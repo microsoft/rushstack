@@ -34,8 +34,9 @@ export class CommandLineRemainder {
    * @internal
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public _setValue(data: any): void { // abstract
-    if (!Array.isArray(data) || !data.every(x => typeof x === 'string')) {
+  public _setValue(data: any): void {
+    // abstract
+    if (!Array.isArray(data) || !data.every((x) => typeof x === 'string')) {
       throw new Error(`Unexpected data object for remainder: ` + JSON.stringify(data));
     }
 

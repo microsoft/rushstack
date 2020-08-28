@@ -11,6 +11,6 @@
       "type": "string"
     }
   },
-  "required": [ "enabled" ],
+  "required": ["enabled"],
   "additionalProperties": false
 }

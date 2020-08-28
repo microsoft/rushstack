@@ -1,16 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  GulpTask,
-  GCBTerminalProvider
-} from '@microsoft/gulp-core-build';
+import { GulpTask, GCBTerminalProvider } from '@microsoft/gulp-core-build';
 import { Terminal } from '@rushstack/node-core-library';
 import * as Gulp from 'gulp';
-import {
-  CertificateStore,
-  CertificateManager
-} from '@rushstack/debug-certificate-manager';
+import { CertificateStore, CertificateManager } from '@rushstack/debug-certificate-manager';
 
 /**
  * On Windows, this task removes the certificate with the expected serial number from the user's

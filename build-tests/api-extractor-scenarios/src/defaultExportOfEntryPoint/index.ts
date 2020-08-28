@@ -2,4 +2,4 @@
 // See LICENSE in the project root for license information.
 
 /** @public */
-export default class DefaultClass { };
+export default class DefaultClass {}

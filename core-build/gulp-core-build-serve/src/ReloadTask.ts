@@ -13,8 +13,7 @@ export class ReloadTask extends GulpTask<void> {
     // eslint-disable-next-line
     const gulpConnect = require('gulp-connect');
 
-    gulp.src('')
-        .pipe(gulpConnect.reload());
+    gulp.src('').pipe(gulpConnect.reload());
 
     completeCallback();
   }

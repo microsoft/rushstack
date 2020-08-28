@@ -13,7 +13,4 @@
  * @packageDocumentation
  */
 
-export {
-  Interleaver,
-  ITaskWriter
-} from './Interleaver';
+export { Interleaver, ITaskWriter } from './Interleaver';

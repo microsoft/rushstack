@@ -61,8 +61,7 @@ export interface IMarkdownDocumenterFeatureOnBeforeWritePageArgs {
  * Event arguments for MarkdownDocumenterFeature.onFinished()
  * @public
  */
-export interface IMarkdownDocumenterFeatureOnFinishedArgs {
-}
+export interface IMarkdownDocumenterFeatureOnFinishedArgs {}
 
 /**
  * Inherit from this base class to implement an API Documenter plugin feature that customizes

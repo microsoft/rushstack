@@ -4,17 +4,15 @@
 import { TextRange } from '../TextRange';
 
 function escape(s: string): string {
-  return s.replace(/\n/g, '[n]')
-    .replace(/\r/g, '[r]')
-    .replace(/\t/g, '[t]');
+  return s.replace(/\n/g, '[n]').replace(/\r/g, '[r]').replace(/\t/g, '[t]');
 }
 
 function matchSnapshot(textRange: TextRange): void {
   for (let i: number = -1; i <= textRange.end + 1; ++i) {
-
     // Show the current character
     const c: string = escape(textRange.buffer.substr(Math.max(i, 0), 1))
-      .replace(/\n/g, '[n]').replace(/\r/g, '[r]');
+      .replace(/\n/g, '[n]')
+      .replace(/\r/g, '[r]');
 
     // Show the next 10 characters of context
     const context: string = escape(textRange.buffer.substr(Math.max(i, 0), 10));
@@ -38,13 +36,15 @@ test('construction scenarios', () => {
 });
 
 test('getLocation() basic', () => {
-  const textRange: TextRange = TextRange.fromString([
-    'L1',
-    'L2',
-    '', // (line 3 is blank)
-    'L4',
-    'L5+CR\rL5+CRLF\r\nL6+LFCR\n\rL7'
-  ].join('\n'));
+  const textRange: TextRange = TextRange.fromString(
+    [
+      'L1',
+      'L2',
+      '', // (line 3 is blank)
+      'L4',
+      'L5+CR\rL5+CRLF\r\nL6+LFCR\n\rL7'
+    ].join('\n')
+  );
   matchSnapshot(textRange);
 });
 

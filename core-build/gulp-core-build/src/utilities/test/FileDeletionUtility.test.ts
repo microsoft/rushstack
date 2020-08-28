@@ -12,74 +12,42 @@ describe('FileDeletionUtility', () => {
   });
   describe('isParentDirectory', () => {
     it('can detect an immediate child', () => {
-      expect(
-        FileDeletionUtility.isParentDirectory('/a', '/a/b.txt')
-      ).toEqual(true);
+      expect(FileDeletionUtility.isParentDirectory('/a', '/a/b.txt')).toEqual(true);
     });
     it('can detect a deep child', () => {
-      expect(
-        FileDeletionUtility.isParentDirectory('/a', '/a/b/c/d.txt')
-      ).toEqual(true);
+      expect(FileDeletionUtility.isParentDirectory('/a', '/a/b/c/d.txt')).toEqual(true);
     });
     it('can detect if base path is longer', () => {
-      expect(
-        FileDeletionUtility.isParentDirectory('/a/b/c/d', '/a/b/c/d/g.txt')
-      ).toEqual(true);
+      expect(FileDeletionUtility.isParentDirectory('/a/b/c/d', '/a/b/c/d/g.txt')).toEqual(true);
     });
     it('can detect siblings', () => {
-      expect(
-        FileDeletionUtility.isParentDirectory('/a/b', '/a/c')
-      ).toEqual(false);
+      expect(FileDeletionUtility.isParentDirectory('/a/b', '/a/c')).toEqual(false);
     });
     it('can detect siblings with file extensions', () => {
-      expect(
-        FileDeletionUtility.isParentDirectory('/a/b/c.txt', '/a/b/d.txt')
-      ).toEqual(false);
+      expect(FileDeletionUtility.isParentDirectory('/a/b/c.txt', '/a/b/d.txt')).toEqual(false);
     });
     it('can detect when not a parent', () => {
-      expect(
-        FileDeletionUtility.isParentDirectory('/a/b/c', '/a')
-      ).toEqual(false);
-      expect(
-        FileDeletionUtility.isParentDirectory('/a/b/c', '/a/b.txt')
-      ).toEqual(false);
+      expect(FileDeletionUtility.isParentDirectory('/a/b/c', '/a')).toEqual(false);
+      expect(FileDeletionUtility.isParentDirectory('/a/b/c', '/a/b.txt')).toEqual(false);
     });
     it('accepts anything under the root', () => {
-      expect(
-        FileDeletionUtility.isParentDirectory('/', '/a.txt')
-      ).toEqual(true);
-      expect(
-        FileDeletionUtility.isParentDirectory('/', '/a/b/c/d.txt')
-      ).toEqual(true);
+      expect(FileDeletionUtility.isParentDirectory('/', '/a.txt')).toEqual(true);
+      expect(FileDeletionUtility.isParentDirectory('/', '/a/b/c/d.txt')).toEqual(true);
     });
     it('it is case sensitive', () => {
-      expect(
-        FileDeletionUtility.isParentDirectory('/a', '/A/b.txt')
-      ).toEqual(false);
-      expect(
-        FileDeletionUtility.isParentDirectory('/a', '/a/b.txt')
-      ).toEqual(true);
-      expect(
-        FileDeletionUtility.isParentDirectory('/a/B/c', '/a/b/c/d.txt')
-      ).toEqual(false);
+      expect(FileDeletionUtility.isParentDirectory('/a', '/A/b.txt')).toEqual(false);
+      expect(FileDeletionUtility.isParentDirectory('/a', '/a/b.txt')).toEqual(true);
+      expect(FileDeletionUtility.isParentDirectory('/a/B/c', '/a/b/c/d.txt')).toEqual(false);
     });
     it('it does not accept null or undefined', () => {
       /* eslint-disable @rushstack/no-null */
-      expect(
-        FileDeletionUtility.isParentDirectory('', '/A/b.txt')
-      ).toEqual(false);
-      expect(
-        FileDeletionUtility.isParentDirectory(undefined, '/a/b.txt')
-      ).toEqual(false);
+      expect(FileDeletionUtility.isParentDirectory('', '/A/b.txt')).toEqual(false);
+      expect(FileDeletionUtility.isParentDirectory(undefined, '/a/b.txt')).toEqual(false);
       expect(
         FileDeletionUtility.isParentDirectory(null as any, '/a/b/c/d.txt') // eslint-disable-line @typescript-eslint/no-explicit-any
       ).toEqual(false);
-      expect(
-        FileDeletionUtility.isParentDirectory('/A/b.txt', '')
-      ).toEqual(false);
-      expect(
-        FileDeletionUtility.isParentDirectory('/a/b.txt', undefined)
-      ).toEqual(false);
+      expect(FileDeletionUtility.isParentDirectory('/A/b.txt', '')).toEqual(false);
+      expect(FileDeletionUtility.isParentDirectory('/a/b.txt', undefined)).toEqual(false);
       expect(
         FileDeletionUtility.isParentDirectory('/a/b/c/d.txt', null as any) // eslint-disable-line @typescript-eslint/no-explicit-any
       ).toEqual(false);
@@ -102,13 +70,7 @@ describe('FileDeletionUtility', () => {
         '/c/f/g/h/j/k/l/q',
         '/d'
       ];
-      const expected: string[] = [
-        '/a',
-        '/b/f/g',
-        '/b/f/ggg',
-        '/c',
-        '/d'
-      ];
+      const expected: string[] = ['/a', '/b/f/g', '/b/f/ggg', '/c', '/d'];
       const actual: string[] = FileDeletionUtility.removeChildren(files);
 
       expect(actual).toHaveLength(expected.length);
@@ -129,9 +91,7 @@ describe('FileDeletionUtility', () => {
         '/c/f/g/h/j/k/l/q',
         '/d'
       ];
-      const expected: string[] = [
-        '/'
-      ];
+      const expected: string[] = ['/'];
       const actual: string[] = FileDeletionUtility.removeChildren(files);
 
       expect(actual).toHaveLength(expected.length);

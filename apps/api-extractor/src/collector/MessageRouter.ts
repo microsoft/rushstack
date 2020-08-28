@@ -16,10 +16,7 @@ import {
   IExtractorMessageProperties
 } from '../api/ExtractorMessage';
 import { ExtractorMessageId, allExtractorMessageIds } from '../api/ExtractorMessageId';
-import {
-  IExtractorMessagesConfig,
-  IConfigMessageReportingRule
-} from '../api/IConfigFile';
+import { IExtractorMessagesConfig, IConfigMessageReportingRule } from '../api/IConfigFile';
 import { SourceMapper } from './SourceMapper';
 import { ExtractorLogLevel } from '../api/ExtractorLogLevel';
 import { ConsoleMessageId } from '../api/ConsoleMessageId';
@@ -38,7 +35,8 @@ export interface IMessageRouterOptions {
 }
 
 export class MessageRouter {
-  public static readonly DIAGNOSTICS_LINE: string = '============================================================';
+  public static readonly DIAGNOSTICS_LINE: string =
+    '============================================================';
 
   private readonly _workingPackageFolder: string | undefined;
   private readonly _messageCallback: ((message: ExtractorMessage) => void) | undefined;
@@ -53,12 +51,15 @@ export class MessageRouter {
 
   // Normalized representation of the routing rules from api-extractor.json
   private _reportingRuleByMessageId: Map<string, IReportingRule> = new Map<string, IReportingRule>();
-  private _compilerDefaultRule: IReportingRule = { logLevel: ExtractorLogLevel.None,
-    addToApiReportFile: false };
-  private _extractorDefaultRule: IReportingRule = { logLevel: ExtractorLogLevel.None,
-    addToApiReportFile: false };
-  private _tsdocDefaultRule: IReportingRule = { logLevel: ExtractorLogLevel.None,
-    addToApiReportFile: false };
+  private _compilerDefaultRule: IReportingRule = {
+    logLevel: ExtractorLogLevel.None,
+    addToApiReportFile: false
+  };
+  private _extractorDefaultRule: IReportingRule = {
+    logLevel: ExtractorLogLevel.None,
+    addToApiReportFile: false
+  };
+  private _tsdocDefaultRule: IReportingRule = { logLevel: ExtractorLogLevel.None, addToApiReportFile: false };
 
   public errorCount: number = 0;
   public warningCount: number = 0;
@@ -95,13 +96,16 @@ export class MessageRouter {
     if (messagesConfig.compilerMessageReporting) {
       for (const messageId of Object.getOwnPropertyNames(messagesConfig.compilerMessageReporting)) {
         const reportingRule: IReportingRule = MessageRouter._getNormalizedRule(
-          messagesConfig.compilerMessageReporting[messageId]);
+          messagesConfig.compilerMessageReporting[messageId]
+        );
 
         if (messageId === 'default') {
           this._compilerDefaultRule = reportingRule;
         } else if (!/^TS[0-9]+$/.test(messageId)) {
-          throw new Error(`Error in API Extractor config: The messages.compilerMessageReporting table contains`
-            + ` an invalid entry "${messageId}". The identifier format is "TS" followed by an integer.`);
+          throw new Error(
+            `Error in API Extractor config: The messages.compilerMessageReporting table contains` +
+              ` an invalid entry "${messageId}". The identifier format is "TS" followed by an integer.`
+          );
         } else {
           this._reportingRuleByMessageId.set(messageId, reportingRule);
         }
@@ -111,16 +115,21 @@ export class MessageRouter {
     if (messagesConfig.extractorMessageReporting) {
       for (const messageId of Object.getOwnPropertyNames(messagesConfig.extractorMessageReporting)) {
         const reportingRule: IReportingRule = MessageRouter._getNormalizedRule(
-          messagesConfig.extractorMessageReporting[messageId]);
+          messagesConfig.extractorMessageReporting[messageId]
+        );
 
         if (messageId === 'default') {
           this._extractorDefaultRule = reportingRule;
         } else if (!/^ae-/.test(messageId)) {
-          throw new Error(`Error in API Extractor config: The messages.extractorMessageReporting table contains`
-            + ` an invalid entry "${messageId}".  The name should begin with the "ae-" prefix.`);
+          throw new Error(
+            `Error in API Extractor config: The messages.extractorMessageReporting table contains` +
+              ` an invalid entry "${messageId}".  The name should begin with the "ae-" prefix.`
+          );
         } else if (!allExtractorMessageIds.has(messageId)) {
-          throw new Error(`Error in API Extractor config: The messages.extractorMessageReporting table contains`
-            + ` an unrecognized identifier "${messageId}".  Is it spelled correctly?`);
+          throw new Error(
+            `Error in API Extractor config: The messages.extractorMessageReporting table contains` +
+              ` an unrecognized identifier "${messageId}".  Is it spelled correctly?`
+          );
         } else {
           this._reportingRuleByMessageId.set(messageId, reportingRule);
         }
@@ -130,16 +139,21 @@ export class MessageRouter {
     if (messagesConfig.tsdocMessageReporting) {
       for (const messageId of Object.getOwnPropertyNames(messagesConfig.tsdocMessageReporting)) {
         const reportingRule: IReportingRule = MessageRouter._getNormalizedRule(
-          messagesConfig.tsdocMessageReporting[messageId]);
+          messagesConfig.tsdocMessageReporting[messageId]
+        );
 
         if (messageId === 'default') {
           this._tsdocDefaultRule = reportingRule;
         } else if (!/^tsdoc-/.test(messageId)) {
-          throw new Error(`Error in API Extractor config: The messages.tsdocMessageReporting table contains`
-            + ` an invalid entry "${messageId}".  The name should begin with the "tsdoc-" prefix.`);
+          throw new Error(
+            `Error in API Extractor config: The messages.tsdocMessageReporting table contains` +
+              ` an invalid entry "${messageId}".  The name should begin with the "tsdoc-" prefix.`
+          );
         } else if (!AedocDefinitions.tsdocConfiguration.isKnownMessageId(messageId)) {
-          throw new Error(`Error in API Extractor config: The messages.tsdocMessageReporting table contains`
-            + ` an unrecognized identifier "${messageId}".  Is it spelled correctly?`);
+          throw new Error(
+            `Error in API Extractor config: The messages.tsdocMessageReporting table contains` +
+              ` an unrecognized identifier "${messageId}".  Is it spelled correctly?`
+          );
         } else {
           this._reportingRuleByMessageId.set(messageId, reportingRule);
         }
@@ -165,7 +179,7 @@ export class MessageRouter {
     switch (diagnostic.category) {
       case ts.DiagnosticCategory.Suggestion:
       case ts.DiagnosticCategory.Message:
-        return;  // ignore noise
+        return; // ignore noise
     }
 
     const messageText: string = `${diagnostic.messageText}`;
@@ -178,7 +192,8 @@ export class MessageRouter {
     if (diagnostic.file) {
       const sourceFile: ts.SourceFile = diagnostic.file;
       const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(
-        diagnostic.start || 0);
+        diagnostic.start || 0
+      );
 
       options.sourceFilePath = sourceFile.fileName;
       options.sourceFileLine = lineAndCharacter.line + 1;
@@ -193,9 +208,12 @@ export class MessageRouter {
   /**
    * Add a message from the API Extractor analysis
    */
-  public addAnalyzerIssue(messageId: ExtractorMessageId, messageText: string,
-    astDeclarationOrSymbol: AstDeclaration | AstSymbol, properties?: IExtractorMessageProperties): void {
-
+  public addAnalyzerIssue(
+    messageId: ExtractorMessageId,
+    messageText: string,
+    astDeclarationOrSymbol: AstDeclaration | AstSymbol,
+    properties?: IExtractorMessageProperties
+  ): void {
     let astDeclaration: AstDeclaration;
     if (astDeclarationOrSymbol instanceof AstDeclaration) {
       astDeclaration = astDeclarationOrSymbol;
@@ -204,8 +222,12 @@ export class MessageRouter {
     }
 
     const extractorMessage: ExtractorMessage = this.addAnalyzerIssueForPosition(
-      messageId, messageText, astDeclaration.declaration.getSourceFile(),
-      astDeclaration.declaration.getStart(), properties);
+      messageId,
+      messageText,
+      astDeclaration.declaration.getSourceFile(),
+      astDeclaration.declaration.getStart(),
+      properties
+    );
 
     this._associateMessageWithAstDeclaration(extractorMessage, astDeclaration);
   }
@@ -214,12 +236,15 @@ export class MessageRouter {
    * Add all messages produced from an invocation of the TSDoc parser, assuming they refer to
    * code in the specified source file.
    */
-  public addTsdocMessages(parserContext: tsdoc.ParserContext, sourceFile: ts.SourceFile,
-    astDeclaration?: AstDeclaration): void {
-
+  public addTsdocMessages(
+    parserContext: tsdoc.ParserContext,
+    sourceFile: ts.SourceFile,
+    astDeclaration?: AstDeclaration
+  ): void {
     for (const message of parserContext.log.messages) {
       const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(
-        message.textRange.pos);
+        message.textRange.pos
+      );
 
       const options: IExtractorMessageOptions = {
         category: ExtractorMessageCategory.TSDoc,
@@ -274,7 +299,7 @@ export class MessageRouter {
           return outputArray;
         }
 
-        const outputObject: object = { };
+        const outputObject: object = {};
         for (const key of Object.getOwnPropertyNames(input)) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const value: any = input[key];
@@ -295,11 +320,13 @@ export class MessageRouter {
   /**
    * Record this message in  _associatedMessagesForAstDeclaration
    */
-  private _associateMessageWithAstDeclaration(extractorMessage: ExtractorMessage,
-    astDeclaration: AstDeclaration): void {
-
-    let associatedMessages: ExtractorMessage[] | undefined
-      = this._associatedMessagesForAstDeclaration.get(astDeclaration);
+  private _associateMessageWithAstDeclaration(
+    extractorMessage: ExtractorMessage,
+    astDeclaration: AstDeclaration
+  ): void {
+    let associatedMessages: ExtractorMessage[] | undefined = this._associatedMessagesForAstDeclaration.get(
+      astDeclaration
+    );
 
     if (!associatedMessages) {
       associatedMessages = [];
@@ -311,11 +338,14 @@ export class MessageRouter {
   /**
    * Add a message for a location in an arbitrary source file.
    */
-  public addAnalyzerIssueForPosition(messageId: ExtractorMessageId, messageText: string,
-    sourceFile: ts.SourceFile, pos: number, properties?: IExtractorMessageProperties): ExtractorMessage {
-
-    const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(
-      pos);
+  public addAnalyzerIssueForPosition(
+    messageId: ExtractorMessageId,
+    messageText: string,
+    sourceFile: ts.SourceFile,
+    pos: number,
+    properties?: IExtractorMessageProperties
+  ): ExtractorMessage {
+    const lineAndCharacter: ts.LineAndCharacter = sourceFile.getLineAndCharacterOfPosition(pos);
 
     const options: IExtractorMessageOptions = {
       category: ExtractorMessageCategory.Extractor,
@@ -342,22 +372,19 @@ export class MessageRouter {
   public fetchAssociatedMessagesForReviewFile(astDeclaration: AstDeclaration): ExtractorMessage[] {
     const messagesForApiReportFile: ExtractorMessage[] = [];
 
-    const associatedMessages: ExtractorMessage[] = this._associatedMessagesForAstDeclaration.get(astDeclaration) || [];
+    const associatedMessages: ExtractorMessage[] =
+      this._associatedMessagesForAstDeclaration.get(astDeclaration) || [];
     for (const associatedMessage of associatedMessages) {
-
       // Make sure we didn't already report this message for some reason
       if (!associatedMessage.handled) {
-
         // Is this message type configured to go in the API report file?
         const reportingRule: IReportingRule = this._getRuleForMessage(associatedMessage);
         if (reportingRule.addToApiReportFile) {
-
           // Include it in the result, and record that it went to the API report file
           messagesForApiReportFile.push(associatedMessage);
           associatedMessage.handled = true;
         }
       }
-
     }
 
     this._sortMessagesForOutput(messagesForApiReportFile);
@@ -372,20 +399,16 @@ export class MessageRouter {
     const messagesForApiReportFile: ExtractorMessage[] = [];
 
     for (const unassociatedMessage of this.messages) {
-
       // Make sure we didn't already report this message for some reason
       if (!unassociatedMessage.handled) {
-
         // Is this message type configured to go in the API report file?
         const reportingRule: IReportingRule = this._getRuleForMessage(unassociatedMessage);
         if (reportingRule.addToApiReportFile) {
-
           // Include it in the result, and record that it went to the API report file
           messagesForApiReportFile.push(unassociatedMessage);
           unassociatedMessage.handled = true;
         }
       }
-
     }
 
     this._sortMessagesForOutput(messagesForApiReportFile);
@@ -414,44 +437,68 @@ export class MessageRouter {
     }
   }
 
-  public logError(messageId: ConsoleMessageId, message: string, properties?: IExtractorMessageProperties): void {
-    this._handleMessage(new ExtractorMessage({
-      category: ExtractorMessageCategory.Console,
-      messageId,
-      text: message,
-      properties,
-      logLevel: ExtractorLogLevel.Error
-    }));
+  public logError(
+    messageId: ConsoleMessageId,
+    message: string,
+    properties?: IExtractorMessageProperties
+  ): void {
+    this._handleMessage(
+      new ExtractorMessage({
+        category: ExtractorMessageCategory.Console,
+        messageId,
+        text: message,
+        properties,
+        logLevel: ExtractorLogLevel.Error
+      })
+    );
   }
 
-  public logWarning(messageId: ConsoleMessageId, message: string, properties?: IExtractorMessageProperties): void {
-    this._handleMessage(new ExtractorMessage({
-      category: ExtractorMessageCategory.Console,
-      messageId,
-      text: message,
-      properties,
-      logLevel: ExtractorLogLevel.Warning
-    }));
+  public logWarning(
+    messageId: ConsoleMessageId,
+    message: string,
+    properties?: IExtractorMessageProperties
+  ): void {
+    this._handleMessage(
+      new ExtractorMessage({
+        category: ExtractorMessageCategory.Console,
+        messageId,
+        text: message,
+        properties,
+        logLevel: ExtractorLogLevel.Warning
+      })
+    );
   }
 
-  public logInfo(messageId: ConsoleMessageId, message: string, properties?: IExtractorMessageProperties): void {
-    this._handleMessage(new ExtractorMessage({
-      category: ExtractorMessageCategory.Console,
-      messageId,
-      text: message,
-      properties,
-      logLevel: ExtractorLogLevel.Info
-    }));
+  public logInfo(
+    messageId: ConsoleMessageId,
+    message: string,
+    properties?: IExtractorMessageProperties
+  ): void {
+    this._handleMessage(
+      new ExtractorMessage({
+        category: ExtractorMessageCategory.Console,
+        messageId,
+        text: message,
+        properties,
+        logLevel: ExtractorLogLevel.Info
+      })
+    );
   }
 
-  public logVerbose(messageId: ConsoleMessageId, message: string, properties?: IExtractorMessageProperties): void {
-    this._handleMessage(new ExtractorMessage({
-      category: ExtractorMessageCategory.Console,
-      messageId,
-      text: message,
-      properties,
-      logLevel: ExtractorLogLevel.Verbose
-    }));
+  public logVerbose(
+    messageId: ConsoleMessageId,
+    message: string,
+    properties?: IExtractorMessageProperties
+  ): void {
+    this._handleMessage(
+      new ExtractorMessage({
+        category: ExtractorMessageCategory.Console,
+        messageId,
+        text: message,
+        properties,
+        logLevel: ExtractorLogLevel.Verbose
+      })
+    );
   }
 
   public logDiagnosticHeader(title: string): void {

@@ -12,17 +12,10 @@ import {
   CommandLineStringParameter,
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
-import {
-  FileSystem,
-  Path
-} from '@rushstack/node-core-library';
+import { FileSystem, Path } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import {
-  IChangeFile,
-  IChangeInfo,
-  ChangeType
-} from '../../api/ChangeManagement';
+import { IChangeFile, IChangeInfo, ChangeType } from '../../api/ChangeManagement';
 import { VersionControl } from '../../utilities/VersionControl';
 import { ChangeFile } from '../../api/ChangeFile';
 import { BaseRushAction } from './BaseRushAction';
@@ -52,33 +45,34 @@ export class ChangeAction extends BaseRushAction {
   public constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
       'Asks a series of questions and then generates a <branchname>-<timestamp>.json file ' +
-      'in the common folder. The `publish` command will consume these files and perform the proper ' +
-      'version bumps. Note these changes will eventually be published in a changelog.md file in each package.',
+        'in the common folder. The `publish` command will consume these files and perform the proper ' +
+        'version bumps. Note these changes will eventually be published in a changelog.md file in each package.',
       '',
       'The possible types of changes are: ',
       '',
       'MAJOR - these are breaking changes that are not backwards compatible. ' +
-      'Examples are: renaming a public class, adding/removing a non-optional ' +
-      'parameter from a public API, or renaming an variable or function that ' +
-      'is exported.',
+        'Examples are: renaming a public class, adding/removing a non-optional ' +
+        'parameter from a public API, or renaming an variable or function that ' +
+        'is exported.',
       '',
       'MINOR - these are changes that are backwards compatible (but not ' +
-      'forwards compatible). Examples are: adding a new public API or adding an ' +
-      'optional parameter to a public API',
+        'forwards compatible). Examples are: adding a new public API or adding an ' +
+        'optional parameter to a public API',
       '',
       'PATCH - these are changes that are backwards and forwards compatible. ' +
-      'Examples are: Modifying a private API or fixing a bug in the logic ' +
-      'of how an existing API works.',
+        'Examples are: Modifying a private API or fixing a bug in the logic ' +
+        'of how an existing API works.',
       '',
       'HOTFIX (EXPERIMENTAL) - these are changes that are hotfixes targeting a ' +
-      'specific older version of the package. When a hotfix change is added, ' +
-      'other changes will not be able to increment the version number. ' +
-      'Enable this feature by setting \'hotfixChangeEnabled\' in your rush.json.',
+        'specific older version of the package. When a hotfix change is added, ' +
+        'other changes will not be able to increment the version number. ' +
+        "Enable this feature by setting 'hotfixChangeEnabled' in your rush.json.",
       ''
     ];
     super({
       actionName: 'change',
-      summary: 'Records changes made to projects, indicating how the package version number should be bumped ' +
+      summary:
+        'Records changes made to projects, indicating how the package version number should be bumped ' +
         'for the next publish.',
       documentation: documentation.join(os.EOL),
       safeForSimultaneousRushProcesses: true,
@@ -106,27 +100,31 @@ export class ChangeAction extends BaseRushAction {
       parameterLongName: '--target-branch',
       parameterShortName: '-b',
       argumentName: 'BRANCH',
-      description: 'If this parameter is specified, compare the checked out branch with the specified branch to ' +
+      description:
+        'If this parameter is specified, compare the checked out branch with the specified branch to ' +
         'determine which projects were changed. If this parameter is not specified, the checked out branch ' +
         'is compared against the "master" branch.'
     });
 
     this._overwriteFlagParameter = this.defineFlagParameter({
       parameterLongName: '--overwrite',
-      description: `If a changefile already exists, overwrite without prompting ` +
+      description:
+        `If a changefile already exists, overwrite without prompting ` +
         `(or erroring in ${BULK_LONG_NAME} mode).`
     });
 
     this._changeEmailParameter = this.defineStringParameter({
       parameterLongName: '--email',
       argumentName: 'EMAIL',
-      description: 'The email address to use in changefiles. If this parameter is not provided, the email address ' +
+      description:
+        'The email address to use in changefiles. If this parameter is not provided, the email address ' +
         'will be detected or prompted for in interactive mode.'
     });
 
     this._bulkChangeParameter = this.defineFlagParameter({
       parameterLongName: BULK_LONG_NAME,
-      description: 'If this flag is specified, apply the same change message and bump type to all changed projects. ' +
+      description:
+        'If this flag is specified, apply the same change message and bump type to all changed projects. ' +
         `The ${BULK_MESSAGE_LONG_NAME} and the ${BULK_BUMP_TYPE_LONG_NAME} parameters must be specified if the ` +
         `${BULK_LONG_NAME} parameter is specified`
     });
@@ -149,19 +147,19 @@ export class ChangeAction extends BaseRushAction {
     this._projectHostMap = this._generateHostMap();
 
     if (this._verifyParameter.value) {
-      const errors: string[] = ([
+      const errors: string[] = [
         this._bulkChangeParameter,
         this._bulkChangeMessageParameter,
         this._bulkChangeBumpTypeParameter,
         this._overwriteFlagParameter
-      ]).map((parameter) => {
-        return parameter.value
-        ? (
-          `The {${this._bulkChangeParameter.longName} parameter cannot be provided with the ` +
-            `${this._verifyParameter.longName} parameter`
-          )
-        : '';
-      }).filter((error) => error !== '');
+      ]
+        .map((parameter) => {
+          return parameter.value
+            ? `The {${this._bulkChangeParameter.longName} parameter cannot be provided with the ` +
+                `${this._verifyParameter.longName} parameter`
+            : '';
+        })
+        .filter((error) => error !== '');
       if (errors.length > 0) {
         errors.forEach((error) => console.error(error));
         throw new AlreadyReportedError();
@@ -186,24 +184,24 @@ export class ChangeAction extends BaseRushAction {
     if (this._bulkChangeParameter.value) {
       if (
         !this._bulkChangeBumpTypeParameter.value ||
-        (
-          !this._bulkChangeMessageParameter.value &&
-          this._bulkChangeBumpTypeParameter.value !== ChangeType[ChangeType.none]
-        )
+        (!this._bulkChangeMessageParameter.value &&
+          this._bulkChangeBumpTypeParameter.value !== ChangeType[ChangeType.none])
       ) {
         throw new Error(
           `The ${this._bulkChangeBumpTypeParameter.longName} and ${this._bulkChangeMessageParameter.longName} ` +
-          `parameters must provided if the ${this._bulkChangeParameter.longName} flag is provided. If the value ` +
-          `"${ChangeType[ChangeType.none]}" is provided to the ${this._bulkChangeBumpTypeParameter.longName} ` +
-          `parameter, the ${this._bulkChangeMessageParameter.longName} parameter may be omitted.`
+            `parameters must provided if the ${this._bulkChangeParameter.longName} flag is provided. If the value ` +
+            `"${ChangeType[ChangeType.none]}" is provided to the ${
+              this._bulkChangeBumpTypeParameter.longName
+            } ` +
+            `parameter, the ${this._bulkChangeMessageParameter.longName} parameter may be omitted.`
         );
       }
 
       const email: string | undefined = this._changeEmailParameter.value || this._detectEmail();
       if (!email) {
         throw new Error(
-          'Unable to detect Git email and an email address wasn\'t provided using the ' +
-          `${this._changeEmailParameter.longName} paramter.`
+          "Unable to detect Git email and an email address wasn't provided using the " +
+            `${this._changeEmailParameter.longName} paramter.`
         );
       }
 
@@ -223,20 +221,17 @@ export class ChangeAction extends BaseRushAction {
           errors.push(`The "${projectChangeType}" change type is not allowed for package "${packageName}".`);
         }
 
-        changeFileData.set(
+        changeFileData.set(packageName, {
+          changes: [
+            {
+              comment,
+              type: projectChangeType,
+              packageName
+            } as IChangeInfo
+          ],
           packageName,
-          {
-            changes: [
-              {
-                comment,
-                type: projectChangeType,
-                packageName
-              } as IChangeInfo
-            ],
-            packageName,
-            email
-          }
-        );
+          email
+        });
       }
 
       if (errors.length > 0) {
@@ -249,12 +244,14 @@ export class ChangeAction extends BaseRushAction {
     } else if (this._bulkChangeBumpTypeParameter.value || this._bulkChangeMessageParameter.value) {
       throw new Error(
         `The ${this._bulkChangeParameter.longName} flag must be provided with the ` +
-        `${this._bulkChangeBumpTypeParameter.longName} and ${this._bulkChangeMessageParameter.longName} parameters.`
+          `${this._bulkChangeBumpTypeParameter.longName} and ${this._bulkChangeMessageParameter.longName} parameters.`
       );
     } else {
       interactiveMode = true;
 
-      const existingChangeComments: Map<string, string[]> = ChangeFiles.getChangeComments(this._getChangeFiles());
+      const existingChangeComments: Map<string, string[]> = ChangeFiles.getChangeComments(
+        this._getChangeFiles()
+      );
       changeFileData = await this._promptForChangeFileData(
         promptModule,
         sortedProjectList,
@@ -283,7 +280,7 @@ export class ChangeAction extends BaseRushAction {
 
   private _generateHostMap(): Map<string, string> {
     const hostMap: Map<string, string> = new Map<string, string>();
-    this.rushConfiguration.projects.forEach(project => {
+    this.rushConfiguration.projects.forEach((project) => {
       let hostProjectName: string = project.packageName;
       if (project.versionPolicy && project.versionPolicy.isLockstepped) {
         const lockstepPolicy: LockStepVersionPolicy = project.versionPolicy as LockStepVersionPolicy;
@@ -307,9 +304,8 @@ export class ChangeAction extends BaseRushAction {
 
   private get _targetBranch(): string {
     if (!this._targetBranchName) {
-      this._targetBranchName = (
-        this._targetBranchParameter.value || VersionControl.getRemoteMasterBranch(this.rushConfiguration)
-      );
+      this._targetBranchName =
+        this._targetBranchParameter.value || VersionControl.getRemoteMasterBranch(this.rushConfiguration);
     }
 
     return this._targetBranchName;
@@ -327,20 +323,20 @@ export class ChangeAction extends BaseRushAction {
 
     const repoRootFolder: string | undefined = VersionControl.getRepositoryRootPath();
     this.rushConfiguration.projects
-    .filter(project => project.shouldPublish)
-    .filter(project => !project.versionPolicy || !project.versionPolicy.exemptFromRushChange)
-    .filter(project => {
-      const projectFolder: string = repoRootFolder
-        ? path.relative(repoRootFolder, project.projectFolder)
-        : project.projectRelativeFolder;
-      return this._hasProjectChanged(changedFolders, projectFolder);
-    })
-    .forEach(project => {
-      const hostName: string | undefined = this._projectHostMap.get(project.packageName);
-      if (hostName) {
-        changedPackageNames.add(hostName);
-      }
-    });
+      .filter((project) => project.shouldPublish)
+      .filter((project) => !project.versionPolicy || !project.versionPolicy.exemptFromRushChange)
+      .filter((project) => {
+        const projectFolder: string = repoRootFolder
+          ? path.relative(repoRootFolder, project.projectFolder)
+          : project.projectRelativeFolder;
+        return this._hasProjectChanged(changedFolders, projectFolder);
+      })
+      .forEach((project) => {
+        const hostName: string | undefined = this._projectHostMap.get(project.packageName);
+        if (hostName) {
+          changedPackageNames.add(hostName);
+        }
+      });
 
     return [...changedPackageNames];
   }
@@ -351,15 +347,12 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private _getChangeFiles(): string[] {
-    return VersionControl.getChangedFiles(this._targetBranch, true, `common/changes/`).map(relativePath => {
+    return VersionControl.getChangedFiles(this._targetBranch, true, `common/changes/`).map((relativePath) => {
       return path.join(this.rushConfiguration.rushJsonFolder, relativePath);
     });
   }
 
-  private _hasProjectChanged(
-    changedFolders: (string | undefined)[],
-    projectFolder: string
-  ): boolean {
+  private _hasProjectChanged(changedFolders: (string | undefined)[], projectFolder: string): boolean {
     for (const folder of changedFolders) {
       if (folder && Path.isUnderOrEqual(folder, projectFolder)) {
         return true;
@@ -416,7 +409,7 @@ export class ChangeAction extends BaseRushAction {
     const comments: string[] | undefined = existingChangeComments.get(packageName);
     if (comments) {
       console.log(`Found existing comments:`);
-      comments.forEach(comment => {
+      comments.forEach((comment) => {
         console.log(`    > ${comment}`);
       });
       const { appendComment }: { appendComment: 'skip' | 'append' } = await promptModule({
@@ -426,12 +419,12 @@ export class ChangeAction extends BaseRushAction {
         message: 'Append to existing comments or skip?',
         choices: [
           {
-            'name': 'Skip',
-            'value': 'skip'
+            name: 'Skip',
+            value: 'skip'
           },
           {
-            'name': 'Append',
-            'value': 'append'
+            name: 'Append',
+            value: 'append'
           }
         ]
       });
@@ -465,10 +458,10 @@ export class ChangeAction extends BaseRushAction {
       } as IChangeInfo;
     } else {
       const { bumpType }: { bumpType: string } = await promptModule({
-        choices: Object.keys(bumpOptions).map(option => {
+        choices: Object.keys(bumpOptions).map((option) => {
           return {
-            'value': option,
-            'name': bumpOptions[option]
+            value: option,
+            name: bumpOptions[option]
           };
         }),
         default: 'patch',
@@ -486,18 +479,24 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private _getBumpOptions(packageName?: string): { [type: string]: string } {
-    let bumpOptions: { [type: string]: string } = (this.rushConfiguration && this.rushConfiguration.hotfixChangeEnabled)
-      ? {
-          [ChangeType[ChangeType.hotfix]]: 'hotfix - for changes that need to be published in a separate hotfix package'
-        }
-      : {
-          [ChangeType[ChangeType.major]]: 'major - for changes that break compatibility, e.g. removing an API',
-          [ChangeType[ChangeType.minor]]: 'minor - for backwards compatible changes, e.g. adding a new API',
-          [ChangeType[ChangeType.patch]]: 'patch - for changes that do not affect compatibility, e.g. fixing a bug'
-        };
+    let bumpOptions: { [type: string]: string } =
+      this.rushConfiguration && this.rushConfiguration.hotfixChangeEnabled
+        ? {
+            [ChangeType[ChangeType.hotfix]]:
+              'hotfix - for changes that need to be published in a separate hotfix package'
+          }
+        : {
+            [ChangeType[ChangeType.major]]:
+              'major - for changes that break compatibility, e.g. removing an API',
+            [ChangeType[ChangeType.minor]]: 'minor - for backwards compatible changes, e.g. adding a new API',
+            [ChangeType[ChangeType.patch]]:
+              'patch - for changes that do not affect compatibility, e.g. fixing a bug'
+          };
 
     if (packageName) {
-      const project: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(packageName);
+      const project: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(
+        packageName
+      );
       const versionPolicy: VersionPolicy | undefined = project!.versionPolicy;
 
       if (versionPolicy) {
@@ -521,12 +520,13 @@ export class ChangeAction extends BaseRushAction {
    * or will ask for it if it is not found or the Git config is wrong.
    */
   private async _detectOrAskForEmail(promptModule: inquirer.PromptModule): Promise<string> {
-    return await this._detectAndConfirmEmail(promptModule) || await this._promptForEmail(promptModule);
+    return (await this._detectAndConfirmEmail(promptModule)) || (await this._promptForEmail(promptModule));
   }
 
   private _detectEmail(): string | undefined {
     try {
-      return child_process.execSync('git config user.email')
+      return child_process
+        .execSync('git config user.email')
         .toString()
         .replace(/(\r\n|\n|\r)/gm, '');
     } catch (err) {
@@ -579,10 +579,10 @@ export class ChangeAction extends BaseRushAction {
       if (VersionControl.hasUncommittedChanges()) {
         console.log(
           os.EOL +
-          colors.yellow(
-            'Warning: You have uncommitted changes, which do not trigger prompting for change ' +
-            'descriptions.'
-          )
+            colors.yellow(
+              'Warning: You have uncommitted changes, which do not trigger prompting for change ' +
+                'descriptions.'
+            )
         );
       }
     } catch (error) {
@@ -615,11 +615,10 @@ export class ChangeAction extends BaseRushAction {
     const filePath: string = changeFile.generatePath();
 
     const fileExists: boolean = FileSystem.exists(filePath);
-    const shouldWrite: boolean = (
+    const shouldWrite: boolean =
       !fileExists ||
       overwrite ||
-      (interactiveMode ? await this._promptForOverwrite(promptModule, filePath) : false)
-    );
+      (interactiveMode ? await this._promptForOverwrite(promptModule, filePath) : false);
 
     if (!interactiveMode && fileExists && !overwrite) {
       throw new Error(`Changefile ${filePath} already exists`);

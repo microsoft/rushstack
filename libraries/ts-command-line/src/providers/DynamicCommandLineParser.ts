@@ -7,6 +7,7 @@ import { CommandLineParser } from './CommandLineParser';
  * @public
  */
 export class DynamicCommandLineParser extends CommandLineParser {
-  protected onDefineParameters(): void { // abstract
+  protected onDefineParameters(): void {
+    // abstract
   }
 }

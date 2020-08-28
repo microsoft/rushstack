@@ -49,7 +49,8 @@ export class Git {
    * the result of `Git.getGitInfo()` is used.
    */
   public static isPathUnderGitWorkingTree(repoInfo?: gitInfo.GitRepoInfo): boolean {
-    if (Git.isGitPresent()) { // Do we even have a Git binary?
+    if (Git.isGitPresent()) {
+      // Do we even have a Git binary?
       if (!repoInfo) {
         repoInfo = Git.getGitInfo();
       }
@@ -94,14 +95,16 @@ export class Git {
     }
 
     if (emailResult.result === undefined || emailResult.result.length === 0) {
-      console.log([
-        'This operation requires that a Git email be specified.',
-        '',
-        `If you didn't configure your email yet, try something like this:`,
-        '',
-        ...GitEmailPolicy.getEmailExampleLines(rushConfiguration),
-        ''
-      ].join(os.EOL));
+      console.log(
+        [
+          'This operation requires that a Git email be specified.',
+          '',
+          `If you didn't configure your email yet, try something like this:`,
+          '',
+          ...GitEmailPolicy.getEmailExampleLines(rushConfiguration),
+          ''
+        ].join(os.EOL)
+      );
       throw new AlreadyReportedError();
     }
 
@@ -146,16 +149,12 @@ export class Git {
     if (Git._gitEmailResult === undefined) {
       if (!Git.isGitPresent()) {
         Git._gitEmailResult = {
-          error: new Error('Git isn\'t present on the path')
+          error: new Error("Git isn't present on the path")
         };
       } else {
         try {
           Git._gitEmailResult = {
-            result: Utilities.executeCommandAndCaptureOutput(
-              'git',
-              ['config', 'user.email'],
-              '.'
-            ).trim()
+            result: Utilities.executeCommandAndCaptureOutput('git', ['config', 'user.email'], '.').trim()
           };
         } catch (e) {
           Git._gitEmailResult = {

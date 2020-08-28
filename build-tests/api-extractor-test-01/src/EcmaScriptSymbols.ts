@@ -29,17 +29,15 @@ export class ClassWithSymbols {
     return 'hello';
   }
 
-  public [fullyExportedCustomSymbol](): void {
-  }
+  public [fullyExportedCustomSymbol](): void {}
 
   public get [ANamespace.locallyExportedCustomSymbol](): string {
     return 'hello';
   }
 
-  public [ANamespace.fullyExportedCustomSymbol](): void {
-  }
+  public [ANamespace.fullyExportedCustomSymbol](): void {}
 
   public get [Symbol.toStringTag](): string {
-    return "ClassWithSymbols";
+    return 'ClassWithSymbols';
   }
 }

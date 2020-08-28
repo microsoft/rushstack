@@ -1,7 +1,9 @@
 {
-  "changes": [{
-    "packageName": "a",
-    "type": "major",
-    "comment": "Major change to a"
-  }]
+  "changes": [
+    {
+      "packageName": "a",
+      "type": "major",
+      "comment": "Major change to a"
+    }
+  ]
 }

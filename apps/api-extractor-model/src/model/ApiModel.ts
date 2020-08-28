@@ -55,7 +55,7 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
   private _packagesByName: Map<string, ApiPackage> | undefined = undefined;
   private _apiItemsByCanonicalReference: Map<string, ApiItem> | undefined = undefined;
   public constructor() {
-    super({ });
+    super({});
 
     this._resolver = new ModelReferenceResolver(this);
   }
@@ -160,7 +160,9 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
         errorMessage: undefined
       };
 
-      const apiItem: ApiItem | undefined = this._apiItemsByCanonicalReference.get(declarationReference.toString());
+      const apiItem: ApiItem | undefined = this._apiItemsByCanonicalReference.get(
+        declarationReference.toString()
+      );
 
       if (!apiItem) {
         result.errorMessage = `${declarationReference.toString()} can not be located`;
@@ -171,8 +173,10 @@ export class ApiModel extends ApiItemContainerMixin(ApiItem) {
       return result;
     } else {
       // NOTE: The "instanceof DeclarationReference" test assumes a specific version of the @microsoft/tsdoc package.
-      throw new Error('The "declarationReference" parameter must be an instance of'
-        + ' DocDeclarationReference or DeclarationReference');
+      throw new Error(
+        'The "declarationReference" parameter must be an instance of' +
+          ' DocDeclarationReference or DeclarationReference'
+      );
     }
   }
 

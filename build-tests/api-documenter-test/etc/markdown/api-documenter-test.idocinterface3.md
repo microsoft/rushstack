@@ -17,7 +17,7 @@ export interface IDocInterface3
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  ["\[not.a.symbol\]"](./api-documenter-test.idocinterface3.__not.a.symbol__.md) | string | An identifier that does needs quotes. It misleadingly looks like an ECMAScript symbol. |
+|  ["\[not.a.symbol\]"](./api-documenter-test.idocinterface3.__not.a.symbol__.md) | string | An identifier that does need quotes. It misleadingly looks like an ECMAScript symbol. |
 |  [\[EcmaSmbols.example\]](./api-documenter-test.idocinterface3._ecmasmbols.example_.md) | string | ECMAScript symbol |
 |  [redundantQuotes](./api-documenter-test.idocinterface3.redundantquotes.md) | string | A quoted identifier with redundant quotes. |
 

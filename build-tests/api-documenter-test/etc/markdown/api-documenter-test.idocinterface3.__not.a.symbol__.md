@@ -4,7 +4,7 @@
 
 ## IDocInterface3."\[not.a.symbol\]" property
 
-An identifier that does needs quotes. It misleadingly looks like an ECMAScript symbol.
+An identifier that does need quotes. It misleadingly looks like an ECMAScript symbol.
 
 <b>Signature:</b>
 

@@ -8,7 +8,10 @@ import { FileSystem, NewlineKind } from '@rushstack/node-core-library';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 export class InitDeployAction extends BaseRushAction {
-  private static _CONFIG_TEMPLATE_PATH: string = path.join(__dirname, '../../../assets/rush-deploy-init/scenario-template.json');
+  private static _CONFIG_TEMPLATE_PATH: string = path.join(
+    __dirname,
+    '../../../assets/rush-deploy-init/scenario-template.json'
+  );
   private _scenario: CommandLineStringParameter;
   private _project: CommandLineStringParameter;
 
@@ -16,8 +19,9 @@ export class InitDeployAction extends BaseRushAction {
     super({
       actionName: 'init-deploy',
       summary: 'Create the config file for a new deployment scenario.',
-      documentation: 'The deployment config files are stored under "common/config/deploy" and are used'
-        + ' to configure behavior of the "rush deploy" command.',
+      documentation:
+        'The deployment config files are stored under "common/config/deploy" and are used' +
+        ' to configure behavior of the "rush deploy" command.',
       parser
     });
   }
@@ -45,24 +49,34 @@ export class InitDeployAction extends BaseRushAction {
     const scenarioName: string = this._scenario.value!;
     DeployManager.validateScenarioName(scenarioName);
 
-    const scenarioFilePath: string = path.join(this.rushConfiguration.commonDeployConfigFolder,`${scenarioName}.json`);
+    const scenarioFilePath: string = path.join(
+      this.rushConfiguration.commonDeployConfigFolder,
+      `${scenarioName}.json`
+    );
 
     if (FileSystem.exists(scenarioFilePath)) {
-      throw new Error('The target file already exists:\n' + scenarioFilePath +
-        '\nIf you intend to replace it, please delete the old file first.');
+      throw new Error(
+        'The target file already exists:\n' +
+          scenarioFilePath +
+          '\nIf you intend to replace it, please delete the old file first.'
+      );
     }
 
     console.log(colors.green('Creating scenario file: ') + scenarioFilePath);
 
     const shortProjectName: string = this._project.value!;
-    const rushProject: RushConfigurationProject | undefined
-      = this.rushConfiguration.findProjectByShorthandName(shortProjectName);
+    const rushProject:
+      | RushConfigurationProject
+      | undefined = this.rushConfiguration.findProjectByShorthandName(shortProjectName);
     if (!rushProject) {
       throw new Error(`The specified project was not found in rush.json: "${shortProjectName}"`);
     }
 
     const templateContent: string = FileSystem.readFile(InitDeployAction._CONFIG_TEMPLATE_PATH);
-    const expandedContent: string = templateContent.replace('[%PROJECT_NAME_TO_DEPLOY%]', rushProject.packageName);
+    const expandedContent: string = templateContent.replace(
+      '[%PROJECT_NAME_TO_DEPLOY%]',
+      rushProject.packageName
+    );
 
     FileSystem.writeFile(scenarioFilePath, expandedContent, {
       ensureFolderExists: true,

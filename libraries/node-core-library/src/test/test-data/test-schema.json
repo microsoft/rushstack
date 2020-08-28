@@ -13,7 +13,7 @@
         }
       },
       "additionalProperties": false,
-      "required": [ "field1" ]
+      "required": ["field1"]
     },
     "type2": {
       "description": "Description for type2",
@@ -29,7 +29,7 @@
         }
       },
       "additionalProperties": false,
-      "required": [ "field2", "field3" ]
+      "required": ["field2", "field3"]
     }
   },
 
@@ -46,12 +46,9 @@
     "exampleOneOf": {
       "description": "Description for exampleOneOf - this is a very long description to show in an error message",
       "type": "object",
-      "oneOf": [
-        { "$ref": "#/definitions/type1" },
-        { "$ref": "#/definitions/type2" }
-      ]
+      "oneOf": [{ "$ref": "#/definitions/type1" }, { "$ref": "#/definitions/type2" }]
     }
   },
   "additionalProperties": false,
-  "required": [ "exampleString", "exampleArray" ]
+  "required": ["exampleString", "exampleArray"]
 }

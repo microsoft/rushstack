@@ -7,7 +7,6 @@ import { getConfig } from './index';
 const ENVIRONMENT_VARIABLE_PREFIX: string = 'GCB_';
 
 export function getConfigValue(name: string, defaultValue?: string | boolean): string | boolean {
-
   // Try to get config value from environment variable.
   const envVariable: string = ENVIRONMENT_VARIABLE_PREFIX + name.toUpperCase();
   const envValue: string | undefined = process.env[envVariable];

@@ -26,7 +26,8 @@ export class CommandLineFlagParameter extends CommandLineParameter {
    * @internal
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public _setValue(data: any): void { // abstract
+  public _setValue(data: any): void {
+    // abstract
     if (data !== null && data !== undefined) {
       if (typeof data !== 'boolean') {
         this.reportInvalidData(data);
@@ -46,8 +47,10 @@ export class CommandLineFlagParameter extends CommandLineParameter {
       const environmentValue: string | undefined = process.env[this.environmentVariable];
       if (environmentValue !== undefined && environmentValue !== '') {
         if (environmentValue !== '0' && environmentValue !== '1') {
-          throw new Error(`Invalid value "${environmentValue}" for the environment variable`
-            + ` ${this.environmentVariable}.  Valid choices are 0 or 1.`);
+          throw new Error(
+            `Invalid value "${environmentValue}" for the environment variable` +
+              ` ${this.environmentVariable}.  Valid choices are 0 or 1.`
+          );
         }
         this._value = environmentValue === '1';
         return;

@@ -16,5 +16,4 @@ export class DefaultExportEdgeCase {
  * Referenced by DefaultExportEdgeCaseReferencer.
  * @public
  */
-export default class ClassExportedAsDefault {
-}
+export default class ClassExportedAsDefault {}

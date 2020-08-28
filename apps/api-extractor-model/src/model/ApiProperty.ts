@@ -1,7 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import {
+  DeclarationReference,
+  Meaning,
+  Navigation,
+  Component
+} from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
 import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyItem';
@@ -10,9 +15,7 @@ import { ApiPropertyItem, IApiPropertyItemOptions } from '../items/ApiPropertyIt
  * Constructor options for {@link ApiProperty}.
  * @public
  */
-export interface IApiPropertyOptions extends IApiPropertyItemOptions,
-  IApiStaticMixinOptions {
-}
+export interface IApiPropertyOptions extends IApiPropertyItemOptions, IApiStaticMixinOptions {}
 
 /**
  * Represents a TypeScript property declaration that belongs to an `ApiClass`.
@@ -49,7 +52,6 @@ export interface IApiPropertyOptions extends IApiPropertyItemOptions,
  * @public
  */
 export class ApiProperty extends ApiStaticMixin(ApiPropertyItem) {
-
   public constructor(options: IApiPropertyOptions) {
     super(options);
   }

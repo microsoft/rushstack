@@ -5,7 +5,7 @@ import { Sort } from '../Sort';
 
 test('Sort.compareByValue', () => {
   const array: number[] = [3, 6, 2];
-  array.sort(Sort.compareByValue);  // [2, 3, 6]
+  array.sort(Sort.compareByValue); // [2, 3, 6]
 });
 
 test('Sort.compareByValue cases', () => {
@@ -17,9 +17,15 @@ test('Sort.compareByValue cases', () => {
       const y: unknown = values[j];
       let relation: string = '?';
       switch (Sort.compareByValue(x, y)) {
-        case -1: relation = '<'; break;
-        case 0: relation = '='; break;
-        case 1: relation = '>'; break;
+        case -1:
+          relation = '<';
+          break;
+        case 0:
+          relation = '=';
+          break;
+        case 1:
+          relation = '>';
+          break;
       }
       results.push(`${x} ${relation} ${y}`);
     }
@@ -28,13 +34,13 @@ test('Sort.compareByValue cases', () => {
 });
 
 test('Sort.sortBy', () => {
-  const array: string[] = [ 'aaa', 'bb', 'c' ];
-  Sort.sortBy(array, x => x.length);  // [ 'c', 'bb', 'aaa' ]
+  const array: string[] = ['aaa', 'bb', 'c'];
+  Sort.sortBy(array, (x) => x.length); // [ 'c', 'bb', 'aaa' ]
 });
 
 test('Sort.isSortedBy', () => {
-  const array: string[] = [ 'a', 'bb', 'ccc' ];
-  Sort.isSortedBy(array, x => x.length); // true
+  const array: string[] = ['a', 'bb', 'ccc'];
+  Sort.isSortedBy(array, (x) => x.length); // true
 });
 
 test('Sort.sortMapKeys', () => {
@@ -51,7 +57,7 @@ test('Sort.sortSetBy', () => {
   set.add('aaa');
   set.add('bb');
   set.add('c');
-  Sort.sortSetBy(set, x => x.length);
+  Sort.sortSetBy(set, (x) => x.length);
   expect(Array.from(set)).toEqual(['c', 'bb', 'aaa']);
 });
 

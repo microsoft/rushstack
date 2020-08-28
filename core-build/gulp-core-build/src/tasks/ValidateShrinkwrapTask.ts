@@ -8,12 +8,12 @@ import * as semver from 'semver';
 import { FileConstants } from '@rushstack/node-core-library';
 
 interface IShrinkwrapDep {
-  [name: string]: { version: string }
-};
+  [name: string]: { version: string };
+}
 
 interface IPackageDep {
-  [name: string]: string
-};
+  [name: string]: string;
+}
 
 /**
  * Partial representation of the contents of a `package.json` file
@@ -51,7 +51,10 @@ export class ValidateShrinkwrapTask extends GulpTask<void> {
    * Iterates through dependencies listed in a project's package.json and ensures that they are all
    * resolvable in the npm-shrinkwrap file.
    */
-  public executeTask(gulp: gulpType.Gulp, completeCallback: (error: string) => void): NodeJS.ReadWriteStream | void {
+  public executeTask(
+    gulp: gulpType.Gulp,
+    completeCallback: (error: string) => void
+  ): NodeJS.ReadWriteStream | void {
     const pathToPackageJson: string = path.join(this.buildConfig.rootPath, FileConstants.PackageJson);
     const pathToShrinkwrap: string = path.join(this.buildConfig.rootPath, 'npm-shrinkwrap.json');
 

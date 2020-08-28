@@ -1,4 +1,3 @@
-
 /**
  * Returns the sum of adding `b` to `a`
  * @param a - first number
@@ -6,8 +5,8 @@
  * @returns Sum of adding `b` to `a`
  */
 export function add(a: number, b: number): number {
-  return a + b;  
-} 
+  return a + b;
+}
 
 /**
  * Returns the sum of subtracting `b` from `a`

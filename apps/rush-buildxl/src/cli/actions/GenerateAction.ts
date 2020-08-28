@@ -29,10 +29,10 @@ export class GenerateAction extends CommandLineAction {
       throw new Error('Environment variable BUILDXL_BIN not defined');
     }
 
-    const generator: BxlModulesGenerator =
-        new BxlModulesGenerator(
-          RushConfiguration.loadFromDefaultLocation(),
-          process.env.BUILDXL_BIN);
+    const generator: BxlModulesGenerator = new BxlModulesGenerator(
+      RushConfiguration.loadFromDefaultLocation(),
+      process.env.BUILDXL_BIN
+    );
 
     await generator.run();
     this._terminal.writeLine(`Successfully generated BuildXL configuration.`);

@@ -43,5 +43,4 @@ export abstract class AstEntity {
  * - `AstImport`
  * - `AstImportAsModule`
  */
-export abstract class AstSyntheticEntity extends AstEntity {
-}
+export abstract class AstSyntheticEntity extends AstEntity {}

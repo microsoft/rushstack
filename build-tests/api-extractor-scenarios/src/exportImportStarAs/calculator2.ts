@@ -1,4 +1,3 @@
-
 /**
  * Returns the sum of adding `b` to `a` for large integers
  * @param a - first number
@@ -6,8 +5,8 @@
  * @returns Sum of adding `b` to `a`
  */
 export function add(a: bigint, b: bigint): bigint {
-    return a + b;  
-} 
+  return a + b;
+}
 
 /**
  * Returns the sum of subtracting `b` from `a` for large integers
@@ -16,7 +15,7 @@ export function add(a: bigint, b: bigint): bigint {
  * @returns Sum of subtract `b` from `a`
  */
 export function subtract(a: bigint, b: bigint): bigint {
-    return a - b;
+  return a - b;
 }
 
 export * from './common';

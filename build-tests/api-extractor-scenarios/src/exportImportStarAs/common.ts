@@ -1,4 +1,3 @@
-
 /**
  * Returns the version of the calculator.
  */

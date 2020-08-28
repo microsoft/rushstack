@@ -2,11 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import {
-  JsonFile,
-  JsonSchema,
-  FileSystem
-} from '@rushstack/node-core-library';
+import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
 /**
  * This interface represents the raw experiments.json file which allows repo

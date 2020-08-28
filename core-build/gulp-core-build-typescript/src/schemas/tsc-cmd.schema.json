@@ -14,11 +14,11 @@
     "staticMatch": {
       "description": "Glob matches for files to be passed through the build",
       "type": "array",
-       "items": {
-         "type": "string",
-         "minLength": 1
-       },
-       "minItems": 1
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
     },
     "buildDirectory": {
       "description": "The directory in which the typescript compiler should be invoked.",

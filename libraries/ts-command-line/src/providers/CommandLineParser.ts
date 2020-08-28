@@ -6,7 +6,7 @@ import * as colors from 'colors';
 
 import { CommandLineAction } from './CommandLineAction';
 import { CommandLineParameterProvider, ICommandLineParserData } from './CommandLineParameterProvider';
-import { CommandLineParserExitError, CustomArgumentParser} from './CommandLineParserExitError';
+import { CommandLineParserExitError, CustomArgumentParser } from './CommandLineParserExitError';
 
 /**
  * Options for the {@link CommandLineParser} constructor.
@@ -60,14 +60,15 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
 
     this._options = options;
     this._actions = [];
-    this._actionsByName = new  Map<string, CommandLineAction>();
+    this._actionsByName = new Map<string, CommandLineAction>();
 
     this._argumentParser = new CustomArgumentParser({
       addHelp: true,
       prog: this._options.toolFilename,
       description: this._options.toolDescription,
-      epilog: colors.bold('For detailed help about a specific command, use:'
-        + ` ${this._options.toolFilename} <command> -h`)
+      epilog: colors.bold(
+        `For detailed help about a specific command, use: ${this._options.toolFilename} <command> -h`
+      )
     });
 
     this.onDefineParameters();
@@ -134,27 +135,29 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    *               the process.argv will be used
    */
   public execute(args?: string[]): Promise<boolean> {
-    return this.executeWithoutErrorHandling(args).then(() => {
-      return true;
-    }).catch((err) => {
-      if (err instanceof CommandLineParserExitError) {
-        // executeWithoutErrorHandling() handles the successful cases,
-        // so here we can assume err has a nonzero exit code
-        if (err.message) {
-          console.error(err.message);
+    return this.executeWithoutErrorHandling(args)
+      .then(() => {
+        return true;
+      })
+      .catch((err) => {
+        if (err instanceof CommandLineParserExitError) {
+          // executeWithoutErrorHandling() handles the successful cases,
+          // so here we can assume err has a nonzero exit code
+          if (err.message) {
+            console.error(err.message);
+          }
+          if (!process.exitCode) {
+            process.exitCode = err.exitCode;
+          }
+        } else {
+          const message: string = (err.message || 'An unknown error occurred').trim();
+          console.error(colors.red('Error: ' + message));
+          if (!process.exitCode) {
+            process.exitCode = 1;
+          }
         }
-        if (!process.exitCode) {
-          process.exitCode = err.exitCode;
-        }
-      } else {
-        const message: string = (err.message || 'An unknown error occurred').trim();
-        console.error(colors.red('Error: ' + message));
-        if (!process.exitCode) {
-          process.exitCode = 1;
-        }
-      }
-      return false;
-    });
+        return false;
+      });
   }
 
   /**
@@ -193,7 +196,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
         }
       }
       if (this.actions.length > 0 && !this.selectedAction) {
-        const actions: string[] = this.actions.map(x => x.actionName);
+        const actions: string[] = this.actions.map((x) => x.actionName);
         throw new Error(`An action must be specified (${actions.join(', ')})`);
       }
 
@@ -223,7 +226,8 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
    * {@inheritDoc CommandLineParameterProvider._getArgumentParser}
    * @internal
    */
-  protected _getArgumentParser(): argparse.ArgumentParser { // override
+  protected _getArgumentParser(): argparse.ArgumentParser {
+    // override
     return this._argumentParser;
   }
 

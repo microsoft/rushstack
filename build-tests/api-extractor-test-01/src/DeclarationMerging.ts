@@ -4,8 +4,7 @@
 /**
  * @alpha
  */
-export interface IMergedInterfaceReferencee {
-}
+export interface IMergedInterfaceReferencee {}
 
 /**
  * IMergedInterface instance 1.

@@ -13,8 +13,5 @@
  * @packageDocumentation
  */
 
-export {
-  getPackageDeps,
-  getGitHashForFiles
-} from './getPackageDeps';
+export { getPackageDeps, getGitHashForFiles } from './getPackageDeps';
 export { IPackageDeps } from './IPackageDeps';

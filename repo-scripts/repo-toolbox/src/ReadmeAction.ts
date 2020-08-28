@@ -11,7 +11,7 @@ export class ReadmeAction extends CommandLineAction {
     super({
       actionName: 'readme',
       summary: 'Generates README.md project table based on rush.json inventory',
-      documentation: 'Use this to update the repo\'s README.md'
+      documentation: "Use this to update the repo's README.md"
     });
   }
 
@@ -19,20 +19,20 @@ export class ReadmeAction extends CommandLineAction {
     return project.shouldPublish || !!project.versionPolicyName;
   }
 
-  protected onExecute(): Promise<void> { // abstract
+  protected onExecute(): Promise<void> {
+    // abstract
 
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
 
     const builder: StringBuilder = new StringBuilder();
     const orderedProjects: RushConfigurationProject[] = [...rushConfiguration.projects];
-    Sort.sortBy(orderedProjects, x => x.projectRelativeFolder);
+    Sort.sortBy(orderedProjects, (x) => x.projectRelativeFolder);
 
     builder.append('## Published Packages\n\n');
     builder.append('<!-- the table below was generated using the ./repo-scripts/repo-toolbox script -->\n\n');
     builder.append('| Folder | Version | Changelog | Package |\n');
     builder.append('| ------ | ------- | --------- | ------- |\n');
-    for (const project of orderedProjects.filter(x => ReadmeAction._isPublished(x))) {
-
+    for (const project of orderedProjects.filter((x) => ReadmeAction._isPublished(x))) {
       // Example:
       //
       // | [/apps/api-extractor](./apps/api-extractor/)
@@ -43,8 +43,8 @@ export class ReadmeAction extends CommandLineAction {
       // |
 
       const scopedName: string = project.packageName; // "@microsoft/api-extractor"
-      const folderPath: string = project.projectRelativeFolder;  // "apps/api-extractor"
-      let escapedScopedName: string = scopedName;  // "%40microsoft%2Fapi-extractor"
+      const folderPath: string = project.projectRelativeFolder; // "apps/api-extractor"
+      let escapedScopedName: string = scopedName; // "%40microsoft%2Fapi-extractor"
       escapedScopedName = Text.replaceAll(escapedScopedName, '/', '%2F');
       escapedScopedName = Text.replaceAll(escapedScopedName, '@', '%40');
 
@@ -53,8 +53,10 @@ export class ReadmeAction extends CommandLineAction {
 
       // | [![npm version](https://badge.fury.io/js/%40microsoft%2Fapi-extractor.svg
       //     )](https://badge.fury.io/js/%40microsoft%2Fapi-extractor)
-      builder.append(`| [![npm version](https://badge.fury.io/js/${escapedScopedName}.svg)]`
-        + `(https://badge.fury.io/js/${escapedScopedName}) `);
+      builder.append(
+        `| [![npm version](https://badge.fury.io/js/${escapedScopedName}.svg)]` +
+          `(https://badge.fury.io/js/${escapedScopedName}) `
+      );
 
       let hasChangeLog: boolean = true;
       if (project.versionPolicy instanceof LockStepVersionPolicy) {
@@ -82,8 +84,8 @@ export class ReadmeAction extends CommandLineAction {
     builder.append('<!-- the table below was generated using the ./repo-scripts/repo-toolbox script -->\n\n');
     builder.append('| Folder | Description |\n');
     builder.append('| ------ | -----------|\n');
-    for (const project of orderedProjects.filter(x => !ReadmeAction._isPublished(x))) {
-      const folderPath: string = project.projectRelativeFolder;  // "apps/api-extractor"
+    for (const project of orderedProjects.filter((x) => !ReadmeAction._isPublished(x))) {
+      const folderPath: string = project.projectRelativeFolder; // "apps/api-extractor"
 
       // | [/apps/api-extractor](./apps/api-extractor/)
       builder.append(`| [/${folderPath}](./${folderPath}/) `);
@@ -105,6 +107,7 @@ export class ReadmeAction extends CommandLineAction {
     return Promise.resolve();
   }
 
-  protected onDefineParameters(): void { // abstract
+  protected onDefineParameters(): void {
+    // abstract
   }
 }

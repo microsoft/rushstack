@@ -4,15 +4,8 @@
 import * as os from 'os';
 import * as jju from 'jju';
 
-import {
-  JsonSchema,
-  IJsonSchemaErrorInfo,
-  IJsonSchemaValidateOptions
-} from './JsonSchema';
-import {
-  Text,
-  NewlineKind
-} from './Text';
+import { JsonSchema, IJsonSchemaErrorInfo, IJsonSchemaValidateOptions } from './JsonSchema';
+import { Text, NewlineKind } from './Text';
 import { FileSystem } from './FileSystem';
 
 /**
@@ -198,7 +191,7 @@ export class JsonFile {
     options?: IJsonFileStringifyOptions
   ): string {
     if (!options) {
-      options = { };
+      options = {};
     }
 
     JsonFile.validateNoUndefinedMembers(newJsonObject);
@@ -239,7 +232,7 @@ export class JsonFile {
    */
   public static save(jsonObject: JsonObject, jsonFilename: string, options?: IJsonFileSaveOptions): boolean {
     if (!options) {
-      options = { };
+      options = {};
     }
 
     // Do we need to read the previous file contents?
@@ -291,9 +284,13 @@ export class JsonFile {
   /**
    * An async version of {@link JsonFile.loadAndValidateWithCallback}.
    */
-  public static async saveAsync(jsonObject: JsonObject, jsonFilename: string, options?: IJsonFileSaveOptions): Promise<boolean> {
+  public static async saveAsync(
+    jsonObject: JsonObject,
+    jsonFilename: string,
+    options?: IJsonFileSaveOptions
+  ): Promise<boolean> {
     if (!options) {
-      options = { };
+      options = {};
     }
 
     // Do we need to read the previous file contents?
@@ -392,7 +389,8 @@ export class JsonFile {
 
         // Convert this:     A path: "C:\file"
         // To this:          A path: \"C:\\file\"
-        const escapedKey: string = key.replace(/[\\]/g, '\\\\') // escape backslashes
+        const escapedKey: string = key
+          .replace(/[\\]/g, '\\\\') // escape backslashes
           .replace(/["]/g, '\\'); // escape quotes
         result += `["${escapedKey}"]`;
       }

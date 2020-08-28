@@ -27,8 +27,7 @@ export namespace MyNamespace {
  * but its `@beta` tag will not get copied.
  * @public
  */
-export function testSimple(): void {
-}
+export function testSimple(): void {}
 
 /**
  * {@inheritDoc nonexistent-package#MyNamespace.MyClass.nonExistentMethod}
@@ -39,20 +38,16 @@ export function testSimple(): void {
  *
  * @public
  */
-export function succeedForNow(): void {
-}
-
+export function succeedForNow(): void {}
 
 /**
  * {@inheritDoc MyNamespace.MyClass.nonExistentMethod}
  * @public
  */
-export function failWithBrokenLink(): void {
-}
+export function failWithBrokenLink(): void {}
 
 /**
  * {@inheritDoc}
  * @public
  */
-export function failWithMissingReference(): void {
-}
+export function failWithMissingReference(): void {}

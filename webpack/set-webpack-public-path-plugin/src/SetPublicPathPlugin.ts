@@ -2,23 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import { EOL } from 'os';
-import {
-  cloneDeep,
-  escapeRegExp
-} from 'lodash';
+import { cloneDeep, escapeRegExp } from 'lodash';
 import * as Webpack from 'webpack';
 import * as Tapable from 'tapable';
 import * as lodash from 'lodash';
 
-import {
-  IV3Compilation,
-  IV3Module,
-  IV3Chunk
-} from './V3Interfaces';
-import {
-  IInternalOptions,
-  getSetPublicPathCode
-} from './codeGenerator';
+import { IV3Compilation, IV3Module, IV3Chunk } from './V3Interfaces';
+import { IInternalOptions, getSetPublicPathCode } from './codeGenerator';
 
 /**
  * The base options for setting the webpack public path at runtime.
@@ -130,7 +120,9 @@ interface IStartupCodeOptions {
 
 const PLUGIN_NAME: string = 'set-webpack-public-path';
 
-const SHOULD_REPLACE_ASSET_NAME_TOKEN: unique symbol = Symbol('set-public-path-plugin-should-replace-asset-name');
+const SHOULD_REPLACE_ASSET_NAME_TOKEN: unique symbol = Symbol(
+  'set-public-path-plugin-should-replace-asset-name'
+);
 
 const ASSET_NAME_TOKEN: string = '-ASSET-NAME-c0ef4f86-b570-44d3-b210-4428c5b7825c';
 
@@ -164,7 +156,8 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
       compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
         const v4MainTemplate: IV4MainTemplate = compilation.mainTemplate as IV4MainTemplate;
         v4MainTemplate.hooks.startup.tap(PLUGIN_NAME, (source: string, chunk: IV4Chunk, hash: string) => {
-          const assetOrChunkFound: boolean = !!this.options.skipDetection || this._detectAssetsOrChunks(chunk);
+          const assetOrChunkFound: boolean =
+            !!this.options.skipDetection || this._detectAssetsOrChunks(chunk);
           if (assetOrChunkFound) {
             return this._getStartupCode({
               source,
@@ -185,7 +178,10 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
               for (const assetFilename of chunk.files) {
                 let escapedAssetFilename: string;
                 if (assetFilename.match(/\.map$/)) {
-                  escapedAssetFilename = assetFilename.substr(0, assetFilename.length - (4 /* '.map'.length */)); // Trim the ".map" extension
+                  escapedAssetFilename = assetFilename.substr(
+                    0,
+                    assetFilename.length - 4 /* '.map'.length */
+                  ); // Trim the ".map" extension
                   escapedAssetFilename = lodash.escapeRegExp(escapedAssetFilename);
                   escapedAssetFilename = JSON.stringify(escapedAssetFilename); // source in sourcemaps is JSON-encoded
                   escapedAssetFilename = escapedAssetFilename.substring(1, escapedAssetFilename.length - 1); // Trim the quotes from the JSON encoding
@@ -197,7 +193,10 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
                 const originalAssetSource: string = asset.source();
                 const originalAssetSize: number = asset.size();
 
-                const newAssetSource: string = originalAssetSource.replace(ASSET_NAME_TOKEN_REGEX, escapedAssetFilename);
+                const newAssetSource: string = originalAssetSource.replace(
+                  ASSET_NAME_TOKEN_REGEX,
+                  escapedAssetFilename
+                );
                 const sizeDifference: number = assetFilename.length - ASSET_NAME_TOKEN.length;
                 asset.source = () => newAssetSource;
                 asset.size = () => originalAssetSize + sizeDifference;
@@ -280,7 +279,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
     return [
       '// Set the webpack public path',
       '(function () {',
-        getSetPublicPathCode(moduleOptions, console.error),
+      getSetPublicPathCode(moduleOptions, console.error),
       '})();',
       '',
       options.source

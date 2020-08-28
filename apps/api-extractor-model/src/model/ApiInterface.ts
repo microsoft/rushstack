@@ -1,40 +1,53 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DeclarationReference, Meaning, Navigation, Component } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import {
+  DeclarationReference,
+  Meaning,
+  Navigation,
+  Component
+} from '@microsoft/tsdoc/lib/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
-import { ApiItemContainerMixin, IApiItemContainerMixinOptions, IApiItemContainerJson
-  } from '../mixins/ApiItemContainerMixin';
+import {
+  ApiItemContainerMixin,
+  IApiItemContainerMixinOptions,
+  IApiItemContainerJson
+} from '../mixins/ApiItemContainerMixin';
 import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
-import { IApiReleaseTagMixinOptions, ApiReleaseTagMixin, IApiReleaseTagMixinJson } from '../mixins/ApiReleaseTagMixin';
+import {
+  IApiReleaseTagMixinOptions,
+  ApiReleaseTagMixin,
+  IApiReleaseTagMixinJson
+} from '../mixins/ApiReleaseTagMixin';
 import { IExcerptTokenRange } from '../mixins/Excerpt';
 import { HeritageType } from './HeritageType';
 import { IApiNameMixinOptions, ApiNameMixin, IApiNameMixinJson } from '../mixins/ApiNameMixin';
-import { IApiTypeParameterListMixinOptions, IApiTypeParameterListMixinJson, ApiTypeParameterListMixin
-  } from '../mixins/ApiTypeParameterListMixin';
+import {
+  IApiTypeParameterListMixinOptions,
+  IApiTypeParameterListMixinJson,
+  ApiTypeParameterListMixin
+} from '../mixins/ApiTypeParameterListMixin';
 import { DeserializerContext } from './DeserializerContext';
 
 /**
  * Constructor options for {@link ApiInterface}.
  * @public
  */
-export interface IApiInterfaceOptions extends
-  IApiItemContainerMixinOptions,
-  IApiNameMixinOptions,
-  IApiTypeParameterListMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiDeclaredItemOptions {
-
+export interface IApiInterfaceOptions
+  extends IApiItemContainerMixinOptions,
+    IApiNameMixinOptions,
+    IApiTypeParameterListMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiDeclaredItemOptions {
   extendsTokenRanges: IExcerptTokenRange[];
 }
 
-export interface IApiInterfaceJson extends
-  IApiItemContainerJson,
-  IApiNameMixinJson,
-  IApiTypeParameterListMixinJson,
-  IApiReleaseTagMixinJson,
-  IApiDeclaredItemJson {
-
+export interface IApiInterfaceJson
+  extends IApiItemContainerJson,
+    IApiNameMixinJson,
+    IApiTypeParameterListMixinJson,
+    IApiReleaseTagMixinJson,
+    IApiDeclaredItemJson {
   extendsTokenRanges: IExcerptTokenRange[];
 }
 
@@ -55,9 +68,9 @@ export interface IApiInterfaceJson extends
  *
  * @public
  */
-export class ApiInterface extends ApiItemContainerMixin(ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(
-  ApiDeclaredItem)))) {
-
+export class ApiInterface extends ApiItemContainerMixin(
+  ApiNameMixin(ApiTypeParameterListMixin(ApiReleaseTagMixin(ApiDeclaredItem)))
+) {
   private readonly _extendsTypes: HeritageType[] = [];
 
   public constructor(options: IApiInterfaceOptions) {
@@ -73,9 +86,11 @@ export class ApiInterface extends ApiItemContainerMixin(ApiNameMixin(ApiTypePara
   }
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiInterfaceOptions>, context: DeserializerContext,
-    jsonObject: IApiInterfaceJson): void {
-
+  public static onDeserializeInto(
+    options: Partial<IApiInterfaceOptions>,
+    context: DeserializerContext,
+    jsonObject: IApiInterfaceJson
+  ): void {
     super.onDeserializeInto(options, context, jsonObject);
 
     options.extendsTokenRanges = jsonObject.extendsTokenRanges;
@@ -102,7 +117,7 @@ export class ApiInterface extends ApiItemContainerMixin(ApiNameMixin(ApiTypePara
   public serializeInto(jsonObject: Partial<IApiInterfaceJson>): void {
     super.serializeInto(jsonObject);
 
-    jsonObject.extendsTokenRanges = this.extendsTypes.map(x => x.excerpt.tokenRange);
+    jsonObject.extendsTokenRanges = this.extendsTypes.map((x) => x.excerpt.tokenRange);
   }
 
   /** @beta @override */

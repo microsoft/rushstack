@@ -15,7 +15,6 @@ import { ReleaseTag } from '@microsoft/api-extractor-model';
 import { AstImportAsModule } from '../analyzer/AstImportAsModule';
 
 export class ValidationEnhancer {
-
   public static analyze(collector: Collector): void {
     const alreadyWarnedSymbols: Set<AstSymbol> = new Set<AstSymbol>();
 
@@ -44,7 +43,6 @@ export class ValidationEnhancer {
     astSymbol: AstSymbol,
     symbolMetadata: SymbolMetadata
   ): void {
-
     let needsUnderscore: boolean = false;
 
     if (symbolMetadata.maxEffectiveReleaseTag === ReleaseTag.Internal) {
@@ -87,8 +85,8 @@ export class ValidationEnhancer {
         if (exportName[0] !== '_') {
           collector.messageRouter.addAnalyzerIssue(
             ExtractorMessageId.InternalMissingUnderscore,
-            `The name "${exportName}" should be prefixed with an underscore`
-            + ` because the declaration is marked as @internal`,
+            `The name "${exportName}" should be prefixed with an underscore` +
+              ` because the declaration is marked as @internal`,
             astSymbol,
             { exportName }
           );
@@ -155,7 +153,7 @@ export class ValidationEnhancer {
         collector.messageRouter.addAnalyzerIssue(
           ExtractorMessageId.InternalMixedReleaseTag,
           `Mixed release tags are not allowed for "${astSymbol.localName}" because one of its declarations` +
-          ` is marked as @internal`,
+            ` is marked as @internal`,
           astSymbol
         );
       }
@@ -171,7 +169,6 @@ export class ValidationEnhancer {
     const declarationReleaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
 
     for (const referencedEntity of astDeclaration.referencedAstEntities) {
-
       if (referencedEntity instanceof AstSymbol) {
         // If this is e.g. a member of a namespace, then we need to be checking the top-level scope to see
         // whether it's exported.
@@ -188,15 +185,19 @@ export class ValidationEnhancer {
             const referencedReleaseTag: ReleaseTag = referencedMetadata.maxEffectiveReleaseTag;
 
             if (ReleaseTag.compare(declarationReleaseTag, referencedReleaseTag) > 0) {
-              collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.IncompatibleReleaseTags,
-                `The symbol "${astDeclaration.astSymbol.localName}"`
-                + ` is marked as ${ReleaseTag.getTagName(declarationReleaseTag)},`
-                + ` but its signature references "${referencedEntity.localName}"`
-                + ` which is marked as ${ReleaseTag.getTagName(referencedReleaseTag)}`,
-                astDeclaration);
+              collector.messageRouter.addAnalyzerIssue(
+                ExtractorMessageId.IncompatibleReleaseTags,
+                `The symbol "${astDeclaration.astSymbol.localName}"` +
+                  ` is marked as ${ReleaseTag.getTagName(declarationReleaseTag)},` +
+                  ` but its signature references "${referencedEntity.localName}"` +
+                  ` which is marked as ${ReleaseTag.getTagName(referencedReleaseTag)}`,
+                astDeclaration
+              );
             }
           } else {
-            const entryPointFilename: string = path.basename(collector.workingPackage.entryPointSourceFile.fileName);
+            const entryPointFilename: string = path.basename(
+              collector.workingPackage.entryPointSourceFile.fileName
+            );
 
             if (!alreadyWarnedSymbols.has(referencedEntity)) {
               alreadyWarnedSymbols.add(referencedEntity);
@@ -204,15 +205,14 @@ export class ValidationEnhancer {
               // The main usage scenario for ECMAScript symbols is to attach private data to a JavaScript object,
               // so as a special case, we do NOT report them as forgotten exports.
               if (!ValidationEnhancer._isEcmaScriptSymbol(referencedEntity)) {
-
-                collector.messageRouter.addAnalyzerIssue(ExtractorMessageId.ForgottenExport,
-                  `The symbol "${rootSymbol.localName}" needs to be exported`
-                    + ` by the entry point ${entryPointFilename}`,
-                  astDeclaration);
+                collector.messageRouter.addAnalyzerIssue(
+                  ExtractorMessageId.ForgottenExport,
+                  `The symbol "${rootSymbol.localName}" needs to be exported` +
+                    ` by the entry point ${entryPointFilename}`,
+                  astDeclaration
+                );
               }
-
             }
-
           }
         }
       }
@@ -253,5 +253,4 @@ export class ValidationEnhancer {
 
     return false;
   }
-
 }

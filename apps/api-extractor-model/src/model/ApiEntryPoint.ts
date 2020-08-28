@@ -11,8 +11,7 @@ import { ApiPackage } from './ApiPackage';
  * Constructor options for {@link ApiEntryPoint}.
  * @public
  */
-export interface IApiEntryPointOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions {
-}
+export interface IApiEntryPointOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions {}
 
 /**
  * Represents the entry point for an NPM package.
@@ -75,7 +74,6 @@ export class ApiEntryPoint extends ApiItemContainerMixin(ApiNameMixin(ApiItem)) 
 
   /** @beta @override */
   public buildCanonicalReference(): DeclarationReference {
-
     if (this.parent instanceof ApiPackage) {
       return DeclarationReference.package(this.parent.name, this.importPath);
     }

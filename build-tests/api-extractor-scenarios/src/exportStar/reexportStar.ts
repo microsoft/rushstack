@@ -4,4 +4,4 @@
 export * from './localFile';
 
 /** @public */
-export class C { }
+export class C {}

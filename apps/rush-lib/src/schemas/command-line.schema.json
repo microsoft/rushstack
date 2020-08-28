@@ -5,27 +5,20 @@
 
   "definitions": {
     "anything": {
-      "type": [
-        "array",
-        "boolean",
-        "integer",
-        "number",
-        "object",
-        "string"
-      ],
+      "type": ["array", "boolean", "integer", "number", "object", "string"],
       "items": { "$ref": "#/definitions/anything" }
     },
 
     "baseCommand": {
       "type": "object",
       "additionalProperties": true,
-      "required": [ "commandKind", "name", "summary" ],
+      "required": ["commandKind", "name", "summary"],
       "properties": {
         "commandKind": {
           "title": "Command Kind",
           "description": "Indicates the kind of command: \"bulk\" commands are run separately for each project; \"global\" commands are run once for the entire repository.",
           "type": "string",
-          "enum": [ "bulk", "global" ]
+          "enum": ["bulk", "global"]
         },
         "name": {
           "title": "Custom Command Name",
@@ -58,10 +51,10 @@
         {
           "type": "object",
           "additionalProperties": true,
-          "required": [ "enableParallelism" ],
+          "required": ["enableParallelism"],
           "properties": {
             "commandKind": {
-              "enum": [ "bulk" ]
+              "enum": ["bulk"]
             },
             "enableParallelism": {
               "title": "enableParallelism",
@@ -118,10 +111,10 @@
         {
           "type": "object",
           "additionalProperties": true,
-          "required": [ "shellCommand" ],
+          "required": ["shellCommand"],
           "properties": {
             "commandKind": {
-              "enum": [ "global" ]
+              "enum": ["global"]
             },
             "shellCommand": {
               "title": "Shell Command",
@@ -150,13 +143,13 @@
     "baseParameter": {
       "type": "object",
       "additionalProperties": true,
-      "required": [ "parameterKind", "longName", "description", "associatedCommands" ],
+      "required": ["parameterKind", "longName", "description", "associatedCommands"],
       "properties": {
         "parameterKind": {
           "title": "Parameter Kind",
           "description": "Indicates the kind of syntax for this command-line parameter: \"flag\" or \"choice\" or \"string\"",
           "type": "string",
-          "enum": [ "flag", "choice", "string" ]
+          "enum": ["flag", "choice", "string"]
         },
         "longName": {
           "title": "Long Name",
@@ -202,7 +195,7 @@
           "additionalProperties": true,
           "properties": {
             "parameterKind": {
-              "enum": [ "flag" ]
+              "enum": ["flag"]
             }
           }
         },
@@ -232,7 +225,7 @@
           "required": ["argumentName"],
           "properties": {
             "parameterKind": {
-              "enum": [ "string" ]
+              "enum": ["string"]
             },
             "argumentName": {
               "title": "Argument Name",
@@ -266,10 +259,10 @@
         {
           "type": "object",
           "additionalProperties": true,
-          "required": [ "alternatives" ],
+          "required": ["alternatives"],
           "properties": {
             "parameterKind": {
-              "enum": [ "choice" ]
+              "enum": ["choice"]
             },
             "alternatives": {
               "title": "Alternatives",
@@ -279,7 +272,7 @@
               "items": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": [ "name", "description" ],
+                "required": ["name", "description"],
                 "properties": {
                   "name": {
                     "title": "Name of Alternative",
@@ -335,10 +328,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "oneOf": [
-          { "$ref": "#/definitions/bulkCommand" },
-          { "$ref": "#/definitions/globalCommand" }
-        ]
+        "oneOf": [{ "$ref": "#/definitions/bulkCommand" }, { "$ref": "#/definitions/globalCommand" }]
       }
     },
 

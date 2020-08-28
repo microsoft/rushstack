@@ -2,6 +2,6 @@
 // See LICENSE in the project root for license information.
 
 /** @public */
-const defaultFunctionStatement = () => { };
+const defaultFunctionStatement = () => {};
 
 export default defaultFunctionStatement;

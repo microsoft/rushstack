@@ -6,10 +6,7 @@ import { ITerminalProvider } from '@rushstack/node-core-library';
 
 import { CmdRunner } from './CmdRunner';
 import { ToolPaths } from './ToolPaths';
-import {
-  RushStackCompilerBase,
-  IRushStackCompilerBaseOptions
-} from './RushStackCompilerBase';
+import { RushStackCompilerBase, IRushStackCompilerBaseOptions } from './RushStackCompilerBase';
 import { LoggingUtilities } from './LoggingUtilities';
 
 /**
@@ -27,8 +24,12 @@ export interface ITypescriptCompilerOptions extends IRushStackCompilerBaseOption
  */
 export class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompilerOptions> {
   private _cmdRunner: CmdRunner;
-  public constructor(rootPath: string, terminalProvider: ITerminalProvider) // Remove in the next major version
-  public constructor(taskOptions: ITypescriptCompilerOptions, rootPath: string, terminalProvider: ITerminalProvider)
+  public constructor(rootPath: string, terminalProvider: ITerminalProvider); // Remove in the next major version
+  public constructor(
+    taskOptions: ITypescriptCompilerOptions,
+    rootPath: string,
+    terminalProvider: ITerminalProvider
+  );
   public constructor(
     arg1: ITypescriptCompilerOptions | string,
     arg2: string | ITerminalProvider,
@@ -60,15 +61,11 @@ export class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompile
     }
 
     super(taskOptions, rootPath, terminalProvider);
-    this._cmdRunner = new CmdRunner(
-      this._standardBuildFolders,
-      this._terminal,
-      {
-        packagePath: ToolPaths.typescriptPackagePath,
-        packageJson: ToolPaths.typescriptPackageJson,
-        packageBinPath: path.join('bin', 'tsc')
-      }
-    );
+    this._cmdRunner = new CmdRunner(this._standardBuildFolders, this._terminal, {
+      packagePath: ToolPaths.typescriptPackagePath,
+      packageJson: ToolPaths.typescriptPackageJson,
+      packageBinPath: path.join('bin', 'tsc')
+    });
   }
 
   public invoke(): Promise<void> {

@@ -11,9 +11,7 @@
  */
 
 /** @public */
-export class Lib2Class {
-}
+export class Lib2Class {}
 
 /** @alpha */
-export interface Lib2Interface {
-}
+export interface Lib2Interface {}

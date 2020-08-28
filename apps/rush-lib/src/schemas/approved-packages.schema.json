@@ -20,7 +20,7 @@
         }
       },
       "additionalProperties": false,
-      "required": [ "name" ]
+      "required": ["name"]
     }
   },
   "type": "object",
@@ -36,5 +36,5 @@
     }
   },
   "additionalProperties": false,
-  "required": [ "packages" ]
+  "required": ["packages"]
 }

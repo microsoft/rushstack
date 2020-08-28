@@ -30,137 +30,97 @@ test('render Markdown from TSDoc', () => {
 
   output.appendNodes([
     new DocHeading({ configuration, title: 'Simple bold test' }),
-    new DocParagraph({ configuration },
-      [
-        new DocPlainText({ configuration, text: 'This is a ' }),
-        new DocEmphasisSpan({ configuration, bold: true },
-          [
-            new DocPlainText({ configuration, text: 'bold' })
-          ]
-        ),
-        new DocPlainText({ configuration, text: ' word.' })
-      ]
-    )
+    new DocParagraph({ configuration }, [
+      new DocPlainText({ configuration, text: 'This is a ' }),
+      new DocEmphasisSpan({ configuration, bold: true }, [new DocPlainText({ configuration, text: 'bold' })]),
+      new DocPlainText({ configuration, text: ' word.' })
+    ])
   ]);
 
   output.appendNodes([
     new DocHeading({ configuration, title: 'All whitespace bold' }),
-    new DocParagraph({ configuration },
-      [
-        new DocEmphasisSpan({ configuration, bold: true },
-          [
-            new DocPlainText({ configuration, text: '  ' })
-          ]
-        )
-      ]
-    )
+    new DocParagraph({ configuration }, [
+      new DocEmphasisSpan({ configuration, bold: true }, [new DocPlainText({ configuration, text: '  ' })])
+    ])
   ]);
 
   output.appendNodes([
     new DocHeading({ configuration, title: 'Newline bold' }),
-    new DocParagraph({ configuration },
-      [
-        new DocEmphasisSpan({ configuration, bold: true },
-          [
-            new DocPlainText({ configuration, text: 'line 1' }),
-            new DocSoftBreak({ configuration }),
-            new DocPlainText({ configuration, text: 'line 2' })
-          ]
-        )
-      ]
-    )
+    new DocParagraph({ configuration }, [
+      new DocEmphasisSpan({ configuration, bold: true }, [
+        new DocPlainText({ configuration, text: 'line 1' }),
+        new DocSoftBreak({ configuration }),
+        new DocPlainText({ configuration, text: 'line 2' })
+      ])
+    ])
   ]);
 
   output.appendNodes([
     new DocHeading({ configuration, title: 'Newline bold with spaces' }),
-    new DocParagraph({ configuration },
-      [
-        new DocEmphasisSpan({ configuration, bold: true },
-          [
-            new DocPlainText({ configuration, text: '  line 1  ' }),
-            new DocSoftBreak({ configuration }),
-            new DocPlainText({ configuration, text: '  line 2  ' }),
-            new DocSoftBreak({ configuration }),
-            new DocPlainText({ configuration, text: '  line 3  ' })
-          ]
-        )
-      ]
-    )
+    new DocParagraph({ configuration }, [
+      new DocEmphasisSpan({ configuration, bold: true }, [
+        new DocPlainText({ configuration, text: '  line 1  ' }),
+        new DocSoftBreak({ configuration }),
+        new DocPlainText({ configuration, text: '  line 2  ' }),
+        new DocSoftBreak({ configuration }),
+        new DocPlainText({ configuration, text: '  line 3  ' })
+      ])
+    ])
   ]);
 
   output.appendNodes([
     new DocHeading({ configuration, title: 'Adjacent bold regions' }),
-    new DocParagraph({ configuration },
-      [
-        new DocEmphasisSpan({ configuration, bold: true },
-          [ new DocPlainText({ configuration, text: 'one' }) ]
-        ),
-        new DocEmphasisSpan({ configuration, bold: true },
-          [ new DocPlainText({ configuration, text: 'two' }) ]
-        ),
-        new DocEmphasisSpan({ configuration, bold: true },
-          [ new DocPlainText({ configuration, text: ' three ' }) ]
-        ),
-        new DocPlainText({ configuration, text: '' }),
-        new DocEmphasisSpan({ configuration, bold: true },
-          [ new DocPlainText({ configuration, text: 'four' }) ]
-        ),
-        new DocPlainText({ configuration, text: 'non-bold' }),
-        new DocEmphasisSpan({ configuration, bold: true },
-          [ new DocPlainText({ configuration, text: 'five' }) ]
-        )
-      ]
-    )
+    new DocParagraph({ configuration }, [
+      new DocEmphasisSpan({ configuration, bold: true }, [new DocPlainText({ configuration, text: 'one' })]),
+      new DocEmphasisSpan({ configuration, bold: true }, [new DocPlainText({ configuration, text: 'two' })]),
+      new DocEmphasisSpan({ configuration, bold: true }, [
+        new DocPlainText({ configuration, text: ' three ' })
+      ]),
+      new DocPlainText({ configuration, text: '' }),
+      new DocEmphasisSpan({ configuration, bold: true }, [new DocPlainText({ configuration, text: 'four' })]),
+      new DocPlainText({ configuration, text: 'non-bold' }),
+      new DocEmphasisSpan({ configuration, bold: true }, [new DocPlainText({ configuration, text: 'five' })])
+    ])
   ]);
 
   output.appendNodes([
     new DocHeading({ configuration, title: 'Adjacent to other characters' }),
-    new DocParagraph({ configuration },
-      [
-        new DocLinkTag({
-          configuration,
-          tagName: '@link',
-          linkText: 'a link',
-          urlDestination: './index.md'
-        }),
-        new DocEmphasisSpan({ configuration, bold: true },
-          [ new DocPlainText({ configuration, text: 'bold' }) ]
-        ),
-        new DocPlainText({ configuration, text: 'non-bold' }),
-        new DocPlainText({ configuration, text: 'more-non-bold' })
-      ]
-    )
+    new DocParagraph({ configuration }, [
+      new DocLinkTag({
+        configuration,
+        tagName: '@link',
+        linkText: 'a link',
+        urlDestination: './index.md'
+      }),
+      new DocEmphasisSpan({ configuration, bold: true }, [new DocPlainText({ configuration, text: 'bold' })]),
+      new DocPlainText({ configuration, text: 'non-bold' }),
+      new DocPlainText({ configuration, text: 'more-non-bold' })
+    ])
   ]);
 
   output.appendNodes([
     new DocHeading({ configuration, title: 'Unknown block tag' }),
-    new DocParagraph({ configuration },
-      [
-        new DocBlockTag({
-          configuration,
-          tagName: '@unknown'
-        }),
-        new DocEmphasisSpan({ configuration, bold: true },
-          [ new DocPlainText({ configuration, text: 'bold' }) ]
-        ),
-        new DocPlainText({ configuration, text: 'non-bold' }),
-        new DocPlainText({ configuration, text: 'more-non-bold' })
-      ]
-    )
+    new DocParagraph({ configuration }, [
+      new DocBlockTag({
+        configuration,
+        tagName: '@unknown'
+      }),
+      new DocEmphasisSpan({ configuration, bold: true }, [new DocPlainText({ configuration, text: 'bold' })]),
+      new DocPlainText({ configuration, text: 'non-bold' }),
+      new DocPlainText({ configuration, text: 'more-non-bold' })
+    ])
   ]);
 
   output.appendNodes([
     new DocHeading({ configuration, title: 'Bad characters' }),
-    new DocParagraph({ configuration },
-      [
-        new DocEmphasisSpan({ configuration, bold: true },
-          [ new DocPlainText({ configuration, text: '*one*two*' }) ]
-        ),
-        new DocEmphasisSpan({ configuration, bold: true },
-          [ new DocPlainText({ configuration, text: 'three*four' }) ]
-        )
-      ]
-    )
+    new DocParagraph({ configuration }, [
+      new DocEmphasisSpan({ configuration, bold: true }, [
+        new DocPlainText({ configuration, text: '*one*two*' })
+      ]),
+      new DocEmphasisSpan({ configuration, bold: true }, [
+        new DocPlainText({ configuration, text: 'three*four' })
+      ])
+    ])
   ]);
 
   output.appendNodes([
@@ -168,47 +128,42 @@ test('render Markdown from TSDoc', () => {
     new DocParagraph({ configuration }, [
       new DocPlainText({ configuration, text: 'Double-encoded JSON: "{ \\"A\\": 123}"' })
     ]),
-    new DocParagraph({ configuration },
-      [  new DocPlainText({ configuration, text: 'HTML chars: <script>alert("[You] are #1!");</script>' }) ]
-    ),
-    new DocParagraph({ configuration },
-      [  new DocPlainText({ configuration, text: 'HTML escape: &quot;' }) ]
-    ),
-    new DocParagraph({ configuration },
-      [  new DocPlainText({ configuration, text: '3 or more hyphens: - -- --- ---- ----- ------' }) ]
-    )
+    new DocParagraph({ configuration }, [
+      new DocPlainText({ configuration, text: 'HTML chars: <script>alert("[You] are #1!");</script>' })
+    ]),
+    new DocParagraph({ configuration }, [new DocPlainText({ configuration, text: 'HTML escape: &quot;' })]),
+    new DocParagraph({ configuration }, [
+      new DocPlainText({ configuration, text: '3 or more hyphens: - -- --- ---- ----- ------' })
+    ])
   ]);
 
   output.appendNodes([
     new DocHeading({ configuration, title: 'HTML tag' }),
-    new DocParagraph({ configuration },
-      [
-        new DocHtmlStartTag({ configuration, name: 'b' }),
-        new DocPlainText({ configuration, text: 'bold' }),
-        new DocHtmlEndTag({ configuration, name: 'b' })
-      ]
-    )
+    new DocParagraph({ configuration }, [
+      new DocHtmlStartTag({ configuration, name: 'b' }),
+      new DocPlainText({ configuration, text: 'bold' }),
+      new DocHtmlEndTag({ configuration, name: 'b' })
+    ])
   ]);
 
   output.appendNodes([
     new DocHeading({ configuration, title: 'Table' }),
-    new DocTable({
+    new DocTable(
+      {
         configuration,
-        headerTitles: [ 'Header 1', 'Header 2' ]
-      }, [
-      new DocTableRow({ configuration }, [
-        new DocTableCell({ configuration }, [
-          new DocParagraph({ configuration },
-            [ new DocPlainText({ configuration, text: 'Cell 1' }) ]
-          )
-        ]),
-        new DocTableCell({ configuration }, [
-          new DocParagraph({ configuration },
-            [ new DocPlainText({ configuration, text: 'Cell 2' }) ]
-          )
+        headerTitles: ['Header 1', 'Header 2']
+      },
+      [
+        new DocTableRow({ configuration }, [
+          new DocTableCell({ configuration }, [
+            new DocParagraph({ configuration }, [new DocPlainText({ configuration, text: 'Cell 1' })])
+          ]),
+          new DocTableCell({ configuration }, [
+            new DocParagraph({ configuration }, [new DocPlainText({ configuration, text: 'Cell 2' })])
+          ])
         ])
-      ])
-    ])
+      ]
+    )
   ]);
 
   const stringBuilder: StringBuilder = new StringBuilder();

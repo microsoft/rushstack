@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 /** @public */
-export class X { }
-export { X as Y }
+export class X {}
+export { X as Y };
 
 /** @internal */
-class A { }
+class A {}
 // The underscore warning should get printed next to these export statements, not next to the class declaration
-export { A as B }
-export { A as C }
+export { A as B };
+export { A as C };

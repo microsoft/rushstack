@@ -31,7 +31,7 @@ function generateConfiguration(mode, outputFolderName) {
     entry: {
       'localization-test-A': path.join(__dirname, 'src', 'indexA.ts'),
       'localization-test-B': path.join(__dirname, 'src', 'indexB.ts'),
-      'localization-test-C': path.join(__dirname, 'src', 'indexC.ts'),
+      'localization-test-C': path.join(__dirname, 'src', 'indexC.ts')
     },
     output: {
       path: path.join(__dirname, outputFolderName),
@@ -51,17 +51,17 @@ function generateConfiguration(mode, outputFolderName) {
             fillMissingTranslationStrings: true
           },
           translatedStrings: {
-            "es-es": {
-              "./src/strings1.loc.json": {
-                "string1": "la primera cadena de texto"
+            'es-es': {
+              './src/strings1.loc.json': {
+                string1: 'la primera cadena de texto'
               },
-              "./src/chunks/strings2.loc.json": {
-                "string1": "la segunda cadena de texto"
+              './src/chunks/strings2.loc.json': {
+                string1: 'la segunda cadena de texto'
               },
-              "./src/strings4.loc.json": {
-                "string1": "\"cadena de texto con comillas\""
+              './src/strings4.loc.json': {
+                string1: '"cadena de texto con comillas"'
               },
-              "./src/strings5.resx": "./localization/es-es/strings5.resx"
+              './src/strings5.resx': './localization/es-es/strings5.resx'
             }
           },
           passthroughLocale: {
@@ -98,5 +98,5 @@ function generateConfiguration(mode, outputFolderName) {
 
 module.exports = [
   generateConfiguration('development', 'dist-dev'),
-  generateConfiguration('production', 'dist-prod'),
+  generateConfiguration('production', 'dist-prod')
 ];

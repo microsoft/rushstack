@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  * When using the PNPM package manager, you can use pnpmfile.js to workaround
@@ -27,12 +27,12 @@ module.exports = {
  * The return value is the updated object.
  */
 function readPackage(packageJson, context) {
-
   /*[LINE "HYPOTHETICAL"]*/ // The karma types have a missing dependency on typings from the log4js package.
   /*[LINE "HYPOTHETICAL"]*/ if (packageJson.name === '@types/karma') {
-  /*[LINE "HYPOTHETICAL"]*/  context.log('Fixed up dependencies for @types/karma');
-  /*[LINE "HYPOTHETICAL"]*/  packageJson.dependencies['log4js'] = '0.6.38';
-  /*[LINE "HYPOTHETICAL"]*/ }
+    /*[LINE "HYPOTHETICAL"]*/ context.log('Fixed up dependencies for @types/karma');
+    /*[LINE "HYPOTHETICAL"]*/ packageJson.dependencies['log4js'] = '0.6.38';
+    /*[LINE "HYPOTHETICAL"]*/
+  }
 
   return packageJson;
 }

@@ -21,15 +21,15 @@ test('02 Indent something', () => {
   indentedWriter.write('a');
   indentedWriter.write('b');
   indentedWriter.increaseIndent();
-    indentedWriter.writeLine('c');
-    indentedWriter.writeLine('d');
+  indentedWriter.writeLine('c');
+  indentedWriter.writeLine('d');
   indentedWriter.decreaseIndent();
   indentedWriter.writeLine('e');
 
   indentedWriter.increaseIndent('>>> ');
-    indentedWriter.writeLine();
-    indentedWriter.writeLine();
-    indentedWriter.writeLine('g');
+  indentedWriter.writeLine();
+  indentedWriter.writeLine();
+  indentedWriter.writeLine('g');
   indentedWriter.decreaseIndent();
 
   expect(indentedWriter.toString()).toMatchSnapshot();

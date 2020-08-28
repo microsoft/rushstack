@@ -17,13 +17,18 @@ type CommandName = 'rush' | 'rushx' | undefined;
 export class RushCommandSelector {
   public static failIfNotInvokedAsRush(version: string): void {
     if (RushCommandSelector._getCommandName() === 'rushx') {
-      RushCommandSelector._failWithError(`This repository is using Rush version ${version}`
-        + ` which does not support the "rushx" command`);
+      RushCommandSelector._failWithError(
+        `This repository is using Rush version ${version} which does not support the "rushx" command`
+      );
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static execute(launcherVersion: string, selectedRushLib: any, options: rushLib.ILaunchOptions): void {
+  public static execute(
+    launcherVersion: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    selectedRushLib: any,
+    options: rushLib.ILaunchOptions
+  ): void {
     const Rush: typeof rushLib.Rush = selectedRushLib.Rush;
 
     if (!Rush) {
@@ -33,24 +38,20 @@ export class RushCommandSelector {
 
     if (RushCommandSelector._getCommandName() === 'rushx') {
       if (!Rush.launchRushX) {
-        RushCommandSelector._failWithError(`This repository is using Rush version ${Rush.version}`
-          + ` which does not support the "rushx" command`);
+        RushCommandSelector._failWithError(
+          `This repository is using Rush version ${Rush.version}` +
+            ` which does not support the "rushx" command`
+        );
       }
-      Rush.launchRushX(
-        launcherVersion,
-        {
-          isManaged: options.isManaged,
-          alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
-        }
-      );
+      Rush.launchRushX(launcherVersion, {
+        isManaged: options.isManaged,
+        alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
+      });
     } else {
-      Rush.launch(
-        launcherVersion,
-        {
-          isManaged: options.isManaged,
-          alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
-        }
-      );
+      Rush.launch(launcherVersion, {
+        isManaged: options.isManaged,
+        alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
+      });
     }
   }
 

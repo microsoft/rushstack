@@ -49,26 +49,10 @@ export class ApprovedPackagesChecker {
     for (const rushProject of this._rushConfiguration.projects) {
       const packageJson: IPackageJson = rushProject.packageJson;
 
-      this._collectDependencies(
-        packageJson.dependencies,
-        this._approvedPackagesPolicy,
-        rushProject
-      );
-      this._collectDependencies(
-        packageJson.devDependencies,
-        this._approvedPackagesPolicy,
-        rushProject
-      );
-      this._collectDependencies(
-        packageJson.peerDependencies,
-        this._approvedPackagesPolicy,
-        rushProject
-      );
-      this._collectDependencies(
-        packageJson.optionalDependencies,
-        this._approvedPackagesPolicy,
-        rushProject
-      );
+      this._collectDependencies(packageJson.dependencies, this._approvedPackagesPolicy, rushProject);
+      this._collectDependencies(packageJson.devDependencies, this._approvedPackagesPolicy, rushProject);
+      this._collectDependencies(packageJson.peerDependencies, this._approvedPackagesPolicy, rushProject);
+      this._collectDependencies(packageJson.optionalDependencies, this._approvedPackagesPolicy, rushProject);
     }
   }
 
@@ -79,7 +63,6 @@ export class ApprovedPackagesChecker {
   ): void {
     if (dependencies) {
       for (const packageName of Object.keys(dependencies)) {
-
         let referencedPackageName: string = packageName;
 
         // Special handling for NPM package aliases such as this:

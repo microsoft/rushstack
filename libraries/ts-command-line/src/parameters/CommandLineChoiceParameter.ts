@@ -22,11 +22,15 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
     super(definition);
 
     if (definition.alternatives.length < 1) {
-      throw new Error(`When defining a choice parameter, the alternatives list must contain at least one value.`);
+      throw new Error(
+        `When defining a choice parameter, the alternatives list must contain at least one value.`
+      );
     }
     if (definition.defaultValue && definition.alternatives.indexOf(definition.defaultValue) === -1) {
-      throw new Error(`The specified default value "${definition.defaultValue}"`
-        + ` is not one of the available options: ${definition.alternatives.toString()}`);
+      throw new Error(
+        `The specified default value "${definition.defaultValue}"` +
+          ` is not one of the available options: ${definition.alternatives.toString()}`
+      );
     }
 
     this.alternatives = definition.alternatives;
@@ -44,7 +48,8 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
    * @internal
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public _setValue(data: any): void { // abstract
+  public _setValue(data: any): void {
+    // abstract
     if (data !== null && data !== undefined) {
       if (typeof data !== 'string') {
         this.reportInvalidData(data);
@@ -59,8 +64,10 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
       if (environmentValue !== undefined && environmentValue !== '') {
         if (this.alternatives.indexOf(environmentValue) < 0) {
           const choices: string = '"' + this.alternatives.join('", "') + '"';
-          throw new Error(`Invalid value "${environmentValue}" for the environment variable`
-            + ` ${this.environmentVariable}.  Valid choices are: ${choices}`);
+          throw new Error(
+            `Invalid value "${environmentValue}" for the environment variable` +
+              ` ${this.environmentVariable}.  Valid choices are: ${choices}`
+          );
         }
         this._value = environmentValue;
         return;
@@ -79,7 +86,8 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
    * {@inheritDoc CommandLineParameter._getSupplementaryNotes}
    * @internal
    */
-  public _getSupplementaryNotes(supplementaryNotes: string[]): void { // virtual
+  public _getSupplementaryNotes(supplementaryNotes: string[]): void {
+    // virtual
     super._getSupplementaryNotes(supplementaryNotes);
     if (this.defaultValue !== undefined) {
       supplementaryNotes.push(`The default value is "${this.defaultValue}".`);

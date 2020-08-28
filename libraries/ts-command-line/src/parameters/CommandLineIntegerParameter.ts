@@ -31,7 +31,8 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
    * @internal
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public _setValue(data: any): void { // abstract
+  public _setValue(data: any): void {
+    // abstract
     if (data !== null && data !== undefined) {
       if (typeof data !== 'number') {
         this.reportInvalidData(data);
@@ -46,8 +47,10 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
       if (environmentValue !== undefined && environmentValue !== '') {
         const parsed: number = parseInt(environmentValue, 10);
         if (isNaN(parsed) || environmentValue.indexOf('.') >= 0) {
-          throw new Error(`Invalid value "${environmentValue}" for the environment variable`
-            + ` ${this.environmentVariable}.  It must be an integer value.`);
+          throw new Error(
+            `Invalid value "${environmentValue}" for the environment variable` +
+              ` ${this.environmentVariable}.  It must be an integer value.`
+          );
         }
         this._value = parsed;
         return;
@@ -66,7 +69,8 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
    * {@inheritDoc CommandLineParameter._getSupplementaryNotes}
    * @internal
    */
-  public _getSupplementaryNotes(supplementaryNotes: string[]): void { // virtual
+  public _getSupplementaryNotes(supplementaryNotes: string[]): void {
+    // virtual
     super._getSupplementaryNotes(supplementaryNotes);
     if (this.defaultValue !== undefined) {
       supplementaryNotes.push(`The default value is ${this.defaultValue}.`);

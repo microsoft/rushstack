@@ -13,7 +13,7 @@ items:
       - 'api-documenter-test!IDocInterface3#[EcmaSmbols.example]:member'
       - 'api-documenter-test!IDocInterface3#redundantQuotes:member'
   - uid: 'api-documenter-test!IDocInterface3#"[not.a.symbol]":member'
-    summary: An identifier that does needs quotes. It misleadingly looks like an ECMAScript symbol.
+    summary: An identifier that does need quotes. It misleadingly looks like an ECMAScript symbol.
     name: '"[not.a.symbol]"'
     fullName: '"[not.a.symbol]"'
     langs:

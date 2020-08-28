@@ -1,5 +1,5 @@
-import * as calculator from './calculator'
+import * as calculator from './calculator';
 export { calculator };
 
-import * as calculator2 from './calculator2'
+import * as calculator2 from './calculator2';
 export { calculator2 };

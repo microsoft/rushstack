@@ -18,5 +18,5 @@ export interface IPublicComplexInterface {
    * Example of trimming a construct signature.
    * @internal
    */
-  new();
+  new ();
 }

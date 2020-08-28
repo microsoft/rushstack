@@ -10,11 +10,7 @@ import {
   CommandLineStringListParameter,
   CommandLineParameterKind
 } from '@rushstack/ts-command-line';
-import {
-  FileSystem,
-  PackageJsonLookup,
-  IPackageJson
-} from '@rushstack/node-core-library';
+import { FileSystem, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
 
 import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
@@ -81,20 +77,19 @@ export class BulkScriptAction extends BaseScriptAction {
 
   public run(): Promise<void> {
     if (!FileSystem.exists(this.rushConfiguration.rushLinkJsonFilename)) {
-      throw new Error(`File not found: ${this.rushConfiguration.rushLinkJsonFilename}` +
-        `${os.EOL}Did you run "rush link"?`);
+      throw new Error(
+        `File not found: ${this.rushConfiguration.rushLinkJsonFilename}${os.EOL}Did you run "rush link"?`
+      );
     }
     this._doBeforeTask();
 
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    const isQuietMode: boolean = !(this._verboseParameter.value);
+    const isQuietMode: boolean = !this._verboseParameter.value;
 
     // if this is parallelizable, then use the value from the flag (undefined or a number),
     // if parallelism is not enabled, then restrict to 1 core
-    const parallelism: string | undefined = this._enableParallelism
-      ? this._parallelismParameter!.value
-      : '1';
+    const parallelism: string | undefined = this._enableParallelism ? this._parallelismParameter!.value : '1';
 
     // Collect all custom parameter values
     const customParameterValues: string[] = [];
@@ -120,35 +115,35 @@ export class BulkScriptAction extends BaseScriptAction {
     // Register all tasks with the task collection
     const taskCollection: TaskCollection = taskSelector.registerTasks();
 
-    const taskRunner: TaskRunner = new TaskRunner(
-      taskCollection.getOrderedTasks(),
-      {
-        quietMode: isQuietMode,
-        parallelism: parallelism,
-        changedProjectsOnly: changedProjectsOnly,
-        allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
-      }
-    );
+    const taskRunner: TaskRunner = new TaskRunner(taskCollection.getOrderedTasks(), {
+      quietMode: isQuietMode,
+      parallelism: parallelism,
+      changedProjectsOnly: changedProjectsOnly,
+      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
+    });
 
-    return taskRunner.execute().then(() => {
-      stopwatch.stop();
-      console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
-      this._doAfterTask(stopwatch, true);
-    }).catch((error: Error) => {
-      stopwatch.stop();
-      if (error instanceof AlreadyReportedError) {
+    return taskRunner
+      .execute()
+      .then(() => {
+        stopwatch.stop();
         console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
-      } else {
-        if (error && error.message) {
-          console.log('Error: ' + error.message);
+        this._doAfterTask(stopwatch, true);
+      })
+      .catch((error: Error) => {
+        stopwatch.stop();
+        if (error instanceof AlreadyReportedError) {
+          console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
+        } else {
+          if (error && error.message) {
+            console.log('Error: ' + error.message);
+          }
+
+          console.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
         }
 
-        console.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
-      }
-
-      this._doAfterTask(stopwatch, false);
-      throw new AlreadyReportedError();
-    });
+        this._doAfterTask(stopwatch, false);
+        throw new AlreadyReportedError();
+      });
   }
 
   protected onDefineParameters(): void {
@@ -158,35 +153,40 @@ export class BulkScriptAction extends BaseScriptAction {
         parameterShortName: '-p',
         argumentName: 'COUNT',
         environmentVariable: EnvironmentVariableNames.RUSH_PARALLELISM,
-        description: 'Specifies the maximum number of concurrent processes to launch during a build.'
-          + ' The COUNT should be a positive integer or else the word "max" to specify a count that is equal to'
-          + ' the number of CPU cores. If this parameter is omitted, then the default value depends on the'
-          + ' operating system and number of CPU cores.'
+        description:
+          'Specifies the maximum number of concurrent processes to launch during a build.' +
+          ' The COUNT should be a positive integer or else the word "max" to specify a count that is equal to' +
+          ' the number of CPU cores. If this parameter is omitted, then the default value depends on the' +
+          ' operating system and number of CPU cores.'
       });
     }
     this._toFlag = this.defineStringListParameter({
       parameterLongName: '--to',
       parameterShortName: '-t',
       argumentName: 'PROJECT1',
-      description: 'Run command in the specified project and all of its dependencies. "." can be used as shorthand ' +
+      description:
+        'Run command in the specified project and all of its dependencies. "." can be used as shorthand ' +
         'to specify the project in the current working directory.'
     });
-    this._fromVersionPolicy =  this.defineStringListParameter({
+    this._fromVersionPolicy = this.defineStringListParameter({
       parameterLongName: '--from-version-policy',
       argumentName: 'VERSION_POLICY_NAME',
-      description: 'Run command in all projects with the specified version policy '
-        + 'and all projects that directly or indirectly depend on projects with the specified version policy'
+      description:
+        'Run command in all projects with the specified version policy ' +
+        'and all projects that directly or indirectly depend on projects with the specified version policy'
     });
-    this._toVersionPolicy =  this.defineStringListParameter({
+    this._toVersionPolicy = this.defineStringListParameter({
       parameterLongName: '--to-version-policy',
       argumentName: 'VERSION_POLICY_NAME',
-      description: 'Run command in all projects with the specified version policy and all of their dependencies'
+      description:
+        'Run command in all projects with the specified version policy and all of their dependencies'
     });
     this._fromFlag = this.defineStringListParameter({
       parameterLongName: '--from',
       parameterShortName: '-f',
       argumentName: 'PROJECT2',
-      description: 'Run command in all projects that directly or indirectly depend on the specified project. ' +
+      description:
+        'Run command in all projects that directly or indirectly depend on the specified project. ' +
         '"." can be used as shorthand to specify the project in the current working directory.'
     });
     this._verboseParameter = this.defineFlagParameter({
@@ -198,8 +198,9 @@ export class BulkScriptAction extends BaseScriptAction {
       this._changedProjectsOnly = this.defineFlagParameter({
         parameterLongName: '--changed-projects-only',
         parameterShortName: '-o',
-        description: 'If specified, the incremental build will only rebuild projects that have changed, '
-          + 'but not any projects that directly or indirectly depend on the changed package.'
+        description:
+          'If specified, the incremental build will only rebuild projects that have changed, ' +
+          'but not any projects that directly or indirectly depend on the changed package.'
       });
     }
 
@@ -221,19 +222,23 @@ export class BulkScriptAction extends BaseScriptAction {
           if (this.rushConfiguration.projectsByName.has(projectName)) {
             projects.push(projectName);
           } else {
-            console.log(colors.red(
-              'Rush is not currently running in a project directory specified in rush.json. ' +
-              `The "." value for the ${this._toFlag.longName} parameter or the ${this._fromFlag.longName} parameter ` +
-              'is not allowed.'
-            ));
+            console.log(
+              colors.red(
+                'Rush is not currently running in a project directory specified in rush.json. ' +
+                  `The "." value for the ${this._toFlag.longName} parameter or the ${this._fromFlag.longName} parameter ` +
+                  'is not allowed.'
+              )
+            );
             throw new AlreadyReportedError();
           }
         } else {
-          console.log(colors.red(
-            'Rush is not currently running in a project directory. ' +
-            `The "." value for the ${this._toFlag.longName} parameter or the ${this._fromFlag.longName} parameter ` +
-            'is not allowed.'
-          ));
+          console.log(
+            colors.red(
+              'Rush is not currently running in a project directory. ' +
+                `The "." value for the ${this._toFlag.longName} parameter or the ${this._fromFlag.longName} parameter ` +
+                'is not allowed.'
+            )
+          );
           throw new AlreadyReportedError();
         }
       } else {
@@ -242,8 +247,8 @@ export class BulkScriptAction extends BaseScriptAction {
     }
 
     if (versionPoliciesParameters.values && versionPoliciesParameters.values.length > 0) {
-      this.rushConfiguration.projects.forEach(project => {
-        const matches: boolean = versionPoliciesParameters.values.some(policyName => {
+      this.rushConfiguration.projects.forEach((project) => {
+        const matches: boolean = versionPoliciesParameters.values.some((policyName) => {
           return project.versionPolicyName === policyName;
         });
         if (matches) {
@@ -256,7 +261,10 @@ export class BulkScriptAction extends BaseScriptAction {
   }
 
   private _doBeforeTask(): void {
-    if (this.actionName !== RushConstants.buildCommandName && this.actionName !== RushConstants.rebuildCommandName) {
+    if (
+      this.actionName !== RushConstants.buildCommandName &&
+      this.actionName !== RushConstants.rebuildCommandName
+    ) {
       // Only collects information for built-in tasks like build or rebuild.
       return;
     }
@@ -267,7 +275,10 @@ export class BulkScriptAction extends BaseScriptAction {
   }
 
   private _doAfterTask(stopwatch: Stopwatch, success: boolean): void {
-    if (this.actionName !== RushConstants.buildCommandName && this.actionName !== RushConstants.rebuildCommandName) {
+    if (
+      this.actionName !== RushConstants.buildCommandName &&
+      this.actionName !== RushConstants.rebuildCommandName
+    ) {
       // Only collects information for built-in tasks like build or rebuild.
       return;
     }

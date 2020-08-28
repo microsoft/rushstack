@@ -1,14 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  StringValuesTypingsGenerator,
-  IStringValueTyping
-} from '@rushstack/typings-generator';
-import {
-  Terminal,
-  NewlineKind
-} from '@rushstack/node-core-library';
+import { StringValuesTypingsGenerator, IStringValueTyping } from '@rushstack/typings-generator';
+import { Terminal, NewlineKind } from '@rushstack/node-core-library';
 
 import { ILocalizationFile } from './interfaces';
 import { LocFileParser } from './utilities/LocFileParser';
@@ -45,7 +39,8 @@ export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
 
         const typings: IStringValueTyping[] = [];
 
-        for (const stringName in locFileData) { // eslint-disable-line guard-for-in
+        // eslint-disable-next-line guard-for-in
+        for (const stringName in locFileData) {
           typings.push({
             exportName: stringName,
             comment: locFileData[stringName].comment

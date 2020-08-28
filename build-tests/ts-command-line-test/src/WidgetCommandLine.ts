@@ -19,7 +19,8 @@ export class WidgetCommandLine extends CommandLineParser {
     this.addAction(new RunAction());
   }
 
-  protected onDefineParameters(): void { // abstract
+  protected onDefineParameters(): void {
+    // abstract
     this._verbose = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
@@ -27,7 +28,8 @@ export class WidgetCommandLine extends CommandLineParser {
     });
   }
 
-  protected onExecute(): Promise<void> { // override
+  protected onExecute(): Promise<void> {
+    // override
     BusinessLogic.configureLogger(this._verbose.value);
     return super.onExecute();
   }

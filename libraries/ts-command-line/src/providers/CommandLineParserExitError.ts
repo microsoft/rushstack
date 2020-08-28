@@ -20,11 +20,13 @@ export class CommandLineParserExitError extends Error {
 }
 
 export class CustomArgumentParser extends argparse.ArgumentParser {
-  public exit(status: number, message: string): void { // override
+  public exit(status: number, message: string): void {
+    // override
     throw new CommandLineParserExitError(status, message);
   }
 
-  public error(err: Error | string): void { // override
+  public error(err: Error | string): void {
+    // override
     // Ensure the ParserExitError bubbles up to the top without any special processing
     if (err instanceof CommandLineParserExitError) {
       throw err;

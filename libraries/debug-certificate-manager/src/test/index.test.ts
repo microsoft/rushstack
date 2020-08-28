@@ -11,7 +11,7 @@ test('Verify CertificateStore store is created.', () => {
 });
 
 test('Verify CertificateManger provides ensure and untrust methods', () => {
-  const certificateManger: CertificateManager = new CertificateManager;
+  const certificateManger: CertificateManager = new CertificateManager();
   expect(certificateManger).toHaveProperty('ensureCertificate');
   expect(certificateManger).toHaveProperty('untrustCertificate');
 });

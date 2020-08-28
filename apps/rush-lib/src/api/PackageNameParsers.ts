@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  PackageNameParser
-} from '@rushstack/node-core-library';
+import { PackageNameParser } from '@rushstack/node-core-library';
 
 export class PackageNameParsers {
   /**
    * This is the default for `RushConfiguration.packageNameParser`.
    */
-  public static rushDefault: PackageNameParser = new PackageNameParser({ });
+  public static rushDefault: PackageNameParser = new PackageNameParser({});
 
   /**
    * This is the `RushConfiguration.packageNameParser` used when `allowMostlyStandardPackageNames = true`

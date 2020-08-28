@@ -15,10 +15,9 @@ describe('AddAction', () => {
     let oldArgs: string[];
 
     beforeEach(() => {
-      doRushAddMock = jest.spyOn(
-        PackageJsonUpdater.prototype,
-        'doRushAdd'
-      ).mockImplementation(() => Promise.resolve());
+      doRushAddMock = jest
+        .spyOn(PackageJsonUpdater.prototype, 'doRushAdd')
+        .mockImplementation(() => Promise.resolve());
       jest.spyOn(process, 'exit').mockImplementation();
       oldExitCode = process.exitCode;
       oldArgs = process.argv;
@@ -47,7 +46,8 @@ describe('AddAction', () => {
         // Mock the command
         process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'add', '-p', 'assert'];
 
-        return expect(parser.execute()).resolves.toEqual(true)
+        return expect(parser.execute())
+          .resolves.toEqual(true)
           .then(() => {
             expect(doRushAddMock).toHaveBeenCalledTimes(1);
             expect(doRushAddMock.mock.calls[0][0].projects).toHaveLength(1);
@@ -74,7 +74,8 @@ describe('AddAction', () => {
         // Mock the command
         process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'add', '-p', 'assert', '--all'];
 
-        return expect(parser.execute()).resolves.toEqual(true)
+        return expect(parser.execute())
+          .resolves.toEqual(true)
           .then(() => {
             expect(doRushAddMock).toHaveBeenCalledTimes(1);
             expect(doRushAddMock.mock.calls[0][0].projects).toHaveLength(2);

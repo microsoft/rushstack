@@ -238,21 +238,21 @@ export class AstDeclaration {
     switch (kind) {
       case ts.SyntaxKind.CallSignature:
       case ts.SyntaxKind.ClassDeclaration:
-      case ts.SyntaxKind.ConstructSignature:    // Example: "new(x: number): IMyClass"
-      case ts.SyntaxKind.Constructor:           // Example: "constructor(x: number)"
+      case ts.SyntaxKind.ConstructSignature: // Example: "new(x: number): IMyClass"
+      case ts.SyntaxKind.Constructor: // Example: "constructor(x: number)"
       case ts.SyntaxKind.EnumDeclaration:
       case ts.SyntaxKind.EnumMember:
-      case ts.SyntaxKind.FunctionDeclaration:   // Example: "(x: number): number"
+      case ts.SyntaxKind.FunctionDeclaration: // Example: "(x: number): number"
       case ts.SyntaxKind.GetAccessor:
       case ts.SyntaxKind.SetAccessor:
-      case ts.SyntaxKind.IndexSignature:        // Example: "[key: string]: string"
+      case ts.SyntaxKind.IndexSignature: // Example: "[key: string]: string"
       case ts.SyntaxKind.InterfaceDeclaration:
       case ts.SyntaxKind.MethodDeclaration:
       case ts.SyntaxKind.MethodSignature:
-      case ts.SyntaxKind.ModuleDeclaration:     // Used for both "module" and "namespace" declarations
+      case ts.SyntaxKind.ModuleDeclaration: // Used for both "module" and "namespace" declarations
       case ts.SyntaxKind.PropertyDeclaration:
       case ts.SyntaxKind.PropertySignature:
-      case ts.SyntaxKind.TypeAliasDeclaration:  // Example: "type Shape = Circle | Square"
+      case ts.SyntaxKind.TypeAliasDeclaration: // Example: "type Shape = Circle | Square"
       case ts.SyntaxKind.VariableDeclaration:
         return true;
 
@@ -268,5 +268,4 @@ export class AstDeclaration {
 
     return false;
   }
-
 }

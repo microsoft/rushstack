@@ -11,7 +11,12 @@ export class BxlConfig {
   private _modules: BxlModule[];
   private _commonRushConfigFolder: string;
 
-  public constructor(bxlRoot: string, modulesFolder: string, modules: BxlModule[], commonRushConfigFolder: string) {
+  public constructor(
+    bxlRoot: string,
+    modulesFolder: string,
+    modules: BxlModule[],
+    commonRushConfigFolder: string
+  ) {
     this._bxlRoot = bxlRoot;
     this._modulesFolder = modulesFolder;
     this._modules = modules;
@@ -23,8 +28,7 @@ export class BxlConfig {
   }
 
   public async writeFile(): Promise<void> {
-    const contents: string =
-`config({
+    const contents: string = `config({
   modules: [
     f\`${this._modules[0].configFilePath}\`,
   ],

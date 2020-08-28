@@ -13,6 +13,5 @@ export class MyClass {
     return { title: 'thing' };
   }
   // The setter should also be considered @internal because the getter was marked as internal.
-  public set _thing(value: _IInternalThing) {
-  }
+  public set _thing(value: _IInternalThing) {}
 }

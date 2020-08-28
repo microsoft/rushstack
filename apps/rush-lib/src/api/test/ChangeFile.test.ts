@@ -12,11 +12,14 @@ describe('ChangeFile', () => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-npm.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
-    const changeFile: ChangeFile = new ChangeFile({
-      packageName: 'a',
-      changes: [],
-      email: 'fake@microsoft.com'
-    }, rushConfiguration);
+    const changeFile: ChangeFile = new ChangeFile(
+      {
+        packageName: 'a',
+        changes: [],
+        email: 'fake@microsoft.com'
+      },
+      rushConfiguration
+    );
 
     changeFile.addChange({
       packageName: 'a',

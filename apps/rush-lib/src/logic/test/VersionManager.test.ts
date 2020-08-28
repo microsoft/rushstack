@@ -10,8 +10,7 @@ import { ChangeType, IChangeInfo } from '../../api/ChangeManagement';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionManager } from '../VersionManager';
 
-function _getChanges(changeFiles: Map<string, ChangeFile>,
-  packageName: string): IChangeInfo[] | undefined {
+function _getChanges(changeFiles: Map<string, ChangeFile>, packageName: string): IChangeInfo[] | undefined {
   const changeFile: ChangeFile | undefined = changeFiles.get(packageName);
   if (!changeFile) {
     return undefined;
@@ -25,8 +24,11 @@ describe('VersionManager', () => {
   let versionManager: VersionManager;
 
   beforeEach(() => {
-    versionManager = new VersionManager(rushConfiguration, 'test@microsoft.com',
-      rushConfiguration.versionPolicyConfiguration);
+    versionManager = new VersionManager(
+      rushConfiguration,
+      'test@microsoft.com',
+      rushConfiguration.versionPolicyConfiguration
+    );
   });
 
   /* eslint-disable dot-notation */

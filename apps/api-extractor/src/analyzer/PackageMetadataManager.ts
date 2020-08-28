@@ -60,8 +60,10 @@ export class PackageMetadataManager {
 
   private readonly _packageJsonLookup: PackageJsonLookup;
   private readonly _messageRouter: MessageRouter;
-  private readonly _packageMetadataByPackageJsonPath: Map<string, PackageMetadata>
-    = new Map<string, PackageMetadata>();
+  private readonly _packageMetadataByPackageJsonPath: Map<string, PackageMetadata> = new Map<
+    string,
+    PackageMetadata
+  >();
 
   public constructor(packageJsonLookup: PackageJsonLookup, messageRouter: MessageRouter) {
     this._packageJsonLookup = packageJsonLookup;
@@ -70,9 +72,10 @@ export class PackageMetadataManager {
 
   // This feature is still being standardized: https://github.com/microsoft/tsdoc/issues/7
   // In the future we will use the @microsoft/tsdoc library to read this file.
-  private static _resolveTsdocMetadataPathFromPackageJson(packageFolder: string,
-    packageJson: INodePackageJson): string {
-
+  private static _resolveTsdocMetadataPathFromPackageJson(
+    packageFolder: string,
+    packageJson: INodePackageJson
+  ): string {
     const tsdocMetadataFilename: string = PackageMetadataManager.tsdocMetadataFilename;
 
     let tsdocMetadataRelativePath: string;
@@ -85,17 +88,11 @@ export class PackageMetadataManager {
     } else if (packageJson.typings) {
       // 2. If package.json contains a field such as "typings": "./path1/path2/index.d.ts", then we look
       // for the file under "./path1/path2/tsdoc-metadata.json"
-      tsdocMetadataRelativePath = path.join(
-        path.dirname(packageJson.typings),
-        tsdocMetadataFilename
-      );
+      tsdocMetadataRelativePath = path.join(path.dirname(packageJson.typings), tsdocMetadataFilename);
     } else if (packageJson.main) {
       // 3. If package.json contains a field such as "main": "./path1/path2/index.js", then we look for
       // the file under "./path1/path2/tsdoc-metadata.json"
-      tsdocMetadataRelativePath = path.join(
-        path.dirname(packageJson.main),
-        tsdocMetadataFilename
-      );
+      tsdocMetadataRelativePath = path.join(path.dirname(packageJson.main), tsdocMetadataFilename);
     } else {
       // 4. If none of the above rules apply, then by default we look for the file under "./tsdoc-metadata.json"
       // since the default entry point is "./index.js"
@@ -103,10 +100,7 @@ export class PackageMetadataManager {
     }
 
     // Always resolve relative to the package folder.
-    const tsdocMetadataPath: string = path.resolve(
-      packageFolder,
-      tsdocMetadataRelativePath
-    );
+    const tsdocMetadataPath: string = path.resolve(packageFolder, tsdocMetadataRelativePath);
     return tsdocMetadataPath;
   }
 
@@ -123,10 +117,7 @@ export class PackageMetadataManager {
     if (tsdocMetadataPath) {
       return path.resolve(packageFolder, tsdocMetadataPath);
     }
-    return PackageMetadataManager._resolveTsdocMetadataPathFromPackageJson(
-      packageFolder,
-      packageJson
-    );
+    return PackageMetadataManager._resolveTsdocMetadataPathFromPackageJson(packageFolder, packageJson);
   }
 
   /**
@@ -160,13 +151,15 @@ export class PackageMetadataManager {
    * is returned.  The results are cached.
    */
   public tryFetchPackageMetadata(sourceFilePath: string): PackageMetadata | undefined {
-    const packageJsonFilePath: string | undefined
-      = this._packageJsonLookup.tryGetPackageJsonFilePathFor(sourceFilePath);
+    const packageJsonFilePath: string | undefined = this._packageJsonLookup.tryGetPackageJsonFilePathFor(
+      sourceFilePath
+    );
     if (!packageJsonFilePath) {
       return undefined;
     }
-    let packageMetadata: PackageMetadata | undefined
-      = this._packageMetadataByPackageJsonPath.get(packageJsonFilePath);
+    let packageMetadata: PackageMetadata | undefined = this._packageMetadataByPackageJsonPath.get(
+      packageJsonFilePath
+    );
 
     if (!packageMetadata) {
       const packageJson: INodePackageJson = this._packageJsonLookup.loadNodePackageJson(packageJsonFilePath);
@@ -181,7 +174,10 @@ export class PackageMetadataManager {
       );
 
       if (FileSystem.exists(tsdocMetadataPath)) {
-        this._messageRouter.logVerbose(ConsoleMessageId.FoundTSDocMetadata, 'Found metadata in ' + tsdocMetadataPath);
+        this._messageRouter.logVerbose(
+          ConsoleMessageId.FoundTSDocMetadata,
+          'Found metadata in ' + tsdocMetadataPath
+        );
         // If the file exists at all, assume it was written by API Extractor
         aedocSupported = true;
       }

@@ -9,12 +9,10 @@ import { DynamicCommandLineParser } from '../providers/DynamicCommandLineParser'
 import { DynamicCommandLineAction } from '../providers/DynamicCommandLineAction';
 
 function createParser(): DynamicCommandLineParser {
-  const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser(
-    {
-      toolFilename: 'example',
-      toolDescription: 'An example project'
-    }
-  );
+  const commandLineParser: DynamicCommandLineParser = new DynamicCommandLineParser({
+    toolFilename: 'example',
+    toolDescription: 'An example project'
+  });
   commandLineParser.defineFlagParameter({
     parameterLongName: '--verbose',
     description: 'A flag that affects all actions'
@@ -57,7 +55,7 @@ describe('CommandLineRemainder', () => {
   it('parses an action input with remainder', () => {
     const commandLineParser: CommandLineParser = createParser();
     const action: CommandLineAction = commandLineParser.getAction('run');
-    const args: string[] = [ 'run', '--title', 'The title', 'the', 'remaining', 'args'];
+    const args: string[] = ['run', '--title', 'The title', 'the', 'remaining', 'args'];
 
     return commandLineParser.execute(args).then(() => {
       expect(commandLineParser.selectedAction).toBe(action);
@@ -74,5 +72,4 @@ describe('CommandLineRemainder', () => {
       expect(copiedArgs).toMatchSnapshot();
     });
   });
-
 });

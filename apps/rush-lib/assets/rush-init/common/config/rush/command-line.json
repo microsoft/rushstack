@@ -170,7 +170,7 @@
        * (Required) A list of custom commands and/or built-in Rush commands that this parameter may
        * be used with.  The parameter will be appended to the shell command that Rush invokes.
        */
-      "associatedCommands": [ "build", "rebuild" ]
+      "associatedCommands": ["build", "rebuild"]
     },
 
     {
@@ -182,7 +182,7 @@
       "longName": "--my-string",
       "description": "A custom string parameter for the \"my-global-command\" custom command",
 
-      "associatedCommands": [ "my-global-command" ],
+      "associatedCommands": ["my-global-command"],
 
       /**
        * The name of the argument, which will be shown in the command-line help.
@@ -209,12 +209,12 @@
       "longName": "--my-choice",
       "description": "A custom choice parameter for the \"my-global-command\" custom command",
 
-      "associatedCommands": [ "my-global-command" ],
+      "associatedCommands": ["my-global-command"],
 
       /**
        * If true, this parameter must be included with the command.  The default is false.
        */
-       "required": false,
+      "required": false,
 
       /**
        * Normally if a parameter is omitted from the command line, it will not be passed

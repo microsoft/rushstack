@@ -8,7 +8,7 @@ function pseudoTimeMilliseconds(times: number[]): () => number {
 }
 
 function pseudoTimeSeconds(times: number[]): () => number {
-  return pseudoTimeMilliseconds(times.map(time => time * 1000));
+  return pseudoTimeMilliseconds(times.map((time) => time * 1000));
 }
 
 describe('Stopwatch', () => {
@@ -24,7 +24,7 @@ describe('Stopwatch', () => {
     done();
   });
 
-  it('can\'t start twice', (done: jest.DoneCallback) => {
+  it("can't start twice", (done: jest.DoneCallback) => {
     const watch: Stopwatch = new Stopwatch();
     expect(() => {
       watch.start();

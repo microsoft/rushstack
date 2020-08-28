@@ -14,24 +14,10 @@ export { AedocDefinitions } from './aedoc/AedocDefinitions';
 export { ReleaseTag } from './aedoc/ReleaseTag';
 
 // items
-export {
-  IApiDeclaredItemOptions,
-  ApiDeclaredItem
-} from './items/ApiDeclaredItem';
-export {
-  IApiDocumentedItemOptions,
-  ApiDocumentedItem
-} from './items/ApiDocumentedItem';
-export {
-  ApiItemKind,
-  IApiItemOptions,
-  ApiItem,
-  IApiItemConstructor
-} from './items/ApiItem';
-export {
-  IApiPropertyItemOptions,
-  ApiPropertyItem
-} from './items/ApiPropertyItem';
+export { IApiDeclaredItemOptions, ApiDeclaredItem } from './items/ApiDeclaredItem';
+export { IApiDocumentedItemOptions, ApiDocumentedItem } from './items/ApiDocumentedItem';
+export { ApiItemKind, IApiItemOptions, ApiItem, IApiItemConstructor } from './items/ApiItem';
+export { IApiPropertyItemOptions, ApiPropertyItem } from './items/ApiPropertyItem';
 
 // mixins
 export {
@@ -44,126 +30,35 @@ export {
   IApiTypeParameterListMixinOptions,
   ApiTypeParameterListMixin
 } from './mixins/ApiTypeParameterListMixin';
-export {
-  IApiItemContainerMixinOptions,
-  ApiItemContainerMixin
-} from './mixins/ApiItemContainerMixin';
-export {
-  IApiReleaseTagMixinOptions,
-  ApiReleaseTagMixin
-} from './mixins/ApiReleaseTagMixin';
-export {
-  IApiReturnTypeMixinOptions,
-  ApiReturnTypeMixin
-} from './mixins/ApiReturnTypeMixin';
-export {
-  IApiStaticMixinOptions,
-  ApiStaticMixin
-} from './mixins/ApiStaticMixin';
-export {
-  IApiNameMixinOptions,
-  ApiNameMixin
-} from './mixins/ApiNameMixin';
-export {
-  ExcerptTokenKind,
-  IExcerptTokenRange,
-  IExcerptToken,
-  ExcerptToken,
-  Excerpt
-} from './mixins/Excerpt';
-export {
-  Constructor,
-  PropertiesOf
-} from './mixins/Mixin';
+export { IApiItemContainerMixinOptions, ApiItemContainerMixin } from './mixins/ApiItemContainerMixin';
+export { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from './mixins/ApiReleaseTagMixin';
+export { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from './mixins/ApiReturnTypeMixin';
+export { IApiStaticMixinOptions, ApiStaticMixin } from './mixins/ApiStaticMixin';
+export { IApiNameMixinOptions, ApiNameMixin } from './mixins/ApiNameMixin';
+export { ExcerptTokenKind, IExcerptTokenRange, IExcerptToken, ExcerptToken, Excerpt } from './mixins/Excerpt';
+export { Constructor, PropertiesOf } from './mixins/Mixin';
 
 // model
-export {
-  IApiCallSignatureOptions,
-  ApiCallSignature
-} from './model/ApiCallSignature';
-export {
-  IApiClassOptions,
-  ApiClass
-} from './model/ApiClass';
-export {
-  IApiConstructorOptions,
-  ApiConstructor
-} from './model/ApiConstructor';
-export {
-  IApiConstructSignatureOptions,
-  ApiConstructSignature
-} from './model/ApiConstructSignature';
-export {
-  IApiEntryPointOptions,
-  ApiEntryPoint
-} from './model/ApiEntryPoint';
-export {
-  IApiEnumOptions,
-  ApiEnum
-} from './model/ApiEnum';
-export {
-  IApiEnumMemberOptions,
-  ApiEnumMember
-} from './model/ApiEnumMember';
-export {
-  IApiFunctionOptions,
-  ApiFunction
-} from './model/ApiFunction';
-export {
-  IApiIndexSignatureOptions,
-  ApiIndexSignature
-} from './model/ApiIndexSignature';
-export {
-  IApiInterfaceOptions,
-  ApiInterface
-} from './model/ApiInterface';
-export {
-  IApiMethodOptions,
-  ApiMethod
-} from './model/ApiMethod';
-export {
-  IApiMethodSignatureOptions,
-  ApiMethodSignature
-} from './model/ApiMethodSignature';
-export {
-  ApiModel
-} from './model/ApiModel';
-export {
-  IApiNamespaceOptions,
-  ApiNamespace
-} from './model/ApiNamespace';
-export {
-  IApiPackageOptions,
-  ApiPackage,
-  IApiPackageSaveOptions
-} from './model/ApiPackage';
-export {
-  IParameterOptions,
-  Parameter
-} from './model/Parameter';
-export {
-  IApiPropertyOptions,
-  ApiProperty
-} from './model/ApiProperty';
-export {
-  IApiPropertySignatureOptions,
-  ApiPropertySignature
-} from './model/ApiPropertySignature';
-export {
-  IApiTypeAliasOptions,
-  ApiTypeAlias
-} from './model/ApiTypeAlias';
-export {
-  ITypeParameterOptions,
-  TypeParameter
-} from './model/TypeParameter';
-export {
-  IApiVariableOptions,
-  ApiVariable
-} from './model/ApiVariable';
-export {
-  IResolveDeclarationReferenceResult
-} from './model/ModelReferenceResolver';
-export {
-  HeritageType
-} from './model/HeritageType';
+export { IApiCallSignatureOptions, ApiCallSignature } from './model/ApiCallSignature';
+export { IApiClassOptions, ApiClass } from './model/ApiClass';
+export { IApiConstructorOptions, ApiConstructor } from './model/ApiConstructor';
+export { IApiConstructSignatureOptions, ApiConstructSignature } from './model/ApiConstructSignature';
+export { IApiEntryPointOptions, ApiEntryPoint } from './model/ApiEntryPoint';
+export { IApiEnumOptions, ApiEnum } from './model/ApiEnum';
+export { IApiEnumMemberOptions, ApiEnumMember } from './model/ApiEnumMember';
+export { IApiFunctionOptions, ApiFunction } from './model/ApiFunction';
+export { IApiIndexSignatureOptions, ApiIndexSignature } from './model/ApiIndexSignature';
+export { IApiInterfaceOptions, ApiInterface } from './model/ApiInterface';
+export { IApiMethodOptions, ApiMethod } from './model/ApiMethod';
+export { IApiMethodSignatureOptions, ApiMethodSignature } from './model/ApiMethodSignature';
+export { ApiModel } from './model/ApiModel';
+export { IApiNamespaceOptions, ApiNamespace } from './model/ApiNamespace';
+export { IApiPackageOptions, ApiPackage, IApiPackageSaveOptions } from './model/ApiPackage';
+export { IParameterOptions, Parameter } from './model/Parameter';
+export { IApiPropertyOptions, ApiProperty } from './model/ApiProperty';
+export { IApiPropertySignatureOptions, ApiPropertySignature } from './model/ApiPropertySignature';
+export { IApiTypeAliasOptions, ApiTypeAlias } from './model/ApiTypeAlias';
+export { ITypeParameterOptions, TypeParameter } from './model/TypeParameter';
+export { IApiVariableOptions, ApiVariable } from './model/ApiVariable';
+export { IResolveDeclarationReferenceResult } from './model/ModelReferenceResolver';
+export { HeritageType } from './model/HeritageType';

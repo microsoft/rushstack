@@ -17,7 +17,10 @@ export function combine(x: string, y: string): string;
 export function combine(x: number, y: number): number;
 
 // implementation
-export function combine(x: string|number|boolean, y: string|number|boolean): string|number|boolean {
+export function combine(
+  x: string | number | boolean,
+  y: string | number | boolean
+): string | number | boolean {
   return 42;
 }
 
@@ -32,7 +35,7 @@ export function _combine(x: string, y: string): string;
 export function _combine(x: number, y: number): number;
 
 // implementation
-export function _combine(x: string|number, y: string|number): string|number {
+export function _combine(x: string | number, y: string | number): string | number {
   return 42;
 }
 
@@ -56,7 +59,7 @@ export class Combiner {
   public combine(x: number, y: number): number;
 
   // implementation
-  public combine(x: string|number|boolean, y: string|number|boolean): string|number|boolean {
+  public combine(x: string | number | boolean, y: string | number | boolean): string | number | boolean {
     return 42;
   }
 }

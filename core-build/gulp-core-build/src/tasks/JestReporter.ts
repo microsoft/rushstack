@@ -40,8 +40,8 @@ class JestReporter extends (DefaultReporter as { new (globalConfig: Config.Globa
 }
 
 interface IReporterOptions {
-  outputFilePath?: string,
-  writeNUnitResults?: boolean
+  outputFilePath?: string;
+  writeNUnitResults?: boolean;
 }
 
 module.exports = JestReporter;

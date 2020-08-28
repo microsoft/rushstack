@@ -1,5 +1,3 @@
 {
-  "bundledPackages": [
-    "api-extractor-lib1-test"
-  ]
+  "bundledPackages": ["api-extractor-lib1-test"]
 }

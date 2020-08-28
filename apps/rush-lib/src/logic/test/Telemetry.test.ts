@@ -5,10 +5,7 @@ import * as path from 'path';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Rush } from '../../api/Rush';
-import {
-  Telemetry,
-  ITelemetryData
- } from '../Telemetry';
+import { Telemetry, ITelemetryData } from '../Telemetry';
 
 describe('Telemetry', () => {
   it('adds data to store if telemetry is enabled', () => {

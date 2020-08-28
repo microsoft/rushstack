@@ -13,16 +13,9 @@ export { ConsoleMessageId } from './api/ConsoleMessageId';
 
 export { CompilerState, ICompilerStateCreateOptions } from './api/CompilerState';
 
-export {
-  Extractor,
-  IExtractorInvokeOptions,
-  ExtractorResult
-} from './api/Extractor';
+export { Extractor, IExtractorInvokeOptions, ExtractorResult } from './api/Extractor';
 
-export {
-  IExtractorConfigPrepareOptions,
-  ExtractorConfig
-} from './api/ExtractorConfig';
+export { IExtractorConfigPrepareOptions, ExtractorConfig } from './api/ExtractorConfig';
 
 export { ExtractorLogLevel } from './api/ExtractorLogLevel';
 

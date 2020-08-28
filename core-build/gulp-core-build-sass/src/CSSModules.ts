@@ -57,14 +57,14 @@ export default class CSSModules implements ICSSModules {
     this._classMap = json;
   }
 
-  protected generateScopedName(name: string, fileName: string, css: string)
-      : string {
+  protected generateScopedName(name: string, fileName: string, css: string): string {
     const fileBaseName: string = path.relative(this._rootPath, fileName);
     const safeFileBaseName: string = fileBaseName.replace(/\\/g, '/');
-    const hash: string = crypto.createHmac('sha1', safeFileBaseName)
-                               .update(css)
-                               .digest('hex')
-                               .substring(0, 8);
+    const hash: string = crypto
+      .createHmac('sha1', safeFileBaseName)
+      .update(css)
+      .digest('hex')
+      .substring(0, 8);
     return `${name}_${hash}`;
   }
 }

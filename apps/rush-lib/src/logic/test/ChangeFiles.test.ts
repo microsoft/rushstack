@@ -48,7 +48,9 @@ describe('ChangeFiles', () => {
       const changeFile: string = path.join(__dirname, 'leafChange', 'change1.json');
       const changedPackages: string[] = ['d'];
       expect(() => {
-        ChangeFiles.validate([changeFile], changedPackages, { hotfixChangeEnabled: true } as RushConfiguration);
+        ChangeFiles.validate([changeFile], changedPackages, {
+          hotfixChangeEnabled: true
+        } as RushConfiguration);
       }).toThrow(Error);
     });
 

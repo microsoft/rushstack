@@ -25,9 +25,13 @@ if (process.argv.indexOf('--production') >= 0) {
 }
 
 // Run the API Documenter command-line
-executeCommand('node node_modules/@microsoft/api-documenter/lib/start '
-  + 'generate --input-folder etc --output-folder etc/yaml');
-executeCommand('node node_modules/@microsoft/api-documenter/lib/start '
-  + 'markdown --input-folder etc --output-folder etc/markdown');
+executeCommand(
+  'node node_modules/@microsoft/api-documenter/lib/start ' +
+    'generate --input-folder etc --output-folder etc/yaml'
+);
+executeCommand(
+  'node node_modules/@microsoft/api-documenter/lib/start ' +
+    'markdown --input-folder etc --output-folder etc/markdown'
+);
 
 console.log(`==> Finished build.js for ${path.basename(process.cwd())}`);

@@ -11,9 +11,11 @@ export const args: { [flat: string]: boolean | string } = clArgs;
 export interface IPackageJSON {
   name?: string;
   version?: string;
-  directories: {
-    packagePath: string | undefined;
-  } | undefined;
+  directories:
+    | {
+        packagePath: string | undefined;
+      }
+    | undefined;
 }
 
 // There appears to be a TypeScript compiler bug that isn't allowing us to say

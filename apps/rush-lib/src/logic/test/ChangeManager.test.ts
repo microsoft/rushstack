@@ -24,11 +24,9 @@ describe('ChangeManager', () => {
 
     expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('2.0.0');
     expect(changeManager.allPackages.get('b')!.packageJson.version).toEqual('1.0.1');
-    expect(changeManager.allPackages.get('b')!.packageJson.dependencies!['a']).toEqual(
-      '>=2.0.0 <3.0.0');
+    expect(changeManager.allPackages.get('b')!.packageJson.dependencies!['a']).toEqual('>=2.0.0 <3.0.0');
     expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.0');
-    expect(changeManager.allPackages.get('c')!.packageJson.dependencies!['b']).toEqual(
-      '>=1.0.1 <2.0.0');
+    expect(changeManager.allPackages.get('c')!.packageJson.dependencies!['b']).toEqual('>=1.0.1 <2.0.0');
   });
 
   it('can update explicit version dependency', () => {
@@ -37,24 +35,25 @@ describe('ChangeManager', () => {
 
     expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.1');
     expect(changeManager.allPackages.get('d')!.packageJson.version).toEqual('1.0.1');
-    expect(changeManager.allPackages.get('d')!.packageJson.dependencies!['c']).toEqual(
-      '1.0.1');
+    expect(changeManager.allPackages.get('d')!.packageJson.dependencies!['c']).toEqual('1.0.1');
   });
 
   it('can update explicit cyclic dependency', () => {
     changeManager.load(path.join(__dirname, 'cyclicDepsExplicit'));
     changeManager.apply(false);
 
-    expect(changeManager.allPackages.get('cyclic-dep-explicit-1')!.packageJson.version).toEqual(
-      '2.0.0');
-    expect(changeManager.allPackages.get('cyclic-dep-explicit-1')!.packageJson.dependencies!['cyclic-dep-explicit-2'])
-      .toEqual(
-        '>=1.0.0 <2.0.0');
-    expect(changeManager.allPackages.get('cyclic-dep-explicit-2')!.packageJson.version).toEqual(
-      '1.0.0');
-    expect(changeManager.allPackages.get('cyclic-dep-explicit-2')!.packageJson.dependencies!['cyclic-dep-explicit-1'])
-      .toEqual(
-        '>=1.0.0 <2.0.0');
+    expect(changeManager.allPackages.get('cyclic-dep-explicit-1')!.packageJson.version).toEqual('2.0.0');
+    expect(
+      changeManager.allPackages.get('cyclic-dep-explicit-1')!.packageJson.dependencies![
+        'cyclic-dep-explicit-2'
+      ]
+    ).toEqual('>=1.0.0 <2.0.0');
+    expect(changeManager.allPackages.get('cyclic-dep-explicit-2')!.packageJson.version).toEqual('1.0.0');
+    expect(
+      changeManager.allPackages.get('cyclic-dep-explicit-2')!.packageJson.dependencies![
+        'cyclic-dep-explicit-1'
+      ]
+    ).toEqual('>=1.0.0 <2.0.0');
   });
 
   it('can update root with patch change for prerelease', () => {
@@ -64,16 +63,16 @@ describe('ChangeManager', () => {
     changeManager.load(path.join(__dirname, 'rootPatchChange'), prereleaseToken);
     changeManager.apply(false);
 
-    expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual(
-      '1.0.1-' + prereleaseName);
-    expect(changeManager.allPackages.get('b')!.packageJson.version).toEqual(
-      '1.0.1-' + prereleaseName);
+    expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
+    expect(changeManager.allPackages.get('b')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
     expect(changeManager.allPackages.get('b')!.packageJson.dependencies!['a']).toEqual(
-      '1.0.1-' + prereleaseName);
+      '1.0.1-' + prereleaseName
+    );
     expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
     expect(changeManager.allPackages.get('d')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
     expect(changeManager.allPackages.get('d')!.packageJson.dependencies!['c']).toEqual(
-      '1.0.1-' + prereleaseName);
+      '1.0.1-' + prereleaseName
+    );
   });
 
   it('can update non-root with patch change for prerelease', () => {
@@ -83,16 +82,14 @@ describe('ChangeManager', () => {
     changeManager.load(path.join(__dirname, 'explicitVersionChange'), prereleaseToken);
     changeManager.apply(false);
 
-    expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual(
-      '1.0.0');
-    expect(changeManager.allPackages.get('b')!.packageJson.version).toEqual(
-      '1.0.0');
-    expect(changeManager.allPackages.get('b')!.packageJson.dependencies!['a']).toEqual(
-      '>=1.0.0 <2.0.0');
+    expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0');
+    expect(changeManager.allPackages.get('b')!.packageJson.version).toEqual('1.0.0');
+    expect(changeManager.allPackages.get('b')!.packageJson.dependencies!['a']).toEqual('>=1.0.0 <2.0.0');
     expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
     expect(changeManager.allPackages.get('d')!.packageJson.version).toEqual('1.0.1-' + prereleaseName);
     expect(changeManager.allPackages.get('d')!.packageJson.dependencies!['c']).toEqual(
-      '1.0.1-' + prereleaseName);
+      '1.0.1-' + prereleaseName
+    );
   });
 
   it('can update cyclic dependency for non-explicit prerelease', () => {
@@ -103,13 +100,17 @@ describe('ChangeManager', () => {
     changeManager.apply(false);
 
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.version).toEqual(
-      '2.0.0-' + prereleaseName);
+      '2.0.0-' + prereleaseName
+    );
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.dependencies!['cyclic-dep-2']).toEqual(
-      '1.0.1-' + prereleaseName);
+      '1.0.1-' + prereleaseName
+    );
     expect(changeManager.allPackages.get('cyclic-dep-2')!.packageJson.version).toEqual(
-      '1.0.1-' + prereleaseName);
+      '1.0.1-' + prereleaseName
+    );
     expect(changeManager.allPackages.get('cyclic-dep-2')!.packageJson.dependencies!['cyclic-dep-1']).toEqual(
-      '2.0.0-' + prereleaseName);
+      '2.0.0-' + prereleaseName
+    );
   });
 
   it('can update root with patch change for adding version suffix', () => {
@@ -119,16 +120,12 @@ describe('ChangeManager', () => {
     changeManager.load(path.join(__dirname, 'rootPatchChange'), prereleaseToken);
     changeManager.apply(false);
 
-    expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual(
-      '1.0.0-' + suffix);
-    expect(changeManager.allPackages.get('b')!.packageJson.version).toEqual(
-      '1.0.0-' + suffix);
-    expect(changeManager.allPackages.get('b')!.packageJson.dependencies!['a']).toEqual(
-      '1.0.0-' + suffix);
+    expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0-' + suffix);
+    expect(changeManager.allPackages.get('b')!.packageJson.version).toEqual('1.0.0-' + suffix);
+    expect(changeManager.allPackages.get('b')!.packageJson.dependencies!['a']).toEqual('1.0.0-' + suffix);
     expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.0-' + suffix);
     expect(changeManager.allPackages.get('d')!.packageJson.version).toEqual('1.0.0-' + suffix);
-    expect(changeManager.allPackages.get('d')!.packageJson.dependencies!['c']).toEqual(
-      '1.0.0-' + suffix);
+    expect(changeManager.allPackages.get('d')!.packageJson.dependencies!['c']).toEqual('1.0.0-' + suffix);
   });
 
   it('can update non-root with patch change for version suffix', () => {
@@ -138,16 +135,12 @@ describe('ChangeManager', () => {
     changeManager.load(path.join(__dirname, 'explicitVersionChange'), prereleaseToken);
     changeManager.apply(false);
 
-    expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual(
-      '1.0.0');
-    expect(changeManager.allPackages.get('b')!.packageJson.version).toEqual(
-      '1.0.0');
-    expect(changeManager.allPackages.get('b')!.packageJson.dependencies!['a']).toEqual(
-      '>=1.0.0 <2.0.0');
+    expect(changeManager.allPackages.get('a')!.packageJson.version).toEqual('1.0.0');
+    expect(changeManager.allPackages.get('b')!.packageJson.version).toEqual('1.0.0');
+    expect(changeManager.allPackages.get('b')!.packageJson.dependencies!['a']).toEqual('>=1.0.0 <2.0.0');
     expect(changeManager.allPackages.get('c')!.packageJson.version).toEqual('1.0.0-' + suffix);
     expect(changeManager.allPackages.get('d')!.packageJson.version).toEqual('1.0.0-' + suffix);
-    expect(changeManager.allPackages.get('d')!.packageJson.dependencies!['c']).toEqual(
-      '1.0.0-' + suffix);
+    expect(changeManager.allPackages.get('d')!.packageJson.dependencies!['c']).toEqual('1.0.0-' + suffix);
   });
 
   it('can update cyclic dependency for non-explicit suffix', () => {
@@ -157,14 +150,14 @@ describe('ChangeManager', () => {
     changeManager.load(path.join(__dirname, 'cyclicDeps'), prereleaseToken);
     changeManager.apply(false);
 
-    expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.version).toEqual(
-      '1.0.0-' + suffix);
+    expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.version).toEqual('1.0.0-' + suffix);
     expect(changeManager.allPackages.get('cyclic-dep-1')!.packageJson.dependencies!['cyclic-dep-2']).toEqual(
-      '1.0.0-' + suffix);
-    expect(changeManager.allPackages.get('cyclic-dep-2')!.packageJson.version).toEqual(
-      '1.0.0-' + suffix);
+      '1.0.0-' + suffix
+    );
+    expect(changeManager.allPackages.get('cyclic-dep-2')!.packageJson.version).toEqual('1.0.0-' + suffix);
     expect(changeManager.allPackages.get('cyclic-dep-2')!.packageJson.dependencies!['cyclic-dep-1']).toEqual(
-      '1.0.0-' + suffix);
+      '1.0.0-' + suffix
+    );
   });
   /* eslint-enable dot-notation */
 });

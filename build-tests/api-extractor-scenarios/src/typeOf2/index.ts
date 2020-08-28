@@ -3,7 +3,7 @@
 
 /** @public */
 export function f(): { a: number } {
-  return { a: 1};
+  return { a: 1 };
 }
 
 /** @public */

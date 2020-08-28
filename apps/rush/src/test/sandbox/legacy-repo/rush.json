@@ -5,29 +5,18 @@
   "projectFolderMinDepth": 1,
   "projectFolderMaxDepth": 99,
   "approvedPackagesPolicy": {
-    "reviewCategories": [
-      "first-party",
-      "third-party",
-      "prototype"
-    ],
-    "ignoredNpmScopes": [
-      "@types",
-      "@internal"
-    ]
+    "reviewCategories": ["first-party", "third-party", "prototype"],
+    "ignoredNpmScopes": ["@types", "@internal"]
   },
   "repository": {
     "url": "someFakeUrl"
   },
   "gitPolicy": {
-    "allowedEmailRegExps": [
-      "[^@]+@contoso\\.com"
-    ],
+    "allowedEmailRegExps": ["[^@]+@contoso\\.com"],
     "sampleEmail": "mrexample@contoso.com"
   },
   "eventHooks": {
-    "postRushBuild": [
-      "do something"
-    ]
+    "postRushBuild": ["do something"]
   },
   "projects": [
     {

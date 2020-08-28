@@ -253,13 +253,13 @@
       "longName": "--no-color",
       "parameterKind": "flag",
       "description": "disable colors in the build log, defaults to 'true'",
-      "associatedCommands": [ "build", "rebuild" ]
+      "associatedCommands": ["build", "rebuild"]
     },
     {
       "longName": "--production",
       "parameterKind": "flag",
       "description": "Perform a production build, including minification and localization steps",
-      "associatedCommands": [ "build", "rebuild" ]
+      "associatedCommands": ["build", "rebuild"]
     }
   ]
 }

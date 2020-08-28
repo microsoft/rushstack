@@ -5,8 +5,9 @@ import { convertSlashesForWindows } from '../ProjectTask';
 
 describe('convertSlashesForWindows()', () => {
   it('converted inputs', () => {
-    expect(convertSlashesForWindows('./node_modules/.bin/tslint -c config/tslint.json'))
-      .toEqual('.\\node_modules\\.bin\\tslint -c config/tslint.json');
+    expect(convertSlashesForWindows('./node_modules/.bin/tslint -c config/tslint.json')).toEqual(
+      '.\\node_modules\\.bin\\tslint -c config/tslint.json'
+    );
     expect(convertSlashesForWindows('/blah/bleep&&/bloop')).toEqual('\\blah\\bleep&&/bloop');
     expect(convertSlashesForWindows('/blah/bleep')).toEqual('\\blah\\bleep');
     expect(convertSlashesForWindows('/blah/bleep --path a/b')).toEqual('\\blah\\bleep --path a/b');

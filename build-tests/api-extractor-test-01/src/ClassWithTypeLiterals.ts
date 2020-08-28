@@ -7,11 +7,10 @@
  */
 export class ClassWithTypeLiterals {
   /** type literal in  */
-  public method1(vector: { x :number, y :number}): void {
-  }
+  public method1(vector: { x: number; y: number }): void {}
 
   /** type literal output  */
-  public method2(): { classValue: ClassWithTypeLiterals, callback: () => number } | undefined {
+  public method2(): { classValue: ClassWithTypeLiterals; callback: () => number } | undefined {
     return undefined;
   }
 }

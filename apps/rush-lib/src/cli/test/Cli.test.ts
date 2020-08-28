@@ -11,7 +11,7 @@ describe('CLI', () => {
     const startPath: string = path.resolve(path.join(__dirname, '../../start.js'));
 
     expect(() => {
-      Utilities.executeCommand('node', [ startPath ], workingDir, undefined, true);
+      Utilities.executeCommand('node', [startPath], workingDir, undefined, true);
     }).not.toThrow();
   });
 });

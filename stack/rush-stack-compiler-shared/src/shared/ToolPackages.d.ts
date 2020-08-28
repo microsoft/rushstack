@@ -5,8 +5,4 @@ import * as Tslint from 'tslint';
 import * as Typescript from 'typescript';
 import * as ApiExtractor from '@microsoft/api-extractor';
 
-export {
-  Typescript,
-  Tslint,
-  ApiExtractor
-};
+export { Typescript, Tslint, ApiExtractor };

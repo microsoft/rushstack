@@ -73,7 +73,7 @@ export class CollectorEntity {
    * In all other cases, it is undefined.
    */
   public get singleExportName(): string | undefined {
-   return this._singleExportName;
+    return this._singleExportName;
   }
 
   /**
