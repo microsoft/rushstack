@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "0.5.8",
+      "tag": "@rushstack/eslint-config_v0.5.8",
+      "date": "Wed, 27 May 2020 05:15:10 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Relax \"max-lines\" lint rule to 2,000 lines instead of 1,000 lines"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.7",
       "tag": "@rushstack/eslint-config_v0.5.7",
       "date": "Wed, 08 Apr 2020 04:07:33 GMT",

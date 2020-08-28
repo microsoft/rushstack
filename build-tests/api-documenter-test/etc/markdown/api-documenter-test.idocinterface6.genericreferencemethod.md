@@ -14,9 +14,9 @@ genericReferenceMethod<T>(x: T): T;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  x | <code>T</code> |  |
+|  x | T |  |
 
 <b>Returns:</b>
 
-`T`
+T
 

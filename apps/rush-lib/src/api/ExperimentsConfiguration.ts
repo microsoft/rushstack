@@ -21,6 +21,12 @@ export interface IExperimentsJson {
   legacyIncrementalBuildDependencyDetection?: boolean;
 
   /**
+   * By default, rush passes --no-prefer-frozen-lockfile to 'pnpm install'.
+   * Set this option to true to pass '--frozen-lockfile' instead.
+   */
+  usePnpmFrozenLockfileForRushInstall?: boolean;
+
+  /**
    * If true, the chmod field in temporary project tar headers will not be normalized.
    * This normalization can help ensure consistent tarball integrity across platforms.
    */

@@ -108,7 +108,7 @@ export class TypeScriptHelpers {
   public static getSymbolForDeclaration(declaration: ts.Declaration, checker: ts.TypeChecker): ts.Symbol {
     const symbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(declaration, checker);
     if (!symbol) {
-      throw new InternalError('Unable to determine semantic information for declaration: '
+      throw new InternalError('Unable to determine semantic information for declaration:\n'
         + SourceFileLocationFormatter.formatDeclaration(declaration));
     }
     return symbol;

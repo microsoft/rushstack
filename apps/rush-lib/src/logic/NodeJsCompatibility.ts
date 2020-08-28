@@ -10,7 +10,7 @@ import { RushConfiguration } from '../api/RushConfiguration';
  * This constant is the major version of the next LTS node Node.js release. This constant should be updated when
  * a new LTS version is added to Rush's support matrix.
  */
-const UPCOMING_NODE_LTS_VERSION: number = 12;
+const UPCOMING_NODE_LTS_VERSION: number = 14;
 const nodeVersion: string = process.versions.node;
 const nodeMajorVersion: number = semver.major(nodeVersion);
 

@@ -58,7 +58,7 @@ module.exports = {
         // CONFIGURATION:     By default, these are banned: String, Boolean, Number, Object, Symbol
         "@typescript-eslint/ban-types": [
           "error",
-          {          
+          {
             types: {
               String: {
                 message: "Use 'string' instead",
@@ -78,8 +78,8 @@ module.exports = {
               Symbol: {
                 message: "Use 'symbol' instead",
                 fixWith: "symbol"
-              }     
-            }                  
+              }
+            }
           }
         ],
 
@@ -298,9 +298,9 @@ module.exports = {
         // RATIONALE:         Catches a common coding mistake.
         "guard-for-in": "error",
 
-        // RATIONALE:         If you have more than 1,000 lines in a single source file, it's probably time
+        // RATIONALE:         If you have more than 2,000 lines in a single source file, it's probably time
         //                    to split up your code.
-        "max-lines": ["error", { "max": 1000 }],
+        "max-lines": ["error", { "max": 2000 }],
 
         // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
         "no-async-promise-executor": "error",

@@ -16,5 +16,5 @@ constructor(x: number);
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  x | <code>number</code> |  |
+|  x | number |  |
 

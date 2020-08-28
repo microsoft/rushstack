@@ -5,7 +5,6 @@ import * as path from 'path';
 import {
   JsonFile,
   IPackageJson,
-  PackageName,
   FileSystem,
   FileConstants
 } from '@rushstack/node-core-library';
@@ -14,6 +13,7 @@ import { RushConfiguration } from '../api/RushConfiguration';
 import { VersionPolicy, LockStepVersionPolicy } from './VersionPolicy';
 import { PackageJsonEditor } from './PackageJsonEditor';
 import { RushConstants } from '../logic/RushConstants';
+import { PackageNameParsers } from './PackageNameParsers';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -116,7 +116,7 @@ export class RushConfigurationProject {
     // The "rushProject.tempProjectName" is guaranteed to be unique name (e.g. by adding the "-2"
     // suffix).  Even after we strip the NPM scope, it will still be unique.
     // Example: "my-project-2"
-    this._unscopedTempProjectName = PackageName.getUnscopedName(tempProjectName);
+    this._unscopedTempProjectName = PackageNameParsers.permissive.getUnscopedName(tempProjectName);
 
     this._cyclicDependencyProjects = new Set<string>();
     if (projectJson.cyclicDependencyProjects) {

@@ -14,7 +14,7 @@ describe('EventHooks', () => {
 
   it('loads empty rush hooks', () => {
     const eventHooks: EventHooks = new EventHooks({});
-    expect(eventHooks.get(Event.postRushBuild).length).toEqual(0);
+    expect(eventHooks.get(Event.postRushBuild)).toHaveLength(0);
   });
 
   it('loads two rush hooks', () => {

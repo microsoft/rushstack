@@ -11,9 +11,10 @@ import {
 import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
 import * as decomment from 'decomment';
-import { TypescriptCompiler as TTypescriptCompiler, ToolPackages } from '@microsoft/rush-stack-compiler-3.1';
-
-type TTypescript = typeof ToolPackages.typescript;
+import {
+  TypescriptCompiler as TTypescriptCompiler,
+  Typescript as TTypescript
+} from '@microsoft/rush-stack-compiler-3.1';
 
 import {
   RSCTask,
@@ -117,7 +118,7 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
 
     if (this.taskConfig.removeCommentsFromJavaScript === true) {
       buildPromise = buildPromise.then(
-        () => this._removeComments(this._rushStackCompiler.ToolPackages.typescript)
+        () => this._removeComments(this._rushStackCompiler.Typescript)
       );
     }
 
@@ -140,7 +141,7 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
     }
   }
 
-  private _removeComments(typescript: TTypescript): Promise<void> {
+  private _removeComments(typescript: typeof TTypescript): Promise<void> {
     const configFilePath: string | undefined = typescript.findConfigFile(this.buildConfig.rootPath, FileSystem.exists);
     if (!configFilePath) {
       return Promise.reject(new Error('Unable to resolve tsconfig file to determine outDir.'));

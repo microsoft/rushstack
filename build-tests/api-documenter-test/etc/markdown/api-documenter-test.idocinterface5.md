@@ -16,5 +16,5 @@ export interface IDocInterface5
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [regularProperty](./api-documenter-test.idocinterface5.regularproperty.md) | <code>string</code> | Property of type string that does something |
+|  [regularProperty](./api-documenter-test.idocinterface5.regularproperty.md) | string | Property of type string that does something |
 

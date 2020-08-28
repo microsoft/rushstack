@@ -1,0 +1,16 @@
+{
+  "name": "ts-command-line-test",
+  "description": "Building this project is a regression test for ts-command-line",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node build.js",
+    "start": "node ./lib/start.js"
+  },
+  "devDependencies": {
+    "@rushstack/ts-command-line": "4.4.2",
+    "@types/node": "10.17.13",
+    "fs-extra": "~7.0.1",
+    "typescript": "~3.7.2"
+  }
+}

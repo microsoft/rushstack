@@ -34,8 +34,8 @@ exports[`CommandLineParameter parses an input with ALL parameters 3`] = `
 Object {
   "argumentName": undefined,
   "defaultValue": "default",
-  "description": "A choice with a default",
-  "environmentVariable": "ENV_CHOICE",
+  "description": "A choice with a default. This description ends with a \\"quoted word\\"",
+  "environmentVariable": "ENV_CHOICE2",
   "kind": 0,
   "longName": "--choice-with-default",
   "required": false,
@@ -80,7 +80,7 @@ Object {
   "argumentName": "NUMBER",
   "defaultValue": 123,
   "description": "An integer with a default",
-  "environmentVariable": "ENV_INTEGER",
+  "environmentVariable": "ENV_INTEGER2",
   "kind": 2,
   "longName": "--integer-with-default",
   "required": false,
@@ -110,7 +110,7 @@ Object {
   "argumentName": "TEXT",
   "defaultValue": undefined,
   "description": "A string",
-  "environmentVariable": "ENV_INTEGER",
+  "environmentVariable": "ENV_STRING",
   "kind": 3,
   "longName": "--string",
   "required": false,
@@ -125,7 +125,7 @@ Object {
   "argumentName": "TEXT",
   "defaultValue": "123",
   "description": "A string with a default",
-  "environmentVariable": "ENV_INTEGER",
+  "environmentVariable": "ENV_STRING2",
   "kind": 3,
   "longName": "--string-with-default",
   "required": false,
@@ -137,10 +137,10 @@ Object {
 
 exports[`CommandLineParameter parses an input with ALL parameters 10`] = `
 Object {
-  "argumentName": "LIST",
+  "argumentName": "LIST_ITEM",
   "defaultValue": undefined,
-  "description": "A string list",
-  "environmentVariable": "ENV_INTEGER",
+  "description": "This parameter be specified multiple times to make a list of strings",
+  "environmentVariable": "ENV_STRING_LIST",
   "kind": 4,
   "longName": "--string-list",
   "required": false,
@@ -220,8 +220,8 @@ exports[`CommandLineParameter parses an input with NO parameters 3`] = `
 Object {
   "argumentName": undefined,
   "defaultValue": "default",
-  "description": "A choice with a default",
-  "environmentVariable": "ENV_CHOICE",
+  "description": "A choice with a default. This description ends with a \\"quoted word\\"",
+  "environmentVariable": "ENV_CHOICE2",
   "kind": 0,
   "longName": "--choice-with-default",
   "required": false,
@@ -266,7 +266,7 @@ Object {
   "argumentName": "NUMBER",
   "defaultValue": 123,
   "description": "An integer with a default",
-  "environmentVariable": "ENV_INTEGER",
+  "environmentVariable": "ENV_INTEGER2",
   "kind": 2,
   "longName": "--integer-with-default",
   "required": false,
@@ -296,7 +296,7 @@ Object {
   "argumentName": "TEXT",
   "defaultValue": undefined,
   "description": "A string",
-  "environmentVariable": "ENV_INTEGER",
+  "environmentVariable": "ENV_STRING",
   "kind": 3,
   "longName": "--string",
   "required": false,
@@ -311,7 +311,7 @@ Object {
   "argumentName": "TEXT",
   "defaultValue": "123",
   "description": "A string with a default",
-  "environmentVariable": "ENV_INTEGER",
+  "environmentVariable": "ENV_STRING2",
   "kind": 3,
   "longName": "--string-with-default",
   "required": false,
@@ -323,10 +323,10 @@ Object {
 
 exports[`CommandLineParameter parses an input with NO parameters 10`] = `
 Object {
-  "argumentName": "LIST",
+  "argumentName": "LIST_ITEM",
   "defaultValue": undefined,
-  "description": "A string list",
-  "environmentVariable": "ENV_INTEGER",
+  "description": "This parameter be specified multiple times to make a list of strings",
+  "environmentVariable": "ENV_STRING_LIST",
   "kind": 4,
   "longName": "--string-list",
   "required": false,
@@ -358,12 +358,50 @@ Array [
 ]
 `;
 
+exports[`CommandLineParameter parses each parameter from an environment variable 1`] = `
+Array [
+  "### --choice output: ###",
+  "--choice",
+  "one",
+  "### --choice-with-default output: ###",
+  "--choice-with-default",
+  "two",
+  "### --flag output: ###",
+  "--flag",
+  "### --integer output: ###",
+  "--integer",
+  "111",
+  "### --integer-with-default output: ###",
+  "--integer-with-default",
+  "222",
+  "### --integer-required output: ###",
+  "--integer-required",
+  "1",
+  "### --string output: ###",
+  "--string",
+  "Hello, world!",
+  "### --string-with-default output: ###",
+  "--string-with-default",
+  "Hello, world!",
+  "### --string-list output: ###",
+  "--string-list",
+  "simple text",
+  "### --json-string-list output: ###",
+  "--json-string-list",
+  "1",
+  "--json-string-list",
+  "true",
+  "--json-string-list",
+  "Hello, world!",
+]
+`;
+
 exports[`CommandLineParameter prints the action help 1`] = `
 "usage: example do:the-job [-h] [-c {one,two,three,default}]
                           [--choice-with-default {one,two,three,default}] [-f]
                           [-i NUMBER] [--integer-with-default NUMBER]
                           --integer-required NUMBER [-s TEXT]
-                          [--string-with-default TEXT] [-l LIST]
+                          [--string-with-default TEXT] [-l LIST_ITEM]
                           
 
 a longer description
@@ -371,33 +409,36 @@ a longer description
 Optional arguments:
   -h, --help            Show this help message and exit.
   -c {one,two,three,default}, --choice {one,two,three,default}
-                        A choice. This parameter may alternatively specified 
-                        via the ENV_CHOICE environment variable.
+                        A choice. This parameter may alternatively be 
+                        specified via the ENV_CHOICE environment variable.
   --choice-with-default {one,two,three,default}
-                        A choice with a default. This parameter may 
-                        alternatively specified via the ENV_CHOICE 
-                        environment variable. The default value is \\"default\\".
-  -f, --flag            A flag. This parameter may alternatively specified 
+                        A choice with a default. This description ends with a 
+                        \\"quoted word\\". This parameter may alternatively be 
+                        specified via the ENV_CHOICE2 environment variable. 
+                        The default value is \\"default\\".
+  -f, --flag            A flag. This parameter may alternatively be specified 
                         via the ENV_FLAG environment variable.
   -i NUMBER, --integer NUMBER
-                        An integer. This parameter may alternatively 
+                        An integer. This parameter may alternatively be 
                         specified via the ENV_INTEGER environment variable.
   --integer-with-default NUMBER
                         An integer with a default. This parameter may 
-                        alternatively specified via the ENV_INTEGER 
+                        alternatively be specified via the ENV_INTEGER2 
                         environment variable. The default value is 123.
   --integer-required NUMBER
                         An integer
   -s TEXT, --string TEXT
-                        A string. This parameter may alternatively specified 
-                        via the ENV_INTEGER environment variable.
+                        A string. This parameter may alternatively be 
+                        specified via the ENV_STRING environment variable.
   --string-with-default TEXT
                         A string with a default. This parameter may 
-                        alternatively specified via the ENV_INTEGER 
+                        alternatively be specified via the ENV_STRING2 
                         environment variable. The default value is \\"123\\".
-  -l LIST, --string-list LIST
-                        A string list. This parameter may alternatively 
-                        specified via the ENV_INTEGER environment variable.
+  -l LIST_ITEM, --string-list LIST_ITEM
+                        This parameter be specified multiple times to make a 
+                        list of strings. This parameter may alternatively be 
+                        specified via the ENV_STRING_LIST environment 
+                        variable.
 "
 `;
 

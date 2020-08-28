@@ -18,7 +18,7 @@ export interface IBaseCommandLineDefinition {
   parameterShortName?: string;
 
   /**
-   * Documentation for the flag, that will be shown when invoking the tool with "--help"
+   * Documentation for the parameter that will be shown when invoking the tool with "--help"
    */
   description: string;
 
@@ -31,12 +31,35 @@ export interface IBaseCommandLineDefinition {
    * The name of an environment variable that the parameter value will be read from,
    * if it was omitted from the command-line.  An error will be reported if the
    * environment value cannot be parsed.
+   *
    * @remarks
    * The environment variable name must consist only of upper-case letters, numbers,
    * and underscores. It may not start with a number.
    *
    * This feature cannot be used when {@link IBaseCommandLineDefinition.required} is true,
    * because in that case the environmentVariable would never be used.
+   *
+   * Syntax notes for environment variable values:
+   *
+   * - Choice Parameter: The value must match one of the defined choices,
+   *   otherwise a validation error is reported.
+   *   An empty string causes the environment variable to be ignored.
+   *
+   * - Flag Parameter: The value must be `1` for true, or `0` for false,
+   *   otherwise a validation error is reported.
+   *   An empty string causes the environment variable to be ignored.
+   *
+   * - Integer Parameter: The value must be an integer number,
+   *   otherwise a validation error is reported.
+   *   An empty string causes the environment variable to be ignored.
+   *
+   * - String Parameter: Any value is accepted, including an empty string.
+   *
+   * - String List Parameter: If the string starts with `[` (ignoring whitespace)
+   *   then it will be parsed as a JSON array, whose elements must be strings,
+   *   numbers, or boolean values.
+   *   If the string does not start with `[`, then it behaves like an
+   *   ordinary String Parameter:  Any value is accepted, including an empty string.
    */
   environmentVariable?: string;
 }
@@ -80,16 +103,16 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
 }
 
 /**
- * For use with CommandLineParser, this interface represents a command line parameter
- * that is a boolean flag.
+ * For use with {@link CommandLineParameterProvider.defineFlagParameter},
+ * this interface defines a command line parameter that is a boolean flag.
  *
  * @public
  */
 export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition { }
 
 /**
- * For use with CommandLineParser, this interface represents a command line parameter
- * whose argument is an integer value.
+ * For use with {@link CommandLineParameterProvider.defineIntegerParameter},
+ * this interface defines a command line parameter whose argument is an integer value.
  *
  * @public
  */
@@ -101,8 +124,8 @@ export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitio
 }
 
 /**
- * For use with CommandLineParser, this interface represents a command line parameter
- * whose argument is a string value.
+ * For use with {@link CommandLineParameterProvider.defineStringParameter},
+ * this interface defines a command line parameter whose argument is a string value.
  *
  * @public
  */
@@ -119,9 +142,24 @@ export interface ICommandLineStringDefinition extends IBaseCommandLineDefinition
 }
 
 /**
- * For use with CommandLineParser, this interface represents a command line parameter
- * whose argument is a list of strings.
+ * For use with {@link CommandLineParameterProvider.defineStringListParameter},
+ * this interface defines a command line parameter whose argument is a single text string.
+ * The parameter can be specified multiple times to build a list.
  *
  * @public
  */
 export interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument { }
+
+/**
+ * For use with {@link CommandLineParameterProvider.defineCommandLineRemainder},
+ * this interface defines a rule that captures any remaining command line arguments after the recognized portion.
+ *
+ * @public
+ */
+export interface ICommandLineRemainderDefinition {
+  /**
+   * Documentation for how the remaining arguments will be used.  This will be shown when invoking
+   * the tool with "--help".
+   */
+  description: string;
+}

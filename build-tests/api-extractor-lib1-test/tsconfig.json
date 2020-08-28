@@ -8,8 +8,7 @@
     "experimentalDecorators": true,
     "strictNullChecks": true,
     "types": [
-      "node",
-      "jest"
+      "node"
     ],
     "lib": [
       "es5",

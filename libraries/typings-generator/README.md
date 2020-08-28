@@ -59,7 +59,7 @@ return TypeScript declarations for the file it is called with.
 ### `terminal`
 
 Optionally provide a [Terminal](https://github.com/microsoft/rushstack/blob/master/libraries/node-core-library/src/Terminal/Terminal.ts)
-object for logging. If one isn't provided, logs will go to the terminal.
+object for logging. If one isn't provided, logs will go to the console.
 
 ### `filesToIgnore`
 

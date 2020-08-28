@@ -240,9 +240,10 @@ export class AssetProcessor {
             // @todo: look into using JSON.parse(...) to get the escaping characters
             const escapingCharacterSequence: string = escapedBackslash.substr(escapedBackslash.length / 2);
 
-            // Ensure the the quotemark, apostrophe, and newline characters are properly escaped
+            // Ensure the the quotemark, apostrophe, tab, and newline characters are properly escaped
             newValue = newValue.replace(/\r/g, `${escapingCharacterSequence}r`);
             newValue = newValue.replace(/\n/g, `${escapingCharacterSequence}n`);
+            newValue = newValue.replace(/\t/g, `${escapingCharacterSequence}t`);
             newValue = newValue.replace(/\"/g, `${escapingCharacterSequence}u0022`);
             newValue = newValue.replace(/\'/g, `${escapingCharacterSequence}u0027`);
 

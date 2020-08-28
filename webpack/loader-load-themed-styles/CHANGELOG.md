@@ -1,6 +1,66 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Wed, 08 Apr 2020 04:07:33 GMT and should not be manually modified.
+This log was last generated on Mon, 01 Jun 2020 08:34:17 GMT and should not be manually modified.
+
+## 1.8.22
+Mon, 01 Jun 2020 08:34:17 GMT
+
+*Version update only*
+
+## 1.8.21
+Sat, 30 May 2020 02:59:54 GMT
+
+*Version update only*
+
+## 1.8.20
+Thu, 28 May 2020 05:59:02 GMT
+
+*Version update only*
+
+## 1.8.19
+Wed, 27 May 2020 05:15:11 GMT
+
+*Version update only*
+
+## 1.8.18
+Tue, 26 May 2020 23:00:25 GMT
+
+*Version update only*
+
+## 1.8.17
+Fri, 22 May 2020 15:08:42 GMT
+
+*Version update only*
+
+## 1.8.16
+Thu, 21 May 2020 23:09:44 GMT
+
+*Version update only*
+
+## 1.8.15
+Thu, 21 May 2020 15:42:00 GMT
+
+*Version update only*
+
+## 1.8.14
+Tue, 19 May 2020 15:08:19 GMT
+
+*Version update only*
+
+## 1.8.13
+Fri, 15 May 2020 08:10:59 GMT
+
+*Version update only*
+
+## 1.8.12
+Wed, 06 May 2020 08:23:45 GMT
+
+*Version update only*
+
+## 1.8.11
+Sat, 02 May 2020 00:08:16 GMT
+
+*Version update only*
 
 ## 1.8.10
 Wed, 08 Apr 2020 04:07:33 GMT

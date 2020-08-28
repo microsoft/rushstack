@@ -19,7 +19,7 @@ describe('AddAction', () => {
         PackageJsonUpdater.prototype,
         'doRushAdd'
       ).mockImplementation(() => Promise.resolve());
-      jest.spyOn(process, 'exit').mockImplementation(() => { /* stub */ });
+      jest.spyOn(process, 'exit').mockImplementation();
       oldExitCode = process.exitCode;
       oldArgs = process.argv;
     });
@@ -50,7 +50,7 @@ describe('AddAction', () => {
         return expect(parser.execute()).resolves.toEqual(true)
           .then(() => {
             expect(doRushAddMock).toHaveBeenCalledTimes(1);
-            expect(doRushAddMock.mock.calls[0][0].projects.length).toEqual(1);
+            expect(doRushAddMock.mock.calls[0][0].projects).toHaveLength(1);
             expect(doRushAddMock.mock.calls[0][0].projects[0].packageName).toEqual('a');
             expect(doRushAddMock.mock.calls[0][0].packageName).toEqual('assert');
           });
@@ -77,7 +77,7 @@ describe('AddAction', () => {
         return expect(parser.execute()).resolves.toEqual(true)
           .then(() => {
             expect(doRushAddMock).toHaveBeenCalledTimes(1);
-            expect(doRushAddMock.mock.calls[0][0].projects.length).toEqual(2);
+            expect(doRushAddMock.mock.calls[0][0].projects).toHaveLength(2);
             expect(doRushAddMock.mock.calls[0][0].projects[0].packageName).toEqual('a');
             expect(doRushAddMock.mock.calls[0][0].projects[1].packageName).toEqual('b');
             expect(doRushAddMock.mock.calls[0][0].packageName).toEqual('assert');

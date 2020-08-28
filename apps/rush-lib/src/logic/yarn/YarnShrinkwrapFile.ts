@@ -3,9 +3,10 @@ import * as lockfile from '@yarnpkg/lockfile';
 import {
   BaseShrinkwrapFile
 } from '../base/BaseShrinkwrapFile';
-import { FileSystem, PackageName, IParsedPackageNameOrError, InternalError } from '@rushstack/node-core-library';
+import { FileSystem, IParsedPackageNameOrError, InternalError } from '@rushstack/node-core-library';
 import { RushConstants } from '../RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';
+import { PackageNameParsers } from '../../api/PackageNameParsers';
 
 /**
  * Used with YarnShrinkwrapFile._encodePackageNameAndSemVer() and _decodePackageNameAndSemVer().
@@ -96,7 +97,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
       const packageNameAndSemVer: IPackageNameAndSemVer = YarnShrinkwrapFile._decodePackageNameAndSemVer(key);
 
       // If it starts with @rush-temp, then include it:
-      if (PackageName.getScope(packageNameAndSemVer.packageName) === RushConstants.rushTempNpmScope) {
+      if (PackageNameParsers.permissive.getScope(packageNameAndSemVer.packageName) === RushConstants.rushTempNpmScope) {
         if (!/^file:/i.test(packageNameAndSemVer.semVerRange)) {
           // Sanity check to make sure this is a real package.
           // (Nobody should ever have an actual dependency on an "@rush-temp/" package.
@@ -168,7 +169,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     const packageName: string = result[1] || '';
-    const parsedPackageName: IParsedPackageNameOrError = PackageName.tryParse(packageName);
+    const parsedPackageName: IParsedPackageNameOrError = PackageNameParsers.permissive.tryParse(packageName);
     if (parsedPackageName.error) {
       // Sanity check -- this should never happen
       throw new Error('Invalid package name the Yarn shrinkwrap file (yarn.lock): '

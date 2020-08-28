@@ -161,6 +161,19 @@
   /*[LINE "HYPOTHETICAL"]*/ "projectFolderMaxDepth": 2,
 
   /**
+   * Today the npmjs.com registry enforces fairly strict naming rules for packages, but in the early
+   * days there was no standard and hardly any enforcement.  A few large legacy projects are still using
+   * nonstandard package names, and private registries sometimes allow it.  Set "allowMostlyStandardPackageNames"
+   * to true to relax Rush's enforcement of package names.  This allows upper case letters and in the future may
+   * relax other rules, however we want to minimize these exceptions.  Many popular tools use certain punctuation
+   * characters as delimiters, based on the assumption that they will never appear in a package name; thus if we relax
+   * the rules too much it is likely to cause very confusing malfunctions.
+   *
+   * The default value is false.
+   */
+  /*[LINE "HYPOTHETICAL"]*/ "allowMostlyStandardPackageNames": true,
+
+  /**
    * This feature helps you to review and approve new packages before they are introduced
    * to your monorepo.  For example, you may be concerned about licensing, code quality,
    * performance, or simply accumulating too many libraries with overlapping functionality.

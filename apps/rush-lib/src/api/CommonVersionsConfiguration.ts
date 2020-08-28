@@ -6,10 +6,10 @@ import {
   JsonFile,
   JsonSchema,
   MapExtensions,
-  PackageName,
   ProtectableMap,
   FileSystem
 } from '@rushstack/node-core-library';
+import { PackageNameParsers } from './PackageNameParsers';
 import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
 
 /**
@@ -220,7 +220,7 @@ export class CommonVersionsConfiguration {
   }
 
   private _onSetPreferredVersions(source: ProtectableMap<string, string>, key: string, value: string): string {
-    PackageName.validate(key);
+    PackageNameParsers.permissive.validate(key);
 
     if (source === this._preferredVersions) {
       if (this._xstitchPreferredVersions.has(key)) {
@@ -240,7 +240,7 @@ export class CommonVersionsConfiguration {
   }
 
   private _onSetAllowedAlternativeVersions(source: ProtectableMap<string, string>, key: string, value: string): string {
-    PackageName.validate(key);
+    PackageNameParsers.permissive.validate(key);
 
     this._modified = true;
 

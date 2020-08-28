@@ -37,7 +37,7 @@ describe('npm', () => {
     expect(stub).toHaveBeenCalledWith('npm', `view ${packageName} time --json`.split(' '),
     expect.anything(), expect.anything(), expect.anything());
 
-    expect(versions.length).toEqual(4);
+    expect(versions).toHaveLength(4);
     expect(versions).toMatchObject(['0.0.0', '1.4.0', '1.4.1', '2.4.0-alpha.1']);
   });
 
@@ -60,7 +60,7 @@ describe('npm', () => {
     expect(stub).toHaveBeenCalledWith('npm', `view ${packageName} versions --json`.split(' '),
     expect.anything(), expect.anything(), expect.anything());
 
-    expect(versions.length).toEqual(4);
+    expect(versions).toHaveLength(4);
     expect(versions).toMatchObject(['0.0.0', '1.4.0', '1.4.1', '2.4.0-alpha.1']);
   });
 });

@@ -4,12 +4,7 @@
   "extends": "./tsconfig-base.json",
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es6",
-    "lib": [
-      "es5",
-      "es2015.collection",
-      "es2015.iterable",
-      "es2015.promise"
-    ]
+    "target": "es2017",
+    "lib": [ "es2017" ]
   }
 }

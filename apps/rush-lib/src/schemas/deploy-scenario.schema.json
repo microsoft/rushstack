@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush config file that defines a deployment scenario",
+  "description": "For use with the Rush tool, these files are located in the \"common/config/deploy-scenarios\" folder and enable repo maintainers to define deployment scenarios.",
+
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "deploymentProjectNames": {
+      "description": "Specify the name of the main Rush project to be deployed, using the full package name as declared in rush.json. Dependencies are automatically included with the main project.  If you want the deployment to include other unrelated projects, add your main project to the \"projectSettings\" section, and then add the other projects to its \"additionalProjectsToInclude\" list.\n\nThe \"deploymentProjectNames\" array normally contains exactly one item.  However, if \"enableSubdeployments\" is true, then multiple projects can be specified, and each item create a separate subdeployment.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minItems": 1
+      }
+    },
+
+    "enableSubdeployments": {
+      "description": "Subdeployments are an optional feature that enables multiple deployments to be processed with a single invocation of \"rush deploy\". In this mode, more than one item can be specified for \"deploymentProjectNames\". For each item, a subdeployment folder will be created under the \"rush deploy\" target folder. (The folder name can be customized using the \"subdeploymentFolderName\" project setting.) Each subdeployment folder will receive its own copy of the named project and its associated dependencies. The default value is false.",
+      "type": "boolean",
+    },
+
+    "includeDevDependencies": {
+      "description": "When deploying a local Rush project, the package.json \"devDependencies\" are normally excluded. If you want to include them, set \"includeDevDependencies\" to true. The default value is false.",
+      "type": "boolean"
+    },
+
+    "includeNpmIgnoreFiles": {
+      "description": "When deploying a local Rush project, normally the .npmignore filter is applied so that Rush only copies files that would be packaged by \"npm pack\".  Setting \"includeNpmIgnoreFiles\" to true will disable this filtering so that all files are copied (with a few trivial exceptions such as the \"node_modules\" folder). The default value is false.",
+      "type": "boolean"
+    },
+
+    "linkCreation": {
+      "description": "Specify how links (symbolic links, hard links, and/or NTFS junctions) will be created in the deployed folder:\n\"default\": Create the links while copying the files; this is the default behavior.\n\"script\": A Node.js script called \"create-links.js\" will be written.  When executed, this script will create the links described in the \"deploy-metadata.json\" output file.\n\"none\": Do nothing; some other tool may create the links later.",
+      "type": "string",
+      "enum": [ "default", "script", "none" ]
+    },
+
+    "projectSettings": {
+      "description": "Customize how Rush projects are processed during deployment.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "projectName": {
+            "description": "The full package name of the project, which must be declared in rush.json.",
+            "type": "string"
+          },
+          "subdeploymentFolderName": {
+            "description": "This optional setting is only relevant when the \"enableSubdeployments\" setting is true.  It customizes the subdeployment folder name.  If omitted, the default subdeployment folder name will be the package name without its NPM scope.",
+            "type": "string"
+          },
+          "additionalProjectsToInclude": {
+            "description": " A list of additional local Rush projects to be deployed with this project (beyond the package.json dependencies).  Specify full package names, which must be declared in rush.json.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [ "projectName" ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [ "deploymentProjectNames" ],
+  "additionalProperties": false
+}

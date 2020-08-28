@@ -36,4 +36,9 @@ export {
   TslintRunner
 } from './TslintRunner';
 export { ToolPaths } from './ToolPaths';
-export { ToolPackages } from  './ToolPackages';
+
+export {
+  Typescript,
+  Tslint,
+  ApiExtractor
+} from './ToolPackages';

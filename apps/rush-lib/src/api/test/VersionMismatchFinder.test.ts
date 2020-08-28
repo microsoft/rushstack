@@ -37,7 +37,7 @@ describe('VersionMismatchFinder', () => {
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
     expect(mismatchFinder.numberOfMismatches).toEqual(0);
-    expect(mismatchFinder.getMismatches().length).toEqual(0);
+    expect(mismatchFinder.getMismatches()).toHaveLength(0);
     done();
   });
 
@@ -65,7 +65,7 @@ describe('VersionMismatchFinder', () => {
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
     expect(mismatchFinder.numberOfMismatches).toEqual(1);
-    expect(mismatchFinder.getMismatches().length).toEqual(1);
+    expect(mismatchFinder.getMismatches()).toHaveLength(1);
     expect(mismatchFinder.getMismatches()[0]).toEqual('@types/foo');
     expect(mismatchFinder.getVersionsOfMismatch('@types/foo')!.sort()).toEqual(['1.2.3', '2.0.0']);
     expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0')).toEqual([projectB]);
@@ -97,7 +97,7 @@ describe('VersionMismatchFinder', () => {
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
     expect(mismatchFinder.numberOfMismatches).toEqual(0);
-    expect(mismatchFinder.getMismatches().length).toEqual(0);
+    expect(mismatchFinder.getMismatches()).toHaveLength(0);
     done();
   });
 
@@ -174,7 +174,7 @@ describe('VersionMismatchFinder', () => {
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB, projectC, projectD]);
     expect(mismatchFinder.numberOfMismatches).toEqual(2);
-    expect(mismatchFinder.getMismatches().length).toEqual(2);
+    expect(mismatchFinder.getMismatches()).toHaveLength(2);
     expect(mismatchFinder.getMismatches()).toMatchObject(['@types/foo', 'mocha']);
     expect(mismatchFinder.getVersionsOfMismatch('@types/foo')!.sort()).toEqual(['1.2.3', '2.0.0']);
     expect(mismatchFinder.getVersionsOfMismatch('mocha')!.sort()).toEqual(['1.2.3', '2.0.0']);
@@ -219,7 +219,7 @@ describe('VersionMismatchFinder', () => {
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB, projectC]);
     expect(mismatchFinder.numberOfMismatches).toEqual(1);
-    expect(mismatchFinder.getMismatches().length).toEqual(1);
+    expect(mismatchFinder.getMismatches()).toHaveLength(1);
     expect(mismatchFinder.getMismatches()).toMatchObject(['@types/foo']);
     expect(mismatchFinder.getVersionsOfMismatch('@types/foo')!.sort()).toEqual(['1.2.3', '2.0.0', '9.9.9']);
     expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3')).toEqual([projectA]);
@@ -253,7 +253,7 @@ describe('VersionMismatchFinder', () => {
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
 
     expect(mismatchFinder.numberOfMismatches).toEqual(1);
-    expect(mismatchFinder.getMismatches().length).toEqual(1);
+    expect(mismatchFinder.getMismatches()).toHaveLength(1);
     expect(mismatchFinder.getMismatches()[0]).toEqual('@types/foo');
     expect(mismatchFinder.getVersionsOfMismatch('@types/foo')!.sort()).toEqual(['1.2.3', '2.0.0']);
     expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0')).toEqual([projectB]);
@@ -312,7 +312,7 @@ describe('VersionMismatchFinder', () => {
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
     expect(mismatchFinder.numberOfMismatches).toEqual(1);
-    expect(mismatchFinder.getMismatches().length).toEqual(1);
+    expect(mismatchFinder.getMismatches()).toHaveLength(1);
     expect(mismatchFinder.getMismatches()[0]).toEqual('@types/foo');
     expect(mismatchFinder.getVersionsOfMismatch('@types/foo')!.sort()).toEqual(['1.2.3', '2.0.0']);
     expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0')).toEqual([projectB]);
@@ -346,7 +346,7 @@ describe('VersionMismatchFinder', () => {
     alternatives.set('@types/foo', ['2.0.0']);
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB], alternatives);
     expect(mismatchFinder.numberOfMismatches).toEqual(0);
-    expect(mismatchFinder.getMismatches().length).toEqual(0);
+    expect(mismatchFinder.getMismatches()).toHaveLength(0);
     done();
   });
 
@@ -369,7 +369,7 @@ describe('VersionMismatchFinder', () => {
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
     expect(mismatchFinder.numberOfMismatches).toEqual(1);
-    expect(mismatchFinder.getMismatches().length).toEqual(1);
+    expect(mismatchFinder.getMismatches()).toHaveLength(1);
     expect(mismatchFinder.getMismatches()[0]).toEqual('@scope/library-1');
     expect(mismatchFinder.getVersionsOfMismatch('@scope/library-1')!.sort()).toEqual(['1.2.3', '~3.2.1']);
     expect(mismatchFinder.getConsumersOfMismatch('@scope/library-1', '~3.2.1')).toEqual([projectB]);

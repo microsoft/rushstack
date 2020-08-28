@@ -17,9 +17,24 @@ export const enum ExcerptTokenKind {
   Reference = 'Reference'
 }
 
-/** @public */
+/**
+ * Used by {@link Excerpt} to indicate a range of indexes within an array of `ExcerptToken` objects.
+ *
+ * @public
+ */
 export interface IExcerptTokenRange {
+  /**
+   * The starting index of the span.
+   */
   startIndex: number;
+
+  /**
+   * The index of the last member of the span, plus one.
+   *
+   * @remarks
+   *
+   * If `startIndex` and `endIndex` are the same number, then the span is empty.
+   */
   endIndex: number;
 }
 
@@ -30,7 +45,11 @@ export interface IExcerptToken {
   canonicalReference?: string;
 }
 
-/** @public */
+/**
+ * Represents a fragment of text belonging to an {@link Excerpt} object.
+ *
+ * @public
+ */
 export class ExcerptToken {
   private readonly _kind: ExcerptTokenKind;
   private readonly _text: string;
@@ -46,29 +65,46 @@ export class ExcerptToken {
     this._canonicalReference = canonicalReference;
   }
 
+  /**
+   * Indicates the kind of token.
+   */
   public get kind(): ExcerptTokenKind {
     return this._kind;
   }
 
+  /**
+   * The text fragment.
+   */
   public get text(): string {
     return this._text;
   }
 
+  /**
+   * The hyperlink target for a token whose type is `ExcerptTokenKind.Reference`.  For other token types,
+   * this property will be `undefined`.
+   */
   public get canonicalReference(): DeclarationReference | undefined {
     return this._canonicalReference;
   }
 }
 
 /**
- * This class is used by {@link ApiDeclaredItem} to represent a source code excerpt containing
- * a TypeScript declaration.
+ * The `Excerpt` class is used by {@link ApiDeclaredItem} to represent a TypeScript code fragment that may be
+ * annotated with hyperlinks to declared types (and in the future, source code locations).
  *
  * @remarks
+ * API Extractor's .api.json file format stores excerpts compactly as a start/end indexes into an array of tokens.
+ * Every `ApiDeclaredItem` has a "main excerpt" corresponding to the full list of tokens.  The declaration may
+ * also have have "captured" excerpts that correspond to subranges of tokens.
  *
- * The main excerpt is parsed into an array of tokens, and the main excerpt's token range will span all of these
- * tokens.  The declaration may also have have "captured" excerpts, which are other subranges of tokens.
- * For example, if the main excerpt is a function declaration, it will also have a captured excerpt corresponding
- * to the return type of the function.
+ * For example, if the main excerpt is:
+ *
+ * ```
+ * function parse(s: string): Vector | undefined;
+ * ```
+ *
+ * ...then this entire signature is the "main excerpt", whereas the function's return type `Vector | undefined` is a
+ * captured excerpt.  The `Vector` token might be a hyperlink to that API item.
  *
  * An excerpt may be empty (i.e. a token range containing zero tokens).  For example, if a function's return value
  * is not explicitly declared, then the returnTypeExcerpt will be empty.  By contrast, a class constructor cannot
@@ -77,9 +113,23 @@ export class ExcerptToken {
  * @public
  */
 export class Excerpt {
+  /**
+   * The complete list of tokens for the source code fragment that this excerpt is based upon.
+   * If this object is the main excerpt, then it will span all of the tokens; otherwise, it will correspond to
+   * a range within the array.
+   */
+  public readonly tokens: ReadonlyArray<ExcerptToken>;
+
+  /**
+   * Specifies the excerpt's range within the `tokens` array.
+   */
   public readonly tokenRange: Readonly<IExcerptTokenRange>;
 
-  public readonly tokens: ReadonlyArray<ExcerptToken>;
+  /**
+   * The tokens spanned by this excerpt.  It is the range of the `tokens` array as specified by the `tokenRange`
+   * property.
+   */
+  public readonly spannedTokens: ReadonlyArray<ExcerptToken>;
 
   private _text: string | undefined;
 
@@ -91,16 +141,23 @@ export class Excerpt {
       || this.tokenRange.startIndex > this.tokenRange.endIndex) {
       throw new Error('Invalid token range');
     }
+
+    this.spannedTokens = this.tokens.slice(this.tokenRange.startIndex, this.tokenRange.endIndex);
   }
 
+  /**
+   * The excerpted text, formed by concatenating the text of the `spannedTokens` strings.
+   */
   public get text(): string {
     if (this._text === undefined) {
-      this._text = this.tokens.slice(this.tokenRange.startIndex, this.tokenRange.endIndex)
-      .map(x => x.text).join('');
+      this._text = this.spannedTokens.map(x => x.text).join('');
     }
     return this._text;
   }
 
+  /**
+   * Returns true if the excerpt is an empty range.
+   */
   public get isEmpty(): boolean {
     return this.tokenRange.startIndex === this.tokenRange.endIndex;
   }

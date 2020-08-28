@@ -1,6 +1,65 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 08 Apr 2020 04:07:33 GMT and should not be manually modified.
+This log was last generated on Mon, 01 Jun 2020 08:34:17 GMT and should not be manually modified.
+
+## 7.8.10
+Mon, 01 Jun 2020 08:34:17 GMT
+
+*Version update only*
+
+## 7.8.9
+Sat, 30 May 2020 02:59:54 GMT
+
+*Version update only*
+
+## 7.8.8
+Thu, 28 May 2020 05:59:02 GMT
+
+*Version update only*
+
+## 7.8.7
+Wed, 27 May 2020 05:15:10 GMT
+
+*Version update only*
+
+## 7.8.6
+Tue, 26 May 2020 23:00:25 GMT
+
+*Version update only*
+
+## 7.8.5
+Fri, 22 May 2020 15:08:42 GMT
+
+*Version update only*
+
+## 7.8.4
+Thu, 21 May 2020 23:09:44 GMT
+
+*Version update only*
+
+## 7.8.3
+Thu, 21 May 2020 15:41:59 GMT
+
+*Version update only*
+
+## 7.8.2
+Tue, 19 May 2020 15:08:19 GMT
+
+### Patches
+
+- Report an error to indicate that "import()" types are not supported
+
+## 7.8.1
+Fri, 15 May 2020 08:10:59 GMT
+
+*Version update only*
+
+## 7.8.0
+Wed, 06 May 2020 08:23:45 GMT
+
+### Minor changes
+
+- Version update only
 
 ## 7.7.13
 Wed, 08 Apr 2020 04:07:33 GMT

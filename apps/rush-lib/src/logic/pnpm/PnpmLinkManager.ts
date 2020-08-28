@@ -11,7 +11,6 @@ import * as colors from 'colors';
 import {
   JsonFile,
   Text,
-  PackageName,
   FileSystem,
   FileConstants,
   InternalError
@@ -74,7 +73,8 @@ export class PnpmLinkManager extends BaseLinkManager {
     // first, read the temp package.json information
 
     // Example: "project1"
-    const unscopedTempProjectName: string = PackageName.getUnscopedName(project.tempProjectName);
+    const unscopedTempProjectName: string = this._rushConfiguration.packageNameParser
+      .getUnscopedName(project.tempProjectName);
 
     // Example: "C:\MyRepo\common\temp\projects\project1
     const extractedFolder: string = path.join(this._rushConfiguration.commonTempFolder,

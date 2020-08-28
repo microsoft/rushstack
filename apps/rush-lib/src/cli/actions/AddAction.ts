@@ -13,7 +13,6 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { PackageJsonUpdater, SemVerStyle } from '../../logic/PackageJsonUpdater';
-import { PackageName } from '@rushstack/node-core-library';
 
 export class AddAction extends BaseRushAction {
   private _allFlag: CommandLineFlagParameter;
@@ -122,7 +121,7 @@ export class AddAction extends BaseRushAction {
       version = parts[1];
     }
 
-    if (!PackageName.isValidName(packageName)) {
+    if (!this.rushConfiguration.packageNameParser.isValidName(packageName)) {
       throw new Error(`The package name "${packageName}" is not valid.`);
     }
 

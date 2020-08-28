@@ -18,3 +18,4 @@ import(/* webpackChunkName: 'chunk-without-strings' */ './chunks/chunkWithoutStr
 
 console.log(strings5.string1);
 console.log(strings5.stringWithQuotes);
+console.log(strings5.stringWithTabsAndNewlines);
