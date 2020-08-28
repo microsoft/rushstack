@@ -337,14 +337,14 @@ importers:
     devDependencies:
       '@microsoft/api-documenter': 'link:../../apps/api-documenter'
       '@microsoft/api-extractor': 'link:../../apps/api-extractor'
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: 7.0.1
       typescript: 3.9.7
     specifiers:
       '@microsoft/api-documenter': 'workspace:*'
       '@microsoft/api-extractor': 'workspace:*'
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: ~7.0.1
       typescript: ~3.9.5
@@ -362,13 +362,13 @@ importers:
   ../../build-tests/api-extractor-lib2-test:
     devDependencies:
       '@microsoft/api-extractor': 'link:../../apps/api-extractor'
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: 7.0.1
       typescript: 3.9.7
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: ~7.0.1
       typescript: ~3.9.5
@@ -377,13 +377,13 @@ importers:
       api-extractor-lib1-test: 'link:../api-extractor-lib1-test'
     devDependencies:
       '@microsoft/api-extractor': 'link:../../apps/api-extractor'
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: 7.0.1
       typescript: 3.9.7
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       api-extractor-lib1-test: 'workspace:*'
       fs-extra: ~7.0.1
@@ -393,7 +393,7 @@ importers:
       '@microsoft/api-extractor': 'link:../../apps/api-extractor'
       '@microsoft/teams-js': 1.3.0-beta.4
       '@rushstack/node-core-library': 'link:../../libraries/node-core-library'
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       api-extractor-lib1-test: 'link:../api-extractor-lib1-test'
       api-extractor-lib2-test: 'link:../api-extractor-lib2-test'
@@ -405,7 +405,7 @@ importers:
       '@microsoft/api-extractor': 'workspace:*'
       '@microsoft/teams-js': 1.3.0-beta.4
       '@rushstack/node-core-library': 'workspace:*'
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       api-extractor-lib1-test: 'workspace:*'
       api-extractor-lib2-test: 'workspace:*'
@@ -453,13 +453,13 @@ importers:
       typescript: ~3.9.5
   ../../build-tests/api-extractor-test-03:
     devDependencies:
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       api-extractor-test-02: 'link:../api-extractor-test-02'
       fs-extra: 7.0.1
       typescript: 3.9.7
     specifiers:
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       api-extractor-test-02: 'workspace:*'
       fs-extra: ~7.0.1
@@ -897,7 +897,7 @@ importers:
       '@microsoft/load-themed-styles': 'link:../../libraries/load-themed-styles'
       '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@microsoft/web-library-build': 'link:../../core-build/web-library-build'
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       gulp: 4.0.2
       jest: 25.4.0
       ts-jest: 25.1.0_jest@25.4.0
@@ -905,7 +905,7 @@ importers:
       '@microsoft/load-themed-styles': 'workspace:*'
       '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@microsoft/web-library-build': 'workspace:*'
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       gulp: ~4.0.2
       jest: ~25.4.0
       ts-jest: ~25.1.0
@@ -916,7 +916,7 @@ importers:
       '@rushstack/node-core-library': 'link:../../libraries/node-core-library'
       '@types/chalk': 0.4.31
       '@types/gulp': 4.0.6
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       '@types/node-notifier': 0.0.28
       '@types/orchestrator': 0.0.30
@@ -966,7 +966,7 @@ importers:
       '@types/chalk': 0.4.31
       '@types/glob': 7.1.1
       '@types/gulp': 4.0.6
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       '@types/node-notifier': 0.0.28
       '@types/orchestrator': 0.0.30
@@ -1055,7 +1055,7 @@ importers:
       '@types/autoprefixer': 9.7.2
       '@types/clean-css': 4.2.1
       '@types/glob': 7.1.1
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       '@types/node-sass': 4.11.1
       gulp: 4.0.2
       jest: 25.4.0
@@ -1070,7 +1070,7 @@ importers:
       '@types/clean-css': 4.2.1
       '@types/glob': 7.1.1
       '@types/gulp': 4.0.6
-      '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       '@types/node': 10.17.13
       '@types/node-sass': 4.11.1
       autoprefixer: ~9.8.0
@@ -3111,6 +3111,7 @@ packages:
   /@types/heft-jest/1.0.1:
     dependencies:
       '@types/jest': 26.0.10
+    dev: true
     resolution:
       integrity: sha512-cF2iEUpvGh2WgLowHVAdjI05xuDo+GwCA8hGV3Q5PBl8apjd6BTcpPFQ2uPlfUM7BLpgur2xpYo8VeBXopMI4A==
   /@types/http-proxy-middleware/0.19.3:
@@ -3158,6 +3159,7 @@ packages:
     dependencies:
       jest-diff: 25.5.0
       pretty-format: 25.5.0
+    dev: true
     resolution:
       integrity: sha512-i2m0oyh8w/Lum7wWK/YOZJakYF8Mx08UaKA1CtbmFeDquVhAEdA7znacsVSf2hJ1OQ/OfVMGN90pw/AtzF8s/Q==
   /@types/jju/1.4.1:
