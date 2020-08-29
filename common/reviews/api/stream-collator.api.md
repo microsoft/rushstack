@@ -5,28 +5,19 @@
 ```ts
 
 // @public
-export class CollatedWriter {
-    constructor(taskName: string, collator: StreamCollator, quietMode: boolean);
+export class CollatedWriter<TMessage = IStdioMessage> {
+    constructor(taskName: string, collator: StreamCollator<TMessage>);
+    // (undocumented)
+    readonly accumulatedMessages: ReadonlyArray<TMessage>;
     close(): void;
     // @internal (undocumented)
-    readonly _collator: StreamCollator;
-    // (undocumented)
-    getStdError(): string;
-    // (undocumented)
-    getStdOutput(): string;
-    // (undocumented)
-    readonly quietMode: boolean;
+    readonly _collator: StreamCollator<TMessage>;
     // (undocumented)
     readonly state: CollatedWriterState;
     // (undocumented)
     readonly taskName: string;
-    // (undocumented)
-    write(data: string): void;
-    // (undocumented)
-    writeError(data: string): void;
-    // (undocumented)
-    writeLine(data: string): void;
-    }
+    writeMessage(message: TMessage): void;
+}
 
 // @public (undocumented)
 export enum CollatedWriterState {
@@ -38,26 +29,38 @@ export enum CollatedWriterState {
     Written = 3
 }
 
+// @public (undocumented)
+export interface IStdioMessage {
+    // (undocumented)
+    stream: 'stdout' | 'stderr';
+    // (undocumented)
+    text: string;
+}
+
+// @public (undocumented)
+export interface IStreamCollatorOptions<TMessage> {
+    // (undocumented)
+    writeToStream: WriteToStreamCallback<TMessage>;
+}
+
 // @public
-export class StreamCollator {
-    constructor();
+export class StreamCollator<TMessage = IStdioMessage> {
+    constructor(options: IStreamCollatorOptions<TMessage>);
     // (undocumented)
     readonly activeTaskName: string;
     // (undocumented)
-    readonly activeWriter: CollatedWriter | undefined;
-    registerTask(taskName: string, quietMode?: boolean): CollatedWriter;
+    readonly activeWriter: CollatedWriter<TMessage> | undefined;
+    registerTask(taskName: string): CollatedWriter<TMessage>;
     // @internal (undocumented)
-    _setActiveWriter(writer: CollatedWriter): void;
-    setStdOut(stdout: {
-        write: (text: string) => void;
-    }): void;
+    _setActiveWriter(writer: CollatedWriter<TMessage>): void;
     // (undocumented)
-    _stdout: {
-        write: (text: string) => void;
-    };
+    readonly writers: ReadonlySet<CollatedWriter<TMessage>>;
     // (undocumented)
-    readonly writers: ReadonlySet<CollatedWriter>;
-    }
+    readonly writeToStream: WriteToStreamCallback<TMessage>;
+}
+
+// @public (undocumented)
+export type WriteToStreamCallback<TMessage> = (message: TMessage) => void;
 
 
 ```
