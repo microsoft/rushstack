@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 import * as os from 'os';
 
-import { Interleaver, ITaskWriter } from '../Interleaver';
+import { StreamCollator, ITaskWriter } from '../StreamCollator';
 
 class StringStream {
   private _buffer: string[] = [];
@@ -21,41 +21,41 @@ class StringStream {
 }
 
 const stdout: StringStream = new StringStream();
-Interleaver.setStdOut(stdout);
+StreamCollator.setStdOut(stdout);
 
-describe('Interleaver tests', () => {
+describe('StreamCollator tests', () => {
   // Reset task information before each test
   beforeEach(() => {
-    Interleaver.reset();
+    StreamCollator.reset();
     stdout.reset();
   });
 
   describe('Testing register and close', () => {
     it('can register a task', () => {
-      const helloWorldWriter: ITaskWriter = Interleaver.registerTask('Hello World');
+      const helloWorldWriter: ITaskWriter = StreamCollator.registerTask('Hello World');
       expect(typeof helloWorldWriter).toEqual('object');
     });
 
     it('should not let you register two tasks with the same name', () => {
       const taskName: string = 'Hello World';
       expect(() => {
-        Interleaver.registerTask(taskName);
+        StreamCollator.registerTask(taskName);
       }).not.toThrow();
       expect(() => {
-        Interleaver.registerTask(taskName);
+        StreamCollator.registerTask(taskName);
       }).toThrow();
     });
 
     it('should not let you close a task twice', () => {
       const taskName: string = 'Hello World';
-      const task: ITaskWriter = Interleaver.registerTask(taskName);
+      const task: ITaskWriter = StreamCollator.registerTask(taskName);
       task.close();
       expect(task.close).toThrow();
     });
 
     it('should not let you write to a closed task', () => {
       const taskName: string = 'Hello World';
-      const task: ITaskWriter = Interleaver.registerTask(taskName);
+      const task: ITaskWriter = StreamCollator.registerTask(taskName);
       task.close();
       expect(() => {
         task.write('1');
@@ -65,7 +65,7 @@ describe('Interleaver tests', () => {
 
   describe('Testing write functions', () => {
     it('writeLine should add a newline', () => {
-      const taskA: ITaskWriter = Interleaver.registerTask('A');
+      const taskA: ITaskWriter = StreamCollator.registerTask('A');
       const text: string = 'Hello World';
 
       taskA.writeLine(text);
@@ -74,7 +74,7 @@ describe('Interleaver tests', () => {
     });
 
     it('should write errors to stderr', () => {
-      const taskA: ITaskWriter = Interleaver.registerTask('A');
+      const taskA: ITaskWriter = StreamCollator.registerTask('A');
       const error: string = 'Critical error';
 
       taskA.writeError(error);
@@ -89,8 +89,8 @@ describe('Interleaver tests', () => {
 
   describe('Testing that output is interleaved', () => {
     it('should not write non-active tasks to stdout', () => {
-      const taskA: ITaskWriter = Interleaver.registerTask('A');
-      const taskB: ITaskWriter = Interleaver.registerTask('B');
+      const taskA: ITaskWriter = StreamCollator.registerTask('A');
+      const taskB: ITaskWriter = StreamCollator.registerTask('B');
 
       taskA.write('1');
       expect(stdout.read()).toEqual('1');
@@ -112,8 +112,8 @@ describe('Interleaver tests', () => {
     });
 
     it('should not write anything when in quiet mode', () => {
-      const taskA: ITaskWriter = Interleaver.registerTask('A', true);
-      const taskB: ITaskWriter = Interleaver.registerTask('B', true);
+      const taskA: ITaskWriter = StreamCollator.registerTask('A', true);
+      const taskB: ITaskWriter = StreamCollator.registerTask('B', true);
 
       taskA.write('1');
       expect(stdout.read()).toEqual('');
@@ -135,8 +135,8 @@ describe('Interleaver tests', () => {
     });
 
     it('should update the active task once the active task is closed', () => {
-      const taskA: ITaskWriter = Interleaver.registerTask('A');
-      const taskB: ITaskWriter = Interleaver.registerTask('B');
+      const taskA: ITaskWriter = StreamCollator.registerTask('A');
+      const taskB: ITaskWriter = StreamCollator.registerTask('B');
 
       taskA.write('1');
       expect(stdout.read()).toEqual('1');
@@ -155,8 +155,8 @@ describe('Interleaver tests', () => {
     });
 
     it('should write completed tasks after the active task is completed', () => {
-      const taskA: ITaskWriter = Interleaver.registerTask('A');
-      const taskB: ITaskWriter = Interleaver.registerTask('B');
+      const taskA: ITaskWriter = StreamCollator.registerTask('A');
+      const taskB: ITaskWriter = StreamCollator.registerTask('B');
 
       taskA.write('1');
       expect(stdout.read()).toEqual('1');

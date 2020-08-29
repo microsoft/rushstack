@@ -5,15 +5,6 @@
 ```ts
 
 // @public
-export class Interleaver {
-    static registerTask(taskName: string, quietMode?: boolean): ITaskWriter;
-    static reset(): void;
-    static setStdOut(stdout: {
-        write: (text: string) => void;
-    }): void;
-    }
-
-// @public
 export interface ITaskWriter {
     // (undocumented)
     close(): void;
@@ -28,6 +19,15 @@ export interface ITaskWriter {
     // (undocumented)
     writeLine(data: string): void;
 }
+
+// @public
+export class StreamCollator {
+    static registerTask(taskName: string, quietMode?: boolean): ITaskWriter;
+    static reset(): void;
+    static setStdOut(stdout: {
+        write: (text: string) => void;
+    }): void;
+    }
 
 
 ```

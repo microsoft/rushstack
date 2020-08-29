@@ -13,4 +13,4 @@
  * @packageDocumentation
  */
 
-export { Interleaver, ITaskWriter } from './Interleaver';
+export { StreamCollator, ITaskWriter } from './StreamCollator';
