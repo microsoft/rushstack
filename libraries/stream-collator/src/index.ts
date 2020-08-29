@@ -13,4 +13,5 @@
  * @packageDocumentation
  */
 
-export { StreamCollator, ITaskWriter } from './StreamCollator';
+export { StreamCollator } from './StreamCollator';
+export { CollatedWriter, CollatedWriterState } from './CollatedWriter';
