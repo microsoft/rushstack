@@ -5,28 +5,58 @@
 ```ts
 
 // @public
-export interface ITaskWriter {
-    // (undocumented)
+export class CollatedWriter {
+    constructor(taskName: string, collator: StreamCollator, quietMode: boolean);
     close(): void;
+    // @internal (undocumented)
+    readonly _collator: StreamCollator;
     // (undocumented)
     getStdError(): string;
     // (undocumented)
     getStdOutput(): string;
+    // (undocumented)
+    readonly quietMode: boolean;
+    // (undocumented)
+    readonly state: CollatedWriterState;
+    // (undocumented)
+    readonly taskName: string;
     // (undocumented)
     write(data: string): void;
     // (undocumented)
     writeError(data: string): void;
     // (undocumented)
     writeLine(data: string): void;
+    }
+
+// @public (undocumented)
+export enum CollatedWriterState {
+    // (undocumented)
+    ClosedUnwritten = 2,
+    // (undocumented)
+    Open = 1,
+    // (undocumented)
+    Written = 3
 }
 
 // @public
 export class StreamCollator {
-    static registerTask(taskName: string, quietMode?: boolean): ITaskWriter;
-    static reset(): void;
-    static setStdOut(stdout: {
+    constructor();
+    // (undocumented)
+    readonly activeTaskName: string;
+    // (undocumented)
+    readonly activeWriter: CollatedWriter | undefined;
+    registerTask(taskName: string, quietMode?: boolean): CollatedWriter;
+    // @internal (undocumented)
+    _setActiveWriter(writer: CollatedWriter): void;
+    setStdOut(stdout: {
         write: (text: string) => void;
     }): void;
+    // (undocumented)
+    _stdout: {
+        write: (text: string) => void;
+    };
+    // (undocumented)
+    readonly writers: ReadonlySet<CollatedWriter>;
     }
 
 
