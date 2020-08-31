@@ -9,7 +9,7 @@ export class ExamplePlugin02 implements IHeftPlugin {
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     heftSession.applyForPlugin(heftExamplePlugin01, (plugin: typeof heftExamplePlugin01) => {
       plugin.hooks.exampleHook.tap(PLUGIN_NAME, () => {
-        heftConfiguration.terminal.writeLine(
+        heftConfiguration.globalTerminal.writeLine(
           `!!!!!!!!!!!!!!! Plugin "${plugin.displayName}" hook called !!!!!!!!!!!!!!! `
         );
       });

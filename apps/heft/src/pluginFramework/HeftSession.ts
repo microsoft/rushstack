@@ -26,15 +26,15 @@ export interface IHeftSessionHooks {
 
 export interface IHeftSessionOptions {
   plugin: IHeftPlugin;
-  applyForPluginFn: ApplyForPluginFn;
+  applyForPluginCallback: ApplyForPluginCallback;
 }
 
 /**
  * @beta
  */
-export type ApplyForPluginFn = <TPlugin extends IHeftPlugin>(
+export type ApplyForPluginCallback = <TPlugin extends IHeftPlugin>(
   pluginToTap: TPlugin,
-  pluginApplyFn: (plugin: TPlugin) => void
+  pluginApply: (plugin: TPlugin) => void
 ) => void;
 
 /**
@@ -62,7 +62,7 @@ export class HeftSession {
    *
    * @beta
    */
-  public readonly applyForPlugin: ApplyForPluginFn;
+  public readonly applyForPlugin: ApplyForPluginCallback;
 
   /**
    * @internal
@@ -83,7 +83,7 @@ export class HeftSession {
 
     this.debugMode = internalSessionOptions.getIsDebugMode();
 
-    this.applyForPlugin = options.applyForPluginFn;
+    this.applyForPlugin = options.applyForPluginCallback;
   }
 
   /**

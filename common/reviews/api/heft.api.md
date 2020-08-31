@@ -19,7 +19,7 @@ import { Terminal } from '@rushstack/node-core-library';
 import * as webpack from 'webpack';
 
 // @beta (undocumented)
-export type ApplyForPluginFn = <TPlugin extends IHeftPlugin>(pluginToTap: TPlugin, pluginApplyFn: (plugin: TPlugin) => void) => void;
+export type ApplyForPluginCallback = <TPlugin extends IHeftPlugin>(pluginToTap: TPlugin, pluginApply: (plugin: TPlugin) => void) => void;
 
 // @public (undocumented)
 export class BuildStageHooks extends StageHooksBase<IBuildStageProperties> {
@@ -98,7 +98,7 @@ export class HeftSession {
     // @internal
     constructor(options: IHeftSessionOptions, internalSessionOptions: IInternalHeftSessionOptions);
     // @beta
-    readonly applyForPlugin: ApplyForPluginFn;
+    readonly applyForPlugin: ApplyForPluginCallback;
     readonly debugMode: boolean;
     // (undocumented)
     readonly hooks: IHeftSessionHooks;

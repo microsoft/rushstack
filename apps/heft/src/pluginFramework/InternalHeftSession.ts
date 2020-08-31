@@ -44,7 +44,7 @@ export class InternalHeftSession {
     return new HeftSession(
       {
         plugin: thisPlugin,
-        applyForPluginFn: <TPlugin extends IHeftPlugin>(
+        applyForPluginCallback: <TPlugin extends IHeftPlugin>(
           pluginToTap: TPlugin,
           pluginApplyFn: (plugin: TPlugin) => void
         ) => {
