@@ -146,7 +146,7 @@ export class MarkdownDocumenter {
         output.appendNode(new DocHeading({ configuration, title: `${unscopedPackageName} package` }));
         break;
       case ApiItemKind.EntryPoint:
-        const packageName = apiItem.parent!.displayName;
+        const packageName: string = apiItem.parent!.displayName;
         output.appendNode(
           new DocHeading({
             configuration,
@@ -1021,7 +1021,7 @@ export class MarkdownDocumenter {
 
     let multipleEntryPoints: boolean = false;
     for (const hierarchyItem of apiItem.getHierarchy()) {
-      let customDisplayName = '';
+      let customDisplayName: string = '';
 
       if (hierarchyItem.kind === ApiItemKind.Model) {
         // We don't show the model as part of the breadcrumb because it is the root-level container.
@@ -1112,8 +1112,8 @@ export class MarkdownDocumenter {
         case ApiItemKind.Model:
           break;
         case ApiItemKind.EntryPoint:
-          const packageName = hierarchyItem.parent!.displayName;
-          let entryPointName = PackageName.getUnscopedName(packageName);
+          const packageName: string = hierarchyItem.parent!.displayName;
+          let entryPointName: string = PackageName.getUnscopedName(packageName);
           if (multipleEntryPoints) {
             entryPointName = `${PackageName.getUnscopedName(packageName)}/${hierarchyItem.displayName}`;
           }
