@@ -39,7 +39,6 @@ interface IRunBuilderForTsconfigOptions {
   copyFromCacheMode?: CopyFromCacheMode;
   watchMode: boolean;
   maxWriteParallelism: number;
-  subprocessNodeArgv?: string[];
   firstEmitCallback: () => void;
 
   terminalProvider: ITerminalProvider;
@@ -104,8 +103,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
       lintingEnabled: !!typeScriptConfiguration.isLintingEnabled,
       copyFromCacheMode: typeScriptConfiguration.copyFromCacheMode,
       watchMode: watchMode,
-      maxWriteParallelism: typeScriptConfiguration.maxWriteParallelism,
-      subprocessNodeArgv: typeScriptConfiguration.subprocessNodeArgv
+      maxWriteParallelism: typeScriptConfiguration.maxWriteParallelism
     };
 
     JestTypeScriptDataFile.saveForProject(heftConfiguration.buildFolder, typeScriptConfiguration);
@@ -174,7 +172,6 @@ export class TypeScriptPlugin implements IHeftPlugin {
       additionalModuleKindsToEmit,
       watchMode,
       maxWriteParallelism,
-      subprocessNodeArgv,
       firstEmitCallback
     } = options;
 
@@ -200,8 +197,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
       copyFromCacheMode,
       watchMode,
       loggerPrefixLabel: terminalPrefixLabel,
-      maxWriteParallelism,
-      subprocessNodeArgv
+      maxWriteParallelism
     };
     const typeScriptBuilder: TypeScriptBuilder = new TypeScriptBuilder(
       terminalProvider,

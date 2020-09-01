@@ -51,14 +51,6 @@
     "maxWriteParallelism": {
       "description": "Set this to change the maximum write parallelism. The default is 50.",
       "type": "number"
-    },
-
-    "subprocessNodeArgv": {
-      "description": "Adds extra commandline arguments to pass to the Node subprocess running Typescript. e.g. --max-old-space-size. Supported command line interface for node.js can be found at https://nodejs.org/api/cli.html",
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
     }
   }
 }

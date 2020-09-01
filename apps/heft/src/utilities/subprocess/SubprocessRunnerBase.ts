@@ -67,11 +67,6 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
    */
   public abstract get filename(): string;
 
-  /**
-   * subprocessNodeArgv is undefined unless overridden by the child class.
-   */
-  public subprocessNodeArgv: string[] | undefined;
-
   public get runningAsSubprocess(): boolean {
     return this._runningAsSubprocess;
   }
@@ -154,11 +149,7 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
         path.resolve(__dirname, 'startSubprocess'),
         [this.filename, JSON.stringify(this._innerConfiguration), JSON.stringify(this._configuration)],
         {
-          // argv sent to Node inherits from the parent as well as from the subprocessNodeArgv
-          execArgv: this._processNodeArgsForSubprocess(
-            this._globalTerminal,
-            this.subprocessNodeArgv ? this.subprocessNodeArgv.concat(process.execArgv) : process.execArgv
-          )
+          execArgv: this._processNodeArgsForSubprocess(this._globalTerminal, process.execArgv)
         }
       );
 

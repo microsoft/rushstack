@@ -296,7 +296,6 @@ export interface ISharedTypeScriptConfiguration {
     copyFromCacheMode?: CopyFromCacheMode | undefined;
     emitFolderPathForJest?: string;
     maxWriteParallelism: number;
-    subprocessNodeArgv?: string[];
 }
 
 // @public (undocumented)

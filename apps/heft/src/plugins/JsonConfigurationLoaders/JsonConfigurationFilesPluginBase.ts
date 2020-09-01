@@ -135,10 +135,6 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
     if (typeScriptConfigurationJson?.maxWriteParallelism !== undefined) {
       typeScriptConfiguration.maxWriteParallelism = typeScriptConfigurationJson.maxWriteParallelism;
     }
-
-    if (typeScriptConfigurationJson?.subprocessNodeArgv !== undefined) {
-      typeScriptConfiguration.subprocessNodeArgv = typeScriptConfigurationJson.subprocessNodeArgv;
-    }
   }
 
   private async _updateCopyStaticAssetsConfigurationAsync(

@@ -65,12 +65,6 @@ export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfig
    * The default is 50.
    */
   maxWriteParallelism: number;
-
-  /**
-   * Adds extra commandline arguments to pass to the Node subprocess running Typescript. e.g. --max-old-space-size
-   * Supported command line interface for node.js can be found at https://nodejs.org/api/cli.html
-   */
-  subprocessNodeArgv?: string[];
 }
 
 type TWatchCompilerHost = TTypescript.WatchCompilerHostOfFilesAndCompilerOptions<
@@ -146,9 +140,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     firstEmitCallback: () => void
   ) {
     super(parentGlobalTerminalProvider, configuration, heftSession);
-
-    // This is read by the subprocess runner
-    this.subprocessNodeArgv = this._configuration.subprocessNodeArgv;
 
     this._firstEmitCompletedCallbackManager = new FirstEmitCompletedCallbackManager(firstEmitCallback);
     this.registerSubprocessCommunicationManager(this._firstEmitCompletedCallbackManager);

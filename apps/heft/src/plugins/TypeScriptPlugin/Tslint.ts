@@ -48,6 +48,7 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     }
     return path.resolve(packagePath, packageJson.main);
   }
+
   /**
    * getConfigHash returns the sha1 hash unique to the contents of the given config as
    * well as all the configs that the given one extends.
@@ -92,19 +93,7 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
         modulePath: extendsProperty,
         baseFolderPath: path.dirname(configFilePath)
       });
-
       hash = Tslint.getConfigHash(extendsFullPath, terminal, fileSystem, hash);
-      /*
-    let hash: crypto.Hash;
-    if (parsedConfig.extends) {
-      const extendsFullPath: string = Import.resolveModule({
-        modulePath: parsedConfig.extends,
-        baseFolderPath: path.dirname(configFilePath)
-      });
-      hash = Tslint.getConfigHash(extendsFullPath, terminal, fileSystem);
-    } else {
-      hash = crypto.createHash('sha1').update(rawConfig);
-      */
     }
 
     return hash.update(rawConfig);
