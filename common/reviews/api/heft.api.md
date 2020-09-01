@@ -69,6 +69,9 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
 // @public (undocumented)
 export type CopyFromCacheMode = 'hardlink' | 'copy';
 
+// @alpha (undocumented)
+export type CustomActionParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
+
 // @public (undocumented)
 export class DevDeployStageHooks extends StageHooksBase<IDevDeployStageProperties> {
 }
@@ -99,6 +102,8 @@ export class HeftSession {
     readonly hooks: IHeftSessionHooks;
     // @internal (undocumented)
     readonly metricsCollector: _MetricsCollector;
+    // @alpha (undocumented)
+    readonly registerAction: RegisterAction;
     // @beta
     readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
     requestScopedLogger(loggerName: string): ScopedLogger;
@@ -188,6 +193,34 @@ export interface ICompileSubstageProperties {
 export interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsConfiguration {
     destinationFolderNames: string[];
     sourceFolderName: string;
+}
+
+// @alpha (undocumented)
+export interface ICustomActionOptions {
+    // (undocumented)
+    actionName: string;
+    // (undocumented)
+    callback: (parameters: {
+        [callbackValueName: string]: CustomActionParameterType;
+    }) => void | Promise<void>;
+    // (undocumented)
+    documentation: string;
+    // (undocumented)
+    parameters?: ICustomActionParameter[];
+    // (undocumented)
+    summary?: string;
+}
+
+// @alpha (undocumented)
+export interface ICustomActionParameter {
+    // (undocumented)
+    callbackValueName: string;
+    // (undocumented)
+    description: string;
+    // (undocumented)
+    kind: 'flag' | 'integer' | 'string' | 'stringList';
+    // (undocumented)
+    paramterLongName: string;
 }
 
 // @public (undocumented)
@@ -361,6 +394,9 @@ export class MetricsCollectorHooks {
     flushAndTeardown: AsyncParallelHook;
     recordMetric: SyncHook<string, IMetricsData>;
 }
+
+// @alpha (undocumented)
+export type RegisterAction = (action: ICustomActionOptions) => void;
 
 // @beta (undocumented)
 export type RequestAccessToPluginByNameCallback = (pluginToAccessName: string, pluginApply: (pluginAccessor: object) => void) => void;

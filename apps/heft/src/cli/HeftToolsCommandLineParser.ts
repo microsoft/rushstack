@@ -28,6 +28,7 @@ import { BuildStage } from '../stages/BuildStage';
 import { DevDeployStage } from '../stages/DevDeployStage';
 import { TestStage } from '../stages/TestStage';
 import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
+import { ICustomActionOptions, CustomAction } from './actions/CustomAction';
 
 export class HeftToolsCommandLineParser extends CommandLineParser {
   private _terminalProvider: ConsoleTerminalProvider;
@@ -88,7 +89,11 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       getIsDebugMode: () => this.isDebug,
       ...stages,
       loggingManager: this._loggingManager,
-      metricsCollector: this._metricsCollector
+      metricsCollector: this._metricsCollector,
+      registerAction: (options: ICustomActionOptions) => {
+        const action: CustomAction = new CustomAction(options, actionOptions);
+        this.addAction(action);
+      }
     });
 
     this._pluginManager = new PluginManager({
@@ -133,10 +138,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     });
   }
 
-  protected async onExecute(): Promise<void> {
-    // Defensively set the exit code to 1 so if the tool crashes for whatever reason, we'll have a nonzero exit code.
-    process.exitCode = 1;
-
+  public async execute(args?: string[]): Promise<boolean> {
     this._terminalProvider.verboseEnabled = this.isDebug;
 
     if (this.isDebug) {
@@ -147,6 +149,13 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     this._normalizeCwd();
 
     await this._initializePluginsAsync(this._pluginsParameter.values);
+
+    return await super.execute(args);
+  }
+
+  protected async onExecute(): Promise<void> {
+    // Defensively set the exit code to 1 so if the tool crashes for whatever reason, we'll have a nonzero exit code.
+    process.exitCode = 1;
 
     try {
       await super.onExecute();

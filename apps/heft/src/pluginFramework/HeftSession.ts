@@ -12,16 +12,21 @@ import { IHeftPlugin } from './IHeftPlugin';
 import { IInternalHeftSessionOptions } from './InternalHeftSession';
 import { ScopedLogger } from './logging/ScopedLogger';
 import { LoggingManager } from './logging/LoggingManager';
+import { ICustomActionOptions } from '../cli/actions/CustomAction';
+
+/** @alpha */
+export type RegisterAction = (action: ICustomActionOptions) => void;
 
 /**
  * @public
  */
 export interface IHeftSessionHooks {
+  metricsCollector: MetricsCollectorHooks;
+
   build: SyncHook<IBuildStageContext>;
   clean: SyncHook<ICleanStageContext>;
   devDeploy: SyncHook<IDevDeployStageContext>;
   test: SyncHook<ITestStageContext>;
-  metricsCollector: MetricsCollectorHooks;
 }
 
 export interface IHeftSessionOptions {
@@ -60,6 +65,9 @@ export class HeftSession {
    */
   public readonly debugMode: boolean;
 
+  /** @alpha */
+  public readonly registerAction: RegisterAction;
+
   /**
    * Call this function to receive a callback with the plugin if and after the specified plugin
    * has been applied. This is used to tap hooks on another plugin.
@@ -76,13 +84,15 @@ export class HeftSession {
 
     this._loggingManager = internalSessionOptions.loggingManager;
     this.metricsCollector = internalSessionOptions.metricsCollector;
+    this.registerAction = internalSessionOptions.registerAction;
 
     this.hooks = {
+      metricsCollector: this.metricsCollector.hooks,
+
       build: internalSessionOptions.buildStage.stageInitializationHook,
       clean: internalSessionOptions.cleanStage.stageInitializationHook,
       devDeploy: internalSessionOptions.devDeployStage.stageInitializationHook,
-      test: internalSessionOptions.testStage.stageInitializationHook,
-      metricsCollector: this.metricsCollector.hooks
+      test: internalSessionOptions.testStage.stageInitializationHook
     };
 
     this.debugMode = internalSessionOptions.getIsDebugMode();

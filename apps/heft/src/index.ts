@@ -12,7 +12,8 @@ export {
 export {
   HeftSession,
   IHeftSessionHooks,
-  RequestAccessToPluginByNameCallback
+  RequestAccessToPluginByNameCallback,
+  RegisterAction
 } from './pluginFramework/HeftSession';
 export {
   MetricsCollectorHooks,
@@ -21,6 +22,11 @@ export {
   MetricsCollector as _MetricsCollector
 } from './metrics/MetricsCollector';
 export { ScopedLogger, IScopedLogger } from './pluginFramework/logging/ScopedLogger';
+export {
+  ICustomActionOptions,
+  ICustomActionParameter,
+  CustomActionParameterType
+} from './cli/actions/CustomAction';
 
 // Stages
 export { StageHooksBase, IStageContext } from './stages/StageBase';
