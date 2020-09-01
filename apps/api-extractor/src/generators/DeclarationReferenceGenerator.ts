@@ -321,7 +321,7 @@ export class DeclarationReferenceGenerator {
       return DeclarationReferenceGenerator.unknownReference;
     }
 
-    let modulePath = '';
+    let modulePath: string = '';
     for (const entryPoint of this._workingPackage.entryPoints) {
       if (entryPoint.sourceFile === sourceFile) {
         modulePath = entryPoint.modulePath;

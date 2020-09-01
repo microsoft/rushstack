@@ -39,7 +39,7 @@ export class ApiReportGenerator {
 
   public static generateReviewFileContent(collector: Collector): Map<string, string> {
     // mapping from entrypoint name to its file content
-    const fileContentMap = new Map<string, string>();
+    const fileContentMap: Map<string, string> = new Map<string, string>();
 
     for (const [entryPoint, entryPointEntities] of collector.entities) {
       const stringWriter: StringWriter = new StringWriter();

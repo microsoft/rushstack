@@ -23,6 +23,7 @@ import { TypeScriptInternals, IGlobalVariableAnalyzer } from '../analyzer/TypeSc
 import { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 import { ExtractorConfig } from '../api/ExtractorConfig';
+import { IConfigEntryPoint } from '../api/IConfigFile';
 
 /**
  * Options for Collector constructor.
@@ -97,7 +98,7 @@ export class Collector {
     this._program = options.program;
     this.extractorConfig = options.extractorConfig;
 
-    const entryPoints = [
+    const entryPoints: IConfigEntryPoint[] = [
       this.extractorConfig.mainEntryPointFilePath,
       ...this.extractorConfig.additionalEntryPoints
     ];
@@ -214,7 +215,7 @@ export class Collector {
 
     // Build entry points
     for (const entryPoint of this.workingPackage.entryPoints) {
-      const { modulePath, sourceFile: entryPointSourceFile } = entryPoint;
+      const { sourceFile: entryPointSourceFile } = entryPoint;
 
       const astEntryPoint: AstModule = this.astSymbolTable.fetchAstModuleFromWorkingPackage(
         entryPointSourceFile
@@ -437,7 +438,7 @@ export class Collector {
     }
 
     // add collectorEntity to the corresponding entry point
-    const entitiesOfAstModule = this._entitiesByAstEntryPoint.get(entryPoint) || [];
+    const entitiesOfAstModule: CollectorEntity[] = this._entitiesByAstEntryPoint.get(entryPoint) || [];
     if (!entitiesOfAstModule.find((e) => e === entity)) {
       entitiesOfAstModule.push(entity);
       this._entitiesByAstEntryPoint.set(entryPoint, entitiesOfAstModule);
@@ -503,7 +504,7 @@ export class Collector {
     // Set of names that should NOT be used when generating a unique nameForEmit
     const usedNames: Set<string> = new Set<string>();
 
-    const entities = this._entitiesByAstEntryPoint.get(entryPoint) || [];
+    const entities: CollectorEntity[] = this._entitiesByAstEntryPoint.get(entryPoint) || [];
 
     // First collect the names of explicit package exports, and perform a sanity check.
     for (const entity of entities) {

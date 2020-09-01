@@ -40,12 +40,12 @@ export class Extractor {
 
 // @public
 export class ExtractorConfig {
+    readonly additionalEntryPoints: IConfigEntryPoint[];
     readonly apiJsonFilePath: string;
     readonly apiReportEnabled: boolean;
     readonly betaTrimmedFilePath: string;
     readonly bundledPackages: string[];
     readonly docModelEnabled: boolean;
-    readonly entryPointFilePaths: string[];
     static readonly FILENAME: string;
     getDiagnosticDump(): string;
     // @internal
@@ -54,7 +54,8 @@ export class ExtractorConfig {
     static readonly jsonSchema: JsonSchema;
     static loadFile(jsonFilePath: string): IConfigFile;
     static loadFileAndPrepare(configJsonFilePath: string): ExtractorConfig;
-    readonly mainEntryPointFilePath: string;
+    // Warning: (ae-forgotten-export) The symbol "IConfigEntryPoint" needs to be exported by the entry point index.d.ts
+    readonly mainEntryPointFilePath: IConfigEntryPoint;
     readonly messages: IExtractorMessagesConfig;
     readonly newlineKind: NewlineKind;
     readonly omitTrimmingComments: boolean;
@@ -182,13 +183,13 @@ export interface IConfigDtsRollup {
 
 // @public
 export interface IConfigFile {
+    additionalEntryPoints: IConfigEntryPoint[];
     apiReport?: IConfigApiReport;
     bundledPackages?: string[];
     compiler?: IConfigCompiler;
     docModel?: IConfigDocModel;
     // @beta
     dtsRollup?: IConfigDtsRollup;
-    entryPointFilePaths: string[];
     extends?: string;
     mainEntryPointFilePath: string;
     messages?: IExtractorMessagesConfig;

@@ -17,11 +17,7 @@ import {
   Path,
   NewlineKind
 } from '@rushstack/node-core-library';
-import {
-  IConfigFile,
-  IConfigEntryPoint,
-  IExtractorMessagesConfig
-} from './IConfigFile';
+import { IConfigFile, IConfigEntryPoint, IExtractorMessagesConfig } from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { MessageRouter } from '../collector/MessageRouter';
 
@@ -400,13 +396,13 @@ export class ExtractorConfig {
     if (configFile.additionalEntryPoints) {
       const entryPointWithAbsolutePath: IConfigEntryPoint[] = [];
       for (const entryPoint of configFile.additionalEntryPoints) {
-        const absoluteFilePath =  ExtractorConfig._resolveConfigFileRelativePath(
+        const absoluteFilePath: string = ExtractorConfig._resolveConfigFileRelativePath(
           'additionalEntryPoints',
           entryPoint.filePath,
           currentConfigFolderPath
         );
 
-        entryPointWithAbsolutePath.push({...entryPoint, filePath: absoluteFilePath});
+        entryPointWithAbsolutePath.push({ ...entryPoint, filePath: absoluteFilePath });
       }
       configFile.additionalEntryPoints = entryPointWithAbsolutePath;
     }
@@ -628,19 +624,24 @@ export class ExtractorConfig {
       }
 
       const additionalEntryPoints: IConfigEntryPoint[] = [];
-      for(const entryPoint of configObject.additionalEntryPoints || []) {
-        const absoluteEntryPointFilePath: string = ExtractorConfig._resolvePathWithTokens('entryPointFilePath',
-        entryPoint.filePath, tokenContext);
+      for (const entryPoint of configObject.additionalEntryPoints || []) {
+        const absoluteEntryPointFilePath: string = ExtractorConfig._resolvePathWithTokens(
+          'entryPointFilePath',
+          entryPoint.filePath,
+          tokenContext
+        );
 
         if (!ExtractorConfig.hasDtsFileExtension(absoluteEntryPointFilePath)) {
-          throw new Error('The "additionalEntryPoints" value is not a declaration file: ' + absoluteEntryPointFilePath);
+          throw new Error(
+            'The "additionalEntryPoints" value is not a declaration file: ' + absoluteEntryPointFilePath
+          );
         }
 
         if (!FileSystem.exists(absoluteEntryPointFilePath)) {
           throw new Error('The "additionalEntryPoints" path does not exist: ' + absoluteEntryPointFilePath);
         }
 
-        additionalEntryPoints.push({ ...entryPoint, filePath: absoluteEntryPointFilePath});
+        additionalEntryPoints.push({ ...entryPoint, filePath: absoluteEntryPointFilePath });
       }
 
       const bundledPackages: string[] = configObject.bundledPackages || [];
@@ -766,8 +767,9 @@ export class ExtractorConfig {
         // d.ts rollup is not supported when there are more than one entry points.
         if (rollupEnabled && additionalEntryPoints.length > 0) {
           throw new Error(
-            `It seems that you have dtsRollup enabled while you also have defined additionalEntryPoints.`
-          + `dtsRollup is not supported when there are multiple entry points in your package`);
+            `It seems that you have dtsRollup enabled while you also have defined additionalEntryPoints.` +
+              `dtsRollup is not supported when there are multiple entry points in your package`
+          );
         }
 
         untrimmedFilePath = ExtractorConfig._resolvePathWithTokens(

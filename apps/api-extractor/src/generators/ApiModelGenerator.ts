@@ -72,9 +72,7 @@ export class ApiModelGenerator {
     this._apiModel.addMember(apiPackage);
 
     for (const [entryPoint, entities] of this._collector.entities.entries()) {
-      const shortName = entryPoint.modulePath;
-
-      const apiEntryPoint: ApiEntryPoint = new ApiEntryPoint({ name: shortName });
+      const apiEntryPoint: ApiEntryPoint = new ApiEntryPoint({ name: entryPoint.modulePath });
       apiPackage.addMember(apiEntryPoint);
 
       // Create a CollectorEntity for each top-level export

@@ -260,11 +260,14 @@ export class Extractor {
     let apiReportChanged: boolean = false;
 
     if (extractorConfig.apiReportEnabled) {
-      const acutalApiReportPathWithoutExtension = extractorConfig.reportTempFilePath.replace(
+      const acutalApiReportPathWithoutExtension: string = extractorConfig.reportTempFilePath.replace(
         /\.api\.md$/,
         ''
       );
-      const expectedApiReportPathWithoutExtension = extractorConfig.reportFilePath.replace(/\.api\.md$/, '');
+      const expectedApiReportPathWithoutExtension: string = extractorConfig.reportFilePath.replace(
+        /\.api\.md$/,
+        ''
+      );
 
       const actualApiReportContentMap: Map<string, string> = ApiReportGenerator.generateReviewFileContent(
         collector
