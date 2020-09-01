@@ -3,9 +3,8 @@
 
 import * as path from 'path';
 import { Tslint as TTslint } from '@microsoft/rush-stack-compiler-3.7';
-import { Import } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
-import { Terminal, JsonFile, IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
+import { Import, Terminal, JsonFile, IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
 
 import { LinterBase, ILinterBaseOptions } from './LinterBase';
 import { IExtendedSourceFile, IExtendedProgram } from './internalTypings/TypeScriptInternals';
