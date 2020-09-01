@@ -455,6 +455,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "heft-action-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "heft-example-plugin-01",
       "allowedCategories": [ "tests" ]
     },

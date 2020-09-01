@@ -475,6 +475,26 @@ importers:
       api-extractor-lib1-test: 'workspace:*'
       fs-extra: ~7.0.1
       typescript: ~3.9.5
+  ../../build-tests/heft-action-plugin:
+    devDependencies:
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
+      '@types/node': 10.17.13
+      eslint: 7.2.0
+      typescript: 3.9.7
+    specifiers:
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
+      '@types/node': 10.17.13
+      eslint: ~7.2.0
+      typescript: ~3.9.5
+  ../../build-tests/heft-action-plugin-test:
+    devDependencies:
+      '@rushstack/heft': 'link:../../apps/heft'
+      heft-action-plugin: 'link:../heft-action-plugin'
+    specifiers:
+      '@rushstack/heft': 'workspace:*'
+      heft-action-plugin: 'workspace:*'
   ../../build-tests/heft-example-plugin-01:
     dependencies:
       tapable: 1.1.3
@@ -545,6 +565,8 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       eslint: 7.2.0
+      heft-example-plugin-01: 'link:../heft-example-plugin-01'
+      heft-example-plugin-02: 'link:../heft-example-plugin-02'
       tslint: 5.20.1_typescript@3.9.7
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.9.7
       typescript: 3.9.7
@@ -555,6 +577,8 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       eslint: ~7.2.0
+      heft-example-plugin-01: 'workspace:*'
+      heft-example-plugin-02: 'workspace:*'
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
       typescript: ~3.9.5
