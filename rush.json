@@ -555,6 +555,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-node-jest-test",
+      "projectFolder": "build-tests/heft-node-jest-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-oldest-compiler-test",
       "projectFolder": "build-tests/heft-oldest-compiler-test",
       "reviewCategory": "tests",
@@ -776,6 +782,13 @@
       "projectFolder": "libraries/debug-certificate-manager",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-config-file",
+      "projectFolder": "libraries/heft-config-file",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft"]
     },
     {
       "packageName": "@microsoft/load-themed-styles",

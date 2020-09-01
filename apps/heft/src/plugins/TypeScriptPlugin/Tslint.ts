@@ -3,13 +3,13 @@
 
 import * as path from 'path';
 import { Tslint as TTslint } from '@microsoft/rush-stack-compiler-3.7';
+import { Import } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
-import { Terminal, JsonFile } from '@rushstack/node-core-library';
+import { Terminal, JsonFile, IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
 
 import { LinterBase, ILinterBaseOptions } from './LinterBase';
 import { IExtendedSourceFile, IExtendedProgram } from './internalTypings/TypeScriptInternals';
 import { IExtendedFileSystem } from '../../utilities/fileSystem/IExtendedFileSystem';
-import { ResolveUtilities } from '../../utilities/ResolveUtilities';
 import { IExtendedLinter } from './internalTypings/TslintInternals';
 import { FileError } from '../../pluginFramework/logging/FileError';
 
@@ -28,6 +28,7 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
   private _enabledRules: TTslint.IRule[];
   private _ruleSeverityMap: Map<string, TTslint.RuleSeverity>;
   protected _lintResult: TTslint.LintResult;
+  private static _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
   public constructor(options: ITslintOptions) {
     super('tslint', options);
@@ -36,6 +37,17 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     this._fileSystem = options.fileSystem;
   }
 
+  private static _resolvePackageMainFilePath(packagePath: string): string {
+    const packageJson: IPackageJson | undefined = this._packageJsonLookup.tryLoadPackageJsonFor(packagePath);
+    if (!packageJson) {
+      throw new Error(
+        `Supplied package path ${packagePath} could not resolve a package.json while searching for main file`
+      );
+    } else if (!packageJson.main) {
+      throw new Error(`Package at path ${packagePath} specifies no main file`);
+    }
+    return path.resolve(packagePath, packageJson.main);
+  }
   /**
    * getConfigHash returns the sha1 hash unique to the contents of the given config as
    * well as all the configs that the given one extends.
@@ -59,7 +71,7 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     // is a config file, per the the "extends" spec of tslint.json, found at
     //  https://palantir.github.io/tslint/usage/configuration/
     if (!configFilePath.endsWith('.json')) {
-      configFilePath = ResolveUtilities.resolvePackageMainFilePath(configFilePath);
+      configFilePath = this._resolvePackageMainFilePath(configFilePath);
     }
     const rawConfig: string = fileSystem.readFile(configFilePath);
     const parsedConfig: IMinimalConfig = JsonFile.parseString(rawConfig);
@@ -68,19 +80,31 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
 
     if (extendsProperty instanceof Array) {
       for (const extendFile of extendsProperty) {
-        const extendFilePath: string = ResolveUtilities.resolvePackagePath(
-          extendFile,
-          path.dirname(configFilePath)
-        );
+        const extendFilePath: string = Import.resolveModule({
+          modulePath: extendFile,
+          baseFolderPath: path.dirname(configFilePath)
+        });
         hash = this.getConfigHash(extendFilePath, terminal, fileSystem, hash);
       }
     } else if (extendsProperty) {
       // note that if we get here, extendsProperty is a string
-      const extendsFullPath: string = ResolveUtilities.resolvePackagePath(
-        extendsProperty,
-        path.dirname(configFilePath)
-      );
+      const extendsFullPath: string = Import.resolveModule({
+        modulePath: extendsProperty,
+        baseFolderPath: path.dirname(configFilePath)
+      });
+
       hash = Tslint.getConfigHash(extendsFullPath, terminal, fileSystem, hash);
+      /*
+    let hash: crypto.Hash;
+    if (parsedConfig.extends) {
+      const extendsFullPath: string = Import.resolveModule({
+        modulePath: parsedConfig.extends,
+        baseFolderPath: path.dirname(configFilePath)
+      });
+      hash = Tslint.getConfigHash(extendsFullPath, terminal, fileSystem);
+    } else {
+      hash = crypto.createHash('sha1').update(rawConfig);
+      */
     }
 
     return hash.update(rawConfig);

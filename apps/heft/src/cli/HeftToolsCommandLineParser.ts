@@ -146,7 +146,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
 
     this._normalizeCwd();
 
-    this._initializePlugins(this._pluginsParameter.values);
+    await this._initializePluginsAsync(this._pluginsParameter.values);
 
     try {
       await super.onExecute();
@@ -170,10 +170,10 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     }
   }
 
-  private _initializePlugins(pluginSpecifiers: ReadonlyArray<string>): void {
+  private async _initializePluginsAsync(pluginSpecifiers: ReadonlyArray<string>): Promise<void> {
     this._pluginManager.initializeDefaultPlugins();
 
-    this._pluginManager.initializePluginsFromConfigFile();
+    await this._pluginManager.initializePluginsFromConfigFileAsync();
 
     for (const pluginSpecifier of pluginSpecifiers) {
       this._pluginManager.initializePlugin(pluginSpecifier);

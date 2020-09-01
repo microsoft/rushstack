@@ -6,12 +6,16 @@ import { hoistJestMock } from './hoist-jest-mock';
 
 const { RuleTester } = ESLintUtils;
 const ruleTester = new RuleTester({
-  parser: '@typescript-eslint/parser'
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    ecmaVersion: 2018,
+    sourceType: 'module'
+  }
 });
 
 // These are the CODE_WITH_HOISTING cases from ts-jest's hoist-jest.spec.ts
 const INVALID_EXAMPLE_CODE = [
-  /* 001 */ "const foo = 'foo'",
+  /* 001 */ "require('foo')",
   /* 002 */ 'console.log(foo)',
   /* 003 */ 'jest.enableAutomock()',
   /* 004 */ 'jest.disableAutomock()',
@@ -44,43 +48,10 @@ const INVALID_EXAMPLE_CODE = [
   /* 031 */ '}'
 ].join('\n');
 
-const VALID_EXAMPLE_CODE = [
-  /* 001 */ 'jest.enableAutomock()',
-  /* 002 */ 'jest.disableAutomock()',
-  /* 003 */ "jest.mock('./foo')",
-  /* 004 */ "jest.mock('./foo/bar', () => 'bar')",
-  /* 005 */ "jest.unmock('./bar/foo').dontMock('./bar/bar')",
-  /* 006 */ "jest.deepUnmock('./foo')",
-  /* 007 */ "jest.mock('./foo').mock('./bar')",
-  /* 008 */ "const foo = 'foo'",
-  /* 009 */ 'console.log(foo)',
-  /* 010 */ 'const func = () => {',
-  /* 011 */ "  jest.unmock('./foo')",
-  /* 012 */ "  jest.mock('./bar')",
-  /* 013 */ "  jest.mock('./bar/foo', () => 'foo')",
-  /* 014 */ "  jest.unmock('./foo/bar')",
-  /* 015 */ "  jest.unmock('./bar/foo').dontMock('./bar/bar')",
-  /* 016 */ "  jest.deepUnmock('./bar')",
-  /* 017 */ "  jest.mock('./foo').mock('./bar')",
-  /* 018 */ "  const bar = 'bar'",
-  /* 019 */ '  console.log(bar)',
-  /* 020 */ '}',
-  /* 021 */ 'const func2 = () => {',
-  /* 022 */ "  jest.mock('./bar')",
-  /* 023 */ "  jest.unmock('./foo/bar')",
-  /* 024 */ "  jest.mock('./bar/foo', () => 'foo')",
-  /* 025 */ "  jest.unmock('./foo')",
-  /* 026 */ "  jest.unmock('./bar/foo').dontMock('./bar/bar')",
-  /* 027 */ "  jest.deepUnmock('./bar')",
-  /* 038 */ "  jest.mock('./foo').mock('./bar')",
-  /* 029 */ "  const bar = 'bar'",
-  /* 030 */ '  console.log(bar)',
-  /* 031 */ '}'
-].join('\n');
-
 ruleTester.run('hoist-jest-mock', hoistJestMock, {
   invalid: [
     {
+      // Detect all the Jest APIs detected by ts-jest
       code: INVALID_EXAMPLE_CODE,
       errors: [
         { messageId: 'error-unhoisted-jest-mock', line: 3 },
@@ -107,7 +78,70 @@ ruleTester.run('hoist-jest-mock', hoistJestMock, {
         { messageId: 'error-unhoisted-jest-mock', line: 29 },
         { messageId: 'error-unhoisted-jest-mock', line: 30 }
       ]
+    },
+    {
+      // A simple failure using realistic code
+      // prettier-ignore
+      code: [
+        "const soundPlayer = require('./SoundPlayer');",
+        "jest.mock('./SoundPlayer');"
+      ].join('\n'),
+      errors: [{ messageId: 'error-unhoisted-jest-mock', line: 2 }]
+    },
+    {
+      // Import syntaxes that should fail
+      code: ["import x from 'y';", 'jest.mock();'].join('\n'),
+      errors: [{ messageId: 'error-unhoisted-jest-mock', line: 2 }]
+    },
+    // {
+    //   // Import syntaxes that should fail
+    //   code: ["export { x } from 'y';", 'jest.mock();'].join('\n'),
+    //   errors: [{ messageId: 'error-unhoisted-jest-mock', line: 2 }]
+    // },
+    {
+      // Import syntaxes that should fail
+      code: ["import * as x from 'y';", 'jest.mock();'].join('\n'),
+      errors: [{ messageId: 'error-unhoisted-jest-mock', line: 2 }]
+    },
+    // {
+    //   // Import syntaxes that should fail
+    //   code: ["export * from 'y';", 'jest.mock();'].join('\n'),
+    //   errors: [{ messageId: 'error-unhoisted-jest-mock', line: 2 }]
+    // },
+    {
+      // Import syntaxes that should fail
+      code: ["import 'y';", 'jest.mock();'].join('\n'),
+      errors: [{ messageId: 'error-unhoisted-jest-mock', line: 2 }]
+    },
+    {
+      // Import syntaxes that should fail
+      code: ["const x = require('package-name');", 'jest.mock();'].join('\n'),
+      errors: [{ messageId: 'error-unhoisted-jest-mock', line: 2 }]
+    },
+    {
+      // Import syntaxes that should fail
+      code: ["const x = import('package-name');", 'jest.mock();'].join('\n'),
+      errors: [{ messageId: 'error-unhoisted-jest-mock', line: 2 }]
+    },
+    {
+      // Import syntaxes that should fail
+      code: ["import x = require('package-name');", 'jest.mock();'].join('\n'),
+      errors: [{ messageId: 'error-unhoisted-jest-mock', line: 2 }]
     }
   ],
-  valid: [{ code: VALID_EXAMPLE_CODE }]
+  valid: [
+    {
+      // A simple success using realistic code
+      code: [
+        'const mockPlaySoundFile = jest.fn();',
+        "jest.mock('./SoundPlayer', () => {",
+        '  return {',
+        '    SoundPlayer: jest.fn().mockImplementation(() => {',
+        '      return { playSoundFile: mockPlaySoundFile };',
+        '    })',
+        '  };',
+        '});'
+      ].join('\n')
+    }
+  ]
 });

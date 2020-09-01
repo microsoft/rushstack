@@ -17,7 +17,7 @@ describe('LockFile', () => {
   });
 
   describe('getLockFilePath', () => {
-    test('only acceps alphabetical characters for resource name', () => {
+    test('only accepts alphabetical characters for resource name', () => {
       expect(() => {
         LockFile.getLockFilePath(process.cwd(), 'foo123');
       }).not.toThrow();

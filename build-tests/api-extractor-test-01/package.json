@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "@microsoft/api-extractor": "workspace:*",
+    "@types/heft-jest": "1.0.1",
     "@types/node": "10.17.13",
     "fs-extra": "~7.0.1",
     "typescript": "~3.9.5"

@@ -55,7 +55,14 @@ module.exports = {
       rules: {
         // The @rushstack rules are documented in the package README:
         // https://www.npmjs.com/package/@rushstack/eslint-plugin
+
+        // RATIONALE:         See the @rushstack/eslint-plugin documentation
         '@rushstack/no-new-null': 'warn',
+
+        // RATIONALE:         See the @rushstack/eslint-plugin documentation
+        //                    This is enabled and classified as an error because it is required when using Heft.
+        //                    It's not required when using ts-jest, but still a good practice.
+        '@rushstack/hoist-jest-mock': 'error',
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/adjacent-overload-signatures': 'warn',
@@ -726,6 +733,48 @@ module.exports = {
         //
         // "no-restricted-syntax": [
         // ],
+      }
+    },
+    {
+      // For unit tests, we can be a little bit less strict.  The settings below revise the
+      // defaults specified above.
+      files: [
+        // Test files
+        '*.test.ts',
+        '*.test.tsx',
+
+        // Facebook convention
+        '**/__mocks__/*.ts',
+        '**/__mocks__/*.tsx',
+        '**/__tests__/*.ts',
+        '**/__tests__/*.tsx',
+
+        // Microsoft convention
+        '**/test/*.ts',
+        '**/test/*.tsx'
+      ],
+      rules: {
+        // Unit tests sometimes use a standalone statement like "new Thing(123);" to test a constructor.
+        'no-new': 'off',
+
+        // Jest's mocking API is designed in a way that produces compositional data types that often have
+        // no concise description.  Since test code does not ship, and typically does not introduce new
+        // concepts or algorithms, the usual arguments for prioritizing readability over writability can be
+        // relaxed in this case. We follow C#'s model of allowing type inference for local variable declarations,
+        // but still requiring strict types for function signatures.
+        '@typescript-eslint/typedef': [
+          'warn',
+          {
+            arrayDestructuring: false,
+            arrowParameter: false,
+            memberVariableDeclaration: true,
+            objectDestructuring: false,
+            parameter: true,
+            propertyDeclaration: true,
+            variableDeclaration: false, // <--- special case for test files
+            variableDeclarationIgnoreFunction: true
+          }
+        ]
       }
     }
   ]

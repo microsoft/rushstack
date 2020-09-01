@@ -122,7 +122,7 @@ function matchTreeRecursive(root: any, pattern: any, captures: IMatchTreeCapture
  * Starting at `root`, search for the first subtree that matches `pattern`.
  * If found, return true and assign the matching nodes to the `captures` object.
  */
-export function matchTree(root: any, pattern: any, captures: IMatchTreeCaptureSet): boolean {
+export function matchTree(root: any, pattern: any, captures: IMatchTreeCaptureSet = {}): boolean {
   return matchTreeRecursive(root, pattern, captures, 'root');
 }
 

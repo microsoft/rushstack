@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as resolve from 'resolve';
 import {
   Terminal,
   PackageJsonLookup,
   FileSystem,
   JsonFile,
-  INodePackageJson
+  INodePackageJson,
+  Import
 } from '@rushstack/node-core-library';
 
 interface ITsconfig {
@@ -119,29 +119,20 @@ export class TaskPackageResolver {
       terminal.writeVerboseLine(`Attempting to resolve "${taskPackageName}" from ${baseFolder}`);
     }
 
-    let resolvedPackageJsonFile: string | undefined;
+    let resolvedPackageFolder: string | undefined;
     try {
-      resolvedPackageJsonFile = resolve.sync(taskPackageName, {
-        basedir: baseFolder,
-        preserveSymlinks: false,
-        packageFilter: (packageJson: INodePackageJson) => {
-          return {
-            ...packageJson,
-            // ensure "main" points to a file in the package root folder
-            main: 'package.json'
-          };
-        }
+      resolvedPackageFolder = Import.resolvePackage({
+        packageName: taskPackageName,
+        baseFolderPath: baseFolder
       });
     } catch (e) {
       // Ignore errors
-      resolvedPackageJsonFile = undefined;
+      resolvedPackageFolder = undefined;
     }
 
-    if (resolvedPackageJsonFile === undefined) {
+    if (resolvedPackageFolder === undefined) {
       return undefined;
     }
-
-    const resolvedPackageFolder: string = path.dirname(resolvedPackageJsonFile);
 
     if (isRigFolder) {
       terminal.writeVerboseLine(`Resolved "${taskPackageName}" via rig package to ${resolvedPackageFolder}`);
@@ -195,16 +186,9 @@ export class TaskPackageResolver {
           `Following a tsconfig.json "extends" property "${tsconfig.extends}" that is a package path.`
         );
         // Package path
-        baseTsconfigPath = resolve.sync(tsconfig.extends, {
-          basedir: path.dirname(tsconfigPath),
-          preserveSymlinks: false,
-          packageFilter: (packageJson: INodePackageJson) => {
-            return {
-              ...packageJson,
-              // ensure "main" points to a file in the package root folder
-              main: 'package.json'
-            };
-          }
+        baseTsconfigPath = Import.resolveModule({
+          modulePath: tsconfig.extends,
+          baseFolderPath: path.dirname(tsconfigPath)
         });
       }
 

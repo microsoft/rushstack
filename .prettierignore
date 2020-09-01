@@ -101,5 +101,8 @@ dist-prod
 # Prettier doesn't understand the /*[LINE "HYPOTHETICAL"]*/ macros in these files:
 apps/rush-lib/assets/rush-init/
 
+# These are intentionally invalid files
+libraries/heft-config-file/src/test/errorCases/invalidJson/config.json
+
 # We'll consider enabling this later; Prettier reformats code blocks, which affects end-user content
 *.md

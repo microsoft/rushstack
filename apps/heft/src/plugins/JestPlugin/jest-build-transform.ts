@@ -27,7 +27,7 @@ const TIMESTAMP_TOLERANCE_MS: number = 15;
 const FLUSH_TIME_MS: number = 500;
 
 // Wait this long for the .js file to be written before giving up.
-const MAX_WAIT_MS: number = 4000;
+const MAX_WAIT_MS: number = 7000;
 
 // Shamefully sleep this long to avoid consuming CPU cycles
 const POLLING_INTERVAL_MS: number = 50;

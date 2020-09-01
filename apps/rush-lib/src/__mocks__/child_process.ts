@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* eslint-disable */
+
 const EventEmitter = require('events');
 
-const childProcess = jest.genMockFromModule('child_process');
+const childProcess: any = jest.genMockFromModule('child_process');
 const childProcessActual = jest.requireActual('child_process');
 childProcess.spawn.mockImplementation(spawn);
 childProcess.__setSpawnMockConfig = setSpawnMockConfig;
@@ -13,7 +15,7 @@ let spawnMockConfig = normalizeSpawnMockConfig();
 /**
  * Helper to initialize how the `spawn` mock should behave.
  */
-function normalizeSpawnMockConfig(maybeConfig) {
+function normalizeSpawnMockConfig(maybeConfig?) {
   const config = maybeConfig || {};
   return {
     emitError: typeof config.emitError !== 'undefined' ? config.emitError : false,

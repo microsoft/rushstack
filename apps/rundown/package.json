@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rundown",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "description": "Detect load time regressions by running an app, tracing require() calls, and generating a deterministic report",
   "repository": {
     "type": "git",
@@ -27,7 +27,7 @@
     "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@types/jest": "25.2.1",
+    "@types/heft-jest": "1.0.1",
     "@types/node": "10.17.13"
   }
 }

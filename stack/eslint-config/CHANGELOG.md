@@ -1,6 +1,17 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Mon, 24 Aug 2020 07:35:20 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Aug 2020 11:27:06 GMT and should not be manually modified.
+
+## 1.3.0
+Thu, 27 Aug 2020 11:27:06 GMT
+
+### Minor changes
+
+- Enable the "@rushstack/hoist-jest-mock" lint rule to catch a common mistake when using Jest with Heft
+
+### Patches
+
+- Add an override to relax some lint rules for *.test.ts files, making unit tests easier to write
 
 ## 1.2.1
 Mon, 24 Aug 2020 07:35:20 GMT

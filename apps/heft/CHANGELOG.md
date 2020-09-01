@@ -1,6 +1,27 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Mon, 24 Aug 2020 07:35:20 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Aug 2020 11:27:06 GMT and should not be manually modified.
+
+## 0.8.0
+Thu, 27 Aug 2020 11:27:06 GMT
+
+### Minor changes
+
+- Formalize the way extendable configuration files are loaded.
+- Add a "setupFiles" setting to jest-shared.config.json, which implements the helper APIs from the @types/heft-jest package
+- Add a "roots" setting to jest-shared.config.json, which enables "src/__mocks__" to be used for manually mocking Node.js system modules
+
+### Patches
+
+- Add a "modulePathIgnorePatterns" setting to jest-shared.config.json, which fixes a warning that was sometimes shown due to Jest loading extraneous files
+- Add a "resolver" setting to jest-shared-config.json, which fixes an issue with importing manual mocks from a "__mocks__" subfolder. (See jest-improved-resolver.js for details.)
+
+## 0.7.0
+Tue, 25 Aug 2020 00:10:12 GMT
+
+### Minor changes
+
+- Adds a "--update-snapshots" command line flag which, when included, causes the test action to update the Jest snapshots. If this flag is omitted, tests with conditions that do not match the snapshots will fail. This replaces the older logic of using --production to prevent updating snapshots, which were otherwise updated.
 
 ## 0.6.6
 Mon, 24 Aug 2020 07:35:20 GMT

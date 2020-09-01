@@ -1,14 +1,26 @@
 {
   "silent": false,
-
   "rootDir": "../../../../",
+
+  "//": ["Adding '<rootDir>/src' here enables src/__mocks__ to be used for mocking Node.js system modules."],
+  "roots": ["<rootDir>", "<rootDir>/src"],
+
   "testURL": "http://localhost/",
   "testMatch": ["<rootDir>/src/**/*.test.{ts,tsx}"],
   "transformIgnorePatterns": [],
   "transform": {
-    "\\.(ts|tsx)$": "<rootDir>/node_modules/@rushstack/heft/lib/exports/jest-build-transform",
-    "\\.(css)$": "<rootDir>/node_modules/@rushstack/heft/lib/exports/jest-identity-mock-transform",
-    "\\.(jpg|png|gif|mp3)$": "<rootDir>/node_modules/@rushstack/heft/lib/exports/jest-string-mock-transform"
+    "\\.(ts|tsx)$": "@rushstack/heft/lib/exports/jest-build-transform.js",
+    "\\.(css)$": "@rushstack/heft/lib/exports/jest-identity-mock-transform.js",
+    "\\.(jpg|png|gif|mp3)$": "@rushstack/heft/lib/exports/jest-string-mock-transform.js"
   },
+  "//": [
+    "The modulePathIgnorePatterns below accepts these sorts of paths:",
+    "  <rootDir>/src",
+    "  <rootDir>/src/file.ts",
+    "...and ignores anything else under <rootDir>"
+  ],
+  "modulePathIgnorePatterns": ["^<rootDir>/(?!(?:src/)|(?:src$))"],
+  "setupFiles": ["@rushstack/heft/lib/exports/jest-global-setup.js"],
+  "resolver": "@rushstack/heft/lib/exports/jest-improved-resolver.js",
   "passWithNoTests": true
 }
