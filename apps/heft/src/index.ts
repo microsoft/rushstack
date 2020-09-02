@@ -61,9 +61,4 @@ export {
   IWebpackConfiguration
 } from './stages/BuildStage';
 export { ICleanStageProperties, CleanStageHooks, ICleanStageContext } from './stages/CleanStage';
-export {
-  IDevDeployStageProperties,
-  DevDeployStageHooks,
-  IDevDeployStageContext
-} from './stages/DevDeployStage';
 export { ITestStageProperties, TestStageHooks, ITestStageContext } from './stages/TestStage';

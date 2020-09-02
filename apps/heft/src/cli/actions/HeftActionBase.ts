@@ -20,14 +20,12 @@ import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { PluginManager } from '../../pluginFramework/PluginManager';
 import { BuildStage } from '../../stages/BuildStage';
 import { CleanStage } from '../../stages/CleanStage';
-import { DevDeployStage } from '../../stages/DevDeployStage';
 import { TestStage } from '../../stages/TestStage';
 import { LoggingManager } from '../../pluginFramework/logging/LoggingManager';
 
 export interface IStages {
   buildStage: BuildStage;
   cleanStage: CleanStage;
-  devDeployStage: DevDeployStage;
   testStage: TestStage;
 }
 

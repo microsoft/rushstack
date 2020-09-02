@@ -73,10 +73,6 @@ export type CopyFromCacheMode = 'hardlink' | 'copy';
 export type CustomActionParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
 
 // @public (undocumented)
-export class DevDeployStageHooks extends StageHooksBase<IDevDeployStageProperties> {
-}
-
-// @public (undocumented)
 export class HeftConfiguration {
     get buildCacheFolder(): string;
     get buildFolder(): string;
@@ -249,14 +245,6 @@ export interface ICustomActionParameterStringList extends ICustomActionParameter
 }
 
 // @public (undocumented)
-export interface IDevDeployStageContext extends IStageContext<DevDeployStageHooks, IDevDeployStageProperties> {
-}
-
-// @public (undocumented)
-export interface IDevDeployStageProperties {
-}
-
-// @public (undocumented)
 export type IEmitModuleKind = IEmitModuleKindBase<'commonjs' | 'amd' | 'umd' | 'system' | 'es2015' | 'esnext'>;
 
 // @public (undocumented)
@@ -298,8 +286,6 @@ export interface IHeftSessionHooks {
     build: SyncHook<IBuildStageContext>;
     // (undocumented)
     clean: SyncHook<ICleanStageContext>;
-    // (undocumented)
-    devDeploy: SyncHook<IDevDeployStageContext>;
     // (undocumented)
     metricsCollector: MetricsCollectorHooks;
     // (undocumented)
