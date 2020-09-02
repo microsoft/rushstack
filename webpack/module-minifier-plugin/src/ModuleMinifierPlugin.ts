@@ -332,7 +332,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
             const externals: string[] = [];
             const externalNames: Map<string, string> = new Map();
 
-            const chunkModules: (string | number)[] = [];
+            const chunkModuleSet: Set<string | number> = new Set();
             const allChunkModules: Iterable<IExtendedModule> = chunk.modulesIterable;
             let hasNonNumber: boolean = false;
             for (const mod of allChunkModules) {
@@ -340,7 +340,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
                 if (typeof mod.id !== 'number') {
                   hasNonNumber = true;
                 }
-                chunkModules.push(mod.id);
+                chunkModuleSet.add(mod.id);
 
                 if (mod.external) {
                   const key: string = `__WEBPACK_EXTERNAL_MODULE_${webpack.Template.toIdentifier(
@@ -355,6 +355,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
               }
             }
 
+            const chunkModules: (string | number)[] = Array.from(chunkModuleSet);
             // Sort by id before rehydration in case we rehydrate a given chunk multiple times
             chunkModules.sort(hasNonNumber ? stringifyIdSortPredicate : (x: number, y: number) => x - y);
 
