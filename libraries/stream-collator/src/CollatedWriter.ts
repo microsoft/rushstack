@@ -3,6 +3,7 @@
 
 import { Text } from '@rushstack/node-core-library';
 import { ICollatedChunk, StreamKind } from './CollatedChunk';
+import { CollatedTerminal } from './CollatedTerminal';
 
 /**
  * @public
@@ -27,6 +28,8 @@ export class CollatedWriter {
 
   public readonly taskName: string;
 
+  public readonly terminal: CollatedTerminal;
+
   /**
    * @internal
    */
@@ -46,6 +49,8 @@ export class CollatedWriter {
 
   public constructor(taskName: string, collator: StreamCollator) {
     this.taskName = taskName;
+    this.terminal = new CollatedTerminal(this._writeToStream);
+
     this._collator = collator;
 
     this._state = CollatedWriterState.Open;
@@ -70,7 +75,7 @@ export class CollatedWriter {
   /**
    * Adds the text to the task's buffer, and writes it to the console if it is the active task
    */
-  public writeChunk(chunk: ICollatedChunk): void {
+  private _writeToStream = (chunk: ICollatedChunk): void => {
     if (this.state !== CollatedWriterState.Open) {
       throw new Error('The task is not registered or has been completed and written.');
     }
@@ -84,11 +89,11 @@ export class CollatedWriter {
     this._processChunk(chunk);
 
     if (this._collator.activeWriter === this) {
-      this._collator.writeToStream(chunk);
+      this._collator.terminal.writeChunk(chunk);
     } else {
       this._accumulatedChunks.push(chunk);
     }
-  }
+  };
 
   /**
    * Marks a task as completed. There are 3 cases:
@@ -147,7 +152,7 @@ export class CollatedWriter {
   private _flushUnwrittenOutput(): void {
     this._state = CollatedWriterState.Written;
     for (const chunk of this._accumulatedChunks) {
-      this._collator.writeToStream(chunk);
+      this._collator.terminal.writeChunk(chunk);
     }
 
     // Free the memory as soon as we have written the output, to avoid a resource leak

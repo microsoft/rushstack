@@ -2,12 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { CollatedWriter } from './CollatedWriter';
-import { ICollatedChunk } from './CollatedChunk';
-
-/**
- * @public
- */
-export type WriteToStreamCallback = (chunk: ICollatedChunk) => void;
+import { CollatedTerminal, WriteToStreamCallback } from './CollatedTerminal';
 
 /**
  * @public
@@ -26,10 +21,10 @@ export class StreamCollator {
   private _writers: Set<CollatedWriter> = new Set();
   private _activeWriter: CollatedWriter | undefined = undefined;
 
-  public readonly writeToStream: WriteToStreamCallback;
+  public readonly terminal: CollatedTerminal;
 
   public constructor(options: IStreamCollatorOptions) {
-    this.writeToStream = options.writeToStream;
+    this.terminal = new CollatedTerminal(options.writeToStream);
   }
 
   public get activeWriter(): CollatedWriter | undefined {
