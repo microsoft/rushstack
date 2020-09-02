@@ -425,7 +425,7 @@ export interface ITryFindRushJsonLocationOptions {
 export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
 
 /**
- * This represents the Rush configuration for a repository, based on the "rush.json"
+ * This represents the a minimal Rush configuration for a repository, based on the "rush.json"
  * configuration file.
  * @public
  */
@@ -441,8 +441,8 @@ export class MinimalRushConfiguration {
   private readonly _rushConfigurationJson: IRushConfigurationJson;
 
   /**
-   * Use RushConfiguration.loadFromConfigurationFile() or Use RushConfiguration.loadFromDefaultLocation()
-   * instead.
+   * Use MinimalRushConfiguration.loadFromConfigurationFile() or Use
+   * MinimalRushConfiguration.loadFromDefaultLocation() instead.
    */
   protected constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string) {
     this._rushConfigurationJson = rushConfigurationJson;
@@ -466,7 +466,7 @@ export class MinimalRushConfiguration {
 
   /**
    * Loads the configuration data from an Rush.json configuration file and returns
-   * an RushConfiguration object.
+   * an MinimalRushConfiguration object.
    */
   public static loadFromConfigurationFile(rushJsonFilename: string): MinimalRushConfiguration {
     let resolvedRushJsonFilename: string = path.resolve(rushJsonFilename);
