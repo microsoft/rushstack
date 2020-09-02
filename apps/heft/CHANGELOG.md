@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 02 Sep 2020 15:10:17 GMT and should not be manually modified.
+This log was last generated on Wed, 02 Sep 2020 23:01:13 GMT and should not be manually modified.
+
+## 0.10.0
+Wed, 02 Sep 2020 23:01:13 GMT
+
+### Minor changes
+
+- Add a simple way to specify a custom action.
+- Remove the dev-deploy action from Heft
 
 ## 0.9.0
 Wed, 02 Sep 2020 15:10:17 GMT
