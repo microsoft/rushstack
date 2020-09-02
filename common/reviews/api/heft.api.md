@@ -227,11 +227,11 @@ export interface _IHeftConfigurationInitializationOptions {
 // @public (undocumented)
 export interface IHeftPlugin<TOptions = void> {
     // (undocumented)
-    accessor?: object;
+    readonly accessor?: object;
     // (undocumented)
-    apply: (heftSession: HeftSession, heftConfiguration: HeftConfiguration, options?: TOptions) => void;
+    apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration, options?: TOptions): void;
     // (undocumented)
-    pluginName: string;
+    readonly pluginName: string;
 }
 
 // @public (undocumented)
