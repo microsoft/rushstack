@@ -9,8 +9,6 @@ Positional arguments:
   <command>
     clean        Clean the project
     build        Build the project.
-    dev-deploy   Deploy the current project, and optionally the whole repo, 
-                 to a testing CDN.
     start        Run the local server for the current project
     test         Build the project and run tests.
 
@@ -63,15 +61,6 @@ Optional arguments:
   --clear-cache  If this flag is provided, the compiler cache will also be 
                  cleared. This isn't dangerous, but may lead to longer 
                  compile times
-"
-`;
-
-exports[`CommandLineHelp prints the help for each action: dev-deploy 1`] = `
-"usage: heft dev-deploy [-h] [-v]
-
-Optional arguments:
-  -h, --help     Show this help message and exit.
-  -v, --verbose  If specified, log information useful for debugging.
 "
 `;
 
