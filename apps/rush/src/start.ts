@@ -58,10 +58,7 @@ if (previewVersion) {
   );
 
   if (configuration) {
-    lines.push(
-      '* The rush.json configuration asks for:   ' +
-        `${Text.padEnd(configuration.rushConfigurationJson.rushVersion, 25)} *`
-    );
+    lines.push(`* The rush.json configuration asks for:   ${Text.padEnd(configuration.rushVersion, 25)} *`);
   }
 
   lines.push(
@@ -73,7 +70,7 @@ if (previewVersion) {
 
   console.error(lines.map((line) => colors.black(colors.bgYellow(line))).join(os.EOL));
 } else if (configuration) {
-  rushVersionToLoad = configuration.rushConfigurationJson.rushVersion;
+  rushVersionToLoad = configuration.rushVersion;
 }
 
 // If we are previewing an older Rush that doesn't understand the RUSH_PREVIEW_VERSION variable,
