@@ -2,18 +2,19 @@
 // See LICENSE in the project root for license information.
 
 import { StreamCollator } from '../StreamCollator';
-import { CollatedWriter, IStdioMessage } from '../CollatedWriter';
+import { CollatedWriter } from '../CollatedWriter';
+import { ICollatedChunk, StreamKind } from '../CollatedChunk';
 
 let collator: StreamCollator;
-const outputMessages: IStdioMessage[] = [];
+const outputMessages: ICollatedChunk[] = [];
 
 describe('StreamCollator tests', () => {
   // Reset task information before each test
   beforeEach(() => {
     outputMessages.length = 0;
     collator = new StreamCollator({
-      writeToStream: (message: IStdioMessage) => {
-        outputMessages.push(message);
+      writeToStream: (chunk: ICollatedChunk) => {
+        outputMessages.push(chunk);
       }
     });
   });
@@ -46,7 +47,7 @@ describe('StreamCollator tests', () => {
       const writer: CollatedWriter = collator.registerTask(taskName);
       writer.close();
       expect(() => {
-        writer.writeMessage({ text: '1', stream: 'stdout' });
+        writer.writeChunk({ text: '1', stream: StreamKind.Stdout });
       }).toThrow();
     });
   });
@@ -56,23 +57,23 @@ describe('StreamCollator tests', () => {
       const taskA: CollatedWriter = collator.registerTask('A');
       const text: string = 'Hello World';
 
-      taskA.writeMessage({ text, stream: 'stdout' });
+      taskA.writeChunk({ text, stream: StreamKind.Stdout });
 
-      expect(outputMessages).toEqual([{ text, stream: 'stdout' }]);
+      expect(outputMessages).toEqual([{ text, stream: StreamKind.Stdout }]);
     });
 
     it('should write errors to stderr', () => {
       const taskA: CollatedWriter = collator.registerTask('A');
       const error: string = 'Critical error';
 
-      taskA.writeMessage({ text: error, stream: 'stderr' });
+      taskA.writeChunk({ text: error, stream: StreamKind.Stderr });
 
-      expect(outputMessages).toEqual([{ text: error, stream: 'stderr' }]);
+      expect(outputMessages).toEqual([{ text: error, stream: StreamKind.Stderr }]);
 
       taskA.close();
 
-      expect(taskA.accumulatedMessages).toEqual([]);
-      expect(outputMessages).toEqual([{ text: error, stream: 'stderr' }]);
+      expect(taskA.accumulatedChunks).toEqual([]);
+      expect(outputMessages).toEqual([{ text: error, stream: StreamKind.Stderr }]);
     });
   });
 
@@ -81,54 +82,54 @@ describe('StreamCollator tests', () => {
       const taskA: CollatedWriter = collator.registerTask('A');
       const taskB: CollatedWriter = collator.registerTask('B');
 
-      taskA.writeMessage({ text: '1', stream: 'stdout' });
-      expect(taskA.accumulatedMessages).toEqual([]);
-      expect(outputMessages).toEqual([{ text: '1', stream: 'stdout' }]);
+      taskA.writeChunk({ text: '1', stream: StreamKind.Stdout });
+      expect(taskA.accumulatedChunks).toEqual([]);
+      expect(outputMessages).toEqual([{ text: '1', stream: StreamKind.Stdout }]);
 
-      taskB.writeMessage({ text: '2', stream: 'stdout' });
-      expect(taskB.accumulatedMessages).toEqual([{ text: '2', stream: 'stdout' }]);
-      expect(outputMessages).toEqual([{ text: '1', stream: 'stdout' }]);
+      taskB.writeChunk({ text: '2', stream: StreamKind.Stdout });
+      expect(taskB.accumulatedChunks).toEqual([{ text: '2', stream: StreamKind.Stdout }]);
+      expect(outputMessages).toEqual([{ text: '1', stream: StreamKind.Stdout }]);
 
-      taskA.writeMessage({ text: '3', stream: 'stdout' });
+      taskA.writeChunk({ text: '3', stream: StreamKind.Stdout });
       expect(outputMessages).toEqual([
-        { text: '1', stream: 'stdout' },
-        { text: '3', stream: 'stdout' }
+        { text: '1', stream: StreamKind.Stdout },
+        { text: '3', stream: StreamKind.Stdout }
       ]);
 
       taskA.close();
       expect(outputMessages).toEqual([
-        { text: '1', stream: 'stdout' },
-        { text: '3', stream: 'stdout' }
+        { text: '1', stream: StreamKind.Stdout },
+        { text: '3', stream: StreamKind.Stdout }
       ]);
 
       taskB.close();
       expect(outputMessages).toEqual([
-        { text: '1', stream: 'stdout' },
-        { text: '3', stream: 'stdout' },
-        { text: '2', stream: 'stdout' }
+        { text: '1', stream: StreamKind.Stdout },
+        { text: '3', stream: StreamKind.Stdout },
+        { text: '2', stream: StreamKind.Stdout }
       ]);
 
-      expect(taskA.accumulatedMessages).toEqual([]);
-      expect(taskB.accumulatedMessages).toEqual([]);
+      expect(taskA.accumulatedChunks).toEqual([]);
+      expect(taskB.accumulatedChunks).toEqual([]);
     });
 
     it('should update the active task once the active task is closed', () => {
       const taskA: CollatedWriter = collator.registerTask('A');
       const taskB: CollatedWriter = collator.registerTask('B');
 
-      taskA.writeMessage({ text: '1', stream: 'stdout' });
-      expect(outputMessages).toEqual([{ text: '1', stream: 'stdout' }]);
+      taskA.writeChunk({ text: '1', stream: StreamKind.Stdout });
+      expect(outputMessages).toEqual([{ text: '1', stream: StreamKind.Stdout }]);
       taskA.close();
 
-      taskB.writeMessage({ text: '2', stream: 'stdout' });
+      taskB.writeChunk({ text: '2', stream: StreamKind.Stdout });
       expect(outputMessages).toEqual([
-        { text: '1', stream: 'stdout' },
-        { text: '2', stream: 'stdout' }
+        { text: '1', stream: StreamKind.Stdout },
+        { text: '2', stream: StreamKind.Stdout }
       ]);
       taskB.close();
       expect(outputMessages).toEqual([
-        { text: '1', stream: 'stdout' },
-        { text: '2', stream: 'stdout' }
+        { text: '1', stream: StreamKind.Stdout },
+        { text: '2', stream: StreamKind.Stdout }
       ]);
     });
 
@@ -136,19 +137,19 @@ describe('StreamCollator tests', () => {
       const taskA: CollatedWriter = collator.registerTask('A');
       const taskB: CollatedWriter = collator.registerTask('B');
 
-      taskA.writeMessage({ text: '1', stream: 'stdout' });
-      expect(outputMessages).toEqual([{ text: '1', stream: 'stdout' }]);
+      taskA.writeChunk({ text: '1', stream: StreamKind.Stdout });
+      expect(outputMessages).toEqual([{ text: '1', stream: StreamKind.Stdout }]);
 
-      taskB.writeMessage({ text: '2', stream: 'stdout' });
-      expect(outputMessages).toEqual([{ text: '1', stream: 'stdout' }]);
+      taskB.writeChunk({ text: '2', stream: StreamKind.Stdout });
+      expect(outputMessages).toEqual([{ text: '1', stream: StreamKind.Stdout }]);
 
       taskB.close();
-      expect(outputMessages).toEqual([{ text: '1', stream: 'stdout' }]);
+      expect(outputMessages).toEqual([{ text: '1', stream: StreamKind.Stdout }]);
 
       taskA.close();
       expect(outputMessages).toEqual([
-        { text: '1', stream: 'stdout' },
-        { text: '2', stream: 'stdout' }
+        { text: '1', stream: StreamKind.Stdout },
+        { text: '2', stream: StreamKind.Stdout }
       ]);
     });
   });

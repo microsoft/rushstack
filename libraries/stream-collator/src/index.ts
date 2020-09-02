@@ -14,4 +14,5 @@
  */
 
 export { StreamCollator, WriteToStreamCallback, IStreamCollatorOptions } from './StreamCollator';
-export { CollatedWriter, CollatedWriterState, IStdioMessage } from './CollatedWriter';
+export { CollatedWriter, CollatedWriterState } from './CollatedWriter';
+export { ICollatedChunk, StreamKind } from './CollatedChunk';
