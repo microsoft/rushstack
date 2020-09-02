@@ -14,7 +14,7 @@ export interface IExamplePlugin01Hooks {
 }
 
 export class ExamplePlugin01 implements IHeftPlugin {
-  public displayName: string = PLUGIN_NAME;
+  public pluginName: string = PLUGIN_NAME;
 
   public hooks: IExamplePlugin01Hooks;
 

@@ -232,7 +232,7 @@ export interface IHeftPlugin<TOptions = void> {
     // (undocumented)
     apply: (heftSession: HeftSession, heftConfiguration: HeftConfiguration, options?: TOptions) => void;
     // (undocumented)
-    displayName: string;
+    pluginName: string;
 }
 
 // @public (undocumented)

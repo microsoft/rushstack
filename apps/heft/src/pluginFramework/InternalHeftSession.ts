@@ -56,7 +56,7 @@ export class InternalHeftSession {
             this._pluginHooks.set(pluginToTap, pluginHook);
           }
 
-          pluginHook.tap(thisPlugin.displayName, pluginApplyFn);
+          pluginHook.tap(thisPlugin.pluginName, pluginApplyFn);
         }
       },
       this._options

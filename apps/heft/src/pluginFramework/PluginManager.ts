@@ -114,7 +114,7 @@ export class PluginManager {
       plugin.apply(heftSession, this._heftConfiguration, options);
       this._appliedPlugins.push(plugin);
     } catch (e) {
-      throw new InternalError(`Error applying "${plugin.displayName}": ${e}`);
+      throw new InternalError(`Error applying "${plugin.pluginName}": ${e}`);
     }
   }
 
@@ -141,7 +141,7 @@ export class PluginManager {
       );
     }
 
-    if (!pluginPackage.displayName || typeof pluginPackage.displayName !== 'string') {
+    if (!pluginPackage.pluginName || typeof pluginPackage.pluginName !== 'string') {
       throw new InternalError(
         `Plugin packages must define a "displayName" property. The plugin loaded from "${resolvedPluginPath}" ` +
           'either doesn\'t define a "displayName" property, or its value isn\'t a string.'

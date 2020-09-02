@@ -42,25 +42,25 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
     IConfigurationJsonCacheEntry
   >();
 
-  public abstract displayName: string;
+  public abstract pluginName: string;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftSession.hooks.clean.tap(this.displayName, (clean: ICleanStageContext) => {
-      clean.hooks.loadStageConfiguration.tapPromise(this.displayName, async () => {
+    heftSession.hooks.clean.tap(this.pluginName, (clean: ICleanStageContext) => {
+      clean.hooks.loadStageConfiguration.tapPromise(this.pluginName, async () => {
         await this._updateCleanConfigurationAsync(heftConfiguration, clean.properties);
       });
     });
 
-    heftSession.hooks.build.tap(this.displayName, (build: IBuildStageContext) => {
-      build.hooks.compile.tap(this.displayName, (compile) => {
-        compile.hooks.configureCopyStaticAssets.tapPromise(this.displayName, async () => {
+    heftSession.hooks.build.tap(this.pluginName, (build: IBuildStageContext) => {
+      build.hooks.compile.tap(this.pluginName, (compile) => {
+        compile.hooks.configureCopyStaticAssets.tapPromise(this.pluginName, async () => {
           await this._updateCopyStaticAssetsConfigurationAsync(
             heftConfiguration,
             compile.properties.copyStaticAssetsConfiguration
           );
         });
 
-        compile.hooks.configureTypeScript.tapPromise(this.displayName, async () => {
+        compile.hooks.configureTypeScript.tapPromise(this.pluginName, async () => {
           await this._updateTypeScriptConfigurationAsync(
             heftConfiguration,
             compile.properties.typeScriptConfiguration
@@ -68,8 +68,8 @@ export abstract class JsonConfigurationFilesPluginBase implements IHeftPlugin {
         });
       });
 
-      build.hooks.bundle.tap(this.displayName, (bundle) => {
-        bundle.hooks.configureApiExtractor.tapPromise(this.displayName, async (existingConfiguration) => {
+      build.hooks.bundle.tap(this.pluginName, (bundle) => {
+        bundle.hooks.configureApiExtractor.tapPromise(this.pluginName, async (existingConfiguration) => {
           await this._updateApiExtractorConfigurationAsync(heftConfiguration, existingConfiguration);
           return existingConfiguration;
         });

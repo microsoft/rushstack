@@ -7,7 +7,7 @@ import { JsonConfigurationFilesPluginBase } from './JsonConfigurationFilesPlugin
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 
 export class ProjectJsonConfigurationFilesPlugin extends JsonConfigurationFilesPluginBase {
-  public readonly displayName: string = 'projectJsonConfigurationFiles';
+  public readonly pluginName: string = 'projectJsonConfigurationFiles';
 
   protected _getConfigurationFilePathByName(
     name: string,
