@@ -196,7 +196,7 @@ export interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsC
 }
 
 // @alpha (undocumented)
-export interface ICustomActionOptions<TParameters extends ICustomActionParameters> {
+export interface ICustomActionOptions<TParameters> {
     // (undocumented)
     actionName: string;
     // (undocumented)
@@ -234,12 +234,6 @@ export interface ICustomActionParameterFlag extends ICustomActionParameterBase<b
 export interface ICustomActionParameterInteger extends ICustomActionParameterBase<number> {
     // (undocumented)
     kind: 'integer';
-}
-
-// @alpha (undocumented)
-export interface ICustomActionParameters {
-    // (undocumented)
-    [callbackName: string]: CustomActionParameterType;
 }
 
 // @alpha (undocumented)
@@ -427,7 +421,7 @@ export class MetricsCollectorHooks {
 }
 
 // @alpha (undocumented)
-export type RegisterAction = <TParameters extends ICustomActionParameters>(action: ICustomActionOptions<TParameters>) => void;
+export type RegisterAction = <TParameters>(action: ICustomActionOptions<TParameters>) => void;
 
 // @beta (undocumented)
 export type RequestAccessToPluginByNameCallback = (pluginToAccessName: string, pluginApply: (pluginAccessor: object) => void) => void;

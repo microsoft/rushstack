@@ -53,12 +53,7 @@ export type ICustomActionParameter<TParameter> = TParameter extends boolean
 export type CustomActionParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
 
 /** @alpha */
-export interface ICustomActionParameters {
-  [callbackName: string]: CustomActionParameterType;
-}
-
-/** @alpha */
-export interface ICustomActionOptions<TParameters extends ICustomActionParameters> {
+export interface ICustomActionOptions<TParameters> {
   actionName: string;
   documentation: string;
   summary?: string;
@@ -68,7 +63,7 @@ export interface ICustomActionOptions<TParameters extends ICustomActionParameter
   callback: (parameters: TParameters) => void | Promise<void>;
 }
 
-export class CustomAction<TParameters extends ICustomActionParameters> extends HeftActionBase {
+export class CustomAction<TParameters> extends HeftActionBase {
   private _customActionOptions: ICustomActionOptions<TParameters>;
   private _parameterValues: Map<string, () => CustomActionParameterType>;
 
@@ -92,7 +87,7 @@ export class CustomAction<TParameters extends ICustomActionParameters> extends H
     super.onDefineParameters();
 
     this._parameterValues = new Map<string, () => CustomActionParameterType>();
-    for (const [callbackValueName, parameterOption] of Object.entries(
+    for (const [callbackValueName, untypedParameterOption] of Object.entries(
       this._customActionOptions.parameters || {}
     )) {
       if (this._parameterValues.has(callbackValueName)) {
@@ -101,6 +96,9 @@ export class CustomAction<TParameters extends ICustomActionParameters> extends H
 
       let getParameterValue: () => CustomActionParameterType;
 
+      const parameterOption: ICustomActionParameterBase<CustomActionParameterType> = untypedParameterOption as ICustomActionParameterBase<
+        CustomActionParameterType
+      >;
       switch (parameterOption.kind) {
         case 'flag': {
           const parameter: CommandLineFlagParameter = this.defineFlagParameter({
@@ -153,9 +151,7 @@ export class CustomAction<TParameters extends ICustomActionParameters> extends H
   }
 
   protected async actionExecuteAsync(): Promise<void> {
-    const parameterValues: {
-      [callbackValueName: string]: CustomActionParameterType;
-    } = {};
+    const parameterValues: {} = {};
 
     for (const [callbackName, getParameterValue] of this._parameterValues.entries()) {
       parameterValues[callbackName] = getParameterValue();

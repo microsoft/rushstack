@@ -29,7 +29,6 @@ export {
   ICustomActionParameterBase,
   ICustomActionParameterFlag,
   ICustomActionParameterInteger,
-  ICustomActionParameters,
   ICustomActionParameterString,
   ICustomActionParameterStringList
 } from './cli/actions/CustomAction';

@@ -90,9 +90,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       ...stages,
       loggingManager: this._loggingManager,
       metricsCollector: this._metricsCollector,
-      registerAction: <TParameters extends ICustomActionParameters>(
-        options: ICustomActionOptions<TParameters>
-      ) => {
+      registerAction: <TParameters>(options: ICustomActionOptions<TParameters>) => {
         const action: CustomAction<TParameters> = new CustomAction(options, actionOptions);
         this.addAction(action);
       }
