@@ -18,9 +18,6 @@ import { SyncHook } from 'tapable';
 import { Terminal } from '@rushstack/node-core-library';
 import * as webpack from 'webpack';
 
-// @beta (undocumented)
-export type ApplyForPluginCallback = <TPlugin extends IHeftPlugin>(pluginToTap: TPlugin, pluginApply: (plugin: TPlugin) => void) => void;
-
 // @public (undocumented)
 export class BuildStageHooks extends StageHooksBase<IBuildStageProperties> {
     // (undocumented)
@@ -97,13 +94,13 @@ export class HeftSession {
     //
     // @internal
     constructor(options: IHeftSessionOptions, internalSessionOptions: IInternalHeftSessionOptions);
-    // @beta
-    readonly applyForPlugin: ApplyForPluginCallback;
     readonly debugMode: boolean;
     // (undocumented)
     readonly hooks: IHeftSessionHooks;
     // @internal (undocumented)
     readonly metricsCollector: _MetricsCollector;
+    // @beta
+    readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
     requestScopedLogger(loggerName: string): ScopedLogger;
 }
 
@@ -229,6 +226,8 @@ export interface _IHeftConfigurationInitializationOptions {
 
 // @public (undocumented)
 export interface IHeftPlugin<TOptions = void> {
+    // (undocumented)
+    accessor?: object;
     // (undocumented)
     apply: (heftSession: HeftSession, heftConfiguration: HeftConfiguration, options?: TOptions) => void;
     // (undocumented)
@@ -362,6 +361,9 @@ export class MetricsCollectorHooks {
     flushAndTeardown: AsyncParallelHook;
     recordMetric: SyncHook<string, IMetricsData>;
 }
+
+// @beta (undocumented)
+export type RequestAccessToPluginByNameCallback = (pluginToAccessName: string, pluginApply: (pluginAccessor: object) => void) => void;
 
 // @public (undocumented)
 export class ScopedLogger implements IScopedLogger {

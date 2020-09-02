@@ -40,6 +40,7 @@ export class PluginManager {
   private _heftConfiguration: HeftConfiguration;
   private _internalHeftSession: InternalHeftSession;
   private _appliedPlugins: IHeftPlugin[] = [];
+  private _appliedPluginNames: Set<string> = new Set<string>();
 
   public constructor(options: IPluginManagerOptions) {
     this._terminal = options.terminal;
@@ -104,15 +105,23 @@ export class PluginManager {
 
   private _initializeResolvedPlugin(resolvedPluginPath: string, options?: object): void {
     const plugin: IHeftPlugin<object | void> = this._loadAndValidatePluginPackage(resolvedPluginPath);
-    this._applyPlugin(plugin, options);
+
+    if (this._appliedPluginNames.has(plugin.pluginName)) {
+      throw new Error(
+        `Error applying plugin "${resolvedPluginPath}": A plugin with name "${plugin.pluginName}" has ` +
+          'already been applied'
+      );
+    } else {
+      this._applyPlugin(plugin, options);
+    }
   }
 
   private _applyPlugin(plugin: IHeftPlugin<object | void>, options?: object): void {
     try {
-      // Todo: Use the plugin displayName in its logging.
       const heftSession: HeftSession = this._internalHeftSession.getSessionForPlugin(plugin);
       plugin.apply(heftSession, this._heftConfiguration, options);
       this._appliedPlugins.push(plugin);
+      this._appliedPluginNames.add(plugin.pluginName);
     } catch (e) {
       throw new InternalError(`Error applying "${plugin.pluginName}": ${e}`);
     }

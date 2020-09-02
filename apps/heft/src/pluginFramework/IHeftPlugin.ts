@@ -9,5 +9,6 @@ import { HeftSession } from './HeftSession';
  */
 export interface IHeftPlugin<TOptions = void> {
   pluginName: string;
+  accessor?: object;
   apply: (heftSession: HeftSession, heftConfiguration: HeftConfiguration, options?: TOptions) => void;
 }

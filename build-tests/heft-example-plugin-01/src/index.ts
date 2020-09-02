@@ -7,26 +7,32 @@ import {
   IPreCompileSubstage
 } from '@rushstack/heft';
 
-const PLUGIN_NAME: string = 'example-plugin-01';
+export const enum PluginNames {
+  ExamplePlugin01 = 'example-plugin-01'
+}
 
-export interface IExamplePlugin01Hooks {
+export interface IExamplePlugin01Accessor {
   exampleHook: SyncHook;
 }
 
 export class ExamplePlugin01 implements IHeftPlugin {
-  public pluginName: string = PLUGIN_NAME;
+  private _accessor: IExamplePlugin01Accessor;
 
-  public hooks: IExamplePlugin01Hooks;
+  public pluginName: string = PluginNames.ExamplePlugin01;
+
+  public get accessor(): IExamplePlugin01Accessor {
+    return this._accessor;
+  }
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    this.hooks = {
+    this._accessor = {
       exampleHook: new SyncHook()
     };
 
-    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-      build.hooks.preCompile.tap(PLUGIN_NAME, (preCompile: IPreCompileSubstage) => {
-        preCompile.hooks.run.tap(PLUGIN_NAME, () => {
-          this.hooks.exampleHook.call();
+    heftSession.hooks.build.tap(PluginNames.ExamplePlugin01, (build: IBuildStageContext) => {
+      build.hooks.preCompile.tap(PluginNames.ExamplePlugin01, (preCompile: IPreCompileSubstage) => {
+        preCompile.hooks.run.tap(PluginNames.ExamplePlugin01, () => {
+          this.accessor.exampleHook.call();
         });
       });
     });

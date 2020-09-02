@@ -31,10 +31,7 @@ export interface IInternalHeftSessionOptions {
  */
 export class InternalHeftSession {
   private readonly _options: IInternalHeftSessionOptions;
-  private _pluginHooks: Map<IHeftPlugin, SyncHook<IHeftPlugin>> = new Map<
-    IHeftPlugin,
-    SyncHook<IHeftPlugin>
-  >();
+  private _pluginHooks: Map<string, SyncHook<object>> = new Map<string, SyncHook<object>>();
 
   public constructor(options: IInternalHeftSessionOptions) {
     this._options = options;
@@ -44,16 +41,14 @@ export class InternalHeftSession {
     return new HeftSession(
       {
         plugin: thisPlugin,
-        applyForPluginCallback: <TPlugin extends IHeftPlugin>(
-          pluginToTap: TPlugin,
-          pluginApplyFn: (plugin: TPlugin) => void
+        requestAccessToPluginByName: (
+          pluginToAccessName: string,
+          pluginApplyFn: (pluginAccessor: object) => void
         ) => {
-          let pluginHook: SyncHook<TPlugin> | undefined = this._pluginHooks.get(pluginToTap) as
-            | SyncHook<TPlugin>
-            | undefined;
+          let pluginHook: SyncHook<object> | undefined = this._pluginHooks.get(pluginToAccessName);
           if (!pluginHook) {
-            pluginHook = new SyncHook(['plugin']);
-            this._pluginHooks.set(pluginToTap, pluginHook);
+            pluginHook = new SyncHook<object>(['pluginAccessor']);
+            this._pluginHooks.set(pluginToAccessName, pluginHook);
           }
 
           pluginHook.tap(thisPlugin.pluginName, pluginApplyFn);
@@ -63,12 +58,20 @@ export class InternalHeftSession {
     );
   }
 
-  public applyPluginHooks<THeftPlugin extends IHeftPlugin>(plugin: THeftPlugin): void {
-    const pluginHook: SyncHook<THeftPlugin> | undefined = this._pluginHooks.get(plugin) as
-      | SyncHook<THeftPlugin>
-      | undefined;
-    if (pluginHook) {
-      pluginHook.call(plugin);
+  public applyPluginHooks(plugin: IHeftPlugin): void {
+    const pluginHook: SyncHook<object> | undefined = this._pluginHooks.get(plugin.pluginName);
+    const accessor: object | undefined = plugin.accessor;
+    if (pluginHook && pluginHook.taps.length > 0) {
+      if (!accessor) {
+        const accessingPlugins: Set<string> = new Set<string>(pluginHook.taps);
+        throw new Error(
+          `Plugin "${plugin.pluginName}" does not provide an accessor property, so it does not provide ` +
+            `access to other plugins. Plugins requesting access to "${plugin.pluginName}: ` +
+            Array.from(accessingPlugins).join(', ')
+        );
+      } else {
+        pluginHook.call(accessor);
+      }
     }
   }
 }
