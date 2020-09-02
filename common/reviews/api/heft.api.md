@@ -69,7 +69,7 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
 // @public (undocumented)
 export type CopyFromCacheMode = 'hardlink' | 'copy';
 
-// @alpha (undocumented)
+// @beta (undocumented)
 export type CustomActionParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
 
 // @public (undocumented)
@@ -102,7 +102,7 @@ export class HeftSession {
     readonly hooks: IHeftSessionHooks;
     // @internal (undocumented)
     readonly metricsCollector: _MetricsCollector;
-    // @alpha (undocumented)
+    // @beta (undocumented)
     readonly registerAction: RegisterAction;
     // @beta
     readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
@@ -195,7 +195,7 @@ export interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsC
     sourceFolderName: string;
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 export interface ICustomActionOptions<TParameters> {
     // (undocumented)
     actionName: string;
@@ -211,10 +211,10 @@ export interface ICustomActionOptions<TParameters> {
     summary?: string;
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 export type ICustomActionParameter<TParameter> = TParameter extends boolean ? ICustomActionParameterFlag : TParameter extends number ? ICustomActionParameterInteger : TParameter extends string ? ICustomActionParameterString : TParameter extends ReadonlyArray<string> ? ICustomActionParameterStringList : never;
 
-// @alpha (undocumented)
+// @beta (undocumented)
 export interface ICustomActionParameterBase<TParameter extends CustomActionParameterType> {
     // (undocumented)
     description: string;
@@ -224,25 +224,25 @@ export interface ICustomActionParameterBase<TParameter extends CustomActionParam
     paramterLongName: string;
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 export interface ICustomActionParameterFlag extends ICustomActionParameterBase<boolean> {
     // (undocumented)
     kind: 'flag';
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 export interface ICustomActionParameterInteger extends ICustomActionParameterBase<number> {
     // (undocumented)
     kind: 'integer';
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 export interface ICustomActionParameterString extends ICustomActionParameterBase<string> {
     // (undocumented)
     kind: 'string';
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 export interface ICustomActionParameterStringList extends ICustomActionParameterBase<ReadonlyArray<string>> {
     // (undocumented)
     kind: 'stringList';
@@ -420,7 +420,7 @@ export class MetricsCollectorHooks {
     recordMetric: SyncHook<string, IMetricsData>;
 }
 
-// @alpha (undocumented)
+// @beta (undocumented)
 export type RegisterAction = <TParameters>(action: ICustomActionOptions<TParameters>) => void;
 
 // @beta (undocumented)

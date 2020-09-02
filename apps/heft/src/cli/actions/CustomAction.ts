@@ -10,27 +10,27 @@ import {
 
 import { HeftActionBase, IHeftActionBaseOptions } from './HeftActionBase';
 
-/** @alpha */
+/** @beta */
 export interface ICustomActionParameterFlag extends ICustomActionParameterBase<boolean> {
   kind: 'flag';
 }
 
-/** @alpha */
+/** @beta */
 export interface ICustomActionParameterInteger extends ICustomActionParameterBase<number> {
   kind: 'integer';
 }
 
-/** @alpha */
+/** @beta */
 export interface ICustomActionParameterString extends ICustomActionParameterBase<string> {
   kind: 'string';
 }
 
-/** @alpha */
+/** @beta */
 export interface ICustomActionParameterStringList extends ICustomActionParameterBase<ReadonlyArray<string>> {
   kind: 'stringList';
 }
 
-/** @alpha */
+/** @beta */
 export interface ICustomActionParameterBase<TParameter extends CustomActionParameterType> {
   kind: 'flag' | 'integer' | 'string' | 'stringList'; // TODO: Add "choice"
 
@@ -38,7 +38,7 @@ export interface ICustomActionParameterBase<TParameter extends CustomActionParam
   description: string;
 }
 
-/** @alpha */
+/** @beta */
 export type ICustomActionParameter<TParameter> = TParameter extends boolean
   ? ICustomActionParameterFlag
   : TParameter extends number
@@ -49,10 +49,10 @@ export type ICustomActionParameter<TParameter> = TParameter extends boolean
   ? ICustomActionParameterStringList
   : never;
 
-/** @alpha */
+/** @beta */
 export type CustomActionParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
 
-/** @alpha */
+/** @beta */
 export interface ICustomActionOptions<TParameters> {
   actionName: string;
   documentation: string;

@@ -14,7 +14,7 @@ import { ScopedLogger } from './logging/ScopedLogger';
 import { LoggingManager } from './logging/LoggingManager';
 import { ICustomActionOptions } from '../cli/actions/CustomAction';
 
-/** @alpha */
+/** @beta */
 export type RegisterAction = <TParameters>(action: ICustomActionOptions<TParameters>) => void;
 
 /**
@@ -65,7 +65,7 @@ export class HeftSession {
    */
   public readonly debugMode: boolean;
 
-  /** @alpha */
+  /** @beta */
   public readonly registerAction: RegisterAction;
 
   /**
