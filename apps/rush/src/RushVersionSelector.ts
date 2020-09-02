@@ -6,10 +6,14 @@ import * as semver from 'semver';
 
 import { LockFile } from '@rushstack/node-core-library';
 import { Utilities } from '@microsoft/rush-lib/lib/utilities/Utilities';
-import { _LastInstallFlag, _RushGlobalFolder, ILaunchOptions } from '@microsoft/rush-lib';
+import {
+  MinimalRushConfiguration,
+  _LastInstallFlag,
+  _RushGlobalFolder,
+  ILaunchOptions
+} from '@microsoft/rush-lib';
 
 import { RushCommandSelector } from './RushCommandSelector';
-import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
 const MAX_INSTALL_ATTEMPTS: number = 3;
 

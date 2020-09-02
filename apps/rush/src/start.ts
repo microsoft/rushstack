@@ -22,12 +22,11 @@ import * as os from 'os';
 import * as semver from 'semver';
 
 import { Text, PackageJsonLookup } from '@rushstack/node-core-library';
-import { EnvironmentVariableNames } from '@microsoft/rush-lib';
+import { EnvironmentVariableNames, MinimalRushConfiguration } from '@microsoft/rush-lib';
 import * as rushLib from '@microsoft/rush-lib';
 
 import { RushCommandSelector } from './RushCommandSelector';
 import { RushVersionSelector } from './RushVersionSelector';
-import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
 // Load the configuration
 const configuration:
@@ -59,7 +58,10 @@ if (previewVersion) {
   );
 
   if (configuration) {
-    lines.push(`* The rush.json configuration asks for:   ${Text.padEnd(configuration.rushVersion, 25)} *`);
+    lines.push(
+      '* The rush.json configuration asks for:   ' +
+        `${Text.padEnd(configuration.rushConfigurationJson.rushVersion, 25)} *`
+    );
   }
 
   lines.push(
@@ -71,7 +73,7 @@ if (previewVersion) {
 
   console.error(lines.map((line) => colors.black(colors.bgYellow(line))).join(os.EOL));
 } else if (configuration) {
-  rushVersionToLoad = configuration.rushVersion;
+  rushVersionToLoad = configuration.rushConfigurationJson.rushVersion;
 }
 
 // If we are previewing an older Rush that doesn't understand the RUSH_PREVIEW_VERSION variable,

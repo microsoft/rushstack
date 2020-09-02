@@ -6,6 +6,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as semver from 'semver';
+import { trueCasePathSync } from 'true-case-path';
 import {
   JsonFile,
   JsonSchema,
@@ -14,7 +15,6 @@ import {
   FileSystem,
   PackageNameParser
 } from '@rushstack/node-core-library';
-import { trueCasePathSync } from 'true-case-path';
 
 import { Rush } from '../api/Rush';
 import { RushConfigurationProject, IRushConfigurationProjectJson } from './RushConfigurationProject';
@@ -429,11 +429,7 @@ export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
  * configuration file.
  * @public
  */
-export class RushConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/rush.schema.json')
-  );
-
+export class MinimalRushConfiguration {
   private _rushJsonFile: string;
   private _rushJsonFolder: string;
   private _changesFolder: string;
@@ -441,6 +437,210 @@ export class RushConfiguration {
   private _commonTempFolder: string;
   private _commonScriptsFolder: string;
   private _commonRushConfigFolder: string;
+
+  private readonly _rushConfigurationJson: IRushConfigurationJson;
+
+  /**
+   * Use RushConfiguration.loadFromConfigurationFile() or Use RushConfiguration.loadFromDefaultLocation()
+   * instead.
+   */
+  protected constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string) {
+    this._rushConfigurationJson = rushConfigurationJson;
+    EnvironmentConfiguration.initialize();
+
+    this._rushJsonFile = rushJsonFilename;
+    this._rushJsonFolder = path.dirname(rushJsonFilename);
+
+    this._commonFolder = path.resolve(path.join(this._rushJsonFolder, RushConstants.commonFolderName));
+
+    this._commonRushConfigFolder = path.join(this._commonFolder, 'config', 'rush');
+
+    this._commonTempFolder =
+      EnvironmentConfiguration.rushTempFolderOverride ||
+      path.join(this._commonFolder, RushConstants.rushTempFolderName);
+
+    this._commonScriptsFolder = path.join(this._commonFolder, 'scripts');
+
+    this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
+  }
+
+  /**
+   * Loads the configuration data from an Rush.json configuration file and returns
+   * an RushConfiguration object.
+   */
+  public static loadFromConfigurationFile(rushJsonFilename: string): MinimalRushConfiguration {
+    let resolvedRushJsonFilename: string = path.resolve(rushJsonFilename);
+    // Load the rush.json before we fix the casing. If the case is wrong on a case-sensitive filesystem,
+    // the next line show throw.
+    const rushConfigurationJson: IRushConfigurationJson = JsonFile.load(resolvedRushJsonFilename);
+
+    try {
+      resolvedRushJsonFilename = trueCasePathSync(resolvedRushJsonFilename);
+    } catch (error) {
+      /* ignore errors from true-case-path */
+    }
+
+    return new MinimalRushConfiguration(rushConfigurationJson, resolvedRushJsonFilename);
+  }
+
+  public static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): MinimalRushConfiguration {
+    const rushJsonLocation: string | undefined = MinimalRushConfiguration.tryFindRushJsonLocation(options);
+
+    if (rushJsonLocation) {
+      return MinimalRushConfiguration.loadFromConfigurationFile(rushJsonLocation);
+    } else {
+      throw Utilities.getRushConfigNotFoundError();
+    }
+  }
+
+  /**
+   * Find the rush.json location and return the path, or undefined if a rush.json can't be found.
+   */
+  public static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined {
+    const optionsIn: ITryFindRushJsonLocationOptions = options || {};
+    const verbose: boolean = optionsIn.showVerbose || false;
+    let currentFolder: string = optionsIn.startingFolder || process.cwd();
+
+    // Look upwards at parent folders until we find a folder containing rush.json
+    for (let i: number = 0; i < 10; ++i) {
+      const rushJsonFilename: string = path.join(currentFolder, 'rush.json');
+
+      if (FileSystem.exists(rushJsonFilename)) {
+        if (i > 0 && verbose) {
+          console.log('Found configuration in ' + rushJsonFilename);
+        }
+
+        if (verbose) {
+          console.log('');
+        }
+
+        return rushJsonFilename;
+      }
+
+      const parentFolder: string = path.dirname(currentFolder);
+      if (parentFolder === currentFolder) {
+        break;
+      }
+
+      currentFolder = parentFolder;
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Gets the JSON data structure for the "rush.json" configuration file.
+   *
+   * @internal
+   */
+  public get rushConfigurationJson(): IRushConfigurationJson {
+    return this._rushConfigurationJson;
+  }
+
+  /**
+   * The version of rush specified by the rushVersion property of the rush.json configuration file. This
+   * should be a semver style version number like "4.0.0"
+   */
+  public get rushVersion(): string {
+    return this._rushConfigurationJson.rushVersion;
+  }
+
+  /**
+   * The absolute path to the "rush.json" configuration file that was loaded to construct this object.
+   */
+  public get rushJsonFile(): string {
+    return this._rushJsonFile;
+  }
+
+  /**
+   * The absolute path of the folder that contains rush.json for this project.
+   */
+  public get rushJsonFolder(): string {
+    return this._rushJsonFolder;
+  }
+
+  /**
+   * The folder that contains all change files.
+   */
+  public get changesFolder(): string {
+    return this._changesFolder;
+  }
+
+  /**
+   * The fully resolved path for the "common" folder where Rush will store settings that
+   * affect all Rush projects.  This is always a subfolder of the folder containing "rush.json".
+   * Example: `C:\MyRepo\common`
+   */
+  public get commonFolder(): string {
+    return this._commonFolder;
+  }
+
+  /**
+   * The folder where Rush's additional config files are stored.  This folder is always a
+   * subfolder called `config\rush` inside the common folder.  (The `common\config` folder
+   * is reserved for configuration files used by other tools.)  To avoid confusion or mistakes,
+   * Rush will report an error if this this folder contains any unrecognized files.
+   *
+   * Example: `C:\MyRepo\common\config\rush`
+   */
+  public get commonRushConfigFolder(): string {
+    return this._commonRushConfigFolder;
+  }
+
+  /**
+   * The folder where temporary files will be stored.  This is always a subfolder called "temp"
+   * under the common folder.
+   * Example: `C:\MyRepo\common\temp`
+   */
+  public get commonTempFolder(): string {
+    return this._commonTempFolder;
+  }
+
+  /**
+   * The folder where automation scripts are stored.  This is always a subfolder called "scripts"
+   * under the common folder.
+   * Example: `C:\MyRepo\common\scripts`
+   */
+  public get commonScriptsFolder(): string {
+    return this._commonScriptsFolder;
+  }
+
+  /**
+   * The fully resolved path for the "autoinstallers" folder.
+   * Example: `C:\MyRepo\common\autoinstallers`
+   */
+  public get commonAutoinstallersFolder(): string {
+    return path.join(this._commonFolder, 'autoinstallers');
+  }
+
+  /**
+   * The filename of the build dependency data file.  By default this is
+   * called 'rush-link.json' resides in the Rush common folder.
+   * Its data structure is defined by IRushLinkJson.
+   *
+   * Example: `C:\MyRepo\common\temp\rush-link.json`
+   *
+   * @deprecated The "rush-link.json" file was removed in Rush 5.30.0.
+   * Use `RushConfigurationProject.localDependencyProjects` instead.
+   */
+  public get rushLinkJsonFilename(): string {
+    throw new Error(
+      'The "rush-link.json" file was removed in Rush 5.30.0. Use ' +
+        'RushConfigurationProject.localDependencyProjects instead.'
+    );
+  }
+}
+
+/**
+ * This represents the Rush configuration for a repository, based on the "rush.json"
+ * configuration file.
+ * @public
+ */
+export class RushConfiguration extends MinimalRushConfiguration {
+  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
+    path.join(__dirname, '../schemas/rush.schema.json')
+  );
+
   private _packageManager: PackageManagerName;
   private _packageManagerWrapper: PackageManager;
   private _npmCacheFolder: string;
@@ -496,15 +696,12 @@ export class RushConfiguration {
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
   private _experimentsConfiguration: ExperimentsConfiguration;
 
-  private readonly _rushConfigurationJson: IRushConfigurationJson;
-
   /**
    * Use RushConfiguration.loadFromConfigurationFile() or Use RushConfiguration.loadFromDefaultLocation()
    * instead.
    */
   private constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string) {
-    this._rushConfigurationJson = rushConfigurationJson;
-    EnvironmentConfiguration.initialize();
+    super(rushConfigurationJson, rushJsonFilename);
 
     if (rushConfigurationJson.nodeSupportedVersionRange) {
       if (!semver.validRange(rushConfigurationJson.nodeSupportedVersionRange)) {
@@ -526,33 +723,18 @@ export class RushConfiguration {
       }
     }
 
-    this._rushJsonFile = rushJsonFilename;
-    this._rushJsonFolder = path.dirname(rushJsonFilename);
+    this._npmCacheFolder = path.resolve(path.join(this.commonTempFolder, 'npm-cache'));
+    this._npmTmpFolder = path.resolve(path.join(this.commonTempFolder, 'npm-tmp'));
+    this._yarnCacheFolder = path.resolve(path.join(this.commonTempFolder, 'yarn-cache'));
 
-    this._commonFolder = path.resolve(path.join(this._rushJsonFolder, RushConstants.commonFolderName));
-
-    this._commonRushConfigFolder = path.join(this._commonFolder, 'config', 'rush');
-
-    this._commonTempFolder =
-      EnvironmentConfiguration.rushTempFolderOverride ||
-      path.join(this._commonFolder, RushConstants.rushTempFolderName);
-
-    this._commonScriptsFolder = path.join(this._commonFolder, 'scripts');
-
-    this._npmCacheFolder = path.resolve(path.join(this._commonTempFolder, 'npm-cache'));
-    this._npmTmpFolder = path.resolve(path.join(this._commonTempFolder, 'npm-tmp'));
-    this._yarnCacheFolder = path.resolve(path.join(this._commonTempFolder, 'yarn-cache'));
-
-    this._changesFolder = path.join(this._commonFolder, RushConstants.changeFilesFolderName);
-
-    this._currentVariantJsonFilename = path.join(this._commonTempFolder, 'current-variant.json');
+    this._currentVariantJsonFilename = path.join(this.commonTempFolder, 'current-variant.json');
 
     this._suppressNodeLtsWarning = !!rushConfigurationJson.suppressNodeLtsWarning;
 
     this._ensureConsistentVersions = !!rushConfigurationJson.ensureConsistentVersions;
 
     const experimentsConfigFile: string = path.join(
-      this._commonRushConfigFolder,
+      this.commonRushConfigFolder,
       RushConstants.experimentsFilename
     );
     this._experimentsConfiguration = new ExperimentsConfiguration(experimentsConfigFile);
@@ -560,7 +742,7 @@ export class RushConfiguration {
     this._npmOptions = new NpmOptionsConfiguration(rushConfigurationJson.npmOptions || {});
     this._pnpmOptions = new PnpmOptionsConfiguration(
       rushConfigurationJson.pnpmOptions || {},
-      this._commonTempFolder
+      this.commonTempFolder
     );
     this._yarnOptions = new YarnOptionsConfiguration(rushConfigurationJson.yarnOptions || {});
 
@@ -609,10 +791,10 @@ export class RushConfiguration {
 
     this._shrinkwrapFilename = this._packageManagerWrapper.shrinkwrapFilename;
 
-    this._tempShrinkwrapFilename = path.join(this._commonTempFolder, this._shrinkwrapFilename);
+    this._tempShrinkwrapFilename = path.join(this.commonTempFolder, this._shrinkwrapFilename);
     this._packageManagerToolFilename = path.resolve(
       path.join(
-        this._commonTempFolder,
+        this.commonTempFolder,
         `${this.packageManager}-local`,
         'node_modules',
         '.bin',
@@ -628,7 +810,7 @@ export class RushConfiguration {
     );
 
     RushConfiguration._validateCommonRushConfigFolder(
-      this._commonRushConfigFolder,
+      this.commonRushConfigFolder,
       this.packageManager,
       this._shrinkwrapFilename
     );
@@ -698,7 +880,7 @@ export class RushConfiguration {
     }
 
     const versionPolicyConfigFile: string = path.join(
-      this._commonRushConfigFolder,
+      this.commonRushConfigFolder,
       RushConstants.versionPoliciesFilename
     );
     this._versionPolicyConfiguration = new VersionPolicyConfiguration(versionPolicyConfigFile);
@@ -724,7 +906,7 @@ export class RushConfiguration {
 
     // We sort the projects array in alphabetical order.  This ensures that the packages
     // are processed in a deterministic order by the various Rush algorithms.
-    const sortedProjectJsons: IRushConfigurationProjectJson[] = this._rushConfigurationJson.projects.slice(0);
+    const sortedProjectJsons: IRushConfigurationProjectJson[] = this.rushConfigurationJson.projects.slice(0);
     sortedProjectJsons.sort((a: IRushConfigurationProjectJson, b: IRushConfigurationProjectJson) =>
       a.packageName.localeCompare(b.packageName)
     );
@@ -773,25 +955,20 @@ export class RushConfiguration {
   /**
    * Loads the configuration data from an Rush.json configuration file and returns
    * an RushConfiguration object.
+   *
+   * @override
    */
   public static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration {
-    let resolvedRushJsonFilename: string = path.resolve(rushJsonFilename);
-    // Load the rush.json before we fix the casing. If the case is wrong on a case-sensitive filesystem,
-    // the next line show throw.
-    const rushConfigurationJson: IRushConfigurationJson = JsonFile.load(resolvedRushJsonFilename);
-
-    try {
-      resolvedRushJsonFilename = trueCasePathSync(resolvedRushJsonFilename);
-    } catch (error) {
-      /* ignore errors from true-case-path */
-    }
+    const minimalRushConfiguration: MinimalRushConfiguration = super.loadFromConfigurationFile(
+      rushJsonFilename
+    );
 
     // Check the Rush version *before* we validate the schema, since if the version is outdated
     // then the schema may have changed. This should no longer be a problem after Rush 4.0 and the C2R wrapper,
     // but we'll validate anyway.
-    const expectedRushVersion: string = rushConfigurationJson.rushVersion;
+    const expectedRushVersion: string = minimalRushConfiguration.rushVersion;
 
-    const rushJsonBaseName: string = path.basename(resolvedRushJsonFilename);
+    const rushJsonBaseName: string = path.basename(minimalRushConfiguration.rushJsonFile);
 
     // If the version is missing or malformed, fall through and let the schema handle it.
     if (expectedRushVersion && semver.valid(expectedRushVersion)) {
@@ -818,18 +995,27 @@ export class RushConfiguration {
         if (semver.lt(Rush.version, expectedRushVersion)) {
           throw new Error(
             `Unable to load ${rushJsonBaseName} because its RushVersion is` +
-              ` ${rushConfigurationJson.rushVersion}, whereas @microsoft/rush-lib is version ${Rush.version}.` +
+              ` ${minimalRushConfiguration.rushVersion}, whereas @microsoft/rush-lib is version ${Rush.version}.` +
               ` Consider upgrading the library.`
           );
         }
       }
     }
 
-    RushConfiguration._jsonSchema.validateObject(rushConfigurationJson, resolvedRushJsonFilename);
+    RushConfiguration._jsonSchema.validateObject(
+      minimalRushConfiguration.rushConfigurationJson,
+      minimalRushConfiguration.rushJsonFile
+    );
 
-    return new RushConfiguration(rushConfigurationJson, resolvedRushJsonFilename);
+    return new RushConfiguration(
+      minimalRushConfiguration.rushConfigurationJson,
+      minimalRushConfiguration.rushJsonFile
+    );
   }
 
+  /**
+   * @override
+   */
   public static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration {
     const rushJsonLocation: string | undefined = RushConfiguration.tryFindRushJsonLocation(options);
 
@@ -838,41 +1024,6 @@ export class RushConfiguration {
     } else {
       throw Utilities.getRushConfigNotFoundError();
     }
-  }
-
-  /**
-   * Find the rush.json location and return the path, or undefined if a rush.json can't be found.
-   */
-  public static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined {
-    const optionsIn: ITryFindRushJsonLocationOptions = options || {};
-    const verbose: boolean = optionsIn.showVerbose || false;
-    let currentFolder: string = optionsIn.startingFolder || process.cwd();
-
-    // Look upwards at parent folders until we find a folder containing rush.json
-    for (let i: number = 0; i < 10; ++i) {
-      const rushJsonFilename: string = path.join(currentFolder, 'rush.json');
-
-      if (FileSystem.exists(rushJsonFilename)) {
-        if (i > 0 && verbose) {
-          console.log('Found configuration in ' + rushJsonFilename);
-        }
-
-        if (verbose) {
-          console.log('');
-        }
-
-        return rushJsonFilename;
-      }
-
-      const parentFolder: string = path.dirname(currentFolder);
-      if (parentFolder === currentFolder) {
-        break;
-      }
-
-      currentFolder = parentFolder;
-    }
-
-    return undefined;
   }
 
   /**
@@ -1001,83 +1152,6 @@ export class RushConfiguration {
    */
   public get packageManagerWrapper(): PackageManager {
     return this._packageManagerWrapper;
-  }
-
-  /**
-   * Gets the JSON data structure for the "rush.json" configuration file.
-   *
-   * @internal
-   */
-  public get rushConfigurationJson(): IRushConfigurationJson {
-    return this._rushConfigurationJson;
-  }
-
-  /**
-   * The absolute path to the "rush.json" configuration file that was loaded to construct this object.
-   */
-  public get rushJsonFile(): string {
-    return this._rushJsonFile;
-  }
-
-  /**
-   * The absolute path of the folder that contains rush.json for this project.
-   */
-  public get rushJsonFolder(): string {
-    return this._rushJsonFolder;
-  }
-
-  /**
-   * The folder that contains all change files.
-   */
-  public get changesFolder(): string {
-    return this._changesFolder;
-  }
-
-  /**
-   * The fully resolved path for the "common" folder where Rush will store settings that
-   * affect all Rush projects.  This is always a subfolder of the folder containing "rush.json".
-   * Example: `C:\MyRepo\common`
-   */
-  public get commonFolder(): string {
-    return this._commonFolder;
-  }
-
-  /**
-   * The folder where Rush's additional config files are stored.  This folder is always a
-   * subfolder called `config\rush` inside the common folder.  (The `common\config` folder
-   * is reserved for configuration files used by other tools.)  To avoid confusion or mistakes,
-   * Rush will report an error if this this folder contains any unrecognized files.
-   *
-   * Example: `C:\MyRepo\common\config\rush`
-   */
-  public get commonRushConfigFolder(): string {
-    return this._commonRushConfigFolder;
-  }
-
-  /**
-   * The folder where temporary files will be stored.  This is always a subfolder called "temp"
-   * under the common folder.
-   * Example: `C:\MyRepo\common\temp`
-   */
-  public get commonTempFolder(): string {
-    return this._commonTempFolder;
-  }
-
-  /**
-   * The folder where automation scripts are stored.  This is always a subfolder called "scripts"
-   * under the common folder.
-   * Example: `C:\MyRepo\common\scripts`
-   */
-  public get commonScriptsFolder(): string {
-    return this._commonScriptsFolder;
-  }
-
-  /**
-   * The fully resolved path for the "autoinstallers" folder.
-   * Example: `C:\MyRepo\common\autoinstallers`
-   */
-  public get commonAutoinstallersFolder(): string {
-    return path.join(this._commonFolder, 'autoinstallers');
   }
 
   /**
@@ -1640,7 +1714,7 @@ export class RushConfiguration {
     }
 
     return path.join(
-      this._commonRushConfigFolder,
+      this.commonRushConfigFolder,
       ...(variant ? [RushConstants.rushVariantsFolderName, variant] : [])
     );
   }

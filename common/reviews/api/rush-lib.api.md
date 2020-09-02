@@ -220,6 +220,28 @@ export class LockStepVersionPolicy extends VersionPolicy {
     }
 
 // @public
+export class MinimalRushConfiguration {
+    protected constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string);
+    readonly changesFolder: string;
+    readonly commonAutoinstallersFolder: string;
+    readonly commonFolder: string;
+    readonly commonRushConfigFolder: string;
+    readonly commonScriptsFolder: string;
+    readonly commonTempFolder: string;
+    static loadFromConfigurationFile(rushJsonFilename: string): MinimalRushConfiguration;
+    // (undocumented)
+    static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): MinimalRushConfiguration;
+    // @internal
+    readonly rushConfigurationJson: IRushConfigurationJson;
+    readonly rushJsonFile: string;
+    readonly rushJsonFolder: string;
+    // @deprecated
+    readonly rushLinkJsonFilename: string;
+    readonly rushVersion: string;
+    static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined;
+}
+
+// @public
 export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
     // @internal
     constructor(json: _INpmOptionsJson);
@@ -318,17 +340,11 @@ export class Rush {
     }
 
 // @public
-export class RushConfiguration {
+export class RushConfiguration extends MinimalRushConfiguration {
     readonly allowMostlyStandardPackageNames: boolean;
     readonly approvedPackagesPolicy: ApprovedPackagesPolicy;
-    readonly changesFolder: string;
     // @deprecated
     readonly committedShrinkwrapFilename: string;
-    readonly commonAutoinstallersFolder: string;
-    readonly commonFolder: string;
-    readonly commonRushConfigFolder: string;
-    readonly commonScriptsFolder: string;
-    readonly commonTempFolder: string;
     // @deprecated
     readonly commonVersions: CommonVersionsConfiguration;
     readonly currentInstalledVariant: string | undefined;
@@ -351,8 +367,9 @@ export class RushConfiguration {
     readonly gitSampleEmail: string;
     readonly gitVersionBumpCommitMessage: string | undefined;
     readonly hotfixChangeEnabled: boolean;
+    // @override
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;
-    // (undocumented)
+    // @override (undocumented)
     static loadFromDefaultLocation(options?: ITryFindRushJsonLocationOptions): RushConfiguration;
     readonly npmCacheFolder: string;
     readonly npmOptions: NpmOptionsConfiguration;
@@ -375,10 +392,6 @@ export class RushConfiguration {
     readonly repositoryDefaultFullyQualifiedRemoteBranch: string;
     readonly repositoryDefaultRemote: string;
     readonly repositoryUrl: string | undefined;
-    // @internal
-    readonly rushConfigurationJson: IRushConfigurationJson;
-    readonly rushJsonFile: string;
-    readonly rushJsonFolder: string;
     // @deprecated
     readonly rushLinkJsonFilename: string;
     readonly shrinkwrapFilename: string;
@@ -388,7 +401,6 @@ export class RushConfiguration {
     readonly telemetryEnabled: boolean;
     readonly tempShrinkwrapFilename: string;
     readonly tempShrinkwrapPreinstallFilename: string;
-    static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined;
     tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
     // @beta (undocumented)
     readonly versionPolicyConfiguration: VersionPolicyConfiguration;

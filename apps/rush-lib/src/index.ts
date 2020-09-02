@@ -9,6 +9,7 @@
 export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 
 export {
+  MinimalRushConfiguration,
   RushConfiguration,
   ITryFindRushJsonLocationOptions,
   ResolutionStrategy,
