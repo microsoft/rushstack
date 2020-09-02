@@ -69,6 +69,9 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
 // @public (undocumented)
 export type CopyFromCacheMode = 'hardlink' | 'copy';
 
+// @beta (undocumented)
+export type CustomActionParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
+
 // @public (undocumented)
 export class DevDeployStageHooks extends StageHooksBase<IDevDeployStageProperties> {
 }
@@ -99,6 +102,8 @@ export class HeftSession {
     readonly hooks: IHeftSessionHooks;
     // @internal (undocumented)
     readonly metricsCollector: _MetricsCollector;
+    // @beta (undocumented)
+    readonly registerAction: RegisterAction;
     // @beta
     readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
     requestScopedLogger(loggerName: string): ScopedLogger;
@@ -188,6 +193,59 @@ export interface ICompileSubstageProperties {
 export interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsConfiguration {
     destinationFolderNames: string[];
     sourceFolderName: string;
+}
+
+// @beta (undocumented)
+export interface ICustomActionOptions<TParameters> {
+    // (undocumented)
+    actionName: string;
+    // (undocumented)
+    callback: (parameters: TParameters) => void | Promise<void>;
+    // (undocumented)
+    documentation: string;
+    // (undocumented)
+    parameters?: {
+        [K in keyof TParameters]: ICustomActionParameter<TParameters[K]>;
+    };
+    // (undocumented)
+    summary?: string;
+}
+
+// @beta (undocumented)
+export type ICustomActionParameter<TParameter> = TParameter extends boolean ? ICustomActionParameterFlag : TParameter extends number ? ICustomActionParameterInteger : TParameter extends string ? ICustomActionParameterString : TParameter extends ReadonlyArray<string> ? ICustomActionParameterStringList : never;
+
+// @beta (undocumented)
+export interface ICustomActionParameterBase<TParameter extends CustomActionParameterType> {
+    // (undocumented)
+    description: string;
+    // (undocumented)
+    kind: 'flag' | 'integer' | 'string' | 'stringList';
+    // (undocumented)
+    paramterLongName: string;
+}
+
+// @beta (undocumented)
+export interface ICustomActionParameterFlag extends ICustomActionParameterBase<boolean> {
+    // (undocumented)
+    kind: 'flag';
+}
+
+// @beta (undocumented)
+export interface ICustomActionParameterInteger extends ICustomActionParameterBase<number> {
+    // (undocumented)
+    kind: 'integer';
+}
+
+// @beta (undocumented)
+export interface ICustomActionParameterString extends ICustomActionParameterBase<string> {
+    // (undocumented)
+    kind: 'string';
+}
+
+// @beta (undocumented)
+export interface ICustomActionParameterStringList extends ICustomActionParameterBase<ReadonlyArray<string>> {
+    // (undocumented)
+    kind: 'stringList';
 }
 
 // @public (undocumented)
@@ -361,6 +419,9 @@ export class MetricsCollectorHooks {
     flushAndTeardown: AsyncParallelHook;
     recordMetric: SyncHook<string, IMetricsData>;
 }
+
+// @beta (undocumented)
+export type RegisterAction = <TParameters>(action: ICustomActionOptions<TParameters>) => void;
 
 // @beta (undocumented)
 export type RequestAccessToPluginByNameCallback = (pluginToAccessName: string, pluginApply: (pluginAccessor: object) => void) => void;

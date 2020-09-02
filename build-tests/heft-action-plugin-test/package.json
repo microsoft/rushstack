@@ -1,0 +1,15 @@
+{
+  "name": "heft-action-plugin-test",
+  "description": "This project exercises a custom Heft action",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft my-custom-action"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "heft-action-plugin": "workspace:*"
+  }
+}

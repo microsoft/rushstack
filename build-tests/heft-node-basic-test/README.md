@@ -8,4 +8,4 @@ The following tasks are configured:
 - [ESLint](https://rushstack.io/pages/heft_tasks/eslint/) coding style validator
 - [Jest](https://rushstack.io/pages/heft_tasks/jest/) test runner
 
-Please see the [Heft documentation](http://localhost:4000/pages/heft/overview/) for documentation and tutorials.
+Please see the [Heft documentation](https://rushstack.io/pages/heft/overview/) for documentation and tutorials.

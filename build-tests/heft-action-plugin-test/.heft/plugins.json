@@ -1,0 +1,21 @@
+/**
+ * Specifies the plugins that will be loaded by Heft.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/plugins.schema.json",
+
+  /**
+   * The list of Heft plugins to be loaded.
+   */
+  "plugins": [
+    /**
+     * The list of Heft plugins to be loaded.
+     */
+    {
+      /**
+       * The path to the plugin package.
+       */
+      "plugin": "heft-action-plugin"
+    }
+  ]
+}
