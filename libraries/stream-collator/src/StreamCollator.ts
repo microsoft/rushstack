@@ -1,18 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CollatedWriter, IStdioMessage } from './CollatedWriter';
+import { CollatedWriter } from './CollatedWriter';
+import { ICollatedChunk } from './CollatedChunk';
 
 /**
  * @public
  */
-export type WriteToStreamCallback<TMessage> = (message: TMessage) => void;
+export type WriteToStreamCallback = (chunk: ICollatedChunk) => void;
 
 /**
  * @public
  */
-export interface IStreamCollatorOptions<TMessage> {
-  writeToStream: WriteToStreamCallback<TMessage>;
+export interface IStreamCollatorOptions {
+  writeToStream: WriteToStreamCallback;
 }
 
 /**
@@ -20,18 +21,18 @@ export interface IStreamCollatorOptions<TMessage> {
  *
  * @public
  */
-export class StreamCollator<TMessage = IStdioMessage> {
+export class StreamCollator {
   private _taskNames: Set<string> = new Set();
-  private _writers: Set<CollatedWriter<TMessage>> = new Set();
-  private _activeWriter: CollatedWriter<TMessage> | undefined = undefined;
+  private _writers: Set<CollatedWriter> = new Set();
+  private _activeWriter: CollatedWriter | undefined = undefined;
 
-  public readonly writeToStream: WriteToStreamCallback<TMessage>;
+  public readonly writeToStream: WriteToStreamCallback;
 
-  public constructor(options: IStreamCollatorOptions<TMessage>) {
+  public constructor(options: IStreamCollatorOptions) {
     this.writeToStream = options.writeToStream;
   }
 
-  public get activeWriter(): CollatedWriter<TMessage> | undefined {
+  public get activeWriter(): CollatedWriter | undefined {
     return this._activeWriter;
   }
 
@@ -42,7 +43,7 @@ export class StreamCollator<TMessage = IStdioMessage> {
     return undefined;
   }
 
-  public get writers(): ReadonlySet<CollatedWriter<TMessage>> {
+  public get writers(): ReadonlySet<CollatedWriter> {
     return this._writers;
   }
 
@@ -50,12 +51,12 @@ export class StreamCollator<TMessage = IStdioMessage> {
    * Registers a task into the list of active buffers and returns a ITaskWriter for the
    * calling process to use to manage output.
    */
-  public registerTask(taskName: string): CollatedWriter<TMessage> {
+  public registerTask(taskName: string): CollatedWriter {
     if (this._taskNames.has(taskName)) {
       throw new Error('A task with that name has already been registered');
     }
 
-    const writer: CollatedWriter<TMessage> = new CollatedWriter<TMessage>(taskName, this);
+    const writer: CollatedWriter = new CollatedWriter(taskName, this);
 
     this._writers.add(writer);
     this._taskNames.add(writer.taskName);
@@ -70,7 +71,7 @@ export class StreamCollator<TMessage = IStdioMessage> {
   /**
    * @internal
    */
-  public _setActiveWriter(writer: CollatedWriter<TMessage>): void {
+  public _setActiveWriter(writer: CollatedWriter): void {
     this._activeWriter = writer;
   }
 }
