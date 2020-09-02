@@ -23,9 +23,15 @@ export {
 } from './metrics/MetricsCollector';
 export { ScopedLogger, IScopedLogger } from './pluginFramework/logging/ScopedLogger';
 export {
+  CustomActionParameterType,
   ICustomActionOptions,
   ICustomActionParameter,
-  CustomActionParameterType
+  ICustomActionParameterBase,
+  ICustomActionParameterFlag,
+  ICustomActionParameterInteger,
+  ICustomActionParameters,
+  ICustomActionParameterString,
+  ICustomActionParameterStringList
 } from './cli/actions/CustomAction';
 
 // Stages

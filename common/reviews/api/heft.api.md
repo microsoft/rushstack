@@ -196,31 +196,62 @@ export interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsC
 }
 
 // @alpha (undocumented)
-export interface ICustomActionOptions {
+export interface ICustomActionOptions<TParameters extends ICustomActionParameters> {
     // (undocumented)
     actionName: string;
     // (undocumented)
-    callback: (parameters: {
-        [callbackValueName: string]: CustomActionParameterType;
-    }) => void | Promise<void>;
+    callback: (parameters: TParameters) => void | Promise<void>;
     // (undocumented)
     documentation: string;
     // (undocumented)
-    parameters?: ICustomActionParameter[];
+    parameters?: {
+        [K in keyof TParameters]: ICustomActionParameter<TParameters[K]>;
+    };
     // (undocumented)
     summary?: string;
 }
 
 // @alpha (undocumented)
-export interface ICustomActionParameter {
-    // (undocumented)
-    callbackValueName: string;
+export type ICustomActionParameter<TParameter> = TParameter extends boolean ? ICustomActionParameterFlag : TParameter extends number ? ICustomActionParameterInteger : TParameter extends string ? ICustomActionParameterString : TParameter extends ReadonlyArray<string> ? ICustomActionParameterStringList : never;
+
+// @alpha (undocumented)
+export interface ICustomActionParameterBase<TParameter extends CustomActionParameterType> {
     // (undocumented)
     description: string;
     // (undocumented)
     kind: 'flag' | 'integer' | 'string' | 'stringList';
     // (undocumented)
     paramterLongName: string;
+}
+
+// @alpha (undocumented)
+export interface ICustomActionParameterFlag extends ICustomActionParameterBase<boolean> {
+    // (undocumented)
+    kind: 'flag';
+}
+
+// @alpha (undocumented)
+export interface ICustomActionParameterInteger extends ICustomActionParameterBase<number> {
+    // (undocumented)
+    kind: 'integer';
+}
+
+// @alpha (undocumented)
+export interface ICustomActionParameters {
+    // (undocumented)
+    [callbackName: string]: CustomActionParameterType;
+}
+
+// @alpha (undocumented)
+export interface ICustomActionParameterString extends ICustomActionParameterBase<string> {
+    // (undocumented)
+    kind: 'string';
+}
+
+// @alpha (undocumented)
+export interface ICustomActionParameterStringList extends ICustomActionParameterBase<ReadonlyArray<string>> {
+    // (undocumented)
+    kind: 'stringList';
 }
 
 // @public (undocumented)
@@ -396,7 +427,7 @@ export class MetricsCollectorHooks {
 }
 
 // @alpha (undocumented)
-export type RegisterAction = (action: ICustomActionOptions) => void;
+export type RegisterAction = <TParameters extends ICustomActionParameters>(action: ICustomActionOptions<TParameters>) => void;
 
 // @beta (undocumented)
 export type RequestAccessToPluginByNameCallback = (pluginToAccessName: string, pluginApply: (pluginAccessor: object) => void) => void;

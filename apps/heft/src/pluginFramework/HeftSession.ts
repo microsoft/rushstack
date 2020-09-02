@@ -12,10 +12,12 @@ import { IHeftPlugin } from './IHeftPlugin';
 import { IInternalHeftSessionOptions } from './InternalHeftSession';
 import { ScopedLogger } from './logging/ScopedLogger';
 import { LoggingManager } from './logging/LoggingManager';
-import { ICustomActionOptions } from '../cli/actions/CustomAction';
+import { ICustomActionOptions, ICustomActionParameters } from '../cli/actions/CustomAction';
 
 /** @alpha */
-export type RegisterAction = (action: ICustomActionOptions) => void;
+export type RegisterAction = <TParameters extends ICustomActionParameters>(
+  action: ICustomActionOptions<TParameters>
+) => void;
 
 /**
  * @public

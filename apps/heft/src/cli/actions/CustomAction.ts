@@ -11,33 +11,71 @@ import {
 import { HeftActionBase, IHeftActionBaseOptions } from './HeftActionBase';
 
 /** @alpha */
-export interface ICustomActionParameter {
+export interface ICustomActionParameterFlag extends ICustomActionParameterBase<boolean> {
+  kind: 'flag';
+}
+
+/** @alpha */
+export interface ICustomActionParameterInteger extends ICustomActionParameterBase<number> {
+  kind: 'integer';
+}
+
+/** @alpha */
+export interface ICustomActionParameterString extends ICustomActionParameterBase<string> {
+  kind: 'string';
+}
+
+/** @alpha */
+export interface ICustomActionParameterStringList extends ICustomActionParameterBase<ReadonlyArray<string>> {
+  kind: 'stringList';
+}
+
+/** @alpha */
+export interface ICustomActionParameterBase<TParameter extends CustomActionParameterType> {
   kind: 'flag' | 'integer' | 'string' | 'stringList'; // TODO: Add "choice"
 
   paramterLongName: string;
   description: string;
-  callbackValueName: string;
 }
+
+/** @alpha */
+export type ICustomActionParameter<TParameter> = TParameter extends boolean
+  ? ICustomActionParameterFlag
+  : TParameter extends number
+  ? ICustomActionParameterInteger
+  : TParameter extends string
+  ? ICustomActionParameterString
+  : TParameter extends ReadonlyArray<string>
+  ? ICustomActionParameterStringList
+  : never;
 
 /** @alpha */
 export type CustomActionParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
 
 /** @alpha */
-export interface ICustomActionOptions {
+export interface ICustomActionParameters {
+  [callbackName: string]: CustomActionParameterType;
+}
+
+/** @alpha */
+export interface ICustomActionOptions<TParameters extends ICustomActionParameters> {
   actionName: string;
   documentation: string;
   summary?: string;
 
-  parameters?: ICustomActionParameter[];
+  parameters?: { [K in keyof TParameters]: ICustomActionParameter<TParameters[K]> };
 
-  callback: (parameters: { [callbackValueName: string]: CustomActionParameterType }) => void | Promise<void>;
+  callback: (parameters: TParameters) => void | Promise<void>;
 }
 
-export class CustomAction extends HeftActionBase {
-  private _customActionOptions: ICustomActionOptions;
+export class CustomAction<TParameters extends ICustomActionParameters> extends HeftActionBase {
+  private _customActionOptions: ICustomActionOptions<TParameters>;
   private _parameterValues: Map<string, () => CustomActionParameterType>;
 
-  public constructor(customActionOptions: ICustomActionOptions, options: IHeftActionBaseOptions) {
+  public constructor(
+    customActionOptions: ICustomActionOptions<TParameters>,
+    options: IHeftActionBaseOptions
+  ) {
     super(
       {
         actionName: customActionOptions.actionName,
@@ -54,9 +92,11 @@ export class CustomAction extends HeftActionBase {
     super.onDefineParameters();
 
     this._parameterValues = new Map<string, () => CustomActionParameterType>();
-    for (const parameterOption of this._customActionOptions.parameters || []) {
-      if (this._parameterValues.has(parameterOption.callbackValueName)) {
-        throw new Error(`Duplicate callbackValueName: ${parameterOption.callbackValueName}`);
+    for (const [callbackValueName, parameterOption] of Object.entries(
+      this._customActionOptions.parameters || {}
+    )) {
+      if (this._parameterValues.has(callbackValueName)) {
+        throw new Error(`Duplicate callbackValueName: ${callbackValueName}`);
       }
 
       let getParameterValue: () => CustomActionParameterType;
@@ -108,7 +148,7 @@ export class CustomAction extends HeftActionBase {
         }
       }
 
-      this._parameterValues.set(parameterOption.callbackValueName, getParameterValue);
+      this._parameterValues.set(callbackValueName, getParameterValue);
     }
   }
 
@@ -121,6 +161,6 @@ export class CustomAction extends HeftActionBase {
       parameterValues[callbackName] = getParameterValue();
     }
 
-    await this._customActionOptions.callback(parameterValues);
+    await this._customActionOptions.callback(parameterValues as TParameters);
   }
 }

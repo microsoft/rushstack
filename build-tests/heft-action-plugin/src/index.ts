@@ -7,17 +7,20 @@ class HeftActionPlugin implements IHeftPlugin {
   public readonly pluginName: string = 'heft-action-plugin';
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftSession.registerAction({
+    interface IMyCustomActionParameters {
+      production: boolean;
+    }
+
+    heftSession.registerAction<IMyCustomActionParameters>({
       actionName: 'my-custom-action',
       documentation: 'An example custom action',
-      parameters: [
-        {
+      parameters: {
+        production: {
           kind: 'flag',
           paramterLongName: '--production',
-          description: 'Run in production mode',
-          callbackValueName: 'production'
+          description: 'Run in production mode'
         }
-      ],
+      },
       callback: ({ production }) => {
         const logger: ScopedLogger = heftSession.requestScopedLogger('custom-action');
         logger.terminal.writeLine(
