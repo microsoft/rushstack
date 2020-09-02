@@ -5,7 +5,6 @@ import { SyncHook } from 'tapable';
 
 import { MetricsCollector, MetricsCollectorHooks } from '../metrics/MetricsCollector';
 import { ICleanStageContext } from '../stages/CleanStage';
-import { IDevDeployStageContext } from '../stages/DevDeployStage';
 import { IBuildStageContext } from '../stages/BuildStage';
 import { ITestStageContext } from '../stages/TestStage';
 import { IHeftPlugin } from './IHeftPlugin';
@@ -25,7 +24,6 @@ export interface IHeftSessionHooks {
 
   build: SyncHook<IBuildStageContext>;
   clean: SyncHook<ICleanStageContext>;
-  devDeploy: SyncHook<IDevDeployStageContext>;
   test: SyncHook<ITestStageContext>;
 }
 
@@ -91,7 +89,6 @@ export class HeftSession {
 
       build: internalSessionOptions.buildStage.stageInitializationHook,
       clean: internalSessionOptions.cleanStage.stageInitializationHook,
-      devDeploy: internalSessionOptions.devDeployStage.stageInitializationHook,
       test: internalSessionOptions.testStage.stageInitializationHook
     };
 

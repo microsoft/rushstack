@@ -7,7 +7,6 @@ import { IHeftPlugin } from './IHeftPlugin';
 import { HeftSession, RegisterAction } from './HeftSession';
 import { BuildStage } from '../stages/BuildStage';
 import { CleanStage } from '../stages/CleanStage';
-import { DevDeployStage } from '../stages/DevDeployStage';
 import { TestStage } from '../stages/TestStage';
 import { MetricsCollector } from '../metrics/MetricsCollector';
 import { LoggingManager } from './logging/LoggingManager';
@@ -18,7 +17,6 @@ import { LoggingManager } from './logging/LoggingManager';
 export interface IInternalHeftSessionOptions {
   buildStage: BuildStage;
   cleanStage: CleanStage;
-  devDeployStage: DevDeployStage;
   testStage: TestStage;
 
   metricsCollector: MetricsCollector;

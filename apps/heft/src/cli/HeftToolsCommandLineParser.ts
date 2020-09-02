@@ -16,7 +16,6 @@ import {
 import { MetricsCollector } from '../metrics/MetricsCollector';
 import { CleanAction } from './actions/CleanAction';
 import { BuildAction } from './actions/BuildAction';
-import { DevDeployAction } from './actions/DevDeployAction';
 import { StartAction } from './actions/StartAction';
 import { TestAction } from './actions/TestAction';
 import { PluginManager } from '../pluginFramework/PluginManager';
@@ -25,7 +24,6 @@ import { IHeftActionBaseOptions, IStages } from './actions/HeftActionBase';
 import { InternalHeftSession } from '../pluginFramework/InternalHeftSession';
 import { CleanStage } from '../stages/CleanStage';
 import { BuildStage } from '../stages/BuildStage';
-import { DevDeployStage } from '../stages/DevDeployStage';
 import { TestStage } from '../stages/TestStage';
 import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 import { ICustomActionOptions, CustomAction } from './actions/CustomAction';
@@ -73,7 +71,6 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     const stages: IStages = {
       buildStage: new BuildStage(this._heftConfiguration, this._loggingManager),
       cleanStage: new CleanStage(this._heftConfiguration, this._loggingManager),
-      devDeployStage: new DevDeployStage(this._heftConfiguration, this._loggingManager),
       testStage: new TestStage(this._heftConfiguration, this._loggingManager)
     };
     const actionOptions: IHeftActionBaseOptions = {
@@ -104,13 +101,11 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
 
     const cleanAction: CleanAction = new CleanAction(actionOptions);
     const buildAction: BuildAction = new BuildAction(actionOptions);
-    const devDeployAction: DevDeployAction = new DevDeployAction(actionOptions);
     const startAction: StartAction = new StartAction(actionOptions);
     const testAction: TestAction = new TestAction(actionOptions);
 
     this.addAction(cleanAction);
     this.addAction(buildAction);
-    this.addAction(devDeployAction);
     this.addAction(startAction);
     this.addAction(testAction);
   }
