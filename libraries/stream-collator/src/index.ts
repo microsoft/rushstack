@@ -13,6 +13,7 @@
  * @packageDocumentation
  */
 
-export { StreamCollator, WriteToStreamCallback, IStreamCollatorOptions } from './StreamCollator';
+export { StreamCollator, IStreamCollatorOptions } from './StreamCollator';
 export { CollatedWriter, CollatedWriterState } from './CollatedWriter';
 export { ICollatedChunk, StreamKind } from './CollatedChunk';
+export { CollatedTerminal, WriteToStreamCallback } from './CollatedTerminal';

@@ -4,6 +4,17 @@
 
 ```ts
 
+// @public (undocumented)
+export class CollatedTerminal {
+    constructor(writeToStream: WriteToStreamCallback);
+    // (undocumented)
+    writeChunk(chunk: ICollatedChunk): void;
+    // (undocumented)
+    writeStderrLine(message: string): void;
+    // (undocumented)
+    writeStdoutLine(message: string): void;
+    }
+
 // @public
 export class CollatedWriter {
     constructor(taskName: string, collator: StreamCollator);
@@ -18,8 +29,9 @@ export class CollatedWriter {
     readonly state: CollatedWriterState;
     // (undocumented)
     readonly taskName: string;
-    writeChunk(chunk: ICollatedChunk): void;
-}
+    // (undocumented)
+    readonly terminal: CollatedTerminal;
+    }
 
 // @public (undocumented)
 export enum CollatedWriterState {
@@ -56,10 +68,10 @@ export class StreamCollator {
     // @internal (undocumented)
     _setActiveWriter(writer: CollatedWriter): void;
     // (undocumented)
-    readonly writers: ReadonlySet<CollatedWriter>;
+    readonly terminal: CollatedTerminal;
     // (undocumented)
-    readonly writeToStream: WriteToStreamCallback;
-}
+    readonly writers: ReadonlySet<CollatedWriter>;
+    }
 
 // @public (undocumented)
 export enum StreamKind {

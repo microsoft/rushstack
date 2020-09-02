@@ -47,7 +47,7 @@ describe('StreamCollator tests', () => {
       const writer: CollatedWriter = collator.registerTask(taskName);
       writer.close();
       expect(() => {
-        writer.writeChunk({ text: '1', stream: StreamKind.Stdout });
+        writer.terminal.writeChunk({ text: '1', stream: StreamKind.Stdout });
       }).toThrow();
     });
   });
@@ -57,7 +57,7 @@ describe('StreamCollator tests', () => {
       const taskA: CollatedWriter = collator.registerTask('A');
       const text: string = 'Hello World';
 
-      taskA.writeChunk({ text, stream: StreamKind.Stdout });
+      taskA.terminal.writeChunk({ text, stream: StreamKind.Stdout });
 
       expect(outputMessages).toEqual([{ text, stream: StreamKind.Stdout }]);
     });
@@ -66,7 +66,7 @@ describe('StreamCollator tests', () => {
       const taskA: CollatedWriter = collator.registerTask('A');
       const error: string = 'Critical error';
 
-      taskA.writeChunk({ text: error, stream: StreamKind.Stderr });
+      taskA.terminal.writeChunk({ text: error, stream: StreamKind.Stderr });
 
       expect(outputMessages).toEqual([{ text: error, stream: StreamKind.Stderr }]);
 
@@ -82,15 +82,15 @@ describe('StreamCollator tests', () => {
       const taskA: CollatedWriter = collator.registerTask('A');
       const taskB: CollatedWriter = collator.registerTask('B');
 
-      taskA.writeChunk({ text: '1', stream: StreamKind.Stdout });
+      taskA.terminal.writeChunk({ text: '1', stream: StreamKind.Stdout });
       expect(taskA.accumulatedChunks).toEqual([]);
       expect(outputMessages).toEqual([{ text: '1', stream: StreamKind.Stdout }]);
 
-      taskB.writeChunk({ text: '2', stream: StreamKind.Stdout });
+      taskB.terminal.writeChunk({ text: '2', stream: StreamKind.Stdout });
       expect(taskB.accumulatedChunks).toEqual([{ text: '2', stream: StreamKind.Stdout }]);
       expect(outputMessages).toEqual([{ text: '1', stream: StreamKind.Stdout }]);
 
-      taskA.writeChunk({ text: '3', stream: StreamKind.Stdout });
+      taskA.terminal.writeChunk({ text: '3', stream: StreamKind.Stdout });
       expect(outputMessages).toEqual([
         { text: '1', stream: StreamKind.Stdout },
         { text: '3', stream: StreamKind.Stdout }
@@ -117,11 +117,11 @@ describe('StreamCollator tests', () => {
       const taskA: CollatedWriter = collator.registerTask('A');
       const taskB: CollatedWriter = collator.registerTask('B');
 
-      taskA.writeChunk({ text: '1', stream: StreamKind.Stdout });
+      taskA.terminal.writeChunk({ text: '1', stream: StreamKind.Stdout });
       expect(outputMessages).toEqual([{ text: '1', stream: StreamKind.Stdout }]);
       taskA.close();
 
-      taskB.writeChunk({ text: '2', stream: StreamKind.Stdout });
+      taskB.terminal.writeChunk({ text: '2', stream: StreamKind.Stdout });
       expect(outputMessages).toEqual([
         { text: '1', stream: StreamKind.Stdout },
         { text: '2', stream: StreamKind.Stdout }
@@ -137,10 +137,10 @@ describe('StreamCollator tests', () => {
       const taskA: CollatedWriter = collator.registerTask('A');
       const taskB: CollatedWriter = collator.registerTask('B');
 
-      taskA.writeChunk({ text: '1', stream: StreamKind.Stdout });
+      taskA.terminal.writeChunk({ text: '1', stream: StreamKind.Stdout });
       expect(outputMessages).toEqual([{ text: '1', stream: StreamKind.Stdout }]);
 
-      taskB.writeChunk({ text: '2', stream: StreamKind.Stdout });
+      taskB.terminal.writeChunk({ text: '2', stream: StreamKind.Stdout });
       expect(outputMessages).toEqual([{ text: '1', stream: StreamKind.Stdout }]);
 
       taskB.close();
@@ -157,7 +157,7 @@ describe('StreamCollator tests', () => {
   describe('Test summary', () => {
     it('should report stdout if there is no stderr', () => {
       const taskA: CollatedWriter = collator.registerTask('A');
-      taskA.writeChunk({ text: 'stdout 1\nstdout 2\n', stream: StreamKind.Stdout });
+      taskA.terminal.writeChunk({ text: 'stdout 1\nstdout 2\n', stream: StreamKind.Stdout });
       taskA.close();
 
       expect(taskA.getSummaryReport()).toMatchSnapshot();
@@ -165,18 +165,18 @@ describe('StreamCollator tests', () => {
 
     it('should abridge extra lines', () => {
       const taskA: CollatedWriter = collator.registerTask('A');
-      taskA.writeChunk({ text: 'discarded stdout\n', stream: StreamKind.Stdout });
+      taskA.terminal.writeChunk({ text: 'discarded stdout\n', stream: StreamKind.Stdout });
       for (let i: number = 0; i < 10; ++i) {
-        taskA.writeChunk({ text: `leading ${i}\n`, stream: StreamKind.Stderr });
-        taskA.writeChunk({ text: 'discarded stdout\n', stream: StreamKind.Stdout });
+        taskA.terminal.writeChunk({ text: `leading ${i}\n`, stream: StreamKind.Stderr });
+        taskA.terminal.writeChunk({ text: 'discarded stdout\n', stream: StreamKind.Stdout });
       }
 
-      taskA.writeChunk({ text: `discarded middle 1\n`, stream: StreamKind.Stderr });
-      taskA.writeChunk({ text: `discarded middle 2\n`, stream: StreamKind.Stderr });
+      taskA.terminal.writeChunk({ text: `discarded middle 1\n`, stream: StreamKind.Stderr });
+      taskA.terminal.writeChunk({ text: `discarded middle 2\n`, stream: StreamKind.Stderr });
 
       for (let i: number = 0; i < 10; ++i) {
-        taskA.writeChunk({ text: `trailing ${i}\n`, stream: StreamKind.Stderr });
-        taskA.writeChunk({ text: 'discarded stdout\n', stream: StreamKind.Stdout });
+        taskA.terminal.writeChunk({ text: `trailing ${i}\n`, stream: StreamKind.Stderr });
+        taskA.terminal.writeChunk({ text: 'discarded stdout\n', stream: StreamKind.Stdout });
       }
 
       taskA.close();
@@ -186,11 +186,11 @@ describe('StreamCollator tests', () => {
 
     it('should concatenate partial lines', () => {
       const taskA: CollatedWriter = collator.registerTask('A');
-      taskA.writeChunk({ text: 'abc', stream: StreamKind.Stderr });
-      taskA.writeChunk({ text: '', stream: StreamKind.Stderr });
-      taskA.writeChunk({ text: 'de\nf\n\ng', stream: StreamKind.Stderr });
-      taskA.writeChunk({ text: '\n', stream: StreamKind.Stderr });
-      taskA.writeChunk({ text: 'h', stream: StreamKind.Stderr });
+      taskA.terminal.writeChunk({ text: 'abc', stream: StreamKind.Stderr });
+      taskA.terminal.writeChunk({ text: '', stream: StreamKind.Stderr });
+      taskA.terminal.writeChunk({ text: 'de\nf\n\ng', stream: StreamKind.Stderr });
+      taskA.terminal.writeChunk({ text: '\n', stream: StreamKind.Stderr });
+      taskA.terminal.writeChunk({ text: 'h', stream: StreamKind.Stderr });
       taskA.close();
 
       expect(taskA.getSummaryReport()).toMatchSnapshot();
