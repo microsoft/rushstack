@@ -531,6 +531,18 @@
 
     // heft-* projects
     {
+      "packageName": "heft-example-plugin-01",
+      "projectFolder": "build-tests/heft-example-plugin-01",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-example-plugin-02",
+      "projectFolder": "build-tests/heft-example-plugin-02",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-minimal-rig-test",
       "projectFolder": "build-tests/heft-minimal-rig-test",
       "reviewCategory": "tests",

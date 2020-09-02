@@ -9,7 +9,11 @@ export {
   ICompilerPackage,
   IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
 } from './configuration/HeftConfiguration';
-export { HeftSession, IHeftSessionHooks } from './pluginFramework/HeftSession';
+export {
+  HeftSession,
+  IHeftSessionHooks,
+  RequestAccessToPluginByNameCallback
+} from './pluginFramework/HeftSession';
 export {
   MetricsCollectorHooks,
   IMetricsData,

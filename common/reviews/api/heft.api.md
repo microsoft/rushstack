@@ -99,6 +99,8 @@ export class HeftSession {
     readonly hooks: IHeftSessionHooks;
     // @internal (undocumented)
     readonly metricsCollector: _MetricsCollector;
+    // @beta
+    readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
     requestScopedLogger(loggerName: string): ScopedLogger;
 }
 
@@ -225,9 +227,11 @@ export interface _IHeftConfigurationInitializationOptions {
 // @public (undocumented)
 export interface IHeftPlugin<TOptions = void> {
     // (undocumented)
-    apply: (heftSession: HeftSession, heftConfiguration: HeftConfiguration, options?: TOptions) => void;
+    readonly accessor?: object;
     // (undocumented)
-    displayName: string;
+    apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration, options?: TOptions): void;
+    // (undocumented)
+    readonly pluginName: string;
 }
 
 // @public (undocumented)
@@ -357,6 +361,9 @@ export class MetricsCollectorHooks {
     flushAndTeardown: AsyncParallelHook;
     recordMetric: SyncHook<string, IMetricsData>;
 }
+
+// @beta (undocumented)
+export type RequestAccessToPluginByNameCallback = (pluginToAccessName: string, pluginApply: (pluginAccessor: object) => void) => void;
 
 // @public (undocumented)
 export class ScopedLogger implements IScopedLogger {

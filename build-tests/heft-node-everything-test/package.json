@@ -15,6 +15,8 @@
     "@types/heft-jest": "1.0.1",
     "@types/node": "10.17.13",
     "eslint": "~7.2.0",
+    "heft-example-plugin-01": "workspace:*",
+    "heft-example-plugin-02": "workspace:*",
     "tslint-microsoft-contrib": "~6.2.0",
     "tslint": "~5.20.1",
     "typescript": "~3.9.5"

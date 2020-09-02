@@ -23,7 +23,7 @@ interface IRunApiExtractorOptions {
 }
 
 export class ApiExtractorPlugin implements IHeftPlugin {
-  public readonly displayName: string = PLUGIN_NAME;
+  public readonly pluginName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     const { buildFolder } = heftConfiguration;

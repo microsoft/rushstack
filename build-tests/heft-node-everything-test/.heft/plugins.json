@@ -22,5 +22,18 @@
     //   */
     //  // "options": { }
     // }
+
+    {
+      /**
+       * The path to the plugin package.
+       */
+      "plugin": "heft-example-plugin-01"
+    },
+    {
+      /**
+       * The path to the plugin package.
+       */
+      "plugin": "heft-example-plugin-02"
+    }
   ]
 }

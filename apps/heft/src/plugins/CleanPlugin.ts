@@ -12,7 +12,7 @@ import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 const PLUGIN_NAME: string = 'CleanPlugin';
 
 export class CleanPlugin implements IHeftPlugin {
-  public readonly displayName: string = PLUGIN_NAME;
+  public readonly pluginName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     heftSession.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanStageContext) => {

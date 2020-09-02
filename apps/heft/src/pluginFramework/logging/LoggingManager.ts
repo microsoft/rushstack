@@ -33,7 +33,7 @@ export class LoggingManager {
     if (existingScopedLogger) {
       throw new Error(
         `A named logger with name "${loggerName}" has already been requested ` +
-          `by plugin "${existingScopedLogger._requestingPlugin.displayName}".`
+          `by plugin "${existingScopedLogger._requestingPlugin.pluginName}".`
       );
     } else {
       const scopedLogger: ScopedLogger = new ScopedLogger({

@@ -178,6 +178,8 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     for (const pluginSpecifier of pluginSpecifiers) {
       this._pluginManager.initializePlugin(pluginSpecifier);
     }
+
+    this._pluginManager.afterInitializeAllPlugins();
   }
 
   private async _reportErrorAndSetExitCode(error: Error): Promise<void> {

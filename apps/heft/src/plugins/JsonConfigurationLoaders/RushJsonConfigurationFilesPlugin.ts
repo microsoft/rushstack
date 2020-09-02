@@ -7,7 +7,7 @@ import * as RushUtilities from '../../utilities/RushUtilities';
 import { JsonConfigurationFilesPluginBase } from './JsonConfigurationFilesPluginBase';
 
 export class RushJsonConfigurationFilesPlugin extends JsonConfigurationFilesPluginBase {
-  public readonly displayName: string = 'rushJsonConfigurationFiles';
+  public readonly pluginName: string = 'rushJsonConfigurationFiles';
 
   private __rushConfigurationFolder: string | undefined | null = undefined;
 

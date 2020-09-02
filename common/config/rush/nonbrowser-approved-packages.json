@@ -455,6 +455,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "heft-example-plugin-01",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "heft-example-plugin-02",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "heft-minimal-rig-test",
       "allowedCategories": [ "tests" ]
     },
@@ -656,7 +664,7 @@
     },
     {
       "name": "tapable",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "tar",

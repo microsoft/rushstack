@@ -19,7 +19,7 @@ const PLUGIN_NAME: string = 'JestPlugin';
 const JEST_CONFIGURATION_LOCATION: string = './config/jest.config.json';
 
 export class JestPlugin implements IHeftPlugin {
-  public readonly displayName: string = PLUGIN_NAME;
+  public readonly pluginName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     if (FileSystem.exists(path.join(heftConfiguration.buildFolder, JEST_CONFIGURATION_LOCATION))) {

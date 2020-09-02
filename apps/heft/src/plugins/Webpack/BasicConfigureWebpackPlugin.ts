@@ -38,7 +38,7 @@ const WEBPACK_CONFIG_FILENAME: string = 'webpack.config.js';
 const WEBPACK_DEV_CONFIG_FILENAME: string = 'webpack.dev.config.js';
 
 export class BasicConfigureWebpackPlugin implements IHeftPlugin {
-  public readonly displayName: string = PLUGIN_NAME;
+  public readonly pluginName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
