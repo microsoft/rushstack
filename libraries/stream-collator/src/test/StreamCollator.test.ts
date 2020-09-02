@@ -153,4 +153,47 @@ describe('StreamCollator tests', () => {
       ]);
     });
   });
+
+  describe('Test summary', () => {
+    it('should report stdout if there is no stderr', () => {
+      const taskA: CollatedWriter = collator.registerTask('A');
+      taskA.writeChunk({ text: 'stdout 1\nstdout 2\n', stream: StreamKind.Stdout });
+      taskA.close();
+
+      expect(taskA.getSummaryReport()).toMatchSnapshot();
+    });
+
+    it('should abridge extra lines', () => {
+      const taskA: CollatedWriter = collator.registerTask('A');
+      taskA.writeChunk({ text: 'discarded stdout\n', stream: StreamKind.Stdout });
+      for (let i: number = 0; i < 10; ++i) {
+        taskA.writeChunk({ text: `leading ${i}\n`, stream: StreamKind.Stderr });
+        taskA.writeChunk({ text: 'discarded stdout\n', stream: StreamKind.Stdout });
+      }
+
+      taskA.writeChunk({ text: `discarded middle 1\n`, stream: StreamKind.Stderr });
+      taskA.writeChunk({ text: `discarded middle 2\n`, stream: StreamKind.Stderr });
+
+      for (let i: number = 0; i < 10; ++i) {
+        taskA.writeChunk({ text: `trailing ${i}\n`, stream: StreamKind.Stderr });
+        taskA.writeChunk({ text: 'discarded stdout\n', stream: StreamKind.Stdout });
+      }
+
+      taskA.close();
+
+      expect(taskA.getSummaryReport()).toMatchSnapshot();
+    });
+
+    it('should concatenate partial lines', () => {
+      const taskA: CollatedWriter = collator.registerTask('A');
+      taskA.writeChunk({ text: 'abc', stream: StreamKind.Stderr });
+      taskA.writeChunk({ text: '', stream: StreamKind.Stderr });
+      taskA.writeChunk({ text: 'de\nf\n\ng', stream: StreamKind.Stderr });
+      taskA.writeChunk({ text: '\n', stream: StreamKind.Stderr });
+      taskA.writeChunk({ text: 'h', stream: StreamKind.Stderr });
+      taskA.close();
+
+      expect(taskA.getSummaryReport()).toMatchSnapshot();
+    });
+  });
 });

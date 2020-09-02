@@ -13,6 +13,8 @@ export class CollatedWriter {
     // @internal (undocumented)
     readonly _collator: StreamCollator;
     // (undocumented)
+    getSummaryReport(): string[];
+    // (undocumented)
     readonly state: CollatedWriterState;
     // (undocumented)
     readonly taskName: string;
