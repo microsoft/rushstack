@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 27 Aug 2020 11:27:06 GMT and should not be manually modified.
+This log was last generated on Wed, 02 Sep 2020 15:10:17 GMT and should not be manually modified.
+
+## 0.9.0
+Wed, 02 Sep 2020 15:10:17 GMT
+
+### Minor changes
+
+- Add a method for plugins to hook into other plugins.
+- BREAKING CHANGE: Rename the "displayName" plugin property to "pluginName"
 
 ## 0.8.0
 Thu, 27 Aug 2020 11:27:06 GMT

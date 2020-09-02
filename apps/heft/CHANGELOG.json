@@ -2,6 +2,21 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.9.0",
+      "tag": "@rushstack/heft_v0.9.0",
+      "date": "Wed, 02 Sep 2020 15:10:17 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a method for plugins to hook into other plugins."
+          },
+          {
+            "comment": "BREAKING CHANGE: Rename the \"displayName\" plugin property to \"pluginName\""
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.0",
       "tag": "@rushstack/heft_v0.8.0",
       "date": "Thu, 27 Aug 2020 11:27:06 GMT",
