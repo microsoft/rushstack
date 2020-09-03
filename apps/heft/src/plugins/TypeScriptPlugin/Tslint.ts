@@ -49,10 +49,10 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
   }
 
   /**
-   * getConfigHash returns the sha1 hash unique to the contents of the given config as
-   * well as all the configs that the given one extends.
-   *
-   * If suppied the previousHash parameter, the hash is updated with the contents of the
+   * Returns the sha1 hash of the contents of the config file at the provided path and the
+   * the configs files that the referenced file extends.
+   * 
+   * @param previousHash - If supplied, the hash is updated with the contents of the
    * file's extended configs and itself before being returned. Passing a digested hash to
    * this parameter will result in an error.
    */
