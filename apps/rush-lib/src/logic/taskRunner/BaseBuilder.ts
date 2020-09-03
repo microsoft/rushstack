@@ -5,7 +5,9 @@ import { ITaskWriter } from '@rushstack/stream-collator';
 import { TaskStatus } from './TaskStatus';
 
 /**
- * A definition for a task, an execute function returning a promise and a unique string name
+ * The `Task` class is a node in the dependency graph of work that needs to be scheduled by the `TaskRunner`.
+ * Each `Task` has a `BaseBuilder` member, whose subclass manages the actual operations for building a single
+ * project.
  */
 export abstract class BaseBuilder {
   /**
@@ -27,5 +29,5 @@ export abstract class BaseBuilder {
   /**
    * Method to be executed for the task.
    */
-  abstract async execute(writer: ITaskWriter): Promise<TaskStatus>;
+  abstract async executeAsync(writer: ITaskWriter): Promise<TaskStatus>;
 }

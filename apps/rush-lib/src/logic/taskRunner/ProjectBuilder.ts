@@ -45,7 +45,8 @@ function _areShallowEqual(object1: JsonObject, object2: JsonObject, writer: ITas
 }
 
 /**
- * A TaskRunner task which cleans and builds a project
+ * A `BaseBuilder` subclass that builds a Rush project and updates its package-deps-hash
+ * incremental state.
  */
 export class ProjectBuilder extends BaseBuilder {
   public get name(): string {
@@ -80,15 +81,15 @@ export class ProjectBuilder extends BaseBuilder {
     return rushProject.packageName;
   }
 
-  public execute(writer: ITaskWriter): Promise<TaskStatus> {
+  public async executeAsync(writer: ITaskWriter): Promise<TaskStatus> {
     try {
       if (!this._commandToRun) {
         this.hadEmptyScript = true;
       }
       const deps: IPackageDependencies | undefined = this._getPackageDependencies(writer);
-      return this._executeTask(writer, deps);
+      return await this._executeTaskAsync(writer, deps);
     } catch (error) {
-      return Promise.reject(new TaskError('executing', error.message));
+      throw new TaskError('executing', error.message);
     }
   }
 
@@ -108,7 +109,7 @@ export class ProjectBuilder extends BaseBuilder {
     return deps;
   }
 
-  private _executeTask(
+  private async _executeTaskAsync(
     writer: ITaskWriter,
     currentPackageDeps: IPackageDependencies | undefined
   ): Promise<TaskStatus> {
@@ -147,7 +148,7 @@ export class ProjectBuilder extends BaseBuilder {
       );
 
       if (isPackageUnchanged && this.isIncrementalBuildAllowed) {
-        return Promise.resolve(TaskStatus.Skipped);
+        return TaskStatus.Skipped;
       } else {
         // If the deps file exists, remove it before starting a build.
         FileSystem.deleteFile(currentDepsPath);
@@ -168,7 +169,7 @@ export class ProjectBuilder extends BaseBuilder {
             });
           }
 
-          return Promise.resolve(TaskStatus.Success);
+          return TaskStatus.Success;
         }
 
         // Run the task
@@ -221,7 +222,7 @@ export class ProjectBuilder extends BaseBuilder {
       console.log(error);
 
       this._writeLogsToDisk(writer);
-      return Promise.reject(new TaskError('error', error.toString()));
+      throw new TaskError('error', error.toString());
     }
   }
 

@@ -95,7 +95,7 @@ export class TaskRunner {
    * Executes all tasks which have been registered, returning a promise which is resolved when all the
    * tasks are completed successfully, or rejects when any task fails.
    */
-  public execute(): Promise<void> {
+  public async executeAsync(): Promise<void> {
     this._currentActiveTasks = 0;
     this._completedTasks = 0;
     this._totalTasks = this._buildQueue.length;
@@ -103,18 +103,16 @@ export class TaskRunner {
       `Executing a maximum of ${this._parallelism} simultaneous processes...${os.EOL}`
     );
 
-    return this._startAvailableTasks().then(() => {
-      this._printTaskStatus();
+    await this._startAvailableTasksAsync();
 
-      if (this._hasAnyFailures) {
-        return Promise.reject(new Error('Project(s) failed'));
-      } else if (this._hasAnyWarnings && !this._allowWarningsInSuccessfulBuild) {
-        this._terminal.writeWarningLine('Project(s) succeeded with warnings');
-        return Promise.reject(new AlreadyReportedError());
-      } else {
-        return Promise.resolve();
-      }
-    });
+    this._printTaskStatus();
+
+    if (this._hasAnyFailures) {
+      throw new Error('Project(s) failed');
+    } else if (this._hasAnyWarnings && !this._allowWarningsInSuccessfulBuild) {
+      this._terminal.writeWarningLine('Project(s) succeeded with warnings');
+      throw new AlreadyReportedError();
+    }
   }
 
   /**
@@ -143,7 +141,7 @@ export class TaskRunner {
    * Helper function which finds any tasks which are available to run and begins executing them.
    * It calls the complete callback when all tasks are completed, or rejects if any task fails.
    */
-  private _startAvailableTasks(): Promise<void> {
+  private _startAvailableTasksAsync(): Promise<void> {
     const taskPromises: Promise<void>[] = [];
     let ctask: Task | undefined;
     while (this._currentActiveTasks < this._parallelism && (ctask = this._getNextTask())) {
@@ -157,7 +155,7 @@ export class TaskRunner {
 
       taskPromises.push(
         task.builder
-          .execute(task.writer)
+          .executeAsync(task.writer)
           .then((result: TaskStatus) => {
             task.stopwatch.stop();
             task.writer.close();
@@ -190,7 +188,7 @@ export class TaskRunner {
             task.error = error;
             this._markTaskAsFailed(task);
           })
-          .then(() => this._startAvailableTasks())
+          .then(() => this._startAvailableTasksAsync())
       );
     }
 

@@ -132,7 +132,7 @@ export class BulkScriptAction extends BaseScriptAction {
     });
 
     return taskRunner
-      .execute()
+      .executeAsync()
       .then(() => {
         stopwatch.stop();
         console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
@@ -223,7 +223,9 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const scopedNames: string[] = [];
 
-    const projectJsons: IRushConfigurationProjectJson[] = [...this.rushConfiguration.rushConfigurationJson.projects];
+    const projectJsons: IRushConfigurationProjectJson[] = [
+      ...this.rushConfiguration.rushConfigurationJson.projects
+    ];
 
     for (const projectJson of projectJsons) {
       scopedNames.push(projectJson.packageName);

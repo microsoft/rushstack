@@ -9,9 +9,15 @@ import { TaskError } from './TaskError';
 import { BaseBuilder } from './BaseBuilder';
 
 /**
- * The interface used internally by TaskRunner, which tracks the dependencies and execution status
+ * The `Task` class is a node in the dependency graph of work that needs to be scheduled by the `TaskRunner`.
+ * Each `Task` has a `BaseBuilder` member, whose subclass manages the actual operations for building a single
+ * project.
  */
 export class Task {
+  /**
+   * When the scheduler is ready to process this `Task`, the `builder` implements the actual work of
+   * building the project.
+   */
   public builder: BaseBuilder;
 
   /**
