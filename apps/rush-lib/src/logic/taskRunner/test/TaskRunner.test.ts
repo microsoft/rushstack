@@ -8,9 +8,10 @@ import { EOL } from 'os';
 import { TaskRunner, ITaskRunnerOptions } from '../TaskRunner';
 import { ITaskWriter } from '@rushstack/stream-collator';
 import { TaskStatus } from '../TaskStatus';
-import { ITaskDefinition, ITask } from '../ITask';
+import { Task } from '../Task';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import { Utilities } from '../../../utilities/Utilities';
+import { BaseBuilder } from '../BaseBuilder';
 
 const mockGetTimeInMs: jest.Mock = jest.fn();
 Utilities.getTimeInMs = mockGetTimeInMs;
@@ -22,14 +23,12 @@ mockGetTimeInMs.mockImplementation(() => {
   return mockTimeInMs;
 });
 
-function createTaskRunner(
-  taskRunnerOptions: ITaskRunnerOptions,
-  taskDefinition: ITaskDefinition
-): TaskRunner {
-  const task: ITask = taskDefinition as ITask;
-  task.dependencies = new Set<ITask>();
-  task.dependents = new Set<ITask>();
+function createTaskRunner(taskRunnerOptions: ITaskRunnerOptions, builder: BaseBuilder): TaskRunner {
+  const task: Task = new Task();
+  task.dependencies = new Set<Task>();
+  task.dependents = new Set<Task>();
   task.status = TaskStatus.Ready;
+  task.builder = builder;
 
   return new TaskRunner([task], taskRunnerOptions);
 }

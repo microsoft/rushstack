@@ -12,14 +12,14 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities } from '../../utilities/Utilities';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
-import { ITaskDefinition } from '../taskRunner/ITask';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
+import { BaseBuilder } from './BaseBuilder';
 
 interface IPackageDependencies extends IPackageDeps {
   arguments: string;
 }
 
-export interface IProjectTaskOptions {
+export interface IProjectBuilderOptions {
   rushProject: RushConfigurationProject;
   rushConfiguration: RushConfiguration;
   commandToRun: string;
@@ -47,9 +47,9 @@ function _areShallowEqual(object1: JsonObject, object2: JsonObject, writer: ITas
 /**
  * A TaskRunner task which cleans and builds a project
  */
-export class ProjectTask implements ITaskDefinition {
+export class ProjectBuilder extends BaseBuilder {
   public get name(): string {
-    return ProjectTask.getTaskName(this._rushProject);
+    return ProjectBuilder.getTaskName(this._rushProject);
   }
 
   public isIncrementalBuildAllowed: boolean;
@@ -62,7 +62,8 @@ export class ProjectTask implements ITaskDefinition {
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
   private _packageDepsFilename: string;
 
-  public constructor(options: IProjectTaskOptions) {
+  public constructor(options: IProjectBuilderOptions) {
+    super();
     this._rushProject = options.rushProject;
     this._rushConfiguration = options.rushConfiguration;
     this._commandToRun = options.commandToRun;
@@ -72,7 +73,7 @@ export class ProjectTask implements ITaskDefinition {
   }
 
   /**
-   * A helper method to determine the task name of a ProjectTask. Used when the task
+   * A helper method to determine the task name of a ProjectBuilder. Used when the task
    * name is required before a task is created.
    */
   public static getTaskName(rushProject: RushConfigurationProject): string {

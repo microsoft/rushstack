@@ -4,21 +4,29 @@
 import { TaskCollection } from '../TaskCollection';
 import { ITaskWriter } from '@rushstack/stream-collator';
 import { TaskStatus } from '../TaskStatus';
-import { ITaskDefinition, ITask } from '../ITask';
+import { Task } from '../Task';
 import { StringBufferTerminalProvider } from '@rushstack/node-core-library';
+import { BaseBuilder } from '../BaseBuilder';
 
-function createDummyTask(name: string, action?: () => void): ITaskDefinition {
-  return {
-    name,
-    isIncrementalBuildAllowed: false,
-    execute: (writer: ITaskWriter) => {
-      if (action) {
-        action();
-      }
-      return Promise.resolve(TaskStatus.Success);
-    },
-    hadEmptyScript: false
-  };
+class DummyBuilder extends BaseBuilder {
+  public readonly name: string;
+  private readonly _action: (() => void) | undefined;
+  public readonly hadEmptyScript: boolean = false;
+  public readonly isIncrementalBuildAllowed: boolean = false;
+
+  public constructor(name: string, action?: () => void) {
+    super();
+
+    this.name = name;
+    this._action = action;
+  }
+
+  public async execute(writer: ITaskWriter): Promise<TaskStatus> {
+    if (this._action) {
+      this._action();
+    }
+    return TaskStatus.Success;
+  }
 }
 
 function checkConsoleOutput(terminalProvider: StringBufferTerminalProvider): void {
@@ -48,13 +56,13 @@ describe('TaskCollection', () => {
     });
 
     it('throwsErrorOnNonExistentDependency', () => {
-      taskCollection.addTask(createDummyTask('foo'));
+      taskCollection.addTask(new DummyBuilder('foo'));
       expect(() => taskCollection.addDependencies('foo', ['bar'])).toThrowErrorMatchingSnapshot();
     });
 
     it('detectsDependencyCycle', () => {
-      taskCollection.addTask(createDummyTask('foo'));
-      taskCollection.addTask(createDummyTask('bar'));
+      taskCollection.addTask(new DummyBuilder('foo'));
+      taskCollection.addTask(new DummyBuilder('bar'));
       taskCollection.addDependencies('foo', ['bar']);
       taskCollection.addDependencies('bar', ['foo']);
       expect(() => taskCollection.getOrderedTasks()).toThrowErrorMatchingSnapshot();
@@ -62,11 +70,11 @@ describe('TaskCollection', () => {
 
     it('respectsDependencyOrder', () => {
       const result: string[] = [];
-      taskCollection.addTask(createDummyTask('two', () => result.push('2')));
-      taskCollection.addTask(createDummyTask('one', () => result.push('1')));
+      taskCollection.addTask(new DummyBuilder('two', () => result.push('2')));
+      taskCollection.addTask(new DummyBuilder('one', () => result.push('1')));
       taskCollection.addDependencies('two', ['one']);
 
-      const tasks: ITask[] = taskCollection.getOrderedTasks();
+      const tasks: Task[] = taskCollection.getOrderedTasks();
       expect(tasks.map((t) => t.name).join(',')).toEqual('one,two');
       checkConsoleOutput(terminalProvider);
     });

@@ -6,55 +6,32 @@ import { ITaskWriter } from '@rushstack/stream-collator';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
-
-/**
- * A definition for a task, an execute function returning a promise and a unique string name
- */
-export interface ITaskDefinition {
-  /**
-   * Name of the task definition.
-   */
-  name: string;
-
-  /**
-   * This flag determines if an incremental build is allowed for the task.
-   */
-  isIncrementalBuildAllowed: boolean;
-
-  /**
-   * Assigned by execute().  True if the build script was an empty string.  Operationally an empty string is
-   * like a shell command that succeeds instantly, but e.g. it would be odd to report build time statistics for it.
-   */
-  hadEmptyScript: boolean;
-
-  /**
-   * Method to be executed for the task.
-   */
-  execute: (writer: ITaskWriter) => Promise<TaskStatus>;
-}
+import { BaseBuilder } from './BaseBuilder';
 
 /**
  * The interface used internally by TaskRunner, which tracks the dependencies and execution status
  */
-export interface ITask extends ITaskDefinition {
+export class Task {
+  public builder: BaseBuilder;
+
   /**
    * The current execution status of a task. Tasks start in the 'ready' state,
    * but can be 'blocked' if an upstream task failed. It is 'executing' when
    * the task is executing. Once execution is complete, it is either 'success' or
    * 'failure'.
    */
-  status: TaskStatus;
+  public status: TaskStatus;
 
   /**
    * A set of all dependencies which must be executed before this task is complete.
    * When dependencies finish execution, they are removed from this list.
    */
-  dependencies: Set<ITask>;
+  public dependencies: Set<Task>;
 
   /**
    * The inverse of dependencies, lists all projects which are directly dependent on this one.
    */
-  dependents: Set<ITask>;
+  public dependents: Set<Task>;
 
   /**
    * This number represents how far away this Task is from the furthest "root" project (i.e.
@@ -85,21 +62,25 @@ export interface ITask extends ITaskDefinition {
    *
    * The algorithm is implemented in TaskRunner as _calculateCriticalPaths()
    */
-  criticalPathLength: number | undefined;
+  public criticalPathLength: number | undefined;
 
   /**
    * The error which occurred while executing this task, this is stored in case we need
    * it later (for example to re-print errors at end of execution).
    */
-  error: TaskError | undefined;
+  public error: TaskError | undefined;
 
   /**
    * The task writer which contains information from the output streams of this task
    */
-  writer: ITaskWriter;
+  public writer: ITaskWriter;
 
   /**
    * The stopwatch which measures how long it takes the task to execute
    */
-  stopwatch: Stopwatch;
+  public stopwatch: Stopwatch;
+
+  public get name(): string {
+    return this.builder.name;
+  }
 }
