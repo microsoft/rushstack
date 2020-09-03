@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 02 Sep 2020 23:01:13 GMT and should not be manually modified.
+This log was last generated on Thu, 03 Sep 2020 15:09:59 GMT and should not be manually modified.
+
+## 0.10.1
+Thu, 03 Sep 2020 15:09:59 GMT
+
+### Patches
+
+- Fix an issue with Heft not printing an error message.
 
 ## 0.10.0
 Wed, 02 Sep 2020 23:01:13 GMT
