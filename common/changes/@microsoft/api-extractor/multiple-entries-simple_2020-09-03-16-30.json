@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Support multiple entry points for api.json and api report. d.ts rollup for multiple entry points is not supported",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "plane1113@gmail.com"
+}

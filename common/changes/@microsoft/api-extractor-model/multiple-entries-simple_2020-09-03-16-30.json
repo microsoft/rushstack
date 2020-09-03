@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Support multiple entry points",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model",
+  "email": "plane1113@gmail.com"
+}
