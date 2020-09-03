@@ -37,7 +37,7 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
   }
 
   private static _resolvePackageMainFilePath(packagePath: string): string {
-    const packageJson: IPackageJson | undefined = this._packageJsonLookup.tryLoadPackageJsonFor(packagePath);
+    const packageJson: IPackageJson | undefined = PackageJsonLookup.instance.tryLoadPackageJsonFor(packagePath);
     if (!packageJson) {
       throw new Error(
         `Supplied package path ${packagePath} could not resolve a package.json while searching for main file`
