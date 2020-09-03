@@ -17,3 +17,4 @@ export { StreamCollator, IStreamCollatorOptions } from './StreamCollator';
 export { CollatedWriter, CollatedWriterState } from './CollatedWriter';
 export { ICollatedChunk, StreamKind } from './CollatedChunk';
 export { CollatedTerminal, WriteToStreamCallback } from './CollatedTerminal';
+export { StdioSummarizer, IStdioSummarizerOptions } from './StdioSummarizer';
