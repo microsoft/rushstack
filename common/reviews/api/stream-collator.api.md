@@ -24,8 +24,6 @@ export class CollatedWriter {
     // @internal (undocumented)
     readonly _collator: StreamCollator;
     // (undocumented)
-    getSummaryReport(): string[];
-    // (undocumented)
     readonly state: CollatedWriterState;
     // (undocumented)
     readonly taskName: string;
@@ -52,9 +50,28 @@ export interface ICollatedChunk {
 }
 
 // @public (undocumented)
+export interface IStdioSummarizerOptions {
+    // (undocumented)
+    leadingLines?: number;
+    // (undocumented)
+    trailingLines?: number;
+}
+
+// @public (undocumented)
 export interface IStreamCollatorOptions {
     // (undocumented)
     writeToStream: WriteToStreamCallback;
+}
+
+// @public
+export class StdioSummarizer {
+    constructor(options?: IStdioSummarizerOptions);
+    // (undocumented)
+    close(): void;
+    // (undocumented)
+    getReport(): string[];
+    // (undocumented)
+    writeChunk(chunk: ICollatedChunk): void;
 }
 
 // @public
