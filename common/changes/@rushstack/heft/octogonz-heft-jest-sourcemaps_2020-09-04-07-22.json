@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Change jest-shared.config.json to use testEnvironment=node by default instead of testEnvironment=jsdom",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
