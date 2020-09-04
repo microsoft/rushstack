@@ -61,6 +61,7 @@ import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
 import { DocHeading } from '../nodes/DocHeading';
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
+import { DocBullet } from '../nodes/DocBullet';
 
 const yamlApiSchema: JsonSchema = JsonSchema.fromFile(
   path.join(__dirname, '..', 'yaml', 'typescript.schema.json')
@@ -421,6 +422,15 @@ export class YamlDocumenter {
 
           ++exampleNumber;
         }
+      }
+
+      if (tsdocComment.seeBlocks.length > 0) {
+        const output: DocSection = new DocSection({ configuration: customConfiguration });
+        for (const seeBlock of tsdocComment.seeBlocks) {
+          output.appendNode(new DocBullet({ configuration: customConfiguration }, seeBlock.content.nodes));
+        }
+        const markdown: string = this._renderMarkdown(output, apiItem);
+        yamlItem.seealsoContent = markdown;
       }
 
       if (tsdocComment.deprecatedBlock) {

@@ -157,6 +157,20 @@ items:
           - 'api-documenter-test!SystemEvent:class'
   - uid: 'api-documenter-test!DocClass1#seeExample:member(1)'
     summary: Example of a `@see` tag.
+    seealsoContent: |-
+      -  [IDocInterface5](xref:api-documenter-test!IDocInterface5:interface) for the returned data structure
+         
+      -  your developer SDK...
+         
+         ...for
+         
+         ```
+         code
+         
+         ```
+         samples
+         
+      -  [RFC 1738](https://tools.ietf.org/html/rfc1738) for syntax
     name: seeExample()
     fullName: seeExample()
     langs:
