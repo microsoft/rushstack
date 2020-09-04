@@ -12,14 +12,14 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities } from '../../utilities/Utilities';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
-import { ITaskDefinition } from '../taskRunner/ITask';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
+import { BaseBuilder } from './BaseBuilder';
 
 interface IPackageDependencies extends IPackageDeps {
   arguments: string;
 }
 
-export interface IProjectTaskOptions {
+export interface IProjectBuilderOptions {
   rushProject: RushConfigurationProject;
   rushConfiguration: RushConfiguration;
   commandToRun: string;
@@ -45,11 +45,12 @@ function _areShallowEqual(object1: JsonObject, object2: JsonObject, writer: ITas
 }
 
 /**
- * A TaskRunner task which cleans and builds a project
+ * A `BaseBuilder` subclass that builds a Rush project and updates its package-deps-hash
+ * incremental state.
  */
-export class ProjectTask implements ITaskDefinition {
+export class ProjectBuilder extends BaseBuilder {
   public get name(): string {
-    return ProjectTask.getTaskName(this._rushProject);
+    return ProjectBuilder.getTaskName(this._rushProject);
   }
 
   public isIncrementalBuildAllowed: boolean;
@@ -62,7 +63,8 @@ export class ProjectTask implements ITaskDefinition {
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
   private _packageDepsFilename: string;
 
-  public constructor(options: IProjectTaskOptions) {
+  public constructor(options: IProjectBuilderOptions) {
+    super();
     this._rushProject = options.rushProject;
     this._rushConfiguration = options.rushConfiguration;
     this._commandToRun = options.commandToRun;
@@ -72,22 +74,22 @@ export class ProjectTask implements ITaskDefinition {
   }
 
   /**
-   * A helper method to determine the task name of a ProjectTask. Used when the task
+   * A helper method to determine the task name of a ProjectBuilder. Used when the task
    * name is required before a task is created.
    */
   public static getTaskName(rushProject: RushConfigurationProject): string {
     return rushProject.packageName;
   }
 
-  public execute(writer: ITaskWriter): Promise<TaskStatus> {
+  public async executeAsync(writer: ITaskWriter): Promise<TaskStatus> {
     try {
       if (!this._commandToRun) {
         this.hadEmptyScript = true;
       }
       const deps: IPackageDependencies | undefined = this._getPackageDependencies(writer);
-      return this._executeTask(writer, deps);
+      return await this._executeTaskAsync(writer, deps);
     } catch (error) {
-      return Promise.reject(new TaskError('executing', error.message));
+      throw new TaskError('executing', error.message);
     }
   }
 
@@ -107,7 +109,7 @@ export class ProjectTask implements ITaskDefinition {
     return deps;
   }
 
-  private _executeTask(
+  private async _executeTaskAsync(
     writer: ITaskWriter,
     currentPackageDeps: IPackageDependencies | undefined
   ): Promise<TaskStatus> {
@@ -146,7 +148,7 @@ export class ProjectTask implements ITaskDefinition {
       );
 
       if (isPackageUnchanged && this.isIncrementalBuildAllowed) {
-        return Promise.resolve(TaskStatus.Skipped);
+        return TaskStatus.Skipped;
       } else {
         // If the deps file exists, remove it before starting a build.
         FileSystem.deleteFile(currentDepsPath);
@@ -167,7 +169,7 @@ export class ProjectTask implements ITaskDefinition {
             });
           }
 
-          return Promise.resolve(TaskStatus.Success);
+          return TaskStatus.Success;
         }
 
         // Run the task
@@ -220,7 +222,7 @@ export class ProjectTask implements ITaskDefinition {
       console.log(error);
 
       this._writeLogsToDisk(writer);
-      return Promise.reject(new TaskError('error', error.toString()));
+      throw new TaskError('error', error.toString());
     }
   }
 

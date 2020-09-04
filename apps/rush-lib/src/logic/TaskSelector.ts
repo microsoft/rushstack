@@ -3,7 +3,7 @@
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { ProjectTask, convertSlashesForWindows } from '../logic/taskRunner/ProjectTask';
+import { ProjectBuilder, convertSlashesForWindows } from '../logic/taskRunner/ProjectBuilder';
 import { PackageChangeAnalyzer } from './PackageChangeAnalyzer';
 import { TaskCollection } from './taskRunner/TaskCollection';
 
@@ -23,8 +23,8 @@ export interface ITaskSelectorConstructor {
 /**
  * This class is responsible for:
  *  - based on to/from flags, solving the dependency graph and figuring out which projects need to be run
- *  - creating a ProjectTask for each project that needs to be built
- *  - registering the necessary ProjectTasks with the TaskRunner, which actually orchestrates execution
+ *  - creating a ProjectBuilder for each project that needs to be built
+ *  - registering the necessary ProjectBuilders with the TaskRunner, which actually orchestrates execution
  */
 export class TaskSelector {
   private _taskCollection: TaskCollection;
@@ -71,8 +71,8 @@ export class TaskSelector {
       // Add ordering relationships for each dependency
       for (const dependencyProject of dependencies.values()) {
         this._taskCollection.addDependencies(
-          ProjectTask.getTaskName(dependencyProject),
-          dependencyProject.localDependencyProjects.map((x) => ProjectTask.getTaskName(x))
+          ProjectBuilder.getTaskName(dependencyProject),
+          dependencyProject.localDependencyProjects.map((x) => ProjectBuilder.getTaskName(x))
         );
       }
     }
@@ -96,10 +96,10 @@ export class TaskSelector {
       // e.g. package C may depend on A & B, but if we are only building A's downstream, we will ignore B
       for (const dependentProject of dependents.values()) {
         this._taskCollection.addDependencies(
-          ProjectTask.getTaskName(dependentProject),
+          ProjectBuilder.getTaskName(dependentProject),
           dependentProject.localDependencyProjects
             .filter((dep) => dependents.has(dep.packageName))
-            .map((x) => ProjectTask.getTaskName(x))
+            .map((x) => ProjectBuilder.getTaskName(x))
         );
       }
     }
@@ -115,8 +115,8 @@ export class TaskSelector {
       // Add ordering relationships for each dependency
       for (const project of this._options.rushConfiguration.projects) {
         this._taskCollection.addDependencies(
-          ProjectTask.getTaskName(project),
-          project.localDependencyProjects.map((x) => ProjectTask.getTaskName(x))
+          ProjectBuilder.getTaskName(project),
+          project.localDependencyProjects.map((x) => ProjectBuilder.getTaskName(x))
         );
       }
     }
@@ -172,12 +172,12 @@ export class TaskSelector {
   }
 
   private _registerTask(project: RushConfigurationProject | undefined): void {
-    if (!project || this._taskCollection.hasTask(ProjectTask.getTaskName(project))) {
+    if (!project || this._taskCollection.hasTask(ProjectBuilder.getTaskName(project))) {
       return;
     }
 
     this._taskCollection.addTask(
-      new ProjectTask({
+      new ProjectBuilder({
         rushProject: project,
         rushConfiguration: this._options.rushConfiguration,
         commandToRun: this._getScriptToRun(project),
