@@ -158,6 +158,9 @@ export function process(
 
     // Fix up the source map, since Jest will present the .ts file path to VS Code as the executing script
     const parsedSourceMap: JsonObject = JSON.parse(originalSourceMap);
+    if (parsedSourceMap.version !== 3) {
+      throw new Error('jest-build-transform: Unsupported source map file version: ' + sourceMapFilePath);
+    }
     parsedSourceMap.file = srcFilePath;
     parsedSourceMap.sources = [srcFilePath];
     parsedSourceMap.sourcesContent = [srcCode];
@@ -166,6 +169,10 @@ export function process(
 
     // Embed the source map, since if we return the { code, map } object, then the debugger does not believe
     // it is the same file, and will show a separate view with the same file path.
+    //
+    // Note that if the Jest testEnvironment does not support vm.compileFunction (introduced with Node.js 10),
+    // then the Jest module wrapper will inject text below the "//# sourceMappingURL=" line which breaks source maps.
+    // See this PR for details: https://github.com/facebook/jest/pull/9252
     const encodedSourceMap: string =
       'data:application/json;charset=utf-8;base64,' +
       Buffer.from(correctedSourceMap, 'utf8').toString('base64');
