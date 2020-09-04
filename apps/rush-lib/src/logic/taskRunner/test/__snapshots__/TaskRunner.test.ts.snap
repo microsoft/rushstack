@@ -44,18 +44,112 @@ exports[`TaskRunner Error logging printedStdoutAfterErrorWithEmptyStderr 5`] = `
 
 exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 1`] = `"An error occurred."`;
 
-exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 2`] = `"Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[success with warnings (failure)] started[x][39m[n][n][x][33m[x][4mSUCCESS WITH WARNINGS (1)[x][24m[x][39m[n][x][33m================================[x][39m[n][x][33m[x][4msuccess with warnings (failure) (0.10 seconds)[x][24m[x][39m[n]Build step 1[-n-]Warning: step 1 succeeded with warnings[n][x][33m================================[-n-][x][39m[n][n]"`;
+exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 2`] = `
+Array [
+  Object {
+    "stream": "O",
+    "text": "Executing a maximum of 1 simultaneous processes...
+",
+  },
+  Object {
+    "stream": "O",
+    "text": "[37m[success with warnings (failure)] started[39m",
+  },
+  Object {
+    "stream": "O",
+    "text": "Build step 1
+",
+  },
+  Object {
+    "stream": "O",
+    "text": "Warning: step 1 succeeded with warnings
+",
+  },
+  Object {
+    "stream": "E",
+    "text": "1 of 1: [success with warnings (failure)] completed with warnings in 0.10 seconds",
+  },
+  Object {
+    "stream": "E",
+    "text": "",
+  },
+  Object {
+    "stream": "O",
+    "text": "[33m[4mSUCCESS WITH WARNINGS (1)[24m[39m",
+  },
+  Object {
+    "stream": "O",
+    "text": "[33m================================[39m",
+  },
+  Object {
+    "stream": "O",
+    "text": "[33m[4msuccess with warnings (failure) (0.10 seconds)[24m[39m",
+  },
+  Object {
+    "stream": "O",
+    "text": "[33m================================[39m
+[33m[39m",
+  },
+  Object {
+    "stream": "O",
+    "text": "",
+  },
+  Object {
+    "stream": "E",
+    "text": "Project(s) succeeded with warnings",
+  },
+]
+`;
 
-exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 3`] = `""`;
-
-exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 4`] = `"[x][33m1 of 1: [success with warnings (failure)] completed with warnings in 0.10 seconds[x][39m[n][x][33mProject(s) succeeded with warnings[x][39m[n]"`;
-
-exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 5`] = `""`;
-
-exports[`TaskRunner Warning logging Success on warning Logs warnings correctly 1`] = `"Executing a maximum of 1 simultaneous processes...[-n-][n][x][37m[success with warnings (success)] started[x][39m[n][n][x][33m[x][4mSUCCESS WITH WARNINGS (1)[x][24m[x][39m[n][x][33m================================[x][39m[n][x][33m[x][4msuccess with warnings (success) (0.10 seconds)[x][24m[x][39m[n]Build step 1[-n-]Warning: step 1 succeeded with warnings[n][x][33m================================[-n-][x][39m[n][n]"`;
-
-exports[`TaskRunner Warning logging Success on warning Logs warnings correctly 2`] = `""`;
-
-exports[`TaskRunner Warning logging Success on warning Logs warnings correctly 3`] = `"[x][33m1 of 1: [success with warnings (success)] completed with warnings in 0.10 seconds[x][39m[n]"`;
-
-exports[`TaskRunner Warning logging Success on warning Logs warnings correctly 4`] = `""`;
+exports[`TaskRunner Warning logging Success on warning Logs warnings correctly 1`] = `
+Array [
+  Object {
+    "stream": "O",
+    "text": "Executing a maximum of 1 simultaneous processes...
+",
+  },
+  Object {
+    "stream": "O",
+    "text": "[37m[success with warnings (success)] started[39m",
+  },
+  Object {
+    "stream": "O",
+    "text": "Build step 1
+",
+  },
+  Object {
+    "stream": "O",
+    "text": "Warning: step 1 succeeded with warnings
+",
+  },
+  Object {
+    "stream": "E",
+    "text": "1 of 1: [success with warnings (success)] completed with warnings in 0.10 seconds",
+  },
+  Object {
+    "stream": "E",
+    "text": "",
+  },
+  Object {
+    "stream": "O",
+    "text": "[33m[4mSUCCESS WITH WARNINGS (1)[24m[39m",
+  },
+  Object {
+    "stream": "O",
+    "text": "[33m================================[39m",
+  },
+  Object {
+    "stream": "O",
+    "text": "[33m[4msuccess with warnings (success) (0.10 seconds)[24m[39m",
+  },
+  Object {
+    "stream": "O",
+    "text": "[33m================================[39m
+[33m[39m",
+  },
+  Object {
+    "stream": "O",
+    "text": "",
+  },
+]
+`;

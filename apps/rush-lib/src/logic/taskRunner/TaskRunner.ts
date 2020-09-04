@@ -2,26 +2,29 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import { Interleaver } from '@rushstack/stream-collator';
+import * as colors from 'colors';
 import {
-  Terminal,
-  ConsoleTerminalProvider,
-  Colors,
-  IColorableSequence,
-  AlreadyReportedError
-} from '@rushstack/node-core-library';
+  StreamCollator,
+  WriteToStreamCallback,
+  ICollatedChunk,
+  StreamKind,
+  CollatedTerminal,
+  StdioSummarizer
+} from '@rushstack/stream-collator';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { Task } from './Task';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
+import { IBuilderContext } from './BaseBuilder';
 
 export interface ITaskRunnerOptions {
   quietMode: boolean;
   parallelism: string | undefined;
   changedProjectsOnly: boolean;
   allowWarningsInSuccessfulBuild: boolean;
-  terminal?: Terminal;
+  writeToStream?: WriteToStreamCallback;
 }
 
 /**
@@ -42,16 +45,11 @@ export class TaskRunner {
   private _currentActiveTasks: number;
   private _totalTasks: number;
   private _completedTasks: number;
-  private _terminal: Terminal;
+  private readonly _streamCollator: StreamCollator;
+  private _terminal: CollatedTerminal;
 
   public constructor(orderedTasks: Task[], options: ITaskRunnerOptions) {
-    const {
-      quietMode,
-      parallelism,
-      changedProjectsOnly,
-      allowWarningsInSuccessfulBuild,
-      terminal = new Terminal(new ConsoleTerminalProvider())
-    } = options;
+    const { quietMode, parallelism, changedProjectsOnly, allowWarningsInSuccessfulBuild } = options;
     this._tasks = orderedTasks;
     this._buildQueue = orderedTasks.slice(0);
     this._quietMode = quietMode;
@@ -59,7 +57,10 @@ export class TaskRunner {
     this._hasAnyWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
     this._allowWarningsInSuccessfulBuild = allowWarningsInSuccessfulBuild;
-    this._terminal = terminal;
+    this._streamCollator = new StreamCollator({
+      writeToStream: options.writeToStream ? options.writeToStream : TaskRunner._writeToStdio
+    });
+    this._terminal = this._streamCollator.terminal;
 
     const numberOfCores: number = os.cpus().length;
 
@@ -91,6 +92,14 @@ export class TaskRunner {
     }
   }
 
+  private static _writeToStdio(chunk: ICollatedChunk): void {
+    if (chunk.stream === StreamKind.Stdout) {
+      process.stdout.write(chunk.text);
+    } else if (chunk.stream === StreamKind.Stderr) {
+      process.stderr.write(chunk.text);
+    }
+  }
+
   /**
    * Executes all tasks which have been registered, returning a promise which is resolved when all the
    * tasks are completed successfully, or rejects when any task fails.
@@ -99,7 +108,7 @@ export class TaskRunner {
     this._currentActiveTasks = 0;
     this._completedTasks = 0;
     this._totalTasks = this._buildQueue.length;
-    this._terminal.writeLine(
+    this._terminal.writeStdoutLine(
       `Executing a maximum of ${this._parallelism} simultaneous processes...${os.EOL}`
     );
 
@@ -110,7 +119,7 @@ export class TaskRunner {
     if (this._hasAnyFailures) {
       throw new Error('Project(s) failed');
     } else if (this._hasAnyWarnings && !this._allowWarningsInSuccessfulBuild) {
-      this._terminal.writeWarningLine('Project(s) succeeded with warnings');
+      this._terminal.writeStderrLine('Project(s) succeeded with warnings');
       throw new AlreadyReportedError();
     }
   }
@@ -148,17 +157,25 @@ export class TaskRunner {
       this._currentActiveTasks++;
       const task: Task = ctask;
       task.status = TaskStatus.Executing;
-      this._terminal.writeLine(Colors.white(`[${task.name}] started`));
+      this._terminal.writeStdoutLine(colors.white(`[${task.name}] started`));
 
       task.stopwatch = Stopwatch.start();
-      task.writer = Interleaver.registerTask(task.name, this._quietMode);
+      task.writer = this._streamCollator.registerTask(task.name);
+      task.stdioSummarizer = new StdioSummarizer();
+
+      const context: IBuilderContext = {
+        quietMode: this._quietMode,
+        stdioSummarizer: task.stdioSummarizer,
+        terminal: task.writer.terminal
+      };
 
       taskPromises.push(
         task.builder
-          .executeAsync(task.writer)
+          .executeAsync(context)
           .then((result: TaskStatus) => {
             task.stopwatch.stop();
             task.writer.close();
+            task.stdioSummarizer.close();
 
             this._currentActiveTasks--;
             this._completedTasks++;
@@ -181,6 +198,7 @@ export class TaskRunner {
           })
           .catch((error: TaskError) => {
             task.writer.close();
+            task.stdioSummarizer.close();
 
             this._currentActiveTasks--;
 
@@ -201,7 +219,7 @@ export class TaskRunner {
    * Marks a task as having failed and marks each of its dependents as blocked
    */
   private _markTaskAsFailed(task: Task): void {
-    this._terminal.writeErrorLine(`${os.EOL}${this._getCurrentCompletedTaskString()}[${task.name}] failed!`);
+    this._terminal.writeStderrLine(`${os.EOL}${this._getCurrentCompletedTaskString()}[${task.name}] failed!`);
     task.status = TaskStatus.Failure;
     task.dependents.forEach((dependent: Task) => {
       this._markTaskAsBlocked(dependent, task);
@@ -214,7 +232,7 @@ export class TaskRunner {
   private _markTaskAsBlocked(task: Task, failedTask: Task): void {
     if (task.status === TaskStatus.Ready) {
       this._completedTasks++;
-      this._terminal.writeErrorLine(
+      this._terminal.writeStderrLine(
         `${this._getCurrentCompletedTaskString()}[${task.name}] blocked by [${failedTask.name}]!`
       );
       task.status = TaskStatus.Blocked;
@@ -229,12 +247,12 @@ export class TaskRunner {
    */
   private _markTaskAsSuccess(task: Task): void {
     if (task.builder.hadEmptyScript) {
-      this._terminal.writeLine(
-        Colors.green(`${this._getCurrentCompletedTaskString()}[${task.name}] had an empty script`)
+      this._terminal.writeStdoutLine(
+        colors.green(`${this._getCurrentCompletedTaskString()}[${task.name}] had an empty script`)
       );
     } else {
-      this._terminal.writeLine(
-        Colors.green(
+      this._terminal.writeStdoutLine(
+        colors.green(
           `${this._getCurrentCompletedTaskString()}` +
             `[${task.name}] completed successfully in ${task.stopwatch.toString()}`
         )
@@ -255,7 +273,7 @@ export class TaskRunner {
    * list of all its dependents
    */
   private _markTaskAsSuccessWithWarning(task: Task): void {
-    this._terminal.writeWarningLine(
+    this._terminal.writeStderrLine(
       `${this._getCurrentCompletedTaskString()}` +
         `[${task.name}] completed with warnings in ${task.stopwatch.toString()}`
     );
@@ -272,7 +290,9 @@ export class TaskRunner {
    * Marks a task as skipped.
    */
   private _markTaskAsSkipped(task: Task): void {
-    this._terminal.writeLine(Colors.green(`${this._getCurrentCompletedTaskString()}[${task.name}] skipped`));
+    this._terminal.writeStdoutLine(
+      colors.green(`${this._getCurrentCompletedTaskString()}[${task.name}] skipped`)
+    );
     task.status = TaskStatus.Skipped;
     task.dependents.forEach((dependent: Task) => {
       dependent.dependencies.delete(task);
@@ -296,44 +316,44 @@ export class TaskRunner {
       }
     });
 
-    this._terminal.writeLine('');
+    this._terminal.writeStderrLine('');
 
-    this._printStatus(TaskStatus.Executing, tasksByStatus, Colors.yellow);
-    this._printStatus(TaskStatus.Ready, tasksByStatus, Colors.white);
-    this._printStatus(TaskStatus.Skipped, tasksByStatus, Colors.gray);
-    this._printStatus(TaskStatus.Success, tasksByStatus, Colors.green);
+    this._printStatus(TaskStatus.Executing, tasksByStatus, colors.yellow);
+    this._printStatus(TaskStatus.Ready, tasksByStatus, colors.white);
+    this._printStatus(TaskStatus.Skipped, tasksByStatus, colors.gray);
+    this._printStatus(TaskStatus.Success, tasksByStatus, colors.green);
     this._printStatus(
       TaskStatus.SuccessWithWarning,
       tasksByStatus,
-      (text: string) => Colors.yellow(text),
-      (text: string) => Colors.yellow(Colors.underline(text))
+      (text: string) => colors.yellow(text),
+      (text: string) => colors.yellow(colors.underline(text))
     );
-    this._printStatus(TaskStatus.Blocked, tasksByStatus, Colors.red);
-    this._printStatus(TaskStatus.Failure, tasksByStatus, Colors.red);
+    this._printStatus(TaskStatus.Blocked, tasksByStatus, colors.red);
+    this._printStatus(TaskStatus.Failure, tasksByStatus, colors.red);
 
     const tasksWithErrors: Task[] = tasksByStatus[TaskStatus.Failure];
     if (tasksWithErrors) {
       tasksWithErrors.forEach((task: Task) => {
         if (task.error) {
-          this._terminal.writeErrorLine(`[${task.name}] ${task.error.message}`);
+          this._terminal.writeStderrLine(`[${task.name}] ${task.error.message}`);
         }
       });
     }
 
-    this._terminal.writeLine('');
+    this._terminal.writeStdoutLine('');
   }
 
   private _printStatus(
     status: TaskStatus,
     tasksByStatus: { [status: number]: Task[] },
-    color: (text: string) => IColorableSequence,
-    headingColor: (text: string) => IColorableSequence = color
+    color: (text: string) => string,
+    headingColor: (text: string) => string = color
   ): void {
     const tasks: Task[] = tasksByStatus[status];
 
     if (tasks && tasks.length) {
-      this._terminal.writeLine(headingColor(`${status} (${tasks.length})`));
-      this._terminal.writeLine(color('================================'));
+      this._terminal.writeStdoutLine(headingColor(`${status} (${tasks.length})`));
+      this._terminal.writeStdoutLine(color('================================'));
       for (let i: number = 0; i < tasks.length; i++) {
         const task: Task = tasks[i];
 
@@ -341,7 +361,7 @@ export class TaskRunner {
           case TaskStatus.Executing:
           case TaskStatus.Ready:
           case TaskStatus.Skipped:
-            this._terminal.writeLine(color(task.name));
+            this._terminal.writeStdoutLine(color(task.name));
             break;
 
           case TaskStatus.Success:
@@ -350,43 +370,28 @@ export class TaskRunner {
           case TaskStatus.Failure:
             if (task.stopwatch && !task.builder.hadEmptyScript) {
               const time: string = task.stopwatch.toString();
-              this._terminal.writeLine(headingColor(`${task.name} (${time})`));
+              this._terminal.writeStdoutLine(headingColor(`${task.name} (${time})`));
             } else {
-              this._terminal.writeLine(headingColor(`${task.name}`));
+              this._terminal.writeStdoutLine(headingColor(`${task.name}`));
             }
             break;
         }
 
         if (task.writer) {
-          const stderr: string = task.writer.getStdError();
           const shouldPrintDetails: boolean =
             task.status === TaskStatus.Failure || task.status === TaskStatus.SuccessWithWarning;
-          let details: string = stderr ? stderr : task.writer.getStdOutput();
+
+          const details: string = task.stdioSummarizer.getReport().join(os.EOL);
           if (details && shouldPrintDetails) {
-            details = this._abridgeTaskReport(details);
-            this._terminal.writeLine(details + (i !== tasks.length - 1 ? os.EOL : ''));
+            this._terminal.writeStdoutLine(details);
+            if (i !== tasks.length - 1) {
+              this._terminal.writeStdoutLine('');
+            }
           }
         }
       }
 
-      this._terminal.writeLine(color('================================' + os.EOL));
+      this._terminal.writeStdoutLine(color('================================' + os.EOL));
     }
-  }
-
-  /**
-   * Remove trailing blanks, and all middle lines if text is large
-   */
-  private _abridgeTaskReport(text: string): string {
-    const headSize: number = 10;
-    const tailSize: number = 20;
-    const margin: number = 10;
-    const lines: string[] = text.split(/\s*\r?\n/).filter((line) => line);
-    if (lines.length < headSize + tailSize + margin) {
-      return lines.join(os.EOL);
-    }
-    const amountRemoved: number = lines.length - headSize - tailSize;
-    const head: string = lines.splice(0, headSize).join(os.EOL);
-    const tail: string = lines.splice(-tailSize).join(os.EOL);
-    return `${head}${os.EOL}[...${amountRemoved} lines omitted...]${os.EOL}${tail}`;
   }
 }

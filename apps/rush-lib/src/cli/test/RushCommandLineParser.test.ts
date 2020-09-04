@@ -5,7 +5,6 @@ import './mockRushCommandLineParser';
 
 import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
-import { Interleaver } from '@rushstack/stream-collator';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 
@@ -86,14 +85,6 @@ const SPAWN_ARG_OPTIONS: number = 2;
 describe('RushCommandLineParser', () => {
   describe('execute', () => {
     afterEach(() => {
-      // Reset Interleaver so we can re-register a task with the same name for the tests.
-      //
-      // Interleaver retains a static list of writer loggers which must have unique names. The names are the
-      // names of the packages. Our unit tests use test repos with generic 'a', 'b' package names, so anything after
-      // the first test that runs an instance of RushCommandLineParser throws an exception complaining of duplicate
-      // writer names.
-      Interleaver.reset();
-
       jest.clearAllMocks();
     });
 

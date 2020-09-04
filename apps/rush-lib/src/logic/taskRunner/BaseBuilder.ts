@@ -1,9 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITaskWriter } from '@rushstack/stream-collator';
+import { CollatedTerminal, StdioSummarizer } from '@rushstack/stream-collator';
 
 import { TaskStatus } from './TaskStatus';
+
+export interface IBuilderContext {
+  terminal: CollatedTerminal;
+  stdioSummarizer: StdioSummarizer;
+  quietMode: boolean;
+}
 
 /**
  * The `Task` class is a node in the dependency graph of work that needs to be scheduled by the `TaskRunner`.
@@ -30,5 +36,5 @@ export abstract class BaseBuilder {
   /**
    * Method to be executed for the task.
    */
-  abstract async executeAsync(writer: ITaskWriter): Promise<TaskStatus>;
+  abstract async executeAsync(context: IBuilderContext): Promise<TaskStatus>;
 }

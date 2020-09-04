@@ -642,6 +642,7 @@ export class StringBuilder implements IStringBuilder {
 export class Terminal {
     constructor(provider: ITerminalProvider);
     registerProvider(provider: ITerminalProvider): void;
+    static removeColors(text: string): string;
     unregisterProvider(provider: ITerminalProvider): void;
     write(...messageParts: (string | IColorableSequence)[]): void;
     writeError(...messageParts: (string | IColorableSequence)[]): void;
