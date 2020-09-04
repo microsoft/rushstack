@@ -5,8 +5,10 @@
 jest.mock('../../../utilities/Utilities');
 
 import { EOL } from 'os';
-import { TaskRunner, ITaskRunnerOptions } from '../TaskRunner';
 import { ICollatedChunk, CollatedTerminal } from '@rushstack/stream-collator';
+import { AnsiEscape } from '@rushstack/node-core-library';
+
+import { TaskRunner, ITaskRunnerOptions } from '../TaskRunner';
 import { TaskStatus } from '../TaskStatus';
 import { Task } from '../Task';
 import { Utilities } from '../../../utilities/Utilities';
@@ -29,9 +31,13 @@ class MockStream {
     this.chunks.length = 0;
   }
   public writeToStream = (chunk: ICollatedChunk): void => {
-    this.chunks.push(chunk);
+    const encodedText: string = AnsiEscape.formatForTests(chunk.text, { encodeNewlines: true });
+    this.chunks.push({
+      text: encodedText,
+      stream: chunk.stream
+    });
   };
-  public getOutput(): string {
+  public getAllOutput(): string {
     return this.chunks.map((x) => x.text).join('\n');
   }
   public checkSnapshot(): void {
@@ -101,7 +107,7 @@ describe('TaskRunner', () => {
         .then(() => fail(EXPECTED_FAIL))
         .catch((err) => {
           expect(err.message).toMatchSnapshot();
-          const allMessages: string = mockStream.getOutput();
+          const allMessages: string = mockStream.getAllOutput();
           expect(allMessages).not.toContain('Build step 1');
           expect(allMessages).toContain('Error: step 1 failed');
           mockStream.checkSnapshot();
@@ -123,7 +129,7 @@ describe('TaskRunner', () => {
         .then(() => fail(EXPECTED_FAIL))
         .catch((err) => {
           expect(err.message).toMatchSnapshot();
-          expect(mockStream.getOutput()).toMatch(/Build step 1.*Error: step 1 failed/);
+          expect(mockStream.getAllOutput()).toMatch(/Build step 1.*Error: step 1 failed/);
           mockStream.checkSnapshot();
         });
     });
@@ -145,7 +151,7 @@ describe('TaskRunner', () => {
         .then(() => fail(EXPECTED_FAIL))
         .catch((err) => {
           expect(err.message).toMatchSnapshot();
-          expect(mockStream.getOutput()).toMatch(
+          expect(mockStream.getAllOutput()).toMatch(
             /Building units.* - unit #1;.* - unit #3;.*lines omitted.* - unit #48;.* - unit #50;/
           );
           mockStream.checkSnapshot();
@@ -172,7 +178,7 @@ describe('TaskRunner', () => {
         .then(() => fail(EXPECTED_FAIL))
         .catch((err) => {
           expect(err.message).toMatchSnapshot();
-          expect(mockStream.getOutput()).toMatch(
+          expect(mockStream.getAllOutput()).toMatch(
             /List of errors:\S.* - error #1;\S.*lines omitted.* - error #48;\S.* - error #50;\S/
           );
           mockStream.checkSnapshot();
@@ -207,7 +213,7 @@ describe('TaskRunner', () => {
           .then(() => fail('Promise returned by execute() resolved but was expected to fail'))
           .catch((err) => {
             expect(err.message).toMatchSnapshot();
-            const allMessages: string = mockStream.getOutput();
+            const allMessages: string = mockStream.getAllOutput();
             expect(allMessages).toContain('Build step 1');
             expect(allMessages).toContain('step 1 succeeded with warnings');
             mockStream.checkSnapshot();
@@ -239,7 +245,7 @@ describe('TaskRunner', () => {
         return taskRunner
           .executeAsync()
           .then(() => {
-            const allMessages: string = mockStream.getOutput();
+            const allMessages: string = mockStream.getAllOutput();
             expect(allMessages).toContain('Build step 1');
             expect(allMessages).toContain('Warning: step 1 succeeded with warnings');
             mockStream.checkSnapshot();

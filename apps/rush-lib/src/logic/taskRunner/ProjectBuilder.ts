@@ -202,28 +202,30 @@ export class ProjectBuilder extends BaseBuilder {
 
         // Hook into events, in order to get live streaming of build log
         if (task.stdout !== null) {
-          task.stdout.on('data', (data: string) => {
+          task.stdout.on('data', (data: Buffer) => {
+            const text: string = data.toString();
             if (!context.quietMode) {
-              terminal.writeChunk({ text: data, stream: StreamKind.Stdout });
+              terminal.writeChunk({ text, stream: StreamKind.Stdout });
             }
 
-            context.stdioSummarizer.writeChunk({ text: data, stream: StreamKind.Stdout });
+            context.stdioSummarizer.writeChunk({ text, stream: StreamKind.Stdout });
 
-            buildLogWriter.write(data);
+            buildLogWriter.write(text);
           });
         }
         if (task.stderr !== null) {
-          task.stderr.on('data', (data: string) => {
-            terminal.writeChunk({ text: data, stream: StreamKind.Stderr });
-            context.stdioSummarizer.writeChunk({ text: data, stream: StreamKind.Stderr });
+          task.stderr.on('data', (data: Buffer) => {
+            const text: string = data.toString();
+            terminal.writeChunk({ text, stream: StreamKind.Stderr });
+            context.stdioSummarizer.writeChunk({ text, stream: StreamKind.Stderr });
 
             if (errorLogWriter === undefined) {
               errorLogWriter = FileWriter.open(errorLogPath);
             }
-            errorLogWriter.write(data);
+            errorLogWriter.write(text);
 
             // Both stderr and stdout are written to the build log
-            buildLogWriter.write(data);
+            buildLogWriter.write(text);
 
             this._hasWarningOrError = true;
           });
@@ -255,11 +257,6 @@ export class ProjectBuilder extends BaseBuilder {
           }
         );
       }
-    } catch (error) {
-      buildLogWriter.close();
-      console.log(error);
-
-      throw new TaskError('error', error.toString());
     } finally {
       try {
         buildLogWriter.close();
