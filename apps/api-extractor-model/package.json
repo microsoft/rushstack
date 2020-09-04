@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "@microsoft/tsdoc": "0.12.19"
+    "@microsoft/tsdoc": "0.12.21"
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.5": "0.8.10",
