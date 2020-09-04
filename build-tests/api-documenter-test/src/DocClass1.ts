@@ -253,6 +253,21 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
   public static sumWithExample(x: number, y: number): number {
     return x + y;
   }
+
+  /**
+   * Example of a `@see` tag.
+   * @see {@link IDocInterface5} for the returned data structure
+   * @see your developer SDK...
+   *
+   * ...for
+   * ```
+   * code
+   * ```
+   * samples
+   * @see {@link https://tools.ietf.org/html/rfc1738|RFC 1738}
+   * for syntax
+   */
+  public seeExample(): void {}
 }
 
 /**

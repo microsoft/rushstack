@@ -34,6 +34,7 @@ items:
       - 'api-documenter-test!DocClass1#modifiedEvent:member'
       - 'api-documenter-test!DocClass1#readonlyProperty:member'
       - 'api-documenter-test!DocClass1#regularProperty:member'
+      - 'api-documenter-test!DocClass1#seeExample:member(1)'
       - 'api-documenter-test!DocClass1.sumWithExample:member(1)'
       - 'api-documenter-test!DocClass1#tableExample:member(1)'
       - 'api-documenter-test!DocClass1#writeableProperty:member'
@@ -154,6 +155,19 @@ items:
       return:
         type:
           - 'api-documenter-test!SystemEvent:class'
+  - uid: 'api-documenter-test!DocClass1#seeExample:member(1)'
+    summary: Example of a `@see` tag.
+    name: seeExample()
+    fullName: seeExample()
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'seeExample(): void;'
+      return:
+        type:
+          - void
+        description: ''
   - uid: 'api-documenter-test!DocClass1.sumWithExample:member(1)'
     summary: Returns the sum of two numbers.
     remarks: This illustrates usage of the `@example` block tag.

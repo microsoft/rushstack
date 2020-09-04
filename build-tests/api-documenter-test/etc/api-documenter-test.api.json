@@ -408,6 +408,34 @@
             },
             {
               "kind": "Method",
+              "canonicalReference": "api-documenter-test!DocClass1#seeExample:member(1)",
+              "docComment": "/**\n * Example of a `@see` tag.\n *\n * @see\n *\n * {@link IDocInterface5} for the returned data structure\n *\n * @see\n *\n * your developer SDK...\n *\n * ...for\n * ```\n * code\n * ```\n *\n * samples\n *\n * @see\n *\n * {@link https://tools.ietf.org/html/rfc1738 | RFC 1738} for syntax\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "seeExample(): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "void"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isStatic": false,
+              "returnTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [],
+              "name": "seeExample"
+            },
+            {
+              "kind": "Method",
               "canonicalReference": "api-documenter-test!DocClass1.sumWithExample:member(1)",
               "docComment": "/**\n * Returns the sum of two numbers.\n *\n * @remarks\n *\n * This illustrates usage of the `@example` block tag.\n *\n * @param x - the first number to add\n *\n * @param y - the second number to add\n *\n * @returns the sum of the two numbers\n *\n * @example\n *\n * Here's a simple example:\n * ```\n * // Prints \"2\":\n * console.log(DocClass1.sumWithExample(1,1));\n * ```\n *\n * @example\n *\n * Here's an example with negative numbers:\n * ```\n * // Prints \"0\":\n * console.log(DocClass1.sumWithExample(1,-1));\n * ```\n *\n */\n",
               "excerptTokens": [
