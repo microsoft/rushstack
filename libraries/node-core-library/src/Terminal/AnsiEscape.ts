@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ConsoleColorCodes } from './Colors';
-
 /**
  * Options for {@link AnsiEscape.formatForTests}.
  * @public
@@ -44,9 +42,9 @@ export class AnsiEscape {
 
       if (match) {
         const sgiCode: number = parseInt(match[1]);
-        const colorCode: string | undefined = ConsoleColorCodes[sgiCode];
+        const colorCode: string | undefined = AnsiEscape._x(sgiCode);
         if (colorCode) {
-          // Example: "[BlackForeground]"
+          // Example: "[black-bg]"
           return `[${colorCode}]`;
         }
       }
@@ -59,5 +57,76 @@ export class AnsiEscape {
       result = result.replace('\n', '[n]').replace('\r', `[r]`);
     }
     return result;
+  }
+
+  private static _x(n: number): string | undefined {
+    switch (n) {
+      case 30:
+        return 'black';
+      case 31:
+        return 'red';
+      case 32:
+        return 'green';
+      case 33:
+        return 'yellow';
+      case 34:
+        return 'blue';
+      case 35:
+        return 'magenta';
+      case 36:
+        return 'cyan';
+      case 37:
+        return 'white';
+      case 90:
+        return 'gray';
+      case 39:
+        return 'default';
+      case 40:
+        return 'black-bg';
+      case 41:
+        return 'red-bg';
+      case 42:
+        return 'green-bg';
+      case 43:
+        return 'yellow-bg';
+      case 44:
+        return 'blue-bg';
+      case 45:
+        return 'magenta-bg';
+      case 46:
+        return 'cyan-bg';
+      case 47:
+        return 'white-bg';
+      case 100:
+        return 'gray-bg';
+      case 49:
+        return 'default-bg';
+      case 1:
+        return 'bold';
+      case 21:
+        return 'bold-off';
+      case 2:
+        return 'dim';
+      case 22:
+        return 'normal';
+      case 4:
+        return 'underline';
+      case 24:
+        return 'underline-off';
+      case 5:
+        return 'blink';
+      case 25:
+        return 'blink-off';
+      case 7:
+        return 'invert';
+      case 27:
+        return 'invert-off';
+      case 8:
+        return 'hidden';
+      case 28:
+        return 'hidden-off';
+      default:
+        return undefined;
+    }
   }
 }

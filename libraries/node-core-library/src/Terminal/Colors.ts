@@ -77,7 +77,7 @@ export enum ConsoleColorCodes {
   Blink = 5,
   BlinkOff = 25,
   InvertColor = 7,
-  InvertColorOFf = 27,
+  InvertColorOff = 27,
   Hidden = 8,
   HiddenOff = 28
 }
