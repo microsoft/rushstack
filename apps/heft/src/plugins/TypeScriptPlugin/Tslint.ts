@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { Tslint as TTslint } from '@microsoft/rush-stack-compiler-3.7';
 import * as crypto from 'crypto';
-import { Import, Terminal, JsonFile, IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
+import { Import, Terminal, JsonFile } from '@rushstack/node-core-library';
 
 import { LinterBase, ILinterBaseOptions } from './LinterBase';
 import { IExtendedSourceFile, IExtendedProgram } from './internalTypings/TypeScriptInternals';
@@ -27,7 +27,6 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
   private _enabledRules: TTslint.IRule[];
   private _ruleSeverityMap: Map<string, TTslint.RuleSeverity>;
   protected _lintResult: TTslint.LintResult;
-  private static _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
   public constructor(options: ITslintOptions) {
     super('tslint', options);
@@ -36,22 +35,10 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     this._fileSystem = options.fileSystem;
   }
 
-  private static _resolvePackageMainFilePath(packagePath: string): string {
-    const packageJson: IPackageJson | undefined = PackageJsonLookup.instance.tryLoadPackageJsonFor(packagePath);
-    if (!packageJson) {
-      throw new Error(
-        `Supplied package path ${packagePath} could not resolve a package.json while searching for main file`
-      );
-    } else if (!packageJson.main) {
-      throw new Error(`Package at path ${packagePath} specifies no main file`);
-    }
-    return path.resolve(packagePath, packageJson.main);
-  }
-
   /**
    * Returns the sha1 hash of the contents of the config file at the provided path and the
    * the configs files that the referenced file extends.
-   * 
+   *
    * @param previousHash - If supplied, the hash is updated with the contents of the
    * file's extended configs and itself before being returned. Passing a digested hash to
    * this parameter will result in an error.
@@ -71,7 +58,10 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     // specifies a "main" file which is a config file, per the "extends" spec of tslint.json, found at
     //  https://palantir.github.io/tslint/usage/configuration/
     if (!configFilePath.endsWith('.json')) {
-      configFilePath = Tslint._resolvePackageMainFilePath(configFilePath);
+      configFilePath = Import.resolveModule({
+        modulePath: configFilePath,
+        baseFolderPath: path.dirname(configFilePath)
+      });
     }
     const rawConfig: string = fileSystem.readFile(configFilePath);
     const parsedConfig: IMinimalConfig = JsonFile.parseString(rawConfig);
