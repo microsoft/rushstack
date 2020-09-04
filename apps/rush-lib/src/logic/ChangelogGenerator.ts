@@ -237,7 +237,7 @@ export class ChangelogGenerator {
 
       if (!comments) {
         markdown +=
-          (changelog.entries.length === index + 1 ? '*Initial release*' : '*Version update only*') +
+          (changelog.entries.length === index + 1 ? '_Initial release_' : '_Version update only_') +
           EOL +
           EOL;
       } else {
