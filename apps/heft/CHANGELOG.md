@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 03 Sep 2020 15:09:59 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Sep 2020 15:06:27 GMT and should not be manually modified.
+
+## 0.10.2
+Fri, 04 Sep 2020 15:06:27 GMT
+
+### Patches
+
+- Fix issues with parsing of tslint.json config files, including adding support for an array provided to "extends" and proper Node module resolution to extended config files.
+- Fix a sourcemap issue that caused the debugger to show Jest files in a duplicate editor window (with the same path as the real file)
 
 ## 0.10.1
 Thu, 03 Sep 2020 15:09:59 GMT

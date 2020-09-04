@@ -2,6 +2,21 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.10.2",
+      "tag": "@rushstack/heft_v0.10.2",
+      "date": "Fri, 04 Sep 2020 15:06:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix issues with parsing of tslint.json config files, including adding support for an array provided to \"extends\" and proper Node module resolution to extended config files."
+          },
+          {
+            "comment": "Fix a sourcemap issue that caused the debugger to show Jest files in a duplicate editor window (with the same path as the real file)"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.1",
       "tag": "@rushstack/heft_v0.10.1",
       "date": "Thu, 03 Sep 2020 15:09:59 GMT",
