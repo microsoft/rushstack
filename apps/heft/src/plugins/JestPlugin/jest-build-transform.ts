@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Path, FileSystem, FileSystemStats } from '@rushstack/node-core-library';
+import { Path, FileSystem, FileSystemStats, JsonObject } from '@rushstack/node-core-library';
 import { InitialOptionsWithRootDir } from '@jest/types/build/Config';
 import { TransformedSource } from '@jest/transform';
 
@@ -36,8 +36,8 @@ const POLLING_INTERVAL_MS: number = 50;
  * This Jest transformer maps TS files under a 'src' folder to their compiled equivalent under 'lib'
  */
 export function process(
-  src: string,
-  filename: string,
+  srcCode: string,
+  srcFilePath: string,
   jestOptions: InitialOptionsWithRootDir
 ): TransformedSource {
   let jestTypeScriptDataFile: IJestTypeScriptDataFileJson | undefined = dataFileJsonCache.get(
@@ -53,9 +53,7 @@ export function process(
   // Is the input file under the "src" folder?
   const srcFolder: string = path.join(jestOptions.rootDir, 'src');
 
-  if (Path.isUnder(filename, srcFolder)) {
-    const srcFilePath: string = filename;
-
+  if (Path.isUnder(srcFilePath, srcFolder)) {
     // Example: /path/to/project/src/folder1/folder2/Example.ts
     const parsedFilename: path.ParsedPath = path.parse(srcFilePath);
 
@@ -129,9 +127,9 @@ export function process(
       delayMs(2000);
     }
 
-    let code: string;
+    let libCode: string;
     try {
-      code = FileSystem.readFile(libFilePath);
+      libCode = FileSystem.readFile(libFilePath);
     } catch (error) {
       if (FileSystem.isNotExistError(error)) {
         throw new Error(
@@ -142,27 +140,41 @@ export function process(
       }
     }
 
-    const sourceMapFilename: string = libFilePath + '.map';
+    const sourceMapFilePath: string = libFilePath + '.map';
 
-    let sourceMap: string;
+    let originalSourceMap: string;
     try {
-      sourceMap = FileSystem.readFile(sourceMapFilename);
+      originalSourceMap = FileSystem.readFile(sourceMapFilePath);
     } catch (error) {
       if (FileSystem.isNotExistError(error)) {
         throw new Error(
           'jest-build-transform: The source map file is missing -- check your tsconfig.json settings:\n' +
-            sourceMapFilename
+            sourceMapFilePath
         );
       } else {
         throw error;
       }
     }
 
-    return {
-      code: code,
-      map: sourceMap
-    };
+    // Fix up the source map, since Jest will present the .ts file path to VS Code as the executing script
+    const parsedSourceMap: JsonObject = JSON.parse(originalSourceMap);
+    parsedSourceMap.file = srcFilePath;
+    parsedSourceMap.sources = [srcFilePath];
+    parsedSourceMap.sourcesContent = [srcCode];
+    delete parsedSourceMap.sourceRoot;
+    const correctedSourceMap: string = JSON.stringify(parsedSourceMap);
+
+    // Embed the source map, since if we return the { code, map } object, then the debugger does not believe
+    // it is the same file, and will show a separate view with the same file path.
+    const encodedSourceMap: string =
+      'data:application/json;charset=utf-8;base64,' +
+      Buffer.from(correctedSourceMap, 'utf8').toString('base64');
+    const stringToFind: string = 'sourceMappingURL=';
+    const libCodeWithSourceMap: string =
+      libCode.slice(0, libCode.lastIndexOf(stringToFind) + stringToFind.length) + encodedSourceMap;
+
+    return libCodeWithSourceMap;
   } else {
-    throw new Error('jest-build-transform: The input path is not under the "src" folder:\n' + filename);
+    throw new Error('jest-build-transform: The input path is not under the "src" folder:\n' + srcFilePath);
   }
 }

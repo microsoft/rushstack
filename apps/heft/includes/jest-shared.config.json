@@ -22,5 +22,12 @@
   "modulePathIgnorePatterns": ["^<rootDir>/(?!(?:src/)|(?:src$))"],
   "setupFiles": ["@rushstack/heft/lib/exports/jest-global-setup.js"],
   "resolver": "@rushstack/heft/lib/exports/jest-improved-resolver.js",
-  "passWithNoTests": true
+  "passWithNoTests": true,
+
+  "//": [
+    "For web projects, change this setting to testEnvironment=jsdom.",
+    "Note that sourcemaps do not work as well with jsdom; see this PR comment for details:",
+    "https://github.com/facebook/jest/pull/9252/files#r352377796"
+  ],
+  "testEnvironment": "node"
 }
