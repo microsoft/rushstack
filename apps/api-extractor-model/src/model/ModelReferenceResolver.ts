@@ -101,8 +101,9 @@ export class ModelReferenceResolver {
       if (!ApiItemContainerMixin.isBaseClassOf(currentItem)) {
         // For example, {@link MyClass.myMethod.X} is invalid because methods cannot contain members
         result.errorMessage =
-          `Unable to resolve ${JSON.stringify(identifier)} because ${JSON.stringify(currentItem)}` +
-          ` cannot act as a container`;
+          `Unable to resolve ${JSON.stringify(
+            identifier
+          )} because ${currentItem.getScopedNameWithinPackage()}` + ` cannot act as a container`;
         return result;
       }
 
