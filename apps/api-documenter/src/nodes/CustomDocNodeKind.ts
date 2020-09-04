@@ -5,6 +5,7 @@ import { DocNoteBox } from './DocNoteBox';
 import { DocTable } from './DocTable';
 import { DocTableCell } from './DocTableCell';
 import { DocTableRow } from './DocTableRow';
+import { DocBullet } from './DocBullet';
 
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
@@ -13,6 +14,7 @@ import { DocTableRow } from './DocTableRow';
  * Identifies custom subclasses of {@link DocNode}.
  */
 export const enum CustomDocNodeKind {
+  Bullet = 'Bullet',
   EmphasisSpan = 'EmphasisSpan',
   Heading = 'Heading',
   NoteBox = 'NoteBox',
@@ -29,6 +31,7 @@ export class CustomDocNodes {
       const configuration: TSDocConfiguration = new TSDocConfiguration();
 
       configuration.docNodeManager.registerDocNodes('@micrososft/api-documenter', [
+        { docNodeKind: CustomDocNodeKind.Bullet, constructor: DocBullet },
         { docNodeKind: CustomDocNodeKind.EmphasisSpan, constructor: DocEmphasisSpan },
         { docNodeKind: CustomDocNodeKind.Heading, constructor: DocHeading },
         { docNodeKind: CustomDocNodeKind.NoteBox, constructor: DocNoteBox },
@@ -43,6 +46,7 @@ export class CustomDocNodes {
       ]);
 
       configuration.docNodeManager.registerAllowableChildren(DocNodeKind.Section, [
+        CustomDocNodeKind.Bullet,
         CustomDocNodeKind.Heading,
         CustomDocNodeKind.NoteBox,
         CustomDocNodeKind.Table
