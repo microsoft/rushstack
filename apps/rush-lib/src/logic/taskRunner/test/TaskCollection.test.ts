@@ -2,32 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import { TaskCollection } from '../TaskCollection';
-import { ITaskWriter } from '@rushstack/stream-collator';
-import { TaskStatus } from '../TaskStatus';
 import { Task } from '../Task';
 import { StringBufferTerminalProvider } from '@rushstack/node-core-library';
-import { BaseBuilder } from '../BaseBuilder';
-
-class DummyBuilder extends BaseBuilder {
-  public readonly name: string;
-  private readonly _action: (() => void) | undefined;
-  public readonly hadEmptyScript: boolean = false;
-  public readonly isIncrementalBuildAllowed: boolean = false;
-
-  public constructor(name: string, action?: () => void) {
-    super();
-
-    this.name = name;
-    this._action = action;
-  }
-
-  public async execute(writer: ITaskWriter): Promise<TaskStatus> {
-    if (this._action) {
-      this._action();
-    }
-    return TaskStatus.Success;
-  }
-}
+import { MockBuilder } from './MockBuilder';
+import { TaskStatus } from '../TaskStatus';
 
 function checkConsoleOutput(terminalProvider: StringBufferTerminalProvider): void {
   expect(terminalProvider.getOutput()).toMatchSnapshot();
@@ -56,13 +34,13 @@ describe('TaskCollection', () => {
     });
 
     it('throwsErrorOnNonExistentDependency', () => {
-      taskCollection.addTask(new DummyBuilder('foo'));
+      taskCollection.addTask(new MockBuilder('foo'));
       expect(() => taskCollection.addDependencies('foo', ['bar'])).toThrowErrorMatchingSnapshot();
     });
 
     it('detectsDependencyCycle', () => {
-      taskCollection.addTask(new DummyBuilder('foo'));
-      taskCollection.addTask(new DummyBuilder('bar'));
+      taskCollection.addTask(new MockBuilder('foo'));
+      taskCollection.addTask(new MockBuilder('bar'));
       taskCollection.addDependencies('foo', ['bar']);
       taskCollection.addDependencies('bar', ['foo']);
       expect(() => taskCollection.getOrderedTasks()).toThrowErrorMatchingSnapshot();
@@ -70,8 +48,18 @@ describe('TaskCollection', () => {
 
     it('respectsDependencyOrder', () => {
       const result: string[] = [];
-      taskCollection.addTask(new DummyBuilder('two', () => result.push('2')));
-      taskCollection.addTask(new DummyBuilder('one', () => result.push('1')));
+      taskCollection.addTask(
+        new MockBuilder('two', async () => {
+          result.push('2');
+          return TaskStatus.Success;
+        })
+      );
+      taskCollection.addTask(
+        new MockBuilder('one', async () => {
+          result.push('1');
+          return TaskStatus.Success;
+        })
+      );
       taskCollection.addDependencies('two', ['one']);
 
       const tasks: Task[] = taskCollection.getOrderedTasks();

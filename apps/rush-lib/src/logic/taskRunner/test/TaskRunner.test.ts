@@ -12,6 +12,7 @@ import { Task } from '../Task';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import { Utilities } from '../../../utilities/Utilities';
 import { BaseBuilder } from '../BaseBuilder';
+import { MockBuilder } from './MockBuilder';
 
 const mockGetTimeInMs: jest.Mock = jest.fn();
 Utilities.getTimeInMs = mockGetTimeInMs;
@@ -80,19 +81,17 @@ describe('TaskRunner', () => {
     const EXPECTED_FAIL: string = 'Promise returned by execute() resolved but was expected to fail';
 
     it('printedStderrAfterError', () => {
-      taskRunner = createTaskRunner(taskRunnerOptions, {
-        name: 'stdout+stderr',
-        isIncrementalBuildAllowed: false,
-        execute: (writer: ITaskWriter) => {
+      taskRunner = createTaskRunner(
+        taskRunnerOptions,
+        new MockBuilder('stdout+stderr', async (writer: ITaskWriter) => {
           writer.write('Build step 1' + EOL);
           writer.writeError('Error: step 1 failed' + EOL);
-          return Promise.resolve(TaskStatus.Failure);
-        },
-        hadEmptyScript: false
-      });
+          return TaskStatus.Failure;
+        })
+      );
 
       return taskRunner
-        .execute()
+        .executeAsync()
         .then(() => fail(EXPECTED_FAIL))
         .catch((err) => {
           expect(err.message).toMatchSnapshot();
@@ -104,19 +103,17 @@ describe('TaskRunner', () => {
     });
 
     it('printedStdoutAfterErrorWithEmptyStderr', () => {
-      taskRunner = createTaskRunner(taskRunnerOptions, {
-        name: 'stdout only',
-        isIncrementalBuildAllowed: false,
-        execute: (writer: ITaskWriter) => {
+      taskRunner = createTaskRunner(
+        taskRunnerOptions,
+        new MockBuilder('stdout only', async (writer: ITaskWriter) => {
           writer.write('Build step 1' + EOL);
           writer.write('Error: step 1 failed' + EOL);
-          return Promise.resolve(TaskStatus.Failure);
-        },
-        hadEmptyScript: false
-      });
+          return TaskStatus.Failure;
+        })
+      );
 
       return taskRunner
-        .execute()
+        .executeAsync()
         .then(() => fail(EXPECTED_FAIL))
         .catch((err) => {
           expect(err.message).toMatchSnapshot();
@@ -126,21 +123,19 @@ describe('TaskRunner', () => {
     });
 
     it('printedAbridgedStdoutAfterErrorWithEmptyStderr', () => {
-      taskRunner = createTaskRunner(taskRunnerOptions, {
-        name: 'large stdout only',
-        isIncrementalBuildAllowed: false,
-        execute: (writer: ITaskWriter) => {
+      taskRunner = createTaskRunner(
+        taskRunnerOptions,
+        new MockBuilder('large stdout only', async (writer: ITaskWriter) => {
           writer.write(`Building units...${EOL}`);
           for (let i: number = 1; i <= 50; i++) {
             writer.write(` - unit #${i};${EOL}`);
           }
-          return Promise.resolve(TaskStatus.Failure);
-        },
-        hadEmptyScript: false
-      });
+          return TaskStatus.Failure;
+        })
+      );
 
       return taskRunner
-        .execute()
+        .executeAsync()
         .then(() => fail(EXPECTED_FAIL))
         .catch((err) => {
           expect(err.message).toMatchSnapshot();
@@ -152,21 +147,19 @@ describe('TaskRunner', () => {
     });
 
     it('preservedLeadingBlanksButTrimmedTrailingBlanks', () => {
-      taskRunner = createTaskRunner(taskRunnerOptions, {
-        name: 'large stderr with leading and trailing blanks',
-        isIncrementalBuildAllowed: false,
-        execute: (writer: ITaskWriter) => {
+      taskRunner = createTaskRunner(
+        taskRunnerOptions,
+        new MockBuilder('large stderr with leading and trailing blanks', async (writer: ITaskWriter) => {
           writer.writeError(`List of errors:  ${EOL}`);
           for (let i: number = 1; i <= 50; i++) {
             writer.writeError(` - error #${i};  ${EOL}`);
           }
-          return Promise.resolve(TaskStatus.Failure);
-        },
-        hadEmptyScript: false
-      });
+          return TaskStatus.Failure;
+        })
+      );
 
       return taskRunner
-        .execute()
+        .executeAsync()
         .then(() => fail(EXPECTED_FAIL))
         .catch((err) => {
           expect(err.message).toMatchSnapshot();
@@ -191,19 +184,17 @@ describe('TaskRunner', () => {
       });
 
       it('Logs warnings correctly', () => {
-        taskRunner = createTaskRunner(taskRunnerOptions, {
-          name: 'success with warnings (failure)',
-          isIncrementalBuildAllowed: false,
-          execute: (writer: ITaskWriter) => {
+        taskRunner = createTaskRunner(
+          taskRunnerOptions,
+          new MockBuilder('success with warnings (failure)', async (writer: ITaskWriter) => {
             writer.write('Build step 1' + EOL);
             writer.write('Warning: step 1 succeeded with warnings' + EOL);
-            return Promise.resolve(TaskStatus.SuccessWithWarning);
-          },
-          hadEmptyScript: false
-        });
+            return TaskStatus.SuccessWithWarning;
+          })
+        );
 
         return taskRunner
-          .execute()
+          .executeAsync()
           .then(() => fail('Promise returned by execute() resolved but was expected to fail'))
           .catch((err) => {
             expect(err.message).toMatchSnapshot();
@@ -227,19 +218,17 @@ describe('TaskRunner', () => {
       });
 
       it('Logs warnings correctly', () => {
-        taskRunner = createTaskRunner(taskRunnerOptions, {
-          name: 'success with warnings (success)',
-          isIncrementalBuildAllowed: false,
-          execute: (writer: ITaskWriter) => {
+        taskRunner = createTaskRunner(
+          taskRunnerOptions,
+          new MockBuilder('success with warnings (success)', async (writer: ITaskWriter) => {
             writer.write('Build step 1' + EOL);
             writer.write('Warning: step 1 succeeded with warnings' + EOL);
-            return Promise.resolve(TaskStatus.SuccessWithWarning);
-          },
-          hadEmptyScript: false
-        });
+            return TaskStatus.SuccessWithWarning;
+          })
+        );
 
         return taskRunner
-          .execute()
+          .executeAsync()
           .then(() => {
             const allMessages: string = terminalProvider.getOutput();
             expect(allMessages).toContain('Build step 1');
