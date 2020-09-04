@@ -4,6 +4,7 @@
 import { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
 import { StringBuilder } from '../StringBuilder';
 import { Text } from '../Text';
+import { AnsiEscape } from './AnsiEscape';
 
 /**
  * @beta
@@ -117,10 +118,7 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
     s = Text.convertToLf(s);
 
     if (options.normalizeSpecialCharacters) {
-      return s
-        .replace(/\u001b/g, '[x]') // eslint-disable-line no-control-regex
-        .replace(/\n/g, '[-n-]')
-        .replace(/\r/g, '[-r-]');
+      return AnsiEscape.formatForTests(s, { encodeNewlines: true });
     } else {
       return s;
     }

@@ -54,7 +54,7 @@ export class AnsiEscape {
     });
 
     if (options.encodeNewlines) {
-      result = result.replace('\n', '[n]').replace('\r', `[r]`);
+      result = result.replace(/\n/g, '[n]').replace(/\r/g, `[r]`);
     }
     return result;
   }
