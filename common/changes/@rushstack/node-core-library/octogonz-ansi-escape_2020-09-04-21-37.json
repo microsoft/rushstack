@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Replace Colors.normalizeColorTokensForTest() (which was marked as \"beta\") with AnsiEscape.formatForTests()",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
