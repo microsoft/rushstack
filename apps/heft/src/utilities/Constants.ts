@@ -5,4 +5,6 @@ export class Constants {
   public static projectHeftFolderName: string = '.heft';
 
   public static buildCacheFolderName: string = 'build-cache';
+
+  public static pluginParameterLongName: string = '--plugin';
 }
