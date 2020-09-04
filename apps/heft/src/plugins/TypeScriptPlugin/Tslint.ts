@@ -3,9 +3,8 @@
 
 import * as path from 'path';
 import { Tslint as TTslint } from '@microsoft/rush-stack-compiler-3.7';
-import { Import } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
-import { Terminal, JsonFile } from '@rushstack/node-core-library';
+import { Import, Terminal, JsonFile } from '@rushstack/node-core-library';
 
 import { LinterBase, ILinterBaseOptions } from './LinterBase';
 import { IExtendedSourceFile, IExtendedProgram } from './internalTypings/TypeScriptInternals';
@@ -36,28 +35,54 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     this._fileSystem = options.fileSystem;
   }
 
+  /**
+   * Returns the sha1 hash of the contents of the config file at the provided path and the
+   * the configs files that the referenced file extends.
+   *
+   * @param previousHash - If supplied, the hash is updated with the contents of the
+   * file's extended configs and itself before being returned. Passing a digested hash to
+   * this parameter will result in an error.
+   */
   public static getConfigHash(
     configFilePath: string,
     terminal: Terminal,
-    fileSystem: IExtendedFileSystem
+    fileSystem: IExtendedFileSystem,
+    previousHash?: crypto.Hash
   ): crypto.Hash {
     interface IMinimalConfig {
-      extends?: string;
+      extends?: string | string[];
     }
 
     terminal.writeVerboseLine(`Examining config file "${configFilePath}"`);
-
-    const rawConfig: string = fileSystem.readFile(configFilePath);
-    const parsedConfig: IMinimalConfig = JsonFile.parseString(rawConfig);
-    let hash: crypto.Hash;
-    if (parsedConfig.extends) {
-      const extendsFullPath: string = Import.resolveModule({
-        modulePath: parsedConfig.extends,
+    // if configFilePath is not a json file, assume that it is a package whose package.json
+    // specifies a "main" file which is a config file, per the "extends" spec of tslint.json, found at
+    //  https://palantir.github.io/tslint/usage/configuration/
+    if (!configFilePath.endsWith('.json')) {
+      configFilePath = Import.resolveModule({
+        modulePath: configFilePath,
         baseFolderPath: path.dirname(configFilePath)
       });
-      hash = Tslint.getConfigHash(extendsFullPath, terminal, fileSystem);
-    } else {
-      hash = crypto.createHash('sha1').update(rawConfig);
+    }
+    const rawConfig: string = fileSystem.readFile(configFilePath);
+    const parsedConfig: IMinimalConfig = JsonFile.parseString(rawConfig);
+    const extendsProperty: string | string[] | undefined = parsedConfig.extends;
+    let hash: crypto.Hash = previousHash || crypto.createHash('sha1');
+
+    if (extendsProperty instanceof Array) {
+      for (const extendFile of extendsProperty) {
+        const extendFilePath: string = Import.resolveModule({
+          modulePath: extendFile,
+          baseFolderPath: path.dirname(configFilePath)
+        });
+        hash = Tslint.getConfigHash(extendFilePath, terminal, fileSystem, hash);
+      }
+    } else if (extendsProperty) {
+      // note that if we get here, extendsProperty is a string
+      const extendsFullPath: string = Import.resolveModule({
+        modulePath: extendsProperty,
+        baseFolderPath: path.dirname(configFilePath)
+      });
+      hash = Tslint.getConfigHash(extendsFullPath, terminal, fileSystem, hash);
     }
 
     return hash.update(rawConfig);
