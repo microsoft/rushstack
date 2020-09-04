@@ -243,24 +243,6 @@ export class Colors {
   }
 
   /**
-   * This utility function can be used to normalize color codes into human-readable
-   * tokens. This is useful for producing more readable test snapshots.
-   *
-   * @beta
-   */
-  public static normalizeColorTokensForTest(text: string): string {
-    // eslint-disable-next-line no-control-regex
-    return text.replace(/\u001b\[(\d+)m/gu, (capture: string, code: number) => {
-      const colorCode: string | undefined = ConsoleColorCodes[code];
-      if (!colorCode) {
-        return `[UnknownColorCode ${code}]`;
-      } else {
-        return `[${colorCode}]`;
-      }
-    });
-  }
-
-  /**
    * If called with a string, returns the string wrapped in a {@link IColorableSequence}.
    * If called with a {@link IColorableSequence}, returns the {@link IColorableSequence}.
    *

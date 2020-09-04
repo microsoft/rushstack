@@ -17,9 +17,6 @@ import {
  * @beta
  */
 export class Terminal {
-  // eslint-disable-next-line no-control-regex
-  private static _colorRegExp: RegExp = /\x1B[[(?);]{0,2}(;?\d)*./g;
-
   private _providers: Set<ITerminalProvider>;
 
   public constructor(provider: ITerminalProvider) {
@@ -147,13 +144,6 @@ export class Terminal {
    */
   public writeVerboseLine(...messageParts: (string | IColorableSequence)[]): void {
     this.writeVerbose(...messageParts, eolSequence);
-  }
-
-  /**
-   * Returns the input string after removing ANSI escape codes that apply foreground/background colors to text.
-   */
-  public static removeColors(text: string): string {
-    return text.replace(Terminal._colorRegExp, '');
   }
 
   private _writeSegmentsToProviders(
