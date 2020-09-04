@@ -12,7 +12,14 @@ import {
   NewlineKind,
   InternalError
 } from '@rushstack/node-core-library';
-import { StringBuilder, DocSection, DocComment } from '@microsoft/tsdoc';
+import {
+  StringBuilder,
+  DocSection,
+  DocComment,
+  StandardTags,
+  DocBlock,
+  TSDocConfiguration
+} from '@microsoft/tsdoc';
 import {
   ApiModel,
   ApiItem,
@@ -52,6 +59,8 @@ import {
 import { IYamlTocFile, IYamlTocItem } from '../yaml/IYamlTocFile';
 import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
+import { DocHeading } from '../nodes/DocHeading';
+import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
 
 const yamlApiSchema: JsonSchema = JsonSchema.fromFile(
   path.join(__dirname, '..', 'yaml', 'typescript.schema.json')
@@ -386,6 +395,31 @@ export class YamlDocumenter {
         const remarks: string = this._renderMarkdown(tsdocComment.remarksBlock.content, apiItem);
         if (remarks) {
           yamlItem.remarks = remarks;
+        }
+      }
+
+      const customConfiguration: TSDocConfiguration = CustomDocNodes.configuration;
+
+      // Write the @example blocks
+      const exampleBlocks: DocBlock[] = tsdocComment.customBlocks.filter(
+        (x) => x.blockTag.tagNameWithUpperCase === StandardTags.example.tagNameWithUpperCase
+      );
+
+      if (exampleBlocks.length > 0) {
+        yamlItem.examples = [];
+
+        let exampleNumber: number = 1;
+        for (const exampleBlock of exampleBlocks) {
+          const heading: string = exampleBlocks.length > 1 ? `Example ${exampleNumber}` : 'Example';
+
+          const output: DocSection = new DocSection({ configuration: customConfiguration });
+          output.appendNode(new DocHeading({ configuration: customConfiguration, title: heading }));
+          output.appendNodes(exampleBlock.content.nodes);
+
+          const markdown: string = this._renderMarkdown(output, apiItem);
+          yamlItem.examples.push(markdown);
+
+          ++exampleNumber;
         }
       }
 
