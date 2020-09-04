@@ -3,8 +3,8 @@
 
 import * as child_process from 'child_process';
 import * as path from 'path';
-import { JsonFile, Text, FileSystem, JsonObject } from '@rushstack/node-core-library';
-import { ITaskWriter } from '@rushstack/stream-collator';
+import { JsonFile, Text, FileSystem, JsonObject, FileWriter } from '@rushstack/node-core-library';
+import { CollatedTerminal, StreamKind } from '@rushstack/stream-collator';
 import { IPackageDeps } from '@rushstack/package-deps-hash';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
@@ -13,7 +13,7 @@ import { Utilities } from '../../utilities/Utilities';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
-import { BaseBuilder } from './BaseBuilder';
+import { BaseBuilder, IBuilderContext } from './BaseBuilder';
 
 interface IPackageDependencies extends IPackageDeps {
   arguments: string;
@@ -28,16 +28,14 @@ export interface IProjectBuilderOptions {
   packageDepsFilename: string;
 }
 
-function _areShallowEqual(object1: JsonObject, object2: JsonObject, writer: ITaskWriter): boolean {
+function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
   for (const n in object1) {
     if (!(n in object2) || object1[n] !== object2[n]) {
-      // writer.writeLine(`Found mismatch: "${n}": "${object1[n]}" !== "${object2[n]}"`);
       return false;
     }
   }
   for (const n in object2) {
     if (!(n in object1)) {
-      // writer.writeLine(`Found new prop in obj2: "${n}" value="${object2[n]}"`);
       return false;
     }
   }
@@ -81,44 +79,61 @@ export class ProjectBuilder extends BaseBuilder {
     return rushProject.packageName;
   }
 
-  public async executeAsync(writer: ITaskWriter): Promise<TaskStatus> {
+  public async executeAsync(context: IBuilderContext): Promise<TaskStatus> {
     try {
       if (!this._commandToRun) {
         this.hadEmptyScript = true;
       }
-      const deps: IPackageDependencies | undefined = this._getPackageDependencies(writer);
-      return await this._executeTaskAsync(writer, deps);
+      const dependencies: IPackageDependencies | undefined = this._getPackageDependencies(context.terminal);
+      return await this._executeTaskAsync(dependencies, context);
     } catch (error) {
       throw new TaskError('executing', error.message);
     }
   }
 
-  private _getPackageDependencies(writer: ITaskWriter): IPackageDependencies | undefined {
-    let deps: IPackageDependencies | undefined = undefined;
+  private _getPackageDependencies(terminal: CollatedTerminal): IPackageDependencies | undefined {
+    let dependencies: IPackageDependencies | undefined = undefined;
     try {
-      deps = {
+      dependencies = {
         files: this._packageChangeAnalyzer.getPackageDepsHash(this._rushProject.packageName)!.files,
         arguments: this._commandToRun
       };
     } catch (error) {
-      writer.writeLine(
+      terminal.writeStdoutLine(
         'Unable to calculate incremental build state. Instead running full rebuild. ' + error.toString()
       );
     }
 
-    return deps;
+    return dependencies;
   }
 
   private async _executeTaskAsync(
-    writer: ITaskWriter,
-    currentPackageDeps: IPackageDependencies | undefined
+    currentPackageDeps: IPackageDependencies | undefined,
+    context: IBuilderContext
   ): Promise<TaskStatus> {
+    const terminal: CollatedTerminal = context.terminal;
+
+    const buildLogPath: string = path.join(
+      this._rushProject.projectFolder,
+      `${path.basename(this._rushProject.projectFolder)}.build.log`
+    );
+    const errorLogPath: string = path.join(
+      this._rushProject.projectFolder,
+      `${path.basename(this._rushProject.projectFolder)}.build.error.log`
+    );
+
+    FileSystem.deleteFile(buildLogPath);
+    FileSystem.deleteFile(errorLogPath);
+
+    const buildLogWriter: FileWriter = FileWriter.open(buildLogPath);
+    let errorLogWriter: FileWriter | undefined = undefined;
+
     try {
       this._hasWarningOrError = false;
       const projectFolder: string = this._rushProject.projectFolder;
       let lastPackageDeps: IPackageDependencies | undefined = undefined;
 
-      writer.writeLine(`>>> ${this.name}`);
+      terminal.writeStdoutLine(`>>> ${this.name}`);
 
       // TODO: Remove legacyDepsPath with the next major release of Rush
       const legacyDepsPath: string = path.join(this._rushProject.projectFolder, 'package-deps.json');
@@ -133,7 +148,7 @@ export class ProjectBuilder extends BaseBuilder {
           lastPackageDeps = JsonFile.load(currentDepsPath) as IPackageDependencies;
         } catch (e) {
           // Warn and ignore - treat failing to load the file as the project being not built.
-          writer.writeLine(
+          terminal.writeStdoutLine(
             `Warning: error parsing ${this._packageDepsFilename}: ${e}. Ignoring and ` +
               `treating the command "${this._commandToRun}" as not run.`
           );
@@ -144,7 +159,7 @@ export class ProjectBuilder extends BaseBuilder {
         lastPackageDeps &&
         currentPackageDeps &&
         currentPackageDeps.arguments === lastPackageDeps.arguments &&
-        _areShallowEqual(currentPackageDeps.files, lastPackageDeps.files, writer)
+        _areShallowEqual(currentPackageDeps.files, lastPackageDeps.files)
       );
 
       if (isPackageUnchanged && this.isIncrementalBuildAllowed) {
@@ -157,7 +172,7 @@ export class ProjectBuilder extends BaseBuilder {
         FileSystem.deleteFile(legacyDepsPath);
 
         if (!this._commandToRun) {
-          writer.writeLine(
+          terminal.writeStdoutLine(
             `The task command "${this._commandToRun}" was registered in the package.json but is blank,` +
               ` so no action will be taken.`
           );
@@ -174,7 +189,7 @@ export class ProjectBuilder extends BaseBuilder {
 
         // Run the task
 
-        writer.writeLine(this._commandToRun);
+        terminal.writeStdoutLine(this._commandToRun);
         const task: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(this._commandToRun, {
           rushConfiguration: this._rushConfiguration,
           workingDirectory: projectFolder,
@@ -187,66 +202,67 @@ export class ProjectBuilder extends BaseBuilder {
 
         // Hook into events, in order to get live streaming of build log
         if (task.stdout !== null) {
-          task.stdout.on('data', (data: string) => {
-            writer.write(data);
+          task.stdout.on('data', (data: Buffer) => {
+            const text: string = data.toString();
+            if (!context.quietMode) {
+              terminal.writeChunk({ text, stream: StreamKind.Stdout });
+            }
+
+            context.stdioSummarizer.writeChunk({ text, stream: StreamKind.Stdout });
+
+            buildLogWriter.write(text);
           });
         }
         if (task.stderr !== null) {
-          task.stderr.on('data', (data: string) => {
-            writer.writeError(data);
+          task.stderr.on('data', (data: Buffer) => {
+            const text: string = data.toString();
+            terminal.writeChunk({ text, stream: StreamKind.Stderr });
+            context.stdioSummarizer.writeChunk({ text, stream: StreamKind.Stderr });
+
+            if (errorLogWriter === undefined) {
+              errorLogWriter = FileWriter.open(errorLogPath);
+            }
+            errorLogWriter.write(text);
+
+            // Both stderr and stdout are written to the build log
+            buildLogWriter.write(text);
+
             this._hasWarningOrError = true;
           });
         }
 
-        return new Promise((resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
-          task.on('close', (code: number) => {
-            this._writeLogsToDisk(writer);
+        return await new Promise(
+          (resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
+            task.on('close', (code: number) => {
+              try {
+                buildLogWriter.close();
 
-            if (code !== 0) {
-              reject(new TaskError('error', `Returned error code: ${code}`));
-            } else if (this._hasWarningOrError) {
-              resolve(TaskStatus.SuccessWithWarning);
-            } else {
-              // Write deps on success.
-              if (currentPackageDeps) {
-                JsonFile.save(currentPackageDeps, currentDepsPath, {
-                  ensureFolderExists: true
-                });
+                if (code !== 0) {
+                  reject(new TaskError('error', `Returned error code: ${code}`));
+                } else if (this._hasWarningOrError) {
+                  resolve(TaskStatus.SuccessWithWarning);
+                } else {
+                  // Write deps on success.
+                  if (currentPackageDeps) {
+                    JsonFile.save(currentPackageDeps, currentDepsPath, {
+                      ensureFolderExists: true
+                    });
+                  }
+                  resolve(TaskStatus.Success);
+                }
+              } catch (error) {
+                reject(error);
               }
-              resolve(TaskStatus.Success);
-            }
-          });
-        });
-      }
-    } catch (error) {
-      console.log(error);
-
-      this._writeLogsToDisk(writer);
-      throw new TaskError('error', error.toString());
-    }
-  }
-
-  // @todo #179371: add log files to list of things that get gulp cleaned
-  private _writeLogsToDisk(writer: ITaskWriter): void {
-    try {
-      const logFilename: string = path.basename(this._rushProject.projectFolder);
-
-      // eslint-disable-next-line no-control-regex
-      const stdout: string = writer.getStdOutput().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
-      if (stdout) {
-        FileSystem.writeFile(path.join(this._rushProject.projectFolder, logFilename + '.build.log'), stdout);
-      }
-
-      // eslint-disable-next-line no-control-regex
-      const stderr: string = writer.getStdError().replace(/\x1B[[(?);]{0,2}(;?\d)*./g, '');
-      if (stderr) {
-        FileSystem.writeFile(
-          path.join(this._rushProject.projectFolder, logFilename + '.build.error.log'),
-          stderr
+            });
+          }
         );
       }
-    } catch (e) {
-      console.log(`Error writing logs to disk: ${e}`);
+    } finally {
+      try {
+        buildLogWriter.close();
+      } catch (error) {
+        terminal.writeStderrLine('Failed to close file handle for ' + buildLogPath);
+      }
     }
   }
 }

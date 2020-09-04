@@ -5,11 +5,12 @@
 jest.mock('../../../utilities/Utilities');
 
 import { EOL } from 'os';
+import { ICollatedChunk, CollatedTerminal } from '@rushstack/stream-collator';
+import { AnsiEscape } from '@rushstack/node-core-library';
+
 import { TaskRunner, ITaskRunnerOptions } from '../TaskRunner';
-import { ITaskWriter } from '@rushstack/stream-collator';
 import { TaskStatus } from '../TaskStatus';
 import { Task } from '../Task';
-import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import { Utilities } from '../../../utilities/Utilities';
 import { BaseBuilder } from '../BaseBuilder';
 import { MockBuilder } from './MockBuilder';
@@ -24,6 +25,27 @@ mockGetTimeInMs.mockImplementation(() => {
   return mockTimeInMs;
 });
 
+class MockStream {
+  public readonly chunks: ICollatedChunk[] = [];
+  public reset(): void {
+    this.chunks.length = 0;
+  }
+  public writeToStream = (chunk: ICollatedChunk): void => {
+    const encodedText: string = AnsiEscape.formatForTests(chunk.text, { encodeNewlines: true });
+    this.chunks.push({
+      text: encodedText,
+      stream: chunk.stream
+    });
+  };
+  public getAllOutput(): string {
+    return this.chunks.map((x) => x.text).join('');
+  }
+  public checkSnapshot(): void {
+    expect(this.chunks).toMatchSnapshot();
+  }
+}
+const mockStream: MockStream = new MockStream();
+
 function createTaskRunner(taskRunnerOptions: ITaskRunnerOptions, builder: BaseBuilder): TaskRunner {
   const task: Task = new Task();
   task.dependencies = new Set<Task>();
@@ -34,22 +56,12 @@ function createTaskRunner(taskRunnerOptions: ITaskRunnerOptions, builder: BaseBu
   return new TaskRunner([task], taskRunnerOptions);
 }
 
-function checkConsoleOutput(terminalProvider: StringBufferTerminalProvider): void {
-  expect(terminalProvider.getOutput()).toMatchSnapshot();
-  expect(terminalProvider.getVerbose()).toMatchSnapshot();
-  expect(terminalProvider.getWarningOutput()).toMatchSnapshot();
-  expect(terminalProvider.getErrorOutput()).toMatchSnapshot();
-}
-
 describe('TaskRunner', () => {
-  let terminalProvider: StringBufferTerminalProvider;
-  let terminal: Terminal;
   let taskRunner: TaskRunner;
   let taskRunnerOptions: ITaskRunnerOptions;
 
   beforeEach(() => {
-    terminalProvider = new StringBufferTerminalProvider(true);
-    terminal = new Terminal(terminalProvider);
+    mockStream.reset();
   });
 
   describe('Constructor', () => {
@@ -60,7 +72,7 @@ describe('TaskRunner', () => {
             quietMode: false,
             parallelism: 'tequila',
             changedProjectsOnly: false,
-            terminal,
+            writeToStream: mockStream.writeToStream,
             allowWarningsInSuccessfulBuild: false
           })
       ).toThrowErrorMatchingSnapshot();
@@ -73,7 +85,7 @@ describe('TaskRunner', () => {
         quietMode: false,
         parallelism: '1',
         changedProjectsOnly: false,
-        terminal,
+        writeToStream: mockStream.writeToStream,
         allowWarningsInSuccessfulBuild: false
       };
     });
@@ -83,9 +95,9 @@ describe('TaskRunner', () => {
     it('printedStderrAfterError', () => {
       taskRunner = createTaskRunner(
         taskRunnerOptions,
-        new MockBuilder('stdout+stderr', async (writer: ITaskWriter) => {
-          writer.write('Build step 1' + EOL);
-          writer.writeError('Error: step 1 failed' + EOL);
+        new MockBuilder('stdout+stderr', async (terminal: CollatedTerminal) => {
+          terminal.writeStdoutLine('Build step 1' + EOL);
+          terminal.writeStderrLine('Error: step 1 failed' + EOL);
           return TaskStatus.Failure;
         })
       );
@@ -95,19 +107,18 @@ describe('TaskRunner', () => {
         .then(() => fail(EXPECTED_FAIL))
         .catch((err) => {
           expect(err.message).toMatchSnapshot();
-          const allMessages: string = terminalProvider.getOutput();
-          expect(allMessages).not.toContain('Build step 1');
+          const allMessages: string = mockStream.getAllOutput();
           expect(allMessages).toContain('Error: step 1 failed');
-          checkConsoleOutput(terminalProvider);
+          mockStream.checkSnapshot();
         });
     });
 
     it('printedStdoutAfterErrorWithEmptyStderr', () => {
       taskRunner = createTaskRunner(
         taskRunnerOptions,
-        new MockBuilder('stdout only', async (writer: ITaskWriter) => {
-          writer.write('Build step 1' + EOL);
-          writer.write('Error: step 1 failed' + EOL);
+        new MockBuilder('stdout only', async (terminal: CollatedTerminal) => {
+          terminal.writeStdoutLine('Build step 1' + EOL);
+          terminal.writeStdoutLine('Error: step 1 failed' + EOL);
           return TaskStatus.Failure;
         })
       );
@@ -117,56 +128,8 @@ describe('TaskRunner', () => {
         .then(() => fail(EXPECTED_FAIL))
         .catch((err) => {
           expect(err.message).toMatchSnapshot();
-          expect(terminalProvider.getOutput()).toMatch(/Build step 1.*Error: step 1 failed/);
-          checkConsoleOutput(terminalProvider);
-        });
-    });
-
-    it('printedAbridgedStdoutAfterErrorWithEmptyStderr', () => {
-      taskRunner = createTaskRunner(
-        taskRunnerOptions,
-        new MockBuilder('large stdout only', async (writer: ITaskWriter) => {
-          writer.write(`Building units...${EOL}`);
-          for (let i: number = 1; i <= 50; i++) {
-            writer.write(` - unit #${i};${EOL}`);
-          }
-          return TaskStatus.Failure;
-        })
-      );
-
-      return taskRunner
-        .executeAsync()
-        .then(() => fail(EXPECTED_FAIL))
-        .catch((err) => {
-          expect(err.message).toMatchSnapshot();
-          expect(terminalProvider.getOutput()).toMatch(
-            /Building units.* - unit #1;.* - unit #3;.*lines omitted.* - unit #48;.* - unit #50;/
-          );
-          checkConsoleOutput(terminalProvider);
-        });
-    });
-
-    it('preservedLeadingBlanksButTrimmedTrailingBlanks', () => {
-      taskRunner = createTaskRunner(
-        taskRunnerOptions,
-        new MockBuilder('large stderr with leading and trailing blanks', async (writer: ITaskWriter) => {
-          writer.writeError(`List of errors:  ${EOL}`);
-          for (let i: number = 1; i <= 50; i++) {
-            writer.writeError(` - error #${i};  ${EOL}`);
-          }
-          return TaskStatus.Failure;
-        })
-      );
-
-      return taskRunner
-        .executeAsync()
-        .then(() => fail(EXPECTED_FAIL))
-        .catch((err) => {
-          expect(err.message).toMatchSnapshot();
-          expect(terminalProvider.getOutput()).toMatch(
-            /List of errors:\S.* - error #1;\S.*lines omitted.* - error #48;\S.* - error #50;\S/
-          );
-          checkConsoleOutput(terminalProvider);
+          expect(mockStream.getAllOutput()).toMatch(/Build step 1.*Error: step 1 failed/);
+          mockStream.checkSnapshot();
         });
     });
   });
@@ -178,7 +141,7 @@ describe('TaskRunner', () => {
           quietMode: false,
           parallelism: '1',
           changedProjectsOnly: false,
-          terminal,
+          writeToStream: mockStream.writeToStream,
           allowWarningsInSuccessfulBuild: false
         };
       });
@@ -186,9 +149,9 @@ describe('TaskRunner', () => {
       it('Logs warnings correctly', () => {
         taskRunner = createTaskRunner(
           taskRunnerOptions,
-          new MockBuilder('success with warnings (failure)', async (writer: ITaskWriter) => {
-            writer.write('Build step 1' + EOL);
-            writer.write('Warning: step 1 succeeded with warnings' + EOL);
+          new MockBuilder('success with warnings (failure)', async (terminal: CollatedTerminal) => {
+            terminal.writeStdoutLine('Build step 1' + EOL);
+            terminal.writeStdoutLine('Warning: step 1 succeeded with warnings' + EOL);
             return TaskStatus.SuccessWithWarning;
           })
         );
@@ -198,10 +161,10 @@ describe('TaskRunner', () => {
           .then(() => fail('Promise returned by execute() resolved but was expected to fail'))
           .catch((err) => {
             expect(err.message).toMatchSnapshot();
-            const allMessages: string = terminalProvider.getOutput();
+            const allMessages: string = mockStream.getAllOutput();
             expect(allMessages).toContain('Build step 1');
             expect(allMessages).toContain('step 1 succeeded with warnings');
-            checkConsoleOutput(terminalProvider);
+            mockStream.checkSnapshot();
           });
       });
     });
@@ -212,7 +175,7 @@ describe('TaskRunner', () => {
           quietMode: false,
           parallelism: '1',
           changedProjectsOnly: false,
-          terminal,
+          writeToStream: mockStream.writeToStream,
           allowWarningsInSuccessfulBuild: true
         };
       });
@@ -220,9 +183,9 @@ describe('TaskRunner', () => {
       it('Logs warnings correctly', () => {
         taskRunner = createTaskRunner(
           taskRunnerOptions,
-          new MockBuilder('success with warnings (success)', async (writer: ITaskWriter) => {
-            writer.write('Build step 1' + EOL);
-            writer.write('Warning: step 1 succeeded with warnings' + EOL);
+          new MockBuilder('success with warnings (success)', async (terminal: CollatedTerminal) => {
+            terminal.writeStdoutLine('Build step 1' + EOL);
+            terminal.writeStdoutLine('Warning: step 1 succeeded with warnings' + EOL);
             return TaskStatus.SuccessWithWarning;
           })
         );
@@ -230,10 +193,10 @@ describe('TaskRunner', () => {
         return taskRunner
           .executeAsync()
           .then(() => {
-            const allMessages: string = terminalProvider.getOutput();
+            const allMessages: string = mockStream.getAllOutput();
             expect(allMessages).toContain('Build step 1');
             expect(allMessages).toContain('Warning: step 1 succeeded with warnings');
-            checkConsoleOutput(terminalProvider);
+            mockStream.checkSnapshot();
           })
           .catch((err) => fail('Promise returned by execute() rejected but was expected to resolve'));
       });

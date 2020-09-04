@@ -85,6 +85,9 @@ export class FileWriter {
   /**
    * Closes the file handle permanently. No operations can be made on this file handle after calling this.
    * Behind the scenes it uses `fs.closeSync()` and releases the file descriptor to be re-used.
+   *
+   * @remarks
+   * The `close()` method can be called more than once; additional calls are ignored.
    */
   public close(): void {
     const fd: number | undefined = this._fileDescriptor;

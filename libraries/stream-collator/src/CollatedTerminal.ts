@@ -22,10 +22,10 @@ export class CollatedTerminal {
   }
 
   public writeStdoutLine(message: string): void {
-    this._writeToStream({ text: message, stream: StreamKind.Stdout });
+    this._writeToStream({ text: message + '\n', stream: StreamKind.Stdout });
   }
 
   public writeStderrLine(message: string): void {
-    this._writeToStream({ text: message, stream: StreamKind.Stderr });
+    this._writeToStream({ text: message + '\n', stream: StreamKind.Stderr });
   }
 }
