@@ -7,8 +7,8 @@ import { TaskStatus } from '../TaskStatus';
 import { BaseBuilder } from '../BaseBuilder';
 
 export class MockBuilder extends BaseBuilder {
-  public readonly name: string;
   private readonly _action: ((writer?: ITaskWriter) => Promise<TaskStatus>) | undefined;
+  public readonly name: string;
   public readonly hadEmptyScript: boolean = false;
   public readonly isIncrementalBuildAllowed: boolean = false;
 

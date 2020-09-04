@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { ITaskWriter } from '@rushstack/stream-collator';
+
 import { TaskStatus } from './TaskStatus';
 
 /**
@@ -13,7 +14,7 @@ export abstract class BaseBuilder {
   /**
    * Name of the task definition.
    */
-  abstract name: string;
+  abstract readonly name: string;
 
   /**
    * This flag determines if an incremental build is allowed for the task.

@@ -131,28 +131,29 @@ export class BulkScriptAction extends BaseScriptAction {
       allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
     });
 
-    return taskRunner
-      .executeAsync()
-      .then(() => {
-        stopwatch.stop();
-        console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
-        this._doAfterTask(stopwatch, true);
-      })
-      .catch((error: Error) => {
-        stopwatch.stop();
-        if (error instanceof AlreadyReportedError) {
-          console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
-        } else {
-          if (error && error.message) {
-            console.log('Error: ' + error.message);
-          }
+    try {
+      await taskRunner.executeAsync();
 
-          console.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
+      stopwatch.stop();
+      console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
+
+      this._doAfterTask(stopwatch, true);
+    } catch (error) {
+      stopwatch.stop();
+
+      if (error instanceof AlreadyReportedError) {
+        console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
+      } else {
+        if (error && error.message) {
+          console.log('Error: ' + error.message);
         }
 
-        this._doAfterTask(stopwatch, false);
-        throw new AlreadyReportedError();
-      });
+        console.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
+      }
+
+      this._doAfterTask(stopwatch, false);
+      throw new AlreadyReportedError();
+    }
   }
 
   protected onDefineParameters(): void {
