@@ -13,10 +13,9 @@ export interface IAnsiEscapeConvertForTestsOptions {
 }
 
 /**
- * Operations for encoding and decoding text strings containing
+ * Operations for working with text strings that contain
  * {@link https://en.wikipedia.org/wiki/ANSI_escape_code | ANSI escape codes}.
- * The most commonly used escape codes set the foreground/background color for
- * console output.
+ * The most commonly used escape codes set the foreground/background color for console output.
  * @public
  */
 export class AnsiEscape {
@@ -38,17 +37,18 @@ export class AnsiEscape {
     }
 
     let result: string = text.replace(AnsiEscape._csiRegExp, (capture: string, csiCode: string) => {
+      // If it is an SGR code, then try to show a friendly token
       const match: RegExpMatchArray | null = csiCode.match(AnsiEscape._sgrRegExp);
-
       if (match) {
-        const sgiCode: number = parseInt(match[1]);
-        const colorCode: string | undefined = AnsiEscape._x(sgiCode);
-        if (colorCode) {
+        const sgrParameter: number = parseInt(match[1]);
+        const sgrParameterName: string | undefined = AnsiEscape._tryGetSgrFriendlyName(sgrParameter);
+        if (sgrParameterName) {
           // Example: "[black-bg]"
-          return `[${colorCode}]`;
+          return `[${sgrParameterName}]`;
         }
       }
 
+      // Otherwise show the raw code, but without the "[" from the CSI prefix
       // Example: "[31m]"
       return `[${csiCode}]`;
     });
@@ -59,8 +59,11 @@ export class AnsiEscape {
     return result;
   }
 
-  private static _x(n: number): string | undefined {
-    switch (n) {
+  // Returns a human-readable token representing an SGR parameter, or undefined for parameter that is not well-known.
+  // The SGR parameter numbers are documented in this table:
+  // https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
+  private static _tryGetSgrFriendlyName(sgiParameter: number): string | undefined {
+    switch (sgiParameter) {
       case 30:
         return 'black';
       case 31:
