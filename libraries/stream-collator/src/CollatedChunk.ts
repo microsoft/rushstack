@@ -2,6 +2,8 @@
 // See LICENSE in the project root for license information.
 
 /**
+ * This API was introduced as a temporary measure.
+ * @deprecated Very soon we plan to replace this with the `Terminal` API from `@rushstack/node-core-library`.
  * @public
  */
 export enum StreamKind {
@@ -10,6 +12,8 @@ export enum StreamKind {
 }
 
 /**
+ * This API was introduced as a temporary measure.
+ * @deprecated Very soon we plan to replace this with the `Terminal` API from `@rushstack/node-core-library`.
  * @public
  */
 export interface ICollatedChunk {

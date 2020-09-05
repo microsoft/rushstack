@@ -4,7 +4,7 @@
 
 ```ts
 
-// @public (undocumented)
+// @public @deprecated
 export class CollatedTerminal {
     constructor(writeToStream: WriteToStreamCallback);
     // (undocumented)
@@ -41,7 +41,7 @@ export enum CollatedWriterState {
     Written = 3
 }
 
-// @public (undocumented)
+// @public @deprecated
 export interface ICollatedChunk {
     // (undocumented)
     stream: StreamKind;
@@ -90,7 +90,7 @@ export class StreamCollator {
     readonly writers: ReadonlySet<CollatedWriter>;
     }
 
-// @public (undocumented)
+// @public @deprecated
 export enum StreamKind {
     // (undocumented)
     Stderr = "E",
@@ -98,7 +98,7 @@ export enum StreamKind {
     Stdout = "O"
 }
 
-// @public (undocumented)
+// @public @deprecated
 export type WriteToStreamCallback = (chunk: ICollatedChunk) => void;
 
 

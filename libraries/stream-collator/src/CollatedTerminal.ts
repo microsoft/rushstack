@@ -4,11 +4,15 @@
 import { ICollatedChunk, StreamKind } from './CollatedChunk';
 
 /**
+ * This API was introduced as a temporary measure.
+ * @deprecated Very soon we plan to replace this with the `TerminalProvider` API from `@rushstack/node-core-library`.
  * @public
  */
 export type WriteToStreamCallback = (chunk: ICollatedChunk) => void;
 
 /**
+ * This API was introduced as a temporary measure.
+ * @deprecated Very soon we plan to replace this with the `Terminal` API from `@rushstack/node-core-library`.
  * @public
  */
 export class CollatedTerminal {
