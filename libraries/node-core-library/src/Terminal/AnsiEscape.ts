@@ -21,11 +21,14 @@ export interface IAnsiEscapeConvertForTestsOptions {
 export class AnsiEscape {
   // For now, we only care about the Control Sequence Introducer (CSI) commands which always start with "[".
   // eslint-disable-next-line no-control-regex
-  private static _csiRegExp: RegExp = /\x1b\[([\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e])/gu;
+  private static readonly _csiRegExp: RegExp = /\x1b\[([\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e])/gu;
 
   // Text coloring is performed using Select Graphic Rendition (SGR) codes, which come after the
   // CSI introducer "ESC [".  The SGR sequence is a number followed by "m".
-  private static _sgrRegExp: RegExp = /([0-9]+)m/u;
+  private static readonly _sgrRegExp: RegExp = /([0-9]+)m/u;
+
+  private static readonly _backslashNRegExp: RegExp = /\n/g;
+  private static readonly _backslashRRegExp: RegExp = /\r/g;
 
   /**
    * Returns the input text with all ANSI escape codes removed.  For example, this is useful when saving
@@ -33,7 +36,7 @@ export class AnsiEscape {
    */
   public static removeCodes(text: string): string {
     // eslint-disable-next-line no-control-regex
-    return text.replace(/\x1b[[(?);]{0,2}(;?\d)*./g, '');
+    return text.replace(AnsiEscape._csiRegExp, '');
   }
 
   /**
@@ -63,7 +66,9 @@ export class AnsiEscape {
     });
 
     if (options.encodeNewlines) {
-      result = result.replace(/\n/g, '[n]').replace(/\r/g, `[r]`);
+      result = result
+        .replace(AnsiEscape._backslashNRegExp, '[n]')
+        .replace(AnsiEscape._backslashRRegExp, `[r]`);
     }
     return result;
   }
