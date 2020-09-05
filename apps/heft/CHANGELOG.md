@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 04 Sep 2020 15:06:27 GMT and should not be manually modified.
+This log was last generated on Sat, 05 Sep 2020 18:56:35 GMT and should not be manually modified.
+
+## 0.10.3
+Sat, 05 Sep 2020 18:56:35 GMT
+
+### Patches
+
+- Fix parsing of the --max-old-space-size build parameter.
+- Fix parsing of the --plugin heft parameter.
 
 ## 0.10.2
 Fri, 04 Sep 2020 15:06:27 GMT

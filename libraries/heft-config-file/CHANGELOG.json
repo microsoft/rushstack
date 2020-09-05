@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.1.1",
+      "tag": "@rushstack/heft-config-file_v0.1.1",
+      "date": "Sat, 05 Sep 2020 18:56:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.7\" to `0.6.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0",
       "tag": "@rushstack/heft-config-file_v0.1.0",
       "date": "Thu, 27 Aug 2020 11:27:06 GMT",

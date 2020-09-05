@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Thu, 27 Aug 2020 11:27:06 GMT and should not be manually modified.
+This log was last generated on Sat, 05 Sep 2020 18:56:34 GMT and should not be manually modified.
+
+## 7.8.20
+Sat, 05 Sep 2020 18:56:34 GMT
+
+### Patches
+
+- Fix "Converting circular structure to JSON" error (GitHub #2152)
 
 ## 7.8.19
 Thu, 27 Aug 2020 11:27:06 GMT

@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.8.20",
+      "tag": "@microsoft/api-extractor-model_v7.8.20",
+      "date": "Sat, 05 Sep 2020 18:56:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix \"Converting circular structure to JSON\" error (GitHub #2152)"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.8.19",
       "tag": "@microsoft/api-extractor-model_v7.8.19",
       "date": "Thu, 27 Aug 2020 11:27:06 GMT",
