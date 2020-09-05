@@ -4,7 +4,17 @@
 import {
   CommandLineAction,
   CommandLineFlagParameter,
-  ICommandLineActionOptions
+  ICommandLineActionOptions,
+  ICommandLineFlagDefinition,
+  IBaseCommandLineDefinition,
+  ICommandLineChoiceDefinition,
+  CommandLineChoiceParameter,
+  CommandLineIntegerParameter,
+  ICommandLineIntegerDefinition,
+  CommandLineStringParameter,
+  ICommandLineStringDefinition,
+  CommandLineStringListParameter,
+  ICommandLineStringListDefinition
 } from '@rushstack/ts-command-line';
 import {
   Terminal,
@@ -22,6 +32,7 @@ import { BuildStage } from '../../stages/BuildStage';
 import { CleanStage } from '../../stages/CleanStage';
 import { TestStage } from '../../stages/TestStage';
 import { LoggingManager } from '../../pluginFramework/logging/LoggingManager';
+import { Constants } from '../../utilities/Constants';
 
 export interface IStages {
   buildStage: BuildStage;
@@ -65,6 +76,33 @@ export abstract class HeftActionBase extends CommandLineAction {
       parameterShortName: '-v',
       description: 'If specified, log information useful for debugging.'
     });
+  }
+
+  public defineChoiceParameter(options: ICommandLineChoiceDefinition): CommandLineChoiceParameter {
+    this._validateDefinedParameter(options);
+    return super.defineChoiceParameter(options);
+  }
+
+  public defineFlagParameter(options: ICommandLineFlagDefinition): CommandLineFlagParameter {
+    this._validateDefinedParameter(options);
+    return super.defineFlagParameter(options);
+  }
+
+  public defineIntegerParameter(options: ICommandLineIntegerDefinition): CommandLineIntegerParameter {
+    this._validateDefinedParameter(options);
+    return super.defineIntegerParameter(options);
+  }
+
+  public defineStringParameter(options: ICommandLineStringDefinition): CommandLineStringParameter {
+    this._validateDefinedParameter(options);
+    return super.defineStringParameter(options);
+  }
+
+  public defineStringListParameter(
+    options: ICommandLineStringListDefinition
+  ): CommandLineStringListParameter {
+    this._validateDefinedParameter(options);
+    return super.defineStringListParameter(options);
   }
 
   public setStartTime(): void {
@@ -139,4 +177,12 @@ export abstract class HeftActionBase extends CommandLineAction {
    * @virtual
    */
   protected abstract actionExecuteAsync(): Promise<void>;
+
+  private _validateDefinedParameter(options: IBaseCommandLineDefinition): void {
+    if (options.parameterLongName === Constants.pluginParameterLongName) {
+      throw new Error(
+        `Actions must not register a parameter with longName "${Constants.pluginParameterLongName}".`
+      );
+    }
+  }
 }

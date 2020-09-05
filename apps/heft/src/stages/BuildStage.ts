@@ -333,6 +333,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       production: standardParameters.productionFlag.value,
       lite: standardParameters.liteFlag.value,
       locale: standardParameters.localeParameter.value,
+      maxOldSpaceSize: standardParameters.maxOldSpaceSizeParameter.value,
       typescriptMaxWriteParallelism: standardParameters.typescriptMaxWriteParallelismParameter.value
     };
   }

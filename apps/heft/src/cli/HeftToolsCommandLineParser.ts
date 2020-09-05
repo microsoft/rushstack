@@ -12,6 +12,7 @@ import {
   ConsoleTerminalProvider,
   AlreadyReportedError
 } from '@rushstack/node-core-library';
+import { ArgumentParser } from 'argparse';
 
 import { MetricsCollector } from '../metrics/MetricsCollector';
 import { CleanAction } from './actions/CleanAction';
@@ -27,6 +28,7 @@ import { BuildStage } from '../stages/BuildStage';
 import { TestStage } from '../stages/TestStage';
 import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 import { ICustomActionOptions, CustomAction } from './actions/CustomAction';
+import { Constants } from '../utilities/Constants';
 
 export class HeftToolsCommandLineParser extends CommandLineParser {
   private _terminalProvider: ConsoleTerminalProvider;
@@ -127,7 +129,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     });
 
     this._pluginsParameter = this.defineStringListParameter({
-      parameterLongName: '--plugin',
+      parameterLongName: Constants.pluginParameterLongName,
       argumentName: 'PATH',
       description: 'Used to specify Heft plugins.'
     });
@@ -143,7 +145,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
 
     this._normalizeCwd();
 
-    await this._initializePluginsAsync(this._pluginsParameter.values);
+    await this._initializePluginsAsync();
 
     return await super.execute(args);
   }
@@ -174,11 +176,22 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     }
   }
 
-  private async _initializePluginsAsync(pluginSpecifiers: ReadonlyArray<string>): Promise<void> {
+  private _getPluginArgumentValues(args: string[] = process.argv): string[] {
+    // This is a rough parsing of the --plugin parameters
+    const parser: ArgumentParser = new ArgumentParser();
+    parser.addArgument(this._pluginsParameter.longName, { dest: 'plugins', action: 'append' });
+
+    const [result]: { plugins: string[] }[] = parser.parseKnownArgs(args);
+
+    return result.plugins || [];
+  }
+
+  private async _initializePluginsAsync(): Promise<void> {
     this._pluginManager.initializeDefaultPlugins();
 
     await this._pluginManager.initializePluginsFromConfigFileAsync();
 
+    const pluginSpecifiers: string[] = this._getPluginArgumentValues();
     for (const pluginSpecifier of pluginSpecifiers) {
       this._pluginManager.initializePlugin(pluginSpecifier);
     }

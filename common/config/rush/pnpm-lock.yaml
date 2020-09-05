@@ -103,6 +103,7 @@ importers:
       '@rushstack/ts-command-line': 'link:../../libraries/ts-command-line'
       '@types/tapable': 1.0.5
       '@types/webpack': 4.39.8
+      argparse: 1.0.10
       chokidar: 3.4.2
       glob: 7.0.6
       glob-escape: 0.0.2
@@ -117,6 +118,7 @@ importers:
       '@microsoft/rush-stack-compiler-3.7': 'link:../../stack/rush-stack-compiler-3.7'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 0.8.0
+      '@types/argparse': 1.0.38
       '@types/eslint': 7.2.0
       '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
@@ -135,6 +137,7 @@ importers:
       '@rushstack/heft-config-file': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@rushstack/ts-command-line': 'workspace:*'
+      '@types/argparse': 1.0.38
       '@types/eslint': 7.2.0
       '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
@@ -143,6 +146,7 @@ importers:
       '@types/tapable': 1.0.5
       '@types/webpack': 4.39.8
       '@types/webpack-dev-server': 3.11.0
+      argparse: ~1.0.9
       chokidar: ~3.4.0
       colors: ~1.2.1
       glob: ~7.0.5
