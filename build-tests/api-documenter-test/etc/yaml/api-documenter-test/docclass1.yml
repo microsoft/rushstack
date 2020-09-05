@@ -34,6 +34,7 @@ items:
       - 'api-documenter-test!DocClass1#modifiedEvent:member'
       - 'api-documenter-test!DocClass1#readonlyProperty:member'
       - 'api-documenter-test!DocClass1#regularProperty:member'
+      - 'api-documenter-test!DocClass1#seeExample:member(1)'
       - 'api-documenter-test!DocClass1.sumWithExample:member(1)'
       - 'api-documenter-test!DocClass1#tableExample:member(1)'
       - 'api-documenter-test!DocClass1#writeableProperty:member'
@@ -154,9 +155,57 @@ items:
       return:
         type:
           - 'api-documenter-test!SystemEvent:class'
+  - uid: 'api-documenter-test!DocClass1#seeExample:member(1)'
+    summary: Example of a `@see` tag.
+    seealsoContent: |-
+      -  [IDocInterface5](xref:api-documenter-test!IDocInterface5:interface) for the returned data structure
+         
+      -  your developer SDK...
+         
+         ...for
+         
+         ```
+         code
+         
+         ```
+         samples
+         
+      -  [RFC 1738](https://tools.ietf.org/html/rfc1738) for syntax
+    name: seeExample()
+    fullName: seeExample()
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'seeExample(): void;'
+      return:
+        type:
+          - void
+        description: ''
   - uid: 'api-documenter-test!DocClass1.sumWithExample:member(1)'
     summary: Returns the sum of two numbers.
     remarks: This illustrates usage of the `@example` block tag.
+    examples:
+      - |-
+        ## Example 1
+
+        Here's a simple example:
+
+        ```
+        // Prints "2":
+        console.log(DocClass1.sumWithExample(1,1));
+
+        ```
+      - |-
+        ## Example 2
+
+        Here's an example with negative numbers:
+
+        ```
+        // Prints "0":
+        console.log(DocClass1.sumWithExample(1,-1));
+
+        ```
     name: 'sumWithExample(x, y)'
     fullName: 'sumWithExample(x, y)'
     langs:

@@ -56,6 +56,7 @@ import {
 } from '../plugin/MarkdownDocumenterFeature';
 import { DocumenterConfig } from './DocumenterConfig';
 import { MarkdownDocumenterAccessor } from '../plugin/MarkdownDocumenterAccessor';
+import { DocBullet } from '../nodes/DocBullet';
 
 /**
  * Renders API documentation in the Markdown file format.
@@ -369,6 +370,15 @@ export class MarkdownDocumenter {
           this._appendSection(output, exampleBlock.content);
 
           ++exampleNumber;
+        }
+
+        if (tsdocComment.seeBlocks.length > 0) {
+          output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'See also' }));
+          for (const seeBlock of tsdocComment.seeBlocks) {
+            output.appendNode(
+              new DocBullet({ configuration: this._tsdocConfiguration }, seeBlock.content.nodes)
+            );
+          }
         }
       }
     }

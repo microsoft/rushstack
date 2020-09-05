@@ -14,6 +14,7 @@ import { DocTableCell } from '../nodes/DocTableCell';
 import { DocEmphasisSpan } from '../nodes/DocEmphasisSpan';
 import { MarkdownEmitter, IMarkdownEmitterContext, IMarkdownEmitterOptions } from './MarkdownEmitter';
 import { IndentedWriter } from '../utils/IndentedWriter';
+import { DocBullet } from '../nodes/DocBullet';
 
 export interface ICustomMarkdownEmitterOptions extends IMarkdownEmitterOptions {
   contextApiItem: ApiItem | undefined;
@@ -43,6 +44,18 @@ export class CustomMarkdownEmitter extends MarkdownEmitter {
     const writer: IndentedWriter = context.writer;
 
     switch (docNode.kind) {
+      case CustomDocNodeKind.Bullet: {
+        const docBullet: DocBullet = docNode as DocBullet;
+        writer.ensureNewLine();
+        writer.write('-  ');
+
+        writer.increaseIndent('   ');
+        this.writeNode(docBullet.content, context, false);
+        writer.decreaseIndent();
+
+        writer.ensureNewLine();
+        break;
+      }
       case CustomDocNodeKind.Heading: {
         const docHeading: DocHeading = docNode as DocHeading;
         writer.ensureSkippedLine();

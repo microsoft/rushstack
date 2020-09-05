@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "Implement support for \"@see\" blocks",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

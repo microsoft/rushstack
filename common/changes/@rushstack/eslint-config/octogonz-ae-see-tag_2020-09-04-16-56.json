@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-config",
+      "comment": "Upgrade TSDoc parser",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-config",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
