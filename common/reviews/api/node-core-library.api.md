@@ -24,6 +24,7 @@ export class AlreadyReportedError extends Error {
 // @public
 export class AnsiEscape {
     static formatForTests(text: string, options?: IAnsiEscapeConvertForTestsOptions): string;
+    static removeCodes(text: string): string;
     }
 
 // @beta

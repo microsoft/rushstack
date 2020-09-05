@@ -28,6 +28,15 @@ export class AnsiEscape {
   private static _sgrRegExp: RegExp = /([0-9]+)m/u;
 
   /**
+   * Returns the input text with all ANSI escape codes removed.  For example, this is useful when saving
+   * colorized console output to a log file.
+   */
+  public static removeCodes(text: string): string {
+    // eslint-disable-next-line no-control-regex
+    return text.replace(/\x1b[[(?);]{0,2}(;?\d)*./g, '');
+  }
+
+  /**
    * Replaces ANSI escape codes with human-readable tokens.  This is useful for unit tests
    * that compare text strings in test assertions or snapshot files.
    */
