@@ -17,6 +17,8 @@ import {
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 
 const PLUGIN_NAME: string = 'WebpackPlugin';
+const WEBPACK_DEV_SERVER_PACKAGE_NAME: string = 'webpack-dev-server';
+const WEBPACK_DEV_SERVER_ENV_VAR_NAME: string = 'WEBPACK_DEV_SERVER';
 
 export class WebpackPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
@@ -71,7 +73,7 @@ export class WebpackPlugin implements IHeftPlugin {
       // Require webpack-dev-server here because it sets the "WEBPACK_DEV_SERVER" env
       // variable when it's loaded, which can cause problems when webpack isn't run
       // in serve mode.
-      const WebpackDevServer: typeof TWebpackDevServer = require('webpack-dev-server');
+      const WebpackDevServer: typeof TWebpackDevServer = require(WEBPACK_DEV_SERVER_PACKAGE_NAME);
       // TODO: the WebpackDevServer accepts a third parameter for a logger. We should make
       // use of that to make logging cleaner
       const devServer: TWebpackDevServer = new WebpackDevServer(compiler, options);
@@ -83,6 +85,16 @@ export class WebpackPlugin implements IHeftPlugin {
         });
       });
     } else {
+      if (process.env[WEBPACK_DEV_SERVER_ENV_VAR_NAME]) {
+        logger.emitWarning(
+          new Error(
+            `The "${WEBPACK_DEV_SERVER_ENV_VAR_NAME}" environment variable is set. ` +
+              'This can happen if the "webpack-dev-server" package is required. ' +
+              'Running webpack in non-serve mode with this environment variable set can cause problems.'
+          )
+        );
+      }
+
       let stats: webpack.Stats | undefined;
       if (buildProperties.watchMode) {
         try {
