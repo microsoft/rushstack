@@ -70,9 +70,10 @@ export class WebpackPlugin implements IHeftPlugin {
         port: 8080
       };
 
-      // Require webpack-dev-server here because it sets the "WEBPACK_DEV_SERVER" env
-      // variable when it's loaded, which can cause problems when webpack isn't run
-      // in serve mode.
+      // The webpack-dev-server package has a design flaw, where merely loading its package will set the
+      // WEBPACK_DEV_SERVER environment variable -- even if no APIs are accessed. This environment variable
+      // causes incorrect behavior if Heft is not running in serve mode. Thus, we need to be careful to call require()
+      // only if Heft is in serve mode.
       const WebpackDevServer: typeof TWebpackDevServer = require(WEBPACK_DEV_SERVER_PACKAGE_NAME);
       // TODO: the WebpackDevServer accepts a third parameter for a logger. We should make
       // use of that to make logging cleaner
