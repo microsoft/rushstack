@@ -95,6 +95,7 @@ exports[`CommandLineHelp prints the help for each action: test 1`] = `
                  [--no-build] [-u] [--find-related-tests SOURCE_FILE]
                  [--silent] [-t REGEXP] [--test-path-pattern REGEXP]
                  [--test-timeout-ms INTEGER] [--debug-heft-reporter]
+                 [--max-workers STRING]
                  
 
 Optional arguments:
@@ -154,5 +155,12 @@ Optional arguments:
                         how Jest's default reporter would have presented it. 
                         Include this output in your bug report. Do not use 
                         \\"--debug-heft-reporter\\" in production.
+  --max-workers STRING  Change the default maximum workers for tests; this 
+                        parameter conforms to the Jest documentation, and can 
+                        either be an integer representing the number of 
+                        workers to spawn when running tests, or can be a 
+                        string representing a percentage of the available 
+                        CPUs on the machine to utilize. This corresponds to 
+                        the \\"--maxWorkers\\" parameter in Jest's documentation.
 "
 `;
