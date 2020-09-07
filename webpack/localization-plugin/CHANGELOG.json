@@ -2,6 +2,33 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.3.51",
+      "tag": "@rushstack/localization-plugin_v0.3.51",
+      "date": "Mon, 07 Sep 2020 07:37:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.31.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.1.49`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `2.4.51`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.10.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^2.4.50` to `^2.4.51`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.50",
       "tag": "@rushstack/localization-plugin_v0.3.50",
       "date": "Sat, 05 Sep 2020 18:56:35 GMT",

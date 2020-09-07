@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Sat, 05 Sep 2020 18:56:35 GMT and should not be manually modified.
+This log was last generated on Mon, 07 Sep 2020 07:37:37 GMT and should not be manually modified.
+
+## 0.10.4
+Mon, 07 Sep 2020 07:37:37 GMT
+
+### Patches
+
+- Fix an issue with WebpackPlugin loading webpack-dev-server in non-serve mode and setting the "WEBPACK_DEV_SERVER" environment variable.
 
 ## 0.10.3
 Sat, 05 Sep 2020 18:56:35 GMT

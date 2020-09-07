@@ -1,6 +1,11 @@
 # Change Log - @microsoft/rush-stack-compiler-3.0
 
-This log was last generated on Sat, 05 Sep 2020 18:56:35 GMT and should not be manually modified.
+This log was last generated on Mon, 07 Sep 2020 07:37:37 GMT and should not be manually modified.
+
+## 0.13.12
+Mon, 07 Sep 2020 07:37:37 GMT
+
+*Version update only*
 
 ## 0.13.11
 Sat, 05 Sep 2020 18:56:35 GMT

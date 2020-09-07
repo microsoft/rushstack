@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.31.0",
+      "tag": "@rushstack/node-core-library_v3.31.0",
+      "date": "Mon, 07 Sep 2020 07:37:37 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Replace Colors.normalizeColorTokensForTest() (which was marked as \"beta\") with AnsiEscape.formatForTests()"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.30.0",
       "tag": "@rushstack/node-core-library_v3.30.0",
       "date": "Thu, 27 Aug 2020 11:27:06 GMT",

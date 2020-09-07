@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 27 Aug 2020 11:27:06 GMT and should not be manually modified.
+This log was last generated on Mon, 07 Sep 2020 07:37:37 GMT and should not be manually modified.
+
+## 3.31.0
+Mon, 07 Sep 2020 07:37:37 GMT
+
+### Minor changes
+
+- Replace Colors.normalizeColorTokensForTest() (which was marked as "beta") with AnsiEscape.formatForTests()
 
 ## 3.30.0
 Thu, 27 Aug 2020 11:27:06 GMT
