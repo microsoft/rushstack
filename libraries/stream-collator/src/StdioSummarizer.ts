@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
-import { TerminalWriter } from './TerminalWriter';
+import { TerminalWritable } from './TerminalWritable';
 
 /** @beta */
 export interface IStdioSummarizerOptions {
@@ -11,7 +11,7 @@ export interface IStdioSummarizerOptions {
 }
 
 /** @beta */
-export class StdioSummarizer extends TerminalWriter {
+export class StdioSummarizer extends TerminalWritable {
   // Capture up to this many leading lines
   private _leadingLines: number;
 

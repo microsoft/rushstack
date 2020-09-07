@@ -106,7 +106,7 @@ export interface ITerminalChunk {
 // @beta (undocumented)
 export interface ITerminalTransformOptions {
     // (undocumented)
-    destination: TerminalWriter;
+    destination: TerminalWritable;
 }
 
 // @beta (undocumented)
@@ -146,7 +146,7 @@ export class StderrLineTransform extends TerminalTransform {
     }
 
 // @beta (undocumented)
-export class StdioSummarizer extends TerminalWriter {
+export class StdioSummarizer extends TerminalWritable {
     constructor(options?: IStdioSummarizerOptions);
     // (undocumented)
     getReport(): string[];
@@ -179,16 +179,16 @@ export const enum TerminalChunkKind {
 }
 
 // @beta (undocumented)
-export abstract class TerminalTransform extends TerminalWriter {
+export abstract class TerminalTransform extends TerminalWritable {
     constructor(options: ITerminalTransformOptions);
     // (undocumented)
-    readonly destination: TerminalWriter;
+    readonly destination: TerminalWritable;
     // (undocumented)
     protected onClose(): void;
 }
 
 // @beta (undocumented)
-export abstract class TerminalWriter {
+export abstract class TerminalWritable {
     constructor();
     // (undocumented)
     close(): void;
@@ -203,7 +203,7 @@ export abstract class TerminalWriter {
 }
 
 // @beta (undocumented)
-export class TestWriter extends TerminalWriter {
+export class TestWritable extends TerminalWritable {
     // (undocumented)
     readonly chunks: ITerminalChunk[];
     // (undocumented)

@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { TerminalWriter } from './TerminalWriter';
+import { TerminalWritable } from './TerminalWritable';
 
 /** @beta */
 export interface ITerminalTransformOptions {
-  destination: TerminalWriter;
+  destination: TerminalWritable;
 }
 
 /** @beta */
-export abstract class TerminalTransform extends TerminalWriter {
-  public readonly destination: TerminalWriter;
+export abstract class TerminalTransform extends TerminalWritable {
+  public readonly destination: TerminalWritable;
 
   public constructor(options: ITerminalTransformOptions) {
     super();

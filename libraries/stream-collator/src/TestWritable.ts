@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import { ITerminalChunk } from './ITerminalChunk';
-import { TerminalWriter } from './TerminalWriter';
+import { TerminalWritable } from './TerminalWritable';
 
 /** @beta */
-export class TestWriter extends TerminalWriter {
+export class TestWritable extends TerminalWritable {
   public readonly chunks: ITerminalChunk[] = [];
 
   protected onWriteChunk(chunk: ITerminalChunk): void {

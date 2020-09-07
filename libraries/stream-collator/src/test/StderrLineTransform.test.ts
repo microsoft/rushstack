@@ -3,16 +3,16 @@
 
 import { TerminalChunkKind } from '../ITerminalChunk';
 import { StderrLineTransform } from '../StderrLineTransform';
-import { TestWriter } from '../TestWriter';
+import { TestWritable } from '../TestWritable';
 
-describe('LineAlignerStream', () => {
+describe('StderrLineTransform', () => {
   it('should report stdout if there is no stderr', () => {
-    const testWriter: TestWriter = new TestWriter();
-    const transform: StderrLineTransform = new StderrLineTransform({ destination: testWriter });
+    const testWritable: TestWritable = new TestWritable();
+    const transform: StderrLineTransform = new StderrLineTransform({ destination: testWritable });
 
     transform.writeChunk({ text: 'stdout 1\nstdout 2\n', kind: TerminalChunkKind.Stdout });
     transform.close();
 
-    expect(testWriter.chunks).toMatchSnapshot();
+    expect(testWritable.chunks).toMatchSnapshot();
   });
 });

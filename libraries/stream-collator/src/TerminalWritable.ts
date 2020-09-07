@@ -4,7 +4,7 @@
 import { ITerminalChunk } from './ITerminalChunk';
 
 /** @beta */
-export abstract class TerminalWriter {
+export abstract class TerminalWritable {
   private _isOpen: boolean;
 
   public constructor() {

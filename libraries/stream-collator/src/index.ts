@@ -24,5 +24,5 @@ export * from './StderrLineTransform';
 export * from './StdioSummarizer';
 export * from './StreamCollator';
 export * from './TerminalTransform';
-export * from './TerminalWriter';
-export * from './TestWriter';
+export * from './TerminalWritable';
+export * from './TestWritable';
