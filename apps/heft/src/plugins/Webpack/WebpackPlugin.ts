@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as webpack from 'webpack';
-import * as WebpackDevServer from 'webpack-dev-server';
+import /* type */ * as TWebpackDevServer from 'webpack-dev-server';
 import { LegacyAdapters } from '@rushstack/node-core-library';
 
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
@@ -55,7 +55,7 @@ export class WebpackPlugin implements IHeftPlugin {
 
     if (buildProperties.serveMode) {
       // TODO: make these options configurable
-      const options: WebpackDevServer.Configuration = {
+      const options: TWebpackDevServer.Configuration = {
         host: 'localhost',
         publicPath: '/',
         filename: '[name]_[hash].js',
@@ -68,9 +68,13 @@ export class WebpackPlugin implements IHeftPlugin {
         port: 8080
       };
 
+      // Require webpack-dev-server here because it sets the "WEBPACK_DEV_SERVER" env
+      // variable when it's loaded, which can cause problems when webpack isn't run
+      // in serve mode.
+      const WebpackDevServer: typeof TWebpackDevServer = require('webpack-dev-server');
       // TODO: the WebpackDevServer accepts a third parameter for a logger. We should make
       // use of that to make logging cleaner
-      const devServer: WebpackDevServer = new WebpackDevServer(compiler, options);
+      const devServer: TWebpackDevServer = new WebpackDevServer(compiler, options);
       await new Promise((resolve: () => void, reject: (error: Error) => void) => {
         devServer.listen(options.port!, options.host!, (error: Error) => {
           if (error) {
