@@ -5,7 +5,7 @@
 jest.mock('../../../utilities/Utilities');
 
 import { EOL } from 'os';
-import { ICollatedChunk, CollatedTerminal } from '@rushstack/stream-collator';
+import { ITerminalChunk, CollatedTerminal } from '@rushstack/stream-collator';
 import { AnsiEscape } from '@rushstack/node-core-library';
 
 import { TaskRunner, ITaskRunnerOptions } from '../TaskRunner';
@@ -26,15 +26,15 @@ mockGetTimeInMs.mockImplementation(() => {
 });
 
 class MockStream {
-  public readonly chunks: ICollatedChunk[] = [];
+  public readonly chunks: ITerminalChunk[] = [];
   public reset(): void {
     this.chunks.length = 0;
   }
-  public writeToStream = (chunk: ICollatedChunk): void => {
+  public writeToStream = (chunk: ITerminalChunk): void => {
     const encodedText: string = AnsiEscape.formatForTests(chunk.text, { encodeNewlines: true });
     this.chunks.push({
       text: encodedText,
-      stream: chunk.stream
+      kind: chunk.kind
     });
   };
   public getAllOutput(): string {

@@ -4,7 +4,7 @@
 import * as child_process from 'child_process';
 import * as path from 'path';
 import { JsonFile, Text, FileSystem, JsonObject, FileWriter } from '@rushstack/node-core-library';
-import { CollatedTerminal, StreamKind } from '@rushstack/stream-collator';
+import { CollatedTerminal, TerminalChunkKind } from '@rushstack/stream-collator';
 import { IPackageDeps } from '@rushstack/package-deps-hash';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
@@ -205,10 +205,10 @@ export class ProjectBuilder extends BaseBuilder {
           task.stdout.on('data', (data: Buffer) => {
             const text: string = data.toString();
             if (!context.quietMode) {
-              terminal.writeChunk({ text, stream: StreamKind.Stdout });
+              terminal.writeChunk({ text, kind: TerminalChunkKind.Stdout });
             }
 
-            context.stdioSummarizer.writeChunk({ text, stream: StreamKind.Stdout });
+            context.stdioSummarizer.writeChunk({ text, kind: TerminalChunkKind.Stdout });
 
             buildLogWriter.write(text);
           });
@@ -216,8 +216,8 @@ export class ProjectBuilder extends BaseBuilder {
         if (task.stderr !== null) {
           task.stderr.on('data', (data: Buffer) => {
             const text: string = data.toString();
-            terminal.writeChunk({ text, stream: StreamKind.Stderr });
-            context.stdioSummarizer.writeChunk({ text, stream: StreamKind.Stderr });
+            terminal.writeChunk({ text, kind: TerminalChunkKind.Stderr });
+            context.stdioSummarizer.writeChunk({ text, kind: TerminalChunkKind.Stderr });
 
             if (errorLogWriter === undefined) {
               errorLogWriter = FileWriter.open(errorLogPath);

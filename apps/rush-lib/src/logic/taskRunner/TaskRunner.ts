@@ -6,8 +6,8 @@ import * as colors from 'colors';
 import {
   StreamCollator,
   WriteToStreamCallback,
-  ICollatedChunk,
-  StreamKind,
+  ITerminalChunk,
+  TerminalChunkKind,
   CollatedTerminal,
   StdioSummarizer
 } from '@rushstack/stream-collator';
@@ -92,10 +92,10 @@ export class TaskRunner {
     }
   }
 
-  private static _writeToStdio(chunk: ICollatedChunk): void {
-    if (chunk.stream === StreamKind.Stdout) {
+  private static _writeToStdio(chunk: ITerminalChunk): void {
+    if (chunk.kind === TerminalChunkKind.Stdout) {
       process.stdout.write(chunk.text);
-    } else if (chunk.stream === StreamKind.Stderr) {
+    } else if (chunk.kind === TerminalChunkKind.Stderr) {
       process.stderr.write(chunk.text);
     }
   }

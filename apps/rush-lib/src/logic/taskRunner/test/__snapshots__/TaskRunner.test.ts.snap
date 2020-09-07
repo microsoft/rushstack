@@ -7,47 +7,47 @@ exports[`TaskRunner Error logging printedStderrAfterError 1`] = `"Project(s) fai
 exports[`TaskRunner Error logging printedStderrAfterError 2`] = `
 Array [
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "Executing a maximum of 1 simultaneous processes...[r][n][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[white][stdout+stderr] started[default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "Build step 1[r][n][n]",
   },
   Object {
-    "stream": "E",
+    "kind": "E",
     "text": "Error: step 1 failed[r][n][n]",
   },
   Object {
-    "stream": "E",
+    "kind": "E",
     "text": "[r][n]1 of 1: [stdout+stderr] failed![n]",
   },
   Object {
-    "stream": "E",
+    "kind": "E",
     "text": "[n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[red]FAILURE (1)[default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[red]================================[default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[red]stdout+stderr (0.10 seconds)[default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[red]================================[default][n][red][default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[n]",
   },
 ]
@@ -58,47 +58,47 @@ exports[`TaskRunner Error logging printedStdoutAfterErrorWithEmptyStderr 1`] = `
 exports[`TaskRunner Error logging printedStdoutAfterErrorWithEmptyStderr 2`] = `
 Array [
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "Executing a maximum of 1 simultaneous processes...[r][n][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[white][stdout only] started[default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "Build step 1[r][n][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "Error: step 1 failed[r][n][n]",
   },
   Object {
-    "stream": "E",
+    "kind": "E",
     "text": "[r][n]1 of 1: [stdout only] failed![n]",
   },
   Object {
-    "stream": "E",
+    "kind": "E",
     "text": "[n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[red]FAILURE (1)[default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[red]================================[default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[red]stdout only (0.10 seconds)[default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[red]================================[default][n][red][default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[n]",
   },
 ]
@@ -109,51 +109,51 @@ exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 1`] 
 exports[`TaskRunner Warning logging Fail on warning Logs warnings correctly 2`] = `
 Array [
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "Executing a maximum of 1 simultaneous processes...[r][n][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[white][success with warnings (failure)] started[default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "Build step 1[r][n][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "Warning: step 1 succeeded with warnings[r][n][n]",
   },
   Object {
-    "stream": "E",
+    "kind": "E",
     "text": "1 of 1: [success with warnings (failure)] completed with warnings in 0.10 seconds[n]",
   },
   Object {
-    "stream": "E",
+    "kind": "E",
     "text": "[n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[yellow][underline]SUCCESS WITH WARNINGS (1)[underline-off][default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[yellow]================================[default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[yellow][underline]success with warnings (failure) (0.10 seconds)[underline-off][default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[yellow]================================[default][n][yellow][default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[n]",
   },
   Object {
-    "stream": "E",
+    "kind": "E",
     "text": "Project(s) succeeded with warnings[n]",
   },
 ]
@@ -162,47 +162,47 @@ Array [
 exports[`TaskRunner Warning logging Success on warning Logs warnings correctly 1`] = `
 Array [
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "Executing a maximum of 1 simultaneous processes...[r][n][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[white][success with warnings (success)] started[default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "Build step 1[r][n][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "Warning: step 1 succeeded with warnings[r][n][n]",
   },
   Object {
-    "stream": "E",
+    "kind": "E",
     "text": "1 of 1: [success with warnings (success)] completed with warnings in 0.10 seconds[n]",
   },
   Object {
-    "stream": "E",
+    "kind": "E",
     "text": "[n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[yellow][underline]SUCCESS WITH WARNINGS (1)[underline-off][default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[yellow]================================[default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[yellow][underline]success with warnings (success) (0.10 seconds)[underline-off][default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[yellow]================================[default][n][yellow][default][n]",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "[n]",
   },
 ]
