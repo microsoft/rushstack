@@ -89,9 +89,9 @@ export class WebpackPlugin implements IHeftPlugin {
       if (process.env[WEBPACK_DEV_SERVER_ENV_VAR_NAME]) {
         logger.emitWarning(
           new Error(
-            `The "${WEBPACK_DEV_SERVER_ENV_VAR_NAME}" environment variable is set. ` +
-              'This can happen if the "webpack-dev-server" package is required. ' +
-              'Running webpack in non-serve mode with this environment variable set can cause problems.'
+            `The "${WEBPACK_DEV_SERVER_ENV_VAR_NAME}" environment variable is set, ` +
+              'which will cause problems when webpack is not running in serve mode. ' +
+              '(Did a dependency inadvertently load the "webpack-dev-server" package?)'
           )
         );
       }
