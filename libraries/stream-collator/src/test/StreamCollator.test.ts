@@ -3,17 +3,17 @@
 
 import { StreamCollator } from '../StreamCollator';
 import { CollatedWriter } from '../CollatedWriter';
-import { ICollatedChunk, StreamKind } from '../CollatedChunk';
+import { ITerminalChunk, StreamKind } from '../ITerminalChunk';
 
 let collator: StreamCollator;
-const outputMessages: ICollatedChunk[] = [];
+const outputMessages: ITerminalChunk[] = [];
 
 describe('StreamCollator tests', () => {
   // Reset task information before each test
   beforeEach(() => {
     outputMessages.length = 0;
     collator = new StreamCollator({
-      writeToStream: (chunk: ICollatedChunk) => {
+      writeToStream: (chunk: ITerminalChunk) => {
         outputMessages.push(chunk);
       }
     });

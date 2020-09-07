@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ICollatedChunk } from './CollatedChunk';
+import { ITerminalChunk } from './ITerminalChunk';
 import { CollatedTerminal } from './CollatedTerminal';
 
 /**
- * @public
+ * @beta
  */
 export enum CollatedWriterState {
   Open = 1,
@@ -16,7 +16,7 @@ export enum CollatedWriterState {
 /**
  * An writable interface for managing output of simultaneous processes.
  *
- * @public
+ * @beta
  */
 export class CollatedWriter {
   public readonly taskName: string;
@@ -30,7 +30,7 @@ export class CollatedWriter {
 
   private _state: CollatedWriterState;
 
-  private readonly _accumulatedChunks: ICollatedChunk[];
+  private readonly _accumulatedChunks: ITerminalChunk[];
 
   public constructor(taskName: string, collator: StreamCollator) {
     this.taskName = taskName;
@@ -46,14 +46,14 @@ export class CollatedWriter {
     return this._state;
   }
 
-  public get accumulatedChunks(): ReadonlyArray<ICollatedChunk> {
+  public get accumulatedChunks(): ReadonlyArray<ITerminalChunk> {
     return this._accumulatedChunks;
   }
 
   /**
    * Adds the text to the task's buffer, and writes it to the console if it is the active task
    */
-  private _writeToStream = (chunk: ICollatedChunk): void => {
+  private _writeToStream = (chunk: ITerminalChunk): void => {
     if (this.state !== CollatedWriterState.Open) {
       throw new Error('The task is not registered or has been completed and written.');
     }

@@ -4,22 +4,22 @@
 
 ```ts
 
-// @public @deprecated
+// @beta @deprecated
 export class CollatedTerminal {
     constructor(writeToStream: WriteToStreamCallback);
     // (undocumented)
-    writeChunk(chunk: ICollatedChunk): void;
+    writeChunk(chunk: ITerminalChunk): void;
     // (undocumented)
     writeStderrLine(message: string): void;
     // (undocumented)
     writeStdoutLine(message: string): void;
     }
 
-// @public
+// @beta
 export class CollatedWriter {
     constructor(taskName: string, collator: StreamCollator);
     // (undocumented)
-    readonly accumulatedChunks: ReadonlyArray<ICollatedChunk>;
+    readonly accumulatedChunks: ReadonlyArray<ITerminalChunk>;
     close(): void;
     // @internal (undocumented)
     readonly _collator: StreamCollator;
@@ -31,7 +31,7 @@ export class CollatedWriter {
     readonly terminal: CollatedTerminal;
     }
 
-// @public (undocumented)
+// @beta (undocumented)
 export enum CollatedWriterState {
     // (undocumented)
     ClosedUnwritten = 2,
@@ -41,15 +41,7 @@ export enum CollatedWriterState {
     Written = 3
 }
 
-// @public @deprecated
-export interface ICollatedChunk {
-    // (undocumented)
-    stream: StreamKind;
-    // (undocumented)
-    text: string;
-}
-
-// @public (undocumented)
+// @beta (undocumented)
 export interface IStdioSummarizerOptions {
     // (undocumented)
     leadingLines?: number;
@@ -57,24 +49,39 @@ export interface IStdioSummarizerOptions {
     trailingLines?: number;
 }
 
-// @public (undocumented)
+// @beta (undocumented)
 export interface IStreamCollatorOptions {
     // (undocumented)
     writeToStream: WriteToStreamCallback;
 }
 
-// @public
-export class StdioSummarizer {
-    constructor(options?: IStdioSummarizerOptions);
+// @beta
+export interface ITerminalChunk {
     // (undocumented)
-    close(): void;
+    stream: StreamKind;
+    // (undocumented)
+    text: string;
+}
+
+// @beta (undocumented)
+export class StderrLineTransform extends TerminalTransform {
+    constructor(destination: TerminalWriter);
+    // (undocumented)
+    protected onClose(): void;
+    // (undocumented)
+    protected onWriteChunk(chunk: ITerminalChunk): void;
+    }
+
+// @beta (undocumented)
+export class StdioSummarizer extends TerminalWriter {
+    constructor(options?: IStdioSummarizerOptions);
     // (undocumented)
     getReport(): string[];
     // (undocumented)
-    writeChunk(chunk: ICollatedChunk): void;
-}
+    onWriteChunk(chunk: ITerminalChunk): void;
+    }
 
-// @public
+// @beta
 export class StreamCollator {
     constructor(options: IStreamCollatorOptions);
     // (undocumented)
@@ -90,7 +97,7 @@ export class StreamCollator {
     readonly writers: ReadonlySet<CollatedWriter>;
     }
 
-// @public @deprecated
+// @beta
 export enum StreamKind {
     // (undocumented)
     Stderr = "E",
@@ -98,8 +105,40 @@ export enum StreamKind {
     Stdout = "O"
 }
 
-// @public @deprecated
-export type WriteToStreamCallback = (chunk: ICollatedChunk) => void;
+// @beta (undocumented)
+export abstract class TerminalTransform extends TerminalWriter {
+    constructor(destination: TerminalWriter);
+    // (undocumented)
+    readonly destination: TerminalWriter;
+    // (undocumented)
+    protected onClose(): void;
+}
+
+// @beta (undocumented)
+export abstract class TerminalWriter {
+    constructor();
+    // (undocumented)
+    close(): void;
+    // (undocumented)
+    readonly isOpen: boolean;
+    // (undocumented)
+    protected onClose(): void;
+    // (undocumented)
+    protected abstract onWriteChunk(chunk: ITerminalChunk): void;
+    // (undocumented)
+    writeChunk(chunk: ITerminalChunk): void;
+}
+
+// @beta (undocumented)
+export class TestWriter extends TerminalWriter {
+    // (undocumented)
+    readonly chunks: ITerminalChunk[];
+    // (undocumented)
+    protected onWriteChunk(chunk: ITerminalChunk): void;
+}
+
+// @beta @deprecated
+export type WriteToStreamCallback = (chunk: ITerminalChunk) => void;
 
 
 ```

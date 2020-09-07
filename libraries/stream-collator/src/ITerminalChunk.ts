@@ -3,8 +3,7 @@
 
 /**
  * This API was introduced as a temporary measure.
- * @deprecated Very soon we plan to replace this with the `Terminal` API from `@rushstack/node-core-library`.
- * @public
+ * @beta
  */
 export enum StreamKind {
   Stdout = 'O',
@@ -13,10 +12,9 @@ export enum StreamKind {
 
 /**
  * This API was introduced as a temporary measure.
- * @deprecated Very soon we plan to replace this with the `Terminal` API from `@rushstack/node-core-library`.
- * @public
+ * @beta
  */
-export interface ICollatedChunk {
+export interface ITerminalChunk {
   stream: StreamKind;
   text: string;
 }

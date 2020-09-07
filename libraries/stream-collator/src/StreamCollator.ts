@@ -4,9 +4,7 @@
 import { CollatedWriter } from './CollatedWriter';
 import { CollatedTerminal, WriteToStreamCallback } from './CollatedTerminal';
 
-/**
- * @public
- */
+/** @beta */
 export interface IStreamCollatorOptions {
   writeToStream: WriteToStreamCallback;
 }
@@ -14,7 +12,7 @@ export interface IStreamCollatorOptions {
 /**
  * A static class which manages the output of multiple threads.
  *
- * @public
+ * @beta
  */
 export class StreamCollator {
   private _taskNames: Set<string> = new Set();

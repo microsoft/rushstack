@@ -1,19 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ICollatedChunk, StreamKind } from './CollatedChunk';
+import { ITerminalChunk, StreamKind } from './ITerminalChunk';
 
 /**
  * This API was introduced as a temporary measure.
  * @deprecated Very soon we plan to replace this with the `TerminalProvider` API from `@rushstack/node-core-library`.
- * @public
+ * @beta
  */
-export type WriteToStreamCallback = (chunk: ICollatedChunk) => void;
+export type WriteToStreamCallback = (chunk: ITerminalChunk) => void;
 
 /**
  * This API was introduced as a temporary measure.
  * @deprecated Very soon we plan to replace this with the `Terminal` API from `@rushstack/node-core-library`.
- * @public
+ * @beta
  */
 export class CollatedTerminal {
   private _writeToStream: WriteToStreamCallback;
@@ -21,7 +21,7 @@ export class CollatedTerminal {
     this._writeToStream = writeToStream;
   }
 
-  public writeChunk(chunk: ICollatedChunk): void {
+  public writeChunk(chunk: ITerminalChunk): void {
     this._writeToStream(chunk);
   }
 

@@ -13,8 +13,12 @@
  * @packageDocumentation
  */
 
-export { StreamCollator, IStreamCollatorOptions } from './StreamCollator';
-export { CollatedWriter, CollatedWriterState } from './CollatedWriter';
-export { ICollatedChunk, StreamKind } from './CollatedChunk';
-export { CollatedTerminal, WriteToStreamCallback } from './CollatedTerminal';
-export { StdioSummarizer, IStdioSummarizerOptions } from './StdioSummarizer';
+export * from './CollatedTerminal';
+export * from './CollatedWriter';
+export * from './ITerminalChunk';
+export * from './StderrLineTransform';
+export * from './StdioSummarizer';
+export * from './StreamCollator';
+export * from './TerminalTransform';
+export * from './TerminalWriter';
+export * from './TestWriter';
