@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { ConsoleColorCodes } from './Colors';
+
 /**
  * Options for {@link AnsiEscape.formatForTests}.
  * @public
@@ -78,69 +80,71 @@ export class AnsiEscape {
   // https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
   private static _tryGetSgrFriendlyName(sgiParameter: number): string | undefined {
     switch (sgiParameter) {
-      case 30:
+      case ConsoleColorCodes.BlackForeground:
         return 'black';
-      case 31:
+      case ConsoleColorCodes.RedForeground:
         return 'red';
-      case 32:
+      case ConsoleColorCodes.GreenForeground:
         return 'green';
-      case 33:
+      case ConsoleColorCodes.YellowForeground:
         return 'yellow';
-      case 34:
+      case ConsoleColorCodes.BlueForeground:
         return 'blue';
-      case 35:
+      case ConsoleColorCodes.MagentaForeground:
         return 'magenta';
-      case 36:
+      case ConsoleColorCodes.CyanForeground:
         return 'cyan';
-      case 37:
+      case ConsoleColorCodes.WhiteForeground:
         return 'white';
-      case 90:
+      case ConsoleColorCodes.GrayForeground:
         return 'gray';
-      case 39:
+      case ConsoleColorCodes.DefaultForeground:
         return 'default';
-      case 40:
+
+      case ConsoleColorCodes.BlackBackground:
         return 'black-bg';
-      case 41:
+      case ConsoleColorCodes.RedBackground:
         return 'red-bg';
-      case 42:
+      case ConsoleColorCodes.GreenBackground:
         return 'green-bg';
-      case 43:
+      case ConsoleColorCodes.YellowBackground:
         return 'yellow-bg';
-      case 44:
+      case ConsoleColorCodes.BlueBackground:
         return 'blue-bg';
-      case 45:
+      case ConsoleColorCodes.MagentaBackground:
         return 'magenta-bg';
-      case 46:
+      case ConsoleColorCodes.CyanBackground:
         return 'cyan-bg';
-      case 47:
+      case ConsoleColorCodes.WhiteBackground:
         return 'white-bg';
-      case 100:
+      case ConsoleColorCodes.GrayBackground:
         return 'gray-bg';
-      case 49:
+      case ConsoleColorCodes.DefaultBackground:
         return 'default-bg';
-      case 1:
+
+      case ConsoleColorCodes.Bold:
         return 'bold';
-      case 21:
+      case ConsoleColorCodes.BoldOff:
         return 'bold-off';
-      case 2:
+      case ConsoleColorCodes.Dim:
         return 'dim';
-      case 22:
+      case ConsoleColorCodes.NormalColorOrIntensity:
         return 'normal';
-      case 4:
+      case ConsoleColorCodes.Underline:
         return 'underline';
-      case 24:
+      case ConsoleColorCodes.UnderlineOff:
         return 'underline-off';
-      case 5:
+      case ConsoleColorCodes.Blink:
         return 'blink';
-      case 25:
+      case ConsoleColorCodes.BlinkOff:
         return 'blink-off';
-      case 7:
+      case ConsoleColorCodes.InvertColor:
         return 'invert';
-      case 27:
+      case ConsoleColorCodes.InvertColorOff:
         return 'invert-off';
-      case 8:
+      case ConsoleColorCodes.Hidden:
         return 'hidden';
-      case 28:
+      case ConsoleColorCodes.HiddenOff:
         return 'hidden-off';
       default:
         return undefined;
