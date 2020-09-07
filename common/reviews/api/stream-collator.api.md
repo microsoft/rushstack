@@ -4,6 +4,30 @@
 
 ```ts
 
+import { NewlineKind } from '@rushstack/node-core-library';
+
+// @beta (undocumented)
+export abstract class CharMatcher {
+    // (undocumented)
+    abstract flush(state: CharMatcherState): string;
+    // (undocumented)
+    abstract initialize(): CharMatcherState;
+    // (undocumented)
+    abstract process(state: CharMatcherState, text: string): string;
+}
+
+// @beta (undocumented)
+export type CharMatcherState = unknown;
+
+// @beta (undocumented)
+export class CharMatcherTransform extends TerminalTransform {
+    constructor(options: ICharMatcherTransformOptions);
+    // (undocumented)
+    readonly charMatchers: ReadonlyArray<CharMatcher>;
+    // (undocumented)
+    protected onWriteChunk(chunk: ITerminalChunk): void;
+}
+
 // @beta @deprecated
 export class CollatedTerminal {
     constructor(writeToStream: WriteToStreamCallback);
@@ -42,6 +66,18 @@ export enum CollatedWriterState {
 }
 
 // @beta (undocumented)
+export interface ICharMatcherTransformOptions extends ITerminalTransformOptions {
+    // (undocumented)
+    charMatchers: CharMatcher[];
+}
+
+// @beta (undocumented)
+export interface IStderrLineTransformOptions extends ITerminalTransformOptions {
+    // (undocumented)
+    newlineKind?: NewlineKind;
+}
+
+// @beta (undocumented)
 export interface IStdioSummarizerOptions {
     // (undocumented)
     leadingLines?: number;
@@ -64,8 +100,26 @@ export interface ITerminalChunk {
 }
 
 // @beta (undocumented)
+export interface ITerminalTransformOptions {
+    // (undocumented)
+    destination: TerminalWriter;
+}
+
+// @beta (undocumented)
+export class RemoveColorsCharMatcher extends CharMatcher {
+    // (undocumented)
+    flush(unknownState: CharMatcherState): string;
+    // (undocumented)
+    initialize(): CharMatcherState;
+    // (undocumented)
+    process(unknownState: CharMatcherState, text: string): string;
+}
+
+// @beta (undocumented)
 export class StderrLineTransform extends TerminalTransform {
-    constructor(destination: TerminalWriter);
+    constructor(options: IStderrLineTransformOptions);
+    // (undocumented)
+    readonly newline: string;
     // (undocumented)
     protected onClose(): void;
     // (undocumented)
@@ -107,7 +161,7 @@ export enum StreamKind {
 
 // @beta (undocumented)
 export abstract class TerminalTransform extends TerminalWriter {
-    constructor(destination: TerminalWriter);
+    constructor(options: ITerminalTransformOptions);
     // (undocumented)
     readonly destination: TerminalWriter;
     // (undocumented)

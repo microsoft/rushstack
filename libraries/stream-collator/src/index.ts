@@ -13,9 +13,12 @@
  * @packageDocumentation
  */
 
+export * from './CharMatcher';
+export * from './CharMatcherTransform';
 export * from './CollatedTerminal';
 export * from './CollatedWriter';
 export * from './ITerminalChunk';
+export * from './RemoveColorsCharMatcher';
 export * from './StderrLineTransform';
 export * from './StdioSummarizer';
 export * from './StreamCollator';

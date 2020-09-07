@@ -4,12 +4,17 @@
 import { TerminalWriter } from './TerminalWriter';
 
 /** @beta */
+export interface ITerminalTransformOptions {
+  destination: TerminalWriter;
+}
+
+/** @beta */
 export abstract class TerminalTransform extends TerminalWriter {
   public readonly destination: TerminalWriter;
 
-  public constructor(destination: TerminalWriter) {
+  public constructor(options: ITerminalTransformOptions) {
     super();
-    this.destination = destination;
+    this.destination = options.destination;
   }
 
   protected onClose(): void {

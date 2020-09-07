@@ -1,21 +1,30 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Text } from '@rushstack/node-core-library';
+import { Text, NewlineKind } from '@rushstack/node-core-library';
 
 import { ITerminalChunk, StreamKind } from './ITerminalChunk';
-import { TerminalTransform } from './TerminalTransform';
-import { TerminalWriter } from './TerminalWriter';
+import { TerminalTransform, ITerminalTransformOptions } from './TerminalTransform';
+
+/** @beta */
+export interface IStderrLineTransformOptions extends ITerminalTransformOptions {
+  newlineKind?: NewlineKind;
+}
 
 /** @beta */
 export class StderrLineTransform extends TerminalTransform {
   private _accumulatedLine: string;
   private _accumulatedStderr: boolean;
 
-  public constructor(destination: TerminalWriter) {
-    super(destination);
+  public readonly newline: string;
+
+  public constructor(options: IStderrLineTransformOptions) {
+    super(options);
+
     this._accumulatedLine = '';
     this._accumulatedStderr = false;
+
+    this.newline = Text.getNewline(options.newlineKind || NewlineKind.Lf);
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
@@ -52,7 +61,7 @@ export class StderrLineTransform extends TerminalTransform {
   }
 
   private _processAccumulatedLine(): void {
-    this._accumulatedLine += '\n';
+    this._accumulatedLine += this.newline;
 
     if (this._accumulatedStderr) {
       this.destination.writeChunk({

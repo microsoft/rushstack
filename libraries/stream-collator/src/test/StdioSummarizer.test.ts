@@ -11,7 +11,7 @@ describe('StdioSummarizer', () => {
 
   beforeEach(() => {
     summarizer = new StdioSummarizer();
-    transform = new StderrLineTransform(summarizer);
+    transform = new StderrLineTransform({ destination: summarizer });
   });
 
   it('should report stdout if there is no stderr', () => {

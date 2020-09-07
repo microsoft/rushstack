@@ -8,7 +8,7 @@ import { TestWriter } from '../TestWriter';
 describe('LineAlignerStream', () => {
   it('should report stdout if there is no stderr', () => {
     const testWriter: TestWriter = new TestWriter();
-    const transform: StderrLineTransform = new StderrLineTransform(testWriter);
+    const transform: StderrLineTransform = new StderrLineTransform({ destination: testWriter });
 
     transform.writeChunk({ text: 'stdout 1\nstdout 2\n', stream: StreamKind.Stdout });
     transform.close();
