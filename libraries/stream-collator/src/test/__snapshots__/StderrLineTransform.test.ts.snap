@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`LineAlignerStream should report stdout if there is no stderr 1`] = `
+exports[`StderrLineTransform should report stdout if there is no stderr 1`] = `
 Array [
   Object {
     "kind": "O",

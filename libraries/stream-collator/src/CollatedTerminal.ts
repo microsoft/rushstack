@@ -2,13 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
-
-/**
- * This API was introduced as a temporary measure.
- * @deprecated Very soon we plan to replace this with the `TerminalProvider` API from `@rushstack/node-core-library`.
- * @beta
- */
-export type WriteToStreamCallback = (chunk: ITerminalChunk) => void;
+import { TerminalWritable } from './TerminalWritable';
 
 /**
  * This API was introduced as a temporary measure.
@@ -16,20 +10,21 @@ export type WriteToStreamCallback = (chunk: ITerminalChunk) => void;
  * @beta
  */
 export class CollatedTerminal {
-  private _writeToStream: WriteToStreamCallback;
-  public constructor(writeToStream: WriteToStreamCallback) {
-    this._writeToStream = writeToStream;
+  private readonly _destination: TerminalWritable;
+
+  public constructor(destination: TerminalWritable) {
+    this._destination = destination;
   }
 
   public writeChunk(chunk: ITerminalChunk): void {
-    this._writeToStream(chunk);
+    this._destination.writeChunk(chunk);
   }
 
   public writeStdoutLine(message: string): void {
-    this._writeToStream({ text: message + '\n', kind: TerminalChunkKind.Stdout });
+    this._destination.writeChunk({ text: message + '\n', kind: TerminalChunkKind.Stdout });
   }
 
   public writeStderrLine(message: string): void {
-    this._writeToStream({ text: message + '\n', kind: TerminalChunkKind.Stderr });
+    this._destination.writeChunk({ text: message + '\n', kind: TerminalChunkKind.Stderr });
   }
 }

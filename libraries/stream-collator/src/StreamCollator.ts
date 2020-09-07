@@ -2,11 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import { CollatedWriter } from './CollatedWriter';
-import { CollatedTerminal, WriteToStreamCallback } from './CollatedTerminal';
+import { CollatedTerminal } from './CollatedTerminal';
+import { TerminalWritable } from './TerminalWritable';
 
 /** @beta */
 export interface IStreamCollatorOptions {
-  writeToStream: WriteToStreamCallback;
+  destination: TerminalWritable;
 }
 
 /**
@@ -19,10 +20,11 @@ export class StreamCollator {
   private _writers: Set<CollatedWriter> = new Set();
   private _activeWriter: CollatedWriter | undefined = undefined;
 
+  public readonly destination: TerminalWritable;
   public readonly terminal: CollatedTerminal;
 
   public constructor(options: IStreamCollatorOptions) {
-    this.terminal = new CollatedTerminal(options.writeToStream);
+    this.terminal = new CollatedTerminal(options.destination);
   }
 
   public get activeWriter(): CollatedWriter | undefined {

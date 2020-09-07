@@ -11,4 +11,8 @@ export class TestWritable extends TerminalWritable {
   protected onWriteChunk(chunk: ITerminalChunk): void {
     this.chunks.push(chunk);
   }
+
+  public reset(): void {
+    this.chunks.length = 0;
+  }
 }

@@ -32,30 +32,31 @@ export class CharMatcherTransform extends TerminalTransform {
 
 // @beta @deprecated
 export class CollatedTerminal {
-    constructor(writeToStream: WriteToStreamCallback);
+    constructor(destination: TerminalWritable);
     // (undocumented)
     writeChunk(chunk: ITerminalChunk): void;
     // (undocumented)
     writeStderrLine(message: string): void;
     // (undocumented)
     writeStdoutLine(message: string): void;
-    }
+}
 
 // @beta
-export class CollatedWriter {
+export class CollatedWriter extends TerminalWritable {
     constructor(taskName: string, collator: StreamCollator);
     // (undocumented)
     readonly accumulatedChunks: ReadonlyArray<ITerminalChunk>;
-    close(): void;
     // @internal (undocumented)
     readonly _collator: StreamCollator;
+    onClose(): void;
+    onWriteChunk(chunk: ITerminalChunk): void;
     // (undocumented)
     readonly state: CollatedWriterState;
     // (undocumented)
     readonly taskName: string;
     // (undocumented)
     readonly terminal: CollatedTerminal;
-    }
+}
 
 // @beta (undocumented)
 export enum CollatedWriterState {
@@ -92,7 +93,7 @@ export interface IStdioSummarizerOptions {
 // @beta (undocumented)
 export interface IStreamCollatorOptions {
     // (undocumented)
-    writeToStream: WriteToStreamCallback;
+    destination: TerminalWritable;
 }
 
 // @beta
@@ -161,6 +162,8 @@ export class StreamCollator {
     readonly activeTaskName: string;
     // (undocumented)
     readonly activeWriter: CollatedWriter | undefined;
+    // (undocumented)
+    readonly destination: TerminalWritable;
     registerTask(taskName: string): CollatedWriter;
     // @internal (undocumented)
     _setActiveWriter(writer: CollatedWriter): void;
@@ -208,10 +211,9 @@ export class TestWritable extends TerminalWritable {
     readonly chunks: ITerminalChunk[];
     // (undocumented)
     protected onWriteChunk(chunk: ITerminalChunk): void;
+    // (undocumented)
+    reset(): void;
 }
-
-// @beta @deprecated
-export type WriteToStreamCallback = (chunk: ITerminalChunk) => void;
 
 
 ```

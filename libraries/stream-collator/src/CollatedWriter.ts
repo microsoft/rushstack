@@ -3,6 +3,7 @@
 
 import { ITerminalChunk } from './ITerminalChunk';
 import { CollatedTerminal } from './CollatedTerminal';
+import { TerminalWritable } from './TerminalWritable';
 
 /**
  * @beta
@@ -18,7 +19,7 @@ export enum CollatedWriterState {
  *
  * @beta
  */
-export class CollatedWriter {
+export class CollatedWriter extends TerminalWritable {
   public readonly taskName: string;
 
   public readonly terminal: CollatedTerminal;
@@ -33,8 +34,10 @@ export class CollatedWriter {
   private readonly _accumulatedChunks: ITerminalChunk[];
 
   public constructor(taskName: string, collator: StreamCollator) {
+    super();
+
     this.taskName = taskName;
-    this.terminal = new CollatedTerminal(this._writeToStream);
+    this.terminal = new CollatedTerminal(this);
 
     this._collator = collator;
 
@@ -53,11 +56,7 @@ export class CollatedWriter {
   /**
    * Adds the text to the task's buffer, and writes it to the console if it is the active task
    */
-  private _writeToStream = (chunk: ITerminalChunk): void => {
-    if (this.state !== CollatedWriterState.Open) {
-      throw new Error('The task is not registered or has been completed and written.');
-    }
-
+  public onWriteChunk(chunk: ITerminalChunk): void {
     if (this._collator.activeWriter === undefined) {
       this._collator._setActiveWriter(this);
       this._flushUnwrittenOutput();
@@ -69,7 +68,7 @@ export class CollatedWriter {
     } else {
       this._accumulatedChunks.push(chunk);
     }
-  };
+  }
 
   /**
    * Marks a task as completed. There are 3 cases:
@@ -77,11 +76,7 @@ export class CollatedWriter {
    *  - If there is no active task, write the output to the screen
    *  - If there is an active task, mark the task as completed and wait for active task to complete
    */
-  public close(): void {
-    if (this.state !== CollatedWriterState.Open) {
-      throw new Error('The task is not registered or has been completed and written.');
-    }
-
+  public onClose(): void {
     if (this._collator.activeWriter === undefined) {
       this._flushUnwrittenOutput();
     } else if (this._collator.activeWriter === this) {
