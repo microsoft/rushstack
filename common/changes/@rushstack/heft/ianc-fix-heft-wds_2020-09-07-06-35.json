@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Fix an issue with WebpackPlugin loading webpack-dev-server in non-serve mode and setting the \"WEBPACK_DEV_SERVER\" environment variable.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "iclanton@users.noreply.github.com"
+}

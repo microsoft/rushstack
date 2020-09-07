@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as webpack from 'webpack';
-import * as WebpackDevServer from 'webpack-dev-server';
+import /* type */ * as TWebpackDevServer from 'webpack-dev-server';
 import { LegacyAdapters } from '@rushstack/node-core-library';
 
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
@@ -17,6 +17,8 @@ import {
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 
 const PLUGIN_NAME: string = 'WebpackPlugin';
+const WEBPACK_DEV_SERVER_PACKAGE_NAME: string = 'webpack-dev-server';
+const WEBPACK_DEV_SERVER_ENV_VAR_NAME: string = 'WEBPACK_DEV_SERVER';
 
 export class WebpackPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
@@ -55,7 +57,7 @@ export class WebpackPlugin implements IHeftPlugin {
 
     if (buildProperties.serveMode) {
       // TODO: make these options configurable
-      const options: WebpackDevServer.Configuration = {
+      const options: TWebpackDevServer.Configuration = {
         host: 'localhost',
         publicPath: '/',
         filename: '[name]_[hash].js',
@@ -68,9 +70,14 @@ export class WebpackPlugin implements IHeftPlugin {
         port: 8080
       };
 
+      // The webpack-dev-server package has a design flaw, where merely loading its package will set the
+      // WEBPACK_DEV_SERVER environment variable -- even if no APIs are accessed. This environment variable
+      // causes incorrect behavior if Heft is not running in serve mode. Thus, we need to be careful to call require()
+      // only if Heft is in serve mode.
+      const WebpackDevServer: typeof TWebpackDevServer = require(WEBPACK_DEV_SERVER_PACKAGE_NAME);
       // TODO: the WebpackDevServer accepts a third parameter for a logger. We should make
       // use of that to make logging cleaner
-      const devServer: WebpackDevServer = new WebpackDevServer(compiler, options);
+      const devServer: TWebpackDevServer = new WebpackDevServer(compiler, options);
       await new Promise((resolve: () => void, reject: (error: Error) => void) => {
         devServer.listen(options.port!, options.host!, (error: Error) => {
           if (error) {
@@ -79,6 +86,16 @@ export class WebpackPlugin implements IHeftPlugin {
         });
       });
     } else {
+      if (process.env[WEBPACK_DEV_SERVER_ENV_VAR_NAME]) {
+        logger.emitWarning(
+          new Error(
+            `The "${WEBPACK_DEV_SERVER_ENV_VAR_NAME}" environment variable is set, ` +
+              'which will cause problems when webpack is not running in serve mode. ' +
+              `(Did a dependency inadvertently load the "${WEBPACK_DEV_SERVER_PACKAGE_NAME}" package?)`
+          )
+        );
+      }
+
       let stats: webpack.Stats | undefined;
       if (buildProperties.watchMode) {
         try {
