@@ -77,7 +77,7 @@ export enum ConsoleColorCodes {
   Blink = 5,
   BlinkOff = 25,
   InvertColor = 7,
-  InvertColorOFf = 27,
+  InvertColorOff = 27,
   Hidden = 8,
   HiddenOff = 28
 }
@@ -240,24 +240,6 @@ export class Colors {
 
   public static hidden(text: string | IColorableSequence): IColorableSequence {
     return Colors._applyTextAttribute(text, TextAttribute.Hidden);
-  }
-
-  /**
-   * This utility function can be used to normalize color codes into human-readable
-   * tokens. This is useful for producing more readable test snapshots.
-   *
-   * @beta
-   */
-  public static normalizeColorTokensForTest(text: string): string {
-    // eslint-disable-next-line no-control-regex
-    return text.replace(/\u001b\[(\d+)m/gu, (capture: string, code: number) => {
-      const colorCode: string | undefined = ConsoleColorCodes[code];
-      if (!colorCode) {
-        return `[UnknownColorCode ${code}]`;
-      } else {
-        return `[${colorCode}]`;
-      }
-    });
   }
 
   /**

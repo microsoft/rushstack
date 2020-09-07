@@ -60,7 +60,7 @@ Optional arguments:
   -d, --debug           Show the full call stack if an error occurs while 
                         executing the tool
 
-[Bold]For detailed help about a specific command, use: rush <command> -h[NormalColorOrIntensity]
+[bold]For detailed help about a specific command, use: rush <command> -h[normal]
 "
 `;
 

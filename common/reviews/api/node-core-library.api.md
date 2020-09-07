@@ -21,6 +21,12 @@ export class AlreadyReportedError extends Error {
     constructor();
 }
 
+// @public
+export class AnsiEscape {
+    static formatForTests(text: string, options?: IAnsiEscapeConvertForTestsOptions): string;
+    static removeCodes(text: string): string;
+    }
+
 // @beta
 export class Colors {
     // (undocumented)
@@ -57,7 +63,6 @@ export class Colors {
     static magenta(text: string | IColorableSequence): IColorableSequence;
     // (undocumented)
     static magentaBackground(text: string | IColorableSequence): IColorableSequence;
-    static normalizeColorTokensForTest(text: string): string;
     // @internal
     static _normalizeStringOrColorableSequence(value: string | IColorableSequence): IColorableSequence;
     // (undocumented)
@@ -206,6 +211,11 @@ export class FileWriter {
 export const enum FolderConstants {
     Git = ".git",
     NodeModules = "node_modules"
+}
+
+// @public
+export interface IAnsiEscapeConvertForTestsOptions {
+    encodeNewlines?: boolean;
 }
 
 // @beta (undocumented)

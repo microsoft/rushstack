@@ -8,6 +8,7 @@
  */
 
 export { AlreadyReportedError } from './AlreadyReportedError';
+export { AnsiEscape, IAnsiEscapeConvertForTestsOptions } from './Terminal/AnsiEscape';
 export { FileConstants, FolderConstants } from './Constants';
 export {
   ExecutableStdioStreamMapping,
