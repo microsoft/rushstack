@@ -6,9 +6,16 @@ import { AnsiEscape } from '../AnsiEscape';
 
 describe('AnsiEscape', () => {
   test('calls removeCodes() successfully', () => {
+    const oldEnabled: boolean = colors.enabled;
+    colors.enable();
+
     const coloredInput: string = colors.rainbow('Hello, world!');
     const decoloredInput: string = AnsiEscape.removeCodes(coloredInput);
     expect(coloredInput).not.toBe(decoloredInput);
     expect(decoloredInput).toBe('Hello, world!');
+
+    if (!oldEnabled) {
+      colors.disable();
+    }
   });
 });
