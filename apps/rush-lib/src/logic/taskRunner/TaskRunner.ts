@@ -5,11 +5,10 @@ import * as os from 'os';
 import * as colors from 'colors';
 import {
   StreamCollator,
-  WriteToStreamCallback,
-  ITerminalChunk,
-  TerminalChunkKind,
   CollatedTerminal,
-  StdioSummarizer
+  StdioSummarizer,
+  TerminalWritable,
+  StdioWritable
 } from '@rushstack/stream-collator';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 
@@ -24,7 +23,7 @@ export interface ITaskRunnerOptions {
   parallelism: string | undefined;
   changedProjectsOnly: boolean;
   allowWarningsInSuccessfulBuild: boolean;
-  writeToStream?: WriteToStreamCallback;
+  destination?: TerminalWritable;
 }
 
 /**
@@ -58,7 +57,7 @@ export class TaskRunner {
     this._changedProjectsOnly = changedProjectsOnly;
     this._allowWarningsInSuccessfulBuild = allowWarningsInSuccessfulBuild;
     this._streamCollator = new StreamCollator({
-      writeToStream: options.writeToStream ? options.writeToStream : TaskRunner._writeToStdio
+      destination: options.destination ? options.destination : StdioWritable.instance
     });
     this._terminal = this._streamCollator.terminal;
 
@@ -89,14 +88,6 @@ export class TaskRunner {
         // to the number of CPU cores
         this._parallelism = numberOfCores;
       }
-    }
-  }
-
-  private static _writeToStdio(chunk: ITerminalChunk): void {
-    if (chunk.kind === TerminalChunkKind.Stdout) {
-      process.stdout.write(chunk.text);
-    } else if (chunk.kind === TerminalChunkKind.Stderr) {
-      process.stderr.write(chunk.text);
     }
   }
 

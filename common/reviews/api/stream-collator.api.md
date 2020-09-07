@@ -111,6 +111,18 @@ export interface ITerminalTransformOptions {
 }
 
 // @beta (undocumented)
+export class MockWritable extends TerminalWritable {
+    // (undocumented)
+    readonly chunks: ITerminalChunk[];
+    // (undocumented)
+    getAllOutput(): string;
+    // (undocumented)
+    protected onWriteChunk(chunk: ITerminalChunk): void;
+    // (undocumented)
+    reset(): void;
+}
+
+// @beta (undocumented)
 export class NormalizeNewlinesCharMatcher extends CharMatcher {
     constructor(newlineKind: NewlineKind);
     // (undocumented)
@@ -154,6 +166,14 @@ export class StdioSummarizer extends TerminalWritable {
     // (undocumented)
     onWriteChunk(chunk: ITerminalChunk): void;
     }
+
+// @beta (undocumented)
+export class StdioWritable extends TerminalWritable {
+    // (undocumented)
+    static instance: StdioWritable;
+    // (undocumented)
+    protected onWriteChunk(chunk: ITerminalChunk): void;
+}
 
 // @beta
 export class StreamCollator {
@@ -203,16 +223,6 @@ export abstract class TerminalWritable {
     protected abstract onWriteChunk(chunk: ITerminalChunk): void;
     // (undocumented)
     writeChunk(chunk: ITerminalChunk): void;
-}
-
-// @beta (undocumented)
-export class TestWritable extends TerminalWritable {
-    // (undocumented)
-    readonly chunks: ITerminalChunk[];
-    // (undocumented)
-    protected onWriteChunk(chunk: ITerminalChunk): void;
-    // (undocumented)
-    reset(): void;
 }
 
 

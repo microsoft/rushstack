@@ -4,16 +4,16 @@
 import { StreamCollator } from '../StreamCollator';
 import { CollatedWriter } from '../CollatedWriter';
 import { TerminalChunkKind } from '../ITerminalChunk';
-import { TestWritable } from '../TestWritable';
+import { MockWritable } from '../MockWritable';
 
 let collator: StreamCollator;
-const testWritable: TestWritable = new TestWritable();
+const mockWritable: MockWritable = new MockWritable();
 
 describe('StreamCollator tests', () => {
   // Reset task information before each test
   beforeEach(() => {
-    testWritable.reset();
-    collator = new StreamCollator({ destination: testWritable });
+    mockWritable.reset();
+    collator = new StreamCollator({ destination: mockWritable });
   });
 
   describe('Testing register and close', () => {
@@ -56,7 +56,7 @@ describe('StreamCollator tests', () => {
 
       taskA.terminal.writeChunk({ text, kind: TerminalChunkKind.Stdout });
 
-      expect(testWritable.chunks).toEqual([{ text, kind: TerminalChunkKind.Stdout }]);
+      expect(mockWritable.chunks).toEqual([{ text, kind: TerminalChunkKind.Stdout }]);
     });
 
     it('should write errors to stderr', () => {
@@ -65,12 +65,12 @@ describe('StreamCollator tests', () => {
 
       taskA.terminal.writeChunk({ text: error, kind: TerminalChunkKind.Stderr });
 
-      expect(testWritable.chunks).toEqual([{ text: error, kind: TerminalChunkKind.Stderr }]);
+      expect(mockWritable.chunks).toEqual([{ text: error, kind: TerminalChunkKind.Stderr }]);
 
       taskA.close();
 
       expect(taskA.accumulatedChunks).toEqual([]);
-      expect(testWritable.chunks).toEqual([{ text: error, kind: TerminalChunkKind.Stderr }]);
+      expect(mockWritable.chunks).toEqual([{ text: error, kind: TerminalChunkKind.Stderr }]);
     });
   });
 
@@ -81,26 +81,26 @@ describe('StreamCollator tests', () => {
 
       taskA.terminal.writeChunk({ text: '1', kind: TerminalChunkKind.Stdout });
       expect(taskA.accumulatedChunks).toEqual([]);
-      expect(testWritable.chunks).toEqual([{ text: '1', kind: TerminalChunkKind.Stdout }]);
+      expect(mockWritable.chunks).toEqual([{ text: '1', kind: TerminalChunkKind.Stdout }]);
 
       taskB.terminal.writeChunk({ text: '2', kind: TerminalChunkKind.Stdout });
       expect(taskB.accumulatedChunks).toEqual([{ text: '2', kind: TerminalChunkKind.Stdout }]);
-      expect(testWritable.chunks).toEqual([{ text: '1', kind: TerminalChunkKind.Stdout }]);
+      expect(mockWritable.chunks).toEqual([{ text: '1', kind: TerminalChunkKind.Stdout }]);
 
       taskA.terminal.writeChunk({ text: '3', kind: TerminalChunkKind.Stdout });
-      expect(testWritable.chunks).toEqual([
+      expect(mockWritable.chunks).toEqual([
         { text: '1', kind: TerminalChunkKind.Stdout },
         { text: '3', kind: TerminalChunkKind.Stdout }
       ]);
 
       taskA.close();
-      expect(testWritable.chunks).toEqual([
+      expect(mockWritable.chunks).toEqual([
         { text: '1', kind: TerminalChunkKind.Stdout },
         { text: '3', kind: TerminalChunkKind.Stdout }
       ]);
 
       taskB.close();
-      expect(testWritable.chunks).toEqual([
+      expect(mockWritable.chunks).toEqual([
         { text: '1', kind: TerminalChunkKind.Stdout },
         { text: '3', kind: TerminalChunkKind.Stdout },
         { text: '2', kind: TerminalChunkKind.Stdout }
@@ -115,16 +115,16 @@ describe('StreamCollator tests', () => {
       const taskB: CollatedWriter = collator.registerTask('B');
 
       taskA.terminal.writeChunk({ text: '1', kind: TerminalChunkKind.Stdout });
-      expect(testWritable.chunks).toEqual([{ text: '1', kind: TerminalChunkKind.Stdout }]);
+      expect(mockWritable.chunks).toEqual([{ text: '1', kind: TerminalChunkKind.Stdout }]);
       taskA.close();
 
       taskB.terminal.writeChunk({ text: '2', kind: TerminalChunkKind.Stdout });
-      expect(testWritable.chunks).toEqual([
+      expect(mockWritable.chunks).toEqual([
         { text: '1', kind: TerminalChunkKind.Stdout },
         { text: '2', kind: TerminalChunkKind.Stdout }
       ]);
       taskB.close();
-      expect(testWritable.chunks).toEqual([
+      expect(mockWritable.chunks).toEqual([
         { text: '1', kind: TerminalChunkKind.Stdout },
         { text: '2', kind: TerminalChunkKind.Stdout }
       ]);
@@ -135,16 +135,16 @@ describe('StreamCollator tests', () => {
       const taskB: CollatedWriter = collator.registerTask('B');
 
       taskA.terminal.writeChunk({ text: '1', kind: TerminalChunkKind.Stdout });
-      expect(testWritable.chunks).toEqual([{ text: '1', kind: TerminalChunkKind.Stdout }]);
+      expect(mockWritable.chunks).toEqual([{ text: '1', kind: TerminalChunkKind.Stdout }]);
 
       taskB.terminal.writeChunk({ text: '2', kind: TerminalChunkKind.Stdout });
-      expect(testWritable.chunks).toEqual([{ text: '1', kind: TerminalChunkKind.Stdout }]);
+      expect(mockWritable.chunks).toEqual([{ text: '1', kind: TerminalChunkKind.Stdout }]);
 
       taskB.close();
-      expect(testWritable.chunks).toEqual([{ text: '1', kind: TerminalChunkKind.Stdout }]);
+      expect(mockWritable.chunks).toEqual([{ text: '1', kind: TerminalChunkKind.Stdout }]);
 
       taskA.close();
-      expect(testWritable.chunks).toEqual([
+      expect(mockWritable.chunks).toEqual([
         { text: '1', kind: TerminalChunkKind.Stdout },
         { text: '2', kind: TerminalChunkKind.Stdout }
       ]);

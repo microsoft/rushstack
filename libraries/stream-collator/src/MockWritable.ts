@@ -5,7 +5,7 @@ import { ITerminalChunk } from './ITerminalChunk';
 import { TerminalWritable } from './TerminalWritable';
 
 /** @beta */
-export class TestWritable extends TerminalWritable {
+export class MockWritable extends TerminalWritable {
   public readonly chunks: ITerminalChunk[] = [];
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
@@ -14,5 +14,9 @@ export class TestWritable extends TerminalWritable {
 
   public reset(): void {
     this.chunks.length = 0;
+  }
+
+  public getAllOutput(): string {
+    return this.chunks.map((x) => x.text).join('');
   }
 }

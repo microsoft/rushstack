@@ -5,8 +5,8 @@
 jest.mock('../../../utilities/Utilities');
 
 import { EOL } from 'os';
-import { ITerminalChunk, CollatedTerminal } from '@rushstack/stream-collator';
-import { AnsiEscape } from '@rushstack/node-core-library';
+import { CollatedTerminal } from '@rushstack/stream-collator';
+import { MockWritable } from '@rushstack/stream-collator';
 
 import { TaskRunner, ITaskRunnerOptions } from '../TaskRunner';
 import { TaskStatus } from '../TaskStatus';
@@ -25,26 +25,7 @@ mockGetTimeInMs.mockImplementation(() => {
   return mockTimeInMs;
 });
 
-class MockStream {
-  public readonly chunks: ITerminalChunk[] = [];
-  public reset(): void {
-    this.chunks.length = 0;
-  }
-  public writeToStream = (chunk: ITerminalChunk): void => {
-    const encodedText: string = AnsiEscape.formatForTests(chunk.text, { encodeNewlines: true });
-    this.chunks.push({
-      text: encodedText,
-      kind: chunk.kind
-    });
-  };
-  public getAllOutput(): string {
-    return this.chunks.map((x) => x.text).join('');
-  }
-  public checkSnapshot(): void {
-    expect(this.chunks).toMatchSnapshot();
-  }
-}
-const mockStream: MockStream = new MockStream();
+const mockWritable: MockWritable = new MockWritable();
 
 function createTaskRunner(taskRunnerOptions: ITaskRunnerOptions, builder: BaseBuilder): TaskRunner {
   const task: Task = new Task();
@@ -61,7 +42,7 @@ describe('TaskRunner', () => {
   let taskRunnerOptions: ITaskRunnerOptions;
 
   beforeEach(() => {
-    mockStream.reset();
+    mockWritable.reset();
   });
 
   describe('Constructor', () => {
@@ -72,7 +53,7 @@ describe('TaskRunner', () => {
             quietMode: false,
             parallelism: 'tequila',
             changedProjectsOnly: false,
-            writeToStream: mockStream.writeToStream,
+            destination: mockWritable,
             allowWarningsInSuccessfulBuild: false
           })
       ).toThrowErrorMatchingSnapshot();
@@ -85,7 +66,7 @@ describe('TaskRunner', () => {
         quietMode: false,
         parallelism: '1',
         changedProjectsOnly: false,
-        writeToStream: mockStream.writeToStream,
+        destination: mockWritable,
         allowWarningsInSuccessfulBuild: false
       };
     });
@@ -107,9 +88,9 @@ describe('TaskRunner', () => {
         .then(() => fail(EXPECTED_FAIL))
         .catch((err) => {
           expect(err.message).toMatchSnapshot();
-          const allMessages: string = mockStream.getAllOutput();
+          const allMessages: string = mockWritable.getAllOutput();
           expect(allMessages).toContain('Error: step 1 failed');
-          mockStream.checkSnapshot();
+          expect(mockWritable.chunks).toMatchSnapshot();
         });
     });
 
@@ -128,8 +109,8 @@ describe('TaskRunner', () => {
         .then(() => fail(EXPECTED_FAIL))
         .catch((err) => {
           expect(err.message).toMatchSnapshot();
-          expect(mockStream.getAllOutput()).toMatch(/Build step 1.*Error: step 1 failed/);
-          mockStream.checkSnapshot();
+          expect(mockWritable.getAllOutput()).toMatch(/Build step 1.*Error: step 1 failed/);
+          expect(mockWritable.chunks).toMatchSnapshot();
         });
     });
   });
@@ -141,7 +122,7 @@ describe('TaskRunner', () => {
           quietMode: false,
           parallelism: '1',
           changedProjectsOnly: false,
-          writeToStream: mockStream.writeToStream,
+          destination: mockWritable,
           allowWarningsInSuccessfulBuild: false
         };
       });
@@ -161,10 +142,10 @@ describe('TaskRunner', () => {
           .then(() => fail('Promise returned by execute() resolved but was expected to fail'))
           .catch((err) => {
             expect(err.message).toMatchSnapshot();
-            const allMessages: string = mockStream.getAllOutput();
+            const allMessages: string = mockWritable.getAllOutput();
             expect(allMessages).toContain('Build step 1');
             expect(allMessages).toContain('step 1 succeeded with warnings');
-            mockStream.checkSnapshot();
+            expect(mockWritable.chunks).toMatchSnapshot();
           });
       });
     });
@@ -175,7 +156,7 @@ describe('TaskRunner', () => {
           quietMode: false,
           parallelism: '1',
           changedProjectsOnly: false,
-          writeToStream: mockStream.writeToStream,
+          destination: mockWritable,
           allowWarningsInSuccessfulBuild: true
         };
       });
@@ -193,10 +174,10 @@ describe('TaskRunner', () => {
         return taskRunner
           .executeAsync()
           .then(() => {
-            const allMessages: string = mockStream.getAllOutput();
+            const allMessages: string = mockWritable.getAllOutput();
             expect(allMessages).toContain('Build step 1');
             expect(allMessages).toContain('Warning: step 1 succeeded with warnings');
-            mockStream.checkSnapshot();
+            expect(mockWritable.chunks).toMatchSnapshot();
           })
           .catch((err) => fail('Promise returned by execute() rejected but was expected to resolve'));
       });

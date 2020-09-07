@@ -3,16 +3,16 @@
 
 import { TerminalChunkKind } from '../ITerminalChunk';
 import { StderrLineTransform } from '../StderrLineTransform';
-import { TestWritable } from '../TestWritable';
+import { MockWritable } from '../MockWritable';
 
 describe('StderrLineTransform', () => {
   it('should report stdout if there is no stderr', () => {
-    const testWritable: TestWritable = new TestWritable();
-    const transform: StderrLineTransform = new StderrLineTransform({ destination: testWritable });
+    const mockWritable: MockWritable = new MockWritable();
+    const transform: StderrLineTransform = new StderrLineTransform({ destination: mockWritable });
 
     transform.writeChunk({ text: 'stdout 1\nstdout 2\n', kind: TerminalChunkKind.Stdout });
     transform.close();
 
-    expect(testWritable.chunks).toMatchSnapshot();
+    expect(mockWritable.chunks).toMatchSnapshot();
   });
 });
