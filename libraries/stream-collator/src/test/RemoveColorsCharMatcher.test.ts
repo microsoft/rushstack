@@ -7,7 +7,7 @@ import { RemoveColorsCharMatcher } from '../RemoveColorsCharMatcher';
 import { CharMatcherState } from '../CharMatcher';
 import { AnsiEscape } from '@rushstack/node-core-library';
 
-function test(inputs: string[]): void {
+function testCase(inputs: string[]): void {
   const matcher: RemoveColorsCharMatcher = new RemoveColorsCharMatcher();
   const state: CharMatcherState = matcher.initialize();
   const outputs: string[] = inputs.map((x) => matcher.process(state, x));
@@ -24,29 +24,29 @@ function test(inputs: string[]): void {
 }
 
 describe('RemoveColorsCharMatcher', () => {
-  let oldEnabled: boolean;
+  let initialColorsEnabled: boolean;
 
   beforeAll(() => {
-    oldEnabled = colors.enabled;
+    initialColorsEnabled = colors.enabled;
     colors.enable();
   });
 
   afterAll(() => {
-    if (!oldEnabled) {
+    if (!initialColorsEnabled) {
       colors.disable();
     }
   });
 
   it('01 should process empty inputs', () => {
-    test([]);
-    test(['']);
-    test(['', 'a', '']);
+    testCase([]);
+    testCase(['']);
+    testCase(['', 'a', '']);
   });
 
   it('02 should remove colors from complete chunks', () => {
-    test([colors.red('1')]);
-    test([colors.red('1') + colors.green('2')]);
-    test([colors.red('1') + '2' + colors.green('3')]);
+    testCase([colors.red('1')]);
+    testCase([colors.red('1') + colors.green('2')]);
+    testCase([colors.red('1') + '2' + colors.green('3')]);
   });
 
   it('03 should remove colors from 1-character chunks', () => {
@@ -55,12 +55,12 @@ describe('RemoveColorsCharMatcher', () => {
     for (let i: number = 0; i < source.length; ++i) {
       inputs.push(source.substr(i, 1));
     }
-    test(inputs);
+    testCase(inputs);
   });
 
   it('04 should pass through incomplete partial matches', () => {
-    test(['\x1b']);
-    test(['\x1b[\n']);
-    test(['\x1b[1']);
+    testCase(['\x1b']);
+    testCase(['\x1b[\n']);
+    testCase(['\x1b[1']);
   });
 });

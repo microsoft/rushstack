@@ -18,6 +18,7 @@ export * from './CharMatcherTransform';
 export * from './CollatedTerminal';
 export * from './CollatedWriter';
 export * from './ITerminalChunk';
+export * from './NormalizeNewlinesCharMatcher';
 export * from './RemoveColorsCharMatcher';
 export * from './StderrLineTransform';
 export * from './StdioSummarizer';

@@ -25,8 +25,10 @@ export class CharMatcherTransform extends TerminalTransform {
     // (undocumented)
     readonly charMatchers: ReadonlyArray<CharMatcher>;
     // (undocumented)
+    protected onClose(): void;
+    // (undocumented)
     protected onWriteChunk(chunk: ITerminalChunk): void;
-}
+    }
 
 // @beta @deprecated
 export class CollatedTerminal {
@@ -68,7 +70,9 @@ export enum CollatedWriterState {
 // @beta (undocumented)
 export interface ICharMatcherTransformOptions extends ITerminalTransformOptions {
     // (undocumented)
-    charMatchers: CharMatcher[];
+    charMatchers?: CharMatcher[];
+    // (undocumented)
+    removeColors?: boolean;
 }
 
 // @beta (undocumented)
@@ -103,6 +107,21 @@ export interface ITerminalChunk {
 export interface ITerminalTransformOptions {
     // (undocumented)
     destination: TerminalWriter;
+}
+
+// @beta (undocumented)
+export class NormalizeNewlinesCharMatcher extends CharMatcher {
+    constructor(newlineKind: NewlineKind);
+    // (undocumented)
+    flush(unknownState: CharMatcherState): string;
+    // (undocumented)
+    initialize(): CharMatcherState;
+    // (undocumented)
+    readonly newline: string;
+    // (undocumented)
+    readonly newlineKind: NewlineKind;
+    // (undocumented)
+    process(unknownState: CharMatcherState, text: string): string;
 }
 
 // @beta (undocumented)
