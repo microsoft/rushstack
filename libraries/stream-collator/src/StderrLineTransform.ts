@@ -3,7 +3,7 @@
 
 import { Text, NewlineKind } from '@rushstack/node-core-library';
 
-import { ITerminalChunk, StreamKind } from './ITerminalChunk';
+import { ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
 import { TerminalTransform, ITerminalTransformOptions } from './TerminalTransform';
 
 /** @beta */
@@ -32,7 +32,7 @@ export class StderrLineTransform extends TerminalTransform {
     let startIndex: number = 0;
 
     while (startIndex < text.length) {
-      if (chunk.stream === StreamKind.Stderr) {
+      if (chunk.kind === TerminalChunkKind.Stderr) {
         this._accumulatedStderr = true;
       }
 
@@ -65,12 +65,12 @@ export class StderrLineTransform extends TerminalTransform {
 
     if (this._accumulatedStderr) {
       this.destination.writeChunk({
-        stream: StreamKind.Stderr,
+        kind: TerminalChunkKind.Stderr,
         text: this._accumulatedLine
       });
     } else {
       this.destination.writeChunk({
-        stream: StreamKind.Stdout,
+        kind: TerminalChunkKind.Stdout,
         text: this._accumulatedLine
       });
     }

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminalChunk, StreamKind } from './ITerminalChunk';
+import { ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
 import { TerminalTransform, ITerminalTransformOptions } from './TerminalTransform';
 import { CharMatcher, CharMatcherState } from './CharMatcher';
 import { RemoveColorsCharMatcher } from './RemoveColorsCharMatcher';
@@ -39,9 +39,9 @@ export class CharMatcherTransform extends TerminalTransform {
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
-    if (chunk.stream === StreamKind.Stderr) {
+    if (chunk.kind === TerminalChunkKind.Stderr) {
       this._processText(chunk, this._stderrStates);
-    } else if (chunk.stream === StreamKind.Stdout) {
+    } else if (chunk.kind === TerminalChunkKind.Stdout) {
       this._processText(chunk, this._stdoutStates);
     } else {
       this.destination.writeChunk(chunk);
@@ -58,12 +58,12 @@ export class CharMatcherTransform extends TerminalTransform {
     if (text.length > 0) {
       this.destination.writeChunk({
         text: text,
-        stream: chunk.stream
+        kind: chunk.kind
       });
     }
   }
 
-  private _flushText(states: CharMatcherState[], streamKind: StreamKind): void {
+  private _flushText(states: CharMatcherState[], chunkKind: TerminalChunkKind): void {
     let text: string = '';
     for (let i: number = 0; i < states.length; ++i) {
       if (text.length > 0) {
@@ -74,14 +74,14 @@ export class CharMatcherTransform extends TerminalTransform {
     if (text.length > 0) {
       this.destination.writeChunk({
         text: text,
-        stream: streamKind
+        kind: chunkKind
       });
     }
   }
 
   protected onClose(): void {
-    this._flushText(this._stderrStates, StreamKind.Stderr);
-    this._flushText(this._stderrStates, StreamKind.Stdout);
+    this._flushText(this._stderrStates, TerminalChunkKind.Stderr);
+    this._flushText(this._stderrStates, TerminalChunkKind.Stdout);
     this.destination.close();
   }
 }

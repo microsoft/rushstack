@@ -5,7 +5,7 @@
  * This API was introduced as a temporary measure.
  * @beta
  */
-export enum StreamKind {
+export const enum TerminalChunkKind {
   Stdout = 'O',
   Stderr = 'E'
 }
@@ -15,6 +15,6 @@ export enum StreamKind {
  * @beta
  */
 export interface ITerminalChunk {
-  stream: StreamKind;
+  kind: TerminalChunkKind;
   text: string;
 }

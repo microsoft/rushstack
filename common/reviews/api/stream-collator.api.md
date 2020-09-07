@@ -98,7 +98,7 @@ export interface IStreamCollatorOptions {
 // @beta
 export interface ITerminalChunk {
     // (undocumented)
-    stream: StreamKind;
+    kind: TerminalChunkKind;
     // (undocumented)
     text: string;
 }
@@ -171,7 +171,7 @@ export class StreamCollator {
     }
 
 // @beta
-export enum StreamKind {
+export const enum TerminalChunkKind {
     // (undocumented)
     Stderr = "E",
     // (undocumented)

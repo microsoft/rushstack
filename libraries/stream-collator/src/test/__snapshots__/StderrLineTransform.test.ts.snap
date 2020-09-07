@@ -3,12 +3,12 @@
 exports[`LineAlignerStream should report stdout if there is no stderr 1`] = `
 Array [
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "stdout 1
 ",
   },
   Object {
-    "stream": "O",
+    "kind": "O",
     "text": "stdout 2
 ",
   },

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminalChunk, StreamKind } from './ITerminalChunk';
+import { ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
 import { TerminalWriter } from './TerminalWriter';
 
 /** @beta */
@@ -51,13 +51,13 @@ export class StdioSummarizer extends TerminalWriter {
   }
 
   public onWriteChunk(chunk: ITerminalChunk): void {
-    if (chunk.stream === StreamKind.Stderr && !this._abridgedStderr) {
+    if (chunk.kind === TerminalChunkKind.Stderr && !this._abridgedStderr) {
       // The first time we see stderr, switch to capturing stderr
       this._abridgedStderr = true;
       this._abridgedLeading.length = 0;
       this._abridgedTrailing.length = 0;
       this._abridgedOmittedLines = 0;
-    } else if (this._abridgedStderr && chunk.stream !== StreamKind.Stderr) {
+    } else if (this._abridgedStderr && chunk.kind !== TerminalChunkKind.Stderr) {
       // If we're capturing stderr, then ignore non-stderr input
       return;
     }

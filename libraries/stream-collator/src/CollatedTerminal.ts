@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminalChunk, StreamKind } from './ITerminalChunk';
+import { ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
 
 /**
  * This API was introduced as a temporary measure.
@@ -26,10 +26,10 @@ export class CollatedTerminal {
   }
 
   public writeStdoutLine(message: string): void {
-    this._writeToStream({ text: message + '\n', stream: StreamKind.Stdout });
+    this._writeToStream({ text: message + '\n', kind: TerminalChunkKind.Stdout });
   }
 
   public writeStderrLine(message: string): void {
-    this._writeToStream({ text: message + '\n', stream: StreamKind.Stderr });
+    this._writeToStream({ text: message + '\n', kind: TerminalChunkKind.Stderr });
   }
 }
