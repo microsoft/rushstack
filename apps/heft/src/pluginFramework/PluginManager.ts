@@ -152,8 +152,8 @@ export class PluginManager {
 
     if (!pluginPackage.pluginName || typeof pluginPackage.pluginName !== 'string') {
       throw new InternalError(
-        `Plugin packages must define a "displayName" property. The plugin loaded from "${resolvedPluginPath}" ` +
-          'either doesn\'t define a "displayName" property, or its value isn\'t a string.'
+        `Plugin packages must define a "pluginName" property. The plugin loaded from "${resolvedPluginPath}" ` +
+          'either doesn\'t define a "pluginName" property, or its value isn\'t a string.'
       );
     }
 
