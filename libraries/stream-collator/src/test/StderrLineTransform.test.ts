@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { TerminalChunkKind } from '../ITerminalChunk';
-import { StderrLineTransform } from '../StderrLineTransform';
+import { StderrLineTransform } from '../StdioLineTransform';
 import { MockWritable } from '../MockWritable';
 
 describe('StderrLineTransform', () => {

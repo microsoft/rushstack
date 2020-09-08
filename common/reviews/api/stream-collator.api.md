@@ -78,6 +78,15 @@ export enum CollatedWriterState {
 }
 
 // @beta (undocumented)
+export class DiscardStdoutTransform extends TerminalTransform {
+    constructor(options: IDiscardStdoutTransformOptions);
+    // (undocumented)
+    protected onClose(): void;
+    // (undocumented)
+    protected onWriteChunk(chunk: ITerminalChunk): void;
+    }
+
+// @beta (undocumented)
 export interface ICallbackWritableOptions {
     // (undocumented)
     onClose: () => void;
@@ -96,13 +105,17 @@ export interface ICharMatcherTransformOptions extends ITerminalTransformOptions 
 }
 
 // @beta (undocumented)
+export interface IDiscardStdoutTransformOptions extends ITerminalTransformOptions {
+}
+
+// @beta (undocumented)
 export interface ISplitterTransformOptions {
     // (undocumented)
     destinations: TerminalWritable[];
 }
 
 // @beta (undocumented)
-export interface IStderrLineTransformOptions extends ITerminalTransformOptions {
+export interface IStdioLineTransformOptions extends ITerminalTransformOptions {
     // (undocumented)
     newlineKind?: NewlineKind;
 }
@@ -185,7 +198,7 @@ export class SplitterTransform extends TerminalWritable {
 
 // @beta (undocumented)
 export class StderrLineTransform extends TerminalTransform {
-    constructor(options: IStderrLineTransformOptions);
+    constructor(options: IStdioLineTransformOptions);
     // (undocumented)
     readonly newline: string;
     // (undocumented)

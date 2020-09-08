@@ -5,48 +5,33 @@ import { Text, NewlineKind } from '@rushstack/node-core-library';
 
 import { ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
 import { TerminalTransform, ITerminalTransformOptions } from './TerminalTransform';
-import { CharMatcherTransform } from './CharMatcherTransform';
-import { CallbackWritable } from './CallbackWritable';
 
 /** @beta */
-export interface IStderrLineTransformOptions extends ITerminalTransformOptions {
+export interface IStdioLineTransformOptions extends ITerminalTransformOptions {
   newlineKind?: NewlineKind;
 }
 
 /** @beta */
 export class StderrLineTransform extends TerminalTransform {
-  private _newlineNormalizerTransform: CharMatcherTransform;
-
   private _accumulatedLine: string;
   private _accumulatedStderr: boolean;
 
   public readonly newline: string;
 
-  public constructor(options: IStderrLineTransformOptions) {
+  public constructor(options: IStdioLineTransformOptions) {
     super(options);
 
     this._accumulatedLine = '';
     this._accumulatedStderr = false;
 
     this.newline = Text.getNewline(options.newlineKind || NewlineKind.Lf);
-
-    // The _newlineNormalizerTransform is applied first to convert newlines to "\n"
-    this._newlineNormalizerTransform = new CharMatcherTransform({
-      destination: new CallbackWritable({
-        onWriteChunk: (chunk: ITerminalChunk): void => {
-          this._onWriteNormalizedChunk(chunk);
-        },
-        onClose: (): void => {}
-      }),
-      normalizeNewlines: NewlineKind.Lf
-    });
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
-    this._newlineNormalizerTransform.writeChunk(chunk);
-  }
+    if (chunk.text.indexOf('\r') >= 0) {
+      throw new Error('StderrLineTransform expects chunks with normalized newlines');
+    }
 
-  private _onWriteNormalizedChunk(chunk: ITerminalChunk): void {
     // After _newlineNormalizerTransform was applied, we can now assume that all newlines
     // use the "\n" string
     const text: string = chunk.text;
@@ -75,8 +60,6 @@ export class StderrLineTransform extends TerminalTransform {
   }
 
   protected onClose(): void {
-    this._newlineNormalizerTransform.close();
-
     if (this._accumulatedLine.length > 0) {
       this._processAccumulatedLine();
     }

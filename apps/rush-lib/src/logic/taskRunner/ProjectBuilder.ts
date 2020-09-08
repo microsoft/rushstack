@@ -10,8 +10,7 @@ import {
   CharMatcherTransform,
   StderrLineTransform,
   SplitterTransform,
-  CallbackWritable,
-  ITerminalChunk
+  DiscardStdoutTransform
 } from '@rushstack/stream-collator';
 import { IPackageDeps } from '@rushstack/package-deps-hash';
 
@@ -124,11 +123,11 @@ export class ProjectBuilder extends BaseBuilder {
   ): Promise<TaskStatus> {
     // The pipeline looks like this:
     //
-    //            +--> quietModeTransform --> collatedWriter
-    //            |
-    // terminal --1--> stderrLineTransform --2--> removeColorsTransform --> projectLogWritable
-    //                                       |
-    //                                       +--> stdioSummarizer
+    //                             +--> quietModeTransform? --> collatedWriter
+    //                             |
+    // normalizeNewlineTransform --1--> stderrLineTransform --2--> removeColorsTransform --> projectLogWritable
+    //                                                        |
+    //                                                        +--> stdioSummarizer
     const projectLogWritable: ProjectLogWritable = new ProjectLogWritable(
       this._rushProject,
       context.collatedWriter.terminal
@@ -141,32 +140,29 @@ export class ProjectBuilder extends BaseBuilder {
         normalizeNewlines: NewlineKind.OsDefault
       });
 
-      const quietModeTransform: CallbackWritable = new CallbackWritable({
-        onWriteChunk: (chunk: ITerminalChunk): void => {
-          if (chunk.kind === TerminalChunkKind.Stdout && context.quietMode) {
-            return;
-          }
-          context.collatedWriter.writeChunk(chunk);
-        },
-        onClose: (): void => {
-          context.collatedWriter.close();
-        }
-      });
-
       const splitterTransform2: SplitterTransform = new SplitterTransform({
         destinations: [removeColorsTransform, context.stdioSummarizer]
       });
 
       const stderrLineTransform: StderrLineTransform = new StderrLineTransform({
         destination: splitterTransform2,
-        newlineKind: NewlineKind.Lf
+        newlineKind: NewlineKind.Lf // for StdioSummarizer
+      });
+
+      const quietModeTransform: DiscardStdoutTransform = new DiscardStdoutTransform({
+        destination: context.collatedWriter
       });
 
       const splitterTransform1: SplitterTransform = new SplitterTransform({
-        destinations: [quietModeTransform, stderrLineTransform]
+        destinations: [context.quietMode ? quietModeTransform : context.collatedWriter, stderrLineTransform]
       });
 
-      const terminal: CollatedTerminal = new CollatedTerminal(splitterTransform1);
+      const normalizeNewlineTransform: CharMatcherTransform = new CharMatcherTransform({
+        destination: splitterTransform1,
+        normalizeNewlines: NewlineKind.Lf
+      });
+
+      const terminal: CollatedTerminal = new CollatedTerminal(normalizeNewlineTransform);
 
       this._hasWarningOrError = false;
       const projectFolder: string = this._rushProject.projectFolder;

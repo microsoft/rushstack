@@ -3,18 +3,25 @@
 
 import { TerminalChunkKind } from '../ITerminalChunk';
 import { StdioSummarizer } from '../StdioSummarizer';
-import { StderrLineTransform } from '../StderrLineTransform';
+import { StderrLineTransform } from '../StdioLineTransform';
+import { CharMatcherTransform } from '../CharMatcherTransform';
+import { NewlineKind } from '@rushstack/node-core-library';
 
 describe('StdioSummarizer', () => {
   let summarizer: StdioSummarizer;
-  let transform: StderrLineTransform;
+  let stderrLineTransform: StderrLineTransform;
+  let transform: CharMatcherTransform;
 
   beforeEach(() => {
     summarizer = new StdioSummarizer();
-    transform = new StderrLineTransform({ destination: summarizer });
+    stderrLineTransform = new StderrLineTransform({ destination: summarizer });
+    transform = new CharMatcherTransform({
+      destination: stderrLineTransform,
+      normalizeNewlines: NewlineKind.Lf
+    });
   });
 
-  it('should report stdout if there is no stderr', () => {
+  it.only('should report stdout if there is no stderr', () => {
     transform.writeChunk({ text: 'stdout 1\nstdout 2\n', kind: TerminalChunkKind.Stdout });
     transform.close();
 

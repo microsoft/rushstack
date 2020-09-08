@@ -63,10 +63,15 @@ export class CharMatcherTransform extends TerminalTransform {
       }
     }
     if (text.length > 0) {
-      this.destination.writeChunk({
-        text: text,
-        kind: chunk.kind
-      });
+      // If possible, avoid allocating a new chunk
+      if (text === chunk.text) {
+        this.destination.writeChunk(chunk);
+      } else {
+        this.destination.writeChunk({
+          text: text,
+          kind: chunk.kind
+        });
+      }
     }
   }
 

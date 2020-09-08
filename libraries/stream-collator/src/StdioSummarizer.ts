@@ -51,7 +51,7 @@ export class StdioSummarizer extends TerminalWritable {
   }
 
   public onWriteChunk(chunk: ITerminalChunk): void {
-    if (chunk.text[chunk.text.length - 1] !== '\n') {
+    if (chunk.text.length === 0 || chunk.text[chunk.text.length - 1] !== '\n') {
       throw new Error(
         'StdioSummarizer expects chunks that were separated parsed into lines by StderrLineTransform\n' +
           ' Invalid input: ' +
