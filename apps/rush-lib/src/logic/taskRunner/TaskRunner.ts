@@ -111,9 +111,20 @@ export class TaskRunner {
     this._currentActiveTasks = 0;
     this._completedTasks = 0;
     this._totalTasks = this._buildQueue.length;
-    this._terminal.writeStdoutLine(
-      `Executing a maximum of ${this._parallelism} simultaneous processes...${os.EOL}`
-    );
+
+    if (!this._quietMode) {
+      const plural: string = this._tasks.length === 1 ? '' : 's';
+      this._terminal.writeStdoutLine(`Selected ${this._tasks.length} project${plural}:`);
+      this._terminal.writeStdoutLine(
+        this._tasks
+          .map((x) => `  ${x.name}`)
+          .sort()
+          .join('\n')
+      );
+      this._terminal.writeStdoutLine('');
+    }
+
+    this._terminal.writeStdoutLine(`Executing a maximum of ${this._parallelism} simultaneous processes...\n`);
 
     await this._startAvailableTasksAsync();
 

@@ -1,16 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Terminal, ConsoleTerminalProvider, Sort } from '@rushstack/node-core-library';
+import { Sort } from '@rushstack/node-core-library';
 
 import { Task } from './Task';
 import { TaskStatus } from './TaskStatus';
 import { BaseBuilder } from './BaseBuilder';
-
-export interface ITaskCollectionOptions {
-  quietMode: boolean;
-  terminal?: Terminal;
-}
 
 /**
  * This class represents a set of tasks with interdependencies.  Any class of task definition
@@ -19,14 +14,9 @@ export interface ITaskCollectionOptions {
  */
 export class TaskCollection {
   private _tasks: Map<string, Task>;
-  private _quietMode: boolean;
-  private _terminal: Terminal;
 
-  public constructor(options: ITaskCollectionOptions) {
-    const { quietMode, terminal = new Terminal(new ConsoleTerminalProvider()) } = options;
+  public constructor() {
     this._tasks = new Map<string, Task>();
-    this._quietMode = quietMode;
-    this._terminal = terminal;
   }
 
   /**
@@ -44,10 +34,6 @@ export class TaskCollection {
     task.status = TaskStatus.Ready;
     task.criticalPathLength = undefined;
     this._tasks.set(task.name, task);
-
-    if (!this._quietMode) {
-      this._terminal.writeLine(`Registered ${task.name}`);
-    }
   }
 
   /**
