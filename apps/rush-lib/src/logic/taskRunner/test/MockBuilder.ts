@@ -22,7 +22,7 @@ export class MockBuilder extends BaseBuilder {
   public async executeAsync(context: IBuilderContext): Promise<TaskStatus> {
     let result: TaskStatus | void;
     if (this._action) {
-      result = await this._action(context.terminal);
+      result = await this._action(context.collatedWriter.terminal);
     }
     return result ? result : TaskStatus.Success;
   }

@@ -14,6 +14,7 @@
  */
 
 export * from './CharMatcher';
+export * from './CallbackWritable';
 export * from './CharMatcherTransform';
 export * from './CollatedTerminal';
 export * from './CollatedWriter';
@@ -21,6 +22,7 @@ export * from './ITerminalChunk';
 export * from './MockWritable';
 export * from './NormalizeNewlinesCharMatcher';
 export * from './RemoveColorsCharMatcher';
+export * from './SplitterTransform';
 export * from './StderrLineTransform';
 export * from './StdioSummarizer';
 export * from './StdioWritable';

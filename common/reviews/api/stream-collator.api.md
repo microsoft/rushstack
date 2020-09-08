@@ -7,6 +7,15 @@
 import { NewlineKind } from '@rushstack/node-core-library';
 
 // @beta (undocumented)
+export class CallbackWritable extends TerminalWritable {
+    constructor(options: ICallbackWritableOptions);
+    // (undocumented)
+    protected onClose(): void;
+    // (undocumented)
+    protected onWriteChunk(chunk: ITerminalChunk): void;
+}
+
+// @beta (undocumented)
 export abstract class CharMatcher {
     // (undocumented)
     abstract flush(state: CharMatcherState): string;
@@ -69,6 +78,14 @@ export enum CollatedWriterState {
 }
 
 // @beta (undocumented)
+export interface ICallbackWritableOptions {
+    // (undocumented)
+    onClose?: (chunk: ITerminalChunk) => void;
+    // (undocumented)
+    onWriteChunk: (chunk: ITerminalChunk) => void;
+}
+
+// @beta (undocumented)
 export interface ICharMatcherTransformOptions extends ITerminalTransformOptions {
     // (undocumented)
     charMatchers?: CharMatcher[];
@@ -76,6 +93,12 @@ export interface ICharMatcherTransformOptions extends ITerminalTransformOptions 
     normalizeNewlines?: NewlineKind;
     // (undocumented)
     removeColors?: boolean;
+}
+
+// @beta (undocumented)
+export interface ISplitterTransformOptions {
+    // (undocumented)
+    destinations: TerminalWritable[];
 }
 
 // @beta (undocumented)
@@ -147,6 +170,17 @@ export class RemoveColorsCharMatcher extends CharMatcher {
     initialize(): CharMatcherState;
     // (undocumented)
     process(unknownState: CharMatcherState, text: string): string;
+}
+
+// @beta (undocumented)
+export class SplitterTransform extends TerminalWritable {
+    constructor(options: ISplitterTransformOptions);
+    // (undocumented)
+    readonly destinations: ReadonlyArray<TerminalWritable>;
+    // (undocumented)
+    protected onClose(): void;
+    // (undocumented)
+    protected onWriteChunk(chunk: ITerminalChunk): void;
 }
 
 // @beta (undocumented)

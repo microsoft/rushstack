@@ -19,7 +19,7 @@ function testCase(input: string): void {
 }
 
 describe('NormalizeNewlinesCharMatcher', () => {
-  it.only('should duplicate Text.convertToLf()', () => {
+  it('should duplicate Text.convertToLf()', () => {
     testCase('');
     testCase('\n');
     testCase('\r');

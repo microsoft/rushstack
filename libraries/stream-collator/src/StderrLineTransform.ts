@@ -5,6 +5,8 @@ import { Text, NewlineKind } from '@rushstack/node-core-library';
 
 import { ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
 import { TerminalTransform, ITerminalTransformOptions } from './TerminalTransform';
+import { CharMatcherTransform } from './CharMatcherTransform';
+import { CallbackWritable } from './CallbackWritable';
 
 /** @beta */
 export interface IStderrLineTransformOptions extends ITerminalTransformOptions {
@@ -13,6 +15,8 @@ export interface IStderrLineTransformOptions extends ITerminalTransformOptions {
 
 /** @beta */
 export class StderrLineTransform extends TerminalTransform {
+  private _newlineNormalizerTransform: CharMatcherTransform;
+
   private _accumulatedLine: string;
   private _accumulatedStderr: boolean;
 
@@ -25,10 +29,27 @@ export class StderrLineTransform extends TerminalTransform {
     this._accumulatedStderr = false;
 
     this.newline = Text.getNewline(options.newlineKind || NewlineKind.Lf);
+
+    // The _newlineNormalizerTransform is applied first to convert newlines to "\n"
+    this._newlineNormalizerTransform = new CharMatcherTransform({
+      destination: new CallbackWritable({
+        onWriteChunk: (chunk: ITerminalChunk): void => {
+          this._onWriteNormalizedChunk(chunk);
+        },
+        onClose: (): void => {}
+      }),
+      normalizeNewlines: NewlineKind.Lf
+    });
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
-    const text: string = Text.convertToLf(chunk.text);
+    this._newlineNormalizerTransform.writeChunk(chunk);
+  }
+
+  private _onWriteNormalizedChunk(chunk: ITerminalChunk): void {
+    // After _newlineNormalizerTransform was applied, we can now assume that all newlines
+    // use the "\n" string
+    const text: string = chunk.text;
     let startIndex: number = 0;
 
     while (startIndex < text.length) {
@@ -54,6 +75,8 @@ export class StderrLineTransform extends TerminalTransform {
   }
 
   protected onClose(): void {
+    this._newlineNormalizerTransform.close();
+
     if (this._accumulatedLine.length > 0) {
       this._processAccumulatedLine();
     }

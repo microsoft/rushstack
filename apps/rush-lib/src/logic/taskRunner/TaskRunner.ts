@@ -155,9 +155,9 @@ export class TaskRunner {
       task.stdioSummarizer = new StdioSummarizer();
 
       const context: IBuilderContext = {
-        quietMode: this._quietMode,
         stdioSummarizer: task.stdioSummarizer,
-        terminal: task.collatedWriter.terminal
+        collatedWriter: task.collatedWriter,
+        quietMode: this._quietMode
       };
 
       taskPromises.push(

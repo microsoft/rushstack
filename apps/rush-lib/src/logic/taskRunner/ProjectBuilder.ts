@@ -3,12 +3,15 @@
 
 import * as child_process from 'child_process';
 import * as path from 'path';
-import { JsonFile, Text, FileSystem, JsonObject, NewlineKind } from '@rushstack/node-core-library';
+import { JsonFile, Text, FileSystem, JsonObject } from '@rushstack/node-core-library';
 import {
   CollatedTerminal,
   TerminalChunkKind,
   CharMatcherTransform,
-  StderrLineTransform
+  StderrLineTransform,
+  SplitterTransform,
+  CallbackWritable,
+  ITerminalChunk
 } from '@rushstack/stream-collator';
 import { IPackageDeps } from '@rushstack/package-deps-hash';
 
@@ -90,7 +93,9 @@ export class ProjectBuilder extends BaseBuilder {
       if (!this._commandToRun) {
         this.hadEmptyScript = true;
       }
-      const dependencies: IPackageDependencies | undefined = this._getPackageDependencies(context.terminal);
+      const dependencies: IPackageDependencies | undefined = this._getPackageDependencies(
+        context.collatedWriter.terminal
+      );
       return await this._executeTaskAsync(dependencies, context);
     } catch (error) {
       throw new TaskError('executing', error.message);
@@ -117,9 +122,16 @@ export class ProjectBuilder extends BaseBuilder {
     currentPackageDeps: IPackageDependencies | undefined,
     context: IBuilderContext
   ): Promise<TaskStatus> {
+    // The pipeline looks like this:
+    //
+    //                                                          +--> removeColorsTransform --> projectLogWritable
+    //                                                          |
+    // terminal --> stderrLineTransform --> splitterTransform --+--> quietModeTransform --> collatedWriter
+    //                                                          |
+    //                                                          +--> stdioSummarizer
     const projectLogWritable: ProjectLogWritable = new ProjectLogWritable(
       this._rushProject,
-      context.terminal
+      context.collatedWriter.terminal
     );
 
     try {
@@ -127,14 +139,27 @@ export class ProjectBuilder extends BaseBuilder {
         destination: projectLogWritable,
         removeColors: true
       });
+
+      const quietModeTransform: CallbackWritable = new CallbackWritable({
+        onWriteChunk: (chunk: ITerminalChunk): void => {
+          if (chunk.kind === TerminalChunkKind.Stdout && context.quietMode) {
+            return;
+          }
+          context.collatedWriter.writeChunk(chunk);
+        },
+        onClose: (): void => {
+          context.collatedWriter.close();
+        }
+      });
+
+      const splitterTransform: SplitterTransform = new SplitterTransform({
+        destinations: [removeColorsTransform, quietModeTransform, context.stdioSummarizer]
+      });
+
       const stderrLineTransform: StderrLineTransform = new StderrLineTransform({
-        destination: removeColorsTransform
+        destination: splitterTransform
       });
-      const normalizeNewlinesTransform: CharMatcherTransform = new CharMatcherTransform({
-        destination: stderrLineTransform,
-        normalizeNewlines: NewlineKind.Lf
-      });
-      const terminal: CollatedTerminal = new CollatedTerminal(normalizeNewlinesTransform);
+      const terminal: CollatedTerminal = new CollatedTerminal(stderrLineTransform);
 
       this._hasWarningOrError = false;
       const projectFolder: string = this._rushProject.projectFolder;
@@ -193,7 +218,6 @@ export class ProjectBuilder extends BaseBuilder {
         }
 
         // Run the task
-
         terminal.writeStdoutLine(this._commandToRun);
         const task: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(this._commandToRun, {
           rushConfiguration: this._rushConfiguration,
@@ -228,6 +252,7 @@ export class ProjectBuilder extends BaseBuilder {
           (resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
             task.on('close', (code: number) => {
               try {
+                stderrLineTransform.close();
                 projectLogWritable.close();
 
                 if (code !== 0) {

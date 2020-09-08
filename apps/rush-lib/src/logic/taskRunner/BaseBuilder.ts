@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CollatedTerminal, StdioSummarizer } from '@rushstack/stream-collator';
+import { StdioSummarizer, CollatedWriter } from '@rushstack/stream-collator';
 
 import { TaskStatus } from './TaskStatus';
 
 export interface IBuilderContext {
-  terminal: CollatedTerminal;
+  collatedWriter: CollatedWriter;
   stdioSummarizer: StdioSummarizer;
   quietMode: boolean;
 }
