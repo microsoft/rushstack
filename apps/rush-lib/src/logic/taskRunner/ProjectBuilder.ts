@@ -3,8 +3,13 @@
 
 import * as child_process from 'child_process';
 import * as path from 'path';
-import { JsonFile, Text, FileSystem, JsonObject, FileWriter } from '@rushstack/node-core-library';
-import { CollatedTerminal, TerminalChunkKind } from '@rushstack/stream-collator';
+import { JsonFile, Text, FileSystem, JsonObject, NewlineKind } from '@rushstack/node-core-library';
+import {
+  CollatedTerminal,
+  TerminalChunkKind,
+  CharMatcherTransform,
+  StderrLineTransform
+} from '@rushstack/stream-collator';
 import { IPackageDeps } from '@rushstack/package-deps-hash';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
@@ -14,6 +19,7 @@ import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
 import { BaseBuilder, IBuilderContext } from './BaseBuilder';
+import { ProjectLogWritable } from './ProjectLogWritable';
 
 interface IPackageDependencies extends IPackageDeps {
   arguments: string;
@@ -111,29 +117,28 @@ export class ProjectBuilder extends BaseBuilder {
     currentPackageDeps: IPackageDependencies | undefined,
     context: IBuilderContext
   ): Promise<TaskStatus> {
-    const terminal: CollatedTerminal = context.terminal;
-
-    const buildLogPath: string = path.join(
-      this._rushProject.projectFolder,
-      `${path.basename(this._rushProject.projectFolder)}.build.log`
+    const projectLogWritable: ProjectLogWritable = new ProjectLogWritable(
+      this._rushProject,
+      context.terminal
     );
-    const errorLogPath: string = path.join(
-      this._rushProject.projectFolder,
-      `${path.basename(this._rushProject.projectFolder)}.build.error.log`
-    );
-
-    FileSystem.deleteFile(buildLogPath);
-    FileSystem.deleteFile(errorLogPath);
-
-    const buildLogWriter: FileWriter = FileWriter.open(buildLogPath);
-    let errorLogWriter: FileWriter | undefined = undefined;
 
     try {
+      const removeColorsTransform: CharMatcherTransform = new CharMatcherTransform({
+        destination: projectLogWritable,
+        removeColors: true
+      });
+      const stderrLineTransform: StderrLineTransform = new StderrLineTransform({
+        destination: removeColorsTransform
+      });
+      const normalizeNewlinesTransform: CharMatcherTransform = new CharMatcherTransform({
+        destination: stderrLineTransform,
+        normalizeNewlines: NewlineKind.Lf
+      });
+      const terminal: CollatedTerminal = new CollatedTerminal(normalizeNewlinesTransform);
+
       this._hasWarningOrError = false;
       const projectFolder: string = this._rushProject.projectFolder;
       let lastPackageDeps: IPackageDependencies | undefined = undefined;
-
-      terminal.writeStdoutLine(`>>> ${this.name}`);
 
       // TODO: Remove legacyDepsPath with the next major release of Rush
       const legacyDepsPath: string = path.join(this._rushProject.projectFolder, 'package-deps.json');
@@ -204,29 +209,17 @@ export class ProjectBuilder extends BaseBuilder {
         if (task.stdout !== null) {
           task.stdout.on('data', (data: Buffer) => {
             const text: string = data.toString();
-            if (!context.quietMode) {
-              terminal.writeChunk({ text, kind: TerminalChunkKind.Stdout });
-            }
+            terminal.writeChunk({ text, kind: TerminalChunkKind.Stdout });
 
             context.stdioSummarizer.writeChunk({ text, kind: TerminalChunkKind.Stdout });
-
-            buildLogWriter.write(text);
           });
         }
         if (task.stderr !== null) {
           task.stderr.on('data', (data: Buffer) => {
             const text: string = data.toString();
             terminal.writeChunk({ text, kind: TerminalChunkKind.Stderr });
+
             context.stdioSummarizer.writeChunk({ text, kind: TerminalChunkKind.Stderr });
-
-            if (errorLogWriter === undefined) {
-              errorLogWriter = FileWriter.open(errorLogPath);
-            }
-            errorLogWriter.write(text);
-
-            // Both stderr and stdout are written to the build log
-            buildLogWriter.write(text);
-
             this._hasWarningOrError = true;
           });
         }
@@ -235,7 +228,7 @@ export class ProjectBuilder extends BaseBuilder {
           (resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
             task.on('close', (code: number) => {
               try {
-                buildLogWriter.close();
+                projectLogWritable.close();
 
                 if (code !== 0) {
                   reject(new TaskError('error', `Returned error code: ${code}`));
@@ -258,11 +251,7 @@ export class ProjectBuilder extends BaseBuilder {
         );
       }
     } finally {
-      try {
-        buildLogWriter.close();
-      } catch (error) {
-        terminal.writeStderrLine('Failed to close file handle for ' + buildLogPath);
-      }
+      projectLogWritable.close();
     }
   }
 }

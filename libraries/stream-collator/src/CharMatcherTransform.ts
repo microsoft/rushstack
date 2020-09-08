@@ -1,15 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { NewlineKind } from '@rushstack/node-core-library';
+
 import { ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
 import { TerminalTransform, ITerminalTransformOptions } from './TerminalTransform';
 import { CharMatcher, CharMatcherState } from './CharMatcher';
 import { RemoveColorsCharMatcher } from './RemoveColorsCharMatcher';
+import { NormalizeNewlinesCharMatcher } from './NormalizeNewlinesCharMatcher';
 
 /** @beta */
 export interface ICharMatcherTransformOptions extends ITerminalTransformOptions {
   charMatchers?: CharMatcher[];
   removeColors?: boolean;
+  normalizeNewlines?: NewlineKind;
 }
 
 /** @beta */
@@ -26,6 +30,9 @@ export class CharMatcherTransform extends TerminalTransform {
 
     if (options.removeColors) {
       charMatchers.push(new RemoveColorsCharMatcher());
+    }
+    if (options.normalizeNewlines) {
+      charMatchers.push(new NormalizeNewlinesCharMatcher(options.normalizeNewlines));
     }
 
     if (charMatchers.length === 0) {

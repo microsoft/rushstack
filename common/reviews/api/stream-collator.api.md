@@ -73,6 +73,8 @@ export interface ICharMatcherTransformOptions extends ITerminalTransformOptions 
     // (undocumented)
     charMatchers?: CharMatcher[];
     // (undocumented)
+    normalizeNewlines?: NewlineKind;
+    // (undocumented)
     removeColors?: boolean;
 }
 

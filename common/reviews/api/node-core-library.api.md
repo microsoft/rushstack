@@ -203,7 +203,8 @@ export type FileSystemStats = fs.Stats;
 // @public
 export class FileWriter {
     close(): void;
-    static open(path: string, flags?: IFileWriterFlags): FileWriter;
+    readonly filePath: string;
+    static open(filePath: string, flags?: IFileWriterFlags): FileWriter;
     write(text: string): void;
 }
 

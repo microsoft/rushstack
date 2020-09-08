@@ -151,13 +151,13 @@ export class TaskRunner {
       this._terminal.writeStdoutLine(colors.white(`[${task.name}] started`));
 
       task.stopwatch = Stopwatch.start();
-      task.writer = this._streamCollator.registerTask(task.name);
+      task.collatedWriter = this._streamCollator.registerTask(task.name);
       task.stdioSummarizer = new StdioSummarizer();
 
       const context: IBuilderContext = {
         quietMode: this._quietMode,
         stdioSummarizer: task.stdioSummarizer,
-        terminal: task.writer.terminal
+        terminal: task.collatedWriter.terminal
       };
 
       taskPromises.push(
@@ -165,7 +165,7 @@ export class TaskRunner {
           .executeAsync(context)
           .then((result: TaskStatus) => {
             task.stopwatch.stop();
-            task.writer.close();
+            task.collatedWriter.close();
             task.stdioSummarizer.close();
 
             this._currentActiveTasks--;
@@ -188,7 +188,7 @@ export class TaskRunner {
             }
           })
           .catch((error: TaskError) => {
-            task.writer.close();
+            task.collatedWriter.close();
             task.stdioSummarizer.close();
 
             this._currentActiveTasks--;
@@ -368,7 +368,7 @@ export class TaskRunner {
             break;
         }
 
-        if (task.writer) {
+        if (task.collatedWriter) {
           const shouldPrintDetails: boolean =
             task.status === TaskStatus.Failure || task.status === TaskStatus.SuccessWithWarning;
 

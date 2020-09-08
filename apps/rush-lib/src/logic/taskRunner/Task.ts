@@ -79,7 +79,7 @@ export class Task {
   /**
    * The task writer which contains information from the output streams of this task
    */
-  public writer: CollatedWriter;
+  public collatedWriter: CollatedWriter;
 
   public stdioSummarizer: StdioSummarizer;
 
