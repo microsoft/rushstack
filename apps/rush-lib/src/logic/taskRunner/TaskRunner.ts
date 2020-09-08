@@ -8,7 +8,8 @@ import {
   CollatedTerminal,
   StdioSummarizer,
   TerminalWritable,
-  StdioWritable
+  StdioWritable,
+  TerminalChunkKind
 } from '@rushstack/stream-collator';
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 
@@ -309,8 +310,11 @@ export class TaskRunner {
 
     this._terminal.writeStderrLine('');
 
-    this._printStatus(TaskStatus.Executing, tasksByStatus, colors.yellow);
-    this._printStatus(TaskStatus.Ready, tasksByStatus, colors.white);
+    // These cases should never happen:
+    this._printStatus(TaskStatus.Executing, tasksByStatus, colors.red);
+    this._printStatus(TaskStatus.Ready, tasksByStatus, colors.red);
+
+    // These are ordered so that the most interesting statuses appear last:
     this._printStatus(TaskStatus.Skipped, tasksByStatus, colors.gray);
     this._printStatus(TaskStatus.Success, tasksByStatus, colors.green);
     this._printStatus(
@@ -372,12 +376,10 @@ export class TaskRunner {
           const shouldPrintDetails: boolean =
             task.status === TaskStatus.Failure || task.status === TaskStatus.SuccessWithWarning;
 
-          const details: string = task.stdioSummarizer.getReport().join(os.EOL);
+          const details: string = task.stdioSummarizer.getReport();
           if (details && shouldPrintDetails) {
-            this._terminal.writeStdoutLine(details);
-            if (i !== tasks.length - 1) {
-              this._terminal.writeStdoutLine('');
-            }
+            // Don't write a newline, because the report will always end with a newline
+            this._terminal.writeChunk({ text: details, kind: TerminalChunkKind.Stdout });
           }
         }
       }

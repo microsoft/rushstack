@@ -7,7 +7,7 @@ import { ITerminalChunk } from './ITerminalChunk';
 /** @beta */
 export interface ICallbackWritableOptions {
   onWriteChunk: (chunk: ITerminalChunk) => void;
-  onClose: (chunk: ITerminalChunk) => void;
+  onClose: () => void;
 }
 
 /** @beta */
@@ -18,6 +18,7 @@ export class CallbackWritable extends TerminalWritable {
   public constructor(options: ICallbackWritableOptions) {
     super();
     this._callback = options.onWriteChunk;
+    this._onClose = options.onClose;
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
@@ -25,6 +26,6 @@ export class CallbackWritable extends TerminalWritable {
   }
 
   protected onClose(): void {
-    this.onClose();
+    this._onClose();
   }
 }

@@ -3,7 +3,7 @@
 
 import * as child_process from 'child_process';
 import * as path from 'path';
-import { JsonFile, Text, FileSystem, JsonObject } from '@rushstack/node-core-library';
+import { JsonFile, Text, FileSystem, JsonObject, NewlineKind } from '@rushstack/node-core-library';
 import {
   CollatedTerminal,
   TerminalChunkKind,
@@ -124,11 +124,11 @@ export class ProjectBuilder extends BaseBuilder {
   ): Promise<TaskStatus> {
     // The pipeline looks like this:
     //
-    //                                                          +--> removeColorsTransform --> projectLogWritable
-    //                                                          |
-    // terminal --> stderrLineTransform --> splitterTransform --+--> quietModeTransform --> collatedWriter
-    //                                                          |
-    //                                                          +--> stdioSummarizer
+    //            +--> quietModeTransform --> collatedWriter
+    //            |
+    // terminal --1--> stderrLineTransform --2--> removeColorsTransform --> projectLogWritable
+    //                                       |
+    //                                       +--> stdioSummarizer
     const projectLogWritable: ProjectLogWritable = new ProjectLogWritable(
       this._rushProject,
       context.collatedWriter.terminal
@@ -137,7 +137,8 @@ export class ProjectBuilder extends BaseBuilder {
     try {
       const removeColorsTransform: CharMatcherTransform = new CharMatcherTransform({
         destination: projectLogWritable,
-        removeColors: true
+        removeColors: true,
+        normalizeNewlines: NewlineKind.OsDefault
       });
 
       const quietModeTransform: CallbackWritable = new CallbackWritable({
@@ -152,14 +153,20 @@ export class ProjectBuilder extends BaseBuilder {
         }
       });
 
-      const splitterTransform: SplitterTransform = new SplitterTransform({
-        destinations: [removeColorsTransform, quietModeTransform, context.stdioSummarizer]
+      const splitterTransform2: SplitterTransform = new SplitterTransform({
+        destinations: [removeColorsTransform, context.stdioSummarizer]
       });
 
       const stderrLineTransform: StderrLineTransform = new StderrLineTransform({
-        destination: splitterTransform
+        destination: splitterTransform2,
+        newlineKind: NewlineKind.Lf
       });
-      const terminal: CollatedTerminal = new CollatedTerminal(stderrLineTransform);
+
+      const splitterTransform1: SplitterTransform = new SplitterTransform({
+        destinations: [quietModeTransform, stderrLineTransform]
+      });
+
+      const terminal: CollatedTerminal = new CollatedTerminal(splitterTransform1);
 
       this._hasWarningOrError = false;
       const projectFolder: string = this._rushProject.projectFolder;
@@ -234,16 +241,12 @@ export class ProjectBuilder extends BaseBuilder {
           task.stdout.on('data', (data: Buffer) => {
             const text: string = data.toString();
             terminal.writeChunk({ text, kind: TerminalChunkKind.Stdout });
-
-            context.stdioSummarizer.writeChunk({ text, kind: TerminalChunkKind.Stdout });
           });
         }
         if (task.stderr !== null) {
           task.stderr.on('data', (data: Buffer) => {
             const text: string = data.toString();
             terminal.writeChunk({ text, kind: TerminalChunkKind.Stderr });
-
-            context.stdioSummarizer.writeChunk({ text, kind: TerminalChunkKind.Stderr });
             this._hasWarningOrError = true;
           });
         }

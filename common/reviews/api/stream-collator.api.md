@@ -80,7 +80,7 @@ export enum CollatedWriterState {
 // @beta (undocumented)
 export interface ICallbackWritableOptions {
     // (undocumented)
-    onClose?: (chunk: ITerminalChunk) => void;
+    onClose: () => void;
     // (undocumented)
     onWriteChunk: (chunk: ITerminalChunk) => void;
 }
@@ -198,7 +198,7 @@ export class StderrLineTransform extends TerminalTransform {
 export class StdioSummarizer extends TerminalWritable {
     constructor(options?: IStdioSummarizerOptions);
     // (undocumented)
-    getReport(): string[];
+    getReport(): string;
     // (undocumented)
     onWriteChunk(chunk: ITerminalChunk): void;
     }

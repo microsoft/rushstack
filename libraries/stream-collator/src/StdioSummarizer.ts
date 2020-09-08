@@ -38,7 +38,7 @@ export class StdioSummarizer extends TerminalWritable {
     this._abridgedStderr = false;
   }
 
-  public getReport(): string[] {
+  public getReport(): string {
     if (this.isOpen) {
       throw new Error('The summary cannot be prepared until after close() is called.');
     }
@@ -47,10 +47,18 @@ export class StdioSummarizer extends TerminalWritable {
       report.push(`(${this._abridgedOmittedLines} lines omitted)`);
     }
     report.push(...this._abridgedTrailing);
-    return report;
+    return report.join('');
   }
 
   public onWriteChunk(chunk: ITerminalChunk): void {
+    if (chunk.text[chunk.text.length - 1] !== '\n') {
+      throw new Error(
+        'StdioSummarizer expects chunks that were separated parsed into lines by StderrLineTransform\n' +
+          ' Invalid input: ' +
+          JSON.stringify(chunk.text)
+      );
+    }
+
     if (chunk.kind === TerminalChunkKind.Stderr && !this._abridgedStderr) {
       // The first time we see stderr, switch to capturing stderr
       this._abridgedStderr = true;
