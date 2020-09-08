@@ -17,7 +17,6 @@ import { AlreadyReportedError, NewlineKind } from '@rushstack/node-core-library'
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { Task } from './Task';
 import { TaskStatus } from './TaskStatus';
-import { TaskError } from './TaskError';
 import { IBuilderContext } from './BaseBuilder';
 
 export interface ITaskRunnerOptions {
@@ -168,57 +167,61 @@ export class TaskRunner {
 
       task.collatedWriter.terminal.writeStdoutLine(colors.white(`[${task.name}] started`));
 
-      const context: IBuilderContext = {
-        stdioSummarizer: task.stdioSummarizer,
-        collatedWriter: task.collatedWriter,
-        quietMode: this._quietMode
-      };
-
-      taskPromises.push(
-        task.builder
-          .executeAsync(context)
-          .then((result: TaskStatus) => {
-            task.stopwatch.stop();
-            task.stdioSummarizer.close();
-
-            this._currentActiveTasks--;
-            this._completedTasks++;
-            switch (result) {
-              case TaskStatus.Success:
-                this._markTaskAsSuccess(task);
-                break;
-              case TaskStatus.SuccessWithWarning:
-                this._hasAnyWarnings = true;
-                this._markTaskAsSuccessWithWarning(task);
-                break;
-              case TaskStatus.Skipped:
-                this._markTaskAsSkipped(task);
-                break;
-              case TaskStatus.Failure:
-                this._hasAnyFailures = true;
-                this._markTaskAsFailed(task);
-                break;
-            }
-          })
-          .catch((error: TaskError) => {
-            task.stdioSummarizer.close();
-
-            this._currentActiveTasks--;
-
-            this._hasAnyFailures = true;
-            task.error = error;
-            this._markTaskAsFailed(task);
-          })
-          .then(() => {
-            task.collatedWriter.close();
-            return this._startAvailableTasksAsync();
-          })
-      );
+      taskPromises.push(this._executeTaskAndChainAsync(task));
     }
 
     return Promise.all(taskPromises).then(() => {
-      /* collapse void[] to void */
+      // collapse void[] to void
     });
+  }
+
+  private async _executeTaskAndChainAsync(task: Task): Promise<void> {
+    const context: IBuilderContext = {
+      stdioSummarizer: task.stdioSummarizer,
+      collatedWriter: task.collatedWriter,
+      quietMode: this._quietMode
+    };
+
+    const result: TaskStatus = await task.builder.executeAsync(context);
+
+    try {
+      task.stopwatch.stop();
+      task.stdioSummarizer.close();
+
+      this._currentActiveTasks--;
+      this._completedTasks++;
+      switch (result) {
+        case TaskStatus.Success:
+          this._markTaskAsSuccess(task);
+          break;
+        case TaskStatus.SuccessWithWarning:
+          this._hasAnyWarnings = true;
+          this._markTaskAsSuccessWithWarning(task);
+          break;
+        case TaskStatus.Skipped:
+          this._markTaskAsSkipped(task);
+          break;
+        case TaskStatus.Failure:
+          this._hasAnyFailures = true;
+          this._markTaskAsFailed(task);
+          break;
+      }
+    } catch (error) {
+      task.stdioSummarizer.close();
+
+      this._currentActiveTasks--;
+
+      this._hasAnyFailures = true;
+
+      // eslint-disable-next-line require-atomic-updates
+      task.error = error;
+
+      this._markTaskAsFailed(task);
+    }
+
+    task.collatedWriter.close();
+
+    await this._startAvailableTasksAsync();
   }
 
   /**
