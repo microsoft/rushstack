@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Adding \"--max-workers\" parameter to the command line interface of the heft test action, which passes the value along to the \"--maxWorkers\" parameter of the Jest subprocess",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "BPapp-MS@users.noreply.github.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Adding flag \"--detectOpenHandles\" to the Jest subprocess when heft is in debug mode, in order to better debug leaks in tests",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "BPapp-MS@users.noreply.github.com"
+}
