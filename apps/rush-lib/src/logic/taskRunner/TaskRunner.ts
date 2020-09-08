@@ -9,9 +9,10 @@ import {
   StdioSummarizer,
   TerminalWritable,
   StdioWritable,
-  TerminalChunkKind
+  TerminalChunkKind,
+  CharMatcherTransform
 } from '@rushstack/stream-collator';
-import { AlreadyReportedError } from '@rushstack/node-core-library';
+import { AlreadyReportedError, NewlineKind } from '@rushstack/node-core-library';
 
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { Task } from './Task';
@@ -45,7 +46,11 @@ export class TaskRunner {
   private _currentActiveTasks: number;
   private _totalTasks: number;
   private _completedTasks: number;
+
+  private readonly _outputWritable: TerminalWritable;
+  private readonly _colorsNewlinesTransform: CharMatcherTransform;
   private readonly _streamCollator: StreamCollator;
+
   private _terminal: CollatedTerminal;
 
   public constructor(orderedTasks: Task[], options: ITaskRunnerOptions) {
@@ -57,8 +62,15 @@ export class TaskRunner {
     this._hasAnyWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
     this._allowWarningsInSuccessfulBuild = allowWarningsInSuccessfulBuild;
+
+    this._outputWritable = options.destination ? options.destination : StdioWritable.instance;
+    this._colorsNewlinesTransform = new CharMatcherTransform({
+      destination: this._outputWritable,
+      normalizeNewlines: NewlineKind.OsDefault,
+      removeColors: !colors.enabled
+    });
     this._streamCollator = new StreamCollator({
-      destination: options.destination ? options.destination : StdioWritable.instance
+      destination: this._colorsNewlinesTransform
     });
     this._terminal = this._streamCollator.terminal;
 
