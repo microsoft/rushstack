@@ -54,11 +54,13 @@ export class JestPlugin implements IHeftPlugin {
 
       // In debug mode, avoid forking separate processes that are difficult to debug
       runInBand: heftSession.debugMode,
+      detectOpenHandles: heftSession.debugMode,
       debug: heftSession.debugMode,
 
       config: JEST_CONFIGURATION_LOCATION,
       cacheDirectory: this._getJestCacheFolder(heftConfiguration),
       updateSnapshot: test.properties.updateSnapshots,
+      maxWorkers: test.properties.maxWorkers,
 
       listTests: false,
       rootDir: buildFolder,

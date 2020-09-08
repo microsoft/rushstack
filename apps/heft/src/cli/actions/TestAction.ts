@@ -18,6 +18,7 @@ export class TestAction extends BuildAction {
   private _noTestFlag: CommandLineFlagParameter;
   private _noBuildFlag: CommandLineFlagParameter;
   private _updateSnapshotsFlag: CommandLineFlagParameter;
+  private _maxWorkersFlag: CommandLineIntegerParameter;
   private _findRelatedTests: CommandLineStringListParameter;
   private _silent: CommandLineFlagParameter;
   private _testNamePattern: CommandLineStringParameter;
@@ -53,6 +54,14 @@ export class TestAction extends BuildAction {
       description:
         'Update Jest snapshots while running the tests.' +
         ' This corresponds to the "--updateSnapshots" parameter in Jest'
+    });
+
+    this._maxWorkersFlag = this.defineIntegerParameter({
+      parameterLongName: '--max-workers',
+      argumentName: 'NUM_THREADS',
+      description:
+        'Sets the max number of worker threads to be used by the Jest process.' +
+        ' This corresponds to the "--maxWorkers" parameter in Jest'
     });
 
     this._findRelatedTests = this.defineStringListParameter({
@@ -141,6 +150,7 @@ export class TestAction extends BuildAction {
       const testStageOptions: ITestStageOptions = {
         watchMode: this._watchFlag.value,
         updateSnapshots: this._updateSnapshotsFlag.value,
+        maxWorkers: this._maxWorkersFlag.value,
 
         findRelatedTests: this._findRelatedTests.values,
         silent: this._silent.value,

@@ -20,6 +20,7 @@ export class TestStageHooks extends StageHooksBase<ITestStageProperties> {
 export interface ITestStageProperties {
   watchMode: boolean;
   updateSnapshots: boolean;
+  maxWorkers: number | undefined;
 
   findRelatedTests: ReadonlyArray<string> | undefined;
   silent: boolean | undefined;
@@ -37,6 +38,7 @@ export interface ITestStageContext extends IStageContext<TestStageHooks, ITestSt
 export interface ITestStageOptions {
   watchMode: boolean;
   updateSnapshots: boolean;
+  maxWorkers: number | undefined;
 
   findRelatedTests: ReadonlyArray<string> | undefined;
   silent: boolean | undefined;
@@ -55,7 +57,7 @@ export class TestStage extends StageBase<TestStageHooks, ITestStageProperties, I
     return {
       watchMode: options.watchMode,
       updateSnapshots: options.updateSnapshots,
-
+      maxWorkers: options.maxWorkers,
       findRelatedTests: options.findRelatedTests,
       silent: options.silent,
       testNamePattern: options.testNamePattern,
