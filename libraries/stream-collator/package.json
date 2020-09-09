@@ -14,6 +14,7 @@
   "license": "MIT",
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
     "colors": "~1.2.1"
   },
   "devDependencies": {
