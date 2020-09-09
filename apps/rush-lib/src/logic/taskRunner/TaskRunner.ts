@@ -10,7 +10,8 @@ import {
   TerminalWritable,
   StdioWritable,
   TerminalChunkKind,
-  CharMatcherTransform
+  CharMatcherTransform,
+  CollatedWriter
 } from '@rushstack/stream-collator';
 import { AlreadyReportedError, NewlineKind } from '@rushstack/node-core-library';
 
@@ -69,7 +70,8 @@ export class TaskRunner {
       removeColors: !colors.enabled
     });
     this._streamCollator = new StreamCollator({
-      destination: this._colorsNewlinesTransform
+      destination: this._colorsNewlinesTransform,
+      onSetActiveWriter: this._streamCollator_onSetActiveWriter
     });
     this._terminal = this._streamCollator.terminal;
 
@@ -103,6 +105,37 @@ export class TaskRunner {
     }
   }
 
+  private _streamCollator_onSetActiveWriter = (writer: CollatedWriter | undefined): void => {
+    if (writer) {
+      this._completedTasks++;
+
+      // Format a header like this, for a shell window with classic 80 columns
+      //
+      // ==[ @rushstack/the-long-thing ]=================[ 1 of 1000 ]==
+      const headerWidth: number = 79;
+
+      // leftPart: "==[ @rushstack/the-long-thing "
+      const leftPart: string = colors.gray('==[') + ' ' + colors.cyan(writer.taskName) + ' ';
+      const leftPartLength: number = 4 + writer.taskName.length + 1;
+
+      // rightPart: " 1 of 1000 ]=="
+      const completedOfTotal: string = `${this._completedTasks} of ${this._totalTasks}`;
+      const rightPart: string = ' ' + colors.white(completedOfTotal) + ' ' + colors.gray(']==');
+      const rightPartLength: number = 1 + completedOfTotal.length + 4;
+
+      // middlePart: "]=================["
+      const twoBracketsLength: number = 2;
+      const middlePartLengthMinusTwoBrackets: number = Math.max(
+        headerWidth - (leftPartLength + rightPartLength + twoBracketsLength),
+        0
+      );
+
+      const middlePart: string = colors.gray(']' + '='.repeat(middlePartLengthMinusTwoBrackets) + '[');
+
+      this._terminal.writeStdoutLine(leftPart + middlePart + rightPart + '\n');
+    }
+  };
+
   /**
    * Executes all tasks which have been registered, returning a promise which is resolved when all the
    * tasks are completed successfully, or rejects when any task fails.
@@ -110,7 +143,7 @@ export class TaskRunner {
   public async executeAsync(): Promise<void> {
     this._currentActiveTasks = 0;
     this._completedTasks = 0;
-    this._totalTasks = this._buildQueue.length;
+    this._totalTasks = this._tasks.length;
 
     if (!this._quietMode) {
       const plural: string = this._tasks.length === 1 ? '' : 's';
@@ -176,8 +209,6 @@ export class TaskRunner {
       task.collatedWriter = this._streamCollator.registerTask(task.name);
       task.stdioSummarizer = new StdioSummarizer();
 
-      task.collatedWriter.terminal.writeStdoutLine(colors.white(`[${task.name}] started`));
-
       taskPromises.push(this._executeTaskAndChainAsync(task));
     }
 
@@ -200,7 +231,6 @@ export class TaskRunner {
       task.stdioSummarizer.close();
 
       this._currentActiveTasks--;
-      this._completedTasks++;
       switch (result) {
         case TaskStatus.Success:
           this._markTaskAsSuccess(task);

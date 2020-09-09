@@ -132,6 +132,8 @@ export interface IStdioSummarizerOptions {
 export interface IStreamCollatorOptions {
     // (undocumented)
     destination: TerminalWritable;
+    // (undocumented)
+    onSetActiveWriter?: (writer: CollatedWriter | undefined) => void;
 }
 
 // @beta
@@ -235,7 +237,7 @@ export class StreamCollator {
     readonly destination: TerminalWritable;
     registerTask(taskName: string): CollatedWriter;
     // @internal (undocumented)
-    _setActiveWriter(writer: CollatedWriter): void;
+    _setActiveWriter(writer: CollatedWriter | undefined): void;
     // (undocumented)
     readonly terminal: CollatedTerminal;
     // (undocumented)

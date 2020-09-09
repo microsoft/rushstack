@@ -221,7 +221,8 @@ export class ProjectBuilder extends BaseBuilder {
         }
 
         // Run the task
-        terminal.writeStdoutLine(this._commandToRun);
+        terminal.writeStdoutLine('Command: ' + this._commandToRun);
+
         const task: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(this._commandToRun, {
           rushConfiguration: this._rushConfiguration,
           workingDirectory: projectFolder,

@@ -8,6 +8,7 @@ import { TerminalWritable } from './TerminalWritable';
 /** @beta */
 export interface IStreamCollatorOptions {
   destination: TerminalWritable;
+  onSetActiveWriter?: (writer: CollatedWriter | undefined) => void;
 }
 
 /**
@@ -19,12 +20,14 @@ export class StreamCollator {
   private _taskNames: Set<string> = new Set();
   private _writers: Set<CollatedWriter> = new Set();
   private _activeWriter: CollatedWriter | undefined = undefined;
+  private _onSetActiveWriter: ((writer: CollatedWriter) => void) | undefined;
 
   public readonly destination: TerminalWritable;
   public readonly terminal: CollatedTerminal;
 
   public constructor(options: IStreamCollatorOptions) {
     this.terminal = new CollatedTerminal(options.destination);
+    this._onSetActiveWriter = options.onSetActiveWriter;
   }
 
   public get activeWriter(): CollatedWriter | undefined {
@@ -57,7 +60,7 @@ export class StreamCollator {
     this._taskNames.add(writer.taskName);
 
     if (this._activeWriter === undefined) {
-      this._activeWriter = writer;
+      this._setActiveWriter(writer);
     }
 
     return writer;
@@ -66,7 +69,11 @@ export class StreamCollator {
   /**
    * @internal
    */
-  public _setActiveWriter(writer: CollatedWriter): void {
+  public _setActiveWriter(writer: CollatedWriter | undefined): void {
     this._activeWriter = writer;
+
+    if (this._onSetActiveWriter) {
+      this._onSetActiveWriter(writer);
+    }
   }
 }
