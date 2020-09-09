@@ -114,13 +114,12 @@ export class TestAction extends BuildAction {
 
     this._maxWorkers = this.defineStringParameter({
       parameterLongName: '--max-workers',
-      argumentName: 'STRING',
+      argumentName: 'COUNT_OR_PERCENTAGE',
       description:
-        'Change the default maximum workers for tests; this parameter conforms to the Jest' +
-        ' documentation, and can either be an integer representing the number of workers to spawn' +
-        ' when running tests, or can be a string representing a percentage of the available CPUs' +
-        ' on the machine to utilize.' +
-        ' This corresponds to the "--maxWorkers" parameter in Jest\'s documentation.'
+        'Use this parameter to control maximum number of worker processes tests are allowed to use.' +
+        ' This parameter is similar to the parameter noted in the Jest documentation, and can either be' +
+        ' an integer representing the number of workers to spawn when running tests, or can be a string' +
+        ' representing a percentage of the available CPUs on the machine to utilize. Example values: "3", "25%"'
     });
   }
 

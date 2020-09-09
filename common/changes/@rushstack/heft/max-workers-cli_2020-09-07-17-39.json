@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "add --maxWorkers option for running tests",
+      "comment": "Add --max-workers option to the \"test\" action to control the maximum number of worker processes the test process can use.",
       "type": "minor"
     }
   ],
