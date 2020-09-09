@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.11.0",
+      "tag": "@rushstack/heft_v0.11.0",
+      "date": "Wed, 09 Sep 2020 03:29:01 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add --max-workers option to the \"test\" action to control the maximum number of worker processes the test process can use."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.5",
       "tag": "@rushstack/heft_v0.10.5",
       "date": "Wed, 09 Sep 2020 00:38:48 GMT",

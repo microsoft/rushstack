@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 09 Sep 2020 00:38:48 GMT and should not be manually modified.
+This log was last generated on Wed, 09 Sep 2020 03:29:01 GMT and should not be manually modified.
+
+## 0.11.0
+Wed, 09 Sep 2020 03:29:01 GMT
+
+### Minor changes
+
+- Add --max-workers option to the "test" action to control the maximum number of worker processes the test process can use.
 
 ## 0.10.5
 Wed, 09 Sep 2020 00:38:48 GMT
