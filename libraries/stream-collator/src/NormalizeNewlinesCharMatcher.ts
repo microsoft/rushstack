@@ -6,21 +6,33 @@ import { CharMatcher, CharMatcherState } from './CharMatcher';
 
 interface INormalizeNewlinesCharMatcherState {
   characterToIgnore: string;
+  incompleteLine: boolean;
+}
+
+/** @beta */
+export interface INormalizeNewlinesCharMatcherOptions {
+  newlineKind: NewlineKind;
+  ensureNewlineAtEnd?: boolean;
 }
 
 /** @beta */
 export class NormalizeNewlinesCharMatcher extends CharMatcher {
   public readonly newlineKind: NewlineKind;
   public readonly newline: string;
+  public readonly ensureNewlineAtEnd: boolean;
 
-  public constructor(newlineKind: NewlineKind) {
+  public constructor(options: INormalizeNewlinesCharMatcherOptions) {
     super();
-    this.newlineKind = newlineKind;
-    this.newline = Text.getNewline(newlineKind);
+    this.newlineKind = options.newlineKind;
+    this.newline = Text.getNewline(options.newlineKind);
+    this.ensureNewlineAtEnd = !!options.ensureNewlineAtEnd;
   }
 
   public initialize(): CharMatcherState {
-    return { characterToIgnore: '' } as INormalizeNewlinesCharMatcherState;
+    return {
+      characterToIgnore: '',
+      incompleteLine: false
+    } as INormalizeNewlinesCharMatcherState;
   }
 
   public process(unknownState: CharMatcherState, text: string): string {
@@ -28,21 +40,29 @@ export class NormalizeNewlinesCharMatcher extends CharMatcher {
 
     let result: string = '';
 
-    for (let i: number = 0; i < text.length; ++i) {
-      const c: string = text[i];
+    if (text.length > 0) {
+      let i: number = 0;
 
-      if (c === state.characterToIgnore) {
-        state.characterToIgnore = '';
-      } else if (c === '\r') {
-        result += this.newline;
-        state.characterToIgnore = '\n';
-      } else if (c === '\n') {
-        result += this.newline;
-        state.characterToIgnore = '\r';
-      } else {
-        result += c;
-        state.characterToIgnore = '';
-      }
+      do {
+        const c: string = text[i];
+        ++i;
+
+        if (c === state.characterToIgnore) {
+          state.characterToIgnore = '';
+        } else if (c === '\r') {
+          result += this.newline;
+          state.characterToIgnore = '\n';
+          state.incompleteLine = false;
+        } else if (c === '\n') {
+          result += this.newline;
+          state.characterToIgnore = '\r';
+          state.incompleteLine = false;
+        } else {
+          result += c;
+          state.characterToIgnore = '';
+          state.incompleteLine = true;
+        }
+      } while (i < text.length);
     }
 
     return result;
@@ -51,6 +71,12 @@ export class NormalizeNewlinesCharMatcher extends CharMatcher {
   public flush(unknownState: CharMatcherState): string {
     const state: INormalizeNewlinesCharMatcherState = unknownState as INormalizeNewlinesCharMatcherState;
     state.characterToIgnore = '';
-    return '';
+
+    if (state.incompleteLine) {
+      state.incompleteLine = false;
+      return this.newline;
+    } else {
+      return '';
+    }
   }
 }

@@ -63,6 +63,10 @@ export class TaskRunner {
     this._changedProjectsOnly = changedProjectsOnly;
     this._allowWarningsInSuccessfulBuild = allowWarningsInSuccessfulBuild;
 
+    // TERMINAL PIPELINE:
+    //
+    // streamCollator --> colorsNewlinesTransform --> StdioWritable
+    //
     this._outputWritable = options.destination ? options.destination : StdioWritable.instance;
     this._colorsNewlinesTransform = new CharMatcherTransform({
       destination: this._outputWritable,
@@ -132,7 +136,7 @@ export class TaskRunner {
 
       const middlePart: string = colors.gray(']' + '='.repeat(middlePartLengthMinusTwoBrackets) + '[');
 
-      this._terminal.writeStdoutLine(leftPart + middlePart + rightPart + '\n');
+      this._terminal.writeStdoutLine('\n' + leftPart + middlePart + rightPart + '\n');
     }
   };
 
@@ -157,7 +161,7 @@ export class TaskRunner {
       this._terminal.writeStdoutLine('');
     }
 
-    this._terminal.writeStdoutLine(`Executing a maximum of ${this._parallelism} simultaneous processes...\n`);
+    this._terminal.writeStdoutLine(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
 
     await this._startAvailableTasksAsync();
 
@@ -269,9 +273,7 @@ export class TaskRunner {
    * Marks a task as having failed and marks each of its dependents as blocked
    */
   private _markTaskAsFailed(task: Task): void {
-    task.collatedWriter.terminal.writeStderrLine(
-      `${os.EOL}${this._getCurrentCompletedTaskString()}[${task.name}] failed!`
-    );
+    task.collatedWriter.terminal.writeStderrLine(colors.red(`"${task.name}" failed to build.`));
     task.status = TaskStatus.Failure;
     task.dependents.forEach((dependent: Task) => {
       this._markTaskAsBlocked(dependent, task);
@@ -284,9 +286,7 @@ export class TaskRunner {
   private _markTaskAsBlocked(task: Task, failedTask: Task): void {
     if (task.status === TaskStatus.Ready) {
       this._completedTasks++;
-      task.collatedWriter.terminal.writeStderrLine(
-        `${this._getCurrentCompletedTaskString()}[${task.name}] blocked by [${failedTask.name}]!`
-      );
+      task.collatedWriter.terminal.writeStderrLine(`"${task.name}" is blocked by "${failedTask.name}".`);
       task.status = TaskStatus.Blocked;
       task.dependents.forEach((dependent: Task) => {
         this._markTaskAsBlocked(dependent, failedTask);
@@ -299,15 +299,10 @@ export class TaskRunner {
    */
   private _markTaskAsSuccess(task: Task): void {
     if (task.builder.hadEmptyScript) {
-      task.collatedWriter.terminal.writeStdoutLine(
-        colors.green(`${this._getCurrentCompletedTaskString()}[${task.name}] had an empty script`)
-      );
+      task.collatedWriter.terminal.writeStdoutLine(colors.green(`"${task.name}" had an empty script.`));
     } else {
       task.collatedWriter.terminal.writeStdoutLine(
-        colors.green(
-          `${this._getCurrentCompletedTaskString()}` +
-            `[${task.name}] completed successfully in ${task.stopwatch.toString()}`
-        )
+        colors.green(`"${task.name}" completed successfully in ${task.stopwatch.toString()}.`)
       );
     }
     task.status = TaskStatus.Success;
@@ -326,8 +321,7 @@ export class TaskRunner {
    */
   private _markTaskAsSuccessWithWarning(task: Task): void {
     task.collatedWriter.terminal.writeStderrLine(
-      `${this._getCurrentCompletedTaskString()}` +
-        `[${task.name}] completed with warnings in ${task.stopwatch.toString()}`
+      colors.yellow(`"${task.name}" completed with warnings in ${task.stopwatch.toString()}.`)
     );
     task.status = TaskStatus.SuccessWithWarning;
     task.dependents.forEach((dependent: Task) => {
@@ -342,17 +336,11 @@ export class TaskRunner {
    * Marks a task as skipped.
    */
   private _markTaskAsSkipped(task: Task): void {
-    task.collatedWriter.terminal.writeStdoutLine(
-      colors.green(`${this._getCurrentCompletedTaskString()}[${task.name}] skipped`)
-    );
+    task.collatedWriter.terminal.writeStdoutLine(colors.green(`${task.name} was skipped.`));
     task.status = TaskStatus.Skipped;
     task.dependents.forEach((dependent: Task) => {
       dependent.dependencies.delete(task);
     });
-  }
-
-  private _getCurrentCompletedTaskString(): string {
-    return `${this._completedTasks} of ${this._totalTasks}: `;
   }
 
   /**

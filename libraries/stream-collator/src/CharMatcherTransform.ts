@@ -14,6 +14,7 @@ export interface ICharMatcherTransformOptions extends ITerminalTransformOptions 
   charMatchers?: CharMatcher[];
   removeColors?: boolean;
   normalizeNewlines?: NewlineKind;
+  ensureNewlineAtEnd?: boolean;
 }
 
 /** @beta */
@@ -32,7 +33,12 @@ export class CharMatcherTransform extends TerminalTransform {
       charMatchers.push(new RemoveColorsCharMatcher());
     }
     if (options.normalizeNewlines) {
-      charMatchers.push(new NormalizeNewlinesCharMatcher(options.normalizeNewlines));
+      charMatchers.push(
+        new NormalizeNewlinesCharMatcher({
+          newlineKind: options.normalizeNewlines,
+          ensureNewlineAtEnd: options.ensureNewlineAtEnd
+        })
+      );
     }
 
     if (charMatchers.length === 0) {

@@ -97,6 +97,8 @@ export interface ICharMatcherTransformOptions extends ITerminalTransformOptions 
     // (undocumented)
     charMatchers?: CharMatcher[];
     // (undocumented)
+    ensureNewlineAtEnd?: boolean;
+    // (undocumented)
     normalizeNewlines?: NewlineKind;
     // (undocumented)
     removeColors?: boolean;
@@ -104,6 +106,14 @@ export interface ICharMatcherTransformOptions extends ITerminalTransformOptions 
 
 // @beta (undocumented)
 export interface IDiscardStdoutTransformOptions extends ITerminalTransformOptions {
+}
+
+// @beta (undocumented)
+export interface INormalizeNewlinesCharMatcherOptions {
+    // (undocumented)
+    ensureNewlineAtEnd?: boolean;
+    // (undocumented)
+    newlineKind: NewlineKind;
 }
 
 // @beta (undocumented)
@@ -170,7 +180,9 @@ export class MockWritable extends TerminalWritable {
 
 // @beta (undocumented)
 export class NormalizeNewlinesCharMatcher extends CharMatcher {
-    constructor(newlineKind: NewlineKind);
+    constructor(options: INormalizeNewlinesCharMatcherOptions);
+    // (undocumented)
+    readonly ensureNewlineAtEnd: boolean;
     // (undocumented)
     flush(unknownState: CharMatcherState): string;
     // (undocumented)

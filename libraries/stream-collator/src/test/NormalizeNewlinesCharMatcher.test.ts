@@ -6,7 +6,9 @@ import { CharMatcherState } from '../CharMatcher';
 import { NormalizeNewlinesCharMatcher } from '../NormalizeNewlinesCharMatcher';
 
 function testCase(input: string): void {
-  const matcher: NormalizeNewlinesCharMatcher = new NormalizeNewlinesCharMatcher(NewlineKind.Lf);
+  const matcher: NormalizeNewlinesCharMatcher = new NormalizeNewlinesCharMatcher({
+    newlineKind: NewlineKind.Lf
+  });
   const state: CharMatcherState = matcher.initialize();
   let result: string = '';
 

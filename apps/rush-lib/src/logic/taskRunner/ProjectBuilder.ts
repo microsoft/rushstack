@@ -128,7 +128,7 @@ export class ProjectBuilder extends BaseBuilder {
     currentPackageDeps: IPackageDependencies | undefined,
     context: IBuilderContext
   ): Promise<TaskStatus> {
-    // The pipeline looks like this:
+    // TERMINAL PIPELINE:
     //
     //                             +--> quietModeTransform? --> collatedWriter
     //                             |
@@ -166,7 +166,8 @@ export class ProjectBuilder extends BaseBuilder {
 
       const normalizeNewlineTransform: CharMatcherTransform = new CharMatcherTransform({
         destination: splitterTransform1,
-        normalizeNewlines: NewlineKind.Lf
+        normalizeNewlines: NewlineKind.Lf,
+        ensureNewlineAtEnd: true
       });
 
       const terminal: CollatedTerminal = new CollatedTerminal(normalizeNewlineTransform);
@@ -228,7 +229,7 @@ export class ProjectBuilder extends BaseBuilder {
         }
 
         // Run the task
-        terminal.writeStdoutLine('Command: ' + this._commandToRun);
+        terminal.writeStdoutLine('Invoking: ' + this._commandToRun);
 
         const task: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(this._commandToRun, {
           rushConfiguration: this._rushConfiguration,
