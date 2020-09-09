@@ -94,6 +94,7 @@ export class CharMatcherTransform extends TerminalTransform {
   protected onClose(): void {
     this._flushText(this._stderrStates, TerminalChunkKind.Stderr);
     this._flushText(this._stderrStates, TerminalChunkKind.Stdout);
-    this.destination.close();
+
+    this.autocloseDestination();
   }
 }

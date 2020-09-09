@@ -53,8 +53,4 @@ export class DiscardStdoutTransform extends TerminalTransform {
       this.destination.writeChunk(chunk);
     }
   }
-
-  protected onClose(): void {
-    this.destination.close();
-  }
 }

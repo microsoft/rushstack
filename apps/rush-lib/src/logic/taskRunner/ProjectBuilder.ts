@@ -3,7 +3,14 @@
 
 import * as child_process from 'child_process';
 import * as path from 'path';
-import { JsonFile, Text, FileSystem, JsonObject, NewlineKind } from '@rushstack/node-core-library';
+import {
+  JsonFile,
+  Text,
+  FileSystem,
+  JsonObject,
+  NewlineKind,
+  InternalError
+} from '@rushstack/node-core-library';
 import {
   CollatedTerminal,
   TerminalChunkKind,
@@ -252,8 +259,13 @@ export class ProjectBuilder extends BaseBuilder {
           (resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
             task.on('close', (code: number) => {
               try {
-                stderrLineTransform.close();
-                projectLogWritable.close();
+                normalizeNewlineTransform.close();
+
+                // If the pipeline is wired up correctly, then closing normalizeNewlineTransform should
+                // have closed projectLogWritable.
+                if (projectLogWritable.isOpen) {
+                  throw new InternalError('The output file handle was not closed');
+                }
 
                 if (code !== 0) {
                   reject(new TaskError('error', `Returned error code: ${code}`));

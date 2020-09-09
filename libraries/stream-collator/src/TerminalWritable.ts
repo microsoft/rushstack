@@ -4,11 +4,24 @@
 import { ITerminalChunk } from './ITerminalChunk';
 
 /** @beta */
+export interface ITerminalWritableOptions {
+  preventAutoclose?: boolean;
+}
+
+/** @beta */
 export abstract class TerminalWritable {
   private _isOpen: boolean;
 
-  public constructor() {
+  public readonly preventAutoclose: boolean;
+
+  public constructor(options?: ITerminalWritableOptions) {
     this._isOpen = true;
+
+    if (!options) {
+      options = {};
+    }
+
+    this.preventAutoclose = !!options.preventAutoclose;
   }
 
   public get isOpen(): boolean {

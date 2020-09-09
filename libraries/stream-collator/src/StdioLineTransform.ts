@@ -63,7 +63,7 @@ export class StderrLineTransform extends TerminalTransform {
     if (this._accumulatedLine.length > 0) {
       this._processAccumulatedLine();
     }
-    this.destination.close();
+    this.autocloseDestination();
   }
 
   private _processAccumulatedLine(): void {

@@ -81,8 +81,6 @@ export enum CollatedWriterState {
 export class DiscardStdoutTransform extends TerminalTransform {
     constructor(options: IDiscardStdoutTransformOptions);
     // (undocumented)
-    protected onClose(): void;
-    // (undocumented)
     protected onWriteChunk(chunk: ITerminalChunk): void;
     }
 
@@ -109,7 +107,7 @@ export interface IDiscardStdoutTransformOptions extends ITerminalTransformOption
 }
 
 // @beta (undocumented)
-export interface ISplitterTransformOptions {
+export interface ISplitterTransformOptions extends ITerminalWritableOptions {
     // (undocumented)
     destinations: TerminalWritable[];
 }
@@ -145,9 +143,17 @@ export interface ITerminalChunk {
 }
 
 // @beta (undocumented)
-export interface ITerminalTransformOptions {
+export interface ITerminalTransformOptions extends ITerminalWritableOptions {
     // (undocumented)
     destination: TerminalWritable;
+    // (undocumented)
+    preventDestinationAutoclose?: boolean;
+}
+
+// @beta (undocumented)
+export interface ITerminalWritableOptions {
+    // (undocumented)
+    preventAutoclose?: boolean;
 }
 
 // @beta (undocumented)
@@ -256,14 +262,18 @@ export const enum TerminalChunkKind {
 export abstract class TerminalTransform extends TerminalWritable {
     constructor(options: ITerminalTransformOptions);
     // (undocumented)
+    protected autocloseDestination(): void;
+    // (undocumented)
     readonly destination: TerminalWritable;
     // (undocumented)
     protected onClose(): void;
+    // (undocumented)
+    readonly preventDestinationAutoclose: boolean;
 }
 
 // @beta (undocumented)
 export abstract class TerminalWritable {
-    constructor();
+    constructor(options?: ITerminalWritableOptions);
     // (undocumented)
     close(): void;
     // (undocumented)
@@ -272,6 +282,8 @@ export abstract class TerminalWritable {
     protected onClose(): void;
     // (undocumented)
     protected abstract onWriteChunk(chunk: ITerminalChunk): void;
+    // (undocumented)
+    readonly preventAutoclose: boolean;
     // (undocumented)
     writeChunk(chunk: ITerminalChunk): void;
 }

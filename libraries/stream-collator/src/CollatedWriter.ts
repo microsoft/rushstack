@@ -34,7 +34,7 @@ export class CollatedWriter extends TerminalWritable {
   private readonly _accumulatedChunks: ITerminalChunk[];
 
   public constructor(taskName: string, collator: StreamCollator) {
-    super();
+    super({ preventAutoclose: true });
 
     this.taskName = taskName;
     this.terminal = new CollatedTerminal(this);

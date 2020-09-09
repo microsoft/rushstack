@@ -145,7 +145,11 @@ export class BulkScriptAction extends BaseScriptAction {
         console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
       } else {
         if (error && error.message) {
-          console.log('Error: ' + error.message);
+          if (this.parser.isDebug) {
+            console.log('Error: ' + error.stack);
+          } else {
+            console.log('Error: ' + error.message);
+          }
         }
 
         console.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));

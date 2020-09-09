@@ -224,9 +224,9 @@ export class TaskRunner {
       quietMode: this._quietMode
     };
 
-    const result: TaskStatus = await task.builder.executeAsync(context);
-
     try {
+      const result: TaskStatus = await task.builder.executeAsync(context);
+
       task.stopwatch.stop();
       task.stdioSummarizer.close();
 
