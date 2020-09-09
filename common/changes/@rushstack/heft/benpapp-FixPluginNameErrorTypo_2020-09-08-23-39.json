@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "fix typo in an error message to read that plugins must define a \"pluginName\" property, rather than the former \"displayName\" property",
+      "comment": "Fix a typo in an error message to read that plugins must define a \"pluginName\" property, rather than the former \"displayName\" property",
       "type": "patch"
     }
   ],
