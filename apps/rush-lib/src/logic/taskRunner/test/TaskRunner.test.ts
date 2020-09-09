@@ -6,7 +6,7 @@ jest.mock('../../../utilities/Utilities');
 
 import { EOL } from 'os';
 import { CollatedTerminal } from '@rushstack/stream-collator';
-import { MockWritable } from '@rushstack/stream-collator';
+import { MockWritable } from '@rushstack/terminal';
 
 import { TaskRunner, ITaskRunnerOptions } from '../TaskRunner';
 import { TaskStatus } from '../TaskStatus';

@@ -4,15 +4,13 @@
 import * as os from 'os';
 import * as colors from 'colors';
 import {
-  StreamCollator,
-  CollatedTerminal,
   StdioSummarizer,
   TerminalWritable,
   StdioWritable,
   TerminalChunkKind,
-  CharMatcherTransform,
-  CollatedWriter
-} from '@rushstack/stream-collator';
+  CharMatcherTransform
+} from '@rushstack/terminal';
+import { StreamCollator, CollatedTerminal, CollatedWriter } from '@rushstack/stream-collator';
 import { AlreadyReportedError, NewlineKind } from '@rushstack/node-core-library';
 
 import { Stopwatch } from '../../utilities/Stopwatch';

@@ -3,12 +3,8 @@
 
 import * as path from 'path';
 import { FileSystem, FileWriter, InternalError } from '@rushstack/node-core-library';
-import {
-  CollatedTerminal,
-  TerminalChunkKind,
-  TerminalWritable,
-  ITerminalChunk
-} from '@rushstack/stream-collator';
+import { TerminalChunkKind, TerminalWritable, ITerminalChunk } from '@rushstack/terminal';
+import { CollatedTerminal } from '@rushstack/stream-collator';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PackageNameParsers } from '../../api/PackageNameParsers';

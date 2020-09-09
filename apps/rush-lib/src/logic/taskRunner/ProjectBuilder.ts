@@ -12,13 +12,14 @@ import {
   InternalError
 } from '@rushstack/node-core-library';
 import {
-  CollatedTerminal,
   TerminalChunkKind,
   CharMatcherTransform,
   StderrLineTransform,
   SplitterTransform,
   DiscardStdoutTransform
-} from '@rushstack/stream-collator';
+} from '@rushstack/terminal';
+
+import { CollatedTerminal } from '@rushstack/stream-collator';
 import { IPackageDeps } from '@rushstack/package-deps-hash';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
