@@ -119,7 +119,8 @@ export class TestAction extends BuildAction {
         'Use this parameter to control maximum number of worker processes tests are allowed to use.' +
         ' This parameter is similar to the parameter noted in the Jest documentation, and can either be' +
         ' an integer representing the number of workers to spawn when running tests, or can be a string' +
-        ' representing a percentage of the available CPUs on the machine to utilize. Example values: "3", "25%"'
+        ' representing a percentage of the available CPUs on the machine to utilize. Example values: "3",' +
+        ' "25%%"' // The "%%" is required because argparse (used by ts-command-line) treats % as an escape character
     });
   }
 
