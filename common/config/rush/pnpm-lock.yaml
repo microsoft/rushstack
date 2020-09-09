@@ -233,6 +233,7 @@ importers:
       '@rushstack/node-core-library': 'link:../../libraries/node-core-library'
       '@rushstack/package-deps-hash': 'link:../../libraries/package-deps-hash'
       '@rushstack/stream-collator': 'link:../../libraries/stream-collator'
+      '@rushstack/terminal': 'link:../../libraries/terminal'
       '@rushstack/ts-command-line': 'link:../../libraries/ts-command-line'
       '@yarnpkg/lockfile': 1.0.2
       builtin-modules: 3.1.0
@@ -291,6 +292,7 @@ importers:
       '@rushstack/node-core-library': 'workspace:*'
       '@rushstack/package-deps-hash': 'workspace:*'
       '@rushstack/stream-collator': 'workspace:*'
+      '@rushstack/terminal': 'workspace:*'
       '@rushstack/ts-command-line': 'workspace:*'
       '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
@@ -1453,7 +1455,8 @@ importers:
       ts-jest: ~25.1.0
   ../../libraries/stream-collator:
     dependencies:
-      colors: 1.2.5
+      '@rushstack/node-core-library': 'link:../node-core-library'
+      '@rushstack/terminal': 'link:../terminal'
     devDependencies:
       '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
@@ -1464,6 +1467,25 @@ importers:
       '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/terminal': 'workspace:*'
+      '@types/heft-jest': 1.0.1
+      '@types/node': 10.17.13
+  ../../libraries/terminal:
+    dependencies:
+      '@types/node': 10.17.13
+    devDependencies:
+      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
+      '@rushstack/node-core-library': 'link:../node-core-library'
+      '@types/heft-jest': 1.0.1
+      colors: 1.2.5
+    specifiers:
+      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
+      '@rushstack/node-core-library': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       colors: ~1.2.1
