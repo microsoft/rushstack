@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.12.24",
+      "tag": "@microsoft/gulp-core-build-sass_v4.12.24",
+      "date": "Wed, 09 Sep 2020 00:38:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `1.10.87`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.12.23",
       "tag": "@microsoft/gulp-core-build-sass_v4.12.23",
       "date": "Mon, 07 Sep 2020 07:37:37 GMT",
