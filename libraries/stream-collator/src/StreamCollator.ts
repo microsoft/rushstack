@@ -4,11 +4,13 @@
 import { CollatedWriter } from './CollatedWriter';
 import { CollatedTerminal } from './CollatedTerminal';
 import { TerminalWritable } from './TerminalWritable';
+import { ITerminalChunk } from './ITerminalChunk';
+import { InternalError } from '@rushstack/node-core-library';
 
 /** @beta */
 export interface IStreamCollatorOptions {
   destination: TerminalWritable;
-  onSetActiveWriter?: (writer: CollatedWriter | undefined) => void;
+  onWriterActive?: (writer: CollatedWriter) => void;
 }
 
 /**
@@ -19,15 +21,27 @@ export interface IStreamCollatorOptions {
 export class StreamCollator {
   private _taskNames: Set<string> = new Set();
   private _writers: Set<CollatedWriter> = new Set();
+
+  // The writer whose output is being shown in realtime, or undefined if none
   private _activeWriter: CollatedWriter | undefined = undefined;
-  private _onSetActiveWriter: ((writer: CollatedWriter) => void) | undefined;
+
+  // Writers that have accumulated buffered chunks and are not closed yet
+  private _openBufferedWriters: Set<CollatedWriter> = new Set();
+
+  // Writers that have accumulated buffered chunks and are now closed
+  private _closedBufferedWriters: Set<CollatedWriter> = new Set();
+
+  private _onWriterActive: ((writer: CollatedWriter) => void) | undefined;
+
+  private _preventReentrantCall: boolean = false;
 
   public readonly destination: TerminalWritable;
   public readonly terminal: CollatedTerminal;
 
   public constructor(options: IStreamCollatorOptions) {
-    this.terminal = new CollatedTerminal(options.destination);
-    this._onSetActiveWriter = options.onSetActiveWriter;
+    this.destination = options.destination;
+    this.terminal = new CollatedTerminal(this.destination);
+    this._onWriterActive = options.onWriterActive;
   }
 
   public get activeWriter(): CollatedWriter | undefined {
@@ -59,21 +73,89 @@ export class StreamCollator {
     this._writers.add(writer);
     this._taskNames.add(writer.taskName);
 
-    if (this._activeWriter === undefined) {
-      this._setActiveWriter(writer);
-    }
-
     return writer;
   }
 
-  /**
-   * @internal
-   */
-  public _setActiveWriter(writer: CollatedWriter | undefined): void {
+  /** @internal */
+  public _writerWriteChunk(
+    writer: CollatedWriter,
+    chunk: ITerminalChunk,
+    bufferedChunks: ITerminalChunk[]
+  ): void {
+    this._checkForReentrantCall();
+
+    if (this._activeWriter === undefined) {
+      // If no writer is currently active, then the first one to write something becomes active
+      this._assignActiveWriter(writer);
+    }
+
+    if (writer.isActive) {
+      this.destination.writeChunk(chunk);
+    } else {
+      if (bufferedChunks.length === 0) {
+        this._openBufferedWriters.add(writer);
+      }
+      bufferedChunks.push(chunk);
+    }
+  }
+
+  /** @internal */
+  public _writerClose(writer: CollatedWriter, bufferedChunks: ITerminalChunk[]): void {
+    this._checkForReentrantCall();
+
+    if (writer.isActive) {
+      writer.flushBufferedChunks();
+
+      this._activeWriter = undefined;
+
+      // If any buffered writers are already closed, activate them each immediately
+      for (const closedBufferedWriter of [...this._closedBufferedWriters]) {
+        this._closedBufferedWriters.delete(closedBufferedWriter);
+
+        try {
+          this._assignActiveWriter(closedBufferedWriter);
+        } finally {
+          this._activeWriter = undefined;
+        }
+      }
+
+      // Find a buffered writer and activate it
+      let openBufferedWriter: CollatedWriter | undefined = undefined;
+      for (const first of this._openBufferedWriters) {
+        openBufferedWriter = first;
+        break;
+      }
+      if (openBufferedWriter) {
+        this._assignActiveWriter(openBufferedWriter);
+      }
+    } else {
+      if (writer.bufferedChunks.length > 0) {
+        this._openBufferedWriters.delete(writer);
+        this._closedBufferedWriters.add(writer);
+      }
+    }
+  }
+
+  private _assignActiveWriter(writer: CollatedWriter): void {
     this._activeWriter = writer;
 
-    if (this._onSetActiveWriter) {
-      this._onSetActiveWriter(writer);
+    this._openBufferedWriters.delete(writer);
+
+    if (this._onWriterActive) {
+      this._preventReentrantCall = true;
+      try {
+        this._onWriterActive(writer);
+      } finally {
+        this._preventReentrantCall = false;
+      }
+    }
+
+    writer.flushBufferedChunks();
+  }
+
+  private _checkForReentrantCall(): void {
+    if (this._preventReentrantCall) {
+      throw new InternalError('Reentrant call to StreamCollator');
     }
   }
 }

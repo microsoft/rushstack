@@ -54,27 +54,19 @@ export class CollatedTerminal {
 export class CollatedWriter extends TerminalWritable {
     constructor(taskName: string, collator: StreamCollator);
     // (undocumented)
-    readonly accumulatedChunks: ReadonlyArray<ITerminalChunk>;
+    readonly bufferedChunks: ReadonlyArray<ITerminalChunk>;
     // @internal (undocumented)
-    readonly _collator: StreamCollator;
-    onClose(): void;
-    onWriteChunk(chunk: ITerminalChunk): void;
+    flushBufferedChunks(): void;
     // (undocumented)
-    readonly state: CollatedWriterState;
+    readonly isActive: boolean;
+    // (undocumented)
+    onClose(): void;
+    // (undocumented)
+    onWriteChunk(chunk: ITerminalChunk): void;
     // (undocumented)
     readonly taskName: string;
     // (undocumented)
     readonly terminal: CollatedTerminal;
-}
-
-// @beta (undocumented)
-export enum CollatedWriterState {
-    // (undocumented)
-    ClosedUnwritten = 2,
-    // (undocumented)
-    Open = 1,
-    // (undocumented)
-    Written = 3
 }
 
 // @beta (undocumented)
@@ -141,7 +133,7 @@ export interface IStreamCollatorOptions {
     // (undocumented)
     destination: TerminalWritable;
     // (undocumented)
-    onSetActiveWriter?: (writer: CollatedWriter | undefined) => void;
+    onWriterActive?: (writer: CollatedWriter) => void;
 }
 
 // @beta
@@ -254,13 +246,15 @@ export class StreamCollator {
     // (undocumented)
     readonly destination: TerminalWritable;
     registerTask(taskName: string): CollatedWriter;
-    // @internal (undocumented)
-    _setActiveWriter(writer: CollatedWriter | undefined): void;
     // (undocumented)
     readonly terminal: CollatedTerminal;
+    // @internal (undocumented)
+    _writerClose(writer: CollatedWriter, bufferedChunks: ITerminalChunk[]): void;
     // (undocumented)
     readonly writers: ReadonlySet<CollatedWriter>;
-    }
+    // @internal (undocumented)
+    _writerWriteChunk(writer: CollatedWriter, chunk: ITerminalChunk, bufferedChunks: ITerminalChunk[]): void;
+}
 
 // @beta
 export const enum TerminalChunkKind {

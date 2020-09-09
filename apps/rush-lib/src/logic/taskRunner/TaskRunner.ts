@@ -75,7 +75,7 @@ export class TaskRunner {
     });
     this._streamCollator = new StreamCollator({
       destination: this._colorsNewlinesTransform,
-      onSetActiveWriter: this._streamCollator_onSetActiveWriter
+      onWriterActive: this._streamCollator_onWriterActive
     });
     this._terminal = this._streamCollator.terminal;
 
@@ -109,7 +109,7 @@ export class TaskRunner {
     }
   }
 
-  private _streamCollator_onSetActiveWriter = (writer: CollatedWriter | undefined): void => {
+  private _streamCollator_onWriterActive = (writer: CollatedWriter | undefined): void => {
     if (writer) {
       this._completedTasks++;
 
