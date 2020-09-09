@@ -365,6 +365,8 @@ export interface ITestStageProperties {
     // (undocumented)
     findRelatedTests: ReadonlyArray<string> | undefined;
     // (undocumented)
+    maxWorkers: string | undefined;
+    // (undocumented)
     silent: boolean | undefined;
     // (undocumented)
     testNamePattern: string | undefined;
