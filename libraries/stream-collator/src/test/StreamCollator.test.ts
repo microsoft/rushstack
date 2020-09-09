@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { TerminalChunkKind, MockWritable } from '@rushstack/terminal';
+
 import { StreamCollator } from '../StreamCollator';
 import { CollatedWriter } from '../CollatedWriter';
-import { TerminalChunkKind } from '../ITerminalChunk';
-import { MockWritable } from '../MockWritable';
 
 let collator: StreamCollator;
 const mockWritable: MockWritable = new MockWritable();

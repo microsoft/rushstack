@@ -26,6 +26,8 @@ export class CallbackWritable extends TerminalWritable {
   }
 
   protected onClose(): void {
-    this._onClose();
+    if (this._onClose) {
+      this._onClose();
+    }
   }
 }

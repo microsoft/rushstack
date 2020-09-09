@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { InternalError } from '@rushstack/node-core-library';
+import { TerminalWritable, ITerminalChunk } from '@rushstack/terminal';
+
 import { CollatedWriter } from './CollatedWriter';
 import { CollatedTerminal } from './CollatedTerminal';
-import { TerminalWritable } from './TerminalWritable';
-import { ITerminalChunk } from './ITerminalChunk';
-import { InternalError } from '@rushstack/node-core-library';
 
 /** @beta */
 export interface IStreamCollatorOptions {
