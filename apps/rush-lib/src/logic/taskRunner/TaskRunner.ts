@@ -161,11 +161,12 @@ export class TaskRunner {
       this._currentActiveTasks++;
       const task: Task = ctask;
       task.status = TaskStatus.Executing;
-      this._terminal.writeStdoutLine(colors.white(`[${task.name}] started`));
 
       task.stopwatch = Stopwatch.start();
       task.collatedWriter = this._streamCollator.registerTask(task.name);
       task.stdioSummarizer = new StdioSummarizer();
+
+      task.collatedWriter.terminal.writeStdoutLine(colors.white(`[${task.name}] started`));
 
       const context: IBuilderContext = {
         stdioSummarizer: task.stdioSummarizer,
@@ -178,7 +179,6 @@ export class TaskRunner {
           .executeAsync(context)
           .then((result: TaskStatus) => {
             task.stopwatch.stop();
-            task.collatedWriter.close();
             task.stdioSummarizer.close();
 
             this._currentActiveTasks--;
@@ -201,7 +201,6 @@ export class TaskRunner {
             }
           })
           .catch((error: TaskError) => {
-            task.collatedWriter.close();
             task.stdioSummarizer.close();
 
             this._currentActiveTasks--;
@@ -210,7 +209,10 @@ export class TaskRunner {
             task.error = error;
             this._markTaskAsFailed(task);
           })
-          .then(() => this._startAvailableTasksAsync())
+          .then(() => {
+            task.collatedWriter.close();
+            return this._startAvailableTasksAsync();
+          })
       );
     }
 
@@ -223,7 +225,9 @@ export class TaskRunner {
    * Marks a task as having failed and marks each of its dependents as blocked
    */
   private _markTaskAsFailed(task: Task): void {
-    this._terminal.writeStderrLine(`${os.EOL}${this._getCurrentCompletedTaskString()}[${task.name}] failed!`);
+    task.collatedWriter.terminal.writeStderrLine(
+      `${os.EOL}${this._getCurrentCompletedTaskString()}[${task.name}] failed!`
+    );
     task.status = TaskStatus.Failure;
     task.dependents.forEach((dependent: Task) => {
       this._markTaskAsBlocked(dependent, task);
@@ -236,7 +240,7 @@ export class TaskRunner {
   private _markTaskAsBlocked(task: Task, failedTask: Task): void {
     if (task.status === TaskStatus.Ready) {
       this._completedTasks++;
-      this._terminal.writeStderrLine(
+      task.collatedWriter.terminal.writeStderrLine(
         `${this._getCurrentCompletedTaskString()}[${task.name}] blocked by [${failedTask.name}]!`
       );
       task.status = TaskStatus.Blocked;
@@ -251,11 +255,11 @@ export class TaskRunner {
    */
   private _markTaskAsSuccess(task: Task): void {
     if (task.builder.hadEmptyScript) {
-      this._terminal.writeStdoutLine(
+      task.collatedWriter.terminal.writeStdoutLine(
         colors.green(`${this._getCurrentCompletedTaskString()}[${task.name}] had an empty script`)
       );
     } else {
-      this._terminal.writeStdoutLine(
+      task.collatedWriter.terminal.writeStdoutLine(
         colors.green(
           `${this._getCurrentCompletedTaskString()}` +
             `[${task.name}] completed successfully in ${task.stopwatch.toString()}`
@@ -277,7 +281,7 @@ export class TaskRunner {
    * list of all its dependents
    */
   private _markTaskAsSuccessWithWarning(task: Task): void {
-    this._terminal.writeStderrLine(
+    task.collatedWriter.terminal.writeStderrLine(
       `${this._getCurrentCompletedTaskString()}` +
         `[${task.name}] completed with warnings in ${task.stopwatch.toString()}`
     );
@@ -294,7 +298,7 @@ export class TaskRunner {
    * Marks a task as skipped.
    */
   private _markTaskAsSkipped(task: Task): void {
-    this._terminal.writeStdoutLine(
+    task.collatedWriter.terminal.writeStdoutLine(
       colors.green(`${this._getCurrentCompletedTaskString()}[${task.name}] skipped`)
     );
     task.status = TaskStatus.Skipped;
