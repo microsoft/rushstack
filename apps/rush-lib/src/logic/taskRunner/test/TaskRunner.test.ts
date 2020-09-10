@@ -90,11 +90,11 @@ describe('TaskRunner', () => {
           expect(err.message).toMatchSnapshot();
           const allMessages: string = mockWritable.getAllOutput();
           expect(allMessages).toContain('Error: step 1 failed');
-          expect(mockWritable.chunks).toMatchSnapshot();
+          expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
         });
     });
 
-    it('printedStdoutAfterErrorWithEmptyStderr', () => {
+    it.only('printedStdoutAfterErrorWithEmptyStderr', () => {
       taskRunner = createTaskRunner(
         taskRunnerOptions,
         new MockBuilder('stdout only', async (terminal: CollatedTerminal) => {
@@ -109,8 +109,10 @@ describe('TaskRunner', () => {
         .then(() => fail(EXPECTED_FAIL))
         .catch((err) => {
           expect(err.message).toMatchSnapshot();
-          expect(mockWritable.getAllOutput()).toMatch(/Build step 1.*Error: step 1 failed/);
-          expect(mockWritable.chunks).toMatchSnapshot();
+          const allOutput: string = mockWritable.getAllOutput();
+          expect(allOutput).toMatch(/Build step 1/);
+          expect(allOutput).toMatch(/Error: step 1 failed/);
+          expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
         });
     });
   });
@@ -145,7 +147,7 @@ describe('TaskRunner', () => {
             const allMessages: string = mockWritable.getAllOutput();
             expect(allMessages).toContain('Build step 1');
             expect(allMessages).toContain('step 1 succeeded with warnings');
-            expect(mockWritable.chunks).toMatchSnapshot();
+            expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
           });
       });
     });
@@ -177,7 +179,7 @@ describe('TaskRunner', () => {
             const allMessages: string = mockWritable.getAllOutput();
             expect(allMessages).toContain('Build step 1');
             expect(allMessages).toContain('Warning: step 1 succeeded with warnings');
-            expect(mockWritable.chunks).toMatchSnapshot();
+            expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
           })
           .catch((err) => fail('Promise returned by execute() rejected but was expected to resolve'));
       });

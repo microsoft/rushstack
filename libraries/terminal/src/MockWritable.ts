@@ -3,6 +3,7 @@
 
 import { ITerminalChunk } from './ITerminalChunk';
 import { TerminalWritable } from './TerminalWritable';
+import { AnsiEscape } from '@rushstack/node-core-library';
 
 /** @beta */
 export class MockWritable extends TerminalWritable {
@@ -17,6 +18,10 @@ export class MockWritable extends TerminalWritable {
   }
 
   public getAllOutput(): string {
-    return this.chunks.map((x) => x.text).join('');
+    return AnsiEscape.formatForTests(this.chunks.map((x) => x.text).join(''));
+  }
+
+  public getFormattedChunks(): ITerminalChunk[] {
+    return this.chunks.map((x) => ({ ...x, text: AnsiEscape.formatForTests(x.text) } as ITerminalChunk));
   }
 }

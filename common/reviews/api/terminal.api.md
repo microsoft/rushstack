@@ -127,6 +127,8 @@ export class MockWritable extends TerminalWritable {
     // (undocumented)
     getAllOutput(): string;
     // (undocumented)
+    getFormattedChunks(): ITerminalChunk[];
+    // (undocumented)
     protected onWriteChunk(chunk: ITerminalChunk): void;
     // (undocumented)
     reset(): void;
