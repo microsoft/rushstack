@@ -21,7 +21,7 @@ describe('StdioSummarizer', () => {
     });
   });
 
-  it.only('should report stdout if there is no stderr', () => {
+  it('should report stdout if there is no stderr', () => {
     transform.writeChunk({ text: 'stdout 1\nstdout 2\n', kind: TerminalChunkKind.Stdout });
     transform.close();
 

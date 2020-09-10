@@ -75,7 +75,7 @@ describe('StreamCollator tests', () => {
   });
 
   describe('Testing that output is interleaved', () => {
-    it.only('should not write non-active tasks to stdout', () => {
+    it('should not write non-active tasks to stdout', () => {
       const taskA: CollatedWriter = collator.registerTask('A');
       const taskB: CollatedWriter = collator.registerTask('B');
 

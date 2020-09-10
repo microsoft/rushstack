@@ -94,7 +94,7 @@ describe('TaskRunner', () => {
         });
     });
 
-    it.only('printedStdoutAfterErrorWithEmptyStderr', () => {
+    it('printedStdoutAfterErrorWithEmptyStderr', () => {
       taskRunner = createTaskRunner(
         taskRunnerOptions,
         new MockBuilder('stdout only', async (terminal: CollatedTerminal) => {
