@@ -30,7 +30,11 @@ Array [
     "kind": "O",
     "text": "
 [gray]==[[default] [cyan]stdout+stderr[default] [gray]]================================================[[default] [white]1 of 1[default] [gray]]==[default]
-
+",
+  },
+  Object {
+    "kind": "O",
+    "text": "
 ",
   },
   Object {
@@ -128,7 +132,11 @@ Array [
     "kind": "O",
     "text": "
 [gray]==[[default] [cyan]stdout only[default] [gray]]==================================================[[default] [white]1 of 1[default] [gray]]==[default]
-
+",
+  },
+  Object {
+    "kind": "O",
+    "text": "
 ",
   },
   Object {
@@ -226,7 +234,11 @@ Array [
     "kind": "O",
     "text": "
 [gray]==[[default] [cyan]success with warnings (failure)[default] [gray]]==============================[[default] [white]1 of 1[default] [gray]]==[default]
-
+",
+  },
+  Object {
+    "kind": "O",
+    "text": "
 ",
   },
   Object {
@@ -322,7 +334,11 @@ Array [
     "kind": "O",
     "text": "
 [gray]==[[default] [cyan]success with warnings (success)[default] [gray]]==============================[[default] [white]1 of 1[default] [gray]]==[default]
-
+",
+  },
+  Object {
+    "kind": "O",
+    "text": "
 ",
   },
   Object {

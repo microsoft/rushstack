@@ -136,7 +136,11 @@ export class TaskRunner {
 
       const middlePart: string = colors.gray(']' + '='.repeat(middlePartLengthMinusTwoBrackets) + '[');
 
-      this._terminal.writeStdoutLine('\n' + leftPart + middlePart + rightPart + '\n');
+      this._terminal.writeStdoutLine('\n' + leftPart + middlePart + rightPart);
+
+      if (!this._quietMode) {
+        this._terminal.writeStdoutLine('');
+      }
     }
   };
 
