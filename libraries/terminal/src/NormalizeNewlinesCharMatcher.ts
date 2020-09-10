@@ -4,7 +4,7 @@
 import { Text, NewlineKind } from '@rushstack/node-core-library';
 import { CharMatcher, CharMatcherState } from './CharMatcher';
 
-interface INormalizeNewlinesCharMatcherState {
+interface INormalizeNewlinesCharMatcherState extends CharMatcherState {
   characterToIgnore: string;
   incompleteLine: boolean;
 }

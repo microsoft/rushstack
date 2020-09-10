@@ -13,7 +13,7 @@ enum State {
   ReadingCodes
 }
 
-interface IRemoveColorsCharMatcherState {
+interface IRemoveColorsCharMatcherState extends CharMatcherState {
   buffer: string;
   parseState: State;
 }
