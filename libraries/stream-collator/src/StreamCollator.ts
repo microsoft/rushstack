@@ -7,9 +7,27 @@ import { TerminalWritable, ITerminalChunk } from '@rushstack/terminal';
 import { CollatedWriter } from './CollatedWriter';
 import { CollatedTerminal } from './CollatedTerminal';
 
-/** @beta */
+/**
+ * Constructor options for {@link StreamCollator}.
+ *
+ * @beta
+ */
 export interface IStreamCollatorOptions {
+  /**
+   * The target {@link @rushstack/terminal#TerminalWritable} object that the
+   * {@link StreamCollator} will write its output to.
+   */
   destination: TerminalWritable;
+
+  /**
+   * An event handler that is called when a {@link CollatedWriter} becomes output,
+   * before any of its chunks have been written to the destination.
+   *
+   * @remarks
+   *
+   * Each `CollatedWriter` object will become active exactly once
+   * before the `StreamCollator` completes.
+   */
   onWriterActive?: (writer: CollatedWriter) => void;
 }
 
@@ -44,24 +62,36 @@ export class StreamCollator {
     this._onWriterActive = options.onWriterActive;
   }
 
+  /**
+   * Returns the currently active `CollatedWriter`, or `undefined` if no writer
+   * is active yet.
+   */
   public get activeWriter(): CollatedWriter | undefined {
     return this._activeWriter;
   }
 
+  /**
+   * For diagnostic purposes, returns the {@link CollatedWriter.taskName} for the
+   * currently active writer, or an empty string if no writer is active.
+   */
   public get activeTaskName(): string {
     if (this._activeWriter) {
       return this._activeWriter.taskName;
     }
-    return undefined;
+    return '';
   }
 
+  /**
+   * The list of writers that have been registered by calling {@link StreamCollator.registerTask},
+   * in the order that they were registered.
+   */
   public get writers(): ReadonlySet<CollatedWriter> {
     return this._writers;
   }
 
   /**
-   * Registers a task into the list of active buffers and returns a ITaskWriter for the
-   * calling process to use to manage output.
+   * Registers a new task to be collated, and constructs a {@link CollatedWriter} object
+   * to receive its input.
    */
   public registerTask(taskName: string): CollatedWriter {
     if (this._taskNames.has(taskName)) {
@@ -104,7 +134,7 @@ export class StreamCollator {
     this._checkForReentrantCall();
 
     if (writer.isActive) {
-      writer.flushBufferedChunks();
+      writer._flushBufferedChunks();
 
       this._activeWriter = undefined;
 
@@ -150,7 +180,7 @@ export class StreamCollator {
       }
     }
 
-    writer.flushBufferedChunks();
+    writer._flushBufferedChunks();
   }
 
   private _checkForReentrantCall(): void {

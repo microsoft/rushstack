@@ -29,24 +29,33 @@ export class CollatedWriter extends TerminalWritable {
     this._bufferedChunks = [];
   }
 
+  /**
+   * Returns true if this is the active writer for its associated {@link StreamCollator}.
+   */
   public get isActive(): boolean {
     return this._collator.activeWriter === this;
   }
 
+  /**
+   * For diagnostic purposes, if the writer is buffering chunks because it has
+   * not become active yet, they can be inspected via this property.
+   */
   public get bufferedChunks(): ReadonlyArray<ITerminalChunk> {
     return this._bufferedChunks;
   }
 
+  /** {@inheritDoc TerminalWritable.onWriteChunk} */
   public onWriteChunk(chunk: ITerminalChunk): void {
     this._collator._writerWriteChunk(this, chunk, this._bufferedChunks);
   }
 
+  /** {@inheritDoc TerminalWritable.onClose} */
   public onClose(): void {
     this._collator._writerClose(this, this._bufferedChunks);
   }
 
   /** @internal */
-  public flushBufferedChunks(): void {
+  public _flushBufferedChunks(): void {
     for (const chunk of this._bufferedChunks) {
       this._collator.destination.writeChunk(chunk);
     }

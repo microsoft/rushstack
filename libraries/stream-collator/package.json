@@ -1,7 +1,7 @@
 {
   "name": "@rushstack/stream-collator",
   "version": "3.2.53",
-  "description": "Display intelligible realtime output from your asynchronous streams",
+  "description": "Display intelligible realtime output from concurrent processes",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack/tree/master/libraries/stream-collator"

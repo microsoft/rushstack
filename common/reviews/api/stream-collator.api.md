@@ -21,14 +21,16 @@ export class CollatedTerminal {
 // @beta
 export class CollatedWriter extends TerminalWritable {
     constructor(taskName: string, collator: StreamCollator);
-    // (undocumented)
     readonly bufferedChunks: ReadonlyArray<ITerminalChunk>;
     // @internal (undocumented)
-    flushBufferedChunks(): void;
-    // (undocumented)
+    _flushBufferedChunks(): void;
     readonly isActive: boolean;
+    // Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "@rushstack/stream-collator" does not have an export "TerminalWritable"
+    //
     // (undocumented)
     onClose(): void;
+    // Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "@rushstack/stream-collator" does not have an export "TerminalWritable"
+    //
     // (undocumented)
     onWriteChunk(chunk: ITerminalChunk): void;
     // (undocumented)
@@ -37,20 +39,16 @@ export class CollatedWriter extends TerminalWritable {
     readonly terminal: CollatedTerminal;
 }
 
-// @beta (undocumented)
+// @beta
 export interface IStreamCollatorOptions {
-    // (undocumented)
     destination: TerminalWritable;
-    // (undocumented)
     onWriterActive?: (writer: CollatedWriter) => void;
 }
 
 // @beta
 export class StreamCollator {
     constructor(options: IStreamCollatorOptions);
-    // (undocumented)
     readonly activeTaskName: string;
-    // (undocumented)
     readonly activeWriter: CollatedWriter | undefined;
     // (undocumented)
     readonly destination: TerminalWritable;
@@ -59,7 +57,6 @@ export class StreamCollator {
     readonly terminal: CollatedTerminal;
     // @internal (undocumented)
     _writerClose(writer: CollatedWriter, bufferedChunks: ITerminalChunk[]): void;
-    // (undocumented)
     readonly writers: ReadonlySet<CollatedWriter>;
     // @internal (undocumented)
     _writerWriteChunk(writer: CollatedWriter, chunk: ITerminalChunk, bufferedChunks: ITerminalChunk[]): void;
