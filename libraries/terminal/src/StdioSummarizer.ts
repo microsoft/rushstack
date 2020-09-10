@@ -43,8 +43,11 @@ export class StdioSummarizer extends TerminalWritable {
       throw new Error('The summary cannot be prepared until after close() is called.');
     }
     const report: string[] = [...this._abridgedLeading];
-    if (this._abridgedOmittedLines > 0) {
-      report.push(`(${this._abridgedOmittedLines} lines omitted)`);
+    if (this._abridgedOmittedLines === 1) {
+      report.push(`  ...${this._abridgedOmittedLines} line omitted...\n`);
+    }
+    if (this._abridgedOmittedLines > 1) {
+      report.push(`  ...${this._abridgedOmittedLines} lines omitted...\n`);
     }
     report.push(...this._abridgedTrailing);
     return report.join('');

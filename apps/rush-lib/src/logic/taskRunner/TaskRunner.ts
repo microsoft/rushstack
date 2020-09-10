@@ -168,9 +168,10 @@ export class TaskRunner {
     this._printTaskStatus();
 
     if (this._hasAnyFailures) {
-      throw new Error('Project(s) failed');
+      this._terminal.writeStderrLine(colors.red('Projects failed to build.') + '\n');
+      throw new AlreadyReportedError();
     } else if (this._hasAnyWarnings && !this._allowWarningsInSuccessfulBuild) {
-      this._terminal.writeStderrLine('Project(s) succeeded with warnings');
+      this._terminal.writeStderrLine(colors.yellow('Projects succeeded with warnings.') + '\n');
       throw new AlreadyReportedError();
     }
   }
@@ -273,6 +274,9 @@ export class TaskRunner {
    * Marks a task as having failed and marks each of its dependents as blocked
    */
   private _markTaskAsFailed(task: Task): void {
+    if (task.error) {
+      task.collatedWriter.terminal.writeStderrLine(task.error.message);
+    }
     task.collatedWriter.terminal.writeStderrLine(colors.red(`"${task.name}" failed to build.`));
     task.status = TaskStatus.Failure;
     task.dependents.forEach((dependent: Task) => {
@@ -405,17 +409,6 @@ export class TaskRunner {
     this._writeDetailedSummary(TaskStatus.Failure, tasksByStatus, colors.red);
 
     this._terminal.writeStdoutLine('');
-
-    const tasksWithErrors: Task[] = tasksByStatus[TaskStatus.Failure];
-    if (tasksWithErrors) {
-      tasksWithErrors.forEach((task: Task) => {
-        if (task.error) {
-          this._terminal.writeStderrLine(`[${task.name}] ${task.error.message}`);
-        }
-      });
-    }
-
-    this._terminal.writeStdoutLine('');
   }
 
   private _writeCondensedSummary(
@@ -445,7 +438,7 @@ export class TaskRunner {
     const longestTaskName: number = Math.max(...tasks.map((x) => x.name.length));
 
     for (const task of tasks) {
-      if (task.stopwatch && !task.builder.hadEmptyScript) {
+      if (task.stopwatch && !task.builder.hadEmptyScript && task.status !== TaskStatus.Skipped) {
         const time: string = task.stopwatch.toString();
         const padding: string = ' '.repeat(longestTaskName - task.name.length);
         this._terminal.writeStdoutLine(`  ${task.name}${padding}    ${time}`);

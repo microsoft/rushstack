@@ -142,7 +142,7 @@ export class BulkScriptAction extends BaseScriptAction {
       stopwatch.stop();
 
       if (error instanceof AlreadyReportedError) {
-        console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
+        console.log(`rush ${this.actionName} (${stopwatch.toString()})`);
       } else {
         if (error && error.message) {
           if (this.parser.isDebug) {
