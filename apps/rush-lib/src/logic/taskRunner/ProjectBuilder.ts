@@ -13,7 +13,7 @@ import {
 } from '@rushstack/node-core-library';
 import {
   TerminalChunkKind,
-  CharMatcherTransform,
+  TextRewriterTransform,
   StderrLineTransform,
   SplitterTransform,
   DiscardStdoutTransform
@@ -142,7 +142,7 @@ export class ProjectBuilder extends BaseBuilder {
     );
 
     try {
-      const removeColorsTransform: CharMatcherTransform = new CharMatcherTransform({
+      const removeColorsTransform: TextRewriterTransform = new TextRewriterTransform({
         destination: projectLogWritable,
         removeColors: true,
         normalizeNewlines: NewlineKind.OsDefault
@@ -165,7 +165,7 @@ export class ProjectBuilder extends BaseBuilder {
         destinations: [context.quietMode ? quietModeTransform : context.collatedWriter, stderrLineTransform]
       });
 
-      const normalizeNewlineTransform: CharMatcherTransform = new CharMatcherTransform({
+      const normalizeNewlineTransform: TextRewriterTransform = new TextRewriterTransform({
         destination: splitterTransform1,
         normalizeNewlines: NewlineKind.Lf,
         ensureNewlineAtEnd: true

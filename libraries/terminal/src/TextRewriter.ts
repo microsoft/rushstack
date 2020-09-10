@@ -4,29 +4,29 @@
 import { Brand } from '@rushstack/node-core-library';
 
 /**
- * Represents the internal state of a {@link CharMatcher} subclass.
+ * Represents the internal state of a {@link TextRewriter} subclass.
  *
  * @public
  */
-export type CharMatcherState = Brand<unknown, 'CharMatcherState'>;
+export type TextRewriterState = Brand<unknown, 'TextRewriterState'>;
 
 /**
- * The abstract base class for operations that can be applied by {@link CharMatcherTransform}.
+ * The abstract base class for operations that can be applied by {@link TextRewriterTransform}.
  *
  * @remarks
- * The {@link CharMatcherTransform} applies one or more character rewriting operations to its
+ * The {@link TextRewriterTransform} applies one or more character rewriting operations to its
  * chunk stream.  Since these operations are applied separately to `stderr` and `stdout`, the
- * state is stored in an opaque `CharMatcherState` object.
+ * state is stored in an opaque `TextRewriterState` object.
  *
- * Conceptually, a `CharMatcher` subclass is very similar to a regular expression, with the difference
- * that `RegExp` operates on a text string, whereas `CharMatcher` operates on a stream of characters.
+ * Conceptually, a `TextRewriter` subclass is very similar to a regular expression, with the difference
+ * that `RegExp` operates on a text string, whereas `TextRewriter` operates on a stream of characters.
  *
- * The two most common subclasses are {@link NormalizeNewlinesCharMatcher} and {@link RemoveColorsCharMatcher}.
+ * The two most common subclasses are {@link NormalizeNewlinesTextRewriter} and {@link RemoveColorsTextRewriter}.
  *
  * @public
  */
-export abstract class CharMatcher {
-  public abstract initialize(): CharMatcherState;
-  public abstract process(state: CharMatcherState, text: string): string;
-  public abstract flush(state: CharMatcherState): string;
+export abstract class TextRewriter {
+  public abstract initialize(): TextRewriterState;
+  public abstract process(state: TextRewriterState, text: string): string;
+  public abstract flush(state: TextRewriterState): string;
 }

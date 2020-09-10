@@ -4,18 +4,18 @@
 import { TerminalChunkKind } from '../ITerminalChunk';
 import { StdioSummarizer } from '../StdioSummarizer';
 import { StderrLineTransform } from '../StdioLineTransform';
-import { CharMatcherTransform } from '../CharMatcherTransform';
+import { TextRewriterTransform } from '../TextRewriterTransform';
 import { NewlineKind } from '@rushstack/node-core-library';
 
 describe('StdioSummarizer', () => {
   let summarizer: StdioSummarizer;
   let stderrLineTransform: StderrLineTransform;
-  let transform: CharMatcherTransform;
+  let transform: TextRewriterTransform;
 
   beforeEach(() => {
     summarizer = new StdioSummarizer();
     stderrLineTransform = new StderrLineTransform({ destination: summarizer });
-    transform = new CharMatcherTransform({
+    transform = new TextRewriterTransform({
       destination: stderrLineTransform,
       normalizeNewlines: NewlineKind.Lf
     });

@@ -2,14 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import { Text, NewlineKind } from '@rushstack/node-core-library';
-import { CharMatcherState } from '../CharMatcher';
-import { NormalizeNewlinesCharMatcher } from '../NormalizeNewlinesCharMatcher';
+import { TextRewriterState } from '../TextRewriter';
+import { NormalizeNewlinesTextRewriter } from '../NormalizeNewlinesTextRewriter';
 
 function testCase(input: string): void {
-  const matcher: NormalizeNewlinesCharMatcher = new NormalizeNewlinesCharMatcher({
+  const matcher: NormalizeNewlinesTextRewriter = new NormalizeNewlinesTextRewriter({
     newlineKind: NewlineKind.Lf
   });
-  const state: CharMatcherState = matcher.initialize();
+  const state: TextRewriterState = matcher.initialize();
   let result: string = '';
 
   for (let i = 0; i < input.length; ++i) {
@@ -20,7 +20,7 @@ function testCase(input: string): void {
   expect(result).toEqual(Text.convertToLf(input));
 }
 
-describe('NormalizeNewlinesCharMatcher', () => {
+describe('NormalizeNewlinesTextRewriter', () => {
   it('should duplicate Text.convertToLf()', () => {
     testCase('');
     testCase('\n');

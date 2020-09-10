@@ -8,7 +8,7 @@ import {
   TerminalWritable,
   StdioWritable,
   TerminalChunkKind,
-  CharMatcherTransform
+  TextRewriterTransform
 } from '@rushstack/terminal';
 import { StreamCollator, CollatedTerminal, CollatedWriter } from '@rushstack/stream-collator';
 import { AlreadyReportedError, NewlineKind, InternalError, Sort } from '@rushstack/node-core-library';
@@ -49,7 +49,7 @@ export class TaskRunner {
   private _completedTasks: number;
 
   private readonly _outputWritable: TerminalWritable;
-  private readonly _colorsNewlinesTransform: CharMatcherTransform;
+  private readonly _colorsNewlinesTransform: TextRewriterTransform;
   private readonly _streamCollator: StreamCollator;
 
   private _terminal: CollatedTerminal;
@@ -69,7 +69,7 @@ export class TaskRunner {
     // streamCollator --> colorsNewlinesTransform --> StdioWritable
     //
     this._outputWritable = options.destination ? options.destination : StdioWritable.instance;
-    this._colorsNewlinesTransform = new CharMatcherTransform({
+    this._colorsNewlinesTransform = new TextRewriterTransform({
       destination: this._outputWritable,
       normalizeNewlines: NewlineKind.OsDefault,
       removeColors: !colors.enabled

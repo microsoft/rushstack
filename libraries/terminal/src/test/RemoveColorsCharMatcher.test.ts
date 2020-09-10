@@ -3,13 +3,13 @@
 
 import * as colors from 'colors';
 
-import { RemoveColorsCharMatcher } from '../RemoveColorsCharMatcher';
-import { CharMatcherState } from '../CharMatcher';
+import { RemoveColorsTextRewriter } from '../RemoveColorsTextRewriter';
+import { TextRewriterState } from '../TextRewriter';
 import { AnsiEscape } from '@rushstack/node-core-library';
 
 function testCase(inputs: string[]): void {
-  const matcher: RemoveColorsCharMatcher = new RemoveColorsCharMatcher();
-  const state: CharMatcherState = matcher.initialize();
+  const matcher: RemoveColorsTextRewriter = new RemoveColorsTextRewriter();
+  const state: TextRewriterState = matcher.initialize();
   const outputs: string[] = inputs.map((x) => matcher.process(state, x));
   const flush: string = matcher.flush(state);
   if (flush !== '') {
@@ -23,7 +23,7 @@ function testCase(inputs: string[]): void {
   }).toMatchSnapshot();
 }
 
-describe('RemoveColorsCharMatcher', () => {
+describe('RemoveColorsTextRewriter', () => {
   let initialColorsEnabled: boolean;
 
   beforeAll(() => {

@@ -2,41 +2,41 @@
 // See LICENSE in the project root for license information.
 
 import { Text, NewlineKind } from '@rushstack/node-core-library';
-import { CharMatcher, CharMatcherState } from './CharMatcher';
+import { TextRewriter, TextRewriterState } from './TextRewriter';
 
-interface INormalizeNewlinesCharMatcherState extends CharMatcherState {
+interface INormalizeNewlinesTextRewriterState extends TextRewriterState {
   characterToIgnore: string;
   incompleteLine: boolean;
 }
 
 /** @beta */
-export interface INormalizeNewlinesCharMatcherOptions {
+export interface INormalizeNewlinesTextRewriterOptions {
   newlineKind: NewlineKind;
   ensureNewlineAtEnd?: boolean;
 }
 
 /** @beta */
-export class NormalizeNewlinesCharMatcher extends CharMatcher {
+export class NormalizeNewlinesTextRewriter extends TextRewriter {
   public readonly newlineKind: NewlineKind;
   public readonly newline: string;
   public readonly ensureNewlineAtEnd: boolean;
 
-  public constructor(options: INormalizeNewlinesCharMatcherOptions) {
+  public constructor(options: INormalizeNewlinesTextRewriterOptions) {
     super();
     this.newlineKind = options.newlineKind;
     this.newline = Text.getNewline(options.newlineKind);
     this.ensureNewlineAtEnd = !!options.ensureNewlineAtEnd;
   }
 
-  public initialize(): CharMatcherState {
+  public initialize(): TextRewriterState {
     return {
       characterToIgnore: '',
       incompleteLine: false
-    } as INormalizeNewlinesCharMatcherState;
+    } as INormalizeNewlinesTextRewriterState;
   }
 
-  public process(unknownState: CharMatcherState, text: string): string {
-    const state: INormalizeNewlinesCharMatcherState = unknownState as INormalizeNewlinesCharMatcherState;
+  public process(unknownState: TextRewriterState, text: string): string {
+    const state: INormalizeNewlinesTextRewriterState = unknownState as INormalizeNewlinesTextRewriterState;
 
     let result: string = '';
 
@@ -68,8 +68,8 @@ export class NormalizeNewlinesCharMatcher extends CharMatcher {
     return result;
   }
 
-  public flush(unknownState: CharMatcherState): string {
-    const state: INormalizeNewlinesCharMatcherState = unknownState as INormalizeNewlinesCharMatcherState;
+  public flush(unknownState: TextRewriterState): string {
+    const state: INormalizeNewlinesTextRewriterState = unknownState as INormalizeNewlinesTextRewriterState;
     state.characterToIgnore = '';
 
     if (state.incompleteLine) {

@@ -5,50 +5,50 @@ import { NewlineKind } from '@rushstack/node-core-library';
 
 import { ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
 import { TerminalTransform, ITerminalTransformOptions } from './TerminalTransform';
-import { CharMatcher, CharMatcherState } from './CharMatcher';
-import { RemoveColorsCharMatcher } from './RemoveColorsCharMatcher';
-import { NormalizeNewlinesCharMatcher } from './NormalizeNewlinesCharMatcher';
+import { TextRewriter, TextRewriterState } from './TextRewriter';
+import { RemoveColorsTextRewriter } from './RemoveColorsTextRewriter';
+import { NormalizeNewlinesTextRewriter } from './NormalizeNewlinesTextRewriter';
 
 /** @beta */
-export interface ICharMatcherTransformOptions extends ITerminalTransformOptions {
-  charMatchers?: CharMatcher[];
+export interface ITextRewriterTransformOptions extends ITerminalTransformOptions {
+  textRewriters?: TextRewriter[];
   removeColors?: boolean;
   normalizeNewlines?: NewlineKind;
   ensureNewlineAtEnd?: boolean;
 }
 
 /** @beta */
-export class CharMatcherTransform extends TerminalTransform {
-  private readonly _stderrStates: CharMatcherState[];
-  private readonly _stdoutStates: CharMatcherState[];
+export class TextRewriterTransform extends TerminalTransform {
+  private readonly _stderrStates: TextRewriterState[];
+  private readonly _stdoutStates: TextRewriterState[];
 
-  public readonly charMatchers: ReadonlyArray<CharMatcher>;
+  public readonly textRewriters: ReadonlyArray<TextRewriter>;
 
-  public constructor(options: ICharMatcherTransformOptions) {
+  public constructor(options: ITextRewriterTransformOptions) {
     super(options);
 
-    const charMatchers: CharMatcher[] = options.charMatchers || [];
+    const textRewriters: TextRewriter[] = options.textRewriters || [];
 
     if (options.removeColors) {
-      charMatchers.push(new RemoveColorsCharMatcher());
+      textRewriters.push(new RemoveColorsTextRewriter());
     }
     if (options.normalizeNewlines) {
-      charMatchers.push(
-        new NormalizeNewlinesCharMatcher({
+      textRewriters.push(
+        new NormalizeNewlinesTextRewriter({
           newlineKind: options.normalizeNewlines,
           ensureNewlineAtEnd: options.ensureNewlineAtEnd
         })
       );
     }
 
-    if (charMatchers.length === 0) {
-      throw new Error('CharMatcherTransform requires at least one matcher');
+    if (textRewriters.length === 0) {
+      throw new Error('TextRewriterTransform requires at least one matcher');
     }
 
-    this.charMatchers = charMatchers;
+    this.textRewriters = textRewriters;
 
-    this._stderrStates = this.charMatchers.map((x) => x.initialize());
-    this._stdoutStates = this.charMatchers.map((x) => x.initialize());
+    this._stderrStates = this.textRewriters.map((x) => x.initialize());
+    this._stdoutStates = this.textRewriters.map((x) => x.initialize());
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
@@ -61,11 +61,11 @@ export class CharMatcherTransform extends TerminalTransform {
     }
   }
 
-  private _processText(chunk: ITerminalChunk, states: CharMatcherState[]): void {
+  private _processText(chunk: ITerminalChunk, states: TextRewriterState[]): void {
     let text: string = chunk.text;
     for (let i: number = 0; i < states.length; ++i) {
       if (text.length > 0) {
-        text = this.charMatchers[i].process(states[i], text);
+        text = this.textRewriters[i].process(states[i], text);
       }
     }
     if (text.length > 0) {
@@ -81,13 +81,13 @@ export class CharMatcherTransform extends TerminalTransform {
     }
   }
 
-  private _flushText(states: CharMatcherState[], chunkKind: TerminalChunkKind): void {
+  private _flushText(states: TextRewriterState[], chunkKind: TerminalChunkKind): void {
     let text: string = '';
     for (let i: number = 0; i < states.length; ++i) {
       if (text.length > 0) {
-        text = this.charMatchers[i].process(states[i], text);
+        text = this.textRewriters[i].process(states[i], text);
       }
-      text += this.charMatchers[i].flush(states[i]);
+      text += this.textRewriters[i].flush(states[i]);
     }
     if (text.length > 0) {
       this.destination.writeChunk({

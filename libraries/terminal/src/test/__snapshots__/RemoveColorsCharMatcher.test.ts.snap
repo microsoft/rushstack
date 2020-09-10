@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`RemoveColorsCharMatcher 01 should process empty inputs 1`] = `
+exports[`RemoveColorsTextRewriter 01 should process empty inputs 1`] = `
 Object {
   "inputs": Array [],
   "outputs": Array [],
 }
 `;
 
-exports[`RemoveColorsCharMatcher 01 should process empty inputs 2`] = `
+exports[`RemoveColorsTextRewriter 01 should process empty inputs 2`] = `
 Object {
   "inputs": Array [
     "",
@@ -18,7 +18,7 @@ Object {
 }
 `;
 
-exports[`RemoveColorsCharMatcher 01 should process empty inputs 3`] = `
+exports[`RemoveColorsTextRewriter 01 should process empty inputs 3`] = `
 Object {
   "inputs": Array [
     "",
@@ -33,7 +33,7 @@ Object {
 }
 `;
 
-exports[`RemoveColorsCharMatcher 02 should remove colors from complete chunks 1`] = `
+exports[`RemoveColorsTextRewriter 02 should remove colors from complete chunks 1`] = `
 Object {
   "inputs": Array [
     "[red]1[default]",
@@ -44,7 +44,7 @@ Object {
 }
 `;
 
-exports[`RemoveColorsCharMatcher 02 should remove colors from complete chunks 2`] = `
+exports[`RemoveColorsTextRewriter 02 should remove colors from complete chunks 2`] = `
 Object {
   "inputs": Array [
     "[red]1[default][green]2[default]",
@@ -55,7 +55,7 @@ Object {
 }
 `;
 
-exports[`RemoveColorsCharMatcher 02 should remove colors from complete chunks 3`] = `
+exports[`RemoveColorsTextRewriter 02 should remove colors from complete chunks 3`] = `
 Object {
   "inputs": Array [
     "[red]1[default]2[green]3[default]",
@@ -66,7 +66,7 @@ Object {
 }
 `;
 
-exports[`RemoveColorsCharMatcher 03 should remove colors from 1-character chunks 1`] = `
+exports[`RemoveColorsTextRewriter 03 should remove colors from 1-character chunks 1`] = `
 Object {
   "inputs": Array [
     "1",
@@ -99,7 +99,7 @@ Object {
 }
 `;
 
-exports[`RemoveColorsCharMatcher 04 should pass through incomplete partial matches 1`] = `
+exports[`RemoveColorsTextRewriter 04 should pass through incomplete partial matches 1`] = `
 Object {
   "inputs": Array [
     "",
@@ -112,7 +112,7 @@ Object {
 }
 `;
 
-exports[`RemoveColorsCharMatcher 04 should pass through incomplete partial matches 2`] = `
+exports[`RemoveColorsTextRewriter 04 should pass through incomplete partial matches 2`] = `
 Object {
   "inputs": Array [
     "[
@@ -125,7 +125,7 @@ Object {
 }
 `;
 
-exports[`RemoveColorsCharMatcher 04 should pass through incomplete partial matches 3`] = `
+exports[`RemoveColorsTextRewriter 04 should pass through incomplete partial matches 3`] = `
 Object {
   "inputs": Array [
     "[1",

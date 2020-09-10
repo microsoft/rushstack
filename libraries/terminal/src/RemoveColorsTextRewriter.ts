@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { AnsiEscape } from '@rushstack/node-core-library';
-import { CharMatcher, CharMatcherState } from './CharMatcher';
+import { TextRewriter, TextRewriterState } from './TextRewriter';
 
 enum State {
   // Buffer is empty, and we're looking for the ESC character
@@ -13,19 +13,19 @@ enum State {
   ReadingCodes
 }
 
-interface IRemoveColorsCharMatcherState extends CharMatcherState {
+interface IRemoveColorsTextRewriterState extends TextRewriterState {
   buffer: string;
   parseState: State;
 }
 
 /** @beta */
-export class RemoveColorsCharMatcher extends CharMatcher {
-  public initialize(): CharMatcherState {
-    return { buffer: '', parseState: State.Start } as IRemoveColorsCharMatcherState;
+export class RemoveColorsTextRewriter extends TextRewriter {
+  public initialize(): TextRewriterState {
+    return { buffer: '', parseState: State.Start } as IRemoveColorsTextRewriterState;
   }
 
-  public process(unknownState: CharMatcherState, text: string): string {
-    const state: IRemoveColorsCharMatcherState = unknownState as IRemoveColorsCharMatcherState;
+  public process(unknownState: TextRewriterState, text: string): string {
+    const state: IRemoveColorsTextRewriterState = unknownState as IRemoveColorsTextRewriterState;
 
     // We will be matching AnsiEscape._csiRegExp:
     //
@@ -88,8 +88,8 @@ export class RemoveColorsCharMatcher extends CharMatcher {
     return result;
   }
 
-  public flush(unknownState: CharMatcherState): string {
-    const state: IRemoveColorsCharMatcherState = unknownState as IRemoveColorsCharMatcherState;
+  public flush(unknownState: TextRewriterState): string {
+    const state: IRemoveColorsTextRewriterState = unknownState as IRemoveColorsTextRewriterState;
 
     const result: string = state.buffer;
     state.buffer = '';
