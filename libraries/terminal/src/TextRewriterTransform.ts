@@ -9,15 +9,56 @@ import { TextRewriter, TextRewriterState } from './TextRewriter';
 import { RemoveColorsTextRewriter } from './RemoveColorsTextRewriter';
 import { NormalizeNewlinesTextRewriter } from './NormalizeNewlinesTextRewriter';
 
-/** @beta */
+/**
+ * Constructor options for {@link TextRewriterTransform}.
+ *
+ * @public
+ */
 export interface ITextRewriterTransformOptions extends ITerminalTransformOptions {
+  /**
+   * A list of rewriters to be applied.  More items may be appended to the list, for example
+   * if {@link ITextRewriterTransformOptions.removeColors} is specified.
+   *
+   * @remarks
+   * The final list must contain at least one item.
+   */
   textRewriters?: TextRewriter[];
+
+  /**
+   * If specified, a {@link RemoveColorsTextRewriter} will be appended to the list of rewriters.
+   */
   removeColors?: boolean;
+
+  /**
+   * If `normalizeNewlines` or `ensureNewlineAtEnd` is specified, a {@link NormalizeNewlinesTextRewriter}
+   * will be appended to the list of rewriters with the specified settings.
+   *
+   * @remarks
+   * See {@link INormalizeNewlinesTextRewriterOptions} for details.
+   */
   normalizeNewlines?: NewlineKind;
+
+  /**
+   * If `normalizeNewlines` or `ensureNewlineAtEnd` is specified, a {@link NormalizeNewlinesTextRewriter}
+   * will be appended to the list of rewriters with the specified settings.
+   *
+   * @remarks
+   * See {@link INormalizeNewlinesTextRewriterOptions} for details.
+   */
   ensureNewlineAtEnd?: boolean;
 }
 
-/** @beta */
+/**
+ * A {@link TerminalTransform} subclass that performs one or more {@link TextRewriter} operations.
+ * The most common operations are {@link NormalizeNewlinesTextRewriter} and {@link RemoveColorsTextRewriter}.
+ *
+ * @remarks
+ * The `TextRewriter` operations are applied separately to the `stderr` and `stdout` streams.
+ * If multiple {@link ITextRewriterTransformOptions.textRewriters} are configured, they are applied
+ * in the order that they appear in the array.
+ *
+ * @public
+ */
 export class TextRewriterTransform extends TerminalTransform {
   private readonly _stderrStates: TextRewriterState[];
   private readonly _stdoutStates: TextRewriterState[];
@@ -81,13 +122,13 @@ export class TextRewriterTransform extends TerminalTransform {
     }
   }
 
-  private _flushText(states: TextRewriterState[], chunkKind: TerminalChunkKind): void {
+  private _closeRewriters(states: TextRewriterState[], chunkKind: TerminalChunkKind): void {
     let text: string = '';
     for (let i: number = 0; i < states.length; ++i) {
       if (text.length > 0) {
         text = this.textRewriters[i].process(states[i], text);
       }
-      text += this.textRewriters[i].flush(states[i]);
+      text += this.textRewriters[i].close(states[i]);
     }
     if (text.length > 0) {
       this.destination.writeChunk({
@@ -98,8 +139,8 @@ export class TextRewriterTransform extends TerminalTransform {
   }
 
   protected onClose(): void {
-    this._flushText(this._stderrStates, TerminalChunkKind.Stderr);
-    this._flushText(this._stderrStates, TerminalChunkKind.Stdout);
+    this._closeRewriters(this._stderrStates, TerminalChunkKind.Stderr);
+    this._closeRewriters(this._stderrStates, TerminalChunkKind.Stdout);
 
     this.autocloseDestination();
   }

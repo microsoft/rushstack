@@ -106,7 +106,7 @@ Object {
   ],
   "outputs": Array [
     "",
-    "--flush--",
+    "--close--",
     "",
   ],
 }
@@ -132,7 +132,7 @@ Object {
   ],
   "outputs": Array [
     "",
-    "--flush--",
+    "--close--",
     "[1",
   ],
 }

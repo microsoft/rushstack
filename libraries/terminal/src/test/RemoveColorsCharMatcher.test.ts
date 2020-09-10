@@ -11,10 +11,10 @@ function testCase(inputs: string[]): void {
   const matcher: RemoveColorsTextRewriter = new RemoveColorsTextRewriter();
   const state: TextRewriterState = matcher.initialize();
   const outputs: string[] = inputs.map((x) => matcher.process(state, x));
-  const flush: string = matcher.flush(state);
-  if (flush !== '') {
-    outputs.push('--flush--');
-    outputs.push(flush);
+  const closeOutput: string = matcher.close(state);
+  if (closeOutput !== '') {
+    outputs.push('--close--');
+    outputs.push(closeOutput);
   }
 
   expect({

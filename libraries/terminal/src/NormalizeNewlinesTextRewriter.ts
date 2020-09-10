@@ -68,7 +68,7 @@ export class NormalizeNewlinesTextRewriter extends TextRewriter {
     return result;
   }
 
-  public flush(unknownState: TextRewriterState): string {
+  public close(unknownState: TextRewriterState): string {
     const state: INormalizeNewlinesTextRewriterState = unknownState as INormalizeNewlinesTextRewriterState;
     state.characterToIgnore = '';
 

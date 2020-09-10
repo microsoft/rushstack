@@ -15,7 +15,7 @@ function testCase(input: string): void {
   for (let i = 0; i < input.length; ++i) {
     result += matcher.process(state, input[i]);
   }
-  result += matcher.flush(state);
+  result += matcher.close(state);
 
   expect(result).toEqual(Text.convertToLf(input));
 }

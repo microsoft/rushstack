@@ -88,7 +88,7 @@ export class RemoveColorsTextRewriter extends TextRewriter {
     return result;
   }
 
-  public flush(unknownState: TextRewriterState): string {
+  public close(unknownState: TextRewriterState): string {
     const state: IRemoveColorsTextRewriterState = unknownState as IRemoveColorsTextRewriterState;
 
     const result: string = state.buffer;
