@@ -214,11 +214,6 @@ export class ProjectBuilder extends BaseBuilder {
         FileSystem.deleteFile(legacyDepsPath);
 
         if (!this._commandToRun) {
-          terminal.writeStdoutLine(
-            `The task command "${this._commandToRun}" was registered in the package.json but is blank,` +
-              ` so no action will be taken.`
-          );
-
           // Write deps on success.
           if (currentPackageDeps) {
             JsonFile.save(currentPackageDeps, currentDepsPath, {

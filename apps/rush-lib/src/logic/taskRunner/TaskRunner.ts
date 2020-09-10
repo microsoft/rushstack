@@ -11,7 +11,7 @@ import {
   CharMatcherTransform
 } from '@rushstack/terminal';
 import { StreamCollator, CollatedTerminal, CollatedWriter } from '@rushstack/stream-collator';
-import { AlreadyReportedError, NewlineKind } from '@rushstack/node-core-library';
+import { AlreadyReportedError, NewlineKind, InternalError, Sort } from '@rushstack/node-core-library';
 
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { Task } from './Task';
@@ -33,6 +33,9 @@ export interface ITaskRunnerOptions {
  * tasks are complete, or prematurely fails if any of the tasks fail.
  */
 export class TaskRunner {
+  // Format "======" lines for a shell window with classic 80 columns
+  private static readonly _ASCII_HEADER_WIDTH: number = 79;
+
   private _tasks: Task[];
   private _changedProjectsOnly: boolean;
   private _allowWarningsInSuccessfulBuild: boolean;
@@ -111,10 +114,9 @@ export class TaskRunner {
     if (writer) {
       this._completedTasks++;
 
-      // Format a header like this, for a shell window with classic 80 columns
+      // Format a header like this
       //
       // ==[ @rushstack/the-long-thing ]=================[ 1 of 1000 ]==
-      const headerWidth: number = 79;
 
       // leftPart: "==[ @rushstack/the-long-thing "
       const leftPart: string = colors.gray('==[') + ' ' + colors.cyan(writer.taskName) + ' ';
@@ -128,7 +130,7 @@ export class TaskRunner {
       // middlePart: "]=================["
       const twoBracketsLength: number = 2;
       const middlePartLengthMinusTwoBrackets: number = Math.max(
-        headerWidth - (leftPartLength + rightPartLength + twoBracketsLength),
+        TaskRunner._ASCII_HEADER_WIDTH - (leftPartLength + rightPartLength + twoBracketsLength),
         0
       );
 
@@ -281,12 +283,16 @@ export class TaskRunner {
   /**
    * Marks a task and all its dependents as blocked
    */
-  private _markTaskAsBlocked(task: Task, failedTask: Task): void {
-    if (task.status === TaskStatus.Ready) {
+  private _markTaskAsBlocked(blockedTask: Task, failedTask: Task): void {
+    if (blockedTask.status === TaskStatus.Ready) {
       this._completedTasks++;
-      task.collatedWriter.terminal.writeStderrLine(`"${task.name}" is blocked by "${failedTask.name}".`);
-      task.status = TaskStatus.Blocked;
-      task.dependents.forEach((dependent: Task) => {
+
+      // Note: We cannot write to task.collatedWriter because "blockedTask" will be skipped
+      failedTask.collatedWriter.terminal.writeStderrLine(
+        `"${blockedTask.name}" is blocked by "${failedTask.name}".`
+      );
+      blockedTask.status = TaskStatus.Blocked;
+      blockedTask.dependents.forEach((dependent: Task) => {
         this._markTaskAsBlocked(dependent, failedTask);
       });
     }
@@ -346,31 +352,59 @@ export class TaskRunner {
    */
   private _printTaskStatus(): void {
     const tasksByStatus: { [status: number]: Task[] } = {};
-    this._tasks.forEach((task: Task) => {
+    for (const task of this._tasks) {
+      switch (task.status) {
+        // These are the sections that we will report below
+        case TaskStatus.Skipped:
+        case TaskStatus.Success:
+        case TaskStatus.SuccessWithWarning:
+        case TaskStatus.Blocked:
+        case TaskStatus.Failure:
+          break;
+        default:
+          // This should never happen
+          throw new InternalError('Unexpected task status: ' + task.status);
+      }
+
       if (tasksByStatus[task.status]) {
         tasksByStatus[task.status].push(task);
       } else {
         tasksByStatus[task.status] = [task];
       }
-    });
+    }
 
+    // Skip a few lines before we start the summary
+    this._terminal.writeStderrLine('');
+    this._terminal.writeStderrLine('');
     this._terminal.writeStderrLine('');
 
-    // These cases should never happen:
-    this._printStatus(TaskStatus.Executing, tasksByStatus, colors.red);
-    this._printStatus(TaskStatus.Ready, tasksByStatus, colors.red);
-
     // These are ordered so that the most interesting statuses appear last:
-    this._printStatus(TaskStatus.Skipped, tasksByStatus, colors.gray);
-    this._printStatus(TaskStatus.Success, tasksByStatus, colors.green);
-    this._printStatus(
-      TaskStatus.SuccessWithWarning,
+    this._writeCondensedSummary(
+      TaskStatus.Skipped,
       tasksByStatus,
-      (text: string) => colors.yellow(text),
-      (text: string) => colors.yellow(colors.underline(text))
+      colors.green,
+      'These projects were already up to date:'
     );
-    this._printStatus(TaskStatus.Blocked, tasksByStatus, colors.red);
-    this._printStatus(TaskStatus.Failure, tasksByStatus, colors.red);
+
+    this._writeCondensedSummary(
+      TaskStatus.Success,
+      tasksByStatus,
+      colors.green,
+      'These projects completed successfully:'
+    );
+
+    this._writeDetailedSummary(TaskStatus.SuccessWithWarning, tasksByStatus, colors.yellow, 'WARNING');
+
+    this._writeCondensedSummary(
+      TaskStatus.Blocked,
+      tasksByStatus,
+      colors.white,
+      'These projects were blocked by dependencies that failed:'
+    );
+
+    this._writeDetailedSummary(TaskStatus.Failure, tasksByStatus, colors.red);
+
+    this._terminal.writeStdoutLine('');
 
     const tasksWithErrors: Task[] = tasksByStatus[TaskStatus.Failure];
     if (tasksWithErrors) {
@@ -384,53 +418,132 @@ export class TaskRunner {
     this._terminal.writeStdoutLine('');
   }
 
-  private _printStatus(
+  private _writeCondensedSummary(
     status: TaskStatus,
     tasksByStatus: { [status: number]: Task[] },
-    color: (text: string) => string,
-    headingColor: (text: string) => string = color
+    headingColor: (text: string) => string,
+    preamble: string
   ): void {
-    const tasks: Task[] = tasksByStatus[status];
+    // Example:
+    //
+    // ==[ BLOCKED: 4 projects ]==============================================================
+    //
+    // These projects were blocked by dependencies that failed:
+    //   @scope/name
+    //   e
+    //   k
 
-    if (tasks && tasks.length) {
-      this._terminal.writeStdoutLine(headingColor(`${status} (${tasks.length})`));
-      this._terminal.writeStdoutLine(color('================================'));
-      for (let i: number = 0; i < tasks.length; i++) {
-        const task: Task = tasks[i];
+    const tasks: Task[] | undefined = tasksByStatus[status];
+    if (!tasks || tasks.length === 0) {
+      return;
+    }
+    Sort.sortBy(tasks, (x) => x.name);
 
-        switch (status) {
-          case TaskStatus.Executing:
-          case TaskStatus.Ready:
-          case TaskStatus.Skipped:
-            this._terminal.writeStdoutLine(color(task.name));
-            break;
+    this._writeSummaryHeader(status, tasks, headingColor);
+    this._terminal.writeStdoutLine(preamble);
 
-          case TaskStatus.Success:
-          case TaskStatus.SuccessWithWarning:
-          case TaskStatus.Blocked:
-          case TaskStatus.Failure:
-            if (task.stopwatch && !task.builder.hadEmptyScript) {
-              const time: string = task.stopwatch.toString();
-              this._terminal.writeStdoutLine(headingColor(`${task.name} (${time})`));
-            } else {
-              this._terminal.writeStdoutLine(headingColor(`${task.name}`));
-            }
-            break;
-        }
+    const longestTaskName: number = Math.max(...tasks.map((x) => x.name.length));
 
-        if (task.collatedWriter) {
-          const shouldPrintDetails: boolean =
-            task.status === TaskStatus.Failure || task.status === TaskStatus.SuccessWithWarning;
+    for (const task of tasks) {
+      if (task.stopwatch && !task.builder.hadEmptyScript) {
+        const time: string = task.stopwatch.toString();
+        const padding: string = ' '.repeat(longestTaskName - task.name.length);
+        this._terminal.writeStdoutLine(`  ${task.name}${padding}    ${time}`);
+      } else {
+        this._terminal.writeStdoutLine(`  ${task.name}`);
+      }
+    }
+    this._terminal.writeStdoutLine('');
+  }
 
-          const details: string = task.stdioSummarizer.getReport();
-          if (details && shouldPrintDetails) {
-            // Don't write a newline, because the report will always end with a newline
-            this._terminal.writeChunk({ text: details, kind: TerminalChunkKind.Stdout });
-          }
-        }
+  private _writeDetailedSummary(
+    status: TaskStatus,
+    tasksByStatus: { [status: number]: Task[] },
+    headingColor: (text: string) => string,
+    shortStatusName?: string
+  ): void {
+    // Example:
+    //
+    // ==[ SUCCESS WITH WARNINGS: 2 projects ]================================
+    //
+    // --[ WARNINGS: f ]------------------------------------[ 5.07 seconds ]--
+    //
+    // [eslint] Warning: src/logic/taskRunner/TaskRunner.ts:393:3 ...
+
+    const tasks: Task[] | undefined = tasksByStatus[status];
+    if (!tasks || tasks.length === 0) {
+      return;
+    }
+
+    this._writeSummaryHeader(status, tasks, headingColor);
+
+    if (shortStatusName === undefined) {
+      shortStatusName = status;
+    }
+
+    for (const task of tasks) {
+      // Format a header like this
+      //
+      // --[ WARNINGS: f ]------------------------------------[ 5.07 seconds ]--
+
+      // leftPart: "--[ WARNINGS: f "
+      const subheadingText: string = `${shortStatusName}: ${task.name}`;
+
+      const leftPart: string = colors.gray('--[') + ' ' + headingColor(subheadingText) + ' ';
+      const leftPartLength: number = 4 + subheadingText.length + 1;
+
+      // rightPart: " 5.07 seconds ]--"
+      const time: string = task.stopwatch.toString();
+      const rightPart: string = ' ' + colors.white(time) + ' ' + colors.gray(']--');
+      const rightPartLength: number = 1 + time.length + 1 + 3;
+
+      // middlePart: "]----------------------["
+      const twoBracketsLength: number = 2;
+      const middlePartLengthMinusTwoBrackets: number = Math.max(
+        TaskRunner._ASCII_HEADER_WIDTH - (leftPartLength + rightPartLength + twoBracketsLength),
+        0
+      );
+
+      const middlePart: string = colors.gray(']' + '-'.repeat(middlePartLengthMinusTwoBrackets) + '[');
+
+      this._terminal.writeStdoutLine(leftPart + middlePart + rightPart + '\n');
+
+      const details: string = task.stdioSummarizer.getReport();
+      if (details) {
+        // Don't write a newline, because the report will always end with a newline
+        this._terminal.writeChunk({ text: details, kind: TerminalChunkKind.Stdout });
       }
 
-      this._terminal.writeStdoutLine(color('================================' + os.EOL));
+      this._terminal.writeStdoutLine('');
     }
+  }
+
+  private _writeSummaryHeader(
+    status: TaskStatus,
+    tasks: Task[],
+    headingColor: (text: string) => string
+  ): void {
+    // Format a header like this
+    //
+    // ==[ FAILED: 2 projects ]================================================
+
+    // "2 projects"
+    const projectsText: string = tasks.length.toString() + (tasks.length === 1 ? ' project' : ' projects');
+    const headingText: string = `${status}: ${projectsText}`;
+
+    // leftPart: "==[ FAILED: 2 projects "
+    const leftPart: string = colors.gray('==[') + ' ' + headingColor(headingText) + ' ';
+    const leftPartLength: number = 3 + 1 + headingText.length + 1;
+
+    const rightPartLengthMinusBracket: number = Math.max(
+      TaskRunner._ASCII_HEADER_WIDTH - (leftPartLength + 1),
+      0
+    );
+
+    // rightPart: "]======================"
+    const rightPart: string = colors.gray(']' + '='.repeat(rightPartLengthMinusBracket));
+
+    this._terminal.writeStdoutLine(leftPart + rightPart);
+    this._terminal.writeStdoutLine('');
   }
 }
