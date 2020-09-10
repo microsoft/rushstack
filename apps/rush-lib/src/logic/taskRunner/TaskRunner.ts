@@ -292,7 +292,7 @@ export class TaskRunner {
       this._completedTasks++;
 
       // Note: We cannot write to task.collatedWriter because "blockedTask" will be skipped
-      failedTask.collatedWriter.terminal.writeStderrLine(
+      failedTask.collatedWriter.terminal.writeStdoutLine(
         `"${blockedTask.name}" is blocked by "${failedTask.name}".`
       );
       blockedTask.status = TaskStatus.Blocked;
@@ -378,9 +378,9 @@ export class TaskRunner {
     }
 
     // Skip a few lines before we start the summary
-    this._terminal.writeStderrLine('');
-    this._terminal.writeStderrLine('');
-    this._terminal.writeStderrLine('');
+    this._terminal.writeStdoutLine('');
+    this._terminal.writeStdoutLine('');
+    this._terminal.writeStdoutLine('');
 
     // These are ordered so that the most interesting statuses appear last:
     this._writeCondensedSummary(

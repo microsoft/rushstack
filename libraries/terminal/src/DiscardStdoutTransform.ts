@@ -44,10 +44,12 @@ export class DiscardStdoutTransform extends TerminalTransform {
 
       this.destination.writeChunk({ kind: TerminalChunkKind.Stderr, text: correctedText });
 
-      if (correctedText[correctedText.length - 1] === '\n') {
-        this._state = State.Okay;
-      } else {
-        this._state = State.StderrFragment;
+      if (correctedText.length > 0) {
+        if (correctedText[correctedText.length - 1] === '\n') {
+          this._state = State.Okay;
+        } else {
+          this._state = State.StderrFragment;
+        }
       }
     } else {
       this.destination.writeChunk(chunk);
