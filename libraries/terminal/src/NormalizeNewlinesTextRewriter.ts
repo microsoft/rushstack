@@ -9,16 +9,44 @@ interface INormalizeNewlinesTextRewriterState extends TextRewriterState {
   incompleteLine: boolean;
 }
 
-/** @beta */
+/**
+ * Constructor options for {@link NormalizeNewlinesTextRewriter}
+ *
+ * @public
+ */
 export interface INormalizeNewlinesTextRewriterOptions {
+  /**
+   * Specifies how newlines should be represented in the output stream.
+   */
   newlineKind: NewlineKind;
+
+  /**
+   * If `true`, then `NormalizeNewlinesTextRewriter.close()` will append a newline to
+   * the output if it ends with an incomplete line.
+   *
+   * @remarks
+   * If the output is an empty string, then a newline will NOT be appended,
+   * because writing an empty string does not produce an incomplete line.
+   */
   ensureNewlineAtEnd?: boolean;
 }
 
-/** @beta */
+/**
+ * For use with {@link TextRewriterTransform}, this rewriter converts all newlines to
+ * a standard format.
+ *
+ * @public
+ */
 export class NormalizeNewlinesTextRewriter extends TextRewriter {
+  /** {@inheritDoc INormalizeNewlinesTextRewriterOptions.newlineKind} */
   public readonly newlineKind: NewlineKind;
+
+  /**
+   * The specific character sequence that will be used when appending newlines.
+   */
   public readonly newline: string;
+
+  /** {@inheritDoc INormalizeNewlinesTextRewriterOptions.ensureNewlineAtEnd} */
   public readonly ensureNewlineAtEnd: boolean;
 
   public constructor(options: INormalizeNewlinesTextRewriterOptions) {

@@ -5,7 +5,11 @@ import { ITerminalChunk } from './ITerminalChunk';
 import { TerminalWritable } from './TerminalWritable';
 import { AnsiEscape } from '@rushstack/node-core-library';
 
-/** @beta */
+/**
+ * A {@link TerminalWritable} subclass for use by unit tests.
+ *
+ * @beta
+ */
 export class MockWritable extends TerminalWritable {
   public readonly chunks: ITerminalChunk[] = [];
 

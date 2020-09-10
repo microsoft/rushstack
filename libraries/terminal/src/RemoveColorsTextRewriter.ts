@@ -18,7 +18,12 @@ interface IRemoveColorsTextRewriterState extends TextRewriterState {
   parseState: State;
 }
 
-/** @beta */
+/**
+ * For use with {@link TextRewriterTransform}, this rewriter removes ANSI escape codes
+ * including colored text.
+ *
+ * @public
+ */
 export class RemoveColorsTextRewriter extends TextRewriter {
   public initialize(): TextRewriterState {
     return { buffer: '', parseState: State.Start } as IRemoveColorsTextRewriterState;
