@@ -5,7 +5,16 @@ import * as process from 'process';
 import { ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
 import { TerminalWritable } from './TerminalWritable';
 
-/** @beta */
+/**
+ * A {@link TerminalWritable} subclass that writes its output directly to the process `stdout` and `stderr`
+ * streams.
+ *
+ * @remarks
+ * This is the standard output target for a process.  You normally do not need to construct
+ * this class; the {@link StdioWritable."instance"} singleton can be used instead.
+ *
+ * @public
+ */
 export class StdioWritable extends TerminalWritable {
   public static instance: StdioWritable = new StdioWritable();
 

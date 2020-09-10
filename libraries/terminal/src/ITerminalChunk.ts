@@ -26,6 +26,9 @@ export const enum TerminalChunkKind {
  * an interactive progress bar.  We may also add other metadata, for example tracking whether
  * the `text` string is known to contain color codes or not.
  *
+ * The `ITerminalChunk` object should be considered to be immutable once it is created.
+ * For example, {@link SplitterTransform} may pass the same chunk to multiple destinations.
+ *
  * @public
  */
 export interface ITerminalChunk {

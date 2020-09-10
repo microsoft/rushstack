@@ -4,123 +4,81 @@
 
 ```ts
 
+import { Brand } from '@rushstack/node-core-library';
 import { NewlineKind } from '@rushstack/node-core-library';
 
-// @beta (undocumented)
+// @public
 export class CallbackWritable extends TerminalWritable {
     constructor(options: ICallbackWritableOptions);
     // (undocumented)
-    protected onClose(): void;
-    // (undocumented)
     protected onWriteChunk(chunk: ITerminalChunk): void;
 }
 
-// @beta (undocumented)
-export abstract class CharMatcher {
-    // (undocumented)
-    abstract flush(state: CharMatcherState): string;
-    // (undocumented)
-    abstract initialize(): CharMatcherState;
-    // (undocumented)
-    abstract process(state: CharMatcherState, text: string): string;
-}
-
-// @beta (undocumented)
-export type CharMatcherState = unknown;
-
-// @beta (undocumented)
-export class CharMatcherTransform extends TerminalTransform {
-    constructor(options: ICharMatcherTransformOptions);
-    // (undocumented)
-    readonly charMatchers: ReadonlyArray<CharMatcher>;
-    // (undocumented)
-    protected onClose(): void;
-    // (undocumented)
-    protected onWriteChunk(chunk: ITerminalChunk): void;
-    }
-
-// @beta (undocumented)
+// @beta
 export class DiscardStdoutTransform extends TerminalTransform {
     constructor(options: IDiscardStdoutTransformOptions);
     // (undocumented)
     protected onWriteChunk(chunk: ITerminalChunk): void;
     }
 
-// @beta (undocumented)
+// @public
 export interface ICallbackWritableOptions {
-    // (undocumented)
-    onClose: () => void;
     // (undocumented)
     onWriteChunk: (chunk: ITerminalChunk) => void;
 }
 
-// @beta (undocumented)
-export interface ICharMatcherTransformOptions extends ITerminalTransformOptions {
-    // (undocumented)
-    charMatchers?: CharMatcher[];
-    // (undocumented)
-    ensureNewlineAtEnd?: boolean;
-    // (undocumented)
-    normalizeNewlines?: NewlineKind;
-    // (undocumented)
-    removeColors?: boolean;
-}
-
-// @beta (undocumented)
+// @beta
 export interface IDiscardStdoutTransformOptions extends ITerminalTransformOptions {
 }
 
-// @beta (undocumented)
-export interface INormalizeNewlinesCharMatcherOptions {
-    // (undocumented)
+// @public
+export interface INormalizeNewlinesTextRewriterOptions {
     ensureNewlineAtEnd?: boolean;
-    // (undocumented)
     newlineKind: NewlineKind;
 }
 
-// @beta (undocumented)
+// @public
 export interface ISplitterTransformOptions extends ITerminalWritableOptions {
-    // (undocumented)
     destinations: TerminalWritable[];
 }
 
-// @beta (undocumented)
+// @beta
 export interface IStdioLineTransformOptions extends ITerminalTransformOptions {
-    // (undocumented)
     newlineKind?: NewlineKind;
 }
 
-// @beta (undocumented)
+// @beta
 export interface IStdioSummarizerOptions {
-    // (undocumented)
     leadingLines?: number;
-    // (undocumented)
     trailingLines?: number;
 }
 
-// @beta
+// @public
 export interface ITerminalChunk {
-    // (undocumented)
     kind: TerminalChunkKind;
-    // (undocumented)
     text: string;
 }
 
-// @beta (undocumented)
+// @public
 export interface ITerminalTransformOptions extends ITerminalWritableOptions {
-    // (undocumented)
     destination: TerminalWritable;
-    // (undocumented)
     preventDestinationAutoclose?: boolean;
 }
 
-// @beta (undocumented)
+// @public
 export interface ITerminalWritableOptions {
-    // (undocumented)
     preventAutoclose?: boolean;
 }
 
-// @beta (undocumented)
+// @public
+export interface ITextRewriterTransformOptions extends ITerminalTransformOptions {
+    ensureNewlineAtEnd?: boolean;
+    normalizeNewlines?: NewlineKind;
+    removeColors?: boolean;
+    textRewriters?: TextRewriter[];
+}
+
+// @beta
 export class MockWritable extends TerminalWritable {
     // (undocumented)
     readonly chunks: ITerminalChunk[];
@@ -134,34 +92,31 @@ export class MockWritable extends TerminalWritable {
     reset(): void;
 }
 
-// @beta (undocumented)
-export class NormalizeNewlinesCharMatcher extends CharMatcher {
-    constructor(options: INormalizeNewlinesCharMatcherOptions);
+// @public
+export class NormalizeNewlinesTextRewriter extends TextRewriter {
+    constructor(options: INormalizeNewlinesTextRewriterOptions);
     // (undocumented)
+    close(unknownState: TextRewriterState): string;
     readonly ensureNewlineAtEnd: boolean;
     // (undocumented)
-    flush(unknownState: CharMatcherState): string;
-    // (undocumented)
-    initialize(): CharMatcherState;
-    // (undocumented)
+    initialize(): TextRewriterState;
     readonly newline: string;
-    // (undocumented)
     readonly newlineKind: NewlineKind;
     // (undocumented)
-    process(unknownState: CharMatcherState, text: string): string;
+    process(unknownState: TextRewriterState, text: string): string;
 }
 
-// @beta (undocumented)
-export class RemoveColorsCharMatcher extends CharMatcher {
+// @public
+export class RemoveColorsTextRewriter extends TextRewriter {
     // (undocumented)
-    flush(unknownState: CharMatcherState): string;
+    close(unknownState: TextRewriterState): string;
     // (undocumented)
-    initialize(): CharMatcherState;
+    initialize(): TextRewriterState;
     // (undocumented)
-    process(unknownState: CharMatcherState, text: string): string;
+    process(unknownState: TextRewriterState, text: string): string;
 }
 
-// @beta (undocumented)
+// @public
 export class SplitterTransform extends TerminalWritable {
     constructor(options: ISplitterTransformOptions);
     // (undocumented)
@@ -172,7 +127,7 @@ export class SplitterTransform extends TerminalWritable {
     protected onWriteChunk(chunk: ITerminalChunk): void;
 }
 
-// @beta (undocumented)
+// @beta
 export class StderrLineTransform extends TerminalTransform {
     constructor(options: IStdioLineTransformOptions);
     // (undocumented)
@@ -183,16 +138,15 @@ export class StderrLineTransform extends TerminalTransform {
     protected onWriteChunk(chunk: ITerminalChunk): void;
     }
 
-// @beta (undocumented)
+// @beta
 export class StdioSummarizer extends TerminalWritable {
     constructor(options?: IStdioSummarizerOptions);
-    // (undocumented)
     getReport(): string;
     // (undocumented)
     onWriteChunk(chunk: ITerminalChunk): void;
     }
 
-// @beta (undocumented)
+// @public
 export class StdioWritable extends TerminalWritable {
     // (undocumented)
     static instance: StdioWritable;
@@ -200,42 +154,58 @@ export class StdioWritable extends TerminalWritable {
     protected onWriteChunk(chunk: ITerminalChunk): void;
 }
 
-// @beta
+// @public
 export const enum TerminalChunkKind {
-    // (undocumented)
     Stderr = "E",
-    // (undocumented)
     Stdout = "O"
 }
 
-// @beta (undocumented)
+// @public
 export abstract class TerminalTransform extends TerminalWritable {
     constructor(options: ITerminalTransformOptions);
-    // (undocumented)
+    // @sealed
     protected autocloseDestination(): void;
-    // (undocumented)
     readonly destination: TerminalWritable;
-    // (undocumented)
+    // @override (undocumented)
     protected onClose(): void;
-    // (undocumented)
     readonly preventDestinationAutoclose: boolean;
 }
 
-// @beta (undocumented)
+// @public
 export abstract class TerminalWritable {
     constructor(options?: ITerminalWritableOptions);
-    // (undocumented)
+    // @sealed
     close(): void;
-    // (undocumented)
+    // @sealed
     readonly isOpen: boolean;
-    // (undocumented)
+    // @virtual
     protected onClose(): void;
-    // (undocumented)
     protected abstract onWriteChunk(chunk: ITerminalChunk): void;
     // (undocumented)
     readonly preventAutoclose: boolean;
-    // (undocumented)
+    // @sealed
     writeChunk(chunk: ITerminalChunk): void;
+}
+
+// @public
+export abstract class TextRewriter {
+    abstract close(state: TextRewriterState): string;
+    abstract initialize(): TextRewriterState;
+    abstract process(state: TextRewriterState, input: string): string;
+}
+
+// @public
+export type TextRewriterState = Brand<unknown, 'TextRewriterState'>;
+
+// @public
+export class TextRewriterTransform extends TerminalTransform {
+    constructor(options: ITextRewriterTransformOptions);
+    // (undocumented)
+    protected onClose(): void;
+    // (undocumented)
+    protected onWriteChunk(chunk: ITerminalChunk): void;
+    // (undocumented)
+    readonly textRewriters: ReadonlyArray<TextRewriter>;
 }
 
 

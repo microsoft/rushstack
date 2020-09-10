@@ -4,13 +4,51 @@
 import { ITerminalChunk, TerminalChunkKind } from './ITerminalChunk';
 import { TerminalWritable } from './TerminalWritable';
 
-/** @beta */
+/**
+ * Constructor options for {@link StdioSummarizer}.
+ * @beta
+ */
 export interface IStdioSummarizerOptions {
+  /**
+   * Specifies the maximum number of leading lines to include in the summary.
+   * @defaultValue `10`
+   */
   leadingLines?: number;
+
+  /**
+   * Specifies the maximum number of trailing lines to include in the summary.
+   * @defaultValue `10`
+   */
   trailingLines?: number;
 }
 
-/** @beta */
+/**
+ * Summarizes the results of a failed build task by returning a subset of `stderr` output not to exceed
+ * a specified maximum number of lines.
+ *
+ * @remarks
+ * IMPORTANT: This transform assumes that its input was prepared by {@link StderrLineTransform}, so that each
+ * {@link ITerminalChunk.text} item is a single line terminated by a `"\n"` character.
+ *
+ * The {@link IStdioSummarizerOptions.leadingLines} and {@link IStdioSummarizerOptions.trailingLines}
+ * counts specify the maximum number of lines to be returned. Any additional lines will be omitted.
+ * For example, if `leadingLines` and `trailingLines` were set to `3`, then the summary of 16 `stderr` lines might
+ * look like this:
+ *
+ * ```
+ * Line 1
+ * Line 2
+ * Line 3
+ *   ...10 lines omitted...
+ * Line 14
+ * Line 15
+ * Line 16
+ * ```
+ *
+ * If the `stderr` output is completely empty, then the `stdout` output will be summarized instead.
+ *
+ * @beta
+ */
 export class StdioSummarizer extends TerminalWritable {
   // Capture up to this many leading lines
   private _leadingLines: number;
@@ -38,6 +76,12 @@ export class StdioSummarizer extends TerminalWritable {
     this._abridgedStderr = false;
   }
 
+  /**
+   * Returns the summary report.
+   *
+   * @remarks
+   * The `close()` method must be called before `getReport()` can be used.
+   */
   public getReport(): string {
     if (this.isOpen) {
       throw new Error('The summary cannot be prepared until after close() is called.');
