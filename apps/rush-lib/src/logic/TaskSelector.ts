@@ -36,9 +36,7 @@ export class TaskSelector {
     this._options = options;
 
     this._packageChangeAnalyzer = new PackageChangeAnalyzer(options.rushConfiguration);
-    this._taskCollection = new TaskCollection({
-      quietMode: options.isQuietMode
-    });
+    this._taskCollection = new TaskCollection();
   }
 
   public registerTasks(): TaskCollection {

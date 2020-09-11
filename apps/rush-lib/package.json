@@ -22,6 +22,7 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/package-deps-hash": "workspace:*",
     "@rushstack/stream-collator": "workspace:*",
+    "@rushstack/terminal": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "@yarnpkg/lockfile": "~1.0.2",
     "builtin-modules": "~3.1.0",

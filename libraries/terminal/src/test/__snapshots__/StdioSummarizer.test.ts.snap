@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StdioSummarizer should abridge extra lines 1`] = `
+"leading 0
+leading 1
+leading 2
+leading 3
+leading 4
+leading 5
+leading 6
+leading 7
+leading 8
+leading 9
+  ...2 lines omitted...
+trailing 0
+trailing 1
+trailing 2
+trailing 3
+trailing 4
+trailing 5
+trailing 6
+trailing 7
+trailing 8
+trailing 9
+"
+`;
+
+exports[`StdioSummarizer should concatenate partial lines 1`] = `
+"abcde
+f
+
+g
+h
+"
+`;
+
+exports[`StdioSummarizer should report stdout if there is no stderr 1`] = `
+"stdout 1
+stdout 2
+"
+`;

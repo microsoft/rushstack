@@ -27,6 +27,11 @@ export class AnsiEscape {
     static removeCodes(text: string): string;
     }
 
+// @public
+export type Brand<T, BrandTag extends string> = T & {
+    __brand: BrandTag;
+};
+
 // @beta
 export class Colors {
     // (undocumented)
@@ -203,7 +208,8 @@ export type FileSystemStats = fs.Stats;
 // @public
 export class FileWriter {
     close(): void;
-    static open(path: string, flags?: IFileWriterFlags): FileWriter;
+    readonly filePath: string;
+    static open(filePath: string, flags?: IFileWriterFlags): FileWriter;
     write(text: string): void;
 }
 
@@ -681,6 +687,7 @@ export class Text {
     static convertToCrLf(input: string): string;
     static convertToLf(input: string): string;
     static ensureTrailingNewline(s: string, newlineKind?: NewlineKind): string;
+    static getNewline(newlineKind: NewlineKind): string;
     static padEnd(s: string, minimumLength: number, paddingCharacter?: string): string;
     static padStart(s: string, minimumLength: number, paddingCharacter?: string): string;
     static replaceAll(input: string, searchValue: string, replaceValue: string): string;

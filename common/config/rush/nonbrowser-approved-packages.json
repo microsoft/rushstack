@@ -211,6 +211,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/terminal",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/ts-command-line",
       "allowedCategories": [ "libraries", "tests" ]
     },

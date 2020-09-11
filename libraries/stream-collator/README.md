@@ -1,6 +1,6 @@
-## stream-collator
+## @rushstack/stream-collator
 
-This library enables a tool to display live console output from multiple asynchronous processes,
+This library enables a tool to display live console output from multiple concurrent processes,
 while ensuring that their output does not get jumbled together.
 
 ## How does it work?
@@ -18,8 +18,8 @@ Stream B will write: `BBBBBBBBBBBBBBBBBBBB`
 
 Stream C will write: `CCCCCCCCCC`
 
-If these streams are all being piped directly to stdout (without stream-collator), you could end up with jumbled
-output:
+If these streams are all being piped directly to stdout (without `@rushstack/stream-collator`), you could end up
+with jumbled output:
 
 `ABACCCBCCCCBBABBCBBABBBBBBCCAB`
 
@@ -27,78 +27,24 @@ Something like the following would be much more useful to users of your applicat
 
 `AAAAABBBBBBBBBBBBBBBCCCCCCCCCC`
 
-This is where the **stream-collator** comes in!
-
-## Usage
-
-Install the stream-collator:
-
-`npm install --save @rushstack/stream-collator`
-
-
-Import the collator:
-
-```javascript
-import StreamCollator from '@rushstack/stream-collator'; // es6
-```
-
-```javascript
-const StreamCollator = require('@rushstack/stream-collator'); // commonjs
-```
-
-A stream collator adheres to the [NodeJS Stream API](https://nodejs.org/api/stream.html), meaning that it effectively
-is special type of [ReadableStream](https://nodejs.org/api/stream.html#stream_class_stream_readable). This makes
-working with the stream collator very simple. Imagine we had the 3 streams from the example above:
-
-```javascript
-const streamA = getRepeaterStream('A', 5); // fake helper function that returns a ReadableStream
-const streamB = getRepeaterStream('B', 15); // fake helper function that returns a ReadableStream
-const streamC = getRepeaterStream('C', 10); // fake helper function that returns a ReadableStream
-```
-
-Next, instantiate a stream collator instance and register the streams with it:
-
-```javascript
-const collator = new StreamCollator();
-
-collator.register(streamA);
-collator.register(streamB);
-collator.register(streamC);
-```
-
-`collator` is now a stream which can be accessed with the standard stream API's. For example, you could pass the output
-to process.stdout:
-
-`collator.pipe(process.stdout);`
-
-Or a file:
-
-```javascript
-var wstream = fs.createWriteStream('myOutput.txt');
-
-collator.pipe(wstream);
-```
+This is where the `@rushstack/stream-collator` comes in!
 
 ## The active stream
+
 At any given time, a single stream is designated as the **active stream**. The output of the active stream will always be
 live-streamed. This is particularly useful for long-running streams. When the active stream finishes, a new stream
 is selected as the active stream and all of its contents up to that point will be emitted. Whenever an active stream finishes,
 all background streams which have been completed will be emitted.
 
-## Helper streams
-Two additional stream classes are also exported with this package:
+## Usage
 
-### DualTaskStream
-A utility string-based stream with two sub-streams, `stdout` and `stderr`. These streams can be written to, and will be emitted
-by this class. Anything written to `stderr` will be automatically wrapped in red coloring, unless is begins with the text `Warning -`,
-in which case it will write the warning to `stdout` in yellow.
+> 🚨 _This is an early preview release. Please report issues!_ 🚨
+>
+> WITH VERSION 4.X, THIS PACKAGE HAS BEEN REDESIGNED TO USE THE NEW
+> [@rushstack/terminal](https://www.npmjs.com/package/@rushstack/terminal) SYSTEM.
+> IN THE NEXT RELEASE, THE `CollatedTerminal` API WILL BE REPLACED WITH
+> THE `Terminal` API.
+>
+> The usage instructions will be updated once that refactoring is complete.
 
-### PersistentStream
-A special string-based stream with a function `readAll()` which will return the contents of everything that has been written
-to the stream as a string, regardless of whether the stream is open or closed.
-
-## Improvements
-NOTE: Ending the collator stream could be improved with an option that lets you select between the following behaviors:
-* Close the collator stream when ANY registered stream has been closed
-* Close the collator stream when ALL registered streams have been closed
-* Don't automatically close the collator stream
+API documentation for this package: https://rushstack.io/pages/api/stream-collator/

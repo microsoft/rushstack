@@ -846,6 +846,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/terminal",
+      "projectFolder": "libraries/terminal",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/ts-command-line",
       "projectFolder": "libraries/ts-command-line",
       "reviewCategory": "libraries",

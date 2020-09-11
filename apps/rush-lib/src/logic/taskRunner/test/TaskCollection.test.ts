@@ -24,9 +24,7 @@ describe('TaskCollection', () => {
 
   describe('Dependencies', () => {
     beforeEach(() => {
-      taskCollection = new TaskCollection({
-        quietMode: false
-      });
+      taskCollection = new TaskCollection();
     });
 
     it('throwsErrorOnNonExistentTask', () => {
@@ -70,9 +68,7 @@ describe('TaskCollection', () => {
 
   describe('Error logging', () => {
     beforeEach(() => {
-      taskCollection = new TaskCollection({
-        quietMode: false
-      });
+      taskCollection = new TaskCollection();
     });
   });
 });

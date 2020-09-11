@@ -1,0 +1,139 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RemoveColorsTextRewriter 01 should process empty inputs 1`] = `
+Object {
+  "inputs": Array [],
+  "outputs": Array [],
+}
+`;
+
+exports[`RemoveColorsTextRewriter 01 should process empty inputs 2`] = `
+Object {
+  "inputs": Array [
+    "",
+  ],
+  "outputs": Array [
+    "",
+  ],
+}
+`;
+
+exports[`RemoveColorsTextRewriter 01 should process empty inputs 3`] = `
+Object {
+  "inputs": Array [
+    "",
+    "a",
+    "",
+  ],
+  "outputs": Array [
+    "",
+    "a",
+    "",
+  ],
+}
+`;
+
+exports[`RemoveColorsTextRewriter 02 should remove colors from complete chunks 1`] = `
+Object {
+  "inputs": Array [
+    "[red]1[default]",
+  ],
+  "outputs": Array [
+    "1",
+  ],
+}
+`;
+
+exports[`RemoveColorsTextRewriter 02 should remove colors from complete chunks 2`] = `
+Object {
+  "inputs": Array [
+    "[red]1[default][green]2[default]",
+  ],
+  "outputs": Array [
+    "12",
+  ],
+}
+`;
+
+exports[`RemoveColorsTextRewriter 02 should remove colors from complete chunks 3`] = `
+Object {
+  "inputs": Array [
+    "[red]1[default]2[green]3[default]",
+  ],
+  "outputs": Array [
+    "123",
+  ],
+}
+`;
+
+exports[`RemoveColorsTextRewriter 03 should remove colors from 1-character chunks 1`] = `
+Object {
+  "inputs": Array [
+    "1",
+    "",
+    "[",
+    "3",
+    "1",
+    "m",
+    "2",
+    "",
+    "[",
+    "3",
+    "9",
+    "m",
+  ],
+  "outputs": Array [
+    "1",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "2",
+    "",
+    "",
+    "",
+    "",
+    "",
+  ],
+}
+`;
+
+exports[`RemoveColorsTextRewriter 04 should pass through incomplete partial matches 1`] = `
+Object {
+  "inputs": Array [
+    "",
+  ],
+  "outputs": Array [
+    "",
+    "--close--",
+    "",
+  ],
+}
+`;
+
+exports[`RemoveColorsTextRewriter 04 should pass through incomplete partial matches 2`] = `
+Object {
+  "inputs": Array [
+    "[
+",
+  ],
+  "outputs": Array [
+    "[
+",
+  ],
+}
+`;
+
+exports[`RemoveColorsTextRewriter 04 should pass through incomplete partial matches 3`] = `
+Object {
+  "inputs": Array [
+    "[1",
+  ],
+  "outputs": Array [
+    "",
+    "--close--",
+    "[1",
+  ],
+}
+`;
