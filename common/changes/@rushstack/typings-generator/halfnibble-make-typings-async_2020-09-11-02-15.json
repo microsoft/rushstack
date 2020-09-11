@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/typings-generator",
+      "comment": "Change TypingsGenerator to support async methods. Typings generation now returns a promise.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@rushstack/typings-generator",
+  "email": "halfnibble@users.noreply.github.com"
+}

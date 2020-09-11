@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-plugin",
+      "comment": "Update typings generator dependency.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/localization-plugin",
+  "email": "halfnibble@users.noreply.github.com"
+}
