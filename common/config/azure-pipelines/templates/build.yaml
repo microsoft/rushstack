@@ -10,5 +10,5 @@ steps:
     displayName: 'git config name'
   - script: 'node common/scripts/install-run-rush.js install'
     displayName: 'Rush Install'
-  - script: 'node common/scripts/install-run-rush.js rebuild --verbose --production'
+  - script: 'node common/scripts/install-run-rush.js rebuild --verbose --production --to rush --to rush-lib'
     displayName: 'Rush Rebuild'
