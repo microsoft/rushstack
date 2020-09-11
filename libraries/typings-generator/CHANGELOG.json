@@ -2,6 +2,27 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.1.52",
+      "tag": "@rushstack/typings-generator_v0.1.52",
+      "date": "Fri, 11 Sep 2020 02:13:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.32.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.13`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" to `6.4.44`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.11.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.51",
       "tag": "@rushstack/typings-generator_v0.1.51",
       "date": "Wed, 09 Sep 2020 03:29:01 GMT",

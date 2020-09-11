@@ -9,6 +9,7 @@
 
 export { AlreadyReportedError } from './AlreadyReportedError';
 export { AnsiEscape, IAnsiEscapeConvertForTestsOptions } from './Terminal/AnsiEscape';
+export { Brand } from './PrimitiveTypes';
 export { FileConstants, FolderConstants } from './Constants';
 export {
   ExecutableStdioStreamMapping,
