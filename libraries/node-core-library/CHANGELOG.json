@@ -2,6 +2,21 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.32.0",
+      "tag": "@rushstack/node-core-library_v3.32.0",
+      "date": "Fri, 11 Sep 2020 02:13:35 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add Text.getNewline() and FileWriter.filePath"
+          },
+          {
+            "comment": "Add Brand API"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.31.0",
       "tag": "@rushstack/node-core-library_v3.31.0",
       "date": "Mon, 07 Sep 2020 07:37:37 GMT",

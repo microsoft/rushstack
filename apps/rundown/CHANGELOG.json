@@ -2,6 +2,24 @@
   "name": "@rushstack/rundown",
   "entries": [
     {
+      "version": "1.0.17",
+      "tag": "@rushstack/rundown_v1.0.17",
+      "date": "Fri, 11 Sep 2020 02:13:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.32.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.11.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.16",
       "tag": "@rushstack/rundown_v1.0.16",
       "date": "Wed, 09 Sep 2020 03:29:01 GMT",
