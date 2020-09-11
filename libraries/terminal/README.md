@@ -27,15 +27,15 @@ before finally being output. The conceptual block diagram might look like this:
                       [write to build.log]
 ```
 
-The application uses the `Terminal` API to print stdout/stderr messages, for example with standardized
+The application uses the `Terminal` API to print `stdout` and `stderr` messages, for example with standardized
 formatting for errors and warnings, and ANSI escapes to make nice colors. Maybe it also includes text
 received from external processes, whose newlines may be inconsistent. Ultimately we want to write the
 output to the shell console and a `build.log` file, but we don't want to put ANSI colors in the build log.
 
 For the above example, `[shell console]` and `[write to build.log]` would be modeled as subclasses of
 `TerminalWritable`. The `[normalize newlines]` and `[remove ANSI colors]` steps are modeled as subclasses
-of `TerminalTransform`, because they receive an input. The `[splitter]` would be implemented using
-`SplitterTransform`.
+of `TerminalTransform`, because they output to a "destination" object. The `[splitter]` would be
+implemented using `SplitterTransform`.
 
 The stream of messages are {@link ITerminalChunk} objects, which can represent both `stdout` and `stderr`
 channels. The pipeline operates synchronously on each chunk, but by processing one chunk at a time,
