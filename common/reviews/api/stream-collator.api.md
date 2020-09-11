@@ -25,12 +25,8 @@ export class CollatedWriter extends TerminalWritable {
     // @internal (undocumented)
     _flushBufferedChunks(): void;
     readonly isActive: boolean;
-    // Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "@rushstack/stream-collator" does not have an export "TerminalWritable"
-    //
     // (undocumented)
     onClose(): void;
-    // Warning: (ae-unresolved-inheritdoc-reference) The @inheritDoc reference could not be resolved: The package "@rushstack/stream-collator" does not have an export "TerminalWritable"
-    //
     // (undocumented)
     onWriteChunk(chunk: ITerminalChunk): void;
     // (undocumented)

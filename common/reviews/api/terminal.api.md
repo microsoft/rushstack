@@ -209,6 +209,4 @@ export class TextRewriterTransform extends TerminalTransform {
 }
 
 
-// (No @packageDocumentation comment for this package)
-
 ```

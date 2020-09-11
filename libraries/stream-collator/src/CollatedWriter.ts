@@ -44,12 +44,12 @@ export class CollatedWriter extends TerminalWritable {
     return this._bufferedChunks;
   }
 
-  /** {@inheritDoc TerminalWritable.onWriteChunk} */
+  /** {@inheritDoc @rushstack/node-core-library#TerminalWritable.onWriteChunk} */
   public onWriteChunk(chunk: ITerminalChunk): void {
     this._collator._writerWriteChunk(this, chunk, this._bufferedChunks);
   }
 
-  /** {@inheritDoc TerminalWritable.onClose} */
+  /** {@inheritDoc @rushstack/node-core-library#TerminalWritable.onClose} */
   public onClose(): void {
     this._collator._writerClose(this, this._bufferedChunks);
   }

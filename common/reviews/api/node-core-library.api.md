@@ -27,6 +27,11 @@ export class AnsiEscape {
     static removeCodes(text: string): string;
     }
 
+// @public
+export type Brand<T, BrandTag extends string> = T & {
+    __brand: BrandTag;
+};
+
 // @beta
 export class Colors {
     // (undocumented)
