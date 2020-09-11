@@ -39,8 +39,8 @@ export class StringValuesTypingsGenerator extends TypingsGenerator {
   public constructor(options: IStringValuesTypingsGeneratorOptions) {
     super({
       ...options,
-      parseAndGenerateTypings: (fileContents: string, filePath: string) => {
-        const stringValueTypings: IStringValueTypings = options.parseAndGenerateTypings(
+      parseAndGenerateTypings: async (fileContents: string, filePath: string) => {
+        const stringValueTypings: IStringValueTypings = await options.parseAndGenerateTypings(
           fileContents,
           filePath
         );
