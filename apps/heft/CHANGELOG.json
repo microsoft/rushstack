@@ -2,6 +2,30 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.11.0",
+      "tag": "@rushstack/heft_v0.11.0",
+      "date": "Wed, 09 Sep 2020 03:29:01 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add --max-workers option to the \"test\" action to control the maximum number of worker processes the test process can use."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.10.5",
+      "tag": "@rushstack/heft_v0.10.5",
+      "date": "Wed, 09 Sep 2020 00:38:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a typo in an error message to read that plugins must define a \"pluginName\" property, rather than the former \"displayName\" property"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.10.4",
       "tag": "@rushstack/heft_v0.10.4",
       "date": "Mon, 07 Sep 2020 07:37:37 GMT",

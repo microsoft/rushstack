@@ -67,6 +67,7 @@ export class JestPlugin implements IHeftPlugin {
       testNamePattern: test.properties.testNamePattern,
       testPathPattern: test.properties.testPathPattern ? [...test.properties.testPathPattern] : undefined,
       testTimeout: test.properties.testTimeout,
+      maxWorkers: test.properties.maxWorkers,
 
       $0: process.argv0,
       _: []

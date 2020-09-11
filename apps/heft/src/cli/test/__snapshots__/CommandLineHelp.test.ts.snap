@@ -95,6 +95,7 @@ exports[`CommandLineHelp prints the help for each action: test 1`] = `
                  [--no-build] [-u] [--find-related-tests SOURCE_FILE]
                  [--silent] [-t REGEXP] [--test-path-pattern REGEXP]
                  [--test-timeout-ms INTEGER] [--debug-heft-reporter]
+                 [--max-workers COUNT_OR_PERCENTAGE]
                  
 
 Optional arguments:
@@ -154,5 +155,14 @@ Optional arguments:
                         how Jest's default reporter would have presented it. 
                         Include this output in your bug report. Do not use 
                         \\"--debug-heft-reporter\\" in production.
+  --max-workers COUNT_OR_PERCENTAGE
+                        Use this parameter to control maximum number of 
+                        worker processes tests are allowed to use. This 
+                        parameter is similar to the parameter noted in the 
+                        Jest documentation, and can either be an integer 
+                        representing the number of workers to spawn when 
+                        running tests, or can be a string representing a 
+                        percentage of the available CPUs on the machine to 
+                        utilize. Example values: \\"3\\", \\"25%\\"
 "
 `;
