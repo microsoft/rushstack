@@ -207,26 +207,6 @@ importers:
       colors: ~1.2.1
       semver: ~7.3.0
       sinon: ~1.17.3
-  ../../apps/rush-buildxl:
-    dependencies:
-      '@microsoft/rush-lib': 'link:../rush-lib'
-      '@rushstack/node-core-library': 'link:../../libraries/node-core-library'
-      '@rushstack/ts-command-line': 'link:../../libraries/ts-command-line'
-    devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
-      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
-      '@rushstack/heft': 'link:../heft'
-      '@types/heft-jest': 1.0.1
-      '@types/node': 10.17.13
-    specifiers:
-      '@microsoft/rush-lib': 'workspace:*'
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
-      '@rushstack/eslint-config': 'workspace:*'
-      '@rushstack/heft': 'workspace:*'
-      '@rushstack/node-core-library': 'workspace:*'
-      '@rushstack/ts-command-line': 'workspace:*'
-      '@types/heft-jest': 1.0.1
-      '@types/node': 10.17.13
   ../../apps/rush-lib:
     dependencies:
       '@pnpm/link-bins': 5.3.12
