@@ -18,6 +18,7 @@ for large scale TypeScript monorepos.
 - [API Extractor](https://api-extractor.com/) - create .d.ts rollups and track your TypeScript API signatures
 - [API Documenter](https://api-extractor.com/pages/setup/generating_docs/) - use TSDoc comments to publish an API documentation website
 
+<!-- GENERATED PROJECT SUMMARY START -->
 
 ## Published Packages
 
@@ -130,6 +131,7 @@ for large scale TypeScript monorepos.
 | [/repo-scripts/repo-toolbox](./repo-scripts/repo-toolbox/) | Used to execute various operations specific to this repo |
 | [/stack/rush-stack-compiler-shared](./stack/rush-stack-compiler-shared/) |  |
 
+<!-- GENERATED PROJECT SUMMARY END -->
 
 ## Contributor Notice
 

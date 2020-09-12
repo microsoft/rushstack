@@ -6,6 +6,9 @@ import { StringBuilder, Text, Sort, FileSystem } from '@rushstack/node-core-libr
 import { RushConfiguration, RushConfigurationProject, LockStepVersionPolicy } from '@microsoft/rush-lib';
 import { CommandLineAction } from '@rushstack/ts-command-line';
 
+const GENERATED_PROJECT_SUMMARY_START_COMMENT_TEXT: string = '<!-- GENERATED PROJECT SUMMARY START -->';
+const GENERATED_PROJECT_SUMMARY_END_COMMENT_TEXT: string = '<!-- GENERATED PROJECT SUMMARY END -->';
+
 export class ReadmeAction extends CommandLineAction {
   public constructor() {
     super({
@@ -19,15 +22,41 @@ export class ReadmeAction extends CommandLineAction {
     return project.shouldPublish || !!project.versionPolicyName;
   }
 
-  protected onExecute(): Promise<void> {
+  protected async onExecute(): Promise<void> {
     // abstract
 
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation();
+
+    const repoReadmePath: string = path.resolve(rushConfiguration.rushJsonFolder, 'README.md');
+    const existingReadme: string = await FileSystem.readFileAsync(repoReadmePath);
+    const generatedProjectSummaryStartIndex: number = existingReadme.indexOf(
+      GENERATED_PROJECT_SUMMARY_START_COMMENT_TEXT
+    );
+    const generatedProjectSummaryEndIndex: number = existingReadme.indexOf(
+      GENERATED_PROJECT_SUMMARY_END_COMMENT_TEXT
+    );
+
+    if (generatedProjectSummaryStartIndex === -1 || generatedProjectSummaryEndIndex === -1) {
+      throw new Error(
+        `Unable to find "${GENERATED_PROJECT_SUMMARY_START_COMMENT_TEXT}" or ` +
+          `"${GENERATED_PROJECT_SUMMARY_END_COMMENT_TEXT}" comment in "${repoReadmePath}"`
+      );
+    }
+
+    const readmePrefix: string = existingReadme.substr(
+      0,
+      generatedProjectSummaryStartIndex + GENERATED_PROJECT_SUMMARY_START_COMMENT_TEXT.length
+    );
+
+    const readmePostfix: string = existingReadme.substr(generatedProjectSummaryEndIndex);
 
     const builder: StringBuilder = new StringBuilder();
     const orderedProjects: RushConfigurationProject[] = [...rushConfiguration.projects];
     Sort.sortBy(orderedProjects, (x) => x.projectRelativeFolder);
 
+    builder.append(readmePrefix);
+    builder.append('\n');
+    builder.append('\n');
     builder.append('## Published Packages\n\n');
     builder.append('<!-- the table below was generated using the ./repo-scripts/repo-toolbox script -->\n\n');
     builder.append('| Folder | Version | Changelog | Package |\n');
@@ -97,14 +126,12 @@ export class ReadmeAction extends CommandLineAction {
       builder.append(`|\n`);
     }
 
-    const outputFilePath: string = path.resolve('./dist/README.md');
+    builder.append(readmePostfix);
 
-    console.log('Writing ' + outputFilePath);
-    FileSystem.writeFile(outputFilePath, builder.toString(), { ensureFolderExists: true });
+    console.log(`Writing ${repoReadmePath}`);
+    FileSystem.writeFile(repoReadmePath, builder.toString());
 
     console.log('\nSuccess.');
-
-    return Promise.resolve();
   }
 
   protected onDefineParameters(): void {
