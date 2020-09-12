@@ -18,6 +18,7 @@ for large scale TypeScript monorepos.
 - [API Extractor](https://api-extractor.com/) - create .d.ts rollups and track your TypeScript API signatures
 - [API Documenter](https://api-extractor.com/pages/setup/generating_docs/) - use TSDoc comments to publish an API documentation website
 
+<!-- GENERATED PROJECT SUMMARY START -->
 
 ## Published Packages
 
@@ -31,7 +32,6 @@ for large scale TypeScript monorepos.
 | [/apps/heft](./apps/heft/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fheft.svg)](https://badge.fury.io/js/%40rushstack%2Fheft) | [changelog](./apps/heft/CHANGELOG.md) | [@rushstack/heft](https://www.npmjs.com/package/@rushstack/heft) |
 | [/apps/rundown](./apps/rundown/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frundown.svg)](https://badge.fury.io/js/%40rushstack%2Frundown) | [changelog](./apps/rundown/CHANGELOG.md) | [@rushstack/rundown](https://www.npmjs.com/package/@rushstack/rundown) |
 | [/apps/rush](./apps/rush/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush.svg)](https://badge.fury.io/js/%40microsoft%2Frush) | [changelog](./apps/rush/CHANGELOG.md) | [@microsoft/rush](https://www.npmjs.com/package/@microsoft/rush) |
-| [/apps/rush-buildxl](./apps/rush-buildxl/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-buildxl.svg)](https://badge.fury.io/js/%40microsoft%2Frush-buildxl) | | [@microsoft/rush-buildxl](https://www.npmjs.com/package/@microsoft/rush-buildxl) |
 | [/apps/rush-lib](./apps/rush-lib/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-lib.svg)](https://badge.fury.io/js/%40microsoft%2Frush-lib) | | [@microsoft/rush-lib](https://www.npmjs.com/package/@microsoft/rush-lib) |
 | [/core-build/gulp-core-build](./core-build/gulp-core-build/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build) | [changelog](./core-build/gulp-core-build/CHANGELOG.md) | [@microsoft/gulp-core-build](https://www.npmjs.com/package/@microsoft/gulp-core-build) |
 | [/core-build/gulp-core-build-mocha](./core-build/gulp-core-build-mocha/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-mocha.svg)](https://badge.fury.io/js/%40microsoft%2Fgulp-core-build-mocha) | [changelog](./core-build/gulp-core-build-mocha/CHANGELOG.md) | [@microsoft/gulp-core-build-mocha](https://www.npmjs.com/package/@microsoft/gulp-core-build-mocha) |
@@ -129,7 +129,7 @@ for large scale TypeScript monorepos.
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |
 | [/repo-scripts/repo-toolbox](./repo-scripts/repo-toolbox/) | Used to execute various operations specific to this repo |
 | [/stack/rush-stack-compiler-shared](./stack/rush-stack-compiler-shared/) |  |
-
+<!-- GENERATED PROJECT SUMMARY END -->
 
 ## Contributor Notice
 
