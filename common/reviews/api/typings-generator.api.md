@@ -51,11 +51,11 @@ export class StringValuesTypingsGenerator extends TypingsGenerator {
 export class TypingsGenerator {
     constructor(options: ITypingsGeneratorOptions);
     // (undocumented)
-    generateTypings(): Promise<void>;
+    generateTypingsAsync(): Promise<void>;
     // (undocumented)
     protected _options: ITypingsGeneratorOptions;
     // (undocumented)
-    runWatcher(): Promise<void>;
+    runWatcherAsync(): Promise<void>;
 }
 
 

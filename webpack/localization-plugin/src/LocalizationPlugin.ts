@@ -200,7 +200,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       if (typingsPreprocessor) {
         compiler.hooks.afterEnvironment.tapPromise(
           PLUGIN_NAME,
-          async () => await typingsPreprocessor!.runWatcher()
+          async () => await typingsPreprocessor!.runWatcherAsync()
         );
 
         if (!compiler.options.plugins) {
@@ -219,7 +219,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
       if (typingsPreprocessor) {
         compiler.hooks.beforeRun.tapPromise(
           PLUGIN_NAME,
-          async () => await typingsPreprocessor!.generateTypings()
+          async () => await typingsPreprocessor!.generateTypingsAsync()
         );
       }
 

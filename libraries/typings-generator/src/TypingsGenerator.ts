@@ -72,7 +72,7 @@ export class TypingsGenerator {
     this._options.fileExtensions = this._normalizeFileExtensions(this._options.fileExtensions);
   }
 
-  public async generateTypings(): Promise<void> {
+  public async generateTypingsAsync(): Promise<void> {
     await FileSystem.ensureEmptyFolderAsync(this._options.generatedTsFolder);
 
     const filesToIgnore: Set<string> = new Set<string>(
@@ -95,11 +95,11 @@ export class TypingsGenerator {
         continue;
       }
 
-      await this._parseFileAndGenerateTypings(filePath);
+      await this._parseFileAndGenerateTypingsAsync(filePath);
     }
   }
 
-  public async runWatcher(): Promise<void> {
+  public async runWatcherAsync(): Promise<void> {
     await FileSystem.ensureEmptyFolderAsync(this._options.generatedTsFolder);
 
     const globBase: string = path.resolve(this._options.srcFolder, '**');
@@ -110,7 +110,7 @@ export class TypingsGenerator {
       );
       const boundGenerateTypingsFunction: (
         filePath: string
-      ) => Promise<void> = this._parseFileAndGenerateTypings.bind(this);
+      ) => Promise<void> = this._parseFileAndGenerateTypingsAsync.bind(this);
       watcher.on('add', boundGenerateTypingsFunction);
       watcher.on('change', boundGenerateTypingsFunction);
       watcher.on('unlink', async (filePath) => {
@@ -121,7 +121,7 @@ export class TypingsGenerator {
     });
   }
 
-  private async _parseFileAndGenerateTypings(locFilePath: string): Promise<void> {
+  private async _parseFileAndGenerateTypingsAsync(locFilePath: string): Promise<void> {
     try {
       const fileContents: string = await FileSystem.readFileAsync(locFilePath);
       const typingsData: string = await this._options.parseAndGenerateTypings(fileContents, locFilePath);
