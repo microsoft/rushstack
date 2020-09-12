@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Add functionality to copy files during build.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "iclanton@users.noreply.github.com"
+}
