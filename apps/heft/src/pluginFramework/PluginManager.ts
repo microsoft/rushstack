@@ -12,11 +12,8 @@ import { HeftSession } from './HeftSession';
 
 // Default plugins
 import { TypeScriptPlugin } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
-import { RushJsonConfigurationFilesPlugin } from '../plugins/JsonConfigurationLoaders/RushJsonConfigurationFilesPlugin';
-import { ProjectJsonConfigurationFilesPlugin } from '../plugins/JsonConfigurationLoaders/ProjectJsonConfigurationFilesPlugin';
 import { CleanPlugin } from '../plugins/CleanPlugin';
 import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
-import { PackageJsonConfigurationPlugin } from '../plugins/PackageJsonConfigurationPlugin';
 import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
 import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
 import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWebpackPlugin';
@@ -50,11 +47,8 @@ export class PluginManager {
 
   public initializeDefaultPlugins(): void {
     this._applyPlugin(new TypeScriptPlugin());
-    this._applyPlugin(new RushJsonConfigurationFilesPlugin());
-    this._applyPlugin(new ProjectJsonConfigurationFilesPlugin());
     this._applyPlugin(new CopyStaticAssetsPlugin());
     this._applyPlugin(new CleanPlugin());
-    this._applyPlugin(new PackageJsonConfigurationPlugin());
     this._applyPlugin(new ApiExtractorPlugin());
     this._applyPlugin(new JestPlugin());
     this._applyPlugin(new BasicConfigureWebpackPlugin());

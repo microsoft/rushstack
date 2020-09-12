@@ -24,18 +24,18 @@
     //  "moduleKind": "amd",
     //
     //   /**
-    //    * (Required) The path where the output will be written.
+    //    * (Required) The name of the folder where the output will be written.
     //    */
-    //    "outFolderPath": "lib-amd"
+    //    "outFolderName": "lib-amd"
     // }
     {
       "moduleKind": "amd",
-      "outFolderPath": "lib-amd"
+      "outFolderName": "lib-amd"
     },
 
     {
       "moduleKind": "esnext",
-      "outFolderPath": "lib-es6"
+      "outFolderName": "lib-es6"
     }
   ],
 
@@ -45,7 +45,7 @@
    *
    * The default value is "lib".
    */
-  "emitFolderPathForJest": "lib"
+  "emitFolderNameForJest": "lib"
 
   /**
    * If set to "true", the TSlint task will not be invoked.

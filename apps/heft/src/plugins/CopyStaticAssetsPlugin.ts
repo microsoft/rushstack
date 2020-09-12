@@ -12,10 +12,47 @@ import { performance } from 'perf_hooks';
 import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { ICopyStaticAssetsConfiguration, IBuildStageContext, ICompileSubstage } from '../stages/BuildStage';
+import { IBuildStageContext, ICompileSubstage } from '../stages/BuildStage';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
+import { ConfigurationFile } from '@rushstack/heft-config-file';
 
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
+
+interface ISharedCopyStaticAssetsConfiguration {
+  /**
+   * File extensions that should be copied from the src folder to the destination folder(s)
+   */
+  fileExtensions?: string[];
+
+  /**
+   * Globs that should be explicitly excluded. This takes precedence over globs listed in "includeGlobs" and
+   * files that match the file extensions provided in "fileExtensions".
+   */
+  excludeGlobs?: string[];
+
+  /**
+   * Globs that should be explicitly included.
+   */
+  includeGlobs?: string[];
+}
+
+interface ICopyStaticAssetsConfigurationJson extends ISharedCopyStaticAssetsConfiguration {}
+
+interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsConfiguration {
+  /**
+   * The folder from which assets should be copied. For example, "src". This defaults to "src".
+   *
+   * This folder is directly under the folder containing the project's package.json file
+   */
+  sourceFolderName: string;
+
+  /**
+   * The folder(s) to which assets should be copied. For example ["lib", "lib-cjs"]. This defaults to ["lib"]
+   *
+   * These folders are directly under the folder containing the project's package.json file
+   */
+  destinationFolderNames: string[];
+}
 
 interface ICopyStaticAssetsOptions {
   logger: ScopedLogger;
@@ -39,15 +76,44 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
         compile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
           const logger: ScopedLogger = heftSession.requestScopedLogger('copy-static-assets');
 
+          const copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration = await this._loadCopyStaticAssetsConfigurationAsync(
+            heftConfiguration.buildFolder
+          );
           await this._runCopyAsync({
             logger,
+            copyStaticAssetsConfiguration,
             buildFolder: heftConfiguration.buildFolder,
-            copyStaticAssetsConfiguration: compile.properties.copyStaticAssetsConfiguration,
             watchMode: build.properties.watchMode
           });
         });
       });
     });
+  }
+
+  private async _loadCopyStaticAssetsConfigurationAsync(
+    buildFolder: string
+  ): Promise<ICopyStaticAssetsConfiguration> {
+    const copyStaticAssetsConfigurationLoader: ConfigurationFile<ICopyStaticAssetsConfigurationJson> = new ConfigurationFile(
+      path.resolve(__dirname, '..', 'schemas', 'copy-static-assets.schema.json')
+    );
+    let copyStaticAssetsConfigurationJson: ICopyStaticAssetsConfigurationJson | undefined;
+    try {
+      copyStaticAssetsConfigurationJson = await copyStaticAssetsConfigurationLoader.loadConfigurationFileAsync(
+        path.resolve(buildFolder, '.heft', 'copy-static-assets.json')
+      );
+    } catch (e) {
+      if (!FileSystem.isNotExistError(e)) {
+        throw e;
+      }
+    }
+
+    return {
+      ...copyStaticAssetsConfigurationJson,
+
+      // For now - these may need to be revised later
+      sourceFolderName: 'src',
+      destinationFolderNames: ['lib']
+    };
   }
 
   private async _expandGlobPatternAsync(

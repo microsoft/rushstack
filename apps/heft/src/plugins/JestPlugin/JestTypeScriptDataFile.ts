@@ -4,16 +4,14 @@
 import * as path from 'path';
 import { JsonFile } from '@rushstack/node-core-library';
 
-import { ITypeScriptConfiguration } from '../../stages/BuildStage';
-
 /**
  * Schema for jest-typescript-data.json
  */
 export interface IJestTypeScriptDataFileJson {
   /**
-   * The "emitFolderPathForJest" from .heft/typescript.json
+   * The "emitFolderNameForJest" from .heft/typescript.json
    */
-  emitFolderPathForJest: string;
+  emitFolderNameForJest: string;
 }
 
 /**
@@ -25,14 +23,11 @@ export class JestTypeScriptDataFile {
   /**
    * Called by TypeScriptPlugin to write the file.
    */
-  public static saveForProject(
-    projectFolder: string,
-    typeScriptConfiguration: ITypeScriptConfiguration
-  ): void {
+  public static saveForProject(projectFolder: string, emitFolderNameForJest: string = 'lib'): void {
     const jsonFilePath: string = JestTypeScriptDataFile.getConfigFilePath(projectFolder);
 
     const json: IJestTypeScriptDataFileJson = {
-      emitFolderPathForJest: typeScriptConfiguration.emitFolderPathForJest || 'lib'
+      emitFolderNameForJest
     };
     JsonFile.save(json, jsonFilePath, {
       ensureFolderExists: true,

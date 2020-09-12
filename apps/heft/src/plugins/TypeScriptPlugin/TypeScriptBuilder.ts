@@ -26,13 +26,13 @@ import { Async } from '../../utilities/Async';
 import { PerformanceMeasurer, PerformanceMeasurerAsync } from '../../utilities/Performance';
 import { Tslint } from './Tslint';
 import { Eslint } from './Eslint';
-import { ISharedTypeScriptConfiguration } from '../../stages/BuildStage';
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { FileError } from '../../pluginFramework/logging/FileError';
 
 import { EmitFilesPatch, ICachedEmitModuleKind } from './EmitFilesPatch';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { FirstEmitCompletedCallbackManager } from './FirstEmitCompletedCallbackManager';
+import { ISharedTypeScriptConfiguration } from './TypeScriptPlugin';
 
 export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfiguration {
   buildFolder: string;
@@ -100,7 +100,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
   private _eslintEnabled: boolean;
   private _tslintEnabled: boolean;
-  private _moduleKindsToEmit: ICachedEmitModuleKind<TTypescript.ModuleKind>[];
+  private _moduleKindsToEmit: ICachedEmitModuleKind[];
   private _eslintConfigFilePath: string;
   private _tslintConfigFilePath: string;
   private _typescriptLogger: IScopedLogger;
@@ -747,24 +747,24 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           throw new Error(
             `Module kind "${additionalModuleKindToEmit.moduleKind}" is already specified in the tsconfig file.`
           );
-        } else if (tsconfigOutFolderName === additionalModuleKindToEmit.outFolderPath) {
+        } else if (tsconfigOutFolderName === additionalModuleKindToEmit.outFolderName) {
           throw new Error(
-            `Output folder "${additionalModuleKindToEmit.outFolderPath}" is already specified in the tsconfig file.`
+            `Output folder "${additionalModuleKindToEmit.outFolderName}" is already specified in the tsconfig file.`
           );
         } else if (specifiedKinds.has(moduleKind)) {
           throw new Error(
             `Module kind "${additionalModuleKindToEmit.moduleKind}" is specified in more than one ` +
               'additionalModuleKindsToEmit entry.'
           );
-        } else if (specifiedOutDirs.has(additionalModuleKindToEmit.outFolderPath)) {
+        } else if (specifiedOutDirs.has(additionalModuleKindToEmit.outFolderName)) {
           throw new Error(
-            `Output folder "${additionalModuleKindToEmit.outFolderPath}" is specified in more than one ` +
+            `Output folder "${additionalModuleKindToEmit.outFolderName}" is specified in more than one ` +
               'additionalModuleKindsToEmit entry.'
           );
         } else {
           const outFolderPath: string = this._addModuleKindToEmit(
             moduleKind,
-            additionalModuleKindToEmit.outFolderPath,
+            additionalModuleKindToEmit.outFolderName,
             false
           );
           specifiedKinds.add(moduleKind);

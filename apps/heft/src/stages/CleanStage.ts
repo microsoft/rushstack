@@ -5,7 +5,8 @@ import * as path from 'path';
 import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
 import { AsyncSeriesBailHook } from 'tapable';
-import { LegacyAdapters } from '@rushstack/node-core-library';
+import { FileSystem, LegacyAdapters } from '@rushstack/node-core-library';
+import { ConfigurationFile, PathResolutionMethod } from '@rushstack/heft-config-file';
 
 import { StageBase, StageHooksBase, IStageContext } from './StageBase';
 import { Async } from '../utilities/Async';
@@ -36,16 +37,43 @@ export interface ICleanStageOptions {
  */
 export interface ICleanStageContext extends IStageContext<CleanStageHooks, ICleanStageProperties> {}
 
+interface ICleanConfigurationJson {
+  pathsToDelete: string[];
+}
+
 export class CleanStage extends StageBase<CleanStageHooks, ICleanStageProperties, ICleanStageOptions> {
   public constructor(heftConfiguration: HeftConfiguration, loggingManager: LoggingManager) {
     super(heftConfiguration, loggingManager, CleanStageHooks);
   }
 
-  protected getDefaultStageProperties(options: ICleanStageOptions): ICleanStageProperties {
+  protected async getDefaultStagePropertiesAsync(
+    options: ICleanStageOptions
+  ): Promise<ICleanStageProperties> {
+    const cleanConfigurationFileLoader: ConfigurationFile<ICleanConfigurationJson> = new ConfigurationFile<
+      ICleanConfigurationJson
+    >(path.resolve(__dirname, '..', 'schemas', 'clean.schema.json'), {
+      jsonPathMetadata: {
+        '$.pathsToDelete.*': {
+          pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+        }
+      }
+    });
+
+    let cleanConfigurationFile: ICleanConfigurationJson | undefined = undefined;
+    try {
+      cleanConfigurationFile = await cleanConfigurationFileLoader.loadConfigurationFileAsync(
+        path.resolve(this.heftConfiguration.buildFolder, '.heft', 'clean.json')
+      );
+    } catch (e) {
+      if (!FileSystem.isNotExistError(e)) {
+        throw e;
+      }
+    }
+
     return {
       deleteCache: false,
       ...options,
-      pathsToDelete: new Set<string>()
+      pathsToDelete: new Set<string>(cleanConfigurationFile?.pathsToDelete)
     };
   }
 

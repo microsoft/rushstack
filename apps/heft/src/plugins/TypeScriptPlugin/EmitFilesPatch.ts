@@ -11,9 +11,12 @@ import {
   IEmitTransformers,
   IExtendedSourceFile
 } from './internalTypings/TypeScriptInternals';
-import { IEmitModuleKindBase } from '../../stages/BuildStage';
 
-export interface ICachedEmitModuleKind<TModuleKind> extends IEmitModuleKindBase<TModuleKind> {
+export interface ICachedEmitModuleKind {
+  moduleKind: TTypescript.ModuleKind;
+
+  outFolderPath: string;
+
   /**
    * TypeScript's output is placed in the \<project root\>/.heft/build-cache folder.
    * This is the the path to the subfolder in the build-cache folder that this emit kind
@@ -40,7 +43,7 @@ export class EmitFilesPatch {
   public static install(
     ts: ExtendedTypeScript,
     tsconfig: TTypescript.ParsedCommandLine,
-    moduleKindsToEmit: ICachedEmitModuleKind<TTypescript.ModuleKind>[],
+    moduleKindsToEmit: ICachedEmitModuleKind[],
     useBuildCache: boolean,
     changedFiles?: Set<IExtendedSourceFile>
   ): void {
