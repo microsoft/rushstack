@@ -9,6 +9,7 @@ import { ICopyStaticAssetsConfigurationJson } from '../plugins/CopyStaticAssetsP
 import { IApiExtractorPluginConfiguration } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
 import { ITypeScriptConfigurationJson } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
 import { ICleanConfigurationJson } from '../stages/CleanStage';
+import { ICopyConfiguration } from '../plugins/CopyPlugin';
 
 export class HeftConfigFiles {
   private static _pluginConfigFileLoader: ConfigurationFile<IPluginConfigurationJson> | undefined;
@@ -22,6 +23,7 @@ export class HeftConfigFiles {
     | ConfigurationFile<ITypeScriptConfigurationJson>
     | undefined;
   private static _cleanConfigurationFileLoader: ConfigurationFile<ICleanConfigurationJson> | undefined;
+  private static _copyConfigurationFileLoader: ConfigurationFile<ICopyConfiguration> | undefined;
 
   public static get pluginConfigFileLoader(): ConfigurationFile<IPluginConfigurationJson> {
     if (!HeftConfigFiles._pluginConfigFileLoader) {
@@ -91,5 +93,24 @@ export class HeftConfigFiles {
     }
 
     return HeftConfigFiles._cleanConfigurationFileLoader;
+  }
+
+  public static get copyConfigurationFileLoader(): ConfigurationFile<ICopyConfiguration> {
+    if (!HeftConfigFiles._copyConfigurationFileLoader) {
+      const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'copy.schema.json');
+      HeftConfigFiles._copyConfigurationFileLoader = new ConfigurationFile<ICopyConfiguration>({
+        jsonSchemaPath: schemaPath,
+        jsonPathMetadata: {
+          '$.buildStage.*.*.sourcePath': {
+            pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+          },
+          '$.buildStage.*.*.destinationPath': {
+            pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+          }
+        }
+      });
+    }
+
+    return HeftConfigFiles._copyConfigurationFileLoader;
   }
 }

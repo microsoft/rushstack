@@ -1,0 +1,108 @@
+/**
+ * Configures the "copy" task for Heft.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/copy.schema.json",
+
+  "stages": {
+    /**
+     * Run these copy operations before the pre-compile build stage runs
+     */
+    "beforePreCompile": [
+      // {
+      //   /**
+      //    * The path from which a file or folder should be copied.
+      //    */
+      //   "sourcePath": "source/path",
+      //   /**
+      //    * The path to which a file or folder should be copied.
+      //    */
+      //   "destinationPath": "destination/path",
+      //   /**
+      //    * If set to true, create a hardlink for each file instead of copying.
+      //    */
+      //   "hardlinkInsteadOfCopy": true
+      // }
+    ],
+
+    /**
+     * Run these copy operations before the compile build stage runs
+     */
+    "beforeCompile": [
+      // {
+      //   /**
+      //    * The path from which a file or folder should be copied.
+      //    */
+      //   "sourcePath": "source/path",
+      //   /**
+      //    * The path to which a file or folder should be copied.
+      //    */
+      //   "destinationPath": "destination/path",
+      //   /**
+      //    * If set to true, create a hardlink for each file instead of copying.
+      //    */
+      //   "hardlinkInsteadOfCopy": true
+      // }
+    ],
+
+    /**
+     * Run these copy operations before the bundle build stage runs
+     */
+    "beforeBundle": [
+      // {
+      //   /**
+      //    * The path from which a file or folder should be copied.
+      //    */
+      //   "sourcePath": "source/path",
+      //   /**
+      //    * The path to which a file or folder should be copied.
+      //    */
+      //   "destinationPath": "destination/path",
+      //   /**
+      //    * If set to true, create a hardlink for each file instead of copying.
+      //    */
+      //   "hardlinkInsteadOfCopy": true
+      // }
+    ],
+
+    /**
+     * Run these copy operations before the post-build build stage runs
+     */
+    "beforePostBuild": [
+      // {
+      //   /**
+      //    * The path from which a file or folder should be copied.
+      //    */
+      //   "sourcePath": "source/path",
+      //   /**
+      //    * The path to which a file or folder should be copied.
+      //    */
+      //   "destinationPath": "destination/path",
+      //   /**
+      //    * If set to true, create a hardlink for each file instead of copying.
+      //    */
+      //   "hardlinkInsteadOfCopy": true
+      // }
+    ],
+
+    /**
+     * Run these copy operations after the post-build build stage runs
+     */
+    "afterPostBuild": [
+      // {
+      //   /**
+      //    * The path from which a file or folder should be copied.
+      //    */
+      //   "sourcePath": "source/path",
+      //   /**
+      //    * The path to which a file or folder should be copied.
+      //    */
+      //   "destinationPath": "destination/path",
+      //   /**
+      //    * If set to true, create a hardlink for each file instead of copying.
+      //    */
+      //   "hardlinkInsteadOfCopy": true
+      // }
+    ]
+  }
+}

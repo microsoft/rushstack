@@ -18,6 +18,7 @@ import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
 import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWebpackPlugin';
 import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
 import { HeftConfigFiles } from '../utilities/HeftConfigFiles';
+import { CopyPlugin } from '../plugins/CopyPlugin';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
@@ -46,6 +47,7 @@ export class PluginManager {
   }
 
   public initializeDefaultPlugins(): void {
+    this._applyPlugin(new CopyPlugin());
     this._applyPlugin(new TypeScriptPlugin());
     this._applyPlugin(new CopyStaticAssetsPlugin());
     this._applyPlugin(new CleanPlugin());

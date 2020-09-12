@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Copy Configuration",
+  "description": "Defines the heft configuration for the copy task.",
+  "type": "object",
+
+  "definitions": {
+    "copySpecifiers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sourcePath", "destinationPath"],
+        "properties": {
+          "sourcePath": {
+            "type": "string",
+            "description": "The path from which a file or folder should be copied."
+          },
+
+          "destinationPath": {
+            "type": "string",
+            "description": "The path to which a file or folder should be copied."
+          },
+
+          "hardlinkInsteadOfCopy": {
+            "type": "boolean",
+            "description": "If set to true, create a hardlink for each file instead of copying."
+          }
+        }
+      }
+    }
+  },
+
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "buildStage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "beforePreCompile": {
+          "$ref": "#/definitions/copySpecifiers"
+        },
+        "beforeCompile": {
+          "$ref": "#/definitions/copySpecifiers"
+        },
+        "beforeBundle": {
+          "$ref": "#/definitions/copySpecifiers"
+        },
+        "beforePostBuild": {
+          "$ref": "#/definitions/copySpecifiers"
+        },
+        "afterPostBuild": {
+          "$ref": "#/definitions/copySpecifiers"
+        }
+      }
+    }
+  }
+}
