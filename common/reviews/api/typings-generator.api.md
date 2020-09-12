@@ -35,7 +35,7 @@ export interface ITypingsGeneratorOptions<TTypingsResult = string> {
     // (undocumented)
     generatedTsFolder: string;
     // (undocumented)
-    parseAndGenerateTypings: (fileContents: string, filePath: string) => TTypingsResult;
+    parseAndGenerateTypings: (fileContents: string, filePath: string) => TTypingsResult | Promise<TTypingsResult>;
     // (undocumented)
     srcFolder: string;
     // (undocumented)
@@ -51,11 +51,11 @@ export class StringValuesTypingsGenerator extends TypingsGenerator {
 export class TypingsGenerator {
     constructor(options: ITypingsGeneratorOptions);
     // (undocumented)
-    generateTypings(): void;
+    generateTypingsAsync(): Promise<void>;
     // (undocumented)
     protected _options: ITypingsGeneratorOptions;
     // (undocumented)
-    runWatcher(): void;
+    runWatcherAsync(): Promise<void>;
 }
 
 

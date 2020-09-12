@@ -198,7 +198,10 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
     if (isWebpackDevServer) {
       if (typingsPreprocessor) {
-        compiler.hooks.afterEnvironment.tap(PLUGIN_NAME, () => typingsPreprocessor!.runWatcher());
+        compiler.hooks.afterEnvironment.tapPromise(
+          PLUGIN_NAME,
+          async () => await typingsPreprocessor!.runWatcherAsync()
+        );
 
         if (!compiler.options.plugins) {
           compiler.options.plugins = [];
@@ -214,7 +217,10 @@ export class LocalizationPlugin implements Webpack.Plugin {
       );
     } else {
       if (typingsPreprocessor) {
-        compiler.hooks.beforeRun.tap(PLUGIN_NAME, () => typingsPreprocessor!.generateTypings());
+        compiler.hooks.beforeRun.tapPromise(
+          PLUGIN_NAME,
+          async () => await typingsPreprocessor!.generateTypingsAsync()
+        );
       }
 
       WebpackConfigurationUpdater.amendWebpackConfigurationForMultiLocale(webpackConfigurationUpdaterOptions);

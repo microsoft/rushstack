@@ -27,10 +27,10 @@ const typingsGenerator: TypingsGenerator = new TypingsGenerator({
 });
 
 // To run once before a compilation:
-typingsGenerator.generateTypings();
+await typingsGenerator.generateTypings();
 
 // To start a watcher:
-typingsGenerator.runWatcher();
+await typingsGenerator.runWatcher();
 ```
 
 ## Options
@@ -50,7 +50,7 @@ that this be a folder parallel to the source folder, specified in addition to th
 
 This property enumerates the file extensions that should be handled.
 
-### `parseAndGenerateTypings = (fileContents: string, filePath: string) => string`
+### `parseAndGenerateTypings = (fileContents: string, filePath: string) => string | Promise<string>`
 
 This property is used to specify the function that should be called on every file for which typings
 are being generated. In watch mode, this is called on every file creation and file update. It should
@@ -72,7 +72,7 @@ There is an extension of this utility specifically for file types where typings 
 set of exported string values. This is useful for file types like CSS and RESX. This class takes
 the same options as the standard `TypingsGenerator`, with one additional option ([`exportAsDefault`](#exportAsDefault--)) and a different return value for `parseAndGenerateTypings`.
 
-### `parseAndGenerateTypings = (fileContents: string, filePath: string) => { typings: ({ exportName: string, comment?: string })[] }`
+### `parseAndGenerateTypings = (fileContents: string, filePath: string) => { typings: ({ exportName: string, comment?: string })[] } | Promise<{ typings: ({ exportName: string, comment?: string })[] }>`
 
 This function should behave the same as the `parseAndGenerateTypings` function for the standard
 `TypingsGenerator`, except that it should return an object with a `typings` property, set to
