@@ -14,11 +14,11 @@ import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IBuildStageContext, ICompileSubstage } from '../stages/BuildStage';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
-import { ConfigurationFile } from '@rushstack/heft-config-file';
+import { HeftConfigFiles } from '../utilities/HeftConfigFiles';
 
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
 
-interface ISharedCopyStaticAssetsConfiguration {
+export interface ISharedCopyStaticAssetsConfiguration {
   /**
    * File extensions that should be copied from the src folder to the destination folder(s)
    */
@@ -36,7 +36,7 @@ interface ISharedCopyStaticAssetsConfiguration {
   includeGlobs?: string[];
 }
 
-interface ICopyStaticAssetsConfigurationJson extends ISharedCopyStaticAssetsConfiguration {}
+export interface ICopyStaticAssetsConfigurationJson extends ISharedCopyStaticAssetsConfiguration {}
 
 interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsConfiguration {
   /**
@@ -93,12 +93,9 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
   private async _loadCopyStaticAssetsConfigurationAsync(
     buildFolder: string
   ): Promise<ICopyStaticAssetsConfiguration> {
-    const copyStaticAssetsConfigurationLoader: ConfigurationFile<ICopyStaticAssetsConfigurationJson> = new ConfigurationFile(
-      path.resolve(__dirname, '..', 'schemas', 'copy-static-assets.schema.json')
-    );
     let copyStaticAssetsConfigurationJson: ICopyStaticAssetsConfigurationJson | undefined;
     try {
-      copyStaticAssetsConfigurationJson = await copyStaticAssetsConfigurationLoader.loadConfigurationFileAsync(
+      copyStaticAssetsConfigurationJson = await HeftConfigFiles.copyStaticAssetsConfigurationLoader.loadConfigurationFileAsync(
         path.resolve(buildFolder, '.heft', 'copy-static-assets.json')
       );
     } catch (e) {

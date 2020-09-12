@@ -3,7 +3,6 @@
 
 import * as path from 'path';
 import { Terminal, InternalError, FileSystem, Import } from '@rushstack/node-core-library';
-import { InheritanceType, PathResolutionMethod, ConfigurationFile } from '@rushstack/heft-config-file';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IHeftPlugin } from './IHeftPlugin';
@@ -18,6 +17,7 @@ import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPl
 import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
 import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWebpackPlugin';
 import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
+import { HeftConfigFiles } from '../utilities/HeftConfigFiles';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
@@ -25,7 +25,7 @@ export interface IPluginManagerOptions {
   internalHeftSession: InternalHeftSession;
 }
 
-interface IPluginConfigurationJson {
+export interface IPluginConfigurationJson {
   plugins: {
     plugin: string;
     options?: object;
@@ -66,18 +66,7 @@ export class PluginManager {
         this._heftConfiguration.projectHeftDataFolder,
         'plugins.json'
       );
-      const schemaPath: string = path.join(__dirname, '..', 'schemas', 'plugins.schema.json');
-      const pluginConfigFileLoader: ConfigurationFile<IPluginConfigurationJson> = new ConfigurationFile<
-        IPluginConfigurationJson
-      >(schemaPath, {
-        propertyInheritanceTypes: { plugins: InheritanceType.append },
-        jsonPathMetadata: {
-          '$.plugins.*.plugin': {
-            pathResolutionMethod: PathResolutionMethod.NodeResolve
-          }
-        }
-      });
-      const pluginConfigurationJson: IPluginConfigurationJson = await pluginConfigFileLoader.loadConfigurationFileAsync(
+      const pluginConfigurationJson: IPluginConfigurationJson = await HeftConfigFiles.pluginConfigFileLoader.loadConfigurationFileAsync(
         pluginConfigFilePath
       );
 

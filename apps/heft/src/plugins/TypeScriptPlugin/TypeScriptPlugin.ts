@@ -19,7 +19,7 @@ import { TaskPackageResolver, ITaskPackageResolution } from '../../utilities/Tas
 import { JestTypeScriptDataFile } from '../JestPlugin/JestTypeScriptDataFile';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { ICleanStageContext, ICleanStageProperties } from '../../stages/CleanStage';
-import { ConfigurationFile } from '@rushstack/heft-config-file';
+import { HeftConfigFiles } from '../../utilities/HeftConfigFiles';
 
 const PLUGIN_NAME: string = 'typescript';
 
@@ -81,7 +81,7 @@ export interface ISharedTypeScriptConfiguration {
   maxWriteParallelism: number;
 }
 
-interface ITypeScriptConfigurationJson extends ISharedTypeScriptConfiguration {
+export interface ITypeScriptConfigurationJson extends ISharedTypeScriptConfiguration {
   disableTslint?: boolean;
 }
 
@@ -131,12 +131,9 @@ export class TypeScriptPlugin implements IHeftPlugin {
       | undefined = this._typeScriptConfigurationFileCache.get(buildFolder);
 
     if (!typescriptConfigurationFileCacheEntry) {
-      const typeScriptConfigurationFileLoader: ConfigurationFile<ITypeScriptConfigurationJson> = new ConfigurationFile<
-        ITypeScriptConfigurationJson
-      >(path.resolve(__dirname, '..', '..', 'schemas', 'typescript.schema.json'));
       try {
         typescriptConfigurationFileCacheEntry = {
-          configurationFile: await typeScriptConfigurationFileLoader.loadConfigurationFileAsync(
+          configurationFile: await HeftConfigFiles.typeScriptConfigurationFileLoader.loadConfigurationFileAsync(
             path.resolve(buildFolder, '.heft', 'typescript.json')
           )
         };

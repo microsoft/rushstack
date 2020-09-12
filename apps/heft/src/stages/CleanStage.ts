@@ -6,12 +6,12 @@ import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
 import { AsyncSeriesBailHook } from 'tapable';
 import { FileSystem, LegacyAdapters } from '@rushstack/node-core-library';
-import { ConfigurationFile, PathResolutionMethod } from '@rushstack/heft-config-file';
 
 import { StageBase, StageHooksBase, IStageContext } from './StageBase';
 import { Async } from '../utilities/Async';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
+import { HeftConfigFiles } from '../utilities/HeftConfigFiles';
 
 /**
  * @public
@@ -37,7 +37,7 @@ export interface ICleanStageOptions {
  */
 export interface ICleanStageContext extends IStageContext<CleanStageHooks, ICleanStageProperties> {}
 
-interface ICleanConfigurationJson {
+export interface ICleanConfigurationJson {
   pathsToDelete: string[];
 }
 
@@ -49,19 +49,9 @@ export class CleanStage extends StageBase<CleanStageHooks, ICleanStageProperties
   protected async getDefaultStagePropertiesAsync(
     options: ICleanStageOptions
   ): Promise<ICleanStageProperties> {
-    const cleanConfigurationFileLoader: ConfigurationFile<ICleanConfigurationJson> = new ConfigurationFile<
-      ICleanConfigurationJson
-    >(path.resolve(__dirname, '..', 'schemas', 'clean.schema.json'), {
-      jsonPathMetadata: {
-        '$.pathsToDelete.*': {
-          pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
-        }
-      }
-    });
-
     let cleanConfigurationFile: ICleanConfigurationJson | undefined = undefined;
     try {
-      cleanConfigurationFile = await cleanConfigurationFileLoader.loadConfigurationFileAsync(
+      cleanConfigurationFile = await HeftConfigFiles.cleanConfigurationFileLoader.loadConfigurationFileAsync(
         path.resolve(this.heftConfiguration.buildFolder, '.heft', 'clean.json')
       );
     } catch (e) {

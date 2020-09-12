@@ -9,12 +9,12 @@ import { HeftSession } from '../../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { ApiExtractorRunner } from './ApiExtractorRunner';
 import { IBuildStageContext, IBundleSubstage } from '../../stages/BuildStage';
-import { ConfigurationFile } from '@rushstack/heft-config-file';
+import { HeftConfigFiles } from '../../utilities/HeftConfigFiles';
 
 const PLUGIN_NAME: string = 'ApiExtractorPlugin';
 const CONFIG_FILE_LOCATION: string = './config/api-extractor.json';
 
-interface IApiExtractorConfiguration {
+export interface IApiExtractorPluginConfiguration {
   /**
    * If set to true, use the project's TypeScript compiler version for API Extractor's
    * analysis. API Extractor's included TypeScript compiler can generally correctly
@@ -64,12 +64,9 @@ export class ApiExtractorPlugin implements IHeftPlugin {
   ): Promise<void> {
     const { heftConfiguration, buildFolder, debugMode, watchMode, production } = options;
 
-    const apiExtractorTaskConfigurationLoader: ConfigurationFile<IApiExtractorConfiguration> = new ConfigurationFile<
-      IApiExtractorConfiguration
-    >(path.resolve(__dirname, '..', '..', 'schemas', 'api-extractor-task.schema.json'));
-    let apiExtractorTaskConfiguration: IApiExtractorConfiguration | undefined;
+    let apiExtractorTaskConfiguration: IApiExtractorPluginConfiguration | undefined;
     try {
-      apiExtractorTaskConfiguration = await apiExtractorTaskConfigurationLoader.loadConfigurationFileAsync(
+      apiExtractorTaskConfiguration = await HeftConfigFiles.apiExtractorTaskConfigurationLoader.loadConfigurationFileAsync(
         path.resolve(heftConfiguration.buildFolder, '.heft', 'api-extractor-task.json')
       );
     } catch (e) {
