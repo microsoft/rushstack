@@ -21,7 +21,7 @@ describe('ConfigLoader', () => {
     it('Correctly loads the config file', async () => {
       const configFileLoader: ConfigurationFile<ISimplestConfigFile> = new ConfigurationFile<
         ISimplestConfigFile
-      >(schemaPath);
+      >({ jsonSchemaPath: schemaPath });
       const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath
       );
@@ -37,7 +37,8 @@ describe('ConfigLoader', () => {
     it('Correctly resolves paths relative to the config file', async () => {
       const configFileLoader: ConfigurationFile<ISimplestConfigFile> = new ConfigurationFile<
         ISimplestConfigFile
-      >(schemaPath, {
+      >({
+        jsonSchemaPath: schemaPath,
         jsonPathMetadata: {
           '$.thing': {
             pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
@@ -60,7 +61,8 @@ describe('ConfigLoader', () => {
     it('Correctly resolves paths relative to the project root', async () => {
       const configFileLoader: ConfigurationFile<ISimplestConfigFile> = new ConfigurationFile<
         ISimplestConfigFile
-      >(schemaPath, {
+      >({
+        jsonSchemaPath: schemaPath,
         jsonPathMetadata: {
           '$.thing': {
             pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
@@ -92,7 +94,7 @@ describe('ConfigLoader', () => {
 
     it('Correctly loads the config file', async () => {
       const configFileLoader: ConfigurationFile<ISimpleConfigFile> = new ConfigurationFile<ISimpleConfigFile>(
-        schemaPath
+        { jsonSchemaPath: schemaPath }
       );
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath
@@ -103,8 +105,8 @@ describe('ConfigLoader', () => {
 
     it('Correctly resolves paths relative to the config file', async () => {
       const configFileLoader: ConfigurationFile<ISimpleConfigFile> = new ConfigurationFile<ISimpleConfigFile>(
-        schemaPath,
         {
+          jsonSchemaPath: schemaPath,
           jsonPathMetadata: {
             '$.things.*': {
               pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
@@ -127,8 +129,8 @@ describe('ConfigLoader', () => {
 
     it('Correctly resolves paths relative to the project root', async () => {
       const configFileLoader: ConfigurationFile<ISimpleConfigFile> = new ConfigurationFile<ISimpleConfigFile>(
-        schemaPath,
         {
+          jsonSchemaPath: schemaPath,
           jsonPathMetadata: {
             '$.things.*': {
               pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
@@ -164,7 +166,7 @@ describe('ConfigLoader', () => {
 
     it('Correctly loads the config file with default config meta', async () => {
       const configFileLoader: ConfigurationFile<ISimpleConfigFile> = new ConfigurationFile<ISimpleConfigFile>(
-        schemaPath
+        { jsonSchemaPath: schemaPath }
       );
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileAsync(
         configFilePath
@@ -175,8 +177,8 @@ describe('ConfigLoader', () => {
 
     it('Correctly loads the config file with "append" in config meta', async () => {
       const configFileLoader: ConfigurationFile<ISimpleConfigFile> = new ConfigurationFile<ISimpleConfigFile>(
-        schemaPath,
         {
+          jsonSchemaPath: schemaPath,
           propertyInheritanceTypes: {
             things: InheritanceType.append
           }
@@ -191,8 +193,8 @@ describe('ConfigLoader', () => {
 
     it('Correctly loads the config file with "replace" in config meta', async () => {
       const configFileLoader: ConfigurationFile<ISimpleConfigFile> = new ConfigurationFile<ISimpleConfigFile>(
-        schemaPath,
         {
+          jsonSchemaPath: schemaPath,
           propertyInheritanceTypes: {
             things: InheritanceType.replace
           }
@@ -207,8 +209,8 @@ describe('ConfigLoader', () => {
 
     it('Correctly resolves paths relative to the config file', async () => {
       const configFileLoader: ConfigurationFile<ISimpleConfigFile> = new ConfigurationFile<ISimpleConfigFile>(
-        schemaPath,
         {
+          jsonSchemaPath: schemaPath,
           jsonPathMetadata: {
             '$.things.*': {
               pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
@@ -250,7 +252,8 @@ describe('ConfigLoader', () => {
 
       const configFileLoader: ConfigurationFile<IComplexConfigFile> = new ConfigurationFile<
         IComplexConfigFile
-      >(schemaPath, {
+      >({
+        jsonSchemaPath: schemaPath,
         jsonPathMetadata: {
           '$.plugins.*.plugin': {
             pathResolutionMethod: PathResolutionMethod.NodeResolve
@@ -329,9 +332,9 @@ describe('ConfigLoader', () => {
 
     it("throws an error when the file doesn't exist", async () => {
       const errorCaseFolder: string = nodeJsPath.join(errorCasesFolder, 'invalidType');
-      const configFileLoader: ConfigurationFile<void> = new ConfigurationFile(
-        nodeJsPath.join(errorCaseFolder, 'config.schema.json')
-      );
+      const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
+        jsonSchemaPath: nodeJsPath.join(errorCaseFolder, 'config.schema.json')
+      });
       try {
         await configFileLoader.loadConfigurationFileAsync(nodeJsPath.join(errorCaseFolder, 'notExist.json'));
         fail();
@@ -342,9 +345,9 @@ describe('ConfigLoader', () => {
 
     it("Throws an error when the file isn't valid JSON", async () => {
       const errorCaseFolder: string = nodeJsPath.join(errorCasesFolder, 'invalidJson');
-      const configFileLoader: ConfigurationFile<void> = new ConfigurationFile(
-        nodeJsPath.join(errorCaseFolder, 'config.schema.json')
-      );
+      const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
+        jsonSchemaPath: nodeJsPath.join(errorCaseFolder, 'config.schema.json')
+      });
       try {
         await configFileLoader.loadConfigurationFileAsync(nodeJsPath.join(errorCaseFolder, 'config.json'));
         fail();
@@ -355,9 +358,9 @@ describe('ConfigLoader', () => {
 
     it("Throws an error for a file that doesn't match its schema", async () => {
       const errorCaseFolder: string = nodeJsPath.join(errorCasesFolder, 'invalidType');
-      const configFileLoader: ConfigurationFile<void> = new ConfigurationFile(
-        nodeJsPath.join(errorCaseFolder, 'config.schema.json')
-      );
+      const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
+        jsonSchemaPath: nodeJsPath.join(errorCaseFolder, 'config.schema.json')
+      });
       try {
         await configFileLoader.loadConfigurationFileAsync(nodeJsPath.join(errorCaseFolder, 'config.json'));
         fail();
@@ -368,9 +371,9 @@ describe('ConfigLoader', () => {
 
     it('Throws an error when there is a circular reference in "extends" properties', async () => {
       const errorCaseFolder: string = nodeJsPath.join(errorCasesFolder, 'circularReference');
-      const configFileLoader: ConfigurationFile<void> = new ConfigurationFile(
-        nodeJsPath.join(errorCaseFolder, 'config.schema.json')
-      );
+      const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
+        jsonSchemaPath: nodeJsPath.join(errorCaseFolder, 'config.schema.json')
+      });
       try {
         await configFileLoader.loadConfigurationFileAsync(nodeJsPath.join(errorCaseFolder, 'config1.json'));
         fail();
@@ -381,9 +384,9 @@ describe('ConfigLoader', () => {
 
     it("Throws an error when a combined config file doesn't match the schema", async () => {
       const errorCaseFolder: string = nodeJsPath.join(errorCasesFolder, 'invalidCombinedFile');
-      const configFileLoader: ConfigurationFile<void> = new ConfigurationFile(
-        nodeJsPath.join(errorCaseFolder, 'config.schema.json')
-      );
+      const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
+        jsonSchemaPath: nodeJsPath.join(errorCaseFolder, 'config.schema.json')
+      });
 
       try {
         await configFileLoader.loadConfigurationFileAsync(nodeJsPath.join(errorCaseFolder, 'config1.json'));

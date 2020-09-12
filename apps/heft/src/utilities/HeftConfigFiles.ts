@@ -26,7 +26,8 @@ export class HeftConfigFiles {
   public static get pluginConfigFileLoader(): ConfigurationFile<IPluginConfigurationJson> {
     if (!HeftConfigFiles._pluginConfigFileLoader) {
       const schemaPath: string = path.join(__dirname, '..', 'schemas', 'plugins.schema.json');
-      HeftConfigFiles._pluginConfigFileLoader = new ConfigurationFile<IPluginConfigurationJson>(schemaPath, {
+      HeftConfigFiles._pluginConfigFileLoader = new ConfigurationFile<IPluginConfigurationJson>({
+        jsonSchemaPath: schemaPath,
         propertyInheritanceTypes: { plugins: InheritanceType.append },
         jsonPathMetadata: {
           '$.plugins.*.plugin': {
@@ -46,7 +47,7 @@ export class HeftConfigFiles {
       const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'copy-static-assets.schema.json');
       HeftConfigFiles._copyStaticAssetsConfigurationLoader = new ConfigurationFile<
         ICopyStaticAssetsConfigurationJson
-      >(schemaPath);
+      >({ jsonSchemaPath: schemaPath });
     }
 
     return HeftConfigFiles._copyStaticAssetsConfigurationLoader;
@@ -59,7 +60,7 @@ export class HeftConfigFiles {
       const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'api-extractor-task.schema.json');
       HeftConfigFiles._apiExtractorTaskConfigurationLoader = new ConfigurationFile<
         IApiExtractorPluginConfiguration
-      >(schemaPath);
+      >({ jsonSchemaPath: schemaPath });
     }
 
     return HeftConfigFiles._apiExtractorTaskConfigurationLoader;
@@ -70,7 +71,7 @@ export class HeftConfigFiles {
       const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'typescript.schema.json');
       HeftConfigFiles._typeScriptConfigurationFileLoader = new ConfigurationFile<
         ITypeScriptConfigurationJson
-      >(schemaPath);
+      >({ jsonSchemaPath: schemaPath });
     }
 
     return HeftConfigFiles._typeScriptConfigurationFileLoader;
@@ -79,16 +80,14 @@ export class HeftConfigFiles {
   public static get cleanConfigurationFileLoader(): ConfigurationFile<ICleanConfigurationJson> {
     if (!HeftConfigFiles._cleanConfigurationFileLoader) {
       const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'clean.schema.json');
-      HeftConfigFiles._cleanConfigurationFileLoader = new ConfigurationFile<ICleanConfigurationJson>(
-        schemaPath,
-        {
-          jsonPathMetadata: {
-            '$.pathsToDelete.*': {
-              pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
-            }
+      HeftConfigFiles._cleanConfigurationFileLoader = new ConfigurationFile<ICleanConfigurationJson>({
+        jsonSchemaPath: schemaPath,
+        jsonPathMetadata: {
+          '$.pathsToDelete.*': {
+            pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
           }
         }
-      );
+      });
     }
 
     return HeftConfigFiles._cleanConfigurationFileLoader;
