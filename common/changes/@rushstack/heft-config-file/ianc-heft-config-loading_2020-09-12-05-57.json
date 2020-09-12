@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-config-file",
+      "comment": "(BREAKING CHANGE) Change the API to require the JSON schema path to be passed via the ConfigurationFile constructor options object.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-config-file",
+  "email": "iclanton@users.noreply.github.com"
+}
