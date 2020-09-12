@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Rename the \"outFolderPath\" and \"emitFolderPathForJest\" properties in typescript.json to \"outFolderName\" and \"emitFolderNameForJest\"",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "iclanton@users.noreply.github.com"
+}
