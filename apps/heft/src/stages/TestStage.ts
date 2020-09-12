@@ -53,7 +53,7 @@ export class TestStage extends StageBase<TestStageHooks, ITestStageProperties, I
     super(heftConfiguration, loggingManager, TestStageHooks);
   }
 
-  protected getDefaultStageProperties(options: ITestStageOptions): ITestStageProperties {
+  protected async getDefaultStagePropertiesAsync(options: ITestStageOptions): Promise<ITestStageProperties> {
     return {
       watchMode: options.watchMode,
       updateSnapshots: options.updateSnapshots,

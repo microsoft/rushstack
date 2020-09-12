@@ -41,7 +41,6 @@ export {
   BundleSubstageHooks,
   CompileSubstageHooks,
   CopyFromCacheMode,
-  IApiExtractorConfiguration,
   IBuildStageContext,
   IBuildStageProperties,
   IBuildSubstage,
@@ -49,15 +48,8 @@ export {
   IBundleSubstageProperties,
   ICompileSubstage,
   ICompileSubstageProperties,
-  ICopyStaticAssetsConfiguration,
-  IEmitModuleKind,
-  IEmitModuleKindBase,
   IPostBuildSubstage,
   IPreCompileSubstage,
-  ISharedBundleSubstageWebpackProperties,
-  ISharedCopyStaticAssetsConfiguration,
-  ISharedTypeScriptConfiguration,
-  ITypeScriptConfiguration,
   IWebpackConfiguration
 } from './stages/BuildStage';
 export { ICleanStageProperties, CleanStageHooks, ICleanStageContext } from './stages/CleanStage';

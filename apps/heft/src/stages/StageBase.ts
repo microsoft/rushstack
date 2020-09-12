@@ -66,7 +66,7 @@ export abstract class StageBase<
 
   public async initializeAsync(stageOptions: TStageOptions): Promise<void> {
     this.stageOptions = stageOptions;
-    this.stageProperties = this.getDefaultStageProperties(this.stageOptions);
+    this.stageProperties = await this.getDefaultStagePropertiesAsync(this.stageOptions);
     this.stageHooks = new this._innerHooksType();
     const stageContext: IStageContext<TStageHooks, TStageProperties> = {
       hooks: this.stageHooks,
@@ -87,7 +87,7 @@ export abstract class StageBase<
     }
   }
 
-  protected abstract getDefaultStageProperties(options: TStageOptions): TStageProperties;
+  protected abstract getDefaultStagePropertiesAsync(options: TStageOptions): Promise<TStageProperties>;
 
   protected abstract executeInnerAsync(): Promise<void>;
 }

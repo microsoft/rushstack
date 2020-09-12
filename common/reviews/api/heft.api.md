@@ -41,8 +41,6 @@ export class BundleSubstageHooks extends BuildSubstageHooksBase {
     // (undocumented)
     readonly afterConfigureWebpack: AsyncSeriesHook;
     // (undocumented)
-    readonly configureApiExtractor: AsyncSeriesWaterfallHook<IApiExtractorConfiguration>;
-    // (undocumented)
     readonly configureWebpack: AsyncSeriesWaterfallHook<IWebpackConfiguration>;
 }
 
@@ -54,16 +52,8 @@ export class CleanStageHooks extends StageHooksBase<ICleanStageProperties> {
 
 // @public (undocumented)
 export class CompileSubstageHooks extends BuildSubstageHooksBase {
-    // (undocumented)
-    readonly afterConfigureCopyStaticAssets: AsyncSeriesHook;
-    // (undocumented)
-    readonly afterConfigureTypeScript: AsyncSeriesHook;
     // @internal (undocumented)
     readonly afterTypescriptFirstEmit: AsyncParallelHook;
-    // (undocumented)
-    readonly configureCopyStaticAssets: AsyncSeriesHook;
-    // (undocumented)
-    readonly configureTypeScript: AsyncSeriesHook;
 }
 
 // @public (undocumented)
@@ -106,11 +96,6 @@ export class HeftSession {
 }
 
 // @public (undocumented)
-export interface IApiExtractorConfiguration {
-    useProjectTypescriptVersion?: boolean;
-}
-
-// @public (undocumented)
 export interface IBuildStageContext extends IStageContext<BuildStageHooks, IBuildStageProperties> {
 }
 
@@ -145,7 +130,7 @@ export interface IBundleSubstage extends IBuildSubstage<BundleSubstageHooks, IBu
 }
 
 // @public (undocumented)
-export interface IBundleSubstageProperties extends ISharedBundleSubstageWebpackProperties {
+export interface IBundleSubstageProperties {
     webpackConfiguration?: webpack.Configuration | webpack.Configuration[];
 }
 
@@ -180,15 +165,7 @@ export interface ICompileSubstage extends IBuildSubstage<CompileSubstageHooks, I
 // @public (undocumented)
 export interface ICompileSubstageProperties {
     // (undocumented)
-    copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration;
-    // (undocumented)
-    typeScriptConfiguration: ITypeScriptConfiguration;
-}
-
-// @public (undocumented)
-export interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsConfiguration {
-    destinationFolderNames: string[];
-    sourceFolderName: string;
+    typescriptMaxWriteParallelism: number | undefined;
 }
 
 // @beta (undocumented)
@@ -242,17 +219,6 @@ export interface ICustomActionParameterString extends ICustomActionParameterBase
 export interface ICustomActionParameterStringList extends ICustomActionParameterBase<ReadonlyArray<string>> {
     // (undocumented)
     kind: 'stringList';
-}
-
-// @public (undocumented)
-export type IEmitModuleKind = IEmitModuleKindBase<'commonjs' | 'amd' | 'umd' | 'system' | 'es2015' | 'esnext'>;
-
-// @public (undocumented)
-export interface IEmitModuleKindBase<TModuleKind> {
-    // (undocumented)
-    moduleKind: TModuleKind;
-    // (undocumented)
-    outFolderPath: string;
 }
 
 // @public
@@ -326,27 +292,6 @@ export interface IScopedLogger {
 }
 
 // @public (undocumented)
-export interface ISharedBundleSubstageWebpackProperties {
-    // (undocumented)
-    apiExtractorConfiguration: IApiExtractorConfiguration;
-}
-
-// @public (undocumented)
-export interface ISharedCopyStaticAssetsConfiguration {
-    excludeGlobs?: string[];
-    fileExtensions?: string[];
-    includeGlobs?: string[];
-}
-
-// @public (undocumented)
-export interface ISharedTypeScriptConfiguration {
-    additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
-    copyFromCacheMode?: CopyFromCacheMode | undefined;
-    emitFolderPathForJest?: string;
-    maxWriteParallelism: number;
-}
-
-// @public (undocumented)
 export interface IStageContext<TStageHooks extends StageHooksBase<TStageProperties>, TStageProperties extends object> {
     // (undocumented)
     hooks: TStageHooks;
@@ -378,14 +323,6 @@ export interface ITestStageProperties {
     updateSnapshots: boolean;
     // (undocumented)
     watchMode: boolean;
-}
-
-// @public (undocumented)
-export interface ITypeScriptConfiguration extends ISharedTypeScriptConfiguration {
-    // (undocumented)
-    isLintingEnabled: boolean | undefined;
-    // (undocumented)
-    tsconfigPaths: string[];
 }
 
 // @public (undocumented)

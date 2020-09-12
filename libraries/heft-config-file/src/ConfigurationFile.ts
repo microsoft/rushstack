@@ -67,6 +67,10 @@ interface IConfigurationFileCacheEntry<TConfigurationFile> {
  * @beta
  */
 export interface IJsonPathMetadata {
+  /**
+   * If this property describes a filesystem path, use this property to describe
+   * how the path should be resolved.
+   */
   pathResolutionMethod?: PathResolutionMethod;
 }
 
@@ -91,6 +95,11 @@ export interface IJsonPathsMetadata {
  * @beta
  */
 export interface IConfigurationFileOptions<TConfigurationFile> {
+  /**
+   * The path to the schema for the configuration file.
+   */
+  jsonSchemaPath: string;
+
   /**
    * Use this property to specify how JSON nodes are postprocessed.
    */
@@ -122,9 +131,17 @@ export interface IOriginalValueOptions<TParentProperty> {
  * @beta
  */
 export class ConfigurationFile<TConfigurationFile> {
-  private readonly _schema: JsonSchema;
+  private readonly _schemaPath: string;
   private readonly _jsonPathMetadata: IJsonPathsMetadata;
   private readonly _propertyInheritanceTypes: IPropertyInheritanceTypes<TConfigurationFile>;
+  private __schema: JsonSchema | undefined;
+  private get _schema(): JsonSchema {
+    if (!this.__schema) {
+      this.__schema = JsonSchema.fromFile(this._schemaPath);
+    }
+
+    return this.__schema;
+  }
 
   private readonly _configurationFileCache: Map<
     string,
@@ -132,17 +149,8 @@ export class ConfigurationFile<TConfigurationFile> {
   > = new Map<string, IConfigurationFileCacheEntry<TConfigurationFile>>();
   private readonly _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
-  public constructor(jsonSchemaPath: string, options?: IConfigurationFileOptions<TConfigurationFile>);
-  public constructor(jsonSchema: JsonSchema, options?: IConfigurationFileOptions<TConfigurationFile>);
-  public constructor(
-    jsonSchema: string | JsonSchema,
-    options?: IConfigurationFileOptions<TConfigurationFile>
-  ) {
-    if (typeof jsonSchema === 'string') {
-      jsonSchema = JsonSchema.fromFile(jsonSchema);
-    }
-
-    this._schema = jsonSchema;
+  public constructor(options: IConfigurationFileOptions<TConfigurationFile>) {
+    this._schemaPath = options.jsonSchemaPath;
     this._jsonPathMetadata = options?.jsonPathMetadata || {};
     this._propertyInheritanceTypes = options?.propertyInheritanceTypes || {};
   }

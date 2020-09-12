@@ -4,12 +4,9 @@
 
 ```ts
 
-import { JsonSchema } from '@rushstack/node-core-library';
-
 // @beta (undocumented)
 export class ConfigurationFile<TConfigurationFile> {
-    constructor(jsonSchemaPath: string, options?: IConfigurationFileOptions<TConfigurationFile>);
-    constructor(jsonSchema: JsonSchema, options?: IConfigurationFileOptions<TConfigurationFile>);
+    constructor(options: IConfigurationFileOptions<TConfigurationFile>);
     // @internal (undocumented)
     static _formatPathForError: (path: string) => string;
     getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
@@ -21,12 +18,12 @@ export class ConfigurationFile<TConfigurationFile> {
 // @beta (undocumented)
 export interface IConfigurationFileOptions<TConfigurationFile> {
     jsonPathMetadata?: IJsonPathsMetadata;
+    jsonSchemaPath: string;
     propertyInheritanceTypes?: IPropertyInheritanceTypes<TConfigurationFile>;
 }
 
 // @beta
 export interface IJsonPathMetadata {
-    // (undocumented)
     pathResolutionMethod?: PathResolutionMethod;
 }
 

@@ -5,12 +5,13 @@ import * as path from 'path';
 import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
 import { AsyncSeriesBailHook } from 'tapable';
-import { LegacyAdapters } from '@rushstack/node-core-library';
+import { FileSystem, LegacyAdapters } from '@rushstack/node-core-library';
 
 import { StageBase, StageHooksBase, IStageContext } from './StageBase';
 import { Async } from '../utilities/Async';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
+import { HeftConfigFiles } from '../utilities/HeftConfigFiles';
 
 /**
  * @public
@@ -36,16 +37,33 @@ export interface ICleanStageOptions {
  */
 export interface ICleanStageContext extends IStageContext<CleanStageHooks, ICleanStageProperties> {}
 
+export interface ICleanConfigurationJson {
+  pathsToDelete: string[];
+}
+
 export class CleanStage extends StageBase<CleanStageHooks, ICleanStageProperties, ICleanStageOptions> {
   public constructor(heftConfiguration: HeftConfiguration, loggingManager: LoggingManager) {
     super(heftConfiguration, loggingManager, CleanStageHooks);
   }
 
-  protected getDefaultStageProperties(options: ICleanStageOptions): ICleanStageProperties {
+  protected async getDefaultStagePropertiesAsync(
+    options: ICleanStageOptions
+  ): Promise<ICleanStageProperties> {
+    let cleanConfigurationFile: ICleanConfigurationJson | undefined = undefined;
+    try {
+      cleanConfigurationFile = await HeftConfigFiles.cleanConfigurationFileLoader.loadConfigurationFileAsync(
+        path.resolve(this.heftConfiguration.buildFolder, '.heft', 'clean.json')
+      );
+    } catch (e) {
+      if (!FileSystem.isNotExistError(e)) {
+        throw e;
+      }
+    }
+
     return {
       deleteCache: false,
       ...options,
-      pathsToDelete: new Set<string>()
+      pathsToDelete: new Set<string>(cleanConfigurationFile?.pathsToDelete)
     };
   }
 

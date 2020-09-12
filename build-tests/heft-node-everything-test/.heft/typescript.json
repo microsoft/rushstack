@@ -19,11 +19,11 @@
   "additionalModuleKindsToEmit": [
     {
       "moduleKind": "esnext",
-      "outFolderPath": "lib-esnext"
+      "outFolderName": "lib-esnext"
     },
     {
       "moduleKind": "umd",
-      "outFolderPath": "lib-umd"
+      "outFolderName": "lib-umd"
     }
   ]
 

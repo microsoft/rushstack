@@ -24,9 +24,9 @@
     //  "moduleKind": "amd",
     //
     //   /**
-    //    * (Required) The path where the output will be written.
+    //    * (Required) The name of the folder where the output will be written.
     //    */
-    //    "outFolderPath": "lib-amd"
+    //    "outFolderName": "lib-amd"
     // }
   ]
 
@@ -36,7 +36,7 @@
    *
    * The default value is "lib".
    */
-  // "emitFolderPathForJest": "lib-commonjs",
+  // "emitFolderNameForJest": "lib-commonjs",
 
   /**
    * If set to "true", the TSlint task will not be invoked.
