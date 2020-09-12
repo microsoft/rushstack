@@ -24,7 +24,6 @@ export interface IConfigurationFileOptions<TConfigurationFile> {
 
 // @beta
 export interface IJsonPathMetadata {
-    // (undocumented)
     pathResolutionMethod?: PathResolutionMethod;
 }
 

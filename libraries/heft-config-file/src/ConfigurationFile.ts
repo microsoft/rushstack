@@ -67,6 +67,10 @@ interface IConfigurationFileCacheEntry<TConfigurationFile> {
  * @beta
  */
 export interface IJsonPathMetadata {
+  /**
+   * If this property describes a filesystem path, use this property to describe
+   * how the path should be resolved.
+   */
   pathResolutionMethod?: PathResolutionMethod;
 }
 
