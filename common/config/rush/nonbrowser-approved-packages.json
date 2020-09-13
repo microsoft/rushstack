@@ -619,6 +619,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "prettier",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "pretty-hrtime",
       "allowedCategories": [ "libraries" ]
     },
