@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-plugin",
+      "comment": "Handle webpack dev server hot updates.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/localization-plugin",
+  "email": "halfnibble@users.noreply.github.com"
+}
