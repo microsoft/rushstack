@@ -1,6 +1,13 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Sun, 13 Sep 2020 01:53:20 GMT and should not be manually modified.
+This log was last generated on Sun, 13 Sep 2020 06:39:08 GMT and should not be manually modified.
+
+## 0.3.56
+Sun, 13 Sep 2020 06:39:08 GMT
+
+### Patches
+
+- Handle webpack dev server hot updates.
 
 ## 0.3.55
 Sun, 13 Sep 2020 01:53:20 GMT

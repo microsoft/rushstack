@@ -2,6 +2,18 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.3.56",
+      "tag": "@rushstack/localization-plugin_v0.3.56",
+      "date": "Sun, 13 Sep 2020 06:39:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Handle webpack dev server hot updates."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.55",
       "tag": "@rushstack/localization-plugin_v0.3.55",
       "date": "Sun, 13 Sep 2020 01:53:20 GMT",
