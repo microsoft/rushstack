@@ -231,7 +231,7 @@ importers:
       jszip: 3.5.0
       lodash: 4.17.20
       minimatch: 3.0.4
-      node-fetch: 2.1.2
+      node-fetch: 2.6.1
       npm-package-arg: 6.1.1
       npm-packlist: 2.1.2
       read-package-tree: 5.1.6
@@ -309,7 +309,7 @@ importers:
       jszip: ~3.5.0
       lodash: ~4.17.15
       minimatch: ~3.0.2
-      node-fetch: ~2.1.2
+      node-fetch: ~2.6.1
       npm-package-arg: ~6.1.0
       npm-packlist: ~2.1.2
       read-package-tree: ~5.1.5
@@ -9646,12 +9646,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-ibPK3iA+vaY1eEjESkQkM0BbCqFOaZMiXRTtdB0u7b4djtY6JnsjvPdUHVMg6xQt3B8fpTTWHI9A+ADjM9frzg==
-  /node-fetch/2.1.2:
+  /node-fetch/2.6.1:
     dev: false
     engines:
       node: 4.x || >=6.0.0
     resolution:
-      integrity: sha1-q4hOjn5X44qUR1POxwb3iNF2i7U=
+      integrity: sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
   /node-forge/0.7.6:
     dev: false
     resolution:
