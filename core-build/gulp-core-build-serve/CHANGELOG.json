@@ -2,6 +2,24 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "3.7.54",
+      "tag": "@microsoft/gulp-core-build-serve_v3.7.54",
+      "date": "Sun, 13 Sep 2020 01:53:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `0.2.54`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.5\" to `0.8.14`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" to `6.4.45`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.7.53",
       "tag": "@microsoft/gulp-core-build-serve_v3.7.53",
       "date": "Fri, 11 Sep 2020 02:13:35 GMT",

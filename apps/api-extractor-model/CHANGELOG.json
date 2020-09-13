@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.9.0",
+      "tag": "@microsoft/api-extractor-model_v7.9.0",
+      "date": "Sun, 13 Sep 2020 01:53:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for system selectors in declaration references"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.8.22",
       "tag": "@microsoft/api-extractor-model_v7.8.22",
       "date": "Fri, 11 Sep 2020 02:13:35 GMT",
