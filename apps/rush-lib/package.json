@@ -37,7 +37,7 @@
     "js-yaml": "~3.13.1",
     "lodash": "~4.17.15",
     "minimatch": "~3.0.2",
-    "node-fetch": "~2.1.2",
+    "node-fetch": "~2.6.1",
     "npm-package-arg": "~6.1.0",
     "npm-packlist": "~2.1.2",
     "read-package-tree": "~5.1.5",
