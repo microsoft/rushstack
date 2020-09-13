@@ -45,6 +45,10 @@ items:
             uid: 'api-documenter-test!DocClassInterfaceMerge:interface'
           - name: DocEnum
             uid: 'api-documenter-test!DocEnum:enum'
+          - name: DocEnumNamespaceMerge (Enum)
+            uid: 'api-documenter-test!DocEnumNamespaceMerge:enum'
+          - name: DocEnumNamespaceMerge (Namespace)
+            uid: 'api-documenter-test!DocEnumNamespaceMerge:namespace'
           - name: EcmaSmbols
             uid: 'api-documenter-test!EcmaSmbols:namespace'
           - name: Generic
