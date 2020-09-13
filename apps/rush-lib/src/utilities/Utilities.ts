@@ -115,7 +115,7 @@ interface ICreateEnvironmentForRushCommandOptions {
 export class Utilities {
   /**
    * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
-   * this looks something like "/usr/username/"
+   * this looks something like "/home/username/"
    */
   public static getHomeDirectory(): string {
     const unresolvedUserFolder: string | undefined =

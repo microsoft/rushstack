@@ -68,7 +68,25 @@ export const enum EnvironmentVariableNames {
    * This environment variable can be used to specify the `--target-folder` parameter
    * for the "rush deploy" command.
    */
-  RUSH_DEPLOY_TARGET_FOLDER = 'RUSH_DEPLOY_TARGET_FOLDER'
+  RUSH_DEPLOY_TARGET_FOLDER = 'RUSH_DEPLOY_TARGET_FOLDER',
+
+  /**
+   * Overrides the location of the `~/.rush` global folder where Rush stores temporary files.
+   *
+   * @remarks
+   *
+   * Most of the temporary files created by Rush are stored separately for each monorepo working folder,
+   * to avoid issues of concurrency and compatibility between tool versions.  However, a small set
+   * of files (e.g. installations of the `@microsoft/rush-lib` engine and the package manager) are stored
+   * in a global folder to speed up installations.  The default location is `~/.rush` on POSIX-like
+   * operating systems or `C:\Users\YourName` on Windows.
+   *
+   * Use `RUSH_GLOBAL_FOLDER` to specify a different folder path.  This is useful for example if a Windows
+   * group policy forbids executing scripts installed in a user's home directory.
+   *
+   * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
+   */
+  RUSH_GLOBAL_FOLDER = 'RUSH_GLOBAL_FOLDER'
 }
 
 /**
@@ -88,6 +106,8 @@ export class EnvironmentConfiguration {
   private static _allowUnsupportedNodeVersion: boolean = false;
 
   private static _pnpmStorePathOverride: string | undefined;
+
+  private static _rushGlobalFolderOverride: string | undefined;
 
   /**
    * An override for the common/temp folder path.
@@ -128,6 +148,15 @@ export class EnvironmentConfiguration {
   }
 
   /**
+   * Overrides the location of the `~/.rush` global folder where Rush stores temporary files.
+   * See {@link EnvironmentVariableNames.RUSH_GLOBAL_FOLDER}
+   */
+  public static get rushGlobalFolderOverride(): string | undefined {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._rushGlobalFolderOverride;
+  }
+
+  /**
    * Reads and validates environment variables. If any are invalid, this function will throw.
    */
   public static initialize(options: IEnvironmentConfigurationInitializeOptions = {}): void {
@@ -161,6 +190,14 @@ export class EnvironmentConfiguration {
 
           case EnvironmentVariableNames.RUSH_PNPM_STORE_PATH: {
             EnvironmentConfiguration._pnpmStorePathOverride =
+              value && !options.doNotNormalizePaths
+                ? EnvironmentConfiguration._normalizeDeepestParentFolderPath(value) || value
+                : value;
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_GLOBAL_FOLDER: {
+            EnvironmentConfiguration._rushGlobalFolderOverride =
               value && !options.doNotNormalizePaths
                 ? EnvironmentConfiguration._normalizeDeepestParentFolderPath(value) || value
                 : value;
