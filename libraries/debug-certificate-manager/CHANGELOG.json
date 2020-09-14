@@ -2,6 +2,18 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "0.2.55",
+      "tag": "@rushstack/debug-certificate-manager_v0.2.55",
+      "date": "Mon, 14 Sep 2020 15:09:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.13.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.54",
       "tag": "@rushstack/debug-certificate-manager_v0.2.54",
       "date": "Sun, 13 Sep 2020 01:53:20 GMT",
