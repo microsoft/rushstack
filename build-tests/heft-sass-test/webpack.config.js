@@ -1,7 +1,9 @@
 'use strict';
 
 const path = require('path');
+const Autoprefixer = require('autoprefixer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const sass = require('node-sass');
 
 /**
  * If the "--production" command-line parameter is specified when invoking Heft, then the
@@ -17,7 +19,8 @@ function createWebpackConfig({ production }) {
     module: {
       rules: [
         {
-          test: /\.s[ac]ss|css$/i,
+          test: /\.(scss|sass|css)$/,
+          exclude: /node_modules/,
           use: [
             // Creates `style` nodes from JS strings
             'style-loader',
@@ -25,11 +28,29 @@ function createWebpackConfig({ production }) {
             {
               loader: 'css-loader',
               options: {
+                importLoaders: 2,
                 modules: true
               }
             },
+            // Autoprefix CSS
+            {
+              loader: 'postcss-loader',
+              options: {
+                postcssOptions: {
+                  plugins: [new Autoprefixer()]
+                }
+              }
+            },
             // Compiles Sass to CSS
-            'sass-loader'
+            {
+              loader: 'sass-loader',
+              options: {
+                implementation: sass,
+                sassOptions: {
+                  includePaths: [path.resolve(__dirname, 'node_modules')]
+                }
+              }
+            }
           ]
         }
       ]
@@ -42,7 +63,9 @@ function createWebpackConfig({ production }) {
     },
     output: {
       path: path.join(__dirname, 'dist'),
-      filename: '[name]_[contenthash].js'
+      filename: '[name]_[contenthash].js',
+      devtoolModuleFilenameTemplate: 'webpack:///../[resource-path]',
+      devtoolFallbackModuleFilenameTemplate: 'webpack:///../[resource-path]?[hash]'
     },
     performance: {
       // This specifies the bundle size limit that will trigger Webpack's warning saying:
@@ -50,7 +73,7 @@ function createWebpackConfig({ production }) {
       maxEntrypointSize: 250000,
       maxAssetSize: 250000
     },
-    devtool: production ? undefined : 'source-map',
+    devtool: production ? undefined : 'inline-source-map',
     plugins: [
       // See here for documentation: https://github.com/jantimon/html-webpack-plugin
       new HtmlWebpackPlugin({

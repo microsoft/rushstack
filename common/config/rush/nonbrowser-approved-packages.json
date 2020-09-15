@@ -268,7 +268,7 @@
     },
     {
       "name": "autoprefixer",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "builtin-modules",
@@ -612,7 +612,11 @@
     },
     {
       "name": "postcss",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "postcss-loader",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "postcss-modules",
