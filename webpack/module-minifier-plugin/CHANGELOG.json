@@ -2,6 +2,18 @@
   "name": "@rushstack/module-minifier-plugin",
   "entries": [
     {
+      "version": "0.1.31",
+      "tag": "@rushstack/module-minifier-plugin_v0.1.31",
+      "date": "Tue, 15 Sep 2020 01:51:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.13.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.30",
       "tag": "@rushstack/module-minifier-plugin_v0.1.30",
       "date": "Mon, 14 Sep 2020 15:09:48 GMT",

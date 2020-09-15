@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Mon, 14 Sep 2020 15:09:48 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Sep 2020 01:51:37 GMT and should not be manually modified.
+
+## 0.13.1
+Tue, 15 Sep 2020 01:51:37 GMT
+
+### Patches
+
+- Improve reliability of jest-build-transform.js by only comparing timestamps when in "--watch" mode
 
 ## 0.13.0
 Mon, 14 Sep 2020 15:09:48 GMT

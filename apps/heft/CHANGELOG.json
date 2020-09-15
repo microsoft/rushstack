@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.13.1",
+      "tag": "@rushstack/heft_v0.13.1",
+      "date": "Tue, 15 Sep 2020 01:51:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve reliability of jest-build-transform.js by only comparing timestamps when in \"--watch\" mode"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.13.0",
       "tag": "@rushstack/heft_v0.13.0",
       "date": "Mon, 14 Sep 2020 15:09:48 GMT",
