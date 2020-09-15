@@ -58,12 +58,10 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
     const result: Result = renderSync({
       data: fileContents,
       includePaths: [
-        path.join(buildFolder, 'src'),
         path.join(buildFolder, 'node_modules'),
+        path.join(buildFolder, 'src'),
         path.join(buildFolder)
       ],
-      outFile: undefined,
-      sourceMap: false,
       indentedSyntax: path.extname(filePath).toLowerCase() === '.sass'
     });
 
