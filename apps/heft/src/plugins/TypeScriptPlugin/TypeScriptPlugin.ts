@@ -229,10 +229,10 @@ export class TypeScriptPlugin implements IHeftPlugin {
       maxWriteParallelism: typeScriptConfiguration.maxWriteParallelism
     };
 
-    JestTypeScriptDataFile.saveForProject(
-      heftConfiguration.buildFolder,
-      typescriptConfigurationJson?.emitFolderNameForJest
-    );
+    JestTypeScriptDataFile.saveForProject(heftConfiguration.buildFolder, {
+      emitFolderNameForJest: typescriptConfigurationJson?.emitFolderNameForJest || 'lib',
+      skipTimestampCheck: !options.watchMode
+    });
 
     const callbacksForTsconfigs: Set<() => void> = new Set<() => void>();
     function getFirstEmitCallbackForTsconfig(): () => void {

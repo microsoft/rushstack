@@ -71,54 +71,56 @@ export function process(
     const startOfLoopMs: number = new Date().getTime();
     let stalled: boolean = false;
 
-    for (;;) {
-      let srcFileStatistics: FileSystemStats;
-      try {
-        srcFileStatistics = FileSystem.getStatistics(srcFilePath);
-      } catch {
-        // If the source file was deleted, then fall through and allow readFile() to fail
-        break;
-      }
-      let libFileStatistics: FileSystemStats | undefined = undefined;
-      try {
-        libFileStatistics = FileSystem.getStatistics(libFilePath);
-      } catch {
-        // ignore errors
-      }
+    if (!jestTypeScriptDataFile.skipTimestampCheck) {
+      for (;;) {
+        let srcFileStatistics: FileSystemStats;
+        try {
+          srcFileStatistics = FileSystem.getStatistics(srcFilePath);
+        } catch {
+          // If the source file was deleted, then fall through and allow readFile() to fail
+          break;
+        }
+        let libFileStatistics: FileSystemStats | undefined = undefined;
+        try {
+          libFileStatistics = FileSystem.getStatistics(libFilePath);
+        } catch {
+          // ignore errors
+        }
 
-      const nowMs: number = new Date().getTime();
-      if (libFileStatistics) {
-        // The lib/*.js timestamp must not be older than the src/*.ts timestamp, otherwise the transpiler
-        // is not done writing its outputs.
-        if (libFileStatistics.ctimeMs + TIMESTAMP_TOLERANCE_MS > srcFileStatistics.ctimeMs) {
-          // Also, the lib/*.js timestamp must not be too recent, otherwise the transpiler may not have
-          // finished flushing its output to disk.
-          if (nowMs > libFileStatistics.ctimeMs + FLUSH_TIME_MS) {
-            // The .js file is newer than the .ts file, and is old enough to have been flushed
-            break;
+        const nowMs: number = new Date().getTime();
+        if (libFileStatistics) {
+          // The lib/*.js timestamp must not be older than the src/*.ts timestamp, otherwise the transpiler
+          // is not done writing its outputs.
+          if (libFileStatistics.ctimeMs + TIMESTAMP_TOLERANCE_MS > srcFileStatistics.ctimeMs) {
+            // Also, the lib/*.js timestamp must not be too recent, otherwise the transpiler may not have
+            // finished flushing its output to disk.
+            if (nowMs > libFileStatistics.ctimeMs + FLUSH_TIME_MS) {
+              // The .js file is newer than the .ts file, and is old enough to have been flushed
+              break;
+            }
           }
         }
-      }
 
-      if (nowMs - startOfLoopMs > MAX_WAIT_MS) {
-        // Something is wrong -- why hasn't the compiler updated the .js file?
-        if (libFileStatistics) {
-          throw new Error(
-            'jest-build-transform: Gave up waiting for the transpiler to update its output file:\n' +
-              libFilePath
-          );
-        } else {
-          throw new Error(
-            'jest-build-transform: Gave up waiting for the transpiler to write its output file:\n' +
-              libFilePath
-          );
+        if (nowMs - startOfLoopMs > MAX_WAIT_MS) {
+          // Something is wrong -- why hasn't the compiler updated the .js file?
+          if (libFileStatistics) {
+            throw new Error(
+              'jest-build-transform: Gave up waiting for the transpiler to update its output file:\n' +
+                libFilePath
+            );
+          } else {
+            throw new Error(
+              'jest-build-transform: Gave up waiting for the transpiler to write its output file:\n' +
+                libFilePath
+            );
+          }
         }
-      }
 
-      // Jest's transforms are synchronous, so our only option here is to sleep synchronously. Bad Jest. :-(
-      // TODO: The better solution is to change how Jest's watch loop is notified.
-      stalled = true;
-      delayMs(POLLING_INTERVAL_MS);
+        // Jest's transforms are synchronous, so our only option here is to sleep synchronously. Bad Jest. :-(
+        // TODO: The better solution is to change how Jest's watch loop is notified.
+        stalled = true;
+        delayMs(POLLING_INTERVAL_MS);
+      }
     }
 
     if (stalled && DEBUG_TRANSFORM) {
