@@ -27,7 +27,7 @@
     "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@microsoft/node-library-build": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft": "0.8.0",
     "@types/glob": "7.1.1"
   }
 }

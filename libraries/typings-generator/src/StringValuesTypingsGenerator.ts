@@ -25,6 +25,7 @@ export interface IStringValueTypings {
  */
 export interface IStringValuesTypingsGeneratorOptions extends ITypingsGeneratorOptions<IStringValueTypings> {
   exportAsDefault?: boolean;
+  exportAsInterfaceName?: string;
 }
 
 const EXPORT_AS_DEFAULT_INTERFACE_NAME: string = 'IExport';
@@ -46,10 +47,12 @@ export class StringValuesTypingsGenerator extends TypingsGenerator {
         );
 
         const outputLines: string[] = [];
+        const interfaceName: string = options.exportAsInterfaceName
+          ? options.exportAsInterfaceName
+          : EXPORT_AS_DEFAULT_INTERFACE_NAME;
         let indent: string = '';
         if (options.exportAsDefault) {
-          outputLines.push(`export interface ${EXPORT_AS_DEFAULT_INTERFACE_NAME} {`);
-
+          outputLines.push(`export interface ${interfaceName} {`);
           indent = '  ';
         }
 
@@ -65,7 +68,7 @@ export class StringValuesTypingsGenerator extends TypingsGenerator {
           }
 
           if (options.exportAsDefault) {
-            outputLines.push(`${indent}${exportName}: string;`, '');
+            outputLines.push(`${indent}'${exportName}': string;`, '');
           } else {
             outputLines.push(`export declare const ${exportName}: string;`, '');
           }
@@ -75,7 +78,8 @@ export class StringValuesTypingsGenerator extends TypingsGenerator {
           outputLines.push(
             '}',
             '',
-            `declare const strings: ${EXPORT_AS_DEFAULT_INTERFACE_NAME};`,
+            `declare const strings: ${interfaceName};`,
+            '',
             'export default strings;'
           );
         }

@@ -592,7 +592,7 @@
     },
     {
       "name": "node-sass",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "npm-package-arg",
@@ -633,6 +633,10 @@
     {
       "name": "resolve",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "sass-loader",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "semver",

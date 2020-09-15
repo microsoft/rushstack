@@ -17,6 +17,7 @@ import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPl
 import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
 import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWebpackPlugin';
 import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
+import { SassTypingsPlugin } from '../plugins/SassTypingsPlugin/SassTypingsPlugin';
 import { HeftConfigFiles } from '../utilities/HeftConfigFiles';
 
 export interface IPluginManagerOptions {
@@ -53,6 +54,7 @@ export class PluginManager {
     this._applyPlugin(new JestPlugin());
     this._applyPlugin(new BasicConfigureWebpackPlugin());
     this._applyPlugin(new WebpackPlugin());
+    this._applyPlugin(new SassTypingsPlugin());
   }
 
   public initializePlugin(pluginSpecifier: string, options?: object): void {

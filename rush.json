@@ -591,6 +591,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-sass-test",
+      "projectFolder": "build-tests/heft-sass-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-webpack-basic-test",
       "projectFolder": "build-tests/heft-webpack-basic-test",
       "reviewCategory": "tests",
@@ -856,7 +862,8 @@
       "packageName": "@rushstack/typings-generator",
       "projectFolder": "libraries/typings-generator",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft"]
     },
 
     // "repo-scripts" folder (alphabetical order)

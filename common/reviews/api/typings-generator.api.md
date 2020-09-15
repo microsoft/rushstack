@@ -10,6 +10,8 @@ import { Terminal } from '@rushstack/node-core-library';
 export interface IStringValuesTypingsGeneratorOptions extends ITypingsGeneratorOptions<IStringValueTypings> {
     // (undocumented)
     exportAsDefault?: boolean;
+    // (undocumented)
+    exportAsInterfaceName?: string;
 }
 
 // @public (undocumented)
