@@ -73,7 +73,7 @@ function createWebpackConfig({ production }) {
       maxEntrypointSize: 250000,
       maxAssetSize: 250000
     },
-    devtool: production ? undefined : 'inline-source-map',
+    devtool: production ? undefined : 'source-map',
     plugins: [
       // See here for documentation: https://github.com/jantimon/html-webpack-plugin
       new HtmlWebpackPlugin({
