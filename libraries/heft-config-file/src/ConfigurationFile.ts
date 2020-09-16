@@ -59,6 +59,7 @@ interface IConfigurationFileFieldAnnotation<TField> {
 interface IConfigurationFileCacheEntry<TConfigurationFile> {
   configurationFile?: TConfigurationFile;
   error?: Error;
+  parentFileError?: Error;
 }
 
 /**
@@ -130,6 +131,24 @@ export interface IOriginalValueOptions<TParentProperty> {
 /**
  * @beta
  */
+export interface ILoadConfigurationFileOptions {
+  /**
+   * Do not throw an error if the file passed to the load function does not exist.
+   * Note that unresolvable files in "extends" fields will still cause an error to be thrown.
+   */
+  ignoreIfNotExist?: boolean;
+}
+
+/**
+ * @beta
+ */
+export interface ILoadConfigurationFileOptionsIgnoreNotExist extends ILoadConfigurationFileOptions {
+  ignoreIfNotExist: true;
+}
+
+/**
+ * @beta
+ */
 export class ConfigurationFile<TConfigurationFile> {
   private readonly _schemaPath: string;
   private readonly _jsonPathMetadata: IJsonPathsMetadata;
@@ -155,9 +174,22 @@ export class ConfigurationFile<TConfigurationFile> {
     this._propertyInheritanceTypes = options?.propertyInheritanceTypes || {};
   }
 
-  public async loadConfigurationFileAsync(configurationFilePath: string): Promise<TConfigurationFile> {
+  public async loadConfigurationFileAsync(
+    configurationFilePath: string,
+    options?: ILoadConfigurationFileOptions
+  ): Promise<TConfigurationFile>;
+  public async loadConfigurationFileAsync(
+    configurationFilePath: string,
+    options: ILoadConfigurationFileOptionsIgnoreNotExist
+  ): Promise<TConfigurationFile | undefined>;
+  public async loadConfigurationFileAsync(
+    configurationFilePath: string,
+    options: ILoadConfigurationFileOptions = {}
+  ): Promise<TConfigurationFile | undefined> {
     return await this._loadConfigurationFileInnerAsync(
       nodeJsPath.resolve(configurationFilePath),
+      options,
+      true,
       new Set<string>()
     );
   }
@@ -199,187 +231,216 @@ export class ConfigurationFile<TConfigurationFile> {
 
   private async _loadConfigurationFileInnerAsync(
     resolvedConfigurationFilePath: string,
+    options: ILoadConfigurationFileOptions,
+    isFirstFile: boolean,
     visitedConfigurationFilePaths: Set<string>
-  ): Promise<TConfigurationFile> {
+  ): Promise<TConfigurationFile | undefined> {
     let cacheEntry:
       | IConfigurationFileCacheEntry<TConfigurationFile>
       | undefined = this._configurationFileCache.get(resolvedConfigurationFilePath);
     if (!cacheEntry) {
-      try {
-        const resolvedConfigurationFilePathForErrors: string = ConfigurationFile._formatPathForError(
-          resolvedConfigurationFilePath
-        );
-
-        if (visitedConfigurationFilePaths.has(resolvedConfigurationFilePath)) {
-          throw new Error(
-            'A loop has been detected in the "extends" properties of configuration file at ' +
-              `"${resolvedConfigurationFilePathForErrors}".`
-          );
-        }
-
-        visitedConfigurationFilePaths.add(resolvedConfigurationFilePath);
-
-        let fileText: string;
-        try {
-          fileText = await FileSystem.readFileAsync(resolvedConfigurationFilePath);
-        } catch (e) {
-          if (FileSystem.isNotExistError(e)) {
-            e.message = `File does not exist: ${resolvedConfigurationFilePathForErrors}`;
-          }
-
-          throw e;
-        }
-
-        let configurationJson: IConfigurationJson & TConfigurationFile;
-        try {
-          configurationJson = await JsonFile.parseString(fileText);
-        } catch (e) {
-          throw new Error(`In config file "${resolvedConfigurationFilePathForErrors}": ${e}`);
-        }
-
-        this._schema.validateObject(configurationJson, resolvedConfigurationFilePathForErrors);
-
-        this._annotateProperties(resolvedConfigurationFilePath, configurationJson);
-
-        for (const [jsonPath, metadata] of Object.entries(this._jsonPathMetadata)) {
-          JSONPath({
-            path: jsonPath,
-            json: configurationJson,
-            callback: (payload: unknown, payloadType: string, fullPayload: IJsonPathCallbackObject) => {
-              if (metadata.pathResolutionMethod !== undefined) {
-                fullPayload.parent[fullPayload.parentProperty] = this._resolvePathProperty(
-                  resolvedConfigurationFilePath,
-                  fullPayload.value,
-                  metadata.pathResolutionMethod
-                );
-              }
-            },
-            otherTypeCallback: () => {
-              throw new Error('@other() tags are not supported');
-            }
-          });
-        }
-
-        let parentConfiguration: Partial<TConfigurationFile> = {};
-        if (configurationJson.extends) {
-          const resolvedParentConfigPath: string = nodeJsPath.resolve(
-            nodeJsPath.dirname(resolvedConfigurationFilePath),
-            configurationJson.extends
-          );
-          parentConfiguration = await this._loadConfigurationFileInnerAsync(
-            resolvedParentConfigPath,
-            visitedConfigurationFilePaths
-          );
-        }
-
-        const propertyNames: Set<string> = new Set<string>([
-          ...Object.keys(parentConfiguration),
-          ...Object.keys(configurationJson)
-        ]);
-
-        const resultAnnotation: IConfigurationFileFieldAnnotation<TConfigurationFile> = {
-          configurationFilePath: resolvedConfigurationFilePath,
-          originalValues: {} as TConfigurationFile
-        };
-        const result: TConfigurationFile = ({
-          [CONFIGURATION_FILE_FIELD_ANNOTATION]: resultAnnotation
-        } as unknown) as TConfigurationFile;
-        for (const propertyName of propertyNames) {
-          if (propertyName === '$schema' || propertyName === 'extends') {
-            continue;
-          }
-
-          const propertyValue: unknown | undefined = configurationJson[propertyName];
-          const parentPropertyValue: unknown | undefined = parentConfiguration[propertyName];
-
-          const bothAreArrays: boolean = Array.isArray(propertyValue) && Array.isArray(parentPropertyValue);
-          const defaultInheritanceType: InheritanceType = bothAreArrays
-            ? InheritanceType.append
-            : InheritanceType.replace;
-          const inheritanceType: InheritanceType =
-            this._propertyInheritanceTypes[propertyName] !== undefined
-              ? this._propertyInheritanceTypes[propertyName]
-              : defaultInheritanceType;
-
-          let newValue: unknown;
-          const usePropertyValue: () => void = () => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            resultAnnotation.originalValues[propertyName] = this.getPropertyOriginalValue<any, any>({
-              parentObject: configurationJson,
-              propertyName: propertyName
-            });
-            newValue = propertyValue;
-          };
-          const useParentPropertyValue: () => void = () => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            resultAnnotation.originalValues[propertyName] = this.getPropertyOriginalValue<any, any>({
-              parentObject: parentConfiguration,
-              propertyName: propertyName
-            });
-            newValue = parentPropertyValue;
-          };
-
-          switch (inheritanceType) {
-            case InheritanceType.replace: {
-              if (propertyValue !== undefined) {
-                usePropertyValue();
-              } else {
-                useParentPropertyValue();
-              }
-
-              break;
-            }
-
-            case InheritanceType.append: {
-              if (propertyValue !== undefined && parentPropertyValue === undefined) {
-                usePropertyValue();
-              } else if (propertyValue === undefined && parentPropertyValue !== undefined) {
-                useParentPropertyValue();
-              } else {
-                if (!Array.isArray(propertyValue) || !Array.isArray(parentPropertyValue)) {
-                  throw new Error(
-                    `Issue in processing configuration file property "${propertyName}". ` +
-                      `Property is not an array, but the inheritance type is set as "${InheritanceType.append}"`
-                  );
-                }
-
-                newValue = [...parentPropertyValue, ...propertyValue];
-                ((newValue as unknown) as IAnnotatedField<unknown[]>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
-                  configurationFilePath: undefined,
-                  originalValues: {
-                    ...parentPropertyValue[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues,
-                    ...propertyValue[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues
-                  }
-                };
-              }
-
-              break;
-            }
-
-            default: {
-              throw new Error(`Unknown inheritance type "${inheritanceType}"`);
-            }
-          }
-
-          result[propertyName] = newValue;
-        }
-
-        try {
-          this._schema.validateObject(result, resolvedConfigurationFilePathForErrors);
-        } catch (e) {
-          throw new Error(`Resolved configuration object does not match schema: ${e}`);
-        }
-
-        cacheEntry = { configurationFile: result };
-      } catch (e) {
-        cacheEntry = { error: e };
-      }
+      cacheEntry = await this._generateCacheEntryAsync(
+        resolvedConfigurationFilePath,
+        options,
+        visitedConfigurationFilePaths
+      );
+      this._configurationFileCache.set(resolvedConfigurationFilePath, cacheEntry);
     }
 
-    if (cacheEntry.error) {
+    if (cacheEntry.parentFileError) {
+      throw cacheEntry.parentFileError;
+    } else if (cacheEntry.error) {
+      if (!isFirstFile || !options.ignoreIfNotExist || !FileSystem.isNotExistError(cacheEntry.error)) {
+        throw cacheEntry.error;
+      } else {
+        return undefined;
+      }
+    } else if (cacheEntry.error) {
       throw cacheEntry.error;
     } else {
-      return cacheEntry.configurationFile! as TConfigurationFile;
+      return cacheEntry.configurationFile;
+    }
+  }
+
+  private async _generateCacheEntryAsync(
+    resolvedConfigurationFilePath: string,
+    options: ILoadConfigurationFileOptions,
+    visitedConfigurationFilePaths: Set<string>
+  ): Promise<IConfigurationFileCacheEntry<TConfigurationFile>> {
+    try {
+      const resolvedConfigurationFilePathForErrors: string = ConfigurationFile._formatPathForError(
+        resolvedConfigurationFilePath
+      );
+
+      if (visitedConfigurationFilePaths.has(resolvedConfigurationFilePath)) {
+        throw new Error(
+          'A loop has been detected in the "extends" properties of configuration file at ' +
+            `"${resolvedConfigurationFilePathForErrors}".`
+        );
+      }
+
+      visitedConfigurationFilePaths.add(resolvedConfigurationFilePath);
+
+      let fileText: string;
+      try {
+        fileText = await FileSystem.readFileAsync(resolvedConfigurationFilePath);
+      } catch (e) {
+        if (FileSystem.isNotExistError(e)) {
+          e.message = `File does not exist: ${resolvedConfigurationFilePathForErrors}`;
+        }
+
+        throw e;
+      }
+
+      let configurationJson: IConfigurationJson & TConfigurationFile;
+      try {
+        configurationJson = await JsonFile.parseString(fileText);
+      } catch (e) {
+        throw new Error(`In config file "${resolvedConfigurationFilePathForErrors}": ${e}`);
+      }
+
+      this._schema.validateObject(configurationJson, resolvedConfigurationFilePathForErrors);
+
+      this._annotateProperties(resolvedConfigurationFilePath, configurationJson);
+
+      for (const [jsonPath, metadata] of Object.entries(this._jsonPathMetadata)) {
+        JSONPath({
+          path: jsonPath,
+          json: configurationJson,
+          callback: (payload: unknown, payloadType: string, fullPayload: IJsonPathCallbackObject) => {
+            if (metadata.pathResolutionMethod !== undefined) {
+              fullPayload.parent[fullPayload.parentProperty] = this._resolvePathProperty(
+                resolvedConfigurationFilePath,
+                fullPayload.value,
+                metadata.pathResolutionMethod
+              );
+            }
+          },
+          otherTypeCallback: () => {
+            throw new Error('@other() tags are not supported');
+          }
+        });
+      }
+
+      let parentConfiguration: Partial<TConfigurationFile> = {};
+      if (configurationJson.extends) {
+        try {
+          const resolvedParentConfigPath: string = Import.resolveModule({
+            modulePath: configurationJson.extends,
+            baseFolderPath: nodeJsPath.dirname(resolvedConfigurationFilePath)
+          });
+          parentConfiguration = (await this._loadConfigurationFileInnerAsync(
+            resolvedParentConfigPath,
+            options,
+            false,
+            visitedConfigurationFilePaths
+          ))!;
+        } catch (e) {
+          return { parentFileError: e };
+        }
+      }
+
+      const propertyNames: Set<string> = new Set<string>([
+        ...Object.keys(parentConfiguration),
+        ...Object.keys(configurationJson)
+      ]);
+
+      const resultAnnotation: IConfigurationFileFieldAnnotation<TConfigurationFile> = {
+        configurationFilePath: resolvedConfigurationFilePath,
+        originalValues: {} as TConfigurationFile
+      };
+      const result: TConfigurationFile = ({
+        [CONFIGURATION_FILE_FIELD_ANNOTATION]: resultAnnotation
+      } as unknown) as TConfigurationFile;
+      for (const propertyName of propertyNames) {
+        if (propertyName === '$schema' || propertyName === 'extends') {
+          continue;
+        }
+
+        const propertyValue: unknown | undefined = configurationJson[propertyName];
+        const parentPropertyValue: unknown | undefined = parentConfiguration[propertyName];
+
+        const bothAreArrays: boolean = Array.isArray(propertyValue) && Array.isArray(parentPropertyValue);
+        const defaultInheritanceType: InheritanceType = bothAreArrays
+          ? InheritanceType.append
+          : InheritanceType.replace;
+        const inheritanceType: InheritanceType =
+          this._propertyInheritanceTypes[propertyName] !== undefined
+            ? this._propertyInheritanceTypes[propertyName]
+            : defaultInheritanceType;
+
+        let newValue: unknown;
+        const usePropertyValue: () => void = () => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          resultAnnotation.originalValues[propertyName] = this.getPropertyOriginalValue<any, any>({
+            parentObject: configurationJson,
+            propertyName: propertyName
+          });
+          newValue = propertyValue;
+        };
+        const useParentPropertyValue: () => void = () => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          resultAnnotation.originalValues[propertyName] = this.getPropertyOriginalValue<any, any>({
+            parentObject: parentConfiguration,
+            propertyName: propertyName
+          });
+          newValue = parentPropertyValue;
+        };
+
+        switch (inheritanceType) {
+          case InheritanceType.replace: {
+            if (propertyValue !== undefined) {
+              usePropertyValue();
+            } else {
+              useParentPropertyValue();
+            }
+
+            break;
+          }
+
+          case InheritanceType.append: {
+            if (propertyValue !== undefined && parentPropertyValue === undefined) {
+              usePropertyValue();
+            } else if (propertyValue === undefined && parentPropertyValue !== undefined) {
+              useParentPropertyValue();
+            } else {
+              if (!Array.isArray(propertyValue) || !Array.isArray(parentPropertyValue)) {
+                throw new Error(
+                  `Issue in processing configuration file property "${propertyName}". ` +
+                    `Property is not an array, but the inheritance type is set as "${InheritanceType.append}"`
+                );
+              }
+
+              newValue = [...parentPropertyValue, ...propertyValue];
+              ((newValue as unknown) as IAnnotatedField<unknown[]>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
+                configurationFilePath: undefined,
+                originalValues: {
+                  ...parentPropertyValue[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues,
+                  ...propertyValue[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues
+                }
+              };
+            }
+
+            break;
+          }
+
+          default: {
+            throw new Error(`Unknown inheritance type "${inheritanceType}"`);
+          }
+        }
+
+        result[propertyName] = newValue;
+      }
+
+      try {
+        this._schema.validateObject(result, resolvedConfigurationFilePathForErrors);
+      } catch (e) {
+        throw new Error(`Resolved configuration object does not match schema: ${e}`);
+      }
+
+      return { configurationFile: result };
+    } catch (e) {
+      return { error: e };
     }
   }
 

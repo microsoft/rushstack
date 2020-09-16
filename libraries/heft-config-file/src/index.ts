@@ -9,5 +9,7 @@ export {
   InheritanceType,
   IOriginalValueOptions,
   IPropertyInheritanceTypes,
-  PathResolutionMethod
+  PathResolutionMethod,
+  ILoadConfigurationFileOptions,
+  ILoadConfigurationFileOptionsIgnoreNotExist
 } from './ConfigurationFile';

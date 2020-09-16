@@ -12,7 +12,9 @@ export class ConfigurationFile<TConfigurationFile> {
     getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
     getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue;
     // (undocumented)
-    loadConfigurationFileAsync(configurationFilePath: string): Promise<TConfigurationFile>;
+    loadConfigurationFileAsync(configurationFilePath: string, options?: ILoadConfigurationFileOptions): Promise<TConfigurationFile>;
+    // (undocumented)
+    loadConfigurationFileAsync(configurationFilePath: string, options: ILoadConfigurationFileOptionsIgnoreNotExist): Promise<TConfigurationFile | undefined>;
     }
 
 // @beta (undocumented)
@@ -31,6 +33,17 @@ export interface IJsonPathMetadata {
 export interface IJsonPathsMetadata {
     // (undocumented)
     [jsonPath: string]: IJsonPathMetadata;
+}
+
+// @beta (undocumented)
+export interface ILoadConfigurationFileOptions {
+    ignoreIfNotExist?: boolean;
+}
+
+// @beta (undocumented)
+export interface ILoadConfigurationFileOptionsIgnoreNotExist extends ILoadConfigurationFileOptions {
+    // (undocumented)
+    ignoreIfNotExist: true;
 }
 
 // @beta (undocumented)
