@@ -3,7 +3,6 @@
   "description": "This project exercises a custom Heft action",
   "version": "1.0.0",
   "private": true,
-  "main": "lib/index.js",
   "license": "MIT",
   "scripts": {
     "build": "heft my-custom-action"
