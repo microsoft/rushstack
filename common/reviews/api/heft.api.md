@@ -71,6 +71,7 @@ export class HeftConfiguration {
     get heftPackageJson(): IPackageJson;
     // @internal (undocumented)
     static initialize(options: _IHeftConfigurationInitializationOptions): HeftConfiguration;
+    get projectConfigFolder(): string;
     get projectHeftDataFolder(): string;
     get projectPackageJson(): IPackageJson;
     get terminalProvider(): ITerminalProvider;

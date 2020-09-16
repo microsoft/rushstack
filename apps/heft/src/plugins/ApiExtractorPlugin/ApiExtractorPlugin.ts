@@ -65,8 +65,7 @@ export class ApiExtractorPlugin implements IHeftPlugin {
     const { heftConfiguration, buildFolder, debugMode, watchMode, production } = options;
 
     const apiExtractorTaskConfigurationPath: string = path.resolve(
-      heftConfiguration.buildFolder,
-      '.heft',
+      heftConfiguration.projectConfigFolder,
       'api-extractor-task.json'
     );
     let apiExtractorTaskConfiguration: IApiExtractorPluginConfiguration | undefined;

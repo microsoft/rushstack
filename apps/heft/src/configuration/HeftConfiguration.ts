@@ -60,6 +60,7 @@ export interface ICompilerPackage {
 export class HeftConfiguration {
   private _buildFolder: string;
   private _projectHeftDataFolder: string | undefined;
+  private _projectConfigFolder: string | undefined;
   private _buildCacheFolder: string | undefined;
   private _globalTerminal: Terminal;
   private _terminalProvider: ITerminalProvider;
@@ -83,6 +84,17 @@ export class HeftConfiguration {
     }
 
     return this._projectHeftDataFolder;
+  }
+
+  /**
+   * The path to the project's "config" folder.
+   */
+  public get projectConfigFolder(): string {
+    if (!this._projectConfigFolder) {
+      this._projectConfigFolder = path.join(this.buildFolder, Constants.projectConfigFolderName);
+    }
+
+    return this._projectConfigFolder;
   }
 
   /**

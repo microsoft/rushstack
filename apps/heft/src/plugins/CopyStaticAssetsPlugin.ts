@@ -77,7 +77,7 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
           const logger: ScopedLogger = heftSession.requestScopedLogger('copy-static-assets');
 
           const copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration = await this._loadCopyStaticAssetsConfigurationAsync(
-            heftConfiguration.buildFolder
+            heftConfiguration.projectConfigFolder
           );
           await this._runCopyAsync({
             logger,
@@ -91,13 +91,9 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
   }
 
   private async _loadCopyStaticAssetsConfigurationAsync(
-    buildFolder: string
+    configFolder: string
   ): Promise<ICopyStaticAssetsConfiguration> {
-    const copyStaticAssetsConfigurationPath: string = path.resolve(
-      buildFolder,
-      '.heft',
-      'copy-static-assets.json'
-    );
+    const copyStaticAssetsConfigurationPath: string = path.resolve(configFolder, 'copy-static-assets.json');
     let copyStaticAssetsConfigurationJson: ICopyStaticAssetsConfigurationJson | undefined;
     if (await FileSystem.existsAsync(copyStaticAssetsConfigurationPath)) {
       copyStaticAssetsConfigurationJson = await ConfigFile.copyStaticAssetsConfigurationLoader.loadConfigurationFileAsync(

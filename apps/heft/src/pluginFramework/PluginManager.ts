@@ -62,7 +62,7 @@ export class PluginManager {
 
   public async initializePluginsFromConfigFileAsync(): Promise<void> {
     const pluginConfigFilePath: string = path.join(
-      this._heftConfiguration.projectHeftDataFolder,
+      this._heftConfiguration.projectConfigFolder,
       'plugins.json'
     );
     if (await FileSystem.existsAsync(pluginConfigFilePath)) {

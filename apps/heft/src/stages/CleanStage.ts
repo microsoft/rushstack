@@ -51,8 +51,7 @@ export class CleanStage extends StageBase<CleanStageHooks, ICleanStageProperties
   ): Promise<ICleanStageProperties> {
     let cleanConfigurationFile: ICleanConfigurationJson | undefined = undefined;
     const cleanConfigurationFilePath: string = path.resolve(
-      this.heftConfiguration.buildFolder,
-      '.heft',
+      this.heftConfiguration.projectConfigFolder,
       'clean.json'
     );
     if (await FileSystem.existsAsync(cleanConfigurationFilePath)) {
