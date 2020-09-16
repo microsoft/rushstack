@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 15 Sep 2020 01:51:37 GMT and should not be manually modified.
+This log was last generated on Wed, 16 Sep 2020 05:30:25 GMT and should not be manually modified.
+
+## 0.13.2
+Wed, 16 Sep 2020 05:30:25 GMT
+
+### Patches
+
+- Add missing "extends" properties to schemas.
+- Fix an issue where console.log() did not get formatted by HeftJestReporter
 
 ## 0.13.1
 Tue, 15 Sep 2020 01:51:37 GMT
