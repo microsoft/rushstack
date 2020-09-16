@@ -14,6 +14,7 @@
     },
 
     "extends": {
+      "description": "Use this property to extend another configuration file.",
       "type": "string"
     },
 

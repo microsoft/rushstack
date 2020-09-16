@@ -12,6 +12,11 @@
       "type": "string"
     },
 
+    "extends": {
+      "description": "Use this property to extend another configuration file.",
+      "type": "string"
+    },
+
     "fileExtensions": {
       "type": "array",
       "description": "File extensions that should be copied from the src folder to the destination folder(s)",

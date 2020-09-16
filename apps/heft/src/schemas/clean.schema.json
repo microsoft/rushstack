@@ -12,6 +12,11 @@
       "type": "string"
     },
 
+    "extends": {
+      "description": "Use this property to extend another configuration file.",
+      "type": "string"
+    },
+
     "pathsToDelete": {
       "type": "array",
       "description": "paths that need to be cleaned",
