@@ -14,7 +14,7 @@
     },
 
     "extends": {
-      "description": "Use this property to extend another configuration file.",
+      "description": "Optionally specifies another JSON config file that this file extends from.  This provides a way for standard settings to be shared across multiple projects.",
       "type": "string"
     },
 
