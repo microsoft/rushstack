@@ -29,6 +29,7 @@ import { TestStage } from '../stages/TestStage';
 import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 import { ICustomActionOptions, CustomAction } from './actions/CustomAction';
 import { Constants } from '../utilities/Constants';
+import { ProjectValidator } from '../utilities/ProjectValidator';
 
 export class HeftToolsCommandLineParser extends CommandLineParser {
   private _terminalProvider: ConsoleTerminalProvider;
@@ -146,6 +147,8 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     this._normalizeCwd();
 
     await this._initializePluginsAsync();
+
+    await ProjectValidator.validateProjectFoldersAsync(this._heftConfiguration);
 
     return await super.execute(args);
   }
