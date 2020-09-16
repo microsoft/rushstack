@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Terminal, InternalError, FileSystem, Import } from '@rushstack/node-core-library';
+import { Terminal, InternalError, Import } from '@rushstack/node-core-library';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IHeftPlugin } from './IHeftPlugin';
@@ -61,21 +61,20 @@ export class PluginManager {
   }
 
   public async initializePluginsFromConfigFileAsync(): Promise<void> {
-    try {
-      const pluginConfigFilePath: string = path.join(
-        this._heftConfiguration.projectHeftDataFolder,
-        'plugins.json'
-      );
-      const pluginConfigurationJson: IPluginConfigurationJson = await HeftConfigFiles.pluginConfigFileLoader.loadConfigurationFileAsync(
-        pluginConfigFilePath
-      );
+    const pluginConfigFilePath: string = path.join(
+      this._heftConfiguration.projectHeftDataFolder,
+      'plugins.json'
+    );
+    const pluginConfigurationJson:
+      | IPluginConfigurationJson
+      | undefined = await HeftConfigFiles.pluginConfigFileLoader.loadConfigurationFileAsync(
+      pluginConfigFilePath,
+      { ignoreIfNotExist: true }
+    );
 
+    if (pluginConfigurationJson?.plugins) {
       for (const pluginSpecifier of pluginConfigurationJson.plugins) {
         this._initializeResolvedPlugin(pluginSpecifier.plugin, pluginSpecifier.options);
-      }
-    } catch (e) {
-      if (!FileSystem.isNotExistError(e)) {
-        throw e;
       }
     }
   }

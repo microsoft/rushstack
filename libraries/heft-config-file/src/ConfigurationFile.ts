@@ -255,8 +255,6 @@ export class ConfigurationFile<TConfigurationFile> {
       } else {
         return undefined;
       }
-    } else if (cacheEntry.error) {
-      throw cacheEntry.error;
     } else {
       return cacheEntry.configurationFile;
     }

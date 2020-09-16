@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import * as glob from 'glob';
-import { LegacyAdapters, ITerminalProvider, FileSystem } from '@rushstack/node-core-library';
+import { LegacyAdapters, ITerminalProvider } from '@rushstack/node-core-library';
 
 import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 import { HeftSession } from '../../pluginFramework/HeftSession';
@@ -131,19 +131,12 @@ export class TypeScriptPlugin implements IHeftPlugin {
       | undefined = this._typeScriptConfigurationFileCache.get(buildFolder);
 
     if (!typescriptConfigurationFileCacheEntry) {
-      try {
-        typescriptConfigurationFileCacheEntry = {
-          configurationFile: await HeftConfigFiles.typeScriptConfigurationFileLoader.loadConfigurationFileAsync(
-            path.resolve(buildFolder, '.heft', 'typescript.json')
-          )
-        };
-      } catch (e) {
-        if (FileSystem.isNotExistError(e)) {
-          typescriptConfigurationFileCacheEntry = { configurationFile: undefined };
-        } else {
-          throw e;
-        }
-      }
+      typescriptConfigurationFileCacheEntry = {
+        configurationFile: await HeftConfigFiles.typeScriptConfigurationFileLoader.loadConfigurationFileAsync(
+          path.resolve(buildFolder, '.heft', 'typescript.json'),
+          { ignoreIfNotExist: true }
+        )
+      };
 
       this._typeScriptConfigurationFileCache.set(buildFolder, typescriptConfigurationFileCacheEntry);
     }

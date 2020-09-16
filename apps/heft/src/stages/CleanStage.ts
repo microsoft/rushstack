@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
 import { AsyncSeriesBailHook } from 'tapable';
-import { FileSystem, LegacyAdapters } from '@rushstack/node-core-library';
+import { LegacyAdapters } from '@rushstack/node-core-library';
 
 import { StageBase, StageHooksBase, IStageContext } from './StageBase';
 import { Async } from '../utilities/Async';
@@ -49,16 +49,12 @@ export class CleanStage extends StageBase<CleanStageHooks, ICleanStageProperties
   protected async getDefaultStagePropertiesAsync(
     options: ICleanStageOptions
   ): Promise<ICleanStageProperties> {
-    let cleanConfigurationFile: ICleanConfigurationJson | undefined = undefined;
-    try {
-      cleanConfigurationFile = await HeftConfigFiles.cleanConfigurationFileLoader.loadConfigurationFileAsync(
-        path.resolve(this.heftConfiguration.buildFolder, '.heft', 'clean.json')
-      );
-    } catch (e) {
-      if (!FileSystem.isNotExistError(e)) {
-        throw e;
-      }
-    }
+    const cleanConfigurationFile:
+      | ICleanConfigurationJson
+      | undefined = await HeftConfigFiles.cleanConfigurationFileLoader.loadConfigurationFileAsync(
+      path.resolve(this.heftConfiguration.buildFolder, '.heft', 'clean.json'),
+      { ignoreIfNotExist: true }
+    );
 
     return {
       deleteCache: false,

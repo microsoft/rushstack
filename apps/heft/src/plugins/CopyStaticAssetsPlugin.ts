@@ -93,16 +93,12 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
   private async _loadCopyStaticAssetsConfigurationAsync(
     buildFolder: string
   ): Promise<ICopyStaticAssetsConfiguration> {
-    let copyStaticAssetsConfigurationJson: ICopyStaticAssetsConfigurationJson | undefined;
-    try {
-      copyStaticAssetsConfigurationJson = await HeftConfigFiles.copyStaticAssetsConfigurationLoader.loadConfigurationFileAsync(
-        path.resolve(buildFolder, '.heft', 'copy-static-assets.json')
-      );
-    } catch (e) {
-      if (!FileSystem.isNotExistError(e)) {
-        throw e;
-      }
-    }
+    const copyStaticAssetsConfigurationJson:
+      | ICopyStaticAssetsConfigurationJson
+      | undefined = await HeftConfigFiles.copyStaticAssetsConfigurationLoader.loadConfigurationFileAsync(
+      path.resolve(buildFolder, '.heft', 'copy-static-assets.json'),
+      { ignoreIfNotExist: true }
+    );
 
     return {
       ...copyStaticAssetsConfigurationJson,
