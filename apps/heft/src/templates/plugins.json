@@ -5,6 +5,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/heft/plugins.schema.json",
 
   /**
+   * Optionally specifies another JSON config file that this file extends from. This provides a way for standard
+   * settings to be shared across multiple projects.
+   */
+  // "extends": "base-project/config/plugins.json",
+
+  /**
    * The list of Heft plugins to be loaded.
    */
   "plugins": [
