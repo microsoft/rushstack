@@ -12,6 +12,11 @@
       "type": "string"
     },
 
+    "extends": {
+      "description": "Optionally specifies another JSON config file that this file extends from.  This provides a way for standard settings to be shared across multiple projects.",
+      "type": "string"
+    },
+
     "pathsToDelete": {
       "type": "array",
       "description": "paths that need to be cleaned",
