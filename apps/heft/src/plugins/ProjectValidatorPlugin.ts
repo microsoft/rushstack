@@ -2,20 +2,36 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'fs';
+import { FileSystem, LegacyAdapters } from '@rushstack/node-core-library';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { Constants } from './Constants';
-import { FileSystem, LegacyAdapters } from '@rushstack/node-core-library';
+import { Constants } from '../utilities/Constants';
+import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
+import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
+import { HeftSession } from '../pluginFramework/HeftSession';
+import { IHeftLifecycle } from '../pluginFramework/HeftLifecycle';
 
 const ALLOWED_HEFT_DATA_FOLDER_FILES: Set<string> = new Set<string>();
 const ALLOWED_HEFT_DATA_FOLDER_SUBFOLDERS: Set<string> = new Set<string>([Constants.buildCacheFolderName]);
 
-export class ProjectValidator {
-  public static async validateProjectFoldersAsync(heftConfiguration: HeftConfiguration): Promise<void> {
-    await ProjectValidator._scanHeftDataFolderAsync(heftConfiguration);
+const PLUGIN_NAME: string = 'ProjectValidatorPlugin';
+
+export class ProjectValidatorPlugin implements IHeftPlugin {
+  public readonly pluginName: string = PLUGIN_NAME;
+
+  public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
+    heftSession.hooks.heftLifecycle.tap(PLUGIN_NAME, (heftLifecycle: IHeftLifecycle) => {
+      heftLifecycle.hooks.toolStart.tapPromise(PLUGIN_NAME, async () => {
+        const logger: ScopedLogger = heftSession.requestScopedLogger('project-validation');
+        await this._scanHeftDataFolderAsync(logger, heftConfiguration);
+      });
+    });
   }
 
-  private static async _scanHeftDataFolderAsync(heftConfiguration: HeftConfiguration): Promise<void> {
+  private async _scanHeftDataFolderAsync(
+    logger: ScopedLogger,
+    heftConfiguration: HeftConfiguration
+  ): Promise<void> {
     // TODO: Replace this with a FileSystem API
     let heftDataFolderContents: fs.Dirent[];
     try {
@@ -50,10 +66,12 @@ export class ProjectValidator {
     }
 
     if (disallowedItemNames.length > 0) {
-      throw new Error(
-        `Found unexpected items in the "${Constants.projectHeftFolderName}" ` +
-          `folder: ${disallowedItemNames.join(', ')}. If any of these are config files, they ` +
-          `should go in the project's "${Constants.projectConfigFolderName}" folder.`
+      logger.emitWarning(
+        new Error(
+          `Found unexpected items in the "${Constants.projectHeftFolderName}" ` +
+            `folder: ${disallowedItemNames.join(', ')}. If any of these are config files, they ` +
+            `should go in the project's "${Constants.projectConfigFolderName}" folder.`
+        )
       );
     }
   }

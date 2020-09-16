@@ -10,11 +10,13 @@ import { CleanStage } from '../stages/CleanStage';
 import { TestStage } from '../stages/TestStage';
 import { MetricsCollector } from '../metrics/MetricsCollector';
 import { LoggingManager } from './logging/LoggingManager';
+import { IHeftLifecycle } from './HeftLifecycle';
 
 /**
  * @internal
  */
 export interface IInternalHeftSessionOptions {
+  heftLifecycleHook: SyncHook<IHeftLifecycle>;
   buildStage: BuildStage;
   cleanStage: CleanStage;
   testStage: TestStage;

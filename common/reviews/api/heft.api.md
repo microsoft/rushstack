@@ -77,6 +77,12 @@ export class HeftConfiguration {
     get terminalProvider(): ITerminalProvider;
     }
 
+// @internal (undocumented)
+export class _HeftLifecycleHooks {
+    // (undocumented)
+    toolStart: AsyncParallelHook;
+}
+
 // @public (undocumented)
 export class HeftSession {
     // Warning: (ae-forgotten-export) The symbol "IHeftSessionOptions" needs to be exported by the entry point index.d.ts
@@ -237,6 +243,12 @@ export interface _IHeftConfigurationInitializationOptions {
     terminalProvider: ITerminalProvider;
 }
 
+// @internal (undocumented)
+export interface _IHeftLifecycle {
+    // (undocumented)
+    hooks: _HeftLifecycleHooks;
+}
+
 // @public (undocumented)
 export interface IHeftPlugin<TOptions = void> {
     // (undocumented)
@@ -253,6 +265,8 @@ export interface IHeftSessionHooks {
     build: SyncHook<IBuildStageContext>;
     // (undocumented)
     clean: SyncHook<ICleanStageContext>;
+    // @internal (undocumented)
+    heftLifecycle: SyncHook<_IHeftLifecycle>;
     // (undocumented)
     metricsCollector: MetricsCollectorHooks;
     // (undocumented)

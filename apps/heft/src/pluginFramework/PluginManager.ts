@@ -18,6 +18,7 @@ import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
 import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWebpackPlugin';
 import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
 import { ConfigFile } from '../utilities/ConfigFile';
+import { ProjectValidatorPlugin } from '../plugins/ProjectValidatorPlugin';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
@@ -53,6 +54,7 @@ export class PluginManager {
     this._applyPlugin(new JestPlugin());
     this._applyPlugin(new BasicConfigureWebpackPlugin());
     this._applyPlugin(new WebpackPlugin());
+    this._applyPlugin(new ProjectValidatorPlugin());
   }
 
   public initializePlugin(pluginSpecifier: string, options?: object): void {
