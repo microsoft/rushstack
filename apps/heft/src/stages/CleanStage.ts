@@ -11,7 +11,7 @@ import { StageBase, StageHooksBase, IStageContext } from './StageBase';
 import { Async } from '../utilities/Async';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
-import { HeftConfigFiles } from '../utilities/HeftConfigFiles';
+import { ConfigFile } from '../utilities/ConfigFile';
 
 /**
  * @public
@@ -56,7 +56,7 @@ export class CleanStage extends StageBase<CleanStageHooks, ICleanStageProperties
       'clean.json'
     );
     if (await FileSystem.existsAsync(cleanConfigurationFilePath)) {
-      cleanConfigurationFile = await HeftConfigFiles.cleanConfigurationFileLoader.loadConfigurationFileAsync(
+      cleanConfigurationFile = await ConfigFile.cleanConfigurationFileLoader.loadConfigurationFileAsync(
         cleanConfigurationFilePath
       );
     }

@@ -9,7 +9,7 @@ import { HeftSession } from '../../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { ApiExtractorRunner } from './ApiExtractorRunner';
 import { IBuildStageContext, IBundleSubstage } from '../../stages/BuildStage';
-import { HeftConfigFiles } from '../../utilities/HeftConfigFiles';
+import { ConfigFile } from '../../utilities/ConfigFile';
 
 const PLUGIN_NAME: string = 'ApiExtractorPlugin';
 const CONFIG_FILE_LOCATION: string = './config/api-extractor.json';
@@ -71,7 +71,7 @@ export class ApiExtractorPlugin implements IHeftPlugin {
     );
     let apiExtractorTaskConfiguration: IApiExtractorPluginConfiguration | undefined;
     if (await FileSystem.existsAsync(apiExtractorTaskConfigurationPath)) {
-      apiExtractorTaskConfiguration = await HeftConfigFiles.apiExtractorTaskConfigurationLoader.loadConfigurationFileAsync(
+      apiExtractorTaskConfiguration = await ConfigFile.apiExtractorTaskConfigurationLoader.loadConfigurationFileAsync(
         apiExtractorTaskConfigurationPath
       );
     }

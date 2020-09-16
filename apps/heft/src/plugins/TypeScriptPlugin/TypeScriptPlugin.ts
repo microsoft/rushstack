@@ -19,7 +19,7 @@ import { TaskPackageResolver, ITaskPackageResolution } from '../../utilities/Tas
 import { JestTypeScriptDataFile } from '../JestPlugin/JestTypeScriptDataFile';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { ICleanStageContext, ICleanStageProperties } from '../../stages/CleanStage';
-import { HeftConfigFiles } from '../../utilities/HeftConfigFiles';
+import { ConfigFile } from '../../utilities/ConfigFile';
 
 const PLUGIN_NAME: string = 'typescript';
 
@@ -134,7 +134,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
       const typescriptConfigurationFilePath: string = path.resolve(buildFolder, '.heft', 'typescript.json');
       if (await FileSystem.existsAsync(typescriptConfigurationFilePath)) {
         typescriptConfigurationFileCacheEntry = {
-          configurationFile: await HeftConfigFiles.typeScriptConfigurationFileLoader.loadConfigurationFileAsync(
+          configurationFile: await ConfigFile.typeScriptConfigurationFileLoader.loadConfigurationFileAsync(
             typescriptConfigurationFilePath
           )
         };

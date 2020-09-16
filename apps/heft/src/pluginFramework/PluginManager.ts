@@ -17,7 +17,7 @@ import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPl
 import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
 import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWebpackPlugin';
 import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
-import { HeftConfigFiles } from '../utilities/HeftConfigFiles';
+import { ConfigFile } from '../utilities/ConfigFile';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
@@ -66,7 +66,7 @@ export class PluginManager {
       'plugins.json'
     );
     if (await FileSystem.existsAsync(pluginConfigFilePath)) {
-      const pluginConfigurationJson: IPluginConfigurationJson = await HeftConfigFiles.pluginConfigFileLoader.loadConfigurationFileAsync(
+      const pluginConfigurationJson: IPluginConfigurationJson = await ConfigFile.pluginConfigFileLoader.loadConfigurationFileAsync(
         pluginConfigFilePath
       );
 
