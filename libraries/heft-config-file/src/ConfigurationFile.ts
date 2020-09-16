@@ -142,13 +142,6 @@ export interface ILoadConfigurationFileOptions {
 /**
  * @beta
  */
-export interface ILoadConfigurationFileOptionsIgnoreNotExist extends ILoadConfigurationFileOptions {
-  ignoreIfNotExist: true;
-}
-
-/**
- * @beta
- */
 export class ConfigurationFile<TConfigurationFile> {
   private readonly _schemaPath: string;
   private readonly _jsonPathMetadata: IJsonPathsMetadata;
@@ -176,11 +169,15 @@ export class ConfigurationFile<TConfigurationFile> {
 
   public async loadConfigurationFileAsync(
     configurationFilePath: string,
-    options?: ILoadConfigurationFileOptions
+    options?: {}
   ): Promise<TConfigurationFile>;
   public async loadConfigurationFileAsync(
     configurationFilePath: string,
-    options: ILoadConfigurationFileOptionsIgnoreNotExist
+    options?: { ignoreIfNotExist: false }
+  ): Promise<TConfigurationFile>;
+  public async loadConfigurationFileAsync(
+    configurationFilePath: string,
+    options: { ignoreIfNotExist: true }
   ): Promise<TConfigurationFile | undefined>;
   public async loadConfigurationFileAsync(
     configurationFilePath: string,

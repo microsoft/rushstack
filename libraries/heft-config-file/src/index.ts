@@ -10,6 +10,5 @@ export {
   IOriginalValueOptions,
   IPropertyInheritanceTypes,
   PathResolutionMethod,
-  ILoadConfigurationFileOptions,
-  ILoadConfigurationFileOptionsIgnoreNotExist
+  ILoadConfigurationFileOptions
 } from './ConfigurationFile';
