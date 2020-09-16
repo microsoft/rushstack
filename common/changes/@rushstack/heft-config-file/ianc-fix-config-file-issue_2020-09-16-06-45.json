@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-config-file",
+      "comment": "Fix an issue where the \"extends\" property wouldn't resolve a package.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-config-file",
+  "email": "iclanton@users.noreply.github.com"
+}

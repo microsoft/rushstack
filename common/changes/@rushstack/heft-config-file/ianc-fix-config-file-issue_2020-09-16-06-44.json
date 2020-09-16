@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-config-file",
+      "comment": "Add an option to prevent throwing of an exception if a config file doesn't eixst.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-config-file",
+  "email": "iclanton@users.noreply.github.com"
+}
