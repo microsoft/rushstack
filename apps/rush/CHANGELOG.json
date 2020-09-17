@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.34.1",
+      "tag": "@microsoft/rush_v5.34.1",
+      "date": "Thu, 17 Sep 2020 07:13:04 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a regression that reported an error \"The EnvironmentConfiguration must be initialized before values can be accessed\""
+          }
+        ]
+      }
+    },
+    {
       "version": "5.34.0",
       "tag": "@microsoft/rush_v5.34.0",
       "date": "Thu, 17 Sep 2020 01:23:35 GMT",
