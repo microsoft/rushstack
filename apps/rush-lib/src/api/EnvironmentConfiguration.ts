@@ -5,6 +5,8 @@ import * as os from 'os';
 import * as path from 'path';
 import { trueCasePathSync } from 'true-case-path';
 
+import { IEnvironment } from '../utilities/Utilities';
+
 export interface IEnvironmentConfigurationInitializeOptions {
   doNotNormalizePaths?: boolean;
 }
@@ -157,6 +159,22 @@ export class EnvironmentConfiguration {
   }
 
   /**
+   * The front-end RushVersionSelector relies on `RUSH_GLOBAL_FOLDER`, so its value must be read before
+   * `EnvironmentConfiguration` is initialized (and actually before the correct version of `EnvironmentConfiguration`
+   * is even installed). Thus we need to read this environment variable differently from all the others.
+   * @internal
+   */
+  public static _getRushGlobalFolderOverride(processEnv: IEnvironment): string | undefined {
+    const value: string | undefined = processEnv[EnvironmentVariableNames.RUSH_GLOBAL_FOLDER];
+    if (value) {
+      const normalizedValue: string | undefined = EnvironmentConfiguration._normalizeDeepestParentFolderPath(
+        value
+      );
+      return normalizedValue;
+    }
+  }
+
+  /**
    * Reads and validates environment variables. If any are invalid, this function will throw.
    */
   public static initialize(options: IEnvironmentConfigurationInitializeOptions = {}): void {
@@ -197,10 +215,7 @@ export class EnvironmentConfiguration {
           }
 
           case EnvironmentVariableNames.RUSH_GLOBAL_FOLDER: {
-            EnvironmentConfiguration._rushGlobalFolderOverride =
-              value && !options.doNotNormalizePaths
-                ? EnvironmentConfiguration._normalizeDeepestParentFolderPath(value) || value
-                : value;
+            // Handled specially below
             break;
           }
 
@@ -224,6 +239,11 @@ export class EnvironmentConfiguration {
           `recognized by this version of Rush: ${unknownEnvVariables.join(', ')}`
       );
     }
+
+    // See doc comment for EnvironmentConfiguration._getRushGlobalFolderOverride().
+    EnvironmentConfiguration._rushGlobalFolderOverride = EnvironmentConfiguration._getRushGlobalFolderOverride(
+      process.env
+    );
 
     EnvironmentConfiguration._hasBeenInitialized = true;
   }
