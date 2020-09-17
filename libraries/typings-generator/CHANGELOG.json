@@ -2,6 +2,42 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.2.3",
+      "tag": "@rushstack/typings-generator_v0.2.3",
+      "date": "Wed, 16 Sep 2020 05:30:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.13.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.2",
+      "tag": "@rushstack/typings-generator_v0.2.2",
+      "date": "Tue, 15 Sep 2020 01:51:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.13.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.1",
+      "tag": "@rushstack/typings-generator_v0.2.1",
+      "date": "Mon, 14 Sep 2020 15:09:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.13.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@rushstack/typings-generator_v0.2.0",
       "date": "Sun, 13 Sep 2020 01:53:20 GMT",

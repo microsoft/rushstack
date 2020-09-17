@@ -2,6 +2,42 @@
   "name": "@rushstack/rundown",
   "entries": [
     {
+      "version": "1.0.21",
+      "tag": "@rushstack/rundown_v1.0.21",
+      "date": "Wed, 16 Sep 2020 05:30:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.13.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.20",
+      "tag": "@rushstack/rundown_v1.0.20",
+      "date": "Tue, 15 Sep 2020 01:51:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.13.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.19",
+      "tag": "@rushstack/rundown_v1.0.19",
+      "date": "Mon, 14 Sep 2020 15:09:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.13.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.18",
       "tag": "@rushstack/rundown_v1.0.18",
       "date": "Sun, 13 Sep 2020 01:53:20 GMT",

@@ -2,6 +2,42 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.10.93",
+      "tag": "@microsoft/load-themed-styles_v1.10.93",
+      "date": "Wed, 16 Sep 2020 05:30:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.13.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.92",
+      "tag": "@microsoft/load-themed-styles_v1.10.92",
+      "date": "Tue, 15 Sep 2020 01:51:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.13.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.91",
+      "tag": "@microsoft/load-themed-styles_v1.10.91",
+      "date": "Mon, 14 Sep 2020 15:09:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.13.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.90",
       "tag": "@microsoft/load-themed-styles_v1.10.90",
       "date": "Sun, 13 Sep 2020 01:53:20 GMT",

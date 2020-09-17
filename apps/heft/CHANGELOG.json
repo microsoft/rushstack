@@ -2,6 +2,45 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.13.2",
+      "tag": "@rushstack/heft_v0.13.2",
+      "date": "Wed, 16 Sep 2020 05:30:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add missing \"extends\" properties to schemas."
+          },
+          {
+            "comment": "Fix an issue where console.log() did not get formatted by HeftJestReporter"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.1",
+      "tag": "@rushstack/heft_v0.13.1",
+      "date": "Tue, 15 Sep 2020 01:51:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve reliability of jest-build-transform.js by only comparing timestamps when in \"--watch\" mode"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.13.0",
+      "tag": "@rushstack/heft_v0.13.0",
+      "date": "Mon, 14 Sep 2020 15:09:48 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Enable support for Jest inline snapshots"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.12.0",
       "tag": "@rushstack/heft_v0.12.0",
       "date": "Sun, 13 Sep 2020 01:53:20 GMT",

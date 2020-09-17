@@ -1,5 +1,9 @@
 {
+  "//": "By default, don't hide console output",
   "silent": false,
+  "//": "In order for HeftJestReporter to receive console.log() events, we must set verbose=false",
+  "verbose": false,
+
   "rootDir": "../../../../",
 
   "//": ["Adding '<rootDir>/src' here enables src/__mocks__ to be used for mocking Node.js system modules."],

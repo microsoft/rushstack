@@ -1,6 +1,28 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Sun, 13 Sep 2020 01:53:20 GMT and should not be manually modified.
+This log was last generated on Wed, 16 Sep 2020 05:30:25 GMT and should not be manually modified.
+
+## 0.13.2
+Wed, 16 Sep 2020 05:30:25 GMT
+
+### Patches
+
+- Add missing "extends" properties to schemas.
+- Fix an issue where console.log() did not get formatted by HeftJestReporter
+
+## 0.13.1
+Tue, 15 Sep 2020 01:51:37 GMT
+
+### Patches
+
+- Improve reliability of jest-build-transform.js by only comparing timestamps when in "--watch" mode
+
+## 0.13.0
+Mon, 14 Sep 2020 15:09:48 GMT
+
+### Minor changes
+
+- Enable support for Jest inline snapshots
 
 ## 0.12.0
 Sun, 13 Sep 2020 01:53:20 GMT
