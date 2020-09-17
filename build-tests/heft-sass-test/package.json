@@ -27,5 +27,8 @@
     "style-loader": "~1.2.1",
     "typescript": "~3.9.5",
     "webpack": "~4.31.0"
+  },
+  "dependencies": {
+    "buttono": "~1.0.2"
   }
 }

@@ -275,6 +275,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "buttono",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "chai",
       "allowedCategories": [ "libraries", "tests" ]
     },

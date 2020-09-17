@@ -17,6 +17,8 @@ export class ExampleApp extends React.Component {
           <h2 className={styles.exampleImport}>Hello, world!</h2>
           <span className={altSyntaxStyles.label}>Here is an example control:</span>
           <ToggleSwitch leftColor={'#800000'} rightColor={'#008000'} onToggle={this._onToggle} />
+          <br />
+          <button className={styles.exampleButton}>Example Button</button>
         </div>
       </div>
     );

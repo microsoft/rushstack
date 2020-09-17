@@ -4,7 +4,10 @@
  */
  
 // Testing Sass imports
-@import './stylesImport.sass'
+@import 'stylesImport'
+
+// Testing node_modules imports
+@import '~buttono/buttono'
 
 // Testing root styles
 html, body
@@ -19,3 +22,6 @@ html, body
   padding: 20px
   border-radius: 5px
   width: 400px
+  
+.exampleButton
+  @include buttono-block()

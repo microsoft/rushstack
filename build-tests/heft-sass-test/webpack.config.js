@@ -63,9 +63,7 @@ function createWebpackConfig({ production }) {
     },
     output: {
       path: path.join(__dirname, 'dist'),
-      filename: '[name]_[contenthash].js',
-      devtoolModuleFilenameTemplate: 'webpack:///../[resource-path]',
-      devtoolFallbackModuleFilenameTemplate: 'webpack:///../[resource-path]?[hash]'
+      filename: '[name]_[contenthash].js'
     },
     performance: {
       // This specifies the bundle size limit that will trigger Webpack's warning saying:

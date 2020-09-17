@@ -616,6 +616,8 @@ importers:
       '@rushstack/heft': 'workspace:*'
       '@types/heft-jest': 1.0.1
   ../../build-tests/heft-sass-test:
+    dependencies:
+      buttono: 1.0.2
     devDependencies:
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
@@ -644,6 +646,7 @@ importers:
       '@types/react-dom': 16.9.8
       '@types/webpack-env': 1.13.0
       autoprefixer: ~9.8.0
+      buttono: ~1.0.2
       css-loader: ~4.2.1
       eslint: ~7.2.0
       html-webpack-plugin: ~3.2.0
@@ -4835,6 +4838,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-y5T662HIaWRR2zZTThQi+U8K7og=
+  /buttono/1.0.2:
+    dev: false
+    resolution:
+      integrity: sha512-wTnXVnqyu7V34DeIALp03xLCjpzqeDJa65HYoZwvyXnP99qRS/tkrF4zQwJqZBS0l70eXzT8dD+oNGAwceJVyQ==
   /bytes/2.2.0:
     dev: false
     resolution:
