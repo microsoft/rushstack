@@ -399,7 +399,35 @@ module.exports = {
         ],
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/no-use-before-define': 'error',
+        '@typescript-eslint/no-use-before-define': [
+          'error',
+          {
+            // Base ESLint options
+
+            // We set functions=false so that functions can be ordered based on exported/local visibility
+            // similar to class methods.  Also the base lint rule incorrectly flags a legitimate case like:
+            //
+            //   function a(n: number): void {
+            //     if (n > 0) {
+            //       b(n-1); //   lint error
+            //     }
+            //   }
+            //   function b(n: number): void {
+            //     if (n > 0) {
+            //       a(n-1);
+            //     }
+            //   }
+            functions: false,
+            classes: true,
+            variables: true,
+
+            // TypeScript extensions
+
+            enums: true,
+            typedefs: true,
+            ignoreTypeReferences: true
+          }
+        ],
 
         // TODO: This is a good rule for web browser apps, but it is commonly needed API for Node.js tools.
         // '@typescript-eslint/no-var-requires': 'error',
