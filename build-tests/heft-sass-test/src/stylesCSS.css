@@ -3,7 +3,7 @@
  * Then Webpack uses sass-loader to transpile, css-loader to embed, and finally style-loader to apply it to the DOM.
  */
 
-// Testing CSS styles
+/* Testing CSS styles */
 .container {
   padding: 40px;
 }
