@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 21 Aug 2020 22:45:58 GMT and should not be manually modified.
+This log was last generated on Thu, 17 Sep 2020 01:23:35 GMT and should not be manually modified.
+
+## 5.34.0
+Thu, 17 Sep 2020 01:23:35 GMT
+
+### Updates
+
+- Big redesign of "rush build" console reporting (fixes GitHub #2135)
+- Implement RUSH_GLOBAL_FOLDER environment variable (GitHub #2187)
+- Use underscores instead of asterisks for italic formatting in changelogs to match the way Prettier formats italics in markdown.
+- In PNPM 5, --no-lock and --resolution-strategy flags have been removed. Do not pass these flags if they are not supported by the PNPM version used in the repository.
 
 ## 5.33.2
 Fri, 21 Aug 2020 22:45:58 GMT
