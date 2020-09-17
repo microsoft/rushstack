@@ -1,3 +1,4 @@
+import { InternalError } from '@rushstack/node-core-library';
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
@@ -259,7 +260,9 @@ export class EnvironmentConfiguration {
 
   private static _ensureInitialized(): void {
     if (!EnvironmentConfiguration._hasBeenInitialized) {
-      throw new Error('The EnvironmentConfiguration must be initialized before values can be accessed.');
+      throw new InternalError(
+        'The EnvironmentConfiguration must be initialized before values can be accessed.'
+      );
     }
   }
 
