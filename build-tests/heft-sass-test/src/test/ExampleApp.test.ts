@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ToggleSwitch } from '../ToggleSwitch';
+import { ExampleApp } from '../ExampleApp';
 
-describe('ToggleSwitch', () => {
+describe('ExampleApp', () => {
   it('can be tested', () => {
-    expect(ToggleSwitch).toBeDefined();
+    expect(ExampleApp).toBeDefined();
   });
 });

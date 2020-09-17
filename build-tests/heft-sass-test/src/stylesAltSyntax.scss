@@ -4,9 +4,8 @@
  */
 
 // Testing SCSS syntax
-$marginValue: 12px;
+$marginValue: 15px;
 
 .label {
-  display: inline-block;
   margin-bottom: $marginValue;
 }
