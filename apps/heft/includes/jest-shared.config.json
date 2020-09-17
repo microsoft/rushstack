@@ -14,7 +14,7 @@
   "transformIgnorePatterns": [],
   "transform": {
     "\\.(ts|tsx)$": "@rushstack/heft/lib/exports/jest-build-transform.js",
-    "\\.(css)$": "@rushstack/heft/lib/exports/jest-identity-mock-transform.js",
+    "\\.(css|sass|scss)$": "@rushstack/heft/lib/exports/jest-identity-mock-transform.js",
     "\\.(jpg|png|gif|mp3)$": "@rushstack/heft/lib/exports/jest-string-mock-transform.js"
   },
   "//": [

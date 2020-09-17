@@ -3,7 +3,7 @@
 
   "compilerOptions": {
     "outDir": "lib",
-    "rootDirs": ["src/", "./temp/sass-ts"],
+    "rootDirs": ["src/", "temp/sass-ts/"],
 
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",
