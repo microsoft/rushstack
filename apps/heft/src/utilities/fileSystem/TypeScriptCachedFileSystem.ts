@@ -37,16 +37,10 @@ interface ICacheEntry<TEntry> {
  * instance.
  */
 export class TypeScriptCachedFileSystem {
-  private _statsCache: Map<string, ICacheEntry<FileSystemStats>> = new Map<
-    string,
-    ICacheEntry<FileSystemStats>
-  >();
-  private _readFolderCache: Map<string, ICacheEntry<IReadFolderFilesAndDirectoriesResult>> = new Map<
-    string,
-    ICacheEntry<IReadFolderFilesAndDirectoriesResult>
-  >();
-  private _readFileCache: Map<string, ICacheEntry<Buffer>> = new Map<string, ICacheEntry<Buffer>>();
-  private _realPathCache: Map<string, ICacheEntry<string>> = new Map<string, ICacheEntry<string>>();
+  private _statsCache: Map<string, ICacheEntry<FileSystemStats>> = new Map();
+  private _readFolderCache: Map<string, ICacheEntry<IReadFolderFilesAndDirectoriesResult>> = new Map();
+  private _readFileCache: Map<string, ICacheEntry<Buffer>> = new Map();
+  private _realPathCache: Map<string, ICacheEntry<string>> = new Map();
 
   public exists: (path: string) => boolean = (path: string) => {
     try {
