@@ -901,6 +901,13 @@
       "cyclicDependencyProjects": ["@microsoft/rush-stack-compiler-3.9", "@rushstack/heft"]
     },
     {
+      "packageName": "@rushstack/eslint-plugin-security",
+      "projectFolder": "stack/eslint-plugin-security",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@microsoft/rush-stack-compiler-3.9", "@rushstack/heft"]
+    },
+    {
       "packageName": "@microsoft/rush-stack-compiler-2.4",
       "projectFolder": "stack/rush-stack-compiler-2.4",
       "reviewCategory": "libraries",
