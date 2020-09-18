@@ -33,6 +33,7 @@ import { EmitFilesPatch, ICachedEmitModuleKind } from './EmitFilesPatch';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { FirstEmitCompletedCallbackManager } from './FirstEmitCompletedCallbackManager';
 import { ISharedTypeScriptConfiguration } from './TypeScriptPlugin';
+import { TypeScriptCachedFileSystem } from '../../utilities/fileSystem/TypeScriptCachedFileSystem';
 
 export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfiguration {
   buildFolder: string;
@@ -109,6 +110,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
   private __tsCacheFilePath: string;
   private _tsReadJsonCache: Map<string, object> = new Map<string, object>();
+  private _fileSystem: TypeScriptCachedFileSystem = new TypeScriptCachedFileSystem();
 
   public get filename(): string {
     return __filename;

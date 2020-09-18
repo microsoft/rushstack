@@ -20,11 +20,14 @@ import {
   IFileSystemCopyFilesOptions
 } from '@rushstack/node-core-library';
 
-import {
-  IExtendedFileSystem,
-  IReadFolderFilesAndDirectoriesResult,
-  ICreateHardLinkExtendedOptions
-} from './IExtendedFileSystem';
+export interface IReadFolderFilesAndDirectoriesResult {
+  files: string[];
+  directories: string[];
+}
+
+export interface ICreateHardLinkExtendedOptions extends IFileSystemCreateLinkOptions {
+  preserveExisting: boolean;
+}
 
 interface ICacheEntry<TEntry> {
   entry?: TEntry;
@@ -32,11 +35,13 @@ interface ICacheEntry<TEntry> {
 }
 
 /**
- * This extended variant of the FileSystem API uses an in-memory cache to avoid
- * requests against the disk. It assumes that the disk stays static after construction,
- * except for writes performed through the CachedFileSystem instance.
+ * This is a FileSystem API (largely unrelated to the @rushstack/node-core-library FileSystem API)
+ * that provides caching to the Heft TypeScriptBuilder.
+ * It uses an in-memory cache to avoid requests against the disk. It assumes that the disk stays
+ * static after construction, except for writes performed through the TypeScriptCachedFileSystem
+ * instance.
  */
-export class CachedFileSystem implements IExtendedFileSystem {
+export class TypeScriptCachedFileSystem {
   private _statsCache: Map<string, ICacheEntry<FileSystemStats>> = new Map<
     string,
     ICacheEntry<FileSystemStats>

@@ -8,19 +8,19 @@ import { Import, Terminal, JsonFile } from '@rushstack/node-core-library';
 
 import { LinterBase, ILinterBaseOptions } from './LinterBase';
 import { IExtendedSourceFile, IExtendedProgram } from './internalTypings/TypeScriptInternals';
-import { IExtendedFileSystem } from '../../utilities/fileSystem/IExtendedFileSystem';
 import { IExtendedLinter } from './internalTypings/TslintInternals';
 import { FileError } from '../../pluginFramework/logging/FileError';
+import { TypeScriptCachedFileSystem } from '../../utilities/fileSystem/TypeScriptCachedFileSystem';
 
 interface ITslintOptions extends ILinterBaseOptions {
   tslintPackagePath: string;
 
-  fileSystem: IExtendedFileSystem;
+  fileSystem: TypeScriptCachedFileSystem;
 }
 
 export class Tslint extends LinterBase<TTslint.RuleFailure> {
   private readonly _tslint: typeof TTslint;
-  private readonly _fileSystem: IExtendedFileSystem;
+  private readonly _fileSystem: TypeScriptCachedFileSystem;
 
   private _tslintConfiguration: TTslint.Configuration.IConfigurationFile;
   private _linter: IExtendedLinter;
@@ -46,7 +46,7 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
   public static getConfigHash(
     configFilePath: string,
     terminal: Terminal,
-    fileSystem: IExtendedFileSystem,
+    fileSystem: TypeScriptCachedFileSystem,
     previousHash?: crypto.Hash
   ): crypto.Hash {
     interface IMinimalConfig {
