@@ -2,6 +2,14 @@
 // See LICENSE in the project root for license information.
 
 /**
+ * Indicates the tree-like data structure that {@link MatchTree} will traverse.
+ *
+ * @remarks
+ * Since `MatchTree` makes relatively few assumptions object the object structure, this is
+ * just an alias for `any`.  At least as far as the portions to be matched, the tree nodes
+ * are expected to be JSON-like structures made from JavaScript arrays, JavaScript objects,
+ * and primitive values that can be compared using `===`.
+ *
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,29 +32,74 @@ class MatchTreeAlternatives {
 }
 
 /**
+ * Provides additional detail about the success or failure of {@link MatchTree.match}.
+ *
+ * @remarks
+ * On success, the object will contain keys for any successfully matched tags, as
+ * defined using {@link MatchTree.tag}.
+ *
+ * On failure, the `failPath` member will indicate the JSON path of the node that
+ * failed to match.
+ *
  * @public
  */
 export type IMatchTreeCaptureSet =
   | {
-      [key: string]: TreeNode;
+      [tagName: string]: TreeNode;
     }
   | { failPath: string };
 
 /**
+ * A fast, lightweight pattern matcher for tree structures such as an Abstract Syntax Tree (AST).
  * @public
  */
 export class MatchTree {
   /**
-   * Used to build the `pattern` tree for `matchTree()`.  For the given `subtree` of the pattern,
-   * if it is matched, that node will be assigned to the `captures` object using `keyName`.
+   * Labels a subtree within the search pattern, so that the matching object can be retrieved.
+   *
+   * @remarks
+   * Used to build the `pattern` tree for {@link MatchTree.match}.  For the given `subtree` of the pattern,
+   * if it is matched, that node will be assigned to the `captures` object using `tagName` as the key.
+   *
+   * Example:
+   *
+   * ```ts
+   * const myCaptures: { personName?: string } = {};
+   * const myPattern = {
+   *   name: MatchTree.tag('personName')
+   * };
+   * if (MatchTree.match({ name: 'Bob' }, myPattern, myCaptures)) {
+   *   console.log(myCaptures.personName);
+   * }
+   * ```
    */
-  public static tag(keyName: string, subtree?: TreeNode): TreeNode {
-    return new MatchTreeArg(keyName, subtree);
+  public static tag(tagName: string, subtree?: TreeNode): TreeNode {
+    return new MatchTreeArg(tagName, subtree);
   }
 
   /**
-   * Used to build the `pattern` tree for `matchTree()`.  Allows several alternative patterns
+   * Used to specify alternative possible subtrees in the search pattern.
+   *
+   * @remarks
+   * Used to build the `pattern` tree for {@link MatchTree.match}.  Allows several alternative patterns
    * to be matched for a given subtree.
+   *
+   * Example:
+   *
+   * ```ts
+   * const myPattern = {
+   *   animal: MatchTree.oneOf([
+   *     { kind: 'dog', bark: 'loud' },
+   *     { kind: 'cat', meow: 'quiet' }
+   *   ])
+   * };
+   * if (MatchTree.match({ animal: { kind: 'dog', bark: 'loud' } }, myPattern)) {
+   *   console.log('I can match dog.');
+   * }
+   * if (MatchTree.match({ animal: { kind: 'cat', meow: 'quiet' } }, myPattern)) {
+   *   console.log('I can match cat, too.');
+   * }
+   * ```
    */
   public static oneOf(possibleSubtrees: TreeNode[]): TreeNode {
     return new MatchTreeAlternatives(possibleSubtrees);

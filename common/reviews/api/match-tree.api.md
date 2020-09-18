@@ -4,21 +4,21 @@
 
 ```ts
 
-// @public (undocumented)
+// @public
 export type IMatchTreeCaptureSet = {
-    [key: string]: TreeNode;
+    [tagName: string]: TreeNode;
 } | {
     failPath: string;
 };
 
-// @public (undocumented)
+// @public
 export class MatchTree {
     static match(root: TreeNode, pattern: TreeNode, captures?: IMatchTreeCaptureSet): boolean;
     static oneOf(possibleSubtrees: TreeNode[]): TreeNode;
-    static tag(keyName: string, subtree?: TreeNode): TreeNode;
+    static tag(tagName: string, subtree?: TreeNode): TreeNode;
 }
 
-// @public (undocumented)
+// @public
 export type TreeNode = any;
 
 

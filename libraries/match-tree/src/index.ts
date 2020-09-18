@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- *
+ * A fast, lightweight pattern matcher for tree structures such as an Abstract Syntax Tree (AST).
  *
  * @packageDocumentation
  */
