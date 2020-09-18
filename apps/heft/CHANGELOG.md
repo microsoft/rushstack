@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 16 Sep 2020 05:30:25 GMT and should not be manually modified.
+This log was last generated on Fri, 18 Sep 2020 21:49:53 GMT and should not be manually modified.
+
+## 0.13.3
+Fri, 18 Sep 2020 21:49:53 GMT
+
+### Patches
+
+- Add a missing field to the template config files.
+- Fix an issue where, if an "extends" field pointed to a module that didn't exist, the error was silently ignored.
 
 ## 0.13.2
 Wed, 16 Sep 2020 05:30:25 GMT

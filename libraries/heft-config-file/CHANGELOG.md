@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Sun, 13 Sep 2020 01:53:20 GMT and should not be manually modified.
+This log was last generated on Fri, 18 Sep 2020 21:49:53 GMT and should not be manually modified.
+
+## 0.2.1
+Fri, 18 Sep 2020 21:49:53 GMT
+
+### Patches
+
+- Allow "extends" fields to refer to modules in addition to relative paths.
 
 ## 0.2.0
 Sun, 13 Sep 2020 01:53:20 GMT

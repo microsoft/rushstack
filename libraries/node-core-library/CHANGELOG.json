@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.33.0",
+      "tag": "@rushstack/node-core-library_v3.33.0",
+      "date": "Fri, 18 Sep 2020 21:49:53 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a missing \"existsAsync\" function to the FileSystem API."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.32.0",
       "tag": "@rushstack/node-core-library_v3.32.0",
       "date": "Fri, 11 Sep 2020 02:13:35 GMT",
