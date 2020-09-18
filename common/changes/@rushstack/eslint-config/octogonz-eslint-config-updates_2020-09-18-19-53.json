@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-config",
+      "comment": "Add *.spec.ts file extension for tests, since this is also a commonly used convention",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-config",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

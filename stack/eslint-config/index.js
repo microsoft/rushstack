@@ -67,20 +67,6 @@ module.exports = {
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/adjacent-overload-signatures': 'warn',
 
-        // RATIONALE:         We require "string[]" (instead of "Array<string>") because it is idiomatic TypeScript.
-        //                    We require "ReadonlyArray<string>" (instead of "readonly string[]") because, although
-        //                    the latter form is nicer, it is not supported by TypeScript version prior to 3.4.
-        //                    It can be expensive to upgrade a large code base to use the latest compiler, so our
-        //                    lint rules should not require usage of bleeding edge language features.  In the future
-        //                    when TypeScript 3 is obsolete, we'll change this rule to require "readonly string[]".
-        '@typescript-eslint/array-type': [
-          'warn',
-          {
-            default: 'array',
-            readonly: 'generic'
-          }
-        ],
-
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         //
         // CONFIGURATION:     By default, these are banned: String, Boolean, Number, Object, Symbol
@@ -413,7 +399,35 @@ module.exports = {
         ],
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
-        '@typescript-eslint/no-use-before-define': 'error',
+        '@typescript-eslint/no-use-before-define': [
+          'error',
+          {
+            // Base ESLint options
+
+            // We set functions=false so that functions can be ordered based on exported/local visibility
+            // similar to class methods.  Also the base lint rule incorrectly flags a legitimate case like:
+            //
+            //   function a(n: number): void {
+            //     if (n > 0) {
+            //       b(n-1); //   lint error
+            //     }
+            //   }
+            //   function b(n: number): void {
+            //     if (n > 0) {
+            //       a(n-1);
+            //     }
+            //   }
+            functions: false,
+            classes: true,
+            variables: true,
+
+            // TypeScript extensions
+
+            enums: true,
+            typedefs: true
+            // ignoreTypeReferences: true
+          }
+        ],
 
         // TODO: This is a good rule for web browser apps, but it is commonly needed API for Node.js tools.
         // '@typescript-eslint/no-var-requires': 'error',
@@ -742,6 +756,8 @@ module.exports = {
         // Test files
         '*.test.ts',
         '*.test.tsx',
+        '*.spec.ts',
+        '*.spec.tsx',
 
         // Facebook convention
         '**/__mocks__/*.ts',
