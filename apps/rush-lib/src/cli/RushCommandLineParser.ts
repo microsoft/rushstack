@@ -369,7 +369,7 @@ export class RushCommandLineParser extends CommandLineParser {
     // performs nontrivial work that can throw an exception.  Either the Rush class would need
     // to handle reporting for those exceptions, or else _populateActions() should be moved
     // to a RushCommandLineParser lifecycle stage that can handle it.
-    if (process.exitCode > 0) {
+    if (typeof process.exitCode === 'number' && process.exitCode > 0) {
       process.exit(process.exitCode);
     } else {
       process.exit(1);
