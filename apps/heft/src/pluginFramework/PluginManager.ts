@@ -61,21 +61,17 @@ export class PluginManager {
   }
 
   public async initializePluginsFromConfigFileAsync(): Promise<void> {
-    try {
-      const pluginConfigFilePath: string = path.join(
-        this._heftConfiguration.projectHeftDataFolder,
-        'plugins.json'
-      );
+    const pluginConfigFilePath: string = path.join(
+      this._heftConfiguration.projectHeftDataFolder,
+      'plugins.json'
+    );
+    if (await FileSystem.existsAsync(pluginConfigFilePath)) {
       const pluginConfigurationJson: IPluginConfigurationJson = await HeftConfigFiles.pluginConfigFileLoader.loadConfigurationFileAsync(
         pluginConfigFilePath
       );
 
       for (const pluginSpecifier of pluginConfigurationJson.plugins) {
         this._initializeResolvedPlugin(pluginSpecifier.plugin, pluginSpecifier.options);
-      }
-    } catch (e) {
-      if (!FileSystem.isNotExistError(e)) {
-        throw e;
       }
     }
   }
