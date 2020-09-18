@@ -6,3 +6,5 @@
  *
  * @packageDocumentation
  */
+
+export * from './matchTree';
