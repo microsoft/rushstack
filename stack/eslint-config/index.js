@@ -756,6 +756,8 @@ module.exports = {
         // Test files
         '*.test.ts',
         '*.test.tsx',
+        '*.spec.ts',
+        '*.spec.tsx',
 
         // Facebook convention
         '**/__mocks__/*.ts',
