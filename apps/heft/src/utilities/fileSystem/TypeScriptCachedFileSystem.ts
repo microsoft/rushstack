@@ -12,7 +12,8 @@ import {
   IFileSystemDeleteFileOptions,
   IFileSystemCreateLinkOptions,
   FileSystem,
-  FileSystemStats
+  FileSystemStats,
+  Sort
 } from '@rushstack/node-core-library';
 
 export interface IReadFolderFilesAndDirectoriesResult {
@@ -174,15 +175,7 @@ export class TypeScriptCachedFileSystem {
   private _sortFolderEntries(folderEntries: fs.Dirent[]): IReadFolderFilesAndDirectoriesResult {
     // TypeScript expects entries sorted ordinally by name
     // In practice this might not matter
-    folderEntries.sort((a, b) => {
-      if (a > b) {
-        return 1;
-      } else if (a < b) {
-        return -1;
-      } else {
-        return 0;
-      }
-    });
+    folderEntries.sort((a, b) => Sort.compareByValue(a, b));
 
     const files: string[] = [];
     const directories: string[] = [];
