@@ -2,6 +2,26 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "1.4.0",
+      "tag": "@rushstack/eslint-config_v1.4.0",
+      "date": "Fri, 18 Sep 2020 22:57:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove the @typescript-eslint/array-type rule"
+          },
+          {
+            "comment": "Add *.spec.ts file extension for tests, since this is also a commonly used convention"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Relax @typescript-eslint/no-use-before-define slightly"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.0",
       "tag": "@rushstack/eslint-config_v1.3.0",
       "date": "Thu, 27 Aug 2020 11:27:06 GMT",

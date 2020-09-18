@@ -1,6 +1,11 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Fri, 18 Sep 2020 21:49:54 GMT and should not be manually modified.
+This log was last generated on Fri, 18 Sep 2020 22:57:24 GMT and should not be manually modified.
+
+## 3.16.23
+Fri, 18 Sep 2020 22:57:24 GMT
+
+*Version update only*
 
 ## 3.16.22
 Fri, 18 Sep 2020 21:49:54 GMT

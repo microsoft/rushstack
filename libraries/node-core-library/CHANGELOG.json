@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.33.1",
+      "tag": "@rushstack/node-core-library_v3.33.1",
+      "date": "Fri, 18 Sep 2020 22:57:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `1.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.33.0",
       "tag": "@rushstack/node-core-library_v3.33.0",
       "date": "Fri, 18 Sep 2020 21:49:53 GMT",
