@@ -815,6 +815,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/match-tree",
+      "projectFolder": "libraries/match-tree",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/node-core-library",
       "projectFolder": "libraries/node-core-library",
       "reviewCategory": "libraries",
