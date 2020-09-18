@@ -25,7 +25,7 @@ export interface ICreateHardLinkExtendedOptions extends IFileSystemCreateLinkOpt
 }
 
 interface ICacheEntry<TEntry> {
-  entry?: TEntry;
+  entry: TEntry | undefined;
   error?: NodeJS.ErrnoException;
 }
 
@@ -213,7 +213,7 @@ export class TypeScriptCachedFileSystem {
       try {
         cacheEntry = { entry: fn(path) };
       } catch (e) {
-        cacheEntry = { error: e };
+        cacheEntry = { error: e, entry: undefined };
       }
 
       cache.set(path, cacheEntry);
