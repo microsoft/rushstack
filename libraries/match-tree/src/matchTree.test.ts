@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { matchTree, matchTreeArg } from './matchTree';
+import { MatchTree } from './matchTree';
 
 export interface IPattern {
   branch?: string;
@@ -11,7 +11,7 @@ const pattern = {
   a: [
     1,
     2,
-    matchTreeArg('branch', {
+    MatchTree.matchTreeArg('branch', {
       b: []
     })
   ]
@@ -32,7 +32,7 @@ describe('matchTree', () => {
     };
 
     const captures: IPattern = {};
-    expect(matchTree(tree, pattern, captures)).toBe(true);
+    expect(MatchTree.matchTree(tree, pattern, captures)).toBe(true);
     expect(captures.branch).toMatchObject({
       b: [],
       extra: 'hi'
