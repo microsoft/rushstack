@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { matchTreeArg } from './matchTree';
+import { MatchTree, TreeNode } from '@rushstack/match-tree';
 
 export interface IJestCallExpression {
   // Example: "mock" from "jest.mock('./thing')"
@@ -32,7 +32,7 @@ export interface IJestCallExpression {
 //       }
 //     ]
 //   };
-export const jestCallExpression = {
+export const jestCallExpression: TreeNode = {
   type: 'CallExpression',
   callee: {
     type: 'MemberExpression',
@@ -42,14 +42,14 @@ export const jestCallExpression = {
     },
     property: {
       type: 'Identifier',
-      name: matchTreeArg('methodName')
+      name: MatchTree.tag('methodName')
     }
   }
 };
 
 // Matches require() in a statement expression like this:
 //   const x = require("package-name");
-export const requireCallExpression = {
+export const requireCallExpression: TreeNode = {
   type: 'CallExpression',
   callee: {
     type: 'Identifier',
@@ -59,7 +59,7 @@ export const requireCallExpression = {
 
 // Matches import in a statement expression like this:
 //   const x = import("package-name");
-export const importExpression = {
+export const importExpression: TreeNode = {
   type: 'ImportExpression',
   source: {
     type: 'Literal'
