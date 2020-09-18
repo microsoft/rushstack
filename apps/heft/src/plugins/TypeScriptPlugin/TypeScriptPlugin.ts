@@ -131,18 +131,15 @@ export class TypeScriptPlugin implements IHeftPlugin {
       | undefined = this._typeScriptConfigurationFileCache.get(buildFolder);
 
     if (!typescriptConfigurationFileCacheEntry) {
-      try {
+      const typescriptConfigurationFilePath: string = path.resolve(buildFolder, '.heft', 'typescript.json');
+      if (await FileSystem.existsAsync(typescriptConfigurationFilePath)) {
         typescriptConfigurationFileCacheEntry = {
           configurationFile: await HeftConfigFiles.typeScriptConfigurationFileLoader.loadConfigurationFileAsync(
-            path.resolve(buildFolder, '.heft', 'typescript.json')
+            typescriptConfigurationFilePath
           )
         };
-      } catch (e) {
-        if (FileSystem.isNotExistError(e)) {
-          typescriptConfigurationFileCacheEntry = { configurationFile: undefined };
-        } else {
-          throw e;
-        }
+      } else {
+        typescriptConfigurationFileCacheEntry = { configurationFile: undefined };
       }
 
       this._typeScriptConfigurationFileCache.set(buildFolder, typescriptConfigurationFileCacheEntry);
