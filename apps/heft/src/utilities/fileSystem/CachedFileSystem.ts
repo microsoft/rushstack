@@ -66,6 +66,19 @@ export class CachedFileSystem implements IExtendedFileSystem {
     }
   };
 
+  public existsAsync: (path: string) => Promise<boolean> = async (path: string) => {
+    try {
+      await this.getStatisticsAsync(path);
+      return true;
+    } catch (e) {
+      if (FileSystem.isNotExistError(e)) {
+        return false;
+      } else {
+        throw e;
+      }
+    }
+  };
+
   public getStatistics: (path: string) => FileSystemStats = (path: string) => {
     return this._withCaching(path, FileSystem.getStatistics, this._statsCache);
   };

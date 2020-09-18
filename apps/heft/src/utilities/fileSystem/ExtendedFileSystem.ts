@@ -29,6 +29,7 @@ export class ExtendedFileSystem implements IExtendedFileSystem {
    * This is a wrapper around the node-core-library FileSystem API, so just use those APIs for everything we can
    */
   public readonly exists: (path: string) => boolean = FileSystem.exists;
+  public readonly existsAsync: (path: string) => Promise<boolean> = FileSystem.existsAsync;
   public readonly getStatistics: (path: string) => FileSystemStats = FileSystem.getStatistics;
   public readonly getStatisticsAsync: (path: string) => Promise<FileSystemStats> =
     FileSystem.getStatisticsAsync;

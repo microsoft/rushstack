@@ -337,6 +337,17 @@ export class FileSystem {
   }
 
   /**
+   * An async version of {@link FileSystem.exists}.
+   */
+  public static async existsAsync(path: string): Promise<boolean> {
+    return await FileSystem._wrapExceptionAsync(() => {
+      return new Promise<boolean>((resolve: (result: boolean) => void) => {
+        fsx.exists(path, resolve);
+      });
+    });
+  }
+
+  /**
    * Gets the statistics for a particular filesystem object.
    * If the path is a link, this function follows the link and returns statistics about the link target.
    * Behind the scenes it uses `fs.statSync()`.
