@@ -424,8 +424,8 @@ module.exports = {
             // TypeScript extensions
 
             enums: true,
-            typedefs: true,
-            ignoreTypeReferences: true
+            typedefs: true
+            // ignoreTypeReferences: true
           }
         ],
 
