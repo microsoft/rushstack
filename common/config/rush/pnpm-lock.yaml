@@ -1357,6 +1357,17 @@ importers:
       '@rushstack/heft': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/webpack-env': 1.13.0
+  ../../libraries/match-tree:
+    devDependencies:
+      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
+      '@types/heft-jest': 1.0.1
+    specifiers:
+      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
+      '@types/heft-jest': 1.0.1
   ../../libraries/node-core-library:
     dependencies:
       '@types/node': 10.17.13
@@ -1604,6 +1615,33 @@ importers:
       '@rushstack/heft': 0.8.0
       '@types/node': 10.17.13
   ../../stack/eslint-plugin:
+    devDependencies:
+      '@microsoft/rush-stack-compiler-3.9': 0.4.10
+      '@rushstack/heft': 0.8.0
+      '@rushstack/match-tree': 'link:../../libraries/match-tree'
+      '@types/eslint': 7.2.0
+      '@types/estree': 0.0.44
+      '@types/heft-jest': 1.0.1
+      '@types/node': 10.17.13
+      '@typescript-eslint/experimental-utils': 3.4.0_eslint@7.2.0+typescript@3.9.7
+      '@typescript-eslint/parser': 3.4.0_eslint@7.2.0+typescript@3.9.7
+      '@typescript-eslint/typescript-estree': 3.4.0_typescript@3.9.7
+      eslint: 7.2.0
+      typescript: 3.9.7
+    specifiers:
+      '@microsoft/rush-stack-compiler-3.9': 0.4.10
+      '@rushstack/heft': 0.8.0
+      '@rushstack/match-tree': 'workspace:*'
+      '@types/eslint': 7.2.0
+      '@types/estree': 0.0.44
+      '@types/heft-jest': 1.0.1
+      '@types/node': 10.17.13
+      '@typescript-eslint/experimental-utils': 3.4.0
+      '@typescript-eslint/parser': 3.4.0
+      '@typescript-eslint/typescript-estree': 3.4.0
+      eslint: ~7.2.0
+      typescript: ~3.9.5
+  ../../stack/eslint-plugin-security:
     devDependencies:
       '@microsoft/rush-stack-compiler-3.9': 0.4.10
       '@rushstack/heft': 0.8.0

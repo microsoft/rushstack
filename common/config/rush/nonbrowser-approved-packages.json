@@ -187,6 +187,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@rushstack/match-tree",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/module-minifier-plugin",
       "allowedCategories": [ "tests" ]
     },
