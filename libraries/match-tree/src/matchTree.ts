@@ -40,7 +40,7 @@ export class MatchTree {
    * Used to build the `pattern` tree for `matchTree()`.  For the given `subtree` of the pattern,
    * if it is matched, that node will be assigned to the `captures` object using `keyName`.
    */
-  public static matchTreeArg(keyName: string, subtree?: TreeNode): TreeNode {
+  public static tag(keyName: string, subtree?: TreeNode): TreeNode {
     return new MatchTreeArg(keyName, subtree);
   }
 
@@ -48,7 +48,7 @@ export class MatchTree {
    * Used to build the `pattern` tree for `matchTree()`.  Allows several alternative patterns
    * to be matched for a given subtree.
    */
-  public static matchTreeAlternatives(possibleSubtrees: TreeNode[]): TreeNode {
+  public static oneOf(possibleSubtrees: TreeNode[]): TreeNode {
     return new MatchTreeAlternatives(possibleSubtrees);
   }
 
@@ -56,7 +56,7 @@ export class MatchTree {
    * Starting at `root`, search for the first subtree that matches `pattern`.
    * If found, return true and assign the matching nodes to the `captures` object.
    */
-  public static matchTree(root: TreeNode, pattern: TreeNode, captures: IMatchTreeCaptureSet = {}): boolean {
+  public static match(root: TreeNode, pattern: TreeNode, captures: IMatchTreeCaptureSet = {}): boolean {
     return MatchTree._matchTreeRecursive(root, pattern, captures, 'root');
   }
 

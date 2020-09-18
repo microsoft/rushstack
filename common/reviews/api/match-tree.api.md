@@ -13,10 +13,10 @@ export type IMatchTreeCaptureSet = {
 
 // @public (undocumented)
 export class MatchTree {
-    static matchTree(root: TreeNode, pattern: TreeNode, captures?: IMatchTreeCaptureSet): boolean;
-    static matchTreeAlternatives(possibleSubtrees: TreeNode[]): TreeNode;
-    static matchTreeArg(keyName: string, subtree?: TreeNode): TreeNode;
-    }
+    static match(root: TreeNode, pattern: TreeNode, captures?: IMatchTreeCaptureSet): boolean;
+    static oneOf(possibleSubtrees: TreeNode[]): TreeNode;
+    static tag(keyName: string, subtree?: TreeNode): TreeNode;
+}
 
 // @public (undocumented)
 export type TreeNode = any;
