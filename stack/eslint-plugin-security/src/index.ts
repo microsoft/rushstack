@@ -2,13 +2,17 @@
 // See LICENSE in the project root for license information.
 
 import { TSESLint } from '@typescript-eslint/experimental-utils';
+import { noUnsafeRegExp } from './no-unsafe-regexp';
 
 interface IPlugin {
   rules: { [ruleName: string]: TSESLint.RuleModule<string, unknown[]> };
 }
 
 const plugin: IPlugin = {
-  rules: {}
+  rules: {
+    // Full name: "@rushstack/security/no-unsafe-regexp"
+    'no-unsafe-regexp': noUnsafeRegExp
+  }
 };
 
 export = plugin;

@@ -109,7 +109,6 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
             const outerStatement: TSESTree.Node = findOuterStatement(node);
             if (!reportedStatements.has(outerStatement)) {
               reportedStatements.add(outerStatement);
-              debugger;
               context.report({
                 node,
                 messageId: 'error-unhoisted-jest-mock',
