@@ -7,5 +7,7 @@
 const common = require('./_common');
 
 module.exports = {
-  ...common
+  ...common,
+
+  '@rushstack/security/no-unsafe-regexp': 'warn'
 };

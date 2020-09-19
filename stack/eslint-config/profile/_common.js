@@ -69,15 +69,6 @@ module.exports = {
         '@rushstack/hoist-jest-mock': 'error',
 
         // ====================================================================
-        // SECURITY RULES
-        // ====================================================================
-
-        // RATIONALE:         See the @rushstack/eslint-plugin-security documentation
-
-        // TODO: We'll enable this in the next PR
-        // '@rushstack/security/no-unsafe-regexp': 'warn',
-
-        // ====================================================================
         // GENERAL RULES
         // ====================================================================
 
