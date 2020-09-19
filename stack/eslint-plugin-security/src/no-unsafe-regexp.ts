@@ -69,9 +69,9 @@ const noUnsafeRegExp: TSESLint.RuleModule<MessageIds, Options> = {
     return {
       NewExpression: (node: TSESTree.NewExpression): void => {
         const captures: INewRegExpPatternCaptures = {};
-        if (MatchTree.match(node, newRegExpPattern, captures)) {
+        if (MatchTree.match(node, newRegExpPattern, captures) && captures.constructorArgs) {
           if (
-            captures.constructorArgs?.length > 0 &&
+            captures.constructorArgs.length > 0 &&
             captures.constructorArgs[0].type !== AST_NODE_TYPES.Literal
           ) {
             context.report({
