@@ -818,7 +818,12 @@
       "packageName": "@rushstack/match-tree",
       "projectFolder": "libraries/match-tree",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": true,
+      "cyclicDependencyProjects": [
+        "@microsoft/rush-stack-compiler-3.5",
+        "@rushstack/heft",
+        "@rushstack/eslint-config"
+      ]
     },
     {
       "packageName": "@rushstack/node-core-library",
