@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Sat, 19 Sep 2020 03:33:06 GMT and should not be manually modified.
+This log was last generated on Sat, 19 Sep 2020 04:37:26 GMT and should not be manually modified.
+
+## 0.6.3
+Sat, 19 Sep 2020 04:37:26 GMT
+
+### Patches
+
+- Add missing dependency
 
 ## 0.6.2
 Sat, 19 Sep 2020 03:33:06 GMT

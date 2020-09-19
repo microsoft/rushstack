@@ -1,6 +1,11 @@
 # Change Log - @rushstack/loader-raw-script
 
-This log was last generated on Sat, 19 Sep 2020 03:33:07 GMT and should not be manually modified.
+This log was last generated on Sat, 19 Sep 2020 04:37:27 GMT and should not be manually modified.
+
+## 1.3.64
+Sat, 19 Sep 2020 04:37:27 GMT
+
+*Version update only*
 
 ## 1.3.63
 Sat, 19 Sep 2020 03:33:07 GMT

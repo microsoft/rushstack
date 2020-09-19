@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.6.3",
+      "tag": "@rushstack/eslint-plugin_v0.6.3",
+      "date": "Sat, 19 Sep 2020 04:37:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add missing dependency"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.2",
       "tag": "@rushstack/eslint-plugin_v0.6.2",
       "date": "Sat, 19 Sep 2020 03:33:06 GMT",
