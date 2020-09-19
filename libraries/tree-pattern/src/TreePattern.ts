@@ -74,7 +74,7 @@ export class TreePattern {
    * const myPattern = {
    *   name: TreePattern.tag('personName')
    * };
-   * if (TreePattern.match({ name: 'Bob' }, myPattern, myCaptures)) {
+   * if (myPattern.match({ name: 'Bob' }, myCaptures)) {
    *   console.log(myCaptures.personName);
    * }
    * ```
