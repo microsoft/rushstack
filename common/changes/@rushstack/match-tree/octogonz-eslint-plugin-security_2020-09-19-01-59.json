@@ -1,11 +1,11 @@
 {
   "changes": [
     {
-      "packageName": "@rushstack/match-tree",
+      "packageName": "@rushstack/tree-pattern",
       "comment": "Initial release",
       "type": "minor"
     }
   ],
-  "packageName": "@rushstack/match-tree",
+  "packageName": "@rushstack/tree-pattern",
   "email": "4673363+octogonz@users.noreply.github.com"
 }

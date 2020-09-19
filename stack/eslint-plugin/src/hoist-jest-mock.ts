@@ -4,7 +4,7 @@
 import type { TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
 import { AST_NODE_TYPES } from '@typescript-eslint/experimental-utils';
 
-import { MatchTree } from '@rushstack/match-tree';
+import { MatchTree } from '@rushstack/tree-pattern';
 import * as hoistJestMockPatterns from './hoistJestMockPatterns';
 
 type MessageIds = 'error-unhoisted-jest-mock';

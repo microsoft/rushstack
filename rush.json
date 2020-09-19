@@ -815,17 +815,6 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@rushstack/match-tree",
-      "projectFolder": "libraries/match-tree",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/rush-stack-compiler-3.5",
-        "@rushstack/heft",
-        "@rushstack/eslint-config"
-      ]
-    },
-    {
       "packageName": "@rushstack/node-core-library",
       "projectFolder": "libraries/node-core-library",
       "reviewCategory": "libraries",
@@ -855,6 +844,17 @@
       "projectFolder": "libraries/terminal",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/tree-pattern",
+      "projectFolder": "libraries/tree-pattern",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": [
+        "@microsoft/rush-stack-compiler-3.5",
+        "@rushstack/heft",
+        "@rushstack/eslint-config"
+      ]
     },
     {
       "packageName": "@rushstack/ts-command-line",

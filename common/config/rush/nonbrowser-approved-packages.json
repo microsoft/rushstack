@@ -191,7 +191,7 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "@rushstack/match-tree",
+      "name": "@rushstack/tree-pattern",
       "allowedCategories": [ "libraries" ]
     },
     {

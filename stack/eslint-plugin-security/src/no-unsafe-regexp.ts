@@ -4,7 +4,7 @@
 import type { TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
 import { AST_NODE_TYPES } from '@typescript-eslint/experimental-utils';
 
-import { MatchTree, TreeNode } from '@rushstack/match-tree';
+import { MatchTree, TreeNode } from '@rushstack/tree-pattern';
 
 // Matches an expression like this:
 //   new RegExp('hello');

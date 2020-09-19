@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { MatchTree, TreeNode } from '@rushstack/match-tree';
+import { MatchTree, TreeNode } from '@rushstack/tree-pattern';
 
 export interface IJestCallExpression {
   // Example: "mock" from "jest.mock('./thing')"
