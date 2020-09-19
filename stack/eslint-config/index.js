@@ -73,7 +73,9 @@ module.exports = {
         // ====================================================================
 
         // RATIONALE:         See the @rushstack/eslint-plugin-security documentation
-        '@rushstack/security/no-unsafe-regexp': 'warn',
+
+        // TODO: We'll enable this in the next PR
+        // '@rushstack/security/no-unsafe-regexp': 'warn',
 
         // ====================================================================
         // GENERAL RULES
