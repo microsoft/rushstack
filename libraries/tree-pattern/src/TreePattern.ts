@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 /**
- * Indicates the tree-like data structure that {@link MatchTree} will traverse.
+ * Indicates the tree-like data structure that {@link TreePattern} will traverse.
  *
  * @remarks
- * Since `MatchTree` makes relatively few assumptions object the object structure, this is
+ * Since `TreePattern` makes relatively few assumptions object the object structure, this is
  * just an alias for `any`.  At least as far as the portions to be matched, the tree nodes
  * are expected to be JSON-like structures made from JavaScript arrays, JavaScript objects,
  * and primitive values that can be compared using `===`.
@@ -15,7 +15,7 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type TreeNode = any;
 
-class MatchTreeArg {
+class TreePatternArg {
   public readonly keyName: string;
   public readonly subtree: TreeNode | undefined;
   public constructor(keyName: string, subtree?: TreeNode) {
@@ -24,7 +24,7 @@ class MatchTreeArg {
   }
 }
 
-class MatchTreeAlternatives {
+class TreePatternAlternatives {
   public readonly possibleSubtrees: TreeNode[];
   public constructor(possibleSubtrees: TreeNode[]) {
     this.possibleSubtrees = possibleSubtrees;
@@ -32,18 +32,18 @@ class MatchTreeAlternatives {
 }
 
 /**
- * Provides additional detail about the success or failure of {@link MatchTree.match}.
+ * Provides additional detail about the success or failure of {@link TreePattern.match}.
  *
  * @remarks
  * On success, the object will contain keys for any successfully matched tags, as
- * defined using {@link MatchTree.tag}.
+ * defined using {@link TreePattern.tag}.
  *
  * On failure, the `failPath` member will indicate the JSON path of the node that
  * failed to match.
  *
  * @public
  */
-export type IMatchTreeCaptureSet =
+export type ITreePatternCaptureSet =
   | {
       [tagName: string]: TreeNode;
     }
@@ -53,12 +53,12 @@ export type IMatchTreeCaptureSet =
  * A fast, lightweight pattern matcher for tree structures such as an Abstract Syntax Tree (AST).
  * @public
  */
-export class MatchTree {
+export class TreePattern {
   /**
    * Labels a subtree within the search pattern, so that the matching object can be retrieved.
    *
    * @remarks
-   * Used to build the `pattern` tree for {@link MatchTree.match}.  For the given `subtree` of the pattern,
+   * Used to build the `pattern` tree for {@link TreePattern.match}.  For the given `subtree` of the pattern,
    * if it is matched, that node will be assigned to the `captures` object using `tagName` as the key.
    *
    * Example:
@@ -66,66 +66,66 @@ export class MatchTree {
    * ```ts
    * const myCaptures: { personName?: string } = {};
    * const myPattern = {
-   *   name: MatchTree.tag('personName')
+   *   name: TreePattern.tag('personName')
    * };
-   * if (MatchTree.match({ name: 'Bob' }, myPattern, myCaptures)) {
+   * if (TreePattern.match({ name: 'Bob' }, myPattern, myCaptures)) {
    *   console.log(myCaptures.personName);
    * }
    * ```
    */
   public static tag(tagName: string, subtree?: TreeNode): TreeNode {
-    return new MatchTreeArg(tagName, subtree);
+    return new TreePatternArg(tagName, subtree);
   }
 
   /**
    * Used to specify alternative possible subtrees in the search pattern.
    *
    * @remarks
-   * Used to build the `pattern` tree for {@link MatchTree.match}.  Allows several alternative patterns
+   * Used to build the `pattern` tree for {@link TreePattern.match}.  Allows several alternative patterns
    * to be matched for a given subtree.
    *
    * Example:
    *
    * ```ts
    * const myPattern = {
-   *   animal: MatchTree.oneOf([
+   *   animal: TreePattern.oneOf([
    *     { kind: 'dog', bark: 'loud' },
    *     { kind: 'cat', meow: 'quiet' }
    *   ])
    * };
-   * if (MatchTree.match({ animal: { kind: 'dog', bark: 'loud' } }, myPattern)) {
+   * if (TreePattern.match({ animal: { kind: 'dog', bark: 'loud' } }, myPattern)) {
    *   console.log('I can match dog.');
    * }
-   * if (MatchTree.match({ animal: { kind: 'cat', meow: 'quiet' } }, myPattern)) {
+   * if (TreePattern.match({ animal: { kind: 'cat', meow: 'quiet' } }, myPattern)) {
    *   console.log('I can match cat, too.');
    * }
    * ```
    */
   public static oneOf(possibleSubtrees: TreeNode[]): TreeNode {
-    return new MatchTreeAlternatives(possibleSubtrees);
+    return new TreePatternAlternatives(possibleSubtrees);
   }
 
   /**
    * Starting at `root`, search for the first subtree that matches `pattern`.
    * If found, return true and assign the matching nodes to the `captures` object.
    */
-  public static match(root: TreeNode, pattern: TreeNode, captures: IMatchTreeCaptureSet = {}): boolean {
-    return MatchTree._matchTreeRecursive(root, pattern, captures, 'root');
+  public static match(root: TreeNode, pattern: TreeNode, captures: ITreePatternCaptureSet = {}): boolean {
+    return TreePattern._matchTreeRecursive(root, pattern, captures, 'root');
   }
 
   private static _matchTreeRecursive(
     root: TreeNode,
     pattern: TreeNode,
-    captures: IMatchTreeCaptureSet,
+    captures: ITreePatternCaptureSet,
     path: string
   ): boolean {
     if (pattern === undefined) {
       throw new Error('pattern has an undefined value at ' + path);
     }
 
-    if (pattern instanceof MatchTreeArg) {
+    if (pattern instanceof TreePatternArg) {
       if (pattern.subtree !== undefined) {
-        if (!MatchTree._matchTreeRecursive(root, pattern.subtree, captures, path)) {
+        if (!TreePattern._matchTreeRecursive(root, pattern.subtree, captures, path)) {
           return false;
         }
       }
@@ -134,13 +134,13 @@ export class MatchTree {
       return true;
     }
 
-    if (pattern instanceof MatchTreeAlternatives) {
+    if (pattern instanceof TreePatternAlternatives) {
       // Try each possible alternative until we find one that matches
       for (const possibleSubtree of pattern.possibleSubtrees) {
         // We shouldn't update "captures" unless the match is fully successful.
         // So make a temporary copy of it.
-        const tempCaptures: IMatchTreeCaptureSet = { ...captures };
-        if (MatchTree._matchTreeRecursive(root, possibleSubtree, tempCaptures, path)) {
+        const tempCaptures: ITreePatternCaptureSet = { ...captures };
+        if (TreePattern._matchTreeRecursive(root, possibleSubtree, tempCaptures, path)) {
           // The match was successful, so assign the tempCaptures results back into the
           // original "captures" object.
           for (const key of Object.getOwnPropertyNames(tempCaptures)) {
@@ -170,7 +170,7 @@ export class MatchTree {
 
         const rootElement: TreeNode = root[i];
         const patternElement: TreeNode = pattern[i];
-        if (!MatchTree._matchTreeRecursive(rootElement, patternElement, captures, subPath)) {
+        if (!TreePattern._matchTreeRecursive(rootElement, patternElement, captures, subPath)) {
           return false;
         }
       }
@@ -197,7 +197,7 @@ export class MatchTree {
           captures.failPath = subPath;
           return false;
         }
-        if (!MatchTree._matchTreeRecursive(root[keyName], pattern[keyName], captures, subPath)) {
+        if (!TreePattern._matchTreeRecursive(root[keyName], pattern[keyName], captures, subPath)) {
           return false;
         }
       }

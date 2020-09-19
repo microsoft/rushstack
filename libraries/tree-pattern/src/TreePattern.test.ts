@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { MatchTree, TreeNode } from './matchTree';
+import { TreePattern, TreeNode } from './TreePattern';
 
 export interface IMyPattern {
   branch?: string;
@@ -11,14 +11,14 @@ const pattern1: TreeNode = {
   a: [
     1,
     2,
-    MatchTree.tag('branch', {
+    TreePattern.tag('branch', {
       b: []
     })
   ]
 };
 
 const pattern2: TreeNode = {
-  c: MatchTree.oneOf([
+  c: TreePattern.oneOf([
     123,
     {
       d: 1
@@ -26,7 +26,7 @@ const pattern2: TreeNode = {
   ])
 };
 
-describe('MatchTree', () => {
+describe('TreePattern', () => {
   test('matches using a tag', () => {
     const tree1: TreeNode = {
       a: [
@@ -41,7 +41,7 @@ describe('MatchTree', () => {
     };
 
     const captures: IMyPattern = {};
-    expect(MatchTree.match(tree1, pattern1, captures)).toBe(true);
+    expect(TreePattern.match(tree1, pattern1, captures)).toBe(true);
     expect(captures.branch).toMatchObject({
       b: [],
       extra: 'hi'
@@ -52,16 +52,16 @@ describe('MatchTree', () => {
     const tree2a: TreeNode = {
       c: 123
     };
-    expect(MatchTree.match(tree2a, pattern2)).toBe(true);
+    expect(TreePattern.match(tree2a, pattern2)).toBe(true);
 
     const tree2b: TreeNode = {
       c: { d: 1 }
     };
-    expect(MatchTree.match(tree2b, pattern2)).toBe(true);
+    expect(TreePattern.match(tree2b, pattern2)).toBe(true);
 
     const tree2c: TreeNode = {
       c: 321
     };
-    expect(MatchTree.match(tree2c, pattern2)).toBe(false);
+    expect(TreePattern.match(tree2c, pattern2)).toBe(false);
   });
 });

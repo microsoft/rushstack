@@ -7,4 +7,4 @@
  * @packageDocumentation
  */
 
-export * from './matchTree';
+export * from './TreePattern';

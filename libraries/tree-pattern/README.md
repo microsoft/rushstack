@@ -1,4 +1,4 @@
-# @rushstack/match-tree
+# @rushstack/tree-pattern
 
 This is a simple, fast pattern matcher for JavaScript tree structures.  It was designed for ESLint rules and
 transforms that match parse trees such as produced by [Esprima](https://esprima.org/). However, it can be used
@@ -71,7 +71,7 @@ const pattern: TreeNode = {
 
 Then when our visitor encounters an `ExpressionStatement`, we can match the `expressionNode` like this:
 ```js
-if (MatchTree.match(expressionNode, pattern)) {
+if (TreePattern.match(expressionNode, pattern)) {
   console.log('Success!');
 }
 ```
@@ -90,7 +90,7 @@ const pattern: TreeNode = {
       type: 'Identifier',
       name: 'Promise'
     },
-    property: MatchTree.tag('promiseMethod', {
+    property: TreePattern.tag('promiseMethod', {
       type: 'Identifier'
     }),
     computed: false
@@ -101,13 +101,13 @@ const pattern: TreeNode = {
 On a successful match, the tagged `promiseMethod` subtree can be retrieved like this:
 ```ts
 interface IMyCaptures {
-  // Captures the "promiseMethod" tag specified using MatchTree.tag()
+  // Captures the "promiseMethod" tag specified using TreePattern.tag()
   promiseMethod?: { name?: string }; // <--- substitute your real AST interface here
 }
 
 const captures: IMyCaptures = {};
 
-if (MatchTree.match(node, pattern, captures)) {
+if (TreePattern.match(node, pattern, captures)) {
   // Prints: "Matched fulfilled"
   console.log('Matched ' + captures?.promiseMethod?.name);
 }
@@ -119,21 +119,21 @@ The `oneOf` API enables you to write patterns that match alternative subtrees.
 
 ```ts
 const myPattern = {
-  animal: MatchTree.oneOf([
+  animal: TreePattern.oneOf([
     { kind: 'dog', bark: 'loud' },
     { kind: 'cat', meow: 'quiet' }
   ])
 };
 
-if (MatchTree.match({ animal: { kind: 'dog', bark: 'loud' } }, myPattern)) {
+if (TreePattern.match({ animal: { kind: 'dog', bark: 'loud' } }, myPattern)) {
   console.log('I can match dog.');
 }
 
-if (MatchTree.match({ animal: { kind: 'cat', meow: 'quiet' } }, myPattern)) {
+if (TreePattern.match({ animal: { kind: 'cat', meow: 'quiet' } }, myPattern)) {
   console.log('I can match cat, too.');
 }
 ```
 
 For example, maybe we want to match `Promise['fulfilled'](123);` as well as `Promise.fulfilled(123);`.
-If the structure of the expressions is similar enough, `MatchTree.oneOf` avoids having to create two
+If the structure of the expressions is similar enough, `TreePattern.oneOf` avoids having to create two
 separate patterns.
