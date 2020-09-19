@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin",
+      "comment": "Extract the pattern matcher into the new \"@rushstack/match-tree\" package",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
