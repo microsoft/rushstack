@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Fri, 18 Sep 2020 22:57:24 GMT and should not be manually modified.
+This log was last generated on Sat, 19 Sep 2020 03:33:06 GMT and should not be manually modified.
+
+## 1.4.1
+Sat, 19 Sep 2020 03:33:06 GMT
+
+### Patches
+
+- Add a dependency on the new @rushstack/eslint-plugin-security
 
 ## 1.4.0
 Fri, 18 Sep 2020 22:57:24 GMT

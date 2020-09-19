@@ -2,6 +2,23 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.6.2",
+      "tag": "@rushstack/eslint-plugin_v0.6.2",
+      "date": "Sat, 19 Sep 2020 03:33:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Extract the pattern matcher into the new \"@rushstack/tree-pattern\" package"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.1",
       "tag": "@rushstack/eslint-plugin_v0.6.1",
       "date": "Thu, 27 Aug 2020 11:27:06 GMT",

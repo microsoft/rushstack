@@ -1,6 +1,11 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Fri, 18 Sep 2020 22:57:24 GMT and should not be manually modified.
+This log was last generated on Sat, 19 Sep 2020 03:33:07 GMT and should not be manually modified.
+
+## 7.9.3
+Sat, 19 Sep 2020 03:33:07 GMT
+
+*Version update only*
 
 ## 7.9.2
 Fri, 18 Sep 2020 22:57:24 GMT

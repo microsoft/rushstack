@@ -1,0 +1,22 @@
+{
+  "name": "@rushstack/eslint-plugin-security",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/eslint-plugin-security_v0.1.0",
+      "date": "Sat, 19 Sep 2020 03:33:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.1.0`"
+          }
+        ]
+      }
+    }
+  ]
+}

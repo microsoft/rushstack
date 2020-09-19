@@ -2,6 +2,26 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "1.4.1",
+      "tag": "@rushstack/eslint-config_v1.4.1",
+      "date": "Sat, 19 Sep 2020 03:33:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add a dependency on the new @rushstack/eslint-plugin-security"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.6.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-security\" to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.0",
       "tag": "@rushstack/eslint-config_v1.4.0",
       "date": "Fri, 18 Sep 2020 22:57:24 GMT",
