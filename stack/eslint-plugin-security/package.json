@@ -1,19 +1,15 @@
 {
-  "name": "@rushstack/eslint-plugin",
-  "version": "0.6.1",
-  "description": "An ESLint plugin providing supplementary rules for use with the @rushstack/eslint-config package",
+  "name": "@rushstack/eslint-plugin-security",
+  "version": "0.0.0",
+  "description": "An ESLint plugin providing rules that identify common security vulnerabilities for browser applications, Node.js tools, and Node.js services",
   "repository": {
-    "url": "https://github.com/microsoft/rushstack/tree/master/stack/eslint-plugin"
+    "url": "https://github.com/microsoft/rushstack/tree/master/stack/eslint-plugin-security"
   },
   "homepage": "https://rushstack.io",
   "keywords": [
     "eslint",
     "eslint-config",
-    "monorepo",
-    "rush",
-    "scalable",
-    "scale",
-    "typescript"
+    "security"
   ],
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",

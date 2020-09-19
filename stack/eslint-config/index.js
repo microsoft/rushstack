@@ -28,9 +28,9 @@ module.exports = {
 
   plugins: [
     '@rushstack/eslint-plugin',
+    '@rushstack/eslint-plugin-security',
     '@typescript-eslint/eslint-plugin',
     'eslint-plugin-promise',
-    'eslint-plugin-security',
     'eslint-plugin-tsdoc'
   ],
 
@@ -53,6 +53,10 @@ module.exports = {
       },
 
       rules: {
+        // ====================================================================
+        // CUSTOM RULES
+        // ====================================================================
+
         // The @rushstack rules are documented in the package README:
         // https://www.npmjs.com/package/@rushstack/eslint-plugin
 
@@ -63,6 +67,19 @@ module.exports = {
         //                    This is enabled and classified as an error because it is required when using Heft.
         //                    It's not required when using ts-jest, but still a good practice.
         '@rushstack/hoist-jest-mock': 'error',
+
+        // ====================================================================
+        // SECURITY RULES
+        // ====================================================================
+
+        // RATIONALE:         See the @rushstack/eslint-plugin-security documentation
+
+        // TODO: We'll enable this in the next PR
+        // '@rushstack/security/no-unsafe-regexp': 'warn',
+
+        // ====================================================================
+        // GENERAL RULES
+        // ====================================================================
 
         // STANDARDIZED BY:   @typescript-eslint\eslint-plugin\dist\configs\recommended.json
         '@typescript-eslint/adjacent-overload-signatures': 'warn',

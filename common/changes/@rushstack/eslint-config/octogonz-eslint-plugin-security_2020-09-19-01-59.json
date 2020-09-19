@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-config",
+      "comment": "Add a dependency on the new @rushstack/eslint-plugin-security",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-config",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
