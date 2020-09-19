@@ -1357,21 +1357,6 @@ importers:
       '@rushstack/heft': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/webpack-env': 1.13.0
-  ../../libraries/match-tree:
-    devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 0.8.10
-      '@rushstack/eslint-config': 1.4.0_eslint@7.2.0+typescript@3.9.7
-      '@rushstack/heft': 0.8.0
-      '@types/heft-jest': 1.0.1
-      eslint: 7.2.0
-      typescript: 3.9.7
-    specifiers:
-      '@microsoft/rush-stack-compiler-3.5': 0.8.10
-      '@rushstack/eslint-config': 1.4.0
-      '@rushstack/heft': 0.8.0
-      '@types/heft-jest': 1.0.1
-      eslint: ~7.2.0
-      typescript: ~3.9.5
   ../../libraries/node-core-library:
     dependencies:
       '@types/node': 10.17.13
@@ -1486,6 +1471,21 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       colors: ~1.2.1
+  ../../libraries/tree-pattern:
+    devDependencies:
+      '@microsoft/rush-stack-compiler-3.5': 0.8.10
+      '@rushstack/eslint-config': 1.4.0_eslint@7.2.0+typescript@3.9.7
+      '@rushstack/heft': 0.8.0
+      '@types/heft-jest': 1.0.1
+      eslint: 7.2.0
+      typescript: 3.9.7
+    specifiers:
+      '@microsoft/rush-stack-compiler-3.5': 0.8.10
+      '@rushstack/eslint-config': 1.4.0
+      '@rushstack/heft': 0.8.0
+      '@types/heft-jest': 1.0.1
+      eslint: ~7.2.0
+      typescript: ~3.9.5
   ../../libraries/ts-command-line:
     dependencies:
       '@types/argparse': 1.0.38
@@ -1622,7 +1622,7 @@ importers:
     devDependencies:
       '@microsoft/rush-stack-compiler-3.9': 0.4.10
       '@rushstack/heft': 0.8.0
-      '@rushstack/match-tree': 'link:../../libraries/match-tree'
+      '@rushstack/tree-pattern': 'link:../../libraries/tree-pattern'
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
       '@types/heft-jest': 1.0.1
@@ -1635,7 +1635,7 @@ importers:
     specifiers:
       '@microsoft/rush-stack-compiler-3.9': 0.4.10
       '@rushstack/heft': 0.8.0
-      '@rushstack/match-tree': 'workspace:*'
+      '@rushstack/tree-pattern': 'workspace:*'
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
       '@types/heft-jest': 1.0.1
@@ -1649,7 +1649,7 @@ importers:
     devDependencies:
       '@microsoft/rush-stack-compiler-3.9': 0.4.10
       '@rushstack/heft': 0.8.0
-      '@rushstack/match-tree': 'link:../../libraries/match-tree'
+      '@rushstack/tree-pattern': 'link:../../libraries/tree-pattern'
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
       '@types/heft-jest': 1.0.1
@@ -1662,7 +1662,7 @@ importers:
     specifiers:
       '@microsoft/rush-stack-compiler-3.9': 0.4.10
       '@rushstack/heft': 0.8.0
-      '@rushstack/match-tree': 'workspace:*'
+      '@rushstack/tree-pattern': 'workspace:*'
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
       '@types/heft-jest': 1.0.1
