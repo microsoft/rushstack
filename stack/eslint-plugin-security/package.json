@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-plugin-security",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An ESLint plugin providing rules that identify common security vulnerabilities for browser applications, Node.js tools, and Node.js services",
   "repository": {
     "url": "https://github.com/microsoft/rushstack/tree/master/stack/eslint-plugin-security"

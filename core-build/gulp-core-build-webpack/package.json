@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-webpack",
-  "version": "5.0.45",
+  "version": "5.0.46",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
