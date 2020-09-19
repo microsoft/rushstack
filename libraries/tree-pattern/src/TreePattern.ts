@@ -54,6 +54,12 @@ export type ITreePatternCaptureSet =
  * @public
  */
 export class TreePattern {
+  private readonly _pattern: TreeNode;
+
+  public constructor(pattern: TreeNode) {
+    this._pattern = pattern;
+  }
+
   /**
    * Labels a subtree within the search pattern, so that the matching object can be retrieved.
    *
@@ -87,16 +93,16 @@ export class TreePattern {
    * Example:
    *
    * ```ts
-   * const myPattern = {
+   * const myPattern: TreePattern = new TreePattern({
    *   animal: TreePattern.oneOf([
    *     { kind: 'dog', bark: 'loud' },
    *     { kind: 'cat', meow: 'quiet' }
    *   ])
-   * };
-   * if (TreePattern.match({ animal: { kind: 'dog', bark: 'loud' } }, myPattern)) {
+   * });
+   * if (myPattern.match({ animal: { kind: 'dog', bark: 'loud' } })) {
    *   console.log('I can match dog.');
    * }
-   * if (TreePattern.match({ animal: { kind: 'cat', meow: 'quiet' } }, myPattern)) {
+   * if (myPattern.match({ animal: { kind: 'cat', meow: 'quiet' } })) {
    *   console.log('I can match cat, too.');
    * }
    * ```
@@ -106,11 +112,23 @@ export class TreePattern {
   }
 
   /**
-   * Starting at `root`, search for the first subtree that matches `pattern`.
-   * If found, return true and assign the matching nodes to the `captures` object.
+   * Match an input tree.
+   *
+   * @remarks
+   * Return true if the `root` node matches the pattern.  (If the `root` node does not match, the child nodes are
+   * not recursively tested, since for an Abstract Syntax Tree the caller is typically an efficient visitor
+   * callback that already handles that job.)
+   *
+   * If the input matches the pattern, any tagged subtrees will be assigned to the `captures` target object
+   * if provided.  If the input does not match, the path of the mismatched node will be assigned to
+   * `captures.failPath`.
+   *
+   * @param root - the input tree to be matched
+   * @param captures - an optional object to receive any subtrees that were matched using {@link TreePattern.tag}
+   * @returns `true` if `root` matches the pattern, or `false` otherwise
    */
-  public static match(root: TreeNode, pattern: TreeNode, captures: ITreePatternCaptureSet = {}): boolean {
-    return TreePattern._matchTreeRecursive(root, pattern, captures, 'root');
+  public match(root: TreeNode, captures: ITreePatternCaptureSet = {}): boolean {
+    return TreePattern._matchTreeRecursive(root, this._pattern, captures, 'root');
   }
 
   private static _matchTreeRecursive(

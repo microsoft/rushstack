@@ -7,7 +7,7 @@ export interface IMyPattern {
   branch?: string;
 }
 
-const pattern1: TreeNode = {
+const pattern1: TreePattern = new TreePattern({
   a: [
     1,
     2,
@@ -15,16 +15,16 @@ const pattern1: TreeNode = {
       b: []
     })
   ]
-};
+});
 
-const pattern2: TreeNode = {
+const pattern2: TreePattern = new TreePattern({
   c: TreePattern.oneOf([
     123,
     {
       d: 1
     }
   ])
-};
+});
 
 describe('TreePattern', () => {
   test('matches using a tag', () => {
@@ -41,7 +41,7 @@ describe('TreePattern', () => {
     };
 
     const captures: IMyPattern = {};
-    expect(TreePattern.match(tree1, pattern1, captures)).toBe(true);
+    expect(pattern1.match(tree1, captures)).toBe(true);
     expect(captures.branch).toMatchObject({
       b: [],
       extra: 'hi'
@@ -52,16 +52,16 @@ describe('TreePattern', () => {
     const tree2a: TreeNode = {
       c: 123
     };
-    expect(TreePattern.match(tree2a, pattern2)).toBe(true);
+    expect(pattern2.match(tree2a)).toBe(true);
 
     const tree2b: TreeNode = {
       c: { d: 1 }
     };
-    expect(TreePattern.match(tree2b, pattern2)).toBe(true);
+    expect(pattern2.match(tree2b)).toBe(true);
 
     const tree2c: TreeNode = {
       c: 321
     };
-    expect(TreePattern.match(tree2c, pattern2)).toBe(false);
+    expect(pattern2.match(tree2c)).toBe(false);
   });
 });

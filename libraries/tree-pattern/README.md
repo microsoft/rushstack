@@ -52,7 +52,7 @@ The parsed subtree looks like this:
 Throwing away the details that we don't care about, we can specify a pattern expression with the parts
 that need to be present:
 ```js
-const pattern: TreeNode = {
+const pattern1: TreePattern = new TreePattern({
   type: 'CallExpression',
   callee: {
     type: 'MemberExpression',
@@ -66,12 +66,12 @@ const pattern: TreeNode = {
     },
     computed: false
   }
-};
+});
 ```
 
 Then when our visitor encounters an `ExpressionStatement`, we can match the `expressionNode` like this:
 ```js
-if (TreePattern.match(expressionNode, pattern)) {
+if (pattern1.match(expressionNode)) {
   console.log('Success!');
 }
 ```
@@ -82,7 +82,7 @@ Suppose we want to generalize this to match any API such as `Promise.thing(123);
 We can use a "tag" to extract the matching identifier:
 
 ```js
-const pattern: TreeNode = {
+const pattern2: TreePattern = new TreePattern({
   type: 'CallExpression',
   callee: {
     type: 'MemberExpression',
@@ -95,7 +95,7 @@ const pattern: TreeNode = {
     }),
     computed: false
   }
-};
+});
 ```
 
 On a successful match, the tagged `promiseMethod` subtree can be retrieved like this:
@@ -107,7 +107,7 @@ interface IMyCaptures {
 
 const captures: IMyCaptures = {};
 
-if (TreePattern.match(node, pattern, captures)) {
+if (pattern2.match(node, captures)) {
   // Prints: "Matched fulfilled"
   console.log('Matched ' + captures?.promiseMethod?.name);
 }
@@ -118,18 +118,18 @@ if (TreePattern.match(node, pattern, captures)) {
 The `oneOf` API enables you to write patterns that match alternative subtrees.
 
 ```ts
-const myPattern = {
+const pattern3: TreePattern = new TreePattern({
   animal: TreePattern.oneOf([
     { kind: 'dog', bark: 'loud' },
     { kind: 'cat', meow: 'quiet' }
   ])
-};
+});
 
-if (TreePattern.match({ animal: { kind: 'dog', bark: 'loud' } }, myPattern)) {
+if (pattern3.match({ animal: { kind: 'dog', bark: 'loud' } })) {
   console.log('I can match dog.');
 }
 
-if (TreePattern.match({ animal: { kind: 'cat', meow: 'quiet' } }, myPattern)) {
+if (pattern3.match({ animal: { kind: 'cat', meow: 'quiet' } })) {
   console.log('I can match cat, too.');
 }
 ```

@@ -16,7 +16,8 @@ export type TreeNode = any;
 
 // @public
 export class TreePattern {
-    static match(root: TreeNode, pattern: TreeNode, captures?: ITreePatternCaptureSet): boolean;
+    constructor(pattern: TreeNode);
+    match(root: TreeNode, captures?: ITreePatternCaptureSet): boolean;
     static oneOf(possibleSubtrees: TreeNode[]): TreeNode;
     static tag(tagName: string, subtree?: TreeNode): TreeNode;
 }

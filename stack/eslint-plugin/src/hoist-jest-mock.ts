@@ -4,7 +4,6 @@
 import type { TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
 import { AST_NODE_TYPES } from '@typescript-eslint/experimental-utils';
 
-import { MatchTree } from '@rushstack/tree-pattern';
 import * as hoistJestMockPatterns from './hoistJestMockPatterns';
 
 type MessageIds = 'error-unhoisted-jest-mock';
@@ -52,7 +51,7 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
 
       const captures: hoistJestMockPatterns.IJestCallExpression = {};
 
-      if (MatchTree.match(node, hoistJestMockPatterns.jestCallExpression, captures)) {
+      if (hoistJestMockPatterns.jestCallExpression.match(node, captures)) {
         if (captures.methodName && HOIST_METHODS.indexOf(captures.methodName) >= 0) {
           return true;
         }
@@ -98,7 +97,7 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
       CallExpression: (node: TSESTree.CallExpression): void => {
         if (firstImportNode === undefined) {
           // EXAMPLE:  const x = require('x')
-          if (MatchTree.match(node, hoistJestMockPatterns.requireCallExpression)) {
+          if (hoistJestMockPatterns.requireCallExpression.match(node)) {
             firstImportNode = node;
           }
         }
@@ -122,7 +121,7 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
       ImportExpression: (node: TSESTree.ImportExpression): void => {
         if (firstImportNode === undefined) {
           // EXAMPLE:  const x = import('x');
-          if (MatchTree.match(node, hoistJestMockPatterns.importExpression)) {
+          if (hoistJestMockPatterns.importExpression.match(node)) {
             firstImportNode = node;
           }
         }

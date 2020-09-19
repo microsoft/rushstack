@@ -4,7 +4,7 @@
 import type { TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
 import { AST_NODE_TYPES } from '@typescript-eslint/experimental-utils';
 
-import { MatchTree, TreeNode } from '@rushstack/tree-pattern';
+import { TreePattern, TreeNode } from '@rushstack/tree-pattern';
 
 // Matches an expression like this:
 //   new RegExp('hello');
@@ -24,14 +24,14 @@ import { MatchTree, TreeNode } from '@rushstack/tree-pattern';
 //       }
 //     ]
 //   }
-const newRegExpPattern: TreeNode = {
+const newRegExpPattern: TreePattern = new TreePattern({
   type: 'NewExpression',
   callee: {
     type: 'Identifier',
     name: 'RegExp'
   },
-  arguments: MatchTree.tag('constructorArgs')
-};
+  arguments: TreePattern.tag('constructorArgs')
+});
 
 interface INewRegExpPatternCaptures {
   constructorArgs?: TSESTree.Expression[];
@@ -69,7 +69,7 @@ const noUnsafeRegExp: TSESLint.RuleModule<MessageIds, Options> = {
     return {
       NewExpression: (node: TSESTree.NewExpression): void => {
         const captures: INewRegExpPatternCaptures = {};
-        if (MatchTree.match(node, newRegExpPattern, captures) && captures.constructorArgs) {
+        if (newRegExpPattern.match(node, captures) && captures.constructorArgs) {
           if (
             captures.constructorArgs.length > 0 &&
             captures.constructorArgs[0].type !== AST_NODE_TYPES.Literal
