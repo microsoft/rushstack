@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-config",
+      "comment": "(BREAKING CHANGE) The \"@rushstack/eslint-config\" entry point has been separated into 3 choices: \"@rushstack/eslint-config/profile/node\", \"@rushstack/eslint-config/profile/node-trusted-tool\", or \"@rushstack/eslint-config/profile/web-app\".  So the documentation for details.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@rushstack/eslint-config",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

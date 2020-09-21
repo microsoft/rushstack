@@ -2,7 +2,7 @@
 require('@rushstack/eslint-config/patch/modern-module-resolution');
 
 module.exports = {
-  extends: ['@rushstack/eslint-config'],
+  extends: ['@rushstack/eslint-config/profile/node-trusted-tool'],
   parserOptions: { tsconfigRootDir: __dirname },
   rules: {
     // This predates the new ESLint ruleset; not worth fixing
