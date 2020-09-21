@@ -43,11 +43,11 @@ export class StreamCollator {
   // The writer whose output is being shown in realtime, or undefined if none
   private _activeWriter: CollatedWriter | undefined = undefined;
 
-  // Writers that have accumulated buffered chunks and are not closed yet
-  private _openBufferedWriters: Set<CollatedWriter> = new Set();
+  // Writers that are not closed yet, and have never been active
+  private _openInactiveWriters: Set<CollatedWriter> = new Set();
 
-  // Writers that have accumulated buffered chunks and are now closed
-  private _closedBufferedWriters: Set<CollatedWriter> = new Set();
+  // Writers that are now closed, but have accumulated buffered chunks, and have never been active
+  private _closedInactiveWriters: Set<CollatedWriter> = new Set();
 
   private _onWriterActive: ((writer: CollatedWriter) => void) | undefined;
 
@@ -103,6 +103,14 @@ export class StreamCollator {
     this._writers.add(writer);
     this._taskNames.add(writer.taskName);
 
+    // When a task is initially registered, it is open and has not accumulated any buffered chunks
+    this._openInactiveWriters.add(writer);
+
+    if (this._activeWriter === undefined) {
+      // If there is no active writer, then the first one to be registered becomes active.
+      this._assignActiveWriter(writer);
+    }
+
     return writer;
   }
 
@@ -122,9 +130,6 @@ export class StreamCollator {
     if (writer.isActive) {
       this.destination.writeChunk(chunk);
     } else {
-      if (bufferedChunks.length === 0) {
-        this._openBufferedWriters.add(writer);
-      }
       bufferedChunks.push(chunk);
     }
   }
@@ -139,37 +144,46 @@ export class StreamCollator {
       this._activeWriter = undefined;
 
       // If any buffered writers are already closed, activate them each immediately
-      for (const closedBufferedWriter of [...this._closedBufferedWriters]) {
-        this._closedBufferedWriters.delete(closedBufferedWriter);
-
+      // We copy the set, since _assignActiveWriter() will be deleting from it.
+      for (const closedInactiveWriter of [...this._closedInactiveWriters]) {
         try {
-          this._assignActiveWriter(closedBufferedWriter);
+          this._assignActiveWriter(closedInactiveWriter);
         } finally {
           this._activeWriter = undefined;
         }
       }
 
-      // Find a buffered writer and activate it
-      let openBufferedWriter: CollatedWriter | undefined = undefined;
-      for (const first of this._openBufferedWriters) {
-        openBufferedWriter = first;
-        break;
+      let writerToActivate: CollatedWriter | undefined = undefined;
+
+      // Try to activate a writer that already accumulated some data
+      for (const openInactiveWriter of this._openInactiveWriters) {
+        if (openInactiveWriter.bufferedChunks.length > 0) {
+          writerToActivate = openInactiveWriter;
+          break;
+        }
       }
-      if (openBufferedWriter) {
-        this._assignActiveWriter(openBufferedWriter);
+      if (!writerToActivate) {
+        // Otherwise just take the first one
+        for (const openInactiveWriter of this._openInactiveWriters) {
+          writerToActivate = openInactiveWriter;
+          break;
+        }
+      }
+
+      if (writerToActivate) {
+        this._assignActiveWriter(writerToActivate);
       }
     } else {
-      if (writer.bufferedChunks.length > 0) {
-        this._openBufferedWriters.delete(writer);
-        this._closedBufferedWriters.add(writer);
-      }
+      this._openInactiveWriters.delete(writer);
+      this._closedInactiveWriters.add(writer);
     }
   }
 
   private _assignActiveWriter(writer: CollatedWriter): void {
     this._activeWriter = writer;
 
-    this._openBufferedWriters.delete(writer);
+    this._closedInactiveWriters.delete(writer);
+    this._openInactiveWriters.delete(writer);
 
     if (this._onWriterActive) {
       this._preventReentrantCall = true;
