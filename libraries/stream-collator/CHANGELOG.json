@@ -2,6 +2,18 @@
   "name": "@rushstack/stream-collator",
   "entries": [
     {
+      "version": "4.0.9",
+      "tag": "@rushstack/stream-collator_v4.0.9",
+      "date": "Mon, 21 Sep 2020 17:49:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where output was lagged because writers were not activated aggressively enough"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.8",
       "tag": "@rushstack/stream-collator_v4.0.8",
       "date": "Sat, 19 Sep 2020 04:37:27 GMT",
