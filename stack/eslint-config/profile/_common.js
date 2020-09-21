@@ -491,10 +491,32 @@ function buildRules(profile) {
               objectDestructuring: false,
               parameter: true,
               propertyDeclaration: true,
-              variableDeclaration: true,
 
               // This case is handled by our "@rushstack/typedef-var" rule
-              variableDeclaration: false
+              variableDeclaration: false,
+
+              // Normally we require type declarations for class members.  However, that rule is relaxed
+              // for situations where we need to bind the "this" pointer for a callback.  For example, consider
+              // this event handler for a React component:
+              //
+              //     class MyComponent {
+              //       public render(): React.ReactNode {
+              //          return (
+              //            <a href="#" onClick={this._onClick}> click me </a>
+              //          );
+              //        }
+              //
+              //        // The assignment here avoids the need for "this._onClick.bind(this)"
+              //        private _onClick = (event: React.MouseEvent<HTMLAnchorElement>): void => {
+              //          console.log("Clicked! " + this.props.title);
+              //        };
+              //      }
+              //
+              // This coding style has limitations and should be used sparingly.  For example, "_onClick"
+              // will not participate correctly in "virtual"/"override" inheritance.
+              //
+              // NOTE: This option affects both "memberVariableDeclaration" and "variableDeclaration" options.
+              variableDeclarationIgnoreFunction: true
             }
           ],
 
