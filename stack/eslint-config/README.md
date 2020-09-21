@@ -27,26 +27,30 @@ designed around the the requirements of large teams and projects.
 ## Implementation
 
 - **Monorepo friendly:** The `@rushstack/eslint-config` package has direct dependencies on all the ESLint plugins
-  that it needs.  This avoids encumbering each consuming project with a bunch of peer dependencies.  It also ensures
-  that the installed plugin versions were tested for compatibility.
+  that it needs.  This avoids encumbering each consuming project with the obligation to satisfy a peer dependencies.
+  It also ensures that the installed plugin versions were tested for compatibility together.
 
-- **Explicit:**  The ruleset does not "extend" configs from other ESLint packages.  This avoids worrying about
-  precedence issues due to import order.  It also eliminates confusion caused by settings overriding/undoing settings
-  from another file.  The [index.js](./index.js) file is a centralized, complete inventory of all rules.
+- **Battle tested:**  The `@rushstack/eslint-config` rules have been vetted on large production monorepos, across
+  a broad set of projects, teams, and requirements.  These rules embody a way of working that scales, and quite
+  a lot of discussion and evolution went into them.
 
-- **Battle tested:**  The `@rushstack/eslint-config` rules have been vetted on large production monorepos.
-  The [index.js](./index.js) file includes code comments explaining the rationale behind each rule.
-
-- **Minimal configuration:**  Rather than providing opt-in entry points for different setups, we've rolled most of
-  the rules into a single entry point.  When you have hundreds of projects in a monorepo, a unified ruleset avoids
-  having to maintain custom **.eslintrc.js** configs for each project.  The extra cost for applying irrelevant
-  ESLint rules turns out to be negligible in practice.
-
-- **Designed for Prettier:** The `@rushstack/eslint-config` ruleset is designed to be used with
+- **Designed for Prettier:** The `@rushstack/eslint-config` ruleset is designed to be used together with
   the [Prettier](https://prettier.io/) code formatter.  This separation of workflows avoids hassling developers with
   lint "errors" for frivolous issues like spaces and commas.  Instead, those issues get fixed automatically whenever
   you save or commit a file.  Prettier also avoids frivolous debates -- its defaults have already been debated
   at length and adopted by a sizeable community.  No need to reinvent the wheel!
+
+- **Explicit:**  The ruleset does not "extend" any configs from other ESLint packages.  This avoids worrying about
+  precedence issues due to import order.  It also eliminates confusion caused by settings overriding/undoing settings
+  from another file.  Each rule is configured once, in one easy-to-read file
+  [_common.js](https://github.com/microsoft/rushstack/blob/master/stack/eslint-config/profile/_common.js).
+
+- **Minimal configuration:**  To use this ruleset, your **.eslintrc.js** will need to choose a project **"profile"**
+  which mainly determines the applicable security rules.  There are also optional **"mixins"** for a few
+  special cases, but generally the goal is to reduce monorepo maintenance by providing a small set of
+  **.eslintrc.js** recipes that can be reused across many projects.  This sometimes means rules will be included
+  that have no effect for a particular project, but in practice the installation/execution cost for unused rules
+  turns out to be negligible.
 
 
 ## Usage
@@ -60,7 +64,28 @@ $ npm install --save-dev typescript
 $ npm install --save-dev @rushstack/eslint-config
 ```
 
-Next, create an **.eslintrc.js** config file that provides the NodeJS `__dirname` context:
+## Choose a profile
+
+The ruleset currently supports three different "profile" strings, which select lint rules applicable for
+your project:
+
+- `@rushstack/eslint-config/profile/node` - This profile enables lint rules intended for a general Node.js project,
+  typically a web service.  It enables security rules that assume the service could receive malicious inputs from an
+  untrusted user.
+
+- `@rushstack/eslint-config/profile/node-trusted-tool` - This profile enables lint rules intended for a Node.js project
+  whose inputs will always come from a developer or other trusted source.  Most build system tasks are like this,
+  since they operate exclusively on files prepared by a developer.  This profile disables certain security rules that
+  would otherwise prohibit APIs that could cause a denial-of-service by consuming too many resources, or which might
+  interact with the filesystem in unsafe ways.  Such activities are safe and commonplace for a trusted tool.
+  **DO NOT use this profile for a library project that might also be loaded by a Node.js service.**
+
+- `@rushstack/eslint-config/profile/web-app` - This profile enables lint rules intended for a web application, for
+  example security rules that are relevant to web browser APIs such as DOM.
+  _Also use this profile if you are creating a library that can be consumed by both Node.js and web applications._
+
+After choosing a profile, create an **.eslintrc.js** config file that provides the NodeJS `__dirname` context
+for TypeScript. Add your profile string in the `extends` field, as shown below:
 
 **.eslintrc.js**
 ```ts
@@ -68,13 +93,29 @@ Next, create an **.eslintrc.js** config file that provides the NodeJS `__dirname
 require('@rushstack/eslint-config/patch/modern-module-resolution');
 
 module.exports = {
-  extends: [ "@rushstack/eslint-config" ],
+  extends: [ "@rushstack/eslint-config/profile/node" ],  // <---- put your profile string here
   parserOptions: { tsconfigRootDir: __dirname }
 };
 ```
 
-For projects using React, you'll need a **tsconfig.json** with `"jsx": "react"`.  You also need to configure your
-React version, which the lint rules use to determine deprecated APIs.  Specify it like this:
+The `@rushstack/eslint-config` ruleset is intended to be used with the Prettier code formatter.  For general
+instructions on setting that up, please refer to the [Prettier docs](https://prettier.io/docs/en/index.html).
+For Rush-specific settings, see the article
+[Rush: Enabling Prettier](https://rushjs.io/pages/maintainer/enabling_prettier/).
+
+
+## Add your mixins
+
+#### "@rushstack/eslint-config/mixins/react"
+
+For projects using React, the `"@rushstack/eslint-config/mixins/react"` mixin provides some recommended additional
+rules.  These rules are selected via a mixin because they require you to:
+
+- Add `"jsx": "react"` to your **tsconfig.json**
+- Configure your `settings.react.version` as shown below.  This determines which React APIs will be considered
+  to be deprecated.
+
+Example:
 
 **.eslintrc.js**
 ```ts
@@ -83,8 +124,8 @@ require('@rushstack/eslint-config/patch/modern-module-resolution');
 
 module.exports = {
   extends: [
-    "@rushstack/eslint-config",
-    "@rushstack/eslint-config/react"
+    "@rushstack/eslint-config/profile/web-app",
+    "@rushstack/eslint-config/mixins/react"
   ],
   parserOptions: { tsconfigRootDir: __dirname },
 
@@ -96,8 +137,27 @@ module.exports = {
 };
 ```
 
-The `@rushstack/eslint-config` ruleset is intended to be used with the Prettier code formatter.  For instructions
-on setting that up, please refer to the [Prettier docs](https://prettier.io/docs/en/index.html).
+#### "@rushstack/eslint-config/mixins/tsdoc"
+
+If your project is using [API Extractor](https://api-extractor.com/) or another tool that uses
+the [TSDoc](https://github.com/Microsoft/tsdoc) standard for doc comments, it's recommended to use the
+`"@rushstack/eslint-config/mixins/tsdoc"` mixin.  It will enable
+[eslint-plugin-tsdoc](https://www.npmjs.com/package/eslint-plugin-tsdoc) validation for TypeScript doc comments.
+
+Example:
+
+```ts
+// This is a workaround for https://github.com/eslint/eslint/issues/3458
+require('@rushstack/eslint-config/patch/modern-module-resolution');
+
+module.exports = {
+  extends: [
+    "@rushstack/eslint-config/profile/node",
+    "@rushstack/eslint-config/profile/mixins/tsdoc",
+  ],
+  parserOptions: { tsconfigRootDir: __dirname }
+};
+```
 
 
 ## Learn more

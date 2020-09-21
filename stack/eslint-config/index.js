@@ -3,5 +3,6 @@
 
 throw new Error(
   'The index.js entry point has been removed. Please update your ESLint configuration to import one of the' +
-    ' profile paths such as "@rushstack/eslint-config/profile/web-app". See the documentation for details.'
+    ' profile paths such as "@rushstack/eslint-config/profile/web-app" or "@rushstack/eslint-config/profile/node.' +
+    ' See the documentation for details.'
 );
