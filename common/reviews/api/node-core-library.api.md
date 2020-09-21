@@ -167,6 +167,7 @@ export class FileSystem {
     static ensureFolder(folderPath: string): void;
     static ensureFolderAsync(folderPath: string): Promise<void>;
     static exists(path: string): boolean;
+    static existsAsync(path: string): Promise<boolean>;
     static formatPosixModeBits(modeBits: PosixModeBits): string;
     static getLinkStatistics(path: string): FileSystemStats;
     static getLinkStatisticsAsync(path: string): Promise<FileSystemStats>;

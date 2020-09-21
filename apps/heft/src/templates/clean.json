@@ -5,6 +5,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/heft/clean.schema.json"
 
   /**
+   * Optionally specifies another JSON config file that this file extends from. This provides a way for standard
+   * settings to be shared across multiple projects.
+   */
+  // "extends": "base-project/config/clean.json",
+
+  /**
    * Glob patterns to be deleted by the "heft clean" action.  The paths are resolved relative to the project folder.
    */
   // "pathsToDelete": [

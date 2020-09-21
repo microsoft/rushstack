@@ -852,6 +852,17 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/tree-pattern",
+      "projectFolder": "libraries/tree-pattern",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": [
+        "@microsoft/rush-stack-compiler-3.5",
+        "@rushstack/heft",
+        "@rushstack/eslint-config"
+      ]
+    },
+    {
       "packageName": "@rushstack/ts-command-line",
       "projectFolder": "libraries/ts-command-line",
       "reviewCategory": "libraries",
@@ -903,6 +914,13 @@
     {
       "packageName": "@rushstack/eslint-plugin",
       "projectFolder": "stack/eslint-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@microsoft/rush-stack-compiler-3.9", "@rushstack/heft"]
+    },
+    {
+      "packageName": "@rushstack/eslint-plugin-security",
+      "projectFolder": "stack/eslint-plugin-security",
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": ["@microsoft/rush-stack-compiler-3.9", "@rushstack/heft"]

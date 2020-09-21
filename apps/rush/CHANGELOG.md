@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 17 Sep 2020 01:23:35 GMT and should not be manually modified.
+This log was last generated on Thu, 17 Sep 2020 07:13:04 GMT and should not be manually modified.
+
+## 5.34.1
+Thu, 17 Sep 2020 07:13:04 GMT
+
+### Updates
+
+- Fix a regression that reported an error "The EnvironmentConfiguration must be initialized before values can be accessed"
 
 ## 5.34.0
 Thu, 17 Sep 2020 01:23:35 GMT

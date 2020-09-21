@@ -10,7 +10,8 @@ import {
   JsonFile,
   IPackageJson,
   InternalError,
-  ITerminalProvider
+  ITerminalProvider,
+  FileSystem
 } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
 import { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
@@ -33,6 +34,7 @@ import { EmitFilesPatch, ICachedEmitModuleKind } from './EmitFilesPatch';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { FirstEmitCompletedCallbackManager } from './FirstEmitCompletedCallbackManager';
 import { ISharedTypeScriptConfiguration } from './TypeScriptPlugin';
+import { TypeScriptCachedFileSystem } from '../../utilities/fileSystem/TypeScriptCachedFileSystem';
 
 export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfiguration {
   buildFolder: string;
@@ -109,6 +111,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
   private __tsCacheFilePath: string;
   private _tsReadJsonCache: Map<string, object> = new Map<string, object>();
+  private _cachedFileSystem: TypeScriptCachedFileSystem = new TypeScriptCachedFileSystem();
 
   public get filename(): string {
     return __filename;
@@ -119,7 +122,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       const configHash: crypto.Hash = Tslint.getConfigHash(
         this._configuration.tsconfigPath,
         this._typescriptTerminal,
-        this._fileSystem
+        this._cachedFileSystem
       );
       configHash.update(JSON.stringify(this._configuration.additionalModuleKindsToEmit || {}));
       const serializedConfigHash: string = configHash.digest('hex');
@@ -192,11 +195,11 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       this._configuration.lintingEnabled && !this._configuration.watchMode; // Don't run lint in watch mode
 
     if (this._tslintEnabled) {
-      this._tslintEnabled = this._fileSystem.exists(this._tslintConfigFilePath);
+      this._tslintEnabled = this._cachedFileSystem.exists(this._tslintConfigFilePath);
     }
 
     if (this._eslintEnabled) {
-      this._eslintEnabled = this._fileSystem.exists(this._eslintConfigFilePath);
+      this._eslintEnabled = this._cachedFileSystem.exists(this._eslintConfigFilePath);
     }
 
     // Report a warning if the TypeScript version is too old/new.  The current oldest supported version is
@@ -274,7 +277,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         buildFolderPath: this._configuration.buildFolder,
         buildCacheFolderPath: this._configuration.buildCacheFolder,
         linterConfigFilePath: this._tslintConfigFilePath,
-        fileSystem: this._fileSystem,
+        cachedFileSystem: this._cachedFileSystem,
         measurePerformance: measureTsPerformance
       });
     }
@@ -352,7 +355,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     measureTsPerformanceAsync: PerformanceMeasurerAsync
   ): Promise<void> {
     // Ensure the cache folder exists
-    this._fileSystem.ensureFolder(this._configuration.buildCacheFolder);
+    this._cachedFileSystem.ensureFolder(this._configuration.buildCacheFolder);
 
     //#region CONFIGURE
     const { duration: configureDurationMs, tsconfig, compilerHost } = measureTsPerformance(
@@ -451,7 +454,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       Async.forEachLimitAsync(
         emitResult.filesToWrite,
         this._configuration.maxWriteParallelism,
-        async ({ filePath, data }) => this._fileSystem.writeFile(filePath, data, { ensureFolderExists: true })
+        async ({ filePath, data }) =>
+          this._cachedFileSystem.writeFile(filePath, data, { ensureFolderExists: true })
       )
     );
     //#endregion
@@ -504,7 +508,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         if (shouldHardlink) {
           queueLinkOrCopy = (options: IFileSystemCreateLinkOptions) => {
             linkPromises.push(
-              this._fileSystem
+              this._cachedFileSystem
                 .createHardLinkExtendedAsync({ ...options, preserveExisting: true })
                 .then((successful) => {
                   if (successful) {
@@ -512,7 +516,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
                   }
                 })
                 .catch((error) => {
-                  if (!this._fileSystem.isNotExistError(error)) {
+                  if (!FileSystem.isNotExistError(error)) {
                     // Only re-throw errors that aren't not-exist errors
                     throw error;
                   }
@@ -522,7 +526,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         } else {
           queueLinkOrCopy = (options: IFileSystemCreateLinkOptions) => {
             linkPromises.push(
-              this._fileSystem
+              this._cachedFileSystem
                 .copyFileAsync({
                   sourcePath: options.linkTargetPath,
                   destinationPath: options.newLinkPath
@@ -531,7 +535,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
                   linkCount++;
                 })
                 .catch((error) => {
-                  if (!this._fileSystem.isNotExistError(error)) {
+                  if (!FileSystem.isNotExistError(error)) {
                     // Only re-throw errors that aren't not-exist errors
                     throw error;
                   }
@@ -802,14 +806,14 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _loadTsconfig(ts: ExtendedTypeScript): TTypescript.ParsedCommandLine {
     const parsedConfigFile: ReturnType<typeof ts.readConfigFile> = ts.readConfigFile(
       this._configuration.tsconfigPath,
-      this._fileSystem.readFile
+      this._cachedFileSystem.readFile
     );
     const currentFolder: string = path.dirname(this._configuration.tsconfigPath);
     const tsconfig: TTypescript.ParsedCommandLine = ts.parseJsonConfigFileContent(
       parsedConfigFile.config,
       {
-        fileExists: this._fileSystem.exists,
-        readFile: this._fileSystem.readFile,
+        fileExists: this._cachedFileSystem.exists,
+        readFile: this._cachedFileSystem.readFile,
         readDirectory: (
           folderPath: string,
           extensions?: ReadonlyArray<string>,
@@ -825,8 +829,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
             /* useCaseSensitiveFileNames */ true,
             currentFolder,
             depth,
-            this._fileSystem.readFolderFilesAndDirectories.bind(this._fileSystem),
-            this._fileSystem.getRealPath.bind(this._fileSystem)
+            this._cachedFileSystem.readFolderFilesAndDirectories.bind(this._cachedFileSystem),
+            this._cachedFileSystem.getRealPath.bind(this._cachedFileSystem)
           ),
         useCaseSensitiveFileNames: true
       },
@@ -853,25 +857,25 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       compilerHost = ts.createCompilerHost(tsconfig.options);
     }
 
-    compilerHost.realpath = this._fileSystem.getRealPath.bind(this._fileSystem);
+    compilerHost.realpath = this._cachedFileSystem.getRealPath.bind(this._cachedFileSystem);
     compilerHost.readFile = (filePath: string) => {
       try {
-        return this._fileSystem.readFile(filePath, {});
+        return this._cachedFileSystem.readFile(filePath, {});
       } catch (error) {
-        if (this._fileSystem.isNotExistError(error)) {
+        if (FileSystem.isNotExistError(error)) {
           return undefined;
         } else {
           throw error;
         }
       }
     };
-    compilerHost.fileExists = this._fileSystem.exists.bind(this._fileSystem);
+    compilerHost.fileExists = this._cachedFileSystem.exists.bind(this._cachedFileSystem);
     compilerHost.directoryExists = (directoryPath: string) => {
       try {
-        const stats: FileSystemStats = this._fileSystem.getStatistics(directoryPath);
+        const stats: FileSystemStats = this._cachedFileSystem.getStatistics(directoryPath);
         return stats.isDirectory() || stats.isSymbolicLink();
       } catch (error) {
-        if (this._fileSystem.isNotExistError(error)) {
+        if (FileSystem.isNotExistError(error)) {
           return false;
         } else {
           throw error;
@@ -879,7 +883,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       }
     };
     compilerHost.getDirectories = (folderPath: string) =>
-      this._fileSystem.readFolderFilesAndDirectories(folderPath).directories;
+      this._cachedFileSystem.readFolderFilesAndDirectories(folderPath).directories;
 
     return compilerHost;
   }
@@ -944,7 +948,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         return jsonData;
       } else {
         try {
-          const fileContents: string = this._fileSystem.readFile(filePath);
+          const fileContents: string = this._cachedFileSystem.readFile(filePath);
           if (!fileContents) {
             jsonData = EMPTY_JSON;
           } else {

@@ -175,6 +175,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/eslint-plugin-security",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/heft",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -185,6 +189,10 @@
     {
       "name": "@rushstack/localization-plugin",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@rushstack/tree-pattern",
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/module-minifier-plugin",

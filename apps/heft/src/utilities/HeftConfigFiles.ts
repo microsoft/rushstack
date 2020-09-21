@@ -83,12 +83,7 @@ export class HeftConfigFiles {
     if (!HeftConfigFiles._cleanConfigurationFileLoader) {
       const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'clean.schema.json');
       HeftConfigFiles._cleanConfigurationFileLoader = new ConfigurationFile<ICleanConfigurationJson>({
-        jsonSchemaPath: schemaPath,
-        jsonPathMetadata: {
-          '$.pathsToDelete.*': {
-            pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
-          }
-        }
+        jsonSchemaPath: schemaPath
       });
     }
 

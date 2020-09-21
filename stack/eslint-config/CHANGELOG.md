@@ -1,6 +1,30 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Thu, 27 Aug 2020 11:27:06 GMT and should not be manually modified.
+This log was last generated on Sat, 19 Sep 2020 04:37:26 GMT and should not be manually modified.
+
+## 1.4.2
+Sat, 19 Sep 2020 04:37:26 GMT
+
+*Version update only*
+
+## 1.4.1
+Sat, 19 Sep 2020 03:33:06 GMT
+
+### Patches
+
+- Add a dependency on the new @rushstack/eslint-plugin-security
+
+## 1.4.0
+Fri, 18 Sep 2020 22:57:24 GMT
+
+### Minor changes
+
+- Remove the @typescript-eslint/array-type rule
+- Add *.spec.ts file extension for tests, since this is also a commonly used convention
+
+### Patches
+
+- Relax @typescript-eslint/no-use-before-define slightly
 
 ## 1.3.0
 Thu, 27 Aug 2020 11:27:06 GMT

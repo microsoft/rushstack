@@ -5,6 +5,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/heft/copy-static-assets.schema.json"
 
   /**
+   * Optionally specifies another JSON config file that this file extends from. This provides a way for standard
+   * settings to be shared across multiple projects.
+   */
+  // "extends": "base-project/config/copy-static-assets.json",
+
+  /**
    * File extensions that should be copied from the src folder to the destination folder(s).
    */
   // "fileExtensions": [

@@ -1,6 +1,31 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 16 Sep 2020 05:30:25 GMT and should not be manually modified.
+This log was last generated on Sat, 19 Sep 2020 04:37:27 GMT and should not be manually modified.
+
+## 0.13.6
+Sat, 19 Sep 2020 04:37:27 GMT
+
+*Version update only*
+
+## 0.13.5
+Sat, 19 Sep 2020 03:33:07 GMT
+
+*Version update only*
+
+## 0.13.4
+Fri, 18 Sep 2020 22:57:24 GMT
+
+### Patches
+
+- Fix an issue where folders listed in pathsToDelete in clean.json weren't deleted on Windows.
+
+## 0.13.3
+Fri, 18 Sep 2020 21:49:53 GMT
+
+### Patches
+
+- Add a missing field to the template config files.
+- Fix an issue where, if an "extends" field pointed to a module that didn't exist, the error was silently ignored.
 
 ## 0.13.2
 Wed, 16 Sep 2020 05:30:25 GMT

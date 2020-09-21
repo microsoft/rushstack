@@ -1525,6 +1525,21 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       colors: ~1.2.1
+  ../../libraries/tree-pattern:
+    devDependencies:
+      '@microsoft/rush-stack-compiler-3.5': 0.8.10
+      '@rushstack/eslint-config': 1.4.0_eslint@7.2.0+typescript@3.9.7
+      '@rushstack/heft': 0.8.0
+      '@types/heft-jest': 1.0.1
+      eslint: 7.2.0
+      typescript: 3.9.7
+    specifiers:
+      '@microsoft/rush-stack-compiler-3.5': 0.8.10
+      '@rushstack/eslint-config': 1.4.0
+      '@rushstack/heft': 0.8.0
+      '@types/heft-jest': 1.0.1
+      eslint: ~7.2.0
+      typescript: ~3.9.5
   ../../libraries/ts-command-line:
     dependencies:
       '@types/argparse': 1.0.38
@@ -1624,13 +1639,13 @@ importers:
     dependencies:
       '@rushstack/eslint-patch': 'link:../eslint-patch'
       '@rushstack/eslint-plugin': 'link:../eslint-plugin'
+      '@rushstack/eslint-plugin-security': 'link:../eslint-plugin-security'
       '@typescript-eslint/eslint-plugin': 3.4.0_43170e314695d1b0876b4d3c3574f4a4
       '@typescript-eslint/experimental-utils': 3.4.0_eslint@7.2.0+typescript@3.7.5
       '@typescript-eslint/parser': 3.4.0_eslint@7.2.0+typescript@3.7.5
       '@typescript-eslint/typescript-estree': 3.4.0_typescript@3.7.5
       eslint-plugin-promise: 4.2.1
       eslint-plugin-react: 7.20.6_eslint@7.2.0
-      eslint-plugin-security: 1.4.0
       eslint-plugin-tsdoc: 0.2.7
     devDependencies:
       eslint: 7.2.0
@@ -1638,6 +1653,7 @@ importers:
     specifiers:
       '@rushstack/eslint-patch': 'workspace:*'
       '@rushstack/eslint-plugin': 'workspace:*'
+      '@rushstack/eslint-plugin-security': 'workspace:*'
       '@typescript-eslint/eslint-plugin': 3.4.0
       '@typescript-eslint/experimental-utils': 3.4.0
       '@typescript-eslint/parser': 3.4.0
@@ -1645,7 +1661,6 @@ importers:
       eslint: ~7.2.0
       eslint-plugin-promise: ~4.2.1
       eslint-plugin-react: ~7.20.0
-      eslint-plugin-security: ~1.4.0
       eslint-plugin-tsdoc: ~0.2.5
       typescript: ~3.7.2
   ../../stack/eslint-patch:
@@ -1658,6 +1673,8 @@ importers:
       '@rushstack/heft': 0.8.0
       '@types/node': 10.17.13
   ../../stack/eslint-plugin:
+    dependencies:
+      '@rushstack/tree-pattern': 'link:../../libraries/tree-pattern'
     devDependencies:
       '@microsoft/rush-stack-compiler-3.9': 0.4.10
       '@rushstack/heft': 0.8.0
@@ -1673,6 +1690,35 @@ importers:
     specifiers:
       '@microsoft/rush-stack-compiler-3.9': 0.4.10
       '@rushstack/heft': 0.8.0
+      '@rushstack/tree-pattern': 'workspace:*'
+      '@types/eslint': 7.2.0
+      '@types/estree': 0.0.44
+      '@types/heft-jest': 1.0.1
+      '@types/node': 10.17.13
+      '@typescript-eslint/experimental-utils': 3.4.0
+      '@typescript-eslint/parser': 3.4.0
+      '@typescript-eslint/typescript-estree': 3.4.0
+      eslint: ~7.2.0
+      typescript: ~3.9.5
+  ../../stack/eslint-plugin-security:
+    dependencies:
+      '@rushstack/tree-pattern': 'link:../../libraries/tree-pattern'
+    devDependencies:
+      '@microsoft/rush-stack-compiler-3.9': 0.4.10
+      '@rushstack/heft': 0.8.0
+      '@types/eslint': 7.2.0
+      '@types/estree': 0.0.44
+      '@types/heft-jest': 1.0.1
+      '@types/node': 10.17.13
+      '@typescript-eslint/experimental-utils': 3.4.0_eslint@7.2.0+typescript@3.9.7
+      '@typescript-eslint/parser': 3.4.0_eslint@7.2.0+typescript@3.9.7
+      '@typescript-eslint/typescript-estree': 3.4.0_typescript@3.9.7
+      eslint: 7.2.0
+      typescript: 3.9.7
+    specifiers:
+      '@microsoft/rush-stack-compiler-3.9': 0.4.10
+      '@rushstack/heft': 0.8.0
+      '@rushstack/tree-pattern': 'workspace:*'
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
       '@types/heft-jest': 1.0.1
@@ -2993,6 +3039,26 @@ packages:
       typescript: '>=3.0.0'
     resolution:
       integrity: sha512-Bxf1x3jjDRFujp66mKMukQsZGJGmO14SxNKPEpcg2MUSbvx2BsUA2B3oRUYyiYfbhmoWpmAXbWJOFBvZpGZMCw==
+  /@rushstack/eslint-config/1.4.0_eslint@7.2.0+typescript@3.9.7:
+    dependencies:
+      '@rushstack/eslint-patch': 1.0.3
+      '@rushstack/eslint-plugin': 0.6.1_eslint@7.2.0
+      '@typescript-eslint/eslint-plugin': 3.4.0_def47c0014fd51b1497b94bf8e50ada2
+      '@typescript-eslint/experimental-utils': 3.4.0_eslint@7.2.0+typescript@3.9.7
+      '@typescript-eslint/parser': 3.4.0_eslint@7.2.0+typescript@3.9.7
+      '@typescript-eslint/typescript-estree': 3.4.0_typescript@3.9.7
+      eslint: 7.2.0
+      eslint-plugin-promise: 4.2.1
+      eslint-plugin-react: 7.20.6_eslint@7.2.0
+      eslint-plugin-security: 1.4.0
+      eslint-plugin-tsdoc: 0.2.7
+      typescript: 3.9.7
+    dev: true
+    peerDependencies:
+      eslint: ^6.0.0 || ^7.0.0
+      typescript: '>=3.0.0'
+    resolution:
+      integrity: sha512-B7KgKj2qk2snXDQZnLS8d/5Xu1B3DtNe8z1PvR75fzuAXfXIH6JPNyXU4lhR/wARUJ5ulWKaeHQudYI8tGJUOg==
   /@rushstack/eslint-patch/1.0.3:
     dev: true
     resolution:
@@ -6176,6 +6242,7 @@ packages:
   /eslint-plugin-security/1.4.0:
     dependencies:
       safe-regex: 1.1.0
+    dev: true
     resolution:
       integrity: sha512-xlS7P2PLMXeqfhyf3NpqbvbnW04kN8M9NtmhpR3XGyOvt/vNKS7XPXT5EDbwKW9vCjWH4PpfQvgD/+JgN0VJKA==
   /eslint-plugin-tsdoc/0.2.7:

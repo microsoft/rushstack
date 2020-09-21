@@ -262,10 +262,10 @@ export class ConfigurationFile<TConfigurationFile> {
 
         let parentConfiguration: Partial<TConfigurationFile> = {};
         if (configurationJson.extends) {
-          const resolvedParentConfigPath: string = nodeJsPath.resolve(
-            nodeJsPath.dirname(resolvedConfigurationFilePath),
-            configurationJson.extends
-          );
+          const resolvedParentConfigPath: string = Import.resolveModule({
+            modulePath: configurationJson.extends,
+            baseFolderPath: nodeJsPath.dirname(resolvedConfigurationFilePath)
+          });
           parentConfiguration = await this._loadConfigurationFileInnerAsync(
             resolvedParentConfigPath,
             visitedConfigurationFilePaths

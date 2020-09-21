@@ -1,6 +1,26 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Wed, 16 Sep 2020 05:30:25 GMT and should not be manually modified.
+This log was last generated on Sat, 19 Sep 2020 04:37:26 GMT and should not be manually modified.
+
+## 7.8.53
+Sat, 19 Sep 2020 04:37:26 GMT
+
+*Version update only*
+
+## 7.8.52
+Sat, 19 Sep 2020 03:33:06 GMT
+
+*Version update only*
+
+## 7.8.51
+Fri, 18 Sep 2020 22:57:24 GMT
+
+*Version update only*
+
+## 7.8.50
+Fri, 18 Sep 2020 21:49:53 GMT
+
+*Version update only*
 
 ## 7.8.49
 Wed, 16 Sep 2020 05:30:25 GMT
