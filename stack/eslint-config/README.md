@@ -106,7 +106,7 @@ For Rush-specific settings, see the article
 
 ### Add your mixins
 
-#### "@rushstack/eslint-config/mixins/react"
+#### `@rushstack/eslint-config/mixins/react`
 
 For projects using React, the `"@rushstack/eslint-config/mixins/react"` mixin provides some recommended additional
 rules.  These rules are selected via a mixin because they require you to:
@@ -139,7 +139,7 @@ module.exports = {
 };
 ```
 
-#### "@rushstack/eslint-config/mixins/tsdoc"
+#### `@rushstack/eslint-config/mixins/tsdoc`
 
 If your project is using [API Extractor](https://api-extractor.com/) or another tool that uses
 the [TSDoc](https://github.com/Microsoft/tsdoc) standard for doc comments, it's recommended to use the
