@@ -31,8 +31,7 @@ function buildRules(profile) {
       '@rushstack/eslint-plugin',
       '@rushstack/eslint-plugin-security',
       '@typescript-eslint/eslint-plugin',
-      'eslint-plugin-promise',
-      'eslint-plugin-tsdoc'
+      'eslint-plugin-promise'
     ],
 
     overrides: [
@@ -747,9 +746,6 @@ function buildRules(profile) {
 
           // "Use strict" is redundant when using the TypeScript compiler.
           strict: ['error', 'never'],
-
-          // We're still experimenting with this plugin, so for now it is off by default.
-          'tsdoc/syntax': 'off',
 
           // RATIONALE:         Catches code that is likely to be incorrect
           // STANDARDIZED BY:   eslint\conf\eslint-recommended.js
