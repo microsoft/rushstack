@@ -53,7 +53,13 @@ designed around the the requirements of large teams and projects.
   the installation/execution cost for unused rules turns out to be negligible.)
 
 
-## Usage
+## Getting started in 3 steps
+
+Applying the ruleset to your project is quick and easy. You install the package, then create an **.eslintrc.js** file
+and select an appropriate project profile.  Optionally you can also add some "mixins" to enable additional rules.
+Let's walk through those three steps in more detail.
+
+### 1. Install the package
 
 To install the package, do this:
 
@@ -64,7 +70,7 @@ $ npm install --save-dev typescript
 $ npm install --save-dev @rushstack/eslint-config
 ```
 
-### Choose one profile
+### 2. Choose one profile
 
 The ruleset currently supports three different "profile" strings, which select lint rules applicable for
 your project:
@@ -104,7 +110,9 @@ For Rush-specific settings, see the article
 [Rush: Enabling Prettier](https://rushjs.io/pages/maintainer/enabling_prettier/).
 
 
-### Add your mixins
+### 3. Add any relevant mixins
+
+Optionally, you can add some "mixins" to your `extends` array to opt-in to some extra behaviors.
 
 #### `@rushstack/eslint-config/mixins/react`
 
