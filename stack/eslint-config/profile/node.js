@@ -5,10 +5,7 @@
 // It enables security rules that assume the service could receive malicious inputs from an
 // untrusted user.  If that is not the case, consider using the "node-trusted-tool" profile instead.
 
-const common = require('./_common');
+const { buildRules } = require('./_common');
 
-module.exports = {
-  ...common,
-
-  '@rushstack/security/no-unsafe-regexp': 'warn'
-};
+const rules = buildRules('node');
+module.exports = rules;
