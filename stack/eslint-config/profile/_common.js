@@ -796,8 +796,8 @@ function buildRules(profile) {
           // Jest's mocking API is designed in a way that produces compositional data types that often have
           // no concise description.  Since test code does not ship, and typically does not introduce new
           // concepts or algorithms, the usual arguments for prioritizing readability over writability can be
-          // relaxed in this case. We follow C#'s model of allowing type inference for local variable declarations,
-          // but still requiring strict types for function signatures.
+          // relaxed in this case.
+          '@rushstack/typedef-var': 'off',
           '@typescript-eslint/typedef': [
             'warn',
             {
