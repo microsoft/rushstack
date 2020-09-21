@@ -15,10 +15,11 @@ expressions that seem to require a TypeScript Ph.D. -- especially for newcomers 
 refactoring in bulk, you may edit lots of files without reading them very carefully.  In short, the linting needs
 reflect different priorities:
 
-**Small scale:** We can assume developers are *familiar* with the project.  We want code to be *easy to write*.
+**Small scale:** We can assume developers are _familiar_ with the project.  We want code to be _easy to write_.
 
-**Large scale:** Developers are generally *unfamiliar* with projects.  Code must be *easy to read*.  If not,
-there's a risk of fragmentation, duplication of efforts, and costly rewrites.
+**Large scale:** Developers are generally _unfamiliar_ with projects.  Code must be _easy to read_.  If not,
+there's a risk of fragmentation, duplication of efforts, and costly rewrites.  (Enabling people to churn out
+lots of code really fast is still a goal of course; just not the #1 priority.)
 
 Welcome to the world of [Rush Stack](https://rushstack.io/)!  The `@rushstack/eslint-config` package was specifically
 designed around the the requirements of large teams and projects.
@@ -31,26 +32,25 @@ designed around the the requirements of large teams and projects.
   It also ensures that the installed plugin versions were tested for compatibility together.
 
 - **Battle tested:**  The `@rushstack/eslint-config` rules have been vetted on large production monorepos, across
-  a broad set of projects, teams, and requirements.  These rules embody a way of working that scales, and quite
+  a broad set of projects, teams, and requirements.  These rules embody a way of working that scales.  Quite
   a lot of discussion and evolution went into them.
 
 - **Designed for Prettier:** The `@rushstack/eslint-config` ruleset is designed to be used together with
   the [Prettier](https://prettier.io/) code formatter.  This separation of workflows avoids hassling developers with
   lint "errors" for frivolous issues like spaces and commas.  Instead, those issues get fixed automatically whenever
-  you save or commit a file.  Prettier also avoids frivolous debates -- its defaults have already been debated
+  you save or commit a file.  Prettier also avoids frivolous debates: its defaults have already been debated
   at length and adopted by a sizeable community.  No need to reinvent the wheel!
 
-- **Explicit:**  The ruleset does not "extend" any configs from other ESLint packages.  This avoids worrying about
-  precedence issues due to import order.  It also eliminates confusion caused by settings overriding/undoing settings
-  from another file.  Each rule is configured once, in one easy-to-read file
-  [_common.js](https://github.com/microsoft/rushstack/blob/master/stack/eslint-config/profile/_common.js).
+- **Explicit:**  The ruleset does not import any "recommended" templates from other ESLint packages.  This avoids
+  worrying about precedence issues due to import order.  It also eliminates confusion caused by files
+  overriding/undoing settings from another file.  Each rule is configured once, in one
+  [easy-to-read file](https://github.com/microsoft/rushstack/blob/master/stack/eslint-config/profile/_common.js).
 
-- **Minimal configuration:**  To use this ruleset, your **.eslintrc.js** will need to choose a project **"profile"**
-  which mainly determines the applicable security rules.  There are also optional **"mixins"** for a few
-  special cases, but generally the goal is to reduce monorepo maintenance by providing a small set of
-  **.eslintrc.js** recipes that can be reused across many projects.  This sometimes means rules will be included
-  that have no effect for a particular project, but in practice the installation/execution cost for unused rules
-  turns out to be negligible.
+- **Minimal configuration:**  To use this ruleset, your **.eslintrc.js** will need to choose one **"profile"**
+  and possibly one or two **"mixins"** that cover special cases.  Beyond that, our goal is to reduce monorepo
+  maintenance by providing a small set of **.eslintrc.js** recipes that can be reused across many different projects.
+  (This sometimes means that rules will be included which have no effect for a particular project, however in practice
+  the installation/execution cost for unused rules turns out to be negligible.)
 
 
 ## Usage
@@ -64,7 +64,7 @@ $ npm install --save-dev typescript
 $ npm install --save-dev @rushstack/eslint-config
 ```
 
-## Choose a profile
+### Choose one profile
 
 The ruleset currently supports three different "profile" strings, which select lint rules applicable for
 your project:
@@ -104,7 +104,7 @@ For Rush-specific settings, see the article
 [Rush: Enabling Prettier](https://rushjs.io/pages/maintainer/enabling_prettier/).
 
 
-## Add your mixins
+### Add your mixins
 
 #### "@rushstack/eslint-config/mixins/react"
 
@@ -113,7 +113,9 @@ rules.  These rules are selected via a mixin because they require you to:
 
 - Add `"jsx": "react"` to your **tsconfig.json**
 - Configure your `settings.react.version` as shown below.  This determines which React APIs will be considered
-  to be deprecated.
+  to be deprecated.  (If you omit this, the React version will be detected automatically by
+  [loading the entire React library](https://github.com/yannickcr/eslint-plugin-react/blob/4da74518bd78f11c9c6875a159ffbae7d26be693/lib/util/version.js#L23)
+  into the linter's process, which is costly.)
 
 Example:
 
