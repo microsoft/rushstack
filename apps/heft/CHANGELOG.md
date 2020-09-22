@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 22 Sep 2020 01:45:31 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Sep 2020 05:45:56 GMT and should not be manually modified.
+
+## 0.13.9
+Tue, 22 Sep 2020 05:45:56 GMT
+
+### Patches
+
+- Make the "plugins" field of "plugins.json" optional.
 
 ## 0.13.8
 Tue, 22 Sep 2020 01:45:31 GMT

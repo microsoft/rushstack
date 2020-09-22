@@ -1,6 +1,11 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Tue, 22 Sep 2020 01:45:31 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Sep 2020 05:45:56 GMT and should not be manually modified.
+
+## 4.12.37
+Tue, 22 Sep 2020 05:45:56 GMT
+
+_Version update only_
 
 ## 4.12.36
 Tue, 22 Sep 2020 01:45:31 GMT

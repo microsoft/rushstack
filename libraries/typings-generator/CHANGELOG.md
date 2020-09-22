@@ -1,6 +1,11 @@
 # Change Log - @rushstack/typings-generator
 
-This log was last generated on Tue, 22 Sep 2020 01:45:31 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Sep 2020 05:45:57 GMT and should not be manually modified.
+
+## 0.2.10
+Tue, 22 Sep 2020 05:45:57 GMT
+
+_Version update only_
 
 ## 0.2.9
 Tue, 22 Sep 2020 01:45:31 GMT
