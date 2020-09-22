@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.34.2",
+      "tag": "@microsoft/rush_v5.34.2",
+      "date": "Mon, 21 Sep 2020 22:00:03 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush build\" output was lagged due to stream-collator not activating streams aggressively enough"
+          },
+          {
+            "comment": "Fix incorrect \"successful\" exit status code"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.34.1",
       "tag": "@microsoft/rush_v5.34.1",
       "date": "Thu, 17 Sep 2020 07:13:04 GMT",

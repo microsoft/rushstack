@@ -7,6 +7,7 @@ import { hoistJestMock } from './hoist-jest-mock';
 import { noNewNullRule } from './no-new-null';
 import { noNullRule } from './no-null';
 import { noUntypedUnderscoreRule } from './no-untyped-underscore';
+import { typedefVar } from './typedef-var';
 
 interface IPlugin {
   rules: { [ruleName: string]: TSESLint.RuleModule<string, unknown[]> };
@@ -24,7 +25,10 @@ const plugin: IPlugin = {
     'no-null': noNullRule,
 
     // Full name: "@rushstack/no-untyped-underscore"
-    'no-untyped-underscore': noUntypedUnderscoreRule
+    'no-untyped-underscore': noUntypedUnderscoreRule,
+
+    // Full name: "@rushstack/typedef-var"
+    'typedef-var': typedefVar
   }
 };
 

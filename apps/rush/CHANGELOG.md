@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 17 Sep 2020 07:13:04 GMT and should not be manually modified.
+This log was last generated on Mon, 21 Sep 2020 22:00:03 GMT and should not be manually modified.
+
+## 5.34.2
+Mon, 21 Sep 2020 22:00:03 GMT
+
+### Updates
+
+- Fix an issue where "rush build" output was lagged due to stream-collator not activating streams aggressively enough
+- Fix incorrect "successful" exit status code
 
 ## 5.34.1
 Thu, 17 Sep 2020 07:13:04 GMT

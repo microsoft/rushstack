@@ -2,9 +2,10 @@
 require('@rushstack/eslint-config/patch/modern-module-resolution');
 
 module.exports = {
-  extends: ['@rushstack/eslint-config'],
-  parserOptions: { tsconfigRootDir: __dirname },
-
-  // TODO: Remove this once "tsdoc/syntax" is enabled by default
-  rules: { 'tsdoc/syntax': 'error' }
+  extends: [
+    '@rushstack/eslint-config/profile/node',
+    '@rushstack/eslint-config/mixins/friendly-locals',
+    '@rushstack/eslint-config/mixins/tsdoc'
+  ],
+  parserOptions: { tsconfigRootDir: __dirname }
 };

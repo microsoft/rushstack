@@ -2,6 +2,47 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "2.1.1",
+      "tag": "@rushstack/eslint-config_v2.1.1",
+      "date": "Tue, 22 Sep 2020 05:45:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix some missing files that were incorrectly excluded due to .npmignore"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.0",
+      "tag": "@rushstack/eslint-config_v2.1.0",
+      "date": "Tue, 22 Sep 2020 01:45:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Relax the \"typedef\" rule so that type inference is now allowed for local variables, while still requiring explicit type declarations in other scopes"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.7.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.0",
+      "tag": "@rushstack/eslint-config_v2.0.0",
+      "date": "Tue, 22 Sep 2020 00:08:53 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "(BREAKING CHANGE) The \"@rushstack/eslint-config\" entry point has been separated into 3 choices: \"@rushstack/eslint-config/profile/node\", \"@rushstack/eslint-config/profile/node-trusted-tool\", or \"@rushstack/eslint-config/profile/web-app\".  See the documentation for details."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.2",
       "tag": "@rushstack/eslint-config_v1.4.2",
       "date": "Sat, 19 Sep 2020 04:37:26 GMT",

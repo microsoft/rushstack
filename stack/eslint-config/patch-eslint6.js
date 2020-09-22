@@ -3,5 +3,6 @@
 
 throw new Error(
   'The patch-eslint6.js script has been rewritten to support both ESLint 6.x and 7.x.' +
-    ' Please update your configuration to import patch-eslint-resolver.js instead.'
+    ' Please update your ESLint configuration to use this path instead:\n\n' +
+    '  require("@rushstack/eslint-config/patch/modern-module-resolution");'
 );

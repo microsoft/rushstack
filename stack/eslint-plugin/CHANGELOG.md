@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Sat, 19 Sep 2020 04:37:26 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Sep 2020 01:45:31 GMT and should not be manually modified.
+
+## 0.7.0
+Tue, 22 Sep 2020 01:45:31 GMT
+
+### Minor changes
+
+- Add a new rule "@rushstack/typedef-var" which supplements "@typescript-eslint/typedef" by enabling a special policy for local variables
 
 ## 0.6.3
 Sat, 19 Sep 2020 04:37:26 GMT
