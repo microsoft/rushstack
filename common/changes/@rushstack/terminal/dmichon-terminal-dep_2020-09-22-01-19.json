@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/terminal",
+      "comment": "Fix @rushstack/node-core-library dependency",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/terminal",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
