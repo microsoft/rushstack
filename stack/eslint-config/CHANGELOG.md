@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Tue, 22 Sep 2020 00:08:53 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Sep 2020 01:45:31 GMT and should not be manually modified.
+
+## 2.1.0
+Tue, 22 Sep 2020 01:45:31 GMT
+
+### Minor changes
+
+- Relax the "typedef" rule so that type inference is now allowed for local variables, while still requiring explicit type declarations in other scopes
 
 ## 2.0.0
 Tue, 22 Sep 2020 00:08:53 GMT
@@ -12,7 +19,7 @@ Tue, 22 Sep 2020 00:08:53 GMT
 ## 1.4.2
 Sat, 19 Sep 2020 04:37:26 GMT
 
-*Version update only*
+_Version update only_
 
 ## 1.4.1
 Sat, 19 Sep 2020 03:33:06 GMT
@@ -47,7 +54,7 @@ Thu, 27 Aug 2020 11:27:06 GMT
 ## 1.2.1
 Mon, 24 Aug 2020 07:35:20 GMT
 
-*Version update only*
+_Version update only_
 
 ## 1.2.0
 Sat, 22 Aug 2020 05:55:42 GMT
@@ -66,7 +73,7 @@ Mon, 17 Aug 2020 04:53:23 GMT
 ## 1.0.4
 Wed, 12 Aug 2020 00:10:06 GMT
 
-*Version update only*
+_Version update only_
 
 ## 1.0.3
 Sat, 25 Jul 2020 01:38:03 GMT
@@ -120,7 +127,7 @@ Sat, 28 Mar 2020 00:37:16 GMT
 ## 0.5.5
 Wed, 18 Mar 2020 15:07:47 GMT
 
-*Version update only*
+_Version update only_
 
 ## 0.5.4
 Tue, 21 Jan 2020 21:56:13 GMT
@@ -132,17 +139,17 @@ Tue, 21 Jan 2020 21:56:13 GMT
 ## 0.5.3
 Sun, 19 Jan 2020 02:26:53 GMT
 
-*Version update only*
+_Version update only_
 
 ## 0.5.2
 Fri, 17 Jan 2020 01:08:23 GMT
 
-*Version update only*
+_Version update only_
 
 ## 0.5.1
 Thu, 09 Jan 2020 06:44:13 GMT
 
-*Version update only*
+_Version update only_
 
 ## 0.5.0
 Wed, 08 Jan 2020 00:11:31 GMT

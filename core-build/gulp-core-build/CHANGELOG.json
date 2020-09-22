@@ -2,6 +2,21 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.16.27",
+      "tag": "@microsoft/gulp-core-build_v3.16.27",
+      "date": "Tue, 22 Sep 2020 01:45:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.33.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.16.26",
       "tag": "@microsoft/gulp-core-build_v3.16.26",
       "date": "Tue, 22 Sep 2020 00:08:53 GMT",
