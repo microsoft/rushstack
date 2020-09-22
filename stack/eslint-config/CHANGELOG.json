@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "2.0.0",
+      "tag": "@rushstack/eslint-config_v2.0.0",
+      "date": "Tue, 22 Sep 2020 00:08:53 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "(BREAKING CHANGE) The \"@rushstack/eslint-config\" entry point has been separated into 3 choices: \"@rushstack/eslint-config/profile/node\", \"@rushstack/eslint-config/profile/node-trusted-tool\", or \"@rushstack/eslint-config/profile/web-app\".  So the documentation for details."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.2",
       "tag": "@rushstack/eslint-config_v1.4.2",
       "date": "Sat, 19 Sep 2020 04:37:26 GMT",

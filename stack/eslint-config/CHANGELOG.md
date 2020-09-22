@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Sat, 19 Sep 2020 04:37:26 GMT and should not be manually modified.
+This log was last generated on Tue, 22 Sep 2020 00:08:53 GMT and should not be manually modified.
+
+## 2.0.0
+Tue, 22 Sep 2020 00:08:53 GMT
+
+### Breaking changes
+
+- (BREAKING CHANGE) The "@rushstack/eslint-config" entry point has been separated into 3 choices: "@rushstack/eslint-config/profile/node", "@rushstack/eslint-config/profile/node-trusted-tool", or "@rushstack/eslint-config/profile/web-app".  So the documentation for details.
 
 ## 1.4.2
 Sat, 19 Sep 2020 04:37:26 GMT
