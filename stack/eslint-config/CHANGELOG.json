@@ -25,7 +25,7 @@
       "comments": {
         "major": [
           {
-            "comment": "(BREAKING CHANGE) The \"@rushstack/eslint-config\" entry point has been separated into 3 choices: \"@rushstack/eslint-config/profile/node\", \"@rushstack/eslint-config/profile/node-trusted-tool\", or \"@rushstack/eslint-config/profile/web-app\".  So the documentation for details."
+            "comment": "(BREAKING CHANGE) The \"@rushstack/eslint-config\" entry point has been separated into 3 choices: \"@rushstack/eslint-config/profile/node\", \"@rushstack/eslint-config/profile/node-trusted-tool\", or \"@rushstack/eslint-config/profile/web-app\".  See the documentation for details."
           }
         ]
       }
