@@ -1,3 +1,7 @@
+variables:
+  # Enable ANSI color escapes in CI logs
+  - name: FORCE_COLOR
+    value: 1
 steps:
   - task: NodeTool@0
     displayName: 'Use Node $(NodeVersion).x'
