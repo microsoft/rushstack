@@ -114,10 +114,13 @@ For Rush-specific settings, see the article
 
 Optionally, you can add some "mixins" to your `extends` array to opt-in to some extra behaviors.
 
+Important: Your **.eslintrc.js** `"extends"` field must load mixins after the profile entry.
+
+
 #### `@rushstack/eslint-config/mixins/react`
 
-For projects using React, the `"@rushstack/eslint-config/mixins/react"` mixin provides some recommended additional
-rules.  These rules are selected via a mixin because they require you to:
+For projects using the [React](https://reactjs.org/) library, the `"@rushstack/eslint-config/mixins/react"` mixin
+enables some recommended additional rules.  These rules are selected via a mixin because they require you to:
 
 - Add `"jsx": "react"` to your **tsconfig.json**
 - Configure your `settings.react.version` as shown below.  This determines which React APIs will be considered
@@ -125,7 +128,7 @@ rules.  These rules are selected via a mixin because they require you to:
   [loading the entire React library](https://github.com/yannickcr/eslint-plugin-react/blob/4da74518bd78f11c9c6875a159ffbae7d26be693/lib/util/version.js#L23)
   into the linter's process, which is costly.)
 
-Example:
+Add the mixin to your `"extends"` field like this:
 
 **.eslintrc.js**
 ```ts
@@ -135,17 +138,85 @@ require('@rushstack/eslint-config/patch/modern-module-resolution');
 module.exports = {
   extends: [
     "@rushstack/eslint-config/profile/web-app",
-    "@rushstack/eslint-config/mixins/react"
+    "@rushstack/eslint-config/mixins/react" // <----
   ],
   parserOptions: { tsconfigRootDir: __dirname },
 
   settings: {
     react: {
-      "version": "16.9"
+      "version": "16.9" // <----
     }
   }
 };
 ```
+
+#### `@rushstack/eslint-config/mixins/friendly-locals`
+
+Requires explicit type declarations for local variables.
+
+For the first 5 years of Rush, our lint rules required explicit types for most declarations
+such as function parameters, function return values, and exported variables.  Although more verbose,
+declaring types (instead of relying on type inference) encourages engineers to create interfaces
+that inspire discussions about data structure design.  It also makes source files easier
+to understand for code reviewers who may be unfamiliar with a particular project.  Once developers get
+used to the extra work of declaring types, it turns out to be a surprisingly popular practice.
+
+However in 2020, to make adoption easier for existing projects, this rule was relaxed.  Explicit
+type declarations are now optional for local variables (although still required in other contexts).
+See [GitHub #2206](https://github.com/microsoft/rushstack/issues/2206) for background.
+
+If you are onboarding a large existing code base, this new default will make adoption easier:
+
+Example source file without `mixins/friendly-locals`:
+```ts
+export class MyDataService {
+  . . .
+  public queryResult(provider: IProvider): IResult {
+    // Type inference is concise, but what are "item", "index", and "data"?
+    const item = provider.getItem(provider.title);
+    const index = item.fetchIndex();
+    const data = index.get(provider.state);
+    return data.results.filter(x => x.title === provider.title);
+  }
+}
+```
+
+On the other hand, if your priority is make source files more friendly for other people to read, you can enable
+the `"@rushstack/eslint-config/mixins/friendly-locals"` mixin.  This restores the requirement that local variables
+should have explicit type declarations.
+
+Example source file with `mixins/friendly-locals`:
+```ts
+export class MyDataService {
+  . . .
+  public queryResult(provider: IProvider): IResult {
+    // This is more work for the person writing the code... but definitely easier to understand
+    // for a code reviewer if they are unfamiliar with your project
+    const item: ISalesReport = provider.getItem(provider.title);
+    const index: Map<string, IGeographicData> = item.fetchIndex();
+    const data: IGeographicData | undefined = index.get(provider.state);
+    return data.results.filter(x => x.title === provider.title);
+  }
+}
+```
+
+Add the mixin to your `"extends"` field like this:
+
+**.eslintrc.js**
+```ts
+// This is a workaround for https://github.com/eslint/eslint/issues/3458
+require('@rushstack/eslint-config/patch/modern-module-resolution');
+
+module.exports = {
+  extends: [
+    "@rushstack/eslint-config/profile/node",
+    "@rushstack/eslint-config/profile/mixins/friendly-locals" // <----
+  ],
+  parserOptions: { tsconfigRootDir: __dirname }
+};
+```
+
+
 
 #### `@rushstack/eslint-config/mixins/tsdoc`
 
@@ -154,8 +225,9 @@ the [TSDoc](https://github.com/Microsoft/tsdoc) standard for doc comments, it's 
 `"@rushstack/eslint-config/mixins/tsdoc"` mixin.  It will enable
 [eslint-plugin-tsdoc](https://www.npmjs.com/package/eslint-plugin-tsdoc) validation for TypeScript doc comments.
 
-Example:
+Add the mixin to your `"extends"` field like this:
 
+**.eslintrc.js**
 ```ts
 // This is a workaround for https://github.com/eslint/eslint/issues/3458
 require('@rushstack/eslint-config/patch/modern-module-resolution');
@@ -163,7 +235,7 @@ require('@rushstack/eslint-config/patch/modern-module-resolution');
 module.exports = {
   extends: [
     "@rushstack/eslint-config/profile/node",
-    "@rushstack/eslint-config/profile/mixins/tsdoc",
+    "@rushstack/eslint-config/profile/mixins/tsdoc" // <----
   ],
   parserOptions: { tsconfigRootDir: __dirname }
 };

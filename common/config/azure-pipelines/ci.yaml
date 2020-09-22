@@ -1,5 +1,7 @@
 pool:
   vmImage: 'ubuntu-latest'
+variables:
+  FORCE_COLOR: 1
 jobs:
   - job: PRBuild
     condition: succeeded()

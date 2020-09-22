@@ -28,9 +28,13 @@ function buildRules(profile) {
     parser: '',
 
     plugins: [
+      // Plugin documentation: https://www.npmjs.com/package/@rushstack/eslint-plugin
       '@rushstack/eslint-plugin',
+      // Plugin documentation: https://www.npmjs.com/package/@rushstack/eslint-plugin-security
       '@rushstack/eslint-plugin-security',
+      // Plugin documentation: https://www.npmjs.com/package/@typescript-eslint/eslint-plugin
       '@typescript-eslint/eslint-plugin',
+      // Plugin documentation: https://www.npmjs.com/package/eslint-plugin-promise
       'eslint-plugin-promise'
     ],
 
@@ -62,6 +66,9 @@ function buildRules(profile) {
 
           // RATIONALE:         See the @rushstack/eslint-plugin documentation
           '@rushstack/no-new-null': 'warn',
+
+          // RATIONALE:         See the @rushstack/eslint-plugin documentation
+          '@rushstack/typedef-var': 'warn',
 
           // RATIONALE:         See the @rushstack/eslint-plugin documentation
           //                    This is enabled and classified as an error because it is required when using Heft.
@@ -488,7 +495,9 @@ function buildRules(profile) {
               objectDestructuring: false,
               parameter: true,
               propertyDeclaration: true,
-              variableDeclaration: true,
+
+              // This case is handled by our "@rushstack/typedef-var" rule
+              variableDeclaration: false,
 
               // Normally we require type declarations for class members.  However, that rule is relaxed
               // for situations where we need to bind the "this" pointer for a callback.  For example, consider
@@ -509,6 +518,8 @@ function buildRules(profile) {
               //
               // This coding style has limitations and should be used sparingly.  For example, "_onClick"
               // will not participate correctly in "virtual"/"override" inheritance.
+              //
+              // NOTE: This option affects both "memberVariableDeclaration" and "variableDeclaration" options.
               variableDeclarationIgnoreFunction: true
             }
           ],
@@ -789,8 +800,8 @@ function buildRules(profile) {
           // Jest's mocking API is designed in a way that produces compositional data types that often have
           // no concise description.  Since test code does not ship, and typically does not introduce new
           // concepts or algorithms, the usual arguments for prioritizing readability over writability can be
-          // relaxed in this case. We follow C#'s model of allowing type inference for local variable declarations,
-          // but still requiring strict types for function signatures.
+          // relaxed in this case.
+          '@rushstack/typedef-var': 'off',
           '@typescript-eslint/typedef': [
             'warn',
             {
