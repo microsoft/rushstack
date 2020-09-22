@@ -1,11 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// This mixin applies some additional checks for projects using the React library.  For more information,
+// please see the README.md for "@rushstack/eslint-config".
 module.exports = {
+  // Plugin documentation: https://www.npmjs.com/package/eslint-plugin-react
   plugins: ['eslint-plugin-react'],
 
   settings: {
     react: {
+      // The default value is "detect".  Automatic detection works by loading the entire React library
+      // into the linter's process, which is inefficient.  It is recommended to specify the version
+      // explicity.  For details, see README.md for "@rushstack/eslint-config".
       version: 'detect'
     }
   },
