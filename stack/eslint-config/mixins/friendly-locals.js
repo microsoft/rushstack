@@ -44,6 +44,42 @@ module.exports = {
           }
         ]
       }
+    },
+    // Note that the above block also applies to *.test.ts, so we need to
+    // reapply those overrides.
+    {
+      files: [
+        // Test files
+        '*.test.ts',
+        '*.test.tsx',
+        '*.spec.ts',
+        '*.spec.tsx',
+
+        // Facebook convention
+        '**/__mocks__/*.ts',
+        '**/__mocks__/*.tsx',
+        '**/__tests__/*.ts',
+        '**/__tests__/*.tsx',
+
+        // Microsoft convention
+        '**/test/*.ts',
+        '**/test/*.tsx'
+      ],
+      rules: {
+        '@typescript-eslint/typedef': [
+          'warn',
+          {
+            arrayDestructuring: false,
+            arrowParameter: false,
+            memberVariableDeclaration: true,
+            objectDestructuring: false,
+            parameter: true,
+            propertyDeclaration: true,
+            variableDeclaration: false, // <--- special case for test files
+            variableDeclarationIgnoreFunction: true
+          }
+        ]
+      }
     }
   ]
 };
