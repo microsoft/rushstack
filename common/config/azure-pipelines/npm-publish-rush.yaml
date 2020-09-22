@@ -3,5 +3,6 @@ pool:
 variables:
   NodeVersion: 12
   VersionPolicy: rush
+  FORCE_COLOR: 1
 steps:
   - template: templates/buildAndPublish.yaml
