@@ -126,8 +126,6 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
   private _patchSassUrl(url: string): string {
     if (url[0] === '~') {
       url = 'node_modules/' + url.substr(1);
-    } else if (url === 'stdin') {
-      url = '';
     }
 
     return url;
