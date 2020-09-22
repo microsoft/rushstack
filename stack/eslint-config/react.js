@@ -3,5 +3,6 @@
 
 throw new Error(
   'The react.js entry point has moved. Please update your ESLint configuration to reference' +
-    ' "@rushstack/eslint-config/mixins/react" instead. See the documentation for details.'
+    ' "@rushstack/eslint-config/mixins/react" instead.' +
+    '\n\nSee the documentation for details: https://www.npmjs.com/package/@rushstack/eslint-config'
 );

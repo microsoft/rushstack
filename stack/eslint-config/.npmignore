@@ -23,4 +23,6 @@
 
 # (Add your exceptions here)
 !*.js
+!mixins/*.js
 !patch/*.js
+!profile/*.js
