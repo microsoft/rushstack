@@ -1,0 +1,2 @@
+# @rushstack/rig-package
+

@@ -828,6 +828,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/rig-package",
+      "projectFolder": "libraries/rig-package",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@microsoft/rushell",
       "projectFolder": "libraries/rushell",
       "reviewCategory": "libraries",

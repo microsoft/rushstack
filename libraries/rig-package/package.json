@@ -1,0 +1,24 @@
+{
+  "name": "@rushstack/rig-package",
+  "version": "0.0.0",
+  "description": "A standard for sharing project configuration in a monorepo without duplicating config files",
+  "main": "lib/index.js",
+  "typings": "dist/rig-package.d.ts",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/rig-package"
+  },
+  "scripts": {
+    "build": "heft test --clean"
+  },
+  "dependencies": {
+    "@types/node": "10.17.13"
+  },
+  "devDependencies": {
+    "@microsoft/rush-stack-compiler-3.5": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "colors": "~1.2.1"
+  }
+}
