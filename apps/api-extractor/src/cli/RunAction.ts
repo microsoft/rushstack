@@ -4,7 +4,8 @@
 import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
-import { PackageJsonLookup, FileSystem, IPackageJson } from '@rushstack/node-core-library';
+import { PackageJsonLookup, FileSystem, IPackageJson, Import } from '@rushstack/node-core-library';
+import { IModuleResolverOptions, RigConfig } from '@rushstack/rig-package';
 
 import {
   CommandLineAction,
@@ -134,7 +135,25 @@ export class RunAction extends CommandLineAction {
         configFilename = path.join(baseFolder, ExtractorConfig.FILENAME);
 
         if (!FileSystem.exists(configFilename)) {
-          throw new Error(`Unable to find an ${ExtractorConfig.FILENAME} file`);
+          // If We didn't find it in <projectFolder>/api-extractor.json or <projectFolder>/config/api-extractor.json
+          // then check for a rig package
+          if (packageFolder) {
+            const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
+              packageJsonFolderPath: packageFolder,
+              moduleResolver: (options: IModuleResolverOptions): string => {
+                return Import.resolveModule({
+                  modulePath: options.modulePath,
+                  baseFolderPath: options.baseFolderPath
+                });
+              }
+            });
+            if (rigConfig.enabled) {
+              configFilename = path.join(rigConfig.getResolvedProfileFolder(), ExtractorConfig.FILENAME);
+            }
+          }
+          if (!FileSystem.exists(configFilename)) {
+            throw new Error(`Unable to find an ${ExtractorConfig.FILENAME} file`);
+          }
         }
       }
 

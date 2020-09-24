@@ -207,6 +207,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/rig-package",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/set-webpack-public-path-plugin",
       "allowedCategories": [ "libraries", "tests" ]
     },

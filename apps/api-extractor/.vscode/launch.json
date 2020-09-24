@@ -9,12 +9,8 @@
       "request": "launch",
       "name": "Run in specified folder",
       "program": "${workspaceFolder}/lib/start.js",
-      "cwd": "(your project path)",
-      "args": [
-        "--debug",
-        "run",
-        "--local"
-      ],
+      "cwd": "C:\\Git\\rushstack\\build-tests\\heft-minimal-rig-usage-test",
+      "args": ["--debug", "run", "--local"],
       "sourceMaps": true
     },
     {
@@ -23,11 +19,7 @@
       "name": "test-01",
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-01",
-      "args": [
-        "--debug",
-        "run",
-        "--local"
-      ],
+      "args": ["--debug", "run", "--local"],
       "sourceMaps": true
     },
     {
@@ -36,11 +28,7 @@
       "name": "test-02",
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-02",
-      "args": [
-        "--debug",
-        "run",
-        "--local"
-      ],
+      "args": ["--debug", "run", "--local"],
       "sourceMaps": true
     },
     {
@@ -49,11 +37,7 @@
       "name": "test-03",
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-03",
-      "args": [
-        "--debug",
-        "run",
-        "--local"
-      ],
+      "args": ["--debug", "run", "--local"],
       "sourceMaps": true
     },
     {
@@ -62,11 +46,7 @@
       "name": "test-04",
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-04",
-      "args": [
-        "--debug",
-        "run",
-        "--local"
-      ],
+      "args": ["--debug", "run", "--local"],
       "sourceMaps": true
     },
     {
@@ -75,11 +55,7 @@
       "name": "test-05",
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/api-extractor-test-05",
-      "args": [
-        "--debug",
-        "run",
-        "--local"
-      ],
+      "args": ["--debug", "run", "--local"],
       "sourceMaps": true
     },
     {
@@ -88,13 +64,7 @@
       "name": "scenario",
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/api-extractor-scenarios",
-      "args": [
-        "--debug",
-        "run",
-        "--local",
-        "--config",
-        "./temp/configs/api-extractor-typeof.json"
-      ],
+      "args": ["--debug", "run", "--local", "--config", "./temp/configs/api-extractor-typeof.json"],
       "sourceMaps": true
     }
   ]
