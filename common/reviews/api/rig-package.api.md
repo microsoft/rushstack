@@ -5,7 +5,27 @@
 ```ts
 
 // @public (undocumented)
+export interface IModuleResolver {
+    // (undocumented)
+    resolve(moduleName: string, baseFolder: string): string;
+}
+
+// @public (undocumented)
+export class ResolvedRigConfig extends RigConfig {
+    // Warning: (ae-forgotten-export) The symbol "IResolvedRigConfigOptions" needs to be exported by the entry point index.d.ts
+    //
+    // @internal
+    constructor(options: IResolvedRigConfigOptions);
+    // (undocumented)
+    readonly profileFolderPath: string;
+}
+
+// @public (undocumented)
 export class RigConfig {
+    // Warning: (ae-forgotten-export) The symbol "IRigConfigOptions" needs to be exported by the entry point index.d.ts
+    //
+    // @internal
+    protected constructor(options: IRigConfigOptions);
     // (undocumented)
     readonly enabled: boolean;
     // (undocumented)
@@ -17,9 +37,15 @@ export class RigConfig {
     // (undocumented)
     static loadForProjectFolder(packageJsonFolderPath: string): RigConfig;
     // (undocumented)
-    readonly profileName: string;
+    readonly projectFolderPath: string;
+    // (undocumented)
+    readonly relativeProfileFolderPath: string;
+    // (undocumented)
+    resolveRig(resolver: IModuleResolver): ResolvedRigConfig;
     // (undocumented)
     readonly rigPackageName: string;
+    // (undocumented)
+    readonly rigProfile: string;
     }
 
 

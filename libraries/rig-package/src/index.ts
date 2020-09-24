@@ -7,4 +7,5 @@
  * @packageDocumentation
  */
 
-export * from './RigConfig';
+export { ResolvedRigConfig } from './ResolvedRigConfig';
+export { IModuleResolver, RigConfig } from './RigConfig';

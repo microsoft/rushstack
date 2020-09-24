@@ -9,25 +9,31 @@ import { RigConfig } from '../RigConfig';
 
 const testProjectFolder: string = path.join(__dirname, 'test-project');
 
-function isSameFilePath(path1: string, path2: string): boolean {
-  return path.relative(path1, path2) === '';
+function expectEqualPaths(path1: string, path2: string): void {
+  if (path.relative(path1, path2) !== '') {
+    fail('Expected paths to be equal:\npath1: ' + path1 + '\npath2: ' + path2);
+  }
 }
 
 describe('RigConfig tests', () => {
   it('loads a rig.json file', () => {
     const rigConfig: RigConfig = RigConfig.loadForProjectFolder(testProjectFolder);
+    expectEqualPaths(rigConfig.projectFolderPath, testProjectFolder);
     expect(rigConfig.enabled).toBe(true);
-    expect(isSameFilePath(rigConfig.filePath, path.join(testProjectFolder, 'config/rig.json'))).toBe(true);
-    expect(rigConfig.profileName).toBe('web-app');
+    expectEqualPaths(rigConfig.filePath, path.join(testProjectFolder, 'config/rig.json'));
+    expect(rigConfig.rigProfile).toBe('web-app');
     expect(rigConfig.rigPackageName).toBe('example-rig');
+    expect(rigConfig.relativeProfileFolderPath).toBe('profile/web-app');
   });
 
   it('handles a missing rig.json file', () => {
     const rigConfig: RigConfig = RigConfig.loadForProjectFolder(__dirname);
+    expectEqualPaths(rigConfig.projectFolderPath, __dirname);
     expect(rigConfig.enabled).toBe(false);
     expect(rigConfig.filePath).toBe('');
-    expect(rigConfig.profileName).toBe('');
+    expect(rigConfig.rigProfile).toBe('');
     expect(rigConfig.rigPackageName).toBe('');
+    expect(rigConfig.relativeProfileFolderPath).toBe('');
   });
 
   it('validates a rig.json file using the schema', () => {
