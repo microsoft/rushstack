@@ -137,3 +137,6 @@ if (pattern3.match({ animal: { kind: 'cat', meow: 'quiet' } })) {
 For example, maybe we want to match `Promise['fulfilled'](123);` as well as `Promise.fulfilled(123);`.
 If the structure of the expressions is similar enough, `TreePattern.oneOf` avoids having to create two
 separate patterns.
+
+
+API documentation for this package: https://rushstack.io/pages/api/tree-pattern/
