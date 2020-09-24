@@ -15,6 +15,27 @@
     "extends": {
       "description": "Optionally specifies another JSON config file that this file extends from.  This provides a way for standard settings to be shared across multiple projects.",
       "type": "string"
+    },
+
+    "heftPlugins": {
+      "type": "array",
+      "description": "Defines heft plugins that are used by a project.",
+
+      "items": {
+        "type": "object",
+        "required": ["plugin"],
+        "properties": {
+          "plugin": {
+            "description": "Path to the plugin package, relative to the project root.",
+            "type": "string",
+            "pattern": "[^\\\\]"
+          },
+
+          "options": {
+            "type": "object"
+          }
+        }
+      }
     }
   }
 }

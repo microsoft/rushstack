@@ -2,11 +2,28 @@
  * Defines configuration used by core Heft.
  */
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json"
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
 
   /**
    * Optionally specifies another JSON config file that this file extends from. This provides a way for standard
    * settings to be shared across multiple projects.
    */
-  // "extends": "base-project/config/heft.json"
+  // "extends": "base-project/config/heft.json",
+
+  /**
+   * The list of Heft plugins to be loaded.
+   */
+  "heftPlugins": [
+    // {
+    //  /**
+    //   * The path to the plugin package.
+    //   */
+    //  "plugin": "path/to/my-plugin",
+    //
+    //  /**
+    //   * An optional object that provides additional settings that may be defined by the plugin.
+    //   */
+    //  // "options": { }
+    // }
+  ]
 }

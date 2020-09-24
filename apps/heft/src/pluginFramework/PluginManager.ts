@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import { Terminal, InternalError, FileSystem, Import } from '@rushstack/node-core-library';
+import { Terminal, InternalError, Import } from '@rushstack/node-core-library';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IHeftPlugin } from './IHeftPlugin';
@@ -17,20 +16,17 @@ import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPl
 import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
 import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWebpackPlugin';
 import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
-import { ConfigFile } from '../utilities/ConfigFile';
+import {
+  ConfigFile,
+  IHeftConfigurationJsonPluginSpecifier,
+  IHeftConfigurationJson
+} from '../utilities/ConfigFile';
 import { ProjectValidatorPlugin } from '../plugins/ProjectValidatorPlugin';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
   heftConfiguration: HeftConfiguration;
   internalHeftSession: InternalHeftSession;
-}
-
-export interface IPluginConfigurationJson {
-  plugins: {
-    plugin: string;
-    options?: object;
-  }[];
 }
 
 export class PluginManager {
@@ -63,18 +59,14 @@ export class PluginManager {
   }
 
   public async initializePluginsFromConfigFileAsync(): Promise<void> {
-    const pluginConfigFilePath: string = path.join(
-      this._heftConfiguration.projectConfigFolder,
-      'plugins.json'
-    );
-    if (await FileSystem.existsAsync(pluginConfigFilePath)) {
-      const pluginConfigurationJson: IPluginConfigurationJson = await ConfigFile.pluginConfigFileLoader.loadConfigurationFileAsync(
-        pluginConfigFilePath
-      );
+    const heftConfigurationJson:
+      | IHeftConfigurationJson
+      | undefined = await ConfigFile.tryLoadHeftConfigFileFromDefaultLocationAsync(this._heftConfiguration);
+    const heftPluginSpecifiers: IHeftConfigurationJsonPluginSpecifier[] =
+      heftConfigurationJson?.heftPlugins || [];
 
-      for (const pluginSpecifier of pluginConfigurationJson.plugins) {
-        this._initializeResolvedPlugin(pluginSpecifier.plugin, pluginSpecifier.options);
-      }
+    for (const pluginSpecifier of heftPluginSpecifiers) {
+      this._initializeResolvedPlugin(pluginSpecifier.plugin, pluginSpecifier.options);
     }
   }
 

@@ -4,7 +4,6 @@
 import * as path from 'path';
 import { ConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
 
-import { IPluginConfigurationJson } from '../pluginFramework/PluginManager';
 import { ICopyStaticAssetsConfigurationJson } from '../plugins/CopyStaticAssetsPlugin';
 import { IApiExtractorPluginConfiguration } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
 import { ITypeScriptConfigurationJson } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
@@ -12,12 +11,18 @@ import { ICleanConfigurationJson } from '../stages/CleanStage';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { FileSystem } from '@rushstack/node-core-library';
 
-export interface IHeftConfigurationJson {}
+export interface IHeftConfigurationJsonPluginSpecifier {
+  plugin: string;
+  options?: object;
+}
+
+export interface IHeftConfigurationJson {
+  heftPlugins: IHeftConfigurationJsonPluginSpecifier[];
+}
 
 export class ConfigFile {
   private static _heftConfigFileLoader: ConfigurationFile<IHeftConfigurationJson> | undefined;
 
-  private static _pluginConfigFileLoader: ConfigurationFile<IPluginConfigurationJson> | undefined;
   private static _copyStaticAssetsConfigurationLoader:
     | ConfigurationFile<ICopyStaticAssetsConfigurationJson>
     | undefined;
@@ -33,7 +38,13 @@ export class ConfigFile {
     if (!ConfigFile._heftConfigFileLoader) {
       const schemaPath: string = path.join(__dirname, '..', 'schemas', 'heft.schema.json');
       ConfigFile._heftConfigFileLoader = new ConfigurationFile<IHeftConfigurationJson>({
-        jsonSchemaPath: schemaPath
+        jsonSchemaPath: schemaPath,
+        propertyInheritanceTypes: { heftPlugins: InheritanceType.append },
+        jsonPathMetadata: {
+          '$.heftPlugins.*.plugin': {
+            pathResolutionMethod: PathResolutionMethod.NodeResolve
+          }
+        }
       });
     }
 
@@ -49,23 +60,6 @@ export class ConfigFile {
     } else {
       return undefined;
     }
-  }
-
-  public static get pluginConfigFileLoader(): ConfigurationFile<IPluginConfigurationJson> {
-    if (!ConfigFile._pluginConfigFileLoader) {
-      const schemaPath: string = path.join(__dirname, '..', 'schemas', 'plugins.schema.json');
-      ConfigFile._pluginConfigFileLoader = new ConfigurationFile<IPluginConfigurationJson>({
-        jsonSchemaPath: schemaPath,
-        propertyInheritanceTypes: { plugins: InheritanceType.append },
-        jsonPathMetadata: {
-          '$.plugins.*.plugin': {
-            pathResolutionMethod: PathResolutionMethod.NodeResolve
-          }
-        }
-      });
-    }
-
-    return ConfigFile._pluginConfigFileLoader;
   }
 
   public static get copyStaticAssetsConfigurationLoader(): ConfigurationFile<
