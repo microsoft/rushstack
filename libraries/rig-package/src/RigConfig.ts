@@ -68,7 +68,7 @@ export class RigConfig {
     this.rigProfile = options.rigProfile;
 
     if (this.enabled) {
-      this.relativeProfileFolderPath = 'profile/' + this.rigProfile;
+      this.relativeProfileFolderPath = 'profiles/' + this.rigProfile;
     } else {
       this.relativeProfileFolderPath = '';
     }

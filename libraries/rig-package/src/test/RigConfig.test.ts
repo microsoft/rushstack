@@ -25,7 +25,7 @@ describe('RigConfig tests', () => {
     expectEqualPaths(rigConfig.filePath, path.join(testProjectFolder, 'config/rig.json'));
     expect(rigConfig.rigProfile).toBe('web-app');
     expect(rigConfig.rigPackageName).toBe('example-rig');
-    expect(rigConfig.relativeProfileFolderPath).toBe('profile/web-app');
+    expect(rigConfig.relativeProfileFolderPath).toBe('profiles/web-app');
   });
 
   it('handles a missing rig.json file', () => {
@@ -50,7 +50,7 @@ describe('RigConfig tests', () => {
 
     expectEqualPaths(
       rigConfig.getResolvedProfileFolder(),
-      path.join(testProjectFolder, 'node_modules/example-rig/profile/web-app')
+      path.join(testProjectFolder, 'node_modules/example-rig/profiles/web-app')
     );
   });
 
