@@ -4,46 +4,32 @@
 
 ```ts
 
-// @public (undocumented)
+// @public
 export interface ILoadForProjectFolderOptions {
-    // (undocumented)
     moduleResolver?: ModuleResolver;
-    // (undocumented)
-    packageJsonFolderPath: string;
+    projectFolderPath: string;
 }
 
-// @public (undocumented)
+// @public
 export interface IModuleResolverOptions {
     baseFolderPath: string;
     modulePath: string;
 }
 
-// @public (undocumented)
+// @public
 export type ModuleResolver = (options: IModuleResolverOptions) => string;
 
-// @public (undocumented)
+// @public
 export class RigConfig {
-    // (undocumented)
     readonly enabled: boolean;
-    // (undocumented)
     readonly filePath: string;
-    // (undocumented)
     getResolvedProfileFolder(): string;
-    // (undocumented)
     static readonly jsonSchemaObject: object;
-    // (undocumented)
     static jsonSchemaPath: string;
-    // (undocumented)
     static loadForProjectFolder(options: ILoadForProjectFolderOptions): RigConfig;
-    // (undocumented)
-    readonly profileFolderPath: string;
-    // (undocumented)
     readonly projectFolderPath: string;
-    // (undocumented)
     readonly relativeProfileFolderPath: string;
-    // (undocumented)
     readonly rigPackageName: string;
-    // (undocumented)
     readonly rigProfile: string;
     }
 

@@ -22,14 +22,26 @@ interface IRigConfigOptions {
 }
 
 /**
+ * Options for {@link RigConfig.loadForProjectFolder}.
+ *
  * @public
  */
 export interface ILoadForProjectFolderOptions {
-  packageJsonFolderPath: string;
+  /**
+   * The path to the folder of the project to be analyzed.  This folder should contain a `package.json` file.
+   */
+  projectFolderPath: string;
+
+  /**
+   * A function that implements Node.js module resolution.  The {@link RigConfig.getResolvedProfileFolder}
+   * API cannot be used if this is omitted.
+   */
   moduleResolver?: ModuleResolver;
 }
 
 /**
+ * This is the main API for loading the `config/rig.json` file format.
+ *
  * @public
  */
 export class RigConfig {
@@ -40,21 +52,70 @@ export class RigConfig {
   // Also silently accept "-rig-test" for our build test projects.
   private static readonly _rigNameRegExp: RegExp = /-rig(-test)?$/;
 
+  /**
+   * Returns the absolute path of the `rig.schema.json` JSON schema file for `config/rig.json`,
+   * which is bundled with this NPM package.
+   *
+   * @remarks
+   * The `RigConfig` class already performs schema validation when loading `rig.json`; however
+   * this schema file may be useful for integration with other validation tools.
+   *
+   * @public
+   */
   public static jsonSchemaPath: string = path.resolve(__dirname, './schemas/rig.schema.json');
   private static _jsonSchemaObject: object | undefined = undefined;
 
+  /**
+   * The project folder path that was passed to {@link RigConfig.loadForProjectFolder}.
+   *
+   * @remarks
+   * Example: `/path/to/your-project`
+   */
   public readonly projectFolderPath: string;
+
   private readonly _moduleResolver: ModuleResolver | undefined;
 
+  /**
+   * Returns `true` if `config/rig.json` was found, or `false` otherwise.
+   */
   public readonly enabled: boolean;
+
+  /**
+   * The full path to the `rig.json` file that was found, or `""` if none was found.
+   *
+   * @remarks
+   * Example: `/path/to/your-project/config/rig.json`
+   */
   public readonly filePath: string;
 
+  /**
+   * The `"rigPackageName"` field from `rig.json`, or `""` if the file was not found.
+   *
+   * @remarks
+   * The name must be a valid NPM package name, and must end with the `-rig` suffix.
+   *
+   * Example: `example-rig`
+   */
   public readonly rigPackageName: string;
+
+  /**
+   * The `"rigProfile"` value that was loaded from `rig.json`, or `""` if the file was not found.
+   *
+   * @remarks
+   * If the `rig.json` file exists, but the `"rigProfile"` is not specified, then the profile
+   * name will be `"default"`.
+   *
+   * Example: `example-profile`
+   */
   public readonly rigProfile: string;
 
+  /**
+   * The relative path to the rig profile specified by `rig.json`, or `""` if the file was not found.
+   *
+   * @remarks
+   * Example: `profiles/example-profile`
+   */
   public readonly relativeProfileFolderPath: string;
-
-  public readonly profileFolderPath: string;
 
   private _resolvedRigPackageFolder: string | undefined;
 
@@ -74,6 +135,13 @@ export class RigConfig {
     }
   }
 
+  /**
+   * The JSON contents of the {@link RigConfig.jsonSchemaPath} file.
+   *
+   * @remarks
+   * The JSON object will be lazily loaded when this property getter is accessed, and the result
+   * will be cached.
+   */
   public static get jsonSchemaObject(): object {
     if (RigConfig._jsonSchemaObject === undefined) {
       const jsonSchemaContent: string = fs.readFileSync(RigConfig.jsonSchemaPath).toString();
@@ -82,11 +150,18 @@ export class RigConfig {
     return RigConfig._jsonSchemaObject!;
   }
 
+  /**
+   * Use this method to load the `config/rig.json` file for a given project.
+   *
+   * @remarks
+   * If the file cannot be found, an empty `RigConfig` object will be returned with {@link RigConfig.enabled}
+   * equal to `false`.
+   */
   public static loadForProjectFolder(options: ILoadForProjectFolderOptions): RigConfig {
-    const rigConfigFilePath: string = path.join(options.packageJsonFolderPath, 'config/rig.json');
+    const rigConfigFilePath: string = path.join(options.projectFolderPath, 'config/rig.json');
     if (!fs.existsSync(rigConfigFilePath)) {
       return new RigConfig({
-        projectFolderPath: options.packageJsonFolderPath,
+        projectFolderPath: options.projectFolderPath,
         moduleResolver: options.moduleResolver,
 
         enabled: false,
@@ -106,7 +181,7 @@ export class RigConfig {
     }
 
     return new RigConfig({
-      projectFolderPath: options.packageJsonFolderPath,
+      projectFolderPath: options.projectFolderPath,
       moduleResolver: options.moduleResolver,
 
       enabled: true,
@@ -116,6 +191,15 @@ export class RigConfig {
     });
   }
 
+  /**
+   * Performs Node.js module resolution to locate the rig package folder, then returns the absolute path
+   * of the rig profile folder specified by `rig.json`.
+   *
+   * @remarks
+   * If no `rig.json` file was found, then this method throws an error.
+   *
+   * Example: `/path/to/your-project/node_modules/example-rig/profiles/example-profile`
+   */
   public getResolvedProfileFolder(): string {
     const resolvedRigPackageFolder: string = this._getResolvedRigPackageFolder();
     return path.join(resolvedRigPackageFolder, this.relativeProfileFolderPath);

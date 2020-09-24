@@ -19,7 +19,7 @@ function expectEqualPaths(path1: string, path2: string): void {
 
 describe('RigConfig tests', () => {
   it('loads a rig.json file', () => {
-    const rigConfig: RigConfig = RigConfig.loadForProjectFolder({ packageJsonFolderPath: testProjectFolder });
+    const rigConfig: RigConfig = RigConfig.loadForProjectFolder({ projectFolderPath: testProjectFolder });
     expectEqualPaths(rigConfig.projectFolderPath, testProjectFolder);
     expect(rigConfig.enabled).toBe(true);
     expectEqualPaths(rigConfig.filePath, path.join(testProjectFolder, 'config/rig.json'));
@@ -29,7 +29,7 @@ describe('RigConfig tests', () => {
   });
 
   it('handles a missing rig.json file', () => {
-    const rigConfig: RigConfig = RigConfig.loadForProjectFolder({ packageJsonFolderPath: __dirname });
+    const rigConfig: RigConfig = RigConfig.loadForProjectFolder({ projectFolderPath: __dirname });
     expectEqualPaths(rigConfig.projectFolderPath, __dirname);
     expect(rigConfig.enabled).toBe(false);
     expect(rigConfig.filePath).toBe('');
@@ -40,7 +40,7 @@ describe('RigConfig tests', () => {
 
   it('resolves the profile path', () => {
     const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
-      packageJsonFolderPath: testProjectFolder,
+      projectFolderPath: testProjectFolder,
       moduleResolver: (options: IModuleResolverOptions): string => {
         return resolve.sync(options.modulePath, { basedir: options.baseFolderPath });
       }

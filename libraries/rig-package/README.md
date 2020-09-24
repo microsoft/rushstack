@@ -154,6 +154,8 @@ loading the file and performing lookups.  It does not depend on any other NPM pa
 Example usage of the API:
 
 ```js
+import * as resolve from 'resolve';
+import { RigConfig } from '@rushstack/rig-package';
 
 // Probe for the rig.json file and load it if found
 const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
