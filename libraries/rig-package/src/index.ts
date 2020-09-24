@@ -7,5 +7,5 @@
  * @packageDocumentation
  */
 
-export { ResolvedRigConfig } from './ResolvedRigConfig';
-export { IModuleResolver, RigConfig } from './RigConfig';
+export { RigConfig, ILoadForProjectFolderOptions } from './RigConfig';
+export { ModuleResolver, IModuleResolverOptions } from './ModuleResolver';

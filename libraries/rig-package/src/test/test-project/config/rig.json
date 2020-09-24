@@ -1,4 +1,6 @@
 {
+  "$schema": "https://developer.microsoft.com/json-schemas/rig-package/rig.schema.json",
+
   "rigPackageName": "example-rig",
   "rigProfile": "web-app"
 }

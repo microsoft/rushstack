@@ -4,13 +4,16 @@
 import * as path from 'path';
 import * as fs from 'fs';
 
+import { ModuleResolver } from './ModuleResolver';
+
 interface IRigConfigJson {
   rigPackageName: string;
   rigProfile: string;
 }
 
-export interface IRigConfigOptions {
+interface IRigConfigOptions {
   projectFolderPath: string;
+  moduleResolver: ModuleResolver | undefined;
 
   enabled: boolean;
   filePath: string;
@@ -21,8 +24,9 @@ export interface IRigConfigOptions {
 /**
  * @public
  */
-export interface IModuleResolver {
-  resolve(moduleName: string, baseFolder: string): string;
+export interface ILoadForProjectFolderOptions {
+  packageJsonFolderPath: string;
+  moduleResolver?: ModuleResolver;
 }
 
 /**
@@ -32,13 +36,15 @@ export class RigConfig {
   // For syntax details, see PackageNameParser from @rushstack/node-core-library
   private static readonly _packageNameRegExp: RegExp = /^(@[A-Za-z0-9\-_\.]+\/)?[A-Za-z0-9\-_\.]+$/;
 
-  // Rig package names must have the "-rig" suffix
-  private static readonly _rigNameRegExp: RegExp = /-rig$/;
+  // Rig package names must have the "-rig" suffix.
+  // Also silently accept "-rig-test" for our build test projects.
+  private static readonly _rigNameRegExp: RegExp = /-rig(-test)?$/;
 
   public static jsonSchemaPath: string = path.resolve(__dirname, './schemas/rig.schema.json');
   private static _jsonSchemaObject: object | undefined = undefined;
 
   public readonly projectFolderPath: string;
+  private readonly _moduleResolver: ModuleResolver | undefined;
 
   public readonly enabled: boolean;
   public readonly filePath: string;
@@ -48,9 +54,14 @@ export class RigConfig {
 
   public readonly relativeProfileFolderPath: string;
 
-  /** @internal */
-  protected constructor(options: IRigConfigOptions) {
+  public readonly profileFolderPath: string;
+
+  private _resolvedRigPackageFolder: string | undefined;
+
+  private constructor(options: IRigConfigOptions) {
     this.projectFolderPath = options.projectFolderPath;
+    this._moduleResolver = options.moduleResolver;
+
     this.enabled = options.enabled;
     this.filePath = options.filePath;
     this.rigPackageName = options.rigPackageName;
@@ -71,11 +82,13 @@ export class RigConfig {
     return RigConfig._jsonSchemaObject!;
   }
 
-  public static loadForProjectFolder(packageJsonFolderPath: string): RigConfig {
-    const rigConfigFilePath: string = path.join(packageJsonFolderPath, 'config/rig.json');
+  public static loadForProjectFolder(options: ILoadForProjectFolderOptions): RigConfig {
+    const rigConfigFilePath: string = path.join(options.packageJsonFolderPath, 'config/rig.json');
     if (!fs.existsSync(rigConfigFilePath)) {
       return new RigConfig({
-        projectFolderPath: packageJsonFolderPath,
+        projectFolderPath: options.packageJsonFolderPath,
+        moduleResolver: options.moduleResolver,
+
         enabled: false,
         filePath: '',
         rigPackageName: '',
@@ -93,7 +106,9 @@ export class RigConfig {
     }
 
     return new RigConfig({
-      projectFolderPath: packageJsonFolderPath,
+      projectFolderPath: options.packageJsonFolderPath,
+      moduleResolver: options.moduleResolver,
+
       enabled: true,
       filePath: rigConfigFilePath,
       rigPackageName: json.rigPackageName,
@@ -101,27 +116,31 @@ export class RigConfig {
     });
   }
 
-  public resolveRig(resolver: IModuleResolver): ResolvedRigConfig {
-    if (!this.enabled) {
-      throw new Error('Cannot resolve the rig package because no rig is enabled for this project');
+  public getResolvedProfileFolder(): string {
+    const resolvedRigPackageFolder: string = this._getResolvedRigPackageFolder();
+    return path.join(resolvedRigPackageFolder, this.relativeProfileFolderPath);
+  }
+
+  private _getResolvedRigPackageFolder(): string {
+    if (this._resolvedRigPackageFolder === undefined) {
+      if (!this.enabled) {
+        throw new Error('Cannot resolve the rig package because no rig is enabled for this project');
+      }
+
+      if (!this._moduleResolver) {
+        throw new Error(
+          'Cannot resolve because no module resolver was provided to the RigConfig constructor'
+        );
+      }
+
+      const resolvedRigPackageJsonPath: string = this._moduleResolver({
+        modulePath: this.rigPackageName + '/package.json',
+        baseFolderPath: this.projectFolderPath
+      });
+
+      this._resolvedRigPackageFolder = path.dirname(resolvedRigPackageJsonPath);
     }
-
-    const resolvedRigPackageJsonPath: string = resolver.resolve(
-      this.rigPackageName + '/package.json',
-      this.projectFolderPath
-    );
-    const resolvedRigPackageFolder: string = path.dirname(resolvedRigPackageJsonPath);
-
-    // Circular reference
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    return new ResolvedRigConfig({
-      projectFolderPath: this.projectFolderPath,
-      enabled: this.enabled,
-      filePath: this.filePath,
-      rigPackageName: this.rigPackageName,
-      rigProfile: this.rigProfile,
-      resolvedRigPackageFolder
-    });
+    return this._resolvedRigPackageFolder;
   }
 
   private static _validateSchema(json: IRigConfigJson): void {
@@ -150,5 +169,3 @@ export class RigConfig {
     }
   }
 }
-
-import { ResolvedRigConfig } from './ResolvedRigConfig';

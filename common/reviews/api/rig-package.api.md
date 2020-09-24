@@ -5,43 +5,42 @@
 ```ts
 
 // @public (undocumented)
-export interface IModuleResolver {
+export interface ILoadForProjectFolderOptions {
     // (undocumented)
-    resolve(moduleName: string, baseFolder: string): string;
+    moduleResolver?: ModuleResolver;
+    // (undocumented)
+    packageJsonFolderPath: string;
 }
 
 // @public (undocumented)
-export class ResolvedRigConfig extends RigConfig {
-    // Warning: (ae-forgotten-export) The symbol "IResolvedRigConfigOptions" needs to be exported by the entry point index.d.ts
-    //
-    // @internal
-    constructor(options: IResolvedRigConfigOptions);
-    // (undocumented)
-    readonly profileFolderPath: string;
+export interface IModuleResolverOptions {
+    baseFolderPath: string;
+    modulePath: string;
 }
+
+// @public (undocumented)
+export type ModuleResolver = (options: IModuleResolverOptions) => string;
 
 // @public (undocumented)
 export class RigConfig {
-    // Warning: (ae-forgotten-export) The symbol "IRigConfigOptions" needs to be exported by the entry point index.d.ts
-    //
-    // @internal
-    protected constructor(options: IRigConfigOptions);
     // (undocumented)
     readonly enabled: boolean;
     // (undocumented)
     readonly filePath: string;
     // (undocumented)
+    getResolvedProfileFolder(): string;
+    // (undocumented)
     static readonly jsonSchemaObject: object;
     // (undocumented)
     static jsonSchemaPath: string;
     // (undocumented)
-    static loadForProjectFolder(packageJsonFolderPath: string): RigConfig;
+    static loadForProjectFolder(options: ILoadForProjectFolderOptions): RigConfig;
+    // (undocumented)
+    readonly profileFolderPath: string;
     // (undocumented)
     readonly projectFolderPath: string;
     // (undocumented)
     readonly relativeProfileFolderPath: string;
-    // (undocumented)
-    resolveRig(resolver: IModuleResolver): ResolvedRigConfig;
     // (undocumented)
     readonly rigPackageName: string;
     // (undocumented)
