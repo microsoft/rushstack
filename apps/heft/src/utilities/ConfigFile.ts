@@ -9,8 +9,13 @@ import { ICopyStaticAssetsConfigurationJson } from '../plugins/CopyStaticAssetsP
 import { IApiExtractorPluginConfiguration } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
 import { ITypeScriptConfigurationJson } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
 import { ICleanConfigurationJson } from '../stages/CleanStage';
+import { HeftConfiguration } from '../configuration/HeftConfiguration';
+
+export interface IHeftConfigurationJson {}
 
 export class ConfigFile {
+  private static _heftConfigFileLoader: ConfigurationFile<IHeftConfigurationJson> | undefined;
+
   private static _pluginConfigFileLoader: ConfigurationFile<IPluginConfigurationJson> | undefined;
   private static _copyStaticAssetsConfigurationLoader:
     | ConfigurationFile<ICopyStaticAssetsConfigurationJson>
@@ -22,6 +27,25 @@ export class ConfigFile {
     | ConfigurationFile<ITypeScriptConfigurationJson>
     | undefined;
   private static _cleanConfigurationFileLoader: ConfigurationFile<ICleanConfigurationJson> | undefined;
+
+  public static get heftConfigFileLoader(): ConfigurationFile<IHeftConfigurationJson> {
+    if (!ConfigFile._heftConfigFileLoader) {
+      const schemaPath: string = path.join(__dirname, '..', 'schemas', 'heft.schema.json');
+      ConfigFile._heftConfigFileLoader = new ConfigurationFile<IPluginConfigurationJson>({
+        jsonSchemaPath: schemaPath
+      });
+    }
+
+    return ConfigFile._heftConfigFileLoader;
+  }
+
+  public static async loadHeftConfigFileFromDefaultLocationAsync(
+    heftConfiguration: HeftConfiguration
+  ): Promise<IHeftConfigurationJson> {
+    return await ConfigFile.heftConfigFileLoader.loadConfigurationFileAsync(
+      path.resolve(heftConfiguration.projectConfigFolder, 'heft.json')
+    );
+  }
 
   public static get pluginConfigFileLoader(): ConfigurationFile<IPluginConfigurationJson> {
     if (!ConfigFile._pluginConfigFileLoader) {
