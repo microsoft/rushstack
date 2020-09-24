@@ -1,16 +1,13 @@
 /**
- * Specifies the plugins that will be loaded by Heft.
+ * Defines configuration used by core Heft.
  */
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/heft/plugins.schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
 
   /**
    * The list of Heft plugins to be loaded.
    */
-  "plugins": [
-    /**
-     * The list of Heft plugins to be loaded.
-     */
+  "heftPlugins": [
     // {
     //  /**
     //   * The path to the plugin package.
