@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "Heft Configuration",
-  "description": "Defines configuration used by core Heft tasks.",
+  "description": "Defines configuration used by core Heft.",
   "type": "object",
 
   "additionalProperties": false,

@@ -10,6 +10,7 @@ import { IApiExtractorPluginConfiguration } from '../plugins/ApiExtractorPlugin/
 import { ITypeScriptConfigurationJson } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
 import { ICleanConfigurationJson } from '../stages/CleanStage';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
+import { FileSystem } from '@rushstack/node-core-library';
 
 export interface IHeftConfigurationJson {}
 
@@ -31,7 +32,7 @@ export class ConfigFile {
   public static get heftConfigFileLoader(): ConfigurationFile<IHeftConfigurationJson> {
     if (!ConfigFile._heftConfigFileLoader) {
       const schemaPath: string = path.join(__dirname, '..', 'schemas', 'heft.schema.json');
-      ConfigFile._heftConfigFileLoader = new ConfigurationFile<IPluginConfigurationJson>({
+      ConfigFile._heftConfigFileLoader = new ConfigurationFile<IHeftConfigurationJson>({
         jsonSchemaPath: schemaPath
       });
     }
@@ -39,12 +40,15 @@ export class ConfigFile {
     return ConfigFile._heftConfigFileLoader;
   }
 
-  public static async loadHeftConfigFileFromDefaultLocationAsync(
+  public static async tryLoadHeftConfigFileFromDefaultLocationAsync(
     heftConfiguration: HeftConfiguration
-  ): Promise<IHeftConfigurationJson> {
-    return await ConfigFile.heftConfigFileLoader.loadConfigurationFileAsync(
-      path.resolve(heftConfiguration.projectConfigFolder, 'heft.json')
-    );
+  ): Promise<IHeftConfigurationJson | undefined> {
+    const heftConfigJsonPath: string = path.resolve(heftConfiguration.projectConfigFolder, 'heft.json');
+    if (await FileSystem.existsAsync(heftConfigJsonPath)) {
+      return await ConfigFile.heftConfigFileLoader.loadConfigurationFileAsync(heftConfigJsonPath);
+    } else {
+      return undefined;
+    }
   }
 
   public static get pluginConfigFileLoader(): ConfigurationFile<IPluginConfigurationJson> {
