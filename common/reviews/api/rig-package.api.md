@@ -11,6 +11,10 @@ export class RigConfig {
     // (undocumented)
     readonly filePath: string;
     // (undocumented)
+    static readonly jsonSchemaObject: object;
+    // (undocumented)
+    static jsonSchemaPath: string;
+    // (undocumented)
     static loadForProjectFolder(packageJsonFolderPath: string): RigConfig;
     // (undocumented)
     readonly profile: string | undefined;
