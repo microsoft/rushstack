@@ -1423,6 +1423,7 @@ importers:
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
       '@types/heft-jest': 1.0.1
+      ajv: 6.12.5
       colors: 1.2.5
     specifiers:
       '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
@@ -1430,6 +1431,7 @@ importers:
       '@rushstack/heft': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
+      ajv: ~6.12.5
       colors: ~1.2.1
   ../../libraries/rushell:
     dependencies:
@@ -14403,3 +14405,4 @@ packages:
       commander: 2.20.3
     resolution:
       integrity: sha512-DUOKC/IhbkdLKKiV89gw9DUauTV8U/8yJl1sjf6MtDmzevLKOF2duNJ495S3MFVjqZarr+qNGCPbkg4mu4PpLw==
+registry: ''

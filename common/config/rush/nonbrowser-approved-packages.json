@@ -191,10 +191,6 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "@rushstack/tree-pattern",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@rushstack/module-minifier-plugin",
       "allowedCategories": [ "tests" ]
     },
@@ -223,6 +219,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/tree-pattern",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/ts-command-line",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -248,6 +248,10 @@
     },
     {
       "name": "@yarnpkg/lockfile",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "ajv",
       "allowedCategories": [ "libraries" ]
     },
     {
