@@ -5,8 +5,18 @@
 ```ts
 
 // @public (undocumented)
-export class X {
-}
+export class RigConfig {
+    // (undocumented)
+    readonly enabled: boolean;
+    // (undocumented)
+    readonly filePath: string;
+    // (undocumented)
+    static loadForProjectFolder(packageJsonFolderPath: string): RigConfig;
+    // (undocumented)
+    readonly profile: string | undefined;
+    // (undocumented)
+    readonly rigPackageName: string;
+    }
 
 
 ```

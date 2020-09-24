@@ -7,5 +7,4 @@
  * @packageDocumentation
  */
 
-/** @public */
-export class X {}
+export * from './RigConfig';
