@@ -17,7 +17,7 @@
       "description": "The name of the rig package to inherit from. It should be an NPM package name with the \"-rig\" suffix."
     },
 
-    "profile": {
+    "rigProfile": {
       "type": "string",
       "description": "Selects a config profile from the rig package.  If omitted, then the \"default\" profile will be used."
     }

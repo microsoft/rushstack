@@ -17,7 +17,7 @@ export class RigConfig {
     // (undocumented)
     static loadForProjectFolder(packageJsonFolderPath: string): RigConfig;
     // (undocumented)
-    readonly profile: string | undefined;
+    readonly profileName: string;
     // (undocumented)
     readonly rigPackageName: string;
     }

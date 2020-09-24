@@ -18,7 +18,7 @@ describe('RigConfig tests', () => {
     const rigConfig: RigConfig = RigConfig.loadForProjectFolder(testProjectFolder);
     expect(rigConfig.enabled).toBe(true);
     expect(isSameFilePath(rigConfig.filePath, path.join(testProjectFolder, 'config/rig.json'))).toBe(true);
-    expect(rigConfig.profile).toBe('web-app');
+    expect(rigConfig.profileName).toBe('web-app');
     expect(rigConfig.rigPackageName).toBe('example-rig');
   });
 
@@ -26,7 +26,7 @@ describe('RigConfig tests', () => {
     const rigConfig: RigConfig = RigConfig.loadForProjectFolder(__dirname);
     expect(rigConfig.enabled).toBe(false);
     expect(rigConfig.filePath).toBe('');
-    expect(rigConfig.profile).toBeUndefined();
+    expect(rigConfig.profileName).toBe('');
     expect(rigConfig.rigPackageName).toBe('');
   });
 

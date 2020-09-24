@@ -6,13 +6,14 @@ import * as fs from 'fs';
 
 interface IRigConfigJson {
   rigPackageName: string;
-  profile: string | undefined;
+  rigProfile: string;
 }
 
 interface IRigConfigOptions {
   enabled: boolean;
   rigConfigFilePath: string;
-  json: IRigConfigJson;
+  rigPackageName: string;
+  rigProfile: string;
 }
 
 /**
@@ -32,13 +33,13 @@ export class RigConfig {
   public readonly filePath: string;
 
   public readonly rigPackageName: string;
-  public readonly profile: string | undefined;
+  public readonly profileName: string;
 
   private constructor(options: IRigConfigOptions) {
     this.enabled = options.enabled;
     this.filePath = options.rigConfigFilePath;
-    this.rigPackageName = options.json.rigPackageName;
-    this.profile = options.json.profile;
+    this.rigPackageName = options.rigPackageName;
+    this.profileName = options.rigProfile;
   }
 
   public static get jsonSchemaObject(): object {
@@ -55,10 +56,8 @@ export class RigConfig {
       return new RigConfig({
         enabled: false,
         rigConfigFilePath: '',
-        json: {
-          rigPackageName: '',
-          profile: undefined
-        }
+        rigPackageName: '',
+        rigProfile: ''
       });
     }
 
@@ -74,7 +73,8 @@ export class RigConfig {
     return new RigConfig({
       enabled: true,
       rigConfigFilePath,
-      json
+      rigPackageName: json.rigPackageName,
+      rigProfile: json.rigProfile || 'default'
     });
   }
 
@@ -83,7 +83,7 @@ export class RigConfig {
       switch (key) {
         case '$schema':
         case 'rigPackageName':
-        case 'profile':
+        case 'rigProfile':
           break;
         default:
           throw new Error(`Unsupported field ${JSON.stringify(key)}`);
