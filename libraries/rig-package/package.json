@@ -19,7 +19,9 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/heft-jest": "1.0.1",
+    "@types/resolve": "1.17.1",
     "ajv": "~6.12.5",
-    "colors": "~1.2.1"
+    "colors": "~1.2.1",
+    "resolve": "~1.17.0"
   }
 }
