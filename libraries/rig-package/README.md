@@ -13,17 +13,20 @@ that all share the exact same configuration:
 ```
 project1/package.json
 project1/config/api-extractor.json
-project1/config/other-tool.json
+project1/config/other-tool2.json
+project1/config/other-tool3.json
 project1/src/index.ts
 
 project2/package.json
 project2/config/api-extractor.json
-project2/config/other-tool.json
+project2/config/other-tool2.json
+project2/config/other-tool3.json
 project2/src/index.ts
 
 project3/package.json
 project3/config/api-extractor.json
-project3/config/other-tool.json
+project3/config/other-tool2.json
+project3/config/other-tool3.json
 project3/src/index.ts
 ```
 
@@ -41,17 +44,20 @@ example-rig/profile/web-library/api-extractor.json
 
 project1/package.json
 project1/config/api-extractor.json
-project1/config/other-tool.json
+project1/config/other-tool2.json
+project1/config/other-tool3.json
 project1/src/index.ts
 
 project2/package.json
 project2/config/api-extractor.json
-project2/config/other-tool.json
+project2/config/other-tool2.json
+project2/config/other-tool3.json
 project2/src/index.ts
 
 project3/package.json
 project3/config/api-extractor.json
-project3/config/other-tool.json
+project3/config/other-tool2.json
+project3/config/other-tool3.json
 project3/src/index.ts
 ```
 
@@ -92,7 +98,7 @@ Can we do better?
 
 ## rig.json eliminates files entirely
 
-The idea is to replace `config/api-extractor.json` and `config/other-tool.json` (and any other such files)
+The idea is to replace `config/api-extractor.json` and `config/other-tool2.json` (and any other such files)
 with a single file `config/rig.json` that delegates everything to the rig package:
 
 **project3/config/rig.json**
@@ -126,7 +132,7 @@ would probe for its config file (`<targetFile>.json`) using the following proced
    For example, it could report an error, or proceed using defaults.
 
 In cases where we need a project-specific customization, the `"extends"` field is still supported.  For example,
-**project1** can still add a custom setting like this:
+**project1** can still add a local override like this:
 
 **project1/config/api-extractor.json**
 ```js
@@ -134,7 +140,7 @@ In cases where we need a project-specific customization, the `"extends"` field i
   "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
   "extends": "example-rig/profile/node-library/api-extractor.json",
 
-  // Custom setting:
+  // Local override:
   "mainEntryPointFilePath": "<projectFolder>/lib/custom.d.ts",
 }
 ```
@@ -144,11 +150,16 @@ The result is a much shorter inventory of files:
 ```
 example-rig/package.json
 example-rig/profile/node-library/api-extractor.json
+example-rig/profile/node-library/other-tool2.json
+example-rig/profile/node-library/other-tool3.json
+example-rig/profile/node-library/api-extractor.json
+example-rig/profile/node-library/other-tool2.json
+example-rig/profile/node-library/other-tool3.json
 example-rig/profile/web-library/api-extractor.json
 
 project1/package.json
 project1/config/rig.json
-project1/config/api-extractor.json  <-- custom setting shown above
+project1/config/api-extractor.json  <-- local override shown above
 project1/src/index.ts
 
 project2/package.json
@@ -161,9 +172,9 @@ project3/src/index.ts
 ```
 
 
-## The `@ruhstack/rig-package` API
+## The `@rushstack/rig-package` API
 
-The `@ruhstack/rig-package` library provides an API for loading the **rig.json** file and performing lookups.
+The `@rushstack/rig-package` library provides an API for loading the **rig.json** file and performing lookups.
 It is a lightweight NPM package, intended to be easy for tool projects to accept as a dependency.  The package
 also includes the JSON schema file **rig.schema.json**.
 
@@ -175,10 +186,10 @@ import { RigConfig } from '@rushstack/rig-package';
 // Probe for the rig.json file and load it if found
 const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
   // Specify a  project folder (i.e. where its package.json file is located)
-  packageJsonFolderPath: '/path/to/project3'
+  projectFolderPath: '/path/to/project3'
 });
 
-if (rigConfig.enabled) {
+if (rigConfig.rigFound) {
   // We found a config/rig.json file
   //
   // Prints "/path/to/project3"
