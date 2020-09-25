@@ -7,6 +7,11 @@ import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IHeftPlugin } from './IHeftPlugin';
 import { InternalHeftSession } from './InternalHeftSession';
 import { HeftSession } from './HeftSession';
+import {
+  ConfigFile,
+  IHeftConfigurationJsonPluginSpecifier,
+  IHeftConfigurationJson
+} from '../utilities/ConfigFile';
 
 // Default plugins
 import { TypeScriptPlugin } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
@@ -16,11 +21,6 @@ import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPl
 import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
 import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWebpackPlugin';
 import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
-import {
-  ConfigFile,
-  IHeftConfigurationJsonPluginSpecifier,
-  IHeftConfigurationJson
-} from '../utilities/ConfigFile';
 import { ProjectValidatorPlugin } from '../plugins/ProjectValidatorPlugin';
 
 export interface IPluginManagerOptions {
