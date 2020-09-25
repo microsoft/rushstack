@@ -19,7 +19,7 @@
 
     "rigProfile": {
       "type": "string",
-      "description": "Selects a config profile from the rig package.  If omitted, then the \"default\" profile will be used."
+      "description": "Selects a config profile from the rig package.  The name must consist of lowercase alphanumeric words separated by hyphens, for example \"sample-profile\".  If omitted, then the \"default\" profile will be used."
     }
   },
 

@@ -52,6 +52,9 @@ export class RigConfig {
   // Also silently accept "-rig-test" for our build test projects.
   private static readonly _rigNameRegExp: RegExp = /-rig(-test)?$/;
 
+  // Profiles must be lowercase alphanumeric words separated by hyphens
+  private static readonly _profileNameRegExp: RegExp = /^[a-z0-9_\.]+(\-[a-z0-9_\.]+)*$/;
+
   /**
    * Returns the absolute path of the `rig.schema.json` JSON schema file for `config/rig.json`,
    * which is bundled with this NPM package.
@@ -102,6 +105,7 @@ export class RigConfig {
    * The `"rigProfile"` value that was loaded from `rig.json`, or `""` if the file was not found.
    *
    * @remarks
+   * The name must consist of lowercase alphanumeric words separated by hyphens, for example `"sample-profile"`.
    * If the `rig.json` file exists, but the `"rigProfile"` is not specified, then the profile
    * name will be `"default"`.
    *
@@ -249,7 +253,18 @@ export class RigConfig {
     }
 
     if (!RigConfig._rigNameRegExp.test(json.rigPackageName)) {
-      throw new Error(`The "rigPackageName" value is missing the "-rig" suffix`);
+      throw new Error(
+        `The "rigPackageName" value is missing the "-rig" suffix: ` + JSON.stringify(json.rigProfile)
+      );
+    }
+
+    if (json.rigProfile !== undefined) {
+      if (!RigConfig._profileNameRegExp.test(json.rigProfile)) {
+        throw new Error(
+          `The profile name must consist of lowercase alphanumeric words separated by hyphens: ` +
+            JSON.stringify(json.rigProfile)
+        );
+      }
     }
   }
 }
