@@ -22,17 +22,17 @@ import {
   IPreCompileSubstage
 } from '../stages/BuildStage';
 
-const PLUGIN_NAME: string = 'CleanPlugin';
+const PLUGIN_NAME: string = 'DeleteGlobsPlugin';
 const HEFT_STAGE_TAP: Tap = {
   name: PLUGIN_NAME,
   stage: Number.MIN_SAFE_INTEGER
 } as Tap; /* tappable's typings are wrong here */
 
-export class CleanPlugin implements IHeftPlugin {
+export class DeleteGlobsPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    const logger: ScopedLogger = heftSession.requestScopedLogger('clean');
+    const logger: ScopedLogger = heftSession.requestScopedLogger('delete-globs');
     heftSession.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanStageContext) => {
       clean.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
         await this._runDeleteForHeftEvent(

@@ -10,7 +10,7 @@ import { HeftSession } from './HeftSession';
 
 // Default plugins
 import { TypeScriptPlugin } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
-import { CleanPlugin } from '../plugins/CleanPlugin';
+import { DeleteGlobsPlugin } from '../plugins/DeleteGlobsPlugin';
 import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
 import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
 import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
@@ -45,7 +45,7 @@ export class PluginManager {
   public initializeDefaultPlugins(): void {
     this._applyPlugin(new TypeScriptPlugin());
     this._applyPlugin(new CopyStaticAssetsPlugin());
-    this._applyPlugin(new CleanPlugin());
+    this._applyPlugin(new DeleteGlobsPlugin());
     this._applyPlugin(new ApiExtractorPlugin());
     this._applyPlugin(new JestPlugin());
     this._applyPlugin(new BasicConfigureWebpackPlugin());
