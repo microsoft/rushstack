@@ -10,6 +10,23 @@
    */
   // "extends": "base-project/config/heft.json",
 
+  "eventActions": [
+    // {
+    //   "actionKind": "deleteGlobs",
+    //   "heftEvent": "clean",
+    //   "actionId": "defaultClean",
+    //   /**
+    //    * Glob patterns to be deleted. The paths are resolved relative to the project folder.
+    //    */
+    //   "globsToDelete": [
+    //     "dist",
+    //     "lib",
+    //     "lib-esnext",
+    //     "temp"
+    //   ]
+    // }
+  ],
+
   /**
    * The list of Heft plugins to be loaded.
    */

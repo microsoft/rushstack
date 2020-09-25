@@ -17,6 +17,61 @@
       "type": "string"
     },
 
+    "eventActions": {
+      "type": "array",
+      "description": "TBA",
+
+      "items": {
+        "type": "object",
+        "required": ["actionKind", "heftEvent", "actionId"],
+        "allOf": [
+          {
+            "properties": {
+              "actionKind": {
+                "type": "string",
+                "description": "TBA",
+                "enum": ["deleteGlobs"]
+              },
+
+              "heftEvent": {
+                "type": "string",
+                "description": "TBA",
+                "enum": ["clean"]
+              },
+
+              "actionId": {
+                "type": "string",
+                "description": "TBA"
+              }
+            }
+          },
+          {
+            "oneOf": [
+              // Delete Globs
+              {
+                "required": ["actionKind"],
+                "properties": {
+                  "actionKind": {
+                    "type": "string",
+                    "enum": ["deleteGlobs"]
+                  },
+
+                  "globsToDelete": {
+                    "type": "array",
+                    "description": "Glob patterns to be deleted. The paths are resolved relative to the project folder.",
+                    "items": {
+                      "type": "string",
+                      "pattern": "[^\\\\]"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+
     "heftPlugins": {
       "type": "array",
       "description": "Defines heft plugins that are used by a project.",

@@ -47,7 +47,7 @@ export class BundleSubstageHooks extends BuildSubstageHooksBase {
 // @public (undocumented)
 export class CleanStageHooks extends StageHooksBase<ICleanStageProperties> {
     // (undocumented)
-    readonly deletePath: AsyncSeriesBailHook<string>;
+    readonly run: AsyncParallelHook;
 }
 
 // @public (undocumented)

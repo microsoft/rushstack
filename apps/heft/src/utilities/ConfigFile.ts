@@ -7,9 +7,19 @@ import { ConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushs
 import { ICopyStaticAssetsConfigurationJson } from '../plugins/CopyStaticAssetsPlugin';
 import { IApiExtractorPluginConfiguration } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
 import { ITypeScriptConfigurationJson } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
-import { ICleanConfigurationJson } from '../stages/CleanStage';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { FileSystem } from '@rushstack/node-core-library';
+
+export interface IHeftConfigurationJsonEventActionBase {
+  actionKind: string;
+  heftEvent: string;
+  actionId: string;
+}
+
+export interface IHeftConfigurationDeleteGlobsEventAction extends IHeftConfigurationJsonEventActionBase {
+  actionKind: 'deleteGlobs';
+  globsToDelete: string[];
+}
 
 export interface IHeftConfigurationJsonPluginSpecifier {
   plugin: string;
@@ -17,11 +27,21 @@ export interface IHeftConfigurationJsonPluginSpecifier {
 }
 
 export interface IHeftConfigurationJson {
-  heftPlugins: IHeftConfigurationJsonPluginSpecifier[];
+  eventActions?: IHeftConfigurationJsonEventActionBase[];
+  heftPlugins?: IHeftConfigurationJsonPluginSpecifier[];
+}
+
+export interface IHeftEventActions {
+  deleteGlobs: IHeftConfigurationDeleteGlobsEventAction[];
 }
 
 export class ConfigFile {
   private static _heftConfigFileLoader: ConfigurationFile<IHeftConfigurationJson> | undefined;
+
+  private static _heftConfigFileEventActionsCache: Map<HeftConfiguration, IHeftEventActions> = new Map<
+    HeftConfiguration,
+    IHeftEventActions
+  >();
 
   private static _copyStaticAssetsConfigurationLoader:
     | ConfigurationFile<ICopyStaticAssetsConfigurationJson>
@@ -32,7 +52,6 @@ export class ConfigFile {
   private static _typeScriptConfigurationFileLoader:
     | ConfigurationFile<ITypeScriptConfigurationJson>
     | undefined;
-  private static _cleanConfigurationFileLoader: ConfigurationFile<ICleanConfigurationJson> | undefined;
 
   public static get heftConfigFileLoader(): ConfigurationFile<IHeftConfigurationJson> {
     if (!ConfigFile._heftConfigFileLoader) {
@@ -60,6 +79,42 @@ export class ConfigFile {
     } else {
       return undefined;
     }
+  }
+
+  public static async getConfigConfigFileEventActionsAsync(
+    heftConfiguration: HeftConfiguration
+  ): Promise<IHeftEventActions> {
+    let result: IHeftEventActions | undefined = ConfigFile._heftConfigFileEventActionsCache.get(
+      heftConfiguration
+    );
+    if (!result) {
+      const heftConfigJson:
+        | IHeftConfigurationJson
+        | undefined = await ConfigFile.tryLoadHeftConfigFileFromDefaultLocationAsync(heftConfiguration);
+
+      result = {
+        deleteGlobs: []
+      };
+      ConfigFile._heftConfigFileEventActionsCache.set(heftConfiguration, result);
+
+      for (const eventAction of heftConfigJson?.eventActions || []) {
+        switch (eventAction.actionKind) {
+          case 'deleteGlobs': {
+            result.deleteGlobs.push(eventAction as IHeftConfigurationDeleteGlobsEventAction);
+            break;
+          }
+
+          default: {
+            throw new Error(
+              `Unknown heft eventAction actionKind "${eventAction.actionKind}" in ` +
+                `"${ConfigFile.heftConfigFileLoader.getObjectSourceFilePath(eventAction)}" `
+            );
+          }
+        }
+      }
+    }
+
+    return result;
   }
 
   public static get copyStaticAssetsConfigurationLoader(): ConfigurationFile<
@@ -97,16 +152,5 @@ export class ConfigFile {
     }
 
     return ConfigFile._typeScriptConfigurationFileLoader;
-  }
-
-  public static get cleanConfigurationFileLoader(): ConfigurationFile<ICleanConfigurationJson> {
-    if (!ConfigFile._cleanConfigurationFileLoader) {
-      const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'clean.schema.json');
-      ConfigFile._cleanConfigurationFileLoader = new ConfigurationFile<ICleanConfigurationJson>({
-        jsonSchemaPath: schemaPath
-      });
-    }
-
-    return ConfigFile._cleanConfigurationFileLoader;
   }
 }
