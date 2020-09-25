@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/rig-package",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/rig-package_v0.1.0",
+      "date": "Fri, 25 Sep 2020 08:13:01 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release"
+          }
+        ]
+      }
+    }
+  ]
+}
