@@ -8,10 +8,10 @@ import { IHeftPlugin } from './IHeftPlugin';
 import { InternalHeftSession } from './InternalHeftSession';
 import { HeftSession } from './HeftSession';
 import {
-  ConfigFile,
+  CoreConfigFiles,
   IHeftConfigurationJsonPluginSpecifier,
   IHeftConfigurationJson
-} from '../utilities/ConfigFile';
+} from '../utilities/CoreConfigFiles';
 
 // Default plugins
 import { TypeScriptPlugin } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
@@ -61,7 +61,9 @@ export class PluginManager {
   public async initializePluginsFromConfigFileAsync(): Promise<void> {
     const heftConfigurationJson:
       | IHeftConfigurationJson
-      | undefined = await ConfigFile.tryLoadHeftConfigFileFromDefaultLocationAsync(this._heftConfiguration);
+      | undefined = await CoreConfigFiles.tryLoadHeftConfigFileFromDefaultLocationAsync(
+      this._heftConfiguration
+    );
     const heftPluginSpecifiers: IHeftConfigurationJsonPluginSpecifier[] =
       heftConfigurationJson?.heftPlugins || [];
 

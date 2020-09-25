@@ -14,7 +14,7 @@ import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IBuildStageContext, ICompileSubstage } from '../stages/BuildStage';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
-import { ConfigFile } from '../utilities/ConfigFile';
+import { CoreConfigFiles } from '../utilities/CoreConfigFiles';
 
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
 
@@ -96,7 +96,7 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
     const copyStaticAssetsConfigurationPath: string = path.resolve(configFolder, 'copy-static-assets.json');
     let copyStaticAssetsConfigurationJson: ICopyStaticAssetsConfigurationJson | undefined;
     if (await FileSystem.existsAsync(copyStaticAssetsConfigurationPath)) {
-      copyStaticAssetsConfigurationJson = await ConfigFile.copyStaticAssetsConfigurationLoader.loadConfigurationFileAsync(
+      copyStaticAssetsConfigurationJson = await CoreConfigFiles.copyStaticAssetsConfigurationLoader.loadConfigurationFileAsync(
         copyStaticAssetsConfigurationPath
       );
     }

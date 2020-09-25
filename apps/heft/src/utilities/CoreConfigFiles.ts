@@ -43,7 +43,7 @@ export interface IHeftEventActions {
   deleteGlobs: Map<HeftEvent, IHeftConfigurationDeleteGlobsEventAction[]>;
 }
 
-export class ConfigFile {
+export class CoreConfigFiles {
   private static _heftConfigFileLoader: ConfigurationFile<IHeftConfigurationJson> | undefined;
 
   private static _heftConfigFileEventActionsCache: Map<HeftConfiguration, IHeftEventActions> = new Map<
@@ -61,10 +61,13 @@ export class ConfigFile {
     | ConfigurationFile<ITypeScriptConfigurationJson>
     | undefined;
 
+  /**
+   * Returns the loader for the `config/heft.json` config file.
+   */
   public static get heftConfigFileLoader(): ConfigurationFile<IHeftConfigurationJson> {
-    if (!ConfigFile._heftConfigFileLoader) {
+    if (!CoreConfigFiles._heftConfigFileLoader) {
       const schemaPath: string = path.join(__dirname, '..', 'schemas', 'heft.schema.json');
-      ConfigFile._heftConfigFileLoader = new ConfigurationFile<IHeftConfigurationJson>({
+      CoreConfigFiles._heftConfigFileLoader = new ConfigurationFile<IHeftConfigurationJson>({
         jsonSchemaPath: schemaPath,
         propertyInheritanceTypes: { heftPlugins: InheritanceType.append },
         jsonPathMetadata: {
@@ -75,40 +78,46 @@ export class ConfigFile {
       });
     }
 
-    return ConfigFile._heftConfigFileLoader;
+    return CoreConfigFiles._heftConfigFileLoader;
   }
 
+  /**
+   * Try to load the config/heft.json config file. If it doesn't exist, returns undefined
+   */
   public static async tryLoadHeftConfigFileFromDefaultLocationAsync(
     heftConfiguration: HeftConfiguration
   ): Promise<IHeftConfigurationJson | undefined> {
     const heftConfigJsonPath: string = path.resolve(heftConfiguration.projectConfigFolder, 'heft.json');
     if (await FileSystem.existsAsync(heftConfigJsonPath)) {
-      return await ConfigFile.heftConfigFileLoader.loadConfigurationFileAsync(heftConfigJsonPath);
+      return await CoreConfigFiles.heftConfigFileLoader.loadConfigurationFileAsync(heftConfigJsonPath);
     } else {
       return undefined;
     }
   }
 
+  /**
+   * Gets the eventActions from config/heft.json
+   */
   public static async getConfigConfigFileEventActionsAsync(
     heftConfiguration: HeftConfiguration
   ): Promise<IHeftEventActions> {
-    let result: IHeftEventActions | undefined = ConfigFile._heftConfigFileEventActionsCache.get(
+    let result: IHeftEventActions | undefined = CoreConfigFiles._heftConfigFileEventActionsCache.get(
       heftConfiguration
     );
     if (!result) {
       const heftConfigJson:
         | IHeftConfigurationJson
-        | undefined = await ConfigFile.tryLoadHeftConfigFileFromDefaultLocationAsync(heftConfiguration);
+        | undefined = await CoreConfigFiles.tryLoadHeftConfigFileFromDefaultLocationAsync(heftConfiguration);
 
       result = {
         deleteGlobs: new Map<HeftEvent, IHeftConfigurationDeleteGlobsEventAction[]>()
       };
-      ConfigFile._heftConfigFileEventActionsCache.set(heftConfiguration, result);
+      CoreConfigFiles._heftConfigFileEventActionsCache.set(heftConfiguration, result);
 
       for (const eventAction of heftConfigJson?.eventActions || []) {
         switch (eventAction.actionKind) {
           case 'deleteGlobs': {
-            ConfigFile._addEventActionToMap(
+            CoreConfigFiles._addEventActionToMap(
               eventAction as IHeftConfigurationDeleteGlobsEventAction,
               result.deleteGlobs
             );
@@ -118,7 +127,7 @@ export class ConfigFile {
           default: {
             throw new Error(
               `Unknown heft eventAction actionKind "${eventAction.actionKind}" in ` +
-                `"${ConfigFile.heftConfigFileLoader.getObjectSourceFilePath(eventAction)}" `
+                `"${CoreConfigFiles.heftConfigFileLoader.getObjectSourceFilePath(eventAction)}" `
             );
           }
         }
@@ -128,48 +137,59 @@ export class ConfigFile {
     return result;
   }
 
+  /**
+   * Returns the loader for the `config/copy-static-assets.json` config file.
+   */
   public static get copyStaticAssetsConfigurationLoader(): ConfigurationFile<
     ICopyStaticAssetsConfigurationJson
   > {
-    if (!ConfigFile._copyStaticAssetsConfigurationLoader) {
+    if (!CoreConfigFiles._copyStaticAssetsConfigurationLoader) {
       const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'copy-static-assets.schema.json');
-      ConfigFile._copyStaticAssetsConfigurationLoader = new ConfigurationFile<
+      CoreConfigFiles._copyStaticAssetsConfigurationLoader = new ConfigurationFile<
         ICopyStaticAssetsConfigurationJson
       >({ jsonSchemaPath: schemaPath });
     }
 
-    return ConfigFile._copyStaticAssetsConfigurationLoader;
+    return CoreConfigFiles._copyStaticAssetsConfigurationLoader;
   }
 
+  /**
+   * Returns the loader for the `config/api-extractor-task.json` config file.
+   */
   public static get apiExtractorTaskConfigurationLoader(): ConfigurationFile<
     IApiExtractorPluginConfiguration
   > {
-    if (!ConfigFile._apiExtractorTaskConfigurationLoader) {
+    if (!CoreConfigFiles._apiExtractorTaskConfigurationLoader) {
       const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'api-extractor-task.schema.json');
-      ConfigFile._apiExtractorTaskConfigurationLoader = new ConfigurationFile<
+      CoreConfigFiles._apiExtractorTaskConfigurationLoader = new ConfigurationFile<
         IApiExtractorPluginConfiguration
       >({ jsonSchemaPath: schemaPath });
     }
 
-    return ConfigFile._apiExtractorTaskConfigurationLoader;
+    return CoreConfigFiles._apiExtractorTaskConfigurationLoader;
   }
 
+  /**
+   * Returns the loader for the `config/typescript.json` config file.
+   */
   public static get typeScriptConfigurationFileLoader(): ConfigurationFile<ITypeScriptConfigurationJson> {
-    if (!ConfigFile._typeScriptConfigurationFileLoader) {
+    if (!CoreConfigFiles._typeScriptConfigurationFileLoader) {
       const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'typescript.schema.json');
-      ConfigFile._typeScriptConfigurationFileLoader = new ConfigurationFile<ITypeScriptConfigurationJson>({
+      CoreConfigFiles._typeScriptConfigurationFileLoader = new ConfigurationFile<
+        ITypeScriptConfigurationJson
+      >({
         jsonSchemaPath: schemaPath
       });
     }
 
-    return ConfigFile._typeScriptConfigurationFileLoader;
+    return CoreConfigFiles._typeScriptConfigurationFileLoader;
   }
 
   private static _addEventActionToMap<TEventAction extends IHeftConfigurationJsonEventActionBase>(
     eventAction: TEventAction,
     map: Map<HeftEvent, TEventAction[]>
   ): void {
-    const heftEvent: HeftEvent = ConfigFile._parseHeftEvent(eventAction);
+    const heftEvent: HeftEvent = CoreConfigFiles._parseHeftEvent(eventAction);
     let eventArray: TEventAction[] | undefined = map.get(heftEvent);
     if (!eventArray) {
       eventArray = [];
@@ -199,7 +219,7 @@ export class ConfigFile {
       default:
         throw new Error(
           `Unknown heft event "${eventAction.heftEvent}" in ` +
-            ` "${ConfigFile.heftConfigFileLoader.getObjectSourceFilePath(eventAction)}".`
+            ` "${CoreConfigFiles.heftConfigFileLoader.getObjectSourceFilePath(eventAction)}".`
         );
     }
   }

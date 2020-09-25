@@ -12,7 +12,7 @@ import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { ICleanStageContext } from '../stages/CleanStage';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
-import { IHeftEventActions, ConfigFile, HeftEvent } from '../utilities/ConfigFile';
+import { IHeftEventActions, CoreConfigFiles, HeftEvent } from '../utilities/CoreConfigFiles';
 import { Async } from '../utilities/Async';
 import {
   IBuildStageContext,
@@ -80,7 +80,7 @@ export class DeleteGlobsPlugin implements IHeftPlugin {
     let deletedFiles: number = 0;
     let deletedFolders: number = 0;
 
-    const eventActions: IHeftEventActions = await ConfigFile.getConfigConfigFileEventActionsAsync(
+    const eventActions: IHeftEventActions = await CoreConfigFiles.getConfigConfigFileEventActionsAsync(
       heftConfiguration
     );
 
