@@ -1418,15 +1418,16 @@ importers:
   ../../libraries/rig-package:
     dependencies:
       '@types/node': 10.17.13
+      resolve: 1.17.0
+      strip-json-comments: 3.1.1
     devDependencies:
       '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
       '@types/heft-jest': 1.0.1
       '@types/resolve': 1.17.1
+      '@types/strip-json-comments': 3.0.0
       ajv: 6.12.5
-      colors: 1.2.5
-      resolve: 1.17.0
     specifiers:
       '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
@@ -1434,9 +1435,10 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       '@types/resolve': 1.17.1
+      '@types/strip-json-comments': 3.0.0
       ajv: ~6.12.5
-      colors: ~1.2.1
       resolve: ~1.17.0
+      strip-json-comments: ~3.1.1
   ../../libraries/rushell:
     dependencies:
       '@rushstack/node-core-library': 'link:../node-core-library'
@@ -3551,6 +3553,13 @@ packages:
     dev: true
     resolution:
       integrity: sha512-R6vDd7CHxcWMzv5wfVhR3qyCRVQoZKwVd6kit0rkozTThRZSXZKEW2Kz3AxfVqq9+UyJAz1g8Q+bJ3CL6NzztQ==
+  /@types/strip-json-comments/3.0.0:
+    dependencies:
+      strip-json-comments: 3.1.1
+    deprecated: 'This is a stub types definition. strip-json-comments provides its own type definitions, so you do not need this installed.'
+    dev: true
+    resolution:
+      integrity: sha512-+vSlZeCCGm/1Q3WwBJDUSGHvADTQjRl4Fve0AG9H+A4+xgJ7yAkWKoc4g7I9UoVqtwCzjv2g/GZn4xipokMYyQ==
   /@types/tapable/1.0.5:
     resolution:
       integrity: sha512-/gG2M/Imw7cQFp8PGvz/SwocNrmKFjFsm5Pb8HdbHkZ1K8pmuPzOX4VeVoiEecFCVf4CsN1r3/BRvx+6sNqwtQ==

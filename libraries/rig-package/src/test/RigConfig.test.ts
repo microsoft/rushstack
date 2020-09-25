@@ -4,6 +4,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as Ajv from 'ajv';
+import * as stripJsonComments from 'strip-json-comments';
 
 import { RigConfig } from '../RigConfig';
 
@@ -106,7 +107,8 @@ describe('RigConfig tests', () => {
     const validateRigFile: Ajv.ValidateFunction = ajv.compile(RigConfig.jsonSchemaObject);
 
     // Load the rig.json file
-    const rigConfigJsonObject: unknown = JSON.parse(fs.readFileSync(rigConfigFilePath).toString());
+    const rigConfigFileContent: string = fs.readFileSync(rigConfigFilePath).toString();
+    const rigConfigJsonObject: unknown = JSON.parse(stripJsonComments(rigConfigFileContent));
 
     // Validate it against our schema
     const valid: boolean = validateRigFile(rigConfigJsonObject) as boolean;

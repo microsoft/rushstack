@@ -4,6 +4,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as nodeResolve from 'resolve';
+import * as stripJsonComments from 'strip-json-comments';
 
 interface IRigConfigJson {
   rigPackageName: string;
@@ -167,7 +168,7 @@ export class RigConfig {
     let json: IRigConfigJson;
     try {
       const rigConfigFileContent: string = fs.readFileSync(rigConfigFilePath).toString();
-      json = JSON.parse(rigConfigFileContent);
+      json = JSON.parse(stripJsonComments(rigConfigFileContent));
       RigConfig._validateSchema(json);
     } catch (error) {
       throw new Error(error.message + '\nError loading config file: ' + rigConfigFilePath);
@@ -205,7 +206,7 @@ export class RigConfig {
     let json: IRigConfigJson;
     try {
       const rigConfigFileContent: string = (await fs.promises.readFile(rigConfigFilePath)).toString();
-      json = JSON.parse(rigConfigFileContent);
+      json = JSON.parse(stripJsonComments(rigConfigFileContent));
       RigConfig._validateSchema(json);
     } catch (error) {
       throw new Error(error.message + '\nError loading config file: ' + rigConfigFilePath);

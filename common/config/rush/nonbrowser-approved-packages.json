@@ -679,6 +679,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "strip-json-comments",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "style-loader",
       "allowedCategories": [ "tests" ]
     },

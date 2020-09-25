@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "@types/node": "10.17.13",
-    "resolve": "~1.17.0"
+    "resolve": "~1.17.0",
+    "strip-json-comments": "~3.1.1"
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-3.5": "workspace:*",
@@ -21,8 +22,8 @@
     "@rushstack/heft": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/resolve": "1.17.1",
+    "@types/strip-json-comments": "3.0.0",
     "ajv": "~6.12.5",
-    "colors": "~1.2.1",
     "resolve": "~1.17.0"
   }
 }

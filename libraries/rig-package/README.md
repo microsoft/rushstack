@@ -100,18 +100,19 @@ with a single file `config/rig.json` that delegates everything to the rig packag
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rig-package/rig.schema.json",
 
+  /**
+   * (Required) The name of the rig package to inherit from.
+   * It should be an NPM package name with the "-rig" suffix.
+   */
   "rigPackageName": "example-rig",
+  /**
+   * (Optional) Selects a config profile from the rig package.  The name must consist of
+   * lowercase alphanumeric words separated by hyphens, for example "sample-profile".
+   * If omitted, then the "default" profile will be used."
+   */
   "rigProfile": "web-library"
 }
 ```
-
-The fields:
-- `"rigPackageName"`: (Required) The name of the rig package to inherit from. It should be an NPM package name
-   with the "-rig" suffix.
-- `"rigProfile"`: (Optional) Selects a config profile from the rig package.  The name must consist of
-   lowercase alphanumeric words separated by hyphens, for example `"sample-profile"`.
-   If omitted, then the `"default"` profile will be used.
-
 
 Using **rig.json** eliminates the `"extends"` stub files entirely.  A tool that implements the **rig.json** system
 would probe for its config file (`<targetFile>.json`) using the following procedure:
@@ -163,8 +164,8 @@ project3/src/index.ts
 ## The `@ruhstack/rig-package` API
 
 The `@ruhstack/rig-package` library provides an API for loading the **rig.json** file and performing lookups.
-It is a lightweight NPM package (with only one dependency, the `resolve` package), intended to be easy for
-other tool projects to adopt.  The package also includes the JSON schema file **rig.schema.json**.
+It is a lightweight NPM package, intended to be easy for tool projects to accept as a dependency.  The package
+also includes the JSON schema file **rig.schema.json**.
 
 Example usage of the API:
 
