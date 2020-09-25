@@ -19,7 +19,7 @@ describe('RigConfig tests', () => {
   describe('loads a rig.json file', () => {
     function validate(rigConfig: RigConfig): void {
       expectEqualPaths(rigConfig.projectFolderPath, testProjectFolder);
-      expect(rigConfig.enabled).toBe(true);
+      expect(rigConfig.rigFound).toBe(true);
       expectEqualPaths(rigConfig.filePath, path.join(testProjectFolder, 'config/rig.json'));
       expect(rigConfig.rigProfile).toBe('web-app');
       expect(rigConfig.rigPackageName).toBe('example-rig');
@@ -42,7 +42,7 @@ describe('RigConfig tests', () => {
   describe('handles a missing rig.json file', () => {
     function validate(rigConfig: RigConfig): void {
       expectEqualPaths(rigConfig.projectFolderPath, __dirname);
-      expect(rigConfig.enabled).toBe(false);
+      expect(rigConfig.rigFound).toBe(false);
       expect(rigConfig.filePath).toBe('');
       expect(rigConfig.rigProfile).toBe('');
       expect(rigConfig.rigPackageName).toBe('');
@@ -68,7 +68,7 @@ describe('RigConfig tests', () => {
         projectFolderPath: testProjectFolder
       });
 
-      expect(rigConfig.enabled).toBe(true);
+      expect(rigConfig.rigFound).toBe(true);
 
       expectEqualPaths(
         rigConfig.getResolvedProfileFolder(),
@@ -81,7 +81,7 @@ describe('RigConfig tests', () => {
         projectFolderPath: testProjectFolder
       });
 
-      expect(rigConfig.enabled).toBe(true);
+      expect(rigConfig.rigFound).toBe(true);
 
       expectEqualPaths(
         await rigConfig.getResolvedProfileFolderAsync(),

@@ -13,7 +13,7 @@ interface IRigConfigJson {
 interface IRigConfigOptions {
   projectFolderPath: string;
 
-  enabled: boolean;
+  rigFound: boolean;
   filePath: string;
   rigPackageName: string;
   rigProfile: string;
@@ -71,7 +71,7 @@ export class RigConfig {
   /**
    * Returns `true` if `config/rig.json` was found, or `false` otherwise.
    */
-  public readonly enabled: boolean;
+  public readonly rigFound: boolean;
 
   /**
    * The full path to the `rig.json` file that was found, or `""` if none was found.
@@ -116,12 +116,12 @@ export class RigConfig {
   private constructor(options: IRigConfigOptions) {
     this.projectFolderPath = options.projectFolderPath;
 
-    this.enabled = options.enabled;
+    this.rigFound = options.rigFound;
     this.filePath = options.filePath;
     this.rigPackageName = options.rigPackageName;
     this.rigProfile = options.rigProfile;
 
-    if (this.enabled) {
+    if (this.rigFound) {
       this.relativeProfileFolderPath = 'profiles/' + this.rigProfile;
     } else {
       this.relativeProfileFolderPath = '';
@@ -148,7 +148,7 @@ export class RigConfig {
    * Use this method to load the `config/rig.json` file for a given project.
    *
    * @remarks
-   * If the file cannot be found, an empty `RigConfig` object will be returned with {@link RigConfig.enabled}
+   * If the file cannot be found, an empty `RigConfig` object will be returned with {@link RigConfig.rigFound}
    * equal to `false`.
    */
   public static loadForProjectFolder(options: ILoadForProjectFolderOptions): RigConfig {
@@ -157,7 +157,7 @@ export class RigConfig {
       return new RigConfig({
         projectFolderPath: options.projectFolderPath,
 
-        enabled: false,
+        rigFound: false,
         filePath: '',
         rigPackageName: '',
         rigProfile: ''
@@ -176,7 +176,7 @@ export class RigConfig {
     return new RigConfig({
       projectFolderPath: options.projectFolderPath,
 
-      enabled: true,
+      rigFound: true,
       filePath: rigConfigFilePath,
       rigPackageName: json.rigPackageName,
       rigProfile: json.rigProfile || 'default'
@@ -195,7 +195,7 @@ export class RigConfig {
       return new RigConfig({
         projectFolderPath: options.projectFolderPath,
 
-        enabled: false,
+        rigFound: false,
         filePath: '',
         rigPackageName: '',
         rigProfile: ''
@@ -214,7 +214,7 @@ export class RigConfig {
     return new RigConfig({
       projectFolderPath: options.projectFolderPath,
 
-      enabled: true,
+      rigFound: true,
       filePath: rigConfigFilePath,
       rigPackageName: json.rigPackageName,
       rigProfile: json.rigProfile || 'default'
@@ -253,7 +253,7 @@ export class RigConfig {
         return this._resolvedRigPackageFolder;
       }
     } else {
-      if (!this.enabled) {
+      if (!this.rigFound) {
         throw new Error('Cannot resolve the rig package because no rig was specified for this project');
       }
 

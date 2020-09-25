@@ -11,7 +11,6 @@ export interface ILoadForProjectFolderOptions {
 
 // @public
 export class RigConfig {
-    readonly enabled: boolean;
     readonly filePath: string;
     getResolvedProfileFolder(): string;
     getResolvedProfileFolderAsync(): Promise<string>;
@@ -21,6 +20,7 @@ export class RigConfig {
     static loadForProjectFolderAsync(options: ILoadForProjectFolderOptions): Promise<RigConfig>;
     readonly projectFolderPath: string;
     readonly relativeProfileFolderPath: string;
+    readonly rigFound: boolean;
     readonly rigPackageName: string;
     readonly rigProfile: string;
     }
