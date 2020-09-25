@@ -3,8 +3,7 @@
 
 import * as path from 'path';
 import * as fs from 'fs';
-
-import { ModuleResolver } from './ModuleResolver';
+import * as nodeResolve from 'resolve';
 
 interface IRigConfigJson {
   rigPackageName: string;
@@ -13,7 +12,6 @@ interface IRigConfigJson {
 
 interface IRigConfigOptions {
   projectFolderPath: string;
-  moduleResolver: ModuleResolver | undefined;
 
   enabled: boolean;
   filePath: string;
@@ -31,12 +29,6 @@ export interface ILoadForProjectFolderOptions {
    * The path to the folder of the project to be analyzed.  This folder should contain a `package.json` file.
    */
   projectFolderPath: string;
-
-  /**
-   * A function that implements Node.js module resolution.  The {@link RigConfig.getResolvedProfileFolder}
-   * API cannot be used if this is omitted.
-   */
-  moduleResolver?: ModuleResolver;
 }
 
 /**
@@ -75,8 +67,6 @@ export class RigConfig {
    * Example: `/path/to/your-project`
    */
   public readonly projectFolderPath: string;
-
-  private readonly _moduleResolver: ModuleResolver | undefined;
 
   /**
    * Returns `true` if `config/rig.json` was found, or `false` otherwise.
@@ -125,7 +115,6 @@ export class RigConfig {
 
   private constructor(options: IRigConfigOptions) {
     this.projectFolderPath = options.projectFolderPath;
-    this._moduleResolver = options.moduleResolver;
 
     this.enabled = options.enabled;
     this.filePath = options.filePath;
@@ -145,6 +134,7 @@ export class RigConfig {
    * @remarks
    * The JSON object will be lazily loaded when this property getter is accessed, and the result
    * will be cached.
+   * Accessing this property may make a synchronous filesystem call.
    */
   public static get jsonSchemaObject(): object {
     if (RigConfig._jsonSchemaObject === undefined) {
@@ -166,7 +156,6 @@ export class RigConfig {
     if (!fs.existsSync(rigConfigFilePath)) {
       return new RigConfig({
         projectFolderPath: options.projectFolderPath,
-        moduleResolver: options.moduleResolver,
 
         enabled: false,
         filePath: '',
@@ -186,7 +175,44 @@ export class RigConfig {
 
     return new RigConfig({
       projectFolderPath: options.projectFolderPath,
-      moduleResolver: options.moduleResolver,
+
+      enabled: true,
+      filePath: rigConfigFilePath,
+      rigPackageName: json.rigPackageName,
+      rigProfile: json.rigProfile || 'default'
+    });
+  }
+
+  /**
+   * An async variant of {@link RigConfig.loadForProjectFolder}
+   */
+  public static async loadForProjectFolderAsync(options: ILoadForProjectFolderOptions): Promise<RigConfig> {
+    const rigConfigFilePath: string = path.join(options.projectFolderPath, 'config/rig.json');
+    const rigConfigFilePathExists: boolean = await new Promise((resolve: (result: boolean) => void) =>
+      fs.exists(rigConfigFilePath, resolve)
+    );
+    if (!rigConfigFilePathExists) {
+      return new RigConfig({
+        projectFolderPath: options.projectFolderPath,
+
+        enabled: false,
+        filePath: '',
+        rigPackageName: '',
+        rigProfile: ''
+      });
+    }
+
+    let json: IRigConfigJson;
+    try {
+      const rigConfigFileContent: string = (await fs.promises.readFile(rigConfigFilePath)).toString();
+      json = JSON.parse(rigConfigFileContent);
+      RigConfig._validateSchema(json);
+    } catch (error) {
+      throw new Error(error.message + '\nError loading config file: ' + rigConfigFilePath);
+    }
+
+    return new RigConfig({
+      projectFolderPath: options.projectFolderPath,
 
       enabled: true,
       filePath: rigConfigFilePath,
@@ -205,30 +231,59 @@ export class RigConfig {
    * Example: `/path/to/your-project/node_modules/example-rig/profiles/example-profile`
    */
   public getResolvedProfileFolder(): string {
-    const resolvedRigPackageFolder: string = this._getResolvedRigPackageFolder();
+    const resolvedRigPackageFolder: string = this._getResolvedRigPackageFolder(false);
     return path.join(resolvedRigPackageFolder, this.relativeProfileFolderPath);
   }
 
-  private _getResolvedRigPackageFolder(): string {
-    if (this._resolvedRigPackageFolder === undefined) {
+  /**
+   * An async variant of {@link RigConfig.getResolvedProfileFolder}
+   */
+  public async getResolvedProfileFolderAsync(): Promise<string> {
+    const resolvedRigPackageFolder: string = await this._getResolvedRigPackageFolder(true);
+    return path.join(resolvedRigPackageFolder, this.relativeProfileFolderPath);
+  }
+
+  private _getResolvedRigPackageFolder(async: true): Promise<string>;
+  private _getResolvedRigPackageFolder(async: false): string;
+  private _getResolvedRigPackageFolder(async: boolean): Promise<string> | string {
+    if (this._resolvedRigPackageFolder !== undefined) {
+      if (async) {
+        return Promise.resolve(this._resolvedRigPackageFolder);
+      } else {
+        return this._resolvedRigPackageFolder;
+      }
+    } else {
       if (!this.enabled) {
         throw new Error('Cannot resolve the rig package because no rig is enabled for this project');
       }
 
-      if (!this._moduleResolver) {
-        throw new Error(
-          'Cannot resolve because no module resolver was provided to the RigConfig constructor'
+      const rigPackageJsonModuleSpecifier: string = `${this.rigPackageName}/package.json`;
+      const resolveOptions: nodeResolve.Opts = { basedir: this.projectFolderPath };
+      if (async) {
+        const resolvePromise: Promise<string> = new Promise(
+          (resolve: (result: string) => void, reject: (error: Error) => void) => {
+            nodeResolve(rigPackageJsonModuleSpecifier, resolveOptions, (error: Error, result: string) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(result);
+              }
+            });
+          }
         );
+        return resolvePromise.then((resolvedRigPackageJsonPath) => {
+          this._resolvedRigPackageFolder = path.dirname(resolvedRigPackageJsonPath);
+          return this._resolvedRigPackageFolder;
+        });
+      } else {
+        const resolvedRigPackageJsonPath: string = nodeResolve.sync(
+          rigPackageJsonModuleSpecifier,
+          resolveOptions
+        );
+        this._resolvedRigPackageFolder = path.dirname(resolvedRigPackageJsonPath);
+        return this._resolvedRigPackageFolder;
       }
-
-      const resolvedRigPackageJsonPath: string = this._moduleResolver({
-        modulePath: this.rigPackageName + '/package.json',
-        baseFolderPath: this.projectFolderPath
-      });
-
-      this._resolvedRigPackageFolder = path.dirname(resolvedRigPackageJsonPath);
     }
-    return this._resolvedRigPackageFolder;
   }
 
   private static _validateSchema(json: IRigConfigJson): void {

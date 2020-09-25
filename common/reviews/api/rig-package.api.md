@@ -6,27 +6,19 @@
 
 // @public
 export interface ILoadForProjectFolderOptions {
-    moduleResolver?: ModuleResolver;
     projectFolderPath: string;
 }
-
-// @public
-export interface IModuleResolverOptions {
-    baseFolderPath: string;
-    modulePath: string;
-}
-
-// @public
-export type ModuleResolver = (options: IModuleResolverOptions) => string;
 
 // @public
 export class RigConfig {
     readonly enabled: boolean;
     readonly filePath: string;
     getResolvedProfileFolder(): string;
+    getResolvedProfileFolderAsync(): Promise<string>;
     static readonly jsonSchemaObject: object;
     static jsonSchemaPath: string;
     static loadForProjectFolder(options: ILoadForProjectFolderOptions): RigConfig;
+    static loadForProjectFolderAsync(options: ILoadForProjectFolderOptions): Promise<RigConfig>;
     readonly projectFolderPath: string;
     readonly relativeProfileFolderPath: string;
     readonly rigPackageName: string;

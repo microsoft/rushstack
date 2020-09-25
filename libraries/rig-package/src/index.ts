@@ -15,4 +15,3 @@
  */
 
 export { RigConfig, ILoadForProjectFolderOptions } from './RigConfig';
-export { ModuleResolver, IModuleResolverOptions } from './ModuleResolver';

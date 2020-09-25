@@ -156,25 +156,18 @@ project3/src/index.ts
 ## A helper library
 
 The `@ruhstack/rig-package` library provides a lightweight API for loading the `rig.json` file and performing lookups.
-The package does not depend on any other NPM packages.  It also includes the JSON schema file `rig.schema.json` for
+The package only depends on the `resolve` other NPM package.  It also includes the JSON schema file `rig.schema.json` for
 tools that need it.
 
 Example usage of the API:
 
 ```js
-import * as resolve from 'resolve';
 import { RigConfig } from '@rushstack/rig-package';
 
 // Probe for the rig.json file and load it if found
 const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
   // Specify a  project folder (i.e. where its package.json file is located)
-  packageJsonFolderPath: '/path/to/project3',
-
-  // If you want to use the RigConfig.getResolvedProfileFolder() API, you need to provide
-  // a Node.js module resolver.  For portability, @rushstack/rig-package does not depend on one.
-  moduleResolver: (options: IModuleResolverOptions): string => {
-    return resolve.sync(options.modulePath, { basedir: options.baseFolderPath });
-  }
+  packageJsonFolderPath: '/path/to/project3'
 });
 
 if (rigConfig.enabled) {
@@ -194,6 +187,8 @@ if (rigConfig.enabled) {
   // (Your tool can check this folder for its config file)
 }
 ```
+
+Note that there are also async variants of the functions that access the filesystem.
 
 
 API documentation for this package: https://rushstack.io/pages/api/rig-package/

@@ -4,10 +4,8 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as Ajv from 'ajv';
-import * as resolve from 'resolve';
 
 import { RigConfig } from '../RigConfig';
-import { IModuleResolverOptions } from '../ModuleResolver';
 
 const testProjectFolder: string = path.join(__dirname, 'test-project');
 
@@ -18,40 +16,78 @@ function expectEqualPaths(path1: string, path2: string): void {
 }
 
 describe('RigConfig tests', () => {
-  it('loads a rig.json file', () => {
-    const rigConfig: RigConfig = RigConfig.loadForProjectFolder({ projectFolderPath: testProjectFolder });
-    expectEqualPaths(rigConfig.projectFolderPath, testProjectFolder);
-    expect(rigConfig.enabled).toBe(true);
-    expectEqualPaths(rigConfig.filePath, path.join(testProjectFolder, 'config/rig.json'));
-    expect(rigConfig.rigProfile).toBe('web-app');
-    expect(rigConfig.rigPackageName).toBe('example-rig');
-    expect(rigConfig.relativeProfileFolderPath).toBe('profiles/web-app');
-  });
+  describe('loads a rig.json file', () => {
+    function validate(rigConfig: RigConfig): void {
+      expectEqualPaths(rigConfig.projectFolderPath, testProjectFolder);
+      expect(rigConfig.enabled).toBe(true);
+      expectEqualPaths(rigConfig.filePath, path.join(testProjectFolder, 'config/rig.json'));
+      expect(rigConfig.rigProfile).toBe('web-app');
+      expect(rigConfig.rigPackageName).toBe('example-rig');
+      expect(rigConfig.relativeProfileFolderPath).toBe('profiles/web-app');
+    }
 
-  it('handles a missing rig.json file', () => {
-    const rigConfig: RigConfig = RigConfig.loadForProjectFolder({ projectFolderPath: __dirname });
-    expectEqualPaths(rigConfig.projectFolderPath, __dirname);
-    expect(rigConfig.enabled).toBe(false);
-    expect(rigConfig.filePath).toBe('');
-    expect(rigConfig.rigProfile).toBe('');
-    expect(rigConfig.rigPackageName).toBe('');
-    expect(rigConfig.relativeProfileFolderPath).toBe('');
-  });
-
-  it('resolves the profile path', () => {
-    const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
-      projectFolderPath: testProjectFolder,
-      moduleResolver: (options: IModuleResolverOptions): string => {
-        return resolve.sync(options.modulePath, { basedir: options.baseFolderPath });
-      }
+    it('synchronously', () => {
+      const rigConfig: RigConfig = RigConfig.loadForProjectFolder({ projectFolderPath: testProjectFolder });
+      validate(rigConfig);
     });
 
-    expect(rigConfig.enabled).toBe(true);
+    it('asynchronously', async () => {
+      const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
+        projectFolderPath: testProjectFolder
+      });
+      validate(rigConfig);
+    });
+  });
 
-    expectEqualPaths(
-      rigConfig.getResolvedProfileFolder(),
-      path.join(testProjectFolder, 'node_modules/example-rig/profiles/web-app')
-    );
+  describe('handles a missing rig.json file', () => {
+    function validate(rigConfig: RigConfig): void {
+      expectEqualPaths(rigConfig.projectFolderPath, __dirname);
+      expect(rigConfig.enabled).toBe(false);
+      expect(rigConfig.filePath).toBe('');
+      expect(rigConfig.rigProfile).toBe('');
+      expect(rigConfig.rigPackageName).toBe('');
+      expect(rigConfig.relativeProfileFolderPath).toBe('');
+    }
+
+    it('synchronously', () => {
+      const rigConfig: RigConfig = RigConfig.loadForProjectFolder({ projectFolderPath: __dirname });
+      validate(rigConfig);
+    });
+
+    it('asynchronously', async () => {
+      const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
+        projectFolderPath: __dirname
+      });
+      validate(rigConfig);
+    });
+  });
+
+  describe(`resolves the profile path`, () => {
+    it('synchronously', () => {
+      const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
+        projectFolderPath: testProjectFolder
+      });
+
+      expect(rigConfig.enabled).toBe(true);
+
+      expectEqualPaths(
+        rigConfig.getResolvedProfileFolder(),
+        path.join(testProjectFolder, 'node_modules/example-rig/profiles/web-app')
+      );
+    });
+
+    it('asynchronously', async () => {
+      const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
+        projectFolderPath: testProjectFolder
+      });
+
+      expect(rigConfig.enabled).toBe(true);
+
+      expectEqualPaths(
+        await rigConfig.getResolvedProfileFolderAsync(),
+        path.join(testProjectFolder, 'node_modules/example-rig/profiles/web-app')
+      );
+    });
   });
 
   it('validates a rig.json file using the schema', () => {
