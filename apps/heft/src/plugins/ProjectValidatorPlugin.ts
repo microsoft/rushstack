@@ -16,6 +16,10 @@ const ALLOWED_HEFT_DATA_FOLDER_SUBFOLDERS: Set<string> = new Set<string>([Consta
 
 const PLUGIN_NAME: string = 'ProjectValidatorPlugin';
 
+/**
+ * This plugin is a place to do generic project-level validation. For example, ensuring that only expected
+ * files are in the ".heft" folder (i.e. - legacy config files aren't still there)
+ */
 export class ProjectValidatorPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
 
