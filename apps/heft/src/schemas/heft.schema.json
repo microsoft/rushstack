@@ -19,7 +19,7 @@
 
     "eventActions": {
       "type": "array",
-      "description": "TBA",
+      "description": "An array of actions (such as deleting files or folders) that should occur during a Heft run.",
 
       "items": {
         "type": "object",
@@ -29,19 +29,19 @@
             "properties": {
               "actionKind": {
                 "type": "string",
-                "description": "TBA",
+                "description": "The kind of built-in operation that should be performed.",
                 "enum": ["deleteGlobs"]
               },
 
               "heftEvent": {
                 "type": "string",
-                "description": "TBA",
+                "description": "The stage of the Heft run during which this action should occur. Note that actions specified in heft.json occur at the end of the stage of the Heft run.",
                 "enum": ["clean"]
               },
 
               "actionId": {
                 "type": "string",
-                "description": "TBA"
+                "description": "A user-defined tag whose purpose is to allow configs to replace/delete handlers that were added by other configs."
               }
             }
           },
