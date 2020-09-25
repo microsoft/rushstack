@@ -10,9 +10,17 @@ import { ITypeScriptConfigurationJson } from '../plugins/TypeScriptPlugin/TypeSc
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { FileSystem } from '@rushstack/node-core-library';
 
+export enum HeftEvent {
+  clean = 'clean',
+  preCompile = 'pre-compile',
+  compile = 'compile',
+  bundle = 'bundle',
+  postBuild = 'post-build'
+}
+
 export interface IHeftConfigurationJsonEventActionBase {
   actionKind: string;
-  heftEvent: string;
+  heftEvent: 'clean' | 'pre-compile' | 'compile' | 'bundle' | 'post-build';
   actionId: string;
 }
 
@@ -32,7 +40,7 @@ export interface IHeftConfigurationJson {
 }
 
 export interface IHeftEventActions {
-  deleteGlobs: IHeftConfigurationDeleteGlobsEventAction[];
+  deleteGlobs: Map<HeftEvent, IHeftConfigurationDeleteGlobsEventAction[]>;
 }
 
 export class ConfigFile {
@@ -93,14 +101,17 @@ export class ConfigFile {
         | undefined = await ConfigFile.tryLoadHeftConfigFileFromDefaultLocationAsync(heftConfiguration);
 
       result = {
-        deleteGlobs: []
+        deleteGlobs: new Map<HeftEvent, IHeftConfigurationDeleteGlobsEventAction[]>()
       };
       ConfigFile._heftConfigFileEventActionsCache.set(heftConfiguration, result);
 
       for (const eventAction of heftConfigJson?.eventActions || []) {
         switch (eventAction.actionKind) {
           case 'deleteGlobs': {
-            result.deleteGlobs.push(eventAction as IHeftConfigurationDeleteGlobsEventAction);
+            ConfigFile._addEventActionToMap(
+              eventAction as IHeftConfigurationDeleteGlobsEventAction,
+              result.deleteGlobs
+            );
             break;
           }
 
@@ -152,5 +163,44 @@ export class ConfigFile {
     }
 
     return ConfigFile._typeScriptConfigurationFileLoader;
+  }
+
+  private static _addEventActionToMap<TEventAction extends IHeftConfigurationJsonEventActionBase>(
+    eventAction: TEventAction,
+    map: Map<HeftEvent, TEventAction[]>
+  ): void {
+    const heftEvent: HeftEvent = ConfigFile._parseHeftEvent(eventAction);
+    let eventArray: TEventAction[] | undefined = map.get(heftEvent);
+    if (!eventArray) {
+      eventArray = [];
+      map.set(heftEvent, eventArray);
+    }
+
+    eventArray.push(eventAction);
+  }
+
+  private static _parseHeftEvent(eventAction: IHeftConfigurationJsonEventActionBase): HeftEvent {
+    switch (eventAction.heftEvent) {
+      case 'clean':
+        return HeftEvent.clean;
+
+      case 'pre-compile':
+        return HeftEvent.preCompile;
+
+      case 'compile':
+        return HeftEvent.compile;
+
+      case 'bundle':
+        return HeftEvent.bundle;
+
+      case 'post-build':
+        return HeftEvent.postBuild;
+
+      default:
+        throw new Error(
+          `Unknown heft event "${eventAction.heftEvent}" in ` +
+            ` "${ConfigFile.heftConfigFileLoader.getObjectSourceFilePath(eventAction)}".`
+        );
+    }
   }
 }

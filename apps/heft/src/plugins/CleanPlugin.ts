@@ -5,32 +5,74 @@ import * as path from 'path';
 import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
 import { FileSystem, LegacyAdapters } from '@rushstack/node-core-library';
+import { Tap } from 'tapable';
 
 import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { ICleanStageContext } from '../stages/CleanStage';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
-import { IHeftEventActions, ConfigFile } from '../utilities/ConfigFile';
+import { IHeftEventActions, ConfigFile, HeftEvent } from '../utilities/ConfigFile';
 import { Async } from '../utilities/Async';
+import {
+  IBuildStageContext,
+  IBundleSubstage,
+  ICompileSubstage,
+  IPostBuildSubstage,
+  IPreCompileSubstage
+} from '../stages/BuildStage';
 
 const PLUGIN_NAME: string = 'CleanPlugin';
+const HEFT_STAGE_TAP: Tap = {
+  name: PLUGIN_NAME,
+  stage: Number.MIN_SAFE_INTEGER
+} as Tap; /* tappable's typings are wrong here */
 
 export class CleanPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
+    const logger: ScopedLogger = heftSession.requestScopedLogger('clean');
     heftSession.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanStageContext) => {
-      const logger: ScopedLogger = heftSession.requestScopedLogger('clean');
+      clean.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
+        await this._runDeleteForHeftEvent(
+          HeftEvent.clean,
+          logger,
+          heftConfiguration,
+          clean.properties.pathsToDelete
+        );
+      });
+    });
 
-      clean.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-        await this._runDeleteForHeftEvent('clean', logger, heftConfiguration, clean.properties.pathsToDelete);
+    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
+      build.hooks.preCompile.tap(PLUGIN_NAME, (preCompile: IPreCompileSubstage) => {
+        preCompile.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
+          await this._runDeleteForHeftEvent(HeftEvent.preCompile, logger, heftConfiguration);
+        });
+      });
+
+      build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
+        compile.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
+          await this._runDeleteForHeftEvent(HeftEvent.compile, logger, heftConfiguration);
+        });
+      });
+
+      build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
+        bundle.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
+          await this._runDeleteForHeftEvent(HeftEvent.bundle, logger, heftConfiguration);
+        });
+      });
+
+      build.hooks.postBuild.tap(PLUGIN_NAME, (postBuild: IPostBuildSubstage) => {
+        postBuild.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
+          await this._runDeleteForHeftEvent(HeftEvent.postBuild, logger, heftConfiguration);
+        });
       });
     });
   }
 
   private async _runDeleteForHeftEvent(
-    heftEventName: string,
+    heftEvent: HeftEvent,
     logger: ScopedLogger,
     heftConfiguration: HeftConfiguration,
     additionalPathsToDelete?: Set<string>
@@ -43,16 +85,14 @@ export class CleanPlugin implements IHeftPlugin {
     );
 
     const pathsToDelete: Set<string> = new Set<string>(additionalPathsToDelete);
-    for (const deleteGlobsEventAction of eventActions.deleteGlobs) {
-      if (deleteGlobsEventAction.heftEvent === heftEventName) {
-        for (const globPattern of deleteGlobsEventAction.globsToDelete) {
-          const resolvedPaths: string[] = await this._resolvePathAsync(
-            globPattern,
-            heftConfiguration.buildFolder
-          );
-          for (const resolvedPath of resolvedPaths) {
-            pathsToDelete.add(resolvedPath);
-          }
+    for (const deleteGlobsEventAction of eventActions.deleteGlobs.get(heftEvent) || []) {
+      for (const globPattern of deleteGlobsEventAction.globsToDelete) {
+        const resolvedPaths: string[] = await this._resolvePathAsync(
+          globPattern,
+          heftConfiguration.buildFolder
+        );
+        for (const resolvedPath of resolvedPaths) {
+          pathsToDelete.add(resolvedPath);
         }
       }
     }

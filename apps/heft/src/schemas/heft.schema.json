@@ -36,7 +36,7 @@
               "heftEvent": {
                 "type": "string",
                 "description": "The stage of the Heft run during which this action should occur. Note that actions specified in heft.json occur at the end of the stage of the Heft run.",
-                "enum": ["clean"]
+                "enum": ["clean", "pre-compile", "compile", "bundle", "post-build"]
               },
 
               "actionId": {
