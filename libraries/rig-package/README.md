@@ -1,6 +1,6 @@
 # @rushstack/rig-package
 
-The **config/rig.json** file is a standard that Node.js build tools can support, in order to eliminate
+The **config/rig.json** file is a system that Node.js build tools can adopt, in order to eliminate
 duplication of config files when many projects share a common configuration.  This is particularly valuable
 in a setup where hundreds of projects may be built using a small set of reusable recipes.
 
@@ -36,8 +36,8 @@ we'll call our NPM package **example-rig**:
 
 ```
 example-rig/package.json
-example-rig/profile/library/api-extractor.json
-example-rig/profile/sdk-library/api-extractor.json
+example-rig/profile/node-library/api-extractor.json
+example-rig/profile/web-library/api-extractor.json
 
 project1/package.json
 project1/config/api-extractor.json
@@ -57,29 +57,29 @@ project3/src/index.ts
 
 To make things interesting, above we've introduced two "profiles":
 
-- `library` is for regular libraries.
-- `sdk-library` is for projects that are shipping with our company's SDK, and thus generate API docs and
-need stricter settings.
+- `node-library` is for libraries that target the Node.js runtime
+- `web-library` is for libraries that target a web browser
 
-(These are just examples; profiles are user-defined.)
+> **NOTE:** The `node-library` and `web-library` names are hypothetical examples. The names and purposes of
+> rig profiles are user-defined.  If you only need one profile, then call it `default`.
 
-If **project1** and **project2** are regular libraries, then their **api-extractor.json** now reduces to this:
+If **project1** and **project2** are Node.js libraries, then their **api-extractor.json** now reduces to this:
 
 **project1/config/api-extractor.json**
 ```js
 {
   "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
-  "extends": "example-rig/profile/library/api-extractor.json"
+  "extends": "example-rig/profile/node-library/api-extractor.json"
 }
 ```
 
-Whereas if **project3** is an SDK library, then it might look like this:
+Whereas if **project3** is a web browser library, then it might look like this:
 
 **project3/config/api-extractor.json**
 ```js
 {
   "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
-  "extends": "example-rig/profile/sdk-library/api-extractor.json"
+  "extends": "example-rig/profile/web-library/api-extractor.json"
 }
 ```
 
@@ -101,12 +101,20 @@ with a single file `config/rig.json` that delegates everything to the rig packag
   "$schema": "https://developer.microsoft.com/json-schemas/rig-package/rig.schema.json",
 
   "rigPackageName": "example-rig",
-  "rigProfile": "sdk-library"
+  "rigProfile": "web-library"
 }
 ```
 
-This eliminates the `"extends"` stub files entirely.  A tool that implements the `rig.json` system would
-look for its config file (`config/<targetFile>.json`) using this procedure:
+The fields:
+- `"rigPackageName"`: (Required) The name of the rig package to inherit from. It should be an NPM package name
+   with the "-rig" suffix.
+- `"rigProfile"`: (Optional) Selects a config profile from the rig package.  The name must consist of
+   lowercase alphanumeric words separated by hyphens, for example `"sample-profile"`.
+   If omitted, then the `"default"` profile will be used.
+
+
+Using **rig.json** eliminates the `"extends"` stub files entirely.  A tool that implements the **rig.json** system
+would probe for its config file (`<targetFile>.json`) using the following procedure:
 
 1. First check for `config/<targetFile>.json` in the project folder; if found, use that file.  OTHERWISE...
 2. Check for `config/rig.json`; if found, then this project is using a rig package.  Read the `<rigPackageName>`
@@ -116,15 +124,14 @@ look for its config file (`config/<targetFile>.json`) using this procedure:
 5. If the `<targetFile>.json` cannot be found in either of these places, the behavior is left to the tool.
    For example, it could report an error, or proceed using defaults.
 
-This eliminates the need for most config files that support this system.  In cases where we need a project-specific
-customization, the `"extends"` field is still supported.  For example, **project1** can still add a custom setting
-like this:
+In cases where we need a project-specific customization, the `"extends"` field is still supported.  For example,
+**project1** can still add a custom setting like this:
 
 **project1/config/api-extractor.json**
 ```js
 {
   "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
-  "extends": "example-rig/profile/library/api-extractor.json",
+  "extends": "example-rig/profile/node-library/api-extractor.json",
 
   // Custom setting:
   "mainEntryPointFilePath": "<projectFolder>/lib/custom.d.ts",
@@ -135,8 +142,8 @@ The result is a much shorter inventory of files:
 
 ```
 example-rig/package.json
-example-rig/profile/library/api-extractor.json
-example-rig/profile/sdk-library/api-extractor.json
+example-rig/profile/node-library/api-extractor.json
+example-rig/profile/web-library/api-extractor.json
 
 project1/package.json
 project1/config/rig.json
@@ -153,15 +160,15 @@ project3/src/index.ts
 ```
 
 
-## A helper library
+## The `@ruhstack/rig-package` API
 
-The `@ruhstack/rig-package` library provides a lightweight API for loading the `rig.json` file and performing lookups.
-The package only depends on the `resolve` other NPM package.  It also includes the JSON schema file `rig.schema.json` for
-tools that need it.
+The `@ruhstack/rig-package` library provides an API for loading the **rig.json** file and performing lookups.
+It is a lightweight NPM package (with only one dependency, the `resolve` package), intended to be easy for
+other tool projects to adopt.  The package also includes the JSON schema file **rig.schema.json**.
 
 Example usage of the API:
 
-```js
+```ts
 import { RigConfig } from '@rushstack/rig-package';
 
 // Probe for the rig.json file and load it if found
@@ -181,7 +188,7 @@ if (rigConfig.enabled) {
 
   // Resolve the rig package
   //
-  // Prints "/path/to/project3/node_modules/example-rig/profile/sdk-library"
+  // Prints "/path/to/project3/node_modules/example-rig/profile/web-library"
   console.log('Profile folder' + rigConfig.getResolvedProfileFolder());
 
   // (Your tool can check this folder for its config file)

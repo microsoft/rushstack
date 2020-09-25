@@ -254,7 +254,7 @@ export class RigConfig {
       }
     } else {
       if (!this.enabled) {
-        throw new Error('Cannot resolve the rig package because no rig is enabled for this project');
+        throw new Error('Cannot resolve the rig package because no rig was specified for this project');
       }
 
       const rigPackageJsonModuleSpecifier: string = `${this.rigPackageName}/package.json`;

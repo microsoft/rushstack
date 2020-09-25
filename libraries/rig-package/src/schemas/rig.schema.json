@@ -14,7 +14,7 @@
 
     "rigPackageName": {
       "type": "string",
-      "description": "The name of the rig package to inherit from. It should be an NPM package name with the \"-rig\" suffix."
+      "description": "(Required) The name of the rig package to inherit from. It should be an NPM package name with the \"-rig\" suffix."
     },
 
     "rigProfile": {
