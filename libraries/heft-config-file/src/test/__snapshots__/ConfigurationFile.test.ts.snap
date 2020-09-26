@@ -20,6 +20,8 @@ Error: #/
          Additional properties not allowed: filePaths]
 `;
 
+exports[`ConfigurationFile error cases Throws an error when a requested file doesn't exist 1`] = `[Error: File does not exist: <project root>/src/test/errorCases/folderThatDoesntExist/config.json]`;
+
 exports[`ConfigurationFile error cases Throws an error when an "extends" property points to a file that cannot be resolved 1`] = `[Error: In file "<project root>/src/test/errorCases/extendsNotExist/config.json", file referenced in "extends" property ("./config2.json") cannot be resolved.]`;
 
 exports[`ConfigurationFile error cases Throws an error when the file isn't valid JSON 1`] = `

@@ -494,5 +494,24 @@ describe('ConfigurationFile', () => {
         expect(e).toMatchSnapshot();
       }
     });
+
+    it("Throws an error when a requested file doesn't exist", async () => {
+      const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
+        projectRelativeFilePath: `${errorCasesFolderName}/folderThatDoesntExist/config.json`,
+        jsonSchemaPath: nodeJsPath.resolve(
+          __dirname,
+          errorCasesFolderName,
+          'invalidCombinedFile',
+          'config.schema.json'
+        )
+      });
+
+      try {
+        await configFileLoader.loadConfigurationFileForProjectAsync(__dirname);
+        fail();
+      } catch (e) {
+        expect(e).toMatchSnapshot();
+      }
+    });
   });
 });
