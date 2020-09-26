@@ -197,12 +197,15 @@ export class ConfigurationFile<TConfigurationFile> {
     }
 
     if (!exists) {
-      return undefined;
+      if (this._rigsEnabled) {
+        return await this._tryLoadConfigurationFileInRigAsync(projectPath, new Set<string>());
+      } else {
+        return undefined;
+      }
     } else {
       return await this._loadConfigurationFileInnerWithCacheAsync(
         projectConfigurationFilePath,
-        new Set<string>(),
-        this._rigsEnabled ? projectPath : undefined
+        new Set<string>()
       );
     }
   }
@@ -245,7 +248,7 @@ export class ConfigurationFile<TConfigurationFile> {
   private async _loadConfigurationFileInnerWithCacheAsync(
     resolvedConfigurationFilePath: string,
     visitedConfigurationFilePaths: Set<string>,
-    projectFolderForRig: string | undefined
+    projectFolderForRig: string | undefined = undefined
   ): Promise<TConfigurationFile> {
     let cacheEntry:
       | IConfigurationFileCacheEntry<TConfigurationFile>
@@ -295,26 +298,12 @@ export class ConfigurationFile<TConfigurationFile> {
     } catch (e) {
       if (FileSystem.isNotExistError(e)) {
         if (projectFolderForRig) {
-          const rigPackage: RigConfig = await RigConfig.loadForProjectFolderAsync({
-            projectFolderPath: projectFolderForRig
-          });
-
-          if (rigPackage.rigFound) {
-            const rigProfileFolder: string = await rigPackage.getResolvedProfileFolderAsync();
-            try {
-              return await this._loadConfigurationFileInnerWithCacheAsync(
-                nodeJsPath.resolve(rigProfileFolder, this._projectRelativeFilePath),
-                visitedConfigurationFilePaths,
-                undefined
-              );
-            } catch (rigError) {
-              if (FileSystem.isNotExistError(rigError)) {
-                // Ignore cases where a configuration file doesn't exist in a rig, and fall through
-                // to throwing the original not-found error
-              } else {
-                throw rigError;
-              }
-            }
+          const rigResult: TConfigurationFile | undefined = await this._tryLoadConfigurationFileInRigAsync(
+            projectFolderForRig,
+            visitedConfigurationFilePaths
+          );
+          if (rigResult) {
+            return rigResult;
           }
         }
 
@@ -477,6 +466,33 @@ export class ConfigurationFile<TConfigurationFile> {
     }
 
     return result;
+  }
+
+  private async _tryLoadConfigurationFileInRigAsync(
+    projectFolder: string,
+    visitedConfigurationFilePaths: Set<string>
+  ): Promise<TConfigurationFile | undefined> {
+    const rigPackage: RigConfig = await RigConfig.loadForProjectFolderAsync({
+      projectFolderPath: projectFolder
+    });
+
+    if (rigPackage.rigFound) {
+      const rigProfileFolder: string = await rigPackage.getResolvedProfileFolderAsync();
+      try {
+        return await this._loadConfigurationFileInnerWithCacheAsync(
+          nodeJsPath.resolve(rigProfileFolder, this._projectRelativeFilePath),
+          visitedConfigurationFilePaths,
+          undefined
+        );
+      } catch (e) {
+        // Ignore cases where a configuration file doesn't exist in a rig
+        if (!FileSystem.isNotExistError(e)) {
+          throw e;
+        }
+      }
+    }
+
+    return undefined;
   }
 
   private _annotateProperties<TObject>(resolvedConfigurationFilePath: string, obj: TObject): void {

@@ -398,6 +398,33 @@ describe('ConfigurationFile', () => {
       ).toEqual('A');
     });
 
+    it('correctly loads a config file inside a rig via tryLoadConfigurationFileForProjectAsync', async () => {
+      const projectRelativeFilePath: string = 'config/simplestConfigFile.json';
+      const configFileLoader: ConfigurationFile<ISimplestConfigFile> = new ConfigurationFile<
+        ISimplestConfigFile
+      >({ projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath });
+      const loadedConfigFile:
+        | ISimplestConfigFile
+        | undefined = await configFileLoader.tryLoadConfigurationFileForProjectAsync(projectFolder);
+      const expectedConfigFile: ISimplestConfigFile = { thing: 'A' };
+
+      expect(loadedConfigFile).not.toBeUndefined();
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile!)).toEqual(
+        nodeJsPath.resolve(
+          projectFolder,
+          'node_modules',
+          'test-rig',
+          'profiles',
+          'default',
+          projectRelativeFilePath
+        )
+      );
+      expect(
+        configFileLoader.getPropertyOriginalValue({ parentObject: loadedConfigFile!, propertyName: 'thing' })
+      ).toEqual('A');
+    });
+
     it("throws an error when a config file doesn't exist in a project referencing a rig, which also doesn't have the file", async () => {
       const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
         projectRelativeFilePath: 'config/notExist.json',
