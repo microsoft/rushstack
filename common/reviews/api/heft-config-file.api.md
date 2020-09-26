@@ -18,6 +18,7 @@ export class ConfigurationFile<TConfigurationFile> {
 
 // @beta (undocumented)
 export interface IConfigurationFileOptions<TConfigurationFile> {
+    disableRigs?: boolean;
     jsonPathMetadata?: IJsonPathsMetadata;
     jsonSchemaPath: string;
     projectRelativeFilePath: string;

@@ -4,6 +4,7 @@
 import * as nodeJsPath from 'path';
 import { JSONPath } from 'jsonpath-plus';
 import { JsonSchema, JsonFile, PackageJsonLookup, Import, FileSystem } from '@rushstack/node-core-library';
+import { RigConfig } from '@rushstack/rig-package';
 
 interface IConfigurationJson {
   extends?: string;
@@ -115,6 +116,12 @@ export interface IConfigurationFileOptions<TConfigurationFile> {
    * configuration files.
    */
   propertyInheritanceTypes?: IPropertyInheritanceTypes<TConfigurationFile>;
+
+  /**
+   * If set to true, don't use the "config/rig.json" pattern to resolve a file that doesn't exist in the
+   * config folder
+   */
+  disableRigs?: boolean;
 }
 
 interface IJsonPathCallbackObject {
@@ -140,6 +147,7 @@ export class ConfigurationFile<TConfigurationFile> {
   private readonly _projectRelativeFilePath: string;
   private readonly _jsonPathMetadata: IJsonPathsMetadata;
   private readonly _propertyInheritanceTypes: IPropertyInheritanceTypes<TConfigurationFile>;
+  private readonly _rigsEnabled: boolean;
   private __schema: JsonSchema | undefined;
   private get _schema(): JsonSchema {
     if (!this.__schema) {
@@ -161,13 +169,15 @@ export class ConfigurationFile<TConfigurationFile> {
     this._schemaPath = options.jsonSchemaPath;
     this._jsonPathMetadata = options.jsonPathMetadata || {};
     this._propertyInheritanceTypes = options.propertyInheritanceTypes || {};
+    this._rigsEnabled = !options.disableRigs;
   }
 
   public async loadConfigurationFileForProjectAsync(projectPath: string): Promise<TConfigurationFile> {
     const projectConfigurationFilePath: string = this._getConfigurationFilePathForProject(projectPath);
     return await this._loadConfigurationFileInnerWithCacheAsync(
       projectConfigurationFilePath,
-      new Set<string>()
+      new Set<string>(),
+      this._rigsEnabled ? projectPath : undefined
     );
   }
 
@@ -191,7 +201,8 @@ export class ConfigurationFile<TConfigurationFile> {
     } else {
       return await this._loadConfigurationFileInnerWithCacheAsync(
         projectConfigurationFilePath,
-        new Set<string>()
+        new Set<string>(),
+        this._rigsEnabled ? projectPath : undefined
       );
     }
   }
@@ -233,7 +244,8 @@ export class ConfigurationFile<TConfigurationFile> {
 
   private async _loadConfigurationFileInnerWithCacheAsync(
     resolvedConfigurationFilePath: string,
-    visitedConfigurationFilePaths: Set<string>
+    visitedConfigurationFilePaths: Set<string>,
+    projectFolderForRig: string | undefined
   ): Promise<TConfigurationFile> {
     let cacheEntry:
       | IConfigurationFileCacheEntry<TConfigurationFile>
@@ -243,7 +255,8 @@ export class ConfigurationFile<TConfigurationFile> {
         cacheEntry = {
           configurationFile: await this._loadConfigurationFileInnerAsync(
             resolvedConfigurationFilePath,
-            visitedConfigurationFilePaths
+            visitedConfigurationFilePaths,
+            projectFolderForRig
           )
         };
       } catch (e) {
@@ -260,7 +273,8 @@ export class ConfigurationFile<TConfigurationFile> {
 
   private async _loadConfigurationFileInnerAsync(
     resolvedConfigurationFilePath: string,
-    visitedConfigurationFilePaths: Set<string>
+    visitedConfigurationFilePaths: Set<string>,
+    projectFolderForRig: string | undefined
   ): Promise<TConfigurationFile> {
     const resolvedConfigurationFilePathForErrors: string = ConfigurationFile._formatPathForError(
       resolvedConfigurationFilePath
@@ -280,6 +294,30 @@ export class ConfigurationFile<TConfigurationFile> {
       fileText = await FileSystem.readFileAsync(resolvedConfigurationFilePath);
     } catch (e) {
       if (FileSystem.isNotExistError(e)) {
+        if (projectFolderForRig) {
+          const rigPackage: RigConfig = await RigConfig.loadForProjectFolderAsync({
+            projectFolderPath: projectFolderForRig
+          });
+
+          if (rigPackage.rigFound) {
+            const rigProfileFolder: string = await rigPackage.getResolvedProfileFolderAsync();
+            try {
+              return await this._loadConfigurationFileInnerWithCacheAsync(
+                nodeJsPath.resolve(rigProfileFolder, this._projectRelativeFilePath),
+                visitedConfigurationFilePaths,
+                undefined
+              );
+            } catch (rigError) {
+              if (FileSystem.isNotExistError(rigError)) {
+                // Ignore cases where a configuration file doesn't exist in a rig, and fall through
+                // to throwing the original not-found error
+              } else {
+                throw rigError;
+              }
+            }
+          }
+        }
+
         e.message = `File does not exist: ${resolvedConfigurationFilePathForErrors}`;
       }
 
@@ -325,7 +363,8 @@ export class ConfigurationFile<TConfigurationFile> {
         });
         parentConfiguration = await this._loadConfigurationFileInnerWithCacheAsync(
           resolvedParentConfigPath,
-          visitedConfigurationFilePaths
+          visitedConfigurationFilePaths,
+          undefined
         );
       } catch (e) {
         if (FileSystem.isNotExistError(e)) {

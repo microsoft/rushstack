@@ -1331,6 +1331,7 @@ importers:
   ../../libraries/heft-config-file:
     dependencies:
       '@rushstack/node-core-library': 'link:../node-core-library'
+      '@rushstack/rig-package': 'link:../rig-package'
       jsonpath-plus: 4.0.0
     devDependencies:
       '@microsoft/rush-stack-compiler-3.7': 'link:../../stack/rush-stack-compiler-3.7'
@@ -1343,6 +1344,7 @@ importers:
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.8.0
       '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/rig-package': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       jsonpath-plus: ~4.0.0
