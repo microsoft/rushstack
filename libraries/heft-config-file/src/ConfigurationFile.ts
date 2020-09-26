@@ -96,6 +96,11 @@ export interface IJsonPathsMetadata {
  */
 export interface IConfigurationFileOptions<TConfigurationFile> {
   /**
+   * A project root-relative path to the configuration file that should be loaded.
+   */
+  projectRelativeFilePath: string;
+
+  /**
    * The path to the schema for the configuration file.
    */
   jsonSchemaPath: string;
@@ -132,6 +137,7 @@ export interface IOriginalValueOptions<TParentProperty> {
  */
 export class ConfigurationFile<TConfigurationFile> {
   private readonly _schemaPath: string;
+  private readonly _projectRelativeFilePath: string;
   private readonly _jsonPathMetadata: IJsonPathsMetadata;
   private readonly _propertyInheritanceTypes: IPropertyInheritanceTypes<TConfigurationFile>;
   private __schema: JsonSchema | undefined;
@@ -147,19 +153,41 @@ export class ConfigurationFile<TConfigurationFile> {
     string,
     IConfigurationFileCacheEntry<TConfigurationFile>
   > = new Map<string, IConfigurationFileCacheEntry<TConfigurationFile>>();
+  private readonly _fileExistsCache: Map<string, boolean> = new Map<string, boolean>();
   private readonly _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
   public constructor(options: IConfigurationFileOptions<TConfigurationFile>) {
+    this._projectRelativeFilePath = options.projectRelativeFilePath;
     this._schemaPath = options.jsonSchemaPath;
-    this._jsonPathMetadata = options?.jsonPathMetadata || {};
-    this._propertyInheritanceTypes = options?.propertyInheritanceTypes || {};
+    this._jsonPathMetadata = options.jsonPathMetadata || {};
+    this._propertyInheritanceTypes = options.propertyInheritanceTypes || {};
   }
 
-  public async loadConfigurationFileAsync(configurationFilePath: string): Promise<TConfigurationFile> {
-    return await this._loadConfigurationFileInnerAsync(
-      nodeJsPath.resolve(configurationFilePath),
-      new Set<string>()
-    );
+  public async loadConfigurationFileForProjectAsync(projectPath: string): Promise<TConfigurationFile> {
+    const projectConfigurationFilePath: string = this._getConfigurationFilePathForProject(projectPath);
+    return await this._loadConfigurationFileInnerAsync(projectConfigurationFilePath, new Set<string>());
+  }
+
+  /**
+   * This function is identical to {@link ConfigurationFile.loadConfigurationFileForProjectAsync}, except
+   * that a preliminary file existence check is performed and this function returns `undefined` if the
+   * configuration file doesn't exist.
+   */
+  public async tryLoadConfigurationFileForProjectAsync(
+    projectPath: string
+  ): Promise<TConfigurationFile | undefined> {
+    const projectConfigurationFilePath: string = this._getConfigurationFilePathForProject(projectPath);
+    let exists: boolean | undefined = this._fileExistsCache.get(projectConfigurationFilePath);
+    if (exists === undefined) {
+      exists = await FileSystem.existsAsync(projectConfigurationFilePath);
+      this._fileExistsCache.set(projectConfigurationFilePath, exists);
+    }
+
+    if (!exists) {
+      return undefined;
+    } else {
+      return await this._loadConfigurationFileInnerAsync(projectConfigurationFilePath, new Set<string>());
+    }
   }
 
   /**
@@ -446,5 +474,9 @@ export class ConfigurationFile<TConfigurationFile> {
         return propertyValue;
       }
     }
+  }
+
+  private _getConfigurationFilePathForProject(projectPath: string): string {
+    return nodeJsPath.resolve(projectPath, this._projectRelativeFilePath);
   }
 }

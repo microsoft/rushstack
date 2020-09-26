@@ -12,13 +12,15 @@ export class ConfigurationFile<TConfigurationFile> {
     getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
     getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue;
     // (undocumented)
-    loadConfigurationFileAsync(configurationFilePath: string): Promise<TConfigurationFile>;
-    }
+    loadConfigurationFileForProjectAsync(projectPath: string): Promise<TConfigurationFile>;
+    tryLoadConfigurationFileForProjectAsync(projectPath: string): Promise<TConfigurationFile | undefined>;
+}
 
 // @beta (undocumented)
 export interface IConfigurationFileOptions<TConfigurationFile> {
     jsonPathMetadata?: IJsonPathsMetadata;
     jsonSchemaPath: string;
+    projectRelativeFilePath: string;
     propertyInheritanceTypes?: IPropertyInheritanceTypes<TConfigurationFile>;
 }
 
