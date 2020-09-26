@@ -8,7 +8,6 @@ import { ICopyStaticAssetsConfigurationJson } from '../plugins/CopyStaticAssetsP
 import { IApiExtractorPluginConfiguration } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
 import { ITypeScriptConfigurationJson } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { FileSystem } from '@rushstack/node-core-library';
 
 export enum HeftEvent {
   clean = 'clean',
@@ -68,6 +67,7 @@ export class CoreConfigFiles {
     if (!CoreConfigFiles._heftConfigFileLoader) {
       const schemaPath: string = path.join(__dirname, '..', 'schemas', 'heft.schema.json');
       CoreConfigFiles._heftConfigFileLoader = new ConfigurationFile<IHeftConfigurationJson>({
+        projectRelativeFilePath: 'config/heft.json',
         jsonSchemaPath: schemaPath,
         propertyInheritanceTypes: { heftPlugins: InheritanceType.append },
         jsonPathMetadata: {
@@ -82,20 +82,6 @@ export class CoreConfigFiles {
   }
 
   /**
-   * Try to load the config/heft.json config file. If it doesn't exist, returns undefined
-   */
-  public static async tryLoadHeftConfigFileFromDefaultLocationAsync(
-    heftConfiguration: HeftConfiguration
-  ): Promise<IHeftConfigurationJson | undefined> {
-    const heftConfigJsonPath: string = path.resolve(heftConfiguration.projectConfigFolder, 'heft.json');
-    if (await FileSystem.existsAsync(heftConfigJsonPath)) {
-      return await CoreConfigFiles.heftConfigFileLoader.loadConfigurationFileAsync(heftConfigJsonPath);
-    } else {
-      return undefined;
-    }
-  }
-
-  /**
    * Gets the eventActions from config/heft.json
    */
   public static async getConfigConfigFileEventActionsAsync(
@@ -107,7 +93,9 @@ export class CoreConfigFiles {
     if (!result) {
       const heftConfigJson:
         | IHeftConfigurationJson
-        | undefined = await CoreConfigFiles.tryLoadHeftConfigFileFromDefaultLocationAsync(heftConfiguration);
+        | undefined = await CoreConfigFiles.heftConfigFileLoader.tryLoadConfigurationFileForProjectAsync(
+        heftConfiguration.buildFolder
+      );
 
       result = {
         deleteGlobs: new Map<HeftEvent, IHeftConfigurationDeleteGlobsEventAction[]>()
@@ -147,7 +135,7 @@ export class CoreConfigFiles {
       const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'copy-static-assets.schema.json');
       CoreConfigFiles._copyStaticAssetsConfigurationLoader = new ConfigurationFile<
         ICopyStaticAssetsConfigurationJson
-      >({ jsonSchemaPath: schemaPath });
+      >({ projectRelativeFilePath: 'config/copy-static-assets.json', jsonSchemaPath: schemaPath });
     }
 
     return CoreConfigFiles._copyStaticAssetsConfigurationLoader;
@@ -163,7 +151,7 @@ export class CoreConfigFiles {
       const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'api-extractor-task.schema.json');
       CoreConfigFiles._apiExtractorTaskConfigurationLoader = new ConfigurationFile<
         IApiExtractorPluginConfiguration
-      >({ jsonSchemaPath: schemaPath });
+      >({ projectRelativeFilePath: 'config/api-extractor-task.json', jsonSchemaPath: schemaPath });
     }
 
     return CoreConfigFiles._apiExtractorTaskConfigurationLoader;
@@ -178,6 +166,7 @@ export class CoreConfigFiles {
       CoreConfigFiles._typeScriptConfigurationFileLoader = new ConfigurationFile<
         ITypeScriptConfigurationJson
       >({
+        projectRelativeFilePath: 'config/typescript.json',
         jsonSchemaPath: schemaPath
       });
     }

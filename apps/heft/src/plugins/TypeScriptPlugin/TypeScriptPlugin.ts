@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import * as glob from 'glob';
-import { LegacyAdapters, ITerminalProvider, FileSystem } from '@rushstack/node-core-library';
+import { LegacyAdapters, ITerminalProvider } from '@rushstack/node-core-library';
 
 import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 import { HeftSession } from '../../pluginFramework/HeftSession';
@@ -124,25 +124,21 @@ export class TypeScriptPlugin implements IHeftPlugin {
   }
 
   private async _ensureConfigFileLoadedAsync(
-    configFolder: string
+    heftConfiguration: HeftConfiguration
   ): Promise<ITypeScriptConfigurationJson | undefined> {
+    const buildFolder: string = heftConfiguration.buildFolder;
     let typescriptConfigurationFileCacheEntry:
       | ITypeScriptConfigurationFileCacheEntry
-      | undefined = this._typeScriptConfigurationFileCache.get(configFolder);
+      | undefined = this._typeScriptConfigurationFileCache.get(buildFolder);
 
     if (!typescriptConfigurationFileCacheEntry) {
-      const typescriptConfigurationFilePath: string = path.resolve(configFolder, 'typescript.json');
-      if (await FileSystem.existsAsync(typescriptConfigurationFilePath)) {
-        typescriptConfigurationFileCacheEntry = {
-          configurationFile: await CoreConfigFiles.typeScriptConfigurationFileLoader.loadConfigurationFileAsync(
-            typescriptConfigurationFilePath
-          )
-        };
-      } else {
-        typescriptConfigurationFileCacheEntry = { configurationFile: undefined };
-      }
+      typescriptConfigurationFileCacheEntry = {
+        configurationFile: await CoreConfigFiles.typeScriptConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
+          buildFolder
+        )
+      };
 
-      this._typeScriptConfigurationFileCache.set(configFolder, typescriptConfigurationFileCacheEntry);
+      this._typeScriptConfigurationFileCache.set(buildFolder, typescriptConfigurationFileCacheEntry);
     }
 
     return typescriptConfigurationFileCacheEntry.configurationFile;
@@ -154,7 +150,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
   ): Promise<void> {
     const configurationFile:
       | ITypeScriptConfigurationJson
-      | undefined = await this._ensureConfigFileLoadedAsync(heftConfiguration.projectConfigFolder);
+      | undefined = await this._ensureConfigFileLoadedAsync(heftConfiguration);
 
     if (configurationFile?.additionalModuleKindsToEmit) {
       for (const additionalModuleKindToEmit of configurationFile.additionalModuleKindsToEmit) {
@@ -170,7 +166,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
 
     const typescriptConfigurationJson:
       | ITypeScriptConfigurationJson
-      | undefined = await this._ensureConfigFileLoadedAsync(heftConfiguration.projectConfigFolder);
+      | undefined = await this._ensureConfigFileLoadedAsync(heftConfiguration);
     const tsconfigPaths: string[] = await LegacyAdapters.convertCallbackToPromise(
       glob,
       'tsconfig?(-*).json',

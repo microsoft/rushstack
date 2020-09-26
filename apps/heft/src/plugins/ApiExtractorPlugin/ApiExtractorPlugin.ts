@@ -64,16 +64,11 @@ export class ApiExtractorPlugin implements IHeftPlugin {
   ): Promise<void> {
     const { heftConfiguration, buildFolder, debugMode, watchMode, production } = options;
 
-    const apiExtractorTaskConfigurationPath: string = path.resolve(
-      heftConfiguration.projectConfigFolder,
-      'api-extractor-task.json'
+    const apiExtractorTaskConfiguration:
+      | IApiExtractorPluginConfiguration
+      | undefined = await CoreConfigFiles.apiExtractorTaskConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
+      heftConfiguration.buildFolder
     );
-    let apiExtractorTaskConfiguration: IApiExtractorPluginConfiguration | undefined;
-    if (await FileSystem.existsAsync(apiExtractorTaskConfigurationPath)) {
-      apiExtractorTaskConfiguration = await CoreConfigFiles.apiExtractorTaskConfigurationLoader.loadConfigurationFileAsync(
-        apiExtractorTaskConfigurationPath
-      );
-    }
 
     const terminal: Terminal = ApiExtractorRunner.getTerminal(heftConfiguration.terminalProvider);
 
