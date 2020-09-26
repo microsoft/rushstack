@@ -318,14 +318,25 @@ export class ConfigurationFile<TConfigurationFile> {
 
     let parentConfiguration: Partial<TConfigurationFile> = {};
     if (configurationJson.extends) {
-      const resolvedParentConfigPath: string = Import.resolveModule({
-        modulePath: configurationJson.extends,
-        baseFolderPath: nodeJsPath.dirname(resolvedConfigurationFilePath)
-      });
-      parentConfiguration = await this._loadConfigurationFileInnerWithCacheAsync(
-        resolvedParentConfigPath,
-        visitedConfigurationFilePaths
-      );
+      try {
+        const resolvedParentConfigPath: string = Import.resolveModule({
+          modulePath: configurationJson.extends,
+          baseFolderPath: nodeJsPath.dirname(resolvedConfigurationFilePath)
+        });
+        parentConfiguration = await this._loadConfigurationFileInnerWithCacheAsync(
+          resolvedParentConfigPath,
+          visitedConfigurationFilePaths
+        );
+      } catch (e) {
+        if (FileSystem.isNotExistError(e)) {
+          throw new Error(
+            `In file "${resolvedConfigurationFilePathForErrors}", file referenced in "extends" property ` +
+              `("${configurationJson.extends}") cannot be resolved.`
+          );
+        } else {
+          throw e;
+        }
+      }
     }
 
     const propertyNames: Set<string> = new Set<string>([

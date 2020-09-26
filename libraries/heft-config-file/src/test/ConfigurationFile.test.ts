@@ -456,6 +456,25 @@ describe('ConfigurationFile', () => {
       }
     });
 
+    it('Throws an error when an "extends" property points to a file that cannot be resolved', async () => {
+      const errorCaseFolderName: string = 'extendsNotExist';
+      const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
+        projectRelativeFilePath: `${errorCasesFolderName}/${errorCaseFolderName}/config.json`,
+        jsonSchemaPath: nodeJsPath.resolve(
+          __dirname,
+          errorCasesFolderName,
+          errorCaseFolderName,
+          'config.schema.json'
+        )
+      });
+      try {
+        await configFileLoader.loadConfigurationFileForProjectAsync(__dirname);
+        fail();
+      } catch (e) {
+        expect(e).toMatchSnapshot();
+      }
+    });
+
     it("Throws an error when a combined config file doesn't match the schema", async () => {
       const errorCaseFolderName: string = 'invalidCombinedFile';
       const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
