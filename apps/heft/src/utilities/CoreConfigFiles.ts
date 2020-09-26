@@ -8,6 +8,7 @@ import { ICopyStaticAssetsConfigurationJson } from '../plugins/CopyStaticAssetsP
 import { IApiExtractorPluginConfiguration } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
 import { ITypeScriptConfigurationJson } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
+import { Terminal } from '@rushstack/node-core-library';
 
 export enum HeftEvent {
   clean = 'clean',
@@ -85,6 +86,7 @@ export class CoreConfigFiles {
    * Gets the eventActions from config/heft.json
    */
   public static async getConfigConfigFileEventActionsAsync(
+    terminal: Terminal,
     heftConfiguration: HeftConfiguration
   ): Promise<IHeftEventActions> {
     let result: IHeftEventActions | undefined = CoreConfigFiles._heftConfigFileEventActionsCache.get(
@@ -94,6 +96,7 @@ export class CoreConfigFiles {
       const heftConfigJson:
         | IHeftConfigurationJson
         | undefined = await CoreConfigFiles.heftConfigFileLoader.tryLoadConfigurationFileForProjectAsync(
+        terminal,
         heftConfiguration.buildFolder
       );
 

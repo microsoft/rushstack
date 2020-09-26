@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { LegacyAdapters, FileSystem } from '@rushstack/node-core-library';
+import { LegacyAdapters, FileSystem, Terminal } from '@rushstack/node-core-library';
 import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
 import * as path from 'path';
@@ -77,6 +77,7 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
           const logger: ScopedLogger = heftSession.requestScopedLogger('copy-static-assets');
 
           const copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration = await this._loadCopyStaticAssetsConfigurationAsync(
+            logger.terminal,
             heftConfiguration
           );
           await this._runCopyAsync({
@@ -91,11 +92,13 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
   }
 
   private async _loadCopyStaticAssetsConfigurationAsync(
+    terminal: Terminal,
     heftConfiguration: HeftConfiguration
   ): Promise<ICopyStaticAssetsConfiguration> {
     const copyStaticAssetsConfigurationJson:
       | ICopyStaticAssetsConfigurationJson
       | undefined = await CoreConfigFiles.copyStaticAssetsConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
+      terminal,
       heftConfiguration.buildFolder
     );
 

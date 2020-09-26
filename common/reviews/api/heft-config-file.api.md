@@ -4,6 +4,8 @@
 
 ```ts
 
+import { Terminal } from '@rushstack/node-core-library';
+
 // @beta (undocumented)
 export class ConfigurationFile<TConfigurationFile> {
     constructor(options: IConfigurationFileOptions<TConfigurationFile>);
@@ -12,9 +14,9 @@ export class ConfigurationFile<TConfigurationFile> {
     getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
     getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue;
     // (undocumented)
-    loadConfigurationFileForProjectAsync(projectPath: string): Promise<TConfigurationFile>;
-    tryLoadConfigurationFileForProjectAsync(projectPath: string): Promise<TConfigurationFile | undefined>;
-}
+    loadConfigurationFileForProjectAsync(terminal: Terminal, projectPath: string): Promise<TConfigurationFile>;
+    tryLoadConfigurationFileForProjectAsync(terminal: Terminal, projectPath: string): Promise<TConfigurationFile | undefined>;
+    }
 
 // @beta (undocumented)
 export interface IConfigurationFileOptions<TConfigurationFile> {

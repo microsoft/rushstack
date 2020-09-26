@@ -4,18 +4,32 @@
 import * as nodeJsPath from 'path';
 
 import { ConfigurationFile, PathResolutionMethod, InheritanceType } from '../ConfigurationFile';
-import { FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 
 describe('ConfigurationFile', () => {
+  const projectRoot: string = nodeJsPath.resolve(__dirname, '..', '..');
+  let terminalProvider: StringBufferTerminalProvider;
+  let terminal: Terminal;
+
   beforeEach(() => {
     const projectRoot: string = nodeJsPath.resolve(__dirname, '..', '..');
     const formatPathForError: (path: string) => string = (path: string) =>
       `<project root>/${nodeJsPath.relative(projectRoot, path).replace(/\\/g, '/')}`;
     jest.spyOn(ConfigurationFile, '_formatPathForError').mockImplementation(formatPathForError);
     jest.spyOn(JsonFile, '_formatPathForError').mockImplementation(formatPathForError);
+
+    terminalProvider = new StringBufferTerminalProvider(false);
+    terminal = new Terminal(terminalProvider);
   });
 
-  const projectRoot: string = nodeJsPath.resolve(__dirname, '..', '..');
+  afterEach(() => {
+    expect({
+      log: terminalProvider.getOutput(),
+      warning: terminalProvider.getWarningOutput(),
+      error: terminalProvider.getErrorOutput(),
+      verbose: terminalProvider.getVerbose()
+    }).toMatchSnapshot();
+  });
 
   describe('A simple config file', () => {
     const configFileFolderName: string = 'simplestConfigFile';
@@ -35,6 +49,7 @@ describe('ConfigurationFile', () => {
         ISimplestConfigFile
       >({ projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath });
       const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
+        terminal,
         __dirname
       );
       const expectedConfigFile: ISimplestConfigFile = { thing: 'A' };
@@ -61,6 +76,7 @@ describe('ConfigurationFile', () => {
         }
       });
       const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
+        terminal,
         __dirname
       );
       const expectedConfigFile: ISimplestConfigFile = {
@@ -88,6 +104,7 @@ describe('ConfigurationFile', () => {
         }
       });
       const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
+        terminal,
         __dirname
       );
       const expectedConfigFile: ISimplestConfigFile = {
@@ -121,6 +138,7 @@ describe('ConfigurationFile', () => {
         { projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath }
       );
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
+        terminal,
         __dirname
       );
       const expectedConfigFile: ISimpleConfigFile = { things: ['A', 'B', 'C'] };
@@ -140,6 +158,7 @@ describe('ConfigurationFile', () => {
         }
       );
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
+        terminal,
         __dirname
       );
       const expectedConfigFile: ISimpleConfigFile = {
@@ -165,6 +184,7 @@ describe('ConfigurationFile', () => {
         }
       );
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
+        terminal,
         __dirname
       );
       const expectedConfigFile: ISimpleConfigFile = {
@@ -196,6 +216,7 @@ describe('ConfigurationFile', () => {
         { projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath }
       );
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
+        terminal,
         __dirname
       );
       const expectedConfigFile: ISimpleConfigFile = { things: ['A', 'B', 'C', 'D', 'E'] };
@@ -213,6 +234,7 @@ describe('ConfigurationFile', () => {
         }
       );
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
+        terminal,
         __dirname
       );
       const expectedConfigFile: ISimpleConfigFile = { things: ['A', 'B', 'C', 'D', 'E'] };
@@ -230,6 +252,7 @@ describe('ConfigurationFile', () => {
         }
       );
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
+        terminal,
         __dirname
       );
       const expectedConfigFile: ISimpleConfigFile = { things: ['D', 'E'] };
@@ -249,6 +272,7 @@ describe('ConfigurationFile', () => {
         }
       );
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
+        terminal,
         __dirname
       );
       const parentConfigFileFolder: string = nodeJsPath.resolve(
@@ -297,6 +321,7 @@ describe('ConfigurationFile', () => {
         }
       });
       const loadedConfigFile: IComplexConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
+        terminal,
         __dirname
       );
       const expectedConfigFile: IComplexConfigFile = {
@@ -378,6 +403,7 @@ describe('ConfigurationFile', () => {
         ISimplestConfigFile
       >({ projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath });
       const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
+        terminal,
         projectFolder
       );
       const expectedConfigFile: ISimplestConfigFile = { thing: 'A' };
@@ -405,7 +431,7 @@ describe('ConfigurationFile', () => {
       >({ projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath });
       const loadedConfigFile:
         | ISimplestConfigFile
-        | undefined = await configFileLoader.tryLoadConfigurationFileForProjectAsync(projectFolder);
+        | undefined = await configFileLoader.tryLoadConfigurationFileForProjectAsync(terminal, projectFolder);
       const expectedConfigFile: ISimplestConfigFile = { thing: 'A' };
 
       expect(loadedConfigFile).not.toBeUndefined();
@@ -431,7 +457,7 @@ describe('ConfigurationFile', () => {
         jsonSchemaPath: schemaPath
       });
       try {
-        await configFileLoader.loadConfigurationFileForProjectAsync(projectFolder);
+        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, projectFolder);
         fail();
       } catch (e) {
         expect(e).toMatchSnapshot();
@@ -454,7 +480,7 @@ describe('ConfigurationFile', () => {
         )
       });
       try {
-        await configFileLoader.loadConfigurationFileForProjectAsync(__dirname);
+        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
         fail();
       } catch (e) {
         expect(e).toMatchSnapshot();
@@ -473,7 +499,9 @@ describe('ConfigurationFile', () => {
         )
       });
       try {
-        expect(await configFileLoader.tryLoadConfigurationFileForProjectAsync(__dirname)).toBeUndefined();
+        expect(
+          await configFileLoader.tryLoadConfigurationFileForProjectAsync(terminal, __dirname)
+        ).toBeUndefined();
       } catch (e) {
         fail();
       }
@@ -491,7 +519,7 @@ describe('ConfigurationFile', () => {
         )
       });
       try {
-        await configFileLoader.loadConfigurationFileForProjectAsync(__dirname);
+        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
         fail();
       } catch (e) {
         expect(e).toMatchSnapshot();
@@ -510,7 +538,7 @@ describe('ConfigurationFile', () => {
         )
       });
       try {
-        await configFileLoader.loadConfigurationFileForProjectAsync(__dirname);
+        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
         fail();
       } catch (e) {
         expect(e).toMatchSnapshot();
@@ -529,7 +557,7 @@ describe('ConfigurationFile', () => {
         )
       });
       try {
-        await configFileLoader.loadConfigurationFileForProjectAsync(__dirname);
+        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
         fail();
       } catch (e) {
         expect(e).toMatchSnapshot();
@@ -548,7 +576,7 @@ describe('ConfigurationFile', () => {
         )
       });
       try {
-        await configFileLoader.loadConfigurationFileForProjectAsync(__dirname);
+        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
         fail();
       } catch (e) {
         expect(e).toMatchSnapshot();
@@ -568,7 +596,7 @@ describe('ConfigurationFile', () => {
       });
 
       try {
-        await configFileLoader.loadConfigurationFileForProjectAsync(__dirname);
+        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
         fail();
       } catch (e) {
         expect(e).toMatchSnapshot();
@@ -587,7 +615,7 @@ describe('ConfigurationFile', () => {
       });
 
       try {
-        await configFileLoader.loadConfigurationFileForProjectAsync(__dirname);
+        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
         fail();
       } catch (e) {
         expect(e).toMatchSnapshot();

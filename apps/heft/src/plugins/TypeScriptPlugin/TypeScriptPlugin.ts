@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import * as glob from 'glob';
-import { LegacyAdapters, ITerminalProvider } from '@rushstack/node-core-library';
+import { LegacyAdapters, ITerminalProvider, Terminal } from '@rushstack/node-core-library';
 
 import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 import { HeftSession } from '../../pluginFramework/HeftSession';
@@ -102,16 +102,18 @@ export class TypeScriptPlugin implements IHeftPlugin {
   >();
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
+    const logger: ScopedLogger = heftSession.requestScopedLogger('TypeScript Plugin');
+
     heftSession.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanStageContext) => {
       clean.hooks.loadStageConfiguration.tapPromise(PLUGIN_NAME, async () => {
-        await this._updateCleanOptions(heftConfiguration, clean.properties);
+        await this._updateCleanOptions(logger, heftConfiguration, clean.properties);
       });
     });
 
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
         compile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          await this._runTypeScriptAsync({
+          await this._runTypeScriptAsync(logger, {
             heftSession,
             heftConfiguration,
             buildProperties: build.properties,
@@ -124,6 +126,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
   }
 
   private async _ensureConfigFileLoadedAsync(
+    terminal: Terminal,
     heftConfiguration: HeftConfiguration
   ): Promise<ITypeScriptConfigurationJson | undefined> {
     const buildFolder: string = heftConfiguration.buildFolder;
@@ -134,6 +137,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
     if (!typescriptConfigurationFileCacheEntry) {
       typescriptConfigurationFileCacheEntry = {
         configurationFile: await CoreConfigFiles.typeScriptConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
+          terminal,
           buildFolder
         )
       };
@@ -145,12 +149,13 @@ export class TypeScriptPlugin implements IHeftPlugin {
   }
 
   private async _updateCleanOptions(
+    logger: ScopedLogger,
     heftConfiguration: HeftConfiguration,
     cleanProperties: ICleanStageProperties
   ): Promise<void> {
     const configurationFile:
       | ITypeScriptConfigurationJson
-      | undefined = await this._ensureConfigFileLoadedAsync(heftConfiguration);
+      | undefined = await this._ensureConfigFileLoadedAsync(logger.terminal, heftConfiguration);
 
     if (configurationFile?.additionalModuleKindsToEmit) {
       for (const additionalModuleKindToEmit of configurationFile.additionalModuleKindsToEmit) {
@@ -161,12 +166,12 @@ export class TypeScriptPlugin implements IHeftPlugin {
     }
   }
 
-  private async _runTypeScriptAsync(options: IRunTypeScriptOptions): Promise<void> {
+  private async _runTypeScriptAsync(logger: ScopedLogger, options: IRunTypeScriptOptions): Promise<void> {
     const { heftSession, heftConfiguration, buildProperties, watchMode, firstEmitCallback } = options;
 
     const typescriptConfigurationJson:
       | ITypeScriptConfigurationJson
-      | undefined = await this._ensureConfigFileLoadedAsync(heftConfiguration);
+      | undefined = await this._ensureConfigFileLoadedAsync(logger.terminal, heftConfiguration);
     const tsconfigPaths: string[] = await LegacyAdapters.convertCallbackToPromise(
       glob,
       'tsconfig?(-*).json',
@@ -183,8 +188,6 @@ export class TypeScriptPlugin implements IHeftPlugin {
       tsconfigPaths: tsconfigPaths,
       isLintingEnabled: !(buildProperties.lite || typescriptConfigurationJson?.disableTslint)
     };
-
-    const logger: ScopedLogger = heftSession.requestScopedLogger('TypeScript Plugin');
 
     if (heftConfiguration.projectPackageJson.private !== true) {
       if (typeScriptConfiguration.copyFromCacheMode === undefined) {

@@ -81,6 +81,7 @@ export class DeleteGlobsPlugin implements IHeftPlugin {
     let deletedFolders: number = 0;
 
     const eventActions: IHeftEventActions = await CoreConfigFiles.getConfigConfigFileEventActionsAsync(
+      logger.terminal,
       heftConfiguration
     );
 

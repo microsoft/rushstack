@@ -62,6 +62,7 @@ export class PluginManager {
     const heftConfigurationJson:
       | IHeftConfigurationJson
       | undefined = await CoreConfigFiles.heftConfigFileLoader.tryLoadConfigurationFileForProjectAsync(
+      this._heftConfiguration.globalTerminal,
       this._heftConfiguration.buildFolder
     );
     const heftPluginSpecifiers: IHeftConfigurationJsonPluginSpecifier[] =
