@@ -6,9 +6,32 @@ import * as fs from 'fs';
 import * as nodeResolve from 'resolve';
 import * as stripJsonComments from 'strip-json-comments';
 
-interface IRigConfigJson {
+/**
+ * Represents the literal contents of the `config/rig.json` file.
+ *
+ * @public
+ */
+export interface IRigConfigJson {
+  /**
+   * The name of the rig package to use.
+   *
+   * @remarks
+   * The name must be a valid NPM package name, and must end with the `-rig` suffix.
+   *
+   * Example: `example-rig`
+   */
   rigPackageName: string;
-  rigProfile: string;
+
+  /**
+   * Specify which rig profile to use from the rig package.
+   *
+   * @remarks
+   * The name must consist of lowercase alphanumeric words separated by hyphens, for example `"sample-profile"`.
+   * If the `"rigProfile"` is not specified, then the profile name `"default"` will be used.
+   *
+   * Example: `example-profile`
+   */
+  rigProfile?: string;
 }
 
 interface IRigConfigOptions {
@@ -30,6 +53,11 @@ export interface ILoadForProjectFolderOptions {
    * The path to the folder of the project to be analyzed.  This folder should contain a `package.json` file.
    */
   projectFolderPath: string;
+
+  /**
+   * If specified, instead of loading the `config/rig.json` from disk, this object will be substituted instead.
+   */
+  overrideRigJsonObject?: IRigConfigJson;
 }
 
 /**
@@ -160,21 +188,26 @@ export class RigConfig {
    */
   public static loadForProjectFolder(options: ILoadForProjectFolderOptions): RigConfig {
     const rigConfigFilePath: string = path.join(options.projectFolderPath, 'config/rig.json');
-    if (!fs.existsSync(rigConfigFilePath)) {
-      return new RigConfig({
-        projectFolderPath: options.projectFolderPath,
-
-        rigFound: false,
-        filePath: '',
-        rigPackageName: '',
-        rigProfile: ''
-      });
-    }
 
     let json: IRigConfigJson;
     try {
-      const rigConfigFileContent: string = fs.readFileSync(rigConfigFilePath).toString();
-      json = JSON.parse(stripJsonComments(rigConfigFileContent));
+      if (options.overrideRigJsonObject) {
+        json = options.overrideRigJsonObject;
+      } else {
+        if (!fs.existsSync(rigConfigFilePath)) {
+          return new RigConfig({
+            projectFolderPath: options.projectFolderPath,
+
+            rigFound: false,
+            filePath: '',
+            rigPackageName: '',
+            rigProfile: ''
+          });
+        }
+
+        const rigConfigFileContent: string = fs.readFileSync(rigConfigFilePath).toString();
+        json = JSON.parse(stripJsonComments(rigConfigFileContent));
+      }
       RigConfig._validateSchema(json);
     } catch (error) {
       throw new Error(error.message + '\nError loading config file: ' + rigConfigFilePath);
@@ -195,24 +228,27 @@ export class RigConfig {
    */
   public static async loadForProjectFolderAsync(options: ILoadForProjectFolderOptions): Promise<RigConfig> {
     const rigConfigFilePath: string = path.join(options.projectFolderPath, 'config/rig.json');
-    const rigConfigFilePathExists: boolean = await new Promise((resolve: (result: boolean) => void) =>
-      fs.exists(rigConfigFilePath, resolve)
-    );
-    if (!rigConfigFilePathExists) {
-      return new RigConfig({
-        projectFolderPath: options.projectFolderPath,
-
-        rigFound: false,
-        filePath: '',
-        rigPackageName: '',
-        rigProfile: ''
-      });
-    }
 
     let json: IRigConfigJson;
     try {
-      const rigConfigFileContent: string = (await fs.promises.readFile(rigConfigFilePath)).toString();
-      json = JSON.parse(stripJsonComments(rigConfigFileContent));
+      if (options.overrideRigJsonObject) {
+        json = options.overrideRigJsonObject;
+      } else {
+        if (!(await RigConfig._fsExistsAsync(rigConfigFilePath))) {
+          return new RigConfig({
+            projectFolderPath: options.projectFolderPath,
+
+            rigFound: false,
+            filePath: '',
+            rigPackageName: '',
+            rigProfile: ''
+          });
+        }
+
+        const rigConfigFileContent: string = (await fs.promises.readFile(rigConfigFilePath)).toString();
+        json = JSON.parse(stripJsonComments(rigConfigFileContent));
+      }
+
       RigConfig._validateSchema(json);
     } catch (error) {
       throw new Error(error.message + '\nError loading config file: ' + rigConfigFilePath);

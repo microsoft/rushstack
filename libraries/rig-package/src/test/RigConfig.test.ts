@@ -91,6 +91,38 @@ describe('RigConfig tests', () => {
     });
   });
 
+  describe(`reports an undefined profile`, () => {
+    it('synchronously', () => {
+      const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
+        projectFolderPath: testProjectFolder,
+        overrideRigJsonObject: {
+          rigPackageName: 'example-rig',
+          rigProfile: 'missing-profile'
+        }
+      });
+
+      expect(rigConfig.rigFound).toBe(true);
+
+      expect(() => rigConfig.getResolvedProfileFolder()).toThrowError(
+        'The rig profile "missing-profile" is not defined by the rig package "example-rig"'
+      );
+    });
+
+    it('asynchronously', async () => {
+      const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
+        projectFolderPath: testProjectFolder,
+        overrideRigJsonObject: {
+          rigPackageName: 'example-rig',
+          rigProfile: 'missing-profile'
+        }
+      });
+
+      await expect(rigConfig.getResolvedProfileFolderAsync()).rejects.toThrowError(
+        'The rig profile "missing-profile" is not defined by the rig package "example-rig"'
+      );
+    });
+  });
+
   it('validates a rig.json file using the schema', () => {
     const rigConfigFilePath: string = path.join(testProjectFolder, 'config', 'rig.json');
 
