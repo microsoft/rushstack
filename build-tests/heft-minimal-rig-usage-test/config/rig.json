@@ -1,6 +1,5 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rig-package/rig.schema.json",
 
-  "rigPackageName": "heft-minimal-rig-test",
-  "rigProfile": "example-rig"
+  "rigPackageName": "heft-minimal-rig-test"
 }
