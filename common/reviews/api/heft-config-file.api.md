@@ -10,7 +10,7 @@ import { Terminal } from '@rushstack/node-core-library';
 export class ConfigurationFile<TConfigurationFile> {
     constructor(options: IConfigurationFileOptions<TConfigurationFile>);
     // @internal (undocumented)
-    static _formatPathForError: (path: string) => string;
+    static _formatPathForLogging: (path: string) => string;
     getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
     getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue;
     // (undocumented)
@@ -20,11 +20,11 @@ export class ConfigurationFile<TConfigurationFile> {
 
 // @beta (undocumented)
 export interface IConfigurationFileOptions<TConfigurationFile> {
-    disableRigs?: boolean;
     jsonPathMetadata?: IJsonPathsMetadata;
     jsonSchemaPath: string;
     projectRelativeFilePath: string;
     propertyInheritanceTypes?: IPropertyInheritanceTypes<TConfigurationFile>;
+    supportsRigs?: boolean;
 }
 
 // @beta

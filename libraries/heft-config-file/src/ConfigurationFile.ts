@@ -12,7 +12,6 @@ import {
   Terminal
 } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
-import { Console } from 'console';
 
 interface IConfigurationJson {
   extends?: string;
@@ -126,10 +125,10 @@ export interface IConfigurationFileOptions<TConfigurationFile> {
   propertyInheritanceTypes?: IPropertyInheritanceTypes<TConfigurationFile>;
 
   /**
-   * If set to true, don't use the "config/rig.json" pattern to resolve a file that doesn't exist in the
+   * If set to true, use the "config/rig.json" pattern to resolve a file that doesn't exist in the
    * config folder
    */
-  disableRigs?: boolean;
+  supportsRigs?: boolean;
 }
 
 interface IJsonPathCallbackObject {
@@ -155,7 +154,7 @@ export class ConfigurationFile<TConfigurationFile> {
   private readonly _projectRelativeFilePath: string;
   private readonly _jsonPathMetadata: IJsonPathsMetadata;
   private readonly _propertyInheritanceTypes: IPropertyInheritanceTypes<TConfigurationFile>;
-  private readonly _rigsEnabled: boolean;
+  private readonly _supportsRigs: boolean;
   private __schema: JsonSchema | undefined;
   private get _schema(): JsonSchema {
     if (!this.__schema) {
@@ -177,7 +176,7 @@ export class ConfigurationFile<TConfigurationFile> {
     this._schemaPath = options.jsonSchemaPath;
     this._jsonPathMetadata = options.jsonPathMetadata || {};
     this._propertyInheritanceTypes = options.propertyInheritanceTypes || {};
-    this._rigsEnabled = !options.disableRigs;
+    this._supportsRigs = !!options.supportsRigs;
   }
 
   public async loadConfigurationFileForProjectAsync(
@@ -189,7 +188,7 @@ export class ConfigurationFile<TConfigurationFile> {
       terminal,
       projectConfigurationFilePath,
       new Set<string>(),
-      this._rigsEnabled ? projectPath : undefined
+      this._supportsRigs ? projectPath : undefined
     );
   }
 
@@ -213,7 +212,7 @@ export class ConfigurationFile<TConfigurationFile> {
     }
 
     if (!exists) {
-      if (this._rigsEnabled) {
+      if (this._supportsRigs) {
         terminal.writeVerboseLine(
           `Config file "${projectConfigurationFilePathForLogging}" does not exist. Attempting to load via rig.`
         );

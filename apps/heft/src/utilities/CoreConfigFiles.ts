@@ -75,7 +75,8 @@ export class CoreConfigFiles {
           '$.heftPlugins.*.plugin': {
             pathResolutionMethod: PathResolutionMethod.NodeResolve
           }
-        }
+        },
+        supportsRigs: true
       });
     }
 
@@ -138,7 +139,11 @@ export class CoreConfigFiles {
       const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'copy-static-assets.schema.json');
       CoreConfigFiles._copyStaticAssetsConfigurationLoader = new ConfigurationFile<
         ICopyStaticAssetsConfigurationJson
-      >({ projectRelativeFilePath: 'config/copy-static-assets.json', jsonSchemaPath: schemaPath });
+      >({
+        projectRelativeFilePath: 'config/copy-static-assets.json',
+        jsonSchemaPath: schemaPath,
+        supportsRigs: true
+      });
     }
 
     return CoreConfigFiles._copyStaticAssetsConfigurationLoader;
@@ -154,7 +159,11 @@ export class CoreConfigFiles {
       const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'api-extractor-task.schema.json');
       CoreConfigFiles._apiExtractorTaskConfigurationLoader = new ConfigurationFile<
         IApiExtractorPluginConfiguration
-      >({ projectRelativeFilePath: 'config/api-extractor-task.json', jsonSchemaPath: schemaPath });
+      >({
+        projectRelativeFilePath: 'config/api-extractor-task.json',
+        jsonSchemaPath: schemaPath,
+        supportsRigs: true
+      });
     }
 
     return CoreConfigFiles._apiExtractorTaskConfigurationLoader;
@@ -170,7 +179,8 @@ export class CoreConfigFiles {
         ITypeScriptConfigurationJson
       >({
         projectRelativeFilePath: 'config/typescript.json',
-        jsonSchemaPath: schemaPath
+        jsonSchemaPath: schemaPath,
+        supportsRigs: true
       });
     }
 
