@@ -22,7 +22,6 @@
     "@rushstack/heft": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/resolve": "1.17.1",
-    "@types/strip-json-comments": "3.0.0",
     "ajv": "~6.12.5",
     "resolve": "~1.17.0"
   }
