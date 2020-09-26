@@ -12,6 +12,7 @@ import {
   Terminal
 } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
+import { Console } from 'console';
 
 interface IConfigurationJson {
   extends?: string;
@@ -202,6 +203,9 @@ export class ConfigurationFile<TConfigurationFile> {
     projectPath: string
   ): Promise<TConfigurationFile | undefined> {
     const projectConfigurationFilePath: string = this._getConfigurationFilePathForProject(projectPath);
+    const projectConfigurationFilePathForLogging: string = ConfigurationFile._formatPathForLogging(
+      projectConfigurationFilePath
+    );
     let exists: boolean | undefined = this._fileExistsCache.get(projectConfigurationFilePath);
     if (exists === undefined) {
       exists = await FileSystem.existsAsync(projectConfigurationFilePath);
@@ -210,8 +214,14 @@ export class ConfigurationFile<TConfigurationFile> {
 
     if (!exists) {
       if (this._rigsEnabled) {
+        terminal.writeVerboseLine(
+          `Config file "${projectConfigurationFilePathForLogging}" does not exist. Attempting to load via rig.`
+        );
         return await this._tryLoadConfigurationFileInRigAsync(terminal, projectPath, new Set<string>());
       } else {
+        terminal.writeVerboseLine(
+          `Config file "${projectConfigurationFilePathForLogging}" does not exist and rig loading is disabled.`
+        );
         return undefined;
       }
     } else {
@@ -226,7 +236,7 @@ export class ConfigurationFile<TConfigurationFile> {
   /**
    * @internal
    */
-  public static _formatPathForError: (path: string) => string = (path: string) => path;
+  public static _formatPathForLogging: (path: string) => string = (path: string) => path;
 
   /**
    * Get the path to the source file that the referenced property was originally
@@ -280,6 +290,12 @@ export class ConfigurationFile<TConfigurationFile> {
       } catch (e) {
         cacheEntry = { error: e };
       }
+    } else {
+      terminal.writeVerboseLine(
+        `Found "${ConfigurationFile._formatPathForLogging(
+          resolvedConfigurationFilePath
+        )}" in ConfigurationFile path.`
+      );
     }
 
     if (cacheEntry.error) {
@@ -295,14 +311,14 @@ export class ConfigurationFile<TConfigurationFile> {
     visitedConfigurationFilePaths: Set<string>,
     projectFolderForRig: string | undefined
   ): Promise<TConfigurationFile> {
-    const resolvedConfigurationFilePathForErrors: string = ConfigurationFile._formatPathForError(
+    const resolvedConfigurationFilePathForLogging: string = ConfigurationFile._formatPathForLogging(
       resolvedConfigurationFilePath
     );
 
     if (visitedConfigurationFilePaths.has(resolvedConfigurationFilePath)) {
       throw new Error(
         'A loop has been detected in the "extends" properties of configuration file at ' +
-          `"${resolvedConfigurationFilePathForErrors}".`
+          `"${resolvedConfigurationFilePathForLogging}".`
       );
     }
 
@@ -313,6 +329,9 @@ export class ConfigurationFile<TConfigurationFile> {
       fileText = await FileSystem.readFileAsync(resolvedConfigurationFilePath);
     } catch (e) {
       if (FileSystem.isNotExistError(e)) {
+        terminal.writeVerboseLine(
+          `Configuration file "${resolvedConfigurationFilePathForLogging}" not found.`
+        );
         if (projectFolderForRig) {
           const rigResult: TConfigurationFile | undefined = await this._tryLoadConfigurationFileInRigAsync(
             terminal,
@@ -324,7 +343,7 @@ export class ConfigurationFile<TConfigurationFile> {
           }
         }
 
-        e.message = `File does not exist: ${resolvedConfigurationFilePathForErrors}`;
+        e.message = `File does not exist: ${resolvedConfigurationFilePathForLogging}`;
       }
 
       throw e;
@@ -334,10 +353,10 @@ export class ConfigurationFile<TConfigurationFile> {
     try {
       configurationJson = await JsonFile.parseString(fileText);
     } catch (e) {
-      throw new Error(`In config file "${resolvedConfigurationFilePathForErrors}": ${e}`);
+      throw new Error(`In config file "${resolvedConfigurationFilePathForLogging}": ${e}`);
     }
 
-    this._schema.validateObject(configurationJson, resolvedConfigurationFilePathForErrors);
+    this._schema.validateObject(configurationJson, resolvedConfigurationFilePathForLogging);
 
     this._annotateProperties(resolvedConfigurationFilePath, configurationJson);
 
@@ -376,7 +395,7 @@ export class ConfigurationFile<TConfigurationFile> {
       } catch (e) {
         if (FileSystem.isNotExistError(e)) {
           throw new Error(
-            `In file "${resolvedConfigurationFilePathForErrors}", file referenced in "extends" property ` +
+            `In file "${resolvedConfigurationFilePathForLogging}", file referenced in "extends" property ` +
               `("${configurationJson.extends}") cannot be resolved.`
           );
         } else {
@@ -478,7 +497,7 @@ export class ConfigurationFile<TConfigurationFile> {
     }
 
     try {
-      this._schema.validateObject(result, resolvedConfigurationFilePathForErrors);
+      this._schema.validateObject(result, resolvedConfigurationFilePathForLogging);
     } catch (e) {
       throw new Error(`Resolved configuration object does not match schema: ${e}`);
     }
@@ -488,10 +507,13 @@ export class ConfigurationFile<TConfigurationFile> {
 
   private async _tryLoadConfigurationFileInRigAsync(
     terminal: Terminal,
-
     projectFolder: string,
     visitedConfigurationFilePaths: Set<string>
   ): Promise<TConfigurationFile | undefined> {
+    terminal.writeVerboseLine(
+      `Attempting to load rig for "${ConfigurationFile._formatPathForLogging(projectFolder)}"`
+    );
+
     const rigPackage: RigConfig = await RigConfig.loadForProjectFolderAsync({
       projectFolderPath: projectFolder
     });
@@ -509,8 +531,18 @@ export class ConfigurationFile<TConfigurationFile> {
         // Ignore cases where a configuration file doesn't exist in a rig
         if (!FileSystem.isNotExistError(e)) {
           throw e;
+        } else {
+          terminal.writeVerboseLine(
+            `Configuration file "${
+              this._projectRelativeFilePath
+            }" not found in rig ("${ConfigurationFile._formatPathForLogging(rigProfileFolder)}")`
+          );
         }
       }
+    } else {
+      terminal.writeVerboseLine(
+        `No rig found for "${ConfigurationFile._formatPathForLogging(projectFolder)}"`
+      );
     }
 
     return undefined;
@@ -559,7 +591,7 @@ export class ConfigurationFile<TConfigurationFile> {
         );
         if (!packageRoot) {
           throw new Error(
-            `Could not find a package root for path "${ConfigurationFile._formatPathForError(
+            `Could not find a package root for path "${ConfigurationFile._formatPathForLogging(
               configurationFilePath
             )}"`
           );

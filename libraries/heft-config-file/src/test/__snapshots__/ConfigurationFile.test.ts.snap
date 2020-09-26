@@ -143,7 +143,7 @@ exports[`ConfigurationFile error cases Throws an error when a requested file doe
 Object {
   "error": "",
   "log": "",
-  "verbose": "",
+  "verbose": "Configuration file \\"<project root>/src/test/errorCases/folderThatDoesntExist/config.json\\" not found.[n]Attempting to load rig for \\"<project root>/src/test\\"[n]No rig found for \\"<project root>/src/test\\"[n]",
   "warning": "",
 }
 `;
@@ -154,7 +154,7 @@ exports[`ConfigurationFile error cases Throws an error when an "extends" propert
 Object {
   "error": "",
   "log": "",
-  "verbose": "",
+  "verbose": "Configuration file \\"<project root>/src/test/errorCases/extendsNotExist/config2.json\\" not found.[n]",
   "warning": "",
 }
 `;
@@ -189,7 +189,7 @@ exports[`ConfigurationFile error cases returns undefined when the file doesn't e
 Object {
   "error": "",
   "log": "",
-  "verbose": "",
+  "verbose": "Config file \\"<project root>/src/test/errorCases/invalidType/notExist.json\\" does not exist. Attempting to load via rig.[n]Attempting to load rig for \\"<project root>/src/test\\"[n]No rig found for \\"<project root>/src/test\\"[n]",
   "warning": "",
 }
 `;
@@ -200,7 +200,7 @@ exports[`ConfigurationFile error cases throws an error when the file doesn't exi
 Object {
   "error": "",
   "log": "",
-  "verbose": "",
+  "verbose": "Configuration file \\"<project root>/src/test/errorCases/invalidType/notExist.json\\" not found.[n]Attempting to load rig for \\"<project root>/src/test\\"[n]No rig found for \\"<project root>/src/test\\"[n]",
   "warning": "",
 }
 `;
@@ -209,7 +209,7 @@ exports[`ConfigurationFile loading a rig correctly loads a config file inside a 
 Object {
   "error": "",
   "log": "",
-  "verbose": "",
+  "verbose": "Configuration file \\"<project root>/src/test/project-referencing-rig/config/simplestConfigFile.json\\" not found.[n]Attempting to load rig for \\"<project root>/src/test/project-referencing-rig\\"[n]",
   "warning": "",
 }
 `;
@@ -218,7 +218,7 @@ exports[`ConfigurationFile loading a rig correctly loads a config file inside a 
 Object {
   "error": "",
   "log": "",
-  "verbose": "",
+  "verbose": "Config file \\"<project root>/src/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig.[n]Attempting to load rig for \\"<project root>/src/test/project-referencing-rig\\"[n]",
   "warning": "",
 }
 `;
@@ -229,7 +229,7 @@ exports[`ConfigurationFile loading a rig throws an error when a config file does
 Object {
   "error": "",
   "log": "",
-  "verbose": "",
+  "verbose": "Configuration file \\"<project root>/src/test/project-referencing-rig/config/notExist.json\\" not found.[n]Attempting to load rig for \\"<project root>/src/test/project-referencing-rig\\"[n]Configuration file \\"<project root>/src/test/project-referencing-rig/node_modules/test-rig/profiles/default/config/notExist.json\\" not found.[n]Configuration file \\"config/notExist.json\\" not found in rig (\\"<project root>/src/test/project-referencing-rig/node_modules/test-rig/profiles/default\\")[n]",
   "warning": "",
 }
 `;

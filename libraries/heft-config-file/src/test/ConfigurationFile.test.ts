@@ -13,10 +13,10 @@ describe('ConfigurationFile', () => {
 
   beforeEach(() => {
     const projectRoot: string = nodeJsPath.resolve(__dirname, '..', '..');
-    const formatPathForError: (path: string) => string = (path: string) =>
+    const formatPathForLogging: (path: string) => string = (path: string) =>
       `<project root>/${nodeJsPath.relative(projectRoot, path).replace(/\\/g, '/')}`;
-    jest.spyOn(ConfigurationFile, '_formatPathForError').mockImplementation(formatPathForError);
-    jest.spyOn(JsonFile, '_formatPathForError').mockImplementation(formatPathForError);
+    jest.spyOn(ConfigurationFile, '_formatPathForLogging').mockImplementation(formatPathForLogging);
+    jest.spyOn(JsonFile, '_formatPathForError').mockImplementation(formatPathForLogging);
 
     terminalProvider = new StringBufferTerminalProvider(false);
     terminal = new Terminal(terminalProvider);
