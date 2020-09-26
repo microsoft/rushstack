@@ -190,7 +190,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
 
   private _getPluginArgumentValues(args: string[] = process.argv): string[] {
     // This is a rough parsing of the --plugin parameters
-    const parser: ArgumentParser = new ArgumentParser();
+    const parser: ArgumentParser = new ArgumentParser({ addHelp: false });
     parser.addArgument(this._pluginsParameter.longName, { dest: 'plugins', action: 'append' });
 
     const [result]: { plugins: string[] }[] = parser.parseKnownArgs(args);
