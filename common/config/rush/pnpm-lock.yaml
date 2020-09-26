@@ -40,6 +40,7 @@ importers:
       '@microsoft/api-extractor-model': 'link:../api-extractor-model'
       '@microsoft/tsdoc': 0.12.19
       '@rushstack/node-core-library': 'link:../../libraries/node-core-library'
+      '@rushstack/rig-package': 'link:../../libraries/rig-package'
       '@rushstack/ts-command-line': 'link:../../libraries/ts-command-line'
       colors: 1.2.5
       lodash: 4.17.20
@@ -63,6 +64,7 @@ importers:
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.8.0
       '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/rig-package': 'workspace:*'
       '@rushstack/ts-command-line': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/lodash': 4.14.116
@@ -1421,21 +1423,19 @@ importers:
       resolve: 1.17.0
       strip-json-comments: 3.1.1
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
+      '@microsoft/rush-stack-compiler-3.5': 0.8.10
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
-      '@rushstack/heft': 'link:../../apps/heft'
+      '@rushstack/heft': 0.8.0
       '@types/heft-jest': 1.0.1
       '@types/resolve': 1.17.1
-      '@types/strip-json-comments': 3.0.0
       ajv: 6.12.5
     specifiers:
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
+      '@microsoft/rush-stack-compiler-3.5': 0.8.10
       '@rushstack/eslint-config': 'workspace:*'
-      '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft': 0.8.0
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       '@types/resolve': 1.17.1
-      '@types/strip-json-comments': 3.0.0
       ajv: ~6.12.5
       resolve: ~1.17.0
       strip-json-comments: ~3.1.1
@@ -3128,31 +3128,31 @@ packages:
     dev: true
     resolution:
       integrity: sha512-QX7U7YW3zX3ex6MECtWO9folTGsXeP4b8bSjTq3I1ODM+H+sFHwGKuof+T+qBcDClGlCGtDb3SVfiTVfmcxw4g==
-  /@types/babel__core/7.1.9:
+  /@types/babel__core/7.1.10:
     dependencies:
       '@babel/parser': 7.11.5
       '@babel/types': 7.11.5
-      '@types/babel__generator': 7.6.1
-      '@types/babel__template': 7.0.2
-      '@types/babel__traverse': 7.0.14
+      '@types/babel__generator': 7.6.2
+      '@types/babel__template': 7.0.3
+      '@types/babel__traverse': 7.0.15
     resolution:
-      integrity: sha512-sY2RsIJ5rpER1u3/aQ8OFSI7qGIy8o1NEEbgb2UaJcvOtXOMpd39ko723NBpjQFg9SIX7TXtjejZVGeIMLhoOw==
-  /@types/babel__generator/7.6.1:
+      integrity: sha512-x8OM8XzITIMyiwl5Vmo2B1cR1S1Ipkyv4mdlbJjMa1lmuKvKY9FrBbEANIaMlnWn5Rf7uO+rC/VgYabNkE17Hw==
+  /@types/babel__generator/7.6.2:
     dependencies:
       '@babel/types': 7.11.5
     resolution:
-      integrity: sha512-bBKm+2VPJcMRVwNhxKu8W+5/zT7pwNEqeokFOmbvVSqGzFneNxYcEBro9Ac7/N9tlsaPYnZLK8J1LWKkMsLAew==
-  /@types/babel__template/7.0.2:
+      integrity: sha512-MdSJnBjl+bdwkLskZ3NGFp9YcXGx5ggLpQQPqtgakVhsWK0hTtNYhjpZLlWQTviGTvF8at+Bvli3jV7faPdgeQ==
+  /@types/babel__template/7.0.3:
     dependencies:
       '@babel/parser': 7.11.5
       '@babel/types': 7.11.5
     resolution:
-      integrity: sha512-/K6zCpeW7Imzgab2bLkLEbz0+1JlFSrUMdw7KoIIu+IUdu51GWaBZpd3y1VXGVXzynvGa4DaIaxNZHiON3GXUg==
-  /@types/babel__traverse/7.0.14:
+      integrity: sha512-uCoznIPDmnickEi6D0v11SBpW0OuVqHJCa7syXqQHy5uktSCreIlt0iglsCnmvz8yCb38hGcWeseA8cWJSwv5Q==
+  /@types/babel__traverse/7.0.15:
     dependencies:
       '@babel/types': 7.11.5
     resolution:
-      integrity: sha512-8w9szzKs14ZtBVuP6Wn7nMLRJ0D6dfB0VEBEyRgxrZ/Ln49aNMykrghM2FaNn4FJRzNppCSa0Rv9pBRM5Xc3wg==
+      integrity: sha512-Pzh9O3sTK8V6I1olsXpCfj2k/ygO2q1X0vhhnDrEQyYLHZesWz+zMZMVcwXLCYf0U36EtmyYaFGPfXlTtDHe3A==
   /@types/body-parser/1.19.0:
     dependencies:
       '@types/connect': 3.4.33
@@ -3553,13 +3553,6 @@ packages:
     dev: true
     resolution:
       integrity: sha512-R6vDd7CHxcWMzv5wfVhR3qyCRVQoZKwVd6kit0rkozTThRZSXZKEW2Kz3AxfVqq9+UyJAz1g8Q+bJ3CL6NzztQ==
-  /@types/strip-json-comments/3.0.0:
-    dependencies:
-      strip-json-comments: 3.1.1
-    deprecated: 'This is a stub types definition. strip-json-comments provides its own type definitions, so you do not need this installed.'
-    dev: true
-    resolution:
-      integrity: sha512-+vSlZeCCGm/1Q3WwBJDUSGHvADTQjRl4Fve0AG9H+A4+xgJ7yAkWKoc4g7I9UoVqtwCzjv2g/GZn4xipokMYyQ==
   /@types/tapable/1.0.5:
     resolution:
       integrity: sha512-/gG2M/Imw7cQFp8PGvz/SwocNrmKFjFsm5Pb8HdbHkZ1K8pmuPzOX4VeVoiEecFCVf4CsN1r3/BRvx+6sNqwtQ==
@@ -4465,8 +4458,8 @@ packages:
       integrity: sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==
   /autoprefixer/9.8.6:
     dependencies:
-      browserslist: 4.14.4
-      caniuse-lite: 1.0.30001135
+      browserslist: 4.14.5
+      caniuse-lite: 1.0.30001137
       colorette: 1.2.1
       normalize-range: 0.1.2
       num2fraction: 1.2.2
@@ -4495,7 +4488,7 @@ packages:
       '@babel/core': 7.11.6
       '@jest/transform': 25.5.1
       '@jest/types': 25.5.0
-      '@types/babel__core': 7.1.9
+      '@types/babel__core': 7.1.10
       babel-plugin-istanbul: 6.0.0
       babel-preset-jest: 25.5.0_@babel+core@7.11.6
       chalk: 3.0.0
@@ -4522,7 +4515,7 @@ packages:
     dependencies:
       '@babel/template': 7.10.4
       '@babel/types': 7.11.5
-      '@types/babel__traverse': 7.0.14
+      '@types/babel__traverse': 7.0.15
     engines:
       node: '>= 8.3'
     resolution:
@@ -4819,10 +4812,10 @@ packages:
       pako: 1.0.11
     resolution:
       integrity: sha512-Z942RysHXmJrhqk88FmKBVq/v5tqmSkDz7p54G/MGyjMnCFFnC79XWNbg+Vta8W6Wb2qtSZTSxIGkJrRpCFEiA==
-  /browserslist/4.14.4:
+  /browserslist/4.14.5:
     dependencies:
-      caniuse-lite: 1.0.30001135
-      electron-to-chromium: 1.3.571
+      caniuse-lite: 1.0.30001137
+      electron-to-chromium: 1.3.573
       escalade: 3.1.0
       node-releases: 1.1.61
     dev: false
@@ -4830,7 +4823,7 @@ packages:
       node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7
     hasBin: true
     resolution:
-      integrity: sha512-7FOuawafVdEwa5Jv4nzeik/PepAjVte6HmVGHsjt2bC237jeL9QlcTBDF3PnHEvcC6uHwLGYPwZHNZMB7wWAnw==
+      integrity: sha512-Z+vsCZIvCBvqLoYkBFTwEYH3v5MCQbsAjp50ERycpOjnPmolg1Gjy4+KaWWpm8QOJt9GHkhdqAl14NpCX73CWA==
   /bs-logger/0.2.6:
     dependencies:
       fast-json-stable-stringify: 2.1.0
@@ -4986,10 +4979,10 @@ packages:
       node: '>=10'
     resolution:
       integrity: sha512-8KMDF1Vz2gzOq54ONPJS65IvTUaB1cHJ2DMM7MbPmLZljDH1qpzzLsWdiN9pHh6qvkRVDTi/07+eNGch/oLU4w==
-  /caniuse-lite/1.0.30001135:
+  /caniuse-lite/1.0.30001137:
     dev: false
     resolution:
-      integrity: sha512-ziNcheTGTHlu9g34EVoHQdIu5g4foc8EsxMGC7Xkokmvw0dqNtX8BS8RgCgFBaAiSp2IdjvBxNdh0ssib28eVQ==
+      integrity: sha512-54xKQZTqZrKVHmVz0+UvdZR6kQc7pJDgfhsMYDG19ID1BWoNnDMFm5Q3uSBSU401pBvKYMsHAt9qhEDcxmk8aw==
   /capture-exit/2.0.0:
     dependencies:
       rsvp: 4.8.5
@@ -5989,10 +5982,10 @@ packages:
     requiresBuild: true
     resolution:
       integrity: sha512-7vmuyh5+kuUyJKePhQfRQBhXV5Ce+RnaeeQArKu1EAMpL3WbgMt5WG6uQZpEVvYSSsxMXRKOewtDk9RaTKXRlA==
-  /electron-to-chromium/1.3.571:
+  /electron-to-chromium/1.3.573:
     dev: false
     resolution:
-      integrity: sha512-UYEQ2Gtc50kqmyOmOVtj6Oqi38lm5yRJY3pLuWt6UIot0No1L09uu6Ja6/1XKwmz/p0eJFZTUZi+khd1PV1hHA==
+      integrity: sha512-oypaNmexr8w0m2GX67fGLQ0Xgsd7uXz7GcwaHZ9eW3ZdQ8uA2+V/wXmLdMTk3gcacbqQGAN7CXWG3fOkfKYftw==
   /elliptic/6.5.3:
     dependencies:
       bn.js: 4.11.9
@@ -10653,7 +10646,7 @@ packages:
     dependencies:
       icss-utils: 4.1.1
       postcss: 7.0.32
-      postcss-selector-parser: 6.0.3
+      postcss-selector-parser: 6.0.4
       postcss-value-parser: 4.1.0
     dev: true
     engines:
@@ -10670,7 +10663,7 @@ packages:
   /postcss-modules-scope/2.2.0:
     dependencies:
       postcss: 7.0.32
-      postcss-selector-parser: 6.0.3
+      postcss-selector-parser: 6.0.4
     dev: true
     engines:
       node: '>= 6'
@@ -10700,7 +10693,7 @@ packages:
     dev: false
     resolution:
       integrity: sha512-KiAihzcV0TxTTNA5OXreyIXctuHOfR50WIhqBpc8pe0Q5dcs/Uap9EVlifOI9am7zGGdGOJQ6B1MPYKo2UxgOg==
-  /postcss-selector-parser/6.0.3:
+  /postcss-selector-parser/6.0.4:
     dependencies:
       cssesc: 3.0.0
       indexes-of: 1.0.1
@@ -10710,7 +10703,7 @@ packages:
     engines:
       node: '>=4'
     resolution:
-      integrity: sha512-0ClFaY4X1ra21LRqbW6y3rUbWcxnSVkDFG57R7Nxus9J9myPFlv+jYDMohzpkBx0RrjjiqjtycpchQ+PLGmZ9w==
+      integrity: sha512-gjMeXBempyInaBqpp8gODmwZ52WaYsVOsfr4L4lDQ7n3ncD6mEyySiDtgzCT+NYC0mmeOLvtsF8iaEf0YT6dBw==
   /postcss-value-parser/4.1.0:
     resolution:
       integrity: sha512-97DXOFbQJhk71ne5/Mt6cOu6yxsSfM0QGQyl0L25Gca4yGWEGJaig7l7gbCX623VqTBNGLRLaVUCnNkcedlRSQ==
@@ -14418,4 +14411,3 @@ packages:
       commander: 2.20.3
     resolution:
       integrity: sha512-DUOKC/IhbkdLKKiV89gw9DUauTV8U/8yJl1sjf6MtDmzevLKOF2duNJ495S3MFVjqZarr+qNGCPbkg4mu4PpLw==
-registry: ''
