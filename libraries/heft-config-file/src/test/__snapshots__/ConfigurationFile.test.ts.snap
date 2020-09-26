@@ -33,3 +33,5 @@ exports[`ConfigurationFile error cases Throws an error when the file isn't valid
 exports[`ConfigurationFile error cases Throws an error when there is a circular reference in "extends" properties 1`] = `[Error: A loop has been detected in the "extends" properties of configuration file at "<project root>/src/test/errorCases/circularReference/config1.json".]`;
 
 exports[`ConfigurationFile error cases throws an error when the file doesn't exist 1`] = `[Error: File does not exist: <project root>/src/test/errorCases/invalidType/notExist.json]`;
+
+exports[`ConfigurationFile loading a rig throws an error when a config file doesn't exist in a project referencing a rig, which also doesn't have the file 1`] = `[Error: File does not exist: <project root>/src/test/project-referencing-rig/config/notExist.json]`;

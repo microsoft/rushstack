@@ -7,6 +7,14 @@ import { ConfigurationFile, PathResolutionMethod, InheritanceType } from '../Con
 import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 
 describe('ConfigurationFile', () => {
+  beforeEach(() => {
+    const projectRoot: string = nodeJsPath.resolve(__dirname, '..', '..');
+    const formatPathForError: (path: string) => string = (path: string) =>
+      `<project root>/${nodeJsPath.relative(projectRoot, path).replace(/\\/g, '/')}`;
+    jest.spyOn(ConfigurationFile, '_formatPathForError').mockImplementation(formatPathForError);
+    jest.spyOn(JsonFile, '_formatPathForError').mockImplementation(formatPathForError);
+  });
+
   const projectRoot: string = nodeJsPath.resolve(__dirname, '..', '..');
 
   describe('A simple config file', () => {
@@ -351,16 +359,61 @@ describe('ConfigurationFile', () => {
     });
   });
 
+  describe('loading a rig', () => {
+    const projectFolder: string = nodeJsPath.resolve(__dirname, 'project-referencing-rig');
+
+    const schemaPath: string = nodeJsPath.resolve(
+      __dirname,
+      'simplestConfigFile',
+      'simplestConfigFile.schema.json'
+    );
+
+    interface ISimplestConfigFile {
+      thing: string;
+    }
+
+    it('correctly loads a config file inside a rig', async () => {
+      const projectRelativeFilePath: string = 'config/simplestConfigFile.json';
+      const configFileLoader: ConfigurationFile<ISimplestConfigFile> = new ConfigurationFile<
+        ISimplestConfigFile
+      >({ projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath });
+      const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
+        projectFolder
+      );
+      const expectedConfigFile: ISimplestConfigFile = { thing: 'A' };
+
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+      expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile)).toEqual(
+        nodeJsPath.resolve(
+          projectFolder,
+          'node_modules',
+          'test-rig',
+          'profiles',
+          'default',
+          projectRelativeFilePath
+        )
+      );
+      expect(
+        configFileLoader.getPropertyOriginalValue({ parentObject: loadedConfigFile, propertyName: 'thing' })
+      ).toEqual('A');
+    });
+
+    it("throws an error when a config file doesn't exist in a project referencing a rig, which also doesn't have the file", async () => {
+      const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
+        projectRelativeFilePath: 'config/notExist.json',
+        jsonSchemaPath: schemaPath
+      });
+      try {
+        await configFileLoader.loadConfigurationFileForProjectAsync(projectFolder);
+        fail();
+      } catch (e) {
+        expect(e).toMatchSnapshot();
+      }
+    });
+  });
+
   describe('error cases', () => {
     const errorCasesFolderName: string = 'errorCases';
-
-    beforeEach(() => {
-      const projectRoot: string = nodeJsPath.resolve(__dirname, '..', '..');
-      const formatPathForError: (path: string) => string = (path: string) =>
-        `<project root>/${nodeJsPath.relative(projectRoot, path).replace(/\\/g, '/')}`;
-      jest.spyOn(ConfigurationFile, '_formatPathForError').mockImplementation(formatPathForError);
-      jest.spyOn(JsonFile, '_formatPathForError').mockImplementation(formatPathForError);
-    });
 
     it("throws an error when the file doesn't exist", async () => {
       const errorCaseFolderName: string = 'invalidType';
