@@ -36,6 +36,7 @@
   "dependencies": {
     "@microsoft/api-extractor-model": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rig-package": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "@microsoft/tsdoc": "0.12.19",
     "colors": "~1.2.1",

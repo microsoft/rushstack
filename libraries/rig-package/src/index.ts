@@ -12,4 +12,4 @@
  * @packageDocumentation
  */
 
-export { RigConfig, ILoadForProjectFolderOptions } from './RigConfig';
+export { IRigConfigJson, RigConfig, ILoadForProjectFolderOptions } from './RigConfig';

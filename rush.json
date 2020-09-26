@@ -831,7 +831,8 @@
       "packageName": "@rushstack/rig-package",
       "projectFolder": "libraries/rig-package",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@microsoft/rush-stack-compiler-3.5", "@rushstack/heft"]
     },
     {
       "packageName": "@microsoft/rushell",

@@ -17,12 +17,11 @@
     "strip-json-comments": "~3.1.1"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "workspace:*",
+    "@microsoft/rush-stack-compiler-3.5": "0.8.10",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft": "0.8.0",
     "@types/heft-jest": "1.0.1",
     "@types/resolve": "1.17.1",
-    "@types/strip-json-comments": "3.0.0",
     "ajv": "~6.12.5",
     "resolve": "~1.17.0"
   }

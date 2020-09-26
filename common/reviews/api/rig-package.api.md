@@ -6,7 +6,14 @@
 
 // @public
 export interface ILoadForProjectFolderOptions {
+    overrideRigJsonObject?: IRigConfigJson;
     projectFolderPath: string;
+}
+
+// @public
+export interface IRigConfigJson {
+    rigPackageName: string;
+    rigProfile?: string;
 }
 
 // @public
