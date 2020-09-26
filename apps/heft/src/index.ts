@@ -54,3 +54,9 @@ export {
 } from './stages/BuildStage';
 export { ICleanStageProperties, CleanStageHooks, ICleanStageContext } from './stages/CleanStage';
 export { ITestStageProperties, TestStageHooks, ITestStageContext } from './stages/TestStage';
+
+// Other hooks
+export {
+  IHeftLifecycle as _IHeftLifecycle,
+  HeftLifecycleHooks as _HeftLifecycleHooks
+} from './pluginFramework/HeftLifecycle';

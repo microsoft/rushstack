@@ -29,6 +29,8 @@ import { TestStage } from '../stages/TestStage';
 import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 import { ICustomActionOptions, CustomAction } from './actions/CustomAction';
 import { Constants } from '../utilities/Constants';
+import { SyncHook } from 'tapable';
+import { IHeftLifecycle, HeftLifecycleHooks } from '../pluginFramework/HeftLifecycle';
 
 export class HeftToolsCommandLineParser extends CommandLineParser {
   private _terminalProvider: ConsoleTerminalProvider;
@@ -38,6 +40,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
   private _pluginManager: PluginManager;
   private _heftConfiguration: HeftConfiguration;
   private _internalHeftSession: InternalHeftSession;
+  private _heftLifecycleHook: SyncHook<IHeftLifecycle>;
 
   // @ts-ignore (TS6133) '_unmanagedFlag' is declared but its value is never read.
   private _unmanagedFlag: CommandLineFlagParameter;
@@ -84,9 +87,11 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       stages
     };
 
+    this._heftLifecycleHook = new SyncHook<IHeftLifecycle>(['heftLifecycle']);
     this._internalHeftSession = new InternalHeftSession({
       getIsDebugMode: () => this.isDebug,
       ...stages,
+      heftLifecycleHook: this._heftLifecycleHook,
       loggingManager: this._loggingManager,
       metricsCollector: this._metricsCollector,
       registerAction: <TParameters>(options: ICustomActionOptions<TParameters>) => {
@@ -146,6 +151,13 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     this._normalizeCwd();
 
     await this._initializePluginsAsync();
+
+    const heftLifecycle: IHeftLifecycle = {
+      hooks: new HeftLifecycleHooks()
+    };
+    this._heftLifecycleHook.call(heftLifecycle);
+
+    await heftLifecycle.hooks.toolStart.promise();
 
     return await super.execute(args);
   }

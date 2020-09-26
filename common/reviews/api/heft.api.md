@@ -47,7 +47,7 @@ export class BundleSubstageHooks extends BuildSubstageHooksBase {
 // @public (undocumented)
 export class CleanStageHooks extends StageHooksBase<ICleanStageProperties> {
     // (undocumented)
-    readonly deletePath: AsyncSeriesBailHook<string>;
+    readonly run: AsyncParallelHook;
 }
 
 // @public (undocumented)
@@ -71,10 +71,17 @@ export class HeftConfiguration {
     get heftPackageJson(): IPackageJson;
     // @internal (undocumented)
     static initialize(options: _IHeftConfigurationInitializationOptions): HeftConfiguration;
+    get projectConfigFolder(): string;
     get projectHeftDataFolder(): string;
     get projectPackageJson(): IPackageJson;
     get terminalProvider(): ITerminalProvider;
     }
+
+// @internal (undocumented)
+export class _HeftLifecycleHooks {
+    // (undocumented)
+    toolStart: AsyncParallelHook;
+}
 
 // @public (undocumented)
 export class HeftSession {
@@ -236,6 +243,12 @@ export interface _IHeftConfigurationInitializationOptions {
     terminalProvider: ITerminalProvider;
 }
 
+// @internal (undocumented)
+export interface _IHeftLifecycle {
+    // (undocumented)
+    hooks: _HeftLifecycleHooks;
+}
+
 // @public (undocumented)
 export interface IHeftPlugin<TOptions = void> {
     // (undocumented)
@@ -252,6 +265,8 @@ export interface IHeftSessionHooks {
     build: SyncHook<IBuildStageContext>;
     // (undocumented)
     clean: SyncHook<ICleanStageContext>;
+    // @internal (undocumented)
+    heftLifecycle: SyncHook<_IHeftLifecycle>;
     // (undocumented)
     metricsCollector: MetricsCollectorHooks;
     // (undocumented)

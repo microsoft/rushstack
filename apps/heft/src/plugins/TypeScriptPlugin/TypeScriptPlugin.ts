@@ -19,7 +19,7 @@ import { TaskPackageResolver, ITaskPackageResolution } from '../../utilities/Tas
 import { JestTypeScriptDataFile } from '../JestPlugin/JestTypeScriptDataFile';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { ICleanStageContext, ICleanStageProperties } from '../../stages/CleanStage';
-import { HeftConfigFiles } from '../../utilities/HeftConfigFiles';
+import { CoreConfigFiles } from '../../utilities/CoreConfigFiles';
 
 const PLUGIN_NAME: string = 'typescript';
 
@@ -104,7 +104,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     heftSession.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanStageContext) => {
       clean.hooks.loadStageConfiguration.tapPromise(PLUGIN_NAME, async () => {
-        await this._updateCleanOptions(heftConfiguration.buildFolder, clean.properties);
+        await this._updateCleanOptions(heftConfiguration, clean.properties);
       });
     });
 
@@ -124,17 +124,17 @@ export class TypeScriptPlugin implements IHeftPlugin {
   }
 
   private async _ensureConfigFileLoadedAsync(
-    buildFolder: string
+    configFolder: string
   ): Promise<ITypeScriptConfigurationJson | undefined> {
     let typescriptConfigurationFileCacheEntry:
       | ITypeScriptConfigurationFileCacheEntry
-      | undefined = this._typeScriptConfigurationFileCache.get(buildFolder);
+      | undefined = this._typeScriptConfigurationFileCache.get(configFolder);
 
     if (!typescriptConfigurationFileCacheEntry) {
-      const typescriptConfigurationFilePath: string = path.resolve(buildFolder, '.heft', 'typescript.json');
+      const typescriptConfigurationFilePath: string = path.resolve(configFolder, 'typescript.json');
       if (await FileSystem.existsAsync(typescriptConfigurationFilePath)) {
         typescriptConfigurationFileCacheEntry = {
-          configurationFile: await HeftConfigFiles.typeScriptConfigurationFileLoader.loadConfigurationFileAsync(
+          configurationFile: await CoreConfigFiles.typeScriptConfigurationFileLoader.loadConfigurationFileAsync(
             typescriptConfigurationFilePath
           )
         };
@@ -142,24 +142,24 @@ export class TypeScriptPlugin implements IHeftPlugin {
         typescriptConfigurationFileCacheEntry = { configurationFile: undefined };
       }
 
-      this._typeScriptConfigurationFileCache.set(buildFolder, typescriptConfigurationFileCacheEntry);
+      this._typeScriptConfigurationFileCache.set(configFolder, typescriptConfigurationFileCacheEntry);
     }
 
     return typescriptConfigurationFileCacheEntry.configurationFile;
   }
 
   private async _updateCleanOptions(
-    buildFolder: string,
+    heftConfiguration: HeftConfiguration,
     cleanProperties: ICleanStageProperties
   ): Promise<void> {
     const configurationFile:
       | ITypeScriptConfigurationJson
-      | undefined = await this._ensureConfigFileLoadedAsync(buildFolder);
+      | undefined = await this._ensureConfigFileLoadedAsync(heftConfiguration.projectConfigFolder);
 
     if (configurationFile?.additionalModuleKindsToEmit) {
       for (const additionalModuleKindToEmit of configurationFile.additionalModuleKindsToEmit) {
         cleanProperties.pathsToDelete.add(
-          path.resolve(buildFolder, additionalModuleKindToEmit.outFolderName)
+          path.resolve(heftConfiguration.buildFolder, additionalModuleKindToEmit.outFolderName)
         );
       }
     }
@@ -170,7 +170,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
 
     const typescriptConfigurationJson:
       | ITypeScriptConfigurationJson
-      | undefined = await this._ensureConfigFileLoadedAsync(heftConfiguration.buildFolder);
+      | undefined = await this._ensureConfigFileLoadedAsync(heftConfiguration.projectConfigFolder);
     const tsconfigPaths: string[] = await LegacyAdapters.convertCallbackToPromise(
       glob,
       'tsconfig?(-*).json',
