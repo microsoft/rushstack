@@ -22,6 +22,7 @@ import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
 import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWebpackPlugin';
 import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
 import { ProjectValidatorPlugin } from '../plugins/ProjectValidatorPlugin';
+import { RigConfig } from '@rushstack/rig-package';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
@@ -59,11 +60,13 @@ export class PluginManager {
   }
 
   public async initializePluginsFromConfigFileAsync(): Promise<void> {
+    const rigConfig: RigConfig = await CoreConfigFiles.getRigConfigAsync(this._heftConfiguration);
     const heftConfigurationJson:
       | IHeftConfigurationJson
       | undefined = await CoreConfigFiles.heftConfigFileLoader.tryLoadConfigurationFileForProjectAsync(
       this._heftConfiguration.globalTerminal,
-      this._heftConfiguration.buildFolder
+      this._heftConfiguration.buildFolder,
+      rigConfig
     );
     const heftPluginSpecifiers: IHeftConfigurationJsonPluginSpecifier[] =
       heftConfigurationJson?.heftPlugins || [];

@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import { ConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
+import { RigConfig } from '@rushstack/rig-package';
 
 import { ICopyStaticAssetsConfigurationJson } from '../plugins/CopyStaticAssetsPlugin';
 import { IApiExtractorPluginConfiguration } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
@@ -44,6 +45,7 @@ export interface IHeftEventActions {
 }
 
 export class CoreConfigFiles {
+  private static _rigConfigCache: Map<string, RigConfig> = new Map<string, RigConfig>();
   private static _heftConfigFileLoader: ConfigurationFile<IHeftConfigurationJson> | undefined;
 
   private static _heftConfigFileEventActionsCache: Map<HeftConfiguration, IHeftEventActions> = new Map<
@@ -61,6 +63,19 @@ export class CoreConfigFiles {
     | ConfigurationFile<ITypeScriptConfigurationJson>
     | undefined;
 
+  public static async getRigConfigAsync(heftConfiguration: HeftConfiguration): Promise<RigConfig> {
+    const projectFolderPath: string = heftConfiguration.buildFolder;
+    let rigConfig: RigConfig | undefined = CoreConfigFiles._rigConfigCache.get(projectFolderPath);
+    if (!rigConfig) {
+      rigConfig = await RigConfig.loadForProjectFolderAsync({
+        projectFolderPath
+      });
+      CoreConfigFiles._rigConfigCache.set(projectFolderPath, rigConfig);
+    }
+
+    return rigConfig;
+  }
+
   /**
    * Returns the loader for the `config/heft.json` config file.
    */
@@ -75,8 +90,7 @@ export class CoreConfigFiles {
           '$.heftPlugins.*.plugin': {
             pathResolutionMethod: PathResolutionMethod.NodeResolve
           }
-        },
-        supportsRigs: true
+        }
       });
     }
 
@@ -94,11 +108,13 @@ export class CoreConfigFiles {
       heftConfiguration
     );
     if (!result) {
+      const rigConfig: RigConfig = await CoreConfigFiles.getRigConfigAsync(heftConfiguration);
       const heftConfigJson:
         | IHeftConfigurationJson
         | undefined = await CoreConfigFiles.heftConfigFileLoader.tryLoadConfigurationFileForProjectAsync(
         terminal,
-        heftConfiguration.buildFolder
+        heftConfiguration.buildFolder,
+        rigConfig
       );
 
       result = {
@@ -141,8 +157,7 @@ export class CoreConfigFiles {
         ICopyStaticAssetsConfigurationJson
       >({
         projectRelativeFilePath: 'config/copy-static-assets.json',
-        jsonSchemaPath: schemaPath,
-        supportsRigs: true
+        jsonSchemaPath: schemaPath
       });
     }
 
@@ -161,8 +176,7 @@ export class CoreConfigFiles {
         IApiExtractorPluginConfiguration
       >({
         projectRelativeFilePath: 'config/api-extractor-task.json',
-        jsonSchemaPath: schemaPath,
-        supportsRigs: true
+        jsonSchemaPath: schemaPath
       });
     }
 
@@ -179,8 +193,7 @@ export class CoreConfigFiles {
         ITypeScriptConfigurationJson
       >({
         projectRelativeFilePath: 'config/typescript.json',
-        jsonSchemaPath: schemaPath,
-        supportsRigs: true
+        jsonSchemaPath: schemaPath
       });
     }
 

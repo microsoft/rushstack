@@ -123,12 +123,6 @@ export interface IConfigurationFileOptions<TConfigurationFile> {
    * configuration files.
    */
   propertyInheritanceTypes?: IPropertyInheritanceTypes<TConfigurationFile>;
-
-  /**
-   * If set to true, use the "config/rig.json" pattern to resolve a file that doesn't exist in the
-   * config folder
-   */
-  supportsRigs?: boolean;
 }
 
 interface IJsonPathCallbackObject {
@@ -154,7 +148,6 @@ export class ConfigurationFile<TConfigurationFile> {
   private readonly _projectRelativeFilePath: string;
   private readonly _jsonPathMetadata: IJsonPathsMetadata;
   private readonly _propertyInheritanceTypes: IPropertyInheritanceTypes<TConfigurationFile>;
-  private readonly _supportsRigs: boolean;
   private __schema: JsonSchema | undefined;
   private get _schema(): JsonSchema {
     if (!this.__schema) {
@@ -176,19 +169,19 @@ export class ConfigurationFile<TConfigurationFile> {
     this._schemaPath = options.jsonSchemaPath;
     this._jsonPathMetadata = options.jsonPathMetadata || {};
     this._propertyInheritanceTypes = options.propertyInheritanceTypes || {};
-    this._supportsRigs = !!options.supportsRigs;
   }
 
   public async loadConfigurationFileForProjectAsync(
     terminal: Terminal,
-    projectPath: string
+    projectPath: string,
+    rigConfig?: RigConfig
   ): Promise<TConfigurationFile> {
     const projectConfigurationFilePath: string = this._getConfigurationFilePathForProject(projectPath);
     return await this._loadConfigurationFileInnerWithCacheAsync(
       terminal,
       projectConfigurationFilePath,
       new Set<string>(),
-      this._supportsRigs ? projectPath : undefined
+      rigConfig
     );
   }
 
@@ -199,7 +192,8 @@ export class ConfigurationFile<TConfigurationFile> {
    */
   public async tryLoadConfigurationFileForProjectAsync(
     terminal: Terminal,
-    projectPath: string
+    projectPath: string,
+    rigConfig?: RigConfig
   ): Promise<TConfigurationFile | undefined> {
     const projectConfigurationFilePath: string = this._getConfigurationFilePathForProject(projectPath);
     const projectConfigurationFilePathForLogging: string = ConfigurationFile._formatPathForLogging(
@@ -212,22 +206,20 @@ export class ConfigurationFile<TConfigurationFile> {
     }
 
     if (!exists) {
-      if (this._supportsRigs) {
+      if (rigConfig) {
         terminal.writeVerboseLine(
           `Config file "${projectConfigurationFilePathForLogging}" does not exist. Attempting to load via rig.`
         );
-        return await this._tryLoadConfigurationFileInRigAsync(terminal, projectPath, new Set<string>());
+        return await this._tryLoadConfigurationFileInRigAsync(terminal, rigConfig, new Set<string>());
       } else {
-        terminal.writeVerboseLine(
-          `Config file "${projectConfigurationFilePathForLogging}" does not exist and rig loading is disabled.`
-        );
         return undefined;
       }
     } else {
       return await this._loadConfigurationFileInnerWithCacheAsync(
         terminal,
         projectConfigurationFilePath,
-        new Set<string>()
+        new Set<string>(),
+        undefined
       );
     }
   }
@@ -271,7 +263,7 @@ export class ConfigurationFile<TConfigurationFile> {
     terminal: Terminal,
     resolvedConfigurationFilePath: string,
     visitedConfigurationFilePaths: Set<string>,
-    projectFolderForRig: string | undefined = undefined
+    rigConfig: RigConfig | undefined
   ): Promise<TConfigurationFile> {
     let cacheEntry:
       | IConfigurationFileCacheEntry<TConfigurationFile>
@@ -283,7 +275,7 @@ export class ConfigurationFile<TConfigurationFile> {
             terminal,
             resolvedConfigurationFilePath,
             visitedConfigurationFilePaths,
-            projectFolderForRig
+            rigConfig
           )
         };
       } catch (e) {
@@ -308,7 +300,7 @@ export class ConfigurationFile<TConfigurationFile> {
     terminal: Terminal,
     resolvedConfigurationFilePath: string,
     visitedConfigurationFilePaths: Set<string>,
-    projectFolderForRig: string | undefined
+    rigConfig: RigConfig | undefined
   ): Promise<TConfigurationFile> {
     const resolvedConfigurationFilePathForLogging: string = ConfigurationFile._formatPathForLogging(
       resolvedConfigurationFilePath
@@ -331,10 +323,10 @@ export class ConfigurationFile<TConfigurationFile> {
         terminal.writeVerboseLine(
           `Configuration file "${resolvedConfigurationFilePathForLogging}" not found.`
         );
-        if (projectFolderForRig) {
+        if (rigConfig) {
           const rigResult: TConfigurationFile | undefined = await this._tryLoadConfigurationFileInRigAsync(
             terminal,
-            projectFolderForRig,
+            rigConfig,
             visitedConfigurationFilePaths
           );
           if (rigResult) {
@@ -506,19 +498,11 @@ export class ConfigurationFile<TConfigurationFile> {
 
   private async _tryLoadConfigurationFileInRigAsync(
     terminal: Terminal,
-    projectFolder: string,
+    rigConfig: RigConfig,
     visitedConfigurationFilePaths: Set<string>
   ): Promise<TConfigurationFile | undefined> {
-    terminal.writeVerboseLine(
-      `Attempting to load rig for "${ConfigurationFile._formatPathForLogging(projectFolder)}"`
-    );
-
-    const rigPackage: RigConfig = await RigConfig.loadForProjectFolderAsync({
-      projectFolderPath: projectFolder
-    });
-
-    if (rigPackage.rigFound) {
-      const rigProfileFolder: string = await rigPackage.getResolvedProfileFolderAsync();
+    if (rigConfig.rigFound) {
+      const rigProfileFolder: string = await rigConfig.getResolvedProfileFolderAsync();
       try {
         return await this._loadConfigurationFileInnerWithCacheAsync(
           terminal,
@@ -540,7 +524,7 @@ export class ConfigurationFile<TConfigurationFile> {
       }
     } else {
       terminal.writeVerboseLine(
-        `No rig found for "${ConfigurationFile._formatPathForLogging(projectFolder)}"`
+        `No rig found for "${ConfigurationFile._formatPathForLogging(rigConfig.projectFolderPath)}"`
       );
     }
 

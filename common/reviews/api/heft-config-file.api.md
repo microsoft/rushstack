@@ -4,6 +4,7 @@
 
 ```ts
 
+import { RigConfig } from '@rushstack/rig-package';
 import { Terminal } from '@rushstack/node-core-library';
 
 // @beta (undocumented)
@@ -14,8 +15,8 @@ export class ConfigurationFile<TConfigurationFile> {
     getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
     getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue;
     // (undocumented)
-    loadConfigurationFileForProjectAsync(terminal: Terminal, projectPath: string): Promise<TConfigurationFile>;
-    tryLoadConfigurationFileForProjectAsync(terminal: Terminal, projectPath: string): Promise<TConfigurationFile | undefined>;
+    loadConfigurationFileForProjectAsync(terminal: Terminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile>;
+    tryLoadConfigurationFileForProjectAsync(terminal: Terminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile | undefined>;
     }
 
 // @beta (undocumented)
@@ -24,7 +25,6 @@ export interface IConfigurationFileOptions<TConfigurationFile> {
     jsonSchemaPath: string;
     projectRelativeFilePath: string;
     propertyInheritanceTypes?: IPropertyInheritanceTypes<TConfigurationFile>;
-    supportsRigs?: boolean;
 }
 
 // @beta

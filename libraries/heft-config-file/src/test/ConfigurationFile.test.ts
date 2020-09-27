@@ -5,6 +5,7 @@ import * as nodeJsPath from 'path';
 
 import { ConfigurationFile, PathResolutionMethod, InheritanceType } from '../ConfigurationFile';
 import { FileSystem, JsonFile, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { RigConfig } from '@rushstack/rig-package';
 
 describe('ConfigurationFile', () => {
   const projectRoot: string = nodeJsPath.resolve(__dirname, '..', '..');
@@ -47,7 +48,7 @@ describe('ConfigurationFile', () => {
     it('Correctly loads the config file', async () => {
       const configFileLoader: ConfigurationFile<ISimplestConfigFile> = new ConfigurationFile<
         ISimplestConfigFile
-      >({ projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath, supportsRigs: true });
+      >({ projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath });
       const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
         terminal,
         __dirname
@@ -73,8 +74,7 @@ describe('ConfigurationFile', () => {
           '$.thing': {
             pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
           }
-        },
-        supportsRigs: true
+        }
       });
       const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
         terminal,
@@ -102,8 +102,7 @@ describe('ConfigurationFile', () => {
           '$.thing': {
             pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
           }
-        },
-        supportsRigs: true
+        }
       });
       const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
         terminal,
@@ -137,7 +136,7 @@ describe('ConfigurationFile', () => {
 
     it('Correctly loads the config file', async () => {
       const configFileLoader: ConfigurationFile<ISimpleConfigFile> = new ConfigurationFile<ISimpleConfigFile>(
-        { projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath, supportsRigs: true }
+        { projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath }
       );
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
         terminal,
@@ -156,8 +155,7 @@ describe('ConfigurationFile', () => {
             '$.things.*': {
               pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
             }
-          },
-          supportsRigs: true
+          }
         }
       );
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
@@ -183,8 +181,7 @@ describe('ConfigurationFile', () => {
             '$.things.*': {
               pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
             }
-          },
-          supportsRigs: true
+          }
         }
       );
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
@@ -217,7 +214,7 @@ describe('ConfigurationFile', () => {
 
     it('Correctly loads the config file with default config meta', async () => {
       const configFileLoader: ConfigurationFile<ISimpleConfigFile> = new ConfigurationFile<ISimpleConfigFile>(
-        { projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath, supportsRigs: true }
+        { projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath }
       );
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
         terminal,
@@ -234,8 +231,7 @@ describe('ConfigurationFile', () => {
           jsonSchemaPath: schemaPath,
           propertyInheritanceTypes: {
             things: InheritanceType.append
-          },
-          supportsRigs: true
+          }
         }
       );
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
@@ -253,8 +249,7 @@ describe('ConfigurationFile', () => {
           jsonSchemaPath: schemaPath,
           propertyInheritanceTypes: {
             things: InheritanceType.replace
-          },
-          supportsRigs: true
+          }
         }
       );
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
@@ -274,8 +269,7 @@ describe('ConfigurationFile', () => {
             '$.things.*': {
               pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
             }
-          },
-          supportsRigs: true
+          }
         }
       );
       const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
@@ -325,8 +319,7 @@ describe('ConfigurationFile', () => {
           '$.plugins.*.plugin': {
             pathResolutionMethod: PathResolutionMethod.NodeResolve
           }
-        },
-        supportsRigs: true
+        }
       });
       const loadedConfigFile: IComplexConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
         terminal,
@@ -394,6 +387,7 @@ describe('ConfigurationFile', () => {
 
   describe('loading a rig', () => {
     const projectFolder: string = nodeJsPath.resolve(__dirname, 'project-referencing-rig');
+    const rigConfig: RigConfig = RigConfig.loadForProjectFolder({ projectFolderPath: projectFolder });
 
     const schemaPath: string = nodeJsPath.resolve(
       __dirname,
@@ -409,10 +403,11 @@ describe('ConfigurationFile', () => {
       const projectRelativeFilePath: string = 'config/simplestConfigFile.json';
       const configFileLoader: ConfigurationFile<ISimplestConfigFile> = new ConfigurationFile<
         ISimplestConfigFile
-      >({ projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath, supportsRigs: true });
+      >({ projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath });
       const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
         terminal,
-        projectFolder
+        projectFolder,
+        rigConfig
       );
       const expectedConfigFile: ISimplestConfigFile = { thing: 'A' };
 
@@ -436,10 +431,14 @@ describe('ConfigurationFile', () => {
       const projectRelativeFilePath: string = 'config/simplestConfigFile.json';
       const configFileLoader: ConfigurationFile<ISimplestConfigFile> = new ConfigurationFile<
         ISimplestConfigFile
-      >({ projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath, supportsRigs: true });
+      >({ projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath });
       const loadedConfigFile:
         | ISimplestConfigFile
-        | undefined = await configFileLoader.tryLoadConfigurationFileForProjectAsync(terminal, projectFolder);
+        | undefined = await configFileLoader.tryLoadConfigurationFileForProjectAsync(
+        terminal,
+        projectFolder,
+        rigConfig
+      );
       const expectedConfigFile: ISimplestConfigFile = { thing: 'A' };
 
       expect(loadedConfigFile).not.toBeUndefined();
@@ -462,11 +461,10 @@ describe('ConfigurationFile', () => {
     it("throws an error when a config file doesn't exist in a project referencing a rig, which also doesn't have the file", async () => {
       const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
         projectRelativeFilePath: 'config/notExist.json',
-        jsonSchemaPath: schemaPath,
-        supportsRigs: true
+        jsonSchemaPath: schemaPath
       });
       try {
-        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, projectFolder);
+        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, projectFolder, rigConfig);
         fail();
       } catch (e) {
         expect(e).toMatchSnapshot();
@@ -486,8 +484,7 @@ describe('ConfigurationFile', () => {
           errorCasesFolderName,
           errorCaseFolderName,
           'config.schema.json'
-        ),
-        supportsRigs: true
+        )
       });
       try {
         await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
@@ -506,8 +503,7 @@ describe('ConfigurationFile', () => {
           errorCasesFolderName,
           errorCaseFolderName,
           'config.schema.json'
-        ),
-        supportsRigs: true
+        )
       });
       try {
         expect(
@@ -527,8 +523,7 @@ describe('ConfigurationFile', () => {
           errorCasesFolderName,
           errorCaseFolderName,
           'config.schema.json'
-        ),
-        supportsRigs: true
+        )
       });
       try {
         await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
@@ -547,8 +542,7 @@ describe('ConfigurationFile', () => {
           errorCasesFolderName,
           errorCaseFolderName,
           'config.schema.json'
-        ),
-        supportsRigs: true
+        )
       });
       try {
         await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
@@ -567,8 +561,7 @@ describe('ConfigurationFile', () => {
           errorCasesFolderName,
           errorCaseFolderName,
           'config.schema.json'
-        ),
-        supportsRigs: true
+        )
       });
       try {
         await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
@@ -587,8 +580,7 @@ describe('ConfigurationFile', () => {
           errorCasesFolderName,
           errorCaseFolderName,
           'config.schema.json'
-        ),
-        supportsRigs: true
+        )
       });
       try {
         await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
@@ -607,8 +599,7 @@ describe('ConfigurationFile', () => {
           errorCasesFolderName,
           errorCaseFolderName,
           'config.schema.json'
-        ),
-        supportsRigs: true
+        )
       });
 
       try {
@@ -627,8 +618,7 @@ describe('ConfigurationFile', () => {
           errorCasesFolderName,
           'invalidCombinedFile',
           'config.schema.json'
-        ),
-        supportsRigs: true
+        )
       });
 
       try {
