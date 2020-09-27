@@ -2,6 +2,7 @@
   "name": "@microsoft/web-library-build",
   "version": "7.4.70",
   "description": "",
+  "license": "MIT",
   "engines": {
     "npm": "3.10.8"
   },
