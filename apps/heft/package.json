@@ -37,6 +37,7 @@
     "@jest/transform": "~25.4.0",
     "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rig-package": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
     "@types/tapable": "1.0.5",
     "@types/webpack": "4.39.8",

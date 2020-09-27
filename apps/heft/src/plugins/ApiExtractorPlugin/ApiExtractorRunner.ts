@@ -2,11 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { ITerminalProvider, Terminal, Path } from '@rushstack/node-core-library';
+import { Terminal, Path } from '@rushstack/node-core-library';
 import { ApiExtractor as TApiExtractor } from '@microsoft/rush-stack-compiler-3.7';
 
 import { SubprocessRunnerBase } from '../../utilities/subprocess/SubprocessRunnerBase';
-import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 
 export interface IApiExtractorRunnerConfiguration {
@@ -47,15 +46,6 @@ export interface IApiExtractorRunnerConfiguration {
 export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunnerConfiguration> {
   private _scopedLogger: IScopedLogger;
   private _terminal: Terminal;
-
-  public static getTerminal(terminalProvider: ITerminalProvider): Terminal {
-    const prefixTerminalProvider: PrefixProxyTerminalProvider = new PrefixProxyTerminalProvider(
-      terminalProvider,
-      '[api-extractor] '
-    );
-
-    return new Terminal(prefixTerminalProvider);
-  }
 
   public get filename(): string {
     return __filename;

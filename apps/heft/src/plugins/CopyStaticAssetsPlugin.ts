@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { LegacyAdapters, FileSystem } from '@rushstack/node-core-library';
+import { LegacyAdapters, FileSystem, Terminal } from '@rushstack/node-core-library';
 import * as glob from 'glob';
 import * as globEscape from 'glob-escape';
 import * as path from 'path';
@@ -15,6 +15,7 @@ import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IBuildStageContext, ICompileSubstage } from '../stages/BuildStage';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import { CoreConfigFiles } from '../utilities/CoreConfigFiles';
+import { RigConfig } from '@rushstack/rig-package';
 
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
 
@@ -77,7 +78,8 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
           const logger: ScopedLogger = heftSession.requestScopedLogger('copy-static-assets');
 
           const copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration = await this._loadCopyStaticAssetsConfigurationAsync(
-            heftConfiguration.projectConfigFolder
+            logger.terminal,
+            heftConfiguration
           );
           await this._runCopyAsync({
             logger,
@@ -91,15 +93,17 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
   }
 
   private async _loadCopyStaticAssetsConfigurationAsync(
-    configFolder: string
+    terminal: Terminal,
+    heftConfiguration: HeftConfiguration
   ): Promise<ICopyStaticAssetsConfiguration> {
-    const copyStaticAssetsConfigurationPath: string = path.resolve(configFolder, 'copy-static-assets.json');
-    let copyStaticAssetsConfigurationJson: ICopyStaticAssetsConfigurationJson | undefined;
-    if (await FileSystem.existsAsync(copyStaticAssetsConfigurationPath)) {
-      copyStaticAssetsConfigurationJson = await CoreConfigFiles.copyStaticAssetsConfigurationLoader.loadConfigurationFileAsync(
-        copyStaticAssetsConfigurationPath
-      );
-    }
+    const rigConfig: RigConfig = await CoreConfigFiles.getRigConfigAsync(heftConfiguration);
+    const copyStaticAssetsConfigurationJson:
+      | ICopyStaticAssetsConfigurationJson
+      | undefined = await CoreConfigFiles.copyStaticAssetsConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
+      terminal,
+      heftConfiguration.buildFolder,
+      rigConfig
+    );
 
     return {
       ...copyStaticAssetsConfigurationJson,

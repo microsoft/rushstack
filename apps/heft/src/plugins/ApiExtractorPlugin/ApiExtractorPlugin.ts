@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, Terminal } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 import { HeftSession } from '../../pluginFramework/HeftSession';
@@ -10,6 +10,8 @@ import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { ApiExtractorRunner } from './ApiExtractorRunner';
 import { IBuildStageContext, IBundleSubstage } from '../../stages/BuildStage';
 import { CoreConfigFiles } from '../../utilities/CoreConfigFiles';
+import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
+import { RigConfig } from '@rushstack/rig-package';
 
 const PLUGIN_NAME: string = 'ApiExtractorPlugin';
 const CONFIG_FILE_LOCATION: string = './config/api-extractor.json';
@@ -64,30 +66,31 @@ export class ApiExtractorPlugin implements IHeftPlugin {
   ): Promise<void> {
     const { heftConfiguration, buildFolder, debugMode, watchMode, production } = options;
 
-    const apiExtractorTaskConfigurationPath: string = path.resolve(
-      heftConfiguration.projectConfigFolder,
-      'api-extractor-task.json'
+    const logger: ScopedLogger = heftSession.requestScopedLogger('API Extractor Plugin');
+    const rigConfig: RigConfig = await CoreConfigFiles.getRigConfigAsync(heftConfiguration);
+    const apiExtractorTaskConfiguration:
+      | IApiExtractorPluginConfiguration
+      | undefined = await CoreConfigFiles.apiExtractorTaskConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
+      logger.terminal,
+      heftConfiguration.buildFolder,
+      rigConfig
     );
-    let apiExtractorTaskConfiguration: IApiExtractorPluginConfiguration | undefined;
-    if (await FileSystem.existsAsync(apiExtractorTaskConfigurationPath)) {
-      apiExtractorTaskConfiguration = await CoreConfigFiles.apiExtractorTaskConfigurationLoader.loadConfigurationFileAsync(
-        apiExtractorTaskConfigurationPath
-      );
-    }
-
-    const terminal: Terminal = ApiExtractorRunner.getTerminal(heftConfiguration.terminalProvider);
 
     if (watchMode) {
-      terminal.writeWarningLine("API Extractor isn't currently supported in --watch mode.");
+      logger.terminal.writeWarningLine("API Extractor isn't currently supported in --watch mode.");
       return;
     }
 
     if (!heftConfiguration.compilerPackage) {
-      throw new Error('Unable to resolve a compiler package for tsconfig.json');
+      logger.emitError(new Error('Unable to resolve a compiler package for tsconfig.json'));
+      return;
     }
 
     if (!heftConfiguration.compilerPackage.apiExtractorPackagePath) {
-      throw new Error('Unable to resolve the "@microsoft/api-extractor" package for this project');
+      logger.emitError(
+        new Error('Unable to resolve the "@microsoft/api-extractor" package for this project')
+      );
+      return;
     }
 
     const apiExtractorRunner: ApiExtractorRunner = new ApiExtractorRunner(

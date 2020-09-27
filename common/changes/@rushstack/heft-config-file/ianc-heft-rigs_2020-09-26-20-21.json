@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-config-file",
+      "comment": "Add support for config/rig.json.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-config-file",
+  "email": "iclanton@users.noreply.github.com"
+}

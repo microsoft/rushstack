@@ -102,6 +102,7 @@ importers:
       '@jest/transform': 25.4.0
       '@rushstack/heft-config-file': 'link:../../libraries/heft-config-file'
       '@rushstack/node-core-library': 'link:../../libraries/node-core-library'
+      '@rushstack/rig-package': 'link:../../libraries/rig-package'
       '@rushstack/ts-command-line': 'link:../../libraries/ts-command-line'
       '@types/tapable': 1.0.5
       '@types/webpack': 4.39.8
@@ -139,6 +140,7 @@ importers:
       '@rushstack/heft': 0.8.0
       '@rushstack/heft-config-file': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/rig-package': 'workspace:*'
       '@rushstack/ts-command-line': 'workspace:*'
       '@types/argparse': 1.0.38
       '@types/eslint': 7.2.0
@@ -526,10 +528,12 @@ importers:
   ../../build-tests/heft-minimal-rig-usage-test:
     devDependencies:
       '@rushstack/heft': 'link:../../apps/heft'
+      '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       heft-minimal-rig-test: 'link:../heft-minimal-rig-test'
     specifiers:
       '@rushstack/heft': 'workspace:*'
+      '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       heft-minimal-rig-test: 'workspace:*'
   ../../build-tests/heft-node-basic-test:
@@ -1331,6 +1335,7 @@ importers:
   ../../libraries/heft-config-file:
     dependencies:
       '@rushstack/node-core-library': 'link:../node-core-library'
+      '@rushstack/rig-package': 'link:../rig-package'
       jsonpath-plus: 4.0.0
     devDependencies:
       '@microsoft/rush-stack-compiler-3.7': 'link:../../stack/rush-stack-compiler-3.7'
@@ -1343,6 +1348,7 @@ importers:
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.8.0
       '@rushstack/node-core-library': 'workspace:*'
+      '@rushstack/rig-package': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       jsonpath-plus: ~4.0.0
@@ -7438,7 +7444,7 @@ packages:
       node: '>=0.4.7'
     hasBin: true
     optionalDependencies:
-      uglify-js: 3.10.4
+      uglify-js: 3.11.0
     resolution:
       integrity: sha512-1f2BACcBfiwAfStCKZNrUCgqNZkGsAT7UM3kkYtXuLo0KnaVfjKOyf7PRzB6++aK9STyT1Pd2ZCPe3EGOXleXA==
   /har-schema/2.0.0:
@@ -13553,13 +13559,13 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-0h/qGay016GG2lVav3Kz174F3T2Vjlz2v6HCt+WDQpoXfco0hWwF5gHK9yh88mUYvIC+N7Z8NT8WpjSp1yoqGA==
-  /uglify-js/3.10.4:
+  /uglify-js/3.11.0:
     engines:
       node: '>=0.8.0'
     hasBin: true
     optional: true
     resolution:
-      integrity: sha512-kBFT3U4Dcj4/pJ52vfjCSfyLyvG9VYYuGYPmrPvAxRw/i7xHiT4VvCev+uiEMcEEiu6UNB6KgWmGtSUYIWScbw==
+      integrity: sha512-e1KQFRCpOxnrJsJVqDUCjURq+wXvIn7cK2sRAx9XL3HYLL9aezOP4Pb1+Y3/o693EPk111Yj2Q+IUXxcpHlygQ==
   /uglify-js/3.4.10:
     dependencies:
       commander: 2.19.0

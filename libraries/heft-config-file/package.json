@@ -19,7 +19,8 @@
   },
   "dependencies": {
     "jsonpath-plus": "~4.0.0",
-    "@rushstack/node-core-library": "workspace:*"
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rig-package": "workspace:*"
   },
   "devDependencies": {
     "@types/heft-jest": "1.0.1",

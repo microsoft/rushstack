@@ -4,4 +4,8 @@
 /**
  * @public
  */
-export class TestClass {} // tslint:disable-line:export-name
+export class TestClass {
+  public static getTrue(): boolean {
+    return true;
+  }
+}

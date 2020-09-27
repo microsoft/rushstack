@@ -4,21 +4,26 @@
 
 ```ts
 
+import { RigConfig } from '@rushstack/rig-package';
+import { Terminal } from '@rushstack/node-core-library';
+
 // @beta (undocumented)
 export class ConfigurationFile<TConfigurationFile> {
     constructor(options: IConfigurationFileOptions<TConfigurationFile>);
     // @internal (undocumented)
-    static _formatPathForError: (path: string) => string;
+    static _formatPathForLogging: (path: string) => string;
     getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
     getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue;
     // (undocumented)
-    loadConfigurationFileAsync(configurationFilePath: string): Promise<TConfigurationFile>;
+    loadConfigurationFileForProjectAsync(terminal: Terminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile>;
+    tryLoadConfigurationFileForProjectAsync(terminal: Terminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile | undefined>;
     }
 
 // @beta (undocumented)
 export interface IConfigurationFileOptions<TConfigurationFile> {
     jsonPathMetadata?: IJsonPathsMetadata;
     jsonSchemaPath: string;
+    projectRelativeFilePath: string;
     propertyInheritanceTypes?: IPropertyInheritanceTypes<TConfigurationFile>;
 }
 

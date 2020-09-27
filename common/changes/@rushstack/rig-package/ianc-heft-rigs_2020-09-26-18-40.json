@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rig-package",
+      "comment": "Update the rig package guidance to place tool configuration files that would normally be in a \"config\" folder in a \"config\" folder inside the rig package as well.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/rig-package",
+  "email": "iclanton@users.noreply.github.com"
+}
