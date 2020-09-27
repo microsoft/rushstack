@@ -15,8 +15,9 @@
     "strictNullChecks": true,
     "noUnusedLocals": true,
     "types": [],
+    "moduleResolution": "node",
 
-    "module": "commonjs",
+    "module": "esnext",
     "target": "es2017",
     "lib": ["es2017"]
   },
