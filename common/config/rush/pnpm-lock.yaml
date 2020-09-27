@@ -1356,13 +1356,13 @@ importers:
     devDependencies:
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
-      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
+      '@rushstack/heft-web-rig': 'link:../../rigs/heft-web-rig'
       '@types/heft-jest': 1.0.1
       '@types/webpack-env': 1.13.0
     specifiers:
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
-      '@rushstack/heft-node-rig': 'workspace:*'
+      '@rushstack/heft-web-rig': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/webpack-env': 1.13.0
   ../../libraries/node-core-library:
@@ -1613,9 +1613,20 @@ importers:
       '@types/node': 10.17.13
   ../../rigs/heft-node-rig:
     dependencies:
+      '@microsoft/api-extractor': 'link:../../apps/api-extractor'
       eslint: 7.2.0
       typescript: 3.5.3
     specifiers:
+      '@microsoft/api-extractor': 'workspace:*'
+      eslint: ~7.2.0
+      typescript: ~3.5.3
+  ../../rigs/heft-web-rig:
+    dependencies:
+      '@microsoft/api-extractor': 'link:../../apps/api-extractor'
+      eslint: 7.2.0
+      typescript: 3.5.3
+    specifiers:
+      '@microsoft/api-extractor': 'workspace:*'
       eslint: ~7.2.0
       typescript: ~3.5.3
   ../../stack/eslint-config:
