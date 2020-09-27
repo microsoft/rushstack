@@ -37,7 +37,6 @@
     "semver": "~7.3.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/heft-jest": "1.0.1",
@@ -45,6 +44,7 @@
     "@types/semver": "~7.3.1",
     "@types/sinon": "1.16.34",
     "chai": "~3.5.0",
-    "sinon": "~1.17.3"
+    "sinon": "~1.17.3",
+    "@rushstack/heft-node-rig": "workspace:*"
   }
 }

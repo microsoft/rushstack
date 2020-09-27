@@ -33,13 +33,13 @@
     "terser": "4.7.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/webpack": "4.39.8",
     "webpack": "~4.31.0",
-    "webpack-sources": "~1.4.3"
+    "webpack-sources": "~1.4.3",
+    "@rushstack/heft-node-rig": "workspace:*"
   },
   "sideEffects": [
     "./lib/terser/Base54",

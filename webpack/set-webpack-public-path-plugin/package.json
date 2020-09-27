@@ -25,7 +25,6 @@
     }
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/lodash": "4.14.116",
@@ -33,6 +32,7 @@
     "@types/node": "10.17.13",
     "@types/tapable": "1.0.5",
     "@types/uglify-js": "2.6.29",
-    "@types/webpack": "4.39.8"
+    "@types/webpack": "4.39.8",
+    "@rushstack/heft-node-rig": "workspace:*"
   }
 }

@@ -17,12 +17,12 @@
     "loader-utils": "~1.1.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/loader-utils": "1.1.3",
     "@types/heft-jest": "1.0.1",
     "@types/node": "10.17.13",
-    "@types/webpack": "4.39.8"
+    "@types/webpack": "4.39.8",
+    "@rushstack/heft-node-rig": "workspace:*"
   }
 }
