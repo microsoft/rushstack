@@ -897,6 +897,14 @@
       "shouldPublish": false
     },
 
+    // "rigs" folder (alphabetical order)
+    {
+      "packageName": "@rushstack/heft-node-rig",
+      "projectFolder": "rigs/heft-node-rig",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+
     // "stack" folder (alphabetical order)
     {
       "packageName": "@rushstack/eslint-config",
