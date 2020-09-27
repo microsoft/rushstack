@@ -41,6 +41,9 @@ interface IExtractorConfigTokenContext {
    */
   packageName: string;
 
+  /**
+   * The `<projectFolder>` token returns the expanded `"projectFolder"` setting from api-extractor.json.
+   */
   projectFolder: string;
 }
 
@@ -86,6 +89,12 @@ export interface IExtractorConfigPrepareOptions {
    * If `packageJsonFullPath` is specified but `packageJson` is omitted, the file will be loaded automatically.
    */
   packageJsonFullPath: string | undefined;
+
+  /**
+   * The default value for the `projectFolder` setting is the `<lookup>` token, which uses a heuristic to guess
+   * an appropriate project folder.  Use `projectFolderLookupValue` to manually specify the `<lookup>` token value.
+   */
+  projectFolderLookupToken?: string;
 }
 
 interface IExtractorConfigParameters {
@@ -532,33 +541,45 @@ export class ExtractorConfig {
 
       let projectFolder: string;
       if (configObject.projectFolder.trim() === '<lookup>') {
-        if (!options.configObjectFullPath) {
-          throw new Error(
-            'The "projectFolder" setting uses the "<lookup>" token, but it cannot be expanded because' +
-              ' the "configObjectFullPath" setting was not specified'
-          );
-        }
+        if (options.projectFolderLookupToken) {
+          // Use the manually specified "<lookup>" value
+          projectFolder = options.projectFolderLookupToken;
 
-        // "The default value for `projectFolder` is the token `<lookup>`, which means the folder is determined
-        // by traversing parent folders, starting from the folder containing api-extractor.json, and stopping
-        // at the first folder that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in
-        // this way, then an error will be reported."
-
-        let currentFolder: string = path.dirname(options.configObjectFullPath);
-        for (;;) {
-          const tsconfigPath: string = path.join(currentFolder, 'tsconfig.json');
-          if (FileSystem.exists(tsconfigPath)) {
-            projectFolder = currentFolder;
-            break;
-          }
-          const parentFolder: string = path.dirname(currentFolder);
-          if (parentFolder === '' || parentFolder === currentFolder) {
+          if (!FileSystem.exists(options.projectFolderLookupToken)) {
             throw new Error(
-              'The "projectFolder" setting uses the "<lookup>" token, but a tsconfig.json file cannot be' +
-                ' found in this folder or any parent folder.'
+              'The specified "projectFolderLookupToken" path does not exist: ' +
+                options.projectFolderLookupToken
             );
           }
-          currentFolder = parentFolder;
+        } else {
+          if (!options.configObjectFullPath) {
+            throw new Error(
+              'The "projectFolder" setting uses the "<lookup>" token, but it cannot be expanded because' +
+                ' the "configObjectFullPath" setting was not specified'
+            );
+          }
+
+          // "The default value for `projectFolder` is the token `<lookup>`, which means the folder is determined
+          // by traversing parent folders, starting from the folder containing api-extractor.json, and stopping
+          // at the first folder that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in
+          // this way, then an error will be reported."
+
+          let currentFolder: string = path.dirname(options.configObjectFullPath);
+          for (;;) {
+            const tsconfigPath: string = path.join(currentFolder, 'tsconfig.json');
+            if (FileSystem.exists(tsconfigPath)) {
+              projectFolder = currentFolder;
+              break;
+            }
+            const parentFolder: string = path.dirname(currentFolder);
+            if (parentFolder === '' || parentFolder === currentFolder) {
+              throw new Error(
+                'The "projectFolder" setting uses the "<lookup>" token, but a tsconfig.json file cannot be' +
+                  ' found in this folder or any parent folder.'
+              );
+            }
+            currentFolder = parentFolder;
+          }
         }
       } else {
         ExtractorConfig._rejectAnyTokensInPath(configObject.projectFolder, 'projectFolder');

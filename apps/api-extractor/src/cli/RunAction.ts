@@ -5,6 +5,7 @@ import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 import { PackageJsonLookup, FileSystem, IPackageJson } from '@rushstack/node-core-library';
+import { RigConfig } from '@rushstack/rig-package';
 
 import {
   CommandLineAction,
@@ -108,6 +109,8 @@ export class RunAction extends CommandLineAction {
       }
     }
 
+    let projectFolderLookupToken: string | undefined = undefined;
+
     if (this._configFileParameter.value) {
       configFilename = path.normalize(this._configFileParameter.value);
       if (!FileSystem.exists(configFilename)) {
@@ -134,7 +137,25 @@ export class RunAction extends CommandLineAction {
         configFilename = path.join(baseFolder, ExtractorConfig.FILENAME);
 
         if (!FileSystem.exists(configFilename)) {
-          throw new Error(`Unable to find an ${ExtractorConfig.FILENAME} file`);
+          // If We didn't find it in <packageFolder>/api-extractor.json or <packageFolder>/config/api-extractor.json
+          // then check for a rig package
+          if (packageFolder) {
+            const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
+              projectFolderPath: packageFolder
+            });
+            if (rigConfig.rigFound) {
+              configFilename = path.join(rigConfig.getResolvedProfileFolder(), ExtractorConfig.FILENAME);
+
+              // If the "projectFolder" setting isn't specified in api-extractor.json, it defaults to the
+              // "<lookup>" token which will probe for the tsconfig.json nearest to the api-extractor.json path.
+              // But this won't work if api-extractor.json belongs to the rig.  So instead "<lookup>" should be
+              // the "<packageFolder>" that referenced the rig.
+              projectFolderLookupToken = packageFolder;
+            }
+          }
+          if (!FileSystem.exists(configFilename)) {
+            throw new Error(`Unable to find an ${ExtractorConfig.FILENAME} file`);
+          }
         }
       }
 
@@ -147,7 +168,8 @@ export class RunAction extends CommandLineAction {
     const extractorConfig: ExtractorConfig = ExtractorConfig.prepare({
       configObject: configObject,
       configObjectFullPath: configObjectFullPath,
-      packageJsonFullPath: lookup.tryGetPackageJsonFilePathFor(configObjectFullPath)
+      packageJsonFullPath: lookup.tryGetPackageJsonFilePathFor(configObjectFullPath),
+      projectFolderLookupToken
     });
 
     const extractorResult: ExtractorResult = Extractor.invoke(extractorConfig, {

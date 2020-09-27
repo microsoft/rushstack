@@ -220,6 +220,7 @@ export interface IExtractorConfigPrepareOptions {
     configObjectFullPath: string | undefined;
     packageJson?: INodePackageJson | undefined;
     packageJsonFullPath: string | undefined;
+    projectFolderLookupToken?: string;
 }
 
 // @public
