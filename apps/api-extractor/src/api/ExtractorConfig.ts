@@ -92,7 +92,8 @@ export interface IExtractorConfigPrepareOptions {
 
   /**
    * The default value for the `projectFolder` setting is the `<lookup>` token, which uses a heuristic to guess
-   * an appropriate project folder.  Use `projectFolderLookupValue` to manually specify the `<lookup>` token value.
+   * an appropriate project folder.  Use `projectFolderLookupValue` to manually specify the `<lookup>` token value
+   * instead.
    */
   projectFolderLookupToken?: string;
 }
