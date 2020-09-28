@@ -295,10 +295,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "chai",
-      "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
       "name": "chalk",
       "allowedCategories": [ "libraries" ]
     },
@@ -661,14 +657,6 @@
     {
       "name": "semver",
       "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
-      "name": "sinon",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "sinon-chai",
-      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "source-map",
