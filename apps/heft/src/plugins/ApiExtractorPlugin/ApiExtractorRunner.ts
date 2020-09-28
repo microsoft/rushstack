@@ -12,7 +12,7 @@ export interface IApiExtractorRunnerConfiguration {
   /**
    * The path to the Extractor's config file ("api-extractor.json")
    *
-   * For example, /home/username/code/repo/project/config/api-extractor.json
+   * For example, ./config/api-extractor.json
    */
   configFileLocation: string;
 
@@ -56,9 +56,19 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
     this._terminal = this._scopedLogger.terminal;
 
     const apiExtractor: typeof TApiExtractor = require(this._configuration.apiExtractorPackagePath);
-    const extractorConfig: TApiExtractor.ExtractorConfig = apiExtractor.ExtractorConfig.loadFileAndPrepare(
-      this._configuration.configFileLocation
+
+    const configObjectFullPath: string = this._configuration.configFileLocation;
+    const configObject: TApiExtractor.IConfigFile = apiExtractor.ExtractorConfig.loadFile(
+      configObjectFullPath
     );
+
+    const extractorConfig: TApiExtractor.ExtractorConfig = apiExtractor.ExtractorConfig.prepare({
+      configObject,
+      configObjectFullPath,
+      packageJsonFullPath: path.join(this._configuration.buildFolder, 'package.json'),
+      projectFolderLookupToken: this._configuration.buildFolder
+    });
+
     const extractorOptions: TApiExtractor.IExtractorInvokeOptions = {
       localBuild: !this._configuration.production,
       typescriptCompilerFolder: this._configuration.typescriptPackagePath,

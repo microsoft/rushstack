@@ -64,7 +64,8 @@ export interface IExtractorConfigPrepareOptions {
    *
    * @remarks
    *
-   * If this is omitted, then the `projectFolder` must not be specified using the `<lookup>` token.
+   * If `configObjectFullPath` and `projectFolderLookupToken` are both unspecified, then the api-extractor.json
+   * config file must explicitly specify a `projectFolder` setting rather than relying on the `<lookup>` token.
    */
   configObjectFullPath: string | undefined;
 
@@ -94,6 +95,11 @@ export interface IExtractorConfigPrepareOptions {
    * The default value for the `projectFolder` setting is the `<lookup>` token, which uses a heuristic to guess
    * an appropriate project folder.  Use `projectFolderLookupValue` to manually specify the `<lookup>` token value
    * instead.
+   *
+   * @remarks
+   * If the `projectFolder` setting is explicitly specified in api-extractor.json file, it should take precedence
+   * over a value specified via the API.  Thus the `projectFolderLookupToken` option provides a way to override
+   * the default value for `projectFolder` setting while still honoring a manually specified value.
    */
   projectFolderLookupToken?: string;
 }
@@ -310,7 +316,7 @@ export class ExtractorConfig {
     // Set to keep track of config files which have been processed.
     const visitedPaths: Set<string> = new Set<string>();
 
-    let currentConfigFilePath: string = path.resolve(process.cwd(), jsonFilePath);
+    let currentConfigFilePath: string = path.resolve(jsonFilePath);
     let configObject: Partial<IConfigFile> = {};
 
     try {
