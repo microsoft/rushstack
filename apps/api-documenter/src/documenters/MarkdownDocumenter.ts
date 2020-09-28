@@ -57,6 +57,12 @@ import {
 import { DocumenterConfig } from './DocumenterConfig';
 import { MarkdownDocumenterAccessor } from '../plugin/MarkdownDocumenterAccessor';
 
+export interface IMarkdownDocumenterOptions {
+  apiModel: ApiModel;
+  documenterConfig: DocumenterConfig | undefined;
+  outputFolder: string;
+}
+
 /**
  * Renders API documentation in the Markdown file format.
  * For more info:  https://en.wikipedia.org/wiki/Markdown
@@ -66,23 +72,25 @@ export class MarkdownDocumenter {
   private readonly _documenterConfig: DocumenterConfig | undefined;
   private readonly _tsdocConfiguration: TSDocConfiguration;
   private readonly _markdownEmitter: CustomMarkdownEmitter;
+  private readonly _outputFolder: string;
   private readonly _pluginLoader: PluginLoader;
 
-  public constructor(apiModel: ApiModel, documenterConfig: DocumenterConfig | undefined) {
-    this._apiModel = apiModel;
-    this._documenterConfig = documenterConfig;
+  public constructor(options: IMarkdownDocumenterOptions) {
+    this._apiModel = options.apiModel;
+    this._documenterConfig = options.documenterConfig;
+    this._outputFolder = options.outputFolder;
     this._tsdocConfiguration = CustomDocNodes.configuration;
     this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
 
     this._pluginLoader = new PluginLoader();
   }
 
-  public generateFiles(outputFolder: string): void {
+  public generateFiles(): void {
     if (this._documenterConfig) {
       this._pluginLoader.load(this._documenterConfig, () => {
         return new MarkdownDocumenterFeatureContext({
           apiModel: this._apiModel,
-          outputFolder: outputFolder,
+          outputFolder: this._outputFolder,
           documenter: new MarkdownDocumenterAccessor({
             getLinkForApiItem: (apiItem: ApiItem) => {
               return this._getLinkFilenameForApiItem(apiItem);
@@ -93,16 +101,16 @@ export class MarkdownDocumenter {
     }
 
     console.log();
-    this._deleteOldOutputFiles(outputFolder);
+    this._deleteOldOutputFiles();
 
-    this._writeApiItemPage(outputFolder, this._apiModel);
+    this._writeApiItemPage(this._apiModel);
 
     if (this._pluginLoader.markdownDocumenterFeature) {
       this._pluginLoader.markdownDocumenterFeature.onFinished({});
     }
   }
 
-  private _writeApiItemPage(outputFolder: string, apiItem: ApiItem): void {
+  private _writeApiItemPage(apiItem: ApiItem): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
     const output: DocSection = new DocSection({ configuration: this._tsdocConfiguration });
 
@@ -218,13 +226,13 @@ export class MarkdownDocumenter {
 
     switch (apiItem.kind) {
       case ApiItemKind.Class:
-        this._writeClassTables(outputFolder, output, apiItem as ApiClass);
+        this._writeClassTables(output, apiItem as ApiClass);
         break;
       case ApiItemKind.Enum:
         this._writeEnumTables(output, apiItem as ApiEnum);
         break;
       case ApiItemKind.Interface:
-        this._writeInterfaceTables(outputFolder, output, apiItem as ApiInterface);
+        this._writeInterfaceTables(output, apiItem as ApiInterface);
         break;
       case ApiItemKind.Constructor:
       case ApiItemKind.ConstructSignature:
@@ -235,13 +243,13 @@ export class MarkdownDocumenter {
         this._writeThrowsSection(output, apiItem);
         break;
       case ApiItemKind.Namespace:
-        this._writePackageOrNamespaceTables(outputFolder, output, apiItem as ApiNamespace);
+        this._writePackageOrNamespaceTables(output, apiItem as ApiNamespace);
         break;
       case ApiItemKind.Model:
-        this._writeModelTable(outputFolder, output, apiItem as ApiModel);
+        this._writeModelTable(output, apiItem as ApiModel);
         break;
       case ApiItemKind.Package:
-        this._writePackageOrNamespaceTables(outputFolder, output, apiItem as ApiPackage);
+        this._writePackageOrNamespaceTables(output, apiItem as ApiPackage);
         break;
       case ApiItemKind.Property:
       case ApiItemKind.PropertySignature:
@@ -258,7 +266,7 @@ export class MarkdownDocumenter {
       this._writeRemarksSection(output, apiItem);
     }
 
-    const filename: string = path.join(outputFolder, this._getFilenameForApiItem(apiItem));
+    const filename: string = path.join(this._outputFolder, this._getFilenameForApiItem(apiItem));
     const stringBuilder: StringBuilder = new StringBuilder();
 
     stringBuilder.append(
@@ -396,7 +404,7 @@ export class MarkdownDocumenter {
   /**
    * GENERATE PAGE: MODEL
    */
-  private _writeModelTable(outputFolder: string, output: DocSection, apiModel: ApiModel): void {
+  private _writeModelTable(output: DocSection, apiModel: ApiModel): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     const packagesTable: DocTable = new DocTable({
@@ -413,7 +421,7 @@ export class MarkdownDocumenter {
       switch (apiMember.kind) {
         case ApiItemKind.Package:
           packagesTable.addRow(row);
-          this._writeApiItemPage(outputFolder, apiMember);
+          this._writeApiItemPage(apiMember);
           break;
       }
     }
@@ -427,11 +435,7 @@ export class MarkdownDocumenter {
   /**
    * GENERATE PAGE: PACKAGE or NAMESPACE
    */
-  private _writePackageOrNamespaceTables(
-    outputFolder: string,
-    output: DocSection,
-    apiContainer: ApiPackage | ApiNamespace
-  ): void {
+  private _writePackageOrNamespaceTables(output: DocSection, apiContainer: ApiPackage | ApiNamespace): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     const classesTable: DocTable = new DocTable({
@@ -483,37 +487,37 @@ export class MarkdownDocumenter {
       switch (apiMember.kind) {
         case ApiItemKind.Class:
           classesTable.addRow(row);
-          this._writeApiItemPage(outputFolder, apiMember);
+          this._writeApiItemPage(apiMember);
           break;
 
         case ApiItemKind.Enum:
           enumerationsTable.addRow(row);
-          this._writeApiItemPage(outputFolder, apiMember);
+          this._writeApiItemPage(apiMember);
           break;
 
         case ApiItemKind.Interface:
           interfacesTable.addRow(row);
-          this._writeApiItemPage(outputFolder, apiMember);
+          this._writeApiItemPage(apiMember);
           break;
 
         case ApiItemKind.Namespace:
           namespacesTable.addRow(row);
-          this._writeApiItemPage(outputFolder, apiMember);
+          this._writeApiItemPage(apiMember);
           break;
 
         case ApiItemKind.Function:
           functionsTable.addRow(row);
-          this._writeApiItemPage(outputFolder, apiMember);
+          this._writeApiItemPage(apiMember);
           break;
 
         case ApiItemKind.TypeAlias:
           typeAliasesTable.addRow(row);
-          this._writeApiItemPage(outputFolder, apiMember);
+          this._writeApiItemPage(apiMember);
           break;
 
         case ApiItemKind.Variable:
           variablesTable.addRow(row);
-          this._writeApiItemPage(outputFolder, apiMember);
+          this._writeApiItemPage(apiMember);
           break;
       }
     }
@@ -556,7 +560,7 @@ export class MarkdownDocumenter {
   /**
    * GENERATE PAGE: CLASS
    */
-  private _writeClassTables(outputFolder: string, output: DocSection, apiClass: ApiClass): void {
+  private _writeClassTables(output: DocSection, apiClass: ApiClass): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     const eventsTable: DocTable = new DocTable({
@@ -590,7 +594,7 @@ export class MarkdownDocumenter {
             ])
           );
 
-          this._writeApiItemPage(outputFolder, apiMember);
+          this._writeApiItemPage(apiMember);
           break;
         }
         case ApiItemKind.Method: {
@@ -602,7 +606,7 @@ export class MarkdownDocumenter {
             ])
           );
 
-          this._writeApiItemPage(outputFolder, apiMember);
+          this._writeApiItemPage(apiMember);
           break;
         }
         case ApiItemKind.Property: {
@@ -626,7 +630,7 @@ export class MarkdownDocumenter {
             );
           }
 
-          this._writeApiItemPage(outputFolder, apiMember);
+          this._writeApiItemPage(apiMember);
           break;
         }
       }
@@ -695,7 +699,7 @@ export class MarkdownDocumenter {
   /**
    * GENERATE PAGE: INTERFACE
    */
-  private _writeInterfaceTables(outputFolder: string, output: DocSection, apiClass: ApiInterface): void {
+  private _writeInterfaceTables(output: DocSection, apiClass: ApiInterface): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     const eventsTable: DocTable = new DocTable({
@@ -724,7 +728,7 @@ export class MarkdownDocumenter {
             ])
           );
 
-          this._writeApiItemPage(outputFolder, apiMember);
+          this._writeApiItemPage(apiMember);
           break;
         }
         case ApiItemKind.PropertySignature: {
@@ -746,7 +750,7 @@ export class MarkdownDocumenter {
             );
           }
 
-          this._writeApiItemPage(outputFolder, apiMember);
+          this._writeApiItemPage(apiMember);
           break;
         }
       }
@@ -1049,8 +1053,8 @@ export class MarkdownDocumenter {
     return './' + this._getFilenameForApiItem(apiItem);
   }
 
-  private _deleteOldOutputFiles(outputFolder: string): void {
-    console.log('Deleting old output from ' + outputFolder);
-    FileSystem.ensureEmptyFolder(outputFolder);
+  private _deleteOldOutputFiles(): void {
+    console.log('Deleting old output from ' + this._outputFolder);
+    FileSystem.ensureEmptyFolder(this._outputFolder);
   }
 }
