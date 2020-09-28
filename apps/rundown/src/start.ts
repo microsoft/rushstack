@@ -12,4 +12,6 @@ console.log(`Rundown ${toolVersion} - https://rushstack.io`);
 console.log();
 
 const commandLine: RundownCommandLine = new RundownCommandLine();
-commandLine.execute();
+commandLine.execute().catch((error) => {
+  console.error(error);
+});
