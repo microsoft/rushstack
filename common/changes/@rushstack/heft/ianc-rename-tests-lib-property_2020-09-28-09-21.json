@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "[BREAKING CHANGE] Rename \"emitFolderNameForJest\" to \"emitFolderNameForTests\" in typescript.json",
+      "comment": "(BREAKING CHANGE) Rename \"emitFolderNameForJest\" to \"emitFolderNameForTests\" in typescript.json",
       "type": "minor"
     }
   ],
