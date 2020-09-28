@@ -13,7 +13,7 @@ import { TypeUuid } from '@rushstack/node-core-library';
  */
 export class PluginFeatureInitialization {
   /** @internal */
-  public _context: PluginFeatureContext;
+  public _context!: PluginFeatureContext;
 
   /** @internal */
   public constructor() {
