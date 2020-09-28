@@ -29,7 +29,12 @@ export enum InheritanceType {
   /**
    * Discard elements from the parent file's property
    */
-  replace = 'replace'
+  replace = 'replace',
+
+  /**
+   * Custom inheritance functionality
+   */
+  custom = 'custom'
 }
 
 /**
@@ -85,8 +90,32 @@ export interface IJsonPathMetadata {
 /**
  * @beta
  */
-export type IPropertyInheritanceTypes<TConfigurationFile> = {
-  [propertyName in keyof TConfigurationFile]?: InheritanceType;
+export type PropertyInheritanceCustomFunction<TObject> = (
+  currentObject: TObject,
+  parentObject: TObject
+) => TObject;
+
+/**
+ * @beta
+ */
+export interface IPropertyInheritance<TInheritanceType extends InheritanceType> {
+  inheritanceType: TInheritanceType;
+}
+
+/**
+ * @beta
+ */
+export interface ICustomPropertyInheritance<TObject> extends IPropertyInheritance<InheritanceType.custom> {
+  inheritanceFunction: PropertyInheritanceCustomFunction<TObject>;
+}
+
+/**
+ * @beta
+ */
+export type IPropertiesInheritance<TConfigurationFile> = {
+  [propertyName in keyof TConfigurationFile]?:
+    | IPropertyInheritance<InheritanceType.append | InheritanceType.replace>
+    | ICustomPropertyInheritance<TConfigurationFile[propertyName]>;
 };
 
 /**
@@ -122,7 +151,7 @@ export interface IConfigurationFileOptions<TConfigurationFile> {
    * Use this property to control how root-level properties are handled between parent and child
    * configuration files.
    */
-  propertyInheritanceTypes?: IPropertyInheritanceTypes<TConfigurationFile>;
+  propertyInheritance?: IPropertiesInheritance<TConfigurationFile>;
 }
 
 interface IJsonPathCallbackObject {
@@ -147,7 +176,7 @@ export class ConfigurationFile<TConfigurationFile> {
   private readonly _schemaPath: string;
   private readonly _projectRelativeFilePath: string;
   private readonly _jsonPathMetadata: IJsonPathsMetadata;
-  private readonly _propertyInheritanceTypes: IPropertyInheritanceTypes<TConfigurationFile>;
+  private readonly _propertyInheritanceTypes: IPropertiesInheritance<TConfigurationFile>;
   private __schema: JsonSchema | undefined;
   private get _schema(): JsonSchema {
     if (!this.__schema) {
@@ -168,7 +197,7 @@ export class ConfigurationFile<TConfigurationFile> {
     this._projectRelativeFilePath = options.projectRelativeFilePath;
     this._schemaPath = options.jsonSchemaPath;
     this._jsonPathMetadata = options.jsonPathMetadata || {};
-    this._propertyInheritanceTypes = options.propertyInheritanceTypes || {};
+    this._propertyInheritanceTypes = options.propertyInheritance || {};
   }
 
   public async loadConfigurationFileForProjectAsync(
@@ -416,10 +445,10 @@ export class ConfigurationFile<TConfigurationFile> {
       const parentPropertyValue: unknown | undefined = parentConfiguration[propertyName];
 
       const bothAreArrays: boolean = Array.isArray(propertyValue) && Array.isArray(parentPropertyValue);
-      const defaultInheritanceType: InheritanceType = bothAreArrays
-        ? InheritanceType.append
-        : InheritanceType.replace;
-      const inheritanceType: InheritanceType =
+      const defaultInheritanceType: IPropertyInheritance<InheritanceType> = bothAreArrays
+        ? { inheritanceType: InheritanceType.append }
+        : { inheritanceType: InheritanceType.replace };
+      const propertyInheritance: IPropertyInheritance<InheritanceType> =
         this._propertyInheritanceTypes[propertyName] !== undefined
           ? this._propertyInheritanceTypes[propertyName]
           : defaultInheritanceType;
@@ -442,45 +471,69 @@ export class ConfigurationFile<TConfigurationFile> {
         newValue = parentPropertyValue;
       };
 
-      switch (inheritanceType) {
-        case InheritanceType.replace: {
-          if (propertyValue !== undefined) {
-            usePropertyValue();
-          } else {
-            useParentPropertyValue();
+      if (propertyValue && !parentPropertyValue) {
+        usePropertyValue();
+      } else if (parentPropertyValue && !propertyValue) {
+        useParentPropertyValue();
+      } else {
+        switch (propertyInheritance.inheritanceType) {
+          case InheritanceType.replace: {
+            if (propertyValue !== undefined) {
+              usePropertyValue();
+            } else {
+              useParentPropertyValue();
+            }
+
+            break;
           }
 
-          break;
-        }
+          case InheritanceType.append: {
+            if (propertyValue !== undefined && parentPropertyValue === undefined) {
+              usePropertyValue();
+            } else if (propertyValue === undefined && parentPropertyValue !== undefined) {
+              useParentPropertyValue();
+            } else {
+              if (!Array.isArray(propertyValue) || !Array.isArray(parentPropertyValue)) {
+                throw new Error(
+                  `Issue in processing configuration file property "${propertyName}". ` +
+                    `Property is not an array, but the inheritance type is set as "${InheritanceType.append}"`
+                );
+              }
 
-        case InheritanceType.append: {
-          if (propertyValue !== undefined && parentPropertyValue === undefined) {
-            usePropertyValue();
-          } else if (propertyValue === undefined && parentPropertyValue !== undefined) {
-            useParentPropertyValue();
-          } else {
-            if (!Array.isArray(propertyValue) || !Array.isArray(parentPropertyValue)) {
+              newValue = [...parentPropertyValue, ...propertyValue];
+              ((newValue as unknown) as IAnnotatedField<unknown[]>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
+                configurationFilePath: undefined,
+                originalValues: {
+                  ...parentPropertyValue[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues,
+                  ...propertyValue[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues
+                }
+              };
+            }
+
+            break;
+          }
+
+          case InheritanceType.custom: {
+            const customInheritance: ICustomPropertyInheritance<unknown> = propertyInheritance as ICustomPropertyInheritance<
+              unknown
+            >;
+            if (
+              !customInheritance.inheritanceFunction ||
+              typeof customInheritance.inheritanceFunction !== 'function'
+            ) {
               throw new Error(
-                `Issue in processing configuration file property "${propertyName}". ` +
-                  `Property is not an array, but the inheritance type is set as "${InheritanceType.append}"`
+                'For property inheritance type "InheritanceType.custom", an inheritanceFunction must be provided.'
               );
             }
 
-            newValue = [...parentPropertyValue, ...propertyValue];
-            ((newValue as unknown) as IAnnotatedField<unknown[]>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
-              configurationFilePath: undefined,
-              originalValues: {
-                ...parentPropertyValue[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues,
-                ...propertyValue[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues
-              }
-            };
+            newValue = customInheritance.inheritanceFunction(propertyValue, parentPropertyValue);
+
+            break;
           }
 
-          break;
-        }
-
-        default: {
-          throw new Error(`Unknown inheritance type "${inheritanceType}"`);
+          default: {
+            throw new Error(`Unknown inheritance type "${propertyInheritance}"`);
+          }
         }
       }
 

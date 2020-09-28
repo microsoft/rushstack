@@ -85,7 +85,11 @@ export class CoreConfigFiles {
       CoreConfigFiles._heftConfigFileLoader = new ConfigurationFile<IHeftConfigurationJson>({
         projectRelativeFilePath: 'config/heft.json',
         jsonSchemaPath: schemaPath,
-        propertyInheritanceTypes: { heftPlugins: InheritanceType.append },
+        propertyInheritance: {
+          heftPlugins: {
+            inheritanceType: InheritanceType.append
+          }
+        },
         jsonPathMetadata: {
           '$.heftPlugins.*.plugin': {
             pathResolutionMethod: PathResolutionMethod.NodeResolve
