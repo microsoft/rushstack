@@ -34,7 +34,7 @@
     //    */
     //    "outFolderName": "lib-amd"
     // }
-  ]
+  ],
 
   /**
    * Specifies the intermediary folder that tests will use.  Because Jest uses the
@@ -53,5 +53,30 @@
    * Set this to change the maximum number of file handles that will be opened concurrently for writing.
    * The default is 50.
    */
-  // "maxWriteParallelism": 50
+  // "maxWriteParallelism": 50,
+
+  /**
+   * Describes the way files should be statically coped from src to TS output folders
+   */
+  "staticAssetsToCopy": {
+    /**
+     * File extensions that should be copied from the src folder to the destination folder(s).
+     */
+    // "fileExtensions": [
+    //   ".json", ".css"
+    // ],
+    /**
+     * Glob patterns that should be explicitly included.
+     */
+    // "includeGlobs": [
+    //   "some/path/*.js"
+    // ],
+    /**
+     * Glob patterns that should be explicitly excluded. This takes precedence over globs listed
+     * in "includeGlobs" and files that match the file extensions provided in "fileExtensions".
+     */
+    // "excludeGlobs": [
+    //   "some/path/*.css"
+    // ]
+  }
 }

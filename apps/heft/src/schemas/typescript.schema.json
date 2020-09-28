@@ -56,6 +56,42 @@
     "maxWriteParallelism": {
       "description": "Set this to change the maximum write parallelism. The default is 50.",
       "type": "number"
+    },
+
+    "staticAssetsToCopy": {
+      "description": "Describes the way files should be statically coped from src to TS output folders.",
+      "type": "object",
+
+      "additionalProperties": false,
+
+      "properties": {
+        "fileExtensions": {
+          "type": "array",
+          "description": "File extensions that should be copied from the src folder to the destination folder(s)",
+          "items": {
+            "type": "string",
+            "pattern": "\\..+"
+          }
+        },
+
+        "excludeGlobs": {
+          "type": "array",
+          "description": "Globs that should be explicitly excluded. This takes precedence over globs listed in \"includeGlobs\" and files that match the file extensions provided in \"fileExtensions\".",
+          "items": {
+            "type": "string",
+            "pattern": "[^\\\\]"
+          }
+        },
+
+        "includeGlobs": {
+          "type": "array",
+          "description": "Globs that should be explicitly included.",
+          "items": {
+            "type": "string",
+            "pattern": "[^\\\\]"
+          }
+        }
+      }
     }
   }
 }

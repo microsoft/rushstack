@@ -16,6 +16,7 @@ import { IBuildStageContext, ICompileSubstage } from '../stages/BuildStage';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import { CoreConfigFiles } from '../utilities/CoreConfigFiles';
 import { RigConfig } from '@rushstack/rig-package';
+import { ITypeScriptConfigurationJson } from './TypeScriptPlugin/TypeScriptPlugin';
 
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
 
@@ -36,8 +37,6 @@ export interface ISharedCopyStaticAssetsConfiguration {
    */
   includeGlobs?: string[];
 }
-
-export interface ICopyStaticAssetsConfigurationJson extends ISharedCopyStaticAssetsConfiguration {}
 
 interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsConfiguration {
   /**
@@ -97,16 +96,16 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
     heftConfiguration: HeftConfiguration
   ): Promise<ICopyStaticAssetsConfiguration> {
     const rigConfig: RigConfig = await CoreConfigFiles.getRigConfigAsync(heftConfiguration);
-    const copyStaticAssetsConfigurationJson:
-      | ICopyStaticAssetsConfigurationJson
-      | undefined = await CoreConfigFiles.copyStaticAssetsConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
+    const typescriptConfiguration:
+      | ITypeScriptConfigurationJson
+      | undefined = await CoreConfigFiles.typeScriptConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
       terminal,
       heftConfiguration.buildFolder,
       rigConfig
     );
 
     return {
-      ...copyStaticAssetsConfigurationJson,
+      ...typescriptConfiguration?.staticAssetsToCopy,
 
       // For now - these may need to be revised later
       sourceFolderName: 'src',
