@@ -12,14 +12,14 @@
   "dependencies": {
     "@microsoft/api-documenter": "workspace:*",
     "@microsoft/api-extractor-model": "workspace:*",
-    "@rushstack/node-core-library": "workspace:*",
     "@microsoft/tsdoc": "0.12.19",
+    "@rushstack/node-core-library": "workspace:*",
     "js-yaml": "~3.13.1"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
     "@types/js-yaml": "3.12.1",
     "@types/node": "10.17.13"
   }

@@ -13,10 +13,10 @@
     "build": "heft test --clean"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "workspace:*",
-    "@rushstack/node-core-library": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "10.17.13"
   },

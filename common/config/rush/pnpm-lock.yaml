@@ -11,9 +11,9 @@ importers:
       js-yaml: 3.13.1
       resolve: 1.17.0
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../heft'
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
       '@types/heft-jest': 1.0.1
       '@types/js-yaml': 3.12.1
       '@types/node': 10.17.13
@@ -21,10 +21,10 @@ importers:
       jest: 25.4.0
     specifiers:
       '@microsoft/api-extractor-model': 'workspace:*'
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@microsoft/tsdoc': 0.12.19
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-node-rig': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@rushstack/ts-command-line': 'workspace:*'
       '@types/heft-jest': 1.0.1
@@ -169,15 +169,15 @@ importers:
       '@rushstack/ts-command-line': 'link:../../libraries/ts-command-line'
       string-argv: 0.3.1
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../heft'
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
     specifiers:
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-node-rig': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@rushstack/ts-command-line': 'workspace:*'
       '@types/heft-jest': 1.0.1
@@ -190,9 +190,9 @@ importers:
       colors: 1.2.5
       semver: 7.3.2
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../heft'
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       '@types/semver': 7.3.4
@@ -201,9 +201,9 @@ importers:
       sinon: 1.17.7
     specifiers:
       '@microsoft/rush-lib': 'workspace:*'
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-node-rig': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
@@ -248,9 +248,9 @@ importers:
       wordwrap: 1.0.0
       z-schema: 3.18.4
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../heft'
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
       '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
       '@types/inquirer': 0.0.43
@@ -271,10 +271,10 @@ importers:
       '@types/z-schema': 3.16.31
       jest: 25.4.0
     specifiers:
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@pnpm/link-bins': ~5.3.7
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-node-rig': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@rushstack/package-deps-hash': 'workspace:*'
       '@rushstack/stream-collator': 'workspace:*'
@@ -1315,16 +1315,16 @@ importers:
       node-forge: 0.7.6
       sudo: 1.0.3
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       '@types/node-forge': 0.9.1
     specifiers:
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-node-rig': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
@@ -1354,15 +1354,15 @@ importers:
       jsonpath-plus: ~4.0.0
   ../../libraries/load-themed-styles:
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
+      '@rushstack/heft-web-rig': 'link:../../rigs/heft-web-rig'
       '@types/heft-jest': 1.0.1
       '@types/webpack-env': 1.13.0
     specifiers:
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-web-rig': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/webpack-env': 1.13.0
   ../../libraries/node-core-library:
@@ -1411,15 +1411,15 @@ importers:
     dependencies:
       '@rushstack/node-core-library': 'link:../node-core-library'
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
     specifiers:
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-node-rig': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
@@ -1449,17 +1449,17 @@ importers:
     dependencies:
       '@rushstack/node-core-library': 'link:../node-core-library'
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       jest: 25.4.0
       ts-jest: 25.1.0_jest@25.4.0
     specifiers:
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-node-rig': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
@@ -1470,15 +1470,15 @@ importers:
       '@rushstack/node-core-library': 'link:../node-core-library'
       '@rushstack/terminal': 'link:../terminal'
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
     specifiers:
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-node-rig': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@rushstack/terminal': 'workspace:*'
       '@types/heft-jest': 1.0.1
@@ -1488,15 +1488,15 @@ importers:
       '@rushstack/node-core-library': 'link:../node-core-library'
       '@types/node': 10.17.13
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
       '@types/heft-jest': 1.0.1
       colors: 1.2.5
     specifiers:
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-node-rig': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
@@ -1546,15 +1546,15 @@ importers:
       glob: 7.0.6
     devDependencies:
       '@microsoft/node-library-build': 'link:../../core-build/node-library-build'
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
       '@types/glob': 7.1.1
     specifiers:
       '@microsoft/node-library-build': 'workspace:*'
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-node-rig': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@types/glob': 7.1.1
       '@types/node': 10.17.13
@@ -1568,18 +1568,18 @@ importers:
       '@rushstack/node-core-library': 'link:../../libraries/node-core-library'
       js-yaml: 3.13.1
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
       '@types/js-yaml': 3.12.1
       '@types/node': 10.17.13
     specifiers:
       '@microsoft/api-documenter': 'workspace:*'
       '@microsoft/api-extractor-model': 'workspace:*'
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@microsoft/tsdoc': 0.12.19
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-node-rig': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@types/js-yaml': 3.12.1
       '@types/node': 10.17.13
@@ -1599,18 +1599,36 @@ importers:
       '@rushstack/node-core-library': 'link:../../libraries/node-core-library'
       '@rushstack/ts-command-line': 'link:../../libraries/ts-command-line'
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
       '@types/node': 10.17.13
     specifiers:
       '@microsoft/rush-lib': 'workspace:*'
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-node-rig': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@rushstack/ts-command-line': 'workspace:*'
       '@types/node': 10.17.13
+  ../../rigs/heft-node-rig:
+    dependencies:
+      '@microsoft/api-extractor': 'link:../../apps/api-extractor'
+      eslint: 7.2.0
+      typescript: 3.5.3
+    specifiers:
+      '@microsoft/api-extractor': 'workspace:*'
+      eslint: ~7.2.0
+      typescript: ~3.5.3
+  ../../rigs/heft-web-rig:
+    dependencies:
+      '@microsoft/api-extractor': 'link:../../apps/api-extractor'
+      eslint: 7.2.0
+      typescript: 3.5.3
+    specifiers:
+      '@microsoft/api-extractor': 'workspace:*'
+      eslint: ~7.2.0
+      typescript: ~3.5.3
   ../../stack/eslint-config:
     dependencies:
       '@rushstack/eslint-patch': 'link:../eslint-patch'
@@ -2111,18 +2129,18 @@ importers:
       '@microsoft/load-themed-styles': 'link:../../libraries/load-themed-styles'
       loader-utils: 1.1.0
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
       '@types/heft-jest': 1.0.1
       '@types/loader-utils': 1.1.3
       '@types/node': 10.17.13
       '@types/webpack': 4.39.8
     specifiers:
       '@microsoft/load-themed-styles': 'workspace:*'
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-node-rig': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/loader-utils': 1.1.3
       '@types/node': 10.17.13
@@ -2132,15 +2150,15 @@ importers:
     dependencies:
       loader-utils: 1.1.0
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
     specifiers:
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-node-rig': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       loader-utils: ~1.1.0
@@ -2156,9 +2174,9 @@ importers:
       pseudolocale: 1.1.0
       xmldoc: 1.1.2
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
       '@rushstack/set-webpack-public-path-plugin': 'link:../set-webpack-public-path-plugin'
       '@types/loader-utils': 1.1.3
       '@types/lodash': 4.14.116
@@ -2166,9 +2184,9 @@ importers:
       '@types/xmldoc': 1.1.4
       webpack: 4.31.0_webpack@4.31.0
     specifiers:
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-node-rig': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@rushstack/set-webpack-public-path-plugin': 'workspace:*'
       '@rushstack/typings-generator': 'workspace:*'
@@ -2192,17 +2210,17 @@ importers:
       tapable: 1.1.3
       terser: 4.7.0
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
       '@types/heft-jest': 1.0.1
       '@types/webpack': 4.39.8
       webpack: 4.31.0_webpack@4.31.0
       webpack-sources: 1.4.3
     specifiers:
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-node-rig': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       '@types/tapable': 1.0.5
@@ -2217,9 +2235,9 @@ importers:
       lodash: 4.17.20
       uglify-js: 3.0.28
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.5': 'link:../../stack/rush-stack-compiler-3.5'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
       '@types/heft-jest': 1.0.1
       '@types/lodash': 4.14.116
       '@types/node': 10.17.13
@@ -2227,9 +2245,9 @@ importers:
       '@types/uglify-js': 2.6.29
       '@types/webpack': 4.39.8
     specifiers:
-      '@microsoft/rush-stack-compiler-3.5': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-node-rig': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/lodash': 4.14.116
       '@types/node': 10.17.13
@@ -14417,3 +14435,4 @@ packages:
       commander: 2.20.3
     resolution:
       integrity: sha512-DUOKC/IhbkdLKKiV89gw9DUauTV8U/8yJl1sjf6MtDmzevLKOF2duNJ495S3MFVjqZarr+qNGCPbkg4mu4PpLw==
+registry: ''

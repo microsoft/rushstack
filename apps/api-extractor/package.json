@@ -35,10 +35,10 @@
   },
   "dependencies": {
     "@microsoft/api-extractor-model": "workspace:*",
+    "@microsoft/tsdoc": "0.12.19",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rig-package": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
-    "@microsoft/tsdoc": "0.12.19",
     "colors": "~1.2.1",
     "lodash": "~4.17.15",
     "resolve": "~1.17.0",
@@ -52,8 +52,8 @@
     "@rushstack/heft": "0.8.0",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
-    "@types/semver": "~7.3.1",
     "@types/node": "10.17.13",
-    "@types/resolve": "1.17.1"
+    "@types/resolve": "1.17.1",
+    "@types/semver": "~7.3.1"
   }
 }

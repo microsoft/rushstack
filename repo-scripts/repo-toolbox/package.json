@@ -9,14 +9,14 @@
     "readme": "node ./lib/start.js readme"
   },
   "dependencies": {
-    "@rushstack/node-core-library": "workspace:*",
     "@microsoft/rush-lib": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
     "@types/node": "10.17.13"
   }
 }

@@ -187,6 +187,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/heft-node-rig",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/localization-plugin",
       "allowedCategories": [ "tests" ]
     },

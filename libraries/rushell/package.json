@@ -17,9 +17,9 @@
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "10.17.13",
     "jest": "~25.4.0",
