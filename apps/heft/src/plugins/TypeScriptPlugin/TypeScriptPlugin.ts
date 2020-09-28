@@ -68,12 +68,12 @@ export interface ISharedTypeScriptConfiguration {
   additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
 
   /**
-   * Specifies the intermediary folder that Jest will use for its input.  Because Jest uses the
+   * Specifies the intermediary folder that tests will use.  Because Jest uses the
    * Node.js runtime to execute tests, the module format must be CommonJS.
    *
    * The default value is "lib".
    */
-  emitFolderNameForJest?: string;
+  emitFolderNameForTests?: string;
 
   /**
    * Set this to change the maximum number of file handles that will be opened concurrently for writing.
@@ -186,7 +186,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
     const typeScriptConfiguration: ITypeScriptConfiguration = {
       copyFromCacheMode: typescriptConfigurationJson?.copyFromCacheMode,
       additionalModuleKindsToEmit: typescriptConfigurationJson?.additionalModuleKindsToEmit,
-      emitFolderNameForJest: typescriptConfigurationJson?.emitFolderNameForJest,
+      emitFolderNameForTests: typescriptConfigurationJson?.emitFolderNameForTests,
       maxWriteParallelism: typescriptConfigurationJson?.maxWriteParallelism || 50,
       tsconfigPaths: tsconfigPaths,
       isLintingEnabled: !(buildProperties.lite || typescriptConfigurationJson?.disableTslint)
@@ -229,7 +229,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
     };
 
     JestTypeScriptDataFile.saveForProject(heftConfiguration.buildFolder, {
-      emitFolderNameForJest: typescriptConfigurationJson?.emitFolderNameForJest || 'lib',
+      emitFolderNameForTests: typescriptConfigurationJson?.emitFolderNameForTests || 'lib',
       skipTimestampCheck: !options.watchMode
     });
 

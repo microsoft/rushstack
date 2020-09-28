@@ -63,7 +63,7 @@ export function process(
     // Example: /path/to/project/lib/folder1/folder2/Example.js
     const libFilePath: string = path.join(
       jestOptions.rootDir,
-      jestTypeScriptDataFile.emitFolderNameForJest,
+      jestTypeScriptDataFile.emitFolderNameForTests,
       srcRelativeFolderPath,
       `${parsedFilename.name}.js`
     );
