@@ -591,6 +591,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-web-rig-library-test",
+      "projectFolder": "build-tests/heft-web-rig-library-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-webpack-basic-test",
       "projectFolder": "build-tests/heft-webpack-basic-test",
       "reviewCategory": "tests",

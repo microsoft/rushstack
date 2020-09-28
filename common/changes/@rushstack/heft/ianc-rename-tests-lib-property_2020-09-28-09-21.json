@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "(BREAKING CHANGE) Consolidate the clean.json and plugins.json files into a new heft.json file.",
+      "comment": "(BREAKING CHANGE) Rename \"emitFolderNameForJest\" to \"emitFolderNameForTests\" in typescript.json",
       "type": "minor"
     }
   ],
