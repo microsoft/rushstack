@@ -108,7 +108,7 @@ export function minifySingleFile(
   return {
     error: undefined,
     code: minified.code!,
-    map: minified.map as RawSourceMap,
+    map: (minified.map as unknown) as RawSourceMap,
     hash,
     extractedComments
   };

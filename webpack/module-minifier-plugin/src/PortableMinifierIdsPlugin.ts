@@ -5,7 +5,7 @@ import { compilation, Compiler, Plugin } from 'webpack';
 import { ReplaceSource } from 'webpack-sources';
 import { createHash } from 'crypto';
 import { Tap } from 'tapable';
-import * as RequestShortener from 'webpack/lib/RequestShortener';
+import RequestShortener from 'webpack/lib/RequestShortener';
 
 import { STAGE_AFTER, STAGE_BEFORE } from './Constants';
 import {
@@ -93,7 +93,7 @@ export class PortableMinifierModuleIdsPlugin implements Plugin {
     });
 
     this._minifierHooks.postProcessCodeFragment.tap(PLUGIN_NAME, (source: ReplaceSource, context: string) => {
-      const code: string = source.original().source();
+      const code: string = source.original().source() as string;
 
       STABLE_MODULE_ID_REGEX.lastIndex = -1;
       // RegExp.exec uses null or an array as the return type, explicitly

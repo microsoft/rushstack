@@ -79,7 +79,7 @@ describe('rehydrateAsset', () => {
       externalNames: new Map()
     };
 
-    const result: string = rehydrateAsset(asset, modules, banner).source();
+    const result: string = rehydrateAsset(asset, modules, banner).source() as string;
     const expected: string = `/* fnord */\n<before>{a:foo,b:bar,"0b":baz,"=":bak,a0:bal}<after>`;
 
     if (result !== expected) {
@@ -97,7 +97,7 @@ describe('rehydrateAsset', () => {
       externalNames: new Map()
     };
 
-    const result: string = rehydrateAsset(asset, modules, banner).source();
+    const result: string = rehydrateAsset(asset, modules, banner).source() as string;
     const expected: string = `/* fnord */\n<before>{0:fizz,25:bang}<after>`;
 
     if (result !== expected) {
@@ -115,7 +115,7 @@ describe('rehydrateAsset', () => {
       externalNames: new Map()
     };
 
-    const result: string = rehydrateAsset(asset, modules, banner).source();
+    const result: string = rehydrateAsset(asset, modules, banner).source() as string;
     const expected: string = `/* fnord */\n<before>[,,buzz]<after>`;
 
     if (result !== expected) {
@@ -133,7 +133,7 @@ describe('rehydrateAsset', () => {
       externalNames: new Map()
     };
 
-    const result: string = rehydrateAsset(asset, modules, banner).source();
+    const result: string = rehydrateAsset(asset, modules, banner).source() as string;
     const expected: string = `/* fnord */\n<before>[,,,,,,,,,,,,,,bozz,bozz,bozz,bozz,bozz,bozz,bozz,bozz,bozz,bozz,bozz,bang,bozz,bozz,bozz,bozz]<after>`;
 
     if (result !== expected) {
@@ -151,7 +151,7 @@ describe('rehydrateAsset', () => {
       externalNames: new Map()
     };
 
-    const result: string = rehydrateAsset(asset, modules, banner).source();
+    const result: string = rehydrateAsset(asset, modules, banner).source() as string;
     const expected: string = `/* fnord */\n<before>Array(1000).concat([b1000,b1001,b1002,b1003,b1004,b1005,b1006,b1007,b1008,b1009])<after>`;
 
     if (result !== expected) {
@@ -169,7 +169,7 @@ describe('rehydrateAsset', () => {
       externalNames: new Map()
     };
 
-    const result: string = rehydrateAsset(asset, modules, banner).source();
+    const result: string = rehydrateAsset(asset, modules, banner).source() as string;
     const expected: string = `/* fnord */\n<before>[fizz,,buzz].concat(Array(997),[b1000,b1001,b1002,b1003,b1004,b1005,b1006,b1007,b1008,b1009])<after>`;
 
     if (result !== expected) {
@@ -187,7 +187,7 @@ describe('rehydrateAsset', () => {
       externalNames: new Map()
     };
 
-    const result: string = rehydrateAsset(asset, modules, banner).source();
+    const result: string = rehydrateAsset(asset, modules, banner).source() as string;
     const expected: string = `/* fnord */\n<before>[,,buzz].concat(Array(997),[b1000,b1001,b1002,b1003,b1004,b1005,b1006,b1007,b1008,b1009])<after>`;
 
     if (result !== expected) {
@@ -205,7 +205,7 @@ describe('rehydrateAsset', () => {
       externalNames: new Map([['__WEBPACK_EXTERNAL_MODULE_fizz__', 'TREBLE']])
     };
 
-    const result: string = rehydrateAsset(asset, modules, banner).source();
+    const result: string = rehydrateAsset(asset, modules, banner).source() as string;
     const expected: string = `/* fnord */\n<before>{255:TREBLE}<after>`;
 
     if (result !== expected) {

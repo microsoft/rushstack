@@ -80,6 +80,10 @@
       "~3.7.2",
       "~3.8.3",
       "~3.9.5"
+    ],
+
+    "source-map": [
+      "~0.6.1" // API Extractor is using an older version of source-map because newer versions are async
     ]
   }
 }
