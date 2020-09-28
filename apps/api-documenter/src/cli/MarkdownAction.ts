@@ -20,8 +20,12 @@ export class MarkdownAction extends BaseAction {
     // override
     const { apiModel, outputFolder } = this.buildApiModel();
 
-    const markdownDocumenter: MarkdownDocumenter = new MarkdownDocumenter(apiModel, undefined);
-    markdownDocumenter.generateFiles(outputFolder);
+    const markdownDocumenter: MarkdownDocumenter = new MarkdownDocumenter({
+      apiModel,
+      documenterConfig: undefined,
+      outputFolder
+    });
+    markdownDocumenter.generateFiles();
     return Promise.resolve();
   }
 }
