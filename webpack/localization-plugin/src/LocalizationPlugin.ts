@@ -130,7 +130,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     const isWebpack4: boolean = !!compiler.hooks;
 
     if (!isWebpack4) {
-      throw new Error('The localization plugin requires webpack 4');
+      throw new Error(`The ${LocalizationPlugin.name} plugin requires Webpack 4`);
     }
 
     if (this._options.typingsOptions && compiler.context) {
