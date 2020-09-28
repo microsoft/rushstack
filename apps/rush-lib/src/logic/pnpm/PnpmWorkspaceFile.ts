@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as globEscape from 'glob-escape';
+const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
 import * as os from 'os';
 import * as path from 'path';
 import { FileSystem, Sort, Text, Import } from '@rushstack/node-core-library';

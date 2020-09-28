@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -44,8 +44,8 @@ export class InitAction extends BaseConfiglessRushAction {
   // Used to catch malformed macro expressions
   private static _anyMacroRegExp: RegExp = /\/\*\s*\[.*\]\s*\*\//;
 
-  private _overwriteParameter: CommandLineFlagParameter;
-  private _rushExampleParameter: CommandLineFlagParameter;
+  private _overwriteParameter!: CommandLineFlagParameter;
+  private _rushExampleParameter!: CommandLineFlagParameter;
 
   // template section name --> whether it should be commented out
   private _commentedBySectionName: Map<string, boolean> = new Map<string, boolean>();

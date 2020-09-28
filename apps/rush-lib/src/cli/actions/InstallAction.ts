@@ -8,8 +8,8 @@ import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 
 export class InstallAction extends BaseInstallAction {
-  protected _toFlag: CommandLineStringListParameter;
-  protected _toVersionPolicy: CommandLineStringListParameter;
+  protected _toFlag!: CommandLineStringListParameter;
+  protected _toVersionPolicy!: CommandLineStringListParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({

@@ -25,6 +25,15 @@ export interface IChangeInfoHash {
   [key: string]: IChangeInfo;
 }
 
+const CHANGE_TYPE_NAME_MAP: { [name: string]: ChangeType } = {
+  none: ChangeType.none,
+  dependency: ChangeType.dependency,
+  hotfix: ChangeType.hotfix,
+  patch: ChangeType.patch,
+  minor: ChangeType.minor,
+  major: ChangeType.major
+};
+
 export class PublishUtilities {
   /**
    * Finds change requests in the given folder.
@@ -509,7 +518,10 @@ export class PublishUtilities {
 
     // If the given change does not have a changeType, derive it from the "type" string.
     if (change.changeType === undefined) {
-      change.changeType = ChangeType[change.type!];
+      change.changeType = CHANGE_TYPE_NAME_MAP[change.type!];
+      if (change.changeType === undefined) {
+        throw new Error(`Unknown change type "${change.type}"`);
+      }
     }
 
     if (!allChanges[packageName]) {

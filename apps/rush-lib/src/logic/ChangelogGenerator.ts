@@ -251,7 +251,7 @@ export class ChangelogGenerator {
   /**
    * Helper to return the comments string to be appends to the markdown content.
    */
-  private static _getChangeComments(title: string, commentsArray: IChangeLogComment[]): string {
+  private static _getChangeComments(title: string, commentsArray: IChangeLogComment[] | undefined): string {
     let comments: string = '';
 
     if (commentsArray) {

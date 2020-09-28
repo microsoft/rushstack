@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as colors from 'colors';
+import colors from 'colors';
 
 import { getPackageDeps, getGitHashForFiles, IPackageDeps } from '@rushstack/package-deps-hash';
 import { Path, InternalError, FileSystem } from '@rushstack/node-core-library';

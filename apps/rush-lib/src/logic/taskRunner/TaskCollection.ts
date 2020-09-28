@@ -27,11 +27,7 @@ export class TaskCollection {
       throw new Error('A task with that name has already been registered.');
     }
 
-    const task: Task = new Task();
-    task.builder = builder;
-    task.dependencies = new Set<Task>();
-    task.dependents = new Set<Task>();
-    task.status = TaskStatus.Ready;
+    const task: Task = new Task(builder, TaskStatus.Ready);
     task.criticalPathLength = undefined;
     this._tasks.set(task.name, task);
   }

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import * as colors from 'colors';
+import colors from 'colors';
 
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 import {
@@ -57,12 +57,12 @@ export class BulkScriptAction extends BaseScriptAction {
   private _isIncrementalBuildAllowed: boolean;
   private _commandToRun: string;
 
-  private _changedProjectsOnly: CommandLineFlagParameter;
-  private _fromFlag: CommandLineStringListParameter;
-  private _toFlag: CommandLineStringListParameter;
-  private _fromVersionPolicy: CommandLineStringListParameter;
-  private _toVersionPolicy: CommandLineStringListParameter;
-  private _verboseParameter: CommandLineFlagParameter;
+  private _changedProjectsOnly!: CommandLineFlagParameter;
+  private _fromFlag!: CommandLineStringListParameter;
+  private _toFlag!: CommandLineStringListParameter;
+  private _fromVersionPolicy!: CommandLineStringListParameter;
+  private _toVersionPolicy!: CommandLineStringListParameter;
+  private _verboseParameter!: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
   private _ignoreDependencyOrder: boolean;
   private _allowWarningsInSuccessfulBuild: boolean;

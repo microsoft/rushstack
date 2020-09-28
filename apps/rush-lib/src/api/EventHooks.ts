@@ -26,6 +26,13 @@ export enum Event {
   postRushBuild = 4
 }
 
+const EVENT_NAME_MAPPING: { [name: string]: Event } = {
+  preRushInstall: Event.preRushInstall,
+  postRushInstall: Event.postRushInstall,
+  preRushBuild: Event.preRushBuild,
+  postRushBuild: Event.postRushBuild
+};
+
 /**
  * This class represents Rush event hooks configured for this repo.
  * Hooks are customized script actions that Rush executes when specific events occur.
@@ -40,18 +47,12 @@ export class EventHooks {
    */
   public constructor(eventHooksJson: IEventHooksJson) {
     this._hooks = new Map<Event, string[]>();
-    Object.getOwnPropertyNames(eventHooksJson).forEach((name) => {
-      const eventName: Event = Event[name];
+    for (const [name, eventHooks] of Object.entries(eventHooksJson)) {
+      const eventName: Event | undefined = EVENT_NAME_MAPPING[name];
       if (eventName) {
-        const foundHooks: string[] = [];
-        if (eventHooksJson[name]) {
-          eventHooksJson[name].forEach((hook) => {
-            foundHooks.push(hook);
-          });
-        }
-        this._hooks.set(eventName, foundHooks);
+        this._hooks.set(eventName, eventHooks || []);
       }
-    });
+    }
   }
 
   /**

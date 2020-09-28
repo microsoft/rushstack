@@ -25,6 +25,8 @@ export class ApprovedPackagesConfiguration {
 
 // @public
 export class ApprovedPackagesItem {
+    // @internal
+    constructor(packageName: string);
     allowedCategories: Set<string>;
     packageName: string;
 }
@@ -416,7 +418,7 @@ export class RushConfigurationProject {
     readonly projectFolder: string;
     readonly projectRelativeFolder: string;
     readonly projectRushTempFolder: string;
-    readonly reviewCategory: string;
+    readonly reviewCategory: string | undefined;
     readonly rushConfiguration: RushConfiguration;
     readonly shouldPublish: boolean;
     readonly skipRushCheck: boolean;
@@ -453,6 +455,8 @@ export abstract class VersionPolicy {
     readonly policyName: string;
     setDependenciesBeforeCommit(packageName: string, configuration: RushConfiguration): void;
     setDependenciesBeforePublish(packageName: string, configuration: RushConfiguration): void;
+    // @internal (undocumented)
+    static tryParseBumpType(bumpTypeName: string): BumpType | undefined;
     abstract validate(versionString: string, packageName: string): void;
     }
 

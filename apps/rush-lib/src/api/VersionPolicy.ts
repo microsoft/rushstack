@@ -46,6 +46,20 @@ export enum VersionPolicyDefinitionName {
   'individualVersion'
 }
 
+const BUMP_TYPE_NAME_MAP: { [name: string]: BumpType } = {
+  none: BumpType.none,
+  prerelease: BumpType.prerelease,
+  patch: BumpType.patch,
+  preminor: BumpType.preminor,
+  minor: BumpType.minor,
+  major: BumpType.major
+};
+
+const VERSION_POLICY_DEFINITION_NAME_NAME_MAP: { [name: string]: VersionPolicyDefinitionName } = {
+  lockStepVersion: VersionPolicyDefinitionName.lockStepVersion,
+  individualVersion: VersionPolicyDefinitionName.individualVersion
+};
+
 /**
  * This is the base class for version policy which controls how versions get bumped.
  * @beta
@@ -62,13 +76,20 @@ export abstract class VersionPolicy {
    */
   public constructor(versionPolicyJson: IVersionPolicyJson) {
     this._policyName = versionPolicyJson.policyName;
-    this._definitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
+    this._definitionName = VERSION_POLICY_DEFINITION_NAME_NAME_MAP[versionPolicyJson.definitionName];
     this._exemptFromRushChange = versionPolicyJson.exemptFromRushChange || false;
 
     const jsonDependencies: IVersionPolicyDependencyJson = versionPolicyJson.dependencies || {};
     this._versionFormatForCommit = jsonDependencies.versionFormatForCommit || VersionFormatForCommit.original;
     this._versionFormatForPublish =
       jsonDependencies.versionFormatForPublish || VersionFormatForPublish.original;
+  }
+
+  /**
+   * @internal
+   */
+  public static tryParseBumpType(bumpTypeName: string): BumpType | undefined {
+    return BUMP_TYPE_NAME_MAP[bumpTypeName];
   }
 
   /**
@@ -80,7 +101,7 @@ export abstract class VersionPolicy {
    */
   public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined {
     const definition: VersionPolicyDefinitionName =
-      VersionPolicyDefinitionName[versionPolicyJson.definitionName];
+      VERSION_POLICY_DEFINITION_NAME_NAME_MAP[versionPolicyJson.definitionName];
     if (definition === VersionPolicyDefinitionName.lockStepVersion) {
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       return new LockStepVersionPolicy(versionPolicyJson as ILockStepVersionJson);
@@ -218,8 +239,14 @@ export class LockStepVersionPolicy extends VersionPolicy {
   public constructor(versionPolicyJson: ILockStepVersionJson) {
     super(versionPolicyJson);
     this._version = new semver.SemVer(versionPolicyJson.version);
-    this._nextBump = BumpType[versionPolicyJson.nextBump];
     this._mainProject = versionPolicyJson.mainProject;
+
+    const nextBump: BumpType | undefined = VersionPolicy.tryParseBumpType(versionPolicyJson.nextBump);
+    if (!nextBump) {
+      throw new Error(`Unknown bump type: ${versionPolicyJson.nextBump}`);
+    }
+
+    this._nextBump = nextBump;
   }
 
   /**

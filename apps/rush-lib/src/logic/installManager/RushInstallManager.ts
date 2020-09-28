@@ -2,13 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as glob from 'glob';
-import * as colors from 'colors';
+import colors from 'colors';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as ssri from 'ssri';
-import * as globEscape from 'glob-escape';
+const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
 import {
   JsonFile,
   Text,

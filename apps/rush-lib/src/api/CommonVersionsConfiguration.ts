@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as crypto from 'crypto';
+import crypto from 'crypto';
 import * as path from 'path';
 import {
   JsonFile,
@@ -66,7 +66,7 @@ export class CommonVersionsConfiguration {
   private _implicitlyPreferredVersions: boolean | undefined;
   private _xstitchPreferredVersions: ProtectableMap<string, string>;
   private _allowedAlternativeVersions: ProtectableMap<string, string[]>;
-  private _modified: boolean;
+  private _modified: boolean = false;
 
   private constructor(commonVersionsJson: ICommonVersionsJson | undefined, filePath: string) {
     this._preferredVersions = new ProtectableMap<string, string>({
@@ -122,22 +122,24 @@ export class CommonVersionsConfiguration {
     return new CommonVersionsConfiguration(commonVersionsJson, jsonFilename);
   }
 
-  private static _deserializeTable<TValue>(map: Map<string, TValue>, object: {} | undefined): void {
+  private static _deserializeTable<TValue>(
+    map: Map<string, TValue>,
+    object: { [key: string]: TValue } | undefined
+  ): void {
     if (object) {
-      for (const key of Object.getOwnPropertyNames(object)) {
-        const value: TValue = object[key];
+      for (const [key, value] of Object.entries(object)) {
         map.set(key, value);
       }
     }
   }
 
-  private static _serializeTable<TValue>(map: Map<string, TValue>): {} {
-    const table: {} = {};
+  private static _serializeTable<TValue>(map: Map<string, TValue>): { [key: string]: TValue } {
+    const table: { [key: string]: TValue } = {};
 
     const keys: string[] = [...map.keys()];
     keys.sort();
     for (const key of keys) {
-      table[key] = map.get(key);
+      table[key] = map.get(key)!;
     }
 
     return table;
@@ -277,10 +279,10 @@ export class CommonVersionsConfiguration {
   }
 
   private _onSetAllowedAlternativeVersions(
-    source: ProtectableMap<string, string>,
+    source: ProtectableMap<string, string[]>,
     key: string,
-    value: string
-  ): string {
+    value: string[]
+  ): string[] {
     PackageNameParsers.permissive.validate(key);
 
     this._modified = true;
@@ -306,7 +308,7 @@ export class CommonVersionsConfiguration {
     if (this._allowedAlternativeVersions.size) {
       result.allowedAlternativeVersions = CommonVersionsConfiguration._serializeTable(
         this.allowedAlternativeVersions
-      );
+      ) as ICommonVersionsJsonVersionsMap;
     }
 
     return result;

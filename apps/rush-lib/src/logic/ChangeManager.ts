@@ -18,11 +18,11 @@ import { ChangelogGenerator } from './ChangelogGenerator';
  * can be applied to package.json and change logs.
  */
 export class ChangeManager {
-  private _prereleaseToken: PrereleaseToken;
-  private _orderedChanges: IChangeInfo[];
-  private _allPackages: Map<string, RushConfigurationProject>;
-  private _allChanges: IChangeInfoHash;
-  private _changeFiles: ChangeFiles;
+  private _prereleaseToken!: PrereleaseToken;
+  private _orderedChanges!: IChangeInfo[];
+  private _allPackages!: Map<string, RushConfigurationProject>;
+  private _allChanges!: IChangeInfoHash;
+  private _changeFiles!: ChangeFiles;
   private _rushConfiguration: RushConfiguration;
   private _lockStepProjectsToExclude: Set<string> | undefined;
 

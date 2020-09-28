@@ -4,7 +4,7 @@
 // The TaskRunner prints "x.xx seconds" in TestRunner.test.ts.snap; ensure that the Stopwatch timing is deterministic
 jest.mock('../../../utilities/Utilities');
 
-import * as colors from 'colors';
+import colors from 'colors';
 import { EOL } from 'os';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 import { MockWritable } from '@rushstack/terminal';
@@ -29,11 +29,7 @@ mockGetTimeInMs.mockImplementation(() => {
 const mockWritable: MockWritable = new MockWritable();
 
 function createTaskRunner(taskRunnerOptions: ITaskRunnerOptions, builder: BaseBuilder): TaskRunner {
-  const task: Task = new Task();
-  task.dependencies = new Set<Task>();
-  task.dependents = new Set<Task>();
-  task.status = TaskStatus.Ready;
-  task.builder = builder;
+  const task: Task = new Task(builder, TaskStatus.Ready);
 
   return new TaskRunner([task], taskRunnerOptions);
 }
