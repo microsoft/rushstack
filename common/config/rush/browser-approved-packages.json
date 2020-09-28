@@ -4,7 +4,7 @@
   "packages": [
     {
       "name": "@rushstack/heft-web-rig",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "react",

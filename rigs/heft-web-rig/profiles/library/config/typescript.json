@@ -17,18 +17,18 @@
    * Note that this option only applies to the main tsconfig.json configuration.
    */
   "additionalModuleKindsToEmit": [
-    // {
-    //   /**
-    //    * (Required) Must be one of "commonjs", "amd", "umd", "system", "es2015", "esnext"
-    //    */
-    //  "moduleKind": "amd",
-    //
-    //   /**
-    //    * (Required) The name of the folder where the output will be written.
-    //    */
-    //    "outFolderName": "lib-amd"
-    // }
-  ]
+    {
+      /**
+       * (Required) Must be one of "commonjs", "amd", "umd", "system", "es2015", "esnext"
+       */
+      "moduleKind": "commonjs",
+
+      /**
+       * (Required) The name of the folder where the output will be written.
+       */
+      "outFolderName": "lib-commonjs"
+    }
+  ],
 
   /**
    * Specifies the intermediary folder that tests will use.  Because Jest uses the
@@ -36,7 +36,7 @@
    *
    * The default value is "lib".
    */
-  // "emitFolderNameForTests": "lib-commonjs",
+  "emitFolderNameForTests": "lib-commonjs"
 
   /**
    * If set to "true", the TSlint task will not be invoked.

@@ -611,6 +611,15 @@ importers:
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
       '@types/heft-jest': 1.0.1
+  ../../build-tests/heft-web-rig-library-test:
+    devDependencies:
+      '@rushstack/heft': 'link:../../apps/heft'
+      '@rushstack/heft-web-rig': 'link:../../rigs/heft-web-rig'
+      '@types/heft-jest': 1.0.1
+    specifiers:
+      '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-web-rig': 'workspace:*'
+      '@types/heft-jest': 1.0.1
   ../../build-tests/heft-webpack-basic-test:
     devDependencies:
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
