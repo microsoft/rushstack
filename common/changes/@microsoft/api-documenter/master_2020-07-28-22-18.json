@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-documenter",
+      "comment": "[api-documenter] Separate section for classes and errors in package summary",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/api-documenter",
+  "email": "johanblumenberg-symphony@users.noreply.github.com"
+}
