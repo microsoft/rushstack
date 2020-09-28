@@ -142,7 +142,7 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
         `API Extractor completed with ${errorCount} error${errorCount > 1 ? 's' : ''}`
       );
     } else if (warningCount > 0) {
-      this._terminal.writeErrorLine(
+      this._terminal.writeWarningLine(
         `API Extractor completed with ${warningCount} warning${warningCount > 1 ? 's' : ''}`
       );
     }
