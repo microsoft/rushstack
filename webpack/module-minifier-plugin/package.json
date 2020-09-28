@@ -35,11 +35,11 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/webpack": "4.39.8",
     "webpack": "~4.31.0",
-    "webpack-sources": "~1.4.3",
-    "@rushstack/heft-node-rig": "workspace:*"
+    "webpack-sources": "~1.4.3"
   },
   "sideEffects": [
     "./lib/terser/Base54",

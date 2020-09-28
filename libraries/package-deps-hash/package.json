@@ -13,12 +13,12 @@
     "build": "heft test --clean"
   },
   "devDependencies": {
-    "@rushstack/node-core-library": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "10.17.13",
-    "@rushstack/heft-node-rig": "workspace:*"
+    "@types/node": "10.17.13"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*"
