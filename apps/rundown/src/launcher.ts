@@ -63,7 +63,7 @@ class Launcher {
       const callingModuleInfo: NodeModule = this;
 
       // Paranoidly use "arguments" in case some implementor passes additional undocumented arguments
-      // @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const importedModule: unknown = (realRequire as any).apply(callingModuleInfo, arguments);
 
       if (!importedModules.has(importedModule)) {
