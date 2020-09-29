@@ -30,6 +30,7 @@
     "typescript": "~3.7.2"
   },
   "devDependencies": {
+    "@microsoft/rush-stack-compiler-3.9": "workspace:*",
     "@microsoft/rush-stack-compiler-shared": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "0.8.0",

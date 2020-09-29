@@ -1041,7 +1041,7 @@
       "projectFolder": "stack/rush-stack-compiler-3.9",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft"]
+      "cyclicDependencyProjects": ["@microsoft/rush-stack-compiler-3.9", "@rushstack/heft"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-shared",
