@@ -30,6 +30,8 @@ export class RigConfig {
     readonly rigFound: boolean;
     readonly rigPackageName: string;
     readonly rigProfile: string;
+    tryResolveConfigFilePath(configFileRelativePath: string): string | undefined;
+    tryResolveConfigFilePathAsync(configFileRelativePath: string): Promise<string | undefined>;
     }
 
 

@@ -11,7 +11,7 @@ import { RigConfig } from '../RigConfig';
 const testProjectFolder: string = path.join(__dirname, 'test-project');
 
 function expectEqualPaths(path1: string, path2: string): void {
-  if (path.relative(path1, path2) !== '') {
+  if (path.relative(path1!, path2) !== '') {
     fail('Expected paths to be equal:\npath1: ' + path1 + '\npath2: ' + path2);
   }
 }
@@ -123,6 +123,41 @@ describe('RigConfig tests', () => {
     });
   });
 
+  describe(`resolves a config file path`, () => {
+    it('synchronously', () => {
+      const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
+        projectFolderPath: testProjectFolder
+      });
+
+      expect(rigConfig.rigFound).toBe(true);
+
+      const resolvedPath: string | undefined = rigConfig.tryResolveConfigFilePath('example-config.json');
+
+      expect(resolvedPath).toBeDefined();
+      expectEqualPaths(
+        resolvedPath!,
+        path.join(testProjectFolder, 'node_modules/example-rig/profiles/web-app/example-config.json')
+      );
+    });
+
+    it('asynchronously', async () => {
+      const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
+        projectFolderPath: testProjectFolder
+      });
+
+      expect(rigConfig.rigFound).toBe(true);
+
+      const resolvedPath: string | undefined = await rigConfig.tryResolveConfigFilePathAsync(
+        'example-config.json'
+      );
+
+      expect(resolvedPath).toBeDefined();
+      expectEqualPaths(
+        resolvedPath!,
+        path.join(testProjectFolder, 'node_modules/example-rig/profiles/web-app/example-config.json')
+      );
+    });
+  });
   it('validates a rig.json file using the schema', () => {
     const rigConfigFilePath: string = path.join(testProjectFolder, 'config', 'rig.json');
 

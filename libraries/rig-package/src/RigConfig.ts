@@ -337,6 +337,56 @@ export class RigConfig {
     return this._resolvedProfileFolder;
   }
 
+  /**
+   * This lookup first checks for the specified relative path under `projectFolderPath`; if it does
+   * not exist there, then it checks in the resolved rig profile folder.  If the file is found,
+   * its absolute path is returned. Otherwise, `undefined` is returned.
+   *
+   * @remarks
+   * For example, suppose the rig profile is:
+   *
+   * `/path/to/your-project/node_modules/example-rig/profiles/example-profile`
+   *
+   * And suppose `configFileRelativePath` is `folder/file.json`. Then the following locations will be checked:
+   *
+   * `/path/to/your-project/folder/file.json`
+   *
+   * `/path/to/your-project/node_modules/example-rig/profiles/example-profile/folder/file.json`
+   */
+  public tryResolveConfigFilePath(configFileRelativePath: string): string | undefined {
+    const localPath: string = path.join(this.projectFolderPath, configFileRelativePath);
+    if (fs.existsSync(localPath)) {
+      return localPath;
+    }
+    if (this.rigFound) {
+      const riggedPath: string = path.join(this.getResolvedProfileFolder(), configFileRelativePath);
+      if (fs.existsSync(riggedPath)) {
+        return riggedPath;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * An async variant of {@link RigConfig.tryResolveConfigFilePath}
+   */
+  public async tryResolveConfigFilePathAsync(configFileRelativePath: string): Promise<string | undefined> {
+    const localPath: string = path.join(this.projectFolderPath, configFileRelativePath);
+    if (await RigConfig._fsExistsAsync(localPath)) {
+      return localPath;
+    }
+    if (this.rigFound) {
+      const riggedPath: string = path.join(
+        await this.getResolvedProfileFolderAsync(),
+        configFileRelativePath
+      );
+      if (await RigConfig._fsExistsAsync(riggedPath)) {
+        return riggedPath;
+      }
+    }
+    return undefined;
+  }
+
   private static _nodeResolveAsync(id: string, opts: nodeResolve.AsyncOpts): Promise<string> {
     return new Promise((resolve: (result: string) => void, reject: (error: Error) => void) => {
       nodeResolve(id, opts, (error: Error, result: string) => {
