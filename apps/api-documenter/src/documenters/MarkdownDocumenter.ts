@@ -57,6 +57,12 @@ import {
 import { DocumenterConfig } from './DocumenterConfig';
 import { MarkdownDocumenterAccessor } from '../plugin/MarkdownDocumenterAccessor';
 
+export interface IMarkdownDocumenterOptions {
+  apiModel: ApiModel;
+  documenterConfig: DocumenterConfig | undefined;
+  outputFolder: string;
+}
+
 /**
  * Renders API documentation in the Markdown file format.
  * For more info:  https://en.wikipedia.org/wiki/Markdown
@@ -66,26 +72,25 @@ export class MarkdownDocumenter {
   private readonly _documenterConfig: DocumenterConfig | undefined;
   private readonly _tsdocConfiguration: TSDocConfiguration;
   private readonly _markdownEmitter: CustomMarkdownEmitter;
-  private _outputFolder: string;
+  private readonly _outputFolder: string;
   private readonly _pluginLoader: PluginLoader;
 
-  public constructor(apiModel: ApiModel, documenterConfig: DocumenterConfig | undefined) {
-    this._apiModel = apiModel;
-    this._documenterConfig = documenterConfig;
+  public constructor(options: IMarkdownDocumenterOptions) {
+    this._apiModel = options.apiModel;
+    this._documenterConfig = options.documenterConfig;
+    this._outputFolder = options.outputFolder;
     this._tsdocConfiguration = CustomDocNodes.configuration;
     this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
 
     this._pluginLoader = new PluginLoader();
   }
 
-  public generateFiles(outputFolder: string): void {
-    this._outputFolder = outputFolder;
-
+  public generateFiles(): void {
     if (this._documenterConfig) {
       this._pluginLoader.load(this._documenterConfig, () => {
         return new MarkdownDocumenterFeatureContext({
           apiModel: this._apiModel,
-          outputFolder: outputFolder,
+          outputFolder: this._outputFolder,
           documenter: new MarkdownDocumenterAccessor({
             getLinkForApiItem: (apiItem: ApiItem) => {
               return this._getLinkFilenameForApiItem(apiItem);

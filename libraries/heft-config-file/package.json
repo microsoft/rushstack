@@ -23,7 +23,7 @@
     "jsonpath-plus": "~4.0.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.7": "workspace:*",
+    "@microsoft/rush-stack-compiler-3.9": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "0.8.0",
     "@types/heft-jest": "1.0.1",

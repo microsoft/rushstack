@@ -15,7 +15,7 @@ let spawnMockConfig = normalizeSpawnMockConfig();
 /**
  * Helper to initialize how the `spawn` mock should behave.
  */
-function normalizeSpawnMockConfig(maybeConfig?) {
+function normalizeSpawnMockConfig(maybeConfig?: any) {
   const config = maybeConfig || {};
   return {
     emitError: typeof config.emitError !== 'undefined' ? config.emitError : false,
@@ -28,14 +28,14 @@ function normalizeSpawnMockConfig(maybeConfig?) {
  *
  * Not a pure function.
  */
-function setSpawnMockConfig(spawnConfig) {
+function setSpawnMockConfig(spawnConfig: any) {
   spawnMockConfig = normalizeSpawnMockConfig(spawnConfig);
 }
 
 /**
  * Mock of `spawn`.
  */
-function spawn(file, args, options) {
+function spawn(file: string, args: string[], options: {}) {
   const cpMock = new childProcess.ChildProcess();
 
   // Add working event emitters ourselves since `genMockFromModule` does not add them because they

@@ -16,8 +16,12 @@ export interface ILoaderResult {
 export function loaderFactory<TOptions extends IBaseLoaderOptions>(
   innerLoader: (locFilePath: string, content: string, options: TOptions) => ILoaderResult
 ): loader.Loader {
-  return function (this: loader.LoaderContext, content: string): string {
+  return function (this: loader.LoaderContext, content: string | Buffer): string {
     const options: TOptions = loaderUtils.getOptions(this) as TOptions;
+    if (typeof content !== 'string') {
+      content = content.toString();
+    }
+
     const resultObject: ILoaderResult = innerLoader.call(this, this.resourcePath, content, options);
     return JSON.stringify(resultObject);
   };

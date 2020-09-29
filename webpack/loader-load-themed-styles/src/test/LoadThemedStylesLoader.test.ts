@@ -1,3 +1,4 @@
+import webpack = require('webpack');
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
@@ -31,7 +32,7 @@ describe('LoadThemedStylesLoader', () => {
 
   it('it inserts the resolved load-themed-styles path', () => {
     const expectedPath: string = require.resolve('@microsoft/load-themed-styles');
-    const loaderResult: string = LoadThemedStylesLoader.pitch.call({}, '');
+    const loaderResult: string = LoadThemedStylesLoader.pitch.call({} as webpack.loader.LoaderContext, '');
     expect(loaderResult.indexOf(expectedPath)).not.toBeNull();
   });
 
@@ -47,14 +48,17 @@ describe('LoadThemedStylesLoader', () => {
 
   it('it inserts the overridden load-themed-styles path', () => {
     const expectedPath: string = './testData/LoadThemedStylesMock';
-    const loaderResult: string = LoadThemedStylesLoader.pitch.call({}, '');
+    const loaderResult: string = LoadThemedStylesLoader.pitch.call({} as webpack.loader.LoaderContext, '');
     expect(loaderResult.indexOf(expectedPath)).not.toBeNull();
   });
 
   it('correctly calls loadStyles in load-themed-styles with a module reference', () => {
     LoadThemedStylesLoader.loadedThemedStylesPath = './testData/LoadThemedStylesMock';
 
-    let loaderResult: string = LoadThemedStylesLoader.pitch.call({}, './testData/MockStyle1');
+    let loaderResult: string = LoadThemedStylesLoader.pitch.call(
+      {} as webpack.loader.LoaderContext,
+      './testData/MockStyle1'
+    );
     loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
     loaderResult = wrapResult(loaderResult);
 
@@ -72,7 +76,10 @@ describe('LoadThemedStylesLoader', () => {
   it('correctly calls loadStyles in load-themed-styles with a string reference', () => {
     LoadThemedStylesLoader.loadedThemedStylesPath = './testData/LoadThemedStylesMock';
 
-    let loaderResult: string = LoadThemedStylesLoader.pitch.call({}, './testData/MockStyle2');
+    let loaderResult: string = LoadThemedStylesLoader.pitch.call(
+      {} as webpack.loader.LoaderContext,
+      './testData/MockStyle2'
+    );
     loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
     loaderResult = wrapResult(loaderResult);
 
@@ -87,7 +94,10 @@ describe('LoadThemedStylesLoader', () => {
     LoadThemedStylesLoader.loadedThemedStylesPath = './testData/LoadThemedStylesMock';
 
     const query: {} = { namedExport: 'default' };
-    let loaderResult: string = LoadThemedStylesLoader.pitch.call({ query }, './testData/MockStyle1');
+    let loaderResult: string = LoadThemedStylesLoader.pitch.call(
+      { query } as webpack.loader.LoaderContext,
+      './testData/MockStyle1'
+    );
     loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
     loaderResult = wrapResult(loaderResult);
 
@@ -106,7 +116,10 @@ describe('LoadThemedStylesLoader', () => {
     LoadThemedStylesLoader.loadedThemedStylesPath = './testData/LoadThemedStylesMock';
 
     const query: {} = { async: true };
-    let loaderResult: string = LoadThemedStylesLoader.pitch.call({ query }, './testData/MockStyle1');
+    let loaderResult: string = LoadThemedStylesLoader.pitch.call(
+      { query } as webpack.loader.LoaderContext,
+      './testData/MockStyle1'
+    );
     loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
     loaderResult = wrapResult(loaderResult);
 
@@ -124,7 +137,10 @@ describe('LoadThemedStylesLoader', () => {
   it('correctly handles the async option set to a non-boolean', () => {
     LoadThemedStylesLoader.loadedThemedStylesPath = './testData/LoadThemedStylesMock';
 
-    let loaderResult: string = LoadThemedStylesLoader.pitch.call({}, './testData/MockStyle1');
+    let loaderResult: string = LoadThemedStylesLoader.pitch.call(
+      {} as webpack.loader.LoaderContext,
+      './testData/MockStyle1'
+    );
     loaderResult = loaderResult.replace(/require\(\"!!/, 'require("');
     loaderResult = wrapResult(loaderResult);
 

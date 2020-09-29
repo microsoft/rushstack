@@ -441,7 +441,7 @@ export class RushConfiguration {
   private _commonTempFolder: string;
   private _commonScriptsFolder: string;
   private _commonRushConfigFolder: string;
-  private _packageManager: PackageManagerName;
+  private _packageManager!: PackageManagerName;
   private _packageManagerWrapper: PackageManager;
   private _npmCacheFolder: string;
   private _npmTmpFolder: string;
@@ -478,7 +478,7 @@ export class RushConfiguration {
   private _npmOptions: NpmOptionsConfiguration;
   private _pnpmOptions: PnpmOptionsConfiguration;
   private _yarnOptions: YarnOptionsConfiguration;
-  private _packageManagerConfigurationOptions: PackageManagerOptionsConfigurationBase;
+  private _packageManagerConfigurationOptions!: PackageManagerOptionsConfigurationBase;
 
   // Rush hooks
   private _eventHooks: EventHooks;
@@ -488,10 +488,10 @@ export class RushConfiguration {
   private _telemetryEnabled: boolean;
 
   // Lazily loaded when the projects() getter is called.
-  private _projects: RushConfigurationProject[];
+  private _projects: RushConfigurationProject[] | undefined;
 
   // Lazily loaded when the projectsByName() getter is called.
-  private _projectsByName: Map<string, RushConfigurationProject>;
+  private _projectsByName: Map<string, RushConfigurationProject> | undefined;
 
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
   private _experimentsConfiguration: ExperimentsConfiguration;
@@ -693,9 +693,7 @@ export class RushConfiguration {
     this._repositoryDefaultRemote = rushConfigurationJson.repository.defaultRemote || DEFAULT_REMOTE;
 
     this._telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
-    if (rushConfigurationJson.eventHooks) {
-      this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks);
-    }
+    this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks || {});
 
     const versionPolicyConfigFile: string = path.join(
       this._commonRushConfigFolder,
@@ -1363,7 +1361,7 @@ export class RushConfiguration {
       this._initializeAndValidateLocalProjects();
     }
 
-    return this._projects;
+    return this._projects!;
   }
 
   public get projectsByName(): Map<string, RushConfigurationProject> {
@@ -1371,7 +1369,7 @@ export class RushConfiguration {
       this._initializeAndValidateLocalProjects();
     }
 
-    return this._projectsByName;
+    return this._projectsByName!;
   }
 
   /**

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import * as colors from 'colors';
+import colors from 'colors';
 import {
   StdioSummarizer,
   TerminalWritable,
@@ -44,9 +44,9 @@ export class TaskRunner {
   private _hasAnyFailures: boolean;
   private _hasAnyWarnings: boolean;
   private _parallelism: number;
-  private _currentActiveTasks: number;
-  private _totalTasks: number;
-  private _completedTasks: number;
+  private _currentActiveTasks!: number;
+  private _totalTasks!: number;
+  private _completedTasks!: number;
 
   private readonly _outputWritable: TerminalWritable;
   private readonly _colorsNewlinesTransform: TextRewriterTransform;
@@ -359,7 +359,7 @@ export class TaskRunner {
    * Prints out a report of the status of each project
    */
   private _printTaskStatus(): void {
-    const tasksByStatus: { [status: number]: Task[] } = {};
+    const tasksByStatus: { [status: string]: Task[] } = {};
     for (const task of this._tasks) {
       switch (task.status) {
         // These are the sections that we will report below
@@ -417,7 +417,7 @@ export class TaskRunner {
 
   private _writeCondensedSummary(
     status: TaskStatus,
-    tasksByStatus: { [status: number]: Task[] },
+    tasksByStatus: { [status: string]: Task[] },
     headingColor: (text: string) => string,
     preamble: string
   ): void {
@@ -455,7 +455,7 @@ export class TaskRunner {
 
   private _writeDetailedSummary(
     status: TaskStatus,
-    tasksByStatus: { [status: number]: Task[] },
+    tasksByStatus: { [status: string]: Task[] },
     headingColor: (text: string) => string,
     shortStatusName?: string
   ): void {

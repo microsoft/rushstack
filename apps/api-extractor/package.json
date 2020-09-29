@@ -44,10 +44,10 @@
     "resolve": "~1.17.0",
     "semver": "~7.3.0",
     "source-map": "~0.6.1",
-    "typescript": "~3.9.5"
+    "typescript": "~3.9.7"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.8.10",
+    "@microsoft/rush-stack-compiler-3.9": "0.4.21",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "0.8.0",
     "@types/heft-jest": "1.0.1",

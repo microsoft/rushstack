@@ -121,7 +121,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
     readJSONSync(localPath: string): JsonObject | undefined;
     replaceConfig(taskConfig: TTaskConfig): void;
     resolvePath(localPath: string): string;
-    readonly schema: JsonObject | undefined;
+    get schema(): JsonObject | undefined;
     setConfig(taskConfig: Partial<TTaskConfig>): void;
     taskConfig: TTaskConfig;
 }

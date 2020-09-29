@@ -12,8 +12,8 @@
     "declarationMap": true,
     "inlineSources": true,
     "experimentalDecorators": true,
-    "strictNullChecks": true,
-    "noUnusedLocals": true,
+    "strict": true,
+    "esModuleInterop": true,
     "types": [],
 
     "module": "commonjs",

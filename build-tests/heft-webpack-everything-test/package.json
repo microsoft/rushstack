@@ -16,7 +16,7 @@
     "file-loader": "~6.0.0",
     "tslint": "~5.20.1",
     "tslint-microsoft-contrib": "~6.2.0",
-    "typescript": "~3.9.5",
+    "typescript": "~3.9.7",
     "webpack": "~4.31.0"
   }
 }

@@ -8,7 +8,6 @@ import { BaseAction } from './BaseAction';
 import { DocumenterConfig } from '../documenters/DocumenterConfig';
 import { ExperimentalYamlDocumenter } from '../documenters/ExperimentalYamlDocumenter';
 
-import { ApiModel } from '@microsoft/api-extractor-model';
 import { FileSystem } from '@rushstack/node-core-library';
 import { MarkdownDocumenter } from '../documenters/MarkdownDocumenter';
 
@@ -42,17 +41,21 @@ export class GenerateAction extends BaseAction {
 
     const documenterConfig: DocumenterConfig = DocumenterConfig.loadFile(configFilePath);
 
-    const apiModel: ApiModel = this.buildApiModel();
+    const { apiModel, outputFolder } = this.buildApiModel();
 
     if (documenterConfig.configFile.outputTarget === 'markdown') {
-      const markdownDocumenter: MarkdownDocumenter = new MarkdownDocumenter(apiModel, documenterConfig);
-      markdownDocumenter.generateFiles(this.outputFolder);
+      const markdownDocumenter: MarkdownDocumenter = new MarkdownDocumenter({
+        apiModel,
+        documenterConfig,
+        outputFolder
+      });
+      markdownDocumenter.generateFiles();
     } else {
       const yamlDocumenter: ExperimentalYamlDocumenter = new ExperimentalYamlDocumenter(
         apiModel,
         documenterConfig
       );
-      yamlDocumenter.generateFiles(this.outputFolder);
+      yamlDocumenter.generateFiles(outputFolder);
     }
 
     return Promise.resolve();

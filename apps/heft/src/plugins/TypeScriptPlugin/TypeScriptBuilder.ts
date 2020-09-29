@@ -14,7 +14,7 @@ import {
   FileSystem
 } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
-import { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
+import { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.9';
 import {
   ExtendedTypeScript,
   IExtendedProgram,

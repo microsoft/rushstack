@@ -23,6 +23,6 @@
     "@types/node": "10.17.13",
     "eslint": "~7.2.0",
     "heft-example-plugin-01": "workspace:*",
-    "typescript": "~3.9.5"
+    "typescript": "~3.9.7"
   }
 }

@@ -4,8 +4,8 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import * as crypto from 'crypto';
-import * as colors from 'colors';
+import crypto from 'crypto';
+import colors from 'colors';
 import { FileSystem, AlreadyReportedError, Import } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
@@ -415,16 +415,11 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * @override
    */
   protected serialize(): string {
-    // Ensure that if any of the top-level properties are provided but empty that they are removed. We populate the object
+    // Ensure that if any of the top-level properties are provided but empty are removed. We populate the object
     // properties when we read the shrinkwrap but PNPM does not set these top-level properties unless they are present.
-    const shrinkwrapToSerialize: Partial<IPnpmShrinkwrapYaml> = { ...this._shrinkwrapJson };
-    for (const key of Object.keys(shrinkwrapToSerialize).filter((key) =>
-      shrinkwrapToSerialize.hasOwnProperty(key)
-    )) {
-      if (
-        typeof shrinkwrapToSerialize[key] === 'object' &&
-        Object.entries(shrinkwrapToSerialize[key] || {}).length === 0
-      ) {
+    const shrinkwrapToSerialize: { [key: string]: unknown } = { ...this._shrinkwrapJson };
+    for (const [key, value] of Object.entries(shrinkwrapToSerialize)) {
+      if (typeof value === 'object' && Object.entries(value || {}).length === 0) {
         delete shrinkwrapToSerialize[key];
       }
     }

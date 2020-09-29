@@ -30,15 +30,16 @@ class Launcher {
     return [nodeArg, this.targetScriptPathArg, ...remainderArgs];
   }
 
-  private static _copyProperties(dst: object, src: object): void {
-    for (var prop of Object.keys(src)) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private static _copyProperties(dst: any, src: any): void {
+    for (const prop of Object.keys(src)) {
       dst[prop] = src[prop];
     }
   }
 
   private _sendIpcTraceBatch(): void {
     if (this._ipcTraceRecordsBatch.length > 0) {
-      const batch = [...this._ipcTraceRecordsBatch];
+      const batch: IIpcTraceRecord[] = [...this._ipcTraceRecordsBatch];
       this._ipcTraceRecordsBatch.length = 0;
 
       process.send!({
@@ -49,26 +50,28 @@ class Launcher {
   }
 
   public installHook(): void {
-    const realRequire = moduleApi.Module.prototype.require;
+    const realRequire: NodeRequireFunction = moduleApi.Module.prototype.require;
 
     const importedModules: Set<unknown> = this._importedModules; // for closure
     const importedModulePaths: Set<string> = this._importedModulePaths; // for closure
     const ipcTraceRecordsBatch: IIpcTraceRecord[] = this._ipcTraceRecordsBatch; // for closure
     const sendIpcTraceBatch: () => void = this._sendIpcTraceBatch.bind(this); // for closure
 
-    function hookedRequire(moduleName: string): unknown {
+    function hookedRequire(this: NodeModule, moduleName: string): unknown {
       // NOTE: The "this" pointer is the calling NodeModule, so we rely on closure
       // variable here.
       const callingModuleInfo: NodeModule = this;
 
-      const importedModule: unknown = realRequire.apply(callingModuleInfo, arguments);
+      // Paranoidly use "arguments" in case some implementor passes additional undocumented arguments
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const importedModule: unknown = (realRequire as any).apply(callingModuleInfo, arguments);
 
       if (!importedModules.has(importedModule)) {
         importedModules.add(importedModule);
 
         // Find the info for the imported module
         let importedModuleInfo: NodeModule | undefined = undefined;
-        const children = callingModuleInfo.children || [];
+        const children: NodeModule[] = callingModuleInfo.children || [];
         for (const child of children) {
           if (child.exports === importedModule) {
             importedModuleInfo = child;

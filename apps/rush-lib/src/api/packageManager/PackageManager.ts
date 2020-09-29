@@ -22,7 +22,7 @@ export abstract class PackageManager {
    */
   public readonly version: string;
 
-  protected _shrinkwrapFilename: string;
+  protected _shrinkwrapFilename!: string;
 
   /** @internal */
   protected constructor(version: string, packageManager: PackageManagerName) {
