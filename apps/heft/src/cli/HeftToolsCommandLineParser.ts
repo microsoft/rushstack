@@ -32,8 +32,6 @@ import { ICustomActionOptions, CustomAction } from './actions/CustomAction';
 import { Constants } from '../utilities/Constants';
 import { SyncHook } from 'tapable';
 import { IHeftLifecycle, HeftLifecycleHooks } from '../pluginFramework/HeftLifecycle';
-import { RigConfig } from '@rushstack/rig-package';
-import { CoreConfigFiles } from '../utilities/CoreConfigFiles';
 
 export class HeftToolsCommandLineParser extends CommandLineParser {
   private _terminalProvider: ConsoleTerminalProvider;
@@ -153,6 +151,16 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
 
     this._normalizeCwd();
 
+    await this._heftConfiguration.checkForRigAsync();
+
+    if (this._heftConfiguration.rigConfig.rigFound) {
+      const rigProfileFolder: string = await this._heftConfiguration.rigConfig.getResolvedProfileFolderAsync();
+      const relativeRigFolderPath: string = path
+        .relative(this._heftConfiguration.buildFolder, rigProfileFolder)
+        .replace(/\\/g, '/');
+      this._terminal.writeLine(`Using rig configuration from ./${relativeRigFolderPath}"`);
+    }
+
     await this._initializePluginsAsync();
 
     const heftLifecycle: IHeftLifecycle = {
@@ -170,15 +178,6 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     process.exitCode = 1;
 
     try {
-      const rigConfig: RigConfig = await CoreConfigFiles.getRigConfigAsync(this._heftConfiguration);
-      if (rigConfig.rigFound) {
-        const rigProfileFolder: string = await rigConfig.getResolvedProfileFolderAsync();
-        const relativeRigFolderPath: string = path
-          .relative(this._heftConfiguration.buildFolder, rigProfileFolder)
-          .replace(/\\/g, '/');
-        this._terminal.writeLine(`Using rig configuration from ./${relativeRigFolderPath}"`);
-      }
-
       await super.onExecute();
       await this._metricsCollector.flushAndTeardownAsync();
     } catch (e) {

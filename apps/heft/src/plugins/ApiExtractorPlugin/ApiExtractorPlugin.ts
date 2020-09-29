@@ -11,7 +11,6 @@ import { ApiExtractorRunner } from './ApiExtractorRunner';
 import { IBuildStageContext, IBundleSubstage } from '../../stages/BuildStage';
 import { CoreConfigFiles } from '../../utilities/CoreConfigFiles';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
-import { RigConfig } from '@rushstack/rig-package';
 
 const PLUGIN_NAME: string = 'ApiExtractorPlugin';
 const CONFIG_FILE_LOCATION: string = './config/api-extractor.json';
@@ -67,13 +66,13 @@ export class ApiExtractorPlugin implements IHeftPlugin {
     const { heftConfiguration, buildFolder, debugMode, watchMode, production } = options;
 
     const logger: ScopedLogger = heftSession.requestScopedLogger('API Extractor Plugin');
-    const rigConfig: RigConfig = await CoreConfigFiles.getRigConfigAsync(heftConfiguration);
+
     const apiExtractorTaskConfiguration:
       | IApiExtractorPluginConfiguration
       | undefined = await CoreConfigFiles.apiExtractorTaskConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
       logger.terminal,
       heftConfiguration.buildFolder,
-      rigConfig
+      heftConfiguration.rigConfig
     );
 
     if (watchMode) {

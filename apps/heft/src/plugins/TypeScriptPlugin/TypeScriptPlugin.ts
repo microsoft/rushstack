@@ -20,7 +20,6 @@ import { JestTypeScriptDataFile } from '../JestPlugin/JestTypeScriptDataFile';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { ICleanStageContext, ICleanStageProperties } from '../../stages/CleanStage';
 import { CoreConfigFiles } from '../../utilities/CoreConfigFiles';
-import { RigConfig } from '@rushstack/rig-package';
 
 const PLUGIN_NAME: string = 'typescript';
 
@@ -136,12 +135,11 @@ export class TypeScriptPlugin implements IHeftPlugin {
       | undefined = this._typeScriptConfigurationFileCache.get(buildFolder);
 
     if (!typescriptConfigurationFileCacheEntry) {
-      const rigConfig: RigConfig = await CoreConfigFiles.getRigConfigAsync(heftConfiguration);
       typescriptConfigurationFileCacheEntry = {
         configurationFile: await CoreConfigFiles.typeScriptConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
           terminal,
           buildFolder,
-          rigConfig
+          heftConfiguration.rigConfig
         )
       };
 

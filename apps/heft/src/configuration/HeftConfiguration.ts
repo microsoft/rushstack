@@ -2,8 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Terminal, ITerminalProvider, IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
+import {
+  Terminal,
+  ITerminalProvider,
+  IPackageJson,
+  PackageJsonLookup,
+  InternalError
+} from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
+import { RigConfig } from '@rushstack/rig-package';
 
 import { TaskPackageResolver, ITaskPackageResolution } from '../utilities/TaskPackageResolver';
 import { Constants } from '../utilities/Constants';
@@ -61,6 +68,7 @@ export class HeftConfiguration {
   private _projectHeftDataFolder: string | undefined;
   private _projectConfigFolder: string | undefined;
   private _buildCacheFolder: string | undefined;
+  private _rigConfig: RigConfig | undefined;
   private _globalTerminal: Terminal;
   private _terminalProvider: ITerminalProvider;
 
@@ -108,6 +116,18 @@ export class HeftConfiguration {
     }
 
     return this._buildCacheFolder;
+  }
+
+  /**
+   * The rig.json configuration for this project, if present.
+   */
+  public get rigConfig(): RigConfig {
+    if (!this._rigConfig) {
+      throw new InternalError(
+        'The rigConfig cannot be accessed until HeftConfiguration.checkForRigAsync() has been called'
+      );
+    }
+    return this._rigConfig;
   }
 
   /**
@@ -159,6 +179,15 @@ export class HeftConfiguration {
   }
 
   private constructor() {}
+
+  /**
+   * Performs the search for rig.json and initializes the `HeftConfiguration.rigConfig` object.
+   */
+  public async checkForRigAsync(): Promise<void> {
+    if (!this._rigConfig) {
+      this._rigConfig = await RigConfig.loadForProjectFolderAsync({ projectFolderPath: this._buildFolder });
+    }
+  }
 
   /**
    * @internal
