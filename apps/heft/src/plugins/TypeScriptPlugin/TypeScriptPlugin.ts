@@ -21,6 +21,7 @@ import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { ICleanStageContext, ICleanStageProperties } from '../../stages/CleanStage';
 import { CoreConfigFiles } from '../../utilities/CoreConfigFiles';
 import { RigConfig } from '@rushstack/rig-package';
+import { ISharedCopyStaticAssetsConfiguration } from '../CopyStaticAssetsPlugin';
 
 const PLUGIN_NAME: string = 'typescript';
 
@@ -76,17 +77,24 @@ export interface ISharedTypeScriptConfiguration {
   emitFolderNameForTests?: string;
 
   /**
-   * Set this to change the maximum number of file handles that will be opened concurrently for writing.
-   * The default is 50.
+   * Configures additional file types that should be copied into the TypeScript compiler's emit folders, for example
+   * so that these files can be resolved by import statements.
    */
-  maxWriteParallelism: number;
+  staticAssetsToCopy?: ISharedCopyStaticAssetsConfiguration;
 }
 
 export interface ITypeScriptConfigurationJson extends ISharedTypeScriptConfiguration {
   disableTslint?: boolean;
+  maxWriteParallelism: number | undefined;
 }
 
 interface ITypeScriptConfiguration extends ISharedTypeScriptConfiguration {
+  /**
+   * Set this to change the maximum number of file handles that will be opened concurrently for writing.
+   * The default is 50.
+   */
+  maxWriteParallelism: number;
+
   tsconfigPaths: string[];
   isLintingEnabled: boolean | undefined;
 }
