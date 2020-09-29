@@ -8,7 +8,6 @@ import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as ssri from 'ssri';
-const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
 import {
   JsonFile,
   Text,
@@ -36,6 +35,8 @@ import { PurgeManager } from '../PurgeManager';
 import { LinkManagerFactory } from '../LinkManagerFactory';
 import { BaseLinkManager } from '../base/BaseLinkManager';
 import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from '../pnpm/PnpmShrinkwrapFile';
+
+const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
 
 /**
  * The "noMtime" flag is new in tar@4.4.1 and not available yet for \@types/tar.

@@ -10,7 +10,7 @@ import { EOL } from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 
-import { IPackageJson, JsonFile, FileConstants, Text } from '@rushstack/node-core-library';
+import { IPackageJson, JsonFile, FileConstants, Text, Enum } from '@rushstack/node-core-library';
 
 import { IChangeInfo, ChangeType } from '../api/ChangeManagement';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
@@ -24,15 +24,6 @@ import { DependencySpecifier, DependencySpecifierType } from './DependencySpecif
 export interface IChangeInfoHash {
   [key: string]: IChangeInfo;
 }
-
-const CHANGE_TYPE_NAME_MAP: { [name: string]: ChangeType } = {
-  none: ChangeType.none,
-  dependency: ChangeType.dependency,
-  hotfix: ChangeType.hotfix,
-  patch: ChangeType.patch,
-  minor: ChangeType.minor,
-  major: ChangeType.major
-};
 
 export class PublishUtilities {
   /**
@@ -518,10 +509,7 @@ export class PublishUtilities {
 
     // If the given change does not have a changeType, derive it from the "type" string.
     if (change.changeType === undefined) {
-      change.changeType = CHANGE_TYPE_NAME_MAP[change.type!];
-      if (change.changeType === undefined) {
-        throw new Error(`Unknown change type "${change.type}"`);
-      }
+      change.changeType = Enum.tryGetValueByKey(ChangeType, change.type!);
     }
 
     if (!allChanges[packageName]) {

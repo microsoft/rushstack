@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { IEventHooksJson } from './RushConfiguration';
+import { Enum } from '@rushstack/node-core-library';
 
 /**
  * Events happen during Rush runs.
@@ -26,13 +27,6 @@ export enum Event {
   postRushBuild = 4
 }
 
-const EVENT_NAME_MAPPING: { [name: string]: Event } = {
-  preRushInstall: Event.preRushInstall,
-  postRushInstall: Event.postRushInstall,
-  preRushBuild: Event.preRushBuild,
-  postRushBuild: Event.postRushBuild
-};
-
 /**
  * This class represents Rush event hooks configured for this repo.
  * Hooks are customized script actions that Rush executes when specific events occur.
@@ -48,9 +42,9 @@ export class EventHooks {
   public constructor(eventHooksJson: IEventHooksJson) {
     this._hooks = new Map<Event, string[]>();
     for (const [name, eventHooks] of Object.entries(eventHooksJson)) {
-      const eventName: Event | undefined = EVENT_NAME_MAPPING[name];
+      const eventName: Event | undefined = Enum.tryGetValueByKey(Event, name);
       if (eventName) {
-        this._hooks.set(eventName, eventHooks || []);
+        this._hooks.set(eventName, [...eventHooks] || []);
       }
     }
   }

@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { IPackageJson, FileConstants, Import } from '@rushstack/node-core-library';
+import { IPackageJson, FileConstants, Import, Enum } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
-import { LockStepVersionPolicy, VersionPolicy } from '../../api/VersionPolicy';
+import { BumpType, LockStepVersionPolicy } from '../../api/VersionPolicy';
 import { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { VersionControl } from '../../utilities/VersionControl';
@@ -122,7 +122,7 @@ export class VersionAction extends BaseRushAction {
       const tempBranch: string = 'version/bump-' + new Date().getTime();
       await versionManager.bumpAsync(
         this._versionPolicy.value,
-        this._overwriteBump.value ? VersionPolicy.tryParseBumpType(this._overwriteBump.value) : undefined,
+        this._overwriteBump.value ? Enum.getValueByKey(BumpType, this._overwriteBump.value) : undefined,
         this._prereleaseIdentifier.value,
         true
       );
@@ -186,7 +186,7 @@ export class VersionAction extends BaseRushAction {
       throw new Error('Please choose --bump or --ensure-version-policy but not together.');
     }
 
-    if (this._overwriteBump.value && !VersionPolicy.tryParseBumpType(this._overwriteBump.value)) {
+    if (this._overwriteBump.value && !Enum.tryGetValueByKey(BumpType, this._overwriteBump.value)) {
       throw new Error(
         'The value of override-bump is not valid.  ' +
           'Valid values include prerelease, patch, preminor, minor, and major'
