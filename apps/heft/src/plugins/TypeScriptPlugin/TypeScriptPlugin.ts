@@ -77,7 +77,8 @@ export interface ISharedTypeScriptConfiguration {
   emitFolderNameForTests?: string;
 
   /**
-   * Describes the way files should be statically coped from src to TS output folders.
+   * Configures additional file types that should be copied into the TypeScript compiler's emit folders, for example
+   * so that these files can be resolved by import statements.
    */
   staticAssetsToCopy?: ISharedCopyStaticAssetsConfiguration;
 }

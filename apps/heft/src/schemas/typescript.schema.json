@@ -59,7 +59,7 @@
     },
 
     "staticAssetsToCopy": {
-      "description": "Describes the way files should be statically coped from src to TS output folders.",
+      "description": "Configures additional file types that should be copied into the TypeScript compiler's emit folders, for example so that these files can be resolved by import statements.",
       "type": "object",
 
       "additionalProperties": false,
