@@ -329,7 +329,7 @@ export class ExtractorConfig {
     const packageFolder: string | undefined = packageJsonLookup.tryGetPackageFolderFor(startingFolder);
 
     // If there is no package, then just use the starting folder
-    const baseFolder: string = packageFolder ? packageFolder : startingFolder;
+    const baseFolder: string = packageFolder || startingFolder;
 
     let projectFolderLookupToken: string | undefined = undefined;
 
