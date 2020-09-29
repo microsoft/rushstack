@@ -591,6 +591,8 @@ export class PackageNameParser {
 
 // @public
 export class Path {
+    static convertToBackslashes(inputPath: string): string;
+    static convertToSlashes(inputPath: string): string;
     static isEqual(path1: string, path2: string): boolean;
     static isUnder(childPath: string, parentFolderPath: string): boolean;
     static isUnderOrEqual(childPath: string, parentFolderPath: string): boolean;

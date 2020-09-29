@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import { Text } from './Text';
 
 /**
  * Common operations for manipulating file and directory paths.
@@ -73,5 +74,25 @@ export class Path {
     } else {
       return path.resolve(longPath);
     }
+  }
+
+  /**
+   * Replaces Windows-style backslashes with POSIX-style slashes.
+   *
+   * @remarks
+   * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
+   */
+  public static convertToSlashes(inputPath: string): string {
+    return Text.replaceAll(inputPath, '\\', '/');
+  }
+
+  /**
+   * Replaces POSIX-style slashes with Windows-style backslashes
+   *
+   * @remarks
+   * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
+   */
+  public static convertToBackslashes(inputPath: string): string {
+    return Text.replaceAll(inputPath, '/', '\\');
   }
 }

@@ -296,7 +296,7 @@ export class ExtractorConfig {
       throw new InternalError('Expected absolute path: ' + absolutePath);
     }
     if (Path.isUnderOrEqual(absolutePath, this.projectFolder)) {
-      return path.relative(this.projectFolder, absolutePath).replace(/\\/g, '/');
+      return Path.convertToSlashes(path.relative(this.projectFolder, absolutePath));
     }
     return absolutePath;
   }

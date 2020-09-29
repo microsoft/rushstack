@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import { Path } from '@rushstack/node-core-library';
 
 import { IChangelog } from '../../api/Changelog';
 import { ChangeFiles } from '../ChangeFiles';
@@ -18,7 +19,7 @@ describe('ChangeFiles', () => {
     it('returns correctly when there is one change file', () => {
       const changesPath: string = path.join(__dirname, 'leafChange');
       const changeFiles: ChangeFiles = new ChangeFiles(changesPath);
-      const expectedPath: string = path.join(changesPath, 'change1.json').replace(/\\/g, '/');
+      const expectedPath: string = Path.convertToSlashes(path.join(changesPath, 'change1.json'));
       expect(changeFiles.getFiles()).toEqual([expectedPath]);
     });
 
@@ -34,9 +35,9 @@ describe('ChangeFiles', () => {
       const files: string[] = changeFiles.getFiles();
       expect(files).toHaveLength(3);
 
-      const expectedPathA: string = path.join(changesPath, '@ms', 'a', 'changeA.json').replace(/\\/g, '/');
-      const expectedPathB: string = path.join(changesPath, '@ms', 'b', 'changeB.json').replace(/\\/g, '/');
-      const expectedPathC: string = path.join(changesPath, 'changeC.json').replace(/\\/g, '/');
+      const expectedPathA: string = Path.convertToSlashes(path.join(changesPath, '@ms', 'a', 'changeA.json'));
+      const expectedPathB: string = Path.convertToSlashes(path.join(changesPath, '@ms', 'b', 'changeB.json'));
+      const expectedPathC: string = Path.convertToSlashes(path.join(changesPath, 'changeC.json'));
       expect(files).toContain(expectedPathA);
       expect(files).toContain(expectedPathB);
       expect(files).toContain(expectedPathC);

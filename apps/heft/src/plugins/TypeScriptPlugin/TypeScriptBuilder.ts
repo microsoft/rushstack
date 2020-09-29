@@ -11,7 +11,8 @@ import {
   IPackageJson,
   InternalError,
   ITerminalProvider,
-  FileSystem
+  FileSystem,
+  Path
 } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
 import { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
@@ -188,7 +189,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     // to delete the cache when switching modes, or else maintain two separate cache folders.
     this._useIncrementalProgram = this._capabilities.incrementalProgram && !this._configuration.watchMode;
 
-    this._configuration.buildCacheFolder = this._configuration.buildCacheFolder.replace(/\\/g, '/');
+    this._configuration.buildCacheFolder = Path.convertToSlashes(this._configuration.buildCacheFolder);
     this._tslintConfigFilePath = path.resolve(this._configuration.buildFolder, 'tslint.json');
     this._eslintConfigFilePath = path.resolve(this._configuration.buildFolder, '.eslintrc.js');
     this._eslintEnabled = this._tslintEnabled =
@@ -794,9 +795,10 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     this._moduleKindsToEmit.push({
       outFolderPath: outFolderPath,
       moduleKind,
-      cacheOutFolderPath: path
-        .resolve(this._configuration.buildCacheFolder, outFolderName)
-        .replace(/\\/g, '/'),
+      cacheOutFolderPath: Path.convertToSlashes(
+        path.resolve(this._configuration.buildCacheFolder, outFolderName)
+      ),
+
       isPrimary
     });
 

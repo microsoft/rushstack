@@ -4,7 +4,13 @@
 import * as nodeJsPath from 'path';
 
 import { ConfigurationFile, PathResolutionMethod, InheritanceType } from '../ConfigurationFile';
-import { FileSystem, JsonFile, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  JsonFile,
+  Path,
+  StringBufferTerminalProvider,
+  Terminal
+} from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
 
 describe('ConfigurationFile', () => {
@@ -15,7 +21,7 @@ describe('ConfigurationFile', () => {
   beforeEach(() => {
     const projectRoot: string = nodeJsPath.resolve(__dirname, '..', '..');
     const formatPathForLogging: (path: string) => string = (path: string) =>
-      `<project root>/${nodeJsPath.relative(projectRoot, path).replace(/\\/g, '/')}`;
+      `<project root>/${Path.convertToSlashes(nodeJsPath.relative(projectRoot, path))}`;
     jest.spyOn(ConfigurationFile, '_formatPathForLogging').mockImplementation(formatPathForLogging);
     jest.spyOn(JsonFile, '_formatPathForError').mockImplementation(formatPathForLogging);
 

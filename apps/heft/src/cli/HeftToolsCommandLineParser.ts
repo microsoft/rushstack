@@ -11,7 +11,8 @@ import {
   Terminal,
   InternalError,
   ConsoleTerminalProvider,
-  AlreadyReportedError
+  AlreadyReportedError,
+  Path
 } from '@rushstack/node-core-library';
 import { ArgumentParser } from 'argparse';
 
@@ -155,9 +156,9 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
 
     if (this._heftConfiguration.rigConfig.rigFound) {
       const rigProfileFolder: string = await this._heftConfiguration.rigConfig.getResolvedProfileFolderAsync();
-      const relativeRigFolderPath: string = path
-        .relative(this._heftConfiguration.buildFolder, rigProfileFolder)
-        .replace(/\\/g, '/');
+      const relativeRigFolderPath: string = Path.convertToSlashes(
+        path.relative(this._heftConfiguration.buildFolder, rigProfileFolder)
+      );
       this._terminal.writeLine(`Using rig configuration from ./${relativeRigFolderPath}"`);
     }
 
