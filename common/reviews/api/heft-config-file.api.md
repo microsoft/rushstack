@@ -29,7 +29,6 @@ export interface IConfigurationFileOptions<TConfigurationFile> {
 
 // @beta (undocumented)
 export interface ICustomPropertyInheritance<TObject> extends IPropertyInheritance<InheritanceType.custom> {
-    // (undocumented)
     inheritanceFunction: PropertyInheritanceCustomFunction<TObject>;
 }
 

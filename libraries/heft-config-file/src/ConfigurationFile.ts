@@ -106,6 +106,11 @@ export interface IPropertyInheritance<TInheritanceType extends InheritanceType> 
  * @beta
  */
 export interface ICustomPropertyInheritance<TObject> extends IPropertyInheritance<InheritanceType.custom> {
+  /**
+   * Provides a custom inheritance function. This function takes two arguments: the first is the
+   * child file's object, and the second is the parent file's object. The function should return
+   * the resulting combined object.
+   */
   inheritanceFunction: PropertyInheritanceCustomFunction<TObject>;
 }
 
