@@ -34,8 +34,8 @@ export const enum ConsoleMessageId {
 export class Extractor {
     static invoke(extractorConfig: ExtractorConfig, options?: IExtractorInvokeOptions): ExtractorResult;
     static loadConfigAndInvoke(configFilePath: string, options?: IExtractorInvokeOptions): ExtractorResult;
-    static readonly packageName: string;
-    static readonly version: string;
+    static get packageName(): string;
+    static get version(): string;
 }
 
 // @public
@@ -93,8 +93,10 @@ export class ExtractorMessage {
     formatMessageWithLocation(workingPackageFolderPath: string | undefined): string;
     // (undocumented)
     formatMessageWithoutLocation(): string;
-    handled: boolean;
-    logLevel: ExtractorLogLevel;
+    get handled(): boolean;
+    set handled(value: boolean);
+    get logLevel(): ExtractorLogLevel;
+    set logLevel(value: ExtractorLogLevel);
     readonly messageId: tsdoc.TSDocMessageId | ExtractorMessageId | ConsoleMessageId | string;
     readonly properties: IExtractorMessageProperties;
     readonly sourceFileColumn: number | undefined;
