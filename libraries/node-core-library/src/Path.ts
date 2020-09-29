@@ -43,4 +43,35 @@ export class Path {
     const relativePath: string = path.relative(childPath, parentFolderPath);
     return relativePath === '' || Path._relativePathRegex.test(relativePath);
   }
+
+  /**
+   * Returns true if `path1` and `path2` refer to the same underlying path.
+   *
+   * @remarks
+   *
+   * The comparison is performed using `path.relative()`.
+   */
+  public static isEqual(path1: string, path2: string): boolean {
+    return path.relative(path1, path2) === '';
+  }
+
+  /**
+   * If `longPath` is under `parentFolderPath`, then this returns a shortened relative path.
+   * Otherwise, it converts it to an absolute path.
+   *
+   * @remarks
+   * This is useful when displaying a file path that is typically expected to be under the current
+   * working directory; in the unusual case where it is in another folder, the full path is interesting.
+   */
+  public static makeRelativeOnlyIfUnder(longPath: string, parentFolderPath: string): string {
+    // Same logic as Path.isUnderOrEqual()
+    const relativePath: string = path.relative(longPath, parentFolderPath);
+    const isUnderOrEqual: boolean = relativePath === '' || Path._relativePathRegex.test(relativePath);
+
+    if (isUnderOrEqual) {
+      return relativePath;
+    } else {
+      return path.resolve(longPath);
+    }
+  }
 }

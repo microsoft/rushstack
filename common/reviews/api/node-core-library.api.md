@@ -591,8 +591,10 @@ export class PackageNameParser {
 
 // @public
 export class Path {
+    static isEqual(path1: string, path2: string): boolean;
     static isUnder(childPath: string, parentFolderPath: string): boolean;
     static isUnderOrEqual(childPath: string, parentFolderPath: string): boolean;
+    static makeRelativeOnlyIfUnder(longPath: string, parentFolderPath: string): string;
     }
 
 // @public
