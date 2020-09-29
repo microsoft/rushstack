@@ -111,8 +111,8 @@ export enum ColorValue {
 // @beta
 export class ConsoleTerminalProvider implements ITerminalProvider {
     constructor(options?: Partial<IConsoleTerminalProviderOptions>);
-    readonly eolCharacter: string;
-    readonly supportsColor: boolean;
+    get eolCharacter(): string;
+    get supportsColor(): boolean;
     verboseEnabled: boolean;
     write(data: string, severity: TerminalProviderSeverity): void;
 }
@@ -503,7 +503,7 @@ export class JsonSchema {
     ensureCompiled(): void;
     static fromFile(filename: string, options?: IJsonSchemaFromFileOptions): JsonSchema;
     static fromLoadedObject(schemaObject: JsonObject): JsonSchema;
-    readonly shortName: string;
+    get shortName(): string;
     validateObject(jsonObject: JsonObject, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void;
     validateObjectWithCallback(jsonObject: JsonObject, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void;
     }
@@ -529,10 +529,10 @@ export type LegacyCallback<TResult, TError> = (error: TError | null | undefined,
 // @public
 export class LockFile {
     static acquire(resourceFolder: string, resourceName: string, maxWaitMs?: number): Promise<LockFile>;
-    readonly dirtyWhenAcquired: boolean;
-    readonly filePath: string;
+    get dirtyWhenAcquired(): boolean;
+    get filePath(): string;
     static getLockFilePath(resourceFolder: string, resourceName: string, pid?: number): string;
-    readonly isReleased: boolean;
+    get isReleased(): boolean;
     release(): void;
     static tryAcquire(resourceFolder: string, resourceName: string): LockFile | undefined;
     }
@@ -556,7 +556,7 @@ export const enum NewlineKind {
 export class PackageJsonLookup {
     constructor(parameters?: IPackageJsonLookupParameters);
     clearCache(): void;
-    static readonly instance: PackageJsonLookup;
+    static get instance(): PackageJsonLookup;
     loadNodePackageJson(jsonFilename: string): INodePackageJson;
     static loadOwnPackageJson(dirnameOfCaller: string): IPackageJson;
     loadPackageJson(jsonFilename: string): IPackageJson;
@@ -620,9 +620,9 @@ export class ProtectableMap<K, V> {
     forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void;
     get(key: K): V | undefined;
     has(key: K): boolean;
-    readonly protectedView: Map<K, V>;
+    get protectedView(): Map<K, V>;
     set(key: K, value: V): this;
-    readonly size: number;
+    get size(): number;
 }
 
 // @public
@@ -639,12 +639,12 @@ export class Sort {
 // @beta
 export class StringBufferTerminalProvider implements ITerminalProvider {
     constructor(supportsColor?: boolean);
-    readonly eolCharacter: string;
+    get eolCharacter(): string;
     getErrorOutput(options?: IStringBufferOutputOptions): string;
     getOutput(options?: IStringBufferOutputOptions): string;
     getVerbose(options?: IStringBufferOutputOptions): string;
     getWarningOutput(options?: IStringBufferOutputOptions): string;
-    readonly supportsColor: boolean;
+    get supportsColor(): boolean;
     write(data: string, severity: TerminalProviderSeverity): void;
 }
 
