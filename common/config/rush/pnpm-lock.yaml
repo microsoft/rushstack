@@ -1859,11 +1859,13 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.0.3
       typescript: 3.0.3
     devDependencies:
+      '@microsoft/rush-stack-compiler-3.9': 'link:../rush-stack-compiler-3.9'
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
       '@rushstack/heft': 0.8.0
       '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
+      '@microsoft/rush-stack-compiler-3.9': 'workspace:*'
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.8.0
@@ -1887,11 +1889,13 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.1.6
       typescript: 3.1.6
     devDependencies:
+      '@microsoft/rush-stack-compiler-3.9': 'link:../rush-stack-compiler-3.9'
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
       '@rushstack/heft': 0.8.0
       '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
+      '@microsoft/rush-stack-compiler-3.9': 'workspace:*'
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.8.0
@@ -1915,11 +1919,13 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.2.4
       typescript: 3.2.4
     devDependencies:
+      '@microsoft/rush-stack-compiler-3.9': 'link:../rush-stack-compiler-3.9'
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
       '@rushstack/heft': 0.8.0
       '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
+      '@microsoft/rush-stack-compiler-3.9': 'workspace:*'
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.8.0
@@ -1943,11 +1949,13 @@ importers:
       tslint-microsoft-contrib: 6.2.0_5de1f8fa14d12d0f8943ae8c5c9e10ce
       typescript: 3.3.4000
     devDependencies:
+      '@microsoft/rush-stack-compiler-3.9': 'link:../rush-stack-compiler-3.9'
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
       '@rushstack/heft': 0.8.0
       '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
+      '@microsoft/rush-stack-compiler-3.9': 'workspace:*'
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.8.0
@@ -1971,11 +1979,13 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.4.5
       typescript: 3.4.5
     devDependencies:
+      '@microsoft/rush-stack-compiler-3.9': 'link:../rush-stack-compiler-3.9'
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
       '@rushstack/heft': 0.8.0
       '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
+      '@microsoft/rush-stack-compiler-3.9': 'workspace:*'
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.8.0
@@ -1999,11 +2009,13 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.5.3
       typescript: 3.5.3
     devDependencies:
+      '@microsoft/rush-stack-compiler-3.9': 'link:../rush-stack-compiler-3.9'
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
       '@rushstack/heft': 0.8.0
       '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
+      '@microsoft/rush-stack-compiler-3.9': 'workspace:*'
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.8.0
@@ -2027,11 +2039,13 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.6.5
       typescript: 3.6.5
     devDependencies:
+      '@microsoft/rush-stack-compiler-3.9': 'link:../rush-stack-compiler-3.9'
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
       '@rushstack/heft': 0.8.0
       '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
+      '@microsoft/rush-stack-compiler-3.9': 'workspace:*'
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.8.0
@@ -2055,11 +2069,13 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.7.5
       typescript: 3.7.5
     devDependencies:
+      '@microsoft/rush-stack-compiler-3.9': 'link:../rush-stack-compiler-3.9'
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
       '@rushstack/heft': 0.8.0
       '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
+      '@microsoft/rush-stack-compiler-3.9': 'workspace:*'
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.8.0
@@ -2083,11 +2099,13 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.8.3
       typescript: 3.8.3
     devDependencies:
+      '@microsoft/rush-stack-compiler-3.9': 'link:../rush-stack-compiler-3.9'
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
       '@rushstack/heft': 0.8.0
       '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
+      '@microsoft/rush-stack-compiler-3.9': 'workspace:*'
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.8.0
@@ -2111,11 +2129,13 @@ importers:
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.9.7
       typescript: 3.9.7
     devDependencies:
+      '@microsoft/rush-stack-compiler-3.9': 0.4.21
       '@microsoft/rush-stack-compiler-shared': 'link:../rush-stack-compiler-shared'
       '@rushstack/heft': 0.8.0
       '@rushstack/pre-compile-hardlink-or-copy-plugin': 'link:../../heft-plugins/pre-compile-hardlink-or-copy-plugin'
     specifiers:
       '@microsoft/api-extractor': 'workspace:*'
+      '@microsoft/rush-stack-compiler-3.9': 0.4.21
       '@microsoft/rush-stack-compiler-shared': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.8.0
