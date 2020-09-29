@@ -12,9 +12,9 @@ export interface IApiExtractorRunnerConfiguration {
   /**
    * The path to the Extractor's config file ("api-extractor.json")
    *
-   * For example, ./config/api-extractor.json
+   * For example, /home/username/code/repo/project/config/api-extractor.json
    */
-  configFileLocation: string;
+  apiExtractorJsonFilePath: string;
 
   /**
    * The path to the @microsoft/api-extractor package
@@ -57,7 +57,7 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
 
     const apiExtractor: typeof TApiExtractor = require(this._configuration.apiExtractorPackagePath);
 
-    const configObjectFullPath: string = this._configuration.configFileLocation;
+    const configObjectFullPath: string = this._configuration.apiExtractorJsonFilePath;
     const configObject: TApiExtractor.IConfigFile = apiExtractor.ExtractorConfig.loadFile(
       configObjectFullPath
     );

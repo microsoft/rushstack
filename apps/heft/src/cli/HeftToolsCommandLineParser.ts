@@ -159,7 +159,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       const relativeRigFolderPath: string = Path.convertToSlashes(
         path.relative(this._heftConfiguration.buildFolder, rigProfileFolder)
       );
-      this._terminal.writeLine(`Using rig configuration from ./${relativeRigFolderPath}"`);
+      this._terminal.writeLine(`Using rig configuration from ./${relativeRigFolderPath}`);
     }
 
     await this._initializePluginsAsync();

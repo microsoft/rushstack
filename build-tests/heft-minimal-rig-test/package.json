@@ -9,5 +9,8 @@
   },
   "dependencies": {
     "typescript": "~3.9.5"
+  },
+  "devDependencies": {
+    "@microsoft/api-extractor": "workspace:*"
   }
 }

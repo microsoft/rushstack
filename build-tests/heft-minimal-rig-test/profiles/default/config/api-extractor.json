@@ -3,8 +3,7 @@
 
   "mainEntryPointFilePath": "<projectFolder>/lib/index.d.ts",
   "apiReport": {
-    "enabled": true,
-    "reportFolder": "<projectFolder>/etc"
+    "enabled": false
   },
   "docModel": {
     "enabled": true
@@ -12,5 +11,6 @@
   "dtsRollup": {
     "enabled": true,
     "betaTrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>.d.ts"
-  }
+  },
+  "tsdocMetadata": { "enabled": false }
 }
