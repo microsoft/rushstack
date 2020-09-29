@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Add Path.isEqual() and Path.makeRelativeOnlyIfUnder()",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
