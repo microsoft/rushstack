@@ -303,7 +303,18 @@ export class ExtractorConfig {
 
   /**
    * Searches for the api-extractor.json config file associated with the specified starting folder,
-   * and loads the file if found.
+   * and loads the file if found.  This lookup supports
+   * {@link https://www.npmjs.com/package/@rushstack/rig-package | rig packages}.
+   *
+   * @remarks
+   * The search will first look for a package.json file in a parent folder of the starting folder;
+   * if found, that will be used as the base folder instead of the starting folder.  If the config
+   * file is not found in `<baseFolder>/api-extractor.json` or `<baseFolder>/config/api-extractor.json`,
+   * then `<baseFolder/config/rig.json` will be checked to see whether a
+   * {@link https://www.npmjs.com/package/@rushstack/rig-package | rig package} is referenced; if so then
+   * the rig's api-extractor.json file will be used instead.  If a config file is found, it will be loaded
+   * and returned with the `IExtractorConfigPrepareOptions` object. Otherwise, `undefined` is returned
+   * to indicate that API Extractor does not appear to be configured for the specified folder.
    *
    * @returns An options object that can be passed to {@link ExtractorConfig.prepare}, or `undefined`
    * if not api-extractor.json file was found.
