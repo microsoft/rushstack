@@ -2,11 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Terminal, ITerminalProvider, IPackageJson } from '@rushstack/node-core-library';
+import { Terminal, ITerminalProvider, IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
 
 import { TaskPackageResolver, ITaskPackageResolution } from '../utilities/TaskPackageResolver';
-import { Utilities } from '../utilities/Utilities';
 import { Constants } from '../utilities/Constants';
 
 /**
@@ -129,14 +128,14 @@ export class HeftConfiguration {
    * The Heft tool's package.json
    */
   public get heftPackageJson(): IPackageJson {
-    return Utilities.packageJsonLookup.tryLoadPackageJsonFor(__dirname)!;
+    return PackageJsonLookup.instance.tryLoadPackageJsonFor(__dirname)!;
   }
 
   /**
    * The package.json of the project being built
    */
   public get projectPackageJson(): IPackageJson {
-    return Utilities.packageJsonLookup.tryLoadPackageJsonFor(this.buildFolder)!;
+    return PackageJsonLookup.instance.tryLoadPackageJsonFor(this.buildFolder)!;
   }
 
   /**
@@ -167,7 +166,7 @@ export class HeftConfiguration {
   public static initialize(options: IHeftConfigurationInitializationOptions): HeftConfiguration {
     const configuration: HeftConfiguration = new HeftConfiguration();
 
-    const packageJsonPath: string | undefined = Utilities.packageJsonLookup.tryGetPackageJsonFilePathFor(
+    const packageJsonPath: string | undefined = PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(
       options.cwd
     );
     if (packageJsonPath) {
