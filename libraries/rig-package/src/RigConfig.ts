@@ -6,6 +6,8 @@ import * as fs from 'fs';
 import * as nodeResolve from 'resolve';
 import * as stripJsonComments from 'strip-json-comments';
 
+import { Helpers } from './Helpers';
+
 /**
  * Represents the literal contents of the `config/rig.json` file.
  *
@@ -244,7 +246,7 @@ export class RigConfig {
       if (options.overrideRigJsonObject) {
         json = options.overrideRigJsonObject;
       } else {
-        if (!(await RigConfig._fsExistsAsync(rigConfigFilePath))) {
+        if (!(await Helpers.fsExistsAsync(rigConfigFilePath))) {
           return new RigConfig({
             projectFolderPath: options.projectFolderPath,
 
@@ -325,7 +327,7 @@ export class RigConfig {
 
       const rigPackageJsonModuleSpecifier: string = `${this.rigPackageName}/package.json`;
       const resolveOptions: nodeResolve.Opts = { basedir: this.projectFolderPath };
-      const resolvedRigPackageJsonPath: string = await RigConfig._nodeResolveAsync(
+      const resolvedRigPackageJsonPath: string = await Helpers.nodeResolveAsync(
         rigPackageJsonModuleSpecifier,
         resolveOptions
       );
@@ -336,7 +338,7 @@ export class RigConfig {
     if (this._resolvedProfileFolder === undefined) {
       this._resolvedProfileFolder = path.join(this._resolvedRigPackageFolder, this.relativeProfileFolderPath);
 
-      if (!(await RigConfig._fsExistsAsync(this._resolvedProfileFolder))) {
+      if (!(await Helpers.fsExistsAsync(this._resolvedProfileFolder))) {
         throw new Error(
           `The rig profile "${this.rigProfile}" is not defined` +
             ` by the rig package "${this.rigPackageName}"`
@@ -364,6 +366,10 @@ export class RigConfig {
    * `/path/to/your-project/node_modules/example-rig/profiles/example-profile/folder/file.json`
    */
   public tryResolveConfigFilePath(configFileRelativePath: string): string | undefined {
+    if (!Helpers.isDownwardRelative(configFileRelativePath)) {
+      throw new Error('The configFileRelativePath is not a relative path: ' + configFileRelativePath);
+    }
+
     const localPath: string = path.join(this.projectFolderPath, configFileRelativePath);
     if (fs.existsSync(localPath)) {
       return localPath;
@@ -381,8 +387,12 @@ export class RigConfig {
    * An async variant of {@link RigConfig.tryResolveConfigFilePath}
    */
   public async tryResolveConfigFilePathAsync(configFileRelativePath: string): Promise<string | undefined> {
+    if (!Helpers.isDownwardRelative(configFileRelativePath)) {
+      throw new Error('The configFileRelativePath is not a relative path: ' + configFileRelativePath);
+    }
+
     const localPath: string = path.join(this.projectFolderPath, configFileRelativePath);
-    if (await RigConfig._fsExistsAsync(localPath)) {
+    if (await Helpers.fsExistsAsync(localPath)) {
       return localPath;
     }
     if (this.rigFound) {
@@ -390,31 +400,11 @@ export class RigConfig {
         await this.getResolvedProfileFolderAsync(),
         configFileRelativePath
       );
-      if (await RigConfig._fsExistsAsync(riggedPath)) {
+      if (await Helpers.fsExistsAsync(riggedPath)) {
         return riggedPath;
       }
     }
     return undefined;
-  }
-
-  private static _nodeResolveAsync(id: string, opts: nodeResolve.AsyncOpts): Promise<string> {
-    return new Promise((resolve: (result: string) => void, reject: (error: Error) => void) => {
-      nodeResolve(id, opts, (error: Error, result: string) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(result);
-        }
-      });
-    });
-  }
-
-  private static _fsExistsAsync(path: fs.PathLike): Promise<boolean> {
-    return new Promise((resolve: (result: boolean) => void) => {
-      fs.exists(path, (exists: boolean) => {
-        resolve(exists);
-      });
-    });
   }
 
   private static _validateSchema(json: IRigConfigJson): void {
