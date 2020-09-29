@@ -16,6 +16,6 @@
   "dependencies": {
     "@microsoft/api-extractor": "workspace:*",
     "eslint": "~7.2.0",
-    "typescript": "~3.5.3"
+    "typescript": "~3.9.7"
   }
 }

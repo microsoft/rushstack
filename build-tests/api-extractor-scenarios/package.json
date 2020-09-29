@@ -19,6 +19,6 @@
     "api-extractor-lib3-test": "workspace:*",
     "colors": "~1.2.1",
     "fs-extra": "~7.0.1",
-    "typescript": "~3.9.5"
+    "typescript": "~3.9.7"
   }
 }
