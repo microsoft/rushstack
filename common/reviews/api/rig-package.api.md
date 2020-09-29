@@ -25,6 +25,7 @@ export class RigConfig {
     static jsonSchemaPath: string;
     static loadForProjectFolder(options: ILoadForProjectFolderOptions): RigConfig;
     static loadForProjectFolderAsync(options: ILoadForProjectFolderOptions): Promise<RigConfig>;
+    readonly projectFolderOriginalPath: string;
     readonly projectFolderPath: string;
     readonly relativeProfileFolderPath: string;
     readonly rigFound: boolean;

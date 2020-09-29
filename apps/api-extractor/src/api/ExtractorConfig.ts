@@ -356,7 +356,7 @@ export class ExtractorConfig {
                   '\nExpected path: ' +
                   packageFolder +
                   '\nProvided path: ' +
-                  options.rigConfig.projectFolderPath
+                  options.rigConfig.projectFolderOriginalPath
               );
             }
             rigConfig = options.rigConfig;

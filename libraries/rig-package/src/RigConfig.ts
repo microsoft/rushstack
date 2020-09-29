@@ -90,7 +90,16 @@ export class RigConfig {
   private static _jsonSchemaObject: object | undefined = undefined;
 
   /**
-   * The project folder path that was passed to {@link RigConfig.loadForProjectFolder}.
+   * The project folder path that was passed to {@link RigConfig.loadForProjectFolder},
+   * which maybe an absolute or relative path.
+   *
+   * @remarks
+   * Example: `.`
+   */
+  public readonly projectFolderOriginalPath: string;
+
+  /**
+   * The absolute path for the project folder path that was passed to {@link RigConfig.loadForProjectFolder}.
    *
    * @remarks
    * Example: `/path/to/your-project`
@@ -149,7 +158,8 @@ export class RigConfig {
   private _resolvedProfileFolder: string | undefined;
 
   private constructor(options: IRigConfigOptions) {
-    this.projectFolderPath = options.projectFolderPath;
+    this.projectFolderOriginalPath = options.projectFolderPath;
+    this.projectFolderPath = path.resolve(options.projectFolderPath);
 
     this.rigFound = options.rigFound;
     this.filePath = options.filePath;
