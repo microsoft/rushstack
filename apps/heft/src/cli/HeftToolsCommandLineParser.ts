@@ -152,7 +152,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
 
     this._normalizeCwd();
 
-    await this._heftConfiguration.checkForRigAsync();
+    await this._heftConfiguration._checkForRigAsync();
 
     if (this._heftConfiguration.rigConfig.rigFound) {
       const rigProfileFolder: string = await this._heftConfiguration.rigConfig.getResolvedProfileFolderAsync();

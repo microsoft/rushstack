@@ -182,8 +182,9 @@ export class HeftConfiguration {
 
   /**
    * Performs the search for rig.json and initializes the `HeftConfiguration.rigConfig` object.
+   * @internal
    */
-  public async checkForRigAsync(): Promise<void> {
+  public async _checkForRigAsync(): Promise<void> {
     if (!this._rigConfig) {
       this._rigConfig = await RigConfig.loadForProjectFolderAsync({ projectFolderPath: this._buildFolder });
     }

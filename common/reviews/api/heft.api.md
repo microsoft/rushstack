@@ -67,7 +67,8 @@ export type CustomActionParameterType = string | boolean | number | ReadonlyArra
 export class HeftConfiguration {
     get buildCacheFolder(): string;
     get buildFolder(): string;
-    checkForRigAsync(): Promise<void>;
+    // @internal
+    _checkForRigAsync(): Promise<void>;
     get compilerPackage(): ICompilerPackage | undefined;
     get globalTerminal(): Terminal;
     get heftPackageJson(): IPackageJson;
