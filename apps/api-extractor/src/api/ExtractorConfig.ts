@@ -4,7 +4,6 @@
 import * as path from 'path';
 import * as resolve from 'resolve';
 import lodash = require('lodash');
-
 import {
   JsonFile,
   JsonSchema,
@@ -17,6 +16,8 @@ import {
   Path,
   NewlineKind
 } from '@rushstack/node-core-library';
+import { RigConfig } from '@rushstack/rig-package';
+
 import { IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { MessageRouter } from '../collector/MessageRouter';
@@ -45,6 +46,29 @@ interface IExtractorConfigTokenContext {
    * The `<projectFolder>` token returns the expanded `"projectFolder"` setting from api-extractor.json.
    */
   projectFolder: string;
+}
+
+/**
+ * Options for {@link ExtractorConfig.tryLoadForFolder}.
+ *
+ * @public
+ */
+export interface IExtractorConfigLoadForFolderOptions {
+  /**
+   * The folder path to start from when searching for api-extractor.json.
+   */
+  startingFolder: string;
+
+  /**
+   * An already constructed `PackageJsonLookup` cache object to use.  If omitted, a temporary one will
+   * be constructed.
+   */
+  packageJsonLookup?: PackageJsonLookup;
+
+  /**
+   * An already constructed `RigConfig` object.  If omitted, then a new `RigConfig` object will be constructed.
+   */
+  rigConfig?: RigConfig;
 }
 
 /**
@@ -275,6 +299,88 @@ export class ExtractorConfig {
       return path.relative(this.projectFolder, absolutePath).replace(/\\/g, '/');
     }
     return absolutePath;
+  }
+
+  /**
+   * Searches for the api-extractor.json config file associated with the specified starting folder,
+   * and loads the file if found.
+   *
+   * @returns An options object that can be passed to {@link ExtractorConfig.prepare}, or `undefined`
+   * if not api-extractor.json file was found.
+   */
+  public static tryLoadForFolder(
+    options: IExtractorConfigLoadForFolderOptions
+  ): IExtractorConfigPrepareOptions | undefined {
+    const packageJsonLookup: PackageJsonLookup = options.packageJsonLookup || new PackageJsonLookup();
+    const startingFolder: string = options.startingFolder;
+
+    // Figure out which project we're in and look for the config file at the project root
+    const packageFolder: string | undefined = packageJsonLookup.tryGetPackageFolderFor(startingFolder);
+
+    // If there is no package, then just use the starting folder
+    const baseFolder: string = packageFolder ? packageFolder : startingFolder;
+
+    let projectFolderLookupToken: string | undefined = undefined;
+
+    // First try the standard "config" subfolder:
+    let configFilename: string = path.join(baseFolder, 'config', ExtractorConfig.FILENAME);
+    if (FileSystem.exists(configFilename)) {
+      if (FileSystem.exists(path.join(baseFolder, ExtractorConfig.FILENAME))) {
+        throw new Error(`Found conflicting ${ExtractorConfig.FILENAME} files in "." and "./config" folders`);
+      }
+    } else {
+      // Otherwise try the top-level folder
+      configFilename = path.join(baseFolder, ExtractorConfig.FILENAME);
+
+      if (!FileSystem.exists(configFilename)) {
+        // If We didn't find it in <packageFolder>/api-extractor.json or <packageFolder>/config/api-extractor.json
+        // then check for a rig package
+        if (packageFolder) {
+          let rigConfig: RigConfig;
+          if (options.rigConfig) {
+            // The caller provided an already solved RigConfig.  Double-check that it is for the right project.
+            if (!Path.isEqual(options.rigConfig.projectFolderPath, packageFolder)) {
+              throw new Error(
+                'The provided ILoadForFolderOptions.rigConfig is for the wrong project folder:\n' +
+                  '\nExpected path: ' +
+                  packageFolder +
+                  '\nProvided path: ' +
+                  options.rigConfig.projectFolderPath
+              );
+            }
+            rigConfig = options.rigConfig;
+          } else {
+            rigConfig = RigConfig.loadForProjectFolder({
+              projectFolderPath: packageFolder
+            });
+          }
+
+          if (rigConfig.rigFound) {
+            configFilename = path.join(rigConfig.getResolvedProfileFolder(), ExtractorConfig.FILENAME);
+
+            // If the "projectFolder" setting isn't specified in api-extractor.json, it defaults to the
+            // "<lookup>" token which will probe for the tsconfig.json nearest to the api-extractor.json path.
+            // But this won't work if api-extractor.json belongs to the rig.  So instead "<lookup>" should be
+            // the "<packageFolder>" that referenced the rig.
+            projectFolderLookupToken = packageFolder;
+          }
+        }
+        if (!FileSystem.exists(configFilename)) {
+          // API Extractor does not seem to be configured for this folder
+          return undefined;
+        }
+      }
+    }
+
+    const configObjectFullPath: string = path.resolve(configFilename);
+    const configObject: IConfigFile = ExtractorConfig.loadFile(configObjectFullPath);
+
+    return {
+      configObject,
+      configObjectFullPath,
+      packageJsonFullPath: packageFolder,
+      projectFolderLookupToken
+    };
   }
 
   /**

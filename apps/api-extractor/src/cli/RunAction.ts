@@ -4,8 +4,7 @@
 import * as colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
-import { PackageJsonLookup, FileSystem, IPackageJson } from '@rushstack/node-core-library';
-import { RigConfig } from '@rushstack/rig-package';
+import { PackageJsonLookup, FileSystem, IPackageJson, Path } from '@rushstack/node-core-library';
 
 import {
   CommandLineAction,
@@ -14,10 +13,9 @@ import {
 } from '@rushstack/ts-command-line';
 
 import { Extractor, ExtractorResult } from '../api/Extractor';
-import { IConfigFile } from '../api/IConfigFile';
 
 import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
-import { ExtractorConfig } from '../api/ExtractorConfig';
+import { ExtractorConfig, IExtractorConfigPrepareOptions } from '../api/ExtractorConfig';
 
 export class RunAction extends CommandLineAction {
   private _configFileParameter: CommandLineStringParameter;
@@ -109,68 +107,32 @@ export class RunAction extends CommandLineAction {
       }
     }
 
-    let projectFolderLookupToken: string | undefined = undefined;
+    let extractorConfig: ExtractorConfig;
 
     if (this._configFileParameter.value) {
       configFilename = path.normalize(this._configFileParameter.value);
       if (!FileSystem.exists(configFilename)) {
         throw new Error('Config file not found: ' + this._configFileParameter.value);
       }
+
+      extractorConfig = ExtractorConfig.loadFileAndPrepare(configFilename);
     } else {
-      // Otherwise, figure out which project we're in and look for the config file
-      // at the project root
-      const packageFolder: string | undefined = lookup.tryGetPackageFolderFor('.');
+      const prepareOptions: IExtractorConfigPrepareOptions | undefined = ExtractorConfig.tryLoadForFolder({
+        startingFolder: '.'
+      });
 
-      // If there is no package, then try the current directory
-      const baseFolder: string = packageFolder ? packageFolder : process.cwd();
-
-      // First try the standard "config" subfolder:
-      configFilename = path.join(baseFolder, 'config', ExtractorConfig.FILENAME);
-      if (FileSystem.exists(configFilename)) {
-        if (FileSystem.exists(path.join(baseFolder, ExtractorConfig.FILENAME))) {
-          throw new Error(
-            `Found conflicting ${ExtractorConfig.FILENAME} files in "." and "./config" folders`
-          );
-        }
-      } else {
-        // Otherwise try the top-level folder
-        configFilename = path.join(baseFolder, ExtractorConfig.FILENAME);
-
-        if (!FileSystem.exists(configFilename)) {
-          // If We didn't find it in <packageFolder>/api-extractor.json or <packageFolder>/config/api-extractor.json
-          // then check for a rig package
-          if (packageFolder) {
-            const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
-              projectFolderPath: packageFolder
-            });
-            if (rigConfig.rigFound) {
-              configFilename = path.join(rigConfig.getResolvedProfileFolder(), ExtractorConfig.FILENAME);
-
-              // If the "projectFolder" setting isn't specified in api-extractor.json, it defaults to the
-              // "<lookup>" token which will probe for the tsconfig.json nearest to the api-extractor.json path.
-              // But this won't work if api-extractor.json belongs to the rig.  So instead "<lookup>" should be
-              // the "<packageFolder>" that referenced the rig.
-              projectFolderLookupToken = packageFolder;
-            }
-          }
-          if (!FileSystem.exists(configFilename)) {
-            throw new Error(`Unable to find an ${ExtractorConfig.FILENAME} file`);
-          }
-        }
+      if (!prepareOptions || !prepareOptions.configObjectFullPath) {
+        throw new Error(`Unable to find an ${ExtractorConfig.FILENAME} file`);
       }
 
-      console.log(`Using configuration from ${configFilename}`);
+      const configObjectShortPath: string = Path.makeRelativeOnlyIfUnder(
+        prepareOptions.configObjectFullPath,
+        '.'
+      );
+      console.log(`Using configuration from ${configObjectShortPath}`);
+
+      extractorConfig = ExtractorConfig.prepare(prepareOptions);
     }
-
-    const configObjectFullPath: string = path.resolve(configFilename);
-    const configObject: IConfigFile = ExtractorConfig.loadFile(configObjectFullPath);
-
-    const extractorConfig: ExtractorConfig = ExtractorConfig.prepare({
-      configObject: configObject,
-      configObjectFullPath: configObjectFullPath,
-      packageJsonFullPath: lookup.tryGetPackageJsonFilePathFor(configObjectFullPath),
-      projectFolderLookupToken
-    });
 
     const extractorResult: ExtractorResult = Extractor.invoke(extractorConfig, {
       localBuild: this._localParameter.value,

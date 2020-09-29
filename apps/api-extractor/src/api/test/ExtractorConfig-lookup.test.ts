@@ -2,12 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import { Path } from '@rushstack/node-core-library';
+
 import { ExtractorConfig } from '../ExtractorConfig';
 
 const testDataFolder: string = path.join(__dirname, 'test-data');
 
 function expectEqualPaths(path1: string, path2: string): void {
-  if (path.relative(path1, path2) !== '') {
+  if (!Path.isEqual(path1, path2)) {
     fail('Expected paths to be equal:\npath1: ' + path1 + '\npath2: ' + path2);
   }
 }
