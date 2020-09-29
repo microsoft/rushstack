@@ -43,10 +43,14 @@ export class ApiExtractorPlugin implements IHeftPlugin {
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     const { buildFolder } = heftConfiguration;
-    if (FileSystem.exists(path.join(buildFolder, CONFIG_FILE_LOCATION))) {
-      heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-        build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
-          bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
+    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
+      build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
+        bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
+          const apiExtractorConfigExists: boolean = await this._doesAPiExtractorConfigExistAsync(
+            heftConfiguration
+          );
+
+          if (apiExtractorConfigExists) {
             await this._runApiExtractorAsync(heftSession, {
               heftConfiguration,
               buildFolder,
@@ -54,10 +58,10 @@ export class ApiExtractorPlugin implements IHeftPlugin {
               watchMode: build.properties.watchMode,
               production: build.properties.production
             });
-          });
+          }
         });
       });
-    }
+    });
   }
 
   private async _runApiExtractorAsync(
@@ -111,5 +115,15 @@ export class ApiExtractorPlugin implements IHeftPlugin {
     } else {
       await apiExtractorRunner.invokeAsSubprocessAsync();
     }
+  }
+
+  private async _doesAPiExtractorConfigExistAsync(heftConfiguration: HeftConfiguration): Promise<boolean> {
+    if (await FileSystem.existsAsync(path.resolve(heftConfiguration.buildFolder, CONFIG_FILE_LOCATION))) {
+      return true;
+    }
+
+    const rigConfig: RigConfig = await CoreConfigFiles.getRigConfigAsync(heftConfiguration);
+    const rigConfigFolder: string = await rigConfig.getResolvedProfileFolderAsync();
+    return await FileSystem.existsAsync(path.resolve(rigConfigFolder, CONFIG_FILE_LOCATION));
   }
 }
