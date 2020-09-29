@@ -348,6 +348,17 @@ export class ExportAnalyzer {
     symbol: ts.Symbol,
     referringModuleIsExternal: boolean
   ): AstEntity | undefined {
+    // eslint-disable-next-line no-bitwise
+    if ((symbol.flags & ts.SymbolFlags.FunctionScopedVariable) !== 0) {
+      // If a symbol refers back to part of its own definition, don't follow that rabbit hole
+      // Example:
+      //
+      // function f(x: number): typeof x {
+      //    return 123;
+      // }
+      return undefined;
+    }
+
     let current: ts.Symbol = symbol;
 
     if (referringModuleIsExternal) {
