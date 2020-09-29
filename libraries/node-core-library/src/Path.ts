@@ -11,7 +11,13 @@ import { Text } from './Text';
  * @public
  */
 export class Path {
+  // Matches a relative path consisting entirely of periods and slashes
+  // Example: ".", "..", "../..", etc
   private static _relativePathRegex: RegExp = /^[.\/\\]+$/;
+
+  // Matches a relative path segment that traverses upwards
+  // Example: "a/../b"
+  private static _upwardPathSegmentRegex: RegExp = /([\/\\]|^)\.\.([\/\\]|$)/;
 
   /**
    * Returns true if "childPath" is located inside the "parentFolderPath" folder
@@ -94,5 +100,34 @@ export class Path {
    */
   public static convertToBackslashes(inputPath: string): string {
     return Text.replaceAll(inputPath, '/', '\\');
+  }
+
+  /**
+   * Returns true if the specified path is a relative path and does not use `..` to walk upwards.
+   *
+   * @example
+   * ```ts
+   * // These evaluate to true
+   * isDownwardRelative('folder');
+   * isDownwardRelative('file');
+   * isDownwardRelative('folder/');
+   * isDownwardRelative('./folder/');
+   * isDownwardRelative('./folder/file');
+   *
+   * // These evaluate to false
+   * isDownwardRelative('../folder');
+   * isDownwardRelative('folder/../file');
+   * isDownwardRelative('/folder/file');
+   * ```
+   */
+  public static isDownwardRelative(inputPath: string): boolean {
+    if (path.isAbsolute(inputPath)) {
+      return false;
+    }
+    // Does it contain ".."
+    if (Path._upwardPathSegmentRegex.test(inputPath)) {
+      return false;
+    }
+    return true;
   }
 }
