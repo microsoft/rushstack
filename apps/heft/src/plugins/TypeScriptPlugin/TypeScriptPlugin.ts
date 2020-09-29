@@ -20,6 +20,7 @@ import { JestTypeScriptDataFile } from '../JestPlugin/JestTypeScriptDataFile';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { ICleanStageContext, ICleanStageProperties } from '../../stages/CleanStage';
 import { CoreConfigFiles } from '../../utilities/CoreConfigFiles';
+import { ISharedCopyStaticAssetsConfiguration } from '../CopyStaticAssetsPlugin';
 
 const PLUGIN_NAME: string = 'typescript';
 
@@ -67,25 +68,32 @@ export interface ISharedTypeScriptConfiguration {
   additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
 
   /**
-   * Specifies the intermediary folder that Jest will use for its input.  Because Jest uses the
+   * Specifies the intermediary folder that tests will use.  Because Jest uses the
    * Node.js runtime to execute tests, the module format must be CommonJS.
    *
    * The default value is "lib".
    */
-  emitFolderNameForJest?: string;
+  emitFolderNameForTests?: string;
 
+  /**
+   * Configures additional file types that should be copied into the TypeScript compiler's emit folders, for example
+   * so that these files can be resolved by import statements.
+   */
+  staticAssetsToCopy?: ISharedCopyStaticAssetsConfiguration;
+}
+
+export interface ITypeScriptConfigurationJson extends ISharedTypeScriptConfiguration {
+  disableTslint?: boolean;
+  maxWriteParallelism: number | undefined;
+}
+
+interface ITypeScriptConfiguration extends ISharedTypeScriptConfiguration {
   /**
    * Set this to change the maximum number of file handles that will be opened concurrently for writing.
    * The default is 50.
    */
   maxWriteParallelism: number;
-}
 
-export interface ITypeScriptConfigurationJson extends ISharedTypeScriptConfiguration {
-  disableTslint?: boolean;
-}
-
-interface ITypeScriptConfiguration extends ISharedTypeScriptConfiguration {
   tsconfigPaths: string[];
   isLintingEnabled: boolean | undefined;
 }
@@ -184,7 +192,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
     const typeScriptConfiguration: ITypeScriptConfiguration = {
       copyFromCacheMode: typescriptConfigurationJson?.copyFromCacheMode,
       additionalModuleKindsToEmit: typescriptConfigurationJson?.additionalModuleKindsToEmit,
-      emitFolderNameForJest: typescriptConfigurationJson?.emitFolderNameForJest,
+      emitFolderNameForTests: typescriptConfigurationJson?.emitFolderNameForTests,
       maxWriteParallelism: typescriptConfigurationJson?.maxWriteParallelism || 50,
       tsconfigPaths: tsconfigPaths,
       isLintingEnabled: !(buildProperties.lite || typescriptConfigurationJson?.disableTslint)
@@ -227,7 +235,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
     };
 
     JestTypeScriptDataFile.saveForProject(heftConfiguration.buildFolder, {
-      emitFolderNameForJest: typescriptConfigurationJson?.emitFolderNameForJest || 'lib',
+      emitFolderNameForTests: typescriptConfigurationJson?.emitFolderNameForTests || 'lib',
       skipTimestampCheck: !options.watchMode
     });
 

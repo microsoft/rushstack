@@ -106,22 +106,23 @@ interface IExtendedMainTemplate extends Webpack.compilation.MainTemplate {
   requireFn: string;
 }
 
+const SHOULD_REPLACE_ASSET_NAME_TOKEN: unique symbol = Symbol(
+  'set-public-path-plugin-should-replace-asset-name'
+);
+
 interface IExtendedChunk extends Webpack.compilation.Chunk {
+  [SHOULD_REPLACE_ASSET_NAME_TOKEN]: boolean;
   forEachModule(callback: (module: Webpack.compilation.Module) => void): void;
 }
 
 interface IStartupCodeOptions {
   source: string;
-  chunk: Webpack.compilation.Chunk;
+  chunk: IExtendedChunk;
   hash: string;
   requireFn: string;
 }
 
 const PLUGIN_NAME: string = 'set-webpack-public-path';
-
-const SHOULD_REPLACE_ASSET_NAME_TOKEN: unique symbol = Symbol(
-  'set-public-path-plugin-should-replace-asset-name'
-);
 
 const ASSET_NAME_TOKEN: string = '-ASSET-NAME-c0ef4f86-b570-44d3-b210-4428c5b7825c';
 
@@ -157,19 +158,24 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
 
     compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
       const v4MainTemplate: IExtendedMainTemplate = compilation.mainTemplate as IExtendedMainTemplate;
-      v4MainTemplate.hooks.startup.tap(PLUGIN_NAME, (source: string, chunk: IExtendedChunk, hash: string) => {
-        const assetOrChunkFound: boolean = !!this.options.skipDetection || this._detectAssetsOrChunks(chunk);
-        if (assetOrChunkFound) {
-          return this._getStartupCode({
-            source,
-            chunk,
-            hash,
-            requireFn: v4MainTemplate.requireFn
-          });
-        } else {
-          return source;
+      v4MainTemplate.hooks.startup.tap(
+        PLUGIN_NAME,
+        (source: string, chunk: Webpack.compilation.Chunk, hash: string) => {
+          const extendedChunk: IExtendedChunk = chunk as IExtendedChunk;
+          const assetOrChunkFound: boolean =
+            !!this.options.skipDetection || this._detectAssetsOrChunks(extendedChunk);
+          if (assetOrChunkFound) {
+            return this._getStartupCode({
+              source,
+              chunk: extendedChunk,
+              hash,
+              requireFn: v4MainTemplate.requireFn
+            });
+          } else {
+            return source;
+          }
         }
-      });
+      );
     });
 
     compiler.hooks.emit.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {

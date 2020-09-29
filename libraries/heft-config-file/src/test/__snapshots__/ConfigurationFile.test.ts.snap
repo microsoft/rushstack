@@ -72,6 +72,15 @@ Object {
 }
 `;
 
+exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "custom" in config meta 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
 exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "replace" in config meta 1`] = `
 Object {
   "error": "",

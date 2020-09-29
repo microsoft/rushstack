@@ -19,13 +19,13 @@ const packageJsonUpdaterModule: typeof PackageJsonUpdaterTypes = Import.lazy(
 );
 
 export class AddAction extends BaseRushAction {
-  private _allFlag: CommandLineFlagParameter;
-  private _exactFlag: CommandLineFlagParameter;
-  private _caretFlag: CommandLineFlagParameter;
-  private _devDependencyFlag: CommandLineFlagParameter;
-  private _makeConsistentFlag: CommandLineFlagParameter;
-  private _skipUpdateFlag: CommandLineFlagParameter;
-  private _packageName: CommandLineStringParameter;
+  private _allFlag!: CommandLineFlagParameter;
+  private _exactFlag!: CommandLineFlagParameter;
+  private _caretFlag!: CommandLineFlagParameter;
+  private _devDependencyFlag!: CommandLineFlagParameter;
+  private _makeConsistentFlag!: CommandLineFlagParameter;
+  private _skipUpdateFlag!: CommandLineFlagParameter;
+  private _packageName!: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [

@@ -235,8 +235,10 @@ describe('ConfigurationFile', () => {
         {
           projectRelativeFilePath: projectRelativeFilePath,
           jsonSchemaPath: schemaPath,
-          propertyInheritanceTypes: {
-            things: InheritanceType.append
+          propertyInheritance: {
+            things: {
+              inheritanceType: InheritanceType.append
+            }
           }
         }
       );
@@ -253,8 +255,10 @@ describe('ConfigurationFile', () => {
         {
           projectRelativeFilePath: projectRelativeFilePath,
           jsonSchemaPath: schemaPath,
-          propertyInheritanceTypes: {
-            things: InheritanceType.replace
+          propertyInheritance: {
+            things: {
+              inheritanceType: InheritanceType.replace
+            }
           }
         }
       );
@@ -263,6 +267,27 @@ describe('ConfigurationFile', () => {
         __dirname
       );
       const expectedConfigFile: ISimpleConfigFile = { things: ['D', 'E'] };
+      expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
+    });
+
+    it('Correctly loads the config file with "custom" in config meta', async () => {
+      const configFileLoader: ConfigurationFile<ISimpleConfigFile> = new ConfigurationFile<ISimpleConfigFile>(
+        {
+          projectRelativeFilePath: projectRelativeFilePath,
+          jsonSchemaPath: schemaPath,
+          propertyInheritance: {
+            things: {
+              inheritanceType: InheritanceType.custom,
+              inheritanceFunction: (current: string[], parent: string[]) => ['X', 'Y', 'Z']
+            }
+          }
+        }
+      );
+      const loadedConfigFile: ISimpleConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
+        terminal,
+        __dirname
+      );
+      const expectedConfigFile: ISimpleConfigFile = { things: ['X', 'Y', 'Z'] };
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
     });
 

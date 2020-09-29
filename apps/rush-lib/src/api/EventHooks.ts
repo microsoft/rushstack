@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { IEventHooksJson } from './RushConfiguration';
+import { Enum } from '@rushstack/node-core-library';
 
 /**
  * Events happen during Rush runs.
@@ -40,18 +41,12 @@ export class EventHooks {
    */
   public constructor(eventHooksJson: IEventHooksJson) {
     this._hooks = new Map<Event, string[]>();
-    Object.getOwnPropertyNames(eventHooksJson).forEach((name) => {
-      const eventName: Event = Event[name];
+    for (const [name, eventHooks] of Object.entries(eventHooksJson)) {
+      const eventName: Event | undefined = Enum.tryGetValueByKey(Event, name);
       if (eventName) {
-        const foundHooks: string[] = [];
-        if (eventHooksJson[name]) {
-          eventHooksJson[name].forEach((hook) => {
-            foundHooks.push(hook);
-          });
-        }
-        this._hooks.set(eventName, foundHooks);
+        this._hooks.set(eventName, [...eventHooks] || []);
       }
-    });
+    }
   }
 
   /**

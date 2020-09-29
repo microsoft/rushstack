@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as colors from 'colors';
+import colors from 'colors';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
@@ -15,8 +15,8 @@ export class InitDeployAction extends BaseRushAction {
     __dirname,
     '../../../assets/rush-init-deploy/scenario-template.json'
   );
-  private _project: CommandLineStringParameter;
-  private _scenario: CommandLineStringParameter;
+  private _project!: CommandLineStringParameter;
+  private _scenario!: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({

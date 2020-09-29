@@ -4,11 +4,11 @@
 import * as path from 'path';
 import { ConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
 
-import { ICopyStaticAssetsConfigurationJson } from '../plugins/CopyStaticAssetsPlugin';
 import { IApiExtractorPluginConfiguration } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
 import { ITypeScriptConfigurationJson } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { Terminal } from '@rushstack/node-core-library';
+import { ISharedCopyStaticAssetsConfiguration } from '../plugins/CopyStaticAssetsPlugin';
 
 export enum HeftEvent {
   clean = 'clean',
@@ -51,9 +51,6 @@ export class CoreConfigFiles {
     IHeftEventActions
   >();
 
-  private static _copyStaticAssetsConfigurationLoader:
-    | ConfigurationFile<ICopyStaticAssetsConfigurationJson>
-    | undefined;
   private static _apiExtractorTaskConfigurationLoader:
     | ConfigurationFile<IApiExtractorPluginConfiguration>
     | undefined;
@@ -70,7 +67,11 @@ export class CoreConfigFiles {
       CoreConfigFiles._heftConfigFileLoader = new ConfigurationFile<IHeftConfigurationJson>({
         projectRelativeFilePath: 'config/heft.json',
         jsonSchemaPath: schemaPath,
-        propertyInheritanceTypes: { heftPlugins: InheritanceType.append },
+        propertyInheritance: {
+          heftPlugins: {
+            inheritanceType: InheritanceType.append
+          }
+        },
         jsonPathMetadata: {
           '$.heftPlugins.*.plugin': {
             pathResolutionMethod: PathResolutionMethod.NodeResolve
@@ -130,25 +131,6 @@ export class CoreConfigFiles {
   }
 
   /**
-   * Returns the loader for the `config/copy-static-assets.json` config file.
-   */
-  public static get copyStaticAssetsConfigurationLoader(): ConfigurationFile<
-    ICopyStaticAssetsConfigurationJson
-  > {
-    if (!CoreConfigFiles._copyStaticAssetsConfigurationLoader) {
-      const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'copy-static-assets.schema.json');
-      CoreConfigFiles._copyStaticAssetsConfigurationLoader = new ConfigurationFile<
-        ICopyStaticAssetsConfigurationJson
-      >({
-        projectRelativeFilePath: 'config/copy-static-assets.json',
-        jsonSchemaPath: schemaPath
-      });
-    }
-
-    return CoreConfigFiles._copyStaticAssetsConfigurationLoader;
-  }
-
-  /**
    * Returns the loader for the `config/api-extractor-task.json` config file.
    */
   public static get apiExtractorTaskConfigurationLoader(): ConfigurationFile<
@@ -177,7 +159,38 @@ export class CoreConfigFiles {
         ITypeScriptConfigurationJson
       >({
         projectRelativeFilePath: 'config/typescript.json',
-        jsonSchemaPath: schemaPath
+        jsonSchemaPath: schemaPath,
+        propertyInheritance: {
+          staticAssetsToCopy: {
+            inheritanceType: InheritanceType.custom,
+            inheritanceFunction: (
+              currentObject: ISharedCopyStaticAssetsConfiguration,
+              parentObject: ISharedCopyStaticAssetsConfiguration
+            ): ISharedCopyStaticAssetsConfiguration => {
+              const result: ISharedCopyStaticAssetsConfiguration = {};
+
+              if (currentObject.fileExtensions && parentObject.fileExtensions) {
+                result.fileExtensions = [...currentObject.fileExtensions, ...parentObject.fileExtensions];
+              } else {
+                result.fileExtensions = currentObject.fileExtensions || parentObject.fileExtensions;
+              }
+
+              if (currentObject.includeGlobs && parentObject.includeGlobs) {
+                result.includeGlobs = [...currentObject.includeGlobs, ...parentObject.includeGlobs];
+              } else {
+                result.includeGlobs = currentObject.includeGlobs || parentObject.includeGlobs;
+              }
+
+              if (currentObject.excludeGlobs && parentObject.excludeGlobs) {
+                result.excludeGlobs = [...currentObject.excludeGlobs, ...parentObject.excludeGlobs];
+              } else {
+                result.excludeGlobs = currentObject.excludeGlobs || parentObject.excludeGlobs;
+              }
+
+              return result;
+            }
+          }
+        }
       });
     }
 

@@ -16,7 +16,7 @@ import { DocumenterConfig } from './DocumenterConfig';
 export class ExperimentalYamlDocumenter extends YamlDocumenter {
   private _config: IConfigTableOfContents;
   private _tocPointerMap: { [key: string]: IYamlTocItem };
-  private _catchAllPointer: IYamlTocItem;
+  private _catchAllPointer: IYamlTocItem | undefined;
 
   public constructor(apiModel: ApiModel, documenterConfig: DocumenterConfig) {
     super(apiModel, documenterConfig.configFile.newDocfxNamespaces);

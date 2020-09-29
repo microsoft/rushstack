@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Upgrade compiler; the API now requires TypeScript 3.9 or newer",
+      "type": "minor",
+      "packageName": "@microsoft/gulp-core-build-serve"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-serve",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

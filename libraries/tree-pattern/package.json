@@ -13,11 +13,11 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.8.10",
+    "@microsoft/rush-stack-compiler-3.9": "0.4.21",
     "@rushstack/eslint-config": "1.4.0",
     "@rushstack/heft": "0.8.0",
     "@types/heft-jest": "1.0.1",
     "eslint": "~7.2.0",
-    "typescript": "~3.9.5"
+    "typescript": "~3.9.7"
   }
 }

@@ -202,7 +202,8 @@ export class SynchronousMinifier implements IModuleMinifier {
 export class WorkerPoolMinifier implements IModuleMinifier {
     constructor(options: IWorkerPoolMinifierOptions);
     // (undocumented)
-    maxThreads: number;
+    get maxThreads(): number;
+    set maxThreads(threads: number);
     minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
     // (undocumented)
     ref(): () => Promise<void>;

@@ -3,7 +3,7 @@
   "version": "3.33.6",
   "description": "Core libraries that every NodeJS toolchain project should use",
   "main": "lib/index.js",
-  "typings": "dist/node-core-library.d.ts",
+  "typings": "lib/index.d.ts",
   "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack/tree/master/libraries/node-core-library"
@@ -23,7 +23,7 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.8.10",
+    "@microsoft/rush-stack-compiler-3.9": "0.4.21",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "0.8.0",
     "@types/fs-extra": "7.0.0",

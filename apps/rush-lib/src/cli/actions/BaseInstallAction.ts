@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import * as os from 'os';
 
 import { Import } from '@rushstack/node-core-library';
@@ -31,13 +31,13 @@ const installManagerFactoryModule: typeof import('../../logic/InstallManagerFact
  * This is the common base class for InstallAction and UpdateAction.
  */
 export abstract class BaseInstallAction extends BaseRushAction {
-  protected _variant: CommandLineStringParameter;
-  protected _purgeParameter: CommandLineFlagParameter;
-  protected _bypassPolicyParameter: CommandLineFlagParameter;
-  protected _noLinkParameter: CommandLineFlagParameter;
-  protected _networkConcurrencyParameter: CommandLineIntegerParameter;
-  protected _debugPackageManagerParameter: CommandLineFlagParameter;
-  protected _maxInstallAttempts: CommandLineIntegerParameter;
+  protected _variant!: CommandLineStringParameter;
+  protected _purgeParameter!: CommandLineFlagParameter;
+  protected _bypassPolicyParameter!: CommandLineFlagParameter;
+  protected _noLinkParameter!: CommandLineFlagParameter;
+  protected _networkConcurrencyParameter!: CommandLineIntegerParameter;
+  protected _debugPackageManagerParameter!: CommandLineFlagParameter;
+  protected _maxInstallAttempts!: CommandLineIntegerParameter;
 
   protected onDefineParameters(): void {
     this._purgeParameter = this.defineFlagParameter({

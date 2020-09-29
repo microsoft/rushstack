@@ -4,10 +4,13 @@
 export {
   ConfigurationFile,
   IConfigurationFileOptions,
+  ICustomPropertyInheritance,
   IJsonPathMetadata,
   IJsonPathsMetadata,
   InheritanceType,
   IOriginalValueOptions,
-  IPropertyInheritanceTypes,
-  PathResolutionMethod
+  IPropertiesInheritance,
+  IPropertyInheritance,
+  PathResolutionMethod,
+  PropertyInheritanceCustomFunction
 } from './ConfigurationFile';

@@ -16,7 +16,7 @@ import { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.type
 export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner: string): Source {
   const { source: assetSource, modules, externalNames } = asset;
 
-  const assetCode: string = assetSource.source();
+  const assetCode: string = assetSource.source() as string;
 
   const tokenIndex: number = assetCode.indexOf(CHUNK_MODULES_TOKEN);
   const suffixStart: number = tokenIndex + CHUNK_MODULES_TOKEN.length;
@@ -142,7 +142,7 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
 
   if (externalNames.size) {
     const replaceSource: ReplaceSource = new ReplaceSource(cached);
-    const code: string = cached.source();
+    const code: string = cached.source() as string;
 
     const externalIdRegex: RegExp = /__WEBPACK_EXTERNAL_MODULE_[A-Za-z0-9_$]+/g;
 
@@ -154,9 +154,9 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
 
       if (mapped === undefined) {
         console.error(`Missing minified external for ${id} in ${asset.fileName}!`);
+      } else {
+        replaceSource.replace(match.index, externalIdRegex.lastIndex - 1, mapped);
       }
-
-      replaceSource.replace(match.index, externalIdRegex.lastIndex - 1, mapped);
     }
 
     return new CachedSource(replaceSource);

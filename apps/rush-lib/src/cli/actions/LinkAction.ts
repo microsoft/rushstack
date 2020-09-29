@@ -17,7 +17,7 @@ const linkManagerFactoryModule: typeof LinkManagerFactoryTypes = Import.lazy(
 );
 
 export class LinkAction extends BaseRushAction {
-  private _force: CommandLineFlagParameter;
+  private _force!: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({

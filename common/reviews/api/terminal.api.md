@@ -177,7 +177,7 @@ export abstract class TerminalWritable {
     // @sealed
     close(): void;
     // @sealed
-    readonly isOpen: boolean;
+    get isOpen(): boolean;
     // @virtual
     protected onClose(): void;
     protected abstract onWriteChunk(chunk: ITerminalChunk): void;

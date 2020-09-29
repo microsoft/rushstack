@@ -9,9 +9,9 @@ import { JsonFile } from '@rushstack/node-core-library';
  */
 export interface IJestTypeScriptDataFileJson {
   /**
-   * The "emitFolderNameForJest" from .heft/typescript.json
+   * The "emitFolderNameForTests" from .heft/typescript.json
    */
-  emitFolderNameForJest: string;
+  emitFolderNameForTests: string;
 
   /**
    * Normally the jest-build-transform compares the timestamps of the .js output file and .ts source file

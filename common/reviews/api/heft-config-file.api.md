@@ -24,7 +24,12 @@ export interface IConfigurationFileOptions<TConfigurationFile> {
     jsonPathMetadata?: IJsonPathsMetadata;
     jsonSchemaPath: string;
     projectRelativeFilePath: string;
-    propertyInheritanceTypes?: IPropertyInheritanceTypes<TConfigurationFile>;
+    propertyInheritance?: IPropertiesInheritance<TConfigurationFile>;
+}
+
+// @beta (undocumented)
+export interface ICustomPropertyInheritance<TObject> extends IPropertyInheritance<InheritanceType.custom> {
+    inheritanceFunction: PropertyInheritanceCustomFunction<TObject>;
 }
 
 // @beta
@@ -41,6 +46,7 @@ export interface IJsonPathsMetadata {
 // @beta (undocumented)
 export enum InheritanceType {
     append = "append",
+    custom = "custom",
     replace = "replace"
 }
 
@@ -53,9 +59,15 @@ export interface IOriginalValueOptions<TParentProperty> {
 }
 
 // @beta (undocumented)
-export type IPropertyInheritanceTypes<TConfigurationFile> = {
-    [propertyName in keyof TConfigurationFile]?: InheritanceType;
+export type IPropertiesInheritance<TConfigurationFile> = {
+    [propertyName in keyof TConfigurationFile]?: IPropertyInheritance<InheritanceType.append | InheritanceType.replace> | ICustomPropertyInheritance<TConfigurationFile[propertyName]>;
 };
+
+// @beta (undocumented)
+export interface IPropertyInheritance<TInheritanceType extends InheritanceType> {
+    // (undocumented)
+    inheritanceType: TInheritanceType;
+}
 
 // @beta (undocumented)
 export enum PathResolutionMethod {
@@ -63,6 +75,9 @@ export enum PathResolutionMethod {
     resolvePathRelativeToConfigurationFile = 0,
     resolvePathRelativeToProjectRoot = 1
 }
+
+// @beta (undocumented)
+export type PropertyInheritanceCustomFunction<TObject> = (currentObject: TObject, parentObject: TObject) => TObject;
 
 
 // (No @packageDocumentation comment for this package)

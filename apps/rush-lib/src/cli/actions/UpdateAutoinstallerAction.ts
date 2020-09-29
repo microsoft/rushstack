@@ -8,7 +8,7 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 
 export class UpdateAutoinstallerAction extends BaseRushAction {
-  private _name: CommandLineStringParameter;
+  private _name!: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({

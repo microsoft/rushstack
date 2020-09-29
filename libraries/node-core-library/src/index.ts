@@ -11,6 +11,7 @@ export { AlreadyReportedError } from './AlreadyReportedError';
 export { AnsiEscape, IAnsiEscapeConvertForTestsOptions } from './Terminal/AnsiEscape';
 export { Brand } from './PrimitiveTypes';
 export { FileConstants, FolderConstants } from './Constants';
+export { Enum } from './Enum';
 export {
   ExecutableStdioStreamMapping,
   ExecutableStdioMapping,
