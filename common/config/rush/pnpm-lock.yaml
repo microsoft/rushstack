@@ -49,9 +49,9 @@ importers:
       source-map: 0.6.1
       typescript: 3.9.7
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0_@rushstack+heft@0.14.0
       '@types/heft-jest': 1.0.1
       '@types/lodash': 4.14.116
       '@types/node': 10.17.13
@@ -59,10 +59,10 @@ importers:
       '@types/semver': 7.3.4
     specifiers:
       '@microsoft/api-extractor-model': 'workspace:*'
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@microsoft/tsdoc': 0.12.19
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0
       '@rushstack/node-core-library': 'workspace:*'
       '@rushstack/rig-package': 'workspace:*'
       '@rushstack/ts-command-line': 'workspace:*'
@@ -82,16 +82,16 @@ importers:
       '@microsoft/tsdoc': 0.12.19
       '@rushstack/node-core-library': 'link:../../libraries/node-core-library'
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0_@rushstack+heft@0.14.0
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
     specifiers:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@microsoft/tsdoc': 0.12.19
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0
       '@rushstack/node-core-library': 'workspace:*'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
@@ -1307,13 +1307,13 @@ importers:
       '@rushstack/node-core-library': 'link:../../libraries/node-core-library'
       '@types/node': 10.17.13
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0_@rushstack+heft@0.14.0
     specifiers:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0
       '@rushstack/node-core-library': 'workspace:*'
       '@types/node': 10.17.13
   ../../libraries/debug-certificate-manager:
@@ -1385,9 +1385,9 @@ importers:
       timsort: 0.3.0
       z-schema: 3.18.4
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0_@rushstack+heft@0.14.0
       '@types/fs-extra': 7.0.0
       '@types/heft-jest': 1.0.1
       '@types/jju': 1.4.1
@@ -1396,9 +1396,9 @@ importers:
       '@types/timsort': 0.3.0
       '@types/z-schema': 3.16.31
     specifiers:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0
       '@types/fs-extra': 7.0.0
       '@types/heft-jest': 1.0.1
       '@types/jju': 1.4.1
@@ -1437,16 +1437,16 @@ importers:
       resolve: 1.17.0
       strip-json-comments: 3.1.1
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0_@rushstack+heft@0.14.0
       '@types/heft-jest': 1.0.1
       '@types/resolve': 1.17.1
       ajv: 6.12.5
     specifiers:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       '@types/resolve': 1.17.1
@@ -1511,16 +1511,16 @@ importers:
       colors: ~1.2.1
   ../../libraries/tree-pattern:
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@rushstack/eslint-config': 2.1.2_eslint@7.2.0+typescript@3.9.7
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0_@rushstack+heft@0.14.0
       '@types/heft-jest': 1.0.1
       eslint: 7.2.0
       typescript: 3.9.7
     specifiers:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@rushstack/eslint-config': 2.1.2
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0
       '@types/heft-jest': 1.0.1
       eslint: ~7.2.0
       typescript: ~3.9.7
@@ -1531,15 +1531,15 @@ importers:
       colors: 1.2.5
       string-argv: 0.3.1
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0_@rushstack+heft@0.14.0
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
     specifiers:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0
       '@types/argparse': 1.0.38
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
@@ -1667,19 +1667,19 @@ importers:
       typescript: ~3.9.7
   ../../stack/eslint-patch:
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0_@rushstack+heft@0.14.0
       '@types/node': 10.17.13
     specifiers:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0
       '@types/node': 10.17.13
   ../../stack/eslint-plugin:
     dependencies:
       '@rushstack/tree-pattern': 'link:../../libraries/tree-pattern'
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0_@rushstack+heft@0.14.0
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
       '@types/heft-jest': 1.0.1
@@ -1690,8 +1690,8 @@ importers:
       eslint: 7.2.0
       typescript: 3.9.7
     specifiers:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0
       '@rushstack/tree-pattern': 'workspace:*'
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
@@ -1706,8 +1706,8 @@ importers:
     dependencies:
       '@rushstack/tree-pattern': 'link:../../libraries/tree-pattern'
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0_@rushstack+heft@0.14.0
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
       '@types/heft-jest': 1.0.1
@@ -1718,8 +1718,8 @@ importers:
       eslint: 7.2.0
       typescript: 3.9.7
     specifiers:
-      '@microsoft/rush-stack-compiler-3.9': 0.4.22
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0
       '@rushstack/tree-pattern': 'workspace:*'
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
@@ -3026,6 +3026,17 @@ packages:
       node: '>=10.13.0'
     resolution:
       integrity: sha512-ssw5WIzSgwAOnQZcywrWTWZHf88rb9HNbxijla5QeVbvOONq8mvj/6JBIVxBwqZ2lTODnOsVcm6u8MRh0eljBA==
+  /@rushstack/heft-node-rig/0.1.0_@rushstack+heft@0.14.0:
+    dependencies:
+      '@microsoft/api-extractor': 7.10.0
+      '@rushstack/heft': 0.14.0
+      eslint: 7.2.0
+      typescript: 3.9.7
+    dev: true
+    peerDependencies:
+      '@rushstack/heft': ^0.14.0
+    resolution:
+      integrity: sha512-7jacbTz/sFgOQACx1oBdywvds35/OqK9r4wJ2uYVSshHWb1L0lA3t4muvTW4QZU2F+vpHbteZOY40gabloQMYQ==
   /@rushstack/heft/0.14.0:
     dependencies:
       '@jest/core': 25.4.0
@@ -3843,6 +3854,9 @@ packages:
   /abbrev/1.0.9:
     resolution:
       integrity: sha1-kbR5JYinc4wl813W9jdSovh3YTU=
+  /abbrev/1.1.1:
+    resolution:
+      integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==
   /accepts/1.3.7:
     dependencies:
       mime-types: 2.1.27
@@ -5456,7 +5470,6 @@ packages:
     dependencies:
       ms: 2.1.2
       supports-color: 6.1.0
-    dev: false
     engines:
       node: '>=6.0'
     peerDependencies:
@@ -9626,7 +9639,7 @@ packages:
       integrity: sha512-sjCuOlvGyCJS40R8BscF5vhVlQjNN069NtQ1gSxyK1u9iqvn6tf7O1R4GNowVZfiZUCRt5MmMs1xd+4V/7Yr0g==
   /nopt/3.0.6:
     dependencies:
-      abbrev: 1.0.9
+      abbrev: 1.1.1
     hasBin: true
     resolution:
       integrity: sha1-xkZdvwirzU2zWTF/eaxopkayj/k=
@@ -11621,6 +11634,7 @@ packages:
       obuf: 1.1.2
       readable-stream: 3.6.0
       wbuf: 1.7.3
+    dev: false
     peerDependencies:
       supports-color: '*'
     resolution:
@@ -11633,7 +11647,6 @@ packages:
       obuf: 1.1.2
       readable-stream: 3.6.0
       wbuf: 1.7.3
-    dev: false
     peerDependencies:
       supports-color: '*'
     resolution:
@@ -11645,6 +11658,7 @@ packages:
       http-deceiver: 1.2.7
       select-hose: 2.0.0
       spdy-transport: 3.0.0
+    dev: false
     engines:
       node: '>=6.0.0'
     peerDependencies:
@@ -11658,7 +11672,6 @@ packages:
       http-deceiver: 1.2.7
       select-hose: 2.0.0
       spdy-transport: 3.0.0_supports-color@6.1.0
-    dev: false
     engines:
       node: '>=6.0.0'
     peerDependencies:
@@ -13644,7 +13657,7 @@ packages:
       chokidar: 2.1.8
       compression: 1.7.4
       connect-history-api-fallback: 1.6.0
-      debug: 4.2.0_supports-color@6.1.0
+      debug: 4.2.0
       del: 4.1.1
       express: 4.17.1
       html-entities: 1.3.1
@@ -13664,7 +13677,7 @@ packages:
       serve-index: 1.9.1
       sockjs: 0.3.20
       sockjs-client: 1.4.0
-      spdy: 4.0.2_supports-color@6.1.0
+      spdy: 4.0.2
       strip-ansi: 3.0.1
       supports-color: 6.1.0
       url: 0.11.0
@@ -13693,7 +13706,7 @@ packages:
       chokidar: 2.1.8
       compression: 1.7.4
       connect-history-api-fallback: 1.6.0
-      debug: 4.2.0
+      debug: 4.2.0_supports-color@6.1.0
       del: 4.1.1
       express: 4.17.1
       html-entities: 1.3.1
@@ -13713,7 +13726,7 @@ packages:
       serve-index: 1.9.1
       sockjs: 0.3.20
       sockjs-client: 1.4.0
-      spdy: 4.0.2
+      spdy: 4.0.2_supports-color@6.1.0
       strip-ansi: 3.0.1
       supports-color: 6.1.0
       url: 0.11.0
