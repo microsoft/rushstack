@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Reclassify compiler messages TS2564 and TS7053 as warnings instead of errors",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
