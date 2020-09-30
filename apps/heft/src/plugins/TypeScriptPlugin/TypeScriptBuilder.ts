@@ -680,6 +680,15 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       return ts.DiagnosticCategory.Warning;
     }
 
+    // These pedantic checks also should not be treated as hard errors
+    switch (diagnostic.code) {
+      case ts.Diagnostics.Property_0_has_no_initializer_and_is_not_definitely_assigned_in_the_constructor
+        .code:
+      case ts.Diagnostics
+        .Element_implicitly_has_an_any_type_because_expression_of_type_0_can_t_be_used_to_index_type_1.code:
+        return ts.DiagnosticCategory.Warning;
+    }
+
     return diagnostic.category;
   }
 
