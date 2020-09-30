@@ -39,7 +39,7 @@
 
     "fileExtensions": {
       "type": "array",
-      "description": "Files with these extensions will pass through the Sass transpiler..",
+      "description": "Files with these extensions will pass through the Sass transpiler.",
       "items": {
         "type": "string",
         "pattern": "[^\\\\]"
