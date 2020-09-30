@@ -188,13 +188,13 @@ import { RigConfig } from '@rushstack/rig-package';
 // Probe for the rig.json file and load it if found
 const rigConfig: RigConfig = RigConfig.loadForProjectFolder({
   // Specify a  project folder (i.e. where its package.json file is located)
-  projectFolderPath: '/path/to/project3'
+  projectFolderPath: testProjectFolder
 });
 
 if (rigConfig.rigFound) {
   // We found a config/rig.json file
   //
-  // Prints "/path/to/project3"
+  // Prints "/path/to/project3/config/rig.json"
   console.log('Found rig.json: ' + rigConfig.filePath);
 
   // Prints "example-rig"
@@ -203,9 +203,15 @@ if (rigConfig.rigFound) {
   // Resolve the rig package
   //
   // Prints "/path/to/project3/node_modules/example-rig/profile/web-library"
-  console.log('Profile folder' + rigConfig.getResolvedProfileFolder());
+  console.log('Profile folder: ' + rigConfig.getResolvedProfileFolder());
 
-  // (Your tool can check this folder for its config file)
+  // Look up a config file.  These file paths will be tested:
+  //
+  //   /path/to/project3/folder/file.json
+  //   /path/to/project3/node_modules/example-rig/profile/web-library/folder/file.json
+  //
+  // The result will be the first path that exists, or undefined if the config file was not found.
+  console.log('Resolved config file: ' + rigConfig.tryResolveConfigFilePath('folder/file.json'));
 }
 ```
 
