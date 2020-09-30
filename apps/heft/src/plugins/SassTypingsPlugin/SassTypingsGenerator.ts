@@ -1,10 +1,13 @@
 import * as path from 'path';
 import { render, Result } from 'node-sass';
-import * as postcss from 'postcss';
-import * as cssModules from 'postcss-modules';
+import postcss from 'postcss';
+import cssModules from 'postcss-modules';
 import { StringValuesTypingsGenerator, IStringValueTypings } from '@rushstack/typings-generator';
 import { LegacyAdapters } from '@rushstack/node-core-library';
 
+/**
+ * @public
+ */
 export interface ISassConfiguration {
   /**
    * Source code root directory.
@@ -52,12 +55,16 @@ export interface ISassTypingsGeneratorOptions {
   sassConfiguration: ISassConfiguration;
 }
 
-/**
- * @internal
- */
 interface IClassMap {
   [className: string]: string;
 }
+
+interface ICssModulesOptions {
+  getJSON(cssFileName: string, json: IClassMap): void;
+  generateScopeName(name: string): string;
+}
+
+type TCssModules = (options: ICssModulesOptions) => TCssModules;
 
 /**
  * Generates type files (.d.ts) for Sass/SCSS/CSS files.
@@ -133,7 +140,7 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
 
   private async _getClassNamesFromCSSAsync(css: string, filePath: string): Promise<string[]> {
     let classMap: IClassMap = {};
-    const cssModulesClassMapPlugin: cssModules = cssModules({
+    const cssModulesClassMapPlugin: postcss.Plugin<TCssModules> = cssModules({
       getJSON: (cssFileName: string, json: IClassMap) => {
         classMap = json;
       },
