@@ -58,7 +58,7 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
 
     const apiExtractor: typeof TApiExtractor = require(this._configuration.apiExtractorPackagePath);
 
-    this._terminal.writeLine(`Using API Extractor version ${apiExtractor.Extractor.version}`);
+    this._scopedLogger.terminal.writeLine(`Using API Extractor version ${apiExtractor.Extractor.version}`);
 
     const apiExtractorVersion: semver.SemVer | null = semver.parse(apiExtractor.Extractor.version);
     if (
