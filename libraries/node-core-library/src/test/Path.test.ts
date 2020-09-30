@@ -50,13 +50,16 @@ describe('Path', () => {
     test('Positive cases', () => {
       expect(Path.isDownwardRelative('folder')).toEqual(true);
       expect(Path.isDownwardRelative('folder/')).toEqual(true);
-      expect(Path.isDownwardRelative('folder\\')).toEqual(true);
       expect(Path.isDownwardRelative('./folder')).toEqual(true);
-      expect(Path.isDownwardRelative('.\\folder')).toEqual(true);
       expect(Path.isDownwardRelative('./folder/file')).toEqual(true);
-      expect(Path.isDownwardRelative('.\\folder\\file')).toEqual(true);
       expect(Path.isDownwardRelative('./folder/file')).toEqual(true);
-      expect(Path.isDownwardRelative('.\\folder\\file')).toEqual(true);
+
+      if (os.platform() === 'win32') {
+        expect(Path.isDownwardRelative('folder\\')).toEqual(true);
+        expect(Path.isDownwardRelative('.\\folder')).toEqual(true);
+        expect(Path.isDownwardRelative('.\\folder\\file')).toEqual(true);
+        expect(Path.isDownwardRelative('.\\folder\\file')).toEqual(true);
+      }
     });
     test('Degenerate positive cases', () => {
       expect(Path.isDownwardRelative('folder/degenerate...')).toEqual(true);
@@ -71,15 +74,18 @@ describe('Path', () => {
     });
     test('Negative cases', () => {
       expect(Path.isDownwardRelative('../folder')).toEqual(false);
-      expect(Path.isDownwardRelative('..\\folder')).toEqual(false);
       expect(Path.isDownwardRelative('../folder/folder')).toEqual(false);
-      expect(Path.isDownwardRelative('..\\folder\\folder')).toEqual(false);
       expect(Path.isDownwardRelative('folder/../folder')).toEqual(false);
-      expect(Path.isDownwardRelative('folder\\..\\folder')).toEqual(false);
       expect(Path.isDownwardRelative('/folder/file')).toEqual(false);
-      expect(Path.isDownwardRelative('\\folder\\file')).toEqual(false);
-      expect(Path.isDownwardRelative('C:/folder/file')).toEqual(false);
-      expect(Path.isDownwardRelative('C:\\folder\\file')).toEqual(false);
+
+      if (os.platform() === 'win32') {
+        expect(Path.isDownwardRelative('C:/folder/file')).toEqual(false);
+        expect(Path.isDownwardRelative('..\\folder')).toEqual(false);
+        expect(Path.isDownwardRelative('..\\folder\\folder')).toEqual(false);
+        expect(Path.isDownwardRelative('folder\\..\\folder')).toEqual(false);
+        expect(Path.isDownwardRelative('\\folder\\file')).toEqual(false);
+        expect(Path.isDownwardRelative('C:\\folder\\file')).toEqual(false);
+      }
     });
   });
   describe('formatConcisely', () => {
