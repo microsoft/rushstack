@@ -2,8 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as glob from 'glob';
-import * as globEscape from 'glob-escape';
+import glob from 'glob';
 import { FileSystem, LegacyAdapters } from '@rushstack/node-core-library';
 import { Tap } from 'tapable';
 
@@ -21,6 +20,8 @@ import {
   IPostBuildSubstage,
   IPreCompileSubstage
 } from '../stages/BuildStage';
+
+const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
 
 const PLUGIN_NAME: string = 'DeleteGlobsPlugin';
 const HEFT_STAGE_TAP: Tap = {

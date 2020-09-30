@@ -108,7 +108,8 @@ function expectPropertiesToMatchSnapshot(object: {}, propertyNames: string[]): v
   const snapshotObject: {} = {};
 
   for (const propertyName of propertyNames) {
-    snapshotObject[propertyName] = object[propertyName];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (snapshotObject as any)[propertyName] = (object as any)[propertyName];
   }
   expect(snapshotObject).toMatchSnapshot();
 }

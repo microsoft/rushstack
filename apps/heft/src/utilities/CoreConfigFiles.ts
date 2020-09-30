@@ -2,7 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { ConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
+import {
+  ConfigurationFile,
+  IConfigurationFileOptions,
+  InheritanceType,
+  PathResolutionMethod
+} from '@rushstack/heft-config-file';
 
 import { IApiExtractorPluginConfiguration } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
 import { ITypeScriptConfigurationJson } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
@@ -191,7 +196,7 @@ export class CoreConfigFiles {
             }
           }
         }
-      });
+      } as IConfigurationFileOptions<ITypeScriptConfigurationJson>);
     }
 
     return CoreConfigFiles._typeScriptConfigurationFileLoader;

@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import * as colors from 'colors';
+import colors from 'colors';
 
 import { ApiExtractorCommandLine } from './cli/ApiExtractorCommandLine';
 import { Extractor } from './api/Extractor';

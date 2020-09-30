@@ -64,13 +64,13 @@ export interface ICompilerPackage {
  * @public
  */
 export class HeftConfiguration {
-  private _buildFolder: string;
+  private _buildFolder!: string;
   private _projectHeftDataFolder: string | undefined;
   private _projectConfigFolder: string | undefined;
   private _buildCacheFolder: string | undefined;
   private _rigConfig: RigConfig | undefined;
-  private _globalTerminal: Terminal;
-  private _terminalProvider: ITerminalProvider;
+  private _globalTerminal!: Terminal;
+  private _terminalProvider!: ITerminalProvider;
 
   private _compilerPackage: ICompilerPackage | undefined;
   private _hasCompilerPackageBeenAccessed: boolean = false;

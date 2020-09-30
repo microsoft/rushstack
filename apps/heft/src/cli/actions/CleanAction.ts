@@ -7,7 +7,7 @@ import { HeftActionBase, IHeftActionBaseOptions } from './HeftActionBase';
 import { CleanStage, ICleanStageOptions } from '../../stages/CleanStage';
 
 export class CleanAction extends HeftActionBase {
-  private _deleteCacheFlag: CommandLineFlagParameter;
+  private _deleteCacheFlag!: CommandLineFlagParameter;
 
   public constructor(options: IHeftActionBaseOptions) {
     super(

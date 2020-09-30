@@ -45,6 +45,7 @@ export class PreCompileHardlinkOrCopyPlugin implements IHeftPlugin<IPreCompileHa
   }
 
   public readonly displayName: string = PLUGIN_NAME;
+  public readonly pluginName: string = PLUGIN_NAME;
 
   public apply(
     heftSession: HeftSession,

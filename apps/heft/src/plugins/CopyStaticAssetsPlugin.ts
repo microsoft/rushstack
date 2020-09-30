@@ -2,8 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { LegacyAdapters, FileSystem, Terminal } from '@rushstack/node-core-library';
-import * as glob from 'glob';
-import * as globEscape from 'glob-escape';
+import glob from 'glob';
 import * as path from 'path';
 import * as chokidar from 'chokidar';
 
@@ -16,6 +15,8 @@ import { IBuildStageContext, ICompileSubstage } from '../stages/BuildStage';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import { CoreConfigFiles } from '../utilities/CoreConfigFiles';
 import { ITypeScriptConfigurationJson } from './TypeScriptPlugin/TypeScriptPlugin';
+
+const globEscape: (unescaped: string[]) => string[] = require('glob-escape'); // No @types/glob-escape package exists
 
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
 

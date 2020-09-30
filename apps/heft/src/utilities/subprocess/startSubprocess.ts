@@ -16,7 +16,8 @@ const [
   serializedSubprocessConfiguration
 ] = process.argv;
 
-const subprocessRunnerModule: object = require(subprocessModulePath);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const subprocessRunnerModule: any = require(subprocessModulePath);
 const subprocessRunnerModuleExports: string[] = Object.getOwnPropertyNames(subprocessRunnerModule).filter(
   (exportName) => exportName !== '__esModule'
 );
@@ -49,4 +50,4 @@ const subprocessRunner: SubprocessRunnerSubclass = SubprocessRunnerClass.initial
   subprocessConfiguration
 );
 
-subprocessRunner[SUBPROCESS_RUNNER_INNER_INVOKE].call(subprocessRunner);
+subprocessRunner[SUBPROCESS_RUNNER_INNER_INVOKE].call(subprocessRunner).catch(console.error);

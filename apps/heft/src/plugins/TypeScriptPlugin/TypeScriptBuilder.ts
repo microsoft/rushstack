@@ -15,7 +15,7 @@ import {
   Path
 } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
-import { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.9';
+import type { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.9';
 import {
   ExtendedTypeScript,
   IExtendedProgram,
@@ -95,22 +95,22 @@ interface IExtendedEmitResult extends TTypescript.EmitResult {
 }
 
 export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderConfiguration> {
-  private _typescriptVersion: string;
-  private _typescriptParsedVersion: semver.SemVer;
+  private _typescriptVersion!: string;
+  private _typescriptParsedVersion!: semver.SemVer;
 
-  private _capabilities: ICompilerCapabilities;
-  private _useIncrementalProgram: boolean;
+  private _capabilities!: ICompilerCapabilities;
+  private _useIncrementalProgram!: boolean;
 
-  private _eslintEnabled: boolean;
-  private _tslintEnabled: boolean;
-  private _moduleKindsToEmit: ICachedEmitModuleKind[];
-  private _eslintConfigFilePath: string;
-  private _tslintConfigFilePath: string;
-  private _typescriptLogger: IScopedLogger;
-  private _typescriptTerminal: Terminal;
+  private _eslintEnabled!: boolean;
+  private _tslintEnabled!: boolean;
+  private _moduleKindsToEmit!: ICachedEmitModuleKind[];
+  private _eslintConfigFilePath!: string;
+  private _tslintConfigFilePath!: string;
+  private _typescriptLogger!: IScopedLogger;
+  private _typescriptTerminal!: Terminal;
   private _firstEmitCompletedCallbackManager: FirstEmitCompletedCallbackManager;
 
-  private __tsCacheFilePath: string;
+  private __tsCacheFilePath!: string;
   private _tsReadJsonCache: Map<string, object> = new Map<string, object>();
   private _cachedFileSystem: TypeScriptCachedFileSystem = new TypeScriptCachedFileSystem();
 
@@ -914,7 +914,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         const originalWriteFile: TTypescript.WriteFileCallback = compilerHost.writeFile;
         compilerHost.writeFile = (filePath: string, ...rest: unknown[]) => {
           const redirectedFilePath: string = EmitFilesPatch.getRedirectedFilePath(filePath);
-          originalWriteFile.call(this, redirectedFilePath, ...rest);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (originalWriteFile as any).call(this, redirectedFilePath, ...rest);
         };
 
         return ts.createEmitAndSemanticDiagnosticsBuilderProgram(

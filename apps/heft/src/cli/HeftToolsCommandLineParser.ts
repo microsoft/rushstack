@@ -44,10 +44,9 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
   private _internalHeftSession: InternalHeftSession;
   private _heftLifecycleHook: SyncHook<IHeftLifecycle>;
 
-  // @ts-ignore (TS6133) '_unmanagedFlag' is declared but its value is never read.
-  private _unmanagedFlag: CommandLineFlagParameter;
-  private _debugFlag: CommandLineFlagParameter;
-  private _pluginsParameter: CommandLineStringListParameter;
+  private _unmanagedFlag!: CommandLineFlagParameter;
+  private _debugFlag!: CommandLineFlagParameter;
+  private _pluginsParameter!: CommandLineStringListParameter;
 
   public get isDebug(): boolean {
     return this._debugFlag.value;
@@ -84,7 +83,6 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       terminal: this._terminal,
       loggingManager: this._loggingManager,
       metricsCollector: this._metricsCollector,
-      pluginManager: this._pluginManager,
       heftConfiguration: this._heftConfiguration,
       stages
     };

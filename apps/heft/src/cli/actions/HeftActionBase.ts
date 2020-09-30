@@ -27,7 +27,6 @@ import { performance } from 'perf_hooks';
 
 import { MetricsCollector } from '../../metrics/MetricsCollector';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
-import { PluginManager } from '../../pluginFramework/PluginManager';
 import { BuildStage } from '../../stages/BuildStage';
 import { CleanStage } from '../../stages/CleanStage';
 import { TestStage } from '../../stages/TestStage';
@@ -45,7 +44,6 @@ export interface IHeftActionBaseOptions {
   loggingManager: LoggingManager;
   metricsCollector: MetricsCollector;
   heftConfiguration: HeftConfiguration;
-  pluginManager: PluginManager;
   stages: IStages;
 }
 
@@ -55,7 +53,7 @@ export abstract class HeftActionBase extends CommandLineAction {
   protected readonly metricsCollector: MetricsCollector;
   protected readonly heftConfiguration: HeftConfiguration;
   protected readonly stages: IStages;
-  protected verboseFlag: CommandLineFlagParameter;
+  protected verboseFlag!: CommandLineFlagParameter;
 
   public constructor(
     commandLineOptions: ICommandLineActionOptions,

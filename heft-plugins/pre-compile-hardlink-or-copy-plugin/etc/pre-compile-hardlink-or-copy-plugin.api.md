@@ -29,6 +29,8 @@ export class PreCompileHardlinkOrCopyPlugin implements IHeftPlugin<IPreCompileHa
     apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration, options?: IPreCompileHardlinkOrCopyPluginOptions): void;
     // (undocumented)
     readonly displayName: string;
+    // (undocumented)
+    readonly pluginName: string;
     }
 
 

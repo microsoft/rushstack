@@ -268,8 +268,10 @@ export class ConfigurationFile<TConfigurationFile> {
    * loaded from.
    */
   public getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined {
-    const annotation: IConfigurationFileFieldAnnotation<TObject> | undefined =
-      obj[CONFIGURATION_FILE_FIELD_ANNOTATION];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const annotation: IConfigurationFileFieldAnnotation<TObject> | undefined = (obj as any)[
+      CONFIGURATION_FILE_FIELD_ANNOTATION
+    ];
     if (annotation) {
       return annotation.configurationFilePath;
     }
@@ -285,7 +287,8 @@ export class ConfigurationFile<TConfigurationFile> {
     options: IOriginalValueOptions<TParentProperty>
   ): TValue {
     const annotation: IConfigurationFileFieldAnnotation<TParentProperty> | undefined =
-      options.parentObject[CONFIGURATION_FILE_FIELD_ANNOTATION];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (options.parentObject as any)[CONFIGURATION_FILE_FIELD_ANNOTATION];
     if (annotation && annotation.originalValues.hasOwnProperty(options.propertyName)) {
       return annotation.originalValues[options.propertyName] as TValue;
     }
@@ -391,7 +394,8 @@ export class ConfigurationFile<TConfigurationFile> {
         json: configurationJson,
         callback: (payload: unknown, payloadType: string, fullPayload: IJsonPathCallbackObject) => {
           if (metadata.pathResolutionMethod !== undefined) {
-            fullPayload.parent[fullPayload.parentProperty] = this._resolvePathProperty(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (fullPayload.parent as any)[fullPayload.parentProperty] = this._resolvePathProperty(
               resolvedConfigurationFilePath,
               fullPayload.value,
               metadata.pathResolutionMethod
@@ -446,22 +450,26 @@ export class ConfigurationFile<TConfigurationFile> {
         continue;
       }
 
-      const propertyValue: unknown | undefined = configurationJson[propertyName];
-      const parentPropertyValue: unknown | undefined = parentConfiguration[propertyName];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const propertyValue: unknown | undefined = (configurationJson as any)[propertyName];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const parentPropertyValue: unknown | undefined = (parentConfiguration as any)[propertyName];
 
       const bothAreArrays: boolean = Array.isArray(propertyValue) && Array.isArray(parentPropertyValue);
       const defaultInheritanceType: IPropertyInheritance<InheritanceType> = bothAreArrays
         ? { inheritanceType: InheritanceType.append }
         : { inheritanceType: InheritanceType.replace };
       const propertyInheritance: IPropertyInheritance<InheritanceType> =
-        this._propertyInheritanceTypes[propertyName] !== undefined
-          ? this._propertyInheritanceTypes[propertyName]
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (this._propertyInheritanceTypes as any)[propertyName] !== undefined
+          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (this._propertyInheritanceTypes as any)[propertyName]
           : defaultInheritanceType;
 
       let newValue: unknown;
       const usePropertyValue: () => void = () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        resultAnnotation.originalValues[propertyName] = this.getPropertyOriginalValue<any, any>({
+        (resultAnnotation.originalValues as any)[propertyName] = this.getPropertyOriginalValue<any, any>({
           parentObject: configurationJson,
           propertyName: propertyName
         });
@@ -469,7 +477,7 @@ export class ConfigurationFile<TConfigurationFile> {
       };
       const useParentPropertyValue: () => void = () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        resultAnnotation.originalValues[propertyName] = this.getPropertyOriginalValue<any, any>({
+        (resultAnnotation.originalValues as any)[propertyName] = this.getPropertyOriginalValue<any, any>({
           parentObject: parentConfiguration,
           propertyName: propertyName
         });
@@ -509,8 +517,10 @@ export class ConfigurationFile<TConfigurationFile> {
               ((newValue as unknown) as IAnnotatedField<unknown[]>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
                 configurationFilePath: undefined,
                 originalValues: {
-                  ...parentPropertyValue[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues,
-                  ...propertyValue[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  ...(parentPropertyValue as any)[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues,
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  ...(propertyValue as any)[CONFIGURATION_FILE_FIELD_ANNOTATION].originalValues
                 }
               };
             }
@@ -542,7 +552,8 @@ export class ConfigurationFile<TConfigurationFile> {
         }
       }
 
-      result[propertyName] = newValue;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (result as any)[propertyName] = newValue;
     }
 
     try {

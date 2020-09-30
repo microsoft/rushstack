@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as webpack from 'webpack';
-import /* type */ * as TWebpackDevServer from 'webpack-dev-server';
+import webpack from 'webpack';
+import type TWebpackDevServer from 'webpack-dev-server';
 import { LegacyAdapters } from '@rushstack/node-core-library';
 
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
@@ -79,7 +79,7 @@ export class WebpackPlugin implements IHeftPlugin {
       // use of that to make logging cleaner
       const devServer: TWebpackDevServer = new WebpackDevServer(compiler, options);
       await new Promise((resolve: () => void, reject: (error: Error) => void) => {
-        devServer.listen(options.port!, options.host!, (error: Error) => {
+        devServer.listen(options.port!, options.host!, (error: Error | undefined) => {
           if (error) {
             reject(error);
           }

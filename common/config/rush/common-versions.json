@@ -84,6 +84,13 @@
 
     "source-map": [
       "~0.6.1" // API Extractor is using an older version of source-map because newer versions are async
+    ],
+
+    "@rushstack/heft": [
+      // This is needed for the rush-stack-compiler-x.x projects which cannot build using
+      // the latest Heft due to a regression from PR #2073 that prevents the same plugin from
+      // being applied multiple times
+      "0.8.0"
     ]
   }
 }
