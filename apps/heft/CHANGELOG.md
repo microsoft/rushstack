@@ -1,6 +1,15 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 30 Sep 2020 06:53:53 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+
+## 0.14.1
+Wed, 30 Sep 2020 18:39:17 GMT
+
+### Patches
+
+- Update to build with @rushstack/heft-node-rig
+- Reclassify compiler messages TS2564 and TS7053 as warnings instead of errors
+- Print a warning if the API Extractor version is too old
 
 ## 0.14.0
 Wed, 30 Sep 2020 06:53:53 GMT

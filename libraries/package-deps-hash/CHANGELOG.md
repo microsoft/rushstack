@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Wed, 30 Sep 2020 06:53:53 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+
+## 2.4.70
+Wed, 30 Sep 2020 18:39:17 GMT
+
+### Patches
+
+- Update to build with @rushstack/heft-node-rig
 
 ## 2.4.69
 Wed, 30 Sep 2020 06:53:53 GMT

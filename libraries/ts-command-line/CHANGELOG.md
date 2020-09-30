@@ -1,6 +1,13 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Wed, 30 Sep 2020 06:53:53 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+
+## 4.7.1
+Wed, 30 Sep 2020 18:39:17 GMT
+
+### Patches
+
+- Update to build with @rushstack/heft-node-rig
 
 ## 4.7.0
 Wed, 30 Sep 2020 06:53:53 GMT

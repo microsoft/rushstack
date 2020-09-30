@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 30 Sep 2020 06:53:53 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+
+## 7.10.1
+Wed, 30 Sep 2020 18:39:17 GMT
+
+### Patches
+
+- Update to build with @rushstack/heft-node-rig
 
 ## 7.10.0
 Wed, 30 Sep 2020 06:53:53 GMT
