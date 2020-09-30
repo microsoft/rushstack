@@ -1,0 +1,11 @@
+{
+  "name": "project-referencing-rig",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "test-rig": "1.0.0"
+  },
+  "author": "",
+  "license": "ISC"
+}

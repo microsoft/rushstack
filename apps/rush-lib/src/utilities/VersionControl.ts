@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
-import * as colors from 'colors';
+import colors from 'colors';
 import { Executable, Path } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../api/RushConfiguration';
 

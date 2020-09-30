@@ -1,6 +1,21 @@
 # Change Log - @rushstack/eslint-plugin-security
 
-This log was last generated on Sat, 19 Sep 2020 04:37:26 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+
+## 0.1.3
+Wed, 30 Sep 2020 18:39:17 GMT
+
+### Patches
+
+- Update to build with @rushstack/heft-node-rig
+
+## 0.1.2
+Wed, 30 Sep 2020 06:53:53 GMT
+
+### Patches
+
+- Include missing "License" field.
+- Update README.md
 
 ## 0.1.1
 Sat, 19 Sep 2020 04:37:26 GMT

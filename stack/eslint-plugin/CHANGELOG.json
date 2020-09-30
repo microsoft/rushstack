@@ -2,6 +2,43 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.7.2",
+      "tag": "@rushstack/eslint-plugin_v0.7.2",
+      "date": "Wed, 30 Sep 2020 18:39:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update to build with @rushstack/heft-node-rig"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.1",
+      "tag": "@rushstack/eslint-plugin_v0.7.1",
+      "date": "Wed, 30 Sep 2020 06:53:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include missing \"License\" field."
+          },
+          {
+            "comment": "Update README.md"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.0",
       "tag": "@rushstack/eslint-plugin_v0.7.0",
       "date": "Tue, 22 Sep 2020 01:45:31 GMT",

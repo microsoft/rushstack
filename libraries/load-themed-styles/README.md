@@ -59,6 +59,10 @@ window.CSPSettings = {
 };
 ```
 
-## License
+## Links
 
-MIT © [Microsoft](http://github.com/microsoft)
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/libraries/load-themed-styles/CHANGELOG.md) - Find
+  out what's new in the latest version
+
+`@microsoft/load-themed-styles` is part of the [Rush Stack](https://rushstack.io/) family of projects.

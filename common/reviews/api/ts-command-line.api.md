@@ -35,10 +35,10 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
     readonly defaultValue: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    readonly kind: CommandLineParameterKind;
+    get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: any): void;
-    readonly value: string | undefined;
+    get value(): string | undefined;
     }
 
 // @public
@@ -52,10 +52,10 @@ export class CommandLineFlagParameter extends CommandLineParameter {
     constructor(definition: ICommandLineFlagDefinition);
     // @override
     appendToArgList(argList: string[]): void;
-    readonly kind: CommandLineParameterKind;
+    get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: any): void;
-    readonly value: boolean;
+    get value(): boolean;
     }
 
 // @public
@@ -72,10 +72,10 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
     readonly defaultValue: number | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    readonly kind: CommandLineParameterKind;
+    get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: any): void;
-    readonly value: number | undefined;
+    get value(): number | undefined;
     }
 
 // @public
@@ -87,10 +87,10 @@ export abstract class CommandLineParameter {
     readonly environmentVariable: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    abstract readonly kind: CommandLineParameterKind;
+    abstract get kind(): CommandLineParameterKind;
     readonly longName: string;
     // @internal
-    _parserKey: string;
+    _parserKey: string | undefined;
     protected reportInvalidData(data: any): never;
     readonly required: boolean;
     // @internal
@@ -128,10 +128,10 @@ export abstract class CommandLineParameterProvider {
     getStringListParameter(parameterLongName: string): CommandLineStringListParameter;
     getStringParameter(parameterLongName: string): CommandLineStringParameter;
     protected abstract onDefineParameters(): void;
-    readonly parameters: ReadonlyArray<CommandLineParameter>;
+    get parameters(): ReadonlyArray<CommandLineParameter>;
     // @internal (undocumented)
     protected _processParsedData(data: _ICommandLineParserData): void;
-    readonly remainder: CommandLineRemainder | undefined;
+    get remainder(): CommandLineRemainder | undefined;
     renderHelpText(): string;
 }
 
@@ -146,7 +146,7 @@ export abstract class CommandLineParameterWithArgument extends CommandLineParame
 // @public
 export abstract class CommandLineParser extends CommandLineParameterProvider {
     constructor(options: ICommandLineParserOptions);
-    readonly actions: ReadonlyArray<CommandLineAction>;
+    get actions(): ReadonlyArray<CommandLineAction>;
     addAction(action: CommandLineAction): void;
     execute(args?: string[]): Promise<boolean>;
     executeWithoutErrorHandling(args?: string[]): Promise<void>;
@@ -167,7 +167,7 @@ export class CommandLineRemainder {
     readonly description: string;
     // @internal
     _setValue(data: any): void;
-    readonly values: ReadonlyArray<string>;
+    get values(): ReadonlyArray<string>;
     }
 
 // @public
@@ -176,10 +176,10 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
     constructor(definition: ICommandLineStringListDefinition);
     // @override
     appendToArgList(argList: string[]): void;
-    readonly kind: CommandLineParameterKind;
+    get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: any): void;
-    readonly values: ReadonlyArray<string>;
+    get values(): ReadonlyArray<string>;
     }
 
 // @public
@@ -191,10 +191,10 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
     readonly defaultValue: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    readonly kind: CommandLineParameterKind;
+    get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: any): void;
-    readonly value: string | undefined;
+    get value(): string | undefined;
     }
 
 // @public (undocumented)

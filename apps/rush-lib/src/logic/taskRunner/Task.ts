@@ -33,12 +33,12 @@ export class Task {
    * A set of all dependencies which must be executed before this task is complete.
    * When dependencies finish execution, they are removed from this list.
    */
-  public dependencies: Set<Task>;
+  public dependencies: Set<Task> = new Set<Task>();
 
   /**
    * The inverse of dependencies, lists all projects which are directly dependent on this one.
    */
-  public dependents: Set<Task>;
+  public dependents: Set<Task> = new Set<Task>();
 
   /**
    * This number represents how far away this Task is from the furthest "root" project (i.e.
@@ -80,14 +80,19 @@ export class Task {
   /**
    * The task writer which contains information from the output streams of this task
    */
-  public collatedWriter: CollatedWriter;
+  public collatedWriter!: CollatedWriter;
 
-  public stdioSummarizer: StdioSummarizer;
+  public stdioSummarizer!: StdioSummarizer;
 
   /**
    * The stopwatch which measures how long it takes the task to execute
    */
-  public stopwatch: Stopwatch;
+  public stopwatch!: Stopwatch;
+
+  public constructor(builder: BaseBuilder, initialStatus: TaskStatus) {
+    this.builder = builder;
+    this.status = initialStatus;
+  }
 
   public get name(): string {
     return this.builder.name;

@@ -49,7 +49,7 @@ const TAP_AFTER: Tap = {
 
 interface IExtendedChunkTemplate {
   hooks: {
-    modules: SyncWaterfallHook<webpack.compilation.Module[], webpack.compilation.Chunk>;
+    modules: SyncWaterfallHook<Source, webpack.compilation.Chunk>;
   };
 }
 
@@ -196,10 +196,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
       /**
        * Callback to invoke for a chunk during render to replace the modules with CHUNK_MODULES_TOKEN
        */
-      function dehydrateAsset(
-        modules: webpack.compilation.Module[],
-        chunk: webpack.compilation.Chunk
-      ): Source {
+      function dehydrateAsset(modules: Source, chunk: webpack.compilation.Chunk): Source {
         for (const mod of chunk.modulesIterable) {
           if (!submittedModules.has(mod.id)) {
             console.error(`Chunk ${chunk.id} failed to render module ${mod.id} for ${mod.resourcePath}`);
@@ -278,9 +275,9 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
                       ? new SourceMapSource(
                           minified, // Code
                           nameForMap, // File
-                          minifierMap, // Base source map
+                          minifierMap!, // Base source map
                           sourceForMap, // Source from before transform
-                          map, // Source Map from before transform
+                          map!, // Source Map from before transform
                           false // Remove original source
                         )
                       : new RawSource(minified);
@@ -357,7 +354,11 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
 
             const chunkModules: (string | number)[] = Array.from(chunkModuleSet);
             // Sort by id before rehydration in case we rehydrate a given chunk multiple times
-            chunkModules.sort(hasNonNumber ? stringifyIdSortPredicate : (x: number, y: number) => x - y);
+            chunkModules.sort(
+              hasNonNumber
+                ? stringifyIdSortPredicate
+                : (x: string | number, y: string | number) => (x as number) - (y as number)
+            );
 
             for (const assetName of chunk.files) {
               const asset: Source = compilation.assets[assetName];
@@ -366,7 +367,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
               if (/\.m?js(\?.+)?$/.test(assetName)) {
                 ++pendingMinificationRequests;
 
-                const rawCode: string = asset.source();
+                const rawCode: string = asset.source() as string;
                 const nameForMap: string = `(chunks)/${assetName}`;
 
                 const hash: string = hashCodeFragment(rawCode);
@@ -399,7 +400,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
                           ? new SourceMapSource(
                               minified, // Code
                               nameForMap, // File
-                              minifierMap, // Base source map
+                              minifierMap!, // Base source map
                               codeForMap, // Source from before transform
                               undefined, // Source Map from before transform
                               false // Remove original source

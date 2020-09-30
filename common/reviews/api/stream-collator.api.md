@@ -21,10 +21,10 @@ export class CollatedTerminal {
 // @beta
 export class CollatedWriter extends TerminalWritable {
     constructor(taskName: string, collator: StreamCollator);
-    readonly bufferedChunks: ReadonlyArray<ITerminalChunk>;
+    get bufferedChunks(): ReadonlyArray<ITerminalChunk>;
     // @internal (undocumented)
     _flushBufferedChunks(): void;
-    readonly isActive: boolean;
+    get isActive(): boolean;
     // (undocumented)
     onClose(): void;
     // (undocumented)
@@ -44,8 +44,8 @@ export interface IStreamCollatorOptions {
 // @beta
 export class StreamCollator {
     constructor(options: IStreamCollatorOptions);
-    readonly activeTaskName: string;
-    readonly activeWriter: CollatedWriter | undefined;
+    get activeTaskName(): string;
+    get activeWriter(): CollatedWriter | undefined;
     // (undocumented)
     readonly destination: TerminalWritable;
     registerTask(taskName: string): CollatedWriter;
@@ -53,7 +53,7 @@ export class StreamCollator {
     readonly terminal: CollatedTerminal;
     // @internal (undocumented)
     _writerClose(writer: CollatedWriter, bufferedChunks: ITerminalChunk[]): void;
-    readonly writers: ReadonlySet<CollatedWriter>;
+    get writers(): ReadonlySet<CollatedWriter>;
     // @internal (undocumented)
     _writerWriteChunk(writer: CollatedWriter, chunk: ITerminalChunk, bufferedChunks: ITerminalChunk[]): void;
 }

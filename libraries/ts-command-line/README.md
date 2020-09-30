@@ -235,13 +235,17 @@ commandLineParser.execute(process.argv).then(() => {
 You can also mix the two models.  For example, we could augment the `WidgetCommandLine` from the original model by adding `DynamicAction` objects to it.
 
 
-### Further reading
+## Links
 
-The [API reference](https://rushstack.io/pages/api/ts-command-line/) has
-complete documentation for the library.
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/libraries/ts-command-line/CHANGELOG.md) - Find
+  out what's new in the latest version
+- [API Reference](https://rushstack.io/pages/api/ts-command-line/)
 
 Here are some real world GitHub projects that illustrate different use cases for **ts-command-line**:
 
 - [@microsoft/rush](https://www.npmjs.com/package/@microsoft/rush)
 - [@microsoft/api-extractor](https://www.npmjs.com/package/@microsoft/api-extractor)
 - [@microsoft/api-documenter](https://www.npmjs.com/package/@microsoft/api-documenter)
+
+`@rushstack/ts-command-line` is part of the [Rush Stack](https://rushstack.io/) family of projects.

@@ -8,6 +8,7 @@
     "start": "heft start"
   },
   "devDependencies": {
+    "@microsoft/rush-stack-compiler-3.9": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/heft-jest": "1.0.1",
@@ -25,7 +26,6 @@
     "react": "~16.13.1",
     "sass-loader": "~7.3.1",
     "style-loader": "~1.2.1",
-    "typescript": "~3.9.5",
     "webpack": "~4.31.0"
   },
   "dependencies": {

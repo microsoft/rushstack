@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as globEscape from 'glob-escape';
 import * as os from 'os';
 import * as path from 'path';
 import { FileSystem, Sort, Text, Import } from '@rushstack/node-core-library';
@@ -10,6 +9,8 @@ import { BaseWorkspaceFile } from '../base/BaseWorkspaceFile';
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
+
+const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
 
 /**
  * This interface represents the raw pnpm-workspace.YAML file

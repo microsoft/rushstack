@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { LegacyAdapters, FileSystem } from '@rushstack/node-core-library';
-import * as glob from 'glob';
-import * as globEscape from 'glob-escape';
+import { LegacyAdapters, FileSystem, Terminal } from '@rushstack/node-core-library';
+import glob from 'glob';
 import * as path from 'path';
 import * as chokidar from 'chokidar';
 
@@ -14,7 +13,10 @@ import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IBuildStageContext, ICompileSubstage } from '../stages/BuildStage';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
-import { HeftConfigFiles } from '../utilities/HeftConfigFiles';
+import { CoreConfigFiles } from '../utilities/CoreConfigFiles';
+import { ITypeScriptConfigurationJson } from './TypeScriptPlugin/TypeScriptPlugin';
+
+const globEscape: (unescaped: string[]) => string[] = require('glob-escape'); // No @types/glob-escape package exists
 
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
 
@@ -35,8 +37,6 @@ export interface ISharedCopyStaticAssetsConfiguration {
    */
   includeGlobs?: string[];
 }
-
-export interface ICopyStaticAssetsConfigurationJson extends ISharedCopyStaticAssetsConfiguration {}
 
 interface ICopyStaticAssetsConfiguration extends ISharedCopyStaticAssetsConfiguration {
   /**
@@ -77,7 +77,8 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
           const logger: ScopedLogger = heftSession.requestScopedLogger('copy-static-assets');
 
           const copyStaticAssetsConfiguration: ICopyStaticAssetsConfiguration = await this._loadCopyStaticAssetsConfigurationAsync(
-            heftConfiguration.buildFolder
+            logger.terminal,
+            heftConfiguration
           );
           await this._runCopyAsync({
             logger,
@@ -91,22 +92,19 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
   }
 
   private async _loadCopyStaticAssetsConfigurationAsync(
-    buildFolder: string
+    terminal: Terminal,
+    heftConfiguration: HeftConfiguration
   ): Promise<ICopyStaticAssetsConfiguration> {
-    const copyStaticAssetsConfigurationPath: string = path.resolve(
-      buildFolder,
-      '.heft',
-      'copy-static-assets.json'
+    const typescriptConfiguration:
+      | ITypeScriptConfigurationJson
+      | undefined = await CoreConfigFiles.typeScriptConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
+      terminal,
+      heftConfiguration.buildFolder,
+      heftConfiguration.rigConfig
     );
-    let copyStaticAssetsConfigurationJson: ICopyStaticAssetsConfigurationJson | undefined;
-    if (await FileSystem.existsAsync(copyStaticAssetsConfigurationPath)) {
-      copyStaticAssetsConfigurationJson = await HeftConfigFiles.copyStaticAssetsConfigurationLoader.loadConfigurationFileAsync(
-        copyStaticAssetsConfigurationPath
-      );
-    }
 
     return {
-      ...copyStaticAssetsConfigurationJson,
+      ...typescriptConfiguration?.staticAssetsToCopy,
 
       // For now - these may need to be revised later
       sourceFolderName: 'src',

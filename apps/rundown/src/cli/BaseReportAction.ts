@@ -12,10 +12,10 @@ import {
 } from '@rushstack/ts-command-line';
 
 export abstract class BaseReportAction extends CommandLineAction {
-  protected scriptParameter: CommandLineStringParameter;
-  protected argsParameter: CommandLineStringParameter;
-  protected quietParameter: CommandLineFlagParameter;
-  protected ignoreExitCodeParameter: CommandLineFlagParameter;
+  protected scriptParameter!: CommandLineStringParameter;
+  protected argsParameter!: CommandLineStringParameter;
+  protected quietParameter!: CommandLineFlagParameter;
+  protected ignoreExitCodeParameter!: CommandLineFlagParameter;
 
   public constructor(options: ICommandLineActionOptions) {
     super(options);

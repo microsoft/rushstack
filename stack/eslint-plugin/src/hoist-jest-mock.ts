@@ -141,7 +141,7 @@ const hoistJestMock: TSESLint.RuleModule<MessageIds, Options> = {
         if (firstImportNode === undefined) {
           // EXAMPLE: export * from "Y";
           // IGNORE:  export type { Y } from "Y";
-          if (node['exportKind'] !== 'type') {
+          if (((node as any) as TSESTree.ExportNamedDeclaration).exportKind !== 'type') {
             firstImportNode = node;
           }
         }

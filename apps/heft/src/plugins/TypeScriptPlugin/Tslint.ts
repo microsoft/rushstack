@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Tslint as TTslint } from '@microsoft/rush-stack-compiler-3.7';
+import type { Tslint as TTslint } from '@microsoft/rush-stack-compiler-3.9';
 import * as crypto from 'crypto';
 import { Import, Terminal, JsonFile } from '@rushstack/node-core-library';
 
@@ -22,11 +22,11 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
   private readonly _tslint: typeof TTslint;
   private readonly _cachedFileSystem: TypeScriptCachedFileSystem;
 
-  private _tslintConfiguration: TTslint.Configuration.IConfigurationFile;
-  private _linter: IExtendedLinter;
-  private _enabledRules: TTslint.IRule[];
-  private _ruleSeverityMap: Map<string, TTslint.RuleSeverity>;
-  protected _lintResult: TTslint.LintResult;
+  private _tslintConfiguration!: TTslint.Configuration.IConfigurationFile;
+  private _linter!: IExtendedLinter;
+  private _enabledRules!: TTslint.IRule[];
+  private _ruleSeverityMap!: Map<string, TTslint.RuleSeverity>;
+  protected _lintResult!: TTslint.LintResult;
 
   public constructor(options: ITslintOptions) {
     super('tslint', options);

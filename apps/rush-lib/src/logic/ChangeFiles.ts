@@ -19,7 +19,7 @@ export class ChangeFiles {
   /**
    * Change file path relative to changes folder.
    */
-  private _files: string[];
+  private _files: string[] | undefined;
   private _changesPath: string;
 
   public constructor(changesPath: string) {
@@ -103,11 +103,11 @@ export class ChangeFiles {
    * Get the array of absolute paths of change files.
    */
   public getFiles(): string[] {
-    if (this._files) {
-      return this._files;
+    if (!this._files) {
+      this._files = glob.sync(`${this._changesPath}/**/*.json`) || [];
     }
-    this._files = glob.sync(`${this._changesPath}/**/*.json`);
-    return this._files || [];
+
+    return this._files;
   }
 
   /**

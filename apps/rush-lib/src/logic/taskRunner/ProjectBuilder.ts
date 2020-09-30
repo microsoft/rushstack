@@ -70,7 +70,6 @@ export class ProjectBuilder extends BaseBuilder {
   public isIncrementalBuildAllowed: boolean;
   public hadEmptyScript: boolean = false;
 
-  private _hasWarningOrError: boolean;
   private _rushProject: RushConfigurationProject;
   private _rushConfiguration: RushConfiguration;
   private _commandToRun: string;
@@ -173,7 +172,7 @@ export class ProjectBuilder extends BaseBuilder {
 
       const terminal: CollatedTerminal = new CollatedTerminal(normalizeNewlineTransform);
 
-      this._hasWarningOrError = false;
+      let hasWarningOrError: boolean = false;
       const projectFolder: string = this._rushProject.projectFolder;
       let lastPackageDeps: IPackageDependencies | undefined = undefined;
 
@@ -248,7 +247,7 @@ export class ProjectBuilder extends BaseBuilder {
           task.stderr.on('data', (data: Buffer) => {
             const text: string = data.toString();
             terminal.writeChunk({ text, kind: TerminalChunkKind.Stderr });
-            this._hasWarningOrError = true;
+            hasWarningOrError = true;
           });
         }
 
@@ -266,7 +265,7 @@ export class ProjectBuilder extends BaseBuilder {
 
                 if (code !== 0) {
                   reject(new TaskError('error', `Returned error code: ${code}`));
-                } else if (this._hasWarningOrError) {
+                } else if (hasWarningOrError) {
                   resolve(TaskStatus.SuccessWithWarning);
                 } else {
                   // Write deps on success.

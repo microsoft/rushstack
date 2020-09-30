@@ -40,6 +40,13 @@ export class ApprovedPackagesItem {
    * The project categories that are allowed to use this package.
    */
   public allowedCategories: Set<string> = new Set<string>();
+
+  /**
+   * @internal
+   */
+  public constructor(packageName: string) {
+    this.packageName = packageName;
+  }
 }
 
 /**
@@ -55,7 +62,7 @@ export class ApprovedPackagesConfiguration {
 
   private _itemsByName: Map<string, ApprovedPackagesItem> = new Map<string, ApprovedPackagesItem>();
 
-  private _loadedJson: IApprovedPackagesJson;
+  private _loadedJson!: IApprovedPackagesJson;
   private _jsonFilename: string;
 
   public constructor(jsonFilename: string) {
@@ -84,8 +91,7 @@ export class ApprovedPackagesConfiguration {
 
     let item: ApprovedPackagesItem | undefined = this._itemsByName.get(packageName);
     if (!item) {
-      item = new ApprovedPackagesItem();
-      item.packageName = packageName;
+      item = new ApprovedPackagesItem(packageName);
       this._addItem(item);
       changed = true;
     }
@@ -191,8 +197,7 @@ export class ApprovedPackagesConfiguration {
       );
     }
 
-    const item: ApprovedPackagesItem = new ApprovedPackagesItem();
-    item.packageName = itemJson.name;
+    const item: ApprovedPackagesItem = new ApprovedPackagesItem(itemJson.name);
     if (itemJson.allowedCategories) {
       for (const allowedCategory of itemJson.allowedCategories) {
         item.allowedCategories.add(allowedCategory);

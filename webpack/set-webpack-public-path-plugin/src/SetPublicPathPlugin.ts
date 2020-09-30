@@ -7,7 +7,6 @@ import * as Webpack from 'webpack';
 import * as Tapable from 'tapable';
 import * as lodash from 'lodash';
 
-import { IV3Compilation, IV3Module, IV3Chunk } from './V3Interfaces';
 import { IInternalOptions, getSetPublicPathCode } from './codeGenerator';
 
 /**
@@ -98,7 +97,7 @@ interface IAsset {
   source(): string;
 }
 
-interface IV4MainTemplate extends Webpack.compilation.MainTemplate {
+interface IExtendedMainTemplate extends Webpack.compilation.MainTemplate {
   hooks: {
     jsonpScript?: Tapable.SyncWaterfallHook<string, Webpack.compilation.Chunk, string>;
     requireExtensions: Tapable.SyncWaterfallHook<string, Webpack.compilation.Chunk, string>;
@@ -107,22 +106,23 @@ interface IV4MainTemplate extends Webpack.compilation.MainTemplate {
   requireFn: string;
 }
 
-interface IV4Chunk extends Webpack.compilation.Chunk {
+const SHOULD_REPLACE_ASSET_NAME_TOKEN: unique symbol = Symbol(
+  'set-public-path-plugin-should-replace-asset-name'
+);
+
+interface IExtendedChunk extends Webpack.compilation.Chunk {
+  [SHOULD_REPLACE_ASSET_NAME_TOKEN]: boolean;
   forEachModule(callback: (module: Webpack.compilation.Module) => void): void;
 }
 
 interface IStartupCodeOptions {
   source: string;
-  chunk: IV3Chunk | Webpack.compilation.Chunk;
+  chunk: IExtendedChunk;
   hash: string;
   requireFn: string;
 }
 
 const PLUGIN_NAME: string = 'set-webpack-public-path';
-
-const SHOULD_REPLACE_ASSET_NAME_TOKEN: unique symbol = Symbol(
-  'set-public-path-plugin-should-replace-asset-name'
-);
 
 const ASSET_NAME_TOKEN: string = '-ASSET-NAME-c0ef4f86-b570-44d3-b210-4428c5b7825c';
 
@@ -152,92 +152,66 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
   public apply(compiler: Webpack.Compiler): void {
     const isWebpack4: boolean = !!compiler.hooks;
 
-    if (isWebpack4) {
-      compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
-        const v4MainTemplate: IV4MainTemplate = compilation.mainTemplate as IV4MainTemplate;
-        v4MainTemplate.hooks.startup.tap(PLUGIN_NAME, (source: string, chunk: IV4Chunk, hash: string) => {
+    if (!isWebpack4) {
+      throw new Error(`The ${SetPublicPathPlugin.name} plugin requires Webpack 4`);
+    }
+
+    compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
+      const v4MainTemplate: IExtendedMainTemplate = compilation.mainTemplate as IExtendedMainTemplate;
+      v4MainTemplate.hooks.startup.tap(
+        PLUGIN_NAME,
+        (source: string, chunk: Webpack.compilation.Chunk, hash: string) => {
+          const extendedChunk: IExtendedChunk = chunk as IExtendedChunk;
           const assetOrChunkFound: boolean =
-            !!this.options.skipDetection || this._detectAssetsOrChunks(chunk);
+            !!this.options.skipDetection || this._detectAssetsOrChunks(extendedChunk);
           if (assetOrChunkFound) {
             return this._getStartupCode({
               source,
-              chunk,
+              chunk: extendedChunk,
               hash,
               requireFn: v4MainTemplate.requireFn
             });
           } else {
             return source;
           }
-        });
-      });
+        }
+      );
+    });
 
-      compiler.hooks.emit.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
-        for (const chunkGroup of compilation.chunkGroups) {
-          for (const chunk of chunkGroup.chunks) {
-            if (chunk[SHOULD_REPLACE_ASSET_NAME_TOKEN]) {
-              for (const assetFilename of chunk.files) {
-                let escapedAssetFilename: string;
-                if (assetFilename.match(/\.map$/)) {
-                  escapedAssetFilename = assetFilename.substr(
-                    0,
-                    assetFilename.length - 4 /* '.map'.length */
-                  ); // Trim the ".map" extension
-                  escapedAssetFilename = lodash.escapeRegExp(escapedAssetFilename);
-                  escapedAssetFilename = JSON.stringify(escapedAssetFilename); // source in sourcemaps is JSON-encoded
-                  escapedAssetFilename = escapedAssetFilename.substring(1, escapedAssetFilename.length - 1); // Trim the quotes from the JSON encoding
-                } else {
-                  escapedAssetFilename = lodash.escapeRegExp(assetFilename);
-                }
-
-                const asset: IAsset = compilation.assets[assetFilename];
-                const originalAssetSource: string = asset.source();
-                const originalAssetSize: number = asset.size();
-
-                const newAssetSource: string = originalAssetSource.replace(
-                  ASSET_NAME_TOKEN_REGEX,
-                  escapedAssetFilename
-                );
-                const sizeDifference: number = assetFilename.length - ASSET_NAME_TOKEN.length;
-                asset.source = () => newAssetSource;
-                asset.size = () => originalAssetSize + sizeDifference;
+    compiler.hooks.emit.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
+      for (const chunkGroup of compilation.chunkGroups) {
+        for (const chunk of chunkGroup.chunks) {
+          if (chunk[SHOULD_REPLACE_ASSET_NAME_TOKEN]) {
+            for (const assetFilename of chunk.files) {
+              let escapedAssetFilename: string;
+              if (assetFilename.match(/\.map$/)) {
+                escapedAssetFilename = assetFilename.substr(0, assetFilename.length - 4 /* '.map'.length */); // Trim the ".map" extension
+                escapedAssetFilename = lodash.escapeRegExp(escapedAssetFilename);
+                escapedAssetFilename = JSON.stringify(escapedAssetFilename); // source in sourcemaps is JSON-encoded
+                escapedAssetFilename = escapedAssetFilename.substring(1, escapedAssetFilename.length - 1); // Trim the quotes from the JSON encoding
+              } else {
+                escapedAssetFilename = lodash.escapeRegExp(assetFilename);
               }
+
+              const asset: IAsset = compilation.assets[assetFilename];
+              const originalAssetSource: string = asset.source();
+              const originalAssetSize: number = asset.size();
+
+              const newAssetSource: string = originalAssetSource.replace(
+                ASSET_NAME_TOKEN_REGEX,
+                escapedAssetFilename
+              );
+              const sizeDifference: number = assetFilename.length - ASSET_NAME_TOKEN.length;
+              asset.source = () => newAssetSource;
+              asset.size = () => originalAssetSize + sizeDifference;
             }
           }
         }
-      });
-    } else {
-      if (this.options.scriptName && this.options.scriptName.useAssetName) {
-        throw new Error('scriptName.useAssetName is only supported on Webpack 4');
       }
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      compiler.plugin('compilation', (compilation: IV3Compilation, params: any): void => {
-        compilation.mainTemplate.plugin('startup', (source: string, chunk: IV3Chunk, hash: string) => {
-          let assetOrChunkFound: boolean = this.options.skipDetection || chunk.chunks.length > 0;
-          if (!assetOrChunkFound) {
-            chunk.forEachModule((innerModule: IV3Module) => {
-              if (innerModule.assets && Object.keys(innerModule.assets).length > 0) {
-                assetOrChunkFound = true;
-              }
-            });
-          }
-
-          if (assetOrChunkFound) {
-            return this._getStartupCode({
-              source,
-              chunk,
-              hash,
-              requireFn: compilation.mainTemplate.requireFn
-            });
-          } else {
-            return source;
-          }
-        });
-      });
-    }
+    });
   }
 
-  private _detectAssetsOrChunks(chunk: IV4Chunk): boolean {
+  private _detectAssetsOrChunks(chunk: IExtendedChunk): boolean {
     for (const chunkGroup of chunk.groupsIterable) {
       const children: Webpack.compilation.Chunk[] = chunkGroup.getChildren();
       if (children.length > 0) {

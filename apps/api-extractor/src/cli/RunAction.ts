@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
-import { PackageJsonLookup, FileSystem, IPackageJson } from '@rushstack/node-core-library';
+import { PackageJsonLookup, FileSystem, IPackageJson, Path } from '@rushstack/node-core-library';
 
 import {
   CommandLineAction,
@@ -13,17 +13,16 @@ import {
 } from '@rushstack/ts-command-line';
 
 import { Extractor, ExtractorResult } from '../api/Extractor';
-import { IConfigFile } from '../api/IConfigFile';
 
 import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
-import { ExtractorConfig } from '../api/ExtractorConfig';
+import { ExtractorConfig, IExtractorConfigPrepareOptions } from '../api/ExtractorConfig';
 
 export class RunAction extends CommandLineAction {
-  private _configFileParameter: CommandLineStringParameter;
-  private _localParameter: CommandLineFlagParameter;
-  private _verboseParameter: CommandLineFlagParameter;
-  private _diagnosticsParameter: CommandLineFlagParameter;
-  private _typescriptCompilerFolder: CommandLineStringParameter;
+  private _configFileParameter!: CommandLineStringParameter;
+  private _localParameter!: CommandLineFlagParameter;
+  private _verboseParameter!: CommandLineFlagParameter;
+  private _diagnosticsParameter!: CommandLineFlagParameter;
+  private _typescriptCompilerFolder!: CommandLineStringParameter;
 
   public constructor(parser: ApiExtractorCommandLine) {
     super({
@@ -108,47 +107,32 @@ export class RunAction extends CommandLineAction {
       }
     }
 
+    let extractorConfig: ExtractorConfig;
+
     if (this._configFileParameter.value) {
       configFilename = path.normalize(this._configFileParameter.value);
       if (!FileSystem.exists(configFilename)) {
         throw new Error('Config file not found: ' + this._configFileParameter.value);
       }
+
+      extractorConfig = ExtractorConfig.loadFileAndPrepare(configFilename);
     } else {
-      // Otherwise, figure out which project we're in and look for the config file
-      // at the project root
-      const packageFolder: string | undefined = lookup.tryGetPackageFolderFor('.');
+      const prepareOptions: IExtractorConfigPrepareOptions | undefined = ExtractorConfig.tryLoadForFolder({
+        startingFolder: '.'
+      });
 
-      // If there is no package, then try the current directory
-      const baseFolder: string = packageFolder ? packageFolder : process.cwd();
-
-      // First try the standard "config" subfolder:
-      configFilename = path.join(baseFolder, 'config', ExtractorConfig.FILENAME);
-      if (FileSystem.exists(configFilename)) {
-        if (FileSystem.exists(path.join(baseFolder, ExtractorConfig.FILENAME))) {
-          throw new Error(
-            `Found conflicting ${ExtractorConfig.FILENAME} files in "." and "./config" folders`
-          );
-        }
-      } else {
-        // Otherwise try the top-level folder
-        configFilename = path.join(baseFolder, ExtractorConfig.FILENAME);
-
-        if (!FileSystem.exists(configFilename)) {
-          throw new Error(`Unable to find an ${ExtractorConfig.FILENAME} file`);
-        }
+      if (!prepareOptions || !prepareOptions.configObjectFullPath) {
+        throw new Error(`Unable to find an ${ExtractorConfig.FILENAME} file`);
       }
 
-      console.log(`Using configuration from ${configFilename}`);
+      const configObjectShortPath: string = Path.formatConcisely({
+        pathToConvert: prepareOptions.configObjectFullPath,
+        baseFolder: process.cwd()
+      });
+      console.log(`Using configuration from ${configObjectShortPath}`);
+
+      extractorConfig = ExtractorConfig.prepare(prepareOptions);
     }
-
-    const configObjectFullPath: string = path.resolve(configFilename);
-    const configObject: IConfigFile = ExtractorConfig.loadFile(configObjectFullPath);
-
-    const extractorConfig: ExtractorConfig = ExtractorConfig.prepare({
-      configObject: configObject,
-      configObjectFullPath: configObjectFullPath,
-      packageJsonFullPath: lookup.tryGetPackageJsonFilePathFor(configObjectFullPath)
-    });
 
     const extractorResult: ExtractorResult = Extractor.invoke(extractorConfig, {
       localBuild: this._localParameter.value,

@@ -21,10 +21,10 @@ export interface IJsonOutput {
 }
 
 export class ListAction extends BaseRushAction {
-  private _version: CommandLineFlagParameter;
-  private _path: CommandLineFlagParameter;
-  private _fullPath: CommandLineFlagParameter;
-  private _jsonFlag: CommandLineFlagParameter;
+  private _version!: CommandLineFlagParameter;
+  private _path!: CommandLineFlagParameter;
+  private _fullPath!: CommandLineFlagParameter;
+  private _jsonFlag!: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({

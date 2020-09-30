@@ -11,6 +11,7 @@ export { AlreadyReportedError } from './AlreadyReportedError';
 export { AnsiEscape, IAnsiEscapeConvertForTestsOptions } from './Terminal/AnsiEscape';
 export { Brand } from './PrimitiveTypes';
 export { FileConstants, FolderConstants } from './Constants';
+export { Enum } from './Enum';
 export {
   ExecutableStdioStreamMapping,
   ExecutableStdioMapping,
@@ -50,7 +51,7 @@ export {
   IParsedPackageName,
   IParsedPackageNameOrError
 } from './PackageName';
-export { Path } from './Path';
+export { Path, IPathFormatConciselyOptions } from './Path';
 export { Encoding, Text, NewlineKind } from './Text';
 export { Sort } from './Sort';
 export {

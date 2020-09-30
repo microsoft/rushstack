@@ -1,6 +1,21 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Tue, 22 Sep 2020 01:45:31 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+
+## 0.7.2
+Wed, 30 Sep 2020 18:39:17 GMT
+
+### Patches
+
+- Update to build with @rushstack/heft-node-rig
+
+## 0.7.1
+Wed, 30 Sep 2020 06:53:53 GMT
+
+### Patches
+
+- Include missing "License" field.
+- Update README.md
 
 ## 0.7.0
 Tue, 22 Sep 2020 01:45:31 GMT

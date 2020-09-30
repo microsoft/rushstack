@@ -28,7 +28,7 @@
     // From the allowedAlternativeVersions list below, this should be the TypeScript version that's used to
     // build most of the projects in the repo.  Preferring it avoids errors for indirect dependencies
     // that request it as a peer dependency.
-    "typescript": "~3.5.3",
+    "typescript": "~3.9.7",
 
     // Workaround for https://github.com/microsoft/rushstack/issues/1466
     "eslint": "~7.2.0",
@@ -79,7 +79,18 @@
       "~3.6.4",
       "~3.7.2",
       "~3.8.3",
-      "~3.9.5"
+      "~3.9.7"
+    ],
+
+    "source-map": [
+      "~0.6.1" // API Extractor is using an older version of source-map because newer versions are async
+    ],
+
+    "@rushstack/heft": [
+      // This is needed for the rush-stack-compiler-x.x projects which cannot build using
+      // the latest Heft due to a regression from PR #2073 that prevents the same plugin from
+      // being applied multiple times
+      "0.8.0"
     ]
   }
 }

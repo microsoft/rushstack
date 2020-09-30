@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import * as semver from 'semver';
-import * as crypto from 'crypto';
+import crypto from 'crypto';
 import { JsonFile, InternalError, FileSystem } from '@rushstack/node-core-library';
 
 import {

@@ -62,3 +62,11 @@ function isInteger(s: string): boolean {
   return new RegExp('[0-9]+').test(s);
 }
 ```
+
+## Links
+
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/stack/eslint-plugin-security/CHANGELOG.md) - Find
+  out what's new in the latest version
+
+`@rushstack/eslint-plugin-security` is part of the [Rush Stack](https://rushstack.io/) family of projects.

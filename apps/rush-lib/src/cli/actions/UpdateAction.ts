@@ -8,8 +8,8 @@ import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 
 export class UpdateAction extends BaseInstallAction {
-  private _fullParameter: CommandLineFlagParameter;
-  private _recheckParameter: CommandLineFlagParameter;
+  private _fullParameter!: CommandLineFlagParameter;
+  private _recheckParameter!: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({

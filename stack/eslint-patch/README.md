@@ -60,7 +60,10 @@ For an even leaner setup, `@your-company/eslint-config` can provide the patch as
 and recommended approach.
 
 
-## Learn more
+## Links
 
-This package is part of the Rush Stack project.  Please visit [https://rushstack.io/](https://rushstack.io/)
-for more background as well as [help resources](https://rushstack.io/pages/help/support/).
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/stack/eslint-patch/CHANGELOG.md) - Find
+  out what's new in the latest version
+
+`@rushstack/eslint-patch` is part of the [Rush Stack](https://rushstack.io/) family of projects.

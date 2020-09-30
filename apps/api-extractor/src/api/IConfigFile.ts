@@ -303,10 +303,15 @@ export interface IConfigFile {
    *
    * The path is resolved relative to the folder of the config file that contains the setting.
    *
-   * The default value for `projectFolder` is the token `<lookup>`, which means the folder is determined by traversing
-   * parent folders, starting from the folder containing api-extractor.json, and stopping at the first folder
-   * that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in this way, then an error
-   * will be reported.
+   * The default value for `projectFolder` is the token `<lookup>`, which means the folder is determined using
+   * the following heuristics:
+   *
+   * If the config/rig.json system is used (as defined by {@link https://www.npmjs.com/package/@rushstack/rig-package
+   * | @rushstack/rig-package}), then the `<lookup>` value will be the package folder that referenced the rig.
+   *
+   * Otherwise, the `<lookup>` value is determined by traversing parent folders, starting from the folder containing
+   * api-extractor.json, and stopping at the first folder that contains a tsconfig.json file.  If a tsconfig.json file
+   * cannot be found in this way, then an error will be reported.
    */
   projectFolder?: string;
 

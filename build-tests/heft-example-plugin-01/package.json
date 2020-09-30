@@ -16,8 +16,8 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/node": "10.17.13",
+    "@types/tapable": "1.0.5",
     "eslint": "~7.2.0",
-    "typescript": "~3.9.5",
-    "@types/tapable": "1.0.5"
+    "typescript": "~3.9.7"
   }
 }

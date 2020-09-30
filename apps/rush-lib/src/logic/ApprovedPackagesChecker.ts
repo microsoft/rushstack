@@ -82,7 +82,7 @@ export class ApprovedPackagesChecker {
         const scope: string = this._rushConfiguration.packageNameParser.getScope(referencedPackageName);
 
         // Make sure the scope isn't something like "@types" which should be ignored
-        if (!approvedPackagesPolicy.ignoredNpmScopes.has(scope)) {
+        if (!approvedPackagesPolicy.ignoredNpmScopes.has(scope) && rushProject.reviewCategory) {
           // Yes, add it to the list if it's not already there
 
           let updated: boolean = false;

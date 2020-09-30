@@ -14,6 +14,7 @@ import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
+import { RigConfig } from '@rushstack/rig-package';
 import { SyncHook } from 'tapable';
 import { Terminal } from '@rushstack/node-core-library';
 import * as webpack from 'webpack';
@@ -47,7 +48,7 @@ export class BundleSubstageHooks extends BuildSubstageHooksBase {
 // @public (undocumented)
 export class CleanStageHooks extends StageHooksBase<ICleanStageProperties> {
     // (undocumented)
-    readonly deletePath: AsyncSeriesBailHook<string>;
+    readonly run: AsyncParallelHook;
 }
 
 // @public (undocumented)
@@ -66,15 +67,25 @@ export type CustomActionParameterType = string | boolean | number | ReadonlyArra
 export class HeftConfiguration {
     get buildCacheFolder(): string;
     get buildFolder(): string;
+    // @internal
+    _checkForRigAsync(): Promise<void>;
     get compilerPackage(): ICompilerPackage | undefined;
     get globalTerminal(): Terminal;
     get heftPackageJson(): IPackageJson;
     // @internal (undocumented)
     static initialize(options: _IHeftConfigurationInitializationOptions): HeftConfiguration;
+    get projectConfigFolder(): string;
     get projectHeftDataFolder(): string;
     get projectPackageJson(): IPackageJson;
+    get rigConfig(): RigConfig;
     get terminalProvider(): ITerminalProvider;
     }
+
+// @internal (undocumented)
+export class _HeftLifecycleHooks {
+    // (undocumented)
+    toolStart: AsyncParallelHook;
+}
 
 // @public (undocumented)
 export class HeftSession {
@@ -236,6 +247,12 @@ export interface _IHeftConfigurationInitializationOptions {
     terminalProvider: ITerminalProvider;
 }
 
+// @internal (undocumented)
+export interface _IHeftLifecycle {
+    // (undocumented)
+    hooks: _HeftLifecycleHooks;
+}
+
 // @public (undocumented)
 export interface IHeftPlugin<TOptions = void> {
     // (undocumented)
@@ -252,6 +269,8 @@ export interface IHeftSessionHooks {
     build: SyncHook<IBuildStageContext>;
     // (undocumented)
     clean: SyncHook<ICleanStageContext>;
+    // @internal (undocumented)
+    heftLifecycle: SyncHook<_IHeftLifecycle>;
     // (undocumented)
     metricsCollector: MetricsCollectorHooks;
     // (undocumented)

@@ -187,12 +187,12 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@rushstack/localization-plugin",
-      "allowedCategories": [ "tests" ]
+      "name": "@rushstack/heft-node-rig",
+      "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@rushstack/tree-pattern",
-      "allowedCategories": [ "libraries" ]
+      "name": "@rushstack/localization-plugin",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@rushstack/module-minifier-plugin",
@@ -211,6 +211,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/rig-package",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/set-webpack-public-path-plugin",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -220,6 +224,10 @@
     },
     {
       "name": "@rushstack/terminal",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/tree-pattern",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -248,6 +256,10 @@
     },
     {
       "name": "@yarnpkg/lockfile",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "ajv",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -285,10 +297,6 @@
     {
       "name": "buttono",
       "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "chai",
-      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "chalk",
@@ -663,14 +671,6 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "sinon",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "sinon-chai",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "source-map",
       "allowedCategories": [ "libraries" ]
     },
@@ -684,6 +684,10 @@
     },
     {
       "name": "string-argv",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "strip-json-comments",
       "allowedCategories": [ "libraries" ]
     },
     {

@@ -1,36 +1,33 @@
-// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
-// See LICENSE in the project root for license information.
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the
+// MIT license. See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import { Terminal, InternalError, FileSystem, Import } from '@rushstack/node-core-library';
+import { Import, InternalError, Terminal } from '@rushstack/node-core-library';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { IHeftPlugin } from './IHeftPlugin';
-import { InternalHeftSession } from './InternalHeftSession';
-import { HeftSession } from './HeftSession';
-
+import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
+import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
+import { DeleteGlobsPlugin } from '../plugins/DeleteGlobsPlugin';
+import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
+import { ProjectValidatorPlugin } from '../plugins/ProjectValidatorPlugin';
+import { SassTypingsPlugin } from '../plugins/SassTypingsPlugin/SassTypingsPlugin';
 // Default plugins
 import { TypeScriptPlugin } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
-import { CleanPlugin } from '../plugins/CleanPlugin';
-import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
-import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
-import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
 import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWebpackPlugin';
 import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
-import { SassTypingsPlugin } from '../plugins/SassTypingsPlugin/SassTypingsPlugin';
-import { HeftConfigFiles } from '../utilities/HeftConfigFiles';
+import {
+  CoreConfigFiles,
+  IHeftConfigurationJson,
+  IHeftConfigurationJsonPluginSpecifier
+} from '../utilities/CoreConfigFiles';
+
+import { HeftSession } from './HeftSession';
+import { IHeftPlugin } from './IHeftPlugin';
+import { InternalHeftSession } from './InternalHeftSession';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
   heftConfiguration: HeftConfiguration;
   internalHeftSession: InternalHeftSession;
-}
-
-export interface IPluginConfigurationJson {
-  plugins: {
-    plugin: string;
-    options?: object;
-  }[];
 }
 
 export class PluginManager {
@@ -49,12 +46,13 @@ export class PluginManager {
   public initializeDefaultPlugins(): void {
     this._applyPlugin(new TypeScriptPlugin());
     this._applyPlugin(new CopyStaticAssetsPlugin());
-    this._applyPlugin(new CleanPlugin());
+    this._applyPlugin(new DeleteGlobsPlugin());
     this._applyPlugin(new ApiExtractorPlugin());
     this._applyPlugin(new JestPlugin());
     this._applyPlugin(new BasicConfigureWebpackPlugin());
     this._applyPlugin(new WebpackPlugin());
     this._applyPlugin(new SassTypingsPlugin());
+    this._applyPlugin(new ProjectValidatorPlugin());
   }
 
   public initializePlugin(pluginSpecifier: string, options?: object): void {
@@ -63,18 +61,18 @@ export class PluginManager {
   }
 
   public async initializePluginsFromConfigFileAsync(): Promise<void> {
-    const pluginConfigFilePath: string = path.join(
-      this._heftConfiguration.projectHeftDataFolder,
-      'plugins.json'
+    const heftConfigurationJson:
+      | IHeftConfigurationJson
+      | undefined = await CoreConfigFiles.heftConfigFileLoader.tryLoadConfigurationFileForProjectAsync(
+      this._heftConfiguration.globalTerminal,
+      this._heftConfiguration.buildFolder,
+      this._heftConfiguration.rigConfig
     );
-    if (await FileSystem.existsAsync(pluginConfigFilePath)) {
-      const pluginConfigurationJson: IPluginConfigurationJson = await HeftConfigFiles.pluginConfigFileLoader.loadConfigurationFileAsync(
-        pluginConfigFilePath
-      );
+    const heftPluginSpecifiers: IHeftConfigurationJsonPluginSpecifier[] =
+      heftConfigurationJson?.heftPlugins || [];
 
-      for (const pluginSpecifier of pluginConfigurationJson.plugins) {
-        this._initializeResolvedPlugin(pluginSpecifier.plugin, pluginSpecifier.options);
-      }
+    for (const pluginSpecifier of heftPluginSpecifiers) {
+      this._initializeResolvedPlugin(pluginSpecifier.plugin, pluginSpecifier.options);
     }
   }
 

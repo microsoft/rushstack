@@ -80,7 +80,8 @@ export class TypeUuid {
 
     let objectPrototype: {} = Object.getPrototypeOf(targetObject);
     while (objectPrototype !== undefined && objectPrototype !== null) {
-      const registeredUuid: string = objectPrototype[classPrototypeUuidSymbol];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const registeredUuid: string = (objectPrototype as any)[classPrototypeUuidSymbol];
       if (registeredUuid === typeUuid) {
         return true;
       }

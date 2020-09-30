@@ -1,6 +1,18 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Tue, 22 Sep 2020 05:45:56 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+
+## 2.1.3
+Wed, 30 Sep 2020 18:39:17 GMT
+
+_Version update only_
+
+## 2.1.2
+Wed, 30 Sep 2020 06:53:53 GMT
+
+### Patches
+
+- Update README.md
 
 ## 2.1.1
 Tue, 22 Sep 2020 05:45:56 GMT

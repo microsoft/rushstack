@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 
@@ -109,7 +109,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
  * The base class that most Rush command-line actions should extend.
  */
 export abstract class BaseRushAction extends BaseConfiglessRushAction {
-  private _eventHooksManager: EventHooksManager;
+  private _eventHooksManager: EventHooksManager | undefined;
 
   protected get eventHooksManager(): EventHooksManager {
     if (!this._eventHooksManager) {

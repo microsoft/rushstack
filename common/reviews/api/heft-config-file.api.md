@@ -4,22 +4,32 @@
 
 ```ts
 
+import { RigConfig } from '@rushstack/rig-package';
+import { Terminal } from '@rushstack/node-core-library';
+
 // @beta (undocumented)
 export class ConfigurationFile<TConfigurationFile> {
     constructor(options: IConfigurationFileOptions<TConfigurationFile>);
     // @internal (undocumented)
-    static _formatPathForError: (path: string) => string;
+    static _formatPathForLogging: (path: string) => string;
     getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
     getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue;
     // (undocumented)
-    loadConfigurationFileAsync(configurationFilePath: string): Promise<TConfigurationFile>;
+    loadConfigurationFileForProjectAsync(terminal: Terminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile>;
+    tryLoadConfigurationFileForProjectAsync(terminal: Terminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile | undefined>;
     }
 
 // @beta (undocumented)
 export interface IConfigurationFileOptions<TConfigurationFile> {
     jsonPathMetadata?: IJsonPathsMetadata;
     jsonSchemaPath: string;
-    propertyInheritanceTypes?: IPropertyInheritanceTypes<TConfigurationFile>;
+    projectRelativeFilePath: string;
+    propertyInheritance?: IPropertiesInheritance<TConfigurationFile>;
+}
+
+// @beta (undocumented)
+export interface ICustomPropertyInheritance<TObject> extends IPropertyInheritance<InheritanceType.custom> {
+    inheritanceFunction: PropertyInheritanceCustomFunction<TObject>;
 }
 
 // @beta
@@ -36,6 +46,7 @@ export interface IJsonPathsMetadata {
 // @beta (undocumented)
 export enum InheritanceType {
     append = "append",
+    custom = "custom",
     replace = "replace"
 }
 
@@ -48,9 +59,15 @@ export interface IOriginalValueOptions<TParentProperty> {
 }
 
 // @beta (undocumented)
-export type IPropertyInheritanceTypes<TConfigurationFile> = {
-    [propertyName in keyof TConfigurationFile]?: InheritanceType;
+export type IPropertiesInheritance<TConfigurationFile> = {
+    [propertyName in keyof TConfigurationFile]?: IPropertyInheritance<InheritanceType.append | InheritanceType.replace> | ICustomPropertyInheritance<TConfigurationFile[propertyName]>;
 };
+
+// @beta (undocumented)
+export interface IPropertyInheritance<TInheritanceType extends InheritanceType> {
+    // (undocumented)
+    inheritanceType: TInheritanceType;
+}
 
 // @beta (undocumented)
 export enum PathResolutionMethod {
@@ -58,6 +75,9 @@ export enum PathResolutionMethod {
     resolvePathRelativeToConfigurationFile = 0,
     resolvePathRelativeToProjectRoot = 1
 }
+
+// @beta (undocumented)
+export type PropertyInheritanceCustomFunction<TObject> = (currentObject: TObject, parentObject: TObject) => TObject;
 
 
 // (No @packageDocumentation comment for this package)

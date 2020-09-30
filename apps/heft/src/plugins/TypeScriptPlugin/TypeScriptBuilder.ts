@@ -11,10 +11,11 @@ import {
   IPackageJson,
   InternalError,
   ITerminalProvider,
-  FileSystem
+  FileSystem,
+  Path
 } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
-import { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
+import type { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.9';
 import {
   ExtendedTypeScript,
   IExtendedProgram,
@@ -94,22 +95,22 @@ interface IExtendedEmitResult extends TTypescript.EmitResult {
 }
 
 export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderConfiguration> {
-  private _typescriptVersion: string;
-  private _typescriptParsedVersion: semver.SemVer;
+  private _typescriptVersion!: string;
+  private _typescriptParsedVersion!: semver.SemVer;
 
-  private _capabilities: ICompilerCapabilities;
-  private _useIncrementalProgram: boolean;
+  private _capabilities!: ICompilerCapabilities;
+  private _useIncrementalProgram!: boolean;
 
-  private _eslintEnabled: boolean;
-  private _tslintEnabled: boolean;
-  private _moduleKindsToEmit: ICachedEmitModuleKind[];
-  private _eslintConfigFilePath: string;
-  private _tslintConfigFilePath: string;
-  private _typescriptLogger: IScopedLogger;
-  private _typescriptTerminal: Terminal;
+  private _eslintEnabled!: boolean;
+  private _tslintEnabled!: boolean;
+  private _moduleKindsToEmit!: ICachedEmitModuleKind[];
+  private _eslintConfigFilePath!: string;
+  private _tslintConfigFilePath!: string;
+  private _typescriptLogger!: IScopedLogger;
+  private _typescriptTerminal!: Terminal;
   private _firstEmitCompletedCallbackManager: FirstEmitCompletedCallbackManager;
 
-  private __tsCacheFilePath: string;
+  private __tsCacheFilePath!: string;
   private _tsReadJsonCache: Map<string, object> = new Map<string, object>();
   private _cachedFileSystem: TypeScriptCachedFileSystem = new TypeScriptCachedFileSystem();
 
@@ -188,7 +189,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     // to delete the cache when switching modes, or else maintain two separate cache folders.
     this._useIncrementalProgram = this._capabilities.incrementalProgram && !this._configuration.watchMode;
 
-    this._configuration.buildCacheFolder = this._configuration.buildCacheFolder.replace(/\\/g, '/');
+    this._configuration.buildCacheFolder = Path.convertToSlashes(this._configuration.buildCacheFolder);
     this._tslintConfigFilePath = path.resolve(this._configuration.buildFolder, 'tslint.json');
     this._eslintConfigFilePath = path.resolve(this._configuration.buildFolder, '.eslintrc.js');
     this._eslintEnabled = this._tslintEnabled =
@@ -679,6 +680,15 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       return ts.DiagnosticCategory.Warning;
     }
 
+    // These pedantic checks also should not be treated as hard errors
+    switch (diagnostic.code) {
+      case ts.Diagnostics.Property_0_has_no_initializer_and_is_not_definitely_assigned_in_the_constructor
+        .code:
+      case ts.Diagnostics
+        .Element_implicitly_has_an_any_type_because_expression_of_type_0_can_t_be_used_to_index_type_1.code:
+        return ts.DiagnosticCategory.Warning;
+    }
+
     return diagnostic.category;
   }
 
@@ -794,9 +804,10 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     this._moduleKindsToEmit.push({
       outFolderPath: outFolderPath,
       moduleKind,
-      cacheOutFolderPath: path
-        .resolve(this._configuration.buildCacheFolder, outFolderName)
-        .replace(/\\/g, '/'),
+      cacheOutFolderPath: Path.convertToSlashes(
+        path.resolve(this._configuration.buildCacheFolder, outFolderName)
+      ),
+
       isPrimary
     });
 
@@ -912,7 +923,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         const originalWriteFile: TTypescript.WriteFileCallback = compilerHost.writeFile;
         compilerHost.writeFile = (filePath: string, ...rest: unknown[]) => {
           const redirectedFilePath: string = EmitFilesPatch.getRedirectedFilePath(filePath);
-          originalWriteFile.call(this, redirectedFilePath, ...rest);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (originalWriteFile as any).call(this, redirectedFilePath, ...rest);
         };
 
         return ts.createEmitAndSemanticDiagnosticsBuilderProgram(

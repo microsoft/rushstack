@@ -4,9 +4,10 @@
 import * as nodeJsPath from 'path';
 import { Import } from '../Import';
 import { PackageJsonLookup } from '../PackageJsonLookup';
+import { Path } from '../Path';
 
 describe('Import', () => {
-  const pacakgeRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
+  const packageRoot: string = PackageJsonLookup.instance.tryGetPackageFolderFor(__dirname)!;
 
   describe('resolveModule', () => {
     it('returns an absolute path as-is', () => {
@@ -36,34 +37,42 @@ describe('Import', () => {
 
     it('resolves a dependency', () => {
       expect(
-        Import.resolveModule({ modulePath: '@rushstack/heft', baseFolderPath: __dirname }).replace(/\\/g, '/')
+        Path.convertToSlashes(
+          Import.resolveModule({ modulePath: '@rushstack/heft', baseFolderPath: __dirname })
+        )
       ).toMatch(/node_modules\/@rushstack\/heft\/lib\/index.js$/);
     });
 
     it('resolves a path inside a dependency', () => {
       expect(
-        Import.resolveModule({
-          modulePath: '@rushstack/heft/lib/start.js',
-          baseFolderPath: __dirname
-        }).replace(/\\/g, '/')
+        Path.convertToSlashes(
+          Import.resolveModule({
+            modulePath: '@rushstack/heft/lib/start.js',
+            baseFolderPath: __dirname
+          })
+        )
       ).toMatch(/node_modules\/@rushstack\/heft\/lib\/start\.js$/);
     });
 
     it('resolves a dependency of a dependency', () => {
       expect(
-        Import.resolveModule({
-          modulePath: '@rushstack/ts-command-line',
-          baseFolderPath: nodeJsPath.join(pacakgeRoot, 'node_modules', '@rushstack', 'heft')
-        }).replace(/\\/g, '/')
+        Path.convertToSlashes(
+          Import.resolveModule({
+            modulePath: '@rushstack/ts-command-line',
+            baseFolderPath: nodeJsPath.join(packageRoot, 'node_modules', '@rushstack', 'heft')
+          })
+        )
       ).toMatch(/node_modules\/@rushstack\/ts-command-line\/lib\/index\.js$/);
     });
 
     it('resolves a path inside a dependency of a dependency', () => {
       expect(
-        Import.resolveModule({
-          modulePath: '@rushstack/ts-command-line/lib/Constants.js',
-          baseFolderPath: nodeJsPath.join(pacakgeRoot, 'node_modules', '@rushstack', 'heft')
-        }).replace(/\\/g, '/')
+        Path.convertToSlashes(
+          Import.resolveModule({
+            modulePath: '@rushstack/ts-command-line/lib/Constants.js',
+            baseFolderPath: nodeJsPath.join(packageRoot, 'node_modules', '@rushstack', 'heft')
+          })
+        )
       ).toMatch(/node_modules\/@rushstack\/ts-command-line\/lib\/Constants\.js$/);
     });
 
@@ -75,14 +84,14 @@ describe('Import', () => {
             baseFolderPath: __dirname,
             allowSelfReference: true
           })
-        ).toEqual(pacakgeRoot);
+        ).toEqual(packageRoot);
         expect(
           Import.resolveModule({
             modulePath: '@rushstack/node-core-library/lib/Constants.js',
             baseFolderPath: __dirname,
             allowSelfReference: true
           })
-        ).toEqual(nodeJsPath.join(pacakgeRoot, 'lib', 'Constants.js'));
+        ).toEqual(nodeJsPath.join(packageRoot, 'lib', 'Constants.js'));
       });
 
       it('throws on an attempt to reference this package without allowSelfReference turned on', () => {
@@ -138,28 +147,34 @@ describe('Import', () => {
 
     it('fails to resolve a path inside a dependency', () => {
       expect(() =>
-        Import.resolvePackage({
-          packageName: '@rushstack/heft/lib/start.js',
-          baseFolderPath: __dirname
-        }).replace(/\\/g, '/')
+        Path.convertToSlashes(
+          Import.resolvePackage({
+            packageName: '@rushstack/heft/lib/start.js',
+            baseFolderPath: __dirname
+          })
+        )
       ).toThrowError(/^Cannot find package "@rushstack\/heft\/lib\/start.js" from ".+"\.$/);
     });
 
     it('resolves a dependency of a dependency', () => {
       expect(
-        Import.resolvePackage({
-          packageName: '@rushstack/ts-command-line',
-          baseFolderPath: nodeJsPath.join(pacakgeRoot, 'node_modules', '@rushstack', 'heft')
-        }).replace(/\\/g, '/')
+        Path.convertToSlashes(
+          Import.resolvePackage({
+            packageName: '@rushstack/ts-command-line',
+            baseFolderPath: nodeJsPath.join(packageRoot, 'node_modules', '@rushstack', 'heft')
+          })
+        )
       ).toMatch(/node_modules\/@rushstack\/ts-command-line$/);
     });
 
     it('fails to resolve a path inside a dependency of a dependency', () => {
       expect(() =>
-        Import.resolvePackage({
-          packageName: '@rushstack/ts-command-line/lib/Constants.js',
-          baseFolderPath: nodeJsPath.join(pacakgeRoot, 'node_modules', '@rushstack', 'heft')
-        }).replace(/\\/g, '/')
+        Path.convertToSlashes(
+          Import.resolvePackage({
+            packageName: '@rushstack/ts-command-line/lib/Constants.js',
+            baseFolderPath: nodeJsPath.join(packageRoot, 'node_modules', '@rushstack', 'heft')
+          })
+        )
       ).toThrowError(/^Cannot find package "@rushstack\/ts-command-line\/lib\/Constants.js" from ".+"\.$/);
     });
 
@@ -171,7 +186,7 @@ describe('Import', () => {
             baseFolderPath: __dirname,
             allowSelfReference: true
           })
-        ).toEqual(pacakgeRoot);
+        ).toEqual(packageRoot);
       });
 
       it('fails to resolve a path inside this package with allowSelfReference turned on', () => {

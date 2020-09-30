@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as colors from 'colors';
+import colors from 'colors';
 
 import { getPackageDeps, getGitHashForFiles, IPackageDeps } from '@rushstack/package-deps-hash';
 import { Path, InternalError, FileSystem } from '@rushstack/node-core-library';
@@ -140,9 +140,9 @@ export class PackageChangeAnalyzer {
         const dependencyManifestFilePath: string = PnpmProjectDependencyManifest.getFilePathForProject(
           project
         );
-        const relativeDependencyManifestFilePath: string = path
-          .relative(this._rushConfiguration.rushJsonFolder, dependencyManifestFilePath)
-          .replace(/\\/g, '/');
+        const relativeDependencyManifestFilePath: string = Path.convertToSlashes(
+          path.relative(this._rushConfiguration.rushJsonFolder, dependencyManifestFilePath)
+        );
 
         if (!FileSystem.exists(dependencyManifestFilePath)) {
           throw new Error(
@@ -173,12 +173,12 @@ export class PackageChangeAnalyzer {
       const variant: string | undefined = this._rushConfiguration.currentInstalledVariant;
 
       // Add the shrinkwrap file to every project's dependencies
-      const shrinkwrapFile: string = path
-        .relative(
+      const shrinkwrapFile: string = Path.convertToSlashes(
+        path.relative(
           this._rushConfiguration.rushJsonFolder,
           this._rushConfiguration.getCommittedShrinkwrapFilename(variant)
         )
-        .replace(/\\/g, '/');
+      );
 
       for (const project of this._rushConfiguration.projects) {
         const shrinkwrapHash: string | undefined = noProjectHashes[shrinkwrapFile];

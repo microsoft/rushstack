@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import * as os from 'os';
 
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
@@ -13,7 +13,7 @@ import { PurgeManager } from '../../logic/PurgeManager';
 import { UnlinkManager } from '../../logic/UnlinkManager';
 
 export class PurgeAction extends BaseRushAction {
-  private _unsafeParameter: CommandLineFlagParameter;
+  private _unsafeParameter!: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({

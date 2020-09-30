@@ -10,7 +10,7 @@ import { EOL } from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 
-import { IPackageJson, JsonFile, FileConstants, Text } from '@rushstack/node-core-library';
+import { IPackageJson, JsonFile, FileConstants, Text, Enum } from '@rushstack/node-core-library';
 
 import { IChangeInfo, ChangeType } from '../api/ChangeManagement';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
@@ -509,7 +509,7 @@ export class PublishUtilities {
 
     // If the given change does not have a changeType, derive it from the "type" string.
     if (change.changeType === undefined) {
-      change.changeType = ChangeType[change.type!];
+      change.changeType = Enum.tryGetValueByKey(ChangeType, change.type!);
     }
 
     if (!allChanges[packageName]) {

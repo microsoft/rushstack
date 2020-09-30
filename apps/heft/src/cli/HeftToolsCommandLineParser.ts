@@ -10,7 +10,9 @@ import {
   Terminal,
   InternalError,
   ConsoleTerminalProvider,
-  AlreadyReportedError
+  AlreadyReportedError,
+  Path,
+  FileSystem
 } from '@rushstack/node-core-library';
 import { ArgumentParser } from 'argparse';
 
@@ -29,6 +31,8 @@ import { TestStage } from '../stages/TestStage';
 import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 import { ICustomActionOptions, CustomAction } from './actions/CustomAction';
 import { Constants } from '../utilities/Constants';
+import { SyncHook } from 'tapable';
+import { IHeftLifecycle, HeftLifecycleHooks } from '../pluginFramework/HeftLifecycle';
 
 export class HeftToolsCommandLineParser extends CommandLineParser {
   private _terminalProvider: ConsoleTerminalProvider;
@@ -38,11 +42,11 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
   private _pluginManager: PluginManager;
   private _heftConfiguration: HeftConfiguration;
   private _internalHeftSession: InternalHeftSession;
+  private _heftLifecycleHook: SyncHook<IHeftLifecycle>;
 
-  // @ts-ignore (TS6133) '_unmanagedFlag' is declared but its value is never read.
-  private _unmanagedFlag: CommandLineFlagParameter;
-  private _debugFlag: CommandLineFlagParameter;
-  private _pluginsParameter: CommandLineStringListParameter;
+  private _unmanagedFlag!: CommandLineFlagParameter;
+  private _debugFlag!: CommandLineFlagParameter;
+  private _pluginsParameter!: CommandLineStringListParameter;
 
   public get isDebug(): boolean {
     return this._debugFlag.value;
@@ -79,14 +83,15 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       terminal: this._terminal,
       loggingManager: this._loggingManager,
       metricsCollector: this._metricsCollector,
-      pluginManager: this._pluginManager,
       heftConfiguration: this._heftConfiguration,
       stages
     };
 
+    this._heftLifecycleHook = new SyncHook<IHeftLifecycle>(['heftLifecycle']);
     this._internalHeftSession = new InternalHeftSession({
       getIsDebugMode: () => this.isDebug,
       ...stages,
+      heftLifecycleHook: this._heftLifecycleHook,
       loggingManager: this._loggingManager,
       metricsCollector: this._metricsCollector,
       registerAction: <TParameters>(options: ICustomActionOptions<TParameters>) => {
@@ -145,9 +150,43 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
 
     this._normalizeCwd();
 
+    await this._checkForUpgradeAsync();
+
+    await this._heftConfiguration._checkForRigAsync();
+
+    if (this._heftConfiguration.rigConfig.rigFound) {
+      const rigProfileFolder: string = await this._heftConfiguration.rigConfig.getResolvedProfileFolderAsync();
+      const relativeRigFolderPath: string = Path.formatConcisely({
+        pathToConvert: rigProfileFolder,
+        baseFolder: this._heftConfiguration.buildFolder
+      });
+      this._terminal.writeLine(`Using rig configuration from ${relativeRigFolderPath}`);
+    }
+
     await this._initializePluginsAsync();
 
+    const heftLifecycle: IHeftLifecycle = {
+      hooks: new HeftLifecycleHooks()
+    };
+    this._heftLifecycleHook.call(heftLifecycle);
+
+    await heftLifecycle.hooks.toolStart.promise();
+
     return await super.execute(args);
+  }
+
+  private async _checkForUpgradeAsync(): Promise<void> {
+    // The .heft/clean.json file is a fairly reliable heuristic for detecting projects created prior to
+    // the big config file redesign with Heft 0.14.0
+    if (await FileSystem.existsAsync('.heft/clean.json')) {
+      this._terminal.writeErrorLine(
+        '\nThis project has a ".heft/clean.json" file, which is now obsolete as of Heft 0.14.0.'
+      );
+      this._terminal.writeLine(
+        '\nFor instructions for migrating config files, please read UPGRADING.md in the @rushstack/heft package folder.\n'
+      );
+      throw new AlreadyReportedError();
+    }
   }
 
   protected async onExecute(): Promise<void> {
@@ -178,7 +217,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
 
   private _getPluginArgumentValues(args: string[] = process.argv): string[] {
     // This is a rough parsing of the --plugin parameters
-    const parser: ArgumentParser = new ArgumentParser();
+    const parser: ArgumentParser = new ArgumentParser({ addHelp: false });
     parser.addArgument(this._pluginsParameter.longName, { dest: 'plugins', action: 'append' });
 
     const [result]: { plugins: string[] }[] = parser.parseKnownArgs(args);

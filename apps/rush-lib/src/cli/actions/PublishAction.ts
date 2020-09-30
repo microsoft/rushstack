@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import { EOL } from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -29,30 +29,30 @@ import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
 import { Utilities } from '../../utilities/Utilities';
 
 export class PublishAction extends BaseRushAction {
-  private _addCommitDetails: CommandLineFlagParameter;
-  private _apply: CommandLineFlagParameter;
-  private _includeAll: CommandLineFlagParameter;
-  private _npmAuthToken: CommandLineStringParameter;
-  private _npmTag: CommandLineStringParameter;
-  private _npmAccessLevel: CommandLineChoiceParameter;
-  private _publish: CommandLineFlagParameter;
-  private _regenerateChangelogs: CommandLineFlagParameter;
-  private _registryUrl: CommandLineStringParameter;
-  private _targetBranch: CommandLineStringParameter;
-  private _prereleaseName: CommandLineStringParameter;
-  private _partialPrerelease: CommandLineFlagParameter;
-  private _suffix: CommandLineStringParameter;
-  private _force: CommandLineFlagParameter;
-  private _versionPolicy: CommandLineStringParameter;
-  private _applyGitTagsOnPack: CommandLineFlagParameter;
-  private _commitId: CommandLineStringParameter;
-  private _releaseFolder: CommandLineStringParameter;
-  private _pack: CommandLineFlagParameter;
+  private _addCommitDetails!: CommandLineFlagParameter;
+  private _apply!: CommandLineFlagParameter;
+  private _includeAll!: CommandLineFlagParameter;
+  private _npmAuthToken!: CommandLineStringParameter;
+  private _npmTag!: CommandLineStringParameter;
+  private _npmAccessLevel!: CommandLineChoiceParameter;
+  private _publish!: CommandLineFlagParameter;
+  private _regenerateChangelogs!: CommandLineFlagParameter;
+  private _registryUrl!: CommandLineStringParameter;
+  private _targetBranch!: CommandLineStringParameter;
+  private _prereleaseName!: CommandLineStringParameter;
+  private _partialPrerelease!: CommandLineFlagParameter;
+  private _suffix!: CommandLineStringParameter;
+  private _force!: CommandLineFlagParameter;
+  private _versionPolicy!: CommandLineStringParameter;
+  private _applyGitTagsOnPack!: CommandLineFlagParameter;
+  private _commitId!: CommandLineStringParameter;
+  private _releaseFolder!: CommandLineStringParameter;
+  private _pack!: CommandLineFlagParameter;
 
-  private _prereleaseToken: PrereleaseToken;
-  private _hotfixTagOverride: string;
-  private _targetNpmrcPublishFolder: string;
-  private _targetNpmrcPublishPath: string;
+  private _prereleaseToken!: PrereleaseToken;
+  private _hotfixTagOverride!: string;
+  private _targetNpmrcPublishFolder!: string;
+  private _targetNpmrcPublishPath!: string;
 
   public constructor(parser: RushCommandLineParser) {
     super({
