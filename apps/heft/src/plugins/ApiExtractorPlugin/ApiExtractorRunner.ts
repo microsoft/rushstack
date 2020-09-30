@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as semver from 'semver';
 import * as path from 'path';
 import { Terminal, Path } from '@rushstack/node-core-library';
 import { ApiExtractor as TApiExtractor } from '@microsoft/rush-stack-compiler-3.9';
@@ -56,6 +57,17 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
     this._terminal = this._scopedLogger.terminal;
 
     const apiExtractor: typeof TApiExtractor = require(this._configuration.apiExtractorPackagePath);
+
+    this._terminal.writeLine(`Using API Extractor version ${apiExtractor.Extractor.version}`);
+
+    const apiExtractorVersion: semver.SemVer | null = semver.parse(apiExtractor.Extractor.version);
+    if (
+      !apiExtractorVersion ||
+      apiExtractorVersion.major < 7 ||
+      (apiExtractorVersion.major === 7 && apiExtractorVersion.minor < 10)
+    ) {
+      this._scopedLogger.emitWarning(new Error(`Heft requires API Extractor version 7.10.0 or newer`));
+    }
 
     const configObjectFullPath: string = this._configuration.apiExtractorJsonFilePath;
     const configObject: TApiExtractor.IConfigFile = apiExtractor.ExtractorConfig.loadFile(
@@ -138,8 +150,6 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
         message.handled = true;
       }
     };
-
-    this._terminal.writeLine(`Using API Extractor version ${apiExtractor.Extractor.version}`);
 
     const apiExtractorResult: TApiExtractor.ExtractorResult = apiExtractor.Extractor.invoke(
       extractorConfig,
