@@ -23,8 +23,8 @@
   ],
   "dependencies": {},
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.9": "0.4.22",
     "@rushstack/heft": "0.14.0",
+    "@rushstack/heft-node-rig": "0.1.0",
     "@types/node": "10.17.13"
   }
 }
