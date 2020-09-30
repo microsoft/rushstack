@@ -1,6 +1,21 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Tue, 22 Sep 2020 05:45:57 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Sep 2020 06:53:53 GMT and should not be manually modified.
+
+## 0.3.0
+Wed, 30 Sep 2020 06:53:53 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Remove "propertyInheritanceTypes" option in favor of a more flexible "propertyInheritance" that allows for custom inheritance.
+- (BREAKING CHANGE) Change the ConfigurationFile API to take the project-relative configuration file in the constructor. Now the configuration file loading function takes the project root instead of the configuration file path.
+- Add an API to "try" to load a configuration file, and return undefined if it doesn't exist instead of throwing an exception.
+- Add support for config/rig.json.
+- Upgrade compiler; the API now requires TypeScript 3.9 or newer
+
+### Patches
+
+- Update README.md
 
 ## 0.2.7
 Tue, 22 Sep 2020 05:45:57 GMT

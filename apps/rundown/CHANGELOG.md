@@ -1,6 +1,14 @@
 # Change Log - @rushstack/rundown
 
-This log was last generated on Tue, 22 Sep 2020 05:45:57 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Sep 2020 06:53:53 GMT and should not be manually modified.
+
+## 1.0.29
+Wed, 30 Sep 2020 06:53:53 GMT
+
+### Patches
+
+- Include missing "License" field.
+- Update README.md
 
 ## 1.0.28
 Tue, 22 Sep 2020 05:45:57 GMT

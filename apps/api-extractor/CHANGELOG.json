@@ -2,6 +2,49 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.10.0",
+      "tag": "@microsoft/api-extractor_v7.10.0",
+      "date": "Wed, 30 Sep 2020 06:53:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an InternalError reported when a declaration referred to itself using \"tyepof\""
+          },
+          {
+            "comment": "Update README.md"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "API Extractor now supports the config/rig.json system, as defined by @rushstack/rig-package"
+          },
+          {
+            "comment": "Add IExtractorConfigPrepareOptions.projectFolderLookupToken"
+          },
+          {
+            "comment": "Upgrade compiler; the API now requires TypeScript 3.9 or newer"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.10.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.34.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.1.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.9.22",
       "tag": "@microsoft/api-extractor_v7.9.22",
       "date": "Tue, 22 Sep 2020 05:45:56 GMT",

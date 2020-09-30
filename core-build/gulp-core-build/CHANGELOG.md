@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Tue, 22 Sep 2020 05:45:57 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Sep 2020 06:53:53 GMT and should not be manually modified.
+
+## 3.17.0
+Wed, 30 Sep 2020 06:53:53 GMT
+
+### Minor changes
+
+- Upgrade compiler; the API now requires TypeScript 3.9 or newer
 
 ## 3.16.28
 Tue, 22 Sep 2020 05:45:57 GMT

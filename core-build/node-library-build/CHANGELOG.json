@@ -2,6 +2,35 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "6.5.0",
+      "tag": "@microsoft/node-library-build_v6.5.0",
+      "date": "Wed, 30 Sep 2020 06:53:53 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade compiler; the API now requires TypeScript 3.9 or newer"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" to `3.17.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" to `3.9.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" to `8.5.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.9\" to `0.4.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.1.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.4.52",
       "tag": "@microsoft/node-library-build_v6.4.52",
       "date": "Tue, 22 Sep 2020 05:45:56 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/node-library-build
 
-This log was last generated on Tue, 22 Sep 2020 05:45:56 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Sep 2020 06:53:53 GMT and should not be manually modified.
+
+## 6.5.0
+Wed, 30 Sep 2020 06:53:53 GMT
+
+### Minor changes
+
+- Upgrade compiler; the API now requires TypeScript 3.9 or newer
 
 ## 6.4.52
 Tue, 22 Sep 2020 05:45:56 GMT

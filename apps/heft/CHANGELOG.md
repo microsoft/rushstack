@@ -1,6 +1,24 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 22 Sep 2020 05:45:56 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Sep 2020 06:53:53 GMT and should not be manually modified.
+
+## 0.14.0
+Wed, 30 Sep 2020 06:53:53 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Collapse copy-static-assets.json into typescript.json.
+- (BREAKING CHANGE) Move the config files from the ".heft" folder to the "config" folder and print a warning if an unexpected file is found in the ".heft" folder.
+- (BREAKING CHANGE) Consolidate the clean.json and plugins.json files into a new heft.json file.
+- (BREAKING CHANGE) Rename "emitFolderNameForJest" to "emitFolderNameForTests" in typescript.json
+- Heft now supports the config/rig.json system as defined by @rushstack/rig-package
+- Enable api-extractor.json to be provided by a rig package
+- Upgrade compiler; the API now requires TypeScript 3.9 or newer
+
+### Patches
+
+- Update README.md
+- Fix an issue where "heft build --help" printed incorrect help
 
 ## 0.13.9
 Tue, 22 Sep 2020 05:45:56 GMT

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Wed, 12 Aug 2020 00:10:05 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Sep 2020 06:53:53 GMT and should not be manually modified.
+
+## 1.0.4
+Wed, 30 Sep 2020 06:53:53 GMT
+
+### Patches
+
+- Update README.md
 
 ## 1.0.3
 Wed, 12 Aug 2020 00:10:05 GMT

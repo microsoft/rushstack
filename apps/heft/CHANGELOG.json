@@ -2,6 +2,64 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.14.0",
+      "tag": "@rushstack/heft_v0.14.0",
+      "date": "Wed, 30 Sep 2020 06:53:53 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING CHANGE) Collapse copy-static-assets.json into typescript.json."
+          },
+          {
+            "comment": "(BREAKING CHANGE) Move the config files from the \".heft\" folder to the \"config\" folder and print a warning if an unexpected file is found in the \".heft\" folder."
+          },
+          {
+            "comment": "(BREAKING CHANGE) Consolidate the clean.json and plugins.json files into a new heft.json file."
+          },
+          {
+            "comment": "(BREAKING CHANGE) Rename \"emitFolderNameForJest\" to \"emitFolderNameForTests\" in typescript.json"
+          },
+          {
+            "comment": "Heft now supports the config/rig.json system as defined by @rushstack/rig-package"
+          },
+          {
+            "comment": "Enable api-extractor.json to be provided by a rig package"
+          },
+          {
+            "comment": "Upgrade compiler; the API now requires TypeScript 3.9 or newer"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Update README.md"
+          },
+          {
+            "comment": "Fix an issue where \"heft build --help\" printed incorrect help"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.34.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.7.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.9\" to `0.4.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.1.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.13.9",
       "tag": "@rushstack/heft_v0.13.9",
       "date": "Tue, 22 Sep 2020 05:45:56 GMT",
