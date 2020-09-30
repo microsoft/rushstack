@@ -35,12 +35,12 @@
   ],
 
   /**
-   * Specifies the intermediary folder that Jest will use for its input.  Because Jest uses the
+   * Specifies the intermediary folder that tests will use.  Because Jest uses the
    * Node.js runtime to execute tests, the module format must be CommonJS.
    *
    * The default value is "lib".
    */
-  "emitFolderNameForJest": "lib-commonjs"
+  "emitFolderNameForTests": "lib-commonjs",
 
   /**
    * If set to "true", the TSlint task will not be invoked.
@@ -51,5 +51,30 @@
    * Set this to change the maximum number of file handles that will be opened concurrently for writing.
    * The default is 50.
    */
-  // "maxWriteParallelism": 50
+  // "maxWriteParallelism": 50,
+
+  /**
+   * Describes the way files should be statically coped from src to TS output folders
+   */
+  "staticAssetsToCopy": {
+    /**
+     * File extensions that should be copied from the src folder to the destination folder(s).
+     */
+    "fileExtensions": [".sass", ".scss", ".css"]
+
+    /**
+     * Glob patterns that should be explicitly included.
+     */
+    // "includeGlobs": [
+    //   "some/path/*.js"
+    // ],
+
+    /**
+     * Glob patterns that should be explicitly excluded. This takes precedence over globs listed
+     * in "includeGlobs" and files that match the file extensions provided in "fileExtensions".
+     */
+    // "excludeGlobs": [
+    //   "some/path/*.css"
+    // ]
+  }
 }
