@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-web-rig",
-      "comment": "Initial project creation.",
+      "comment": "Initial release",
       "type": "minor"
     }
   ],
