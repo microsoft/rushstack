@@ -207,6 +207,7 @@ export class CoreConfigFiles {
   public static get sassConfigurationFileLoader(): ConfigurationFile<ISassConfigurationJson> {
     const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'sass.schema.json');
     CoreConfigFiles._sassConfigurationFileLoader = new ConfigurationFile<ISassConfigurationJson>({
+      projectRelativeFilePath: 'config/sass.json',
       jsonSchemaPath: schemaPath,
       jsonPathMetadata: {
         '$.includePaths.*': {
