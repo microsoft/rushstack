@@ -43,4 +43,11 @@ it avoids storing the entire output in memory. This means that operations like `
 cannot be simple regular expressions -- they must be implemented as state machines (`TextRewriter` subclasses)
 capable of matching substrings that span multiple chunks.
 
-API documentation for this package: https://rushstack.io/pages/api/terminal/
+## Links
+
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/libraries/terminal/CHANGELOG.md) - Find
+  out what's new in the latest version
+- [API Reference](https://rushstack.io/pages/api/terminal/)
+
+`@rushstack/terminal` is part of the [Rush Stack](https://rushstack.io/) family of projects.

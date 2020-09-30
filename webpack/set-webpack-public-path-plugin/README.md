@@ -178,6 +178,10 @@ gulp.src('finizlied/webpack/bundle/path')
   .pipe(gulp.dest('dest/path'));
 ```
 
-# License
+## Links
 
-MIT (http://www.opensource.org/licenses/mit-license.php)
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/webpack/set-webpack-public-path-plugin/CHANGELOG.md) - Find
+  out what's new in the latest version
+
+`@rushstack/set-webpack-public-path-plugin` is part of the [Rush Stack](https://rushstack.io/) family of projects.

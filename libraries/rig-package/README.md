@@ -217,4 +217,11 @@ if (rigConfig.rigFound) {
 
 Note that there are also async variants of the functions that access the filesystem.
 
-API documentation for this package: https://rushstack.io/pages/api/rig-package/
+## Links
+
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/libraries/rig-package/CHANGELOG.md) - Find
+  out what's new in the latest version
+- [API Reference](https://rushstack.io/pages/api/rig-package/)
+
+`@rushstack/rig-package` is part of the [Rush Stack](https://rushstack.io/) family of projects.

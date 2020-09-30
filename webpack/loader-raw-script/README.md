@@ -1,4 +1,4 @@
-# raw-script loader for webpack
+# @rushstack/loader-raw-script
 
 ## Installation
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-This simple loader loads a script file's contents directly in a webpack bundle using an `eval(...)`.
+This simple Webpack loader loads a script file's contents directly in a webpack bundle using an `eval(...)`.
 
 ## Usage
 
@@ -16,6 +16,10 @@ This simple loader loads a script file's contents directly in a webpack bundle u
 require("@rushstack/loader-raw-script!path/to/script.js");
 ```
 
-## License
+## Links
 
-MIT (http://www.opensource.org/licenses/mit-license.php)
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/webpack/loader-raw-script/CHANGELOG.md) - Find
+  out what's new in the latest version
+
+`@rushstack/loader-raw-script` is part of the [Rush Stack](https://rushstack.io/) family of projects.
