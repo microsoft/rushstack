@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.34.3",
+      "tag": "@microsoft/rush_v5.34.3",
+      "date": "Wed, 30 Sep 2020 21:04:15 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update to build with @rushstack/heft-node-rig"
+          },
+          {
+            "comment": "Update README.md"
+          },
+          {
+            "comment": "Upgrade compiler; the API now requires TypeScript 3.9 or newer"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.34.2",
       "tag": "@microsoft/rush_v5.34.2",
       "date": "Mon, 21 Sep 2020 22:00:03 GMT",
