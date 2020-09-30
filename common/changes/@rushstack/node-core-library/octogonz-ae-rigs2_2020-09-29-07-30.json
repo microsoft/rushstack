@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Add Path.isEqual() and Path.makeRelativeOnlyIfUnder()",
+      "comment": "Add Path.isEqual(), Path.formatConcisely(), Path.convertToSlashes(), Path.convertToBackslashes(), and Path.isDownwardRelative()",
       "type": "minor"
     }
   ],
