@@ -28,8 +28,8 @@
     "eslint": "^6.0.0 || ^7.0.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.9": "0.4.21",
-    "@rushstack/heft": "0.8.0",
+    "@microsoft/rush-stack-compiler-3.9": "0.4.22",
+    "@rushstack/heft": "0.14.0",
     "@types/eslint": "7.2.0",
     "@types/estree": "0.0.44",
     "@types/heft-jest": "1.0.1",
