@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft",
-  "version": "0.13.9",
+  "version": "0.14.0",
   "description": "The Rush Stack extensible build system",
   "keywords": [
     "toolchain",
