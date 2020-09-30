@@ -1,28 +1,28 @@
-// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the
-// MIT license. See LICENSE in the project root for license information.
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
 
-import { Import, InternalError, Terminal } from '@rushstack/node-core-library';
+import { Terminal, InternalError, Import } from '@rushstack/node-core-library';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
-import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
-import { DeleteGlobsPlugin } from '../plugins/DeleteGlobsPlugin';
-import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
-import { ProjectValidatorPlugin } from '../plugins/ProjectValidatorPlugin';
-import { SassTypingsPlugin } from '../plugins/SassTypingsPlugin/SassTypingsPlugin';
-// Default plugins
-import { TypeScriptPlugin } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
-import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWebpackPlugin';
-import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
-import {
-  CoreConfigFiles,
-  IHeftConfigurationJson,
-  IHeftConfigurationJsonPluginSpecifier
-} from '../utilities/CoreConfigFiles';
-
-import { HeftSession } from './HeftSession';
 import { IHeftPlugin } from './IHeftPlugin';
 import { InternalHeftSession } from './InternalHeftSession';
+import { HeftSession } from './HeftSession';
+import {
+  CoreConfigFiles,
+  IHeftConfigurationJsonPluginSpecifier,
+  IHeftConfigurationJson
+} from '../utilities/CoreConfigFiles';
+
+// Default plugins
+import { TypeScriptPlugin } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
+import { DeleteGlobsPlugin } from '../plugins/DeleteGlobsPlugin';
+import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
+import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
+import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
+import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWebpackPlugin';
+import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
+import { SassTypingsPlugin } from '../plugins/SassTypingsPlugin/SassTypingsPlugin';
+import { ProjectValidatorPlugin } from '../plugins/ProjectValidatorPlugin';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
