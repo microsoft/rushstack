@@ -5,7 +5,7 @@ import { CommandLineAction, CommandLineParser, CommandLineFlagParameter } from '
 
 class TestAction extends CommandLineAction {
   public done: boolean = false;
-  private _flag: CommandLineFlagParameter;
+  private _flag!: CommandLineFlagParameter;
 
   public constructor() {
     super({

@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { Terminal, Path } from '@rushstack/node-core-library';
-import { ApiExtractor as TApiExtractor } from '@microsoft/rush-stack-compiler-3.9';
+import type { ApiExtractor as TApiExtractor } from '@microsoft/rush-stack-compiler-3.9';
 
 import { SubprocessRunnerBase } from '../../utilities/subprocess/SubprocessRunnerBase';
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
@@ -44,8 +44,8 @@ export interface IApiExtractorRunnerConfiguration {
 }
 
 export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunnerConfiguration> {
-  private _scopedLogger: IScopedLogger;
-  private _terminal: Terminal;
+  private _scopedLogger!: IScopedLogger;
+  private _terminal!: Terminal;
 
   public get filename(): string {
     return __filename;

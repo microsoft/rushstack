@@ -65,7 +65,7 @@ export interface ICustomActionOptions<TParameters> {
 
 export class CustomAction<TParameters> extends HeftActionBase {
   private _customActionOptions: ICustomActionOptions<TParameters>;
-  private _parameterValues: Map<string, () => CustomActionParameterType>;
+  private _parameterValues!: Map<string, () => CustomActionParameterType>;
 
   public constructor(
     customActionOptions: ICustomActionOptions<TParameters>,
@@ -151,7 +151,8 @@ export class CustomAction<TParameters> extends HeftActionBase {
   }
 
   protected async actionExecuteAsync(): Promise<void> {
-    const parameterValues: {} = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const parameterValues: Record<string, any> = {};
 
     for (const [callbackName, getParameterValue] of this._parameterValues.entries()) {
       parameterValues[callbackName] = getParameterValue();

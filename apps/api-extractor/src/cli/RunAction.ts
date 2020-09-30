@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 import { PackageJsonLookup, FileSystem, IPackageJson, Path } from '@rushstack/node-core-library';
@@ -18,11 +18,11 @@ import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
 import { ExtractorConfig, IExtractorConfigPrepareOptions } from '../api/ExtractorConfig';
 
 export class RunAction extends CommandLineAction {
-  private _configFileParameter: CommandLineStringParameter;
-  private _localParameter: CommandLineFlagParameter;
-  private _verboseParameter: CommandLineFlagParameter;
-  private _diagnosticsParameter: CommandLineFlagParameter;
-  private _typescriptCompilerFolder: CommandLineStringParameter;
+  private _configFileParameter!: CommandLineStringParameter;
+  private _localParameter!: CommandLineFlagParameter;
+  private _verboseParameter!: CommandLineFlagParameter;
+  private _diagnosticsParameter!: CommandLineFlagParameter;
+  private _typescriptCompilerFolder!: CommandLineStringParameter;
 
   public constructor(parser: ApiExtractorCommandLine) {
     super({

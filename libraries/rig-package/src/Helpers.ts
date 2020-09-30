@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import * as fs from 'fs';
-import * as nodeResolve from 'resolve';
+import nodeResolve from 'resolve';
 
 // These helpers avoid taking dependencies on other NPM packages
 export class Helpers {
@@ -12,11 +12,11 @@ export class Helpers {
 
   public static nodeResolveAsync(id: string, opts: nodeResolve.AsyncOpts): Promise<string> {
     return new Promise((resolve: (result: string) => void, reject: (error: Error) => void) => {
-      nodeResolve(id, opts, (error: Error, result: string) => {
+      nodeResolve(id, opts, (error: Error | null, result: string | undefined) => {
         if (error) {
           reject(error);
         } else {
-          resolve(result);
+          resolve(result!);
         }
       });
     });

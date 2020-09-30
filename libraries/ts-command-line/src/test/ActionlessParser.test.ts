@@ -4,7 +4,7 @@
 import { CommandLineParser, CommandLineFlagParameter } from '..';
 
 class TestCommandLine extends CommandLineParser {
-  public flag: CommandLineFlagParameter;
+  public flag!: CommandLineFlagParameter;
 
   public constructor() {
     super({

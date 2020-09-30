@@ -41,7 +41,7 @@ export abstract class CommandLineParameter {
    * A unique internal key used to retrieve the value from the parser's dictionary.
    * @internal
    */
-  public _parserKey: string;
+  public _parserKey: string | undefined;
 
   /** {@inheritDoc IBaseCommandLineDefinition.parameterLongName} */
   public readonly longName: string;

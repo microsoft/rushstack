@@ -45,9 +45,9 @@ export abstract class StageBase<
   protected readonly heftConfiguration: HeftConfiguration;
   protected readonly loggingManager: LoggingManager;
   protected readonly globalTerminal: Terminal;
-  protected stageOptions: TStageOptions;
-  protected stageProperties: TStageProperties;
-  protected stageHooks: TStageHooks;
+  protected stageOptions!: TStageOptions;
+  protected stageProperties!: TStageProperties;
+  protected stageHooks!: TStageHooks;
   private readonly _innerHooksType: new () => TStageHooks;
 
   public constructor(

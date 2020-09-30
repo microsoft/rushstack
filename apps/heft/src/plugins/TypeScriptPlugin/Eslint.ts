@@ -29,10 +29,10 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   private readonly _eslintPackage: typeof TEslint;
   private readonly _eslintTimings: Map<string, string> = new Map<string, string>();
 
-  private _eslintCli: TEslint.CLIEngine;
-  private _eslint: TEslint.ESLint;
+  private _eslintCli!: TEslint.CLIEngine;
+  private _eslint!: TEslint.ESLint;
   private _eslintBaseConfiguration: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-  private _lintResult: TEslint.ESLint.LintResult[];
+  private _lintResult!: TEslint.ESLint.LintResult[];
 
   public constructor(options: IEslintOptions) {
     super('eslint', options);

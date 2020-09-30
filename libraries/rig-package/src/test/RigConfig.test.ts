@@ -3,8 +3,8 @@
 
 import * as path from 'path';
 import * as fs from 'fs';
-import * as Ajv from 'ajv';
-import * as stripJsonComments from 'strip-json-comments';
+import Ajv from 'ajv';
+import stripJsonComments from 'strip-json-comments';
 
 import { RigConfig } from '../RigConfig';
 
@@ -168,7 +168,7 @@ describe('RigConfig tests', () => {
 
     // Delete our older "draft-04/schema" and use AJV's built-in schema
     // eslint-disable-next-line
-    delete RigConfig.jsonSchemaObject['$schema'];
+    delete (RigConfig.jsonSchemaObject as any)['$schema'];
 
     // Compile our schema
     const validateRigFile: Ajv.ValidateFunction = ajv.compile(RigConfig.jsonSchemaObject);

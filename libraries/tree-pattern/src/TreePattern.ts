@@ -141,6 +141,9 @@ export class TreePattern {
       throw new Error('pattern has an undefined value at ' + path);
     }
 
+    // Avoid "Element implicitly has an 'any' type" (TS7053)
+    const castedCaptures: Record<string, TreeNode> = captures;
+
     if (pattern instanceof TreePatternArg) {
       if (pattern.subtree !== undefined) {
         if (!TreePattern._matchTreeRecursive(root, pattern.subtree, captures, path)) {
@@ -148,7 +151,7 @@ export class TreePattern {
         }
       }
 
-      captures[pattern.keyName] = root;
+      castedCaptures[pattern.keyName] = root;
       return true;
     }
 
@@ -157,12 +160,12 @@ export class TreePattern {
       for (const possibleSubtree of pattern.possibleSubtrees) {
         // We shouldn't update "captures" unless the match is fully successful.
         // So make a temporary copy of it.
-        const tempCaptures: ITreePatternCaptureSet = { ...captures };
+        const tempCaptures: Record<string, TreeNode> = { ...captures };
         if (TreePattern._matchTreeRecursive(root, possibleSubtree, tempCaptures, path)) {
           // The match was successful, so assign the tempCaptures results back into the
           // original "captures" object.
           for (const key of Object.getOwnPropertyNames(tempCaptures)) {
-            captures[key] = tempCaptures[key];
+            castedCaptures[key] = tempCaptures[key];
           }
           return true;
         }

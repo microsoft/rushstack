@@ -90,7 +90,7 @@ export abstract class CommandLineParameter {
     abstract get kind(): CommandLineParameterKind;
     readonly longName: string;
     // @internal
-    _parserKey: string;
+    _parserKey: string | undefined;
     protected reportInvalidData(data: any): never;
     readonly required: boolean;
     // @internal

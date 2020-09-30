@@ -15,16 +15,16 @@ import { Logging } from '../../utilities/Logging';
 import { IBuildStageContext, ICompileSubstage } from '../../stages/BuildStage';
 
 export class TestAction extends BuildAction {
-  private _noTestFlag: CommandLineFlagParameter;
-  private _noBuildFlag: CommandLineFlagParameter;
-  private _updateSnapshotsFlag: CommandLineFlagParameter;
-  private _findRelatedTests: CommandLineStringListParameter;
-  private _silent: CommandLineFlagParameter;
-  private _testNamePattern: CommandLineStringParameter;
-  private _testPathPattern: CommandLineStringListParameter;
-  private _testTimeout: CommandLineIntegerParameter;
-  private _debugHeftReporter: CommandLineFlagParameter;
-  private _maxWorkers: CommandLineStringParameter;
+  private _noTestFlag!: CommandLineFlagParameter;
+  private _noBuildFlag!: CommandLineFlagParameter;
+  private _updateSnapshotsFlag!: CommandLineFlagParameter;
+  private _findRelatedTests!: CommandLineStringListParameter;
+  private _silent!: CommandLineFlagParameter;
+  private _testNamePattern!: CommandLineStringParameter;
+  private _testPathPattern!: CommandLineStringListParameter;
+  private _testTimeout!: CommandLineIntegerParameter;
+  private _debugHeftReporter!: CommandLineFlagParameter;
+  private _maxWorkers!: CommandLineStringParameter;
 
   public constructor(heftActionOptions: IHeftActionBaseOptions) {
     super(heftActionOptions, {
