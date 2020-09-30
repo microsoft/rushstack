@@ -1,5 +1,5 @@
 {
-  "name": "heft-webpack-basic-test",
+  "name": "heft-webpack-basic-tutorial",
   "description": "This project illustrates a minimal tutorial Heft project targeting the web browser runtime",
   "version": "1.0.0",
   "private": true,
