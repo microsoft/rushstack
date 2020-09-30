@@ -1,4 +1,4 @@
-# Module Minification Plugin for Webpack
+# @rushstack/module-minifier-plugin
 
 ## Installation
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-This plugin performs minification of production assets on a per-module basis, rather than minifying an entire chunk at a time.
+This Webpack plugin performs minification of production assets on a per-module basis, rather than minifying an entire chunk at a time.
 It issues async calls to the minifier for each unique module and each unique set of chunk boilerplate (i.e. the webpack runtime and the structure of the module list).
 This improves minification time by:
 - Avoiding duplicate work for each module that is included in multiple distinct assets/chunks (this is common with async chunks)
@@ -48,3 +48,11 @@ optimization: [
   ]
 ]
 ```
+
+## Links
+
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/webpack/module-minifier-plugin/CHANGELOG.md) - Find
+  out what's new in the latest version
+
+`@rushstack/module-minifier-plugin` is part of the [Rush Stack](https://rushstack.io/) family of projects.

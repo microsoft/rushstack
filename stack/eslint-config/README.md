@@ -241,8 +241,10 @@ module.exports = {
 };
 ```
 
+## Links
 
-## Learn more
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/stack/eslint-config/CHANGELOG.md) - Find
+  out what's new in the latest version
 
-This package is part of the Rush Stack project.  Please visit [https://rushstack.io/](https://rushstack.io/)
-for more guidance as well as [help resources](https://rushstack.io/pages/help/support/).
+`@rushstack/eslint-config` is part of the [Rush Stack](https://rushstack.io/) family of projects.

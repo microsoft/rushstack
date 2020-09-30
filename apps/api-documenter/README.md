@@ -9,4 +9,11 @@ For usage information, see the
 [Generating Docs](https://api-extractor.com/pages/setup/generating_docs/) article from the API Extractor
 documentation.
 
-API documentation for this package: https://rushstack.io/pages/api/api-documenter/
+## Links
+
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/apps/api-documenter/CHANGELOG.md) - Find
+  out what's new in the latest version
+- [API Reference](https://rushstack.io/pages/api/api-documenter/)
+
+API Documenter is part of the [Rush Stack](https://rushstack.io/) family of projects.

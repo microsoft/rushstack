@@ -57,3 +57,12 @@ a namespace containing static members of the class.
 
 > For a complete project that uses these APIs to generate an API reference web site,
 > see the [@microsoft/api-documenter](https://www.npmjs.com/package/@microsoft/api-documenter) source code.
+
+## Links
+
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/apps/api-extractor-model/CHANGELOG.md) - Find
+  out what's new in the latest version
+- [API Reference](https://rushstack.io/pages/api/api-extractor-model/)
+
+API Extractor is part of the [Rush Stack](https://rushstack.io/) family of projects.

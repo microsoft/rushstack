@@ -2,10 +2,10 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-web-rig",
-      "comment": "Initial release",
-      "type": "minor"
+      "comment": "",
+      "type": "none"
     }
   ],
   "packageName": "@rushstack/heft-web-rig",
-  "email": "iclanton@users.noreply.github.com"
+  "email": "4673363+octogonz@users.noreply.github.com"
 }

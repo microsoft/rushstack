@@ -138,5 +138,11 @@ For example, maybe we want to match `Promise['fulfilled'](123);` as well as `Pro
 If the structure of the expressions is similar enough, `TreePattern.oneOf` avoids having to create two
 separate patterns.
 
+## Links
 
-API documentation for this package: https://rushstack.io/pages/api/tree-pattern/
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/libraries/tree-pattern/CHANGELOG.md) - Find
+  out what's new in the latest version
+- [API Reference](https://rushstack.io/pages/api/tree-pattern/)
+
+`@rushstack/tree-pattern` is part of the [Rush Stack](https://rushstack.io/) family of projects.

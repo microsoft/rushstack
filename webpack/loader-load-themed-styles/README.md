@@ -1,4 +1,4 @@
-# load-themed-styles loader for webpack
+# @microsoft/loader-load-themed-styles
 
 ## Installation
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-This simple loader wraps the loading of CSS in script equivalent
+This simple Webpack loader that wraps the loading of CSS in script equivalent
 to `require("load-themed-styles").loadStyles( /* css text */ )`.
 It is designed to be a replacement for style-loader.
 
@@ -83,6 +83,11 @@ if many styles are loaded in quick succession. If the `async` option is set to `
 is called with the second parameter set to `true`, directing the function to debounce style loading causing fewer
 changes to the DOM.
 
-## License
 
-MIT (http://www.opensource.org/licenses/mit-license.php)
+## Links
+
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/webpack/loader-load-themed-styles/CHANGELOG.md) - Find
+  out what's new in the latest version
+
+`@microsoft/loader-load-themed-styles` is part of the [Rush Stack](https://rushstack.io/) family of projects.

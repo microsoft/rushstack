@@ -2,12 +2,13 @@
 
 > 🚨 *This is an early preview release. Please report issues!* 🚨
 
-<div>
-  <br />
-  <a href="https://rushstack.io/pages/heft/overview/">
-    <img width="380" src="https://rushstack.io/images/heft-logo-horse.svg">
-  </a>
-  <p />
-</div>
+A library for loading config files for use with the [Heft](https://rushstack.io/pages/heft/overview/) build system.
 
-This project is a utility for loading Heft configuration JSON files.
+## Links
+
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/libraries/heft-config-file/CHANGELOG.md) - Find
+  out what's new in the latest version
+- [API Reference](https://rushstack.io/pages/api/heft-config-file/)
+
+Heft is part of the [Rush Stack](https://rushstack.io/) family of projects.

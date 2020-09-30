@@ -47,4 +47,11 @@ all background streams which have been completed will be emitted.
 >
 > The usage instructions will be updated once that refactoring is complete.
 
-API documentation for this package: https://rushstack.io/pages/api/stream-collator/
+## Links
+
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/libraries/stream-collator/CHANGELOG.md) - Find
+  out what's new in the latest version
+- [API Reference](https://rushstack.io/pages/api/stream-collator/)
+
+`@rushstack/stream-collator` is part of the [Rush Stack](https://rushstack.io/) family of projects.

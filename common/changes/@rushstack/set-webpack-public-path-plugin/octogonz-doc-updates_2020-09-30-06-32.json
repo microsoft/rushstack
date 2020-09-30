@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update README.md",
+      "type": "patch",
+      "packageName": "@rushstack/set-webpack-public-path-plugin"
+    }
+  ],
+  "packageName": "@rushstack/set-webpack-public-path-plugin",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

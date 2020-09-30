@@ -11,7 +11,8 @@ import {
   InternalError,
   ConsoleTerminalProvider,
   AlreadyReportedError,
-  Path
+  Path,
+  FileSystem
 } from '@rushstack/node-core-library';
 import { ArgumentParser } from 'argparse';
 
@@ -151,6 +152,8 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
 
     this._normalizeCwd();
 
+    await this._checkForUpgradeAsync();
+
     await this._heftConfiguration._checkForRigAsync();
 
     if (this._heftConfiguration.rigConfig.rigFound) {
@@ -172,6 +175,20 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     await heftLifecycle.hooks.toolStart.promise();
 
     return await super.execute(args);
+  }
+
+  private async _checkForUpgradeAsync(): Promise<void> {
+    // The .heft/clean.json file is a fairly reliable heuristic for detecting projects created prior to
+    // the big config file redesign with Heft 0.14.0
+    if (await FileSystem.existsAsync('.heft/clean.json')) {
+      this._terminal.writeErrorLine(
+        '\nThis project has a ".heft/clean.json" file, which is now obsolete as of Heft 0.14.0.'
+      );
+      this._terminal.writeLine(
+        '\nFor instructions for migrating config files, please read UPGRADING.md in the @rushstack/heft package folder.\n'
+      );
+      throw new AlreadyReportedError();
+    }
   }
 
   protected async onExecute(): Promise<void> {
