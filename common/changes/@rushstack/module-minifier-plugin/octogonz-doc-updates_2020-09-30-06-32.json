@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update README.md",
+      "type": "patch",
+      "packageName": "@rushstack/module-minifier-plugin"
+    }
+  ],
+  "packageName": "@rushstack/module-minifier-plugin",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update README.md",
+      "type": "patch",
+      "packageName": "@rushstack/eslint-patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-patch",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
