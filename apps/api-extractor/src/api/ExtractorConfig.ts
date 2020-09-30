@@ -326,7 +326,12 @@ export class ExtractorConfig {
     const startingFolder: string = options.startingFolder;
 
     // Figure out which project we're in and look for the config file at the project root
-    const packageFolder: string | undefined = packageJsonLookup.tryGetPackageFolderFor(startingFolder);
+    const packageJsonFullPath: string | undefined = packageJsonLookup.tryGetPackageJsonFilePathFor(
+      startingFolder
+    );
+    const packageFolder: string | undefined = packageJsonFullPath
+      ? path.dirname(packageJsonFullPath)
+      : undefined;
 
     // If there is no package, then just use the starting folder
     const baseFolder: string = packageFolder || startingFolder;
@@ -389,7 +394,7 @@ export class ExtractorConfig {
     return {
       configObject,
       configObjectFullPath,
-      packageJsonFullPath: packageFolder,
+      packageJsonFullPath,
       projectFolderLookupToken
     };
   }

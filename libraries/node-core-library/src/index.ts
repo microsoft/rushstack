@@ -51,7 +51,7 @@ export {
   IParsedPackageName,
   IParsedPackageNameOrError
 } from './PackageName';
-export { Path } from './Path';
+export { Path, IPathFormatConciselyOptions } from './Path';
 export { Encoding, Text, NewlineKind } from './Text';
 export { Sort } from './Sort';
 export {

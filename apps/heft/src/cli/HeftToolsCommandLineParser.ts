@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import {
   CommandLineParser,
   CommandLineStringListParameter,
@@ -156,10 +155,11 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
 
     if (this._heftConfiguration.rigConfig.rigFound) {
       const rigProfileFolder: string = await this._heftConfiguration.rigConfig.getResolvedProfileFolderAsync();
-      const relativeRigFolderPath: string = Path.convertToSlashes(
-        path.relative(this._heftConfiguration.buildFolder, rigProfileFolder)
-      );
-      this._terminal.writeLine(`Using rig configuration from ./${relativeRigFolderPath}`);
+      const relativeRigFolderPath: string = Path.formatConcisely({
+        pathToConvert: rigProfileFolder,
+        baseFolder: this._heftConfiguration.buildFolder
+      });
+      this._terminal.writeLine(`Using rig configuration from ${relativeRigFolderPath}`);
     }
 
     await this._initializePluginsAsync();

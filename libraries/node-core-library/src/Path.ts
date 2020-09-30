@@ -5,6 +5,21 @@ import * as path from 'path';
 import { Text } from './Text';
 
 /**
+ * Options for {@link Path.formatConcisely}.
+ * @public
+ */
+export interface IPathFormatConciselyOptions {
+  /**
+   * The path to be converted.
+   */
+  pathToConvert: string;
+  /**
+   * The base path to use when converting `pathToConvert` to a relative path.
+   */
+  baseFolder: string;
+}
+
+/**
  * Common operations for manipulating file and directory paths.
  * @remarks
  * This API is intended to eventually be a complete replacement for the NodeJS "path" API.
@@ -63,23 +78,25 @@ export class Path {
   }
 
   /**
-   * If `longPath` is under `parentFolderPath`, then this returns a shortened relative path.
-   * Otherwise, it converts it to an absolute path.
-   *
+   * Formats a path to look nice for reporting purposes.
    * @remarks
-   * This is useful when displaying a file path that is typically expected to be under the current
-   * working directory; in the unusual case where it is in another folder, the full path is interesting.
+   * If `pathToConvert` is under the `baseFolder`, then it will be converted to a relative with the `./` prefix.
+   * Otherwise, it will be converted to an absolute path.
+   *
+   * Backslashes will be converted to slashes, unless the path starts with an OS-specific string like `C:\`.
    */
-  public static makeRelativeOnlyIfUnder(longPath: string, parentFolderPath: string): string {
+  public static formatConcisely(options: IPathFormatConciselyOptions): string {
     // Same logic as Path.isUnderOrEqual()
-    const relativePath: string = path.relative(longPath, parentFolderPath);
+    const relativePath: string = path.relative(options.pathToConvert, options.baseFolder);
     const isUnderOrEqual: boolean = relativePath === '' || Path._relativePathRegex.test(relativePath);
 
     if (isUnderOrEqual) {
-      return relativePath;
-    } else {
-      return path.resolve(longPath);
+      // Note that isUnderOrEqual()'s relativePath is the reverse direction
+      return './' + Path.convertToSlashes(path.relative(options.baseFolder, options.pathToConvert));
     }
+
+    const absolutePath: string = path.resolve(options.pathToConvert);
+    return absolutePath;
   }
 
   /**

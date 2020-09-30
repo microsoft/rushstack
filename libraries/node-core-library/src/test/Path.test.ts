@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
+import * as path from 'path';
 import { Path } from '../Path';
 
 describe('Path', () => {
@@ -79,6 +80,24 @@ describe('Path', () => {
       expect(Path.isDownwardRelative('\\folder\\file')).toEqual(false);
       expect(Path.isDownwardRelative('C:/folder/file')).toEqual(false);
       expect(Path.isDownwardRelative('C:\\folder\\file')).toEqual(false);
+    });
+  });
+  describe('formatConcisely', () => {
+    test('tests', () => {
+      expect(
+        Path.formatConcisely({ pathToConvert: '/folder1/folder2/folder3', baseFolder: '/folder1' })
+      ).toEqual('./folder2/folder3');
+      expect(
+        path.isAbsolute(
+          Path.formatConcisely({ pathToConvert: '/folder1/folder2/folder3', baseFolder: '/folder4' })
+        )
+      ).toBe(true);
+      expect(
+        Path.formatConcisely({
+          pathToConvert: '/folder1/folder2/folder3/folder4/../file.txt',
+          baseFolder: '/folder1/folder2/folder3'
+        })
+      ).toEqual('./file.txt');
     });
   });
 });

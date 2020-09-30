@@ -125,10 +125,10 @@ export class RunAction extends CommandLineAction {
         throw new Error(`Unable to find an ${ExtractorConfig.FILENAME} file`);
       }
 
-      const configObjectShortPath: string = Path.makeRelativeOnlyIfUnder(
-        prepareOptions.configObjectFullPath,
-        '.'
-      );
+      const configObjectShortPath: string = Path.formatConcisely({
+        pathToConvert: prepareOptions.configObjectFullPath,
+        baseFolder: process.cwd()
+      });
       console.log(`Using configuration from ${configObjectShortPath}`);
 
       extractorConfig = ExtractorConfig.prepare(prepareOptions);
