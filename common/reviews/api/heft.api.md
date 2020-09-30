@@ -14,6 +14,7 @@ import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
+import { RigConfig } from '@rushstack/rig-package';
 import { SyncHook } from 'tapable';
 import { Terminal } from '@rushstack/node-core-library';
 import * as webpack from 'webpack';
@@ -66,6 +67,8 @@ export type CustomActionParameterType = string | boolean | number | ReadonlyArra
 export class HeftConfiguration {
     get buildCacheFolder(): string;
     get buildFolder(): string;
+    // @internal
+    _checkForRigAsync(): Promise<void>;
     get compilerPackage(): ICompilerPackage | undefined;
     get globalTerminal(): Terminal;
     get heftPackageJson(): IPackageJson;
@@ -74,6 +77,7 @@ export class HeftConfiguration {
     get projectConfigFolder(): string;
     get projectHeftDataFolder(): string;
     get projectPackageJson(): IPackageJson;
+    get rigConfig(): RigConfig;
     get terminalProvider(): ITerminalProvider;
     }
 

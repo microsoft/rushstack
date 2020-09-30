@@ -15,7 +15,11 @@ export { CompilerState, ICompilerStateCreateOptions } from './api/CompilerState'
 
 export { Extractor, IExtractorInvokeOptions, ExtractorResult } from './api/Extractor';
 
-export { IExtractorConfigPrepareOptions, ExtractorConfig } from './api/ExtractorConfig';
+export {
+  IExtractorConfigPrepareOptions,
+  IExtractorConfigLoadForFolderOptions,
+  ExtractorConfig
+} from './api/ExtractorConfig';
 
 export { ExtractorLogLevel } from './api/ExtractorLogLevel';
 

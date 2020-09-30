@@ -18,7 +18,7 @@
         {
           "kind": "Function",
           "canonicalReference": "api-extractor-scenarios!f1:function(1)",
-          "docComment": "/**\n * A function that references its own parameter type.\n */\n",
+          "docComment": "/**\n * A function that references its own parameter type.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -66,7 +66,7 @@
         {
           "kind": "Function",
           "canonicalReference": "api-extractor-scenarios!f2:function(1)",
-          "docComment": "/**\n * A function that indirectly references its own parameter type.\n */\n",
+          "docComment": "/**\n * A function that indirectly references its own parameter type.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -114,7 +114,7 @@
         {
           "kind": "Function",
           "canonicalReference": "api-extractor-scenarios!f3:function(1)",
-          "docComment": "/**\n * A function that references its own type.\n */\n",
+          "docComment": "/**\n * A function that references its own type.\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",

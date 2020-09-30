@@ -15,7 +15,6 @@ import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IBuildStageContext, ICompileSubstage } from '../stages/BuildStage';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import { CoreConfigFiles } from '../utilities/CoreConfigFiles';
-import { RigConfig } from '@rushstack/rig-package';
 import { ITypeScriptConfigurationJson } from './TypeScriptPlugin/TypeScriptPlugin';
 
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
@@ -95,13 +94,12 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
     terminal: Terminal,
     heftConfiguration: HeftConfiguration
   ): Promise<ICopyStaticAssetsConfiguration> {
-    const rigConfig: RigConfig = await CoreConfigFiles.getRigConfigAsync(heftConfiguration);
     const typescriptConfiguration:
       | ITypeScriptConfigurationJson
       | undefined = await CoreConfigFiles.typeScriptConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
       terminal,
       heftConfiguration.buildFolder,
-      rigConfig
+      heftConfiguration.rigConfig
     );
 
     return {

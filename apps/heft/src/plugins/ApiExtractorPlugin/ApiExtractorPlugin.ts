@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import { FileSystem } from '@rushstack/node-core-library';
-
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
@@ -11,7 +8,6 @@ import { ApiExtractorRunner } from './ApiExtractorRunner';
 import { IBuildStageContext, IBundleSubstage } from '../../stages/BuildStage';
 import { CoreConfigFiles } from '../../utilities/CoreConfigFiles';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
-import { RigConfig } from '@rushstack/rig-package';
 
 const PLUGIN_NAME: string = 'ApiExtractorPlugin';
 const CONFIG_FILE_LOCATION: string = './config/api-extractor.json';
@@ -36,6 +32,7 @@ interface IRunApiExtractorOptions {
   debugMode: boolean;
   watchMode: boolean;
   production: boolean;
+  apiExtractorJsonFilePath: string;
 }
 
 export class ApiExtractorPlugin implements IHeftPlugin {
@@ -43,21 +40,32 @@ export class ApiExtractorPlugin implements IHeftPlugin {
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     const { buildFolder } = heftConfiguration;
-    if (FileSystem.exists(path.join(buildFolder, CONFIG_FILE_LOCATION))) {
-      heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-        build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
-          bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
+
+    heftSession.hooks.build.tap(PLUGIN_NAME, async (build: IBuildStageContext) => {
+      build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
+        bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
+          // API Extractor provides an ExtractorConfig.tryLoadForFolder() API that will probe for api-extractor.json
+          // including support for rig.json.  However, Heft does not load the @microsoft/api-extractor package at all
+          // unless it sees a config/api-extractor.json file.  Thus we need to do our own lookup here.
+          const apiExtractorJsonFilePath:
+            | string
+            | undefined = await heftConfiguration.rigConfig.tryResolveConfigFilePathAsync(
+            CONFIG_FILE_LOCATION
+          );
+
+          if (apiExtractorJsonFilePath !== undefined) {
             await this._runApiExtractorAsync(heftSession, {
               heftConfiguration,
               buildFolder,
               debugMode: heftSession.debugMode,
               watchMode: build.properties.watchMode,
-              production: build.properties.production
+              production: build.properties.production,
+              apiExtractorJsonFilePath: apiExtractorJsonFilePath
             });
-          });
+          }
         });
       });
-    }
+    });
   }
 
   private async _runApiExtractorAsync(
@@ -67,13 +75,13 @@ export class ApiExtractorPlugin implements IHeftPlugin {
     const { heftConfiguration, buildFolder, debugMode, watchMode, production } = options;
 
     const logger: ScopedLogger = heftSession.requestScopedLogger('API Extractor Plugin');
-    const rigConfig: RigConfig = await CoreConfigFiles.getRigConfigAsync(heftConfiguration);
+
     const apiExtractorTaskConfiguration:
       | IApiExtractorPluginConfiguration
       | undefined = await CoreConfigFiles.apiExtractorTaskConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
       logger.terminal,
       heftConfiguration.buildFolder,
-      rigConfig
+      heftConfiguration.rigConfig
     );
 
     if (watchMode) {
@@ -96,7 +104,7 @@ export class ApiExtractorPlugin implements IHeftPlugin {
     const apiExtractorRunner: ApiExtractorRunner = new ApiExtractorRunner(
       heftConfiguration.terminalProvider,
       {
-        configFileLocation: CONFIG_FILE_LOCATION,
+        apiExtractorJsonFilePath: options.apiExtractorJsonFilePath,
         apiExtractorPackagePath: heftConfiguration.compilerPackage.apiExtractorPackagePath,
         typescriptPackagePath: apiExtractorTaskConfiguration?.useProjectTypescriptVersion
           ? heftConfiguration.compilerPackage.typeScriptPackagePath

@@ -14,7 +14,7 @@ export interface IApiExtractorRunnerConfiguration {
    *
    * For example, /home/username/code/repo/project/config/api-extractor.json
    */
-  configFileLocation: string;
+  apiExtractorJsonFilePath: string;
 
   /**
    * The path to the @microsoft/api-extractor package
@@ -56,9 +56,19 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
     this._terminal = this._scopedLogger.terminal;
 
     const apiExtractor: typeof TApiExtractor = require(this._configuration.apiExtractorPackagePath);
-    const extractorConfig: TApiExtractor.ExtractorConfig = apiExtractor.ExtractorConfig.loadFileAndPrepare(
-      this._configuration.configFileLocation
+
+    const configObjectFullPath: string = this._configuration.apiExtractorJsonFilePath;
+    const configObject: TApiExtractor.IConfigFile = apiExtractor.ExtractorConfig.loadFile(
+      configObjectFullPath
     );
+
+    const extractorConfig: TApiExtractor.ExtractorConfig = apiExtractor.ExtractorConfig.prepare({
+      configObject,
+      configObjectFullPath,
+      packageJsonFullPath: path.join(this._configuration.buildFolder, 'package.json'),
+      projectFolderLookupToken: this._configuration.buildFolder
+    });
+
     const extractorOptions: TApiExtractor.IExtractorInvokeOptions = {
       localBuild: !this._configuration.production,
       typescriptCompilerFolder: this._configuration.typescriptPackagePath,
@@ -142,7 +152,7 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
         `API Extractor completed with ${errorCount} error${errorCount > 1 ? 's' : ''}`
       );
     } else if (warningCount > 0) {
-      this._terminal.writeErrorLine(
+      this._terminal.writeWarningLine(
         `API Extractor completed with ${warningCount} warning${warningCount > 1 ? 's' : ''}`
       );
     }

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Enable api-extractor.json to be provided by a rig package",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

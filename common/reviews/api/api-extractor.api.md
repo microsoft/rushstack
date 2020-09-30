@@ -7,6 +7,8 @@
 import { INodePackageJson } from '@rushstack/node-core-library';
 import { JsonSchema } from '@rushstack/node-core-library';
 import { NewlineKind } from '@rushstack/node-core-library';
+import { PackageJsonLookup } from '@rushstack/node-core-library';
+import { RigConfig } from '@rushstack/rig-package';
 import * as tsdoc from '@microsoft/tsdoc';
 
 // @public
@@ -68,6 +70,7 @@ export class ExtractorConfig {
     readonly rollupEnabled: boolean;
     readonly skipLibCheck: boolean;
     readonly testMode: boolean;
+    static tryLoadForFolder(options: IExtractorConfigLoadForFolderOptions): IExtractorConfigPrepareOptions | undefined;
     readonly tsconfigFilePath: string;
     readonly tsdocMetadataEnabled: boolean;
     readonly tsdocMetadataFilePath: string;
@@ -217,11 +220,19 @@ export interface IConfigTsdocMetadata {
 }
 
 // @public
+export interface IExtractorConfigLoadForFolderOptions {
+    packageJsonLookup?: PackageJsonLookup;
+    rigConfig?: RigConfig;
+    startingFolder: string;
+}
+
+// @public
 export interface IExtractorConfigPrepareOptions {
     configObject: IConfigFile;
     configObjectFullPath: string | undefined;
     packageJson?: INodePackageJson | undefined;
     packageJsonFullPath: string | undefined;
+    projectFolderLookupToken?: string;
 }
 
 // @public

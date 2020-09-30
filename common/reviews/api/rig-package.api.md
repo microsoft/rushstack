@@ -25,11 +25,14 @@ export class RigConfig {
     static jsonSchemaPath: string;
     static loadForProjectFolder(options: ILoadForProjectFolderOptions): RigConfig;
     static loadForProjectFolderAsync(options: ILoadForProjectFolderOptions): Promise<RigConfig>;
+    readonly projectFolderOriginalPath: string;
     readonly projectFolderPath: string;
     readonly relativeProfileFolderPath: string;
     readonly rigFound: boolean;
     readonly rigPackageName: string;
     readonly rigProfile: string;
+    tryResolveConfigFilePath(configFileRelativePath: string): string | undefined;
+    tryResolveConfigFilePathAsync(configFileRelativePath: string): Promise<string | undefined>;
     }
 
 

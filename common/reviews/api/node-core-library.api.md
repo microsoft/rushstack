@@ -124,6 +124,24 @@ export const enum Encoding {
 }
 
 // @public
+export class Enum {
+    static getKeyByNumber<TEnumValue, TEnumObject extends {
+        [key: string]: TEnumValue;
+    }>(enumObject: TEnumObject, value: number): keyof typeof enumObject;
+    static getValueByKey<TEnumValue>(enumObject: {
+        [key: string]: TEnumValue | string;
+        [key: number]: TEnumValue | string;
+    }, key: string): TEnumValue;
+    static tryGetKeyByNumber<TEnumValue, TEnumObject extends {
+        [key: string]: TEnumValue;
+    }>(enumObject: TEnumObject, value: number): keyof typeof enumObject | undefined;
+    static tryGetValueByKey<TEnumValue>(enumObject: {
+        [key: string]: TEnumValue | string;
+        [key: number]: TEnumValue | string;
+    }, key: string): TEnumValue | undefined;
+}
+
+// @public
 export class Executable {
     static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
     static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
@@ -450,6 +468,12 @@ export interface IParsedPackageNameOrError extends IParsedPackageName {
 }
 
 // @public
+export interface IPathFormatConciselyOptions {
+    baseFolder: string;
+    pathToConvert: string;
+}
+
+// @public
 export interface IProtectableMapParameters<K, V> {
     onClear?: (source: ProtectableMap<K, V>) => void;
     onDelete?: (source: ProtectableMap<K, V>, key: K) => void;
@@ -591,6 +615,11 @@ export class PackageNameParser {
 
 // @public
 export class Path {
+    static convertToBackslashes(inputPath: string): string;
+    static convertToSlashes(inputPath: string): string;
+    static formatConcisely(options: IPathFormatConciselyOptions): string;
+    static isDownwardRelative(inputPath: string): boolean;
+    static isEqual(path1: string, path2: string): boolean;
     static isUnder(childPath: string, parentFolderPath: string): boolean;
     static isUnderOrEqual(childPath: string, parentFolderPath: string): boolean;
     }

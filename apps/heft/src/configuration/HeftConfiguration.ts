@@ -2,11 +2,17 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Terminal, ITerminalProvider, IPackageJson } from '@rushstack/node-core-library';
+import {
+  Terminal,
+  ITerminalProvider,
+  IPackageJson,
+  PackageJsonLookup,
+  InternalError
+} from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
+import { RigConfig } from '@rushstack/rig-package';
 
 import { TaskPackageResolver, ITaskPackageResolution } from '../utilities/TaskPackageResolver';
-import { Utilities } from '../utilities/Utilities';
 import { Constants } from '../utilities/Constants';
 
 /**
@@ -62,6 +68,7 @@ export class HeftConfiguration {
   private _projectHeftDataFolder: string | undefined;
   private _projectConfigFolder: string | undefined;
   private _buildCacheFolder: string | undefined;
+  private _rigConfig: RigConfig | undefined;
   private _globalTerminal: Terminal;
   private _terminalProvider: ITerminalProvider;
 
@@ -112,6 +119,18 @@ export class HeftConfiguration {
   }
 
   /**
+   * The rig.json configuration for this project, if present.
+   */
+  public get rigConfig(): RigConfig {
+    if (!this._rigConfig) {
+      throw new InternalError(
+        'The rigConfig cannot be accessed until HeftConfiguration.checkForRigAsync() has been called'
+      );
+    }
+    return this._rigConfig;
+  }
+
+  /**
    * Terminal instance to facilitate logging.
    */
   public get globalTerminal(): Terminal {
@@ -129,14 +148,14 @@ export class HeftConfiguration {
    * The Heft tool's package.json
    */
   public get heftPackageJson(): IPackageJson {
-    return Utilities.packageJsonLookup.tryLoadPackageJsonFor(__dirname)!;
+    return PackageJsonLookup.instance.tryLoadPackageJsonFor(__dirname)!;
   }
 
   /**
    * The package.json of the project being built
    */
   public get projectPackageJson(): IPackageJson {
-    return Utilities.packageJsonLookup.tryLoadPackageJsonFor(this.buildFolder)!;
+    return PackageJsonLookup.instance.tryLoadPackageJsonFor(this.buildFolder)!;
   }
 
   /**
@@ -162,12 +181,22 @@ export class HeftConfiguration {
   private constructor() {}
 
   /**
+   * Performs the search for rig.json and initializes the `HeftConfiguration.rigConfig` object.
+   * @internal
+   */
+  public async _checkForRigAsync(): Promise<void> {
+    if (!this._rigConfig) {
+      this._rigConfig = await RigConfig.loadForProjectFolderAsync({ projectFolderPath: this._buildFolder });
+    }
+  }
+
+  /**
    * @internal
    */
   public static initialize(options: IHeftConfigurationInitializationOptions): HeftConfiguration {
     const configuration: HeftConfiguration = new HeftConfiguration();
 
-    const packageJsonPath: string | undefined = Utilities.packageJsonLookup.tryGetPackageJsonFilePathFor(
+    const packageJsonPath: string | undefined = PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(
       options.cwd
     );
     if (packageJsonPath) {

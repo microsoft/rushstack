@@ -3,7 +3,6 @@
 
 import * as path from 'path';
 import { ConfigurationFile, InheritanceType, PathResolutionMethod } from '@rushstack/heft-config-file';
-import { RigConfig } from '@rushstack/rig-package';
 
 import { IApiExtractorPluginConfiguration } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
 import { ITypeScriptConfigurationJson } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
@@ -45,7 +44,6 @@ export interface IHeftEventActions {
 }
 
 export class CoreConfigFiles {
-  private static _rigConfigCache: Map<string, RigConfig> = new Map<string, RigConfig>();
   private static _heftConfigFileLoader: ConfigurationFile<IHeftConfigurationJson> | undefined;
 
   private static _heftConfigFileEventActionsCache: Map<HeftConfiguration, IHeftEventActions> = new Map<
@@ -59,19 +57,6 @@ export class CoreConfigFiles {
   private static _typeScriptConfigurationFileLoader:
     | ConfigurationFile<ITypeScriptConfigurationJson>
     | undefined;
-
-  public static async getRigConfigAsync(heftConfiguration: HeftConfiguration): Promise<RigConfig> {
-    const projectFolderPath: string = heftConfiguration.buildFolder;
-    let rigConfig: RigConfig | undefined = CoreConfigFiles._rigConfigCache.get(projectFolderPath);
-    if (!rigConfig) {
-      rigConfig = await RigConfig.loadForProjectFolderAsync({
-        projectFolderPath
-      });
-      CoreConfigFiles._rigConfigCache.set(projectFolderPath, rigConfig);
-    }
-
-    return rigConfig;
-  }
 
   /**
    * Returns the loader for the `config/heft.json` config file.
@@ -109,13 +94,12 @@ export class CoreConfigFiles {
       heftConfiguration
     );
     if (!result) {
-      const rigConfig: RigConfig = await CoreConfigFiles.getRigConfigAsync(heftConfiguration);
       const heftConfigJson:
         | IHeftConfigurationJson
         | undefined = await CoreConfigFiles.heftConfigFileLoader.tryLoadConfigurationFileForProjectAsync(
         terminal,
         heftConfiguration.buildFolder,
-        rigConfig
+        heftConfiguration.rigConfig
       );
 
       result = {
