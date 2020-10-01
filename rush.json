@@ -1030,19 +1030,25 @@
     // "tutorials" folder (alphabetical order)
     {
       "packageName": "heft-node-basic-tutorial",
-      "projectFolder": "build-tests/heft-node-basic-ttutorialest",
+      "projectFolder": "tutorials/heft-node-basic-tutorial",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
     {
-      "packageName": "heft-node-jest-test",
-      "projectFolder": "build-tests/heft-node-jest-tutorial",
+      "packageName": "heft-node-jest-tutorial",
+      "projectFolder": "tutorials/heft-node-jest-tutorial",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
     {
-      "packageName": "heft-webpack-basic-test",
-      "projectFolder": "build-tests/heft-webpack-basic-tutorial",
+      "packageName": "heft-node-rig-tutorial",
+      "projectFolder": "tutorials/heft-node-rig-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-webpack-basic-tutorial",
+      "projectFolder": "tutorials/heft-webpack-basic-tutorial",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
