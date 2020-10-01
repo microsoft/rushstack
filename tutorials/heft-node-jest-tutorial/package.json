@@ -1,5 +1,5 @@
 {
-  "name": "heft-node-jest-test",
+  "name": "heft-node-jest-tutorial",
   "description": "Building this project validates that various Jest features work correctly with Heft",
   "version": "1.0.0",
   "private": true,

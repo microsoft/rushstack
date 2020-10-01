@@ -100,13 +100,10 @@ for large scale TypeScript monorepos.
 | [/build-tests/heft-example-plugin-02](./build-tests/heft-example-plugin-02/) | This is an example heft plugin that taps the hooks exposed from heft-example-plugin-01 |
 | [/build-tests/heft-minimal-rig-test](./build-tests/heft-minimal-rig-test/) | This is a minimal rig package that is imported by the 'heft-minimal-rig-usage-test' project |
 | [/build-tests/heft-minimal-rig-usage-test](./build-tests/heft-minimal-rig-usage-test/) | A test project for Heft that resolves its compiler from the 'heft-minimal-rig-test' package |
-| [/build-tests/heft-node-basic-test](./build-tests/heft-node-basic-test/) | This project illustrates a minimal tutorial Heft project targeting the Node.js runtime |
 | [/build-tests/heft-node-everything-test](./build-tests/heft-node-everything-test/) | Building this project tests every task and config file for Heft when targeting the Node.js runtime |
-| [/build-tests/heft-node-jest-test](./build-tests/heft-node-jest-test/) | Building this project validates that various Jest features work correctly with Heft |
 | [/build-tests/heft-oldest-compiler-test](./build-tests/heft-oldest-compiler-test/) | Building this project tests Heft with the oldest supported TypeScript compiler version |
 | [/build-tests/heft-rsc-test](./build-tests/heft-rsc-test/) | Building this project tests Heft using the rush-stack-compiler rig package |
 | [/build-tests/heft-web-rig-library-test](./build-tests/heft-web-rig-library-test/) | A test project for Heft that exercises the '@rushstack/heft-web-rig' package |
-| [/build-tests/heft-webpack-basic-test](./build-tests/heft-webpack-basic-test/) | This project illustrates a minimal tutorial Heft project targeting the web browser runtime |
 | [/build-tests/heft-webpack-everything-test](./build-tests/heft-webpack-everything-test/) | Building this project tests every task and config file for Heft when targeting the web browser runtime |
 | [/build-tests/localization-plugin-test-01](./build-tests/localization-plugin-test-01/) | Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly without any localized resources. |
 | [/build-tests/localization-plugin-test-02](./build-tests/localization-plugin-test-02/) | Building this project exercises @microsoft/localization-plugin. This tests that the loader works correctly with the exportAsDefault option unset. |
@@ -135,6 +132,10 @@ for large scale TypeScript monorepos.
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |
 | [/repo-scripts/repo-toolbox](./repo-scripts/repo-toolbox/) | Used to execute various operations specific to this repo |
 | [/stack/rush-stack-compiler-shared](./stack/rush-stack-compiler-shared/) |  |
+| [/tutorials/heft-node-basic-tutorial](./tutorials/heft-node-basic-tutorial/) | This project illustrates a minimal tutorial Heft project targeting the Node.js runtime |
+| [/tutorials/heft-node-jest-tutorial](./tutorials/heft-node-jest-tutorial/) | Building this project validates that various Jest features work correctly with Heft |
+| [/tutorials/heft-node-rig-tutorial](./tutorials/heft-node-rig-tutorial/) | This project illustrates a minimal tutorial Heft project targeting the Node.js runtime and using a rig package |
+| [/tutorials/heft-webpack-basic-tutorial](./tutorials/heft-webpack-basic-tutorial/) | This project illustrates a minimal tutorial Heft project targeting the web browser runtime |
 <!-- GENERATED PROJECT SUMMARY END -->
 
 ## Contributor Notice
