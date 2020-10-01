@@ -2,6 +2,18 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "2.4.71",
+      "tag": "@rushstack/package-deps-hash_v2.4.71",
+      "date": "Thu, 01 Oct 2020 18:51:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.15.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.70",
       "tag": "@rushstack/package-deps-hash_v2.4.70",
       "date": "Wed, 30 Sep 2020 18:39:17 GMT",

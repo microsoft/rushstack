@@ -2,6 +2,18 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.2.13",
+      "tag": "@rushstack/typings-generator_v0.2.13",
+      "date": "Thu, 01 Oct 2020 18:51:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Handle export names with special chars in exportAsDefault interface keys."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.12",
       "tag": "@rushstack/typings-generator_v0.2.12",
       "date": "Wed, 30 Sep 2020 18:39:17 GMT",

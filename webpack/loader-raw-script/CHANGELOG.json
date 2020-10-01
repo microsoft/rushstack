@@ -2,6 +2,18 @@
   "name": "@rushstack/loader-raw-script",
   "entries": [
     {
+      "version": "1.3.70",
+      "tag": "@rushstack/loader-raw-script_v1.3.70",
+      "date": "Thu, 01 Oct 2020 18:51:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.15.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.69",
       "tag": "@rushstack/loader-raw-script_v1.3.69",
       "date": "Wed, 30 Sep 2020 18:39:17 GMT",
