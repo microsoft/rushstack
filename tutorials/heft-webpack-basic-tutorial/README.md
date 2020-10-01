@@ -1,7 +1,7 @@
-# heft-webpack-basic-test
+# heft-webpack-basic-tutorial
 
-This project folder is one of the **build-tests** for the [Heft](https://www.npmjs.com/package/@rushstack/heft)
-build system.  It illustrates a realistic small project that targets a web browser runtime and renders using
+This project folder demonstrates a sample configuration of the [Heft](https://www.npmjs.com/package/@rushstack/heft)
+build system.   It illustrates a realistic small project that targets a web browser runtime and renders using
 the [React](https://reactjs.org/) library.
 
 The following tasks are configured:
@@ -11,4 +11,5 @@ The following tasks are configured:
 - [copy-static-assets](https://rushstack.io/pages/heft_tasks/copy-static-assets/) for .css files
 - [Webpack](https://rushstack.io/pages/heft_tasks/webpack/) for bundling and optimization
 
-Please see the [Heft documentation](https://rushstack.io/pages/heft/overview/) for documentation and tutorials.
+Please see the [Getting started with Heft](https://rushstack.io/pages/heft_tutorials/getting_started/)
+and ["webpack" task](https://rushstack.io/pages/heft_tasks/webpack/) articles for more information.

@@ -561,20 +561,8 @@
       "shouldPublish": false
     },
     {
-      "packageName": "heft-node-basic-test",
-      "projectFolder": "build-tests/heft-node-basic-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
       "packageName": "heft-node-everything-test",
       "projectFolder": "build-tests/heft-node-everything-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "heft-node-jest-test",
-      "projectFolder": "build-tests/heft-node-jest-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -593,12 +581,6 @@
     {
       "packageName": "heft-web-rig-library-test",
       "projectFolder": "build-tests/heft-web-rig-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "heft-webpack-basic-test",
-      "projectFolder": "build-tests/heft-webpack-basic-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -1043,6 +1025,32 @@
       "packageName": "@microsoft/rush-stack-compiler-shared",
       "projectFolder": "stack/rush-stack-compiler-shared",
       "reviewCategory": "libraries"
+    },
+
+    // "tutorials" folder (alphabetical order)
+    {
+      "packageName": "heft-node-basic-tutorial",
+      "projectFolder": "tutorials/heft-node-basic-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-node-jest-tutorial",
+      "projectFolder": "tutorials/heft-node-jest-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-node-rig-tutorial",
+      "projectFolder": "tutorials/heft-node-rig-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-webpack-basic-tutorial",
+      "projectFolder": "tutorials/heft-webpack-basic-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
     },
 
     // "webpack" folder (alphabetical order)

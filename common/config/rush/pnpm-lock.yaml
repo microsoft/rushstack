@@ -119,6 +119,7 @@ importers:
       webpack-dev-server: 3.11.0_webpack@4.31.0
     devDependencies:
       '@jest/types': 25.4.0
+      '@microsoft/rush-stack-compiler-3.9': 'link:../../stack/rush-stack-compiler-3.9'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 0.14.0
       '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
@@ -135,6 +136,7 @@ importers:
       '@jest/reporters': ~25.4.0
       '@jest/transform': ~25.4.0
       '@jest/types': ~25.4.0
+      '@microsoft/rush-stack-compiler-3.9': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.14.0
       '@rushstack/heft-config-file': 'workspace:*'
@@ -535,21 +537,6 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       heft-minimal-rig-test: 'workspace:*'
-  ../../build-tests/heft-node-basic-test:
-    devDependencies:
-      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
-      '@rushstack/heft': 'link:../../apps/heft'
-      '@types/heft-jest': 1.0.1
-      '@types/node': 10.17.13
-      eslint: 7.2.0
-      typescript: 3.9.7
-    specifiers:
-      '@rushstack/eslint-config': 'workspace:*'
-      '@rushstack/heft': 'workspace:*'
-      '@types/heft-jest': 1.0.1
-      '@types/node': 10.17.13
-      eslint: ~7.2.0
-      typescript: ~3.9.7
   ../../build-tests/heft-node-everything-test:
     devDependencies:
       '@microsoft/api-extractor': 'link:../../apps/api-extractor'
@@ -574,21 +561,6 @@ importers:
       heft-example-plugin-02: 'workspace:*'
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
-      typescript: ~3.9.7
-  ../../build-tests/heft-node-jest-test:
-    devDependencies:
-      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
-      '@rushstack/heft': 'link:../../apps/heft'
-      '@types/heft-jest': 1.0.1
-      '@types/node': 10.17.13
-      eslint: 7.2.0
-      typescript: 3.9.7
-    specifiers:
-      '@rushstack/eslint-config': 'workspace:*'
-      '@rushstack/heft': 'workspace:*'
-      '@types/heft-jest': 1.0.1
-      '@types/node': 10.17.13
-      eslint: ~7.2.0
       typescript: ~3.9.7
   ../../build-tests/heft-oldest-compiler-test:
     devDependencies:
@@ -619,37 +591,6 @@ importers:
       '@rushstack/heft': 'workspace:*'
       '@rushstack/heft-web-rig': 'workspace:*'
       '@types/heft-jest': 1.0.1
-  ../../build-tests/heft-webpack-basic-test:
-    devDependencies:
-      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
-      '@rushstack/heft': 'link:../../apps/heft'
-      '@types/heft-jest': 1.0.1
-      '@types/react': 16.9.45
-      '@types/react-dom': 16.9.8
-      '@types/webpack-env': 1.13.0
-      css-loader: 4.2.2_webpack@4.31.0
-      eslint: 7.2.0
-      html-webpack-plugin: 3.2.0_webpack@4.31.0
-      react: 16.13.1
-      react-dom: 16.13.1_react@16.13.1
-      style-loader: 1.2.1_webpack@4.31.0
-      typescript: 3.9.7
-      webpack: 4.31.0_webpack@4.31.0
-    specifiers:
-      '@rushstack/eslint-config': 'workspace:*'
-      '@rushstack/heft': 'workspace:*'
-      '@types/heft-jest': 1.0.1
-      '@types/react': 16.9.45
-      '@types/react-dom': 16.9.8
-      '@types/webpack-env': 1.13.0
-      css-loader: ~4.2.1
-      eslint: ~7.2.0
-      html-webpack-plugin: ~3.2.0
-      react: ~16.13.1
-      react-dom: ~16.13.1
-      style-loader: ~1.2.1
-      typescript: ~3.9.7
-      webpack: ~4.31.0
   ../../build-tests/heft-webpack-everything-test:
     devDependencies:
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
@@ -1346,15 +1287,15 @@ importers:
       '@rushstack/rig-package': 'link:../rig-package'
       jsonpath-plus: 4.0.0
     devDependencies:
-      '@microsoft/rush-stack-compiler-3.9': 'link:../../stack/rush-stack-compiler-3.9'
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
     specifiers:
-      '@microsoft/rush-stack-compiler-3.9': 'workspace:*'
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 'workspace:*'
       '@rushstack/node-core-library': 'workspace:*'
       '@rushstack/rig-package': 'workspace:*'
       '@types/heft-jest': 1.0.1
@@ -2152,6 +2093,80 @@ importers:
       typescript: ~3.9.7
   ../../stack/rush-stack-compiler-shared:
     specifiers: {}
+  ../../tutorials/heft-node-basic-tutorial:
+    devDependencies:
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
+      '@types/heft-jest': 1.0.1
+      '@types/node': 10.17.13
+      eslint: 7.2.0
+      typescript: 3.9.7
+    specifiers:
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
+      '@types/heft-jest': 1.0.1
+      '@types/node': 10.17.13
+      eslint: ~7.2.0
+      typescript: ~3.9.7
+  ../../tutorials/heft-node-jest-tutorial:
+    devDependencies:
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
+      '@types/heft-jest': 1.0.1
+      '@types/node': 10.17.13
+      eslint: 7.2.0
+      typescript: 3.9.7
+    specifiers:
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
+      '@types/heft-jest': 1.0.1
+      '@types/node': 10.17.13
+      eslint: ~7.2.0
+      typescript: ~3.9.7
+  ../../tutorials/heft-node-rig-tutorial:
+    devDependencies:
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
+      '@rushstack/heft-node-rig': 'link:../../rigs/heft-node-rig'
+      '@types/heft-jest': 1.0.1
+      '@types/node': 10.17.13
+    specifiers:
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
+      '@rushstack/heft-node-rig': 'workspace:*'
+      '@types/heft-jest': 1.0.1
+      '@types/node': 10.17.13
+  ../../tutorials/heft-webpack-basic-tutorial:
+    devDependencies:
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
+      '@types/heft-jest': 1.0.1
+      '@types/react': 16.9.45
+      '@types/react-dom': 16.9.8
+      '@types/webpack-env': 1.13.0
+      css-loader: 4.2.2_webpack@4.31.0
+      eslint: 7.2.0
+      html-webpack-plugin: 3.2.0_webpack@4.31.0
+      react: 16.13.1
+      react-dom: 16.13.1_react@16.13.1
+      style-loader: 1.2.1_webpack@4.31.0
+      typescript: 3.9.7
+      webpack: 4.31.0_webpack@4.31.0
+    specifiers:
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
+      '@types/heft-jest': 1.0.1
+      '@types/react': 16.9.45
+      '@types/react-dom': 16.9.8
+      '@types/webpack-env': 1.13.0
+      css-loader: ~4.2.1
+      eslint: ~7.2.0
+      html-webpack-plugin: ~3.2.0
+      react: ~16.13.1
+      react-dom: ~16.13.1
+      style-loader: ~1.2.1
+      typescript: ~3.9.7
+      webpack: ~4.31.0
   ../../webpack/loader-load-themed-styles:
     dependencies:
       '@microsoft/load-themed-styles': 'link:../../libraries/load-themed-styles'
@@ -3911,9 +3926,6 @@ packages:
   /abbrev/1.0.9:
     resolution:
       integrity: sha1-kbR5JYinc4wl813W9jdSovh3YTU=
-  /abbrev/1.1.1:
-    resolution:
-      integrity: sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==
   /accepts/1.3.7:
     dependencies:
       mime-types: 2.1.27
@@ -4190,7 +4202,7 @@ packages:
   /array-includes/3.1.1:
     dependencies:
       define-properties: 1.1.3
-      es-abstract: 1.17.6
+      es-abstract: 1.17.7
       is-string: 1.0.5
     engines:
       node: '>= 0.4'
@@ -4245,7 +4257,7 @@ packages:
   /array.prototype.flatmap/1.2.3:
     dependencies:
       define-properties: 1.1.3
-      es-abstract: 1.17.6
+      es-abstract: 1.17.7
       function-bind: 1.1.1
     engines:
       node: '>= 0.4'
@@ -5569,7 +5581,7 @@ packages:
       is-arguments: 1.0.4
       is-date-object: 1.0.2
       is-regex: 1.1.1
-      object-is: 1.1.2
+      object-is: 1.1.3
       object-keys: 1.1.1
       regexp.prototype.flags: 1.3.0
     resolution:
@@ -5912,7 +5924,7 @@ packages:
       is-arrayish: 0.2.1
     resolution:
       integrity: sha512-7dFHNmqeFSEt2ZBsCriorKnn3Z2pj+fd9kmI6QoWw4//DL+icEBfc0U7qJCisqrTsKTjw4fNFy2pW9OqStD84g==
-  /es-abstract/1.17.6:
+  /es-abstract/1.17.7:
     dependencies:
       es-to-primitive: 1.2.1
       function-bind: 1.1.1
@@ -5928,8 +5940,8 @@ packages:
     engines:
       node: '>= 0.4'
     resolution:
-      integrity: sha512-Fr89bON3WFyUi5EvAeI48QTWX0AyekGgLA8H+c+7fbfCkJwRWRMLd8CQedNEyJuoYYhmtEqY92pgte1FAhBlhw==
-  /es-abstract/1.18.0-next.0:
+      integrity: sha512-VBl/gnfcJ7OercKA9MVaegWsBHFjV492syMudcnQZvt/Dw8ezpcOHYZXa/J96O8vx+g4x65YKhxOwDUh63aS5g==
+  /es-abstract/1.18.0-next.1:
     dependencies:
       es-to-primitive: 1.2.1
       function-bind: 1.1.1
@@ -5946,7 +5958,7 @@ packages:
     engines:
       node: '>= 0.4'
     resolution:
-      integrity: sha512-elZXTZXKn51hUBdJjSZGYRujuzilgXo8vSPQzjGYXLvSlGiCo8VO8ZGV3kjo9a0WNJJ57hENagwbtlRuHuzkcQ==
+      integrity: sha512-I4UGspA0wpZXWENrdA0uHbnhte683t3qT/1VFH9aX2dA5PPSf6QW5HHXf5HImaqPmjXaVeVk4RGWnaylmV7uAA==
   /es-to-primitive/1.2.1:
     dependencies:
       is-callable: 1.2.2
@@ -7757,7 +7769,7 @@ packages:
       integrity: sha512-S1zBo1D6zcsyuC6PMmY5+55YMILQ9av8lotMx447Bq6SAgo/sDK6y6uUKmuYhW7eacnIhFfsPmCNYdDzsnnDCg==
   /internal-slot/1.0.2:
     dependencies:
-      es-abstract: 1.17.6
+      es-abstract: 1.17.7
       has: 1.0.3
       side-channel: 1.0.3
     engines:
@@ -9696,7 +9708,7 @@ packages:
       integrity: sha512-sjCuOlvGyCJS40R8BscF5vhVlQjNN069NtQ1gSxyK1u9iqvn6tf7O1R4GNowVZfiZUCRt5MmMs1xd+4V/7Yr0g==
   /nopt/3.0.6:
     dependencies:
-      abbrev: 1.1.1
+      abbrev: 1.0.9
     hasBin: true
     resolution:
       integrity: sha1-xkZdvwirzU2zWTF/eaxopkayj/k=
@@ -9829,14 +9841,14 @@ packages:
   /object-inspect/1.8.0:
     resolution:
       integrity: sha512-jLdtEOB112fORuypAyl/50VRVIBIdVQOSUUGQHzJ4xBSbit81zRarz7GThkEFZy1RceYrWYcPcBFPQwHyAc1gA==
-  /object-is/1.1.2:
+  /object-is/1.1.3:
     dependencies:
       define-properties: 1.1.3
-      es-abstract: 1.17.6
+      es-abstract: 1.18.0-next.1
     engines:
       node: '>= 0.4'
     resolution:
-      integrity: sha512-5lHCz+0uufF6wZ7CRFWJN3hp8Jqblpgve06U5CMQ3f//6iDjPr2PEo9MWCjEssDsa+UZEL4PkFpr+BMop6aKzQ==
+      integrity: sha512-teyqLvFWzLkq5B9ki8FVWA902UER2qkxmdA4nLf+wjOLAWgxzCWZNCxpDq9MvE8MmhWNr+I8w3BN49Vx36Y6Xg==
   /object-keys/1.1.1:
     engines:
       node: '>= 0.4'
@@ -9852,7 +9864,7 @@ packages:
   /object.assign/4.1.1:
     dependencies:
       define-properties: 1.1.3
-      es-abstract: 1.18.0-next.0
+      es-abstract: 1.18.0-next.1
       has-symbols: 1.0.1
       object-keys: 1.1.1
     engines:
@@ -9872,7 +9884,7 @@ packages:
   /object.entries/1.1.2:
     dependencies:
       define-properties: 1.1.3
-      es-abstract: 1.17.6
+      es-abstract: 1.17.7
       has: 1.0.3
     engines:
       node: '>= 0.4'
@@ -9881,7 +9893,7 @@ packages:
   /object.fromentries/2.0.2:
     dependencies:
       define-properties: 1.1.3
-      es-abstract: 1.17.6
+      es-abstract: 1.17.7
       function-bind: 1.1.1
       has: 1.0.3
     engines:
@@ -9891,7 +9903,7 @@ packages:
   /object.getownpropertydescriptors/2.1.0:
     dependencies:
       define-properties: 1.1.3
-      es-abstract: 1.17.6
+      es-abstract: 1.17.7
     engines:
       node: '>= 0.8'
     resolution:
@@ -9922,7 +9934,7 @@ packages:
   /object.values/1.1.1:
     dependencies:
       define-properties: 1.1.3
-      es-abstract: 1.17.6
+      es-abstract: 1.17.7
       function-bind: 1.1.1
       has: 1.0.3
     engines:
@@ -10959,7 +10971,7 @@ packages:
   /regexp.prototype.flags/1.3.0:
     dependencies:
       define-properties: 1.1.3
-      es-abstract: 1.17.6
+      es-abstract: 1.17.7
     engines:
       node: '>= 0.4'
     resolution:
@@ -11529,7 +11541,7 @@ packages:
       integrity: sha512-vFwSUfQvqybiICwZY5+DAWIPLKsWO31Q91JSKl3UYv+K5c2QRPzn0qzec6QPu1Qc9eHYItiP3NdJqNVqetYAww==
   /side-channel/1.0.3:
     dependencies:
-      es-abstract: 1.18.0-next.0
+      es-abstract: 1.18.0-next.1
       object-inspect: 1.8.0
     resolution:
       integrity: sha512-A6+ByhlLkksFoUepsGxfj5x1gTSrs+OydsRptUxeNCabQpCFUvcwIczgOigI8vhY/OJCnPnyE9rGiwgvr9cS1g==
@@ -11921,7 +11933,7 @@ packages:
   /string.prototype.matchall/4.0.2:
     dependencies:
       define-properties: 1.1.3
-      es-abstract: 1.17.6
+      es-abstract: 1.17.7
       has-symbols: 1.0.1
       internal-slot: 1.0.2
       regexp.prototype.flags: 1.3.0
@@ -11931,13 +11943,13 @@ packages:
   /string.prototype.trimend/1.0.1:
     dependencies:
       define-properties: 1.1.3
-      es-abstract: 1.17.6
+      es-abstract: 1.17.7
     resolution:
       integrity: sha512-LRPxFUaTtpqYsTeNKaFOw3R4bxIzWOnbQ837QfBylo8jIxtcbK/A/sMV7Q+OAV/vWo+7s25pOE10KYSjaSO06g==
   /string.prototype.trimstart/1.0.1:
     dependencies:
       define-properties: 1.1.3
-      es-abstract: 1.17.6
+      es-abstract: 1.17.7
     resolution:
       integrity: sha512-XxZn+QpvrBI1FOcg6dIpxUPgWCPuNXvMD72aaRaUQv1eD4e/Qy8i/hFTe0BUmD60p/QA6bh1avmuPTfNjqVWRw==
   /string_decoder/0.10.31:
@@ -14172,4 +14184,3 @@ packages:
       commander: 2.20.3
     resolution:
       integrity: sha512-DUOKC/IhbkdLKKiV89gw9DUauTV8U/8yJl1sjf6MtDmzevLKOF2duNJ495S3MFVjqZarr+qNGCPbkg4mu4PpLw==
-registry: ''

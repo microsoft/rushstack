@@ -1,6 +1,6 @@
 {
-  "name": "heft-node-basic-test",
-  "description": "This project illustrates a minimal tutorial Heft project targeting the Node.js runtime",
+  "name": "heft-node-rig-tutorial",
+  "description": "This project illustrates a minimal tutorial Heft project targeting the Node.js runtime and using a rig package",
   "version": "1.0.0",
   "private": true,
   "main": "lib/index.js",
@@ -11,9 +11,8 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "10.17.13",
-    "eslint": "~7.2.0",
-    "typescript": "~3.9.7"
+    "@types/node": "10.17.13"
   }
 }
