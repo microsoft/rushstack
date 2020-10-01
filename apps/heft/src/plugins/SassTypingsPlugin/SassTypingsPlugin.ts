@@ -53,7 +53,7 @@ export class SassTypingsPlugin implements IHeftPlugin {
     heftConfiguration: HeftConfiguration
   ): Promise<ISassConfiguration> {
     const { buildFolder } = heftConfiguration;
-    const logger: ScopedLogger = heftSession.requestScopedLogger('Sass Typings Plugin');
+    const logger: ScopedLogger = heftSession.requestScopedLogger('sass-typings-plugin');
     const sassConfigurationJson:
       | ISassConfigurationJson
       | undefined = await CoreConfigFiles.sassConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
