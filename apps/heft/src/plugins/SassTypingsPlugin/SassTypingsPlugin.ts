@@ -23,21 +23,29 @@ export class SassTypingsPlugin implements IHeftPlugin {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.preCompile.tap(PLUGIN_NAME, (preCompile: IPreCompileSubstage) => {
         preCompile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          const sassConfiguration: ISassConfiguration = await this._loadSassConfigurationAsync(
-            heftSession,
-            heftConfiguration
-          );
-          const sassTypingsGenerator: SassTypingsGenerator = new SassTypingsGenerator({
-            buildFolder: heftConfiguration.buildFolder,
-            sassConfiguration
-          });
-          await sassTypingsGenerator.generateTypingsAsync();
-          if (build.properties.watchMode) {
-            await sassTypingsGenerator.runWatcherAsync();
-          }
+          await this._runSassTypingsGenerator(heftSession, heftConfiguration, build.properties.watchMode);
         });
       });
     });
+  }
+
+  private async _runSassTypingsGenerator(
+    heftSession: HeftSession,
+    heftConfiguration: HeftConfiguration,
+    isWatchMode: boolean
+  ): Promise<void> {
+    const sassConfiguration: ISassConfiguration = await this._loadSassConfigurationAsync(
+      heftSession,
+      heftConfiguration
+    );
+    const sassTypingsGenerator: SassTypingsGenerator = new SassTypingsGenerator({
+      buildFolder: heftConfiguration.buildFolder,
+      sassConfiguration
+    });
+    await sassTypingsGenerator.generateTypingsAsync();
+    if (isWatchMode) {
+      await sassTypingsGenerator.runWatcherAsync();
+    }
   }
 
   private async _loadSassConfigurationAsync(
