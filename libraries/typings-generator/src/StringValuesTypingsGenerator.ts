@@ -30,7 +30,7 @@ export interface IStringValuesTypingsGeneratorOptions extends ITypingsGeneratorO
   exportAsDefault?: boolean;
 
   /**
-   * When `exportAsDefault` is true (default), this option determines the name of the interface
+   * When `exportAsDefault` is true (default), this optional setting determines the interface name
    * for the default wrapped export. Ignored when `exportAsDefault` is false.
    */
   exportAsDefaultInterfaceName?: string;
