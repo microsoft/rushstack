@@ -11,7 +11,7 @@
     "url": "https://github.com/microsoft/rushstack/tree/master/rigs/heft-node-rig"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.14.1"
+    "@rushstack/heft": "^0.15.0"
   },
   "dependencies": {
     "@microsoft/api-extractor": "workspace:*",
