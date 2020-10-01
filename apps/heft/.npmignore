@@ -24,3 +24,4 @@
 ## Project specific definitions
 # -----------------------------
 !/includes/**
+!UPGRADING.md
