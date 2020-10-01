@@ -212,6 +212,9 @@ export class CoreConfigFiles {
       jsonPathMetadata: {
         '$.includePaths.*': {
           pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+        },
+        '$.generatedTsFolder.*': {
+          pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
         }
       }
     });

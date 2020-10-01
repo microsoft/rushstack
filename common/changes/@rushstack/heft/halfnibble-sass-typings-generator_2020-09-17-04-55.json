@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "Add new Sass typings plugin.",
+      "comment": "Add functionality to automatically generate typings for *.scss, *.sass, and *.css files.",
       "type": "minor"
     }
   ],

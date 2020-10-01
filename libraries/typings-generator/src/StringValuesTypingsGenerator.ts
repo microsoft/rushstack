@@ -25,7 +25,7 @@ export interface IStringValueTypings {
  */
 export interface IStringValuesTypingsGeneratorOptions extends ITypingsGeneratorOptions<IStringValueTypings> {
   exportAsDefault?: boolean;
-  exportAsInterfaceName?: string;
+  exportAsDefaultInterfaceName?: string;
 }
 
 const EXPORT_AS_DEFAULT_INTERFACE_NAME: string = 'IExport';
@@ -47,8 +47,8 @@ export class StringValuesTypingsGenerator extends TypingsGenerator {
         );
 
         const outputLines: string[] = [];
-        const interfaceName: string = options.exportAsInterfaceName
-          ? options.exportAsInterfaceName
+        const interfaceName: string = options.exportAsDefaultInterfaceName
+          ? options.exportAsDefaultInterfaceName
           : EXPORT_AS_DEFAULT_INTERFACE_NAME;
         let indent: string = '';
         if (options.exportAsDefault) {

@@ -32,20 +32,6 @@
       "description": "Determines if export values are wrapped in a default property, or not."
     },
 
-    "exportAsInterfaceName": {
-      "type": "string",
-      "description": "The name of the export interface."
-    },
-
-    "fileExtensions": {
-      "type": "array",
-      "description": "Files with these extensions will pass through the Sass transpiler.",
-      "items": {
-        "type": "string",
-        "pattern": "[^\\\\]"
-      }
-    },
-
     "includePaths": {
       "type": "array",
       "description": "A list of paths used when resolving Sass imports.",

@@ -5,8 +5,8 @@ import * as path from 'path';
 import { render, Result } from 'node-sass';
 import postcss from 'postcss';
 import cssModules from 'postcss-modules';
-import { StringValuesTypingsGenerator, IStringValueTypings } from '@rushstack/typings-generator';
 import { LegacyAdapters } from '@rushstack/node-core-library';
+import { IStringValueTypings, StringValuesTypingsGenerator } from '@rushstack/typings-generator';
 
 /**
  * @public
@@ -29,18 +29,6 @@ export interface ISassConfiguration {
    * Defaults to true.
    */
   exportAsDefault?: boolean;
-
-  /**
-   * The name of the export interface.
-   * Defaults to "IExportStyles".
-   */
-  exportAsInterfaceName?: string;
-
-  /**
-   * Files with these extensions will pass through the Sass transpiler.
-   * Defaults to ["sass", "scss", "css"]
-   */
-  fileExtensions?: string[];
 
   /**
    * A list of paths used when resolving Sass imports.
@@ -76,24 +64,28 @@ type TCssModules = (options: ICssModulesOptions) => TCssModules;
  */
 export class SassTypingsGenerator extends StringValuesTypingsGenerator {
   /**
-   * @param buildFolder - The project folder to search for Sass files and generate typings.
+   * @param buildFolder - The project folder to search for Sass files and
+   *     generate typings.
    */
   public constructor(options: ISassTypingsGeneratorOptions) {
     const { buildFolder, sassConfiguration } = options;
     const srcFolder: string = path.join(buildFolder, 'src');
     const generatedTsFolder: string = path.join(buildFolder, 'temp', 'sass-ts');
+    const exportAsDefault: boolean = true;
+    const exportAsDefaultInterfaceName: string = 'IExportStyles';
+    const fileExtensions: string[] = ['css', 'sass', 'scss'];
     super({
       // Default configuration values
       srcFolder,
       generatedTsFolder,
-      exportAsDefault: true,
-      exportAsInterfaceName: 'IExportStyles',
-      fileExtensions: ['scss', 'sass', 'css'],
+      exportAsDefault,
+      exportAsDefaultInterfaceName,
+      fileExtensions,
 
       // User configured overrides
       ...sassConfiguration,
 
-      // Generate typings
+      // Generate typings function
       parseAndGenerateTypings: async (fileContents: string, filePath: string) => {
         const css: string = await this._transpileSassAsync(
           fileContents,
@@ -103,9 +95,7 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
         );
         const classNames: string[] = await this._getClassNamesFromCSSAsync(css, filePath);
         const sortedClassNames: string[] = classNames.sort((a, b) => a.localeCompare(b));
-        const sassTypings: IStringValueTypings = {
-          typings: []
-        };
+        const sassTypings: IStringValueTypings = { typings: [] };
         for (const exportName of sortedClassNames) {
           sassTypings.typings.push({ exportName });
         }
