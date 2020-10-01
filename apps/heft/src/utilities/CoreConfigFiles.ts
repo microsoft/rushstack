@@ -14,6 +14,7 @@ import { ITypeScriptConfigurationJson } from '../plugins/TypeScriptPlugin/TypeSc
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { Terminal } from '@rushstack/node-core-library';
 import { ISharedCopyStaticAssetsConfiguration } from '../plugins/CopyStaticAssetsPlugin';
+import { ISassConfigurationJson } from '../plugins/SassTypingsPlugin/SassTypingsPlugin';
 
 export enum HeftEvent {
   clean = 'clean',
@@ -62,6 +63,7 @@ export class CoreConfigFiles {
   private static _typeScriptConfigurationFileLoader:
     | ConfigurationFile<ITypeScriptConfigurationJson>
     | undefined;
+  private static _sassConfigurationFileLoader: ConfigurationFile<ISassConfigurationJson> | undefined;
 
   /**
    * Returns the loader for the `config/heft.json` config file.
@@ -200,6 +202,27 @@ export class CoreConfigFiles {
     }
 
     return CoreConfigFiles._typeScriptConfigurationFileLoader;
+  }
+
+  public static get sassConfigurationFileLoader(): ConfigurationFile<ISassConfigurationJson> {
+    const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'sass.schema.json');
+    CoreConfigFiles._sassConfigurationFileLoader = new ConfigurationFile<ISassConfigurationJson>({
+      projectRelativeFilePath: 'config/sass.json',
+      jsonSchemaPath: schemaPath,
+      jsonPathMetadata: {
+        '$.includePaths.*': {
+          pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+        },
+        '$.generatedTsFolder.*': {
+          pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+        },
+        '$.srcFolder.*': {
+          pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+        }
+      }
+    });
+
+    return CoreConfigFiles._sassConfigurationFileLoader;
   }
 
   private static _addEventActionToMap<TEventAction extends IHeftConfigurationJsonEventActionBase>(

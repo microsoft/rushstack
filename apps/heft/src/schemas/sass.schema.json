@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Sass Configuration",
+  "description": "Defines the heft configuration for the sass typings plugin.",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "extends": {
+      "description": "Optionally specifies another JSON config file that this file extends from.  This provides a way for standard settings to be shared across multiple projects.",
+      "type": "string"
+    },
+
+    "srcFolder": {
+      "type": "string",
+      "description": "Source code root directory."
+    },
+
+    "generatedTsFolder": {
+      "type": "string",
+      "description": "Output directory for generated Sass typings."
+    },
+
+    "exportAsDefault": {
+      "type": "boolean",
+      "description": "Determines if export values are wrapped in a default property, or not."
+    },
+
+    "includePaths": {
+      "type": "array",
+      "description": "A list of paths used when resolving Sass imports.",
+      "items": {
+        "type": "string",
+        "pattern": "[^\\\\]"
+      }
+    }
+  }
+}

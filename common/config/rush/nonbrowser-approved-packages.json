@@ -288,11 +288,15 @@
     },
     {
       "name": "autoprefixer",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "builtin-modules",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "buttono",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "chalk",
@@ -608,7 +612,7 @@
     },
     {
       "name": "node-sass",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "npm-package-arg",
@@ -628,7 +632,11 @@
     },
     {
       "name": "postcss",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "postcss-loader",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "postcss-modules",
@@ -653,6 +661,10 @@
     {
       "name": "resolve",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "sass-loader",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "semver",

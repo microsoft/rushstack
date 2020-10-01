@@ -116,6 +116,13 @@ allows the file to be imported by using the `import myFile from './myFile.my-ext
 the `import { myExport } from './myFile.my-extension';` or the `import * as myFile from './myFile.my-extension';`
 syntax. This style of export is not recommended as it can prevent tree-shaking optimization.
 
+### `exportAsDefaultInterfaceName = true | false`
+
+When `exportAsDefault` is true, this optional setting determines the interface name
+for the default wrapped export. For example, in the Sass Typings plugin, the interface name
+is set to `IExportStyles`. If not specified, the interface name will be `IExport`.
+(This setting is ignored when `exportAsDefault` is false).
+
 ## Links
 
 - [CHANGELOG.md](
