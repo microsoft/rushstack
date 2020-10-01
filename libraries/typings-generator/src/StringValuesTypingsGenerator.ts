@@ -25,12 +25,12 @@ export interface IStringValueTypings {
  */
 export interface IStringValuesTypingsGeneratorOptions extends ITypingsGeneratorOptions<IStringValueTypings> {
   /**
-   * Setting this option wraps the typings export in a default property. On by default.
+   * Setting this option wraps the typings export in a default property.
    */
   exportAsDefault?: boolean;
 
   /**
-   * When `exportAsDefault` is true (default), this optional setting determines the interface name
+   * When `exportAsDefault` is true, this optional setting determines the interface name
    * for the default wrapped export. Ignored when `exportAsDefault` is false.
    */
   exportAsDefaultInterfaceName?: string;

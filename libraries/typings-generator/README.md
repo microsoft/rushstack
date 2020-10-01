@@ -118,9 +118,9 @@ syntax. This style of export is not recommended as it can prevent tree-shaking o
 
 ### `exportAsDefaultInterfaceName = true | false`
 
-When `exportAsDefault` is true (true by default), this optional setting determines the interface name
+When `exportAsDefault` is true, this optional setting determines the interface name
 for the default wrapped export. For example, in the Sass Typings plugin, the interface name
-is set to `IExportStyles`. If not specified, the interface will be `IExport`.
+is set to `IExportStyles`. If not specified, the interface name will be `IExport`.
 (This setting is ignored when `exportAsDefault` is false).
 
 ## Links
