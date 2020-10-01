@@ -15,12 +15,12 @@
     "@rushstack/heft": ">=0.4.4 <1.0.0"
   },
   "dependencies": {
-    "@types/node": "10.17.13",
-    "@rushstack/node-core-library": "workspace:*"
+    "@rushstack/node-core-library": "workspace:*",
+    "@types/node": "10.17.13"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
-    "@microsoft/rush-stack-compiler-3.7": "0.6.10",
-    "@rushstack/heft": "0.8.0"
+    "@rushstack/heft": "0.14.0",
+    "@rushstack/heft-node-rig": "0.1.0"
   }
 }

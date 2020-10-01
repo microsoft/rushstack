@@ -37,8 +37,15 @@ Best of all, **API Extractor** is free and open source.  Join the community and 
 <!-- Text above this line should stay in sync with the web site content -->
 <!-- ------------------------------------------------------------------ -->
 
-# Getting Started
+## Getting Started
 
 For more details and support resources, please visit: https://api-extractor.com/
 
-API documentation for this package: https://rushstack.io/pages/api/api-extractor/
+## Links
+
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/apps/api-extractor/CHANGELOG.md) - Find
+  out what's new in the latest version
+- [API Reference](https://rushstack.io/pages/api/api-extractor/)
+
+API Extractor is part of the [Rush Stack](https://rushstack.io/) family of projects.

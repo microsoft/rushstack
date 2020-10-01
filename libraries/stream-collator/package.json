@@ -1,7 +1,7 @@
 {
   "name": "@rushstack/stream-collator",
-  "version": "3.2.47",
-  "description": "Display intelligible realtime output from your asynchronous streams",
+  "version": "4.0.14",
+  "description": "Display intelligible realtime output from concurrent processes",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack/tree/master/libraries/stream-collator"
@@ -13,13 +13,14 @@
   },
   "license": "MIT",
   "dependencies": {
-    "colors": "~1.2.1"
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "workspace:*",
-    "@types/heft-jest": "1.0.1",
-    "@types/node": "10.17.13",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "workspace:*"
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "10.17.13"
   }
 }

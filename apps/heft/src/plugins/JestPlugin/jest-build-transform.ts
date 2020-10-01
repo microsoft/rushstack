@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Path, FileSystem, FileSystemStats } from '@rushstack/node-core-library';
+import { Path, FileSystem, FileSystemStats, JsonObject } from '@rushstack/node-core-library';
 import { InitialOptionsWithRootDir } from '@jest/types/build/Config';
 import { TransformedSource } from '@jest/transform';
 
@@ -36,8 +36,8 @@ const POLLING_INTERVAL_MS: number = 50;
  * This Jest transformer maps TS files under a 'src' folder to their compiled equivalent under 'lib'
  */
 export function process(
-  src: string,
-  filename: string,
+  srcCode: string,
+  srcFilePath: string,
   jestOptions: InitialOptionsWithRootDir
 ): TransformedSource {
   let jestTypeScriptDataFile: IJestTypeScriptDataFileJson | undefined = dataFileJsonCache.get(
@@ -53,9 +53,7 @@ export function process(
   // Is the input file under the "src" folder?
   const srcFolder: string = path.join(jestOptions.rootDir, 'src');
 
-  if (Path.isUnder(filename, srcFolder)) {
-    const srcFilePath: string = filename;
-
+  if (Path.isUnder(srcFilePath, srcFolder)) {
     // Example: /path/to/project/src/folder1/folder2/Example.ts
     const parsedFilename: path.ParsedPath = path.parse(srcFilePath);
 
@@ -65,7 +63,7 @@ export function process(
     // Example: /path/to/project/lib/folder1/folder2/Example.js
     const libFilePath: string = path.join(
       jestOptions.rootDir,
-      jestTypeScriptDataFile.emitFolderPathForJest,
+      jestTypeScriptDataFile.emitFolderNameForTests,
       srcRelativeFolderPath,
       `${parsedFilename.name}.js`
     );
@@ -73,54 +71,56 @@ export function process(
     const startOfLoopMs: number = new Date().getTime();
     let stalled: boolean = false;
 
-    for (;;) {
-      let srcFileStatistics: FileSystemStats;
-      try {
-        srcFileStatistics = FileSystem.getStatistics(srcFilePath);
-      } catch {
-        // If the source file was deleted, then fall through and allow readFile() to fail
-        break;
-      }
-      let libFileStatistics: FileSystemStats | undefined = undefined;
-      try {
-        libFileStatistics = FileSystem.getStatistics(libFilePath);
-      } catch {
-        // ignore errors
-      }
+    if (!jestTypeScriptDataFile.skipTimestampCheck) {
+      for (;;) {
+        let srcFileStatistics: FileSystemStats;
+        try {
+          srcFileStatistics = FileSystem.getStatistics(srcFilePath);
+        } catch {
+          // If the source file was deleted, then fall through and allow readFile() to fail
+          break;
+        }
+        let libFileStatistics: FileSystemStats | undefined = undefined;
+        try {
+          libFileStatistics = FileSystem.getStatistics(libFilePath);
+        } catch {
+          // ignore errors
+        }
 
-      const nowMs: number = new Date().getTime();
-      if (libFileStatistics) {
-        // The lib/*.js timestamp must not be older than the src/*.ts timestamp, otherwise the transpiler
-        // is not done writing its outputs.
-        if (libFileStatistics.ctimeMs + TIMESTAMP_TOLERANCE_MS > srcFileStatistics.ctimeMs) {
-          // Also, the lib/*.js timestamp must not be too recent, otherwise the transpiler may not have
-          // finished flushing its output to disk.
-          if (nowMs > libFileStatistics.ctimeMs + FLUSH_TIME_MS) {
-            // The .js file is newer than the .ts file, and is old enough to have been flushed
-            break;
+        const nowMs: number = new Date().getTime();
+        if (libFileStatistics) {
+          // The lib/*.js timestamp must not be older than the src/*.ts timestamp, otherwise the transpiler
+          // is not done writing its outputs.
+          if (libFileStatistics.ctimeMs + TIMESTAMP_TOLERANCE_MS > srcFileStatistics.ctimeMs) {
+            // Also, the lib/*.js timestamp must not be too recent, otherwise the transpiler may not have
+            // finished flushing its output to disk.
+            if (nowMs > libFileStatistics.ctimeMs + FLUSH_TIME_MS) {
+              // The .js file is newer than the .ts file, and is old enough to have been flushed
+              break;
+            }
           }
         }
-      }
 
-      if (nowMs - startOfLoopMs > MAX_WAIT_MS) {
-        // Something is wrong -- why hasn't the compiler updated the .js file?
-        if (libFileStatistics) {
-          throw new Error(
-            'jest-build-transform: Gave up waiting for the transpiler to update its output file:\n' +
-              libFilePath
-          );
-        } else {
-          throw new Error(
-            'jest-build-transform: Gave up waiting for the transpiler to write its output file:\n' +
-              libFilePath
-          );
+        if (nowMs - startOfLoopMs > MAX_WAIT_MS) {
+          // Something is wrong -- why hasn't the compiler updated the .js file?
+          if (libFileStatistics) {
+            throw new Error(
+              'jest-build-transform: Gave up waiting for the transpiler to update its output file:\n' +
+                libFilePath
+            );
+          } else {
+            throw new Error(
+              'jest-build-transform: Gave up waiting for the transpiler to write its output file:\n' +
+                libFilePath
+            );
+          }
         }
-      }
 
-      // Jest's transforms are synchronous, so our only option here is to sleep synchronously. Bad Jest. :-(
-      // TODO: The better solution is to change how Jest's watch loop is notified.
-      stalled = true;
-      delayMs(POLLING_INTERVAL_MS);
+        // Jest's transforms are synchronous, so our only option here is to sleep synchronously. Bad Jest. :-(
+        // TODO: The better solution is to change how Jest's watch loop is notified.
+        stalled = true;
+        delayMs(POLLING_INTERVAL_MS);
+      }
     }
 
     if (stalled && DEBUG_TRANSFORM) {
@@ -129,9 +129,9 @@ export function process(
       delayMs(2000);
     }
 
-    let code: string;
+    let libCode: string;
     try {
-      code = FileSystem.readFile(libFilePath);
+      libCode = FileSystem.readFile(libFilePath);
     } catch (error) {
       if (FileSystem.isNotExistError(error)) {
         throw new Error(
@@ -142,27 +142,48 @@ export function process(
       }
     }
 
-    const sourceMapFilename: string = libFilePath + '.map';
+    const sourceMapFilePath: string = libFilePath + '.map';
 
-    let sourceMap: string;
+    let originalSourceMap: string;
     try {
-      sourceMap = FileSystem.readFile(sourceMapFilename);
+      originalSourceMap = FileSystem.readFile(sourceMapFilePath);
     } catch (error) {
       if (FileSystem.isNotExistError(error)) {
         throw new Error(
           'jest-build-transform: The source map file is missing -- check your tsconfig.json settings:\n' +
-            sourceMapFilename
+            sourceMapFilePath
         );
       } else {
         throw error;
       }
     }
 
-    return {
-      code: code,
-      map: sourceMap
-    };
+    // Fix up the source map, since Jest will present the .ts file path to VS Code as the executing script
+    const parsedSourceMap: JsonObject = JSON.parse(originalSourceMap);
+    if (parsedSourceMap.version !== 3) {
+      throw new Error('jest-build-transform: Unsupported source map file version: ' + sourceMapFilePath);
+    }
+    parsedSourceMap.file = srcFilePath;
+    parsedSourceMap.sources = [srcFilePath];
+    parsedSourceMap.sourcesContent = [srcCode];
+    delete parsedSourceMap.sourceRoot;
+    const correctedSourceMap: string = JSON.stringify(parsedSourceMap);
+
+    // Embed the source map, since if we return the { code, map } object, then the debugger does not believe
+    // it is the same file, and will show a separate view with the same file path.
+    //
+    // Note that if the Jest testEnvironment does not support vm.compileFunction (introduced with Node.js 10),
+    // then the Jest module wrapper will inject text below the "//# sourceMappingURL=" line which breaks source maps.
+    // See this PR for details: https://github.com/facebook/jest/pull/9252
+    const encodedSourceMap: string =
+      'data:application/json;charset=utf-8;base64,' +
+      Buffer.from(correctedSourceMap, 'utf8').toString('base64');
+    const stringToFind: string = 'sourceMappingURL=';
+    const libCodeWithSourceMap: string =
+      libCode.slice(0, libCode.lastIndexOf(stringToFind) + stringToFind.length) + encodedSourceMap;
+
+    return libCodeWithSourceMap;
   } else {
-    throw new Error('jest-build-transform: The input path is not under the "src" folder:\n' + filename);
+    throw new Error('jest-build-transform: The input path is not under the "src" folder:\n' + srcFilePath);
   }
 }

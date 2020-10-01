@@ -41,10 +41,11 @@ export interface ICertificate {
 
 Attempts to locate a previously generated debug certificate and untrust it. Returns a `boolean` value to denote success.
 
-## API Documentation
+## Links
 
-Complete API documentation for this package: https://rushstack.io/pages/api/debug-certificate-manager/
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/libraries/debug-certificate-manager/CHANGELOG.md) - Find
+  out what's new in the latest version
+- [API Reference](https://rushstack.io/pages/api/debug-certificate-manager/)
 
-# License
-
-MIT (http://www.opensource.org/licenses/mit-license.php)
+**@rushstack/debug-certificate-manager** is part of the [Rush Stack](https://rushstack.io/) family of projects.

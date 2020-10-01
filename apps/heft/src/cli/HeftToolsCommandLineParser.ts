@@ -10,13 +10,15 @@ import {
   Terminal,
   InternalError,
   ConsoleTerminalProvider,
-  AlreadyReportedError
+  AlreadyReportedError,
+  Path,
+  FileSystem
 } from '@rushstack/node-core-library';
+import { ArgumentParser } from 'argparse';
 
 import { MetricsCollector } from '../metrics/MetricsCollector';
 import { CleanAction } from './actions/CleanAction';
 import { BuildAction } from './actions/BuildAction';
-import { DevDeployAction } from './actions/DevDeployAction';
 import { StartAction } from './actions/StartAction';
 import { TestAction } from './actions/TestAction';
 import { PluginManager } from '../pluginFramework/PluginManager';
@@ -25,9 +27,12 @@ import { IHeftActionBaseOptions, IStages } from './actions/HeftActionBase';
 import { InternalHeftSession } from '../pluginFramework/InternalHeftSession';
 import { CleanStage } from '../stages/CleanStage';
 import { BuildStage } from '../stages/BuildStage';
-import { DevDeployStage } from '../stages/DevDeployStage';
 import { TestStage } from '../stages/TestStage';
 import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
+import { ICustomActionOptions, CustomAction } from './actions/CustomAction';
+import { Constants } from '../utilities/Constants';
+import { SyncHook } from 'tapable';
+import { IHeftLifecycle, HeftLifecycleHooks } from '../pluginFramework/HeftLifecycle';
 
 export class HeftToolsCommandLineParser extends CommandLineParser {
   private _terminalProvider: ConsoleTerminalProvider;
@@ -37,11 +42,11 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
   private _pluginManager: PluginManager;
   private _heftConfiguration: HeftConfiguration;
   private _internalHeftSession: InternalHeftSession;
+  private _heftLifecycleHook: SyncHook<IHeftLifecycle>;
 
-  // @ts-ignore (TS6133) '_unmanagedFlag' is declared but its value is never read.
-  private _unmanagedFlag: CommandLineFlagParameter;
-  private _debugFlag: CommandLineFlagParameter;
-  private _pluginsParameter: CommandLineStringListParameter;
+  private _unmanagedFlag!: CommandLineFlagParameter;
+  private _debugFlag!: CommandLineFlagParameter;
+  private _pluginsParameter!: CommandLineStringListParameter;
 
   public get isDebug(): boolean {
     return this._debugFlag.value;
@@ -72,23 +77,27 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     const stages: IStages = {
       buildStage: new BuildStage(this._heftConfiguration, this._loggingManager),
       cleanStage: new CleanStage(this._heftConfiguration, this._loggingManager),
-      devDeployStage: new DevDeployStage(this._heftConfiguration, this._loggingManager),
       testStage: new TestStage(this._heftConfiguration, this._loggingManager)
     };
     const actionOptions: IHeftActionBaseOptions = {
       terminal: this._terminal,
       loggingManager: this._loggingManager,
       metricsCollector: this._metricsCollector,
-      pluginManager: this._pluginManager,
       heftConfiguration: this._heftConfiguration,
       stages
     };
 
+    this._heftLifecycleHook = new SyncHook<IHeftLifecycle>(['heftLifecycle']);
     this._internalHeftSession = new InternalHeftSession({
       getIsDebugMode: () => this.isDebug,
       ...stages,
+      heftLifecycleHook: this._heftLifecycleHook,
       loggingManager: this._loggingManager,
-      metricsCollector: this._metricsCollector
+      metricsCollector: this._metricsCollector,
+      registerAction: <TParameters>(options: ICustomActionOptions<TParameters>) => {
+        const action: CustomAction<TParameters> = new CustomAction(options, actionOptions);
+        this.addAction(action);
+      }
     });
 
     this._pluginManager = new PluginManager({
@@ -99,13 +108,11 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
 
     const cleanAction: CleanAction = new CleanAction(actionOptions);
     const buildAction: BuildAction = new BuildAction(actionOptions);
-    const devDeployAction: DevDeployAction = new DevDeployAction(actionOptions);
     const startAction: StartAction = new StartAction(actionOptions);
     const testAction: TestAction = new TestAction(actionOptions);
 
     this.addAction(cleanAction);
     this.addAction(buildAction);
-    this.addAction(devDeployAction);
     this.addAction(startAction);
     this.addAction(testAction);
   }
@@ -127,16 +134,13 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     });
 
     this._pluginsParameter = this.defineStringListParameter({
-      parameterLongName: '--plugin',
+      parameterLongName: Constants.pluginParameterLongName,
       argumentName: 'PATH',
       description: 'Used to specify Heft plugins.'
     });
   }
 
-  protected async onExecute(): Promise<void> {
-    // Defensively set the exit code to 1 so if the tool crashes for whatever reason, we'll have a nonzero exit code.
-    process.exitCode = 1;
-
+  public async execute(args?: string[]): Promise<boolean> {
     this._terminalProvider.verboseEnabled = this.isDebug;
 
     if (this.isDebug) {
@@ -146,7 +150,48 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
 
     this._normalizeCwd();
 
-    await this._initializePluginsAsync(this._pluginsParameter.values);
+    await this._checkForUpgradeAsync();
+
+    await this._heftConfiguration._checkForRigAsync();
+
+    if (this._heftConfiguration.rigConfig.rigFound) {
+      const rigProfileFolder: string = await this._heftConfiguration.rigConfig.getResolvedProfileFolderAsync();
+      const relativeRigFolderPath: string = Path.formatConcisely({
+        pathToConvert: rigProfileFolder,
+        baseFolder: this._heftConfiguration.buildFolder
+      });
+      this._terminal.writeLine(`Using rig configuration from ${relativeRigFolderPath}`);
+    }
+
+    await this._initializePluginsAsync();
+
+    const heftLifecycle: IHeftLifecycle = {
+      hooks: new HeftLifecycleHooks()
+    };
+    this._heftLifecycleHook.call(heftLifecycle);
+
+    await heftLifecycle.hooks.toolStart.promise();
+
+    return await super.execute(args);
+  }
+
+  private async _checkForUpgradeAsync(): Promise<void> {
+    // The .heft/clean.json file is a fairly reliable heuristic for detecting projects created prior to
+    // the big config file redesign with Heft 0.14.0
+    if (await FileSystem.existsAsync('.heft/clean.json')) {
+      this._terminal.writeErrorLine(
+        '\nThis project has a ".heft/clean.json" file, which is now obsolete as of Heft 0.14.0.'
+      );
+      this._terminal.writeLine(
+        '\nFor instructions for migrating config files, please read UPGRADING.md in the @rushstack/heft package folder.\n'
+      );
+      throw new AlreadyReportedError();
+    }
+  }
+
+  protected async onExecute(): Promise<void> {
+    // Defensively set the exit code to 1 so if the tool crashes for whatever reason, we'll have a nonzero exit code.
+    process.exitCode = 1;
 
     try {
       await super.onExecute();
@@ -170,14 +215,27 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     }
   }
 
-  private async _initializePluginsAsync(pluginSpecifiers: ReadonlyArray<string>): Promise<void> {
+  private _getPluginArgumentValues(args: string[] = process.argv): string[] {
+    // This is a rough parsing of the --plugin parameters
+    const parser: ArgumentParser = new ArgumentParser({ addHelp: false });
+    parser.addArgument(this._pluginsParameter.longName, { dest: 'plugins', action: 'append' });
+
+    const [result]: { plugins: string[] }[] = parser.parseKnownArgs(args);
+
+    return result.plugins || [];
+  }
+
+  private async _initializePluginsAsync(): Promise<void> {
     this._pluginManager.initializeDefaultPlugins();
 
     await this._pluginManager.initializePluginsFromConfigFileAsync();
 
+    const pluginSpecifiers: string[] = this._getPluginArgumentValues();
     for (const pluginSpecifier of pluginSpecifiers) {
       this._pluginManager.initializePlugin(pluginSpecifier);
     }
+
+    this._pluginManager.afterInitializeAllPlugins();
   }
 
   private async _reportErrorAndSetExitCode(error: Error): Promise<void> {

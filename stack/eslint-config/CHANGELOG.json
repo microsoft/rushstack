@@ -2,6 +2,143 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "2.1.3",
+      "tag": "@rushstack/eslint-config_v2.1.3",
+      "date": "Wed, 30 Sep 2020 18:39:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.0.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.7.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-security\" to `0.1.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.2",
+      "tag": "@rushstack/eslint-config_v2.1.2",
+      "date": "Wed, 30 Sep 2020 06:53:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update README.md"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-patch\" to `1.0.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.7.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-security\" to `0.1.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.1",
+      "tag": "@rushstack/eslint-config_v2.1.1",
+      "date": "Tue, 22 Sep 2020 05:45:56 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix some missing files that were incorrectly excluded due to .npmignore"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.0",
+      "tag": "@rushstack/eslint-config_v2.1.0",
+      "date": "Tue, 22 Sep 2020 01:45:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Relax the \"typedef\" rule so that type inference is now allowed for local variables, while still requiring explicit type declarations in other scopes"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.7.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.0.0",
+      "tag": "@rushstack/eslint-config_v2.0.0",
+      "date": "Tue, 22 Sep 2020 00:08:53 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "(BREAKING CHANGE) The \"@rushstack/eslint-config\" entry point has been separated into 3 choices: \"@rushstack/eslint-config/profile/node\", \"@rushstack/eslint-config/profile/node-trusted-tool\", or \"@rushstack/eslint-config/profile/web-app\".  See the documentation for details."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.2",
+      "tag": "@rushstack/eslint-config_v1.4.2",
+      "date": "Sat, 19 Sep 2020 04:37:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.6.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-security\" to `0.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.1",
+      "tag": "@rushstack/eslint-config_v1.4.1",
+      "date": "Sat, 19 Sep 2020 03:33:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add a dependency on the new @rushstack/eslint-plugin-security"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.6.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-security\" to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.4.0",
+      "tag": "@rushstack/eslint-config_v1.4.0",
+      "date": "Fri, 18 Sep 2020 22:57:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove the @typescript-eslint/array-type rule"
+          },
+          {
+            "comment": "Add *.spec.ts file extension for tests, since this is also a commonly used convention"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Relax @typescript-eslint/no-use-before-define slightly"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.0",
       "tag": "@rushstack/eslint-config_v1.3.0",
       "date": "Thu, 27 Aug 2020 11:27:06 GMT",

@@ -1,0 +1,16 @@
+{
+  "name": "heft-web-rig-library-test",
+  "description": "A test project for Heft that exercises the '@rushstack/heft-web-rig' package",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft test --clean --verbose"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-web-rig": "workspace:*",
+    "@types/heft-jest": "1.0.1"
+  }
+}

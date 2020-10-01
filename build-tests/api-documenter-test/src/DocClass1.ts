@@ -292,6 +292,12 @@ export interface IDocInterface6 {
 
 /**
  * Class that merges with interface
+ *
+ * @remarks
+ * {@link (DocClassInterfaceMerge:class)|Link to class}
+ *
+ * {@link (DocClassInterfaceMerge:interface)|Link to interface}
+ *
  * @public
  */
 export class DocClassInterfaceMerge {}

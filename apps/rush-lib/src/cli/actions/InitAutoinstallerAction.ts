@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { FileSystem, NewlineKind, IPackageJson, JsonFile } from '@rushstack/node-core-library';
@@ -11,7 +11,7 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 
 export class InitAutoinstallerAction extends BaseRushAction {
-  private _name: CommandLineStringParameter;
+  private _name!: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({

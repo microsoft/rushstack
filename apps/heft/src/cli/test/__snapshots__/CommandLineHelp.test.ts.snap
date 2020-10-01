@@ -9,8 +9,6 @@ Positional arguments:
   <command>
     clean        Clean the project
     build        Build the project.
-    dev-deploy   Deploy the current project, and optionally the whole repo, 
-                 to a testing CDN.
     start        Run the local server for the current project
     test         Build the project and run tests.
 
@@ -26,7 +24,7 @@ Optional arguments:
                  the tool
   --plugin PATH  Used to specify Heft plugins.
 
-[Bold]For detailed help about a specific command, use: heft <command> -h[NormalColorOrIntensity]
+[bold]For detailed help about a specific command, use: heft <command> -h[normal]
 "
 `;
 
@@ -66,15 +64,6 @@ Optional arguments:
 "
 `;
 
-exports[`CommandLineHelp prints the help for each action: dev-deploy 1`] = `
-"usage: heft dev-deploy [-h] [-v]
-
-Optional arguments:
-  -h, --help     Show this help message and exit.
-  -v, --verbose  If specified, log information useful for debugging.
-"
-`;
-
 exports[`CommandLineHelp prints the help for each action: start 1`] = `
 "usage: heft start [-h] [-v] [--production] [--locale LOCALE] [-l]
                   [--typescript-max-write-parallelism PARALLEILSM]
@@ -106,6 +95,7 @@ exports[`CommandLineHelp prints the help for each action: test 1`] = `
                  [--no-build] [-u] [--find-related-tests SOURCE_FILE]
                  [--silent] [-t REGEXP] [--test-path-pattern REGEXP]
                  [--test-timeout-ms INTEGER] [--debug-heft-reporter]
+                 [--max-workers COUNT_OR_PERCENTAGE]
                  
 
 Optional arguments:
@@ -165,5 +155,14 @@ Optional arguments:
                         how Jest's default reporter would have presented it. 
                         Include this output in your bug report. Do not use 
                         \\"--debug-heft-reporter\\" in production.
+  --max-workers COUNT_OR_PERCENTAGE
+                        Use this parameter to control maximum number of 
+                        worker processes tests are allowed to use. This 
+                        parameter is similar to the parameter noted in the 
+                        Jest documentation, and can either be an integer 
+                        representing the number of workers to spawn when 
+                        running tests, or can be a string representing a 
+                        percentage of the available CPUs on the machine to 
+                        utilize. Example values: \\"3\\", \\"25%\\"
 "
 `;

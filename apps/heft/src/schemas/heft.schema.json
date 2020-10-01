@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Heft Configuration",
+  "description": "Defines configuration used by core Heft.",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "extends": {
+      "description": "Optionally specifies another JSON config file that this file extends from.  This provides a way for standard settings to be shared across multiple projects.",
+      "type": "string"
+    },
+
+    "eventActions": {
+      "type": "array",
+      "description": "An array of actions (such as deleting files or folders) that should occur during a Heft run.",
+
+      "items": {
+        "type": "object",
+        "required": ["actionKind", "heftEvent", "actionId"],
+        "allOf": [
+          {
+            "properties": {
+              "actionKind": {
+                "type": "string",
+                "description": "The kind of built-in operation that should be performed.",
+                "enum": ["deleteGlobs"]
+              },
+
+              "heftEvent": {
+                "type": "string",
+                "description": "The stage of the Heft run during which this action should occur. Note that actions specified in heft.json occur at the end of the stage of the Heft run.",
+                "enum": ["clean", "pre-compile", "compile", "bundle", "post-build"]
+              },
+
+              "actionId": {
+                "type": "string",
+                "description": "A user-defined tag whose purpose is to allow configs to replace/delete handlers that were added by other configs."
+              }
+            }
+          },
+          {
+            "oneOf": [
+              // Delete Globs
+              {
+                "required": ["actionKind"],
+                "properties": {
+                  "actionKind": {
+                    "type": "string",
+                    "enum": ["deleteGlobs"]
+                  },
+
+                  "globsToDelete": {
+                    "type": "array",
+                    "description": "Glob patterns to be deleted. The paths are resolved relative to the project folder.",
+                    "items": {
+                      "type": "string",
+                      "pattern": "[^\\\\]"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+
+    "heftPlugins": {
+      "type": "array",
+      "description": "Defines heft plugins that are used by a project.",
+
+      "items": {
+        "type": "object",
+        "required": ["plugin"],
+        "properties": {
+          "plugin": {
+            "description": "Path to the plugin package, relative to the project root.",
+            "type": "string",
+            "pattern": "[^\\\\]"
+          },
+
+          "options": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

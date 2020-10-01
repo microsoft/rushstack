@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Add functionality to automatically generate typings for *.scss, *.sass, and *.css files.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "halfnibble@users.noreply.github.com"
+}

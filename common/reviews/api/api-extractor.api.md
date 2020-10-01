@@ -7,6 +7,8 @@
 import { INodePackageJson } from '@rushstack/node-core-library';
 import { JsonSchema } from '@rushstack/node-core-library';
 import { NewlineKind } from '@rushstack/node-core-library';
+import { PackageJsonLookup } from '@rushstack/node-core-library';
+import { RigConfig } from '@rushstack/rig-package';
 import * as tsdoc from '@microsoft/tsdoc';
 
 // @public
@@ -34,8 +36,8 @@ export const enum ConsoleMessageId {
 export class Extractor {
     static invoke(extractorConfig: ExtractorConfig, options?: IExtractorInvokeOptions): ExtractorResult;
     static loadConfigAndInvoke(configFilePath: string, options?: IExtractorInvokeOptions): ExtractorResult;
-    static readonly packageName: string;
-    static readonly version: string;
+    static get packageName(): string;
+    static get version(): string;
 }
 
 // @public
@@ -68,6 +70,7 @@ export class ExtractorConfig {
     readonly rollupEnabled: boolean;
     readonly skipLibCheck: boolean;
     readonly testMode: boolean;
+    static tryLoadForFolder(options: IExtractorConfigLoadForFolderOptions): IExtractorConfigPrepareOptions | undefined;
     readonly tsconfigFilePath: string;
     readonly tsdocMetadataEnabled: boolean;
     readonly tsdocMetadataFilePath: string;
@@ -93,8 +96,10 @@ export class ExtractorMessage {
     formatMessageWithLocation(workingPackageFolderPath: string | undefined): string;
     // (undocumented)
     formatMessageWithoutLocation(): string;
-    handled: boolean;
-    logLevel: ExtractorLogLevel;
+    get handled(): boolean;
+    set handled(value: boolean);
+    get logLevel(): ExtractorLogLevel;
+    set logLevel(value: ExtractorLogLevel);
     readonly messageId: tsdoc.TSDocMessageId | ExtractorMessageId | ConsoleMessageId | string;
     readonly properties: IExtractorMessageProperties;
     readonly sourceFileColumn: number | undefined;
@@ -215,11 +220,19 @@ export interface IConfigTsdocMetadata {
 }
 
 // @public
+export interface IExtractorConfigLoadForFolderOptions {
+    packageJsonLookup?: PackageJsonLookup;
+    rigConfig?: RigConfig;
+    startingFolder: string;
+}
+
+// @public
 export interface IExtractorConfigPrepareOptions {
     configObject: IConfigFile;
     configObjectFullPath: string | undefined;
     packageJson?: INodePackageJson | undefined;
     packageJsonFullPath: string | undefined;
+    projectFolderLookupToken?: string;
 }
 
 // @public

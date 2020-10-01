@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { EOL } from 'os';
-import * as colors from 'colors';
+import colors from 'colors';
 import { PackageJsonLookup } from '@rushstack/node-core-library';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';

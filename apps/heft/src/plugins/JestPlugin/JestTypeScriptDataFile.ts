@@ -4,16 +4,22 @@
 import * as path from 'path';
 import { JsonFile } from '@rushstack/node-core-library';
 
-import { ITypeScriptConfiguration } from '../../stages/BuildStage';
-
 /**
  * Schema for jest-typescript-data.json
  */
 export interface IJestTypeScriptDataFileJson {
   /**
-   * The "emitFolderPathForJest" from .heft/typescript.json
+   * The "emitFolderNameForTests" from .heft/typescript.json
    */
-  emitFolderPathForJest: string;
+  emitFolderNameForTests: string;
+
+  /**
+   * Normally the jest-build-transform compares the timestamps of the .js output file and .ts source file
+   * to determine whether the TypeScript compiler has completed.  However this heuristic is only necessary
+   * in the interactive "--watch" mode, since otherwise Heft doesn't invoke Jest until after the compiler
+   * has finished.  Heft improves reliability for a non-watch build by setting skipTimestampCheck=true.
+   */
+  skipTimestampCheck: boolean;
 }
 
 /**
@@ -25,15 +31,9 @@ export class JestTypeScriptDataFile {
   /**
    * Called by TypeScriptPlugin to write the file.
    */
-  public static saveForProject(
-    projectFolder: string,
-    typeScriptConfiguration: ITypeScriptConfiguration
-  ): void {
+  public static saveForProject(projectFolder: string, json?: IJestTypeScriptDataFileJson): void {
     const jsonFilePath: string = JestTypeScriptDataFile.getConfigFilePath(projectFolder);
 
-    const json: IJestTypeScriptDataFileJson = {
-      emitFolderPathForJest: typeScriptConfiguration.emitFolderPathForJest || 'lib'
-    };
     JsonFile.save(json, jsonFilePath, {
       ensureFolderExists: true,
       onlyIfChanged: true,

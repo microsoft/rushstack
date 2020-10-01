@@ -342,7 +342,7 @@ export class Terminal {
 
                 case TextAttribute.InvertColor: {
                   startColorCodes.push(ConsoleColorCodes.InvertColor);
-                  endColorCodes.push(ConsoleColorCodes.InvertColorOFf);
+                  endColorCodes.push(ConsoleColorCodes.InvertColorOff);
                   break;
                 }
 

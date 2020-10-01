@@ -1,0 +1,26 @@
+{
+  "name": "heft-webpack-basic-tutorial",
+  "description": "This project illustrates a minimal tutorial Heft project targeting the web browser runtime",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "heft test --clean",
+    "start": "heft start"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/react": "16.9.45",
+    "@types/react-dom": "16.9.8",
+    "@types/webpack-env": "1.13.0",
+    "css-loader": "~4.2.1",
+    "eslint": "~7.2.0",
+    "html-webpack-plugin": "~3.2.0",
+    "react": "~16.13.1",
+    "react-dom": "~16.13.1",
+    "style-loader": "~1.2.1",
+    "typescript": "~3.9.7",
+    "webpack": "~4.31.0"
+  }
+}

@@ -1,0 +1,5 @@
+NOTE: We do not invoke ESLint on this project's source files, because ESLint's module resolution (as of 6.x) is naive
+and fairly brittle.  It gets confused between the dependencies of this project, versus the dependencies of
+@rushstack/eslint-config (which imports the previously published version of this project).  Normally we solve
+this problem by using Rush's "cyclicDependencyProjects" feature, but that fails because ESLint does not correctly
+implement NodeJS module resolution.

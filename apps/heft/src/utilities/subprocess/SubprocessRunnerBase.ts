@@ -13,8 +13,6 @@ import {
   ISerializedErrorValue,
   ISerializedFileErrorValue
 } from './SubprocessCommunication';
-import { IExtendedFileSystem } from '../fileSystem/IExtendedFileSystem';
-import { CachedFileSystem } from '../fileSystem/CachedFileSystem';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { TerminalProviderManager } from './TerminalProviderManager';
 import {
@@ -50,16 +48,15 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
   public static [SUBPROCESS_RUNNER_CLASS_LABEL]: boolean = true;
   private static _subprocessInspectorPort: number = 9229 + 1; // 9229 is the default port
 
-  private _terminalProviderManager: TerminalProviderManager;
-  private _scopedLoggerManager: SubprocessLoggerManager;
-  private _subprocessCommunicationManagerInitializationOptions: ISubprocessCommunicationManagerInitializationOptions;
+  private _terminalProviderManager!: TerminalProviderManager;
+  private _scopedLoggerManager!: SubprocessLoggerManager;
+  private _subprocessCommunicationManagerInitializationOptions!: ISubprocessCommunicationManagerInitializationOptions;
 
-  private _innerConfiguration: ISubprocessInnerConfiguration;
+  private _innerConfiguration!: ISubprocessInnerConfiguration;
   public _runningAsSubprocess: boolean = false;
   protected readonly _configuration: TSubprocessConfiguration;
-  protected readonly _fileSystem: IExtendedFileSystem = new CachedFileSystem();
 
-  protected _globalTerminal: Terminal;
+  protected _globalTerminal!: Terminal;
   private readonly _subprocessCommunicationManagers: SubprocessCommunicationManagerBase[] = [];
 
   /**

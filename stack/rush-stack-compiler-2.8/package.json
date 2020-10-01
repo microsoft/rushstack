@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush-stack-compiler-2.8",
-  "version": "0.8.10",
+  "version": "0.8.23",
   "description": "A plug-in for selecting the compiler used with the @microsoft/rush-stack toolchain. This version selects TypeScript 2.8.",
   "license": "MIT",
   "repository": {
@@ -20,17 +20,17 @@
   "typings": "lib/index.d.ts",
   "dependencies": {
     "@microsoft/api-extractor": "workspace:*",
-    "@rushstack/node-core-library": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
     "@types/node": "10.17.13",
-    "import-lazy": "~4.0.0",
     "eslint": "~7.2.0",
+    "import-lazy": "~4.0.0",
     "tslint": "~5.20.1",
     "tslint-microsoft-contrib": "~6.2.0",
     "typescript": "~2.8.4"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "workspace:*",
+    "@microsoft/rush-stack-compiler-3.9": "workspace:*",
     "@microsoft/rush-stack-compiler-shared": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "0.8.0",

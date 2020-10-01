@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 
@@ -50,10 +50,10 @@ export interface IRushCommandLineParserOptions {
 
 export class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
-  public rushGlobalFolder: RushGlobalFolder;
-  public rushConfiguration: RushConfiguration;
+  public rushGlobalFolder!: RushGlobalFolder;
+  public rushConfiguration!: RushConfiguration;
 
-  private _debugParameter: CommandLineFlagParameter;
+  private _debugParameter!: CommandLineFlagParameter;
   private _rushOptions: IRushCommandLineParserOptions;
 
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {
@@ -369,7 +369,7 @@ export class RushCommandLineParser extends CommandLineParser {
     // performs nontrivial work that can throw an exception.  Either the Rush class would need
     // to handle reporting for those exceptions, or else _populateActions() should be moved
     // to a RushCommandLineParser lifecycle stage that can handle it.
-    if (!process.exitCode || process.exitCode > 0) {
+    if (process.exitCode !== undefined) {
       process.exit(process.exitCode);
     } else {
       process.exit(1);

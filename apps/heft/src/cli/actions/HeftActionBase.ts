@@ -4,7 +4,17 @@
 import {
   CommandLineAction,
   CommandLineFlagParameter,
-  ICommandLineActionOptions
+  ICommandLineActionOptions,
+  ICommandLineFlagDefinition,
+  IBaseCommandLineDefinition,
+  ICommandLineChoiceDefinition,
+  CommandLineChoiceParameter,
+  CommandLineIntegerParameter,
+  ICommandLineIntegerDefinition,
+  CommandLineStringParameter,
+  ICommandLineStringDefinition,
+  CommandLineStringListParameter,
+  ICommandLineStringListDefinition
 } from '@rushstack/ts-command-line';
 import {
   Terminal,
@@ -17,17 +27,15 @@ import { performance } from 'perf_hooks';
 
 import { MetricsCollector } from '../../metrics/MetricsCollector';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
-import { PluginManager } from '../../pluginFramework/PluginManager';
 import { BuildStage } from '../../stages/BuildStage';
 import { CleanStage } from '../../stages/CleanStage';
-import { DevDeployStage } from '../../stages/DevDeployStage';
 import { TestStage } from '../../stages/TestStage';
 import { LoggingManager } from '../../pluginFramework/logging/LoggingManager';
+import { Constants } from '../../utilities/Constants';
 
 export interface IStages {
   buildStage: BuildStage;
   cleanStage: CleanStage;
-  devDeployStage: DevDeployStage;
   testStage: TestStage;
 }
 
@@ -36,7 +44,6 @@ export interface IHeftActionBaseOptions {
   loggingManager: LoggingManager;
   metricsCollector: MetricsCollector;
   heftConfiguration: HeftConfiguration;
-  pluginManager: PluginManager;
   stages: IStages;
 }
 
@@ -46,7 +53,7 @@ export abstract class HeftActionBase extends CommandLineAction {
   protected readonly metricsCollector: MetricsCollector;
   protected readonly heftConfiguration: HeftConfiguration;
   protected readonly stages: IStages;
-  protected verboseFlag: CommandLineFlagParameter;
+  protected verboseFlag!: CommandLineFlagParameter;
 
   public constructor(
     commandLineOptions: ICommandLineActionOptions,
@@ -67,6 +74,33 @@ export abstract class HeftActionBase extends CommandLineAction {
       parameterShortName: '-v',
       description: 'If specified, log information useful for debugging.'
     });
+  }
+
+  public defineChoiceParameter(options: ICommandLineChoiceDefinition): CommandLineChoiceParameter {
+    this._validateDefinedParameter(options);
+    return super.defineChoiceParameter(options);
+  }
+
+  public defineFlagParameter(options: ICommandLineFlagDefinition): CommandLineFlagParameter {
+    this._validateDefinedParameter(options);
+    return super.defineFlagParameter(options);
+  }
+
+  public defineIntegerParameter(options: ICommandLineIntegerDefinition): CommandLineIntegerParameter {
+    this._validateDefinedParameter(options);
+    return super.defineIntegerParameter(options);
+  }
+
+  public defineStringParameter(options: ICommandLineStringDefinition): CommandLineStringParameter {
+    this._validateDefinedParameter(options);
+    return super.defineStringParameter(options);
+  }
+
+  public defineStringListParameter(
+    options: ICommandLineStringListDefinition
+  ): CommandLineStringListParameter {
+    this._validateDefinedParameter(options);
+    return super.defineStringListParameter(options);
   }
 
   public setStartTime(): void {
@@ -141,4 +175,12 @@ export abstract class HeftActionBase extends CommandLineAction {
    * @virtual
    */
   protected abstract actionExecuteAsync(): Promise<void>;
+
+  private _validateDefinedParameter(options: IBaseCommandLineDefinition): void {
+    if (options.parameterLongName === Constants.pluginParameterLongName) {
+      throw new Error(
+        `Actions must not register a parameter with longName "${Constants.pluginParameterLongName}".`
+      );
+    }
+  }
 }

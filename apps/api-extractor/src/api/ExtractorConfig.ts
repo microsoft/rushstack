@@ -4,7 +4,6 @@
 import * as path from 'path';
 import * as resolve from 'resolve';
 import lodash = require('lodash');
-
 import {
   JsonFile,
   JsonSchema,
@@ -17,6 +16,8 @@ import {
   Path,
   NewlineKind
 } from '@rushstack/node-core-library';
+import { RigConfig } from '@rushstack/rig-package';
+
 import { IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { MessageRouter } from '../collector/MessageRouter';
@@ -41,7 +42,33 @@ interface IExtractorConfigTokenContext {
    */
   packageName: string;
 
+  /**
+   * The `<projectFolder>` token returns the expanded `"projectFolder"` setting from api-extractor.json.
+   */
   projectFolder: string;
+}
+
+/**
+ * Options for {@link ExtractorConfig.tryLoadForFolder}.
+ *
+ * @public
+ */
+export interface IExtractorConfigLoadForFolderOptions {
+  /**
+   * The folder path to start from when searching for api-extractor.json.
+   */
+  startingFolder: string;
+
+  /**
+   * An already constructed `PackageJsonLookup` cache object to use.  If omitted, a temporary one will
+   * be constructed.
+   */
+  packageJsonLookup?: PackageJsonLookup;
+
+  /**
+   * An already constructed `RigConfig` object.  If omitted, then a new `RigConfig` object will be constructed.
+   */
+  rigConfig?: RigConfig;
 }
 
 /**
@@ -61,7 +88,8 @@ export interface IExtractorConfigPrepareOptions {
    *
    * @remarks
    *
-   * If this is omitted, then the `projectFolder` must not be specified using the `<lookup>` token.
+   * If `configObjectFullPath` and `projectFolderLookupToken` are both unspecified, then the api-extractor.json
+   * config file must explicitly specify a `projectFolder` setting rather than relying on the `<lookup>` token.
    */
   configObjectFullPath: string | undefined;
 
@@ -86,6 +114,18 @@ export interface IExtractorConfigPrepareOptions {
    * If `packageJsonFullPath` is specified but `packageJson` is omitted, the file will be loaded automatically.
    */
   packageJsonFullPath: string | undefined;
+
+  /**
+   * The default value for the `projectFolder` setting is the `<lookup>` token, which uses a heuristic to guess
+   * an appropriate project folder.  Use `projectFolderLookupValue` to manually specify the `<lookup>` token value
+   * instead.
+   *
+   * @remarks
+   * If the `projectFolder` setting is explicitly specified in api-extractor.json file, it should take precedence
+   * over a value specified via the API.  Thus the `projectFolderLookupToken` option provides a way to override
+   * the default value for `projectFolder` setting while still honoring a manually specified value.
+   */
+  projectFolderLookupToken?: string;
 }
 
 interface IExtractorConfigParameters {
@@ -256,9 +296,107 @@ export class ExtractorConfig {
       throw new InternalError('Expected absolute path: ' + absolutePath);
     }
     if (Path.isUnderOrEqual(absolutePath, this.projectFolder)) {
-      return path.relative(this.projectFolder, absolutePath).replace(/\\/g, '/');
+      return Path.convertToSlashes(path.relative(this.projectFolder, absolutePath));
     }
     return absolutePath;
+  }
+
+  /**
+   * Searches for the api-extractor.json config file associated with the specified starting folder,
+   * and loads the file if found.  This lookup supports
+   * {@link https://www.npmjs.com/package/@rushstack/rig-package | rig packages}.
+   *
+   * @remarks
+   * The search will first look for a package.json file in a parent folder of the starting folder;
+   * if found, that will be used as the base folder instead of the starting folder.  If the config
+   * file is not found in `<baseFolder>/api-extractor.json` or `<baseFolder>/config/api-extractor.json`,
+   * then `<baseFolder/config/rig.json` will be checked to see whether a
+   * {@link https://www.npmjs.com/package/@rushstack/rig-package | rig package} is referenced; if so then
+   * the rig's api-extractor.json file will be used instead.  If a config file is found, it will be loaded
+   * and returned with the `IExtractorConfigPrepareOptions` object. Otherwise, `undefined` is returned
+   * to indicate that API Extractor does not appear to be configured for the specified folder.
+   *
+   * @returns An options object that can be passed to {@link ExtractorConfig.prepare}, or `undefined`
+   * if not api-extractor.json file was found.
+   */
+  public static tryLoadForFolder(
+    options: IExtractorConfigLoadForFolderOptions
+  ): IExtractorConfigPrepareOptions | undefined {
+    const packageJsonLookup: PackageJsonLookup = options.packageJsonLookup || new PackageJsonLookup();
+    const startingFolder: string = options.startingFolder;
+
+    // Figure out which project we're in and look for the config file at the project root
+    const packageJsonFullPath: string | undefined = packageJsonLookup.tryGetPackageJsonFilePathFor(
+      startingFolder
+    );
+    const packageFolder: string | undefined = packageJsonFullPath
+      ? path.dirname(packageJsonFullPath)
+      : undefined;
+
+    // If there is no package, then just use the starting folder
+    const baseFolder: string = packageFolder || startingFolder;
+
+    let projectFolderLookupToken: string | undefined = undefined;
+
+    // First try the standard "config" subfolder:
+    let configFilename: string = path.join(baseFolder, 'config', ExtractorConfig.FILENAME);
+    if (FileSystem.exists(configFilename)) {
+      if (FileSystem.exists(path.join(baseFolder, ExtractorConfig.FILENAME))) {
+        throw new Error(`Found conflicting ${ExtractorConfig.FILENAME} files in "." and "./config" folders`);
+      }
+    } else {
+      // Otherwise try the top-level folder
+      configFilename = path.join(baseFolder, ExtractorConfig.FILENAME);
+
+      if (!FileSystem.exists(configFilename)) {
+        // If We didn't find it in <packageFolder>/api-extractor.json or <packageFolder>/config/api-extractor.json
+        // then check for a rig package
+        if (packageFolder) {
+          let rigConfig: RigConfig;
+          if (options.rigConfig) {
+            // The caller provided an already solved RigConfig.  Double-check that it is for the right project.
+            if (!Path.isEqual(options.rigConfig.projectFolderPath, packageFolder)) {
+              throw new Error(
+                'The provided ILoadForFolderOptions.rigConfig is for the wrong project folder:\n' +
+                  '\nExpected path: ' +
+                  packageFolder +
+                  '\nProvided path: ' +
+                  options.rigConfig.projectFolderOriginalPath
+              );
+            }
+            rigConfig = options.rigConfig;
+          } else {
+            rigConfig = RigConfig.loadForProjectFolder({
+              projectFolderPath: packageFolder
+            });
+          }
+
+          if (rigConfig.rigFound) {
+            configFilename = path.join(rigConfig.getResolvedProfileFolder(), ExtractorConfig.FILENAME);
+
+            // If the "projectFolder" setting isn't specified in api-extractor.json, it defaults to the
+            // "<lookup>" token which will probe for the tsconfig.json nearest to the api-extractor.json path.
+            // But this won't work if api-extractor.json belongs to the rig.  So instead "<lookup>" should be
+            // the "<packageFolder>" that referenced the rig.
+            projectFolderLookupToken = packageFolder;
+          }
+        }
+        if (!FileSystem.exists(configFilename)) {
+          // API Extractor does not seem to be configured for this folder
+          return undefined;
+        }
+      }
+    }
+
+    const configObjectFullPath: string = path.resolve(configFilename);
+    const configObject: IConfigFile = ExtractorConfig.loadFile(configObjectFullPath);
+
+    return {
+      configObject,
+      configObjectFullPath,
+      packageJsonFullPath,
+      projectFolderLookupToken
+    };
   }
 
   /**
@@ -300,7 +438,7 @@ export class ExtractorConfig {
     // Set to keep track of config files which have been processed.
     const visitedPaths: Set<string> = new Set<string>();
 
-    let currentConfigFilePath: string = path.resolve(process.cwd(), jsonFilePath);
+    let currentConfigFilePath: string = path.resolve(jsonFilePath);
     let configObject: Partial<IConfigFile> = {};
 
     try {
@@ -532,33 +670,45 @@ export class ExtractorConfig {
 
       let projectFolder: string;
       if (configObject.projectFolder.trim() === '<lookup>') {
-        if (!options.configObjectFullPath) {
-          throw new Error(
-            'The "projectFolder" setting uses the "<lookup>" token, but it cannot be expanded because' +
-              ' the "configObjectFullPath" setting was not specified'
-          );
-        }
+        if (options.projectFolderLookupToken) {
+          // Use the manually specified "<lookup>" value
+          projectFolder = options.projectFolderLookupToken;
 
-        // "The default value for `projectFolder` is the token `<lookup>`, which means the folder is determined
-        // by traversing parent folders, starting from the folder containing api-extractor.json, and stopping
-        // at the first folder that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in
-        // this way, then an error will be reported."
-
-        let currentFolder: string = path.dirname(options.configObjectFullPath);
-        for (;;) {
-          const tsconfigPath: string = path.join(currentFolder, 'tsconfig.json');
-          if (FileSystem.exists(tsconfigPath)) {
-            projectFolder = currentFolder;
-            break;
-          }
-          const parentFolder: string = path.dirname(currentFolder);
-          if (parentFolder === '' || parentFolder === currentFolder) {
+          if (!FileSystem.exists(options.projectFolderLookupToken)) {
             throw new Error(
-              'The "projectFolder" setting uses the "<lookup>" token, but a tsconfig.json file cannot be' +
-                ' found in this folder or any parent folder.'
+              'The specified "projectFolderLookupToken" path does not exist: ' +
+                options.projectFolderLookupToken
             );
           }
-          currentFolder = parentFolder;
+        } else {
+          if (!options.configObjectFullPath) {
+            throw new Error(
+              'The "projectFolder" setting uses the "<lookup>" token, but it cannot be expanded because' +
+                ' the "configObjectFullPath" setting was not specified'
+            );
+          }
+
+          // "The default value for `projectFolder` is the token `<lookup>`, which means the folder is determined
+          // by traversing parent folders, starting from the folder containing api-extractor.json, and stopping
+          // at the first folder that contains a tsconfig.json file.  If a tsconfig.json file cannot be found in
+          // this way, then an error will be reported."
+
+          let currentFolder: string = path.dirname(options.configObjectFullPath);
+          for (;;) {
+            const tsconfigPath: string = path.join(currentFolder, 'tsconfig.json');
+            if (FileSystem.exists(tsconfigPath)) {
+              projectFolder = currentFolder;
+              break;
+            }
+            const parentFolder: string = path.dirname(currentFolder);
+            if (parentFolder === '' || parentFolder === currentFolder) {
+              throw new Error(
+                'The "projectFolder" setting uses the "<lookup>" token, but a tsconfig.json file cannot be' +
+                  ' found in this folder or any parent folder.'
+              );
+            }
+            currentFolder = parentFolder;
+          }
         }
       } else {
         ExtractorConfig._rejectAnyTokensInPath(configObject.projectFolder, 'projectFolder');

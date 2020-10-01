@@ -4,7 +4,7 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
-import * as colors from 'colors';
+import colors from 'colors';
 
 import {
   CommandLineFlagParameter,
@@ -32,17 +32,16 @@ import * as inquirerTypes from 'inquirer';
 const inquirer: typeof inquirerTypes = Import.lazy('inquirer', require);
 
 export class ChangeAction extends BaseRushAction {
-  private _verifyParameter: CommandLineFlagParameter;
-  private _noFetchParameter: CommandLineFlagParameter;
-  private _targetBranchParameter: CommandLineStringParameter;
-  private _changeEmailParameter: CommandLineStringParameter;
-  private _bulkChangeParameter: CommandLineFlagParameter;
-  private _bulkChangeMessageParameter: CommandLineStringParameter;
-  private _bulkChangeBumpTypeParameter: CommandLineChoiceParameter;
-  private _overwriteFlagParameter: CommandLineFlagParameter;
+  private _verifyParameter!: CommandLineFlagParameter;
+  private _noFetchParameter!: CommandLineFlagParameter;
+  private _targetBranchParameter!: CommandLineStringParameter;
+  private _changeEmailParameter!: CommandLineStringParameter;
+  private _bulkChangeParameter!: CommandLineFlagParameter;
+  private _bulkChangeMessageParameter!: CommandLineStringParameter;
+  private _bulkChangeBumpTypeParameter!: CommandLineChoiceParameter;
+  private _overwriteFlagParameter!: CommandLineFlagParameter;
 
-  private _targetBranchName: string;
-  private _projectHostMap: Map<string, string>;
+  private _targetBranchName: string | undefined;
 
   public constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
@@ -146,7 +145,6 @@ export class ChangeAction extends BaseRushAction {
 
   public async runAsync(): Promise<void> {
     console.log(`The target branch is ${this._targetBranch}`);
-    this._projectHostMap = this._generateHostMap();
 
     if (this._verifyParameter.value) {
       const errors: string[] = [
@@ -324,6 +322,8 @@ export class ChangeAction extends BaseRushAction {
     const changedPackageNames: Set<string> = new Set<string>();
 
     const repoRootFolder: string | undefined = VersionControl.getRepositoryRootPath();
+    const projectHostMap: Map<string, string> = this._generateHostMap();
+
     this.rushConfiguration.projects
       .filter((project) => project.shouldPublish)
       .filter((project) => !project.versionPolicy || !project.versionPolicy.exemptFromRushChange)
@@ -334,7 +334,7 @@ export class ChangeAction extends BaseRushAction {
         return this._hasProjectChanged(changedFolders, projectFolder);
       })
       .forEach((project) => {
-        const hostName: string | undefined = this._projectHostMap.get(project.packageName);
+        const hostName: string | undefined = projectHostMap.get(project.packageName);
         if (hostName) {
           changedPackageNames.add(hostName);
         }

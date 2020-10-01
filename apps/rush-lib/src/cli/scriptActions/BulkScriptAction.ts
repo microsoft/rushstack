@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import * as colors from 'colors';
+import colors from 'colors';
 
 import { AlreadyReportedError } from '@rushstack/node-core-library';
 import {
@@ -57,12 +57,12 @@ export class BulkScriptAction extends BaseScriptAction {
   private _isIncrementalBuildAllowed: boolean;
   private _commandToRun: string;
 
-  private _changedProjectsOnly: CommandLineFlagParameter;
-  private _fromFlag: CommandLineStringListParameter;
-  private _toFlag: CommandLineStringListParameter;
-  private _fromVersionPolicy: CommandLineStringListParameter;
-  private _toVersionPolicy: CommandLineStringListParameter;
-  private _verboseParameter: CommandLineFlagParameter;
+  private _changedProjectsOnly!: CommandLineFlagParameter;
+  private _fromFlag!: CommandLineStringListParameter;
+  private _toFlag!: CommandLineStringListParameter;
+  private _fromVersionPolicy!: CommandLineStringListParameter;
+  private _toVersionPolicy!: CommandLineStringListParameter;
+  private _verboseParameter!: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
   private _ignoreDependencyOrder: boolean;
   private _allowWarningsInSuccessfulBuild: boolean;
@@ -131,28 +131,33 @@ export class BulkScriptAction extends BaseScriptAction {
       allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
     });
 
-    return taskRunner
-      .execute()
-      .then(() => {
-        stopwatch.stop();
-        console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
-        this._doAfterTask(stopwatch, true);
-      })
-      .catch((error: Error) => {
-        stopwatch.stop();
-        if (error instanceof AlreadyReportedError) {
-          console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
-        } else {
-          if (error && error.message) {
+    try {
+      await taskRunner.executeAsync();
+
+      stopwatch.stop();
+      console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
+
+      this._doAfterTask(stopwatch, true);
+    } catch (error) {
+      stopwatch.stop();
+
+      if (error instanceof AlreadyReportedError) {
+        console.log(`rush ${this.actionName} (${stopwatch.toString()})`);
+      } else {
+        if (error && error.message) {
+          if (this.parser.isDebug) {
+            console.log('Error: ' + error.stack);
+          } else {
             console.log('Error: ' + error.message);
           }
-
-          console.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
         }
 
-        this._doAfterTask(stopwatch, false);
-        throw new AlreadyReportedError();
-      });
+        console.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
+      }
+
+      this._doAfterTask(stopwatch, false);
+      throw new AlreadyReportedError();
+    }
   }
 
   protected onDefineParameters(): void {
@@ -223,7 +228,9 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const scopedNames: string[] = [];
 
-    const projectJsons: IRushConfigurationProjectJson[] = [...this.rushConfiguration.rushConfigurationJson.projects];
+    const projectJsons: IRushConfigurationProjectJson[] = [
+      ...this.rushConfiguration.rushConfigurationJson.projects
+    ];
 
     for (const projectJson of projectJsons) {
       scopedNames.push(projectJson.packageName);

@@ -4,6 +4,7 @@
 import * as os from 'os';
 import { AsyncParallelHook, SyncHook } from 'tapable';
 import { performance } from 'perf_hooks';
+import { InternalError } from '@rushstack/node-core-library';
 
 /**
  * @public
@@ -84,7 +85,7 @@ export interface IPerformanceData {
 export class MetricsCollector {
   public readonly hooks: MetricsCollectorHooks = new MetricsCollectorHooks();
   private _hasBeenTornDown: boolean = false;
-  private _startTimeMs: number;
+  private _startTimeMs: number | undefined;
 
   /**
    * Start metrics log timer.
@@ -100,12 +101,16 @@ export class MetricsCollector {
    * @param params - Optional parameters
    */
   public record(command: string, performanceData?: Partial<IPerformanceData>): void {
+    if (this._startTimeMs === undefined) {
+      throw new InternalError('MetricsCollector has not been initialized with setStartTime() yet');
+    }
+
     if (this._hasBeenTornDown) {
-      throw new Error('MetricsCollector has been torn down.');
+      throw new InternalError('MetricsCollector has been torn down.');
     }
 
     if (!command) {
-      throw new Error('The command name must be specified.');
+      throw new InternalError('The command name must be specified.');
     }
 
     const filledPerformanceData: IPerformanceData = {

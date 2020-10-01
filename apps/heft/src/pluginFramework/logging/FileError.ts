@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-import { TypeUuid } from '@rushstack/node-core-library';
+import { Path, TypeUuid } from '@rushstack/node-core-library';
 
 export const enum FileErrorFormat {
   Unix,
@@ -31,7 +31,7 @@ export class FileError extends Error {
   public constructor(message: string, filePath: string, line?: number, column?: number) {
     super(message);
 
-    this.filePath = filePath.replace(/\\/g, '/');
+    this.filePath = Path.convertToSlashes(filePath);
     this.line = line;
     this.column = column;
 

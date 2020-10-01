@@ -1,9 +1,12 @@
+import { InternalError } from '@rushstack/node-core-library';
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
 import * as path from 'path';
 import { trueCasePathSync } from 'true-case-path';
+
+import { IEnvironment } from '../utilities/Utilities';
 
 export interface IEnvironmentConfigurationInitializeOptions {
   doNotNormalizePaths?: boolean;
@@ -68,7 +71,25 @@ export const enum EnvironmentVariableNames {
    * This environment variable can be used to specify the `--target-folder` parameter
    * for the "rush deploy" command.
    */
-  RUSH_DEPLOY_TARGET_FOLDER = 'RUSH_DEPLOY_TARGET_FOLDER'
+  RUSH_DEPLOY_TARGET_FOLDER = 'RUSH_DEPLOY_TARGET_FOLDER',
+
+  /**
+   * Overrides the location of the `~/.rush` global folder where Rush stores temporary files.
+   *
+   * @remarks
+   *
+   * Most of the temporary files created by Rush are stored separately for each monorepo working folder,
+   * to avoid issues of concurrency and compatibility between tool versions.  However, a small set
+   * of files (e.g. installations of the `@microsoft/rush-lib` engine and the package manager) are stored
+   * in a global folder to speed up installations.  The default location is `~/.rush` on POSIX-like
+   * operating systems or `C:\Users\YourName` on Windows.
+   *
+   * Use `RUSH_GLOBAL_FOLDER` to specify a different folder path.  This is useful for example if a Windows
+   * group policy forbids executing scripts installed in a user's home directory.
+   *
+   * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
+   */
+  RUSH_GLOBAL_FOLDER = 'RUSH_GLOBAL_FOLDER'
 }
 
 /**
@@ -88,6 +109,8 @@ export class EnvironmentConfiguration {
   private static _allowUnsupportedNodeVersion: boolean = false;
 
   private static _pnpmStorePathOverride: string | undefined;
+
+  private static _rushGlobalFolderOverride: string | undefined;
 
   /**
    * An override for the common/temp folder path.
@@ -125,6 +148,31 @@ export class EnvironmentConfiguration {
   public static get pnpmStorePathOverride(): string | undefined {
     EnvironmentConfiguration._ensureInitialized();
     return EnvironmentConfiguration._pnpmStorePathOverride;
+  }
+
+  /**
+   * Overrides the location of the `~/.rush` global folder where Rush stores temporary files.
+   * See {@link EnvironmentVariableNames.RUSH_GLOBAL_FOLDER}
+   */
+  public static get rushGlobalFolderOverride(): string | undefined {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._rushGlobalFolderOverride;
+  }
+
+  /**
+   * The front-end RushVersionSelector relies on `RUSH_GLOBAL_FOLDER`, so its value must be read before
+   * `EnvironmentConfiguration` is initialized (and actually before the correct version of `EnvironmentConfiguration`
+   * is even installed). Thus we need to read this environment variable differently from all the others.
+   * @internal
+   */
+  public static _getRushGlobalFolderOverride(processEnv: IEnvironment): string | undefined {
+    const value: string | undefined = processEnv[EnvironmentVariableNames.RUSH_GLOBAL_FOLDER];
+    if (value) {
+      const normalizedValue: string | undefined = EnvironmentConfiguration._normalizeDeepestParentFolderPath(
+        value
+      );
+      return normalizedValue;
+    }
   }
 
   /**
@@ -167,6 +215,11 @@ export class EnvironmentConfiguration {
             break;
           }
 
+          case EnvironmentVariableNames.RUSH_GLOBAL_FOLDER: {
+            // Handled specially below
+            break;
+          }
+
           case EnvironmentVariableNames.RUSH_PARALLELISM:
           case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:
           case EnvironmentVariableNames.RUSH_VARIANT:
@@ -188,6 +241,11 @@ export class EnvironmentConfiguration {
       );
     }
 
+    // See doc comment for EnvironmentConfiguration._getRushGlobalFolderOverride().
+    EnvironmentConfiguration._rushGlobalFolderOverride = EnvironmentConfiguration._getRushGlobalFolderOverride(
+      process.env
+    );
+
     EnvironmentConfiguration._hasBeenInitialized = true;
   }
 
@@ -202,7 +260,9 @@ export class EnvironmentConfiguration {
 
   private static _ensureInitialized(): void {
     if (!EnvironmentConfiguration._hasBeenInitialized) {
-      throw new Error('The EnvironmentConfiguration must be initialized before values can be accessed.');
+      throw new InternalError(
+        'The EnvironmentConfiguration must be initialized before values can be accessed.'
+      );
     }
   }
 

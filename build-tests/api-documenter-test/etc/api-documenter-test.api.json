@@ -542,7 +542,7 @@
         {
           "kind": "Class",
           "canonicalReference": "api-documenter-test!DocClassInterfaceMerge:class",
-          "docComment": "/**\n * Class that merges with interface\n *\n * @public\n */\n",
+          "docComment": "/**\n * Class that merges with interface\n *\n * @remarks\n *\n * {@link (DocClassInterfaceMerge:class) | Link to class}\n *\n * {@link (DocClassInterfaceMerge:interface) | Link to interface}\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
@@ -644,6 +644,105 @@
                 "startIndex": 1,
                 "endIndex": 2
               }
+            }
+          ]
+        },
+        {
+          "kind": "Enum",
+          "canonicalReference": "api-documenter-test!DocEnumNamespaceMerge:enum",
+          "docComment": "/**\n * Enum that merges with namespace\n *\n * @remarks\n *\n * {@link (DocEnumNamespaceMerge:enum) | Link to enum}\n *\n * {@link (DocEnumNamespaceMerge:namespace) | Link to namespace}\n *\n * {@link (DocEnumNamespaceMerge:namespace).exampleFunction | Link to function inside namespace}\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare enum DocEnumNamespaceMerge "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "DocEnumNamespaceMerge",
+          "members": [
+            {
+              "kind": "EnumMember",
+              "canonicalReference": "api-documenter-test!DocEnumNamespaceMerge.Left:member",
+              "docComment": "/**\n * These are some docs for Left\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "Left = "
+                },
+                {
+                  "kind": "Content",
+                  "text": "0"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "Left",
+              "initializerTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "EnumMember",
+              "canonicalReference": "api-documenter-test!DocEnumNamespaceMerge.Right:member",
+              "docComment": "/**\n * These are some docs for Right\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "Right = "
+                },
+                {
+                  "kind": "Content",
+                  "text": "1"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "Right",
+              "initializerTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ]
+        },
+        {
+          "kind": "Namespace",
+          "canonicalReference": "api-documenter-test!DocEnumNamespaceMerge:namespace",
+          "docComment": "/**\n * Namespace that merges with enum\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export declare namespace DocEnumNamespaceMerge "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "DocEnumNamespaceMerge",
+          "members": [
+            {
+              "kind": "Function",
+              "canonicalReference": "api-documenter-test!DocEnumNamespaceMerge.exampleFunction:function(1)",
+              "docComment": "/**\n * This is a function inside of a namespace that merges with an enum.\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "function exampleFunction(): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "void"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [],
+              "name": "exampleFunction"
             }
           ]
         },

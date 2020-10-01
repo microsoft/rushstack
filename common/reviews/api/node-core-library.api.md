@@ -21,6 +21,17 @@ export class AlreadyReportedError extends Error {
     constructor();
 }
 
+// @public
+export class AnsiEscape {
+    static formatForTests(text: string, options?: IAnsiEscapeConvertForTestsOptions): string;
+    static removeCodes(text: string): string;
+    }
+
+// @public
+export type Brand<T, BrandTag extends string> = T & {
+    __brand: BrandTag;
+};
+
 // @beta
 export class Colors {
     // (undocumented)
@@ -57,7 +68,6 @@ export class Colors {
     static magenta(text: string | IColorableSequence): IColorableSequence;
     // (undocumented)
     static magentaBackground(text: string | IColorableSequence): IColorableSequence;
-    static normalizeColorTokensForTest(text: string): string;
     // @internal
     static _normalizeStringOrColorableSequence(value: string | IColorableSequence): IColorableSequence;
     // (undocumented)
@@ -101,8 +111,8 @@ export enum ColorValue {
 // @beta
 export class ConsoleTerminalProvider implements ITerminalProvider {
     constructor(options?: Partial<IConsoleTerminalProviderOptions>);
-    readonly eolCharacter: string;
-    readonly supportsColor: boolean;
+    get eolCharacter(): string;
+    get supportsColor(): boolean;
     verboseEnabled: boolean;
     write(data: string, severity: TerminalProviderSeverity): void;
 }
@@ -111,6 +121,24 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
 export const enum Encoding {
     // (undocumented)
     Utf8 = "utf8"
+}
+
+// @public
+export class Enum {
+    static getKeyByNumber<TEnumValue, TEnumObject extends {
+        [key: string]: TEnumValue;
+    }>(enumObject: TEnumObject, value: number): keyof typeof enumObject;
+    static getValueByKey<TEnumValue>(enumObject: {
+        [key: string]: TEnumValue | string;
+        [key: number]: TEnumValue | string;
+    }, key: string): TEnumValue;
+    static tryGetKeyByNumber<TEnumValue, TEnumObject extends {
+        [key: string]: TEnumValue;
+    }>(enumObject: TEnumObject, value: number): keyof typeof enumObject | undefined;
+    static tryGetValueByKey<TEnumValue>(enumObject: {
+        [key: string]: TEnumValue | string;
+        [key: number]: TEnumValue | string;
+    }, key: string): TEnumValue | undefined;
 }
 
 // @public
@@ -157,6 +185,7 @@ export class FileSystem {
     static ensureFolder(folderPath: string): void;
     static ensureFolderAsync(folderPath: string): Promise<void>;
     static exists(path: string): boolean;
+    static existsAsync(path: string): Promise<boolean>;
     static formatPosixModeBits(modeBits: PosixModeBits): string;
     static getLinkStatistics(path: string): FileSystemStats;
     static getLinkStatisticsAsync(path: string): Promise<FileSystemStats>;
@@ -198,7 +227,8 @@ export type FileSystemStats = fs.Stats;
 // @public
 export class FileWriter {
     close(): void;
-    static open(path: string, flags?: IFileWriterFlags): FileWriter;
+    readonly filePath: string;
+    static open(filePath: string, flags?: IFileWriterFlags): FileWriter;
     write(text: string): void;
 }
 
@@ -206,6 +236,11 @@ export class FileWriter {
 export const enum FolderConstants {
     Git = ".git",
     NodeModules = "node_modules"
+}
+
+// @public
+export interface IAnsiEscapeConvertForTestsOptions {
+    encodeNewlines?: boolean;
 }
 
 // @beta (undocumented)
@@ -433,6 +468,12 @@ export interface IParsedPackageNameOrError extends IParsedPackageName {
 }
 
 // @public
+export interface IPathFormatConciselyOptions {
+    baseFolder: string;
+    pathToConvert: string;
+}
+
+// @public
 export interface IProtectableMapParameters<K, V> {
     onClear?: (source: ProtectableMap<K, V>) => void;
     onDelete?: (source: ProtectableMap<K, V>, key: K) => void;
@@ -486,7 +527,7 @@ export class JsonSchema {
     ensureCompiled(): void;
     static fromFile(filename: string, options?: IJsonSchemaFromFileOptions): JsonSchema;
     static fromLoadedObject(schemaObject: JsonObject): JsonSchema;
-    readonly shortName: string;
+    get shortName(): string;
     validateObject(jsonObject: JsonObject, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void;
     validateObjectWithCallback(jsonObject: JsonObject, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void;
     }
@@ -512,10 +553,10 @@ export type LegacyCallback<TResult, TError> = (error: TError | null | undefined,
 // @public
 export class LockFile {
     static acquire(resourceFolder: string, resourceName: string, maxWaitMs?: number): Promise<LockFile>;
-    readonly dirtyWhenAcquired: boolean;
-    readonly filePath: string;
+    get dirtyWhenAcquired(): boolean;
+    get filePath(): string;
     static getLockFilePath(resourceFolder: string, resourceName: string, pid?: number): string;
-    readonly isReleased: boolean;
+    get isReleased(): boolean;
     release(): void;
     static tryAcquire(resourceFolder: string, resourceName: string): LockFile | undefined;
     }
@@ -539,7 +580,7 @@ export const enum NewlineKind {
 export class PackageJsonLookup {
     constructor(parameters?: IPackageJsonLookupParameters);
     clearCache(): void;
-    static readonly instance: PackageJsonLookup;
+    static get instance(): PackageJsonLookup;
     loadNodePackageJson(jsonFilename: string): INodePackageJson;
     static loadOwnPackageJson(dirnameOfCaller: string): IPackageJson;
     loadPackageJson(jsonFilename: string): IPackageJson;
@@ -574,6 +615,11 @@ export class PackageNameParser {
 
 // @public
 export class Path {
+    static convertToBackslashes(inputPath: string): string;
+    static convertToSlashes(inputPath: string): string;
+    static formatConcisely(options: IPathFormatConciselyOptions): string;
+    static isDownwardRelative(inputPath: string): boolean;
+    static isEqual(path1: string, path2: string): boolean;
     static isUnder(childPath: string, parentFolderPath: string): boolean;
     static isUnderOrEqual(childPath: string, parentFolderPath: string): boolean;
     }
@@ -603,9 +649,9 @@ export class ProtectableMap<K, V> {
     forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void;
     get(key: K): V | undefined;
     has(key: K): boolean;
-    readonly protectedView: Map<K, V>;
+    get protectedView(): Map<K, V>;
     set(key: K, value: V): this;
-    readonly size: number;
+    get size(): number;
 }
 
 // @public
@@ -622,12 +668,12 @@ export class Sort {
 // @beta
 export class StringBufferTerminalProvider implements ITerminalProvider {
     constructor(supportsColor?: boolean);
-    readonly eolCharacter: string;
+    get eolCharacter(): string;
     getErrorOutput(options?: IStringBufferOutputOptions): string;
     getOutput(options?: IStringBufferOutputOptions): string;
     getVerbose(options?: IStringBufferOutputOptions): string;
     getWarningOutput(options?: IStringBufferOutputOptions): string;
-    readonly supportsColor: boolean;
+    get supportsColor(): boolean;
     write(data: string, severity: TerminalProviderSeverity): void;
 }
 
@@ -671,6 +717,7 @@ export class Text {
     static convertToCrLf(input: string): string;
     static convertToLf(input: string): string;
     static ensureTrailingNewline(s: string, newlineKind?: NewlineKind): string;
+    static getNewline(newlineKind: NewlineKind): string;
     static padEnd(s: string, minimumLength: number, paddingCharacter?: string): string;
     static padStart(s: string, minimumLength: number, paddingCharacter?: string): string;
     static replaceAll(input: string, searchValue: string, replaceValue: string): string;

@@ -1,14 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import * as glob from 'glob';
-import * as globEscape from 'glob-escape';
-import { AsyncSeriesBailHook } from 'tapable';
-import { LegacyAdapters } from '@rushstack/node-core-library';
+import { AsyncParallelHook } from 'tapable';
+import { FileSystem } from '@rushstack/node-core-library';
 
 import { StageBase, StageHooksBase, IStageContext } from './StageBase';
-import { Async } from '../utilities/Async';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 
@@ -16,7 +12,7 @@ import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
  * @public
  */
 export class CleanStageHooks extends StageHooksBase<ICleanStageProperties> {
-  public readonly deletePath: AsyncSeriesBailHook<string> = new AsyncSeriesBailHook<string>(['pathToDelete']);
+  public readonly run: AsyncParallelHook = new AsyncParallelHook();
 }
 
 /**
@@ -41,7 +37,9 @@ export class CleanStage extends StageBase<CleanStageHooks, ICleanStageProperties
     super(heftConfiguration, loggingManager, CleanStageHooks);
   }
 
-  protected getDefaultStageProperties(options: ICleanStageOptions): ICleanStageProperties {
+  protected async getDefaultStagePropertiesAsync(
+    options: ICleanStageOptions
+  ): Promise<ICleanStageProperties> {
     return {
       deleteCache: false,
       ...options,
@@ -50,40 +48,14 @@ export class CleanStage extends StageBase<CleanStageHooks, ICleanStageProperties
   }
 
   protected async executeInnerAsync(): Promise<void> {
-    const resolvedPathsToDelete: string[] = [];
-    for (const pathToDelete of this.stageProperties.pathsToDelete) {
-      const resolvedPaths: string[] = await this._resolvePathAsync(
-        pathToDelete,
-        this.heftConfiguration.buildFolder
-      );
-      resolvedPathsToDelete.push(...resolvedPaths);
-    }
+    const promises: Promise<void>[] = [];
 
     if (this.stageProperties.deleteCache) {
-      resolvedPathsToDelete.push(this.heftConfiguration.buildCacheFolder);
+      promises.push(FileSystem.deleteFolderAsync(this.heftConfiguration.buildCacheFolder));
     }
 
-    await Async.forEachLimitAsync(resolvedPathsToDelete, 100, (pathToDelete) =>
-      this.stageHooks.deletePath.promise(pathToDelete)
-    );
+    promises.push(this.stageHooks.run.promise());
 
-    this.globalTerminal.writeLine(`Deleted ${this.stageProperties.pathsToDelete.size} paths`);
-  }
-
-  private async _resolvePathAsync(globPattern: string, buildFolder: string): Promise<string[]> {
-    if (globEscape(globPattern) !== globPattern) {
-      const expandedGlob: string[] = await LegacyAdapters.convertCallbackToPromise(glob, globPattern, {
-        cwd: buildFolder
-      });
-
-      const result: string[] = [];
-      for (const pathFromGlob of expandedGlob) {
-        result.push(path.resolve(buildFolder, pathFromGlob));
-      }
-
-      return result;
-    } else {
-      return [path.resolve(buildFolder, globPattern)];
-    }
+    await Promise.all(promises);
   }
 }

@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as tty from 'tty';
 import * as path from 'path';
-import * as wordwrap from 'wordwrap';
+import wordwrap = require('wordwrap');
 import { JsonFile, IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Stream } from 'stream';
@@ -115,7 +115,7 @@ interface ICreateEnvironmentForRushCommandOptions {
 export class Utilities {
   /**
    * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
-   * this looks something like "/usr/username/"
+   * this looks something like "/home/username/"
    */
   public static getHomeDirectory(): string {
     const unresolvedUserFolder: string | undefined =

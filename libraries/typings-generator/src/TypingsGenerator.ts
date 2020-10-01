@@ -20,7 +20,10 @@ export interface ITypingsGeneratorOptions<TTypingsResult = string> {
   srcFolder: string;
   generatedTsFolder: string;
   fileExtensions: string[];
-  parseAndGenerateTypings: (fileContents: string, filePath: string) => TTypingsResult;
+  parseAndGenerateTypings: (
+    fileContents: string,
+    filePath: string
+  ) => TTypingsResult | Promise<TTypingsResult>;
   terminal?: Terminal;
   filesToIgnore?: string[];
 }
@@ -69,8 +72,8 @@ export class TypingsGenerator {
     this._options.fileExtensions = this._normalizeFileExtensions(this._options.fileExtensions);
   }
 
-  public generateTypings(): void {
-    FileSystem.ensureEmptyFolder(this._options.generatedTsFolder);
+  public async generateTypingsAsync(): Promise<void> {
+    await FileSystem.ensureEmptyFolderAsync(this._options.generatedTsFolder);
 
     const filesToIgnore: Set<string> = new Set<string>(
       this._options.filesToIgnore!.map((fileToIgnore) => {
@@ -92,33 +95,36 @@ export class TypingsGenerator {
         continue;
       }
 
-      this._parseFileAndGenerateTypings(filePath);
+      await this._parseFileAndGenerateTypingsAsync(filePath);
     }
   }
 
-  public runWatcher(): void {
-    FileSystem.ensureEmptyFolder(this._options.generatedTsFolder);
+  public async runWatcherAsync(): Promise<void> {
+    await FileSystem.ensureEmptyFolderAsync(this._options.generatedTsFolder);
 
     const globBase: string = path.resolve(this._options.srcFolder, '**');
 
-    const watcher: chokidar.FSWatcher = chokidar.watch(
-      this._options.fileExtensions.map((fileExtension) => path.join(globBase, `*${fileExtension}`))
-    );
-    const boundGenerateTypingsFunction: (filePath: string) => void = this._parseFileAndGenerateTypings.bind(
-      this
-    );
-    watcher.on('add', boundGenerateTypingsFunction);
-    watcher.on('change', boundGenerateTypingsFunction);
-    watcher.on('unlink', (filePath) => {
-      const generatedTsFilePath: string = this._getTypingsFilePath(filePath);
-      FileSystem.deleteFile(generatedTsFilePath);
+    await new Promise((resolve, reject): void => {
+      const watcher: chokidar.FSWatcher = chokidar.watch(
+        this._options.fileExtensions.map((fileExtension) => path.join(globBase, `*${fileExtension}`))
+      );
+      const boundGenerateTypingsFunction: (
+        filePath: string
+      ) => Promise<void> = this._parseFileAndGenerateTypingsAsync.bind(this);
+      watcher.on('add', boundGenerateTypingsFunction);
+      watcher.on('change', boundGenerateTypingsFunction);
+      watcher.on('unlink', async (filePath) => {
+        const generatedTsFilePath: string = this._getTypingsFilePath(filePath);
+        await FileSystem.deleteFileAsync(generatedTsFilePath);
+      });
+      watcher.on('error', reject);
     });
   }
 
-  private _parseFileAndGenerateTypings(locFilePath: string): void {
+  private async _parseFileAndGenerateTypingsAsync(locFilePath: string): Promise<void> {
     try {
-      const fileContents: string = FileSystem.readFile(locFilePath);
-      const typingsData: string = this._options.parseAndGenerateTypings(fileContents, locFilePath);
+      const fileContents: string = await FileSystem.readFileAsync(locFilePath);
+      const typingsData: string = await this._options.parseAndGenerateTypings(fileContents, locFilePath);
       const generatedTsFilePath: string = this._getTypingsFilePath(locFilePath);
 
       const prefixedTypingsData: string = [
@@ -127,7 +133,7 @@ export class TypingsGenerator {
         typingsData
       ].join(EOL);
 
-      FileSystem.writeFile(generatedTsFilePath, prefixedTypingsData, {
+      await FileSystem.writeFileAsync(generatedTsFilePath, prefixedTypingsData, {
         ensureFolderExists: true,
         convertLineEndings: NewlineKind.OsDefault
       });

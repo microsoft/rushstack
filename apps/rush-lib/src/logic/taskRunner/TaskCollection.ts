@@ -1,15 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Terminal, ConsoleTerminalProvider, Sort } from '@rushstack/node-core-library';
+import { Sort } from '@rushstack/node-core-library';
 
-import { ITask, ITaskDefinition } from './ITask';
+import { Task } from './Task';
 import { TaskStatus } from './TaskStatus';
-
-export interface ITaskCollectionOptions {
-  quietMode: boolean;
-  terminal?: Terminal;
-}
+import { BaseBuilder } from './BaseBuilder';
 
 /**
  * This class represents a set of tasks with interdependencies.  Any class of task definition
@@ -17,35 +13,23 @@ export interface ITaskCollectionOptions {
  * cyclic dependencies and tasks are ordered based on critical path.
  */
 export class TaskCollection {
-  private _tasks: Map<string, ITask>;
-  private _quietMode: boolean;
-  private _terminal: Terminal;
+  private _tasks: Map<string, Task>;
 
-  public constructor(options: ITaskCollectionOptions) {
-    const { quietMode, terminal = new Terminal(new ConsoleTerminalProvider()) } = options;
-    this._tasks = new Map<string, ITask>();
-    this._quietMode = quietMode;
-    this._terminal = terminal;
+  public constructor() {
+    this._tasks = new Map<string, Task>();
   }
 
   /**
    * Registers a task definition to the map of defined tasks
    */
-  public addTask(taskDefinition: ITaskDefinition): void {
-    if (this._tasks.has(taskDefinition.name)) {
+  public addTask(builder: BaseBuilder): void {
+    if (this._tasks.has(builder.name)) {
       throw new Error('A task with that name has already been registered.');
     }
 
-    const task: ITask = taskDefinition as ITask;
-    task.dependencies = new Set<ITask>();
-    task.dependents = new Set<ITask>();
-    task.status = TaskStatus.Ready;
+    const task: Task = new Task(builder, TaskStatus.Ready);
     task.criticalPathLength = undefined;
     this._tasks.set(task.name, task);
-
-    if (!this._quietMode) {
-      this._terminal.writeLine(`Registered ${task.name}`);
-    }
   }
 
   /**
@@ -61,7 +45,7 @@ export class TaskCollection {
    * name must already have been registered.
    */
   public addDependencies(taskName: string, taskDependencies: string[]): void {
-    const task: ITask | undefined = this._tasks.get(taskName);
+    const task: Task | undefined = this._tasks.get(taskName);
 
     if (!task) {
       throw new Error(`The task '${taskName}' has not been registered`);
@@ -74,7 +58,7 @@ export class TaskCollection {
       if (!this._tasks.has(dependencyName)) {
         throw new Error(`The project '${dependencyName}' has not been registered.`);
       }
-      const dependency: ITask = this._tasks.get(dependencyName)!;
+      const dependency: Task = this._tasks.get(dependencyName)!;
       task.dependencies.add(dependency);
       dependency.dependents.add(task);
     }
@@ -84,22 +68,22 @@ export class TaskCollection {
    * Returns the tasks registered with the collection ordered by the critical path.
    * It also makes sure there are no cyclic dependencies in the tasks.
    */
-  public getOrderedTasks(): ITask[] {
+  public getOrderedTasks(): Task[] {
     this._checkForCyclicDependencies(this._tasks.values(), [], new Set<string>());
 
     // Precalculate the number of dependent packages
-    this._tasks.forEach((task: ITask) => {
+    this._tasks.forEach((task: Task) => {
       this._calculateCriticalPaths(task);
     });
 
-    const buildQueue: ITask[] = [];
+    const buildQueue: Task[] = [];
     // Add everything to the buildQueue
-    this._tasks.forEach((task: ITask) => {
+    this._tasks.forEach((task: Task) => {
       buildQueue.push(task);
     });
 
     // Sort the queue in descending order, nothing will mess with the order
-    Sort.sortBy(buildQueue, (task: ITask): number => -task.criticalPathLength!);
+    Sort.sortBy(buildQueue, (task: Task): number => -task.criticalPathLength!);
 
     return buildQueue;
   }
@@ -108,7 +92,7 @@ export class TaskCollection {
    * Checks for projects that indirectly depend on themselves.
    */
   private _checkForCyclicDependencies(
-    tasks: Iterable<ITask>,
+    tasks: Iterable<Task>,
     dependencyChain: string[],
     alreadyCheckedProjects: Set<string>
   ): void {
@@ -135,7 +119,7 @@ export class TaskCollection {
    * Calculate the number of packages which must be built before we reach
    * the furthest away "root" node
    */
-  private _calculateCriticalPaths(task: ITask): number {
+  private _calculateCriticalPaths(task: Task): number {
     // Return the memoized value
     if (task.criticalPathLength !== undefined) {
       return task.criticalPathLength;

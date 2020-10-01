@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { IPackageJson, Import } from '@rushstack/node-core-library';
+import { IPackageJson, Import, Enum } from '@rushstack/node-core-library';
 
 import {
   IVersionPolicyJson,
@@ -62,7 +62,7 @@ export abstract class VersionPolicy {
    */
   public constructor(versionPolicyJson: IVersionPolicyJson) {
     this._policyName = versionPolicyJson.policyName;
-    this._definitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
+    this._definitionName = Enum.getValueByKey(VersionPolicyDefinitionName, versionPolicyJson.definitionName);
     this._exemptFromRushChange = versionPolicyJson.exemptFromRushChange || false;
 
     const jsonDependencies: IVersionPolicyDependencyJson = versionPolicyJson.dependencies || {};
@@ -79,8 +79,10 @@ export abstract class VersionPolicy {
    * @internal
    */
   public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined {
-    const definition: VersionPolicyDefinitionName =
-      VersionPolicyDefinitionName[versionPolicyJson.definitionName];
+    const definition: VersionPolicyDefinitionName = Enum.getValueByKey(
+      VersionPolicyDefinitionName,
+      versionPolicyJson.definitionName
+    );
     if (definition === VersionPolicyDefinitionName.lockStepVersion) {
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       return new LockStepVersionPolicy(versionPolicyJson as ILockStepVersionJson);
@@ -218,7 +220,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
   public constructor(versionPolicyJson: ILockStepVersionJson) {
     super(versionPolicyJson);
     this._version = new semver.SemVer(versionPolicyJson.version);
-    this._nextBump = BumpType[versionPolicyJson.nextBump];
+    this._nextBump = Enum.getValueByKey(BumpType, versionPolicyJson.nextBump);
     this._mainProject = versionPolicyJson.mainProject;
   }
 

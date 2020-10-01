@@ -1,0 +1,39 @@
+{
+  "name": "@rushstack/eslint-plugin-security",
+  "version": "0.1.3",
+  "description": "An ESLint plugin providing rules that identify common security vulnerabilities for browser applications, Node.js tools, and Node.js services",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/microsoft/rushstack/tree/master/stack/eslint-plugin-security"
+  },
+  "homepage": "https://rushstack.io",
+  "keywords": [
+    "eslint",
+    "eslint-config",
+    "security"
+  ],
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "scripts": {
+    "build": "heft test --clean"
+  },
+  "dependencies": {
+    "@rushstack/tree-pattern": "workspace:*"
+  },
+  "peerDependencies": {
+    "eslint": "^6.0.0 || ^7.0.0"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "0.14.0",
+    "@rushstack/heft-node-rig": "0.1.0",
+    "@types/eslint": "7.2.0",
+    "@types/estree": "0.0.44",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "10.17.13",
+    "@typescript-eslint/experimental-utils": "3.4.0",
+    "@typescript-eslint/parser": "3.4.0",
+    "@typescript-eslint/typescript-estree": "3.4.0",
+    "eslint": "~7.2.0",
+    "typescript": "~3.9.7"
+  }
+}

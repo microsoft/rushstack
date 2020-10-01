@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import * as os from 'os';
 
 import { CommandLineParser, CommandLineFlagParameter } from '@rushstack/ts-command-line';
@@ -11,7 +11,7 @@ import { RunAction } from './RunAction';
 import { InitAction } from './InitAction';
 
 export class ApiExtractorCommandLine extends CommandLineParser {
-  private _debugParameter: CommandLineFlagParameter;
+  private _debugParameter!: CommandLineFlagParameter;
 
   public constructor() {
     super({

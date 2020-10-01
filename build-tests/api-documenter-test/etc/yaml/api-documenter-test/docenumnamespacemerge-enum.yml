@@ -1,0 +1,35 @@
+### YamlMime:UniversalReference
+items:
+  - uid: 'api-documenter-test!DocEnumNamespaceMerge:enum'
+    summary: Enum that merges with namespace
+    remarks: |-
+      [Link to enum](xref:api-documenter-test!DocEnumNamespaceMerge:enum)
+
+      [Link to namespace](xref:api-documenter-test!DocEnumNamespaceMerge:namespace)
+
+      [Link to function inside namespace](xref:api-documenter-test!DocEnumNamespaceMerge.exampleFunction:function(1))
+    name: DocEnumNamespaceMerge
+    fullName: DocEnumNamespaceMerge
+    langs:
+      - typeScript
+    type: enum
+    package: api-documenter-test!
+    children:
+      - 'api-documenter-test!DocEnumNamespaceMerge.Left:member'
+      - 'api-documenter-test!DocEnumNamespaceMerge.Right:member'
+  - uid: 'api-documenter-test!DocEnumNamespaceMerge.Left:member'
+    summary: These are some docs for Left
+    name: Left
+    fullName: Left
+    langs:
+      - typeScript
+    type: field
+    numericValue: '0'
+  - uid: 'api-documenter-test!DocEnumNamespaceMerge.Right:member'
+    summary: These are some docs for Right
+    name: Right
+    fullName: Right
+    langs:
+      - typeScript
+    type: field
+    numericValue: '1'

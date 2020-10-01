@@ -74,7 +74,7 @@ const uuidMarkdownDocumenterFeature: string = '34196154-9eb3-4de0-a8c8-7e9539dfe
  */
 export class MarkdownDocumenterFeature extends PluginFeature {
   /** {@inheritdoc PluginFeature.context} */
-  public context: MarkdownDocumenterFeatureContext;
+  public context!: MarkdownDocumenterFeatureContext;
 
   /**
    * This event occurs before each markdown file is written.  It provides an opportunity to customize the

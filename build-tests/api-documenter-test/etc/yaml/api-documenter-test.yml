@@ -17,6 +17,8 @@ items:
       - 'api-documenter-test!DocClassInterfaceMerge:class'
       - 'api-documenter-test!DocClassInterfaceMerge:interface'
       - 'api-documenter-test!DocEnum:enum'
+      - 'api-documenter-test!DocEnumNamespaceMerge:enum'
+      - 'api-documenter-test!DocEnumNamespaceMerge:namespace'
       - 'api-documenter-test!EcmaSmbols:namespace'
       - 'api-documenter-test!exampleFunction:function(1)'
       - 'api-documenter-test!ExampleTypeAlias:type'
@@ -126,6 +128,10 @@ references:
     name: DocClassInterfaceMerge
   - uid: 'api-documenter-test!DocEnum:enum'
     name: DocEnum
+  - uid: 'api-documenter-test!DocEnumNamespaceMerge:enum'
+    name: DocEnumNamespaceMerge
+  - uid: 'api-documenter-test!DocEnumNamespaceMerge:namespace'
+    name: DocEnumNamespaceMerge
   - uid: 'api-documenter-test!EcmaSmbols:namespace'
     name: EcmaSmbols
   - uid: 'api-documenter-test!IDocInterface1:interface'

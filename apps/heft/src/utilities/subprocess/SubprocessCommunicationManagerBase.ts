@@ -13,8 +13,8 @@ export interface ISubprocessCommunicationManagerInitializationOptions {
 }
 
 export abstract class SubprocessCommunicationManagerBase {
-  private _sendMessageToParentProcess: SendMessageFunctionType;
-  private _sendMessageToSubprocess: SendMessageFunctionType;
+  private _sendMessageToParentProcess!: SendMessageFunctionType;
+  private _sendMessageToSubprocess!: SendMessageFunctionType;
 
   protected get sendMessageToParentProcess(): SendMessageFunctionType {
     return this._sendMessageToParentProcess;

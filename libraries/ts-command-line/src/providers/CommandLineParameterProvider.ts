@@ -247,7 +247,7 @@ export abstract class CommandLineParameterProvider {
   protected _processParsedData(data: ICommandLineParserData): void {
     // Fill in the values for the parameters
     for (const parameter of this._parameters) {
-      const value: any = data[parameter._parserKey]; // eslint-disable-line @typescript-eslint/no-explicit-any
+      const value: any = data[parameter._parserKey!]; // eslint-disable-line @typescript-eslint/no-explicit-any
       parameter._setValue(value);
     }
 

@@ -2,6 +2,84 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.7.2",
+      "tag": "@rushstack/eslint-plugin_v0.7.2",
+      "date": "Wed, 30 Sep 2020 18:39:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update to build with @rushstack/heft-node-rig"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.1",
+      "tag": "@rushstack/eslint-plugin_v0.7.1",
+      "date": "Wed, 30 Sep 2020 06:53:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include missing \"License\" field."
+          },
+          {
+            "comment": "Update README.md"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.0",
+      "tag": "@rushstack/eslint-plugin_v0.7.0",
+      "date": "Tue, 22 Sep 2020 01:45:31 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new rule \"@rushstack/typedef-var\" which supplements \"@typescript-eslint/typedef\" by enabling a special policy for local variables"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.3",
+      "tag": "@rushstack/eslint-plugin_v0.6.3",
+      "date": "Sat, 19 Sep 2020 04:37:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add missing dependency"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.2",
+      "tag": "@rushstack/eslint-plugin_v0.6.2",
+      "date": "Sat, 19 Sep 2020 03:33:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Extract the pattern matcher into the new \"@rushstack/tree-pattern\" package"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.1.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.1",
       "tag": "@rushstack/eslint-plugin_v0.6.1",
       "date": "Thu, 27 Aug 2020 11:27:06 GMT",

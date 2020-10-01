@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import { CommandLineStringParameter, CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
@@ -10,8 +10,8 @@ import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismat
 import { Variants } from '../../api/Variants';
 
 export class CheckAction extends BaseRushAction {
-  private _variant: CommandLineStringParameter;
-  private _jsonFlag: CommandLineFlagParameter;
+  private _variant!: CommandLineStringParameter;
+  private _jsonFlag!: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({

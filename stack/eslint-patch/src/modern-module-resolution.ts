@@ -50,10 +50,14 @@ if (!ConfigArrayFactory.__patched) {
 
   if (eslintMajorVersion === 6) {
     // ESLint 6.x
-    ConfigArrayFactory.prototype._loadPlugin = function (name, importerPath, importerName) {
+    ConfigArrayFactory.prototype._loadPlugin = function (
+      name: string,
+      importerPath: string,
+      importerName: string
+    ) {
       const originalResolve = ModuleResolver.resolve;
       try {
-        ModuleResolver.resolve = function (moduleName, relativeToPath) {
+        ModuleResolver.resolve = function (moduleName: string, relativeToPath: string) {
           // resolve using importerPath instead of relativeToPath
           return originalResolve.call(this, moduleName, importerPath);
         };
@@ -64,10 +68,10 @@ if (!ConfigArrayFactory.__patched) {
     };
   } else {
     // ESLint 7.x
-    ConfigArrayFactory.prototype._loadPlugin = function (name, ctx) {
+    ConfigArrayFactory.prototype._loadPlugin = function (name: string, ctx: Record<string, unknown>) {
       const originalResolve = ModuleResolver.resolve;
       try {
-        ModuleResolver.resolve = function (moduleName, relativeToPath) {
+        ModuleResolver.resolve = function (moduleName: string, relativeToPath: string) {
           // resolve using ctx.filePath instead of relativeToPath
           return originalResolve.call(this, moduleName, ctx.filePath);
         };

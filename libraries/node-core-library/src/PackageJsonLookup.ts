@@ -53,11 +53,11 @@ export class PackageJsonLookup {
 
   // Cached the return values for tryGetPackageFolder():
   // sourceFilePath --> packageJsonFolder
-  private _packageFolderCache: Map<string, string | undefined>;
+  private _packageFolderCache!: Map<string, string | undefined>;
 
   // Cached the return values for getPackageName():
   // packageJsonPath --> packageName
-  private _packageJsonCache: Map<string, IPackageJson>;
+  private _packageJsonCache!: Map<string, IPackageJson>;
 
   public constructor(parameters?: IPackageJsonLookupParameters) {
     if (parameters) {

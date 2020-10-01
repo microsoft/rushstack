@@ -1,0 +1,35 @@
+{
+  "name": "heft-sass-test",
+  "description": "This project illustrates a minimal tutorial Heft project targeting the web browser runtime",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "heft test --clean",
+    "start": "heft start"
+  },
+  "devDependencies": {
+    "@microsoft/rush-stack-compiler-3.9": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/react-dom": "16.9.8",
+    "@types/react": "16.9.45",
+    "@types/webpack-env": "1.13.0",
+    "autoprefixer": "~9.8.0",
+    "css-loader": "~4.2.1",
+    "eslint": "~7.2.0",
+    "html-webpack-plugin": "~3.2.0",
+    "node-sass": "4.14.1",
+    "postcss": "7.0.32",
+    "postcss-loader": "~4.0.1",
+    "react-dom": "~16.13.1",
+    "react": "~16.13.1",
+    "sass-loader": "~7.3.1",
+    "style-loader": "~1.2.1",
+    "typescript": "~3.9.7",
+    "webpack": "~4.31.0"
+  },
+  "dependencies": {
+    "buttono": "~1.0.2"
+  }
+}

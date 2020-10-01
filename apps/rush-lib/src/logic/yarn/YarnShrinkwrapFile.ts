@@ -8,8 +8,19 @@ import { RushConstants } from '../RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
 
-// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
-import * as YarnPkgLockfileTypes from '@yarnpkg/lockfile';
+/**
+ * @yarnpkg/lockfile doesn't have types
+ */
+// eslint-disable-next-line
+declare module YarnPkgLockfileTypes {
+  export class ParseResult {
+    public object: IYarnShrinkwrapJson;
+  }
+
+  export function parse(shrinkwrapJson: string): ParseResult;
+
+  export function stringify(shrinkwrap: IYarnShrinkwrapJson): string;
+}
 const lockfileModule: typeof YarnPkgLockfileTypes = Import.lazy('@yarnpkg/lockfile', require);
 
 /**
@@ -161,7 +172,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
       throw new Error(`Error reading "${shrinkwrapFilename}":` + os.EOL + `  ${error.message}`);
     }
 
-    return new YarnShrinkwrapFile(shrinkwrapJson.object as IYarnShrinkwrapJson);
+    return new YarnShrinkwrapFile(shrinkwrapJson.object);
   }
 
   /**

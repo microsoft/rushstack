@@ -8,8 +8,8 @@ import { ICleanStageOptions, CleanStage } from '../../stages/CleanStage';
 import { Logging } from '../../utilities/Logging';
 
 export class StartAction extends HeftActionBase {
-  private _buildStandardParameters: IBuildStageStandardParameters;
-  private _cleanFlag: CommandLineFlagParameter;
+  private _buildStandardParameters!: IBuildStageStandardParameters;
+  private _cleanFlag!: CommandLineFlagParameter;
 
   public constructor(heftActionOptions: IHeftActionBaseOptions) {
     super(

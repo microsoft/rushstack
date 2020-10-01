@@ -1,0 +1,33 @@
+/**
+ * Configures the Sass Typings plugin for the Heft build system.
+ *
+ * This optional additional file customizes Sass parsing, module resolution, and emitting of
+ * typings files for the Typescript compiler.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/sass.schema.json"
+
+  /**
+   * Source code root directory.
+   * This is where .css, .sass, and .scss files will be searched for to generate typings.
+   */
+  // "srcFolder": "src",
+
+  /**
+   * Output directory for generated Sass typings.
+   */
+  // "generatedTsFolder": "temp/sass-ts",
+
+  /**
+   * Determines if export values are wrapped in a default property, or not.
+   */
+  // "exportAsDefault": true,
+
+  /**
+   * A list of paths used when resolving Sass imports.
+   */
+  // "includePaths": [
+  //   "node_modules",
+  //   "src"
+  // ]
+}

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DocDeclarationReference, SelectorKind } from '@microsoft/tsdoc';
-import { ApiItem } from '../items/ApiItem';
+import { DocDeclarationReference, DocMemberSelector, SelectorKind } from '@microsoft/tsdoc';
+import { ApiItem, ApiItemKind } from '../items/ApiItem';
 import { ApiModel } from './ApiModel';
 import { ApiPackage } from './ApiPackage';
 import { ApiEntryPoint } from './ApiEntryPoint';
@@ -100,9 +100,9 @@ export class ModelReferenceResolver {
 
       if (!ApiItemContainerMixin.isBaseClassOf(currentItem)) {
         // For example, {@link MyClass.myMethod.X} is invalid because methods cannot contain members
-        result.errorMessage =
-          `Unable to resolve ${JSON.stringify(identifier)} because ${JSON.stringify(currentItem)}` +
-          ` cannot act as a container`;
+        result.errorMessage = `Unable to resolve ${JSON.stringify(
+          identifier
+        )} because ${currentItem.getScopedNameWithinPackage()} cannot act as a container`;
         return result;
       }
 
@@ -111,40 +111,125 @@ export class ModelReferenceResolver {
         result.errorMessage = `The member reference ${JSON.stringify(identifier)} was not found`;
         return result;
       }
-      if (foundMembers.length > 1) {
-        if (memberReference.selector && memberReference.selector.selectorKind === SelectorKind.Index) {
-          const selectedMembers: ApiItem[] = [];
 
-          const selectorOverloadIndex: number = parseInt(memberReference.selector.selector);
-          for (const foundMember of foundMembers) {
-            if (ApiParameterListMixin.isBaseClassOf(foundMember)) {
-              if (foundMember.overloadIndex === selectorOverloadIndex) {
-                selectedMembers.push(foundMember);
-              }
-            }
-          }
-
-          if (selectedMembers.length === 0) {
-            result.errorMessage =
-              `An overload for ${JSON.stringify(identifier)} was not found that matches` +
-              ` the TSDoc selector ":${selectorOverloadIndex}"`;
-            return result;
-          }
-
-          if (selectedMembers.length === 1) {
-            result.resolvedApiItem = selectedMembers[0];
-            return result;
-          }
+      const memberSelector: DocMemberSelector | undefined = memberReference.selector;
+      if (memberSelector === undefined) {
+        if (foundMembers.length > 1) {
+          result.errorMessage = `The member reference ${JSON.stringify(identifier)} was ambiguous`;
+          return result;
         }
-
-        // TODO: Support other TSDoc selectors
-        result.errorMessage = `The member reference ${JSON.stringify(identifier)} was ambiguous`;
-        return result;
+        currentItem = foundMembers[0];
+      } else {
+        let memberSelectorResult: IResolveDeclarationReferenceResult;
+        switch (memberSelector.selectorKind) {
+          case SelectorKind.System:
+            memberSelectorResult = this._selectUsingSystemSelector(foundMembers, memberSelector, identifier);
+            break;
+          case SelectorKind.Index:
+            memberSelectorResult = this._selectUsingIndexSelector(foundMembers, memberSelector, identifier);
+            break;
+          default:
+            result.errorMessage = `The selector "${memberSelector.selector}" is not a supported selector type`;
+            return result;
+        }
+        if (memberSelectorResult.resolvedApiItem === undefined) {
+          return memberSelectorResult;
+        }
+        currentItem = memberSelectorResult.resolvedApiItem;
       }
-
-      currentItem = foundMembers[0];
     }
     result.resolvedApiItem = currentItem;
+    return result;
+  }
+
+  private _selectUsingSystemSelector(
+    foundMembers: ReadonlyArray<ApiItem>,
+    memberSelector: DocMemberSelector,
+    identifier: string
+  ): IResolveDeclarationReferenceResult {
+    const result: IResolveDeclarationReferenceResult = {
+      resolvedApiItem: undefined,
+      errorMessage: undefined
+    };
+
+    const selectorName: string = memberSelector.selector;
+
+    let selectorItemKind: ApiItemKind;
+    switch (selectorName) {
+      case 'class':
+        selectorItemKind = ApiItemKind.Class;
+        break;
+      case 'enum':
+        selectorItemKind = ApiItemKind.Enum;
+        break;
+      case 'function':
+        selectorItemKind = ApiItemKind.Function;
+        break;
+      case 'interface':
+        selectorItemKind = ApiItemKind.Interface;
+        break;
+      case 'namespace':
+        selectorItemKind = ApiItemKind.Namespace;
+        break;
+      case 'type':
+        selectorItemKind = ApiItemKind.TypeAlias;
+        break;
+      case 'variable':
+        selectorItemKind = ApiItemKind.Variable;
+        break;
+      default:
+        result.errorMessage = `Unsupported system selector "${selectorName}"`;
+        return result;
+    }
+
+    const matches: ApiItem[] = foundMembers.filter((x) => x.kind === selectorItemKind);
+    if (matches.length === 0) {
+      result.errorMessage =
+        `A declaration for "${identifier}" was not found that matches the` +
+        ` TSDoc selector "${selectorName}"`;
+      return result;
+    }
+    if (matches.length > 1) {
+      result.errorMessage = `More than one declaration "${identifier}" matches the TSDoc selector "${selectorName}"`;
+    }
+    result.resolvedApiItem = matches[0];
+    return result;
+  }
+
+  private _selectUsingIndexSelector(
+    foundMembers: ReadonlyArray<ApiItem>,
+    memberSelector: DocMemberSelector,
+    identifier: string
+  ): IResolveDeclarationReferenceResult {
+    const result: IResolveDeclarationReferenceResult = {
+      resolvedApiItem: undefined,
+      errorMessage: undefined
+    };
+
+    const selectedMembers: ApiItem[] = [];
+
+    const selectorOverloadIndex: number = parseInt(memberSelector.selector);
+    for (const foundMember of foundMembers) {
+      if (ApiParameterListMixin.isBaseClassOf(foundMember)) {
+        if (foundMember.overloadIndex === selectorOverloadIndex) {
+          selectedMembers.push(foundMember);
+        }
+      }
+    }
+
+    if (selectedMembers.length === 0) {
+      result.errorMessage =
+        `An overload for ${JSON.stringify(identifier)} was not found that matches` +
+        ` the TSDoc selector ":${selectorOverloadIndex}"`;
+      return result;
+    }
+
+    if (selectedMembers.length === 1) {
+      result.resolvedApiItem = selectedMembers[0];
+      return result;
+    }
+
+    result.errorMessage = `The member reference ${JSON.stringify(identifier)} was ambiguous`;
     return result;
   }
 }

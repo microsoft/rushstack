@@ -5,6 +5,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/heft/typescript.schema.json",
 
   /**
+   * Optionally specifies another JSON config file that this file extends from. This provides a way for standard
+   * settings to be shared across multiple projects.
+   */
+  // "extends": "base-project/config/typescript.json",
+
+  /**
    * Can be set to "copy" or "hardlink". If set to "copy", copy files from cache.
    * If set to "hardlink", files will be hardlinked to the cache location.
    * This option is useful when producing a tarball of build output as TAR files don't
@@ -24,19 +30,19 @@
     //  "moduleKind": "amd",
     //
     //   /**
-    //    * (Required) The path where the output will be written.
+    //    * (Required) The name of the folder where the output will be written.
     //    */
-    //    "outFolderPath": "lib-amd"
+    //    "outFolderName": "lib-amd"
     // }
-  ]
+  ],
 
   /**
-   * Specifies the intermediary folder that Jest will use for its input.  Because Jest uses the
+   * Specifies the intermediary folder that tests will use.  Because Jest uses the
    * Node.js runtime to execute tests, the module format must be CommonJS.
    *
    * The default value is "lib".
    */
-  // "emitFolderPathForJest": "lib-commonjs",
+  // "emitFolderNameForTests": "lib-commonjs",
 
   /**
    * If set to "true", the TSlint task will not be invoked.
@@ -47,5 +53,31 @@
    * Set this to change the maximum number of file handles that will be opened concurrently for writing.
    * The default is 50.
    */
-  // "maxWriteParallelism": 50
+  // "maxWriteParallelism": 50,
+
+  /**
+   * Configures additional file types that should be copied into the TypeScript compiler's emit folders, for example
+   * so that these files can be resolved by import statements.
+   */
+  "staticAssetsToCopy": {
+    /**
+     * File extensions that should be copied from the src folder to the destination folder(s).
+     */
+    // "fileExtensions": [
+    //   ".json", ".css"
+    // ],
+    /**
+     * Glob patterns that should be explicitly included.
+     */
+    // "includeGlobs": [
+    //   "some/path/*.js"
+    // ],
+    /**
+     * Glob patterns that should be explicitly excluded. This takes precedence over globs listed
+     * in "includeGlobs" and files that match the file extensions provided in "fileExtensions".
+     */
+    // "excludeGlobs": [
+    //   "some/path/*.css"
+    // ]
+  }
 }

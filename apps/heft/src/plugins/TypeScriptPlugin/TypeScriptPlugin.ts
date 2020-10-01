@@ -2,32 +2,39 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as glob from 'glob';
-import { LegacyAdapters, ITerminalProvider } from '@rushstack/node-core-library';
+import glob from 'glob';
+import { LegacyAdapters, ITerminalProvider, Terminal } from '@rushstack/node-core-library';
 
 import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 import {
-  ITypeScriptConfiguration,
   CopyFromCacheMode,
-  IEmitModuleKind,
   IBuildStageContext,
-  ICompileSubstage
+  ICompileSubstage,
+  IBuildStageProperties
 } from '../../stages/BuildStage';
 import { TaskPackageResolver, ITaskPackageResolution } from '../../utilities/TaskPackageResolver';
 import { JestTypeScriptDataFile } from '../JestPlugin/JestTypeScriptDataFile';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
+import { ICleanStageContext, ICleanStageProperties } from '../../stages/CleanStage';
+import { CoreConfigFiles } from '../../utilities/CoreConfigFiles';
+import { ISharedCopyStaticAssetsConfiguration } from '../CopyStaticAssetsPlugin';
 
 const PLUGIN_NAME: string = 'typescript';
 
 interface IRunTypeScriptOptions {
   heftSession: HeftSession;
   heftConfiguration: HeftConfiguration;
-  typeScriptConfiguration: ITypeScriptConfiguration;
+  buildProperties: IBuildStageProperties;
   watchMode: boolean;
   firstEmitCallback: () => void;
+}
+
+interface IEmitModuleKind {
+  moduleKind: 'commonjs' | 'amd' | 'umd' | 'system' | 'es2015' | 'esnext';
+  outFolderName: string;
 }
 
 interface IRunBuilderForTsconfigOptions {
@@ -46,24 +53,78 @@ interface IRunBuilderForTsconfigOptions {
   additionalModuleKindsToEmit: IEmitModuleKind[] | undefined;
 }
 
+export interface ISharedTypeScriptConfiguration {
+  /**
+   * Can be set to 'copy' or 'hardlink'. If set to 'copy', copy files from cache. If set to 'hardlink', files will be
+   * hardlinked to the cache location. This option is useful when producing a tarball of build output as TAR files
+   * don't handle these hardlinks correctly. 'hardlink' is the default behavior.
+   */
+  copyFromCacheMode?: CopyFromCacheMode | undefined;
+
+  /**
+   * If provided, emit these module kinds in addition to the modules specified in the tsconfig.
+   * Note that this option only applies to the main tsconfig.json configuration.
+   */
+  additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
+
+  /**
+   * Specifies the intermediary folder that tests will use.  Because Jest uses the
+   * Node.js runtime to execute tests, the module format must be CommonJS.
+   *
+   * The default value is "lib".
+   */
+  emitFolderNameForTests?: string;
+
+  /**
+   * Configures additional file types that should be copied into the TypeScript compiler's emit folders, for example
+   * so that these files can be resolved by import statements.
+   */
+  staticAssetsToCopy?: ISharedCopyStaticAssetsConfiguration;
+}
+
+export interface ITypeScriptConfigurationJson extends ISharedTypeScriptConfiguration {
+  disableTslint?: boolean;
+  maxWriteParallelism: number | undefined;
+}
+
+interface ITypeScriptConfiguration extends ISharedTypeScriptConfiguration {
+  /**
+   * Set this to change the maximum number of file handles that will be opened concurrently for writing.
+   * The default is 50.
+   */
+  maxWriteParallelism: number;
+
+  tsconfigPaths: string[];
+  isLintingEnabled: boolean | undefined;
+}
+
+interface ITypeScriptConfigurationFileCacheEntry {
+  configurationFile: ITypeScriptConfigurationJson | undefined;
+}
+
 export class TypeScriptPlugin implements IHeftPlugin {
-  public readonly displayName: string = PLUGIN_NAME;
+  public readonly pluginName: string = PLUGIN_NAME;
+  private _typeScriptConfigurationFileCache: Map<string, ITypeScriptConfigurationFileCacheEntry> = new Map<
+    string,
+    ITypeScriptConfigurationFileCacheEntry
+  >();
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
+    const logger: ScopedLogger = heftSession.requestScopedLogger('TypeScript Plugin');
+
+    heftSession.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanStageContext) => {
+      clean.hooks.loadStageConfiguration.tapPromise(PLUGIN_NAME, async () => {
+        await this._updateCleanOptions(logger, heftConfiguration, clean.properties);
+      });
+    });
+
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
-        compile.hooks.configureTypeScript.tapPromise(PLUGIN_NAME, async () => {
-          await this._configureTypeScriptAsync(
-            compile.properties.typeScriptConfiguration,
-            heftConfiguration.buildFolder
-          );
-        });
-
         compile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          await this._runTypeScriptAsync({
+          await this._runTypeScriptAsync(logger, {
             heftSession,
             heftConfiguration,
-            typeScriptConfiguration: compile.properties.typeScriptConfiguration,
+            buildProperties: build.properties,
             watchMode: build.properties.watchMode,
             firstEmitCallback: async () => compile.hooks.afterTypescriptFirstEmit.promise()
           });
@@ -72,24 +133,91 @@ export class TypeScriptPlugin implements IHeftPlugin {
     });
   }
 
-  private async _configureTypeScriptAsync(
-    typeScriptConfiguration: ITypeScriptConfiguration,
-    buildFolder: string
+  private async _ensureConfigFileLoadedAsync(
+    terminal: Terminal,
+    heftConfiguration: HeftConfiguration
+  ): Promise<ITypeScriptConfigurationJson | undefined> {
+    const buildFolder: string = heftConfiguration.buildFolder;
+    let typescriptConfigurationFileCacheEntry:
+      | ITypeScriptConfigurationFileCacheEntry
+      | undefined = this._typeScriptConfigurationFileCache.get(buildFolder);
+
+    if (!typescriptConfigurationFileCacheEntry) {
+      typescriptConfigurationFileCacheEntry = {
+        configurationFile: await CoreConfigFiles.typeScriptConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
+          terminal,
+          buildFolder,
+          heftConfiguration.rigConfig
+        )
+      };
+
+      this._typeScriptConfigurationFileCache.set(buildFolder, typescriptConfigurationFileCacheEntry);
+    }
+
+    return typescriptConfigurationFileCacheEntry.configurationFile;
+  }
+
+  private async _updateCleanOptions(
+    logger: ScopedLogger,
+    heftConfiguration: HeftConfiguration,
+    cleanProperties: ICleanStageProperties
   ): Promise<void> {
-    typeScriptConfiguration.tsconfigPaths = await LegacyAdapters.convertCallbackToPromise(
+    const configurationFile:
+      | ITypeScriptConfigurationJson
+      | undefined = await this._ensureConfigFileLoadedAsync(logger.terminal, heftConfiguration);
+
+    if (configurationFile?.additionalModuleKindsToEmit) {
+      for (const additionalModuleKindToEmit of configurationFile.additionalModuleKindsToEmit) {
+        cleanProperties.pathsToDelete.add(
+          path.resolve(heftConfiguration.buildFolder, additionalModuleKindToEmit.outFolderName)
+        );
+      }
+    }
+  }
+
+  private async _runTypeScriptAsync(logger: ScopedLogger, options: IRunTypeScriptOptions): Promise<void> {
+    const { heftSession, heftConfiguration, buildProperties, watchMode, firstEmitCallback } = options;
+
+    const typescriptConfigurationJson:
+      | ITypeScriptConfigurationJson
+      | undefined = await this._ensureConfigFileLoadedAsync(logger.terminal, heftConfiguration);
+    const tsconfigPaths: string[] = await LegacyAdapters.convertCallbackToPromise(
       glob,
       'tsconfig?(-*).json',
       {
-        cwd: buildFolder,
+        cwd: heftConfiguration.buildFolder,
         nocase: true
       }
     );
-  }
+    const typeScriptConfiguration: ITypeScriptConfiguration = {
+      copyFromCacheMode: typescriptConfigurationJson?.copyFromCacheMode,
+      additionalModuleKindsToEmit: typescriptConfigurationJson?.additionalModuleKindsToEmit,
+      emitFolderNameForTests: typescriptConfigurationJson?.emitFolderNameForTests,
+      maxWriteParallelism: typescriptConfigurationJson?.maxWriteParallelism || 50,
+      tsconfigPaths: tsconfigPaths,
+      isLintingEnabled: !(buildProperties.lite || typescriptConfigurationJson?.disableTslint)
+    };
 
-  private async _runTypeScriptAsync(options: IRunTypeScriptOptions): Promise<void> {
-    const { heftSession, heftConfiguration, typeScriptConfiguration, watchMode, firstEmitCallback } = options;
+    if (heftConfiguration.projectPackageJson.private !== true) {
+      if (typeScriptConfiguration.copyFromCacheMode === undefined) {
+        logger.terminal.writeVerboseLine(
+          'Setting TypeScript copyFromCacheMode to "copy" because the "private" field ' +
+            'in package.json is not set to true. Linked files are not handled correctly ' +
+            'when package are packed for publishing.'
+        );
+        // Copy if the package is intended to be published
+        typeScriptConfiguration.copyFromCacheMode = 'copy';
+      } else if (typeScriptConfiguration.copyFromCacheMode !== 'copy') {
+        logger.emitWarning(
+          new Error(
+            `The TypeScript copyFromCacheMode is set to "${typeScriptConfiguration.copyFromCacheMode}", ` +
+              'but the the "private" field in package.json is not set to true. ' +
+              'Linked files are not handled correctly when package are packed for publishing.'
+          )
+        );
+      }
+    }
 
-    const logger: ScopedLogger = heftSession.requestScopedLogger('TypeScript Plugin');
     const builderOptions: Omit<
       IRunBuilderForTsconfigOptions,
       | 'terminalProvider'
@@ -106,7 +234,10 @@ export class TypeScriptPlugin implements IHeftPlugin {
       maxWriteParallelism: typeScriptConfiguration.maxWriteParallelism
     };
 
-    JestTypeScriptDataFile.saveForProject(heftConfiguration.buildFolder, typeScriptConfiguration);
+    JestTypeScriptDataFile.saveForProject(heftConfiguration.buildFolder, {
+      emitFolderNameForTests: typescriptConfigurationJson?.emitFolderNameForTests || 'lib',
+      skipTimestampCheck: !options.watchMode
+    });
 
     const callbacksForTsconfigs: Set<() => void> = new Set<() => void>();
     function getFirstEmitCallbackForTsconfig(): () => void {

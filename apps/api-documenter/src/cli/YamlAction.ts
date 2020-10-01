@@ -8,11 +8,10 @@ import { BaseAction } from './BaseAction';
 
 import { YamlDocumenter } from '../documenters/YamlDocumenter';
 import { OfficeYamlDocumenter } from '../documenters/OfficeYamlDocumenter';
-import { ApiModel } from '@microsoft/api-extractor-model';
 
 export class YamlAction extends BaseAction {
-  private _officeParameter: CommandLineFlagParameter;
-  private _newDocfxNamespacesParameter: CommandLineFlagParameter;
+  private _officeParameter!: CommandLineFlagParameter;
+  private _newDocfxNamespacesParameter!: CommandLineFlagParameter;
 
   public constructor(parser: ApiDocumenterCommandLine) {
     super({
@@ -45,13 +44,13 @@ export class YamlAction extends BaseAction {
 
   protected onExecute(): Promise<void> {
     // override
-    const apiModel: ApiModel = this.buildApiModel();
+    const { apiModel, inputFolder, outputFolder } = this.buildApiModel();
 
     const yamlDocumenter: YamlDocumenter = this._officeParameter.value
-      ? new OfficeYamlDocumenter(apiModel, this.inputFolder, this._newDocfxNamespacesParameter.value)
+      ? new OfficeYamlDocumenter(apiModel, inputFolder, this._newDocfxNamespacesParameter.value)
       : new YamlDocumenter(apiModel, this._newDocfxNamespacesParameter.value);
 
-    yamlDocumenter.generateFiles(this.outputFolder);
+    yamlDocumenter.generateFiles(outputFolder);
     return Promise.resolve();
   }
 }

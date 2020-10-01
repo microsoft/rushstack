@@ -65,7 +65,7 @@ export class Rundown {
     }
 
     Sort.sortSet(importedPackageFolders);
-    let data: string = [...importedPackageFolders].join('\n') + '\n';
+    const data: string = [...importedPackageFolders].join('\n') + '\n';
 
     FileSystem.writeFile(reportPath, data);
   }
@@ -84,9 +84,9 @@ export class Rundown {
         data += importedPath + '\n';
 
         let current: string = importedPath;
-        let visited: Set<string> = new Set();
+        const visited: Set<string> = new Set();
         for (;;) {
-          const callerPath = this._importedModuleMap.get(current);
+          const callerPath: string | undefined = this._importedModuleMap.get(current);
           if (!callerPath) {
             break;
           }

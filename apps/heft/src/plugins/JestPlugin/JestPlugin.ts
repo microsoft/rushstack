@@ -19,7 +19,7 @@ const PLUGIN_NAME: string = 'JestPlugin';
 const JEST_CONFIGURATION_LOCATION: string = './config/jest.config.json';
 
 export class JestPlugin implements IHeftPlugin {
-  public readonly displayName: string = PLUGIN_NAME;
+  public readonly pluginName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     if (FileSystem.exists(path.join(heftConfiguration.buildFolder, JEST_CONFIGURATION_LOCATION))) {
@@ -67,6 +67,7 @@ export class JestPlugin implements IHeftPlugin {
       testNamePattern: test.properties.testNamePattern,
       testPathPattern: test.properties.testPathPattern ? [...test.properties.testPathPattern] : undefined,
       testTimeout: test.properties.testTimeout,
+      maxWorkers: test.properties.maxWorkers,
 
       $0: process.argv0,
       _: []
@@ -116,13 +117,13 @@ export class JestPlugin implements IHeftPlugin {
     );
     const emitFolderPathForJest: string = path.join(
       buildFolder,
-      jestTypeScriptDataFile.emitFolderPathForJest
+      jestTypeScriptDataFile.emitFolderNameForTests
     );
     if (!FileSystem.exists(emitFolderPathForJest)) {
       throw new Error(
         'The transpiler output folder does not exist:\n  ' +
           emitFolderPathForJest +
-          '\nWas the compiler invoked? Is the "emitFolderPathForJest" setting correctly' +
+          '\nWas the compiler invoked? Is the "emitFolderNameForTests" setting correctly' +
           ' specified in .heft/typescript.json?\n'
       );
     }

@@ -5,28 +5,47 @@ import { SyncHook } from 'tapable';
 
 import { MetricsCollector, MetricsCollectorHooks } from '../metrics/MetricsCollector';
 import { ICleanStageContext } from '../stages/CleanStage';
-import { IDevDeployStageContext } from '../stages/DevDeployStage';
 import { IBuildStageContext } from '../stages/BuildStage';
 import { ITestStageContext } from '../stages/TestStage';
 import { IHeftPlugin } from './IHeftPlugin';
 import { IInternalHeftSessionOptions } from './InternalHeftSession';
 import { ScopedLogger } from './logging/ScopedLogger';
 import { LoggingManager } from './logging/LoggingManager';
+import { ICustomActionOptions } from '../cli/actions/CustomAction';
+import { IHeftLifecycle } from './HeftLifecycle';
+
+/** @beta */
+export type RegisterAction = <TParameters>(action: ICustomActionOptions<TParameters>) => void;
 
 /**
  * @public
  */
 export interface IHeftSessionHooks {
+  metricsCollector: MetricsCollectorHooks;
+
+  /** @internal */
+  heftLifecycle: SyncHook<IHeftLifecycle>;
   build: SyncHook<IBuildStageContext>;
   clean: SyncHook<ICleanStageContext>;
-  devDeploy: SyncHook<IDevDeployStageContext>;
   test: SyncHook<ITestStageContext>;
-  metricsCollector: MetricsCollectorHooks;
 }
 
 export interface IHeftSessionOptions {
   plugin: IHeftPlugin;
+
+  /**
+   * @beta
+   */
+  requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
 }
+
+/**
+ * @beta
+ */
+export type RequestAccessToPluginByNameCallback = (
+  pluginToAccessName: string,
+  pluginApply: (pluginAccessor: object) => void
+) => void;
 
 /**
  * @public
@@ -47,6 +66,17 @@ export class HeftSession {
    */
   public readonly debugMode: boolean;
 
+  /** @beta */
+  public readonly registerAction: RegisterAction;
+
+  /**
+   * Call this function to receive a callback with the plugin if and after the specified plugin
+   * has been applied. This is used to tap hooks on another plugin.
+   *
+   * @beta
+   */
+  public readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
+
   /**
    * @internal
    */
@@ -55,16 +85,20 @@ export class HeftSession {
 
     this._loggingManager = internalSessionOptions.loggingManager;
     this.metricsCollector = internalSessionOptions.metricsCollector;
+    this.registerAction = internalSessionOptions.registerAction;
 
     this.hooks = {
+      metricsCollector: this.metricsCollector.hooks,
+
+      heftLifecycle: internalSessionOptions.heftLifecycleHook,
       build: internalSessionOptions.buildStage.stageInitializationHook,
       clean: internalSessionOptions.cleanStage.stageInitializationHook,
-      devDeploy: internalSessionOptions.devDeployStage.stageInitializationHook,
-      test: internalSessionOptions.testStage.stageInitializationHook,
-      metricsCollector: this.metricsCollector.hooks
+      test: internalSessionOptions.testStage.stageInitializationHook
     };
 
     this.debugMode = internalSessionOptions.getIsDebugMode();
+
+    this.requestAccessToPluginByName = options.requestAccessToPluginByName;
   }
 
   /**

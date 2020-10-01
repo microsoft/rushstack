@@ -1,6 +1,171 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 27 Aug 2020 11:27:06 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+
+## 0.14.1
+Wed, 30 Sep 2020 18:39:17 GMT
+
+### Patches
+
+- Update to build with @rushstack/heft-node-rig
+- Reclassify compiler messages TS2564 and TS7053 as warnings instead of errors
+- Print a warning if the API Extractor version is too old
+
+## 0.14.0
+Wed, 30 Sep 2020 06:53:53 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Collapse copy-static-assets.json into typescript.json.
+- (BREAKING CHANGE) Move the config files from the ".heft" folder to the "config" folder and print a warning if an unexpected file is found in the ".heft" folder.
+- (BREAKING CHANGE) Consolidate the clean.json and plugins.json files into a new heft.json file.
+- (BREAKING CHANGE) Rename "emitFolderNameForJest" to "emitFolderNameForTests" in typescript.json
+- Heft now supports the config/rig.json system as defined by @rushstack/rig-package
+- Enable api-extractor.json to be provided by a rig package
+- Upgrade compiler; the API now requires TypeScript 3.9 or newer
+
+### Patches
+
+- Update README.md
+- Fix an issue where "heft build --help" printed incorrect help
+
+## 0.13.9
+Tue, 22 Sep 2020 05:45:56 GMT
+
+### Patches
+
+- Make the "plugins" field of "plugins.json" optional.
+
+## 0.13.8
+Tue, 22 Sep 2020 01:45:31 GMT
+
+_Version update only_
+
+## 0.13.7
+Tue, 22 Sep 2020 00:08:53 GMT
+
+_Version update only_
+
+## 0.13.6
+Sat, 19 Sep 2020 04:37:27 GMT
+
+_Version update only_
+
+## 0.13.5
+Sat, 19 Sep 2020 03:33:07 GMT
+
+_Version update only_
+
+## 0.13.4
+Fri, 18 Sep 2020 22:57:24 GMT
+
+### Patches
+
+- Fix an issue where folders listed in pathsToDelete in clean.json weren't deleted on Windows.
+
+## 0.13.3
+Fri, 18 Sep 2020 21:49:53 GMT
+
+### Patches
+
+- Add a missing field to the template config files.
+- Fix an issue where, if an "extends" field pointed to a module that didn't exist, the error was silently ignored.
+
+## 0.13.2
+Wed, 16 Sep 2020 05:30:25 GMT
+
+### Patches
+
+- Add missing "extends" properties to schemas.
+- Fix an issue where console.log() did not get formatted by HeftJestReporter
+
+## 0.13.1
+Tue, 15 Sep 2020 01:51:37 GMT
+
+### Patches
+
+- Improve reliability of jest-build-transform.js by only comparing timestamps when in "--watch" mode
+
+## 0.13.0
+Mon, 14 Sep 2020 15:09:48 GMT
+
+### Minor changes
+
+- Enable support for Jest inline snapshots
+
+## 0.12.0
+Sun, 13 Sep 2020 01:53:20 GMT
+
+### Minor changes
+
+- Update plugins to load configuration via heft-configuration-loader instead of in central plugins.
+- Remove the loading of common/config/heft/* config files.
+- (BREAKING CHANGE) Rename the "outFolderPath" and "emitFolderPathForJest" properties in typescript.json to "outFolderName" and "emitFolderNameForJest"
+
+## 0.11.1
+Fri, 11 Sep 2020 02:13:35 GMT
+
+_Version update only_
+
+## 0.11.0
+Wed, 09 Sep 2020 03:29:01 GMT
+
+### Minor changes
+
+- Add --max-workers option to the "test" action to control the maximum number of worker processes the test process can use.
+
+## 0.10.5
+Wed, 09 Sep 2020 00:38:48 GMT
+
+### Patches
+
+- Fix a typo in an error message to read that plugins must define a "pluginName" property, rather than the former "displayName" property
+
+## 0.10.4
+Mon, 07 Sep 2020 07:37:37 GMT
+
+### Patches
+
+- Fix an issue with WebpackPlugin loading webpack-dev-server in non-serve mode and setting the "WEBPACK_DEV_SERVER" environment variable.
+
+## 0.10.3
+Sat, 05 Sep 2020 18:56:35 GMT
+
+### Patches
+
+- Fix parsing of the --max-old-space-size build parameter.
+- Fix parsing of the --plugin heft parameter.
+
+## 0.10.2
+Fri, 04 Sep 2020 15:06:27 GMT
+
+### Patches
+
+- Fix issues with parsing of tslint.json config files, including adding support for an array provided to "extends" and proper Node module resolution to extended config files.
+- Fix a sourcemap issue that caused the debugger to show Jest files in a duplicate editor window (with the same path as the real file)
+
+## 0.10.1
+Thu, 03 Sep 2020 15:09:59 GMT
+
+### Patches
+
+- Fix an issue with Heft not printing an error message.
+
+## 0.10.0
+Wed, 02 Sep 2020 23:01:13 GMT
+
+### Minor changes
+
+- Add a simple way to specify a custom action.
+- Remove the dev-deploy action from Heft
+
+## 0.9.0
+Wed, 02 Sep 2020 15:10:17 GMT
+
+### Minor changes
+
+- Add a method for plugins to hook into other plugins.
+- BREAKING CHANGE: Rename the "displayName" plugin property to "pluginName"
 
 ## 0.8.0
 Thu, 27 Aug 2020 11:27:06 GMT
@@ -26,12 +191,12 @@ Tue, 25 Aug 2020 00:10:12 GMT
 ## 0.6.6
 Mon, 24 Aug 2020 07:35:20 GMT
 
-*Version update only*
+_Version update only_
 
 ## 0.6.5
 Sat, 22 Aug 2020 05:55:42 GMT
 
-*Version update only*
+_Version update only_
 
 ## 0.6.4
 Fri, 21 Aug 2020 01:21:17 GMT
@@ -57,7 +222,7 @@ Thu, 20 Aug 2020 15:13:52 GMT
 ## 0.6.1
 Tue, 18 Aug 2020 23:59:42 GMT
 
-*Version update only*
+_Version update only_
 
 ## 0.6.0
 Tue, 18 Aug 2020 03:03:23 GMT
@@ -111,7 +276,7 @@ Thu, 13 Aug 2020 04:57:38 GMT
 ## 0.4.5
 Wed, 12 Aug 2020 00:10:05 GMT
 
-*Version update only*
+_Version update only_
 
 ## 0.4.4
 Tue, 11 Aug 2020 00:36:22 GMT
@@ -123,7 +288,7 @@ Tue, 11 Aug 2020 00:36:22 GMT
 ## 0.4.3
 Wed, 05 Aug 2020 18:27:33 GMT
 
-*Version update only*
+_Version update only_
 
 ## 0.4.2
 Tue, 04 Aug 2020 07:27:25 GMT

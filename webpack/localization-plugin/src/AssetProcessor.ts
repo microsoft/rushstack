@@ -28,7 +28,7 @@ interface ILocalizedReconstructionElement extends IReconstructionElement {
 
 interface IDynamicReconstructionElement extends IReconstructionElement {
   kind: 'dynamic';
-  valueFn: (locale: string | undefined, token: string | undefined) => string;
+  valueFn: (locale: string, token: string | undefined) => string;
   size: number;
   escapedBackslash: string;
   token?: string;
@@ -331,7 +331,7 @@ export class AssetProcessor {
   private static _parseStringToReconstructionSequence(
     plugin: LocalizationPlugin,
     source: string,
-    jsonpFunction: (locale: string, chunkIdToken: string) => string
+    jsonpFunction: (locale: string, chunkIdToken: string | undefined) => string
   ): IParseResult {
     const issues: string[] = [];
     const reconstructionSeries: IReconstructionElement[] = [];
@@ -454,7 +454,7 @@ export class AssetProcessor {
         chunkMapping[idWithoutStrings] = 1;
       }
 
-      return (locale: string, chunkIdToken: string) => {
+      return (locale: string, chunkIdToken: string | undefined) => {
         if (!locale) {
           throw new Error('Missing locale name.');
         }

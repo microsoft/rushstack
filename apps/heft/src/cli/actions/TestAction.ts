@@ -15,15 +15,16 @@ import { Logging } from '../../utilities/Logging';
 import { IBuildStageContext, ICompileSubstage } from '../../stages/BuildStage';
 
 export class TestAction extends BuildAction {
-  private _noTestFlag: CommandLineFlagParameter;
-  private _noBuildFlag: CommandLineFlagParameter;
-  private _updateSnapshotsFlag: CommandLineFlagParameter;
-  private _findRelatedTests: CommandLineStringListParameter;
-  private _silent: CommandLineFlagParameter;
-  private _testNamePattern: CommandLineStringParameter;
-  private _testPathPattern: CommandLineStringListParameter;
-  private _testTimeout: CommandLineIntegerParameter;
-  private _debugHeftReporter: CommandLineFlagParameter;
+  private _noTestFlag!: CommandLineFlagParameter;
+  private _noBuildFlag!: CommandLineFlagParameter;
+  private _updateSnapshotsFlag!: CommandLineFlagParameter;
+  private _findRelatedTests!: CommandLineStringListParameter;
+  private _silent!: CommandLineFlagParameter;
+  private _testNamePattern!: CommandLineStringParameter;
+  private _testPathPattern!: CommandLineStringListParameter;
+  private _testTimeout!: CommandLineIntegerParameter;
+  private _debugHeftReporter!: CommandLineFlagParameter;
+  private _maxWorkers!: CommandLineStringParameter;
 
   public constructor(heftActionOptions: IHeftActionBaseOptions) {
     super(heftActionOptions, {
@@ -110,6 +111,17 @@ export class TestAction extends BuildAction {
         ' default reporter would have presented it. Include this output in your bug report.' +
         ' Do not use "--debug-heft-reporter" in production.'
     });
+
+    this._maxWorkers = this.defineStringParameter({
+      parameterLongName: '--max-workers',
+      argumentName: 'COUNT_OR_PERCENTAGE',
+      description:
+        'Use this parameter to control maximum number of worker processes tests are allowed to use.' +
+        ' This parameter is similar to the parameter noted in the Jest documentation, and can either be' +
+        ' an integer representing the number of workers to spawn when running tests, or can be a string' +
+        ' representing a percentage of the available CPUs on the machine to utilize. Example values: "3",' +
+        ' "25%%"' // The "%%" is required because argparse (used by ts-command-line) treats % as an escape character
+    });
   }
 
   protected async actionExecuteAsync(): Promise<void> {
@@ -147,7 +159,8 @@ export class TestAction extends BuildAction {
         testNamePattern: this._testNamePattern.value,
         testPathPattern: this._testPathPattern.values,
         testTimeout: this._testTimeout.value,
-        debugHeftReporter: this._debugHeftReporter.value
+        debugHeftReporter: this._debugHeftReporter.value,
+        maxWorkers: this._maxWorkers.value
       };
       await testStage.initializeAsync(testStageOptions);
 

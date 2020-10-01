@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Colors } from '@rushstack/node-core-library';
+import { AnsiEscape } from '@rushstack/node-core-library';
 import * as colorsPackage from 'colors';
 
 import { HeftToolsCommandLineParser } from '../HeftToolsCommandLineParser';
@@ -35,13 +35,13 @@ describe('CommandLineHelp', () => {
   });
 
   it('prints the global help', () => {
-    const helpText: string = Colors.normalizeColorTokensForTest(parser.renderHelpText());
+    const helpText: string = AnsiEscape.formatForTests(parser.renderHelpText());
     expect(helpText).toMatchSnapshot();
   });
 
   it(`prints the help for each action`, () => {
     for (const action of parser.actions) {
-      const helpText: string = Colors.normalizeColorTokensForTest(action.renderHelpText());
+      const helpText: string = AnsiEscape.formatForTests(action.renderHelpText());
       expect(helpText).toMatchSnapshot(action.actionName);
     }
   });

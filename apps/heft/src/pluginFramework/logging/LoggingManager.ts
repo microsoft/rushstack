@@ -13,8 +13,8 @@ export interface ILoggingManagerOptions {
 export class LoggingManager {
   private _options: ILoggingManagerOptions;
   private _scopedLoggers: Map<string, ScopedLogger> = new Map<string, ScopedLogger>();
-  private _shouldPrintStacks: boolean;
-  private _hasAnyErrors: boolean;
+  private _shouldPrintStacks: boolean = false;
+  private _hasAnyErrors: boolean = false;
 
   public get errorsHaveBeenEmitted(): boolean {
     return this._hasAnyErrors;
@@ -33,7 +33,7 @@ export class LoggingManager {
     if (existingScopedLogger) {
       throw new Error(
         `A named logger with name "${loggerName}" has already been requested ` +
-          `by plugin "${existingScopedLogger._requestingPlugin.displayName}".`
+          `by plugin "${existingScopedLogger._requestingPlugin.pluginName}".`
       );
     } else {
       const scopedLogger: ScopedLogger = new ScopedLogger({

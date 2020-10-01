@@ -41,14 +41,14 @@ export class RushConfigurationProject {
   private _projectFolder: string;
   private _projectRelativeFolder: string;
   private _projectRushTempFolder: string;
-  private _reviewCategory: string;
+  private _reviewCategory: string | undefined;
   private _packageJson: IPackageJson;
   private _packageJsonEditor: PackageJsonEditor;
   private _tempProjectName: string;
   private _unscopedTempProjectName: string;
   private _cyclicDependencyProjects: Set<string>;
   private _versionPolicyName: string | undefined;
-  private _versionPolicy: VersionPolicy;
+  private _versionPolicy: VersionPolicy | undefined;
   private _shouldPublish: boolean;
   private _skipRushCheck: boolean;
   private _downstreamDependencyProjects: string[];
@@ -192,7 +192,7 @@ export class RushConfigurationProject {
    * The review category name, or undefined if no category was assigned.
    * This name must be one of the valid choices listed in RushConfiguration.reviewCategories.
    */
-  public get reviewCategory(): string {
+  public get reviewCategory(): string | undefined {
     return this._reviewCategory;
   }
 

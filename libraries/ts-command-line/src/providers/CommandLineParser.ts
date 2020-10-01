@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as argparse from 'argparse';
-import * as colors from 'colors';
+import colors from 'colors';
 
 import { CommandLineAction } from './CommandLineAction';
 import { CommandLineParameterProvider, ICommandLineParserData } from './CommandLineParameterProvider';

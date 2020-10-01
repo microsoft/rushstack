@@ -21,7 +21,7 @@ Object {
 exports[`01 color enabled 01 basic terminal functions 01 write 03 writes a message with colors 1`] = `
 Object {
   "error": "",
-  "log": "[x][32mmessage 1[x][39m",
+  "log": "[green]message 1[default]",
   "verbose": "",
   "warning": "",
 }
@@ -30,7 +30,7 @@ Object {
 exports[`01 color enabled 01 basic terminal functions 01 write 04 writes a multiple messages with colors 1`] = `
 Object {
   "error": "",
-  "log": "[x][32mmessage 1[x][39m[x][31mmessage 2[x][39m",
+  "log": "[green]message 1[default][red]message 2[default]",
   "verbose": "",
   "warning": "",
 }
@@ -39,7 +39,7 @@ Object {
 exports[`01 color enabled 01 basic terminal functions 01 write 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
   "error": "",
-  "log": "message 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m",
+  "log": "message 1[green]message 2[default]message 3[red]message 4[default]",
   "verbose": "",
   "warning": "",
 }
@@ -66,7 +66,7 @@ Object {
 exports[`01 color enabled 01 basic terminal functions 02 writeLine 03 writes a message with colors 1`] = `
 Object {
   "error": "",
-  "log": "[x][32mmessage 1[x][39m[n]",
+  "log": "[green]message 1[default][n]",
   "verbose": "",
   "warning": "",
 }
@@ -75,7 +75,7 @@ Object {
 exports[`01 color enabled 01 basic terminal functions 02 writeLine 04 writes a multiple messages with colors 1`] = `
 Object {
   "error": "",
-  "log": "[x][32mmessage 1[x][39m[x][31mmessage 2[x][39m[n]",
+  "log": "[green]message 1[default][red]message 2[default][n]",
   "verbose": "",
   "warning": "",
 }
@@ -84,7 +84,7 @@ Object {
 exports[`01 color enabled 01 basic terminal functions 02 writeLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
   "error": "",
-  "log": "message 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m[n]",
+  "log": "message 1[green]message 2[default]message 3[red]message 4[default][n]",
   "verbose": "",
   "warning": "",
 }
@@ -95,7 +95,7 @@ Object {
   "error": "",
   "log": "",
   "verbose": "",
-  "warning": "[x][33mtest message[x][39m",
+  "warning": "[yellow]test message[default]",
 }
 `;
 
@@ -104,7 +104,7 @@ Object {
   "error": "",
   "log": "",
   "verbose": "",
-  "warning": "[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m",
+  "warning": "[yellow]message 1[default][yellow]message 2[default]",
 }
 `;
 
@@ -113,7 +113,7 @@ Object {
   "error": "",
   "log": "",
   "verbose": "",
-  "warning": "[x][33mmessage 1[x][39m",
+  "warning": "[yellow]message 1[default]",
 }
 `;
 
@@ -122,7 +122,7 @@ Object {
   "error": "",
   "log": "",
   "verbose": "",
-  "warning": "[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m",
+  "warning": "[yellow]message 1[default][yellow]message 2[default]",
 }
 `;
 
@@ -131,7 +131,7 @@ Object {
   "error": "",
   "log": "",
   "verbose": "",
-  "warning": "[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 3[x][39m[x][33mmessage 4[x][39m",
+  "warning": "[yellow]message 1[default][yellow]message 2[default][yellow]message 3[default][yellow]message 4[default]",
 }
 `;
 
@@ -140,7 +140,7 @@ Object {
   "error": "",
   "log": "",
   "verbose": "",
-  "warning": "[x][33mtest message[x][39m[n]",
+  "warning": "[yellow]test message[default][n]",
 }
 `;
 
@@ -149,7 +149,7 @@ Object {
   "error": "",
   "log": "",
   "verbose": "",
-  "warning": "[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[n]",
+  "warning": "[yellow]message 1[default][yellow]message 2[default][n]",
 }
 `;
 
@@ -158,7 +158,7 @@ Object {
   "error": "",
   "log": "",
   "verbose": "",
-  "warning": "[x][33mmessage 1[x][39m[n]",
+  "warning": "[yellow]message 1[default][n]",
 }
 `;
 
@@ -167,7 +167,7 @@ Object {
   "error": "",
   "log": "",
   "verbose": "",
-  "warning": "[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[n]",
+  "warning": "[yellow]message 1[default][yellow]message 2[default][n]",
 }
 `;
 
@@ -176,13 +176,13 @@ Object {
   "error": "",
   "log": "",
   "verbose": "",
-  "warning": "[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 3[x][39m[x][33mmessage 4[x][39m[n]",
+  "warning": "[yellow]message 1[default][yellow]message 2[default][yellow]message 3[default][yellow]message 4[default][n]",
 }
 `;
 
 exports[`01 color enabled 01 basic terminal functions 05 writeError 01 writes a single message 1`] = `
 Object {
-  "error": "[x][31mtest message[x][39m",
+  "error": "[red]test message[default]",
   "log": "",
   "verbose": "",
   "warning": "",
@@ -191,7 +191,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 05 writeError 02 writes multiple messages 1`] = `
 Object {
-  "error": "[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m",
+  "error": "[red]message 1[default][red]message 2[default]",
   "log": "",
   "verbose": "",
   "warning": "",
@@ -200,7 +200,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 05 writeError 03 writes a message with colors 1`] = `
 Object {
-  "error": "[x][31mmessage 1[x][39m",
+  "error": "[red]message 1[default]",
   "log": "",
   "verbose": "",
   "warning": "",
@@ -209,7 +209,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 05 writeError 04 writes a multiple messages with colors 1`] = `
 Object {
-  "error": "[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m",
+  "error": "[red]message 1[default][red]message 2[default]",
   "log": "",
   "verbose": "",
   "warning": "",
@@ -218,7 +218,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 05 writeError 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
-  "error": "[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[x][31mmessage 3[x][39m[x][31mmessage 4[x][39m",
+  "error": "[red]message 1[default][red]message 2[default][red]message 3[default][red]message 4[default]",
   "log": "",
   "verbose": "",
   "warning": "",
@@ -227,7 +227,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 01 writes a single message 1`] = `
 Object {
-  "error": "[x][31mtest message[x][39m[n]",
+  "error": "[red]test message[default][n]",
   "log": "",
   "verbose": "",
   "warning": "",
@@ -236,7 +236,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 02 writes multiple messages 1`] = `
 Object {
-  "error": "[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[n]",
+  "error": "[red]message 1[default][red]message 2[default][n]",
   "log": "",
   "verbose": "",
   "warning": "",
@@ -245,7 +245,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 03 writes a message with colors 1`] = `
 Object {
-  "error": "[x][31mmessage 1[x][39m[n]",
+  "error": "[red]message 1[default][n]",
   "log": "",
   "verbose": "",
   "warning": "",
@@ -254,7 +254,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 04 writes a multiple messages with colors 1`] = `
 Object {
-  "error": "[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[n]",
+  "error": "[red]message 1[default][red]message 2[default][n]",
   "log": "",
   "verbose": "",
   "warning": "",
@@ -263,7 +263,7 @@ Object {
 
 exports[`01 color enabled 01 basic terminal functions 06 writeErrorLine 05 writes a messages with colors interspersed with non-colored messages 1`] = `
 Object {
-  "error": "[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[x][31mmessage 3[x][39m[x][31mmessage 4[x][39m[n]",
+  "error": "[red]message 1[default][red]message 2[default][red]message 3[default][red]message 4[default][n]",
   "log": "",
   "verbose": "",
   "warning": "",
@@ -292,7 +292,7 @@ exports[`01 color enabled 01 basic terminal functions 07 writeVerbose 03 writes 
 Object {
   "error": "",
   "log": "",
-  "verbose": "[x][32mmessage 1[x][39m",
+  "verbose": "[green]message 1[default]",
   "warning": "",
 }
 `;
@@ -301,7 +301,7 @@ exports[`01 color enabled 01 basic terminal functions 07 writeVerbose 04 writes 
 Object {
   "error": "",
   "log": "",
-  "verbose": "[x][32mmessage 1[x][39m[x][31mmessage 2[x][39m",
+  "verbose": "[green]message 1[default][red]message 2[default]",
   "warning": "",
 }
 `;
@@ -310,7 +310,7 @@ exports[`01 color enabled 01 basic terminal functions 07 writeVerbose 05 writes 
 Object {
   "error": "",
   "log": "",
-  "verbose": "message 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m",
+  "verbose": "message 1[green]message 2[default]message 3[red]message 4[default]",
   "warning": "",
 }
 `;
@@ -337,7 +337,7 @@ exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 03 wri
 Object {
   "error": "",
   "log": "",
-  "verbose": "[x][32mmessage 1[x][39m[n]",
+  "verbose": "[green]message 1[default][n]",
   "warning": "",
 }
 `;
@@ -346,7 +346,7 @@ exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 04 wri
 Object {
   "error": "",
   "log": "",
-  "verbose": "[x][32mmessage 1[x][39m[x][31mmessage 2[x][39m[n]",
+  "verbose": "[green]message 1[default][red]message 2[default][n]",
   "warning": "",
 }
 `;
@@ -355,17 +355,17 @@ exports[`01 color enabled 01 basic terminal functions 08 writeVerboseLine 05 wri
 Object {
   "error": "",
   "log": "",
-  "verbose": "message 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m[n]",
+  "verbose": "message 1[green]message 2[default]message 3[red]message 4[default][n]",
   "warning": "",
 }
 `;
 
 exports[`01 color enabled 05 writes to multiple streams 1`] = `
 Object {
-  "error": "[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[x][31mmessage 3[x][39m[x][31mmessage 4[x][39m[x][31mtest message[x][39m[n][x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[n][x][31mmessage 1[x][39m[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[x][31mmessage 3[x][39m[x][31mmessage 4[x][39m[n][x][31mmessage 1[x][39m[n][x][31mtest message[x][39m[x][31mmessage 1[x][39m[x][31mmessage 2[x][39m[n][x][31mmessage 1[x][39m[x][31mmessage 2[x][39m",
-  "log": "message 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m[x][32mmessage 1[x][39m[n][x][32mmessage 1[x][39m[x][32mmessage 1[x][39m[x][31mmessage 2[x][39m[x][32mmessage 1[x][39m[x][31mmessage 2[x][39m[n]test messagemessage 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m[n]message 1message 2test message[n]message 1message 2[n]",
-  "verbose": "test message[x][32mmessage 1[x][39mmessage 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39m[n]test message[n]message 1[x][32mmessage 2[x][39mmessage 3[x][31mmessage 4[x][39mmessage 1message 2[x][32mmessage 1[x][39m[n][x][32mmessage 1[x][39m[x][31mmessage 2[x][39m[n]message 1message 2[n][x][32mmessage 1[x][39m[x][31mmessage 2[x][39m",
-  "warning": "[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[n][x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 3[x][39m[x][33mmessage 4[x][39m[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 3[x][39m[x][33mmessage 4[x][39m[n][x][33mtest message[x][39m[n][x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[x][33mmessage 1[x][39m[x][33mmessage 1[x][39m[x][33mmessage 2[x][39m[n][x][33mmessage 1[x][39m[n]",
+  "error": "[red]message 1[default][red]message 2[default][red]message 3[default][red]message 4[default][red]test message[default][n][red]message 1[default][red]message 2[default][red]message 1[default][red]message 2[default][n][red]message 1[default][red]message 1[default][red]message 2[default][red]message 3[default][red]message 4[default][n][red]message 1[default][n][red]test message[default][red]message 1[default][red]message 2[default][n][red]message 1[default][red]message 2[default]",
+  "log": "message 1[green]message 2[default]message 3[red]message 4[default][green]message 1[default][n][green]message 1[default][green]message 1[default][red]message 2[default][green]message 1[default][red]message 2[default][n]test messagemessage 1[green]message 2[default]message 3[red]message 4[default][n]message 1message 2test message[n]message 1message 2[n]",
+  "verbose": "test message[green]message 1[default]message 1[green]message 2[default]message 3[red]message 4[default][n]test message[n]message 1[green]message 2[default]message 3[red]message 4[default]message 1message 2[green]message 1[default][n][green]message 1[default][red]message 2[default][n]message 1message 2[n][green]message 1[default][red]message 2[default]",
+  "warning": "[yellow]message 1[default][yellow]message 2[default][n][yellow]message 1[default][yellow]message 2[default][yellow]message 1[default][yellow]message 2[default][yellow]message 3[default][yellow]message 4[default][yellow]message 1[default][yellow]message 2[default][yellow]message 3[default][yellow]message 4[default][n][yellow]test message[default][n][yellow]message 1[default][yellow]message 2[default][yellow]message 1[default][yellow]message 1[default][yellow]message 2[default][n][yellow]message 1[default][n]",
 }
 `;
 

@@ -1,7 +1,8 @@
 {
   "name": "@microsoft/web-library-build",
-  "version": "7.4.50",
+  "version": "7.5.1",
   "description": "",
+  "license": "MIT",
   "engines": {
     "npm": "3.10.8"
   },
@@ -27,7 +28,7 @@
   },
   "devDependencies": {
     "@microsoft/node-library-build": "workspace:*",
-    "@microsoft/rush-stack-compiler-3.5": "workspace:*",
+    "@microsoft/rush-stack-compiler-3.9": "workspace:*",
     "@rushstack/eslint-config": "workspace:*"
   }
 }

@@ -22,7 +22,7 @@ export class AedocDefinitions {
     // (undocumented)
     static readonly preapprovedTag: TSDocTagDefinition;
     // (undocumented)
-    static readonly tsdocConfiguration: TSDocConfiguration;
+    static get tsdocConfiguration(): TSDocConfiguration;
     }
 
 // Warning: (ae-forgotten-export) The symbol "ApiCallSignature_base" needs to be exported by the entry point index.d.ts
@@ -33,11 +33,11 @@ export class ApiCallSignature extends ApiCallSignature_base {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
+    get containerKey(): string;
     // (undocumented)
     static getContainerKey(overloadIndex: number): string;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
 }
 
 // Warning: (ae-forgotten-export) The symbol "ApiClass_base" needs to be exported by the entry point index.d.ts
@@ -48,13 +48,13 @@ export class ApiClass extends ApiClass_base {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
+    get containerKey(): string;
     readonly extendsType: HeritageType | undefined;
     // (undocumented)
     static getContainerKey(name: string): string;
-    readonly implementsTypes: ReadonlyArray<HeritageType>;
+    get implementsTypes(): ReadonlyArray<HeritageType>;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
     // Warning: (ae-forgotten-export) The symbol "DeserializerContext" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "IApiClassJson" needs to be exported by the entry point index.d.ts
     //
@@ -72,11 +72,11 @@ export class ApiConstructor extends ApiConstructor_base {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
+    get containerKey(): string;
     // (undocumented)
     static getContainerKey(overloadIndex: number): string;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
 }
 
 // Warning: (ae-forgotten-export) The symbol "ApiConstructSignature_base" needs to be exported by the entry point index.d.ts
@@ -87,19 +87,19 @@ export class ApiConstructSignature extends ApiConstructSignature_base {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
+    get containerKey(): string;
     // (undocumented)
     static getContainerKey(overloadIndex: number): string;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
 }
 
 // @public
 export class ApiDeclaredItem extends ApiDocumentedItem {
     constructor(options: IApiDeclaredItemOptions);
     buildExcerpt(tokenRange: IExcerptTokenRange): Excerpt;
-    readonly excerpt: Excerpt;
-    readonly excerptTokens: ReadonlyArray<ExcerptToken>;
+    get excerpt(): Excerpt;
+    get excerptTokens(): ReadonlyArray<ExcerptToken>;
     getExcerptWithModifiers(): string;
     // Warning: (ae-forgotten-export) The symbol "IApiDeclaredItemJson" needs to be exported by the entry point index.d.ts
     //
@@ -121,7 +121,7 @@ export class ApiDocumentedItem extends ApiItem {
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiDocumentedItemJson>): void;
     // (undocumented)
-    readonly tsdocComment: tsdoc.DocComment | undefined;
+    get tsdocComment(): tsdoc.DocComment | undefined;
     }
 
 // Warning: (ae-forgotten-export) The symbol "ApiEntryPoint_base" needs to be exported by the entry point index.d.ts
@@ -132,10 +132,10 @@ export class ApiEntryPoint extends ApiEntryPoint_base {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
-    readonly importPath: string;
+    get containerKey(): string;
+    get importPath(): string;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
 }
 
 // Warning: (ae-forgotten-export) The symbol "ApiEnum_base" needs to be exported by the entry point index.d.ts
@@ -148,13 +148,13 @@ export class ApiEnum extends ApiEnum_base {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
+    get containerKey(): string;
     // (undocumented)
     static getContainerKey(name: string): string;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
     // @override (undocumented)
-    readonly members: ReadonlyArray<ApiEnumMember>;
+    get members(): ReadonlyArray<ApiEnumMember>;
 }
 
 // Warning: (ae-forgotten-export) The symbol "ApiEnumMember_base" needs to be exported by the entry point index.d.ts
@@ -165,12 +165,12 @@ export class ApiEnumMember extends ApiEnumMember_base {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
+    get containerKey(): string;
     // (undocumented)
     static getContainerKey(name: string): string;
     readonly initializerExcerpt: Excerpt;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
     // Warning: (ae-forgotten-export) The symbol "IApiEnumMemberJson" needs to be exported by the entry point index.d.ts
     //
     // @override (undocumented)
@@ -187,11 +187,11 @@ export class ApiFunction extends ApiFunction_base {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
+    get containerKey(): string;
     // (undocumented)
     static getContainerKey(name: string, overloadIndex: number): string;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
 }
 
 // Warning: (ae-forgotten-export) The symbol "ApiIndexSignature_base" needs to be exported by the entry point index.d.ts
@@ -202,11 +202,11 @@ export class ApiIndexSignature extends ApiIndexSignature_base {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
+    get containerKey(): string;
     // (undocumented)
     static getContainerKey(overloadIndex: number): string;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
 }
 
 // Warning: (ae-forgotten-export) The symbol "ApiInterface_base" needs to be exported by the entry point index.d.ts
@@ -217,12 +217,12 @@ export class ApiInterface extends ApiInterface_base {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
-    readonly extendsTypes: ReadonlyArray<HeritageType>;
+    get containerKey(): string;
+    get extendsTypes(): ReadonlyArray<HeritageType>;
     // (undocumented)
     static getContainerKey(name: string): string;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
     // Warning: (ae-forgotten-export) The symbol "IApiInterfaceJson" needs to be exported by the entry point index.d.ts
     //
     // @override (undocumented)
@@ -239,13 +239,13 @@ export class ApiItem {
     // @virtual
     protected buildCanonicalReference(): DeclarationReference;
     // @beta
-    readonly canonicalReference: DeclarationReference;
+    get canonicalReference(): DeclarationReference;
     // @virtual
-    readonly containerKey: string;
+    get containerKey(): string;
     // (undocumented)
     static deserialize(jsonObject: IApiItemJson, context: DeserializerContext): ApiItem;
     // @virtual
-    readonly displayName: string;
+    get displayName(): string;
     getAssociatedPackage(): ApiPackage | undefined;
     getHierarchy(): ReadonlyArray<ApiItem>;
     getMergedSiblings(): ReadonlyArray<ApiItem>;
@@ -253,13 +253,13 @@ export class ApiItem {
     // @virtual (undocumented)
     getSortKey(): string;
     // @virtual
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
     // @virtual
-    readonly members: ReadonlyArray<ApiItem>;
+    get members(): ReadonlyArray<ApiItem>;
     // @virtual (undocumented)
     static onDeserializeInto(options: Partial<IApiItemOptions>, context: DeserializerContext, jsonObject: IApiItemJson): void;
     // @virtual
-    readonly parent: ApiItem | undefined;
+    get parent(): ApiItem | undefined;
     // @virtual (undocumented)
     serializeInto(jsonObject: Partial<IApiItemJson>): void;
 }
@@ -336,11 +336,11 @@ export class ApiMethod extends ApiMethod_base {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
+    get containerKey(): string;
     // (undocumented)
     static getContainerKey(name: string, isStatic: boolean, overloadIndex: number): string;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
 }
 
 // Warning: (ae-forgotten-export) The symbol "ApiMethodSignature_base" needs to be exported by the entry point index.d.ts
@@ -351,11 +351,11 @@ export class ApiMethodSignature extends ApiMethodSignature_base {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
+    get containerKey(): string;
     // (undocumented)
     static getContainerKey(name: string, overloadIndex: number): string;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
 }
 
 // Warning: (ae-forgotten-export) The symbol "ApiModel_base" needs to be exported by the entry point index.d.ts
@@ -368,13 +368,13 @@ export class ApiModel extends ApiModel_base {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
+    get containerKey(): string;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
     // (undocumented)
     loadPackage(apiJsonFilename: string): ApiPackage;
     // (undocumented)
-    readonly packages: ReadonlyArray<ApiPackage>;
+    get packages(): ReadonlyArray<ApiPackage>;
     // (undocumented)
     resolveDeclarationReference(declarationReference: DocDeclarationReference | DeclarationReference, contextApiItem: ApiItem | undefined): IResolveDeclarationReferenceResult;
     tryGetPackageByName(packageName: string): ApiPackage | undefined;
@@ -403,11 +403,11 @@ export class ApiNamespace extends ApiNamespace_base {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
+    get containerKey(): string;
     // (undocumented)
     static getContainerKey(name: string): string;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
 }
 
 // Warning: (ae-forgotten-export) The symbol "ApiPackage_base" needs to be exported by the entry point index.d.ts
@@ -420,13 +420,13 @@ export class ApiPackage extends ApiPackage_base {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
+    get containerKey(): string;
     // (undocumented)
-    readonly entryPoints: ReadonlyArray<ApiEntryPoint>;
+    get entryPoints(): ReadonlyArray<ApiEntryPoint>;
     // (undocumented)
     findEntryPointsByPath(importPath: string): ReadonlyArray<ApiEntryPoint>;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
     // (undocumented)
     static loadFromJsonFile(apiJsonFilename: string): ApiPackage;
     // (undocumented)
@@ -457,11 +457,11 @@ export class ApiProperty extends ApiProperty_base {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
+    get containerKey(): string;
     // (undocumented)
     static getContainerKey(name: string, isStatic: boolean): string;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
 }
 
 // Warning: (ae-forgotten-export) The symbol "ApiPropertyItem_base" needs to be exported by the entry point index.d.ts
@@ -469,7 +469,7 @@ export class ApiProperty extends ApiProperty_base {
 // @public
 export class ApiPropertyItem extends ApiPropertyItem_base {
     constructor(options: IApiPropertyItemOptions);
-    readonly isEventProperty: boolean;
+    get isEventProperty(): boolean;
     // Warning: (ae-forgotten-export) The symbol "IApiPropertyItemJson" needs to be exported by the entry point index.d.ts
     //
     // @override (undocumented)
@@ -485,11 +485,11 @@ export class ApiPropertySignature extends ApiPropertyItem {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
+    get containerKey(): string;
     // (undocumented)
     static getContainerKey(name: string): string;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
 }
 
 // @public
@@ -547,11 +547,11 @@ export class ApiTypeAlias extends ApiTypeAlias_base {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
+    get containerKey(): string;
     // (undocumented)
     static getContainerKey(name: string): string;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
     // Warning: (ae-forgotten-export) The symbol "IApiTypeAliasJson" needs to be exported by the entry point index.d.ts
     //
     // @override (undocumented)
@@ -584,11 +584,11 @@ export class ApiVariable extends ApiVariable_base {
     // @beta @override (undocumented)
     buildCanonicalReference(): DeclarationReference;
     // @override (undocumented)
-    readonly containerKey: string;
+    get containerKey(): string;
     // (undocumented)
     static getContainerKey(name: string): string;
     // @override (undocumented)
-    readonly kind: ApiItemKind;
+    get kind(): ApiItemKind;
     // Warning: (ae-forgotten-export) The symbol "IApiVariableJson" needs to be exported by the entry point index.d.ts
     //
     // @override (undocumented)
@@ -604,9 +604,9 @@ export type Constructor<T = {}> = new (...args: any[]) => T;
 // @public
 export class Excerpt {
     constructor(tokens: ReadonlyArray<ExcerptToken>, tokenRange: IExcerptTokenRange);
-    readonly isEmpty: boolean;
+    get isEmpty(): boolean;
     readonly spannedTokens: ReadonlyArray<ExcerptToken>;
-    readonly text: string;
+    get text(): string;
     readonly tokenRange: Readonly<IExcerptTokenRange>;
     readonly tokens: ReadonlyArray<ExcerptToken>;
 }
@@ -614,9 +614,9 @@ export class Excerpt {
 // @public
 export class ExcerptToken {
     constructor(kind: ExcerptTokenKind, text: string, canonicalReference?: DeclarationReference);
-    readonly canonicalReference: DeclarationReference | undefined;
-    readonly kind: ExcerptTokenKind;
-    readonly text: string;
+    get canonicalReference(): DeclarationReference | undefined;
+    get kind(): ExcerptTokenKind;
+    get text(): string;
     }
 
 // @public (undocumented)
@@ -859,7 +859,7 @@ export class Parameter {
     constructor(options: IParameterOptions);
     name: string;
     readonly parameterTypeExcerpt: Excerpt;
-    readonly tsdocParamBlock: tsdoc.DocParamBlock | undefined;
+    get tsdocParamBlock(): tsdoc.DocParamBlock | undefined;
 }
 
 // @public
@@ -888,7 +888,7 @@ export class TypeParameter {
     readonly constraintExcerpt: Excerpt;
     readonly defaultTypeExcerpt: Excerpt;
     name: string;
-    readonly tsdocTypeParamBlock: tsdoc.DocParamBlock | undefined;
+    get tsdocTypeParamBlock(): tsdoc.DocParamBlock | undefined;
 }
 
 
