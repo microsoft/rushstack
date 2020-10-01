@@ -2,6 +2,24 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.15.1",
+      "tag": "@rushstack/heft_v0.15.1",
+      "date": "Thu, 01 Oct 2020 20:27:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.3.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.2.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.15.0",
       "tag": "@rushstack/heft_v0.15.0",
       "date": "Thu, 01 Oct 2020 18:51:21 GMT",
