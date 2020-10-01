@@ -11,7 +11,7 @@ export interface IStringValuesTypingsGeneratorOptions extends ITypingsGeneratorO
     // (undocumented)
     exportAsDefault?: boolean;
     // (undocumented)
-    exportAsInterfaceName?: string;
+    exportAsDefaultInterfaceName?: string;
 }
 
 // @public (undocumented)

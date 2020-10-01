@@ -215,6 +215,9 @@ export class CoreConfigFiles {
         },
         '$.generatedTsFolder.*': {
           pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+        },
+        '$.srcFolder.*': {
+          pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
         }
       }
     });
