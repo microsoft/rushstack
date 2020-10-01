@@ -24,7 +24,15 @@ export interface IStringValueTypings {
  * @public
  */
 export interface IStringValuesTypingsGeneratorOptions extends ITypingsGeneratorOptions<IStringValueTypings> {
+  /**
+   * Setting this option wraps the typings export in a default property. On by default.
+   */
   exportAsDefault?: boolean;
+
+  /**
+   * When `exportAsDefault` is true (default), this option determines the name of the interface
+   * for the default wrapped export. Ignored when `exportAsDefault` is false.
+   */
   exportAsDefaultInterfaceName?: string;
 }
 
