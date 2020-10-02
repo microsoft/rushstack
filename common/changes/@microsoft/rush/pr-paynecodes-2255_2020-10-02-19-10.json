@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add documentation for incremental option for buld custom commands",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "jpayne@webotomy.com"
+}
