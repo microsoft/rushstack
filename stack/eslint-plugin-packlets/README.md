@@ -1,0 +1,2 @@
+# @rushstack/eslint-plugin-packlets
+
