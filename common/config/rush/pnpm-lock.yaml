@@ -2223,6 +2223,19 @@ importers:
       style-loader: ~1.2.1
       typescript: ~3.9.7
       webpack: ~4.31.0
+  ../../tutorials/packlets-tutorial:
+    devDependencies:
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
+      '@types/node': 10.17.13
+      eslint: 7.2.0
+      typescript: 3.9.7
+    specifiers:
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
+      '@types/node': 10.17.13
+      eslint: ~7.2.0
+      typescript: ~3.9.7
   ../../webpack/loader-load-themed-styles:
     dependencies:
       '@microsoft/load-themed-styles': 'link:../../libraries/load-themed-styles'
