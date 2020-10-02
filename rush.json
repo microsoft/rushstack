@@ -1059,6 +1059,12 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
+    {
+      "packageName": "packlets-tutorial",
+      "projectFolder": "tutorials/packlets-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
 
     // "webpack" folder (alphabetical order)
     {
