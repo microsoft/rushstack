@@ -22,17 +22,21 @@ export class JestPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    if (FileSystem.exists(path.join(heftConfiguration.buildFolder, JEST_CONFIGURATION_LOCATION))) {
-      heftSession.hooks.test.tap(PLUGIN_NAME, (test: ITestStageContext) => {
-        test.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          await this._runJestAsync(heftSession, heftConfiguration, test);
-        });
-      });
+    const expectedConfigPath: string = path.join(heftConfiguration.buildFolder, JEST_CONFIGURATION_LOCATION);
 
-      heftSession.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanStageContext) => {
-        this._includeJestCacheWhenCleaning(heftConfiguration, clean);
-      });
+    if (!FileSystem.exists(expectedConfigPath)) {
+      throw new Error(`Expected to find jest config file at ${expectedConfigPath}`);
     }
+
+    heftSession.hooks.test.tap(PLUGIN_NAME, (test: ITestStageContext) => {
+      test.hooks.run.tapPromise(PLUGIN_NAME, async () => {
+        await this._runJestAsync(heftSession, heftConfiguration, test);
+      });
+    });
+
+    heftSession.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanStageContext) => {
+      this._includeJestCacheWhenCleaning(heftConfiguration, clean);
+    });
   }
 
   private async _runJestAsync(
