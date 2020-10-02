@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.15.2",
+      "tag": "@rushstack/heft_v0.15.2",
+      "date": "Fri, 02 Oct 2020 00:10:59 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include UPGRADING.md in npm package publish."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.15.1",
       "tag": "@rushstack/heft_v0.15.1",
       "date": "Thu, 01 Oct 2020 20:27:16 GMT",

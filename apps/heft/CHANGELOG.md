@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 01 Oct 2020 20:27:16 GMT and should not be manually modified.
+This log was last generated on Fri, 02 Oct 2020 00:10:59 GMT and should not be manually modified.
+
+## 0.15.2
+Fri, 02 Oct 2020 00:10:59 GMT
+
+### Patches
+
+- Include UPGRADING.md in npm package publish.
 
 ## 0.15.1
 Thu, 01 Oct 2020 20:27:16 GMT
