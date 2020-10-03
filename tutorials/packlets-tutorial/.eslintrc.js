@@ -3,5 +3,16 @@ require('@rushstack/eslint-config/patch/modern-module-resolution');
 
 module.exports = {
   extends: ['@rushstack/eslint-config/profile/node'],
-  parserOptions: { tsconfigRootDir: __dirname }
+  plugins: ['@rushstack/eslint-plugin-packlets'],
+  parserOptions: { tsconfigRootDir: __dirname },
+  overrides: [
+    {
+      // Declare an override that applies to TypeScript files only
+      files: ['*.ts', '*.tsx'],
+
+      rules: {
+        '@rushstack/packlets/import-path': 'warn'
+      }
+    }
+  ]
 };
