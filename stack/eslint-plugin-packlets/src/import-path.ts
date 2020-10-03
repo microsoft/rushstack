@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type * as ts from 'typescript';
 import * as path from 'path';
 import * as fs from 'fs';
 
 import type { TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
-import { AST_NODE_TYPES } from '@typescript-eslint/experimental-utils';
+import { AST_NODE_TYPES, ESLintUtils } from '@typescript-eslint/experimental-utils';
 import { Path } from './Path';
 
 import { ILintError } from './PackletImportAnalyzer';
@@ -18,10 +19,191 @@ export type MessageIds =
   | 'misplaced-packlets-folder'
   | 'bypassed-entry-point'
   | 'circular-entry-point'
-  | 'packlet-importing-project-file';
+  | 'packlet-importing-project-file'
+  | 'circular-import'
+  | 'debug';
 type Options = [];
 
 const validPackletName: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+export enum RefFileKind {
+  Import,
+  ReferenceFile,
+  TypeReferenceDirective
+}
+
+interface RefFile {
+  referencedFileName: string;
+  kind: RefFileKind;
+  index: number;
+  file: string;
+}
+
+interface IResult {
+  globalError: ILintError | undefined;
+  skip: boolean;
+  packletsEnabled: boolean;
+  packletsFolderPath: string | undefined;
+  packletName: string | undefined;
+  isEntryPoint: boolean;
+}
+
+function f(inputFilePath: string, tsconfigFilePath: string | undefined): IResult {
+  const result: IResult = {
+    globalError: undefined,
+    skip: false,
+    packletsEnabled: false,
+    packletsFolderPath: undefined,
+    packletName: undefined,
+    isEntryPoint: false
+  };
+
+  // Example: /path/to/my-project/src
+  let srcFolderPath: string | undefined;
+
+  if (!tsconfigFilePath) {
+    result.globalError = { messageId: 'missing-tsconfig' };
+    return result;
+  }
+
+  srcFolderPath = path.join(path.dirname(tsconfigFilePath), 'src');
+
+  if (!fs.existsSync(srcFolderPath)) {
+    result.globalError = { messageId: 'missing-src-folder', data: { srcFolderPath } };
+    return result;
+  }
+
+  if (!Path.isUnder(inputFilePath, srcFolderPath)) {
+    // Ignore files outside the "src" folder
+    result.skip = true;
+    return result;
+  }
+
+  // Example: packlets/my-packlet/index.ts
+  const inputFilePathRelativeToSrc: string = path.relative(srcFolderPath, inputFilePath);
+
+  // Example: [ 'packlets', 'my-packlet', 'index.ts' ]
+  const pathParts: string[] = inputFilePathRelativeToSrc.split(/[\/\\]+/);
+
+  let underPackletsFolder: boolean = false;
+
+  const expectedPackletsFolder: string = path.join(srcFolderPath, 'packlets');
+
+  for (let i = 0; i < pathParts.length; ++i) {
+    const pathPart: string = pathParts[i];
+    if (pathPart.toUpperCase() === 'PACKLETS') {
+      if (pathPart !== 'packlets') {
+        // Example: /path/to/my-project/src/PACKLETS
+        const packletsFolderPath: string = path.join(srcFolderPath, ...pathParts.slice(0, i + 1));
+        result.globalError = { messageId: 'packlet-folder-case', data: { packletsFolderPath } };
+        return result;
+      }
+
+      if (i !== 0) {
+        result.globalError = { messageId: 'misplaced-packlets-folder', data: { expectedPackletsFolder } };
+        return result;
+      }
+
+      underPackletsFolder = true;
+    }
+  }
+
+  if (underPackletsFolder || fs.existsSync(expectedPackletsFolder)) {
+    // packletsAbsolutePath
+    result.packletsEnabled = true;
+    result.packletsFolderPath = expectedPackletsFolder;
+  }
+
+  if (underPackletsFolder && pathParts.length >= 2) {
+    // Example: 'my-packlet'
+    const packletName: string = pathParts[1];
+    result.packletName = packletName;
+
+    // Example: 'index.ts' or 'index.tsx'
+    const thirdPart: string = pathParts[2];
+
+    // Example: 'index'
+    const thirdPartWithoutExtension: string = path.parse(thirdPart).name;
+
+    if (thirdPartWithoutExtension.toUpperCase() === 'INDEX') {
+      if (!validPackletName.test(packletName)) {
+        result.globalError = { messageId: 'invalid-packlet-name', data: { packletName } };
+        return result;
+      }
+
+      result.isEntryPoint = true;
+    }
+  }
+
+  return result;
+}
+
+interface ILink {
+  previous: ILink | undefined;
+  packletName: string;
+  fromFilePath: string;
+}
+
+function loop(
+  packletName: string,
+  startingPackletName: string,
+  refFileMap: Map<string, RefFile[]>,
+  program: ts.Program,
+  packletsFolderPath: string,
+  visitedPacklets: Set<string>,
+  previousLink: ILink | undefined,
+  context: TSESLint.RuleContext<MessageIds, Options>
+): ILink | undefined {
+  const packletEntryPoint: string = path.join(packletsFolderPath, packletName, 'index');
+
+  const tsSourceFile: ts.SourceFile | undefined =
+    program.getSourceFile(packletEntryPoint + '.ts') || program.getSourceFile(packletEntryPoint + '.tsx');
+  if (tsSourceFile) {
+    const refFiles: RefFile[] | undefined = refFileMap.get((tsSourceFile as any).path as any);
+    if (refFiles) {
+      for (const refFile of refFiles) {
+        if (refFile.kind === RefFileKind.Import) {
+          const referencingFilePath: string = refFile.file;
+
+          if (Path.isUnder(referencingFilePath, packletsFolderPath)) {
+            const referencingRelativePath: string = path.relative(packletsFolderPath, referencingFilePath);
+            const referencingPathParts: string[] = referencingRelativePath.split(/[\/\\]+/);
+            const referencingPackletName: string = referencingPathParts[0];
+
+            if (!visitedPacklets.has(packletName)) {
+              visitedPacklets.add(packletName);
+
+              const link2: ILink = {
+                previous: previousLink,
+                fromFilePath: referencingFilePath,
+                packletName: packletName
+              };
+
+              if (referencingPackletName === startingPackletName) {
+                return link2;
+              }
+
+              const result: ILink | undefined = loop(
+                referencingPackletName,
+                startingPackletName,
+                refFileMap,
+                program,
+                packletsFolderPath,
+                visitedPacklets,
+                link2,
+                context
+              );
+              if (result) {
+                return result;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return undefined;
+}
 
 const importPath: TSESLint.RuleModule<MessageIds, Options> = {
   meta: {
@@ -41,7 +223,9 @@ const importPath: TSESLint.RuleModule<MessageIds, Options> = {
       'circular-entry-point': 'Files under a packlet folder must not import from their own index.ts file',
       'packlet-importing-project-file':
         'A local project file cannot be imported.' +
-        " A packlet's dependencies must be NPM packages and/or other packlets."
+        " A packlet's dependencies must be NPM packages and/or other packlets.",
+      'circular-import': 'Packlet imports create a circular reference:\n{{report}}',
+      debug: 'debug {{debug}}'
     },
     schema: [
       {
@@ -60,108 +244,15 @@ const importPath: TSESLint.RuleModule<MessageIds, Options> = {
   },
 
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {
-    interface IResult {
-      globalError: ILintError | undefined;
-      skip: boolean;
-      packletsEnabled: boolean;
-      packletsFolderPath: string | undefined;
-      packletName: string | undefined;
-    }
-
-    function f(inputFilePath: string): IResult {
-      const result: IResult = {
-        globalError: undefined,
-        skip: false,
-        packletsEnabled: false,
-        packletsFolderPath: undefined,
-        packletName: undefined
-      };
-      // Example: /path/to/my-project/tsconfig.json
-      const tsconfigFilePath: string | undefined = context.parserServices?.program.getCompilerOptions()[
-        'configFilePath'
-      ] as string;
-
-      // Example: /path/to/my-project/src
-      let srcFolderPath: string | undefined;
-
-      if (!tsconfigFilePath) {
-        result.globalError = { messageId: 'missing-tsconfig' };
-        return result;
-      }
-
-      srcFolderPath = path.join(path.dirname(tsconfigFilePath), 'src');
-
-      if (!fs.existsSync(srcFolderPath)) {
-        result.globalError = { messageId: 'missing-src-folder', data: { srcFolderPath } };
-        return result;
-      }
-
-      if (!Path.isUnder(inputFilePath, srcFolderPath)) {
-        // Ignore files outside the "src" folder
-        result.skip = true;
-        return result;
-      }
-
-      // Example: packlets/my-packlet/index.ts
-      const inputFilePathRelativeToSrc: string = path.relative(srcFolderPath, inputFilePath);
-
-      // Example: [ 'packlets', 'my-packlet', 'index.ts' ]
-      const pathParts: string[] = inputFilePathRelativeToSrc.split(/[\/\\]+/);
-
-      let underPackletsFolder: boolean = false;
-
-      const expectedPackletsFolder: string = path.join(srcFolderPath, 'packlets');
-
-      for (let i = 0; i < pathParts.length; ++i) {
-        const pathPart: string = pathParts[i];
-        if (pathPart.toUpperCase() === 'PACKLETS') {
-          if (pathPart !== 'packlets') {
-            // Example: /path/to/my-project/src/PACKLETS
-            const packletsFolderPath: string = path.join(srcFolderPath, ...pathParts.slice(0, i + 1));
-            result.globalError = { messageId: 'packlet-folder-case', data: { packletsFolderPath } };
-            return result;
-          }
-
-          if (i !== 0) {
-            result.globalError = { messageId: 'misplaced-packlets-folder', data: { expectedPackletsFolder } };
-            return result;
-          }
-
-          underPackletsFolder = true;
-        }
-      }
-
-      if (underPackletsFolder || fs.existsSync(expectedPackletsFolder)) {
-        // packletsAbsolutePath
-        result.packletsEnabled = true;
-        result.packletsFolderPath = expectedPackletsFolder;
-      }
-
-      if (underPackletsFolder && pathParts.length >= 2) {
-        // Example: 'my-packlet'
-        const packletName: string = pathParts[1];
-        result.packletName = packletName;
-
-        // Example: 'index.ts' or 'index.tsx'
-        const thirdPart: string = pathParts[2];
-
-        // Example: 'index'
-        const thirdPartWithoutExtension: string = path.parse(thirdPart).name;
-
-        if (thirdPartWithoutExtension.toUpperCase() === 'INDEX') {
-          if (!validPackletName.test(packletName)) {
-            result.globalError = { messageId: 'invalid-packlet-name', data: { packletName } };
-            return result;
-          }
-        }
-      }
-
-      return result;
-    }
-
     // Example: /path/to/my-project/src/packlets/my-packlet/index.ts
     const inputFilePath: string = context.getFilename();
-    const result: IResult = f(inputFilePath);
+
+    // Example: /path/to/my-project/tsconfig.json
+    const tsconfigFilePath: string | undefined = ESLintUtils.getParserServices(
+      context
+    ).program.getCompilerOptions()['configFilePath'] as string;
+
+    const result: IResult = f(inputFilePath, tsconfigFilePath);
     if (result.skip) {
       return {};
     }
@@ -174,6 +265,45 @@ const importPath: TSESLint.RuleModule<MessageIds, Options> = {
       // so a warning doesn't highlight the whole file.  But that's blocked behind a bug in the query selector:
       // https://github.com/estools/esquery/issues/114
       Program: (node: TSESTree.Node): void => {
+        if (result.isEntryPoint && !result.globalError) {
+          const visitedPacklets: Set<string> = new Set();
+          const program: ts.Program | undefined = context.parserServices?.program;
+          if (program) {
+            const refFileMap: Map<string, RefFile[]> = (program as any).getRefFileMap();
+
+            const resultLink: ILink | undefined = loop(
+              result.packletName!,
+              result.packletName!,
+              refFileMap,
+              program,
+              result.packletsFolderPath!,
+              visitedPacklets,
+              undefined,
+              context
+            );
+
+            if (resultLink) {
+              const tsconfigFileFolder: string = path.dirname(tsconfigFilePath);
+
+              let report: string = '';
+              const affectedPackletNames: string[] = [];
+
+              for (let current: ILink | undefined = resultLink; current; current = current.previous) {
+                affectedPackletNames.push(current.packletName);
+                const filePath: string = path.relative(tsconfigFileFolder, current.fromFilePath);
+                report += `"${current.packletName}" is referenced by ${filePath}\n`;
+              }
+
+              // If 3 different packlets form a circular dependency, we don't need to report the same warning 3 times.
+              // Instead, only report the warning for the alphabetically smallest packlet.
+              affectedPackletNames.sort();
+              if (affectedPackletNames[0] === result.packletName) {
+                result.globalError = { messageId: 'circular-import', data: { report: report } };
+              }
+            }
+          }
+        }
+
         if (result.globalError) {
           context.report({
             node: node,

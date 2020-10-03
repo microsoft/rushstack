@@ -10,7 +10,7 @@ export class App {
     const logger: Logger = new Logger();
     logger.log(MessageType.Info, 'Starting app...');
 
-    const dataModel: DataModel = new ExampleModel();
+    const dataModel: DataModel = new ExampleModel(logger);
     const report: MainReport = new MainReport(logger);
     report.showReport(dataModel);
 
