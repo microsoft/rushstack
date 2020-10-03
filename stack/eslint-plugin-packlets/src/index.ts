@@ -2,13 +2,17 @@
 // See LICENSE in the project root for license information.
 
 import { TSESLint } from '@typescript-eslint/experimental-utils';
+import { importPath } from './import-path';
 
 interface IPlugin {
   rules: { [ruleName: string]: TSESLint.RuleModule<string, unknown[]> };
 }
 
 const plugin: IPlugin = {
-  rules: {}
+  rules: {
+    // Full name: "@rushstack/packlets/import-path"
+    'import-path': importPath
+  }
 };
 
 export = plugin;
