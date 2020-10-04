@@ -12,12 +12,18 @@ export type MyMessageIds =
   | 'invalid-packlet-name'
   | 'misplaced-packlets-folder';
 
+export type MyMessageIds2 =
+  | 'bypassed-entry-point'
+  | 'circular-entry-point'
+  | 'packlet-importing-project-file';
+
 export interface ILintError {
-  messageId: MyMessageIds;
+  messageId: MyMessageIds | MyMessageIds2;
   data?: Readonly<Record<string, unknown>>;
 }
 
 export interface IResult {
+  inputFilePath: string;
   globalError: ILintError | undefined;
   skip: boolean;
   packletsEnabled: boolean;
@@ -30,6 +36,7 @@ const validPackletName: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 export function analyze(inputFilePath: string, tsconfigFilePath: string | undefined): IResult {
   const result: IResult = {
+    inputFilePath,
     globalError: undefined,
     skip: false,
     packletsEnabled: false,
@@ -120,4 +127,83 @@ export function analyze(inputFilePath: string, tsconfigFilePath: string | undefi
   }
 
   return result;
+}
+
+export function analyze2(modulePath: string, result: IResult): ILintError | undefined {
+  if (!result.packletsFolderPath) {
+    // This should not happen
+    throw new Error('Missing packletsFolderPath');
+  }
+
+  // Example: /path/to/my-project/src/packlets/my-packlet
+  const inputFileFolder: string = path.dirname(result.inputFilePath);
+
+  // Example: /path/to/my-project/src/other-packlet/index
+  const importedPath: string = path.resolve(inputFileFolder, modulePath);
+
+  // Is the imported path referring to a file under the src/packlets folder?
+  if (Path.isUnder(importedPath, result.packletsFolderPath)) {
+    // Example: other-packlet/index
+    const importedPathRelativeToPackletsFolder: string = path.relative(
+      result.packletsFolderPath,
+      importedPath
+    );
+    // Example: [ 'other-packlet', 'index' ]
+    const importedPathParts: string[] = importedPathRelativeToPackletsFolder.split(/[\/\\]+/);
+    if (importedPathParts.length > 0) {
+      // Example: 'other-packlet'
+      const importedPackletName: string = importedPathParts[0];
+
+      // We are importing from a packlet. Is the input file part of the same packlet?
+      if (result.packletName && importedPackletName === result.packletName) {
+        // Yes.  Then our import must NOT use the packlet entry point.
+
+        // Example: 'index'
+        //
+        // We discard the file extension to handle a degenerate case like:
+        //   import { X } from "../index.js";
+        const lastPart: string = path.parse(importedPathParts[importedPathParts.length - 1]).name;
+        let pathToCompare: string;
+        if (lastPart.toUpperCase() === 'INDEX') {
+          // Example:
+          //   importedPath = /path/to/my-project/src/other-packlet/index
+          //   pathToCompare = /path/to/my-project/src/other-packlet
+          pathToCompare = path.dirname(importedPath);
+        } else {
+          pathToCompare = importedPath;
+        }
+
+        // Example: /path/to/my-project/src/other-packlet
+        const entryPointPath: string = path.join(result.packletsFolderPath, importedPackletName);
+
+        if (Path.isEqual(pathToCompare, entryPointPath)) {
+          return {
+            messageId: 'circular-entry-point'
+          };
+        }
+      } else {
+        // No.  If we are not part of the same packlet, then the module path must refer
+        // to the index.ts entry point.
+
+        // Example: /path/to/my-project/src/other-packlet
+        const entryPointPath: string = path.join(result.packletsFolderPath, importedPackletName);
+
+        if (!Path.isEqual(importedPath, entryPointPath)) {
+          const entryPointModulePath: string = path.posix.relative(importedPackletName, inputFileFolder);
+
+          return {
+            messageId: 'bypassed-entry-point',
+            data: { entryPointModulePath }
+          };
+        }
+      }
+    }
+  } else {
+    // The imported path does NOT refer to a file under the src/packlets folder
+    if (result.packletName) {
+      return {
+        messageId: 'packlet-importing-project-file'
+      };
+    }
+  }
 }
