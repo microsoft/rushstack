@@ -111,15 +111,55 @@ The basic design can be summarized in 5 rules:
 
 ## Getting Started
 
+To enable packlet validation for a simple `typescript-eslint` setup, reference the `@rushstack/eslint-plugin-packlets` project like this:
+
+**\<my-project\>/.eslintrc.js**
+```js
+module.exports = {
+  root: true,
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint'],
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:@rushstack/eslint-plugin-packlets/recommended' // <--- ADD THIS
+  ],
+  parserOptions: {
+    project: './tsconfig.json',
+    sourceType: 'module',
+    tsconfigRootDir: __dirname
+  }
+};
+```
+
+If you use the [@rushstack/eslint-config](https://www.npmjs.com/package/@rushstack/eslint-config) ruleset, add the `"packlets"` mixin like this:
+
+**\<my-project\>/.eslintrc.js**
+```ts
+// This is a workaround for https://github.com/eslint/eslint/issues/3458
+require('@rushstack/eslint-config/patch/modern-module-resolution');
+
+module.exports = {
+  extends: [
+    "@rushstack/eslint-config/profile/node",
+    "@rushstack/eslint-config/profile/mixins/packlets" // <----
+  ],
+  parserOptions: { tsconfigRootDir: __dirname }
+};
+```
+
+The `@rushstack/eslint-plugin-packlets` plugin performs validation via two separate rules:
+
+- `@rushstack/packlets/mechanics` - This rule implements most of the basic checks for packlet folder names.
+- `@rushstack/packlets/circular-deps` - This rule detects circular dependencies between packlets.  It requires full type information from the TypeScript compiler.
+
 
 ## Links
 
 - [CHANGELOG.md](
   https://github.com/microsoft/rushstack/blob/master/stack/eslint-plugin-packlets/CHANGELOG.md) - Find
   out what's new in the latest version
-
-- [@rushstack/eslint-config](https://www.npmjs.com/package/@rushstack/eslint-config) - A recommended ruleset
-  that includes support for packlets
+- [@rushstack/eslint-config](https://www.npmjs.com/package/@rushstack/eslint-config) documentation
 
 `@rushstack/eslint-plugin-packlets` is part of the [Rush Stack](https://rushstack.io/) family of projects.
 The idea for packlets was originally proposed by [@bartvandenende-wm](https://github.com/bartvandenende-wm)
