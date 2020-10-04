@@ -215,7 +215,10 @@ export class PacketAnalyzer {
           const entryPointPath: string = path.join(this.packletsFolderPath, importedPackletName);
 
           if (!Path.isEqual(importedPath, entryPointPath)) {
-            const entryPointModulePath: string = path.posix.relative(importedPackletName, inputFileFolder);
+            // Example: "../packlets/other-packlet"
+            const entryPointModulePath: string = Path.convertToSlashes(
+              path.relative(inputFileFolder, entryPointPath)
+            );
 
             return {
               messageId: 'bypassed-entry-point',

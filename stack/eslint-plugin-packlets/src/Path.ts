@@ -32,4 +32,14 @@ export class Path {
   public static isEqual(path1: string, path2: string): boolean {
     return path.relative(path1, path2) === '';
   }
+
+  /**
+   * Replaces Windows-style backslashes with POSIX-style slashes.
+   *
+   * @remarks
+   * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
+   */
+  public static convertToSlashes(inputPath: string): string {
+    return inputPath.split('\\').join('/');
+  }
 }
