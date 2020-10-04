@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { TSESLint } from '@typescript-eslint/experimental-utils';
-import { importPath } from './mechanics';
+import { mechanics } from './mechanics';
 import { circularDeps } from './circular-deps';
 
 interface IPlugin {
@@ -12,7 +12,7 @@ interface IPlugin {
 const plugin: IPlugin = {
   rules: {
     // Full name: "@rushstack/packlets/mechanics"
-    'import-path': importPath,
+    mechanics: mechanics,
     // Full name: "@rushstack/packlets/circular-deps"
     'circular-deps': circularDeps
   }

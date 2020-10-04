@@ -11,7 +11,8 @@ module.exports = {
       files: ['*.ts', '*.tsx'],
 
       rules: {
-        '@rushstack/packlets/import-path': 'warn'
+        '@rushstack/packlets/mechanics': 'warn',
+        '@rushstack/packlets/circular-deps': 'warn'
       }
     }
   ]
