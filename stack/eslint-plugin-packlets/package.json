@@ -1,7 +1,7 @@
 {
   "name": "@rushstack/eslint-plugin-packlets",
   "version": "0.0.0",
-  "description": "A lightweight system for creating project subfolders with import relationships similar to NPM packages",
+  "description": "A lightweight alternative to NPM packages for organizing source files within a single project",
   "license": "MIT",
   "repository": {
     "url": "https://github.com/microsoft/rushstack/tree/master/stack/eslint-plugin-packlets"
