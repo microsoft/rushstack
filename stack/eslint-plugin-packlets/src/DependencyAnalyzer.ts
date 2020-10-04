@@ -13,6 +13,8 @@ enum RefFileKind {
   TypeReferenceDirective
 }
 
+// TypeScript compiler internal:
+// https://github.com/microsoft/TypeScript/blob/5ecdcef4cecfcdc86bd681b377636422447507d7/src/compiler/program.ts#L541
 interface RefFile {
   referencedFileName: string;
   kind: RefFileKind;
@@ -20,83 +22,121 @@ interface RefFile {
   file: string;
 }
 
-export interface ILink {
-  previous: ILink | undefined;
+/**
+ * Represents a packlet that imports another packlet.
+ */
+export interface IPackletImport {
+  /**
+   * The name of the packlet being imported.
+   */
   packletName: string;
+
+  /**
+   * The absolute path of the file that imports the packlet.
+   */
   fromFilePath: string;
 }
 
+/**
+ * Used to build a linked list of imports that represent a circular dependency.
+ */
+interface IImportListNode extends IPackletImport {
+  /**
+   * The previous link in the linked list.
+   */
+  previousNode: IImportListNode | undefined;
+}
+
 export class DependencyAnalyzer {
-  private static _loop(
+  private static walkImports(
     packletName: string,
     startingPackletName: string,
     refFileMap: Map<string, RefFile[]>,
     program: ts.Program,
     packletsFolderPath: string,
     visitedPacklets: Set<string>,
-    previousLink: ILink | undefined
-  ): ILink | undefined {
+    previousNode: IImportListNode | undefined
+  ): IImportListNode | undefined {
     const packletEntryPoint: string = path.join(packletsFolderPath, packletName, 'index');
 
     const tsSourceFile: ts.SourceFile | undefined =
       program.getSourceFile(packletEntryPoint + '.ts') || program.getSourceFile(packletEntryPoint + '.tsx');
-    if (tsSourceFile) {
-      const refFiles: RefFile[] | undefined = refFileMap.get((tsSourceFile as any).path as any);
-      if (refFiles) {
-        for (const refFile of refFiles) {
-          if (refFile.kind === RefFileKind.Import) {
-            const referencingFilePath: string = refFile.file;
+    if (!tsSourceFile) {
+      return undefined;
+    }
 
-            if (Path.isUnder(referencingFilePath, packletsFolderPath)) {
-              const referencingRelativePath: string = path.relative(packletsFolderPath, referencingFilePath);
-              const referencingPathParts: string[] = referencingRelativePath.split(/[\/\\]+/);
-              const referencingPackletName: string = referencingPathParts[0];
+    const refFiles: RefFile[] | undefined = refFileMap.get((tsSourceFile as any).path as any);
+    if (!refFiles) {
+      return undefined;
+    }
 
-              if (!visitedPacklets.has(packletName)) {
-                visitedPacklets.add(packletName);
+    for (const refFile of refFiles) {
+      if (refFile.kind === RefFileKind.Import) {
+        const referencingFilePath: string = refFile.file;
 
-                const link2: ILink = {
-                  previous: previousLink,
-                  fromFilePath: referencingFilePath,
-                  packletName: packletName
-                };
+        if (Path.isUnder(referencingFilePath, packletsFolderPath)) {
+          const referencingRelativePath: string = path.relative(packletsFolderPath, referencingFilePath);
+          const referencingPathParts: string[] = referencingRelativePath.split(/[\/\\]+/);
+          const referencingPackletName: string = referencingPathParts[0];
 
-                if (referencingPackletName === startingPackletName) {
-                  return link2;
-                }
+          if (!visitedPacklets.has(packletName)) {
+            visitedPacklets.add(packletName);
 
-                const result: ILink | undefined = DependencyAnalyzer._loop(
-                  referencingPackletName,
-                  startingPackletName,
-                  refFileMap,
-                  program,
-                  packletsFolderPath,
-                  visitedPacklets,
-                  link2
-                );
-                if (result) {
-                  return result;
-                }
-              }
+            const importListNode: IImportListNode = {
+              previousNode: previousNode,
+              fromFilePath: referencingFilePath,
+              packletName: packletName
+            };
+
+            if (referencingPackletName === startingPackletName) {
+              return importListNode;
+            }
+
+            const result: IImportListNode | undefined = DependencyAnalyzer.walkImports(
+              referencingPackletName,
+              startingPackletName,
+              refFileMap,
+              program,
+              packletsFolderPath,
+              visitedPacklets,
+              importListNode
+            );
+            if (result) {
+              return result;
             }
           }
         }
       }
     }
+
     return undefined;
   }
 
-  public static loopp(packetAnalyzer: PacketAnalyzer, program: ts.Program): ILink | undefined {
+  public static detectCircularImport(
+    packetAnalyzer: PacketAnalyzer,
+    program: ts.Program
+  ): IPackletImport[] | undefined {
     const refFileMap: Map<string, RefFile[]> = (program as any).getRefFileMap();
     const visitedPacklets: Set<string> = new Set();
-    return DependencyAnalyzer._loop(
-      packetAnalyzer.packletName!,
-      packetAnalyzer.packletName!,
+
+    const listNode: IImportListNode | undefined = DependencyAnalyzer.walkImports(
+      packetAnalyzer.inputFilePackletName!,
+      packetAnalyzer.inputFilePackletName!,
       refFileMap,
       program,
       packetAnalyzer.packletsFolderPath!,
       visitedPacklets,
-      undefined
+      undefined // previousNode
     );
+
+    if (listNode) {
+      const packletImports: IPackletImport[] = [];
+      for (let current: IImportListNode | undefined = listNode; current; current = current.previousNode) {
+        packletImports.push({ fromFilePath: current.fromFilePath, packletName: current.packletName });
+      }
+      return packletImports;
+    }
+
+    return undefined;
   }
 }

@@ -8,7 +8,7 @@ import type { TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
 import { ESLintUtils } from '@typescript-eslint/experimental-utils';
 
 import { PacketAnalyzer } from './PackletAnalyzer';
-import { DependencyAnalyzer, ILink } from './DependencyAnalyzer';
+import { DependencyAnalyzer, IPackletImport } from './DependencyAnalyzer';
 
 export type MessageIds = 'circular-import';
 type Options = [];
@@ -41,7 +41,7 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
     ).program.getCompilerOptions()['configFilePath'] as string;
 
     const packletAnalyzer: PacketAnalyzer = new PacketAnalyzer(inputFilePath, tsconfigFilePath);
-    if (packletAnalyzer.skip) {
+    if (packletAnalyzer.nothingToDo) {
       return {};
     }
 
@@ -50,27 +50,29 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
       // so a warning doesn't highlight the whole file.  But that's blocked behind a bug in the query selector:
       // https://github.com/estools/esquery/issues/114
       Program: (node: TSESTree.Node): void => {
-        if (packletAnalyzer.isEntryPoint && !packletAnalyzer.globalError) {
+        if (packletAnalyzer.isEntryPoint && !packletAnalyzer.error) {
           const program: ts.Program | undefined = context.parserServices?.program;
           if (program) {
-            const resultLink: ILink | undefined = DependencyAnalyzer.loopp(packletAnalyzer, program);
+            const packletImports: IPackletImport[] | undefined = DependencyAnalyzer.detectCircularImport(
+              packletAnalyzer,
+              program
+            );
 
-            if (resultLink) {
+            if (packletImports) {
               const tsconfigFileFolder: string = path.dirname(tsconfigFilePath);
 
-              let report: string = '';
-              const affectedPackletNames: string[] = [];
-
-              for (let current: ILink | undefined = resultLink; current; current = current.previous) {
-                affectedPackletNames.push(current.packletName);
-                const filePath: string = path.relative(tsconfigFileFolder, current.fromFilePath);
-                report += `"${current.packletName}" is referenced by ${filePath}\n`;
-              }
+              const affectedPackletNames: string[] = packletImports.map((x) => x.packletName);
 
               // If 3 different packlets form a circular dependency, we don't need to report the same warning 3 times.
               // Instead, only report the warning for the alphabetically smallest packlet.
               affectedPackletNames.sort();
-              if (affectedPackletNames[0] === packletAnalyzer.packletName) {
+              if (affectedPackletNames[0] === packletAnalyzer.inputFilePackletName) {
+                let report: string = '';
+                for (const packletImport of packletImports) {
+                  const filePath: string = path.relative(tsconfigFileFolder, packletImport.fromFilePath);
+                  report += `"${packletImport.packletName}" is referenced by ${filePath}\n`;
+                }
+
                 context.report({
                   node: node,
                   messageId: 'circular-import',

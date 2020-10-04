@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 
+// These helpers are borrowed from @rushstack/node-core-library
 export class Path {
   private static _relativePathRegex: RegExp = /^[.\/\\]+$/;
 

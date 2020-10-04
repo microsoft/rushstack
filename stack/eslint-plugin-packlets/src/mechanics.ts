@@ -1,12 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-
 import type { TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
 import { AST_NODE_TYPES, ESLintUtils } from '@typescript-eslint/experimental-utils';
 
-import { PacketAnalyzer, ILintError, MyMessageIds, MyMessageIds2 } from './PackletAnalyzer';
+import { PacketAnalyzer, IAnalyzerError, MyMessageIds, MyMessageIds2 } from './PackletAnalyzer';
 
 export type MessageIds = MyMessageIds | MyMessageIds2;
 type Options = [];
@@ -55,7 +53,7 @@ const mechanics: TSESLint.RuleModule<MessageIds, Options> = {
     ).program.getCompilerOptions()['configFilePath'] as string;
 
     const packletAnalyzer: PacketAnalyzer = new PacketAnalyzer(inputFilePath, tsconfigFilePath);
-    if (packletAnalyzer.skip) {
+    if (packletAnalyzer.nothingToDo) {
       return {};
     }
 
@@ -64,11 +62,11 @@ const mechanics: TSESLint.RuleModule<MessageIds, Options> = {
       // so a warning doesn't highlight the whole file.  But that's blocked behind a bug in the query selector:
       // https://github.com/estools/esquery/issues/114
       Program: (node: TSESTree.Node): void => {
-        if (packletAnalyzer.globalError) {
+        if (packletAnalyzer.error) {
           context.report({
             node: node,
-            messageId: packletAnalyzer.globalError.messageId,
-            data: packletAnalyzer.globalError.data
+            messageId: packletAnalyzer.error.messageId,
+            data: packletAnalyzer.error.data
           });
         }
       },
@@ -89,7 +87,7 @@ const mechanics: TSESLint.RuleModule<MessageIds, Options> = {
         node: TSESTree.ImportDeclaration | TSESTree.ExportNamedDeclaration | TSESTree.ExportAllDeclaration
       ): void => {
         if (node.source?.type === AST_NODE_TYPES.Literal) {
-          if (packletAnalyzer.packletsEnabled) {
+          if (packletAnalyzer.projectUsesPacklets) {
             // Extract the import/export module path
             // Example: "../../packlets/other-packlet"
             const modulePath = node.source.value;
@@ -106,7 +104,7 @@ const mechanics: TSESLint.RuleModule<MessageIds, Options> = {
               return;
             }
 
-            const lint: ILintError | undefined = packletAnalyzer.analyze2(modulePath);
+            const lint: IAnalyzerError | undefined = packletAnalyzer.analyzeImport(modulePath);
             if (lint) {
               context.report({
                 node: node,

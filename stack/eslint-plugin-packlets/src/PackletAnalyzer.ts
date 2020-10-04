@@ -17,7 +17,7 @@ export type MyMessageIds2 =
   | 'circular-entry-point'
   | 'packlet-importing-project-file';
 
-export interface ILintError {
+export interface IAnalyzerError {
   messageId: MyMessageIds | MyMessageIds2;
   data?: Readonly<Record<string, unknown>>;
 }
@@ -25,41 +25,72 @@ export interface ILintError {
 export class PacketAnalyzer {
   private static _validPackletName: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
+  /**
+   * The input file being linted.
+   *
+   * Example: "/path/to/my-project/src/file.ts"
+   */
   public readonly inputFilePath: string;
-  public readonly globalError: ILintError | undefined;
-  public readonly skip: boolean;
-  public readonly packletsEnabled: boolean;
+
+  /**
+   * An error that occurred while analyzing the inputFilePath.
+   */
+  public readonly error: IAnalyzerError | undefined;
+
+  /**
+   * Returned to indicate that the linter can ignore this file.  Possible reasons:
+   * - It's outside the "src" folder
+   * - The project doesn't define any packlets
+   */
+  public readonly nothingToDo: boolean;
+
+  /**
+   * If true, then the "src/packlets" folder exists.
+   */
+  public readonly projectUsesPacklets: boolean;
+
+  /**
+   * The absolute path of the "src/packlets" folder.
+   */
   public readonly packletsFolderPath: string | undefined;
-  public readonly packletName: string | undefined;
+
+  /**
+   * The packlet that the inputFilePath is under, if any.
+   */
+  public readonly inputFilePackletName: string | undefined;
+
+  /**
+   * Returns true if inputFilePath belongs to a packlet and is the entry point index.ts.
+   */
   public readonly isEntryPoint: boolean;
 
   public constructor(inputFilePath: string, tsconfigFilePath: string | undefined) {
     this.inputFilePath = inputFilePath;
-    this.globalError = undefined;
-    this.skip = false;
-    this.packletsEnabled = false;
+    this.error = undefined;
+    this.nothingToDo = false;
+    this.projectUsesPacklets = false;
     this.packletsFolderPath = undefined;
-    this.packletName = undefined;
+    this.inputFilePackletName = undefined;
     this.isEntryPoint = false;
 
     // Example: /path/to/my-project/src
     let srcFolderPath: string | undefined;
 
     if (!tsconfigFilePath) {
-      this.globalError = { messageId: 'missing-tsconfig' };
+      this.error = { messageId: 'missing-tsconfig' };
       return;
     }
 
     srcFolderPath = path.join(path.dirname(tsconfigFilePath), 'src');
 
     if (!fs.existsSync(srcFolderPath)) {
-      this.globalError = { messageId: 'missing-src-folder', data: { srcFolderPath } };
+      this.error = { messageId: 'missing-src-folder', data: { srcFolderPath } };
       return;
     }
 
     if (!Path.isUnder(inputFilePath, srcFolderPath)) {
       // Ignore files outside the "src" folder
-      this.skip = true;
+      this.nothingToDo = true;
       return;
     }
 
@@ -79,12 +110,12 @@ export class PacketAnalyzer {
         if (pathPart !== 'packlets') {
           // Example: /path/to/my-project/src/PACKLETS
           const packletsFolderPath: string = path.join(srcFolderPath, ...pathParts.slice(0, i + 1));
-          this.globalError = { messageId: 'packlet-folder-case', data: { packletsFolderPath } };
+          this.error = { messageId: 'packlet-folder-case', data: { packletsFolderPath } };
           return;
         }
 
         if (i !== 0) {
-          this.globalError = { messageId: 'misplaced-packlets-folder', data: { expectedPackletsFolder } };
+          this.error = { messageId: 'misplaced-packlets-folder', data: { expectedPackletsFolder } };
           return;
         }
 
@@ -94,14 +125,14 @@ export class PacketAnalyzer {
 
     if (underPackletsFolder || fs.existsSync(expectedPackletsFolder)) {
       // packletsAbsolutePath
-      this.packletsEnabled = true;
+      this.projectUsesPacklets = true;
       this.packletsFolderPath = expectedPackletsFolder;
     }
 
     if (underPackletsFolder && pathParts.length >= 2) {
       // Example: 'my-packlet'
       const packletName: string = pathParts[1];
-      this.packletName = packletName;
+      this.inputFilePackletName = packletName;
 
       // Example: 'index.ts' or 'index.tsx'
       const thirdPart: string = pathParts[2];
@@ -111,7 +142,7 @@ export class PacketAnalyzer {
 
       if (thirdPartWithoutExtension.toUpperCase() === 'INDEX') {
         if (!PacketAnalyzer._validPackletName.test(packletName)) {
-          this.globalError = { messageId: 'invalid-packlet-name', data: { packletName } };
+          this.error = { messageId: 'invalid-packlet-name', data: { packletName } };
           return;
         }
 
@@ -119,15 +150,15 @@ export class PacketAnalyzer {
       }
     }
 
-    if (this.globalError === undefined && !this.packletsEnabled) {
-      this.skip = true;
+    if (this.error === undefined && !this.projectUsesPacklets) {
+      this.nothingToDo = true;
     }
   }
 
-  public analyze2(modulePath: string): ILintError | undefined {
+  public analyzeImport(modulePath: string): IAnalyzerError | undefined {
     if (!this.packletsFolderPath) {
-      // This should not happen
-      throw new Error('Missing packletsFolderPath');
+      // The caller should ensure this can never happen
+      throw new Error('Internal error: packletsFolderPath is not defined');
     }
 
     // Example: /path/to/my-project/src/packlets/my-packlet
@@ -150,7 +181,7 @@ export class PacketAnalyzer {
         const importedPackletName: string = importedPathParts[0];
 
         // We are importing from a packlet. Is the input file part of the same packlet?
-        if (this.packletName && importedPackletName === this.packletName) {
+        if (this.inputFilePackletName && importedPackletName === this.inputFilePackletName) {
           // Yes.  Then our import must NOT use the packlet entry point.
 
           // Example: 'index'
@@ -195,7 +226,7 @@ export class PacketAnalyzer {
       }
     } else {
       // The imported path does NOT refer to a file under the src/packlets folder
-      if (this.packletName) {
+      if (this.inputFilePackletName) {
         return {
           messageId: 'packlet-importing-project-file'
         };
