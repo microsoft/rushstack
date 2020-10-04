@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { MessageIds } from './import-path';
+import type { MessageIds } from './mechanics';
 
 export interface ILintError {
   messageId: MessageIds;
