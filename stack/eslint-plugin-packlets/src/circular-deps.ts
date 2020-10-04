@@ -7,8 +7,8 @@ import * as path from 'path';
 import type { TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
 import { ESLintUtils } from '@typescript-eslint/experimental-utils';
 
-import { analyze, IResult } from './PackletAnalyzer';
-import { ILink, loopp } from './DependencyAnalyzer';
+import { PacketAnalyzer } from './PackletAnalyzer';
+import { DependencyAnalyzer, ILink } from './DependencyAnalyzer';
 
 export type MessageIds = 'circular-import';
 type Options = [];
@@ -40,8 +40,8 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
       context
     ).program.getCompilerOptions()['configFilePath'] as string;
 
-    const result: IResult = analyze(inputFilePath, tsconfigFilePath);
-    if (result.skip) {
+    const packletAnalyzer: PacketAnalyzer = new PacketAnalyzer(inputFilePath, tsconfigFilePath);
+    if (packletAnalyzer.skip) {
       return {};
     }
 
@@ -50,10 +50,10 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
       // so a warning doesn't highlight the whole file.  But that's blocked behind a bug in the query selector:
       // https://github.com/estools/esquery/issues/114
       Program: (node: TSESTree.Node): void => {
-        if (result.isEntryPoint && !result.globalError) {
+        if (packletAnalyzer.isEntryPoint && !packletAnalyzer.globalError) {
           const program: ts.Program | undefined = context.parserServices?.program;
           if (program) {
-            const resultLink: ILink | undefined = loopp(result, program);
+            const resultLink: ILink | undefined = DependencyAnalyzer.loopp(packletAnalyzer, program);
 
             if (resultLink) {
               const tsconfigFileFolder: string = path.dirname(tsconfigFilePath);
@@ -70,7 +70,7 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
               // If 3 different packlets form a circular dependency, we don't need to report the same warning 3 times.
               // Instead, only report the warning for the alphabetically smallest packlet.
               affectedPackletNames.sort();
-              if (affectedPackletNames[0] === result.packletName) {
+              if (affectedPackletNames[0] === packletAnalyzer.packletName) {
                 context.report({
                   node: node,
                   messageId: 'circular-import',

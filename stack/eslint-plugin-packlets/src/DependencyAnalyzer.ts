@@ -5,9 +5,9 @@ import type * as ts from 'typescript';
 import * as path from 'path';
 
 import { Path } from './Path';
-import { IResult } from './PackletAnalyzer';
+import { PacketAnalyzer } from './PackletAnalyzer';
 
-export enum RefFileKind {
+enum RefFileKind {
   Import,
   ReferenceFile,
   TypeReferenceDirective
@@ -26,75 +26,77 @@ export interface ILink {
   fromFilePath: string;
 }
 
-export function loop(
-  packletName: string,
-  startingPackletName: string,
-  refFileMap: Map<string, RefFile[]>,
-  program: ts.Program,
-  packletsFolderPath: string,
-  visitedPacklets: Set<string>,
-  previousLink: ILink | undefined
-): ILink | undefined {
-  const packletEntryPoint: string = path.join(packletsFolderPath, packletName, 'index');
+export class DependencyAnalyzer {
+  private static _loop(
+    packletName: string,
+    startingPackletName: string,
+    refFileMap: Map<string, RefFile[]>,
+    program: ts.Program,
+    packletsFolderPath: string,
+    visitedPacklets: Set<string>,
+    previousLink: ILink | undefined
+  ): ILink | undefined {
+    const packletEntryPoint: string = path.join(packletsFolderPath, packletName, 'index');
 
-  const tsSourceFile: ts.SourceFile | undefined =
-    program.getSourceFile(packletEntryPoint + '.ts') || program.getSourceFile(packletEntryPoint + '.tsx');
-  if (tsSourceFile) {
-    const refFiles: RefFile[] | undefined = refFileMap.get((tsSourceFile as any).path as any);
-    if (refFiles) {
-      for (const refFile of refFiles) {
-        if (refFile.kind === RefFileKind.Import) {
-          const referencingFilePath: string = refFile.file;
+    const tsSourceFile: ts.SourceFile | undefined =
+      program.getSourceFile(packletEntryPoint + '.ts') || program.getSourceFile(packletEntryPoint + '.tsx');
+    if (tsSourceFile) {
+      const refFiles: RefFile[] | undefined = refFileMap.get((tsSourceFile as any).path as any);
+      if (refFiles) {
+        for (const refFile of refFiles) {
+          if (refFile.kind === RefFileKind.Import) {
+            const referencingFilePath: string = refFile.file;
 
-          if (Path.isUnder(referencingFilePath, packletsFolderPath)) {
-            const referencingRelativePath: string = path.relative(packletsFolderPath, referencingFilePath);
-            const referencingPathParts: string[] = referencingRelativePath.split(/[\/\\]+/);
-            const referencingPackletName: string = referencingPathParts[0];
+            if (Path.isUnder(referencingFilePath, packletsFolderPath)) {
+              const referencingRelativePath: string = path.relative(packletsFolderPath, referencingFilePath);
+              const referencingPathParts: string[] = referencingRelativePath.split(/[\/\\]+/);
+              const referencingPackletName: string = referencingPathParts[0];
 
-            if (!visitedPacklets.has(packletName)) {
-              visitedPacklets.add(packletName);
+              if (!visitedPacklets.has(packletName)) {
+                visitedPacklets.add(packletName);
 
-              const link2: ILink = {
-                previous: previousLink,
-                fromFilePath: referencingFilePath,
-                packletName: packletName
-              };
+                const link2: ILink = {
+                  previous: previousLink,
+                  fromFilePath: referencingFilePath,
+                  packletName: packletName
+                };
 
-              if (referencingPackletName === startingPackletName) {
-                return link2;
-              }
+                if (referencingPackletName === startingPackletName) {
+                  return link2;
+                }
 
-              const result: ILink | undefined = loop(
-                referencingPackletName,
-                startingPackletName,
-                refFileMap,
-                program,
-                packletsFolderPath,
-                visitedPacklets,
-                link2
-              );
-              if (result) {
-                return result;
+                const result: ILink | undefined = DependencyAnalyzer._loop(
+                  referencingPackletName,
+                  startingPackletName,
+                  refFileMap,
+                  program,
+                  packletsFolderPath,
+                  visitedPacklets,
+                  link2
+                );
+                if (result) {
+                  return result;
+                }
               }
             }
           }
         }
       }
     }
+    return undefined;
   }
-  return undefined;
-}
 
-export function loopp(result: IResult, program: ts.Program): ILink | undefined {
-  const refFileMap: Map<string, RefFile[]> = (program as any).getRefFileMap();
-  const visitedPacklets: Set<string> = new Set();
-  return loop(
-    result.packletName!,
-    result.packletName!,
-    refFileMap,
-    program,
-    result.packletsFolderPath!,
-    visitedPacklets,
-    undefined
-  );
+  public static loopp(packetAnalyzer: PacketAnalyzer, program: ts.Program): ILink | undefined {
+    const refFileMap: Map<string, RefFile[]> = (program as any).getRefFileMap();
+    const visitedPacklets: Set<string> = new Set();
+    return DependencyAnalyzer._loop(
+      packetAnalyzer.packletName!,
+      packetAnalyzer.packletName!,
+      refFileMap,
+      program,
+      packetAnalyzer.packletsFolderPath!,
+      visitedPacklets,
+      undefined
+    );
+  }
 }
