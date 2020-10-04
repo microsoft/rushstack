@@ -6,89 +6,9 @@ import * as path from 'path';
 
 import type { TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
 import { ESLintUtils } from '@typescript-eslint/experimental-utils';
-import { Path } from './Path';
 
-import { analyze, IResult } from './PackletImportAnalyzer';
-
-export enum RefFileKind {
-  Import,
-  ReferenceFile,
-  TypeReferenceDirective
-}
-
-interface RefFile {
-  referencedFileName: string;
-  kind: RefFileKind;
-  index: number;
-  file: string;
-}
-
-interface ILink {
-  previous: ILink | undefined;
-  packletName: string;
-  fromFilePath: string;
-}
-
-function loop(
-  packletName: string,
-  startingPackletName: string,
-  refFileMap: Map<string, RefFile[]>,
-  program: ts.Program,
-  packletsFolderPath: string,
-  visitedPacklets: Set<string>,
-  previousLink: ILink | undefined,
-  context: TSESLint.RuleContext<MessageIds, Options>
-): ILink | undefined {
-  const packletEntryPoint: string = path.join(packletsFolderPath, packletName, 'index');
-
-  const tsSourceFile: ts.SourceFile | undefined =
-    program.getSourceFile(packletEntryPoint + '.ts') || program.getSourceFile(packletEntryPoint + '.tsx');
-  if (tsSourceFile) {
-    const refFiles: RefFile[] | undefined = refFileMap.get((tsSourceFile as any).path as any);
-    if (refFiles) {
-      for (const refFile of refFiles) {
-        if (refFile.kind === RefFileKind.Import) {
-          const referencingFilePath: string = refFile.file;
-
-          if (Path.isUnder(referencingFilePath, packletsFolderPath)) {
-            const referencingRelativePath: string = path.relative(packletsFolderPath, referencingFilePath);
-            const referencingPathParts: string[] = referencingRelativePath.split(/[\/\\]+/);
-            const referencingPackletName: string = referencingPathParts[0];
-
-            if (!visitedPacklets.has(packletName)) {
-              visitedPacklets.add(packletName);
-
-              const link2: ILink = {
-                previous: previousLink,
-                fromFilePath: referencingFilePath,
-                packletName: packletName
-              };
-
-              if (referencingPackletName === startingPackletName) {
-                return link2;
-              }
-
-              const result: ILink | undefined = loop(
-                referencingPackletName,
-                startingPackletName,
-                refFileMap,
-                program,
-                packletsFolderPath,
-                visitedPacklets,
-                link2,
-                context
-              );
-              if (result) {
-                return result;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  return undefined;
-}
+import { analyze, IResult } from './PackletAnalyzer';
+import { ILink, loopp } from './DependencyAnalyzer';
 
 export type MessageIds = 'circular-import';
 type Options = [];
@@ -131,21 +51,9 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
       // https://github.com/estools/esquery/issues/114
       Program: (node: TSESTree.Node): void => {
         if (result.isEntryPoint && !result.globalError) {
-          const visitedPacklets: Set<string> = new Set();
           const program: ts.Program | undefined = context.parserServices?.program;
           if (program) {
-            const refFileMap: Map<string, RefFile[]> = (program as any).getRefFileMap();
-
-            const resultLink: ILink | undefined = loop(
-              result.packletName!,
-              result.packletName!,
-              refFileMap,
-              program,
-              result.packletsFolderPath!,
-              visitedPacklets,
-              undefined,
-              context
-            );
+            const resultLink: ILink | undefined = loopp(result, program);
 
             if (resultLink) {
               const tsconfigFileFolder: string = path.dirname(tsconfigFilePath);
