@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/rundown",
-  "version": "1.0.33",
+  "version": "1.0.34",
   "description": "Detect load time regressions by running an app, tracing require() calls, and generating a deterministic report",
   "repository": {
     "type": "git",
