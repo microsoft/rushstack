@@ -152,13 +152,14 @@ The result is a much shorter inventory of files:
 
 ```
 example-rig/package.json
+
 example-rig/profile/node-library/config/api-extractor.json
 example-rig/profile/node-library/config/other-tool2.json
 example-rig/profile/node-library/config/other-tool3.json
-example-rig/profile/node-library/config/api-extractor.json
-example-rig/profile/node-library/config/other-tool2.json
-example-rig/profile/node-library/config/other-tool3.json
+
 example-rig/profile/web-library/config/api-extractor.json
+example-rig/profile/web-library/config/other-tool2.json
+example-rig/profile/web-library/config/other-tool3.json
 
 project1/package.json
 project1/config/rig.json
