@@ -26,6 +26,7 @@
   "dependencies": {
     "@rushstack/eslint-patch": "workspace:*",
     "@rushstack/eslint-plugin": "workspace:*",
+    "@rushstack/eslint-plugin-packlets": "workspace:*",
     "@rushstack/eslint-plugin-security": "workspace:*",
     "@typescript-eslint/eslint-plugin": "3.4.0",
     "@typescript-eslint/experimental-utils": "3.4.0",

@@ -176,7 +176,7 @@
     },
     {
       "name": "@rushstack/eslint-plugin-packlets",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/eslint-plugin-security",

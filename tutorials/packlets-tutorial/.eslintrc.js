@@ -2,18 +2,6 @@
 require('@rushstack/eslint-config/patch/modern-module-resolution');
 
 module.exports = {
-  extends: ['@rushstack/eslint-config/profile/node'],
-  plugins: ['@rushstack/eslint-plugin-packlets'],
-  parserOptions: { tsconfigRootDir: __dirname },
-  overrides: [
-    {
-      // Declare an override that applies to TypeScript files only
-      files: ['*.ts', '*.tsx'],
-
-      rules: {
-        '@rushstack/packlets/mechanics': 'warn',
-        '@rushstack/packlets/circular-deps': 'warn'
-      }
-    }
-  ]
+  extends: ['@rushstack/eslint-config/profile/node', '@rushstack/eslint-config/mixins/packlets'],
+  parserOptions: { tsconfigRootDir: __dirname }
 };
