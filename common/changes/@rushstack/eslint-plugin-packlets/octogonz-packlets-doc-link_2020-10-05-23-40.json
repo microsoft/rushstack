@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin-packlets",
+      "comment": "Fix broken link to tutorial project in README.md",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin-packlets",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
