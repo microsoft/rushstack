@@ -1,6 +1,6 @@
 # @rushstack/eslint-plugin-packlets
 
-Packlets provide a lightweight alternative to NPM packages for organizing source files within a single project.  The formalism is enforced using ESLint rules.
+Packlets provide a lightweight alternative to NPM packages for organizing source files within a single project.  The formalism is validated using ESLint rules.
 
 ## Motivation
 

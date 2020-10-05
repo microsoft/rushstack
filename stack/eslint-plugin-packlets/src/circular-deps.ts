@@ -40,7 +40,7 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
       context
     ).program.getCompilerOptions()['configFilePath'] as string;
 
-    const packletAnalyzer: PacketAnalyzer = new PacketAnalyzer(inputFilePath, tsconfigFilePath);
+    const packletAnalyzer: PacketAnalyzer = PacketAnalyzer.analyzeInputFile(inputFilePath, tsconfigFilePath);
     if (packletAnalyzer.nothingToDo) {
       return {};
     }

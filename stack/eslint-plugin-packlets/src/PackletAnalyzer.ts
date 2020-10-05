@@ -5,20 +5,20 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { Path } from './Path';
 
-export type MyMessageIds =
+export type InputFileMessageIds =
   | 'missing-tsconfig'
   | 'missing-src-folder'
   | 'packlet-folder-case'
   | 'invalid-packlet-name'
   | 'misplaced-packlets-folder';
 
-export type MyMessageIds2 =
+export type ImportMessageIds =
   | 'bypassed-entry-point'
   | 'circular-entry-point'
   | 'packlet-importing-project-file';
 
 export interface IAnalyzerError {
-  messageId: MyMessageIds | MyMessageIds2;
+  messageId: InputFileMessageIds | ImportMessageIds;
   data?: Readonly<Record<string, unknown>>;
 }
 
@@ -64,7 +64,7 @@ export class PacketAnalyzer {
    */
   public readonly isEntryPoint: boolean;
 
-  public constructor(inputFilePath: string, tsconfigFilePath: string | undefined) {
+  private constructor(inputFilePath: string, tsconfigFilePath: string | undefined) {
     this.inputFilePath = inputFilePath;
     this.error = undefined;
     this.nothingToDo = false;
@@ -153,6 +153,10 @@ export class PacketAnalyzer {
     if (this.error === undefined && !this.projectUsesPacklets) {
       this.nothingToDo = true;
     }
+  }
+
+  public static analyzeInputFile(inputFilePath: string, tsconfigFilePath: string | undefined) {
+    return new PacketAnalyzer(inputFilePath, tsconfigFilePath);
   }
 
   public analyzeImport(modulePath: string): IAnalyzerError | undefined {
