@@ -4,7 +4,7 @@
 import type { TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
 import { AST_NODE_TYPES, ESLintUtils } from '@typescript-eslint/experimental-utils';
 
-import { PacketAnalyzer, IAnalyzerError, InputFileMessageIds, ImportMessageIds } from './PackletAnalyzer';
+import { PackletAnalyzer, IAnalyzerError, InputFileMessageIds, ImportMessageIds } from './PackletAnalyzer';
 
 export type MessageIds = InputFileMessageIds | ImportMessageIds;
 type Options = [];
@@ -52,7 +52,10 @@ const mechanics: TSESLint.RuleModule<MessageIds, Options> = {
       context
     ).program.getCompilerOptions()['configFilePath'] as string;
 
-    const packletAnalyzer: PacketAnalyzer = PacketAnalyzer.analyzeInputFile(inputFilePath, tsconfigFilePath);
+    const packletAnalyzer: PackletAnalyzer = PackletAnalyzer.analyzeInputFile(
+      inputFilePath,
+      tsconfigFilePath
+    );
     if (packletAnalyzer.nothingToDo) {
       return {};
     }

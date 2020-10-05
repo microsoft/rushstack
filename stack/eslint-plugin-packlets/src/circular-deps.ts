@@ -7,7 +7,7 @@ import * as path from 'path';
 import type { ParserServices, TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
 import { ESLintUtils } from '@typescript-eslint/experimental-utils';
 
-import { PacketAnalyzer } from './PackletAnalyzer';
+import { PackletAnalyzer } from './PackletAnalyzer';
 import { DependencyAnalyzer, IPackletImport } from './DependencyAnalyzer';
 
 export type MessageIds = 'circular-import';
@@ -39,7 +39,10 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
     const program: ts.Program = ESLintUtils.getParserServices(context).program;
     const tsconfigFilePath: string | undefined = program.getCompilerOptions()['configFilePath'] as string;
 
-    const packletAnalyzer: PacketAnalyzer = PacketAnalyzer.analyzeInputFile(inputFilePath, tsconfigFilePath);
+    const packletAnalyzer: PackletAnalyzer = PackletAnalyzer.analyzeInputFile(
+      inputFilePath,
+      tsconfigFilePath
+    );
     if (packletAnalyzer.nothingToDo) {
       return {};
     }

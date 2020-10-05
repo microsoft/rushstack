@@ -22,7 +22,7 @@ export interface IAnalyzerError {
   data?: Readonly<Record<string, unknown>>;
 }
 
-export class PacketAnalyzer {
+export class PackletAnalyzer {
   private static _validPackletName: RegExp = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
   /**
@@ -141,7 +141,7 @@ export class PacketAnalyzer {
       const thirdPartWithoutExtension: string = path.parse(thirdPart).name;
 
       if (thirdPartWithoutExtension.toUpperCase() === 'INDEX') {
-        if (!PacketAnalyzer._validPackletName.test(packletName)) {
+        if (!PackletAnalyzer._validPackletName.test(packletName)) {
           this.error = { messageId: 'invalid-packlet-name', data: { packletName } };
           return;
         }
@@ -156,7 +156,7 @@ export class PacketAnalyzer {
   }
 
   public static analyzeInputFile(inputFilePath: string, tsconfigFilePath: string | undefined) {
-    return new PacketAnalyzer(inputFilePath, tsconfigFilePath);
+    return new PackletAnalyzer(inputFilePath, tsconfigFilePath);
   }
 
   public analyzeImport(modulePath: string): IAnalyzerError | undefined {

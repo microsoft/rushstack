@@ -5,7 +5,7 @@ import type * as ts from 'typescript';
 import * as path from 'path';
 
 import { Path } from './Path';
-import { PacketAnalyzer } from './PackletAnalyzer';
+import { PackletAnalyzer } from './PackletAnalyzer';
 
 enum RefFileKind {
   Import,
@@ -162,7 +162,7 @@ export class DependencyAnalyzer {
    */
   public static checkEntryPointForCircularImport(
     packletName: string,
-    packletAnalyzer: PacketAnalyzer,
+    packletAnalyzer: PackletAnalyzer,
     program: ts.Program
   ): IPackletImport[] | undefined {
     const refFileMap: Map<string, RefFile[]> = (program as any).getRefFileMap();
