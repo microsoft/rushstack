@@ -4,7 +4,7 @@
 import type * as ts from 'typescript';
 import * as path from 'path';
 
-import type { TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
+import type { ParserServices, TSESLint, TSESTree } from '@typescript-eslint/experimental-utils';
 import { ESLintUtils } from '@typescript-eslint/experimental-utils';
 
 import { PacketAnalyzer } from './PackletAnalyzer';
@@ -24,7 +24,7 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
       }
     ],
     docs: {
-      description: '',
+      description: 'Check for circular dependencies between packlets',
       category: 'Best Practices',
       recommended: 'warn',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin-packlets'
@@ -36,9 +36,8 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
     const inputFilePath: string = context.getFilename();
 
     // Example: /path/to/my-project/tsconfig.json
-    const tsconfigFilePath: string | undefined = ESLintUtils.getParserServices(
-      context
-    ).program.getCompilerOptions()['configFilePath'] as string;
+    const program: ts.Program = ESLintUtils.getParserServices(context).program;
+    const tsconfigFilePath: string | undefined = program.getCompilerOptions()['configFilePath'] as string;
 
     const packletAnalyzer: PacketAnalyzer = PacketAnalyzer.analyzeInputFile(inputFilePath, tsconfigFilePath);
     if (packletAnalyzer.nothingToDo) {
@@ -51,34 +50,34 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
       // https://github.com/estools/esquery/issues/114
       Program: (node: TSESTree.Node): void => {
         if (packletAnalyzer.isEntryPoint && !packletAnalyzer.error) {
-          const program: ts.Program | undefined = context.parserServices?.program;
-          if (program) {
-            const packletImports: IPackletImport[] | undefined = DependencyAnalyzer.detectCircularImport(
-              packletAnalyzer,
-              program
-            );
+          const packletImports:
+            | IPackletImport[]
+            | undefined = DependencyAnalyzer.checkEntryPointForCircularImport(
+            packletAnalyzer.inputFilePackletName!,
+            packletAnalyzer,
+            program
+          );
 
-            if (packletImports) {
-              const tsconfigFileFolder: string = path.dirname(tsconfigFilePath);
+          if (packletImports) {
+            const tsconfigFileFolder: string = path.dirname(tsconfigFilePath);
 
-              const affectedPackletNames: string[] = packletImports.map((x) => x.packletName);
+            const affectedPackletNames: string[] = packletImports.map((x) => x.packletName);
 
-              // If 3 different packlets form a circular dependency, we don't need to report the same warning 3 times.
-              // Instead, only report the warning for the alphabetically smallest packlet.
-              affectedPackletNames.sort();
-              if (affectedPackletNames[0] === packletAnalyzer.inputFilePackletName) {
-                let report: string = '';
-                for (const packletImport of packletImports) {
-                  const filePath: string = path.relative(tsconfigFileFolder, packletImport.fromFilePath);
-                  report += `"${packletImport.packletName}" is referenced by ${filePath}\n`;
-                }
-
-                context.report({
-                  node: node,
-                  messageId: 'circular-import',
-                  data: { report: report }
-                });
+            // If 3 different packlets form a circular dependency, we don't need to report the same warning 3 times.
+            // Instead, only report the warning for the alphabetically smallest packlet.
+            affectedPackletNames.sort();
+            if (affectedPackletNames[0] === packletAnalyzer.inputFilePackletName) {
+              let report: string = '';
+              for (const packletImport of packletImports) {
+                const filePath: string = path.relative(tsconfigFileFolder, packletImport.fromFilePath);
+                report += `"${packletImport.packletName}" is referenced by ${filePath}\n`;
               }
+
+              context.report({
+                node: node,
+                messageId: 'circular-import',
+                data: { report: report }
+              });
             }
           }
         }

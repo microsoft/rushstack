@@ -22,7 +22,7 @@ All these problems can be solved by reorganizing the project into NPM packages (
 
 However, separating code in this ways has some downsides.  The projects need to build separately, which has some tooling costs (for example, "watch mode" now needs to consider multiple projects).  In a large monorepo, the library may attract other consumers, before the API has been fully worked out.
 
-Packlets provide a lightweight alternative that provides many of the same benefits of packages, but without the `package.json` file.  It's a great way to prototype your project organization before later graduating your packlets into proper NPM packages.
+Packlets provide a lightweight alternative that offers many of the same benefits of packages, but without the `package.json` file.  It's a great way to prototype your project organization before later graduating your packlets into proper NPM packages.
 
 ## 5 rules for packlets
 
@@ -109,6 +109,7 @@ The basic design can be summarized in 5 rules:
     import { App } from '../../app/App';
     ```
 
+
 ## Getting Started
 
 To enable packlet validation for a simple `typescript-eslint` setup, reference the `@rushstack/eslint-plugin-packlets` project like this:
@@ -150,7 +151,7 @@ module.exports = {
 
 The `@rushstack/eslint-plugin-packlets` plugin performs validation via two separate rules:
 
-- `@rushstack/packlets/mechanics` - This rule implements most of the basic checks for packlet folder names.
+- `@rushstack/packlets/mechanics` - This rule validates most of the import path rules outlined above.  It does not require full type information.
 - `@rushstack/packlets/circular-deps` - This rule detects circular dependencies between packlets.  It requires full type information from the TypeScript compiler.
 
 

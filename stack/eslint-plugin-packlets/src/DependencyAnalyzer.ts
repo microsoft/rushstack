@@ -16,9 +16,16 @@ enum RefFileKind {
 // TypeScript compiler internal:
 // https://github.com/microsoft/TypeScript/blob/5ecdcef4cecfcdc86bd681b377636422447507d7/src/compiler/program.ts#L541
 interface RefFile {
+  // The absolute path of the module that was imported.
+  // (Normalized to an all lowercase ts.Path string.)
   referencedFileName: string;
+  // The kind of reference.
   kind: RefFileKind;
+  // An index indicating the order in which items occur in a compound expression
   index: number;
+
+  // The absolute path of the source file containing the import statement.
+  // (Normalized to an all lowercase ts.Path string.)
   file: string;
 }
 
@@ -48,7 +55,17 @@ interface IImportListNode extends IPackletImport {
 }
 
 export class DependencyAnalyzer {
-  private static walkImports(
+  /**
+   * @param packletName - the packlet to be checked next in our traversal
+   * @param startingPackletName - the packlet that we started with; if the traversal reaches this packlet,
+   *   then a circular dependency has been detected
+   * @param refFileMap - the compiler's `refFileMap` data structure describing import relationships
+   * @param program - the compiler's `ts.Program` object
+   * @param packletsFolderPath - the absolute path of the "src/packlets" folder.
+   * @param visitedPacklets - the set of packlets that have already been visited in this traversal
+   * @param previousNode - a linked list of import statements that brought us to this step in the traversal
+   */
+  private static _walkImports(
     packletName: string,
     startingPackletName: string,
     refFileMap: Map<string, RefFile[]>,
@@ -74,14 +91,17 @@ export class DependencyAnalyzer {
       if (refFile.kind === RefFileKind.Import) {
         const referencingFilePath: string = refFile.file;
 
+        // Is it a reference to a packlet?
         if (Path.isUnder(referencingFilePath, packletsFolderPath)) {
           const referencingRelativePath: string = path.relative(packletsFolderPath, referencingFilePath);
           const referencingPathParts: string[] = referencingRelativePath.split(/[\/\\]+/);
           const referencingPackletName: string = referencingPathParts[0];
 
+          // Have we already analyzed this packlet?
           if (!visitedPacklets.has(packletName)) {
             visitedPacklets.add(packletName);
 
+            // Make a new linked list node  to record this step of the traversal
             const importListNode: IImportListNode = {
               previousNode: previousNode,
               fromFilePath: referencingFilePath,
@@ -89,10 +109,12 @@ export class DependencyAnalyzer {
             };
 
             if (referencingPackletName === startingPackletName) {
+              // The traversal has returned to the packlet that we started from;
+              // this means we have detected a circular dependency
               return importListNode;
             }
 
-            const result: IImportListNode | undefined = DependencyAnalyzer.walkImports(
+            const result: IImportListNode | undefined = DependencyAnalyzer._walkImports(
               referencingPackletName,
               startingPackletName,
               refFileMap,
@@ -112,24 +134,52 @@ export class DependencyAnalyzer {
     return undefined;
   }
 
-  public static detectCircularImport(
-    packetAnalyzer: PacketAnalyzer,
+  /**
+   * For the specified packlet, trace all modules that import it, looking for a circular dependency
+   * between packlets.  If found, an array is returned describing the import statements that cause
+   * the problem.
+   *
+   * @remarks
+   * For example, suppose we have files like this:
+   *
+   * ```
+   * src/packlets/logging/index.ts
+   * src/packlets/logging/Logger.ts --> imports "../data-model"
+   * src/packlets/data-model/index.ts
+   * src/packlets/data-model/DataModel.ts --> imports "../logging"
+   * ```
+   *
+   * The returned array would be:
+   * ```ts
+   * [
+   *   { packletName: "logging",    fromFilePath: "/path/to/src/packlets/data-model/DataModel.ts" },
+   *   { packletName: "data-model", fromFilePath: "/path/to/src/packlets/logging/Logger.ts" },
+   * ]
+   * ```
+   *
+   * If there is more than one circular dependency chain, only the first one that is encountered
+   * will be returned.
+   */
+  public static checkEntryPointForCircularImport(
+    packletName: string,
+    packletAnalyzer: PacketAnalyzer,
     program: ts.Program
   ): IPackletImport[] | undefined {
     const refFileMap: Map<string, RefFile[]> = (program as any).getRefFileMap();
     const visitedPacklets: Set<string> = new Set();
 
-    const listNode: IImportListNode | undefined = DependencyAnalyzer.walkImports(
-      packetAnalyzer.inputFilePackletName!,
-      packetAnalyzer.inputFilePackletName!,
+    const listNode: IImportListNode | undefined = DependencyAnalyzer._walkImports(
+      packletName,
+      packletName,
       refFileMap,
       program,
-      packetAnalyzer.packletsFolderPath!,
+      packletAnalyzer.packletsFolderPath!,
       visitedPacklets,
       undefined // previousNode
     );
 
     if (listNode) {
+      // Convert the linked list to an array
       const packletImports: IPackletImport[] = [];
       for (let current: IImportListNode | undefined = listNode; current; current = current.previousNode) {
         packletImports.push({ fromFilePath: current.fromFilePath, packletName: current.packletName });
