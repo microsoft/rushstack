@@ -924,6 +924,13 @@
       "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
     {
+      "packageName": "@rushstack/eslint-plugin-packlets",
+      "projectFolder": "stack/eslint-plugin-packlets",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
       "packageName": "@rushstack/eslint-plugin-security",
       "projectFolder": "stack/eslint-plugin-security",
       "reviewCategory": "libraries",
@@ -1056,6 +1063,12 @@
     {
       "packageName": "heft-webpack-basic-tutorial",
       "projectFolder": "tutorials/heft-webpack-basic-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "packlets-tutorial",
+      "projectFolder": "tutorials/packlets-tutorial",
       "reviewCategory": "tests",
       "shouldPublish": false
     },

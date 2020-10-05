@@ -1699,6 +1699,34 @@ importers:
       '@typescript-eslint/typescript-estree': 3.4.0
       eslint: ~7.2.0
       typescript: ~3.9.7
+  ../../stack/eslint-plugin-packlets:
+    dependencies:
+      '@rushstack/tree-pattern': 'link:../../libraries/tree-pattern'
+    devDependencies:
+      '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0_@rushstack+heft@0.14.0
+      '@types/eslint': 7.2.0
+      '@types/estree': 0.0.44
+      '@types/heft-jest': 1.0.1
+      '@types/node': 10.17.13
+      '@typescript-eslint/experimental-utils': 3.4.0_eslint@7.2.0+typescript@3.9.7
+      '@typescript-eslint/parser': 3.4.0_eslint@7.2.0+typescript@3.9.7
+      '@typescript-eslint/typescript-estree': 3.4.0_typescript@3.9.7
+      eslint: 7.2.0
+      typescript: 3.9.7
+    specifiers:
+      '@rushstack/heft': 0.14.0
+      '@rushstack/heft-node-rig': 0.1.0
+      '@rushstack/tree-pattern': 'workspace:*'
+      '@types/eslint': 7.2.0
+      '@types/estree': 0.0.44
+      '@types/heft-jest': 1.0.1
+      '@types/node': 10.17.13
+      '@typescript-eslint/experimental-utils': 3.4.0
+      '@typescript-eslint/parser': 3.4.0
+      '@typescript-eslint/typescript-estree': 3.4.0
+      eslint: ~7.2.0
+      typescript: ~3.9.7
   ../../stack/eslint-plugin-security:
     dependencies:
       '@rushstack/tree-pattern': 'link:../../libraries/tree-pattern'
@@ -2223,6 +2251,19 @@ importers:
       style-loader: ~1.2.1
       typescript: ~3.9.7
       webpack: ~4.31.0
+  ../../tutorials/packlets-tutorial:
+    devDependencies:
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
+      '@types/node': 10.17.13
+      eslint: 7.2.0
+      typescript: 3.9.7
+    specifiers:
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
+      '@types/node': 10.17.13
+      eslint: ~7.2.0
+      typescript: ~3.9.7
   ../../webpack/loader-load-themed-styles:
     dependencies:
       '@microsoft/load-themed-styles': 'link:../../libraries/load-themed-styles'

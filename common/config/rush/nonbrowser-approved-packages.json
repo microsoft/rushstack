@@ -175,6 +175,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/eslint-plugin-packlets",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "@rushstack/eslint-plugin-security",
       "allowedCategories": [ "libraries" ]
     },
