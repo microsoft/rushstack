@@ -2,6 +2,21 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "0.1.4",
+      "tag": "@rushstack/heft-node-rig_v0.1.4",
+      "date": "Mon, 05 Oct 2020 22:36:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.10.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.15.3` to `^0.15.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.3",
       "tag": "@rushstack/heft-node-rig_v0.1.3",
       "date": "Mon, 05 Oct 2020 15:10:43 GMT",

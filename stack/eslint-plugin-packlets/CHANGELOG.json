@@ -1,0 +1,17 @@
+{
+  "name": "@rushstack/eslint-plugin-packlets",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.1.0",
+      "date": "Mon, 05 Oct 2020 22:36:57 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release"
+          }
+        ]
+      }
+    }
+  ]
+}

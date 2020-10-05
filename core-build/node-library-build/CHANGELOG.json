@@ -2,6 +2,30 @@
   "name": "@microsoft/node-library-build",
   "entries": [
     {
+      "version": "6.5.3",
+      "tag": "@microsoft/node-library-build_v6.5.3",
+      "date": "Mon, 05 Oct 2020 22:36:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" to `3.17.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-mocha\" to `3.9.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-typescript\" to `8.5.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.9\" to `0.4.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "6.5.2",
       "tag": "@microsoft/node-library-build_v6.5.2",
       "date": "Mon, 05 Oct 2020 15:10:42 GMT",
