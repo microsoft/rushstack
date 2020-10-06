@@ -20,7 +20,7 @@ All these problems can be solved by reorganizing the project into NPM packages (
 - `@my-app/reports` - the report engine
 - `@my-app/application` - other arbitrary files such as startup code and the main application
 
-However, separating code in this ways has some downsides.  The projects need to build separately, which has some tooling costs (for example, "watch mode" now needs to consider multiple projects).  In a large monorepo, the library may attract other consumers, before the API has been fully worked out.
+However, separating code in this way has some downsides.  The projects need to build separately, which has some tooling costs (for example, "watch mode" now needs to consider multiple projects).  In a large monorepo, the library may attract other consumers, before the API has been fully worked out.
 
 Packlets provide a lightweight alternative that offers many of the same benefits of packages, but without the `package.json` file.  It's a great way to prototype your project organization before later graduating your packlets into proper NPM packages.
 
@@ -33,7 +33,7 @@ With packlets, our folders would be reorganized as follows:
 - `src/packlets/reports/*.ts` - the report engine
 - `src/*.ts` - other arbitrary files such as startup code and the main application
 
-The [packlets-tutorial](https://github.com/microsoft/rushstack/tree/master/packlets/tutorials/packlets-tutorial) sample project shows this layout in more detail.
+The [packlets-tutorial](https://github.com/microsoft/rushstack/tree/master/tutorials/packlets-tutorial) sample project illustrates this layout in full detail.
 
 The basic design can be summarized in 5 rules:
 
@@ -133,7 +133,7 @@ module.exports = {
 };
 ```
 
-If you use the [@rushstack/eslint-config](https://www.npmjs.com/package/@rushstack/eslint-config) ruleset, add the `"packlets"` mixin like this:
+Or, if you are using the [@rushstack/eslint-config](https://www.npmjs.com/package/@rushstack/eslint-config) ruleset, add the `"packlets"` mixin like this:
 
 **\<my-project\>/.eslintrc.js**
 ```ts
@@ -151,8 +151,8 @@ module.exports = {
 
 The `@rushstack/eslint-plugin-packlets` plugin performs validation via two separate rules:
 
-- `@rushstack/packlets/mechanics` - This rule validates most of the import path rules outlined above.  It does not require full type information.
-- `@rushstack/packlets/circular-deps` - This rule detects circular dependencies between packlets.  It requires full type information from the TypeScript compiler.
+- `@rushstack/packlets/mechanics` - validates most of the import path rules outlined above.  It does not require full type information.
+- `@rushstack/packlets/circular-deps` - detects circular dependencies between packlets.  It requires full type information from the TypeScript compiler.
 
 
 ## Links
