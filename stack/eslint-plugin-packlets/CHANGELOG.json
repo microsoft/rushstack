@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin-packlets",
   "entries": [
     {
+      "version": "0.1.1",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.1.1",
+      "date": "Tue, 06 Oct 2020 00:24:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix broken link to tutorial project in README.md"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0",
       "tag": "@rushstack/eslint-plugin-packlets_v0.1.0",
       "date": "Mon, 05 Oct 2020 22:36:57 GMT",

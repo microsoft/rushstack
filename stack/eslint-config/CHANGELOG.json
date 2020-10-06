@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "2.2.1",
+      "tag": "@rushstack/eslint-config_v2.2.1",
+      "date": "Tue, 06 Oct 2020 00:24:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-packlets\" to `0.1.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.0",
       "tag": "@rushstack/eslint-config_v2.2.0",
       "date": "Mon, 05 Oct 2020 22:36:57 GMT",
