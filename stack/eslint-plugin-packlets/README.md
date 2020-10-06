@@ -159,7 +159,7 @@ The `@rushstack/eslint-plugin-packlets` plugin implements three separate rules:
 
 If you'd like to require a README.md file in each packlet folder, enable the optional `@rushstack/packlets/readme` rule.
 
-The `minimumReadmeWords` allows you to require a minimum number of words of documentation in the README.md file.  The default value is `10` words.
+The `minimumReadmeWords` option allows you to specify a minimum number of words of documentation in the README.md file.  The default value is `10` words.
 
 Example configuration with the `@rushstack/packlets/readme` rule enabled:
 
