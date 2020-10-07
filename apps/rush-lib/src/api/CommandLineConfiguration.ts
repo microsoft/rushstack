@@ -7,7 +7,13 @@ import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
 import { RushConstants } from '../logic/RushConstants';
 
-import { CommandJson, ICommandLineJson, ParameterJson } from './CommandLineJson';
+import {
+  CommandJson,
+  ICommandLineJson,
+  IPhaseJson,
+  ParameterJson,
+  IPhasedCommandJson
+} from './CommandLineJson';
 
 /**
  * Custom Commands and Options for the Rush Command Line
@@ -17,8 +23,13 @@ export class CommandLineConfiguration {
     path.join(__dirname, '../schemas/command-line.schema.json')
   );
 
-  public readonly commands: CommandJson[] = [];
+  public readonly commands: Map<string, CommandJson> = new Map<string, CommandJson>();
+  public readonly phases: Map<string, IPhaseJson> = new Map<string, IPhaseJson>();
   public readonly parameters: ParameterJson[] = [];
+  private readonly _commandNames: Set<string> = new Set<string>([
+    RushConstants.buildCommandName,
+    RushConstants.rebuildCommandName
+  ]);
 
   public static readonly defaultBuildCommandJson: CommandJson = {
     commandKind: RushConstants.bulkCommandKind,
@@ -66,9 +77,55 @@ export class CommandLineConfiguration {
    */
   private constructor(commandLineJson: ICommandLineJson | undefined) {
     if (commandLineJson) {
+      if (commandLineJson.phases) {
+        for (const phase of commandLineJson.phases) {
+          if (this.phases.has(phase.name)) {
+            throw new Error(
+              `In ${RushConstants.commandLineFilename}, the phase "${phase.name}" is specified ` +
+                'more than once.'
+            );
+          }
+
+          this.phases.set(phase.name, phase);
+        }
+      }
+
       if (commandLineJson.commands) {
         for (const command of commandLineJson.commands) {
-          this.commands.push(command);
+          if (this.commands.has(command.name)) {
+            throw new Error(
+              `In ${RushConstants.commandLineFilename}, the command "${command.name}" is specified ` +
+                'more than once.'
+            );
+          }
+
+          if (command.commandKind === 'phased') {
+            const phasedCommand: IPhasedCommandJson = command as IPhasedCommandJson;
+            if (phasedCommand.dependencies?.self) {
+              for (const phase of phasedCommand.dependencies.self) {
+                if (!this.phases.has(phase)) {
+                  throw new Error(
+                    `In ${RushConstants.commandLineFilename}, in the command "${command.name}", the self ` +
+                      `dependency phase "${phase}" does not exist.`
+                  );
+                }
+              }
+            }
+
+            if (phasedCommand.dependencies?.upstream) {
+              for (const phase of phasedCommand.dependencies.upstream) {
+                if (!this.phases.has(phase)) {
+                  throw new Error(
+                    `In ${RushConstants.commandLineFilename}, in the command "${command.name}", the upstream ` +
+                      `dependency phase "${phase}" does not exist.`
+                  );
+                }
+              }
+            }
+          }
+
+          this.commands.set(command.name, command);
+          this._commandNames.add(command.name);
         }
       }
 
@@ -89,6 +146,38 @@ export class CommandLineConfiguration {
                 );
               }
               break;
+          }
+
+          let parameterHasAssociations: boolean = false;
+
+          for (const associatedCommand of parameter.associatedCommands || []) {
+            if (!this._commandNames.has(associatedCommand)) {
+              throw new Error(
+                `${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}" ` +
+                  `that is associated with a command "${associatedCommand}" that does not exist or does ` +
+                  'not support custom parameters.'
+              );
+            } else {
+              parameterHasAssociations = true;
+            }
+          }
+
+          for (const associatedPhase of parameter.associatedPhases || []) {
+            if (!this.phases.has(associatedPhase)) {
+              throw new Error(
+                `${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}" ` +
+                  `that is associated with a phase "${associatedPhase}" that does not exist.`
+              );
+            } else {
+              parameterHasAssociations = true;
+            }
+          }
+
+          if (!parameterHasAssociations) {
+            throw new Error(
+              `${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}"` +
+                ` that lists no associated commands or phases.`
+            );
           }
         }
       }

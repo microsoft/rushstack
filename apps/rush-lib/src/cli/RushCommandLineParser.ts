@@ -5,7 +5,7 @@ import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
 
-import { CommandLineParser, CommandLineFlagParameter, CommandLineAction } from '@rushstack/ts-command-line';
+import { CommandLineParser, CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -13,7 +13,6 @@ import { RushConstants } from '../logic/RushConstants';
 import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
 import { CommandJson } from '../api/CommandLineJson';
 import { Utilities } from '../utilities/Utilities';
-import { BaseScriptAction } from '../cli/scriptActions/BaseScriptAction';
 
 import { AddAction } from './actions/AddAction';
 import { ChangeAction } from './actions/ChangeAction';
@@ -203,7 +202,6 @@ export class RushCommandLineParser extends CommandLineParser {
     // Build actions from the command line configuration supersede default build actions.
     this._addCommandLineConfigActions(commandLineConfiguration);
     this._addDefaultBuildActions(commandLineConfiguration);
-    this._validateCommandLineConfigParameterAssociations(commandLineConfiguration);
   }
 
   private _addDefaultBuildActions(commandLineConfiguration?: CommandLineConfiguration): void {
@@ -229,7 +227,7 @@ export class RushCommandLineParser extends CommandLineParser {
     }
 
     // Register each custom command
-    for (const command of commandLineConfiguration.commands) {
+    for (const command of commandLineConfiguration.commands.values()) {
       this._addCommandLineConfigAction(commandLineConfiguration, command);
     }
   }
@@ -249,7 +247,7 @@ export class RushCommandLineParser extends CommandLineParser {
     this._validateCommandLineConfigCommand(command);
 
     switch (command.commandKind) {
-      case RushConstants.bulkCommandKind:
+      case RushConstants.bulkCommandKind: {
         this.addAction(
           new BulkScriptAction({
             actionName: command.name,
@@ -276,8 +274,9 @@ export class RushCommandLineParser extends CommandLineParser {
           })
         );
         break;
+      }
 
-      case RushConstants.globalCommandKind:
+      case RushConstants.globalCommandKind: {
         this.addAction(
           new GlobalScriptAction({
             actionName: command.name,
@@ -294,39 +293,18 @@ export class RushCommandLineParser extends CommandLineParser {
           })
         );
         break;
+      }
+
+      case RushConstants.phasedCommandKind: {
+        // TODO
+        break;
+      }
+
       default:
         throw new Error(
           `${RushConstants.commandLineFilename} defines a command "${command!.name}"` +
             ` using an unsupported command kind "${command!.commandKind}"`
         );
-    }
-  }
-
-  private _validateCommandLineConfigParameterAssociations(
-    commandLineConfiguration?: CommandLineConfiguration
-  ): void {
-    if (!commandLineConfiguration) {
-      return;
-    }
-
-    // Check for any invalid associations
-    for (const parameter of commandLineConfiguration.parameters) {
-      for (const associatedCommand of parameter.associatedCommands) {
-        const action: CommandLineAction | undefined = this.tryGetAction(associatedCommand);
-        if (!action) {
-          throw new Error(
-            `${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}"` +
-              ` that is associated with a nonexistent command "${associatedCommand}"`
-          );
-        }
-        if (!(action instanceof BaseScriptAction)) {
-          throw new Error(
-            `${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}"` +
-              ` that is associated with a command "${associatedCommand}", but that command does not` +
-              ` support custom parameters`
-          );
-        }
-      }
     }
   }
 
