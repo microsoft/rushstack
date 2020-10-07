@@ -26,31 +26,41 @@ const clientPnpmfile: IPnpmfile | undefined = pnpmfileSettings.useClientPnpmfile
   ? require('./clientPnpmfile')
   : undefined;
 
-// Set the preferred versions on the dependency map. If the version on the map is an allowedAlternativeVersion
-// then skip it. Otherwise, check to ensure that the common version is a subset of the specified version. If
-// it is, then replace the specified version with the preferredVersion
-function setPreferredVersions(dependencies?: { [dependencyName: string]: string }): void {
-  for (const name of Object.keys(dependencies || {})) {
-    if (pnpmfileSettings.allPreferredVersions.hasOwnProperty(name)) {
-      const preferredVersion: string = pnpmfileSettings.allPreferredVersions[name];
-      const version: string = dependencies![name];
-      if (pnpmfileSettings.allowedAlternativeVersions.hasOwnProperty(name)) {
-        const allowedAlternatives: ReadonlyArray<string> | undefined =
-          pnpmfileSettings.allowedAlternativeVersions[name];
-        if (allowedAlternatives && allowedAlternatives.indexOf(version) > -1) {
-          continue;
-        }
-      }
-      let isValidRange: boolean = false;
-      try {
-        isValidRange = !!semver.validRange(preferredVersion) && !!semver.validRange(version);
-      } catch {
-        // Swallow invalid range errors
-      }
+const convertToSemverRange = ([dep, specifier]: [string, string]): [string, TSemver.Range] | undefined => {
+  try {
+    const range: TSemver.Range = new semver.Range(specifier);
+    return [dep, range];
+  } catch (err) {
+    return;
+  }
+};
 
-      if (isValidRange && semver.subset(preferredVersion, version)) {
-        dependencies![name] = preferredVersion;
+const preferredVersions: Map<string, TSemver.Range> = new Map(
+  Object.entries(pnpmfileSettings.allPreferredVersions).map(convertToSemverRange).filter(Boolean)
+);
+
+// Any time the preferred version is a subset of the dependency version, use it instead.
+// Allowed alternative versions are only for `rush check` validation
+function setPreferredVersions(dependencies?: { [dependencyName: string]: string }): void {
+  if (!dependencies) {
+    return;
+  }
+
+  for (const [dep, specifier] of Object.entries(dependencies)) {
+    const preferredRange: TSemver.Range | undefined = preferredVersions.get(dep);
+    if (!preferredRange) {
+      // No preferred version, ignore
+      continue;
+    }
+
+    try {
+      const existingRange: TSemver.Range = new semver.Range(specifier);
+      if (semver.subset(preferredRange, existingRange)) {
+        dependencies[dep] = preferredRange.toString();
       }
+    } catch (err) {
+      // If the existing specifier isn't a valid semver range, ignore it
+      continue;
     }
   }
 }
