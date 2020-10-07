@@ -26,18 +26,19 @@ const clientPnpmfile: IPnpmfile | undefined = pnpmfileSettings.useClientPnpmfile
   ? require('./clientPnpmfile')
   : undefined;
 
-const convertToSemverRange = ([dep, specifier]: [string, string]): [string, TSemver.Range] | undefined => {
-  try {
-    const range: TSemver.Range = new semver.Range(specifier);
-    return [dep, range];
-  } catch (err) {
-    return;
-  }
-};
+const preferredVersions: Map<string, TSemver.Range> = (() => {
+  const result: Map<string, TSemver.Range> = new Map();
 
-const preferredVersions: Map<string, TSemver.Range> = new Map(
-  Object.entries(pnpmfileSettings.allPreferredVersions).map(convertToSemverRange).filter(Boolean)
-);
+  for (const [dep, specifier] of Object.entries(pnpmfileSettings.allPreferredVersions)) {
+    try {
+      const range: TSemver.Range = new semver.Range(specifier);
+      result.set(dep, range);
+    } catch (err) {
+      continue;
+    }
+  }
+  return result;
+})();
 
 // Any time the preferred version is a subset of the dependency version, use it instead.
 // Allowed alternative versions are only for `rush check` validation
