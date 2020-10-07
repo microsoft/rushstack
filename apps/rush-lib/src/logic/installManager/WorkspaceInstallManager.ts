@@ -473,6 +473,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       allowedAlternativeVersions: MapExtensions.toObject(
         this.rushConfiguration.getCommonVersions(this.options.variant).allowedAlternativeVersions
       ),
+      coreLibraryPath: require.resolve('@rushstack/node-core-library'),
       semverPath: require.resolve('semver'),
       useClientPnpmfile: pnpmfileExists
     };

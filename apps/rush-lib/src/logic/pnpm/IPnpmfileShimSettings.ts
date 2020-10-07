@@ -4,6 +4,13 @@
 export interface IPnpmfileShimSettings {
   allPreferredVersions: { [dependencyName: string]: string };
   allowedAlternativeVersions: { [dependencyName: string]: ReadonlyArray<string> };
+  /**
+   * Path to `@rushstack/node-core-library`
+   */
+  coreLibraryPath: string;
+  /**
+   * Path to `semver`
+   */
   semverPath: string;
   useClientPnpmfile: boolean;
 }
