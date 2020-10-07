@@ -41,7 +41,7 @@ export abstract class BaseScriptAction extends BaseRushAction {
     // Find any parameters that are associated with this command
     for (const parameterJson of this._commandLineConfiguration.parameters) {
       let associated: boolean = false;
-      for (const associatedCommand of parameterJson.associatedCommands) {
+      for (const associatedCommand of parameterJson.associatedCommands || []) {
         if (associatedCommand === this.actionName) {
           associated = true;
         }

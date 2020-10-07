@@ -191,6 +191,11 @@ export class RushConstants {
   public static readonly globalCommandKind: 'global' = 'global';
 
   /**
+   * The value of the "commandKind" property for a phased command in command-line.json
+   */
+  public static readonly phasedCommandKind: 'phased' = 'phased';
+
+  /**
    * The name of the incremental build command.
    */
   public static readonly buildCommandName: string = 'build';
