@@ -22,12 +22,6 @@ export class JestPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    const expectedConfigPath: string = path.join(heftConfiguration.buildFolder, JEST_CONFIGURATION_LOCATION);
-
-    if (!FileSystem.exists(expectedConfigPath)) {
-      throw new Error(`Expected to find jest config file at ${expectedConfigPath}`);
-    }
-
     heftSession.hooks.test.tap(PLUGIN_NAME, (test: ITestStageContext) => {
       test.hooks.run.tapPromise(PLUGIN_NAME, async () => {
         await this._runJestAsync(heftSession, heftConfiguration, test);
@@ -46,6 +40,13 @@ export class JestPlugin implements IHeftPlugin {
   ): Promise<void> {
     const jestLogger: ScopedLogger = heftSession.requestScopedLogger('jest');
     const buildFolder: string = heftConfiguration.buildFolder;
+
+    const expectedConfigPath: string = path.join(buildFolder, JEST_CONFIGURATION_LOCATION);
+
+    if (!FileSystem.exists(expectedConfigPath)) {
+      jestLogger.emitError(new Error(`Expected to find jest config file at ${expectedConfigPath}`));
+      return;
+    }
 
     // In watch mode, Jest starts up in parallel with the compiler, so there's no
     // guarantee that the output files would have been written yet.
