@@ -113,6 +113,7 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
   ): Promise<string> {
     const result: Result = await LegacyAdapters.convertCallbackToPromise(render, {
       data: fileContents,
+      file: filePath,
       importer: (url: string) => ({ file: this._patchSassUrl(url) }),
       includePaths: includePaths
         ? includePaths
@@ -125,7 +126,7 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
 
   private _patchSassUrl(url: string): string {
     if (url[0] === '~') {
-      url = 'node_modules/' + url.substr(1);
+      return 'node_modules/' + url.substr(1);
     }
 
     return url;
