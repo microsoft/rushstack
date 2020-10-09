@@ -309,44 +309,44 @@ export function detokenize(styles: string | undefined): string | undefined {
  * Resolves ThemingInstruction objects in an array and joins the result into a string.
  * @param {ThemableArray} splitStyleArray ThemableArray to resolve and join.
  */
-function resolveThemableArray(splitStyleArray: ThemableArray): IThemableArrayResolveResult {
+function resolveThemableArray(splitStyleArray: ThemableArray = []): IThemableArrayResolveResult {
   const { theme }: IThemeState = _themeState;
   let themable: boolean = false;
+  let styleString: string = '';
+
   // Resolve the array of theming instructions to an array of strings.
   // Then join the array to produce the final CSS string.
-  const resolvedArray: (string | undefined)[] = (splitStyleArray || []).map(
-    (currentValue: IThemingInstruction) => {
-      const themeSlot: string | undefined = currentValue.theme;
-      if (themeSlot) {
-        themable = true;
-        // A theming annotation. Resolve it.
-        const themedValue: string | undefined = theme ? theme[themeSlot] : undefined;
-        const defaultValue: string = currentValue.defaultValue || 'inherit';
+  splitStyleArray.forEach((currentValue: IThemingInstruction) => {
+    const themeSlot: string | undefined = currentValue.theme;
+    if (themeSlot) {
+      themable = true;
+      // A theming annotation. Resolve it.
+      const themedValue: string | undefined = theme ? theme[themeSlot] : undefined;
+      const defaultValue: string = currentValue.defaultValue || 'inherit';
 
-        // Warn to console if we hit an unthemed value even when themes are provided, but only if "DEBUG" is true.
-        // Allow the themedValue to be undefined to explicitly request the default value.
-        if (
-          theme &&
-          !themedValue &&
-          console &&
-          !(themeSlot in theme) &&
-          typeof DEBUG !== 'undefined' &&
-          DEBUG
-        ) {
-          console.warn(`Theming value not provided for "${themeSlot}". Falling back to "${defaultValue}".`);
-        }
-
-        return themedValue || defaultValue;
-      } else {
-        // A non-themable string. Preserve it.
-        return currentValue.rawString;
+      // Warn to console if we hit an unthemed value even when themes are provided, but only if "DEBUG" is true.
+      // Allow the themedValue to be undefined to explicitly request the default value.
+      if (
+        theme &&
+        !themedValue &&
+        console &&
+        !(themeSlot in theme) &&
+        typeof DEBUG !== 'undefined' &&
+        DEBUG
+      ) {
+        console.warn(`Theming value not provided for "${themeSlot}". Falling back to "${defaultValue}".`);
       }
+
+      styleString += themedValue || defaultValue;
+    } else {
+      // A non-themable string. Preserve it.
+      styleString += currentValue.rawString;
     }
-  );
+  });
 
   return {
-    styleString: resolvedArray.join(''),
-    themable: themable
+    styleString,
+    themable
   };
 }
 
