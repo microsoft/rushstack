@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 06 Oct 2020 00:24:06 GMT and should not be manually modified.
+This log was last generated on Fri, 09 Oct 2020 15:11:08 GMT and should not be manually modified.
+
+## 0.15.6
+Fri, 09 Oct 2020 15:11:08 GMT
+
+### Patches
+
+- Support relative imports in the Sass typings generator.
 
 ## 0.15.5
 Tue, 06 Oct 2020 00:24:06 GMT

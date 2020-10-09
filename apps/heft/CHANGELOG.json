@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.15.6",
+      "tag": "@rushstack/heft_v0.15.6",
+      "date": "Fri, 09 Oct 2020 15:11:08 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Support relative imports in the Sass typings generator."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.15.5",
       "tag": "@rushstack/heft_v0.15.5",
       "date": "Tue, 06 Oct 2020 00:24:06 GMT",
