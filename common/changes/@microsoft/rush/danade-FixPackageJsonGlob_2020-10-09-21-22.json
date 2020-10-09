@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "When running `rush version --bump`, only include package.json updates in the generated commit",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "3473356+D4N14L@users.noreply.github.com"
+}
