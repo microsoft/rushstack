@@ -10,7 +10,7 @@
     "url": "https://github.com/microsoft/rushstack/tree/master/webpack/set-webpack-public-path-plugin"
   },
   "scripts": {
-    "build": "heft test --clean"
+    "build": "heft build --clean"
   },
   "dependencies": {
     "lodash": "~4.17.15",

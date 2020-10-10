@@ -6,7 +6,7 @@
   "main": "lib/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "heft test --clean"
+    "build": "heft build --clean"
   },
   "devDependencies": {
     "@microsoft/rush-stack-compiler-2.9": "workspace:*",
