@@ -6,7 +6,7 @@
   "main": "lib/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "heft test --clean --verbose"
+    "build": "heft build --clean --verbose"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",
