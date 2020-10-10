@@ -104,10 +104,9 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
     );
 
     const destinationFolderNames: string[] = ['lib'];
-    // eslint-disable-next-line no-unused-expressions
-    typescriptConfiguration?.additionalModuleKindsToEmit?.forEach((emitModule) =>
-      destinationFolderNames.push(emitModule.outFolderName)
-    );
+    for (const emitModule of typescriptConfiguration?.additionalModuleKindsToEmit || []) {
+      destinationFolderNames.push(emitModule.outFolderName);
+    }
 
     return {
       ...typescriptConfiguration?.staticAssetsToCopy,
