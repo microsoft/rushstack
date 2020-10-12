@@ -37,7 +37,9 @@ import {
   ApiDeclaredItem,
   ApiNamespace,
   ExcerptTokenKind,
-  IResolveDeclarationReferenceResult
+  IResolveDeclarationReferenceResult,
+  ApiTypeAlias,
+  ExcerptToken
 } from '@microsoft/api-extractor-model';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -345,6 +347,28 @@ export class MarkdownDocumenter {
           needsComma = true;
         }
         output.appendNode(extendsParagraph);
+      }
+    }
+
+    if (apiItem instanceof ApiTypeAlias) {
+      const refs: ExcerptToken[] = apiItem.excerptTokens.filter(
+        (token) => token.kind === ExcerptTokenKind.Reference && token.canonicalReference
+      );
+      if (refs.length > 0) {
+        const referencesParagraph: DocParagraph = new DocParagraph({ configuration }, [
+          new DocEmphasisSpan({ configuration, bold: true }, [
+            new DocPlainText({ configuration, text: 'References: ' })
+          ])
+        ]);
+        let needsComma: boolean = false;
+        for (const ref of refs) {
+          if (needsComma) {
+            referencesParagraph.appendNode(new DocPlainText({ configuration, text: ', ' }));
+          }
+          this._appendExcerptTokenWithHyperlinks(referencesParagraph, ref);
+          needsComma = true;
+        }
+        output.appendNode(referencesParagraph);
       }
     }
   }
@@ -843,37 +867,41 @@ export class MarkdownDocumenter {
   }
 
   private _appendExcerptWithHyperlinks(docNodeContainer: DocNodeContainer, excerpt: Excerpt): void {
+    for (const token of excerpt.spannedTokens) {
+      this._appendExcerptTokenWithHyperlinks(docNodeContainer, token);
+    }
+  }
+
+  private _appendExcerptTokenWithHyperlinks(docNodeContainer: DocNodeContainer, token: ExcerptToken): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
-    for (const token of excerpt.spannedTokens) {
-      // Markdown doesn't provide a standardized syntax for hyperlinks inside code spans, so we will render
-      // the type expression as DocPlainText.  Instead of creating multiple DocParagraphs, we can simply
-      // discard any newlines and let the renderer do normal word-wrapping.
-      const unwrappedTokenText: string = token.text.replace(/[\r\n]+/g, ' ');
+    // Markdown doesn't provide a standardized syntax for hyperlinks inside code spans, so we will render
+    // the type expression as DocPlainText.  Instead of creating multiple DocParagraphs, we can simply
+    // discard any newlines and let the renderer do normal word-wrapping.
+    const unwrappedTokenText: string = token.text.replace(/[\r\n]+/g, ' ');
 
-      // If it's hyperlinkable, then append a DocLinkTag
-      if (token.kind === ExcerptTokenKind.Reference && token.canonicalReference) {
-        const apiItemResult: IResolveDeclarationReferenceResult = this._apiModel.resolveDeclarationReference(
-          token.canonicalReference,
-          undefined
+    // If it's hyperlinkable, then append a DocLinkTag
+    if (token.kind === ExcerptTokenKind.Reference && token.canonicalReference) {
+      const apiItemResult: IResolveDeclarationReferenceResult = this._apiModel.resolveDeclarationReference(
+        token.canonicalReference,
+        undefined
+      );
+
+      if (apiItemResult.resolvedApiItem) {
+        docNodeContainer.appendNode(
+          new DocLinkTag({
+            configuration,
+            tagName: '@link',
+            linkText: unwrappedTokenText,
+            urlDestination: this._getLinkFilenameForApiItem(apiItemResult.resolvedApiItem)
+          })
         );
-
-        if (apiItemResult.resolvedApiItem) {
-          docNodeContainer.appendNode(
-            new DocLinkTag({
-              configuration,
-              tagName: '@link',
-              linkText: unwrappedTokenText,
-              urlDestination: this._getLinkFilenameForApiItem(apiItemResult.resolvedApiItem)
-            })
-          );
-          continue;
-        }
+        return;
       }
-
-      // Otherwise append non-hyperlinked text
-      docNodeContainer.appendNode(new DocPlainText({ configuration, text: unwrappedTokenText }));
     }
+
+    // Otherwise append non-hyperlinked text
+    docNodeContainer.appendNode(new DocPlainText({ configuration, text: unwrappedTokenText }));
   }
 
   private _createTitleCell(apiItem: ApiItem): DocTableCell {
