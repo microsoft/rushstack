@@ -39,6 +39,11 @@
         "type": "string",
         "pattern": "[^\\\\]"
       }
+    },
+
+    "useCSSModules": {
+      "type": "boolean",
+      "description": "Determines if CSS Modules are used, or not"
     }
   }
 }
