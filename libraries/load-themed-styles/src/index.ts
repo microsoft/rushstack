@@ -310,14 +310,17 @@ export function detokenize(styles: string | undefined): string | undefined {
  * @param {ThemableArray} splitStyleArray ThemableArray to resolve and join.
  */
 function resolveThemableArray(splitStyleArray: ThemableArray = []): IThemableArrayResolveResult {
+  const shouldWarn: boolean = console && typeof DEBUG !== 'undefined' && DEBUG;
   const { theme }: IThemeState = _themeState;
   let themable: boolean = false;
   let styleString: string = '';
 
   // Resolve the array of theming instructions to an array of strings.
   // Then join the array to produce the final CSS string.
-  splitStyleArray.forEach((currentValue: IThemingInstruction) => {
+  for (let i = 0; i < splitStyleArray.length; i++) {
+    const currentValue: IThemingInstruction = splitStyleArray[i];
     const themeSlot: string | undefined = currentValue.theme;
+
     if (themeSlot) {
       themable = true;
       // A theming annotation. Resolve it.
@@ -326,14 +329,7 @@ function resolveThemableArray(splitStyleArray: ThemableArray = []): IThemableArr
 
       // Warn to console if we hit an unthemed value even when themes are provided, but only if "DEBUG" is true.
       // Allow the themedValue to be undefined to explicitly request the default value.
-      if (
-        theme &&
-        !themedValue &&
-        console &&
-        !(themeSlot in theme) &&
-        typeof DEBUG !== 'undefined' &&
-        DEBUG
-      ) {
+      if (theme && !themedValue && !(themeSlot in theme) && shouldWarn) {
         console.warn(`Theming value not provided for "${themeSlot}". Falling back to "${defaultValue}".`);
       }
 
@@ -342,7 +338,7 @@ function resolveThemableArray(splitStyleArray: ThemableArray = []): IThemableArr
       // A non-themable string. Preserve it.
       styleString += currentValue.rawString;
     }
-  });
+  }
 
   return {
     styleString,
