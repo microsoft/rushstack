@@ -2,6 +2,21 @@
   "name": "@rushstack/stream-collator",
   "entries": [
     {
+      "version": "4.0.22",
+      "tag": "@rushstack/stream-collator_v4.0.22",
+      "date": "Mon, 12 Oct 2020 15:11:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.1.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.15.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.21",
       "tag": "@rushstack/stream-collator_v4.0.21",
       "date": "Fri, 09 Oct 2020 15:11:09 GMT",

@@ -2,6 +2,18 @@
   "name": "@rushstack/rundown",
   "entries": [
     {
+      "version": "1.0.38",
+      "tag": "@rushstack/rundown_v1.0.38",
+      "date": "Mon, 12 Oct 2020 15:11:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.15.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.37",
       "tag": "@rushstack/rundown_v1.0.37",
       "date": "Fri, 09 Oct 2020 15:11:09 GMT",

@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 09 Oct 2020 15:11:08 GMT and should not be manually modified.
+This log was last generated on Mon, 12 Oct 2020 15:11:16 GMT and should not be manually modified.
+
+## 0.15.7
+Mon, 12 Oct 2020 15:11:16 GMT
+
+### Patches
+
+- Include additionalModuleKindsToEmit in the copy-static-assets plugin destination folders.
+- Throw if jest config file doesn't exist
 
 ## 0.15.6
 Fri, 09 Oct 2020 15:11:08 GMT

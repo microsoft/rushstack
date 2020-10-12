@@ -2,6 +2,21 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.15.7",
+      "tag": "@rushstack/heft_v0.15.7",
+      "date": "Mon, 12 Oct 2020 15:11:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include additionalModuleKindsToEmit in the copy-static-assets plugin destination folders."
+          },
+          {
+            "comment": "Throw if jest config file doesn't exist"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.15.6",
       "tag": "@rushstack/heft_v0.15.6",
       "date": "Fri, 09 Oct 2020 15:11:08 GMT",
