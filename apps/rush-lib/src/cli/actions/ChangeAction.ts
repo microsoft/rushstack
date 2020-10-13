@@ -5,6 +5,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import colors from 'colors';
+import ignore, { Ignore } from 'ignore';
 
 import {
   CommandLineFlagParameter,
@@ -31,6 +32,8 @@ import {
 import * as inquirerTypes from 'inquirer';
 const inquirer: typeof inquirerTypes = Import.lazy('inquirer', require);
 
+const CHANGE_IGNORE_FILE_NAME: string = '.changeignore';
+
 export class ChangeAction extends BaseRushAction {
   private _verifyParameter!: CommandLineFlagParameter;
   private _noFetchParameter!: CommandLineFlagParameter;
@@ -47,7 +50,9 @@ export class ChangeAction extends BaseRushAction {
     const documentation: string[] = [
       'Asks a series of questions and then generates a <branchname>-<timestamp>.json file ' +
         'in the common folder. The `publish` command will consume these files and perform the proper ' +
-        'version bumps. Note these changes will eventually be published in a changelog.md file in each package.',
+        'version bumps. Files will be excluded from change detection if they match an entry in a ' +
+        `"${CHANGE_IGNORE_FILE_NAME}" file in their package's root directory. The changes will eventually be ` +
+        'published in a CHANGELOG.md file in each package.',
       '',
       'The possible types of changes are: ',
       '',
@@ -312,11 +317,11 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private _getChangedPackageNames(): string[] {
-    const changedFolders: (string | undefined)[] | undefined = VersionControl.getChangedFolders(
+    const changedFiles: string[] = VersionControl.getChangedFiles(
       this._targetBranch,
       this._noFetchParameter.value
     );
-    if (!changedFolders) {
+    if (changedFiles.length === 0) {
       return [];
     }
     const changedPackageNames: Set<string> = new Set<string>();
@@ -331,7 +336,7 @@ export class ChangeAction extends BaseRushAction {
         const projectFolder: string = repoRootFolder
           ? path.relative(repoRootFolder, project.projectFolder)
           : project.projectRelativeFolder;
-        return this._hasProjectChanged(changedFolders, projectFolder);
+        return this._hasProjectChanged(changedFiles, projectFolder);
       })
       .forEach((project) => {
         const hostName: string | undefined = projectHostMap.get(project.packageName);
@@ -354,14 +359,17 @@ export class ChangeAction extends BaseRushAction {
     });
   }
 
-  private _hasProjectChanged(changedFolders: (string | undefined)[], projectFolder: string): boolean {
-    for (const folder of changedFolders) {
-      if (folder && Path.isUnderOrEqual(folder, projectFolder)) {
-        return true;
-      }
+  private _hasProjectChanged(changedFiles: string[], projectFolder: string): boolean {
+    const relevantFiles: string[] = changedFiles.filter((file) => Path.isUnderOrEqual(file, projectFolder));
+
+    const changeIgnoreFile: string = path.join(projectFolder, CHANGE_IGNORE_FILE_NAME);
+
+    const ignoreConfig: Ignore = ignore();
+    if (relevantFiles.length > 0 && FileSystem.exists(changeIgnoreFile)) {
+      ignoreConfig.add(FileSystem.readFile(changeIgnoreFile));
     }
 
-    return false;
+    return changedFiles.some(ignoreConfig.createFilter());
   }
 
   /**
