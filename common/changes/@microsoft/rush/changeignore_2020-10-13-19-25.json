@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/rush",
       "comment": "Add .changeignore file support",
-      "type": "minor"
+      "type": "none"
     }
   ],
   "packageName": "@microsoft/rush",
