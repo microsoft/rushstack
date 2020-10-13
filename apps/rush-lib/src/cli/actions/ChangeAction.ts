@@ -51,8 +51,8 @@ export class ChangeAction extends BaseRushAction {
       'Asks a series of questions and then generates a <branchname>-<timestamp>.json file ' +
         'in the common folder. The `publish` command will consume these files and perform the proper ' +
         'version bumps. Files will be excluded from change detection if they match an entry in a ' +
-        `"${CHANGE_IGNORE_FILE_NAME}" file in their package's root directory. The changes will eventually be ` +
-        'published in a CHANGELOG.md file in each package.',
+        `\`${CHANGE_IGNORE_FILE_NAME}\` file in the package's root directory. The changes will ` +
+        'eventually be published in a CHANGELOG.md file in each package.',
       '',
       'The possible types of changes are: ',
       '',
