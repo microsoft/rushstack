@@ -369,7 +369,7 @@ export class ChangeAction extends BaseRushAction {
       ignoreConfig.add(FileSystem.readFile(changeIgnoreFile));
     }
 
-    return changedFiles.some(ignoreConfig.createFilter());
+    return relevantFiles.some(ignoreConfig.createFilter());
   }
 
   /**
