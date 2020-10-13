@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add .changeignore file support",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "mmkal@users.noreply.github.com"
+}
