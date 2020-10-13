@@ -94,7 +94,7 @@ export class HeftSession {
     //
     // @internal
     constructor(options: IHeftSessionOptions, internalSessionOptions: IInternalHeftSessionOptions);
-    readonly debugMode: boolean;
+    get debugMode(): boolean;
     // (undocumented)
     readonly hooks: IHeftSessionHooks;
     // @internal (undocumented)
