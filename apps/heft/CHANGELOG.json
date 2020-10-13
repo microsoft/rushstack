@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.15.8",
+      "tag": "@rushstack/heft_v0.15.8",
+      "date": "Tue, 13 Oct 2020 15:11:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where heftSession.debugMode isn't set properly."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.15.7",
       "tag": "@rushstack/heft_v0.15.7",
       "date": "Mon, 12 Oct 2020 15:11:16 GMT",
