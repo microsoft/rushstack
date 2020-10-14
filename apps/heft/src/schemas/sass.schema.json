@@ -39,6 +39,15 @@
         "type": "string",
         "pattern": "[^\\\\]"
       }
+    },
+
+    "excludeFiles": {
+      "type": "array",
+      "description": "A list of file paths relative to the \"src\" folder that should be excluded from typings generation.",
+      "items": {
+        "type": "string",
+        "pattern": "[^\\\\]"
+      }
     }
   }
 }

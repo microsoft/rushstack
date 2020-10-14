@@ -36,6 +36,11 @@ export interface ISassConfiguration {
    * Defaults to ["node_modules", "src"]
    */
   importIncludePaths?: string[];
+
+  /**
+   * A list of file paths relative to the "src" folder that should be excluded from typings generation.
+   */
+  excludeFiles?: string[];
 }
 
 /**
@@ -81,6 +86,7 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
       exportAsDefault,
       exportAsDefaultInterfaceName,
       fileExtensions,
+      filesToIgnore: sassConfiguration.excludeFiles,
 
       // User configured overrides
       ...sassConfiguration,
