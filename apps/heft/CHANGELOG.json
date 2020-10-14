@@ -2,6 +2,23 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.16.0",
+      "tag": "@rushstack/heft_v0.16.0",
+      "date": "Wed, 14 Oct 2020 23:30:14 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING CHANGE) Rename \"includePaths\" to \"importIncludePaths\" in sass.json."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Add an \"exclude\" option to sass.json."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.15.8",
       "tag": "@rushstack/heft_v0.15.8",
       "date": "Tue, 13 Oct 2020 15:11:28 GMT",

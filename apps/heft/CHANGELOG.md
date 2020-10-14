@@ -1,6 +1,17 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 13 Oct 2020 15:11:28 GMT and should not be manually modified.
+This log was last generated on Wed, 14 Oct 2020 23:30:14 GMT and should not be manually modified.
+
+## 0.16.0
+Wed, 14 Oct 2020 23:30:14 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Rename "includePaths" to "importIncludePaths" in sass.json.
+
+### Patches
+
+- Add an "exclude" option to sass.json.
 
 ## 0.15.8
 Tue, 13 Oct 2020 15:11:28 GMT
