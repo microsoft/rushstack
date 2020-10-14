@@ -35,7 +35,12 @@ export interface ISassConfiguration {
    * The paths should be relative to the project root.
    * Defaults to ["node_modules", "src"]
    */
-  includePaths?: string[];
+  importIncludePaths?: string[];
+
+  /**
+   * A list of file paths relative to the "src" folder that should be excluded from typings generation.
+   */
+  excludeFiles?: string[];
 }
 
 /**
@@ -69,9 +74,11 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
    */
   public constructor(options: ISassTypingsGeneratorOptions) {
     const { buildFolder, sassConfiguration } = options;
-    const srcFolder: string = path.join(buildFolder, 'src');
-    const generatedTsFolder: string = path.join(buildFolder, 'temp', 'sass-ts');
-    const exportAsDefault: boolean = true;
+    const srcFolder: string = sassConfiguration.srcFolder || path.join(buildFolder, 'src');
+    const generatedTsFolder: string =
+      sassConfiguration.generatedTsFolder || path.join(buildFolder, 'temp', 'sass-ts');
+    const exportAsDefault: boolean =
+      sassConfiguration.exportAsDefault === undefined ? true : sassConfiguration.exportAsDefault;
     const exportAsDefaultInterfaceName: string = 'IExportStyles';
     const fileExtensions: string[] = ['css', 'sass', 'scss'];
     super({
@@ -81,9 +88,7 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
       exportAsDefault,
       exportAsDefaultInterfaceName,
       fileExtensions,
-
-      // User configured overrides
-      ...sassConfiguration,
+      filesToIgnore: sassConfiguration.excludeFiles,
 
       // Generate typings function
       parseAndGenerateTypings: async (fileContents: string, filePath: string) => {
@@ -91,7 +96,7 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
           fileContents,
           filePath,
           buildFolder,
-          sassConfiguration.includePaths
+          sassConfiguration.importIncludePaths
         );
         const classNames: string[] = await this._getClassNamesFromCSSAsync(css, filePath);
         const sortedClassNames: string[] = classNames.sort((a, b) => a.localeCompare(b));
@@ -109,14 +114,14 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
     fileContents: string,
     filePath: string,
     buildFolder: string,
-    includePaths: string[] | undefined
+    importIncludePaths: string[] | undefined
   ): Promise<string> {
     const result: Result = await LegacyAdapters.convertCallbackToPromise(render, {
       data: fileContents,
       file: filePath,
       importer: (url: string) => ({ file: this._patchSassUrl(url) }),
-      includePaths: includePaths
-        ? includePaths
+      includePaths: importIncludePaths
+        ? importIncludePaths
         : [path.join(buildFolder, 'node_modules'), path.join(buildFolder, 'src')],
       indentedSyntax: path.extname(filePath).toLowerCase() === '.sass'
     });
