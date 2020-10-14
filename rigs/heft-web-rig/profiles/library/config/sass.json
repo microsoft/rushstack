@@ -26,7 +26,7 @@
   /**
    * A list of paths used when resolving Sass imports.
    */
-  // "includePaths": [
+  // "importIncludePaths": [
   //   "node_modules",
   //   "src"
   // ]

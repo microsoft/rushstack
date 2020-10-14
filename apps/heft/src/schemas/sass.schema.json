@@ -32,7 +32,7 @@
       "description": "Determines if export values are wrapped in a default property, or not."
     },
 
-    "includePaths": {
+    "importIncludePaths": {
       "type": "array",
       "description": "A list of paths used when resolving Sass imports.",
       "items": {

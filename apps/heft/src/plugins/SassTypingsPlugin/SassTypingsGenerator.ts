@@ -35,7 +35,7 @@ export interface ISassConfiguration {
    * The paths should be relative to the project root.
    * Defaults to ["node_modules", "src"]
    */
-  includePaths?: string[];
+  importIncludePaths?: string[];
 }
 
 /**
@@ -91,7 +91,7 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
           fileContents,
           filePath,
           buildFolder,
-          sassConfiguration.includePaths
+          sassConfiguration.importIncludePaths
         );
         const classNames: string[] = await this._getClassNamesFromCSSAsync(css, filePath);
         const sortedClassNames: string[] = classNames.sort((a, b) => a.localeCompare(b));
@@ -109,14 +109,14 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
     fileContents: string,
     filePath: string,
     buildFolder: string,
-    includePaths: string[] | undefined
+    importIncludePaths: string[] | undefined
   ): Promise<string> {
     const result: Result = await LegacyAdapters.convertCallbackToPromise(render, {
       data: fileContents,
       file: filePath,
       importer: (url: string) => ({ file: this._patchSassUrl(url) }),
-      includePaths: includePaths
-        ? includePaths
+      includePaths: importIncludePaths
+        ? importIncludePaths
         : [path.join(buildFolder, 'node_modules'), path.join(buildFolder, 'src')],
       indentedSyntax: path.extname(filePath).toLowerCase() === '.sass'
     });
