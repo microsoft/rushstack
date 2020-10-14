@@ -74,9 +74,11 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
    */
   public constructor(options: ISassTypingsGeneratorOptions) {
     const { buildFolder, sassConfiguration } = options;
-    const srcFolder: string = path.join(buildFolder, 'src');
-    const generatedTsFolder: string = path.join(buildFolder, 'temp', 'sass-ts');
-    const exportAsDefault: boolean = true;
+    const srcFolder: string = sassConfiguration.srcFolder || path.join(buildFolder, 'src');
+    const generatedTsFolder: string =
+      sassConfiguration.generatedTsFolder || path.join(buildFolder, 'temp', 'sass-ts');
+    const exportAsDefault: boolean =
+      sassConfiguration.exportAsDefault === undefined ? true : sassConfiguration.exportAsDefault;
     const exportAsDefaultInterfaceName: string = 'IExportStyles';
     const fileExtensions: string[] = ['css', 'sass', 'scss'];
     super({
@@ -87,9 +89,6 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
       exportAsDefaultInterfaceName,
       fileExtensions,
       filesToIgnore: sassConfiguration.excludeFiles,
-
-      // User configured overrides
-      ...sassConfiguration,
 
       // Generate typings function
       parseAndGenerateTypings: async (fileContents: string, filePath: string) => {
