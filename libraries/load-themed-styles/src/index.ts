@@ -317,7 +317,7 @@ function resolveThemableArray(splitStyleArray: ThemableArray = []): IThemableArr
 
   // Resolve the array of theming instructions to an array of strings.
   // Then join the array to produce the final CSS string.
-  for (let i = 0; i < splitStyleArray.length; i++) {
+  for (let i: number = 0; i < splitStyleArray.length; i++) {
     const currentValue: IThemingInstruction = splitStyleArray[i];
     const themeSlot: string | undefined = currentValue.theme;
 
