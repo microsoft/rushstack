@@ -38,6 +38,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected _networkConcurrencyParameter!: CommandLineIntegerParameter;
   protected _debugPackageManagerParameter!: CommandLineFlagParameter;
   protected _maxInstallAttempts!: CommandLineIntegerParameter;
+  protected _ignoreHooksParameter!: CommandLineFlagParameter;
 
   protected onDefineParameters(): void {
     this._purgeParameter = this.defineFlagParameter({
@@ -77,6 +78,10 @@ export abstract class BaseInstallAction extends BaseRushAction {
       description: `Overrides the default maximum number of install attempts.`,
       defaultValue: RushConstants.defaultMaxInstallAttempts
     });
+    this._ignoreHooksParameter = this.defineFlagParameter({
+      parameterLongName: '--ignore-hooks',
+      description: `Overrides execution of "preInstall" and "postInstall" event hooks. Meant for use on CI machines.`
+    });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
 
@@ -97,7 +102,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
       StandardScriptUpdater.validate(this.rushConfiguration);
     }
 
-    this.eventHooksManager.handle(Event.preRushInstall, this.parser.isDebug);
+    if (!this._ignoreHooksParameter.value) {
+      this.eventHooksManager.handle(Event.preRushInstall, this.parser.isDebug);
+    } else {
+      console.log(`The --ignore-hooks flag was specified, skipping preInstall hooks`);
+    }
 
     const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration, this.rushGlobalFolder);
 
@@ -138,7 +147,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
         stopwatch.stop();
 
         this._collectTelemetry(stopwatch, installManagerOptions, true);
-        this.eventHooksManager.handle(Event.postRushInstall, this.parser.isDebug);
+        if (!this._ignoreHooksParameter.value) {
+          this.eventHooksManager.handle(Event.postRushInstall, this.parser.isDebug);
+        } else {
+          console.log(`The --ignore-hooks flag was specified, skipping postInstall hooks`);
+        }
 
         if (warnAboutScriptUpdate) {
           console.log(
