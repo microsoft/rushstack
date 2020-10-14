@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { runCLI } from '@jest/core';
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 
 import { IHeftJestReporterOptions } from './HeftJestReporter';
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
@@ -15,8 +15,9 @@ import { JestTypeScriptDataFile, IJestTypeScriptDataFileJson } from './JestTypeS
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { Config } from '@jest/types';
 
+type JestReporterConfig = string | Config.ReporterConfig;
 const PLUGIN_NAME: string = 'JestPlugin';
-const JEST_CONFIGURATION_LOCATION: string = './config/jest.config.json';
+const JEST_CONFIGURATION_LOCATION: string = path.join('config', 'jest.config.json');
 
 export class JestPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
@@ -41,7 +42,7 @@ export class JestPlugin implements IHeftPlugin {
     const jestLogger: ScopedLogger = heftSession.requestScopedLogger('jest');
     const buildFolder: string = heftConfiguration.buildFolder;
 
-    const expectedConfigPath: string = path.join(buildFolder, JEST_CONFIGURATION_LOCATION);
+    const expectedConfigPath: string = this._getJestConfigPath(heftConfiguration);
 
     if (!FileSystem.exists(expectedConfigPath)) {
       jestLogger.emitError(new Error(`Expected to find jest config file at ${expectedConfigPath}`));
@@ -61,7 +62,7 @@ export class JestPlugin implements IHeftPlugin {
       runInBand: heftSession.debugMode,
       debug: heftSession.debugMode,
 
-      config: JEST_CONFIGURATION_LOCATION,
+      config: expectedConfigPath,
       cacheDirectory: this._getJestCacheFolder(heftConfiguration),
       updateSnapshot: test.properties.updateSnapshots,
 
@@ -79,11 +80,15 @@ export class JestPlugin implements IHeftPlugin {
     };
 
     if (!test.properties.debugHeftReporter) {
-      const reporterOptions: IHeftJestReporterOptions = {
-        heftConfiguration,
-        debugMode: heftSession.debugMode
-      };
-      jestArgv.reporters = [[path.resolve(__dirname, 'HeftJestReporter.js'), reporterOptions]];
+      const { reporters, isUsingHeftReporter } = await this._getJestReporters(heftSession, heftConfiguration);
+
+      jestArgv.reporters = reporters;
+
+      if (!isUsingHeftReporter) {
+        jestLogger.terminal.writeVerboseLine(
+          `HeftJestReporter not specified in Jest config '${JEST_CONFIGURATION_LOCATION}'. Consider adding a 'default' entry in the reporters array.`
+        );
+      }
     } else {
       jestLogger.emitWarning(
         new Error('The "--debug-heft-reporter" parameter was specified; disabling HeftJestReporter')
@@ -143,6 +148,56 @@ export class JestPlugin implements IHeftPlugin {
     // clean it.  Thus we need to ensure that "heft clean" always cleans the Jest cache.
     const cacheFolder: string = this._getJestCacheFolder(heftConfiguration);
     clean.properties.pathsToDelete.add(cacheFolder);
+  }
+
+  private async _getJestReporters(
+    heftSession: HeftSession,
+    heftConfiguration: HeftConfiguration
+  ): Promise<{
+    reporters: JestReporterConfig[];
+    isUsingHeftReporter: boolean;
+  }> {
+    const config: Config.GlobalConfig = await JsonFile.loadAsync(this._getJestConfigPath(heftConfiguration));
+    let reporters: JestReporterConfig[];
+    let isUsingHeftReporter: boolean = false;
+
+    if (Array.isArray(config.reporters)) {
+      reporters = config.reporters;
+      // Replace the 'default' reporter with the heft reporter
+      const defaultIndex: number = reporters.indexOf('default');
+      if (defaultIndex >= 0) {
+        reporters[defaultIndex] = this._getHeftJestReporterConfig(heftSession, heftConfiguration);
+        isUsingHeftReporter = true;
+      }
+    } else {
+      // Otherwise if no reporters are specified install only the heft reporter
+      reporters = [this._getHeftJestReporterConfig(heftSession, heftConfiguration)];
+      isUsingHeftReporter = true;
+    }
+
+    return {
+      reporters,
+      isUsingHeftReporter
+    };
+  }
+
+  private _getHeftJestReporterConfig(
+    heftSession: HeftSession,
+    heftConfiguration: HeftConfiguration
+  ): Config.ReporterConfig {
+    const reporterOptions: IHeftJestReporterOptions = {
+      heftConfiguration,
+      debugMode: heftSession.debugMode
+    };
+
+    return [
+      path.resolve(__dirname, 'HeftJestReporter.js'),
+      reporterOptions as Record<keyof IHeftJestReporterOptions, unknown>
+    ];
+  }
+
+  private _getJestConfigPath(heftConfiguration: HeftConfiguration): string {
+    return path.join(heftConfiguration.buildFolder, JEST_CONFIGURATION_LOCATION);
   }
 
   private _getJestCacheFolder(heftConfiguration: HeftConfiguration): string {

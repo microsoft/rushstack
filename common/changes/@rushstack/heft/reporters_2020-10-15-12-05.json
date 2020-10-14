@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Honor jest reporters specified in config/jest.config.json",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "ifeanyi.echeruo@users.noreply.github.com"
+}
