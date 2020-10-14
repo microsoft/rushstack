@@ -390,8 +390,9 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: install 1`] = `
 "usage: rush install [-h] [-p] [--bypass-policy] [--no-link]
                     [--network-concurrency COUNT] [--debug-package-manager]
-                    [--max-install-attempts NUMBER] [--variant VARIANT]
-                    [-t PROJECT1] [--to-version-policy VERSION_POLICY_NAME]
+                    [--max-install-attempts NUMBER] [--ignore-hooks]
+                    [--variant VARIANT] [-t PROJECT1]
+                    [--to-version-policy VERSION_POLICY_NAME]
                     
 
 The \\"rush install\\" command installs package dependencies for all your 
@@ -429,6 +430,8 @@ Optional arguments:
   --max-install-attempts NUMBER
                         Overrides the default maximum number of install 
                         attempts. The default value is 3.
+  --ignore-hooks        Overrides execution of \\"preInstall\\" and \\"postInstall\\" 
+                        event hooks. Meant for use on CI machines.
   --variant VARIANT     Run command using a variant installation 
                         configuration. This parameter may alternatively be 
                         specified via the RUSH_VARIANT environment variable.
@@ -686,8 +689,8 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: update 1`] = `
 "usage: rush update [-h] [-p] [--bypass-policy] [--no-link]
                    [--network-concurrency COUNT] [--debug-package-manager]
-                   [--max-install-attempts NUMBER] [--variant VARIANT]
-                   [--full] [--recheck]
+                   [--max-install-attempts NUMBER] [--ignore-hooks]
+                   [--variant VARIANT] [--full] [--recheck]
                    
 
 The \\"rush update\\" command installs the dependencies described in your package.
@@ -724,6 +727,8 @@ Optional arguments:
   --max-install-attempts NUMBER
                         Overrides the default maximum number of install 
                         attempts. The default value is 3.
+  --ignore-hooks        Overrides execution of \\"preInstall\\" and \\"postInstall\\" 
+                        event hooks. Meant for use on CI machines.
   --variant VARIANT     Run command using a variant installation 
                         configuration. This parameter may alternatively be 
                         specified via the RUSH_VARIANT environment variable.
