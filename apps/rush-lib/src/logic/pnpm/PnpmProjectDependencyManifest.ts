@@ -178,10 +178,9 @@ export class PnpmProjectDependencyManifest {
       return;
     }
 
-    for (const [peerDependencyName, peerDependencyVersion] of Object.entries(shrinkwrapEntry.peerDependencies)) {
-      // Peer dependencies come in the form of a semantic version range
-      const peerDependencyVersion: string = shrinkwrapEntry.peerDependencies[peerDependencyName];
-
+    for (const [peerDependencyName, peerDependencyVersion] of Object.entries(
+      shrinkwrapEntry.peerDependencies
+    )) {
       // Check to see if the peer dependency is satisfied with the current shrinkwrap
       // entry and if not, check the parent shrinkwrap entry
       if (
