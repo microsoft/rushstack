@@ -56,8 +56,7 @@ export class WebpackPlugin implements IHeftPlugin {
       : webpack(webpackConfiguration); /* (webpack.Compilation) => webpack.Compiler */
 
     if (buildProperties.serveMode) {
-      // TODO: make these options configurable
-      const options: TWebpackDevServer.Configuration = {
+      let options: TWebpackDevServer.Configuration = {
         host: 'localhost',
         publicPath: '/',
         filename: '[name]_[hash].js',
@@ -69,6 +68,13 @@ export class WebpackPlugin implements IHeftPlugin {
         },
         port: 8080
       };
+
+      if (Array.isArray(webpackConfiguration)) {
+        // TODO: How should we handle the MultiCompiler. Do we need to spawn a
+        //        dev server for each configuration?
+      } else {
+        options = { ...options, ...webpackConfiguration.devServer };
+      }
 
       // The webpack-dev-server package has a design flaw, where merely loading its package will set the
       // WEBPACK_DEV_SERVER environment variable -- even if no APIs are accessed. This environment variable
