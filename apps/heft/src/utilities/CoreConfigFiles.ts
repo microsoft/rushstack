@@ -210,7 +210,7 @@ export class CoreConfigFiles {
       projectRelativeFilePath: 'config/sass.json',
       jsonSchemaPath: schemaPath,
       jsonPathMetadata: {
-        '$.includePaths.*': {
+        '$.importIncludePaths.*': {
           pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
         },
         '$.generatedTsFolder.*': {

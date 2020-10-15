@@ -26,8 +26,13 @@
   /**
    * A list of paths used when resolving Sass imports.
    */
-  // "includePaths": [
+  // "importIncludePaths": [
   //   "node_modules",
   //   "src"
-  // ]
+  // ],
+
+  /**
+   * A list of file paths relative to the "src" folder that should be excluded from typings generation.
+   */
+  // "excludeFiles": []
 }

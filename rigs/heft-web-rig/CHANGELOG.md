@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Tue, 06 Oct 2020 00:24:06 GMT and should not be manually modified.
+This log was last generated on Thu, 15 Oct 2020 00:59:08 GMT and should not be manually modified.
+
+## 0.1.6
+Thu, 15 Oct 2020 00:59:08 GMT
+
+### Patches
+
+- Update Heft dependency
 
 ## 0.1.5
 Tue, 06 Oct 2020 00:24:06 GMT
