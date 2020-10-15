@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.9';
+import type * as TTypescript from 'typescript';
 
 // The specifics of these types aren't important
 /**
