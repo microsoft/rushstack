@@ -13,7 +13,7 @@ import {
 } from './PnpmShrinkwrapFile';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../RushConstants';
-import { DependencySpecifier } from '../DependencySpecifier';
+import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 
 export interface IPnpmProjectDependencyManifestOptions {
   pnpmShrinkwrapFile: PnpmShrinkwrapFile;
@@ -185,11 +185,18 @@ export class PnpmProjectDependencyManifest {
 
         // Check the current package to see if the dependency is already satisfied
         if (shrinkwrapEntry.dependencies && shrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)) {
-          const dependencySpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
+          let dependencySpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
             peerDependencyName,
             shrinkwrapEntry.dependencies[peerDependencyName]
           );
           if (dependencySpecifier) {
+            if (
+              dependencySpecifier.specifierType === DependencySpecifierType.Alias &&
+              dependencySpecifier.aliasTarget
+            ) {
+              dependencySpecifier = dependencySpecifier.aliasTarget;
+            }
+
             if (!semver.valid(dependencySpecifier.versionSpecifier)) {
               throw new InternalError(
                 `The version '${dependencySemVer}' of peer dependency '${peerDependencyName}' is invalid`
@@ -204,11 +211,18 @@ export class PnpmProjectDependencyManifest {
           parentShrinkwrapEntry.dependencies &&
           parentShrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)
         ) {
-          const dependencySpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
+          let dependencySpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
             peerDependencyName,
             parentShrinkwrapEntry.dependencies[peerDependencyName]
           );
           if (dependencySpecifier) {
+            if (
+              dependencySpecifier.specifierType === DependencySpecifierType.Alias &&
+              dependencySpecifier.aliasTarget
+            ) {
+              dependencySpecifier = dependencySpecifier.aliasTarget;
+            }
+
             if (!semver.valid(dependencySpecifier.versionSpecifier)) {
               throw new InternalError(
                 `The version '${dependencySemVer}' of peer dependency '${peerDependencyName}' is invalid`
