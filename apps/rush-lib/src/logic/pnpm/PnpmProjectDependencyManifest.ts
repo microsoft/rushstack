@@ -178,7 +178,7 @@ export class PnpmProjectDependencyManifest {
       return;
     }
 
-    for (const peerDependencyName of Object.keys(shrinkwrapEntry.peerDependencies)) {
+    for (const [peerDependencyName, peerDependencyVersion] of Object.entries(shrinkwrapEntry.peerDependencies)) {
       // Peer dependencies come in the form of a semantic version range
       const peerDependencyVersion: string = shrinkwrapEntry.peerDependencies[peerDependencyName];
 
