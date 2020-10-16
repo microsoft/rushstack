@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "Added functionality so the webpack task supports custom devServer options",
+      "comment": "Allow the Webpack dev server configuration to be customized.",
       "type": "minor"
     }
   ],
