@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { Path, InternalError } from '@rushstack/node-core-library';
-import type { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.9';
+import type * as TTypescript from 'typescript';
 import {
   ExtendedTypeScript,
   IEmitResolver,
