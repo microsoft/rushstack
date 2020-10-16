@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.17.0",
+      "tag": "@rushstack/heft_v0.17.0",
+      "date": "Fri, 16 Oct 2020 23:32:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow the Webpack dev server configuration to be customized."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.16.1",
       "tag": "@rushstack/heft_v0.16.1",
       "date": "Thu, 15 Oct 2020 00:59:08 GMT",
