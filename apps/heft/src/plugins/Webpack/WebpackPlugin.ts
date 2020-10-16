@@ -68,16 +68,22 @@ export class WebpackPlugin implements IHeftPlugin {
         },
         port: 8080
       };
-      let options: TWebpackDevServer.Configuration = defaultDevServerOptions;
 
+      let options: TWebpackDevServer.Configuration;
       if (Array.isArray(webpackConfiguration)) {
-        const devServerOptions: TWebpackDevServer.Configuration[] = webpackConfiguration.map((configuration) => configuration.devServer).filter((devServer) => !!devServer);
+        const devServerOptions: TWebpackDevServer.Configuration[] = webpackConfiguration
+          .map((configuration) => configuration.devServer)
+          .filter((devServer): devServer is TWebpackDevServer.Configuration => !!devServer);
         if (devServerOptions.length > 1) {
-          logger.emitWarning(new Error(`Detected multiple webpack devServer configurations, using the first one.`));
+          logger.emitWarning(
+            new Error(`Detected multiple webpack devServer configurations, using the first one.`)
+          );
         }
-        
-        if (devServerOptions.length) {
+
+        if (devServerOptions.length > 0) {
           options = { ...defaultDevServerOptions, ...devServerOptions[0] };
+        } else {
+          options = defaultDevServerOptions;
         }
       } else {
         options = { ...defaultDevServerOptions, ...webpackConfiguration.devServer };
