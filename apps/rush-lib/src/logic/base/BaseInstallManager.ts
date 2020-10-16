@@ -243,16 +243,16 @@ export abstract class BaseInstallManager {
         }
       }
 
-      // Perform any post-install work the install manager requires
-      await this.postInstallAsync();
-
       // Create the marker file to indicate a successful install if it's not a filtered install
       if (!isFilteredInstall) {
         this._commonTempInstallFlag.create();
       }
-
-      console.log('');
     }
+
+    // Perform any post-install work the install manager requires
+    await this.postInstallAsync();
+
+    console.log('');
   }
 
   protected abstract prepareCommonTempAsync(
