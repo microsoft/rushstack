@@ -528,6 +528,19 @@ importers:
       eslint: ~7.2.0
       heft-example-plugin-01: 'workspace:*'
       typescript: ~3.9.7
+  ../../build-tests/heft-jest-reporters-test:
+    devDependencies:
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
+      '@types/heft-jest': 1.0.1
+      eslint: 7.2.0
+      typescript: 3.9.7
+    specifiers:
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
+      '@types/heft-jest': 1.0.1
+      eslint: ~7.2.0
+      typescript: ~3.9.7
   ../../build-tests/heft-minimal-rig-test:
     dependencies:
       typescript: 3.9.7
@@ -1638,6 +1651,7 @@ importers:
     dependencies:
       '@rushstack/eslint-patch': 'link:../eslint-patch'
       '@rushstack/eslint-plugin': 'link:../eslint-plugin'
+      '@rushstack/eslint-plugin-packlets': 'link:../eslint-plugin-packlets'
       '@rushstack/eslint-plugin-security': 'link:../eslint-plugin-security'
       '@typescript-eslint/eslint-plugin': 3.4.0_def47c0014fd51b1497b94bf8e50ada2
       '@typescript-eslint/experimental-utils': 3.4.0_eslint@7.2.0+typescript@3.9.7
@@ -1652,6 +1666,7 @@ importers:
     specifiers:
       '@rushstack/eslint-patch': 'workspace:*'
       '@rushstack/eslint-plugin': 'workspace:*'
+      '@rushstack/eslint-plugin-packlets': 'workspace:*'
       '@rushstack/eslint-plugin-security': 'workspace:*'
       '@typescript-eslint/eslint-plugin': 3.4.0
       '@typescript-eslint/experimental-utils': 3.4.0

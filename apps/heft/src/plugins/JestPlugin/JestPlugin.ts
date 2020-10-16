@@ -80,15 +80,7 @@ export class JestPlugin implements IHeftPlugin {
     };
 
     if (!test.properties.debugHeftReporter) {
-      const { reporters, isUsingHeftReporter } = await this._getJestReporters(heftSession, heftConfiguration);
-
-      jestArgv.reporters = reporters;
-
-      if (!isUsingHeftReporter) {
-        jestLogger.terminal.writeVerboseLine(
-          `HeftJestReporter not specified in Jest config '${JEST_CONFIGURATION_LOCATION}'. Consider adding a 'default' entry in the reporters array.`
-        );
-      }
+      jestArgv.reporters = await this._getJestReporters(heftSession, heftConfiguration, jestLogger);
     } else {
       jestLogger.emitWarning(
         new Error('The "--debug-heft-reporter" parameter was specified; disabling HeftJestReporter')
@@ -152,33 +144,67 @@ export class JestPlugin implements IHeftPlugin {
 
   private async _getJestReporters(
     heftSession: HeftSession,
-    heftConfiguration: HeftConfiguration
-  ): Promise<{
-    reporters: JestReporterConfig[];
-    isUsingHeftReporter: boolean;
-  }> {
+    heftConfiguration: HeftConfiguration,
+    jestLogger: ScopedLogger
+  ): Promise<JestReporterConfig[]> {
     const config: Config.GlobalConfig = await JsonFile.loadAsync(this._getJestConfigPath(heftConfiguration));
     let reporters: JestReporterConfig[];
     let isUsingHeftReporter: boolean = false;
+    let parsedConfig: boolean = false;
 
     if (Array.isArray(config.reporters)) {
       reporters = config.reporters;
-      // Replace the 'default' reporter with the heft reporter
-      const defaultIndex: number = reporters.indexOf('default');
-      if (defaultIndex >= 0) {
-        reporters[defaultIndex] = this._getHeftJestReporterConfig(heftSession, heftConfiguration);
+
+      // Harvest all the array indices that need to modified before altering the array
+      const heftReporterIndices: number[] = this._findIndexes(config.reporters, 'default');
+      const jestDefaultReporterIndexes: number[] = this._findIndexes(config.reporters, '__jest_default');
+
+      // Replace 'default' reporter with the heft reporter
+      // This may clobber default reporters options
+      if (heftReporterIndices.length > 0) {
         isUsingHeftReporter = true;
+        const heftReporter: Config.ReporterConfig = this._getHeftJestReporterConfig(
+          heftSession,
+          heftConfiguration
+        );
+
+        for (const index of heftReporterIndices) {
+          reporters[index] = heftReporter;
+        }
       }
-    } else {
+
+      // Restore the names of __jest_default reporters to default
+      for (const index of jestDefaultReporterIndexes) {
+        this._renameJestReporter(config.reporters, index, 'default');
+      }
+
+      parsedConfig = true;
+    } else if (typeof config.reporters === 'undefined' || config.reporters === null) {
       // Otherwise if no reporters are specified install only the heft reporter
       reporters = [this._getHeftJestReporterConfig(heftSession, heftConfiguration)];
       isUsingHeftReporter = true;
+      parsedConfig = true;
+    } else {
+      // The reporters config is in a format Heft does not support, leave it as is but complain about it
+      reporters = config.reporters;
     }
 
-    return {
-      reporters,
-      isUsingHeftReporter
-    };
+    if (!parsedConfig) {
+      // Making a note if Heft cannot understand the reporter entry in Jest config
+      // Not making this an error or warning because it does not warrant blocking a dev or CI test pass
+      // If the Jest config is truly wrong Jest itself is in a better position to report what is wrong with the config
+      jestLogger.terminal.writeVerboseLine(
+        `The 'reporters' entry in Jest config '${JEST_CONFIGURATION_LOCATION}' is in an unexpected format. Was expecting an array of reporters`
+      );
+    }
+
+    if (!isUsingHeftReporter) {
+      jestLogger.terminal.writeVerboseLine(
+        `HeftJestReporter was not specified in Jest config '${JEST_CONFIGURATION_LOCATION}'. Consider adding a 'default' entry in the reporters array.`
+      );
+    }
+
+    return reporters;
   }
 
   private _getHeftJestReporterConfig(
@@ -202,5 +228,39 @@ export class JestPlugin implements IHeftPlugin {
 
   private _getJestCacheFolder(heftConfiguration: HeftConfiguration): string {
     return path.join(heftConfiguration.buildCacheFolder, 'jest-cache');
+  }
+
+  // Finds the indices of jest reporters with a given name
+  private _findIndexes(items: JestReporterConfig[], search: string): number[] {
+    const result: number[] = [];
+
+    for (let index: number = 0; index < items.length; index++) {
+      const item: JestReporterConfig = items[index];
+
+      // Item is either a string or a tuple of [reporterName: string, options: unknown]
+      if (item === search) {
+        result.push(index);
+      } else if (typeof item !== 'undefined' && item !== null && item[0] === search) {
+        result.push(index);
+      }
+    }
+
+    return result;
+  }
+
+  private _renameJestReporter(items: JestReporterConfig[], index: number, newName: string): boolean {
+    const item: JestReporterConfig = items[index];
+
+    if (typeof item === 'string') {
+      items[index] = newName;
+      return true;
+    }
+
+    if (typeof item !== 'undefined' && item !== null) {
+      item[0] = newName;
+      return true;
+    }
+
+    return false;
   }
 }
