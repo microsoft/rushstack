@@ -56,7 +56,7 @@ export class WebpackPlugin implements IHeftPlugin {
       : webpack(webpackConfiguration); /* (webpack.Compilation) => webpack.Compiler */
 
     if (buildProperties.serveMode) {
-      let options: TWebpackDevServer.Configuration = {
+      const defaultDevServerOptions: TWebpackDevServer.Configuration = {
         host: 'localhost',
         publicPath: '/',
         filename: '[name]_[hash].js',
@@ -68,12 +68,17 @@ export class WebpackPlugin implements IHeftPlugin {
         },
         port: 8080
       };
+      let options: TWebpackDevServer.Configuration = defaultDevServerOptions;
 
       if (Array.isArray(webpackConfiguration)) {
-        // TODO: How should we handle the MultiCompiler. Do we need to spawn a
-        //        dev server for each configuration?
+        if (webpackConfiguration.length > 1) {
+          logger.emitWarning(new Error(`Detected multiple webpack configurations, utilizing the first one.`));
+        }
+        if (webpackConfiguration.length) {
+          options = { ...defaultDevServerOptions, ...webpackConfiguration[0].devServer };
+        }
       } else {
-        options = { ...options, ...webpackConfiguration.devServer };
+        options = { ...defaultDevServerOptions, ...webpackConfiguration.devServer };
       }
 
       // The webpack-dev-server package has a design flaw, where merely loading its package will set the
