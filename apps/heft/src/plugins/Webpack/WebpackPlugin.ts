@@ -71,11 +71,13 @@ export class WebpackPlugin implements IHeftPlugin {
       let options: TWebpackDevServer.Configuration = defaultDevServerOptions;
 
       if (Array.isArray(webpackConfiguration)) {
-        if (webpackConfiguration.length > 1) {
-          logger.emitWarning(new Error(`Detected multiple webpack configurations, utilizing the first one.`));
+        const devServerOptions: TWebpackDevServer.Configuration[] = webpackConfiguration.map((configuration) => configuration.devServer).filter((devServer) => !!devServer);
+        if (devServerOptions.length > 1) {
+          logger.emitWarning(new Error(`Detected multiple webpack devServer configurations, using the first one.`));
         }
-        if (webpackConfiguration.length) {
-          options = { ...defaultDevServerOptions, ...webpackConfiguration[0].devServer };
+        
+        if (devServerOptions.length) {
+          options = { ...defaultDevServerOptions, ...devServerOptions[0] };
         }
       } else {
         options = { ...defaultDevServerOptions, ...webpackConfiguration.devServer };
