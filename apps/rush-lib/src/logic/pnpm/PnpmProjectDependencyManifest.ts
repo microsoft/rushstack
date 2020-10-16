@@ -179,7 +179,7 @@ export class PnpmProjectDependencyManifest {
     }
 
     for (const [peerDependencyName, peerDependencyVersion] of Object.entries(
-      shrinkwrapEntry.peerDependencies
+      shrinkwrapEntry.peerDependencies || {}
     )) {
       // Check to see if the peer dependency is satisfied with the current shrinkwrap
       // entry and if not, check the parent shrinkwrap entry
