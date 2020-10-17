@@ -8,7 +8,7 @@ import { ProjectBuilder, convertSlashesForWindows } from '../logic/taskRunner/Pr
 import { PackageChangeAnalyzer } from './PackageChangeAnalyzer';
 import { TaskCollection } from './taskRunner/TaskCollection';
 
-export interface ITaskSelectorConstructor {
+export interface ITaskSelectorOptions {
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration: BuildCacheConfiguration | undefined;
   selection: ReadonlySet<RushConfigurationProject>;
@@ -30,10 +30,10 @@ export interface ITaskSelectorConstructor {
  *  - registering the necessary ProjectBuilders with the TaskRunner, which actually orchestrates execution
  */
 export class TaskSelector {
-  private _options: ITaskSelectorConstructor;
+  private _options: ITaskSelectorOptions;
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
 
-  public constructor(options: ITaskSelectorConstructor) {
+  public constructor(options: ITaskSelectorOptions) {
     this._options = options;
 
     const { packageChangeAnalyzer = new PackageChangeAnalyzer(options.rushConfiguration) } = options;
