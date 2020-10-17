@@ -2,6 +2,27 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.34.4",
+      "tag": "@microsoft/rush_v5.34.4",
+      "date": "Sat, 17 Oct 2020 00:23:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "When running `rush version --bump`, only include package.json updates in the generated commit"
+          },
+          {
+            "comment": "Fix Rush peer dependency validation when satisfied with a package alias"
+          },
+          {
+            "comment": "Prevent `rush unlink` from breaking installs for non-workspace projects"
+          },
+          {
+            "comment": "Add documentation for incremental option for buld custom commands"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.34.3",
       "tag": "@microsoft/rush_v5.34.3",
       "date": "Wed, 30 Sep 2020 21:04:15 GMT",
