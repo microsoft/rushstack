@@ -215,8 +215,7 @@ export class RushCommandLineParser extends CommandLineParser {
     if (!this.tryGetAction(RushConstants.rebuildCommandName)) {
       this._addCommandLineConfigAction(
         commandLineConfiguration,
-        CommandLineConfiguration.defaultRebuildCommandJson,
-        RushConstants.buildCommandName
+        CommandLineConfiguration.defaultRebuildCommandJson
       );
     }
   }
@@ -234,8 +233,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private _addCommandLineConfigAction(
     commandLineConfiguration: CommandLineConfiguration | undefined,
-    command: CommandJson,
-    commandToRun?: string
+    command: CommandJson
   ): void {
     if (this.tryGetAction(command.name)) {
       throw new Error(
@@ -251,10 +249,7 @@ export class RushCommandLineParser extends CommandLineParser {
         this.addAction(
           new BulkScriptAction({
             actionName: command.name,
-
-            // By default, the "rebuild" action runs the "build" script. However, if the command-line.json file
-            // overrides "rebuild," the "rebuild" script should be run.
-            commandToRun: commandToRun,
+            script: command.script,
 
             summary: command.summary,
             documentation: command.description || command.summary,

@@ -31,15 +31,14 @@ import { IRushConfigurationProjectJson } from '../../api/RushConfigurationProjec
  */
 export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   enableParallelism: boolean;
+  /**
+   * Optional package.json script to run otherwise use `actionName` as the script to run..
+   */
+  script?: string | string[];
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
   incremental: boolean;
   allowWarningsInSuccessfulBuild: boolean;
-
-  /**
-   * Optional command to run. Otherwise, use the `actionName` as the command to run.
-   */
-  commandToRun?: string;
 }
 
 /**
@@ -55,7 +54,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private _enableParallelism: boolean;
   private _ignoreMissingScript: boolean;
   private _isIncrementalBuildAllowed: boolean;
-  private _commandToRun: string;
+  private _commandToRun: string[];
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
   private _fromFlag!: CommandLineStringListParameter;
@@ -72,9 +71,16 @@ export class BulkScriptAction extends BaseScriptAction {
     this._enableParallelism = options.enableParallelism;
     this._ignoreMissingScript = options.ignoreMissingScript;
     this._isIncrementalBuildAllowed = options.incremental;
-    this._commandToRun = options.commandToRun || options.actionName;
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
+
+    if (Array.isArray(options.script)) {
+      this._commandToRun = [...options.script, options.actionName];
+    } else if (typeof options.script === 'string') {
+      this._commandToRun = [options.script, options.actionName];
+    } else {
+      this._commandToRun = [options.actionName];
+    }
   }
 
   public async runAsync(): Promise<void> {
@@ -118,7 +124,7 @@ export class BulkScriptAction extends BaseScriptAction {
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
       ignoreMissingScript: this._ignoreMissingScript,
       ignoreDependencyOrder: this._ignoreDependencyOrder,
-      packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun)
+      packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun[0])
     });
 
     // Register all tasks with the task collection
