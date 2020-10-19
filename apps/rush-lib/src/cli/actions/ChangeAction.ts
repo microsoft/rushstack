@@ -30,9 +30,9 @@ import {
 
 // TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
 import * as inquirerTypes from 'inquirer';
+import { RushConstants } from '../../logic/RushConstants';
+import { flatMap, memoize } from 'lodash';
 const inquirer: typeof inquirerTypes = Import.lazy('inquirer', require);
-
-const CHANGE_IGNORE_FILE_NAME: string = '.changeignore';
 
 export class ChangeAction extends BaseRushAction {
   private _verifyParameter!: CommandLineFlagParameter;
@@ -51,7 +51,7 @@ export class ChangeAction extends BaseRushAction {
       'Asks a series of questions and then generates a <branchname>-<timestamp>.json file ' +
         'in the common folder. The `publish` command will consume these files and perform the proper ' +
         'version bumps. Files will be excluded from change detection if they match an entry in a ' +
-        `\`${CHANGE_IGNORE_FILE_NAME}\` file in the package's root directory. The changes will ` +
+        `\`${RushConstants.changeignoreFileName}\` file in the package's root directory. The changes will ` +
         'eventually be published in a CHANGELOG.md file in each package.',
       '',
       'The possible types of changes are: ',
@@ -329,6 +329,20 @@ export class ChangeAction extends BaseRushAction {
     const repoRootFolder: string | undefined = VersionControl.getRepositoryRootPath();
     const projectHostMap: Map<string, string> = this._generateHostMap();
 
+    const getChangeIgnorePatterns: (fsPath: string) => string[] = memoize((fsPath: string): string[] => {
+      if ((repoRootFolder && Path.isUnder(repoRootFolder, fsPath)) || !FileSystem.exists(fsPath)) {
+        return [];
+      }
+      const parent: string = path.dirname(fsPath);
+      const parentIgnoreStrings: string[] = getChangeIgnorePatterns(parent);
+
+      const changeIgnoreFilePath: string = path.join(parent, RushConstants.changeignoreFileName);
+
+      return FileSystem.exists(changeIgnoreFilePath)
+        ? [...parentIgnoreStrings, FileSystem.readFile(changeIgnoreFilePath)]
+        : parentIgnoreStrings;
+    });
+
     this.rushConfiguration.projects
       .filter((project) => project.shouldPublish)
       .filter((project) => !project.versionPolicy || !project.versionPolicy.exemptFromRushChange)
@@ -336,7 +350,7 @@ export class ChangeAction extends BaseRushAction {
         const projectFolder: string = repoRootFolder
           ? path.relative(repoRootFolder, project.projectFolder)
           : project.projectRelativeFolder;
-        return this._hasProjectChanged(changedFiles, projectFolder);
+        return this._hasProjectChanged(changedFiles, projectFolder, getChangeIgnorePatterns);
       })
       .forEach((project) => {
         const hostName: string | undefined = projectHostMap.get(project.packageName);
@@ -359,14 +373,17 @@ export class ChangeAction extends BaseRushAction {
     });
   }
 
-  private _hasProjectChanged(changedFiles: string[], projectFolder: string): boolean {
+  private _hasProjectChanged(
+    changedFiles: string[],
+    projectFolder: string,
+    getChangeIgnorePatterns: (fsPath: string) => string[]
+  ): boolean {
     const relevantFiles: string[] = changedFiles.filter((file) => Path.isUnderOrEqual(file, projectFolder));
 
-    const changeIgnoreFile: string = path.join(projectFolder, CHANGE_IGNORE_FILE_NAME);
-
     const ignoreConfig: Ignore = ignore();
-    if (relevantFiles.length > 0 && FileSystem.exists(changeIgnoreFile)) {
-      ignoreConfig.add(FileSystem.readFile(changeIgnoreFile));
+
+    for (const ignorePattern of flatMap(relevantFiles.map(path.dirname), getChangeIgnorePatterns)) {
+      ignoreConfig.add(ignorePattern);
     }
 
     return relevantFiles.some(ignoreConfig.createFilter());
