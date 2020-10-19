@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add .changeignore file support",
+      "comment": "Add support for a \".changeignore\" file that allows files and folders to be excluded from change detection in \"rush change\".",
       "type": "none"
     }
   ],
