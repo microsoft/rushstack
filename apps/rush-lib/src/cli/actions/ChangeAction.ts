@@ -333,10 +333,9 @@ export class ChangeAction extends BaseRushAction {
       if ((repoRootFolder && Path.isUnder(repoRootFolder, fsPath)) || !FileSystem.exists(fsPath)) {
         return [];
       }
-      const parent: string = path.dirname(fsPath);
-      const parentIgnoreStrings: string[] = getChangeIgnorePatterns(parent);
+      const parentIgnoreStrings: string[] = getChangeIgnorePatterns(path.dirname(fsPath));
 
-      const changeIgnoreFilePath: string = path.join(parent, RushConstants.changeignoreFileName);
+      const changeIgnoreFilePath: string = path.join(fsPath, RushConstants.changeignoreFileName);
 
       return FileSystem.exists(changeIgnoreFilePath)
         ? [...parentIgnoreStrings, FileSystem.readFile(changeIgnoreFilePath)]
