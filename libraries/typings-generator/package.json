@@ -27,7 +27,7 @@
     "@microsoft/node-library-build": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "0.14.0",
-    "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/heft-node-rig": "0.1.0",
     "@types/glob": "7.1.1"
   }
 }
