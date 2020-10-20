@@ -17,5 +17,8 @@
     "@microsoft/api-extractor": "workspace:*",
     "eslint": "~7.2.0",
     "typescript": "~3.9.7"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*"
   }
 }
