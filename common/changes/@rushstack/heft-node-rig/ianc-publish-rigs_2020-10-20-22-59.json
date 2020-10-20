@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-node-rig",
+      "comment": "Update Heft.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-node-rig",
+  "email": "iclanton@users.noreply.github.com"
+}
