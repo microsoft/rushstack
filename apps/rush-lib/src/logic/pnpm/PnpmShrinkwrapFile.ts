@@ -621,7 +621,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
         pnpmDependencyKey
       );
 
-      if (!result) {
+      // We don't support links in shrinkwraps.
+      if (!result && !pnpmDependencyKey.startsWith('link:')) {
         throw new Error(
           `Cannot parse PNPM shrinkwrap version specifier: "${pnpmDependencyKey}"` +
             ` for "${dependencyName}"`
