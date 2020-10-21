@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.17.1",
+      "tag": "@rushstack/heft_v0.17.1",
+      "date": "Wed, 21 Oct 2020 05:09:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump downstream dependencies."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.17.0",
       "tag": "@rushstack/heft_v0.17.0",
       "date": "Fri, 16 Oct 2020 23:32:58 GMT",
