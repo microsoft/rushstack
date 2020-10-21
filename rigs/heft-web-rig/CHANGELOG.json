@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.1.7",
+      "tag": "@rushstack/heft-web-rig_v0.1.7",
+      "date": "Wed, 21 Oct 2020 02:28:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update Heft."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.6",
       "tag": "@rushstack/heft-web-rig_v0.1.6",
       "date": "Thu, 15 Oct 2020 00:59:08 GMT",

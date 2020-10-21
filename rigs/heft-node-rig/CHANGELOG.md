@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Thu, 15 Oct 2020 00:59:08 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Oct 2020 02:28:17 GMT and should not be manually modified.
+
+## 0.1.7
+Wed, 21 Oct 2020 02:28:17 GMT
+
+### Patches
+
+- Update Heft.
 
 ## 0.1.6
 Thu, 15 Oct 2020 00:59:08 GMT
