@@ -6,11 +6,12 @@ import * as fs from 'fs';
 import { Path } from './Path';
 
 export type InputFileMessageIds =
-  | 'missing-tsconfig'
-  | 'missing-src-folder'
-  | 'packlet-folder-case'
+  | 'file-in-packets-folder'
   | 'invalid-packlet-name'
-  | 'misplaced-packlets-folder';
+  | 'misplaced-packlets-folder'
+  | 'missing-src-folder'
+  | 'missing-tsconfig'
+  | 'packlet-folder-case';
 
 export type ImportMessageIds =
   | 'bypassed-entry-point'
@@ -129,24 +130,33 @@ export class PackletAnalyzer {
       this.packletsFolderPath = expectedPackletsFolder;
     }
 
-    if (underPackletsFolder && pathParts.length >= 2) {
-      // Example: 'my-packlet'
-      const packletName: string = pathParts[1];
-      this.inputFilePackletName = packletName;
+    if (underPackletsFolder) {
+      if (pathParts.length === 2) {
+        // Example: src/packlets/SomeFile.ts
+        this.error = { messageId: 'file-in-packets-folder' };
+        return;
+      }
+      if (pathParts.length >= 2) {
+        // Example: 'my-packlet'
+        const packletName: string = pathParts[1];
+        this.inputFilePackletName = packletName;
 
-      // Example: 'index.ts' or 'index.tsx'
-      const thirdPart: string = pathParts[2];
+        if (pathParts.length === 3) {
+          // Example: 'index.ts' or 'index.tsx'
+          const thirdPart: string = pathParts[2];
 
-      // Example: 'index'
-      const thirdPartWithoutExtension: string = path.parse(thirdPart).name;
+          // Example: 'index'
+          const thirdPartWithoutExtension: string = path.parse(thirdPart).name;
 
-      if (thirdPartWithoutExtension.toUpperCase() === 'INDEX') {
-        if (!PackletAnalyzer._validPackletName.test(packletName)) {
-          this.error = { messageId: 'invalid-packlet-name', data: { packletName } };
-          return;
+          if (thirdPartWithoutExtension.toUpperCase() === 'INDEX') {
+            if (!PackletAnalyzer._validPackletName.test(packletName)) {
+              this.error = { messageId: 'invalid-packlet-name', data: { packletName } };
+              return;
+            }
+
+            this.isEntryPoint = true;
+          }
         }
-
-        this.isEntryPoint = true;
       }
     }
 
