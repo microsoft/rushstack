@@ -24,6 +24,15 @@
   // "exportAsDefault": true,
 
   /**
+   * Files with these extensions will pass through the Sass transpiler for typings generation.
+   */
+  // "fileExtensions": [
+  //   ".sass",
+  //   ".scss",
+  //   ".css
+  // ],
+
+  /**
    * A list of paths used when resolving Sass imports.
    */
   // "importIncludePaths": [

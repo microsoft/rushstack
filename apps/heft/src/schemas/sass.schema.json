@@ -37,7 +37,7 @@
       "description": "Files with these extensions will pass through the Sass transpiler for typings generation.",
       "items": {
         "type": "string",
-        "pattern": "[^\\\\]"
+        "pattern": "^\\.[A-z0-9-._]*[A-z0-9-]+$"
       }
     },
 

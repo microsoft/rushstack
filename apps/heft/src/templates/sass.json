@@ -27,9 +27,9 @@
    * Files with these extensions will pass through the Sass transpiler for typings generation.
    */
   // "fileExtensions": [
-  //   "sass",
-  //   "scss",
-  //   "css
+  //   ".sass",
+  //   ".scss",
+  //   ".css
   // ],
 
   /**

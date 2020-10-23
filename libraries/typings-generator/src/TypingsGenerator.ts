@@ -130,6 +130,7 @@ export class TypingsGenerator {
       );
       const generatedTsFilePath: string = this._getTypingsFilePath(locFilePath);
 
+      // Typings data will be undefined when no types should be generated for the parsed file.
       if (typingsData === undefined) {
         return;
       }

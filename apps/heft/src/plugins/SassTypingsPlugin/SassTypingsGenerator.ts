@@ -32,7 +32,7 @@ export interface ISassConfiguration {
 
   /**
    * Files with these extensions will pass through the Sass transpiler for typings generation.
-   * Defaults to ["sass", "scss", "css"]
+   * Defaults to [".sass", ".scss", ".css"]
    */
   fileExtensions?: string[];
 
@@ -86,7 +86,7 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
     const exportAsDefault: boolean =
       sassConfiguration.exportAsDefault === undefined ? true : sassConfiguration.exportAsDefault;
     const exportAsDefaultInterfaceName: string = 'IExportStyles';
-    const fileExtensions: string[] = sassConfiguration.fileExtensions || ['css', 'sass', 'scss'];
+    const fileExtensions: string[] = sassConfiguration.fileExtensions || ['.sass', '.scss', '.css'];
     super({
       srcFolder,
       generatedTsFolder,
@@ -119,6 +119,10 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
     });
   }
 
+  /**
+   * Sass partial files are snippets of CSS meant to be included in other Sass files.
+   * Partial filenames always begin with a leading underscore and do not produce a CSS output file.
+   */
   private _isSassPartial(filePath: string): boolean {
     return path.basename(filePath)[0] === '_';
   }
