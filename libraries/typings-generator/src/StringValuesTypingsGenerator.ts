@@ -23,7 +23,8 @@ export interface IStringValueTypings {
 /**
  * @public
  */
-export interface IStringValuesTypingsGeneratorOptions extends ITypingsGeneratorOptions<IStringValueTypings> {
+export interface IStringValuesTypingsGeneratorOptions
+  extends ITypingsGeneratorOptions<IStringValueTypings | undefined> {
   /**
    * Setting this option wraps the typings export in a default property.
    */
@@ -49,10 +50,14 @@ export class StringValuesTypingsGenerator extends TypingsGenerator {
     super({
       ...options,
       parseAndGenerateTypings: async (fileContents: string, filePath: string) => {
-        const stringValueTypings: IStringValueTypings = await options.parseAndGenerateTypings(
+        const stringValueTypings: IStringValueTypings | undefined = await options.parseAndGenerateTypings(
           fileContents,
           filePath
         );
+
+        if (stringValueTypings === undefined) {
+          return;
+        }
 
         const outputLines: string[] = [];
         const interfaceName: string = options.exportAsDefaultInterfaceName

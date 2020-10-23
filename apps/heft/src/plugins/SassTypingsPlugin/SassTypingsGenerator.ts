@@ -31,6 +31,12 @@ export interface ISassConfiguration {
   exportAsDefault?: boolean;
 
   /**
+   * Files with these extensions will pass through the Sass transpiler for typings generation.
+   * Defaults to [".sass", ".scss", ".css"]
+   */
+  fileExtensions?: string[];
+
+  /**
    * A list of paths used when resolving Sass imports.
    * The paths should be relative to the project root.
    * Defaults to ["node_modules", "src"]
@@ -80,9 +86,8 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
     const exportAsDefault: boolean =
       sassConfiguration.exportAsDefault === undefined ? true : sassConfiguration.exportAsDefault;
     const exportAsDefaultInterfaceName: string = 'IExportStyles';
-    const fileExtensions: string[] = ['css', 'sass', 'scss'];
+    const fileExtensions: string[] = sassConfiguration.fileExtensions || ['.sass', '.scss', '.css'];
     super({
-      // Default configuration values
       srcFolder,
       generatedTsFolder,
       exportAsDefault,
@@ -92,6 +97,10 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
 
       // Generate typings function
       parseAndGenerateTypings: async (fileContents: string, filePath: string) => {
+        if (this._isSassPartial(filePath)) {
+          // Do not generate typings for Sass partials.
+          return;
+        }
         const css: string = await this._transpileSassAsync(
           fileContents,
           filePath,
@@ -108,6 +117,14 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
         return sassTypings;
       }
     });
+  }
+
+  /**
+   * Sass partial files are snippets of CSS meant to be included in other Sass files.
+   * Partial filenames always begin with a leading underscore and do not produce a CSS output file.
+   */
+  private _isSassPartial(filePath: string): boolean {
+    return path.basename(filePath)[0] === '_';
   }
 
   private async _transpileSassAsync(
