@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 21 Oct 2020 05:09:44 GMT and should not be manually modified.
+This log was last generated on Sat, 24 Oct 2020 00:11:18 GMT and should not be manually modified.
+
+## 0.17.2
+Sat, 24 Oct 2020 00:11:18 GMT
+
+### Patches
+
+- Add fileExtensions config to SassTypingsGenerator. 
 
 ## 0.17.1
 Wed, 21 Oct 2020 05:09:44 GMT

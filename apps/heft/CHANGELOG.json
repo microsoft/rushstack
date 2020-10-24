@@ -2,6 +2,23 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.17.2",
+      "tag": "@rushstack/heft_v0.17.2",
+      "date": "Sat, 24 Oct 2020 00:11:18 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add fileExtensions config to SassTypingsGenerator. "
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.2.19`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.17.1",
       "tag": "@rushstack/heft_v0.17.1",
       "date": "Wed, 21 Oct 2020 05:09:44 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/typings-generator
 
-This log was last generated on Thu, 15 Oct 2020 00:59:08 GMT and should not be manually modified.
+This log was last generated on Sat, 24 Oct 2020 00:11:18 GMT and should not be manually modified.
+
+## 0.2.19
+Sat, 24 Oct 2020 00:11:18 GMT
+
+### Patches
+
+- Support `undefined` as a result from parseFileAndGenerateTypings.
 
 ## 0.2.18
 Thu, 15 Oct 2020 00:59:08 GMT

@@ -2,6 +2,18 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.2.19",
+      "tag": "@rushstack/typings-generator_v0.2.19",
+      "date": "Sat, 24 Oct 2020 00:11:18 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Support `undefined` as a result from parseFileAndGenerateTypings."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.18",
       "tag": "@rushstack/typings-generator_v0.2.18",
       "date": "Thu, 15 Oct 2020 00:59:08 GMT",
