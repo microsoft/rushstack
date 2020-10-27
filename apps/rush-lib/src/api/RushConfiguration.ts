@@ -494,6 +494,7 @@ export class RushConfiguration {
   private _projectsByName: Map<string, RushConfigurationProject> | undefined;
 
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
+  private _versionPolicyConfigurationFilePath: string;
   private _experimentsConfiguration: ExperimentsConfiguration;
 
   private readonly _rushConfigurationJson: IRushConfigurationJson;
@@ -695,11 +696,13 @@ export class RushConfiguration {
     this._telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
     this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks || {});
 
-    const versionPolicyConfigFile: string = path.join(
+    this._versionPolicyConfigurationFilePath = path.join(
       this._commonRushConfigFolder,
       RushConstants.versionPoliciesFilename
     );
-    this._versionPolicyConfiguration = new VersionPolicyConfiguration(versionPolicyConfigFile);
+    this._versionPolicyConfiguration = new VersionPolicyConfiguration(
+      this._versionPolicyConfigurationFilePath
+    );
 
     this._variants = new Set<string>();
 
@@ -1582,6 +1585,13 @@ export class RushConfiguration {
    */
   public get versionPolicyConfiguration(): VersionPolicyConfiguration {
     return this._versionPolicyConfiguration;
+  }
+
+  /**
+   * @beta
+   */
+  public get versionPolicyConfigurationFilePath(): string {
+    return this._versionPolicyConfigurationFilePath;
   }
 
   /**
