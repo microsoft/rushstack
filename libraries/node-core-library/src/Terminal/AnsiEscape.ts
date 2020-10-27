@@ -124,8 +124,6 @@ export class AnsiEscape {
 
       case ConsoleColorCodes.Bold:
         return 'bold';
-      case ConsoleColorCodes.BoldOff:
-        return 'bold-off';
       case ConsoleColorCodes.Dim:
         return 'dim';
       case ConsoleColorCodes.NormalColorOrIntensity:
