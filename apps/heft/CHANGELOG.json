@@ -2,6 +2,27 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.17.3",
+      "tag": "@rushstack/heft_v0.17.3",
+      "date": "Tue, 27 Oct 2020 15:10:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.3.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.34.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.2.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.10.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.17.2",
       "tag": "@rushstack/heft_v0.17.2",
       "date": "Sat, 24 Oct 2020 00:11:18 GMT",
