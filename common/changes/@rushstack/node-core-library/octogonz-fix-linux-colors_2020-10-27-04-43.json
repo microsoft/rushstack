@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Fix an issue where the TextAttribute.Bold ANSI escape was not rendered correctly by Linux",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
