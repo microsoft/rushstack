@@ -881,7 +881,7 @@ export class MarkdownDocumenter {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     let linkText: string = Utilities.getConciseSignature(apiItem);
-    if (apiItem instanceof ApiPropertySignature && this._isOptionalProperty(apiItem)) {
+    if (apiItem instanceof ApiPropertySignature && apiItem.isOptional) {
       linkText += '?';
     }
 
@@ -895,10 +895,6 @@ export class MarkdownDocumenter {
         })
       ])
     ]);
-  }
-
-  private _isOptionalProperty(property: ApiPropertySignature): boolean {
-    return property.excerptTokens[0].text.endsWith('?: ');
   }
 
   /**
@@ -924,7 +920,7 @@ export class MarkdownDocumenter {
       }
     }
 
-    if (apiItem instanceof ApiPropertySignature && this._isOptionalProperty(apiItem)) {
+    if (apiItem instanceof ApiPropertySignature && apiItem.isOptional) {
       section.appendNodesInParagraph([
         new DocEmphasisSpan({ configuration, italic: true }, [
           new DocPlainText({ configuration, text: '(Optional)' })

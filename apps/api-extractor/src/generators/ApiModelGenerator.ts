@@ -738,6 +738,8 @@ export class ApiModelGenerator {
     const name: string = exportedName ? exportedName : astDeclaration.astSymbol.localName;
 
     const isStatic: boolean = (astDeclaration.modifierFlags & ts.ModifierFlags.Static) !== 0;
+    const isOptional: boolean =
+      (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
 
     const containerKey: string = ApiProperty.getContainerKey(name, isStatic);
 
@@ -761,6 +763,7 @@ export class ApiModelGenerator {
         docComment,
         releaseTag,
         isStatic,
+        isOptional,
         excerptTokens,
         propertyTypeTokenRange
       });
