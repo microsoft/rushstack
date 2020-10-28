@@ -19,6 +19,11 @@ function createWebpackConfig({ production }) {
         {
           test: /\.css$/,
           use: [require.resolve('style-loader'), require.resolve('css-loader')]
+        },
+        {
+          test: /\.js$/,
+          enforce: 'pre',
+          use: ['source-map-loader']
         }
       ]
     },

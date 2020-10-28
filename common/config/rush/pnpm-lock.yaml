@@ -1638,6 +1638,7 @@ importers:
     dependencies:
       '@rushstack/eslint-patch': 'link:../eslint-patch'
       '@rushstack/eslint-plugin': 'link:../eslint-plugin'
+      '@rushstack/eslint-plugin-packlets': 'link:../eslint-plugin-packlets'
       '@rushstack/eslint-plugin-security': 'link:../eslint-plugin-security'
       '@typescript-eslint/eslint-plugin': 3.4.0_def47c0014fd51b1497b94bf8e50ada2
       '@typescript-eslint/experimental-utils': 3.4.0_eslint@7.2.0+typescript@3.9.7
@@ -1652,6 +1653,7 @@ importers:
     specifiers:
       '@rushstack/eslint-patch': 'workspace:*'
       '@rushstack/eslint-plugin': 'workspace:*'
+      '@rushstack/eslint-plugin-packlets': 'workspace:*'
       '@rushstack/eslint-plugin-security': 'workspace:*'
       '@typescript-eslint/eslint-plugin': 3.4.0
       '@typescript-eslint/experimental-utils': 3.4.0
@@ -2233,6 +2235,7 @@ importers:
       html-webpack-plugin: 3.2.0_webpack@4.31.0
       react: 16.13.1
       react-dom: 16.13.1_react@16.13.1
+      source-map-loader: 1.1.2_webpack@4.31.0
       style-loader: 1.2.1_webpack@4.31.0
       typescript: 3.9.7
       webpack: 4.31.0_webpack@4.31.0
@@ -2248,6 +2251,7 @@ importers:
       html-webpack-plugin: ~3.2.0
       react: ~16.13.1
       react-dom: ~16.13.1
+      source-map-loader: ~1.1.2
       style-loader: ~1.2.1
       typescript: ~3.9.7
       webpack: ~4.31.0
@@ -7697,6 +7701,14 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==
+  /iconv-lite/0.6.2:
+    dependencies:
+      safer-buffer: 2.1.2
+    dev: true
+    engines:
+      node: '>=0.10.0'
+    resolution:
+      integrity: sha512-2y91h5OpQlolefMPmUlivelittSWy0rP+oYVpn6A7GwVHNE8AWzoYOBNmlwks3LobaJxgHCYZAnyNo2GgpNRNQ==
   /icss-replace-symbols/1.1.0:
     dev: false
     resolution:
@@ -11446,6 +11458,16 @@ packages:
       node: '>= 8.9.0'
     resolution:
       integrity: sha512-SHiNtMOUGWBQJwzISiVYKu82GiV4QYGePp3odlY1tuKO7gPtphAT5R/py0fA6xtbgLL/RvtJZnU9b8s0F1q0Xg==
+  /schema-utils/3.0.0:
+    dependencies:
+      '@types/json-schema': 7.0.6
+      ajv: 6.12.5
+      ajv-keywords: 3.5.2_ajv@6.12.5
+    dev: true
+    engines:
+      node: '>= 10.13.0'
+    resolution:
+      integrity: sha512-6D82/xSzO094ajanoOSbe4YvXWMfn2A//8Y1+MUqFAJul5Bs+yn36xbK9OtNDcRVSBJ9jjeoXftM6CfztsjOAA==
   /scss-tokenizer/0.2.3:
     dependencies:
       js-base64: 2.6.4
@@ -11741,6 +11763,22 @@ packages:
   /source-list-map/2.0.1:
     resolution:
       integrity: sha512-qnQ7gVMxGNxsiL4lEuJwe/To8UnK7fAnmbGEEH8RpLouuKbeEm0lhbQVFIrNSuB+G7tVrAlVsZgETT5nljf+Iw==
+  /source-map-loader/1.1.2_webpack@4.31.0:
+    dependencies:
+      abab: 2.0.5
+      iconv-lite: 0.6.2
+      loader-utils: 2.0.0
+      schema-utils: 3.0.0
+      source-map: 0.6.1
+      webpack: 4.31.0_webpack@4.31.0
+      whatwg-mimetype: 2.3.0
+    dev: true
+    engines:
+      node: '>= 10.13.0'
+    peerDependencies:
+      webpack: ^4.0.0 || ^5.0.0
+    resolution:
+      integrity: sha512-bjf6eSENOYBX4JZDfl9vVLNsGAQ6Uz90fLmOazcmMcyDYOBFsGxPNn83jXezWLY9bJsVAo1ObztxPcV8HAbjVA==
   /source-map-resolve/0.5.3:
     dependencies:
       atob: 2.1.2
