@@ -222,7 +222,7 @@ export class BulkScriptAction extends BaseScriptAction {
     }
     this._ignoreHooksParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-hooks',
-      description: `Overrides execution of event hooks. Meant for use on CI machines.`
+      description: `Overrides execution of event hooks. Make sure you know what you are skipping.`
     });
 
     this.defineScriptParameters();

@@ -28,8 +28,8 @@ export class EventHooksManager {
 
     const scripts: string[] = this._eventHooks.get(event);
     if (scripts.length > 0) {
-      console.log(`Skipping event hooks for ${Event[event]} since --ignore-hooks was specified`);
       if (ignoreHooks) {
+        console.log(`Skipping event hooks for ${Event[event]} since --ignore-hooks was specified`);
         return;
       }
 
