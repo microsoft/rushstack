@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin-packlets",
+      "comment": "Fix an issue where @rushstack/packlets/circular-deps did not detect certain types of circular dependencies",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin-packlets",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
