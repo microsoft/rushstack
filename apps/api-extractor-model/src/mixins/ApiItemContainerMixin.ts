@@ -47,7 +47,7 @@ const _membersByKind: unique symbol = Symbol('ApiItemContainerMixin._membersByKi
  * Examples of `ApiItemContainerMixin` child classes include `ApiModel`, `ApiPackage`, `ApiEntryPoint`,
  * and `ApiEnum`.  But note that `Parameter` is not considered a "member" of an `ApiMethod`; this relationship
  * is modeled using {@link (ApiParameterListMixin:interface).parameters} instead
- * of {@link (ApiItemContainerMixin:interface).members}.
+ * of {@link ApiItem.members}.
  *
  * @public
  */
