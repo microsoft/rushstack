@@ -141,7 +141,7 @@ export interface IBuildStageProperties {
   maxOldSpaceSize?: string;
   watchMode: boolean;
   serveMode: boolean;
-  webpackStats?: webpack.Stats;
+  webpackStats?: webpack.Stats | webpack.compilation.MultiStats;
 }
 
 /**

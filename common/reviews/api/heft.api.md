@@ -126,7 +126,7 @@ export interface IBuildStageProperties {
     // (undocumented)
     watchMode: boolean;
     // (undocumented)
-    webpackStats?: webpack.Stats;
+    webpackStats?: webpack.Stats | webpack.compilation.MultiStats;
 }
 
 // @public (undocumented)

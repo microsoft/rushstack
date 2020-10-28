@@ -198,8 +198,10 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
        */
       function dehydrateAsset(modules: Source, chunk: webpack.compilation.Chunk): Source {
         for (const mod of chunk.modulesIterable) {
-          if (!submittedModules.has(mod.id)) {
-            console.error(`Chunk ${chunk.id} failed to render module ${mod.id} for ${mod.resourcePath}`);
+          if (mod.id === null || !submittedModules.has(mod.id)) {
+            console.error(
+              `Chunk ${chunk.id} failed to render module ${mod.id} for ${(mod as IExtendedModule).resource}`
+            );
           }
         }
 
@@ -330,7 +332,9 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
             const externalNames: Map<string, string> = new Map();
 
             const chunkModuleSet: Set<string | number> = new Set();
-            const allChunkModules: Iterable<IExtendedModule> = chunk.modulesIterable;
+            const allChunkModules: Iterable<IExtendedModule> = chunk.modulesIterable as Iterable<
+              IExtendedModule
+            >;
             let hasNonNumber: boolean = false;
             for (const mod of allChunkModules) {
               if (mod.id !== null) {
