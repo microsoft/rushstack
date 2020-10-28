@@ -54,11 +54,6 @@ const _membersByKind: unique symbol = Symbol('ApiItemContainerMixin._membersByKi
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export interface ApiItemContainerMixin extends ApiItem {
   /**
-   * Returns the members of this container, sorted alphabetically.
-   */
-  readonly members: ReadonlyArray<ApiItem>;
-
-  /**
    * Adds a new member to the container.
    *
    * @remarks
@@ -146,6 +141,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
       }
     }
 
+    /** @override */
     public get members(): ReadonlyArray<ApiItem> {
       if (!this[_membersSorted]) {
         LegacyAdapters.sortStable(this[_members], (x, y) => x.getSortKey().localeCompare(y.getSortKey()));
