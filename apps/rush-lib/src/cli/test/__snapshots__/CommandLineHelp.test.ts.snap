@@ -110,7 +110,7 @@ exports[`CommandLineHelp prints the help for each action: build 1`] = `
 "usage: rush build [-h] [-p COUNT] [-t PROJECT1]
                   [--from-version-policy VERSION_POLICY_NAME]
                   [--to-version-policy VERSION_POLICY_NAME] [-f PROJECT2] [-v]
-                  [-o] [-s] [-m]
+                  [-o] [--ignore-hooks] [-s] [-m]
                   
 
 This command is similar to \\"rush rebuild\\", except that \\"rush build\\" performs 
@@ -159,6 +159,8 @@ Optional arguments:
                         If specified, the incremental build will only rebuild 
                         projects that have changed, but not any projects that 
                         directly or indirectly depend on the changed package.
+  --ignore-hooks        Overrides execution of event hooks. Meant for use on 
+                        CI machines.
   -s, --ship            Perform a production build, including minification 
                         and localization steps
   -m, --minimal         Perform a fast build, which disables certain tasks 
@@ -282,7 +284,7 @@ exports[`CommandLineHelp prints the help for each action: import-strings 1`] = `
 "usage: rush import-strings [-h] [-p COUNT] [-t PROJECT1]
                            [--from-version-policy VERSION_POLICY_NAME]
                            [--to-version-policy VERSION_POLICY_NAME]
-                           [-f PROJECT2] [-v]
+                           [-f PROJECT2] [-v] [--ignore-hooks]
                            [--locale {en-us,fr-fr,es-es,zh-cn}]
                            
 
@@ -319,6 +321,8 @@ Optional arguments:
                         project in the current working directory.
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
+  --ignore-hooks        Overrides execution of event hooks. Meant for use on 
+                        CI machines.
   --locale {en-us,fr-fr,es-es,zh-cn}
                         Selects a single instead of the default locale 
                         (en-us) for non-ship builds or all locales for ship 
@@ -595,7 +599,7 @@ exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
 "usage: rush rebuild [-h] [-p COUNT] [-t PROJECT1]
                     [--from-version-policy VERSION_POLICY_NAME]
                     [--to-version-policy VERSION_POLICY_NAME] [-f PROJECT2]
-                    [-v] [-s] [-m]
+                    [-v] [--ignore-hooks] [-s] [-m]
                     
 
 This command assumes that the package.json file for each project contains a 
@@ -637,6 +641,8 @@ Optional arguments:
                         project in the current working directory.
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
+  --ignore-hooks        Overrides execution of event hooks. Meant for use on 
+                        CI machines.
   -s, --ship            Perform a production build, including minification 
                         and localization steps
   -m, --minimal         Perform a fast build, which disables certain tasks 
