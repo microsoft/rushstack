@@ -59,6 +59,10 @@ export class ApiEnum extends ApiItemContainerMixin(ApiNameMixin(ApiReleaseTagMix
   }
 
   /** @override */
+  // error TS2611: 'members' is defined as a property in the base class, but is overridden here as an accessor.
+  // But there is no way to declare an accessor in the ApiItemContainerMixin interface.
+  // See discussion here: https://github.com/microsoft/TypeScript/pull/37894#issuecomment-717789311
+  // @ts-ignore
   public get members(): ReadonlyArray<ApiEnumMember> {
     return super.members as ReadonlyArray<ApiEnumMember>;
   }
