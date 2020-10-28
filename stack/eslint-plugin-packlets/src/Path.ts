@@ -35,19 +35,32 @@ export class Path {
     return !fs.existsSync(__filename.toUpperCase());
   }
 
+  // Removes redundant trailing slashes from a path.
+  private static _trimTrailingSlashes(inputPath: string): string {
+    // Examples:
+    // "/a/b///\\" --> "/a/b"
+    // "/"         --> "/"
+    return inputPath.replace(/(?<=[^\/\\])[\/\\]+$/, '');
+  }
+
   // An implementation of path.relative() that is case-insensitive.
   private static _relativeCaseInsensitive(from: string, to: string): string {
-    // Convert everything to uppercase and call path.relative()
-    const fromNormalized: string = from.toUpperCase();
-    const toNormalized: string = to.toUpperCase();
-    const result: string = path.relative(fromNormalized, toNormalized);
+    // path.relative() apples path.normalize() and also trims any trailing slashes.
+    // Since we'll be matching toNormalized against result, we need to do that for our string as well.
+    const normalizedTo: string = Path._trimTrailingSlashes(path.normalize(to));
+
+    // We start by converting everything to uppercase and call path.relative()
+    const uppercasedFrom: string = from.toUpperCase();
+    const uppercasedTo: string = normalizedTo.toUpperCase();
+
+    // The result will be all uppercase because its inputs were uppercased
+    const uppercasedResult: string = path.relative(uppercasedFrom, uppercasedTo);
 
     // Are there any cased characters in the result?
-    const lowerCasedResult = result.toLowerCase();
-    if (lowerCasedResult === result) {
+    if (uppercasedResult.toLowerCase() === uppercasedResult) {
       // No cased characters
       // Example: "../.."
-      return lowerCasedResult;
+      return uppercasedResult;
     }
 
     // Example:
@@ -59,25 +72,29 @@ export class Path {
     //
     //   result="../D/E"
     //
-    // Scan backwards through result and toNormalized, to find the first character where they differ
-    let resultIndex: number = result.length;
-    let toIndex: number = toNormalized.length;
+    // Scan backwards comparing uppercasedResult versus uppercasedTo, stopping at the first place where they differ.
+    let resultIndex: number = uppercasedResult.length;
+    let toIndex: number = normalizedTo.length;
     for (;;) {
       if (resultIndex === 0 || toIndex === 0) {
+        // Stop if we reach the start of the string
         break;
       }
+
+      if (uppercasedResult.charCodeAt(resultIndex - 1) !== uppercasedTo.charCodeAt(toIndex - 1)) {
+        // Stop before we reach a character that is different
+        break;
+      }
+
       --resultIndex;
       --toIndex;
-      if (result.charCodeAt(resultIndex) !== toNormalized.charCodeAt(toIndex)) {
-        break;
-      }
     }
 
-    // Replace the matching part with the casing from the "to" input
+    // Replace the matching part with the properly cased substring from the "normalizedTo" input
     //
     // Example:
     //   ".." + "/d/e" = "../d/e"
-    return result.substring(0, resultIndex) + to.substring(toIndex);
+    return uppercasedResult.substring(0, resultIndex) + normalizedTo.substring(toIndex);
   }
 
   public static relative(from: string, to: string): string {
