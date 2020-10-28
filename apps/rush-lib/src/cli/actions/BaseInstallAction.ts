@@ -80,7 +80,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
     });
     this._ignoreHooksParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-hooks',
-      description: `Overrides execution of event hooks. Make sure you know what you are skipping.`
+      description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
     });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
