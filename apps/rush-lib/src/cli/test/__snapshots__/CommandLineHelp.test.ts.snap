@@ -159,8 +159,8 @@ Optional arguments:
                         If specified, the incremental build will only rebuild 
                         projects that have changed, but not any projects that 
                         directly or indirectly depend on the changed package.
-  --ignore-hooks        Overrides execution of event hooks. Meant for use on 
-                        CI machines.
+  --ignore-hooks        Overrides execution of event hooks. Make sure you 
+                        know what you are skipping.
   -s, --ship            Perform a production build, including minification 
                         and localization steps
   -m, --minimal         Perform a fast build, which disables certain tasks 
@@ -321,8 +321,8 @@ Optional arguments:
                         project in the current working directory.
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
-  --ignore-hooks        Overrides execution of event hooks. Meant for use on 
-                        CI machines.
+  --ignore-hooks        Overrides execution of event hooks. Make sure you 
+                        know what you are skipping.
   --locale {en-us,fr-fr,es-es,zh-cn}
                         Selects a single instead of the default locale 
                         (en-us) for non-ship builds or all locales for ship 
@@ -434,8 +434,8 @@ Optional arguments:
   --max-install-attempts NUMBER
                         Overrides the default maximum number of install 
                         attempts. The default value is 3.
-  --ignore-hooks        Overrides execution of \\"preInstall\\" and \\"postInstall\\" 
-                        event hooks. Meant for use on CI machines.
+  --ignore-hooks        Overrides execution of event hooks. Make sure you 
+                        know what you are skipping.
   --variant VARIANT     Run command using a variant installation 
                         configuration. This parameter may alternatively be 
                         specified via the RUSH_VARIANT environment variable.
@@ -641,8 +641,8 @@ Optional arguments:
                         project in the current working directory.
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
-  --ignore-hooks        Overrides execution of event hooks. Meant for use on 
-                        CI machines.
+  --ignore-hooks        Overrides execution of event hooks. Make sure you 
+                        know what you are skipping.
   -s, --ship            Perform a production build, including minification 
                         and localization steps
   -m, --minimal         Perform a fast build, which disables certain tasks 
@@ -733,8 +733,8 @@ Optional arguments:
   --max-install-attempts NUMBER
                         Overrides the default maximum number of install 
                         attempts. The default value is 3.
-  --ignore-hooks        Overrides execution of \\"preInstall\\" and \\"postInstall\\" 
-                        event hooks. Meant for use on CI machines.
+  --ignore-hooks        Overrides execution of event hooks. Make sure you 
+                        know what you are skipping.
   --variant VARIANT     Run command using a variant installation 
                         configuration. This parameter may alternatively be 
                         specified via the RUSH_VARIANT environment variable.
