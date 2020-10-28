@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update Webpack dependency to ~4.44.2",
+      "type": "minor",
+      "packageName": "@rushstack/localization-plugin"
+    }
+  ],
+  "packageName": "@rushstack/localization-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
