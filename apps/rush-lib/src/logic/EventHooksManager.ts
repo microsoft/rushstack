@@ -21,13 +21,18 @@ export class EventHooksManager {
     this._commonTempFolder = rushConfiguration.commonTempFolder;
   }
 
-  public handle(event: Event, isDebug: boolean): void {
+  public handle(event: Event, isDebug: boolean, ignoreHooks: boolean): void {
     if (!this._eventHooks) {
       return;
     }
 
     const scripts: string[] = this._eventHooks.get(event);
     if (scripts.length > 0) {
+      if (ignoreHooks) {
+        console.log(`Skipping event hooks for ${Event[event]} since --ignore-hooks was specified`);
+        return;
+      }
+
       const stopwatch: Stopwatch = Stopwatch.start();
       console.log(os.EOL + colors.green(`Executing event hooks for ${Event[event]}`));
       scripts.forEach((script) => {

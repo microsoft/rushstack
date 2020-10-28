@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Adds an --ignore-hooks flag to every rush action that skips event hooks during execution of the action.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
