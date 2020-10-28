@@ -115,16 +115,21 @@ export class WebpackPlugin implements IHeftPlugin {
         );
       }
 
-      let stats: webpack.Stats | undefined;
+      let stats: webpack.Stats | webpack.compilation.MultiStats | undefined;
       if (buildProperties.watchMode) {
         try {
-          stats = await LegacyAdapters.convertCallbackToPromise(compiler.watch.bind(compiler), {});
+          stats = await LegacyAdapters.convertCallbackToPromise(
+            (compiler as webpack.Compiler).watch.bind(compiler),
+            {}
+          );
         } catch (e) {
           logger.emitError(e);
         }
       } else {
         try {
-          stats = await LegacyAdapters.convertCallbackToPromise(compiler.run.bind(compiler));
+          stats = await LegacyAdapters.convertCallbackToPromise(
+            (compiler as webpack.Compiler).run.bind(compiler)
+          );
         } catch (e) {
           logger.emitError(e);
         }
@@ -139,7 +144,7 @@ export class WebpackPlugin implements IHeftPlugin {
     }
   }
 
-  private _emitErrors(logger: ScopedLogger, stats: webpack.Stats): void {
+  private _emitErrors(logger: ScopedLogger, stats: webpack.Stats | webpack.compilation.MultiStats): void {
     if (stats.hasErrors() || stats.hasWarnings()) {
       const serializedStats: webpack.Stats.ToJsonOutput = stats.toJson('errors-warnings');
 
