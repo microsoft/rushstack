@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Adds an --ignore-hooks flag to rush actions that skips event hooks during execution of the action",
+      "comment": "Adds an --ignore-hooks flag to every rush action that skips event hooks during execution of the action.",
       "type": "none"
     }
   ],
