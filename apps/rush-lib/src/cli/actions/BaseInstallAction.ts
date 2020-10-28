@@ -102,11 +102,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
       StandardScriptUpdater.validate(this.rushConfiguration);
     }
 
-    if (!this._ignoreHooksParameter.value) {
-      this.eventHooksManager.handle(Event.preRushInstall, this.parser.isDebug);
-    } else {
-      console.log(`The --ignore-hooks flag was specified, skipping preInstall hooks`);
-    }
+    this.eventHooksManager.handle(
+      Event.preRushInstall,
+      this.parser.isDebug,
+      this._ignoreHooksParameter.value
+    );
 
     const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration, this.rushGlobalFolder);
 
@@ -147,11 +147,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
         stopwatch.stop();
 
         this._collectTelemetry(stopwatch, installManagerOptions, true);
-        if (!this._ignoreHooksParameter.value) {
-          this.eventHooksManager.handle(Event.postRushInstall, this.parser.isDebug);
-        } else {
-          console.log(`The --ignore-hooks flag was specified, skipping postInstall hooks`);
-        }
+        this.eventHooksManager.handle(
+          Event.postRushInstall,
+          this.parser.isDebug,
+          this._ignoreHooksParameter.value
+        );
 
         if (warnAboutScriptUpdate) {
           console.log(
