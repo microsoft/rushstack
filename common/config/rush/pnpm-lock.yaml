@@ -530,12 +530,16 @@ importers:
       typescript: ~3.9.7
   ../../build-tests/heft-jest-reporters-test:
     devDependencies:
+      '@jest/reporters': 25.4.0
+      '@jest/types': 25.4.0
       '@rushstack/eslint-config': 'link:../../stack/eslint-config'
       '@rushstack/heft': 'link:../../apps/heft'
       '@types/heft-jest': 1.0.1
       eslint: 7.2.0
       typescript: 3.9.7
     specifiers:
+      '@jest/reporters': ~25.4.0
+      '@jest/types': ~25.4.0
       '@rushstack/eslint-config': 'workspace:*'
       '@rushstack/heft': 'workspace:*'
       '@types/heft-jest': 1.0.1

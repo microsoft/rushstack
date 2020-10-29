@@ -157,12 +157,10 @@ export class JestPlugin implements IHeftPlugin {
 
       // Harvest all the array indices that need to modified before altering the array
       const heftReporterIndices: number[] = this._findIndexes(config.reporters, 'default');
-      const jestDefaultReporterIndexes: number[] = this._findIndexes(config.reporters, '__jest_default');
 
       // Replace 'default' reporter with the heft reporter
       // This may clobber default reporters options
       if (heftReporterIndices.length > 0) {
-        isUsingHeftReporter = true;
         const heftReporter: Config.ReporterConfig = this._getHeftJestReporterConfig(
           heftSession,
           heftConfiguration
@@ -171,11 +169,7 @@ export class JestPlugin implements IHeftPlugin {
         for (const index of heftReporterIndices) {
           reporters[index] = heftReporter;
         }
-      }
-
-      // Restore the names of __jest_default reporters to default
-      for (const index of jestDefaultReporterIndexes) {
-        this._renameJestReporter(config.reporters, index, 'default');
+        isUsingHeftReporter = true;
       }
 
       parsedConfig = true;

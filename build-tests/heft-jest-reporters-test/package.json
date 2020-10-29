@@ -12,7 +12,8 @@
     "@rushstack/heft": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "eslint": "~7.2.0",
-    "typescript": "~3.9.7"
-  },
-  "dependencies": {}
+    "typescript": "~3.9.7",
+    "@jest/reporters": "~25.4.0",
+    "@jest/types": "~25.4.0"
+  }
 }
