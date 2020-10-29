@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 17 Oct 2020 00:23:18 GMT and should not be manually modified.
+This log was last generated on Wed, 28 Oct 2020 21:44:10 GMT and should not be manually modified.
+
+## 5.35.0
+Wed, 28 Oct 2020 21:44:10 GMT
+
+### Updates
+
+- Adds an --ignore-hooks flag to every rush action that skips event hooks during execution of the action.
+- Fix bug where version process was not adding version-policy configuration file changes into the version commit
 
 ## 5.34.4
 Sat, 17 Oct 2020 00:23:18 GMT

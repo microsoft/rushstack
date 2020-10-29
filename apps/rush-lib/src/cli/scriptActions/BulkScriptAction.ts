@@ -64,6 +64,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private _toVersionPolicy!: CommandLineStringListParameter;
   private _verboseParameter!: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
+  private _ignoreHooksParameter!: CommandLineFlagParameter;
   private _ignoreDependencyOrder: boolean;
   private _allowWarningsInSuccessfulBuild: boolean;
 
@@ -219,6 +220,10 @@ export class BulkScriptAction extends BaseScriptAction {
           'but not any projects that directly or indirectly depend on the changed package.'
       });
     }
+    this._ignoreHooksParameter = this.defineFlagParameter({
+      parameterLongName: '--ignore-hooks',
+      description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
+    });
 
     this.defineScriptParameters();
   }
@@ -266,7 +271,7 @@ export class BulkScriptAction extends BaseScriptAction {
 
     SetupChecks.validate(this.rushConfiguration);
 
-    this.eventHooksManager.handle(Event.preRushBuild, this.parser.isDebug);
+    this.eventHooksManager.handle(Event.preRushBuild, this.parser.isDebug, this._ignoreHooksParameter.value);
   }
 
   private _doAfterTask(stopwatch: Stopwatch, success: boolean): void {
@@ -279,7 +284,7 @@ export class BulkScriptAction extends BaseScriptAction {
     }
     this._collectTelemetry(stopwatch, success);
     this.parser.flushTelemetry();
-    this.eventHooksManager.handle(Event.postRushBuild, this.parser.isDebug);
+    this.eventHooksManager.handle(Event.postRushBuild, this.parser.isDebug, this._ignoreHooksParameter.value);
   }
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {

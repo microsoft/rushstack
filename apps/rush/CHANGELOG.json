@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.35.0",
+      "tag": "@microsoft/rush_v5.35.0",
+      "date": "Wed, 28 Oct 2020 21:44:10 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Adds an --ignore-hooks flag to every rush action that skips event hooks during execution of the action."
+          },
+          {
+            "comment": "Fix bug where version process was not adding version-policy configuration file changes into the version commit"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.34.4",
       "tag": "@microsoft/rush_v5.34.4",
       "date": "Sat, 17 Oct 2020 00:23:18 GMT",
