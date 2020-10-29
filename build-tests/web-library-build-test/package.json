@@ -12,9 +12,7 @@
     "@microsoft/load-themed-styles": "workspace:*",
     "@microsoft/rush-stack-compiler-3.9": "workspace:*",
     "@microsoft/web-library-build": "workspace:*",
-    "@types/jest": "25.2.1",
     "gulp": "~4.0.2",
-    "jest": "~25.4.0",
-    "ts-jest": "~25.1.0"
+    "typescript": "~3.9.7"
   }
 }
