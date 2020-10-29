@@ -2,6 +2,26 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.19.0",
+      "tag": "@rushstack/heft_v0.19.0",
+      "date": "Thu, 29 Oct 2020 06:14:19 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade @types/tapable and @types/webpack"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.2.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.11.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.18.0",
       "tag": "@rushstack/heft_v0.18.0",
       "date": "Thu, 29 Oct 2020 00:11:33 GMT",

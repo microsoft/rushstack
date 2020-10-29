@@ -1,6 +1,11 @@
 # Change Log - @rushstack/rundown
 
-This log was last generated on Thu, 29 Oct 2020 00:11:33 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Oct 2020 06:14:19 GMT and should not be manually modified.
+
+## 1.0.49
+Thu, 29 Oct 2020 06:14:19 GMT
+
+_Version update only_
 
 ## 1.0.48
 Thu, 29 Oct 2020 00:11:33 GMT

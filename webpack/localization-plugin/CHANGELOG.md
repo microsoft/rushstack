@@ -1,6 +1,13 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Thu, 29 Oct 2020 00:11:33 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Oct 2020 06:14:19 GMT and should not be manually modified.
+
+## 0.5.0
+Thu, 29 Oct 2020 06:14:19 GMT
+
+### Minor changes
+
+- Upgrade @types/tapable
 
 ## 0.4.0
 Thu, 29 Oct 2020 00:11:33 GMT

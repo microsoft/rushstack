@@ -2,6 +2,21 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "2.4.89",
+      "tag": "@rushstack/package-deps-hash_v2.4.89",
+      "date": "Thu, 29 Oct 2020 06:14:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.19.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.13`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.88",
       "tag": "@rushstack/package-deps-hash_v2.4.88",
       "date": "Thu, 29 Oct 2020 00:11:33 GMT",
