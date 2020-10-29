@@ -1,6 +1,67 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 13 Oct 2020 15:11:28 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Oct 2020 06:14:19 GMT and should not be manually modified.
+
+## 0.19.0
+Thu, 29 Oct 2020 06:14:19 GMT
+
+### Minor changes
+
+- Upgrade @types/tapable and @types/webpack
+
+## 0.18.0
+Thu, 29 Oct 2020 00:11:33 GMT
+
+### Minor changes
+
+- Update Webpack dependency to ~4.44.2
+
+## 0.17.4
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 0.17.3
+Tue, 27 Oct 2020 15:10:13 GMT
+
+_Version update only_
+
+## 0.17.2
+Sat, 24 Oct 2020 00:11:18 GMT
+
+### Patches
+
+- Add fileExtensions config to SassTypingsGenerator. 
+
+## 0.17.1
+Wed, 21 Oct 2020 05:09:44 GMT
+
+### Patches
+
+- Bump downstream dependencies.
+
+## 0.17.0
+Fri, 16 Oct 2020 23:32:58 GMT
+
+### Minor changes
+
+- Allow the Webpack dev server configuration to be customized.
+
+## 0.16.1
+Thu, 15 Oct 2020 00:59:08 GMT
+
+_Version update only_
+
+## 0.16.0
+Wed, 14 Oct 2020 23:30:14 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Rename "includePaths" to "importIncludePaths" in sass.json.
+
+### Patches
+
+- Add an "exclude" option to sass.json.
 
 ## 0.15.8
 Tue, 13 Oct 2020 15:11:28 GMT

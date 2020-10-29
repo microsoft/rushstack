@@ -69,7 +69,12 @@ export enum ConsoleColorCodes {
   DefaultBackground = 49,
 
   Bold = 1,
-  BoldOff = 21,
+
+  // On Linux, the "BoldOff" code instead causes the text to be double-underlined:
+  // https://en.wikipedia.org/wiki/Talk:ANSI_escape_code#SGR_21%E2%80%94%60Bold_off%60_not_widely_supported
+  // Use "NormalColorOrIntensity" instead
+  // BoldOff = 21,
+
   Dim = 2,
   NormalColorOrIntensity = 22,
   Underline = 4,

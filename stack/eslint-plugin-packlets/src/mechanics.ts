@@ -13,15 +13,19 @@ const mechanics: TSESLint.RuleModule<MessageIds, Options> = {
   meta: {
     type: 'problem',
     messages: {
-      'missing-tsconfig':
-        'In order to use @rushstack/eslint-plugin-packlets, your ESLint config file' +
-        ' must configure the TypeScript parser',
-      'missing-src-folder': 'Expecting to find a "src" folder at: {{srcFolderPath}}',
-      'packlet-folder-case': 'The packlets folder must be all lower case: {{packletsFolderPath}}',
+      // InputFileMessageIds
+      'file-in-packets-folder': 'The "packlets" folder must not contain regular source files',
       'invalid-packlet-name':
         'Invalid packlet name "{{packletName}}".' +
         ' The name must be lowercase alphanumeric words separated by hyphens. Example: "my-packlet"',
       'misplaced-packlets-folder': 'The packlets folder must be located at "{{expectedPackletsFolder}}"',
+      'missing-src-folder': 'Expecting to find a "src" folder at: {{srcFolderPath}}',
+      'missing-tsconfig':
+        'In order to use @rushstack/eslint-plugin-packlets, your ESLint config file' +
+        ' must configure the TypeScript parser',
+      'packlet-folder-case': 'The packlets folder must be all lower case: {{packletsFolderPath}}',
+
+      // ImportMessageIds
       'bypassed-entry-point':
         'The import statement does not use the packlet\'s entry point "{{entryPointModulePath}}"',
       'circular-entry-point': 'Files under a packlet folder must not import from their own index.ts file',

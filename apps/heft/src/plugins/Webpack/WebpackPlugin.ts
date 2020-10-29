@@ -56,8 +56,7 @@ export class WebpackPlugin implements IHeftPlugin {
       : webpack(webpackConfiguration); /* (webpack.Compilation) => webpack.Compiler */
 
     if (buildProperties.serveMode) {
-      // TODO: make these options configurable
-      const options: TWebpackDevServer.Configuration = {
+      const defaultDevServerOptions: TWebpackDevServer.Configuration = {
         host: 'localhost',
         publicPath: '/',
         filename: '[name]_[hash].js',
@@ -69,6 +68,26 @@ export class WebpackPlugin implements IHeftPlugin {
         },
         port: 8080
       };
+
+      let options: TWebpackDevServer.Configuration;
+      if (Array.isArray(webpackConfiguration)) {
+        const devServerOptions: TWebpackDevServer.Configuration[] = webpackConfiguration
+          .map((configuration) => configuration.devServer)
+          .filter((devServer): devServer is TWebpackDevServer.Configuration => !!devServer);
+        if (devServerOptions.length > 1) {
+          logger.emitWarning(
+            new Error(`Detected multiple webpack devServer configurations, using the first one.`)
+          );
+        }
+
+        if (devServerOptions.length > 0) {
+          options = { ...defaultDevServerOptions, ...devServerOptions[0] };
+        } else {
+          options = defaultDevServerOptions;
+        }
+      } else {
+        options = { ...defaultDevServerOptions, ...webpackConfiguration.devServer };
+      }
 
       // The webpack-dev-server package has a design flaw, where merely loading its package will set the
       // WEBPACK_DEV_SERVER environment variable -- even if no APIs are accessed. This environment variable
@@ -96,16 +115,21 @@ export class WebpackPlugin implements IHeftPlugin {
         );
       }
 
-      let stats: webpack.Stats | undefined;
+      let stats: webpack.Stats | webpack.compilation.MultiStats | undefined;
       if (buildProperties.watchMode) {
         try {
-          stats = await LegacyAdapters.convertCallbackToPromise(compiler.watch.bind(compiler), {});
+          stats = await LegacyAdapters.convertCallbackToPromise(
+            (compiler as webpack.Compiler).watch.bind(compiler),
+            {}
+          );
         } catch (e) {
           logger.emitError(e);
         }
       } else {
         try {
-          stats = await LegacyAdapters.convertCallbackToPromise(compiler.run.bind(compiler));
+          stats = await LegacyAdapters.convertCallbackToPromise(
+            (compiler as webpack.Compiler).run.bind(compiler)
+          );
         } catch (e) {
           logger.emitError(e);
         }
@@ -120,7 +144,7 @@ export class WebpackPlugin implements IHeftPlugin {
     }
   }
 
-  private _emitErrors(logger: ScopedLogger, stats: webpack.Stats): void {
+  private _emitErrors(logger: ScopedLogger, stats: webpack.Stats | webpack.compilation.MultiStats): void {
     if (stats.hasErrors() || stats.hasWarnings()) {
       const serializedStats: webpack.Stats.ToJsonOutput = stats.toJson('errors-warnings');
 

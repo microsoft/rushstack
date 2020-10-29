@@ -2,6 +2,165 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.19.0",
+      "tag": "@rushstack/heft_v0.19.0",
+      "date": "Thu, 29 Oct 2020 06:14:19 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade @types/tapable and @types/webpack"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.2.22`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.11.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.18.0",
+      "tag": "@rushstack/heft_v0.18.0",
+      "date": "Thu, 29 Oct 2020 00:11:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update Webpack dependency to ~4.44.2"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.17.4",
+      "tag": "@rushstack/heft_v0.17.4",
+      "date": "Wed, 28 Oct 2020 01:18:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.3.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.34.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.2.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.7.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.2.21`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.10.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.2.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.17.3",
+      "tag": "@rushstack/heft_v0.17.3",
+      "date": "Tue, 27 Oct 2020 15:10:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.3.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.34.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.2.20`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.10.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.17.2",
+      "tag": "@rushstack/heft_v0.17.2",
+      "date": "Sat, 24 Oct 2020 00:11:18 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add fileExtensions config to SassTypingsGenerator. "
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.2.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.17.1",
+      "tag": "@rushstack/heft_v0.17.1",
+      "date": "Wed, 21 Oct 2020 05:09:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Bump downstream dependencies."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.17.0",
+      "tag": "@rushstack/heft_v0.17.0",
+      "date": "Fri, 16 Oct 2020 23:32:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow the Webpack dev server configuration to be customized."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.16.1",
+      "tag": "@rushstack/heft_v0.16.1",
+      "date": "Thu, 15 Oct 2020 00:59:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.3.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.2.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.16.0",
+      "tag": "@rushstack/heft_v0.16.0",
+      "date": "Wed, 14 Oct 2020 23:30:14 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING CHANGE) Rename \"includePaths\" to \"importIncludePaths\" in sass.json."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Add an \"exclude\" option to sass.json."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.15.8",
       "tag": "@rushstack/heft_v0.15.8",
       "date": "Tue, 13 Oct 2020 15:11:28 GMT",

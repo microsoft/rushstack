@@ -4,7 +4,7 @@
 import * as semver from 'semver';
 import * as path from 'path';
 import { Terminal, Path } from '@rushstack/node-core-library';
-import type { ApiExtractor as TApiExtractor } from '@microsoft/rush-stack-compiler-3.9';
+import type * as TApiExtractor from '@microsoft/api-extractor';
 
 import { SubprocessRunnerBase } from '../../utilities/subprocess/SubprocessRunnerBase';
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';

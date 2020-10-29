@@ -1,6 +1,24 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 30 Sep 2020 21:04:15 GMT and should not be manually modified.
+This log was last generated on Wed, 28 Oct 2020 21:44:10 GMT and should not be manually modified.
+
+## 5.35.0
+Wed, 28 Oct 2020 21:44:10 GMT
+
+### Updates
+
+- Adds an --ignore-hooks flag to every rush action that skips event hooks during execution of the action.
+- Fix bug where version process was not adding version-policy configuration file changes into the version commit
+
+## 5.34.4
+Sat, 17 Oct 2020 00:23:18 GMT
+
+### Updates
+
+- When running `rush version --bump`, only include package.json updates in the generated commit
+- Fix Rush peer dependency validation when satisfied with a package alias
+- Prevent `rush unlink` from breaking installs for non-workspace projects
+- Add documentation for incremental option for buld custom commands
 
 ## 5.34.3
 Wed, 30 Sep 2020 21:04:15 GMT
