@@ -33,7 +33,7 @@
     // Workaround for https://github.com/microsoft/rushstack/issues/1466
     "eslint": "~7.2.0",
 
-    "@types/webpack": "4.41.23",
+    "@types/webpack": "4.41.24",
     "webpack": "~4.44.2"
   },
 
