@@ -273,7 +273,6 @@ export interface ApiItemContainerMixin extends ApiItem {
     findMembersByName(name: string): ReadonlyArray<ApiItem>;
     // @internal
     _getMergedSiblingsForMember(memberApiItem: ApiItem): ReadonlyArray<ApiItem>;
-    readonly members: ReadonlyArray<ApiItem>;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiItemJson>): void;
     tryGetMemberByKey(containerKey: string): ApiItem | undefined;

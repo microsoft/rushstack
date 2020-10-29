@@ -64,7 +64,7 @@ export class InternalHeftSession {
     const accessor: object | undefined = plugin.accessor;
     if (pluginHook && pluginHook.taps.length > 0) {
       if (!accessor) {
-        const accessingPlugins: Set<string> = new Set<string>(pluginHook.taps);
+        const accessingPlugins: Set<string> = new Set<string>(pluginHook.taps.map((x) => x.name));
         throw new Error(
           `Plugin "${plugin.pluginName}" does not provide an accessor property, so it does not provide ` +
             `access to other plugins. Plugins requesting access to "${plugin.pluginName}: ` +
