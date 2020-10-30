@@ -24,6 +24,15 @@ const macros = require('./_macros');
 
 function buildRules(profile) {
   return {
+    // After an .eslintrc.js file is loaded, ESLint will normally continue visiting all parent folders
+    // to look for other .eslintrc.js files, and also consult a personal file ~/.eslintrc.js.  If any files
+    // are found, their options will be merged.  This is difficult for humans to understand, and it will cause
+    // nondeterministic behavior if files are loaded from outside the Git working folder.
+    //
+    // Setting root=true causes ESLint to stop looking for other config files after the first .eslintrc.js
+    // is loaded.
+    root: true,
+
     // Disable the parser by default
     parser: '',
 
