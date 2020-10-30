@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-config",
+      "comment": "Set \"root\"=true to prevent unintended loading of other ESLint config files found in parent folders (which may be outside the Git working directory)",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-config",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
