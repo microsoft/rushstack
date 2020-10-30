@@ -2,6 +2,21 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "2.3.0",
+      "tag": "@rushstack/eslint-config_v2.3.0",
+      "date": "Fri, 30 Oct 2020 06:38:38 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Exclude *.d.ts from linting"
+          },
+          {
+            "comment": "Set \"root\"=true to prevent unintended loading of other ESLint config files found in parent folders (which may be outside the Git working directory)"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.2.3",
       "tag": "@rushstack/eslint-config_v2.2.3",
       "date": "Fri, 30 Oct 2020 00:10:14 GMT",

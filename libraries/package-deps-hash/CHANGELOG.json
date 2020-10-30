@@ -2,6 +2,30 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "2.4.91",
+      "tag": "@rushstack/package-deps-hash_v2.4.91",
+      "date": "Fri, 30 Oct 2020 06:38:39 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.34.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.19.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.34.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.90",
       "tag": "@rushstack/package-deps-hash_v2.4.90",
       "date": "Fri, 30 Oct 2020 00:10:14 GMT",

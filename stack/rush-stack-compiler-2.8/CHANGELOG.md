@@ -1,6 +1,11 @@
 # Change Log - @microsoft/rush-stack-compiler-2.8
 
-This log was last generated on Fri, 30 Oct 2020 00:10:14 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2020 06:38:39 GMT and should not be manually modified.
+
+## 0.8.31
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
 
 ## 0.8.30
 Fri, 30 Oct 2020 00:10:14 GMT
