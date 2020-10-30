@@ -38,6 +38,11 @@ function buildRules(profile) {
       'eslint-plugin-promise'
     ],
 
+    // Manually authored .d.ts files are generally used to describe external APIs that are  not expected
+    // to follow our coding conventions.  Linting those files tends to produce a lot of spurious suppressions,
+    // so we simply ignore them.
+    ignorePatterns: ['*.d.ts'],
+
     overrides: [
       {
         // Declare an override that applies to TypeScript files only
