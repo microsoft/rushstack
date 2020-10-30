@@ -1,6 +1,11 @@
 # Change Log - @microsoft/node-library-build
 
-This log was last generated on Thu, 29 Oct 2020 06:14:19 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2020 00:10:14 GMT and should not be manually modified.
+
+## 6.5.8
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
 
 ## 6.5.7
 Thu, 29 Oct 2020 06:14:19 GMT
