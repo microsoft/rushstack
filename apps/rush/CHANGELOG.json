@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.35.1",
+      "tag": "@microsoft/rush_v5.35.1",
+      "date": "Fri, 30 Oct 2020 05:17:42 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a recent \"rush scan\" regression (which resulted from enabling \"esModuleInterop\")"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.35.0",
       "tag": "@microsoft/rush_v5.35.0",
       "date": "Wed, 28 Oct 2020 21:44:10 GMT",

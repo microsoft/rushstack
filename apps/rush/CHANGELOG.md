@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 28 Oct 2020 21:44:10 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2020 05:17:42 GMT and should not be manually modified.
+
+## 5.35.1
+Fri, 30 Oct 2020 05:17:42 GMT
+
+### Updates
+
+- Fix a recent "rush scan" regression (which resulted from enabling "esModuleInterop")
 
 ## 5.35.0
 Wed, 28 Oct 2020 21:44:10 GMT
