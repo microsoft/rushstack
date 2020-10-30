@@ -10,15 +10,66 @@
 const path = require('path');
 const fs = require('fs');
 
-let currentModule = module;
-while (!/[\\/]eslint[\\/]lib[\\/]cli-engine[\\/]config-array-factory\.js/i.test(currentModule.filename)) {
+// Module path for config-array-factory.js
+// Example: ".../@eslint/eslintrc/lib/config-array-factory"
+let configArrayFactoryPath: string | undefined = undefined;
+
+// Module path for relative-module-resolver.js
+// Example: ".../@eslint/eslintrc/lib/shared/relative-module-resolver"
+let moduleResolverPath: string | undefined = undefined;
+
+// Folder path where ESLint's package.json can be found
+// Example: ".../node_modules/eslint"
+let eslintFolder: string | undefined = undefined;
+
+// Probe for the ESLint >=7.8.0 layout:
+for (let currentModule = module; ; ) {
+  if (!configArrayFactoryPath) {
+    // For ESLint >=7.8.0, config-array-factory.js is at this path:
+    //   .../@eslint/eslintrc/lib/config-array-factory.js
+    if (/[\\/]@eslint[\\/]eslintrc[\\/]lib[\\/]config-array-factory\.js$/i.test(currentModule.filename)) {
+      const eslintrcFolder: string = path.join(path.dirname(currentModule.filename), '..');
+      configArrayFactoryPath = path.join(eslintrcFolder, 'lib/config-array-factory');
+      moduleResolverPath = path.join(eslintrcFolder, 'lib/shared/relative-module-resolver');
+    }
+  } else {
+    // Next look for a file in ESLint's folder
+    //   .../eslint/lib/cli-engine/cli-engine.js
+    if (/[\\/]eslint[\\/]lib[\\/]cli-engine[\\/]cli-engine\.js$/i.test(currentModule.filename)) {
+      eslintFolder = path.join(path.dirname(currentModule.filename), '../..');
+      break;
+    }
+  }
+
   if (!currentModule.parent) {
-    // This was tested with ESLint 6.1.0; other versions may not work
-    throw new Error('Failed to patch ESLint because the calling module was not recognized');
+    break;
   }
   currentModule = currentModule.parent;
 }
-const eslintFolder = path.join(path.dirname(currentModule.filename), '../..');
+
+if (!eslintFolder) {
+  // Probe for the <7.8.0 layout:
+  for (let currentModule = module; ; ) {
+    // For ESLint <7.8.0, config-array-factory.js was at this path:
+    //   .../eslint/lib/cli-engine/config-array-factory.js
+    if (/[\\/]eslint[\\/]lib[\\/]cli-engine[\\/]config-array-factory\.js$/i.test(currentModule.filename)) {
+      eslintFolder = path.join(path.dirname(currentModule.filename), '../..');
+      configArrayFactoryPath = path.join(eslintFolder, 'lib/cli-engine/config-array-factory');
+      moduleResolverPath = path.join(eslintFolder, 'lib/shared/relative-module-resolver');
+      break;
+    }
+
+    if (!currentModule.parent) {
+      // This was tested with ESLint 6.1.0 .. 7.12.1.
+      throw new Error(
+        'Failed to patch ESLint because the calling module was not recognized.\n' +
+          'If you are using a newer ESLint version that may be unsupported, please create a GitHub issue:\n' +
+          'https://github.com/microsoft/rushstack/issues'
+      );
+    }
+    currentModule = currentModule.parent;
+  }
+}
 
 // Detect the ESLint package version
 const eslintPackageJson = fs.readFileSync(path.join(eslintFolder, 'package.json')).toString();
@@ -31,20 +82,19 @@ if (!versionMatch) {
 const eslintMajorVersion = Number(versionMatch[1]);
 if (!(eslintMajorVersion >= 6 && eslintMajorVersion <= 7)) {
   throw new Error(
-    'The patch-eslint.js script has only been tested with ESLint version 6.x or 7.x. (Your version: ' +
-      eslintPackageVersion +
-      ')'
+    'The patch-eslint.js script has only been tested with ESLint version 6.x or 7.x.' +
+      ` (Your version: ${eslintPackageVersion})\n` +
+      'Consider reporting a GitHub issue:\n' +
+      'https://github.com/microsoft/rushstack/issues'
   );
 }
 
-const configArrayFactoryPath = path.join(eslintFolder, 'lib/cli-engine/config-array-factory');
-const ConfigArrayFactory = require(configArrayFactoryPath).ConfigArrayFactory;
+const ConfigArrayFactory = require(configArrayFactoryPath!).ConfigArrayFactory;
 
 if (!ConfigArrayFactory.__patched) {
   ConfigArrayFactory.__patched = true;
 
-  const moduleResolverPath = path.join(eslintFolder, 'lib/shared/relative-module-resolver');
-  const ModuleResolver = require(moduleResolverPath);
+  const ModuleResolver = require(moduleResolverPath!);
 
   const originalLoadPlugin = ConfigArrayFactory.prototype._loadPlugin;
 

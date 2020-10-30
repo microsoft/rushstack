@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix a recent \"rush scan\" regression (which resulted from enabling \"esModuleInterop\")",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

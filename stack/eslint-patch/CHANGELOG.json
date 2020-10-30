@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.0.6",
+      "tag": "@rushstack/eslint-patch_v1.0.6",
+      "date": "Fri, 30 Oct 2020 00:10:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the \"modern-module-resolution\" patch to support ESLint 7.8.0 and newer"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.5",
       "tag": "@rushstack/eslint-patch_v1.0.5",
       "date": "Wed, 30 Sep 2020 18:39:17 GMT",
