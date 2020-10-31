@@ -549,6 +549,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-jest-reporters-test",
+      "projectFolder": "build-tests/heft-jest-reporters-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-minimal-rig-test",
       "projectFolder": "build-tests/heft-minimal-rig-test",
       "reviewCategory": "tests",

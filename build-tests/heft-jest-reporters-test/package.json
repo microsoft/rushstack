@@ -1,0 +1,19 @@
+{
+  "name": "heft-jest-reporters-test",
+  "description": "This project illustrates configuring Jest reporters in a minimal Heft project",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "heft test --clean",
+    "start": "heft start"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "eslint": "~7.12.1",
+    "typescript": "~3.9.7",
+    "@jest/reporters": "~25.4.0",
+    "@jest/types": "~25.4.0"
+  }
+}

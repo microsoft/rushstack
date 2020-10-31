@@ -8,7 +8,7 @@
     },
     {
       "name": "@jest/reporters",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@jest/transform",
@@ -16,7 +16,7 @@
     },
     {
       "name": "@jest/types",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/api-documenter",

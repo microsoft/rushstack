@@ -532,6 +532,23 @@ importers:
       eslint: ~7.12.1
       heft-example-plugin-01: 'workspace:*'
       typescript: ~3.9.7
+  ../../build-tests/heft-jest-reporters-test:
+    devDependencies:
+      '@jest/reporters': 25.4.0
+      '@jest/types': 25.4.0
+      '@rushstack/eslint-config': 'link:../../stack/eslint-config'
+      '@rushstack/heft': 'link:../../apps/heft'
+      '@types/heft-jest': 1.0.1
+      eslint: 7.12.1
+      typescript: 3.9.7
+    specifiers:
+      '@jest/reporters': ~25.4.0
+      '@jest/types': ~25.4.0
+      '@rushstack/eslint-config': 'workspace:*'
+      '@rushstack/heft': 'workspace:*'
+      '@types/heft-jest': 1.0.1
+      eslint: ~7.12.1
+      typescript: ~3.9.7
   ../../build-tests/heft-minimal-rig-test:
     dependencies:
       typescript: 3.9.7
@@ -4715,7 +4732,7 @@ packages:
   /autoprefixer/9.8.6:
     dependencies:
       browserslist: 4.14.5
-      caniuse-lite: 1.0.30001151
+      caniuse-lite: 1.0.30001153
       colorette: 1.2.1
       normalize-range: 0.1.2
       num2fraction: 1.2.2
@@ -5060,7 +5077,7 @@ packages:
       integrity: sha512-Z942RysHXmJrhqk88FmKBVq/v5tqmSkDz7p54G/MGyjMnCFFnC79XWNbg+Vta8W6Wb2qtSZTSxIGkJrRpCFEiA==
   /browserslist/4.14.5:
     dependencies:
-      caniuse-lite: 1.0.30001151
+      caniuse-lite: 1.0.30001153
       electron-to-chromium: 1.3.584
       escalade: 3.1.1
       node-releases: 1.1.64
@@ -5213,9 +5230,9 @@ packages:
       node: '>=10'
     resolution:
       integrity: sha512-c7wVvbw3f37nuobQNtgsgG9POC9qMbNuMQmTCqZv23b6MIz0fcYpBiOlv9gEN/hdLdnZTDQhg6e9Dq5M1vKvfg==
-  /caniuse-lite/1.0.30001151:
+  /caniuse-lite/1.0.30001153:
     resolution:
-      integrity: sha512-Zh3sHqskX6mHNrqUerh+fkf0N72cMxrmflzje/JyVImfpknscMnkeJrlFGJcqTmaa0iszdYptGpWMJCRQDkBVw==
+      integrity: sha512-qv14w7kWwm2IW7DBvAKWlCqGTmV2XxNtSejJBVplwRjhkohHuhRUpeSlPjtu9erru0+A12zCDUiSmvx/AcqVRA==
   /capture-exit/2.0.0:
     dependencies:
       rsvp: 4.8.5
@@ -14839,3 +14856,4 @@ packages:
       commander: 2.20.3
     resolution:
       integrity: sha512-DUOKC/IhbkdLKKiV89gw9DUauTV8U/8yJl1sjf6MtDmzevLKOF2duNJ495S3MFVjqZarr+qNGCPbkg4mu4PpLw==
+registry: ''
