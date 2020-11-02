@@ -29,6 +29,8 @@ const HEFT_STAGE_TAP: TapOptions<'promise'> = {
   stage: Number.MIN_SAFE_INTEGER
 };
 
+const MAX_PARALLELISM: number = 100;
+
 export class DeleteGlobsPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
 
@@ -99,7 +101,7 @@ export class DeleteGlobsPlugin implements IHeftPlugin {
       }
     }
 
-    await Async.forEachLimitAsync(Array.from(pathsToDelete), 100, async (pathToDelete) => {
+    await Async.forEachLimitAsync(Array.from(pathsToDelete), MAX_PARALLELISM, async (pathToDelete) => {
       try {
         FileSystem.deleteFile(pathToDelete, { throwIfNotExists: true });
         logger.terminal.writeVerboseLine(`Deleted "${pathToDelete}"`);
