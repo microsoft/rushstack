@@ -29,6 +29,41 @@
        * Glob patterns to be deleted. The paths are resolved relative to the project folder.
        */
       "globsToDelete": ["dist", "lib", "temp"]
+    },
+    {
+      /**
+       * The kind of built-in operation that should be performed.
+       * The "copyFiles" action copies files that match the specified glob patterns. It can be optionally
+       * configured to use hardlinks
+       */
+      "actionKind": "copyGlobs",
+
+      /**
+       * The stage of the Heft run during which this action should occur. Note that actions specified in heft.json
+       * occur at the end of the stage of the Heft run.
+       */
+      "heftEvent": "pre-compile",
+
+      /**
+       * A user-defined tag whose purpose is to allow configs to replace/delete handlers that were added by other
+       * configs.
+       */
+      "actionId": "defaultCopyGlobs",
+
+      /**
+       * Glob patterns to be copied. The paths are resolved relative to the project folder.
+       */
+      "globsToCopy": ["src/**/*.md"],
+
+      /**
+       * Destination folders for the files to be copied. The paths are resolved relative to the project folder.
+       */
+      "targetFolders": ["dist"],
+
+      /**
+       * Whether to copy or hardlink the files.
+       */
+      "hardlink": false
     }
   ],
 
