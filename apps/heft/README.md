@@ -1,7 +1,5 @@
 # @rushstack/heft
 
-> 🚨 *This is an early preview release. Please report issues!* 🚨
-
 <div>
   <br />
   <a href="https://rushstack.io/pages/heft/overview/">
@@ -52,7 +50,7 @@ other similar systems, Heft has some unique design goals:
 <!-- Text above this line should stay in sync with the Rush Stack web site content -->
 <!-- ----------------------------------------------------------------------------- -->
 
-This is an early preview release, however the following tasks are already available:
+Heft has not yet reached its 1.0 milestone, however the following tasks are already available:
 
 - **Compiler**: [TypeScript](https://www.typescriptlang.org/) with incremental compilation, with "watch" mode
 - **Linter**: [TypeScript-ESLint](https://github.com/typescript-eslint/typescript-eslint), plus legacy support
