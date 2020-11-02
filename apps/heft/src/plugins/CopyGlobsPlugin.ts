@@ -22,7 +22,7 @@ import {
 
 const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
 
-const PLUGIN_NAME: string = 'CopyFilesPlugin';
+const PLUGIN_NAME: string = 'CopyGlobsPlugin';
 const HEFT_STAGE_TAP: TapOptions<'promise'> = {
   name: PLUGIN_NAME,
   stage: Number.MAX_SAFE_INTEGER / 2 // This should give us some certainty that this will run after other plugins
