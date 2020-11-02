@@ -147,10 +147,10 @@ export class CopyGlobsPlugin implements IHeftPlugin {
     );
 
     if (linkedFiles > 0) {
-      logger.terminal.writeLine(`Linked ${linkedFiles} files`);
+      logger.terminal.writeLine(`Linked ${linkedFiles} file${linkedFiles > 1 ? 's' : ''}`);
     }
     if (copiedFiles > 0) {
-      logger.terminal.writeLine(`Copied ${copiedFiles} files`);
+      logger.terminal.writeLine(`Copied ${copiedFiles} file${copiedFiles > 1 ? 's' : ''}`);
     }
   }
 
