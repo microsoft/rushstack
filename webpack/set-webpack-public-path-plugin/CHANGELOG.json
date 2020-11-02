@@ -2,6 +2,21 @@
   "name": "@rushstack/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "3.1.4",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v3.1.4",
+      "date": "Mon, 02 Nov 2020 16:12:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.19.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.16`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.1.3",
       "tag": "@rushstack/set-webpack-public-path-plugin_v3.1.3",
       "date": "Fri, 30 Oct 2020 06:38:39 GMT",

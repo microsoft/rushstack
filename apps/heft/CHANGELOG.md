@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 30 Oct 2020 06:38:39 GMT and should not be manually modified.
+This log was last generated on Mon, 02 Nov 2020 16:12:05 GMT and should not be manually modified.
+
+## 0.19.3
+Mon, 02 Nov 2020 16:12:05 GMT
+
+### Patches
+
+- Honor jest reporters specified in config/jest.config.json
 
 ## 0.19.2
 Fri, 30 Oct 2020 06:38:39 GMT
