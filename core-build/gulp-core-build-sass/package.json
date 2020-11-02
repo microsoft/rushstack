@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-sass",
-  "version": "4.13.22",
+  "version": "4.13.23",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
