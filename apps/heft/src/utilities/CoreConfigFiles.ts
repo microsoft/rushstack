@@ -35,6 +35,13 @@ export interface IHeftConfigurationDeleteGlobsEventAction extends IHeftConfigura
   globsToDelete: string[];
 }
 
+export interface IHeftConfigurationCopyGlobsEventAction extends IHeftConfigurationJsonEventActionBase {
+  actionKind: 'copyGlobs';
+  globsToCopy: string[];
+  targetFolders: string[];
+  hardlink?: boolean;
+}
+
 export interface IHeftConfigurationJsonPluginSpecifier {
   plugin: string;
   options?: object;
@@ -46,6 +53,7 @@ export interface IHeftConfigurationJson {
 }
 
 export interface IHeftEventActions {
+  copyGlobs: Map<HeftEvent, IHeftConfigurationCopyGlobsEventAction[]>;
   deleteGlobs: Map<HeftEvent, IHeftConfigurationDeleteGlobsEventAction[]>;
 }
 
@@ -110,12 +118,21 @@ export class CoreConfigFiles {
       );
 
       result = {
+        copyGlobs: new Map<HeftEvent, IHeftConfigurationCopyGlobsEventAction[]>(),
         deleteGlobs: new Map<HeftEvent, IHeftConfigurationDeleteGlobsEventAction[]>()
       };
       CoreConfigFiles._heftConfigFileEventActionsCache.set(heftConfiguration, result);
 
       for (const eventAction of heftConfigJson?.eventActions || []) {
         switch (eventAction.actionKind) {
+          case 'copyGlobs': {
+            CoreConfigFiles._addEventActionToMap(
+              eventAction as IHeftConfigurationCopyGlobsEventAction,
+              result.copyGlobs
+            );
+            break;
+          }
+
           case 'deleteGlobs': {
             CoreConfigFiles._addEventActionToMap(
               eventAction as IHeftConfigurationDeleteGlobsEventAction,

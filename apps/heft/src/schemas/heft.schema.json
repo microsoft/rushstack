@@ -30,7 +30,7 @@
               "actionKind": {
                 "type": "string",
                 "description": "The kind of built-in operation that should be performed.",
-                "enum": ["deleteGlobs"]
+                "enum": ["deleteGlobs", "copyGlobs"]
               },
 
               "heftEvent": {
@@ -49,7 +49,7 @@
             "oneOf": [
               // Delete Globs
               {
-                "required": ["actionKind"],
+                "required": ["actionKind", "globsToDelete"],
                 "properties": {
                   "actionKind": {
                     "type": "string",
@@ -63,6 +63,44 @@
                       "type": "string",
                       "pattern": "[^\\\\]"
                     }
+                  }
+                }
+              },
+              // Copy Files
+              {
+                "required": ["actionKind", "globsToCopy", "targetFolders"],
+                "properties": {
+                  "actionKind": {
+                    "type": "string",
+                    "enum": ["copyGlobs"]
+                  },
+
+                  "heftEvent": {
+                    "type": "string",
+                    "enum": ["pre-compile", "compile", "bundle", "post-build"]
+                  },
+
+                  "globsToCopy": {
+                    "type": "array",
+                    "description": "Glob patterns to be copied. The paths are resolved relative to the project folder.",
+                    "items": {
+                      "type": "string",
+                      "pattern": "[^\\\\]"
+                    }
+                  },
+
+                  "targetFolders": {
+                    "type": "array",
+                    "description": "Destination folders for the files to be copied. The paths are resolved relative to the project folder.",
+                    "items": {
+                      "type": "string",
+                      "pattern": "[^\\\\]"
+                    }
+                  },
+
+                  "hardlink": {
+                    "type": "boolean",
+                    "description": "Whether to copy or hardlink the files."
                   }
                 }
               }
