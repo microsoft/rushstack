@@ -34,7 +34,7 @@ export class CopyGlobsPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    const logger: ScopedLogger = heftSession.requestScopedLogger('copy-files');
+    const logger: ScopedLogger = heftSession.requestScopedLogger('copy-globs');
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.preCompile.tap(PLUGIN_NAME, (preCompile: IPreCompileSubstage) => {
         preCompile.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
@@ -91,7 +91,11 @@ export class CopyGlobsPlugin implements IHeftPlugin {
 
           for (const targetFolder of copyFilesEventAction.targetFolders) {
             resolvedTargetPathsMap.set(
-              path.resolve(heftConfiguration.buildFolder, targetFolder),
+              path.resolve(
+                heftConfiguration.buildFolder,
+                targetFolder,
+                path.basename(resolvedSourceFilePath)
+              ),
               copyFilesEventAction.hardlink || false
             );
           }
@@ -123,6 +127,7 @@ export class CopyGlobsPlugin implements IHeftPlugin {
             }
           }
 
+          await FileSystem.ensureFolderAsync(path.dirname(targetFilePath));
           await FileSystem.createHardLinkAsync({
             linkTargetPath: sourceFilePath,
             newLinkPath: targetFilePath
