@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 30 Oct 2020 05:17:42 GMT and should not be manually modified.
+This log was last generated on Tue, 03 Nov 2020 23:34:30 GMT and should not be manually modified.
+
+## 5.35.2
+Tue, 03 Nov 2020 23:34:30 GMT
+
+### Updates
+
+- Fix bug where version process is using a wrong `git.addChanges` signature
 
 ## 5.35.1
 Fri, 30 Oct 2020 05:17:42 GMT

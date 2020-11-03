@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.35.2",
+      "tag": "@microsoft/rush_v5.35.2",
+      "date": "Tue, 03 Nov 2020 23:34:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix bug where version process is using a wrong `git.addChanges` signature"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.35.1",
       "tag": "@microsoft/rush_v5.35.1",
       "date": "Fri, 30 Oct 2020 05:17:42 GMT",
