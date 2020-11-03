@@ -166,7 +166,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     const parsedVersion: semver.SemVer | null = semver.parse(this._typescriptVersion);
     if (!parsedVersion) {
       throw new Error(
-        'Unable to parse version "${this._typescriptVersion}" for TypeScript compiler package in: ' +
+        `Unable to parse version "${this._typescriptVersion}" for TypeScript compiler package in: ` +
           compilerPackageJsonFilename
       );
     }
