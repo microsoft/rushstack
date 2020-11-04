@@ -22,7 +22,7 @@ import {
 
 const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
 
-const PLUGIN_NAME: string = 'CopyGlobsPlugin';
+const PLUGIN_NAME: string = 'CopyFilesPlugin';
 const HEFT_STAGE_TAP: TapOptions<'promise'> = {
   name: PLUGIN_NAME,
   stage: Number.MAX_SAFE_INTEGER / 2 // This should give us some certainty that this will run after other plugins
@@ -30,11 +30,11 @@ const HEFT_STAGE_TAP: TapOptions<'promise'> = {
 
 const MAX_PARALLELISM: number = 100;
 
-export class CopyGlobsPlugin implements IHeftPlugin {
+export class CopyFilesPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    const logger: ScopedLogger = heftSession.requestScopedLogger('copy-globs');
+    const logger: ScopedLogger = heftSession.requestScopedLogger('copy-files');
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.preCompile.tap(PLUGIN_NAME, (preCompile: IPreCompileSubstage) => {
         preCompile.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
@@ -74,30 +74,50 @@ export class CopyGlobsPlugin implements IHeftPlugin {
 
     // Build a map to dedupe copy operations
     const fileOperationMap: Map<string, Map<string, boolean>> = new Map<string, Map<string, boolean>>();
-    for (const copyFilesEventAction of eventActions.copyGlobs.get(heftEvent) || []) {
-      for (const globPattern of copyFilesEventAction.globsToCopy) {
-        const resolvedSourceFilePaths: string[] = await this._resolvePathAsync(
-          globPattern,
-          heftConfiguration.buildFolder
+    for (const copyFilesEventAction of eventActions.copyFiles.get(heftEvent) || []) {
+      for (const copyOperation of copyFilesEventAction.copyOperations) {
+        // Default the resolved sourceFolder path to the current build folder
+        const resolvedSourceFolderPath: string = path.resolve(
+          heftConfiguration.buildFolder,
+          copyOperation.sourceFolder ?? '.'
         );
+        // Run each glob against the resolved sourceFolder and flatten out the results
+        const resolvedSourceFilePaths: string[] = (
+          await Promise.all(
+            copyOperation.includeGlobs.map((includeGlob) => {
+              return this._resolvePathAsync(
+                resolvedSourceFolderPath,
+                includeGlob,
+                copyOperation.excludeGlobs
+              );
+            })
+          )
+        ).reduce((prev: string[], curr: string[]) => {
+          prev.push(...curr);
+          return prev;
+        }, []);
+
+        // Determine the target path for each source file and append to the correct map
         for (const resolvedSourceFilePath of resolvedSourceFilePaths) {
-          let resolvedTargetPathsMap: Map<string, boolean> | undefined = fileOperationMap.get(
+          let resolvedDestinationPathsMap: Map<string, boolean> | undefined = fileOperationMap.get(
             resolvedSourceFilePath
           );
-          if (!resolvedTargetPathsMap) {
-            resolvedTargetPathsMap = new Map<string, boolean>();
-            fileOperationMap.set(resolvedSourceFilePath, resolvedTargetPathsMap);
+          if (!resolvedDestinationPathsMap) {
+            resolvedDestinationPathsMap = new Map<string, boolean>();
+            fileOperationMap.set(resolvedSourceFilePath, resolvedDestinationPathsMap);
           }
 
-          for (const targetFolder of copyFilesEventAction.targetFolders) {
-            resolvedTargetPathsMap.set(
-              path.resolve(
-                heftConfiguration.buildFolder,
-                targetFolder,
-                path.basename(resolvedSourceFilePath)
-              ),
-              copyFilesEventAction.hardlink || false
+          for (const destinationFolder of copyOperation.destinationFolders) {
+            // Only include the relative path from the sourceFolder if flatten is false
+            const resolvedDestinationFilePath: string = path.resolve(
+              heftConfiguration.buildFolder,
+              destinationFolder,
+              copyOperation.flatten
+                ? '.'
+                : path.relative(resolvedSourceFolderPath, path.dirname(resolvedSourceFilePath)),
+              path.basename(resolvedSourceFilePath)
             );
+            resolvedDestinationPathsMap.set(resolvedDestinationFilePath, copyOperation.hardlink || false);
           }
         }
       }
@@ -154,20 +174,25 @@ export class CopyGlobsPlugin implements IHeftPlugin {
     }
   }
 
-  private async _resolvePathAsync(globPattern: string, buildFolder: string): Promise<string[]> {
+  private async _resolvePathAsync(
+    sourceFolder: string,
+    globPattern: string,
+    excludeGlobPatterns?: string[]
+  ): Promise<string[]> {
     if (globEscape(globPattern) !== globPattern) {
       const expandedGlob: string[] = await LegacyAdapters.convertCallbackToPromise(glob, globPattern, {
-        cwd: buildFolder
+        cwd: sourceFolder,
+        ignore: excludeGlobPatterns
       });
 
       const result: string[] = [];
       for (const pathFromGlob of expandedGlob) {
-        result.push(path.resolve(buildFolder, pathFromGlob));
+        result.push(path.resolve(sourceFolder, pathFromGlob));
       }
 
       return result;
     } else {
-      return [path.resolve(buildFolder, globPattern)];
+      return [path.resolve(sourceFolder, globPattern)];
     }
   }
 }
