@@ -136,41 +136,42 @@ export class CopyFilesPlugin implements IHeftPlugin {
     await Async.forEachLimitAsync(
       flattenedOperationMap,
       MAX_PARALLELISM,
-      async ([sourceFilePath, targetFilePath, hardlink]) => {
+      async ([sourceFilePath, destinationFilePath, hardlink]) => {
         if (hardlink) {
           // Hardlink doesn't allow passing in overwrite param, so delete ourselves
           try {
-            await FileSystem.deleteFileAsync(targetFilePath);
+            await FileSystem.deleteFileAsync(destinationFilePath, { throwIfNotExists: true });
           } catch (e) {
             if (!FileSystem.isFileDoesNotExistError(e)) {
               throw e;
             }
+            // Since the file doesn't exist, the parent folder may also not exist
+            await FileSystem.ensureFolderAsync(path.dirname(destinationFilePath));
           }
 
-          await FileSystem.ensureFolderAsync(path.dirname(targetFilePath));
           await FileSystem.createHardLinkAsync({
             linkTargetPath: sourceFilePath,
-            newLinkPath: targetFilePath
+            newLinkPath: destinationFilePath
           });
-          logger.terminal.writeVerboseLine(`Linked "${sourceFilePath}" to "${targetFilePath}"`);
+          logger.terminal.writeVerboseLine(`Linked "${sourceFilePath}" to "${destinationFilePath}"`);
           linkedFiles++;
         } else {
           await FileSystem.copyFileAsync({
             sourcePath: sourceFilePath,
-            destinationPath: targetFilePath,
+            destinationPath: destinationFilePath,
             alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
           });
-          logger.terminal.writeVerboseLine(`Copied "${sourceFilePath}" to "${targetFilePath}"`);
+          logger.terminal.writeVerboseLine(`Copied "${sourceFilePath}" to "${destinationFilePath}"`);
           copiedFiles++;
         }
       }
     );
 
     if (linkedFiles > 0) {
-      logger.terminal.writeLine(`Linked ${linkedFiles} file${linkedFiles > 1 ? 's' : ''}`);
+      logger.terminal.writeLine(`Linked ${linkedFiles} file${linkedFiles !== 1 ? 's' : ''}`);
     }
     if (copiedFiles > 0) {
-      logger.terminal.writeLine(`Copied ${copiedFiles} file${copiedFiles > 1 ? 's' : ''}`);
+      logger.terminal.writeLine(`Copied ${copiedFiles} file${copiedFiles !== 1 ? 's' : ''}`);
     }
   }
 
@@ -192,6 +193,10 @@ export class CopyFilesPlugin implements IHeftPlugin {
 
       return result;
     } else {
+      // NOTE: Does not take excludeGlobPatterns into account as we cannot run glob
+      // against a path string. We could run the original globPattern through glob
+      // as well and solve this issue, however this carveout is done for performance
+      // and as such avoids glob
       return [path.resolve(sourceFolder, globPattern)];
     }
   }

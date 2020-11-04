@@ -117,8 +117,8 @@ export class DeleteGlobsPlugin implements IHeftPlugin {
 
     if (deletedFiles > 0 || deletedFolders > 0) {
       logger.terminal.writeLine(
-        `Deleted ${deletedFiles} file${deletedFiles > 1 ? 's' : ''} ` +
-          `and ${deletedFolders} folder${deletedFolders > 1 ? 's' : ''}`
+        `Deleted ${deletedFiles} file${deletedFiles !== 1 ? 's' : ''} ` +
+          `and ${deletedFolders} folder${deletedFolders !== 1 ? 's' : ''}`
       );
     }
   }
