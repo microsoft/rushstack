@@ -10,7 +10,7 @@ import { Lib1Interface } from 'api-extractor-lib1-test';
 // @public (undocumented)
 export interface IExample {
     // (undocumented)
-    generic: Lib1GenericType.Lib1GenericType;
+    generic: Lib1GenericType<number, Lib1Interface>;
 }
 
 

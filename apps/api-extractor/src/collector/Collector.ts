@@ -498,6 +498,11 @@ export class Collector {
         idealNameForEmit = entity.astEntity.localName;
       }
 
+      if (idealNameForEmit.includes('.')) {
+        // For an ImportType with a namespace chain, only the top namespace is imported.
+        idealNameForEmit = idealNameForEmit.split('.')[0];
+      }
+
       // If the idealNameForEmit happens to be the same as one of the exports, then we're safe to use that...
       if (entity.exportNames.has(idealNameForEmit)) {
         // ...except that if it conflicts with a global name, then the global name wins
