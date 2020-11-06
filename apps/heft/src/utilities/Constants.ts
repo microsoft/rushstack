@@ -9,4 +9,6 @@ export class Constants {
   public static buildCacheFolderName: string = 'build-cache';
 
   public static pluginParameterLongName: string = '--plugin';
+
+  public static debugParameterLongName: string = '--debug';
 }
