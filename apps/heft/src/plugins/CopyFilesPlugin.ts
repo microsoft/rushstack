@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import glob from 'glob';
+import { performance } from 'perf_hooks';
 import { AlreadyExistsBehavior, FileSystem, LegacyAdapters } from '@rushstack/node-core-library';
 import { TapOptions } from 'tapable';
 
@@ -10,8 +11,13 @@ import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
-import { IHeftEventActions, CoreConfigFiles, HeftEvent } from '../utilities/CoreConfigFiles';
 import { Async } from '../utilities/Async';
+import {
+  IHeftEventActions,
+  CoreConfigFiles,
+  HeftEvent,
+  IExtendedSharedCopyConfiguration
+} from '../utilities/CoreConfigFiles';
 import {
   IBuildStageContext,
   IBundleSubstage,
@@ -20,7 +26,7 @@ import {
   IPreCompileSubstage
 } from '../stages/BuildStage';
 
-const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
+const globEscape: (unescaped: string[]) => string[] = require('glob-escape'); // No @types/glob-escape package exists
 
 const PLUGIN_NAME: string = 'CopyFilesPlugin';
 const HEFT_STAGE_TAP: TapOptions<'promise'> = {
@@ -29,6 +35,18 @@ const HEFT_STAGE_TAP: TapOptions<'promise'> = {
 };
 
 const MAX_PARALLELISM: number = 100;
+
+export interface ICopyFileDescriptor {
+  sourceFilePath: string;
+  destinationFilePath: string;
+  hardlink: boolean;
+}
+
+export interface ICopyFilesOptions {
+  buildFolder: string;
+  copyConfigurations: IExtendedSharedCopyConfiguration[];
+  logger: ScopedLogger;
+}
 
 export class CopyFilesPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
@@ -72,132 +90,176 @@ export class CopyFilesPlugin implements IHeftPlugin {
       heftConfiguration
     );
 
-    // Build a map to dedupe copy operations
-    const fileOperationMap: Map<string, Map<string, boolean>> = new Map<string, Map<string, boolean>>();
+    const copyConfigurations: IExtendedSharedCopyConfiguration[] = [];
     for (const copyFilesEventAction of eventActions.copyFiles.get(heftEvent) || []) {
-      for (const copyOperation of copyFilesEventAction.copyOperations) {
-        // Default the resolved sourceFolder path to the current build folder
-        const resolvedSourceFolderPath: string = path.resolve(
-          heftConfiguration.buildFolder,
-          copyOperation.sourceFolder ?? '.'
-        );
-        // Run each glob against the resolved sourceFolder and flatten out the results
-        const resolvedSourceFilePaths: string[] = (
-          await Promise.all(
-            copyOperation.includeGlobs.map((includeGlob) => {
-              return this._resolvePathAsync(
-                resolvedSourceFolderPath,
-                includeGlob,
-                copyOperation.excludeGlobs
-              );
-            })
-          )
-        ).reduce((prev: string[], curr: string[]) => {
-          prev.push(...curr);
-          return prev;
-        }, []);
-
-        // Determine the target path for each source file and append to the correct map
-        for (const resolvedSourceFilePath of resolvedSourceFilePaths) {
-          let resolvedDestinationPathsMap: Map<string, boolean> | undefined = fileOperationMap.get(
-            resolvedSourceFilePath
-          );
-          if (!resolvedDestinationPathsMap) {
-            resolvedDestinationPathsMap = new Map<string, boolean>();
-            fileOperationMap.set(resolvedSourceFilePath, resolvedDestinationPathsMap);
-          }
-
-          for (const destinationFolder of copyOperation.destinationFolders) {
-            // Only include the relative path from the sourceFolder if flatten is false
-            const resolvedDestinationFilePath: string = path.resolve(
-              heftConfiguration.buildFolder,
-              destinationFolder,
-              copyOperation.flatten
-                ? '.'
-                : path.relative(resolvedSourceFolderPath, path.dirname(resolvedSourceFilePath)),
-              path.basename(resolvedSourceFilePath)
-            );
-            resolvedDestinationPathsMap.set(resolvedDestinationFilePath, copyOperation.hardlink || false);
-          }
-        }
-      }
+      copyConfigurations.push(...copyFilesEventAction.copyOperations);
     }
 
-    // Flatten out the map to simplify processing
-    const flattenedOperationMap: [string, string, boolean][] = [];
-    for (const [sourceFilePath, destinationMap] of fileOperationMap.entries()) {
-      for (const [destinationFilePath, hardlink] of destinationMap.entries()) {
-        flattenedOperationMap.push([sourceFilePath, destinationFilePath, hardlink]);
-      }
+    await this.runCopyAsync({
+      buildFolder: heftConfiguration.buildFolder,
+      copyConfigurations,
+      logger
+    });
+  }
+
+  protected async runCopyAsync(options: ICopyFilesOptions): Promise<void> {
+    const { logger, buildFolder, copyConfigurations } = options;
+
+    const startTime: number = performance.now();
+    const copyDescriptors: ICopyFileDescriptor[] = await this._getCopyFileDescriptorsAsync(
+      buildFolder,
+      copyConfigurations
+    );
+
+    if (copyDescriptors.length === 0) {
+      // No need to run copy and print to console
+      return;
     }
 
-    let linkedFiles: number = 0;
-    let copiedFiles: number = 0;
+    const [copyCount, hardlinkCount] = await this.copyFilesAsync(copyDescriptors);
+    const duration: number = performance.now() - startTime;
+    logger.terminal.writeLine(
+      `Copied ${copyCount} file${copyCount === 1 ? '' : 's'} and linked ${hardlinkCount} ` +
+        `file${hardlinkCount === 1 ? '' : 's'} in ${Math.round(duration)}ms`
+    );
+  }
+
+  protected async copyFilesAsync(copyDescriptors: ICopyFileDescriptor[]): Promise<[number, number]> {
+    if (copyDescriptors.length === 0) {
+      return [0, 0];
+    }
+
+    let copyCount: number = 0;
+    let hardlinkCount: number = 0;
     await Async.forEachLimitAsync(
-      flattenedOperationMap,
+      copyDescriptors,
       MAX_PARALLELISM,
-      async ([sourceFilePath, destinationFilePath, hardlink]) => {
-        if (hardlink) {
+      async (copyDescriptor: ICopyFileDescriptor) => {
+        if (copyDescriptor.hardlink) {
           // Hardlink doesn't allow passing in overwrite param, so delete ourselves
           try {
-            await FileSystem.deleteFileAsync(destinationFilePath, { throwIfNotExists: true });
+            await FileSystem.deleteFileAsync(copyDescriptor.destinationFilePath, { throwIfNotExists: true });
           } catch (e) {
             if (!FileSystem.isFileDoesNotExistError(e)) {
               throw e;
             }
             // Since the file doesn't exist, the parent folder may also not exist
-            await FileSystem.ensureFolderAsync(path.dirname(destinationFilePath));
+            await FileSystem.ensureFolderAsync(path.dirname(copyDescriptor.destinationFilePath));
           }
 
           await FileSystem.createHardLinkAsync({
-            linkTargetPath: sourceFilePath,
-            newLinkPath: destinationFilePath
+            linkTargetPath: copyDescriptor.sourceFilePath,
+            newLinkPath: copyDescriptor.destinationFilePath
           });
-          logger.terminal.writeVerboseLine(`Linked "${sourceFilePath}" to "${destinationFilePath}"`);
-          linkedFiles++;
+          hardlinkCount++;
         } else {
+          // If it's a copy, simply call the copy function
           await FileSystem.copyFileAsync({
-            sourcePath: sourceFilePath,
-            destinationPath: destinationFilePath,
+            sourcePath: copyDescriptor.sourceFilePath,
+            destinationPath: copyDescriptor.destinationFilePath,
             alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
           });
-          logger.terminal.writeVerboseLine(`Copied "${sourceFilePath}" to "${destinationFilePath}"`);
-          copiedFiles++;
+          copyCount++;
         }
       }
     );
 
-    if (linkedFiles > 0) {
-      logger.terminal.writeLine(`Linked ${linkedFiles} file${linkedFiles !== 1 ? 's' : ''}`);
-    }
-    if (copiedFiles > 0) {
-      logger.terminal.writeLine(`Copied ${copiedFiles} file${copiedFiles !== 1 ? 's' : ''}`);
-    }
+    return [copyCount, hardlinkCount];
   }
 
-  private async _resolvePathAsync(
-    sourceFolder: string,
-    globPattern: string,
-    excludeGlobPatterns?: string[]
-  ): Promise<string[]> {
-    if (globEscape(globPattern) !== globPattern) {
-      const expandedGlob: string[] = await LegacyAdapters.convertCallbackToPromise(glob, globPattern, {
-        cwd: sourceFolder,
-        ignore: excludeGlobPatterns
-      });
+  private async _getCopyFileDescriptorsAsync(
+    buildFolder: string,
+    copyConfigurations: IExtendedSharedCopyConfiguration[]
+  ): Promise<ICopyFileDescriptor[]> {
+    // Create a map to deduplicate and prevent double-writes
+    // resolvedDestinationFilePath -> [resolvedSourceFilePath, hardlink]
+    const destinationCopyDescriptors: Map<string, ICopyFileDescriptor> = new Map();
 
-      const result: string[] = [];
-      for (const pathFromGlob of expandedGlob) {
-        result.push(path.resolve(sourceFolder, pathFromGlob));
+    for (const copyConfiguration of copyConfigurations) {
+      // Resolve the source folder path which is where the glob will be run from
+      const resolvedSourceFolderPath: string = path.resolve(buildFolder, copyConfiguration.sourceFolder);
+
+      // Glob extensions with a specific glob to increase perf
+      let sourceFileRelativePaths: Set<string>;
+      if (copyConfiguration.fileExtensions?.length) {
+        const escapedExtensions: string[] = globEscape(copyConfiguration.fileExtensions);
+        const pattern: string = `**/*+(${escapedExtensions.join('|')})`;
+        sourceFileRelativePaths = await this._expandGlobPatternAsync(
+          resolvedSourceFolderPath,
+          pattern,
+          copyConfiguration.excludeGlobs
+        );
+      } else {
+        sourceFileRelativePaths = new Set<string>();
       }
 
-      return result;
-    } else {
-      // NOTE: Does not take excludeGlobPatterns into account as we cannot run glob
-      // against a path string. We could run the original globPattern through glob
-      // as well and solve this issue, however this carveout is done for performance
-      // and as such avoids glob
-      return [path.resolve(sourceFolder, globPattern)];
+      // Now include the other glob as well
+      for (const include of copyConfiguration.includeGlobs || []) {
+        const explicitlyIncludedPaths: Set<string> = await this._expandGlobPatternAsync(
+          resolvedSourceFolderPath,
+          include,
+          copyConfiguration.excludeGlobs
+        );
+
+        for (const explicitlyIncludedPath of explicitlyIncludedPaths) {
+          sourceFileRelativePaths.add(explicitlyIncludedPath);
+        }
+      }
+
+      // Dedupe and throw if a double-write is detected
+      for (const destinationFolderRelativePath of copyConfiguration.destinationFolders) {
+        for (const sourceFileRelativePath of sourceFileRelativePaths) {
+          // Only include the relative path from the sourceFolder if flatten is false
+          const resolvedSourceFilePath: string = path.join(resolvedSourceFolderPath, sourceFileRelativePath);
+          const resolvedDestinationFilePath: string = path.resolve(
+            buildFolder,
+            destinationFolderRelativePath,
+            copyConfiguration.flatten ? '.' : path.dirname(sourceFileRelativePath),
+            path.basename(sourceFileRelativePath)
+          );
+
+          // Throw if a duplicate copy target with a different source or options is specified
+          const existingCopyDescriptor: ICopyFileDescriptor | undefined = destinationCopyDescriptors.get(
+            resolvedDestinationFilePath
+          );
+          if (existingCopyDescriptor) {
+            if (
+              existingCopyDescriptor.sourceFilePath === resolvedSourceFilePath &&
+              existingCopyDescriptor.hardlink === !!copyConfiguration.hardlink
+            ) {
+              // Found a duplicate, avoid adding again
+              continue;
+            }
+            throw new Error(
+              `Cannot copy different files to the same destination "${resolvedDestinationFilePath}"`
+            );
+          }
+
+          // Finally, add to the map and default hardlink to false
+          destinationCopyDescriptors.set(resolvedDestinationFilePath, {
+            sourceFilePath: resolvedSourceFilePath,
+            destinationFilePath: resolvedDestinationFilePath,
+            hardlink: !!copyConfiguration.hardlink
+          });
+        }
+      }
     }
+
+    // We're done with the map, grab the values and return
+    return Array.from(destinationCopyDescriptors.values());
+  }
+
+  private async _expandGlobPatternAsync(
+    resolvedSourceFolderPath: string,
+    pattern: string,
+    exclude: string[] | undefined
+  ): Promise<Set<string>> {
+    const results: string[] = await LegacyAdapters.convertCallbackToPromise(glob, pattern, {
+      cwd: resolvedSourceFolderPath,
+      nodir: true,
+      ignore: exclude
+    });
+
+    return new Set<string>(results);
   }
 }
