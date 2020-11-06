@@ -333,11 +333,12 @@ describe('ConfigurationFile', () => {
     }
 
     it('Correctly loads a complex config file', async () => {
-      const projectRelativeFilePath: string = 'complexConfigFile/pluginsB.json';
-      const parentConfigFilePath: string = nodeJsPath.resolve(
+      const projectRelativeFilePath: string = 'complexConfigFile/pluginsD.json';
+      const rootConfigFilePath: string = nodeJsPath.resolve(__dirname, 'complexConfigFile', 'pluginsA.json');
+      const secondConfigFilePath: string = nodeJsPath.resolve(
         __dirname,
         'complexConfigFile',
-        'pluginsA.json'
+        'pluginsB.json'
       );
       const schemaPath: string = nodeJsPath.resolve(__dirname, 'complexConfigFile', 'plugins.schema.json');
 
@@ -405,13 +406,13 @@ describe('ConfigurationFile', () => {
       ).toEqual('@rushstack/eslint-config');
 
       expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[0])).toEqual(
-        parentConfigFilePath
+        rootConfigFilePath
       );
       expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[1])).toEqual(
-        nodeJsPath.resolve(__dirname, projectRelativeFilePath)
+        nodeJsPath.resolve(__dirname, secondConfigFilePath)
       );
       expect(configFileLoader.getObjectSourceFilePath(loadedConfigFile.plugins[2])).toEqual(
-        nodeJsPath.resolve(__dirname, projectRelativeFilePath)
+        nodeJsPath.resolve(__dirname, secondConfigFilePath)
       );
     });
   });

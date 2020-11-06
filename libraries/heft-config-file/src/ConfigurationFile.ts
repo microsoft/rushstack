@@ -285,15 +285,15 @@ export class ConfigurationFile<TConfigurationFile> {
    */
   public getPropertyOriginalValue<TParentProperty extends object, TValue>(
     options: IOriginalValueOptions<TParentProperty>
-  ): TValue {
+  ): TValue | undefined {
     const annotation: IConfigurationFileFieldAnnotation<TParentProperty> | undefined =
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (options.parentObject as any)[CONFIGURATION_FILE_FIELD_ANNOTATION];
     if (annotation && annotation.originalValues.hasOwnProperty(options.propertyName)) {
       return annotation.originalValues[options.propertyName] as TValue;
+    } else {
+      return undefined;
     }
-
-    throw new Error(`No original value could be determined for property "${options.propertyName}"`);
   }
 
   private async _loadConfigurationFileInnerWithCacheAsync(
