@@ -7,8 +7,7 @@ import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 
-// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
-import * as deployManagerTypes from '../../logic/deploy/DeployManager';
+import type * as deployManagerTypes from '../../logic/deploy/DeployManager';
 const deployManagerModule: typeof deployManagerTypes = Import.lazy(
   '../../logic/deploy/DeployManager',
   require
