@@ -13,17 +13,17 @@ import { Lib2Interface } from 'api-extractor-lib2-test';
 // @public (undocumented)
 export class Item {
     // (undocumented)
-    lib1: Lib1Interface.Lib1Interface;
+    lib1: Lib1Interface;
     // (undocumented)
-    lib2: Lib2Interface.Lib2Interface;
+    lib2: Lib2Interface;
     // (undocumented)
-    lib3: Lib1Class.Lib1Class;
+    lib3: Lib1Class;
     // Warning: (ae-forgotten-export) The symbol "Options" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     options: Options;
     // (undocumented)
-    reExport: Lib2Class.Lib2Class;
+    reExport: Lib2Class;
 }
 
 export { Lib1 }

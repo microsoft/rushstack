@@ -133,7 +133,7 @@ export class AstImport {
    * `AstImport.exportName`.
    */
   public get localName(): string | undefined {
-    return this.exportName ? this.exportName.split('.').slice(-1)[0] : undefined;
+    return this.exportName;
   }
 
   /**
@@ -149,8 +149,14 @@ export class AstImport {
         return `${options.modulePath}:*`;
       case AstImportKind.EqualsImport:
         return `${options.modulePath}:=`;
-      case AstImportKind.ImportType:
-        return `${options.modulePath}:${options.exportName}`;
+      case AstImportKind.ImportType: {
+        const subKey: string = !options.exportName
+          ? '*' // Equivalent to StarImport
+          : options.exportName.includes('.') // Equivalent to a named export
+          ? options.exportName.split('.')[0]
+          : options.exportName;
+        return `${options.modulePath}:${subKey}`;
+      }
       default:
         throw new InternalError('Unknown AstImportKind');
     }

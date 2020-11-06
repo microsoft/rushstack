@@ -337,14 +337,20 @@ export class DtsRollupGenerator {
             if (
               referencedEntity.astEntity instanceof AstImport &&
               referencedEntity.astEntity.importKind === AstImportKind.ImportType &&
-              (referencedEntity.astEntity.exportName || '').split('.').length > 1
+              referencedEntity.astEntity.exportName
             ) {
-              const replacement: string = referencedEntity.astEntity.exportName
-                ? `${referencedEntity.nameForEmit}.${referencedEntity.astEntity.exportName}`
-                : referencedEntity.nameForEmit;
+              // For an ImportType with a namespace chain, only the top namespace is imported.
+              // Must add the original nested qualifiers to the rolled up import.
+              const qualifiersText: string = node.qualifier?.getText() ?? '';
+              const nestedQualifiersStart: number = qualifiersText.indexOf('.');
+              // Including the leading "."
+              const nestedQualifiersText: string =
+                nestedQualifiersStart >= 0 ? qualifiersText.substring(nestedQualifiersStart) : '';
+
+              const replacement: string = `${referencedEntity.nameForEmit}${nestedQualifiersText}${typeArgumentsText}`;
 
               span.modification.skipAll();
-              span.modification.prefix = `${replacement}${typeArgumentsText}`;
+              span.modification.prefix = replacement;
             } else {
               // Replace with internal symbol or AstImport
 
