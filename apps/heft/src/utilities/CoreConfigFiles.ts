@@ -176,23 +176,9 @@ export class CoreConfigFiles {
             ): ISharedCopyStaticAssetsConfiguration => {
               const result: ISharedCopyStaticAssetsConfiguration = {};
 
-              if (currentObject.fileExtensions && parentObject.fileExtensions) {
-                result.fileExtensions = [...currentObject.fileExtensions, ...parentObject.fileExtensions];
-              } else {
-                result.fileExtensions = currentObject.fileExtensions || parentObject.fileExtensions;
-              }
-
-              if (currentObject.includeGlobs && parentObject.includeGlobs) {
-                result.includeGlobs = [...currentObject.includeGlobs, ...parentObject.includeGlobs];
-              } else {
-                result.includeGlobs = currentObject.includeGlobs || parentObject.includeGlobs;
-              }
-
-              if (currentObject.excludeGlobs && parentObject.excludeGlobs) {
-                result.excludeGlobs = [...currentObject.excludeGlobs, ...parentObject.excludeGlobs];
-              } else {
-                result.excludeGlobs = currentObject.excludeGlobs || parentObject.excludeGlobs;
-              }
+              CoreConfigFiles._inheritArray(result, 'fileExtensions', currentObject, parentObject);
+              CoreConfigFiles._inheritArray(result, 'includeGlobs', currentObject, parentObject);
+              CoreConfigFiles._inheritArray(result, 'excludeGlobs', currentObject, parentObject);
 
               return result;
             }
@@ -261,6 +247,30 @@ export class CoreConfigFiles {
           `Unknown heft event "${eventAction.heftEvent}" in ` +
             ` "${CoreConfigFiles.heftConfigFileLoader.getObjectSourceFilePath(eventAction)}".`
         );
+    }
+  }
+
+  private static _inheritArray<
+    TResultObject extends { [P in TArrayKeys]?: unknown[] },
+    TArrayKeys extends keyof TResultObject
+  >(
+    resultObject: TResultObject,
+    propertyName: TArrayKeys,
+    currentObject: TResultObject,
+    parentObject: TResultObject
+  ): void {
+    let newValue: unknown[] | undefined;
+    if (currentObject[propertyName] && parentObject[propertyName]) {
+      newValue = [
+        ...(currentObject[propertyName] as unknown[]),
+        ...(parentObject[propertyName] as unknown[])
+      ];
+    } else {
+      newValue = currentObject[propertyName] || parentObject[propertyName];
+    }
+
+    if (newValue !== undefined) {
+      resultObject[propertyName] = newValue as TResultObject[TArrayKeys];
     }
   }
 }
