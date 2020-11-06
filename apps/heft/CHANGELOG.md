@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 03 Nov 2020 01:11:18 GMT and should not be manually modified.
+This log was last generated on Fri, 06 Nov 2020 16:09:30 GMT and should not be manually modified.
+
+## 0.19.5
+Fri, 06 Nov 2020 16:09:30 GMT
+
+### Patches
+
+- Fix an issue where an extended "typescript.json" config file with omitted optional staticAssetsToCopy fields would cause schema validation to fail.
 
 ## 0.19.4
 Tue, 03 Nov 2020 01:11:18 GMT
