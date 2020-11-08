@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 06 Nov 2020 16:09:30 GMT and should not be manually modified.
+This log was last generated on Sun, 08 Nov 2020 22:52:49 GMT and should not be manually modified.
+
+## 0.20.0
+Sun, 08 Nov 2020 22:52:49 GMT
+
+### Minor changes
+
+- Update jest-shared.config.json with more file extension mappings for "jest-string-mock-transform"
 
 ## 0.19.5
 Fri, 06 Nov 2020 16:09:30 GMT

@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.20.0",
+      "tag": "@rushstack/heft_v0.20.0",
+      "date": "Sun, 08 Nov 2020 22:52:49 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update jest-shared.config.json with more file extension mappings for \"jest-string-mock-transform\""
+          }
+        ]
+      }
+    },
+    {
       "version": "0.19.5",
       "tag": "@rushstack/heft_v0.19.5",
       "date": "Fri, 06 Nov 2020 16:09:30 GMT",
