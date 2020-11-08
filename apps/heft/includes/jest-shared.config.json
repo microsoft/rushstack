@@ -14,8 +14,12 @@
   "transformIgnorePatterns": [],
   "transform": {
     "\\.(ts|tsx)$": "@rushstack/heft/lib/exports/jest-build-transform.js",
+
+    "//": "jest-identity-mock-transform returns a proxy for exported key/value pairs, where Webpack would return a module",
     "\\.(css|sass|scss)$": "@rushstack/heft/lib/exports/jest-identity-mock-transform.js",
-    "\\.(jpg|png|gif|mp3)$": "@rushstack/heft/lib/exports/jest-string-mock-transform.js"
+
+    "//": "jest-string-mock-transform returns the filename, where Webpack would return a URL",
+    "\\.(aac|eot|gif|jpeg|jpg|m4a|mp3|mp4|oga|otf|png|svg|ttf|wav|webm|webp|woff|woff2)$": "@rushstack/heft/lib/exports/jest-string-mock-transform.js"
   },
   "//": [
     "The modulePathIgnorePatterns below accepts these sorts of paths:",
