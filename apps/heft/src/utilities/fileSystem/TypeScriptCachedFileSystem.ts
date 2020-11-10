@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'fs';
-import * as nodeJsPath from 'path';
 import {
   Encoding,
   Text,
