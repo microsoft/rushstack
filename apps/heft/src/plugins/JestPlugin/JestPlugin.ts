@@ -241,20 +241,4 @@ export class JestPlugin implements IHeftPlugin {
 
     return result;
   }
-
-  private _renameJestReporter(items: JestReporterConfig[], index: number, newName: string): boolean {
-    const item: JestReporterConfig = items[index];
-
-    if (typeof item === 'string') {
-      items[index] = newName;
-      return true;
-    }
-
-    if (typeof item !== 'undefined' && item !== null) {
-      item[0] = newName;
-      return true;
-    }
-
-    return false;
-  }
 }
