@@ -1249,13 +1249,15 @@ export class FileSystem {
             default:
               throw error;
           }
-        } else if (FileSystem.isNotExistError(error)) {
-          this.ensureFolder(nodeJsPath.dirname(options.newLinkPath));
         } else {
-          throw error;
+          const linkTargetExists: boolean = FileSystem.exists(options.linkTargetPath);
+          if (FileSystem.isNotExistError(error) && linkTargetExists) {
+            this.ensureFolder(nodeJsPath.dirname(options.newLinkPath));
+            this.createHardLink(options);
+          } else {
+            throw error;
+          }
         }
-
-        this.createHardLink(options);
       }
     });
   }
@@ -1279,13 +1281,15 @@ export class FileSystem {
             default:
               throw error;
           }
-        } else if (FileSystem.isNotExistError(error)) {
-          await this.ensureFolderAsync(nodeJsPath.dirname(options.newLinkPath));
         } else {
-          throw error;
+          const linkTargetExists: boolean = await FileSystem.exists(options.linkTargetPath);
+          if (FileSystem.isNotExistError(error) && linkTargetExists) {
+            await this.ensureFolderAsync(nodeJsPath.dirname(options.newLinkPath));
+            await this.createHardLinkAsync(options);
+          } else {
+            throw error;
+          }
         }
-
-        await this.createHardLinkAsync(options);
       }
     });
   }
