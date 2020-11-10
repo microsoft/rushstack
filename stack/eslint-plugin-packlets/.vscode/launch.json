@@ -1,0 +1,28 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "packlets-tutorial",
+      "cwd": "${workspaceFolder}/../../tutorials/packlets-tutorial",
+      "program": "${workspaceFolder}/node_modules/eslint/bin/eslint.js",
+      "args": ["-f", "unix", "src/**/*.ts"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "packlets-tutorial file",
+      "cwd": "${workspaceFolder}/../../tutorials/packlets-tutorial/src",
+      "program": "${workspaceFolder}/node_modules/eslint/bin/eslint.js",
+      "args": [
+        "-f",
+        "unix",
+        "${workspaceFolder}/../../tutorials/packlets-tutorial/src/packlets/reports/index.ts"
+      ]
+    }
+  ]
+}
