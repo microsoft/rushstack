@@ -1027,7 +1027,7 @@ export class FileSystem {
       const sourceStream: fs.ReadStream = fsx.createReadStream(options.sourcePath);
       const uniqueDestinationPaths: Set<string> = new Set(options.destinationPaths);
       const pipePromises: Promise<void>[] = [];
-      for (const destinationPath of uniqueDestinationPaths.values()) {
+      for (const destinationPath of uniqueDestinationPaths) {
         pipePromises.push(createPipePromise(sourceStream, destinationPath));
       }
 
