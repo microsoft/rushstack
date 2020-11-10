@@ -977,14 +977,16 @@ export class FileSystem {
       }
       const flags: string = writeFlags.join();
 
-      const createPipePromise: (
+      const createPipePromise: (sourceStream: fs.ReadStream, destinationPath: string) => Promise<void> = (
         sourceStream: fs.ReadStream,
-        destinationStream: fs.WriteStream
-      ) => Promise<void> = (sourceStream: fs.ReadStream, destinationStream: fs.WriteStream) => {
+        destinationPath: string
+      ) => {
         return new Promise((resolve: () => void, reject: (error: Error) => void) => {
+          const destinationStream: fs.WriteStream = fs.createWriteStream(destinationPath);
+          const streamsToDestroy: fs.WriteStream[] = [destinationStream];
           sourceStream.on('error', (e: Error) => {
-            if (destinationStream) {
-              destinationStream.destroy();
+            for (const streamToDestroy of streamsToDestroy) {
+              streamToDestroy.destroy();
             }
             reject(e);
           });
@@ -993,15 +995,31 @@ export class FileSystem {
             .on('close', () => {
               resolve();
             })
-            .on('error', (e: Error) => {
-              if (
+            .on('error', async (e: Error) => {
+              if (FileSystem.isNotExistError(e)) {
+                destinationStream.destroy();
+                await FileSystem.ensureFolderAsync(nodeJsPath.dirname(destinationStream.path as string));
+                const retryDestinationStream: fs.WriteStream = fsx.createWriteStream(destinationPath, {
+                  flags
+                });
+                streamsToDestroy.push(retryDestinationStream);
+                sourceStream
+                  .pipe(retryDestinationStream)
+                  .on('close', () => {
+                    resolve();
+                  })
+                  .on('error', (e2: Error) => {
+                    reject(e2);
+                  });
+              } else if (
                 options.alreadyExistsBehavior === AlreadyExistsBehavior.Ignore &&
                 FileSystem.isErrnoException(e) &&
-                (e as NodeJS.ErrnoException).code === 'EEXIST'
+                e.code === 'EEXIST'
               ) {
                 resolve();
+              } else {
+                reject(e);
               }
-              reject(e);
             });
         });
       };
@@ -1010,7 +1028,7 @@ export class FileSystem {
       const uniqueDestinationPaths: Set<string> = new Set(options.destinationPaths);
       const pipePromises: Promise<void>[] = [];
       for (const destinationPath of uniqueDestinationPaths.values()) {
-        pipePromises.push(createPipePromise(sourceStream, fsx.createWriteStream(destinationPath, { flags })));
+        pipePromises.push(createPipePromise(sourceStream, destinationPath));
       }
 
       await Promise.all(pipePromises);
