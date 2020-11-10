@@ -11,4 +11,6 @@ export class Constants {
   public static pluginParameterLongName: string = '--plugin';
 
   public static debugParameterLongName: string = '--debug';
+
+  public static maxParallelism: number = 100;
 }

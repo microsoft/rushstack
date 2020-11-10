@@ -20,6 +20,7 @@ import {
   IPostBuildSubstage,
   IPreCompileSubstage
 } from '../stages/BuildStage';
+import { Constants } from '../utilities/Constants';
 
 const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
 
@@ -28,8 +29,6 @@ const HEFT_STAGE_TAP: TapOptions<'promise'> = {
   name: PLUGIN_NAME,
   stage: Number.MIN_SAFE_INTEGER
 };
-
-const MAX_PARALLELISM: number = 100;
 
 export class DeleteGlobsPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
@@ -101,19 +100,23 @@ export class DeleteGlobsPlugin implements IHeftPlugin {
       }
     }
 
-    await Async.forEachLimitAsync(Array.from(pathsToDelete), MAX_PARALLELISM, async (pathToDelete) => {
-      try {
-        FileSystem.deleteFile(pathToDelete, { throwIfNotExists: true });
-        logger.terminal.writeVerboseLine(`Deleted "${pathToDelete}"`);
-        deletedFiles++;
-      } catch (error) {
-        if (FileSystem.exists(pathToDelete)) {
-          FileSystem.deleteFolder(pathToDelete);
-          logger.terminal.writeVerboseLine(`Deleted folder "${pathToDelete}"`);
-          deletedFolders++;
+    await Async.forEachLimitAsync(
+      Array.from(pathsToDelete),
+      Constants.maxParallelism,
+      async (pathToDelete) => {
+        try {
+          FileSystem.deleteFile(pathToDelete, { throwIfNotExists: true });
+          logger.terminal.writeVerboseLine(`Deleted "${pathToDelete}"`);
+          deletedFiles++;
+        } catch (error) {
+          if (FileSystem.exists(pathToDelete)) {
+            FileSystem.deleteFolder(pathToDelete);
+            logger.terminal.writeVerboseLine(`Deleted folder "${pathToDelete}"`);
+            deletedFolders++;
+          }
         }
       }
-    });
+    );
 
     if (deletedFiles > 0 || deletedFolders > 0) {
       logger.terminal.writeLine(
