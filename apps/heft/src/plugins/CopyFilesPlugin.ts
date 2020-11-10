@@ -189,9 +189,10 @@ export class CopyFilesPlugin implements IHeftPlugin {
     buildFolder: string,
     copyConfigurations: IExtendedSharedCopyConfiguration[]
   ): Promise<ICopyFileDescriptor[]> {
-    // Create a map to deduplicate and prevent double-writes
+    // Create a map to deduplicate and prevent double-writes. The key in this map is the copy/link destination
+    // file path
     const destinationCopyDescriptors: Map<string, ICopyFileDescriptor> = new Map();
-    // And a map to contain the actual results
+    // And a map to contain the actual results. The key in this map is the copy/link source file path
     const sourceCopyDescriptors: Map<string, ICopyFileDescriptor> = new Map();
 
     for (const copyConfiguration of copyConfigurations) {
