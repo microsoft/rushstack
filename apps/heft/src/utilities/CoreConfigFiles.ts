@@ -64,12 +64,12 @@ export interface ISharedCopyConfiguration {
 
 export interface IExtendedSharedCopyConfiguration extends ISharedCopyConfiguration {
   /**
-   * The folder from which files should be copied. For example, "src".
+   * The folder from which files should be copied, relative to the project root. For example, "src".
    */
   sourceFolder: string;
 
   /**
-   * The folder(s) to which files should be copied. For example ["lib", "lib-cjs"].
+   * Folder(s) to which files should be copied, relative to the project root. For example ["lib", "lib-cjs"].
    */
   destinationFolders: string[];
 }

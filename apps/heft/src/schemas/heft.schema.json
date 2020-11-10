@@ -89,13 +89,13 @@
                       "properties": {
                         "sourceFolder": {
                           "type": "string",
-                          "description": "The folder from which files should be copied.",
+                          "description": "",
                           "pattern": "[^\\\\]"
                         },
 
                         "destinationFolders": {
                           "type": "array",
-                          "description": "The folder(s) to which files should be copied.",
+                          "description": "Folder(s) to which files should be copied, relative to the project root.",
                           "items": {
                             "type": "string",
                             "pattern": "[^\\\\]"
