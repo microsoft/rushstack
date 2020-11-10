@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.20.1",
+      "tag": "@rushstack/heft_v0.20.1",
+      "date": "Tue, 10 Nov 2020 16:11:42 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve error handling and make --debug print stacks of errors that occur in heft's internal initialization."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.20.0",
       "tag": "@rushstack/heft_v0.20.0",
       "date": "Sun, 08 Nov 2020 22:52:49 GMT",

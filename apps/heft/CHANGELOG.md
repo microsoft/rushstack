@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Sun, 08 Nov 2020 22:52:49 GMT and should not be manually modified.
+This log was last generated on Tue, 10 Nov 2020 16:11:42 GMT and should not be manually modified.
+
+## 0.20.1
+Tue, 10 Nov 2020 16:11:42 GMT
+
+### Patches
+
+- Improve error handling and make --debug print stacks of errors that occur in heft's internal initialization.
 
 ## 0.20.0
 Sun, 08 Nov 2020 22:52:49 GMT
