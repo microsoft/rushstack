@@ -987,10 +987,10 @@ export class FileSystem {
             .on('close', () => {
               resolve();
             })
-            .on('error', async (e: Error) => {
+            .on('error', (e: Error) => {
               if (FileSystem.isNotExistError(e)) {
                 destinationStream.destroy();
-                await FileSystem.ensureFolderAsync(nodeJsPath.dirname(destinationStream.path as string));
+                FileSystem.ensureFolder(nodeJsPath.dirname(destinationStream.path as string));
                 const retryDestinationStream: fs.WriteStream = fsx.createWriteStream(destinationPath, {
                   flags
                 });
