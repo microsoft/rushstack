@@ -20,6 +20,7 @@ import {
   IPostBuildSubstage,
   IPreCompileSubstage
 } from '../stages/BuildStage';
+import { Constants } from '../utilities/Constants';
 
 const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
 
@@ -99,22 +100,29 @@ export class DeleteGlobsPlugin implements IHeftPlugin {
       }
     }
 
-    await Async.forEachLimitAsync(Array.from(pathsToDelete), 100, async (pathToDelete) => {
-      try {
-        FileSystem.deleteFile(pathToDelete, { throwIfNotExists: true });
-        logger.terminal.writeVerboseLine(`Deleted "${pathToDelete}"`);
-        deletedFiles++;
-      } catch (error) {
-        if (FileSystem.exists(pathToDelete)) {
-          FileSystem.deleteFolder(pathToDelete);
-          logger.terminal.writeVerboseLine(`Deleted folder "${pathToDelete}"`);
-          deletedFolders++;
+    await Async.forEachLimitAsync(
+      Array.from(pathsToDelete),
+      Constants.maxParallelism,
+      async (pathToDelete) => {
+        try {
+          FileSystem.deleteFile(pathToDelete, { throwIfNotExists: true });
+          logger.terminal.writeVerboseLine(`Deleted "${pathToDelete}"`);
+          deletedFiles++;
+        } catch (error) {
+          if (FileSystem.exists(pathToDelete)) {
+            FileSystem.deleteFolder(pathToDelete);
+            logger.terminal.writeVerboseLine(`Deleted folder "${pathToDelete}"`);
+            deletedFolders++;
+          }
         }
       }
-    });
+    );
 
     if (deletedFiles > 0 || deletedFolders > 0) {
-      logger.terminal.writeLine(`Deleted ${deletedFiles} files and ${deletedFolders} folders`);
+      logger.terminal.writeLine(
+        `Deleted ${deletedFiles} file${deletedFiles !== 1 ? 's' : ''} ` +
+          `and ${deletedFolders} folder${deletedFolders !== 1 ? 's' : ''}`
+      );
     }
   }
 

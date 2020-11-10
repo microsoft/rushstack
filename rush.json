@@ -537,6 +537,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-copy-files-test",
+      "projectFolder": "build-tests/heft-copy-files-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-example-plugin-01",
       "projectFolder": "build-tests/heft-example-plugin-01",
       "reviewCategory": "tests",

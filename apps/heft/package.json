@@ -46,6 +46,7 @@
     "chokidar": "~3.4.0",
     "glob-escape": "~0.0.2",
     "glob": "~7.0.5",
+    "fast-glob": "~3.2.4",
     "jest-snapshot": "~25.4.0",
     "node-sass": "4.14.1",
     "postcss-modules": "~1.5.0",

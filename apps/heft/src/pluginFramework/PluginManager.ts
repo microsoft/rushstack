@@ -14,6 +14,7 @@ import {
 } from '../utilities/CoreConfigFiles';
 
 // Default plugins
+import { CopyFilesPlugin } from '../plugins/CopyFilesPlugin';
 import { TypeScriptPlugin } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
 import { DeleteGlobsPlugin } from '../plugins/DeleteGlobsPlugin';
 import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
@@ -46,6 +47,7 @@ export class PluginManager {
   public initializeDefaultPlugins(): void {
     this._applyPlugin(new TypeScriptPlugin());
     this._applyPlugin(new CopyStaticAssetsPlugin());
+    this._applyPlugin(new CopyFilesPlugin());
     this._applyPlugin(new DeleteGlobsPlugin());
     this._applyPlugin(new ApiExtractorPlugin());
     this._applyPlugin(new JestPlugin());
