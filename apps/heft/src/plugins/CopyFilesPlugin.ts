@@ -303,14 +303,14 @@ export class CopyFilesPlugin implements IHeftPlugin {
               destinationFilePaths: resolvedDestinationFolderPaths.map((resolvedDestinationFolderPath) => {
                 return path.join(
                   resolvedDestinationFolderPath,
-                  !!copyConfiguration.flatten ? path.basename(assetPath) : assetPath
+                  copyConfiguration.flatten ? path.basename(assetPath) : assetPath
                 );
               }),
               hardlink: !!copyConfiguration.hardlink
             }
           ]);
           logger.terminal.writeLine(
-            !!copyConfiguration.hardlink
+            copyConfiguration.hardlink
               ? `Linked ${linkedFileCount} file${linkedFileCount === 1 ? '' : 's'}`
               : `Copied ${copiedFileCount} file${copiedFileCount === 1 ? '' : 's'}`
           );
