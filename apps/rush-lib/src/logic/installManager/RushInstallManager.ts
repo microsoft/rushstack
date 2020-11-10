@@ -605,7 +605,10 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     // Run "npm install" in the common folder
-    const installArgs: string[] = ['install'];
+    const installArgs: string[] = (
+      this.rushConfiguration.packageManager !== 'npm' ||
+      this.options.allowShrinkwrapUpdates
+    ) ? ['install'] : ['ci'];
     this.pushConfigurationArgs(installArgs, this.options);
 
     console.log(
