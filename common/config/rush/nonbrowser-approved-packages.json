@@ -195,6 +195,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/heft-web-rig",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "@rushstack/localization-plugin",
       "allowedCategories": [ "tests" ]
     },
@@ -677,6 +681,10 @@
     {
       "name": "source-map",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "source-map-loader",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "ssri",

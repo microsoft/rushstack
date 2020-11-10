@@ -2254,6 +2254,7 @@ importers:
       html-webpack-plugin: 4.5.0_webpack@4.44.2
       react: 16.13.1
       react-dom: 16.13.1_react@16.13.1
+      source-map-loader: 1.1.2_webpack@4.44.2
       style-loader: 1.2.1_webpack@4.44.2
       typescript: 3.9.7
       webpack: 4.44.2_webpack@4.44.2
@@ -2269,6 +2270,7 @@ importers:
       html-webpack-plugin: ~4.5.0
       react: ~16.13.1
       react-dom: ~16.13.1
+      source-map-loader: ~1.1.2
       style-loader: ~1.2.1
       typescript: ~3.9.7
       webpack: ~4.44.2
@@ -8081,6 +8083,14 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==
+  /iconv-lite/0.6.2:
+    dependencies:
+      safer-buffer: 2.1.2
+    dev: true
+    engines:
+      node: '>=0.10.0'
+    resolution:
+      integrity: sha512-2y91h5OpQlolefMPmUlivelittSWy0rP+oYVpn6A7GwVHNE8AWzoYOBNmlwks3LobaJxgHCYZAnyNo2GgpNRNQ==
   /icss-replace-symbols/1.1.0:
     dev: false
     resolution:
@@ -12166,6 +12176,22 @@ packages:
   /source-list-map/2.0.1:
     resolution:
       integrity: sha512-qnQ7gVMxGNxsiL4lEuJwe/To8UnK7fAnmbGEEH8RpLouuKbeEm0lhbQVFIrNSuB+G7tVrAlVsZgETT5nljf+Iw==
+  /source-map-loader/1.1.2_webpack@4.44.2:
+    dependencies:
+      abab: 2.0.5
+      iconv-lite: 0.6.2
+      loader-utils: 2.0.0
+      schema-utils: 3.0.0
+      source-map: 0.6.1
+      webpack: 4.44.2_webpack@4.44.2
+      whatwg-mimetype: 2.3.0
+    dev: true
+    engines:
+      node: '>= 10.13.0'
+    peerDependencies:
+      webpack: ^4.0.0 || ^5.0.0
+    resolution:
+      integrity: sha512-bjf6eSENOYBX4JZDfl9vVLNsGAQ6Uz90fLmOazcmMcyDYOBFsGxPNn83jXezWLY9bJsVAo1ObztxPcV8HAbjVA==
   /source-map-resolve/0.5.3:
     dependencies:
       atob: 2.1.2
