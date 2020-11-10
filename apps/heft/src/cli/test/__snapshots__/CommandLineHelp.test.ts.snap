@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CommandLineHelp prints the global help 1`] = `
-"usage: heft [-h] [--unmanaged] [-d] [--plugin PATH] <command> ...
+"usage: heft [-h] [--unmanaged] [--debug] [--plugin PATH] <command> ...
 
 Heft is a pluggable build system designed for web projects.
 
@@ -20,7 +20,7 @@ Optional arguments:
                  installed version of Heft. Specify \\"--unmanaged\\" to force 
                  the invoked version of Heft to be used. This is useful for 
                  example if you want to test a different version of Heft.
-  -d, --debug    Show the full call stack if an error occurs while executing 
+  --debug        Show the full call stack if an error occurs while executing 
                  the tool
   --plugin PATH  Used to specify Heft plugins.
 
