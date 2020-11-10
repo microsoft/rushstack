@@ -26,7 +26,7 @@ export interface ICachedEmitModuleKind {
 
   /**
    * Set to true if this is the emit kind that is specified in the tsconfig.json.
-   * Sourcemaps and declarations are only emitted for the primary module kind.
+   * Declarations are only emitted for the primary module kind.
    */
   isPrimary: boolean;
 }
