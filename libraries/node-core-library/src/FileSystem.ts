@@ -959,7 +959,7 @@ export class FileSystem {
 
     if (FileSystem.getStatistics(options.sourcePath).isDirectory()) {
       throw new Error(
-        'The specified path refers to a folder; this operation expects a file object:\n' + options.sourcePath
+        'The specified path refers to a folder; this operation expects a file path:\n' + options.sourcePath
       );
     }
 
