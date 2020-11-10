@@ -168,6 +168,7 @@ export class FileSystem {
     static copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void>;
     static copyFiles(options: IFileSystemCopyFilesOptions): void;
     static copyFilesAsync(options: IFileSystemCopyFilesOptions): Promise<void>;
+    static copyFileToManyAsync(options: IFileSystemCopyFileToManyOptions): Promise<void>;
     static createHardLink(options: IFileSystemCreateLinkOptions): void;
     static createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
     static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void;
@@ -296,6 +297,13 @@ export interface IFileSystemCopyFilesAsyncOptions {
 // @public
 export interface IFileSystemCopyFilesOptions extends IFileSystemCopyFilesAsyncOptions {
     filter?: FileSystemCopyFilesFilter;
+}
+
+// @public
+export interface IFileSystemCopyFileToManyOptions extends Omit<IFileSystemCopyFileOptions, 'destinationPath'> {
+    alreadyExistsBehavior?: AlreadyExistsBehavior;
+    destinationPaths: string[];
+    sourcePath: string;
 }
 
 // @public

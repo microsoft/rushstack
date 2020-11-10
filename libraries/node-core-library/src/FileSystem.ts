@@ -129,6 +129,31 @@ export interface IFileSystemCopyFileOptions {
 }
 
 /**
+ * The options for {@link FileSystem.copyFile}
+ * @public
+ */
+export interface IFileSystemCopyFileToManyOptions
+  extends Omit<IFileSystemCopyFileOptions, 'destinationPath'> {
+  /**
+   * The path of the existing object to be copied.
+   * The path may be absolute or relative.
+   */
+  sourcePath: string;
+
+  /**
+   * The path that the object will be copied to.
+   * The path may be absolute or relative.
+   */
+  destinationPaths: string[];
+
+  /**
+   * Specifies what to do if the target object already exists.
+   * @defaultValue {@link AlreadyExistsBehavior.Overwrite}
+   */
+  alreadyExistsBehavior?: AlreadyExistsBehavior;
+}
+
+/**
  * Specifies the behavior of {@link FileSystem.copyFiles} in a situation where the target object
  * already exists.
  * @public
@@ -913,6 +938,82 @@ export class FileSystem {
         errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
         overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite
       });
+    });
+  }
+
+  /**
+   * Copies a single file from one location to one or more other locations.
+   * By default, the file at the destination is overwritten if it already exists.
+   *
+   * @remarks
+   * The `copyFileToManyAsync()` API cannot be used to copy folders.  It copies at most one file.
+   *
+   * The implementation is based on `createReadStream()` and `createWriteStream()` from the
+   * `fs-extra` package.
+   */
+  public static async copyFileToManyAsync(options: IFileSystemCopyFileToManyOptions): Promise<void> {
+    options = {
+      ...COPY_FILE_DEFAULT_OPTIONS,
+      ...options
+    };
+
+    if (FileSystem.getStatistics(options.sourcePath).isDirectory()) {
+      throw new Error(
+        'The specified path refers to a folder; this operation expects a file object:\n' + options.sourcePath
+      );
+    }
+
+    await FileSystem._wrapExceptionAsync(async () => {
+      // See flags documentation: https://nodejs.org/api/fs.html#fs_file_system_flags
+      const writeFlags: string[] = [];
+      switch (options.alreadyExistsBehavior) {
+        case AlreadyExistsBehavior.Error:
+        case AlreadyExistsBehavior.Ignore:
+          writeFlags.push('wx');
+          break;
+        case AlreadyExistsBehavior.Overwrite:
+        default:
+          writeFlags.push('w');
+      }
+      const flags: string = writeFlags.join();
+
+      const createPipePromise: (
+        sourceStream: fs.ReadStream,
+        destinationStream: fs.WriteStream
+      ) => Promise<void> = (sourceStream: fs.ReadStream, destinationStream: fs.WriteStream) => {
+        return new Promise((resolve: () => void, reject: (error: Error) => void) => {
+          sourceStream.on('error', (e: Error) => {
+            if (destinationStream) {
+              destinationStream.destroy();
+            }
+            reject(e);
+          });
+          sourceStream
+            .pipe(destinationStream)
+            .on('close', () => {
+              resolve();
+            })
+            .on('error', (e: Error) => {
+              if (
+                options.alreadyExistsBehavior === AlreadyExistsBehavior.Ignore &&
+                FileSystem.isErrnoException(e) &&
+                (e as NodeJS.ErrnoException).code === 'EEXIST'
+              ) {
+                resolve();
+              }
+              reject(e);
+            });
+        });
+      };
+
+      const sourceStream: fs.ReadStream = fsx.createReadStream(options.sourcePath);
+      const uniqueDestinationPaths: Set<string> = new Set(options.destinationPaths);
+      const pipePromises: Promise<void>[] = [];
+      for (const destinationPath of uniqueDestinationPaths.values()) {
+        pipePromises.push(createPipePromise(sourceStream, fsx.createWriteStream(destinationPath, { flags })));
+      }
+
+      await Promise.all(pipePromises);
     });
   }
 

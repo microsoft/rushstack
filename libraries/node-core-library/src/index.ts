@@ -63,6 +63,7 @@ export {
   IFileSystemReadFileOptions,
   IFileSystemMoveOptions,
   IFileSystemCopyFileOptions,
+  IFileSystemCopyFileToManyOptions,
   IFileSystemDeleteFileOptions,
   IFileSystemUpdateTimeParameters,
   IFileSystemCreateLinkOptions,
