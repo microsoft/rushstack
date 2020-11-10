@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as chokidar from 'chokidar';
 import * as path from 'path';
 import glob from 'fast-glob';
 import { performance } from 'perf_hooks';
@@ -43,6 +44,7 @@ export interface ICopyFilesOptions {
   buildFolder: string;
   copyConfigurations: IExtendedSharedCopyConfiguration[];
   logger: ScopedLogger;
+  watchMode: boolean;
 }
 
 export interface ICopyFilesResult {
@@ -100,7 +102,8 @@ export class CopyFilesPlugin implements IHeftPlugin {
     await this.runCopyAsync({
       buildFolder: heftConfiguration.buildFolder,
       copyConfigurations,
-      logger
+      logger,
+      watchMode: false
     });
   }
 
@@ -124,6 +127,11 @@ export class CopyFilesPlugin implements IHeftPlugin {
       `Copied ${copiedFileCount} file${copiedFileCount === 1 ? '' : 's'} and ` +
         `linked ${linkedFileCount} file${linkedFileCount === 1 ? '' : 's'} in ${Math.round(duration)}ms`
     );
+
+    // Then enter watch mode if requested
+    if (options.watchMode) {
+      await this._runWatchAsync(options);
+    }
   }
 
   protected async copyFilesAsync(copyDescriptors: ICopyFileDescriptor[]): Promise<ICopyFilesResult> {
@@ -189,21 +197,8 @@ export class CopyFilesPlugin implements IHeftPlugin {
     for (const copyConfiguration of copyConfigurations) {
       // Resolve the source folder path which is where the glob will be run from
       const resolvedSourceFolderPath: string = path.resolve(buildFolder, copyConfiguration.sourceFolder);
-
-      // Glob extensions with a specific glob to increase perf
-      const patternsToGlob: Set<string> = new Set<string>();
-      for (const fileExtension of copyConfiguration.fileExtensions || []) {
-        const escapedExtension: string = glob.escapePath(fileExtension);
-        patternsToGlob.add(`**/*${escapedExtension}`);
-      }
-
-      // Now include the other globs as well
-      for (const include of copyConfiguration.includeGlobs || []) {
-        patternsToGlob.add(include);
-      }
-
       const sourceFileRelativePaths: Set<string> = new Set<string>(
-        await glob(Array.from(patternsToGlob), {
+        await glob(this._getIncludedGlobPatterns(copyConfiguration), {
           cwd: resolvedSourceFolderPath,
           ignore: copyConfiguration.excludeGlobs,
           dot: true,
@@ -263,5 +258,79 @@ export class CopyFilesPlugin implements IHeftPlugin {
 
     // We're done with the map, grab the values and return
     return Array.from(sourceCopyDescriptors.values());
+  }
+
+  private _getIncludedGlobPatterns(copyConfiguration: IExtendedSharedCopyConfiguration): string[] {
+    // Glob extensions with a specific glob to increase perf
+    const patternsToGlob: Set<string> = new Set<string>();
+    for (const fileExtension of copyConfiguration.fileExtensions || []) {
+      const escapedExtension: string = glob.escapePath(fileExtension);
+      patternsToGlob.add(`**/*${escapedExtension}`);
+    }
+
+    // Now include the other globs as well
+    for (const include of copyConfiguration.includeGlobs || []) {
+      patternsToGlob.add(include);
+    }
+
+    return Array.from(patternsToGlob);
+  }
+
+  private async _runWatchAsync(options: ICopyFilesOptions): Promise<void> {
+    const { buildFolder, copyConfigurations, logger } = options;
+
+    for (const copyConfiguration of copyConfigurations) {
+      // Obtain the glob patterns to provide to the watcher
+      const globsToWatch: string[] = this._getIncludedGlobPatterns(copyConfiguration);
+      if (globsToWatch.length) {
+        const resolvedSourceFolderPath: string = path.join(buildFolder, copyConfiguration.sourceFolder);
+        const resolvedDestinationFolderPaths: string[] = copyConfiguration.destinationFolders.map(
+          (destinationFolder) => {
+            return path.join(buildFolder, destinationFolder);
+          }
+        );
+
+        const watcher: chokidar.FSWatcher = chokidar.watch(globsToWatch, {
+          cwd: resolvedSourceFolderPath,
+          ignoreInitial: true,
+          ignored: copyConfiguration.excludeGlobs
+        });
+
+        const copyAsset: (assetPath: string) => Promise<void> = async (assetPath: string) => {
+          const { copiedFileCount, linkedFileCount } = await this.copyFilesAsync([
+            {
+              sourceFilePath: path.join(resolvedSourceFolderPath, assetPath),
+              destinationFilePaths: resolvedDestinationFolderPaths.map((resolvedDestinationFolderPath) => {
+                return path.join(
+                  resolvedDestinationFolderPath,
+                  !!copyConfiguration.flatten ? path.basename(assetPath) : assetPath
+                );
+              }),
+              hardlink: !!copyConfiguration.hardlink
+            }
+          ]);
+          logger.terminal.writeLine(
+            !!copyConfiguration.hardlink
+              ? `Linked ${linkedFileCount} file${linkedFileCount === 1 ? '' : 's'}`
+              : `Copied ${copiedFileCount} file${copiedFileCount === 1 ? '' : 's'}`
+          );
+        };
+
+        watcher.on('add', copyAsset);
+        watcher.on('change', copyAsset);
+        watcher.on('unlink', (assetPath) => {
+          let deleteCount: number = 0;
+          for (const resolvedDestinationFolder of resolvedDestinationFolderPaths) {
+            FileSystem.deleteFile(path.resolve(resolvedDestinationFolder, assetPath));
+            deleteCount++;
+          }
+          logger.terminal.writeLine(`Deleted ${deleteCount} file${deleteCount === 1 ? '' : 's'}`);
+        });
+      }
+    }
+
+    return new Promise(() => {
+      /* never resolve */
+    });
   }
 }

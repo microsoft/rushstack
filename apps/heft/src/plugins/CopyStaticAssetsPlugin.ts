@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, Terminal } from '@rushstack/node-core-library';
-import * as path from 'path';
-import * as chokidar from 'chokidar';
+import { Terminal } from '@rushstack/node-core-library';
 
 import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
@@ -11,15 +9,9 @@ import { IBuildStageContext, ICompileSubstage } from '../stages/BuildStage';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import { CoreConfigFiles, IExtendedSharedCopyConfiguration } from '../utilities/CoreConfigFiles';
 import { ITypeScriptConfigurationJson } from './TypeScriptPlugin/TypeScriptPlugin';
-import { CopyFilesPlugin, ICopyFilesOptions } from './CopyFilesPlugin';
-
-const globEscape: (unescaped: string[]) => string[] = require('glob-escape'); // No @types/glob-escape package exists
+import { CopyFilesPlugin } from './CopyFilesPlugin';
 
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
-
-interface ICopyStaticAssetsOptions extends ICopyFilesOptions {
-  watchMode: boolean;
-}
 
 export class CopyStaticAssetsPlugin extends CopyFilesPlugin {
   /**
@@ -78,78 +70,5 @@ export class CopyStaticAssetsPlugin extends CopyFilesPlugin {
       flatten: false,
       hardlink: false
     };
-  }
-
-  /**
-   * @override
-   */
-  protected async runCopyAsync(options: ICopyStaticAssetsOptions): Promise<void> {
-    // First, run the actual copy
-    await super.runCopyAsync(options);
-
-    // Then enter watch mode if requested
-    if (options.watchMode) {
-      await this._runWatchAsync(options);
-    }
-  }
-
-  private async _runWatchAsync(options: ICopyStaticAssetsOptions): Promise<void> {
-    const { buildFolder, copyConfigurations, logger } = options;
-    const [copyStaticAssetsConfiguration] = copyConfigurations;
-
-    // Obtain the glob patterns to provide to the watcher
-    const globsToWatch: string[] = [...(copyStaticAssetsConfiguration.includeGlobs || [])];
-    if (copyStaticAssetsConfiguration.fileExtensions?.length) {
-      const escapedExtensions: string[] = globEscape(copyStaticAssetsConfiguration.fileExtensions);
-      globsToWatch.push(`**/*+(${escapedExtensions.join('|')})`);
-    }
-
-    if (globsToWatch.length) {
-      const resolvedSourceFolderPath: string = path.join(
-        buildFolder,
-        copyStaticAssetsConfiguration.sourceFolder
-      );
-      const resolvedDestinationFolderPaths: string[] = copyStaticAssetsConfiguration.destinationFolders.map(
-        (destinationFolder) => {
-          return path.join(buildFolder, destinationFolder);
-        }
-      );
-
-      const watcher: chokidar.FSWatcher = chokidar.watch(globsToWatch, {
-        cwd: resolvedSourceFolderPath,
-        ignoreInitial: true,
-        ignored: copyStaticAssetsConfiguration.excludeGlobs
-      });
-
-      const copyAsset: (assetPath: string) => Promise<void> = async (assetPath: string) => {
-        const { copiedFileCount } = await this.copyFilesAsync([
-          {
-            sourceFilePath: path.join(resolvedSourceFolderPath, assetPath),
-            destinationFilePaths: resolvedDestinationFolderPaths.map((resolvedDestinationFolderPath) => {
-              return path.join(resolvedDestinationFolderPath, assetPath);
-            }),
-            hardlink: false
-          }
-        ]);
-        logger.terminal.writeLine(
-          `Copied ${copiedFileCount} static asset${copiedFileCount === 1 ? '' : 's'}`
-        );
-      };
-
-      watcher.on('add', copyAsset);
-      watcher.on('change', copyAsset);
-      watcher.on('unlink', (assetPath) => {
-        let deleteCount: number = 0;
-        for (const resolvedDestinationFolder of resolvedDestinationFolderPaths) {
-          FileSystem.deleteFile(path.resolve(resolvedDestinationFolder, assetPath));
-          deleteCount++;
-        }
-        logger.terminal.writeLine(`Deleted ${deleteCount} static asset${deleteCount === 1 ? '' : 's'}`);
-      });
-    }
-
-    return new Promise(() => {
-      /* never resolve */
-    });
   }
 }
