@@ -300,6 +300,7 @@ export interface IFileSystemCopyFilesOptions extends IFileSystemCopyFilesAsyncOp
 
 // @public
 export interface IFileSystemCreateLinkOptions {
+    alreadyExistsBehavior?: AlreadyExistsBehavior;
     linkTargetPath: string;
     newLinkPath: string;
 }

@@ -260,6 +260,11 @@ export interface IFileSystemCreateLinkOptions {
    * The new path for the new symlink link to be created.
    */
   newLinkPath: string;
+
+  /**
+   * Specifies what to do if the target object already exists. Defaults to `AlreadyExistsBehavior.Error`.
+   */
+  alreadyExistsBehavior?: AlreadyExistsBehavior;
 }
 
 const MOVE_DEFAULT_OPTIONS: Partial<IFileSystemMoveOptions> = {
@@ -1119,7 +1124,28 @@ export class FileSystem {
    */
   public static createHardLink(options: IFileSystemCreateLinkOptions): void {
     FileSystem._wrapException(() => {
-      fsx.linkSync(options.linkTargetPath, options.newLinkPath);
+      try {
+        fsx.linkSync(options.linkTargetPath, options.newLinkPath);
+      } catch (error) {
+        if (error.code === 'EEXIST') {
+          switch (options.alreadyExistsBehavior) {
+            case AlreadyExistsBehavior.Ignore:
+              return;
+            case AlreadyExistsBehavior.Overwrite:
+              this.deleteFile(options.newLinkPath);
+              break;
+            case AlreadyExistsBehavior.Error:
+            default:
+              throw error;
+          }
+        } else if (FileSystem.isNotExistError(error)) {
+          this.ensureFolder(nodeJsPath.dirname(options.newLinkPath));
+        } else {
+          throw error;
+        }
+
+        this.createHardLink(options);
+      }
     });
   }
 
@@ -1127,8 +1153,29 @@ export class FileSystem {
    * An async version of {@link FileSystem.createHardLink}.
    */
   public static async createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    await FileSystem._wrapExceptionAsync(() => {
-      return fsx.link(options.linkTargetPath, options.newLinkPath);
+    await FileSystem._wrapExceptionAsync(async () => {
+      try {
+        await fsx.link(options.linkTargetPath, options.newLinkPath);
+      } catch (error) {
+        if (error.code === 'EEXIST') {
+          switch (options.alreadyExistsBehavior) {
+            case AlreadyExistsBehavior.Ignore:
+              return;
+            case AlreadyExistsBehavior.Overwrite:
+              await this.deleteFileAsync(options.newLinkPath);
+              break;
+            case AlreadyExistsBehavior.Error:
+            default:
+              throw error;
+          }
+        } else if (FileSystem.isNotExistError(error)) {
+          await this.ensureFolderAsync(nodeJsPath.dirname(options.newLinkPath));
+        } else {
+          throw error;
+        }
+
+        await this.createHardLinkAsync(options);
+      }
     });
   }
 
