@@ -40,7 +40,7 @@ const readme: TSESLint.RuleModule<MessageIds, Options> = {
     ],
 
     docs: {
-      description: '',
+      description: 'Require each packlet folder to have a README.md file summarizing its purpose and usage',
       category: 'Best Practices',
       // Too strict to be recommended in the default configuration
       recommended: false,
@@ -81,14 +81,16 @@ const readme: TSESLint.RuleModule<MessageIds, Options> = {
                   data: { readmePath }
                 });
               } else {
-                const readmeContent: string = fs.readFileSync(readmePath).toString();
-                const words: string[] = readmeContent.split(/[^a-z'"]+/i).filter((x) => x.length > 0);
-                if (words.length < minimumReadmeWords) {
-                  context.report({
-                    node: node,
-                    messageId: 'readme-too-short',
-                    data: { readmePath, minimumReadmeWords }
-                  });
+                if (minimumReadmeWords > 0) {
+                  const readmeContent: string = fs.readFileSync(readmePath).toString();
+                  const words: string[] = readmeContent.split(/[^a-z'"]+/i).filter((x) => x.length > 0);
+                  if (words.length < minimumReadmeWords) {
+                    context.report({
+                      node: node,
+                      messageId: 'readme-too-short',
+                      data: { readmePath, minimumReadmeWords }
+                    });
+                  }
                 }
               }
             } catch (error) {
