@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "Add new built-in Heft action \"copyGlobs\" to copy or hardlink files during specified Heft events",
+      "comment": "Add new built-in Heft action \"copyFiles\" to copy or hardlink files during specified Heft events",
       "type": "minor"
     }
   ],
