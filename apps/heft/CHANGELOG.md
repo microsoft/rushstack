@@ -1,6 +1,17 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 10 Nov 2020 16:11:42 GMT and should not be manually modified.
+This log was last generated on Tue, 10 Nov 2020 23:13:11 GMT and should not be manually modified.
+
+## 0.21.0
+Tue, 10 Nov 2020 23:13:11 GMT
+
+### Minor changes
+
+- Add new built-in Heft action "copyFiles" to copy or hardlink files during specified Heft events
+
+### Patches
+
+- Fix an incorrectly formatted error message
 
 ## 0.20.1
 Tue, 10 Nov 2020 16:11:42 GMT

@@ -2,6 +2,21 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.35.0",
+      "tag": "@rushstack/node-core-library_v3.35.0",
+      "date": "Tue, 10 Nov 2020 23:13:11 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new \"copyFileToMany\" API to copy a single file to multiple locations"
+          },
+          {
+            "comment": "Add an alreadyExistsBehavior option to the options for creating links in FileSystem."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.34.7",
       "tag": "@rushstack/node-core-library_v3.34.7",
       "date": "Fri, 30 Oct 2020 06:38:39 GMT",

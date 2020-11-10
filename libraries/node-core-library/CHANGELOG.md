@@ -1,6 +1,14 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 30 Oct 2020 06:38:39 GMT and should not be manually modified.
+This log was last generated on Tue, 10 Nov 2020 23:13:11 GMT and should not be manually modified.
+
+## 3.35.0
+Tue, 10 Nov 2020 23:13:11 GMT
+
+### Minor changes
+
+- Add new "copyFileToMany" API to copy a single file to multiple locations
+- Add an alreadyExistsBehavior option to the options for creating links in FileSystem.
 
 ## 3.34.7
 Fri, 30 Oct 2020 06:38:39 GMT
