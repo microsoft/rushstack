@@ -262,11 +262,26 @@ export class CopyFilesPlugin implements IHeftPlugin {
   }
 
   private _getIncludedGlobPatterns(copyConfiguration: IExtendedSharedCopyConfiguration): string[] {
-    // Glob extensions with a specific glob to increase perf
     const patternsToGlob: Set<string> = new Set<string>();
+
+    // Glob file extensions with a specific glob to increase perf
+    const escapedFileExtensions: Set<string> = new Set<string>();
     for (const fileExtension of copyConfiguration.fileExtensions || []) {
-      const escapedExtension: string = glob.escapePath(fileExtension);
-      patternsToGlob.add(`**/*${escapedExtension}`);
+      let escapedFileExtension: string;
+      if (fileExtension.charAt(0) === '.') {
+        escapedFileExtension = fileExtension.substr(1);
+      } else {
+        escapedFileExtension = fileExtension;
+      }
+
+      escapedFileExtension = glob.escapePath(escapedFileExtension);
+      escapedFileExtensions.add(escapedFileExtension);
+    }
+
+    if (escapedFileExtensions.size > 1) {
+      patternsToGlob.add(`**/*.{${Array.from(escapedFileExtensions).join(',')}}`);
+    } else if (escapedFileExtensions.size === 1) {
+      patternsToGlob.add(`**/*.${Array.from(escapedFileExtensions)[0]}`);
     }
 
     // Now include the other globs as well
