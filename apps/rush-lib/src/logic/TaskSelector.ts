@@ -147,6 +147,10 @@ export class TaskSelector {
       result.set(project.packageName, project);
 
       for (const dependent of dependentList.get(project.packageName) || []) {
+        // Collect all local dependency for these dependents to collect transitive dependency
+        // for e.g. B has D as dependent and D depends on both B and C
+        // project C is transitive dependency but needsto be collected to build D
+        this._collectAllDependencies(dependent, result);
         this._collectAllDependents(dependentList, dependent, result);
       }
     }
