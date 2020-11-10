@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import type { Tslint as TTslint } from '@microsoft/rush-stack-compiler-3.9';
+import type * as TTslint from 'tslint';
 import * as crypto from 'crypto';
 import { Import, Terminal, JsonFile } from '@rushstack/node-core-library';
 

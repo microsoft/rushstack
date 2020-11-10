@@ -1,6 +1,33 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Tue, 06 Oct 2020 00:24:06 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2020 06:38:38 GMT and should not be manually modified.
+
+## 7.11.2
+Fri, 30 Oct 2020 06:38:38 GMT
+
+_Version update only_
+
+## 7.11.1
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 7.11.0
+Thu, 29 Oct 2020 06:14:19 GMT
+
+### Minor changes
+
+- Upgrade the bundled compiler engine to TypeScript 4.0
+
+## 7.10.6
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 7.10.5
+Tue, 27 Oct 2020 15:10:13 GMT
+
+_Version update only_
 
 ## 7.10.4
 Tue, 06 Oct 2020 00:24:06 GMT

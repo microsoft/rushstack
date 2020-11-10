@@ -31,10 +31,10 @@
     "typescript": "~3.9.7",
 
     // Workaround for https://github.com/microsoft/rushstack/issues/1466
-    "eslint": "~7.2.0",
+    "eslint": "~7.12.1",
 
-    "@types/webpack": "4.39.8",
-    "webpack": "~4.31.0"
+    "@types/webpack": "4.41.24",
+    "webpack": "~4.44.2"
   },
 
   /**
@@ -79,7 +79,8 @@
       "~3.6.4",
       "~3.7.2",
       "~3.8.3",
-      "~3.9.7"
+      "~3.9.7",
+      "~4.0.5"
     ],
 
     "source-map": [

@@ -1,6 +1,134 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 06 Oct 2020 00:24:06 GMT and should not be manually modified.
+This log was last generated on Tue, 10 Nov 2020 16:11:42 GMT and should not be manually modified.
+
+## 0.20.1
+Tue, 10 Nov 2020 16:11:42 GMT
+
+### Patches
+
+- Improve error handling and make --debug print stacks of errors that occur in heft's internal initialization.
+
+## 0.20.0
+Sun, 08 Nov 2020 22:52:49 GMT
+
+### Minor changes
+
+- Update jest-shared.config.json with more file extension mappings for "jest-string-mock-transform"
+
+## 0.19.5
+Fri, 06 Nov 2020 16:09:30 GMT
+
+### Patches
+
+- Fix an issue where an extended "typescript.json" config file with omitted optional staticAssetsToCopy fields would cause schema validation to fail.
+
+## 0.19.4
+Tue, 03 Nov 2020 01:11:18 GMT
+
+### Patches
+
+- Update README.md
+
+## 0.19.3
+Mon, 02 Nov 2020 16:12:05 GMT
+
+### Patches
+
+- Honor jest reporters specified in config/jest.config.json
+
+## 0.19.2
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 0.19.1
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 0.19.0
+Thu, 29 Oct 2020 06:14:19 GMT
+
+### Minor changes
+
+- Upgrade @types/tapable and @types/webpack
+
+## 0.18.0
+Thu, 29 Oct 2020 00:11:33 GMT
+
+### Minor changes
+
+- Update Webpack dependency to ~4.44.2
+
+## 0.17.4
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 0.17.3
+Tue, 27 Oct 2020 15:10:13 GMT
+
+_Version update only_
+
+## 0.17.2
+Sat, 24 Oct 2020 00:11:18 GMT
+
+### Patches
+
+- Add fileExtensions config to SassTypingsGenerator. 
+
+## 0.17.1
+Wed, 21 Oct 2020 05:09:44 GMT
+
+### Patches
+
+- Bump downstream dependencies.
+
+## 0.17.0
+Fri, 16 Oct 2020 23:32:58 GMT
+
+### Minor changes
+
+- Allow the Webpack dev server configuration to be customized.
+
+## 0.16.1
+Thu, 15 Oct 2020 00:59:08 GMT
+
+_Version update only_
+
+## 0.16.0
+Wed, 14 Oct 2020 23:30:14 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Rename "includePaths" to "importIncludePaths" in sass.json.
+
+### Patches
+
+- Add an "exclude" option to sass.json.
+
+## 0.15.8
+Tue, 13 Oct 2020 15:11:28 GMT
+
+### Patches
+
+- Fix an issue where heftSession.debugMode isn't set properly.
+
+## 0.15.7
+Mon, 12 Oct 2020 15:11:16 GMT
+
+### Patches
+
+- Include additionalModuleKindsToEmit in the copy-static-assets plugin destination folders.
+- Throw if jest config file doesn't exist
+
+## 0.15.6
+Fri, 09 Oct 2020 15:11:08 GMT
+
+### Patches
+
+- Support relative imports in the Sass typings generator.
 
 ## 0.15.5
 Tue, 06 Oct 2020 00:24:06 GMT

@@ -103,12 +103,17 @@ export class CopyStaticAssetsPlugin implements IHeftPlugin {
       heftConfiguration.rigConfig
     );
 
+    const destinationFolderNames: string[] = ['lib'];
+    for (const emitModule of typescriptConfiguration?.additionalModuleKindsToEmit || []) {
+      destinationFolderNames.push(emitModule.outFolderName);
+    }
+
     return {
       ...typescriptConfiguration?.staticAssetsToCopy,
 
       // For now - these may need to be revised later
       sourceFolderName: 'src',
-      destinationFolderNames: ['lib']
+      destinationFolderNames
     };
   }
 

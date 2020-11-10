@@ -12,10 +12,15 @@
   "testURL": "http://localhost/",
   "testMatch": ["<rootDir>/src/**/*.test.{ts,tsx}"],
   "transformIgnorePatterns": [],
+
+  "//": "jest-identity-mock-transform returns a proxy for exported key/value pairs, where Webpack would return a module",
+  "//": "jest-string-mock-transform returns the filename, where Webpack would return a URL",
   "transform": {
     "\\.(ts|tsx)$": "@rushstack/heft/lib/exports/jest-build-transform.js",
+
     "\\.(css|sass|scss)$": "@rushstack/heft/lib/exports/jest-identity-mock-transform.js",
-    "\\.(jpg|png|gif|mp3)$": "@rushstack/heft/lib/exports/jest-string-mock-transform.js"
+
+    "\\.(aac|eot|gif|jpeg|jpg|m4a|mp3|mp4|oga|otf|png|svg|ttf|wav|webm|webp|woff|woff2)$": "@rushstack/heft/lib/exports/jest-string-mock-transform.js"
   },
   "//": [
     "The modulePathIgnorePatterns below accepts these sorts of paths:",

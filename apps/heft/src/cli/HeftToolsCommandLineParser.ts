@@ -15,6 +15,7 @@ import {
   FileSystem
 } from '@rushstack/node-core-library';
 import { ArgumentParser } from 'argparse';
+import { SyncHook } from 'tapable';
 
 import { MetricsCollector } from '../metrics/MetricsCollector';
 import { CleanAction } from './actions/CleanAction';
@@ -31,8 +32,16 @@ import { TestStage } from '../stages/TestStage';
 import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 import { ICustomActionOptions, CustomAction } from './actions/CustomAction';
 import { Constants } from '../utilities/Constants';
-import { SyncHook } from 'tapable';
 import { IHeftLifecycle, HeftLifecycleHooks } from '../pluginFramework/HeftLifecycle';
+
+/**
+ * This interfaces specifies values for parameters that must be parsed before the CLI
+ * is fully initialized.
+ */
+interface IPreInitializationArgumentValues {
+  plugins?: string[];
+  debug?: boolean;
+}
 
 export class HeftToolsCommandLineParser extends CommandLineParser {
   private _terminalProvider: ConsoleTerminalProvider;
@@ -44,12 +53,14 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
   private _internalHeftSession: InternalHeftSession;
   private _heftLifecycleHook: SyncHook<IHeftLifecycle>;
 
+  private _preInitializationArgumentValues: IPreInitializationArgumentValues;
+
   private _unmanagedFlag!: CommandLineFlagParameter;
   private _debugFlag!: CommandLineFlagParameter;
   private _pluginsParameter!: CommandLineStringListParameter;
 
   public get isDebug(): boolean {
-    return this._debugFlag.value;
+    return !!this._preInitializationArgumentValues.debug;
   }
 
   public get terminal(): Terminal {
@@ -62,12 +73,19 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       toolDescription: 'Heft is a pluggable build system designed for web projects.'
     });
 
+    this._preInitializationArgumentValues = this._getPreInitializationArgumentValues();
+
     this._terminalProvider = new ConsoleTerminalProvider();
     this._terminal = new Terminal(this._terminalProvider);
     this._metricsCollector = new MetricsCollector();
     this._loggingManager = new LoggingManager({
       terminalProvider: this._terminalProvider
     });
+
+    if (this.isDebug) {
+      this._loggingManager.enablePrintStacks();
+      InternalError.breakInDebugger = true;
+    }
 
     this._heftConfiguration = HeftConfiguration.initialize({
       cwd: process.cwd(),
@@ -128,8 +146,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     });
 
     this._debugFlag = this.defineFlagParameter({
-      parameterLongName: '--debug',
-      parameterShortName: '-d',
+      parameterLongName: Constants.debugParameterLongName,
       description: 'Show the full call stack if an error occurs while executing the tool'
     });
 
@@ -141,38 +158,41 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
   }
 
   public async execute(args?: string[]): Promise<boolean> {
+    // Defensively set the exit code to 1 so if the tool crashes for whatever reason, we'll have a nonzero exit code.
+    process.exitCode = 1;
+
     this._terminalProvider.verboseEnabled = this.isDebug;
 
-    if (this.isDebug) {
-      this._loggingManager.enablePrintStacks();
-      InternalError.breakInDebugger = true;
+    try {
+      this._normalizeCwd();
+
+      await this._checkForUpgradeAsync();
+
+      await this._heftConfiguration._checkForRigAsync();
+
+      if (this._heftConfiguration.rigConfig.rigFound) {
+        const rigProfileFolder: string = await this._heftConfiguration.rigConfig.getResolvedProfileFolderAsync();
+        const relativeRigFolderPath: string = Path.formatConcisely({
+          pathToConvert: rigProfileFolder,
+          baseFolder: this._heftConfiguration.buildFolder
+        });
+        this._terminal.writeLine(`Using rig configuration from ${relativeRigFolderPath}`);
+      }
+
+      await this._initializePluginsAsync();
+
+      const heftLifecycle: IHeftLifecycle = {
+        hooks: new HeftLifecycleHooks()
+      };
+      this._heftLifecycleHook.call(heftLifecycle);
+
+      await heftLifecycle.hooks.toolStart.promise();
+
+      return await super.execute(args);
+    } catch (e) {
+      await this._reportErrorAndSetExitCode(e);
+      return false;
     }
-
-    this._normalizeCwd();
-
-    await this._checkForUpgradeAsync();
-
-    await this._heftConfiguration._checkForRigAsync();
-
-    if (this._heftConfiguration.rigConfig.rigFound) {
-      const rigProfileFolder: string = await this._heftConfiguration.rigConfig.getResolvedProfileFolderAsync();
-      const relativeRigFolderPath: string = Path.formatConcisely({
-        pathToConvert: rigProfileFolder,
-        baseFolder: this._heftConfiguration.buildFolder
-      });
-      this._terminal.writeLine(`Using rig configuration from ${relativeRigFolderPath}`);
-    }
-
-    await this._initializePluginsAsync();
-
-    const heftLifecycle: IHeftLifecycle = {
-      hooks: new HeftLifecycleHooks()
-    };
-    this._heftLifecycleHook.call(heftLifecycle);
-
-    await heftLifecycle.hooks.toolStart.promise();
-
-    return await super.execute(args);
   }
 
   private async _checkForUpgradeAsync(): Promise<void> {
@@ -190,9 +210,6 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
   }
 
   protected async onExecute(): Promise<void> {
-    // Defensively set the exit code to 1 so if the tool crashes for whatever reason, we'll have a nonzero exit code.
-    process.exitCode = 1;
-
     try {
       await super.onExecute();
       await this._metricsCollector.flushAndTeardownAsync();
@@ -215,14 +232,16 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     }
   }
 
-  private _getPluginArgumentValues(args: string[] = process.argv): string[] {
+  private _getPreInitializationArgumentValues(
+    args: string[] = process.argv
+  ): IPreInitializationArgumentValues {
     // This is a rough parsing of the --plugin parameters
     const parser: ArgumentParser = new ArgumentParser({ addHelp: false });
     parser.addArgument(this._pluginsParameter.longName, { dest: 'plugins', action: 'append' });
+    parser.addArgument(this._debugFlag.longName, { dest: 'debug', action: 'storeTrue' });
 
-    const [result]: { plugins: string[] }[] = parser.parseKnownArgs(args);
-
-    return result.plugins || [];
+    const [result]: IPreInitializationArgumentValues[] = parser.parseKnownArgs(args);
+    return result;
   }
 
   private async _initializePluginsAsync(): Promise<void> {
@@ -230,7 +249,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
 
     await this._pluginManager.initializePluginsFromConfigFileAsync();
 
-    const pluginSpecifiers: string[] = this._getPluginArgumentValues();
+    const pluginSpecifiers: string[] = this._preInitializationArgumentValues.plugins || [];
     for (const pluginSpecifier of pluginSpecifiers) {
       this._pluginManager.initializePlugin(pluginSpecifier);
     }

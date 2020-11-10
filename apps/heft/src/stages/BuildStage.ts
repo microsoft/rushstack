@@ -3,6 +3,7 @@
 
 import { SyncHook, AsyncParallelHook, AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable';
 import * as webpack from 'webpack';
+import { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
 
 import { StageBase, StageHooksBase, IStageContext } from './StageBase';
 import { Logging } from '../utilities/Logging';
@@ -51,7 +52,17 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
 /**
  * @public
  */
-export type IWebpackConfiguration = webpack.Configuration | webpack.Configuration[] | undefined;
+export interface IWebpackConfigurationWithDevServer extends webpack.Configuration {
+  devServer?: WebpackDevServerConfiguration;
+}
+
+/**
+ * @public
+ */
+export type IWebpackConfiguration =
+  | IWebpackConfigurationWithDevServer
+  | IWebpackConfigurationWithDevServer[]
+  | undefined;
 
 /**
  * @public
@@ -130,7 +141,7 @@ export interface IBuildStageProperties {
   maxOldSpaceSize?: string;
   watchMode: boolean;
   serveMode: boolean;
-  webpackStats?: webpack.Stats;
+  webpackStats?: webpack.Stats | webpack.compilation.MultiStats;
 }
 
 /**

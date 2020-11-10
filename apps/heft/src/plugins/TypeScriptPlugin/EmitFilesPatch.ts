@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { Path, InternalError } from '@rushstack/node-core-library';
-import type { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.9';
+import type * as TTypescript from 'typescript';
 import {
   ExtendedTypeScript,
   IEmitResolver,
@@ -26,7 +26,7 @@ export interface ICachedEmitModuleKind {
 
   /**
    * Set to true if this is the emit kind that is specified in the tsconfig.json.
-   * Sourcemaps and declarations are only emitted for the primary module kind.
+   * Declarations are only emitted for the primary module kind.
    */
   isPrimary: boolean;
 }

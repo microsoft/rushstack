@@ -7,7 +7,7 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "heft test --clean"
+    "build": "heft build --clean"
   },
   "dependencies": {
     "@microsoft/api-documenter": "workspace:*",

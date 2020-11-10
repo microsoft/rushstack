@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-plugin-packlets",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A lightweight alternative to NPM packages for organizing source files within a single project",
   "license": "MIT",
   "repository": {
@@ -34,7 +34,7 @@
     "@typescript-eslint/experimental-utils": "3.4.0",
     "@typescript-eslint/parser": "3.4.0",
     "@typescript-eslint/typescript-estree": "3.4.0",
-    "eslint": "~7.2.0",
+    "eslint": "~7.12.1",
     "typescript": "~3.9.7"
   }
 }

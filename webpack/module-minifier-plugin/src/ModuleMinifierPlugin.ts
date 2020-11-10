@@ -10,7 +10,7 @@ import {
   SourceMapSource
 } from 'webpack-sources';
 import * as webpack from 'webpack';
-import { AsyncSeriesWaterfallHook, SyncWaterfallHook, Tap } from 'tapable';
+import { AsyncSeriesWaterfallHook, SyncWaterfallHook, TapOptions } from 'tapable';
 import {
   CHUNK_MODULES_TOKEN,
   MODULE_WRAPPER_PREFIX,
@@ -38,14 +38,14 @@ import { createHash } from 'crypto';
 // The name of the plugin, for use in taps
 const PLUGIN_NAME: 'ModuleMinifierPlugin' = 'ModuleMinifierPlugin';
 
-const TAP_BEFORE: Tap = {
+const TAP_BEFORE: TapOptions<'promise'> = {
   name: PLUGIN_NAME,
   stage: STAGE_BEFORE
-} as Tap;
-const TAP_AFTER: Tap = {
+};
+const TAP_AFTER: TapOptions<'sync'> = {
   name: PLUGIN_NAME,
   stage: STAGE_AFTER
-} as Tap;
+};
 
 interface IExtendedChunkTemplate {
   hooks: {
@@ -198,8 +198,10 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
        */
       function dehydrateAsset(modules: Source, chunk: webpack.compilation.Chunk): Source {
         for (const mod of chunk.modulesIterable) {
-          if (!submittedModules.has(mod.id)) {
-            console.error(`Chunk ${chunk.id} failed to render module ${mod.id} for ${mod.resourcePath}`);
+          if (mod.id === null || !submittedModules.has(mod.id)) {
+            console.error(
+              `Chunk ${chunk.id} failed to render module ${mod.id} for ${(mod as IExtendedModule).resource}`
+            );
           }
         }
 
@@ -330,7 +332,9 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
             const externalNames: Map<string, string> = new Map();
 
             const chunkModuleSet: Set<string | number> = new Set();
-            const allChunkModules: Iterable<IExtendedModule> = chunk.modulesIterable;
+            const allChunkModules: Iterable<IExtendedModule> = chunk.modulesIterable as Iterable<
+              IExtendedModule
+            >;
             let hasNonNumber: boolean = false;
             for (const mod of allChunkModules) {
               if (mod.id !== null) {

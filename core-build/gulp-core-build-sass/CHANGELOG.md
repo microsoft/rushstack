@@ -1,6 +1,106 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Tue, 06 Oct 2020 00:24:06 GMT and should not be manually modified.
+This log was last generated on Tue, 10 Nov 2020 16:11:42 GMT and should not be manually modified.
+
+## 4.13.27
+Tue, 10 Nov 2020 16:11:42 GMT
+
+_Version update only_
+
+## 4.13.26
+Sun, 08 Nov 2020 22:52:49 GMT
+
+_Version update only_
+
+## 4.13.25
+Fri, 06 Nov 2020 16:09:30 GMT
+
+_Version update only_
+
+## 4.13.24
+Tue, 03 Nov 2020 01:11:18 GMT
+
+_Version update only_
+
+## 4.13.23
+Mon, 02 Nov 2020 16:12:05 GMT
+
+_Version update only_
+
+## 4.13.22
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 4.13.21
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 4.13.20
+Thu, 29 Oct 2020 06:14:19 GMT
+
+_Version update only_
+
+## 4.13.19
+Thu, 29 Oct 2020 00:11:33 GMT
+
+_Version update only_
+
+## 4.13.18
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 4.13.17
+Tue, 27 Oct 2020 15:10:13 GMT
+
+_Version update only_
+
+## 4.13.16
+Sat, 24 Oct 2020 00:11:18 GMT
+
+_Version update only_
+
+## 4.13.15
+Wed, 21 Oct 2020 05:09:44 GMT
+
+_Version update only_
+
+## 4.13.14
+Wed, 21 Oct 2020 02:28:18 GMT
+
+_Version update only_
+
+## 4.13.13
+Fri, 16 Oct 2020 23:32:58 GMT
+
+_Version update only_
+
+## 4.13.12
+Thu, 15 Oct 2020 00:59:08 GMT
+
+_Version update only_
+
+## 4.13.11
+Wed, 14 Oct 2020 23:30:14 GMT
+
+_Version update only_
+
+## 4.13.10
+Tue, 13 Oct 2020 15:11:28 GMT
+
+_Version update only_
+
+## 4.13.9
+Mon, 12 Oct 2020 15:11:16 GMT
+
+_Version update only_
+
+## 4.13.8
+Fri, 09 Oct 2020 15:11:08 GMT
+
+_Version update only_
 
 ## 4.13.7
 Tue, 06 Oct 2020 00:24:06 GMT

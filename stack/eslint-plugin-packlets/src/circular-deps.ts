@@ -9,6 +9,7 @@ import { ESLintUtils } from '@typescript-eslint/experimental-utils';
 
 import { PackletAnalyzer } from './PackletAnalyzer';
 import { DependencyAnalyzer, IPackletImport } from './DependencyAnalyzer';
+import { Path } from './Path';
 
 export type MessageIds = 'circular-import';
 type Options = [];
@@ -62,7 +63,7 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
           );
 
           if (packletImports) {
-            const tsconfigFileFolder: string = path.dirname(tsconfigFilePath);
+            const tsconfigFileFolder: string = Path.dirname(tsconfigFilePath);
 
             const affectedPackletNames: string[] = packletImports.map((x) => x.packletName);
 
@@ -72,7 +73,7 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
             if (affectedPackletNames[0] === packletAnalyzer.inputFilePackletName) {
               let report: string = '';
               for (const packletImport of packletImports) {
-                const filePath: string = path.relative(tsconfigFileFolder, packletImport.fromFilePath);
+                const filePath: string = Path.relative(tsconfigFileFolder, packletImport.fromFilePath);
                 report += `"${packletImport.packletName}" is referenced by ${filePath}\n`;
               }
 

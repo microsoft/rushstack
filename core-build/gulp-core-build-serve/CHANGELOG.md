@@ -1,6 +1,106 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Tue, 06 Oct 2020 00:24:06 GMT and should not be manually modified.
+This log was last generated on Tue, 10 Nov 2020 16:11:42 GMT and should not be manually modified.
+
+## 3.8.27
+Tue, 10 Nov 2020 16:11:42 GMT
+
+_Version update only_
+
+## 3.8.26
+Sun, 08 Nov 2020 22:52:49 GMT
+
+_Version update only_
+
+## 3.8.25
+Fri, 06 Nov 2020 16:09:30 GMT
+
+_Version update only_
+
+## 3.8.24
+Tue, 03 Nov 2020 01:11:19 GMT
+
+_Version update only_
+
+## 3.8.23
+Mon, 02 Nov 2020 16:12:05 GMT
+
+_Version update only_
+
+## 3.8.22
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 3.8.21
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 3.8.20
+Thu, 29 Oct 2020 06:14:19 GMT
+
+_Version update only_
+
+## 3.8.19
+Thu, 29 Oct 2020 00:11:33 GMT
+
+_Version update only_
+
+## 3.8.18
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 3.8.17
+Tue, 27 Oct 2020 15:10:13 GMT
+
+_Version update only_
+
+## 3.8.16
+Sat, 24 Oct 2020 00:11:19 GMT
+
+_Version update only_
+
+## 3.8.15
+Wed, 21 Oct 2020 05:09:44 GMT
+
+_Version update only_
+
+## 3.8.14
+Wed, 21 Oct 2020 02:28:17 GMT
+
+_Version update only_
+
+## 3.8.13
+Fri, 16 Oct 2020 23:32:58 GMT
+
+_Version update only_
+
+## 3.8.12
+Thu, 15 Oct 2020 00:59:08 GMT
+
+_Version update only_
+
+## 3.8.11
+Wed, 14 Oct 2020 23:30:14 GMT
+
+_Version update only_
+
+## 3.8.10
+Tue, 13 Oct 2020 15:11:28 GMT
+
+_Version update only_
+
+## 3.8.9
+Mon, 12 Oct 2020 15:11:16 GMT
+
+_Version update only_
+
+## 3.8.8
+Fri, 09 Oct 2020 15:11:09 GMT
+
+_Version update only_
 
 ## 3.8.7
 Tue, 06 Oct 2020 00:24:06 GMT

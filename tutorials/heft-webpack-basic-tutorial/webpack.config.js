@@ -19,6 +19,11 @@ function createWebpackConfig({ production }) {
         {
           test: /\.css$/,
           use: [require.resolve('style-loader'), require.resolve('css-loader')]
+        },
+        {
+          test: /\.js$/,
+          enforce: 'pre',
+          use: ['source-map-loader']
         }
       ]
     },
@@ -37,6 +42,9 @@ function createWebpackConfig({ production }) {
       // "The following entrypoint(s) combined asset size exceeds the recommended limit."
       maxEntrypointSize: 250000,
       maxAssetSize: 250000
+    },
+    devServer: {
+      port: 9000
     },
     devtool: production ? undefined : 'source-map',
     plugins: [

@@ -53,6 +53,7 @@ export type RequestAccessToPluginByNameCallback = (
 export class HeftSession {
   private readonly _loggingManager: LoggingManager;
   private readonly _options: IHeftSessionOptions;
+  private readonly _getIsDebugMode: () => boolean;
 
   public readonly hooks: IHeftSessionHooks;
 
@@ -64,7 +65,9 @@ export class HeftSession {
   /**
    * If set to true, the build is running with the --debug flag
    */
-  public readonly debugMode: boolean;
+  public get debugMode(): boolean {
+    return this._getIsDebugMode();
+  }
 
   /** @beta */
   public readonly registerAction: RegisterAction;
@@ -96,7 +99,7 @@ export class HeftSession {
       test: internalSessionOptions.testStage.stageInitializationHook
     };
 
-    this.debugMode = internalSessionOptions.getIsDebugMode();
+    this._getIsDebugMode = internalSessionOptions.getIsDebugMode;
 
     this.requestAccessToPluginByName = options.requestAccessToPluginByName;
   }
