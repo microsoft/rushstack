@@ -105,21 +105,14 @@ export interface IFileSystemMoveOptions {
 }
 
 /**
- * The options for {@link FileSystem.copyFile}
  * @public
  */
-export interface IFileSystemCopyFileOptions {
+export interface IFileSystemCopyFileBaseOptions {
   /**
    * The path of the existing object to be copied.
    * The path may be absolute or relative.
    */
   sourcePath: string;
-
-  /**
-   * The path that the object will be copied to.
-   * The path may be absolute or relative.
-   */
-  destinationPath: string;
 
   /**
    * Specifies what to do if the target object already exists.
@@ -132,25 +125,24 @@ export interface IFileSystemCopyFileOptions {
  * The options for {@link FileSystem.copyFile}
  * @public
  */
-export interface IFileSystemCopyFileToManyOptions
-  extends Omit<IFileSystemCopyFileOptions, 'destinationPath'> {
+export interface IFileSystemCopyFileOptions extends IFileSystemCopyFileBaseOptions {
   /**
-   * The path of the existing object to be copied.
+   * The path that the object will be copied to.
    * The path may be absolute or relative.
    */
-  sourcePath: string;
+  destinationPath: string;
+}
 
+/**
+ * The options for {@link FileSystem.copyFile}
+ * @public
+ */
+export interface IFileSystemCopyFileToManyOptions extends IFileSystemCopyFileBaseOptions {
   /**
    * The path that the object will be copied to.
    * The path may be absolute or relative.
    */
   destinationPaths: string[];
-
-  /**
-   * Specifies what to do if the target object already exists.
-   * @defaultValue {@link AlreadyExistsBehavior.Overwrite}
-   */
-  alreadyExistsBehavior?: AlreadyExistsBehavior;
 }
 
 /**
