@@ -122,16 +122,18 @@ export class CopyStaticAssetsPlugin extends CopyFilesPlugin {
       });
 
       const copyAsset: (assetPath: string) => Promise<void> = async (assetPath: string) => {
-        const [copyCount] = await this.copyFilesAsync(
-          resolvedDestinationFolderPaths.map((resolvedDestinationFolderPath) => {
-            return {
-              sourceFilePath: path.join(resolvedSourceFolderPath, assetPath),
-              destinationFilePath: path.join(resolvedDestinationFolderPath, assetPath),
-              hardlink: false
-            };
-          })
+        const { copiedFileCount } = await this.copyFilesAsync([
+          {
+            sourceFilePath: path.join(resolvedSourceFolderPath, assetPath),
+            destinationFilePaths: resolvedDestinationFolderPaths.map((resolvedDestinationFolderPath) => {
+              return path.join(resolvedDestinationFolderPath, assetPath);
+            }),
+            hardlink: false
+          }
+        ]);
+        logger.terminal.writeLine(
+          `Copied ${copiedFileCount} static asset${copiedFileCount === 1 ? '' : 's'}`
         );
-        logger.terminal.writeLine(`Copied ${copyCount} static asset${copyCount === 1 ? '' : 's'}`);
       };
 
       watcher.on('add', copyAsset);
