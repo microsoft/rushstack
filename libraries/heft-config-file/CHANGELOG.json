@@ -2,6 +2,24 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.3.13",
+      "tag": "@rushstack/heft-config-file_v0.3.13",
+      "date": "Wed, 11 Nov 2020 01:08:59 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.35.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.2.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.3.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.12",
       "tag": "@rushstack/heft-config-file_v0.3.12",
       "date": "Tue, 10 Nov 2020 23:13:12 GMT",

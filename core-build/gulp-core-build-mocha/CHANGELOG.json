@@ -2,6 +2,21 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "3.9.9",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.9.9",
+      "date": "Wed, 11 Nov 2020 01:08:59 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" to `3.17.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.3.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.9.8",
       "tag": "@microsoft/gulp-core-build-mocha_v3.9.8",
       "date": "Tue, 10 Nov 2020 23:13:12 GMT",
