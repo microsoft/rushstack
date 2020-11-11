@@ -34,6 +34,8 @@ export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> {
  * @public
  */
 export class TypingsGenerator {
+  private _targetMap: Map<string, Map<string, boolean>>;
+  private _dependencyMap: Map<string, Map<string, boolean>>;
   protected _options: ITypingsGeneratorOptions;
 
   public constructor(options: ITypingsGeneratorOptions) {
@@ -70,6 +72,9 @@ export class TypingsGenerator {
     }
 
     this._options.fileExtensions = this._normalizeFileExtensions(this._options.fileExtensions);
+
+    this._targetMap = new Map();
+    this._dependencyMap = new Map();
   }
 
   public async generateTypingsAsync(): Promise<void> {
@@ -121,7 +126,35 @@ export class TypingsGenerator {
     });
   }
 
+  /**
+   * Register file dependencies that may effect the typings of a target file.
+   * Note: This feature is only useful in watch mode.
+   * The registerDependency method must be called in the body of parseAndGenerateTypings every
+   * time because the registry for a file is cleared at the beginning of processing.
+   */
+  public registerDependency(target: string, dependency: string): void {
+    if (!this._targetMap.has(target)) {
+      this._targetMap.set(target, new Map());
+    }
+    // eslint-disable-next-line no-unused-expressions
+    this._targetMap.get(target)?.set(dependency, true);
+
+    if (!this._dependencyMap.has(dependency)) {
+      this._dependencyMap.set(dependency, new Map());
+    }
+    // eslint-disable-next-line no-unused-expressions
+    this._dependencyMap.get(dependency)?.set(target, true);
+  }
+
   private async _parseFileAndGenerateTypingsAsync(locFilePath: string): Promise<void> {
+    // Clear registered dependencies prior to reprocessing.
+    this._clearDependencies(locFilePath);
+
+    // Check for targets that register this file as a dependency, and reprocess them too.
+    for (const target of this._getDependencyTargets(locFilePath)) {
+      await this._parseFileAndGenerateTypingsAsync(target);
+    }
+
     try {
       const fileContents: string = await FileSystem.readFileAsync(locFilePath);
       const typingsData: string | undefined = await this._options.parseAndGenerateTypings(
@@ -150,6 +183,21 @@ export class TypingsGenerator {
         `Error occurred parsing and generating typings for file "${locFilePath}": ${e}`
       );
     }
+  }
+
+  private _clearDependencies(target: string): void {
+    const dependencies: IterableIterator<string> | undefined = this._targetMap.get(target)?.keys();
+    if (dependencies) {
+      for (const dependency of dependencies) {
+        // eslint-disable-next-line no-unused-expressions
+        this._dependencyMap.get(dependency)?.delete(target);
+      }
+    }
+    this._targetMap.delete(target);
+  }
+
+  private _getDependencyTargets(dependency: string): string[] {
+    return [...(this._dependencyMap.get(dependency)?.keys() || [])];
   }
 
   private _getTypingsFilePath(locFilePath: string): string {
