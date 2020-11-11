@@ -34,11 +34,11 @@ export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> {
  * @public
  */
 export class TypingsGenerator {
-  // Map of target file path -> Map<dependency file path, exists>
-  private _targetMap: Map<string, Map<string, boolean>>;
+  // Map of target file path -> Set<dependency file path>
+  private _targetMap: Map<string, Set<string>>;
 
-  // Map of dependency file path -> Map<target file path, exists>
-  private _dependencyMap: Map<string, Map<string, boolean>>;
+  // Map of dependency file path -> Set<target file path>
+  private _dependencyMap: Map<string, Set<string>>;
 
   protected _options: ITypingsGeneratorOptions;
 
@@ -138,19 +138,19 @@ export class TypingsGenerator {
    * time because the registry for a file is cleared at the beginning of processing.
    */
   public registerDependency(target: string, dependency: string): void {
-    let targetDependencyMap: Map<string, boolean> | undefined = this._targetMap.get(target);
-    if (!targetDependencyMap) {
-      targetDependencyMap = new Map();
-      this._targetMap.set(target, targetDependencyMap);
+    let targetDependencySet: Set<string> | undefined = this._targetMap.get(target);
+    if (!targetDependencySet) {
+      targetDependencySet = new Set();
+      this._targetMap.set(target, targetDependencySet);
     }
-    targetDependencyMap.set(dependency, true);
+    targetDependencySet.add(dependency);
 
-    let dependencyTargetMap: Map<string, boolean> | undefined = this._dependencyMap.get(dependency);
-    if (!dependencyTargetMap) {
-      dependencyTargetMap = new Map();
-      this._dependencyMap.set(dependency, dependencyTargetMap);
+    let dependencyTargetSet: Set<string> | undefined = this._dependencyMap.get(dependency);
+    if (!dependencyTargetSet) {
+      dependencyTargetSet = new Set();
+      this._dependencyMap.set(dependency, dependencyTargetSet);
     }
-    dependencyTargetMap.set(target, true);
+    dependencyTargetSet.add(target);
   }
 
   private async _parseFileAndGenerateTypingsAsync(locFilePath: string): Promise<void> {
@@ -193,13 +193,13 @@ export class TypingsGenerator {
   }
 
   private _clearDependencies(target: string): void {
-    const dependencies: IterableIterator<string> | undefined = this._targetMap.get(target)?.keys();
-    if (dependencies) {
-      for (const dependency of dependencies) {
+    const targetDependencySet: Set<string> | undefined = this._targetMap.get(target);
+    if (targetDependencySet) {
+      for (const dependency of targetDependencySet) {
         this._dependencyMap.get(dependency)!.delete(target);
       }
+      targetDependencySet.clear();
     }
-    this._targetMap.delete(target);
   }
 
   private _getDependencyTargets(dependency: string): string[] {
