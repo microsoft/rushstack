@@ -9,7 +9,7 @@
   },
   "homepage": "https://rushstack.io",
   "scripts": {
-    "build": "heft test --clean"
+    "build": "heft build --clean"
   },
   "keywords": [
     "eslintrc",
