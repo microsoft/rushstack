@@ -47,7 +47,6 @@
           },
           {
             "oneOf": [
-              // Delete Globs
               {
                 "required": ["globsToDelete"],
                 "properties": {
@@ -66,7 +65,6 @@
                   }
                 }
               },
-              // Copy Files
               {
                 "required": ["copyOperations"],
                 "properties": {
