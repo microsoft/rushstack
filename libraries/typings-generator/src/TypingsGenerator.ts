@@ -34,8 +34,12 @@ export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> {
  * @public
  */
 export class TypingsGenerator {
+  // Map of target file path -> Map<dependency file path, exists>
   private _targetMap: Map<string, Map<string, boolean>>;
+
+  // Map of dependency file path -> Map<target file path, exists>
   private _dependencyMap: Map<string, Map<string, boolean>>;
+
   protected _options: ITypingsGeneratorOptions;
 
   public constructor(options: ITypingsGeneratorOptions) {
@@ -74,6 +78,7 @@ export class TypingsGenerator {
     this._options.fileExtensions = this._normalizeFileExtensions(this._options.fileExtensions);
 
     this._targetMap = new Map();
+
     this._dependencyMap = new Map();
   }
 
@@ -133,17 +138,19 @@ export class TypingsGenerator {
    * time because the registry for a file is cleared at the beginning of processing.
    */
   public registerDependency(target: string, dependency: string): void {
-    if (!this._targetMap.has(target)) {
-      this._targetMap.set(target, new Map());
+    let targetDependencyMap: Map<string, boolean> | undefined = this._targetMap.get(target);
+    if (!targetDependencyMap) {
+      targetDependencyMap = new Map();
+      this._targetMap.set(target, targetDependencyMap);
     }
-    // eslint-disable-next-line no-unused-expressions
-    this._targetMap.get(target)?.set(dependency, true);
+    targetDependencyMap.set(dependency, true);
 
-    if (!this._dependencyMap.has(dependency)) {
-      this._dependencyMap.set(dependency, new Map());
+    let dependencyTargetMap: Map<string, boolean> | undefined = this._dependencyMap.get(dependency);
+    if (!dependencyTargetMap) {
+      dependencyTargetMap = new Map();
+      this._dependencyMap.set(dependency, dependencyTargetMap);
     }
-    // eslint-disable-next-line no-unused-expressions
-    this._dependencyMap.get(dependency)?.set(target, true);
+    dependencyTargetMap.set(target, true);
   }
 
   private async _parseFileAndGenerateTypingsAsync(locFilePath: string): Promise<void> {
@@ -189,8 +196,7 @@ export class TypingsGenerator {
     const dependencies: IterableIterator<string> | undefined = this._targetMap.get(target)?.keys();
     if (dependencies) {
       for (const dependency of dependencies) {
-        // eslint-disable-next-line no-unused-expressions
-        this._dependencyMap.get(dependency)?.delete(target);
+        this._dependencyMap.get(dependency)!.delete(target);
       }
     }
     this._targetMap.delete(target);
