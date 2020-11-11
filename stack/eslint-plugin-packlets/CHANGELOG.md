@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin-packlets
 
-This log was last generated on Wed, 28 Oct 2020 01:18:03 GMT and should not be manually modified.
+This log was last generated on Wed, 11 Nov 2020 01:08:58 GMT and should not be manually modified.
+
+## 0.2.0
+Wed, 11 Nov 2020 01:08:58 GMT
+
+### Minor changes
+
+- Add an optional "@rushstack/packlets/readme" rule that requires a README.md in each packlet folder
 
 ## 0.1.2
 Wed, 28 Oct 2020 01:18:03 GMT

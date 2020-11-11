@@ -13,7 +13,6 @@ import { IApiExtractorPluginConfiguration } from '../plugins/ApiExtractorPlugin/
 import { ITypeScriptConfigurationJson } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { Terminal } from '@rushstack/node-core-library';
-import { ISharedCopyStaticAssetsConfiguration } from '../plugins/CopyStaticAssetsPlugin';
 import { ISassConfigurationJson } from '../plugins/SassTypingsPlugin/SassTypingsPlugin';
 
 export enum HeftEvent {
@@ -35,6 +34,51 @@ export interface IHeftConfigurationDeleteGlobsEventAction extends IHeftConfigura
   globsToDelete: string[];
 }
 
+export interface ISharedCopyConfiguration {
+  /**
+   * File extensions that should be copied from the source folder to the destination folder(s)
+   */
+  fileExtensions?: string[];
+
+  /**
+   * Globs that should be explicitly excluded. This takes precedence over globs listed in "includeGlobs" and
+   * files that match the file extensions provided in "fileExtensions".
+   */
+  excludeGlobs?: string[];
+
+  /**
+   * Globs that should be explicitly included.
+   */
+  includeGlobs?: string[];
+
+  /**
+   * Copy only the file and discard the relative path from the source folder.
+   */
+  flatten?: boolean;
+
+  /**
+   * Hardlink files instead of copying.
+   */
+  hardlink?: boolean;
+}
+
+export interface IExtendedSharedCopyConfiguration extends ISharedCopyConfiguration {
+  /**
+   * The folder from which files should be copied, relative to the project root. For example, "src".
+   */
+  sourceFolder: string;
+
+  /**
+   * Folder(s) to which files should be copied, relative to the project root. For example ["lib", "lib-cjs"].
+   */
+  destinationFolders: string[];
+}
+
+export interface IHeftConfigurationCopyFilesEventAction extends IHeftConfigurationJsonEventActionBase {
+  actionKind: 'copyFiles';
+  copyOperations: IExtendedSharedCopyConfiguration[];
+}
+
 export interface IHeftConfigurationJsonPluginSpecifier {
   plugin: string;
   options?: object;
@@ -46,6 +90,7 @@ export interface IHeftConfigurationJson {
 }
 
 export interface IHeftEventActions {
+  copyFiles: Map<HeftEvent, IHeftConfigurationCopyFilesEventAction[]>;
   deleteGlobs: Map<HeftEvent, IHeftConfigurationDeleteGlobsEventAction[]>;
 }
 
@@ -110,12 +155,21 @@ export class CoreConfigFiles {
       );
 
       result = {
+        copyFiles: new Map<HeftEvent, IHeftConfigurationCopyFilesEventAction[]>(),
         deleteGlobs: new Map<HeftEvent, IHeftConfigurationDeleteGlobsEventAction[]>()
       };
       CoreConfigFiles._heftConfigFileEventActionsCache.set(heftConfiguration, result);
 
       for (const eventAction of heftConfigJson?.eventActions || []) {
         switch (eventAction.actionKind) {
+          case 'copyFiles': {
+            CoreConfigFiles._addEventActionToMap(
+              eventAction as IHeftConfigurationCopyFilesEventAction,
+              result.copyFiles
+            );
+            break;
+          }
+
           case 'deleteGlobs': {
             CoreConfigFiles._addEventActionToMap(
               eventAction as IHeftConfigurationDeleteGlobsEventAction,
@@ -171,10 +225,10 @@ export class CoreConfigFiles {
           staticAssetsToCopy: {
             inheritanceType: InheritanceType.custom,
             inheritanceFunction: (
-              currentObject: ISharedCopyStaticAssetsConfiguration,
-              parentObject: ISharedCopyStaticAssetsConfiguration
-            ): ISharedCopyStaticAssetsConfiguration => {
-              const result: ISharedCopyStaticAssetsConfiguration = {};
+              currentObject: ISharedCopyConfiguration,
+              parentObject: ISharedCopyConfiguration
+            ): ISharedCopyConfiguration => {
+              const result: ISharedCopyConfiguration = {};
 
               CoreConfigFiles._inheritArray(result, 'fileExtensions', currentObject, parentObject);
               CoreConfigFiles._inheritArray(result, 'includeGlobs', currentObject, parentObject);

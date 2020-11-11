@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft",
-  "version": "0.20.1",
+  "version": "0.21.1",
   "description": "The Rush Stack extensible build system",
   "keywords": [
     "toolchain",
@@ -46,6 +46,7 @@
     "chokidar": "~3.4.0",
     "glob-escape": "~0.0.2",
     "glob": "~7.0.5",
+    "fast-glob": "~3.2.4",
     "jest-snapshot": "~25.4.0",
     "node-sass": "4.14.1",
     "postcss-modules": "~1.5.0",
@@ -61,8 +62,8 @@
     "@jest/types": "~25.4.0",
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft-node-rig": "0.1.0",
-    "@rushstack/heft": "0.14.0",
+    "@rushstack/heft-node-rig": "0.1.22",
+    "@rushstack/heft": "0.21.1",
     "@types/argparse": "1.0.38",
     "@types/eslint": "7.2.0",
     "@types/glob": "7.1.1",

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
+
+  "extends": "@rushstack/heft-node-rig/profiles/default/config/heft.json",
+
+  "eventActions": [
+    {
+      "actionKind": "deleteGlobs",
+      "heftEvent": "clean",
+      "actionId": "deleteSrc",
+      "globsToDelete": ["src"]
+    },
+
+    {
+      "actionKind": "copyFiles",
+      "heftEvent": "pre-compile",
+      "actionId": "copySrc",
+      "copyOperations": [
+        {
+          "sourceFolder": "node_modules/@microsoft/rush-stack-compiler-shared/src",
+          "destinationFolders": ["src"],
+          "fileExtensions": [".ts", ".js"],
+          "hardlink": true
+        }
+      ]
+    }
+  ]
+}

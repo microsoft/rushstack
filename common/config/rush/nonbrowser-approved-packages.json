@@ -379,6 +379,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "fast-glob",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "file-loader",
       "allowedCategories": [ "tests" ]
     },

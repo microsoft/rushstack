@@ -40,6 +40,69 @@
     //     "lib-esnext",
     //     "temp"
     //   ]
+    // },
+    //
+    // {
+    //   /**
+    //    * The kind of built-in operation that should be performed.
+    //    * The "copyFiles" action copies files that match the specified patterns.
+    //    */
+    //   "actionKind": "copyFiles",
+    //
+    //   /**
+    //    * The stage of the Heft run during which this action should occur. Note that actions specified in heft.json
+    //    * occur at the end of the stage of the Heft run.
+    //    */
+    //   "heftEvent": "pre-compile",
+    //
+    //   /**
+    //    * A user-defined tag whose purpose is to allow configs to replace/delete handlers that were added by other
+    //    * configs.
+    //    */
+    //   "actionId": "defaultCopy",
+    //
+    //   /**
+    //    * An array of copy operations to run perform during the specified Heft event.
+    //    */
+    //   "copyOperations": [
+    //     {
+    //       /**
+    //        * The folder from which files should be copied, relative to the project root.
+    //        */
+    //       "sourceFolder": "src",
+    //
+    //       /**
+    //        * Folder(s) to which files should be copied, relative to the project root.
+    //        */
+    //       "destinationFolders": ["dist/assets"],
+    //
+    //       /**
+    //        * File extensions that should be copied from the source folder to the destination folder(s)
+    //        */
+    //       "fileExtensions": [".jpg", ".png"],
+    //
+    //       /**
+    //        * Globs that should be explicitly excluded. This takes precedence over globs listed in "includeGlobs"
+    //        * and files that match the file extensions provided in "fileExtensions".
+    //        */
+    //       "excludeGlobs": [],
+    //
+    //       /**
+    //        * Globs that should be explicitly included.
+    //        */
+    //       "includeGlobs": ["assets/**/*"],
+    //
+    //       /**
+    //        * Copy only the file and discard the relative path from the source folder. This defaults to false.
+    //        */
+    //       "flatten": false,
+    //
+    //       /**
+    //        * Hardlink files instead of copying. This defaults to false.
+    //        */
+    //       "hardlink": false
+    //     }
+    //   ]
     // }
   ],
 
