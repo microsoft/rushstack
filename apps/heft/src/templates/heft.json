@@ -82,7 +82,7 @@
     //
     //       /**
     //        * (Required) One or more folders that files will be copied into, relative to the project root.
-    //        * If you more than one destination folder, Heft will read the input files only once, using
+    //        * If you specify more than one destination folder, Heft will read the input files only once, using
     //        * streams to efficiently write multiple outputs.
     //        */
     //       "destinationFolders": ["dist/assets"],

@@ -93,7 +93,7 @@
 
                         "destinationFolders": {
                           "type": "array",
-                          "description": "One or more folders that files will be copied into, relative to the project root. If you more than one destination folder, Heft will read the input files only once, using streams to efficiently write multiple outputs.",
+                          "description": "One or more folders that files will be copied into, relative to the project root. If you specify more than one destination folder, Heft will read the input files only once, using streams to efficiently write multiple outputs.",
                           "items": {
                             "type": "string",
                             "pattern": "[^\\\\]"
