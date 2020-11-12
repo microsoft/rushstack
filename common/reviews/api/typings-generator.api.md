@@ -54,6 +54,7 @@ export class TypingsGenerator {
     generateTypingsAsync(): Promise<void>;
     // (undocumented)
     protected _options: ITypingsGeneratorOptions;
+    registerDependency(target: string, dependency: string): void;
     // (undocumented)
     runWatcherAsync(): Promise<void>;
 }
