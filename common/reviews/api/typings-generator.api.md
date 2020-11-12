@@ -57,7 +57,7 @@ export class TypingsGenerator {
     registerDependency(target: string, dependency: string): void;
     // (undocumented)
     runWatcherAsync(): Promise<void>;
-    }
+}
 
 
 // (No @packageDocumentation comment for this package)
