@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 12 Nov 2020 01:11:10 GMT and should not be manually modified.
+This log was last generated on Fri, 13 Nov 2020 01:11:00 GMT and should not be manually modified.
+
+## 0.21.3
+Fri, 13 Nov 2020 01:11:00 GMT
+
+### Patches
+
+- Update Sass typings generation to update in watch mode when a dependency changes.
 
 ## 0.21.2
 Thu, 12 Nov 2020 01:11:10 GMT

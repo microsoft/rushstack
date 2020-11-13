@@ -1,6 +1,13 @@
 # Change Log - @rushstack/typings-generator
 
-This log was last generated on Wed, 11 Nov 2020 01:08:58 GMT and should not be manually modified.
+This log was last generated on Fri, 13 Nov 2020 01:11:00 GMT and should not be manually modified.
+
+## 0.2.27
+Fri, 13 Nov 2020 01:11:00 GMT
+
+### Patches
+
+- Add register dependency feature for typings generation. 
 
 ## 0.2.26
 Wed, 11 Nov 2020 01:08:58 GMT

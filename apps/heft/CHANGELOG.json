@@ -2,6 +2,23 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.21.3",
+      "tag": "@rushstack/heft_v0.21.3",
+      "date": "Fri, 13 Nov 2020 01:11:00 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update Sass typings generation to update in watch mode when a dependency changes."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.2.27`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.21.2",
       "tag": "@rushstack/heft_v0.21.2",
       "date": "Thu, 12 Nov 2020 01:11:10 GMT",

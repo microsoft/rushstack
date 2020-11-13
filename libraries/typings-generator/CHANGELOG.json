@@ -2,6 +2,18 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.2.27",
+      "tag": "@rushstack/typings-generator_v0.2.27",
+      "date": "Fri, 13 Nov 2020 01:11:00 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add register dependency feature for typings generation. "
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.26",
       "tag": "@rushstack/typings-generator_v0.2.26",
       "date": "Wed, 11 Nov 2020 01:08:58 GMT",
