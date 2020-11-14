@@ -74,6 +74,9 @@ export function exampleFunction(x: ExampleTypeAlias, y: number): IDocInterface1;
 export type ExampleTypeAlias = Promise<boolean>;
 
 // @public
+export type ExampleUnionTypeAlias = IDocInterface1 | IDocInterface3;
+
+// @public
 export class Generic<T> {
 }
 

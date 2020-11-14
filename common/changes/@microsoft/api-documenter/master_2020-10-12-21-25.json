@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/api-documenter",
       "comment": "Support for generating hyperlinks from type aliases",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/api-documenter",

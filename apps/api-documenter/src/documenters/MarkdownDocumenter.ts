@@ -352,7 +352,10 @@ export class MarkdownDocumenter {
 
     if (apiItem instanceof ApiTypeAlias) {
       const refs: ExcerptToken[] = apiItem.excerptTokens.filter(
-        (token) => token.kind === ExcerptTokenKind.Reference && token.canonicalReference
+        (token) =>
+          token.kind === ExcerptTokenKind.Reference &&
+          token.canonicalReference &&
+          this._apiModel.resolveDeclarationReference(token.canonicalReference, undefined).resolvedApiItem
       );
       if (refs.length > 0) {
         const referencesParagraph: DocParagraph = new DocParagraph({ configuration }, [
@@ -365,6 +368,7 @@ export class MarkdownDocumenter {
           if (needsComma) {
             referencesParagraph.appendNode(new DocPlainText({ configuration, text: ', ' }));
           }
+
           this._appendExcerptTokenWithHyperlinks(referencesParagraph, ref);
           needsComma = true;
         }

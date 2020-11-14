@@ -12,13 +12,19 @@
 
 export * from './DocClass1';
 export * from './DocEnums';
-import { IDocInterface1 } from './DocClass1';
+import { IDocInterface1, IDocInterface3 } from './DocClass1';
 
 /**
  * A type alias
  * @public
  */
 export type ExampleTypeAlias = Promise<boolean>;
+
+/**
+ * A type alias that references multiple other types.
+ * @public
+ */
+export type ExampleUnionTypeAlias = IDocInterface1 | IDocInterface3;
 
 /**
  * An exported variable declaration.

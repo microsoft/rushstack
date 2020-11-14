@@ -22,6 +22,7 @@ items:
       - 'api-documenter-test!EcmaSmbols:namespace'
       - 'api-documenter-test!exampleFunction:function(1)'
       - 'api-documenter-test!ExampleTypeAlias:type'
+      - 'api-documenter-test!ExampleUnionTypeAlias:type'
       - 'api-documenter-test!Generic:class'
       - 'api-documenter-test!GenericTypeAlias:type'
       - 'api-documenter-test!IDocInterface1:interface'
@@ -81,6 +82,18 @@ items:
       return:
         type:
           - 'api-documenter-test!ExampleTypeAlias~0:complex'
+  - uid: 'api-documenter-test!ExampleUnionTypeAlias:type'
+    summary: A type alias that references multiple other types.
+    name: ExampleUnionTypeAlias
+    fullName: ExampleUnionTypeAlias
+    langs:
+      - typeScript
+    type: typealias
+    syntax:
+      content: export declare type ExampleUnionTypeAlias = IDocInterface1 | IDocInterface3;
+      return:
+        type:
+          - 'api-documenter-test!ExampleUnionTypeAlias~0:complex'
   - uid: 'api-documenter-test!GenericTypeAlias:type'
     name: GenericTypeAlias
     fullName: GenericTypeAlias
@@ -147,6 +160,18 @@ references:
         fullName: Promise
       - name: <boolean>
         fullName: <boolean>
+  - uid: 'api-documenter-test!ExampleUnionTypeAlias~0:complex'
+    name: IDocInterface1 | IDocInterface3
+    fullName: IDocInterface1 | IDocInterface3
+    spec.typeScript:
+      - uid: 'api-documenter-test!IDocInterface1:interface'
+        name: IDocInterface1
+        fullName: IDocInterface1
+      - name: ' | '
+        fullName: ' | '
+      - uid: 'api-documenter-test!IDocInterface3:interface'
+        name: IDocInterface3
+        fullName: IDocInterface3
   - uid: 'api-documenter-test!Generic:class'
     name: Generic
   - uid: 'api-documenter-test!IDocInterface2:interface'
