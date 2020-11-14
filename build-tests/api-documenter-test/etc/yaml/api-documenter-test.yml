@@ -20,6 +20,7 @@ items:
       - 'api-documenter-test!DocEnumNamespaceMerge:enum'
       - 'api-documenter-test!DocEnumNamespaceMerge:namespace'
       - 'api-documenter-test!EcmaSmbols:namespace'
+      - 'api-documenter-test!ExampleDuplicateTypeAlias:type'
       - 'api-documenter-test!exampleFunction:function(1)'
       - 'api-documenter-test!ExampleTypeAlias:type'
       - 'api-documenter-test!ExampleUnionTypeAlias:type'
@@ -48,6 +49,18 @@ items:
       return:
         type:
           - number
+  - uid: 'api-documenter-test!ExampleDuplicateTypeAlias:type'
+    summary: A type alias that has duplicate references.
+    name: ExampleDuplicateTypeAlias
+    fullName: ExampleDuplicateTypeAlias
+    langs:
+      - typeScript
+    type: typealias
+    syntax:
+      content: export declare type ExampleDuplicateTypeAlias = SystemEvent | typeof SystemEvent;
+      return:
+        type:
+          - 'api-documenter-test!ExampleDuplicateTypeAlias~0:complex'
   - uid: 'api-documenter-test!exampleFunction:function(1)'
     summary: An exported function with hyperlinked parameters and return value.
     name: 'exampleFunction(x, y)'
@@ -147,6 +160,18 @@ references:
     name: DocEnumNamespaceMerge
   - uid: 'api-documenter-test!EcmaSmbols:namespace'
     name: EcmaSmbols
+  - uid: 'api-documenter-test!ExampleDuplicateTypeAlias~0:complex'
+    name: SystemEvent | typeof SystemEvent
+    fullName: SystemEvent | typeof SystemEvent
+    spec.typeScript:
+      - uid: 'api-documenter-test!SystemEvent:class'
+        name: SystemEvent
+        fullName: SystemEvent
+      - name: ' | typeof '
+        fullName: ' | typeof '
+      - uid: 'api-documenter-test!SystemEvent:class'
+        name: SystemEvent
+        fullName: SystemEvent
   - uid: 'api-documenter-test!IDocInterface1:interface'
     name: IDocInterface1
   - uid: 'api-documenter-test!ExampleTypeAlias:type'

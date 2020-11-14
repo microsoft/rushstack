@@ -364,7 +364,13 @@ export class MarkdownDocumenter {
           ])
         ]);
         let needsComma: boolean = false;
+        const visited: string[] = [];
         for (const ref of refs) {
+          if (visited.indexOf(ref.text) !== -1) {
+            continue;
+          }
+
+          visited.push(ref.text);
           if (needsComma) {
             referencesParagraph.appendNode(new DocPlainText({ configuration, text: ', ' }));
           }

@@ -68,6 +68,9 @@ export namespace EcmaSmbols {
 }
 
 // @public
+export type ExampleDuplicateTypeAlias = SystemEvent | typeof SystemEvent;
+
+// @public
 export function exampleFunction(x: ExampleTypeAlias, y: number): IDocInterface1;
 
 // @public
