@@ -6,13 +6,10 @@
 !/lib/**
 !/dist/**
 !ThirdPartyNotice.txt
-!/EULA/**
 
 # Ignore certain files in the above folder
 /dist/*.stats.*
-/lib/**/test/**
-/lib/**/*.js.map
-/dist/**/*.js.map
+/lib/**/test/*
 
 # NOTE: These don't need to be specified, because NPM includes them automatically.
 #
@@ -23,5 +20,7 @@
 
 ## Project specific definitions
 # -----------------------------
+
+# (Add your exceptions here)
 !/includes/**
 !UPGRADING.md

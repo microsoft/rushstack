@@ -5,9 +5,7 @@
 !/bin/**
 !/lib/**
 !/dist/**
-!/includes/**
 !ThirdPartyNotice.txt
-
 
 # Ignore certain files in the above folder
 /dist/*.stats.*
@@ -24,3 +22,4 @@
 # -----------------------------
 
 # (Add your exceptions here)
+!/includes/**
