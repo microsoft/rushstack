@@ -1,6 +1,17 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 13 Nov 2020 01:11:00 GMT and should not be manually modified.
+This log was last generated on Mon, 16 Nov 2020 01:57:58 GMT and should not be manually modified.
+
+## 0.22.0
+Mon, 16 Nov 2020 01:57:58 GMT
+
+### Minor changes
+
+- Add "webpack-dev-server" as a dependency since its types are part of Heft's API contract
+
+### Patches
+
+- Fix an issue where API Extractor errors/warnings did not show the message ID
 
 ## 0.21.3
 Fri, 13 Nov 2020 01:11:00 GMT

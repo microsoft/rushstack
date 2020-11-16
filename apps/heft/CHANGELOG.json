@@ -2,6 +2,23 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.22.0",
+      "tag": "@rushstack/heft_v0.22.0",
+      "date": "Mon, 16 Nov 2020 01:57:58 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where API Extractor errors/warnings did not show the message ID"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add \"webpack-dev-server\" as a dependency since its types are part of Heft's API contract"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.21.3",
       "tag": "@rushstack/heft_v0.21.3",
       "date": "Fri, 13 Nov 2020 01:11:00 GMT",
