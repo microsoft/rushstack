@@ -4,12 +4,15 @@
 # Use negative patterns to bring back the specific things we want to publish
 !/bin/**
 !/lib/**
+!/lib-*/**
 !/dist/**
 !ThirdPartyNotice.txt
 
 # Ignore certain files in the above folder
 /dist/*.stats.*
 /lib/**/test/*
+/lib-*/**/test/*
+*.test.js
 
 # NOTE: These don't need to be specified, because NPM includes them automatically.
 #
