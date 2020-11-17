@@ -2,6 +2,23 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.22.1",
+      "tag": "@rushstack/heft_v0.22.1",
+      "date": "Tue, 17 Nov 2020 01:17:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where .map files were not being published"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.3.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.22.0",
       "tag": "@rushstack/heft_v0.22.0",
       "date": "Mon, 16 Nov 2020 01:57:58 GMT",
