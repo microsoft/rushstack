@@ -222,7 +222,8 @@ export class RushConfigurationProject {
       this._localDependencyProjects = [
         ...this._getLocalDependencyProjects(this.packageJson.dependencies),
         ...this._getLocalDependencyProjects(this.packageJson.devDependencies),
-        ...this._getLocalDependencyProjects(this.packageJson.optionalDependencies)
+        ...this._getLocalDependencyProjects(this.packageJson.optionalDependencies),
+        ...this._getLocalDependencyProjects(this.packageJson.peerDependencies)
       ];
     }
     return this._localDependencyProjects;
