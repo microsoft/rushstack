@@ -115,6 +115,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "releaseTag": "Public",
               "name": "readonlyProperty",
               "propertyTypeTokenRange": {
@@ -141,6 +142,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "releaseTag": "Public",
               "name": "writeableProperty",
               "propertyTypeTokenRange": {

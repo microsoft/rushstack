@@ -40,7 +40,7 @@ import {
   IResolveDeclarationReferenceResult,
   ApiTypeAlias,
   ExcerptToken,
-  ApiPropertySignature
+  ApiOptionalMixin
 } from '@microsoft/api-extractor-model';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -919,7 +919,7 @@ export class MarkdownDocumenter {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     let linkText: string = Utilities.getConciseSignature(apiItem);
-    if (apiItem instanceof ApiPropertySignature && apiItem.isOptional) {
+    if (ApiOptionalMixin.isBaseClassOf(apiItem) && apiItem.isOptional) {
       linkText += '?';
     }
 
@@ -958,7 +958,7 @@ export class MarkdownDocumenter {
       }
     }
 
-    if (apiItem instanceof ApiPropertySignature && apiItem.isOptional) {
+    if (ApiOptionalMixin.isBaseClassOf(apiItem) && apiItem.isOptional) {
       section.appendNodesInParagraph([
         new DocEmphasisSpan({ configuration, italic: true }, [
           new DocPlainText({ configuration, text: '(Optional)' })

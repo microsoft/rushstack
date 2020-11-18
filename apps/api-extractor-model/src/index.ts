@@ -35,6 +35,8 @@ export { IApiReleaseTagMixinOptions, ApiReleaseTagMixin } from './mixins/ApiRele
 export { IApiReturnTypeMixinOptions, ApiReturnTypeMixin } from './mixins/ApiReturnTypeMixin';
 export { IApiStaticMixinOptions, ApiStaticMixin } from './mixins/ApiStaticMixin';
 export { IApiNameMixinOptions, ApiNameMixin } from './mixins/ApiNameMixin';
+export { IApiOptionalMixinOptions, ApiOptionalMixin } from './mixins/ApiOptionalMixin';
+
 export { ExcerptTokenKind, IExcerptTokenRange, IExcerptToken, ExcerptToken, Excerpt } from './mixins/Excerpt';
 export { Constructor, PropertiesOf } from './mixins/Mixin';
 
