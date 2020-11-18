@@ -1,0 +1,63 @@
+### YamlMime:UniversalReference
+items:
+  - uid: 'api-documenter-test!IDocInterface7:interface'
+    summary: Interface for testing optional properties
+    name: IDocInterface7
+    fullName: IDocInterface7
+    langs:
+      - typeScript
+    type: interface
+    package: api-documenter-test!
+    children:
+      - 'api-documenter-test!IDocInterface7#optionalField:member'
+      - 'api-documenter-test!IDocInterface7#optionalMember:member(1)'
+      - 'api-documenter-test!IDocInterface7#optionalReadonlyField:member'
+      - 'api-documenter-test!IDocInterface7#optionalUndocumentedField:member'
+  - uid: 'api-documenter-test!IDocInterface7#optionalField:member'
+    summary: Description of optionalField
+    name: optionalField
+    fullName: optionalField
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'optionalField?: boolean;'
+      return:
+        type:
+          - boolean
+  - uid: 'api-documenter-test!IDocInterface7#optionalMember:member(1)'
+    summary: Description of optionalMember
+    name: optionalMember()
+    fullName: optionalMember()
+    langs:
+      - typeScript
+    type: method
+    syntax:
+      content: 'optionalMember?(): any;'
+      return:
+        type:
+          - any
+        description: ''
+  - uid: 'api-documenter-test!IDocInterface7#optionalReadonlyField:member'
+    summary: Description of optionalReadonlyField
+    name: optionalReadonlyField
+    fullName: optionalReadonlyField
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'readonly optionalReadonlyField?: boolean;'
+      return:
+        type:
+          - boolean
+  - uid: 'api-documenter-test!IDocInterface7#optionalUndocumentedField:member'
+    name: optionalUndocumentedField
+    fullName: optionalUndocumentedField
+    langs:
+      - typeScript
+    type: property
+    syntax:
+      content: 'optionalUndocumentedField?: boolean;'
+      return:
+        type:
+          - boolean

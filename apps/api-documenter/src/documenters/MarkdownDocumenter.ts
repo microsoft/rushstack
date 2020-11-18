@@ -37,7 +37,8 @@ import {
   ApiDeclaredItem,
   ApiNamespace,
   ExcerptTokenKind,
-  IResolveDeclarationReferenceResult
+  IResolveDeclarationReferenceResult,
+  ApiPropertySignature
 } from '@microsoft/api-extractor-model';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -879,12 +880,17 @@ export class MarkdownDocumenter {
   private _createTitleCell(apiItem: ApiItem): DocTableCell {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
+    let linkText: string = Utilities.getConciseSignature(apiItem);
+    if (apiItem instanceof ApiPropertySignature && apiItem.isOptional) {
+      linkText += '?';
+    }
+
     return new DocTableCell({ configuration }, [
       new DocParagraph({ configuration }, [
         new DocLinkTag({
           configuration,
           tagName: '@link',
-          linkText: Utilities.getConciseSignature(apiItem),
+          linkText: linkText,
           urlDestination: this._getLinkFilenameForApiItem(apiItem)
         })
       ])
@@ -912,6 +918,15 @@ export class MarkdownDocumenter {
           new DocPlainText({ configuration, text: ' ' })
         ]);
       }
+    }
+
+    if (apiItem instanceof ApiPropertySignature && apiItem.isOptional) {
+      section.appendNodesInParagraph([
+        new DocEmphasisSpan({ configuration, italic: true }, [
+          new DocPlainText({ configuration, text: '(Optional)' })
+        ]),
+        new DocPlainText({ configuration, text: ' ' })
+      ]);
     }
 
     if (apiItem instanceof ApiDocumentedItem) {
