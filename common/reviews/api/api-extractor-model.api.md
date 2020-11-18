@@ -409,6 +409,21 @@ export class ApiNamespace extends ApiNamespace_base {
     get kind(): ApiItemKind;
 }
 
+// @public
+export function ApiOptionalMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiOptionalMixin);
+
+// @public
+export interface ApiOptionalMixin extends ApiItem {
+    readonly isOptional: boolean;
+    // @override (undocumented)
+    serializeInto(jsonObject: Partial<IApiItemJson>): void;
+}
+
+// @public
+export namespace ApiOptionalMixin {
+    export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiOptionalMixin;
+}
+
 // Warning: (ae-forgotten-export) The symbol "ApiPackage_base" needs to be exported by the entry point index.d.ts
 //
 // @public
@@ -469,7 +484,6 @@ export class ApiProperty extends ApiProperty_base {
 export class ApiPropertyItem extends ApiPropertyItem_base {
     constructor(options: IApiPropertyItemOptions);
     get isEventProperty(): boolean;
-    readonly isOptional: boolean;
     // Warning: (ae-forgotten-export) The symbol "IApiPropertyItemJson" needs to be exported by the entry point index.d.ts
     //
     // @override (undocumented)
@@ -706,11 +720,11 @@ export interface IApiItemOptions {
 }
 
 // @public
-export interface IApiMethodOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiStaticMixinOptions, IApiDeclaredItemOptions {
+export interface IApiMethodOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiStaticMixinOptions, IApiOptionalMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public (undocumented)
-export interface IApiMethodSignatureOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDeclaredItemOptions {
+export interface IApiMethodSignatureOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiOptionalMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public
@@ -721,6 +735,12 @@ export interface IApiNameMixinOptions extends IApiItemOptions {
 
 // @public
 export interface IApiNamespaceOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+}
+
+// @public
+export interface IApiOptionalMixinOptions extends IApiItemOptions {
+    // (undocumented)
+    isOptional: boolean;
 }
 
 // @public
@@ -751,9 +771,7 @@ export interface IApiParameterOptions {
 }
 
 // @public
-export interface IApiPropertyItemOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
-    // (undocumented)
-    isOptional?: boolean;
+export interface IApiPropertyItemOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiOptionalMixinOptions, IApiDeclaredItemOptions {
     // (undocumented)
     propertyTypeTokenRange: IExcerptTokenRange;
 }

@@ -6,6 +6,7 @@ import { IApiDeclaredItemOptions, ApiDeclaredItem, IApiDeclaredItemJson } from '
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import { DeserializerContext } from '../model/DeserializerContext';
+import { ApiOptionalMixin, IApiOptionalMixinOptions } from '../mixins/ApiOptionalMixin';
 
 /**
  * Constructor options for {@link ApiPropertyItem}.
@@ -14,14 +15,13 @@ import { DeserializerContext } from '../model/DeserializerContext';
 export interface IApiPropertyItemOptions
   extends IApiNameMixinOptions,
     IApiReleaseTagMixinOptions,
+    IApiOptionalMixinOptions,
     IApiDeclaredItemOptions {
   propertyTypeTokenRange: IExcerptTokenRange;
-  isOptional?: boolean;
 }
 
 export interface IApiPropertyItemJson extends IApiDeclaredItemJson {
   propertyTypeTokenRange: IExcerptTokenRange;
-  isOptional?: boolean;
 }
 
 /**
@@ -29,30 +29,16 @@ export interface IApiPropertyItemJson extends IApiDeclaredItemJson {
  *
  * @public
  */
-export class ApiPropertyItem extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
+export class ApiPropertyItem extends ApiNameMixin(ApiReleaseTagMixin(ApiOptionalMixin(ApiDeclaredItem))) {
   /**
    * An {@link Excerpt} that describes the type of the property.
    */
   public readonly propertyTypeExcerpt: Excerpt;
 
-  /**
-   * True if this is an optional property.
-   * @remarks
-   * For example:
-   * ```ts
-   * interface X {
-   *   y: string;   // not optional
-   *   z?: string;  // optional
-   * }
-   * ```
-   */
-  public readonly isOptional: boolean;
-
   public constructor(options: IApiPropertyItemOptions) {
     super(options);
 
     this.propertyTypeExcerpt = this.buildExcerpt(options.propertyTypeTokenRange);
-    this.isOptional = !!options.isOptional;
   }
 
   /** @override */
@@ -64,7 +50,6 @@ export class ApiPropertyItem extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclared
     super.onDeserializeInto(options, context, jsonObject);
 
     options.propertyTypeTokenRange = jsonObject.propertyTypeTokenRange;
-    options.isOptional = !!jsonObject.isOptional;
   }
 
   /**
@@ -89,8 +74,5 @@ export class ApiPropertyItem extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclared
     super.serializeInto(jsonObject);
 
     jsonObject.propertyTypeTokenRange = this.propertyTypeExcerpt.tokenRange;
-    if (this.isOptional) {
-      jsonObject.isOptional = true;
-    }
   }
 }

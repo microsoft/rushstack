@@ -17,6 +17,7 @@ import {
   IApiTypeParameterListMixinOptions,
   ApiTypeParameterListMixin
 } from '../mixins/ApiTypeParameterListMixin';
+import { ApiOptionalMixin, IApiOptionalMixinOptions } from '../mixins/ApiOptionalMixin';
 
 /** @public */
 export interface IApiMethodSignatureOptions
@@ -25,6 +26,7 @@ export interface IApiMethodSignatureOptions
     IApiParameterListMixinOptions,
     IApiReleaseTagMixinOptions,
     IApiReturnTypeMixinOptions,
+    IApiOptionalMixinOptions,
     IApiDeclaredItemOptions {}
 
 /**
@@ -49,7 +51,9 @@ export interface IApiMethodSignatureOptions
  * @public
  */
 export class ApiMethodSignature extends ApiNameMixin(
-  ApiTypeParameterListMixin(ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(ApiDeclaredItem))))
+  ApiTypeParameterListMixin(
+    ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(ApiOptionalMixin(ApiDeclaredItem))))
+  )
 ) {
   public constructor(options: IApiMethodSignatureOptions) {
     super(options);
