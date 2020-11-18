@@ -2,6 +2,21 @@
   "name": "@microsoft/gulp-core-build-webpack",
   "entries": [
     {
+      "version": "5.2.6",
+      "tag": "@microsoft/gulp-core-build-webpack_v5.2.6",
+      "date": "Wed, 18 Nov 2020 06:21:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/node-library-build\" to `6.5.12`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.9\" to `0.4.34`"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.2.5",
       "tag": "@microsoft/gulp-core-build-webpack_v5.2.5",
       "date": "Wed, 11 Nov 2020 01:08:58 GMT",

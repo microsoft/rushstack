@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.11.0",
+      "tag": "@microsoft/api-extractor-model_v7.11.0",
+      "date": "Wed, 18 Nov 2020 06:21:57 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update .api.json file format to store a new field \"isOptional\" for documenting optional properties"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.10.10",
       "tag": "@microsoft/api-extractor-model_v7.10.10",
       "date": "Wed, 11 Nov 2020 01:08:59 GMT",

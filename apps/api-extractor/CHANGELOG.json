@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.11.5",
+      "tag": "@microsoft/api-extractor_v7.11.5",
+      "date": "Wed, 18 Nov 2020 06:21:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update .api.json file format to store a new field \"isOptional\" for documenting optional properties"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.11.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.11.4",
       "tag": "@microsoft/api-extractor_v7.11.4",
       "date": "Wed, 11 Nov 2020 01:08:58 GMT",

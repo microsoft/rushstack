@@ -1,6 +1,11 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Wed, 11 Nov 2020 01:08:58 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Nov 2020 06:21:57 GMT and should not be manually modified.
+
+## 8.5.12
+Wed, 18 Nov 2020 06:21:57 GMT
+
+_Version update only_
 
 ## 8.5.11
 Wed, 11 Nov 2020 01:08:58 GMT
