@@ -46,6 +46,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "releaseTag": "Beta",
               "name": "x",
               "propertyTypeTokenRange": {
