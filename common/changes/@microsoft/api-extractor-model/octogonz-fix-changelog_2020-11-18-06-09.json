@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Update .api.json file format to store a new field \"isOptional\" for documenting optional properties",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
