@@ -1760,6 +1760,124 @@
           "extendsTokenRanges": []
         },
         {
+          "kind": "Interface",
+          "canonicalReference": "api-documenter-test!IDocInterface7:interface",
+          "docComment": "/**\n * Interface for testing optional properties\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "export interface IDocInterface7 "
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "IDocInterface7",
+          "members": [
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!IDocInterface7#optionalField:member",
+              "docComment": "/**\n * Description of optionalField\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "optionalField?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "boolean"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "optionalField",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "MethodSignature",
+              "canonicalReference": "api-documenter-test!IDocInterface7#optionalMember:member(1)",
+              "docComment": "/**\n * Description of optionalMember\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "optionalMember?(): "
+                },
+                {
+                  "kind": "Content",
+                  "text": "any"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "returnTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "releaseTag": "Public",
+              "overloadIndex": 1,
+              "parameters": [],
+              "name": "optionalMember"
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!IDocInterface7#optionalReadonlyField:member",
+              "docComment": "/**\n * Description of optionalReadonlyField\n */\n",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "readonly optionalReadonlyField?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "boolean"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "optionalReadonlyField",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            },
+            {
+              "kind": "PropertySignature",
+              "canonicalReference": "api-documenter-test!IDocInterface7#optionalUndocumentedField:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "optionalUndocumentedField?: "
+                },
+                {
+                  "kind": "Content",
+                  "text": "boolean"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "releaseTag": "Public",
+              "name": "optionalUndocumentedField",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              }
+            }
+          ],
+          "extendsTokenRanges": []
+        },
+        {
           "kind": "Namespace",
           "canonicalReference": "api-documenter-test!OuterNamespace:namespace",
           "docComment": "/**\n * A top-level namespace\n *\n * @public\n */\n",

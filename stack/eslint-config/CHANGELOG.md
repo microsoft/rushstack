@@ -1,6 +1,31 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Tue, 06 Oct 2020 00:24:06 GMT and should not be manually modified.
+This log was last generated on Wed, 11 Nov 2020 01:08:58 GMT and should not be manually modified.
+
+## 2.3.1
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 2.3.0
+Fri, 30 Oct 2020 06:38:38 GMT
+
+### Minor changes
+
+- Exclude *.d.ts from linting
+- Set "root"=true to prevent unintended loading of other ESLint config files found in parent folders (which may be outside the Git working directory)
+
+## 2.2.3
+Fri, 30 Oct 2020 00:10:14 GMT
+
+### Patches
+
+- Update the "modern-module-resolution" patch to support ESLint 7.8.0 and newer
+
+## 2.2.2
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
 
 ## 2.2.1
 Tue, 06 Oct 2020 00:24:06 GMT

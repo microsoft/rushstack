@@ -1,0 +1,13 @@
+{
+  "name": "heft-copy-files-test",
+  "description": "Building this project tests copying files with Heft",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean --verbose"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*"
+  }
+}

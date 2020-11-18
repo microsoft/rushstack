@@ -27,8 +27,7 @@ import {
   VersionPolicyDefinitionName
 } from '../../api/VersionPolicy';
 
-// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
-import * as inquirerTypes from 'inquirer';
+import type * as inquirerTypes from 'inquirer';
 const inquirer: typeof inquirerTypes = Import.lazy('inquirer', require);
 
 export class ChangeAction extends BaseRushAction {

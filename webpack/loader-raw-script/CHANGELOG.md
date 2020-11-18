@@ -1,6 +1,136 @@
 # Change Log - @rushstack/loader-raw-script
 
-This log was last generated on Tue, 06 Oct 2020 00:24:06 GMT and should not be manually modified.
+This log was last generated on Tue, 17 Nov 2020 01:17:38 GMT and should not be manually modified.
+
+## 1.3.101
+Tue, 17 Nov 2020 01:17:38 GMT
+
+_Version update only_
+
+## 1.3.100
+Mon, 16 Nov 2020 01:57:58 GMT
+
+_Version update only_
+
+## 1.3.99
+Fri, 13 Nov 2020 01:11:01 GMT
+
+_Version update only_
+
+## 1.3.98
+Thu, 12 Nov 2020 01:11:10 GMT
+
+_Version update only_
+
+## 1.3.97
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 1.3.96
+Tue, 10 Nov 2020 23:13:11 GMT
+
+_Version update only_
+
+## 1.3.95
+Tue, 10 Nov 2020 16:11:42 GMT
+
+_Version update only_
+
+## 1.3.94
+Sun, 08 Nov 2020 22:52:49 GMT
+
+_Version update only_
+
+## 1.3.93
+Fri, 06 Nov 2020 16:09:30 GMT
+
+_Version update only_
+
+## 1.3.92
+Tue, 03 Nov 2020 01:11:19 GMT
+
+_Version update only_
+
+## 1.3.91
+Mon, 02 Nov 2020 16:12:05 GMT
+
+_Version update only_
+
+## 1.3.90
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 1.3.89
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 1.3.88
+Thu, 29 Oct 2020 06:14:19 GMT
+
+_Version update only_
+
+## 1.3.87
+Thu, 29 Oct 2020 00:11:33 GMT
+
+_Version update only_
+
+## 1.3.86
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 1.3.85
+Tue, 27 Oct 2020 15:10:14 GMT
+
+_Version update only_
+
+## 1.3.84
+Sat, 24 Oct 2020 00:11:19 GMT
+
+_Version update only_
+
+## 1.3.83
+Wed, 21 Oct 2020 05:09:44 GMT
+
+_Version update only_
+
+## 1.3.82
+Wed, 21 Oct 2020 02:28:17 GMT
+
+_Version update only_
+
+## 1.3.81
+Fri, 16 Oct 2020 23:32:58 GMT
+
+_Version update only_
+
+## 1.3.80
+Thu, 15 Oct 2020 00:59:08 GMT
+
+_Version update only_
+
+## 1.3.79
+Wed, 14 Oct 2020 23:30:14 GMT
+
+_Version update only_
+
+## 1.3.78
+Tue, 13 Oct 2020 15:11:28 GMT
+
+_Version update only_
+
+## 1.3.77
+Mon, 12 Oct 2020 15:11:16 GMT
+
+_Version update only_
+
+## 1.3.76
+Fri, 09 Oct 2020 15:11:09 GMT
+
+_Version update only_
 
 ## 1.3.75
 Tue, 06 Oct 2020 00:24:06 GMT

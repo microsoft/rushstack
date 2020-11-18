@@ -32,16 +32,16 @@ export interface IPnpmShrinkwrapDependencyYaml {
     tarball?: string;
   };
   /** The list of dependencies and the resolved version */
-  dependencies: { [dependency: string]: string };
+  dependencies?: { [dependency: string]: string };
   /** The list of optional dependencies and the resolved version */
-  optionalDependencies: { [dependency: string]: string };
+  optionalDependencies?: { [dependency: string]: string };
   /** The list of peer dependencies and the resolved version */
-  peerDependencies: { [dependency: string]: string };
+  peerDependencies?: { [dependency: string]: string };
   /**
    * Used to indicate optional peer dependencies, as described in this RFC:
    * https://github.com/yarnpkg/rfcs/blob/master/accepted/0000-optional-peer-dependencies.md
    */
-  peerDependenciesMeta: { [dependency: string]: IPeerDependenciesMetaYaml };
+  peerDependenciesMeta?: { [dependency: string]: IPeerDependenciesMetaYaml };
 }
 
 export interface IPnpmShrinkwrapImporterYaml {
@@ -457,7 +457,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined = this._getPackageDescription(
       tempProjectDependencyKey
     );
-    if (!packageDescription) {
+    if (!packageDescription || !packageDescription.dependencies) {
       return undefined;
     }
 
@@ -577,7 +577,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined = this._getPackageDescription(
       tempProjectDependencyKey
     );
-    if (!packageDescription) {
+    if (!packageDescription || !packageDescription.dependencies) {
       return undefined;
     }
 

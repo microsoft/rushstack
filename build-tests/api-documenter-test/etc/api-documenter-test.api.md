@@ -144,6 +144,15 @@ export interface IDocInterface6 {
 }
 
 // @public
+export interface IDocInterface7 {
+    optionalField?: boolean;
+    optionalMember?(): any;
+    readonly optionalReadonlyField?: boolean;
+    // (undocumented)
+    optionalUndocumentedField?: boolean;
+}
+
+// @public
 export namespace OuterNamespace {
     export namespace InnerNamespace {
         export function nestedFunction(x: number): number;

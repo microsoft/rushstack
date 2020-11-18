@@ -8,7 +8,7 @@
     },
     {
       "name": "@jest/reporters",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@jest/transform",
@@ -16,7 +16,7 @@
     },
     {
       "name": "@jest/types",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@microsoft/api-documenter",
@@ -192,6 +192,10 @@
     },
     {
       "name": "@rushstack/heft-node-rig",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@rushstack/heft-web-rig",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
@@ -372,6 +376,10 @@
     },
     {
       "name": "express",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "fast-glob",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -677,6 +685,10 @@
     {
       "name": "source-map",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "source-map-loader",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "ssri",

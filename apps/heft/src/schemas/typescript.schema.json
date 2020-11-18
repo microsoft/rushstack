@@ -67,10 +67,10 @@
       "properties": {
         "fileExtensions": {
           "type": "array",
-          "description": "File extensions that should be copied from the src folder to the destination folder(s)",
+          "description": "File extensions that should be copied from the source folder to the destination folder(s)",
           "items": {
             "type": "string",
-            "pattern": "\\..+"
+            "pattern": "^\\.[A-z0-9-_.]*[A-z0-9-_]+$"
           }
         },
 

@@ -16,8 +16,7 @@ import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
 import { Git } from '../../logic/Git';
 
-// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
-import * as VersionManagerTypes from '../../logic/VersionManager';
+import type * as VersionManagerTypes from '../../logic/VersionManager';
 const versionManagerModule: typeof VersionManagerTypes = Import.lazy('../../logic/VersionManager', require);
 
 export const DEFAULT_PACKAGE_UPDATE_MESSAGE: string = 'Applying package updates.';
@@ -239,7 +238,8 @@ export class VersionAction extends BaseRushAction {
     });
 
     if (packageJsonUpdated) {
-      git.addChanges(':/*');
+      git.addChanges(this.rushConfiguration.versionPolicyConfigurationFilePath);
+      git.addChanges(':/**/package.json');
       git.commit(this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE);
     }
 

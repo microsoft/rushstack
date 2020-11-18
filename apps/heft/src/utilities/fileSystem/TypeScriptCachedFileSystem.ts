@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as fs from 'fs';
-import * as nodeJsPath from 'path';
 import {
   Encoding,
   Text,
@@ -19,10 +18,6 @@ import {
 export interface IReadFolderFilesAndDirectoriesResult {
   files: string[];
   directories: string[];
-}
-
-export interface ICreateHardLinkExtendedOptions extends IFileSystemCreateLinkOptions {
-  preserveExisting: boolean;
 }
 
 interface ICacheEntry<TEntry> {
@@ -146,30 +141,6 @@ export class TypeScriptCachedFileSystem {
       },
       this._readFolderCache
     );
-  };
-
-  public createHardLinkExtendedAsync: (options: ICreateHardLinkExtendedOptions) => Promise<boolean> = async (
-    options: ICreateHardLinkExtendedOptions
-  ) => {
-    try {
-      await this.createHardLinkAsync(options);
-      return true;
-    } catch (error) {
-      if (error.code === 'EEXIST') {
-        if (options.preserveExisting) {
-          return false;
-        }
-
-        this.deleteFile(options.newLinkPath);
-      } else if (FileSystem.isNotExistError(error)) {
-        await this.ensureFolderAsync(nodeJsPath.dirname(options.newLinkPath));
-      } else {
-        throw error;
-      }
-
-      await this.createHardLinkAsync(options);
-      return true;
-    }
   };
 
   private _sortFolderEntries(folderEntries: fs.Dirent[]): IReadFolderFilesAndDirectoriesResult {

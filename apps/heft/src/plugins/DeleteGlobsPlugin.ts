@@ -4,7 +4,7 @@
 import * as path from 'path';
 import glob from 'glob';
 import { FileSystem, LegacyAdapters } from '@rushstack/node-core-library';
-import { Tap } from 'tapable';
+import { TapOptions } from 'tapable';
 
 import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { HeftSession } from '../pluginFramework/HeftSession';
@@ -20,14 +20,15 @@ import {
   IPostBuildSubstage,
   IPreCompileSubstage
 } from '../stages/BuildStage';
+import { Constants } from '../utilities/Constants';
 
 const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
 
 const PLUGIN_NAME: string = 'DeleteGlobsPlugin';
-const HEFT_STAGE_TAP: Tap = {
+const HEFT_STAGE_TAP: TapOptions<'promise'> = {
   name: PLUGIN_NAME,
   stage: Number.MIN_SAFE_INTEGER
-} as Tap; /* tappable's typings are wrong here */
+};
 
 export class DeleteGlobsPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
@@ -99,22 +100,29 @@ export class DeleteGlobsPlugin implements IHeftPlugin {
       }
     }
 
-    await Async.forEachLimitAsync(Array.from(pathsToDelete), 100, async (pathToDelete) => {
-      try {
-        FileSystem.deleteFile(pathToDelete, { throwIfNotExists: true });
-        logger.terminal.writeVerboseLine(`Deleted "${pathToDelete}"`);
-        deletedFiles++;
-      } catch (error) {
-        if (FileSystem.exists(pathToDelete)) {
-          FileSystem.deleteFolder(pathToDelete);
-          logger.terminal.writeVerboseLine(`Deleted folder "${pathToDelete}"`);
-          deletedFolders++;
+    await Async.forEachLimitAsync(
+      Array.from(pathsToDelete),
+      Constants.maxParallelism,
+      async (pathToDelete) => {
+        try {
+          FileSystem.deleteFile(pathToDelete, { throwIfNotExists: true });
+          logger.terminal.writeVerboseLine(`Deleted "${pathToDelete}"`);
+          deletedFiles++;
+        } catch (error) {
+          if (FileSystem.exists(pathToDelete)) {
+            FileSystem.deleteFolder(pathToDelete);
+            logger.terminal.writeVerboseLine(`Deleted folder "${pathToDelete}"`);
+            deletedFolders++;
+          }
         }
       }
-    });
+    );
 
     if (deletedFiles > 0 || deletedFolders > 0) {
-      logger.terminal.writeLine(`Deleted ${deletedFiles} files and ${deletedFolders} folders`);
+      logger.terminal.writeLine(
+        `Deleted ${deletedFiles} file${deletedFiles !== 1 ? 's' : ''} ` +
+          `and ${deletedFolders} folder${deletedFolders !== 1 ? 's' : ''}`
+      );
     }
   }
 

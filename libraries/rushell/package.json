@@ -21,22 +21,6 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "10.17.13",
-    "jest": "~25.4.0",
-    "ts-jest": "~25.1.0"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx"
-    ],
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "testMatch": [
-      "<rootDir>/src/**/*.test.ts"
-    ]
+    "@types/node": "10.17.13"
   }
 }

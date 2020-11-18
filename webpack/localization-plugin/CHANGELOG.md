@@ -1,6 +1,140 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Tue, 06 Oct 2020 00:24:06 GMT and should not be manually modified.
+This log was last generated on Tue, 17 Nov 2020 01:17:38 GMT and should not be manually modified.
+
+## 0.5.13
+Tue, 17 Nov 2020 01:17:38 GMT
+
+_Version update only_
+
+## 0.5.12
+Mon, 16 Nov 2020 01:57:58 GMT
+
+_Version update only_
+
+## 0.5.11
+Fri, 13 Nov 2020 01:11:01 GMT
+
+_Version update only_
+
+## 0.5.10
+Thu, 12 Nov 2020 01:11:10 GMT
+
+_Version update only_
+
+## 0.5.9
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 0.5.8
+Tue, 10 Nov 2020 23:13:11 GMT
+
+_Version update only_
+
+## 0.5.7
+Tue, 10 Nov 2020 16:11:42 GMT
+
+_Version update only_
+
+## 0.5.6
+Sun, 08 Nov 2020 22:52:49 GMT
+
+_Version update only_
+
+## 0.5.5
+Fri, 06 Nov 2020 16:09:30 GMT
+
+_Version update only_
+
+## 0.5.4
+Tue, 03 Nov 2020 01:11:19 GMT
+
+_Version update only_
+
+## 0.5.3
+Mon, 02 Nov 2020 16:12:05 GMT
+
+_Version update only_
+
+## 0.5.2
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 0.5.1
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 0.5.0
+Thu, 29 Oct 2020 06:14:19 GMT
+
+### Minor changes
+
+- Upgrade @types/tapable
+
+## 0.4.0
+Thu, 29 Oct 2020 00:11:33 GMT
+
+### Minor changes
+
+- Update Webpack dependency to ~4.44.2
+
+## 0.3.85
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 0.3.84
+Tue, 27 Oct 2020 15:10:14 GMT
+
+_Version update only_
+
+## 0.3.83
+Sat, 24 Oct 2020 00:11:18 GMT
+
+_Version update only_
+
+## 0.3.82
+Wed, 21 Oct 2020 05:09:44 GMT
+
+_Version update only_
+
+## 0.3.81
+Wed, 21 Oct 2020 02:28:17 GMT
+
+_Version update only_
+
+## 0.3.80
+Fri, 16 Oct 2020 23:32:58 GMT
+
+_Version update only_
+
+## 0.3.79
+Thu, 15 Oct 2020 00:59:08 GMT
+
+_Version update only_
+
+## 0.3.78
+Wed, 14 Oct 2020 23:30:14 GMT
+
+_Version update only_
+
+## 0.3.77
+Tue, 13 Oct 2020 15:11:28 GMT
+
+_Version update only_
+
+## 0.3.76
+Mon, 12 Oct 2020 15:11:16 GMT
+
+_Version update only_
+
+## 0.3.75
+Fri, 09 Oct 2020 15:11:09 GMT
+
+_Version update only_
 
 ## 0.3.74
 Tue, 06 Oct 2020 00:24:06 GMT

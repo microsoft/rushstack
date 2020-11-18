@@ -1,6 +1,60 @@
 # Change Log - @rushstack/typings-generator
 
-This log was last generated on Tue, 06 Oct 2020 00:24:06 GMT and should not be manually modified.
+This log was last generated on Fri, 13 Nov 2020 01:11:00 GMT and should not be manually modified.
+
+## 0.2.27
+Fri, 13 Nov 2020 01:11:00 GMT
+
+### Patches
+
+- Add register dependency feature for typings generation. 
+
+## 0.2.26
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 0.2.25
+Tue, 10 Nov 2020 23:13:12 GMT
+
+_Version update only_
+
+## 0.2.24
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 0.2.23
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 0.2.22
+Thu, 29 Oct 2020 06:14:19 GMT
+
+_Version update only_
+
+## 0.2.21
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 0.2.20
+Tue, 27 Oct 2020 15:10:13 GMT
+
+_Version update only_
+
+## 0.2.19
+Sat, 24 Oct 2020 00:11:18 GMT
+
+### Patches
+
+- Support `undefined` as a result from parseFileAndGenerateTypings.
+
+## 0.2.18
+Thu, 15 Oct 2020 00:59:08 GMT
+
+_Version update only_
 
 ## 0.2.17
 Tue, 06 Oct 2020 00:24:06 GMT

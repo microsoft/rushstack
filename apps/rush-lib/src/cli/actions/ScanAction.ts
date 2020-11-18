@@ -3,7 +3,7 @@
 
 import colors from 'colors';
 import * as path from 'path';
-import * as builtinPackageNames from 'builtin-modules';
+import builtinPackageNames from 'builtin-modules';
 
 import { Import, FileSystem } from '@rushstack/node-core-library';
 import { RushCommandLineParser } from '../RushCommandLineParser';

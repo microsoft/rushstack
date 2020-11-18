@@ -7,7 +7,7 @@
 import { Terminal } from '@rushstack/node-core-library';
 
 // @public (undocumented)
-export interface IStringValuesTypingsGeneratorOptions extends ITypingsGeneratorOptions<IStringValueTypings> {
+export interface IStringValuesTypingsGeneratorOptions extends ITypingsGeneratorOptions<IStringValueTypings | undefined> {
     exportAsDefault?: boolean;
     exportAsDefaultInterfaceName?: string;
 }
@@ -27,7 +27,7 @@ export interface IStringValueTypings {
 }
 
 // @public (undocumented)
-export interface ITypingsGeneratorOptions<TTypingsResult = string> {
+export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> {
     // (undocumented)
     fileExtensions: string[];
     // (undocumented)
@@ -54,6 +54,7 @@ export class TypingsGenerator {
     generateTypingsAsync(): Promise<void>;
     // (undocumented)
     protected _options: ITypingsGeneratorOptions;
+    registerDependency(target: string, dependency: string): void;
     // (undocumented)
     runWatcherAsync(): Promise<void>;
 }

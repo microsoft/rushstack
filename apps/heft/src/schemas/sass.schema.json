@@ -32,9 +32,27 @@
       "description": "Determines if export values are wrapped in a default property, or not."
     },
 
-    "includePaths": {
+    "fileExtensions": {
+      "type": "array",
+      "description": "Files with these extensions will pass through the Sass transpiler for typings generation.",
+      "items": {
+        "type": "string",
+        "pattern": "^\\.[A-z0-9-_.]*[A-z0-9-_]+$"
+      }
+    },
+
+    "importIncludePaths": {
       "type": "array",
       "description": "A list of paths used when resolving Sass imports.",
+      "items": {
+        "type": "string",
+        "pattern": "[^\\\\]"
+      }
+    },
+
+    "excludeFiles": {
+      "type": "array",
+      "description": "A list of file paths relative to the \"src\" folder that should be excluded from typings generation.",
       "items": {
         "type": "string",
         "pattern": "[^\\\\]"

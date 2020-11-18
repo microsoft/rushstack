@@ -12,6 +12,7 @@ import { CommandLineAction } from '@rushstack/ts-command-line';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { Configuration } from 'webpack-dev-server';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
@@ -94,7 +95,7 @@ export class HeftSession {
     //
     // @internal
     constructor(options: IHeftSessionOptions, internalSessionOptions: IInternalHeftSessionOptions);
-    readonly debugMode: boolean;
+    get debugMode(): boolean;
     // (undocumented)
     readonly hooks: IHeftSessionHooks;
     // @internal (undocumented)
@@ -125,7 +126,7 @@ export interface IBuildStageProperties {
     // (undocumented)
     watchMode: boolean;
     // (undocumented)
-    webpackStats?: webpack.Stats;
+    webpackStats?: webpack.Stats | webpack.compilation.MultiStats;
 }
 
 // @public (undocumented)
@@ -345,7 +346,13 @@ export interface ITestStageProperties {
 }
 
 // @public (undocumented)
-export type IWebpackConfiguration = webpack.Configuration | webpack.Configuration[] | undefined;
+export type IWebpackConfiguration = IWebpackConfigurationWithDevServer | IWebpackConfigurationWithDevServer[] | undefined;
+
+// @public (undocumented)
+export interface IWebpackConfigurationWithDevServer extends webpack.Configuration {
+    // (undocumented)
+    devServer?: Configuration;
+}
 
 // @internal
 export class _MetricsCollector {

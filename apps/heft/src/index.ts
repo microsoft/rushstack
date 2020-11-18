@@ -50,7 +50,8 @@ export {
   ICompileSubstageProperties,
   IPostBuildSubstage,
   IPreCompileSubstage,
-  IWebpackConfiguration
+  IWebpackConfiguration,
+  IWebpackConfigurationWithDevServer
 } from './stages/BuildStage';
 export { ICleanStageProperties, CleanStageHooks, ICleanStageContext } from './stages/CleanStage';
 export { ITestStageProperties, TestStageHooks, ITestStageContext } from './stages/TestStage';

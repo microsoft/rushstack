@@ -19,8 +19,7 @@ import { TaskPackageResolver, ITaskPackageResolution } from '../../utilities/Tas
 import { JestTypeScriptDataFile } from '../JestPlugin/JestTypeScriptDataFile';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { ICleanStageContext, ICleanStageProperties } from '../../stages/CleanStage';
-import { CoreConfigFiles } from '../../utilities/CoreConfigFiles';
-import { ISharedCopyStaticAssetsConfiguration } from '../CopyStaticAssetsPlugin';
+import { CoreConfigFiles, ISharedCopyConfiguration } from '../../utilities/CoreConfigFiles';
 
 const PLUGIN_NAME: string = 'typescript';
 
@@ -79,7 +78,7 @@ export interface ISharedTypeScriptConfiguration {
    * Configures additional file types that should be copied into the TypeScript compiler's emit folders, for example
    * so that these files can be resolved by import statements.
    */
-  staticAssetsToCopy?: ISharedCopyStaticAssetsConfiguration;
+  staticAssetsToCopy?: ISharedCopyConfiguration;
 }
 
 export interface ITypeScriptConfigurationJson extends ISharedTypeScriptConfiguration {

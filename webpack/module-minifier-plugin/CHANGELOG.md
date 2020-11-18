@@ -1,6 +1,140 @@
 # Change Log - @rushstack/module-minifier-plugin
 
-This log was last generated on Tue, 06 Oct 2020 00:24:06 GMT and should not be manually modified.
+This log was last generated on Tue, 17 Nov 2020 01:17:38 GMT and should not be manually modified.
+
+## 0.3.13
+Tue, 17 Nov 2020 01:17:38 GMT
+
+_Version update only_
+
+## 0.3.12
+Mon, 16 Nov 2020 01:57:58 GMT
+
+_Version update only_
+
+## 0.3.11
+Fri, 13 Nov 2020 01:11:01 GMT
+
+_Version update only_
+
+## 0.3.10
+Thu, 12 Nov 2020 01:11:10 GMT
+
+_Version update only_
+
+## 0.3.9
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 0.3.8
+Tue, 10 Nov 2020 23:13:12 GMT
+
+_Version update only_
+
+## 0.3.7
+Tue, 10 Nov 2020 16:11:42 GMT
+
+_Version update only_
+
+## 0.3.6
+Sun, 08 Nov 2020 22:52:49 GMT
+
+_Version update only_
+
+## 0.3.5
+Fri, 06 Nov 2020 16:09:30 GMT
+
+_Version update only_
+
+## 0.3.4
+Tue, 03 Nov 2020 01:11:19 GMT
+
+_Version update only_
+
+## 0.3.3
+Mon, 02 Nov 2020 16:12:05 GMT
+
+_Version update only_
+
+## 0.3.2
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 0.3.1
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 0.3.0
+Thu, 29 Oct 2020 06:14:19 GMT
+
+### Minor changes
+
+- Upgrade @types/tapable
+
+## 0.2.0
+Thu, 29 Oct 2020 00:11:33 GMT
+
+### Minor changes
+
+- Update Webpack dependency to ~4.44.2
+
+## 0.1.58
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 0.1.57
+Tue, 27 Oct 2020 15:10:14 GMT
+
+_Version update only_
+
+## 0.1.56
+Sat, 24 Oct 2020 00:11:19 GMT
+
+_Version update only_
+
+## 0.1.55
+Wed, 21 Oct 2020 05:09:44 GMT
+
+_Version update only_
+
+## 0.1.54
+Wed, 21 Oct 2020 02:28:17 GMT
+
+_Version update only_
+
+## 0.1.53
+Fri, 16 Oct 2020 23:32:58 GMT
+
+_Version update only_
+
+## 0.1.52
+Thu, 15 Oct 2020 00:59:08 GMT
+
+_Version update only_
+
+## 0.1.51
+Wed, 14 Oct 2020 23:30:14 GMT
+
+_Version update only_
+
+## 0.1.50
+Tue, 13 Oct 2020 15:11:28 GMT
+
+_Version update only_
+
+## 0.1.49
+Mon, 12 Oct 2020 15:11:16 GMT
+
+_Version update only_
+
+## 0.1.48
+Fri, 09 Oct 2020 15:11:09 GMT
+
+_Version update only_
 
 ## 0.1.47
 Tue, 06 Oct 2020 00:24:06 GMT

@@ -43,6 +43,7 @@ This project tests various documentation generation scenarios and doc comment sy
 |  [IDocInterface4](./api-documenter-test.idocinterface4.md) | Type union in an interface. |
 |  [IDocInterface5](./api-documenter-test.idocinterface5.md) | Interface without inline tag to test custom TOC |
 |  [IDocInterface6](./api-documenter-test.idocinterface6.md) | Interface without inline tag to test custom TOC with injection |
+|  [IDocInterface7](./api-documenter-test.idocinterface7.md) | Interface for testing optional properties |
 
 ## Namespaces
 

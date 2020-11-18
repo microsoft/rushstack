@@ -32,6 +32,7 @@ items:
       - 'api-documenter-test!IDocInterface4:interface'
       - 'api-documenter-test!IDocInterface5:interface'
       - 'api-documenter-test!IDocInterface6:interface'
+      - 'api-documenter-test!IDocInterface7:interface'
       - 'api-documenter-test!OuterNamespace:namespace'
       - 'api-documenter-test!OuterNamespace.InnerNamespace:namespace'
       - 'api-documenter-test!SystemEvent:class'
@@ -209,6 +210,8 @@ references:
     name: IDocInterface5
   - uid: 'api-documenter-test!IDocInterface6:interface'
     name: IDocInterface6
+  - uid: 'api-documenter-test!IDocInterface7:interface'
+    name: IDocInterface7
   - uid: 'api-documenter-test!OuterNamespace:namespace'
     name: OuterNamespace
   - uid: 'api-documenter-test!OuterNamespace.InnerNamespace:namespace'

@@ -273,7 +273,6 @@ export interface ApiItemContainerMixin extends ApiItem {
     findMembersByName(name: string): ReadonlyArray<ApiItem>;
     // @internal
     _getMergedSiblingsForMember(memberApiItem: ApiItem): ReadonlyArray<ApiItem>;
-    readonly members: ReadonlyArray<ApiItem>;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiItemJson>): void;
     tryGetMemberByKey(containerKey: string): ApiItem | undefined;
@@ -470,6 +469,7 @@ export class ApiProperty extends ApiProperty_base {
 export class ApiPropertyItem extends ApiPropertyItem_base {
     constructor(options: IApiPropertyItemOptions);
     get isEventProperty(): boolean;
+    readonly isOptional: boolean;
     // Warning: (ae-forgotten-export) The symbol "IApiPropertyItemJson" needs to be exported by the entry point index.d.ts
     //
     // @override (undocumented)
@@ -752,6 +752,8 @@ export interface IApiParameterOptions {
 
 // @public
 export interface IApiPropertyItemOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+    // (undocumented)
+    isOptional?: boolean;
     // (undocumented)
     propertyTypeTokenRange: IExcerptTokenRange;
 }

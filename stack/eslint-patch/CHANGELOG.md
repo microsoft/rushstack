@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Oct 2020 00:10:14 GMT and should not be manually modified.
+
+## 1.0.6
+Fri, 30 Oct 2020 00:10:14 GMT
+
+### Patches
+
+- Update the "modern-module-resolution" patch to support ESLint 7.8.0 and newer
 
 ## 1.0.5
 Wed, 30 Sep 2020 18:39:17 GMT

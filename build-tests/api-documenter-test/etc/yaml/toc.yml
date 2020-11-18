@@ -53,6 +53,8 @@ items:
             uid: 'api-documenter-test!EcmaSmbols:namespace'
           - name: Generic
             uid: 'api-documenter-test!Generic:class'
+          - name: IDocInterface7
+            uid: 'api-documenter-test!IDocInterface7:interface'
           - name: OuterNamespace
             uid: 'api-documenter-test!OuterNamespace:namespace'
           - name: OuterNamespace.InnerNamespace

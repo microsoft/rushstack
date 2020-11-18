@@ -1,6 +1,136 @@
 # Change Log - @rushstack/stream-collator
 
-This log was last generated on Tue, 06 Oct 2020 00:24:06 GMT and should not be manually modified.
+This log was last generated on Tue, 17 Nov 2020 01:17:38 GMT and should not be manually modified.
+
+## 4.0.46
+Tue, 17 Nov 2020 01:17:38 GMT
+
+_Version update only_
+
+## 4.0.45
+Mon, 16 Nov 2020 01:57:58 GMT
+
+_Version update only_
+
+## 4.0.44
+Fri, 13 Nov 2020 01:11:01 GMT
+
+_Version update only_
+
+## 4.0.43
+Thu, 12 Nov 2020 01:11:10 GMT
+
+_Version update only_
+
+## 4.0.42
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 4.0.41
+Tue, 10 Nov 2020 23:13:12 GMT
+
+_Version update only_
+
+## 4.0.40
+Tue, 10 Nov 2020 16:11:42 GMT
+
+_Version update only_
+
+## 4.0.39
+Sun, 08 Nov 2020 22:52:49 GMT
+
+_Version update only_
+
+## 4.0.38
+Fri, 06 Nov 2020 16:09:30 GMT
+
+_Version update only_
+
+## 4.0.37
+Tue, 03 Nov 2020 01:11:19 GMT
+
+_Version update only_
+
+## 4.0.36
+Mon, 02 Nov 2020 16:12:05 GMT
+
+_Version update only_
+
+## 4.0.35
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 4.0.34
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 4.0.33
+Thu, 29 Oct 2020 06:14:19 GMT
+
+_Version update only_
+
+## 4.0.32
+Thu, 29 Oct 2020 00:11:33 GMT
+
+_Version update only_
+
+## 4.0.31
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 4.0.30
+Tue, 27 Oct 2020 15:10:14 GMT
+
+_Version update only_
+
+## 4.0.29
+Sat, 24 Oct 2020 00:11:19 GMT
+
+_Version update only_
+
+## 4.0.28
+Wed, 21 Oct 2020 05:09:44 GMT
+
+_Version update only_
+
+## 4.0.27
+Wed, 21 Oct 2020 02:28:17 GMT
+
+_Version update only_
+
+## 4.0.26
+Fri, 16 Oct 2020 23:32:58 GMT
+
+_Version update only_
+
+## 4.0.25
+Thu, 15 Oct 2020 00:59:08 GMT
+
+_Version update only_
+
+## 4.0.24
+Wed, 14 Oct 2020 23:30:14 GMT
+
+_Version update only_
+
+## 4.0.23
+Tue, 13 Oct 2020 15:11:28 GMT
+
+_Version update only_
+
+## 4.0.22
+Mon, 12 Oct 2020 15:11:16 GMT
+
+_Version update only_
+
+## 4.0.21
+Fri, 09 Oct 2020 15:11:09 GMT
+
+_Version update only_
 
 ## 4.0.20
 Tue, 06 Oct 2020 00:24:06 GMT
