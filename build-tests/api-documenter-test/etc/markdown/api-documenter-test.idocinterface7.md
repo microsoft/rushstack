@@ -16,9 +16,9 @@ export interface IDocInterface7
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [optionalField?](./api-documenter-test.idocinterface7.optionalfield.md) | boolean | <i>(Optional)</i> Description of optionalField |
-|  [optionalReadonlyField?](./api-documenter-test.idocinterface7.optionalreadonlyfield.md) | boolean | <i>(Optional)</i> Description of optionalReadonlyField |
-|  [optionalUndocumentedField?](./api-documenter-test.idocinterface7.optionalundocumentedfield.md) | boolean | <i>(Optional)</i> |
+|  [optionalField](./api-documenter-test.idocinterface7.optionalfield.md) | boolean | Description of optionalField |
+|  [optionalReadonlyField](./api-documenter-test.idocinterface7.optionalreadonlyfield.md) | boolean | Description of optionalReadonlyField |
+|  [optionalUndocumentedField](./api-documenter-test.idocinterface7.optionalundocumentedfield.md) | boolean |  |
 
 ## Methods
 
