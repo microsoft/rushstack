@@ -12,13 +12,25 @@
 
 export * from './DocClass1';
 export * from './DocEnums';
-import { IDocInterface1 } from './DocClass1';
+import { IDocInterface1, IDocInterface3, SystemEvent } from './DocClass1';
 
 /**
  * A type alias
  * @public
  */
 export type ExampleTypeAlias = Promise<boolean>;
+
+/**
+ * A type alias that references multiple other types.
+ * @public
+ */
+export type ExampleUnionTypeAlias = IDocInterface1 | IDocInterface3;
+
+/**
+ * A type alias that has duplicate references.
+ * @public
+ */
+export type ExampleDuplicateTypeAlias = SystemEvent | typeof SystemEvent;
 
 /**
  * An exported variable declaration.
