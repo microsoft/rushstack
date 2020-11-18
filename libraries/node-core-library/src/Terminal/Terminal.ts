@@ -318,7 +318,7 @@ export class Terminal {
               switch (textAttribute) {
                 case TextAttribute.Bold: {
                   startColorCodes.push(ConsoleColorCodes.Bold);
-                  endColorCodes.push(ConsoleColorCodes.BoldOff);
+                  endColorCodes.push(ConsoleColorCodes.NormalColorOrIntensity);
                   break;
                 }
 

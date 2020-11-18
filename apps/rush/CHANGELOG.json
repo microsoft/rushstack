@@ -2,6 +2,66 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.35.2",
+      "tag": "@microsoft/rush_v5.35.2",
+      "date": "Tue, 03 Nov 2020 23:34:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix bug where version process is using a wrong `git.addChanges` signature"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.35.1",
+      "tag": "@microsoft/rush_v5.35.1",
+      "date": "Fri, 30 Oct 2020 05:17:42 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a recent \"rush scan\" regression (which resulted from enabling \"esModuleInterop\")"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.35.0",
+      "tag": "@microsoft/rush_v5.35.0",
+      "date": "Wed, 28 Oct 2020 21:44:10 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Adds an --ignore-hooks flag to every rush action that skips event hooks during execution of the action."
+          },
+          {
+            "comment": "Fix bug where version process was not adding version-policy configuration file changes into the version commit"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.34.4",
+      "tag": "@microsoft/rush_v5.34.4",
+      "date": "Sat, 17 Oct 2020 00:23:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "When running `rush version --bump`, only include package.json updates in the generated commit"
+          },
+          {
+            "comment": "Fix Rush peer dependency validation when satisfied with a package alias"
+          },
+          {
+            "comment": "Prevent `rush unlink` from breaking installs for non-workspace projects"
+          },
+          {
+            "comment": "Add documentation for incremental option for buld custom commands"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.34.3",
       "tag": "@microsoft/rush_v5.34.3",
       "date": "Wed, 30 Sep 2020 21:04:15 GMT",

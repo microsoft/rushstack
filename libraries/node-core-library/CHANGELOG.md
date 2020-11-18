@@ -1,6 +1,41 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Tue, 06 Oct 2020 00:24:06 GMT and should not be manually modified.
+This log was last generated on Wed, 11 Nov 2020 01:08:59 GMT and should not be manually modified.
+
+## 3.35.1
+Wed, 11 Nov 2020 01:08:59 GMT
+
+_Version update only_
+
+## 3.35.0
+Tue, 10 Nov 2020 23:13:11 GMT
+
+### Minor changes
+
+- Add new "copyFileToMany" API to copy a single file to multiple locations
+- Add an alreadyExistsBehavior option to the options for creating links in FileSystem.
+
+## 3.34.7
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 3.34.6
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 3.34.5
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 3.34.4
+Tue, 27 Oct 2020 15:10:13 GMT
+
+### Patches
+
+- Fix an issue where the TextAttribute.Bold ANSI escape was not rendered correctly by Linux
 
 ## 3.34.3
 Tue, 06 Oct 2020 00:24:06 GMT

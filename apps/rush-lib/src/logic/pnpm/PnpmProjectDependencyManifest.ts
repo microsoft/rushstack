@@ -13,7 +13,7 @@ import {
 } from './PnpmShrinkwrapFile';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../RushConstants';
-import { DependencySpecifier } from '../DependencySpecifier';
+import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 
 export interface IPnpmProjectDependencyManifestOptions {
   pnpmShrinkwrapFile: PnpmShrinkwrapFile;
@@ -178,92 +178,98 @@ export class PnpmProjectDependencyManifest {
       return;
     }
 
-    for (const peerDependencyName in shrinkwrapEntry.peerDependencies) {
-      if (shrinkwrapEntry.peerDependencies.hasOwnProperty(peerDependencyName)) {
-        // Peer dependencies come in the form of a semantic version range
-        const dependencySemVer: string = shrinkwrapEntry.peerDependencies[peerDependencyName];
+    for (const [peerDependencyName, peerDependencyVersion] of Object.entries(
+      shrinkwrapEntry.peerDependencies || {}
+    )) {
+      // Check to see if the peer dependency is satisfied with the current shrinkwrap
+      // entry and if not, check the parent shrinkwrap entry
+      if (
+        this._validatePeerDependencyVersion(shrinkwrapEntry, peerDependencyName, peerDependencyVersion) ||
+        this._validatePeerDependencyVersion(parentShrinkwrapEntry, peerDependencyName, peerDependencyVersion)
+      ) {
+        continue;
+      }
 
-        // Check the current package to see if the dependency is already satisfied
-        if (shrinkwrapEntry.dependencies && shrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)) {
-          const dependencySpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
+      // The parent doesn't have a version that satisfies the range. As a last attempt, check
+      // if it's been hoisted up as a top-level dependency
+      const topLevelDependencySpecifier:
+        | DependencySpecifier
+        | undefined = this._pnpmShrinkwrapFile.getTopLevelDependencyVersion(peerDependencyName);
+
+      // Sometimes peer dependencies are hoisted but are not represented in the shrinkwrap file
+      // (such as when implicitlyPreferredVersions is false) so we need to find the correct key
+      // and add it ourselves
+      if (!topLevelDependencySpecifier) {
+        const peerDependencyKeys: {
+          [peerDependencyName: string]: string;
+        } = this._parsePeerDependencyKeysFromSpecifier(specifier);
+        if (peerDependencyKeys.hasOwnProperty(peerDependencyName)) {
+          this._addDependencyInternal(
             peerDependencyName,
-            shrinkwrapEntry.dependencies[peerDependencyName]
+            peerDependencyKeys[peerDependencyName],
+            shrinkwrapEntry
           );
-          if (dependencySpecifier) {
-            if (!semver.valid(dependencySpecifier.versionSpecifier)) {
-              throw new InternalError(
-                `The version '${dependencySemVer}' of peer dependency '${peerDependencyName}' is invalid`
-              );
-            }
-            continue;
-          }
+          continue;
         }
+      }
 
-        // If not, check the parent.
+      if (!topLevelDependencySpecifier || !semver.valid(topLevelDependencySpecifier.versionSpecifier)) {
         if (
-          parentShrinkwrapEntry.dependencies &&
-          parentShrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)
+          !this._project.rushConfiguration.pnpmOptions ||
+          !this._project.rushConfiguration.pnpmOptions.strictPeerDependencies ||
+          (shrinkwrapEntry.peerDependenciesMeta &&
+            shrinkwrapEntry.peerDependenciesMeta.hasOwnProperty(peerDependencyName) &&
+            shrinkwrapEntry.peerDependenciesMeta[peerDependencyName].optional)
         ) {
-          const dependencySpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
-            peerDependencyName,
-            parentShrinkwrapEntry.dependencies[peerDependencyName]
-          );
-          if (dependencySpecifier) {
-            if (!semver.valid(dependencySpecifier.versionSpecifier)) {
-              throw new InternalError(
-                `The version '${dependencySemVer}' of peer dependency '${peerDependencyName}' is invalid`
-              );
-            }
-            continue;
-          }
+          // We couldn't find the peer dependency, but we determined it's by design, skip this dependency...
+          continue;
         }
-
-        // The parent doesn't have a version that satisfies the range. As a last attempt, check
-        // if it's been hoisted up as a top-level dependency
-        const topLevelDependencySpecifier:
-          | DependencySpecifier
-          | undefined = this._pnpmShrinkwrapFile.getTopLevelDependencyVersion(peerDependencyName);
-
-        // Sometimes peer dependencies are hoisted but are not represented in the shrinkwrap file
-        // (such as when implicitlyPreferredVersions is false) so we need to find the correct key
-        // and add it ourselves
-        if (!topLevelDependencySpecifier) {
-          const peerDependencyKeys: {
-            [peerDependencyName: string]: string;
-          } = this._parsePeerDependencyKeysFromSpecifier(specifier);
-          if (peerDependencyKeys.hasOwnProperty(peerDependencyName)) {
-            this._addDependencyInternal(
-              peerDependencyName,
-              peerDependencyKeys[peerDependencyName],
-              shrinkwrapEntry
-            );
-            continue;
-          }
-        }
-
-        if (!topLevelDependencySpecifier || !semver.valid(topLevelDependencySpecifier.versionSpecifier)) {
-          if (
-            !this._project.rushConfiguration.pnpmOptions ||
-            !this._project.rushConfiguration.pnpmOptions.strictPeerDependencies ||
-            (shrinkwrapEntry.peerDependenciesMeta &&
-              shrinkwrapEntry.peerDependenciesMeta.hasOwnProperty(peerDependencyName) &&
-              shrinkwrapEntry.peerDependenciesMeta[peerDependencyName].optional)
-          ) {
-            // We couldn't find the peer dependency, but we determined it's by design, skip this dependency...
-            continue;
-          }
-          throw new InternalError(
-            `Could not find peer dependency '${peerDependencyName}' that satisfies version '${dependencySemVer}'`
-          );
-        }
-
-        this._addDependencyInternal(
-          peerDependencyName,
-          this._pnpmShrinkwrapFile.getTopLevelDependencyKey(peerDependencyName)!,
-          shrinkwrapEntry
+        throw new InternalError(
+          `Could not find peer dependency '${peerDependencyName}' that satisfies version '${peerDependencyVersion}'`
         );
       }
+
+      this._addDependencyInternal(
+        peerDependencyName,
+        this._pnpmShrinkwrapFile.getTopLevelDependencyKey(peerDependencyName)!,
+        shrinkwrapEntry
+      );
     }
+  }
+
+  private _validatePeerDependencyVersion(
+    shrinkwrapEntry: Pick<
+      IPnpmShrinkwrapDependencyYaml,
+      'dependencies' | 'optionalDependencies' | 'peerDependencies'
+    >,
+    peerDependencyName: string,
+    peerDependencyVersion: string
+  ): boolean {
+    // Check the current package to see if the dependency is already satisfied
+    if (shrinkwrapEntry.dependencies && shrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)) {
+      let dependencySpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
+        peerDependencyName,
+        shrinkwrapEntry.dependencies[peerDependencyName]
+      );
+      if (dependencySpecifier) {
+        if (
+          dependencySpecifier.specifierType === DependencySpecifierType.Alias &&
+          dependencySpecifier.aliasTarget
+        ) {
+          dependencySpecifier = dependencySpecifier.aliasTarget;
+        }
+
+        if (!semver.valid(dependencySpecifier.versionSpecifier)) {
+          throw new InternalError(
+            `The version '${peerDependencyVersion}' of peer dependency '${peerDependencyName}' is invalid`
+          );
+        }
+
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**

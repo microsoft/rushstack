@@ -1,18 +1,20 @@
-# Ignore everything by default
-**
+# THIS IS A STANDARD TEMPLATE FOR .npmignore FILES IN THIS REPO.
 
-# Use negative patterns to bring back the specific things we want to publish
+# Ignore all files by default, to avoid accidentally publishing unintended files.
+*
+
+# Use negative patterns to bring back the specific things we want to publish.
 !/bin/**
 !/lib/**
+!/lib-*/**
 !/dist/**
 !ThirdPartyNotice.txt
-!/EULA/**
 
-# Ignore certain files in the above folder
+# Ignore certain patterns that should not get published.
 /dist/*.stats.*
-/lib/**/test/**
-/lib/**/*.js.map
-/dist/**/*.js.map
+/lib/**/test/
+/lib-*/**/test/
+*.test.js
 
 # NOTE: These don't need to be specified, because NPM includes them automatically.
 #
@@ -21,6 +23,9 @@
 # CHANGELOG (and its variants)
 # LICENSE / LICENCE
 
-## Project specific definitions
-# -----------------------------
+#--------------------------------------------
+# DO NOT MODIFY THE TEMPLATE ABOVE THIS LINE
+#--------------------------------------------
+
+# (Add your project-specific overrides here)
 !/includes/**

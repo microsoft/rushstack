@@ -1,6 +1,144 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 13 Oct 2020 15:11:28 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Nov 2020 08:19:54 GMT and should not be manually modified.
+
+## 7.11.0
+Wed, 18 Nov 2020 08:19:54 GMT
+
+### Minor changes
+
+- Both methods and properties can now be displayed as "optional" in the documentation
+
+## 7.10.1
+Wed, 18 Nov 2020 06:21:58 GMT
+
+_Version update only_
+
+## 7.10.0
+Wed, 18 Nov 2020 03:15:22 GMT
+
+### Minor changes
+
+- Support for generating hyperlinks from type aliases
+
+### Patches
+
+- Marking optional properties on interface reference docs
+
+## 7.9.33
+Tue, 17 Nov 2020 01:17:38 GMT
+
+_Version update only_
+
+## 7.9.32
+Mon, 16 Nov 2020 01:57:58 GMT
+
+_Version update only_
+
+## 7.9.31
+Fri, 13 Nov 2020 01:11:00 GMT
+
+_Version update only_
+
+## 7.9.30
+Thu, 12 Nov 2020 01:11:10 GMT
+
+_Version update only_
+
+## 7.9.29
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 7.9.28
+Tue, 10 Nov 2020 23:13:11 GMT
+
+_Version update only_
+
+## 7.9.27
+Tue, 10 Nov 2020 16:11:42 GMT
+
+_Version update only_
+
+## 7.9.26
+Sun, 08 Nov 2020 22:52:49 GMT
+
+_Version update only_
+
+## 7.9.25
+Fri, 06 Nov 2020 16:09:30 GMT
+
+_Version update only_
+
+## 7.9.24
+Tue, 03 Nov 2020 01:11:18 GMT
+
+_Version update only_
+
+## 7.9.23
+Mon, 02 Nov 2020 16:12:05 GMT
+
+_Version update only_
+
+## 7.9.22
+Fri, 30 Oct 2020 06:38:38 GMT
+
+_Version update only_
+
+## 7.9.21
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 7.9.20
+Thu, 29 Oct 2020 06:14:19 GMT
+
+_Version update only_
+
+## 7.9.19
+Thu, 29 Oct 2020 00:11:33 GMT
+
+_Version update only_
+
+## 7.9.18
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 7.9.17
+Tue, 27 Oct 2020 15:10:13 GMT
+
+_Version update only_
+
+## 7.9.16
+Sat, 24 Oct 2020 00:11:18 GMT
+
+_Version update only_
+
+## 7.9.15
+Wed, 21 Oct 2020 05:09:44 GMT
+
+_Version update only_
+
+## 7.9.14
+Wed, 21 Oct 2020 02:28:17 GMT
+
+_Version update only_
+
+## 7.9.13
+Fri, 16 Oct 2020 23:32:58 GMT
+
+_Version update only_
+
+## 7.9.12
+Thu, 15 Oct 2020 00:59:08 GMT
+
+_Version update only_
+
+## 7.9.11
+Wed, 14 Oct 2020 23:30:14 GMT
+
+_Version update only_
 
 ## 7.9.10
 Tue, 13 Oct 2020 15:11:28 GMT

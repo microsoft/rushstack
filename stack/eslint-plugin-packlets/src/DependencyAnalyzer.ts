@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import type * as ts from 'typescript';
-import * as path from 'path';
 
 import { Path } from './Path';
 import { PackletAnalyzer } from './PackletAnalyzer';
@@ -74,7 +73,9 @@ export class DependencyAnalyzer {
     visitedPacklets: Set<string>,
     previousNode: IImportListNode | undefined
   ): IImportListNode | undefined {
-    const packletEntryPoint: string = path.join(packletsFolderPath, packletName, 'index');
+    visitedPacklets.add(packletName);
+
+    const packletEntryPoint: string = Path.join(packletsFolderPath, packletName, 'index');
 
     const tsSourceFile: ts.SourceFile | undefined =
       program.getSourceFile(packletEntryPoint + '.ts') || program.getSourceFile(packletEntryPoint + '.tsx');
@@ -93,26 +94,36 @@ export class DependencyAnalyzer {
 
         // Is it a reference to a packlet?
         if (Path.isUnder(referencingFilePath, packletsFolderPath)) {
-          const referencingRelativePath: string = path.relative(packletsFolderPath, referencingFilePath);
+          const referencingRelativePath: string = Path.relative(packletsFolderPath, referencingFilePath);
           const referencingPathParts: string[] = referencingRelativePath.split(/[\/\\]+/);
           const referencingPackletName: string = referencingPathParts[0];
 
-          // Have we already analyzed this packlet?
-          if (!visitedPacklets.has(packletName)) {
-            visitedPacklets.add(packletName);
+          // Did we return to where we started from?
+          if (referencingPackletName === startingPackletName) {
+            // Ignore the degenerate case where the starting node imports itself,
+            // since @rushstack/packlets/mechanics will already report that.
+            if (previousNode) {
+              // Make a new linked list node to record this step of the traversal
+              const importListNode: IImportListNode = {
+                previousNode: previousNode,
+                fromFilePath: referencingFilePath,
+                packletName: packletName
+              };
 
-            // Make a new linked list node  to record this step of the traversal
+              // The traversal has returned to the packlet that we started from;
+              // this means we have detected a circular dependency
+              return importListNode;
+            }
+          }
+
+          // Have we already analyzed this packlet?
+          if (!visitedPacklets.has(referencingPackletName)) {
+            // Make a new linked list node to record this step of the traversal
             const importListNode: IImportListNode = {
               previousNode: previousNode,
               fromFilePath: referencingFilePath,
               packletName: packletName
             };
-
-            if (referencingPackletName === startingPackletName) {
-              // The traversal has returned to the packlet that we started from;
-              // this means we have detected a circular dependency
-              return importListNode;
-            }
 
             const result: IImportListNode | undefined = DependencyAnalyzer._walkImports(
               referencingPackletName,

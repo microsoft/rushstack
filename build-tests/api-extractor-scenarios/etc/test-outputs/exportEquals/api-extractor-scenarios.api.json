@@ -47,6 +47,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "releaseTag": "Public",
               "name": "context",
               "propertyTypeTokenRange": {

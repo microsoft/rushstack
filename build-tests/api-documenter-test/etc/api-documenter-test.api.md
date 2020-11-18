@@ -68,10 +68,16 @@ export namespace EcmaSmbols {
 }
 
 // @public
+export type ExampleDuplicateTypeAlias = SystemEvent | typeof SystemEvent;
+
+// @public
 export function exampleFunction(x: ExampleTypeAlias, y: number): IDocInterface1;
 
 // @public
 export type ExampleTypeAlias = Promise<boolean>;
+
+// @public
+export type ExampleUnionTypeAlias = IDocInterface1 | IDocInterface3;
 
 // @public
 export class Generic<T> {
@@ -135,6 +141,15 @@ export interface IDocInterface6 {
     typeReferenceProperty: Generic<IDocInterface1>;
     // (undocumented)
     unionProperty: IDocInterface1 | IDocInterface2;
+}
+
+// @public
+export interface IDocInterface7 {
+    optionalField?: boolean;
+    optionalMember?(): any;
+    readonly optionalReadonlyField?: boolean;
+    // (undocumented)
+    optionalUndocumentedField?: boolean;
 }
 
 // @public

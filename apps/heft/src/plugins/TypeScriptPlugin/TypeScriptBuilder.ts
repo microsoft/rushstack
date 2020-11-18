@@ -12,10 +12,11 @@ import {
   InternalError,
   ITerminalProvider,
   FileSystem,
-  Path
+  Path,
+  AlreadyExistsBehavior
 } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
-import type { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.9';
+import type * as TTypescript from 'typescript';
 import {
   ExtendedTypeScript,
   IExtendedProgram,
@@ -166,7 +167,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     const parsedVersion: semver.SemVer | null = semver.parse(this._typescriptVersion);
     if (!parsedVersion) {
       throw new Error(
-        'Unable to parse version "${this._typescriptVersion}" for TypeScript compiler package in: ' +
+        `Unable to parse version "${this._typescriptVersion}" for TypeScript compiler package in: ` +
           compilerPackageJsonFilename
       );
     }
@@ -510,11 +511,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           queueLinkOrCopy = (options: IFileSystemCreateLinkOptions) => {
             linkPromises.push(
               this._cachedFileSystem
-                .createHardLinkExtendedAsync({ ...options, preserveExisting: true })
-                .then((successful) => {
-                  if (successful) {
-                    linkCount++;
-                  }
+                .createHardLinkAsync({ ...options, alreadyExistsBehavior: AlreadyExistsBehavior.Ignore })
+                .then(() => {
+                  linkCount++;
                 })
                 .catch((error) => {
                   if (!FileSystem.isNotExistError(error)) {

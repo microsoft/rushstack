@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/set-webpack-public-path-plugin",
-  "version": "3.0.10",
+  "version": "3.1.16",
   "description": "This plugin sets the webpack public path at runtime.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -31,8 +31,8 @@
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
     "@types/node": "10.17.13",
-    "@types/tapable": "1.0.5",
+    "@types/tapable": "1.0.6",
     "@types/uglify-js": "2.6.29",
-    "@types/webpack": "4.39.8"
+    "@types/webpack": "4.41.24"
   }
 }

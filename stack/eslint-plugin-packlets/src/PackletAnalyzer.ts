@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import * as fs from 'fs';
 import { Path } from './Path';
 
 export type InputFileMessageIds =
-  | 'missing-tsconfig'
-  | 'missing-src-folder'
-  | 'packlet-folder-case'
+  | 'file-in-packets-folder'
   | 'invalid-packlet-name'
-  | 'misplaced-packlets-folder';
+  | 'misplaced-packlets-folder'
+  | 'missing-src-folder'
+  | 'missing-tsconfig'
+  | 'packlet-folder-case';
 
 export type ImportMessageIds =
   | 'bypassed-entry-point'
@@ -81,7 +81,7 @@ export class PackletAnalyzer {
       return;
     }
 
-    srcFolderPath = path.join(path.dirname(tsconfigFilePath), 'src');
+    srcFolderPath = Path.join(Path.dirname(tsconfigFilePath), 'src');
 
     if (!fs.existsSync(srcFolderPath)) {
       this.error = { messageId: 'missing-src-folder', data: { srcFolderPath } };
@@ -95,21 +95,21 @@ export class PackletAnalyzer {
     }
 
     // Example: packlets/my-packlet/index.ts
-    const inputFilePathRelativeToSrc: string = path.relative(srcFolderPath, inputFilePath);
+    const inputFilePathRelativeToSrc: string = Path.relative(srcFolderPath, inputFilePath);
 
     // Example: [ 'packlets', 'my-packlet', 'index.ts' ]
     const pathParts: string[] = inputFilePathRelativeToSrc.split(/[\/\\]+/);
 
     let underPackletsFolder: boolean = false;
 
-    const expectedPackletsFolder: string = path.join(srcFolderPath, 'packlets');
+    const expectedPackletsFolder: string = Path.join(srcFolderPath, 'packlets');
 
     for (let i = 0; i < pathParts.length; ++i) {
       const pathPart: string = pathParts[i];
       if (pathPart.toUpperCase() === 'PACKLETS') {
         if (pathPart !== 'packlets') {
           // Example: /path/to/my-project/src/PACKLETS
-          const packletsFolderPath: string = path.join(srcFolderPath, ...pathParts.slice(0, i + 1));
+          const packletsFolderPath: string = Path.join(srcFolderPath, ...pathParts.slice(0, i + 1));
           this.error = { messageId: 'packlet-folder-case', data: { packletsFolderPath } };
           return;
         }
@@ -129,24 +129,33 @@ export class PackletAnalyzer {
       this.packletsFolderPath = expectedPackletsFolder;
     }
 
-    if (underPackletsFolder && pathParts.length >= 2) {
-      // Example: 'my-packlet'
-      const packletName: string = pathParts[1];
-      this.inputFilePackletName = packletName;
+    if (underPackletsFolder) {
+      if (pathParts.length === 2) {
+        // Example: src/packlets/SomeFile.ts
+        this.error = { messageId: 'file-in-packets-folder' };
+        return;
+      }
+      if (pathParts.length >= 2) {
+        // Example: 'my-packlet'
+        const packletName: string = pathParts[1];
+        this.inputFilePackletName = packletName;
 
-      // Example: 'index.ts' or 'index.tsx'
-      const thirdPart: string = pathParts[2];
+        if (pathParts.length === 3) {
+          // Example: 'index.ts' or 'index.tsx'
+          const thirdPart: string = pathParts[2];
 
-      // Example: 'index'
-      const thirdPartWithoutExtension: string = path.parse(thirdPart).name;
+          // Example: 'index'
+          const thirdPartWithoutExtension: string = Path.parse(thirdPart).name;
 
-      if (thirdPartWithoutExtension.toUpperCase() === 'INDEX') {
-        if (!PackletAnalyzer._validPackletName.test(packletName)) {
-          this.error = { messageId: 'invalid-packlet-name', data: { packletName } };
-          return;
+          if (thirdPartWithoutExtension.toUpperCase() === 'INDEX') {
+            if (!PackletAnalyzer._validPackletName.test(packletName)) {
+              this.error = { messageId: 'invalid-packlet-name', data: { packletName } };
+              return;
+            }
+
+            this.isEntryPoint = true;
+          }
         }
-
-        this.isEntryPoint = true;
       }
     }
 
@@ -166,15 +175,15 @@ export class PackletAnalyzer {
     }
 
     // Example: /path/to/my-project/src/packlets/my-packlet
-    const inputFileFolder: string = path.dirname(this.inputFilePath);
+    const inputFileFolder: string = Path.dirname(this.inputFilePath);
 
     // Example: /path/to/my-project/src/other-packlet/index
-    const importedPath: string = path.resolve(inputFileFolder, modulePath);
+    const importedPath: string = Path.resolve(inputFileFolder, modulePath);
 
     // Is the imported path referring to a file under the src/packlets folder?
     if (Path.isUnder(importedPath, this.packletsFolderPath)) {
       // Example: other-packlet/index
-      const importedPathRelativeToPackletsFolder: string = path.relative(
+      const importedPathRelativeToPackletsFolder: string = Path.relative(
         this.packletsFolderPath,
         importedPath
       );
@@ -192,19 +201,19 @@ export class PackletAnalyzer {
           //
           // We discard the file extension to handle a degenerate case like:
           //   import { X } from "../index.js";
-          const lastPart: string = path.parse(importedPathParts[importedPathParts.length - 1]).name;
+          const lastPart: string = Path.parse(importedPathParts[importedPathParts.length - 1]).name;
           let pathToCompare: string;
           if (lastPart.toUpperCase() === 'INDEX') {
             // Example:
             //   importedPath = /path/to/my-project/src/other-packlet/index
             //   pathToCompare = /path/to/my-project/src/other-packlet
-            pathToCompare = path.dirname(importedPath);
+            pathToCompare = Path.dirname(importedPath);
           } else {
             pathToCompare = importedPath;
           }
 
           // Example: /path/to/my-project/src/other-packlet
-          const entryPointPath: string = path.join(this.packletsFolderPath, importedPackletName);
+          const entryPointPath: string = Path.join(this.packletsFolderPath, importedPackletName);
 
           if (Path.isEqual(pathToCompare, entryPointPath)) {
             return {
@@ -216,12 +225,12 @@ export class PackletAnalyzer {
           // to the index.ts entry point.
 
           // Example: /path/to/my-project/src/other-packlet
-          const entryPointPath: string = path.join(this.packletsFolderPath, importedPackletName);
+          const entryPointPath: string = Path.join(this.packletsFolderPath, importedPackletName);
 
           if (!Path.isEqual(importedPath, entryPointPath)) {
             // Example: "../packlets/other-packlet"
             const entryPointModulePath: string = Path.convertToSlashes(
-              path.relative(inputFileFolder, entryPointPath)
+              Path.relative(inputFileFolder, entryPointPath)
             );
 
             return {

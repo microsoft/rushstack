@@ -6,6 +6,7 @@ import { IApiDeclaredItemOptions, ApiDeclaredItem, IApiDeclaredItemJson } from '
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import { DeserializerContext } from '../model/DeserializerContext';
+import { ApiOptionalMixin, IApiOptionalMixinOptions } from '../mixins/ApiOptionalMixin';
 
 /**
  * Constructor options for {@link ApiPropertyItem}.
@@ -14,6 +15,7 @@ import { DeserializerContext } from '../model/DeserializerContext';
 export interface IApiPropertyItemOptions
   extends IApiNameMixinOptions,
     IApiReleaseTagMixinOptions,
+    IApiOptionalMixinOptions,
     IApiDeclaredItemOptions {
   propertyTypeTokenRange: IExcerptTokenRange;
 }
@@ -27,7 +29,7 @@ export interface IApiPropertyItemJson extends IApiDeclaredItemJson {
  *
  * @public
  */
-export class ApiPropertyItem extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
+export class ApiPropertyItem extends ApiNameMixin(ApiReleaseTagMixin(ApiOptionalMixin(ApiDeclaredItem))) {
   /**
    * An {@link Excerpt} that describes the type of the property.
    */

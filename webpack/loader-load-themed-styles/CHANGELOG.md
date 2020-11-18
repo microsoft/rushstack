@@ -1,6 +1,133 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Tue, 13 Oct 2020 15:11:28 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Nov 2020 08:19:54 GMT and should not be manually modified.
+
+## 1.9.16
+Wed, 18 Nov 2020 08:19:54 GMT
+
+_Version update only_
+
+## 1.9.15
+Wed, 18 Nov 2020 06:21:58 GMT
+
+_Version update only_
+
+## 1.9.14
+Tue, 17 Nov 2020 01:17:38 GMT
+
+_Version update only_
+
+## 1.9.13
+Mon, 16 Nov 2020 01:57:58 GMT
+
+_Version update only_
+
+## 1.9.12
+Fri, 13 Nov 2020 01:11:01 GMT
+
+_Version update only_
+
+## 1.9.11
+Thu, 12 Nov 2020 01:11:10 GMT
+
+_Version update only_
+
+## 1.9.10
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 1.9.9
+Tue, 10 Nov 2020 23:13:11 GMT
+
+_Version update only_
+
+## 1.9.8
+Tue, 10 Nov 2020 16:11:42 GMT
+
+_Version update only_
+
+## 1.9.7
+Sun, 08 Nov 2020 22:52:49 GMT
+
+_Version update only_
+
+## 1.9.6
+Fri, 06 Nov 2020 16:09:30 GMT
+
+_Version update only_
+
+## 1.9.5
+Tue, 03 Nov 2020 01:11:18 GMT
+
+_Version update only_
+
+## 1.9.4
+Mon, 02 Nov 2020 16:12:05 GMT
+
+_Version update only_
+
+## 1.9.3
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 1.9.2
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 1.9.1
+Thu, 29 Oct 2020 06:14:19 GMT
+
+_Version update only_
+
+## 1.9.0
+Thu, 29 Oct 2020 00:11:33 GMT
+
+### Minor changes
+
+- Update Webpack dependency to ~4.44.2
+
+## 1.8.86
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 1.8.85
+Tue, 27 Oct 2020 15:10:13 GMT
+
+_Version update only_
+
+## 1.8.84
+Sat, 24 Oct 2020 00:11:19 GMT
+
+_Version update only_
+
+## 1.8.83
+Wed, 21 Oct 2020 05:09:44 GMT
+
+_Version update only_
+
+## 1.8.82
+Wed, 21 Oct 2020 02:28:17 GMT
+
+_Version update only_
+
+## 1.8.81
+Fri, 16 Oct 2020 23:32:58 GMT
+
+_Version update only_
+
+## 1.8.80
+Thu, 15 Oct 2020 00:59:08 GMT
+
+_Version update only_
+
+## 1.8.79
+Wed, 14 Oct 2020 23:30:14 GMT
+
+_Version update only_
 
 ## 1.8.78
 Tue, 13 Oct 2020 15:11:28 GMT

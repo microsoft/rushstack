@@ -177,10 +177,11 @@ export abstract class HeftActionBase extends CommandLineAction {
   protected abstract actionExecuteAsync(): Promise<void>;
 
   private _validateDefinedParameter(options: IBaseCommandLineDefinition): void {
-    if (options.parameterLongName === Constants.pluginParameterLongName) {
-      throw new Error(
-        `Actions must not register a parameter with longName "${Constants.pluginParameterLongName}".`
-      );
+    if (
+      options.parameterLongName === Constants.pluginParameterLongName ||
+      options.parameterLongName === Constants.debugParameterLongName
+    ) {
+      throw new Error(`Actions must not register a parameter with longName "${options.parameterLongName}".`);
     }
   }
 }

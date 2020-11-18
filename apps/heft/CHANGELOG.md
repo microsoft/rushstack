@@ -1,6 +1,170 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 13 Oct 2020 15:11:28 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Nov 2020 08:19:54 GMT and should not be manually modified.
+
+## 0.22.3
+Wed, 18 Nov 2020 08:19:54 GMT
+
+_Version update only_
+
+## 0.22.2
+Wed, 18 Nov 2020 06:21:58 GMT
+
+_Version update only_
+
+## 0.22.1
+Tue, 17 Nov 2020 01:17:38 GMT
+
+### Patches
+
+- Fix an issue where .map files were not being published
+
+## 0.22.0
+Mon, 16 Nov 2020 01:57:58 GMT
+
+### Minor changes
+
+- Add "webpack-dev-server" as a dependency since its types are part of Heft's API contract
+
+### Patches
+
+- Fix an issue where API Extractor errors/warnings did not show the message ID
+
+## 0.21.3
+Fri, 13 Nov 2020 01:11:00 GMT
+
+### Patches
+
+- Update Sass typings generation to update in watch mode when a dependency changes.
+
+## 0.21.2
+Thu, 12 Nov 2020 01:11:10 GMT
+
+### Patches
+
+- Fix a minor issue with heft.schema.json
+
+## 0.21.1
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 0.21.0
+Tue, 10 Nov 2020 23:13:11 GMT
+
+### Minor changes
+
+- Add new built-in Heft action "copyFiles" to copy or hardlink files during specified Heft events
+
+### Patches
+
+- Fix an incorrectly formatted error message
+
+## 0.20.1
+Tue, 10 Nov 2020 16:11:42 GMT
+
+### Patches
+
+- Improve error handling and make --debug print stacks of errors that occur in heft's internal initialization.
+
+## 0.20.0
+Sun, 08 Nov 2020 22:52:49 GMT
+
+### Minor changes
+
+- Update jest-shared.config.json with more file extension mappings for "jest-string-mock-transform"
+
+## 0.19.5
+Fri, 06 Nov 2020 16:09:30 GMT
+
+### Patches
+
+- Fix an issue where an extended "typescript.json" config file with omitted optional staticAssetsToCopy fields would cause schema validation to fail.
+
+## 0.19.4
+Tue, 03 Nov 2020 01:11:18 GMT
+
+### Patches
+
+- Update README.md
+
+## 0.19.3
+Mon, 02 Nov 2020 16:12:05 GMT
+
+### Patches
+
+- Honor jest reporters specified in config/jest.config.json
+
+## 0.19.2
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 0.19.1
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 0.19.0
+Thu, 29 Oct 2020 06:14:19 GMT
+
+### Minor changes
+
+- Upgrade @types/tapable and @types/webpack
+
+## 0.18.0
+Thu, 29 Oct 2020 00:11:33 GMT
+
+### Minor changes
+
+- Update Webpack dependency to ~4.44.2
+
+## 0.17.4
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 0.17.3
+Tue, 27 Oct 2020 15:10:13 GMT
+
+_Version update only_
+
+## 0.17.2
+Sat, 24 Oct 2020 00:11:18 GMT
+
+### Patches
+
+- Add fileExtensions config to SassTypingsGenerator. 
+
+## 0.17.1
+Wed, 21 Oct 2020 05:09:44 GMT
+
+### Patches
+
+- Bump downstream dependencies.
+
+## 0.17.0
+Fri, 16 Oct 2020 23:32:58 GMT
+
+### Minor changes
+
+- Allow the Webpack dev server configuration to be customized.
+
+## 0.16.1
+Thu, 15 Oct 2020 00:59:08 GMT
+
+_Version update only_
+
+## 0.16.0
+Wed, 14 Oct 2020 23:30:14 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Rename "includePaths" to "importIncludePaths" in sass.json.
+
+### Patches
+
+- Add an "exclude" option to sass.json.
 
 ## 0.15.8
 Tue, 13 Oct 2020 15:11:28 GMT

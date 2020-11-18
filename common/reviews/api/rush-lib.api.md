@@ -395,6 +395,8 @@ export class RushConfiguration {
     tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
     // @beta (undocumented)
     get versionPolicyConfiguration(): VersionPolicyConfiguration;
+    // @beta (undocumented)
+    get versionPolicyConfigurationFilePath(): string;
     get yarnCacheFolder(): string;
     get yarnOptions(): YarnOptionsConfiguration;
     }

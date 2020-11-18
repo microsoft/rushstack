@@ -20,8 +20,10 @@ items:
       - 'api-documenter-test!DocEnumNamespaceMerge:enum'
       - 'api-documenter-test!DocEnumNamespaceMerge:namespace'
       - 'api-documenter-test!EcmaSmbols:namespace'
+      - 'api-documenter-test!ExampleDuplicateTypeAlias:type'
       - 'api-documenter-test!exampleFunction:function(1)'
       - 'api-documenter-test!ExampleTypeAlias:type'
+      - 'api-documenter-test!ExampleUnionTypeAlias:type'
       - 'api-documenter-test!Generic:class'
       - 'api-documenter-test!GenericTypeAlias:type'
       - 'api-documenter-test!IDocInterface1:interface'
@@ -30,6 +32,7 @@ items:
       - 'api-documenter-test!IDocInterface4:interface'
       - 'api-documenter-test!IDocInterface5:interface'
       - 'api-documenter-test!IDocInterface6:interface'
+      - 'api-documenter-test!IDocInterface7:interface'
       - 'api-documenter-test!OuterNamespace:namespace'
       - 'api-documenter-test!OuterNamespace.InnerNamespace:namespace'
       - 'api-documenter-test!SystemEvent:class'
@@ -47,6 +50,18 @@ items:
       return:
         type:
           - number
+  - uid: 'api-documenter-test!ExampleDuplicateTypeAlias:type'
+    summary: A type alias that has duplicate references.
+    name: ExampleDuplicateTypeAlias
+    fullName: ExampleDuplicateTypeAlias
+    langs:
+      - typeScript
+    type: typealias
+    syntax:
+      content: export declare type ExampleDuplicateTypeAlias = SystemEvent | typeof SystemEvent;
+      return:
+        type:
+          - 'api-documenter-test!ExampleDuplicateTypeAlias~0:complex'
   - uid: 'api-documenter-test!exampleFunction:function(1)'
     summary: An exported function with hyperlinked parameters and return value.
     name: 'exampleFunction(x, y)'
@@ -81,6 +96,18 @@ items:
       return:
         type:
           - 'api-documenter-test!ExampleTypeAlias~0:complex'
+  - uid: 'api-documenter-test!ExampleUnionTypeAlias:type'
+    summary: A type alias that references multiple other types.
+    name: ExampleUnionTypeAlias
+    fullName: ExampleUnionTypeAlias
+    langs:
+      - typeScript
+    type: typealias
+    syntax:
+      content: export declare type ExampleUnionTypeAlias = IDocInterface1 | IDocInterface3;
+      return:
+        type:
+          - 'api-documenter-test!ExampleUnionTypeAlias~0:complex'
   - uid: 'api-documenter-test!GenericTypeAlias:type'
     name: GenericTypeAlias
     fullName: GenericTypeAlias
@@ -134,6 +161,18 @@ references:
     name: DocEnumNamespaceMerge
   - uid: 'api-documenter-test!EcmaSmbols:namespace'
     name: EcmaSmbols
+  - uid: 'api-documenter-test!ExampleDuplicateTypeAlias~0:complex'
+    name: SystemEvent | typeof SystemEvent
+    fullName: SystemEvent | typeof SystemEvent
+    spec.typeScript:
+      - uid: 'api-documenter-test!SystemEvent:class'
+        name: SystemEvent
+        fullName: SystemEvent
+      - name: ' | typeof '
+        fullName: ' | typeof '
+      - uid: 'api-documenter-test!SystemEvent:class'
+        name: SystemEvent
+        fullName: SystemEvent
   - uid: 'api-documenter-test!IDocInterface1:interface'
     name: IDocInterface1
   - uid: 'api-documenter-test!ExampleTypeAlias:type'
@@ -147,6 +186,18 @@ references:
         fullName: Promise
       - name: <boolean>
         fullName: <boolean>
+  - uid: 'api-documenter-test!ExampleUnionTypeAlias~0:complex'
+    name: IDocInterface1 | IDocInterface3
+    fullName: IDocInterface1 | IDocInterface3
+    spec.typeScript:
+      - uid: 'api-documenter-test!IDocInterface1:interface'
+        name: IDocInterface1
+        fullName: IDocInterface1
+      - name: ' | '
+        fullName: ' | '
+      - uid: 'api-documenter-test!IDocInterface3:interface'
+        name: IDocInterface3
+        fullName: IDocInterface3
   - uid: 'api-documenter-test!Generic:class'
     name: Generic
   - uid: 'api-documenter-test!IDocInterface2:interface'
@@ -159,6 +210,8 @@ references:
     name: IDocInterface5
   - uid: 'api-documenter-test!IDocInterface6:interface'
     name: IDocInterface6
+  - uid: 'api-documenter-test!IDocInterface7:interface'
+    name: IDocInterface7
   - uid: 'api-documenter-test!OuterNamespace:namespace'
     name: OuterNamespace
   - uid: 'api-documenter-test!OuterNamespace.InnerNamespace:namespace'

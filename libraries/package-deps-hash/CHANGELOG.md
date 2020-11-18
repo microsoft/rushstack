@@ -1,6 +1,131 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Tue, 13 Oct 2020 15:11:28 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Nov 2020 08:19:54 GMT and should not be manually modified.
+
+## 2.4.104
+Wed, 18 Nov 2020 08:19:54 GMT
+
+_Version update only_
+
+## 2.4.103
+Wed, 18 Nov 2020 06:21:58 GMT
+
+_Version update only_
+
+## 2.4.102
+Tue, 17 Nov 2020 01:17:38 GMT
+
+_Version update only_
+
+## 2.4.101
+Mon, 16 Nov 2020 01:57:58 GMT
+
+_Version update only_
+
+## 2.4.100
+Fri, 13 Nov 2020 01:11:01 GMT
+
+_Version update only_
+
+## 2.4.99
+Thu, 12 Nov 2020 01:11:10 GMT
+
+_Version update only_
+
+## 2.4.98
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 2.4.97
+Tue, 10 Nov 2020 23:13:12 GMT
+
+_Version update only_
+
+## 2.4.96
+Tue, 10 Nov 2020 16:11:42 GMT
+
+_Version update only_
+
+## 2.4.95
+Sun, 08 Nov 2020 22:52:49 GMT
+
+_Version update only_
+
+## 2.4.94
+Fri, 06 Nov 2020 16:09:30 GMT
+
+_Version update only_
+
+## 2.4.93
+Tue, 03 Nov 2020 01:11:19 GMT
+
+_Version update only_
+
+## 2.4.92
+Mon, 02 Nov 2020 16:12:05 GMT
+
+_Version update only_
+
+## 2.4.91
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 2.4.90
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 2.4.89
+Thu, 29 Oct 2020 06:14:19 GMT
+
+_Version update only_
+
+## 2.4.88
+Thu, 29 Oct 2020 00:11:33 GMT
+
+_Version update only_
+
+## 2.4.87
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 2.4.86
+Tue, 27 Oct 2020 15:10:14 GMT
+
+_Version update only_
+
+## 2.4.85
+Sat, 24 Oct 2020 00:11:19 GMT
+
+_Version update only_
+
+## 2.4.84
+Wed, 21 Oct 2020 05:09:44 GMT
+
+_Version update only_
+
+## 2.4.83
+Wed, 21 Oct 2020 02:28:17 GMT
+
+_Version update only_
+
+## 2.4.82
+Fri, 16 Oct 2020 23:32:58 GMT
+
+_Version update only_
+
+## 2.4.81
+Thu, 15 Oct 2020 00:59:08 GMT
+
+_Version update only_
+
+## 2.4.80
+Wed, 14 Oct 2020 23:30:14 GMT
+
+_Version update only_
 
 ## 2.4.79
 Tue, 13 Oct 2020 15:11:28 GMT

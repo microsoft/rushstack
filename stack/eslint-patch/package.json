@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/eslint-patch",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A patch that improves how ESLint loads plugins when working in a monorepo with a reusable toolchain",
   "main": "lib/usage.js",
   "license": "MIT",
@@ -9,7 +9,7 @@
   },
   "homepage": "https://rushstack.io",
   "scripts": {
-    "build": "heft test --clean"
+    "build": "heft build --clean"
   },
   "keywords": [
     "eslintrc",
@@ -23,8 +23,8 @@
   ],
   "dependencies": {},
   "devDependencies": {
-    "@rushstack/heft": "0.14.0",
-    "@rushstack/heft-node-rig": "0.1.0",
+    "@rushstack/heft": "0.21.1",
+    "@rushstack/heft-node-rig": "0.1.22",
     "@types/node": "10.17.13"
   }
 }

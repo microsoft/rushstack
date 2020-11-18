@@ -198,10 +198,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
     if (isWebpackDevServer) {
       if (typingsPreprocessor) {
-        compiler.hooks.afterEnvironment.tapPromise(
-          PLUGIN_NAME,
-          async () => await typingsPreprocessor!.runWatcherAsync()
-        );
+        compiler.hooks.afterEnvironment.tap(PLUGIN_NAME, () => typingsPreprocessor!.runWatcherAsync());
 
         if (!compiler.options.plugins) {
           compiler.options.plugins = [];
@@ -238,7 +235,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
                   assetPath.match(Constants.LOCALE_FILENAME_TOKEN_REGEX)
                 ) {
                   // Does this look like an async chunk URL generator?
-                  if (typeof options.chunk.id === 'string' && options.chunk.id.match(/^\" \+/)) {
+                  if (typeof options.chunk.id === 'string' && (options.chunk.id as string).match(/^\" \+/)) {
                     return assetPath.replace(
                       Constants.LOCALE_FILENAME_TOKEN_REGEX,
                       `" + ${Constants.JSONP_PLACEHOLDER} + "`

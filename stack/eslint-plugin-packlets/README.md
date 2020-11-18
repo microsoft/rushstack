@@ -143,17 +143,51 @@ require('@rushstack/eslint-config/patch/modern-module-resolution');
 module.exports = {
   extends: [
     "@rushstack/eslint-config/profile/node",
-    "@rushstack/eslint-config/profile/mixins/packlets" // <----
+    "@rushstack/eslint-config/profile/mixins/packlets" // <--- ADD THIS
   ],
   parserOptions: { tsconfigRootDir: __dirname }
 };
 ```
 
-The `@rushstack/eslint-plugin-packlets` plugin performs validation via two separate rules:
+The `@rushstack/eslint-plugin-packlets` plugin implements three separate rules:
 
-- `@rushstack/packlets/mechanics` - validates most of the import path rules outlined above.  It does not require full type information.
-- `@rushstack/packlets/circular-deps` - detects circular dependencies between packlets.  It requires full type information from the TypeScript compiler.
+- `@rushstack/packlets/mechanics` - validates most of the import path rules outlined above.
+- `@rushstack/packlets/circular-deps` - detects circular dependencies between packlets.  This rule requires an ESLint configuration that enables full type information from the TypeScript compiler.
+- `@rushstack/packlets/readme` - requires each packlet to have a README.md file. This rule is disabled by default.
 
+## Requiring a README.md file
+
+If you'd like to require a README.md file in each packlet folder, enable the optional `@rushstack/packlets/readme` rule.
+
+The `minimumReadmeWords` option allows you to specify a minimum number of words of documentation in the README.md file.  The default value is `10` words.
+
+Example configuration with the `@rushstack/packlets/readme` rule enabled:
+
+**\<my-project\>/.eslintrc.js**
+```ts
+// This is a workaround for https://github.com/eslint/eslint/issues/3458
+require('@rushstack/eslint-config/patch/modern-module-resolution');
+
+module.exports = {
+  extends: [
+    "@rushstack/eslint-config/profile/node",
+    "@rushstack/eslint-config/profile/mixins/packlets"
+  ],
+  parserOptions: { tsconfigRootDir: __dirname },
+  overrides: [
+    {
+      files: ['*.ts', '*.tsx'],
+
+      rules: {
+        '@rushstack/packlets/readme': [ // <--- ADD THIS
+          'warn',
+          { minimumReadmeWords: 10 }
+        ]
+      }
+    }
+  ]
+};
+```
 
 ## Links
 

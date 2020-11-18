@@ -9,8 +9,7 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseLinkManager } from '../../logic/base/BaseLinkManager';
 import { BaseRushAction } from './BaseRushAction';
 
-// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
-import * as LinkManagerFactoryTypes from '../../logic/LinkManagerFactory';
+import type * as LinkManagerFactoryTypes from '../../logic/LinkManagerFactory';
 const linkManagerFactoryModule: typeof LinkManagerFactoryTypes = Import.lazy(
   '../../logic/LinkManagerFactory',
   require
