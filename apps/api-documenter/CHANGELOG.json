@@ -2,6 +2,23 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.10.0",
+      "tag": "@microsoft/api-documenter_v7.10.0",
+      "date": "Wed, 18 Nov 2020 03:15:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Marking optional properties on interface reference docs"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Support for generating hyperlinks from type aliases"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.9.33",
       "tag": "@microsoft/api-documenter_v7.9.33",
       "date": "Tue, 17 Nov 2020 01:17:38 GMT",
