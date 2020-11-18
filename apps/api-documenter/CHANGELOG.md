@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Wed, 18 Nov 2020 06:21:58 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Nov 2020 08:19:54 GMT and should not be manually modified.
+
+## 7.11.0
+Wed, 18 Nov 2020 08:19:54 GMT
+
+### Minor changes
+
+- Both methods and properties can now be displayed as "optional" in the documentation
 
 ## 7.10.1
 Wed, 18 Nov 2020 06:21:58 GMT

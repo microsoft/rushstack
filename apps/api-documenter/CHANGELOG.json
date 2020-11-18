@@ -2,6 +2,29 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.11.0",
+      "tag": "@microsoft/api-documenter_v7.11.0",
+      "date": "Wed, 18 Nov 2020 08:19:54 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Both methods and properties can now be displayed as \"optional\" in the documentation"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.22.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.28`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.10.1",
       "tag": "@microsoft/api-documenter_v7.10.1",
       "date": "Wed, 18 Nov 2020 06:21:58 GMT",

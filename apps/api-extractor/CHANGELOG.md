@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 18 Nov 2020 06:21:57 GMT and should not be manually modified.
+This log was last generated on Wed, 18 Nov 2020 08:19:54 GMT and should not be manually modified.
+
+## 7.12.0
+Wed, 18 Nov 2020 08:19:54 GMT
+
+### Minor changes
+
+- The "isOptional" .api.json field is now applied to both methods and properties
 
 ## 7.11.5
 Wed, 18 Nov 2020 06:21:57 GMT
