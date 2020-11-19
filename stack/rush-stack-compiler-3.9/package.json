@@ -33,7 +33,7 @@
     "@microsoft/rush-stack-compiler-3.9": "0.4.33",
     "@microsoft/rush-stack-compiler-shared": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.21.1",
-    "@rushstack/heft-node-rig": "0.1.22"
+    "@rushstack/heft": "0.22.3",
+    "@rushstack/heft-node-rig": "0.1.28"
   }
 }
