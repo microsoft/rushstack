@@ -20,6 +20,8 @@ import type * as VersionManagerTypes from '../../logic/VersionManager';
 const versionManagerModule: typeof VersionManagerTypes = Import.lazy('../../logic/VersionManager', require);
 
 export const DEFAULT_PACKAGE_UPDATE_MESSAGE: string = 'Applying package updates.';
+export const DEFAULT_CHANGELOG_UPDATE_MESSAGE: string =
+  'Deleting change files and updating change logs for package updates.';
 
 export class VersionAction extends BaseRushAction {
   private _ensureVersionPolicy!: CommandLineFlagParameter;
@@ -229,7 +231,7 @@ export class VersionAction extends BaseRushAction {
       git.addChanges('.', this.rushConfiguration.changesFolder);
       git.addChanges(':/**/CHANGELOG.json');
       git.addChanges(':/**/CHANGELOG.md');
-      git.commit('Deleting change files and updating change logs for package updates.');
+      git.commit(this.rushConfiguration.gitChangeLogUpdateCommitMessage || DEFAULT_CHANGELOG_UPDATE_MESSAGE);
     }
 
     // Commit the package.json and change files updates.

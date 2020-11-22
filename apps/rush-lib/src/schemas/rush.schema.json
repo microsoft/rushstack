@@ -176,6 +176,10 @@
         "versionBumpCommitMessage": {
           "description": "The commit message to use when committing changes during \"rush publish\". Defaults to \"Applying package updates.\"",
           "type": "string"
+        },
+        "changeLogUpdateCommitMessage": {
+          "description": "The commit message to use when committing change log files \"rush version\". Defaults to \"Deleting change files and updating change logs for package updates.\"",
+          "type": "string"
         }
       },
       "additionalProperties": false
