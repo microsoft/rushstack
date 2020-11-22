@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add 'rush version' commit message to rush.json-> gitPolicy",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "jaboko@users.noreply.github.com"
+}
