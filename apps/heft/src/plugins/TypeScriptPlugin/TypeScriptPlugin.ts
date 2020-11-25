@@ -211,7 +211,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
           new Error(
             `The TypeScript copyFromCacheMode is set to "${typeScriptConfiguration.copyFromCacheMode}", ` +
               'but the the "private" field in package.json is not set to true. ' +
-              'Linked files are not handled correctly when package are packed for publishing.'
+              'Linked files are not handled correctly when packages are packed for publishing.'
           )
         );
       }
