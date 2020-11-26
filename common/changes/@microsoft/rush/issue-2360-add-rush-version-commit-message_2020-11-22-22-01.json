@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add 'rush version' commit message to rush.json-> gitPolicy",
+      "comment": "Add the ability to customize the commit message used when \"rush version\" is run.",
       "type": "none"
     }
   ],
