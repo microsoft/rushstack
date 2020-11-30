@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.17.10",
+      "tag": "@microsoft/gulp-core-build_v3.17.10",
+      "date": "Mon, 30 Nov 2020 16:11:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix bug: coverage will not fail jest task"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.17.9",
       "tag": "@microsoft/gulp-core-build_v3.17.9",
       "date": "Wed, 11 Nov 2020 01:08:59 GMT",

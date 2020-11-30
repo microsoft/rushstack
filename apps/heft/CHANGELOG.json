@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.22.4",
+      "tag": "@rushstack/heft_v0.22.4",
+      "date": "Mon, 30 Nov 2020 16:11:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.2.30`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.22.3",
       "tag": "@rushstack/heft_v0.22.3",
       "date": "Wed, 18 Nov 2020 08:19:54 GMT",
