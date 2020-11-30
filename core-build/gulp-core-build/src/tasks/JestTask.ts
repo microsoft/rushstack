@@ -171,8 +171,8 @@ export class JestTask extends GulpTask<IJestConfig> {
     runCLI(jestConfig, [this.buildConfig.rootPath])
       .then((result: { results: AggregatedResult; globalConfig: Config.GlobalConfig }) => {
         process.stdout.isTTY = oldTTY;
-        if (result.results.numFailedTests || result.results.numFailedTestSuites) {
-          completeCallback(new Error('Jest tests failed'));
+        if (!result.results.success) {
+          completeCallback(new Error('Jest tests or coverage failed'));
         } else {
           if (!this.buildConfig.production) {
             this._copySnapshots(this.buildConfig.libFolder, this.buildConfig.srcFolder);
