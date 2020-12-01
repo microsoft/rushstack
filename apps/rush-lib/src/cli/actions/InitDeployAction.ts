@@ -21,9 +21,9 @@ export class InitDeployAction extends BaseRushAction {
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'init-deploy',
-      summary: '(EXPERIMENTAL) Creates a deployment scenario config file for use with "rush deploy".',
+      summary: 'Creates a deployment scenario config file for use with "rush deploy".',
       documentation:
-        '(EXPERIMENTAL) Use this command to initialize a new scenario config file for use with "rush deploy".' +
+        'Use this command to initialize a new scenario config file for use with "rush deploy".' +
         ' The default filename is common/config/rush/deploy.json. However, if you need to manage multiple' +
         ' deployments with different settings, you can use use "--scenario" to create additional config files.',
       parser
