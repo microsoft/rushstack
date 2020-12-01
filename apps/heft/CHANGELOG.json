@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.22.5",
+      "tag": "@rushstack/heft_v0.22.5",
+      "date": "Tue, 01 Dec 2020 01:10:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a typo in a logging message."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.22.4",
       "tag": "@rushstack/heft_v0.22.4",
       "date": "Mon, 30 Nov 2020 16:11:49 GMT",
