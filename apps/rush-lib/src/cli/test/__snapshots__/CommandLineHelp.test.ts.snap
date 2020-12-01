@@ -23,13 +23,12 @@ Positional arguments:
     check               Checks each project's package.json files and ensures 
                         that all dependencies are of the same version 
                         throughout the repository.
-    deploy              (EXPERIMENTAL) Prepares a deployment by copying a 
-                        subset of Rush projects and their dependencies to a 
-                        target folder
+    deploy              Prepares a deployment by copying a subset of Rush 
+                        projects and their dependencies to a target folder
     init                Initializes a new repository to be managed by Rush
     init-autoinstaller  Initializes a new autoinstaller
-    init-deploy         (EXPERIMENTAL) Creates a deployment scenario config 
-                        file for use with \\"rush deploy\\".
+    init-deploy         Creates a deployment scenario config file for use 
+                        with \\"rush deploy\\".
     install             Install package dependencies for all projects in the 
                         repo according to the shrinkwrap file
     link                Create node_modules symlinks for all projects
@@ -47,7 +46,7 @@ Positional arguments:
                         needed
     update-autoinstaller
                         Updates autoinstaller package dependenices
-    version             (EXPERIMENTAL) Manage package versions in the repo.
+    version             Manage package versions in the repo.
     import-strings      Imports translated strings into each project.
     upload              Uploads the built files to the server
     build               Build all projects that haven't been built, or have 
@@ -241,11 +240,11 @@ exports[`CommandLineHelp prints the help for each action: deploy 1`] = `
                    [-t PATH] [--create-archive ARCHIVE_PATH]
                    
 
-(EXPERIMENTAL) After building the repo, \\"rush deploy\\" can be used to prepare 
-a deployment by copying a subset of Rush projects and their dependencies to a 
-target folder, which can then be uploaded to a production server. The \\"rush 
-deploy\\" behavior is specified by a scenario config file that must be created 
-first, using the \\"rush init-deploy\\" command.
+After building the repo, \\"rush deploy\\" can be used to prepare a deployment by 
+copying a subset of Rush projects and their dependencies to a target folder, 
+which can then be uploaded to a production server. The \\"rush deploy\\" behavior 
+is specified by a scenario config file that must be created first, using the 
+\\"rush init-deploy\\" command.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
@@ -372,10 +371,10 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: init-deploy 1`] = `
 "usage: rush init-deploy [-h] -p PROJECT_NAME [-s SCENARIO]
 
-(EXPERIMENTAL) Use this command to initialize a new scenario config file for 
-use with \\"rush deploy\\". The default filename is common/config/rush/deploy.
-json. However, if you need to manage multiple deployments with different 
-settings, you can use use \\"--scenario\\" to create additional config files.
+Use this command to initialize a new scenario config file for use with \\"rush 
+deploy\\". The default filename is common/config/rush/deploy.json. However, if 
+you need to manage multiple deployments with different settings, you can use 
+use \\"--scenario\\" to create additional config files.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
@@ -800,8 +799,7 @@ exports[`CommandLineHelp prints the help for each action: version 1`] = `
                     [--override-bump BUMPTYPE] [--override-prerelease-id ID]
                     
 
-(EXPERIMENTAL) use this \\"rush version\\" command to ensure version policies and 
-bump versions.
+use this \\"rush version\\" command to ensure version policies and bump versions.
 
 Optional arguments:
   -h, --help            Show this help message and exit.
