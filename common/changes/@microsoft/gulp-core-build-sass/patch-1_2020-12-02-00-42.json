@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "comment": "Add both ESLint and TSLint supressions for generated .scss.ts files.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-sass",
+  "email": "iclanton@users.noreply.github.com"
+}
