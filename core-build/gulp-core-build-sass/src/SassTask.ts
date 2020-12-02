@@ -94,8 +94,8 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
     super(
       'sass',
       {
-        preamble: '/* eslint-disable */',
-        postamble: '/* eslint-enable */',
+        preamble: '/* eslint-disable */\n/* tslint-disable */',
+        postamble: '/* tslint-enable */\n/* eslint-enable */',
         sassMatch: [
           'src/**/*.scss',
           'src/**/*.sass'
