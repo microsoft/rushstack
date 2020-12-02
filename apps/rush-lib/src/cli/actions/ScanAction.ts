@@ -15,16 +15,18 @@ export class ScanAction extends BaseConfiglessRushAction {
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'scan',
-      summary: 'Scan the current project folder and display a report of imported packages.',
+      summary:
+        'When migrating projects into a Rush repo, this command is helpful for detecting' +
+        ' undeclared dependencies.',
       documentation:
-        `The NPM system allows a project to import dependencies without explicitly` +
-        ` listing them in its package.json file. This is a dangerous practice, because` +
-        ` there is no guarantee you will get a compatible version. The "rush scan" command` +
-        ` reports a list of packages that are imported by your code, which you can` +
-        ` compare against your package.json file to find mistakes. It searches the "./src"` +
-        ` and "./lib" folders for typical import syntaxes such as "import __ from '__'",` +
-        ` "require('__')", "System.import('__'), etc.  The results are only approximate,` +
-        ` but generally pretty accurate.`,
+        `The Node.js module system allows a project to import NPM packages without explicitly` +
+        ` declaring them as dependencies in the package.json file.  Such "phantom dependencies"` +
+        ` can cause problems.  Rush and PNPM use symlinks specifically to protect against phantom dependencies.` +
+        ` These protections may cause runtime errors for existing projects when they are first migrated into` +
+        ` a Rush monorepo.  The "rush scan" command is a handy tool for fixing these errors. It scans the "./src"` +
+        ` and "./lib" folders for import syntaxes such as "import __ from '__'", "require('__')",` +
+        ` and "System.import('__').  It prints a report of the referenced packages.  This heuristic is` +
+        ` not perfect, but it can save a lot of time when migrating projects.`,
       safeForSimultaneousRushProcesses: true,
       parser
     });

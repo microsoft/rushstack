@@ -24,10 +24,10 @@ export class DeployAction extends BaseRushAction {
     super({
       actionName: 'deploy',
       summary:
-        '(EXPERIMENTAL) Prepares a deployment by copying a subset of Rush projects and their dependencies' +
+        'Prepares a deployment by copying a subset of Rush projects and their dependencies' +
         ' to a target folder',
       documentation:
-        '(EXPERIMENTAL) After building the repo, "rush deploy" can be used to prepare a deployment by copying' +
+        'After building the repo, "rush deploy" can be used to prepare a deployment by copying' +
         ' a subset of Rush projects and their dependencies to a target folder, which can then be uploaded to' +
         ' a production server.  The "rush deploy" behavior is specified by a scenario config file that must' +
         ' be created first, using the "rush init-deploy" command.',
