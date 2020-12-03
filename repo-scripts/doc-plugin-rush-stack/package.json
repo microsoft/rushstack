@@ -12,7 +12,7 @@
   "dependencies": {
     "@microsoft/api-documenter": "workspace:*",
     "@microsoft/api-extractor-model": "workspace:*",
-    "@microsoft/tsdoc": "0.12.19",
+    "@microsoft/tsdoc": "0.12.24",
     "@rushstack/node-core-library": "workspace:*",
     "js-yaml": "~3.13.1"
   },
