@@ -173,10 +173,18 @@ export class MarkdownDocumenter {
       }
     }
 
+    const decoratorBlocks: DocBlock[] = [];
+
     if (apiItem instanceof ApiDocumentedItem) {
       const tsdocComment: DocComment | undefined = apiItem.tsdocComment;
 
       if (tsdocComment) {
+        decoratorBlocks.push(
+          ...tsdocComment.customBlocks.filter(
+            (block) => block.blockTag.tagNameWithUpperCase === StandardTags.decorator.tagNameWithUpperCase
+          )
+        );
+
         if (tsdocComment.deprecatedBlock) {
           output.appendNode(
             new DocNoteBox({ configuration: this._tsdocConfiguration }, [
@@ -214,6 +222,19 @@ export class MarkdownDocumenter {
       }
 
       this._writeHeritageTypes(output, apiItem);
+    }
+
+    if (decoratorBlocks.length > 0) {
+      output.appendNode(
+        new DocParagraph({ configuration }, [
+          new DocEmphasisSpan({ configuration, bold: true }, [
+            new DocPlainText({ configuration, text: 'Decorators:' })
+          ])
+        ])
+      );
+      for (const decoratorBlock of decoratorBlocks) {
+        output.appendNodes(decoratorBlock.content.nodes);
+      }
     }
 
     let appendRemarks: boolean = true;
