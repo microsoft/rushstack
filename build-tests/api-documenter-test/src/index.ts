@@ -14,6 +14,8 @@ export * from './DocClass1';
 export * from './DocEnums';
 import { IDocInterface1, IDocInterface3, SystemEvent } from './DocClass1';
 
+export { DecoratorExample } from './DecoratorExample';
+
 /**
  * A type alias
  * @public

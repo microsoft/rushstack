@@ -12,6 +12,7 @@ This project tests various documentation generation scenarios and doc comment sy
 
 |  Class | Description |
 |  --- | --- |
+|  [DecoratorExample](./api-documenter-test.decoratorexample.md) |  |
 |  [DocBaseClass](./api-documenter-test.docbaseclass.md) | Example base class |
 |  [DocClass1](./api-documenter-test.docclass1.md) | This is an example class. |
 |  [DocClassInterfaceMerge](./api-documenter-test.docclassinterfacemerge.md) | Class that merges with interface |

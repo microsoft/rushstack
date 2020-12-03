@@ -39,6 +39,8 @@ items:
         items:
           - name: InjectedCustomItem
             uid: customUrl
+          - name: DecoratorExample
+            uid: 'api-documenter-test!DecoratorExample:class'
           - name: DocClassInterfaceMerge (Class)
             uid: 'api-documenter-test!DocClassInterfaceMerge:class'
           - name: DocClassInterfaceMerge (Interface)

@@ -12,6 +12,7 @@ items:
     type: package
     children:
       - 'api-documenter-test!constVariable:var'
+      - 'api-documenter-test!DecoratorExample:class'
       - 'api-documenter-test!DocBaseClass:class'
       - 'api-documenter-test!DocClass1:class'
       - 'api-documenter-test!DocClassInterfaceMerge:class'
@@ -145,6 +146,8 @@ items:
           - 'api-documenter-test!IDocInterface1:interface'
         description: ''
 references:
+  - uid: 'api-documenter-test!DecoratorExample:class'
+    name: DecoratorExample
   - uid: 'api-documenter-test!DocBaseClass:class'
     name: DocBaseClass
   - uid: 'api-documenter-test!DocClass1:class'
