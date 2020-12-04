@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush-stack-compiler-3.8",
+      "comment": "Ensure rootDir is consistently specified.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/rush-stack-compiler-3.8",
+  "email": "halfnibble@users.noreply.github.com"
+}
