@@ -1,7 +1,8 @@
 {
   "extends": "./node_modules/@microsoft/rush-stack-compiler-3.9/includes/tsconfig-web.json",
   "compilerOptions": {
-    "rootDirs": ["./src", "./temp/loc-json-ts/"],
+    "rootDir": "src",
+    "rootDirs": ["src", "temp/loc-json-ts"],
     "types": ["webpack-env"]
   }
 }
