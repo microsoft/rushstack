@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush-stack-compiler-3.6
 
-This log was last generated on Wed, 18 Nov 2020 08:19:54 GMT and should not be manually modified.
+This log was last generated on Sat, 05 Dec 2020 01:11:23 GMT and should not be manually modified.
+
+## 0.6.36
+Sat, 05 Dec 2020 01:11:23 GMT
+
+### Patches
+
+- Ensure rootDir is consistently specified.
 
 ## 0.6.35
 Wed, 18 Nov 2020 08:19:54 GMT

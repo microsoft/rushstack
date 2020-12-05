@@ -2,6 +2,23 @@
   "name": "@microsoft/rush-stack-compiler-3.4",
   "entries": [
     {
+      "version": "0.8.36",
+      "tag": "@microsoft/rush-stack-compiler-3.4_v0.8.36",
+      "date": "Sat, 05 Dec 2020 01:11:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Ensure rootDir is consistently specified."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.9\" to `0.4.36`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.35",
       "tag": "@microsoft/rush-stack-compiler-3.4_v0.8.35",
       "date": "Wed, 18 Nov 2020 08:19:54 GMT",

@@ -2,6 +2,26 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "0.1.31",
+      "tag": "@rushstack/heft-node-rig_v0.1.31",
+      "date": "Sat, 05 Dec 2020 01:11:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Ensure rootDir is consistently specified."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.22.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.22.5` to `^0.22.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.30",
       "tag": "@rushstack/heft-node-rig_v0.1.30",
       "date": "Tue, 01 Dec 2020 01:10:38 GMT",
