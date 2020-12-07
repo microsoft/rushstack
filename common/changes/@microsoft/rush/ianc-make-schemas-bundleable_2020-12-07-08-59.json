@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update the way JSON files are referenced to improve webpack bundleability.",
+      "type": "none",
+      "packageName": "@microsoft/rush"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
