@@ -5,7 +5,6 @@ import { EOL } from 'os';
 import { cloneDeep, escapeRegExp } from 'lodash';
 import * as Webpack from 'webpack';
 import * as Tapable from 'tapable';
-import * as lodash from 'lodash';
 
 import { IInternalOptions, getSetPublicPathCode } from './codeGenerator';
 
@@ -186,11 +185,11 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
               let escapedAssetFilename: string;
               if (assetFilename.match(/\.map$/)) {
                 escapedAssetFilename = assetFilename.substr(0, assetFilename.length - 4 /* '.map'.length */); // Trim the ".map" extension
-                escapedAssetFilename = lodash.escapeRegExp(escapedAssetFilename);
+                escapedAssetFilename = escapeRegExp(escapedAssetFilename);
                 escapedAssetFilename = JSON.stringify(escapedAssetFilename); // source in sourcemaps is JSON-encoded
                 escapedAssetFilename = escapedAssetFilename.substring(1, escapedAssetFilename.length - 1); // Trim the quotes from the JSON encoding
               } else {
-                escapedAssetFilename = lodash.escapeRegExp(assetFilename);
+                escapedAssetFilename = escapeRegExp(assetFilename);
               }
 
               const asset: IAsset = compilation.assets[assetFilename];
