@@ -9,12 +9,10 @@ import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { FileSystem, NewlineKind } from '@rushstack/node-core-library';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { DeployScenarioConfiguration } from '../../logic/deploy/DeployScenarioConfiguration';
+import { JsonFilePaths } from '../../utilities/JsonFilePaths';
 
 export class InitDeployAction extends BaseRushAction {
-  private static _CONFIG_TEMPLATE_PATH: string = path.join(
-    __dirname,
-    '../../../assets/rush-init-deploy/scenario-template.json'
-  );
+  private static _CONFIG_TEMPLATE_PATH: string = JsonFilePaths.scenarioTemplatePath;
   private _project!: CommandLineStringParameter;
   private _scenario!: CommandLineStringParameter;
 

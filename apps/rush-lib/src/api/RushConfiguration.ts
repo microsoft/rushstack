@@ -32,6 +32,7 @@ import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { ExperimentsConfiguration } from './ExperimentsConfiguration';
 import { PackageNameParsers } from './PackageNameParsers';
 import { RepoStateFile } from '../logic/RepoStateFile';
+import { JsonFilePaths } from '../utilities/JsonFilePaths';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -431,9 +432,7 @@ export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
  * @public
  */
 export class RushConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/rush.schema.json')
-  );
+  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(JsonFilePaths.rushSchemaPath);
 
   private _rushJsonFile: string;
   private _rushJsonFolder: string;

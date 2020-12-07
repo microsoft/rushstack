@@ -14,6 +14,7 @@ import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocume
 import { ApiEntryPoint } from './ApiEntryPoint';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import { DeserializerContext, ApiJsonSchemaVersion } from './DeserializerContext';
+import { JsonFilePaths } from '../JsonFilePaths';
 
 /**
  * Constructor options for {@link ApiPackage}.
@@ -199,7 +200,9 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
       options = {};
     }
 
-    const packageJson: IPackageJson = PackageJsonLookup.loadOwnPackageJson(__dirname);
+    const packageJson: IPackageJson = PackageJsonLookup.instance.loadPackageJson(
+      JsonFilePaths.packageJsonPath
+    );
 
     const jsonObject: IApiPackageJson = {
       metadata: {

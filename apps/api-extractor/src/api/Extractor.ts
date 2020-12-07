@@ -26,6 +26,7 @@ import { CompilerState } from './CompilerState';
 import { ExtractorMessage } from './ExtractorMessage';
 import { MessageRouter } from '../collector/MessageRouter';
 import { ConsoleMessageId } from './ConsoleMessageId';
+import { JsonFilePaths } from '../JsonFilePaths';
 
 /**
  * Runtime options for Extractor.
@@ -168,7 +169,7 @@ export class Extractor {
   }
 
   private static _getPackageJson(): IPackageJson {
-    return PackageJsonLookup.loadOwnPackageJson(__dirname);
+    return PackageJsonLookup.instance.loadPackageJson(JsonFilePaths.packageJsonPath);
   }
 
   /**

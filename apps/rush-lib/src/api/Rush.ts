@@ -11,6 +11,7 @@ import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { Utilities } from '../utilities/Utilities';
+import { JsonFilePaths } from '../utilities/JsonFilePaths';
 
 /**
  * Options to pass to the rush "launch" functions.
@@ -93,7 +94,7 @@ export class Rush {
    */
   public static get version(): string {
     if (!this._version) {
-      this._version = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
+      this._version = PackageJsonLookup.instance.loadPackageJson(JsonFilePaths.packageJsonPath).version;
     }
 
     return this._version!;

@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
 import { VersionPolicy, BumpType, LockStepVersionPolicy } from './VersionPolicy';
 import { RushConfigurationProject } from './RushConfigurationProject';
+import { JsonFilePaths } from '../utilities/JsonFilePaths';
 
 /**
  * @beta
@@ -64,9 +64,7 @@ export interface IVersionPolicyDependencyJson {
  * @beta
  */
 export class VersionPolicyConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/version-policies.schema.json')
-  );
+  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(JsonFilePaths.versionPoliciesSchemaPath);
 
   private _versionPolicies: Map<string, VersionPolicy>;
   private _jsonFileName: string;

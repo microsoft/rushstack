@@ -8,6 +8,7 @@ import { CommandLineAction } from '@rushstack/ts-command-line';
 
 import { ApiExtractorCommandLine } from './ApiExtractorCommandLine';
 import { ExtractorConfig } from '../api/ExtractorConfig';
+import { JsonFilePaths } from '../JsonFilePaths';
 
 export class InitAction extends CommandLineAction {
   public constructor(parser: ApiExtractorCommandLine) {
@@ -28,7 +29,7 @@ export class InitAction extends CommandLineAction {
 
   protected onExecute(): Promise<void> {
     // override
-    const inputFilePath: string = path.resolve(__dirname, '../schemas/api-extractor-template.json');
+    const inputFilePath: string = JsonFilePaths.apiExtractorTemplatePath;
     const outputFilePath: string = path.resolve(ExtractorConfig.FILENAME);
 
     if (FileSystem.exists(outputFilePath)) {

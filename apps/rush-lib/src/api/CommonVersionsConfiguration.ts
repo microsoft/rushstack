@@ -13,6 +13,7 @@ import {
 } from '@rushstack/node-core-library';
 import { PackageNameParsers } from './PackageNameParsers';
 import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
+import { JsonFilePaths } from '../utilities/JsonFilePaths';
 
 /**
  * Part of the ICommonVersionsJson structure.
@@ -57,9 +58,7 @@ interface ICommonVersionsJson {
  * @public
  */
 export class CommonVersionsConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/common-versions.schema.json')
-  );
+  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(JsonFilePaths.commonVersionsSchemaPath);
 
   private _filePath: string;
   private _preferredVersions: ProtectableMap<string, string>;

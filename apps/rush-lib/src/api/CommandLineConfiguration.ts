@@ -1,21 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
 import { RushConstants } from '../logic/RushConstants';
-
 import { CommandJson, ICommandLineJson, ParameterJson } from './CommandLineJson';
+import { JsonFilePaths } from '../utilities/JsonFilePaths';
 
 /**
  * Custom Commands and Options for the Rush Command Line
  */
 export class CommandLineConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/command-line.schema.json')
-  );
+  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(JsonFilePaths.commandLineSchemaPath);
 
   public readonly commands: CommandJson[] = [];
   public readonly parameters: ParameterJson[] = [];

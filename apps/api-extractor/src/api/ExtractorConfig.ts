@@ -21,6 +21,7 @@ import { RigConfig } from '@rushstack/rig-package';
 import { IConfigFile, IExtractorMessagesConfig } from './IConfigFile';
 import { PackageMetadataManager } from '../analyzer/PackageMetadataManager';
 import { MessageRouter } from '../collector/MessageRouter';
+import { JsonFilePaths } from '../JsonFilePaths';
 
 /**
  * Tokens used during variable expansion of path fields from api-extractor.json.
@@ -162,9 +163,7 @@ export class ExtractorConfig {
   /**
    * The JSON Schema for API Extractor config file (api-extractor.schema.json).
    */
-  public static readonly jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/api-extractor.schema.json')
-  );
+  public static readonly jsonSchema: JsonSchema = JsonSchema.fromFile(JsonFilePaths.apiExtractorSchemaPath);
 
   /**
    * The config file name "api-extractor.json".
@@ -172,7 +171,7 @@ export class ExtractorConfig {
   public static readonly FILENAME: string = 'api-extractor.json';
 
   private static readonly _defaultConfig: Partial<IConfigFile> = JsonFile.load(
-    path.join(__dirname, '../schemas/api-extractor-defaults.json')
+    JsonFilePaths.apiExtractorDefaultsPath
   );
 
   private static readonly _declarationFileExtensionRegExp: RegExp = /\.d\.ts$/i;

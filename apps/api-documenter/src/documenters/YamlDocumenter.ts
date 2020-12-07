@@ -52,10 +52,9 @@ import {
 import { IYamlTocFile, IYamlTocItem } from '../yaml/IYamlTocFile';
 import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
+import { JsonFilePaths } from '../JsonFilePaths';
 
-const yamlApiSchema: JsonSchema = JsonSchema.fromFile(
-  path.join(__dirname, '..', 'yaml', 'typescript.schema.json')
-);
+const yamlApiSchema: JsonSchema = JsonSchema.fromFile(JsonFilePaths.typescriptSchemaPath);
 
 interface IYamlReferences {
   references: IYamlReference[];

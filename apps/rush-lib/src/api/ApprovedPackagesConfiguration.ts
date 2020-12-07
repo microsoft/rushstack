@@ -7,6 +7,7 @@ import { JsonFile, JsonSchema, FileSystem, NewlineKind, InternalError } from '@r
 
 import { Utilities } from '../utilities/Utilities';
 import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
+import { JsonFilePaths } from '../utilities/JsonFilePaths';
 
 /**
  * Part of IApprovedPackagesJson.
@@ -54,9 +55,7 @@ export class ApprovedPackagesItem {
  * @public
  */
 export class ApprovedPackagesConfiguration {
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/approved-packages.schema.json')
-  );
+  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(JsonFilePaths.approvedPackagesSchemaPath);
 
   public items: ApprovedPackagesItem[] = [];
 
