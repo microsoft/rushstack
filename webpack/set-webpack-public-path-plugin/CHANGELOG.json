@@ -2,6 +2,18 @@
   "name": "@rushstack/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "3.2.0",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v3.2.0",
+      "date": "Tue, 08 Dec 2020 01:10:30 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove uglify dependency and make suffix script always minified."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.1.19",
       "tag": "@rushstack/set-webpack-public-path-plugin_v3.1.19",
       "date": "Sat, 05 Dec 2020 01:11:23 GMT",

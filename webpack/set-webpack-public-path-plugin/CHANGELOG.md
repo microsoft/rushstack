@@ -1,6 +1,13 @@
 # Change Log - @rushstack/set-webpack-public-path-plugin
 
-This log was last generated on Sat, 05 Dec 2020 01:11:23 GMT and should not be manually modified.
+This log was last generated on Tue, 08 Dec 2020 01:10:30 GMT and should not be manually modified.
+
+## 3.2.0
+Tue, 08 Dec 2020 01:10:30 GMT
+
+### Minor changes
+
+- Remove uglify dependency and make suffix script always minified.
 
 ## 3.1.19
 Sat, 05 Dec 2020 01:11:23 GMT
