@@ -42,10 +42,18 @@ export class SassTypingsPlugin implements IHeftPlugin {
       buildFolder: heftConfiguration.buildFolder,
       sassConfiguration
     });
-    await sassTypingsGenerator.generateTypingsAsync();
-    if (isWatchMode) {
-      await sassTypingsGenerator.runWatcherAsync();
-    }
+    await new Promise((resolve: () => void, reject: (error: Error) => void) => {
+      sassTypingsGenerator
+        .generateTypingsAsync()
+        .then(() => {
+          resolve();
+          if (isWatchMode) {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            sassTypingsGenerator.runWatcherAsync();
+          }
+        })
+        .catch(reject);
+    });
   }
 
   private async _loadSassConfigurationAsync(

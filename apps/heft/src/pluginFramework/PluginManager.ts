@@ -115,7 +115,7 @@ export class PluginManager {
       const loadedPluginPackage: IHeftPlugin | { default: IHeftPlugin } = require(resolvedPluginPath);
       pluginPackage = (loadedPluginPackage as { default: IHeftPlugin }).default || loadedPluginPackage;
     } catch (e) {
-      throw new InternalError(`Error loading plugin package: ${e}`);
+      throw new InternalError(`Error loading plugin package from "${resolvedPluginPath}": ${e}`);
     }
 
     this._terminal.writeVerboseLine(`Loaded plugin package from "${resolvedPluginPath}"`);

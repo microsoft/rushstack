@@ -130,7 +130,8 @@ export class CopyFilesPlugin implements IHeftPlugin {
 
     // Then enter watch mode if requested
     if (options.watchMode) {
-      await this._runWatchAsync(options);
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      this._runWatchAsync(options);
     }
   }
 
