@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Sat, 05 Dec 2020 01:11:23 GMT and should not be manually modified.
+This log was last generated on Thu, 10 Dec 2020 23:25:49 GMT and should not be manually modified.
+
+## 7.12.0
+Thu, 10 Dec 2020 23:25:49 GMT
+
+### Minor changes
+
+- Implement rendering of the "@decorator" TSDoc tag
 
 ## 7.11.3
 Sat, 05 Dec 2020 01:11:23 GMT

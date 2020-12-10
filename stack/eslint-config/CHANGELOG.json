@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "2.3.2",
+      "tag": "@rushstack/eslint-config_v2.3.2",
+      "date": "Thu, 10 Dec 2020 23:25:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade to TSDoc 0.12.24"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.3.1",
       "tag": "@rushstack/eslint-config_v2.3.1",
       "date": "Wed, 11 Nov 2020 01:08:58 GMT",

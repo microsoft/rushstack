@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 18 Nov 2020 08:19:54 GMT and should not be manually modified.
+This log was last generated on Thu, 10 Dec 2020 23:25:49 GMT and should not be manually modified.
+
+## 7.12.1
+Thu, 10 Dec 2020 23:25:49 GMT
+
+### Patches
+
+- Upgrade to TSDoc 0.12.24
 
 ## 7.12.0
 Wed, 18 Nov 2020 08:19:54 GMT

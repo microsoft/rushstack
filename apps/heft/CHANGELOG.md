@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Sat, 05 Dec 2020 01:11:23 GMT and should not be manually modified.
+This log was last generated on Thu, 10 Dec 2020 23:25:49 GMT and should not be manually modified.
+
+## 0.22.7
+Thu, 10 Dec 2020 23:25:49 GMT
+
+### Patches
+
+- Fix an issue where using CTRL+C to terminate "--watch" mode would sometimes leave a background process running (GitHub #2387)
 
 ## 0.22.6
 Sat, 05 Dec 2020 01:11:23 GMT
