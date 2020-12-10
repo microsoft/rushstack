@@ -12,15 +12,19 @@ import process from 'process';
  * This works by hooking the current process's events for SIGTERM/SIGINT/exit, and ensuring the
  * child process gets terminated in those cases.
  *
- * SubprocessTerminator doesn't do any thing on Windows, since by default Windows automatically
+ * SubprocessTerminator doesn't do anything on Windows, since by default Windows automatically
  * terminates child processes when their parent is terminated.
  */
 export class SubprocessTerminator {
-  // Whether the hooks are installed
+  /**
+   * Whether the hooks are installed
+   */
   private static _initialized: boolean = false;
 
-  // The list of registered child processes.  Processes are removed from this set if they
-  // terminate on their own.
+  /**
+   * The list of registered child processes.  Processes are removed from this set if they
+   * terminate on their own.
+   */
   private static _childPids: Set<number> = new Set();
 
   /**
