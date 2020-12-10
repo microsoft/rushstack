@@ -151,7 +151,7 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
         }
       );
 
-      SubprocessTerminator.terminateWithCurrentProcess(subprocess);
+      SubprocessTerminator.registerChildProcess(subprocess);
 
       this._terminalProviderManager.registerSubprocess(subprocess);
       this._scopedLoggerManager.registerSubprocess(subprocess);
