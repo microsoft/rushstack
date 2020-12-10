@@ -4,7 +4,7 @@
 
 ```ts
 
-import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { DocDeclarationReference } from '@microsoft/tsdoc';
 import { IJsonFileSaveOptions } from '@rushstack/node-core-library';
 import * as tsdoc from '@microsoft/tsdoc';

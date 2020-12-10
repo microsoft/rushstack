@@ -39,7 +39,11 @@ import {
   ApiVariable,
   ApiTypeAlias
 } from '@microsoft/api-extractor-model';
-import { DeclarationReference, Navigation, Meaning } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import {
+  DeclarationReference,
+  Navigation,
+  Meaning
+} from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import {
   IYamlApiFile,
   IYamlItem,

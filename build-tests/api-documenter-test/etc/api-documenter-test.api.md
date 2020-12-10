@@ -7,6 +7,11 @@
 // @public
 export const constVariable: number;
 
+// @public (undocumented)
+export class DecoratorExample {
+    creationDate: Date;
+}
+
 // @public
 export class DocBaseClass {
     constructor();

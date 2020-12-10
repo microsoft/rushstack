@@ -38,6 +38,7 @@ export class AedocDefinitions {
         [
           StandardTags.alpha,
           StandardTags.beta,
+          StandardTags.decorator,
           StandardTags.defaultValue,
           StandardTags.deprecated,
           StandardTags.eventProperty,
