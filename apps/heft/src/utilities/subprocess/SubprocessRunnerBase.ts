@@ -22,6 +22,7 @@ import {
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { SubprocessLoggerManager } from './SubprocessLoggerManager';
 import { FileError } from '../../pluginFramework/logging/FileError';
+import { SubprocessTerminator } from './SubprocessTerminator';
 
 export interface ISubprocessInnerConfiguration {
   globalTerminalProviderId: number;
@@ -149,6 +150,8 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
           execArgv: this._processNodeArgsForSubprocess(this._globalTerminal, process.execArgv)
         }
       );
+
+      SubprocessTerminator.registerChildProcess(subprocess);
 
       this._terminalProviderManager.registerSubprocess(subprocess);
       this._scopedLoggerManager.registerSubprocess(subprocess);
