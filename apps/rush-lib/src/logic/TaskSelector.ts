@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { BuildCacheConfiguration } from '../api/BuildCacheConfiguration';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { ProjectBuilder, convertSlashesForWindows } from '../logic/taskRunner/ProjectBuilder';
@@ -9,6 +10,7 @@ import { TaskCollection } from './taskRunner/TaskCollection';
 
 export interface ITaskSelectorConstructor {
   rushConfiguration: RushConfiguration;
+  buildCacheConfiguration: BuildCacheConfiguration | undefined;
   toProjects: ReadonlyArray<RushConfigurationProject>;
   fromProjects: ReadonlyArray<RushConfigurationProject>;
   commandToRun: string;
@@ -183,6 +185,7 @@ export class TaskSelector {
       new ProjectBuilder({
         rushProject: project,
         rushConfiguration: this._options.rushConfiguration,
+        buildCacheProvider: this._options.buildCacheConfiguration?.cacheProvider,
         commandToRun: this._getScriptToRun(project),
         isIncrementalBuildAllowed: this._options.isIncrementalBuildAllowed,
         packageChangeAnalyzer: this._packageChangeAnalyzer,

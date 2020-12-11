@@ -246,6 +246,9 @@ export class TaskRunner {
           this._hasAnyWarnings = true;
           this._markTaskAsSuccessWithWarning(task);
           break;
+        case TaskStatus.FromCache:
+          this._markTaskAsFromCache(task);
+          break;
         case TaskStatus.Skipped:
           this._markTaskAsSkipped(task);
           break;
@@ -348,6 +351,17 @@ export class TaskRunner {
   private _markTaskAsSkipped(task: Task): void {
     task.collatedWriter.terminal.writeStdoutLine(colors.green(`${task.name} was skipped.`));
     task.status = TaskStatus.Skipped;
+    task.dependents.forEach((dependent: Task) => {
+      dependent.dependencies.delete(task);
+    });
+  }
+
+  /**
+   * Marks a task as provided by cache.
+   */
+  private _markTaskAsFromCache(task: Task): void {
+    task.collatedWriter.terminal.writeStdoutLine(colors.green(`${task.name} was provided by cache.`));
+    task.status = TaskStatus.FromCache;
     task.dependents.forEach((dependent: Task) => {
       dependent.dependencies.delete(task);
     });

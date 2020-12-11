@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
+import * as path from 'path';
 import colors from 'colors';
 
 import { AlreadyReportedError } from '@rushstack/node-core-library';
@@ -25,6 +26,7 @@ import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { IRushConfigurationProjectJson } from '../../api/RushConfigurationProject';
+import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -109,8 +111,13 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
+    const buildCacheConfiguration: BuildCacheConfiguration | undefined = BuildCacheConfiguration.loadFromFile(
+      path.resolve(this.rushConfiguration.commonRushConfigFolder, RushConstants.buildCacheFilename)
+    );
+
     const taskSelector: TaskSelector = new TaskSelector({
       rushConfiguration: this.rushConfiguration,
+      buildCacheConfiguration,
       toProjects: this.mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy),
       fromProjects: this.mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy),
       commandToRun: this._commandToRun,
