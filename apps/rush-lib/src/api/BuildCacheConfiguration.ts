@@ -6,12 +6,14 @@ import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
 import { BuildCacheProviderBase } from '../logic/buildCache/BuildCacheProviderBase';
 import { AzureStorageBuildCacheProvider } from '../logic/buildCache/AzureStorageBuildCacheProvider';
+import { RushConfiguration } from './RushConfiguration';
+import { FileSystemBuildCacheProvider } from '../logic/buildCache/FileSystemBuildCacheProvider';
 
 /**
  * Describes the file structure for the "common/config/rush/build-cache.json" config file.
  */
 interface IBuildCacheJson {
-  cacheProvider: 'azure-storage' /* | ... */;
+  cacheProvider: 'azure-storage' | 'filesystem';
 
   /**
    * A list of folder names under each project root that should be cached.
@@ -44,6 +46,10 @@ interface IAzureStorageBuildCacheJson extends IBuildCacheJson {
   isCacheWriteAllowed?: boolean;
 }
 
+interface IFileSystemBuildCacheJson extends IBuildCacheJson {
+  cacheProvider: 'filesystem';
+}
+
 /**
  * Use this class to load and save the "common/config/rush/build-cache.json" config file.
  * This file provides configuration options for cached project build output.
@@ -56,8 +62,16 @@ export class BuildCacheConfiguration {
 
   public readonly cacheProvider: BuildCacheProviderBase;
 
-  protected constructor(buildCacheJson: IBuildCacheJson) {
+  protected constructor(buildCacheJson: IBuildCacheJson, rushConfiguration: RushConfiguration) {
     switch (buildCacheJson.cacheProvider) {
+      case 'filesystem': {
+        this.cacheProvider = new FileSystemBuildCacheProvider({
+          projectOutputFolderNames: buildCacheJson.projectOutputFolderNames,
+          rushConfiguration
+        });
+        break;
+      }
+
       case 'azure-storage': {
         const azureStorageBuildCacheJson: IAzureStorageBuildCacheJson = buildCacheJson as IAzureStorageBuildCacheJson;
         this.cacheProvider = new AzureStorageBuildCacheProvider({
@@ -80,14 +94,17 @@ export class BuildCacheConfiguration {
    * Loads the build-cache.json data from the specified file path.
    * If the file has not been created yet, then undefined is returned.
    */
-  public static loadFromFile(jsonFilename: string): BuildCacheConfiguration | undefined {
+  public static loadFromFile(
+    jsonFilename: string,
+    rushConfiguration: RushConfiguration
+  ): BuildCacheConfiguration | undefined {
     if (FileSystem.exists(jsonFilename)) {
       const buildCacheJson: IBuildCacheJson = JsonFile.loadAndValidate(
         jsonFilename,
         BuildCacheConfiguration._jsonSchema
       );
 
-      return new BuildCacheConfiguration(buildCacheJson);
+      return new BuildCacheConfiguration(buildCacheJson, rushConfiguration);
     } else {
       return undefined;
     }

@@ -17,7 +17,7 @@
 
         "cacheProvider": {
           "type": "string",
-          "enum": ["azure-storage" /* ... */]
+          "enum": ["filesystem", "azure-storage"]
         },
 
         "projectOutputFolderNames": {
@@ -31,6 +31,15 @@
     },
     {
       "oneOf": [
+        {
+          "properties": {
+            "cacheProvider": {
+              "type": "string",
+              "enum": ["filesystem"]
+            }
+          }
+        },
+
         {
           "required": ["storageContainerName", "connectionString"],
           "properties": {

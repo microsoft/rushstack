@@ -25,11 +25,11 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     this._isCacheWriteAllowed = options.isCacheWriteAllowed;
   }
 
-  protected _tryGetCacheEntryStreamAsync(terminal: Terminal, cacheId: string): Promise<Buffer | undefined> {
+  protected _tryGetCacheEntryBufferAsync(terminal: Terminal, cacheId: string): Promise<Buffer | undefined> {
     throw new Error('Method not implemented.');
   }
 
-  protected _trySetCAcheEntryStreamAsync(
+  protected _trySetCAcheEntryBufferAsync(
     terminal: Terminal,
     cacheId: string,
     entryStream: Buffer

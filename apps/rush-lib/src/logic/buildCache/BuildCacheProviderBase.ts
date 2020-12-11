@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import crypto from 'crypto';
+import { Terminal } from '@rushstack/node-core-library';
+import * as crypto from 'crypto';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { IProjectState } from '../taskRunner/ProjectBuilder';
@@ -19,27 +20,38 @@ export abstract class BuildCacheProviderBase {
     this._projectOutputFolderNames = options.projectOutputFolderNames;
   }
 
-  public async tryHydrateFromCacheAsync(projectState: IProjectState | undefined): Promise<boolean> {
+  public async tryHydrateFromCacheAsync(
+    terminal: Terminal,
+    projectState: IProjectState | undefined
+  ): Promise<boolean> {
     if (!projectState) {
       return false;
     }
 
     const cacheId: string = this._getCacheId(JSON.stringify(projectState));
-    const cacheEntryStream: Buffer | undefined = await this._tryGetCacheEntryStreamAsync(cacheId);
+    const cacheEntryStream: Buffer | undefined = await this._tryGetCacheEntryBufferAsync(terminal, cacheId);
     if (!cacheEntryStream) {
       return false;
     }
   }
 
   public trySetCacheEntryAsync(
+    terminal: Terminal,
     projectState: IProjectState,
     rushProject: RushConfigurationProject
   ): Promise<boolean> {
     const cacheId: string = this._getCacheId(JSON.stringify(projectState));
   }
 
-  protected abstract _tryGetCacheEntryStreamAsync(cacheId: string): Promise<Buffer | undefined>;
-  protected abstract _trySetCAcheEntryStreamAsync(cacheId: string, entryStream: Buffer): Promise<boolean>;
+  protected abstract _tryGetCacheEntryBufferAsync(
+    terminal: Terminal,
+    cacheId: string
+  ): Promise<Buffer | undefined>;
+  protected abstract _trySetCAcheEntryBufferAsync(
+    terminal: Terminal,
+    cacheId: string,
+    entryStream: Buffer
+  ): Promise<boolean>;
 
   private _getCacheId(serializedProjectState: string): string {
     let cacheId: string | undefined = BuildCacheProviderBase._cacheIdCache.get(serializedProjectState);
