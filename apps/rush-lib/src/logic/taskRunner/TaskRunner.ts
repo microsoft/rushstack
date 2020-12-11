@@ -376,6 +376,7 @@ export class TaskRunner {
       switch (task.status) {
         // These are the sections that we will report below
         case TaskStatus.Skipped:
+        case TaskStatus.FromCache:
         case TaskStatus.Success:
         case TaskStatus.SuccessWithWarning:
         case TaskStatus.Blocked:
@@ -404,6 +405,13 @@ export class TaskRunner {
       tasksByStatus,
       colors.green,
       'These projects were already up to date:'
+    );
+
+    this._writeCondensedSummary(
+      TaskStatus.FromCache,
+      tasksByStatus,
+      colors.green,
+      'These projects were filled from cache:'
     );
 
     this._writeCondensedSummary(

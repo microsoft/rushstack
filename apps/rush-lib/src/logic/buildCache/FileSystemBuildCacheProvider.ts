@@ -38,7 +38,7 @@ export class FileSystemBuildCacheProvider extends BuildCacheProviderBase {
     }
   }
 
-  protected async _trySetCAcheEntryBufferAsync(
+  protected async _trySetCacheEntryBufferAsync(
     terminal: CollatedTerminal,
     cacheId: string,
     entryBuffer: Buffer

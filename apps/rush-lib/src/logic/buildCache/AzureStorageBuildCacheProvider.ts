@@ -32,7 +32,7 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     throw new Error('Method not implemented.');
   }
 
-  protected _trySetCAcheEntryBufferAsync(
+  protected _trySetCacheEntryBufferAsync(
     terminal: CollatedTerminal,
     cacheId: string,
     entryStream: Buffer

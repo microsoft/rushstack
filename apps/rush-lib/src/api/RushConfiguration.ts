@@ -52,6 +52,7 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.versionPoliciesFilename,
   RushConstants.commandLineFilename,
   RushConstants.experimentsFilename,
+  RushConstants.buildCacheFilename,
   'deploy.json'
 ];
 

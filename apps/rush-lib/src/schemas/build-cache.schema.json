@@ -3,12 +3,17 @@
   "title": "Configuration for Rush's build cache.",
   "description": "For use with the Rush tool, this file provides configuration options for cached project build output. See http://rushjs.io for details.",
 
-  "type": "object",
-  "additionalProperties": false,
+  "definitions": {
+    "anything": {
+      "type": ["array", "boolean", "integer", "number", "object", "string"],
+      "items": { "$ref": "#/definitions/anything" }
+    }
+  },
 
+  "type": "object",
   "allOf": [
     {
-      "required": ["cacheProvider"],
+      "required": ["cacheProvider", "projectOutputFolderNames"],
       "properties": {
         "$schema": {
           "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
@@ -32,21 +37,27 @@
     {
       "oneOf": [
         {
+          "additionalProperties": false,
           "properties": {
             "cacheProvider": {
               "type": "string",
               "enum": ["filesystem"]
-            }
+            },
+
+            "projectOutputFolderNames": { "$ref": "#/definitions/anything" }
           }
         },
 
         {
+          "additionalProperties": false,
           "required": ["storageContainerName", "connectionString"],
           "properties": {
             "cacheProvider": {
               "type": "string",
               "enum": ["azure-storage"]
             },
+
+            "projectOutputFolderNames": { "$ref": "#/definitions/anything" },
 
             "connectionString": {
               "type": "string",
