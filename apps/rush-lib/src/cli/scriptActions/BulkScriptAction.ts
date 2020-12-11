@@ -112,7 +112,8 @@ export class BulkScriptAction extends BaseScriptAction {
     const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
     const buildCacheConfiguration: BuildCacheConfiguration | undefined = BuildCacheConfiguration.loadFromFile(
-      path.resolve(this.rushConfiguration.commonRushConfigFolder, RushConstants.buildCacheFilename)
+      path.resolve(this.rushConfiguration.commonRushConfigFolder, RushConstants.buildCacheFilename),
+      this.rushConfiguration
     );
 
     const taskSelector: TaskSelector = new TaskSelector({

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Terminal } from '@rushstack/node-core-library';
+import { CollatedTerminal } from '@rushstack/stream-collator';
 import * as crypto from 'crypto';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -21,7 +21,8 @@ export abstract class BuildCacheProviderBase {
   }
 
   public async tryHydrateFromCacheAsync(
-    terminal: Terminal,
+    terminal: CollatedTerminal,
+    rushProject: RushConfigurationProject,
     projectState: IProjectState | undefined
   ): Promise<boolean> {
     if (!projectState) {
@@ -36,7 +37,7 @@ export abstract class BuildCacheProviderBase {
   }
 
   public trySetCacheEntryAsync(
-    terminal: Terminal,
+    terminal: CollatedTerminal,
     projectState: IProjectState,
     rushProject: RushConfigurationProject
   ): Promise<boolean> {
@@ -44,11 +45,11 @@ export abstract class BuildCacheProviderBase {
   }
 
   protected abstract _tryGetCacheEntryBufferAsync(
-    terminal: Terminal,
+    terminal: CollatedTerminal,
     cacheId: string
   ): Promise<Buffer | undefined>;
   protected abstract _trySetCAcheEntryBufferAsync(
-    terminal: Terminal,
+    terminal: CollatedTerminal,
     cacheId: string,
     entryStream: Buffer
   ): Promise<boolean>;

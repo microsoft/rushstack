@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Terminal } from '@rushstack/node-core-library';
+import { CollatedTerminal } from '@rushstack/stream-collator';
 import { BuildCacheProviderBase, IBuildCacheProviderBaseOptions } from './BuildCacheProviderBase';
 
 export interface IAzureStorageBuildCacheProviderOptions extends IBuildCacheProviderBaseOptions {
@@ -25,12 +25,15 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     this._isCacheWriteAllowed = options.isCacheWriteAllowed;
   }
 
-  protected _tryGetCacheEntryBufferAsync(terminal: Terminal, cacheId: string): Promise<Buffer | undefined> {
+  protected _tryGetCacheEntryBufferAsync(
+    terminal: CollatedTerminal,
+    cacheId: string
+  ): Promise<Buffer | undefined> {
     throw new Error('Method not implemented.');
   }
 
   protected _trySetCAcheEntryBufferAsync(
-    terminal: Terminal,
+    terminal: CollatedTerminal,
     cacheId: string,
     entryStream: Buffer
   ): Promise<boolean> {

@@ -201,6 +201,8 @@ export class ProjectBuilder extends BaseBuilder {
       );
 
       const hydratedFromCache: boolean | undefined = await this._buildCacheProvider?.tryHydrateFromCacheAsync(
+        terminal,
+        this._rushProject,
         currentProjectState
       );
       if (hydratedFromCache) {
@@ -294,6 +296,7 @@ export class ProjectBuilder extends BaseBuilder {
           const setCacheEntryPromise:
             | Promise<boolean>
             | undefined = this._buildCacheProvider?.trySetCacheEntryAsync(
+            terminal,
             currentProjectState,
             this._rushProject
           );

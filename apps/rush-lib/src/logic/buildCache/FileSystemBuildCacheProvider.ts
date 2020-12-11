@@ -2,7 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, Terminal } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
+import { CollatedTerminal } from '@rushstack/stream-collator';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { BuildCacheProviderBase, IBuildCacheProviderBaseOptions } from './BuildCacheProviderBase';
@@ -22,7 +23,7 @@ export class FileSystemBuildCacheProvider extends BuildCacheProviderBase {
   }
 
   protected async _tryGetCacheEntryBufferAsync(
-    terminal: Terminal,
+    terminal: CollatedTerminal,
     cacheId: string
   ): Promise<Buffer | undefined> {
     const cacheEntryFilePath: string = path.join(this._cacheFolderPath, cacheId);
@@ -38,7 +39,7 @@ export class FileSystemBuildCacheProvider extends BuildCacheProviderBase {
   }
 
   protected async _trySetCAcheEntryBufferAsync(
-    terminal: Terminal,
+    terminal: CollatedTerminal,
     cacheId: string,
     entryBuffer: Buffer
   ): Promise<boolean> {
