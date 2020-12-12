@@ -22,7 +22,7 @@ export class FileSystemBuildCacheProvider extends BuildCacheProviderBase {
     this._cacheFolderPath = path.join(options.rushConfiguration.commonTempFolder, BUILD_CACHE_FOLDER_NAME);
   }
 
-  protected async _tryGetCacheEntryBufferAsync(
+  public async tryGetCacheEntryBufferByIdAsync(
     terminal: CollatedTerminal,
     cacheId: string
   ): Promise<Buffer | undefined> {
@@ -38,7 +38,7 @@ export class FileSystemBuildCacheProvider extends BuildCacheProviderBase {
     }
   }
 
-  protected async _trySetCacheEntryBufferAsync(
+  public async trySetCacheEntryBufferAsync(
     terminal: CollatedTerminal,
     cacheId: string,
     entryBuffer: Buffer

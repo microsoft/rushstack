@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import colors from 'colors';
+import * as crypto from 'crypto';
 
 import { getPackageDeps, getGitHashForFiles, IPackageDeps } from '@rushstack/package-deps-hash';
 import { Path, InternalError, FileSystem } from '@rushstack/node-core-library';
@@ -17,6 +18,7 @@ export class PackageChangeAnalyzer {
   public static getPackageDeps: (path: string, ignoredFiles: string[]) => IPackageDeps;
 
   private _data: Map<string, IPackageDeps>;
+  private _projectStateCache: Map<string, string> = new Map<string, string>();
   private _rushConfiguration: RushConfiguration;
   private _isGitSupported: boolean;
 
@@ -26,12 +28,34 @@ export class PackageChangeAnalyzer {
     this._data = this._getData();
   }
 
-  public getPackageDepsHash(projectName: string): IPackageDeps | undefined {
+  public getPackageDeps(projectName: string): IPackageDeps | undefined {
     if (!this._data) {
       this._data = this._getData();
     }
 
     return this._data.get(projectName);
+  }
+
+  public getProjectStateHash(projectName: string): string | undefined {
+    let projectState: string | undefined = this._projectStateCache.get(projectName);
+    if (!projectState) {
+      const packageDeps: IPackageDeps | undefined = this.getPackageDeps(projectName);
+      if (!packageDeps) {
+        return undefined;
+      } else {
+        const sortedPackageDepsFiles: string[] = Object.keys(packageDeps.files).sort();
+        const hash: crypto.Hash = crypto.createHash('sha1');
+        for (const packageDepsFile of sortedPackageDepsFiles) {
+          hash.update(packageDepsFile);
+          hash.update(packageDeps.files[packageDepsFile]);
+        }
+
+        projectState = hash.digest('hex');
+        this._projectStateCache.set(projectName, projectState);
+      }
+    }
+
+    return projectState;
   }
 
   private _getData(): Map<string, IPackageDeps> {

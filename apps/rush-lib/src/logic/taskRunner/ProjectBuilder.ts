@@ -31,8 +31,9 @@ import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
 import { BaseBuilder, IBuilderContext } from './BaseBuilder';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import { BuildCacheProviderBase } from '../buildCache/BuildCacheProviderBase';
+import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
 
-export interface IProjectState extends IPackageDeps {
+export interface IProjectBuildDeps extends IPackageDeps {
   arguments: string;
 }
 
@@ -103,17 +104,19 @@ export class ProjectBuilder extends BaseBuilder {
       if (!this._commandToRun) {
         this.hadEmptyScript = true;
       }
-      const projectState: IProjectState | undefined = this._getProjectState(context.collatedWriter.terminal);
-      return await this._executeTaskAsync(projectState, context);
+      const projectBuildDeps: IProjectBuildDeps | undefined = this._getProjectBuildDeps(
+        context.collatedWriter.terminal
+      );
+      return await this._executeTaskAsync(projectBuildDeps, context);
     } catch (error) {
       throw new TaskError('executing', error.message);
     }
   }
 
-  private _getProjectState(terminal: CollatedTerminal): IProjectState | undefined {
+  private _getProjectBuildDeps(terminal: CollatedTerminal): IProjectBuildDeps | undefined {
     try {
       return {
-        files: this._packageChangeAnalyzer.getPackageDepsHash(this._rushProject.packageName)!.files,
+        files: this._packageChangeAnalyzer.getPackageDeps(this._rushProject.packageName)!.files,
         arguments: this._commandToRun
       };
     } catch (error) {
@@ -125,7 +128,7 @@ export class ProjectBuilder extends BaseBuilder {
   }
 
   private async _executeTaskAsync(
-    currentProjectState: IProjectState | undefined,
+    projectBuildDeps: IProjectBuildDeps | undefined,
     context: IBuilderContext
   ): Promise<TaskStatus> {
     // TERMINAL PIPELINE:
@@ -174,7 +177,7 @@ export class ProjectBuilder extends BaseBuilder {
 
       let hasWarningOrError: boolean = false;
       const projectFolder: string = this._rushProject.projectFolder;
-      let lstProjectState: IProjectState | undefined = undefined;
+      let lastProjectBuildDeps: IProjectBuildDeps | undefined = undefined;
 
       const currentDepsPath: string = path.join(
         this._rushProject.projectRushTempFolder,
@@ -183,7 +186,7 @@ export class ProjectBuilder extends BaseBuilder {
 
       if (FileSystem.exists(currentDepsPath)) {
         try {
-          lstProjectState = JsonFile.load(currentDepsPath);
+          lastProjectBuildDeps = JsonFile.load(currentDepsPath);
         } catch (e) {
           // Warn and ignore - treat failing to load the file as the project being not built.
           terminal.writeStdoutLine(
@@ -194,17 +197,25 @@ export class ProjectBuilder extends BaseBuilder {
       }
 
       const isPackageUnchanged: boolean = !!(
-        lstProjectState &&
-        currentProjectState &&
-        currentProjectState.arguments === lstProjectState.arguments &&
-        _areShallowEqual(currentProjectState.files, lstProjectState.files)
+        lastProjectBuildDeps &&
+        projectBuildDeps &&
+        projectBuildDeps.arguments === lastProjectBuildDeps.arguments &&
+        _areShallowEqual(projectBuildDeps.files, lastProjectBuildDeps.files)
       );
 
-      const hydratedFromCache: boolean | undefined = await this._buildCacheProvider?.tryHydrateFromCacheAsync(
-        terminal,
-        this._rushProject,
-        currentProjectState
+      const projectBuildCache:
+        | ProjectBuildCache
+        | undefined = this._buildCacheProvider?.tryGetProjectBuildCache(terminal, {
+        project: this._rushProject,
+        command: this._commandToRun,
+        projectBuildDeps: projectBuildDeps,
+        packageChangeAnalyzer: this._packageChangeAnalyzer
+      });
+
+      const hydratedFromCache: boolean | undefined = await projectBuildCache?.tryHydrateFromCacheAsync(
+        terminal
       );
+
       if (hydratedFromCache) {
         return TaskStatus.FromCache;
       } else if (isPackageUnchanged && this.isIncrementalBuildAllowed) {
@@ -220,8 +231,8 @@ export class ProjectBuilder extends BaseBuilder {
 
         if (!this._commandToRun) {
           // Write deps on success.
-          if (currentProjectState) {
-            JsonFile.save(currentProjectState, currentDepsPath, {
+          if (projectBuildDeps) {
+            JsonFile.save(projectBuildDeps, currentDepsPath, {
               ensureFolderExists: true
             });
           }
@@ -283,22 +294,18 @@ export class ProjectBuilder extends BaseBuilder {
           }
         );
 
-        if (status === TaskStatus.Success && currentProjectState) {
+        if (status === TaskStatus.Success && projectBuildDeps) {
           // Write deps on success.
           const writeProjectStatePromise: Promise<boolean> = JsonFile.saveAsync(
-            currentProjectState,
+            projectBuildDeps,
             currentDepsPath,
             {
               ensureFolderExists: true
             }
           );
 
-          const setCacheEntryPromise:
-            | Promise<boolean>
-            | undefined = this._buildCacheProvider?.trySetCacheEntryAsync(
-            terminal,
-            currentProjectState,
-            this._rushProject
+          const setCacheEntryPromise: Promise<boolean> | undefined = projectBuildCache?.trySetCacheEntryAsync(
+            terminal
           );
 
           await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);

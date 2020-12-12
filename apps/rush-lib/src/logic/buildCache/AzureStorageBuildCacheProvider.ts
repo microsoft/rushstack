@@ -29,7 +29,7 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     this._isCacheWriteAllowed = options.isCacheWriteAllowed;
   }
 
-  protected async _tryGetCacheEntryBufferAsync(
+  public async tryGetCacheEntryBufferByIdAsync(
     terminal: CollatedTerminal,
     cacheId: string
   ): Promise<Buffer | undefined> {
@@ -42,7 +42,7 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     }
   }
 
-  protected async _trySetCacheEntryBufferAsync(
+  public async trySetCacheEntryBufferAsync(
     terminal: CollatedTerminal,
     cacheId: string,
     entryStream: Buffer
