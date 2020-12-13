@@ -52,7 +52,6 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.versionPoliciesFilename,
   RushConstants.commandLineFilename,
   RushConstants.experimentsFilename,
-  RushConstants.buildCacheFilename,
   'deploy.json'
 ];
 
@@ -634,7 +633,8 @@ export class RushConfiguration {
     RushConfiguration._validateCommonRushConfigFolder(
       this._commonRushConfigFolder,
       this.packageManager,
-      this._shrinkwrapFilename
+      this._shrinkwrapFilename,
+      this._experimentsConfiguration
     );
 
     this._projectFolderMinDepth =
@@ -927,7 +927,8 @@ export class RushConfiguration {
   private static _validateCommonRushConfigFolder(
     commonRushConfigFolder: string,
     packageManager: PackageManagerName,
-    shrinkwrapFilename: string
+    shrinkwrapFilename: string,
+    experiments: ExperimentsConfiguration
   ): void {
     if (!FileSystem.exists(commonRushConfigFolder)) {
       console.log(`Creating folder: ${commonRushConfigFolder}`);
@@ -959,6 +960,11 @@ export class RushConfiguration {
       }
 
       const knownSet: Set<string> = new Set<string>(knownRushConfigFilenames.map((x) => x.toUpperCase()));
+
+      // If the buildCache experiment is enabled, add its configuration file
+      if (experiments.configuration.buildCache) {
+        knownSet.add(RushConstants.buildCacheFilename.toUpperCase());
+      }
 
       // Add the shrinkwrap filename for the package manager to the known set.
       knownSet.add(shrinkwrapFilename.toUpperCase());
