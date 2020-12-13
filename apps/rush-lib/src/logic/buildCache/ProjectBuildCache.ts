@@ -65,6 +65,8 @@ export class ProjectBuildCache {
 
       const sortedProjectStates: string[] = projectStates.sort();
       const hash: crypto.Hash = crypto.createHash('sha1');
+      const serializedOutputFolders: string = JSON.stringify(this._projectOutputFolderNames);
+      hash.update(serializedOutputFolders);
       hash.update(this._command);
       for (const projectHash of sortedProjectStates) {
         hash.update(projectHash);
