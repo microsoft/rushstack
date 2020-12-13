@@ -57,16 +57,19 @@ interface IFileSystemBuildCacheJson extends IBuildCacheJson {
  */
 export class BuildCacheConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/build-cache.schema.json')
+    path.join(__dirname, '..', 'schemas', 'build-cache.schema.json')
   );
+
+  public readonly projectOutputFolderNames: string[];
 
   public readonly cacheProvider: BuildCacheProviderBase;
 
-  protected constructor(buildCacheJson: IBuildCacheJson, rushConfiguration: RushConfiguration) {
+  private constructor(buildCacheJson: IBuildCacheJson, rushConfiguration: RushConfiguration) {
+    this.projectOutputFolderNames = buildCacheJson.projectOutputFolderNames;
+
     switch (buildCacheJson.cacheProvider) {
       case 'filesystem': {
         this.cacheProvider = new FileSystemBuildCacheProvider({
-          projectOutputFolderNames: buildCacheJson.projectOutputFolderNames,
           rushConfiguration
         });
         break;
@@ -75,7 +78,6 @@ export class BuildCacheConfiguration {
       case 'azure-storage': {
         const azureStorageBuildCacheJson: IAzureStorageBuildCacheJson = buildCacheJson as IAzureStorageBuildCacheJson;
         this.cacheProvider = new AzureStorageBuildCacheProvider({
-          projectOutputFolderNames: buildCacheJson.projectOutputFolderNames,
           connectionString: azureStorageBuildCacheJson.connectionString,
           storageContainerName: azureStorageBuildCacheJson.storageContainerName,
           blobPrefix: azureStorageBuildCacheJson.blobPrefix,

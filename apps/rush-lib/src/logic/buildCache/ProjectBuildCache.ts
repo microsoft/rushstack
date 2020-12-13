@@ -11,13 +11,13 @@ import { FileSystem } from '@rushstack/node-core-library';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
 import { BuildCacheProviderBase } from './BuildCacheProviderBase';
+import { ProjectBuildCacheConfiguration } from '../../api/ProjectBuildCacheConfiguration';
 
 export interface IProjectBuildCacheOptions {
-  project: RushConfigurationProject;
+  projectBuildCacheConfiguration: ProjectBuildCacheConfiguration;
   command: string;
   buildCacheProvider: BuildCacheProviderBase;
   packageChangeAnalyzer: PackageChangeAnalyzer;
-  projectOutputFolderNames: string[];
 }
 
 export class ProjectBuildCache {
@@ -77,11 +77,11 @@ export class ProjectBuildCache {
   }
 
   public constructor(options: IProjectBuildCacheOptions) {
-    this._project = options.project;
+    this._project = options.projectBuildCacheConfiguration.project;
     this._command = options.command;
     this._buildCacheProvider = options.buildCacheProvider;
     this._packageChangeAnalyzer = options.packageChangeAnalyzer;
-    this._projectOutputFolderNames = options.projectOutputFolderNames;
+    this._projectOutputFolderNames = options.projectBuildCacheConfiguration.projectOutputFolders;
   }
 
   public async tryHydrateFromCacheAsync(terminal: CollatedTerminal): Promise<boolean> {

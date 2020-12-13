@@ -185,7 +185,7 @@ export class TaskSelector {
       new ProjectBuilder({
         rushProject: project,
         rushConfiguration: this._options.rushConfiguration,
-        buildCacheProvider: this._options.buildCacheConfiguration?.cacheProvider,
+        buildCacheConfiguration: this._options.buildCacheConfiguration,
         commandToRun: this._getScriptToRun(project),
         isIncrementalBuildAllowed: this._options.isIncrementalBuildAllowed,
         packageChangeAnalyzer: this._packageChangeAnalyzer,

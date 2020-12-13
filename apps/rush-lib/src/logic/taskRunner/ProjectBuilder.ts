@@ -30,8 +30,9 @@ import { TaskError } from './TaskError';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
 import { BaseBuilder, IBuilderContext } from './BaseBuilder';
 import { ProjectLogWritable } from './ProjectLogWritable';
-import { BuildCacheProviderBase } from '../buildCache/BuildCacheProviderBase';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
+import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import { ProjectBuildCacheConfiguration } from '../../api/ProjectBuildCacheConfiguration';
 
 export interface IProjectBuildDeps extends IPackageDeps {
   arguments: string;
@@ -40,7 +41,7 @@ export interface IProjectBuildDeps extends IPackageDeps {
 export interface IProjectBuilderOptions {
   rushProject: RushConfigurationProject;
   rushConfiguration: RushConfiguration;
-  buildCacheProvider: BuildCacheProviderBase | undefined;
+  buildCacheConfiguration: BuildCacheConfiguration | undefined;
   commandToRun: string;
   isIncrementalBuildAllowed: boolean;
   packageChangeAnalyzer: PackageChangeAnalyzer;
@@ -75,7 +76,7 @@ export class ProjectBuilder extends BaseBuilder {
 
   private _rushProject: RushConfigurationProject;
   private _rushConfiguration: RushConfiguration;
-  private _buildCacheProvider: BuildCacheProviderBase | undefined;
+  private _buildCacheConfiguration: BuildCacheConfiguration | undefined;
   private _commandToRun: string;
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
   private _packageDepsFilename: string;
@@ -84,7 +85,7 @@ export class ProjectBuilder extends BaseBuilder {
     super();
     this._rushProject = options.rushProject;
     this._rushConfiguration = options.rushConfiguration;
-    this._buildCacheProvider = options.buildCacheProvider;
+    this._buildCacheConfiguration = options.buildCacheConfiguration;
     this._commandToRun = options.commandToRun;
     this.isIncrementalBuildAllowed = options.isIncrementalBuildAllowed;
     this._packageChangeAnalyzer = options.packageChangeAnalyzer;
@@ -203,14 +204,19 @@ export class ProjectBuilder extends BaseBuilder {
         _areShallowEqual(projectBuildDeps.files, lastProjectBuildDeps.files)
       );
 
-      const projectBuildCache:
-        | ProjectBuildCache
-        | undefined = this._buildCacheProvider?.tryGetProjectBuildCache(terminal, {
-        project: this._rushProject,
-        command: this._commandToRun,
-        projectBuildDeps: projectBuildDeps,
-        packageChangeAnalyzer: this._packageChangeAnalyzer
-      });
+      let projectBuildCache: ProjectBuildCache | undefined;
+      if (this._buildCacheConfiguration) {
+        const projectBuildCacheConfiguration: ProjectBuildCacheConfiguration = ProjectBuildCacheConfiguration.loadForProject(
+          this._rushProject,
+          this._buildCacheConfiguration
+        );
+        projectBuildCache = this._buildCacheConfiguration.cacheProvider.tryGetProjectBuildCache(terminal, {
+          projectBuildCacheConfiguration: projectBuildCacheConfiguration,
+          command: this._commandToRun,
+          projectBuildDeps: projectBuildDeps,
+          packageChangeAnalyzer: this._packageChangeAnalyzer
+        });
+      }
 
       const hydratedFromCache: boolean | undefined = await projectBuildCache?.tryHydrateFromCacheAsync(
         terminal

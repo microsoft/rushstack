@@ -2,53 +2,44 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
+import { Path } from '@rushstack/node-core-library';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { IProjectBuildDeps } from '../taskRunner/ProjectBuilder';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
 import { ProjectBuildCache } from './ProjectBuildCache';
+import { ProjectBuildCacheConfiguration } from '../../api/ProjectBuildCacheConfiguration';
 
-export interface IBuildCacheProviderBaseOptions {
-  projectOutputFolderNames: string[];
-}
+export interface IBuildCacheProviderBaseOptions {}
 
 export interface IGetProjectBuildCacheOptions {
-  project: RushConfigurationProject;
+  projectBuildCacheConfiguration: ProjectBuildCacheConfiguration;
   command: string;
   projectBuildDeps: IProjectBuildDeps | undefined;
   packageChangeAnalyzer: PackageChangeAnalyzer;
 }
 
 export abstract class BuildCacheProviderBase {
-  private static _cacheIdCache: Map<string, string> = new Map<string, string>();
-
-  private readonly _projectOutputFolderNames: string[];
-
-  public constructor(options: IBuildCacheProviderBaseOptions) {
-    this._projectOutputFolderNames = options.projectOutputFolderNames;
-  }
+  public constructor(options: IBuildCacheProviderBaseOptions) {}
 
   public tryGetProjectBuildCache(
     terminal: CollatedTerminal,
     options: IGetProjectBuildCacheOptions
   ): ProjectBuildCache | undefined {
-    const { project, projectBuildDeps, command, packageChangeAnalyzer } = options;
+    const { projectBuildCacheConfiguration, projectBuildDeps, command, packageChangeAnalyzer } = options;
     if (!projectBuildDeps) {
       return undefined;
     }
 
-    const normalizedProjectRelativeFolder: string = options.project.projectRelativeFolder.replace(/\\/g, '/');
-    if (!this._validateProject(terminal, normalizedProjectRelativeFolder, projectBuildDeps)) {
+    if (!this._validateProject(terminal, projectBuildCacheConfiguration, projectBuildDeps)) {
       return undefined;
     }
 
     return new ProjectBuildCache({
-      project,
+      projectBuildCacheConfiguration,
       command,
       buildCacheProvider: this,
-      packageChangeAnalyzer,
-      projectOutputFolderNames: this._projectOutputFolderNames
+      packageChangeAnalyzer
     });
   }
 
@@ -64,11 +55,14 @@ export abstract class BuildCacheProviderBase {
 
   private _validateProject(
     terminal: CollatedTerminal,
-    normalizedProjectRelativeFolder: string,
+    projectBuildCacheConfiguration: ProjectBuildCacheConfiguration,
     projectState: IProjectBuildDeps
   ): boolean {
+    const normalizedProjectRelativeFolder: string = Path.convertToSlashes(
+      projectBuildCacheConfiguration.project.projectRelativeFolder
+    );
     const outputFolders: string[] = [];
-    for (const outputFolderName of this._projectOutputFolderNames) {
+    for (const outputFolderName of projectBuildCacheConfiguration.projectOutputFolders) {
       outputFolders.push(`${path.posix.join(normalizedProjectRelativeFolder, outputFolderName)}/`);
     }
 

@@ -421,6 +421,7 @@ export class RushConfigurationProject {
     get packageName(): string;
     get projectFolder(): string;
     get projectRelativeFolder(): string;
+    get projectRushConfigFolder(): string;
     get projectRushTempFolder(): string;
     get reviewCategory(): string | undefined;
     get rushConfiguration(): RushConfiguration;
