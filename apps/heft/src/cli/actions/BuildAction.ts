@@ -73,4 +73,12 @@ export class BuildAction extends HeftActionBase {
     await buildStage.initializeAsync(buildStageOptions);
     await buildStage.executeAsync();
   }
+
+  protected async afterExecuteAsync(): Promise<void> {
+    if (this._watchFlag.value) {
+      await new Promise(() => {
+        /* never continue if in --watch mode */
+      });
+    }
+  }
 }

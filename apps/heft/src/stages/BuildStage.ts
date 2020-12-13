@@ -302,12 +302,6 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       buildStage: postBuildStage,
       watchMode: watchMode
     });
-
-    if (watchMode) {
-      await new Promise(() => {
-        /* never resolve */
-      });
-    }
   }
 
   private async _runSubstageWithLoggingAsync({
