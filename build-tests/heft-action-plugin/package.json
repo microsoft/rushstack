@@ -14,5 +14,8 @@
     "@types/node": "10.17.13",
     "eslint": "~7.12.1",
     "typescript": "~3.9.7"
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*"
   }
 }
