@@ -89,7 +89,7 @@ const launchOptions: rushLib.ILaunchOptions = { isManaged, alreadyReportedNodeTo
 if (rushVersionToLoad && rushVersionToLoad !== currentPackageVersion) {
   const versionSelector: RushVersionSelector = new RushVersionSelector(currentPackageVersion);
   versionSelector
-    .ensureRushVersionInstalled(rushVersionToLoad, configuration, launchOptions)
+    .ensureRushVersionInstalledAsync(rushVersionToLoad, configuration, launchOptions)
     .catch((error: Error) => {
       console.log(colors.red('Error: ' + error.message));
     });

@@ -208,41 +208,39 @@ export class PublishAction extends BaseRushAction {
   /**
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
-  protected runAsync(): Promise<void> {
-    return Promise.resolve().then(() => {
-      PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: false });
+  protected async runAsync(): Promise<void> {
+    PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: false });
 
-      // Example: "common\temp\publish-home"
-      this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
+    // Example: "common\temp\publish-home"
+    this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
 
-      // Example: "common\temp\publish-home\.npmrc"
-      this._targetNpmrcPublishPath = path.join(this._targetNpmrcPublishFolder, '.npmrc');
+    // Example: "common\temp\publish-home\.npmrc"
+    this._targetNpmrcPublishPath = path.join(this._targetNpmrcPublishFolder, '.npmrc');
 
-      const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
 
-      if (this._regenerateChangelogs.value) {
-        console.log('Regenerating changelogs');
-        ChangelogGenerator.regenerateChangelogs(allPackages, this.rushConfiguration);
-        return Promise.resolve();
-      }
+    if (this._regenerateChangelogs.value) {
+      console.log('Regenerating changelogs');
+      ChangelogGenerator.regenerateChangelogs(allPackages, this.rushConfiguration);
+      return;
+    }
 
-      this._validate();
+    this._validate();
 
-      this._addNpmPublishHome();
+    this._addNpmPublishHome();
 
-      if (this._includeAll.value) {
-        this._publishAll(allPackages);
-      } else {
-        this._prereleaseToken = new PrereleaseToken(
-          this._prereleaseName.value,
-          this._suffix.value,
-          this._partialPrerelease.value
-        );
-        this._publishChanges(allPackages);
-      }
+    if (this._includeAll.value) {
+      this._publishAll(allPackages);
+    } else {
+      this._prereleaseToken = new PrereleaseToken(
+        this._prereleaseName.value,
+        this._suffix.value,
+        this._partialPrerelease.value
+      );
+      this._publishChanges(allPackages);
+    }
 
-      console.log(EOL + colors.green('Rush publish finished successfully.'));
-    });
+    console.log(EOL + colors.green('Rush publish finished successfully.'));
   }
 
   /**

@@ -79,19 +79,17 @@ export class InitAction extends BaseConfiglessRushAction {
     });
   }
 
-  protected runAsync(): Promise<void> {
+  protected async runAsync(): Promise<void> {
     const initFolder: string = process.cwd();
 
     if (!this._overwriteParameter.value) {
       if (!this._validateFolderIsEmpty(initFolder)) {
-        return Promise.reject(new AlreadyReportedError());
+        throw new AlreadyReportedError();
       }
     }
 
     this._defineMacroSections();
     this._copyTemplateFiles(initFolder);
-
-    return Promise.resolve();
   }
 
   private _defineMacroSections(): void {

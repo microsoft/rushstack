@@ -37,29 +37,27 @@ export class PurgeAction extends BaseRushAction {
     });
   }
 
-  protected runAsync(): Promise<void> {
-    return Promise.resolve().then(() => {
-      const stopwatch: Stopwatch = Stopwatch.start();
+  protected async runAsync(): Promise<void> {
+    const stopwatch: Stopwatch = Stopwatch.start();
 
-      const unlinkManager: UnlinkManager = new UnlinkManager(this.rushConfiguration);
-      const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration, this.rushGlobalFolder);
+    const unlinkManager: UnlinkManager = new UnlinkManager(this.rushConfiguration);
+    const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration, this.rushGlobalFolder);
 
-      unlinkManager.unlink(/*force:*/ true);
+    unlinkManager.unlink(/*force:*/ true);
 
-      if (this._unsafeParameter.value!) {
-        purgeManager.purgeUnsafe();
-      } else {
-        purgeManager.purgeNormal();
-      }
+    if (this._unsafeParameter.value!) {
+      purgeManager.purgeUnsafe();
+    } else {
+      purgeManager.purgeNormal();
+    }
 
-      purgeManager.deleteAll();
+    purgeManager.deleteAll();
 
-      console.log(
-        os.EOL +
-          colors.green(
-            `Rush purge started successfully and will complete asynchronously. (${stopwatch.toString()})`
-          )
-      );
-    });
+    console.log(
+      os.EOL +
+        colors.green(
+          `Rush purge started successfully and will complete asynchronously. (${stopwatch.toString()})`
+        )
+    );
   }
 }
