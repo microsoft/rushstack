@@ -12,7 +12,6 @@ import { BuildAction } from './BuildAction';
 import { IHeftActionBaseOptions } from './HeftActionBase';
 import { TestStage, ITestStageOptions } from '../../stages/TestStage';
 import { Logging } from '../../utilities/Logging';
-import { IBuildStageContext, ICompileSubstage } from '../../stages/BuildStage';
 
 export class TestAction extends BuildAction {
   private _noTestFlag!: CommandLineFlagParameter;
@@ -164,38 +163,23 @@ export class TestAction extends BuildAction {
       };
       await testStage.initializeAsync(testStageOptions);
 
-      if (watchMode) {
-        await this.runCleanIfRequestedAsync();
+      if (shouldBuild) {
+        await super.actionExecuteAsync();
 
-        const TAP_NAME: string = 'test-action';
-        this.stages.buildStage.stageInitializationHook.tap(TAP_NAME, (build: IBuildStageContext) => {
-          build.hooks.compile.tap(TAP_NAME, (compile: ICompileSubstage) => {
-            compile.hooks.afterTypescriptFirstEmit.tapPromise(
-              TAP_NAME,
-              async () => await testStage.executeAsync()
-            );
-          });
-        });
-
-        // In --watch mode, kick off all stages concurrently with the expectation that the their
-        // promises will never resolve and that they will handle watching filesystem changes
-        await this.runBuildAsync();
-      } else {
-        if (shouldBuild) {
-          await super.actionExecuteAsync();
-
-          if (this.loggingManager.errorsHaveBeenEmitted) {
-            return;
-          }
-
-          await Logging.runFunctionWithLoggingBoundsAsync(
-            this.terminal,
-            'Test',
-            async () => await testStage.executeAsync()
-          );
-        } else {
-          await testStage.executeAsync();
+        if (
+          this.loggingManager.errorsHaveBeenEmitted &&
+          !watchMode // Kick off tests in --watch mode
+        ) {
+          return;
         }
+
+        await Logging.runFunctionWithLoggingBoundsAsync(
+          this.terminal,
+          'Test',
+          async () => await testStage.executeAsync()
+        );
+      } else {
+        await testStage.executeAsync();
       }
     }
   }

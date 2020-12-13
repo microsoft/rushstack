@@ -53,12 +53,6 @@ export class CleanStageHooks extends StageHooksBase<ICleanStageProperties> {
 }
 
 // @public (undocumented)
-export class CompileSubstageHooks extends BuildSubstageHooksBase {
-    // @internal (undocumented)
-    readonly afterTypescriptFirstEmit: AsyncParallelHook;
-}
-
-// @public (undocumented)
 export type CopyFromCacheMode = 'hardlink' | 'copy';
 
 // @beta (undocumented)
@@ -171,7 +165,7 @@ export interface ICompilerPackage {
 }
 
 // @public (undocumented)
-export interface ICompileSubstage extends IBuildSubstage<CompileSubstageHooks, ICompileSubstageProperties> {
+export interface ICompileSubstage extends IBuildSubstage<BuildSubstageHooksBase, ICompileSubstageProperties> {
 }
 
 // @public (undocumented)

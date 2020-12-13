@@ -120,12 +120,21 @@ export class TypeScriptPlugin implements IHeftPlugin {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
         compile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          await this._runTypeScriptAsync(logger, {
-            heftSession,
-            heftConfiguration,
-            buildProperties: build.properties,
-            watchMode: build.properties.watchMode,
-            firstEmitCallback: async () => compile.hooks.afterTypescriptFirstEmit.promise()
+          await new Promise((resolve: () => void, reject: (error: Error) => void) => {
+            this._runTypeScriptAsync(logger, {
+              heftSession,
+              heftConfiguration,
+              buildProperties: build.properties,
+              watchMode: build.properties.watchMode,
+              firstEmitCallback: () => {
+                if (build.properties.watchMode) {
+                  // Allow compilation to continue after the first emit
+                  resolve();
+                }
+              }
+            })
+              .then(resolve)
+              .catch(reject);
           });
         });
       });

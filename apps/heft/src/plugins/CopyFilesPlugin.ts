@@ -130,7 +130,7 @@ export class CopyFilesPlugin implements IHeftPlugin {
 
     // Then enter watch mode if requested
     if (options.watchMode) {
-      await this._runWatchAsync(options);
+      Async.runWatcherWithErrorHandling(async () => await this._runWatchAsync(options), logger);
     }
   }
 

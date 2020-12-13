@@ -101,6 +101,8 @@ export class WebpackPlugin implements IHeftPlugin {
         devServer.listen(options.port!, options.host!, (error: Error | undefined) => {
           if (error) {
             reject(error);
+          } else {
+            resolve();
           }
         });
       });
