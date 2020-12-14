@@ -1,63 +1,61 @@
-### YamlMime:UniversalReference
-items:
-  - uid: 'api-documenter-test!IDocInterface7:interface'
-    summary: Interface for testing optional properties
-    name: IDocInterface7
-    fullName: IDocInterface7
-    langs:
-      - typeScript
-    type: interface
+### YamlMime:TSType
+name: IDocInterface7
+uid: 'api-documenter-test!IDocInterface7:interface'
+package: api-documenter-test!
+fullName: IDocInterface7
+summary: Interface for testing optional properties
+remarks: ''
+isPreview: false
+isDeprecated: false
+type: interface
+properties:
+  - name: optionalField
+    uid: 'api-documenter-test!IDocInterface7#optionalField:member'
     package: api-documenter-test!
-    children:
-      - 'api-documenter-test!IDocInterface7#optionalField:member'
-      - 'api-documenter-test!IDocInterface7#optionalMember:member(1)'
-      - 'api-documenter-test!IDocInterface7#optionalReadonlyField:member'
-      - 'api-documenter-test!IDocInterface7#optionalUndocumentedField:member'
-  - uid: 'api-documenter-test!IDocInterface7#optionalField:member'
-    summary: Description of optionalField
-    name: optionalField
     fullName: optionalField
-    langs:
-      - typeScript
-    type: property
+    summary: Description of optionalField
+    remarks: ''
+    isPreview: false
+    isDeprecated: false
     syntax:
       content: 'optionalField?: boolean;'
       return:
-        type:
-          - boolean
-  - uid: 'api-documenter-test!IDocInterface7#optionalMember:member(1)'
-    summary: Description of optionalMember
-    name: optionalMember()
-    fullName: optionalMember()
-    langs:
-      - typeScript
-    type: method
-    syntax:
-      content: 'optionalMember?(): any;'
-      return:
-        type:
-          - any
-        description: ''
-  - uid: 'api-documenter-test!IDocInterface7#optionalReadonlyField:member'
-    summary: Description of optionalReadonlyField
-    name: optionalReadonlyField
+        type: boolean
+  - name: optionalReadonlyField
+    uid: 'api-documenter-test!IDocInterface7#optionalReadonlyField:member'
+    package: api-documenter-test!
     fullName: optionalReadonlyField
-    langs:
-      - typeScript
-    type: property
+    summary: Description of optionalReadonlyField
+    remarks: ''
+    isPreview: false
+    isDeprecated: false
     syntax:
       content: 'readonly optionalReadonlyField?: boolean;'
       return:
-        type:
-          - boolean
-  - uid: 'api-documenter-test!IDocInterface7#optionalUndocumentedField:member'
-    name: optionalUndocumentedField
+        type: boolean
+  - name: optionalUndocumentedField
+    uid: 'api-documenter-test!IDocInterface7#optionalUndocumentedField:member'
+    package: api-documenter-test!
     fullName: optionalUndocumentedField
-    langs:
-      - typeScript
-    type: property
+    summary: ''
+    remarks: ''
+    isPreview: false
+    isDeprecated: false
     syntax:
       content: 'optionalUndocumentedField?: boolean;'
       return:
-        type:
-          - boolean
+        type: boolean
+methods:
+  - name: optionalMember()
+    uid: 'api-documenter-test!IDocInterface7#optionalMember:member(1)'
+    package: api-documenter-test!
+    fullName: optionalMember()
+    summary: Description of optionalMember
+    remarks: ''
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'optionalMember?(): any;'
+      return:
+        type: any
+        description: ''

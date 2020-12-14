@@ -1,24 +1,23 @@
-### YamlMime:UniversalReference
-items:
-  - uid: 'api-documenter-test!IDocInterface5:interface'
-    summary: Interface without inline tag to test custom TOC
-    name: IDocInterface5
-    fullName: IDocInterface5
-    langs:
-      - typeScript
-    type: interface
+### YamlMime:TSType
+name: IDocInterface5
+uid: 'api-documenter-test!IDocInterface5:interface'
+package: api-documenter-test!
+fullName: IDocInterface5
+summary: Interface without inline tag to test custom TOC
+remarks: ''
+isPreview: false
+isDeprecated: false
+type: interface
+properties:
+  - name: regularProperty
+    uid: 'api-documenter-test!IDocInterface5#regularProperty:member'
     package: api-documenter-test!
-    children:
-      - 'api-documenter-test!IDocInterface5#regularProperty:member'
-  - uid: 'api-documenter-test!IDocInterface5#regularProperty:member'
-    summary: Property of type string that does something
-    name: regularProperty
     fullName: regularProperty
-    langs:
-      - typeScript
-    type: property
+    summary: Property of type string that does something
+    remarks: ''
+    isPreview: false
+    isDeprecated: false
     syntax:
       content: 'regularProperty: string;'
       return:
-        type:
-          - string
+        type: string

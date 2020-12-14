@@ -1,27 +1,23 @@
-### YamlMime:UniversalReference
-items:
-  - uid: 'api-documenter-test!DecoratorExample:class'
-    name: DecoratorExample
-    fullName: DecoratorExample
-    langs:
-      - typeScript
-    type: class
+### YamlMime:TSType
+name: DecoratorExample
+uid: 'api-documenter-test!DecoratorExample:class'
+package: api-documenter-test!
+fullName: DecoratorExample
+summary: ''
+remarks: ''
+isPreview: false
+isDeprecated: false
+type: class
+properties:
+  - name: creationDate
+    uid: 'api-documenter-test!DecoratorExample#creationDate:member'
     package: api-documenter-test!
-    children:
-      - 'api-documenter-test!DecoratorExample#creationDate:member'
-  - uid: 'api-documenter-test!DecoratorExample#creationDate:member'
+    fullName: creationDate
     summary: The date when the record was created.
     remarks: Here is a longer description of the property.
-    name: creationDate
-    fullName: creationDate
-    langs:
-      - typeScript
-    type: property
+    isPreview: false
+    isDeprecated: false
     syntax:
       content: 'creationDate: Date;'
       return:
-        type:
-          - '!Date:interface'
-references:
-  - uid: '!Date:interface'
-    name: Date
+        type: Date
