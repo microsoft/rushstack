@@ -16,7 +16,7 @@ export class MarkdownAction extends BaseAction {
     });
   }
 
-  protected onExecute(): Promise<void> {
+  protected async onExecute(): Promise<void> {
     // override
     const { apiModel, outputFolder } = this.buildApiModel();
 
@@ -26,6 +26,5 @@ export class MarkdownAction extends BaseAction {
       outputFolder
     });
     markdownDocumenter.generateFiles();
-    return Promise.resolve();
   }
 }

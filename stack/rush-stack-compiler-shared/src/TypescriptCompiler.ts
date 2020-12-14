@@ -69,7 +69,7 @@ export class TypescriptCompiler extends RushStackCompilerBase<ITypescriptCompile
   }
 
   public invoke(): Promise<void> {
-    return this._cmdRunner.runCmd({
+    return this._cmdRunner.runCmdAsync({
       args: this._taskOptions.customArgs || [],
       onData: (data: Buffer) => {
         // Log lines separately

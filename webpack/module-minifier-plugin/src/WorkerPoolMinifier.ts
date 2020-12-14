@@ -110,7 +110,7 @@ export class WorkerPoolMinifier implements IModuleMinifier {
     ++this._minified;
 
     this._pool
-      .checkoutWorker(true)
+      .checkoutWorkerAsync(true)
       .then((worker) => {
         worker.postMessage(request);
       })
@@ -135,7 +135,7 @@ export class WorkerPoolMinifier implements IModuleMinifier {
 
     return async () => {
       if (--this._refCount === 0) {
-        await this._pool.finish();
+        await this._pool.finishAsync();
         console.log(`Module minification: ${this._deduped} Deduped, ${this._minified} Processed`);
       }
     };

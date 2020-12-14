@@ -72,7 +72,7 @@ export class EslintRunner extends RushStackCompilerBase<ILintRunnerConfig> {
 
     const stdoutBuffer: string[] = [];
 
-    return this._cmdRunner.runCmd({
+    return this._cmdRunner.runCmdAsync({
       args: args,
       // ESLint errors are logged to stdout
       onError: (data: Buffer) => {
