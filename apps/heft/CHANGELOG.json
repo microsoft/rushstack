@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.23.0",
+      "tag": "@rushstack/heft_v0.23.0",
+      "date": "Mon, 14 Dec 2020 16:12:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Delay build stages in --watch mode until the previous stage reports an initial completion."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.22.7",
       "tag": "@rushstack/heft_v0.22.7",
       "date": "Thu, 10 Dec 2020 23:25:49 GMT",

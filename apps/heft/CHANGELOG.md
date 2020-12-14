@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 10 Dec 2020 23:25:49 GMT and should not be manually modified.
+This log was last generated on Mon, 14 Dec 2020 16:12:20 GMT and should not be manually modified.
+
+## 0.23.0
+Mon, 14 Dec 2020 16:12:20 GMT
+
+### Minor changes
+
+- Delay build stages in --watch mode until the previous stage reports an initial completion.
 
 ## 0.22.7
 Thu, 10 Dec 2020 23:25:49 GMT
