@@ -28,39 +28,56 @@ export class ProjectBuildCache {
   private readonly _projectOutputFolderNames: string[];
 
   // If __cacheId is null, one doesn't exist
-  private __cacheId: string | undefined | null;
+  private __cacheIdCannotBeCalculated: boolean | undefined;
+  private __cacheId: string | undefined;
+  /**
+   * The cache ID is calculated in the following method:
+   * - The current project's hash (see PackageChangeAnalyzer.getProjectStateHash) is
+   *   calculated and appended to an array
+   * - The current project's recursive dependency projects' hashes are calculated
+   *   and appended to the array
+   * - A SHA1 hash is created and the following data is fed into it, in order:
+   *   1. The JSON-serialized list of output folder names for this
+   *      project (see ProjectBuildCache._projectOutputFolderNames)
+   *   2. The command that will be run in the project
+   *   3. Each dependency project hash (from the array constructed in previous steps),
+   *      in sorted alphanumerical-sorted order
+   * - A hex digest of the hash is returned
+   */
   private get _cacheId(): string | undefined {
-    if (this.__cacheId === null) {
+    if (this.__cacheIdCannotBeCalculated) {
       return undefined;
     } else if (!this.__cacheId) {
       const projectStates: string[] = [];
       const projectsThatHaveBeenProcessed: Set<RushConfigurationProject> = new Set<
         RushConfigurationProject
       >();
-      const projectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
+      let projectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
       projectsToProcess.add(this._project);
 
       while (projectsToProcess.size > 0) {
+        const newProjectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
         for (const projectToProcess of projectsToProcess) {
           projectsThatHaveBeenProcessed.add(projectToProcess);
-          projectsToProcess.delete(projectToProcess);
 
           const projectState: string | undefined = this._packageChangeAnalyzer.getProjectStateHash(
             projectToProcess.packageName
           );
           if (!projectState) {
             // If we hit any projects with unknown state, return unknown cache ID
-            this.__cacheId = null;
+            this.__cacheIdCannotBeCalculated = true;
             return undefined;
           } else {
             projectStates.push(projectState);
             for (const dependency of projectToProcess.localDependencyProjects) {
               if (!projectsThatHaveBeenProcessed.has(dependency)) {
-                projectsToProcess.add(dependency);
+                newProjectsToProcess.add(dependency);
               }
             }
           }
         }
+
+        projectsToProcess = newProjectsToProcess;
       }
 
       const sortedProjectStates: string[] = projectStates.sort();

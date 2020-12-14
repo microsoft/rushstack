@@ -36,6 +36,16 @@ export class PackageChangeAnalyzer {
     return this._data.get(projectName);
   }
 
+  /**
+   * The project state hash is calculated in the following way:
+   * - Project dependencies are collected (see PackageChangeAnalyzer.getPackageDeps)
+   *   - If project dependencies cannot be collected (i.e. - if Git isn't available),
+   *     this function returns `undefined`
+   * - The (path separator normalized) repo-root-relative dependencies' file paths are sorted
+   * - A SHA1 hash is created and each (sorted) file path is fed into the hash and then its
+   *   Git SHA is fed into the hash
+   * - A hex digest of the hash is returned
+   */
   public getProjectStateHash(projectName: string): string | undefined {
     let projectState: string | undefined = this._projectStateCache.get(projectName);
     if (!projectState) {
