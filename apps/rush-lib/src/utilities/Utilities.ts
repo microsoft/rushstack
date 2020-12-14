@@ -503,26 +503,6 @@ export class Utilities {
     );
   }
 
-  public static withFinally<T>(options: { promise: Promise<T>; finally: () => void }): Promise<T> {
-    return options.promise
-      .then<T>((result: T) => {
-        try {
-          options.finally();
-        } catch (error) {
-          return Promise.reject(error);
-        }
-        return result;
-      })
-      .catch<T>((error: Error) => {
-        try {
-          options.finally();
-        } catch (innerError) {
-          return Promise.reject(innerError);
-        }
-        return Promise.reject(error);
-      });
-  }
-
   /**
    * As a workaround, copyAndTrimNpmrcFile() copies the .npmrc file to the target folder, and also trims
    * unusable lines from the .npmrc file.

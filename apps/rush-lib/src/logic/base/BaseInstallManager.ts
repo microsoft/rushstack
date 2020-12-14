@@ -540,59 +540,58 @@ export abstract class BaseInstallManager {
     }
   }
 
-  private _checkIfReleaseIsPublished(): Promise<boolean> {
-    return Promise.resolve().then(() => {
-      const lastCheckFile: string = path.join(
-        this._rushGlobalFolder.nodeSpecificPath,
-        'rush-' + Rush.version,
-        'last-check.flag'
-      );
+  private async _checkIfReleaseIsPublished(): Promise<boolean> {
+    const lastCheckFile: string = path.join(
+      this._rushGlobalFolder.nodeSpecificPath,
+      'rush-' + Rush.version,
+      'last-check.flag'
+    );
 
-      if (FileSystem.exists(lastCheckFile)) {
-        let cachedResult: boolean | 'error' | undefined = undefined;
-        try {
-          // NOTE: mtimeMs is not supported yet in Node.js 6.x
-          const nowMs: number = new Date().getTime();
-          const ageMs: number = nowMs - FileSystem.getStatistics(lastCheckFile).mtime.getTime();
-          const HOUR: number = 60 * 60 * 1000;
+    if (FileSystem.exists(lastCheckFile)) {
+      let cachedResult: boolean | 'error' | undefined = undefined;
+      try {
+        // NOTE: mtimeMs is not supported yet in Node.js 6.x
+        const nowMs: number = new Date().getTime();
+        const ageMs: number = nowMs - FileSystem.getStatistics(lastCheckFile).mtime.getTime();
+        const HOUR: number = 60 * 60 * 1000;
 
-          // Is the cache too old?
-          if (ageMs < 24 * HOUR) {
-            // No, read the cached result
-            cachedResult = JsonFile.load(lastCheckFile);
-          }
-        } catch (e) {
-          // Unable to parse file
+        // Is the cache too old?
+        if (ageMs < 24 * HOUR) {
+          // No, read the cached result
+          cachedResult = JsonFile.load(lastCheckFile);
         }
-        if (cachedResult === 'error') {
-          return Promise.reject(new Error('Unable to contact server'));
-        }
-        if (cachedResult === true || cachedResult === false) {
-          return cachedResult;
-        }
+      } catch (e) {
+        // Unable to parse file
       }
+      if (cachedResult === 'error') {
+        throw new Error('Unable to contact server');
+      }
+      if (cachedResult === true || cachedResult === false) {
+        return cachedResult;
+      }
+    }
 
-      // Before we start the network operation, record a failed state.  If the process exits for some reason,
-      // this will record the error.  It will also update the timestamp to prevent other Rush instances
-      // from attempting to update the file.
-      JsonFile.save('error', lastCheckFile, { ensureFolderExists: true });
+    // Before we start the network operation, record a failed state.  If the process exits for some reason,
+    // this will record the error.  It will also update the timestamp to prevent other Rush instances
+    // from attempting to update the file.
+    await JsonFile.saveAsync('error', lastCheckFile, { ensureFolderExists: true });
 
+    try {
       // For this check we use the official registry, not the private registry
-      return this._queryIfReleaseIsPublished('https://registry.npmjs.org:443')
-        .then((publishedRelease: boolean) => {
-          // Cache the result
-          JsonFile.save(publishedRelease, lastCheckFile, { ensureFolderExists: true });
-          return publishedRelease;
-        })
-        .catch((error: Error) => {
-          JsonFile.save('error', lastCheckFile, { ensureFolderExists: true });
-          return Promise.reject(error);
-        });
-    });
+      const publishedRelease: boolean = await this._queryIfReleaseIsPublishedAsync(
+        'https://registry.npmjs.org:443'
+      );
+      // Cache the result
+      await JsonFile.saveAsync(publishedRelease, lastCheckFile, { ensureFolderExists: true });
+      return publishedRelease;
+    } catch (error) {
+      await JsonFile.saveAsync('error', lastCheckFile, { ensureFolderExists: true });
+      throw error;
+    }
   }
 
   // Helper for checkIfReleaseIsPublished()
-  private _queryIfReleaseIsPublished(registryUrl: string): Promise<boolean> {
+  private async _queryIfReleaseIsPublishedAsync(registryUrl: string): Promise<boolean> {
     let queryUrl: string = registryUrl;
     if (queryUrl[-1] !== '/') {
       queryUrl += '/';
@@ -611,49 +610,46 @@ export abstract class BaseInstallManager {
       agent = new HttpsProxyAgent(process.env.HTTP_PROXY);
     }
 
-    return fetch
-      .default(queryUrl, {
-        headers: headers,
-        agent: agent
-      })
-      .then((response: fetch.Response) => {
-        if (!response.ok) {
-          return Promise.reject(new Error('Failed to query'));
-        }
-        return response.json().then((data) => {
-          let url: string;
-          try {
-            if (!data.versions[Rush.version]) {
-              // Version was not published
-              return false;
-            }
-            url = data.versions[Rush.version].dist.tarball;
-            if (!url) {
-              return Promise.reject(new Error(`URL not found`));
-            }
-          } catch (e) {
-            return Promise.reject(new Error('Error parsing response'));
-          }
+    const response: fetch.Response = await fetch.default(queryUrl, {
+      headers: headers,
+      agent: agent
+    });
+    if (!response.ok) {
+      throw new Error('Failed to query');
+    }
 
-          // Make sure the tarball wasn't deleted from the CDN
-          headers.set('accept', '*/*');
-          return fetch
-            .default(url, {
-              headers: headers,
-              agent: agent
-            })
-            .then<boolean>((response2: fetch.Response) => {
-              if (!response2.ok) {
-                if (response2.status === 404) {
-                  return false;
-                } else {
-                  return Promise.reject(new Error('Failed to fetch'));
-                }
-              }
-              return true;
-            });
-        });
-      });
+    const data: { versions: { [version: string]: { dist: { tarball: string } } } } = await response.json();
+    let url: string;
+    try {
+      if (!data.versions[Rush.version]) {
+        // Version was not published
+        return false;
+      }
+
+      url = data.versions[Rush.version].dist.tarball;
+      if (!url) {
+        throw new Error(`URL not found`);
+      }
+    } catch (e) {
+      throw new Error('Error parsing response');
+    }
+
+    // Make sure the tarball wasn't deleted from the CDN
+    headers.set('accept', '*/*');
+    const response2: fetch.Response = await fetch.default(url, {
+      headers: headers,
+      agent: agent
+    });
+
+    if (!response2.ok) {
+      if (response2.status === 404) {
+        return false;
+      } else {
+        throw new Error('Failed to fetch');
+      }
+    }
+
+    return true;
   }
 
   private _syncTempShrinkwrap(shrinkwrapFile: BaseShrinkwrapFile | undefined): void {

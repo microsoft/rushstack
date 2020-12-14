@@ -112,7 +112,7 @@ export class RushCommandLineParser extends CommandLineParser {
     });
   }
 
-  protected onExecute(): Promise<void> {
+  protected async onExecute(): Promise<void> {
     // Defensively set the exit code to 1 so if Rush crashes for whatever reason, we'll have a nonzero exit code.
     // For example, Node.js currently has the inexcusable design of terminating with zero exit code when
     // there is an uncaught promise exception.  This will supposedly be fixed in Node.js 9.
@@ -124,14 +124,13 @@ export class RushCommandLineParser extends CommandLineParser {
       InternalError.breakInDebugger = true;
     }
 
-    return this._wrapOnExecute()
-      .catch((error: Error) => {
-        this._reportErrorAndSetExitCode(error);
-      })
-      .then(() => {
-        // If we make it here, everything went fine, so reset the exit code back to 0
-        process.exitCode = 0;
-      });
+    try {
+      await this._wrapOnExecuteAsync();
+      // If we make it here, everything went fine, so reset the exit code back to 0
+      process.exitCode = 0;
+    } catch (error) {
+      this._reportErrorAndSetExitCode(error);
+    }
   }
 
   private _normalizeOptions(options: Partial<IRushCommandLineParserOptions>): IRushCommandLineParserOptions {
@@ -141,18 +140,14 @@ export class RushCommandLineParser extends CommandLineParser {
     };
   }
 
-  private _wrapOnExecute(): Promise<void> {
-    try {
-      if (this.rushConfiguration) {
-        this.telemetry = new Telemetry(this.rushConfiguration);
-      }
-      return super.onExecute().then(() => {
-        if (this.telemetry) {
-          this.flushTelemetry();
-        }
-      });
-    } catch (error) {
-      return Promise.reject(error);
+  private async _wrapOnExecuteAsync(): Promise<void> {
+    if (this.rushConfiguration) {
+      this.telemetry = new Telemetry(this.rushConfiguration);
+    }
+
+    await super.onExecute();
+    if (this.telemetry) {
+      this.flushTelemetry();
     }
   }
 

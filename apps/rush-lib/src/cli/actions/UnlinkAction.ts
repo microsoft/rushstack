@@ -24,15 +24,13 @@ export class UnlinkAction extends BaseRushAction {
     // No parameters
   }
 
-  protected runAsync(): Promise<void> {
-    return Promise.resolve().then(() => {
-      const unlinkManager: UnlinkManager = new UnlinkManager(this.rushConfiguration);
+  protected async runAsync(): Promise<void> {
+    const unlinkManager: UnlinkManager = new UnlinkManager(this.rushConfiguration);
 
-      if (!unlinkManager.unlink()) {
-        console.log('Nothing to do.');
-      } else {
-        console.log(os.EOL + 'Done.');
-      }
-    });
+    if (!unlinkManager.unlink()) {
+      console.log('Nothing to do.');
+    } else {
+      console.log(os.EOL + 'Done.');
+    }
   }
 }

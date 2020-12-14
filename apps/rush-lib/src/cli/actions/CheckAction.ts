@@ -35,7 +35,7 @@ export class CheckAction extends BaseRushAction {
     });
   }
 
-  protected runAsync(): Promise<void> {
+  protected async runAsync(): Promise<void> {
     const variant: string | undefined = this.rushConfiguration.currentInstalledVariant;
 
     if (!this._variant.value && variant) {
@@ -51,6 +51,5 @@ export class CheckAction extends BaseRushAction {
       variant: this._variant.value,
       printAsJson: this._jsonFlag.value
     });
-    return Promise.resolve();
   }
 }

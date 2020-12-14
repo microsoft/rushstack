@@ -206,7 +206,7 @@ export class TaskRunner {
    * Helper function which finds any tasks which are available to run and begins executing them.
    * It calls the complete callback when all tasks are completed, or rejects if any task fails.
    */
-  private _startAvailableTasksAsync(): Promise<void> {
+  private async _startAvailableTasksAsync(): Promise<void> {
     const taskPromises: Promise<void>[] = [];
     let ctask: Task | undefined;
     while (this._currentActiveTasks < this._parallelism && (ctask = this._getNextTask())) {
@@ -221,9 +221,7 @@ export class TaskRunner {
       taskPromises.push(this._executeTaskAndChainAsync(task));
     }
 
-    return Promise.all(taskPromises).then(() => {
-      // collapse void[] to void
-    });
+    await Promise.all(taskPromises);
   }
 
   private async _executeTaskAndChainAsync(task: Task): Promise<void> {

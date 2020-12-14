@@ -87,7 +87,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
   protected abstract buildInstallOptions(): IInstallManagerOptions;
 
-  protected runAsync(): Promise<void> {
+  protected async runAsync(): Promise<void> {
     VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, {
       variant: this._variant.value
     });
@@ -140,40 +140,38 @@ export abstract class BaseInstallAction extends BaseRushAction {
       installManagerOptions
     );
 
-    return installManager
-      .doInstall()
-      .then(() => {
-        purgeManager.deleteAll();
-        stopwatch.stop();
+    let installSuccessful: boolean = true;
+    try {
+      await installManager.doInstall();
 
-        this._collectTelemetry(stopwatch, installManagerOptions, true);
-        this.eventHooksManager.handle(
-          Event.postRushInstall,
-          this.parser.isDebug,
-          this._ignoreHooksParameter.value
-        );
+      this.eventHooksManager.handle(
+        Event.postRushInstall,
+        this.parser.isDebug,
+        this._ignoreHooksParameter.value
+      );
 
-        if (warnAboutScriptUpdate) {
-          console.log(
-            os.EOL +
-              colors.yellow(
-                'Rush refreshed some files in the "common/scripts" folder.' +
-                  '  Please commit this change to Git.'
-              )
-          );
-        }
-
+      if (warnAboutScriptUpdate) {
         console.log(
-          os.EOL + colors.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
+          os.EOL +
+            colors.yellow(
+              'Rush refreshed some files in the "common/scripts" folder.' +
+                '  Please commit this change to Git.'
+            )
         );
-      })
-      .catch((error) => {
-        purgeManager.deleteAll();
-        stopwatch.stop();
+      }
 
-        this._collectTelemetry(stopwatch, installManagerOptions, false);
-        throw error;
-      });
+      console.log(
+        os.EOL + colors.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
+      );
+    } catch (error) {
+      installSuccessful = false;
+      throw error;
+    } finally {
+      purgeManager.deleteAll();
+      stopwatch.stop();
+
+      this._collectTelemetry(stopwatch, installManagerOptions, installSuccessful);
+    }
   }
 
   private _collectTelemetry(
