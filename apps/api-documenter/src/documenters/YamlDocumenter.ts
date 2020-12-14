@@ -56,6 +56,7 @@ import {
 import { IYamlTocFile, IYamlTocItem } from '../yaml/IYamlTocFile';
 import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
+import { convertUDPYamlToSDP } from '../utils/ToSdpConvertHelper';
 
 const yamlApiSchema: JsonSchema = JsonSchema.fromFile(
   path.join(__dirname, '..', 'yaml', 'typescript.schema.json')
@@ -112,6 +113,8 @@ export class YamlDocumenter {
       console.log(`Writing ${apiPackage.name} package`);
       this._visitApiItems(outputFolder, apiPackage, undefined);
     }
+
+    convertUDPYamlToSDP(outputFolder);
 
     this._writeTocFile(outputFolder, this._apiModel.packages);
   }
