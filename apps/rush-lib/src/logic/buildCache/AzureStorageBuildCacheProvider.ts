@@ -5,16 +5,15 @@ import { CollatedTerminal } from '@rushstack/stream-collator';
 import { BuildCacheProviderBase, IBuildCacheProviderBaseOptions } from './BuildCacheProviderBase';
 
 import { BlobClient, BlobServiceClient, BlockBlobClient, ContainerClient } from '@azure/storage-blob';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
 export interface IAzureStorageBuildCacheProviderOptions extends IBuildCacheProviderBaseOptions {
-  connectionString: string;
   storageContainerName: string;
   blobPrefix?: string;
   isCacheWriteAllowed: boolean;
 }
 
 export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
-  private readonly _connectionString: string;
   private readonly _storageContainerName: string;
   private readonly _blobPrefix: string | undefined;
   private readonly _isCacheWriteAllowed: boolean;
@@ -23,7 +22,6 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
 
   public constructor(options: IAzureStorageBuildCacheProviderOptions) {
     super(options);
-    this._connectionString = options.connectionString;
     this._storageContainerName = options.storageContainerName;
     this._blobPrefix = options.blobPrefix;
     this._isCacheWriteAllowed = options.isCacheWriteAllowed;
@@ -65,9 +63,15 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
 
   private _getContainerClient(): ContainerClient {
     if (!this._containerClient) {
-      const blobServiceClient: BlobServiceClient = BlobServiceClient.fromConnectionString(
-        this._connectionString
-      );
+      const connectionString: string | undefined = EnvironmentConfiguration.buildCacheConnectionString;
+
+      let blobServiceClient: BlobServiceClient;
+      if (connectionString) {
+        blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
+      } else {
+        throw new Error('No Azure Storage credentials have been provided');
+      }
+
       this._containerClient = blobServiceClient.getContainerClient(this._storageContainerName);
     }
 

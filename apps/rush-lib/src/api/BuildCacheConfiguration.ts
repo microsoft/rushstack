@@ -26,11 +26,6 @@ interface IAzureStorageBuildCacheJson extends IBuildCacheJson {
   cacheProvider: 'azure-storage';
 
   /**
-   * A connection string for accessing the Azure storage account.
-   */
-  connectionString: string;
-
-  /**
    * The name of the container in the Azure storage account to use for build cache.
    */
   storageContainerName: string;
@@ -78,7 +73,6 @@ export class BuildCacheConfiguration {
       case 'azure-storage': {
         const azureStorageBuildCacheJson: IAzureStorageBuildCacheJson = buildCacheJson as IAzureStorageBuildCacheJson;
         this.cacheProvider = new AzureStorageBuildCacheProvider({
-          connectionString: azureStorageBuildCacheJson.connectionString,
           storageContainerName: azureStorageBuildCacheJson.storageContainerName,
           blobPrefix: azureStorageBuildCacheJson.blobPrefix,
           isCacheWriteAllowed: !!azureStorageBuildCacheJson.isCacheWriteAllowed

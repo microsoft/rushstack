@@ -89,7 +89,12 @@ export const enum EnvironmentVariableNames {
    *
    * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
    */
-  RUSH_GLOBAL_FOLDER = 'RUSH_GLOBAL_FOLDER'
+  RUSH_GLOBAL_FOLDER = 'RUSH_GLOBAL_FOLDER',
+
+  /**
+   * Provides the connection string for a remote build cache, if configured.
+   */
+  RUSH_BUILD_CACHE_CONNECTION_STRING = 'RUSH_BUILD_CACHE_CONNECTION_STRING'
 }
 
 /**
@@ -111,6 +116,8 @@ export class EnvironmentConfiguration {
   private static _pnpmStorePathOverride: string | undefined;
 
   private static _rushGlobalFolderOverride: string | undefined;
+
+  private static _buildCacheConnectionString: string | undefined;
 
   /**
    * An override for the common/temp folder path.
@@ -157,6 +164,15 @@ export class EnvironmentConfiguration {
   public static get rushGlobalFolderOverride(): string | undefined {
     EnvironmentConfiguration._ensureInitialized();
     return EnvironmentConfiguration._rushGlobalFolderOverride;
+  }
+
+  /**
+   * Provides the connection string for a remote build cache, if configured.
+   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_CONNECTION_STRING}
+   */
+  public static get buildCacheConnectionString(): string | undefined {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._buildCacheConnectionString;
   }
 
   /**
@@ -217,6 +233,11 @@ export class EnvironmentConfiguration {
 
           case EnvironmentVariableNames.RUSH_GLOBAL_FOLDER: {
             // Handled specially below
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_BUILD_CACHE_CONNECTION_STRING: {
+            EnvironmentConfiguration._buildCacheConnectionString = value;
             break;
           }
 

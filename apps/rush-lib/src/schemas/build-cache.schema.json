@@ -50,7 +50,7 @@
 
         {
           "additionalProperties": false,
-          "required": ["storageContainerName", "connectionString"],
+          "required": ["storageContainerName"],
           "properties": {
             "cacheProvider": {
               "type": "string",
@@ -58,11 +58,6 @@
             },
 
             "projectOutputFolderNames": { "$ref": "#/definitions/anything" },
-
-            "connectionString": {
-              "type": "string",
-              "description": "A connection string for accessing the Azure storage account."
-            },
 
             "storageContainerName": {
               "type": "string",
