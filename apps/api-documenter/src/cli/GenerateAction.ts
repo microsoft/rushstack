@@ -22,7 +22,7 @@ export class GenerateAction extends BaseAction {
     });
   }
 
-  protected onExecute(): Promise<void> {
+  protected async onExecute(): Promise<void> {
     // override
     // Look for the config file under the current folder
 
@@ -57,7 +57,5 @@ export class GenerateAction extends BaseAction {
       );
       yamlDocumenter.generateFiles(outputFolder);
     }
-
-    return Promise.resolve();
   }
 }

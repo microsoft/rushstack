@@ -10,8 +10,8 @@ export class Helpers {
   // Based on Path.isDownwardRelative() from @rushstack/node-core-library
   private static _upwardPathSegmentRegex: RegExp = /([\/\\]|^)\.\.([\/\\]|$)/;
 
-  public static nodeResolveAsync(id: string, opts: nodeResolve.AsyncOpts): Promise<string> {
-    return new Promise((resolve: (result: string) => void, reject: (error: Error) => void) => {
+  public static async nodeResolveAsync(id: string, opts: nodeResolve.AsyncOpts): Promise<string> {
+    return await new Promise((resolve: (result: string) => void, reject: (error: Error) => void) => {
       nodeResolve(id, opts, (error: Error | null, result: string | undefined) => {
         if (error) {
           reject(error);
@@ -22,8 +22,8 @@ export class Helpers {
     });
   }
 
-  public static fsExistsAsync(path: fs.PathLike): Promise<boolean> {
-    return new Promise((resolve: (result: boolean) => void) => {
+  public static async fsExistsAsync(path: fs.PathLike): Promise<boolean> {
+    return await new Promise((resolve: (result: boolean) => void) => {
       fs.exists(path, (exists: boolean) => {
         resolve(exists);
       });

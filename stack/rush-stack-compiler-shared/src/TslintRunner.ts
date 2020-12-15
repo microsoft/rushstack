@@ -37,7 +37,7 @@ export class TslintRunner extends RushStackCompilerBase<ITslintRunnerConfig> {
   public invoke(): Promise<void> {
     const args: string[] = ['--format', 'json', '--project', this._standardBuildFolders.projectFolderPath];
 
-    return this._cmdRunner.runCmd({
+    return this._cmdRunner.runCmdAsync({
       args: args,
       onData: (data: Buffer) => {
         const dataStr: string = data.toString().trim();

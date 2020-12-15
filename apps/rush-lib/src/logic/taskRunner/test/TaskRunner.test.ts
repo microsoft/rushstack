@@ -34,6 +34,8 @@ function createTaskRunner(taskRunnerOptions: ITaskRunnerOptions, builder: BaseBu
   return new TaskRunner([task], taskRunnerOptions);
 }
 
+const EXPECTED_FAIL: string = `Promise returned by ${TaskRunner.prototype.executeAsync.name}() resolved but was expected to fail`;
+
 describe('TaskRunner', () => {
   let taskRunner: TaskRunner;
   let taskRunnerOptions: ITaskRunnerOptions;
@@ -81,9 +83,7 @@ describe('TaskRunner', () => {
       };
     });
 
-    const EXPECTED_FAIL: string = 'Promise returned by execute() resolved but was expected to fail';
-
-    it('printedStderrAfterError', () => {
+    it('printedStderrAfterError', async () => {
       taskRunner = createTaskRunner(
         taskRunnerOptions,
         new MockBuilder('stdout+stderr', async (terminal: CollatedTerminal) => {
@@ -93,18 +93,18 @@ describe('TaskRunner', () => {
         })
       );
 
-      return taskRunner
-        .executeAsync()
-        .then(() => fail(EXPECTED_FAIL))
-        .catch((err) => {
-          expect(err.message).toMatchSnapshot();
-          const allMessages: string = mockWritable.getAllOutput();
-          expect(allMessages).toContain('Error: step 1 failed');
-          expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
-        });
+      try {
+        await taskRunner.executeAsync();
+        fail(EXPECTED_FAIL);
+      } catch (err) {
+        expect(err.message).toMatchSnapshot();
+        const allMessages: string = mockWritable.getAllOutput();
+        expect(allMessages).toContain('Error: step 1 failed');
+        expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
+      }
     });
 
-    it('printedStdoutAfterErrorWithEmptyStderr', () => {
+    it('printedStdoutAfterErrorWithEmptyStderr', async () => {
       taskRunner = createTaskRunner(
         taskRunnerOptions,
         new MockBuilder('stdout only', async (terminal: CollatedTerminal) => {
@@ -114,16 +114,16 @@ describe('TaskRunner', () => {
         })
       );
 
-      return taskRunner
-        .executeAsync()
-        .then(() => fail(EXPECTED_FAIL))
-        .catch((err) => {
-          expect(err.message).toMatchSnapshot();
-          const allOutput: string = mockWritable.getAllOutput();
-          expect(allOutput).toMatch(/Build step 1/);
-          expect(allOutput).toMatch(/Error: step 1 failed/);
-          expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
-        });
+      try {
+        await taskRunner.executeAsync();
+        fail(EXPECTED_FAIL);
+      } catch (err) {
+        expect(err.message).toMatchSnapshot();
+        const allOutput: string = mockWritable.getAllOutput();
+        expect(allOutput).toMatch(/Build step 1/);
+        expect(allOutput).toMatch(/Error: step 1 failed/);
+        expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
+      }
     });
   });
 
@@ -139,7 +139,7 @@ describe('TaskRunner', () => {
         };
       });
 
-      it('Logs warnings correctly', () => {
+      it('Logs warnings correctly', async () => {
         taskRunner = createTaskRunner(
           taskRunnerOptions,
           new MockBuilder('success with warnings (failure)', async (terminal: CollatedTerminal) => {
@@ -149,16 +149,16 @@ describe('TaskRunner', () => {
           })
         );
 
-        return taskRunner
-          .executeAsync()
-          .then(() => fail('Promise returned by execute() resolved but was expected to fail'))
-          .catch((err) => {
-            expect(err.message).toMatchSnapshot();
-            const allMessages: string = mockWritable.getAllOutput();
-            expect(allMessages).toContain('Build step 1');
-            expect(allMessages).toContain('step 1 succeeded with warnings');
-            expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
-          });
+        try {
+          await taskRunner.executeAsync();
+          fail(EXPECTED_FAIL);
+        } catch (err) {
+          expect(err.message).toMatchSnapshot();
+          const allMessages: string = mockWritable.getAllOutput();
+          expect(allMessages).toContain('Build step 1');
+          expect(allMessages).toContain('step 1 succeeded with warnings');
+          expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
+        }
       });
     });
 
@@ -173,7 +173,7 @@ describe('TaskRunner', () => {
         };
       });
 
-      it('Logs warnings correctly', () => {
+      it('Logs warnings correctly', async () => {
         taskRunner = createTaskRunner(
           taskRunnerOptions,
           new MockBuilder('success with warnings (success)', async (terminal: CollatedTerminal) => {
@@ -183,15 +183,11 @@ describe('TaskRunner', () => {
           })
         );
 
-        return taskRunner
-          .executeAsync()
-          .then(() => {
-            const allMessages: string = mockWritable.getAllOutput();
-            expect(allMessages).toContain('Build step 1');
-            expect(allMessages).toContain('Warning: step 1 succeeded with warnings');
-            expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
-          })
-          .catch((err) => fail('Promise returned by execute() rejected but was expected to resolve'));
+        await taskRunner.executeAsync();
+        const allMessages: string = mockWritable.getAllOutput();
+        expect(allMessages).toContain('Build step 1');
+        expect(allMessages).toContain('Warning: step 1 succeeded with warnings');
+        expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
       });
     });
   });

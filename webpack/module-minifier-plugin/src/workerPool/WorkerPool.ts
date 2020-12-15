@@ -102,18 +102,18 @@ export class WorkerPool {
 
   /**
    * Tells the pool to shut down when all workers are done.
-   * Returns a promise that will be fullfilled if all workers finish successfully, or reject with the first error.
+   * Returns a promise that will be fulfilled if all workers finish successfully, or reject with the first error.
    */
-  public finish(): Promise<void> {
+  public async finishAsync(): Promise<void> {
     this._finishing = true;
 
     if (this._error) {
-      return Promise.reject(this._error);
+      throw this._error;
     }
 
     if (!this._alive.length) {
       // The pool has no live workers, this is a no-op
-      return Promise.resolve();
+      return;
     }
 
     // Clean up all idle workers
@@ -122,7 +122,7 @@ export class WorkerPool {
     }
 
     // There are still active workers, wait for them to clean up.
-    return new Promise((resolve, reject) => this._onComplete.push([resolve, reject]));
+    await new Promise((resolve, reject) => this._onComplete.push([resolve, reject]));
   }
 
   /**
@@ -162,9 +162,9 @@ export class WorkerPool {
    * Checks out a currently available worker or waits for the next free worker.
    * @param allowCreate - If creating new workers is allowed (subject to maxSize)
    */
-  public checkoutWorker(allowCreate: boolean): Promise<Worker> {
+  public async checkoutWorkerAsync(allowCreate: boolean): Promise<Worker> {
     if (this._error) {
-      return Promise.reject(this._error);
+      throw this._error;
     }
 
     let worker: Worker | undefined = this._idle.shift();
@@ -173,10 +173,10 @@ export class WorkerPool {
     }
 
     if (worker) {
-      return Promise.resolve(worker);
+      return worker;
     }
 
-    return new Promise((resolve: (worker: Worker) => void, reject: (error: Error) => void) => {
+    return await new Promise((resolve: (worker: Worker) => void, reject: (error: Error) => void) => {
       this._pending.push([resolve, reject]);
     });
   }

@@ -132,7 +132,7 @@ export class Rundown {
       }
     });
 
-    return new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       childProcess.on('exit', (code: number | null, signal: string | null): void => {
         if (code !== 0 && !ignoreExitCode) {
           reject(new Error('Child process terminated with exit code ' + code));

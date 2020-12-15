@@ -26,7 +26,7 @@ export class InitAction extends CommandLineAction {
     // No parameters yet
   }
 
-  protected onExecute(): Promise<void> {
+  protected async onExecute(): Promise<void> {
     // override
     const inputFilePath: string = path.resolve(__dirname, '../schemas/api-extractor-template.json');
     const outputFilePath: string = path.resolve(ExtractorConfig.FILENAME);
@@ -47,7 +47,5 @@ export class InitAction extends CommandLineAction {
       '\nThe recommended location for this file is in the project\'s "config" subfolder,\n' +
         'or else in the top-level folder with package.json.'
     );
-
-    return Promise.resolve();
   }
 }

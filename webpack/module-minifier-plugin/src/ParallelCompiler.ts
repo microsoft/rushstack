@@ -91,7 +91,7 @@ export async function runParallel(options: IParallelWebpackOptions): Promise<voi
   const startTime: bigint = process.hrtime.bigint();
 
   for (let i: number = 0; i < configCount; i++) {
-    const webpackWorker: Worker = await webpackPool.checkoutWorker(true);
+    const webpackWorker: Worker = await webpackPool.checkoutWorkerAsync(true);
 
     const sendMinifierResult: (result: IModuleMinificationResult) => void = (
       result: IModuleMinificationResult
@@ -119,7 +119,7 @@ export async function runParallel(options: IParallelWebpackOptions): Promise<voi
     webpackWorker.postMessage(i);
   }
 
-  await webpackPool.finish();
+  await webpackPool.finishAsync();
 
   await minifierCleanup();
 }

@@ -283,9 +283,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       return;
     }
 
-    await bundleStage.hooks.configureWebpack
-      .promise(undefined)
-      .then((webpackConfiguration) => (bundleStage.properties.webpackConfiguration = webpackConfiguration));
+    bundleStage.properties.webpackConfiguration = await bundleStage.hooks.configureWebpack.promise(undefined);
     await bundleStage.hooks.afterConfigureWebpack.promise();
     await this._runSubstageWithLoggingAsync({
       buildStageName: 'Bundle',
