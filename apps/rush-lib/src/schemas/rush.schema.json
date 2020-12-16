@@ -261,6 +261,10 @@
           "versionPolicyName": {
             "description": "An optional version policy associated with the project. Version policies are defined in \"version-policies.json\" file.",
             "type": "string"
+          },
+          "publishFolder": {
+            "description": "An optional path relative to the project folder that will be used by the \"rush publish\" command.",
+            "type": "string"
           }
         },
         "additionalProperties": false,
