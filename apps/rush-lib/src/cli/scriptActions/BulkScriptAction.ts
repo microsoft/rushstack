@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import * as path from 'path';
 import colors from 'colors';
 
 import { AlreadyReportedError } from '@rushstack/node-core-library';
@@ -113,8 +112,7 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const buildCacheConfiguration:
       | BuildCacheConfiguration
-      | undefined = await BuildCacheConfiguration.loadFromFileAsync(
-      path.resolve(this.rushConfiguration.commonRushConfigFolder, RushConstants.buildCacheFilename),
+      | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(
       this.rushConfiguration,
       this.rushGlobalFolder
     );

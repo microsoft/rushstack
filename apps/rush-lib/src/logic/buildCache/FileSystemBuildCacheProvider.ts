@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem } from '@rushstack/node-core-library';
+import { AlreadyReportedError, FileSystem, Terminal } from '@rushstack/node-core-library';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
@@ -46,5 +46,20 @@ export class FileSystemBuildCacheProvider extends BuildCacheProviderBase {
     const cacheEntryFilePath: string = path.join(this._cacheFolderPath, cacheId);
     await FileSystem.writeFileAsync(cacheEntryFilePath, entryBuffer, { ensureFolderExists: true });
     return true;
+  }
+
+  public async updateCachedCredentialAsync(terminal: Terminal, credential: string): Promise<void> {
+    terminal.writeErrorLine('A filesystem build cache is configured. Credentials are not supported.');
+    throw new AlreadyReportedError();
+  }
+
+  public async updateCachedCredentialInteractiveAsync(terminal: Terminal): Promise<void> {
+    terminal.writeLine('A filesystem build cache is configured. Credentials are not required.');
+  }
+
+  public async deleteCachedCredentialsAsync(terminal: Terminal): Promise<void> {
+    terminal.writeLine(
+      'A filesystem build cache is configured. No credentials are stored and can be deleted.'
+    );
   }
 }

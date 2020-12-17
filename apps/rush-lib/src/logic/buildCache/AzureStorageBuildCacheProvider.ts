@@ -3,9 +3,28 @@
 
 import { CollatedTerminal } from '@rushstack/stream-collator';
 import { BuildCacheProviderBase, IBuildCacheProviderBaseOptions } from './BuildCacheProviderBase';
+import { Terminal } from '@rushstack/node-core-library';
+import {
+  BlobClient,
+  BlobServiceClient,
+  BlockBlobClient,
+  ContainerClient,
+  ContainerSASPermissions,
+  generateBlobSASQueryParameters,
+  SASQueryParameters,
+  ServiceGetUserDelegationKeyResponse,
+  UserDelegationKey
+} from '@azure/storage-blob';
+import { DeviceCodeCredential } from '@azure/identity';
 
-import { BlobClient, BlobServiceClient, BlockBlobClient, ContainerClient } from '@azure/storage-blob';
-import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
+import { RushGlobalFolder } from '../../api/RushGlobalFolder';
+import {
+  BuildCacheProviderCredentialCache,
+  IBuildCacheProviderCredentialCacheEntry
+} from './BuildCacheProviderCredentialCache';
+import { URLSearchParams } from 'url';
+import { RushConstants } from '../RushConstants';
 
 export type AzureEnvironmentNames =
   | 'AzureCloud'
@@ -25,7 +44,10 @@ export interface IAzureStorageBuildCacheProviderOptions extends IBuildCacheProvi
   azureEnvironment?: AzureEnvironment;
   blobPrefix?: string;
   isCacheWriteAllowed: boolean;
+  rushGlobalFolder: RushGlobalFolder;
 }
+
+const SAS_TTL: number = 7 * 24 * 60 * 60 * 1000; // Seven days
 
 export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
   private readonly _storageAccountName: string;
@@ -33,6 +55,8 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
   private readonly _azureEnvironment: AzureEnvironment;
   private readonly _blobPrefix: string | undefined;
   private readonly _isCacheWriteAllowed: boolean;
+  private readonly _rushGlobalFolder: RushGlobalFolder;
+  private __credentialCacheId: string | undefined;
 
   private _containerClient: ContainerClient | undefined;
 
@@ -43,6 +67,57 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     this._azureEnvironment = options.azureEnvironment || AzureEnvironment.AzureCloud;
     this._blobPrefix = options.blobPrefix;
     this._isCacheWriteAllowed = options.isCacheWriteAllowed;
+    this._rushGlobalFolder = options.rushGlobalFolder;
+  }
+
+  private get _credentialCacheId(): string {
+    if (!this.__credentialCacheId) {
+      let serializedAzureEnvironmentName: string;
+      switch (this._azureEnvironment) {
+        case AzureEnvironment.AzureCloud: {
+          serializedAzureEnvironmentName = 'AzureCloud';
+          break;
+        }
+
+        case AzureEnvironment.AzureChinaCloud: {
+          serializedAzureEnvironmentName = 'AzureChinaCloud';
+          break;
+        }
+
+        case AzureEnvironment.AzureUSGovernment: {
+          serializedAzureEnvironmentName = 'AzureUSGovernment';
+          break;
+        }
+
+        case AzureEnvironment.AzureGermanCloud: {
+          serializedAzureEnvironmentName = 'AzureGermanCloud';
+          break;
+        }
+
+        default: {
+          throw new Error(`Unexpected Azure environment: ${this._azureEnvironment}`);
+        }
+      }
+
+      const cacheIdParts: string[] = [
+        'azure-blob-storage',
+        serializedAzureEnvironmentName,
+        this._storageAccountName,
+        this._storageContainerName
+      ];
+
+      if (this._isCacheWriteAllowed) {
+        cacheIdParts.push('cacheWriteAllowed');
+      }
+
+      return cacheIdParts.join('|');
+    }
+
+    return this.__credentialCacheId;
+  }
+
+  private get _storageAccountUrl(): string {
+    return `https://${this._storageAccountName}.blob.core.windows.net/`;
   }
 
   public static parseAzureEnvironmentName(name: AzureEnvironmentNames): AzureEnvironment {
@@ -73,7 +148,7 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     terminal: CollatedTerminal,
     cacheId: string
   ): Promise<Buffer | undefined> {
-    const blobClient: BlobClient = this._getBlobClientForCacheId(cacheId);
+    const blobClient: BlobClient = await this._getBlobClientForCacheIdAsync(cacheId);
     const blobExists: boolean = await blobClient.exists();
     if (blobExists) {
       return await blobClient.downloadToBuffer();
@@ -87,7 +162,7 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     cacheId: string,
     entryStream: Buffer
   ): Promise<boolean> {
-    const blobClient: BlobClient = this._getBlobClientForCacheId(cacheId);
+    const blobClient: BlobClient = await this._getBlobClientForCacheIdAsync(cacheId);
     const blockBlobClient: BlockBlobClient = blobClient.getBlockBlobClient();
     try {
       await blockBlobClient.upload(entryStream, entryStream.length);
@@ -97,26 +172,171 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     }
   }
 
-  private _getBlobClientForCacheId(cacheId: string): BlobClient {
-    const client: ContainerClient = this._getContainerClient();
+  public async updateCachedCredentialAsync(terminal: Terminal, credential: string): Promise<void> {
+    const credentialsCache: BuildCacheProviderCredentialCache = await BuildCacheProviderCredentialCache.initializeAsync(
+      this._rushGlobalFolder,
+      true
+    );
+    credentialsCache.setCacheEntry(this._credentialCacheId, credential);
+    await credentialsCache.saveIfModifiedAsync();
+    credentialsCache.dispose();
+  }
+
+  public async updateCachedCredentialInteractiveAsync(terminal: Terminal): Promise<void> {
+    const credentialsCache: BuildCacheProviderCredentialCache = await BuildCacheProviderCredentialCache.initializeAsync(
+      this._rushGlobalFolder,
+      true
+    );
+
+    const sasQueryParameters: SASQueryParameters = await this._getSasQueryParametersAsync();
+    const connectionString: string = this._getConnectionString(sasQueryParameters);
+
+    credentialsCache.setCacheEntry(this._credentialCacheId, connectionString, sasQueryParameters.expiresOn);
+    await credentialsCache.saveIfModifiedAsync();
+    credentialsCache.dispose();
+  }
+
+  public async deleteCachedCredentialsAsync(terminal: Terminal): Promise<void> {
+    const credentialsCache: BuildCacheProviderCredentialCache = await BuildCacheProviderCredentialCache.initializeAsync(
+      this._rushGlobalFolder,
+      true
+    );
+    credentialsCache.deleteCacheEntry(this._credentialCacheId);
+    await credentialsCache.saveIfModifiedAsync();
+    credentialsCache.dispose();
+  }
+
+  private async _getBlobClientForCacheIdAsync(cacheId: string): Promise<BlobClient> {
+    const client: ContainerClient = await this._getContainerClientAsync();
     const blobName: string = this._blobPrefix ? `${this._blobPrefix}/${cacheId}` : cacheId;
     return client.getBlobClient(blobName);
   }
 
-  private _getContainerClient(): ContainerClient {
+  private async _getContainerClientAsync(): Promise<ContainerClient> {
     if (!this._containerClient) {
-      const connectionString: string | undefined = EnvironmentConfiguration.buildCacheConnectionString;
+      let connectionString: string | undefined = EnvironmentConfiguration.buildCacheConnectionString;
+      if (!connectionString) {
+        const credentialCache: BuildCacheProviderCredentialCache = await BuildCacheProviderCredentialCache.initializeAsync(
+          this._rushGlobalFolder,
+          false
+        );
+        const cacheEntry:
+          | IBuildCacheProviderCredentialCacheEntry
+          | undefined = credentialCache.tryGetCacheEntry(this._credentialCacheId);
+        credentialCache.dispose();
+        const expirationTime: number | undefined = cacheEntry?.expires?.getTime();
+        if (expirationTime && expirationTime < Date.now()) {
+          throw new Error(
+            'Cached Azure Storage credentials have expired. ' +
+              `Update the credentials by running "rush ${RushConstants.updateBuildCacheCredentialsCommandName}".`
+          );
+        } else {
+          connectionString = cacheEntry?.credential;
+        }
+      }
+
+      if (!connectionString && !this._isCacheWriteAllowed) {
+        // Create a connection string without credentials, assuming anonymous access is allowed
+        connectionString = this._getConnectionString(undefined);
+      }
 
       let blobServiceClient: BlobServiceClient;
       if (connectionString) {
         blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
       } else {
-        throw new Error('No Azure Storage credentials have been provided');
+        throw new Error(
+          "Azure Storage credentials haven't been provided, or have expired. " +
+            `Update the credentials by running "rush ${RushConstants.updateBuildCacheCredentialsCommandName}", ` +
+            `or provide a connection string in the ` +
+            `${EnvironmentVariableNames.RUSH_BUILD_CACHE_CONNECTION_STRING} environment variable`
+        );
       }
 
       this._containerClient = blobServiceClient.getContainerClient(this._storageContainerName);
     }
 
     return this._containerClient;
+  }
+
+  private async _getSasQueryParametersAsync(): Promise<SASQueryParameters> {
+    let authorityHost: string;
+    switch (this._azureEnvironment) {
+      case AzureEnvironment.AzureCloud: {
+        authorityHost = 'https://login.microsoftonline.com';
+        break;
+      }
+
+      case AzureEnvironment.AzureChinaCloud: {
+        authorityHost = 'https://login.chinacloudapi.cn';
+        break;
+      }
+
+      case AzureEnvironment.AzureGermanCloud: {
+        authorityHost = 'https://login.microsoftonline.de';
+        break;
+      }
+
+      case AzureEnvironment.AzureUSGovernment: {
+        authorityHost = 'https://login.microsoftonline.us';
+        break;
+      }
+
+      default: {
+        throw new Error(`Unexpected Azure environment: ${this._azureEnvironment}`);
+      }
+    }
+
+    const deviceCodeCredential: DeviceCodeCredential = new DeviceCodeCredential(
+      undefined,
+      undefined,
+      undefined,
+      { authorityHost: authorityHost }
+    );
+    const blobServiceClient: BlobServiceClient = new BlobServiceClient(
+      this._storageAccountUrl,
+      deviceCodeCredential
+    );
+
+    const startsOn: Date = new Date();
+    const expires: Date = new Date(Date.now() + SAS_TTL);
+    const key: ServiceGetUserDelegationKeyResponse = await blobServiceClient.getUserDelegationKey(
+      startsOn,
+      expires
+    );
+
+    const containerSasPermissions: ContainerSASPermissions = new ContainerSASPermissions();
+    containerSasPermissions.read = true;
+    containerSasPermissions.create = this._isCacheWriteAllowed;
+
+    const userDelegationKey: UserDelegationKey = key;
+    const queryParameters: SASQueryParameters = generateBlobSASQueryParameters(
+      {
+        startsOn: startsOn,
+        expiresOn: expires,
+        permissions: containerSasPermissions,
+        containerName: this._storageContainerName
+      },
+      userDelegationKey,
+      this._storageAccountName
+    );
+
+    return queryParameters;
+  }
+
+  private _getConnectionString(sasQueryParameters: SASQueryParameters | undefined): string {
+    const blobEndpoint: string = `BlobEndpoint=${this._storageAccountUrl}`;
+    if (sasQueryParameters) {
+      const sasQuerySearchParameters: URLSearchParams = new URLSearchParams();
+      for (const [parameterName, parameterValue] of Object.entries(sasQueryParameters)) {
+        if (parameterValue) {
+          sasQuerySearchParameters.append(parameterName, parameterValue);
+        }
+      }
+
+      const connectionString: string = `${blobEndpoint};SharedAccessSignature=${sasQuerySearchParameters.toString()}`;
+      return connectionString;
+    } else {
+      return blobEndpoint;
+    }
   }
 }

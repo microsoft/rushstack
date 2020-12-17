@@ -190,4 +190,6 @@ export class RushConstants {
    * The name of the non-incremental build command.
    */
   public static readonly rebuildCommandName: string = 'rebuild';
+
+  public static readonly updateBuildCacheCredentialsCommandName: string = 'update-build-cache-credentials';
 }

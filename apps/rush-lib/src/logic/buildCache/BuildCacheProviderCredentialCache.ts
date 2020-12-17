@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, JsonSchema, LockFile } from '@rushstack/node-core-library';
 
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
 
@@ -15,12 +15,12 @@ interface IBuildCacheProviderCredentialCacheJson {
 }
 
 interface ICacheEntryJson {
-  expiration: number;
+  expires: number;
   credential: string;
 }
 
-export interface ICacheEntry {
-  expiration?: Date;
+export interface IBuildCacheProviderCredentialCacheEntry {
+  expires?: Date;
   credential: string;
 }
 
@@ -28,19 +28,30 @@ export class BuildCacheProviderCredentialCache {
   private readonly _cacheFilePath: string;
   private readonly _cacheEntries: Map<string, ICacheEntryJson>;
   private _modified: boolean = false;
+  private _disposed: boolean = false;
+  private _supportsEditing: boolean;
+  private readonly _lockfile: LockFile | undefined;
 
-  private constructor(cacheFilePath: string, loadedJson: IBuildCacheProviderCredentialCacheJson | undefined) {
+  private constructor(
+    cacheFilePath: string,
+    loadedJson: IBuildCacheProviderCredentialCacheJson | undefined,
+    lockfile: LockFile | undefined
+  ) {
     this._cacheFilePath = cacheFilePath;
     this._cacheEntries = new Map<string, ICacheEntryJson>(Object.entries(loadedJson?.cacheEntries || {}));
+    this._supportsEditing = !!lockfile;
+    this._lockfile = lockfile;
   }
 
   public static async initializeAsync(
-    rushGlobalFolder: RushGlobalFolder
+    rushGlobalFolder: RushGlobalFolder,
+    supportEditing: boolean
   ): Promise<BuildCacheProviderCredentialCache> {
     const cacheFilePath: string = path.join(rushGlobalFolder.path, CACHE_FILENAME);
     const jsonSchema: JsonSchema = JsonSchema.fromFile(
       path.resolve(__dirname, '..', '..', 'schemas', 'build-cache-credentials-cache.schema.json')
     );
+
     let loadedJson: IBuildCacheProviderCredentialCacheJson | undefined;
     try {
       loadedJson = await JsonFile.loadAndValidateAsync(cacheFilePath, jsonSchema);
@@ -50,33 +61,43 @@ export class BuildCacheProviderCredentialCache {
       }
     }
 
+    let lockfile: LockFile | undefined;
+    if (supportEditing) {
+      lockfile = await LockFile.acquire(rushGlobalFolder.path, `${CACHE_FILENAME}.lock`);
+    }
+
     const credentialCache: BuildCacheProviderCredentialCache = new BuildCacheProviderCredentialCache(
       cacheFilePath,
-      loadedJson
+      loadedJson,
+      lockfile
     );
     return credentialCache;
   }
 
-  public setCacheEntry(cacheId: string, credential: string, expiration?: Date): void {
-    const expirationMilliseconds: number = expiration?.getTime() || 0;
+  public setCacheEntry(cacheId: string, credential: string, expires?: Date): void {
+    this._validate(true);
+
+    const expiresMilliseconds: number = expires?.getTime() || 0;
     const existingCacheEntry: ICacheEntryJson | undefined = this._cacheEntries.get(cacheId);
     if (
       existingCacheEntry?.credential !== credential ||
-      existingCacheEntry?.expiration !== expirationMilliseconds
+      existingCacheEntry?.expires !== expiresMilliseconds
     ) {
       this._modified = true;
       this._cacheEntries.set(cacheId, {
-        expiration: expirationMilliseconds,
+        expires: expiresMilliseconds,
         credential
       });
     }
   }
 
-  public tryGetCacheEntry(cacheId: string): ICacheEntry | undefined {
+  public tryGetCacheEntry(cacheId: string): IBuildCacheProviderCredentialCacheEntry | undefined {
+    this._validate(false);
+
     const cacheEntry: ICacheEntryJson | undefined = this._cacheEntries.get(cacheId);
     if (cacheEntry) {
-      const result: ICacheEntry = {
-        expiration: cacheEntry.expiration ? new Date(cacheEntry.expiration) : undefined,
+      const result: IBuildCacheProviderCredentialCacheEntry = {
+        expires: cacheEntry.expires ? new Date(cacheEntry.expires) : undefined,
         credential: cacheEntry.credential
       };
 
@@ -87,6 +108,8 @@ export class BuildCacheProviderCredentialCache {
   }
 
   public deleteCacheEntry(cacheId: string): void {
+    this._validate(true);
+
     if (this._cacheEntries.has(cacheId)) {
       this._modified = true;
       this._cacheEntries.delete(cacheId);
@@ -94,9 +117,11 @@ export class BuildCacheProviderCredentialCache {
   }
 
   public trimExpiredEntries(): void {
+    this._validate(true);
+
     const now: number = Date.now();
     for (const [cacheId, cacheEntry] of this._cacheEntries.entries()) {
-      if (cacheEntry.expiration < now) {
+      if (cacheEntry.expires < now) {
         this._cacheEntries.delete(cacheId);
         this._modified = true;
       }
@@ -104,6 +129,8 @@ export class BuildCacheProviderCredentialCache {
   }
 
   public async saveIfModifiedAsync(): Promise<void> {
+    this._validate(true);
+
     if (this._modified) {
       const cacheEntriesJson: { [cacheId: string]: ICacheEntryJson } = {};
       for (const [cacheId, cacheEntry] of this._cacheEntries.entries()) {
@@ -119,6 +146,21 @@ export class BuildCacheProviderCredentialCache {
       });
 
       this._modified = false;
+    }
+  }
+
+  public dispose(): void {
+    this._lockfile?.release();
+    this._disposed = true;
+  }
+
+  private _validate(requiresEditing: boolean): void {
+    if (!this._supportsEditing && requiresEditing) {
+      throw new Error(`This instance of ${BuildCacheProviderCredentialCache.name} does not support editing.`);
+    }
+
+    if (this._disposed) {
+      throw new Error(`This instance of ${BuildCacheProviderCredentialCache.name} has been disposed.`);
     }
   }
 }

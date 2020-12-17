@@ -12,8 +12,8 @@ import {
 } from '../logic/buildCache/AzureStorageBuildCacheProvider';
 import { RushConfiguration } from './RushConfiguration';
 import { FileSystemBuildCacheProvider } from '../logic/buildCache/FileSystemBuildCacheProvider';
-import { BuildCacheProviderCredentialCache } from '../logic/buildCache/BuildCacheProviderCredentialCache';
 import { RushGlobalFolder } from './RushGlobalFolder';
+import { RushConstants } from '../logic/RushConstants';
 
 /**
  * Describes the file structure for the "common/config/rush/build-cache.json" config file.
@@ -82,14 +82,13 @@ export class BuildCacheConfiguration {
   private constructor(
     buildCacheJson: IBuildCacheJson,
     rushConfiguration: RushConfiguration,
-    credentialCache: BuildCacheProviderCredentialCache
+    rushGlobalFolder: RushGlobalFolder
   ) {
     this.projectOutputFolderNames = buildCacheJson.projectOutputFolderNames;
 
     switch (buildCacheJson.cacheProvider) {
       case 'filesystem': {
         this.cacheProvider = new FileSystemBuildCacheProvider({
-          credentialCache,
           rushConfiguration
         });
         break;
@@ -105,7 +104,7 @@ export class BuildCacheConfiguration {
             )
           : undefined;
         this.cacheProvider = new AzureStorageBuildCacheProvider({
-          credentialCache,
+          rushGlobalFolder,
           storageAccountName: azureStorageConfigurationJson.storageAccountName,
           storageContainerName: azureStorageConfigurationJson.storageContainerName,
           azureEnvironment: azureEnvironment,
@@ -122,30 +121,26 @@ export class BuildCacheConfiguration {
   }
 
   /**
-   * Loads the build-cache.json data from the specified file path.
+   * Loads the build-cache.json data from the repo's default file path (/common/config/rush/build-cache.json).
    * If the file has not been created yet, then undefined is returned.
    */
-  public static async loadFromFileAsync(
-    jsonFilename: string,
+  public static async loadFromDefaultPathAsync(
     rushConfiguration: RushConfiguration,
     rushGlobalFolder: RushGlobalFolder
   ): Promise<BuildCacheConfiguration | undefined> {
-    if (FileSystem.exists(jsonFilename)) {
-      const buildCacheJsonPromise: Promise<IBuildCacheJson> = JsonFile.loadAndValidateAsync(
-        jsonFilename,
+    const jsonFilePath: string = BuildCacheConfiguration.getBuildCacheConfigFilePath(rushConfiguration);
+    if (FileSystem.exists(jsonFilePath)) {
+      const buildCacheJson: IBuildCacheJson = await JsonFile.loadAndValidateAsync(
+        jsonFilePath,
         BuildCacheConfiguration._jsonSchema
       );
-      const credentialCachePromise: Promise<BuildCacheProviderCredentialCache> = BuildCacheProviderCredentialCache.initializeAsync(
-        rushGlobalFolder
-      );
-      const [buildCacheJson, credentialCache] = await Promise.all([
-        buildCacheJsonPromise,
-        credentialCachePromise
-      ]);
-
-      return new BuildCacheConfiguration(buildCacheJson, rushConfiguration, credentialCache);
+      return new BuildCacheConfiguration(buildCacheJson, rushConfiguration, rushGlobalFolder);
     } else {
       return undefined;
     }
+  }
+
+  public static getBuildCacheConfigFilePath(rushConfiguration: RushConfiguration): string {
+    return path.resolve(rushConfiguration.commonRushConfigFolder, RushConstants.buildCacheFilename);
   }
 }

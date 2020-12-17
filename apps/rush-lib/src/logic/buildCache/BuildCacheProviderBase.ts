@@ -4,16 +4,14 @@
 import * as path from 'path';
 import { Path } from '@rushstack/node-core-library';
 import { CollatedTerminal } from '@rushstack/stream-collator';
+import { Terminal } from '@rushstack/node-core-library';
 
 import { IProjectBuildDeps } from '../taskRunner/ProjectBuilder';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
 import { ProjectBuildCache } from './ProjectBuildCache';
 import { ProjectBuildCacheConfiguration } from '../../api/ProjectBuildCacheConfiguration';
-import { BuildCacheProviderCredentialCache } from './BuildCacheProviderCredentialCache';
 
-export interface IBuildCacheProviderBaseOptions {
-  credentialCache: BuildCacheProviderCredentialCache;
-}
+export interface IBuildCacheProviderBaseOptions {}
 
 export interface IGetProjectBuildCacheOptions {
   projectBuildCacheConfiguration: ProjectBuildCacheConfiguration;
@@ -23,11 +21,7 @@ export interface IGetProjectBuildCacheOptions {
 }
 
 export abstract class BuildCacheProviderBase {
-  protected readonly _credentialsCache: BuildCacheProviderCredentialCache;
-
-  public constructor(options: IBuildCacheProviderBaseOptions) {
-    this._credentialsCache = options.credentialCache;
-  }
+  public constructor(options: IBuildCacheProviderBaseOptions) {}
 
   public tryGetProjectBuildCache(
     terminal: CollatedTerminal,
@@ -59,6 +53,9 @@ export abstract class BuildCacheProviderBase {
     cacheId: string,
     entryBuffer: Buffer
   ): Promise<boolean>;
+  public abstract updateCachedCredentialAsync(terminal: Terminal, credential: string): Promise<void>;
+  public abstract updateCachedCredentialInteractiveAsync(terminal: Terminal): Promise<void>;
+  public abstract deleteCachedCredentialsAsync(terminal: Terminal): Promise<void>;
 
   private _validateProject(
     terminal: CollatedTerminal,
