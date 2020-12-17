@@ -7,14 +7,30 @@ import { BuildCacheProviderBase, IBuildCacheProviderBaseOptions } from './BuildC
 import { BlobClient, BlobServiceClient, BlockBlobClient, ContainerClient } from '@azure/storage-blob';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
+export type AzureEnvironmentNames =
+  | 'AzureCloud'
+  | 'AzureChinaCloud'
+  | 'AzureUSGovernment'
+  | 'AzureGermanCloud';
+export enum AzureEnvironment {
+  AzureCloud,
+  AzureChinaCloud,
+  AzureUSGovernment,
+  AzureGermanCloud
+}
+
 export interface IAzureStorageBuildCacheProviderOptions extends IBuildCacheProviderBaseOptions {
   storageContainerName: string;
+  storageAccountName: string;
+  azureEnvironment?: AzureEnvironment;
   blobPrefix?: string;
   isCacheWriteAllowed: boolean;
 }
 
 export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
+  private readonly _storageAccountName: string;
   private readonly _storageContainerName: string;
+  private readonly _azureEnvironment: AzureEnvironment;
   private readonly _blobPrefix: string | undefined;
   private readonly _isCacheWriteAllowed: boolean;
 
@@ -22,9 +38,35 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
 
   public constructor(options: IAzureStorageBuildCacheProviderOptions) {
     super(options);
+    this._storageAccountName = options.storageAccountName;
     this._storageContainerName = options.storageContainerName;
+    this._azureEnvironment = options.azureEnvironment || AzureEnvironment.AzureCloud;
     this._blobPrefix = options.blobPrefix;
     this._isCacheWriteAllowed = options.isCacheWriteAllowed;
+  }
+
+  public static parseAzureEnvironmentName(name: AzureEnvironmentNames): AzureEnvironment {
+    switch (name) {
+      case 'AzureCloud': {
+        return AzureEnvironment.AzureCloud;
+      }
+
+      case 'AzureChinaCloud': {
+        return AzureEnvironment.AzureChinaCloud;
+      }
+
+      case 'AzureUSGovernment': {
+        return AzureEnvironment.AzureUSGovernment;
+      }
+
+      case 'AzureGermanCloud': {
+        return AzureEnvironment.AzureGermanCloud;
+      }
+
+      default: {
+        throw new Error(`Unexpected Azure environment name: ${name}`);
+      }
+    }
   }
 
   public async tryGetCacheEntryBufferByIdAsync(

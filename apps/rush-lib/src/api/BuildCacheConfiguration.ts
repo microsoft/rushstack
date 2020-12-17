@@ -5,7 +5,11 @@ import * as path from 'path';
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
 import { BuildCacheProviderBase } from '../logic/buildCache/BuildCacheProviderBase';
-import { AzureStorageBuildCacheProvider } from '../logic/buildCache/AzureStorageBuildCacheProvider';
+import {
+  AzureEnvironment,
+  AzureEnvironmentNames,
+  AzureStorageBuildCacheProvider
+} from '../logic/buildCache/AzureStorageBuildCacheProvider';
 import { RushConfiguration } from './RushConfiguration';
 import { FileSystemBuildCacheProvider } from '../logic/buildCache/FileSystemBuildCacheProvider';
 
@@ -13,7 +17,7 @@ import { FileSystemBuildCacheProvider } from '../logic/buildCache/FileSystemBuil
  * Describes the file structure for the "common/config/rush/build-cache.json" config file.
  */
 interface IBuildCacheJson {
-  cacheProvider: 'azure-storage' | 'filesystem';
+  cacheProvider: 'azure-blob-storage' | 'filesystem';
 
   /**
    * A list of folder names under each project root that should be cached.
@@ -22,13 +26,27 @@ interface IBuildCacheJson {
   projectOutputFolderNames: string[];
 }
 
-interface IAzureStorageBuildCacheJson extends IBuildCacheJson {
-  cacheProvider: 'azure-storage';
+interface IAzureBlobStorageBuildCacheJson extends IBuildCacheJson {
+  cacheProvider: 'azure-blob-storage';
+
+  azureBlobStorageConfiguration: IAzureStorageConfigurationJson;
+}
+
+interface IAzureStorageConfigurationJson {
+  /**
+   * The name of the the Azure storage account to use for build cache.
+   */
+  storageAccountName: string;
 
   /**
    * The name of the container in the Azure storage account to use for build cache.
    */
   storageContainerName: string;
+
+  /**
+   * The Azure environment the storage account exists in. Defaults to AzureCloud.
+   */
+  azureEnvironment?: AzureEnvironmentNames;
 
   /**
    * An optional prefix for cache item blob names.
@@ -70,12 +88,21 @@ export class BuildCacheConfiguration {
         break;
       }
 
-      case 'azure-storage': {
-        const azureStorageBuildCacheJson: IAzureStorageBuildCacheJson = buildCacheJson as IAzureStorageBuildCacheJson;
+      case 'azure-blob-storage': {
+        const azureStorageBuildCacheJson: IAzureBlobStorageBuildCacheJson = buildCacheJson as IAzureBlobStorageBuildCacheJson;
+        const azureStorageConfigurationJson: IAzureStorageConfigurationJson =
+          azureStorageBuildCacheJson.azureBlobStorageConfiguration;
+        const azureEnvironment: AzureEnvironment | undefined = azureStorageConfigurationJson.azureEnvironment
+          ? AzureStorageBuildCacheProvider.parseAzureEnvironmentName(
+              azureStorageConfigurationJson.azureEnvironment
+            )
+          : undefined;
         this.cacheProvider = new AzureStorageBuildCacheProvider({
-          storageContainerName: azureStorageBuildCacheJson.storageContainerName,
-          blobPrefix: azureStorageBuildCacheJson.blobPrefix,
-          isCacheWriteAllowed: !!azureStorageBuildCacheJson.isCacheWriteAllowed
+          storageAccountName: azureStorageConfigurationJson.storageAccountName,
+          storageContainerName: azureStorageConfigurationJson.storageContainerName,
+          azureEnvironment: azureEnvironment,
+          blobPrefix: azureStorageConfigurationJson.blobPrefix,
+          isCacheWriteAllowed: !!azureStorageConfigurationJson.isCacheWriteAllowed
         });
         break;
       }
