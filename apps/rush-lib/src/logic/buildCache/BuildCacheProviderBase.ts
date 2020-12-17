@@ -9,8 +9,11 @@ import { IProjectBuildDeps } from '../taskRunner/ProjectBuilder';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
 import { ProjectBuildCache } from './ProjectBuildCache';
 import { ProjectBuildCacheConfiguration } from '../../api/ProjectBuildCacheConfiguration';
+import { BuildCacheProviderCredentialCache } from './BuildCacheProviderCredentialCache';
 
-export interface IBuildCacheProviderBaseOptions {}
+export interface IBuildCacheProviderBaseOptions {
+  credentialCache: BuildCacheProviderCredentialCache;
+}
 
 export interface IGetProjectBuildCacheOptions {
   projectBuildCacheConfiguration: ProjectBuildCacheConfiguration;
@@ -20,7 +23,11 @@ export interface IGetProjectBuildCacheOptions {
 }
 
 export abstract class BuildCacheProviderBase {
-  public constructor(options: IBuildCacheProviderBaseOptions) {}
+  protected readonly _credentialsCache: BuildCacheProviderCredentialCache;
+
+  public constructor(options: IBuildCacheProviderBaseOptions) {
+    this._credentialsCache = options.credentialCache;
+  }
 
   public tryGetProjectBuildCache(
     terminal: CollatedTerminal,
