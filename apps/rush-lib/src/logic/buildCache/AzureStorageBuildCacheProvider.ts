@@ -6,10 +6,10 @@ import { BuildCacheProviderBase, IBuildCacheProviderBaseOptions } from './BuildC
 import { Terminal } from '@rushstack/node-core-library';
 import {
   BlobClient,
+  BlobSASPermissions,
   BlobServiceClient,
   BlockBlobClient,
   ContainerClient,
-  ContainerSASPermissions,
   generateBlobSASQueryParameters,
   SASQueryParameters,
   ServiceGetUserDelegationKeyResponse,
@@ -304,17 +304,18 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
       expires
     );
 
-    const containerSasPermissions: ContainerSASPermissions = new ContainerSASPermissions();
-    containerSasPermissions.read = true;
-    containerSasPermissions.create = this._isCacheWriteAllowed;
+    const blobSasPermissions: BlobSASPermissions = new BlobSASPermissions();
+    blobSasPermissions.read = true;
+    blobSasPermissions.create = this._isCacheWriteAllowed;
 
     const userDelegationKey: UserDelegationKey = key;
     const queryParameters: SASQueryParameters = generateBlobSASQueryParameters(
       {
         startsOn: startsOn,
         expiresOn: expires,
-        permissions: containerSasPermissions,
-        containerName: this._storageContainerName
+        permissions: blobSasPermissions,
+        containerName: this._storageContainerName,
+        blobName: 'dummy-blob-name'
       },
       userDelegationKey,
       this._storageAccountName
@@ -329,7 +330,13 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
       const sasQuerySearchParameters: URLSearchParams = new URLSearchParams();
       for (const [parameterName, parameterValue] of Object.entries(sasQueryParameters)) {
         if (parameterValue) {
-          sasQuerySearchParameters.append(parameterName, parameterValue);
+          let serializedParameterValue: string;
+          if (parameterValue instanceof Date) {
+            serializedParameterValue = parameterValue.toISOString();
+          } else {
+            serializedParameterValue = parameterValue;
+          }
+          sasQuerySearchParameters.append(parameterName, serializedParameterValue);
         }
       }
 
