@@ -15,7 +15,7 @@ import {
   ServiceGetUserDelegationKeyResponse,
   UserDelegationKey
 } from '@azure/storage-blob';
-import { DeviceCodeCredential } from '@azure/identity';
+import { DeviceCodeCredential, DeviceCodeInfo } from '@azure/identity';
 
 import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
@@ -25,6 +25,7 @@ import {
 } from './BuildCacheProviderCredentialCache';
 import { URLSearchParams } from 'url';
 import { RushConstants } from '../RushConstants';
+import { Utilities } from '../../utilities/Utilities';
 
 export type AzureEnvironmentNames =
   | 'AzureCloud'
@@ -188,7 +189,7 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
       true
     );
 
-    const sasQueryParameters: SASQueryParameters = await this._getSasQueryParametersAsync();
+    const sasQueryParameters: SASQueryParameters = await this._getSasQueryParametersAsync(terminal);
     const connectionString: string = this._getConnectionString(sasQueryParameters);
 
     credentialsCache.setCacheEntry(this._credentialCacheId, connectionString, sasQueryParameters.expiresOn);
@@ -258,7 +259,7 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     return this._containerClient;
   }
 
-  private async _getSasQueryParametersAsync(): Promise<SASQueryParameters> {
+  private async _getSasQueryParametersAsync(terminal: Terminal): Promise<SASQueryParameters> {
     let authorityHost: string;
     switch (this._azureEnvironment) {
       case AzureEnvironment.AzureCloud: {
@@ -289,7 +290,9 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     const deviceCodeCredential: DeviceCodeCredential = new DeviceCodeCredential(
       undefined,
       undefined,
-      undefined,
+      (deviceCodeInfo: DeviceCodeInfo) => {
+        this._printMessageInBox(deviceCodeInfo.message, terminal);
+      },
       { authorityHost: authorityHost }
     );
     const blobServiceClient: BlobServiceClient = new BlobServiceClient(
@@ -322,6 +325,32 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     );
 
     return queryParameters;
+  }
+
+  private _printMessageInBox(message: string, terminal: Terminal): void {
+    const boxWidth: number = Math.floor(Utilities.getConsoleWidth() / 2);
+    const maxLineLength: number = boxWidth - 10;
+
+    const wrappedMessage: string = Utilities.wrapWords(message, maxLineLength);
+    const wrappedMessageLines: string[] = wrappedMessage.split('\n');
+
+    // ╔═══════════╗
+    // ║  Message  ║
+    // ╚═══════════╝
+    terminal.writeLine(' ╔' + new Array(boxWidth - 3).join('═') + '╗ ');
+    for (const line of wrappedMessageLines) {
+      const trimmedLine: string = line.trim();
+      const padding: number = boxWidth - trimmedLine.length - 4;
+      const leftPadding: number = Math.floor(padding / 2);
+      const rightPadding: number = padding - leftPadding;
+      terminal.writeLine(
+        ' ║' +
+          new Array(leftPadding + 1).join(' ') +
+          trimmedLine +
+          (new Array(rightPadding + 1).join(' ') + '║ ')
+      );
+    }
+    terminal.writeLine(' ╚' + new Array(boxWidth - 3).join('═') + '╝ ');
   }
 
   private _getConnectionString(sasQueryParameters: SASQueryParameters | undefined): string {
