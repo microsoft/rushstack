@@ -190,9 +190,9 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     );
 
     const sasQueryParameters: SASQueryParameters = await this._getSasQueryParametersAsync(terminal);
-    const connectionString: string = this._getConnectionString(sasQueryParameters);
+    const sasString: string = this._getSasStringFromQueryParameters(sasQueryParameters);
 
-    credentialsCache.setCacheEntry(this._credentialCacheId, connectionString, sasQueryParameters.expiresOn);
+    credentialsCache.setCacheEntry(this._credentialCacheId, sasString, sasQueryParameters.expiresOn);
     await credentialsCache.saveIfModifiedAsync();
     credentialsCache.dispose();
   }
@@ -215,8 +215,8 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
 
   private async _getContainerClientAsync(): Promise<ContainerClient> {
     if (!this._containerClient) {
-      let connectionString: string | undefined = EnvironmentConfiguration.buildCacheConnectionString;
-      if (!connectionString) {
+      let sasString: string | undefined = EnvironmentConfiguration.buildCacheCredential;
+      if (!sasString) {
         const credentialCache: BuildCacheProviderCredentialCache = await BuildCacheProviderCredentialCache.initializeAsync(
           this._rushGlobalFolder,
           false
@@ -232,24 +232,20 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
               `Update the credentials by running "rush ${RushConstants.updateBuildCacheCredentialsCommandName}".`
           );
         } else {
-          connectionString = cacheEntry?.credential;
+          sasString = cacheEntry?.credential;
         }
       }
 
-      if (!connectionString && !this._isCacheWriteAllowed) {
-        // Create a connection string without credentials, assuming anonymous access is allowed
-        connectionString = this._getConnectionString(undefined);
-      }
-
       let blobServiceClient: BlobServiceClient;
-      if (connectionString) {
+      if (sasString || !this._isCacheWriteAllowed) {
+        const connectionString: string = this._getConnectionString(sasString);
         blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
       } else {
         throw new Error(
-          "Azure Storage credentials haven't been provided, or have expired. " +
+          "An Azure Storage SAS credential hasn't been provided, or has expired. " +
             `Update the credentials by running "rush ${RushConstants.updateBuildCacheCredentialsCommandName}", ` +
-            `or provide a connection string in the ` +
-            `${EnvironmentVariableNames.RUSH_BUILD_CACHE_CONNECTION_STRING} environment variable`
+            `or provide a SAS in the ` +
+            `${EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL} environment variable`
         );
       }
 
@@ -353,23 +349,27 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     terminal.writeLine(' ╚' + new Array(boxWidth - 3).join('═') + '╝ ');
   }
 
-  private _getConnectionString(sasQueryParameters: SASQueryParameters | undefined): string {
-    const blobEndpoint: string = `BlobEndpoint=${this._storageAccountUrl}`;
-    if (sasQueryParameters) {
-      const sasQuerySearchParameters: URLSearchParams = new URLSearchParams();
-      for (const [parameterName, parameterValue] of Object.entries(sasQueryParameters)) {
-        if (parameterValue) {
-          let serializedParameterValue: string;
-          if (parameterValue instanceof Date) {
-            serializedParameterValue = parameterValue.toISOString();
-          } else {
-            serializedParameterValue = parameterValue;
-          }
-          sasQuerySearchParameters.append(parameterName, serializedParameterValue);
+  private _getSasStringFromQueryParameters(sasQueryParameters: SASQueryParameters): string {
+    const sasQuerySearchParameters: URLSearchParams = new URLSearchParams();
+    for (const [parameterName, parameterValue] of Object.entries(sasQueryParameters)) {
+      if (parameterValue) {
+        let serializedParameterValue: string;
+        if (parameterValue instanceof Date) {
+          serializedParameterValue = parameterValue.toISOString();
+        } else {
+          serializedParameterValue = parameterValue;
         }
+        sasQuerySearchParameters.append(parameterName, serializedParameterValue);
       }
+    }
 
-      const connectionString: string = `${blobEndpoint};SharedAccessSignature=${sasQuerySearchParameters.toString()}`;
+    return sasQuerySearchParameters.toString();
+  }
+
+  private _getConnectionString(sasString: string | undefined): string {
+    const blobEndpoint: string = `BlobEndpoint=${this._storageAccountUrl}`;
+    if (sasString) {
+      const connectionString: string = `${blobEndpoint};SharedAccessSignature=${sasString}`;
       return connectionString;
     } else {
       return blobEndpoint;

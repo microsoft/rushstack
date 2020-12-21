@@ -92,9 +92,9 @@ export const enum EnvironmentVariableNames {
   RUSH_GLOBAL_FOLDER = 'RUSH_GLOBAL_FOLDER',
 
   /**
-   * Provides the connection string for a remote build cache, if configured.
+   * Provides a credential for a remote build cache, if configured.
    */
-  RUSH_BUILD_CACHE_CONNECTION_STRING = 'RUSH_BUILD_CACHE_CONNECTION_STRING'
+  RUSH_BUILD_CACHE_CREDENTIAL = 'RUSH_BUILD_CACHE_CREDENTIAL'
 }
 
 /**
@@ -117,7 +117,7 @@ export class EnvironmentConfiguration {
 
   private static _rushGlobalFolderOverride: string | undefined;
 
-  private static _buildCacheConnectionString: string | undefined;
+  private static _buildCacheCredential: string | undefined;
 
   /**
    * An override for the common/temp folder path.
@@ -167,12 +167,12 @@ export class EnvironmentConfiguration {
   }
 
   /**
-   * Provides the connection string for a remote build cache, if configured.
+   * Provides a credential for a remote build cache, if configured.
    * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_CONNECTION_STRING}
    */
-  public static get buildCacheConnectionString(): string | undefined {
+  public static get buildCacheCredential(): string | undefined {
     EnvironmentConfiguration._ensureInitialized();
-    return EnvironmentConfiguration._buildCacheConnectionString;
+    return EnvironmentConfiguration._buildCacheCredential;
   }
 
   /**
@@ -236,8 +236,8 @@ export class EnvironmentConfiguration {
             break;
           }
 
-          case EnvironmentVariableNames.RUSH_BUILD_CACHE_CONNECTION_STRING: {
-            EnvironmentConfiguration._buildCacheConnectionString = value;
+          case EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL: {
+            EnvironmentConfiguration._buildCacheCredential = value;
             break;
           }
 
