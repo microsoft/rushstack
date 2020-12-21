@@ -191,5 +191,5 @@ export class RushConstants {
    */
   public static readonly rebuildCommandName: string = 'rebuild';
 
-  public static readonly updateBuildCacheCredentialsCommandName: string = 'update-build-cache-credentials';
+  public static readonly updateCloudCredentialsCommandName: string = 'update-cloud-credentials';
 }

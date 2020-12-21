@@ -9,18 +9,18 @@ import { BaseRushAction } from './BaseRushAction';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { RushConstants } from '../../logic/RushConstants';
 
-export class UpdateBuildCacheCredentials extends BaseRushAction {
+export class UpdateCloudCredentials extends BaseRushAction {
   private _interactiveModeFlag!: CommandLineFlagParameter;
   private _credentialParameter!: CommandLineStringParameter;
   private _deleteFlag!: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
-      actionName: RushConstants.updateBuildCacheCredentialsCommandName,
-      summary: 'Update the credentials used by the build cache provider.',
+      actionName: RushConstants.updateCloudCredentialsCommandName,
+      summary: '(EXPERIMENTAL) Update the credentials used by the build cache provider.',
       documentation:
-        'If the build caching feature is configured, this command facilitates updating the credentials ' +
-        'used by a cloud-based provider.',
+        '(EXPERIMENTAL) If the build caching feature is configured, this command facilitates ' +
+        'updating the credentials used by a cloud-based provider.',
       safeForSimultaneousRushProcesses: false,
       parser
     });

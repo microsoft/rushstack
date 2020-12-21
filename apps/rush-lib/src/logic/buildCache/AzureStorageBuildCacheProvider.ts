@@ -229,7 +229,7 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
         if (expirationTime && expirationTime < Date.now()) {
           throw new Error(
             'Cached Azure Storage credentials have expired. ' +
-              `Update the credentials by running "rush ${RushConstants.updateBuildCacheCredentialsCommandName}".`
+              `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}".`
           );
         } else {
           sasString = cacheEntry?.credential;
@@ -243,7 +243,7 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
       } else {
         throw new Error(
           "An Azure Storage SAS credential hasn't been provided, or has expired. " +
-            `Update the credentials by running "rush ${RushConstants.updateBuildCacheCredentialsCommandName}", ` +
+            `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}", ` +
             `or provide a SAS in the ` +
             `${EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL} environment variable`
         );
