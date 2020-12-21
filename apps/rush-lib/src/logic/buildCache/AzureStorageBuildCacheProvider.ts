@@ -37,7 +37,7 @@ export interface IAzureStorageBuildCacheProviderOptions extends IBuildCacheProvi
   rushGlobalFolder: RushGlobalFolder;
 }
 
-const SAS_TTL: number = 7 * 24 * 60 * 60 * 1000; // Seven days
+const SAS_TTL_MILLISECONDS: number = 7 * 24 * 60 * 60 * 1000; // Seven days
 
 export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
   private readonly _storageAccountName: string;
@@ -221,7 +221,7 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     );
 
     const startsOn: Date = new Date();
-    const expires: Date = new Date(Date.now() + SAS_TTL);
+    const expires: Date = new Date(Date.now() + SAS_TTL_MILLISECONDS);
     const key: ServiceGetUserDelegationKeyResponse = await blobServiceClient.getUserDelegationKey(
       startsOn,
       expires
