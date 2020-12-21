@@ -76,8 +76,8 @@
 
                 "azureEnvironment": {
                   "type": "string",
-                  "description": "The Azure environment the storage account exists in. Defaults to AzureCloud.",
-                  "enum": ["AzureCloud", "AzureChinaCloud", "AzureUSGovernment", "AzureGermanCloud"]
+                  "description": "The Azure environment the storage account exists in. Defaults to AzurePublicCloud.",
+                  "enum": ["AzurePublicCloud", "AzureChina", "AzureGermany", "AzureGovernment"]
                 },
 
                 "blobPrefix": {

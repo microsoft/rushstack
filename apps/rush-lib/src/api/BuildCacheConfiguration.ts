@@ -6,7 +6,6 @@ import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
 import { BuildCacheProviderBase } from '../logic/buildCache/BuildCacheProviderBase';
 import {
-  AzureEnvironment,
   AzureEnvironmentNames,
   AzureStorageBuildCacheProvider
 } from '../logic/buildCache/AzureStorageBuildCacheProvider';
@@ -98,16 +97,11 @@ export class BuildCacheConfiguration {
         const azureStorageBuildCacheJson: IAzureBlobStorageBuildCacheJson = buildCacheJson as IAzureBlobStorageBuildCacheJson;
         const azureStorageConfigurationJson: IAzureStorageConfigurationJson =
           azureStorageBuildCacheJson.azureBlobStorageConfiguration;
-        const azureEnvironment: AzureEnvironment | undefined = azureStorageConfigurationJson.azureEnvironment
-          ? AzureStorageBuildCacheProvider.parseAzureEnvironmentName(
-              azureStorageConfigurationJson.azureEnvironment
-            )
-          : undefined;
         this.cacheProvider = new AzureStorageBuildCacheProvider({
           rushGlobalFolder,
           storageAccountName: azureStorageConfigurationJson.storageAccountName,
           storageContainerName: azureStorageConfigurationJson.storageContainerName,
-          azureEnvironment: azureEnvironment,
+          azureEnvironment: azureStorageConfigurationJson.azureEnvironment,
           blobPrefix: azureStorageConfigurationJson.blobPrefix,
           isCacheWriteAllowed: !!azureStorageConfigurationJson.isCacheWriteAllowed
         });

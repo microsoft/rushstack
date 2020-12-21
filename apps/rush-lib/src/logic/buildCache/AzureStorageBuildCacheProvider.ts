@@ -14,7 +14,7 @@ import {
   ServiceGetUserDelegationKeyResponse,
   UserDelegationKey
 } from '@azure/storage-blob';
-import { DeviceCodeCredential, DeviceCodeInfo } from '@azure/identity';
+import { AzureAuthorityHosts, DeviceCodeCredential, DeviceCodeInfo } from '@azure/identity';
 
 import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
@@ -26,22 +26,12 @@ import { URLSearchParams } from 'url';
 import { RushConstants } from '../RushConstants';
 import { Utilities } from '../../utilities/Utilities';
 
-export type AzureEnvironmentNames =
-  | 'AzureCloud'
-  | 'AzureChinaCloud'
-  | 'AzureUSGovernment'
-  | 'AzureGermanCloud';
-export enum AzureEnvironment {
-  AzureCloud,
-  AzureChinaCloud,
-  AzureUSGovernment,
-  AzureGermanCloud
-}
+export type AzureEnvironmentNames = keyof typeof AzureAuthorityHosts;
 
 export interface IAzureStorageBuildCacheProviderOptions extends IBuildCacheProviderBaseOptions {
   storageContainerName: string;
   storageAccountName: string;
-  azureEnvironment?: AzureEnvironment;
+  azureEnvironment?: AzureEnvironmentNames;
   blobPrefix?: string;
   isCacheWriteAllowed: boolean;
   rushGlobalFolder: RushGlobalFolder;
@@ -52,7 +42,7 @@ const SAS_TTL: number = 7 * 24 * 60 * 60 * 1000; // Seven days
 export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
   private readonly _storageAccountName: string;
   private readonly _storageContainerName: string;
-  private readonly _azureEnvironment: AzureEnvironment;
+  private readonly _azureEnvironment: AzureEnvironmentNames;
   private readonly _blobPrefix: string | undefined;
   private readonly _isCacheWriteAllowed: boolean;
   private readonly _rushGlobalFolder: RushGlobalFolder;
@@ -64,44 +54,24 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     super(options);
     this._storageAccountName = options.storageAccountName;
     this._storageContainerName = options.storageContainerName;
-    this._azureEnvironment = options.azureEnvironment || AzureEnvironment.AzureCloud;
+    this._azureEnvironment = options.azureEnvironment || 'AzurePublicCloud';
     this._blobPrefix = options.blobPrefix;
     this._isCacheWriteAllowed = options.isCacheWriteAllowed;
     this._rushGlobalFolder = options.rushGlobalFolder;
+
+    if (!(this._azureEnvironment in AzureAuthorityHosts)) {
+      throw new Error(
+        `The specified Azure Environment ("${this._azureEnvironment}") is invalid. If it is specified, it must ` +
+          `be one of: ${Object.keys(AzureAuthorityHosts).join(', ')}`
+      );
+    }
   }
 
   private get _credentialCacheId(): string {
     if (!this.__credentialCacheId) {
-      let serializedAzureEnvironmentName: string;
-      switch (this._azureEnvironment) {
-        case AzureEnvironment.AzureCloud: {
-          serializedAzureEnvironmentName = 'AzureCloud';
-          break;
-        }
-
-        case AzureEnvironment.AzureChinaCloud: {
-          serializedAzureEnvironmentName = 'AzureChinaCloud';
-          break;
-        }
-
-        case AzureEnvironment.AzureUSGovernment: {
-          serializedAzureEnvironmentName = 'AzureUSGovernment';
-          break;
-        }
-
-        case AzureEnvironment.AzureGermanCloud: {
-          serializedAzureEnvironmentName = 'AzureGermanCloud';
-          break;
-        }
-
-        default: {
-          throw new Error(`Unexpected Azure environment: ${this._azureEnvironment}`);
-        }
-      }
-
       const cacheIdParts: string[] = [
         'azure-blob-storage',
-        serializedAzureEnvironmentName,
+        this._azureEnvironment,
         this._storageAccountName,
         this._storageContainerName
       ];
@@ -118,30 +88,6 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
 
   private get _storageAccountUrl(): string {
     return `https://${this._storageAccountName}.blob.core.windows.net/`;
-  }
-
-  public static parseAzureEnvironmentName(name: AzureEnvironmentNames): AzureEnvironment {
-    switch (name) {
-      case 'AzureCloud': {
-        return AzureEnvironment.AzureCloud;
-      }
-
-      case 'AzureChinaCloud': {
-        return AzureEnvironment.AzureChinaCloud;
-      }
-
-      case 'AzureUSGovernment': {
-        return AzureEnvironment.AzureUSGovernment;
-      }
-
-      case 'AzureGermanCloud': {
-        return AzureEnvironment.AzureGermanCloud;
-      }
-
-      default: {
-        throw new Error(`Unexpected Azure environment name: ${name}`);
-      }
-    }
   }
 
   public async tryGetCacheEntryBufferByIdAsync(
@@ -256,31 +202,9 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
   }
 
   private async _getSasQueryParametersAsync(terminal: Terminal): Promise<SASQueryParameters> {
-    let authorityHost: string;
-    switch (this._azureEnvironment) {
-      case AzureEnvironment.AzureCloud: {
-        authorityHost = 'https://login.microsoftonline.com';
-        break;
-      }
-
-      case AzureEnvironment.AzureChinaCloud: {
-        authorityHost = 'https://login.chinacloudapi.cn';
-        break;
-      }
-
-      case AzureEnvironment.AzureGermanCloud: {
-        authorityHost = 'https://login.microsoftonline.de';
-        break;
-      }
-
-      case AzureEnvironment.AzureUSGovernment: {
-        authorityHost = 'https://login.microsoftonline.us';
-        break;
-      }
-
-      default: {
-        throw new Error(`Unexpected Azure environment: ${this._azureEnvironment}`);
-      }
+    const authorityHost: string | undefined = AzureAuthorityHosts[this._azureEnvironment];
+    if (!authorityHost) {
+      throw new Error(`Unexpected Azure environment: ${this._azureEnvironment}`);
     }
 
     const deviceCodeCredential: DeviceCodeCredential = new DeviceCodeCredential(
