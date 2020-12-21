@@ -108,6 +108,7 @@ export class ProjectBuildCache {
   public async tryHydrateFromCacheAsync(): Promise<boolean> {
     const cacheId: string | undefined = this._cacheId;
     if (!cacheId) {
+      this._terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
       return false;
     }
 
@@ -115,12 +116,16 @@ export class ProjectBuildCache {
       | Buffer
       | undefined = await this._buildCacheProvider.tryGetCacheEntryBufferByIdAsync(this._terminal, cacheId);
     if (!cacheEntryBuffer) {
+      this._terminal.writeVerboseLine('No build cache hit.');
       return false;
     }
+
+    this._terminal.writeLine('Build cache hit.');
 
     const projectFolderPath: string = this._project.projectFolder;
 
     // Purge output folders
+    this._terminal.writeVerboseLine(`Clearing cached folders: ${this._projectOutputFolderNames.join(', ')}`);
     await Promise.all(
       this._projectOutputFolderNames.map((outputFolderName: string) =>
         FileSystem.deleteFolderAsync(path.join(projectFolderPath, outputFolderName))
@@ -128,21 +133,32 @@ export class ProjectBuildCache {
     );
 
     const tarStream: stream.Writable = tar.extract({ cwd: projectFolderPath });
-    return await new Promise((resolve: (result: boolean) => void, reject: (error: Error) => void) => {
-      try {
-        tarStream.on('error', (error: Error) => reject(error));
-        tarStream.on('close', () => resolve(true));
-        tarStream.on('drain', () => resolve(true));
-        tarStream.write(cacheEntryBuffer);
-      } catch (e) {
-        reject(e);
+    const success: boolean = await new Promise(
+      (resolve: (result: boolean) => void, reject: (error: Error) => void) => {
+        try {
+          tarStream.on('error', (error: Error) => reject(error));
+          tarStream.on('close', () => resolve(true));
+          tarStream.on('drain', () => resolve(true));
+          tarStream.write(cacheEntryBuffer);
+        } catch (e) {
+          reject(e);
+        }
       }
-    });
+    );
+
+    if (success) {
+      this._terminal.writeLine('Successfully hydrated build output from cache.');
+    } else {
+      this._terminal.writeErrorLine('Hydration build output from cache was unsuccessful.');
+    }
+
+    return success;
   }
 
   public async trySetCacheEntryAsync(): Promise<boolean> {
     const cacheId: string | undefined = this._cacheId;
     if (!cacheId) {
+      this._terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
       return false;
     }
 
@@ -159,6 +175,9 @@ export class ProjectBuildCache {
       }
     }
 
+    this._terminal.writeVerboseLine(
+      `Caching existent build output folders: ${filteredOutputFolders.join(', ')}`
+    );
     const tarStream: stream.Readable = tar.create(
       {
         gzip: true,
@@ -168,11 +187,19 @@ export class ProjectBuildCache {
       filteredOutputFolders
     );
     const cacheEntryBuffer: Buffer = await this._readStreamToBufferAsync(tarStream);
-    return await this._buildCacheProvider.trySetCacheEntryBufferAsync(
+    const success: boolean = await this._buildCacheProvider.trySetCacheEntryBufferAsync(
       this._terminal,
       cacheId,
       cacheEntryBuffer
     );
+
+    if (success) {
+      this._terminal.writeLine('Successfully set cache entry.');
+    } else {
+      this._terminal.writeErrorLine('Unable to set cache entry.');
+    }
+
+    return success;
   }
 
   private async _readStreamToBufferAsync(stream: stream.Readable): Promise<Buffer> {
