@@ -11,6 +11,7 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
 import { BuildCacheProviderBase } from './BuildCacheProviderBase';
 import { ProjectBuildCacheConfiguration } from '../../api/ProjectBuildCacheConfiguration';
+import { RushConstants } from '../RushConstants';
 
 export interface IProjectBuildCacheOptions {
   projectBuildCacheConfiguration: ProjectBuildCacheConfiguration;
@@ -85,9 +86,12 @@ export class ProjectBuildCache {
       const hash: crypto.Hash = crypto.createHash('sha1');
       const serializedOutputFolders: string = JSON.stringify(this._projectOutputFolderNames);
       hash.update(serializedOutputFolders);
+      hash.update(RushConstants.hashDelimiter);
       hash.update(this._command);
+      hash.update(RushConstants.hashDelimiter);
       for (const projectHash of sortedProjectStates) {
         hash.update(projectHash);
+        hash.update(RushConstants.hashDelimiter);
       }
 
       this.__cacheId = hash.digest('hex');

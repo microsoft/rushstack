@@ -12,6 +12,7 @@ import { RushConfiguration } from '../api/RushConfiguration';
 import { Git } from './Git';
 import { PnpmProjectDependencyManifest } from './pnpm/PnpmProjectDependencyManifest';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import { RushConstants } from './RushConstants';
 
 export class PackageChangeAnalyzer {
   // Allow this function to be overwritten during unit tests
@@ -57,7 +58,9 @@ export class PackageChangeAnalyzer {
         const hash: crypto.Hash = crypto.createHash('sha1');
         for (const packageDepsFile of sortedPackageDepsFiles) {
           hash.update(packageDepsFile);
+          hash.update(RushConstants.hashDelimiter);
           hash.update(packageDeps.files[packageDepsFile]);
+          hash.update(RushConstants.hashDelimiter);
         }
 
         projectState = hash.digest('hex');
