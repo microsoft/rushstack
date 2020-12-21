@@ -29,6 +29,8 @@
   /**
    * If true, the build cache feature is enabled. To use this feature, a common/config/rush/build-cache.json
    * file must be created with configuration options.
+   *
+   * See https://github.com/microsoft/rushstack/issues/2393 for details about this experimental feature.
    */
   /*[LINE "HYPOTHETICAL"]*/ "buildCache": true
 }
