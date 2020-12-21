@@ -3,7 +3,6 @@
 
 import * as path from 'path';
 import { AlreadyReportedError, FileSystem, Terminal } from '@rushstack/node-core-library';
-import { CollatedTerminal } from '@rushstack/stream-collator';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { BuildCacheProviderBase, IBuildCacheProviderBaseOptions } from './BuildCacheProviderBase';
@@ -23,7 +22,7 @@ export class FileSystemBuildCacheProvider extends BuildCacheProviderBase {
   }
 
   public async tryGetCacheEntryBufferByIdAsync(
-    terminal: CollatedTerminal,
+    terminal: Terminal,
     cacheId: string
   ): Promise<Buffer | undefined> {
     const cacheEntryFilePath: string = path.join(this._cacheFolderPath, cacheId);
@@ -39,7 +38,7 @@ export class FileSystemBuildCacheProvider extends BuildCacheProviderBase {
   }
 
   public async trySetCacheEntryBufferAsync(
-    terminal: CollatedTerminal,
+    terminal: Terminal,
     cacheId: string,
     entryBuffer: Buffer
   ): Promise<boolean> {

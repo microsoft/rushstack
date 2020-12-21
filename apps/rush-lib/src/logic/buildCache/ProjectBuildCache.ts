@@ -5,8 +5,7 @@ import * as crypto from 'crypto';
 import * as path from 'path';
 import type * as stream from 'stream';
 import * as tar from 'tar';
-import { CollatedTerminal } from '@rushstack/stream-collator';
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, Terminal } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
@@ -18,6 +17,7 @@ export interface IProjectBuildCacheOptions {
   command: string;
   buildCacheProvider: BuildCacheProviderBase;
   packageChangeAnalyzer: PackageChangeAnalyzer;
+  terminal: Terminal;
 }
 
 export class ProjectBuildCache {
@@ -26,6 +26,7 @@ export class ProjectBuildCache {
   private readonly _buildCacheProvider: BuildCacheProviderBase;
   private readonly _packageChangeAnalyzer: PackageChangeAnalyzer;
   private readonly _projectOutputFolderNames: string[];
+  private readonly _terminal: Terminal;
 
   // If __cacheId is null, one doesn't exist
   private __cacheIdCannotBeCalculated: boolean | undefined;
@@ -101,9 +102,10 @@ export class ProjectBuildCache {
     this._buildCacheProvider = options.buildCacheProvider;
     this._packageChangeAnalyzer = options.packageChangeAnalyzer;
     this._projectOutputFolderNames = options.projectBuildCacheConfiguration.projectOutputFolders;
+    this._terminal = options.terminal;
   }
 
-  public async tryHydrateFromCacheAsync(terminal: CollatedTerminal): Promise<boolean> {
+  public async tryHydrateFromCacheAsync(): Promise<boolean> {
     const cacheId: string | undefined = this._cacheId;
     if (!cacheId) {
       return false;
@@ -111,7 +113,7 @@ export class ProjectBuildCache {
 
     const cacheEntryBuffer:
       | Buffer
-      | undefined = await this._buildCacheProvider.tryGetCacheEntryBufferByIdAsync(terminal, cacheId);
+      | undefined = await this._buildCacheProvider.tryGetCacheEntryBufferByIdAsync(this._terminal, cacheId);
     if (!cacheEntryBuffer) {
       return false;
     }
@@ -138,7 +140,7 @@ export class ProjectBuildCache {
     });
   }
 
-  public async trySetCacheEntryAsync(terminal: CollatedTerminal): Promise<boolean> {
+  public async trySetCacheEntryAsync(): Promise<boolean> {
     const cacheId: string | undefined = this._cacheId;
     if (!cacheId) {
       return false;
@@ -166,7 +168,11 @@ export class ProjectBuildCache {
       filteredOutputFolders
     );
     const cacheEntryBuffer: Buffer = await this._readStreamToBufferAsync(tarStream);
-    return await this._buildCacheProvider.trySetCacheEntryBufferAsync(terminal, cacheId, cacheEntryBuffer);
+    return await this._buildCacheProvider.trySetCacheEntryBufferAsync(
+      this._terminal,
+      cacheId,
+      cacheEntryBuffer
+    );
   }
 
   private async _readStreamToBufferAsync(stream: stream.Readable): Promise<Buffer> {

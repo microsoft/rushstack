@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CollatedTerminal } from '@rushstack/stream-collator';
 import { BuildCacheProviderBase, IBuildCacheProviderBaseOptions } from './BuildCacheProviderBase';
 import { Terminal } from '@rushstack/node-core-library';
 import {
@@ -146,7 +145,7 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
   }
 
   public async tryGetCacheEntryBufferByIdAsync(
-    terminal: CollatedTerminal,
+    terminal: Terminal,
     cacheId: string
   ): Promise<Buffer | undefined> {
     const blobClient: BlobClient = await this._getBlobClientForCacheIdAsync(cacheId);
@@ -159,7 +158,7 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
   }
 
   public async trySetCacheEntryBufferAsync(
-    terminal: CollatedTerminal,
+    terminal: Terminal,
     cacheId: string,
     entryStream: Buffer
   ): Promise<boolean> {

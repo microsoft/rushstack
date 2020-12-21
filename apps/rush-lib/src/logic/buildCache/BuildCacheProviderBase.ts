@@ -2,9 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Path } from '@rushstack/node-core-library';
-import { CollatedTerminal } from '@rushstack/stream-collator';
-import { Terminal } from '@rushstack/node-core-library';
+import { Path, Terminal } from '@rushstack/node-core-library';
 
 import { IProjectBuildDeps } from '../taskRunner/ProjectBuilder';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
@@ -24,7 +22,7 @@ export abstract class BuildCacheProviderBase {
   public constructor(options: IBuildCacheProviderBaseOptions) {}
 
   public tryGetProjectBuildCache(
-    terminal: CollatedTerminal,
+    terminal: Terminal,
     options: IGetProjectBuildCacheOptions
   ): ProjectBuildCache | undefined {
     const { projectBuildCacheConfiguration, projectBuildDeps, command, packageChangeAnalyzer } = options;
@@ -40,16 +38,17 @@ export abstract class BuildCacheProviderBase {
       projectBuildCacheConfiguration,
       command,
       buildCacheProvider: this,
-      packageChangeAnalyzer
+      packageChangeAnalyzer,
+      terminal
     });
   }
 
   public abstract tryGetCacheEntryBufferByIdAsync(
-    terminal: CollatedTerminal,
+    terminal: Terminal,
     cacheId: string
   ): Promise<Buffer | undefined>;
   public abstract trySetCacheEntryBufferAsync(
-    terminal: CollatedTerminal,
+    terminal: Terminal,
     cacheId: string,
     entryBuffer: Buffer
   ): Promise<boolean>;
@@ -58,7 +57,7 @@ export abstract class BuildCacheProviderBase {
   public abstract deleteCachedCredentialsAsync(terminal: Terminal): Promise<void>;
 
   private _validateProject(
-    terminal: CollatedTerminal,
+    terminal: Terminal,
     projectBuildCacheConfiguration: ProjectBuildCacheConfiguration,
     projectState: IProjectBuildDeps
   ): boolean {
@@ -80,7 +79,7 @@ export abstract class BuildCacheProviderBase {
     }
 
     if (inputOutputFiles.length > 0) {
-      terminal.writeStderrLine(
+      terminal.writeWarningLine(
         'Unable to use build cache. The following files are used to calculate project state ' +
           `and are considered project output: ${inputOutputFiles.join(', ')}`
       );

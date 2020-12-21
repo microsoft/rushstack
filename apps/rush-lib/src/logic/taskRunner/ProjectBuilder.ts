@@ -9,7 +9,8 @@ import {
   FileSystem,
   JsonObject,
   NewlineKind,
-  InternalError
+  InternalError,
+  Terminal
 } from '@rushstack/node-core-library';
 import {
   TerminalChunkKind,
@@ -33,6 +34,7 @@ import { ProjectLogWritable } from './ProjectLogWritable';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { ProjectBuildCacheConfiguration } from '../../api/ProjectBuildCacheConfiguration';
+import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 
 export interface IProjectBuildDeps extends IPackageDeps {
   arguments: string;
@@ -174,7 +176,8 @@ export class ProjectBuilder extends BaseBuilder {
         ensureNewlineAtEnd: true
       });
 
-      const terminal: CollatedTerminal = new CollatedTerminal(normalizeNewlineTransform);
+      const collatedTerminal: CollatedTerminal = new CollatedTerminal(normalizeNewlineTransform);
+      const terminal: Terminal = new Terminal(new CollatedTerminalProvider(collatedTerminal));
 
       let hasWarningOrError: boolean = false;
       const projectFolder: string = this._rushProject.projectFolder;
@@ -190,7 +193,7 @@ export class ProjectBuilder extends BaseBuilder {
           lastProjectBuildDeps = JsonFile.load(currentDepsPath);
         } catch (e) {
           // Warn and ignore - treat failing to load the file as the project being not built.
-          terminal.writeStdoutLine(
+          terminal.writeWarningLine(
             `Warning: error parsing ${this._packageDepsFilename}: ${e}. Ignoring and ` +
               `treating the command "${this._commandToRun}" as not run.`
           );
@@ -218,9 +221,7 @@ export class ProjectBuilder extends BaseBuilder {
         });
       }
 
-      const hydratedFromCache: boolean | undefined = await projectBuildCache?.tryHydrateFromCacheAsync(
-        terminal
-      );
+      const hydratedFromCache: boolean | undefined = await projectBuildCache?.tryHydrateFromCacheAsync();
 
       if (hydratedFromCache) {
         return TaskStatus.FromCache;
@@ -247,7 +248,7 @@ export class ProjectBuilder extends BaseBuilder {
         }
 
         // Run the task
-        terminal.writeStdoutLine('Invoking: ' + this._commandToRun);
+        terminal.writeLine('Invoking: ' + this._commandToRun);
 
         const task: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(this._commandToRun, {
           rushConfiguration: this._rushConfiguration,
@@ -263,13 +264,13 @@ export class ProjectBuilder extends BaseBuilder {
         if (task.stdout !== null) {
           task.stdout.on('data', (data: Buffer) => {
             const text: string = data.toString();
-            terminal.writeChunk({ text, kind: TerminalChunkKind.Stdout });
+            collatedTerminal.writeChunk({ text, kind: TerminalChunkKind.Stdout });
           });
         }
         if (task.stderr !== null) {
           task.stderr.on('data', (data: Buffer) => {
             const text: string = data.toString();
-            terminal.writeChunk({ text, kind: TerminalChunkKind.Stderr });
+            collatedTerminal.writeChunk({ text, kind: TerminalChunkKind.Stderr });
             hasWarningOrError = true;
           });
         }
@@ -310,9 +311,9 @@ export class ProjectBuilder extends BaseBuilder {
             }
           );
 
-          const setCacheEntryPromise: Promise<boolean> | undefined = projectBuildCache?.trySetCacheEntryAsync(
-            terminal
-          );
+          const setCacheEntryPromise:
+            | Promise<boolean>
+            | undefined = projectBuildCache?.trySetCacheEntryAsync();
 
           await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
         }
