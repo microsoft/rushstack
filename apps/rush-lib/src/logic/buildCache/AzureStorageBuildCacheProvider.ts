@@ -168,6 +168,7 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
       await blockBlobClient.upload(entryStream, entryStream.length);
       return true;
     } catch (e) {
+      terminal.writeWarningLine(`Error uploading cache entry to Azure Storage: ${e}`);
       return false;
     }
   }

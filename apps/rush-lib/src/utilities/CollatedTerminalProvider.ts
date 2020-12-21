@@ -6,9 +6,19 @@ import { CollatedTerminal } from '@rushstack/stream-collator';
 
 export class CollatedTerminalProvider implements ITerminalProvider {
   private readonly _collatedTerminal: CollatedTerminal;
+  private _hasErrors: boolean = false;
+  private _hasWarnings: boolean = false;
 
   public readonly supportsColor: boolean = true;
   public readonly eolCharacter: string = '\n';
+
+  public get hasErrors(): boolean {
+    return this._hasErrors;
+  }
+
+  public get hasWarnings(): boolean {
+    return this._hasWarnings;
+  }
 
   public constructor(collatedTerminal: CollatedTerminal) {
     this._collatedTerminal = collatedTerminal;
@@ -22,9 +32,15 @@ export class CollatedTerminalProvider implements ITerminalProvider {
         break;
       }
 
-      case TerminalProviderSeverity.error:
+      case TerminalProviderSeverity.error: {
+        this._collatedTerminal.writeStderrLine(data);
+        this._hasErrors = true;
+        break;
+      }
+
       case TerminalProviderSeverity.warning: {
         this._collatedTerminal.writeStderrLine(data);
+        this._hasWarnings = true;
         break;
       }
 

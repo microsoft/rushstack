@@ -149,7 +149,7 @@ export class ProjectBuildCache {
     if (success) {
       this._terminal.writeLine('Successfully hydrated build output from cache.');
     } else {
-      this._terminal.writeErrorLine('Hydration build output from cache was unsuccessful.');
+      this._terminal.writeWarningLine('Hydration build output from cache was unsuccessful.');
     }
 
     return success;
@@ -196,7 +196,7 @@ export class ProjectBuildCache {
     if (success) {
       this._terminal.writeLine('Successfully set cache entry.');
     } else {
-      this._terminal.writeErrorLine('Unable to set cache entry.');
+      this._terminal.writeWarningLine('Unable to set cache entry.');
     }
 
     return success;

@@ -177,7 +177,8 @@ export class ProjectBuilder extends BaseBuilder {
       });
 
       const collatedTerminal: CollatedTerminal = new CollatedTerminal(normalizeNewlineTransform);
-      const terminal: Terminal = new Terminal(new CollatedTerminalProvider(collatedTerminal));
+      const terminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(collatedTerminal);
+      const terminal: Terminal = new Terminal(terminalProvider);
 
       let hasWarningOrError: boolean = false;
       const projectFolder: string = this._rushProject.projectFolder;
@@ -221,9 +222,11 @@ export class ProjectBuilder extends BaseBuilder {
         });
       }
 
-      const hydratedFromCache: boolean | undefined = await projectBuildCache?.tryHydrateFromCacheAsync();
+      const hydrateFromCacheSuccess:
+        | boolean
+        | undefined = await projectBuildCache?.tryHydrateFromCacheAsync();
 
-      if (hydratedFromCache) {
+      if (hydrateFromCacheSuccess) {
         return TaskStatus.FromCache;
       } else if (isPackageUnchanged && this.isIncrementalBuildAllowed) {
         return TaskStatus.Skipped;
@@ -275,7 +278,7 @@ export class ProjectBuilder extends BaseBuilder {
           });
         }
 
-        const status: TaskStatus = await new Promise(
+        let status: TaskStatus = await new Promise(
           (resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
             task.on('close', (code: number) => {
               try {
@@ -307,7 +310,13 @@ export class ProjectBuilder extends BaseBuilder {
             | Promise<boolean>
             | undefined = projectBuildCache?.trySetCacheEntryAsync();
 
-          await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
+          const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
+
+          if (terminalProvider.hasErrors) {
+            status = TaskStatus.Failure;
+          } else if (cacheWriteSuccess === false || terminalProvider.hasWarnings) {
+            status = TaskStatus.SuccessWithWarning;
+          }
         }
 
         normalizeNewlineTransform.close();
