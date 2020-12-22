@@ -93,6 +93,14 @@ export const enum EnvironmentVariableNames {
 
   /**
    * Provides a credential for a remote build cache, if configured.
+   *
+   * @remarks
+   * This credential overrides any cached credentials.
+   *
+   * If Azure Blob Storage is used to store cache entries, this must be a SAS token serialized as query
+   * parameters.
+   *
+   * For information on SAS tokens, see here: https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview
    */
   RUSH_BUILD_CACHE_CREDENTIAL = 'RUSH_BUILD_CACHE_CREDENTIAL'
 }
