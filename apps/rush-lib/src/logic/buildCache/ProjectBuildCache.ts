@@ -5,6 +5,7 @@ import * as crypto from 'crypto';
 import * as path from 'path';
 import type * as stream from 'stream';
 import * as tar from 'tar';
+import * as fs from 'fs';
 import { FileSystem, Terminal } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -180,15 +181,34 @@ export class ProjectBuildCache {
     }
 
     this._terminal.writeVerboseLine(`Caching build output folders: ${filteredOutputFolders.join(', ')}`);
+    let encounteredTarErrors: boolean = false;
     const tarStream: stream.Readable = tar.create(
       {
         gzip: true,
         portable: true,
-        cwd: projectFolderPath
+        strict: true,
+        cwd: projectFolderPath,
+        filter: (tarPath: string, stat: tar.FileStat) => {
+          const tempStats: fs.Stats = new fs.Stats();
+          tempStats.mode = stat.mode;
+          if (tempStats.isSymbolicLink()) {
+            this._terminal.writeError(
+              `Unable to include "${tarPath}" in build cache. It is a symbolic link.`
+            );
+            encounteredTarErrors = true;
+            return false;
+          } else {
+            return true;
+          }
+        }
       },
       filteredOutputFolders
     );
     const cacheEntryBuffer: Buffer = await this._readStreamToBufferAsync(tarStream);
+    if (encounteredTarErrors) {
+      return false;
+    }
+
     const success: boolean = await this._buildCacheProvider.trySetCacheEntryBufferAsync(
       this._terminal,
       cacheId,
