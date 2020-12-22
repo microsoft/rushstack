@@ -94,7 +94,6 @@ describe('RushCommandLineParser', () => {
           const repoName: string = 'basicAndRunBuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
 
-          expect.assertions(8);
           await expect(instance.parser.execute()).resolves.toEqual(true);
 
           // There should be 1 build per package
@@ -127,7 +126,6 @@ describe('RushCommandLineParser', () => {
           const repoName: string = 'basicAndRunRebuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
 
-          expect.assertions(8);
           await expect(instance.parser.execute()).resolves.toEqual(true);
 
           // There should be 1 build per package
@@ -162,7 +160,6 @@ describe('RushCommandLineParser', () => {
           const repoName: string = 'overrideRebuildAndRunBuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
 
-          expect.assertions(8);
           await expect(instance.parser.execute()).resolves.toEqual(true);
 
           // There should be 1 build per package
@@ -195,7 +192,6 @@ describe('RushCommandLineParser', () => {
           const repoName: string = 'overrideRebuildAndRunRebuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
 
-          expect.assertions(8);
           await expect(instance.parser.execute()).resolves.toEqual(true);
 
           // There should be 1 build per package
@@ -229,7 +225,6 @@ describe('RushCommandLineParser', () => {
         it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'overrideAndDefaultBuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
-          expect.assertions(8);
           await expect(instance.parser.execute()).resolves.toEqual(true);
 
           // There should be 1 build per package
@@ -259,9 +254,9 @@ describe('RushCommandLineParser', () => {
 
       describe(`'rebuild' action`, () => {
         it(`executes the package's 'build' script`, async () => {
+          // broken
           const repoName: string = 'overrideAndDefaultRebuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
-          expect.assertions(8);
           await expect(instance.parser.execute()).resolves.toEqual(true);
 
           // There should be 1 build per package
@@ -291,44 +286,40 @@ describe('RushCommandLineParser', () => {
     });
 
     describe(`in repo with 'build' command overridden as a global command`, () => {
-      it(`throws an error when starting Rush`, () => {
+      it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideBuildAsGlobalCommandRepo';
 
-        expect.assertions(1);
-        return expect(() => {
+        await expect(() => {
           getCommandLineParserInstance(repoName, 'doesnt-matter');
         }).toThrowError('This command can only be designated as a command kind "bulk"');
       });
     });
 
     describe(`in repo with 'rebuild' command overridden as a global command`, () => {
-      it(`throws an error when starting Rush`, () => {
+      it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideRebuildAsGlobalCommandRepo';
 
-        expect.assertions(1);
-        return expect(() => {
+        await expect(() => {
           getCommandLineParserInstance(repoName, 'doesnt-matter');
         }).toThrowError('This command can only be designated as a command kind "bulk"');
       });
     });
 
     describe(`in repo with 'build' command overridden with 'safeForSimultaneousRushProcesses=true'`, () => {
-      it(`throws an error when starting Rush`, () => {
+      it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideBuildWithSimultaneousProcessesRepo';
 
-        expect.assertions(1);
-        return expect(() => {
+        await expect(() => {
           getCommandLineParserInstance(repoName, 'doesnt-matter');
         }).toThrowError('"safeForSimultaneousRushProcesses=true". This configuration is not supported');
       });
     });
 
     describe(`in repo with 'rebuild' command overridden with 'safeForSimultaneousRushProcesses=true'`, () => {
-      it(`throws an error when starting Rush`, () => {
+      it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideRebuildWithSimultaneousProcessesRepo';
 
-        expect.assertions(1);
-        return expect(() => {
+        await expect(() => {
           getCommandLineParserInstance(repoName, 'doesnt-matter');
         }).toThrowError('"safeForSimultaneousRushProcesses=true". This configuration is not supported');
       });

@@ -94,6 +94,7 @@ export const enum DependencyType {
 export const enum EnvironmentVariableNames {
     RUSH_ABSOLUTE_SYMLINKS = "RUSH_ABSOLUTE_SYMLINKS",
     RUSH_ALLOW_UNSUPPORTED_NODEJS = "RUSH_ALLOW_UNSUPPORTED_NODEJS",
+    RUSH_BUILD_CACHE_CREDENTIAL = "RUSH_BUILD_CACHE_CREDENTIAL",
     RUSH_DEPLOY_TARGET_FOLDER = "RUSH_DEPLOY_TARGET_FOLDER",
     RUSH_GLOBAL_FOLDER = "RUSH_GLOBAL_FOLDER",
     RUSH_PARALLELISM = "RUSH_PARALLELISM",
@@ -140,6 +141,7 @@ export interface IConfigurationEnvironmentVariable {
 
 // @beta
 export interface IExperimentsJson {
+    buildCache?: boolean;
     legacyIncrementalBuildDependencyDetection?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
@@ -420,6 +422,7 @@ export class RushConfigurationProject {
     get packageName(): string;
     get projectFolder(): string;
     get projectRelativeFolder(): string;
+    get projectRushConfigFolder(): string;
     get projectRushTempFolder(): string;
     get reviewCategory(): string | undefined;
     get rushConfiguration(): RushConfiguration;

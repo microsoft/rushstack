@@ -25,6 +25,7 @@ import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { IRushConfigurationProjectJson } from '../../api/RushConfigurationProject';
+import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -109,8 +110,16 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
+    const buildCacheConfiguration:
+      | BuildCacheConfiguration
+      | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(
+      this.rushConfiguration,
+      this.rushGlobalFolder
+    );
+
     const taskSelector: TaskSelector = new TaskSelector({
       rushConfiguration: this.rushConfiguration,
+      buildCacheConfiguration,
       toProjects: this.mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy),
       fromProjects: this.mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy),
       commandToRun: this._commandToRun,

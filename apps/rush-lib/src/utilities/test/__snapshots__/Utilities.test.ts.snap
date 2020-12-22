@@ -1,0 +1,66 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Utilities printMessageInBox Correctly gets the console width 1`] = `
+Array [
+  " ╔══════════════════════════════╗ ",
+  " ║    Lorem ipsum dolor sit     ║ ",
+  " ║      amet, consectetuer      ║ ",
+  " ║       adipiscing elit.       ║ ",
+  " ║      Maecenas porttitor      ║ ",
+  " ║     congue massa. Fusce      ║ ",
+  " ║      posuere, magna sed      ║ ",
+  " ║     pulvinar ultricies,      ║ ",
+  " ║         purus lectus         ║ ",
+  " ║    malesuada libero, sit     ║ ",
+  " ║      amet commodo magna      ║ ",
+  " ║       eros quis urna.        ║ ",
+  " ╚══════════════════════════════╝ ",
+  "",
+]
+`;
+
+exports[`Utilities printMessageInBox Correctly prints a narrow box 1`] = `
+Array [
+  " ╔══════════════════╗ ",
+  " ║      Lorem       ║ ",
+  " ║      ipsum       ║ ",
+  " ║    dolor sit     ║ ",
+  " ║      amet,       ║ ",
+  " ║   consectetuer   ║ ",
+  " ║    adipiscing    ║ ",
+  " ║      elit.       ║ ",
+  " ║     Maecenas     ║ ",
+  " ║    porttitor     ║ ",
+  " ║      congue      ║ ",
+  " ║      massa.      ║ ",
+  " ║      Fusce       ║ ",
+  " ║     posuere,     ║ ",
+  " ║    magna sed     ║ ",
+  " ║     pulvinar     ║ ",
+  " ║    ultricies,    ║ ",
+  " ║      purus       ║ ",
+  " ║      lectus      ║ ",
+  " ║    malesuada     ║ ",
+  " ║     libero,      ║ ",
+  " ║     sit amet     ║ ",
+  " ║     commodo      ║ ",
+  " ║      magna       ║ ",
+  " ║    eros quis     ║ ",
+  " ║      urna.       ║ ",
+  " ╚══════════════════╝ ",
+  "",
+]
+`;
+
+exports[`Utilities printMessageInBox Correctly prints a wide box 1`] = `
+Array [
+  " ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗ ",
+  " ║                                              Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna.                                               ║ ",
+  " ╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝ ",
+  "",
+]
+`;
+
+exports[`Utilities usingAsync Disposes correctly after the operation throws an exception 1`] = `[Error: operation threw]`;
+
+exports[`Utilities usingAsync Does not dispose if the construction throws an exception 1`] = `[Error: constructor threw]`;

@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AzureStorageBuildCacheProvider Uses a correct list of Azure authority hosts 1`] = `"The specified Azure Environment (\\"INCORRECT_AZURE_ENVIRONMENT\\") is invalid. If it is specified, it must be one of: AzureChina, AzureGermany, AzureGovernment, AzurePublicCloud"`;

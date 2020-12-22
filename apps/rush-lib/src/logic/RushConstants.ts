@@ -145,6 +145,11 @@ export class RushConstants {
   public static readonly experimentsFilename: string = 'experiments.json';
 
   /**
+   * Build cache configuration file.
+   */
+  public static readonly buildCacheFilename: string = 'build-cache.json';
+
+  /**
    * The URL ("http://rushjs.io") for the Rush web site.
    */
   public static readonly rushWebSiteUrl: string = 'https://rushjs.io';
@@ -185,4 +190,13 @@ export class RushConstants {
    * The name of the non-incremental build command.
    */
   public static readonly rebuildCommandName: string = 'rebuild';
+
+  public static readonly updateCloudCredentialsCommandName: string = 'update-cloud-credentials';
+
+  /**
+   * When a hash generated that contains multiple input segments, this character may be used
+   * to separate them to avoid issues like
+   * crypto.createHash('sha1').update('a').update('bc').digest('hex') === crypto.createHash('sha1').update('ab').update('c').digest('hex')
+   */
+  public static readonly hashDelimiter: string = '|';
 }

@@ -246,6 +246,9 @@ export class TaskRunner {
           this._hasAnyWarnings = true;
           this._markTaskAsSuccessWithWarning(task);
           break;
+        case TaskStatus.FromCache:
+          this._markTaskAsFromCache(task);
+          break;
         case TaskStatus.Skipped:
           this._markTaskAsSkipped(task);
           break;
@@ -354,6 +357,17 @@ export class TaskRunner {
   }
 
   /**
+   * Marks a task as provided by cache.
+   */
+  private _markTaskAsFromCache(task: Task): void {
+    task.collatedWriter.terminal.writeStdoutLine(colors.green(`${task.name} was provided by cache.`));
+    task.status = TaskStatus.FromCache;
+    task.dependents.forEach((dependent: Task) => {
+      dependent.dependencies.delete(task);
+    });
+  }
+
+  /**
    * Prints out a report of the status of each project
    */
   private _printTaskStatus(): void {
@@ -362,6 +376,7 @@ export class TaskRunner {
       switch (task.status) {
         // These are the sections that we will report below
         case TaskStatus.Skipped:
+        case TaskStatus.FromCache:
         case TaskStatus.Success:
         case TaskStatus.SuccessWithWarning:
         case TaskStatus.Blocked:
@@ -390,6 +405,13 @@ export class TaskRunner {
       tasksByStatus,
       colors.green,
       'These projects were already up to date:'
+    );
+
+    this._writeCondensedSummary(
+      TaskStatus.FromCache,
+      tasksByStatus,
+      colors.green,
+      'These projects were restored from the build cache:'
     );
 
     this._writeCondensedSummary(

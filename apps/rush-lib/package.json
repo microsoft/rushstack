@@ -18,6 +18,8 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@azure/identity": "~1.2.0",
+    "@azure/storage-blob": "~12.3.0",
     "@pnpm/link-bins": "~5.3.7",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/package-deps-hash": "workspace:*",

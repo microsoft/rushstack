@@ -40,6 +40,7 @@ export class RushConfigurationProject {
   private _packageName: string;
   private _projectFolder: string;
   private _projectRelativeFolder: string;
+  private _projectRushConfigFolder: string;
   private _projectRushTempFolder: string;
   private _reviewCategory: string | undefined;
   private _packageJson: IPackageJson;
@@ -88,6 +89,7 @@ export class RushConfigurationProject {
       throw new Error(`Project folder not found: ${projectJson.projectFolder}`);
     }
 
+    this._projectRushConfigFolder = path.join(this._projectFolder, 'config', 'rush');
     this._projectRushTempFolder = path.join(
       this._projectFolder,
       RushConstants.projectRushFolderName,
@@ -170,6 +172,15 @@ export class RushConfigurationProject {
    */
   public get projectRelativeFolder(): string {
     return this._projectRelativeFolder;
+  }
+
+  /**
+   * The project-specific Rush configuration folder.
+   *
+   * Example: `C:\MyRepo\libraries\my-project\config\rush`
+   */
+  public get projectRushConfigFolder(): string {
+    return this._projectRushConfigFolder;
   }
 
   /**

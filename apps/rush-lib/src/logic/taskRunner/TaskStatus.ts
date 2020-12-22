@@ -10,6 +10,7 @@ export enum TaskStatus {
   Success = 'SUCCESS',
   SuccessWithWarning = 'SUCCESS WITH WARNINGS',
   Skipped = 'SKIPPED',
+  FromCache = 'FROM CACHE',
   Failure = 'FAILURE',
   Blocked = 'BLOCKED'
 }

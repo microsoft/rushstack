@@ -48,6 +48,9 @@ Positional arguments:
     update-autoinstaller
                         Updates autoinstaller package dependenices
     version             Manage package versions in the repo.
+    update-cloud-credentials
+                        (EXPERIMENTAL) Update the credentials used by the 
+                        build cache provider.
     import-strings      Imports translated strings into each project.
     upload              Uploads the built files to the server
     build               Build all projects that haven't been built, or have 
@@ -778,6 +781,24 @@ Optional arguments:
   --name AUTOINSTALLER_NAME
                         Specifies the name of the autoinstaller, which must 
                         be one of the folders under common/autoinstallers.
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: update-cloud-credentials 1`] = `
+"usage: rush update-cloud-credentials [-h] [-i]
+                                     [--credential CREDENTIAL_STRING] [-d]
+                                     
+
+(EXPERIMENTAL) If the build caching feature is configured, this command 
+facilitates updating the credentials used by a cloud-based provider.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -i, --interactive     Run the credential update operation in interactive 
+                        mode, if supported by the provider.
+  --credential CREDENTIAL_STRING
+                        A static credential, to be cached.
+  -d, --delete          If specified, delete stored credentials.
 "
 `;
 

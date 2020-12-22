@@ -43,7 +43,7 @@ describe('PackageChangeAnalyzer', () => {
     } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const packageChangeAnalyzer: PackageChangeAnalyzer = new PackageChangeAnalyzer(rushConfiguration);
-    const packageDeps: IPackageDeps | undefined = packageChangeAnalyzer.getPackageDepsHash(packageA);
+    const packageDeps: IPackageDeps | undefined = packageChangeAnalyzer.getPackageDeps(packageA);
     expect(packageDeps).toEqual(repoHashDeps);
   });
 
