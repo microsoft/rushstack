@@ -109,7 +109,7 @@ export class ProjectBuildCache {
     this._terminal = options.terminal;
   }
 
-  public async tryHydrateFromCacheAsync(): Promise<boolean> {
+  public async tryRestoreFromCacheAsync(): Promise<boolean> {
     const cacheId: string | undefined = this._cacheId;
     if (!cacheId) {
       this._terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');

@@ -222,11 +222,11 @@ export class ProjectBuilder extends BaseBuilder {
         });
       }
 
-      const hydrateFromCacheSuccess:
+      const restoreFromCacheSuccess:
         | boolean
-        | undefined = await projectBuildCache?.tryHydrateFromCacheAsync();
+        | undefined = await projectBuildCache?.tryRestoreFromCacheAsync();
 
-      if (hydrateFromCacheSuccess) {
+      if (restoreFromCacheSuccess) {
         return TaskStatus.FromCache;
       } else if (isPackageUnchanged && this.isIncrementalBuildAllowed) {
         return TaskStatus.Skipped;
