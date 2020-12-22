@@ -8,8 +8,10 @@ import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { IDisposable, Utilities } from '../utilities/Utilities';
 
 const CACHE_FILENAME: string = 'credentials.json';
+const LATEST_CREDENTIALS_JSON_VERSION: string = '0.1.0';
 
 interface ICredentialCacheJson {
+  version: string;
   cacheEntries: {
     [credentialCacheId: string]: ICacheEntryJson;
   };
@@ -46,6 +48,10 @@ export class CredentialCache implements IDisposable {
     loadedJson: ICredentialCacheJson | undefined,
     lockfile: LockFile | undefined
   ) {
+    if (loadedJson && loadedJson.version !== LATEST_CREDENTIALS_JSON_VERSION) {
+      throw new Error(`Unexpected credentials.json file version: ${loadedJson.version}`);
+    }
+
     this._cacheFilePath = cacheFilePath;
     this._cacheEntries = new Map<string, ICacheEntryJson>(Object.entries(loadedJson?.cacheEntries || {}));
     this._supportsEditing = !!lockfile;
@@ -148,6 +154,7 @@ export class CredentialCache implements IDisposable {
       }
 
       const newJson: ICredentialCacheJson = {
+        version: LATEST_CREDENTIALS_JSON_VERSION,
         cacheEntries: cacheEntriesJson
       };
       await JsonFile.saveAsync(newJson, this._cacheFilePath, {
