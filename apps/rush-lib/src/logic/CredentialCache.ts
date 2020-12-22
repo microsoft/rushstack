@@ -4,12 +4,12 @@
 import * as path from 'path';
 import { FileSystem, JsonFile, JsonSchema, LockFile } from '@rushstack/node-core-library';
 
-import { RushGlobalFolder } from '../../api/RushGlobalFolder';
-import { IDisposable, Utilities } from '../../utilities/Utilities';
+import { RushGlobalFolder } from '../api/RushGlobalFolder';
+import { IDisposable, Utilities } from '../utilities/Utilities';
 
-const CACHE_FILENAME: string = 'build-cache-credentials-cache.json';
+const CACHE_FILENAME: string = 'credentials.json';
 
-interface IBuildCacheProviderCredentialCacheJson {
+interface ICredentialCacheJson {
   cacheEntries: {
     [credentialCacheId: string]: ICacheEntryJson;
   };
@@ -20,17 +20,20 @@ interface ICacheEntryJson {
   credential: string;
 }
 
-export interface IBuildCacheProviderCredentialCacheEntry {
+export interface ICredentialCacheEntry {
   expires?: Date;
   credential: string;
 }
 
-export interface IBuildCacheProviderCredentialCacheOptions {
+export interface ICredentialCacheOptions {
   rushGlobalFolder: RushGlobalFolder;
   supportEditing: boolean;
 }
 
-export class BuildCacheProviderCredentialCache implements IDisposable {
+/**
+ * @beta
+ */
+export class CredentialCache implements IDisposable {
   private readonly _cacheFilePath: string;
   private readonly _cacheEntries: Map<string, ICacheEntryJson>;
   private _modified: boolean = false;
@@ -40,7 +43,7 @@ export class BuildCacheProviderCredentialCache implements IDisposable {
 
   private constructor(
     cacheFilePath: string,
-    loadedJson: IBuildCacheProviderCredentialCacheJson | undefined,
+    loadedJson: ICredentialCacheJson | undefined,
     lockfile: LockFile | undefined
   ) {
     this._cacheFilePath = cacheFilePath;
@@ -49,16 +52,14 @@ export class BuildCacheProviderCredentialCache implements IDisposable {
     this._lockfile = lockfile;
   }
 
-  public static async initializeAsync(
-    options: IBuildCacheProviderCredentialCacheOptions
-  ): Promise<BuildCacheProviderCredentialCache> {
+  public static async initializeAsync(options: ICredentialCacheOptions): Promise<CredentialCache> {
     const rushGlobalFolderPath: string = options.rushGlobalFolder.path;
     const cacheFilePath: string = path.join(rushGlobalFolderPath, CACHE_FILENAME);
     const jsonSchema: JsonSchema = JsonSchema.fromFile(
-      path.resolve(__dirname, '..', '..', 'schemas', 'build-cache-credentials-cache.schema.json')
+      path.resolve(__dirname, '..', 'schemas', 'credentials.schema.json')
     );
 
-    let loadedJson: IBuildCacheProviderCredentialCacheJson | undefined;
+    let loadedJson: ICredentialCacheJson | undefined;
     try {
       loadedJson = await JsonFile.loadAndValidateAsync(cacheFilePath, jsonSchema);
     } catch (e) {
@@ -72,22 +73,15 @@ export class BuildCacheProviderCredentialCache implements IDisposable {
       lockfile = await LockFile.acquire(rushGlobalFolderPath, `${CACHE_FILENAME}.lock`);
     }
 
-    const credentialCache: BuildCacheProviderCredentialCache = new BuildCacheProviderCredentialCache(
-      cacheFilePath,
-      loadedJson,
-      lockfile
-    );
+    const credentialCache: CredentialCache = new CredentialCache(cacheFilePath, loadedJson, lockfile);
     return credentialCache;
   }
 
   public static async usingAsync(
-    options: IBuildCacheProviderCredentialCacheOptions,
-    doActionAsync: (credentialCache: BuildCacheProviderCredentialCache) => Promise<void> | void
+    options: ICredentialCacheOptions,
+    doActionAsync: (credentialCache: CredentialCache) => Promise<void> | void
   ): Promise<void> {
-    await Utilities.usingAsync(
-      async () => await BuildCacheProviderCredentialCache.initializeAsync(options),
-      doActionAsync
-    );
+    await Utilities.usingAsync(async () => await CredentialCache.initializeAsync(options), doActionAsync);
   }
 
   public setCacheEntry(cacheId: string, credential: string, expires?: Date): void {
@@ -107,12 +101,12 @@ export class BuildCacheProviderCredentialCache implements IDisposable {
     }
   }
 
-  public tryGetCacheEntry(cacheId: string): IBuildCacheProviderCredentialCacheEntry | undefined {
+  public tryGetCacheEntry(cacheId: string): ICredentialCacheEntry | undefined {
     this._validate(false);
 
     const cacheEntry: ICacheEntryJson | undefined = this._cacheEntries.get(cacheId);
     if (cacheEntry) {
-      const result: IBuildCacheProviderCredentialCacheEntry = {
+      const result: ICredentialCacheEntry = {
         expires: cacheEntry.expires ? new Date(cacheEntry.expires) : undefined,
         credential: cacheEntry.credential
       };
@@ -153,7 +147,7 @@ export class BuildCacheProviderCredentialCache implements IDisposable {
         cacheEntriesJson[cacheId] = cacheEntry;
       }
 
-      const newJson: IBuildCacheProviderCredentialCacheJson = {
+      const newJson: ICredentialCacheJson = {
         cacheEntries: cacheEntriesJson
       };
       await JsonFile.saveAsync(newJson, this._cacheFilePath, {
@@ -172,11 +166,11 @@ export class BuildCacheProviderCredentialCache implements IDisposable {
 
   private _validate(requiresEditing: boolean): void {
     if (!this._supportsEditing && requiresEditing) {
-      throw new Error(`This instance of ${BuildCacheProviderCredentialCache.name} does not support editing.`);
+      throw new Error(`This instance of ${CredentialCache.name} does not support editing.`);
     }
 
     if (this._disposed) {
-      throw new Error(`This instance of ${BuildCacheProviderCredentialCache.name} has been disposed.`);
+      throw new Error(`This instance of ${CredentialCache.name} has been disposed.`);
     }
   }
 }

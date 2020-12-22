@@ -18,10 +18,7 @@ import { AzureAuthorityHosts, DeviceCodeCredential, DeviceCodeInfo } from '@azur
 
 import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
-import {
-  BuildCacheProviderCredentialCache,
-  IBuildCacheProviderCredentialCacheEntry
-} from './BuildCacheProviderCredentialCache';
+import { CredentialCache, ICredentialCacheEntry } from '../CredentialCache';
 import { URLSearchParams } from 'url';
 import { RushConstants } from '../RushConstants';
 import { Utilities } from '../../utilities/Utilities';
@@ -120,12 +117,12 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
   }
 
   public async updateCachedCredentialAsync(terminal: Terminal, credential: string): Promise<void> {
-    await BuildCacheProviderCredentialCache.usingAsync(
+    await CredentialCache.usingAsync(
       {
         rushGlobalFolder: this._rushGlobalFolder,
         supportEditing: true
       },
-      async (credentialsCache: BuildCacheProviderCredentialCache) => {
+      async (credentialsCache: CredentialCache) => {
         credentialsCache.setCacheEntry(this._credentialCacheId, credential);
         await credentialsCache.saveIfModifiedAsync();
       }
@@ -136,12 +133,12 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     const sasQueryParameters: SASQueryParameters = await this._getSasQueryParametersAsync(terminal);
     const sasString: string = this._getSasStringFromQueryParameters(sasQueryParameters);
 
-    await BuildCacheProviderCredentialCache.usingAsync(
+    await CredentialCache.usingAsync(
       {
         rushGlobalFolder: this._rushGlobalFolder,
         supportEditing: true
       },
-      async (credentialsCache: BuildCacheProviderCredentialCache) => {
+      async (credentialsCache: CredentialCache) => {
         credentialsCache.setCacheEntry(this._credentialCacheId, sasString, sasQueryParameters.expiresOn);
         await credentialsCache.saveIfModifiedAsync();
       }
@@ -149,12 +146,12 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
   }
 
   public async deleteCachedCredentialsAsync(terminal: Terminal): Promise<void> {
-    await BuildCacheProviderCredentialCache.usingAsync(
+    await CredentialCache.usingAsync(
       {
         rushGlobalFolder: this._rushGlobalFolder,
         supportEditing: true
       },
-      async (credentialsCache: BuildCacheProviderCredentialCache) => {
+      async (credentialsCache: CredentialCache) => {
         credentialsCache.deleteCacheEntry(this._credentialCacheId);
         await credentialsCache.saveIfModifiedAsync();
       }
@@ -171,13 +168,13 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     if (!this._containerClient) {
       let sasString: string | undefined = EnvironmentConfiguration.buildCacheCredential;
       if (!sasString) {
-        let cacheEntry: IBuildCacheProviderCredentialCacheEntry | undefined;
-        await BuildCacheProviderCredentialCache.usingAsync(
+        let cacheEntry: ICredentialCacheEntry | undefined;
+        await CredentialCache.usingAsync(
           {
             rushGlobalFolder: this._rushGlobalFolder,
             supportEditing: false
           },
-          (credentialsCache: BuildCacheProviderCredentialCache) => {
+          (credentialsCache: CredentialCache) => {
             cacheEntry = credentialsCache.tryGetCacheEntry(this._credentialCacheId);
           }
         );
