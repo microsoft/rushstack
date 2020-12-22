@@ -5,10 +5,12 @@ import * as path from 'path';
 import { AlreadyReportedError, FileSystem, Terminal } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
+import { RushUserConfiguration } from '../../api/RushUserConfiguration';
 import { BuildCacheProviderBase, IBuildCacheProviderBaseOptions } from './BuildCacheProviderBase';
 
 export interface IFileSystemBuildCacheProviderOptions extends IBuildCacheProviderBaseOptions {
   rushConfiguration: RushConfiguration;
+  rushUserConfiguration: RushUserConfiguration;
 }
 
 const BUILD_CACHE_FOLDER_NAME: string = 'build-cache';
@@ -18,7 +20,9 @@ export class FileSystemBuildCacheProvider extends BuildCacheProviderBase {
 
   public constructor(options: IFileSystemBuildCacheProviderOptions) {
     super(options);
-    this._cacheFolderPath = path.join(options.rushConfiguration.commonTempFolder, BUILD_CACHE_FOLDER_NAME);
+    this._cacheFolderPath =
+      options.rushUserConfiguration.buildCacheFolder ||
+      path.join(options.rushConfiguration.commonTempFolder, BUILD_CACHE_FOLDER_NAME);
   }
 
   public async tryGetCacheEntryBufferByIdAsync(

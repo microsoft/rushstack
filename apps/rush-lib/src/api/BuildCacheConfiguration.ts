@@ -13,6 +13,7 @@ import { RushConfiguration } from './RushConfiguration';
 import { FileSystemBuildCacheProvider } from '../logic/buildCache/FileSystemBuildCacheProvider';
 import { RushGlobalFolder } from './RushGlobalFolder';
 import { RushConstants } from '../logic/RushConstants';
+import { RushUserConfiguration } from './RushUserConfiguration';
 
 /**
  * Describes the file structure for the "common/config/rush/build-cache.json" config file.
@@ -64,6 +65,13 @@ interface IFileSystemBuildCacheJson extends IBuildCacheJson {
   cacheProvider: 'filesystem';
 }
 
+interface IBuildCacheConfigurationOptions {
+  buildCacheJson: IBuildCacheJson;
+  rushConfiguration: RushConfiguration;
+  rushUserConfiguration: RushUserConfiguration;
+  rushGlobalFolder: RushGlobalFolder;
+}
+
 /**
  * Use this class to load and save the "common/config/rush/build-cache.json" config file.
  * This file provides configuration options for cached project build output.
@@ -78,17 +86,15 @@ export class BuildCacheConfiguration {
 
   public readonly cacheProvider: BuildCacheProviderBase;
 
-  private constructor(
-    buildCacheJson: IBuildCacheJson,
-    rushConfiguration: RushConfiguration,
-    rushGlobalFolder: RushGlobalFolder
-  ) {
+  private constructor(options: IBuildCacheConfigurationOptions) {
+    const { buildCacheJson, rushConfiguration, rushUserConfiguration, rushGlobalFolder } = options;
     this.projectOutputFolderNames = buildCacheJson.projectOutputFolderNames;
 
     switch (buildCacheJson.cacheProvider) {
       case 'filesystem': {
         this.cacheProvider = new FileSystemBuildCacheProvider({
-          rushConfiguration
+          rushConfiguration,
+          rushUserConfiguration
         });
         break;
       }
@@ -128,7 +134,13 @@ export class BuildCacheConfiguration {
         jsonFilePath,
         BuildCacheConfiguration._jsonSchema
       );
-      return new BuildCacheConfiguration(buildCacheJson, rushConfiguration, rushGlobalFolder);
+      const rushUserConfiguration: RushUserConfiguration = await RushUserConfiguration.initializeAsync();
+      return new BuildCacheConfiguration({
+        buildCacheJson,
+        rushConfiguration,
+        rushUserConfiguration,
+        rushGlobalFolder
+      });
     } else {
       return undefined;
     }

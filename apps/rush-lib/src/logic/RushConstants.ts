@@ -199,4 +199,9 @@ export class RushConstants {
    * crypto.createHash('sha1').update('a').update('bc').digest('hex') === crypto.createHash('sha1').update('ab').update('c').digest('hex')
    */
   public static readonly hashDelimiter: string = '|';
+
+  /**
+   * The name of the per-user Rush configuration file.
+   */
+  public static readonly rushUserConfigurationFilename: string = '.rushrc.json';
 }
