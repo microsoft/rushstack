@@ -210,16 +210,25 @@ export class ProjectBuilder extends BaseBuilder {
 
       let projectBuildCache: ProjectBuildCache | undefined;
       if (this._buildCacheConfiguration) {
-        const projectBuildCacheConfiguration: ProjectBuildCacheConfiguration = ProjectBuildCacheConfiguration.loadForProject(
+        const projectBuildCacheConfiguration:
+          | ProjectBuildCacheConfiguration
+          | undefined = await ProjectBuildCacheConfiguration.tryLoadForProjectAsync(
           this._rushProject,
-          this._buildCacheConfiguration
+          terminal
         );
-        projectBuildCache = this._buildCacheConfiguration.cacheProvider.tryGetProjectBuildCache(terminal, {
-          projectBuildCacheConfiguration: projectBuildCacheConfiguration,
-          command: this._commandToRun,
-          projectBuildDeps: projectBuildDeps,
-          packageChangeAnalyzer: this._packageChangeAnalyzer
-        });
+        if (projectBuildCacheConfiguration) {
+          projectBuildCache = this._buildCacheConfiguration.cacheProvider.tryGetProjectBuildCache(terminal, {
+            projectBuildCacheConfiguration: projectBuildCacheConfiguration,
+            command: this._commandToRun,
+            projectBuildDeps: projectBuildDeps,
+            packageChangeAnalyzer: this._packageChangeAnalyzer
+          });
+        } else {
+          terminal.writeVerboseLine(
+            'Project does not have a build-cache.json configuration file, or one provided by a rig, ' +
+              'so it does not support caching.'
+          );
+        }
       }
 
       const restoreFromCacheSuccess:

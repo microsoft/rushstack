@@ -19,12 +19,6 @@ import { RushUserConfiguration } from './RushUserConfiguration';
  */
 interface IBuildCacheJson {
   cacheProvider: 'azure-blob-storage' | 'filesystem';
-
-  /**
-   * A list of folder names under each project root that should be cached.
-   * These folders should not be tracked by git.
-   */
-  projectOutputFolderNames: string[];
 }
 
 interface IAzureBlobStorageBuildCacheJson extends IBuildCacheJson {
@@ -80,14 +74,10 @@ export class BuildCacheConfiguration {
     path.join(__dirname, '..', 'schemas', 'build-cache.schema.json')
   );
 
-  public readonly projectOutputFolderNames: string[];
-
   public readonly cacheProvider: BuildCacheProviderBase;
 
   private constructor(options: IBuildCacheConfigurationOptions) {
     const { buildCacheJson, rushConfiguration, rushUserConfiguration } = options;
-    this.projectOutputFolderNames = buildCacheJson.projectOutputFolderNames;
-
     switch (buildCacheJson.cacheProvider) {
       case 'filesystem': {
         this.cacheProvider = new FileSystemBuildCacheProvider({
