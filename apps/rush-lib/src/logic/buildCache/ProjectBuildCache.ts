@@ -302,13 +302,10 @@ export class ProjectBuildCache {
       cacheEntryBuffer
     );
 
-    const setCloudCacheEntryPromise:
-      | Promise<boolean>
-      | undefined = this._cloudBuildCacheProvider?.trySetCacheEntryBufferAsync(
-      this._terminal,
-      cacheId,
-      cacheEntryBuffer
-    );
+    const setCloudCacheEntryPromise: Promise<boolean> | undefined =
+      this._cloudBuildCacheProvider?.isCacheWriteAllowed === true
+        ? this._cloudBuildCacheProvider.trySetCacheEntryBufferAsync(this._terminal, cacheId, cacheEntryBuffer)
+        : undefined;
 
     let updateLocalCacheSuccess: boolean;
     let updateCloudCacheSuccess: boolean;

@@ -3,10 +3,8 @@
 
 import { Terminal } from '@rushstack/node-core-library';
 
-export interface ICloudBuildCacheProviderBaseOptions {}
-
 export abstract class CloudBuildCacheProviderBase {
-  public constructor(options: ICloudBuildCacheProviderBaseOptions) {}
+  public abstract readonly isCacheWriteAllowed: boolean;
 
   public abstract tryGetCacheEntryBufferByIdAsync(
     terminal: Terminal,
