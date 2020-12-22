@@ -211,7 +211,7 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
       undefined,
       undefined,
       (deviceCodeInfo: DeviceCodeInfo) => {
-        this._printMessageInBox(deviceCodeInfo.message, terminal);
+        Utilities.printMessageInBox(deviceCodeInfo.message, terminal);
       },
       { authorityHost: authorityHost }
     );
@@ -245,32 +245,6 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     );
 
     return queryParameters;
-  }
-
-  private _printMessageInBox(message: string, terminal: Terminal): void {
-    const boxWidth: number = Math.floor(Utilities.getConsoleWidth() / 2);
-    const maxLineLength: number = boxWidth - 10;
-
-    const wrappedMessage: string = Utilities.wrapWords(message, maxLineLength);
-    const wrappedMessageLines: string[] = wrappedMessage.split('\n');
-
-    // ╔═══════════╗
-    // ║  Message  ║
-    // ╚═══════════╝
-    terminal.writeLine(' ╔' + new Array(boxWidth - 3).join('═') + '╗ ');
-    for (const line of wrappedMessageLines) {
-      const trimmedLine: string = line.trim();
-      const padding: number = boxWidth - trimmedLine.length - 4;
-      const leftPadding: number = Math.floor(padding / 2);
-      const rightPadding: number = padding - leftPadding;
-      terminal.writeLine(
-        ' ║' +
-          new Array(leftPadding + 1).join(' ') +
-          trimmedLine +
-          (new Array(rightPadding + 1).join(' ') + '║ ')
-      );
-    }
-    terminal.writeLine(' ╚' + new Array(boxWidth - 3).join('═') + '╝ ');
   }
 
   private _getSasStringFromQueryParameters(sasQueryParameters: SASQueryParameters): string {

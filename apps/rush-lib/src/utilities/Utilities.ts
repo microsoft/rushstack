@@ -6,11 +6,12 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as tty from 'tty';
 import * as path from 'path';
-import wordwrap = require('wordwrap');
-import { JsonFile, IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
-import { RushConfiguration } from '../api/RushConfiguration';
+import wordwrap from 'wordwrap';
+import { JsonFile, IPackageJson, FileSystem, FileConstants, Terminal } from '@rushstack/node-core-library';
 import { Stream } from 'stream';
 import { CommandLineHelper } from '@rushstack/ts-command-line';
+
+import { RushConfiguration } from '../api/RushConfiguration';
 
 export interface IEnvironment {
   // NOTE: the process.env doesn't actually support "undefined" as a value.
@@ -614,6 +615,30 @@ export class Utilities {
 
   public static getPackageDepsFilenameForCommand(command: string): string {
     return `package-deps_${command}.json`;
+  }
+
+  public static printMessageInBox(
+    message: string,
+    terminal: Terminal,
+    boxWidth: number = Math.floor(Utilities.getConsoleWidth() / 2)
+  ): void {
+    const maxLineLength: number = boxWidth - 10;
+
+    const wrappedMessage: string = Utilities.wrapWords(message, maxLineLength);
+    const wrappedMessageLines: string[] = wrappedMessage.split('\n');
+
+    // ╔═══════════╗
+    // ║  Message  ║
+    // ╚═══════════╝
+    terminal.writeLine(` ╔${'═'.repeat(boxWidth - 2)}╗ `);
+    for (const line of wrappedMessageLines) {
+      const trimmedLine: string = line.trim();
+      const padding: number = boxWidth - trimmedLine.length - 2;
+      const leftPadding: number = Math.floor(padding / 2);
+      const rightPadding: number = padding - leftPadding;
+      terminal.writeLine(` ║${' '.repeat(leftPadding)}${trimmedLine}${' '.repeat(rightPadding)}║ `);
+    }
+    terminal.writeLine(` ╚${'═'.repeat(boxWidth - 2)}╝ `);
   }
 
   private static _executeLifecycleCommandInternal<TCommandResult>(
