@@ -60,3 +60,7 @@ Array [
   "",
 ]
 `;
+
+exports[`Utilities usingAsync Disposes correctly after the operation throws an exception 1`] = `[Error: operation threw]`;
+
+exports[`Utilities usingAsync Does not dispose if the construction throws an exception 1`] = `[Error: constructor threw]`;

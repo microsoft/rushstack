@@ -5,6 +5,7 @@ import * as path from 'path';
 import { FileSystem, JsonFile, JsonSchema, LockFile } from '@rushstack/node-core-library';
 
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
+import { IDisposable, Utilities } from '../../utilities/Utilities';
 
 const CACHE_FILENAME: string = 'build-cache-credentials-cache.json';
 
@@ -24,7 +25,12 @@ export interface IBuildCacheProviderCredentialCacheEntry {
   credential: string;
 }
 
-export class BuildCacheProviderCredentialCache {
+export interface IBuildCacheProviderCredentialCacheOptions {
+  rushGlobalFolder: RushGlobalFolder;
+  supportEditing: boolean;
+}
+
+export class BuildCacheProviderCredentialCache implements IDisposable {
   private readonly _cacheFilePath: string;
   private readonly _cacheEntries: Map<string, ICacheEntryJson>;
   private _modified: boolean = false;
@@ -44,10 +50,10 @@ export class BuildCacheProviderCredentialCache {
   }
 
   public static async initializeAsync(
-    rushGlobalFolder: RushGlobalFolder,
-    supportEditing: boolean
+    options: IBuildCacheProviderCredentialCacheOptions
   ): Promise<BuildCacheProviderCredentialCache> {
-    const cacheFilePath: string = path.join(rushGlobalFolder.path, CACHE_FILENAME);
+    const rushGlobalFolderPath: string = options.rushGlobalFolder.path;
+    const cacheFilePath: string = path.join(rushGlobalFolderPath, CACHE_FILENAME);
     const jsonSchema: JsonSchema = JsonSchema.fromFile(
       path.resolve(__dirname, '..', '..', 'schemas', 'build-cache-credentials-cache.schema.json')
     );
@@ -62,8 +68,8 @@ export class BuildCacheProviderCredentialCache {
     }
 
     let lockfile: LockFile | undefined;
-    if (supportEditing) {
-      lockfile = await LockFile.acquire(rushGlobalFolder.path, `${CACHE_FILENAME}.lock`);
+    if (options.supportEditing) {
+      lockfile = await LockFile.acquire(rushGlobalFolderPath, `${CACHE_FILENAME}.lock`);
     }
 
     const credentialCache: BuildCacheProviderCredentialCache = new BuildCacheProviderCredentialCache(
@@ -72,6 +78,16 @@ export class BuildCacheProviderCredentialCache {
       lockfile
     );
     return credentialCache;
+  }
+
+  public static async usingAsync(
+    options: IBuildCacheProviderCredentialCacheOptions,
+    doActionAsync: (credentialCache: BuildCacheProviderCredentialCache) => Promise<void> | void
+  ): Promise<void> {
+    await Utilities.usingAsync(
+      async () => await BuildCacheProviderCredentialCache.initializeAsync(options),
+      doActionAsync
+    );
   }
 
   public setCacheEntry(cacheId: string, credential: string, expires?: Date): void {

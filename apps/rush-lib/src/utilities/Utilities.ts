@@ -91,6 +91,10 @@ export interface IEnvironmentPathOptions {
   additionalPathFolders?: string[] | undefined;
 }
 
+export interface IDisposable {
+  dispose(): void;
+}
+
 interface ICreateEnvironmentForRushCommandPathOptions extends IEnvironmentPathOptions {
   projectRoot: string | undefined;
   commonTempFolder: string | undefined;
@@ -639,6 +643,19 @@ export class Utilities {
       terminal.writeLine(` ║${' '.repeat(leftPadding)}${trimmedLine}${' '.repeat(rightPadding)}║ `);
     }
     terminal.writeLine(` ╚${'═'.repeat(boxWidth - 2)}╝ `);
+  }
+
+  public static async usingAsync<TDisposable extends IDisposable>(
+    getDisposableAsync: () => Promise<TDisposable> | IDisposable,
+    doActionAsync: (disposable: TDisposable) => Promise<void> | void
+  ): Promise<void> {
+    let disposable: TDisposable | undefined;
+    try {
+      disposable = (await getDisposableAsync()) as TDisposable;
+      await doActionAsync(disposable);
+    } finally {
+      disposable?.dispose();
+    }
   }
 
   private static _executeLifecycleCommandInternal<TCommandResult>(
