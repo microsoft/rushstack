@@ -6,18 +6,22 @@ import * as path from 'path';
 import type * as stream from 'stream';
 import * as tar from 'tar';
 import * as fs from 'fs';
-import { FileSystem, Terminal } from '@rushstack/node-core-library';
+import { FileSystem, Path, Terminal } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
-import { BuildCacheProviderBase } from './BuildCacheProviderBase';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { RushConstants } from '../RushConstants';
+import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
+import { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
+import { IProjectBuildDeps } from '../taskRunner/ProjectBuilder';
 
-export interface IProjectBuildCacheOptions {
+interface IProjectBuildCacheOptions {
+  buildCacheConfiguration: BuildCacheConfiguration;
   projectConfiguration: RushProjectConfiguration;
   command: string;
-  buildCacheProvider: BuildCacheProviderBase;
+  projectBuildDeps: IProjectBuildDeps | undefined;
   packageChangeAnalyzer: PackageChangeAnalyzer;
   terminal: Terminal;
 }
@@ -25,7 +29,8 @@ export interface IProjectBuildCacheOptions {
 export class ProjectBuildCache {
   private readonly _project: RushConfigurationProject;
   private readonly _command: string;
-  private readonly _buildCacheProvider: BuildCacheProviderBase;
+  private readonly _localBuildCacheProvider: FileSystemBuildCacheProvider;
+  private readonly _cloudBuildCacheProvider: CloudBuildCacheProviderBase | undefined;
   private readonly _packageChangeAnalyzer: PackageChangeAnalyzer;
   private readonly _projectOutputFolderNames: string[];
   private readonly _terminal: Terminal;
@@ -52,9 +57,7 @@ export class ProjectBuildCache {
       return undefined;
     } else if (!this.__cacheId) {
       const projectStates: string[] = [];
-      const projectsThatHaveBeenProcessed: Set<RushConfigurationProject> = new Set<
-        RushConfigurationProject
-      >();
+      const projectsThatHaveBeenProcessed: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
       let projectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
       projectsToProcess.add(this._project);
 
@@ -101,13 +104,60 @@ export class ProjectBuildCache {
     return this.__cacheId;
   }
 
-  public constructor(options: IProjectBuildCacheOptions) {
+  private constructor(options: IProjectBuildCacheOptions) {
     this._project = options.projectConfiguration.project;
     this._command = options.command;
-    this._buildCacheProvider = options.buildCacheProvider;
+    this._localBuildCacheProvider = options.buildCacheConfiguration.localCacheProvider;
+    this._cloudBuildCacheProvider = options.buildCacheConfiguration.cloudCacheProvider;
     this._packageChangeAnalyzer = options.packageChangeAnalyzer;
     this._projectOutputFolderNames = options.projectConfiguration.projectOutputFolderNames;
     this._terminal = options.terminal;
+  }
+
+  public static tryGetProjectBuildCache(options: IProjectBuildCacheOptions): ProjectBuildCache | undefined {
+    const { terminal, projectConfiguration, projectBuildDeps } = options;
+    if (!projectBuildDeps) {
+      return undefined;
+    }
+
+    if (!ProjectBuildCache._validateProject(terminal, projectConfiguration, projectBuildDeps)) {
+      return undefined;
+    }
+
+    return new ProjectBuildCache(options);
+  }
+
+  private static _validateProject(
+    terminal: Terminal,
+    projectConfiguration: RushProjectConfiguration,
+    projectState: IProjectBuildDeps
+  ): boolean {
+    const normalizedProjectRelativeFolder: string = Path.convertToSlashes(
+      projectConfiguration.project.projectRelativeFolder
+    );
+    const outputFolders: string[] = [];
+    for (const outputFolderName of projectConfiguration.projectOutputFolderNames) {
+      outputFolders.push(`${path.posix.join(normalizedProjectRelativeFolder, outputFolderName)}/`);
+    }
+
+    const inputOutputFiles: string[] = [];
+    for (const file of Object.keys(projectState.files)) {
+      for (const outputFolder of outputFolders) {
+        if (file.startsWith(outputFolder)) {
+          inputOutputFiles.push(file);
+        }
+      }
+    }
+
+    if (inputOutputFiles.length > 0) {
+      terminal.writeWarningLine(
+        'Unable to use build cache. The following files are used to calculate project state ' +
+          `and are considered project output: ${inputOutputFiles.join(', ')}`
+      );
+      return false;
+    } else {
+      return true;
+    }
   }
 
   public async tryRestoreFromCacheAsync(): Promise<boolean> {
@@ -117,12 +167,32 @@ export class ProjectBuildCache {
       return false;
     }
 
-    const cacheEntryBuffer:
+    let cacheEntryBuffer:
       | Buffer
-      | undefined = await this._buildCacheProvider.tryGetCacheEntryBufferByIdAsync(this._terminal, cacheId);
+      | undefined = await this._localBuildCacheProvider.tryGetCacheEntryBufferByIdAsync(cacheId);
+    const foundInLocalCache: boolean = !!cacheEntryBuffer;
+    if (!foundInLocalCache && this._cloudBuildCacheProvider) {
+      this._terminal.writeVerboseLine(
+        'This project was not found in the local build cache. Querying the cloud build cache.'
+      );
+
+      // No idea why ESLint is complaining about this:
+      // eslint-disable-next-line require-atomic-updates
+      cacheEntryBuffer = await this._cloudBuildCacheProvider.tryGetCacheEntryBufferByIdAsync(
+        this._terminal,
+        cacheId
+      );
+    }
+
+    let setLocalCacheEntryPromise: Promise<boolean> | undefined;
     if (!cacheEntryBuffer) {
       this._terminal.writeVerboseLine('This project was not found in the build cache.');
       return false;
+    } else if (!foundInLocalCache) {
+      setLocalCacheEntryPromise = this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
+        cacheId,
+        cacheEntryBuffer
+      );
     }
 
     this._terminal.writeLine('Build cache hit.');
@@ -138,7 +208,7 @@ export class ProjectBuildCache {
     );
 
     const tarStream: stream.Writable = tar.extract({ cwd: projectFolderPath });
-    const success: boolean = await new Promise(
+    const extractTarPromise: Promise<boolean> = new Promise(
       (resolve: (result: boolean) => void, reject: (error: Error) => void) => {
         try {
           tarStream.on('error', (error: Error) => reject(error));
@@ -151,13 +221,31 @@ export class ProjectBuildCache {
       }
     );
 
-    if (success) {
+    let restoreSuccess: boolean;
+    let updateLocalCacheSuccess: boolean;
+    if (setLocalCacheEntryPromise) {
+      [restoreSuccess, updateLocalCacheSuccess] = await Promise.all([
+        extractTarPromise,
+        setLocalCacheEntryPromise
+      ]);
+    } else {
+      restoreSuccess = await extractTarPromise;
+      updateLocalCacheSuccess = true;
+    }
+
+    if (restoreSuccess) {
       this._terminal.writeLine('Successfully restored build output from cache.');
     } else {
       this._terminal.writeWarningLine('Unable to restore build output from cache.');
     }
 
-    return success;
+    if (!updateLocalCacheSuccess) {
+      this._terminal.writeWarningLine(
+        'An error occurred updating the local cache with the cloud cache data.'
+      );
+    }
+
+    return restoreSuccess;
   }
 
   public async trySetCacheEntryAsync(): Promise<boolean> {
@@ -209,16 +297,40 @@ export class ProjectBuildCache {
       return false;
     }
 
-    const success: boolean = await this._buildCacheProvider.trySetCacheEntryBufferAsync(
+    const setLocalCacheEntryPromise: Promise<boolean> = this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
+      cacheId,
+      cacheEntryBuffer
+    );
+
+    const setCloudCacheEntryPromise:
+      | Promise<boolean>
+      | undefined = this._cloudBuildCacheProvider?.trySetCacheEntryBufferAsync(
       this._terminal,
       cacheId,
       cacheEntryBuffer
     );
 
+    let updateLocalCacheSuccess: boolean;
+    let updateCloudCacheSuccess: boolean;
+    if (setCloudCacheEntryPromise) {
+      [updateCloudCacheSuccess, updateLocalCacheSuccess] = await Promise.all([
+        setCloudCacheEntryPromise,
+        setLocalCacheEntryPromise
+      ]);
+    } else {
+      updateCloudCacheSuccess = true;
+      updateLocalCacheSuccess = await setLocalCacheEntryPromise;
+    }
+
+    const success: boolean = updateCloudCacheSuccess && updateLocalCacheSuccess;
     if (success) {
       this._terminal.writeLine('Successfully set cache entry.');
+    } else if (!updateLocalCacheSuccess && updateCloudCacheSuccess) {
+      this._terminal.writeWarningLine('Unable to set local cache entry.');
+    } else if (updateLocalCacheSuccess && !updateCloudCacheSuccess) {
+      this._terminal.writeWarningLine('Unable to set cloud cache entry.');
     } else {
-      this._terminal.writeWarningLine('Unable to set cache entry.');
+      this._terminal.writeWarningLine('Unable to set both cloud and local cache entries.');
     }
 
     return success;

@@ -15,7 +15,7 @@
 
         "cacheProvider": {
           "type": "string",
-          "enum": ["filesystem", "azure-blob-storage"]
+          "enum": ["local-only", "azure-blob-storage"]
         }
       }
     },
@@ -26,7 +26,7 @@
           "properties": {
             "cacheProvider": {
               "type": "string",
-              "enum": ["filesystem"]
+              "enum": ["local-only"]
             }
           }
         },

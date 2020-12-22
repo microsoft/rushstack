@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { BuildCacheProviderBase, IBuildCacheProviderBaseOptions } from './BuildCacheProviderBase';
 import { Terminal } from '@rushstack/node-core-library';
 import {
   BlobClient,
@@ -19,10 +18,14 @@ import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/En
 import { CredentialCache, ICredentialCacheEntry } from '../CredentialCache';
 import { RushConstants } from '../RushConstants';
 import { Utilities } from '../../utilities/Utilities';
+import {
+  CloudBuildCacheProviderBase,
+  ICloudBuildCacheProviderBaseOptions
+} from './CloudBuildCacheProviderBase';
 
 export type AzureEnvironmentNames = keyof typeof AzureAuthorityHosts;
 
-export interface IAzureStorageBuildCacheProviderOptions extends IBuildCacheProviderBaseOptions {
+export interface IAzureStorageBuildCacheProviderOptions extends ICloudBuildCacheProviderBaseOptions {
   storageContainerName: string;
   storageAccountName: string;
   azureEnvironment?: AzureEnvironmentNames;
@@ -32,7 +35,7 @@ export interface IAzureStorageBuildCacheProviderOptions extends IBuildCacheProvi
 
 const SAS_TTL_MILLISECONDS: number = 7 * 24 * 60 * 60 * 1000; // Seven days
 
-export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
+export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase {
   private readonly _storageAccountName: string;
   private readonly _storageContainerName: string;
   private readonly _azureEnvironment: AzureEnvironmentNames;

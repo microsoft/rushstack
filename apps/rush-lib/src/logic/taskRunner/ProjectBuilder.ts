@@ -214,8 +214,10 @@ export class ProjectBuilder extends BaseBuilder {
           | RushProjectConfiguration
           | undefined = await RushProjectConfiguration.tryLoadForProjectAsync(this._rushProject, terminal);
         if (projectConfiguration) {
-          projectBuildCache = this._buildCacheConfiguration.cacheProvider.tryGetProjectBuildCache(terminal, {
+          projectBuildCache = ProjectBuildCache.tryGetProjectBuildCache({
             projectConfiguration,
+            buildCacheConfiguration: this._buildCacheConfiguration,
+            terminal,
             command: this._commandToRun,
             projectBuildDeps: projectBuildDeps,
             packageChangeAnalyzer: this._packageChangeAnalyzer
