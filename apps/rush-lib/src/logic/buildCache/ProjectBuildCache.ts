@@ -120,7 +120,7 @@ export class ProjectBuildCache {
       | Buffer
       | undefined = await this._buildCacheProvider.tryGetCacheEntryBufferByIdAsync(this._terminal, cacheId);
     if (!cacheEntryBuffer) {
-      this._terminal.writeVerboseLine('No build cache hit.');
+      this._terminal.writeVerboseLine('This project was not found in the build cache.');
       return false;
     }
 
@@ -151,9 +151,9 @@ export class ProjectBuildCache {
     );
 
     if (success) {
-      this._terminal.writeLine('Successfully hydrated build output from cache.');
+      this._terminal.writeLine('Successfully restored build output from cache.');
     } else {
-      this._terminal.writeWarningLine('Hydration build output from cache was unsuccessful.');
+      this._terminal.writeWarningLine('Unable to restore build output from cache.');
     }
 
     return success;
@@ -179,9 +179,7 @@ export class ProjectBuildCache {
       }
     }
 
-    this._terminal.writeVerboseLine(
-      `Caching existent build output folders: ${filteredOutputFolders.join(', ')}`
-    );
+    this._terminal.writeVerboseLine(`Caching build output folders: ${filteredOutputFolders.join(', ')}`);
     const tarStream: stream.Readable = tar.create(
       {
         gzip: true,

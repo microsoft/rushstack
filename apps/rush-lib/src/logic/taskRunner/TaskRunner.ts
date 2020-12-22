@@ -411,7 +411,7 @@ export class TaskRunner {
       TaskStatus.FromCache,
       tasksByStatus,
       colors.green,
-      'These projects were filled from cache:'
+      'These projects were restored from the build cache:'
     );
 
     this._writeCondensedSummary(
