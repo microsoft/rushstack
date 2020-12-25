@@ -5,21 +5,19 @@ import { BuildCacheProviderBase, IBuildCacheProviderBaseOptions } from './BuildC
 import { Terminal } from '@rushstack/node-core-library';
 import {
   BlobClient,
-  BlobSASPermissions,
   BlobServiceClient,
   BlockBlobClient,
   ContainerClient,
+  ContainerSASPermissions,
   generateBlobSASQueryParameters,
   SASQueryParameters,
-  ServiceGetUserDelegationKeyResponse,
-  UserDelegationKey
+  ServiceGetUserDelegationKeyResponse
 } from '@azure/storage-blob';
 import { AzureAuthorityHosts, DeviceCodeCredential, DeviceCodeInfo } from '@azure/identity';
 
 import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { CredentialCache, ICredentialCacheEntry } from '../CredentialCache';
-import { URLSearchParams } from 'url';
 import { RushConstants } from '../RushConstants';
 import { Utilities } from '../../utilities/Utilities';
 
@@ -92,10 +90,15 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     cacheId: string
   ): Promise<Buffer | undefined> {
     const blobClient: BlobClient = await this._getBlobClientForCacheIdAsync(cacheId);
-    const blobExists: boolean = await blobClient.exists();
-    if (blobExists) {
-      return await blobClient.downloadToBuffer();
-    } else {
+    try {
+      const blobExists: boolean = await blobClient.exists();
+      if (blobExists) {
+        return await blobClient.downloadToBuffer();
+      } else {
+        return undefined;
+      }
+    } catch (e) {
+      terminal.writeWarningLine(`Error getting cache entry from Azure Storage: ${e}`);
       return undefined;
     }
   }
@@ -131,7 +134,7 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
 
   public async updateCachedCredentialInteractiveAsync(terminal: Terminal): Promise<void> {
     const sasQueryParameters: SASQueryParameters = await this._getSasQueryParametersAsync(terminal);
-    const sasString: string = this._getSasStringFromQueryParameters(sasQueryParameters);
+    const sasString: string = sasQueryParameters.toString();
 
     await CredentialCache.usingAsync(
       {
@@ -235,41 +238,22 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
       expires
     );
 
-    const blobSasPermissions: BlobSASPermissions = new BlobSASPermissions();
-    blobSasPermissions.read = true;
-    blobSasPermissions.create = this._isCacheWriteAllowed;
+    const containerSasPermissions: ContainerSASPermissions = new ContainerSASPermissions();
+    containerSasPermissions.read = true;
+    containerSasPermissions.write = this._isCacheWriteAllowed;
 
-    const userDelegationKey: UserDelegationKey = key;
     const queryParameters: SASQueryParameters = generateBlobSASQueryParameters(
       {
         startsOn: startsOn,
         expiresOn: expires,
-        permissions: blobSasPermissions,
-        containerName: this._storageContainerName,
-        blobName: 'dummy-blob-name'
+        permissions: containerSasPermissions,
+        containerName: this._storageContainerName
       },
-      userDelegationKey,
+      key,
       this._storageAccountName
     );
 
     return queryParameters;
-  }
-
-  private _getSasStringFromQueryParameters(sasQueryParameters: SASQueryParameters): string {
-    const sasQuerySearchParameters: URLSearchParams = new URLSearchParams();
-    for (const [parameterName, parameterValue] of Object.entries(sasQueryParameters)) {
-      if (parameterValue) {
-        let serializedParameterValue: string;
-        if (parameterValue instanceof Date) {
-          serializedParameterValue = parameterValue.toISOString();
-        } else {
-          serializedParameterValue = parameterValue;
-        }
-        sasQuerySearchParameters.append(parameterName, serializedParameterValue);
-      }
-    }
-
-    return sasQuerySearchParameters.toString();
   }
 
   private _getConnectionString(sasString: string | undefined): string {
