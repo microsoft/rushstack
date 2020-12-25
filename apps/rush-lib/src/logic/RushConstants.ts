@@ -201,7 +201,7 @@ export class RushConstants {
   public static readonly hashDelimiter: string = '|';
 
   /**
-   * The name of the per-user Rush configuration file.
+   * The name of the per-user Rush configuration data folder.
    */
-  public static readonly rushUserConfigurationFilename: string = '.rushrc.json';
+  public static readonly rushUserConfigurationFolderName: string = '.rush-user';
 }

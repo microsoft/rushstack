@@ -7,7 +7,7 @@ import * as path from 'path';
 import { Utilities } from '../utilities/Utilities';
 import { RushConstants } from '../logic/RushConstants';
 
-interface IRushUserConfigurationJson {
+interface IRushUserSettingsJson {
   buildCacheFolder?: string;
 }
 
@@ -18,7 +18,7 @@ interface IRushUserConfigurationJson {
  */
 export class RushUserConfiguration {
   private static _schema: JsonSchema = JsonSchema.fromFile(
-    path.resolve(__dirname, '..', 'schemas', 'rush-user-configuration.schema.json')
+    path.resolve(__dirname, '..', 'schemas', 'rush-user-settings.schema.json')
   );
 
   /**
@@ -26,7 +26,7 @@ export class RushUserConfiguration {
    */
   public readonly buildCacheFolder: string | undefined;
 
-  private constructor(rushUserConfigurationJson: IRushUserConfigurationJson | undefined) {
+  private constructor(rushUserConfigurationJson: IRushUserSettingsJson | undefined) {
     this.buildCacheFolder = rushUserConfigurationJson?.buildCacheFolder;
     if (this.buildCacheFolder && !path.isAbsolute(this.buildCacheFolder)) {
       throw new Error('buildCacheFolder must be an absolute path');
@@ -35,14 +35,15 @@ export class RushUserConfiguration {
 
   public static async initializeAsync(): Promise<RushUserConfiguration> {
     const homeFolderPath: string = Utilities.getHomeFolder();
-    const rushUserConfigurationFilePath: string = path.join(
+    const rushUserSettingsFilePath: string = path.join(
       homeFolderPath,
-      RushConstants.rushUserConfigurationFilename
+      RushConstants.rushUserConfigurationFolderName,
+      'settings.json'
     );
-    let rushUserConfigurationJson: IRushUserConfigurationJson | undefined;
+    let rushUserSettingsJson: IRushUserSettingsJson | undefined;
     try {
-      rushUserConfigurationJson = await JsonFile.loadAndValidateAsync(
-        rushUserConfigurationFilePath,
+      rushUserSettingsJson = await JsonFile.loadAndValidateAsync(
+        rushUserSettingsFilePath,
         RushUserConfiguration._schema
       );
     } catch (e) {
@@ -51,6 +52,6 @@ export class RushUserConfiguration {
       }
     }
 
-    return new RushUserConfiguration(rushUserConfigurationJson);
+    return new RushUserConfiguration(rushUserSettingsJson);
   }
 }

@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Rush per-user configuration file",
-  "description": "For use with the Rush tool, this file stores user-specific configuration options. See http://rushjs.io for details.",
+  "title": "Rush per-user settings file",
+  "description": "For use with the Rush tool, this file stores user-specific settings options. See http://rushjs.io for details.",
 
   "type": "object",
   "properties": {
