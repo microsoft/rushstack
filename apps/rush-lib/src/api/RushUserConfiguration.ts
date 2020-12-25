@@ -34,12 +34,8 @@ export class RushUserConfiguration {
   }
 
   public static async initializeAsync(): Promise<RushUserConfiguration> {
-    const homeFolderPath: string = Utilities.getHomeFolder();
-    const rushUserSettingsFilePath: string = path.join(
-      homeFolderPath,
-      RushConstants.rushUserConfigurationFolderName,
-      'settings.json'
-    );
+    const rushUserFolderPath: string = RushUserConfiguration.getRushUserFolderPath();
+    const rushUserSettingsFilePath: string = path.join(rushUserFolderPath, 'settings.json');
     let rushUserSettingsJson: IRushUserSettingsJson | undefined;
     try {
       rushUserSettingsJson = await JsonFile.loadAndValidateAsync(
@@ -53,5 +49,14 @@ export class RushUserConfiguration {
     }
 
     return new RushUserConfiguration(rushUserSettingsJson);
+  }
+
+  public static getRushUserFolderPath(): string {
+    const homeFolderPath: string = Utilities.getHomeFolder();
+    const rushUserSettingsFilePath: string = path.join(
+      homeFolderPath,
+      RushConstants.rushUserConfigurationFolderName
+    );
+    return rushUserSettingsFilePath;
   }
 }

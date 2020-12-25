@@ -4,8 +4,8 @@
 import * as path from 'path';
 import { FileSystem, JsonFile, JsonSchema, LockFile } from '@rushstack/node-core-library';
 
-import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { IDisposable, Utilities } from '../utilities/Utilities';
+import { RushUserConfiguration } from '../api/RushUserConfiguration';
 
 const CACHE_FILENAME: string = 'credentials.json';
 const LATEST_CREDENTIALS_JSON_VERSION: string = '0.1.0';
@@ -28,7 +28,6 @@ export interface ICredentialCacheEntry {
 }
 
 export interface ICredentialCacheOptions {
-  rushGlobalFolder: RushGlobalFolder;
   supportEditing: boolean;
 }
 
@@ -59,8 +58,8 @@ export class CredentialCache implements IDisposable {
   }
 
   public static async initializeAsync(options: ICredentialCacheOptions): Promise<CredentialCache> {
-    const rushGlobalFolderPath: string = options.rushGlobalFolder.path;
-    const cacheFilePath: string = path.join(rushGlobalFolderPath, CACHE_FILENAME);
+    const rushUserFolderPath: string = RushUserConfiguration.getRushUserFolderPath();
+    const cacheFilePath: string = path.join(rushUserFolderPath, CACHE_FILENAME);
     const jsonSchema: JsonSchema = JsonSchema.fromFile(
       path.resolve(__dirname, '..', 'schemas', 'credentials.schema.json')
     );
@@ -76,7 +75,7 @@ export class CredentialCache implements IDisposable {
 
     let lockfile: LockFile | undefined;
     if (options.supportEditing) {
-      lockfile = await LockFile.acquire(rushGlobalFolderPath, `${CACHE_FILENAME}.lock`);
+      lockfile = await LockFile.acquire(rushUserFolderPath, `${CACHE_FILENAME}.lock`);
     }
 
     const credentialCache: CredentialCache = new CredentialCache(cacheFilePath, loadedJson, lockfile);

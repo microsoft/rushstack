@@ -56,10 +56,7 @@ export class UpdateCloudCredentials extends BaseRushAction {
 
     const buildCacheConfiguration:
       | BuildCacheConfiguration
-      | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(
-      this.rushConfiguration,
-      this.rushGlobalFolder
-    );
+      | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(this.rushConfiguration);
 
     if (!buildCacheConfiguration) {
       const buildCacheConfigurationFilePath: string = BuildCacheConfiguration.getBuildCacheConfigFilePath(
