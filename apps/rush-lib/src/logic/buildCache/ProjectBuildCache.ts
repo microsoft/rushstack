@@ -11,11 +11,11 @@ import { FileSystem, Terminal } from '@rushstack/node-core-library';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
 import { BuildCacheProviderBase } from './BuildCacheProviderBase';
-import { ProjectBuildCacheConfiguration } from '../../api/ProjectBuildCacheConfiguration';
+import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { RushConstants } from '../RushConstants';
 
 export interface IProjectBuildCacheOptions {
-  projectBuildCacheConfiguration: ProjectBuildCacheConfiguration;
+  projectConfiguration: RushProjectConfiguration;
   command: string;
   buildCacheProvider: BuildCacheProviderBase;
   packageChangeAnalyzer: PackageChangeAnalyzer;
@@ -102,11 +102,11 @@ export class ProjectBuildCache {
   }
 
   public constructor(options: IProjectBuildCacheOptions) {
-    this._project = options.projectBuildCacheConfiguration.project;
+    this._project = options.projectConfiguration.project;
     this._command = options.command;
     this._buildCacheProvider = options.buildCacheProvider;
     this._packageChangeAnalyzer = options.packageChangeAnalyzer;
-    this._projectOutputFolderNames = options.projectBuildCacheConfiguration.projectOutputFolders;
+    this._projectOutputFolderNames = options.projectConfiguration.projectOutputFolders;
     this._terminal = options.terminal;
   }
 

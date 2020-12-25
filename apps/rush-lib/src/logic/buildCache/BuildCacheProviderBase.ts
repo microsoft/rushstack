@@ -7,12 +7,12 @@ import { Path, Terminal } from '@rushstack/node-core-library';
 import { IProjectBuildDeps } from '../taskRunner/ProjectBuilder';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
 import { ProjectBuildCache } from './ProjectBuildCache';
-import { ProjectBuildCacheConfiguration } from '../../api/ProjectBuildCacheConfiguration';
+import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 
 export interface IBuildCacheProviderBaseOptions {}
 
 export interface IGetProjectBuildCacheOptions {
-  projectBuildCacheConfiguration: ProjectBuildCacheConfiguration;
+  projectConfiguration: RushProjectConfiguration;
   command: string;
   projectBuildDeps: IProjectBuildDeps | undefined;
   packageChangeAnalyzer: PackageChangeAnalyzer;
@@ -25,17 +25,17 @@ export abstract class BuildCacheProviderBase {
     terminal: Terminal,
     options: IGetProjectBuildCacheOptions
   ): ProjectBuildCache | undefined {
-    const { projectBuildCacheConfiguration, projectBuildDeps, command, packageChangeAnalyzer } = options;
+    const { projectConfiguration, projectBuildDeps, command, packageChangeAnalyzer } = options;
     if (!projectBuildDeps) {
       return undefined;
     }
 
-    if (!this._validateProject(terminal, projectBuildCacheConfiguration, projectBuildDeps)) {
+    if (!this._validateProject(terminal, projectConfiguration, projectBuildDeps)) {
       return undefined;
     }
 
     return new ProjectBuildCache({
-      projectBuildCacheConfiguration,
+      projectConfiguration,
       command,
       buildCacheProvider: this,
       packageChangeAnalyzer,
@@ -58,14 +58,14 @@ export abstract class BuildCacheProviderBase {
 
   private _validateProject(
     terminal: Terminal,
-    projectBuildCacheConfiguration: ProjectBuildCacheConfiguration,
+    projectConfiguration: RushProjectConfiguration,
     projectState: IProjectBuildDeps
   ): boolean {
     const normalizedProjectRelativeFolder: string = Path.convertToSlashes(
-      projectBuildCacheConfiguration.project.projectRelativeFolder
+      projectConfiguration.project.projectRelativeFolder
     );
     const outputFolders: string[] = [];
-    for (const outputFolderName of projectBuildCacheConfiguration.projectOutputFolders) {
+    for (const outputFolderName of projectConfiguration.projectOutputFolders) {
       outputFolders.push(`${path.posix.join(normalizedProjectRelativeFolder, outputFolderName)}/`);
     }
 

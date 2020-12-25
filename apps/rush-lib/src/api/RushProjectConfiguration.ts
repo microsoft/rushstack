@@ -10,9 +10,9 @@ import { RushConfigurationProject } from './RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 
 /**
- * Describes the file structure for the "<project root>/config/rush/build-cache.json" config file.
+ * Describes the file structure for the "<project root>/config/rush-project.json" config file.
  */
-interface IProjectBuildCacheJson {
+interface IRushProjectJson {
   /**
    * A list of folder names under the project root that should be cached.
    *
@@ -22,16 +22,17 @@ interface IProjectBuildCacheJson {
 }
 
 /**
- * Use this class to load and save the "common/config/rush/build-cache.json" config file.
- * This file provides configuration options for cached project build output.
+ * Use this class to load the "config/rush-project.json" config file.
+ *
+ * This file provides project-specific configuration options.
  * @public
  */
-export class ProjectBuildCacheConfiguration {
+export class RushProjectConfiguration {
   private static _projectBuildCacheConfigurationFile: ConfigurationFile<
-    IProjectBuildCacheJson
-  > = new ConfigurationFile<IProjectBuildCacheJson>({
-    projectRelativeFilePath: `config/rush/${RushConstants.buildCacheFilename}`,
-    jsonSchemaPath: path.resolve(__dirname, '..', 'schemas', 'project-build-cache.schema.json'),
+    IRushProjectJson
+  > = new ConfigurationFile<IRushProjectJson>({
+    projectRelativeFilePath: `config/${RushConstants.rushProjectConfigFilename}`,
+    jsonSchemaPath: path.resolve(__dirname, '..', 'schemas', 'rush-project.schema.json'),
     propertyInheritance: {
       projectOutputFolderNames: {
         inheritanceType: InheritanceType.append
@@ -41,26 +42,31 @@ export class ProjectBuildCacheConfiguration {
 
   public readonly project: RushConfigurationProject;
 
+  /**
+   * A list of folder names under the project root that should be cached.
+   *
+   * These folders should not be tracked by git.
+   */
   public readonly projectOutputFolders: string[];
 
-  private constructor(project: RushConfigurationProject, projectBuildCacheJson: IProjectBuildCacheJson) {
+  private constructor(project: RushConfigurationProject, projectBuildCacheJson: IRushProjectJson) {
     this.project = project;
     this.projectOutputFolders = projectBuildCacheJson.projectOutputFolderNames;
   }
 
   /**
-   * Loads the build-cache.json data for the specified project.
+   * Loads the rush-project.json data for the specified project.
    */
   public static async tryLoadForProjectAsync(
     project: RushConfigurationProject,
     terminal: Terminal
-  ): Promise<ProjectBuildCacheConfiguration | undefined> {
+  ): Promise<RushProjectConfiguration | undefined> {
     const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
       projectFolderPath: project.projectFolder
     });
 
     const projectBuildCacheJson:
-      | IProjectBuildCacheJson
+      | IRushProjectJson
       | undefined = await this._projectBuildCacheConfigurationFile.tryLoadConfigurationFileForProjectAsync(
       terminal,
       project.projectFolder,
@@ -68,7 +74,7 @@ export class ProjectBuildCacheConfiguration {
     );
 
     if (projectBuildCacheJson) {
-      return new ProjectBuildCacheConfiguration(project, projectBuildCacheJson);
+      return new RushProjectConfiguration(project, projectBuildCacheJson);
     } else {
       return undefined;
     }

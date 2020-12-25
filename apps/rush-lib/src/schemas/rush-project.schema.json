@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "Configuration for Rush's build cache.",
-  "description": "For use with the Rush tool, this file provides configuration options for cached project build output. See http://rushjs.io for details.",
+  "description": "For use with the Rush tool, this file provides per-project configuration options. See http://rushjs.io for details.",
 
   "type": "object",
   "properties": {
@@ -11,7 +11,7 @@
     },
 
     "extends": {
-      "description": "Optionally specifies another JSON config file that this file extends from.  This provides a way for standard settings to be shared across multiple projects.",
+      "description": "Optionally specifies another JSON config file that this file extends from. This provides a way for standard settings to be shared across multiple projects.",
       "type": "string"
     },
 

@@ -33,7 +33,7 @@ import { BaseBuilder, IBuilderContext } from './BaseBuilder';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import { ProjectBuildCacheConfiguration } from '../../api/ProjectBuildCacheConfiguration';
+import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 
 export interface IProjectBuildDeps extends IPackageDeps {
@@ -210,15 +210,12 @@ export class ProjectBuilder extends BaseBuilder {
 
       let projectBuildCache: ProjectBuildCache | undefined;
       if (this._buildCacheConfiguration) {
-        const projectBuildCacheConfiguration:
-          | ProjectBuildCacheConfiguration
-          | undefined = await ProjectBuildCacheConfiguration.tryLoadForProjectAsync(
-          this._rushProject,
-          terminal
-        );
-        if (projectBuildCacheConfiguration) {
+        const projectConfiguration:
+          | RushProjectConfiguration
+          | undefined = await RushProjectConfiguration.tryLoadForProjectAsync(this._rushProject, terminal);
+        if (projectConfiguration) {
           projectBuildCache = this._buildCacheConfiguration.cacheProvider.tryGetProjectBuildCache(terminal, {
-            projectBuildCacheConfiguration: projectBuildCacheConfiguration,
+            projectConfiguration,
             command: this._commandToRun,
             projectBuildDeps: projectBuildDeps,
             packageChangeAnalyzer: this._packageChangeAnalyzer
