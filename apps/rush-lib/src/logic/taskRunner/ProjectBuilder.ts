@@ -33,7 +33,7 @@ import { BaseBuilder, IBuilderContext } from './BaseBuilder';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import { ProjectBuildCacheConfiguration } from '../../api/ProjectBuildCacheConfiguration';
+import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 
 export interface IProjectBuildDeps extends IPackageDeps {
@@ -210,16 +210,22 @@ export class ProjectBuilder extends BaseBuilder {
 
       let projectBuildCache: ProjectBuildCache | undefined;
       if (this._buildCacheConfiguration) {
-        const projectBuildCacheConfiguration: ProjectBuildCacheConfiguration = ProjectBuildCacheConfiguration.loadForProject(
-          this._rushProject,
-          this._buildCacheConfiguration
-        );
-        projectBuildCache = this._buildCacheConfiguration.cacheProvider.tryGetProjectBuildCache(terminal, {
-          projectBuildCacheConfiguration: projectBuildCacheConfiguration,
-          command: this._commandToRun,
-          projectBuildDeps: projectBuildDeps,
-          packageChangeAnalyzer: this._packageChangeAnalyzer
-        });
+        const projectConfiguration:
+          | RushProjectConfiguration
+          | undefined = await RushProjectConfiguration.tryLoadForProjectAsync(this._rushProject, terminal);
+        if (projectConfiguration) {
+          projectBuildCache = this._buildCacheConfiguration.cacheProvider.tryGetProjectBuildCache(terminal, {
+            projectConfiguration,
+            command: this._commandToRun,
+            projectBuildDeps: projectBuildDeps,
+            packageChangeAnalyzer: this._packageChangeAnalyzer
+          });
+        } else {
+          terminal.writeVerboseLine(
+            'Project does not have a build-cache.json configuration file, or one provided by a rig, ' +
+              'so it does not support caching.'
+          );
+        }
       }
 
       const restoreFromCacheSuccess:

@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Configuration for Rush's build cache.",
+  "description": "For use with the Rush tool, this file provides per-project configuration options. See http://rushjs.io for details.",
+
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "extends": {
+      "description": "Optionally specifies another JSON config file that this file extends from. This provides a way for standard settings to be shared across multiple projects.",
+      "type": "string"
+    },
+
+    "projectOutputFolderNames": {
+      "type": "array",
+      "description": "A list of folder names under the project root that should be cached. These folders should not be tracked by git.",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    }
+  }
+}

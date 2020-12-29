@@ -150,6 +150,11 @@ export class RushConstants {
   public static readonly buildCacheFilename: string = 'build-cache.json';
 
   /**
+   * Per-project configuration filename.
+   */
+  public static readonly rushProjectConfigFilename: string = 'rush-project.json';
+
+  /**
    * The URL ("http://rushjs.io") for the Rush web site.
    */
   public static readonly rushWebSiteUrl: string = 'https://rushjs.io';
