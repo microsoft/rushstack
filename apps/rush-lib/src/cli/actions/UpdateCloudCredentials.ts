@@ -75,8 +75,12 @@ export class UpdateCloudCredentials extends BaseRushAction {
           `If the ${this._deleteFlag.longName} is provided, no other parameters may be provided.`
         );
         throw new AlreadyReportedError();
+      } else if (buildCacheConfiguration.cloudCacheProvider) {
+        await buildCacheConfiguration.cloudCacheProvider.deleteCachedCredentialsAsync(terminal);
       } else {
-        await buildCacheConfiguration.cacheProvider.deleteCachedCredentialsAsync(terminal);
+        terminal.writeLine(
+          'A cloud build cache is not configured; there is nothing to delete.'
+        );
       }
     } else if (this._interactiveModeFlag.value && this._credentialParameter.value !== undefined) {
       terminal.writeErrorLine(
@@ -86,12 +90,21 @@ export class UpdateCloudCredentials extends BaseRushAction {
       );
       throw new AlreadyReportedError();
     } else if (this._interactiveModeFlag.value) {
-      await buildCacheConfiguration.cacheProvider.updateCachedCredentialInteractiveAsync(terminal);
+      if (buildCacheConfiguration.cloudCacheProvider) {
+        await buildCacheConfiguration.cloudCacheProvider.updateCachedCredentialInteractiveAsync(terminal);
+      } else {
+        terminal.writeLine('A cloud build cache is not configured. Credentials are not required.');
+      }
     } else if (this._credentialParameter.value !== undefined) {
-      await buildCacheConfiguration.cacheProvider.updateCachedCredentialAsync(
-        terminal,
-        this._credentialParameter.value
-      );
+      if (buildCacheConfiguration.cloudCacheProvider) {
+        await buildCacheConfiguration.cloudCacheProvider.updateCachedCredentialAsync(
+          terminal,
+          this._credentialParameter.value
+        );
+      } else {
+        terminal.writeErrorLine('A cloud build cache is not configured. Credentials are not supported.');
+        throw new AlreadyReportedError();
+      }
     } else {
       terminal.writeErrorLine(
         `One of the ${this._interactiveModeFlag.longName} parameter, the ` +

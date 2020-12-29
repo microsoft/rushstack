@@ -2,33 +2,28 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { AlreadyReportedError, FileSystem, Terminal } from '@rushstack/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushUserConfiguration } from '../../api/RushUserConfiguration';
-import { BuildCacheProviderBase, IBuildCacheProviderBaseOptions } from './BuildCacheProviderBase';
 
-export interface IFileSystemBuildCacheProviderOptions extends IBuildCacheProviderBaseOptions {
+export interface IFileSystemBuildCacheProviderOptions {
   rushConfiguration: RushConfiguration;
   rushUserConfiguration: RushUserConfiguration;
 }
 
 const BUILD_CACHE_FOLDER_NAME: string = 'build-cache';
 
-export class FileSystemBuildCacheProvider extends BuildCacheProviderBase {
+export class FileSystemBuildCacheProvider {
   private readonly _cacheFolderPath: string;
 
   public constructor(options: IFileSystemBuildCacheProviderOptions) {
-    super(options);
     this._cacheFolderPath =
       options.rushUserConfiguration.buildCacheFolder ||
       path.join(options.rushConfiguration.commonTempFolder, BUILD_CACHE_FOLDER_NAME);
   }
 
-  public async tryGetCacheEntryBufferByIdAsync(
-    terminal: Terminal,
-    cacheId: string
-  ): Promise<Buffer | undefined> {
+  public async tryGetCacheEntryBufferByIdAsync(cacheId: string): Promise<Buffer | undefined> {
     const cacheEntryFilePath: string = path.join(this._cacheFolderPath, cacheId);
     try {
       return await FileSystem.readFileToBufferAsync(cacheEntryFilePath);
@@ -41,28 +36,9 @@ export class FileSystemBuildCacheProvider extends BuildCacheProviderBase {
     }
   }
 
-  public async trySetCacheEntryBufferAsync(
-    terminal: Terminal,
-    cacheId: string,
-    entryBuffer: Buffer
-  ): Promise<boolean> {
+  public async trySetCacheEntryBufferAsync(cacheId: string, entryBuffer: Buffer): Promise<boolean> {
     const cacheEntryFilePath: string = path.join(this._cacheFolderPath, cacheId);
     await FileSystem.writeFileAsync(cacheEntryFilePath, entryBuffer, { ensureFolderExists: true });
     return true;
-  }
-
-  public async updateCachedCredentialAsync(terminal: Terminal, credential: string): Promise<void> {
-    terminal.writeErrorLine('A filesystem build cache is configured. Credentials are not supported.');
-    throw new AlreadyReportedError();
-  }
-
-  public async updateCachedCredentialInteractiveAsync(terminal: Terminal): Promise<void> {
-    terminal.writeLine('A filesystem build cache is configured. Credentials are not required.');
-  }
-
-  public async deleteCachedCredentialsAsync(terminal: Terminal): Promise<void> {
-    terminal.writeLine(
-      'A filesystem build cache is configured. No credentials are stored and can be deleted.'
-    );
   }
 }

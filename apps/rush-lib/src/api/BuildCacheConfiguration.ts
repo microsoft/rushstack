@@ -4,7 +4,6 @@
 import * as path from 'path';
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
-import { BuildCacheProviderBase } from '../logic/buildCache/BuildCacheProviderBase';
 import {
   AzureEnvironmentNames,
   AzureStorageBuildCacheProvider
@@ -12,13 +11,14 @@ import {
 import { RushConfiguration } from './RushConfiguration';
 import { FileSystemBuildCacheProvider } from '../logic/buildCache/FileSystemBuildCacheProvider';
 import { RushConstants } from '../logic/RushConstants';
+import { CloudBuildCacheProviderBase } from '../logic/buildCache/CloudBuildCacheProviderBase';
 import { RushUserConfiguration } from './RushUserConfiguration';
 
 /**
  * Describes the file structure for the "common/config/rush/build-cache.json" config file.
  */
 interface IBuildCacheJson {
-  cacheProvider: 'azure-blob-storage' | 'filesystem';
+  cacheProvider: 'azure-blob-storage' | 'local-only';
 }
 
 interface IAzureBlobStorageBuildCacheJson extends IBuildCacheJson {
@@ -54,10 +54,6 @@ interface IAzureStorageConfigurationJson {
   isCacheWriteAllowed?: boolean;
 }
 
-interface IFileSystemBuildCacheJson extends IBuildCacheJson {
-  cacheProvider: 'filesystem';
-}
-
 interface IBuildCacheConfigurationOptions {
   buildCacheJson: IBuildCacheJson;
   rushConfiguration: RushConfiguration;
@@ -74,16 +70,19 @@ export class BuildCacheConfiguration {
     path.join(__dirname, '..', 'schemas', 'build-cache.schema.json')
   );
 
-  public readonly cacheProvider: BuildCacheProviderBase;
+  public readonly localCacheProvider: FileSystemBuildCacheProvider;
+  public readonly cloudCacheProvider: CloudBuildCacheProviderBase | undefined;
 
   private constructor(options: IBuildCacheConfigurationOptions) {
     const { buildCacheJson, rushConfiguration, rushUserConfiguration } = options;
+    this.localCacheProvider = new FileSystemBuildCacheProvider({
+      rushUserConfiguration,
+      rushConfiguration
+    });
+
     switch (buildCacheJson.cacheProvider) {
-      case 'filesystem': {
-        this.cacheProvider = new FileSystemBuildCacheProvider({
-          rushConfiguration,
-          rushUserConfiguration
-        });
+      case 'local-only': {
+        // Don't configure a cloud cache provider
         break;
       }
 
@@ -91,7 +90,7 @@ export class BuildCacheConfiguration {
         const azureStorageBuildCacheJson: IAzureBlobStorageBuildCacheJson = buildCacheJson as IAzureBlobStorageBuildCacheJson;
         const azureStorageConfigurationJson: IAzureStorageConfigurationJson =
           azureStorageBuildCacheJson.azureBlobStorageConfiguration;
-        this.cacheProvider = new AzureStorageBuildCacheProvider({
+        this.cloudCacheProvider = new AzureStorageBuildCacheProvider({
           storageAccountName: azureStorageConfigurationJson.storageAccountName,
           storageContainerName: azureStorageConfigurationJson.storageContainerName,
           azureEnvironment: azureStorageConfigurationJson.azureEnvironment,

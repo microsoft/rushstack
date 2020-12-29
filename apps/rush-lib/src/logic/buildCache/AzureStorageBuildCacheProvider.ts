@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { BuildCacheProviderBase, IBuildCacheProviderBaseOptions } from './BuildCacheProviderBase';
 import { Terminal } from '@rushstack/node-core-library';
 import {
   BlobClient,
@@ -19,10 +18,11 @@ import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/En
 import { CredentialCache, ICredentialCacheEntry } from '../CredentialCache';
 import { RushConstants } from '../RushConstants';
 import { Utilities } from '../../utilities/Utilities';
+import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
 
 export type AzureEnvironmentNames = keyof typeof AzureAuthorityHosts;
 
-export interface IAzureStorageBuildCacheProviderOptions extends IBuildCacheProviderBaseOptions {
+export interface IAzureStorageBuildCacheProviderOptions {
   storageContainerName: string;
   storageAccountName: string;
   azureEnvironment?: AzureEnvironmentNames;
@@ -32,23 +32,24 @@ export interface IAzureStorageBuildCacheProviderOptions extends IBuildCacheProvi
 
 const SAS_TTL_MILLISECONDS: number = 7 * 24 * 60 * 60 * 1000; // Seven days
 
-export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
+export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase {
   private readonly _storageAccountName: string;
   private readonly _storageContainerName: string;
   private readonly _azureEnvironment: AzureEnvironmentNames;
   private readonly _blobPrefix: string | undefined;
-  private readonly _isCacheWriteAllowed: boolean;
   private __credentialCacheId: string | undefined;
+
+  public readonly isCacheWriteAllowed: boolean;
 
   private _containerClient: ContainerClient | undefined;
 
   public constructor(options: IAzureStorageBuildCacheProviderOptions) {
-    super(options);
+    super();
     this._storageAccountName = options.storageAccountName;
     this._storageContainerName = options.storageContainerName;
     this._azureEnvironment = options.azureEnvironment || 'AzurePublicCloud';
     this._blobPrefix = options.blobPrefix;
-    this._isCacheWriteAllowed = options.isCacheWriteAllowed;
+    this.isCacheWriteAllowed = options.isCacheWriteAllowed;
 
     if (!(this._azureEnvironment in AzureAuthorityHosts)) {
       throw new Error(
@@ -67,7 +68,7 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
         this._storageContainerName
       ];
 
-      if (this._isCacheWriteAllowed) {
+      if (this.isCacheWriteAllowed) {
         cacheIdParts.push('cacheWriteAllowed');
       }
 
@@ -104,6 +105,13 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     cacheId: string,
     entryStream: Buffer
   ): Promise<boolean> {
+    if (!this.isCacheWriteAllowed) {
+      terminal.writeErrorLine(
+        'Writing to Azure Blob Storage cache is not allowed in the current configuration.'
+      );
+      return false;
+    }
+
     const blobClient: BlobClient = await this._getBlobClientForCacheIdAsync(cacheId);
     const blockBlobClient: BlockBlobClient = blobClient.getBlockBlobClient();
     try {
@@ -186,9 +194,12 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
       }
 
       let blobServiceClient: BlobServiceClient;
-      if (sasString || !this._isCacheWriteAllowed) {
+      if (sasString) {
         const connectionString: string = this._getConnectionString(sasString);
         blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
+      } else if (!this.isCacheWriteAllowed) {
+        // If cache write isn't allowed and we don't have a credential, assume the blob supports anonymous read
+        blobServiceClient = new BlobServiceClient(this._storageAccountUrl);
       } else {
         throw new Error(
           "An Azure Storage SAS credential hasn't been provided, or has expired. " +
@@ -232,7 +243,7 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
 
     const containerSasPermissions: ContainerSASPermissions = new ContainerSASPermissions();
     containerSasPermissions.read = true;
-    containerSasPermissions.write = this._isCacheWriteAllowed;
+    containerSasPermissions.write = this.isCacheWriteAllowed;
 
     const queryParameters: SASQueryParameters = generateBlobSASQueryParameters(
       {
