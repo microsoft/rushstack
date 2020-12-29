@@ -65,7 +65,7 @@ export abstract class BuildCacheProviderBase {
       projectConfiguration.project.projectRelativeFolder
     );
     const outputFolders: string[] = [];
-    for (const outputFolderName of projectConfiguration.projectOutputFolders) {
+    for (const outputFolderName of projectConfiguration.projectOutputFolderNames) {
       outputFolders.push(`${path.posix.join(normalizedProjectRelativeFolder, outputFolderName)}/`);
     }
 

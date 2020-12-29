@@ -47,11 +47,12 @@ export class RushProjectConfiguration {
    *
    * These folders should not be tracked by git.
    */
-  public readonly projectOutputFolders: string[];
+  public readonly projectOutputFolderNames: string[];
 
   private constructor(project: RushConfigurationProject, projectBuildCacheJson: IRushProjectJson) {
     this.project = project;
-    this.projectOutputFolders = projectBuildCacheJson.projectOutputFolderNames;
+
+    this.projectOutputFolderNames = projectBuildCacheJson.projectOutputFolderNames;
   }
 
   /**
@@ -65,7 +66,7 @@ export class RushProjectConfiguration {
       projectFolderPath: project.projectFolder
     });
 
-    const projectBuildCacheJson:
+    const rushProjectJson:
       | IRushProjectJson
       | undefined = await this._projectBuildCacheConfigurationFile.tryLoadConfigurationFileForProjectAsync(
       terminal,
@@ -73,10 +74,32 @@ export class RushProjectConfiguration {
       rigConfig
     );
 
-    if (projectBuildCacheJson) {
-      return new RushProjectConfiguration(project, projectBuildCacheJson);
+    if (rushProjectJson) {
+      RushProjectConfiguration._validateConfiguration(project, rushProjectJson, terminal);
+      return new RushProjectConfiguration(project, rushProjectJson);
     } else {
       return undefined;
+    }
+  }
+
+  private static _validateConfiguration(
+    project: RushConfigurationProject,
+    rushProjectJson: IRushProjectJson,
+    terminal: Terminal
+  ): void {
+    const invalidFolderNames: string[] = [];
+    for (const projectOutputFolder of rushProjectJson.projectOutputFolderNames) {
+      if (projectOutputFolder.match(/[\/\\]/)) {
+        invalidFolderNames.push(projectOutputFolder);
+      }
+    }
+
+    if (invalidFolderNames.length > 0) {
+      terminal.writeErrorLine(
+        `Invalid project configuration for project "${project.packageName}". Entries in ` +
+          '"projectOutputFolderNames" must not contain slashes and the following entries do: ' +
+          invalidFolderNames.join(', ')
+      );
     }
   }
 }

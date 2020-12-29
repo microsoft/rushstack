@@ -20,7 +20,8 @@
       "description": "A list of folder names under the project root that should be cached. These folders should not be tracked by git.",
       "items": {
         "type": "string"
-      }
+      },
+      "uniqueItems": true
     }
   }
 }

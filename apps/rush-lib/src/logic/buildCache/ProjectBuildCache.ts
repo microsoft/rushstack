@@ -106,7 +106,7 @@ export class ProjectBuildCache {
     this._command = options.command;
     this._buildCacheProvider = options.buildCacheProvider;
     this._packageChangeAnalyzer = options.packageChangeAnalyzer;
-    this._projectOutputFolderNames = options.projectConfiguration.projectOutputFolders;
+    this._projectOutputFolderNames = options.projectConfiguration.projectOutputFolderNames;
     this._terminal = options.terminal;
   }
 
