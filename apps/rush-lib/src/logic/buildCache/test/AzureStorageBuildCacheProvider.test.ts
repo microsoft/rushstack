@@ -11,8 +11,7 @@ describe('AzureStorageBuildCacheProvider', () => {
           storageAccountName: 'storage-account',
           storageContainerName: 'container-name',
           azureEnvironment: 'INCORRECT_AZURE_ENVIRONMENT' as AzureEnvironmentNames,
-          isCacheWriteAllowed: false,
-          rushGlobalFolder: undefined!
+          isCacheWriteAllowed: false
         })
     ).toThrowErrorMatchingSnapshot();
   });

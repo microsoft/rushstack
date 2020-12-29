@@ -16,7 +16,6 @@ import {
 import { AzureAuthorityHosts, DeviceCodeCredential, DeviceCodeInfo } from '@azure/identity';
 
 import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { CredentialCache, ICredentialCacheEntry } from '../CredentialCache';
 import { RushConstants } from '../RushConstants';
 import { Utilities } from '../../utilities/Utilities';
@@ -29,7 +28,6 @@ export interface IAzureStorageBuildCacheProviderOptions extends IBuildCacheProvi
   azureEnvironment?: AzureEnvironmentNames;
   blobPrefix?: string;
   isCacheWriteAllowed: boolean;
-  rushGlobalFolder: RushGlobalFolder;
 }
 
 const SAS_TTL_MILLISECONDS: number = 7 * 24 * 60 * 60 * 1000; // Seven days
@@ -40,7 +38,6 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
   private readonly _azureEnvironment: AzureEnvironmentNames;
   private readonly _blobPrefix: string | undefined;
   private readonly _isCacheWriteAllowed: boolean;
-  private readonly _rushGlobalFolder: RushGlobalFolder;
   private __credentialCacheId: string | undefined;
 
   private _containerClient: ContainerClient | undefined;
@@ -52,7 +49,6 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
     this._azureEnvironment = options.azureEnvironment || 'AzurePublicCloud';
     this._blobPrefix = options.blobPrefix;
     this._isCacheWriteAllowed = options.isCacheWriteAllowed;
-    this._rushGlobalFolder = options.rushGlobalFolder;
 
     if (!(this._azureEnvironment in AzureAuthorityHosts)) {
       throw new Error(
@@ -122,7 +118,6 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
   public async updateCachedCredentialAsync(terminal: Terminal, credential: string): Promise<void> {
     await CredentialCache.usingAsync(
       {
-        rushGlobalFolder: this._rushGlobalFolder,
         supportEditing: true
       },
       async (credentialsCache: CredentialCache) => {
@@ -138,7 +133,6 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
 
     await CredentialCache.usingAsync(
       {
-        rushGlobalFolder: this._rushGlobalFolder,
         supportEditing: true
       },
       async (credentialsCache: CredentialCache) => {
@@ -151,7 +145,6 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
   public async deleteCachedCredentialsAsync(terminal: Terminal): Promise<void> {
     await CredentialCache.usingAsync(
       {
-        rushGlobalFolder: this._rushGlobalFolder,
         supportEditing: true
       },
       async (credentialsCache: CredentialCache) => {
@@ -174,7 +167,6 @@ export class AzureStorageBuildCacheProvider extends BuildCacheProviderBase {
         let cacheEntry: ICredentialCacheEntry | undefined;
         await CredentialCache.usingAsync(
           {
-            rushGlobalFolder: this._rushGlobalFolder,
             supportEditing: false
           },
           (credentialsCache: CredentialCache) => {

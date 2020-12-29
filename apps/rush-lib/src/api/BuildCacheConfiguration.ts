@@ -11,8 +11,8 @@ import {
 } from '../logic/buildCache/AzureStorageBuildCacheProvider';
 import { RushConfiguration } from './RushConfiguration';
 import { FileSystemBuildCacheProvider } from '../logic/buildCache/FileSystemBuildCacheProvider';
-import { RushGlobalFolder } from './RushGlobalFolder';
 import { RushConstants } from '../logic/RushConstants';
+import { RushUserConfiguration } from './RushUserConfiguration';
 
 /**
  * Describes the file structure for the "common/config/rush/build-cache.json" config file.
@@ -64,6 +64,12 @@ interface IFileSystemBuildCacheJson extends IBuildCacheJson {
   cacheProvider: 'filesystem';
 }
 
+interface IBuildCacheConfigurationOptions {
+  buildCacheJson: IBuildCacheJson;
+  rushConfiguration: RushConfiguration;
+  rushUserConfiguration: RushUserConfiguration;
+}
+
 /**
  * Use this class to load and save the "common/config/rush/build-cache.json" config file.
  * This file provides configuration options for cached project build output.
@@ -78,17 +84,15 @@ export class BuildCacheConfiguration {
 
   public readonly cacheProvider: BuildCacheProviderBase;
 
-  private constructor(
-    buildCacheJson: IBuildCacheJson,
-    rushConfiguration: RushConfiguration,
-    rushGlobalFolder: RushGlobalFolder
-  ) {
+  private constructor(options: IBuildCacheConfigurationOptions) {
+    const { buildCacheJson, rushConfiguration, rushUserConfiguration } = options;
     this.projectOutputFolderNames = buildCacheJson.projectOutputFolderNames;
 
     switch (buildCacheJson.cacheProvider) {
       case 'filesystem': {
         this.cacheProvider = new FileSystemBuildCacheProvider({
-          rushConfiguration
+          rushConfiguration,
+          rushUserConfiguration
         });
         break;
       }
@@ -98,7 +102,6 @@ export class BuildCacheConfiguration {
         const azureStorageConfigurationJson: IAzureStorageConfigurationJson =
           azureStorageBuildCacheJson.azureBlobStorageConfiguration;
         this.cacheProvider = new AzureStorageBuildCacheProvider({
-          rushGlobalFolder,
           storageAccountName: azureStorageConfigurationJson.storageAccountName,
           storageContainerName: azureStorageConfigurationJson.storageContainerName,
           azureEnvironment: azureStorageConfigurationJson.azureEnvironment,
@@ -119,8 +122,7 @@ export class BuildCacheConfiguration {
    * If the file has not been created yet, then undefined is returned.
    */
   public static async loadFromDefaultPathAsync(
-    rushConfiguration: RushConfiguration,
-    rushGlobalFolder: RushGlobalFolder
+    rushConfiguration: RushConfiguration
   ): Promise<BuildCacheConfiguration | undefined> {
     const jsonFilePath: string = BuildCacheConfiguration.getBuildCacheConfigFilePath(rushConfiguration);
     if (FileSystem.exists(jsonFilePath)) {
@@ -128,7 +130,12 @@ export class BuildCacheConfiguration {
         jsonFilePath,
         BuildCacheConfiguration._jsonSchema
       );
-      return new BuildCacheConfiguration(buildCacheJson, rushConfiguration, rushGlobalFolder);
+      const rushUserConfiguration: RushUserConfiguration = await RushUserConfiguration.initializeAsync();
+      return new BuildCacheConfiguration({
+        buildCacheJson,
+        rushConfiguration,
+        rushUserConfiguration
+      });
     } else {
       return undefined;
     }

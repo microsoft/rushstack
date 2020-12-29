@@ -122,7 +122,7 @@ export class Utilities {
    * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
    * this looks something like "/home/username/"
    */
-  public static getHomeDirectory(): string {
+  public static getHomeFolder(): string {
     const unresolvedUserFolder: string | undefined =
       process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
     const dirError: string = "Unable to determine the current user's home directory";

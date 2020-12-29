@@ -112,10 +112,7 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const buildCacheConfiguration:
       | BuildCacheConfiguration
-      | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(
-      this.rushConfiguration,
-      this.rushGlobalFolder
-    );
+      | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(this.rushConfiguration);
 
     const taskSelector: TaskSelector = new TaskSelector({
       rushConfiguration: this.rushConfiguration,

@@ -52,7 +52,7 @@ export class RushGlobalFolder {
     if (rushGlobalFolderOverride !== undefined) {
       this._rushGlobalFolder = rushGlobalFolderOverride;
     } else {
-      this._rushGlobalFolder = path.join(Utilities.getHomeDirectory(), '.rush');
+      this._rushGlobalFolder = path.join(Utilities.getHomeFolder(), '.rush');
     }
 
     const normalizedNodeVersion: string = process.version.match(/^[a-z0-9\-\.]+$/i)
