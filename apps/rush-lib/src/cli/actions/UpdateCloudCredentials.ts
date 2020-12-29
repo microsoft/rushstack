@@ -79,7 +79,7 @@ export class UpdateCloudCredentials extends BaseRushAction {
         await buildCacheConfiguration.cloudCacheProvider.deleteCachedCredentialsAsync(terminal);
       } else {
         terminal.writeLine(
-          'No cloud build cache is configured. No credentials are stored and can be deleted.'
+          'A cloud build cache is not configured; there is nothing to delete.'
         );
       }
     } else if (this._interactiveModeFlag.value && this._credentialParameter.value !== undefined) {
@@ -93,7 +93,7 @@ export class UpdateCloudCredentials extends BaseRushAction {
       if (buildCacheConfiguration.cloudCacheProvider) {
         await buildCacheConfiguration.cloudCacheProvider.updateCachedCredentialInteractiveAsync(terminal);
       } else {
-        terminal.writeLine('No cloud build cache is configured. Credentials are not required.');
+        terminal.writeLine('A cloud build cache is not configured. Credentials are not required.');
       }
     } else if (this._credentialParameter.value !== undefined) {
       if (buildCacheConfiguration.cloudCacheProvider) {
@@ -102,7 +102,7 @@ export class UpdateCloudCredentials extends BaseRushAction {
           this._credentialParameter.value
         );
       } else {
-        terminal.writeErrorLine('No cloud build cache is configured. Credentials are not supported.');
+        terminal.writeErrorLine('A cloud build cache is not configured. Credentials are not supported.');
         throw new AlreadyReportedError();
       }
     } else {
