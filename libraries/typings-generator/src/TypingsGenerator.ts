@@ -110,7 +110,7 @@ export class TypingsGenerator {
   }
 
   public async runWatcherAsync(): Promise<void> {
-    await FileSystem.ensureEmptyFolderAsync(this._options.generatedTsFolder);
+    await FileSystem.ensureFolderAsync(this._options.generatedTsFolder);
 
     const globBase: string = path.resolve(this._options.srcFolder, '**');
 
