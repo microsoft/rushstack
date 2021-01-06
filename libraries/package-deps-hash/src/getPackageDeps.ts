@@ -136,14 +136,18 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
  *
  * @public
  */
-export function getGitHashForFiles(filesToHash: string[], packagePath: string): Map<string, string> {
+export function getGitHashForFiles(
+  filesToHash: string[],
+  packagePath: string,
+  gitPath?: string
+): Map<string, string> {
   const changes: Map<string, string> = new Map<string, string>();
 
   if (filesToHash.length) {
     // Use --stdin-paths arg to pass the list of files to git in order to avoid issues with
     // command length
     const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
-      'git',
+      gitPath || 'git',
       ['hash-object', '--stdin-paths'],
       { input: filesToHash.map((x) => path.resolve(packagePath, x)).join('\n') }
     );
@@ -176,9 +180,9 @@ export function getGitHashForFiles(filesToHash: string[], packagePath: string): 
 /**
  * Executes "git ls-tree" in a folder
  */
-export function gitLsTree(path: string): string {
+export function gitLsTree(path: string, gitPath?: string): string {
   const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
-    'git',
+    gitPath || 'git',
     ['ls-tree', 'HEAD', '-r'],
     {
       currentWorkingDirectory: path
@@ -195,7 +199,7 @@ export function gitLsTree(path: string): string {
 /**
  * Executes "git status" in a folder
  */
-export function gitStatus(path: string): string {
+export function gitStatus(path: string, gitPath?: string): string {
   /**
    * -s - Short format. Will be printed as 'XY PATH' or 'XY ORIG_PATH -> PATH'. Paths with non-standard
    *      characters will be escaped using double-quotes, and non-standard characters will be backslash
@@ -205,7 +209,7 @@ export function gitStatus(path: string): string {
    * See documentation here: https://git-scm.com/docs/git-status
    */
   const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
-    'git',
+    gitPath || 'git',
     ['status', '-s', '-u', '.'],
     {
       currentWorkingDirectory: path
@@ -231,9 +235,10 @@ export function gitStatus(path: string): string {
  */
 export function getPackageDeps(
   packagePath: string = process.cwd(),
-  excludedPaths?: string[]
+  excludedPaths?: string[],
+  gitPath?: string
 ): Map<string, string> {
-  const gitLsOutput: string = gitLsTree(packagePath);
+  const gitLsOutput: string = gitLsTree(packagePath, gitPath);
 
   // Add all the checked in hashes
   const result: Map<string, string> = parseGitLsTree(gitLsOutput);
@@ -246,7 +251,7 @@ export function getPackageDeps(
   }
 
   // Update the checked in hashes with the current repo status
-  const gitStatusOutput: string = gitStatus(packagePath);
+  const gitStatusOutput: string = gitStatus(packagePath, gitPath);
   const currentlyChangedFiles: Map<string, string> = parseGitStatus(gitStatusOutput, packagePath);
   const filesToHash: string[] = [];
   const excludedPathSet: Set<string> = new Set<string>(excludedPaths);
@@ -261,7 +266,11 @@ export function getPackageDeps(
     }
   }
 
-  const currentlyChangedFileHashes: Map<string, string> = getGitHashForFiles(filesToHash, packagePath);
+  const currentlyChangedFileHashes: Map<string, string> = getGitHashForFiles(
+    filesToHash,
+    packagePath,
+    gitPath
+  );
   for (const [filename, hash] of currentlyChangedFileHashes) {
     result.set(filename, hash);
   }

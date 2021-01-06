@@ -21,11 +21,11 @@ export class PackageChangeAnalyzer {
   private _data: Map<string, Map<string, string>>;
   private _projectStateCache: Map<string, string> = new Map<string, string>();
   private _rushConfiguration: RushConfiguration;
-  private _isGitSupported: boolean;
+  private readonly _git: Git;
 
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
-    this._isGitSupported = Git.isPathUnderGitWorkingTree();
+    this._git = new Git(this._rushConfiguration);
     this._data = this._getData();
   }
 
@@ -88,9 +88,10 @@ export class PackageChangeAnalyzer {
 
     let repoDeps: Map<string, string>;
     try {
-      if (this._isGitSupported) {
+      if (this._git.isPathUnderGitWorkingTree()) {
         // Load the package deps hash for the whole repository
-        repoDeps = PackageChangeAnalyzer.getPackageDeps(this._rushConfiguration.rushJsonFolder, []);
+        const gitPath: string = this._git.getGitPathOrThrow();
+        repoDeps = PackageChangeAnalyzer.getPackageDeps(this._rushConfiguration.rushJsonFolder, [], gitPath);
       } else {
         return projectHashDeps;
       }
@@ -145,9 +146,11 @@ export class PackageChangeAnalyzer {
         projectDependencyManifestPaths.push(relativeDependencyManifestFilePath);
       }
 
+      const gitPath: string = this._git.getGitPathOrThrow();
       const hashes: Map<string, string> = getGitHashForFiles(
         projectDependencyManifestPaths,
-        this._rushConfiguration.rushJsonFolder
+        this._rushConfiguration.rushJsonFolder,
+        gitPath
       );
       for (let i: number = 0; i < projects.length; i++) {
         const project: RushConfigurationProject = projects[i];

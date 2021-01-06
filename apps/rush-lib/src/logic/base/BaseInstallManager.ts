@@ -271,7 +271,8 @@ export abstract class BaseInstallManager {
 
     // Git hooks are only installed if the repo opts in by including files in /common/git-hooks
     const hookSource: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
-    const hookDestination: string | undefined = Git.getHooksFolder();
+    const git: Git = new Git(this.rushConfiguration);
+    const hookDestination: string | undefined = git.getHooksFolder();
 
     if (FileSystem.exists(hookSource) && hookDestination) {
       const allHookFilenames: string[] = FileSystem.readFolder(hookSource);

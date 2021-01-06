@@ -22,11 +22,11 @@ import { PrereleaseToken } from '../../logic/PrereleaseToken';
 import { ChangeManager } from '../../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
-import { VersionControl } from '../../utilities/VersionControl';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 import { VersionPolicy } from '../../api/VersionPolicy';
 import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
 import { Utilities } from '../../utilities/Utilities';
+import { Git } from '../../logic/Git';
 
 export class PublishAction extends BaseRushAction {
   private _addCommitDetails!: CommandLineFlagParameter;
@@ -229,15 +229,17 @@ export class PublishAction extends BaseRushAction {
 
     this._addNpmPublishHome();
 
+    const git: Git = new Git(this.rushConfiguration);
+    const publishGit: PublishGit = new PublishGit(git, this._targetBranch.value);
     if (this._includeAll.value) {
-      this._publishAll(allPackages);
+      this._publishAll(publishGit, allPackages);
     } else {
       this._prereleaseToken = new PrereleaseToken(
         this._prereleaseName.value,
         this._suffix.value,
         this._partialPrerelease.value
       );
-      this._publishChanges(allPackages);
+      this._publishChanges(git, publishGit, allPackages);
     }
 
     console.log(EOL + colors.green('Rush publish finished successfully.'));
@@ -258,7 +260,11 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _publishChanges(allPackages: Map<string, RushConfigurationProject>): void {
+  private _publishChanges(
+    git: Git,
+    publishGit: PublishGit,
+    allPackages: Map<string, RushConfigurationProject>
+  ): void {
     const changeManager: ChangeManager = new ChangeManager(this.rushConfiguration);
     changeManager.load(
       this.rushConfiguration.changesFolder,
@@ -268,11 +274,10 @@ export class PublishAction extends BaseRushAction {
 
     if (changeManager.hasChanges()) {
       const orderedChanges: IChangeInfo[] = changeManager.changes;
-      const git: PublishGit = new PublishGit(this._targetBranch.value);
       const tempBranch: string = 'publish-' + new Date().getTime();
 
       // Make changes in temp branch.
-      git.checkout(tempBranch, true);
+      publishGit.checkout(tempBranch, true);
 
       this._setDependenciesBeforePublish();
 
@@ -282,11 +287,13 @@ export class PublishAction extends BaseRushAction {
 
       this._setDependenciesBeforeCommit();
 
-      if (VersionControl.hasUncommittedChanges()) {
+      if (git.hasUncommittedChanges()) {
         // Stage, commit, and push the changes to remote temp branch.
-        git.addChanges(':/*');
-        git.commit(this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE);
-        git.push(tempBranch);
+        publishGit.addChanges(':/*');
+        publishGit.commit(
+          this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE
+        );
+        publishGit.push(tempBranch);
 
         this._setDependenciesBeforePublish();
 
@@ -317,28 +324,26 @@ export class PublishAction extends BaseRushAction {
         this._setDependenciesBeforeCommit();
 
         // Create and push appropriate Git tags.
-        this._gitAddTags(git, orderedChanges);
-        git.push(tempBranch);
+        this._gitAddTags(publishGit, orderedChanges);
+        publishGit.push(tempBranch);
 
         // Now merge to target branch.
-        git.checkout(this._targetBranch.value);
-        git.pull();
-        git.merge(tempBranch);
-        git.push(this._targetBranch.value);
-        git.deleteBranch(tempBranch);
+        publishGit.checkout(this._targetBranch.value);
+        publishGit.pull();
+        publishGit.merge(tempBranch);
+        publishGit.push(this._targetBranch.value);
+        publishGit.deleteBranch(tempBranch);
       } else {
-        git.checkout(this._targetBranch.value);
-        git.deleteBranch(tempBranch, false);
+        publishGit.checkout(this._targetBranch.value);
+        publishGit.deleteBranch(tempBranch, false);
       }
     }
   }
 
-  private _publishAll(allPackages: Map<string, RushConfigurationProject>): void {
+  private _publishAll(git: PublishGit, allPackages: Map<string, RushConfigurationProject>): void {
     console.log(`Rush publish starts with includeAll and version policy ${this._versionPolicy.value}`);
 
     let updated: boolean = false;
-    const git: PublishGit = new PublishGit(this._targetBranch.value);
-
     allPackages.forEach((packageConfig, packageName) => {
       if (
         packageConfig.shouldPublish &&
