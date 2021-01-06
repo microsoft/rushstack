@@ -11,6 +11,7 @@ import { Executable, AlreadyReportedError, Path } from '@rushstack/node-core-lib
 import { Utilities } from '../utilities/Utilities';
 import { GitEmailPolicy } from './policy/GitEmailPolicy';
 import { RushConfiguration } from '../api/RushConfiguration';
+import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 
 interface IResultOrError<TResult> {
   error?: Error;
@@ -35,7 +36,7 @@ export class Git {
    */
   public get gitPath(): string | undefined {
     if (!this._checkedGitPath) {
-      this._gitPath = Executable.tryResolve('git');
+      this._gitPath = EnvironmentConfiguration.gitBinaryPath || Executable.tryResolve('git');
       this._checkedGitPath = true;
     }
 

@@ -103,7 +103,12 @@ export const enum EnvironmentVariableNames {
    *
    * For information on SAS tokens, see here: https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview
    */
-  RUSH_BUILD_CACHE_WRITE_CREDENTIAL = 'RUSH_BUILD_CACHE_WRITE_CREDENTIAL'
+  RUSH_BUILD_CACHE_WRITE_CREDENTIAL = 'RUSH_BUILD_CACHE_WRITE_CREDENTIAL',
+
+  /**
+   * Allows the git binary path to be explicity specified.
+   */
+  RUSH_GIT_BINARY_PATH = 'RUSH_GIT_BINARY_PATH'
 }
 
 /**
@@ -127,6 +132,8 @@ export class EnvironmentConfiguration {
   private static _rushGlobalFolderOverride: string | undefined;
 
   private static _buildCacheCredential: string | undefined;
+
+  private static _gitBinaryPath: string | undefined;
 
   /**
    * An override for the common/temp folder path.
@@ -182,6 +189,15 @@ export class EnvironmentConfiguration {
   public static get buildCacheWriteCredential(): string | undefined {
     EnvironmentConfiguration._ensureInitialized();
     return EnvironmentConfiguration._buildCacheCredential;
+  }
+
+  /**
+   * Allows the git binary path to be explicitly provided.
+   * See {@link EnvironmentVariableNames.RUSH_GIT_BINARY_PATH}
+   */
+  public static get gitBinaryPath(): string | undefined {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._gitBinaryPath;
   }
 
   /**
@@ -247,6 +263,11 @@ export class EnvironmentConfiguration {
 
           case EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_CREDENTIAL: {
             EnvironmentConfiguration._buildCacheCredential = value;
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_GIT_BINARY_PATH: {
+            EnvironmentConfiguration._gitBinaryPath = value;
             break;
           }
 
