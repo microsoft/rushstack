@@ -230,9 +230,9 @@ export class ProjectBuilder extends BaseBuilder {
         }
       }
 
-      const restoreFromCacheSuccess:
-        | boolean
-        | undefined = await projectBuildCache?.tryRestoreFromCacheAsync();
+      const restoreFromCacheSuccess: boolean | undefined = await projectBuildCache?.tryRestoreFromCacheAsync(
+        terminal
+      );
 
       if (restoreFromCacheSuccess) {
         return TaskStatus.FromCache;
@@ -314,9 +314,9 @@ export class ProjectBuilder extends BaseBuilder {
             }
           );
 
-          const setCacheEntryPromise:
-            | Promise<boolean>
-            | undefined = projectBuildCache?.trySetCacheEntryAsync();
+          const setCacheEntryPromise: Promise<boolean> | undefined = projectBuildCache?.trySetCacheEntryAsync(
+            terminal
+          );
 
           const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
 

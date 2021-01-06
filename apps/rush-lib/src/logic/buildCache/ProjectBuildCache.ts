@@ -31,15 +31,13 @@ export class ProjectBuildCache {
   private readonly _localBuildCacheProvider: FileSystemBuildCacheProvider;
   private readonly _cloudBuildCacheProvider: CloudBuildCacheProviderBase | undefined;
   private readonly _projectOutputFolderNames: string[];
-  private readonly _terminal: Terminal;
   private readonly _cacheId: string | undefined;
 
-  private constructor(options: IProjectBuildCacheOptions) {
+  private constructor(options: Omit<IProjectBuildCacheOptions, 'terminal'>) {
     this._project = options.projectConfiguration.project;
     this._localBuildCacheProvider = options.buildCacheConfiguration.localCacheProvider;
     this._cloudBuildCacheProvider = options.buildCacheConfiguration.cloudCacheProvider;
     this._projectOutputFolderNames = options.projectConfiguration.projectOutputFolderNames;
-    this._terminal = options.terminal;
     this._cacheId = ProjectBuildCache._getCacheId(options);
   }
 
@@ -89,10 +87,10 @@ export class ProjectBuildCache {
     }
   }
 
-  public async tryRestoreFromCacheAsync(): Promise<boolean> {
+  public async tryRestoreFromCacheAsync(terminal: Terminal): Promise<boolean> {
     const cacheId: string | undefined = this._cacheId;
     if (!cacheId) {
-      this._terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
+      terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
       return false;
     }
 
@@ -101,21 +99,21 @@ export class ProjectBuildCache {
       | undefined = await this._localBuildCacheProvider.tryGetCacheEntryBufferByIdAsync(cacheId);
     const foundInLocalCache: boolean = !!cacheEntryBuffer;
     if (!foundInLocalCache && this._cloudBuildCacheProvider) {
-      this._terminal.writeVerboseLine(
+      terminal.writeVerboseLine(
         'This project was not found in the local build cache. Querying the cloud build cache.'
       );
 
       // No idea why ESLint is complaining about this:
       // eslint-disable-next-line require-atomic-updates
       cacheEntryBuffer = await this._cloudBuildCacheProvider.tryGetCacheEntryBufferByIdAsync(
-        this._terminal,
+        terminal,
         cacheId
       );
     }
 
     let setLocalCacheEntryPromise: Promise<boolean> | undefined;
     if (!cacheEntryBuffer) {
-      this._terminal.writeVerboseLine('This project was not found in the build cache.');
+      terminal.writeVerboseLine('This project was not found in the build cache.');
       return false;
     } else if (!foundInLocalCache) {
       setLocalCacheEntryPromise = this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
@@ -124,12 +122,12 @@ export class ProjectBuildCache {
       );
     }
 
-    this._terminal.writeLine('Build cache hit.');
+    terminal.writeLine('Build cache hit.');
 
     const projectFolderPath: string = this._project.projectFolder;
 
     // Purge output folders
-    this._terminal.writeVerboseLine(`Clearing cached folders: ${this._projectOutputFolderNames.join(', ')}`);
+    terminal.writeVerboseLine(`Clearing cached folders: ${this._projectOutputFolderNames.join(', ')}`);
     await Promise.all(
       this._projectOutputFolderNames.map((outputFolderName: string) =>
         FileSystem.deleteFolderAsync(path.join(projectFolderPath, outputFolderName))
@@ -163,24 +161,22 @@ export class ProjectBuildCache {
     }
 
     if (restoreSuccess) {
-      this._terminal.writeLine('Successfully restored build output from cache.');
+      terminal.writeLine('Successfully restored build output from cache.');
     } else {
-      this._terminal.writeWarningLine('Unable to restore build output from cache.');
+      terminal.writeWarningLine('Unable to restore build output from cache.');
     }
 
     if (!updateLocalCacheSuccess) {
-      this._terminal.writeWarningLine(
-        'An error occurred updating the local cache with the cloud cache data.'
-      );
+      terminal.writeWarningLine('An error occurred updating the local cache with the cloud cache data.');
     }
 
     return restoreSuccess;
   }
 
-  public async trySetCacheEntryAsync(): Promise<boolean> {
+  public async trySetCacheEntryAsync(terminal: Terminal): Promise<boolean> {
     const cacheId: string | undefined = this._cacheId;
     if (!cacheId) {
-      this._terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
+      terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
       return false;
     }
 
@@ -197,7 +193,7 @@ export class ProjectBuildCache {
       }
     }
 
-    this._terminal.writeVerboseLine(`Caching build output folders: ${filteredOutputFolders.join(', ')}`);
+    terminal.writeVerboseLine(`Caching build output folders: ${filteredOutputFolders.join(', ')}`);
     let encounteredTarErrors: boolean = false;
     const tarStream: stream.Readable = tar.create(
       {
@@ -209,9 +205,7 @@ export class ProjectBuildCache {
           const tempStats: fs.Stats = new fs.Stats();
           tempStats.mode = stat.mode;
           if (tempStats.isSymbolicLink()) {
-            this._terminal.writeError(
-              `Unable to include "${tarPath}" in build cache. It is a symbolic link.`
-            );
+            terminal.writeError(`Unable to include "${tarPath}" in build cache. It is a symbolic link.`);
             encounteredTarErrors = true;
             return false;
           } else {
@@ -233,7 +227,7 @@ export class ProjectBuildCache {
 
     const setCloudCacheEntryPromise: Promise<boolean> | undefined =
       this._cloudBuildCacheProvider?.isCacheWriteAllowed === true
-        ? this._cloudBuildCacheProvider.trySetCacheEntryBufferAsync(this._terminal, cacheId, cacheEntryBuffer)
+        ? this._cloudBuildCacheProvider.trySetCacheEntryBufferAsync(terminal, cacheId, cacheEntryBuffer)
         : undefined;
 
     let updateLocalCacheSuccess: boolean;
@@ -250,13 +244,13 @@ export class ProjectBuildCache {
 
     const success: boolean = updateCloudCacheSuccess && updateLocalCacheSuccess;
     if (success) {
-      this._terminal.writeLine('Successfully set cache entry.');
+      terminal.writeLine('Successfully set cache entry.');
     } else if (!updateLocalCacheSuccess && updateCloudCacheSuccess) {
-      this._terminal.writeWarningLine('Unable to set local cache entry.');
+      terminal.writeWarningLine('Unable to set local cache entry.');
     } else if (updateLocalCacheSuccess && !updateCloudCacheSuccess) {
-      this._terminal.writeWarningLine('Unable to set cloud cache entry.');
+      terminal.writeWarningLine('Unable to set cloud cache entry.');
     } else {
-      this._terminal.writeWarningLine('Unable to set both cloud and local cache entries.');
+      terminal.writeWarningLine('Unable to set both cloud and local cache entries.');
     }
 
     return success;
@@ -274,7 +268,7 @@ export class ProjectBuildCache {
     });
   }
 
-  private static _getCacheId(options: IProjectBuildCacheOptions): string | undefined {
+  private static _getCacheId(options: Omit<IProjectBuildCacheOptions, 'terminal'>): string | undefined {
     // The project state hash is calculated in the following method:
     // - The current project's hash (see PackageChangeAnalyzer.getProjectStateHash) is
     //   calculated and appended to an array
