@@ -1,6 +1,13 @@
 # Change Log - @rushstack/typings-generator
 
-This log was last generated on Thu, 10 Dec 2020 23:25:49 GMT and should not be manually modified.
+This log was last generated on Wed, 06 Jan 2021 16:10:43 GMT and should not be manually modified.
+
+## 0.3.0
+Wed, 06 Jan 2021 16:10:43 GMT
+
+### Minor changes
+
+- Do not empty typings folder when running in watch mode.
 
 ## 0.2.32
 Thu, 10 Dec 2020 23:25:49 GMT

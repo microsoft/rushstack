@@ -2,6 +2,18 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@rushstack/typings-generator_v0.3.0",
+      "date": "Wed, 06 Jan 2021 16:10:43 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Do not empty typings folder when running in watch mode."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.32",
       "tag": "@rushstack/typings-generator_v0.2.32",
       "date": "Thu, 10 Dec 2020 23:25:49 GMT",
