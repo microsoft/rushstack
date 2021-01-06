@@ -28,90 +28,19 @@ interface IProjectBuildCacheOptions {
 
 export class ProjectBuildCache {
   private readonly _project: RushConfigurationProject;
-  private readonly _command: string;
   private readonly _localBuildCacheProvider: FileSystemBuildCacheProvider;
   private readonly _cloudBuildCacheProvider: CloudBuildCacheProviderBase | undefined;
-  private readonly _packageChangeAnalyzer: PackageChangeAnalyzer;
   private readonly _projectOutputFolderNames: string[];
   private readonly _terminal: Terminal;
-
-  // If __cacheId is null, one doesn't exist
-  private __cacheIdCannotBeCalculated: boolean | undefined;
-  private __cacheId: string | undefined;
-  /**
-   * The cache ID is calculated in the following method:
-   * - The current project's hash (see PackageChangeAnalyzer.getProjectStateHash) is
-   *   calculated and appended to an array
-   * - The current project's recursive dependency projects' hashes are calculated
-   *   and appended to the array
-   * - A SHA1 hash is created and the following data is fed into it, in order:
-   *   1. The JSON-serialized list of output folder names for this
-   *      project (see ProjectBuildCache._projectOutputFolderNames)
-   *   2. The command that will be run in the project
-   *   3. Each dependency project hash (from the array constructed in previous steps),
-   *      in sorted alphanumerical-sorted order
-   * - A hex digest of the hash is returned
-   */
-  private get _cacheId(): string | undefined {
-    if (this.__cacheIdCannotBeCalculated) {
-      return undefined;
-    } else if (!this.__cacheId) {
-      const projectStates: string[] = [];
-      const projectsThatHaveBeenProcessed: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
-      let projectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
-      projectsToProcess.add(this._project);
-
-      while (projectsToProcess.size > 0) {
-        const newProjectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
-        for (const projectToProcess of projectsToProcess) {
-          projectsThatHaveBeenProcessed.add(projectToProcess);
-
-          const projectState: string | undefined = this._packageChangeAnalyzer.getProjectStateHash(
-            projectToProcess.packageName
-          );
-          if (!projectState) {
-            // If we hit any projects with unknown state, return unknown cache ID
-            this.__cacheIdCannotBeCalculated = true;
-            return undefined;
-          } else {
-            projectStates.push(projectState);
-            for (const dependency of projectToProcess.localDependencyProjects) {
-              if (!projectsThatHaveBeenProcessed.has(dependency)) {
-                newProjectsToProcess.add(dependency);
-              }
-            }
-          }
-        }
-
-        projectsToProcess = newProjectsToProcess;
-      }
-
-      const sortedProjectStates: string[] = projectStates.sort();
-      const hash: crypto.Hash = crypto.createHash('sha1');
-      const serializedOutputFolders: string = JSON.stringify(this._projectOutputFolderNames);
-      hash.update(serializedOutputFolders);
-      hash.update(RushConstants.hashDelimiter);
-      hash.update(this._command);
-      hash.update(RushConstants.hashDelimiter);
-      for (const projectHash of sortedProjectStates) {
-        hash.update(projectHash);
-        hash.update(RushConstants.hashDelimiter);
-      }
-
-      this.__cacheId = hash.digest('hex');
-    }
-
-    return this.__cacheId;
-  }
+  private readonly _cacheId: string | undefined;
 
   private constructor(options: IProjectBuildCacheOptions) {
     this._project = options.projectConfiguration.project;
-    this._command = options.command;
     this._localBuildCacheProvider = options.buildCacheConfiguration.localCacheProvider;
     this._cloudBuildCacheProvider = options.buildCacheConfiguration.cloudCacheProvider;
-    this._packageChangeAnalyzer = options.packageChangeAnalyzer;
     this._projectOutputFolderNames = options.projectConfiguration.projectOutputFolderNames;
     this._terminal = options.terminal;
+    this._cacheId = ProjectBuildCache._getCacheId(options);
   }
 
   public static tryGetProjectBuildCache(options: IProjectBuildCacheOptions): ProjectBuildCache | undefined {
@@ -342,6 +271,71 @@ export class ProjectBuildCache {
         const result: Buffer = Buffer.concat(parts);
         resolve(result);
       });
+    });
+  }
+
+  private static _getCacheId(options: IProjectBuildCacheOptions): string | undefined {
+    // The project state hash is calculated in the following method:
+    // - The current project's hash (see PackageChangeAnalyzer.getProjectStateHash) is
+    //   calculated and appended to an array
+    // - The current project's recursive dependency projects' hashes are calculated
+    //   and appended to the array
+    // - A SHA1 hash is created and the following data is fed into it, in order:
+    //   1. The JSON-serialized list of output folder names for this
+    //      project (see ProjectBuildCache._projectOutputFolderNames)
+    //   2. The command that will be run in the project
+    //   3. Each dependency project hash (from the array constructed in previous steps),
+    //      in sorted alphanumerical-sorted order
+    // - A hex digest of the hash is returned
+    const packageChangeAnalyzer: PackageChangeAnalyzer = options.packageChangeAnalyzer;
+    const projectStates: string[] = [];
+    const projectsThatHaveBeenProcessed: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
+    let projectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
+    projectsToProcess.add(options.projectConfiguration.project);
+
+    while (projectsToProcess.size > 0) {
+      const newProjectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
+      for (const projectToProcess of projectsToProcess) {
+        projectsThatHaveBeenProcessed.add(projectToProcess);
+
+        const projectState: string | undefined = packageChangeAnalyzer.getProjectStateHash(
+          projectToProcess.packageName
+        );
+        if (!projectState) {
+          // If we hit any projects with unknown state, return unknown cache ID
+          return undefined;
+        } else {
+          projectStates.push(projectState);
+          for (const dependency of projectToProcess.localDependencyProjects) {
+            if (!projectsThatHaveBeenProcessed.has(dependency)) {
+              newProjectsToProcess.add(dependency);
+            }
+          }
+        }
+      }
+
+      projectsToProcess = newProjectsToProcess;
+    }
+
+    const sortedProjectStates: string[] = projectStates.sort();
+    const hash: crypto.Hash = crypto.createHash('sha1');
+    const serializedOutputFolders: string = JSON.stringify(
+      options.projectConfiguration.projectOutputFolderNames
+    );
+    hash.update(serializedOutputFolders);
+    hash.update(RushConstants.hashDelimiter);
+    hash.update(options.command);
+    hash.update(RushConstants.hashDelimiter);
+    for (const projectHash of sortedProjectStates) {
+      hash.update(projectHash);
+      hash.update(RushConstants.hashDelimiter);
+    }
+
+    const projectStateHash: string = hash.digest('hex');
+
+    return options.buildCacheConfiguration.getCacheEntryId({
+      projectName: options.projectConfiguration.project.packageName,
+      projectStateHash
     });
   }
 }
