@@ -4,7 +4,7 @@
 import * as os from 'os';
 import colors from 'colors';
 
-import { AlreadyReportedError } from '@rushstack/node-core-library';
+import { AlreadyReportedError, ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
@@ -110,9 +110,10 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
+    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
     const buildCacheConfiguration:
       | BuildCacheConfiguration
-      | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(this.rushConfiguration);
+      | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(terminal, this.rushConfiguration);
 
     const taskSelector: TaskSelector = new TaskSelector({
       rushConfiguration: this.rushConfiguration,

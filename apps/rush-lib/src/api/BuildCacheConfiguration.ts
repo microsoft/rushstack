@@ -2,7 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
+import {
+  JsonFile,
+  JsonSchema,
+  FileSystem,
+  AlreadyReportedError,
+  Terminal
+} from '@rushstack/node-core-library';
 
 import {
   AzureEnvironmentNames,
@@ -13,12 +19,14 @@ import { FileSystemBuildCacheProvider } from '../logic/buildCache/FileSystemBuil
 import { RushConstants } from '../logic/RushConstants';
 import { CloudBuildCacheProviderBase } from '../logic/buildCache/CloudBuildCacheProviderBase';
 import { RushUserConfiguration } from './RushUserConfiguration';
+import { CacheEntryId, GetCacheEntryIdFunction } from '../logic/buildCache/CacheEntryId';
 
 /**
  * Describes the file structure for the "common/config/rush/build-cache.json" config file.
  */
 interface IBuildCacheJson {
   cacheProvider: 'azure-blob-storage' | 'local-only';
+  cacheEntryNamePattern?: string;
 }
 
 interface IAzureBlobStorageBuildCacheJson extends IBuildCacheJson {
@@ -56,6 +64,7 @@ interface IAzureStorageConfigurationJson {
 
 interface IBuildCacheConfigurationOptions {
   buildCacheJson: IBuildCacheJson;
+  getCacheEntryId: GetCacheEntryIdFunction;
   rushConfiguration: RushConfiguration;
   rushUserConfiguration: RushUserConfiguration;
 }
@@ -70,16 +79,18 @@ export class BuildCacheConfiguration {
     path.join(__dirname, '..', 'schemas', 'build-cache.schema.json')
   );
 
+  public readonly getCacheEntryId: GetCacheEntryIdFunction;
   public readonly localCacheProvider: FileSystemBuildCacheProvider;
   public readonly cloudCacheProvider: CloudBuildCacheProviderBase | undefined;
 
   private constructor(options: IBuildCacheConfigurationOptions) {
-    const { buildCacheJson, rushConfiguration, rushUserConfiguration } = options;
+    this.getCacheEntryId = options.getCacheEntryId;
     this.localCacheProvider = new FileSystemBuildCacheProvider({
-      rushUserConfiguration,
-      rushConfiguration
+      rushUserConfiguration: options.rushUserConfiguration,
+      rushConfiguration: options.rushConfiguration
     });
 
+    const { buildCacheJson } = options;
     switch (buildCacheJson.cacheProvider) {
       case 'local-only': {
         // Don't configure a cloud cache provider
@@ -111,6 +122,7 @@ export class BuildCacheConfiguration {
    * If the file has not been created yet, then undefined is returned.
    */
   public static async loadFromDefaultPathAsync(
+    terminal: Terminal,
     rushConfiguration: RushConfiguration
   ): Promise<BuildCacheConfiguration | undefined> {
     const jsonFilePath: string = BuildCacheConfiguration.getBuildCacheConfigFilePath(rushConfiguration);
@@ -120,8 +132,20 @@ export class BuildCacheConfiguration {
         BuildCacheConfiguration._jsonSchema
       );
       const rushUserConfiguration: RushUserConfiguration = await RushUserConfiguration.initializeAsync();
+
+      let getCacheEntryId: GetCacheEntryIdFunction;
+      try {
+        getCacheEntryId = CacheEntryId.parsePattern(buildCacheJson.cacheEntryNamePattern);
+      } catch (e) {
+        terminal.writeErrorLine(
+          `Error parsing cache entry name pattern "${buildCacheJson.cacheEntryNamePattern}": ${e}`
+        );
+        throw new AlreadyReportedError();
+      }
+
       return new BuildCacheConfiguration({
         buildCacheJson,
+        getCacheEntryId,
         rushConfiguration,
         rushUserConfiguration
       });

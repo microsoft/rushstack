@@ -56,7 +56,7 @@ export class UpdateCloudCredentials extends BaseRushAction {
 
     const buildCacheConfiguration:
       | BuildCacheConfiguration
-      | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(this.rushConfiguration);
+      | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(terminal, this.rushConfiguration);
 
     if (!buildCacheConfiguration) {
       const buildCacheConfigurationFilePath: string = BuildCacheConfiguration.getBuildCacheConfigFilePath(
@@ -78,9 +78,7 @@ export class UpdateCloudCredentials extends BaseRushAction {
       } else if (buildCacheConfiguration.cloudCacheProvider) {
         await buildCacheConfiguration.cloudCacheProvider.deleteCachedCredentialsAsync(terminal);
       } else {
-        terminal.writeLine(
-          'A cloud build cache is not configured; there is nothing to delete.'
-        );
+        terminal.writeLine('A cloud build cache is not configured; there is nothing to delete.');
       }
     } else if (this._interactiveModeFlag.value && this._credentialParameter.value !== undefined) {
       terminal.writeErrorLine(

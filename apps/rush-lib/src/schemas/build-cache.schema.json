@@ -3,6 +3,13 @@
   "title": "Configuration for Rush's build cache.",
   "description": "For use with the Rush tool, this file provides configuration options for cached project build output. See http://rushjs.io for details.",
 
+  "definitions": {
+    "anything": {
+      "type": ["array", "boolean", "integer", "number", "object", "string"],
+      "items": { "$ref": "#/definitions/anything" }
+    }
+  },
+
   "type": "object",
   "allOf": [
     {
@@ -16,6 +23,11 @@
         "cacheProvider": {
           "type": "string",
           "enum": ["local-only", "azure-blob-storage"]
+        },
+
+        "cacheEntryNamePattern": {
+          "type": "string",
+          "description": "Setting this property overrides the cache entry ID. If this property is set, it must contain a [hash] token. It may also contain a [projectName] or a [projectName:normalized] token."
         }
       }
     },
@@ -27,7 +39,9 @@
             "cacheProvider": {
               "type": "string",
               "enum": ["local-only"]
-            }
+            },
+
+            "cacheEntryNamePattern": { "$ref": "#/definitions/anything" }
           }
         },
 
@@ -39,6 +53,8 @@
               "type": "string",
               "enum": ["azure-blob-storage"]
             },
+
+            "cacheEntryNamePattern": { "$ref": "#/definitions/anything" },
 
             "azureBlobStorageConfiguration": {
               "type": "object",
