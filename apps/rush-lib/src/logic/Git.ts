@@ -5,7 +5,7 @@ import child_process from 'child_process';
 import gitInfo = require('git-repo-info');
 import * as os from 'os';
 import * as path from 'path';
-import * as colors from 'colors';
+import colors from 'colors';
 import { Executable, AlreadyReportedError, Path } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
@@ -184,9 +184,11 @@ export class Git {
     }
 
     const gitPath: string = this.getGitPathOrThrow();
-    const output: string = child_process
-      .execSync(`${gitPath} diff ${targetBranch}... --dirstat=files,0`)
-      .toString();
+    const output: string = Utilities.executeCommandAndCaptureOutput(
+      gitPath,
+      ['diff', `${targetBranch}...`, '--dirstat=files,0'],
+      this._rushConfiguration.rushJsonFolder
+    );
     return output.split('\n').map((line) => {
       if (line) {
         const delimiterIndex: number = line.indexOf('%');
@@ -212,9 +214,11 @@ export class Git {
     }
 
     const gitPath: string = this.getGitPathOrThrow();
-    const output: string = child_process
-      .execSync(`${gitPath} diff ${targetBranch}... --name-only --no-renames --diff-filter=A`)
-      .toString();
+    const output: string = Utilities.executeCommandAndCaptureOutput(
+      gitPath,
+      ['diff', `${targetBranch}...`, '--name-only', '--no-renames', '--diff-filter=A'],
+      this._rushConfiguration.rushJsonFolder
+    );
     return output
       .split('\n')
       .map((line) => {
@@ -245,14 +249,19 @@ export class Git {
     const repositoryUrl: string | undefined = this._rushConfiguration.repositoryUrl;
     if (repositoryUrl) {
       const gitPath: string = this.getGitPathOrThrow();
-      const output: string = child_process.execSync(`${gitPath} remote`).toString();
+      const output: string = Utilities.executeCommandAndCaptureOutput(
+        gitPath,
+        ['remote'],
+        this._rushConfiguration.rushJsonFolder
+      ).trim();
       const normalizedRepositoryUrl: string = repositoryUrl.toUpperCase();
       const matchingRemotes: string[] = output.split('\n').filter((remoteName) => {
         if (remoteName) {
-          const remoteUrl: string = child_process
-            .execSync(`${gitPath} remote get-url ${remoteName}`)
-            .toString()
-            .trim();
+          const remoteUrl: string = Utilities.executeCommandAndCaptureOutput(
+            gitPath,
+            ['remote', 'get-url', remoteName],
+            this._rushConfiguration.rushJsonFolder
+          ).trim();
 
           if (!remoteUrl) {
             return false;
@@ -342,15 +351,22 @@ export class Git {
 
   private _getUntrackedChanges(): string[] {
     const gitPath: string = this.getGitPathOrThrow();
-    const output: string = child_process
-      .execSync(`${gitPath} ls-files --exclude-standard --others`)
-      .toString();
+    const output: string = Utilities.executeCommandAndCaptureOutput(
+      gitPath,
+      ['ls-files', '--exclude-standard', '--others'],
+      this._rushConfiguration.rushJsonFolder
+    );
     return output.trim().split('\n');
   }
 
   private _getDiffOnHEAD(): string[] {
     const gitPath: string = this.getGitPathOrThrow();
-    const output: string = child_process.execSync(`${gitPath} diff HEAD --name-only`).toString();
+
+    const output: string = Utilities.executeCommandAndCaptureOutput(
+      gitPath,
+      ['diff', 'HEAD', '--name-only'],
+      this._rushConfiguration.rushJsonFolder
+    );
     return output.trim().split('\n');
   }
 
