@@ -4,7 +4,7 @@ exports[`CacheEntryId Invalid pattern names Throws an exception for an invalid p
 
 exports[`CacheEntryId Invalid pattern names Throws an exception for an invalid pattern 2`] = `"Unexpected token name \\"invalidTag\\"."`;
 
-exports[`CacheEntryId Invalid pattern names Throws an exception for an invalid pattern 3`] = `"Unexpected \\"]\\" character in cache entry name pattern at index 12."`;
+exports[`CacheEntryId Invalid pattern names Throws an exception for an invalid pattern 3`] = `"Unexpected \\"]\\" character in cache entry name pattern."`;
 
 exports[`CacheEntryId Invalid pattern names Throws an exception for an invalid pattern 4`] = `"Unclosed token in cache entry name pattern."`;
 

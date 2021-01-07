@@ -13,6 +13,9 @@ export type GetCacheEntryIdFunction = (options: IGenerateCacheEntryIdOptions) =>
 const HASH_TOKEN_NAME: string = 'hash';
 const PROJECT_NAME_TOKEN_NAME: string = 'projectName';
 
+// This regex matches substrings that look like [token]
+const TOKEN_REGEX: RegExp = /\[[^\]]*\]/g;
+
 export class CacheEntryId {
   private constructor() {}
 
@@ -26,109 +29,66 @@ export class CacheEntryId {
         throw new Error('Cache entry name patterns may not start with a slash.');
       }
 
-      const parts: string[] = [];
-
-      let lastCharacterWasEscape: boolean = false;
-      let inToken: boolean = false;
-      let buffer: string = '';
-      let foundHashToken: boolean = false;
-
-      function insertBufferAsStaticPart(): void {
-        if (buffer !== '') {
-          if (buffer.match(/^[A-z0-9-_\/]*$/)) {
-            parts.push(buffer);
-            buffer = '';
-          } else {
-            throw new Error(
-              'Cache entry name pattern contains an invalid character. ' +
-                'Only alphanumeric characters, slashes, underscores, and hyphens are allowed.'
-            );
-          }
-        }
+      const patternWithoutTokens: string = pattern.replace(TOKEN_REGEX, '');
+      if (patternWithoutTokens.match(/\]/)) {
+        throw new Error(`Unexpected "]" character in cache entry name pattern.`);
       }
 
-      for (let i: number = 0; i < pattern.length; i++) {
-        const char: string = pattern[i];
+      if (patternWithoutTokens.match(/\[/)) {
+        throw new Error('Unclosed token in cache entry name pattern.');
+      }
 
-        if (lastCharacterWasEscape) {
-          buffer += char;
-          lastCharacterWasEscape = false;
-        } else if (char === '\\') {
-          lastCharacterWasEscape = true;
-        } else if (char === '[' && !lastCharacterWasEscape) {
-          if (inToken) {
-            throw new Error(`Unexpected "[" character in cache entry name pattern at index ${i}.`);
-          } else {
-            insertBufferAsStaticPart();
-            inToken = true;
-          }
-        } else if (char === ']' && !lastCharacterWasEscape) {
-          if (!inToken) {
-            throw new Error(`Unexpected "]" character in cache entry name pattern at index ${i}.`);
-          } else {
-            let tokenName: string;
-            let tokenAttribute: string | undefined;
-            const tokenSplitIndex: number = buffer.indexOf(':');
-            if (tokenSplitIndex === -1) {
-              tokenName = buffer;
-            } else {
-              tokenName = buffer.substr(0, tokenSplitIndex);
-              tokenAttribute = buffer.substr(tokenSplitIndex + 1);
+      if (!patternWithoutTokens.match(/^[A-z0-9-_\/]*$/)) {
+        throw new Error(
+          'Cache entry name pattern contains an invalid character. ' +
+            'Only alphanumeric characters, slashes, underscores, and hyphens are allowed.'
+        );
+      }
+
+      let foundHashToken: boolean = false;
+      const templateString: string = pattern.trim().replace(TOKEN_REGEX, (token: string) => {
+        token = token.substring(1, token.length - 1);
+        let tokenName: string;
+        let tokenAttribute: string | undefined;
+        const tokenSplitIndex: number = token.indexOf(':');
+        if (tokenSplitIndex === -1) {
+          tokenName = token;
+        } else {
+          tokenName = token.substr(0, tokenSplitIndex);
+          tokenAttribute = token.substr(tokenSplitIndex + 1);
+        }
+
+        switch (tokenName) {
+          case HASH_TOKEN_NAME: {
+            if (tokenAttribute !== undefined) {
+              throw new Error(`An attribute isn\'t supported for the "${tokenName}" token.`);
             }
 
-            inToken = false;
-            buffer = '';
+            foundHashToken = true;
+            return `\${${OPTIONS_ARGUMENT_NAME}.projectStateHash}`;
+          }
 
-            switch (tokenName) {
-              case HASH_TOKEN_NAME: {
-                if (tokenAttribute !== undefined) {
-                  throw new Error(`An attribute isn\'t supported for the "${tokenName}" token.`);
-                }
-
-                foundHashToken = true;
-                parts.push(`\${${OPTIONS_ARGUMENT_NAME}.projectStateHash}`);
-                break;
+          case PROJECT_NAME_TOKEN_NAME: {
+            switch (tokenAttribute) {
+              case undefined: {
+                return `\${${OPTIONS_ARGUMENT_NAME}.projectName}`;
               }
 
-              case PROJECT_NAME_TOKEN_NAME: {
-                switch (tokenAttribute) {
-                  case undefined: {
-                    parts.push(`\${${OPTIONS_ARGUMENT_NAME}.projectName}`);
-                    break;
-                  }
-
-                  case 'normalize': {
-                    parts.push(
-                      `\${${OPTIONS_ARGUMENT_NAME}.projectName.replace(/\\+/g, '++').replace(/\\/\/g, '+')}`
-                    );
-                    break;
-                  }
-
-                  default: {
-                    throw new Error(`Unexpected attribute "${tokenAttribute}" for the "${tokenName}" token.`);
-                  }
-                }
-
-                break;
+              case 'normalize': {
+                return `\${${OPTIONS_ARGUMENT_NAME}.projectName.replace(/\\+/g, '++').replace(/\\/\/g, '+')}`;
               }
 
               default: {
-                throw new Error(`Unexpected token name "${tokenName}".`);
+                throw new Error(`Unexpected attribute "${tokenAttribute}" for the "${tokenName}" token.`);
               }
             }
           }
-        } else {
-          buffer += char;
-        }
-      }
 
-      if (inToken) {
-        throw new Error('Unclosed token in cache entry name pattern.');
-      } else if (lastCharacterWasEscape) {
-        throw new Error('Incomplete escape sequence in cache entry name pattern.');
-      } else {
-        insertBufferAsStaticPart();
-      }
+          default: {
+            throw new Error(`Unexpected token name "${tokenName}".`);
+          }
+        }
+      });
 
       if (!foundHashToken) {
         throw new Error(`Cache entry name pattern is missing a [${HASH_TOKEN_NAME}] token.`);
@@ -137,7 +97,7 @@ export class CacheEntryId {
       // eslint-disable-next-line no-new-func
       return new Function(
         OPTIONS_ARGUMENT_NAME,
-        `"use strict"\nreturn \`${parts.join('')}\`;`
+        `"use strict"\nreturn \`${templateString}\`;`
       ) as GetCacheEntryIdFunction;
     }
   }
