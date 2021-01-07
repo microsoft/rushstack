@@ -15,13 +15,12 @@ import { RushConstants } from '../RushConstants';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
 import { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
-import { IProjectBuildDeps } from '../taskRunner/ProjectBuilder';
 
 interface IProjectBuildCacheOptions {
   buildCacheConfiguration: BuildCacheConfiguration;
   projectConfiguration: RushProjectConfiguration;
   command: string;
-  projectBuildDeps: IProjectBuildDeps | undefined;
+  trackedProjectFiles: string[] | undefined;
   packageChangeAnalyzer: PackageChangeAnalyzer;
   terminal: Terminal;
 }
@@ -42,12 +41,12 @@ export class ProjectBuildCache {
   }
 
   public static tryGetProjectBuildCache(options: IProjectBuildCacheOptions): ProjectBuildCache | undefined {
-    const { terminal, projectConfiguration, projectBuildDeps } = options;
-    if (!projectBuildDeps) {
+    const { terminal, projectConfiguration, trackedProjectFiles } = options;
+    if (!trackedProjectFiles) {
       return undefined;
     }
 
-    if (!ProjectBuildCache._validateProject(terminal, projectConfiguration, projectBuildDeps)) {
+    if (!ProjectBuildCache._validateProject(terminal, projectConfiguration, trackedProjectFiles)) {
       return undefined;
     }
 
@@ -57,7 +56,7 @@ export class ProjectBuildCache {
   private static _validateProject(
     terminal: Terminal,
     projectConfiguration: RushProjectConfiguration,
-    projectState: IProjectBuildDeps
+    trackedProjectFiles: string[]
   ): boolean {
     const normalizedProjectRelativeFolder: string = Path.convertToSlashes(
       projectConfiguration.project.projectRelativeFolder
@@ -68,7 +67,7 @@ export class ProjectBuildCache {
     }
 
     const inputOutputFiles: string[] = [];
-    for (const file of Object.keys(projectState.files)) {
+    for (const file of Object.keys(trackedProjectFiles)) {
       for (const outputFolder of outputFolders) {
         if (file.startsWith(outputFolder)) {
           inputOutputFiles.push(file);

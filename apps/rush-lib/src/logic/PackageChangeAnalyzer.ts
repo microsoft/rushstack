@@ -5,7 +5,7 @@ import * as path from 'path';
 import colors from 'colors';
 import * as crypto from 'crypto';
 
-import { getPackageDeps, getGitHashForFiles, IPackageDeps } from '@rushstack/package-deps-hash';
+import { getPackageDeps, getGitHashForFiles } from '@rushstack/package-deps-hash';
 import { Path, InternalError, FileSystem } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -16,9 +16,9 @@ import { RushConstants } from './RushConstants';
 
 export class PackageChangeAnalyzer {
   // Allow this function to be overwritten during unit tests
-  public static getPackageDeps: (path: string, ignoredFiles: string[]) => IPackageDeps;
+  public static getPackageDeps: typeof getPackageDeps;
 
-  private _data: Map<string, IPackageDeps>;
+  private _data: Map<string, Map<string, string>>;
   private _projectStateCache: Map<string, string> = new Map<string, string>();
   private _rushConfiguration: RushConfiguration;
   private _isGitSupported: boolean;
@@ -29,7 +29,7 @@ export class PackageChangeAnalyzer {
     this._data = this._getData();
   }
 
-  public getPackageDeps(projectName: string): IPackageDeps | undefined {
+  public getPackageDeps(projectName: string): Map<string, string> | undefined {
     if (!this._data) {
       this._data = this._getData();
     }
@@ -50,16 +50,16 @@ export class PackageChangeAnalyzer {
   public getProjectStateHash(projectName: string): string | undefined {
     let projectState: string | undefined = this._projectStateCache.get(projectName);
     if (!projectState) {
-      const packageDeps: IPackageDeps | undefined = this.getPackageDeps(projectName);
+      const packageDeps: Map<string, string> | undefined = this.getPackageDeps(projectName);
       if (!packageDeps) {
         return undefined;
       } else {
-        const sortedPackageDepsFiles: string[] = Object.keys(packageDeps.files).sort();
+        const sortedPackageDepsFiles: string[] = Array.from(packageDeps.keys()).sort();
         const hash: crypto.Hash = crypto.createHash('sha1');
         for (const packageDepsFile of sortedPackageDepsFiles) {
           hash.update(packageDepsFile);
           hash.update(RushConstants.hashDelimiter);
-          hash.update(packageDeps.files[packageDepsFile]);
+          hash.update(packageDeps.get(packageDepsFile)!);
           hash.update(RushConstants.hashDelimiter);
         }
 
@@ -71,24 +71,22 @@ export class PackageChangeAnalyzer {
     return projectState;
   }
 
-  private _getData(): Map<string, IPackageDeps> {
+  private _getData(): Map<string, Map<string, string>> {
     // If we are not in a unit test, use the correct resources
     if (!PackageChangeAnalyzer.getPackageDeps) {
       PackageChangeAnalyzer.getPackageDeps = getPackageDeps;
     }
 
-    const projectHashDeps: Map<string, IPackageDeps> = new Map<string, IPackageDeps>();
+    const projectHashDeps: Map<string, Map<string, string>> = new Map<string, Map<string, string>>();
 
     // pre-populate the map with the projects from the config
     for (const project of this._rushConfiguration.projects) {
-      projectHashDeps.set(project.packageName, {
-        files: {}
-      });
+      projectHashDeps.set(project.packageName, new Map<string, string>());
     }
 
     const noProjectHashes: { [key: string]: string } = {};
 
-    let repoDeps: IPackageDeps;
+    let repoDeps: Map<string, string>;
     try {
       if (this._isGitSupported) {
         // Load the package deps hash for the whole repository
@@ -109,61 +107,16 @@ export class PackageChangeAnalyzer {
     }
 
     // Sort each project folder into its own package deps hash
-    Object.keys(repoDeps.files).forEach((filePath: string) => {
-      const fileHash: string = repoDeps.files[filePath];
-
+    for (const [filePath, fileHash] of repoDeps.entries()) {
       const projectName: string | undefined = this._getProjectForFile(filePath);
 
       // If we found a project for the file, go ahead and store this file's hash
       if (projectName) {
-        projectHashDeps.get(projectName)!.files[filePath] = fileHash;
+        projectHashDeps.get(projectName)!.set(filePath, fileHash);
       } else {
         noProjectHashes[filePath] = fileHash;
       }
-    });
-
-    /* Incremental Build notes:
-     *
-     * Temporarily revert below code in favor of replacing this solution with something more
-     * flexible. Idea is essentially that we should have gulp-core-build (or other build tool)
-     * create the package-deps_<command>.json. The build tool would default to using the 'simple'
-     * algorithm (e.g. only files that are in a project folder are associated with the project), however it would
-     * also provide a hook which would allow certain tasks to modify the package-deps-hash before being written.
-     * At the end of the build, a we would create a package-deps_<command>.json file like so:
-     *
-     *  {
-     *    commandLine: ["--production"],
-     *    files: {
-     *      "src/index.ts": "478789a7fs8a78989afd8",
-     *      "src/fileOne.ts": "a8sfa8979871fdjiojlk",
-     *      "common/api/review": "324598afasfdsd",                      // this entry was added by the API Extractor
-     *                                                                  //  task (for example)
-     *      ".rush/temp/shrinkwrap-deps.json": "3428789dsafdsfaf"       // this is a file which will be created by rush
-     *                                                                  //  link describing the state of the
-     *                                                                  //  node_modules folder
-     *    }
-     *  }
-     *
-     * Verifying this file should be fairly straightforward, we would simply need to check if:
-     *   A) no files were added or deleted from the current folder
-     *   B) all file hashes match
-     *   C) the node_modules hash/contents match
-     *   D) the command line parameters match or are compatible
-     *
-     *   Notes:
-     *   * We need to store the command line arguments, which is currently done by rush instead of GCB
-     *   * We need to store the hash/text of the a file which describes the state of the node_modules folder
-     *   * The package-deps_<command>.json should be a complete list of dependencies, and it should be extremely cheap
-     *       to validate/check the file (even if creating it is more computationally costly).
-     */
-
-    // Add the "NO_PROJECT" files to every project's dependencies
-    // for (const project of PackageChangeAnalyzer.rushConfig.projects) {
-    //  Object.keys(noProjectHashes).forEach((filePath: string) => {
-    //    const fileHash: string = noProjectHashes[filePath];
-    //    projectHashDeps.get(project.packageName).files[filePath] = fileHash;
-    //  });
-    // }
+    }
 
     if (
       this._rushConfiguration.packageManager === 'pnpm' &&
@@ -202,8 +155,9 @@ export class PackageChangeAnalyzer {
         if (!hashes.has(projectDependencyManifestPath)) {
           throw new InternalError(`Expected to get a hash for ${projectDependencyManifestPath}`);
         }
+
         const hash: string = hashes.get(projectDependencyManifestPath)!;
-        projectHashDeps.get(project.packageName)!.files[projectDependencyManifestPath] = hash;
+        projectHashDeps.get(project.packageName)!.set(projectDependencyManifestPath, hash);
       }
     } else {
       // Determine the current variant from the link JSON.
@@ -220,7 +174,7 @@ export class PackageChangeAnalyzer {
       for (const project of this._rushConfiguration.projects) {
         const shrinkwrapHash: string | undefined = noProjectHashes[shrinkwrapFile];
         if (shrinkwrapHash) {
-          projectHashDeps.get(project.packageName)!.files[shrinkwrapFile] = shrinkwrapHash;
+          projectHashDeps.get(project.packageName)!.set(shrinkwrapFile, shrinkwrapHash);
         }
       }
     }
@@ -234,6 +188,7 @@ export class PackageChangeAnalyzer {
         return project.packageName;
       }
     }
+
     return undefined;
   }
 
