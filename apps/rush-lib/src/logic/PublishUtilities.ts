@@ -9,13 +9,12 @@
 import { EOL } from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-
+import { execSync } from 'child_process';
 import { IPackageJson, JsonFile, FileConstants, Text, Enum } from '@rushstack/node-core-library';
 
 import { IChangeInfo, ChangeType } from '../api/ChangeManagement';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { Utilities, IEnvironment } from '../utilities/Utilities';
-import { execSync } from 'child_process';
 import { PrereleaseToken } from './PrereleaseToken';
 import { ChangeFiles } from './ChangeFiles';
 import { RushConfiguration } from '../api/RushConfiguration';
