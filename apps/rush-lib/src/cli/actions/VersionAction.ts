@@ -116,9 +116,7 @@ export class VersionAction extends BaseRushAction {
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       if (updatedPackages.size > 0) {
         console.log(`${updatedPackages.size} packages are getting updated.`);
-        if (this._targetBranch.value) {
-          this._gitProcess(tempBranch, this._targetBranch.value);
-        }
+        this._gitProcess(tempBranch, this._targetBranch.value);
       }
     } else if (this._bumpVersion.value) {
       const tempBranch: string = 'version/bump-' + new Date().getTime();
@@ -128,9 +126,7 @@ export class VersionAction extends BaseRushAction {
         this._prereleaseIdentifier.value,
         true
       );
-      if (this._targetBranch.value) {
-        this._gitProcess(tempBranch, this._targetBranch.value);
-      }
+      this._gitProcess(tempBranch, this._targetBranch.value);
     }
   }
 
@@ -213,7 +209,7 @@ export class VersionAction extends BaseRushAction {
     }
   }
 
-  private _gitProcess(tempBranch: string, targetBranch: string): void {
+  private _gitProcess(tempBranch: string, targetBranch: string | undefined): void {
     // Validate the result before commit.
     this._validateResult();
 

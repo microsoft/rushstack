@@ -6,22 +6,24 @@ import { Utilities } from '../utilities/Utilities';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { Git } from './Git';
 
+const DUMMY_BRANCH_NAME: string = '-branch-name-';
+
 export class PublishGit {
-  private readonly _targetBranch: string;
+  private readonly _targetBranch: string | undefined;
   private readonly _gitPath: string;
 
-  public constructor(git: Git, targetBranch: string) {
+  public constructor(git: Git, targetBranch: string | undefined) {
     this._targetBranch = targetBranch;
     this._gitPath = git.getGitPathOrThrow();
   }
 
-  public checkout(branchName: string, createBranch: boolean = false): void {
+  public checkout(branchName: string | undefined, createBranch: boolean = false): void {
     const params: string[] = ['checkout'];
     if (createBranch) {
       params.push('-b');
     }
 
-    params.push(branchName);
+    params.push(branchName || DUMMY_BRANCH_NAME);
 
     PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, params);
   }
@@ -30,7 +32,11 @@ export class PublishGit {
     PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, ['merge', branchName, '--no-edit']);
   }
 
-  public deleteBranch(branchName: string, hasRemote: boolean = true): void {
+  public deleteBranch(branchName: string | undefined, hasRemote: boolean = true): void {
+    if (!branchName) {
+      branchName = DUMMY_BRANCH_NAME;
+    }
+
     PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, ['branch', '-d', branchName]);
     if (hasRemote) {
       PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, [
@@ -108,13 +114,20 @@ export class PublishGit {
     ]);
   }
 
-  public push(branchName: string): void {
+  public push(branchName: string | undefined): void {
     PublishUtilities.execCommand(
       !!this._targetBranch,
       this._gitPath,
       // We append "--no-verify" to prevent Git hooks from running.  For example, people may
       // want to invoke "rush change -v" as a pre-push hook.
-      ['push', 'origin', `HEAD:${branchName}`, '--follow-tags', '--verbose', '--no-verify']
+      [
+        'push',
+        'origin',
+        `HEAD:${branchName || DUMMY_BRANCH_NAME}`,
+        '--follow-tags',
+        '--verbose',
+        '--no-verify'
+      ]
     );
   }
 }
