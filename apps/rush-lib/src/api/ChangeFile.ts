@@ -76,7 +76,8 @@ export class ChangeFile {
    */
   public generatePath(): string {
     let branch: string | undefined = undefined;
-    const repoInfo: gitInfo.GitRepoInfo | undefined = Git.getGitInfo();
+    const git: Git = new Git(this._rushConfiguration);
+    const repoInfo: gitInfo.GitRepoInfo | undefined = git.getGitInfo();
     branch = repoInfo && repoInfo.branch;
     if (!branch) {
       console.log('Could not automatically detect git branch name, using timestamp instead.');

@@ -5,6 +5,7 @@ import * as path from 'path';
 
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
 import { RushConfiguration } from '../../api/RushConfiguration';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
 const packageA: string = 'project-a';
 const packageAPath: string = path.join('tools', packageA);
@@ -17,6 +18,14 @@ const HASH: string = '12345abcdef';
 // const looseFile: string = 'some/other/folder/index.ts';
 
 describe('PackageChangeAnalyzer', () => {
+  beforeEach(() => {
+    jest.spyOn(EnvironmentConfiguration, 'gitBinaryPath', 'get').mockReturnValue(undefined);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it('can associate a file in a project folder with a project', () => {
     const repoHashDeps: Map<string, string> = new Map<string, string>([
       [fileA, HASH],

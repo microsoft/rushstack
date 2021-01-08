@@ -9,17 +9,17 @@
 import { EOL } from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-
+import { execSync } from 'child_process';
 import { IPackageJson, JsonFile, FileConstants, Text, Enum } from '@rushstack/node-core-library';
 
 import { IChangeInfo, ChangeType } from '../api/ChangeManagement';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { Utilities, IEnvironment } from '../utilities/Utilities';
-import { execSync } from 'child_process';
 import { PrereleaseToken } from './PrereleaseToken';
 import { ChangeFiles } from './ChangeFiles';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { DependencySpecifier, DependencySpecifierType } from './DependencySpecifier';
+import { Git } from './Git';
 
 export interface IChangeInfoHash {
   [key: string]: IChangeInfo;
@@ -49,7 +49,8 @@ export class PublishUtilities {
       const changeRequest: IChangeInfo = JsonFile.load(fullPath);
 
       if (includeCommitDetails) {
-        PublishUtilities._updateCommitDetails(fullPath, changeRequest.changes);
+        const git: Git = new Git(rushConfiguration);
+        PublishUtilities._updateCommitDetails(git, fullPath, changeRequest.changes);
       }
 
       for (const change of changeRequest.changes!) {
@@ -293,9 +294,10 @@ export class PublishUtilities {
     );
   }
 
-  private static _updateCommitDetails(filename: string, changes: IChangeInfo[] | undefined): void {
+  private static _updateCommitDetails(git: Git, filename: string, changes: IChangeInfo[] | undefined): void {
     try {
-      const fileLog: string = execSync('git log -n 1 ' + filename, {
+      const gitPath: string = git.getGitPathOrThrow();
+      const fileLog: string = execSync(`${gitPath} log -n 1 ${filename}`, {
         cwd: path.dirname(filename)
       }).toString();
       const author: string = fileLog.match(/Author: (.*)/)![1];

@@ -15,7 +15,6 @@ import { FileSystem, Path, AlreadyReportedError, Import } from '@rushstack/node-
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { IChangeFile, IChangeInfo, ChangeType } from '../../api/ChangeManagement';
-import { VersionControl } from '../../utilities/VersionControl';
 import { ChangeFile } from '../../api/ChangeFile';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
@@ -28,9 +27,11 @@ import {
 } from '../../api/VersionPolicy';
 
 import type * as inquirerTypes from 'inquirer';
+import { Git } from '../../logic/Git';
 const inquirer: typeof inquirerTypes = Import.lazy('inquirer', require);
 
 export class ChangeAction extends BaseRushAction {
+  private readonly _git: Git;
   private _verifyParameter!: CommandLineFlagParameter;
   private _noFetchParameter!: CommandLineFlagParameter;
   private _targetBranchParameter!: CommandLineStringParameter;
@@ -78,6 +79,8 @@ export class ChangeAction extends BaseRushAction {
       safeForSimultaneousRushProcesses: true,
       parser
     });
+
+    this._git = new Git(this.rushConfiguration);
   }
 
   public onDefineParameters(): void {
@@ -303,24 +306,24 @@ export class ChangeAction extends BaseRushAction {
 
   private get _targetBranch(): string {
     if (!this._targetBranchName) {
-      this._targetBranchName =
-        this._targetBranchParameter.value || VersionControl.getRemoteMasterBranch(this.rushConfiguration);
+      this._targetBranchName = this._targetBranchParameter.value || this._git.getRemoteDefaultBranch();
     }
 
     return this._targetBranchName;
   }
 
   private _getChangedPackageNames(): string[] {
-    const changedFolders: (string | undefined)[] | undefined = VersionControl.getChangedFolders(
+    const changedFolders: string[] | undefined = this._git.getChangedFolders(
       this._targetBranch,
-      this._noFetchParameter.value
+      !this._noFetchParameter.value
     );
     if (!changedFolders) {
       return [];
     }
     const changedPackageNames: Set<string> = new Set<string>();
 
-    const repoRootFolder: string | undefined = VersionControl.getRepositoryRootPath();
+    const git: Git = new Git(this.rushConfiguration);
+    const repoRootFolder: string | undefined = git.getRepositoryRootPath();
     const projectHostMap: Map<string, string> = this._generateHostMap();
 
     this.rushConfiguration.projects
@@ -348,14 +351,14 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private _getChangeFiles(): string[] {
-    return VersionControl.getChangedFiles(this._targetBranch, true, `common/changes/`).map((relativePath) => {
+    return this._git.getChangedFiles(this._targetBranch, true, `common/changes/`).map((relativePath) => {
       return path.join(this.rushConfiguration.rushJsonFolder, relativePath);
     });
   }
 
-  private _hasProjectChanged(changedFolders: (string | undefined)[], projectFolder: string): boolean {
+  private _hasProjectChanged(changedFolders: string[], projectFolder: string): boolean {
     for (const folder of changedFolders) {
-      if (folder && Path.isUnderOrEqual(folder, projectFolder)) {
+      if (Path.isUnderOrEqual(folder, projectFolder)) {
         return true;
       }
     }
@@ -579,7 +582,7 @@ export class ChangeAction extends BaseRushAction {
 
   private _warnUncommittedChanges(): void {
     try {
-      if (VersionControl.hasUncommittedChanges()) {
+      if (this._git.hasUncommittedChanges()) {
         console.log(
           os.EOL +
             colors.yellow(

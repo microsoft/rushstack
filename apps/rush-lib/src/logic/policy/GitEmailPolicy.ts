@@ -11,7 +11,9 @@ import { Git } from '../Git';
 
 export class GitEmailPolicy {
   public static validate(rushConfiguration: RushConfiguration): void {
-    if (!Git.isGitPresent()) {
+    const git: Git = new Git(rushConfiguration);
+
+    if (!git.isGitPresent()) {
       // If Git isn't installed, or this Rush project is not under a Git working folder,
       // then we don't care about the Git email
       console.log(
@@ -21,7 +23,7 @@ export class GitEmailPolicy {
       return;
     }
 
-    if (!Git.isPathUnderGitWorkingTree()) {
+    if (!git.isPathUnderGitWorkingTree()) {
       // If Git isn't installed, or this Rush project is not under a Git working folder,
       // then we don't care about the Git email
       console.log(colors.cyan('Ignoring Git validation because this is not a Git working folder.' + os.EOL));
@@ -31,7 +33,7 @@ export class GitEmailPolicy {
     // If there isn't a Git policy, then we don't care whether the person configured
     // a Git email address at all.  This helps people who don't
     if (rushConfiguration.gitAllowedEmailRegExps.length === 0) {
-      if (Git.tryGetGitEmail(rushConfiguration) === undefined) {
+      if (git.tryGetGitEmail() === undefined) {
         return;
       }
 
@@ -41,7 +43,7 @@ export class GitEmailPolicy {
 
     let userEmail: string;
     try {
-      userEmail = Git.getGitEmail(rushConfiguration);
+      userEmail = git.getGitEmail();
 
       // sanity check; a valid email should not contain any whitespace
       // if this fails, then we have another issue to report
@@ -87,10 +89,9 @@ export class GitEmailPolicy {
     // Show the user's name as well.
     // Ex. "Mr. Example <mr@example.com>"
     let fancyEmail: string = colors.cyan(userEmail);
-    const gitPath: string = Git.getGitPath()!;
     try {
       const userName: string = Utilities.executeCommandAndCaptureOutput(
-        gitPath,
+        git.gitPath!,
         ['config', 'user.name'],
         '.'
       ).trim();
