@@ -92,7 +92,8 @@ export const enum EnvironmentVariableNames {
   RUSH_GLOBAL_FOLDER = 'RUSH_GLOBAL_FOLDER',
 
   /**
-   * Provides a credential for a remote build cache, if configured.
+   * Provides a credential for a remote build cache, if configured. Setting this environment variable
+   * overrides a "isCacheWriteAllowed": false setting.
    *
    * @remarks
    * This credential overrides any cached credentials.
@@ -102,7 +103,7 @@ export const enum EnvironmentVariableNames {
    *
    * For information on SAS tokens, see here: https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview
    */
-  RUSH_BUILD_CACHE_CREDENTIAL = 'RUSH_BUILD_CACHE_CREDENTIAL'
+  RUSH_BUILD_CACHE_WRITE_CREDENTIAL = 'RUSH_BUILD_CACHE_WRITE_CREDENTIAL'
 }
 
 /**
@@ -175,10 +176,10 @@ export class EnvironmentConfiguration {
   }
 
   /**
-   * Provides a credential for a remote build cache, if configured.
+   * Provides a credential for reading from and writing to a remote build cache, if configured.
    * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_CONNECTION_STRING}
    */
-  public static get buildCacheCredential(): string | undefined {
+  public static get buildCacheWriteCredential(): string | undefined {
     EnvironmentConfiguration._ensureInitialized();
     return EnvironmentConfiguration._buildCacheCredential;
   }
@@ -244,7 +245,7 @@ export class EnvironmentConfiguration {
             break;
           }
 
-          case EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL: {
+          case EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_CREDENTIAL: {
             EnvironmentConfiguration._buildCacheCredential = value;
             break;
           }

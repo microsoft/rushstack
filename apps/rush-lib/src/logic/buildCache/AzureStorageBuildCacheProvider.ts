@@ -37,9 +37,13 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
   private readonly _storageContainerName: string;
   private readonly _azureEnvironment: AzureEnvironmentNames;
   private readonly _blobPrefix: string | undefined;
+  private readonly _environmentWriteCredential: string | undefined;
+  private readonly _isCacheWriteAllowedByConfiguration: boolean;
   private __credentialCacheId: string | undefined;
 
-  public readonly isCacheWriteAllowed: boolean;
+  public get isCacheWriteAllowed(): boolean {
+    return this._isCacheWriteAllowedByConfiguration || !!this._environmentWriteCredential;
+  }
 
   private _containerClient: ContainerClient | undefined;
 
@@ -49,7 +53,8 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
     this._storageContainerName = options.storageContainerName;
     this._azureEnvironment = options.azureEnvironment || 'AzurePublicCloud';
     this._blobPrefix = options.blobPrefix;
-    this.isCacheWriteAllowed = options.isCacheWriteAllowed;
+    this._environmentWriteCredential = EnvironmentConfiguration.buildCacheWriteCredential;
+    this._isCacheWriteAllowedByConfiguration = options.isCacheWriteAllowed;
 
     if (!(this._azureEnvironment in AzureAuthorityHosts)) {
       throw new Error(
@@ -68,7 +73,7 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
         this._storageContainerName
       ];
 
-      if (this.isCacheWriteAllowed) {
+      if (this._isCacheWriteAllowedByConfiguration) {
         cacheIdParts.push('cacheWriteAllowed');
       }
 
@@ -170,7 +175,7 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
 
   private async _getContainerClientAsync(): Promise<ContainerClient> {
     if (!this._containerClient) {
-      let sasString: string | undefined = EnvironmentConfiguration.buildCacheCredential;
+      let sasString: string | undefined = this._environmentWriteCredential;
       if (!sasString) {
         let cacheEntry: ICredentialCacheEntry | undefined;
         await CredentialCache.usingAsync(
@@ -197,7 +202,7 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
       if (sasString) {
         const connectionString: string = this._getConnectionString(sasString);
         blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
-      } else if (!this.isCacheWriteAllowed) {
+      } else if (!this._isCacheWriteAllowedByConfiguration) {
         // If cache write isn't allowed and we don't have a credential, assume the blob supports anonymous read
         blobServiceClient = new BlobServiceClient(this._storageAccountUrl);
       } else {
@@ -205,7 +210,7 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
           "An Azure Storage SAS credential hasn't been provided, or has expired. " +
             `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}", ` +
             `or provide a SAS in the ` +
-            `${EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL} environment variable`
+            `${EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_CREDENTIAL} environment variable`
         );
       }
 
@@ -243,7 +248,7 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
 
     const containerSasPermissions: ContainerSASPermissions = new ContainerSASPermissions();
     containerSasPermissions.read = true;
-    containerSasPermissions.write = this.isCacheWriteAllowed;
+    containerSasPermissions.write = this._isCacheWriteAllowedByConfiguration;
 
     const queryParameters: SASQueryParameters = generateBlobSASQueryParameters(
       {
