@@ -175,10 +175,7 @@ export class Git {
     }
   }
 
-  public getChangedFolders(
-    targetBranch: string,
-    skipFetch: boolean = false
-  ): (string | undefined)[] | undefined {
+  public getChangedFolders(targetBranch: string, skipFetch: boolean = false): string[] | undefined {
     if (!skipFetch) {
       this._fetchRemoteBranch(targetBranch);
     }
@@ -189,16 +186,18 @@ export class Git {
       ['diff', `${targetBranch}...`, '--dirstat=files,0'],
       this._rushConfiguration.rushJsonFolder
     );
-    return output.split('\n').map((line) => {
+    const lines: string[] = output.split('\n');
+    const result: string[] = [];
+    for (const line of lines) {
       if (line) {
         const delimiterIndex: number = line.indexOf('%');
         if (delimiterIndex > 0 && delimiterIndex + 1 < line.length) {
-          return line.substring(delimiterIndex + 1).trim();
+          result.push(line.substring(delimiterIndex + 1).trim());
         }
       }
+    }
 
-      return undefined;
-    });
+    return result;
   }
 
   /**

@@ -313,7 +313,7 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private _getChangedPackageNames(): string[] {
-    const changedFolders: (string | undefined)[] | undefined = this._git.getChangedFolders(
+    const changedFolders: string[] | undefined = this._git.getChangedFolders(
       this._targetBranch,
       this._noFetchParameter.value
     );
@@ -356,9 +356,9 @@ export class ChangeAction extends BaseRushAction {
     });
   }
 
-  private _hasProjectChanged(changedFolders: (string | undefined)[], projectFolder: string): boolean {
+  private _hasProjectChanged(changedFolders: string[], projectFolder: string): boolean {
     for (const folder of changedFolders) {
-      if (folder && Path.isUnderOrEqual(folder, projectFolder)) {
+      if (Path.isUnderOrEqual(folder, projectFolder)) {
         return true;
       }
     }
