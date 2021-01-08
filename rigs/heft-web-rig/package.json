@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-web-rig",
-  "version": "0.1.34",
+  "version": "0.2.0",
   "description": "A rig package for web browser projects that build using Heft",
   "license": "MIT",
   "scripts": {
