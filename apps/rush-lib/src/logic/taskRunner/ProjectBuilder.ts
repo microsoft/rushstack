@@ -19,9 +19,7 @@ import {
   SplitterTransform,
   DiscardStdoutTransform
 } from '@rushstack/terminal';
-
 import { CollatedTerminal } from '@rushstack/stream-collator';
-import { IPackageDeps } from '@rushstack/package-deps-hash';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -36,7 +34,8 @@ import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
 
-export interface IProjectBuildDeps extends IPackageDeps {
+export interface IProjectBuildDeps {
+  files: { [filePath: string]: string };
   arguments: string;
 }
 
@@ -82,6 +81,7 @@ export class ProjectBuilder extends BaseBuilder {
   private _commandToRun: string;
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
   private _packageDepsFilename: string;
+  private _projectBuildCache: ProjectBuildCache | undefined;
 
   public constructor(options: IProjectBuilderOptions) {
     super();
@@ -107,33 +107,24 @@ export class ProjectBuilder extends BaseBuilder {
       if (!this._commandToRun) {
         this.hadEmptyScript = true;
       }
-      const projectBuildDeps: IProjectBuildDeps | undefined = this._getProjectBuildDeps(
-        context.collatedWriter.terminal
-      );
-      return await this._executeTaskAsync(projectBuildDeps, context);
+      return await this._executeTaskAsync(context);
     } catch (error) {
       throw new TaskError('executing', error.message);
     }
   }
 
-  private _getProjectBuildDeps(terminal: CollatedTerminal): IProjectBuildDeps | undefined {
-    try {
-      return {
-        files: this._packageChangeAnalyzer.getPackageDeps(this._rushProject.packageName)!.files,
-        arguments: this._commandToRun
-      };
-    } catch (error) {
-      terminal.writeStdoutLine(
-        'Unable to calculate incremental build state. Instead running full rebuild. ' + error.toString()
-      );
-      return;
-    }
+  public async tryWriteCacheEntryAsync(
+    terminal: Terminal,
+    trackedFilePaths: string[]
+  ): Promise<boolean | undefined> {
+    const projectBuildCache: ProjectBuildCache | undefined = await this._getProjectBuildCacheAsync(
+      terminal,
+      trackedFilePaths
+    );
+    return projectBuildCache?.trySetCacheEntryAsync(terminal);
   }
 
-  private async _executeTaskAsync(
-    projectBuildDeps: IProjectBuildDeps | undefined,
-    context: IBuilderContext
-  ): Promise<TaskStatus> {
+  private async _executeTaskAsync(context: IBuilderContext): Promise<TaskStatus> {
     // TERMINAL PIPELINE:
     //
     //                             +--> quietModeTransform? --> collatedWriter
@@ -201,6 +192,30 @@ export class ProjectBuilder extends BaseBuilder {
         }
       }
 
+      let projectBuildDeps: IProjectBuildDeps | undefined;
+      let trackedFiles: string[] | undefined;
+      try {
+        const fileHashes: Map<string, string> = this._packageChangeAnalyzer.getPackageDeps(
+          this._rushProject.packageName
+        )!;
+
+        const files: { [filePath: string]: string } = {};
+        trackedFiles = [];
+        for (const [filePath, fileHash] of fileHashes) {
+          files[filePath] = fileHash;
+          trackedFiles.push(filePath);
+        }
+
+        projectBuildDeps = {
+          files,
+          arguments: this._commandToRun
+        };
+      } catch (error) {
+        terminal.writeLine(
+          'Unable to calculate incremental build state. Instead running full rebuild. ' + error.toString()
+        );
+      }
+
       const isPackageUnchanged: boolean = !!(
         lastProjectBuildDeps &&
         projectBuildDeps &&
@@ -208,31 +223,13 @@ export class ProjectBuilder extends BaseBuilder {
         _areShallowEqual(projectBuildDeps.files, lastProjectBuildDeps.files)
       );
 
-      let projectBuildCache: ProjectBuildCache | undefined;
-      if (this._buildCacheConfiguration) {
-        const projectConfiguration:
-          | RushProjectConfiguration
-          | undefined = await RushProjectConfiguration.tryLoadForProjectAsync(this._rushProject, terminal);
-        if (projectConfiguration) {
-          projectBuildCache = ProjectBuildCache.tryGetProjectBuildCache({
-            projectConfiguration,
-            buildCacheConfiguration: this._buildCacheConfiguration,
-            terminal,
-            command: this._commandToRun,
-            projectBuildDeps: projectBuildDeps,
-            packageChangeAnalyzer: this._packageChangeAnalyzer
-          });
-        } else {
-          terminal.writeVerboseLine(
-            'Project does not have a build-cache.json configuration file, or one provided by a rig, ' +
-              'so it does not support caching.'
-          );
-        }
-      }
-
-      const restoreFromCacheSuccess:
-        | boolean
-        | undefined = await projectBuildCache?.tryRestoreFromCacheAsync();
+      const projectBuildCache: ProjectBuildCache | undefined = await this._getProjectBuildCacheAsync(
+        terminal,
+        trackedFiles
+      );
+      const restoreFromCacheSuccess: boolean | undefined = await projectBuildCache?.tryRestoreFromCacheAsync(
+        terminal
+      );
 
       if (restoreFromCacheSuccess) {
         return TaskStatus.FromCache;
@@ -314,9 +311,10 @@ export class ProjectBuilder extends BaseBuilder {
             }
           );
 
-          const setCacheEntryPromise:
-            | Promise<boolean>
-            | undefined = projectBuildCache?.trySetCacheEntryAsync();
+          const setCacheEntryPromise: Promise<boolean | undefined> = this.tryWriteCacheEntryAsync(
+            terminal,
+            trackedFiles!
+          );
 
           const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
 
@@ -340,6 +338,36 @@ export class ProjectBuilder extends BaseBuilder {
     } finally {
       projectLogWritable.close();
     }
+  }
+
+  private async _getProjectBuildCacheAsync(
+    terminal: Terminal,
+    trackedProjectFiles: string[] | undefined
+  ): Promise<ProjectBuildCache | undefined> {
+    if (!this._projectBuildCache) {
+      if (this._buildCacheConfiguration) {
+        const projectConfiguration:
+          | RushProjectConfiguration
+          | undefined = await RushProjectConfiguration.tryLoadForProjectAsync(this._rushProject, terminal);
+        if (projectConfiguration) {
+          this._projectBuildCache = ProjectBuildCache.tryGetProjectBuildCache({
+            projectConfiguration,
+            buildCacheConfiguration: this._buildCacheConfiguration,
+            terminal,
+            command: this._commandToRun,
+            trackedProjectFiles: trackedProjectFiles,
+            packageChangeAnalyzer: this._packageChangeAnalyzer
+          });
+        } else {
+          terminal.writeVerboseLine(
+            'Project does not have a build-cache.json configuration file, or one provided by a rig, ' +
+              'so it does not support caching.'
+          );
+        }
+      }
+    }
+
+    return this._projectBuildCache;
   }
 }
 
