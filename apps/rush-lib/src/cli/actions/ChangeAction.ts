@@ -306,7 +306,7 @@ export class ChangeAction extends BaseRushAction {
 
   private get _targetBranch(): string {
     if (!this._targetBranchName) {
-      this._targetBranchName = this._targetBranchParameter.value || this._git.getRemoteMasterBranch();
+      this._targetBranchName = this._targetBranchParameter.value || this._git.getRemoteDefaultBranch();
     }
 
     return this._targetBranchName;
