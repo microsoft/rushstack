@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 03 Nov 2020 23:34:30 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Jan 2021 05:36:55 GMT and should not be manually modified.
+
+## 5.36.0
+Fri, 08 Jan 2021 05:36:55 GMT
+
+### Updates
+
+-  Allow the git binary path to be overridden via the RUSH_GIT_BINARY_PATH environment variable.
+- Introduce an experimental build cache feature.
+- Add the ability to customize the commit message used when "rush version" is run.
+- Remove the "experimental" label from some Rush commands that are now stable.
 
 ## 5.35.2
 Tue, 03 Nov 2020 23:34:30 GMT

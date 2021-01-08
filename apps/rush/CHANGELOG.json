@@ -2,6 +2,27 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.36.0",
+      "tag": "@microsoft/rush_v5.36.0",
+      "date": "Fri, 08 Jan 2021 05:36:55 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": " Allow the git binary path to be overridden via the RUSH_GIT_BINARY_PATH environment variable."
+          },
+          {
+            "comment": "Introduce an experimental build cache feature."
+          },
+          {
+            "comment": "Add the ability to customize the commit message used when \"rush version\" is run."
+          },
+          {
+            "comment": "Remove the \"experimental\" label from some Rush commands that are now stable."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.35.2",
       "tag": "@microsoft/rush_v5.35.2",
       "date": "Tue, 03 Nov 2020 23:34:30 GMT",
