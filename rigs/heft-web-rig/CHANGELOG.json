@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/heft-web-rig_v0.2.0",
+      "date": "Fri, 08 Jan 2021 07:28:50 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a Rush build cache configuration."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.34",
       "tag": "@rushstack/heft-web-rig_v0.1.34",
       "date": "Wed, 06 Jan 2021 16:10:43 GMT",
