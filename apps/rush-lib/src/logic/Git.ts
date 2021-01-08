@@ -175,8 +175,8 @@ export class Git {
     }
   }
 
-  public getChangedFolders(targetBranch: string, skipFetch: boolean = false): string[] | undefined {
-    if (!skipFetch) {
+  public getChangedFolders(targetBranch: string, shouldFetch: boolean = false): string[] | undefined {
+    if (shouldFetch) {
       this._fetchRemoteBranch(targetBranch);
     }
 

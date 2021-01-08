@@ -315,7 +315,7 @@ export class ChangeAction extends BaseRushAction {
   private _getChangedPackageNames(): string[] {
     const changedFolders: string[] | undefined = this._git.getChangedFolders(
       this._targetBranch,
-      this._noFetchParameter.value
+      !this._noFetchParameter.value
     );
     if (!changedFolders) {
       return [];
