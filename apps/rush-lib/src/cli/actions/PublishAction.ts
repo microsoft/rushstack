@@ -230,7 +230,9 @@ export class PublishAction extends BaseRushAction {
     this._addNpmPublishHome();
 
     const git: Git = new Git(this.rushConfiguration);
-    const publishGit: PublishGit = new PublishGit(git, this._targetBranch.value);
+    const publishGit: PublishGit | undefined = this._targetBranch.value
+      ? new PublishGit(git, this._targetBranch.value)
+      : undefined;
     if (this._includeAll.value) {
       this._publishAll(publishGit, allPackages);
     } else {
@@ -262,7 +264,7 @@ export class PublishAction extends BaseRushAction {
 
   private _publishChanges(
     git: Git,
-    publishGit: PublishGit,
+    publishGit: PublishGit | undefined,
     allPackages: Map<string, RushConfigurationProject>
   ): void {
     const changeManager: ChangeManager = new ChangeManager(this.rushConfiguration);
@@ -274,10 +276,12 @@ export class PublishAction extends BaseRushAction {
 
     if (changeManager.hasChanges()) {
       const orderedChanges: IChangeInfo[] = changeManager.changes;
-      const tempBranch: string = 'publish-' + new Date().getTime();
+      const tempBranchName: string = `publish-${Date.now()}`;
 
-      // Make changes in temp branch.
-      publishGit.checkout(tempBranch, true);
+      if (publishGit) {
+        // Make changes in temp branch.
+        publishGit.checkout(tempBranchName, true);
+      }
 
       this._setDependenciesBeforePublish();
 
@@ -288,12 +292,14 @@ export class PublishAction extends BaseRushAction {
       this._setDependenciesBeforeCommit();
 
       if (git.hasUncommittedChanges()) {
-        // Stage, commit, and push the changes to remote temp branch.
-        publishGit.addChanges(':/*');
-        publishGit.commit(
-          this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE
-        );
-        publishGit.push(tempBranch);
+        if (publishGit) {
+          // Stage, commit, and push the changes to remote temp branch.
+          publishGit.addChanges(':/*');
+          publishGit.commit(
+            this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE
+          );
+          publishGit.push(tempBranchName);
+        }
 
         this._setDependenciesBeforePublish();
 
@@ -323,24 +329,26 @@ export class PublishAction extends BaseRushAction {
 
         this._setDependenciesBeforeCommit();
 
-        // Create and push appropriate Git tags.
-        this._gitAddTags(publishGit, orderedChanges);
-        publishGit.push(tempBranch);
+        if (publishGit) {
+          // Create and push appropriate Git tags.
+          this._gitAddTags(publishGit, orderedChanges);
+          publishGit.push(tempBranchName);
 
-        // Now merge to target branch.
-        publishGit.checkout(this._targetBranch.value);
-        publishGit.pull();
-        publishGit.merge(tempBranch);
-        publishGit.push(this._targetBranch.value);
-        publishGit.deleteBranch(tempBranch);
-      } else {
-        publishGit.checkout(this._targetBranch.value);
-        publishGit.deleteBranch(tempBranch, false);
+          // Now merge to target branch.
+          publishGit.checkout(this._targetBranch.value!);
+          publishGit.pull();
+          publishGit.merge(tempBranchName);
+          publishGit.push(this._targetBranch.value!);
+          publishGit.deleteBranch(tempBranchName);
+        }
+      } else if (publishGit) {
+        publishGit.checkout(this._targetBranch.value!);
+        publishGit.deleteBranch(tempBranchName, false);
       }
     }
   }
 
-  private _publishAll(git: PublishGit, allPackages: Map<string, RushConfigurationProject>): void {
+  private _publishAll(git: PublishGit | undefined, allPackages: Map<string, RushConfigurationProject>): void {
     console.log(`Rush publish starts with includeAll and version policy ${this._versionPolicy.value}`);
 
     let updated: boolean = false;
@@ -356,16 +364,18 @@ export class PublishAction extends BaseRushAction {
 
           const packageVersion: string = packageConfig.packageJson.version;
 
-          // Do not create a new tag if one already exists, this will result in a fatal error
-          if (git.hasTag(packageConfig)) {
-            console.log(
-              `Not tagging ${packageName}@${packageVersion}. A tag already exists for this version.`
-            );
-            return;
-          }
+          if (git) {
+            // Do not create a new tag if one already exists, this will result in a fatal error
+            if (git.hasTag(packageConfig)) {
+              console.log(
+                `Not tagging ${packageName}@${packageVersion}. A tag already exists for this version.`
+              );
+              return;
+            }
 
-          git.addTag(!!this._publish.value, packageName, packageVersion, this._commitId.value);
-          updated = true;
+            git.addTag(!!this._publish.value, packageName, packageVersion, this._commitId.value);
+            updated = true;
+          }
         };
 
         if (this._pack.value) {
@@ -381,8 +391,8 @@ export class PublishAction extends BaseRushAction {
         }
       }
     });
-    if (updated) {
-      git.push(this._targetBranch.value);
+    if (updated && git) {
+      git.push(this._targetBranch.value!);
     }
   }
 

@@ -7,51 +7,48 @@ import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { Git } from './Git';
 
 export class PublishGit {
-  private readonly _targetBranch: string | undefined;
+  private readonly _targetBranch: string;
   private readonly _gitPath: string;
 
-  public constructor(git: Git, targetBranch: string | undefined) {
+  public constructor(git: Git, targetBranch: string) {
     this._targetBranch = targetBranch;
-
-    const gitPath: string | undefined = git.gitPath;
-    if (!gitPath) {
-      throw new Error('Unable to resolve git binary');
-    } else {
-      this._gitPath = gitPath;
-    }
+    this._gitPath = git.getGitPathOrThrow();
   }
 
-  public checkout(branchName: string | undefined, createBranch?: boolean): void {
-    const params: string = `checkout ${createBranch ? '-b ' : ''}${branchName}`;
+  public checkout(branchName: string, createBranch: boolean = false): void {
+    const params: string[] = ['checkout'];
+    if (createBranch) {
+      params.push('-b');
+    }
 
-    PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, params.split(' '));
+    params.push(branchName);
+
+    PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, params);
   }
 
   public merge(branchName: string): void {
-    PublishUtilities.execCommand(
-      !!this._targetBranch,
-      this._gitPath,
-      `merge ${branchName} --no-edit`.split(' ')
-    );
+    PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, ['merge', branchName, '--no-edit']);
   }
 
   public deleteBranch(branchName: string, hasRemote: boolean = true): void {
-    PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, `branch -d ${branchName}`.split(' '));
+    PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, ['branch', '-d', branchName]);
     if (hasRemote) {
-      PublishUtilities.execCommand(
-        !!this._targetBranch,
-        this._gitPath,
-        `push origin --delete ${branchName}`.split(' ')
-      );
+      PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, [
+        'push',
+        'origin',
+        '--delete',
+        branchName
+      ]);
     }
   }
 
   public pull(): void {
-    PublishUtilities.execCommand(
-      !!this._targetBranch,
-      this._gitPath,
-      `pull origin ${this._targetBranch}`.split(' ')
-    );
+    const params: string[] = ['pull', 'origin'];
+    if (this._targetBranch) {
+      params.push(this._targetBranch);
+    }
+
+    PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, params);
   }
 
   public fetch(): void {
@@ -111,13 +108,13 @@ export class PublishGit {
     ]);
   }
 
-  public push(branchName: string | undefined): void {
+  public push(branchName: string): void {
     PublishUtilities.execCommand(
       !!this._targetBranch,
       this._gitPath,
       // We append "--no-verify" to prevent Git hooks from running.  For example, people may
       // want to invoke "rush change -v" as a pre-push hook.
-      ['push', 'origin', 'HEAD:' + branchName, '--follow-tags', '--verbose', '--no-verify']
+      ['push', 'origin', `HEAD:${branchName}`, '--follow-tags', '--verbose', '--no-verify']
     );
   }
 }

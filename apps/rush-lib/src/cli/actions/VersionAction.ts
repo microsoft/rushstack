@@ -116,7 +116,9 @@ export class VersionAction extends BaseRushAction {
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       if (updatedPackages.size > 0) {
         console.log(`${updatedPackages.size} packages are getting updated.`);
-        this._gitProcess(tempBranch);
+        if (this._targetBranch.value) {
+          this._gitProcess(tempBranch, this._targetBranch.value);
+        }
       }
     } else if (this._bumpVersion.value) {
       const tempBranch: string = 'version/bump-' + new Date().getTime();
@@ -126,7 +128,9 @@ export class VersionAction extends BaseRushAction {
         this._prereleaseIdentifier.value,
         true
       );
-      this._gitProcess(tempBranch);
+      if (this._targetBranch.value) {
+        this._gitProcess(tempBranch, this._targetBranch.value);
+      }
     }
   }
 
@@ -209,12 +213,12 @@ export class VersionAction extends BaseRushAction {
     }
   }
 
-  private _gitProcess(tempBranch: string): void {
+  private _gitProcess(tempBranch: string, targetBranch: string): void {
     // Validate the result before commit.
     this._validateResult();
 
     const git: Git = new Git(this.rushConfiguration);
-    const publishGit: PublishGit = new PublishGit(git, this._targetBranch.value);
+    const publishGit: PublishGit = new PublishGit(git, targetBranch);
 
     // Make changes in temp branch.
     publishGit.checkout(tempBranch, true);
@@ -252,15 +256,15 @@ export class VersionAction extends BaseRushAction {
 
       // Now merge to target branch.
       publishGit.fetch();
-      publishGit.checkout(this._targetBranch.value);
+      publishGit.checkout(targetBranch);
       publishGit.pull();
       publishGit.merge(tempBranch);
-      publishGit.push(this._targetBranch.value);
+      publishGit.push(targetBranch);
       publishGit.deleteBranch(tempBranch);
     } else {
       // skip commits
       publishGit.fetch();
-      publishGit.checkout(this._targetBranch.value);
+      publishGit.checkout(targetBranch);
       publishGit.deleteBranch(tempBranch, false);
     }
   }
