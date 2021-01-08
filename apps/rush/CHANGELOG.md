@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 08 Jan 2021 05:36:55 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Jan 2021 06:12:37 GMT and should not be manually modified.
+
+## 5.36.1
+Fri, 08 Jan 2021 06:12:37 GMT
+
+### Updates
+
+- Fix an issue where projects with empty scripts would still have arguments appended.
 
 ## 5.36.0
 Fri, 08 Jan 2021 05:36:55 GMT

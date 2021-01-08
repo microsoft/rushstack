@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.36.1",
+      "tag": "@microsoft/rush_v5.36.1",
+      "date": "Fri, 08 Jan 2021 06:12:37 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where projects with empty scripts would still have arguments appended."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.36.0",
       "tag": "@microsoft/rush_v5.36.0",
       "date": "Fri, 08 Jan 2021 05:36:55 GMT",
