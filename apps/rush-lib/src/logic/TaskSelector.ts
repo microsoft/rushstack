@@ -51,8 +51,12 @@ export class TaskSelector {
       return undefined;
     }
 
-    const taskCommand: string = `${script} ${customParameterValues.join(' ')}`;
-    return process.platform === 'win32' ? convertSlashesForWindows(taskCommand) : taskCommand;
+    if (!script) {
+      return '';
+    } else {
+      const taskCommand: string = `${script} ${customParameterValues.join(' ')}`;
+      return process.platform === 'win32' ? convertSlashesForWindows(taskCommand) : taskCommand;
+    }
   }
 
   public registerTasks(): TaskCollection {
