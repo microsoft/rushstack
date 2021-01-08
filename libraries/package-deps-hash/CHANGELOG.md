@@ -1,6 +1,17 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Wed, 06 Jan 2021 16:10:43 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Jan 2021 05:24:33 GMT and should not be manually modified.
+
+## 3.0.0
+Fri, 08 Jan 2021 05:24:33 GMT
+
+### Breaking changes
+
+- Refactor getPackageDeps to return a map.
+
+### Minor changes
+
+- Allow the git binary path to be explicitly provided.
 
 ## 2.4.110
 Wed, 06 Jan 2021 16:10:43 GMT

@@ -2,6 +2,23 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "3.0.0",
+      "tag": "@rushstack/package-deps-hash_v3.0.0",
+      "date": "Fri, 08 Jan 2021 05:24:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow the git binary path to be explicitly provided."
+          }
+        ],
+        "major": [
+          {
+            "comment": "Refactor getPackageDeps to return a map."
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.110",
       "tag": "@rushstack/package-deps-hash_v2.4.110",
       "date": "Wed, 06 Jan 2021 16:10:43 GMT",
