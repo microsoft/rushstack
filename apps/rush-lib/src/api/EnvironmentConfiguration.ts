@@ -106,7 +106,7 @@ export const enum EnvironmentVariableNames {
   RUSH_BUILD_CACHE_WRITE_CREDENTIAL = 'RUSH_BUILD_CACHE_WRITE_CREDENTIAL',
 
   /**
-   * Allows the git binary path to be explicity specified.
+   * Allows the git binary path to be explicitly specified.
    */
   RUSH_GIT_BINARY_PATH = 'RUSH_GIT_BINARY_PATH'
 }
