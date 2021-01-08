@@ -9,7 +9,7 @@ import { BaseRushAction } from './BaseRushAction';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { RushConstants } from '../../logic/RushConstants';
 
-export class UpdateCloudCredentials extends BaseRushAction {
+export class UpdateCloudCredentialsAction extends BaseRushAction {
   private _interactiveModeFlag!: CommandLineFlagParameter;
   private _credentialParameter!: CommandLineStringParameter;
   private _deleteFlag!: CommandLineFlagParameter;

@@ -40,6 +40,21 @@ export class TaskSelector {
     this._taskCollection = new TaskCollection();
   }
 
+  public static getScriptToRun(
+    rushProject: RushConfigurationProject,
+    commandToRun: string,
+    customParameterValues: string[]
+  ): string | undefined {
+    const script: string | undefined = TaskSelector._getScriptCommand(rushProject, commandToRun);
+
+    if (!script) {
+      return undefined;
+    }
+
+    const taskCommand: string = `${script} ${customParameterValues.join(' ')}`;
+    return process.platform === 'win32' ? convertSlashesForWindows(taskCommand) : taskCommand;
+  }
+
   public registerTasks(): TaskCollection {
     if (this._options.toProjects.length > 0) {
       this._registerToProjects(this._options.toProjects);
@@ -181,12 +196,23 @@ export class TaskSelector {
       return;
     }
 
+    const commandToRun: string | undefined = TaskSelector.getScriptToRun(
+      project,
+      this._options.commandToRun,
+      this._options.customParameterValues
+    );
+    if (!commandToRun && !this._options.ignoreMissingScript) {
+      throw new Error(
+        `The project [${project.packageName}] does not define a '${this._options.commandToRun}' command in the 'scripts' section of its package.json`
+      );
+    }
+
     this._taskCollection.addTask(
       new ProjectBuilder({
         rushProject: project,
         rushConfiguration: this._options.rushConfiguration,
         buildCacheConfiguration: this._options.buildCacheConfiguration,
-        commandToRun: this._getScriptToRun(project),
+        commandToRun: commandToRun || '',
         isIncrementalBuildAllowed: this._options.isIncrementalBuildAllowed,
         packageChangeAnalyzer: this._packageChangeAnalyzer,
         packageDepsFilename: this._options.packageDepsFilename
@@ -194,24 +220,10 @@ export class TaskSelector {
     );
   }
 
-  private _getScriptToRun(rushProject: RushConfigurationProject): string {
-    const script: string | undefined = this._getScriptCommand(rushProject, this._options.commandToRun);
-
-    if (script === undefined && !this._options.ignoreMissingScript) {
-      throw new Error(
-        `The project [${rushProject.packageName}] does not define a '${this._options.commandToRun}' command in the 'scripts' section of its package.json`
-      );
-    }
-
-    if (!script) {
-      return '';
-    }
-
-    const taskCommand: string = `${script} ${this._options.customParameterValues.join(' ')}`;
-    return process.platform === 'win32' ? convertSlashesForWindows(taskCommand) : taskCommand;
-  }
-
-  private _getScriptCommand(rushProject: RushConfigurationProject, script: string): string | undefined {
+  private static _getScriptCommand(
+    rushProject: RushConfigurationProject,
+    script: string
+  ): string | undefined {
     if (!rushProject.packageJson.scripts) {
       return undefined;
     }

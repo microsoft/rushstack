@@ -113,6 +113,17 @@ export class ProjectBuilder extends BaseBuilder {
     }
   }
 
+  public async tryWriteCacheEntryAsync(
+    terminal: Terminal,
+    trackedFilePaths: string[]
+  ): Promise<boolean | undefined> {
+    const projectBuildCache: ProjectBuildCache | undefined = await this._getProjectBuildCacheAsync(
+      terminal,
+      trackedFilePaths
+    );
+    return projectBuildCache?.trySetCacheEntryAsync(terminal);
+  }
+
   private async _executeTaskAsync(context: IBuilderContext): Promise<TaskStatus> {
     // TERMINAL PIPELINE:
     //
@@ -300,8 +311,9 @@ export class ProjectBuilder extends BaseBuilder {
             }
           );
 
-          const setCacheEntryPromise: Promise<boolean> | undefined = projectBuildCache?.trySetCacheEntryAsync(
-            terminal
+          const setCacheEntryPromise: Promise<boolean | undefined> = this.tryWriteCacheEntryAsync(
+            terminal,
+            trackedFiles!
           );
 
           const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
