@@ -47,7 +47,7 @@ export class TaskSelector {
   ): string | undefined {
     const script: string | undefined = TaskSelector._getScriptCommand(rushProject, commandToRun);
 
-    if (!script) {
+    if (script === undefined) {
       return undefined;
     }
 
@@ -201,7 +201,7 @@ export class TaskSelector {
       this._options.commandToRun,
       this._options.customParameterValues
     );
-    if (!commandToRun && !this._options.ignoreMissingScript) {
+    if (commandToRun === undefined && !this._options.ignoreMissingScript) {
       throw new Error(
         `The project [${project.packageName}] does not define a '${this._options.commandToRun}' command in the 'scripts' section of its package.json`
       );
