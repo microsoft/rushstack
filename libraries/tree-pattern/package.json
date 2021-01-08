@@ -13,9 +13,9 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@rushstack/eslint-config": "2.3.1",
-    "@rushstack/heft": "0.22.3",
-    "@rushstack/heft-node-rig": "0.1.28",
+    "@rushstack/eslint-config": "2.3.2",
+    "@rushstack/heft": "0.23.1",
+    "@rushstack/heft-node-rig": "0.2.0",
     "@types/heft-jest": "1.0.1",
     "eslint": "~7.12.1",
     "typescript": "~3.9.7"
