@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, Terminal } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushUserConfiguration } from '../../api/RushUserConfiguration';
@@ -23,12 +23,16 @@ export class FileSystemBuildCacheProvider {
       path.join(options.rushConfiguration.commonTempFolder, BUILD_CACHE_FOLDER_NAME);
   }
 
-  public async tryGetCacheEntryBufferByIdAsync(cacheId: string): Promise<Buffer | undefined> {
+  public async tryGetCacheEntryBufferByIdAsync(
+    terminal: Terminal,
+    cacheId: string
+  ): Promise<Buffer | undefined> {
     const cacheEntryFilePath: string = path.join(this._cacheFolderPath, cacheId);
     try {
       return await FileSystem.readFileToBufferAsync(cacheEntryFilePath);
     } catch (e) {
       if (FileSystem.isNotExistError(e)) {
+        terminal.writeVerboseLine(`Cache entry at "${cacheEntryFilePath}" was not found.`);
         return undefined;
       } else {
         throw e;
@@ -36,9 +40,14 @@ export class FileSystemBuildCacheProvider {
     }
   }
 
-  public async trySetCacheEntryBufferAsync(cacheId: string, entryBuffer: Buffer): Promise<boolean> {
+  public async trySetCacheEntryBufferAsync(
+    terminal: Terminal,
+    cacheId: string,
+    entryBuffer: Buffer
+  ): Promise<boolean> {
     const cacheEntryFilePath: string = path.join(this._cacheFolderPath, cacheId);
     await FileSystem.writeFileAsync(cacheEntryFilePath, entryBuffer, { ensureFolderExists: true });
+    terminal.writeVerboseLine(`Wrote cache entry to "${cacheEntryFilePath}".`);
     return true;
   }
 }
