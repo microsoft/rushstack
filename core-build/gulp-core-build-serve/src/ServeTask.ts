@@ -199,7 +199,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
         }:${port}${initialPage}`;
       }
 
-      gulp.src('').pipe(
+      gulp.src('.').pipe(
         open({
           uri: uri
         })
