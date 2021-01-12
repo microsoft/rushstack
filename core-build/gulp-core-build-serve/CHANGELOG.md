@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Fri, 08 Jan 2021 07:28:49 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Jan 2021 21:01:00 GMT and should not be manually modified.
+
+## 3.8.43
+Tue, 12 Jan 2021 21:01:00 GMT
+
+### Patches
+
+- Update source glob argument to be non-empty string for Gulp 4 compat
 
 ## 3.8.42
 Fri, 08 Jan 2021 07:28:49 GMT

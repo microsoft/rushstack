@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "3.8.43",
+      "tag": "@microsoft/gulp-core-build-serve_v3.8.43",
+      "date": "Tue, 12 Jan 2021 21:01:00 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update source glob argument to be non-empty string for Gulp 4 compat"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.8.42",
       "tag": "@microsoft/gulp-core-build-serve_v3.8.42",
       "date": "Fri, 08 Jan 2021 07:28:49 GMT",
