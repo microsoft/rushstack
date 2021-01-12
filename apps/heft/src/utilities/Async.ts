@@ -3,7 +3,13 @@
 
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 
+/**
+ * Helpful async utility methods
+ */
 export class Async {
+  /**
+   * Utility method to limit the number of parallel async operations with a promise queue.
+   */
   public static async forEachLimitAsync<TEntry>(
     array: TEntry[],
     parallelismLimit: number,
@@ -39,6 +45,9 @@ export class Async {
     });
   }
 
+  /**
+   * Utility method to continuously run an async watcher in Heft's watchMode.
+   */
   public static runWatcherWithErrorHandling(fn: () => Promise<void>, scopedLogger: ScopedLogger): void {
     try {
       fn().catch((e) => scopedLogger.emitError(e));
