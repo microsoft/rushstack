@@ -9,8 +9,11 @@ import { RushConfiguration } from '../api/RushConfiguration';
 /**
  * This constant is the major version of the next LTS node Node.js release. This constant should be updated when
  * a new LTS version is added to Rush's support matrix.
+ *
+ * LTS schedule: https://nodejs.org/en/about/releases/
+ * LTS versions: https://nodejs.org/en/download/releases/
  */
-const UPCOMING_NODE_LTS_VERSION: number = 14;
+const UPCOMING_NODE_LTS_VERSION: number = 16;
 const nodeVersion: string = process.versions.node;
 const nodeMajorVersion: number = semver.major(nodeVersion);
 
@@ -40,7 +43,7 @@ export class NodeJsCompatibility {
   }
 
   public static warnAboutVersionTooOld(): boolean {
-    if (semver.satisfies(nodeVersion, '< 8.9.0')) {
+    if (semver.satisfies(nodeVersion, '< 10.13.0')) {
       // We are on an ancient version of Node.js that is known not to work with Rush
       console.error(
         colors.red(
