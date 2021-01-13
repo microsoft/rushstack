@@ -102,6 +102,11 @@ export interface IInstallManagerOptions {
    * The list of projects that should be installed, along with project dependencies.
    */
   toProjects: ReadonlyArray<RushConfigurationProject>;
+
+  /**
+   * The list of projects that should be installed, along with dependencies of the project.
+   */
+  fromProjects: ReadonlyArray<RushConfigurationProject>;
 }
 
 /**
@@ -148,7 +153,8 @@ export abstract class BaseInstallManager {
   }
 
   public async doInstall(): Promise<void> {
-    const isFilteredInstall: boolean = this.options.toProjects.length > 0;
+    const isFilteredInstall: boolean =
+      this.options.toProjects.length > 0 || this.options.fromProjects.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
 
