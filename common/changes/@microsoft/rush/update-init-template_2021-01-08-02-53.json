@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "use pnpm 5 when rush init",
+      "comment": "Update rush.json produced by rush init to use PNPM 5.14.3",
       "type": "none"
     }
   ],
