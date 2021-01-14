@@ -587,14 +587,14 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       args.push('--recursive');
       args.push('--link-workspace-packages', 'false');
 
-      const filteredProjects: string[] = this.options.toProjects
-        // "<package>..." selects the specified package and all direct and indirect dependencies
-        .map((p) => p.packageName + '...')
-        // ..."<package>" selects the specified package and all direct and indirect dependents of that package
-        .concat(this.options.fromProjects.map((p) => '...' + p.packageName));
+      // "<package>..." selects the specified package and all direct and indirect dependencies
+      for (const toProject of this.options.toProjects) {
+        args.push('--filter', `${toProject.packageName}...`);
+      }
 
-      for (const filteredProject of filteredProjects) {
-        args.push('--filter', filteredProject);
+      // ..."<package>" selects the specified package and all direct and indirect dependents of that package
+      for (const toProject of this.options.fromProjects) {
+        args.push('--filter', `...${toProject.packageName}`);
       }
     }
   }
