@@ -18,6 +18,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-s3": "~3.3.0",
     "@azure/identity": "~1.2.0",
     "@azure/storage-blob": "~12.3.0",
     "@pnpm/link-bins": "~5.3.7",
@@ -67,8 +68,8 @@
     "@types/js-yaml": "3.12.1",
     "@types/lodash": "4.14.116",
     "@types/minimatch": "2.0.29",
-    "@types/node-fetch": "1.6.9",
     "@types/node": "10.17.13",
+    "@types/node-fetch": "1.6.9",
     "@types/npm-package-arg": "6.1.0",
     "@types/npm-packlist": "~1.1.1",
     "@types/read-package-tree": "5.1.0",

@@ -14,6 +14,7 @@ import {
   AzureEnvironmentNames,
   AzureStorageBuildCacheProvider
 } from '../logic/buildCache/AzureStorageBuildCacheProvider';
+import { AmazonS3BuildCacheProvider } from '../logic/buildCache/AmazonS3BuildCacheProvider';
 import { RushConfiguration } from './RushConfiguration';
 import { FileSystemBuildCacheProvider } from '../logic/buildCache/FileSystemBuildCacheProvider';
 import { RushConstants } from '../logic/RushConstants';
@@ -25,7 +26,7 @@ import { CacheEntryId, GetCacheEntryIdFunction } from '../logic/buildCache/Cache
  * Describes the file structure for the "common/config/rush/build-cache.json" config file.
  */
 interface IBuildCacheJson {
-  cacheProvider: 'azure-blob-storage' | 'local-only';
+  cacheProvider: 'azure-blob-storage' | 'amazon-s3' | 'local-only';
   cacheEntryNamePattern?: string;
 }
 
@@ -33,6 +34,12 @@ interface IAzureBlobStorageBuildCacheJson extends IBuildCacheJson {
   cacheProvider: 'azure-blob-storage';
 
   azureBlobStorageConfiguration: IAzureStorageConfigurationJson;
+}
+
+interface IAmazonS3BuildCacheJson extends IBuildCacheJson {
+  cacheProvider: 'amazon-s3';
+
+  amazonS3Configuration: IAmazonS3ConfigurationJson;
 }
 
 interface IAzureStorageConfigurationJson {
@@ -55,6 +62,28 @@ interface IAzureStorageConfigurationJson {
    * An optional prefix for cache item blob names.
    */
   blobPrefix?: string;
+
+  /**
+   * If set to true, allow writing to the cache. Defaults to false.
+   */
+  isCacheWriteAllowed?: boolean;
+}
+
+interface IAmazonS3ConfigurationJson {
+  /**
+   * The Amazon S3 region of the bucket to use for build cache (e.g. "us-east-1").
+   */
+  s3Region: string;
+
+  /**
+   * The name of the bucket in Amazon S3 to use for build cache.
+   */
+  s3Bucket: string;
+
+  /**
+   * An optional prefix ("folder") for cache items.
+   */
+  s3Prefix?: string;
 
   /**
    * If set to true, allow writing to the cache. Defaults to false.
@@ -107,6 +136,19 @@ export class BuildCacheConfiguration {
           azureEnvironment: azureStorageConfigurationJson.azureEnvironment,
           blobPrefix: azureStorageConfigurationJson.blobPrefix,
           isCacheWriteAllowed: !!azureStorageConfigurationJson.isCacheWriteAllowed
+        });
+        break;
+      }
+
+      case 'amazon-s3': {
+        const amazonS3BuildCacheJson: IAmazonS3BuildCacheJson = buildCacheJson as IAmazonS3BuildCacheJson;
+        const amazonS3ConfigurationJson: IAmazonS3ConfigurationJson =
+          amazonS3BuildCacheJson.amazonS3Configuration;
+        this.cloudCacheProvider = new AmazonS3BuildCacheProvider({
+          s3Region: amazonS3ConfigurationJson.s3Region,
+          s3Bucket: amazonS3ConfigurationJson.s3Bucket,
+          s3Prefix: amazonS3ConfigurationJson.s3Prefix,
+          isCacheWriteAllowed: !!amazonS3ConfigurationJson.isCacheWriteAllowed
         });
         break;
       }

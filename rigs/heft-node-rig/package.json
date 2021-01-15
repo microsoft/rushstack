@@ -16,7 +16,7 @@
   "dependencies": {
     "@microsoft/api-extractor": "workspace:*",
     "eslint": "~7.12.1",
-    "typescript": "~3.9.7"
+    "typescript": "~4.1.3"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*"
