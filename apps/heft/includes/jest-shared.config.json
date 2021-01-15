@@ -10,7 +10,24 @@
   "roots": ["<rootDir>", "<rootDir>/src"],
 
   "testURL": "http://localhost/",
+
   "testMatch": ["<rootDir>/src/**/*.test.{ts,tsx}"],
+  "testPathIgnorePatterns": ["/node_modules/"],
+
+  "//": "code coverage tracking is disabled by default; set this to true to enable it ",
+  "collectCoverage": false,
+
+  "collectCoverageFrom": [
+    "src/**/*.{ts,tsx}",
+    "!src/**/*.d.ts",
+    "!src/**/*.test.{ts,tsx}",
+    "!src/**/test/**",
+    "!src/**/__tests__/**",
+    "!src/**/__fixtures__/**",
+    "!src/**/__mocks__/**"
+  ],
+  "coveragePathIgnorePatterns": ["/node_modules/"],
+
   "transformIgnorePatterns": [],
 
   "//": "jest-identity-mock-transform returns a proxy for exported key/value pairs, where Webpack would return a module",
@@ -22,6 +39,7 @@
 
     "\\.(aac|eot|gif|jpeg|jpg|m4a|mp3|mp4|oga|otf|png|svg|ttf|wav|webm|webp|woff|woff2)$": "@rushstack/heft/lib/exports/jest-string-mock-transform.js"
   },
+
   "//": [
     "The modulePathIgnorePatterns below accepts these sorts of paths:",
     "  <rootDir>/src",
@@ -29,6 +47,7 @@
     "...and ignores anything else under <rootDir>"
   ],
   "modulePathIgnorePatterns": ["^<rootDir>/(?!(?:src/)|(?:src$))"],
+
   "setupFiles": ["@rushstack/heft/lib/exports/jest-global-setup.js"],
   "resolver": "@rushstack/heft/lib/exports/jest-improved-resolver.js",
   "passWithNoTests": true
