@@ -43,17 +43,18 @@ const DEFAULT_REMOTE: string = 'origin';
  * To avoid confusion/mistakes, any extra files will be reported as an error.
  */
 const knownRushConfigFilenames: string[] = [
-  '.npmrc',
   '.npmrc-publish',
-  RushConstants.pinnedVersionsFilename,
-  RushConstants.commonVersionsFilename,
-  RushConstants.repoStateFilename,
+  '.npmrc',
+  'deploy.json',
   RushConstants.browserApprovedPackagesFilename,
-  RushConstants.nonbrowserApprovedPackagesFilename,
-  RushConstants.versionPoliciesFilename,
   RushConstants.commandLineFilename,
+  RushConstants.commonVersionsFilename,
   RushConstants.experimentsFilename,
-  'deploy.json'
+  RushConstants.nonbrowserApprovedPackagesFilename,
+  RushConstants.pinnedVersionsFilename,
+  RushConstants.repoStateFilename,
+  RushConstants.setupFilename,
+  RushConstants.versionPoliciesFilename
 ];
 
 /**
