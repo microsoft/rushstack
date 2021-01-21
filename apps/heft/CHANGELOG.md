@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 13 Jan 2021 01:11:06 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Jan 2021 04:19:00 GMT and should not be manually modified.
+
+## 0.24.0
+Thu, 21 Jan 2021 04:19:00 GMT
+
+### Minor changes
+
+- Update jest-shared.config.json to specify a default "collectCoverageFrom" that includes all "src" files excluding test files
+- Update jest-shared.config.json to configure "coverageDirectory" to use "./temp/coverage" (instead of "./coverage")
 
 ## 0.23.2
 Wed, 13 Jan 2021 01:11:06 GMT
