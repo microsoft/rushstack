@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "Update jest-shared.config.json to specify a default for \"collectCoverageFrom\" that excludes test files",
+      "comment": "Update jest-shared.config.json to specify a default \"collectCoverageFrom\" that includes all \"src\" files excluding test files",
       "type": "minor"
     }
   ],
