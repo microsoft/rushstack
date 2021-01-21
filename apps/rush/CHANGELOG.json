@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.36.2",
+      "tag": "@microsoft/rush_v5.36.2",
+      "date": "Thu, 21 Jan 2021 04:51:19 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update Node.js version checks to support the new LTS release"
+          },
+          {
+            "comment": "Update rush.json produced by rush init to use PNPM 5.14.3"
+          },
+          {
+            "comment": "Use forward slashes when creating deploy zip file for Unix compatibility"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.36.1",
       "tag": "@microsoft/rush_v5.36.1",
       "date": "Fri, 08 Jan 2021 06:12:37 GMT",

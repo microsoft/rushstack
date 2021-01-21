@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 08 Jan 2021 06:12:37 GMT and should not be manually modified.
+This log was last generated on Thu, 21 Jan 2021 04:51:19 GMT and should not be manually modified.
+
+## 5.36.2
+Thu, 21 Jan 2021 04:51:19 GMT
+
+### Updates
+
+- Update Node.js version checks to support the new LTS release
+- Update rush.json produced by rush init to use PNPM 5.14.3
+- Use forward slashes when creating deploy zip file for Unix compatibility
 
 ## 5.36.1
 Fri, 08 Jan 2021 06:12:37 GMT
