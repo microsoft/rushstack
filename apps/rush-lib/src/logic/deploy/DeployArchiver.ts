@@ -60,7 +60,8 @@ export class DeployArchiver {
 
     const zip: JSZip = new JSZip();
     for (const filePath of allPaths) {
-      const addPath: string = path.relative(dir, filePath);
+      // Get the relative path and replace backslashes for Unix compat
+      const addPath: string = path.relative(dir, filePath).replace(/\\/g, '/');
       const stat: FileSystemStats = FileSystem.getLinkStatistics(filePath);
       const permissions: number = stat.mode;
 
