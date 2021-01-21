@@ -17,6 +17,8 @@
   "//": "code coverage tracking is disabled by default; set this to true to enable it ",
   "collectCoverage": false,
 
+  "coverageDirectory": "<rootDir>/temp/coverage",
+
   "collectCoverageFrom": [
     "src/**/*.{ts,tsx}",
     "!src/**/*.d.ts",
