@@ -146,7 +146,11 @@ export class SetupPackageRegistry {
     }
 
     if (!response.ok) {
-      throw new Error('Failed to query');
+      if (response.status === 401) {
+        throw new Error('Authorization failed; the Artifactory user name or password may be incorrect.');
+      }
+
+      throw new Error(`The Artifactory request failed:\n  (${response.status}) ${response.statusText}`);
     }
 
     // We expect a response like this:
@@ -169,11 +173,20 @@ export class SetupPackageRegistry {
     //   //your-company.jfrog.io/your-artifacts/api/npm/npm-private/:username=
     //
     // We will delete these lines from .npmrc
-    const keysToReplace: Set<string> = new Set();
+    const updatedLinesMap: Map<string, string> = new Map(); // key --> complete line
+
+    for (const globallyMappedNpmScope of packageRegistry.globallyMappedNpmScopes || []) {
+      // We'll add a line like:
+      //   @company:registry=https://your-company.jfrog.io/your-artifacts/api/npm/npm-private/
+      const key: string = `${globallyMappedNpmScope}:registry=`;
+
+      updatedLinesMap.set(key, key + packageRegistry.registryUrl);
+    }
+
     for (const responseLine of responseLines) {
       const key: string | undefined = SetupPackageRegistry._getNpmrcKey(responseLine);
       if (key !== undefined) {
-        keysToReplace.add(key);
+        updatedLinesMap.set(key, responseLine);
       }
     }
 
@@ -189,15 +202,24 @@ export class SetupPackageRegistry {
       npmrcLines.push(...npmrcContent.trimRight().split('\n'));
     }
 
-    // Delete the old keys
-    for (let i: number = 0; i < npmrcLines.length; ) {
+    if (npmrcLines.length === 1 && npmrcLines[0] === '') {
+      // Edge case where split() adds a blank line to the start of the file
+      npmrcLines.length = 0;
+    }
+
+    // Replace existing lines
+    for (let i: number = 0; i < npmrcLines.length; ++i) {
       const line: string = npmrcLines[i];
 
       const key: string | undefined = SetupPackageRegistry._getNpmrcKey(line);
-      if (key && keysToReplace.has(key)) {
-        npmrcLines.splice(i, 1);
-      } else {
-        ++i;
+      if (key) {
+        const newValue: string | undefined = updatedLinesMap.get(key);
+        if (newValue !== undefined) {
+          npmrcLines[i] = newValue;
+
+          // Delete it; anything that doesn't get deleted will be appended at the end
+          updatedLinesMap.delete(key);
+        }
       }
     }
 
@@ -205,7 +227,9 @@ export class SetupPackageRegistry {
       // Append a blank line
       npmrcLines.push('');
     }
-    npmrcLines.push(...responseLines);
+
+    // Add any remaining values that weren't matched above
+    npmrcLines.push(...updatedLinesMap.values());
 
     // Save the result
     FileSystem.writeFile(npmrcPath, npmrcLines.join('\n') + '\n');
