@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.24.1",
+      "tag": "@rushstack/heft_v0.24.1",
+      "date": "Fri, 22 Jan 2021 05:39:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with webpack in \"heft start\" mode where \"bundle\" would continue too quickly."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.24.0",
       "tag": "@rushstack/heft_v0.24.0",
       "date": "Thu, 21 Jan 2021 04:19:00 GMT",

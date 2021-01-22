@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 21 Jan 2021 04:19:00 GMT and should not be manually modified.
+This log was last generated on Fri, 22 Jan 2021 05:39:22 GMT and should not be manually modified.
+
+## 0.24.1
+Fri, 22 Jan 2021 05:39:22 GMT
+
+### Patches
+
+- Fix an issue with webpack in "heft start" mode where "bundle" would continue too quickly.
 
 ## 0.24.0
 Thu, 21 Jan 2021 04:19:00 GMT
