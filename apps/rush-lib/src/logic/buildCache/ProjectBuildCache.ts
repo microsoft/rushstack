@@ -95,7 +95,7 @@ export class ProjectBuildCache {
 
     let cacheEntryBuffer:
       | Buffer
-      | undefined = await this._localBuildCacheProvider.tryGetCacheEntryBufferByIdAsync(cacheId);
+      | undefined = await this._localBuildCacheProvider.tryGetCacheEntryBufferByIdAsync(terminal, cacheId);
     const foundInLocalCache: boolean = !!cacheEntryBuffer;
     if (!foundInLocalCache && this._cloudBuildCacheProvider) {
       terminal.writeVerboseLine(
@@ -116,6 +116,7 @@ export class ProjectBuildCache {
       return false;
     } else if (!foundInLocalCache) {
       setLocalCacheEntryPromise = this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
+        terminal,
         cacheId,
         cacheEntryBuffer
       );
@@ -220,6 +221,7 @@ export class ProjectBuildCache {
     }
 
     const setLocalCacheEntryPromise: Promise<boolean> = this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
+      terminal,
       cacheId,
       cacheEntryBuffer
     );

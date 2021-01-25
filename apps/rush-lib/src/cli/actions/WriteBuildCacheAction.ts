@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { AlreadyReportedError, ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
-import { CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BaseRushAction } from './BaseRushAction';
@@ -16,6 +16,7 @@ import { TaskSelector } from '../../logic/TaskSelector';
 
 export class WriteBuildCacheAction extends BaseRushAction {
   private _command!: CommandLineStringParameter;
+  private _verboseFlag!: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -38,6 +39,12 @@ export class WriteBuildCacheAction extends BaseRushAction {
       description:
         '(Required) The command run in the current project that produced the current project state.'
     });
+
+    this._verboseFlag = this.defineFlagParameter({
+      parameterLongName: '--verbose',
+      parameterShortName: '-v',
+      description: 'Display verbose log information.'
+    });
   }
 
   public async runAsync(): Promise<void> {
@@ -52,7 +59,9 @@ export class WriteBuildCacheAction extends BaseRushAction {
       );
     }
 
-    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
+    const terminal: Terminal = new Terminal(
+      new ConsoleTerminalProvider({ verboseEnabled: this._verboseFlag.value })
+    );
     const buildCacheConfiguration:
       | BuildCacheConfiguration
       | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(terminal, this.rushConfiguration);
@@ -89,7 +98,7 @@ export class WriteBuildCacheAction extends BaseRushAction {
       trackedFiles
     );
     if (cacheWriteSuccess === undefined) {
-      // We already projectBuilder already reported that the project doesn't support caching
+      terminal.writeErrorLine('This project does not support caching');
       throw new AlreadyReportedError();
     } else if (cacheWriteSuccess === false) {
       terminal.writeErrorLine('Writing cache entry failed.');
