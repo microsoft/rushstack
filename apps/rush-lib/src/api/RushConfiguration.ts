@@ -32,6 +32,7 @@ import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { ExperimentsConfiguration } from './ExperimentsConfiguration';
 import { PackageNameParsers } from './PackageNameParsers';
 import { RepoStateFile } from '../logic/RepoStateFile';
+import { PathTree } from '../logic/PathTree';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -459,6 +460,7 @@ export class RushConfiguration {
   private _ensureConsistentVersions: boolean;
   private _suppressNodeLtsWarning: boolean;
   private _variants: Set<string>;
+  private _projectByRelativePath: PathTree<RushConfigurationProject>;
 
   // "approvedPackagesPolicy" feature
   private _approvedPackagesPolicy: ApprovedPackagesPolicy;
@@ -724,6 +726,13 @@ export class RushConfiguration {
         this._variants.add(variantName);
       }
     }
+
+    const pathTree: PathTree<RushConfigurationProject> = new PathTree<RushConfigurationProject>();
+    for (const project of this.projects) {
+      const relativePath: string = Path.convertToSlashes(project.projectRelativeFolder);
+      pathTree.set(relativePath, project);
+    }
+    this._projectByRelativePath = pathTree;
   }
 
   private _initializeAndValidateLocalProjects(): void {
@@ -1599,6 +1608,14 @@ export class RushConfiguration {
       }
     }
     return undefined;
+  }
+
+  /**
+   * Finds the project that owns the specified POSIX relative path (e.g. apps/rush-lib).
+   * @returns The found project, or undefined if no match was found
+   */
+  public findProjectForPosixRelativePath(posixRelativePath: string): RushConfigurationProject | undefined {
+    return this._projectByRelativePath.getNearestParent(posixRelativePath);
   }
 
   /**

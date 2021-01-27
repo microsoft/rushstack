@@ -84,8 +84,6 @@ export class PackageChangeAnalyzer {
       projectHashDeps.set(project.packageName, new Map<string, string>());
     }
 
-    const noProjectHashes: { [key: string]: string } = {};
-
     let repoDeps: Map<string, string>;
     try {
       if (this._git.isPathUnderGitWorkingTree()) {
@@ -108,14 +106,14 @@ export class PackageChangeAnalyzer {
     }
 
     // Sort each project folder into its own package deps hash
-    for (const [filePath, fileHash] of repoDeps.entries()) {
-      const projectName: string | undefined = this._getProjectForFile(filePath);
-
-      // If we found a project for the file, go ahead and store this file's hash
-      if (projectName) {
-        projectHashDeps.get(projectName)!.set(filePath, fileHash);
-      } else {
-        noProjectHashes[filePath] = fileHash;
+    for (const [filePath, fileHash] of repoDeps) {
+      // findProjectForPosixRelativePath uses PathTree, for which lookups are O(K)
+      // K being the maximum folder depth of any project in rush.json (usually on the order of 3)
+      const owningProject:
+        | RushConfigurationProject
+        | undefined = this._rushConfiguration.findProjectForPosixRelativePath(filePath);
+      if (owningProject) {
+        projectHashDeps.get(owningProject.packageName)!.set(filePath, fileHash);
       }
     }
 
@@ -175,7 +173,7 @@ export class PackageChangeAnalyzer {
       );
 
       for (const project of this._rushConfiguration.projects) {
-        const shrinkwrapHash: string | undefined = noProjectHashes[shrinkwrapFile];
+        const shrinkwrapHash: string | undefined = repoDeps!.get(shrinkwrapFile);
         if (shrinkwrapHash) {
           projectHashDeps.get(project.packageName)!.set(shrinkwrapFile, shrinkwrapHash);
         }
@@ -183,19 +181,5 @@ export class PackageChangeAnalyzer {
     }
 
     return projectHashDeps;
-  }
-
-  private _getProjectForFile(filePath: string): string | undefined {
-    for (const project of this._rushConfiguration.projects) {
-      if (this._fileExistsInFolder(filePath, project.projectRelativeFolder)) {
-        return project.packageName;
-      }
-    }
-
-    return undefined;
-  }
-
-  private _fileExistsInFolder(filePath: string, folderPath: string): boolean {
-    return Path.isUnder(filePath, folderPath);
   }
 }

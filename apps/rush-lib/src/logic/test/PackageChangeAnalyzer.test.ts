@@ -6,10 +6,13 @@ import * as path from 'path';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import { PathTree } from '../PathTree';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 const packageA: string = 'project-a';
-const packageAPath: string = path.join('tools', packageA);
-const fileA: string = path.join(packageAPath, 'src/index.ts');
+// Git will always return paths with '/' as the delimiter
+const packageAPath: string = path.posix.join('tools', packageA);
+const fileA: string = path.posix.join(packageAPath, 'src/index.ts');
 // const packageB: string = 'project-b';
 // const packageBPath: string = path.join('tools', packageB);
 // const fileB: string = path.join(packageBPath, 'src/index.ts');
@@ -32,18 +35,24 @@ describe('PackageChangeAnalyzer', () => {
       [path.posix.join('common', 'config', 'rush', 'pnpm-lock.yaml'), HASH]
     ]);
 
+    const project: RushConfigurationProject = {
+      packageName: packageA,
+      projectRelativeFolder: packageAPath
+    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    const pathTree: PathTree<RushConfigurationProject> = new PathTree([
+      [packageAPath.replace(/\\/g, '/'), project]
+    ]);
+
     PackageChangeAnalyzer.getPackageDeps = () => repoHashDeps;
     const rushConfiguration: RushConfiguration = {
       commonRushConfigFolder: '',
-      projects: [
-        {
-          packageName: packageA,
-          projectRelativeFolder: packageAPath
-        }
-      ],
+      projects: [project],
       rushJsonFolder: '',
       getCommittedShrinkwrapFilename(): string {
         return 'common/config/rush/pnpm-lock.yaml';
+      },
+      findProjectForPosixRelativePath(path: string): object | undefined {
+        return pathTree.getNearestParent(path);
       }
     } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
