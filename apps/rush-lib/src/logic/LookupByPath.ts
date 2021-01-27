@@ -1,15 +1,15 @@
 /**
- * @public
+ * A node in the path tree used in LookupByPath
  */
-export interface IPathTreeNode<T> {
+interface IPathTreeNode<TItem> {
   /**
    * The value that exactly matches the current relative path
    */
-  value: T | undefined;
+  value: TItem | undefined;
   /**
    * Child nodes by subfolder
    */
-  children: Map<string, IPathTreeNode<T>> | undefined;
+  children: Map<string, IPathTreeNode<TItem>> | undefined;
 }
 
 /**
@@ -26,24 +26,23 @@ export interface IPathTreeNode<T> {
  * tree.getNearestAncestor('foo/bar/baz'); returns 3
  * tree.getNearestAncestor('bar/foo/bar'); returns 2
  */
-export class LookupByPath<T> {
-  /**
-   * The root node of the tree, corresponding to the path ''
-   */
-  public readonly root: IPathTreeNode<T>;
-
+export class LookupByPath<TItem> {
   /**
    * The delimiter used to split paths
    */
   public readonly delimiter: string;
+  /**
+   * The root node of the tree, corresponding to the path ''
+   */
+  private readonly _root: IPathTreeNode<TItem>;
 
   /**
    * Constructs a new `LookupByPath`
    *
    * @param entries - Initial path-value pairs to populate the tree.
    */
-  public constructor(entries?: Iterable<[string, T]>, delimiter?: string) {
-    this.root = {
+  public constructor(entries?: Iterable<[string, TItem]>, delimiter?: string) {
+    this._root = {
       value: undefined,
       children: undefined
     };
@@ -87,7 +86,7 @@ export class LookupByPath<T> {
    * Associates the value with the specified serialized path.
    * If a value is already associated, will overwrite.
    */
-  public set(serializedPath: string, value: T): this {
+  public set(serializedPath: string, value: TItem): this {
     return this.setFromPathSegments(LookupByPath.iteratePathSegments(serializedPath, this.delimiter), value);
   }
 
@@ -95,13 +94,13 @@ export class LookupByPath<T> {
    * Associates the value with the specified path.
    * If a value is already associated, will overwrite.
    */
-  public setFromPathSegments(segments: Iterable<string>, value: T): this {
-    let node: IPathTreeNode<T> = this.root;
+  public setFromPathSegments(segments: Iterable<string>, value: TItem): this {
+    let node: IPathTreeNode<TItem> = this._root;
     for (const segment of segments) {
       if (!node.children) {
         node.children = new Map();
       }
-      let child: IPathTreeNode<T> | undefined = node.children.get(segment);
+      let child: IPathTreeNode<TItem> | undefined = node.children.get(segment);
       if (!child) {
         node.children.set(
           segment,
@@ -126,7 +125,7 @@ export class LookupByPath<T> {
    * tree.findNearestAncestor('foo/baz'); // returns 1
    * tree.findNearestAncestor('foo/bar/baz'); // returns 2
    */
-  public findNearestAncestor(serializedPath: string): T | undefined {
+  public findNearestAncestor(serializedPath: string): TItem | undefined {
     return this.findNearestAncestorFromPathSegments(
       LookupByPath.iteratePathSegments(serializedPath, this.delimiter)
     );
@@ -140,13 +139,13 @@ export class LookupByPath<T> {
    * tree.findNearestAncestorFromPathSegments(['foo', 'baz']); // returns 1
    * tree.findNearestAncestorFromPathSegments(['foo','bar', 'baz']); // returns 2
    */
-  public findNearestAncestorFromPathSegments(segments: Iterable<string>): T | undefined {
-    let node: IPathTreeNode<T> = this.root;
-    let best: T | undefined = node.value;
+  public findNearestAncestorFromPathSegments(segments: Iterable<string>): TItem | undefined {
+    let node: IPathTreeNode<TItem> = this._root;
+    let best: TItem | undefined = node.value;
     // Trivial cases
     if (node.children) {
       for (const segment of segments) {
-        const child: IPathTreeNode<T> | undefined = node.children.get(segment);
+        const child: IPathTreeNode<TItem> | undefined = node.children.get(segment);
         if (!child) {
           break;
         }
