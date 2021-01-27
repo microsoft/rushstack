@@ -107,7 +107,7 @@ export class PackageChangeAnalyzer {
 
     // Sort each project folder into its own package deps hash
     for (const [filePath, fileHash] of repoDeps) {
-      // findProjectForPosixRelativePath uses PathTree, for which lookups are O(K)
+      // findProjectForPosixRelativePath uses LookupByPath, for which lookups are O(K)
       // K being the maximum folder depth of any project in rush.json (usually on the order of 3)
       const owningProject:
         | RushConfigurationProject

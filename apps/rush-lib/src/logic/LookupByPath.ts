@@ -19,7 +19,7 @@ export interface IPathTreeNode<T> {
  * It is optimized for efficiently locating the nearest ancestor path with an associated value.
  *
  * @example
- * const tree = new PathTree([['foo', 1], ['bar', 2], ['foo/bar', 3]]);
+ * const tree = new LookupByPath([['foo', 1], ['bar', 2], ['foo/bar', 3]]);
  * tree.getNearestAncestor('foo'); // returns 1
  * tree.getNearestAncestor('foo/baz'); // returns 1
  * tree.getNearestAncestor('baz'); // returns undefined
@@ -38,7 +38,7 @@ export class LookupByPath<T> {
   public readonly delimiter: string;
 
   /**
-   * Constructs a new `PathTree`
+   * Constructs a new `LookupByPath`
    *
    * @param entries - Initial path-value pairs to populate the tree.
    */
@@ -61,8 +61,8 @@ export class LookupByPath<T> {
    * Iterates over the segments of a serialized path.
    *
    * @example
-   * `PathTree.iteratePathSegments('foo/bar/baz')` yields 'foo', 'bar', 'baz'
-   * `PathTree.iteratePathSegments('foo\\bar\\baz', '\\')` yields 'foo', 'bar', 'baz'
+   * `LookupByPath.iteratePathSegments('foo/bar/baz')` yields 'foo', 'bar', 'baz'
+   * `LookupByPath.iteratePathSegments('foo\\bar\\baz', '\\')` yields 'foo', 'bar', 'baz'
    */
   public static *iteratePathSegments(serializedPath: string, delimiter: string = '/'): Iterable<string> {
     if (!serializedPath) {
@@ -122,7 +122,7 @@ export class LookupByPath<T> {
    * Gets the nearest existing ancestor to the specified serialized path
    *
    * @example
-   * const tree = new PathTree([['foo', 1], ['foo/bar', 2]]);
+   * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
    * tree.findNearestAncestor('foo/baz'); // returns 1
    * tree.findNearestAncestor('foo/bar/baz'); // returns 2
    */
@@ -136,7 +136,7 @@ export class LookupByPath<T> {
    * Gets the nearest existing ancestor to the specified path segment iterable
    *
    * @example
-   * const tree = new PathTree([['foo', 1], ['foo/bar', 2]]);
+   * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
    * tree.findNearestAncestorFromPathSegments(['foo', 'baz']); // returns 1
    * tree.findNearestAncestorFromPathSegments(['foo','bar', 'baz']); // returns 2
    */
