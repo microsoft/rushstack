@@ -15,11 +15,10 @@ import { PackageName } from '@rushstack/node-core-library';
 
 import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
-import { TaskSelector } from '../../logic/TaskSelector';
-import { Stopwatch } from '../../utilities/Stopwatch';
+import { ITaskSelectorConstructor, TaskSelector } from '../../logic/TaskSelector';
+import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
-import { TaskRunner } from '../../logic/taskRunner/TaskRunner';
-import { TaskCollection } from '../../logic/taskRunner/TaskCollection';
+import { ITaskRunnerOptions, TaskRunner } from '../../logic/taskRunner/TaskRunner';
 import { Utilities } from '../../utilities/Utilities';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
@@ -27,6 +26,7 @@ import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { IRushConfigurationProjectJson, RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { Selection } from '../../logic/Selection';
+import { IProjectChangeResult, ProjectWatcher } from '../../logic/ProjectWatcher';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -42,6 +42,14 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
    * Optional command to run. Otherwise, use the `actionName` as the command to run.
    */
   commandToRun?: string;
+}
+
+interface IExecuteInternalOptions {
+  taskSelectorOptions: ITaskSelectorConstructor;
+  taskRunnerOptions: ITaskRunnerOptions;
+  stopwatch: Stopwatch;
+  ignoreHooks?: boolean;
+  terminal: Terminal;
 }
 
 /**
@@ -68,6 +76,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private _impactedByExceptProject!: CommandLineStringListParameter;
   private _fromVersionPolicy!: CommandLineStringListParameter;
   private _toVersionPolicy!: CommandLineStringListParameter;
+  private _watchParameter!: CommandLineFlagParameter;
   private _verboseParameter!: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
   private _ignoreHooksParameter!: CommandLineFlagParameter;
@@ -158,7 +167,7 @@ export class BulkScriptAction extends BaseScriptAction {
       Selection.expandAllConsumers(impactedByProjects)
     );
 
-    const taskSelector: TaskSelector = new TaskSelector({
+    const taskSelectorOptions: ITaskSelectorConstructor = {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
       selection,
@@ -169,44 +178,98 @@ export class BulkScriptAction extends BaseScriptAction {
       ignoreMissingScript: this._ignoreMissingScript,
       ignoreDependencyOrder: this._ignoreDependencyOrder,
       packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun)
-    });
+    };
 
-    // Register all tasks with the task collection
-    const taskCollection: TaskCollection = taskSelector.registerTasks();
-
-    const taskRunner: TaskRunner = new TaskRunner(taskCollection.getOrderedTasks(), {
+    const taskRunnerOptions: ITaskRunnerOptions = {
       quietMode: isQuietMode,
       parallelism: parallelism,
       changedProjectsOnly: changedProjectsOnly,
       allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
+    };
+
+    const executeOptions: IExecuteInternalOptions = {
+      taskSelectorOptions,
+      taskRunnerOptions,
+      stopwatch,
+      terminal
+    };
+
+    if (this._watchParameter.value) {
+      await this.runWatch(executeOptions);
+    } else {
+      await this._runOnce(executeOptions);
+    }
+  }
+
+  /**
+   * Runs the command in watch mode. Fundamentally is a simple loop:
+   * 1) Wait for a change to one or more projects in the selection (skipped initially)
+   * 2) Invoke the command on the changed projects, and, if applicable, downstream projects
+   * 3) Goto (1)
+   */
+  protected async runWatch(options: IExecuteInternalOptions): Promise<void> {
+    const {
+      taskSelectorOptions: { selection: initialSelection },
+      stopwatch,
+      terminal
+    } = options;
+
+    const projectWatcher: ProjectWatcher = new ProjectWatcher({
+      debounceMilliseconds: 1000,
+      rushConfiguration: this.rushConfiguration,
+      selection: initialSelection
     });
 
-    try {
-      await taskRunner.executeAsync();
+    // Loop until Ctrl+C
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      // Report so that the developer can always see that it is in watch mode.
+      terminal.writeLine(
+        `Watching for changes to ${initialSelection.size} ${
+          initialSelection.size === 1 ? 'project' : 'projects'
+        }. Press Ctrl+C to exit.`
+      );
 
-      stopwatch.stop();
-      console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
+      // On the initial invocation, this promise will return immediately with the full set of projects
+      const change: IProjectChangeResult = await projectWatcher.waitForChange();
 
-      this._doAfterTask(stopwatch, true);
-    } catch (error) {
-      stopwatch.stop();
+      let selection: ReadonlySet<RushConfigurationProject> = change.changedProjects;
 
-      if (error instanceof AlreadyReportedError) {
-        console.log(`rush ${this.actionName} (${stopwatch.toString()})`);
-      } else {
-        if (error && error.message) {
-          if (this.parser.isDebug) {
-            console.log('Error: ' + error.stack);
-          } else {
-            console.log('Error: ' + error.message);
-          }
-        }
-
-        console.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
+      if (stopwatch.state === StopwatchState.Stopped) {
+        // Clear and reset the stopwatch so that we only report time from a single execution at a time
+        stopwatch.reset();
+        stopwatch.start();
       }
 
-      this._doAfterTask(stopwatch, false);
-      throw new AlreadyReportedError();
+      terminal.writeLine(`Detected changes in ${selection.size} project${selection.size === 1 ? '' : 's'}:`);
+      const names: string[] = [...selection].map((x) => x.packageName).sort();
+      for (const name of names) {
+        terminal.writeLine(`    ${colors.cyan(name)}`);
+      }
+
+      // If the command ignores dependency order, that means that only the changed projects should be affected
+      // That said, running watch for commands that ignore dependency order may have unexpected results
+      if (!this._ignoreDependencyOrder) {
+        selection = Selection.intersection(Selection.expandAllConsumers(selection), initialSelection);
+      }
+
+      const executeOptions: IExecuteInternalOptions = {
+        taskSelectorOptions: {
+          ...options.taskSelectorOptions,
+          // Revise down the set of projects to execute the command on
+          selection,
+          // Pass the PackageChangeAnalyzer from the state differ to save a bit of overhead
+          packageChangeAnalyzer: change.state
+        },
+        taskRunnerOptions: options.taskRunnerOptions,
+        stopwatch,
+        // For now, don't run pre-build or post-build in watch mode
+        ignoreHooks: true,
+        terminal
+      };
+
+      // Delegate the the underlying command, for only the projects that need reprocessing
+      await this._runOnce(executeOptions);
     }
   }
 
@@ -329,6 +392,13 @@ export class BulkScriptAction extends BaseScriptAction {
         ' For details, refer to the website article "Selecting subsets of projects".'
     });
 
+    this._watchParameter = this.defineFlagParameter({
+      parameterLongName: '--watch',
+      parameterShortName: '-w',
+      description:
+        'Activates a file system watcher to dynamically re-invoke the command when projects change.'
+    });
+
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
@@ -349,6 +419,54 @@ export class BulkScriptAction extends BaseScriptAction {
     });
 
     this.defineScriptParameters();
+  }
+
+  /**
+   * Runs a single invocation of the command
+   */
+  private async _runOnce(options: IExecuteInternalOptions): Promise<void> {
+    const taskSelector: TaskSelector = new TaskSelector(options.taskSelectorOptions);
+
+    // Register all tasks with the task collection
+
+    const taskRunner: TaskRunner = new TaskRunner(
+      taskSelector.registerTasks().getOrderedTasks(),
+      options.taskRunnerOptions
+    );
+
+    const { ignoreHooks, stopwatch } = options;
+
+    try {
+      await taskRunner.executeAsync();
+
+      stopwatch.stop();
+      console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
+
+      if (!ignoreHooks) {
+        this._doAfterTask(stopwatch, true);
+      }
+    } catch (error) {
+      stopwatch.stop();
+
+      if (error instanceof AlreadyReportedError) {
+        console.log(`rush ${this.actionName} (${stopwatch.toString()})`);
+      } else {
+        if (error && error.message) {
+          if (this.parser.isDebug) {
+            console.log('Error: ' + error.stack);
+          } else {
+            console.log('Error: ' + error.message);
+          }
+        }
+
+        console.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
+      }
+
+      if (!ignoreHooks) {
+        this._doAfterTask(stopwatch, false);
+      }
+      throw new AlreadyReportedError();
+    }
   }
 
   private async _getProjectNames(): Promise<string[]> {
