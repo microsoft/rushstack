@@ -19,6 +19,7 @@ export interface ITaskSelectorConstructor {
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
   packageDepsFilename: string;
+  packageChangeAnalyzer?: PackageChangeAnalyzer;
 }
 
 /**
@@ -34,7 +35,9 @@ export class TaskSelector {
   public constructor(options: ITaskSelectorConstructor) {
     this._options = options;
 
-    this._packageChangeAnalyzer = new PackageChangeAnalyzer(options.rushConfiguration);
+    const { packageChangeAnalyzer = new PackageChangeAnalyzer(options.rushConfiguration) } = options;
+
+    this._packageChangeAnalyzer = packageChangeAnalyzer;
   }
 
   public static getScriptToRun(
