@@ -32,7 +32,7 @@ import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { ExperimentsConfiguration } from './ExperimentsConfiguration';
 import { PackageNameParsers } from './PackageNameParsers';
 import { RepoStateFile } from '../logic/RepoStateFile';
-import { PathTree } from '../logic/PathTree';
+import { LookupByPath } from '../logic/LookupByPath';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -460,7 +460,7 @@ export class RushConfiguration {
   private _ensureConsistentVersions: boolean;
   private _suppressNodeLtsWarning: boolean;
   private _variants: Set<string>;
-  private _projectByRelativePath: PathTree<RushConfigurationProject>;
+  private _projectByRelativePath: LookupByPath<RushConfigurationProject>;
 
   // "approvedPackagesPolicy" feature
   private _approvedPackagesPolicy: ApprovedPackagesPolicy;
@@ -727,7 +727,7 @@ export class RushConfiguration {
       }
     }
 
-    const pathTree: PathTree<RushConfigurationProject> = new PathTree<RushConfigurationProject>();
+    const pathTree: LookupByPath<RushConfigurationProject> = new LookupByPath<RushConfigurationProject>();
     for (const project of this.projects) {
       const relativePath: string = Path.convertToSlashes(project.projectRelativeFolder);
       pathTree.set(relativePath, project);
@@ -1615,7 +1615,7 @@ export class RushConfiguration {
    * @returns The found project, or undefined if no match was found
    */
   public findProjectForPosixRelativePath(posixRelativePath: string): RushConfigurationProject | undefined {
-    return this._projectByRelativePath.getNearestParent(posixRelativePath);
+    return this._projectByRelativePath.findNearestAncestor(posixRelativePath);
   }
 
   /**

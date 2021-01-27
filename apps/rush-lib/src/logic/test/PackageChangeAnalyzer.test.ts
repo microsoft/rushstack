@@ -6,7 +6,7 @@ import * as path from 'path';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-import { PathTree } from '../PathTree';
+import { LookupByPath } from '../LookupByPath';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 const packageA: string = 'project-a';
@@ -39,7 +39,7 @@ describe('PackageChangeAnalyzer', () => {
       packageName: packageA,
       projectRelativeFolder: packageAPath
     } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-    const pathTree: PathTree<RushConfigurationProject> = new PathTree([
+    const pathTree: LookupByPath<RushConfigurationProject> = new LookupByPath([
       [packageAPath.replace(/\\/g, '/'), project]
     ]);
 
@@ -52,7 +52,7 @@ describe('PackageChangeAnalyzer', () => {
         return 'common/config/rush/pnpm-lock.yaml';
       },
       findProjectForPosixRelativePath(path: string): object | undefined {
-        return pathTree.getNearestParent(path);
+        return pathTree.findNearestAncestor(path);
       }
     } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
