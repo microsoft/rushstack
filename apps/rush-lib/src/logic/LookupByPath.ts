@@ -51,7 +51,7 @@ export class LookupByPath<TItem> {
 
     if (entries) {
       for (const [path, item] of entries) {
-        this.set(path, item);
+        this.setItem(path, item);
       }
     }
   }
@@ -85,18 +85,22 @@ export class LookupByPath<TItem> {
   /**
    * Associates the value with the specified serialized path.
    * If a value is already associated, will overwrite.
+   *
+   * @returns this, for chained calls
    */
-  public set(serializedPath: string, value: TItem): this {
-    return this.setFromPathSegments(LookupByPath.iteratePathSegments(serializedPath, this.delimiter), value);
+  public setItem(serializedPath: string, value: TItem): this {
+    return this.setItemFromSegments(LookupByPath.iteratePathSegments(serializedPath, this.delimiter), value);
   }
 
   /**
    * Associates the value with the specified path.
    * If a value is already associated, will overwrite.
+   *
+   * @returns this, for chained calls
    */
-  public setFromPathSegments(segments: Iterable<string>, value: TItem): this {
+  public setItemFromSegments(pathSegments: Iterable<string>, value: TItem): this {
     let node: IPathTreeNode<TItem> = this._root;
-    for (const segment of segments) {
+    for (const segment of pathSegments) {
       if (!node.children) {
         node.children = new Map();
       }
@@ -118,33 +122,37 @@ export class LookupByPath<TItem> {
   }
 
   /**
-   * Gets the nearest existing ancestor to the specified serialized path
+   * Searches for the item associated with `childPath`, or the nearest ancestor of that path that
+   * has an associated item.
+   *
+   * @returns the found item, or `undefined` if no item was found
    *
    * @example
    * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
-   * tree.findNearestAncestor('foo/baz'); // returns 1
-   * tree.findNearestAncestor('foo/bar/baz'); // returns 2
+   * tree.findChildPath('foo/baz'); // returns 1
+   * tree.findChildPath('foo/bar/baz'); // returns 2
    */
-  public findNearestAncestor(serializedPath: string): TItem | undefined {
-    return this.findNearestAncestorFromPathSegments(
-      LookupByPath.iteratePathSegments(serializedPath, this.delimiter)
-    );
+  public findChildPath(childPath: string): TItem | undefined {
+    return this.findChildPathFromSegments(LookupByPath.iteratePathSegments(childPath, this.delimiter));
   }
 
   /**
-   * Gets the nearest existing ancestor to the specified path segment iterable
+   * Searches for the item associated with `childPathSegments`, or the nearest ancestor of that path that
+   * has an associated item.
+   *
+   * @returns the found item, or `undefined` if no item was found
    *
    * @example
    * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
-   * tree.findNearestAncestorFromPathSegments(['foo', 'baz']); // returns 1
-   * tree.findNearestAncestorFromPathSegments(['foo','bar', 'baz']); // returns 2
+   * tree.findChildPathFromSegments(['foo', 'baz']); // returns 1
+   * tree.findChildPathFromSegments(['foo','bar', 'baz']); // returns 2
    */
-  public findNearestAncestorFromPathSegments(segments: Iterable<string>): TItem | undefined {
+  public findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined {
     let node: IPathTreeNode<TItem> = this._root;
     let best: TItem | undefined = node.value;
     // Trivial cases
     if (node.children) {
-      for (const segment of segments) {
+      for (const segment of childPathSegments) {
         const child: IPathTreeNode<TItem> | undefined = node.children.get(segment);
         if (!child) {
           break;

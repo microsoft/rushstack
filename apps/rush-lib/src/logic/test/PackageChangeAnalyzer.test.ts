@@ -52,7 +52,7 @@ describe('PackageChangeAnalyzer', () => {
         return 'common/config/rush/pnpm-lock.yaml';
       },
       findProjectForPosixRelativePath(path: string): object | undefined {
-        return pathTree.findNearestAncestor(path);
+        return pathTree.findChildPath(path);
       }
     } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 

@@ -19,12 +19,12 @@ describe('iteratePathSegments', () => {
   });
 });
 
-describe('findNearestAncestor', () => {
+describe('findChildPath', () => {
   it('returns empty for an empty tree', () => {
-    expect(new LookupByPath().findNearestAncestor('foo')).toEqual(undefined);
+    expect(new LookupByPath().findChildPath('foo')).toEqual(undefined);
   });
   it('returns the matching node for a trivial tree', () => {
-    expect(new LookupByPath([['foo', 1]]).findNearestAncestor('foo')).toEqual(1);
+    expect(new LookupByPath([['foo', 1]]).findChildPath('foo')).toEqual(1);
   });
   it('returns the matching node for a single-layer tree', () => {
     const tree: LookupByPath<number> = new LookupByPath([
@@ -33,10 +33,10 @@ describe('findNearestAncestor', () => {
       ['baz', 3]
     ]);
 
-    expect(tree.findNearestAncestor('foo')).toEqual(1);
-    expect(tree.findNearestAncestor('bar')).toEqual(2);
-    expect(tree.findNearestAncestor('baz')).toEqual(3);
-    expect(tree.findNearestAncestor('buzz')).toEqual(undefined);
+    expect(tree.findChildPath('foo')).toEqual(1);
+    expect(tree.findChildPath('bar')).toEqual(2);
+    expect(tree.findChildPath('baz')).toEqual(3);
+    expect(tree.findChildPath('buzz')).toEqual(undefined);
   });
   it('returns the matching parent for multi-layer queries', () => {
     const tree: LookupByPath<number> = new LookupByPath([
@@ -45,10 +45,10 @@ describe('findNearestAncestor', () => {
       ['baz', 3]
     ]);
 
-    expect(tree.findNearestAncestor('foo/bar')).toEqual(1);
-    expect(tree.findNearestAncestor('bar/baz')).toEqual(2);
-    expect(tree.findNearestAncestor('baz/foo')).toEqual(3);
-    expect(tree.findNearestAncestor('foo/foo')).toEqual(1);
+    expect(tree.findChildPath('foo/bar')).toEqual(1);
+    expect(tree.findChildPath('bar/baz')).toEqual(2);
+    expect(tree.findChildPath('baz/foo')).toEqual(3);
+    expect(tree.findChildPath('foo/foo')).toEqual(1);
   });
   it('returns the matching parent for multi-layer queries in multi-layer trees', () => {
     const tree: LookupByPath<number> = new LookupByPath([
@@ -61,28 +61,28 @@ describe('findNearestAncestor', () => {
       ['baz/baz/baz/baz', 7]
     ]);
 
-    expect(tree.findNearestAncestor('foo/foo')).toEqual(1);
-    expect(tree.findNearestAncestor('foo/bar\\baz')).toEqual(1);
+    expect(tree.findChildPath('foo/foo')).toEqual(1);
+    expect(tree.findChildPath('foo/bar\\baz')).toEqual(1);
 
-    expect(tree.findNearestAncestor('bar/baz')).toEqual(2);
+    expect(tree.findChildPath('bar/baz')).toEqual(2);
 
-    expect(tree.findNearestAncestor('baz/bar')).toEqual(3);
-    expect(tree.findNearestAncestor('baz/baz')).toEqual(3);
-    expect(tree.findNearestAncestor('baz/baz/baz')).toEqual(3);
+    expect(tree.findChildPath('baz/bar')).toEqual(3);
+    expect(tree.findChildPath('baz/baz')).toEqual(3);
+    expect(tree.findChildPath('baz/baz/baz')).toEqual(3);
 
-    expect(tree.findNearestAncestor('foo/bar')).toEqual(4);
-    expect(tree.findNearestAncestor('foo/bar/foo')).toEqual(4);
+    expect(tree.findChildPath('foo/bar')).toEqual(4);
+    expect(tree.findChildPath('foo/bar/foo')).toEqual(4);
 
-    expect(tree.findNearestAncestor('foo/bar/baz')).toEqual(5);
-    expect(tree.findNearestAncestor('foo/bar/baz/baz/baz/baz/baz')).toEqual(5);
+    expect(tree.findChildPath('foo/bar/baz')).toEqual(5);
+    expect(tree.findChildPath('foo/bar/baz/baz/baz/baz/baz')).toEqual(5);
 
-    expect(tree.findNearestAncestor('baz/foo/')).toEqual(6);
+    expect(tree.findChildPath('baz/foo/')).toEqual(6);
 
-    expect(tree.findNearestAncestor('baz/baz/baz/baz')).toEqual(7);
+    expect(tree.findChildPath('baz/baz/baz/baz')).toEqual(7);
 
-    expect(tree.findNearestAncestor('')).toEqual(undefined);
-    expect(tree.findNearestAncestor('foofoo')).toEqual(undefined);
-    expect(tree.findNearestAncestor('foo\\bar\\baz')).toEqual(undefined);
+    expect(tree.findChildPath('')).toEqual(undefined);
+    expect(tree.findChildPath('foofoo')).toEqual(undefined);
+    expect(tree.findChildPath('foo\\bar\\baz')).toEqual(undefined);
   });
   it('handles custom delimiters', () => {
     const tree: LookupByPath<number> = new LookupByPath(
@@ -93,8 +93,8 @@ describe('findNearestAncestor', () => {
       ','
     );
 
-    expect(tree.findNearestAncestor('foo/bar,baz')).toEqual(2);
-    expect(tree.findNearestAncestor('foo,bar/baz')).toEqual(undefined);
-    expect(tree.findNearestAncestorFromPathSegments(['foo', 'bar', 'baz'])).toEqual(1);
+    expect(tree.findChildPath('foo/bar,baz')).toEqual(2);
+    expect(tree.findChildPath('foo,bar/baz')).toEqual(undefined);
+    expect(tree.findChildPathFromSegments(['foo', 'bar', 'baz'])).toEqual(1);
   });
 });

@@ -730,7 +730,7 @@ export class RushConfiguration {
     const pathTree: LookupByPath<RushConfigurationProject> = new LookupByPath<RushConfigurationProject>();
     for (const project of this.projects) {
       const relativePath: string = Path.convertToSlashes(project.projectRelativeFolder);
-      pathTree.set(relativePath, project);
+      pathTree.setItem(relativePath, project);
     }
     this._projectByRelativePath = pathTree;
   }
@@ -1615,7 +1615,7 @@ export class RushConfiguration {
    * @returns The found project, or undefined if no match was found
    */
   public findProjectForPosixRelativePath(posixRelativePath: string): RushConfigurationProject | undefined {
-    return this._projectByRelativePath.findNearestAncestor(posixRelativePath);
+    return this._projectByRelativePath.findChildPath(posixRelativePath);
   }
 
   /**
