@@ -1612,6 +1612,7 @@ export class RushConfiguration {
 
   /**
    * Finds the project that owns the specified POSIX relative path (e.g. apps/rush-lib).
+   * The path is case-sensitive, so will only return a project if its projectRelativePath matches the casing.
    * @returns The found project, or undefined if no match was found
    */
   public findProjectForPosixRelativePath(posixRelativePath: string): RushConfigurationProject | undefined {
