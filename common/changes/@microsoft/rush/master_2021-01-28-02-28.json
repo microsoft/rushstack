@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Corrected spelling mistakes in rush.json",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "1761608+gregbacchus@users.noreply.github.com"
+}
