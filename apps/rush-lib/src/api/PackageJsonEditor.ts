@@ -217,6 +217,7 @@ export class PackageJsonEditor {
 
   public saveIfModified(): boolean {
     if (this._modified) {
+      JsonFile.save(this._sanitize(), this._filePath, { updateExistingFile: true });
       JsonFile.save(this._normalize(), this._filePath, { updateExistingFile: true });
       this._modified = false;
       return true;
@@ -228,11 +229,16 @@ export class PackageJsonEditor {
     this._modified = true;
   }
 
-  private _normalize(): IPackageJson {
+  private _sanitize(): IPackageJson {
     delete this._data.dependencies;
     delete this._data.optionalDependencies;
     delete this._data.peerDependencies;
     delete this._data.devDependencies;
+    return this._data;
+  }
+
+  private _normalize(): IPackageJson {
+    this._sanitize();
 
     const keys: string[] = [...this._dependencies.keys()].sort();
 
