@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "keep alphabetic order for dependencies when updating package.json",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "liucheng.tech@outlook.com"
+}
