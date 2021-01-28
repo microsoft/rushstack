@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Rework package deps matching",
+      "comment": "Improve performance of association of repo file states with projects to speed up build commands in large repos.",
       "type": "none"
     }
   ],
