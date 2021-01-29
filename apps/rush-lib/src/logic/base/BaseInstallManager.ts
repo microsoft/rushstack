@@ -99,14 +99,14 @@ export interface IInstallManagerOptions {
   maxInstallAttempts: number;
 
   /**
-   * The list of projects that should be installed, along with project dependencies.
+   * The set of projects that should be installed, along with project dependencies.
    */
-  toProjects: ReadonlyArray<RushConfigurationProject>;
+  toProjects: ReadonlySet<RushConfigurationProject>;
 
   /**
-   * The list of projects that should be installed, along with dependencies of the project.
+   * The set of projects that should be installed, along with dependencies of the project.
    */
-  fromProjects: ReadonlyArray<RushConfigurationProject>;
+  fromProjects: ReadonlySet<RushConfigurationProject>;
 }
 
 /**
@@ -153,8 +153,7 @@ export abstract class BaseInstallManager {
   }
 
   public async doInstall(): Promise<void> {
-    const isFilteredInstall: boolean =
-      this.options.toProjects.length > 0 || this.options.fromProjects.length > 0;
+    const isFilteredInstall: boolean = this.options.toProjects.size > 0 || this.options.fromProjects.size > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
 

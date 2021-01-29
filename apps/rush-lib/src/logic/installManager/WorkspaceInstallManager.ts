@@ -522,7 +522,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (!workspaceImporter) {
       // Filtered installs will not contain all projects in the shrinkwrap, but if one is
       // missing during a full install, something has gone wrong
-      if (this.options.toProjects.length === 0 && this.options.fromProjects.length === 0) {
+      if (this.options.toProjects.size === 0 && this.options.fromProjects.size === 0) {
         throw new InternalError(
           `Cannot find shrinkwrap entry using importer key for workspace project: ${importerKey}`
         );
@@ -531,7 +531,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     const localDependencyProjectNames: Set<string> = new Set<string>(
-      project.localDependencyProjects.map((x) => x.packageName)
+      (function* (deps: Iterable<RushConfigurationProject>): Iterable<string> {
+        for (const dep of deps) {
+          yield dep.packageName;
+        }
+      })(project.localDependencyProjectSet)
     );
 
     // Loop through non-local dependencies. Skip peer dependencies because they're only a constraint

@@ -44,7 +44,7 @@ export class TaskCollection {
    * @param taskName - the string name of the task for which we are defining dependencies. A task with this
    * name must already have been registered.
    */
-  public addDependencies(taskName: string, taskDependencies: string[]): void {
+  public addDependencies(taskName: string, taskDependencies: Iterable<string>): void {
     const task: Task | undefined = this._tasks.get(taskName);
 
     if (!task) {

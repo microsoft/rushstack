@@ -24,8 +24,9 @@ import { Utilities } from '../../utilities/Utilities';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
-import { IRushConfigurationProjectJson } from '../../api/RushConfigurationProject';
+import { IRushConfigurationProjectJson, RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import * as Selection from '../../logic/Selection';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -59,8 +60,8 @@ export class BulkScriptAction extends BaseScriptAction {
   private _commandToRun: string;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
-  private _fromFlag!: CommandLineStringListParameter;
-  private _toFlag!: CommandLineStringListParameter;
+  private _fromProject!: CommandLineStringListParameter;
+  private _toProject!: CommandLineStringListParameter;
   private _fromVersionPolicy!: CommandLineStringListParameter;
   private _toVersionPolicy!: CommandLineStringListParameter;
   private _verboseParameter!: CommandLineFlagParameter;
@@ -115,11 +116,26 @@ export class BulkScriptAction extends BaseScriptAction {
       | BuildCacheConfiguration
       | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(terminal, this.rushConfiguration);
 
+    const fromProjects: Set<RushConfigurationProject> = Selection.union(
+      this.evaluateProjects(this._fromProject),
+      this.evaluateVersionPolicyProjects(this._fromVersionPolicy)
+    );
+
+    const toProjects: Set<RushConfigurationProject> = Selection.union(
+      // --to
+      this.evaluateProjects(this._toProject),
+      // --to-version-policy
+      this.evaluateVersionPolicyProjects(this._toVersionPolicy),
+      // --from / --from-version-policy
+      Selection.expandAllDependents(fromProjects)
+    );
+
+    const selection: Set<RushConfigurationProject> = Selection.expandAllDependencies(toProjects);
+
     const taskSelector: TaskSelector = new TaskSelector({
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
-      toProjects: this.mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy),
-      fromProjects: this.mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy),
+      selection,
       commandToRun: this._commandToRun,
       customParameterValues,
       isQuietMode: isQuietMode,
@@ -182,37 +198,46 @@ export class BulkScriptAction extends BaseScriptAction {
           ' operating system and number of CPU cores.'
       });
     }
-    this._toFlag = this.defineStringListParameter({
+
+    this._toProject = this.defineStringListParameter({
       parameterLongName: '--to',
       parameterShortName: '-t',
       argumentName: 'PROJECT',
       description:
-        'Run command in the specified project and all of its dependencies. "." can be used as shorthand ' +
-        'to specify the project in the current working directory.',
+        'Run command on the selection instead of all projects. ' +
+        'Adds the specified project and all its dependencies to the current selection. ' +
+        '"." can be used as shorthand to specify the project in the current working directory. ' +
+        'Additional use of "--from" or "--to" will further expand the selection.',
       completions: this._getProjectNames.bind(this)
+    });
+
+    this._fromProject = this.defineStringListParameter({
+      parameterLongName: '--from',
+      parameterShortName: '-f',
+      argumentName: 'PROJECT',
+      description:
+        'Run command on the selection instead of all projects. ' +
+        'Add the specified project and all of its direct or indirect dependencies to the current selection. ' +
+        '"." can be used as shorthand to specify the project in the current working directory. ' +
+        'Additional use of "--from" or "--to" will further expand the selection.',
+      completions: this._getProjectNames.bind(this)
+    });
+
+    this._toVersionPolicy = this.defineStringListParameter({
+      parameterLongName: '--to-version-policy',
+      argumentName: 'VERSION_POLICY_NAME',
+      description:
+        'Run command on the selection instead of all projects. ' +
+        'Adds all projects with the specified version policy, and all dependencies thereof, to the current selection.'
     });
     this._fromVersionPolicy = this.defineStringListParameter({
       parameterLongName: '--from-version-policy',
       argumentName: 'VERSION_POLICY_NAME',
       description:
-        'Run command in all projects with the specified version policy ' +
-        'and all projects that directly or indirectly depend on projects with the specified version policy'
+        'Run command on the selection instead of all projects. ' +
+        'Adds all projects with the specified version policy, and all projects that depend on them, to the current selection.'
     });
-    this._toVersionPolicy = this.defineStringListParameter({
-      parameterLongName: '--to-version-policy',
-      argumentName: 'VERSION_POLICY_NAME',
-      description:
-        'Run command in all projects with the specified version policy and all of their dependencies'
-    });
-    this._fromFlag = this.defineStringListParameter({
-      parameterLongName: '--from',
-      parameterShortName: '-f',
-      argumentName: 'PROJECT',
-      description:
-        'Run command in the specified project and all projects that directly or indirectly depend on the ' +
-        'specified project. "." can be used as shorthand to specify the project in the current working directory.',
-      completions: this._getProjectNames.bind(this)
-    });
+
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
@@ -296,8 +321,8 @@ export class BulkScriptAction extends BaseScriptAction {
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
     const extraData: { [key: string]: string } = {
-      command_to: (this._toFlag.values.length > 0).toString(),
-      command_from: (this._fromFlag.values.length > 0).toString()
+      command_to: (this._toProject.values.length > 0).toString(),
+      command_from: (this._fromProject.values.length > 0).toString()
     };
 
     for (const customParameter of this.customParameters) {

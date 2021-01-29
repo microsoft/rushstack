@@ -301,7 +301,7 @@ export class ProjectBuildCache {
           return undefined;
         } else {
           projectStates.push(projectState);
-          for (const dependency of projectToProcess.localDependencyProjects) {
+          for (const dependency of projectToProcess.localDependencyProjectSet) {
             if (!projectsThatHaveBeenProcessed.has(dependency)) {
               newProjectsToProcess.add(dependency);
             }

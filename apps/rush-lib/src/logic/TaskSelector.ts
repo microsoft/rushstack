@@ -11,8 +11,7 @@ import { TaskCollection } from './taskRunner/TaskCollection';
 export interface ITaskSelectorConstructor {
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration: BuildCacheConfiguration | undefined;
-  toProjects: ReadonlyArray<RushConfigurationProject>;
-  fromProjects: ReadonlyArray<RushConfigurationProject>;
+  selection: Set<RushConfigurationProject>;
   commandToRun: string;
   customParameterValues: string[];
   isQuietMode: boolean;
@@ -29,7 +28,6 @@ export interface ITaskSelectorConstructor {
  *  - registering the necessary ProjectBuilders with the TaskRunner, which actually orchestrates execution
  */
 export class TaskSelector {
-  private _taskCollection: TaskCollection;
   private _options: ITaskSelectorConstructor;
   private _packageChangeAnalyzer: PackageChangeAnalyzer;
 
@@ -37,7 +35,6 @@ export class TaskSelector {
     this._options = options;
 
     this._packageChangeAnalyzer = new PackageChangeAnalyzer(options.rushConfiguration);
-    this._taskCollection = new TaskCollection();
   }
 
   public static getScriptToRun(
@@ -60,143 +57,51 @@ export class TaskSelector {
   }
 
   public registerTasks(): TaskCollection {
-    if (this._options.toProjects.length > 0) {
-      this._registerToProjects(this._options.toProjects);
-    }
-    if (this._options.fromProjects.length > 0) {
-      this._registerFromProjects(this._options.fromProjects);
-    }
-    if (this._options.toProjects.length === 0 && this._options.fromProjects.length === 0) {
-      this._registerAll();
-    }
+    const selectedProjects: Set<RushConfigurationProject> = this._computeSelectedProjects();
 
-    return this._taskCollection;
+    return this._createTaskCollection(selectedProjects);
   }
 
-  private _registerToProjects(toProjects: ReadonlyArray<RushConfigurationProject>): void {
-    const dependencies: Map<string, RushConfigurationProject> = new Map<string, RushConfigurationProject>();
+  private _computeSelectedProjects(): Set<RushConfigurationProject> {
+    const { selection } = this._options;
 
-    for (const toProject of toProjects) {
-      this._collectAllDependencies(toProject, dependencies);
+    if (selection.size) {
+      return selection;
     }
 
-    // Register any dependencies it may have
-    for (const dependencyProject of dependencies.values()) {
-      this._registerTask(dependencyProject);
-    }
-
-    if (!this._options.ignoreDependencyOrder) {
-      // Add ordering relationships for each dependency
-      for (const dependencyProject of dependencies.values()) {
-        this._taskCollection.addDependencies(
-          ProjectBuilder.getTaskName(dependencyProject),
-          dependencyProject.localDependencyProjects.map((x) => ProjectBuilder.getTaskName(x))
-        );
-      }
-    }
+    // Default to all projects
+    return new Set(this._options.rushConfiguration.projects);
   }
 
-  private _registerFromProjects(fromProjects: ReadonlyArray<RushConfigurationProject>): void {
-    const dependentList: Map<string, Set<RushConfigurationProject>> = this._getDependentGraph();
-    const dependents: Map<string, RushConfigurationProject> = new Map<string, RushConfigurationProject>();
+  private _createTaskCollection(projects: ReadonlySet<RushConfigurationProject>): TaskCollection {
+    const taskCollection: TaskCollection = new TaskCollection();
 
-    for (const fromProject of fromProjects) {
-      this._collectAllDependents(dependentList, fromProject, dependents);
-    }
-
-    // Register all downstream dependents
-    for (const dependentProject of dependents.values()) {
-      this._registerTask(dependentProject);
-    }
-
-    if (!this._options.ignoreDependencyOrder) {
-      // Only add ordering relationships for projects which have been registered
-      // e.g. package C may depend on A & B, but if we are only building A's downstream, we will ignore B
-      for (const dependentProject of dependents.values()) {
-        this._taskCollection.addDependencies(
-          ProjectBuilder.getTaskName(dependentProject),
-          dependentProject.localDependencyProjects
-            .filter((dep) => dependents.has(dep.packageName))
-            .map((x) => ProjectBuilder.getTaskName(x))
-        );
-      }
-    }
-  }
-
-  private _registerAll(): void {
     // Register all tasks
-    for (const rushProject of this._options.rushConfiguration.projects) {
-      this._registerTask(rushProject);
+    for (const rushProject of projects) {
+      this._registerTask(rushProject, taskCollection);
+    }
+
+    function* getDependencyTaskNames(project: RushConfigurationProject): Iterable<string> {
+      for (const dep of project.localDependencyProjectSet) {
+        // Only add relationships for projects in the set
+        if (projects.has(dep)) {
+          yield ProjectBuilder.getTaskName(dep);
+        }
+      }
     }
 
     if (!this._options.ignoreDependencyOrder) {
       // Add ordering relationships for each dependency
-      for (const project of this._options.rushConfiguration.projects) {
-        this._taskCollection.addDependencies(
-          ProjectBuilder.getTaskName(project),
-          project.localDependencyProjects.map((x) => ProjectBuilder.getTaskName(x))
-        );
-      }
-    }
-  }
-
-  /**
-   * Collects all upstream dependencies for a certain project
-   */
-  private _collectAllDependencies(
-    project: RushConfigurationProject,
-    result: Map<string, RushConfigurationProject>
-  ): void {
-    if (!result.has(project.packageName)) {
-      result.set(project.packageName, project);
-
-      for (const dependencyProject of project.localDependencyProjects) {
-        this._collectAllDependencies(dependencyProject, result);
-      }
-    }
-  }
-
-  /**
-   * Collects all downstream dependents of a certain project
-   */
-  private _collectAllDependents(
-    dependentList: Map<string, Set<RushConfigurationProject>>,
-    project: RushConfigurationProject,
-    result: Map<string, RushConfigurationProject>
-  ): void {
-    if (!result.has(project.packageName)) {
-      result.set(project.packageName, project);
-
-      for (const dependent of dependentList.get(project.packageName) || []) {
-        this._collectAllDependents(dependentList, dependent, result);
-      }
-    }
-  }
-
-  /**
-   * Inverts the localLinks to arrive at the dependent graph. This helps when using the --from flag
-   */
-  private _getDependentGraph(): Map<string, Set<RushConfigurationProject>> {
-    const dependentList: Map<string, Set<RushConfigurationProject>> = new Map<
-      string,
-      Set<RushConfigurationProject>
-    >();
-
-    for (const project of this._options.rushConfiguration.projects) {
-      for (const { packageName } of project.localDependencyProjects) {
-        if (!dependentList.has(packageName)) {
-          dependentList.set(packageName, new Set<RushConfigurationProject>());
-        }
-
-        dependentList.get(packageName)!.add(project);
+      for (const project of projects) {
+        taskCollection.addDependencies(ProjectBuilder.getTaskName(project), getDependencyTaskNames(project));
       }
     }
 
-    return dependentList;
+    return taskCollection;
   }
 
-  private _registerTask(project: RushConfigurationProject | undefined): void {
-    if (!project || this._taskCollection.hasTask(ProjectBuilder.getTaskName(project))) {
+  private _registerTask(project: RushConfigurationProject | undefined, taskCollection: TaskCollection): void {
+    if (!project || taskCollection.hasTask(ProjectBuilder.getTaskName(project))) {
       return;
     }
 
@@ -211,7 +116,7 @@ export class TaskSelector {
       );
     }
 
-    this._taskCollection.addTask(
+    taskCollection.addTask(
       new ProjectBuilder({
         rushProject: project,
         rushConfiguration: this._options.rushConfiguration,

@@ -6,6 +6,8 @@ import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
 import { BaseInstallAction } from './BaseInstallAction';
 import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import * as Selection from '../../logic/Selection';
 
 export class InstallAction extends BaseInstallAction {
   protected _toFlag!: CommandLineStringListParameter;
@@ -73,6 +75,15 @@ export class InstallAction extends BaseInstallAction {
   }
 
   protected buildInstallOptions(): IInstallManagerOptions {
+    const toProjects: Set<RushConfigurationProject> = Selection.union<RushConfigurationProject>(
+      this.evaluateProjects(this._toFlag),
+      this.evaluateVersionPolicyProjects(this._toVersionPolicy)
+    );
+    const fromProjects: Set<RushConfigurationProject> = Selection.union<RushConfigurationProject>(
+      this.evaluateProjects(this._fromFlag),
+      this.evaluateVersionPolicyProjects(this._fromVersionPolicy)
+    );
+
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: false,
@@ -86,8 +97,8 @@ export class InstallAction extends BaseInstallAction {
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
-      toProjects: this.mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy),
-      fromProjects: this.mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy)
+      toProjects,
+      fromProjects
     };
   }
 }
