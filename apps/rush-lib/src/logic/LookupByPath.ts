@@ -135,7 +135,7 @@ export class LookupByPath<TItem> {
    * @returns the found item, or `undefined` if no item was found
    *
    * @example
-   * ```
+   * ```ts
    * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
    * tree.findChildPath('foo/baz'); // returns 1
    * tree.findChildPath('foo/bar/baz'); // returns 2
@@ -152,7 +152,7 @@ export class LookupByPath<TItem> {
    * @returns the found item, or `undefined` if no item was found
    *
    * @example
-   * ```
+   * ```ts
    * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
    * tree.findChildPathFromSegments(['foo', 'baz']); // returns 1
    * tree.findChildPathFromSegments(['foo','bar', 'baz']); // returns 2
