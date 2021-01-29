@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for --from flag for filtered installs when using workspaces",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "wbern@users.noreply.github.com"
+}

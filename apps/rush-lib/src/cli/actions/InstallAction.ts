@@ -9,7 +9,9 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 
 export class InstallAction extends BaseInstallAction {
   protected _toFlag!: CommandLineStringListParameter;
+  protected _fromFlag!: CommandLineStringListParameter;
   protected _toVersionPolicy!: CommandLineStringListParameter;
+  protected _fromVersionPolicy!: CommandLineStringListParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -44,12 +46,29 @@ export class InstallAction extends BaseInstallAction {
         'to specify the project in the current working directory. This argument is only valid in workspace ' +
         'environments.'
     });
+    this._fromFlag = this.defineStringListParameter({
+      parameterLongName: '--from',
+      parameterShortName: '-f',
+      argumentName: 'PROJECT2',
+      description:
+        'Run install in the specified project and all projects that directly or indirectly depend on the ' +
+        'specified project. "." can be used as shorthand to specify the project in the current working directory.' +
+        ' This argument is only valid in workspace environments.'
+    });
     this._toVersionPolicy = this.defineStringListParameter({
       parameterLongName: '--to-version-policy',
       argumentName: 'VERSION_POLICY_NAME',
       description:
         'Run install in all projects with the specified version policy and all of their dependencies. ' +
         'This argument is only valid in workspace environments.'
+    });
+    this._fromVersionPolicy = this.defineStringListParameter({
+      parameterLongName: '--from-version-policy',
+      argumentName: 'VERSION_POLICY_NAME',
+      description:
+        'Run command in all projects with the specified version policy ' +
+        'and all projects that directly or indirectly depend on projects with the specified version policy.' +
+        ' This argument is only valid in workspace environments.'
     });
   }
 
@@ -67,7 +86,8 @@ export class InstallAction extends BaseInstallAction {
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
-      toProjects: this.mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy)
+      toProjects: this.mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy),
+      fromProjects: this.mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy)
     };
   }
 }
