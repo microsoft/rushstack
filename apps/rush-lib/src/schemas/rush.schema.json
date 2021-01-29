@@ -261,6 +261,10 @@
           "versionPolicyName": {
             "description": "An optional version policy associated with the project. Version policies are defined in \"version-policies.json\" file.",
             "type": "string"
+          },
+          "publishFolder": {
+            "description": "Facilitates postprocessing of a project's files prior to publishing. If specified, the \"publishFolder\" is the relative path to a subfolder of the project folder. The \"rush publish\" command will publish the subfolder instead of the project folder. The subfolder must contain its own package.json file, which is typically a build output.",
+            "type": "string"
           }
         },
         "additionalProperties": false,

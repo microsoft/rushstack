@@ -426,6 +426,7 @@ export class RushConfigurationProject {
     get projectRelativeFolder(): string;
     get projectRushConfigFolder(): string;
     get projectRushTempFolder(): string;
+    get publishFolder(): string;
     get reviewCategory(): string | undefined;
     get rushConfiguration(): RushConfiguration;
     get shouldPublish(): boolean;

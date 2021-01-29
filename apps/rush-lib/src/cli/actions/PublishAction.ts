@@ -311,7 +311,7 @@ export class PublishAction extends BaseRushAction {
             const project: RushConfigurationProject | undefined = allPackages.get(change.packageName);
             if (project) {
               if (!this._packageExists(project)) {
-                this._npmPublish(change.packageName, project.projectFolder);
+                this._npmPublish(change.packageName, project.publishFolder);
               } else {
                 console.log(`Skip ${change.packageName}. Package exists.`);
               }
@@ -344,6 +344,7 @@ export class PublishAction extends BaseRushAction {
     console.log(`Rush publish starts with includeAll and version policy ${this._versionPolicy.value}`);
 
     let updated: boolean = false;
+
     allPackages.forEach((packageConfig, packageName) => {
       if (
         packageConfig.shouldPublish &&
@@ -374,13 +375,14 @@ export class PublishAction extends BaseRushAction {
           applyTag(this._applyGitTagsOnPack.value);
         } else if (this._force.value || !this._packageExists(packageConfig)) {
           // Publish to npm repository
-          this._npmPublish(packageName, packageConfig.projectFolder);
+          this._npmPublish(packageName, packageConfig.publishFolder);
           applyTag(true);
         } else {
           console.log(`Skip ${packageName}. Not updated.`);
         }
       }
     });
+
     if (updated) {
       git.push(this._targetBranch.value!);
     }
@@ -462,7 +464,7 @@ export class PublishAction extends BaseRushAction {
 
     const publishedVersions: string[] = Npm.publishedVersions(
       packageConfig.packageName,
-      packageConfig.projectFolder,
+      packageConfig.publishFolder,
       env,
       args
     );
@@ -477,14 +479,14 @@ export class PublishAction extends BaseRushAction {
       !!this._publish.value,
       this.rushConfiguration.packageManagerToolFilename,
       args,
-      project.projectFolder,
+      project.publishFolder,
       env
     );
 
     if (this._publish.value) {
       // Copy the tarball the release folder
       const tarballName: string = this._calculateTarballName(project);
-      const tarballPath: string = path.join(project.projectFolder, tarballName);
+      const tarballPath: string = path.join(project.publishFolder, tarballName);
       const destFolder: string = this._releaseFolder.value
         ? this._releaseFolder.value
         : path.join(this.rushConfiguration.commonTempFolder, 'artifacts', 'packages');

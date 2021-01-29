@@ -29,6 +29,7 @@ export interface IRushConfigurationProjectJson {
   versionPolicyName?: string;
   shouldPublish?: boolean;
   skipRushCheck?: boolean;
+  publishFolder?: string;
 }
 
 /**
@@ -52,6 +53,7 @@ export class RushConfigurationProject {
   private _versionPolicy: VersionPolicy | undefined;
   private _shouldPublish: boolean;
   private _skipRushCheck: boolean;
+  private _publishFolder: string;
   private _downstreamDependencyProjects: string[];
   private _localDependencyProjects: ReadonlyArray<RushConfigurationProject> | undefined;
   private readonly _rushConfiguration: RushConfiguration;
@@ -144,6 +146,11 @@ export class RushConfigurationProject {
     this._skipRushCheck = !!projectJson.skipRushCheck;
     this._downstreamDependencyProjects = [];
     this._versionPolicyName = projectJson.versionPolicyName;
+
+    this._publishFolder = this._projectFolder;
+    if (projectJson.publishFolder) {
+      this._publishFolder = path.join(this._publishFolder, projectJson.publishFolder);
+    }
   }
 
   /**
@@ -298,6 +305,19 @@ export class RushConfigurationProject {
    */
   public get versionPolicyName(): string | undefined {
     return this._versionPolicyName;
+  }
+
+  /**
+   * The full path of the folder that will get published by Rush.
+   *
+   * @remarks
+   * By default this is the same as the project folder, but a custom folder can be specified
+   * using the the "publishFolder" setting in rush.json.
+   *
+   * Example: `C:\MyRepo\libraries\my-project\temp\publish`
+   */
+  public get publishFolder(): string {
+    return this._publishFolder;
   }
 
   /**

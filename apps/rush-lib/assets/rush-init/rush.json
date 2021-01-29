@@ -437,6 +437,15 @@
       /*[LINE "HYPOTHETICAL"]*/ "shouldPublish": false,
 
       /**
+       * Facilitates postprocessing of a project's files prior to publishing.
+       *
+       * If specified, the "publishFolder" is the relative path to a subfolder of the project folder.
+       * The "rush publish" command will publish the subfolder instead of the project folder.  The subfolder
+       * must contain its own package.json file, which is typically a build output.
+       */
+      /*[LINE "HYPOTHETICAL"]*/ "publishFolder": "temp/publish",
+
+      /**
        * An optional version policy associated with the project.  Version policies are defined
        * in "version-policies.json" file.  See the "rush publish" documentation for more info.
        * NOTE: "versionPolicyName" and "shouldPublish" are alternatives; you cannot specify them both.
