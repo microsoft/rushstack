@@ -110,9 +110,9 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: build 1`] = `
-"usage: rush build [-h] [-p COUNT] [-t PROJECT1]
+"usage: rush build [-h] [-p COUNT] [-t PROJECT]
                   [--from-version-policy VERSION_POLICY_NAME]
-                  [--to-version-policy VERSION_POLICY_NAME] [-f PROJECT2] [-v]
+                  [--to-version-policy VERSION_POLICY_NAME] [-f PROJECT] [-v]
                   [-o] [--ignore-hooks] [-s] [-m]
                   
 
@@ -139,7 +139,7 @@ Optional arguments:
                         depends on the operating system and number of CPU 
                         cores. This parameter may alternatively be specified 
                         via the RUSH_PARALLELISM environment variable.
-  -t PROJECT1, --to PROJECT1
+  -t PROJECT, --to PROJECT
                         Run command in the specified project and all of its 
                         dependencies. \\".\\" can be used as shorthand to specify 
                         the project in the current working directory.
@@ -151,7 +151,7 @@ Optional arguments:
   --to-version-policy VERSION_POLICY_NAME
                         Run command in all projects with the specified 
                         version policy and all of their dependencies
-  -f PROJECT2, --from PROJECT2
+  -f PROJECT, --from PROJECT
                         Run command in the specified project and all projects 
                         that directly or indirectly depend on the specified 
                         project. \\".\\" can be used as shorthand to specify the 
@@ -285,10 +285,10 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: import-strings 1`] = `
-"usage: rush import-strings [-h] [-p COUNT] [-t PROJECT1]
+"usage: rush import-strings [-h] [-p COUNT] [-t PROJECT]
                            [--from-version-policy VERSION_POLICY_NAME]
                            [--to-version-policy VERSION_POLICY_NAME]
-                           [-f PROJECT2] [-v] [--ignore-hooks]
+                           [-f PROJECT] [-v] [--ignore-hooks]
                            [--locale {en-us,fr-fr,es-es,zh-cn}]
                            
 
@@ -306,7 +306,7 @@ Optional arguments:
                         depends on the operating system and number of CPU 
                         cores. This parameter may alternatively be specified 
                         via the RUSH_PARALLELISM environment variable.
-  -t PROJECT1, --to PROJECT1
+  -t PROJECT, --to PROJECT
                         Run command in the specified project and all of its 
                         dependencies. \\".\\" can be used as shorthand to specify 
                         the project in the current working directory.
@@ -318,7 +318,7 @@ Optional arguments:
   --to-version-policy VERSION_POLICY_NAME
                         Run command in all projects with the specified 
                         version policy and all of their dependencies
-  -f PROJECT2, --from PROJECT2
+  -f PROJECT, --from PROJECT
                         Run command in the specified project and all projects 
                         that directly or indirectly depend on the specified 
                         project. \\".\\" can be used as shorthand to specify the 
@@ -400,7 +400,7 @@ exports[`CommandLineHelp prints the help for each action: install 1`] = `
 "usage: rush install [-h] [-p] [--bypass-policy] [--no-link]
                     [--network-concurrency COUNT] [--debug-package-manager]
                     [--max-install-attempts NUMBER] [--ignore-hooks]
-                    [--variant VARIANT] [-t PROJECT1] [-f PROJECT2]
+                    [--variant VARIANT] [-t PROJECT] [-f PROJECT]
                     [--to-version-policy VERSION_POLICY_NAME]
                     [--from-version-policy VERSION_POLICY_NAME]
                     
@@ -446,12 +446,12 @@ Optional arguments:
   --variant VARIANT     Run command using a variant installation 
                         configuration. This parameter may alternatively be 
                         specified via the RUSH_VARIANT environment variable.
-  -t PROJECT1, --to PROJECT1
+  -t PROJECT, --to PROJECT
                         Run install in the specified project and all of its 
                         dependencies. \\".\\" can be used as shorthand to specify 
                         the project in the current working directory. This 
                         argument is only valid in workspace environments.
-  -f PROJECT2, --from PROJECT2
+  -f PROJECT, --from PROJECT
                         Run install in the specified project and all projects 
                         that directly or indirectly depend on the specified 
                         project. \\".\\" can be used as shorthand to specify the 
@@ -615,9 +615,9 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
-"usage: rush rebuild [-h] [-p COUNT] [-t PROJECT1]
+"usage: rush rebuild [-h] [-p COUNT] [-t PROJECT]
                     [--from-version-policy VERSION_POLICY_NAME]
-                    [--to-version-policy VERSION_POLICY_NAME] [-f PROJECT2]
+                    [--to-version-policy VERSION_POLICY_NAME] [-f PROJECT]
                     [-v] [--ignore-hooks] [-s] [-m]
                     
 
@@ -641,7 +641,7 @@ Optional arguments:
                         depends on the operating system and number of CPU 
                         cores. This parameter may alternatively be specified 
                         via the RUSH_PARALLELISM environment variable.
-  -t PROJECT1, --to PROJECT1
+  -t PROJECT, --to PROJECT
                         Run command in the specified project and all of its 
                         dependencies. \\".\\" can be used as shorthand to specify 
                         the project in the current working directory.
@@ -653,7 +653,7 @@ Optional arguments:
   --to-version-policy VERSION_POLICY_NAME
                         Run command in all projects with the specified 
                         version policy and all of their dependencies
-  -f PROJECT2, --from PROJECT2
+  -f PROJECT, --from PROJECT
                         Run command in the specified project and all projects 
                         that directly or indirectly depend on the specified 
                         project. \\".\\" can be used as shorthand to specify the 

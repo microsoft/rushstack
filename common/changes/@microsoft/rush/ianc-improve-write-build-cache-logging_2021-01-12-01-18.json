@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Improve logging for write-build-cache.",
+      "comment": "Improve logging for the \"rush write-build-cache\" command",
       "type": "none"
     }
   ],

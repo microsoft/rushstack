@@ -37,3 +37,5 @@ it('We can check if the consumer called a method on the class instance', () => {
   expect(mockPlaySoundFile).toHaveBeenCalledWith(coolSoundFileName);
   expect(mockPlaySoundFile).toHaveBeenCalledTimes(1);
 });
+
+console.log(JSON.stringify(process.env, undefined, 2));
