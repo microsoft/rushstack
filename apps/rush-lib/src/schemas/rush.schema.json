@@ -263,7 +263,7 @@
             "type": "string"
           },
           "publishFolder": {
-            "description": "An optional path relative to the project folder that will be used by the \"rush publish\" command.",
+            "description": "Facilitates postprocessing of a project's files prior to publishing. If specified, the \"publishFolder\" is the relative path to a subfolder of the project folder. The \"rush publish\" command will publish the subfolder instead of the project folder. The subfolder must contain its own package.json file, which is typically a build output.",
             "type": "string"
           }
         },

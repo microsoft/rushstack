@@ -54,7 +54,6 @@ export class RushConfigurationProject {
   private _shouldPublish: boolean;
   private _skipRushCheck: boolean;
   private _publishFolder: string;
-  private _publishRelativeFolder: string;
   private _downstreamDependencyProjects: string[];
   private _localDependencyProjects: ReadonlyArray<RushConfigurationProject> | undefined;
   private readonly _rushConfiguration: RushConfiguration;
@@ -148,10 +147,8 @@ export class RushConfigurationProject {
     this._downstreamDependencyProjects = [];
     this._versionPolicyName = projectJson.versionPolicyName;
 
-    this._publishRelativeFolder = this._projectRelativeFolder;
     this._publishFolder = this._projectFolder;
     if (projectJson.publishFolder) {
-      this._publishRelativeFolder = path.join(this._publishRelativeFolder, projectJson.publishFolder);
       this._publishFolder = path.join(this._publishFolder, projectJson.publishFolder);
     }
   }
@@ -313,19 +310,14 @@ export class RushConfigurationProject {
   /**
    * The full path of the folder that will get published by Rush.
    *
-   * Example: `C:\MyRepo\libraries\my-project`
+   * @remarks
+   * By default this is the same as the project folder, but a custom folder can be specified
+   * using the the "publishFolder" setting in rush.json.
+   *
+   * Example: `C:\MyRepo\libraries\my-project\temp\publish`
    */
   public get publishFolder(): string {
     return this._publishFolder;
-  }
-
-  /**
-   * The relative path of the folder that will get published by Rush.
-   *
-   * Example: `libraries\my-project`
-   */
-  public get publishRelativeFolder(): string {
-    return this._publishRelativeFolder;
   }
 
   /**
