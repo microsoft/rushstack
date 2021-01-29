@@ -62,6 +62,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private _changedProjectsOnly!: CommandLineFlagParameter;
   private _fromProject!: CommandLineStringListParameter;
   private _toProject!: CommandLineStringListParameter;
+  private _toExceptProject!: CommandLineStringListParameter;
   private _fromVersionPolicy!: CommandLineStringListParameter;
   private _toVersionPolicy!: CommandLineStringListParameter;
   private _verboseParameter!: CommandLineFlagParameter;
@@ -126,6 +127,8 @@ export class BulkScriptAction extends BaseScriptAction {
       this.evaluateProjects(this._toProject),
       // --to-version-policy
       this.evaluateVersionPolicyProjects(this._toVersionPolicy),
+      // --to-except
+      Selection.directDependenciesOf(this.evaluateProjects(this._toExceptProject)),
       // --from / --from-version-policy
       Selection.expandAllDependents(fromProjects)
     );
@@ -206,6 +209,17 @@ export class BulkScriptAction extends BaseScriptAction {
       description:
         'Run command on the selection instead of all projects. ' +
         'Adds the specified project and all its dependencies to the current selection. ' +
+        '"." can be used as shorthand to specify the project in the current working directory. ' +
+        'Additional use of "--from" or "--to" will further expand the selection.',
+      completions: this._getProjectNames.bind(this)
+    });
+    this._toExceptProject = this.defineStringListParameter({
+      parameterLongName: '--to-except',
+      parameterShortName: '-T',
+      argumentName: 'PROJECT2',
+      description:
+        'Run command on the selection instead of all projects. ' +
+        'Adds all dependencies of the specified project to the current selection. ' +
         '"." can be used as shorthand to specify the project in the current working directory. ' +
         'Additional use of "--from" or "--to" will further expand the selection.',
       completions: this._getProjectNames.bind(this)
