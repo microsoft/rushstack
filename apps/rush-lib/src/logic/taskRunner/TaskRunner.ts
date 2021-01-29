@@ -156,10 +156,28 @@ export class TaskRunner {
     if (!this._quietMode) {
       const plural: string = this._tasks.length === 1 ? '' : 's';
       this._terminal.writeStdoutLine(`Selected ${this._tasks.length} project${plural}:`);
+      const maxNameLength: number = this._tasks.reduce((max, task) => Math.max(max, task.name.length), 0);
       this._terminal.writeStdoutLine(
         this._tasks
-          .map((x) => `  ${x.name}`)
-          .sort()
+          .sort((x, y) => {
+            const diff: number = (y.criticalPathLength || 0) - (x.criticalPathLength || 0);
+            if (diff !== 0) {
+              return diff;
+            }
+            if (x.name < y.name) {
+              return -1;
+            }
+            if (x.name > y.name) {
+              return 1;
+            }
+            return 0;
+          })
+          .map((x) => {
+            if (x.criticalPathLength !== undefined) {
+              return `  ${x.name.padEnd(maxNameLength, ' ')} (Depth: ${x.criticalPathLength})`;
+            }
+            return `  ${x.name}`;
+          })
           .join('\n')
       );
       this._terminal.writeStdoutLine('');
