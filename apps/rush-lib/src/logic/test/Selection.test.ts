@@ -181,7 +181,7 @@ describe('expandAllDependencies', () => {
   });
 });
 
-describe('expandAllDependents', () => {
+describe('expandAllConsumers', () => {
   it('expands at least one level of dependents', () => {
     const result: ReadonlySet<ISimpleGraphable> = expandAllConsumers([projectF]);
 
