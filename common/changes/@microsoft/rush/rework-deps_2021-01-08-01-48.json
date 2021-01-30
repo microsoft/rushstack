@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add `--to-except` command line option to BulkScriptAction to build all dependencies of the target project, but not the project itself. This option is intended for use with the future `--watch` option.\nAdd `--affected-by` and `--affected-by-except` options to build only projects that are directly affected by changes to the specified project.",
+      "comment": "Add new command-line parameters for bulk commands: \"--to-except\", \"--from\", \"--only\", \"--impacted-by\", \"--impacted-by-except\", and \"--from-version-policy\" (GitHub #2354)",
       "type": "none"
     }
   ],
