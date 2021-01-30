@@ -76,11 +76,11 @@ export class InstallAction extends BaseInstallAction {
 
   protected buildInstallOptions(): IInstallManagerOptions {
     const toProjects: Set<RushConfigurationProject> = Selection.union<RushConfigurationProject>(
-      this.evaluateProjects(this._toFlag),
+      this.evaluateProjectParameter(this._toFlag),
       this.evaluateVersionPolicyProjects(this._toVersionPolicy)
     );
     const fromProjects: Set<RushConfigurationProject> = Selection.union<RushConfigurationProject>(
-      this.evaluateProjects(this._fromFlag),
+      this.evaluateProjectParameter(this._fromFlag),
       this.evaluateVersionPolicyProjects(this._fromVersionPolicy)
     );
 

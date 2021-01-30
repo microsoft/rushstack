@@ -131,7 +131,7 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
     return super.onExecute();
   }
 
-  protected *evaluateProjects(
+  protected *evaluateProjectParameter(
     projectsParameters: CommandLineStringListParameter
   ): Iterable<RushConfigurationProject> {
     const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();

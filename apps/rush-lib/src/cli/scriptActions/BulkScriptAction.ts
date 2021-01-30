@@ -121,12 +121,12 @@ export class BulkScriptAction extends BaseScriptAction {
       | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(terminal, this.rushConfiguration);
 
     // Include exactly these projects (--only)
-    const onlyProjects: Iterable<RushConfigurationProject> = this.evaluateProjects(this._onlyProject);
+    const onlyProjects: Iterable<RushConfigurationProject> = this.evaluateProjectParameter(this._onlyProject);
 
     // Include all projects that depend on these projects, and all dependencies thereof
     const fromProjects: Set<RushConfigurationProject> = Selection.union(
       // --from
-      this.evaluateProjects(this._fromProject),
+      this.evaluateProjectParameter(this._fromProject),
       // --from-version-policy
       this.evaluateVersionPolicyProjects(this._fromVersionPolicy)
     );
@@ -134,11 +134,11 @@ export class BulkScriptAction extends BaseScriptAction {
     // Include dependencies of these projects
     const toProjects: Set<RushConfigurationProject> = Selection.union(
       // --to
-      this.evaluateProjects(this._toProject),
+      this.evaluateProjectParameter(this._toProject),
       // --to-version-policy
       this.evaluateVersionPolicyProjects(this._toVersionPolicy),
       // --to-except
-      Selection.directDependenciesOf(this.evaluateProjects(this._toExceptProject)),
+      Selection.directDependenciesOf(this.evaluateProjectParameter(this._toExceptProject)),
       // --from / --from-version-policy
       Selection.expandAllConsumers(fromProjects)
     );
@@ -146,9 +146,9 @@ export class BulkScriptAction extends BaseScriptAction {
     // These projects will not have their dependencies included
     const impactedByProjects: Set<RushConfigurationProject> = Selection.union(
       // --impacted-by
-      this.evaluateProjects(this._impactedByProject),
+      this.evaluateProjectParameter(this._impactedByProject),
       // --impacted-by-except
-      Selection.directConsumersOf(this.evaluateProjects(this._impactedByExceptProject))
+      Selection.directConsumersOf(this.evaluateProjectParameter(this._impactedByExceptProject))
     );
 
     const selection: Set<RushConfigurationProject> = Selection.union(
