@@ -82,7 +82,7 @@ export class TaskSelector {
     }
 
     function* getDependencyTaskNames(project: RushConfigurationProject): Iterable<string> {
-      for (const dep of project.localDependencyProjectSet) {
+      for (const dep of project.dependencyProjects) {
         // Only add relationships for projects in the set
         if (projects.has(dep)) {
           yield ProjectBuilder.getTaskName(dep);

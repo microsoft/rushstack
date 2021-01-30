@@ -535,7 +535,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         for (const dep of deps) {
           yield dep.packageName;
         }
-      })(project.localDependencyProjectSet)
+      })(project.dependencyProjects)
     );
 
     // Loop through non-local dependencies. Skip peer dependencies because they're only a constraint

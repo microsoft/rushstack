@@ -1669,7 +1669,7 @@ export class RushConfiguration {
       const depProject: RushConfigurationProject | undefined = this.projectsByName.get(dependencyName);
 
       if (depProject) {
-        depProject.downstreamDependencyProjectSet.add(packageName);
+        depProject.consumingProjectNames.add(packageName);
       }
     });
   }

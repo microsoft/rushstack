@@ -6,66 +6,66 @@ import {
   union,
   intersection,
   expandAllDependencies,
-  expandAllDependents
+  expandAllConsumers
 } from '../Selection';
 
 interface ISimpleGraphable extends IPartialProject<ISimpleGraphable> {
-  localDependentProjectSet: Set<ISimpleGraphable>;
+  consumingProjects: Set<ISimpleGraphable>;
   toString(): string;
 }
 
 const projectA: ISimpleGraphable = {
-  localDependencyProjectSet: new Set(),
-  localDependentProjectSet: new Set(),
+  dependencyProjects: new Set(),
+  consumingProjects: new Set(),
   toString() {
     return 'A';
   }
 };
 const projectB: ISimpleGraphable = {
-  localDependencyProjectSet: new Set(),
-  localDependentProjectSet: new Set(),
+  dependencyProjects: new Set(),
+  consumingProjects: new Set(),
   toString() {
     return 'B';
   }
 };
 const projectC: ISimpleGraphable = {
-  localDependencyProjectSet: new Set(),
-  localDependentProjectSet: new Set(),
+  dependencyProjects: new Set(),
+  consumingProjects: new Set(),
   toString() {
     return 'C';
   }
 };
 const projectD: ISimpleGraphable = {
-  localDependencyProjectSet: new Set([projectA, projectB]),
-  localDependentProjectSet: new Set(),
+  dependencyProjects: new Set([projectA, projectB]),
+  consumingProjects: new Set(),
   toString() {
     return 'D';
   }
 };
 const projectE: ISimpleGraphable = {
-  localDependencyProjectSet: new Set([projectC, projectD]),
-  localDependentProjectSet: new Set(),
+  dependencyProjects: new Set([projectC, projectD]),
+  consumingProjects: new Set(),
   toString() {
     return 'E';
   }
 };
 const projectF: ISimpleGraphable = {
-  localDependencyProjectSet: new Set([projectE]),
-  localDependentProjectSet: new Set(),
+  dependencyProjects: new Set([projectE]),
+  consumingProjects: new Set(),
   toString() {
     return 'F';
   }
 };
 const projectG: ISimpleGraphable = {
-  localDependencyProjectSet: new Set(),
-  localDependentProjectSet: new Set(),
+  dependencyProjects: new Set(),
+  consumingProjects: new Set(),
   toString() {
     return 'G';
   }
 };
 const projectH: ISimpleGraphable = {
-  localDependencyProjectSet: new Set([projectF, projectG]),
-  localDependentProjectSet: new Set(),
+  dependencyProjects: new Set([projectF, projectG]),
+  consumingProjects: new Set(),
   toString() {
     return 'H';
   }
@@ -84,8 +84,8 @@ const nodes: Set<ISimpleGraphable> = new Set([
 
 // Populate the bidirectional graph
 for (const node of nodes) {
-  for (const dep of node.localDependencyProjectSet) {
-    dep.localDependentProjectSet.add(node);
+  for (const dep of node.dependencyProjects) {
+    dep.consumingProjects.add(node);
   }
 }
 
@@ -187,17 +187,17 @@ describe('expandAllDependencies', () => {
 
 describe('expandAllDependents', () => {
   it('expands at least one level of dependents', () => {
-    const result: ReadonlySet<ISimpleGraphable> = expandAllDependents([projectF]);
+    const result: ReadonlySet<ISimpleGraphable> = expandAllConsumers([projectF]);
 
     expect(result).toMatchSet(new Set([projectF, projectH]));
   });
   it('expands all levels of dependents', () => {
-    const result: ReadonlySet<ISimpleGraphable> = expandAllDependents([projectC]);
+    const result: ReadonlySet<ISimpleGraphable> = expandAllConsumers([projectC]);
 
     expect(result).toMatchSet(new Set([projectC, projectE, projectF, projectH]));
   });
   it('handles multiple inputs', () => {
-    const result: ReadonlySet<ISimpleGraphable> = expandAllDependents([projectC, projectB]);
+    const result: ReadonlySet<ISimpleGraphable> = expandAllConsumers([projectC, projectB]);
 
     expect(result).toMatchSet(new Set([projectB, projectC, projectD, projectE, projectF, projectH]));
   });
