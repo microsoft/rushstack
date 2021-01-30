@@ -246,7 +246,7 @@ export class RushConfigurationProject {
 
   /**
    * An array of projects within the Rush configuration which this project declares as dependencies.
-   * @deprecated Use localDependencyProjectSet instead
+   * @deprecated Use `dependencyProjects` instead
    */
   public get localDependencyProjects(): ReadonlyArray<RushConfigurationProject> {
     return [...this.dependencyProjects];
@@ -270,7 +270,7 @@ export class RushConfigurationProject {
    * The set of projects within the Rush configuration which declare this project as a dependency.
    * Excludes those that declare this project as a `cyclicDependencyProject`.
    *
-   * The counterpart to `localDependencyProjectSet`.
+   * The counterpart to `dependencyProjects`.
    */
   public get consumingProjects(): ReadonlySet<RushConfigurationProject> {
     if (!this._consumingProjects) {
