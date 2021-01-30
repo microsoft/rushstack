@@ -1,6 +1,20 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 21 Jan 2021 04:51:19 GMT and should not be manually modified.
+This log was last generated on Sat, 30 Jan 2021 01:50:27 GMT and should not be manually modified.
+
+## 5.37.0
+Sat, 30 Jan 2021 01:50:27 GMT
+
+### Updates
+
+- Improve performance of association of repo file states with projects to speed up build commands in large repos.
+- Add `publishFolder` property to the project configuration to allow publishing a sub-folder of the project
+- Add support for --from flag for filtered installs when using workspaces
+- Fix an issue where the Rush cache feature did not correctly detect files that were both tracked by git and were expected to be cached build output.
+- Improve logging for the "rush write-build-cache" command
+- Correct some spelling mistakes in rush.json
+- Fix an error "Cannot get dependency key" sometimes reported by "rush install" (GitHub #2460)
+- Updade the "rush init" template to specify PNPM 5.15.2, which fixes a performance regression introduced in PNPM 5.13.7
 
 ## 5.36.2
 Thu, 21 Jan 2021 04:51:19 GMT

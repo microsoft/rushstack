@@ -67,7 +67,7 @@ export class ProjectBuildCache {
     }
 
     const inputOutputFiles: string[] = [];
-    for (const file of Object.keys(trackedProjectFiles)) {
+    for (const file of trackedProjectFiles) {
       for (const outputFolder of outputFolders) {
         if (file.startsWith(outputFolder)) {
           inputOutputFiles.push(file);

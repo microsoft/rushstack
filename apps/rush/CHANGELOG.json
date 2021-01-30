@@ -2,6 +2,39 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.37.0",
+      "tag": "@microsoft/rush_v5.37.0",
+      "date": "Sat, 30 Jan 2021 01:50:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve performance of association of repo file states with projects to speed up build commands in large repos."
+          },
+          {
+            "comment": "Add `publishFolder` property to the project configuration to allow publishing a sub-folder of the project"
+          },
+          {
+            "comment": "Add support for --from flag for filtered installs when using workspaces"
+          },
+          {
+            "comment": "Fix an issue where the Rush cache feature did not correctly detect files that were both tracked by git and were expected to be cached build output."
+          },
+          {
+            "comment": "Improve logging for the \"rush write-build-cache\" command"
+          },
+          {
+            "comment": "Correct some spelling mistakes in rush.json"
+          },
+          {
+            "comment": "Fix an error \"Cannot get dependency key\" sometimes reported by \"rush install\" (GitHub #2460)"
+          },
+          {
+            "comment": "Updade the \"rush init\" template to specify PNPM 5.15.2, which fixes a performance regression introduced in PNPM 5.13.7"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.36.2",
       "tag": "@microsoft/rush_v5.36.2",
       "date": "Thu, 21 Jan 2021 04:51:19 GMT",
