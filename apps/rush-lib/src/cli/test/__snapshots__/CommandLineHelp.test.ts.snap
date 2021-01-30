@@ -110,10 +110,11 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: build 1`] = `
-"usage: rush build [-h] [-p COUNT] [-t PROJECT]
-                  [--from-version-policy VERSION_POLICY_NAME]
-                  [--to-version-policy VERSION_POLICY_NAME] [-f PROJECT] [-v]
-                  [-o] [--ignore-hooks] [-s] [-m]
+"usage: rush build [-h] [-p COUNT] [-t PROJECT] [-T PROJECT] [-f PROJECT]
+                  [-a PROJECT] [-A PROJECT]
+                  [--to-version-policy VERSION_POLICY_NAME]
+                  [--from-version-policy VERSION_POLICY_NAME] [-v] [-o]
+                  [--ignore-hooks] [-s] [-m]
                   
 
 This command is similar to \\"rush rebuild\\", except that \\"rush build\\" performs 
@@ -140,22 +141,53 @@ Optional arguments:
                         cores. This parameter may alternatively be specified 
                         via the RUSH_PARALLELISM environment variable.
   -t PROJECT, --to PROJECT
-                        Run command in the specified project and all of its 
-                        dependencies. \\".\\" can be used as shorthand to specify 
-                        the project in the current working directory.
-  --from-version-policy VERSION_POLICY_NAME
-                        Run command in all projects with the specified 
-                        version policy and all projects that directly or 
-                        indirectly depend on projects with the specified 
-                        version policy
-  --to-version-policy VERSION_POLICY_NAME
-                        Run command in all projects with the specified 
-                        version policy and all of their dependencies
+                        Run command on the selection instead of all projects. 
+                        Adds the specified project and all its dependencies 
+                        to the current selection. \\".\\" can be used as 
+                        shorthand to specify the project in the current 
+                        working directory. Additional use of \\"--affected-by\\", 
+                        \\"--from\\", or \\"--to\\" will further expand the selection.
+  -T PROJECT, --to-except PROJECT
+                        Run command on the selection instead of all projects. 
+                        Adds all dependencies of the specified project to the 
+                        current selection. \\".\\" can be used as shorthand to 
+                        specify the project in the current working directory. 
+                        Additional use of \\"--affected-by\\", \\"--from\\", or 
+                        \\"--to\\" will further expand the selection.
   -f PROJECT, --from PROJECT
-                        Run command in the specified project and all projects 
-                        that directly or indirectly depend on the specified 
-                        project. \\".\\" can be used as shorthand to specify the 
-                        project in the current working directory.
+                        Run command on the selection instead of all projects. 
+                        Add the specified project and all projects that 
+                        depend on it, and all the dependencies of those 
+                        projects, to the current selection. \\".\\" can be used 
+                        as shorthand to specify the project in the current 
+                        working directory. Additional use of \\"--affected-by\\", 
+                        \\"--from\\", or \\"--to\\" will further expand the selection.
+  -a PROJECT, --affected-by PROJECT
+                        Run command on the selection instead of all projects. 
+                        Add the specified project and all projects that would 
+                        be affected by a change to it to the current 
+                        selection. \\".\\" can be used as shorthand to specify 
+                        the project in the current working directory. 
+                        Additional use of \\"--affected-by\\", \\"--from\\", or 
+                        \\"--to\\" will further expand the selection.
+  -A PROJECT, --affected-by-except PROJECT
+                        Run command on the selection instead of all projects. 
+                        Add all projects that would be affected by a change 
+                        to the specified project (except the project itself) 
+                        to the current selection. \\".\\" can be used as 
+                        shorthand to specify the project in the current 
+                        working directory. Additional use of \\"--affected-by\\", 
+                        \\"--from\\", or \\"--to\\" will further expand the selection.
+  --to-version-policy VERSION_POLICY_NAME
+                        Run command on the selection instead of all projects. 
+                        Adds all projects with the specified version policy, 
+                        and all dependencies thereof, to the current 
+                        selection.
+  --from-version-policy VERSION_POLICY_NAME
+                        Run command on the selection instead of all projects. 
+                        Adds all projects with the specified version policy, 
+                        and all projects that depend on them, to the current 
+                        selection.
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   -o, --changed-projects-only
@@ -285,10 +317,11 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: import-strings 1`] = `
-"usage: rush import-strings [-h] [-p COUNT] [-t PROJECT]
-                           [--from-version-policy VERSION_POLICY_NAME]
+"usage: rush import-strings [-h] [-p COUNT] [-t PROJECT] [-T PROJECT]
+                           [-f PROJECT] [-a PROJECT] [-A PROJECT]
                            [--to-version-policy VERSION_POLICY_NAME]
-                           [-f PROJECT] [-v] [--ignore-hooks]
+                           [--from-version-policy VERSION_POLICY_NAME] [-v]
+                           [--ignore-hooks]
                            [--locale {en-us,fr-fr,es-es,zh-cn}]
                            
 
@@ -307,22 +340,53 @@ Optional arguments:
                         cores. This parameter may alternatively be specified 
                         via the RUSH_PARALLELISM environment variable.
   -t PROJECT, --to PROJECT
-                        Run command in the specified project and all of its 
-                        dependencies. \\".\\" can be used as shorthand to specify 
-                        the project in the current working directory.
-  --from-version-policy VERSION_POLICY_NAME
-                        Run command in all projects with the specified 
-                        version policy and all projects that directly or 
-                        indirectly depend on projects with the specified 
-                        version policy
-  --to-version-policy VERSION_POLICY_NAME
-                        Run command in all projects with the specified 
-                        version policy and all of their dependencies
+                        Run command on the selection instead of all projects. 
+                        Adds the specified project and all its dependencies 
+                        to the current selection. \\".\\" can be used as 
+                        shorthand to specify the project in the current 
+                        working directory. Additional use of \\"--affected-by\\", 
+                        \\"--from\\", or \\"--to\\" will further expand the selection.
+  -T PROJECT, --to-except PROJECT
+                        Run command on the selection instead of all projects. 
+                        Adds all dependencies of the specified project to the 
+                        current selection. \\".\\" can be used as shorthand to 
+                        specify the project in the current working directory. 
+                        Additional use of \\"--affected-by\\", \\"--from\\", or 
+                        \\"--to\\" will further expand the selection.
   -f PROJECT, --from PROJECT
-                        Run command in the specified project and all projects 
-                        that directly or indirectly depend on the specified 
-                        project. \\".\\" can be used as shorthand to specify the 
-                        project in the current working directory.
+                        Run command on the selection instead of all projects. 
+                        Add the specified project and all projects that 
+                        depend on it, and all the dependencies of those 
+                        projects, to the current selection. \\".\\" can be used 
+                        as shorthand to specify the project in the current 
+                        working directory. Additional use of \\"--affected-by\\", 
+                        \\"--from\\", or \\"--to\\" will further expand the selection.
+  -a PROJECT, --affected-by PROJECT
+                        Run command on the selection instead of all projects. 
+                        Add the specified project and all projects that would 
+                        be affected by a change to it to the current 
+                        selection. \\".\\" can be used as shorthand to specify 
+                        the project in the current working directory. 
+                        Additional use of \\"--affected-by\\", \\"--from\\", or 
+                        \\"--to\\" will further expand the selection.
+  -A PROJECT, --affected-by-except PROJECT
+                        Run command on the selection instead of all projects. 
+                        Add all projects that would be affected by a change 
+                        to the specified project (except the project itself) 
+                        to the current selection. \\".\\" can be used as 
+                        shorthand to specify the project in the current 
+                        working directory. Additional use of \\"--affected-by\\", 
+                        \\"--from\\", or \\"--to\\" will further expand the selection.
+  --to-version-policy VERSION_POLICY_NAME
+                        Run command on the selection instead of all projects. 
+                        Adds all projects with the specified version policy, 
+                        and all dependencies thereof, to the current 
+                        selection.
+  --from-version-policy VERSION_POLICY_NAME
+                        Run command on the selection instead of all projects. 
+                        Adds all projects with the specified version policy, 
+                        and all projects that depend on them, to the current 
+                        selection.
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
@@ -615,10 +679,11 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
-"usage: rush rebuild [-h] [-p COUNT] [-t PROJECT]
-                    [--from-version-policy VERSION_POLICY_NAME]
-                    [--to-version-policy VERSION_POLICY_NAME] [-f PROJECT]
-                    [-v] [--ignore-hooks] [-s] [-m]
+"usage: rush rebuild [-h] [-p COUNT] [-t PROJECT] [-T PROJECT] [-f PROJECT]
+                    [-a PROJECT] [-A PROJECT]
+                    [--to-version-policy VERSION_POLICY_NAME]
+                    [--from-version-policy VERSION_POLICY_NAME] [-v]
+                    [--ignore-hooks] [-s] [-m]
                     
 
 This command assumes that the package.json file for each project contains a 
@@ -642,22 +707,53 @@ Optional arguments:
                         cores. This parameter may alternatively be specified 
                         via the RUSH_PARALLELISM environment variable.
   -t PROJECT, --to PROJECT
-                        Run command in the specified project and all of its 
-                        dependencies. \\".\\" can be used as shorthand to specify 
-                        the project in the current working directory.
-  --from-version-policy VERSION_POLICY_NAME
-                        Run command in all projects with the specified 
-                        version policy and all projects that directly or 
-                        indirectly depend on projects with the specified 
-                        version policy
-  --to-version-policy VERSION_POLICY_NAME
-                        Run command in all projects with the specified 
-                        version policy and all of their dependencies
+                        Run command on the selection instead of all projects. 
+                        Adds the specified project and all its dependencies 
+                        to the current selection. \\".\\" can be used as 
+                        shorthand to specify the project in the current 
+                        working directory. Additional use of \\"--affected-by\\", 
+                        \\"--from\\", or \\"--to\\" will further expand the selection.
+  -T PROJECT, --to-except PROJECT
+                        Run command on the selection instead of all projects. 
+                        Adds all dependencies of the specified project to the 
+                        current selection. \\".\\" can be used as shorthand to 
+                        specify the project in the current working directory. 
+                        Additional use of \\"--affected-by\\", \\"--from\\", or 
+                        \\"--to\\" will further expand the selection.
   -f PROJECT, --from PROJECT
-                        Run command in the specified project and all projects 
-                        that directly or indirectly depend on the specified 
-                        project. \\".\\" can be used as shorthand to specify the 
-                        project in the current working directory.
+                        Run command on the selection instead of all projects. 
+                        Add the specified project and all projects that 
+                        depend on it, and all the dependencies of those 
+                        projects, to the current selection. \\".\\" can be used 
+                        as shorthand to specify the project in the current 
+                        working directory. Additional use of \\"--affected-by\\", 
+                        \\"--from\\", or \\"--to\\" will further expand the selection.
+  -a PROJECT, --affected-by PROJECT
+                        Run command on the selection instead of all projects. 
+                        Add the specified project and all projects that would 
+                        be affected by a change to it to the current 
+                        selection. \\".\\" can be used as shorthand to specify 
+                        the project in the current working directory. 
+                        Additional use of \\"--affected-by\\", \\"--from\\", or 
+                        \\"--to\\" will further expand the selection.
+  -A PROJECT, --affected-by-except PROJECT
+                        Run command on the selection instead of all projects. 
+                        Add all projects that would be affected by a change 
+                        to the specified project (except the project itself) 
+                        to the current selection. \\".\\" can be used as 
+                        shorthand to specify the project in the current 
+                        working directory. Additional use of \\"--affected-by\\", 
+                        \\"--from\\", or \\"--to\\" will further expand the selection.
+  --to-version-policy VERSION_POLICY_NAME
+                        Run command on the selection instead of all projects. 
+                        Adds all projects with the specified version policy, 
+                        and all dependencies thereof, to the current 
+                        selection.
+  --from-version-policy VERSION_POLICY_NAME
+                        Run command on the selection instead of all projects. 
+                        Adds all projects with the specified version policy, 
+                        and all projects that depend on them, to the current 
+                        selection.
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
