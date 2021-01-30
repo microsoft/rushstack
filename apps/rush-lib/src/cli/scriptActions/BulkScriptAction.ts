@@ -26,7 +26,7 @@ import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { IRushConfigurationProjectJson, RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import * as Selection from '../../logic/Selection';
+import { Selection } from '../../logic/Selection';
 
 /**
  * Constructor parameters for BulkScriptAction.

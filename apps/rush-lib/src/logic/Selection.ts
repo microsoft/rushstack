@@ -12,48 +12,53 @@ export interface IPartialProject<T extends IPartialProject<T>> {
 }
 
 /**
- * Computes the intersection of two or more sets.
+ * This namespace contains functions for manipulating sets of projects
  */
-export function intersection<T>(first: Iterable<T>, ...rest: ReadonlySet<T>[]): Set<T> {
-  return new Set(generateIntersection(first, ...rest));
-}
-
-/**
- * Computes the union of two or more sets.
- */
-export function union<T>(...sets: Iterable<T>[]): Set<T> {
-  return new Set(generateConcatenation<T>(...sets));
-}
-
-/**
- * Computes a set that contains the input projects and all the direct and indirect dependencies thereof.
- */
-export function expandAllDependencies<T extends IPartialProject<T>>(input: Iterable<T>): Set<T> {
-  return expandAll(input, expandDependenciesStep);
-}
-
-/**
- * Computes a set that contains the input projects and all projects that directly or indirectly depend on them.
- */
-export function expandAllConsumers<T extends IPartialProject<T>>(input: Iterable<T>): Set<T> {
-  return expandAll(input, expandConsumers);
-}
-
-/**
- * Iterates the direct dependencies of the listed projects. May contain duplicates.
- */
-export function* directDependenciesOf<T extends IPartialProject<T>>(input: Iterable<T>): Iterable<T> {
-  for (const item of input) {
-    yield* item.dependencyProjects;
+export class Selection {
+  /**
+   * Computes the intersection of two or more sets.
+   */
+  public static intersection<T>(first: Iterable<T>, ...rest: ReadonlySet<T>[]): Set<T> {
+    return new Set(generateIntersection(first, ...rest));
   }
-}
 
-/**
- * Iterates the projects that declare any of the listed projects as a dependency. May contain duplicates.
- */
-export function* directConsumersOf<T extends IPartialProject<T>>(input: Iterable<T>): Iterable<T> {
-  for (const item of input) {
-    yield* item.consumingProjects;
+  /**
+   * Computes the union of two or more sets.
+   */
+  public static union<T>(...sets: Iterable<T>[]): Set<T> {
+    return new Set(generateConcatenation<T>(...sets));
+  }
+
+  /**
+   * Computes a set that contains the input projects and all the direct and indirect dependencies thereof.
+   */
+  public static expandAllDependencies<T extends IPartialProject<T>>(input: Iterable<T>): Set<T> {
+    return expandAll(input, expandDependenciesStep);
+  }
+
+  /**
+   * Computes a set that contains the input projects and all projects that directly or indirectly depend on them.
+   */
+  public static expandAllConsumers<T extends IPartialProject<T>>(input: Iterable<T>): Set<T> {
+    return expandAll(input, expandConsumers);
+  }
+
+  /**
+   * Iterates the direct dependencies of the listed projects. May contain duplicates.
+   */
+  public static *directDependenciesOf<T extends IPartialProject<T>>(input: Iterable<T>): Iterable<T> {
+    for (const item of input) {
+      yield* item.dependencyProjects;
+    }
+  }
+
+  /**
+   * Iterates the projects that declare any of the listed projects as a dependency. May contain duplicates.
+   */
+  public static *directConsumersOf<T extends IPartialProject<T>>(input: Iterable<T>): Iterable<T> {
+    for (const item of input) {
+      yield* item.consumingProjects;
+    }
   }
 }
 

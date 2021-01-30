@@ -7,7 +7,7 @@ import { BaseInstallAction } from './BaseInstallAction';
 import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import * as Selection from '../../logic/Selection';
+import { Selection } from '../../logic/Selection';
 
 export class InstallAction extends BaseInstallAction {
   protected _toFlag!: CommandLineStringListParameter;
