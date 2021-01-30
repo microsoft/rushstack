@@ -40,7 +40,7 @@ export class InstallAction extends BaseInstallAction {
     this._toFlag = this.defineStringListParameter({
       parameterLongName: '--to',
       parameterShortName: '-t',
-      argumentName: 'PROJECT1',
+      argumentName: 'PROJECT',
       description:
         'Run install in the specified project and all of its dependencies. "." can be used as shorthand ' +
         'to specify the project in the current working directory. This argument is only valid in workspace ' +
@@ -49,7 +49,7 @@ export class InstallAction extends BaseInstallAction {
     this._fromFlag = this.defineStringListParameter({
       parameterLongName: '--from',
       parameterShortName: '-f',
-      argumentName: 'PROJECT2',
+      argumentName: 'PROJECT',
       description:
         'Run install in the specified project and all projects that directly or indirectly depend on the ' +
         'specified project. "." can be used as shorthand to specify the project in the current working directory.' +

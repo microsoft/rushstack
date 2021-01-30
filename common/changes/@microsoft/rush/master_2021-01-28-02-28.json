@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Corrected spelling mistakes in rush.json",
+      "comment": "Correct some spelling mistakes in rush.json",
       "type": "none"
     }
   ],

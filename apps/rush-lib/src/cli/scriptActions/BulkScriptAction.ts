@@ -185,7 +185,7 @@ export class BulkScriptAction extends BaseScriptAction {
     this._toFlag = this.defineStringListParameter({
       parameterLongName: '--to',
       parameterShortName: '-t',
-      argumentName: 'PROJECT1',
+      argumentName: 'PROJECT',
       description:
         'Run command in the specified project and all of its dependencies. "." can be used as shorthand ' +
         'to specify the project in the current working directory.',
@@ -207,7 +207,7 @@ export class BulkScriptAction extends BaseScriptAction {
     this._fromFlag = this.defineStringListParameter({
       parameterLongName: '--from',
       parameterShortName: '-f',
-      argumentName: 'PROJECT2',
+      argumentName: 'PROJECT',
       description:
         'Run command in the specified project and all projects that directly or indirectly depend on the ' +
         'specified project. "." can be used as shorthand to specify the project in the current working directory.',

@@ -22,12 +22,14 @@ interface IPathTreeNode<TItem> {
  * It is optimized for efficiently locating the nearest ancestor path with an associated value.
  *
  * @example
+ * ```ts
  * const tree = new LookupByPath([['foo', 1], ['bar', 2], ['foo/bar', 3]]);
  * tree.getNearestAncestor('foo'); // returns 1
  * tree.getNearestAncestor('foo/baz'); // returns 1
  * tree.getNearestAncestor('baz'); // returns undefined
  * tree.getNearestAncestor('foo/bar/baz'); returns 3
  * tree.getNearestAncestor('bar/foo/bar'); returns 2
+ * ```
  */
 export class LookupByPath<TItem> {
   /**
@@ -63,7 +65,9 @@ export class LookupByPath<TItem> {
    * Iterates over the segments of a serialized path.
    *
    * @example
+   *
    * `LookupByPath.iteratePathSegments('foo/bar/baz')` yields 'foo', 'bar', 'baz'
+   *
    * `LookupByPath.iteratePathSegments('foo\\bar\\baz', '\\')` yields 'foo', 'bar', 'baz'
    */
   public static *iteratePathSegments(serializedPath: string, delimiter: string = '/'): Iterable<string> {
@@ -131,9 +135,11 @@ export class LookupByPath<TItem> {
    * @returns the found item, or `undefined` if no item was found
    *
    * @example
+   * ```ts
    * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
    * tree.findChildPath('foo/baz'); // returns 1
    * tree.findChildPath('foo/bar/baz'); // returns 2
+   * ```
    */
   public findChildPath(childPath: string): TItem | undefined {
     return this.findChildPathFromSegments(LookupByPath.iteratePathSegments(childPath, this.delimiter));
@@ -146,9 +152,11 @@ export class LookupByPath<TItem> {
    * @returns the found item, or `undefined` if no item was found
    *
    * @example
+   * ```ts
    * const tree = new LookupByPath([['foo', 1], ['foo/bar', 2]]);
    * tree.findChildPathFromSegments(['foo', 'baz']); // returns 1
    * tree.findChildPathFromSegments(['foo','bar', 'baz']); // returns 2
+   * ```
    */
   public findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined {
     let node: IPathTreeNode<TItem> = this._root;
