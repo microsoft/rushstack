@@ -61,6 +61,7 @@ export class BulkScriptAction extends BaseScriptAction {
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
   private _fromProject!: CommandLineStringListParameter;
+  private _onlyProject!: CommandLineStringListParameter;
   private _toProject!: CommandLineStringListParameter;
   private _toExceptProject!: CommandLineStringListParameter;
   private _affectedByProject!: CommandLineStringListParameter;
@@ -119,6 +120,9 @@ export class BulkScriptAction extends BaseScriptAction {
       | BuildCacheConfiguration
       | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(terminal, this.rushConfiguration);
 
+    // Include exactly these projects (--only)
+    const onlyProjects: Iterable<RushConfigurationProject> = this.evaluateProjects(this._onlyProject);
+
     // Include all projects that depend on these projects, and all dependencies thereof
     const fromProjects: Set<RushConfigurationProject> = Selection.union(
       // --from
@@ -148,6 +152,7 @@ export class BulkScriptAction extends BaseScriptAction {
     );
 
     const selection: Set<RushConfigurationProject> = Selection.union(
+      onlyProjects,
       Selection.expandAllDependencies(toProjects),
       // Only dependents of these projects, not dependencies
       Selection.expandAllDependents(affectedByProjects)
@@ -228,7 +233,7 @@ export class BulkScriptAction extends BaseScriptAction {
         'Run command on the selection instead of all projects. ' +
         'Adds the specified project and all its dependencies to the current selection. ' +
         '"." can be used as shorthand to specify the project in the current working directory. ' +
-        'Additional use of "--affected-by", "--from", or "--to" will further expand the selection.',
+        'Additional use of any selection commands will further expand the selection.',
       completions: this._getProjectNames.bind(this)
     });
     this._toExceptProject = this.defineStringListParameter({
@@ -239,7 +244,7 @@ export class BulkScriptAction extends BaseScriptAction {
         'Run command on the selection instead of all projects. ' +
         'Adds all dependencies of the specified project to the current selection. ' +
         '"." can be used as shorthand to specify the project in the current working directory. ' +
-        'Additional use of "--affected-by", "--from", or "--to" will further expand the selection.',
+        'Additional use of any selection commands will further expand the selection.',
       completions: this._getProjectNames.bind(this)
     });
 
@@ -251,7 +256,18 @@ export class BulkScriptAction extends BaseScriptAction {
         'Run command on the selection instead of all projects. ' +
         'Add the specified project and all projects that depend on it, and all the dependencies of those projects, to the current selection. ' +
         '"." can be used as shorthand to specify the project in the current working directory. ' +
-        'Additional use of "--affected-by", "--from", or "--to" will further expand the selection.',
+        'Additional use of any selection commands will further expand the selection.',
+      completions: this._getProjectNames.bind(this)
+    });
+    this._onlyProject = this.defineStringListParameter({
+      parameterLongName: '--only',
+      parameterShortName: '-o',
+      argumentName: 'PROJECT',
+      description:
+        'Run command on the selection instead of all projects. ' +
+        'Add the specified project (and only the specified project) to the current selection. ' +
+        '"." can be used as shorthand to specify the project in the current working directory. ' +
+        'Additional use of any selection commands will further expand the selection.',
       completions: this._getProjectNames.bind(this)
     });
 
@@ -263,7 +279,7 @@ export class BulkScriptAction extends BaseScriptAction {
         'Run command on the selection instead of all projects. ' +
         'Add the specified project and all projects that would be affected by a change to it to the current selection. ' +
         '"." can be used as shorthand to specify the project in the current working directory. ' +
-        'Additional use of "--affected-by", "--from", or "--to" will further expand the selection.',
+        'Additional use of any selection commands will further expand the selection.',
       completions: this._getProjectNames.bind(this)
     });
 
@@ -275,7 +291,7 @@ export class BulkScriptAction extends BaseScriptAction {
         'Run command on the selection instead of all projects. ' +
         'Add all projects that would be affected by a change to the specified project (except the project itself) to the current selection. ' +
         '"." can be used as shorthand to specify the project in the current working directory. ' +
-        'Additional use of "--affected-by", "--from", or "--to" will further expand the selection.',
+        'Additional use of any selection commands will further expand the selection.',
       completions: this._getProjectNames.bind(this)
     });
 
@@ -284,14 +300,16 @@ export class BulkScriptAction extends BaseScriptAction {
       argumentName: 'VERSION_POLICY_NAME',
       description:
         'Run command on the selection instead of all projects. ' +
-        'Adds all projects with the specified version policy, and all dependencies thereof, to the current selection.'
+        'Adds all projects with the specified version policy, and all dependencies thereof, to the current selection. ' +
+        'Additional use of any selection commands will further expand the selection.'
     });
     this._fromVersionPolicy = this.defineStringListParameter({
       parameterLongName: '--from-version-policy',
       argumentName: 'VERSION_POLICY_NAME',
       description:
         'Run command on the selection instead of all projects. ' +
-        'Adds all projects with the specified version policy, and all projects that depend on them, to the current selection.'
+        'Adds all projects with the specified version policy, and all projects that depend on them, to the current selection. ' +
+        'Additional use of any selection commands will further expand the selection.'
     });
 
     this._verboseParameter = this.defineFlagParameter({
@@ -302,7 +320,7 @@ export class BulkScriptAction extends BaseScriptAction {
     if (this._isIncrementalBuildAllowed) {
       this._changedProjectsOnly = this.defineFlagParameter({
         parameterLongName: '--changed-projects-only',
-        parameterShortName: '-o',
+        parameterShortName: '-c',
         description:
           'If specified, the incremental build will only rebuild projects that have changed, ' +
           'but not any projects that directly or indirectly depend on the changed package.'
