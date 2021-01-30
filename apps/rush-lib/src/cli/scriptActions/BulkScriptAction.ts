@@ -63,6 +63,8 @@ export class BulkScriptAction extends BaseScriptAction {
   private _fromProject!: CommandLineStringListParameter;
   private _toProject!: CommandLineStringListParameter;
   private _toExceptProject!: CommandLineStringListParameter;
+  private _affectedByProject!: CommandLineStringListParameter;
+  private _affectedByExceptProject!: CommandLineStringListParameter;
   private _fromVersionPolicy!: CommandLineStringListParameter;
   private _toVersionPolicy!: CommandLineStringListParameter;
   private _verboseParameter!: CommandLineFlagParameter;
@@ -117,11 +119,15 @@ export class BulkScriptAction extends BaseScriptAction {
       | BuildCacheConfiguration
       | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(terminal, this.rushConfiguration);
 
+    // Include all projects that depend on these projects, and all dependencies thereof
     const fromProjects: Set<RushConfigurationProject> = Selection.union(
+      // --from
       this.evaluateProjects(this._fromProject),
+      // --from-version-policy
       this.evaluateVersionPolicyProjects(this._fromVersionPolicy)
     );
 
+    // Include dependencies of these projects
     const toProjects: Set<RushConfigurationProject> = Selection.union(
       // --to
       this.evaluateProjects(this._toProject),
@@ -133,7 +139,19 @@ export class BulkScriptAction extends BaseScriptAction {
       Selection.expandAllDependents(fromProjects)
     );
 
-    const selection: Set<RushConfigurationProject> = Selection.expandAllDependencies(toProjects);
+    // These projects will not have their dependencies included
+    const affectedByProjects: Set<RushConfigurationProject> = Selection.union(
+      // --affected-by
+      this.evaluateProjects(this._affectedByProject),
+      // --affected-by-except
+      Selection.directDependentsOf(this.evaluateProjects(this._affectedByExceptProject))
+    );
+
+    const selection: Set<RushConfigurationProject> = Selection.union(
+      Selection.expandAllDependencies(toProjects),
+      // Only dependents of these projects, not dependencies
+      Selection.expandAllDependents(affectedByProjects)
+    );
 
     const taskSelector: TaskSelector = new TaskSelector({
       rushConfiguration: this.rushConfiguration,
@@ -210,18 +228,18 @@ export class BulkScriptAction extends BaseScriptAction {
         'Run command on the selection instead of all projects. ' +
         'Adds the specified project and all its dependencies to the current selection. ' +
         '"." can be used as shorthand to specify the project in the current working directory. ' +
-        'Additional use of "--from" or "--to" will further expand the selection.',
+        'Additional use of "--affected-by", "--from", or "--to" will further expand the selection.',
       completions: this._getProjectNames.bind(this)
     });
     this._toExceptProject = this.defineStringListParameter({
       parameterLongName: '--to-except',
       parameterShortName: '-T',
-      argumentName: 'PROJECT2',
+      argumentName: 'PROJECT',
       description:
         'Run command on the selection instead of all projects. ' +
         'Adds all dependencies of the specified project to the current selection. ' +
         '"." can be used as shorthand to specify the project in the current working directory. ' +
-        'Additional use of "--from" or "--to" will further expand the selection.',
+        'Additional use of "--affected-by", "--from", or "--to" will further expand the selection.',
       completions: this._getProjectNames.bind(this)
     });
 
@@ -231,9 +249,33 @@ export class BulkScriptAction extends BaseScriptAction {
       argumentName: 'PROJECT',
       description:
         'Run command on the selection instead of all projects. ' +
-        'Add the specified project and all of its direct or indirect dependencies to the current selection. ' +
+        'Add the specified project and all projects that depend on it, and all the dependencies of those projects, to the current selection. ' +
         '"." can be used as shorthand to specify the project in the current working directory. ' +
-        'Additional use of "--from" or "--to" will further expand the selection.',
+        'Additional use of "--affected-by", "--from", or "--to" will further expand the selection.',
+      completions: this._getProjectNames.bind(this)
+    });
+
+    this._affectedByProject = this.defineStringListParameter({
+      parameterLongName: '--affected-by',
+      parameterShortName: '-a',
+      argumentName: 'PROJECT',
+      description:
+        'Run command on the selection instead of all projects. ' +
+        'Add the specified project and all projects that would be affected by a change to it to the current selection. ' +
+        '"." can be used as shorthand to specify the project in the current working directory. ' +
+        'Additional use of "--affected-by", "--from", or "--to" will further expand the selection.',
+      completions: this._getProjectNames.bind(this)
+    });
+
+    this._affectedByExceptProject = this.defineStringListParameter({
+      parameterLongName: '--affected-by-except',
+      parameterShortName: '-A',
+      argumentName: 'PROJECT',
+      description:
+        'Run command on the selection instead of all projects. ' +
+        'Add all projects that would be affected by a change to the specified project (except the project itself) to the current selection. ' +
+        '"." can be used as shorthand to specify the project in the current working directory. ' +
+        'Additional use of "--affected-by", "--from", or "--to" will further expand the selection.',
       completions: this._getProjectNames.bind(this)
     });
 
