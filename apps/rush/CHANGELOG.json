@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.38.0",
+      "tag": "@microsoft/rush_v5.38.0",
+      "date": "Mon, 01 Feb 2021 20:42:04 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add new command-line parameters for bulk commands: \"--to-except\", \"--from\", \"--only\", \"--impacted-by\", \"--impacted-by-except\", and \"--from-version-policy\" (GitHub #2354)"
+          },
+          {
+            "comment": "Change the short name for \"--changed-projects-only\" to be \"-c\" (so that \"-o\" can be used for the new \"--only\" parameter)"
+          },
+          {
+            "comment": "Change the \"--from\" parameter so that it now includes all dependencies as people expected.  To skip dependencies, use the new \"--impacted-by\" parameter.  (GitHub issue #1447)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.37.0",
       "tag": "@microsoft/rush_v5.37.0",
       "date": "Sat, 30 Jan 2021 01:50:27 GMT",

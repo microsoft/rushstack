@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 30 Jan 2021 01:50:27 GMT and should not be manually modified.
+This log was last generated on Mon, 01 Feb 2021 20:42:04 GMT and should not be manually modified.
+
+## 5.38.0
+Mon, 01 Feb 2021 20:42:04 GMT
+
+### Updates
+
+- Add new command-line parameters for bulk commands: "--to-except", "--from", "--only", "--impacted-by", "--impacted-by-except", and "--from-version-policy" (GitHub #2354)
+- Change the short name for "--changed-projects-only" to be "-c" (so that "-o" can be used for the new "--only" parameter)
+- Change the "--from" parameter so that it now includes all dependencies as people expected.  To skip dependencies, use the new "--impacted-by" parameter.  (GitHub issue #1447)
 
 ## 5.37.0
 Sat, 30 Jan 2021 01:50:27 GMT
