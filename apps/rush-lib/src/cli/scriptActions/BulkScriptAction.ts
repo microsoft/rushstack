@@ -230,10 +230,11 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterShortName: '-t',
       argumentName: 'PROJECT',
       description:
-        'Run command on the selection instead of all projects. ' +
-        'Adds the specified project and all its dependencies to the current selection. ' +
-        '"." can be used as shorthand to specify the project in the current working directory. ' +
-        'Additional use of any selection commands will further expand the selection.',
+        'Normally all projects in the monorepo will be processed;' +
+        ' adding this parameter will instead select a subset of projects.' +
+        ' Each "--to" parameter expands this selection to include PROJECT and all its dependencies.' +
+        ' "." can be used as shorthand for the project in the current working directory.' +
+        ' For details, refer to the website article "Selecting subsets of projects".',
       completions: this._getProjectNames.bind(this)
     });
     this._toExceptProject = this.defineStringListParameter({
@@ -241,10 +242,12 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterShortName: '-T',
       argumentName: 'PROJECT',
       description:
-        'Run command on the selection instead of all projects. ' +
-        'Adds all dependencies of the specified project to the current selection. ' +
-        '"." can be used as shorthand to specify the project in the current working directory. ' +
-        'Additional use of any selection commands will further expand the selection.',
+        'Normally all projects in the monorepo will be processed;' +
+        ' adding this parameter will instead select a subset of projects.' +
+        ' Each "--to-except" parameter expands this selection to include all dependencies of PROJECT,' +
+        ' but not PROJECT itself.' +
+        ' "." can be used as shorthand for the project in the current working directory.' +
+        ' For details, refer to the website article "Selecting subsets of projects".',
       completions: this._getProjectNames.bind(this)
     });
 
@@ -253,10 +256,12 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterShortName: '-f',
       argumentName: 'PROJECT',
       description:
-        'Run command on the selection instead of all projects. ' +
-        'Add the specified project and all projects that depend on it, and all the dependencies of those projects, to the current selection. ' +
-        '"." can be used as shorthand to specify the project in the current working directory. ' +
-        'Additional use of any selection commands will further expand the selection.',
+        'Normally all projects in the monorepo will be processed;' +
+        ' adding this parameter will instead select a subset of projects.' +
+        ' Each "--from" parameter expands this selection to include PROJECT and all projects that depend on it,' +
+        ' plus all dependencies of this set.' +
+        ' "." can be used as shorthand for the project in the current working directory.' +
+        ' For details, refer to the website article "Selecting subsets of projects".',
       completions: this._getProjectNames.bind(this)
     });
     this._onlyProject = this.defineStringListParameter({
@@ -264,10 +269,12 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterShortName: '-o',
       argumentName: 'PROJECT',
       description:
-        'Run command on the selection instead of all projects. ' +
-        'Add the specified project (and only the specified project) to the current selection. ' +
-        '"." can be used as shorthand to specify the project in the current working directory. ' +
-        'Additional use of any selection commands will further expand the selection.',
+        'Normally all projects in the monorepo will be processed;' +
+        ' adding this parameter will instead select a subset of projects.' +
+        ' Each "--only" parameter expands this selection to include PROJECT; its dependencies are not added.' +
+        ' "." can be used as shorthand for the project in the current working directory.' +
+        ' Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies.' +
+        ' For details, refer to the website article "Selecting subsets of projects".',
       completions: this._getProjectNames.bind(this)
     });
 
@@ -276,10 +283,13 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterShortName: '-i',
       argumentName: 'PROJECT',
       description:
-        'Run command on the selection instead of all projects. ' +
-        'Add the specified project and all projects that would be impacted by a change to it to the current selection. ' +
-        '"." can be used as shorthand to specify the project in the current working directory. ' +
-        'Additional use of any selection commands will further expand the selection.',
+        'Normally all projects in the monorepo will be processed;' +
+        ' adding this parameter will instead select a subset of projects.' +
+        ' Each "--impacted-by" parameter expands this selection to include PROJECT and any projects that' +
+        ' depend on PROJECT (and thus might be broken by changes to PROJECT).' +
+        ' "." can be used as shorthand for the project in the current working directory.' +
+        ' Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies.' +
+        ' For details, refer to the website article "Selecting subsets of projects".',
       completions: this._getProjectNames.bind(this)
     });
 
@@ -288,10 +298,13 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterShortName: '-I',
       argumentName: 'PROJECT',
       description:
-        'Run command on the selection instead of all projects. ' +
-        'Add all projects that would be impacted by a change to the specified project (except the project itself) to the current selection. ' +
-        '"." can be used as shorthand to specify the project in the current working directory. ' +
-        'Additional use of any selection commands will further expand the selection.',
+        'Normally all projects in the monorepo will be processed;' +
+        ' adding this parameter will instead select a subset of projects.' +
+        ' Each "--impacted-by-except" parameter works the same as "--impacted-by" except that PROJECT itself' +
+        ' is not added to the selection.' +
+        ' "." can be used as shorthand for the project in the current working directory.' +
+        ' Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies.' +
+        ' For details, refer to the website article "Selecting subsets of projects".',
       completions: this._getProjectNames.bind(this)
     });
 
@@ -299,17 +312,21 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterLongName: '--to-version-policy',
       argumentName: 'VERSION_POLICY_NAME',
       description:
-        'Run command on the selection instead of all projects. ' +
-        'Adds all projects with the specified version policy, and all dependencies thereof, to the current selection. ' +
-        'Additional use of any selection commands will further expand the selection.'
+        'Normally all projects in the monorepo will be processed;' +
+        ' adding this parameter will instead select a subset of projects.' +
+        ' The "--to-version-policy" parameter is equivalent to specifying "--to" for each of the projects' +
+        ' belonging to VERSION_POLICY_NAME.' +
+        ' For details, refer to the website article "Selecting subsets of projects".'
     });
     this._fromVersionPolicy = this.defineStringListParameter({
       parameterLongName: '--from-version-policy',
       argumentName: 'VERSION_POLICY_NAME',
       description:
-        'Run command on the selection instead of all projects. ' +
-        'Adds all projects with the specified version policy, and all projects that depend on them, to the current selection. ' +
-        'Additional use of any selection commands will further expand the selection.'
+        'Normally all projects in the monorepo will be processed;' +
+        ' adding this parameter will instead select a subset of projects.' +
+        ' The "--from-version-policy" parameter is equivalent to specifying "--from" for each of the projects' +
+        ' belonging to VERSION_POLICY_NAME.' +
+        ' For details, refer to the website article "Selecting subsets of projects".'
     });
 
     this._verboseParameter = this.defineFlagParameter({
