@@ -177,7 +177,7 @@ export class RushConfigurationProject {
   /**
    * The relative path of the folder that contains the project to be built by Rush.
    *
-   * Example: `libraries\my-project`
+   * Example: `libraries/my-project`
    */
   public get projectRelativeFolder(): string {
     return this._projectRelativeFolder;
@@ -229,7 +229,8 @@ export class RushConfigurationProject {
 
   /**
    * An array of projects within the Rush configuration which directly depend on this package.
-   * @deprecated Use localDependentProjectSet instead
+   * @deprecated Use `consumingProjectNames` instead, as it has Set semantics, which better reflect the nature
+   * of the data.
    */
   public get downstreamDependencyProjects(): string[] {
     return [...this._consumingProjectNames];
@@ -237,8 +238,10 @@ export class RushConfigurationProject {
 
   /**
    * A set of projects within the Rush configuration which directly consume this package.
-   * Writable because it is mutated by RushConfiguration during initialization.
    * @internal
+   *
+   * @remarks
+   * Writable because it is mutated by RushConfiguration during initialization.
    */
   public get consumingProjectNames(): Set<string> {
     return this._consumingProjectNames;
@@ -246,7 +249,8 @@ export class RushConfigurationProject {
 
   /**
    * An array of projects within the Rush configuration which this project declares as dependencies.
-   * @deprecated Use `dependencyProjects` instead
+   * @deprecated Use `dependencyProjects` instead, as it has Set semantics, which better reflect the nature
+   * of the data.
    */
   public get localDependencyProjects(): ReadonlyArray<RushConfigurationProject> {
     return [...this.dependencyProjects];
@@ -254,6 +258,10 @@ export class RushConfigurationProject {
 
   /**
    * The set of projects within the Rush configuration which this project declares as dependencies.
+   *
+   * @remarks
+   * Can be used recursively to walk the project dependency graph to find all projects that are directly or indirectly
+   * referenced from this project.
    */
   public get dependencyProjects(): ReadonlySet<RushConfigurationProject> {
     if (!this._dependencyProjects) {
@@ -270,7 +278,9 @@ export class RushConfigurationProject {
    * The set of projects within the Rush configuration which declare this project as a dependency.
    * Excludes those that declare this project as a `cyclicDependencyProject`.
    *
-   * The counterpart to `dependencyProjects`.
+   * @remarks
+   * This field is the counterpart to `dependencyProjects`, and can be used recursively to walk the project dependency
+   * graph to find all projects which will be impacted by changes to this project.
    */
   public get consumingProjects(): ReadonlySet<RushConfigurationProject> {
     if (!this._consumingProjects) {
