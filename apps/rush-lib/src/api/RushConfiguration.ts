@@ -783,6 +783,7 @@ export class RushConfiguration {
       // Compute the downstream dependencies within the list of Rush projects.
       this._populateDownstreamDependencies(project.packageJson.dependencies, project.packageName);
       this._populateDownstreamDependencies(project.packageJson.devDependencies, project.packageName);
+      this._populateDownstreamDependencies(project.packageJson.optionalDependencies, project.packageName);
       this._versionPolicyConfiguration.validate(this.projectsByName);
     }
   }
@@ -1668,7 +1669,7 @@ export class RushConfiguration {
       const depProject: RushConfigurationProject | undefined = this.projectsByName.get(dependencyName);
 
       if (depProject) {
-        depProject.downstreamDependencyProjects.push(packageName);
+        depProject._consumingProjectNames.add(packageName);
       }
     });
   }

@@ -24,8 +24,9 @@ import { Utilities } from '../../utilities/Utilities';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
-import { IRushConfigurationProjectJson } from '../../api/RushConfigurationProject';
+import { IRushConfigurationProjectJson, RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import { Selection } from '../../logic/Selection';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -59,8 +60,12 @@ export class BulkScriptAction extends BaseScriptAction {
   private _commandToRun: string;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
-  private _fromFlag!: CommandLineStringListParameter;
-  private _toFlag!: CommandLineStringListParameter;
+  private _fromProject!: CommandLineStringListParameter;
+  private _onlyProject!: CommandLineStringListParameter;
+  private _toProject!: CommandLineStringListParameter;
+  private _toExceptProject!: CommandLineStringListParameter;
+  private _impactedByProject!: CommandLineStringListParameter;
+  private _impactedByExceptProject!: CommandLineStringListParameter;
   private _fromVersionPolicy!: CommandLineStringListParameter;
   private _toVersionPolicy!: CommandLineStringListParameter;
   private _verboseParameter!: CommandLineFlagParameter;
@@ -115,11 +120,48 @@ export class BulkScriptAction extends BaseScriptAction {
       | BuildCacheConfiguration
       | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(terminal, this.rushConfiguration);
 
+    // Include exactly these projects (--only)
+    const onlyProjects: Iterable<RushConfigurationProject> = this.evaluateProjectParameter(this._onlyProject);
+
+    // Include all projects that depend on these projects, and all dependencies thereof
+    const fromProjects: Set<RushConfigurationProject> = Selection.union(
+      // --from
+      this.evaluateProjectParameter(this._fromProject),
+      // --from-version-policy
+      this.evaluateVersionPolicyProjects(this._fromVersionPolicy)
+    );
+
+    // Include dependencies of these projects
+    const toProjects: Set<RushConfigurationProject> = Selection.union(
+      // --to
+      this.evaluateProjectParameter(this._toProject),
+      // --to-version-policy
+      this.evaluateVersionPolicyProjects(this._toVersionPolicy),
+      // --to-except
+      Selection.directDependenciesOf(this.evaluateProjectParameter(this._toExceptProject)),
+      // --from / --from-version-policy
+      Selection.expandAllConsumers(fromProjects)
+    );
+
+    // These projects will not have their dependencies included
+    const impactedByProjects: Set<RushConfigurationProject> = Selection.union(
+      // --impacted-by
+      this.evaluateProjectParameter(this._impactedByProject),
+      // --impacted-by-except
+      Selection.directConsumersOf(this.evaluateProjectParameter(this._impactedByExceptProject))
+    );
+
+    const selection: Set<RushConfigurationProject> = Selection.union(
+      onlyProjects,
+      Selection.expandAllDependencies(toProjects),
+      // Only dependents of these projects, not dependencies
+      Selection.expandAllConsumers(impactedByProjects)
+    );
+
     const taskSelector: TaskSelector = new TaskSelector({
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
-      toProjects: this.mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy),
-      fromProjects: this.mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy),
+      selection,
       commandToRun: this._commandToRun,
       customParameterValues,
       isQuietMode: isQuietMode,
@@ -182,37 +224,111 @@ export class BulkScriptAction extends BaseScriptAction {
           ' operating system and number of CPU cores.'
       });
     }
-    this._toFlag = this.defineStringListParameter({
+
+    this._toProject = this.defineStringListParameter({
       parameterLongName: '--to',
       parameterShortName: '-t',
       argumentName: 'PROJECT',
       description:
-        'Run command in the specified project and all of its dependencies. "." can be used as shorthand ' +
-        'to specify the project in the current working directory.',
+        'Normally all projects in the monorepo will be processed;' +
+        ' adding this parameter will instead select a subset of projects.' +
+        ' Each "--to" parameter expands this selection to include PROJECT and all its dependencies.' +
+        ' "." can be used as shorthand for the project in the current working directory.' +
+        ' For details, refer to the website article "Selecting subsets of projects".',
       completions: this._getProjectNames.bind(this)
+    });
+    this._toExceptProject = this.defineStringListParameter({
+      parameterLongName: '--to-except',
+      parameterShortName: '-T',
+      argumentName: 'PROJECT',
+      description:
+        'Normally all projects in the monorepo will be processed;' +
+        ' adding this parameter will instead select a subset of projects.' +
+        ' Each "--to-except" parameter expands this selection to include all dependencies of PROJECT,' +
+        ' but not PROJECT itself.' +
+        ' "." can be used as shorthand for the project in the current working directory.' +
+        ' For details, refer to the website article "Selecting subsets of projects".',
+      completions: this._getProjectNames.bind(this)
+    });
+
+    this._fromProject = this.defineStringListParameter({
+      parameterLongName: '--from',
+      parameterShortName: '-f',
+      argumentName: 'PROJECT',
+      description:
+        'Normally all projects in the monorepo will be processed;' +
+        ' adding this parameter will instead select a subset of projects.' +
+        ' Each "--from" parameter expands this selection to include PROJECT and all projects that depend on it,' +
+        ' plus all dependencies of this set.' +
+        ' "." can be used as shorthand for the project in the current working directory.' +
+        ' For details, refer to the website article "Selecting subsets of projects".',
+      completions: this._getProjectNames.bind(this)
+    });
+    this._onlyProject = this.defineStringListParameter({
+      parameterLongName: '--only',
+      parameterShortName: '-o',
+      argumentName: 'PROJECT',
+      description:
+        'Normally all projects in the monorepo will be processed;' +
+        ' adding this parameter will instead select a subset of projects.' +
+        ' Each "--only" parameter expands this selection to include PROJECT; its dependencies are not added.' +
+        ' "." can be used as shorthand for the project in the current working directory.' +
+        ' Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies.' +
+        ' For details, refer to the website article "Selecting subsets of projects".',
+      completions: this._getProjectNames.bind(this)
+    });
+
+    this._impactedByProject = this.defineStringListParameter({
+      parameterLongName: '--impacted-by',
+      parameterShortName: '-i',
+      argumentName: 'PROJECT',
+      description:
+        'Normally all projects in the monorepo will be processed;' +
+        ' adding this parameter will instead select a subset of projects.' +
+        ' Each "--impacted-by" parameter expands this selection to include PROJECT and any projects that' +
+        ' depend on PROJECT (and thus might be broken by changes to PROJECT).' +
+        ' "." can be used as shorthand for the project in the current working directory.' +
+        ' Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies.' +
+        ' For details, refer to the website article "Selecting subsets of projects".',
+      completions: this._getProjectNames.bind(this)
+    });
+
+    this._impactedByExceptProject = this.defineStringListParameter({
+      parameterLongName: '--impacted-by-except',
+      parameterShortName: '-I',
+      argumentName: 'PROJECT',
+      description:
+        'Normally all projects in the monorepo will be processed;' +
+        ' adding this parameter will instead select a subset of projects.' +
+        ' Each "--impacted-by-except" parameter works the same as "--impacted-by" except that PROJECT itself' +
+        ' is not added to the selection.' +
+        ' "." can be used as shorthand for the project in the current working directory.' +
+        ' Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies.' +
+        ' For details, refer to the website article "Selecting subsets of projects".',
+      completions: this._getProjectNames.bind(this)
+    });
+
+    this._toVersionPolicy = this.defineStringListParameter({
+      parameterLongName: '--to-version-policy',
+      argumentName: 'VERSION_POLICY_NAME',
+      description:
+        'Normally all projects in the monorepo will be processed;' +
+        ' adding this parameter will instead select a subset of projects.' +
+        ' The "--to-version-policy" parameter is equivalent to specifying "--to" for each of the projects' +
+        ' belonging to VERSION_POLICY_NAME.' +
+        ' For details, refer to the website article "Selecting subsets of projects".'
     });
     this._fromVersionPolicy = this.defineStringListParameter({
       parameterLongName: '--from-version-policy',
       argumentName: 'VERSION_POLICY_NAME',
       description:
-        'Run command in all projects with the specified version policy ' +
-        'and all projects that directly or indirectly depend on projects with the specified version policy'
+        'Normally all projects in the monorepo will be processed;' +
+        ' adding this parameter will instead select a subset of projects.' +
+        ' The "--from-version-policy" parameter is equivalent to specifying "--from" for each of the projects' +
+        ' belonging to VERSION_POLICY_NAME.' +
+        ' For details, refer to the website article "Selecting subsets of projects".'
     });
-    this._toVersionPolicy = this.defineStringListParameter({
-      parameterLongName: '--to-version-policy',
-      argumentName: 'VERSION_POLICY_NAME',
-      description:
-        'Run command in all projects with the specified version policy and all of their dependencies'
-    });
-    this._fromFlag = this.defineStringListParameter({
-      parameterLongName: '--from',
-      parameterShortName: '-f',
-      argumentName: 'PROJECT',
-      description:
-        'Run command in the specified project and all projects that directly or indirectly depend on the ' +
-        'specified project. "." can be used as shorthand to specify the project in the current working directory.',
-      completions: this._getProjectNames.bind(this)
-    });
+
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
@@ -221,7 +337,7 @@ export class BulkScriptAction extends BaseScriptAction {
     if (this._isIncrementalBuildAllowed) {
       this._changedProjectsOnly = this.defineFlagParameter({
         parameterLongName: '--changed-projects-only',
-        parameterShortName: '-o',
+        parameterShortName: '-c',
         description:
           'If specified, the incremental build will only rebuild projects that have changed, ' +
           'but not any projects that directly or indirectly depend on the changed package.'
@@ -296,8 +412,8 @@ export class BulkScriptAction extends BaseScriptAction {
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
     const extraData: { [key: string]: string } = {
-      command_to: (this._toFlag.values.length > 0).toString(),
-      command_from: (this._fromFlag.values.length > 0).toString()
+      command_to: (this._toProject.values.length > 0).toString(),
+      command_from: (this._fromProject.values.length > 0).toString()
     };
 
     for (const customParameter of this.customParameters) {

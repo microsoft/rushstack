@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Change the \"--from\" parameter so that it now includes all dependencies as people expected.  To skip dependencies, use the new \"--impacted-by\" parameter.  (GitHub issue #1447)",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "dmichon-msft@users.noreply.github.com"
+}

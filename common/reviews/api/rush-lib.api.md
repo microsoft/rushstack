@@ -412,10 +412,16 @@ export class RushConfigurationProject {
     //
     // @internal
     constructor(projectJson: IRushConfigurationProjectJson, rushConfiguration: RushConfiguration, tempProjectName: string);
+    // @internal
+    readonly _consumingProjectNames: Set<string>;
+    get consumingProjects(): ReadonlySet<RushConfigurationProject>;
     get cyclicDependencyProjects(): Set<string>;
+    get dependencyProjects(): ReadonlySet<RushConfigurationProject>;
+    // @deprecated
     get downstreamDependencyProjects(): string[];
     // @beta
     get isMainProject(): boolean;
+    // @deprecated
     get localDependencyProjects(): ReadonlyArray<RushConfigurationProject>;
     // @deprecated
     get packageJson(): IPackageJson;

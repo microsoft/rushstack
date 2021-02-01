@@ -131,13 +131,11 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
     return super.onExecute();
   }
 
-  protected mergeProjectsWithVersionPolicy(
-    projectsParameters: CommandLineStringListParameter,
-    versionPoliciesParameters: CommandLineStringListParameter
-  ): RushConfigurationProject[] {
+  protected *evaluateProjectParameter(
+    projectsParameters: CommandLineStringListParameter
+  ): Iterable<RushConfigurationProject> {
     const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
-    const projects: RushConfigurationProject[] = [];
     for (const projectParameter of projectsParameters.values) {
       if (projectParameter === '.') {
         const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(process.cwd());
@@ -146,7 +144,7 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
             packageJson.name
           );
           if (project) {
-            projects.push(project);
+            yield project;
           } else {
             console.log(
               colors.red(
@@ -174,21 +172,23 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
           throw new AlreadyReportedError();
         }
 
-        projects.push(project);
+        yield project;
       }
     }
+  }
 
+  protected *evaluateVersionPolicyProjects(
+    versionPoliciesParameters: CommandLineStringListParameter
+  ): Iterable<RushConfigurationProject> {
     if (versionPoliciesParameters.values && versionPoliciesParameters.values.length > 0) {
-      this.rushConfiguration.projects.forEach((project) => {
+      for (const project of this.rushConfiguration.projects) {
         const matches: boolean = versionPoliciesParameters.values.some((policyName) => {
           return project.versionPolicyName === policyName;
         });
         if (matches) {
-          projects.push(project);
+          yield project;
         }
-      });
+      }
     }
-
-    return projects;
   }
 }
