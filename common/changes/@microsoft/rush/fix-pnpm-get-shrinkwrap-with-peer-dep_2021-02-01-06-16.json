@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "fix pnpm get shrinkwrap entry with peerDeps\"",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "liucheng.tech@outlook.com"
+}
