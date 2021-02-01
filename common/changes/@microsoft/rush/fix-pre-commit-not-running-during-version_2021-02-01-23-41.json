@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add \"--ignore-git-hooks\" flags to \"publish\" and \"version\" commands to prevent the execution of all git hooks",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "manrueda@users.noreply.github.com"
+}
