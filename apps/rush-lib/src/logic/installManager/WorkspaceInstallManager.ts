@@ -531,11 +531,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     const localDependencyProjectNames: Set<string> = new Set<string>(
-      (function* (deps: Iterable<RushConfigurationProject>): Iterable<string> {
-        for (const dep of deps) {
-          yield dep.packageName;
-        }
-      })(project.localDependencyProjectSet)
+      [...project.dependencyProjects].map((x) => x.packageName)
     );
 
     // Loop through non-local dependencies. Skip peer dependencies because they're only a constraint

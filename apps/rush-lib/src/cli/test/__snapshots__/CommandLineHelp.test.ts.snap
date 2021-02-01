@@ -111,7 +111,7 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: build 1`] = `
 "usage: rush build [-h] [-p COUNT] [-t PROJECT] [-T PROJECT] [-f PROJECT]
-                  [-o PROJECT] [-a PROJECT] [-A PROJECT]
+                  [-o PROJECT] [-i PROJECT] [-I PROJECT]
                   [--to-version-policy VERSION_POLICY_NAME]
                   [--from-version-policy VERSION_POLICY_NAME] [-v] [-c]
                   [--ignore-hooks] [-s] [-m]
@@ -169,17 +169,17 @@ Optional arguments:
                         shorthand to specify the project in the current 
                         working directory. Additional use of any selection 
                         commands will further expand the selection.
-  -a PROJECT, --affected-by PROJECT
+  -i PROJECT, --impacted-by PROJECT
                         Run command on the selection instead of all projects. 
                         Add the specified project and all projects that would 
-                        be affected by a change to it to the current 
+                        be impacted by a change to it to the current 
                         selection. \\".\\" can be used as shorthand to specify 
                         the project in the current working directory. 
                         Additional use of any selection commands will further 
                         expand the selection.
-  -A PROJECT, --affected-by-except PROJECT
+  -I PROJECT, --impacted-by-except PROJECT
                         Run command on the selection instead of all projects. 
-                        Add all projects that would be affected by a change 
+                        Add all projects that would be impacted by a change 
                         to the specified project (except the project itself) 
                         to the current selection. \\".\\" can be used as 
                         shorthand to specify the project in the current 
@@ -327,7 +327,7 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: import-strings 1`] = `
 "usage: rush import-strings [-h] [-p COUNT] [-t PROJECT] [-T PROJECT]
-                           [-f PROJECT] [-o PROJECT] [-a PROJECT] [-A PROJECT]
+                           [-f PROJECT] [-o PROJECT] [-i PROJECT] [-I PROJECT]
                            [--to-version-policy VERSION_POLICY_NAME]
                            [--from-version-policy VERSION_POLICY_NAME] [-v]
                            [--ignore-hooks]
@@ -377,17 +377,17 @@ Optional arguments:
                         shorthand to specify the project in the current 
                         working directory. Additional use of any selection 
                         commands will further expand the selection.
-  -a PROJECT, --affected-by PROJECT
+  -i PROJECT, --impacted-by PROJECT
                         Run command on the selection instead of all projects. 
                         Add the specified project and all projects that would 
-                        be affected by a change to it to the current 
+                        be impacted by a change to it to the current 
                         selection. \\".\\" can be used as shorthand to specify 
                         the project in the current working directory. 
                         Additional use of any selection commands will further 
                         expand the selection.
-  -A PROJECT, --affected-by-except PROJECT
+  -I PROJECT, --impacted-by-except PROJECT
                         Run command on the selection instead of all projects. 
-                        Add all projects that would be affected by a change 
+                        Add all projects that would be impacted by a change 
                         to the specified project (except the project itself) 
                         to the current selection. \\".\\" can be used as 
                         shorthand to specify the project in the current 
@@ -698,7 +698,7 @@ Optional arguments:
 
 exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
 "usage: rush rebuild [-h] [-p COUNT] [-t PROJECT] [-T PROJECT] [-f PROJECT]
-                    [-o PROJECT] [-a PROJECT] [-A PROJECT]
+                    [-o PROJECT] [-i PROJECT] [-I PROJECT]
                     [--to-version-policy VERSION_POLICY_NAME]
                     [--from-version-policy VERSION_POLICY_NAME] [-v]
                     [--ignore-hooks] [-s] [-m]
@@ -753,17 +753,17 @@ Optional arguments:
                         shorthand to specify the project in the current 
                         working directory. Additional use of any selection 
                         commands will further expand the selection.
-  -a PROJECT, --affected-by PROJECT
+  -i PROJECT, --impacted-by PROJECT
                         Run command on the selection instead of all projects. 
                         Add the specified project and all projects that would 
-                        be affected by a change to it to the current 
+                        be impacted by a change to it to the current 
                         selection. \\".\\" can be used as shorthand to specify 
                         the project in the current working directory. 
                         Additional use of any selection commands will further 
                         expand the selection.
-  -A PROJECT, --affected-by-except PROJECT
+  -I PROJECT, --impacted-by-except PROJECT
                         Run command on the selection instead of all projects. 
-                        Add all projects that would be affected by a change 
+                        Add all projects that would be impacted by a change 
                         to the specified project (except the project itself) 
                         to the current selection. \\".\\" can be used as 
                         shorthand to specify the project in the current 

@@ -85,7 +85,7 @@ export class PublishUtilities {
         const change: IChangeInfo = allChanges[packageName];
         const project: RushConfigurationProject = allPackages.get(packageName)!;
         const pkg: IPackageJson = project.packageJson;
-        const deps: Set<string> = project.downstreamDependencyProjectSet;
+        const deps: Set<string> = project.consumingProjectNames;
 
         // Write the new version expected for the change.
         const skipVersionBump: boolean = PublishUtilities._shouldSkipVersionBump(
@@ -596,13 +596,13 @@ export class PublishUtilities {
     projectsToExclude?: Set<string>
   ): void {
     const packageName: string = change.packageName;
-    const downstreamNames: Set<string> = allPackages.get(packageName)!.downstreamDependencyProjectSet;
+    const downstream: ReadonlySet<RushConfigurationProject> = allPackages.get(packageName)!.consumingProjects;
 
     // Iterate through all downstream dependencies for the package.
-    if (downstreamNames) {
+    if (downstream) {
       if (change.changeType! >= ChangeType.hotfix || (prereleaseToken && prereleaseToken.hasValue)) {
-        for (const depName of downstreamNames) {
-          const pkg: IPackageJson = allPackages.get(depName)!.packageJson;
+        for (const dependency of downstream) {
+          const pkg: IPackageJson = dependency.packageJson;
 
           PublishUtilities._updateDownstreamDependency(
             pkg.name,

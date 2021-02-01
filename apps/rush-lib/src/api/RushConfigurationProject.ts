@@ -17,6 +17,7 @@ import { PackageJsonEditor } from './PackageJsonEditor';
 import { RushConstants } from '../logic/RushConstants';
 import { PackageNameParsers } from './PackageNameParsers';
 import { DependencySpecifier, DependencySpecifierType } from '../logic/DependencySpecifier';
+import { Selection } from '../logic/Selection';
 
 /**
  * This represents the JSON data object for a project entry in the rush.json configuration file.
@@ -54,9 +55,9 @@ export class RushConfigurationProject {
   private _shouldPublish: boolean;
   private _skipRushCheck: boolean;
   private _publishFolder: string;
-  private _downstreamDependencyProjects: Set<string>;
-  private _localDependencyProjects: ReadonlySet<RushConfigurationProject> | undefined;
-  private _localDependentProjects: ReadonlySet<RushConfigurationProject> | undefined;
+  private _consumingProjectNames: Set<string>;
+  private _dependencyProjects: ReadonlySet<RushConfigurationProject> | undefined;
+  private _consumingProjects: ReadonlySet<RushConfigurationProject> | undefined;
   private readonly _rushConfiguration: RushConfiguration;
 
   /** @internal */
@@ -145,7 +146,7 @@ export class RushConfigurationProject {
     }
     this._shouldPublish = !!projectJson.shouldPublish;
     this._skipRushCheck = !!projectJson.skipRushCheck;
-    this._downstreamDependencyProjects = new Set();
+    this._consumingProjectNames = new Set();
     this._versionPolicyName = projectJson.versionPolicyName;
 
     this._publishFolder = this._projectFolder;
@@ -227,54 +228,55 @@ export class RushConfigurationProject {
   }
 
   /**
-   * A list of projects within the Rush configuration which directly depend on this package.
-   * @deprecated Use downstreamDependencyProjectSet instead
+   * An array of projects within the Rush configuration which directly depend on this package.
+   * @deprecated Use localDependentProjectSet instead
    */
   public get downstreamDependencyProjects(): string[] {
-    return [...this._downstreamDependencyProjects];
+    return [...this._consumingProjectNames];
   }
 
   /**
-   * A set of projects within the Rush configuration which directly depend on this package.
+   * A set of projects within the Rush configuration which directly consume this package.
+   * Writable because it is mutated by RushConfiguration during initialization.
+   * @internal
    */
-  public get downstreamDependencyProjectSet(): Set<string> {
-    return this._downstreamDependencyProjects;
+  public get consumingProjectNames(): Set<string> {
+    return this._consumingProjectNames;
   }
 
   /**
-   * A map of projects within the Rush configuration which are directly depended on by this project
-   * @deprecated Use localDependencyProjectSet instead
+   * An array of projects within the Rush configuration which this project declares as dependencies.
+   * @deprecated Use `dependencyProjects` instead
    */
   public get localDependencyProjects(): ReadonlyArray<RushConfigurationProject> {
-    return [...this.localDependencyProjectSet];
+    return [...this.dependencyProjects];
   }
 
   /**
-   * The set of projects within the Rush configuration which are directly depended on by this project
+   * The set of projects within the Rush configuration which this project declares as dependencies.
    */
-  public get localDependencyProjectSet(): ReadonlySet<RushConfigurationProject> {
-    if (!this._localDependencyProjects) {
-      const self: RushConfigurationProject = this;
-      this._localDependencyProjects = new Set(
-        (function* () {
-          yield* self._getLocalDependencyProjects(self.packageJson.dependencies);
-          yield* self._getLocalDependencyProjects(self.packageJson.devDependencies);
-          yield* self._getLocalDependencyProjects(self.packageJson.optionalDependencies);
-        })()
+  public get dependencyProjects(): ReadonlySet<RushConfigurationProject> {
+    if (!this._dependencyProjects) {
+      this._dependencyProjects = Selection.union(
+        this._getDependencyProjects(this.packageJson.dependencies),
+        this._getDependencyProjects(this.packageJson.devDependencies),
+        this._getDependencyProjects(this.packageJson.optionalDependencies)
       );
     }
-    return this._localDependencyProjects;
+    return this._dependencyProjects;
   }
 
   /**
-   * The set of projects withint he rush configuration which directly depend on this project.
-   * Excludes those that declare this project as a cyclicDependencyProject
+   * The set of projects within the Rush configuration which declare this project as a dependency.
+   * Excludes those that declare this project as a `cyclicDependencyProject`.
+   *
+   * The counterpart to `dependencyProjects`.
    */
-  public get localDependentProjectSet(): ReadonlySet<RushConfigurationProject> {
-    if (!this._localDependentProjects) {
-      this._localDependentProjects = new Set(this._getLocalDependentProjects());
+  public get consumingProjects(): ReadonlySet<RushConfigurationProject> {
+    if (!this._consumingProjects) {
+      this._consumingProjects = this._getConsumingProjects();
     }
-    return this._localDependentProjects;
+    return this._consumingProjects;
   }
 
   /**
@@ -393,9 +395,10 @@ export class RushConfigurationProject {
    * Compute the local rush projects that this project immediately depends on,
    * according to the specific dependency group from package.json
    */
-  private *_getLocalDependencyProjects(
+  private _getDependencyProjects(
     dependencies: IPackageJsonDependencyTable = {}
-  ): Iterable<RushConfigurationProject> {
+  ): Set<RushConfigurationProject> {
+    const dependencyProjects: Set<RushConfigurationProject> = new Set();
     for (const dependency of Object.keys(dependencies)) {
       // Skip if we can't find the local project or it's a cyclic dependency
       const localProject: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
@@ -411,28 +414,31 @@ export class RushConfigurationProject {
           case DependencySpecifierType.Version:
           case DependencySpecifierType.Range:
             if (semver.satisfies(localProject.packageJson.version, dependencySpecifier.versionSpecifier)) {
-              yield localProject;
+              dependencyProjects.add(localProject);
             }
             break;
           case DependencySpecifierType.Workspace:
-            yield localProject;
+            dependencyProjects.add(localProject);
             break;
         }
       }
     }
+    return dependencyProjects;
   }
 
   /**
-   * Compute the local rush projects that immediately depend on this project
+   * Compute the local rush projects that declare this project as a dependency
    */
-  private *_getLocalDependentProjects(): Iterable<RushConfigurationProject> {
-    for (const projectName of this.downstreamDependencyProjectSet) {
+  private _getConsumingProjects(): Set<RushConfigurationProject> {
+    const consumingProjects: Set<RushConfigurationProject> = new Set();
+    for (const projectName of this.consumingProjectNames) {
       const localProject: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
         projectName
       );
-      if (localProject && localProject.localDependencyProjectSet.has(this)) {
-        yield localProject;
+      if (localProject && localProject.dependencyProjects.has(this)) {
+        consumingProjects.add(localProject);
       }
     }
+    return consumingProjects;
   }
 }

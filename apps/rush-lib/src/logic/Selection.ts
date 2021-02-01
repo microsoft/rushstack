@@ -7,53 +7,58 @@
  * @internal
  */
 export interface IPartialProject<T extends IPartialProject<T>> {
-  localDependencyProjectSet: ReadonlySet<T>;
-  localDependentProjectSet: ReadonlySet<T>;
+  dependencyProjects: ReadonlySet<T>;
+  consumingProjects: ReadonlySet<T>;
 }
 
 /**
- * Computes the intersection of two or more sets.
+ * This namespace contains functions for manipulating sets of projects
  */
-export function intersection<T>(first: Iterable<T>, ...rest: ReadonlySet<T>[]): Set<T> {
-  return new Set(generateIntersection(first, ...rest));
-}
-
-/**
- * Computes the union of two or more sets.
- */
-export function union<T>(...sets: Iterable<T>[]): Set<T> {
-  return new Set(generateConcatenation<T>(...sets));
-}
-
-/**
- * Computes a set that contains the input projects and all the direct and indirect dependencies thereof.
- */
-export function expandAllDependencies<T extends IPartialProject<T>>(input: Iterable<T>): Set<T> {
-  return expandAll(input, expandDependenciesStep);
-}
-
-/**
- * Computes a set that contains the input projects and all projects that directly or indirectly depend on them.
- */
-export function expandAllDependents<T extends IPartialProject<T>>(input: Iterable<T>): Set<T> {
-  return expandAll(input, expandDependentsStep);
-}
-
-/**
- * Iterates the direct dependencies of the listed projects. May contain duplicates.
- */
-export function* directDependenciesOf<T extends IPartialProject<T>>(input: Iterable<T>): Iterable<T> {
-  for (const item of input) {
-    yield* item.localDependencyProjectSet;
+export class Selection {
+  /**
+   * Computes the intersection of two or more sets.
+   */
+  public static intersection<T>(first: Iterable<T>, ...rest: ReadonlySet<T>[]): Set<T> {
+    return new Set(generateIntersection(first, ...rest));
   }
-}
 
-/**
- * Iterates the projects that directly depend on the listed projects. May contain duplicates.
- */
-export function* directDependentsOf<T extends IPartialProject<T>>(input: Iterable<T>): Iterable<T> {
-  for (const item of input) {
-    yield* item.localDependentProjectSet;
+  /**
+   * Computes the union of two or more sets.
+   */
+  public static union<T>(...sets: Iterable<T>[]): Set<T> {
+    return new Set(generateConcatenation<T>(...sets));
+  }
+
+  /**
+   * Computes a set that contains the input projects and all the direct and indirect dependencies thereof.
+   */
+  public static expandAllDependencies<T extends IPartialProject<T>>(input: Iterable<T>): Set<T> {
+    return expandAll(input, expandDependenciesStep);
+  }
+
+  /**
+   * Computes a set that contains the input projects and all projects that directly or indirectly depend on them.
+   */
+  public static expandAllConsumers<T extends IPartialProject<T>>(input: Iterable<T>): Set<T> {
+    return expandAll(input, expandConsumers);
+  }
+
+  /**
+   * Iterates the direct dependencies of the listed projects. May contain duplicates.
+   */
+  public static *directDependenciesOf<T extends IPartialProject<T>>(input: Iterable<T>): Iterable<T> {
+    for (const item of input) {
+      yield* item.dependencyProjects;
+    }
+  }
+
+  /**
+   * Iterates the projects that declare any of the listed projects as a dependency. May contain duplicates.
+   */
+  public static *directConsumersOf<T extends IPartialProject<T>>(input: Iterable<T>): Iterable<T> {
+    for (const item of input) {
+      yield* item.consumingProjects;
+    }
   }
 }
 
@@ -82,15 +87,15 @@ function* generateConcatenation<T>(...sets: Iterable<T>[]): Iterable<T> {
  * Adds all dependencies of the specified project to the target set.
  */
 function expandDependenciesStep<T extends IPartialProject<T>>(project: T, targetSet: Set<T>): void {
-  for (const dep of project.localDependencyProjectSet) {
+  for (const dep of project.dependencyProjects) {
     targetSet.add(dep);
   }
 }
 /**
- * Adds all project that depend on the specified project to the target set.
+ * Adds all projects that declare the specified project as a dependency to the target set.
  */
-function expandDependentsStep<T extends IPartialProject<T>>(project: T, targetSet: Set<T>): void {
-  for (const dep of project.localDependentProjectSet) {
+function expandConsumers<T extends IPartialProject<T>>(project: T, targetSet: Set<T>): void {
+  for (const dep of project.consumingProjects) {
     targetSet.add(dep);
   }
 }

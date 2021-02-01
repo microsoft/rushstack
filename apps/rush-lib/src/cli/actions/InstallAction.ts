@@ -7,7 +7,7 @@ import { BaseInstallAction } from './BaseInstallAction';
 import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import * as Selection from '../../logic/Selection';
+import { Selection } from '../../logic/Selection';
 
 export class InstallAction extends BaseInstallAction {
   protected _toFlag!: CommandLineStringListParameter;
@@ -76,11 +76,11 @@ export class InstallAction extends BaseInstallAction {
 
   protected buildInstallOptions(): IInstallManagerOptions {
     const toProjects: Set<RushConfigurationProject> = Selection.union<RushConfigurationProject>(
-      this.evaluateProjects(this._toFlag),
+      this.evaluateProjectParameter(this._toFlag),
       this.evaluateVersionPolicyProjects(this._toVersionPolicy)
     );
     const fromProjects: Set<RushConfigurationProject> = Selection.union<RushConfigurationProject>(
-      this.evaluateProjects(this._fromFlag),
+      this.evaluateProjectParameter(this._fromFlag),
       this.evaluateVersionPolicyProjects(this._fromVersionPolicy)
     );
 
