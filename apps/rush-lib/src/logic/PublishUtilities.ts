@@ -85,7 +85,7 @@ export class PublishUtilities {
         const change: IChangeInfo = allChanges[packageName];
         const project: RushConfigurationProject = allPackages.get(packageName)!;
         const pkg: IPackageJson = project.packageJson;
-        const deps: Set<string> = project.consumingProjectNames;
+        const deps: Set<string> = project._consumingProjectNames;
 
         // Write the new version expected for the change.
         const skipVersionBump: boolean = PublishUtilities._shouldSkipVersionBump(

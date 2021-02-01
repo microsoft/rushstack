@@ -413,7 +413,7 @@ export class RushConfigurationProject {
     // @internal
     constructor(projectJson: IRushConfigurationProjectJson, rushConfiguration: RushConfiguration, tempProjectName: string);
     // @internal
-    get consumingProjectNames(): Set<string>;
+    readonly _consumingProjectNames: Set<string>;
     get consumingProjects(): ReadonlySet<RushConfigurationProject>;
     get cyclicDependencyProjects(): Set<string>;
     get dependencyProjects(): ReadonlySet<RushConfigurationProject>;

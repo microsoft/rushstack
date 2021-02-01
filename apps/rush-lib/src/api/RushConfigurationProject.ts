@@ -55,10 +55,18 @@ export class RushConfigurationProject {
   private _shouldPublish: boolean;
   private _skipRushCheck: boolean;
   private _publishFolder: string;
-  private _consumingProjectNames: Set<string>;
   private _dependencyProjects: ReadonlySet<RushConfigurationProject> | undefined;
   private _consumingProjects: ReadonlySet<RushConfigurationProject> | undefined;
   private readonly _rushConfiguration: RushConfiguration;
+
+  /**
+   * A set of projects within the Rush configuration which directly consume this package.
+   *
+   * @remarks
+   * Writable because it is mutated by RushConfiguration during initialization.
+   * @internal
+   */
+  public readonly _consumingProjectNames: Set<string>;
 
   /** @internal */
   public constructor(
@@ -234,17 +242,6 @@ export class RushConfigurationProject {
    */
   public get downstreamDependencyProjects(): string[] {
     return [...this._consumingProjectNames];
-  }
-
-  /**
-   * A set of projects within the Rush configuration which directly consume this package.
-   * @internal
-   *
-   * @remarks
-   * Writable because it is mutated by RushConfiguration during initialization.
-   */
-  public get consumingProjectNames(): Set<string> {
-    return this._consumingProjectNames;
   }
 
   /**
@@ -441,7 +438,7 @@ export class RushConfigurationProject {
    */
   private _getConsumingProjects(): Set<RushConfigurationProject> {
     const consumingProjects: Set<RushConfigurationProject> = new Set();
-    for (const projectName of this.consumingProjectNames) {
+    for (const projectName of this._consumingProjectNames) {
       const localProject: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
         projectName
       );
