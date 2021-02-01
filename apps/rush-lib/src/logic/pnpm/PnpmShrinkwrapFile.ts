@@ -406,7 +406,17 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public getShrinkwrapEntry(name: string, version: string): IPnpmShrinkwrapDependencyYaml | undefined {
     // Version can sometimes be in the form of a path that's already in the /name/version format.
     const packageId: string = version.indexOf('/') !== -1 ? version : `/${name}/${version}`;
-    return this._shrinkwrapJson.packages[packageId];
+    let ret: IPnpmShrinkwrapDependencyYaml | undefined = this._shrinkwrapJson.packages[packageId];
+    if (!ret) {
+      // Try find the shrinkwrap dependency whose name starts with packageId
+      for (const [k, v] of Object.entries(this._shrinkwrapJson.packages)) {
+        if (k.startsWith(packageId)) {
+          ret = v;
+          break;
+        }
+      }
+    }
+    return ret;
   }
 
   /**
