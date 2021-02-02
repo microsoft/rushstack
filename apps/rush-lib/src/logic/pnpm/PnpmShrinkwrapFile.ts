@@ -408,9 +408,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const packageId: string = version.indexOf('/') !== -1 ? version : `/${name}/${version}`;
     let ret: IPnpmShrinkwrapDependencyYaml | undefined = this._shrinkwrapJson.packages[packageId];
     if (!ret) {
-      // Try find the shrinkwrap dependency whose name starts with packageId
+      // Sometimes, the entry key could be /name/semver_peerDep@semver,
+      // So try to find the shrinkwrap dependency whose name starts with packageId_
       for (const [k, v] of Object.entries(this._shrinkwrapJson.packages)) {
-        if (k.startsWith(packageId)) {
+        if (k.startsWith(`${packageId}_`)) {
           ret = v;
           break;
         }
