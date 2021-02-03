@@ -19,6 +19,7 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
 import { ISetupPackageRegistryJson, SetupConfiguration } from './SetupConfiguration';
 import { WebClient, WebClientResponse } from '../../utilities/WebClient';
+import { TerminalInput } from './TerminalInput';
 
 export class SetupPackageRegistry {
   public readonly rushConfiguration: RushConfiguration;
@@ -121,11 +122,37 @@ export class SetupPackageRegistry {
         throw new Error(`The "npm view" command returned an unexpected error code "${errorCode}"`);
     }
 
+    this._terminal.writeLine();
+    const fixThisProblem: boolean = await TerminalInput.promptYesNo({
+      question: 'Fix this problem now?',
+      defaultValue: false
+    });
+    this._terminal.writeLine();
+    if (!fixThisProblem) {
+      return;
+    }
+
+    const hasArtifactoryAccount: boolean = await TerminalInput.promptYesNo({
+      question: 'Do you already have an Artifactory user account?'
+    });
+    if (!hasArtifactoryAccount) {
+      console.log('Instructions for getting an account');
+      return;
+    }
+
+    const artifactoryUser: string = await TerminalInput.promptLine({
+      question: 'What is your Artifactory user name?'
+    });
+
+    const artifactoryKey: string = await TerminalInput.promptPasswordLine({
+      question: 'What is your Artifactory API key?'
+    });
+
     this._terminal.writeLine('\nFetching token...');
 
     const webClient: WebClient = new WebClient();
 
-    webClient.addBasicAuthHeader('[your user name]', '[your token]');
+    webClient.addBasicAuthHeader(artifactoryUser, artifactoryKey);
 
     let queryUrl: string = packageRegistry.registryUrl;
     if (!queryUrl.endsWith('/')) {
