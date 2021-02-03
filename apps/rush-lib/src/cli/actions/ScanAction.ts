@@ -7,11 +7,30 @@ import builtinPackageNames from 'builtin-modules';
 
 import { Import, FileSystem } from '@rushstack/node-core-library';
 import { RushCommandLineParser } from '../RushCommandLineParser';
+import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { BaseConfiglessRushAction } from './BaseRushAction';
 
 const glob: typeof import('glob') = Import.lazy('glob', require);
 
+export interface IJsonOutput {
+  /**
+   * Dependencies scan from source code
+   */
+  detectedDependencies: string[];
+  /**
+   * Dependencies detected but not declared in package.json
+   */
+  missingDependencies: string[];
+  /**
+   * Dependencies declared in package.json, but not used in source code
+   */
+  unusedDependencies: string[];
+}
+
 export class ScanAction extends BaseConfiglessRushAction {
+  private _jsonFlag!: CommandLineFlagParameter;
+  private _allFlag!: CommandLineFlagParameter;
+
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'scan',
@@ -33,7 +52,14 @@ export class ScanAction extends BaseConfiglessRushAction {
   }
 
   protected onDefineParameters(): void {
-    // abstract
+    this._jsonFlag = this.defineFlagParameter({
+      parameterLongName: '--json',
+      description: 'If this flag is specified, output will be in JSON format.'
+    });
+    this._allFlag = this.defineFlagParameter({
+      parameterLongName: '--all',
+      description: 'If this flag is specified, output will list all detected dependencies.'
+    });
   }
 
   protected async runAsync(): Promise<void> {
@@ -110,17 +136,87 @@ export class ScanAction extends BaseConfiglessRushAction {
       }
     });
 
-    const packageNames: string[] = [];
+    const detectedPackageNames: string[] = [];
 
     packageMatches.forEach((packageName: string) => {
-      packageNames.push(packageName);
+      if (builtinPackageNames.indexOf(packageName) < 0) {
+        detectedPackageNames.push(packageName);
+      }
     });
 
-    packageNames.sort();
+    detectedPackageNames.sort();
 
-    console.log('Detected dependencies:');
-    for (const packageName of packageNames) {
-      if (builtinPackageNames.indexOf(packageName) < 0) {
+    const declaredDependencies: Set<string> = new Set<string>();
+    const declaredDevDependencies: Set<string> = new Set<string>();
+    const missingDependencies: string[] = [];
+    const unusedDependencies: string[] = [];
+    const packageJsonContent: string = FileSystem.readFile(packageJsonFilename);
+    try {
+      const manifest: {
+        dependencies?: Record<string, string>;
+        devDependencies?: Record<string, string>;
+      } = JSON.parse(packageJsonContent);
+      if (manifest.dependencies) {
+        for (const depName of Object.keys(manifest.dependencies)) {
+          declaredDependencies.add(depName);
+        }
+      }
+      if (manifest.devDependencies) {
+        for (const depName of Object.keys(manifest.devDependencies)) {
+          declaredDevDependencies.add(depName);
+        }
+      }
+    } catch (e) {
+      console.error(`JSON.parse ${packageJsonFilename} error`);
+    }
+
+    for (const detectedPkgName of detectedPackageNames) {
+      /**
+       * Missing(phantom) dependencies are
+       * - used in source code
+       * - not decalred in dependencies and devDependencies in package.json
+       */
+      if (!declaredDependencies.has(detectedPkgName) && !declaredDevDependencies.has(detectedPkgName)) {
+        missingDependencies.push(detectedPkgName);
+      }
+    }
+    for (const declaredPkgName of declaredDependencies) {
+      /**
+       * Unused dependencies are
+       * - declared in dependencies in package.json (devDependencies not included)
+       * - not used in source code
+       */
+      if (!detectedPackageNames.includes(declaredPkgName) && !declaredPkgName.startsWith('@types/')) {
+        unusedDependencies.push(declaredPkgName);
+      }
+    }
+
+    const output: IJsonOutput = {
+      detectedDependencies: detectedPackageNames,
+      missingDependencies: missingDependencies,
+      unusedDependencies: unusedDependencies
+    };
+
+    if (this._jsonFlag.value) {
+      console.log(JSON.stringify(output, undefined, 2));
+    } else if (this._allFlag.value) {
+      console.log('Dependencies that seem to be imported by this project:');
+      for (const packageName of detectedPackageNames) {
+        console.log('  ' + packageName);
+      }
+    } else {
+      console.log(
+        `Possible phantom dependencies - these seem to be imported but aren't listed in package.json:`
+      );
+      for (const packageName of missingDependencies) {
+        console.log('  ' + packageName);
+      }
+
+      console.log('');
+      console.log(
+        `Possible unused dependencies - these are listed in package.json but don't seem to be imported:`
+      );
+      for (const packageName of unusedDependencies) {
         console.log('  ' + packageName);
       }
     }
