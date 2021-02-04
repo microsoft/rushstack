@@ -4,6 +4,7 @@
 import * as path from 'path';
 import * as child_process from 'child_process';
 import {
+  AlreadyReportedError,
   Colors,
   ConsoleTerminalProvider,
   Executable,
@@ -21,10 +22,30 @@ import { ISetupPackageRegistryJson, SetupConfiguration } from './SetupConfigurat
 import { WebClient, WebClientResponse } from '../../utilities/WebClient';
 import { TerminalInput } from './TerminalInput';
 
+interface IArtifactoryCustomizableMessages {
+  introduction: string;
+  obtainAnAccount: string;
+  visitWebsite: string;
+  locateUserName: string;
+  locateApiKey: string;
+}
+
+const defaultMessages: IArtifactoryCustomizableMessages = {
+  introduction: 'This monorepo consumes packages from a Artifactory private NPM registry.',
+  obtainAnAccount:
+    'Please contact the repository maintainers for help with setting up an Artifactory user account.',
+  visitWebsite: 'Please open this URL in your web browser:',
+  locateUserName: 'Your user name appears in the upper-right corner of the JFrog website.',
+  locateApiKey:
+    'Click "Edit Profile" on the JFrog website.  Click the "Generate API Key"' +
+    " button if you haven't already done so previously."
+};
+
 export class SetupPackageRegistry {
   public readonly rushConfiguration: RushConfiguration;
   private readonly _terminal: Terminal;
   private readonly _setupConfiguration: SetupConfiguration;
+  private readonly _messages: IArtifactoryCustomizableMessages;
 
   public constructor(rushConfiguration: RushConfiguration, isDebug: boolean) {
     this.rushConfiguration = rushConfiguration;
@@ -38,6 +59,17 @@ export class SetupPackageRegistry {
     this._setupConfiguration = new SetupConfiguration(
       path.join(this.rushConfiguration.commonRushConfigFolder, 'setup.json')
     );
+
+    this._messages = defaultMessages;
+  }
+
+  private _writeInstructionBlock(message: string): void {
+    if (message === '') {
+      return;
+    }
+
+    this._terminal.writeLine(Utilities.wrapWords(message));
+    this._terminal.writeLine();
   }
 
   public async check(): Promise<void> {
@@ -123,6 +155,7 @@ export class SetupPackageRegistry {
     }
 
     this._terminal.writeLine();
+
     const fixThisProblem: boolean = await TerminalInput.promptYesNo({
       question: 'Fix this problem now?',
       defaultValue: false
@@ -132,23 +165,56 @@ export class SetupPackageRegistry {
       return;
     }
 
+    this._writeInstructionBlock(this._messages.introduction);
+
     const hasArtifactoryAccount: boolean = await TerminalInput.promptYesNo({
       question: 'Do you already have an Artifactory user account?'
     });
+    this._terminal.writeLine();
+
     if (!hasArtifactoryAccount) {
-      console.log('Instructions for getting an account');
-      return;
+      this._writeInstructionBlock(this._messages.obtainAnAccount);
+      throw new AlreadyReportedError();
     }
 
-    const artifactoryUser: string = await TerminalInput.promptLine({
+    if (this._messages.visitWebsite) {
+      this._writeInstructionBlock(this._messages.visitWebsite);
+      this._terminal.writeLine(
+        '  ',
+        Colors.cyan(this._setupConfiguration.configuration.packageRegistry.artifactoryWebsiteUrl)
+      );
+      this._terminal.writeLine();
+    }
+
+    this._writeInstructionBlock(this._messages.locateUserName);
+
+    let artifactoryUser: string = await TerminalInput.promptLine({
       question: 'What is your Artifactory user name?'
     });
+    this._terminal.writeLine();
 
-    const artifactoryKey: string = await TerminalInput.promptPasswordLine({
+    artifactoryUser = artifactoryUser.trim();
+    if (artifactoryUser.length === 0) {
+      this._terminal.writeLine(Colors.red('Operation aborted because the input was empty'));
+      this._terminal.writeLine();
+      throw new AlreadyReportedError();
+    }
+
+    this._writeInstructionBlock(this._messages.locateApiKey);
+
+    let artifactoryKey: string = await TerminalInput.promptPasswordLine({
       question: 'What is your Artifactory API key?'
     });
+    this._terminal.writeLine();
 
-    this._terminal.writeLine('\nFetching token...');
+    artifactoryKey = artifactoryKey.trim();
+    if (artifactoryKey.length === 0) {
+      this._terminal.writeLine(Colors.red('Operation aborted because the input was empty'));
+      this._terminal.writeLine();
+      throw new AlreadyReportedError();
+    }
+
+    this._terminal.writeLine('\nFetching an NPM token from the Artifactory service...');
 
     const webClient: WebClient = new WebClient();
 
@@ -174,7 +240,7 @@ export class SetupPackageRegistry {
 
     if (!response.ok) {
       if (response.status === 401) {
-        throw new Error('Authorization failed; the Artifactory user name or password may be incorrect.');
+        throw new Error('Authorization failed; the Artifactory user name or API key may be incorrect.');
       }
 
       throw new Error(`The Artifactory request failed:\n  (${response.status}) ${response.statusText}`);

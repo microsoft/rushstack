@@ -8,6 +8,7 @@ export interface ISetupPackageRegistryJson {
   enabled: boolean;
   registryService: 'artifactory';
   registryUrl: string;
+  artifactoryWebsiteUrl: string;
 
   globallyMappedNpmScopes?: string[];
   messageOverrides?: {
@@ -45,7 +46,8 @@ export class SetupConfiguration {
       packageRegistry: {
         enabled: false,
         registryService: 'artifactory',
-        registryUrl: ''
+        registryUrl: '',
+        artifactoryWebsiteUrl: ''
       }
     };
 
