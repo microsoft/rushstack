@@ -124,9 +124,9 @@ export class SubprocessLoggerManager extends SubprocessCommunicationManagerBase 
           responseMessage = {
             type: SUBPROCESS_LOGGER_MANAGER_REQUEST_LOGGER_MESSAGE_TYPE,
             loggerName: typedMessage.loggerName,
-            error: SubprocessRunnerBase.serializeForIpcMessage(error) as ISubprocessApiCallArgWithValue<
-              ISerializedErrorValue
-            >
+            error: SubprocessRunnerBase.serializeForIpcMessage(
+              error
+            ) as ISubprocessApiCallArgWithValue<ISerializedErrorValue>
           };
         }
 

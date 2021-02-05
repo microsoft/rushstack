@@ -1,4 +1,3 @@
-
 interface IBaseYamlModel {
   uid: string;
   name: string;
@@ -13,7 +12,7 @@ export type CommonYamlModel = IBaseYamlModel & {
   isDeprecated?: boolean;
   remarks?: string;
   customDeprecatedMessage?: string;
-}
+};
 
 export type PackageYamlModel = CommonYamlModel & {
   classes?: Array<string>;
@@ -21,32 +20,32 @@ export type PackageYamlModel = CommonYamlModel & {
   enums?: Array<string>;
   typeAliases?: Array<string>;
   properties?: Array<FunctionYamlModel>;
-  type?: "package" | "module";
-  functions?: Array<FunctionYamlModel>
-}
+  type?: 'package' | 'module';
+  functions?: Array<FunctionYamlModel>;
+};
 
-export type FunctionYamlModel = CommonYamlModel
+export type FunctionYamlModel = CommonYamlModel;
 
 export type TypeAliasYamlModel = CommonYamlModel & {
   syntax: string;
-}
+};
 
 export type TypeYamlModel = CommonYamlModel & {
   constructors?: Array<FunctionYamlModel>;
   properties?: Array<FunctionYamlModel>;
   methods?: Array<FunctionYamlModel>;
-  type: "class" | "interface";
+  type: 'class' | 'interface';
   extends?: IType | string;
-}
+};
 
 export type EnumYamlModel = CommonYamlModel & {
-  fields: Array<FieldYamlModel>
-}
+  fields: Array<FieldYamlModel>;
+};
 
 export type FieldYamlModel = IBaseYamlModel & {
   numericValue?: number;
   value?: string;
-}
+};
 
 export interface ISyntax {
   parameters?: Array<IYamlParameter>;
@@ -54,7 +53,7 @@ export interface ISyntax {
   return?: IReturn;
 }
 
-export interface IYamlParameter{
+export interface IYamlParameter {
   id: string;
   type: IType | string;
   description?: string;

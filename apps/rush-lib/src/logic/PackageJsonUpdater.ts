@@ -490,9 +490,7 @@ export class PackageJsonUpdater {
   private _collectAllDownstreamDependencies(
     project: RushConfigurationProject
   ): Set<RushConfigurationProject> {
-    const allProjectDownstreamDependencies: Set<RushConfigurationProject> = new Set<
-      RushConfigurationProject
-    >();
+    const allProjectDownstreamDependencies: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
 
     const collectDependencies: (rushProject: RushConfigurationProject) => void = (
       rushProject: RushConfigurationProject

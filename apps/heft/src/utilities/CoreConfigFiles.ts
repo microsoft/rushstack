@@ -194,17 +194,15 @@ export class CoreConfigFiles {
   /**
    * Returns the loader for the `config/api-extractor-task.json` config file.
    */
-  public static get apiExtractorTaskConfigurationLoader(): ConfigurationFile<
-    IApiExtractorPluginConfiguration
-  > {
+  public static get apiExtractorTaskConfigurationLoader(): ConfigurationFile<IApiExtractorPluginConfiguration> {
     if (!CoreConfigFiles._apiExtractorTaskConfigurationLoader) {
       const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'api-extractor-task.schema.json');
-      CoreConfigFiles._apiExtractorTaskConfigurationLoader = new ConfigurationFile<
-        IApiExtractorPluginConfiguration
-      >({
-        projectRelativeFilePath: 'config/api-extractor-task.json',
-        jsonSchemaPath: schemaPath
-      });
+      CoreConfigFiles._apiExtractorTaskConfigurationLoader = new ConfigurationFile<IApiExtractorPluginConfiguration>(
+        {
+          projectRelativeFilePath: 'config/api-extractor-task.json',
+          jsonSchemaPath: schemaPath
+        }
+      );
     }
 
     return CoreConfigFiles._apiExtractorTaskConfigurationLoader;
@@ -216,29 +214,29 @@ export class CoreConfigFiles {
   public static get typeScriptConfigurationFileLoader(): ConfigurationFile<ITypeScriptConfigurationJson> {
     if (!CoreConfigFiles._typeScriptConfigurationFileLoader) {
       const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'typescript.schema.json');
-      CoreConfigFiles._typeScriptConfigurationFileLoader = new ConfigurationFile<
-        ITypeScriptConfigurationJson
-      >({
-        projectRelativeFilePath: 'config/typescript.json',
-        jsonSchemaPath: schemaPath,
-        propertyInheritance: {
-          staticAssetsToCopy: {
-            inheritanceType: InheritanceType.custom,
-            inheritanceFunction: (
-              currentObject: ISharedCopyConfiguration,
-              parentObject: ISharedCopyConfiguration
-            ): ISharedCopyConfiguration => {
-              const result: ISharedCopyConfiguration = {};
+      CoreConfigFiles._typeScriptConfigurationFileLoader = new ConfigurationFile<ITypeScriptConfigurationJson>(
+        {
+          projectRelativeFilePath: 'config/typescript.json',
+          jsonSchemaPath: schemaPath,
+          propertyInheritance: {
+            staticAssetsToCopy: {
+              inheritanceType: InheritanceType.custom,
+              inheritanceFunction: (
+                currentObject: ISharedCopyConfiguration,
+                parentObject: ISharedCopyConfiguration
+              ): ISharedCopyConfiguration => {
+                const result: ISharedCopyConfiguration = {};
 
-              CoreConfigFiles._inheritArray(result, 'fileExtensions', currentObject, parentObject);
-              CoreConfigFiles._inheritArray(result, 'includeGlobs', currentObject, parentObject);
-              CoreConfigFiles._inheritArray(result, 'excludeGlobs', currentObject, parentObject);
+                CoreConfigFiles._inheritArray(result, 'fileExtensions', currentObject, parentObject);
+                CoreConfigFiles._inheritArray(result, 'includeGlobs', currentObject, parentObject);
+                CoreConfigFiles._inheritArray(result, 'excludeGlobs', currentObject, parentObject);
 
-              return result;
+                return result;
+              }
             }
           }
-        }
-      } as IConfigurationFileOptions<ITypeScriptConfigurationJson>);
+        } as IConfigurationFileOptions<ITypeScriptConfigurationJson>
+      );
     }
 
     return CoreConfigFiles._typeScriptConfigurationFileLoader;

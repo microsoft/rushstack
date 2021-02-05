@@ -58,9 +58,9 @@ export type IWebpackConfiguration =
  * @public
  */
 export class BundleSubstageHooks extends BuildSubstageHooksBase {
-  public readonly configureWebpack: AsyncSeriesWaterfallHook<
-    IWebpackConfiguration
-  > = new AsyncSeriesWaterfallHook<IWebpackConfiguration>(['webpackConfiguration']);
+  public readonly configureWebpack: AsyncSeriesWaterfallHook<IWebpackConfiguration> = new AsyncSeriesWaterfallHook<IWebpackConfiguration>(
+    ['webpackConfiguration']
+  );
   public readonly afterConfigureWebpack: AsyncSeriesHook = new AsyncSeriesHook();
 }
 
