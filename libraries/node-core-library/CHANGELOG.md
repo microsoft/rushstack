@@ -1,6 +1,14 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 10 Dec 2020 23:25:49 GMT and should not be manually modified.
+This log was last generated on Fri, 05 Feb 2021 16:10:42 GMT and should not be manually modified.
+
+## 3.36.0
+Fri, 05 Feb 2021 16:10:42 GMT
+
+### Minor changes
+
+- Add EnvironmentMap API
+- Add Executable.spawn() API
 
 ## 3.35.2
 Thu, 10 Dec 2020 23:25:49 GMT
