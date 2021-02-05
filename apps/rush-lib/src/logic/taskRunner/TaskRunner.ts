@@ -360,7 +360,9 @@ export class TaskRunner {
    * Marks a task as provided by cache.
    */
   private _markTaskAsFromCache(task: Task): void {
-    task.collatedWriter.terminal.writeStdoutLine(colors.green(`${task.name} was provided by cache.`));
+    task.collatedWriter.terminal.writeStdoutLine(
+      colors.green(`${task.name} was restored from the build cache.`)
+    );
     task.status = TaskStatus.FromCache;
     task.dependents.forEach((dependent: Task) => {
       dependent.dependencies.delete(task);
