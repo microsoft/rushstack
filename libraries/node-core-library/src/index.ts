@@ -12,11 +12,13 @@ export { AnsiEscape, IAnsiEscapeConvertForTestsOptions } from './Terminal/AnsiEs
 export { Brand } from './PrimitiveTypes';
 export { FileConstants, FolderConstants } from './Constants';
 export { Enum } from './Enum';
+export { EnvironmentMap, IEnvironmentEntry } from './EnvironmentMap';
 export {
   ExecutableStdioStreamMapping,
   ExecutableStdioMapping,
   IExecutableResolveOptions,
   IExecutableSpawnSyncOptions,
+  IExecutableSpawnOptions,
   Executable
 } from './Executable';
 export {
