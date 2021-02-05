@@ -45,7 +45,7 @@ export class EnvironmentMap {
       }
     });
 
-    this.caseSensitive = process.platform === 'win32';
+    this.caseSensitive = process.platform !== 'win32';
     this.mergeFromObject(environmentObject);
   }
 
@@ -64,7 +64,7 @@ export class EnvironmentMap {
    * {@link EnvironmentMap.unset} instead.
    */
   public set(name: string, value: string): void {
-    const key: string = this.caseSensitive ? name.toUpperCase() : name;
+    const key: string = this.caseSensitive ? name : name.toUpperCase();
     this._map.set(key, { name: name, value });
   }
 
@@ -72,7 +72,7 @@ export class EnvironmentMap {
    * Removes the key from the map, if present.
    */
   public unset(name: string): void {
-    const key: string = this.caseSensitive ? name.toUpperCase() : name;
+    const key: string = this.caseSensitive ? name : name.toUpperCase();
     this._map.delete(key);
   }
 
@@ -80,7 +80,7 @@ export class EnvironmentMap {
    * Returns the value of the specified variable, or `undefined` if the map does not contain that name.
    */
   public get(name: string): string | undefined {
-    const key: string = this.caseSensitive ? name.toUpperCase() : name;
+    const key: string = this.caseSensitive ? name : name.toUpperCase();
     const entry: IEnvironmentEntry | undefined = this._map.get(key);
     if (entry === undefined) {
       return undefined;
