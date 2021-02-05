@@ -2,9 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
-import { IDisposable } from 'rx';
 
-import { Utilities } from '../Utilities';
+import { IDisposable, Utilities } from '../Utilities';
 
 describe('Utilities', () => {
   describe('printMessageInBox', () => {
