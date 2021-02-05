@@ -115,8 +115,7 @@ export class EnvironmentMap {
    * Merges entries from a plain JavaScript object, such as would be used with the `process.env` API.
    */
   public mergeFromObject(environmentObject: Record<string, string | undefined> = {}): void {
-    for (const name of Object.keys(environmentObject)) {
-      const value: string | undefined = environmentObject[name];
+    for (const [name, value] of Object.entries(environmentObject)) {
       if (value !== undefined) {
         this.set(name, value);
       }
