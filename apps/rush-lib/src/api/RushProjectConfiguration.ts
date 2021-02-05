@@ -28,17 +28,17 @@ interface IRushProjectJson {
  * @public
  */
 export class RushProjectConfiguration {
-  private static _projectBuildCacheConfigurationFile: ConfigurationFile<
-    IRushProjectJson
-  > = new ConfigurationFile<IRushProjectJson>({
-    projectRelativeFilePath: `config/${RushConstants.rushProjectConfigFilename}`,
-    jsonSchemaPath: path.resolve(__dirname, '..', 'schemas', 'rush-project.schema.json'),
-    propertyInheritance: {
-      projectOutputFolderNames: {
-        inheritanceType: InheritanceType.append
+  private static _projectBuildCacheConfigurationFile: ConfigurationFile<IRushProjectJson> = new ConfigurationFile<IRushProjectJson>(
+    {
+      projectRelativeFilePath: `config/${RushConstants.rushProjectConfigFilename}`,
+      jsonSchemaPath: path.resolve(__dirname, '..', 'schemas', 'rush-project.schema.json'),
+      propertyInheritance: {
+        projectOutputFolderNames: {
+          inheritanceType: InheritanceType.append
+        }
       }
     }
-  });
+  );
 
   public readonly project: RushConfigurationProject;
 

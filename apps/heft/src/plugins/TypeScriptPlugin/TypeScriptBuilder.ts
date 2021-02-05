@@ -71,9 +71,7 @@ export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfig
   maxWriteParallelism: number;
 }
 
-type TWatchCompilerHost = TTypescript.WatchCompilerHostOfFilesAndCompilerOptions<
-  TTypescript.EmitAndSemanticDiagnosticsBuilderProgram
->;
+type TWatchCompilerHost = TTypescript.WatchCompilerHostOfFilesAndCompilerOptions<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram>;
 
 const EMPTY_JSON: object = {};
 
