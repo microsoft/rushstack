@@ -75,12 +75,16 @@ export class SetupPackageRegistry {
     this._terminal.writeLine();
   }
 
-  public async check(): Promise<void> {
+  /**
+   * Test whether the NPM token is valid.
+   * @returns - `true` if valid, `false` if not valid
+   */
+  public async checkOnly(): Promise<boolean> {
     const packageRegistry: IArtifactoryPackageRegistryJson = this._artifactoryConfiguration.configuration
       .packageRegistry;
     if (!packageRegistry.enabled) {
       this._terminal.writeVerbose('Skipping package registry setup because packageRegistry.enabled=false');
-      return;
+      return true;
     }
 
     const registryUrl: string = (packageRegistry?.registryUrl || '').trim();
@@ -139,7 +143,7 @@ export class SetupPackageRegistry {
     switch (errorCode) {
       case 'E404':
         this._terminal.writeLine('NPM credentials are working');
-        return;
+        return true;
       case 'E401':
       case 'E403':
         this._terminal.writeVerboseLine(
@@ -155,6 +159,19 @@ export class SetupPackageRegistry {
     }
 
     this._terminal.writeLine();
+    return false;
+  }
+
+  /**
+   * Test whether the NPM token is valid.  If not, prompt to update it.
+   */
+  public async checkAndSetup(): Promise<void> {
+    if (await this.checkOnly()) {
+      return;
+    }
+
+    const packageRegistry: IArtifactoryPackageRegistryJson = this._artifactoryConfiguration.configuration
+      .packageRegistry;
 
     const fixThisProblem: boolean = await TerminalInput.promptYesNo({
       question: 'Fix this problem now?',
@@ -217,6 +234,18 @@ export class SetupPackageRegistry {
       throw new AlreadyReportedError();
     }
 
+    await this._fetchTokenAndUpdateNpmrc(artifactoryUser, artifactoryKey, packageRegistry);
+  }
+
+  /**
+   * Fetch a valid NPM token from the Artifactory service and add it to the `~/.npmrc` file,
+   * preserving other settings in that file.
+   */
+  private async _fetchTokenAndUpdateNpmrc(
+    artifactoryUser: string,
+    artifactoryKey: string,
+    packageRegistry: IArtifactoryPackageRegistryJson
+  ): Promise<void> {
     this._terminal.writeLine('\nFetching an NPM token from the Artifactory service...');
 
     const webClient: WebClient = new WebClient();

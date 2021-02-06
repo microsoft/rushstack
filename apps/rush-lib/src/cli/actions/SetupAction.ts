@@ -29,6 +29,6 @@ export class SetupAction extends BaseRushAction {
       this.rushConfiguration,
       this.parser.isDebug
     );
-    await setupPackageRegistry.check();
+    await setupPackageRegistry.checkAndSetup();
   }
 }
