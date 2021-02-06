@@ -10,6 +10,7 @@ export class KeyboardLoop {
   private _readlineInterface: readline.Interface | undefined;
   private _resolvePromise: (() => void) | undefined;
   private _rejectPromise: ((error: Error) => void) | undefined;
+  private _cursorHidden: boolean = false;
 
   public constructor() {
     this.stdin = process.stdin;
@@ -43,6 +44,22 @@ export class KeyboardLoop {
     this._readlineInterface = undefined;
   }
 
+  protected hideCursor(): void {
+    if (this._cursorHidden) {
+      return;
+    }
+    this._cursorHidden = true;
+    this.stderr.write('\u001B[?25l');
+  }
+
+  protected unhideCursor(): void {
+    if (!this._cursorHidden) {
+      return;
+    }
+    this._cursorHidden = false;
+    this.stderr.write('\u001B[?25h');
+  }
+
   public async startAsync(): Promise<void> {
     try {
       this._captureInput();
@@ -53,6 +70,7 @@ export class KeyboardLoop {
       });
     } finally {
       this._uncaptureInput();
+      this.unhideCursor();
     }
   }
 
