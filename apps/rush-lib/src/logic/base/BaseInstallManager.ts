@@ -34,6 +34,7 @@ import { InstallHelpers } from '../installManager/InstallHelpers';
 import { PolicyValidator } from '../policy/PolicyValidator';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { WebClient, WebClientResponse } from '../../utilities/WebClient';
+import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 
 export interface IInstallManagerOptions {
   /**
@@ -115,6 +116,8 @@ export abstract class BaseInstallManager {
   private _commonTempInstallFlag: LastInstallFlag;
   private _commonTempLinkFlag: LastLinkFlag;
   private _installRecycler: AsyncRecycler;
+  private _npmSetupValidated: boolean = false;
+  private _syncNpmrcAlreadyCalled: boolean = false;
 
   private _options: IInstallManagerOptions;
 
@@ -195,6 +198,9 @@ export abstract class BaseInstallManager {
     };
 
     if (cleanInstall || !shrinkwrapIsUpToDate || !variantIsUpToDate || !canSkipInstall()) {
+      console.log();
+      await this.validateNpmSetup();
+
       let publishedRelease: boolean | undefined;
       try {
         publishedRelease = await this._checkIfReleaseIsPublished();
@@ -383,6 +389,7 @@ export abstract class BaseInstallManager {
       this._rushConfiguration.commonRushConfigFolder,
       this._rushConfiguration.commonTempFolder
     );
+    this._syncNpmrcAlreadyCalled = true;
 
     // also, copy the pnpmfile.js if it exists
     if (this._rushConfiguration.packageManager === 'pnpm') {
@@ -672,5 +679,33 @@ export abstract class BaseInstallManager {
         );
       }
     }
+  }
+
+  protected async validateNpmSetup(): Promise<void> {
+    if (this._npmSetupValidated) {
+      return;
+    }
+
+    if (!this.options.bypassPolicy) {
+      const setupPackageRegistry: SetupPackageRegistry = new SetupPackageRegistry({
+        rushConfiguration: this.rushConfiguration,
+        isDebug: this.options.debug,
+        syncNpmrcAlreadyCalled: this._syncNpmrcAlreadyCalled
+      });
+      const valid: boolean = await setupPackageRegistry.checkOnly();
+      if (!valid) {
+        console.error();
+        console.error(colors.red('ERROR: NPM credentials are missing or expired'));
+        console.error();
+        console.error(
+          colors.bold(
+            '==> Please run "rush setup" to update your NPM token.  (Or append "--bypass-policy" to proceed anyway.)'
+          )
+        );
+        throw new AlreadyReportedError();
+      }
+    }
+
+    this._npmSetupValidated = true;
   }
 }

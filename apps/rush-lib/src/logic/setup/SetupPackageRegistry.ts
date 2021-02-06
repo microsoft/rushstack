@@ -41,18 +41,30 @@ const defaultMessages: IArtifactoryCustomizableMessages = {
     " button if you haven't already done so previously."
 };
 
+export interface ISetupPackageRegistryOptions {
+  rushConfiguration: RushConfiguration;
+  isDebug: boolean;
+
+  /**
+   * Whether Utilities.syncNpmrc() has already been called.
+   */
+  syncNpmrcAlreadyCalled: boolean;
+}
+
 export class SetupPackageRegistry {
+  private readonly _options: ISetupPackageRegistryOptions;
   public readonly rushConfiguration: RushConfiguration;
   private readonly _terminal: Terminal;
   private readonly _artifactoryConfiguration: ArtifactoryConfiguration;
   private readonly _messages: IArtifactoryCustomizableMessages;
 
-  public constructor(rushConfiguration: RushConfiguration, isDebug: boolean) {
-    this.rushConfiguration = rushConfiguration;
+  public constructor(options: ISetupPackageRegistryOptions) {
+    this._options = options;
+    this.rushConfiguration = options.rushConfiguration;
 
     this._terminal = new Terminal(
       new ConsoleTerminalProvider({
-        verboseEnabled: isDebug
+        verboseEnabled: options.isDebug
       })
     );
 
@@ -77,6 +89,7 @@ export class SetupPackageRegistry {
 
   /**
    * Test whether the NPM token is valid.
+   *
    * @returns - `true` if valid, `false` if not valid
    */
   public async checkOnly(): Promise<boolean> {
@@ -92,10 +105,12 @@ export class SetupPackageRegistry {
       throw new Error('The "registryUrl" setting in artifactory.json is missing or empty');
     }
 
-    Utilities.syncNpmrc(
-      this.rushConfiguration.commonRushConfigFolder,
-      this.rushConfiguration.commonTempFolder
-    );
+    if (!this._options.syncNpmrcAlreadyCalled) {
+      Utilities.syncNpmrc(
+        this.rushConfiguration.commonRushConfigFolder,
+        this.rushConfiguration.commonTempFolder
+      );
+    }
 
     // Artifactory does not implement the "npm ping" protocol or any equivalent REST API.
     // But if we query a package that is known not to exist, Artifactory will only return
@@ -143,23 +158,21 @@ export class SetupPackageRegistry {
     switch (errorCode) {
       case 'E404':
         this._terminal.writeLine('NPM credentials are working');
+        this._terminal.writeLine();
         return true;
       case 'E401':
       case 'E403':
         this._terminal.writeVerboseLine(
           'NPM response:\n' + JSON.stringify(jsonOutput, undefined, 2) + '\n\n'
         );
-        this._terminal.writeWarningLine('NPM credentials are missing or expired');
-        break;
+        // Credentials are missing or expired
+        return false;
       default:
         this._terminal.writeVerboseLine(
           'NPM response:\n' + JSON.stringify(jsonOutput, undefined, 2) + '\n\n'
         );
         throw new Error(`The "npm view" command returned an unexpected error code "${errorCode}"`);
     }
-
-    this._terminal.writeLine();
-    return false;
   }
 
   /**
@@ -169,6 +182,9 @@ export class SetupPackageRegistry {
     if (await this.checkOnly()) {
       return;
     }
+
+    this._terminal.writeWarningLine('NPM credentials are missing or expired');
+    this._terminal.writeLine();
 
     const packageRegistry: IArtifactoryPackageRegistryJson = this._artifactoryConfiguration.configuration
       .packageRegistry;

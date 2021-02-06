@@ -25,10 +25,11 @@ export class SetupAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
-    const setupPackageRegistry: SetupPackageRegistry = new SetupPackageRegistry(
-      this.rushConfiguration,
-      this.parser.isDebug
-    );
+    const setupPackageRegistry: SetupPackageRegistry = new SetupPackageRegistry({
+      rushConfiguration: this.rushConfiguration,
+      isDebug: this.parser.isDebug,
+      syncNpmrcAlreadyCalled: false
+    });
     await setupPackageRegistry.checkAndSetup();
   }
 }
