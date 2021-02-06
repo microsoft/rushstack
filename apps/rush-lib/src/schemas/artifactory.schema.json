@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Rush setup.json config file",
+  "title": "Rush artifactory.json config file",
   "description": "",
 
   "type": "object",

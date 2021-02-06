@@ -18,7 +18,7 @@ import {
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
-import { ISetupPackageRegistryJson, SetupConfiguration } from './SetupConfiguration';
+import { IArtifactoryPackageRegistryJson, ArtifactoryConfiguration } from './ArtifactoryConfiguration';
 import { WebClient, WebClientResponse } from '../../utilities/WebClient';
 import { TerminalInput } from './TerminalInput';
 
@@ -44,7 +44,7 @@ const defaultMessages: IArtifactoryCustomizableMessages = {
 export class SetupPackageRegistry {
   public readonly rushConfiguration: RushConfiguration;
   private readonly _terminal: Terminal;
-  private readonly _setupConfiguration: SetupConfiguration;
+  private readonly _artifactoryConfiguration: ArtifactoryConfiguration;
   private readonly _messages: IArtifactoryCustomizableMessages;
 
   public constructor(rushConfiguration: RushConfiguration, isDebug: boolean) {
@@ -56,11 +56,14 @@ export class SetupPackageRegistry {
       })
     );
 
-    this._setupConfiguration = new SetupConfiguration(
-      path.join(this.rushConfiguration.commonRushConfigFolder, 'setup.json')
+    this._artifactoryConfiguration = new ArtifactoryConfiguration(
+      path.join(this.rushConfiguration.commonRushConfigFolder, 'artifactory.json')
     );
 
-    this._messages = defaultMessages;
+    this._messages = {
+      ...defaultMessages,
+      ...this._artifactoryConfiguration.configuration.packageRegistry.messageOverrides
+    };
   }
 
   private _writeInstructionBlock(message: string): void {
@@ -73,7 +76,8 @@ export class SetupPackageRegistry {
   }
 
   public async check(): Promise<void> {
-    const packageRegistry: ISetupPackageRegistryJson = this._setupConfiguration.configuration.packageRegistry;
+    const packageRegistry: IArtifactoryPackageRegistryJson = this._artifactoryConfiguration.configuration
+      .packageRegistry;
     if (!packageRegistry.enabled) {
       this._terminal.writeVerbose('Skipping package registry setup because packageRegistry.enabled=false');
       return;
@@ -81,11 +85,7 @@ export class SetupPackageRegistry {
 
     const registryUrl: string = (packageRegistry?.registryUrl || '').trim();
     if (registryUrl.length === 0) {
-      throw new Error('The "registryUrl" setting in setup.json is missing or empty');
-    }
-
-    if (packageRegistry.registryService !== 'artifactory') {
-      throw new InternalError(`The registry service "${packageRegistry.registryService}" is not implemented`);
+      throw new Error('The "registryUrl" setting in artifactory.json is missing or empty');
     }
 
     Utilities.syncNpmrc(
@@ -179,11 +179,14 @@ export class SetupPackageRegistry {
 
     if (this._messages.visitWebsite) {
       this._writeInstructionBlock(this._messages.visitWebsite);
-      this._terminal.writeLine(
-        '  ',
-        Colors.cyan(this._setupConfiguration.configuration.packageRegistry.artifactoryWebsiteUrl)
-      );
-      this._terminal.writeLine();
+
+      const artifactoryWebsiteUrl: string = this._artifactoryConfiguration.configuration.packageRegistry
+        .artifactoryWebsiteUrl;
+
+      if (artifactoryWebsiteUrl) {
+        this._terminal.writeLine('  ', Colors.cyan(artifactoryWebsiteUrl));
+        this._terminal.writeLine();
+      }
     }
 
     this._writeInstructionBlock(this._messages.locateUserName);

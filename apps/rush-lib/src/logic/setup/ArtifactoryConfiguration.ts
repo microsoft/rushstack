@@ -4,36 +4,40 @@
 import * as path from 'path';
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
-export interface ISetupPackageRegistryJson {
+export interface IArtifactoryPackageRegistryJson {
   enabled: boolean;
-  registryService: 'artifactory';
+  globallyMappedNpmScopes?: string[];
+
   registryUrl: string;
   artifactoryWebsiteUrl: string;
 
-  globallyMappedNpmScopes?: string[];
   messageOverrides?: {
-    [messageId: string]: string;
+    introduction?: string;
+    obtainAnAccount?: string;
+    visitWebsite?: string;
+    locateUserName?: string;
+    locateApiKey?: string;
   };
 }
 
 /**
- * This interface represents the raw setup.json file.
+ * This interface represents the raw artifactory.json file.
  * @beta
  */
-export interface ISetupJson {
-  packageRegistry: ISetupPackageRegistryJson;
+export interface IArtifactoryJson {
+  packageRegistry: IArtifactoryPackageRegistryJson;
 }
 
 /**
- * Use this class to load the "common/config/rush/setup.json" config file.
+ * Use this class to load the "common/config/rush/artifactory.json" config file.
  * It configures the "rush setup" command.
  */
-export class SetupConfiguration {
+export class ArtifactoryConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.resolve(__dirname, '..', '..', 'schemas', 'setup.schema.json')
+    path.resolve(__dirname, '..', '..', 'schemas', 'artifactory.schema.json')
   );
 
-  private _setupJson: ISetupJson;
+  private _setupJson: IArtifactoryJson;
   private _jsonFileName: string;
 
   /**
@@ -45,21 +49,20 @@ export class SetupConfiguration {
     this._setupJson = {
       packageRegistry: {
         enabled: false,
-        registryService: 'artifactory',
         registryUrl: '',
         artifactoryWebsiteUrl: ''
       }
     };
 
     if (FileSystem.exists(this._jsonFileName)) {
-      this._setupJson = JsonFile.loadAndValidate(this._jsonFileName, SetupConfiguration._jsonSchema);
+      this._setupJson = JsonFile.loadAndValidate(this._jsonFileName, ArtifactoryConfiguration._jsonSchema);
     }
   }
 
   /**
    * Get the experiments configuration.
    */
-  public get configuration(): Readonly<ISetupJson> {
+  public get configuration(): Readonly<IArtifactoryJson> {
     return this._setupJson;
   }
 }

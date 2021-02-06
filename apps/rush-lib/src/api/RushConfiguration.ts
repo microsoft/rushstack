@@ -46,6 +46,7 @@ const knownRushConfigFilenames: string[] = [
   '.npmrc-publish',
   '.npmrc',
   'deploy.json',
+  RushConstants.artifactoryFilename,
   RushConstants.browserApprovedPackagesFilename,
   RushConstants.commandLineFilename,
   RushConstants.commonVersionsFilename,
@@ -53,7 +54,6 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.nonbrowserApprovedPackagesFilename,
   RushConstants.pinnedVersionsFilename,
   RushConstants.repoStateFilename,
-  RushConstants.setupFilename,
   RushConstants.versionPoliciesFilename
 ];
 
