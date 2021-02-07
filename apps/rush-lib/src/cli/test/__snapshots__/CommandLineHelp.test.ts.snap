@@ -40,6 +40,9 @@ Positional arguments:
     scan                When migrating projects into a Rush repo, this 
                         command is helpful for detecting undeclared 
                         dependencies.
+    setup               (EXPERIMENTAL) Invoke this command before working in 
+                        a new repo to ensure that any required prerequisites 
+                        are installed and permissions are configured.
     unlink              Delete node_modules symlinks for all projects in the 
                         repo
     update              Install package dependencies for all projects in the 
@@ -47,10 +50,10 @@ Positional arguments:
                         needed
     update-autoinstaller
                         Updates autoinstaller package dependenices
-    version             Manage package versions in the repo.
     update-cloud-credentials
                         (EXPERIMENTAL) Update the credentials used by the 
                         build cache provider.
+    version             Manage package versions in the repo.
     import-strings      Imports translated strings into each project.
     upload              Uploads the built files to the server
     build               Build all projects that haven't been built, or have 
