@@ -161,13 +161,13 @@ export class ProjectBuildCache {
     }
 
     if (restoreSuccess) {
-      terminal.writeLine('Successfully restored build output from cache.');
+      terminal.writeLine('Successfully restored output from the build cache.');
     } else {
-      terminal.writeWarningLine('Unable to restore build output from cache.');
+      terminal.writeWarningLine('Unable to restore output from the build cache.');
     }
 
     if (!updateLocalCacheSuccess) {
-      terminal.writeWarningLine('An error occurred updating the local cache with the cloud cache data.');
+      terminal.writeWarningLine('Unable to update the local build cache with data from the cloud cache.');
     }
 
     return restoreSuccess;
