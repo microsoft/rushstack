@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import moduleApi = require('module');
-import * as process from 'process';
+import process from 'process';
 
 import { /* type */ LauncherAction, IIpcTrace, IIpcDone, IIpcTraceRecord } from './LauncherTypes';
 
