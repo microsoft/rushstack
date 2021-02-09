@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rundown",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/rundown",
+  "email": "raihle@users.noreply.github.com"
+}
