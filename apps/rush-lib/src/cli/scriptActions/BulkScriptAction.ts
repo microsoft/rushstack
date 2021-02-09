@@ -396,7 +396,12 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterLongName: '--watch',
       parameterShortName: '-w',
       description:
-        'Activates a file system watcher to dynamically re-invoke the command when projects change.'
+        'Normally Rush would terminate after the command finishes;' +
+        ' adding this parameter will instead watch the file system for changes to the selected projects' +
+        ' (or all projects if no selection was specified).' +
+        ' If changes are detected, will re-execute the command on all projects within the selection that are' +
+        ' impacted by the detected changes, then resume waiting for changes.' +
+        ' For details, refer to the website article "Using watch mode".'
     });
 
     this._verboseParameter = this.defineFlagParameter({
