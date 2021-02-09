@@ -167,6 +167,14 @@ export class BulkScriptAction extends BaseScriptAction {
       Selection.expandAllConsumers(impactedByProjects)
     );
 
+    // If no projects seleted, select everything.
+    if (!selection.size) {
+      terminal.writeVerboseLine(`No selection specified, selecting all projects.`);
+      for (const project of this.rushConfiguration.projects) {
+        selection.add(project);
+      }
+    }
+
     const taskSelectorOptions: ITaskSelectorConstructor = {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
