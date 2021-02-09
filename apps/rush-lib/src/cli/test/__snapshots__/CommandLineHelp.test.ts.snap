@@ -217,8 +217,15 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
-  -w, --watch           Activates a file system watcher to dynamically 
-                        re-invoke the command when projects change.
+  -w, --watch           Normally Rush would terminate after the command 
+                        finishes; adding this parameter will instead watch 
+                        the file system for changes to the selected projects 
+                        (or all projects if no selection was specified). When 
+                        changes are detected, will re-execute the command on 
+                        all projects within the selection that are impacted 
+                        by the detected changes, then resume waiting for 
+                        changes. For details, refer to the website article 
+                        \\"Using watch mode\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   -c, --changed-projects-only
@@ -447,8 +454,15 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
-  -w, --watch           Activates a file system watcher to dynamically 
-                        re-invoke the command when projects change.
+  -w, --watch           Normally Rush would terminate after the command 
+                        finishes; adding this parameter will instead watch 
+                        the file system for changes to the selected projects 
+                        (or all projects if no selection was specified). When 
+                        changes are detected, will re-execute the command on 
+                        all projects within the selection that are impacted 
+                        by the detected changes, then resume waiting for 
+                        changes. For details, refer to the website article 
+                        \\"Using watch mode\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
@@ -845,8 +859,15 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
-  -w, --watch           Activates a file system watcher to dynamically 
-                        re-invoke the command when projects change.
+  -w, --watch           Normally Rush would terminate after the command 
+                        finishes; adding this parameter will instead watch 
+                        the file system for changes to the selected projects 
+                        (or all projects if no selection was specified). When 
+                        changes are detected, will re-execute the command on 
+                        all projects within the selection that are impacted 
+                        by the detected changes, then resume waiting for 
+                        changes. For details, refer to the website article 
+                        \\"Using watch mode\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
