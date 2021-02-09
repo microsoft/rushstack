@@ -14,7 +14,13 @@ export interface IProjectWatcherOptions {
 }
 
 export interface IProjectChangeResult {
+  /**
+   * The set of projects that have changed since the last iteration
+   */
   changedProjects: ReadonlySet<RushConfigurationProject>;
+  /**
+   * Contains the git hashes for all tracked files in the repo
+   */
   state: PackageChangeAnalyzer;
 }
 
@@ -46,9 +52,11 @@ export class ProjectWatcher {
    * If no change is currently present, watches the source tree of all selected projects for file changes.
    */
   public async waitForChange(): Promise<IProjectChangeResult> {
-    const initalChangeResult: IProjectChangeResult = this._computeChanged();
-    if (initalChangeResult.changedProjects.size) {
-      return initalChangeResult;
+    const initialChangeResult: IProjectChangeResult = this._computeChanged();
+    // Ensure that the new state is recorded so that we don't loop infinitely
+    this._commitChanges(initialChangeResult.state);
+    if (initialChangeResult.changedProjects.size) {
+      return initialChangeResult;
     }
 
     const watcher: FSWatcher = new FSWatcher({
@@ -61,6 +69,7 @@ export class ProjectWatcher {
       interval: 1000
     });
 
+    // Only watch for changes in the project folders
     for (const project of this._selection) {
       watcher.add(Path.convertToSlashes(project.projectFolder));
     }
@@ -78,10 +87,21 @@ export class ProjectWatcher {
 
           try {
             const result: IProjectChangeResult = this._computeChanged();
-            if (result.changedProjects.size) {
-              terminated = true;
-              resolve(result);
-            }
+
+            // Need an async tick to allow for more file system events to be handled
+            process.nextTick(() => {
+              if (timeout) {
+                // If another file has changed, wait for another pass.
+                return;
+              }
+
+              this._commitChanges(result.state);
+
+              if (result.changedProjects.size) {
+                terminated = true;
+                resolve(result);
+              }
+            });
           } catch (err) {
             terminated = true;
             reject(err);
@@ -113,14 +133,13 @@ export class ProjectWatcher {
     return watchedResult;
   }
 
+  /**
+   * Determines which, if any, projects (within the selection) have new hashes for files that are not in .gitignore
+   */
   private _computeChanged(): IProjectChangeResult {
     const state: PackageChangeAnalyzer = new PackageChangeAnalyzer(this._rushConfiguration);
 
     const previousState: PackageChangeAnalyzer | undefined = this._previousState;
-    this._previousState = state;
-    if (!this._initialState) {
-      this._initialState = state;
-    }
 
     if (!previousState) {
       return {
@@ -139,6 +158,7 @@ export class ProjectWatcher {
           state.getPackageDeps(packageName)!
         )
       ) {
+        // May need to detect if the nature of the change will break the process, e.g. changes to package.json
         changedProjects.add(project);
       }
     }
@@ -147,6 +167,13 @@ export class ProjectWatcher {
       changedProjects,
       state
     };
+  }
+
+  private _commitChanges(state: PackageChangeAnalyzer): void {
+    this._previousState = state;
+    if (!this._initialState) {
+      this._initialState = state;
+    }
   }
 
   /**
