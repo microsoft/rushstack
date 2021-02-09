@@ -55,7 +55,8 @@
     "tar": "~5.0.5",
     "true-case-path": "~2.2.1",
     "wordwrap": "~1.0.0",
-    "z-schema": "~3.18.3"
+    "z-schema": "~3.18.3",
+    "@aws-sdk/credential-provider-node": "~3.4.1"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",

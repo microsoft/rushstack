@@ -7,6 +7,10 @@
       "allowedCategories": ["libraries"]
     },
     {
+      "name": "@aws-sdk/credential-provider-node",
+      "allowedCategories": ["libraries"]
+    },
+    {
       "name": "@aws-sdk/node-http-handler",
       "allowedCategories": ["libraries"]
     },

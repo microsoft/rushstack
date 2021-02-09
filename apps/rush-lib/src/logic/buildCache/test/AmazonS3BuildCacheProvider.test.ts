@@ -3,6 +3,9 @@
 
 import { EnvironmentConfiguration } from '../../../api/EnvironmentConfiguration';
 import { AmazonS3BuildCacheProvider } from '../AmazonS3BuildCacheProvider';
+import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { RushUserConfiguration } from '../../../api/RushUserConfiguration';
+import { CredentialCache } from '../../CredentialCache';
 
 describe('AmazonS3BuildCacheProvider', () => {
   let buildCacheWriteCredentialEnvValue: string | undefined;
@@ -21,7 +24,7 @@ describe('AmazonS3BuildCacheProvider', () => {
   it("Isn't writable if isCacheWriteAllowed is set to false and there is no env write credential", () => {
     const cacheProvider: AmazonS3BuildCacheProvider = new AmazonS3BuildCacheProvider({
       s3Region: 'region-name',
-      s3Bucket: 'container-name',
+      s3Bucket: 'bucket-name',
       isCacheWriteAllowed: false
     });
 
@@ -31,7 +34,7 @@ describe('AmazonS3BuildCacheProvider', () => {
   it('Is writable if isCacheWriteAllowed is set to true and there is no env write credential', () => {
     const cacheProvider: AmazonS3BuildCacheProvider = new AmazonS3BuildCacheProvider({
       s3Region: 'region-name',
-      s3Bucket: 'container-name',
+      s3Bucket: 'bucket-name',
       isCacheWriteAllowed: true
     });
 
@@ -43,10 +46,45 @@ describe('AmazonS3BuildCacheProvider', () => {
 
     const cacheProvider: AmazonS3BuildCacheProvider = new AmazonS3BuildCacheProvider({
       s3Region: 'region-name',
-      s3Bucket: 'container-name',
+      s3Bucket: 'bucket-name',
       isCacheWriteAllowed: false
     });
 
     expect(cacheProvider.isCacheWriteAllowed).toBe(true);
+  });
+
+  async function testCredentialCache(isCacheWriteAllowed: boolean): Promise<void> {
+    const cacheProvider: AmazonS3BuildCacheProvider = new AmazonS3BuildCacheProvider({
+      s3Region: 'region-name',
+      s3Bucket: 'bucket-name',
+      isCacheWriteAllowed
+    });
+
+    // Mock the user folder to the current folder so a real .rush-user folder doesn't interfere with the test
+    jest.spyOn(RushUserConfiguration, 'getRushUserFolderPath').mockReturnValue(__dirname);
+    let setCacheEntryArgs: unknown[] = [];
+    const credentialsCacheSetCacheEntrySpy: jest.SpyInstance = jest
+      .spyOn(CredentialCache.prototype, 'setCacheEntry')
+      .mockImplementation((...args) => {
+        setCacheEntryArgs = args;
+      });
+    const credentialsCacheSaveSpy: jest.SpyInstance = jest
+      .spyOn(CredentialCache.prototype, 'saveIfModifiedAsync')
+      .mockImplementation(() => Promise.resolve());
+
+    const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
+    await cacheProvider.updateCachedCredentialAsync(terminal, 'credential');
+
+    expect(credentialsCacheSetCacheEntrySpy).toHaveBeenCalledTimes(1);
+    expect(setCacheEntryArgs).toMatchSnapshot();
+    expect(credentialsCacheSaveSpy).toHaveBeenCalledTimes(1);
+  }
+
+  it('Has an expected cached credential name (write not allowed)', async () => {
+    await testCredentialCache(false);
+  });
+
+  it('Has an expected cached credential name (write allowed)', async () => {
+    await testCredentialCache(true);
   });
 });

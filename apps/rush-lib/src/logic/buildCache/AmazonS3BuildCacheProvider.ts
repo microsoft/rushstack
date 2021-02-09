@@ -3,10 +3,18 @@
 
 import { Terminal } from '@rushstack/node-core-library';
 
-import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
 import { S3Client, GetObjectCommand, PutObjectCommand, GetObjectCommandOutput } from '@aws-sdk/client-s3';
 import { Readable } from 'stream';
+import { CredentialCache, ICredentialCacheEntry } from '../CredentialCache';
+import { RushConstants } from '../RushConstants';
+import { defaultProvider as awsCredentialsProvider } from '@aws-sdk/credential-provider-node';
+
+interface IAmazonS3Credentials {
+  accessKeyId: string;
+  secretAccessKey: string;
+}
 
 export interface IAmazonS3BuildCacheProviderOptions {
   s3Bucket: string;
@@ -26,19 +34,86 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
     return this._isCacheWriteAllowedByConfiguration || !!this._environmentWriteCredential;
   }
 
-  private _s3Client: S3Client | undefined;
+  private __s3Client: S3Client | undefined;
 
   public constructor(options: IAmazonS3BuildCacheProviderOptions) {
     super();
-    //this._storageAccountName = options.storageAccountName;
     this._s3Bucket = options.s3Bucket;
     this._s3Region = options.s3Region;
     this._s3Prefix = options.s3Prefix;
     this._environmentWriteCredential = EnvironmentConfiguration.buildCacheWriteCredential;
     this._isCacheWriteAllowedByConfiguration = options.isCacheWriteAllowed;
+  }
 
-    // TODO: Can we validate the region?
-    this._s3Client = new S3Client({ region: this._s3Region });
+  private _deserializeCredentials(credentialString: string | undefined): IAmazonS3Credentials | undefined {
+    if (!credentialString) {
+      return undefined;
+    }
+    const splitIndex: number = credentialString.indexOf(':');
+    if (splitIndex === -1) {
+      return undefined;
+    }
+    return {
+      accessKeyId: credentialString.substring(0, splitIndex),
+      secretAccessKey: credentialString.substring(splitIndex + 1)
+    };
+  }
+
+  private _serializeCredentialString(credentials: IAmazonS3Credentials): string {
+    return `${credentials.accessKeyId}:${credentials.secretAccessKey}`;
+  }
+
+  private get _credentialCacheId(): string {
+    const cacheIdParts: string[] = ['aws-s3', this._s3Region, this._s3Bucket];
+
+    if (this._isCacheWriteAllowedByConfiguration) {
+      cacheIdParts.push('cacheWriteAllowed');
+    }
+    return cacheIdParts.join('|');
+  }
+
+  private async _getS3ClientAsync(): Promise<S3Client> {
+    if (!this.__s3Client) {
+      let credentials: IAmazonS3Credentials | undefined = this._deserializeCredentials(
+        this._environmentWriteCredential
+      );
+      if (!credentials) {
+        let cacheEntry: ICredentialCacheEntry | undefined;
+        await CredentialCache.usingAsync(
+          {
+            supportEditing: false
+          },
+          (credentialsCache: CredentialCache) => {
+            cacheEntry = credentialsCache.tryGetCacheEntry(this._credentialCacheId);
+          }
+        );
+
+        if (cacheEntry) {
+          const expirationTime: number | undefined = cacheEntry.expires?.getTime();
+          if (expirationTime && expirationTime < Date.now()) {
+            throw new Error(
+              'Cached Amazon S3 credentials have expired. ' +
+                `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}".`
+            );
+          } else {
+            credentials = this._deserializeCredentials(cacheEntry?.credential);
+          }
+        } else {
+          try {
+            credentials = await awsCredentialsProvider()();
+          } catch {
+            throw new Error(
+              "An Amazon S3 credential hasn't been provided, or has expired. " +
+                `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}", ` +
+                `or provide an <AccessKeyId>:<SecretAccessKey> pair in the ` +
+                `${EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_CREDENTIAL} environment variable`
+            );
+          }
+        }
+      }
+      this.__s3Client = new S3Client({ region: this._s3Region, credentials });
+    }
+    return this.__s3Client;
   }
 
   public async tryGetCacheEntryBufferByIdAsync(
@@ -46,7 +121,8 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
     cacheId: string
   ): Promise<Buffer | undefined> {
     try {
-      const fetchResult: GetObjectCommandOutput | undefined = await this._s3Client?.send(
+      const client: S3Client = await this._getS3ClientAsync();
+      const fetchResult: GetObjectCommandOutput | undefined = await client.send(
         new GetObjectCommand({
           Bucket: this._s3Bucket,
           Key: this._s3Prefix ? `${this._s3Prefix}/${cacheId}` : cacheId
@@ -58,7 +134,7 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
       return await this._streamToBuffer(fetchResult.Body as Readable);
     } catch (e) {
       if (e.name === 'NoSuchKey') {
-        // TODO Non-existent file is normal, can it be handled differently?
+        // No object was uploaded with that name/key
         return undefined;
       }
       terminal.writeWarningLine(`Error getting cache entry from S3: ${e}`);
@@ -86,7 +162,8 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
     }
 
     try {
-      await this._s3Client?.send(
+      const client: S3Client = await this._getS3ClientAsync();
+      await client.send(
         new PutObjectCommand({
           Bucket: this._s3Bucket,
           Key: this._s3Prefix ? `${this._s3Prefix}/${cacheId}` : cacheId,
@@ -100,15 +177,34 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
     }
   }
 
-  public updateCachedCredentialAsync(terminal: Terminal, credential: string): Promise<void> {
-    return Promise.reject('Unsupported');
+  public async updateCachedCredentialAsync(terminal: Terminal, credential: string): Promise<void> {
+    await CredentialCache.usingAsync(
+      {
+        supportEditing: true
+      },
+      async (credentialsCache: CredentialCache) => {
+        credentialsCache.setCacheEntry(this._credentialCacheId, credential);
+        await credentialsCache.saveIfModifiedAsync();
+      }
+    );
   }
 
-  public updateCachedCredentialInteractiveAsync(terminal: Terminal): Promise<void> {
-    return Promise.reject('Unsupported');
+  public async updateCachedCredentialInteractiveAsync(terminal: Terminal): Promise<void> {
+    throw new Error(
+      'The interactive cloud credentials flow is not supported for Amazon S3.\n' +
+        'Install and authenticate with aws-cli, or provide your credentials to rush using the --credential flag instead.'
+    );
   }
 
-  public deleteCachedCredentialsAsync(terminal: Terminal): Promise<void> {
-    return Promise.reject('Unsupported');
+  public async deleteCachedCredentialsAsync(terminal: Terminal): Promise<void> {
+    await CredentialCache.usingAsync(
+      {
+        supportEditing: true
+      },
+      async (credentialsCache: CredentialCache) => {
+        credentialsCache.deleteCacheEntry(this._credentialCacheId);
+        await credentialsCache.saveIfModifiedAsync();
+      }
+    );
   }
 }
