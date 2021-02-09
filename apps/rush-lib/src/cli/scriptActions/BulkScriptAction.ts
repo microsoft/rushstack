@@ -167,9 +167,8 @@ export class BulkScriptAction extends BaseScriptAction {
       Selection.expandAllConsumers(impactedByProjects)
     );
 
-    // If no projects seleted, select everything.
-    if (!selection.size) {
-      terminal.writeVerboseLine(`No selection specified, selecting all projects.`);
+    // If no projects selected, select everything.
+    if (selection.size === 0) {
       for (const project of this.rushConfiguration.projects) {
         selection.add(project);
       }
@@ -276,8 +275,15 @@ export class BulkScriptAction extends BaseScriptAction {
         terminal
       };
 
-      // Delegate the the underlying command, for only the projects that need reprocessing
-      await this._runOnce(executeOptions);
+      try {
+        // Delegate the the underlying command, for only the projects that need reprocessing
+        await this._runOnce(executeOptions);
+      } catch (err) {
+        // In watch mode, we want to rebuild even if the original build failed.
+        if (!(err instanceof AlreadyReportedError)) {
+          throw err;
+        }
+      }
     }
   }
 
