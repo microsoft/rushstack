@@ -31,7 +31,7 @@ interface IArtifactoryCustomizableMessages {
 }
 
 const defaultMessages: IArtifactoryCustomizableMessages = {
-  introduction: 'This monorepo consumes packages from a Artifactory private NPM registry.',
+  introduction: 'This monorepo consumes packages from an Artifactory private NPM registry.',
   obtainAnAccount:
     'Please contact the repository maintainers for help with setting up an Artifactory user account.',
   visitWebsite: 'Please open this URL in your web browser:',
@@ -123,7 +123,7 @@ export class SetupPackageRegistry {
       '--registry=' + packageRegistry.registryUrl
     ];
 
-    this._terminal.writeLine('Testing NPM registry credentials...');
+    this._terminal.writeLine('Testing access to private NPM registry: ' + packageRegistry.registryUrl);
 
     const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync('npm', npmArgs, {
       currentWorkingDirectory: this.rushConfiguration.commonTempFolder,
