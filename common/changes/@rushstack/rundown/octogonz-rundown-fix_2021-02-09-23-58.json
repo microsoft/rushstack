@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rundown",
+      "comment": "Fix an error \"process.on() is not a function\" caused by an incorrect import",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rundown",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
