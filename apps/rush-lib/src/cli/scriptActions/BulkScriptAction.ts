@@ -225,14 +225,6 @@ export class BulkScriptAction extends BaseScriptAction {
       terminal
     } = options;
 
-    if (!this.rushConfiguration.experimentsConfiguration.configuration.watchMode) {
-      terminal.writeErrorLine(
-        `Use of the "--watch" flag requires your repository to opt into the "watchMode" experiment in experiments.json`
-      );
-
-      throw new AlreadyReportedError();
-    }
-
     // Use async import so that we don't pay the cost for sync builds
     const { ProjectWatcher } = await import('../../logic/ProjectWatcher');
 
@@ -425,7 +417,7 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterLongName: '--watch',
       parameterShortName: '-w',
       description:
-        '(EXPERIMENTAL) Normally Rush terminates after the command finishes. The "--watch" parameter will instead cause Rush' +
+        'Normally Rush terminates after the command finishes. The "--watch" parameter will instead cause Rush' +
         ' to enter a loop where it watches the file system for changes to the selected projects.' +
         ' Whenever a change is detected, the command will be invoked again for the changed project and' +
         ' any selected projects that directly or indirectly depend on it.' +

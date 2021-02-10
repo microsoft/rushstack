@@ -33,12 +33,6 @@ export interface IExperimentsJson {
    * file must be created with configuration options.
    */
   buildCache?: boolean;
-
-  /**
-   * If true, the watch mode feature is enabled. To use this feature, pass `--watch` to `rush build`, `rush rebuild`,
-   * or any custom command with `"commandKind": "bulk"`
-   */
-  watchMode?: boolean;
 }
 
 /**
