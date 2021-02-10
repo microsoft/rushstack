@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Support `--watch` on BulkScriptAction. Uses PackageChangeAnalyzer and a file system watcher to detect changes to selected projects after the completion of each command execution.",
+      "comment": "Add a new parameter \"--watch\" that interactively watches for filesystem changes and rebuilds the affected Rush projects; this feature can also be used with custom bulk commands (GitHub #2458, #1122)",
       "type": "minor"
     }
   ],
