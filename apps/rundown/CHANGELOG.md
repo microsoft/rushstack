@@ -1,6 +1,14 @@
 # Change Log - @rushstack/rundown
 
-This log was last generated on Fri, 05 Feb 2021 16:10:42 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Feb 2021 01:31:21 GMT and should not be manually modified.
+
+## 1.0.76
+Wed, 10 Feb 2021 01:31:21 GMT
+
+### Patches
+
+- Fix an error "process.on() is not a function" caused by an incorrect import
+- Fix a race condition that sometimes caused an error "Child process terminated without completing IPC handshake"
 
 ## 1.0.75
 Fri, 05 Feb 2021 16:10:42 GMT
