@@ -1,16 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FSWatcher } from 'chokidar';
+import { Import, Path } from '@rushstack/node-core-library';
+
 import { PackageChangeAnalyzer } from './PackageChangeAnalyzer';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { Path } from '@rushstack/node-core-library';
+
+// Use lazy import because we don't need this immediately
+const chokidar: typeof import('chokidar') = Import.lazy('chokidar', require);
 
 export interface IProjectWatcherOptions {
   debounceMilliseconds?: number;
   rushConfiguration: RushConfiguration;
-  selection: ReadonlySet<RushConfigurationProject>;
+  projectsToWatch: ReadonlySet<RushConfigurationProject>;
 }
 
 export interface IProjectChangeResult {
@@ -33,17 +36,17 @@ export interface IProjectChangeResult {
 export class ProjectWatcher {
   private readonly _debounceMilliseconds: number;
   private readonly _rushConfiguration: RushConfiguration;
-  private readonly _selection: ReadonlySet<RushConfigurationProject>;
+  private readonly _projectsToWatch: ReadonlySet<RushConfigurationProject>;
 
   private _initialState: PackageChangeAnalyzer | undefined;
   private _previousState: PackageChangeAnalyzer | undefined;
 
   public constructor(options: IProjectWatcherOptions) {
-    const { debounceMilliseconds = 1000, rushConfiguration, selection } = options;
+    const { debounceMilliseconds = 1000, rushConfiguration, projectsToWatch } = options;
 
     this._debounceMilliseconds = debounceMilliseconds;
     this._rushConfiguration = rushConfiguration;
-    this._selection = selection;
+    this._projectsToWatch = projectsToWatch;
   }
 
   /**
@@ -59,7 +62,7 @@ export class ProjectWatcher {
       return initialChangeResult;
     }
 
-    const watcher: FSWatcher = new FSWatcher({
+    const watcher: import('chokidar').FSWatcher = new chokidar.FSWatcher({
       persistent: true,
       cwd: Path.convertToSlashes(this._rushConfiguration.rushJsonFolder),
       followSymlinks: false,
@@ -69,8 +72,8 @@ export class ProjectWatcher {
       interval: 1000
     });
 
-    // Only watch for changes in the project folders
-    for (const project of this._selection) {
+    // Only watch for changes in the requested project folders
+    for (const project of this._projectsToWatch) {
       watcher.add(Path.convertToSlashes(project.projectFolder));
     }
 
@@ -143,13 +146,13 @@ export class ProjectWatcher {
 
     if (!previousState) {
       return {
-        changedProjects: this._selection,
+        changedProjects: this._projectsToWatch,
         state
       };
     }
 
     const changedProjects: Set<RushConfigurationProject> = new Set();
-    for (const project of this._selection) {
+    for (const project of this._projectsToWatch) {
       const { packageName } = project;
 
       if (

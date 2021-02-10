@@ -4,14 +4,18 @@
 import * as os from 'os';
 import colors from 'colors';
 
-import { AlreadyReportedError, ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import {
+  AlreadyReportedError,
+  ConsoleTerminalProvider,
+  PackageName,
+  Terminal
+} from '@rushstack/node-core-library';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineStringListParameter,
   CommandLineParameterKind
 } from '@rushstack/ts-command-line';
-import { PackageName } from '@rushstack/node-core-library';
 
 import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
@@ -26,7 +30,6 @@ import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { IRushConfigurationProjectJson, RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { Selection } from '../../logic/Selection';
-import { IProjectChangeResult, ProjectWatcher } from '../../logic/ProjectWatcher';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -202,7 +205,7 @@ export class BulkScriptAction extends BaseScriptAction {
     };
 
     if (this._watchParameter.value) {
-      await this.runWatch(executeOptions);
+      await this._runWatch(executeOptions);
     } else {
       await this._runOnce(executeOptions);
     }
@@ -211,20 +214,24 @@ export class BulkScriptAction extends BaseScriptAction {
   /**
    * Runs the command in watch mode. Fundamentally is a simple loop:
    * 1) Wait for a change to one or more projects in the selection (skipped initially)
-   * 2) Invoke the command on the changed projects, and, if applicable, downstream projects
+   * 2) Invoke the command on the changed projects, and, if applicable, impacted projects
+   *    Uses the same algorithm as --impacted-by
    * 3) Goto (1)
    */
-  protected async runWatch(options: IExecuteInternalOptions): Promise<void> {
+  private async _runWatch(options: IExecuteInternalOptions): Promise<void> {
     const {
-      taskSelectorOptions: { selection: initialSelection },
+      taskSelectorOptions: { selection: projectsToWatch },
       stopwatch,
       terminal
     } = options;
 
-    const projectWatcher: ProjectWatcher = new ProjectWatcher({
+    // Use async import so that we don't pay the cost for sync builds
+    const { ProjectWatcher } = await import('../../logic/ProjectWatcher');
+
+    const projectWatcher: typeof ProjectWatcher.prototype = new ProjectWatcher({
       debounceMilliseconds: 1000,
       rushConfiguration: this.rushConfiguration,
-      selection: initialSelection
+      projectsToWatch
     });
 
     // Loop until Ctrl+C
@@ -232,15 +239,15 @@ export class BulkScriptAction extends BaseScriptAction {
     while (true) {
       // Report so that the developer can always see that it is in watch mode.
       terminal.writeLine(
-        `Watching for changes to ${initialSelection.size} ${
-          initialSelection.size === 1 ? 'project' : 'projects'
+        `Watching for changes to ${projectsToWatch.size} ${
+          projectsToWatch.size === 1 ? 'project' : 'projects'
         }. Press Ctrl+C to exit.`
       );
 
       // On the initial invocation, this promise will return immediately with the full set of projects
-      const change: IProjectChangeResult = await projectWatcher.waitForChange();
+      const { changedProjects, state } = await projectWatcher.waitForChange();
 
-      let selection: ReadonlySet<RushConfigurationProject> = change.changedProjects;
+      let selection: ReadonlySet<RushConfigurationProject> = changedProjects;
 
       if (stopwatch.state === StopwatchState.Stopped) {
         // Clear and reset the stopwatch so that we only report time from a single execution at a time
@@ -257,7 +264,7 @@ export class BulkScriptAction extends BaseScriptAction {
       // If the command ignores dependency order, that means that only the changed projects should be affected
       // That said, running watch for commands that ignore dependency order may have unexpected results
       if (!this._ignoreDependencyOrder) {
-        selection = Selection.intersection(Selection.expandAllConsumers(selection), initialSelection);
+        selection = Selection.intersection(Selection.expandAllConsumers(selection), projectsToWatch);
       }
 
       const executeOptions: IExecuteInternalOptions = {
@@ -266,7 +273,7 @@ export class BulkScriptAction extends BaseScriptAction {
           // Revise down the set of projects to execute the command on
           selection,
           // Pass the PackageChangeAnalyzer from the state differ to save a bit of overhead
-          packageChangeAnalyzer: change.state
+          packageChangeAnalyzer: state
         },
         taskRunnerOptions: options.taskRunnerOptions,
         stopwatch,
