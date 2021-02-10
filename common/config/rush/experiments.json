@@ -33,4 +33,9 @@
    * See https://github.com/microsoft/rushstack/issues/2393 for details about this experimental feature.
    */
   "buildCache": true
+  /**
+   * If true, the watch mode feature is enabled. To use this feature, pass the "--watch" flag to "rush build",
+   * "rush rebuild", or any custom command with `"commandKind": "bulk"`.
+   */
+  // "watchMode": true
 }

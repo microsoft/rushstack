@@ -146,6 +146,7 @@ export interface IExperimentsJson {
     legacyIncrementalBuildDependencyDetection?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
+    watchMode?: boolean;
 }
 
 // @public

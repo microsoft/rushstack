@@ -25,6 +25,10 @@
     "buildCache": {
       "description": "If true, the build cache feature is enabled. To use this feature, a common/config/rush/build-cache.json file must be created with configuration options.",
       "type": "boolean"
+    },
+    "watchMode": {
+      "description": "If true, the watch mode feature is enabled. To use this feature, pass `--watch` to `rush build`, `rush rebuild`, or other custom action with `\"commandKind\": \"bulk\"`.",
+      "type": "boolean"
     }
   },
   "additionalProperties": false
