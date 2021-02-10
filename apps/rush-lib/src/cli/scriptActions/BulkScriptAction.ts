@@ -410,11 +410,11 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterLongName: '--watch',
       parameterShortName: '-w',
       description:
-        'Normally Rush would terminate after the command finishes;' +
-        ' adding this parameter will instead watch the file system for changes to the selected projects' +
-        ' (or all projects if no selection was specified).' +
-        ' When changes are detected, will re-execute the command on all projects within the selection that are' +
-        ' impacted by the detected changes, then resume waiting for changes.' +
+        'Normally Rush terminates after the command finishes. The "--watch" parameter will instead cause Rush' +
+        ' to enter a loop where it watches the file system for changes to the selected projects.' +
+        ' Whenever a change is detected, the command will be invoked again for the changed project and' +
+        ' any selected projects that directly or indirectly depend on it.' +
+        ' This parameter may be combined with "--changed-projects-only" to ignore dependent projects.' +
         ' For details, refer to the website article "Using watch mode".'
     });
 
@@ -428,8 +428,11 @@ export class BulkScriptAction extends BaseScriptAction {
         parameterLongName: '--changed-projects-only',
         parameterShortName: '-c',
         description:
-          'If specified, the incremental build will only rebuild projects that have changed, ' +
-          'but not any projects that directly or indirectly depend on the changed package.'
+          'Normally the incremental build logic will rebuild changed projects as well as' +
+          ' any projects that directly or indirectly depend on a changed project. Specify "--changed-projects-only"' +
+          ' to ignore dependent projects, only rebuilding those projects whose files were changed.' +
+          ' Note that this parameter is "unsafe"; it is up to the developer to ensure that the ignored projects' +
+          ' are okay to ignore.'
       });
     }
     this._ignoreHooksParameter = this.defineFlagParameter({
