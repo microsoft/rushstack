@@ -12,8 +12,9 @@
       "args": [
         "snapshot",
         "--script",
-        "../rush-lib/lib/start.js"  // <--- your path here
+        "./lib/start.js"  // <--- your entry point here
       ],
+      "cwd": "${workspaceFolder}/../rush-lib/",  // <--- your project folder here
       "sourceMaps": true
     },
     {
@@ -24,8 +25,9 @@
       "args": [
         "snapshot",
         "--script",
-        "../rush-lib/lib/start.js"  // <--- your path here
+        "./lib/start.js"  // <--- your entry point here
       ],
+      "cwd": "${workspaceFolder}/../rush-lib/",  // <--- your project folder here
       "sourceMaps": true
     }
   ]

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/rundown",
+      "comment": "Fix a race condition that sometimes caused an error \"Child process terminated without completing IPC handshake\"",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/rundown",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
