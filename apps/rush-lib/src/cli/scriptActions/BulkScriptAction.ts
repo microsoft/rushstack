@@ -417,7 +417,7 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterLongName: '--watch',
       parameterShortName: '-w',
       description:
-        'Normally Rush terminates after the command finishes. The "--watch" parameter will instead cause Rush' +
+        '(EXPERIMENTAL) Normally Rush terminates after the command finishes. The "--watch" parameter will instead cause Rush' +
         ' to enter a loop where it watches the file system for changes to the selected projects.' +
         ' Whenever a change is detected, the command will be invoked again for the changed project and' +
         ' any selected projects that directly or indirectly depend on it.' +
