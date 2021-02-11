@@ -296,8 +296,8 @@ export class BulkScriptAction extends BaseScriptAction {
         }
       }
       // Current implementation of the build cache deletes output folders before repopulating them;
-      // this tends to break `webpack --watch` and the like
-      // Also, skipping writes to the local cache improves inner loop performance
+      // this tends to break `webpack --watch`, etc.
+      // Also, skipping writes to the local cache improves inner loop performance and saves disk usage.
       buildCacheConfiguration = undefined;
     }
   }
