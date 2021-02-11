@@ -59,10 +59,6 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
     };
   }
 
-  private _serializeCredentialString(credentials: IAmazonS3Credentials): string {
-    return `${credentials.accessKeyId}:${credentials.secretAccessKey}`;
-  }
-
   private get _credentialCacheId(): string {
     const cacheIdParts: string[] = ['aws-s3', this._s3Region, this._s3Bucket];
 
