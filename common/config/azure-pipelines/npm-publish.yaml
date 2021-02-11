@@ -9,4 +9,4 @@ steps:
   - template: templates/build.yaml
   - template: templates/publish.yaml
     parameters:
-      VersionPolicy: noRush
+      VersionPolicyName: noRush
