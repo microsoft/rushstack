@@ -234,6 +234,9 @@ export class BulkScriptAction extends BaseScriptAction {
       projectsToWatch
     });
 
+    let buildCacheConfiguration: BuildCacheConfiguration | undefined =
+      options.taskSelectorOptions.buildCacheConfiguration;
+
     // Loop until Ctrl+C
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -270,6 +273,7 @@ export class BulkScriptAction extends BaseScriptAction {
       const executeOptions: IExecuteInternalOptions = {
         taskSelectorOptions: {
           ...options.taskSelectorOptions,
+          buildCacheConfiguration,
           // Revise down the set of projects to execute the command on
           selection,
           // Pass the PackageChangeAnalyzer from the state differ to save a bit of overhead
@@ -291,6 +295,10 @@ export class BulkScriptAction extends BaseScriptAction {
           throw err;
         }
       }
+      // Current implementation of the build cache deletes output folders before repopulating them;
+      // this tends to break `webpack --watch` and the like
+      // Also, skipping writes to the local cache improves inner loop performance
+      buildCacheConfiguration = undefined;
     }
   }
 
