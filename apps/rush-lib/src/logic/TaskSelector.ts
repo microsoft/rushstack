@@ -11,7 +11,7 @@ import { TaskCollection } from './taskRunner/TaskCollection';
 export interface ITaskSelectorConstructor {
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration: BuildCacheConfiguration | undefined;
-  selection: Set<RushConfigurationProject>;
+  selection: ReadonlySet<RushConfigurationProject>;
   commandToRun: string;
   customParameterValues: string[];
   isQuietMode: boolean;
@@ -19,6 +19,7 @@ export interface ITaskSelectorConstructor {
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
   packageDepsFilename: string;
+  packageChangeAnalyzer?: PackageChangeAnalyzer;
 }
 
 /**
@@ -34,7 +35,9 @@ export class TaskSelector {
   public constructor(options: ITaskSelectorConstructor) {
     this._options = options;
 
-    this._packageChangeAnalyzer = new PackageChangeAnalyzer(options.rushConfiguration);
+    const { packageChangeAnalyzer = new PackageChangeAnalyzer(options.rushConfiguration) } = options;
+
+    this._packageChangeAnalyzer = packageChangeAnalyzer;
   }
 
   public static getScriptToRun(
@@ -57,12 +60,12 @@ export class TaskSelector {
   }
 
   public registerTasks(): TaskCollection {
-    const selectedProjects: Set<RushConfigurationProject> = this._computeSelectedProjects();
+    const selectedProjects: ReadonlySet<RushConfigurationProject> = this._computeSelectedProjects();
 
     return this._createTaskCollection(selectedProjects);
   }
 
-  private _computeSelectedProjects(): Set<RushConfigurationProject> {
+  private _computeSelectedProjects(): ReadonlySet<RushConfigurationProject> {
     const { selection } = this._options;
 
     if (selection.size) {

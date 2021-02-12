@@ -2,6 +2,21 @@
   "name": "@rushstack/rundown",
   "entries": [
     {
+      "version": "1.0.76",
+      "tag": "@rushstack/rundown_v1.0.76",
+      "date": "Wed, 10 Feb 2021 01:31:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an error \"process.on() is not a function\" caused by an incorrect import"
+          },
+          {
+            "comment": "Fix a race condition that sometimes caused an error \"Child process terminated without completing IPC handshake\""
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.75",
       "tag": "@rushstack/rundown_v1.0.75",
       "date": "Fri, 05 Feb 2021 16:10:42 GMT",

@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 01 Feb 2021 20:42:04 GMT and should not be manually modified.
+This log was last generated on Thu, 11 Feb 2021 04:06:02 GMT and should not be manually modified.
+
+## 5.39.0
+Thu, 11 Feb 2021 04:06:02 GMT
+
+### Minor changes
+
+- Add a new parameter "--watch" that watches for filesystem changes and rebuilds the affected Rush projects; this feature can also be used with custom bulk commands (GitHub #2458, #1122)
+
+### Updates
+
+- Improve the wording of some log messages
 
 ## 5.38.0
 Mon, 01 Feb 2021 20:42:04 GMT

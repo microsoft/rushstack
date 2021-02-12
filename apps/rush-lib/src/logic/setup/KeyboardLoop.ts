@@ -3,6 +3,13 @@
 
 import * as readline from 'readline';
 import * as process from 'process';
+import { InternalError } from '@rushstack/node-core-library';
+
+// TODO: Integrate these into the AnsiEscape API in @rushstack/node-core-library
+// As part of that work we should generalize the "Colors" API to support more general
+// terminal escapes, and simplify the interface for that API.
+const ANSI_ESCAPE_SHOW_CURSOR: string = '\u001B[?25l';
+const ANSI_ESCAPE_HIDE_CURSOR: string = '\u001B[?25h';
 
 export class KeyboardLoop {
   protected stdin: NodeJS.ReadStream;
@@ -49,7 +56,7 @@ export class KeyboardLoop {
       return;
     }
     this._cursorHidden = true;
-    this.stderr.write('\u001B[?25l');
+    this.stderr.write(ANSI_ESCAPE_SHOW_CURSOR);
   }
 
   protected unhideCursor(): void {
@@ -57,7 +64,7 @@ export class KeyboardLoop {
       return;
     }
     this._cursorHidden = false;
-    this.stderr.write('\u001B[?25h');
+    this.stderr.write(ANSI_ESCAPE_HIDE_CURSOR);
   }
 
   public async startAsync(): Promise<void> {
@@ -84,10 +91,10 @@ export class KeyboardLoop {
   }
 
   protected rejectAsync(error: Error): void {
-    if (!this._resolvePromise) {
+    if (!this._rejectPromise) {
       return;
     }
-    this._rejectPromise!(error);
+    this._rejectPromise(error);
     this._resolvePromise = undefined;
     this._rejectPromise = undefined;
   }
@@ -107,8 +114,7 @@ export class KeyboardLoop {
     try {
       this.onKeypress(character, key);
     } catch (error) {
-      console.error('Uncaught exception in Prompter.onKeypress(): ' + error.toString());
-      process.exit(1);
+      throw new InternalError('Uncaught exception in Prompter.onKeypress(): ' + error.toString());
     }
   };
 }

@@ -4,12 +4,12 @@
 import * as readline from 'readline';
 import * as process from 'process';
 import colors from 'colors';
-
-import { KeyboardLoop } from './KeyboardLoop';
 import { AnsiEscape } from '@rushstack/node-core-library';
 
+import { KeyboardLoop } from './KeyboardLoop';
+
 export interface IBasePromptOptions {
-  question: string;
+  message: string;
 }
 
 export interface IPromptYesNoOptions extends IBasePromptOptions {
@@ -37,7 +37,7 @@ class YesNoKeyboardLoop extends KeyboardLoop {
 
   protected onStart(): void {
     this.stderr.write(colors.green('==>') + ' ');
-    this.stderr.write(colors.bold(this.options.question));
+    this.stderr.write(colors.bold(this.options.message));
     let optionSuffix: string = '';
     switch (this.options.defaultValue) {
       case true:
@@ -83,6 +83,7 @@ class YesNoKeyboardLoop extends KeyboardLoop {
 
 class PasswordKeyboardLoop extends KeyboardLoop {
   private readonly _options: IPromptPasswordOptions;
+  private _passwordCharacter: string;
   private _startX: number = 0;
   private _printedY: number = 0;
   private _lastPrintedLength: number = 0;
@@ -92,6 +93,9 @@ class PasswordKeyboardLoop extends KeyboardLoop {
   public constructor(options: IPromptPasswordOptions) {
     super();
     this._options = options;
+
+    this._passwordCharacter =
+      this._options.passwordCharacter === undefined ? '*' : this._options.passwordCharacter.substr(0, 1);
   }
 
   private _getLineWrapWidth(): number {
@@ -103,7 +107,7 @@ class PasswordKeyboardLoop extends KeyboardLoop {
 
     readline.cursorTo(this.stderr, 0);
     readline.clearLine(this.stderr, 1);
-    const prefix: string = colors.green('==>') + ' ' + colors.bold(this._options.question) + ' ';
+    const prefix: string = colors.green('==>') + ' ' + colors.bold(this._options.message) + ' ';
 
     this.stderr.write(prefix);
     let lineStartIndex: number = prefix.lastIndexOf('\n');
@@ -118,29 +122,39 @@ class PasswordKeyboardLoop extends KeyboardLoop {
     switch (key.name) {
       case 'enter':
       case 'return':
+        if (this._passwordCharacter !== '') {
+          // To avoid disclosing the length of the password, after the user presses ENTER,
+          // replace the "*********" sequence with exactly three stars ("***").
+          this._render(this._passwordCharacter.repeat(3));
+        }
         this.stderr.write('\n');
         this.resolveAsync();
         return;
       case 'backspace':
         this.result = this.result.substring(0, this.result.length - 1);
-    }
+        this._render(this.result);
+        break;
+      default:
+        let printable: boolean = true;
+        if (character === '') {
+          printable = false;
+        } else if (key.name && key.name.length !== 1 && key.name !== 'space') {
+          printable = false;
+        } else if (!key.name && !key.sequence) {
+          printable = false;
+        }
 
-    let printable: boolean = true;
-    if (character === '') {
-      printable = false;
-    } else if (key.name && key.name.length !== 1 && key.name !== 'space') {
-      printable = false;
-    } else if (!key.name && !key.sequence) {
-      printable = false;
+        if (printable) {
+          this.result += character;
+          this._render(this.result);
+        }
     }
+  }
 
-    if (printable) {
-      this.result += character;
-    }
-
+  private _render(text: string): void {
     // Optimize rendering when we don't need to erase anything
-    const needsClear: boolean = this.result.length < this._lastPrintedLength;
-    this._lastPrintedLength = this.result.length;
+    const needsClear: boolean = text.length < this._lastPrintedLength;
+    this._lastPrintedLength = text.length;
 
     this.hideCursor();
 
@@ -161,14 +175,12 @@ class PasswordKeyboardLoop extends KeyboardLoop {
     let column: number = this._startX;
     this._printedY = 0;
     let buffer: string = '';
-    const passwordCharacter: string =
-      this._options.passwordCharacter === undefined ? '*' : this._options.passwordCharacter.substr(0, 1);
 
-    while (i < this.result.length) {
-      if (passwordCharacter === '') {
-        buffer += this.result.substr(i, 1);
+    while (i < text.length) {
+      if (this._passwordCharacter === '') {
+        buffer += text.substr(i, 1);
       } else {
-        buffer += passwordCharacter;
+        buffer += this._passwordCharacter;
       }
 
       ++i;
@@ -214,7 +226,7 @@ export class TerminalInput {
   public static async promptLine(options: IPromptLineOptions): Promise<string> {
     const stderr: NodeJS.WriteStream = process.stderr;
     stderr.write(colors.green('==>') + ' ');
-    stderr.write(colors.bold(options.question));
+    stderr.write(colors.bold(options.message));
     stderr.write(' ');
     return await TerminalInput._readLine();
   }

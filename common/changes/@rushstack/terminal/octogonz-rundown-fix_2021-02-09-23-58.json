@@ -1,11 +1,11 @@
 {
   "changes": [
     {
-      "packageName": "@microsoft/rush",
+      "packageName": "@rushstack/terminal",
       "comment": "",
       "type": "none"
     }
   ],
-  "packageName": "@microsoft/rush",
+  "packageName": "@rushstack/terminal",
   "email": "4673363+octogonz@users.noreply.github.com"
 }
