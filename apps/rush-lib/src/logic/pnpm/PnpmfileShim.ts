@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// Uncomment "/* type */" when we upgrade to TS 3.9
-import { /* type */ IPackageJson } from '@rushstack/node-core-library';
-import { /* type */ IPnpmfileShimSettings } from './IPnpmfileShimSettings';
-import /* type */ * as TSemver from 'semver';
+import type { IPackageJson } from '@rushstack/node-core-library';
+import type { IPnpmfileShimSettings } from './IPnpmfileShimSettings';
+import type * as TSemver from 'semver';
 
 interface ILockfile {}
 

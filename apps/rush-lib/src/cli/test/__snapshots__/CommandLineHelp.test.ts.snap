@@ -113,7 +113,7 @@ exports[`CommandLineHelp prints the help for each action: build 1`] = `
 "usage: rush build [-h] [-p COUNT] [-t PROJECT] [-T PROJECT] [-f PROJECT]
                   [-o PROJECT] [-i PROJECT] [-I PROJECT]
                   [--to-version-policy VERSION_POLICY_NAME]
-                  [--from-version-policy VERSION_POLICY_NAME] [-v] [-c]
+                  [--from-version-policy VERSION_POLICY_NAME] [-w] [-v] [-c]
                   [--ignore-hooks] [-s] [-m]
                   
 
@@ -217,12 +217,28 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
+  -w, --watch           (EXPERIMENTAL) Normally Rush terminates after the 
+                        command finishes. The \\"--watch\\" parameter will 
+                        instead cause Rush to enter a loop where it watches 
+                        the file system for changes to the selected projects. 
+                        Whenever a change is detected, the command will be 
+                        invoked again for the changed project and any 
+                        selected projects that directly or indirectly depend 
+                        on it. This parameter may be combined with 
+                        \\"--changed-projects-only\\" to ignore dependent 
+                        projects. For details, refer to the website article 
+                        \\"Using watch mode\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   -c, --changed-projects-only
-                        If specified, the incremental build will only rebuild 
-                        projects that have changed, but not any projects that 
-                        directly or indirectly depend on the changed package.
+                        Normally the incremental build logic will rebuild 
+                        changed projects as well as any projects that 
+                        directly or indirectly depend on a changed project. 
+                        Specify \\"--changed-projects-only\\" to ignore dependent 
+                        projects, only rebuilding those projects whose files 
+                        were changed. Note that this parameter is \\"unsafe\\"; 
+                        it is up to the developer to ensure that the ignored 
+                        projects are okay to ignore.
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
@@ -349,8 +365,8 @@ exports[`CommandLineHelp prints the help for each action: import-strings 1`] = `
 "usage: rush import-strings [-h] [-p COUNT] [-t PROJECT] [-T PROJECT]
                            [-f PROJECT] [-o PROJECT] [-i PROJECT] [-I PROJECT]
                            [--to-version-policy VERSION_POLICY_NAME]
-                           [--from-version-policy VERSION_POLICY_NAME] [-v]
-                           [--ignore-hooks]
+                           [--from-version-policy VERSION_POLICY_NAME] [-w]
+                           [-v] [--ignore-hooks]
                            [--locale {en-us,fr-fr,es-es,zh-cn}]
                            
 
@@ -445,6 +461,17 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
+  -w, --watch           (EXPERIMENTAL) Normally Rush terminates after the 
+                        command finishes. The \\"--watch\\" parameter will 
+                        instead cause Rush to enter a loop where it watches 
+                        the file system for changes to the selected projects. 
+                        Whenever a change is detected, the command will be 
+                        invoked again for the changed project and any 
+                        selected projects that directly or indirectly depend 
+                        on it. This parameter may be combined with 
+                        \\"--changed-projects-only\\" to ignore dependent 
+                        projects. For details, refer to the website article 
+                        \\"Using watch mode\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
@@ -740,7 +767,7 @@ exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
 "usage: rush rebuild [-h] [-p COUNT] [-t PROJECT] [-T PROJECT] [-f PROJECT]
                     [-o PROJECT] [-i PROJECT] [-I PROJECT]
                     [--to-version-policy VERSION_POLICY_NAME]
-                    [--from-version-policy VERSION_POLICY_NAME] [-v]
+                    [--from-version-policy VERSION_POLICY_NAME] [-w] [-v]
                     [--ignore-hooks] [-s] [-m]
                     
 
@@ -841,6 +868,17 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
+  -w, --watch           (EXPERIMENTAL) Normally Rush terminates after the 
+                        command finishes. The \\"--watch\\" parameter will 
+                        instead cause Rush to enter a loop where it watches 
+                        the file system for changes to the selected projects. 
+                        Whenever a change is detected, the command will be 
+                        invoked again for the changed project and any 
+                        selected projects that directly or indirectly depend 
+                        on it. This parameter may be combined with 
+                        \\"--changed-projects-only\\" to ignore dependent 
+                        projects. For details, refer to the website article 
+                        \\"Using watch mode\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 

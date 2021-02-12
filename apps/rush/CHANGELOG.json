@@ -2,6 +2,23 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.39.0",
+      "tag": "@microsoft/rush_v5.39.0",
+      "date": "Thu, 11 Feb 2021 04:06:02 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve the wording of some log messages"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add a new parameter \"--watch\" that watches for filesystem changes and rebuilds the affected Rush projects; this feature can also be used with custom bulk commands (GitHub #2458, #1122)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.38.0",
       "tag": "@microsoft/rush_v5.38.0",
       "date": "Mon, 01 Feb 2021 20:42:04 GMT",

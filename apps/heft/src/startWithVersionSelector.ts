@@ -5,7 +5,7 @@
 // we import here may become side-by-side versions.  We want to minimize any dependencies.
 import * as path from 'path';
 import * as fs from 'fs';
-import { /* type*/ IPackageJson } from '@rushstack/node-core-library';
+import type { IPackageJson } from '@rushstack/node-core-library';
 
 const HEFT_PACKAGE_NAME: string = '@rushstack/heft';
 
