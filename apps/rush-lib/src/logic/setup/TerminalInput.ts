@@ -83,6 +83,7 @@ class YesNoKeyboardLoop extends KeyboardLoop {
 
 class PasswordKeyboardLoop extends KeyboardLoop {
   private readonly _options: IPromptPasswordOptions;
+  private _passwordCharacter: string;
   private _startX: number = 0;
   private _printedY: number = 0;
   private _lastPrintedLength: number = 0;
@@ -92,6 +93,9 @@ class PasswordKeyboardLoop extends KeyboardLoop {
   public constructor(options: IPromptPasswordOptions) {
     super();
     this._options = options;
+
+    this._passwordCharacter =
+      this._options.passwordCharacter === undefined ? '*' : this._options.passwordCharacter.substr(0, 1);
   }
 
   private _getLineWrapWidth(): number {
@@ -118,29 +122,39 @@ class PasswordKeyboardLoop extends KeyboardLoop {
     switch (key.name) {
       case 'enter':
       case 'return':
+        if (this._passwordCharacter !== '') {
+          // To avoid disclosing the length of the password, after the user presses ENTER,
+          // replace the "*********" sequence with exactly three stars ("***").
+          this._render(this._passwordCharacter.repeat(3));
+        }
         this.stderr.write('\n');
         this.resolveAsync();
         return;
       case 'backspace':
         this.result = this.result.substring(0, this.result.length - 1);
-    }
+        this._render(this.result);
+        break;
+      default:
+        let printable: boolean = true;
+        if (character === '') {
+          printable = false;
+        } else if (key.name && key.name.length !== 1 && key.name !== 'space') {
+          printable = false;
+        } else if (!key.name && !key.sequence) {
+          printable = false;
+        }
 
-    let printable: boolean = true;
-    if (character === '') {
-      printable = false;
-    } else if (key.name && key.name.length !== 1 && key.name !== 'space') {
-      printable = false;
-    } else if (!key.name && !key.sequence) {
-      printable = false;
+        if (printable) {
+          this.result += character;
+          this._render(this.result);
+        }
     }
+  }
 
-    if (printable) {
-      this.result += character;
-    }
-
+  private _render(text: string): void {
     // Optimize rendering when we don't need to erase anything
-    const needsClear: boolean = this.result.length < this._lastPrintedLength;
-    this._lastPrintedLength = this.result.length;
+    const needsClear: boolean = text.length < this._lastPrintedLength;
+    this._lastPrintedLength = text.length;
 
     this.hideCursor();
 
@@ -161,14 +175,12 @@ class PasswordKeyboardLoop extends KeyboardLoop {
     let column: number = this._startX;
     this._printedY = 0;
     let buffer: string = '';
-    const passwordCharacter: string =
-      this._options.passwordCharacter === undefined ? '*' : this._options.passwordCharacter.substr(0, 1);
 
-    while (i < this.result.length) {
-      if (passwordCharacter === '') {
-        buffer += this.result.substr(i, 1);
+    while (i < text.length) {
+      if (this._passwordCharacter === '') {
+        buffer += text.substr(i, 1);
       } else {
-        buffer += passwordCharacter;
+        buffer += this._passwordCharacter;
       }
 
       ++i;
