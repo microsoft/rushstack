@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Disable build cache after initial build when \"--watch\" is specified. This saves disk space, reduces CPU usage, and improves compatibility with downstream file watcher processes (e.g. \"webpack --watch\").",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
