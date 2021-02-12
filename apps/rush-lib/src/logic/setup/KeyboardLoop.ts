@@ -3,6 +3,7 @@
 
 import * as readline from 'readline';
 import * as process from 'process';
+import { InternalError } from '@rushstack/node-core-library';
 
 export class KeyboardLoop {
   protected stdin: NodeJS.ReadStream;
@@ -84,10 +85,10 @@ export class KeyboardLoop {
   }
 
   protected rejectAsync(error: Error): void {
-    if (!this._resolvePromise) {
+    if (!this._rejectPromise) {
       return;
     }
-    this._rejectPromise!(error);
+    this._rejectPromise(error);
     this._resolvePromise = undefined;
     this._rejectPromise = undefined;
   }
@@ -107,8 +108,7 @@ export class KeyboardLoop {
     try {
       this.onKeypress(character, key);
     } catch (error) {
-      console.error('Uncaught exception in Prompter.onKeypress(): ' + error.toString());
-      process.exit(1);
+      throw new InternalError('Uncaught exception in Prompter.onKeypress(): ' + error.toString());
     }
   };
 }
