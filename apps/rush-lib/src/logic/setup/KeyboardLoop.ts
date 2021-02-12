@@ -5,6 +5,12 @@ import * as readline from 'readline';
 import * as process from 'process';
 import { InternalError } from '@rushstack/node-core-library';
 
+// TODO: Integrate these into the AnsiEscape API in @rushstack/node-core-library
+// As part of that work we should generalize the "Colors" API to support more general
+// terminal escapes, and simplify the interface for that API.
+const ANSI_ESCAPE_SHOW_CURSOR: string = '\u001B[?25l';
+const ANSI_ESCAPE_HIDE_CURSOR: string = '\u001B[?25h';
+
 export class KeyboardLoop {
   protected stdin: NodeJS.ReadStream;
   protected stderr: NodeJS.WriteStream;
@@ -50,7 +56,7 @@ export class KeyboardLoop {
       return;
     }
     this._cursorHidden = true;
-    this.stderr.write('\u001B[?25l');
+    this.stderr.write(ANSI_ESCAPE_SHOW_CURSOR);
   }
 
   protected unhideCursor(): void {
@@ -58,7 +64,7 @@ export class KeyboardLoop {
       return;
     }
     this._cursorHidden = false;
-    this.stderr.write('\u001B[?25h');
+    this.stderr.write(ANSI_ESCAPE_HIDE_CURSOR);
   }
 
   public async startAsync(): Promise<void> {
