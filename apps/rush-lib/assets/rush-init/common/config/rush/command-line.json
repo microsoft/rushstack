@@ -1,6 +1,6 @@
 /**
  * This configuration file defines custom commands for the "rush" command-line.
- * For full documentation, please see https://rushjs.io
+ * More documentation is available on the Rush website: https://rushjs.io
  */
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
@@ -104,7 +104,7 @@
        * Note: The default value is false. In Rush 5.7.x and earlier, the default value was true.
        */
       "allowWarningsInSuccessfulBuild": false,
-      
+
       /**
        * If true then this command will be incremental like the built-in "build" command
        */
