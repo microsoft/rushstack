@@ -190,7 +190,7 @@ export class SetupPackageRegistry {
       .packageRegistry;
 
     const fixThisProblem: boolean = await TerminalInput.promptYesNo({
-      question: 'Fix this problem now?',
+      message: 'Fix this problem now?',
       defaultValue: false
     });
     this._terminal.writeLine();
@@ -201,7 +201,7 @@ export class SetupPackageRegistry {
     this._writeInstructionBlock(this._messages.introduction);
 
     const hasArtifactoryAccount: boolean = await TerminalInput.promptYesNo({
-      question: 'Do you already have an Artifactory user account?'
+      message: 'Do you already have an Artifactory user account?'
     });
     this._terminal.writeLine();
 
@@ -225,7 +225,7 @@ export class SetupPackageRegistry {
     this._writeInstructionBlock(this._messages.locateUserName);
 
     let artifactoryUser: string = await TerminalInput.promptLine({
-      question: 'What is your Artifactory user name?'
+      message: 'What is your Artifactory user name?'
     });
     this._terminal.writeLine();
 
@@ -239,7 +239,7 @@ export class SetupPackageRegistry {
     this._writeInstructionBlock(this._messages.locateApiKey);
 
     let artifactoryKey: string = await TerminalInput.promptPasswordLine({
-      question: 'What is your Artifactory API key?'
+      message: 'What is your Artifactory API key?'
     });
     this._terminal.writeLine();
 
