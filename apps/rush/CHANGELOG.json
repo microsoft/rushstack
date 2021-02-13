@@ -2,6 +2,23 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.39.1",
+      "tag": "@microsoft/rush_v5.39.1",
+      "date": "Sat, 13 Feb 2021 03:14:52 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Disable build cache after initial build when \"--watch\" is specified. This saves disk space, reduces CPU usage, and improves compatibility with downstream file watcher processes (e.g. \"webpack --watch\")."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Convert the experimental \"--watch\" parameter into a \"watchForChanges: true\" setting in command-line.json, based on user feedback"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.39.0",
       "tag": "@microsoft/rush_v5.39.0",
       "date": "Thu, 11 Feb 2021 04:06:02 GMT",

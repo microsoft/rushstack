@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 11 Feb 2021 04:06:02 GMT and should not be manually modified.
+This log was last generated on Sat, 13 Feb 2021 03:14:52 GMT and should not be manually modified.
+
+## 5.39.1
+Sat, 13 Feb 2021 03:14:52 GMT
+
+### Patches
+
+- Convert the experimental "--watch" parameter into a "watchForChanges: true" setting in command-line.json, based on user feedback
+
+### Updates
+
+- Disable build cache after initial build when "--watch" is specified. This saves disk space, reduces CPU usage, and improves compatibility with downstream file watcher processes (e.g. "webpack --watch").
 
 ## 5.39.0
 Thu, 11 Feb 2021 04:06:02 GMT
