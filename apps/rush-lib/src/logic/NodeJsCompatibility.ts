@@ -53,7 +53,7 @@ export class NodeJsCompatibility {
       console.error(
         colors.red(
           `Your version of Node.js (${nodeVersion}) is very old and incompatible with Rush. ` +
-            `Please upgrade to the latest Long-Term Support (LTS) version.`
+            `Please upgrade to the latest Long-Term Support (LTS) version.\n`
         )
       );
       return true;
@@ -90,7 +90,7 @@ export class NodeJsCompatibility {
             colors.yellow(
               `Your version of Node.js (${nodeVersion}) has not been tested with this release ` +
                 `of the Rush engine. Please consider upgrading the "rushVersion" setting in rush.json, ` +
-                `or downgrading Node.js.`
+                `or downgrading Node.js.\n`
             )
           );
         } else {
@@ -98,7 +98,7 @@ export class NodeJsCompatibility {
             colors.yellow(
               `Your version of Node.js (${nodeVersion}) has not been tested with this release ` +
                 `of Rush. Please consider installing a newer version of the "@microsoft/rush" ` +
-                `package, or downgrading Node.js.`
+                `package, or downgrading Node.js.\n`
             )
           );
         }
@@ -115,7 +115,7 @@ export class NodeJsCompatibility {
       console.warn(
         colors.yellow(
           `Your version of Node.js (${nodeVersion}) is not a Long-Term Support (LTS) release. ` +
-            'These versions frequently have bugs. Please consider installing a stable release.'
+            'These versions frequently have bugs. Please consider installing a stable release.\n'
         )
       );
 
@@ -131,7 +131,7 @@ export class NodeJsCompatibility {
         colors.yellow(
           `Your version of Node.js (${nodeVersion}) is an odd-numbered release. ` +
             `These releases frequently have bugs. Please consider installing a Long Term Support (LTS) ` +
-            `version instead.`
+            `version instead.\n`
         )
       );
 
