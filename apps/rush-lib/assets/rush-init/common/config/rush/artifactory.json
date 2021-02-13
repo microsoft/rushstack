@@ -8,16 +8,13 @@
   "packageRegistry": {
     /**
      * Set this to "true" to enable Rush to manage tokens for an Artifactory NPM registry.
-     * When enabled, "rush install" will automatically detect when the ~/.npmrc authentication token
-     * is missing or expired.  And "rush setup" will prompt the user to renew their token.
+     * When enabled, "rush install" will automatically detect when the user's ~/.npmrc
+     * authentication token is missing or expired.  And "rush setup" will prompt the user to
+     * renew their token.
      *
      * The default value is false.
      */
     "enabled": false,
-
-    /**
-     */
-    "globallyMappedNpmScopes": [ "@hbo" ],
 
     /**
      * (required) Specify the URL of your NPM registry.  This is the same URL that appears in
@@ -26,6 +23,20 @@
      *   https://your-company.jfrog.io/your-project/api/npm/npm-private/
      */
     // "registryUrl": "",
+
+    /**
+     * A list of custom strings that "rush setup" should add to the user's ~/.npmrc file at the time
+     * when the token is updated.  This could be used for example to configure the company registry
+     * to be used whenever NPM is invoked as a standalone command (but it's not needed for Rush
+     * operations like "rush add" and "rush install", which get their mappings from the monorepo's
+     * common/config/rush/.npmrc file).
+     *
+     * NOTE: The ~/.npmrc settings are global for the user account on a given machine, so be careful
+     * about adding settings that may interfere with other work outside the monorepo.
+     */
+    "userNpmrcLinesToAdd": [
+      // "@example:registry=https://your-company.jfrog.io/your-project/api/npm/npm-private/"
+    ],
 
     /**
      * Specifies the URL of the Artifactory control panel where the user can generate

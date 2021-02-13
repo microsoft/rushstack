@@ -6,7 +6,7 @@ import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
 export interface IArtifactoryPackageRegistryJson {
   enabled: boolean;
-  globallyMappedNpmScopes?: string[];
+  userNpmrcLinesToAdd?: string[];
 
   registryUrl: string;
   artifactoryWebsiteUrl: string;

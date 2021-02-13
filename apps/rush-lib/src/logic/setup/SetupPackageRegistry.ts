@@ -306,32 +306,62 @@ export class SetupPackageRegistry {
     if (responseLines.length < 2 || !responseLines[0].startsWith('@.npm:')) {
       throw new Error('Unexpected response from Artifactory');
     }
-    // Remove the @.npm line
-    responseLines.shift();
+    responseLines.shift(); // Remove the @.npm line
 
-    // Extract keys such as:
-    //   //your-company.jfrog.io/your-artifacts/api/npm/npm-private/:_password=
-    //   //your-company.jfrog.io/your-artifacts/api/npm/npm-private/:username=
-    //
-    // We will delete these lines from .npmrc
-    const updatedLinesMap: Map<string, string> = new Map(); // key --> complete line
+    // These are the lines to be injected in ~/.npmrc
+    const linesToAdd: string[] = [];
 
-    for (const globallyMappedNpmScope of packageRegistry.globallyMappedNpmScopes || []) {
-      // We'll add a line like:
-      //   @company:registry=https://your-company.jfrog.io/your-artifacts/api/npm/npm-private/
-      const key: string = `${globallyMappedNpmScope}:registry=`;
-
-      updatedLinesMap.set(key, key + packageRegistry.registryUrl);
+    // Start with userNpmrcLinesToAdd...
+    if (packageRegistry.userNpmrcLinesToAdd) {
+      linesToAdd.push(...packageRegistry.userNpmrcLinesToAdd);
     }
 
-    for (const responseLine of responseLines) {
-      const key: string | undefined = SetupPackageRegistry._getNpmrcKey(responseLine);
-      if (key !== undefined) {
-        updatedLinesMap.set(key, responseLine);
-      }
-    }
+    // ...then append the stuff we got from the REST API, but discard any junk that isn't a proper key/value
+    linesToAdd.push(...responseLines.filter((x) => SetupPackageRegistry._getNpmrcKey(x) !== undefined));
 
     const npmrcPath: string = path.join(Utilities.getHomeFolder(), '.npmrc');
+
+    this._mergeLinesIntoNpmrc(npmrcPath, linesToAdd);
+  }
+
+  /**
+   * Update the `~/.npmrc` file by adding `linesToAdd` to it.
+   * @remarks
+   *
+   * If the `.npmrc` file has existing content, it gets merged as follows:
+   * - If `linesToAdd` contains key/value pairs and the key already appears in .npmrc,
+   *   that line will be overwritten in place
+   * - If `linesToAdd` contains non-key lines (e.g. a comment) and it exactly matches a
+   *   line in .npmrc, then that line will be kept where it is
+   * - The remaining `linesToAdd` that weren't handled by one of the two rules above
+   *   are simply appended to the end of the file
+   * - Under no circumstances is a duplicate key/value added to the file; in the case of
+   *   duplicates, the earliest line in `linesToAdd` takes precedence
+   */
+  private _mergeLinesIntoNpmrc(npmrcPath: string, linesToAdd: readonly string[]): void {
+    // We'll replace entries with "undefined" if they get discarded
+    const workingLinesToAdd: (string | undefined)[] = [...linesToAdd];
+
+    // Now build a table of .npmrc keys that can be replaced if they already exist in the file.
+    // For example, if we are adding "always-auth=false" then we should delete an existing line
+    // that says "always-auth=true".
+    const keysToReplace: Map<string, number> = new Map(); // key --> linesToAdd index
+
+    for (let index: number = 0; index < workingLinesToAdd.length; ++index) {
+      const lineToAdd: string = workingLinesToAdd[index]!;
+
+      const key: string | undefined = SetupPackageRegistry._getNpmrcKey(lineToAdd);
+      if (key !== undefined) {
+        // If there are duplicate keys, the first one takes precedence.
+        // In particular this means "userNpmrcLinesToAdd" takes precedence over the REST API response
+        if (keysToReplace.has(key)) {
+          // Discard the duplicate key
+          workingLinesToAdd[index] = undefined;
+        } else {
+          keysToReplace.set(key, index);
+        }
+      }
+    }
 
     this._terminal.writeLine();
     this._terminal.writeLine(Colors.green('Adding Artifactory token to: '), npmrcPath);
@@ -348,18 +378,32 @@ export class SetupPackageRegistry {
       npmrcLines.length = 0;
     }
 
-    // Replace existing lines
-    for (let i: number = 0; i < npmrcLines.length; ++i) {
-      const line: string = npmrcLines[i];
+    // Make a set of existing .npmrc lines that are not key/value pairs.
+    const npmrcNonKeyLinesSet: Set<string> = new Set();
+    for (const npmrcLine of npmrcLines) {
+      const trimmed: string = npmrcLine.trim();
+      if (trimmed.length > 0) {
+        if (SetupPackageRegistry._getNpmrcKey(trimmed) === undefined) {
+          npmrcNonKeyLinesSet.add(trimmed);
+        }
+      }
+    }
+
+    // Overwrite any existing lines that match a key from "linesToAdd"
+    for (let index: number = 0; index < npmrcLines.length; ++index) {
+      const line: string = npmrcLines[index];
 
       const key: string | undefined = SetupPackageRegistry._getNpmrcKey(line);
       if (key) {
-        const newValue: string | undefined = updatedLinesMap.get(key);
-        if (newValue !== undefined) {
-          npmrcLines[i] = newValue;
+        const linesToAddIndex: number | undefined = keysToReplace.get(key);
+        if (linesToAddIndex !== undefined) {
+          npmrcLines[index] = workingLinesToAdd[linesToAddIndex] || '';
 
-          // Delete it; anything that doesn't get deleted will be appended at the end
-          updatedLinesMap.delete(key);
+          // Delete it since it's been replaced
+          keysToReplace.delete(key);
+
+          // Also remove it from "linesToAdd"
+          workingLinesToAdd[linesToAddIndex] = undefined;
         }
       }
     }
@@ -370,14 +414,23 @@ export class SetupPackageRegistry {
     }
 
     // Add any remaining values that weren't matched above
-    npmrcLines.push(...updatedLinesMap.values());
+    for (const lineToAdd of workingLinesToAdd) {
+      // If a line is undefined, that means we already used it to replace an existing line above
+      if (lineToAdd !== undefined) {
+        // If a line belongs to npmrcNonKeyLinesSet, then we should not add it because it's
+        // already in the .npmrc file
+        if (!npmrcNonKeyLinesSet.has(lineToAdd.trim())) {
+          npmrcLines.push(lineToAdd);
+        }
+      }
+    }
 
     // Save the result
-    FileSystem.writeFile(npmrcPath, npmrcLines.join('\n') + '\n');
+    FileSystem.writeFile(npmrcPath, npmrcLines.join('\n').trimRight() + '\n');
   }
 
   private static _getNpmrcKey(npmrcLine: string): string | undefined {
-    if (/^\s*#/.test(npmrcLine)) {
+    if (SetupPackageRegistry._isCommentLine(npmrcLine)) {
       return undefined;
     }
     const delimiterIndex: number = npmrcLine.indexOf('=');
@@ -385,6 +438,10 @@ export class SetupPackageRegistry {
       return undefined;
     }
     const key: string = npmrcLine.substring(0, delimiterIndex + 1);
-    return key;
+    return key.trim();
+  }
+
+  private static _isCommentLine(npmrcLine: string): boolean {
+    return /^\s*#/.test(npmrcLine);
   }
 }
