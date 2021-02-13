@@ -40,6 +40,7 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   ignoreDependencyOrder: boolean;
   incremental: boolean;
   allowWarningsInSuccessfulBuild: boolean;
+  watchForChanges: boolean;
 
   /**
    * Optional command to run. Otherwise, use the `actionName` as the command to run.
@@ -69,6 +70,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private _ignoreMissingScript: boolean;
   private _isIncrementalBuildAllowed: boolean;
   private _commandToRun: string;
+  private _watchForChanges: boolean;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
   private _fromProject!: CommandLineStringListParameter;
@@ -79,7 +81,6 @@ export class BulkScriptAction extends BaseScriptAction {
   private _impactedByExceptProject!: CommandLineStringListParameter;
   private _fromVersionPolicy!: CommandLineStringListParameter;
   private _toVersionPolicy!: CommandLineStringListParameter;
-  private _watchParameter!: CommandLineFlagParameter;
   private _verboseParameter!: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
   private _ignoreHooksParameter!: CommandLineFlagParameter;
@@ -94,6 +95,7 @@ export class BulkScriptAction extends BaseScriptAction {
     this._commandToRun = options.commandToRun || options.actionName;
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
+    this._watchForChanges = options.watchForChanges;
   }
 
   public async runAsync(): Promise<void> {
@@ -204,7 +206,7 @@ export class BulkScriptAction extends BaseScriptAction {
       terminal
     };
 
-    if (this._watchParameter.value) {
+    if (this._watchForChanges) {
       await this._runWatch(executeOptions);
     } else {
       await this._runOnce(executeOptions);
@@ -422,18 +424,6 @@ export class BulkScriptAction extends BaseScriptAction {
         ' The "--from-version-policy" parameter is equivalent to specifying "--from" for each of the projects' +
         ' belonging to VERSION_POLICY_NAME.' +
         ' For details, refer to the website article "Selecting subsets of projects".'
-    });
-
-    this._watchParameter = this.defineFlagParameter({
-      parameterLongName: '--watch',
-      parameterShortName: '-w',
-      description:
-        '(EXPERIMENTAL) Normally Rush terminates after the command finishes. The "--watch" parameter will instead cause Rush' +
-        ' to enter a loop where it watches the file system for changes to the selected projects.' +
-        ' Whenever a change is detected, the command will be invoked again for the changed project and' +
-        ' any selected projects that directly or indirectly depend on it.' +
-        ' This parameter may be combined with "--changed-projects-only" to ignore dependent projects.' +
-        ' For details, refer to the website article "Using watch mode".'
     });
 
     this._verboseParameter = this.defineFlagParameter({

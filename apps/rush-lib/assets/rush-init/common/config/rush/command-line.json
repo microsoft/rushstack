@@ -104,11 +104,21 @@
        * Note: The default value is false. In Rush 5.7.x and earlier, the default value was true.
        */
       "allowWarningsInSuccessfulBuild": false,
-      
+
       /**
        * If true then this command will be incremental like the built-in "build" command
        */
-      "incremental": false
+      "incremental": false,
+
+      /**
+       * (EXPERIMENTAL) Normally Rush terminates after the command finishes. If this option is set to "true" Rush
+       * will instead enter a loop where it watches the file system for changes to the selected projects. Whenever a
+       * change is detected, the command will be invoked again for the changed project and any selected projects that
+       * directly or indirectly depend on it.
+       *
+       * For details, refer to the website article "Using watch mode".
+       */
+      "watchForChanges": false
     },
 
     {
