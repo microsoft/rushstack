@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Replace \"--watch\" with a \"watchForChanges: true\" setting in command-line.json, since running in watch mode is not automatically compatible with downstream file watchers, and use of such is the expected common scenario.",
-      "type": "none"
+      "comment": "Convert the experimental \"--watch\" parameter into a \"watchForChanges: true\" setting in command-line.json, based on user feedback",
+      "type": "patch"
     }
   ],
   "packageName": "@microsoft/rush",
