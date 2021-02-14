@@ -239,7 +239,7 @@ export class SelectionParameterSet {
     // --to-except
     // All projects that the project directly or indirectly declares as a dependency
     for (const project of this._evaluateProjectParameter(this._toExceptProject)) {
-      args.push('--filter', `^${project.packageName}...`);
+      args.push('--filter', `${project.packageName}^...`);
     }
 
     // --impacted-by
