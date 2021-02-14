@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Normalize selection CLI parameters for \"rush install\"",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
