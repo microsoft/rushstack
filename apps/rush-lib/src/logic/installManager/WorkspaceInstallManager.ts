@@ -522,7 +522,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (!workspaceImporter) {
       // Filtered installs will not contain all projects in the shrinkwrap, but if one is
       // missing during a full install, something has gone wrong
-      if (this.options.toProjects.size === 0 && this.options.fromProjects.size === 0) {
+      if (this.options.pnpmFilterArguments.length === 0) {
         throw new InternalError(
           `Cannot find shrinkwrap entry using importer key for workspace project: ${importerKey}`
         );
@@ -587,14 +587,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       args.push('--recursive');
       args.push('--link-workspace-packages', 'false');
 
-      // "<package>..." selects the specified package and all direct and indirect dependencies
-      for (const toProject of this.options.toProjects) {
-        args.push('--filter', `${toProject.packageName}...`);
-      }
-
-      // ..."<package>" selects the specified package and all direct and indirect dependents of that package
-      for (const fromProject of this.options.fromProjects) {
-        args.push('--filter', `...${fromProject.packageName}`);
+      for (const arg of this.options.pnpmFilterArguments) {
+        args.push(arg);
       }
     }
   }

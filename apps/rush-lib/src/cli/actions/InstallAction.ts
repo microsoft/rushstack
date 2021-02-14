@@ -1,19 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
-
 import { BaseInstallAction } from './BaseInstallAction';
 import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { Selection } from '../../logic/Selection';
+import { SelectionParameterSet } from '../SelectionParameterSet';
 
 export class InstallAction extends BaseInstallAction {
-  protected _toFlag!: CommandLineStringListParameter;
-  protected _fromFlag!: CommandLineStringListParameter;
-  protected _toVersionPolicy!: CommandLineStringListParameter;
-  protected _fromVersionPolicy!: CommandLineStringListParameter;
+  protected _selectionParameters!: SelectionParameterSet;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -39,51 +33,11 @@ export class InstallAction extends BaseInstallAction {
    */
   protected onDefineParameters(): void {
     super.onDefineParameters();
-    this._toFlag = this.defineStringListParameter({
-      parameterLongName: '--to',
-      parameterShortName: '-t',
-      argumentName: 'PROJECT',
-      description:
-        'Run install in the specified project and all of its dependencies. "." can be used as shorthand ' +
-        'to specify the project in the current working directory. This argument is only valid in workspace ' +
-        'environments.'
-    });
-    this._fromFlag = this.defineStringListParameter({
-      parameterLongName: '--from',
-      parameterShortName: '-f',
-      argumentName: 'PROJECT',
-      description:
-        'Run install in the specified project and all projects that directly or indirectly depend on the ' +
-        'specified project. "." can be used as shorthand to specify the project in the current working directory.' +
-        ' This argument is only valid in workspace environments.'
-    });
-    this._toVersionPolicy = this.defineStringListParameter({
-      parameterLongName: '--to-version-policy',
-      argumentName: 'VERSION_POLICY_NAME',
-      description:
-        'Run install in all projects with the specified version policy and all of their dependencies. ' +
-        'This argument is only valid in workspace environments.'
-    });
-    this._fromVersionPolicy = this.defineStringListParameter({
-      parameterLongName: '--from-version-policy',
-      argumentName: 'VERSION_POLICY_NAME',
-      description:
-        'Run command in all projects with the specified version policy ' +
-        'and all projects that directly or indirectly depend on projects with the specified version policy.' +
-        ' This argument is only valid in workspace environments.'
-    });
+
+    this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this);
   }
 
   protected buildInstallOptions(): IInstallManagerOptions {
-    const toProjects: Set<RushConfigurationProject> = Selection.union<RushConfigurationProject>(
-      this.evaluateProjectParameter(this._toFlag),
-      this.evaluateVersionPolicyProjects(this._toVersionPolicy)
-    );
-    const fromProjects: Set<RushConfigurationProject> = Selection.union<RushConfigurationProject>(
-      this.evaluateProjectParameter(this._fromFlag),
-      this.evaluateVersionPolicyProjects(this._fromVersionPolicy)
-    );
-
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: false,
@@ -97,8 +51,8 @@ export class InstallAction extends BaseInstallAction {
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
-      toProjects,
-      fromProjects
+      // These are derived independently of the selection for command line brevity
+      pnpmFilterArguments: this._selectionParameters.getPnpmFilterArguments()
     };
   }
 }
