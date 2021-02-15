@@ -367,10 +367,9 @@ export class ProjectBuilder extends BaseBuilder {
           if (!projectConfiguration.cacheOptions?.disableCache) {
             terminal.writeVerboseLine('Caching has been disabled for this project.');
           } else {
-            const commandOptions: ICacheOptionsForCommand | undefined = projectConfiguration.cacheOptions
-              ?.optionsForCommands
-              ? projectConfiguration.cacheOptions?.optionsForCommands[this._commandName]
-              : undefined;
+            const commandOptions:
+              | ICacheOptionsForCommand
+              | undefined = projectConfiguration.cacheOptions.optionsForCommandsByName.get(this._commandName);
             if (commandOptions?.disableCache) {
               terminal.writeVerboseLine(
                 `Caching has been disabled for this project's "${this._commandName}" command.`

@@ -25,14 +25,19 @@
 
         "optionsForCommands": {
           "description": "Allows for fine-grained control of cache for individual commands.",
-          "patternProperties": {
-            ".+": {
-              "type": "object",
-              "properties": {
-                "disableCache": {
-                  "description": "NOT RECOMMENDED. Disable caching for this command. This may be useful if this command for this project affects state outside of this project folder.",
-                  "type": "boolean"
-                }
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The command name."
+              },
+
+              "disableCache": {
+                "description": "NOT RECOMMENDED. Disable caching for this command. This may be useful if this command for this project affects state outside of this project folder.",
+                "type": "boolean"
               }
             }
           }
