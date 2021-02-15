@@ -31,8 +31,10 @@ import { BaseBuilder, IBuilderContext } from './BaseBuilder';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { ICacheOptionsForCommand, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
+import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
+import { RushConstants } from '../RushConstants';
 
 export interface IProjectBuildDeps {
   files: { [filePath: string]: string };
@@ -44,6 +46,7 @@ export interface IProjectBuilderOptions {
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration: BuildCacheConfiguration | undefined;
   commandToRun: string;
+  commandName: string;
   isIncrementalBuildAllowed: boolean;
   packageChangeAnalyzer: PackageChangeAnalyzer;
   packageDepsFilename: string;
@@ -72,15 +75,16 @@ export class ProjectBuilder extends BaseBuilder {
     return ProjectBuilder.getTaskName(this._rushProject);
   }
 
-  public isIncrementalBuildAllowed: boolean;
+  public readonly isIncrementalBuildAllowed: boolean;
   public hadEmptyScript: boolean = false;
 
-  private _rushProject: RushConfigurationProject;
-  private _rushConfiguration: RushConfiguration;
-  private _buildCacheConfiguration: BuildCacheConfiguration | undefined;
-  private _commandToRun: string;
-  private _packageChangeAnalyzer: PackageChangeAnalyzer;
-  private _packageDepsFilename: string;
+  private readonly _rushProject: RushConfigurationProject;
+  private readonly _rushConfiguration: RushConfiguration;
+  private readonly _buildCacheConfiguration: BuildCacheConfiguration | undefined;
+  private readonly _commandName: string;
+  private readonly _commandToRun: string;
+  private readonly _packageChangeAnalyzer: PackageChangeAnalyzer;
+  private readonly _packageDepsFilename: string;
   private _projectBuildCache: ProjectBuildCache | undefined;
 
   public constructor(options: IProjectBuilderOptions) {
@@ -88,6 +92,7 @@ export class ProjectBuilder extends BaseBuilder {
     this._rushProject = options.rushProject;
     this._rushConfiguration = options.rushConfiguration;
     this._buildCacheConfiguration = options.buildCacheConfiguration;
+    this._commandName = options.commandName;
     this._commandToRun = options.commandToRun;
     this.isIncrementalBuildAllowed = options.isIncrementalBuildAllowed;
     this._packageChangeAnalyzer = options.packageChangeAnalyzer;
@@ -115,11 +120,13 @@ export class ProjectBuilder extends BaseBuilder {
 
   public async tryWriteCacheEntryAsync(
     terminal: Terminal,
-    trackedFilePaths: string[]
+    trackedFilePaths: string[],
+    repoCommandLineConfiguration: CommandLineConfiguration | undefined
   ): Promise<boolean | undefined> {
     const projectBuildCache: ProjectBuildCache | undefined = await this._getProjectBuildCacheAsync(
       terminal,
-      trackedFilePaths
+      trackedFilePaths,
+      repoCommandLineConfiguration
     );
     return projectBuildCache?.trySetCacheEntryAsync(terminal);
   }
@@ -225,7 +232,8 @@ export class ProjectBuilder extends BaseBuilder {
 
       const projectBuildCache: ProjectBuildCache | undefined = await this._getProjectBuildCacheAsync(
         terminal,
-        trackedFiles
+        trackedFiles,
+        context.repoCommandLineConfiguration
       );
       const restoreFromCacheSuccess: boolean | undefined = await projectBuildCache?.tryRestoreFromCacheAsync(
         terminal
@@ -313,7 +321,8 @@ export class ProjectBuilder extends BaseBuilder {
 
           const setCacheEntryPromise: Promise<boolean | undefined> = this.tryWriteCacheEntryAsync(
             terminal,
-            trackedFiles!
+            trackedFiles!,
+            context.repoCommandLineConfiguration
           );
 
           const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
@@ -342,26 +351,44 @@ export class ProjectBuilder extends BaseBuilder {
 
   private async _getProjectBuildCacheAsync(
     terminal: Terminal,
-    trackedProjectFiles: string[] | undefined
+    trackedProjectFiles: string[] | undefined,
+    commandLineConfiguration: CommandLineConfiguration | undefined
   ): Promise<ProjectBuildCache | undefined> {
     if (!this._projectBuildCache) {
       if (this._buildCacheConfiguration) {
         const projectConfiguration:
           | RushProjectConfiguration
-          | undefined = await RushProjectConfiguration.tryLoadForProjectAsync(this._rushProject, terminal);
+          | undefined = await RushProjectConfiguration.tryLoadForProjectAsync(
+          this._rushProject,
+          commandLineConfiguration,
+          terminal
+        );
         if (projectConfiguration) {
-          this._projectBuildCache = ProjectBuildCache.tryGetProjectBuildCache({
-            projectConfiguration,
-            buildCacheConfiguration: this._buildCacheConfiguration,
-            terminal,
-            command: this._commandToRun,
-            trackedProjectFiles: trackedProjectFiles,
-            packageChangeAnalyzer: this._packageChangeAnalyzer
-          });
+          if (projectConfiguration.cacheOptions?.disableBuildCache) {
+            terminal.writeVerboseLine('Caching has been disabled for this project.');
+          } else {
+            const commandOptions:
+              | ICacheOptionsForCommand
+              | undefined = projectConfiguration.cacheOptions.optionsForCommandsByName.get(this._commandName);
+            if (commandOptions?.disableBuildCache) {
+              terminal.writeVerboseLine(
+                `Caching has been disabled for this project's "${this._commandName}" command.`
+              );
+            } else {
+              this._projectBuildCache = ProjectBuildCache.tryGetProjectBuildCache({
+                projectConfiguration,
+                buildCacheConfiguration: this._buildCacheConfiguration,
+                terminal,
+                command: this._commandToRun,
+                trackedProjectFiles: trackedProjectFiles,
+                packageChangeAnalyzer: this._packageChangeAnalyzer
+              });
+            }
+          }
         } else {
           terminal.writeVerboseLine(
-            'Project does not have a build-cache.json configuration file, or one provided by a rig, ' +
-              'so it does not support caching.'
+            `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
+              'or one provided by a rig, so it does not support caching.'
           );
         }
       }

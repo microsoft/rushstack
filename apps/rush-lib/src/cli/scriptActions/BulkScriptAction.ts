@@ -25,6 +25,7 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { Selection } from '../../logic/Selection';
 import { SelectionParameterSet } from '../SelectionParameterSet';
+import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -36,6 +37,7 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   incremental: boolean;
   allowWarningsInSuccessfulBuild: boolean;
   watchForChanges: boolean;
+  disableBuildCache: boolean;
 
   /**
    * Optional command to run. Otherwise, use the `actionName` as the command to run.
@@ -61,19 +63,22 @@ interface IExecuteInternalOptions {
  * execute scripts from package.json in the same as any custom command.
  */
 export class BulkScriptAction extends BaseScriptAction {
-  private _enableParallelism: boolean;
-  private _ignoreMissingScript: boolean;
-  private _isIncrementalBuildAllowed: boolean;
-  private _commandToRun: string;
-  private _watchForChanges: boolean;
+  private readonly _enableParallelism: boolean;
+  private readonly _ignoreMissingScript: boolean;
+  private readonly _isIncrementalBuildAllowed: boolean;
+  private readonly _commandToRun: string;
+  private readonly _watchForChanges: boolean;
+  private readonly _disableBuildCache: boolean;
+  private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
+  private readonly _ignoreDependencyOrder: boolean;
+  private readonly _allowWarningsInSuccessfulBuild: boolean;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
   private _selectionParameters!: SelectionParameterSet;
   private _verboseParameter!: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
   private _ignoreHooksParameter!: CommandLineFlagParameter;
-  private _ignoreDependencyOrder: boolean;
-  private _allowWarningsInSuccessfulBuild: boolean;
+  private _disableBuildCacheFlag: CommandLineFlagParameter | undefined;
 
   public constructor(options: IBulkScriptActionOptions) {
     super(options);
@@ -84,6 +89,8 @@ export class BulkScriptAction extends BaseScriptAction {
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
     this._watchForChanges = options.watchForChanges;
+    this._disableBuildCache = options.disableBuildCache;
+    this._repoCommandLineConfiguration = options.commandLineConfiguration;
   }
 
   public async runAsync(): Promise<void> {
@@ -118,9 +125,13 @@ export class BulkScriptAction extends BaseScriptAction {
     const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
-    const buildCacheConfiguration:
-      | BuildCacheConfiguration
-      | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(terminal, this.rushConfiguration);
+    let buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    if (!this._disableBuildCacheFlag?.value && !this._disableBuildCache) {
+      buildCacheConfiguration = await BuildCacheConfiguration.loadFromDefaultPathAsync(
+        terminal,
+        this.rushConfiguration
+      );
+    }
 
     const selection: Set<RushConfigurationProject> = this._selectionParameters.getSelectedProjects();
 
@@ -128,6 +139,7 @@ export class BulkScriptAction extends BaseScriptAction {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
       selection,
+      commandName: this.actionName,
       commandToRun: this._commandToRun,
       customParameterValues,
       isQuietMode: isQuietMode,
@@ -141,7 +153,8 @@ export class BulkScriptAction extends BaseScriptAction {
       quietMode: isQuietMode,
       parallelism: parallelism,
       changedProjectsOnly: changedProjectsOnly,
-      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
+      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild,
+      repoCommandLineConfiguration: this._repoCommandLineConfiguration
     };
 
     const executeOptions: IExecuteInternalOptions = {
@@ -274,6 +287,7 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterShortName: '-v',
       description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
+
     if (this._isIncrementalBuildAllowed) {
       this._changedProjectsOnly = this.defineFlagParameter({
         parameterLongName: '--changed-projects-only',
@@ -286,10 +300,21 @@ export class BulkScriptAction extends BaseScriptAction {
           ' are okay to ignore.'
       });
     }
+
     this._ignoreHooksParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-hooks',
       description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
     });
+
+    if (
+      !this._disableBuildCache &&
+      this.rushConfiguration?.experimentsConfiguration.configuration.buildCache
+    ) {
+      this._disableBuildCacheFlag = this.defineFlagParameter({
+        parameterLongName: '--disable-build-cache',
+        description: '(EXPERIMENTAL) Disables the build cache for this command invocation.'
+      });
+    }
 
     this.defineScriptParameters();
   }

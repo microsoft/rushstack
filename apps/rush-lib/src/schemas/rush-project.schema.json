@@ -15,6 +15,36 @@
       "type": "string"
     },
 
+    "buildCacheOptions": {
+      "type": "object",
+      "properties": {
+        "disableBuildCache": {
+          "description": "Disable build caching for this project. The project will never be restored from cache. This may be useful if this project affects state outside of its folder. This option is only used when the cloud build cache is enabled for the repo. You can set disableBuildCache=true to disable caching for a specific project. This is a useful workaround if that project's build scripts violate the assumptions of the cache, for example by writing files outside the project folder. Where possible, a better solution is to improve the build scripts to be compatible with caching.",
+          "type": "boolean"
+        },
+
+        "optionsForCommands": {
+          "description": "Allows for fine-grained control of cache for individual commands.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The command name."
+              },
+
+              "disableBuildCache": {
+                "description": "Disable build caching for this command. This may be useful if this command for this project affects state outside of this project folder. This option is only used when the cloud build cache is enabled for the repo. You can set disableBuildCache=true to disable caching for a command in a specific project. This is a useful workaround if that project's build scripts violate the assumptions of the cache, for example by writing files outside the project folder. Where possible, a better solution is to improve the build scripts to be compatible with caching.",
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+
     "projectOutputFolderNames": {
       "type": "array",
       "description": "A list of folder names under the project root that should be cached. These folders should not be tracked by git.",

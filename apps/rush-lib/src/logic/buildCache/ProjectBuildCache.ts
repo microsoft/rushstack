@@ -36,7 +36,7 @@ export class ProjectBuildCache {
     this._project = options.projectConfiguration.project;
     this._localBuildCacheProvider = options.buildCacheConfiguration.localCacheProvider;
     this._cloudBuildCacheProvider = options.buildCacheConfiguration.cloudCacheProvider;
-    this._projectOutputFolderNames = options.projectConfiguration.projectOutputFolderNames;
+    this._projectOutputFolderNames = options.projectConfiguration.projectOutputFolderNames || [];
     this._cacheId = ProjectBuildCache._getCacheId(options);
   }
 
@@ -62,8 +62,10 @@ export class ProjectBuildCache {
       projectConfiguration.project.projectRelativeFolder
     );
     const outputFolders: string[] = [];
-    for (const outputFolderName of projectConfiguration.projectOutputFolderNames) {
-      outputFolders.push(`${path.posix.join(normalizedProjectRelativeFolder, outputFolderName)}/`);
+    if (projectConfiguration.projectOutputFolderNames) {
+      for (const outputFolderName of projectConfiguration.projectOutputFolderNames) {
+        outputFolders.push(`${path.posix.join(normalizedProjectRelativeFolder, outputFolderName)}/`);
+      }
     }
 
     const inputOutputFiles: string[] = [];

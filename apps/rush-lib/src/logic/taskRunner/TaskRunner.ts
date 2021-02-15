@@ -17,12 +17,14 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { Task } from './Task';
 import { TaskStatus } from './TaskStatus';
 import { IBuilderContext } from './BaseBuilder';
+import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 
 export interface ITaskRunnerOptions {
   quietMode: boolean;
   parallelism: string | undefined;
   changedProjectsOnly: boolean;
   allowWarningsInSuccessfulBuild: boolean;
+  repoCommandLineConfiguration: CommandLineConfiguration | undefined;
   destination?: TerminalWritable;
 }
 
@@ -36,14 +38,15 @@ export class TaskRunner {
   // Format "======" lines for a shell window with classic 80 columns
   private static readonly _ASCII_HEADER_WIDTH: number = 79;
 
-  private _tasks: Task[];
-  private _changedProjectsOnly: boolean;
-  private _allowWarningsInSuccessfulBuild: boolean;
-  private _buildQueue: Task[];
-  private _quietMode: boolean;
+  private readonly _tasks: Task[];
+  private readonly _changedProjectsOnly: boolean;
+  private readonly _allowWarningsInSuccessfulBuild: boolean;
+  private readonly _buildQueue: Task[];
+  private readonly _quietMode: boolean;
+  private readonly _parallelism: number;
+  private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
   private _hasAnyFailures: boolean;
   private _hasAnyWarnings: boolean;
-  private _parallelism: number;
   private _currentActiveTasks!: number;
   private _totalTasks!: number;
   private _completedTasks!: number;
@@ -55,7 +58,13 @@ export class TaskRunner {
   private _terminal: CollatedTerminal;
 
   public constructor(orderedTasks: Task[], options: ITaskRunnerOptions) {
-    const { quietMode, parallelism, changedProjectsOnly, allowWarningsInSuccessfulBuild } = options;
+    const {
+      quietMode,
+      parallelism,
+      changedProjectsOnly,
+      allowWarningsInSuccessfulBuild,
+      repoCommandLineConfiguration
+    } = options;
     this._tasks = orderedTasks;
     this._buildQueue = orderedTasks.slice(0);
     this._quietMode = quietMode;
@@ -63,6 +72,7 @@ export class TaskRunner {
     this._hasAnyWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
     this._allowWarningsInSuccessfulBuild = allowWarningsInSuccessfulBuild;
+    this._repoCommandLineConfiguration = repoCommandLineConfiguration;
 
     // TERMINAL PIPELINE:
     //
@@ -226,6 +236,7 @@ export class TaskRunner {
 
   private async _executeTaskAndChainAsync(task: Task): Promise<void> {
     const context: IBuilderContext = {
+      repoCommandLineConfiguration: this._repoCommandLineConfiguration,
       stdioSummarizer: task.stdioSummarizer,
       collatedWriter: task.collatedWriter,
       quietMode: this._quietMode

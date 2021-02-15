@@ -118,7 +118,13 @@
        *
        * For details, refer to the website article "Using watch mode".
        */
-      "watchForChanges": false
+      "watchForChanges": false,
+
+      /**
+       * (EXPERIMENTAL) Disable cache for this action. This may be useful if this command affects state outside of
+       * projects' own folders.
+       */
+      "disableBuildCache ": false
     },
 
     {
