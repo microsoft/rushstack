@@ -12,7 +12,7 @@ export interface IFileSystemBuildCacheProviderOptions {
   rushUserConfiguration: RushUserConfiguration;
 }
 
-const BUILD_CACHE_FOLDER_NAME: string = 'build-cache';
+const DEFAULT_BUILD_CACHE_FOLDER_NAME: string = 'build-cache';
 
 export class FileSystemBuildCacheProvider {
   private readonly _cacheFolderPath: string;
@@ -20,23 +20,22 @@ export class FileSystemBuildCacheProvider {
   public constructor(options: IFileSystemBuildCacheProviderOptions) {
     this._cacheFolderPath =
       options.rushUserConfiguration.buildCacheFolder ||
-      path.join(options.rushConfiguration.commonTempFolder, BUILD_CACHE_FOLDER_NAME);
+      path.join(options.rushConfiguration.commonTempFolder, DEFAULT_BUILD_CACHE_FOLDER_NAME);
   }
 
-  public async tryGetCacheEntryBufferByIdAsync(
+  public getCacheEntryPath(cacheId: string): string {
+    return path.join(this._cacheFolderPath, cacheId);
+  }
+
+  public async tryGetCacheEntryPathByIdAsync(
     terminal: Terminal,
     cacheId: string
-  ): Promise<Buffer | undefined> {
-    const cacheEntryFilePath: string = path.join(this._cacheFolderPath, cacheId);
-    try {
-      return await FileSystem.readFileToBufferAsync(cacheEntryFilePath);
-    } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
-        terminal.writeVerboseLine(`Cache entry at "${cacheEntryFilePath}" was not found.`);
-        return undefined;
-      } else {
-        throw e;
-      }
+  ): Promise<string | undefined> {
+    const cacheEntryFilePath: string = this.getCacheEntryPath(cacheId);
+    if (await FileSystem.existsAsync(cacheEntryFilePath)) {
+      return cacheEntryFilePath;
+    } else {
+      return undefined;
     }
   }
 
@@ -44,10 +43,10 @@ export class FileSystemBuildCacheProvider {
     terminal: Terminal,
     cacheId: string,
     entryBuffer: Buffer
-  ): Promise<boolean> {
-    const cacheEntryFilePath: string = path.join(this._cacheFolderPath, cacheId);
+  ): Promise<string> {
+    const cacheEntryFilePath: string = this.getCacheEntryPath(cacheId);
     await FileSystem.writeFileAsync(cacheEntryFilePath, entryBuffer, { ensureFolderExists: true });
     terminal.writeVerboseLine(`Wrote cache entry to "${cacheEntryFilePath}".`);
-    return true;
+    return cacheEntryFilePath;
   }
 }

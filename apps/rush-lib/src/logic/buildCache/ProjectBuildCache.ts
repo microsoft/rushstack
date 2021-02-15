@@ -6,7 +6,7 @@ import * as path from 'path';
 import type * as stream from 'stream';
 import * as tar from 'tar';
 import * as fs from 'fs';
-import { FileSystem, Path, Terminal } from '@rushstack/node-core-library';
+import { Executable, FileSystem, Path, Terminal } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
@@ -15,6 +15,7 @@ import { RushConstants } from '../RushConstants';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
 import { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
+import { ChildProcess } from 'child_process';
 
 interface IProjectBuildCacheOptions {
   buildCacheConfiguration: BuildCacheConfiguration;
@@ -26,6 +27,19 @@ interface IProjectBuildCacheOptions {
 }
 
 export class ProjectBuildCache {
+  /**
+   * null = we haven't looked yet
+   * undefined = not found
+   */
+  private static __tarExecutablePath: string | undefined | null = null;
+  private static get _tarExecutablePath(): string | undefined {
+    if (ProjectBuildCache.__tarExecutablePath === null) {
+      ProjectBuildCache.__tarExecutablePath = Executable.tryResolve('tar');
+    }
+
+    return ProjectBuildCache.__tarExecutablePath;
+  }
+
   private readonly _project: RushConfigurationProject;
   private readonly _localBuildCacheProvider: FileSystemBuildCacheProvider;
   private readonly _cloudBuildCacheProvider: CloudBuildCacheProviderBase | undefined;
@@ -95,33 +109,38 @@ export class ProjectBuildCache {
       return false;
     }
 
-    let cacheEntryBuffer:
-      | Buffer
-      | undefined = await this._localBuildCacheProvider.tryGetCacheEntryBufferByIdAsync(terminal, cacheId);
-    const foundInLocalCache: boolean = !!cacheEntryBuffer;
-    if (!foundInLocalCache && this._cloudBuildCacheProvider) {
+    let localCacheEntryPath:
+      | string
+      | undefined = await this._localBuildCacheProvider.tryGetCacheEntryPathByIdAsync(terminal, cacheId);
+    let cacheEntryBuffer: Buffer | undefined;
+    let updateLocalCacheSuccess: boolean | undefined;
+    if (!localCacheEntryPath && this._cloudBuildCacheProvider) {
       terminal.writeVerboseLine(
         'This project was not found in the local build cache. Querying the cloud build cache.'
       );
 
-      // No idea why ESLint is complaining about this:
-      // eslint-disable-next-line require-atomic-updates
       cacheEntryBuffer = await this._cloudBuildCacheProvider.tryGetCacheEntryBufferByIdAsync(
         terminal,
         cacheId
       );
+      if (cacheEntryBuffer) {
+        try {
+          // eslint-disable-next-line require-atomic-updates
+          localCacheEntryPath = await this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
+            terminal,
+            cacheId,
+            cacheEntryBuffer
+          );
+          updateLocalCacheSuccess = true;
+        } catch (e) {
+          updateLocalCacheSuccess = false;
+        }
+      }
     }
 
-    let setLocalCacheEntryPromise: Promise<boolean> | undefined;
-    if (!cacheEntryBuffer) {
+    if (!localCacheEntryPath && !cacheEntryBuffer) {
       terminal.writeVerboseLine('This project was not found in the build cache.');
       return false;
-    } else if (!foundInLocalCache) {
-      setLocalCacheEntryPromise = this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
-        terminal,
-        cacheId,
-        cacheEntryBuffer
-      );
     }
 
     terminal.writeLine('Build cache hit.');
@@ -136,30 +155,46 @@ export class ProjectBuildCache {
       )
     );
 
-    const tarStream: stream.Writable = tar.extract({ cwd: projectFolderPath });
-    const extractTarPromise: Promise<boolean> = new Promise(
-      (resolve: (result: boolean) => void, reject: (error: Error) => void) => {
-        try {
-          tarStream.on('error', (error: Error) => reject(error));
-          tarStream.on('close', () => resolve(true));
-          tarStream.on('drain', () => resolve(true));
-          tarStream.write(cacheEntryBuffer);
-        } catch (e) {
-          reject(e);
-        }
-      }
-    );
-
+    const tarExecutablePath: string | undefined = ProjectBuildCache._tarExecutablePath;
     let restoreSuccess: boolean;
-    let updateLocalCacheSuccess: boolean;
-    if (setLocalCacheEntryPromise) {
-      [restoreSuccess, updateLocalCacheSuccess] = await Promise.all([
-        extractTarPromise,
-        setLocalCacheEntryPromise
-      ]);
+    if (!tarExecutablePath || !localCacheEntryPath) {
+      if (!cacheEntryBuffer && localCacheEntryPath) {
+        // eslint-disable-next-line require-atomic-updates
+        cacheEntryBuffer = await FileSystem.readFileToBufferAsync(localCacheEntryPath);
+      }
+
+      if (!cacheEntryBuffer) {
+        throw new Error('Expected the cache entry buffer to be set.');
+      }
+
+      // If we don't have tar on the PATH, or if we failed to update the local cache entry,
+      // untar in-memory
+      const tarStream: stream.Writable = tar.extract({ cwd: projectFolderPath });
+      restoreSuccess = await new Promise(
+        (resolve: (result: boolean) => void, reject: (error: Error) => void) => {
+          try {
+            tarStream.on('error', (error: Error) => reject(error));
+            tarStream.on('close', () => resolve(true));
+            tarStream.on('drain', () => resolve(true));
+            tarStream.write(cacheEntryBuffer);
+          } catch (e) {
+            reject(e);
+          }
+        }
+      );
     } else {
-      restoreSuccess = await extractTarPromise;
-      updateLocalCacheSuccess = true;
+      const childProcess: ChildProcess = Executable.spawn(
+        tarExecutablePath,
+        ['-x', '-f', localCacheEntryPath],
+        {
+          currentWorkingDirectory: projectFolderPath
+        }
+      );
+      restoreSuccess = await new Promise((resolve: (result: boolean) => void) => {
+        childProcess.on('exit', (code) => {
+          resolve(code === 0);
+        });
+      });
     }
 
     if (restoreSuccess) {
@@ -168,7 +203,7 @@ export class ProjectBuildCache {
       terminal.writeWarningLine('Unable to restore output from the build cache.');
     }
 
-    if (!updateLocalCacheSuccess) {
+    if (updateLocalCacheSuccess === false) {
       terminal.writeWarningLine('Unable to update the local build cache with data from the cloud cache.');
     }
 
@@ -196,61 +231,103 @@ export class ProjectBuildCache {
     }
 
     terminal.writeVerboseLine(`Caching build output folders: ${filteredOutputFolders.join(', ')}`);
-    let encounteredTarErrors: boolean = false;
-    const tarStream: stream.Readable = tar.create(
-      {
-        gzip: true,
-        portable: true,
-        strict: true,
-        cwd: projectFolderPath,
-        filter: (tarPath: string, stat: tar.FileStat) => {
-          const tempStats: fs.Stats = new fs.Stats();
-          tempStats.mode = stat.mode;
-          if (tempStats.isSymbolicLink()) {
-            terminal.writeError(`Unable to include "${tarPath}" in build cache. It is a symbolic link.`);
-            encounteredTarErrors = true;
-            return false;
-          } else {
-            return true;
-          }
+    const tarExecutablePath: string | undefined = ProjectBuildCache._tarExecutablePath;
+    let localCacheEntryPath: string | undefined;
+
+    if (tarExecutablePath) {
+      const tempLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
+      const childProcess: ChildProcess = Executable.spawn(
+        tarExecutablePath,
+        ['-c', '-f', tempLocalCacheEntryPath, '-z', ...filteredOutputFolders],
+        {
+          currentWorkingDirectory: projectFolderPath
         }
-      },
-      filteredOutputFolders
-    );
-    const cacheEntryBuffer: Buffer = await this._readStreamToBufferAsync(tarStream);
-    if (encounteredTarErrors) {
-      return false;
+      );
+      const writeLocalCacheSuccess: boolean = await new Promise((resolve: (result: boolean) => void) => {
+        childProcess.on('exit', (code) => {
+          resolve(code === 0);
+        });
+      });
+
+      if (writeLocalCacheSuccess) {
+        localCacheEntryPath = tempLocalCacheEntryPath;
+      }
     }
 
-    const setLocalCacheEntryPromise: Promise<boolean> = this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
-      terminal,
-      cacheId,
-      cacheEntryBuffer
-    );
+    let cacheEntryBuffer: Buffer | undefined;
+    let setLocalCacheEntryPromise: Promise<string> | undefined;
+    if (!localCacheEntryPath) {
+      // If we weren't able to create the cache entry with tar, try to do it with the "tar" NPM package
+      let encounteredTarErrors: boolean = false;
+      const tarStream: stream.Readable = tar.create(
+        {
+          gzip: true,
+          portable: true,
+          strict: true,
+          cwd: projectFolderPath,
+          filter: (tarPath: string, stat: tar.FileStat) => {
+            const tempStats: fs.Stats = new fs.Stats();
+            tempStats.mode = stat.mode;
+            if (tempStats.isSymbolicLink()) {
+              terminal.writeError(`Unable to include "${tarPath}" in build cache. It is a symbolic link.`);
+              encounteredTarErrors = true;
+              return false;
+            } else {
+              return true;
+            }
+          }
+        },
+        filteredOutputFolders
+      );
+      cacheEntryBuffer = await this._readStreamToBufferAsync(tarStream);
+      if (encounteredTarErrors) {
+        return false;
+      }
 
-    const setCloudCacheEntryPromise: Promise<boolean> | undefined =
-      this._cloudBuildCacheProvider?.isCacheWriteAllowed === true
-        ? this._cloudBuildCacheProvider.trySetCacheEntryBufferAsync(terminal, cacheId, cacheEntryBuffer)
-        : undefined;
+      setLocalCacheEntryPromise = this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
+        terminal,
+        cacheId,
+        cacheEntryBuffer
+      );
+    } else {
+      setLocalCacheEntryPromise = Promise.resolve(localCacheEntryPath);
+    }
 
-    let updateLocalCacheSuccess: boolean;
+    let setCloudCacheEntryPromise: Promise<boolean> | undefined;
+    if (this._cloudBuildCacheProvider?.isCacheWriteAllowed === true) {
+      if (!cacheEntryBuffer) {
+        if (localCacheEntryPath) {
+          cacheEntryBuffer = await FileSystem.readFileToBufferAsync(localCacheEntryPath);
+        } else {
+          throw new Error('Expected the local cache entry path to be set.');
+        }
+      }
+
+      setCloudCacheEntryPromise = this._cloudBuildCacheProvider.trySetCacheEntryBufferAsync(
+        terminal,
+        cacheId,
+        cacheEntryBuffer
+      );
+    }
+
+    let localCachePath: string;
     let updateCloudCacheSuccess: boolean;
     if (setCloudCacheEntryPromise) {
-      [updateCloudCacheSuccess, updateLocalCacheSuccess] = await Promise.all([
+      [updateCloudCacheSuccess, localCachePath] = await Promise.all([
         setCloudCacheEntryPromise,
         setLocalCacheEntryPromise
       ]);
     } else {
       updateCloudCacheSuccess = true;
-      updateLocalCacheSuccess = await setLocalCacheEntryPromise;
+      localCachePath = await setLocalCacheEntryPromise;
     }
 
-    const success: boolean = updateCloudCacheSuccess && updateLocalCacheSuccess;
+    const success: boolean = updateCloudCacheSuccess && !!localCachePath;
     if (success) {
       terminal.writeLine('Successfully set cache entry.');
-    } else if (!updateLocalCacheSuccess && updateCloudCacheSuccess) {
+    } else if (!localCachePath && updateCloudCacheSuccess) {
       terminal.writeWarningLine('Unable to set local cache entry.');
-    } else if (updateLocalCacheSuccess && !updateCloudCacheSuccess) {
+    } else if (localCachePath && !updateCloudCacheSuccess) {
       terminal.writeWarningLine('Unable to set cloud cache entry.');
     } else {
       terminal.writeWarningLine('Unable to set both cloud and local cache entries.');
