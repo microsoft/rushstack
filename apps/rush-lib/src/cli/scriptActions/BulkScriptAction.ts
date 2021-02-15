@@ -31,13 +31,13 @@ import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
  * Constructor parameters for BulkScriptAction.
  */
 export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
-  repoCommandLineConfiguration: CommandLineConfiguration | undefined;
   enableParallelism: boolean;
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
   incremental: boolean;
   allowWarningsInSuccessfulBuild: boolean;
   watchForChanges: boolean;
+  disableCache: boolean;
 
   /**
    * Optional command to run. Otherwise, use the `actionName` as the command to run.
@@ -68,6 +68,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private _isIncrementalBuildAllowed: boolean;
   private _commandToRun: string;
   private _watchForChanges: boolean;
+  private _disableCache: boolean;
   private _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
@@ -75,7 +76,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private _verboseParameter!: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
   private _ignoreHooksParameter!: CommandLineFlagParameter;
-  private _disableCache!: CommandLineFlagParameter;
+  private _disableCacheFlag!: CommandLineFlagParameter;
   private _ignoreDependencyOrder: boolean;
   private _allowWarningsInSuccessfulBuild: boolean;
 
@@ -88,7 +89,8 @@ export class BulkScriptAction extends BaseScriptAction {
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
     this._watchForChanges = options.watchForChanges;
-    this._repoCommandLineConfiguration = options.repoCommandLineConfiguration;
+    this._disableCache = options.disableCache;
+    this._repoCommandLineConfiguration = options.commandLineConfiguration;
   }
 
   public async runAsync(): Promise<void> {
@@ -124,7 +126,7 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
     let buildCacheConfiguration: BuildCacheConfiguration | undefined;
-    if (!this._disableCache.value) {
+    if (!this._disableCacheFlag.value && !this._disableCache) {
       buildCacheConfiguration = await BuildCacheConfiguration.loadFromDefaultPathAsync(
         terminal,
         this.rushConfiguration
@@ -304,7 +306,7 @@ export class BulkScriptAction extends BaseScriptAction {
       description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
     });
 
-    this._disableCache = this.defineFlagParameter({
+    this._disableCacheFlag = this.defineFlagParameter({
       parameterLongName: '--disable-cache',
       description: `Disables the build cache for this command invocation.`
     });
