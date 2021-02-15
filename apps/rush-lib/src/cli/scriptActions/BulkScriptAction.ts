@@ -75,6 +75,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private _verboseParameter!: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
   private _ignoreHooksParameter!: CommandLineFlagParameter;
+  private _disableCache!: CommandLineFlagParameter;
   private _ignoreDependencyOrder: boolean;
   private _allowWarningsInSuccessfulBuild: boolean;
 
@@ -122,9 +123,13 @@ export class BulkScriptAction extends BaseScriptAction {
     const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
-    const buildCacheConfiguration:
-      | BuildCacheConfiguration
-      | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(terminal, this.rushConfiguration);
+    let buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    if (!this._disableCache.value) {
+      buildCacheConfiguration = await BuildCacheConfiguration.loadFromDefaultPathAsync(
+        terminal,
+        this.rushConfiguration
+      );
+    }
 
     const selection: Set<RushConfigurationProject> = this._selectionParameters.getSelectedProjects();
 
@@ -280,6 +285,7 @@ export class BulkScriptAction extends BaseScriptAction {
       parameterShortName: '-v',
       description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
+
     if (this._isIncrementalBuildAllowed) {
       this._changedProjectsOnly = this.defineFlagParameter({
         parameterLongName: '--changed-projects-only',
@@ -292,9 +298,15 @@ export class BulkScriptAction extends BaseScriptAction {
           ' are okay to ignore.'
       });
     }
+
     this._ignoreHooksParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-hooks',
       description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
+    });
+
+    this._disableCache = this.defineFlagParameter({
+      parameterLongName: '--disable-cache',
+      description: `Disables the build cache for this command invocation.`
     });
 
     this.defineScriptParameters();
