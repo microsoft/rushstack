@@ -5,8 +5,10 @@ import { StdioSummarizer } from '@rushstack/terminal';
 import { CollatedWriter } from '@rushstack/stream-collator';
 
 import { TaskStatus } from './TaskStatus';
+import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 
 export interface IBuilderContext {
+  repoCommandLineConfiguration: CommandLineConfiguration | undefined;
   collatedWriter: CollatedWriter;
   stdioSummarizer: StdioSummarizer;
   quietMode: boolean;

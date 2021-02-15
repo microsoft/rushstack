@@ -12,6 +12,7 @@ export interface ITaskSelectorConstructor {
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration: BuildCacheConfiguration | undefined;
   selection: ReadonlySet<RushConfigurationProject>;
+  commandName: string;
   commandToRun: string;
   customParameterValues: string[];
   isQuietMode: boolean;
@@ -125,6 +126,7 @@ export class TaskSelector {
         rushConfiguration: this._options.rushConfiguration,
         buildCacheConfiguration: this._options.buildCacheConfiguration,
         commandToRun: commandToRun || '',
+        commandName: this._options.commandName,
         isIncrementalBuildAllowed: this._options.isIncrementalBuildAllowed,
         packageChangeAnalyzer: this._packageChangeAnalyzer,
         packageDepsFilename: this._options.packageDepsFilename
