@@ -78,7 +78,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private _verboseParameter!: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
   private _ignoreHooksParameter!: CommandLineFlagParameter;
-  private _disableCacheFlag!: CommandLineFlagParameter;
+  private _disableCacheFlag: CommandLineFlagParameter | undefined;
 
   public constructor(options: IBulkScriptActionOptions) {
     super(options);
@@ -126,7 +126,7 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
     let buildCacheConfiguration: BuildCacheConfiguration | undefined;
-    if (!this._disableCacheFlag.value && !this._disableCache) {
+    if (!this._disableCacheFlag?.value && !this._disableCache) {
       buildCacheConfiguration = await BuildCacheConfiguration.loadFromDefaultPathAsync(
         terminal,
         this.rushConfiguration
@@ -306,10 +306,12 @@ export class BulkScriptAction extends BaseScriptAction {
       description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
     });
 
-    this._disableCacheFlag = this.defineFlagParameter({
-      parameterLongName: '--disable-cache',
-      description: `Disables the build cache for this command invocation.`
-    });
+    if (!this._disableCache && this.rushConfiguration?.experimentsConfiguration.configuration.buildCache) {
+      this._disableCacheFlag = this.defineFlagParameter({
+        parameterLongName: '--disable-cache',
+        description: `Disables the build cache for this command invocation.`
+      });
+    }
 
     this.defineScriptParameters();
   }
