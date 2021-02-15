@@ -118,7 +118,12 @@
        *
        * For details, refer to the website article "Using watch mode".
        */
-      "watchForChanges": false
+      "watchForChanges": false,
+
+      /**
+       * Disable cache for this action.
+       */
+      "disableCache": false
     },
 
     {
