@@ -19,7 +19,7 @@
       "type": "object",
       "properties": {
         "disableCache": {
-          "description": "NOT RECOMMENDED. Disable caching for this project. The project will never be restored from cache.",
+          "description": "NOT RECOMMENDED. Disable caching for this project. The project will never be restored from cache. This may be useful if this project affects state outside of its folder.",
           "type": "boolean"
         },
 
@@ -30,7 +30,7 @@
               "type": "object",
               "properties": {
                 "disableCache": {
-                  "description": "NOT RECOMMENDED. Disable caching for this command.",
+                  "description": "NOT RECOMMENDED. Disable caching for this command. This may be useful if this command for this project affects state outside of this project folder.",
                   "type": "boolean"
                 }
               }

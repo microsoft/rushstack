@@ -29,6 +29,7 @@ export interface ICacheOptions {
    * NOT RECOMMENDED.
    *
    * Disable caching for this project. The project will never be restored from cache.
+   * This may be useful if this project affects state outside of its folder.
    */
   disableCache?: boolean;
 
@@ -45,6 +46,7 @@ export interface ICacheOptionsForCommand {
    * NOT RECOMMENDED.
    *
    * Disable caching for this command.
+   * This may be useful if this command for this project affects state outside of this project folder.
    */
   disableCache?: boolean;
 }

@@ -121,7 +121,7 @@
       "watchForChanges": false,
 
       /**
-       * Disable cache for this action.
+       * Disable cache for this action. This may be useful if this command affects state outside of projects' own folders.
        */
       "disableCache": false
     },
