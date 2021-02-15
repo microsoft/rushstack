@@ -21,10 +21,17 @@ interface IRushProjectJson {
    */
   projectOutputFolderNames?: string[];
 
-  cacheOptions?: ICacheOptions;
+  cacheOptions?: ICacheOptionsJson;
 }
 
-export interface ICacheOptions {
+interface ICacheOptionsJson extends ICacheOptionsBase {
+  /**
+   * Allows for fine-grained control of cache for individual commands.
+   */
+  optionsForCommands?: ICacheOptionsForCommand[];
+}
+
+export interface ICacheOptionsBase {
   /**
    * NOT RECOMMENDED.
    *
@@ -32,16 +39,21 @@ export interface ICacheOptions {
    * This may be useful if this project affects state outside of its folder.
    */
   disableCache?: boolean;
+}
 
+export interface ICacheOptions extends ICacheOptionsBase {
   /**
    * Allows for fine-grained control of cache for individual commands.
    */
-  optionsForCommands?: {
-    [commandName: string]: ICacheOptionsForCommand;
-  };
+  optionsForCommandsByName: Map<string, ICacheOptionsForCommand>;
 }
 
 export interface ICacheOptionsForCommand {
+  /**
+   * The command name.
+   */
+  name: string;
+
   /**
    * NOT RECOMMENDED.
    *
@@ -65,6 +77,28 @@ export class RushProjectConfiguration {
       propertyInheritance: {
         projectOutputFolderNames: {
           inheritanceType: InheritanceType.append
+        },
+        cacheOptions: {
+          inheritanceType: InheritanceType.custom,
+          inheritanceFunction: (
+            current: ICacheOptionsJson | undefined,
+            parent: ICacheOptionsJson | undefined
+          ): ICacheOptionsJson | undefined => {
+            if (!current) {
+              return parent;
+            } else if (!parent) {
+              return current;
+            } else {
+              return {
+                ...parent,
+                ...current,
+                optionsForCommands: [
+                  ...(parent.optionsForCommands || []),
+                  ...(current.optionsForCommands || [])
+                ]
+              };
+            }
+          }
         }
       }
     }
@@ -82,12 +116,26 @@ export class RushProjectConfiguration {
   /**
    * Project-specific cache options.
    */
-  public readonly cacheOptions?: ICacheOptions;
+  public readonly cacheOptions: ICacheOptions;
 
-  private constructor(project: RushConfigurationProject, projectBuildCacheJson: IRushProjectJson) {
+  private constructor(project: RushConfigurationProject, rushProjectJson: IRushProjectJson) {
     this.project = project;
 
-    this.projectOutputFolderNames = projectBuildCacheJson.projectOutputFolderNames;
+    this.projectOutputFolderNames = rushProjectJson.projectOutputFolderNames;
+
+    const optionsForCommandsByName: Map<string, ICacheOptionsForCommand> = new Map<
+      string,
+      ICacheOptionsForCommand
+    >();
+    if (rushProjectJson.cacheOptions?.optionsForCommands) {
+      for (const cacheOptionsForCommand of rushProjectJson.cacheOptions.optionsForCommands) {
+        optionsForCommandsByName.set(cacheOptionsForCommand.name, cacheOptionsForCommand);
+      }
+    }
+    this.cacheOptions = {
+      disableCache: rushProjectJson.cacheOptions?.disableCache,
+      optionsForCommandsByName
+    };
   }
 
   /**
@@ -144,6 +192,7 @@ export class RushProjectConfiguration {
       );
     }
 
+    const duplicateCommandNames: Set<string> = new Set<string>();
     const invalidCommandNames: string[] = [];
     if (rushProjectJson.cacheOptions?.optionsForCommands) {
       const commandNames: Set<string> = new Set<string>([
@@ -158,9 +207,15 @@ export class RushProjectConfiguration {
         }
       }
 
-      for (const commandName of Object.keys(rushProjectJson.cacheOptions.optionsForCommands)) {
+      const alreadyEncounteredCommandNames: Set<string> = new Set<string>();
+      for (const cacheOptionsForCommand of rushProjectJson.cacheOptions.optionsForCommands) {
+        const commandName: string = cacheOptionsForCommand.name;
         if (!commandNames.has(commandName)) {
           invalidCommandNames.push(commandName);
+        } else if (alreadyEncounteredCommandNames.has(commandName)) {
+          duplicateCommandNames.add(commandName);
+        } else {
+          alreadyEncounteredCommandNames.add(commandName);
         }
       }
     }
@@ -168,8 +223,16 @@ export class RushProjectConfiguration {
     if (invalidCommandNames.length > 0) {
       terminal.writeErrorLine(
         `Invalid project configuration fpr project "${project.packageName}". The following ` +
-          'entries in in cacheOptions.optionsForCommands are not specified in this repo: ' +
+          'command names in cacheOptions.optionsForCommands are not specified in this repo: ' +
           invalidCommandNames.join(', ')
+      );
+    }
+
+    if (duplicateCommandNames.size > 0) {
+      terminal.writeErrorLine(
+        `Invalid project configuration fpr project "${project.packageName}". The following ` +
+          'command names in cacheOptions.optionsForCommands are specified more than once: ' +
+          Array.from(duplicateCommandNames).join(', ')
       );
     }
   }
