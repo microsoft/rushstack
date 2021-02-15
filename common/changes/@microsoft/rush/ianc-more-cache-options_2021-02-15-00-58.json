@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add a \"disableCache\" to builk script command configurations.",
+      "comment": "(EXPERIMENTAL) Add a \"disableBuildCache \" setting in command-line.json for disabling the build cache.",
       "type": "none"
     }
   ],
