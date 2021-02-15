@@ -51,6 +51,8 @@ Positional arguments:
     update-cloud-credentials
                         (EXPERIMENTAL) Update the credentials used by the 
                         build cache provider.
+    write-build-cache   Writes the current state of the current project to 
+                        the cache.
     import-strings      Imports translated strings into each project.
     upload              Uploads the built files to the server
     build               Build all projects that haven't been built, or have 
@@ -1117,5 +1119,20 @@ Optional arguments:
                         prerelease id when \\"--bump\\" is provided but only 
                         replaces the prerelease name when 
                         \\"--ensure-version-policy\\" is provided.
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: write-build-cache 1`] = `
+"usage: rush write-build-cache [-h] -c COMMAND [-v]
+
+(EXPERIMENTAL) If the build cache is configured, when this command is run in 
+the folder of a project, write the current state of the project to the cache.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -c COMMAND, --command COMMAND
+                        (Required) The command run in the current project 
+                        that produced the current project state.
+  -v, --verbose         Display verbose log information.
 "
 `;
