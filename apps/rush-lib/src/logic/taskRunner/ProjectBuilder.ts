@@ -75,16 +75,16 @@ export class ProjectBuilder extends BaseBuilder {
     return ProjectBuilder.getTaskName(this._rushProject);
   }
 
-  public isIncrementalBuildAllowed: boolean;
+  public readonly isIncrementalBuildAllowed: boolean;
   public hadEmptyScript: boolean = false;
 
-  private _rushProject: RushConfigurationProject;
-  private _rushConfiguration: RushConfiguration;
-  private _buildCacheConfiguration: BuildCacheConfiguration | undefined;
-  private _commandName: string;
-  private _commandToRun: string;
-  private _packageChangeAnalyzer: PackageChangeAnalyzer;
-  private _packageDepsFilename: string;
+  private readonly _rushProject: RushConfigurationProject;
+  private readonly _rushConfiguration: RushConfiguration;
+  private readonly _buildCacheConfiguration: BuildCacheConfiguration | undefined;
+  private readonly _commandName: string;
+  private readonly _commandToRun: string;
+  private readonly _packageChangeAnalyzer: PackageChangeAnalyzer;
+  private readonly _packageDepsFilename: string;
   private _projectBuildCache: ProjectBuildCache | undefined;
 
   public constructor(options: IProjectBuilderOptions) {

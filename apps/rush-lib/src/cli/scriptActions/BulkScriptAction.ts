@@ -63,13 +63,15 @@ interface IExecuteInternalOptions {
  * execute scripts from package.json in the same as any custom command.
  */
 export class BulkScriptAction extends BaseScriptAction {
-  private _enableParallelism: boolean;
-  private _ignoreMissingScript: boolean;
-  private _isIncrementalBuildAllowed: boolean;
-  private _commandToRun: string;
-  private _watchForChanges: boolean;
-  private _disableCache: boolean;
-  private _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
+  private readonly _enableParallelism: boolean;
+  private readonly _ignoreMissingScript: boolean;
+  private readonly _isIncrementalBuildAllowed: boolean;
+  private readonly _commandToRun: string;
+  private readonly _watchForChanges: boolean;
+  private readonly _disableCache: boolean;
+  private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
+  private readonly _ignoreDependencyOrder: boolean;
+  private readonly _allowWarningsInSuccessfulBuild: boolean;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
   private _selectionParameters!: SelectionParameterSet;
@@ -77,8 +79,6 @@ export class BulkScriptAction extends BaseScriptAction {
   private _parallelismParameter: CommandLineStringParameter | undefined;
   private _ignoreHooksParameter!: CommandLineFlagParameter;
   private _disableCacheFlag!: CommandLineFlagParameter;
-  private _ignoreDependencyOrder: boolean;
-  private _allowWarningsInSuccessfulBuild: boolean;
 
   public constructor(options: IBulkScriptActionOptions) {
     super(options);

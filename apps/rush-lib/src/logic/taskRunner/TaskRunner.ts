@@ -38,18 +38,18 @@ export class TaskRunner {
   // Format "======" lines for a shell window with classic 80 columns
   private static readonly _ASCII_HEADER_WIDTH: number = 79;
 
-  private _tasks: Task[];
-  private _changedProjectsOnly: boolean;
-  private _allowWarningsInSuccessfulBuild: boolean;
-  private _buildQueue: Task[];
-  private _quietMode: boolean;
+  private readonly _tasks: Task[];
+  private readonly _changedProjectsOnly: boolean;
+  private readonly _allowWarningsInSuccessfulBuild: boolean;
+  private readonly _buildQueue: Task[];
+  private readonly _quietMode: boolean;
+  private readonly _parallelism: number;
+  private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
   private _hasAnyFailures: boolean;
   private _hasAnyWarnings: boolean;
-  private _parallelism: number;
   private _currentActiveTasks!: number;
   private _totalTasks!: number;
   private _completedTasks!: number;
-  private _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
 
   private readonly _outputWritable: TerminalWritable;
   private readonly _colorsNewlinesTransform: TextRewriterTransform;
