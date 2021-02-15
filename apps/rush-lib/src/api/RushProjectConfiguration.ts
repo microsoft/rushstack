@@ -33,10 +33,14 @@ interface IBuildCacheOptionsJson extends IBuildCacheOptionsBase {
 
 export interface IBuildCacheOptionsBase {
   /**
-   * NOT RECOMMENDED.
-   *
    * Disable caching for this project. The project will never be restored from cache.
    * This may be useful if this project affects state outside of its folder.
+   *
+   * This option is only used when the cloud build cache is enabled for the repo. You can set
+   * disableBuildCache=true to disable caching for a specific project. This is a useful workaround
+   * if that project's build scripts violate the assumptions of the cache, for example by writing
+   * files outside the project folder. Where possible, a better solution is to improve the build scripts
+   * to be compatible with caching.
    */
   disableBuildCache?: boolean;
 }
@@ -55,10 +59,14 @@ export interface ICacheOptionsForCommand {
   name: string;
 
   /**
-   * NOT RECOMMENDED.
-   *
    * Disable caching for this command.
    * This may be useful if this command for this project affects state outside of this project folder.
+   *
+   * This option is only used when the cloud build cache is enabled for the repo. You can set
+   * disableBuildCache=true to disable caching for a command in a specific project. This is a useful workaround
+   * if that project's build scripts violate the assumptions of the cache, for example by writing
+   * files outside the project folder. Where possible, a better solution is to improve the build scripts
+   * to be compatible with caching.
    */
   disableBuildCache?: boolean;
 }
