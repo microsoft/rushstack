@@ -88,7 +88,7 @@
             },
             "disableCache": {
               "title": "Watch For Changes",
-              "description": "Disable cache for this action.",
+              "description": "Disable cache for this action. This may be useful if this command affects state outside of projects' own folders.",
               "type": "boolean"
             }
           }
