@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a --disable-cache flag to bulk script actions.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}

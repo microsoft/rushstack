@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a \"disableCache\" to builk script command configurations.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "iclanton@users.noreply.github.com"
+}
