@@ -15,6 +15,31 @@
       "type": "string"
     },
 
+    "cacheOptions": {
+      "type": "object",
+      "properties": {
+        "disableCache": {
+          "description": "NOT RECOMMENDED. Disable caching for this project. The project will never be restored from cache.",
+          "type": "boolean"
+        },
+
+        "optionsForCommands": {
+          "description": "Allows for fine-grained control of cache for individual commands.",
+          "patternProperties": {
+            ".+": {
+              "type": "object",
+              "properties": {
+                "disableCache": {
+                  "description": "NOT RECOMMENDED. Disable caching for this command.",
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
     "projectOutputFolderNames": {
       "type": "array",
       "description": "A list of folder names under the project root that should be cached. These folders should not be tracked by git.",

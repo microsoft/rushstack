@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
 import { AlreadyReportedError, ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
@@ -13,6 +14,8 @@ import { ProjectBuilder } from '../../logic/taskRunner/ProjectBuilder';
 import { PackageChangeAnalyzer } from '../../logic/PackageChangeAnalyzer';
 import { Utilities } from '../../utilities/Utilities';
 import { TaskSelector } from '../../logic/TaskSelector';
+import { RushConstants } from '../../logic/RushConstants';
+import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 
 export class WriteBuildCacheAction extends BaseRushAction {
   private _command!: CommandLineStringParameter;
@@ -84,6 +87,7 @@ export class WriteBuildCacheAction extends BaseRushAction {
       rushProject: project,
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
+      commandName: command,
       commandToRun: commandToRun || '',
       isIncrementalBuildAllowed: false,
       packageChangeAnalyzer,
@@ -93,9 +97,18 @@ export class WriteBuildCacheAction extends BaseRushAction {
     const trackedFiles: string[] = Array.from(
       packageChangeAnalyzer.getPackageDeps(project.packageName)!.keys()
     );
+    const commandLineConfigFilePath: string = path.join(
+      this.rushConfiguration.commonRushConfigFolder,
+      RushConstants.commandLineFilename
+    );
+    const repoCommandLineConfiguration:
+      | CommandLineConfiguration
+      | undefined = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFilePath);
+
     const cacheWriteSuccess: boolean | undefined = await projectBuilder.tryWriteCacheEntryAsync(
       terminal,
-      trackedFiles
+      trackedFiles,
+      repoCommandLineConfiguration
     );
     if (cacheWriteSuccess === undefined) {
       terminal.writeErrorLine('This project does not support caching');

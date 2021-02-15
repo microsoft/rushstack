@@ -8,6 +8,7 @@ import { RigConfig } from '@rushstack/rig-package';
 
 import { RushConfigurationProject } from './RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
+import { CommandLineConfiguration } from './CommandLineConfiguration';
 
 /**
  * Describes the file structure for the "<project root>/config/rush-project.json" config file.
@@ -18,7 +19,34 @@ interface IRushProjectJson {
    *
    * These folders should not be tracked by git.
    */
-  projectOutputFolderNames: string[];
+  projectOutputFolderNames?: string[];
+
+  cacheOptions?: ICacheOptions;
+}
+
+export interface ICacheOptions {
+  /**
+   * NOT RECOMMENDED.
+   *
+   * Disable caching for this project. The project will never be restored from cache.
+   */
+  disableCache?: boolean;
+
+  /**
+   * Allows for fine-grained control of cache for individual commands.
+   */
+  optionsForCommands?: {
+    [commandName: string]: ICacheOptionsForCommand;
+  };
+}
+
+export interface ICacheOptionsForCommand {
+  /**
+   * NOT RECOMMENDED.
+   *
+   * Disable caching for this command.
+   */
+  disableCache?: boolean;
 }
 
 /**
@@ -47,7 +75,12 @@ export class RushProjectConfiguration {
    *
    * These folders should not be tracked by git.
    */
-  public readonly projectOutputFolderNames: string[];
+  public readonly projectOutputFolderNames?: string[];
+
+  /**
+   * Project-specific cache options.
+   */
+  public readonly cacheOptions?: ICacheOptions;
 
   private constructor(project: RushConfigurationProject, projectBuildCacheJson: IRushProjectJson) {
     this.project = project;
@@ -60,6 +93,7 @@ export class RushProjectConfiguration {
    */
   public static async tryLoadForProjectAsync(
     project: RushConfigurationProject,
+    repoCommandLineConfiguration: CommandLineConfiguration | undefined,
     terminal: Terminal
   ): Promise<RushProjectConfiguration | undefined> {
     const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
@@ -75,7 +109,12 @@ export class RushProjectConfiguration {
     );
 
     if (rushProjectJson) {
-      RushProjectConfiguration._validateConfiguration(project, rushProjectJson, terminal);
+      RushProjectConfiguration._validateConfiguration(
+        project,
+        rushProjectJson,
+        repoCommandLineConfiguration,
+        terminal
+      );
       return new RushProjectConfiguration(project, rushProjectJson);
     } else {
       return undefined;
@@ -85,10 +124,11 @@ export class RushProjectConfiguration {
   private static _validateConfiguration(
     project: RushConfigurationProject,
     rushProjectJson: IRushProjectJson,
+    repoCommandLineConfiguration: CommandLineConfiguration | undefined,
     terminal: Terminal
   ): void {
     const invalidFolderNames: string[] = [];
-    for (const projectOutputFolder of rushProjectJson.projectOutputFolderNames) {
+    for (const projectOutputFolder of rushProjectJson.projectOutputFolderNames || []) {
       if (projectOutputFolder.match(/[\/\\]/)) {
         invalidFolderNames.push(projectOutputFolder);
       }
@@ -99,6 +139,35 @@ export class RushProjectConfiguration {
         `Invalid project configuration for project "${project.packageName}". Entries in ` +
           '"projectOutputFolderNames" must not contain slashes and the following entries do: ' +
           invalidFolderNames.join(', ')
+      );
+    }
+
+    const invalidCommandNames: string[] = [];
+    if (rushProjectJson.cacheOptions?.optionsForCommands) {
+      const commandNames: Set<string> = new Set<string>([
+        RushConstants.buildCommandName,
+        RushConstants.rebuildCommandName
+      ]);
+      if (repoCommandLineConfiguration) {
+        for (const command of repoCommandLineConfiguration.commands) {
+          if (command.commandKind === RushConstants.bulkCommandKind) {
+            commandNames.add(command.name);
+          }
+        }
+      }
+
+      for (const commandName of Object.keys(rushProjectJson.cacheOptions.optionsForCommands)) {
+        if (!commandNames.has(commandName)) {
+          invalidCommandNames.push(commandName);
+        }
+      }
+    }
+
+    if (invalidCommandNames.length > 0) {
+      terminal.writeErrorLine(
+        `Invalid project configuration fpr project "${project.packageName}". The following ` +
+          'entries in in cacheOptions.optionsForCommands are not specified in this repo: ' +
+          invalidCommandNames.join(', ')
       );
     }
   }

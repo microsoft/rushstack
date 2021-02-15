@@ -25,11 +25,13 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { Selection } from '../../logic/Selection';
 import { SelectionParameterSet } from '../SelectionParameterSet';
+import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 
 /**
  * Constructor parameters for BulkScriptAction.
  */
 export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
+  repoCommandLineConfiguration: CommandLineConfiguration | undefined;
   enableParallelism: boolean;
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
@@ -66,6 +68,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private _isIncrementalBuildAllowed: boolean;
   private _commandToRun: string;
   private _watchForChanges: boolean;
+  private _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
   private _selectionParameters!: SelectionParameterSet;
@@ -84,6 +87,7 @@ export class BulkScriptAction extends BaseScriptAction {
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
     this._watchForChanges = options.watchForChanges;
+    this._repoCommandLineConfiguration = options.repoCommandLineConfiguration;
   }
 
   public async runAsync(): Promise<void> {
@@ -128,6 +132,7 @@ export class BulkScriptAction extends BaseScriptAction {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
       selection,
+      commandName: this.actionName,
       commandToRun: this._commandToRun,
       customParameterValues,
       isQuietMode: isQuietMode,
@@ -141,7 +146,8 @@ export class BulkScriptAction extends BaseScriptAction {
       quietMode: isQuietMode,
       parallelism: parallelism,
       changedProjectsOnly: changedProjectsOnly,
-      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
+      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild,
+      repoCommandLineConfiguration: this._repoCommandLineConfiguration
     };
 
     const executeOptions: IExecuteInternalOptions = {
