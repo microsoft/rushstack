@@ -114,7 +114,7 @@ exports[`CommandLineHelp prints the help for each action: build 1`] = `
                   [-o PROJECT] [-i PROJECT] [-I PROJECT]
                   [--to-version-policy VERSION_POLICY_NAME]
                   [--from-version-policy VERSION_POLICY_NAME] [-v] [-c]
-                  [--ignore-hooks] [-s] [-m]
+                  [--ignore-hooks] [--disable-cache] [-s] [-m]
                   
 
 This command is similar to \\"rush rebuild\\", except that \\"rush build\\" performs 
@@ -231,6 +231,7 @@ Optional arguments:
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
+  --disable-cache       Disables the build cache for this command invocation.
   -s, --ship            Perform a production build, including minification 
                         and localization steps
   -m, --minimal         Perform a fast build, which disables certain tasks 
@@ -355,7 +356,7 @@ exports[`CommandLineHelp prints the help for each action: import-strings 1`] = `
                            [-f PROJECT] [-o PROJECT] [-i PROJECT] [-I PROJECT]
                            [--to-version-policy VERSION_POLICY_NAME]
                            [--from-version-policy VERSION_POLICY_NAME] [-v]
-                           [--ignore-hooks]
+                           [--ignore-hooks] [--disable-cache]
                            [--locale {en-us,fr-fr,es-es,zh-cn}]
                            
 
@@ -455,6 +456,7 @@ Optional arguments:
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
+  --disable-cache       Disables the build cache for this command invocation.
   --locale {en-us,fr-fr,es-es,zh-cn}
                         Selects a single instead of the default locale 
                         (en-us) for non-ship builds or all locales for ship 
@@ -803,7 +805,7 @@ exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
                     [-o PROJECT] [-i PROJECT] [-I PROJECT]
                     [--to-version-policy VERSION_POLICY_NAME]
                     [--from-version-policy VERSION_POLICY_NAME] [-v]
-                    [--ignore-hooks] [-s] [-m]
+                    [--ignore-hooks] [--disable-cache] [-s] [-m]
                     
 
 This command assumes that the package.json file for each project contains a 
@@ -908,6 +910,7 @@ Optional arguments:
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
+  --disable-cache       Disables the build cache for this command invocation.
   -s, --ship            Perform a production build, including minification 
                         and localization steps
   -m, --minimal         Perform a fast build, which disables certain tasks 
