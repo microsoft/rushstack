@@ -53,7 +53,7 @@ export interface IRushCommandLineParserOptions {
 export class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
   public rushGlobalFolder!: RushGlobalFolder;
-  public rushConfiguration!: RushConfiguration;
+  public readonly rushConfiguration!: RushConfiguration;
 
   private _debugParameter!: CommandLineFlagParameter;
   private _rushOptions: IRushCommandLineParserOptions;
