@@ -364,13 +364,13 @@ export class ProjectBuilder extends BaseBuilder {
           terminal
         );
         if (projectConfiguration) {
-          if (projectConfiguration.cacheOptions?.disableCache) {
+          if (projectConfiguration.cacheOptions?.disableBuildCache) {
             terminal.writeVerboseLine('Caching has been disabled for this project.');
           } else {
             const commandOptions:
               | ICacheOptionsForCommand
               | undefined = projectConfiguration.cacheOptions.optionsForCommandsByName.get(this._commandName);
-            if (commandOptions?.disableCache) {
+            if (commandOptions?.disableBuildCache) {
               terminal.writeVerboseLine(
                 `Caching has been disabled for this project's "${this._commandName}" command.`
               );

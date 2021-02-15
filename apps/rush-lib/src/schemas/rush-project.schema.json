@@ -15,11 +15,11 @@
       "type": "string"
     },
 
-    "cacheOptions": {
+    "buildCacheOptions": {
       "type": "object",
       "properties": {
-        "disableCache": {
-          "description": "NOT RECOMMENDED. Disable caching for this project. The project will never be restored from cache. This may be useful if this project affects state outside of its folder.",
+        "disableBuildCache": {
+          "description": "NOT RECOMMENDED. Disable build caching for this project. The project will never be restored from cache. This may be useful if this project affects state outside of its folder.",
           "type": "boolean"
         },
 
@@ -35,8 +35,8 @@
                 "description": "The command name."
               },
 
-              "disableCache": {
-                "description": "NOT RECOMMENDED. Disable caching for this command. This may be useful if this command for this project affects state outside of this project folder.",
+              "disableBuildCache": {
+                "description": "NOT RECOMMENDED. Disable build caching for this command. This may be useful if this command for this project affects state outside of this project folder.",
                 "type": "boolean"
               }
             }

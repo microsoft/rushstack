@@ -21,27 +21,27 @@ interface IRushProjectJson {
    */
   projectOutputFolderNames?: string[];
 
-  cacheOptions?: ICacheOptionsJson;
+  buildCacheOptions?: IBuildCacheOptionsJson;
 }
 
-interface ICacheOptionsJson extends ICacheOptionsBase {
+interface IBuildCacheOptionsJson extends IBuildCacheOptionsBase {
   /**
    * Allows for fine-grained control of cache for individual commands.
    */
   optionsForCommands?: ICacheOptionsForCommand[];
 }
 
-export interface ICacheOptionsBase {
+export interface IBuildCacheOptionsBase {
   /**
    * NOT RECOMMENDED.
    *
    * Disable caching for this project. The project will never be restored from cache.
    * This may be useful if this project affects state outside of its folder.
    */
-  disableCache?: boolean;
+  disableBuildCache?: boolean;
 }
 
-export interface ICacheOptions extends ICacheOptionsBase {
+export interface IBuildCacheOptions extends IBuildCacheOptionsBase {
   /**
    * Allows for fine-grained control of cache for individual commands.
    */
@@ -60,7 +60,7 @@ export interface ICacheOptionsForCommand {
    * Disable caching for this command.
    * This may be useful if this command for this project affects state outside of this project folder.
    */
-  disableCache?: boolean;
+  disableBuildCache?: boolean;
 }
 
 /**
@@ -78,12 +78,12 @@ export class RushProjectConfiguration {
         projectOutputFolderNames: {
           inheritanceType: InheritanceType.append
         },
-        cacheOptions: {
+        buildCacheOptions: {
           inheritanceType: InheritanceType.custom,
           inheritanceFunction: (
-            current: ICacheOptionsJson | undefined,
-            parent: ICacheOptionsJson | undefined
-          ): ICacheOptionsJson | undefined => {
+            current: IBuildCacheOptionsJson | undefined,
+            parent: IBuildCacheOptionsJson | undefined
+          ): IBuildCacheOptionsJson | undefined => {
             if (!current) {
               return parent;
             } else if (!parent) {
@@ -116,7 +116,7 @@ export class RushProjectConfiguration {
   /**
    * Project-specific cache options.
    */
-  public readonly cacheOptions: ICacheOptions;
+  public readonly cacheOptions: IBuildCacheOptions;
 
   private constructor(project: RushConfigurationProject, rushProjectJson: IRushProjectJson) {
     this.project = project;
@@ -127,13 +127,13 @@ export class RushProjectConfiguration {
       string,
       ICacheOptionsForCommand
     >();
-    if (rushProjectJson.cacheOptions?.optionsForCommands) {
-      for (const cacheOptionsForCommand of rushProjectJson.cacheOptions.optionsForCommands) {
+    if (rushProjectJson.buildCacheOptions?.optionsForCommands) {
+      for (const cacheOptionsForCommand of rushProjectJson.buildCacheOptions.optionsForCommands) {
         optionsForCommandsByName.set(cacheOptionsForCommand.name, cacheOptionsForCommand);
       }
     }
     this.cacheOptions = {
-      disableCache: rushProjectJson.cacheOptions?.disableCache,
+      disableBuildCache: rushProjectJson.buildCacheOptions?.disableBuildCache,
       optionsForCommandsByName
     };
   }
@@ -194,7 +194,7 @@ export class RushProjectConfiguration {
 
     const duplicateCommandNames: Set<string> = new Set<string>();
     const invalidCommandNames: string[] = [];
-    if (rushProjectJson.cacheOptions?.optionsForCommands) {
+    if (rushProjectJson.buildCacheOptions?.optionsForCommands) {
       const commandNames: Set<string> = new Set<string>([
         RushConstants.buildCommandName,
         RushConstants.rebuildCommandName
@@ -208,7 +208,7 @@ export class RushProjectConfiguration {
       }
 
       const alreadyEncounteredCommandNames: Set<string> = new Set<string>();
-      for (const cacheOptionsForCommand of rushProjectJson.cacheOptions.optionsForCommands) {
+      for (const cacheOptionsForCommand of rushProjectJson.buildCacheOptions.optionsForCommands) {
         const commandName: string = cacheOptionsForCommand.name;
         if (!commandNames.has(commandName)) {
           invalidCommandNames.push(commandName);
