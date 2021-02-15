@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add options in rush-project.json to disable the cache for entire projects, or for individual commands for that project.",
+      "comment": "(EXPERIMENTAL) Add options in rush-project.json for disabling the cloud build cache for entire projects, or for individual commands for that project.",
       "type": "none"
     }
   ],
