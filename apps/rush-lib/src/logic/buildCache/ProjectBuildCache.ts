@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as events from 'events';
 import * as crypto from 'crypto';
 import * as path from 'path';
 import type * as stream from 'stream';
@@ -170,18 +171,14 @@ export class ProjectBuildCache {
       // If we don't have tar on the PATH, or if we failed to update the local cache entry,
       // untar in-memory
       const tarStream: stream.Writable = tar.extract({ cwd: projectFolderPath });
-      restoreSuccess = await new Promise(
-        (resolve: (result: boolean) => void, reject: (error: Error) => void) => {
-          try {
-            tarStream.on('error', (error: Error) => reject(error));
-            tarStream.on('close', () => resolve(true));
-            tarStream.on('drain', () => resolve(true));
-            tarStream.write(cacheEntryBuffer);
-          } catch (e) {
-            reject(e);
-          }
-        }
-      );
+      try {
+        const tarPromise: Promise<unknown> = events.once(tarStream, 'drain');
+        tarStream.write(cacheEntryBuffer);
+        await tarPromise;
+        restoreSuccess = true;
+      } catch (e) {
+        restoreSuccess = false;
+      }
     } else {
       const childProcess: ChildProcess = Executable.spawn(
         tarExecutablePath,
@@ -190,11 +187,8 @@ export class ProjectBuildCache {
           currentWorkingDirectory: projectFolderPath
         }
       );
-      restoreSuccess = await new Promise((resolve: (result: boolean) => void) => {
-        childProcess.on('exit', (code) => {
-          resolve(code === 0);
-        });
-      });
+      const [tarExitCode] = await events.once(childProcess, 'exit');
+      restoreSuccess = tarExitCode === 0;
     }
 
     if (restoreSuccess) {
@@ -243,12 +237,8 @@ export class ProjectBuildCache {
           currentWorkingDirectory: projectFolderPath
         }
       );
-      const writeLocalCacheSuccess: boolean = await new Promise((resolve: (result: boolean) => void) => {
-        childProcess.on('exit', (code) => {
-          resolve(code === 0);
-        });
-      });
-
+      const [tarExitCode] = await events.once(childProcess, 'exit');
+      const writeLocalCacheSuccess: boolean = tarExitCode === 0;
       if (writeLocalCacheSuccess) {
         localCacheEntryPath = tempLocalCacheEntryPath;
       }
