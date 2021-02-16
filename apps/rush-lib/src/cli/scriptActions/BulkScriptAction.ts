@@ -4,16 +4,10 @@
 import * as os from 'os';
 import colors from 'colors';
 
-import {
-  AlreadyReportedError,
-  ConsoleTerminalProvider,
-  PackageName,
-  Terminal
-} from '@rushstack/node-core-library';
+import { AlreadyReportedError, ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
-  CommandLineStringListParameter,
   CommandLineParameterKind
 } from '@rushstack/ts-command-line';
 
@@ -27,9 +21,11 @@ import { Utilities } from '../../utilities/Utilities';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
-import { IRushConfigurationProjectJson, RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { Selection } from '../../logic/Selection';
+import { SelectionParameterSet } from '../SelectionParameterSet';
+import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -40,6 +36,8 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   ignoreDependencyOrder: boolean;
   incremental: boolean;
   allowWarningsInSuccessfulBuild: boolean;
+  watchForChanges: boolean;
+  disableBuildCache: boolean;
 
   /**
    * Optional command to run. Otherwise, use the `actionName` as the command to run.
@@ -65,26 +63,22 @@ interface IExecuteInternalOptions {
  * execute scripts from package.json in the same as any custom command.
  */
 export class BulkScriptAction extends BaseScriptAction {
-  private _enableParallelism: boolean;
-  private _ignoreMissingScript: boolean;
-  private _isIncrementalBuildAllowed: boolean;
-  private _commandToRun: string;
+  private readonly _enableParallelism: boolean;
+  private readonly _ignoreMissingScript: boolean;
+  private readonly _isIncrementalBuildAllowed: boolean;
+  private readonly _commandToRun: string;
+  private readonly _watchForChanges: boolean;
+  private readonly _disableBuildCache: boolean;
+  private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
+  private readonly _ignoreDependencyOrder: boolean;
+  private readonly _allowWarningsInSuccessfulBuild: boolean;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
-  private _fromProject!: CommandLineStringListParameter;
-  private _onlyProject!: CommandLineStringListParameter;
-  private _toProject!: CommandLineStringListParameter;
-  private _toExceptProject!: CommandLineStringListParameter;
-  private _impactedByProject!: CommandLineStringListParameter;
-  private _impactedByExceptProject!: CommandLineStringListParameter;
-  private _fromVersionPolicy!: CommandLineStringListParameter;
-  private _toVersionPolicy!: CommandLineStringListParameter;
-  private _watchParameter!: CommandLineFlagParameter;
+  private _selectionParameters!: SelectionParameterSet;
   private _verboseParameter!: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
   private _ignoreHooksParameter!: CommandLineFlagParameter;
-  private _ignoreDependencyOrder: boolean;
-  private _allowWarningsInSuccessfulBuild: boolean;
+  private _disableBuildCacheFlag: CommandLineFlagParameter | undefined;
 
   public constructor(options: IBulkScriptActionOptions) {
     super(options);
@@ -94,6 +88,9 @@ export class BulkScriptAction extends BaseScriptAction {
     this._commandToRun = options.commandToRun || options.actionName;
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
+    this._watchForChanges = options.watchForChanges;
+    this._disableBuildCache = options.disableBuildCache;
+    this._repoCommandLineConfiguration = options.commandLineConfiguration;
   }
 
   public async runAsync(): Promise<void> {
@@ -128,59 +125,21 @@ export class BulkScriptAction extends BaseScriptAction {
     const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
-    const buildCacheConfiguration:
-      | BuildCacheConfiguration
-      | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(terminal, this.rushConfiguration);
-
-    // Include exactly these projects (--only)
-    const onlyProjects: Iterable<RushConfigurationProject> = this.evaluateProjectParameter(this._onlyProject);
-
-    // Include all projects that depend on these projects, and all dependencies thereof
-    const fromProjects: Set<RushConfigurationProject> = Selection.union(
-      // --from
-      this.evaluateProjectParameter(this._fromProject),
-      // --from-version-policy
-      this.evaluateVersionPolicyProjects(this._fromVersionPolicy)
-    );
-
-    // Include dependencies of these projects
-    const toProjects: Set<RushConfigurationProject> = Selection.union(
-      // --to
-      this.evaluateProjectParameter(this._toProject),
-      // --to-version-policy
-      this.evaluateVersionPolicyProjects(this._toVersionPolicy),
-      // --to-except
-      Selection.directDependenciesOf(this.evaluateProjectParameter(this._toExceptProject)),
-      // --from / --from-version-policy
-      Selection.expandAllConsumers(fromProjects)
-    );
-
-    // These projects will not have their dependencies included
-    const impactedByProjects: Set<RushConfigurationProject> = Selection.union(
-      // --impacted-by
-      this.evaluateProjectParameter(this._impactedByProject),
-      // --impacted-by-except
-      Selection.directConsumersOf(this.evaluateProjectParameter(this._impactedByExceptProject))
-    );
-
-    const selection: Set<RushConfigurationProject> = Selection.union(
-      onlyProjects,
-      Selection.expandAllDependencies(toProjects),
-      // Only dependents of these projects, not dependencies
-      Selection.expandAllConsumers(impactedByProjects)
-    );
-
-    // If no projects selected, select everything.
-    if (selection.size === 0) {
-      for (const project of this.rushConfiguration.projects) {
-        selection.add(project);
-      }
+    let buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    if (!this._disableBuildCacheFlag?.value && !this._disableBuildCache) {
+      buildCacheConfiguration = await BuildCacheConfiguration.loadFromDefaultPathAsync(
+        terminal,
+        this.rushConfiguration
+      );
     }
+
+    const selection: Set<RushConfigurationProject> = this._selectionParameters.getSelectedProjects();
 
     const taskSelectorOptions: ITaskSelectorConstructor = {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
       selection,
+      commandName: this.actionName,
       commandToRun: this._commandToRun,
       customParameterValues,
       isQuietMode: isQuietMode,
@@ -194,7 +153,8 @@ export class BulkScriptAction extends BaseScriptAction {
       quietMode: isQuietMode,
       parallelism: parallelism,
       changedProjectsOnly: changedProjectsOnly,
-      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
+      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild,
+      repoCommandLineConfiguration: this._repoCommandLineConfiguration
     };
 
     const executeOptions: IExecuteInternalOptions = {
@@ -204,7 +164,7 @@ export class BulkScriptAction extends BaseScriptAction {
       terminal
     };
 
-    if (this._watchParameter.value) {
+    if (this._watchForChanges) {
       await this._runWatch(executeOptions);
     } else {
       await this._runOnce(executeOptions);
@@ -320,127 +280,14 @@ export class BulkScriptAction extends BaseScriptAction {
       });
     }
 
-    this._toProject = this.defineStringListParameter({
-      parameterLongName: '--to',
-      parameterShortName: '-t',
-      argumentName: 'PROJECT',
-      description:
-        'Normally all projects in the monorepo will be processed;' +
-        ' adding this parameter will instead select a subset of projects.' +
-        ' Each "--to" parameter expands this selection to include PROJECT and all its dependencies.' +
-        ' "." can be used as shorthand for the project in the current working directory.' +
-        ' For details, refer to the website article "Selecting subsets of projects".',
-      completions: this._getProjectNames.bind(this)
-    });
-    this._toExceptProject = this.defineStringListParameter({
-      parameterLongName: '--to-except',
-      parameterShortName: '-T',
-      argumentName: 'PROJECT',
-      description:
-        'Normally all projects in the monorepo will be processed;' +
-        ' adding this parameter will instead select a subset of projects.' +
-        ' Each "--to-except" parameter expands this selection to include all dependencies of PROJECT,' +
-        ' but not PROJECT itself.' +
-        ' "." can be used as shorthand for the project in the current working directory.' +
-        ' For details, refer to the website article "Selecting subsets of projects".',
-      completions: this._getProjectNames.bind(this)
-    });
-
-    this._fromProject = this.defineStringListParameter({
-      parameterLongName: '--from',
-      parameterShortName: '-f',
-      argumentName: 'PROJECT',
-      description:
-        'Normally all projects in the monorepo will be processed;' +
-        ' adding this parameter will instead select a subset of projects.' +
-        ' Each "--from" parameter expands this selection to include PROJECT and all projects that depend on it,' +
-        ' plus all dependencies of this set.' +
-        ' "." can be used as shorthand for the project in the current working directory.' +
-        ' For details, refer to the website article "Selecting subsets of projects".',
-      completions: this._getProjectNames.bind(this)
-    });
-    this._onlyProject = this.defineStringListParameter({
-      parameterLongName: '--only',
-      parameterShortName: '-o',
-      argumentName: 'PROJECT',
-      description:
-        'Normally all projects in the monorepo will be processed;' +
-        ' adding this parameter will instead select a subset of projects.' +
-        ' Each "--only" parameter expands this selection to include PROJECT; its dependencies are not added.' +
-        ' "." can be used as shorthand for the project in the current working directory.' +
-        ' Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies.' +
-        ' For details, refer to the website article "Selecting subsets of projects".',
-      completions: this._getProjectNames.bind(this)
-    });
-
-    this._impactedByProject = this.defineStringListParameter({
-      parameterLongName: '--impacted-by',
-      parameterShortName: '-i',
-      argumentName: 'PROJECT',
-      description:
-        'Normally all projects in the monorepo will be processed;' +
-        ' adding this parameter will instead select a subset of projects.' +
-        ' Each "--impacted-by" parameter expands this selection to include PROJECT and any projects that' +
-        ' depend on PROJECT (and thus might be broken by changes to PROJECT).' +
-        ' "." can be used as shorthand for the project in the current working directory.' +
-        ' Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies.' +
-        ' For details, refer to the website article "Selecting subsets of projects".',
-      completions: this._getProjectNames.bind(this)
-    });
-
-    this._impactedByExceptProject = this.defineStringListParameter({
-      parameterLongName: '--impacted-by-except',
-      parameterShortName: '-I',
-      argumentName: 'PROJECT',
-      description:
-        'Normally all projects in the monorepo will be processed;' +
-        ' adding this parameter will instead select a subset of projects.' +
-        ' Each "--impacted-by-except" parameter works the same as "--impacted-by" except that PROJECT itself' +
-        ' is not added to the selection.' +
-        ' "." can be used as shorthand for the project in the current working directory.' +
-        ' Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies.' +
-        ' For details, refer to the website article "Selecting subsets of projects".',
-      completions: this._getProjectNames.bind(this)
-    });
-
-    this._toVersionPolicy = this.defineStringListParameter({
-      parameterLongName: '--to-version-policy',
-      argumentName: 'VERSION_POLICY_NAME',
-      description:
-        'Normally all projects in the monorepo will be processed;' +
-        ' adding this parameter will instead select a subset of projects.' +
-        ' The "--to-version-policy" parameter is equivalent to specifying "--to" for each of the projects' +
-        ' belonging to VERSION_POLICY_NAME.' +
-        ' For details, refer to the website article "Selecting subsets of projects".'
-    });
-    this._fromVersionPolicy = this.defineStringListParameter({
-      parameterLongName: '--from-version-policy',
-      argumentName: 'VERSION_POLICY_NAME',
-      description:
-        'Normally all projects in the monorepo will be processed;' +
-        ' adding this parameter will instead select a subset of projects.' +
-        ' The "--from-version-policy" parameter is equivalent to specifying "--from" for each of the projects' +
-        ' belonging to VERSION_POLICY_NAME.' +
-        ' For details, refer to the website article "Selecting subsets of projects".'
-    });
-
-    this._watchParameter = this.defineFlagParameter({
-      parameterLongName: '--watch',
-      parameterShortName: '-w',
-      description:
-        '(EXPERIMENTAL) Normally Rush terminates after the command finishes. The "--watch" parameter will instead cause Rush' +
-        ' to enter a loop where it watches the file system for changes to the selected projects.' +
-        ' Whenever a change is detected, the command will be invoked again for the changed project and' +
-        ' any selected projects that directly or indirectly depend on it.' +
-        ' This parameter may be combined with "--changed-projects-only" to ignore dependent projects.' +
-        ' For details, refer to the website article "Using watch mode".'
-    });
+    this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this);
 
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
       description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
+
     if (this._isIncrementalBuildAllowed) {
       this._changedProjectsOnly = this.defineFlagParameter({
         parameterLongName: '--changed-projects-only',
@@ -453,10 +300,21 @@ export class BulkScriptAction extends BaseScriptAction {
           ' are okay to ignore.'
       });
     }
+
     this._ignoreHooksParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-hooks',
       description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
     });
+
+    if (
+      !this._disableBuildCache &&
+      this.rushConfiguration?.experimentsConfiguration.configuration.buildCache
+    ) {
+      this._disableBuildCacheFlag = this.defineFlagParameter({
+        parameterLongName: '--disable-build-cache',
+        description: '(EXPERIMENTAL) Disables the build cache for this command invocation.'
+      });
+    }
 
     this.defineScriptParameters();
   }
@@ -509,38 +367,6 @@ export class BulkScriptAction extends BaseScriptAction {
     }
   }
 
-  private async _getProjectNames(): Promise<string[]> {
-    const unscopedNamesMap: Map<string, number> = new Map<string, number>();
-
-    const scopedNames: string[] = [];
-
-    const projectJsons: IRushConfigurationProjectJson[] = [
-      ...this.rushConfiguration.rushConfigurationJson.projects
-    ];
-
-    for (const projectJson of projectJsons) {
-      scopedNames.push(projectJson.packageName);
-      const unscopedName: string = PackageName.getUnscopedName(projectJson.packageName);
-      let count: number = 0;
-      if (unscopedNamesMap.has(unscopedName)) {
-        count = unscopedNamesMap.get(unscopedName)!;
-      }
-      unscopedNamesMap.set(unscopedName, count + 1);
-    }
-
-    const unscopedNames: string[] = [];
-
-    for (const unscopedName of unscopedNamesMap.keys()) {
-      const unscopedNameCount: number = unscopedNamesMap.get(unscopedName)!;
-      // don't suggest ambiguous unscoped names
-      if (unscopedNameCount === 1 && !scopedNames.includes(unscopedName)) {
-        unscopedNames.push(unscopedName);
-      }
-    }
-
-    return unscopedNames.sort().concat(scopedNames.sort());
-  }
-
   private _doBeforeTask(): void {
     if (
       this.actionName !== RushConstants.buildCommandName &&
@@ -569,10 +395,7 @@ export class BulkScriptAction extends BaseScriptAction {
   }
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
-    const extraData: { [key: string]: string } = {
-      command_to: (this._toProject.values.length > 0).toString(),
-      command_from: (this._fromProject.values.length > 0).toString()
-    };
+    const extraData: { [key: string]: string } = this._selectionParameters.getTelemetry();
 
     for (const customParameter of this.customParameters) {
       switch (customParameter.kind) {

@@ -66,7 +66,8 @@ describe('TaskRunner', () => {
             parallelism: 'tequila',
             changedProjectsOnly: false,
             destination: mockWritable,
-            allowWarningsInSuccessfulBuild: false
+            allowWarningsInSuccessfulBuild: false,
+            repoCommandLineConfiguration: undefined
           })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -79,7 +80,8 @@ describe('TaskRunner', () => {
         parallelism: '1',
         changedProjectsOnly: false,
         destination: mockWritable,
-        allowWarningsInSuccessfulBuild: false
+        allowWarningsInSuccessfulBuild: false,
+        repoCommandLineConfiguration: undefined
       };
     });
 
@@ -135,7 +137,8 @@ describe('TaskRunner', () => {
           parallelism: '1',
           changedProjectsOnly: false,
           destination: mockWritable,
-          allowWarningsInSuccessfulBuild: false
+          allowWarningsInSuccessfulBuild: false,
+          repoCommandLineConfiguration: undefined
         };
       });
 
@@ -169,7 +172,8 @@ describe('TaskRunner', () => {
           parallelism: '1',
           changedProjectsOnly: false,
           destination: mockWritable,
-          allowWarningsInSuccessfulBuild: true
+          allowWarningsInSuccessfulBuild: true,
+          repoCommandLineConfiguration: undefined
         };
       });
 

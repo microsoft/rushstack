@@ -40,9 +40,6 @@ Positional arguments:
     scan                When migrating projects into a Rush repo, this 
                         command is helpful for detecting undeclared 
                         dependencies.
-    setup               (EXPERIMENTAL) Invoke this command before working in 
-                        a new repo to ensure that any required prerequisites 
-                        are installed and permissions are configured.
     unlink              Delete node_modules symlinks for all projects in the 
                         repo
     update              Install package dependencies for all projects in the 
@@ -50,10 +47,12 @@ Positional arguments:
                         needed
     update-autoinstaller
                         Updates autoinstaller package dependenices
+    version             Manage package versions in the repo.
     update-cloud-credentials
                         (EXPERIMENTAL) Update the credentials used by the 
                         build cache provider.
-    version             Manage package versions in the repo.
+    write-build-cache   Writes the current state of the current project to 
+                        the cache.
     import-strings      Imports translated strings into each project.
     upload              Uploads the built files to the server
     build               Build all projects that haven't been built, or have 
@@ -116,8 +115,8 @@ exports[`CommandLineHelp prints the help for each action: build 1`] = `
 "usage: rush build [-h] [-p COUNT] [-t PROJECT] [-T PROJECT] [-f PROJECT]
                   [-o PROJECT] [-i PROJECT] [-I PROJECT]
                   [--to-version-policy VERSION_POLICY_NAME]
-                  [--from-version-policy VERSION_POLICY_NAME] [-w] [-v] [-c]
-                  [--ignore-hooks] [-s] [-m]
+                  [--from-version-policy VERSION_POLICY_NAME] [-v] [-c]
+                  [--ignore-hooks] [--disable-build-cache] [-s] [-m]
                   
 
 This command is similar to \\"rush rebuild\\", except that \\"rush build\\" performs 
@@ -220,17 +219,6 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
-  -w, --watch           (EXPERIMENTAL) Normally Rush terminates after the 
-                        command finishes. The \\"--watch\\" parameter will 
-                        instead cause Rush to enter a loop where it watches 
-                        the file system for changes to the selected projects. 
-                        Whenever a change is detected, the command will be 
-                        invoked again for the changed project and any 
-                        selected projects that directly or indirectly depend 
-                        on it. This parameter may be combined with 
-                        \\"--changed-projects-only\\" to ignore dependent 
-                        projects. For details, refer to the website article 
-                        \\"Using watch mode\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   -c, --changed-projects-only
@@ -245,6 +233,9 @@ Optional arguments:
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
+  --disable-build-cache
+                        (EXPERIMENTAL) Disables the build cache for this 
+                        command invocation.
   -s, --ship            Perform a production build, including minification 
                         and localization steps
   -m, --minimal         Perform a fast build, which disables certain tasks 
@@ -368,8 +359,8 @@ exports[`CommandLineHelp prints the help for each action: import-strings 1`] = `
 "usage: rush import-strings [-h] [-p COUNT] [-t PROJECT] [-T PROJECT]
                            [-f PROJECT] [-o PROJECT] [-i PROJECT] [-I PROJECT]
                            [--to-version-policy VERSION_POLICY_NAME]
-                           [--from-version-policy VERSION_POLICY_NAME] [-w]
-                           [-v] [--ignore-hooks]
+                           [--from-version-policy VERSION_POLICY_NAME] [-v]
+                           [--ignore-hooks] [--disable-build-cache]
                            [--locale {en-us,fr-fr,es-es,zh-cn}]
                            
 
@@ -464,22 +455,14 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
-  -w, --watch           (EXPERIMENTAL) Normally Rush terminates after the 
-                        command finishes. The \\"--watch\\" parameter will 
-                        instead cause Rush to enter a loop where it watches 
-                        the file system for changes to the selected projects. 
-                        Whenever a change is detected, the command will be 
-                        invoked again for the changed project and any 
-                        selected projects that directly or indirectly depend 
-                        on it. This parameter may be combined with 
-                        \\"--changed-projects-only\\" to ignore dependent 
-                        projects. For details, refer to the website article 
-                        \\"Using watch mode\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
+  --disable-build-cache
+                        (EXPERIMENTAL) Disables the build cache for this 
+                        command invocation.
   --locale {en-us,fr-fr,es-es,zh-cn}
                         Selects a single instead of the default locale 
                         (en-us) for non-ship builds or all locales for ship 
@@ -552,7 +535,8 @@ exports[`CommandLineHelp prints the help for each action: install 1`] = `
 "usage: rush install [-h] [-p] [--bypass-policy] [--no-link]
                     [--network-concurrency COUNT] [--debug-package-manager]
                     [--max-install-attempts NUMBER] [--ignore-hooks]
-                    [--variant VARIANT] [-t PROJECT] [-f PROJECT]
+                    [--variant VARIANT] [-t PROJECT] [-T PROJECT] [-f PROJECT]
+                    [-o PROJECT] [-i PROJECT] [-I PROJECT]
                     [--to-version-policy VERSION_POLICY_NAME]
                     [--from-version-policy VERSION_POLICY_NAME]
                     
@@ -599,26 +583,82 @@ Optional arguments:
                         configuration. This parameter may alternatively be 
                         specified via the RUSH_VARIANT environment variable.
   -t PROJECT, --to PROJECT
-                        Run install in the specified project and all of its 
-                        dependencies. \\".\\" can be used as shorthand to specify 
-                        the project in the current working directory. This 
-                        argument is only valid in workspace environments.
+                        Normally all projects in the monorepo will be 
+                        processed; adding this parameter will instead select 
+                        a subset of projects. Each \\"--to\\" parameter expands 
+                        this selection to include PROJECT and all its 
+                        dependencies. \\".\\" can be used as shorthand for the 
+                        project in the current working directory. For details,
+                         refer to the website article \\"Selecting subsets of 
+                        projects\\".
+  -T PROJECT, --to-except PROJECT
+                        Normally all projects in the monorepo will be 
+                        processed; adding this parameter will instead select 
+                        a subset of projects. Each \\"--to-except\\" parameter 
+                        expands this selection to include all dependencies of 
+                        PROJECT, but not PROJECT itself. \\".\\" can be used as 
+                        shorthand for the project in the current working 
+                        directory. For details, refer to the website article 
+                        \\"Selecting subsets of projects\\".
   -f PROJECT, --from PROJECT
-                        Run install in the specified project and all projects 
-                        that directly or indirectly depend on the specified 
-                        project. \\".\\" can be used as shorthand to specify the 
-                        project in the current working directory. This 
-                        argument is only valid in workspace environments.
+                        Normally all projects in the monorepo will be 
+                        processed; adding this parameter will instead select 
+                        a subset of projects. Each \\"--from\\" parameter expands 
+                        this selection to include PROJECT and all projects 
+                        that depend on it, plus all dependencies of this set. 
+                        \\".\\" can be used as shorthand for the project in the 
+                        current working directory. For details, refer to the 
+                        website article \\"Selecting subsets of projects\\".
+  -o PROJECT, --only PROJECT
+                        Normally all projects in the monorepo will be 
+                        processed; adding this parameter will instead select 
+                        a subset of projects. Each \\"--only\\" parameter expands 
+                        this selection to include PROJECT; its dependencies 
+                        are not added. \\".\\" can be used as shorthand for the 
+                        project in the current working directory. Note that 
+                        this parameter is \\"unsafe\\" as it may produce a 
+                        selection that excludes some dependencies. For 
+                        details, refer to the website article \\"Selecting 
+                        subsets of projects\\".
+  -i PROJECT, --impacted-by PROJECT
+                        Normally all projects in the monorepo will be 
+                        processed; adding this parameter will instead select 
+                        a subset of projects. Each \\"--impacted-by\\" parameter 
+                        expands this selection to include PROJECT and any 
+                        projects that depend on PROJECT (and thus might be 
+                        broken by changes to PROJECT). \\".\\" can be used as 
+                        shorthand for the project in the current working 
+                        directory. Note that this parameter is \\"unsafe\\" as it 
+                        may produce a selection that excludes some 
+                        dependencies. For details, refer to the website 
+                        article \\"Selecting subsets of projects\\".
+  -I PROJECT, --impacted-by-except PROJECT
+                        Normally all projects in the monorepo will be 
+                        processed; adding this parameter will instead select 
+                        a subset of projects. Each \\"--impacted-by-except\\" 
+                        parameter works the same as \\"--impacted-by\\" except 
+                        that PROJECT itself is not added to the selection. \\".
+                        \\" can be used as shorthand for the project in the 
+                        current working directory. Note that this parameter 
+                        is \\"unsafe\\" as it may produce a selection that 
+                        excludes some dependencies. For details, refer to the 
+                        website article \\"Selecting subsets of projects\\".
   --to-version-policy VERSION_POLICY_NAME
-                        Run install in all projects with the specified 
-                        version policy and all of their dependencies. This 
-                        argument is only valid in workspace environments.
+                        Normally all projects in the monorepo will be 
+                        processed; adding this parameter will instead select 
+                        a subset of projects. The \\"--to-version-policy\\" 
+                        parameter is equivalent to specifying \\"--to\\" for each 
+                        of the projects belonging to VERSION_POLICY_NAME. For 
+                        details, refer to the website article \\"Selecting 
+                        subsets of projects\\".
   --from-version-policy VERSION_POLICY_NAME
-                        Run command in all projects with the specified 
-                        version policy and all projects that directly or 
-                        indirectly depend on projects with the specified 
-                        version policy. This argument is only valid in 
-                        workspace environments.
+                        Normally all projects in the monorepo will be 
+                        processed; adding this parameter will instead select 
+                        a subset of projects. The \\"--from-version-policy\\" 
+                        parameter is equivalent to specifying \\"--from\\" for 
+                        each of the projects belonging to VERSION_POLICY_NAME.
+                         For details, refer to the website article \\"Selecting 
+                        subsets of projects\\".
 "
 `;
 
@@ -770,8 +810,8 @@ exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
 "usage: rush rebuild [-h] [-p COUNT] [-t PROJECT] [-T PROJECT] [-f PROJECT]
                     [-o PROJECT] [-i PROJECT] [-I PROJECT]
                     [--to-version-policy VERSION_POLICY_NAME]
-                    [--from-version-policy VERSION_POLICY_NAME] [-w] [-v]
-                    [--ignore-hooks] [-s] [-m]
+                    [--from-version-policy VERSION_POLICY_NAME] [-v]
+                    [--ignore-hooks] [--disable-build-cache] [-s] [-m]
                     
 
 This command assumes that the package.json file for each project contains a 
@@ -871,22 +911,14 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
-  -w, --watch           (EXPERIMENTAL) Normally Rush terminates after the 
-                        command finishes. The \\"--watch\\" parameter will 
-                        instead cause Rush to enter a loop where it watches 
-                        the file system for changes to the selected projects. 
-                        Whenever a change is detected, the command will be 
-                        invoked again for the changed project and any 
-                        selected projects that directly or indirectly depend 
-                        on it. This parameter may be combined with 
-                        \\"--changed-projects-only\\" to ignore dependent 
-                        projects. For details, refer to the website article 
-                        \\"Using watch mode\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
+  --disable-build-cache
+                        (EXPERIMENTAL) Disables the build cache for this 
+                        command invocation.
   -s, --ship            Perform a production build, including minification 
                         and localization steps
   -m, --minimal         Perform a fast build, which disables certain tasks 
@@ -907,19 +939,6 @@ errors. It scans the \\"./src\\" and \\"./lib\\" folders for import syntaxes suc
 \\"import __ from '__'\\", \\"require('__')\\", and \\"System.import('__'). It prints a 
 report of the referenced packages. This heuristic is not perfect, but it can 
 save a lot of time when migrating projects.
-
-Optional arguments:
-  -h, --help  Show this help message and exit.
-"
-`;
-
-exports[`CommandLineHelp prints the help for each action: setup 1`] = `
-"usage: rush setup [-h]
-
-(EXPERIMENTAL) Invoke this command before working in a new repo to ensure 
-that any required prerequisites are installed and permissions are configured. 
-The initial implementation configures the NPM registry credentials. More 
-features will be added later.
 
 Optional arguments:
   -h, --help  Show this help message and exit.
@@ -1106,5 +1125,20 @@ Optional arguments:
                         prerelease id when \\"--bump\\" is provided but only 
                         replaces the prerelease name when 
                         \\"--ensure-version-policy\\" is provided.
+"
+`;
+
+exports[`CommandLineHelp prints the help for each action: write-build-cache 1`] = `
+"usage: rush write-build-cache [-h] -c COMMAND [-v]
+
+(EXPERIMENTAL) If the build cache is configured, when this command is run in 
+the folder of a project, write the current state of the project to the cache.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -c COMMAND, --command COMMAND
+                        (Required) The command run in the current project 
+                        that produced the current project state.
+  -v, --verbose         Display verbose log information.
 "
 `;

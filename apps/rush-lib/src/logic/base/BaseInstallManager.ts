@@ -32,7 +32,6 @@ import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import { PolicyValidator } from '../policy/PolicyValidator';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { WebClient, WebClientResponse } from '../../utilities/WebClient';
 import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 
@@ -97,14 +96,10 @@ export interface IInstallManagerOptions {
   maxInstallAttempts: number;
 
   /**
-   * The set of projects that should be installed, along with project dependencies.
+   * Filters to be passed to PNPM during installation, if applicable.
+   * These restrict the scope of a workspace installation.
    */
-  toProjects: ReadonlySet<RushConfigurationProject>;
-
-  /**
-   * The set of projects that should be installed, along with dependencies of the project.
-   */
-  fromProjects: ReadonlySet<RushConfigurationProject>;
+  pnpmFilterArguments: string[];
 }
 
 /**
@@ -153,7 +148,7 @@ export abstract class BaseInstallManager {
   }
 
   public async doInstall(): Promise<void> {
-    const isFilteredInstall: boolean = this.options.toProjects.size > 0 || this.options.fromProjects.size > 0;
+    const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
 
