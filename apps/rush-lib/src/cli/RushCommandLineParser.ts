@@ -41,6 +41,7 @@ import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
 import { Telemetry } from '../logic/Telemetry';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
+import { SetupAction } from './actions/SetupAction';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -170,11 +171,12 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new PublishAction(this));
       this.addAction(new PurgeAction(this));
       this.addAction(new ScanAction(this));
+      this.addAction(new SetupAction(this));
       this.addAction(new UnlinkAction(this));
       this.addAction(new UpdateAction(this));
       this.addAction(new UpdateAutoinstallerAction(this));
-      this.addAction(new VersionAction(this));
       this.addAction(new UpdateCloudCredentialsAction(this));
+      this.addAction(new VersionAction(this));
 
       if (this.rushConfiguration?.experimentsConfiguration.configuration.buildCache) {
         this.addAction(new WriteBuildCacheAction(this));

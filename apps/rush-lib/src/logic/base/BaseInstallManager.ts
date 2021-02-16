@@ -4,7 +4,6 @@
 import colors from 'colors';
 import * as fetch from 'node-fetch';
 import * as fs from 'fs';
-import * as http from 'http';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -13,8 +12,7 @@ import {
   JsonFile,
   PosixModeBits,
   NewlineKind,
-  AlreadyReportedError,
-  Import
+  AlreadyReportedError
 } from '@rushstack/node-core-library';
 
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
@@ -34,8 +32,8 @@ import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import { PolicyValidator } from '../policy/PolicyValidator';
-
-const HttpsProxyAgent: typeof import('https-proxy-agent') = Import.lazy('https-proxy-agent', require);
+import { WebClient, WebClientResponse } from '../../utilities/WebClient';
+import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 
 export interface IInstallManagerOptions {
   /**
@@ -113,6 +111,8 @@ export abstract class BaseInstallManager {
   private _commonTempInstallFlag: LastInstallFlag;
   private _commonTempLinkFlag: LastLinkFlag;
   private _installRecycler: AsyncRecycler;
+  private _npmSetupValidated: boolean = false;
+  private _syncNpmrcAlreadyCalled: boolean = false;
 
   private _options: IInstallManagerOptions;
 
@@ -193,6 +193,9 @@ export abstract class BaseInstallManager {
     };
 
     if (cleanInstall || !shrinkwrapIsUpToDate || !variantIsUpToDate || !canSkipInstall()) {
+      console.log();
+      await this.validateNpmSetup();
+
       let publishedRelease: boolean | undefined;
       try {
         publishedRelease = await this._checkIfReleaseIsPublished();
@@ -381,6 +384,7 @@ export abstract class BaseInstallManager {
       this._rushConfiguration.commonRushConfigFolder,
       this._rushConfiguration.commonTempFolder
     );
+    this._syncNpmrcAlreadyCalled = true;
 
     // also, copy the pnpmfile.js if it exists
     if (this._rushConfiguration.packageManager === 'pnpm') {
@@ -600,21 +604,11 @@ export abstract class BaseInstallManager {
     // Note that the "@" symbol does not normally get URL-encoded
     queryUrl += RushConstants.rushPackageName.replace('/', '%2F');
 
-    const userAgent: string = `pnpm/? npm/? node/${process.version} ${os.platform()} ${os.arch()}`;
+    const webClient: WebClient = new WebClient();
+    webClient.userAgent = `pnpm/? npm/? node/${process.version} ${os.platform()} ${os.arch()}`;
+    webClient.accept = 'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*';
 
-    const headers: fetch.Headers = new fetch.Headers();
-    headers.append('user-agent', userAgent);
-    headers.append('accept', 'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*');
-
-    let agent: http.Agent | undefined = undefined;
-    if (process.env.HTTP_PROXY) {
-      agent = new HttpsProxyAgent(process.env.HTTP_PROXY);
-    }
-
-    const response: fetch.Response = await fetch.default(queryUrl, {
-      headers: headers,
-      agent: agent
-    });
+    const response: WebClientResponse = await webClient.fetch(queryUrl);
     if (!response.ok) {
       throw new Error('Failed to query');
     }
@@ -636,11 +630,9 @@ export abstract class BaseInstallManager {
     }
 
     // Make sure the tarball wasn't deleted from the CDN
-    headers.set('accept', '*/*');
-    const response2: fetch.Response = await fetch.default(url, {
-      headers: headers,
-      agent: agent
-    });
+    webClient.accept = '*/*';
+
+    const response2: fetch.Response = await webClient.fetch(url);
 
     if (!response2.ok) {
       if (response2.status === 404) {
@@ -682,5 +674,33 @@ export abstract class BaseInstallManager {
         );
       }
     }
+  }
+
+  protected async validateNpmSetup(): Promise<void> {
+    if (this._npmSetupValidated) {
+      return;
+    }
+
+    if (!this.options.bypassPolicy) {
+      const setupPackageRegistry: SetupPackageRegistry = new SetupPackageRegistry({
+        rushConfiguration: this.rushConfiguration,
+        isDebug: this.options.debug,
+        syncNpmrcAlreadyCalled: this._syncNpmrcAlreadyCalled
+      });
+      const valid: boolean = await setupPackageRegistry.checkOnly();
+      if (!valid) {
+        console.error();
+        console.error(colors.red('ERROR: NPM credentials are missing or expired'));
+        console.error();
+        console.error(
+          colors.bold(
+            '==> Please run "rush setup" to update your NPM token.  (Or append "--bypass-policy" to proceed anyway.)'
+          )
+        );
+        throw new AlreadyReportedError();
+      }
+    }
+
+    this._npmSetupValidated = true;
   }
 }

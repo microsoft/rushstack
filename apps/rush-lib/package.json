@@ -36,7 +36,7 @@
     "git-repo-info": "~2.1.0",
     "glob": "~7.0.5",
     "glob-escape": "~0.0.2",
-    "https-proxy-agent": "~2.2.1",
+    "https-proxy-agent": "~5.0.0",
     "ignore": "~5.1.6",
     "inquirer": "~7.3.3",
     "js-yaml": "~3.13.1",

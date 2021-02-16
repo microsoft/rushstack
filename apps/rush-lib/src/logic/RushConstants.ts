@@ -140,9 +140,14 @@ export class RushConstants {
   public static readonly versionPoliciesFilename: string = 'version-policies.json';
 
   /**
-   * Experiments configuration file, which
+   * Experiments configuration file.
    */
   public static readonly experimentsFilename: string = 'experiments.json';
+
+  /**
+   * The artifactory.json configuration file name.
+   */
+  public static readonly artifactoryFilename: string = 'artifactory.json';
 
   /**
    * Build cache configuration file.
