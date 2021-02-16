@@ -1,6 +1,20 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 13 Feb 2021 03:14:52 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Feb 2021 23:47:30 GMT and should not be manually modified.
+
+## 5.39.2
+Tue, 16 Feb 2021 23:47:30 GMT
+
+### Minor changes
+
+- Normalize selection CLI parameters for "rush install"
+
+### Updates
+
+- (EXPERIMENTAL) Add a "--disable-cache" parameter for disabling the build cache.
+- (EXPERIMENTAL) Add a "disableBuildCache" setting in command-line.json for disabling the build cache.
+- (EXPERIMENTAL) Add options in rush-project.json for disabling the build cache for entire projects, or for individual commands for that project.
+- Add experimental "rush setup" command
 
 ## 5.39.1
 Sat, 13 Feb 2021 03:14:52 GMT
