@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Add experimental \"rush setup\" command",
+      "comment": "Add an experimental new command \"rush setup\"",
       "type": "none"
     }
   ],
