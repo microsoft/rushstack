@@ -2,6 +2,32 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.39.2",
+      "tag": "@microsoft/rush_v5.39.2",
+      "date": "Tue, 16 Feb 2021 23:47:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(EXPERIMENTAL) Add a \"--disable-cache\" parameter for disabling the build cache."
+          },
+          {
+            "comment": "(EXPERIMENTAL) Add a \"disableBuildCache\" setting in command-line.json for disabling the build cache."
+          },
+          {
+            "comment": "(EXPERIMENTAL) Add options in rush-project.json for disabling the build cache for entire projects, or for individual commands for that project."
+          },
+          {
+            "comment": "Add experimental \"rush setup\" command"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Normalize selection CLI parameters for \"rush install\""
+          }
+        ]
+      }
+    },
+    {
       "version": "5.39.1",
       "tag": "@microsoft/rush_v5.39.1",
       "date": "Sat, 13 Feb 2021 03:14:52 GMT",
