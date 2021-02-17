@@ -2,6 +2,33 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.39.2",
+      "tag": "@microsoft/rush_v5.39.2",
+      "date": "Wed, 17 Feb 2021 01:34:11 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(EXPERIMENTAL) Add a \"--disable-cache\" parameter for disabling the build cache."
+          },
+          {
+            "comment": "(EXPERIMENTAL) Add a \"disableBuildCache\" setting in command-line.json for disabling the build cache."
+          },
+          {
+            "comment": "(EXPERIMENTAL) Add options in rush-project.json for disabling the build cache for entire projects, or for individual commands for that project."
+          },
+          {
+            "comment": "Normalize selection CLI parameters for \"rush install\""
+          },
+          {
+            "comment": "Add experimental \"rush setup\" command"
+          },
+          {
+            "comment": "Add an experimental new config file common/config/artifactory.json for enabling Artifactory integration"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.39.1",
       "tag": "@microsoft/rush_v5.39.1",
       "date": "Sat, 13 Feb 2021 03:14:52 GMT",
