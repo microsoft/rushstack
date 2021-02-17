@@ -29,7 +29,7 @@
           }
         },
         "artifactoryWebsiteUrl": {
-          "description": "Specifies the URL of the Artifactory control panel where the user can generate an API key.  This URL is printed after the \"visitWebsite\" message.  It should look something like this example: https://your-company.jfrog.io/",
+          "description": "Specifies the URL of the Artifactory control panel where the user can generate an API key.  This URL is printed after the \"visitWebsite\" message.  It should look something like this example: https://your-company.jfrog.io/  Specify an empty string to suppress this line entirely.",
           "type": "string"
         },
 
@@ -64,7 +64,7 @@
         }
       },
 
-      "required": ["enabled", "registryUrl"],
+      "required": ["enabled", "registryUrl", "artifactoryWebsiteUrl"],
       "additionalProperties": false
     }
   },
