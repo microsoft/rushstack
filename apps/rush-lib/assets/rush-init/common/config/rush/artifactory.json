@@ -22,7 +22,7 @@
      *
      *   https://your-company.jfrog.io/your-project/api/npm/npm-private/
      */
-    // "registryUrl": "",
+    "registryUrl": "",
 
     /**
      * A list of custom strings that "rush setup" should add to the user's ~/.npmrc file at the time
@@ -44,7 +44,7 @@
      * It should look something like this example:  https://your-company.jfrog.io/
      * Specify an empty string to suppress this line entirely.
      */
-    // "artifactoryWebsiteUrl": "",
+    "artifactoryWebsiteUrl": "",
 
     /**
      * These settings allow the "rush setup" interactive prompts to be customized, for
