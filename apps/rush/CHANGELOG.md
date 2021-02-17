@@ -1,6 +1,11 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 17 Feb 2021 01:34:11 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Feb 2021 01:35:11 GMT and should not be manually modified.
+
+## 5.40.0
+Wed, 17 Feb 2021 01:35:11 GMT
+
+_Version update only_
 
 ## 5.39.2
 Wed, 17 Feb 2021 01:34:11 GMT

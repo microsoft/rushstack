@@ -2,6 +2,12 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.40.0",
+      "tag": "@microsoft/rush_v5.40.0",
+      "date": "Wed, 17 Feb 2021 01:35:11 GMT",
+      "comments": {}
+    },
+    {
       "version": "5.39.2",
       "tag": "@microsoft/rush_v5.39.2",
       "date": "Wed, 17 Feb 2021 01:34:11 GMT",
