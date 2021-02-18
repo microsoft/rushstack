@@ -108,7 +108,14 @@ export const enum EnvironmentVariableNames {
   /**
    * Allows the git binary path to be explicitly specified.
    */
-  RUSH_GIT_BINARY_PATH = 'RUSH_GIT_BINARY_PATH'
+  RUSH_GIT_BINARY_PATH = 'RUSH_GIT_BINARY_PATH',
+
+  /**
+   * When Rush invokes shell commands, it sometimes changes the working directory to be the repository root folder
+   * or a project folder.  The original working directory (where the Rush was invoked) is assigned to the
+   * the child process's RUSH_INVOKED_FOLDER environment variable, in case it is needed by a script.
+   */
+  RUSH_INVOKED_FOLDER = 'RUSH_INVOKED_FOLDER'
 }
 
 /**
@@ -277,6 +284,11 @@ export class EnvironmentConfiguration {
           case EnvironmentVariableNames.RUSH_DEPLOY_TARGET_FOLDER:
             // Handled by @microsoft/rush front end
             break;
+
+          case EnvironmentVariableNames.RUSH_INVOKED_FOLDER:
+            // Assigned by Rush itself
+            break;
+
           default:
             unknownEnvVariables.push(envVarName);
             break;

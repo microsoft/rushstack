@@ -11,6 +11,7 @@ import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { Utilities } from '../utilities/Utilities';
+import { EnvironmentVariableNames } from './EnvironmentConfiguration';
 
 /**
  * Options to pass to the rush "launch" functions.
@@ -100,6 +101,15 @@ export class Rush {
   }
 
   /**
+   * Assign the RUSH_INVOKED_FOLDER environment variable during startup.
+   *
+   * @internal
+   */
+  public static _assignRushInvokedFolder(): void {
+    process.env[EnvironmentVariableNames.RUSH_INVOKED_FOLDER] = process.cwd();
+  }
+
+  /**
    * This function normalizes legacy options to the current {@link ILaunchOptions} object.
    */
   private static _normalizeLaunchOptions(arg: ILaunchOptions): ILaunchOptions {
@@ -128,3 +138,5 @@ export class Rush {
     );
   }
 }
+
+Rush._assignRushInvokedFolder();

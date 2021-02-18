@@ -98,6 +98,7 @@ export const enum EnvironmentVariableNames {
     RUSH_DEPLOY_TARGET_FOLDER = "RUSH_DEPLOY_TARGET_FOLDER",
     RUSH_GIT_BINARY_PATH = "RUSH_GIT_BINARY_PATH",
     RUSH_GLOBAL_FOLDER = "RUSH_GLOBAL_FOLDER",
+    RUSH_INVOKED_FOLDER = "RUSH_INVOKED_FOLDER",
     RUSH_PARALLELISM = "RUSH_PARALLELISM",
     RUSH_PNPM_STORE_PATH = "RUSH_PNPM_STORE_PATH",
     RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
@@ -318,6 +319,8 @@ export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
 
 // @public
 export class Rush {
+    // @internal
+    static _assignRushInvokedFolder(): void;
     static launch(launcherVersion: string, arg: ILaunchOptions): void;
     static launchRushX(launcherVersion: string, options: ILaunchOptions): void;
     static get version(): string;
