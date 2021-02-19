@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow usage of Node.js 8.x since we received feedback that some projects are still supporting it",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
