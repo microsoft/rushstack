@@ -83,7 +83,7 @@ export class SourceMapper {
           sourceMap = { sourceMapConsumer, mappingItems };
         } else {
           // No source map for this filename
-          sourceMap = null; // eslint-disable-line @rushstack/no-null
+          sourceMap = null;
         }
 
         this._sourceMapByFilePath.set(normalizedPath, sourceMap);

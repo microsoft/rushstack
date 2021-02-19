@@ -9,11 +9,11 @@ import { Logging } from '../../utilities/Logging';
 import { BuildStage, IBuildStageOptions, IBuildStageStandardParameters } from '../../stages/BuildStage';
 
 export class BuildAction extends HeftActionBase {
-  protected _watchFlag: CommandLineFlagParameter;
-  protected _productionFlag: CommandLineFlagParameter;
-  protected _liteFlag: CommandLineFlagParameter;
-  private _buildStandardParameters: IBuildStageStandardParameters;
-  private _cleanFlag: CommandLineFlagParameter;
+  protected _watchFlag!: CommandLineFlagParameter;
+  protected _productionFlag!: CommandLineFlagParameter;
+  protected _liteFlag!: CommandLineFlagParameter;
+  private _buildStandardParameters!: IBuildStageStandardParameters;
+  private _cleanFlag!: CommandLineFlagParameter;
 
   public constructor(
     heftActionOptions: IHeftActionBaseOptions,
@@ -45,6 +45,11 @@ export class BuildAction extends HeftActionBase {
   }
 
   protected async actionExecuteAsync(): Promise<void> {
+    await this.runCleanIfRequestedAsync();
+    await this.runBuildAsync();
+  }
+
+  protected async runCleanIfRequestedAsync(): Promise<void> {
     if (this._cleanFlag.value) {
       const cleanStage: CleanStage = this.stages.cleanStage;
       const cleanStageOptions: ICleanStageOptions = {};
@@ -56,7 +61,9 @@ export class BuildAction extends HeftActionBase {
         async () => await cleanStage.executeAsync()
       );
     }
+  }
 
+  protected async runBuildAsync(): Promise<void> {
     const buildStage: BuildStage = this.stages.buildStage;
     const buildStageOptions: IBuildStageOptions = {
       ...BuildStage.getOptionsFromStandardParameters(this._buildStandardParameters),
@@ -65,5 +72,13 @@ export class BuildAction extends HeftActionBase {
     };
     await buildStage.initializeAsync(buildStageOptions);
     await buildStage.executeAsync();
+  }
+
+  protected async afterExecuteAsync(): Promise<void> {
+    if (this._watchFlag.value) {
+      await new Promise(() => {
+        /* never continue if in --watch mode */
+      });
+    }
   }
 }

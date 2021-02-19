@@ -6,7 +6,14 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as semver from 'semver';
-import { JsonFile, JsonSchema, Path, FileSystem, PackageNameParser } from '@rushstack/node-core-library';
+import {
+  JsonFile,
+  JsonSchema,
+  JsonNull,
+  Path,
+  FileSystem,
+  PackageNameParser
+} from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
 
 import { Rush } from '../api/Rush';
@@ -25,6 +32,7 @@ import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { ExperimentsConfiguration } from './ExperimentsConfiguration';
 import { PackageNameParsers } from './PackageNameParsers';
 import { RepoStateFile } from '../logic/RepoStateFile';
+import { LookupByPath } from '../logic/LookupByPath';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -35,17 +43,18 @@ const DEFAULT_REMOTE: string = 'origin';
  * To avoid confusion/mistakes, any extra files will be reported as an error.
  */
 const knownRushConfigFilenames: string[] = [
-  '.npmrc',
   '.npmrc-publish',
-  RushConstants.pinnedVersionsFilename,
-  RushConstants.commonVersionsFilename,
-  RushConstants.repoStateFilename,
+  '.npmrc',
+  'deploy.json',
+  RushConstants.artifactoryFilename,
   RushConstants.browserApprovedPackagesFilename,
-  RushConstants.nonbrowserApprovedPackagesFilename,
-  RushConstants.versionPoliciesFilename,
   RushConstants.commandLineFilename,
+  RushConstants.commonVersionsFilename,
   RushConstants.experimentsFilename,
-  'deploy.json'
+  RushConstants.nonbrowserApprovedPackagesFilename,
+  RushConstants.pinnedVersionsFilename,
+  RushConstants.repoStateFilename,
+  RushConstants.versionPoliciesFilename
 ];
 
 /**
@@ -63,6 +72,7 @@ export interface IRushGitPolicyJson {
   allowedEmailRegExps?: string[];
   sampleEmail?: string;
   versionBumpCommitMessage?: string;
+  changeLogUpdateCommitMessage?: string;
 }
 
 /**
@@ -232,7 +242,7 @@ export interface IRushConfigurationJson {
  * This represents the JSON data structure for the "current-variant.json" data file.
  */
 export interface ICurrentVariantJson {
-  variant: string | null; // Use `null` instead of `undefined` because `undefined` is not handled by JSON.
+  variant: string | JsonNull;
 }
 
 /**
@@ -434,7 +444,7 @@ export class RushConfiguration {
   private _commonTempFolder: string;
   private _commonScriptsFolder: string;
   private _commonRushConfigFolder: string;
-  private _packageManager: PackageManagerName;
+  private _packageManager!: PackageManagerName;
   private _packageManagerWrapper: PackageManager;
   private _npmCacheFolder: string;
   private _npmTmpFolder: string;
@@ -450,9 +460,8 @@ export class RushConfiguration {
   private _allowMostlyStandardPackageNames: boolean;
   private _ensureConsistentVersions: boolean;
   private _suppressNodeLtsWarning: boolean;
-  private _variants: {
-    [variantName: string]: boolean;
-  };
+  private _variants: Set<string>;
+  private _projectByRelativePath: LookupByPath<RushConfigurationProject>;
 
   // "approvedPackagesPolicy" feature
   private _approvedPackagesPolicy: ApprovedPackagesPolicy;
@@ -461,6 +470,7 @@ export class RushConfiguration {
   private _gitAllowedEmailRegExps: string[];
   private _gitSampleEmail: string;
   private _gitVersionBumpCommitMessage: string | undefined;
+  private _gitChangeLogUpdateCommitMessage: string | undefined;
 
   // "hotfixChangeEnabled" feature
   private _hotfixChangeEnabled: boolean;
@@ -473,7 +483,7 @@ export class RushConfiguration {
   private _npmOptions: NpmOptionsConfiguration;
   private _pnpmOptions: PnpmOptionsConfiguration;
   private _yarnOptions: YarnOptionsConfiguration;
-  private _packageManagerConfigurationOptions: PackageManagerOptionsConfigurationBase;
+  private _packageManagerConfigurationOptions!: PackageManagerOptionsConfigurationBase;
 
   // Rush hooks
   private _eventHooks: EventHooks;
@@ -482,17 +492,24 @@ export class RushConfiguration {
 
   private _telemetryEnabled: boolean;
 
-  private _projects: RushConfigurationProject[];
-  private _projectsByName: Map<string, RushConfigurationProject>;
+  // Lazily loaded when the projects() getter is called.
+  private _projects: RushConfigurationProject[] | undefined;
+
+  // Lazily loaded when the projectsByName() getter is called.
+  private _projectsByName: Map<string, RushConfigurationProject> | undefined;
 
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
+  private _versionPolicyConfigurationFilePath: string;
   private _experimentsConfiguration: ExperimentsConfiguration;
+
+  private readonly _rushConfigurationJson: IRushConfigurationJson;
 
   /**
    * Use RushConfiguration.loadFromConfigurationFile() or Use RushConfiguration.loadFromDefaultLocation()
    * instead.
    */
   private constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string) {
+    this._rushConfigurationJson = rushConfigurationJson;
     EnvironmentConfiguration.initialize();
 
     if (rushConfigurationJson.nodeSupportedVersionRange) {
@@ -619,7 +636,8 @@ export class RushConfiguration {
     RushConfiguration._validateCommonRushConfigFolder(
       this._commonRushConfigFolder,
       this.packageManager,
-      this._shrinkwrapFilename
+      this._shrinkwrapFilename,
+      this._experimentsConfiguration
     );
 
     this._projectFolderMinDepth =
@@ -666,6 +684,10 @@ export class RushConfiguration {
       if (rushConfigurationJson.gitPolicy.versionBumpCommitMessage) {
         this._gitVersionBumpCommitMessage = rushConfigurationJson.gitPolicy.versionBumpCommitMessage;
       }
+
+      if (rushConfigurationJson.gitPolicy.changeLogUpdateCommitMessage) {
+        this._gitChangeLogUpdateCommitMessage = rushConfigurationJson.gitPolicy.changeLogUpdateCommitMessage;
+      }
     }
 
     this._hotfixChangeEnabled = false;
@@ -682,22 +704,45 @@ export class RushConfiguration {
     this._repositoryDefaultRemote = rushConfigurationJson.repository.defaultRemote || DEFAULT_REMOTE;
 
     this._telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
-    if (rushConfigurationJson.eventHooks) {
-      this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks);
-    }
+    this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks || {});
 
-    const versionPolicyConfigFile: string = path.join(
+    this._versionPolicyConfigurationFilePath = path.join(
       this._commonRushConfigFolder,
       RushConstants.versionPoliciesFilename
     );
-    this._versionPolicyConfiguration = new VersionPolicyConfiguration(versionPolicyConfigFile);
+    this._versionPolicyConfiguration = new VersionPolicyConfiguration(
+      this._versionPolicyConfigurationFilePath
+    );
 
+    this._variants = new Set<string>();
+
+    if (rushConfigurationJson.variants) {
+      for (const variantOptions of rushConfigurationJson.variants) {
+        const { variantName } = variantOptions;
+
+        if (this._variants.has(variantName)) {
+          throw new Error(`Duplicate variant named '${variantName}' specified in configuration.`);
+        }
+
+        this._variants.add(variantName);
+      }
+    }
+
+    const pathTree: LookupByPath<RushConfigurationProject> = new LookupByPath<RushConfigurationProject>();
+    for (const project of this.projects) {
+      const relativePath: string = Path.convertToSlashes(project.projectRelativeFolder);
+      pathTree.setItem(relativePath, project);
+    }
+    this._projectByRelativePath = pathTree;
+  }
+
+  private _initializeAndValidateLocalProjects(): void {
     this._projects = [];
     this._projectsByName = new Map<string, RushConfigurationProject>();
 
     // We sort the projects array in alphabetical order.  This ensures that the packages
     // are processed in a deterministic order by the various Rush algorithms.
-    const sortedProjectJsons: IRushConfigurationProjectJson[] = rushConfigurationJson.projects.slice(0);
+    const sortedProjectJsons: IRushConfigurationProjectJson[] = this._rushConfigurationJson.projects.slice(0);
     sortedProjectJsons.sort((a: IRushConfigurationProjectJson, b: IRushConfigurationProjectJson) =>
       a.packageName.localeCompare(b.packageName)
     );
@@ -716,7 +761,7 @@ export class RushConfiguration {
           tempProjectName
         );
         this._projects.push(project);
-        if (this._projectsByName.get(project.packageName)) {
+        if (this._projectsByName.has(project.packageName)) {
           throw new Error(
             `The project name "${project.packageName}" was specified more than once` +
               ` in the rush.json configuration file.`
@@ -739,26 +784,9 @@ export class RushConfiguration {
       // Compute the downstream dependencies within the list of Rush projects.
       this._populateDownstreamDependencies(project.packageJson.dependencies, project.packageName);
       this._populateDownstreamDependencies(project.packageJson.devDependencies, project.packageName);
-      this._versionPolicyConfiguration.validate(this._projectsByName);
+      this._populateDownstreamDependencies(project.packageJson.optionalDependencies, project.packageName);
+      this._versionPolicyConfiguration.validate(this.projectsByName);
     }
-
-    const variants: {
-      [variantName: string]: boolean;
-    } = {};
-
-    if (rushConfigurationJson.variants) {
-      for (const variantOptions of rushConfigurationJson.variants) {
-        const { variantName } = variantOptions;
-
-        if (variants[variantName]) {
-          throw new Error(`Duplicate variant named '${variantName}' specified in configuration.`);
-        }
-
-        variants[variantName] = true;
-      }
-    }
-
-    this._variants = variants;
   }
 
   /**
@@ -910,7 +938,8 @@ export class RushConfiguration {
   private static _validateCommonRushConfigFolder(
     commonRushConfigFolder: string,
     packageManager: PackageManagerName,
-    shrinkwrapFilename: string
+    shrinkwrapFilename: string,
+    experiments: ExperimentsConfiguration
   ): void {
     if (!FileSystem.exists(commonRushConfigFolder)) {
       console.log(`Creating folder: ${commonRushConfigFolder}`);
@@ -931,12 +960,22 @@ export class RushConfiguration {
         continue;
       }
 
+      // Ignore hidden files such as ".DS_Store"
+      if (filename.startsWith('.')) {
+        continue;
+      }
+
       if (filename.startsWith('deploy-') && fileExtension === '.json') {
         // Ignore "rush deploy" files, which use the naming pattern "deploy-<scenario-name>.json".
         continue;
       }
 
       const knownSet: Set<string> = new Set<string>(knownRushConfigFilenames.map((x) => x.toUpperCase()));
+
+      // If the buildCache experiment is enabled, add its configuration file
+      if (experiments.configuration.buildCache) {
+        knownSet.add(RushConstants.buildCacheFilename.toUpperCase());
+      }
 
       // Add the shrinkwrap filename for the package manager to the known set.
       knownSet.add(shrinkwrapFilename.toUpperCase());
@@ -987,6 +1026,15 @@ export class RushConfiguration {
    */
   public get packageManagerWrapper(): PackageManager {
     return this._packageManagerWrapper;
+  }
+
+  /**
+   * Gets the JSON data structure for the "rush.json" configuration file.
+   *
+   * @internal
+   */
+  public get rushConfigurationJson(): IRushConfigurationJson {
+    return this._rushConfigurationJson;
   }
 
   /**
@@ -1268,6 +1316,14 @@ export class RushConfiguration {
   }
 
   /**
+   * [Part of the "gitPolicy" feature.]
+   * The commit message to use when committing change log files 'rush version'
+   */
+  public get gitChangeLogUpdateCommitMessage(): string | undefined {
+    return this._gitChangeLogUpdateCommitMessage;
+  }
+
+  /**
    * [Part of the "hotfixChange" feature.]
    * Enables creating hotfix changes
    */
@@ -1336,11 +1392,19 @@ export class RushConfiguration {
   }
 
   public get projects(): RushConfigurationProject[] {
-    return this._projects;
+    if (!this._projects) {
+      this._initializeAndValidateLocalProjects();
+    }
+
+    return this._projects!;
   }
 
   public get projectsByName(): Map<string, RushConfigurationProject> {
-    return this._projectsByName;
+    if (!this._projectsByName) {
+      this._initializeAndValidateLocalProjects();
+    }
+
+    return this._projectsByName!;
   }
 
   /**
@@ -1471,11 +1535,11 @@ export class RushConfiguration {
    */
   public getCommittedShrinkwrapFilename(variant?: string | undefined): string {
     if (variant) {
-      if (!this._variants[variant]) {
+      if (!this._variants.has(variant)) {
         throw new Error(
           `Invalid variant name '${variant}'. The provided variant parameter needs to be ` +
             `one of the following from rush.json: ` +
-            `${Object.keys(this._variants)
+            `${Array.from(this._variants.values())
               .map((name: string) => `"${name}"`)
               .join(', ')}.`
         );
@@ -1504,7 +1568,7 @@ export class RushConfiguration {
    * then undefined is returned.
    */
   public getProjectByName(projectName: string): RushConfigurationProject | undefined {
-    return this._projectsByName.get(projectName);
+    return this.projectsByName.get(projectName);
   }
 
   /**
@@ -1515,13 +1579,13 @@ export class RushConfiguration {
    */
   public findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined {
     // Is there an exact match?
-    let result: RushConfigurationProject | undefined = this._projectsByName.get(shorthandProjectName);
+    let result: RushConfigurationProject | undefined = this.projectsByName.get(shorthandProjectName);
     if (result) {
       return result;
     }
 
     // Is there an approximate match?
-    for (const project of this._projects) {
+    for (const project of this.projects) {
       if (this.packageNameParser.getUnscopedName(project.packageName) === shorthandProjectName) {
         if (result) {
           // Ambiguous -- there is more than one match
@@ -1540,7 +1604,7 @@ export class RushConfiguration {
    */
   public findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined {
     // Is there an approximate match?
-    for (const project of this._projects) {
+    for (const project of this.projects) {
       if (project.tempProjectName === tempProjectName) {
         return project;
       }
@@ -1549,10 +1613,26 @@ export class RushConfiguration {
   }
 
   /**
+   * Finds the project that owns the specified POSIX relative path (e.g. apps/rush-lib).
+   * The path is case-sensitive, so will only return a project if its projectRelativePath matches the casing.
+   * @returns The found project, or undefined if no match was found
+   */
+  public findProjectForPosixRelativePath(posixRelativePath: string): RushConfigurationProject | undefined {
+    return this._projectByRelativePath.findChildPath(posixRelativePath);
+  }
+
+  /**
    * @beta
    */
   public get versionPolicyConfiguration(): VersionPolicyConfiguration {
     return this._versionPolicyConfiguration;
+  }
+
+  /**
+   * @beta
+   */
+  public get versionPolicyConfigurationFilePath(): string {
+    return this._versionPolicyConfigurationFilePath;
   }
 
   /**
@@ -1587,21 +1667,21 @@ export class RushConfiguration {
       return;
     }
     Object.keys(dependencies).forEach((dependencyName) => {
-      const depProject: RushConfigurationProject | undefined = this._projectsByName.get(dependencyName);
+      const depProject: RushConfigurationProject | undefined = this.projectsByName.get(dependencyName);
 
       if (depProject) {
-        depProject.downstreamDependencyProjects.push(packageName);
+        depProject._consumingProjectNames.add(packageName);
       }
     });
   }
 
   private _getVariantConfigFolderPath(variant?: string | undefined): string {
     if (variant) {
-      if (!this._variants[variant]) {
+      if (!this._variants.has(variant)) {
         throw new Error(
           `Invalid variant name '${variant}'. The provided variant parameter needs to be ` +
             `one of the following from rush.json: ` +
-            `${Object.keys(this._variants)
+            `${Array.from(this._variants.values())
               .map((name: string) => `"${name}"`)
               .join(', ')}.`
         );

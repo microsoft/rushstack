@@ -16,7 +16,7 @@ import { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.type
 export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner: string): Source {
   const { source: assetSource, modules, externalNames } = asset;
 
-  const assetCode: string = assetSource.source();
+  const assetCode: string = assetSource.source() as string;
 
   const tokenIndex: number = assetCode.indexOf(CHUNK_MODULES_TOKEN);
   const suffixStart: number = tokenIndex + CHUNK_MODULES_TOKEN.length;
@@ -105,7 +105,7 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
     const enoughCommas: string = ',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,';
 
     const useConcatAtStart: boolean = useConcat && minId > 8;
-    lastId = useConcat ? minId : 0;
+    lastId = useConcatAtStart ? minId : 0;
     // TODO: Just because we want to use concat elsewhere doesn't mean its optimal to use at the start
     let separator: string = useConcatAtStart ? `Array(${minId}).concat([` : '[';
     let concatInserted: boolean = useConcatAtStart;
@@ -142,21 +142,21 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
 
   if (externalNames.size) {
     const replaceSource: ReplaceSource = new ReplaceSource(cached);
-    const code: string = cached.source();
+    const code: string = cached.source() as string;
 
     const externalIdRegex: RegExp = /__WEBPACK_EXTERNAL_MODULE_[A-Za-z0-9_$]+/g;
 
     // RegExp.exec uses null or an array as the return type, explicitly
-    let match: RegExpExecArray | null = null; // eslint-disable-line @rushstack/no-null
+    let match: RegExpExecArray | null = null;
     while ((match = externalIdRegex.exec(code))) {
       const id: string = match[0];
       const mapped: string | undefined = externalNames.get(id);
 
       if (mapped === undefined) {
         console.error(`Missing minified external for ${id} in ${asset.fileName}!`);
+      } else {
+        replaceSource.replace(match.index, externalIdRegex.lastIndex - 1, mapped);
       }
-
-      replaceSource.replace(match.index, externalIdRegex.lastIndex - 1, mapped);
     }
 
     return new CachedSource(replaceSource);

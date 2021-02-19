@@ -7,9 +7,9 @@
 import { Terminal } from '@rushstack/node-core-library';
 
 // @public (undocumented)
-export interface IStringValuesTypingsGeneratorOptions extends ITypingsGeneratorOptions<IStringValueTypings> {
-    // (undocumented)
+export interface IStringValuesTypingsGeneratorOptions extends ITypingsGeneratorOptions<IStringValueTypings | undefined> {
     exportAsDefault?: boolean;
+    exportAsDefaultInterfaceName?: string;
 }
 
 // @public (undocumented)
@@ -27,7 +27,7 @@ export interface IStringValueTypings {
 }
 
 // @public (undocumented)
-export interface ITypingsGeneratorOptions<TTypingsResult = string> {
+export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> {
     // (undocumented)
     fileExtensions: string[];
     // (undocumented)
@@ -35,7 +35,7 @@ export interface ITypingsGeneratorOptions<TTypingsResult = string> {
     // (undocumented)
     generatedTsFolder: string;
     // (undocumented)
-    parseAndGenerateTypings: (fileContents: string, filePath: string) => TTypingsResult;
+    parseAndGenerateTypings: (fileContents: string, filePath: string) => TTypingsResult | Promise<TTypingsResult>;
     // (undocumented)
     srcFolder: string;
     // (undocumented)
@@ -51,11 +51,12 @@ export class StringValuesTypingsGenerator extends TypingsGenerator {
 export class TypingsGenerator {
     constructor(options: ITypingsGeneratorOptions);
     // (undocumented)
-    generateTypings(): void;
+    generateTypingsAsync(): Promise<void>;
     // (undocumented)
     protected _options: ITypingsGeneratorOptions;
+    registerDependency(target: string, dependency: string): void;
     // (undocumented)
-    runWatcher(): void;
+    runWatcherAsync(): Promise<void>;
 }
 
 

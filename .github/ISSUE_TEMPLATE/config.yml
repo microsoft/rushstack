@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: '💬 Chat room'
+    about: Need answers?  Want to propose an idea?  Please discuss it in the chat room before creating a GitHub issue.
+    url: https://rushstack.zulipchat.com/
+  - name: '👉 READ FIRST: Contributor guidelines'
+    about: Instructions for building the projects, debugging, and submitting a PR.
+    url: https://rushstack.io/pages/contributing/get_started/

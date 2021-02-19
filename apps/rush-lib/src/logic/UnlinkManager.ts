@@ -1,15 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import * as path from 'path';
-import { FileSystem } from '@rushstack/node-core-library';
+import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Utilities } from '../utilities/Utilities';
 import { PnpmProjectDependencyManifest } from './pnpm/PnpmProjectDependencyManifest';
 import { LastLinkFlagFactory } from '../api/LastLinkFlag';
-import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 
 /**
  * This class implements the logic for "rush unlink"

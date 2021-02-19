@@ -1,16 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { EOL } from 'os';
-import { TaskRunner, ITaskRunnerOptions } from '../TaskRunner';
-import { ITaskWriter } from '@rushstack/stream-collator';
-import { TaskStatus } from '../TaskStatus';
-import { ITaskDefinition, ITask } from '../ITask';
-import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
-import { Utilities } from '../../../utilities/Utilities';
-
 // The TaskRunner prints "x.xx seconds" in TestRunner.test.ts.snap; ensure that the Stopwatch timing is deterministic
 jest.mock('../../../utilities/Utilities');
+
+import colors from 'colors';
+import { EOL } from 'os';
+import { CollatedTerminal } from '@rushstack/stream-collator';
+import { MockWritable } from '@rushstack/terminal';
+
+import { TaskRunner, ITaskRunnerOptions } from '../TaskRunner';
+import { TaskStatus } from '../TaskStatus';
+import { Task } from '../Task';
+import { Utilities } from '../../../utilities/Utilities';
+import { BaseBuilder } from '../BaseBuilder';
+import { MockBuilder } from './MockBuilder';
+
 const mockGetTimeInMs: jest.Mock = jest.fn();
 Utilities.getTimeInMs = mockGetTimeInMs;
 
@@ -21,34 +26,35 @@ mockGetTimeInMs.mockImplementation(() => {
   return mockTimeInMs;
 });
 
-function createTaskRunner(
-  taskRunnerOptions: ITaskRunnerOptions,
-  taskDefinition: ITaskDefinition
-): TaskRunner {
-  const task: ITask = taskDefinition as ITask;
-  task.dependencies = new Set<ITask>();
-  task.dependents = new Set<ITask>();
-  task.status = TaskStatus.Ready;
+const mockWritable: MockWritable = new MockWritable();
+
+function createTaskRunner(taskRunnerOptions: ITaskRunnerOptions, builder: BaseBuilder): TaskRunner {
+  const task: Task = new Task(builder, TaskStatus.Ready);
 
   return new TaskRunner([task], taskRunnerOptions);
 }
 
-function checkConsoleOutput(terminalProvider: StringBufferTerminalProvider): void {
-  expect(terminalProvider.getOutput()).toMatchSnapshot();
-  expect(terminalProvider.getVerbose()).toMatchSnapshot();
-  expect(terminalProvider.getWarningOutput()).toMatchSnapshot();
-  expect(terminalProvider.getErrorOutput()).toMatchSnapshot();
-}
+const EXPECTED_FAIL: string = `Promise returned by ${TaskRunner.prototype.executeAsync.name}() resolved but was expected to fail`;
 
 describe('TaskRunner', () => {
-  let terminalProvider: StringBufferTerminalProvider;
-  let terminal: Terminal;
   let taskRunner: TaskRunner;
   let taskRunnerOptions: ITaskRunnerOptions;
 
+  let initialColorsEnabled: boolean;
+
+  beforeAll(() => {
+    initialColorsEnabled = colors.enabled;
+    colors.enable();
+  });
+
+  afterAll(() => {
+    if (!initialColorsEnabled) {
+      colors.disable();
+    }
+  });
+
   beforeEach(() => {
-    terminalProvider = new StringBufferTerminalProvider(true);
-    terminal = new Terminal(terminalProvider);
+    mockWritable.reset();
   });
 
   describe('Constructor', () => {
@@ -59,8 +65,9 @@ describe('TaskRunner', () => {
             quietMode: false,
             parallelism: 'tequila',
             changedProjectsOnly: false,
-            terminal,
-            allowWarningsInSuccessfulBuild: false
+            destination: mockWritable,
+            allowWarningsInSuccessfulBuild: false,
+            repoCommandLineConfiguration: undefined
           })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -72,109 +79,53 @@ describe('TaskRunner', () => {
         quietMode: false,
         parallelism: '1',
         changedProjectsOnly: false,
-        terminal,
-        allowWarningsInSuccessfulBuild: false
+        destination: mockWritable,
+        allowWarningsInSuccessfulBuild: false,
+        repoCommandLineConfiguration: undefined
       };
     });
 
-    const EXPECTED_FAIL: string = 'Promise returned by execute() resolved but was expected to fail';
+    it('printedStderrAfterError', async () => {
+      taskRunner = createTaskRunner(
+        taskRunnerOptions,
+        new MockBuilder('stdout+stderr', async (terminal: CollatedTerminal) => {
+          terminal.writeStdoutLine('Build step 1' + EOL);
+          terminal.writeStderrLine('Error: step 1 failed' + EOL);
+          return TaskStatus.Failure;
+        })
+      );
 
-    it('printedStderrAfterError', () => {
-      taskRunner = createTaskRunner(taskRunnerOptions, {
-        name: 'stdout+stderr',
-        isIncrementalBuildAllowed: false,
-        execute: (writer: ITaskWriter) => {
-          writer.write('Build step 1' + EOL);
-          writer.writeError('Error: step 1 failed' + EOL);
-          return Promise.resolve(TaskStatus.Failure);
-        },
-        hadEmptyScript: false
-      });
-
-      return taskRunner
-        .execute()
-        .then(() => fail(EXPECTED_FAIL))
-        .catch((err) => {
-          expect(err.message).toMatchSnapshot();
-          const allMessages: string = terminalProvider.getOutput();
-          expect(allMessages).not.toContain('Build step 1');
-          expect(allMessages).toContain('Error: step 1 failed');
-          checkConsoleOutput(terminalProvider);
-        });
+      try {
+        await taskRunner.executeAsync();
+        fail(EXPECTED_FAIL);
+      } catch (err) {
+        expect(err.message).toMatchSnapshot();
+        const allMessages: string = mockWritable.getAllOutput();
+        expect(allMessages).toContain('Error: step 1 failed');
+        expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
+      }
     });
 
-    it('printedStdoutAfterErrorWithEmptyStderr', () => {
-      taskRunner = createTaskRunner(taskRunnerOptions, {
-        name: 'stdout only',
-        isIncrementalBuildAllowed: false,
-        execute: (writer: ITaskWriter) => {
-          writer.write('Build step 1' + EOL);
-          writer.write('Error: step 1 failed' + EOL);
-          return Promise.resolve(TaskStatus.Failure);
-        },
-        hadEmptyScript: false
-      });
+    it('printedStdoutAfterErrorWithEmptyStderr', async () => {
+      taskRunner = createTaskRunner(
+        taskRunnerOptions,
+        new MockBuilder('stdout only', async (terminal: CollatedTerminal) => {
+          terminal.writeStdoutLine('Build step 1' + EOL);
+          terminal.writeStdoutLine('Error: step 1 failed' + EOL);
+          return TaskStatus.Failure;
+        })
+      );
 
-      return taskRunner
-        .execute()
-        .then(() => fail(EXPECTED_FAIL))
-        .catch((err) => {
-          expect(err.message).toMatchSnapshot();
-          expect(terminalProvider.getOutput()).toMatch(/Build step 1.*Error: step 1 failed/);
-          checkConsoleOutput(terminalProvider);
-        });
-    });
-
-    it('printedAbridgedStdoutAfterErrorWithEmptyStderr', () => {
-      taskRunner = createTaskRunner(taskRunnerOptions, {
-        name: 'large stdout only',
-        isIncrementalBuildAllowed: false,
-        execute: (writer: ITaskWriter) => {
-          writer.write(`Building units...${EOL}`);
-          for (let i: number = 1; i <= 50; i++) {
-            writer.write(` - unit #${i};${EOL}`);
-          }
-          return Promise.resolve(TaskStatus.Failure);
-        },
-        hadEmptyScript: false
-      });
-
-      return taskRunner
-        .execute()
-        .then(() => fail(EXPECTED_FAIL))
-        .catch((err) => {
-          expect(err.message).toMatchSnapshot();
-          expect(terminalProvider.getOutput()).toMatch(
-            /Building units.* - unit #1;.* - unit #3;.*lines omitted.* - unit #48;.* - unit #50;/
-          );
-          checkConsoleOutput(terminalProvider);
-        });
-    });
-
-    it('preservedLeadingBlanksButTrimmedTrailingBlanks', () => {
-      taskRunner = createTaskRunner(taskRunnerOptions, {
-        name: 'large stderr with leading and trailing blanks',
-        isIncrementalBuildAllowed: false,
-        execute: (writer: ITaskWriter) => {
-          writer.writeError(`List of errors:  ${EOL}`);
-          for (let i: number = 1; i <= 50; i++) {
-            writer.writeError(` - error #${i};  ${EOL}`);
-          }
-          return Promise.resolve(TaskStatus.Failure);
-        },
-        hadEmptyScript: false
-      });
-
-      return taskRunner
-        .execute()
-        .then(() => fail(EXPECTED_FAIL))
-        .catch((err) => {
-          expect(err.message).toMatchSnapshot();
-          expect(terminalProvider.getOutput()).toMatch(
-            /List of errors:\S.* - error #1;\S.*lines omitted.* - error #48;\S.* - error #50;\S/
-          );
-          checkConsoleOutput(terminalProvider);
-        });
+      try {
+        await taskRunner.executeAsync();
+        fail(EXPECTED_FAIL);
+      } catch (err) {
+        expect(err.message).toMatchSnapshot();
+        const allOutput: string = mockWritable.getAllOutput();
+        expect(allOutput).toMatch(/Build step 1/);
+        expect(allOutput).toMatch(/Error: step 1 failed/);
+        expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
+      }
     });
   });
 
@@ -185,33 +136,32 @@ describe('TaskRunner', () => {
           quietMode: false,
           parallelism: '1',
           changedProjectsOnly: false,
-          terminal,
-          allowWarningsInSuccessfulBuild: false
+          destination: mockWritable,
+          allowWarningsInSuccessfulBuild: false,
+          repoCommandLineConfiguration: undefined
         };
       });
 
-      it('Logs warnings correctly', () => {
-        taskRunner = createTaskRunner(taskRunnerOptions, {
-          name: 'success with warnings (failure)',
-          isIncrementalBuildAllowed: false,
-          execute: (writer: ITaskWriter) => {
-            writer.write('Build step 1' + EOL);
-            writer.write('Warning: step 1 succeeded with warnings' + EOL);
-            return Promise.resolve(TaskStatus.SuccessWithWarning);
-          },
-          hadEmptyScript: false
-        });
+      it('Logs warnings correctly', async () => {
+        taskRunner = createTaskRunner(
+          taskRunnerOptions,
+          new MockBuilder('success with warnings (failure)', async (terminal: CollatedTerminal) => {
+            terminal.writeStdoutLine('Build step 1' + EOL);
+            terminal.writeStdoutLine('Warning: step 1 succeeded with warnings' + EOL);
+            return TaskStatus.SuccessWithWarning;
+          })
+        );
 
-        return taskRunner
-          .execute()
-          .then(() => fail('Promise returned by execute() resolved but was expected to fail'))
-          .catch((err) => {
-            expect(err.message).toMatchSnapshot();
-            const allMessages: string = terminalProvider.getOutput();
-            expect(allMessages).toContain('Build step 1');
-            expect(allMessages).toContain('step 1 succeeded with warnings');
-            checkConsoleOutput(terminalProvider);
-          });
+        try {
+          await taskRunner.executeAsync();
+          fail(EXPECTED_FAIL);
+        } catch (err) {
+          expect(err.message).toMatchSnapshot();
+          const allMessages: string = mockWritable.getAllOutput();
+          expect(allMessages).toContain('Build step 1');
+          expect(allMessages).toContain('step 1 succeeded with warnings');
+          expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
+        }
       });
     });
 
@@ -221,32 +171,27 @@ describe('TaskRunner', () => {
           quietMode: false,
           parallelism: '1',
           changedProjectsOnly: false,
-          terminal,
-          allowWarningsInSuccessfulBuild: true
+          destination: mockWritable,
+          allowWarningsInSuccessfulBuild: true,
+          repoCommandLineConfiguration: undefined
         };
       });
 
-      it('Logs warnings correctly', () => {
-        taskRunner = createTaskRunner(taskRunnerOptions, {
-          name: 'success with warnings (success)',
-          isIncrementalBuildAllowed: false,
-          execute: (writer: ITaskWriter) => {
-            writer.write('Build step 1' + EOL);
-            writer.write('Warning: step 1 succeeded with warnings' + EOL);
-            return Promise.resolve(TaskStatus.SuccessWithWarning);
-          },
-          hadEmptyScript: false
-        });
-
-        return taskRunner
-          .execute()
-          .then(() => {
-            const allMessages: string = terminalProvider.getOutput();
-            expect(allMessages).toContain('Build step 1');
-            expect(allMessages).toContain('Warning: step 1 succeeded with warnings');
-            checkConsoleOutput(terminalProvider);
+      it('Logs warnings correctly', async () => {
+        taskRunner = createTaskRunner(
+          taskRunnerOptions,
+          new MockBuilder('success with warnings (success)', async (terminal: CollatedTerminal) => {
+            terminal.writeStdoutLine('Build step 1' + EOL);
+            terminal.writeStdoutLine('Warning: step 1 succeeded with warnings' + EOL);
+            return TaskStatus.SuccessWithWarning;
           })
-          .catch((err) => fail('Promise returned by execute() rejected but was expected to resolve'));
+        );
+
+        await taskRunner.executeAsync();
+        const allMessages: string = mockWritable.getAllOutput();
+        expect(allMessages).toContain('Build step 1');
+        expect(allMessages).toContain('Warning: step 1 succeeded with warnings');
+        expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
       });
     });
   });

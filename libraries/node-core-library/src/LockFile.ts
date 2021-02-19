@@ -222,20 +222,17 @@ export class LockFile {
     const interval: number = 100;
     const startTime: number = Date.now();
 
-    const retryLoop: () => Promise<LockFile> = () => {
+    const retryLoop: () => Promise<LockFile> = async () => {
       const lock: LockFile | undefined = LockFile.tryAcquire(resourceFolder, resourceName);
       if (lock) {
-        return Promise.resolve(lock);
+        return lock;
       }
       if (maxWaitMs && Date.now() > startTime + maxWaitMs) {
-        return Promise.reject(
-          new Error(`Exceeded maximum wait time to acquire lock for resource "${resourceName}"`)
-        );
+        throw new Error(`Exceeded maximum wait time to acquire lock for resource "${resourceName}"`);
       }
 
-      return LockFile._sleepForMs(interval).then(() => {
-        return retryLoop();
-      });
+      await LockFile._sleepForMs(interval);
+      return retryLoop();
     };
 
     return retryLoop();

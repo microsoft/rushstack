@@ -1,0 +1,59 @@
+{
+  "name": "@rushstack/eslint-plugin-packlets",
+  "entries": [
+    {
+      "version": "0.2.0",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.2.0",
+      "date": "Wed, 11 Nov 2020 01:08:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add an optional \"@rushstack/packlets/readme\" rule that requires a README.md in each packlet folder"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.2",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.1.2",
+      "date": "Wed, 28 Oct 2020 01:18:03 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an exception that occured if a source file was added to the \"src/packlets\" folder, not belonging to any packlet"
+          },
+          {
+            "comment": "Fix an issue where linting was sometimes not performed on MacOS, because Node.js \"path.relative()\" incorrectly assumes that every POSIX file system is case-sensitive"
+          },
+          {
+            "comment": "Fix an issue where @rushstack/packlets/circular-deps did not detect certain types of circular dependencies"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.1",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.1.1",
+      "date": "Tue, 06 Oct 2020 00:24:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix broken link to tutorial project in README.md"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.1.0",
+      "date": "Mon, 05 Oct 2020 22:36:57 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release"
+          }
+        ]
+      }
+    }
+  ]
+}

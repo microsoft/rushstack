@@ -38,7 +38,10 @@ import {
   ApiNamespace,
   ExcerptTokenKind,
   IResolveDeclarationReferenceResult,
-  ApiEntryPoint
+  ApiEntryPoint,
+  ApiTypeAlias,
+  ExcerptToken,
+  ApiOptionalMixin
 } from '@microsoft/api-extractor-model';
 
 import { CustomDocNodes } from '../nodes/CustomDocNodeKind';
@@ -58,6 +61,12 @@ import {
 import { DocumenterConfig } from './DocumenterConfig';
 import { MarkdownDocumenterAccessor } from '../plugin/MarkdownDocumenterAccessor';
 
+export interface IMarkdownDocumenterOptions {
+  apiModel: ApiModel;
+  documenterConfig: DocumenterConfig | undefined;
+  outputFolder: string;
+}
+
 /**
  * Renders API documentation in the Markdown file format.
  * For more info:  https://en.wikipedia.org/wiki/Markdown
@@ -67,26 +76,25 @@ export class MarkdownDocumenter {
   private readonly _documenterConfig: DocumenterConfig | undefined;
   private readonly _tsdocConfiguration: TSDocConfiguration;
   private readonly _markdownEmitter: CustomMarkdownEmitter;
-  private _outputFolder: string;
+  private readonly _outputFolder: string;
   private readonly _pluginLoader: PluginLoader;
 
-  public constructor(apiModel: ApiModel, documenterConfig: DocumenterConfig | undefined) {
-    this._apiModel = apiModel;
-    this._documenterConfig = documenterConfig;
+  public constructor(options: IMarkdownDocumenterOptions) {
+    this._apiModel = options.apiModel;
+    this._documenterConfig = options.documenterConfig;
+    this._outputFolder = options.outputFolder;
     this._tsdocConfiguration = CustomDocNodes.configuration;
     this._markdownEmitter = new CustomMarkdownEmitter(this._apiModel);
 
     this._pluginLoader = new PluginLoader();
   }
 
-  public generateFiles(outputFolder: string): void {
-    this._outputFolder = outputFolder;
-
+  public generateFiles(): void {
     if (this._documenterConfig) {
       this._pluginLoader.load(this._documenterConfig, () => {
         return new MarkdownDocumenterFeatureContext({
           apiModel: this._apiModel,
-          outputFolder: outputFolder,
+          outputFolder: this._outputFolder,
           documenter: new MarkdownDocumenterAccessor({
             getLinkForApiItem: (apiItem: ApiItem) => {
               return this._getLinkFilenameForApiItem(apiItem);
@@ -174,10 +182,18 @@ export class MarkdownDocumenter {
       }
     }
 
+    const decoratorBlocks: DocBlock[] = [];
+
     if (apiItem instanceof ApiDocumentedItem) {
       const tsdocComment: DocComment | undefined = apiItem.tsdocComment;
 
       if (tsdocComment) {
+        decoratorBlocks.push(
+          ...tsdocComment.customBlocks.filter(
+            (block) => block.blockTag.tagNameWithUpperCase === StandardTags.decorator.tagNameWithUpperCase
+          )
+        );
+
         if (tsdocComment.deprecatedBlock) {
           output.appendNode(
             new DocNoteBox({ configuration: this._tsdocConfiguration }, [
@@ -215,6 +231,19 @@ export class MarkdownDocumenter {
       }
 
       this._writeHeritageTypes(output, apiItem);
+    }
+
+    if (decoratorBlocks.length > 0) {
+      output.appendNode(
+        new DocParagraph({ configuration }, [
+          new DocEmphasisSpan({ configuration, bold: true }, [
+            new DocPlainText({ configuration, text: 'Decorators:' })
+          ])
+        ])
+      );
+      for (const decoratorBlock of decoratorBlocks) {
+        output.appendNodes(decoratorBlock.content.nodes);
+      }
     }
 
     let appendRemarks: boolean = true;
@@ -352,6 +381,38 @@ export class MarkdownDocumenter {
           needsComma = true;
         }
         output.appendNode(extendsParagraph);
+      }
+    }
+
+    if (apiItem instanceof ApiTypeAlias) {
+      const refs: ExcerptToken[] = apiItem.excerptTokens.filter(
+        (token) =>
+          token.kind === ExcerptTokenKind.Reference &&
+          token.canonicalReference &&
+          this._apiModel.resolveDeclarationReference(token.canonicalReference, undefined).resolvedApiItem
+      );
+      if (refs.length > 0) {
+        const referencesParagraph: DocParagraph = new DocParagraph({ configuration }, [
+          new DocEmphasisSpan({ configuration, bold: true }, [
+            new DocPlainText({ configuration, text: 'References: ' })
+          ])
+        ]);
+        let needsComma: boolean = false;
+        const visited: Set<string> = new Set();
+        for (const ref of refs) {
+          if (visited.has(ref.text)) {
+            continue;
+          }
+          visited.add(ref.text);
+
+          if (needsComma) {
+            referencesParagraph.appendNode(new DocPlainText({ configuration, text: ', ' }));
+          }
+
+          this._appendExcerptTokenWithHyperlinks(referencesParagraph, ref);
+          needsComma = true;
+        }
+        output.appendNode(referencesParagraph);
       }
     }
   }
@@ -888,37 +949,41 @@ export class MarkdownDocumenter {
   }
 
   private _appendExcerptWithHyperlinks(docNodeContainer: DocNodeContainer, excerpt: Excerpt): void {
+    for (const token of excerpt.spannedTokens) {
+      this._appendExcerptTokenWithHyperlinks(docNodeContainer, token);
+    }
+  }
+
+  private _appendExcerptTokenWithHyperlinks(docNodeContainer: DocNodeContainer, token: ExcerptToken): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
-    for (const token of excerpt.spannedTokens) {
-      // Markdown doesn't provide a standardized syntax for hyperlinks inside code spans, so we will render
-      // the type expression as DocPlainText.  Instead of creating multiple DocParagraphs, we can simply
-      // discard any newlines and let the renderer do normal word-wrapping.
-      const unwrappedTokenText: string = token.text.replace(/[\r\n]+/g, ' ');
+    // Markdown doesn't provide a standardized syntax for hyperlinks inside code spans, so we will render
+    // the type expression as DocPlainText.  Instead of creating multiple DocParagraphs, we can simply
+    // discard any newlines and let the renderer do normal word-wrapping.
+    const unwrappedTokenText: string = token.text.replace(/[\r\n]+/g, ' ');
 
-      // If it's hyperlinkable, then append a DocLinkTag
-      if (token.kind === ExcerptTokenKind.Reference && token.canonicalReference) {
-        const apiItemResult: IResolveDeclarationReferenceResult = this._apiModel.resolveDeclarationReference(
-          token.canonicalReference,
-          undefined
+    // If it's hyperlinkable, then append a DocLinkTag
+    if (token.kind === ExcerptTokenKind.Reference && token.canonicalReference) {
+      const apiItemResult: IResolveDeclarationReferenceResult = this._apiModel.resolveDeclarationReference(
+        token.canonicalReference,
+        undefined
+      );
+
+      if (apiItemResult.resolvedApiItem) {
+        docNodeContainer.appendNode(
+          new DocLinkTag({
+            configuration,
+            tagName: '@link',
+            linkText: unwrappedTokenText,
+            urlDestination: this._getLinkFilenameForApiItem(apiItemResult.resolvedApiItem)
+          })
         );
-
-        if (apiItemResult.resolvedApiItem) {
-          docNodeContainer.appendNode(
-            new DocLinkTag({
-              configuration,
-              tagName: '@link',
-              linkText: unwrappedTokenText,
-              urlDestination: this._getLinkFilenameForApiItem(apiItemResult.resolvedApiItem)
-            })
-          );
-          continue;
-        }
+        return;
       }
-
-      // Otherwise append non-hyperlinked text
-      docNodeContainer.appendNode(new DocPlainText({ configuration, text: unwrappedTokenText }));
     }
+
+    // Otherwise append non-hyperlinked text
+    docNodeContainer.appendNode(new DocPlainText({ configuration, text: unwrappedTokenText }));
   }
 
   private _createEntryPointTitleCell(apiItem: ApiEntryPoint): DocTableCell {
@@ -939,12 +1004,17 @@ export class MarkdownDocumenter {
   private _createTitleCell(apiItem: ApiItem): DocTableCell {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
+    let linkText: string = Utilities.getConciseSignature(apiItem);
+    if (ApiOptionalMixin.isBaseClassOf(apiItem) && apiItem.isOptional) {
+      linkText += '?';
+    }
+
     return new DocTableCell({ configuration }, [
       new DocParagraph({ configuration }, [
         new DocLinkTag({
           configuration,
           tagName: '@link',
-          linkText: Utilities.getConciseSignature(apiItem),
+          linkText: linkText,
           urlDestination: this._getLinkFilenameForApiItem(apiItem)
         })
       ])
@@ -972,6 +1042,15 @@ export class MarkdownDocumenter {
           new DocPlainText({ configuration, text: ' ' })
         ]);
       }
+    }
+
+    if (ApiOptionalMixin.isBaseClassOf(apiItem) && apiItem.isOptional) {
+      section.appendNodesInParagraph([
+        new DocEmphasisSpan({ configuration, italic: true }, [
+          new DocPlainText({ configuration, text: '(Optional)' })
+        ]),
+        new DocPlainText({ configuration, text: ' ' })
+      ]);
     }
 
     if (apiItem instanceof ApiDocumentedItem) {

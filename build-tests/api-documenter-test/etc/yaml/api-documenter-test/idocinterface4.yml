@@ -1,79 +1,65 @@
-### YamlMime:UniversalReference
-items:
-  - uid: 'api-documenter-test!IDocInterface4:interface'
-    summary: Type union in an interface.
-    name: IDocInterface4
-    fullName: IDocInterface4
-    langs:
-      - typeScript
-    type: interface
+### YamlMime:TSType
+name: IDocInterface4
+uid: 'api-documenter-test!IDocInterface4:interface'
+package: api-documenter-test!
+fullName: IDocInterface4
+summary: Type union in an interface.
+remarks: ''
+isPreview: false
+isDeprecated: false
+type: interface
+properties:
+  - name: Context
+    uid: 'api-documenter-test!IDocInterface4#Context:member'
     package: api-documenter-test!
-    children:
-      - 'api-documenter-test!IDocInterface4#Context:member'
-      - 'api-documenter-test!IDocInterface4#generic:member'
-      - 'api-documenter-test!IDocInterface4#numberOrFunction:member'
-      - 'api-documenter-test!IDocInterface4#stringOrNumber:member'
-  - uid: 'api-documenter-test!IDocInterface4#Context:member'
-    summary: Test newline rendering when code blocks are used in tables
-    name: Context
     fullName: Context
-    langs:
-      - typeScript
-    type: property
+    summary: Test newline rendering when code blocks are used in tables
+    remarks: ''
+    isPreview: false
+    isDeprecated: false
     syntax:
       content: |-
         Context: ({ children }: {
                 children: string;
             }) => boolean;
       return:
-        type:
-          - |-
-            ({ children }: {
-                    children: string;
-                }) => boolean
-  - uid: 'api-documenter-test!IDocInterface4#generic:member'
-    summary: make sure html entities are escaped in tables.
-    name: generic
+        type: |-
+          ({ children }: {
+                  children: string;
+              }) =&gt; boolean
+  - name: generic
+    uid: 'api-documenter-test!IDocInterface4#generic:member'
+    package: api-documenter-test!
     fullName: generic
-    langs:
-      - typeScript
-    type: property
+    summary: make sure html entities are escaped in tables.
+    remarks: ''
+    isPreview: false
+    isDeprecated: false
     syntax:
       content: 'generic: Generic<number>;'
       return:
-        type:
-          - 'api-documenter-test!IDocInterface4#generic~0:complex'
-  - uid: 'api-documenter-test!IDocInterface4#numberOrFunction:member'
-    summary: a union type with a function
-    name: numberOrFunction
+        type: '<xref uid="api-documenter-test!Generic:class" />&lt;number&gt;'
+  - name: numberOrFunction
+    uid: 'api-documenter-test!IDocInterface4#numberOrFunction:member'
+    package: api-documenter-test!
     fullName: numberOrFunction
-    langs:
-      - typeScript
-    type: property
+    summary: a union type with a function
+    remarks: ''
+    isPreview: false
+    isDeprecated: false
     syntax:
       content: 'numberOrFunction: number | (() => number);'
       return:
-        type:
-          - number | (() => number)
-  - uid: 'api-documenter-test!IDocInterface4#stringOrNumber:member'
-    summary: a union type
-    name: stringOrNumber
+        type: number | (() =&gt; number)
+  - name: stringOrNumber
+    uid: 'api-documenter-test!IDocInterface4#stringOrNumber:member'
+    package: api-documenter-test!
     fullName: stringOrNumber
-    langs:
-      - typeScript
-    type: property
+    summary: a union type
+    remarks: ''
+    isPreview: false
+    isDeprecated: false
     syntax:
       content: 'stringOrNumber: string | number;'
       return:
-        type:
-          - string | number
-references:
-  - uid: 'api-documenter-test!IDocInterface4#generic~0:complex'
-    name: Generic<number>
-    fullName: Generic<number>
-    spec.typeScript:
-      - uid: 'api-documenter-test!Generic:class'
-        name: Generic
-        fullName: Generic
-      - name: <number>
-        fullName: <number>
+        type: string | number

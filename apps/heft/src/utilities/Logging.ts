@@ -4,19 +4,30 @@
 import { Terminal } from '@rushstack/node-core-library';
 import { performance } from 'perf_hooks';
 
+export interface IFinishedWords {
+  success: string;
+  failure: string;
+}
+
+const DEFAULT_FINISHED_WORDS: IFinishedWords = {
+  success: 'finished',
+  failure: 'encountered an error'
+};
+
 export class Logging {
   public static async runFunctionWithLoggingBoundsAsync(
     terminal: Terminal,
     name: string,
-    fn: () => Promise<void>
+    fn: () => Promise<void>,
+    finishedWords: IFinishedWords = DEFAULT_FINISHED_WORDS
   ): Promise<void> {
     terminal.writeLine(` ---- ${name} started ---- `);
     const startTime: number = performance.now();
-    let finishedLoggingWord: string = 'finished';
+    let finishedLoggingWord: string = finishedWords.success;
     try {
       await fn();
     } catch (e) {
-      finishedLoggingWord = 'encountered an error';
+      finishedLoggingWord = finishedWords.failure;
       throw e;
     } finally {
       const executionTime: number = Math.round(performance.now() - startTime);

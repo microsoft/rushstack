@@ -1,0 +1,9 @@
+{
+  "$schema": "http://schema.net/",
+
+  "plugins": [
+    {
+      "plugin": "@rushstack/node-core-library"
+    }
+  ]
+}

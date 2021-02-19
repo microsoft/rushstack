@@ -1,0 +1,71 @@
+{
+  "name": "@rushstack/eslint-plugin-security",
+  "entries": [
+    {
+      "version": "0.1.3",
+      "tag": "@rushstack/eslint-plugin-security_v0.1.3",
+      "date": "Wed, 30 Sep 2020 18:39:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update to build with @rushstack/heft-node-rig"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.2",
+      "tag": "@rushstack/eslint-plugin-security_v0.1.2",
+      "date": "Wed, 30 Sep 2020 06:53:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Include missing \"License\" field."
+          },
+          {
+            "comment": "Update README.md"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.1",
+      "tag": "@rushstack/eslint-plugin-security_v0.1.1",
+      "date": "Sat, 19 Sep 2020 04:37:26 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add missing dependency"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/eslint-plugin-security_v0.1.0",
+      "date": "Sat, 19 Sep 2020 03:33:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial release"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.1.0`"
+          }
+        ]
+      }
+    }
+  ]
+}

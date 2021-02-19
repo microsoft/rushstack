@@ -14,12 +14,10 @@ export class RunAction extends CommandLineAction {
     });
   }
 
-  protected onExecute(): Promise<void> {
+  protected async onExecute(): Promise<void> {
     // abstract
     console.log(`Console Title: ${this._title.value || '(none)'}`);
     console.log('Arguments to be executed: ' + JSON.stringify(this.remainder!.values));
-
-    return Promise.resolve();
   }
 
   protected onDefineParameters(): void {

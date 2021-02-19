@@ -1,66 +1,253 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Fri, 03 Jul 2020 15:09:04 GMT and should not be manually modified.
+This log was last generated on Fri, 05 Feb 2021 16:10:42 GMT and should not be manually modified.
+
+## 7.12.2
+Fri, 05 Feb 2021 16:10:42 GMT
+
+_Version update only_
+
+## 7.12.1
+Thu, 10 Dec 2020 23:25:49 GMT
+
+### Patches
+
+- Enable support for @decorator
+
+## 7.12.0
+Wed, 18 Nov 2020 08:19:54 GMT
+
+### Minor changes
+
+- Introduce an ApiOptionalMixin base class for representing optional properties and methods
+
+## 7.11.0
+Wed, 18 Nov 2020 06:21:57 GMT
+
+### Minor changes
+
+- Update .api.json file format to store a new field "isOptional" for documenting optional properties
+
+## 7.10.10
+Wed, 11 Nov 2020 01:08:59 GMT
+
+_Version update only_
+
+## 7.10.9
+Tue, 10 Nov 2020 23:13:12 GMT
+
+_Version update only_
+
+## 7.10.8
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 7.10.7
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 7.10.6
+Thu, 29 Oct 2020 06:14:19 GMT
+
+### Patches
+
+- Fix .d.ts error when the library is imported by a project using TypeScript 4.0
+
+## 7.10.5
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 7.10.4
+Tue, 27 Oct 2020 15:10:14 GMT
+
+_Version update only_
+
+## 7.10.3
+Tue, 06 Oct 2020 00:24:06 GMT
+
+_Version update only_
+
+## 7.10.2
+Mon, 05 Oct 2020 22:36:57 GMT
+
+_Version update only_
+
+## 7.10.1
+Wed, 30 Sep 2020 18:39:17 GMT
+
+### Patches
+
+- Update to build with @rushstack/heft-node-rig
+
+## 7.10.0
+Wed, 30 Sep 2020 06:53:53 GMT
+
+### Minor changes
+
+- Upgrade compiler; the API now requires TypeScript 3.9 or newer
+
+### Patches
+
+- Update README.md
+
+## 7.9.7
+Tue, 22 Sep 2020 05:45:57 GMT
+
+_Version update only_
+
+## 7.9.6
+Tue, 22 Sep 2020 01:45:31 GMT
+
+_Version update only_
+
+## 7.9.5
+Tue, 22 Sep 2020 00:08:53 GMT
+
+_Version update only_
+
+## 7.9.4
+Sat, 19 Sep 2020 04:37:27 GMT
+
+_Version update only_
+
+## 7.9.3
+Sat, 19 Sep 2020 03:33:07 GMT
+
+_Version update only_
+
+## 7.9.2
+Fri, 18 Sep 2020 22:57:24 GMT
+
+_Version update only_
+
+## 7.9.1
+Fri, 18 Sep 2020 21:49:54 GMT
+
+_Version update only_
+
+## 7.9.0
+Sun, 13 Sep 2020 01:53:20 GMT
+
+### Minor changes
+
+- Add support for system selectors in declaration references
+
+## 7.8.22
+Fri, 11 Sep 2020 02:13:35 GMT
+
+_Version update only_
+
+## 7.8.21
+Mon, 07 Sep 2020 07:37:37 GMT
+
+_Version update only_
+
+## 7.8.20
+Sat, 05 Sep 2020 18:56:34 GMT
+
+### Patches
+
+- Fix "Converting circular structure to JSON" error (GitHub #2152)
+
+## 7.8.19
+Thu, 27 Aug 2020 11:27:06 GMT
+
+_Version update only_
+
+## 7.8.18
+Mon, 24 Aug 2020 07:35:20 GMT
+
+_Version update only_
+
+## 7.8.17
+Sat, 22 Aug 2020 05:55:43 GMT
+
+_Version update only_
+
+## 7.8.16
+Tue, 18 Aug 2020 23:59:42 GMT
+
+_Version update only_
+
+## 7.8.15
+Mon, 17 Aug 2020 04:53:23 GMT
+
+_Version update only_
+
+## 7.8.14
+Wed, 12 Aug 2020 00:10:05 GMT
+
+### Patches
+
+- Updated project to build with Heft
+
+## 7.8.13
+Wed, 05 Aug 2020 18:27:33 GMT
+
+_Version update only_
 
 ## 7.8.12
 Fri, 03 Jul 2020 15:09:04 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.8.11
 Thu, 25 Jun 2020 06:43:35 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.8.10
 Wed, 24 Jun 2020 09:50:48 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.8.9
 Wed, 24 Jun 2020 09:04:28 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.8.8
 Wed, 10 Jun 2020 20:48:30 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.8.7
 Sat, 30 May 2020 02:59:54 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.8.6
 Thu, 28 May 2020 05:59:02 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.8.5
 Wed, 27 May 2020 05:15:11 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.8.4
 Tue, 26 May 2020 23:00:25 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.8.3
 Fri, 22 May 2020 15:08:43 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.8.2
 Thu, 21 May 2020 23:09:44 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.8.1
 Thu, 21 May 2020 15:42:00 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.8.0
 Wed, 06 May 2020 08:23:45 GMT
@@ -72,7 +259,7 @@ Wed, 06 May 2020 08:23:45 GMT
 ## 7.7.11
 Wed, 08 Apr 2020 04:07:33 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.7.10
 Sat, 28 Mar 2020 00:37:16 GMT
@@ -98,17 +285,17 @@ Tue, 17 Mar 2020 23:55:58 GMT
 ## 7.7.7
 Tue, 28 Jan 2020 02:23:44 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.7.6
 Thu, 23 Jan 2020 01:07:56 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.7.5
 Tue, 21 Jan 2020 21:56:14 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.7.4
 Sun, 19 Jan 2020 02:26:52 GMT
@@ -120,17 +307,17 @@ Sun, 19 Jan 2020 02:26:52 GMT
 ## 7.7.3
 Fri, 17 Jan 2020 01:08:23 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.7.2
 Thu, 09 Jan 2020 06:44:13 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.7.1
 Wed, 08 Jan 2020 00:11:31 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.7.0
 Tue, 03 Dec 2019 03:17:43 GMT
@@ -149,12 +336,12 @@ Sun, 24 Nov 2019 00:54:04 GMT
 ## 7.5.6
 Fri, 15 Nov 2019 04:50:50 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.5.5
 Mon, 11 Nov 2019 16:07:56 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.5.4
 Tue, 05 Nov 2019 06:49:28 GMT
@@ -215,7 +402,7 @@ Tue, 10 Sep 2019 20:38:33 GMT
 ## 7.3.4
 Wed, 04 Sep 2019 18:28:06 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.3.3
 Wed, 04 Sep 2019 15:15:37 GMT
@@ -227,7 +414,7 @@ Wed, 04 Sep 2019 15:15:37 GMT
 ## 7.3.2
 Thu, 08 Aug 2019 15:14:17 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.3.1
 Thu, 08 Aug 2019 00:49:05 GMT
@@ -286,7 +473,7 @@ Tue, 16 Apr 2019 11:01:37 GMT
 ## 7.0.28
 Wed, 20 Mar 2019 19:14:49 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.0.27
 Mon, 18 Mar 2019 04:28:43 GMT

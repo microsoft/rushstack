@@ -1,0 +1,244 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConfigurationFile A complex config file Correctly loads a complex config file 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile A simple config file Correctly loads the config file 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile A simple config file Correctly resolves paths relative to the config file 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile A simple config file Correctly resolves paths relative to the project root 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile A simple config file containing an array Correctly loads the config file 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile A simple config file containing an array Correctly resolves paths relative to the config file 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile A simple config file containing an array Correctly resolves paths relative to the project root 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "append" in config meta 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "custom" in config meta 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with "replace" in config meta 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile A simple config file with "extends" Correctly loads the config file with default config meta 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile A simple config file with "extends" Correctly resolves paths relative to the config file 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile error cases Throws an error for a file that doesn't match its schema 1`] = `
+[Error: JSON validation failed:
+<project root>/src/test/errorCases/invalidType/config.json
+
+Error: #/filePaths
+       Expected type array but found type string]
+`;
+
+exports[`ConfigurationFile error cases Throws an error for a file that doesn't match its schema 2`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile error cases Throws an error when a combined config file doesn't match the schema 1`] = `
+[Error: Resolved configuration object does not match schema: Error: JSON validation failed:
+<project root>/src/test/errorCases/invalidCombinedFile/config1.json
+
+Error: #/
+       Data does not match any schemas from 'oneOf'
+  Error: #/
+         Additional properties not allowed: folderPaths
+  Error: #/
+         Additional properties not allowed: filePaths]
+`;
+
+exports[`ConfigurationFile error cases Throws an error when a combined config file doesn't match the schema 2`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile error cases Throws an error when a requested file doesn't exist 1`] = `[Error: File does not exist: <project root>/src/test/errorCases/folderThatDoesntExist/config.json]`;
+
+exports[`ConfigurationFile error cases Throws an error when a requested file doesn't exist 2`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "Configuration file \\"<project root>/src/test/errorCases/folderThatDoesntExist/config.json\\" not found.[n]",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile error cases Throws an error when an "extends" property points to a file that cannot be resolved 1`] = `[Error: In file "<project root>/src/test/errorCases/extendsNotExist/config.json", file referenced in "extends" property ("./config2.json") cannot be resolved.]`;
+
+exports[`ConfigurationFile error cases Throws an error when an "extends" property points to a file that cannot be resolved 2`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "Configuration file \\"<project root>/src/test/errorCases/extendsNotExist/config2.json\\" not found.[n]",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile error cases Throws an error when the file isn't valid JSON 1`] = `
+[Error: In config file "<project root>/src/test/errorCases/invalidJson/config.json": SyntaxError: Unexpected token '\\n' at 2:19
+  "filePaths": "A
+                 ^]
+`;
+
+exports[`ConfigurationFile error cases Throws an error when the file isn't valid JSON 2`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile error cases Throws an error when there is a circular reference in "extends" properties 1`] = `[Error: A loop has been detected in the "extends" properties of configuration file at "<project root>/src/test/errorCases/circularReference/config1.json".]`;
+
+exports[`ConfigurationFile error cases Throws an error when there is a circular reference in "extends" properties 2`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile error cases returns undefined when the file doesn't exist for tryLoadConfigurationFileForProjectAsync 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile error cases throws an error when the file doesn't exist 1`] = `[Error: File does not exist: <project root>/src/test/errorCases/invalidType/notExist.json]`;
+
+exports[`ConfigurationFile error cases throws an error when the file doesn't exist 2`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "Configuration file \\"<project root>/src/test/errorCases/invalidType/notExist.json\\" not found.[n]",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile loading a rig correctly loads a config file inside a rig 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "Configuration file \\"<project root>/src/test/project-referencing-rig/config/simplestConfigFile.json\\" not found.[n]",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile loading a rig correctly loads a config file inside a rig via tryLoadConfigurationFileForProjectAsync 1`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "Config file \\"<project root>/src/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig.[n]",
+  "warning": "",
+}
+`;
+
+exports[`ConfigurationFile loading a rig throws an error when a config file doesn't exist in a project referencing a rig, which also doesn't have the file 1`] = `[Error: File does not exist: <project root>/src/test/project-referencing-rig/config/notExist.json]`;
+
+exports[`ConfigurationFile loading a rig throws an error when a config file doesn't exist in a project referencing a rig, which also doesn't have the file 2`] = `
+Object {
+  "error": "",
+  "log": "",
+  "verbose": "Configuration file \\"<project root>/src/test/project-referencing-rig/config/notExist.json\\" not found.[n]Configuration file \\"<project root>/src/test/project-referencing-rig/node_modules/test-rig/profiles/default/config/notExist.json\\" not found.[n]Configuration file \\"config/notExist.json\\" not found in rig (\\"<project root>/src/test/project-referencing-rig/node_modules/test-rig/profiles/default\\")[n]",
+  "warning": "",
+}
+`;

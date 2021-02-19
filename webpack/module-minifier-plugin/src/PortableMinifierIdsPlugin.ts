@@ -4,8 +4,8 @@
 import { compilation, Compiler, Plugin } from 'webpack';
 import { ReplaceSource } from 'webpack-sources';
 import { createHash } from 'crypto';
-import { Tap } from 'tapable';
-import * as RequestShortener from 'webpack/lib/RequestShortener';
+import { TapOptions } from 'tapable';
+import RequestShortener from 'webpack/lib/RequestShortener';
 
 import { STAGE_AFTER, STAGE_BEFORE } from './Constants';
 import {
@@ -16,15 +16,15 @@ import {
 
 const PLUGIN_NAME: 'PortableMinifierModuleIdsPlugin' = 'PortableMinifierModuleIdsPlugin';
 
-const TAP_BEFORE: Tap = {
+const TAP_BEFORE: TapOptions<'sync'> = {
   name: PLUGIN_NAME,
   stage: STAGE_BEFORE
-} as Tap;
+};
 
-const TAP_AFTER: Tap = {
+const TAP_AFTER: TapOptions<'sync'> = {
   name: PLUGIN_NAME,
   stage: STAGE_AFTER
-} as Tap;
+};
 
 const STABLE_MODULE_ID_PREFIX: '__MODULEID_SHA_' = '__MODULEID_SHA_';
 const STABLE_MODULE_ID_REGEX: RegExp = /['"]?(__MODULEID_SHA_[0-9a-f]+)['"]?/g;
@@ -93,11 +93,11 @@ export class PortableMinifierModuleIdsPlugin implements Plugin {
     });
 
     this._minifierHooks.postProcessCodeFragment.tap(PLUGIN_NAME, (source: ReplaceSource, context: string) => {
-      const code: string = source.original().source();
+      const code: string = source.original().source() as string;
 
       STABLE_MODULE_ID_REGEX.lastIndex = -1;
       // RegExp.exec uses null or an array as the return type, explicitly
-      let match: RegExpExecArray | null = null; // eslint-disable-line @rushstack/no-null
+      let match: RegExpExecArray | null = null;
       while ((match = STABLE_MODULE_ID_REGEX.exec(code))) {
         const id: string = match[1];
         const mapped: string | number | undefined = stableIdToFinalId.get(id);

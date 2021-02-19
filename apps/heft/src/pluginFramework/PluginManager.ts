@@ -1,96 +1,110 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import { Terminal, InternalError, JsonFile, FileSystem, JsonSchema } from '@rushstack/node-core-library';
-import * as resolve from 'resolve';
+import { Terminal, InternalError, Import } from '@rushstack/node-core-library';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IHeftPlugin } from './IHeftPlugin';
+import { InternalHeftSession } from './InternalHeftSession';
 import { HeftSession } from './HeftSession';
+import {
+  CoreConfigFiles,
+  IHeftConfigurationJsonPluginSpecifier,
+  IHeftConfigurationJson
+} from '../utilities/CoreConfigFiles';
 
 // Default plugins
+import { CopyFilesPlugin } from '../plugins/CopyFilesPlugin';
 import { TypeScriptPlugin } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
-import { RushJsonConfigurationFilesPlugin } from '../plugins/JsonConfigurationLoaders/RushJsonConfigurationFilesPlugin';
-import { ProjectJsonConfigurationFilesPlugin } from '../plugins/JsonConfigurationLoaders/ProjectJsonConfigurationFilesPlugin';
-import { CleanPlugin } from '../plugins/CleanPlugin';
+import { DeleteGlobsPlugin } from '../plugins/DeleteGlobsPlugin';
 import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
-import { PackageJsonConfigurationPlugin } from '../plugins/PackageJsonConfigurationPlugin';
 import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
 import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
 import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWebpackPlugin';
 import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
+import { SassTypingsPlugin } from '../plugins/SassTypingsPlugin/SassTypingsPlugin';
+import { ProjectValidatorPlugin } from '../plugins/ProjectValidatorPlugin';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
   heftConfiguration: HeftConfiguration;
-  heftSession: HeftSession;
-}
-
-interface IPluginConfigurationJson {
-  plugins: {
-    plugin: string;
-    options?: object;
-  }[];
+  internalHeftSession: InternalHeftSession;
 }
 
 export class PluginManager {
   private _terminal: Terminal;
   private _heftConfiguration: HeftConfiguration;
-  private _heftSession: HeftSession;
+  private _internalHeftSession: InternalHeftSession;
+  private _appliedPlugins: IHeftPlugin[] = [];
+  private _appliedPluginNames: Set<string> = new Set<string>();
 
   public constructor(options: IPluginManagerOptions) {
     this._terminal = options.terminal;
     this._heftConfiguration = options.heftConfiguration;
-    this._heftSession = options.heftSession;
+    this._internalHeftSession = options.internalHeftSession;
   }
 
   public initializeDefaultPlugins(): void {
     this._applyPlugin(new TypeScriptPlugin());
-    this._applyPlugin(new RushJsonConfigurationFilesPlugin());
-    this._applyPlugin(new ProjectJsonConfigurationFilesPlugin());
     this._applyPlugin(new CopyStaticAssetsPlugin());
-    this._applyPlugin(new CleanPlugin());
-    this._applyPlugin(new PackageJsonConfigurationPlugin());
+    this._applyPlugin(new CopyFilesPlugin());
+    this._applyPlugin(new DeleteGlobsPlugin());
     this._applyPlugin(new ApiExtractorPlugin());
     this._applyPlugin(new JestPlugin());
     this._applyPlugin(new BasicConfigureWebpackPlugin());
     this._applyPlugin(new WebpackPlugin());
+    this._applyPlugin(new SassTypingsPlugin());
+    this._applyPlugin(new ProjectValidatorPlugin());
   }
 
   public initializePlugin(pluginSpecifier: string, options?: object): void {
     const resolvedPluginPath: string = this._resolvePlugin(pluginSpecifier);
-    const pluginPackage: IHeftPlugin<object | void> = this._loadAndValidatePluginPackage(resolvedPluginPath);
-    this._applyPlugin(pluginPackage, options);
+    this._initializeResolvedPlugin(resolvedPluginPath, options);
   }
 
-  public initializePluginsFromConfigFile(): void {
-    try {
-      const pluginConfigFilePath: string = path.join(
-        this._heftConfiguration.projectHeftDataFolder,
-        'plugins.json'
-      );
-      const pluginConfigurationJson: IPluginConfigurationJson = JsonFile.loadAndValidate(
-        pluginConfigFilePath,
-        JsonSchema.fromFile(path.join(__dirname, '..', 'schemas', 'plugins.schema.json'))
-      );
+  public async initializePluginsFromConfigFileAsync(): Promise<void> {
+    const heftConfigurationJson:
+      | IHeftConfigurationJson
+      | undefined = await CoreConfigFiles.heftConfigFileLoader.tryLoadConfigurationFileForProjectAsync(
+      this._heftConfiguration.globalTerminal,
+      this._heftConfiguration.buildFolder,
+      this._heftConfiguration.rigConfig
+    );
+    const heftPluginSpecifiers: IHeftConfigurationJsonPluginSpecifier[] =
+      heftConfigurationJson?.heftPlugins || [];
 
-      for (const pluginSpecifier of pluginConfigurationJson.plugins) {
-        this.initializePlugin(pluginSpecifier.plugin, pluginSpecifier.options);
-      }
-    } catch (e) {
-      if (!FileSystem.isNotExistError(e)) {
-        throw e;
-      }
+    for (const pluginSpecifier of heftPluginSpecifiers) {
+      this._initializeResolvedPlugin(pluginSpecifier.plugin, pluginSpecifier.options);
     }
   }
 
-  private _applyPlugin(pluginPackage: IHeftPlugin<object | void>, options?: object): void {
+  public afterInitializeAllPlugins(): void {
+    for (const appliedPlugin of this._appliedPlugins) {
+      this._internalHeftSession.applyPluginHooks(appliedPlugin);
+    }
+  }
+
+  private _initializeResolvedPlugin(resolvedPluginPath: string, options?: object): void {
+    const plugin: IHeftPlugin<object | void> = this._loadAndValidatePluginPackage(resolvedPluginPath);
+
+    if (this._appliedPluginNames.has(plugin.pluginName)) {
+      throw new Error(
+        `Error applying plugin "${resolvedPluginPath}": A plugin with name "${plugin.pluginName}" has ` +
+          'already been applied'
+      );
+    } else {
+      this._applyPlugin(plugin, options);
+    }
+  }
+
+  private _applyPlugin(plugin: IHeftPlugin<object | void>, options?: object): void {
     try {
-      // Todo: Use the plugin displayName in its logging.
-      pluginPackage.apply(this._heftSession, this._heftConfiguration, options);
+      const heftSession: HeftSession = this._internalHeftSession.getSessionForPlugin(plugin);
+      plugin.apply(heftSession, this._heftConfiguration, options);
+      this._appliedPlugins.push(plugin);
+      this._appliedPluginNames.add(plugin.pluginName);
     } catch (e) {
-      throw new InternalError(`Error applying "${pluginPackage.displayName}": ${e}`);
+      throw new InternalError(`Error applying "${plugin.pluginName}": ${e}`);
     }
   }
 
@@ -101,7 +115,7 @@ export class PluginManager {
       const loadedPluginPackage: IHeftPlugin | { default: IHeftPlugin } = require(resolvedPluginPath);
       pluginPackage = (loadedPluginPackage as { default: IHeftPlugin }).default || loadedPluginPackage;
     } catch (e) {
-      throw new InternalError(`Error loading plugin package: ${e}`);
+      throw new InternalError(`Error loading plugin package from "${resolvedPluginPath}": ${e}`);
     }
 
     this._terminal.writeVerboseLine(`Loaded plugin package from "${resolvedPluginPath}"`);
@@ -117,10 +131,10 @@ export class PluginManager {
       );
     }
 
-    if (!pluginPackage.displayName || typeof pluginPackage.displayName !== 'string') {
+    if (!pluginPackage.pluginName || typeof pluginPackage.pluginName !== 'string') {
       throw new InternalError(
-        `Plugin packages must define a "displayName" property. The plugin loaded from "${resolvedPluginPath}" ` +
-          'either doesn\'t define a "displayName" property, or its value isn\'t a string.'
+        `Plugin packages must define a "pluginName" property. The plugin loaded from "${resolvedPluginPath}" ` +
+          'either doesn\'t define a "pluginName" property, or its value isn\'t a string.'
       );
     }
 
@@ -133,8 +147,9 @@ export class PluginManager {
     this._terminal.writeVerboseLine(`Resolving plugin ${pluginSpecifier}`);
 
     try {
-      resolvedPluginPath = resolve.sync(pluginSpecifier, {
-        basedir: this._heftConfiguration.buildFolder
+      resolvedPluginPath = Import.resolveModule({
+        modulePath: pluginSpecifier,
+        baseFolderPath: this._heftConfiguration.buildFolder
       });
     } catch (e) {
       throw new InternalError(`Error resolving specified plugin "${pluginSpecifier}". Resolve error: ${e}`);

@@ -140,9 +140,24 @@ export class RushConstants {
   public static readonly versionPoliciesFilename: string = 'version-policies.json';
 
   /**
-   * Experiments configuration file, which
+   * Experiments configuration file.
    */
   public static readonly experimentsFilename: string = 'experiments.json';
+
+  /**
+   * The artifactory.json configuration file name.
+   */
+  public static readonly artifactoryFilename: string = 'artifactory.json';
+
+  /**
+   * Build cache configuration file.
+   */
+  public static readonly buildCacheFilename: string = 'build-cache.json';
+
+  /**
+   * Per-project configuration filename.
+   */
+  public static readonly rushProjectConfigFilename: string = 'rush-project.json';
 
   /**
    * The URL ("http://rushjs.io") for the Rush web site.
@@ -185,4 +200,18 @@ export class RushConstants {
    * The name of the non-incremental build command.
    */
   public static readonly rebuildCommandName: string = 'rebuild';
+
+  public static readonly updateCloudCredentialsCommandName: string = 'update-cloud-credentials';
+
+  /**
+   * When a hash generated that contains multiple input segments, this character may be used
+   * to separate them to avoid issues like
+   * crypto.createHash('sha1').update('a').update('bc').digest('hex') === crypto.createHash('sha1').update('ab').update('c').digest('hex')
+   */
+  public static readonly hashDelimiter: string = '|';
+
+  /**
+   * The name of the per-user Rush configuration data folder.
+   */
+  public static readonly rushUserConfigurationFolderName: string = '.rush-user';
 }

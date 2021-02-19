@@ -1,15 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseConfiglessRushAction } from './BaseRushAction';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
-import { FileSystem, NewlineKind, InternalError } from '@rushstack/node-core-library';
+import { FileSystem, NewlineKind, InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { Rush } from '../../api/Rush';
 
@@ -45,8 +44,8 @@ export class InitAction extends BaseConfiglessRushAction {
   // Used to catch malformed macro expressions
   private static _anyMacroRegExp: RegExp = /\/\*\s*\[.*\]\s*\*\//;
 
-  private _overwriteParameter: CommandLineFlagParameter;
-  private _rushExampleParameter: CommandLineFlagParameter;
+  private _overwriteParameter!: CommandLineFlagParameter;
+  private _rushExampleParameter!: CommandLineFlagParameter;
 
   // template section name --> whether it should be commented out
   private _commentedBySectionName: Map<string, boolean> = new Map<string, boolean>();
@@ -80,19 +79,17 @@ export class InitAction extends BaseConfiglessRushAction {
     });
   }
 
-  protected run(): Promise<void> {
+  protected async runAsync(): Promise<void> {
     const initFolder: string = process.cwd();
 
     if (!this._overwriteParameter.value) {
       if (!this._validateFolderIsEmpty(initFolder)) {
-        return Promise.reject(new AlreadyReportedError());
+        throw new AlreadyReportedError();
       }
     }
 
     this._defineMacroSections();
     this._copyTemplateFiles(initFolder);
-
-    return Promise.resolve();
   }
 
   private _defineMacroSections(): void {
@@ -161,6 +158,7 @@ export class InitAction extends BaseConfiglessRushAction {
       '[dot]travis.yml',
       'common/config/rush/[dot]npmrc',
       'common/config/rush/[dot]npmrc-publish',
+      'common/config/rush/artifactory.json',
       'common/config/rush/command-line.json',
       'common/config/rush/common-versions.json',
       'common/config/rush/experiments.json',

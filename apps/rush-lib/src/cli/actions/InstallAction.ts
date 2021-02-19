@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineStringListParameter } from '@rushstack/ts-command-line';
-
 import { BaseInstallAction } from './BaseInstallAction';
 import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
+import { SelectionParameterSet } from '../SelectionParameterSet';
 
 export class InstallAction extends BaseInstallAction {
-  protected _toFlag: CommandLineStringListParameter;
-  protected _toVersionPolicy: CommandLineStringListParameter;
+  protected _selectionParameters!: SelectionParameterSet;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -35,22 +33,8 @@ export class InstallAction extends BaseInstallAction {
    */
   protected onDefineParameters(): void {
     super.onDefineParameters();
-    this._toFlag = this.defineStringListParameter({
-      parameterLongName: '--to',
-      parameterShortName: '-t',
-      argumentName: 'PROJECT1',
-      description:
-        'Run install in the specified project and all of its dependencies. "." can be used as shorthand ' +
-        'to specify the project in the current working directory. This argument is only valid in workspace ' +
-        'environments.'
-    });
-    this._toVersionPolicy = this.defineStringListParameter({
-      parameterLongName: '--to-version-policy',
-      argumentName: 'VERSION_POLICY_NAME',
-      description:
-        'Run install in all projects with the specified version policy and all of their dependencies. ' +
-        'This argument is only valid in workspace environments.'
-    });
+
+    this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this);
   }
 
   protected buildInstallOptions(): IInstallManagerOptions {
@@ -67,7 +51,8 @@ export class InstallAction extends BaseInstallAction {
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
-      toProjects: this.mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy)
+      // These are derived independently of the selection for command line brevity
+      pnpmFilterArguments: this._selectionParameters.getPnpmFilterArguments()
     };
   }
 }

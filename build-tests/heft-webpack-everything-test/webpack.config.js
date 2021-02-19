@@ -4,6 +4,18 @@ const path = require('path');
 
 module.exports = {
   mode: 'development',
+  module: {
+    rules: [
+      {
+        test: /\.png$/i,
+        use: [
+          {
+            loader: 'file-loader'
+          }
+        ]
+      }
+    ]
+  },
   resolve: {
     extensions: ['.js', '.jsx', '.json']
   },

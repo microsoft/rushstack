@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as colors from 'colors';
+import colors from 'colors';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
@@ -15,15 +15,15 @@ export class InitDeployAction extends BaseRushAction {
     __dirname,
     '../../../assets/rush-init-deploy/scenario-template.json'
   );
-  private _project: CommandLineStringParameter;
-  private _scenario: CommandLineStringParameter;
+  private _project!: CommandLineStringParameter;
+  private _scenario!: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'init-deploy',
-      summary: '(EXPERIMENTAL) Creates a deployment scenario config file for use with "rush deploy".',
+      summary: 'Creates a deployment scenario config file for use with "rush deploy".',
       documentation:
-        '(EXPERIMENTAL) Use this command to initialize a new scenario config file for use with "rush deploy".' +
+        'Use this command to initialize a new scenario config file for use with "rush deploy".' +
         ' The default filename is common/config/rush/deploy.json. However, if you need to manage multiple' +
         ' deployments with different settings, you can use use "--scenario" to create additional config files.',
       parser
@@ -52,7 +52,7 @@ export class InitDeployAction extends BaseRushAction {
     });
   }
 
-  protected async run(): Promise<void> {
+  protected async runAsync(): Promise<void> {
     const scenarioFilePath: string = DeployScenarioConfiguration.getConfigFilePath(
       this._scenario.value,
       this.rushConfiguration

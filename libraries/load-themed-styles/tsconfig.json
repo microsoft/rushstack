@@ -1,7 +1,7 @@
 {
-  "extends": "./node_modules/@microsoft/rush-stack-compiler-3.5/includes/tsconfig-web.json",
+  "extends": "./node_modules/@rushstack/heft-web-rig/profiles/library/tsconfig-base.json",
   "compilerOptions": {
     "module": "commonjs",
-    "types": ["webpack-env", "jest"]
+    "types": ["heft-jest", "webpack-env"]
   }
 }

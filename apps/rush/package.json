@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush",
-  "version": "5.30.1",
+  "version": "5.40.2",
   "description": "A professional solution for consolidating all your JavaScript projects in one Git repo",
   "keywords": [
     "install",
@@ -23,7 +23,7 @@
   "engineStrict": true,
   "homepage": "https://rushjs.io",
   "scripts": {
-    "build": "gulp test --clean"
+    "build": "heft test --clean"
   },
   "bin": {
     "rush": "./bin/rush",
@@ -31,21 +31,17 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@rushstack/node-core-library": "workspace:*",
     "@microsoft/rush-lib": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
     "colors": "~1.2.1",
     "semver": "~7.3.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "workspace:*",
-    "@microsoft/node-library-build": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "@types/jest": "25.2.1",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@types/heft-jest": "1.0.1",
     "@types/node": "10.17.13",
-    "@types/semver": "~7.3.1",
-    "@types/sinon": "1.16.34",
-    "chai": "~3.5.0",
-    "gulp": "~4.0.2",
-    "sinon": "~1.17.3"
+    "@types/semver": "~7.3.1"
   }
 }

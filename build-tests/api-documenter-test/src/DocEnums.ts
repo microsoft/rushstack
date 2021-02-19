@@ -22,3 +22,38 @@ export enum DocEnum {
    */
   Two = DocEnum.One + 1
 }
+
+/**
+ * Enum that merges with namespace
+ *
+ * @remarks
+ * {@link (DocEnumNamespaceMerge:enum)|Link to enum}
+ *
+ * {@link (DocEnumNamespaceMerge:namespace)|Link to namespace}
+ *
+ * {@link (DocEnumNamespaceMerge:namespace).exampleFunction|Link to function inside namespace}
+ *
+ * @public
+ */
+export enum DocEnumNamespaceMerge {
+  /**
+   * These are some docs for Left
+   */
+  Left = 0,
+
+  /**
+   * These are some docs for Right
+   */
+  Right = 1
+}
+
+/**
+ * Namespace that merges with enum
+ * @public
+ */
+export namespace DocEnumNamespaceMerge {
+  /**
+   * This is a function inside of a namespace that merges with an enum.
+   */
+  export function exampleFunction(): void {}
+}

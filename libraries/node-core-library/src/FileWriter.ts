@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fsx from 'fs-extra';
+import { Import } from './Import';
+
+const fsx: typeof import('fs-extra') = Import.lazy('fs-extra', require);
 
 /**
  * Available file handle opening flags.
@@ -36,10 +38,16 @@ export interface IFileWriterFlags {
  * @public
  */
 export class FileWriter {
+  /**
+   * The `filePath` that was passed to {@link FileWriter.open}.
+   */
+  public readonly filePath: string;
+
   private _fileDescriptor: number | undefined;
 
-  private constructor(fileDescriptor: number) {
+  private constructor(fileDescriptor: number, filePath: string) {
     this._fileDescriptor = fileDescriptor;
+    this.filePath = filePath;
   }
 
   /**
@@ -47,11 +55,11 @@ export class FileWriter {
    * Behind the scenes it uses `fs.openSync()`.
    * The behaviour of this function is platform specific.
    * See: https://nodejs.org/docs/latest-v8.x/api/fs.html#fs_fs_open_path_flags_mode_callback
-   * @param path - The absolute or relative path to the file handle that should be opened.
+   * @param filePath - The absolute or relative path to the file handle that should be opened.
    * @param flags - The flags for opening the handle
    */
-  public static open(path: string, flags?: IFileWriterFlags): FileWriter {
-    return new FileWriter(fsx.openSync(path, FileWriter._convertFlagsForNode(flags)));
+  public static open(filePath: string, flags?: IFileWriterFlags): FileWriter {
+    return new FileWriter(fsx.openSync(filePath, FileWriter._convertFlagsForNode(flags)), filePath);
   }
 
   /**
@@ -83,6 +91,9 @@ export class FileWriter {
   /**
    * Closes the file handle permanently. No operations can be made on this file handle after calling this.
    * Behind the scenes it uses `fs.closeSync()` and releases the file descriptor to be re-used.
+   *
+   * @remarks
+   * The `close()` method can be called more than once; additional calls are ignored.
    */
   public close(): void {
     const fd: number | undefined = this._fileDescriptor;

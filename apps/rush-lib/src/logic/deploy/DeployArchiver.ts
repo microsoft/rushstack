@@ -1,14 +1,13 @@
-import * as JSZip from 'jszip';
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import JSZip = require('jszip');
+
 import * as path from 'path';
-import { FileSystem, FileSystemStats } from '@rushstack/node-core-library';
+import { FileSystem, FileSystemStats, Path } from '@rushstack/node-core-library';
 
 import { IDeployState } from './DeployManager';
 
-// JSZip is dependant on Blob being declared.
-declare global {
-  // eslint-disable-next-line
-  type Blob = any;
-}
 export class DeployArchiver {
   public static async createArchiveAsync(deployState: IDeployState): Promise<void> {
     if (deployState.createArchiveFilePath !== undefined) {
@@ -61,7 +60,8 @@ export class DeployArchiver {
 
     const zip: JSZip = new JSZip();
     for (const filePath of allPaths) {
-      const addPath: string = path.relative(dir, filePath);
+      // Get the relative path and replace backslashes for Unix compat
+      const addPath: string = Path.convertToSlashes(path.relative(dir, filePath));
       const stat: FileSystemStats = FileSystem.getLinkStatistics(filePath);
       const permissions: number = stat.mode;
 

@@ -26,6 +26,8 @@ export interface IBulkCommandJson extends IBaseCommandJson {
   ignoreMissingScript?: boolean;
   incremental?: boolean;
   allowWarningsInSuccessfulBuild?: boolean;
+  watchForChanges?: boolean;
+  disableBuildCache?: boolean;
 }
 
 /**

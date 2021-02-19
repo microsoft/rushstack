@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminalProvider } from '@rushstack/node-core-library';
-
-import { SubprocessTerminalProvider } from './SubprocessTerminalProvider';
 import {
   SubprocessRunnerBase,
   ISubprocessInnerConfiguration,
@@ -19,10 +16,8 @@ const [
   serializedSubprocessConfiguration
 ] = process.argv;
 
-const innerConfiguration: ISubprocessInnerConfiguration = JSON.parse(serializedInnerConfiguration);
-const terminalProvider: ITerminalProvider = new SubprocessTerminalProvider(innerConfiguration);
-
-const subprocessRunnerModule: object = require(subprocessModulePath);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const subprocessRunnerModule: any = require(subprocessModulePath);
 const subprocessRunnerModuleExports: string[] = Object.getOwnPropertyNames(subprocessRunnerModule).filter(
   (exportName) => exportName !== '__esModule'
 );
@@ -46,10 +41,13 @@ if (!SubprocessRunnerClass[SUBPROCESS_RUNNER_CLASS_LABEL]) {
   );
 }
 
+const innerConfiguration: ISubprocessInnerConfiguration = JSON.parse(serializedInnerConfiguration);
 const subprocessConfiguration: object = JSON.parse(serializedSubprocessConfiguration);
-const subprocessRunner: SubprocessRunnerSubclass = new SubprocessRunnerClass(
-  terminalProvider,
+
+const subprocessRunner: SubprocessRunnerSubclass = SubprocessRunnerClass.initializeSubprocess(
+  SubprocessRunnerClass,
+  innerConfiguration,
   subprocessConfiguration
 );
 
-subprocessRunner[SUBPROCESS_RUNNER_INNER_INVOKE].call(subprocessRunner);
+subprocessRunner[SUBPROCESS_RUNNER_INNER_INVOKE].call(subprocessRunner).catch(console.error);

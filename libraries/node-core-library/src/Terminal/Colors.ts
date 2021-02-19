@@ -45,6 +45,48 @@ export enum TextAttribute {
   Hidden
 }
 
+export enum ConsoleColorCodes {
+  BlackForeground = 30,
+  RedForeground = 31,
+  GreenForeground = 32,
+  YellowForeground = 33,
+  BlueForeground = 34,
+  MagentaForeground = 35,
+  CyanForeground = 36,
+  WhiteForeground = 37,
+  GrayForeground = 90,
+  DefaultForeground = 39,
+
+  BlackBackground = 40,
+  RedBackground = 41,
+  GreenBackground = 42,
+  YellowBackground = 43,
+  BlueBackground = 44,
+  MagentaBackground = 45,
+  CyanBackground = 46,
+  WhiteBackground = 47,
+  GrayBackground = 100,
+  DefaultBackground = 49,
+
+  Bold = 1,
+
+  // On Linux, the "BoldOff" code instead causes the text to be double-underlined:
+  // https://en.wikipedia.org/wiki/Talk:ANSI_escape_code#SGR_21%E2%80%94%60Bold_off%60_not_widely_supported
+  // Use "NormalColorOrIntensity" instead
+  // BoldOff = 21,
+
+  Dim = 2,
+  NormalColorOrIntensity = 22,
+  Underline = 4,
+  UnderlineOff = 24,
+  Blink = 5,
+  BlinkOff = 25,
+  InvertColor = 7,
+  InvertColorOff = 27,
+  Hidden = 8,
+  HiddenOff = 28
+}
+
 /**
  * The static functions on this class are used to produce colored text
  * for use with the node-core-library terminal.

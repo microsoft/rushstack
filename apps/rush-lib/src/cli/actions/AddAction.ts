@@ -3,23 +3,28 @@
 
 import * as os from 'os';
 import * as semver from 'semver';
-
+import { Import } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { PackageJsonUpdater, SemVerStyle } from '../../logic/PackageJsonUpdater';
 import { DependencySpecifier } from '../../logic/DependencySpecifier';
 
+import type * as PackageJsonUpdaterTypes from '../../logic/PackageJsonUpdater';
+const packageJsonUpdaterModule: typeof PackageJsonUpdaterTypes = Import.lazy(
+  '../../logic/PackageJsonUpdater',
+  require
+);
+
 export class AddAction extends BaseRushAction {
-  private _allFlag: CommandLineFlagParameter;
-  private _exactFlag: CommandLineFlagParameter;
-  private _caretFlag: CommandLineFlagParameter;
-  private _devDependencyFlag: CommandLineFlagParameter;
-  private _makeConsistentFlag: CommandLineFlagParameter;
-  private _skipUpdateFlag: CommandLineFlagParameter;
-  private _packageName: CommandLineStringParameter;
+  private _allFlag!: CommandLineFlagParameter;
+  private _exactFlag!: CommandLineFlagParameter;
+  private _caretFlag!: CommandLineFlagParameter;
+  private _devDependencyFlag!: CommandLineFlagParameter;
+  private _makeConsistentFlag!: CommandLineFlagParameter;
+  private _skipUpdateFlag!: CommandLineFlagParameter;
+  private _packageName!: CommandLineStringParameter;
 
   public constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
@@ -87,7 +92,7 @@ export class AddAction extends BaseRushAction {
     });
   }
 
-  public async run(): Promise<void> {
+  public async runAsync(): Promise<void> {
     let projects: RushConfigurationProject[];
     if (this._allFlag.value) {
       projects = this.rushConfiguration.projects;
@@ -136,9 +141,12 @@ export class AddAction extends BaseRushAction {
       }
     }
 
-    const updater: PackageJsonUpdater = new PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolder);
+    const updater: PackageJsonUpdaterTypes.PackageJsonUpdater = new packageJsonUpdaterModule.PackageJsonUpdater(
+      this.rushConfiguration,
+      this.rushGlobalFolder
+    );
 
-    let rangeStyle: SemVerStyle;
+    let rangeStyle: PackageJsonUpdaterTypes.SemVerStyle;
     if (version && version !== 'latest') {
       if (this._exactFlag.value || this._caretFlag.value) {
         throw new Error(
@@ -147,13 +155,13 @@ export class AddAction extends BaseRushAction {
         );
       }
 
-      rangeStyle = SemVerStyle.Passthrough;
+      rangeStyle = packageJsonUpdaterModule.SemVerStyle.Passthrough;
     } else {
       rangeStyle = this._caretFlag.value
-        ? SemVerStyle.Caret
+        ? packageJsonUpdaterModule.SemVerStyle.Caret
         : this._exactFlag.value
-        ? SemVerStyle.Exact
-        : SemVerStyle.Tilde;
+        ? packageJsonUpdaterModule.SemVerStyle.Exact
+        : packageJsonUpdaterModule.SemVerStyle.Tilde;
     }
 
     await updater.doRushAdd({

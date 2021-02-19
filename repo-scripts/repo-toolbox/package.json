@@ -5,19 +5,18 @@
   "description": "Used to execute various operations specific to this repo",
   "license": "MIT",
   "scripts": {
-    "build": "gulp test --clean",
+    "build": "heft build --clean",
     "readme": "node ./lib/start.js readme"
   },
   "dependencies": {
-    "@rushstack/node-core-library": "workspace:*",
     "@microsoft/rush-lib": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "workspace:*",
-    "@microsoft/node-library-build": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "@types/node": "10.17.13",
-    "gulp": "~4.0.2"
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@types/node": "10.17.13"
   }
 }

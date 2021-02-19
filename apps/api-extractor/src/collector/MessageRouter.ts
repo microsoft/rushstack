@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 import { Sort, InternalError, LegacyAdapters } from '@rushstack/node-core-library';
@@ -276,7 +276,6 @@ export class MessageRouter {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static buildJsonDumpObject(input: any): any | undefined {
     if (input === null || input === undefined) {
-      // eslint-disable-next-line @rushstack/no-null
       return null; // JSON uses null instead of undefined
     }
 
@@ -308,7 +307,8 @@ export class MessageRouter {
           const serializedValue: any = MessageRouter.buildJsonDumpObject(value);
 
           if (serializedValue !== undefined) {
-            outputObject[key] = serializedValue;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (outputObject as any)[key] = serializedValue;
           }
         }
         return outputObject;

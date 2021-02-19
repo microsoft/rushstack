@@ -31,14 +31,20 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
     readonly alternatives: ReadonlyArray<string>;
     // @override
     appendToArgList(argList: string[]): void;
+    readonly completions: (() => Promise<string[]>) | undefined;
     readonly defaultValue: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    readonly kind: CommandLineParameterKind;
+    get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: any): void;
-    readonly value: string | undefined;
+    get value(): string | undefined;
     }
+
+// @public
+export const enum CommandLineConstants {
+    TabCompletionActionName = "tab-complete"
+}
 
 // @public
 export class CommandLineFlagParameter extends CommandLineParameter {
@@ -46,11 +52,16 @@ export class CommandLineFlagParameter extends CommandLineParameter {
     constructor(definition: ICommandLineFlagDefinition);
     // @override
     appendToArgList(argList: string[]): void;
-    readonly kind: CommandLineParameterKind;
+    get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: any): void;
-    readonly value: boolean;
+    get value(): boolean;
     }
+
+// @public
+export class CommandLineHelper {
+    static isTabCompletionActionRequest(argv: string[]): boolean;
+}
 
 // @public
 export class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
@@ -61,10 +72,10 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
     readonly defaultValue: number | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    readonly kind: CommandLineParameterKind;
+    get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: any): void;
-    readonly value: number | undefined;
+    get value(): number | undefined;
     }
 
 // @public
@@ -76,15 +87,16 @@ export abstract class CommandLineParameter {
     readonly environmentVariable: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    abstract readonly kind: CommandLineParameterKind;
+    abstract get kind(): CommandLineParameterKind;
     readonly longName: string;
     // @internal
-    _parserKey: string;
+    _parserKey: string | undefined;
     protected reportInvalidData(data: any): never;
     readonly required: boolean;
     // @internal
     abstract _setValue(data: any): void;
     readonly shortName: string | undefined;
+    readonly undocumentedSynonyms: string[] | undefined;
     // (undocumented)
     protected validateDefaultValue(hasDefaultValue: boolean): void;
 }
@@ -116,10 +128,10 @@ export abstract class CommandLineParameterProvider {
     getStringListParameter(parameterLongName: string): CommandLineStringListParameter;
     getStringParameter(parameterLongName: string): CommandLineStringParameter;
     protected abstract onDefineParameters(): void;
-    readonly parameters: ReadonlyArray<CommandLineParameter>;
+    get parameters(): ReadonlyArray<CommandLineParameter>;
     // @internal (undocumented)
     protected _processParsedData(data: _ICommandLineParserData): void;
-    readonly remainder: CommandLineRemainder | undefined;
+    get remainder(): CommandLineRemainder | undefined;
     renderHelpText(): string;
 }
 
@@ -128,12 +140,13 @@ export abstract class CommandLineParameterWithArgument extends CommandLineParame
     // @internal
     constructor(definition: IBaseCommandLineDefinitionWithArgument);
     readonly argumentName: string;
+    readonly completions: (() => Promise<string[]>) | undefined;
     }
 
 // @public
 export abstract class CommandLineParser extends CommandLineParameterProvider {
     constructor(options: ICommandLineParserOptions);
-    readonly actions: ReadonlyArray<CommandLineAction>;
+    get actions(): ReadonlyArray<CommandLineAction>;
     addAction(action: CommandLineAction): void;
     execute(args?: string[]): Promise<boolean>;
     executeWithoutErrorHandling(args?: string[]): Promise<void>;
@@ -142,10 +155,8 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     protected _getArgumentParser(): argparse.ArgumentParser;
     protected onExecute(): Promise<void>;
     selectedAction: CommandLineAction | undefined;
-    readonly toolDescription: string;
-    readonly toolFilename: string;
     tryGetAction(actionName: string): CommandLineAction | undefined;
-}
+    }
 
 // @public
 export class CommandLineRemainder {
@@ -156,7 +167,7 @@ export class CommandLineRemainder {
     readonly description: string;
     // @internal
     _setValue(data: any): void;
-    readonly values: ReadonlyArray<string>;
+    get values(): ReadonlyArray<string>;
     }
 
 // @public
@@ -165,10 +176,10 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
     constructor(definition: ICommandLineStringListDefinition);
     // @override
     appendToArgList(argList: string[]): void;
-    readonly kind: CommandLineParameterKind;
+    get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: any): void;
-    readonly values: ReadonlyArray<string>;
+    get values(): ReadonlyArray<string>;
     }
 
 // @public
@@ -180,10 +191,10 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
     readonly defaultValue: string | undefined;
     // @internal
     _getSupplementaryNotes(supplementaryNotes: string[]): void;
-    readonly kind: CommandLineParameterKind;
+    get kind(): CommandLineParameterKind;
     // @internal
     _setValue(data: any): void;
-    readonly value: string | undefined;
+    get value(): string | undefined;
     }
 
 // @public (undocumented)
@@ -207,11 +218,13 @@ export interface IBaseCommandLineDefinition {
     parameterLongName: string;
     parameterShortName?: string;
     required?: boolean;
+    undocumentedSynonyms?: string[];
 }
 
 // @public
 export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLineDefinition {
     argumentName: string;
+    completions?: () => Promise<string[]>;
 }
 
 // @public
@@ -224,6 +237,7 @@ export interface ICommandLineActionOptions {
 // @public
 export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition {
     alternatives: string[];
+    completions?: () => Promise<string[]>;
     defaultValue?: string;
 }
 
@@ -246,6 +260,7 @@ export interface _ICommandLineParserData {
 
 // @public
 export interface ICommandLineParserOptions {
+    enableTabCompletionAction?: boolean;
     toolDescription: string;
     toolFilename: string;
 }

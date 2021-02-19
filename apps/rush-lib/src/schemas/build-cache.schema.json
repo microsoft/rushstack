@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Configuration for Rush's build cache.",
+  "description": "For use with the Rush tool, this file provides configuration options for cached project build output. See http://rushjs.io for details.",
+
+  "definitions": {
+    "anything": {
+      "type": ["array", "boolean", "integer", "number", "object", "string"],
+      "items": { "$ref": "#/definitions/anything" }
+    }
+  },
+
+  "type": "object",
+  "allOf": [
+    {
+      "required": ["cacheProvider"],
+      "properties": {
+        "$schema": {
+          "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+          "type": "string"
+        },
+
+        "cacheProvider": {
+          "type": "string",
+          "enum": ["local-only", "azure-blob-storage"]
+        },
+
+        "cacheEntryNamePattern": {
+          "type": "string",
+          "description": "Setting this property overrides the cache entry ID. If this property is set, it must contain a [hash] token. It may also contain a [projectName] or a [projectName:normalized] token."
+        }
+      }
+    },
+    {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "cacheProvider": {
+              "type": "string",
+              "enum": ["local-only"]
+            },
+
+            "cacheEntryNamePattern": { "$ref": "#/definitions/anything" }
+          }
+        },
+
+        {
+          "additionalProperties": false,
+          "required": ["azureBlobStorageConfiguration"],
+          "properties": {
+            "cacheProvider": {
+              "type": "string",
+              "enum": ["azure-blob-storage"]
+            },
+
+            "cacheEntryNamePattern": { "$ref": "#/definitions/anything" },
+
+            "azureBlobStorageConfiguration": {
+              "type": "object",
+
+              "required": ["storageAccountName", "storageContainerName"],
+              "properties": {
+                "storageAccountName": {
+                  "type": "string",
+                  "description": "The name of the the Azure storage account to use for build cache."
+                },
+
+                "storageContainerName": {
+                  "type": "string",
+                  "description": "The name of the container in the Azure storage account to use for build cache."
+                },
+
+                "azureEnvironment": {
+                  "type": "string",
+                  "description": "The Azure environment the storage account exists in. Defaults to AzurePublicCloud.",
+                  "enum": ["AzurePublicCloud", "AzureChina", "AzureGermany", "AzureGovernment"]
+                },
+
+                "blobPrefix": {
+                  "type": "string",
+                  "description": "An optional prefix for cache item blob names."
+                },
+
+                "isCacheWriteAllowed": {
+                  "type": "boolean",
+                  "description": "If set to true, allow writing to the cache. Defaults to false."
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

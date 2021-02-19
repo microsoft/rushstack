@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 
@@ -102,11 +102,17 @@ export class RushXCommandLine {
         return;
       }
 
-      console.log('Executing: ' + JSON.stringify(scriptBody) + os.EOL);
+      const remainingArgs: string[] = args.slice(1);
+      let commandWithArgs: string = scriptBody;
+      if (remainingArgs.length > 0) {
+        commandWithArgs += ' ' + remainingArgs.join(' ');
+      }
+
+      console.log('Executing: ' + JSON.stringify(commandWithArgs) + os.EOL);
 
       const packageFolder: string = path.dirname(packageJsonFilePath);
 
-      const exitCode: number = Utilities.executeLifecycleCommand(scriptBody, {
+      const exitCode: number = Utilities.executeLifecycleCommand(commandWithArgs, {
         rushConfiguration,
         workingDirectory: packageFolder,
         // If there is a rush.json then use its .npmrc from the temp folder.

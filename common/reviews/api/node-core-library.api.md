@@ -14,6 +14,24 @@ export const enum AlreadyExistsBehavior {
     Overwrite = "overwrite"
 }
 
+// @public
+export class AlreadyReportedError extends Error {
+    // (undocumented)
+    static [Symbol.hasInstance](instance: object): boolean;
+    constructor();
+}
+
+// @public
+export class AnsiEscape {
+    static formatForTests(text: string, options?: IAnsiEscapeConvertForTestsOptions): string;
+    static removeCodes(text: string): string;
+    }
+
+// @public
+export type Brand<T, BrandTag extends string> = T & {
+    __brand: BrandTag;
+};
+
 // @beta
 export class Colors {
     // (undocumented)
@@ -93,8 +111,8 @@ export enum ColorValue {
 // @beta
 export class ConsoleTerminalProvider implements ITerminalProvider {
     constructor(options?: Partial<IConsoleTerminalProviderOptions>);
-    readonly eolCharacter: string;
-    readonly supportsColor: boolean;
+    get eolCharacter(): string;
+    get supportsColor(): boolean;
     verboseEnabled: boolean;
     write(data: string, severity: TerminalProviderSeverity): void;
 }
@@ -106,7 +124,41 @@ export const enum Encoding {
 }
 
 // @public
+export class Enum {
+    static getKeyByNumber<TEnumValue, TEnumObject extends {
+        [key: string]: TEnumValue;
+    }>(enumObject: TEnumObject, value: number): keyof typeof enumObject;
+    static getValueByKey<TEnumValue>(enumObject: {
+        [key: string]: TEnumValue | string;
+        [key: number]: TEnumValue | string;
+    }, key: string): TEnumValue;
+    static tryGetKeyByNumber<TEnumValue, TEnumObject extends {
+        [key: string]: TEnumValue;
+    }>(enumObject: TEnumObject, value: number): keyof typeof enumObject | undefined;
+    static tryGetValueByKey<TEnumValue>(enumObject: {
+        [key: string]: TEnumValue | string;
+        [key: number]: TEnumValue | string;
+    }, key: string): TEnumValue | undefined;
+}
+
+// @public
+export class EnvironmentMap {
+    constructor(environmentObject?: Record<string, string | undefined>);
+    readonly caseSensitive: boolean;
+    clear(): void;
+    entries(): IterableIterator<IEnvironmentEntry>;
+    get(name: string): string | undefined;
+    mergeFrom(environmentMap: EnvironmentMap): void;
+    mergeFromObject(environmentObject?: Record<string, string | undefined>): void;
+    names(): IterableIterator<string>;
+    set(name: string, value: string): void;
+    toObject(): Record<string, string>;
+    unset(name: string): void;
+}
+
+// @public
 export class Executable {
+    static spawn(filename: string, args: string[], options?: IExecutableSpawnOptions): child_process.ChildProcess;
     static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
     static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
     }
@@ -132,6 +184,7 @@ export class FileSystem {
     static copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void>;
     static copyFiles(options: IFileSystemCopyFilesOptions): void;
     static copyFilesAsync(options: IFileSystemCopyFilesOptions): Promise<void>;
+    static copyFileToManyAsync(options: IFileSystemCopyFileToManyOptions): Promise<void>;
     static createHardLink(options: IFileSystemCreateLinkOptions): void;
     static createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
     static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void;
@@ -149,6 +202,7 @@ export class FileSystem {
     static ensureFolder(folderPath: string): void;
     static ensureFolderAsync(folderPath: string): Promise<void>;
     static exists(path: string): boolean;
+    static existsAsync(path: string): Promise<boolean>;
     static formatPosixModeBits(modeBits: PosixModeBits): string;
     static getLinkStatistics(path: string): FileSystemStats;
     static getLinkStatisticsAsync(path: string): Promise<FileSystemStats>;
@@ -190,7 +244,8 @@ export type FileSystemStats = fs.Stats;
 // @public
 export class FileWriter {
     close(): void;
-    static open(path: string, flags?: IFileWriterFlags): FileWriter;
+    readonly filePath: string;
+    static open(filePath: string, flags?: IFileWriterFlags): FileWriter;
     write(text: string): void;
 }
 
@@ -198,6 +253,11 @@ export class FileWriter {
 export const enum FolderConstants {
     Git = ".git",
     NodeModules = "node_modules"
+}
+
+// @public
+export interface IAnsiEscapeConvertForTestsOptions {
+    encodeNewlines?: boolean;
 }
 
 // @beta (undocumented)
@@ -220,9 +280,21 @@ export interface IConsoleTerminalProviderOptions {
 }
 
 // @public
+export interface IEnvironmentEntry {
+    name: string;
+    value: string;
+}
+
+// @public
 export interface IExecutableResolveOptions {
     currentWorkingDirectory?: string;
     environment?: NodeJS.ProcessEnv;
+    environmentMap?: EnvironmentMap;
+}
+
+// @public
+export interface IExecutableSpawnOptions extends IExecutableResolveOptions {
+    stdio?: ExecutableStdioMapping;
 }
 
 // @public
@@ -233,11 +305,15 @@ export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
     timeoutMs?: number;
 }
 
-// @public
-export interface IFileSystemCopyFileOptions {
+// @public (undocumented)
+export interface IFileSystemCopyFileBaseOptions {
     alreadyExistsBehavior?: AlreadyExistsBehavior;
-    destinationPath: string;
     sourcePath: string;
+}
+
+// @public
+export interface IFileSystemCopyFileOptions extends IFileSystemCopyFileBaseOptions {
+    destinationPath: string;
 }
 
 // @public
@@ -256,7 +332,13 @@ export interface IFileSystemCopyFilesOptions extends IFileSystemCopyFilesAsyncOp
 }
 
 // @public
+export interface IFileSystemCopyFileToManyOptions extends IFileSystemCopyFileBaseOptions {
+    destinationPaths: string[];
+}
+
+// @public
 export interface IFileSystemCreateLinkOptions {
+    alreadyExistsBehavior?: AlreadyExistsBehavior;
     linkTargetPath: string;
     newLinkPath: string;
 }
@@ -305,6 +387,23 @@ export interface IFileWriterFlags {
 }
 
 // @public
+export interface IImportResolveModuleOptions extends IImportResolveOptions {
+    modulePath: string;
+}
+
+// @public
+export interface IImportResolveOptions {
+    allowSelfReference?: boolean;
+    baseFolderPath: string;
+    includeSystemModules?: boolean;
+}
+
+// @public
+export interface IImportResolvePackageOptions extends IImportResolveOptions {
+    packageName: string;
+}
+
+// @public
 export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
     ensureFolderExists?: boolean;
     onlyIfChanged?: boolean;
@@ -313,6 +412,7 @@ export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
 
 // @public
 export interface IJsonFileStringifyOptions {
+    headerComment?: string;
     newlineConversion?: NewlineKind;
     prettyFormatting?: boolean;
 }
@@ -330,6 +430,13 @@ export interface IJsonSchemaFromFileOptions {
 // @public
 export interface IJsonSchemaValidateOptions {
     customErrorHeader?: string;
+}
+
+// @public
+export class Import {
+    static lazy(moduleName: string, require: (id: string) => unknown): any;
+    static resolveModule(options: IImportResolveModuleOptions): string;
+    static resolvePackage(options: IImportResolvePackageOptions): string;
 }
 
 // @public
@@ -400,10 +507,21 @@ export interface IParsedPackageNameOrError extends IParsedPackageName {
 }
 
 // @public
+export interface IPathFormatConciselyOptions {
+    baseFolder: string;
+    pathToConvert: string;
+}
+
+// @public
 export interface IProtectableMapParameters<K, V> {
     onClear?: (source: ProtectableMap<K, V>) => void;
     onDelete?: (source: ProtectableMap<K, V>, key: K) => void;
     onSet?: (source: ProtectableMap<K, V>, key: K, value: V) => V;
+}
+
+// @beta (undocumented)
+export interface IStringBufferOutputOptions {
+    normalizeSpecialCharacters: boolean;
 }
 
 // @public
@@ -421,6 +539,8 @@ export interface ITerminalProvider {
 
 // @public
 export class JsonFile {
+    // @internal (undocumented)
+    static _formatPathForError: (path: string) => string;
     static load(jsonFilename: string): JsonObject;
     static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): JsonObject;
     static loadAndValidateAsync(jsonFilename: string, jsonSchema: JsonSchema, options?: IJsonSchemaValidateOptions): Promise<JsonObject>;
@@ -436,6 +556,9 @@ export class JsonFile {
     }
 
 // @public
+export type JsonNull = null;
+
+// @public
 export type JsonObject = any;
 
 // @public
@@ -443,7 +566,7 @@ export class JsonSchema {
     ensureCompiled(): void;
     static fromFile(filename: string, options?: IJsonSchemaFromFileOptions): JsonSchema;
     static fromLoadedObject(schemaObject: JsonObject): JsonSchema;
-    readonly shortName: string;
+    get shortName(): string;
     validateObject(jsonObject: JsonObject, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void;
     validateObjectWithCallback(jsonObject: JsonObject, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void;
     }
@@ -469,10 +592,10 @@ export type LegacyCallback<TResult, TError> = (error: TError | null | undefined,
 // @public
 export class LockFile {
     static acquire(resourceFolder: string, resourceName: string, maxWaitMs?: number): Promise<LockFile>;
-    readonly dirtyWhenAcquired: boolean;
-    readonly filePath: string;
+    get dirtyWhenAcquired(): boolean;
+    get filePath(): string;
     static getLockFilePath(resourceFolder: string, resourceName: string, pid?: number): string;
-    readonly isReleased: boolean;
+    get isReleased(): boolean;
     release(): void;
     static tryAcquire(resourceFolder: string, resourceName: string): LockFile | undefined;
     }
@@ -496,6 +619,7 @@ export const enum NewlineKind {
 export class PackageJsonLookup {
     constructor(parameters?: IPackageJsonLookupParameters);
     clearCache(): void;
+    static get instance(): PackageJsonLookup;
     loadNodePackageJson(jsonFilename: string): INodePackageJson;
     static loadOwnPackageJson(dirnameOfCaller: string): IPackageJson;
     loadPackageJson(jsonFilename: string): IPackageJson;
@@ -530,6 +654,11 @@ export class PackageNameParser {
 
 // @public
 export class Path {
+    static convertToBackslashes(inputPath: string): string;
+    static convertToSlashes(inputPath: string): string;
+    static formatConcisely(options: IPathFormatConciselyOptions): string;
+    static isDownwardRelative(inputPath: string): boolean;
+    static isEqual(path1: string, path2: string): boolean;
     static isUnder(childPath: string, parentFolderPath: string): boolean;
     static isUnderOrEqual(childPath: string, parentFolderPath: string): boolean;
     }
@@ -559,9 +688,9 @@ export class ProtectableMap<K, V> {
     forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void;
     get(key: K): V | undefined;
     has(key: K): boolean;
-    readonly protectedView: Map<K, V>;
+    get protectedView(): Map<K, V>;
     set(key: K, value: V): this;
-    readonly size: number;
+    get size(): number;
 }
 
 // @public
@@ -578,12 +707,12 @@ export class Sort {
 // @beta
 export class StringBufferTerminalProvider implements ITerminalProvider {
     constructor(supportsColor?: boolean);
-    readonly eolCharacter: string;
-    getErrorOutput(): string;
-    getOutput(): string;
-    getVerbose(): string;
-    getWarningOutput(): string;
-    readonly supportsColor: boolean;
+    get eolCharacter(): string;
+    getErrorOutput(options?: IStringBufferOutputOptions): string;
+    getOutput(options?: IStringBufferOutputOptions): string;
+    getVerbose(options?: IStringBufferOutputOptions): string;
+    getWarningOutput(options?: IStringBufferOutputOptions): string;
+    get supportsColor(): boolean;
     write(data: string, severity: TerminalProviderSeverity): void;
 }
 
@@ -627,6 +756,7 @@ export class Text {
     static convertToCrLf(input: string): string;
     static convertToLf(input: string): string;
     static ensureTrailingNewline(s: string, newlineKind?: NewlineKind): string;
+    static getNewline(newlineKind: NewlineKind): string;
     static padEnd(s: string, minimumLength: number, paddingCharacter?: string): string;
     static padStart(s: string, minimumLength: number, paddingCharacter?: string): string;
     static replaceAll(input: string, searchValue: string, replaceValue: string): string;
@@ -648,6 +778,12 @@ export enum TextAttribute {
     // (undocumented)
     Underline = 2
 }
+
+// @public
+export class TypeUuid {
+    static isInstanceOf(targetObject: unknown, typeUuid: string): boolean;
+    static registerClass(targetClass: any, typeUuid: string): void;
+    }
 
 
 ```

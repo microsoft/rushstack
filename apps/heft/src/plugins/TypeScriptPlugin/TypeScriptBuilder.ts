@@ -4,23 +4,21 @@
 import * as path from 'path';
 import * as semver from 'semver';
 import {
-  Colors,
   FileSystemStats,
   IFileSystemCreateLinkOptions,
-  IColorableSequence,
   Terminal,
-  ITerminalProvider,
   JsonFile,
-  IPackageJson
+  IPackageJson,
+  InternalError,
+  ITerminalProvider,
+  FileSystem,
+  Path,
+  AlreadyExistsBehavior
 } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
-import { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
+import type * as TTypescript from 'typescript';
 import {
   ExtendedTypeScript,
-  IEmitResolver,
-  IExtendedEmitResult,
-  IEmitHost,
-  IEmitTransformers,
   IExtendedProgram,
   IExtendedSourceFile,
   IResolveModuleNameResolutionHost
@@ -29,10 +27,16 @@ import {
 import { SubprocessRunnerBase } from '../../utilities/subprocess/SubprocessRunnerBase';
 import { Async } from '../../utilities/Async';
 import { PerformanceMeasurer, PerformanceMeasurerAsync } from '../../utilities/Performance';
-import { PrefixProxyTerminalProvider } from '../../utilities/PrefixProxyTerminalProvider';
 import { Tslint } from './Tslint';
 import { Eslint } from './Eslint';
-import { ISharedTypeScriptConfiguration, IEmitModuleKindBase } from '../../stages/BuildStage';
+import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
+import { FileError } from '../../pluginFramework/logging/FileError';
+
+import { EmitFilesPatch, ICachedEmitModuleKind } from './EmitFilesPatch';
+import { HeftSession } from '../../pluginFramework/HeftSession';
+import { FirstEmitCompletedCallbackManager } from './FirstEmitCompletedCallbackManager';
+import { ISharedTypeScriptConfiguration } from './TypeScriptPlugin';
+import { TypeScriptCachedFileSystem } from '../../utilities/fileSystem/TypeScriptCachedFileSystem';
 
 export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfiguration {
   buildFolder: string;
@@ -44,7 +48,7 @@ export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfig
    * If provided, this is included in the logging prefix. For example, if this
    * is set to "other-tsconfig", logging lines will start with [typescript (other-tsconfig)].
    */
-  terminalPrefixLabel: string | undefined;
+  loggerPrefixLabel: string | undefined;
 
   lintingEnabled: boolean;
 
@@ -67,29 +71,7 @@ export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfig
   maxWriteParallelism: number;
 }
 
-interface ICachedEmitModuleKind<TModuleKind> extends IEmitModuleKindBase<TModuleKind> {
-  /**
-   * TypeScript's output is placed in the \<project root\>/.heft/build-cache folder.
-   * This is the the path to the subfolder in the build-cache folder that this emit kind
-   * written to.
-   */
-  cacheOutFolderPath: string;
-
-  /**
-   * Set to true if this is the emit kind that is specified in the tsconfig.json.
-   * Sourcemaps and declarations are only emitted for the primary module kind.
-   */
-  isPrimary: boolean;
-}
-
-interface IFileToWrite {
-  filePath: string;
-  data: string;
-}
-
-type TWatchCompilerHost = TTypescript.WatchCompilerHostOfFilesAndCompilerOptions<
-  TTypescript.EmitAndSemanticDiagnosticsBuilderProgram
->;
+type TWatchCompilerHost = TTypescript.WatchCompilerHostOfFilesAndCompilerOptions<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram>;
 
 const EMPTY_JSON: object = {};
 
@@ -101,21 +83,35 @@ interface ICompilerCapabilities {
   incrementalProgram: boolean;
 }
 
+interface IFileToWrite {
+  filePath: string;
+  data: string;
+}
+
+interface IExtendedEmitResult extends TTypescript.EmitResult {
+  changedSourceFiles: Set<IExtendedSourceFile>;
+  filesToWrite: IFileToWrite[];
+}
+
 export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderConfiguration> {
-  private _typescriptVersion: string;
-  private _typescriptParsedVersion: semver.SemVer;
+  private _typescriptVersion!: string;
+  private _typescriptParsedVersion!: semver.SemVer;
 
-  private _capabilities: ICompilerCapabilities;
+  private _capabilities!: ICompilerCapabilities;
+  private _useIncrementalProgram!: boolean;
 
-  private _eslintEnabled: boolean;
-  private _tslintEnabled: boolean;
-  private _moduleKindsToEmit: ICachedEmitModuleKind<TTypescript.ModuleKind>[];
-  private _eslintConfigFilePath: string;
-  private _tslintConfigFilePath: string;
-  private _typescriptTerminal: Terminal;
+  private _eslintEnabled!: boolean;
+  private _tslintEnabled!: boolean;
+  private _moduleKindsToEmit!: ICachedEmitModuleKind[];
+  private _eslintConfigFilePath!: string;
+  private _tslintConfigFilePath!: string;
+  private _typescriptLogger!: IScopedLogger;
+  private _typescriptTerminal!: Terminal;
+  private _firstEmitCompletedCallbackManager: FirstEmitCompletedCallbackManager;
 
-  private __tsCacheFilePath: string;
+  private __tsCacheFilePath!: string;
   private _tsReadJsonCache: Map<string, object> = new Map<string, object>();
+  private _cachedFileSystem: TypeScriptCachedFileSystem = new TypeScriptCachedFileSystem();
 
   public get filename(): string {
     return __filename;
@@ -126,7 +122,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       const configHash: crypto.Hash = Tslint.getConfigHash(
         this._configuration.tsconfigPath,
         this._typescriptTerminal,
-        this._fileSystem
+        this._cachedFileSystem
       );
       configHash.update(JSON.stringify(this._configuration.additionalModuleKindsToEmit || {}));
       const serializedConfigHash: string = configHash.digest('hex');
@@ -140,23 +136,24 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     return this.__tsCacheFilePath;
   }
 
-  public static getTypeScriptTerminal(
-    terminalProvider: ITerminalProvider,
-    prefixLabel: string | undefined
-  ): Terminal {
-    const prefixTerminalProvider: PrefixProxyTerminalProvider = new PrefixProxyTerminalProvider(
-      terminalProvider,
-      prefixLabel ? `[typescript (${prefixLabel})] ` : '[typescript] '
-    );
+  public constructor(
+    parentGlobalTerminalProvider: ITerminalProvider,
+    configuration: ITypeScriptBuilderConfiguration,
+    heftSession: HeftSession,
+    firstEmitCallback: () => void
+  ) {
+    super(parentGlobalTerminalProvider, configuration, heftSession);
 
-    return new Terminal(prefixTerminalProvider);
+    this._firstEmitCompletedCallbackManager = new FirstEmitCompletedCallbackManager(firstEmitCallback);
+    this.registerSubprocessCommunicationManager(this._firstEmitCompletedCallbackManager);
   }
 
-  public initialize(): void {
-    this._typescriptTerminal = TypeScriptBuilder.getTypeScriptTerminal(
-      this._terminalProvider,
-      this._configuration.terminalPrefixLabel
+  public async invokeAsync(): Promise<void> {
+    const loggerPrefixLabel: string | undefined = this._configuration.loggerPrefixLabel;
+    this._typescriptLogger = await this.requestScopedLoggerAsync(
+      loggerPrefixLabel ? `typescript (${loggerPrefixLabel})` : 'typescript'
     );
+    this._typescriptTerminal = this._typescriptLogger.terminal;
 
     // Determine the compiler version
     const compilerPackageJsonFilename: string = path.join(
@@ -168,7 +165,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     const parsedVersion: semver.SemVer | null = semver.parse(this._typescriptVersion);
     if (!parsedVersion) {
       throw new Error(
-        'Unable to parse version "${this._typescriptVersion}" for TypeScript compiler package in: ' +
+        `Unable to parse version "${this._typescriptVersion}" for TypeScript compiler package in: ` +
           compilerPackageJsonFilename
       );
     }
@@ -186,22 +183,25 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       this._capabilities.incrementalProgram = true;
     }
 
-    this._configuration.buildCacheFolder = this._configuration.buildCacheFolder.replace(/\\/g, '/');
+    // Disable incremental "useIncrementalProgram" in watch mode because its compiler configuration is
+    // different, which will invalidate the incremental build cache.  In order to support this, we'd need
+    // to delete the cache when switching modes, or else maintain two separate cache folders.
+    this._useIncrementalProgram = this._capabilities.incrementalProgram && !this._configuration.watchMode;
+
+    this._configuration.buildCacheFolder = Path.convertToSlashes(this._configuration.buildCacheFolder);
     this._tslintConfigFilePath = path.resolve(this._configuration.buildFolder, 'tslint.json');
     this._eslintConfigFilePath = path.resolve(this._configuration.buildFolder, '.eslintrc.js');
     this._eslintEnabled = this._tslintEnabled =
       this._configuration.lintingEnabled && !this._configuration.watchMode; // Don't run lint in watch mode
 
     if (this._tslintEnabled) {
-      this._tslintEnabled = this._fileSystem.exists(this._tslintConfigFilePath);
+      this._tslintEnabled = this._cachedFileSystem.exists(this._tslintConfigFilePath);
     }
 
     if (this._eslintEnabled) {
-      this._eslintEnabled = this._fileSystem.exists(this._eslintConfigFilePath);
+      this._eslintEnabled = this._cachedFileSystem.exists(this._eslintConfigFilePath);
     }
-  }
 
-  public async invokeAsync(): Promise<void> {
     // Report a warning if the TypeScript version is too old/new.  The current oldest supported version is
     // TypeScript 2.9. Prior to that the "ts.getConfigFileParsingDiagnostics()" API is missing; more fixups
     // would be required to deal with that.  We won't do that work unless someone requests it.
@@ -266,29 +266,36 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         throw new Error('Unable to resolve "tslint" package');
       }
 
+      const tslintScopedLogger: IScopedLogger = await this.requestScopedLoggerAsync(
+        loggerPrefixLabel ? `tslint (${loggerPrefixLabel})` : 'tslint'
+      );
       tslint = new Tslint({
         ts: ts,
         tslintPackagePath: this._configuration.tslintToolPath,
-        terminalPrefixLabel: this._configuration.terminalPrefixLabel,
-        terminalProvider: this._terminalProvider,
+        terminalPrefixLabel: this._configuration.loggerPrefixLabel,
+        scopedLogger: tslintScopedLogger,
         buildFolderPath: this._configuration.buildFolder,
         buildCacheFolderPath: this._configuration.buildCacheFolder,
         linterConfigFilePath: this._tslintConfigFilePath,
-        fileSystem: this._fileSystem,
+        cachedFileSystem: this._cachedFileSystem,
         measurePerformance: measureTsPerformance
       });
     }
+
     let eslint: Eslint | undefined = undefined;
     if (this._eslintEnabled) {
       if (!this._configuration.eslintToolPath) {
         throw new Error('Unable to resolve "eslint" package');
       }
 
+      const eslintScopedLogger: IScopedLogger = await this.requestScopedLoggerAsync(
+        loggerPrefixLabel ? `eslint (${loggerPrefixLabel})` : 'eslint'
+      );
       eslint = new Eslint({
         ts: ts,
         eslintPackagePath: this._configuration.eslintToolPath,
-        terminalPrefixLabel: this._configuration.terminalPrefixLabel,
-        terminalProvider: this._terminalProvider,
+        terminalPrefixLabel: this._configuration.loggerPrefixLabel,
+        scopedLogger: eslintScopedLogger,
         buildFolderPath: this._configuration.buildFolder,
         buildCacheFolderPath: this._configuration.buildCacheFolder,
         linterConfigFilePath: this._eslintConfigFilePath,
@@ -331,6 +338,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
     this._validateTsconfig(ts, tsconfig);
 
+    EmitFilesPatch.install(ts, tsconfig, this._moduleKindsToEmit, /* useBuildCache */ false);
+
     ts.createWatchProgram(compilerHost);
 
     return new Promise(() => {
@@ -346,7 +355,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     measureTsPerformanceAsync: PerformanceMeasurerAsync
   ): Promise<void> {
     // Ensure the cache folder exists
-    this._fileSystem.ensureFolder(this._configuration.buildCacheFolder);
+    this._cachedFileSystem.ensureFolder(this._configuration.buildCacheFolder);
 
     //#region CONFIGURE
     const { duration: configureDurationMs, tsconfig, compilerHost } = measureTsPerformance(
@@ -371,7 +380,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     let builderProgram: TTypescript.BuilderProgram | undefined = undefined;
     let tsProgram: TTypescript.Program;
 
-    if (this._capabilities.incrementalProgram) {
+    if (this._useIncrementalProgram) {
       builderProgram = ts.createIncrementalProgram({
         rootNames: tsconfig.fileNames,
         options: tsconfig.options,
@@ -405,8 +414,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     );
     //#endregion
 
-    //#region DIAGNOSTICS
-    const { duration: diagnosticsDurationMs, diagnostics } = measureTsPerformance('Diagnostics', () => {
+    //#region ANALYSIS
+    const { duration: diagnosticsDurationMs, diagnostics } = measureTsPerformance('Analyze', () => {
       const rawDiagnostics: TTypescript.Diagnostic[] = [
         ...genericProgram.getConfigFileParsingDiagnostics(),
         ...genericProgram.getOptionsDiagnostics(),
@@ -419,16 +428,11 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       );
       return { diagnostics: _diagnostics };
     });
-    this._typescriptTerminal.writeVerboseLine(`Diagnostics: ${diagnosticsDurationMs}ms`);
+    this._typescriptTerminal.writeVerboseLine(`Analyze: ${diagnosticsDurationMs}ms`);
     //#endregion
 
     //#region EMIT
-    const filesToWrite: IFileToWrite[] = [];
-    const writeFileCallback: TTypescript.WriteFileCallback = (filePath: string, data: string) => {
-      filesToWrite.push({ filePath, data });
-    };
-
-    const emitResult: IExtendedEmitResult = this._emit(ts, tsconfig, genericProgram, writeFileCallback);
+    const emitResult: IExtendedEmitResult = this._emit(ts, tsconfig, genericProgram);
     //#endregion
 
     this._typescriptTerminal.writeVerboseLine(`Bind: ${ts.performance.getDuration('Bind')}ms`);
@@ -448,9 +452,10 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     //#region WRITE
     const writePromise: Promise<{ duration: number }> = measureTsPerformanceAsync('Write', () =>
       Async.forEachLimitAsync(
-        filesToWrite,
+        emitResult.filesToWrite,
         this._configuration.maxWriteParallelism,
-        async ({ filePath, data }) => this._fileSystem.writeFile(filePath, data, { ensureFolderExists: true })
+        async ({ filePath, data }) =>
+          this._cachedFileSystem.writeFile(filePath, data, { ensureFolderExists: true })
       )
     );
     //#endregion
@@ -480,7 +485,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     //#endregion
 
     const { duration: writeDuration } = await writePromise;
-    this._typescriptTerminal.writeVerboseLine(`I/O Write: ${writeDuration}ms (${filesToWrite.length} files)`);
+    this._typescriptTerminal.writeVerboseLine(
+      `I/O Write: ${writeDuration}ms (${emitResult.filesToWrite.length} files)`
+    );
 
     //#region HARDLINK/COPY
     const shouldHardlink: boolean = this._configuration.copyFromCacheMode !== 'copy';
@@ -501,15 +508,13 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         if (shouldHardlink) {
           queueLinkOrCopy = (options: IFileSystemCreateLinkOptions) => {
             linkPromises.push(
-              this._fileSystem
-                .createHardLinkExtendedAsync({ ...options, preserveExisting: true })
-                .then((successful) => {
-                  if (successful) {
-                    linkCount++;
-                  }
+              this._cachedFileSystem
+                .createHardLinkAsync({ ...options, alreadyExistsBehavior: AlreadyExistsBehavior.Ignore })
+                .then(() => {
+                  linkCount++;
                 })
                 .catch((error) => {
-                  if (!this._fileSystem.isNotExistError(error)) {
+                  if (!FileSystem.isNotExistError(error)) {
                     // Only re-throw errors that aren't not-exist errors
                     throw error;
                   }
@@ -519,7 +524,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         } else {
           queueLinkOrCopy = (options: IFileSystemCreateLinkOptions) => {
             linkPromises.push(
-              this._fileSystem
+              this._cachedFileSystem
                 .copyFileAsync({
                   sourcePath: options.linkTargetPath,
                   destinationPath: options.newLinkPath
@@ -528,7 +533,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
                   linkCount++;
                 })
                 .catch((error) => {
-                  if (!this._fileSystem.isNotExistError(error)) {
+                  if (!FileSystem.isNotExistError(error)) {
                     // Only re-throw errors that aren't not-exist errors
                     throw error;
                   }
@@ -545,24 +550,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
             );
 
             for (const { cacheOutFolderPath, outFolderPath, isPrimary } of this._moduleKindsToEmit) {
+              // Only primary module kinds emit declarations
               if (isPrimary) {
-                // Only primary module kinds emit declarations and sourcemaps
-                if (tsconfig.options.declaration) {
-                  const dtsFilename: string = `${relativeFilenameWithoutExtension}.d.ts`;
-                  queueLinkOrCopy({
-                    linkTargetPath: path.join(cacheOutFolderPath, dtsFilename),
-                    newLinkPath: path.join(outFolderPath, dtsFilename)
-                  });
-                }
-
-                if (tsconfig.options.sourceMap && !sourceFile.isDeclarationFile) {
-                  const jsMapFilename: string = `${relativeFilenameWithoutExtension}.js.map`;
-                  queueLinkOrCopy({
-                    linkTargetPath: path.join(cacheOutFolderPath, jsMapFilename),
-                    newLinkPath: path.join(outFolderPath, jsMapFilename)
-                  });
-                }
-
                 if (tsconfig.options.declarationMap) {
                   const dtsMapFilename: string = `${relativeFilenameWithoutExtension}.d.ts.map`;
                   queueLinkOrCopy({
@@ -570,8 +559,25 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
                     newLinkPath: path.join(outFolderPath, dtsMapFilename)
                   });
                 }
+
+                if (tsconfig.options.declaration) {
+                  const dtsFilename: string = `${relativeFilenameWithoutExtension}.d.ts`;
+                  queueLinkOrCopy({
+                    linkTargetPath: path.join(cacheOutFolderPath, dtsFilename),
+                    newLinkPath: path.join(outFolderPath, dtsFilename)
+                  });
+                }
               }
 
+              if (tsconfig.options.sourceMap && !sourceFile.isDeclarationFile) {
+                const jsMapFilename: string = `${relativeFilenameWithoutExtension}.js.map`;
+                queueLinkOrCopy({
+                  linkTargetPath: path.join(cacheOutFolderPath, jsMapFilename),
+                  newLinkPath: path.join(outFolderPath, jsMapFilename)
+                });
+              }
+
+              // Write the .js file last in case something is watching its timestamp
               if (!sourceFile.isDeclarationFile) {
                 const jsFilename: string = `${relativeFilenameWithoutExtension}.js`;
                 queueLinkOrCopy({
@@ -592,18 +598,17 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     this._typescriptTerminal.writeVerboseLine(
       `${shouldHardlink ? 'Hardlink' : 'Copy from cache'}: ${hardlinkDuration}ms (${hardlinkCount} files)`
     );
+
+    this._firstEmitCompletedCallbackManager.callback();
     //#endregion
 
-    let compilationFailed: boolean = false;
     if (diagnostics.length > 0) {
-      this._typescriptTerminal.writeErrorLine(
-        `Encountered ${diagnostics.length} TypeScript error${diagnostics.length > 1 ? 's' : ''}:`
+      this._typescriptTerminal.writeLine(
+        `Encountered ${diagnostics.length} TypeScript issue${diagnostics.length > 1 ? 's' : ''}:`
       );
       for (const diagnostic of diagnostics) {
-        this._printDiagnosticMessage(ts, diagnostic, true);
+        this._printDiagnosticMessage(ts, diagnostic);
       }
-
-      compilationFailed = true;
     }
 
     if (eslint) {
@@ -613,19 +618,12 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     if (tslint) {
       tslint.reportFailures();
     }
-
-    if (compilationFailed) {
-      throw new Error('TypeScript compilation failed.');
-    }
   }
 
-  private _printDiagnosticMessage(
-    ts: ExtendedTypeScript,
-    diagnostic: TTypescript.Diagnostic,
-    withIndent: boolean = false
-  ): void {
-    let terminalMessage: (string | IColorableSequence)[];
+  private _printDiagnosticMessage(ts: ExtendedTypeScript, diagnostic: TTypescript.Diagnostic): void {
     // Code taken from reference example
+    let diagnosticMessage: string;
+    let errorObject: Error;
     if (diagnostic.file) {
       const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!);
       const message: string = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
@@ -633,142 +631,90 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         this._configuration.buildFolder,
         diagnostic.file.fileName
       );
-      terminalMessage = [
-        Colors.red(`ERROR: ${buildFolderRelativeFilename}:${line + 1}:${character + 1}`),
-        ` - (TS${diagnostic.code}) `,
-        Colors.red(message)
-      ];
+      const formattedMessage: string = `(TS${diagnostic.code}) ${message}`;
+      errorObject = new FileError(formattedMessage, buildFolderRelativeFilename, line + 1, character + 1);
+      diagnosticMessage = errorObject.toString();
     } else {
-      terminalMessage = [ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')];
+      diagnosticMessage = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+      errorObject = new Error(diagnosticMessage);
     }
 
-    if (withIndent) {
-      terminalMessage = ['  ', ...terminalMessage];
-    }
+    const adjustedCategory: TTypescript.DiagnosticCategory = this._getAdjustedDiagnosticCategory(
+      diagnostic,
+      ts
+    );
 
-    switch (diagnostic.category) {
+    switch (adjustedCategory) {
       case ts.DiagnosticCategory.Error: {
-        this._typescriptTerminal.writeErrorLine(...terminalMessage);
+        this._typescriptLogger.emitError(errorObject);
         break;
       }
 
       case ts.DiagnosticCategory.Warning: {
-        this._typescriptTerminal.writeWarningLine(...terminalMessage);
+        this._typescriptLogger.emitWarning(errorObject);
         break;
       }
 
       default: {
-        this._typescriptTerminal.writeLine(...terminalMessage);
+        this._typescriptTerminal.writeLine(...diagnosticMessage);
         break;
       }
     }
   }
 
+  private _getAdjustedDiagnosticCategory(
+    diagnostic: TTypescript.Diagnostic,
+    ts: ExtendedTypeScript
+  ): TTypescript.DiagnosticCategory {
+    // Workaround for https://github.com/microsoft/TypeScript/issues/40058
+    // The compiler reports a hard error for issues such as this:
+    //
+    //    error TS6133: 'x' is declared but its value is never read.
+    //
+    // These should properly be treated as warnings, because they are purely cosmetic issues.
+    // TODO: Maybe heft should provide a config file for managing DiagnosticCategory mappings.
+    if (diagnostic.reportsUnnecessary && diagnostic.category === ts.DiagnosticCategory.Error) {
+      return ts.DiagnosticCategory.Warning;
+    }
+
+    // These pedantic checks also should not be treated as hard errors
+    switch (diagnostic.code) {
+      case ts.Diagnostics.Property_0_has_no_initializer_and_is_not_definitely_assigned_in_the_constructor
+        .code:
+      case ts.Diagnostics
+        .Element_implicitly_has_an_any_type_because_expression_of_type_0_can_t_be_used_to_index_type_1.code:
+        return ts.DiagnosticCategory.Warning;
+    }
+
+    return diagnostic.category;
+  }
+
   private _emit(
     ts: ExtendedTypeScript,
     tsconfig: TTypescript.ParsedCommandLine,
-    genericProgram: TTypescript.BuilderProgram | TTypescript.Program,
-    writeFile: TTypescript.WriteFileCallback
+    genericProgram: TTypescript.BuilderProgram | TTypescript.Program
   ): IExtendedEmitResult {
-    let foundPrimary: boolean = false;
-    const moduleKindCompilerOptions: Map<TTypescript.ModuleKind, TTypescript.CompilerOptions> = new Map();
-    let defaultModuleKind: TTypescript.ModuleKind;
-    for (const { moduleKind, cacheOutFolderPath, isPrimary } of this._moduleKindsToEmit) {
-      if (isPrimary) {
-        if (foundPrimary) {
-          throw new Error('Multiple primary module emit kinds encountered.');
-        } else {
-          foundPrimary = true;
-        }
-
-        moduleKindCompilerOptions.set(moduleKind, {
-          ...tsconfig.options,
-          outDir: cacheOutFolderPath
-        });
-        defaultModuleKind = moduleKind;
-      } else {
-        moduleKindCompilerOptions.set(moduleKind, {
-          ...tsconfig.options,
-          outDir: cacheOutFolderPath,
-          module: moduleKind,
-
-          // Don't emit declarations or sourcemaps for secondary module kinds
-          declaration: false,
-          sourceMap: false,
-          declarationMap: false
-        });
-      }
-    }
-
-    const baseEmitFiles: typeof ts.emitFiles = ts.emitFiles;
+    const filesToWrite: IFileToWrite[] = [];
 
     const changedFiles: Set<IExtendedSourceFile> = new Set<IExtendedSourceFile>();
-    // Override the underlying file emitter to run itself once for each flavor
-    // This is a rather inelegant way to convince the TypeScript compiler not to duplicate parse/link/check
-    ts.emitFiles = (
-      resolver: IEmitResolver,
-      host: IEmitHost,
-      targetSourceFile: IExtendedSourceFile | undefined,
-      emitTransformers: IEmitTransformers,
-      emitOnlyDtsFiles?: boolean,
-      onlyBuildInfo?: boolean,
-      forceDtsEmit?: boolean
-    ): TTypescript.EmitResult => {
-      if (onlyBuildInfo || emitOnlyDtsFiles) {
-        // There should only be one tsBuildInfo and one set of declaration files
-        return baseEmitFiles(
-          resolver,
-          host,
-          targetSourceFile,
-          emitTransformers,
-          emitOnlyDtsFiles,
-          onlyBuildInfo,
-          forceDtsEmit
-        );
-      } else {
-        if (targetSourceFile) {
-          changedFiles.add(targetSourceFile);
-        }
+    EmitFilesPatch.install(ts, tsconfig, this._moduleKindsToEmit, /* useBuildCache */ true, changedFiles);
 
-        let defaultModuleKindResult: TTypescript.EmitResult;
-        let emitSkipped: boolean = false;
-        for (const [moduleKind, compilerOptions] of moduleKindCompilerOptions.entries()) {
-          const flavorResult: TTypescript.EmitResult = baseEmitFiles(
-            resolver,
-            {
-              ...host,
-              getCompilerOptions: () => compilerOptions
-            },
-            targetSourceFile,
-            ts.getTransformers(compilerOptions, undefined, emitOnlyDtsFiles),
-            emitOnlyDtsFiles,
-            onlyBuildInfo,
-            forceDtsEmit
-          );
-
-          emitSkipped = emitSkipped || flavorResult.emitSkipped;
-          if (moduleKind === defaultModuleKind) {
-            defaultModuleKindResult = flavorResult;
-          }
-          // Should results be aggregated, in case for whatever reason the diagnostics are not the same?
-        }
-        return {
-          ...defaultModuleKindResult!,
-          emitSkipped
-        };
-      }
+    const writeFileCallback: TTypescript.WriteFileCallback = (filePath: string, data: string) => {
+      const redirectedFilePath: string = EmitFilesPatch.getRedirectedFilePath(filePath);
+      filesToWrite.push({ filePath: redirectedFilePath, data });
     };
 
     const result: TTypescript.EmitResult = genericProgram.emit(
       undefined, // Target source file
-      writeFile
+      writeFileCallback
     );
 
-    ts.emitFiles = baseEmitFiles;
+    EmitFilesPatch.uninstall(ts);
 
     return {
       ...result,
-      changedSourceFiles: changedFiles
+      changedSourceFiles: changedFiles,
+      filesToWrite
     };
   }
 
@@ -812,24 +758,24 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           throw new Error(
             `Module kind "${additionalModuleKindToEmit.moduleKind}" is already specified in the tsconfig file.`
           );
-        } else if (tsconfigOutFolderName === additionalModuleKindToEmit.outFolderPath) {
+        } else if (tsconfigOutFolderName === additionalModuleKindToEmit.outFolderName) {
           throw new Error(
-            `Output folder "${additionalModuleKindToEmit.outFolderPath}" is already specified in the tsconfig file.`
+            `Output folder "${additionalModuleKindToEmit.outFolderName}" is already specified in the tsconfig file.`
           );
         } else if (specifiedKinds.has(moduleKind)) {
           throw new Error(
             `Module kind "${additionalModuleKindToEmit.moduleKind}" is specified in more than one ` +
               'additionalModuleKindsToEmit entry.'
           );
-        } else if (specifiedOutDirs.has(additionalModuleKindToEmit.outFolderPath)) {
+        } else if (specifiedOutDirs.has(additionalModuleKindToEmit.outFolderName)) {
           throw new Error(
-            `Output folder "${additionalModuleKindToEmit.outFolderPath}" is specified in more than one ` +
+            `Output folder "${additionalModuleKindToEmit.outFolderName}" is specified in more than one ` +
               'additionalModuleKindsToEmit entry.'
           );
         } else {
           const outFolderPath: string = this._addModuleKindToEmit(
             moduleKind,
-            additionalModuleKindToEmit.outFolderPath,
+            additionalModuleKindToEmit.outFolderName,
             false
           );
           specifiedKinds.add(moduleKind);
@@ -855,9 +801,10 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     this._moduleKindsToEmit.push({
       outFolderPath: outFolderPath,
       moduleKind,
-      cacheOutFolderPath: path
-        .resolve(this._configuration.buildCacheFolder, outFolderName)
-        .replace(/\\/g, '/'),
+      cacheOutFolderPath: Path.convertToSlashes(
+        path.resolve(this._configuration.buildCacheFolder, outFolderName)
+      ),
+
       isPrimary
     });
 
@@ -867,14 +814,14 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _loadTsconfig(ts: ExtendedTypeScript): TTypescript.ParsedCommandLine {
     const parsedConfigFile: ReturnType<typeof ts.readConfigFile> = ts.readConfigFile(
       this._configuration.tsconfigPath,
-      this._fileSystem.readFile
+      this._cachedFileSystem.readFile
     );
     const currentFolder: string = path.dirname(this._configuration.tsconfigPath);
     const tsconfig: TTypescript.ParsedCommandLine = ts.parseJsonConfigFileContent(
       parsedConfigFile.config,
       {
-        fileExists: this._fileSystem.exists,
-        readFile: this._fileSystem.readFile,
+        fileExists: this._cachedFileSystem.exists,
+        readFile: this._cachedFileSystem.readFile,
         readDirectory: (
           folderPath: string,
           extensions?: ReadonlyArray<string>,
@@ -890,15 +837,15 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
             /* useCaseSensitiveFileNames */ true,
             currentFolder,
             depth,
-            this._fileSystem.readFolderFilesAndDirectories.bind(this._fileSystem),
-            this._fileSystem.getRealPath.bind(this._fileSystem)
+            this._cachedFileSystem.readFolderFilesAndDirectories.bind(this._cachedFileSystem),
+            this._cachedFileSystem.getRealPath.bind(this._cachedFileSystem)
           ),
         useCaseSensitiveFileNames: true
       },
       currentFolder
     );
 
-    if (this._capabilities.incrementalProgram) {
+    if (this._useIncrementalProgram) {
       tsconfig.options.incremental = true;
       tsconfig.options.tsBuildInfoFile = this._tsCacheFilePath;
     }
@@ -912,31 +859,31 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   ): TTypescript.CompilerHost {
     let compilerHost: TTypescript.CompilerHost;
 
-    if (this._capabilities.incrementalProgram) {
+    if (this._useIncrementalProgram) {
       compilerHost = ts.createIncrementalCompilerHost(tsconfig.options);
     } else {
       compilerHost = ts.createCompilerHost(tsconfig.options);
     }
 
-    compilerHost.realpath = this._fileSystem.getRealPath.bind(this._fileSystem);
+    compilerHost.realpath = this._cachedFileSystem.getRealPath.bind(this._cachedFileSystem);
     compilerHost.readFile = (filePath: string) => {
       try {
-        return this._fileSystem.readFile(filePath, {});
+        return this._cachedFileSystem.readFile(filePath, {});
       } catch (error) {
-        if (this._fileSystem.isNotExistError(error)) {
+        if (FileSystem.isNotExistError(error)) {
           return undefined;
         } else {
           throw error;
         }
       }
     };
-    compilerHost.fileExists = this._fileSystem.exists.bind(this._fileSystem);
+    compilerHost.fileExists = this._cachedFileSystem.exists.bind(this._cachedFileSystem);
     compilerHost.directoryExists = (directoryPath: string) => {
       try {
-        const stats: FileSystemStats = this._fileSystem.getStatistics(directoryPath);
+        const stats: FileSystemStats = this._cachedFileSystem.getStatistics(directoryPath);
         return stats.isDirectory() || stats.isSymbolicLink();
       } catch (error) {
-        if (this._fileSystem.isNotExistError(error)) {
+        if (FileSystem.isNotExistError(error)) {
           return false;
         } else {
           throw error;
@@ -944,7 +891,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       }
     };
     compilerHost.getDirectories = (folderPath: string) =>
-      this._fileSystem.readFolderFilesAndDirectories(folderPath).directories;
+      this._cachedFileSystem.readFolderFilesAndDirectories(folderPath).directories;
 
     return compilerHost;
   }
@@ -953,6 +900,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     ts: ExtendedTypeScript,
     tsconfig: TTypescript.ParsedCommandLine
   ): TWatchCompilerHost {
+    let hasAlreadyReportedFirstEmit: boolean = false;
     return ts.createWatchCompilerHost(
       tsconfig.fileNames,
       tsconfig.options,
@@ -960,23 +908,44 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       (
         rootNames: ReadonlyArray<string> | undefined,
         options: TTypescript.CompilerOptions | undefined,
-        host?: TTypescript.CompilerHost,
+        compilerHost?: TTypescript.CompilerHost,
         oldProgram?: TTypescript.EmitAndSemanticDiagnosticsBuilderProgram,
         configFileParsingDiagnostics?: ReadonlyArray<TTypescript.Diagnostic>,
         projectReferences?: ReadonlyArray<TTypescript.ProjectReference> | undefined
       ) => {
-        // TODO: Support additionalModuleKindsToEmit
+        if (compilerHost === undefined) {
+          throw new InternalError('_buildWatchCompilerHost() expects a compilerHost to be configured');
+        }
+
+        const originalWriteFile: TTypescript.WriteFileCallback = compilerHost.writeFile;
+        compilerHost.writeFile = (filePath: string, ...rest: unknown[]) => {
+          const redirectedFilePath: string = EmitFilesPatch.getRedirectedFilePath(filePath);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (originalWriteFile as any).call(this, redirectedFilePath, ...rest);
+        };
+
         return ts.createEmitAndSemanticDiagnosticsBuilderProgram(
           rootNames,
           options,
-          host,
+          compilerHost,
           oldProgram,
           configFileParsingDiagnostics,
           projectReferences
         );
       },
       (diagnostic: TTypescript.Diagnostic) => this._printDiagnosticMessage(ts, diagnostic),
-      (diagnostic: TTypescript.Diagnostic) => this._printDiagnosticMessage(ts, diagnostic),
+      (diagnostic: TTypescript.Diagnostic) => {
+        this._printDiagnosticMessage(ts, diagnostic);
+
+        if (
+          !hasAlreadyReportedFirstEmit &&
+          (diagnostic.code === ts.Diagnostics.Found_0_errors_Watching_for_file_changes.code ||
+            diagnostic.code === ts.Diagnostics.Found_1_error_Watching_for_file_changes.code)
+        ) {
+          this._firstEmitCompletedCallbackManager.callback();
+          hasAlreadyReportedFirstEmit = true;
+        }
+      },
       tsconfig.projectReferences
     );
   }
@@ -988,7 +957,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         return jsonData;
       } else {
         try {
-          const fileContents: string = this._fileSystem.readFile(filePath);
+          const fileContents: string = this._cachedFileSystem.readFile(filePath);
           if (!fileContents) {
             jsonData = EMPTY_JSON;
           } else {

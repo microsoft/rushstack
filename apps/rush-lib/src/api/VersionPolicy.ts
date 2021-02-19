@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { cloneDeep } from 'lodash';
 import * as semver from 'semver';
-import { IPackageJson } from '@rushstack/node-core-library';
+import { IPackageJson, Import, Enum } from '@rushstack/node-core-library';
 
 import {
   IVersionPolicyJson,
@@ -16,6 +15,8 @@ import {
 import { PackageJsonEditor } from './PackageJsonEditor';
 import { RushConfiguration } from './RushConfiguration';
 import { RushConfigurationProject } from './RushConfigurationProject';
+
+const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 /**
  * Type of version bumps
@@ -61,7 +62,7 @@ export abstract class VersionPolicy {
    */
   public constructor(versionPolicyJson: IVersionPolicyJson) {
     this._policyName = versionPolicyJson.policyName;
-    this._definitionName = VersionPolicyDefinitionName[versionPolicyJson.definitionName];
+    this._definitionName = Enum.getValueByKey(VersionPolicyDefinitionName, versionPolicyJson.definitionName);
     this._exemptFromRushChange = versionPolicyJson.exemptFromRushChange || false;
 
     const jsonDependencies: IVersionPolicyDependencyJson = versionPolicyJson.dependencies || {};
@@ -78,8 +79,10 @@ export abstract class VersionPolicy {
    * @internal
    */
   public static load(versionPolicyJson: IVersionPolicyJson): VersionPolicy | undefined {
-    const definition: VersionPolicyDefinitionName =
-      VersionPolicyDefinitionName[versionPolicyJson.definitionName];
+    const definition: VersionPolicyDefinitionName = Enum.getValueByKey(
+      VersionPolicyDefinitionName,
+      versionPolicyJson.definitionName
+    );
     if (definition === VersionPolicyDefinitionName.lockStepVersion) {
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       return new LockStepVersionPolicy(versionPolicyJson as ILockStepVersionJson);
@@ -217,7 +220,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
   public constructor(versionPolicyJson: ILockStepVersionJson) {
     super(versionPolicyJson);
     this._version = new semver.SemVer(versionPolicyJson.version);
-    this._nextBump = BumpType[versionPolicyJson.nextBump];
+    this._nextBump = Enum.getValueByKey(BumpType, versionPolicyJson.nextBump);
     this._mainProject = versionPolicyJson.mainProject;
   }
 
@@ -320,7 +323,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
   }
 
   private _updatePackageVersion(project: IPackageJson, newVersion: semver.SemVer): IPackageJson {
-    const updatedProject: IPackageJson = cloneDeep(project);
+    const updatedProject: IPackageJson = lodash.cloneDeep(project);
     updatedProject.version = newVersion.format();
     return updatedProject;
   }
@@ -379,7 +382,7 @@ export class IndividualVersionPolicy extends VersionPolicy {
     if (this.lockedMajor) {
       const version: semver.SemVer = new semver.SemVer(project.version);
       if (version.major < this.lockedMajor) {
-        const updatedProject: IPackageJson = cloneDeep(project);
+        const updatedProject: IPackageJson = lodash.cloneDeep(project);
         updatedProject.version = `${this._lockedMajor}.0.0`;
         return updatedProject;
       } else if (version.major > this.lockedMajor) {

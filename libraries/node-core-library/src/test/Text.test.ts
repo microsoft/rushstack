@@ -73,4 +73,29 @@ describe('Text', () => {
       expect(Text.truncateWithEllipsis('123456', 5)).toEqual('12...');
     });
   });
+
+  describe('convertToLf', () => {
+    test('degenerate adjacent newlines', () => {
+      expect(Text.convertToLf('')).toEqual('');
+      expect(Text.convertToLf('\n')).toEqual('\n');
+      expect(Text.convertToLf('\r')).toEqual('\n');
+      expect(Text.convertToLf('\n\n')).toEqual('\n\n');
+      expect(Text.convertToLf('\r\n')).toEqual('\n');
+      expect(Text.convertToLf('\n\r')).toEqual('\n');
+      expect(Text.convertToLf('\r\r')).toEqual('\n\n');
+      expect(Text.convertToLf('\n\n\n')).toEqual('\n\n\n');
+      expect(Text.convertToLf('\r\n\n')).toEqual('\n\n');
+      expect(Text.convertToLf('\n\r\n')).toEqual('\n\n');
+      expect(Text.convertToLf('\r\r\n')).toEqual('\n\n');
+      expect(Text.convertToLf('\n\n\r')).toEqual('\n\n');
+      expect(Text.convertToLf('\r\n\r')).toEqual('\n\n');
+      expect(Text.convertToLf('\n\r\r')).toEqual('\n\n');
+      expect(Text.convertToLf('\r\r\r')).toEqual('\n\n\n');
+    });
+    test('degenerate mixed newlines', () => {
+      expect(Text.convertToLf('\nX\n\r')).toEqual('\nX\n');
+      expect(Text.convertToLf('\rX\r')).toEqual('\nX\n');
+      expect(Text.convertToLf('\r \n')).toEqual('\n \n');
+    });
+  });
 });

@@ -1,4 +1,4 @@
-# Localization Plugin for Webpack
+# @rushstack/localization-plugin
 
 ## Installation
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-This plugin produces webpack bundles that have multiple locales' variants of strings embedded. It also
+This Webpack plugin produces bundles that have multiple locales' variants of strings embedded. It also
 has out-of-box support for RESX files in addition to JSON strings files (with the extension `.loc.json`), including
 support for generating typings.
 
@@ -273,3 +273,12 @@ If this option is set to `true`, loc modules typings will be exported wrapped in
 allows strings to be imported by using the `import strings from './strings.loc.json';` syntax instead of
 the `import { string1 } from './strings.loc.json';` or the `import * as strings from './strings.loc.json';`
 syntax. This option is not recommended.
+
+
+## Links
+
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/webpack/localization-plugin/CHANGELOG.md) - Find
+  out what's new in the latest version
+
+`@rushstack/localization-plugin` is part of the [Rush Stack](https://rushstack.io/) family of projects.

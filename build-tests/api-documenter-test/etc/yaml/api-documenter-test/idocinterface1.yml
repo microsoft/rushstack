@@ -1,26 +1,23 @@
-### YamlMime:UniversalReference
-items:
-  - uid: 'api-documenter-test!IDocInterface1:interface'
-    name: IDocInterface1
-    fullName: IDocInterface1
-    langs:
-      - typeScript
-    type: interface
+### YamlMime:TSType
+name: IDocInterface1
+uid: 'api-documenter-test!IDocInterface1:interface'
+package: api-documenter-test!
+fullName: IDocInterface1
+summary: ''
+remarks: ''
+isPreview: false
+isDeprecated: false
+type: interface
+properties:
+  - name: regularProperty
+    uid: 'api-documenter-test!IDocInterface1#regularProperty:member'
     package: api-documenter-test!
-    children:
-      - 'api-documenter-test!IDocInterface1#regularProperty:member'
-  - uid: 'api-documenter-test!IDocInterface1#regularProperty:member'
-    summary: Does something
-    name: regularProperty
     fullName: regularProperty
-    langs:
-      - typeScript
-    type: property
+    summary: Does something
+    remarks: ''
+    isPreview: false
+    isDeprecated: false
     syntax:
       content: 'regularProperty: SystemEvent;'
       return:
-        type:
-          - 'api-documenter-test!SystemEvent:class'
-references:
-  - uid: 'api-documenter-test!SystemEvent:class'
-    name: SystemEvent
+        type: '<xref uid="api-documenter-test!SystemEvent:class" />'

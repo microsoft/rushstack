@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
 import { CommandLineAction } from '@rushstack/ts-command-line';
@@ -26,7 +26,7 @@ export class InitAction extends CommandLineAction {
     // No parameters yet
   }
 
-  protected onExecute(): Promise<void> {
+  protected async onExecute(): Promise<void> {
     // override
     const inputFilePath: string = path.resolve(__dirname, '../schemas/api-extractor-template.json');
     const outputFilePath: string = path.resolve(ExtractorConfig.FILENAME);
@@ -47,7 +47,5 @@ export class InitAction extends CommandLineAction {
       '\nThe recommended location for this file is in the project\'s "config" subfolder,\n' +
         'or else in the top-level folder with package.json.'
     );
-
-    return Promise.resolve();
   }
 }

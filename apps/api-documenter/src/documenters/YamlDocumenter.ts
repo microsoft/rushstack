@@ -39,7 +39,11 @@ import {
   ApiVariable,
   ApiTypeAlias
 } from '@microsoft/api-extractor-model';
-import { DeclarationReference, Navigation, Meaning } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import {
+  DeclarationReference,
+  Navigation,
+  Meaning
+} from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import {
   IYamlApiFile,
   IYamlItem,
@@ -52,6 +56,7 @@ import {
 import { IYamlTocFile, IYamlTocItem } from '../yaml/IYamlTocFile';
 import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
+import { convertUDPYamlToSDP } from '../utils/ToSdpConvertHelper';
 
 const yamlApiSchema: JsonSchema = JsonSchema.fromFile(
   path.join(__dirname, '..', 'yaml', 'typescript.schema.json')
@@ -89,7 +94,6 @@ export class YamlDocumenter {
 
   private _apiItemsByCanonicalReference: Map<string, ApiItem>;
   private _yamlReferences: IYamlReferences | undefined;
-  private _outputFolder: string;
 
   public constructor(apiModel: ApiModel, newDocfxNamespaces: boolean = false) {
     this._apiModel = apiModel;
@@ -102,17 +106,17 @@ export class YamlDocumenter {
 
   /** @virtual */
   public generateFiles(outputFolder: string): void {
-    this._outputFolder = outputFolder;
-
     console.log();
-    this._deleteOldOutputFiles();
+    this._deleteOldOutputFiles(outputFolder);
 
     for (const apiPackage of this._apiModel.packages) {
       console.log(`Writing ${apiPackage.name} package`);
-      this._visitApiItems(apiPackage, undefined);
+      this._visitApiItems(outputFolder, apiPackage, undefined);
     }
 
-    this._writeTocFile(this._apiModel.packages);
+    convertUDPYamlToSDP(outputFolder);
+
+    this._writeTocFile(outputFolder, this._apiModel.packages);
   }
 
   /** @virtual */
@@ -130,7 +134,11 @@ export class YamlDocumenter {
     // (overridden by child class)
   }
 
-  private _visitApiItems(apiItem: ApiDocumentedItem, parentYamlFile: IYamlApiFile | undefined): boolean {
+  private _visitApiItems(
+    outputFolder: string,
+    apiItem: ApiDocumentedItem,
+    parentYamlFile: IYamlApiFile | undefined
+  ): boolean {
     let savedYamlReferences: IYamlReferences | undefined;
     if (!this._shouldEmbed(apiItem.kind)) {
       savedYamlReferences = this._yamlReferences;
@@ -158,7 +166,7 @@ export class YamlDocumenter {
       const children: ApiItem[] = this._getLogicalChildren(apiItem);
       for (const child of children) {
         if (child instanceof ApiDocumentedItem) {
-          if (this._visitApiItems(child, newYamlFile)) {
+          if (this._visitApiItems(outputFolder, child, newYamlFile)) {
             if (!yamlItem.children) {
               yamlItem.children = [];
             }
@@ -173,7 +181,7 @@ export class YamlDocumenter {
 
       this._yamlReferences = savedYamlReferences;
 
-      const yamlFilePath: string = this._getYamlFilePath(apiItem);
+      const yamlFilePath: string = this._getYamlFilePath(outputFolder, apiItem);
 
       if (apiItem.kind === ApiItemKind.Package) {
         console.log('Writing ' + yamlFilePath);
@@ -270,10 +278,10 @@ export class YamlDocumenter {
   /**
    * Write the table of contents
    */
-  private _writeTocFile(apiItems: ReadonlyArray<ApiItem>): void {
+  private _writeTocFile(outputFolder: string, apiItems: ReadonlyArray<ApiItem>): void {
     const tocFile: IYamlTocFile = this.buildYamlTocFile(apiItems);
 
-    const tocFilePath: string = path.join(this._outputFolder, 'toc.yml');
+    const tocFilePath: string = path.join(outputFolder, 'toc.yml');
     console.log('Writing ' + tocFilePath);
     this._writeYamlFile(tocFile, tocFilePath, '', undefined);
   }
@@ -994,7 +1002,7 @@ export class YamlDocumenter {
     }
   }
 
-  private _getYamlFilePath(apiItem: ApiItem): string {
+  private _getYamlFilePath(outputFolder: string, apiItem: ApiItem): string {
     let result: string = '';
 
     for (const current of apiItem.getHierarchy()) {
@@ -1021,11 +1029,11 @@ export class YamlDocumenter {
       disambiguator = `-${apiItem.kind.toLowerCase()}`;
     }
 
-    return path.join(this._outputFolder, result + disambiguator + '.yml');
+    return path.join(outputFolder, result + disambiguator + '.yml');
   }
 
-  private _deleteOldOutputFiles(): void {
-    console.log('Deleting old output from ' + this._outputFolder);
-    FileSystem.ensureEmptyFolder(this._outputFolder);
+  private _deleteOldOutputFiles(outputFolder: string): void {
+    console.log('Deleting old output from ' + outputFolder);
+    FileSystem.ensureEmptyFolder(outputFolder);
   }
 }

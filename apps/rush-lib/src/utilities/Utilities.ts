@@ -6,10 +6,12 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as tty from 'tty';
 import * as path from 'path';
-import * as wordwrap from 'wordwrap';
-import { JsonFile, IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
-import { RushConfiguration } from '../api/RushConfiguration';
+import wordwrap from 'wordwrap';
+import { JsonFile, IPackageJson, FileSystem, FileConstants, Terminal } from '@rushstack/node-core-library';
 import { Stream } from 'stream';
+import { CommandLineHelper } from '@rushstack/ts-command-line';
+
+import { RushConfiguration } from '../api/RushConfiguration';
 
 export interface IEnvironment {
   // NOTE: the process.env doesn't actually support "undefined" as a value.
@@ -89,6 +91,10 @@ export interface IEnvironmentPathOptions {
   additionalPathFolders?: string[] | undefined;
 }
 
+export interface IDisposable {
+  dispose(): void;
+}
+
 interface ICreateEnvironmentForRushCommandPathOptions extends IEnvironmentPathOptions {
   projectRoot: string | undefined;
   commonTempFolder: string | undefined;
@@ -114,9 +120,9 @@ interface ICreateEnvironmentForRushCommandOptions {
 export class Utilities {
   /**
    * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
-   * this looks something like "/usr/username/"
+   * this looks something like "/home/username/"
    */
-  public static getHomeDirectory(): string {
+  public static getHomeFolder(): string {
     const unresolvedUserFolder: string | undefined =
       process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
     const dirError: string = "Unable to determine the current user's home directory";
@@ -443,6 +449,15 @@ export class Utilities {
   }
 
   /**
+   * Utility to determine if the app should restrict writing to the console.
+   */
+  public static shouldRestrictConsoleOutput(): boolean {
+    return (
+      CommandLineHelper.isTabCompletionActionRequest(process.argv) || process.argv.indexOf('--json') !== -1
+    );
+  }
+
+  /**
    * For strings passed to a shell command, this adds appropriate escaping
    * to avoid misinterpretation of spaces or special characters.
    *
@@ -491,26 +506,6 @@ export class Utilities {
       },
       options.maxInstallAttempts
     );
-  }
-
-  public static withFinally<T>(options: { promise: Promise<T>; finally: () => void }): Promise<T> {
-    return options.promise
-      .then<T>((result: T) => {
-        try {
-          options.finally();
-        } catch (error) {
-          return Promise.reject(error);
-        }
-        return result;
-      })
-      .catch<T>((error: Error) => {
-        try {
-          options.finally();
-        } catch (innerError) {
-          return Promise.reject(innerError);
-        }
-        return Promise.reject(error);
-      });
   }
 
   /**
@@ -624,6 +619,43 @@ export class Utilities {
 
   public static getPackageDepsFilenameForCommand(command: string): string {
     return `package-deps_${command}.json`;
+  }
+
+  public static printMessageInBox(
+    message: string,
+    terminal: Terminal,
+    boxWidth: number = Math.floor(Utilities.getConsoleWidth() / 2)
+  ): void {
+    const maxLineLength: number = boxWidth - 10;
+
+    const wrappedMessage: string = Utilities.wrapWords(message, maxLineLength);
+    const wrappedMessageLines: string[] = wrappedMessage.split('\n');
+
+    // ╔═══════════╗
+    // ║  Message  ║
+    // ╚═══════════╝
+    terminal.writeLine(` ╔${'═'.repeat(boxWidth - 2)}╗ `);
+    for (const line of wrappedMessageLines) {
+      const trimmedLine: string = line.trim();
+      const padding: number = boxWidth - trimmedLine.length - 2;
+      const leftPadding: number = Math.floor(padding / 2);
+      const rightPadding: number = padding - leftPadding;
+      terminal.writeLine(` ║${' '.repeat(leftPadding)}${trimmedLine}${' '.repeat(rightPadding)}║ `);
+    }
+    terminal.writeLine(` ╚${'═'.repeat(boxWidth - 2)}╝ `);
+  }
+
+  public static async usingAsync<TDisposable extends IDisposable>(
+    getDisposableAsync: () => Promise<TDisposable> | IDisposable,
+    doActionAsync: (disposable: TDisposable) => Promise<void> | void
+  ): Promise<void> {
+    let disposable: TDisposable | undefined;
+    try {
+      disposable = (await getDisposableAsync()) as TDisposable;
+      await doActionAsync(disposable);
+    } finally {
+      disposable?.dispose();
+    }
   }
 
   private static _executeLifecycleCommandInternal<TCommandResult>(

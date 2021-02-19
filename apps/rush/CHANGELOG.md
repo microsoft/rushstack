@@ -1,6 +1,250 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 23 Jul 2020 23:47:59 GMT and should not be manually modified.
+This log was last generated on Fri, 19 Feb 2021 06:28:28 GMT and should not be manually modified.
+
+## 5.40.2
+Fri, 19 Feb 2021 06:28:28 GMT
+
+### Updates
+
+- Allow usage of Node.js 8.x since we received feedback that some projects are still supporting it
+
+## 5.40.1
+Fri, 19 Feb 2021 01:45:27 GMT
+
+### Updates
+
+- Fix a minor issue with the "rush init" template
+
+## 5.40.0
+Wed, 17 Feb 2021 01:35:11 GMT
+
+_Version update only_
+
+## 5.39.2
+Wed, 17 Feb 2021 01:34:11 GMT
+
+### Updates
+
+- (EXPERIMENTAL) Add a "--disable-cache" parameter for disabling the build cache.
+- (EXPERIMENTAL) Add a "disableBuildCache" setting in command-line.json for disabling the build cache.
+- (EXPERIMENTAL) Add options in rush-project.json for disabling the build cache for entire projects, or for individual commands for that project.
+- Normalize selection CLI parameters for "rush install"
+- Add experimental "rush setup" command
+- Add an experimental new config file common/config/artifactory.json for enabling Artifactory integration
+
+## 5.39.1
+Sat, 13 Feb 2021 03:14:52 GMT
+
+### Patches
+
+- Convert the experimental "--watch" parameter into a "watchForChanges: true" setting in command-line.json, based on user feedback
+
+### Updates
+
+- Disable build cache after initial build when "--watch" is specified. This saves disk space, reduces CPU usage, and improves compatibility with downstream file watcher processes (e.g. "webpack --watch").
+
+## 5.39.0
+Thu, 11 Feb 2021 04:06:02 GMT
+
+### Minor changes
+
+- Add a new parameter "--watch" that watches for filesystem changes and rebuilds the affected Rush projects; this feature can also be used with custom bulk commands (GitHub #2458, #1122)
+
+### Updates
+
+- Improve the wording of some log messages
+
+## 5.38.0
+Mon, 01 Feb 2021 20:42:04 GMT
+
+### Updates
+
+- Add new command-line parameters for bulk commands: "--to-except", "--from", "--only", "--impacted-by", "--impacted-by-except", and "--from-version-policy" (GitHub #2354)
+- Change the short name for "--changed-projects-only" to be "-c" (so that "-o" can be used for the new "--only" parameter)
+- Change the "--from" parameter so that it now includes all dependencies as people expected.  To skip dependencies, use the new "--impacted-by" parameter.  (GitHub issue #1447)
+
+## 5.37.0
+Sat, 30 Jan 2021 01:50:27 GMT
+
+### Updates
+
+- Improve performance of association of repo file states with projects to speed up build commands in large repos.
+- Add `publishFolder` property to the project configuration to allow publishing a sub-folder of the project
+- Add support for --from flag for filtered installs when using workspaces
+- Fix an issue where the Rush cache feature did not correctly detect files that were both tracked by git and were expected to be cached build output.
+- Improve logging for the "rush write-build-cache" command
+- Correct some spelling mistakes in rush.json
+- Fix an error "Cannot get dependency key" sometimes reported by "rush install" (GitHub #2460)
+- Updade the "rush init" template to specify PNPM 5.15.2, which fixes a performance regression introduced in PNPM 5.13.7
+
+## 5.36.2
+Thu, 21 Jan 2021 04:51:19 GMT
+
+### Updates
+
+- Update Node.js version checks to support the new LTS release
+- Update rush.json produced by rush init to use PNPM 5.14.3
+- Use forward slashes when creating deploy zip file for Unix compatibility
+
+## 5.36.1
+Fri, 08 Jan 2021 06:12:37 GMT
+
+### Updates
+
+- Fix an issue where projects with empty scripts would still have arguments appended.
+
+## 5.36.0
+Fri, 08 Jan 2021 05:36:55 GMT
+
+### Updates
+
+-  Allow the git binary path to be overridden via the RUSH_GIT_BINARY_PATH environment variable.
+- Introduce an experimental build cache feature.
+- Add the ability to customize the commit message used when "rush version" is run.
+- Remove the "experimental" label from some Rush commands that are now stable.
+
+## 5.35.2
+Tue, 03 Nov 2020 23:34:30 GMT
+
+### Updates
+
+- Fix bug where version process is using a wrong `git.addChanges` signature
+
+## 5.35.1
+Fri, 30 Oct 2020 05:17:42 GMT
+
+### Updates
+
+- Fix a recent "rush scan" regression (which resulted from enabling "esModuleInterop")
+
+## 5.35.0
+Wed, 28 Oct 2020 21:44:10 GMT
+
+### Updates
+
+- Adds an --ignore-hooks flag to every rush action that skips event hooks during execution of the action.
+- Fix bug where version process was not adding version-policy configuration file changes into the version commit
+
+## 5.34.4
+Sat, 17 Oct 2020 00:23:18 GMT
+
+### Updates
+
+- When running `rush version --bump`, only include package.json updates in the generated commit
+- Fix Rush peer dependency validation when satisfied with a package alias
+- Prevent `rush unlink` from breaking installs for non-workspace projects
+- Add documentation for incremental option for buld custom commands
+
+## 5.34.3
+Wed, 30 Sep 2020 21:04:15 GMT
+
+### Updates
+
+- Update to build with @rushstack/heft-node-rig
+- Update README.md
+- Upgrade compiler; the API now requires TypeScript 3.9 or newer
+
+## 5.34.2
+Mon, 21 Sep 2020 22:00:03 GMT
+
+### Updates
+
+- Fix an issue where "rush build" output was lagged due to stream-collator not activating streams aggressively enough
+- Fix incorrect "successful" exit status code
+
+## 5.34.1
+Thu, 17 Sep 2020 07:13:04 GMT
+
+### Updates
+
+- Fix a regression that reported an error "The EnvironmentConfiguration must be initialized before values can be accessed"
+
+## 5.34.0
+Thu, 17 Sep 2020 01:23:35 GMT
+
+### Updates
+
+- Big redesign of "rush build" console reporting (fixes GitHub #2135)
+- Implement RUSH_GLOBAL_FOLDER environment variable (GitHub #2187)
+- Use underscores instead of asterisks for italic formatting in changelogs to match the way Prettier formats italics in markdown.
+- In PNPM 5, --no-lock and --resolution-strategy flags have been removed. Do not pass these flags if they are not supported by the PNPM version used in the repository.
+
+## 5.33.2
+Fri, 21 Aug 2020 22:45:58 GMT
+
+### Updates
+
+- Fix an issue where PNPM would sometimes prompt for input during "rush publish" (GitHub #1940)
+- Fix an issue that prevented Rush from logging in verbose mode
+
+## 5.33.1
+Thu, 20 Aug 2020 18:25:41 GMT
+
+### Updates
+
+- Fix issues where installs could fail after running 'rush version' while the 'usePnpmFrozenLockfileForRushInstall' experiment is enabled. See PR #2116 for more details.
+- Fix an issue where "rush deploy" would sometimes report an "already exists" when using the "files" setting in package.json (GitHub #2121)
+- Allow multiple simultaneous invocations of "rush deploy" (GitHub #2125)
+- Load and validate local projects lazily to further improve Rush startup times.
+
+## 5.33.0
+Wed, 19 Aug 2020 00:17:48 GMT
+
+### Updates
+
+- Add support for shell tab completion. See PR for details: https://github.com/microsoft/rushstack/pull/2060
+- Use Import.lazy() to optimize the startup time for Rush
+
+## 5.32.3
+Tue, 18 Aug 2020 03:48:56 GMT
+
+### Updates
+
+- Fix an issue where install-run.js sometimes assigned the shell PATH incorrectly due to inconsistent character case
+
+## 5.32.2
+Fri, 14 Aug 2020 21:03:48 GMT
+
+### Updates
+
+- Resolve issue with version --bump where the wrong hash would get written to the pnpm-lock file
+
+## 5.32.1
+Fri, 14 Aug 2020 04:06:30 GMT
+
+### Updates
+
+- Change method used to calculate integrity of tarballs
+
+## 5.32.0
+Thu, 13 Aug 2020 00:53:43 GMT
+
+### Patches
+
+- Update temp project tarball integrities during rush bump
+
+## 5.31.0
+Wed, 12 Aug 2020 19:33:44 GMT
+
+### Updates
+
+- Updated project to build with Heft
+- Fix an issue where "rushx" did not pass additional command-line arguments to the package.json script (GitHub #1232)
+
+## 5.30.3
+Fri, 07 Aug 2020 21:09:05 GMT
+
+### Updates
+
+- Fix an issue where Mac OS sometimes reported "An unrecognized file .DS_Store was found in the Rush config folder"
+
+## 5.30.2
+Wed, 05 Aug 2020 17:57:07 GMT
+
+### Updates
+
+- Fix an issue where a package version bump would not bump downstream packages with a `workspace:*` dependency specifier.
 
 ## 5.30.1
 Thu, 23 Jul 2020 23:47:59 GMT
@@ -229,7 +473,7 @@ Tue, 28 Jan 2020 03:57:30 GMT
 ## 5.19.3
 Tue, 28 Jan 2020 01:35:53 GMT
 
-*Version update only*
+_Version update only_
 
 ## 5.19.2
 Tue, 28 Jan 2020 01:08:26 GMT
@@ -716,7 +960,7 @@ Wed, 22 Aug 2018 20:58:58 GMT
 ## 5.0.2
 Sat, 18 Aug 2018 01:27:39 GMT
 
-*Version update only*
+_Version update only_
 
 ## 5.0.1
 Sat, 18 Aug 2018 01:21:59 GMT
@@ -846,7 +1090,7 @@ Thu, 18 Jan 2018 19:02:07 GMT
 ## 4.2.2
 Wed, 17 Jan 2018 10:49:31 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.2.1
 Fri, 12 Jan 2018 23:35:48 GMT
@@ -1101,7 +1345,7 @@ Fri, 24 Feb 2017 22:54:16 GMT
 ## 2.2.1
 Fri, 24 Feb 2017 22:53:18 GMT
 
-*Version update only*
+_Version update only_
 
 ## 2.2.0
 Fri, 24 Feb 2017 22:44:31 GMT
@@ -1319,5 +1563,5 @@ Sat, 03 Dec 2016 07:47:39 GMT
 
 ## 1.0.0
 
-*Initial release*
+_Initial release_
 

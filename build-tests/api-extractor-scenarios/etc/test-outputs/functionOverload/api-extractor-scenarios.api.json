@@ -236,6 +236,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 5,
@@ -295,6 +296,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 5,

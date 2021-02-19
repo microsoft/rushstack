@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build-sass",
-  "version": "4.12.2",
+  "version": "4.13.46",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -26,8 +26,8 @@
     "postcss-modules": "~1.5.0"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "workspace:*",
     "@microsoft/node-library-build": "workspace:*",
+    "@microsoft/rush-stack-compiler-3.9": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@types/autoprefixer": "9.7.2",
     "@types/clean-css": "4.2.1",

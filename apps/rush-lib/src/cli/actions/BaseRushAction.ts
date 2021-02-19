@@ -1,24 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 
-import {
-  CommandLineAction,
-  ICommandLineActionOptions,
-  CommandLineStringListParameter
-} from '@rushstack/ts-command-line';
-import { LockFile, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
+import { CommandLineAction, ICommandLineActionOptions } from '@rushstack/ts-command-line';
+import { LockFile } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { EventHooksManager } from '../../logic/EventHooksManager';
 import { RushCommandLineParser } from './../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 
 export interface IBaseRushActionOptions extends ICommandLineActionOptions {
   /**
@@ -69,21 +63,23 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
     if (this.rushConfiguration) {
       if (!this._safeForSimultaneousRushProcesses) {
         if (!LockFile.tryAcquire(this.rushConfiguration.commonTempFolder, 'rush')) {
-          console.log(colors.red(`Another rush command is already running in this repository.`));
+          console.log(colors.red(`Another Rush command is already running in this repository.`));
           process.exit(1);
         }
       }
     }
 
-    console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
-    return this.run();
+    if (!Utilities.shouldRestrictConsoleOutput()) {
+      console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
+    }
+    return this.runAsync();
   }
 
   /**
    * All Rush actions need to implement this method. This method runs after
    * environment has been set up by the base class.
    */
-  protected abstract run(): Promise<void>;
+  protected abstract runAsync(): Promise<void>;
 
   private _ensureEnvironment(): void {
     if (this.rushConfiguration) {
@@ -103,7 +99,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
  * The base class that most Rush command-line actions should extend.
  */
 export abstract class BaseRushAction extends BaseConfiglessRushAction {
-  private _eventHooksManager: EventHooksManager;
+  private _eventHooksManager: EventHooksManager | undefined;
 
   protected get eventHooksManager(): EventHooksManager {
     if (!this._eventHooksManager) {
@@ -123,66 +119,5 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
     }
 
     return super.onExecute();
-  }
-
-  protected mergeProjectsWithVersionPolicy(
-    projectsParameters: CommandLineStringListParameter,
-    versionPoliciesParameters: CommandLineStringListParameter
-  ): RushConfigurationProject[] {
-    const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-
-    const projects: RushConfigurationProject[] = [];
-    for (const projectParameter of projectsParameters.values) {
-      if (projectParameter === '.') {
-        const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(process.cwd());
-        if (packageJson) {
-          const project: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(
-            packageJson.name
-          );
-          if (project) {
-            projects.push(project);
-          } else {
-            console.log(
-              colors.red(
-                'Rush is not currently running in a project directory specified in rush.json. ' +
-                  `The "." value for the ${projectsParameters.longName} parameter is not allowed.`
-              )
-            );
-            throw new AlreadyReportedError();
-          }
-        } else {
-          console.log(
-            colors.red(
-              'Rush is not currently running in a project directory. ' +
-                `The "." value for the ${projectsParameters.longName} parameter is not allowed.`
-            )
-          );
-          throw new AlreadyReportedError();
-        }
-      } else {
-        const project:
-          | RushConfigurationProject
-          | undefined = this.rushConfiguration.findProjectByShorthandName(projectParameter);
-        if (!project) {
-          console.log(colors.red(`The project '${projectParameter}' does not exist in rush.json.`));
-          throw new AlreadyReportedError();
-        }
-
-        projects.push(project);
-      }
-    }
-
-    if (versionPoliciesParameters.values && versionPoliciesParameters.values.length > 0) {
-      this.rushConfiguration.projects.forEach((project) => {
-        const matches: boolean = versionPoliciesParameters.values.some((policyName) => {
-          return project.versionPolicyName === policyName;
-        });
-        if (matches) {
-          projects.push(project);
-        }
-      });
-    }
-
-    return projects;
   }
 }

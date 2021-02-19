@@ -28,7 +28,7 @@ interface ILocalizedReconstructionElement extends IReconstructionElement {
 
 interface IDynamicReconstructionElement extends IReconstructionElement {
   kind: 'dynamic';
-  valueFn: (locale: string | undefined, token: string | undefined) => string;
+  valueFn: (locale: string, token: string | undefined) => string;
   size: number;
   escapedBackslash: string;
   token?: string;
@@ -331,7 +331,7 @@ export class AssetProcessor {
   private static _parseStringToReconstructionSequence(
     plugin: LocalizationPlugin,
     source: string,
-    jsonpFunction: (locale: string, chunkIdToken: string) => string
+    jsonpFunction: (locale: string, chunkIdToken: string | undefined) => string
   ): IParseResult {
     const issues: string[] = [];
     const reconstructionSeries: IReconstructionElement[] = [];
@@ -422,15 +422,21 @@ export class AssetProcessor {
     chunkHasLocalizedModules: (chunk: Webpack.compilation.Chunk) => boolean,
     noStringsLocaleName: string
   ): (locale: string, chunkIdToken: string | undefined) => string {
-    const idsWithStrings: Set<string> = new Set<string>();
-    const idsWithoutStrings: Set<string> = new Set<string>();
+    const idsWithStrings: Set<number | string> = new Set<number | string>();
+    const idsWithoutStrings: Set<number | string> = new Set<number | string>();
 
     const asyncChunks: Set<Webpack.compilation.Chunk> = chunk.getAllAsyncChunks();
     for (const asyncChunk of asyncChunks) {
+      const chunkId: number | string | null = asyncChunk.id;
+
+      if (chunkId === null || chunkId === undefined) {
+        throw new Error(`Chunk "${asyncChunk.name}"'s ID is null or undefined.`);
+      }
+
       if (chunkHasLocalizedModules(asyncChunk)) {
-        idsWithStrings.add(asyncChunk.id);
+        idsWithStrings.add(chunkId);
       } else {
-        idsWithoutStrings.add(asyncChunk.id);
+        idsWithoutStrings.add(chunkId);
       }
     }
 
@@ -454,7 +460,7 @@ export class AssetProcessor {
         chunkMapping[idWithoutStrings] = 1;
       }
 
-      return (locale: string, chunkIdToken: string) => {
+      return (locale: string, chunkIdToken: string | undefined) => {
         if (!locale) {
           throw new Error('Missing locale name.');
         }

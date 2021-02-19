@@ -8,8 +8,8 @@ import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 
 export class UpdateAction extends BaseInstallAction {
-  private _fullParameter: CommandLineFlagParameter;
-  private _recheckParameter: CommandLineFlagParameter;
+  private _fullParameter!: CommandLineFlagParameter;
+  private _recheckParameter!: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -70,7 +70,7 @@ export class UpdateAction extends BaseInstallAction {
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
-      toProjects: []
+      pnpmFilterArguments: []
     };
   }
 }

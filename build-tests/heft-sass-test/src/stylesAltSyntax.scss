@@ -1,0 +1,11 @@
+/**
+ * This file gets copied to the "lib" folder because its extension is registered in copy-static-assets.json
+ * Then Webpack uses sass-loader to transpile, css-loader to embed, and finally style-loader to apply it to the DOM.
+ */
+
+// Testing SCSS syntax
+$marginValue: 20px;
+
+.label {
+  margin-bottom: $marginValue;
+}

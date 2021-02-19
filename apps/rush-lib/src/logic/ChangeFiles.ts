@@ -2,13 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import { EOL } from 'os';
-import * as glob from 'glob';
+import { JsonFile, Import } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
 import { IChangeInfo } from '../api/ChangeManagement';
 import { IChangelog } from '../api/Changelog';
-import { JsonFile } from '@rushstack/node-core-library';
 import { RushConfiguration } from '../api/RushConfiguration';
+
+const glob: typeof import('glob') = Import.lazy('glob', require);
 
 /**
  * This class represents the collection of change files existing in the repo and provides operations
@@ -18,7 +19,7 @@ export class ChangeFiles {
   /**
    * Change file path relative to changes folder.
    */
-  private _files: string[];
+  private _files: string[] | undefined;
   private _changesPath: string;
 
   public constructor(changesPath: string) {
@@ -102,11 +103,11 @@ export class ChangeFiles {
    * Get the array of absolute paths of change files.
    */
   public getFiles(): string[] {
-    if (this._files) {
-      return this._files;
+    if (!this._files) {
+      this._files = glob.sync(`${this._changesPath}/**/*.json`) || [];
     }
-    this._files = glob.sync(`${this._changesPath}/**/*.json`);
-    return this._files || [];
+
+    return this._files;
   }
 
   /**

@@ -29,8 +29,9 @@ export class PnpmPackageManager extends PackageManager {
     if (parsedVersion.major >= 3) {
       this._shrinkwrapFilename = RushConstants.pnpmV3ShrinkwrapFilename;
 
-      if (parsedVersion.minor >= 1) {
+      if (parsedVersion.minor >= 1 && parsedVersion.major < 5) {
         // Introduced in version 3.1.0-0
+        // Removed in 5.0.0. See https://github.com/pnpm/pnpm/releases/tag/v5.0.0
         this.supportsResolutionStrategy = true;
       }
     } else {

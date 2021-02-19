@@ -1,17 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import * as fetch from 'node-fetch';
 import * as fs from 'fs';
-import * as http from 'http';
-import HttpsProxyAgent = require('https-proxy-agent');
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import { FileSystem, JsonFile, PosixModeBits, NewlineKind } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  JsonFile,
+  PosixModeBits,
+  NewlineKind,
+  AlreadyReportedError
+} from '@rushstack/node-core-library';
 
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
 import { AsyncRecycler } from '../../utilities/AsyncRecycler';
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
@@ -29,7 +32,8 @@ import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import { PolicyValidator } from '../policy/PolicyValidator';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { WebClient, WebClientResponse } from '../../utilities/WebClient';
+import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 
 export interface IInstallManagerOptions {
   /**
@@ -92,9 +96,10 @@ export interface IInstallManagerOptions {
   maxInstallAttempts: number;
 
   /**
-   * The list of projects that should be installed, along with project dependencies.
+   * Filters to be passed to PNPM during installation, if applicable.
+   * These restrict the scope of a workspace installation.
    */
-  toProjects: ReadonlyArray<RushConfigurationProject>;
+  pnpmFilterArguments: string[];
 }
 
 /**
@@ -106,6 +111,8 @@ export abstract class BaseInstallManager {
   private _commonTempInstallFlag: LastInstallFlag;
   private _commonTempLinkFlag: LastLinkFlag;
   private _installRecycler: AsyncRecycler;
+  private _npmSetupValidated: boolean = false;
+  private _syncNpmrcAlreadyCalled: boolean = false;
 
   private _options: IInstallManagerOptions;
 
@@ -141,7 +148,7 @@ export abstract class BaseInstallManager {
   }
 
   public async doInstall(): Promise<void> {
-    const isFilteredInstall: boolean = this.options.toProjects.length > 0;
+    const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
 
@@ -186,6 +193,9 @@ export abstract class BaseInstallManager {
     };
 
     if (cleanInstall || !shrinkwrapIsUpToDate || !variantIsUpToDate || !canSkipInstall()) {
+      console.log();
+      await this.validateNpmSetup();
+
       let publishedRelease: boolean | undefined;
       try {
         publishedRelease = await this._checkIfReleaseIsPublished();
@@ -236,16 +246,16 @@ export abstract class BaseInstallManager {
         }
       }
 
-      // Perform any post-install work the install manager requires
-      await this.postInstallAsync();
-
       // Create the marker file to indicate a successful install if it's not a filtered install
       if (!isFilteredInstall) {
         this._commonTempInstallFlag.create();
       }
-
-      console.log('');
     }
+
+    // Perform any post-install work the install manager requires
+    await this.postInstallAsync();
+
+    console.log('');
   }
 
   protected abstract prepareCommonTempAsync(
@@ -264,7 +274,8 @@ export abstract class BaseInstallManager {
 
     // Git hooks are only installed if the repo opts in by including files in /common/git-hooks
     const hookSource: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
-    const hookDestination: string | undefined = Git.getHooksFolder();
+    const git: Git = new Git(this.rushConfiguration);
+    const hookDestination: string | undefined = git.getHooksFolder();
 
     if (FileSystem.exists(hookSource) && hookDestination) {
       const allHookFilenames: string[] = FileSystem.readFolder(hookSource);
@@ -349,7 +360,7 @@ export abstract class BaseInstallManager {
     // This will be used by bulk scripts to determine the correct Shrinkwrap file to track.
     const currentVariantJsonFilename: string = this._rushConfiguration.currentVariantJsonFilename;
     const currentVariantJson: ICurrentVariantJson = {
-      variant: this.options.variant || null // eslint-disable-line @rushstack/no-null
+      variant: this.options.variant || null
     };
 
     // Determine if the variant is already current by updating current-variant.json.
@@ -373,6 +384,7 @@ export abstract class BaseInstallManager {
       this._rushConfiguration.commonRushConfigFolder,
       this._rushConfiguration.commonTempFolder
     );
+    this._syncNpmrcAlreadyCalled = true;
 
     // also, copy the pnpmfile.js if it exists
     if (this._rushConfiguration.packageManager === 'pnpm') {
@@ -475,7 +487,11 @@ export abstract class BaseInstallManager {
       // we theoretically could use the lock file, but we would need to clean the store if the
       // lockfile existed, otherwise PNPM would hang indefinitely. it is simpler to rely on Rush's
       // last install flag, which encapsulates the entire installation
-      args.push('--no-lock');
+
+      // This setting was removed in 5.0.0. See https://github.com/pnpm/pnpm/releases/tag/v5.0.0
+      if (semver.lt(this._rushConfiguration.packageManagerToolVersion, '5.0.0')) {
+        args.push('--no-lock');
+      }
 
       if (
         this._rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall &&
@@ -529,59 +545,58 @@ export abstract class BaseInstallManager {
     }
   }
 
-  private _checkIfReleaseIsPublished(): Promise<boolean> {
-    return Promise.resolve().then(() => {
-      const lastCheckFile: string = path.join(
-        this._rushGlobalFolder.nodeSpecificPath,
-        'rush-' + Rush.version,
-        'last-check.flag'
-      );
+  private async _checkIfReleaseIsPublished(): Promise<boolean> {
+    const lastCheckFile: string = path.join(
+      this._rushGlobalFolder.nodeSpecificPath,
+      'rush-' + Rush.version,
+      'last-check.flag'
+    );
 
-      if (FileSystem.exists(lastCheckFile)) {
-        let cachedResult: boolean | 'error' | undefined = undefined;
-        try {
-          // NOTE: mtimeMs is not supported yet in Node.js 6.x
-          const nowMs: number = new Date().getTime();
-          const ageMs: number = nowMs - FileSystem.getStatistics(lastCheckFile).mtime.getTime();
-          const HOUR: number = 60 * 60 * 1000;
+    if (FileSystem.exists(lastCheckFile)) {
+      let cachedResult: boolean | 'error' | undefined = undefined;
+      try {
+        // NOTE: mtimeMs is not supported yet in Node.js 6.x
+        const nowMs: number = new Date().getTime();
+        const ageMs: number = nowMs - FileSystem.getStatistics(lastCheckFile).mtime.getTime();
+        const HOUR: number = 60 * 60 * 1000;
 
-          // Is the cache too old?
-          if (ageMs < 24 * HOUR) {
-            // No, read the cached result
-            cachedResult = JsonFile.load(lastCheckFile);
-          }
-        } catch (e) {
-          // Unable to parse file
+        // Is the cache too old?
+        if (ageMs < 24 * HOUR) {
+          // No, read the cached result
+          cachedResult = JsonFile.load(lastCheckFile);
         }
-        if (cachedResult === 'error') {
-          return Promise.reject(new Error('Unable to contact server'));
-        }
-        if (cachedResult === true || cachedResult === false) {
-          return cachedResult;
-        }
+      } catch (e) {
+        // Unable to parse file
       }
+      if (cachedResult === 'error') {
+        throw new Error('Unable to contact server');
+      }
+      if (cachedResult === true || cachedResult === false) {
+        return cachedResult;
+      }
+    }
 
-      // Before we start the network operation, record a failed state.  If the process exits for some reason,
-      // this will record the error.  It will also update the timestamp to prevent other Rush instances
-      // from attempting to update the file.
-      JsonFile.save('error', lastCheckFile, { ensureFolderExists: true });
+    // Before we start the network operation, record a failed state.  If the process exits for some reason,
+    // this will record the error.  It will also update the timestamp to prevent other Rush instances
+    // from attempting to update the file.
+    await JsonFile.saveAsync('error', lastCheckFile, { ensureFolderExists: true });
 
+    try {
       // For this check we use the official registry, not the private registry
-      return this._queryIfReleaseIsPublished('https://registry.npmjs.org:443')
-        .then((publishedRelease: boolean) => {
-          // Cache the result
-          JsonFile.save(publishedRelease, lastCheckFile, { ensureFolderExists: true });
-          return publishedRelease;
-        })
-        .catch((error: Error) => {
-          JsonFile.save('error', lastCheckFile, { ensureFolderExists: true });
-          return Promise.reject(error);
-        });
-    });
+      const publishedRelease: boolean = await this._queryIfReleaseIsPublishedAsync(
+        'https://registry.npmjs.org:443'
+      );
+      // Cache the result
+      await JsonFile.saveAsync(publishedRelease, lastCheckFile, { ensureFolderExists: true });
+      return publishedRelease;
+    } catch (error) {
+      await JsonFile.saveAsync('error', lastCheckFile, { ensureFolderExists: true });
+      throw error;
+    }
   }
 
   // Helper for checkIfReleaseIsPublished()
-  private _queryIfReleaseIsPublished(registryUrl: string): Promise<boolean> {
+  private async _queryIfReleaseIsPublishedAsync(registryUrl: string): Promise<boolean> {
     let queryUrl: string = registryUrl;
     if (queryUrl[-1] !== '/') {
       queryUrl += '/';
@@ -589,60 +604,45 @@ export abstract class BaseInstallManager {
     // Note that the "@" symbol does not normally get URL-encoded
     queryUrl += RushConstants.rushPackageName.replace('/', '%2F');
 
-    const userAgent: string = `pnpm/? npm/? node/${process.version} ${os.platform()} ${os.arch()}`;
+    const webClient: WebClient = new WebClient();
+    webClient.userAgent = `pnpm/? npm/? node/${process.version} ${os.platform()} ${os.arch()}`;
+    webClient.accept = 'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*';
 
-    const headers: fetch.Headers = new fetch.Headers();
-    headers.append('user-agent', userAgent);
-    headers.append('accept', 'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*');
-
-    let agent: http.Agent | undefined = undefined;
-    if (process.env.HTTP_PROXY) {
-      agent = new HttpsProxyAgent(process.env.HTTP_PROXY);
+    const response: WebClientResponse = await webClient.fetch(queryUrl);
+    if (!response.ok) {
+      throw new Error('Failed to query');
     }
 
-    return fetch
-      .default(queryUrl, {
-        headers: headers,
-        agent: agent
-      })
-      .then((response: fetch.Response) => {
-        if (!response.ok) {
-          return Promise.reject(new Error('Failed to query'));
-        }
-        return response.json().then((data) => {
-          let url: string;
-          try {
-            if (!data.versions[Rush.version]) {
-              // Version was not published
-              return false;
-            }
-            url = data.versions[Rush.version].dist.tarball;
-            if (!url) {
-              return Promise.reject(new Error(`URL not found`));
-            }
-          } catch (e) {
-            return Promise.reject(new Error('Error parsing response'));
-          }
+    const data: { versions: { [version: string]: { dist: { tarball: string } } } } = await response.json();
+    let url: string;
+    try {
+      if (!data.versions[Rush.version]) {
+        // Version was not published
+        return false;
+      }
 
-          // Make sure the tarball wasn't deleted from the CDN
-          headers.set('accept', '*/*');
-          return fetch
-            .default(url, {
-              headers: headers,
-              agent: agent
-            })
-            .then<boolean>((response2: fetch.Response) => {
-              if (!response2.ok) {
-                if (response2.status === 404) {
-                  return false;
-                } else {
-                  return Promise.reject(new Error('Failed to fetch'));
-                }
-              }
-              return true;
-            });
-        });
-      });
+      url = data.versions[Rush.version].dist.tarball;
+      if (!url) {
+        throw new Error(`URL not found`);
+      }
+    } catch (e) {
+      throw new Error('Error parsing response');
+    }
+
+    // Make sure the tarball wasn't deleted from the CDN
+    webClient.accept = '*/*';
+
+    const response2: fetch.Response = await webClient.fetch(url);
+
+    if (!response2.ok) {
+      if (response2.status === 404) {
+        return false;
+      } else {
+        throw new Error('Failed to fetch');
+      }
+    }
+
+    return true;
   }
 
   private _syncTempShrinkwrap(shrinkwrapFile: BaseShrinkwrapFile | undefined): void {
@@ -674,5 +674,33 @@ export abstract class BaseInstallManager {
         );
       }
     }
+  }
+
+  protected async validateNpmSetup(): Promise<void> {
+    if (this._npmSetupValidated) {
+      return;
+    }
+
+    if (!this.options.bypassPolicy) {
+      const setupPackageRegistry: SetupPackageRegistry = new SetupPackageRegistry({
+        rushConfiguration: this.rushConfiguration,
+        isDebug: this.options.debug,
+        syncNpmrcAlreadyCalled: this._syncNpmrcAlreadyCalled
+      });
+      const valid: boolean = await setupPackageRegistry.checkOnly();
+      if (!valid) {
+        console.error();
+        console.error(colors.red('ERROR: NPM credentials are missing or expired'));
+        console.error();
+        console.error(
+          colors.bold(
+            '==> Please run "rush setup" to update your NPM token.  (Or append "--bypass-policy" to proceed anyway.)'
+          )
+        );
+        throw new AlreadyReportedError();
+      }
+    }
+
+    this._npmSetupValidated = true;
   }
 }

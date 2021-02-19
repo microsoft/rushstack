@@ -1,0 +1,32 @@
+{
+  "name": "@rushstack/heft-config-file",
+  "version": "0.3.16",
+  "description": "Configuration file loader for @rushstack/heft",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/heft-config-file"
+  },
+  "engines": {
+    "node": ">=10.13.0"
+  },
+  "homepage": "https://rushstack.io/pages/heft/overview/",
+  "main": "lib/index.js",
+  "types": "dist/heft-config-file.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft test --clean",
+    "start": "heft test --clean --watch"
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rig-package": "workspace:*",
+    "jsonpath-plus": "~4.0.0"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "0.23.1",
+    "@rushstack/heft-node-rig": "0.2.0",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "10.17.13"
+  }
+}

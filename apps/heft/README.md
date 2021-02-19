@@ -1,8 +1,12 @@
 # @rushstack/heft
 
-> 🚨 *This is an early preview release. Please report issues!* 🚨
-
-![heft](https://github.com/microsoft/rushstack/blob/master/common/wiki-images/heft-300x120.png?raw=true)
+<div>
+  <br />
+  <a href="https://rushstack.io/pages/heft/overview/">
+    <img width="380" src="https://rushstack.io/images/heft-logo-horse.svg">
+  </a>
+  <p />
+</div>
 
 <!-- ----------------------------------------------------------------------------- -->
 <!-- Text below this line should stay in sync with the Rush Stack web site content -->
@@ -46,7 +50,7 @@ other similar systems, Heft has some unique design goals:
 <!-- Text above this line should stay in sync with the Rush Stack web site content -->
 <!-- ----------------------------------------------------------------------------- -->
 
-This is an early preview release, however the following tasks are already available:
+Heft has not yet reached its 1.0 milestone, however the following tasks are already available:
 
 - **Compiler**: [TypeScript](https://www.typescriptlang.org/) with incremental compilation, with "watch" mode
 - **Linter**: [TypeScript-ESLint](https://github.com/typescript-eslint/typescript-eslint), plus legacy support
@@ -58,3 +62,15 @@ This is an early preview release, however the following tasks are already availa
 
 For more detailed documentation, please see the [Heft topic](https://rushstack.io/pages/heft/overview/) on
 the Rush Stack website.
+
+## Links
+
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/apps/heft/CHANGELOG.md) - Find
+  out what's new in the latest version
+- [UPGRADING.md](
+  https://github.com/microsoft/rushstack/blob/master/apps/heft/UPGRADING.md) - Instructions
+  for migrating existing projets to use a newer version of Heft
+- [API Reference](https://rushstack.io/pages/api/heft/)
+
+Heft is part of the [Rush Stack](https://rushstack.io/) family of projects.

@@ -40,7 +40,6 @@ describe('FileDeletionUtility', () => {
       expect(FileDeletionUtility.isParentDirectory('/a/B/c', '/a/b/c/d.txt')).toEqual(false);
     });
     it('it does not accept null or undefined', () => {
-      /* eslint-disable @rushstack/no-null */
       expect(FileDeletionUtility.isParentDirectory('', '/A/b.txt')).toEqual(false);
       expect(FileDeletionUtility.isParentDirectory(undefined, '/a/b.txt')).toEqual(false);
       expect(
@@ -51,7 +50,6 @@ describe('FileDeletionUtility', () => {
       expect(
         FileDeletionUtility.isParentDirectory('/a/b/c/d.txt', null as any) // eslint-disable-line @typescript-eslint/no-explicit-any
       ).toEqual(false);
-      /* eslint-enable @rushstack/no-null */
     });
   });
   describe('removeChildren', () => {

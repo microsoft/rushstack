@@ -28,4 +28,11 @@ that seem like they might be useful.  Code should start somewhere else, and
 then graduate to **node-core-library** after its value has already been
 demonstrated.  If in doubt, create your own NPM package.
 
-API documentation for this package: https://rushstack.io/pages/api/node-core-library/
+## Links
+
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/libraries/node-core-library/CHANGELOG.md) - Find
+  out what's new in the latest version
+- [API Reference](https://rushstack.io/pages/api/node-core-library/)
+
+`@rushstack/node-core-library` is part of the [Rush Stack](https://rushstack.io/) family of projects.

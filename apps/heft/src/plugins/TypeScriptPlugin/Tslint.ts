@@ -2,61 +2,87 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Tslint as TTslint } from '@microsoft/rush-stack-compiler-3.7';
+import type * as TTslint from 'tslint';
 import * as crypto from 'crypto';
+import { Import, Terminal, JsonFile } from '@rushstack/node-core-library';
 
 import { LinterBase, ILinterBaseOptions } from './LinterBase';
 import { IExtendedSourceFile, IExtendedProgram } from './internalTypings/TypeScriptInternals';
-import { Terminal, JsonFile, Colors } from '@rushstack/node-core-library';
-import { IExtendedFileSystem } from '../../utilities/fileSystem/IExtendedFileSystem';
-import { ResolveUtilities } from '../../utilities/ResolveUtilities';
 import { IExtendedLinter } from './internalTypings/TslintInternals';
+import { FileError } from '../../pluginFramework/logging/FileError';
+import { TypeScriptCachedFileSystem } from '../../utilities/fileSystem/TypeScriptCachedFileSystem';
 
 interface ITslintOptions extends ILinterBaseOptions {
   tslintPackagePath: string;
 
-  fileSystem: IExtendedFileSystem;
+  cachedFileSystem: TypeScriptCachedFileSystem;
 }
 
 export class Tslint extends LinterBase<TTslint.RuleFailure> {
   private readonly _tslint: typeof TTslint;
-  private readonly _fileSystem: IExtendedFileSystem;
+  private readonly _cachedFileSystem: TypeScriptCachedFileSystem;
 
-  private _tslintConfiguration: TTslint.Configuration.IConfigurationFile;
-  private _linter: IExtendedLinter;
-  private _enabledRules: TTslint.IRule[];
-  private _ruleSeverityMap: Map<string, TTslint.RuleSeverity>;
-  protected _lintResult: TTslint.LintResult;
+  private _tslintConfiguration!: TTslint.Configuration.IConfigurationFile;
+  private _linter!: IExtendedLinter;
+  private _enabledRules!: TTslint.IRule[];
+  private _ruleSeverityMap!: Map<string, TTslint.RuleSeverity>;
+  protected _lintResult!: TTslint.LintResult;
 
   public constructor(options: ITslintOptions) {
     super('tslint', options);
 
     this._tslint = require(options.tslintPackagePath);
-    this._fileSystem = options.fileSystem;
+    this._cachedFileSystem = options.cachedFileSystem;
   }
 
+  /**
+   * Returns the sha1 hash of the contents of the config file at the provided path and the
+   * the configs files that the referenced file extends.
+   *
+   * @param previousHash - If supplied, the hash is updated with the contents of the
+   * file's extended configs and itself before being returned. Passing a digested hash to
+   * this parameter will result in an error.
+   */
   public static getConfigHash(
     configFilePath: string,
     terminal: Terminal,
-    fileSystem: IExtendedFileSystem
+    cachedFileSystem: TypeScriptCachedFileSystem,
+    previousHash?: crypto.Hash
   ): crypto.Hash {
     interface IMinimalConfig {
-      extends?: string;
+      extends?: string | string[];
     }
 
     terminal.writeVerboseLine(`Examining config file "${configFilePath}"`);
-
-    const rawConfig: string = fileSystem.readFile(configFilePath);
+    // if configFilePath is not a json file, assume that it is a package whose package.json
+    // specifies a "main" file which is a config file, per the "extends" spec of tslint.json, found at
+    //  https://palantir.github.io/tslint/usage/configuration/
+    if (!configFilePath.endsWith('.json')) {
+      configFilePath = Import.resolveModule({
+        modulePath: configFilePath,
+        baseFolderPath: path.dirname(configFilePath)
+      });
+    }
+    const rawConfig: string = cachedFileSystem.readFile(configFilePath);
     const parsedConfig: IMinimalConfig = JsonFile.parseString(rawConfig);
-    let hash: crypto.Hash;
-    if (parsedConfig.extends) {
-      const extendsFullPath: string = ResolveUtilities.resolvePackagePath(
-        parsedConfig.extends,
-        path.dirname(configFilePath)
-      );
-      hash = Tslint.getConfigHash(extendsFullPath, terminal, fileSystem);
-    } else {
-      hash = crypto.createHash('sha1').update(rawConfig);
+    const extendsProperty: string | string[] | undefined = parsedConfig.extends;
+    let hash: crypto.Hash = previousHash || crypto.createHash('sha1');
+
+    if (extendsProperty instanceof Array) {
+      for (const extendFile of extendsProperty) {
+        const extendFilePath: string = Import.resolveModule({
+          modulePath: extendFile,
+          baseFolderPath: path.dirname(configFilePath)
+        });
+        hash = Tslint.getConfigHash(extendFilePath, terminal, cachedFileSystem, hash);
+      }
+    } else if (extendsProperty) {
+      // note that if we get here, extendsProperty is a string
+      const extendsFullPath: string = Import.resolveModule({
+        modulePath: extendsProperty,
+        baseFolderPath: path.dirname(configFilePath)
+      });
+      hash = Tslint.getConfigHash(extendsFullPath, terminal, cachedFileSystem, hash);
     }
 
     return hash.update(rawConfig);
@@ -69,23 +95,35 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
   public reportFailures(): void {
     if (this._lintResult.failures?.length) {
       this._terminal.writeWarningLine(
-        `Encountered ${this._lintResult.failures.length} TSLint error${
+        `Encountered ${this._lintResult.failures.length} TSLint issues${
           this._lintResult.failures.length > 1 ? 's' : ''
         }:`
       );
+
       for (const tslintFailure of this._lintResult.failures) {
         const buildFolderRelativeFilename: string = path.relative(
           this._buildFolderPath,
           tslintFailure.getFileName()
         );
         const { line, character } = tslintFailure.getStartPosition().getLineAndCharacter();
-        const severity: string = tslintFailure.getRuleSeverity().toUpperCase();
-        this._terminal.writeWarningLine(
-          '  ',
-          Colors.yellow(`${severity}: ${buildFolderRelativeFilename}:${line + 1}:${character + 1}`),
-          ' - ',
-          Colors.yellow(`(${tslintFailure.getRuleName()}) ${tslintFailure.getFailure()}`)
+        const formattedFailure: string = `(${tslintFailure.getRuleName()}) ${tslintFailure.getFailure()}`;
+        const errorObject: FileError = new FileError(
+          formattedFailure,
+          buildFolderRelativeFilename,
+          line + 1,
+          character + 1
         );
+        switch (tslintFailure.getRuleSeverity()) {
+          case 'error': {
+            this._scopedLogger.emitError(errorObject);
+            break;
+          }
+
+          case 'warning': {
+            this._scopedLogger.emitWarning(errorObject);
+            break;
+          }
+        }
       }
     }
   }
@@ -94,7 +132,7 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     const tslintConfigHash: crypto.Hash = Tslint.getConfigHash(
       this._linterConfigFilePath,
       this._terminal,
-      this._fileSystem
+      this._cachedFileSystem
     );
     const tslintConfigVersion: string = `${this._tslint.Linter.VERSION}_${tslintConfigHash.digest('hex')}`;
 

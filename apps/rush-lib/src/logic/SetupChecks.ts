@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import * as path from 'path';
 import * as semver from 'semver';
+import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
+
 import { RushConfiguration } from '../api/RushConfiguration';
-import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { Utilities } from '../utilities/Utilities';
 import { RushConstants } from '../logic/RushConstants';
-import { FileSystem } from '@rushstack/node-core-library';
 
 // Refuses to run at all if the PNPM version is older than this, because there
 // are known bugs or missing features in earlier releases.

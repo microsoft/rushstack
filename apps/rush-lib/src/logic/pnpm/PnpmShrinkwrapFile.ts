@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as yaml from 'js-yaml';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import * as crypto from 'crypto';
-import * as colors from 'colors';
-import { FileSystem } from '@rushstack/node-core-library';
+import crypto from 'crypto';
+import colors from 'colors';
+import { FileSystem, AlreadyReportedError, Import } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
@@ -16,16 +15,9 @@ import {
   PnpmOptionsConfiguration
 } from '../../api/RushConfiguration';
 import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
+import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 
-// This is based on PNPM's own configuration:
-// https://github.com/pnpm/pnpm-shrinkwrap/blob/master/src/write.ts
-const SHRINKWRAP_YAML_FORMAT: yaml.DumpOptions = {
-  lineWidth: 1000,
-  noCompatMode: true,
-  noRefs: true,
-  sortKeys: true
-};
+const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
 export interface IPeerDependenciesMetaYaml {
   optional?: boolean;
@@ -40,16 +32,16 @@ export interface IPnpmShrinkwrapDependencyYaml {
     tarball?: string;
   };
   /** The list of dependencies and the resolved version */
-  dependencies: { [dependency: string]: string };
+  dependencies?: { [dependency: string]: string };
   /** The list of optional dependencies and the resolved version */
-  optionalDependencies: { [dependency: string]: string };
+  optionalDependencies?: { [dependency: string]: string };
   /** The list of peer dependencies and the resolved version */
-  peerDependencies: { [dependency: string]: string };
+  peerDependencies?: { [dependency: string]: string };
   /**
    * Used to indicate optional peer dependencies, as described in this RFC:
    * https://github.com/yarnpkg/rfcs/blob/master/accepted/0000-optional-peer-dependencies.md
    */
-  peerDependenciesMeta: { [dependency: string]: IPeerDependenciesMetaYaml };
+  peerDependenciesMeta?: { [dependency: string]: IPeerDependenciesMetaYaml };
 }
 
 export interface IPnpmShrinkwrapImporterYaml {
@@ -238,7 +230,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       }
 
       const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilename);
-      const parsedData: IPnpmShrinkwrapYaml = yaml.safeLoad(shrinkwrapContent);
+      const parsedData: IPnpmShrinkwrapYaml = yamlModule.safeLoad(shrinkwrapContent);
       return new PnpmShrinkwrapFile(parsedData, shrinkwrapYamlFilename);
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${error.message}`);
@@ -423,21 +415,16 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * @override
    */
   protected serialize(): string {
-    // Ensure that if any of the top-level properties are provided but empty that they are removed. We populate the object
+    // Ensure that if any of the top-level properties are provided but empty are removed. We populate the object
     // properties when we read the shrinkwrap but PNPM does not set these top-level properties unless they are present.
-    const shrinkwrapToSerialize: Partial<IPnpmShrinkwrapYaml> = { ...this._shrinkwrapJson };
-    for (const key of Object.keys(shrinkwrapToSerialize).filter((key) =>
-      shrinkwrapToSerialize.hasOwnProperty(key)
-    )) {
-      if (
-        typeof shrinkwrapToSerialize[key] === 'object' &&
-        Object.entries(shrinkwrapToSerialize[key] || {}).length === 0
-      ) {
+    const shrinkwrapToSerialize: { [key: string]: unknown } = { ...this._shrinkwrapJson };
+    for (const [key, value] of Object.entries(shrinkwrapToSerialize)) {
+      if (typeof value === 'object' && Object.entries(value || {}).length === 0) {
         delete shrinkwrapToSerialize[key];
       }
     }
 
-    return yaml.safeDump(shrinkwrapToSerialize, SHRINKWRAP_YAML_FORMAT);
+    return yamlModule.safeDump(shrinkwrapToSerialize, PNPM_SHRINKWRAP_YAML_FORMAT);
   }
 
   /**
@@ -470,7 +457,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined = this._getPackageDescription(
       tempProjectDependencyKey
     );
-    if (!packageDescription) {
+    if (!packageDescription || !packageDescription.dependencies) {
       return undefined;
     }
 
@@ -590,7 +577,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined = this._getPackageDescription(
       tempProjectDependencyKey
     );
-    if (!packageDescription) {
+    if (!packageDescription || !packageDescription.dependencies) {
       return undefined;
     }
 

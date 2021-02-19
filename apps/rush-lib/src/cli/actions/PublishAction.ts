@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import { EOL } from 'os';
 import * as path from 'path';
+import * as semver from 'semver';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
@@ -21,37 +22,37 @@ import { PrereleaseToken } from '../../logic/PrereleaseToken';
 import { ChangeManager } from '../../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
-import { VersionControl } from '../../utilities/VersionControl';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 import { VersionPolicy } from '../../api/VersionPolicy';
 import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
 import { Utilities } from '../../utilities/Utilities';
+import { Git } from '../../logic/Git';
 
 export class PublishAction extends BaseRushAction {
-  private _addCommitDetails: CommandLineFlagParameter;
-  private _apply: CommandLineFlagParameter;
-  private _includeAll: CommandLineFlagParameter;
-  private _npmAuthToken: CommandLineStringParameter;
-  private _npmTag: CommandLineStringParameter;
-  private _npmAccessLevel: CommandLineChoiceParameter;
-  private _publish: CommandLineFlagParameter;
-  private _regenerateChangelogs: CommandLineFlagParameter;
-  private _registryUrl: CommandLineStringParameter;
-  private _targetBranch: CommandLineStringParameter;
-  private _prereleaseName: CommandLineStringParameter;
-  private _partialPrerelease: CommandLineFlagParameter;
-  private _suffix: CommandLineStringParameter;
-  private _force: CommandLineFlagParameter;
-  private _versionPolicy: CommandLineStringParameter;
-  private _applyGitTagsOnPack: CommandLineFlagParameter;
-  private _commitId: CommandLineStringParameter;
-  private _releaseFolder: CommandLineStringParameter;
-  private _pack: CommandLineFlagParameter;
+  private _addCommitDetails!: CommandLineFlagParameter;
+  private _apply!: CommandLineFlagParameter;
+  private _includeAll!: CommandLineFlagParameter;
+  private _npmAuthToken!: CommandLineStringParameter;
+  private _npmTag!: CommandLineStringParameter;
+  private _npmAccessLevel!: CommandLineChoiceParameter;
+  private _publish!: CommandLineFlagParameter;
+  private _regenerateChangelogs!: CommandLineFlagParameter;
+  private _registryUrl!: CommandLineStringParameter;
+  private _targetBranch!: CommandLineStringParameter;
+  private _prereleaseName!: CommandLineStringParameter;
+  private _partialPrerelease!: CommandLineFlagParameter;
+  private _suffix!: CommandLineStringParameter;
+  private _force!: CommandLineFlagParameter;
+  private _versionPolicy!: CommandLineStringParameter;
+  private _applyGitTagsOnPack!: CommandLineFlagParameter;
+  private _commitId!: CommandLineStringParameter;
+  private _releaseFolder!: CommandLineStringParameter;
+  private _pack!: CommandLineFlagParameter;
 
-  private _prereleaseToken: PrereleaseToken;
-  private _hotfixTagOverride: string;
-  private _targetNpmrcPublishFolder: string;
-  private _targetNpmrcPublishPath: string;
+  private _prereleaseToken!: PrereleaseToken;
+  private _hotfixTagOverride!: string;
+  private _targetNpmrcPublishFolder!: string;
+  private _targetNpmrcPublishPath!: string;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -207,41 +208,41 @@ export class PublishAction extends BaseRushAction {
   /**
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
-  protected run(): Promise<void> {
-    return Promise.resolve().then(() => {
-      PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: false });
+  protected async runAsync(): Promise<void> {
+    PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: false });
 
-      // Example: "common\temp\publish-home"
-      this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
+    // Example: "common\temp\publish-home"
+    this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
 
-      // Example: "common\temp\publish-home\.npmrc"
-      this._targetNpmrcPublishPath = path.join(this._targetNpmrcPublishFolder, '.npmrc');
+    // Example: "common\temp\publish-home\.npmrc"
+    this._targetNpmrcPublishPath = path.join(this._targetNpmrcPublishFolder, '.npmrc');
 
-      const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
 
-      if (this._regenerateChangelogs.value) {
-        console.log('Regenerating changelogs');
-        ChangelogGenerator.regenerateChangelogs(allPackages, this.rushConfiguration);
-        return Promise.resolve();
-      }
+    if (this._regenerateChangelogs.value) {
+      console.log('Regenerating changelogs');
+      ChangelogGenerator.regenerateChangelogs(allPackages, this.rushConfiguration);
+      return;
+    }
 
-      this._validate();
+    this._validate();
 
-      this._addNpmPublishHome();
+    this._addNpmPublishHome();
 
-      if (this._includeAll.value) {
-        this._publishAll(allPackages);
-      } else {
-        this._prereleaseToken = new PrereleaseToken(
-          this._prereleaseName.value,
-          this._suffix.value,
-          this._partialPrerelease.value
-        );
-        this._publishChanges(allPackages);
-      }
+    const git: Git = new Git(this.rushConfiguration);
+    const publishGit: PublishGit = new PublishGit(git, this._targetBranch.value);
+    if (this._includeAll.value) {
+      this._publishAll(publishGit, allPackages);
+    } else {
+      this._prereleaseToken = new PrereleaseToken(
+        this._prereleaseName.value,
+        this._suffix.value,
+        this._partialPrerelease.value
+      );
+      this._publishChanges(git, publishGit, allPackages);
+    }
 
-      console.log(EOL + colors.green('Rush publish finished successfully.'));
-    });
+    console.log(EOL + colors.green('Rush publish finished successfully.'));
   }
 
   /**
@@ -259,7 +260,11 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _publishChanges(allPackages: Map<string, RushConfigurationProject>): void {
+  private _publishChanges(
+    git: Git,
+    publishGit: PublishGit,
+    allPackages: Map<string, RushConfigurationProject>
+  ): void {
     const changeManager: ChangeManager = new ChangeManager(this.rushConfiguration);
     changeManager.load(
       this.rushConfiguration.changesFolder,
@@ -269,11 +274,10 @@ export class PublishAction extends BaseRushAction {
 
     if (changeManager.hasChanges()) {
       const orderedChanges: IChangeInfo[] = changeManager.changes;
-      const git: PublishGit = new PublishGit(this._targetBranch.value);
-      const tempBranch: string = 'publish-' + new Date().getTime();
+      const tempBranchName: string = `publish-${Date.now()}`;
 
       // Make changes in temp branch.
-      git.checkout(tempBranch, true);
+      publishGit.checkout(tempBranchName, true);
 
       this._setDependenciesBeforePublish();
 
@@ -283,11 +287,13 @@ export class PublishAction extends BaseRushAction {
 
       this._setDependenciesBeforeCommit();
 
-      if (VersionControl.hasUncommittedChanges()) {
+      if (git.hasUncommittedChanges()) {
         // Stage, commit, and push the changes to remote temp branch.
-        git.addChanges(':/*');
-        git.commit(this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE);
-        git.push(tempBranch);
+        publishGit.addChanges(':/*');
+        publishGit.commit(
+          this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE
+        );
+        publishGit.push(tempBranchName);
 
         this._setDependenciesBeforePublish();
 
@@ -305,7 +311,7 @@ export class PublishAction extends BaseRushAction {
             const project: RushConfigurationProject | undefined = allPackages.get(change.packageName);
             if (project) {
               if (!this._packageExists(project)) {
-                this._npmPublish(change.packageName, project.projectFolder);
+                this._npmPublish(change.packageName, project.publishFolder);
               } else {
                 console.log(`Skip ${change.packageName}. Package exists.`);
               }
@@ -318,27 +324,26 @@ export class PublishAction extends BaseRushAction {
         this._setDependenciesBeforeCommit();
 
         // Create and push appropriate Git tags.
-        this._gitAddTags(git, orderedChanges);
-        git.push(tempBranch);
+        this._gitAddTags(publishGit, orderedChanges);
+        publishGit.push(tempBranchName);
 
         // Now merge to target branch.
-        git.checkout(this._targetBranch.value);
-        git.pull();
-        git.merge(tempBranch);
-        git.push(this._targetBranch.value);
-        git.deleteBranch(tempBranch);
+        publishGit.checkout(this._targetBranch.value!);
+        publishGit.pull();
+        publishGit.merge(tempBranchName);
+        publishGit.push(this._targetBranch.value!);
+        publishGit.deleteBranch(tempBranchName);
       } else {
-        git.checkout(this._targetBranch.value);
-        git.deleteBranch(tempBranch, false);
+        publishGit.checkout(this._targetBranch.value!);
+        publishGit.deleteBranch(tempBranchName, false);
       }
     }
   }
 
-  private _publishAll(allPackages: Map<string, RushConfigurationProject>): void {
+  private _publishAll(git: PublishGit, allPackages: Map<string, RushConfigurationProject>): void {
     console.log(`Rush publish starts with includeAll and version policy ${this._versionPolicy.value}`);
 
     let updated: boolean = false;
-    const git: PublishGit = new PublishGit(this._targetBranch.value);
 
     allPackages.forEach((packageConfig, packageName) => {
       if (
@@ -370,15 +375,16 @@ export class PublishAction extends BaseRushAction {
           applyTag(this._applyGitTagsOnPack.value);
         } else if (this._force.value || !this._packageExists(packageConfig)) {
           // Publish to npm repository
-          this._npmPublish(packageName, packageConfig.projectFolder);
+          this._npmPublish(packageName, packageConfig.publishFolder);
           applyTag(true);
         } else {
           console.log(`Skip ${packageName}. Not updated.`);
         }
       }
     });
+
     if (updated) {
-      git.push(this._targetBranch.value);
+      git.push(this._targetBranch.value!);
     }
   }
 
@@ -420,6 +426,15 @@ export class PublishAction extends BaseRushAction {
         args.push(`--access`, this._npmAccessLevel.value);
       }
 
+      if (
+        this.rushConfiguration.packageManager === 'pnpm' &&
+        semver.gte(this.rushConfiguration.packageManagerToolVersion, '4.11.0')
+      ) {
+        // PNPM 4.11.0 introduced a feature that may interrupt publishing and prompt the user for input.
+        // See this issue for details: https://github.com/microsoft/rushstack/issues/1940
+        args.push('--no-git-checks');
+      }
+
       // TODO: Yarn's "publish" command line is fairly different from NPM and PNPM.  The right thing to do here
       // would be to remap our options to the Yarn equivalents.  But until we get around to that, we'll simply invoke
       // whatever NPM binary happens to be installed in the global path.
@@ -449,7 +464,7 @@ export class PublishAction extends BaseRushAction {
 
     const publishedVersions: string[] = Npm.publishedVersions(
       packageConfig.packageName,
-      packageConfig.projectFolder,
+      packageConfig.publishFolder,
       env,
       args
     );
@@ -464,14 +479,14 @@ export class PublishAction extends BaseRushAction {
       !!this._publish.value,
       this.rushConfiguration.packageManagerToolFilename,
       args,
-      project.projectFolder,
+      project.publishFolder,
       env
     );
 
     if (this._publish.value) {
       // Copy the tarball the release folder
       const tarballName: string = this._calculateTarballName(project);
-      const tarballPath: string = path.join(project.projectFolder, tarballName);
+      const tarballPath: string = path.join(project.publishFolder, tarballName);
       const destFolder: string = this._releaseFolder.value
         ? this._releaseFolder.value
         : path.join(this.rushConfiguration.commonTempFolder, 'artifacts', 'packages');

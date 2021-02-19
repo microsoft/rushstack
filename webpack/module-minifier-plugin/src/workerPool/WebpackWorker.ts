@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as webpack from 'webpack';
+import webpack = require('webpack');
 import * as workerThreads from 'worker_threads';
 import { MessagePortMinifier } from '../MessagePortMinifier';
 import { ModuleMinifierPlugin } from '../ModuleMinifierPlugin';
@@ -18,7 +18,7 @@ const webpackConfigs: webpack.Configuration[] = require(configFilePath); // esli
 
 const minifier: MessagePortMinifier = new MessagePortMinifier(workerThreads.parentPort!);
 
-async function processTask(index: number): Promise<void> {
+async function processTaskAsync(index: number): Promise<void> {
   const config: webpack.Configuration = webpackConfigs[index];
   console.log(`Compiling config: ${config.name || (config.output && config.output.filename)}`);
 
@@ -50,7 +50,7 @@ async function processTask(index: number): Promise<void> {
     ];
   }
 
-  return new Promise((resolve: () => void, reject: (err: Error) => void) => {
+  await new Promise((resolve: () => void, reject: (err: Error) => void) => {
     const compiler: webpack.Compiler = webpack(config);
     compiler.run(async (err: Error | undefined, stats: webpack.Stats) => {
       if (err) {
@@ -87,7 +87,7 @@ workerThreads.parentPort!.on('message', (message: number | false | object) => {
 
   const index: number = message as number;
 
-  processTask(index).then(
+  processTaskAsync(index).then(
     () => {
       workerThreads.parentPort!.postMessage(index);
     },

@@ -1,6 +1,142 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Sat, 25 Jul 2020 01:38:03 GMT and should not be manually modified.
+This log was last generated on Thu, 10 Dec 2020 23:25:49 GMT and should not be manually modified.
+
+## 2.3.2
+Thu, 10 Dec 2020 23:25:49 GMT
+
+### Patches
+
+- Upgrade to TSDoc 0.12.24
+
+## 2.3.1
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 2.3.0
+Fri, 30 Oct 2020 06:38:38 GMT
+
+### Minor changes
+
+- Exclude *.d.ts from linting
+- Set "root"=true to prevent unintended loading of other ESLint config files found in parent folders (which may be outside the Git working directory)
+
+## 2.2.3
+Fri, 30 Oct 2020 00:10:14 GMT
+
+### Patches
+
+- Update the "modern-module-resolution" patch to support ESLint 7.8.0 and newer
+
+## 2.2.2
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 2.2.1
+Tue, 06 Oct 2020 00:24:06 GMT
+
+_Version update only_
+
+## 2.2.0
+Mon, 05 Oct 2020 22:36:57 GMT
+
+### Minor changes
+
+- Add a mixin to support @rushstack/eslint-plugin-packlets
+
+## 2.1.3
+Wed, 30 Sep 2020 18:39:17 GMT
+
+_Version update only_
+
+## 2.1.2
+Wed, 30 Sep 2020 06:53:53 GMT
+
+### Patches
+
+- Update README.md
+
+## 2.1.1
+Tue, 22 Sep 2020 05:45:56 GMT
+
+### Patches
+
+- Fix some missing files that were incorrectly excluded due to .npmignore
+
+## 2.1.0
+Tue, 22 Sep 2020 01:45:31 GMT
+
+### Minor changes
+
+- Relax the "typedef" rule so that type inference is now allowed for local variables, while still requiring explicit type declarations in other scopes
+
+## 2.0.0
+Tue, 22 Sep 2020 00:08:53 GMT
+
+### Breaking changes
+
+- (BREAKING CHANGE) The "@rushstack/eslint-config" entry point has been separated into 3 choices: "@rushstack/eslint-config/profile/node", "@rushstack/eslint-config/profile/node-trusted-tool", or "@rushstack/eslint-config/profile/web-app".  See the documentation for details.
+
+## 1.4.2
+Sat, 19 Sep 2020 04:37:26 GMT
+
+_Version update only_
+
+## 1.4.1
+Sat, 19 Sep 2020 03:33:06 GMT
+
+### Patches
+
+- Add a dependency on the new @rushstack/eslint-plugin-security
+
+## 1.4.0
+Fri, 18 Sep 2020 22:57:24 GMT
+
+### Minor changes
+
+- Remove the @typescript-eslint/array-type rule
+- Add *.spec.ts file extension for tests, since this is also a commonly used convention
+
+### Patches
+
+- Relax @typescript-eslint/no-use-before-define slightly
+
+## 1.3.0
+Thu, 27 Aug 2020 11:27:06 GMT
+
+### Minor changes
+
+- Enable the "@rushstack/hoist-jest-mock" lint rule to catch a common mistake when using Jest with Heft
+
+### Patches
+
+- Add an override to relax some lint rules for *.test.ts files, making unit tests easier to write
+
+## 1.2.1
+Mon, 24 Aug 2020 07:35:20 GMT
+
+_Version update only_
+
+## 1.2.0
+Sat, 22 Aug 2020 05:55:42 GMT
+
+### Minor changes
+
+- Replace the "@rushstack/no-null" rule with a more flexible rule "@rushstack/no-new-null" (GitHub #2017)
+
+## 1.1.0
+Mon, 17 Aug 2020 04:53:23 GMT
+
+### Minor changes
+
+- Reclassify many lint rules to report ESLint warnings rather than errors
+
+## 1.0.4
+Wed, 12 Aug 2020 00:10:06 GMT
+
+_Version update only_
 
 ## 1.0.3
 Sat, 25 Jul 2020 01:38:03 GMT
@@ -54,7 +190,7 @@ Sat, 28 Mar 2020 00:37:16 GMT
 ## 0.5.5
 Wed, 18 Mar 2020 15:07:47 GMT
 
-*Version update only*
+_Version update only_
 
 ## 0.5.4
 Tue, 21 Jan 2020 21:56:13 GMT
@@ -66,17 +202,17 @@ Tue, 21 Jan 2020 21:56:13 GMT
 ## 0.5.3
 Sun, 19 Jan 2020 02:26:53 GMT
 
-*Version update only*
+_Version update only_
 
 ## 0.5.2
 Fri, 17 Jan 2020 01:08:23 GMT
 
-*Version update only*
+_Version update only_
 
 ## 0.5.1
 Thu, 09 Jan 2020 06:44:13 GMT
 
-*Version update only*
+_Version update only_
 
 ## 0.5.0
 Wed, 08 Jan 2020 00:11:31 GMT

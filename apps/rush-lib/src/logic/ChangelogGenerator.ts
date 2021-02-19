@@ -8,7 +8,7 @@ import { FileSystem, JsonFile } from '@rushstack/node-core-library';
 
 import { PublishUtilities, IChangeInfoHash } from './PublishUtilities';
 import { IChangeInfo, ChangeType } from '../api/ChangeManagement';
-import { IChangelog, IChangeLogEntry, IChangeLogComment } from '../api/Changelog';
+import { IChangelog, IChangeLogEntry, IChangeLogComment, IChangeLogEntryComments } from '../api/Changelog';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConfiguration } from '../api/RushConfiguration';
 
@@ -110,9 +110,12 @@ export class ChangelogGenerator {
       change.changes!.forEach((individualChange) => {
         if (individualChange.comment) {
           // Initialize the comments array only as necessary.
-          const changeTypeString: string = ChangeType[individualChange.changeType!];
-          const comments: IChangeLogComment[] = (changelogEntry.comments[changeTypeString] =
-            changelogEntry.comments[changeTypeString] || []);
+          const changeTypeString: keyof IChangeLogEntryComments = ChangeType[
+            individualChange.changeType!
+          ] as keyof IChangeLogEntryComments;
+
+          changelogEntry.comments[changeTypeString] = changelogEntry.comments[changeTypeString] || [];
+          const comments: IChangeLogComment[] = changelogEntry.comments[changeTypeString]!;
 
           const changeLogComment: IChangeLogComment = {
             comment: individualChange.comment
@@ -205,39 +208,24 @@ export class ChangelogGenerator {
 
       let comments: string = '';
 
-      comments += ChangelogGenerator._getChangeComments(
-        'Breaking changes',
-        entry.comments[ChangeType[ChangeType.major]]
-      );
+      comments += ChangelogGenerator._getChangeComments('Breaking changes', entry.comments.major);
 
-      comments += ChangelogGenerator._getChangeComments(
-        'Minor changes',
-        entry.comments[ChangeType[ChangeType.minor]]
-      );
+      comments += ChangelogGenerator._getChangeComments('Minor changes', entry.comments.minor);
 
-      comments += ChangelogGenerator._getChangeComments(
-        'Patches',
-        entry.comments[ChangeType[ChangeType.patch]]
-      );
+      comments += ChangelogGenerator._getChangeComments('Patches', entry.comments.patch);
 
       if (isLockstepped) {
         // In lockstepped projects, all changes are of type ChangeType.none.
-        comments += ChangelogGenerator._getChangeComments(
-          'Updates',
-          entry.comments[ChangeType[ChangeType.none]]
-        );
+        comments += ChangelogGenerator._getChangeComments('Updates', entry.comments.none);
       }
 
       if (rushConfiguration.hotfixChangeEnabled) {
-        comments += ChangelogGenerator._getChangeComments(
-          'Hotfixes',
-          entry.comments[ChangeType[ChangeType.hotfix]]
-        );
+        comments += ChangelogGenerator._getChangeComments('Hotfixes', entry.comments.hotfix);
       }
 
       if (!comments) {
         markdown +=
-          (changelog.entries.length === index + 1 ? '*Initial release*' : '*Version update only*') +
+          (changelog.entries.length === index + 1 ? '_Initial release_' : '_Version update only_') +
           EOL +
           EOL;
       } else {
@@ -251,7 +239,7 @@ export class ChangelogGenerator {
   /**
    * Helper to return the comments string to be appends to the markdown content.
    */
-  private static _getChangeComments(title: string, commentsArray: IChangeLogComment[]): string {
+  private static _getChangeComments(title: string, commentsArray: IChangeLogComment[] | undefined): string {
     let comments: string = '';
 
     if (commentsArray) {

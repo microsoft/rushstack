@@ -6,7 +6,7 @@ import {
   Meaning,
   Navigation,
   Component
-} from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+} from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiStaticMixin, IApiStaticMixinOptions } from '../mixins/ApiStaticMixin';
 import { IApiDeclaredItemOptions, ApiDeclaredItem } from '../items/ApiDeclaredItem';
@@ -18,6 +18,7 @@ import {
   ApiTypeParameterListMixin,
   IApiTypeParameterListMixinOptions
 } from '../mixins/ApiTypeParameterListMixin';
+import { ApiOptionalMixin, IApiOptionalMixinOptions } from '../mixins/ApiOptionalMixin';
 
 /**
  * Constructor options for {@link ApiMethod}.
@@ -30,6 +31,7 @@ export interface IApiMethodOptions
     IApiReleaseTagMixinOptions,
     IApiReturnTypeMixinOptions,
     IApiStaticMixinOptions,
+    IApiOptionalMixinOptions,
     IApiDeclaredItemOptions {}
 
 /**
@@ -55,7 +57,9 @@ export interface IApiMethodOptions
  */
 export class ApiMethod extends ApiNameMixin(
   ApiTypeParameterListMixin(
-    ApiParameterListMixin(ApiReleaseTagMixin(ApiReturnTypeMixin(ApiStaticMixin(ApiDeclaredItem))))
+    ApiParameterListMixin(
+      ApiReleaseTagMixin(ApiReturnTypeMixin(ApiStaticMixin(ApiOptionalMixin(ApiDeclaredItem))))
+    )
   )
 ) {
   public constructor(options: IApiMethodOptions) {

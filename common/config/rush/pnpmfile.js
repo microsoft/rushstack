@@ -27,5 +27,14 @@ module.exports = {
  * The return value is the updated object.
  */
 function readPackage(packageJson, context) {
+  // schema-utils (dependency of webpack-dev-server) has an unfulfilled peer dependency
+  if (packageJson.name === 'schema-utils') {
+    if (!packageJson.dependencies) {
+      packageJson.dependencies = {};
+    }
+
+    packageJson.dependencies['ajv'] = '~6.12.5';
+  }
+
   return packageJson;
 }

@@ -4,6 +4,20 @@
 import { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
 import { StringBuilder } from '../StringBuilder';
 import { Text } from '../Text';
+import { AnsiEscape } from './AnsiEscape';
+
+/**
+ * @beta
+ */
+export interface IStringBufferOutputOptions {
+  /**
+   * If set to true, special characters like \\n, \\r, and the \\u001b character
+   * in color control tokens will get normalized to [-n-], [-r-], and [-x-] respectively
+   *
+   * This option defaults to `true`
+   */
+  normalizeSpecialCharacters: boolean;
+}
 
 /**
  * Terminal provider that stores written data in buffers separated by severity.
@@ -69,35 +83,44 @@ export class StringBufferTerminalProvider implements ITerminalProvider {
   /**
    * Get everything that has been written at log-level severity.
    */
-  public getOutput(): string {
-    return this._normalizeOutput(this._standardBuffer.toString());
+  public getOutput(options?: IStringBufferOutputOptions): string {
+    return this._normalizeOutput(this._standardBuffer.toString(), options);
   }
 
   /**
    * Get everything that has been written at verbose-level severity.
    */
-  public getVerbose(): string {
-    return this._normalizeOutput(this._verboseBuffer.toString());
+  public getVerbose(options?: IStringBufferOutputOptions): string {
+    return this._normalizeOutput(this._verboseBuffer.toString(), options);
   }
 
   /**
    * Get everything that has been written at error-level severity.
    */
-  public getErrorOutput(): string {
-    return this._normalizeOutput(this._errorBuffer.toString());
+  public getErrorOutput(options?: IStringBufferOutputOptions): string {
+    return this._normalizeOutput(this._errorBuffer.toString(), options);
   }
 
   /**
    * Get everything that has been written at warning-level severity.
    */
-  public getWarningOutput(): string {
-    return this._normalizeOutput(this._warningBuffer.toString());
+  public getWarningOutput(options?: IStringBufferOutputOptions): string {
+    return this._normalizeOutput(this._warningBuffer.toString(), options);
   }
 
-  private _normalizeOutput(s: string): string {
-    return Text.convertToLf(s)
-      .replace(/\u001b/g, '[x]') // eslint-disable-line no-control-regex
-      .replace(/\n/g, '[-n-]')
-      .replace(/\r/g, '[-r-]');
+  private _normalizeOutput(s: string, options: IStringBufferOutputOptions | undefined): string {
+    options = {
+      normalizeSpecialCharacters: true,
+
+      ...(options || {})
+    };
+
+    s = Text.convertToLf(s);
+
+    if (options.normalizeSpecialCharacters) {
+      return AnsiEscape.formatForTests(s, { encodeNewlines: true });
+    } else {
+      return s;
+    }
   }
 }

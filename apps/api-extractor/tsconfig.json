@@ -1,7 +1,7 @@
 {
-  "extends": "./node_modules/@microsoft/rush-stack-compiler-3.5/includes/tsconfig-node.json",
+  "extends": "./node_modules/@rushstack/heft-node-rig/profiles/default/tsconfig-base.json",
 
   "compilerOptions": {
-    "types": ["jest", "node"]
+    "types": ["heft-jest", "node"]
   }
 }

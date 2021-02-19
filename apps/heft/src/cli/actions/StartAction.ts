@@ -8,8 +8,8 @@ import { ICleanStageOptions, CleanStage } from '../../stages/CleanStage';
 import { Logging } from '../../utilities/Logging';
 
 export class StartAction extends HeftActionBase {
-  private _buildStandardParameters: IBuildStageStandardParameters;
-  private _cleanFlag: CommandLineFlagParameter;
+  private _buildStandardParameters!: IBuildStageStandardParameters;
+  private _cleanFlag!: CommandLineFlagParameter;
 
   public constructor(heftActionOptions: IHeftActionBaseOptions) {
     super(
@@ -54,5 +54,11 @@ export class StartAction extends HeftActionBase {
     };
     await buildStage.initializeAsync(buildStageOptions);
     await buildStage.executeAsync();
+  }
+
+  protected async afterExecuteAsync(): Promise<void> {
+    await new Promise(() => {
+      /* start should never continue */
+    });
   }
 }

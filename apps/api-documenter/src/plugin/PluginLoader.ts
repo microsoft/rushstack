@@ -30,22 +30,22 @@ export class PluginLoader {
         });
 
         // Load the package
-        const entryPoint: object | undefined = require(resolvedEntryPointPath);
+        const entryPoint:
+          | { apiDocumenterPluginManifest?: IApiDocumenterPluginManifest }
+          | undefined = require(resolvedEntryPointPath);
 
         if (!entryPoint) {
           throw new Error('Invalid entry point');
         }
 
-        const manifest: IApiDocumenterPluginManifest =
-          // eslint-disable-next-line dot-notation
-          entryPoint['apiDocumenterPluginManifest'] as IApiDocumenterPluginManifest;
-
-        if (!manifest) {
+        if (!entryPoint.apiDocumenterPluginManifest) {
           throw new Error(
             `The package is not an API documenter plugin;` +
               ` the "apiDocumenterPluginManifest" export was not found`
           );
         }
+
+        const manifest: IApiDocumenterPluginManifest = entryPoint.apiDocumenterPluginManifest;
 
         if (manifest.manifestVersion !== 1000) {
           throw new Error(

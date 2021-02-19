@@ -12,9 +12,8 @@ export class DynamicCommandLineAction extends CommandLineAction {
     // (handled by the external code)
   }
 
-  protected onExecute(): Promise<void> {
+  protected async onExecute(): Promise<void> {
     // abstract
     // (handled by the external code)
-    return Promise.resolve();
   }
 }

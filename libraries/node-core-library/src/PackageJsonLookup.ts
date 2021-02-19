@@ -29,19 +29,35 @@ export interface IPackageJsonLookupParameters {
  * @public
  */
 export class PackageJsonLookup {
-  private static _loadOwnPackageJsonLookup: PackageJsonLookup = new PackageJsonLookup({
-    loadExtraFields: true
-  });
+  private static _instance: PackageJsonLookup | undefined;
+
+  /**
+   * A singleton instance of `PackageJsonLookup`, which is useful for short-lived processes
+   * that can reasonably assume that the file system will not be modified after the cache
+   * is populated.
+   *
+   * @remarks
+   * For long-running processes that need to clear the cache at appropriate times,
+   * it is recommended to create your own instance of `PackageJsonLookup` instead
+   * of relying on this instance.
+   */
+  public static get instance(): PackageJsonLookup {
+    if (!PackageJsonLookup._instance) {
+      PackageJsonLookup._instance = new PackageJsonLookup({ loadExtraFields: true });
+    }
+
+    return PackageJsonLookup._instance;
+  }
 
   private _loadExtraFields: boolean = false;
 
   // Cached the return values for tryGetPackageFolder():
   // sourceFilePath --> packageJsonFolder
-  private _packageFolderCache: Map<string, string | undefined>;
+  private _packageFolderCache!: Map<string, string | undefined>;
 
   // Cached the return values for getPackageName():
   // packageJsonPath --> packageName
-  private _packageJsonCache: Map<string, IPackageJson>;
+  private _packageJsonCache!: Map<string, IPackageJson>;
 
   public constructor(parameters?: IPackageJsonLookupParameters) {
     if (parameters) {
@@ -76,9 +92,9 @@ export class PackageJsonLookup {
    * loading, an exception will be thrown instead.
    */
   public static loadOwnPackageJson(dirnameOfCaller: string): IPackageJson {
-    const packageJson:
-      | IPackageJson
-      | undefined = PackageJsonLookup._loadOwnPackageJsonLookup.tryLoadPackageJsonFor(dirnameOfCaller);
+    const packageJson: IPackageJson | undefined = PackageJsonLookup.instance.tryLoadPackageJsonFor(
+      dirnameOfCaller
+    );
 
     if (packageJson === undefined) {
       throw new Error(
@@ -92,8 +108,7 @@ export class PackageJsonLookup {
     }
 
     const errorPath: string =
-      PackageJsonLookup._loadOwnPackageJsonLookup.tryGetPackageJsonFilePathFor(dirnameOfCaller) ||
-      'package.json';
+      PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(dirnameOfCaller) || 'package.json';
     throw new Error(
       `PackageJsonLookup.loadOwnPackageJson() failed because the "version" field is missing in` +
         ` ${errorPath}`

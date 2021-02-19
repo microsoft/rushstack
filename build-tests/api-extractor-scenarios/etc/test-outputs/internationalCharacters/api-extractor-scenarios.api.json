@@ -55,6 +55,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
@@ -105,6 +106,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 3,
@@ -141,6 +143,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,

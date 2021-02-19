@@ -1,16 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import * as semver from 'semver';
 
+import { AlreadyReportedError, Import } from '@rushstack/node-core-library';
 import { BaseInstallManager, IInstallManagerOptions } from './base/BaseInstallManager';
-import { RushInstallManager } from './installManager/RushInstallManager';
 import { WorkspaceInstallManager } from './installManager/WorkspaceInstallManager';
-import { AlreadyReportedError } from '../utilities/AlreadyReportedError';
 import { PurgeManager } from './PurgeManager';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
+
+const rushInstallManagerModule: typeof import('./installManager/RushInstallManager') = Import.lazy(
+  './installManager/RushInstallManager',
+  require
+);
 
 export class InstallManagerFactory {
   public static getInstallManager(
@@ -37,6 +41,11 @@ export class InstallManagerFactory {
       return new WorkspaceInstallManager(rushConfiguration, rushGlobalFolder, purgeManager, options);
     }
 
-    return new RushInstallManager(rushConfiguration, rushGlobalFolder, purgeManager, options);
+    return new rushInstallManagerModule.RushInstallManager(
+      rushConfiguration,
+      rushGlobalFolder,
+      purgeManager,
+      options
+    );
   }
 }

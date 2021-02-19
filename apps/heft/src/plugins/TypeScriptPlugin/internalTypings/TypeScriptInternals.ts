@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.7';
+import type * as TTypescript from 'typescript';
 
 // The specifics of these types aren't important
 /**
@@ -137,10 +137,24 @@ export interface IExtendedTypeScript {
     fileName: string,
     referencePath?: string
   ): string;
-}
 
-export interface IExtendedEmitResult extends TTypescript.EmitResult {
-  changedSourceFiles: Set<IExtendedSourceFile>;
+  Diagnostics: {
+    // https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/diagnosticMessages.json#L4252-L4255
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    Found_1_error_Watching_for_file_changes: TTypescript.DiagnosticMessage;
+
+    // https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/diagnosticMessages.json#L4256-L4259
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    Found_0_errors_Watching_for_file_changes: TTypescript.DiagnosticMessage;
+
+    // https://github.com/microsoft/TypeScript/blob/2428ade1a91248e847f3e1561e31a9426650efee/src/compiler/diagnosticMessages.json#L2252
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    Property_0_has_no_initializer_and_is_not_definitely_assigned_in_the_constructor: TTypescript.DiagnosticMessage;
+
+    // https://github.com/microsoft/TypeScript/blob/2428ade1a91248e847f3e1561e31a9426650efee/src/compiler/diagnosticMessages.json#L4920
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    Element_implicitly_has_an_any_type_because_expression_of_type_0_can_t_be_used_to_index_type_1: TTypescript.DiagnosticMessage;
+  };
 }
 
 export type ExtendedTypeScript = typeof TTypescript & IExtendedTypeScript;

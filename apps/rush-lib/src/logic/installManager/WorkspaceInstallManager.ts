@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -10,10 +10,10 @@ import {
   InternalError,
   MapExtensions,
   JsonFile,
-  FileConstants
+  FileConstants,
+  AlreadyReportedError
 } from '@rushstack/node-core-library';
 
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
 import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
@@ -522,7 +522,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (!workspaceImporter) {
       // Filtered installs will not contain all projects in the shrinkwrap, but if one is
       // missing during a full install, something has gone wrong
-      if (this.options.toProjects.length === 0) {
+      if (this.options.pnpmFilterArguments.length === 0) {
         throw new InternalError(
           `Cannot find shrinkwrap entry using importer key for workspace project: ${importerKey}`
         );
@@ -531,7 +531,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     const localDependencyProjectNames: Set<string> = new Set<string>(
-      project.localDependencyProjects.map((x) => x.packageName)
+      [...project.dependencyProjects].map((x) => x.packageName)
     );
 
     // Loop through non-local dependencies. Skip peer dependencies because they're only a constraint
@@ -587,9 +587,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       args.push('--recursive');
       args.push('--link-workspace-packages', 'false');
 
-      // "<package>..." selects the specified package and all direct and indirect dependencies
-      for (const toProject of this.options.toProjects) {
-        args.push('--filter', `${toProject.packageName}...`);
+      for (const arg of this.options.pnpmFilterArguments) {
+        args.push(arg);
       }
     }
   }

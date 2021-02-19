@@ -21,6 +21,10 @@
     "noChmodFieldInTarHeaderNormalization": {
       "description": "If true, the chmod field in temporary project tar headers will not be normalized. This normalization can help ensure consistent tarball integrity across platforms.",
       "type": "boolean"
+    },
+    "buildCache": {
+      "description": "If true, the build cache feature is enabled. To use this feature, a common/config/rush/build-cache.json file must be created with configuration options.",
+      "type": "boolean"
     }
   },
   "additionalProperties": false

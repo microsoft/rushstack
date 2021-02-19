@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * This library enables a tool to display live console output from multiple asynchronous processes,
+ * This library enables a tool to display live console output from multiple concurrent processes,
  * while ensuring that their output does not get jumbled together.
  *
  * @remarks
@@ -13,4 +13,6 @@
  * @packageDocumentation
  */
 
-export { Interleaver, ITaskWriter } from './Interleaver';
+export * from './CollatedTerminal';
+export * from './CollatedWriter';
+export * from './StreamCollator';

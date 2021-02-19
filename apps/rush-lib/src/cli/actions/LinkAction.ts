@@ -1,15 +1,22 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Import } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { LinkManagerFactory } from '../../logic/LinkManagerFactory';
+
 import { BaseLinkManager } from '../../logic/base/BaseLinkManager';
 import { BaseRushAction } from './BaseRushAction';
 
+import type * as LinkManagerFactoryTypes from '../../logic/LinkManagerFactory';
+const linkManagerFactoryModule: typeof LinkManagerFactoryTypes = Import.lazy(
+  '../../logic/LinkManagerFactory',
+  require
+);
+
 export class LinkAction extends BaseRushAction {
-  private _force: CommandLineFlagParameter;
+  private _force!: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -34,8 +41,10 @@ export class LinkAction extends BaseRushAction {
     });
   }
 
-  protected async run(): Promise<void> {
-    const linkManager: BaseLinkManager = LinkManagerFactory.getLinkManager(this.rushConfiguration);
+  protected async runAsync(): Promise<void> {
+    const linkManager: BaseLinkManager = linkManagerFactoryModule.LinkManagerFactory.getLinkManager(
+      this.rushConfiguration
+    );
     await linkManager.createSymlinksForProjects(this._force.value);
   }
 }

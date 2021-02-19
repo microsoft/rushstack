@@ -27,6 +27,12 @@ export interface IExperimentsJson {
    * This normalization can help ensure consistent tarball integrity across platforms.
    */
   noChmodFieldInTarHeaderNormalization?: boolean;
+
+  /**
+   * If true, the build cache feature is enabled. To use this feature, a common/config/rush/build-cache.json
+   * file must be created with configuration options.
+   */
+  buildCache?: boolean;
 }
 
 /**

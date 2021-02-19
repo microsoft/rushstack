@@ -3,10 +3,12 @@
 
 import * as os from 'os';
 import * as path from 'path';
-import Validator = require('z-schema');
 
 import { JsonFile, JsonObject } from './JsonFile';
 import { FileSystem } from './FileSystem';
+
+import type ValidatorType from 'z-schema';
+const Validator: typeof import('z-schema') = require('z-schema/dist/ZSchema-browser-min');
 
 interface ISchemaWithId {
   id: string | undefined;
@@ -71,7 +73,7 @@ export interface IJsonSchemaFromFileOptions {
 export class JsonSchema {
   private _dependentSchemas: JsonSchema[] = [];
   private _filename: string = '';
-  private _validator: Validator | undefined = undefined;
+  private _validator: ValidatorType | undefined = undefined;
   private _schemaObject: JsonObject | undefined = undefined;
 
   private constructor() {}
@@ -153,7 +155,7 @@ export class JsonSchema {
   /**
    * Used to nicely format the ZSchema error tree.
    */
-  private static _formatErrorDetails(errorDetails: Validator.SchemaErrorDetail[]): string {
+  private static _formatErrorDetails(errorDetails: ValidatorType.SchemaErrorDetail[]): string {
     return JsonSchema._formatErrorDetailsHelper(errorDetails, '', '');
   }
 
@@ -161,7 +163,7 @@ export class JsonSchema {
    * Used by _formatErrorDetails.
    */
   private static _formatErrorDetailsHelper(
-    errorDetails: Validator.SchemaErrorDetail[],
+    errorDetails: ValidatorType.SchemaErrorDetail[],
     indent: string,
     buffer: string
   ): string {
@@ -218,7 +220,7 @@ export class JsonSchema {
 
     if (!this._validator) {
       // Don't assign this to _validator until we're sure everything was successful
-      const newValidator: Validator = new Validator({
+      const newValidator: ValidatorType = new Validator({
         breakOnFirstError: false,
         noTypeless: true,
         noExtraKeywords: true

@@ -2,6 +2,14 @@ pool:
   vmImage: 'ubuntu-latest'
 variables:
   NodeVersion: 12
-  VersionPolicy: rush
+  FORCE_COLOR: 1
 steps:
-  - template: templates/buildAndPublish.yaml
+  - checkout: self
+    persistCredentials: true
+  - template: templates/build.yaml
+  - template: templates/publish.yaml
+    parameters:
+      VersionPolicyName: noRush
+  - template: templates/publish.yaml
+    parameters:
+      VersionPolicyName: rush
