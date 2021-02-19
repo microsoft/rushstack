@@ -4,6 +4,7 @@
 import * as child_process from 'child_process';
 import * as os from 'os';
 import * as path from 'path';
+import { EnvironmentMap } from './EnvironmentMap';
 
 import { FileSystem } from './FileSystem';
 import { PosixModeBits } from './PosixModeBits';
@@ -38,9 +39,22 @@ export interface IExecutableResolveOptions {
   currentWorkingDirectory?: string;
 
   /**
-   * The environment variables for the child process.  If omitted, process.env will be used.
+   * The environment variables for the child process.
+   *
+   * @remarks
+   * If `environment` and `environmentMap` are both omitted, then `process.env` will be used.
+   * If `environment` and `environmentMap` cannot both be specified.
    */
   environment?: NodeJS.ProcessEnv;
+
+  /**
+   * The environment variables for the child process.
+   *
+   * @remarks
+   * If `environment` and `environmentMap` are both omitted, then `process.env` will be used.
+   * If `environment` and `environmentMap` cannot both be specified.
+   */
+  environmentMap?: EnvironmentMap;
 }
 
 /**
@@ -79,7 +93,7 @@ export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
 // Common environmental state used by Executable members
 interface IExecutableContext {
   currentWorkingDirectory: string;
-  environment: NodeJS.ProcessEnv;
+  environmentMap: EnvironmentMap;
   // For Windows, the parsed PATHEXT environment variable
   windowsExecutableExtensions: string[];
 }
@@ -162,7 +176,7 @@ export class Executable {
 
     const spawnOptions: child_process.SpawnSyncOptionsWithStringEncoding = {
       cwd: context.currentWorkingDirectory,
-      env: context.environment,
+      env: context.environmentMap.toObject(),
       input: options.input,
       stdio: options.stdio,
       timeout: options.timeoutMs,
@@ -192,7 +206,7 @@ export class Executable {
     // http://www.windowsinspired.com/understanding-the-command-line-string-and-arguments-received-by-a-windows-program/
     // http://www.windowsinspired.com/how-a-windows-programs-splits-its-command-line-into-individual-arguments/
 
-    const environment: NodeJS.ProcessEnv = (options && options.environment) || process.env;
+    const environmentMap: EnvironmentMap = Executable._buildEnvironmentMap(options);
     const fileExtension: string = path.extname(resolvedPath);
 
     if (os.platform() === 'win32') {
@@ -207,7 +221,7 @@ export class Executable {
           Executable._validateArgsForWindowsShell(args);
 
           // These file types must be invoked via the Windows shell
-          let shellPath: string | undefined = environment.COMSPEC;
+          let shellPath: string | undefined = environmentMap.get('COMSPEC');
           if (!shellPath || !Executable._canExecute(shellPath, context)) {
             shellPath = Executable.tryResolve('cmd.exe');
           }
@@ -315,6 +329,24 @@ export class Executable {
     return undefined;
   }
 
+  private static _buildEnvironmentMap(options: IExecutableResolveOptions): EnvironmentMap {
+    const environmentMap: EnvironmentMap = new EnvironmentMap();
+    if (options.environment !== undefined && options.environmentMap !== undefined) {
+      throw new Error(
+        'IExecutableResolveOptions.environment and IExecutableResolveOptions.environmentMap' +
+          ' cannot both be specified'
+      );
+    }
+    if (options.environment !== undefined) {
+      environmentMap.mergeFromObject(options.environment);
+    } else if (options.environmentMap !== undefined) {
+      environmentMap.mergeFrom(options.environmentMap);
+    } else {
+      environmentMap.mergeFromObject(process.env);
+    }
+    return environmentMap;
+  }
+
   /**
    * This is used when searching the shell PATH for an executable, to determine
    * whether a match should be skipped or not.  If it returns true, this does not
@@ -357,7 +389,7 @@ export class Executable {
    * based on the PATH environment variable.
    */
   private static _getSearchFolders(context: IExecutableContext): string[] {
-    const pathList: string = context.environment.PATH || '';
+    const pathList: string = context.environmentMap.get('PATH') || '';
 
     const folders: string[] = [];
 
@@ -399,7 +431,7 @@ export class Executable {
       options = {};
     }
 
-    const environment: NodeJS.ProcessEnv = options.environment || process.env;
+    const environment: EnvironmentMap = Executable._buildEnvironmentMap(options);
 
     let currentWorkingDirectory: string;
     if (options.currentWorkingDirectory) {
@@ -411,7 +443,7 @@ export class Executable {
     const windowsExecutableExtensions: string[] = [];
 
     if (os.platform() === 'win32') {
-      const pathExtVariable: string = environment.PATHEXT || '';
+      const pathExtVariable: string = environment.get('PATHEXT') || '';
       for (const splitValue of pathExtVariable.split(';')) {
         const trimmed: string = splitValue.trim().toLowerCase();
         // Ignore malformed extensions
@@ -425,7 +457,7 @@ export class Executable {
     }
 
     return {
-      environment,
+      environmentMap: environment,
       currentWorkingDirectory,
       windowsExecutableExtensions
     };

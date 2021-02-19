@@ -142,6 +142,21 @@ export class Enum {
 }
 
 // @public
+export class EnvironmentMap {
+    constructor(environmentObject?: Record<string, string | undefined>);
+    readonly caseSensitive: boolean;
+    clear(): void;
+    entries(): IterableIterator<IEnvironmentEntry>;
+    get(name: string): string | undefined;
+    mergeFrom(environmentMap: EnvironmentMap): void;
+    mergeFromObject(environmentObject?: Record<string, string | undefined>): void;
+    names(): IterableIterator<string>;
+    set(name: string, value: string): void;
+    toObject(): Record<string, string>;
+    unset(name: string): void;
+}
+
+// @public
 export class Executable {
     static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
     static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
@@ -264,9 +279,16 @@ export interface IConsoleTerminalProviderOptions {
 }
 
 // @public
+export interface IEnvironmentEntry {
+    name: string;
+    value: string;
+}
+
+// @public
 export interface IExecutableResolveOptions {
     currentWorkingDirectory?: string;
     environment?: NodeJS.ProcessEnv;
+    environmentMap?: EnvironmentMap;
 }
 
 // @public
