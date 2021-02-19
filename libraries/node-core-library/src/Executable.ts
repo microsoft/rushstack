@@ -98,6 +98,11 @@ interface IExecutableContext {
   windowsExecutableExtensions: string[];
 }
 
+interface ICommandLineFixup {
+  path: string;
+  args: string[];
+}
+
 /**
  * The Executable class provides a safe, portable, recommended solution for tools that need
  * to launch child processes.
@@ -190,23 +195,35 @@ export class Executable {
       shell: false
     } as child_process.SpawnSyncOptionsWithStringEncoding;
 
-    // PROBLEM: Given an "args" array of strings that may contain special characters (e.g. spaces,
-    // backslashes, quotes), ensure that these strings pass through to the child process's ARGV array
-    // without anything getting corrupted along the way.
-    //
-    // On Unix you just pass the array to spawnSync().  But on Windows, this is a very complex problem:
-    // - The Win32 CreateProcess() API expects the args to be encoded as a single text string
-    // - The decoding of this string is up to the application (not the OS), and there are 3 different
-    //   algorithms in common usage:  the cmd.exe shell, the Microsoft CRT library init code, and
-    //   the Win32 CommandLineToArgvW()
-    // - The encodings are counterintuitive and have lots of special cases
-    // - NodeJS spawnSync() tries do the encoding without knowing which decoder will be used
-    //
-    // See these articles for a full analysis:
-    // http://www.windowsinspired.com/understanding-the-command-line-string-and-arguments-received-by-a-windows-program/
-    // http://www.windowsinspired.com/how-a-windows-programs-splits-its-command-line-into-individual-arguments/
+    const normalizedCommandLine: ICommandLineFixup = Executable._buildCommandLineFixup(
+      resolvedPath,
+      args,
+      context
+    );
 
-    const environmentMap: EnvironmentMap = Executable._buildEnvironmentMap(options);
+    return child_process.spawnSync(normalizedCommandLine.path, normalizedCommandLine.args, spawnOptions);
+  }
+
+  // PROBLEM: Given an "args" array of strings that may contain special characters (e.g. spaces,
+  // backslashes, quotes), ensure that these strings pass through to the child process's ARGV array
+  // without anything getting corrupted along the way.
+  //
+  // On Unix you just pass the array to spawnSync().  But on Windows, this is a very complex problem:
+  // - The Win32 CreateProcess() API expects the args to be encoded as a single text string
+  // - The decoding of this string is up to the application (not the OS), and there are 3 different
+  //   algorithms in common usage:  the cmd.exe shell, the Microsoft CRT library init code, and
+  //   the Win32 CommandLineToArgvW()
+  // - The encodings are counterintuitive and have lots of special cases
+  // - NodeJS spawnSync() tries do the encoding without knowing which decoder will be used
+  //
+  // See these articles for a full analysis:
+  // http://www.windowsinspired.com/understanding-the-command-line-string-and-arguments-received-by-a-windows-program/
+  // http://www.windowsinspired.com/how-a-windows-programs-splits-its-command-line-into-individual-arguments/
+  private static _buildCommandLineFixup(
+    resolvedPath: string,
+    args: string[],
+    context: IExecutableContext
+  ): ICommandLineFixup {
     const fileExtension: string = path.extname(resolvedPath);
 
     if (os.platform() === 'win32') {
@@ -221,7 +238,7 @@ export class Executable {
           Executable._validateArgsForWindowsShell(args);
 
           // These file types must be invoked via the Windows shell
-          let shellPath: string | undefined = environmentMap.get('COMSPEC');
+          let shellPath: string | undefined = context.environmentMap.get('COMSPEC');
           if (!shellPath || !Executable._canExecute(shellPath, context)) {
             shellPath = Executable.tryResolve('cmd.exe');
           }
@@ -245,7 +262,7 @@ export class Executable {
           shellArgs.push(Executable._getEscapedForWindowsShell(resolvedPath));
           shellArgs.push(...args);
 
-          return child_process.spawnSync(shellPath, shellArgs, spawnOptions);
+          return { path: shellPath, args: shellArgs };
         }
         default:
           throw new Error(
@@ -254,7 +271,10 @@ export class Executable {
       }
     }
 
-    return child_process.spawnSync(resolvedPath, args, spawnOptions);
+    return {
+      path: resolvedPath,
+      args: args
+    };
   }
 
   /**
