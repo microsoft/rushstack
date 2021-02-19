@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.40.2",
+      "tag": "@microsoft/rush_v5.40.2",
+      "date": "Fri, 19 Feb 2021 06:28:28 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Allow usage of Node.js 8.x since we received feedback that some projects are still supporting it"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.40.1",
       "tag": "@microsoft/rush_v5.40.1",
       "date": "Fri, 19 Feb 2021 01:45:27 GMT",

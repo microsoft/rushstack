@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 19 Feb 2021 01:45:27 GMT and should not be manually modified.
+This log was last generated on Fri, 19 Feb 2021 06:28:28 GMT and should not be manually modified.
+
+## 5.40.2
+Fri, 19 Feb 2021 06:28:28 GMT
+
+### Updates
+
+- Allow usage of Node.js 8.x since we received feedback that some projects are still supporting it
 
 ## 5.40.1
 Fri, 19 Feb 2021 01:45:27 GMT
