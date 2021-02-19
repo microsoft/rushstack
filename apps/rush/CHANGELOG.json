@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.40.1",
+      "tag": "@microsoft/rush_v5.40.1",
+      "date": "Fri, 19 Feb 2021 01:45:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a minor issue with the \"rush init\" template"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.40.0",
       "tag": "@microsoft/rush_v5.40.0",
       "date": "Wed, 17 Feb 2021 01:35:11 GMT",
