@@ -182,53 +182,36 @@ export class PnpmProjectDependencyManifest {
       shrinkwrapEntry.peerDependencies || {}
     )) {
       // Check to see if the peer dependency is satisfied with the current shrinkwrap
-      // entry and if not, check the parent shrinkwrap entry
+      // entry and if not, check the parent shrinkwrap entry. Finally, if neither have
+      // the specified dependency, validate that the parent mentions the dependency in
+      // it's own peer dependencies. If it is, we can rely on the package manager and
+      // make the assumption that we've already found it further up the stack.
       if (
         this._validatePeerDependencyVersion(shrinkwrapEntry, peerDependencyName, peerDependencyVersion) ||
-        this._validatePeerDependencyVersion(parentShrinkwrapEntry, peerDependencyName, peerDependencyVersion)
+        this._validatePeerDependencyVersion(
+          parentShrinkwrapEntry,
+          peerDependencyName,
+          peerDependencyVersion
+        ) ||
+        (parentShrinkwrapEntry.peerDependencies &&
+          parentShrinkwrapEntry.peerDependencies.hasOwnProperty(peerDependencyName))
       ) {
         continue;
       }
 
       // The parent doesn't have a version that satisfies the range. As a last attempt, check
-      // if it's been hoisted up as a top-level dependency
+      // if it's been hoisted up as a top-level dependency.
       const topLevelDependencySpecifier:
         | DependencySpecifier
         | undefined = this._pnpmShrinkwrapFile.getTopLevelDependencyVersion(peerDependencyName);
 
-      // Sometimes peer dependencies are hoisted but are not represented in the shrinkwrap file
-      // (such as when implicitlyPreferredVersions is false) so we need to find the correct key
-      // and add it ourselves
       if (!topLevelDependencySpecifier) {
-        const peerDependencyKeys: {
-          [peerDependencyName: string]: string;
-        } = this._parsePeerDependencyKeysFromSpecifier(specifier);
-        if (peerDependencyKeys.hasOwnProperty(peerDependencyName)) {
-          this._addDependencyInternal(
-            peerDependencyName,
-            peerDependencyKeys[peerDependencyName],
-            shrinkwrapEntry
-          );
-          continue;
-        }
+        // We couldn't find the peer dependency. Let's trust the package manager and assume that
+        // the install is valid and skip including this dependency in the manifest.
+        continue;
       }
 
-      if (!topLevelDependencySpecifier || !semver.valid(topLevelDependencySpecifier.versionSpecifier)) {
-        if (
-          !this._project.rushConfiguration.pnpmOptions ||
-          !this._project.rushConfiguration.pnpmOptions.strictPeerDependencies ||
-          (shrinkwrapEntry.peerDependenciesMeta &&
-            shrinkwrapEntry.peerDependenciesMeta.hasOwnProperty(peerDependencyName) &&
-            shrinkwrapEntry.peerDependenciesMeta[peerDependencyName].optional)
-        ) {
-          // We couldn't find the peer dependency, but we determined it's by design, skip this dependency...
-          continue;
-        }
-        throw new InternalError(
-          `Could not find peer dependency '${peerDependencyName}' that satisfies version '${peerDependencyVersion}'`
-        );
-      }
-
+      // Found it hoisted to the top level.
       this._addDependencyInternal(
         peerDependencyName,
         this._pnpmShrinkwrapFile.getTopLevelDependencyKey(peerDependencyName)!,
