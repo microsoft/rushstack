@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 19 Feb 2021 06:28:28 GMT and should not be manually modified.
+This log was last generated on Sun, 21 Feb 2021 01:05:53 GMT and should not be manually modified.
+
+## 5.40.3
+Sun, 21 Feb 2021 01:05:53 GMT
+
+### Updates
+
+- Fix an issue where "rush setup" did not work correctly with NPM 7.x due to an NPM regression
 
 ## 5.40.2
 Fri, 19 Feb 2021 06:28:28 GMT
