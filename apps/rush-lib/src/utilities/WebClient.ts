@@ -87,7 +87,8 @@ export class WebClient {
 
     return await fetch.default(url, {
       headers: headers,
-      agent: agent
+      agent: agent,
+      timeout: 10000
     });
   }
 }
