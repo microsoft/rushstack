@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "set 10s timeout when query release is published",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "liucheng.tech@outlook.com"
+}
