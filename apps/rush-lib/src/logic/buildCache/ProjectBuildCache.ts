@@ -6,8 +6,8 @@ import * as crypto from 'crypto';
 import * as path from 'path';
 import type * as stream from 'stream';
 import * as tar from 'tar';
+import { FileSystem, LegacyAdapters, Path, Terminal } from '@rushstack/node-core-library';
 import * as fs from 'fs';
-import { Executable, FileSystem, Path, Terminal } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
@@ -16,7 +16,7 @@ import { RushConstants } from '../RushConstants';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
 import { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
-import { ChildProcess } from 'child_process';
+import { TarExecutable } from '../../utilities/TarExecutable';
 
 interface IProjectBuildCacheOptions {
   buildCacheConfiguration: BuildCacheConfiguration;
@@ -27,19 +27,17 @@ interface IProjectBuildCacheOptions {
   terminal: Terminal;
 }
 
+interface IPathsToCache {
+  filteredOutputFolderNames: string[];
+  outputFilePaths: string[];
+}
+
 export class ProjectBuildCache {
   /**
-   * null = we haven't looked yet
-   * undefined = not found
+   * null === we haven't tried to initialize yet
+   * undefined === unable to initialize
    */
-  private static __tarExecutablePath: string | undefined | null = null;
-  private static get _tarExecutablePath(): string | undefined {
-    if (ProjectBuildCache.__tarExecutablePath === null) {
-      ProjectBuildCache.__tarExecutablePath = Executable.tryResolve('tar');
-    }
-
-    return ProjectBuildCache.__tarExecutablePath;
-  }
+  private static _tarUtility: TarExecutable | null | undefined = null;
 
   private readonly _project: RushConfigurationProject;
   private readonly _localBuildCacheProvider: FileSystemBuildCacheProvider;
@@ -53,6 +51,14 @@ export class ProjectBuildCache {
     this._cloudBuildCacheProvider = options.buildCacheConfiguration.cloudCacheProvider;
     this._projectOutputFolderNames = options.projectConfiguration.projectOutputFolderNames || [];
     this._cacheId = ProjectBuildCache._getCacheId(options);
+  }
+
+  private static _tryGetTarUtility(terminal: Terminal): TarExecutable | undefined {
+    if (ProjectBuildCache._tarUtility === null) {
+      ProjectBuildCache._tarUtility = TarExecutable.tryInitialize(terminal);
+    }
+
+    return ProjectBuildCache._tarUtility;
   }
 
   public static tryGetProjectBuildCache(options: IProjectBuildCacheOptions): ProjectBuildCache | undefined {
@@ -126,7 +132,6 @@ export class ProjectBuildCache {
       );
       if (cacheEntryBuffer) {
         try {
-          // eslint-disable-next-line require-atomic-updates
           localCacheEntryPath = await this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
             terminal,
             cacheId,
@@ -156,11 +161,10 @@ export class ProjectBuildCache {
       )
     );
 
-    const tarExecutablePath: string | undefined = ProjectBuildCache._tarExecutablePath;
+    const tarUtility: TarExecutable | undefined = ProjectBuildCache._tryGetTarUtility(terminal);
     let restoreSuccess: boolean;
-    if (!tarExecutablePath || !localCacheEntryPath) {
+    if (!tarUtility || !localCacheEntryPath) {
       if (!cacheEntryBuffer && localCacheEntryPath) {
-        // eslint-disable-next-line require-atomic-updates
         cacheEntryBuffer = await FileSystem.readFileToBufferAsync(localCacheEntryPath);
       }
 
@@ -180,15 +184,7 @@ export class ProjectBuildCache {
         restoreSuccess = false;
       }
     } else {
-      const childProcess: ChildProcess = Executable.spawn(
-        tarExecutablePath,
-        ['-x', '-f', localCacheEntryPath],
-        {
-          currentWorkingDirectory: projectFolderPath
-        }
-      );
-      const [tarExitCode] = await events.once(childProcess, 'exit');
-      restoreSuccess = tarExitCode === 0;
+      restoreSuccess = await tarUtility.tryUntarAsync(localCacheEntryPath, projectFolderPath);
     }
 
     if (restoreSuccess) {
@@ -212,33 +208,25 @@ export class ProjectBuildCache {
     }
 
     const projectFolderPath: string = this._project.projectFolder;
-    const outputFoldersThatExist: boolean[] = await Promise.all(
-      this._projectOutputFolderNames.map((outputFolderName) =>
-        FileSystem.existsAsync(path.join(projectFolderPath, outputFolderName))
-      )
-    );
-    const filteredOutputFolders: string[] = [];
-    for (let i: number = 0; i < outputFoldersThatExist.length; i++) {
-      if (outputFoldersThatExist[i]) {
-        filteredOutputFolders.push(this._projectOutputFolderNames[i]);
-      }
+    const filesToCache: IPathsToCache | undefined = await this._tryCollectPathsToCacheAsync(terminal);
+    if (!filesToCache) {
+      return false;
     }
 
-    terminal.writeVerboseLine(`Caching build output folders: ${filteredOutputFolders.join(', ')}`);
-    const tarExecutablePath: string | undefined = ProjectBuildCache._tarExecutablePath;
+    terminal.writeVerboseLine(
+      `Caching build output folders: ${filesToCache.filteredOutputFolderNames.join(', ')}`
+    );
+
     let localCacheEntryPath: string | undefined;
 
-    if (tarExecutablePath) {
+    const tarUtility: TarExecutable | undefined = ProjectBuildCache._tryGetTarUtility(terminal);
+    if (tarUtility) {
       const tempLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
-      const childProcess: ChildProcess = Executable.spawn(
-        tarExecutablePath,
-        ['-c', '-f', tempLocalCacheEntryPath, '-z', ...filteredOutputFolders],
-        {
-          currentWorkingDirectory: projectFolderPath
-        }
+      const writeLocalCacheSuccess: boolean = await tarUtility.tryCreateArchiveFromProjectPathsAsync(
+        tempLocalCacheEntryPath,
+        filesToCache.outputFilePaths,
+        this._project
       );
-      const [tarExitCode] = await events.once(childProcess, 'exit');
-      const writeLocalCacheSuccess: boolean = tarExitCode === 0;
       if (writeLocalCacheSuccess) {
         localCacheEntryPath = tempLocalCacheEntryPath;
       }
@@ -248,32 +236,16 @@ export class ProjectBuildCache {
     let setLocalCacheEntryPromise: Promise<string> | undefined;
     if (!localCacheEntryPath) {
       // If we weren't able to create the cache entry with tar, try to do it with the "tar" NPM package
-      let encounteredTarErrors: boolean = false;
       const tarStream: stream.Readable = tar.create(
         {
           gzip: true,
           portable: true,
           strict: true,
-          cwd: projectFolderPath,
-          filter: (tarPath: string, stat: tar.FileStat) => {
-            const tempStats: fs.Stats = new fs.Stats();
-            tempStats.mode = stat.mode;
-            if (tempStats.isSymbolicLink()) {
-              terminal.writeError(`Unable to include "${tarPath}" in build cache. It is a symbolic link.`);
-              encounteredTarErrors = true;
-              return false;
-            } else {
-              return true;
-            }
-          }
+          cwd: projectFolderPath
         },
-        filteredOutputFolders
+        filesToCache.outputFilePaths
       );
       cacheEntryBuffer = await this._readStreamToBufferAsync(tarStream);
-      if (encounteredTarErrors) {
-        return false;
-      }
-
       setLocalCacheEntryPromise = this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
         terminal,
         cacheId,
@@ -324,6 +296,80 @@ export class ProjectBuildCache {
     }
 
     return success;
+  }
+
+  private async _tryCollectPathsToCacheAsync(terminal: Terminal): Promise<IPathsToCache | undefined> {
+    const projectFolderPath: string = this._project.projectFolder;
+    const outputFolderNamesThatExist: boolean[] = await Promise.all(
+      this._projectOutputFolderNames.map((outputFolderName) =>
+        FileSystem.existsAsync(path.join(projectFolderPath, outputFolderName))
+      )
+    );
+    const filteredOutputFolderNames: string[] = [];
+    for (let i: number = 0; i < outputFolderNamesThatExist.length; i++) {
+      if (outputFolderNamesThatExist[i]) {
+        filteredOutputFolderNames.push(this._projectOutputFolderNames[i]);
+      }
+    }
+
+    let encounteredEnumerationIssue: boolean = false;
+    function symbolicLinkPathCallback(entryPath: string): void {
+      terminal.writeError(`Unable to include "${entryPath}" in build cache. It is a symbolic link.`);
+      encounteredEnumerationIssue = true;
+    }
+
+    const outputFilePaths: string[] = [];
+    for (const filteredOutputFolderName of filteredOutputFolderNames) {
+      if (encounteredEnumerationIssue) {
+        return undefined;
+      }
+
+      const outputFilePathsForFolder: AsyncIterableIterator<string> = this._getPathsInFolder(
+        terminal,
+        symbolicLinkPathCallback,
+        filteredOutputFolderName,
+        projectFolderPath + path.sep + filteredOutputFolderName
+      );
+
+      for await (const outputFilePath of outputFilePathsForFolder) {
+        outputFilePaths.push(outputFilePath);
+      }
+    }
+
+    if (encounteredEnumerationIssue) {
+      return undefined;
+    }
+
+    return {
+      filteredOutputFolderNames,
+      outputFilePaths
+    };
+  }
+
+  private async *_getPathsInFolder(
+    terminal: Terminal,
+    symbolicLinkPathCallback: (path: string) => void,
+    posixPrefix: string,
+    folderPath: string
+  ): AsyncIterableIterator<string> {
+    const folderEntries: fs.Dirent[] = await LegacyAdapters.convertCallbackToPromise(fs.readdir, folderPath, {
+      withFileTypes: true
+    });
+    for (const folderEntry of folderEntries) {
+      const entryPath: string = `${posixPrefix}/${folderEntry.name}`;
+      if (folderEntry.isSymbolicLink()) {
+        symbolicLinkPathCallback(entryPath);
+      } else if (folderEntry.isDirectory()) {
+        yield* this._getPathsInFolder(
+          terminal,
+          symbolicLinkPathCallback,
+          entryPath,
+          folderPath + path.sep + folderEntry.name
+        );
+      } else {
+        yield entryPath;
+      }
+    }
   }
 
   private async _readStreamToBufferAsync(stream: stream.Readable): Promise<Buffer> {
