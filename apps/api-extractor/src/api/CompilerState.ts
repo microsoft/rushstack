@@ -68,7 +68,8 @@ export class CompilerState {
     }
 
     const inputFilePaths: string[] = commandLine.fileNames.concat(
-      extractorConfig.mainEntryPointFilePath.filePath
+      extractorConfig.mainEntryPointFilePath.filePath,
+      extractorConfig.additionalEntryPoints.map((ep) => ep.filePath)
     );
     if (options && options.additionalEntryPoints) {
       inputFilePaths.push(...options.additionalEntryPoints.map((entryPoint) => entryPoint));
