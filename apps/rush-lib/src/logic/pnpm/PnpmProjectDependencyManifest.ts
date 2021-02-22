@@ -175,7 +175,7 @@ export class PnpmProjectDependencyManifest {
       return;
     }
 
-    for (const [peerDependencyName] of Object.entries(shrinkwrapEntry.peerDependencies)) {
+    for (const peerDependencyName of Object.keys(shrinkwrapEntry.peerDependencies)) {
       // Check to see if the peer dependency is satisfied with the current shrinkwrap
       // entry. If not, check the parent shrinkwrap entry. Finally, if neither have
       // the specified dependency, check that the parent mentions the dependency in
