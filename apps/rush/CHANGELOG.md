@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 23 Feb 2021 00:01:20 GMT and should not be manually modified.
+This log was last generated on Tue, 23 Feb 2021 03:26:25 GMT and should not be manually modified.
+
+## 5.40.5
+Tue, 23 Feb 2021 03:26:25 GMT
+
+### Updates
+
+- Account for indirect dependencies when ordering projects in "rush build" if the intermediary dependencies are excluded by selection parameters.
 
 ## 5.40.4
 Tue, 23 Feb 2021 00:01:20 GMT

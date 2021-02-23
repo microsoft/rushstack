@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.40.5",
+      "tag": "@microsoft/rush_v5.40.5",
+      "date": "Tue, 23 Feb 2021 03:26:25 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Account for indirect dependencies when ordering projects in \"rush build\" if the intermediary dependencies are excluded by selection parameters."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.40.4",
       "tag": "@microsoft/rush_v5.40.4",
       "date": "Tue, 23 Feb 2021 00:01:20 GMT",
