@@ -18,6 +18,7 @@ export {
   ExecutableStdioMapping,
   IExecutableResolveOptions,
   IExecutableSpawnSyncOptions,
+  IExecutableSpawnOptions,
   Executable
 } from './Executable';
 export {

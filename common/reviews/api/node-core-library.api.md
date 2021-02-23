@@ -158,6 +158,7 @@ export class EnvironmentMap {
 
 // @public
 export class Executable {
+    static spawn(filename: string, args: string[], options?: IExecutableSpawnOptions): child_process.ChildProcess;
     static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
     static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
     }
@@ -289,6 +290,11 @@ export interface IExecutableResolveOptions {
     currentWorkingDirectory?: string;
     environment?: NodeJS.ProcessEnv;
     environmentMap?: EnvironmentMap;
+}
+
+// @public
+export interface IExecutableSpawnOptions extends IExecutableResolveOptions {
+    stdio?: ExecutableStdioMapping;
 }
 
 // @public

@@ -23,7 +23,8 @@ export type ExecutableStdioStreamMapping =
   | undefined;
 
 /**
- * Typings for IExecutableSpawnSyncOptions.stdio.
+ * Types for {@link IExecutableSpawnSyncOptions.stdio}
+ * and {@link IExecutableSpawnOptions.stdio}
  * @public
  */
 export type ExecutableStdioMapping = 'pipe' | 'ignore' | 'inherit' | ExecutableStdioStreamMapping[];
@@ -58,7 +59,7 @@ export interface IExecutableResolveOptions {
 }
 
 /**
- * Options for Executable.execute().
+ * Options for {@link Executable.spawnSync}
  * @public
  */
 export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
@@ -84,10 +85,24 @@ export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
   timeoutMs?: number;
 
   /**
-   * The largest amount of bytes allowed on stdout or stderr for this synchonous operation.
+   * The largest amount of bytes allowed on stdout or stderr for this synchronous operation.
    * If exceeded, the child process will be terminated.  The default is 200 * 1024.
    */
   maxBuffer?: number;
+}
+
+/**
+ * Options for {@link Executable.spawn}
+ * @public
+ */
+export interface IExecutableSpawnOptions extends IExecutableResolveOptions {
+  /**
+   * The stdio mappings for the child process.
+   *
+   * NOTE: If IExecutableSpawnSyncOptions.input is provided, it will take precedence
+   * over the stdin mapping (stdio[0]).
+   */
+  stdio?: ExecutableStdioMapping;
 }
 
 // Common environmental state used by Executable members
@@ -183,7 +198,7 @@ export class Executable {
       cwd: context.currentWorkingDirectory,
       env: context.environmentMap.toObject(),
       input: options.input,
-      stdio: options.stdio,
+      stdio: options.stdio as child_process.StdioOptions,
       timeout: options.timeoutMs,
       maxBuffer: options.maxBuffer,
 
@@ -191,9 +206,9 @@ export class Executable {
       // if we want the result to be SpawnSyncReturns<string> instead of SpawnSyncReturns<Buffer>.
       encoding: 'utf8',
 
-      // NOTE: This is always false, because Rushell is recommended instead of relying on the OS shell.
+      // NOTE: This is always false, because Rushell will be recommended instead of relying on the OS shell.
       shell: false
-    } as child_process.SpawnSyncOptionsWithStringEncoding;
+    };
 
     const normalizedCommandLine: ICommandLineFixup = Executable._buildCommandLineFixup(
       resolvedPath,
@@ -202,6 +217,63 @@ export class Executable {
     );
 
     return child_process.spawnSync(normalizedCommandLine.path, normalizedCommandLine.args, spawnOptions);
+  }
+
+  /**
+   * Start a child process.
+   *
+   * @remarks
+   * This function is similar to child_process.spawn().  The main differences are:
+   *
+   * - It does not invoke the OS shell unless the executable file is a shell script.
+   * - Command-line arguments containing special characters are more accurately passed
+   *   through to the child process.
+   * - If the filename is missing a path, then the shell's default PATH will be searched.
+   * - If the filename is missing a file extension, then Windows default file extensions
+   *   will be searched.
+   *
+   * This command is asynchronous, but it does not return a `Promise`.  Instead it returns
+   * a Node.js `ChildProcess` supporting event notifications.
+   *
+   * @param filename - The name of the executable file.  This string must not contain any
+   * command-line arguments.  If the name contains any path delimiters, then the shell's
+   * default PATH will not be searched.
+   * @param args - The command-line arguments to be passed to the process.
+   * @param options - Additional options
+   * @returns the same data type as returned by the NodeJS child_process.spawnSync() API
+   */
+  public static spawn(
+    filename: string,
+    args: string[],
+    options?: IExecutableSpawnOptions
+  ): child_process.ChildProcess {
+    if (!options) {
+      options = {};
+    }
+
+    const context: IExecutableContext = Executable._getExecutableContext(options);
+
+    const resolvedPath: string | undefined = Executable._tryResolve(filename, options, context);
+    if (!resolvedPath) {
+      throw new Error(`The executable file was not found: "${filename}"`);
+    }
+
+    const spawnOptions: child_process.SpawnOptions = {
+      cwd: context.currentWorkingDirectory,
+      env: context.environmentMap.toObject(),
+      stdio: options.stdio as child_process.StdioOptions,
+
+      // NOTE: This is always false, because Rushell will be recommended instead of relying on the OS shell.
+      shell: false
+    };
+
+    const normalizedCommandLine: ICommandLineFixup = Executable._buildCommandLineFixup(
+      resolvedPath,
+      args,
+      context
+    );
+
+    return child_process.spawn(normalizedCommandLine.path, normalizedCommandLine.args, spawnOptions);
   }
 
   // PROBLEM: Given an "args" array of strings that may contain special characters (e.g. spaces,
