@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sun, 21 Feb 2021 01:05:53 GMT and should not be manually modified.
+This log was last generated on Tue, 23 Feb 2021 00:01:20 GMT and should not be manually modified.
+
+## 5.40.4
+Tue, 23 Feb 2021 00:01:20 GMT
+
+### Updates
+
+- Make Rush per-project manifest generation more reliable and remove PNPM shrinkwrap validation
 
 ## 5.40.3
 Sun, 21 Feb 2021 01:05:53 GMT

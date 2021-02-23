@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.40.4",
+      "tag": "@microsoft/rush_v5.40.4",
+      "date": "Tue, 23 Feb 2021 00:01:20 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Make Rush per-project manifest generation more reliable and remove PNPM shrinkwrap validation"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.40.3",
       "tag": "@microsoft/rush_v5.40.3",
       "date": "Sun, 21 Feb 2021 01:05:53 GMT",
