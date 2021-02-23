@@ -85,16 +85,34 @@ export class TaskSelector {
       this._registerTask(rushProject, taskCollection);
     }
 
-    function* getDependencyTaskNames(project: RushConfigurationProject): Iterable<string> {
-      for (const dep of project.dependencyProjects) {
-        // Only add relationships for projects in the set
-        if (projects.has(dep)) {
-          yield ProjectBuilder.getTaskName(dep);
-        }
-      }
-    }
-
     if (!this._options.ignoreDependencyOrder) {
+      const dependencyMap: Map<RushConfigurationProject, Set<string>> = new Map();
+
+      // Generate the filtered dependency graph for selected projects
+      function getDependencyTaskNames(project: RushConfigurationProject): Set<string> {
+        const cached: Set<string> | undefined = dependencyMap.get(project);
+        if (cached) {
+          return cached;
+        }
+
+        const dependencyTaskNames: Set<string> = new Set();
+        dependencyMap.set(project, dependencyTaskNames);
+
+        for (const dep of project.dependencyProjects) {
+          if (projects.has(dep)) {
+            // Add direct relationships for projects in the set
+            dependencyTaskNames.add(ProjectBuilder.getTaskName(dep));
+          } else {
+            // Add indirect relationships for projects not in the set
+            for (const indirectDep of getDependencyTaskNames(dep)) {
+              dependencyTaskNames.add(indirectDep);
+            }
+          }
+        }
+
+        return dependencyTaskNames;
+      }
+
       // Add ordering relationships for each dependency
       for (const project of projects) {
         taskCollection.addDependencies(ProjectBuilder.getTaskName(project), getDependencyTaskNames(project));
