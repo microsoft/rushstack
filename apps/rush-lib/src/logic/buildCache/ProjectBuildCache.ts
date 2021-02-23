@@ -3,7 +3,6 @@
 
 import * as events from 'events';
 import * as crypto from 'crypto';
-import * as path from 'path';
 import type * as stream from 'stream';
 import * as tar from 'tar';
 import { FileSystem, LegacyAdapters, Path, Terminal } from '@rushstack/node-core-library';
@@ -85,7 +84,7 @@ export class ProjectBuildCache {
     const outputFolders: string[] = [];
     if (projectConfiguration.projectOutputFolderNames) {
       for (const outputFolderName of projectConfiguration.projectOutputFolderNames) {
-        outputFolders.push(`${path.posix.join(normalizedProjectRelativeFolder, outputFolderName)}/`);
+        outputFolders.push(`${normalizedProjectRelativeFolder}/${outputFolderName}/`);
       }
     }
 
@@ -157,7 +156,7 @@ export class ProjectBuildCache {
     terminal.writeVerboseLine(`Clearing cached folders: ${this._projectOutputFolderNames.join(', ')}`);
     await Promise.all(
       this._projectOutputFolderNames.map((outputFolderName: string) =>
-        FileSystem.deleteFolderAsync(path.join(projectFolderPath, outputFolderName))
+        FileSystem.deleteFolderAsync(`${projectFolderPath}/${outputFolderName}`)
       )
     );
 
@@ -317,7 +316,7 @@ export class ProjectBuildCache {
     const projectFolderPath: string = this._project.projectFolder;
     const outputFolderNamesThatExist: boolean[] = await Promise.all(
       this._projectOutputFolderNames.map((outputFolderName) =>
-        FileSystem.existsAsync(path.join(projectFolderPath, outputFolderName))
+        FileSystem.existsAsync(`${projectFolderPath}/${outputFolderName}`)
       )
     );
     const filteredOutputFolderNames: string[] = [];
@@ -343,7 +342,7 @@ export class ProjectBuildCache {
         terminal,
         symbolicLinkPathCallback,
         filteredOutputFolderName,
-        projectFolderPath + path.sep + filteredOutputFolderName
+        `${projectFolderPath}/${filteredOutputFolderName}`
       );
 
       for await (const outputFilePath of outputFilePathsForFolder) {
@@ -379,7 +378,7 @@ export class ProjectBuildCache {
           terminal,
           symbolicLinkPathCallback,
           entryPath,
-          folderPath + path.sep + folderEntry.name
+          `${folderPath}/${folderEntry.name}`
         );
       } else {
         yield entryPath;
