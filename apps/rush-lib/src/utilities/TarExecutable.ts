@@ -24,19 +24,27 @@ export class TarExecutable {
     return new TarExecutable(tarExecutablePath);
   }
 
-  public async tryUntarAsync(archivePath: string, outputFolderPath: string): Promise<boolean> {
+  /**
+   * @returns
+   * The "tar" exit code
+   */
+  public async tryUntarAsync(archivePath: string, outputFolderPath: string): Promise<number> {
     const childProcess: ChildProcess = Executable.spawn(this._tarExecutablePath, ['-x', '-f', archivePath], {
       currentWorkingDirectory: outputFolderPath
     });
     const [tarExitCode] = await events.once(childProcess, 'exit');
-    return tarExitCode === 0;
+    return tarExitCode;
   }
 
+  /**
+   * @returns
+   * The "tar" exit code
+   */
   public async tryCreateArchiveFromProjectPathsAsync(
     archivePath: string,
     paths: string[],
     project: RushConfigurationProject
-  ): Promise<boolean> {
+  ): Promise<number> {
     const pathsListFilePath: string = `${project.projectRushTempFolder}/tarPaths_${Date.now()}`;
     await FileSystem.writeFileAsync(pathsListFilePath, paths.join('\n'));
 
@@ -51,6 +59,6 @@ export class TarExecutable {
     const [tarExitCode] = await events.once(childProcess, 'exit');
     await FileSystem.deleteFileAsync(pathsListFilePath);
 
-    return tarExitCode === 0;
+    return tarExitCode;
   }
 }

@@ -162,8 +162,20 @@ export class ProjectBuildCache {
     );
 
     const tarUtility: TarExecutable | undefined = ProjectBuildCache._tryGetTarUtility(terminal);
-    let restoreSuccess: boolean;
-    if (!tarUtility || !localCacheEntryPath) {
+    let restoreSuccess: boolean = false;
+    if (tarUtility && localCacheEntryPath) {
+      const tarExitCode: number = await tarUtility.tryUntarAsync(localCacheEntryPath, projectFolderPath);
+      if (tarExitCode === 0) {
+        restoreSuccess = true;
+      } else {
+        terminal.writeWarningLine(
+          `"tar" exited with code ${tarExitCode} while attempting to restore cache entry. ` +
+            'Rush will attempt to extract from the cache entry with a JavaScript implementation of tar.'
+        );
+      }
+    }
+
+    if (!restoreSuccess) {
       if (!cacheEntryBuffer && localCacheEntryPath) {
         cacheEntryBuffer = await FileSystem.readFileToBufferAsync(localCacheEntryPath);
       }
@@ -172,8 +184,8 @@ export class ProjectBuildCache {
         throw new Error('Expected the cache entry buffer to be set.');
       }
 
-      // If we don't have tar on the PATH, or if we failed to update the local cache entry,
-      // untar in-memory
+      // If we don't have tar on the PATH, if we failed to update the local cache entry,
+      // or if the tar binary failed, untar in-memory
       const tarStream: stream.Writable = tar.extract({ cwd: projectFolderPath });
       try {
         const tarPromise: Promise<unknown> = events.once(tarStream, 'drain');
@@ -183,8 +195,6 @@ export class ProjectBuildCache {
       } catch (e) {
         restoreSuccess = false;
       }
-    } else {
-      restoreSuccess = await tarUtility.tryUntarAsync(localCacheEntryPath, projectFolderPath);
     }
 
     if (restoreSuccess) {
@@ -222,13 +232,18 @@ export class ProjectBuildCache {
     const tarUtility: TarExecutable | undefined = ProjectBuildCache._tryGetTarUtility(terminal);
     if (tarUtility) {
       const tempLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
-      const writeLocalCacheSuccess: boolean = await tarUtility.tryCreateArchiveFromProjectPathsAsync(
+      const tarExitCode: number = await tarUtility.tryCreateArchiveFromProjectPathsAsync(
         tempLocalCacheEntryPath,
         filesToCache.outputFilePaths,
         this._project
       );
-      if (writeLocalCacheSuccess) {
+      if (tarExitCode === 0) {
         localCacheEntryPath = tempLocalCacheEntryPath;
+      } else {
+        terminal.writeWarningLine(
+          `"tar" exited with code ${tarExitCode} while attempting to create the cache entry. ` +
+            'Rush will attempt to create the cache entry with a JavaScript implementation of tar.'
+        );
       }
     }
 
