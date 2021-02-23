@@ -329,7 +329,7 @@ export class ProjectBuilder extends BaseBuilder {
 
           if (terminalProvider.hasErrors) {
             status = TaskStatus.Failure;
-          } else if (cacheWriteSuccess === false || terminalProvider.hasWarnings) {
+          } else if (cacheWriteSuccess === false) {
             status = TaskStatus.SuccessWithWarning;
           }
         }
