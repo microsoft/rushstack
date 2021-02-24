@@ -296,6 +296,14 @@ export class RushCommandLineParser extends CommandLineParser {
       }
 
       case RushConstants.phasedCommandKind: {
+        if (!this.rushConfiguration.experimentsConfiguration.configuration.multiPhaseCommands) {
+          throw new Error(
+            `${RushConstants.commandLineFilename} defines a command "${command.name}" ` +
+              `that uses the "${RushConstants.phasedCommandKind}" command kind. To use this command kind, ` +
+              'the "multiPhaseCommands" experiment must be enabled.'
+          );
+        }
+
         // TODO
         break;
       }
