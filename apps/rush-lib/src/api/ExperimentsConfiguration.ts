@@ -40,6 +40,15 @@ export interface IExperimentsJson {
    * This will not replay warnings from the cached build.
    */
   buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
+
+  /**
+   * If true, the multi-phase commands feature is enabled. To use this feature, create a "phased" command
+   * in common/config/rush/command-line.json.
+   *
+   * This is internal for now, while this feature isn't feature-complete.
+   * @internal
+   */
+  _multiPhaseCommands?: boolean;
 }
 
 /**
