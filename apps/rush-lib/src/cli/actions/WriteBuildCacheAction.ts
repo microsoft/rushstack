@@ -111,7 +111,7 @@ export class WriteBuildCacheAction extends BaseRushAction {
       repoCommandLineConfiguration
     );
     if (cacheWriteSuccess === undefined) {
-      terminal.writeErrorLine('This project does not support caching');
+      terminal.writeErrorLine('This project does not support caching or Git is not present.');
       throw new AlreadyReportedError();
     } else if (cacheWriteSuccess === false) {
       terminal.writeErrorLine('Writing cache entry failed.');
