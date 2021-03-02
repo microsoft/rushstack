@@ -379,6 +379,9 @@ export class RushConfiguration {
     get projects(): RushConfigurationProject[];
     // (undocumented)
     get projectsByName(): Map<string, RushConfigurationProject>;
+    // (undocumented)
+    get projectsExtended(): string[];
+    set projectsExtended(vals: string[]);
     get repositoryDefaultBranch(): string;
     get repositoryDefaultFullyQualifiedRemoteBranch(): string;
     get repositoryDefaultRemote(): string;
