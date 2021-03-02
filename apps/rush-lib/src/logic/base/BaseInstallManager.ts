@@ -502,6 +502,9 @@ export abstract class BaseInstallManager {
         } else {
           args.push('--frozen-shrinkwrap');
         }
+      } else if (this._rushConfiguration.pnpmOptions.useWorkspaces) {
+        // In workspaces, we want to avoid unnecessary lockfile churn
+        args.push('--prefer-frozen-lockfile');
       } else {
         // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
         // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
