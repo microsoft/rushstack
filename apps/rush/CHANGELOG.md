@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 02 Mar 2021 06:22:01 GMT and should not be manually modified.
+This log was last generated on Tue, 02 Mar 2021 23:27:41 GMT and should not be manually modified.
+
+## 5.40.7
+Tue, 02 Mar 2021 23:27:41 GMT
+
+### Updates
+
+- Fix a regression where certain Rush operations reported a TypeError (GitHub #2526)
 
 ## 5.40.6
 Tue, 02 Mar 2021 06:22:01 GMT

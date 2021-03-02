@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.40.7",
+      "tag": "@microsoft/rush_v5.40.7",
+      "date": "Tue, 02 Mar 2021 23:27:41 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a regression where certain Rush operations reported a TypeError (GitHub #2526)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.40.6",
       "tag": "@microsoft/rush_v5.40.6",
       "date": "Tue, 02 Mar 2021 06:22:01 GMT",
