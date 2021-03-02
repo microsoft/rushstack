@@ -24,6 +24,12 @@ export interface ICachedEmitModuleKind {
   cacheOutFolderPath: string;
 
   /**
+   * File extension to use instead of '.js' for emitted ECMAScript files.
+   * For example, '.cjs' to indicate commonjs content, or '.mjs' to indicate ECMAScript modules.
+   */
+  jsExtensionOverride: string | undefined;
+
+  /**
    * Set to true if this is the emit kind that is specified in the tsconfig.json.
    * Declarations are only emitted for the primary module kind.
    */
@@ -123,6 +129,7 @@ export class EmitFilesPatch {
             resolver,
             {
               ...host,
+              writeFile: EmitFilesPatch.wrapWriteFile(host.writeFile, moduleKindToEmit.jsExtensionOverride),
               getCompilerOptions: () => compilerOptions
             },
             targetSourceFile,
@@ -148,6 +155,35 @@ export class EmitFilesPatch {
 
   public static get isInstalled(): boolean {
     return this._patchedTs !== undefined;
+  }
+
+  /**
+   * Wraps the writeFile callback on the IEmitHost to override the .js extension, if applicable
+   */
+  public static wrapWriteFile(
+    baseWriteFile: TTypescript.WriteFileCallback,
+    jsExtensionOverride: string | undefined
+  ): TTypescript.WriteFileCallback {
+    if (!jsExtensionOverride) {
+      return baseWriteFile;
+    }
+
+    const replacementExtension: string = `${jsExtensionOverride}$1`;
+    return (
+      fileName: string,
+      data: string,
+      writeBOM: boolean,
+      onError?: ((message: string) => void) | undefined,
+      sourceFiles?: readonly TTypescript.SourceFile[] | undefined
+    ) => {
+      return baseWriteFile(
+        fileName.replace(/\.js(\.map)?$/g, replacementExtension),
+        data,
+        writeBOM,
+        onError,
+        sourceFiles
+      );
+    };
   }
 
   public static uninstall(ts: ExtendedTypeScript): void {

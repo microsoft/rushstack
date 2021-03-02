@@ -37,6 +37,12 @@
           "outFolderName": {
             "type": "string",
             "pattern": "[^\\\\\\/]"
+          },
+
+          "jsExtensionOverride": {
+            "type": "string",
+            "description": "If provided, use this extension instead of .js for emitted ECMAScript files, e.g. .cjs for commonjs or .mjs for esnext.",
+            "pattern": "^\\.[^\\\\\\/]+$"
           }
         },
         "required": ["moduleKind", "outFolderName"]

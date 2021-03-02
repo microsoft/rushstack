@@ -762,7 +762,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       tsconfigOutFolderName = this._addModuleKindToEmit(
         tsconfig.options.module,
         tsconfig.options.outDir!,
-        true
+        /* isPrimary */ true,
+        /* jsExtensionOverride */ undefined
       );
     }
 
@@ -798,7 +799,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           const outFolderPath: string = this._addModuleKindToEmit(
             moduleKind,
             additionalModuleKindToEmit.outFolderName,
-            false
+            false,
+            additionalModuleKindToEmit.jsExtensionOverride
           );
           specifiedKinds.add(moduleKind);
           specifiedOutDirs.add(outFolderPath);
@@ -810,7 +812,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _addModuleKindToEmit(
     moduleKind: TTypescript.ModuleKind,
     outFolderPath: string,
-    isPrimary: boolean
+    isPrimary: boolean,
+    jsExtensionOverride: string | undefined
   ): string {
     let outFolderName: string;
     if (path.isAbsolute(outFolderPath)) {
@@ -826,6 +829,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       cacheOutFolderPath: Path.convertToSlashes(
         path.resolve(this._configuration.buildCacheFolder, outFolderName)
       ),
+      jsExtensionOverride,
 
       isPrimary
     });
