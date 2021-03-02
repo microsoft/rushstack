@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Added projectsExtended property to rush.json",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "breezedave@users.noreply.github.com"
+}
