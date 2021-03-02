@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "3.8.48",
+      "tag": "@microsoft/gulp-core-build-serve_v3.8.48",
+      "date": "Tue, 02 Mar 2021 23:25:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `0.2.112`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.8.47",
       "tag": "@microsoft/gulp-core-build-serve_v3.8.47",
       "date": "Fri, 05 Feb 2021 16:10:42 GMT",
