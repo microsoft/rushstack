@@ -13,9 +13,9 @@
     "build": "heft build --clean"
   },
   "peerDependencies": {
-    "webpack": "^4.31.0",
     "@rushstack/set-webpack-public-path-plugin": "^3.2.9",
-    "@types/webpack": "^4.39.0"
+    "@types/webpack": "^4.39.0",
+    "webpack": "^4.31.0"
   },
   "peerDependenciesMeta": {
     "@rushstack/set-webpack-public-path-plugin": {
