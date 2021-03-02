@@ -602,12 +602,22 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     this._firstEmitCompletedCallbackManager.callback();
     //#endregion
 
+    let typeScriptErrorCount: number = 0;
     if (diagnostics.length > 0) {
       this._typescriptTerminal.writeLine(
         `Encountered ${diagnostics.length} TypeScript issue${diagnostics.length > 1 ? 's' : ''}:`
       );
       for (const diagnostic of diagnostics) {
-        this._printDiagnosticMessage(ts, diagnostic);
+        const diagnosticCategory: TTypescript.DiagnosticCategory = this._getAdjustedDiagnosticCategory(
+          diagnostic,
+          ts
+        );
+
+        if (diagnosticCategory === ts.DiagnosticCategory.Error) {
+          typeScriptErrorCount++;
+        }
+
+        this._printDiagnosticMessage(ts, diagnostic, diagnosticCategory);
       }
     }
 
@@ -618,9 +628,17 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     if (tslint) {
       tslint.reportFailures();
     }
+
+    if (typeScriptErrorCount > 0) {
+      throw new Error(`Encountered TypeScript error${typeScriptErrorCount > 1 ? 's' : ''}`);
+    }
   }
 
-  private _printDiagnosticMessage(ts: ExtendedTypeScript, diagnostic: TTypescript.Diagnostic): void {
+  private _printDiagnosticMessage(
+    ts: ExtendedTypeScript,
+    diagnostic: TTypescript.Diagnostic,
+    diagnosticCategory: TTypescript.DiagnosticCategory = this._getAdjustedDiagnosticCategory(diagnostic, ts)
+  ): void {
     // Code taken from reference example
     let diagnosticMessage: string;
     let errorObject: Error;
@@ -639,12 +657,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       errorObject = new Error(diagnosticMessage);
     }
 
-    const adjustedCategory: TTypescript.DiagnosticCategory = this._getAdjustedDiagnosticCategory(
-      diagnostic,
-      ts
-    );
-
-    switch (adjustedCategory) {
+    switch (diagnosticCategory) {
       case ts.DiagnosticCategory.Error: {
         this._typescriptLogger.emitError(errorObject);
         break;
