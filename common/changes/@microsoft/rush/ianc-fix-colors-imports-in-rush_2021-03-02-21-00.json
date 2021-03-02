@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix an exception thrown when rush build was run in a non-project folder.",
+      "comment": "Fix a regression where certain Rush operations reported a TypeError (GitHub #2526)",
       "type": "none"
     }
   ],
