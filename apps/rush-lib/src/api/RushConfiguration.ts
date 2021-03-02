@@ -236,6 +236,7 @@ export interface IRushConfigurationJson {
   approvedPackagesPolicy?: IApprovedPackagesPolicyJson;
   gitPolicy?: IRushGitPolicyJson;
   telemetryEnabled?: boolean;
+  projectsExtended: string[];
   projects: IRushConfigurationProjectJson[];
   eventHooks?: IEventHooksJson;
   hotfixChangeEnabled?: boolean;
@@ -446,7 +447,7 @@ export class RushConfiguration {
   );
   private static _projectsSchemaExtended: JsonSchema = JsonSchema.fromFile(
     path.join(__dirname, '../schemas/projects-extended.schema.json')
-  )
+  );
 
   private _rushJsonFile: string;
   private _rushJsonFolder: string;
@@ -502,6 +503,8 @@ export class RushConfiguration {
   private readonly _packageNameParser: PackageNameParser;
 
   private _telemetryEnabled: boolean;
+
+  private _projectsExtended: string[] | undefined;
 
   // Lazily loaded when the projects() getter is called.
   private _projects: RushConfigurationProject[] | undefined;
@@ -745,6 +748,7 @@ export class RushConfiguration {
       pathTree.setItem(relativePath, project);
     }
     this._projectByRelativePath = pathTree;
+    this._projectsExtended = this._rushConfigurationJson.projectsExtended;
   }
 
   private _initializeAndValidateLocalProjects(): void {
@@ -754,17 +758,22 @@ export class RushConfiguration {
     // We sort the projects array in alphabetical order.  This ensures that the packages
     // are processed in a deterministic order by the various Rush algorithms.
 
-    const projectsExtended: string[] = this._rushConfigurationJson.projectsExtended;
+    const projectsExtended: string[] = this._projectsExtended || [];
     const extraProjects: IRushConfigurationProjectJson[] = projectsExtended
-    .map(jsonPath: string => {
+      .map((jsonPath: string) => {
         const resolvedFilePath: string = path.resolve(jsonPath);
         const extendedProjectsJson: IRushConfigurationProjectsExtendedJson = JsonFile.load(jsonPath);
         RushConfiguration._projectsSchemaExtended.validateObject(extendedProjectsJson, resolvedFilePath);
         return extendedProjectsJson.projects;
-    })
-    .reduce((acc:IRushConfigurationProjectJson[], curr:IRushConfigurationProjectJson[]) => curr.concat(acc), []);
+      })
+      .reduce(
+        (acc: IRushConfigurationProjectJson[], curr: IRushConfigurationProjectJson[]) => curr.concat(acc),
+        []
+      );
 
-    const sortedProjectJsons: IRushConfigurationProjectJson[] = this._rushConfigurationJson.projects.slice(0).concat(extraProjects);
+    const sortedProjectJsons: IRushConfigurationProjectJson[] = this._rushConfigurationJson.projects
+      .slice(0)
+      .concat(extraProjects);
     sortedProjectJsons.sort((a: IRushConfigurationProjectJson, b: IRushConfigurationProjectJson) =>
       a.packageName.localeCompare(b.packageName)
     );
@@ -1411,6 +1420,14 @@ export class RushConfiguration {
    */
   public get telemetryEnabled(): boolean {
     return this._telemetryEnabled;
+  }
+
+  public get projectsExtended(): string[] {
+    return this._projectsExtended || [];
+  }
+
+  public set projectsExtended(vals: string[]) {
+    this._projectsExtended = vals;
   }
 
   public get projects(): RushConfigurationProject[] {

@@ -1,0 +1,9 @@
+{
+  "projects": [
+    {
+      "packageName": "project3",
+      "projectFolder": "project3",
+      "reviewCategory": "prototype"
+    }
+  ]
+}
