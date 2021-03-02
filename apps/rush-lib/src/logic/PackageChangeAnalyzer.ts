@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as crypto from 'crypto';
 
 import { getPackageDeps, getGitHashForFiles } from '@rushstack/package-deps-hash';

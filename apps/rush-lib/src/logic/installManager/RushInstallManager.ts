@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as glob from 'glob';
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';

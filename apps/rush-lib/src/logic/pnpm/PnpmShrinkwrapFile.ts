@@ -5,7 +5,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import crypto from 'crypto';
-import colors from 'colors';
+import colors from 'colors/safe';
 import { FileSystem, AlreadyReportedError, Import } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
