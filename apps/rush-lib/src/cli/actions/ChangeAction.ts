@@ -4,7 +4,7 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
-import colors from 'colors';
+import colors from 'colors/safe';
 
 import {
   CommandLineFlagParameter,
