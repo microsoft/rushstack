@@ -225,6 +225,14 @@
       "description": "Indicates whether telemetry data should be collected and stored in the Rush temp folder during Rush runs.",
       "type": "boolean"
     },
+    "projectsExtended": {
+        "description": "A list of paths storing additional projects as json",
+        "type": "array",
+        "items": {
+            "description": "The relative filepath for a additional project json file",
+            "type": "string"
+        }
+    },
     "projects": {
       "description": "A list of projects managed by this tool.",
       "type": "array",
