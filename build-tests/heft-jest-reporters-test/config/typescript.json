@@ -30,7 +30,8 @@
     // }
     {
       "moduleKind": "commonjs",
-      "outFolderName": "lib-commonjs"
+      "outFolderName": "lib",
+      "jsExtensionOverride": ".cjs"
     }
   ],
 
@@ -40,7 +41,7 @@
    *
    * The default value is "lib".
    */
-  "emitFolderNameForTests": "lib-commonjs",
+  // "emitFolderNameForTests": "lib",
 
   /**
    * If set to "true", the TSlint task will not be invoked.

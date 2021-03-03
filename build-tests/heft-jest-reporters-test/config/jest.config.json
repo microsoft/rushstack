@@ -1,4 +1,5 @@
 {
   "preset": "./node_modules/@rushstack/heft/includes/jest-shared.config.json",
-  "reporters": ["default", "./lib/test/customJestReporter.js"]
+  "reporters": ["default", "./lib/test/customJestReporter.js"],
+  "moduleFileExtensions": ["cjs", "js", "json"]
 }
