@@ -502,7 +502,7 @@ export abstract class BaseInstallManager {
         } else {
           args.push('--frozen-shrinkwrap');
         }
-      } else if (this._rushConfiguration.pnpmOptions.useWorkspaces) {
+      } else if (this._rushConfiguration.pnpmOptions.preferFrozenLockfileForUpdate) {
         // In workspaces, we want to avoid unnecessary lockfile churn
         args.push('--prefer-frozen-lockfile');
       } else {
