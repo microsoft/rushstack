@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Support jsExtensionOverride to emit e.g. \".cjs\" files for commonjs or \".mjs\" files for esnext modules in Heft",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
