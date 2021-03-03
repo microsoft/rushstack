@@ -759,7 +759,15 @@ export class RushConfiguration {
     // are processed in a deterministic order by the various Rush algorithms.
 
     const projectsExtended: string[] = this._projectsExtended || [];
-    const extraProjects: IRushConfigurationProjectJson[] = projectsExtended
+    const extraProjects: IRushConfigurationProjectJson[][] = projectsExtended.map((jsonPath: string) => {
+      // Paths should be resolved relative to rush.json
+      const resolvedFilePath: string = path.resolve(this._rushJsonFolder, jsonPath);
+      const extendedProjectsJson: IRushConfigurationProjectsExtendedJson = JsonFile.load(resolvedFilePath);
+      RushConfiguration._projectsSchemaExtended.validateObject(extendedProjectsJson, resolvedFilePath);
+      return extendedProjectsJson.projects;
+    });
+    // .concat() accepts multiple arrays and creates a new array
+    const sortedProjectJsons: IRushConfigurationProjectJson[] = this._rushConfigurationJson.projects.concat(...extraProjects);
       .map((jsonPath: string) => {
         const resolvedFilePath: string = path.resolve(jsonPath);
         const extendedProjectsJson: IRushConfigurationProjectsExtendedJson = JsonFile.load(jsonPath);
