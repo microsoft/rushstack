@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Use --prefer-frozen-lockfile during default `rush update` to minimize lockfile churn",
+      "comment": "Add `preferFrozenLockfileForUpdate` option to minimize lockfile churn by passing --prefer-frozen-lockfile to pnpm during default `rush update`.",
       "type": "none"
     }
   ],
