@@ -767,21 +767,9 @@ export class RushConfiguration {
       return extendedProjectsJson.projects;
     });
     // .concat() accepts multiple arrays and creates a new array
-    const sortedProjectJsons: IRushConfigurationProjectJson[] = this._rushConfigurationJson.projects.concat(...extraProjects);
-      .map((jsonPath: string) => {
-        const resolvedFilePath: string = path.resolve(jsonPath);
-        const extendedProjectsJson: IRushConfigurationProjectsExtendedJson = JsonFile.load(jsonPath);
-        RushConfiguration._projectsSchemaExtended.validateObject(extendedProjectsJson, resolvedFilePath);
-        return extendedProjectsJson.projects;
-      })
-      .reduce(
-        (acc: IRushConfigurationProjectJson[], curr: IRushConfigurationProjectJson[]) => curr.concat(acc),
-        []
-      );
-
-    const sortedProjectJsons: IRushConfigurationProjectJson[] = this._rushConfigurationJson.projects
-      .slice(0)
-      .concat(extraProjects);
+    const sortedProjectJsons: IRushConfigurationProjectJson[] = this._rushConfigurationJson.projects.concat(
+      ...extraProjects
+    );
     sortedProjectJsons.sort((a: IRushConfigurationProjectJson, b: IRushConfigurationProjectJson) =>
       a.packageName.localeCompare(b.packageName)
     );

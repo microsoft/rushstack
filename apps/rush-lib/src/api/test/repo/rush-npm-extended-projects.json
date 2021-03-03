@@ -22,7 +22,7 @@
   "eventHooks": {
     "postRushBuild": ["do something"]
   },
-  "projectsExtended": [],
+  "projectsExtended": ["./extended-projects/extended-1.json", "./extended-projects/extended-2.json"],
   "projects": [
     {
       "packageName": "project1",
