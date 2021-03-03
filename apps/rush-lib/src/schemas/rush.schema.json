@@ -104,7 +104,7 @@
           "$ref": "#/definitions/environmentVariables"
         },
         "preferFrozenLockfileForUpdate": {
-          "description": "If treu, the for \"rush update\", pnpm will use the --prefer-frozen-lockfile flag to minimize shrinkwrap changes.",
+          "description": "If true, then for \"rush update\", pnpm will use the --prefer-frozen-lockfile flag to minimize shrinkwrap changes.",
           "type": "boolean"
         },
         "preventManualShrinkwrapChanges": {
