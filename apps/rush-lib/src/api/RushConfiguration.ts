@@ -177,10 +177,6 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    */
   resolutionStrategy?: ResolutionStrategy;
   /**
-   * {@inheritDoc PnpmOptionsConfiguration.preferFrozenLockfileForUpdate}
-   */
-  preferFrozenLockfileForUpdate?: boolean;
-  /**
    * {@inheritDoc PnpmOptionsConfiguration.preventManualShrinkwrapChanges}
    */
   preventManualShrinkwrapChanges?: boolean;
@@ -339,17 +335,6 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   public readonly resolutionStrategy: ResolutionStrategy;
 
   /**
-   * If true, then `rush update` will instruct PNPM to minimize changes to the lockfile.
-   *
-   * @remarks
-   * This feature is intended to support a flow where the lockfile only ever updates if the constraints from common-versions.json,
-   * pnpmfile.js, or the projects package.json files change in such a fashion as to make the lockfile incompatible.
-   *
-   * The default value is false.
-   */
-  public readonly preferFrozenLockfileForUpdate: boolean;
-
-  /**
    * If true, then `rush install` will report an error if manual modifications
    * were made to the PNPM shrinkwrap file without running `rush update` afterwards.
    *
@@ -389,7 +374,6 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     }
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
-    this.preferFrozenLockfileForUpdate = !!json.preferFrozenLockfileForUpdate;
     this.preventManualShrinkwrapChanges = !!json.preventManualShrinkwrapChanges;
     this.useWorkspaces = !!json.useWorkspaces;
   }

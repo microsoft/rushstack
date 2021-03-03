@@ -79,17 +79,6 @@
     /*[LINE "HYPOTHETICAL"]*/ "resolutionStrategy": "fast",
 
     /**
-    * If true, then `rush update` will instruct PNPM to minimize changes to the lockfile.
-    *
-    * @remarks
-    * This feature is intended to support a flow where the lockfile only ever updates if the constraints from common-versions.json,
-    * pnpmfile.js, or the projects package.json files change in such a fashion as to make the lockfile incompatible.
-    *
-    * The default value is false.
-    */
-    /*[LINE "HYPOTHETICAL"]*/ "preferFrozenLockfileForUpdate": false,
-
-    /**
      * If true, then `rush install` will report an error if manual modifications
      * were made to the PNPM shrinkwrap file without running "rush update" afterwards.
      *

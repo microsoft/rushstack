@@ -103,10 +103,6 @@
         "environmentVariables": {
           "$ref": "#/definitions/environmentVariables"
         },
-        "preferFrozenLockfileForUpdate": {
-          "description": "If true, then for \"rush update\", pnpm will use the --prefer-frozen-lockfile flag to minimize shrinkwrap changes.",
-          "type": "boolean"
-        },
         "preventManualShrinkwrapChanges": {
           "description": "If true, then \"rush install\" will report an error if manual modifications were made to the PNPM shrinkwrap file without running `rush update` afterwards. To temporarily disable this validation when invoking \"rush install\", use the \"--bypassPolicy\" command-line parameter. The default value is false.",
           "type": "boolean"
