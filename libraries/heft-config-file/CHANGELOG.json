@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.3.17",
+      "tag": "@rushstack/heft-config-file_v0.3.17",
+      "date": "Thu, 04 Mar 2021 01:11:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.2.10`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.16",
       "tag": "@rushstack/heft-config-file_v0.3.16",
       "date": "Fri, 05 Feb 2021 16:10:42 GMT",
