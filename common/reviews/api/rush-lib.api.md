@@ -146,6 +146,7 @@ export interface IExperimentsJson {
     legacyIncrementalBuildDependencyDetection?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
+    usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
 }
 
 // @public
@@ -180,7 +181,6 @@ export interface IPackageManagerOptionsJsonBase {
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     pnpmStore?: PnpmStoreOptions;
-    preferFrozenLockfileForUpdate?: boolean;
     preventManualShrinkwrapChanges?: boolean;
     resolutionStrategy?: ResolutionStrategy;
     strictPeerDependencies?: boolean;
@@ -296,7 +296,6 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     constructor(json: _IPnpmOptionsJson, commonTempFolder: string);
     readonly pnpmStore: PnpmStoreOptions;
     readonly pnpmStorePath: string;
-    readonly preferFrozenLockfileForUpdate: boolean;
     readonly preventManualShrinkwrapChanges: boolean;
     readonly resolutionStrategy: ResolutionStrategy;
     readonly strictPeerDependencies: boolean;
