@@ -18,7 +18,8 @@
     "build": "heft test --clean"
   },
   "dependencies": {
-    "@rushstack/tree-pattern": "workspace:*"
+    "@rushstack/tree-pattern": "workspace:*",
+    "@typescript-eslint/experimental-utils": "^3.4.0"
   },
   "peerDependencies": {
     "eslint": "^6.0.0 || ^7.0.0"
@@ -30,7 +31,6 @@
     "@types/estree": "0.0.44",
     "@types/heft-jest": "1.0.1",
     "@types/node": "10.17.13",
-    "@typescript-eslint/experimental-utils": "3.4.0",
     "@typescript-eslint/parser": "3.4.0",
     "@typescript-eslint/typescript-estree": "3.4.0",
     "eslint": "~7.12.1",
