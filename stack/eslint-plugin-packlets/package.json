@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@rushstack/tree-pattern": "workspace:*",
-    "@typescript-eslint/experimental-utils": "3.4.0"
+    "@typescript-eslint/experimental-utils": "^3.4.0"
   },
   "peerDependencies": {
     "eslint": "^6.0.0 || ^7.0.0"
