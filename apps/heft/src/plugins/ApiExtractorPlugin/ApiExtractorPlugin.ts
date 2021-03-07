@@ -8,6 +8,7 @@ import { ApiExtractorRunner } from './ApiExtractorRunner';
 import { IBuildStageContext, IBundleSubstage } from '../../stages/BuildStage';
 import { CoreConfigFiles } from '../../utilities/CoreConfigFiles';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
+import { ITaskPackageResolution, TaskPackageResolver } from '../../utilities/TaskPackageResolver';
 
 const PLUGIN_NAME: string = 'ApiExtractorPlugin';
 const CONFIG_FILE_LOCATION: string = './config/api-extractor.json';
@@ -37,6 +38,12 @@ interface IRunApiExtractorOptions {
 
 export class ApiExtractorPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
+
+  private readonly _taskPackageResolver: TaskPackageResolver;
+
+  public constructor(taskPackageResolver: TaskPackageResolver) {
+    this._taskPackageResolver = taskPackageResolver;
+  }
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     const { buildFolder } = heftConfiguration;
@@ -89,12 +96,19 @@ export class ApiExtractorPlugin implements IHeftPlugin {
       return;
     }
 
-    if (!heftConfiguration.compilerPackage) {
+    const resolution:
+      | ITaskPackageResolution
+      | undefined = await this._taskPackageResolver.resolveTaskPackagesAsync(
+      options.heftConfiguration.buildFolder,
+      logger.terminal
+    );
+
+    if (!resolution) {
       logger.emitError(new Error('Unable to resolve a compiler package for tsconfig.json'));
       return;
     }
 
-    if (!heftConfiguration.compilerPackage.apiExtractorPackagePath) {
+    if (!resolution.apiExtractorPackagePath) {
       logger.emitError(
         new Error('Unable to resolve the "@microsoft/api-extractor" package for this project')
       );
@@ -105,9 +119,9 @@ export class ApiExtractorPlugin implements IHeftPlugin {
       heftConfiguration.terminalProvider,
       {
         apiExtractorJsonFilePath: options.apiExtractorJsonFilePath,
-        apiExtractorPackagePath: heftConfiguration.compilerPackage.apiExtractorPackagePath,
+        apiExtractorPackagePath: resolution.apiExtractorPackagePath,
         typescriptPackagePath: apiExtractorTaskConfiguration?.useProjectTypescriptVersion
-          ? heftConfiguration.compilerPackage.typeScriptPackagePath
+          ? resolution.typeScriptPackagePath
           : undefined,
         buildFolder: buildFolder,
         production: production

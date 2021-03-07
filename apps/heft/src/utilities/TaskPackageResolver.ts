@@ -23,22 +23,43 @@ export interface ITaskPackageResolution {
 }
 
 export class TaskPackageResolver {
-  private static _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+  private _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
+  private _resolverCache: Map<string, Promise<ITaskPackageResolution>> = new Map<
+    string,
+    Promise<ITaskPackageResolution>
+  >();
 
-  public static resolveTaskPackages(startingFolderPath: string, terminal: Terminal): ITaskPackageResolution {
+  public async resolveTaskPackagesAsync(
+    startingPath: string,
+    terminal: Terminal
+  ): Promise<ITaskPackageResolution> {
     // First, make sure we have the governing package.json for the local project
-    const projectFolder: string | undefined = this._packageJsonLookup.tryGetPackageFolderFor(
-      startingFolderPath
-    );
+    const projectFolder: string | undefined = this._packageJsonLookup.tryGetPackageFolderFor(startingPath);
     if (!projectFolder) {
-      throw new Error('Unable to find a package.json file for the working folder: ' + startingFolderPath);
+      throw new Error(`Unable to find a package.json file for "${startingPath}" `);
     }
 
+    let resolutionPromise: Promise<ITaskPackageResolution> | undefined = this._resolverCache.get(
+      projectFolder
+    );
+    if (!resolutionPromise) {
+      resolutionPromise = this._resolveTaskPackagesInnerAsync(projectFolder, terminal);
+      this._resolverCache.set(projectFolder, resolutionPromise);
+    }
+
+    return await resolutionPromise;
+  }
+
+  private async _resolveTaskPackagesInnerAsync(
+    projectFolder: string,
+    terminal: Terminal
+  ): Promise<ITaskPackageResolution> {
     // For now, we're going to rely on the tsconfig.json file's "extends" chain.  Eventually we want
     // to generalize this to resolve each task independently.
 
     const localTsconfigPath: string = path.join(projectFolder, 'tsconfig.json');
-    if (!FileSystem.exists(localTsconfigPath)) {
+    const localTsconfigExists: boolean = await FileSystem.existsAsync(localTsconfigPath);
+    if (!localTsconfigExists) {
       throw new Error(
         'Unable to resolve the task package paths.' +
           '  A local tsconfig.json was not found for this project: ' +
@@ -46,17 +67,19 @@ export class TaskPackageResolver {
       );
     }
 
-    const rigPackageFolder: string | undefined = TaskPackageResolver._locateRigPackageFolder(
+    const tsconfigBaseWithTypescriptDependencyFolder:
+      | string
+      | undefined = await this._findTsconfigBaseWithTypescriptDependencyAsync(
       localTsconfigPath,
       new Set<string>(),
       new Set<string>(),
       terminal
     );
 
-    const typeScriptPackagePath: string | undefined = TaskPackageResolver._tryResolveTaskPackage(
+    const typeScriptPackagePath: string | undefined = this._tryResolveTaskPackage(
       'typescript',
       projectFolder,
-      rigPackageFolder,
+      tsconfigBaseWithTypescriptDependencyFolder,
       terminal
     );
     if (!typeScriptPackagePath) {
@@ -64,22 +87,22 @@ export class TaskPackageResolver {
       throw new Error('Unable to resolve a TypeScript compiler package for ' + localTsconfigPath);
     }
 
-    const tslintPackagePath: string | undefined = TaskPackageResolver._tryResolveTaskPackage(
+    const tslintPackagePath: string | undefined = this._tryResolveTaskPackage(
       'tslint',
       projectFolder,
-      rigPackageFolder,
+      tsconfigBaseWithTypescriptDependencyFolder,
       terminal
     );
-    const eslintPackagePath: string | undefined = TaskPackageResolver._tryResolveTaskPackage(
+    const eslintPackagePath: string | undefined = this._tryResolveTaskPackage(
       'eslint',
       projectFolder,
-      rigPackageFolder,
+      tsconfigBaseWithTypescriptDependencyFolder,
       terminal
     );
-    const apiExtractorPackagePath: string | undefined = TaskPackageResolver._tryResolveTaskPackage(
+    const apiExtractorPackagePath: string | undefined = this._tryResolveTaskPackage(
       '@microsoft/api-extractor',
       projectFolder,
-      rigPackageFolder,
+      tsconfigBaseWithTypescriptDependencyFolder,
       terminal
     );
 
@@ -91,23 +114,27 @@ export class TaskPackageResolver {
     };
   }
 
-  private static _tryResolveTaskPackage(
+  private _tryResolveTaskPackage(
     taskPackageName: string,
-    projectFolder: string,
+    tsconfigBaseWithTypescriptDependencyFolder: string,
     rigPackageFolder: string | undefined,
     terminal: Terminal
   ): string | undefined {
-    let result: string | undefined = undefined;
-    if (rigPackageFolder) {
-      result = TaskPackageResolver._tryResolvePackage(taskPackageName, rigPackageFolder, terminal, true);
+    let result: string | undefined = this._tryResolvePackage(
+      taskPackageName,
+      tsconfigBaseWithTypescriptDependencyFolder,
+      terminal,
+      false
+    );
+
+    if (!result && rigPackageFolder) {
+      result = this._tryResolvePackage(taskPackageName, rigPackageFolder, terminal, true);
     }
-    if (!result) {
-      result = TaskPackageResolver._tryResolvePackage(taskPackageName, projectFolder, terminal, false);
-    }
+
     return result;
   }
 
-  private static _tryResolvePackage(
+  private _tryResolvePackage(
     taskPackageName: string,
     baseFolder: string,
     terminal: Terminal,
@@ -143,12 +170,12 @@ export class TaskPackageResolver {
     return resolvedPackageFolder;
   }
 
-  private static _locateRigPackageFolder(
+  private async _findTsconfigBaseWithTypescriptDependencyAsync(
     tsconfigPath: string,
     visitedTsconfigPaths: Set<string>,
     visitedRigPackagePaths: Set<string>,
     terminal: Terminal
-  ): string | undefined {
+  ): Promise<string | undefined> {
     if (visitedTsconfigPaths.has(tsconfigPath)) {
       throw new Error(`The file "${tsconfigPath}" has an "extends" field that creates a circular reference`);
     }
@@ -158,11 +185,12 @@ export class TaskPackageResolver {
 
     let tsconfig: ITsconfig;
     try {
-      tsconfig = JsonFile.load(tsconfigPath);
+      tsconfig = await JsonFile.loadAsync(tsconfigPath);
     } catch (e) {
       if (FileSystem.isNotExistError(e)) {
         throw new Error(`The referenced tsconfig.json file does not exist:\n` + tsconfigPath);
       }
+
       throw new Error(`Error parsing tsconfig.json: ${e}\n` + tsconfigPath);
     }
 
@@ -193,7 +221,7 @@ export class TaskPackageResolver {
       }
 
       terminal.writeVerboseLine(`Resolved "extends" path to: ${baseTsconfigPath}`);
-      const result: string | undefined = TaskPackageResolver._locateRigPackageFolder(
+      const result: string | undefined = await this._findTsconfigBaseWithTypescriptDependencyAsync(
         baseTsconfigPath,
         visitedTsconfigPaths,
         visitedRigPackagePaths,
@@ -206,9 +234,7 @@ export class TaskPackageResolver {
     }
 
     // Look for the governing package of "tsconfigPath"
-    const rigPackagePath: string | undefined = TaskPackageResolver._packageJsonLookup.tryGetPackageFolderFor(
-      tsconfigPath
-    );
+    const rigPackagePath: string | undefined = this._packageJsonLookup.tryGetPackageFolderFor(tsconfigPath);
     if (!rigPackagePath) {
       // This is unexpected; for now, we'll treat it as unsupported.  Please open a GitHub issue if you find
       // a legitimate reason to reference tsconfig.json that is not part of some package.
@@ -222,7 +248,7 @@ export class TaskPackageResolver {
     if (!visitedRigPackagePaths.has(rigPackagePath)) {
       visitedRigPackagePaths.add(rigPackagePath);
 
-      const rigPackageJson: INodePackageJson = TaskPackageResolver._packageJsonLookup.loadNodePackageJson(
+      const rigPackageJson: INodePackageJson = this._packageJsonLookup.loadNodePackageJson(
         path.join(rigPackagePath, 'package.json')
       );
 

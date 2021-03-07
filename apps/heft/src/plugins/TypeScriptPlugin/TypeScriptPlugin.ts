@@ -103,10 +103,16 @@ interface ITypeScriptConfigurationFileCacheEntry {
 
 export class TypeScriptPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
+
+  private readonly _taskPackageResolver: TaskPackageResolver;
   private _typeScriptConfigurationFileCache: Map<string, ITypeScriptConfigurationFileCacheEntry> = new Map<
     string,
     ITypeScriptConfigurationFileCacheEntry
   >();
+
+  public constructor(taskPackageResolver: TaskPackageResolver) {
+    this._taskPackageResolver = taskPackageResolver;
+  }
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     const logger: ScopedLogger = heftSession.requestScopedLogger('TypeScript Plugin');
@@ -120,7 +126,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
         compile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          await new Promise((resolve: () => void, reject: (error: Error) => void) => {
+          await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
             this._runTypeScriptAsync(logger, {
               heftSession,
               heftConfiguration,
@@ -263,7 +269,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
 
     const tsconfigFilePaths: string[] = typeScriptConfiguration.tsconfigPaths;
     if (tsconfigFilePaths.length === 1) {
-      await this._runBuilderForTsconfig(logger, {
+      await this._runBuilderForTsconfigAsync(logger, {
         ...builderOptions,
         tsconfigFilePath: tsconfigFilePaths[0],
         terminalProvider: heftConfiguration.terminalProvider,
@@ -281,7 +287,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
           tsconfigFilename === 'tsconfig' ? typeScriptConfiguration.additionalModuleKindsToEmit : undefined;
 
         builderProcesses.push(
-          this._runBuilderForTsconfig(logger, {
+          this._runBuilderForTsconfigAsync(logger, {
             ...builderOptions,
             tsconfigFilePath,
             terminalProvider: heftConfiguration.terminalProvider,
@@ -296,7 +302,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
     }
   }
 
-  private async _runBuilderForTsconfig(
+  private async _runBuilderForTsconfigAsync(
     logger: ScopedLogger,
     options: IRunBuilderForTsconfigOptions
   ): Promise<void> {
@@ -315,7 +321,9 @@ export class TypeScriptPlugin implements IHeftPlugin {
     } = options;
 
     const fullTsconfigFilePath: string = path.resolve(heftConfiguration.buildFolder, tsconfigFilePath);
-    const resolution: ITaskPackageResolution | undefined = TaskPackageResolver.resolveTaskPackages(
+    const resolution:
+      | ITaskPackageResolution
+      | undefined = await this._taskPackageResolver.resolveTaskPackagesAsync(
       fullTsconfigFilePath,
       logger.terminal
     );
