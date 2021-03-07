@@ -30,6 +30,7 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
   private readonly _s3Prefix: string | undefined;
   private readonly _environmentWriteCredential: string | undefined;
   private readonly _isCacheWriteAllowedByConfiguration: boolean;
+  private __credentialCacheId: string | undefined;
 
   public get isCacheWriteAllowed(): boolean {
     return this._isCacheWriteAllowedByConfiguration || !!this._environmentWriteCredential;
@@ -63,12 +64,17 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
   }
 
   private get _credentialCacheId(): string {
-    const cacheIdParts: string[] = ['aws-s3', this._s3Region, this._s3Bucket];
+    if (!this.__credentialCacheId) {
+      const cacheIdParts: string[] = ['aws-s3', this._s3Region, this._s3Bucket];
 
-    if (this._isCacheWriteAllowedByConfiguration) {
-      cacheIdParts.push('cacheWriteAllowed');
+      if (this._isCacheWriteAllowedByConfiguration) {
+        cacheIdParts.push('cacheWriteAllowed');
+      }
+
+      this.__credentialCacheId = cacheIdParts.join('|');
     }
-    return cacheIdParts.join('|');
+
+    return this.__credentialCacheId;
   }
 
   private async _getS3ClientAsync(): Promise<S3Client> {

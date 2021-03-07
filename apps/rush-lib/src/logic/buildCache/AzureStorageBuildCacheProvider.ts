@@ -77,7 +77,7 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
         cacheIdParts.push('cacheWriteAllowed');
       }
 
-      return cacheIdParts.join('|');
+      this.__credentialCacheId = cacheIdParts.join('|');
     }
 
     return this.__credentialCacheId;
