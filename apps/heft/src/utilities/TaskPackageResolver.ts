@@ -67,9 +67,7 @@ export class TaskPackageResolver {
       );
     }
 
-    const tsconfigBaseWithTypescriptDependencyFolder:
-      | string
-      | undefined = await this._findTsconfigBaseWithTypescriptDependencyAsync(
+    const tsconfigBaseFolderPath: string | undefined = await this._findTsconfigBaseFolderAsync(
       localTsconfigPath,
       new Set<string>(),
       new Set<string>(),
@@ -79,7 +77,7 @@ export class TaskPackageResolver {
     const typeScriptPackagePath: string | undefined = this._tryResolveTaskPackage(
       'typescript',
       projectFolder,
-      tsconfigBaseWithTypescriptDependencyFolder,
+      tsconfigBaseFolderPath,
       terminal
     );
     if (!typeScriptPackagePath) {
@@ -90,19 +88,19 @@ export class TaskPackageResolver {
     const tslintPackagePath: string | undefined = this._tryResolveTaskPackage(
       'tslint',
       projectFolder,
-      tsconfigBaseWithTypescriptDependencyFolder,
+      tsconfigBaseFolderPath,
       terminal
     );
     const eslintPackagePath: string | undefined = this._tryResolveTaskPackage(
       'eslint',
       projectFolder,
-      tsconfigBaseWithTypescriptDependencyFolder,
+      tsconfigBaseFolderPath,
       terminal
     );
     const apiExtractorPackagePath: string | undefined = this._tryResolveTaskPackage(
       '@microsoft/api-extractor',
       projectFolder,
-      tsconfigBaseWithTypescriptDependencyFolder,
+      tsconfigBaseFolderPath,
       terminal
     );
 
@@ -116,19 +114,19 @@ export class TaskPackageResolver {
 
   private _tryResolveTaskPackage(
     taskPackageName: string,
-    tsconfigBaseWithTypescriptDependencyFolder: string,
-    rigPackageFolder: string | undefined,
+    projectFolderPath: string,
+    tsconfigBaseFolderPath: string | undefined,
     terminal: Terminal
   ): string | undefined {
     let result: string | undefined = this._tryResolvePackage(
       taskPackageName,
-      tsconfigBaseWithTypescriptDependencyFolder,
+      projectFolderPath,
       terminal,
       false
     );
 
-    if (!result && rigPackageFolder) {
-      result = this._tryResolvePackage(taskPackageName, rigPackageFolder, terminal, true);
+    if (!result && tsconfigBaseFolderPath) {
+      result = this._tryResolvePackage(taskPackageName, tsconfigBaseFolderPath, terminal, true);
     }
 
     return result;
@@ -138,10 +136,12 @@ export class TaskPackageResolver {
     taskPackageName: string,
     baseFolder: string,
     terminal: Terminal,
-    isRigFolder: boolean
+    isTsconfigBaseFolder: boolean
   ): string | undefined {
-    if (isRigFolder) {
-      terminal.writeVerboseLine(`Attempting to resolve "${taskPackageName}" from rig folder ${baseFolder}`);
+    if (isTsconfigBaseFolder) {
+      terminal.writeVerboseLine(
+        `Attempting to resolve "${taskPackageName}" from tsconfig base folder ${baseFolder}`
+      );
     } else {
       terminal.writeVerboseLine(`Attempting to resolve "${taskPackageName}" from ${baseFolder}`);
     }
@@ -161,7 +161,7 @@ export class TaskPackageResolver {
       return undefined;
     }
 
-    if (isRigFolder) {
+    if (isTsconfigBaseFolder) {
       terminal.writeVerboseLine(`Resolved "${taskPackageName}" via rig package to ${resolvedPackageFolder}`);
     } else {
       terminal.writeVerboseLine(`Resolved "${taskPackageName}" to ${resolvedPackageFolder}`);
@@ -170,7 +170,7 @@ export class TaskPackageResolver {
     return resolvedPackageFolder;
   }
 
-  private async _findTsconfigBaseWithTypescriptDependencyAsync(
+  private async _findTsconfigBaseFolderAsync(
     tsconfigPath: string,
     visitedTsconfigPaths: Set<string>,
     visitedRigPackagePaths: Set<string>,
@@ -179,6 +179,7 @@ export class TaskPackageResolver {
     if (visitedTsconfigPaths.has(tsconfigPath)) {
       throw new Error(`The file "${tsconfigPath}" has an "extends" field that creates a circular reference`);
     }
+
     visitedTsconfigPaths.add(tsconfigPath);
 
     terminal.writeVerboseLine(`Examining ${tsconfigPath}`);
@@ -221,7 +222,7 @@ export class TaskPackageResolver {
       }
 
       terminal.writeVerboseLine(`Resolved "extends" path to: ${baseTsconfigPath}`);
-      const result: string | undefined = await this._findTsconfigBaseWithTypescriptDependencyAsync(
+      const result: string | undefined = await this._findTsconfigBaseFolderAsync(
         baseTsconfigPath,
         visitedTsconfigPaths,
         visitedRigPackagePaths,
