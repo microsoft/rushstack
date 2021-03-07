@@ -308,6 +308,7 @@ export type PnpmStoreOptions = 'local' | 'global';
 // @public
 export class RepoStateFile {
     get filePath(): string;
+    get isValid(): boolean;
     static loadFromFile(jsonFilename: string, variant: string | undefined): RepoStateFile;
     get pnpmShrinkwrapHash(): string | undefined;
     get preferredVersionsHash(): string | undefined;
