@@ -51,7 +51,7 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
     }
     const splitIndex: number = credentialString.indexOf(':');
     if (splitIndex === -1) {
-      return undefined;
+      throw new Error('Amazon S3 credential is in an unexpected format.');
     }
     return {
       accessKeyId: credentialString.substring(0, splitIndex),
