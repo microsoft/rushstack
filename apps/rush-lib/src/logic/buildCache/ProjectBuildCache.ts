@@ -16,6 +16,7 @@ import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
 import { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
 import { TarExecutable } from '../../utilities/TarExecutable';
+import { Utilities } from '../../utilities/Utilities';
 
 interface IProjectBuildCacheOptions {
   buildCacheConfiguration: BuildCacheConfiguration;
@@ -259,7 +260,7 @@ export class ProjectBuildCache {
         },
         filesToCache.outputFilePaths
       );
-      cacheEntryBuffer = await this._readStreamToBufferAsync(tarStream);
+      cacheEntryBuffer = await Utilities.readStreamToBufferAsync(tarStream);
       setLocalCacheEntryPromise = this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
         terminal,
         cacheId,
@@ -384,18 +385,6 @@ export class ProjectBuildCache {
         yield entryPath;
       }
     }
-  }
-
-  private async _readStreamToBufferAsync(stream: stream.Readable): Promise<Buffer> {
-    return await new Promise((resolve: (result: Buffer) => void, reject: (error: Error) => void) => {
-      const parts: Uint8Array[] = [];
-      stream.on('data', (chunk) => parts.push(chunk));
-      stream.on('error', (error) => reject(error));
-      stream.on('end', () => {
-        const result: Buffer = Buffer.concat(parts);
-        resolve(result);
-      });
-    });
   }
 
   private static _getCacheId(options: Omit<IProjectBuildCacheOptions, 'terminal'>): string | undefined {

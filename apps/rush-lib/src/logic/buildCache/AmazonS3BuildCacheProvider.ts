@@ -1,15 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Readable } from 'stream';
 import { Terminal } from '@rushstack/node-core-library';
+import { S3Client, GetObjectCommand, PutObjectCommand, GetObjectCommandOutput } from '@aws-sdk/client-s3';
+import { defaultProvider as awsCredentialsProvider } from '@aws-sdk/credential-provider-node';
 
 import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
-import { S3Client, GetObjectCommand, PutObjectCommand, GetObjectCommandOutput } from '@aws-sdk/client-s3';
-import { Readable } from 'stream';
 import { CredentialCache, ICredentialCacheEntry } from '../CredentialCache';
 import { RushConstants } from '../RushConstants';
-import { defaultProvider as awsCredentialsProvider } from '@aws-sdk/credential-provider-node';
+import { Utilities } from '../../utilities/Utilities';
 
 interface IAmazonS3Credentials {
   accessKeyId: string;
@@ -49,10 +50,12 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
     if (!credentialString) {
       return undefined;
     }
+
     const splitIndex: number = credentialString.indexOf(':');
     if (splitIndex === -1) {
       throw new Error('Amazon S3 credential is in an unexpected format.');
     }
+
     return {
       accessKeyId: credentialString.substring(0, splitIndex),
       secretAccessKey: credentialString.substring(splitIndex + 1)
@@ -107,8 +110,10 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
           }
         }
       }
+
       this.__s3Client = new S3Client({ region: this._s3Region, credentials });
     }
+
     return this.__s3Client;
   }
 
@@ -127,24 +132,17 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
       if (fetchResult === undefined) {
         return undefined;
       }
-      return await this._streamToBuffer(fetchResult.Body as Readable);
+
+      return await Utilities.readStreamToBufferAsync(fetchResult.Body as Readable);
     } catch (e) {
       if (e.name === 'NoSuchKey') {
         // No object was uploaded with that name/key
         return undefined;
       }
+
       terminal.writeWarningLine(`Error getting cache entry from S3: ${e}`);
       return undefined;
     }
-  }
-
-  private _streamToBuffer(stream: Readable): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-      const parts: Array<Uint8Array> = [];
-      stream.on('data', (part) => parts.push(part));
-      stream.on('end', () => resolve(Buffer.concat(parts)));
-      stream.on('error', reject);
-    });
   }
 
   public async trySetCacheEntryBufferAsync(

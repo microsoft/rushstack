@@ -8,7 +8,7 @@ import * as tty from 'tty';
 import * as path from 'path';
 import wordwrap from 'wordwrap';
 import { JsonFile, IPackageJson, FileSystem, FileConstants, Terminal } from '@rushstack/node-core-library';
-import { Stream } from 'stream';
+import type * as stream from 'stream';
 import { CommandLineHelper } from '@rushstack/ts-command-line';
 
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -658,6 +658,18 @@ export class Utilities {
     }
   }
 
+  public static async readStreamToBufferAsync(stream: stream.Readable): Promise<Buffer> {
+    return await new Promise((resolve: (result: Buffer) => void, reject: (error: Error) => void) => {
+      const parts: Uint8Array[] = [];
+      stream.on('data', (chunk) => parts.push(chunk));
+      stream.on('error', (error) => reject(error));
+      stream.on('end', () => {
+        const result: Buffer = Buffer.concat(parts);
+        resolve(result);
+      });
+    });
+  }
+
   private static _executeLifecycleCommandInternal<TCommandResult>(
     command: string,
     spawnFunction: (
@@ -798,7 +810,7 @@ export class Utilities {
       | 'pipe'
       | 'ignore'
       | 'inherit'
-      | (number | 'pipe' | 'ignore' | 'inherit' | 'ipc' | Stream | null | undefined)[]
+      | (number | 'pipe' | 'ignore' | 'inherit' | 'ipc' | stream.Stream | null | undefined)[]
       | undefined,
     environment?: IEnvironment,
     keepEnvironment: boolean = false
