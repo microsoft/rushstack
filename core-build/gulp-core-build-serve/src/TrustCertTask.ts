@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import { GulpTask, GCBTerminalProvider } from '@microsoft/gulp-core-build';
-import * as Gulp from 'gulp';
 import { ICertificate, CertificateManager } from '@rushstack/debug-certificate-manager';
 import { Terminal } from '@rushstack/node-core-library';
 
@@ -23,14 +22,12 @@ export class TrustCertTask extends GulpTask<void> {
     this._terminal = new Terminal(this._terminalProvider);
   }
 
-  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): void {
+  public async executeTask(): Promise<void> {
     const certificateManager: CertificateManager = new CertificateManager();
-    const certificate: ICertificate = certificateManager.ensureCertificate(true, this._terminal);
+    const certificate: ICertificate = await certificateManager.ensureCertificateAsync(true, this._terminal);
 
-    if (certificate.pemCertificate && certificate.pemKey) {
-      completeCallback();
-    } else {
-      completeCallback('Error trusting development certificate.');
+    if (!certificate.pemCertificate || !certificate.pemKey) {
+      throw new Error('Error trusting development certificate.');
     }
   }
 }

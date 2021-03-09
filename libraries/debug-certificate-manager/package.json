@@ -9,11 +9,10 @@
     "url": "https://github.com/microsoft/rushstack/tree/master/libraries/debug-certificate-manager"
   },
   "scripts": {
-    "build": "heft test --clean"
+    "build": "heft build --clean"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "deasync": "~0.1.19",
     "node-forge": "~0.7.1",
     "sudo": "~1.0.3"
   },

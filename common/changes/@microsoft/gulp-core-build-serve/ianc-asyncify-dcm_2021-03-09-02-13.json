@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-serve",
+      "comment": "Update the debug certificate manager to be async.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-serve",
+  "email": "iclanton@users.noreply.github.com"
+}

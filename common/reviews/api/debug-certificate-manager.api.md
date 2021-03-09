@@ -9,8 +9,8 @@ import { Terminal } from '@rushstack/node-core-library';
 // @public
 export class CertificateManager {
     constructor();
-    ensureCertificate(canGenerateNewCertificate: boolean, terminal: Terminal): ICertificate;
-    untrustCertificate(terminal: Terminal): boolean;
+    ensureCertificateAsync(canGenerateNewCertificate: boolean, terminal: Terminal): Promise<ICertificate>;
+    untrustCertificateAsync(terminal: Terminal): Promise<boolean>;
 }
 
 // @public
