@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/module-minifier-plugin",
-  "version": "0.3.26",
+  "version": "0.3.27",
   "description": "This plugin splits minification of webpack compilations into smaller units.",
   "main": "lib/index.js",
   "typings": "dist/module-minifier-plugin.d.ts",
@@ -16,9 +16,9 @@
     "build": "heft test --clean"
   },
   "peerDependencies": {
+    "@types/webpack": "*",
     "webpack": "^4.31.0",
-    "webpack-sources": "~1.4.3",
-    "@types/webpack": "*"
+    "webpack-sources": "~1.4.3"
   },
   "peerDependenciesMeta": {
     "@types/webpack": {

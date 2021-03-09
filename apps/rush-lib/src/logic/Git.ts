@@ -5,7 +5,7 @@ import child_process from 'child_process';
 import gitInfo = require('git-repo-info');
 import * as os from 'os';
 import * as path from 'path';
-import colors from 'colors';
+import colors from 'colors/safe';
 import { Executable, AlreadyReportedError, Path } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';

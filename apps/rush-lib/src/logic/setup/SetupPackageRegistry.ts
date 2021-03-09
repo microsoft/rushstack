@@ -127,7 +127,7 @@ export class SetupPackageRegistry {
 
     const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync('npm', npmArgs, {
       currentWorkingDirectory: this.rushConfiguration.commonTempFolder,
-      stdio: ['ignore', 'pipe', 'ignore'],
+      stdio: ['ignore', 'pipe', 'pipe'],
       // Wait at most 10 seconds for "npm view" to succeed
       timeoutMs: 10 * 1000
     });
@@ -149,9 +149,26 @@ export class SetupPackageRegistry {
       throw new InternalError('"npm view" unexpectedly succeeded');
     }
 
-    const jsonOutput: JsonObject = JSON.parse(result.stdout);
+    // NPM 6.x writes to stdout
+    let jsonContent: string | undefined = SetupPackageRegistry._tryFindJson(result.stdout);
+    if (jsonContent === undefined) {
+      // NPM 7.x writes dirty output to stderr; see https://github.com/npm/cli/issues/2740
+      jsonContent = SetupPackageRegistry._tryFindJson(result.stderr);
+    }
+    if (jsonContent === undefined) {
+      throw new InternalError('The "npm view" command did not return a JSON structure');
+    }
+
+    let jsonOutput: JsonObject;
+    try {
+      jsonOutput = JSON.parse(jsonContent);
+    } catch (error) {
+      this._terminal.writeVerboseLine('NPM response:\n\n--------\n' + jsonContent + '\n--------\n\n');
+      throw new InternalError('The "npm view" command returned an invalid JSON structure');
+    }
     const errorCode: JsonObject = jsonOutput?.error?.code;
     if (typeof errorCode !== 'string') {
+      this._terminal.writeVerboseLine('NPM response:\n' + JSON.stringify(jsonOutput, undefined, 2) + '\n\n');
       throw new InternalError('The "npm view" command returned unexpected output');
     }
 
@@ -443,5 +460,58 @@ export class SetupPackageRegistry {
 
   private static _isCommentLine(npmrcLine: string): boolean {
     return /^\s*#/.test(npmrcLine);
+  }
+
+  /**
+   * This is a workaround for https://github.com/npm/cli/issues/2740 where the NPM tool sometimes
+   * mixes together JSON and terminal messages in a single STDERR stream.
+   *
+   * @remarks
+   * Given an input like this:
+   * ```
+   * npm ERR! 404 Note that you can also install from a
+   * npm ERR! 404 tarball, folder, http url, or git url.
+   * {
+   *   "error": {
+   *     "code": "E404",
+   *     "summary": "Not Found - GET https://registry.npmjs.org/@rushstack%2fnonexistent-package - Not found"
+   *   }
+   * }
+   * npm ERR! A complete log of this run can be found in:
+   * ```
+   *
+   * @returns the JSON section, or `undefined` if a JSON object could not be detected
+   */
+  private static _tryFindJson(dirtyOutput: string): string | undefined {
+    const lines: string[] = dirtyOutput.split(/\r?\n/g);
+    let startIndex: number | undefined;
+    let endIndex: number | undefined;
+
+    // Find the first line that starts with "{"
+    for (let i: number = 0; i < lines.length; ++i) {
+      const line: string = lines[i];
+      if (/^\s*\{/.test(line)) {
+        startIndex = i;
+        break;
+      }
+    }
+    if (startIndex === undefined) {
+      return undefined;
+    }
+
+    // Find the last line that ends with "}"
+    for (let i: number = lines.length - 1; i >= startIndex; --i) {
+      const line: string = lines[i];
+      if (/\}\s*$/.test(line)) {
+        endIndex = i;
+        break;
+      }
+    }
+
+    if (endIndex === undefined) {
+      return undefined;
+    }
+
+    return lines.slice(startIndex, endIndex + 1).join('\n');
   }
 }

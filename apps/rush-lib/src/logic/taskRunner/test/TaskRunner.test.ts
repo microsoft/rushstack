@@ -4,7 +4,7 @@
 // The TaskRunner prints "x.xx seconds" in TestRunner.test.ts.snap; ensure that the Stopwatch timing is deterministic
 jest.mock('../../../utilities/Utilities');
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import { EOL } from 'os';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 import { MockWritable } from '@rushstack/terminal';
