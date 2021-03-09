@@ -11,6 +11,7 @@ import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { Utilities } from '../utilities/Utilities';
+import { EnvironmentVariableNames } from './EnvironmentConfiguration';
 
 /**
  * Options to pass to the rush "launch" functions.
@@ -66,6 +67,7 @@ export class Rush {
       return;
     }
 
+    Rush._assignRushInvokedFolder();
     const parser: RushCommandLineParser = new RushCommandLineParser({
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
     });
@@ -84,6 +86,7 @@ export class Rush {
 
     Rush._printStartupBanner(options.isManaged);
 
+    Rush._assignRushInvokedFolder();
     RushXCommandLine._launchRushXInternal(launcherVersion, { ...options });
   }
 
@@ -97,6 +100,21 @@ export class Rush {
     }
 
     return this._version!;
+  }
+
+  /**
+   * Assign the `RUSH_INVOKED_FOLDER` environment variable during startup.  This is only applied when
+   * Rush is invoked via the CLI, not via the `@microsoft/rush-lib` automation API.
+   *
+   * @remarks
+   * Modifying the parent process's environment is not a good design.  The better design is (1) to consolidate
+   * Rush's code paths that invoke scripts, and (2) to pass down the invoked folder with each code path,
+   * so that it can finally be applied in a centralized helper like `Utilities._createEnvironmentForRushCommand()`.
+   * The natural time to do that refactoring is when we rework `Utilities.executeCommand()` to use
+   * `Executable.spawn()` or rushell.
+   */
+  private static _assignRushInvokedFolder(): void {
+    process.env[EnvironmentVariableNames.RUSH_INVOKED_FOLDER] = process.cwd();
   }
 
   /**

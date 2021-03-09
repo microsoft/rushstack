@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a RUSH_INVOKED_FOLDER environment variable so that custom scripts can determine the folder path where Rush was invoked (GitHub #2497)",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

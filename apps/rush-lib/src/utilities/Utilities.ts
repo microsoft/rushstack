@@ -696,6 +696,10 @@ export class Utilities {
   /**
    * Returns a process.env environment suitable for executing lifecycle scripts.
    * @param initialEnvironment - an existing environment to copy instead of process.env
+   *
+   * @remarks
+   * Rush._assignRushInvokedFolder() assigns the `RUSH_INVOKED_FOLDER` variable globally
+   * via the parent process's environment.
    */
   private static _createEnvironmentForRushCommand(
     options: ICreateEnvironmentForRushCommandOptions
