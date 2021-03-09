@@ -111,9 +111,13 @@ export const enum EnvironmentVariableNames {
   RUSH_GIT_BINARY_PATH = 'RUSH_GIT_BINARY_PATH',
 
   /**
-   * When Rush invokes shell commands, it sometimes changes the working directory to be the repository root folder
-   * or a project folder.  The original working directory (where the Rush was invoked) is assigned to the
-   * the child process's RUSH_INVOKED_FOLDER environment variable, in case it is needed by a script.
+   * When Rush executes shell scripts, it sometimes changes the working directory to be a project folder or
+   * the repository root folder.  The original working directory (where the Rush command was invoked) is assigned
+   * to the the child process's `RUSH_INVOKED_FOLDER` environment variable, in case it is needed by the script.
+   *
+   * @remarks
+   * The `RUSH_INVOKED_FOLDER` variable is the same idea as the `INIT_CWD` variable that package managers
+   * assign when they execute lifecycle scripts.
    */
   RUSH_INVOKED_FOLDER = 'RUSH_INVOKED_FOLDER'
 }
