@@ -319,8 +319,6 @@ export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
 
 // @public
 export class Rush {
-    // @internal
-    static _assignRushInvokedFolder(): void;
     static launch(launcherVersion: string, arg: ILaunchOptions): void;
     static launchRushX(launcherVersion: string, options: ILaunchOptions): void;
     static get version(): string;
