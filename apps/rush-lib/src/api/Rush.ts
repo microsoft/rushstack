@@ -108,7 +108,7 @@ export class Rush {
    *
    * @remarks
    * Modifying the parent process's environment is not a good design.  The better design is (1) to consolidate
-   * Rush's code paths that invoke scripts, and for each code path to pass down the invoked folder as a parameter,
+   * Rush's code paths that invoke scripts, and (2) to pass down the invoked folder with each code path,
    * so that it can finally be applied in a centralized helper like `Utilities._createEnvironmentForRushCommand()`.
    * The natural time to do that refactoring is when we rework `Utilities.executeCommand()` to use
    * `Executable.spawn()` or rushell.
