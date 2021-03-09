@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-serve
 
-This log was last generated on Thu, 04 Mar 2021 01:11:31 GMT and should not be manually modified.
+This log was last generated on Tue, 09 Mar 2021 23:31:46 GMT and should not be manually modified.
+
+## 3.8.50
+Tue, 09 Mar 2021 23:31:46 GMT
+
+### Patches
+
+- Update the debug certificate manager to be async.
 
 ## 3.8.49
 Thu, 04 Mar 2021 01:11:31 GMT

@@ -2,6 +2,18 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.0.0",
+      "tag": "@rushstack/debug-certificate-manager_v1.0.0",
+      "date": "Tue, 09 Mar 2021 23:31:46 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "Make the trust/untrust APIs async."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.113",
       "tag": "@rushstack/debug-certificate-manager_v0.2.113",
       "date": "Thu, 04 Mar 2021 01:11:31 GMT",

@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build-serve",
   "entries": [
     {
+      "version": "3.8.50",
+      "tag": "@microsoft/gulp-core-build-serve_v3.8.50",
+      "date": "Tue, 09 Mar 2021 23:31:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the debug certificate manager to be async."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.0.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.8.49",
       "tag": "@microsoft/gulp-core-build-serve_v3.8.49",
       "date": "Thu, 04 Mar 2021 01:11:31 GMT",
