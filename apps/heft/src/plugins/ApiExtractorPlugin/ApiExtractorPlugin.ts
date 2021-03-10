@@ -8,7 +8,7 @@ import { ApiExtractorRunner } from './ApiExtractorRunner';
 import { IBuildStageContext, IBundleSubstage } from '../../stages/BuildStage';
 import { CoreConfigFiles } from '../../utilities/CoreConfigFiles';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
-import { ITaskPackageResolution, TaskPackageResolver } from '../../utilities/TaskPackageResolver';
+import { IToolPackageResolution, ToolPackageResolver } from '../../utilities/ToolPackageResolver';
 
 const PLUGIN_NAME: string = 'ApiExtractorPlugin';
 const CONFIG_FILE_LOCATION: string = './config/api-extractor.json';
@@ -39,10 +39,10 @@ interface IRunApiExtractorOptions {
 export class ApiExtractorPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
 
-  private readonly _taskPackageResolver: TaskPackageResolver;
+  private readonly _toolPackageResolver: ToolPackageResolver;
 
-  public constructor(taskPackageResolver: TaskPackageResolver) {
-    this._taskPackageResolver = taskPackageResolver;
+  public constructor(taskPackageResolver: ToolPackageResolver) {
+    this._toolPackageResolver = taskPackageResolver;
   }
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
@@ -97,9 +97,9 @@ export class ApiExtractorPlugin implements IHeftPlugin {
     }
 
     const resolution:
-      | ITaskPackageResolution
-      | undefined = await this._taskPackageResolver.resolveTaskPackagesAsync(
-      options.heftConfiguration.buildFolder,
+      | IToolPackageResolution
+      | undefined = await this._toolPackageResolver.resolveToolPackagesAsync(
+      options.heftConfiguration,
       logger.terminal
     );
 
