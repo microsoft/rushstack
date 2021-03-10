@@ -51,6 +51,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "releaseTag": "Public",
               "name": "lib1",
               "propertyTypeTokenRange": {
@@ -82,6 +83,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "releaseTag": "Public",
               "name": "lib2",
               "propertyTypeTokenRange": {
@@ -113,6 +115,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "releaseTag": "Public",
               "name": "lib3",
               "propertyTypeTokenRange": {
@@ -144,6 +147,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "releaseTag": "Public",
               "name": "options",
               "propertyTypeTokenRange": {
@@ -175,6 +179,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "releaseTag": "Public",
               "name": "reExport",
               "propertyTypeTokenRange": {

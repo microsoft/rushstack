@@ -64,6 +64,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "releaseTag": "Public",
               "name": "generic",
               "propertyTypeTokenRange": {
