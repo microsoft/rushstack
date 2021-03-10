@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.42.0",
+      "tag": "@microsoft/rush_v5.42.0",
+      "date": "Wed, 10 Mar 2021 06:25:44 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add AWS S3 support to the experimental build cache feature"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.41.0",
       "tag": "@microsoft/rush_v5.41.0",
       "date": "Wed, 10 Mar 2021 05:12:41 GMT",

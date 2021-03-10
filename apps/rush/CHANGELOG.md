@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 10 Mar 2021 05:12:41 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Mar 2021 06:25:44 GMT and should not be manually modified.
+
+## 5.42.0
+Wed, 10 Mar 2021 06:25:44 GMT
+
+### Updates
+
+- Add AWS S3 support to the experimental build cache feature
 
 ## 5.41.0
 Wed, 10 Mar 2021 05:12:41 GMT
