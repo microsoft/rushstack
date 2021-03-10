@@ -9,8 +9,10 @@
     "build": "heft build --clean"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-2.9": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "workspace:*"
+    "@rushstack/heft": "workspace:*",
+    "typescript": "~2.9.2",
+    "tslint": "~5.20.1",
+    "eslint": "~7.12.1"
   }
 }
