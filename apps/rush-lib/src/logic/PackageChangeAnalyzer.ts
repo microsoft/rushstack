@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as crypto from 'crypto';
 
 import { getPackageDeps, getGitHashForFiles } from '@rushstack/package-deps-hash';
@@ -18,7 +18,11 @@ export class PackageChangeAnalyzer {
   // Allow this function to be overwritten during unit tests
   public static getPackageDeps: typeof getPackageDeps;
 
-  private _data: Map<string, Map<string, string>>;
+  /**
+   * null === we haven't looked
+   * undefined === data isn't available (i.e. - git isn't present)
+   */
+  private _data: Map<string, Map<string, string>> | undefined | null = null;
   private _projectStateCache: Map<string, string> = new Map<string, string>();
   private _rushConfiguration: RushConfiguration;
   private readonly _git: Git;
@@ -30,11 +34,11 @@ export class PackageChangeAnalyzer {
   }
 
   public getPackageDeps(projectName: string): Map<string, string> | undefined {
-    if (!this._data) {
+    if (this._data === null) {
       this._data = this._getData();
     }
 
-    return this._data.get(projectName);
+    return this._data?.get(projectName);
   }
 
   /**
@@ -71,17 +75,10 @@ export class PackageChangeAnalyzer {
     return projectState;
   }
 
-  private _getData(): Map<string, Map<string, string>> {
+  private _getData(): Map<string, Map<string, string>> | undefined {
     // If we are not in a unit test, use the correct resources
     if (!PackageChangeAnalyzer.getPackageDeps) {
       PackageChangeAnalyzer.getPackageDeps = getPackageDeps;
-    }
-
-    const projectHashDeps: Map<string, Map<string, string>> = new Map<string, Map<string, string>>();
-
-    // pre-populate the map with the projects from the config
-    for (const project of this._rushConfiguration.projects) {
-      projectHashDeps.set(project.packageName, new Map<string, string>());
     }
 
     let repoDeps: Map<string, string>;
@@ -91,7 +88,7 @@ export class PackageChangeAnalyzer {
         const gitPath: string = this._git.getGitPathOrThrow();
         repoDeps = PackageChangeAnalyzer.getPackageDeps(this._rushConfiguration.rushJsonFolder, [], gitPath);
       } else {
-        return projectHashDeps;
+        return undefined;
       }
     } catch (e) {
       // If getPackageDeps fails, don't fail the whole build. Treat this case as if we don't know anything about
@@ -102,7 +99,14 @@ export class PackageChangeAnalyzer {
         )
       );
 
-      return projectHashDeps;
+      return undefined;
+    }
+
+    const projectHashDeps: Map<string, Map<string, string>> = new Map<string, Map<string, string>>();
+
+    // pre-populate the map with the projects from the config
+    for (const project of this._rushConfiguration.projects) {
+      projectHashDeps.set(project.packageName, new Map<string, string>());
     }
 
     // Sort each project folder into its own package deps hash

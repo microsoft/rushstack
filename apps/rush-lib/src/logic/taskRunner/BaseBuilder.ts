@@ -39,5 +39,5 @@ export abstract class BaseBuilder {
   /**
    * Method to be executed for the task.
    */
-  abstract async executeAsync(context: IBuilderContext): Promise<TaskStatus>;
+  abstract executeAsync(context: IBuilderContext): Promise<TaskStatus>;
 }

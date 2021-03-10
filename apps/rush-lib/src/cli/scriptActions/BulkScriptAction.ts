@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import colors from 'colors';
+import colors from 'colors/safe';
 
 import { AlreadyReportedError, ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import {

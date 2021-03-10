@@ -7,13 +7,10 @@ import {
   JsonSchema,
   FileSystem,
   AlreadyReportedError,
-  Terminal
+  Terminal,
+  Import
 } from '@rushstack/node-core-library';
 
-import {
-  AzureEnvironmentNames,
-  AzureStorageBuildCacheProvider
-} from '../logic/buildCache/AzureStorageBuildCacheProvider';
 import { RushConfiguration } from './RushConfiguration';
 import { FileSystemBuildCacheProvider } from '../logic/buildCache/FileSystemBuildCacheProvider';
 import { RushConstants } from '../logic/RushConstants';
@@ -21,19 +18,45 @@ import { CloudBuildCacheProviderBase } from '../logic/buildCache/CloudBuildCache
 import { RushUserConfiguration } from './RushUserConfiguration';
 import { CacheEntryId, GetCacheEntryIdFunction } from '../logic/buildCache/CacheEntryId';
 
+const AzureStorageBuildCacheProviderModule: typeof import('../logic/buildCache/AzureStorageBuildCacheProvider') = Import.lazy(
+  '../logic/buildCache/AzureStorageBuildCacheProvider',
+  require
+);
+import type {
+  AzureEnvironmentNames,
+  AzureStorageBuildCacheProvider
+} from '../logic/buildCache/AzureStorageBuildCacheProvider';
+const AmazonS3BuildCacheProviderModule: typeof import('../logic/buildCache/AmazonS3BuildCacheProvider') = Import.lazy(
+  '../logic/buildCache/AmazonS3BuildCacheProvider',
+  require
+);
+import type { AmazonS3BuildCacheProvider } from '../logic/buildCache/AmazonS3BuildCacheProvider';
+
 /**
  * Describes the file structure for the "common/config/rush/build-cache.json" config file.
  */
-interface IBuildCacheJson {
-  cacheProvider: 'azure-blob-storage' | 'local-only';
+interface IBaseBuildCacheJson {
+  cacheProvider: 'azure-blob-storage' | 'amazon-s3' | 'local-only';
   cacheEntryNamePattern?: string;
 }
 
-interface IAzureBlobStorageBuildCacheJson extends IBuildCacheJson {
+interface IAzureBlobStorageBuildCacheJson extends IBaseBuildCacheJson {
   cacheProvider: 'azure-blob-storage';
 
   azureBlobStorageConfiguration: IAzureStorageConfigurationJson;
 }
+
+interface IAmazonS3BuildCacheJson extends IBaseBuildCacheJson {
+  cacheProvider: 'amazon-s3';
+
+  amazonS3Configuration: IAmazonS3ConfigurationJson;
+}
+
+interface ILocalBuildCacheJson extends IBaseBuildCacheJson {
+  cacheProvider: 'local-only';
+}
+
+type IBuildCacheJson = IAzureBlobStorageBuildCacheJson | IAmazonS3BuildCacheJson | ILocalBuildCacheJson;
 
 interface IAzureStorageConfigurationJson {
   /**
@@ -55,6 +78,28 @@ interface IAzureStorageConfigurationJson {
    * An optional prefix for cache item blob names.
    */
   blobPrefix?: string;
+
+  /**
+   * If set to true, allow writing to the cache. Defaults to false.
+   */
+  isCacheWriteAllowed?: boolean;
+}
+
+interface IAmazonS3ConfigurationJson {
+  /**
+   * The Amazon S3 region of the bucket to use for build cache (e.g. "us-east-1").
+   */
+  s3Region: string;
+
+  /**
+   * The name of the bucket in Amazon S3 to use for build cache.
+   */
+  s3Bucket: string;
+
+  /**
+   * An optional prefix ("folder") for cache items.
+   */
+  s3Prefix?: string;
 
   /**
    * If set to true, allow writing to the cache. Defaults to false.
@@ -98,21 +143,21 @@ export class BuildCacheConfiguration {
       }
 
       case 'azure-blob-storage': {
-        const azureStorageBuildCacheJson: IAzureBlobStorageBuildCacheJson = buildCacheJson as IAzureBlobStorageBuildCacheJson;
-        const azureStorageConfigurationJson: IAzureStorageConfigurationJson =
-          azureStorageBuildCacheJson.azureBlobStorageConfiguration;
-        this.cloudCacheProvider = new AzureStorageBuildCacheProvider({
-          storageAccountName: azureStorageConfigurationJson.storageAccountName,
-          storageContainerName: azureStorageConfigurationJson.storageContainerName,
-          azureEnvironment: azureStorageConfigurationJson.azureEnvironment,
-          blobPrefix: azureStorageConfigurationJson.blobPrefix,
-          isCacheWriteAllowed: !!azureStorageConfigurationJson.isCacheWriteAllowed
-        });
+        this.cloudCacheProvider = this._createAzureStorageBuildCacheProvider(
+          buildCacheJson.azureBlobStorageConfiguration
+        );
+        break;
+      }
+
+      case 'amazon-s3': {
+        this.cloudCacheProvider = this._createAmazonS3BuildCacheProvider(
+          buildCacheJson.amazonS3Configuration
+        );
         break;
       }
 
       default: {
-        throw new Error(`Unexpected cache provider: ${buildCacheJson.cacheProvider}`);
+        throw new Error(`Unexpected cache provider: ${(buildCacheJson as IBuildCacheJson).cacheProvider}`);
       }
     }
   }
@@ -156,5 +201,28 @@ export class BuildCacheConfiguration {
 
   public static getBuildCacheConfigFilePath(rushConfiguration: RushConfiguration): string {
     return path.resolve(rushConfiguration.commonRushConfigFolder, RushConstants.buildCacheFilename);
+  }
+
+  private _createAzureStorageBuildCacheProvider(
+    azureStorageConfigurationJson: IAzureStorageConfigurationJson
+  ): AzureStorageBuildCacheProvider {
+    return new AzureStorageBuildCacheProviderModule.AzureStorageBuildCacheProvider({
+      storageAccountName: azureStorageConfigurationJson.storageAccountName,
+      storageContainerName: azureStorageConfigurationJson.storageContainerName,
+      azureEnvironment: azureStorageConfigurationJson.azureEnvironment,
+      blobPrefix: azureStorageConfigurationJson.blobPrefix,
+      isCacheWriteAllowed: !!azureStorageConfigurationJson.isCacheWriteAllowed
+    });
+  }
+
+  private _createAmazonS3BuildCacheProvider(
+    amazonS3ConfigurationJson: IAmazonS3ConfigurationJson
+  ): AmazonS3BuildCacheProvider {
+    return new AmazonS3BuildCacheProviderModule.AmazonS3BuildCacheProvider({
+      s3Region: amazonS3ConfigurationJson.s3Region,
+      s3Bucket: amazonS3ConfigurationJson.s3Bucket,
+      s3Prefix: amazonS3ConfigurationJson.s3Prefix,
+      isCacheWriteAllowed: !!amazonS3ConfigurationJson.isCacheWriteAllowed
+    });
   }
 }

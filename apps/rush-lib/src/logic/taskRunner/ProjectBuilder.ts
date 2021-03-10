@@ -85,7 +85,12 @@ export class ProjectBuilder extends BaseBuilder {
   private readonly _commandToRun: string;
   private readonly _packageChangeAnalyzer: PackageChangeAnalyzer;
   private readonly _packageDepsFilename: string;
-  private _projectBuildCache: ProjectBuildCache | undefined;
+
+  /**
+   * null === we haven't tried to initialize yet
+   * undefined === can't be initialized
+   */
+  private _projectBuildCache: ProjectBuildCache | undefined | null = null;
 
   public constructor(options: IProjectBuilderOptions) {
     super();
@@ -120,7 +125,7 @@ export class ProjectBuilder extends BaseBuilder {
 
   public async tryWriteCacheEntryAsync(
     terminal: Terminal,
-    trackedFilePaths: string[],
+    trackedFilePaths: string[] | undefined,
     repoCommandLineConfiguration: CommandLineConfiguration | undefined
   ): Promise<boolean | undefined> {
     const projectBuildCache: ProjectBuildCache | undefined = await this._getProjectBuildCacheAsync(
@@ -202,24 +207,30 @@ export class ProjectBuilder extends BaseBuilder {
       let projectBuildDeps: IProjectBuildDeps | undefined;
       let trackedFiles: string[] | undefined;
       try {
-        const fileHashes: Map<string, string> = this._packageChangeAnalyzer.getPackageDeps(
+        const fileHashes: Map<string, string> | undefined = this._packageChangeAnalyzer.getPackageDeps(
           this._rushProject.packageName
-        )!;
+        );
 
-        const files: { [filePath: string]: string } = {};
-        trackedFiles = [];
-        for (const [filePath, fileHash] of fileHashes) {
-          files[filePath] = fileHash;
-          trackedFiles.push(filePath);
+        if (fileHashes) {
+          const files: { [filePath: string]: string } = {};
+          trackedFiles = [];
+          for (const [filePath, fileHash] of fileHashes) {
+            files[filePath] = fileHash;
+            trackedFiles.push(filePath);
+          }
+
+          projectBuildDeps = {
+            files,
+            arguments: this._commandToRun
+          };
+        } else {
+          terminal.writeLine(
+            'Unable to calculate incremental build state. Instead running full rebuild. Ensure Git is present.'
+          );
         }
-
-        projectBuildDeps = {
-          files,
-          arguments: this._commandToRun
-        };
       } catch (error) {
         terminal.writeLine(
-          'Unable to calculate incremental build state. Instead running full rebuild. ' + error.toString()
+          'Error calculating incremental build state. Instead running full rebuild. ' + error.toString()
         );
       }
 
@@ -321,7 +332,7 @@ export class ProjectBuilder extends BaseBuilder {
 
           const setCacheEntryPromise: Promise<boolean | undefined> = this.tryWriteCacheEntryAsync(
             terminal,
-            trackedFiles!,
+            trackedFiles,
             context.repoCommandLineConfiguration
           );
 
@@ -354,7 +365,9 @@ export class ProjectBuilder extends BaseBuilder {
     trackedProjectFiles: string[] | undefined,
     commandLineConfiguration: CommandLineConfiguration | undefined
   ): Promise<ProjectBuildCache | undefined> {
-    if (!this._projectBuildCache) {
+    if (this._projectBuildCache === null) {
+      this._projectBuildCache = undefined;
+
       if (this._buildCacheConfiguration) {
         const projectConfiguration:
           | RushProjectConfiguration

@@ -98,6 +98,7 @@ export const enum EnvironmentVariableNames {
     RUSH_DEPLOY_TARGET_FOLDER = "RUSH_DEPLOY_TARGET_FOLDER",
     RUSH_GIT_BINARY_PATH = "RUSH_GIT_BINARY_PATH",
     RUSH_GLOBAL_FOLDER = "RUSH_GLOBAL_FOLDER",
+    RUSH_INVOKED_FOLDER = "RUSH_INVOKED_FOLDER",
     RUSH_PARALLELISM = "RUSH_PARALLELISM",
     RUSH_PNPM_STORE_PATH = "RUSH_PNPM_STORE_PATH",
     RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
@@ -146,6 +147,7 @@ export interface IExperimentsJson {
     legacyIncrementalBuildDependencyDetection?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
+    usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
 }
 
 // @public
@@ -307,6 +309,7 @@ export type PnpmStoreOptions = 'local' | 'global';
 // @public
 export class RepoStateFile {
     get filePath(): string;
+    get isValid(): boolean;
     static loadFromFile(jsonFilename: string, variant: string | undefined): RepoStateFile;
     get pnpmShrinkwrapHash(): string | undefined;
     get preferredVersionsHash(): string | undefined;

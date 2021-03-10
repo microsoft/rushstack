@@ -445,7 +445,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
           allRequestsIssued = true;
 
           if (pendingMinificationRequests) {
-            await new Promise((resolve) => {
+            await new Promise<void>((resolve) => {
               resolveMinifyPromise = resolve;
             });
           }

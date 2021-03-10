@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as fetch from 'node-fetch';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -493,15 +493,17 @@ export abstract class BaseInstallManager {
         args.push('--no-lock');
       }
 
-      if (
-        this._rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall &&
-        !this._options.allowShrinkwrapUpdates
-      ) {
+      const { configuration: experiments } = this._rushConfiguration.experimentsConfiguration;
+
+      if (experiments.usePnpmFrozenLockfileForRushInstall && !this._options.allowShrinkwrapUpdates) {
         if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
           args.push('--frozen-lockfile');
         } else {
           args.push('--frozen-shrinkwrap');
         }
+      } else if (experiments.usePnpmPreferFrozenLockfileForRushUpdate) {
+        // In workspaces, we want to avoid unnecessary lockfile churn
+        args.push('--prefer-frozen-lockfile');
       } else {
         // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
         // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342

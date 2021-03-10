@@ -7,14 +7,12 @@ import * as child_process from 'child_process';
 import { EOL } from 'os';
 import { FileSystem, Terminal } from '@rushstack/node-core-library';
 
-import { runSudoSync, ISudoSyncResult } from './sudoSync';
+import { runSudoAsync, IRunResult, runAsync } from './exec';
 import { CertificateStore } from './CertificateStore';
 
 const serialNumber: string = '731c321744e34650a202e3ef91c3c1b0';
 const friendlyName: string = 'debug-certificate-manager Development Certificate';
 const macKeychain: string = '/Library/Keychains/System.keychain';
-
-let _certutilExePath: string | undefined;
 
 /**
  * The interface for a debug certificate instance
@@ -40,6 +38,7 @@ export interface ICertificate {
  */
 export class CertificateManager {
   private _certificateStore: CertificateStore;
+  private _getCertUtilPathPromise: Promise<string | undefined> | undefined;
 
   public constructor() {
     this._certificateStore = new CertificateStore();
@@ -51,7 +50,10 @@ export class CertificateManager {
    *
    * @public
    */
-  public ensureCertificate(canGenerateNewCertificate: boolean, terminal: Terminal): ICertificate {
+  public async ensureCertificateAsync(
+    canGenerateNewCertificate: boolean,
+    terminal: Terminal
+  ): Promise<ICertificate> {
     if (this._certificateStore.certificateData && this._certificateStore.keyData) {
       if (!this._certificateHasSubjectAltName()) {
         let warningMessage: string =
@@ -67,12 +69,12 @@ export class CertificateManager {
         terminal.writeWarningLine(warningMessage);
 
         if (canGenerateNewCertificate) {
-          this.untrustCertificate(terminal);
-          this._ensureCertificateInternal(terminal);
+          await this.untrustCertificateAsync(terminal);
+          await this._ensureCertificateInternalAsync(terminal);
         }
       }
     } else if (canGenerateNewCertificate) {
-      this._ensureCertificateInternal(terminal);
+      await this._ensureCertificateInternalAsync(terminal);
     }
 
     return {
@@ -86,10 +88,10 @@ export class CertificateManager {
    *
    * @public
    */
-  public untrustCertificate(terminal: Terminal): boolean {
+  public async untrustCertificateAsync(terminal: Terminal): Promise<boolean> {
     switch (process.platform) {
       case 'win32':
-        const certutilExePath: string | undefined = this._ensureCertUtilExePath(terminal);
+        const certutilExePath: string | undefined = await this._ensureCertUtilExePathAsync(terminal);
         if (!certutilExePath) {
           // Unable to find the cert utility
           return false;
@@ -146,8 +148,7 @@ export class CertificateManager {
 
         terminal.writeVerboseLine(`Found the dev cert. SHA is ${shaHash}`);
 
-        const macUntrustResult: ISudoSyncResult = runSudoSync([
-          'security',
+        const macUntrustResult: IRunResult = await runSudoAsync('security', [
           'delete-certificate',
           '-Z',
           shaHash,
@@ -235,27 +236,32 @@ export class CertificateManager {
     };
   }
 
-  private _ensureCertUtilExePath(terminal: Terminal): string | undefined {
-    if (!_certutilExePath) {
-      const where: child_process.SpawnSyncReturns<string> = child_process.spawnSync('where', ['certutil']);
-
-      const whereErr: string = where.stderr.toString();
-      if (whereErr) {
-        terminal.writeErrorLine(`Error finding certUtil command: "${whereErr}"`);
-        _certutilExePath = undefined;
-      } else {
-        const lines: string[] = where.stdout.toString().trim().split(EOL);
-        _certutilExePath = lines[0].trim();
-      }
+  private async _ensureCertUtilExePathAsync(terminal: Terminal): Promise<string | undefined> {
+    if (!this._getCertUtilPathPromise) {
+      this._getCertUtilPathPromise = this._getCertUtilPathAsync(terminal);
     }
 
-    return _certutilExePath;
+    return await this._getCertUtilPathPromise;
   }
 
-  private _tryTrustCertificate(certificatePath: string, terminal: Terminal): boolean {
+  private async _getCertUtilPathAsync(terminal: Terminal): Promise<string | undefined> {
+    const where: IRunResult = await runAsync('where', ['certutil']);
+
+    const whereErr: string = where.stderr.toString();
+    if (whereErr) {
+      terminal.writeErrorLine(`Error finding certUtil command: "${whereErr}"`);
+      return undefined;
+    } else {
+      const lines: string[] = where.stdout.toString().trim().split(EOL);
+      // eslint-disable-next-line require-atomic-updates
+      return lines[0].trim();
+    }
+  }
+
+  private async _tryTrustCertificateAsync(certificatePath: string, terminal: Terminal): Promise<boolean> {
     switch (process.platform) {
       case 'win32':
-        const certutilExePath: string | undefined = this._ensureCertUtilExePath(terminal);
+        const certutilExePath: string | undefined = await this._ensureCertUtilExePathAsync(terminal);
         if (!certutilExePath) {
           // Unable to find the cert utility
           return false;
@@ -267,12 +273,14 @@ export class CertificateManager {
             'debug-certificate-manager. If you do not consent to trust this certificate, click "NO" in the dialog.'
         );
 
-        const winTrustResult: child_process.SpawnSyncReturns<string> = child_process.spawnSync(
-          certutilExePath,
-          ['-user', '-addstore', 'root', certificatePath]
-        );
+        const winTrustResult: IRunResult = await runAsync(certutilExePath, [
+          '-user',
+          '-addstore',
+          'root',
+          certificatePath
+        ]);
 
-        if (winTrustResult.status !== 0) {
+        if (winTrustResult.code !== 0) {
           terminal.writeErrorLine(`Error: ${winTrustResult.stdout.toString()}`);
 
           const errorLines: string[] = winTrustResult.stdout
@@ -282,7 +290,7 @@ export class CertificateManager {
 
           // Not sure if this is always the status code for "cancelled" - should confirm.
           if (
-            winTrustResult.status === 2147943623 ||
+            winTrustResult.code === 2147943623 ||
             errorLines[errorLines.length - 1].indexOf('The operation was canceled by the user.') > 0
           ) {
             terminal.writeLine('Certificate trust cancelled.');
@@ -305,8 +313,7 @@ export class CertificateManager {
             'root password in the prompt.'
         );
 
-        const commands: string[] = [
-          'security',
+        const result: IRunResult = await runSudoAsync('security', [
           'add-trusted-cert',
           '-d',
           '-r',
@@ -314,8 +321,7 @@ export class CertificateManager {
           '-k',
           macKeychain,
           certificatePath
-        ];
-        const result: ISudoSyncResult = runSudoSync(commands);
+        ]);
 
         if (result.code === 0) {
           terminal.writeVerboseLine('Successfully trusted development certificate.');
@@ -348,9 +354,9 @@ export class CertificateManager {
     }
   }
 
-  private _trySetFriendlyName(certificatePath: string, terminal: Terminal): boolean {
+  private async _trySetFriendlyNameAsync(certificatePath: string, terminal: Terminal): Promise<boolean> {
     if (process.platform === 'win32') {
-      const certutilExePath: string | undefined = this._ensureCertUtilExePath(terminal);
+      const certutilExePath: string | undefined = await this._ensureCertUtilExePathAsync(terminal);
       if (!certutilExePath) {
         // Unable to find the cert utility
         return false;
@@ -368,7 +374,7 @@ export class CertificateManager {
         ''
       ].join(EOL);
 
-      FileSystem.writeFile(friendlyNamePath, friendlyNameFile);
+      await FileSystem.writeFileAsync(friendlyNamePath, friendlyNameFile);
 
       const commands: string[] = ['–repairstore', '–user', 'root', serialNumber, friendlyNamePath];
       const repairStoreResult: child_process.SpawnSyncReturns<string> = child_process.spawnSync(
@@ -391,7 +397,7 @@ export class CertificateManager {
     }
   }
 
-  private _ensureCertificateInternal(terminal: Terminal): void {
+  private async _ensureCertificateInternalAsync(terminal: Terminal): Promise<void> {
     const certificateStore: CertificateStore = this._certificateStore;
     const generatedCertificate: ICertificate = this._createDevelopmentCertificate();
 
@@ -407,12 +413,16 @@ export class CertificateManager {
       });
     }
 
-    if (this._tryTrustCertificate(tempCertificatePath, terminal)) {
+    const trustCertificateResult: boolean = await this._tryTrustCertificateAsync(
+      tempCertificatePath,
+      terminal
+    );
+    if (trustCertificateResult) {
       certificateStore.certificateData = generatedCertificate.pemCertificate;
       certificateStore.keyData = generatedCertificate.pemKey;
 
       // Try to set the friendly name, and warn if we can't
-      if (!this._trySetFriendlyName(tempCertificatePath, terminal)) {
+      if (!this._trySetFriendlyNameAsync(tempCertificatePath, terminal)) {
         terminal.writeWarningLine("Unable to set the certificate's friendly name.");
       }
     } else {
@@ -421,7 +431,7 @@ export class CertificateManager {
       certificateStore.keyData = undefined;
     }
 
-    FileSystem.deleteFile(tempCertificatePath);
+    await FileSystem.deleteFileAsync(tempCertificatePath);
   }
 
   private _certificateHasSubjectAltName(): boolean {

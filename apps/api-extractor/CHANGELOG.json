@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.13.2",
+      "tag": "@microsoft/api-extractor_v7.13.2",
+      "date": "Thu, 04 Mar 2021 01:11:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.2.10`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.13.1",
       "tag": "@microsoft/api-extractor_v7.13.1",
       "date": "Fri, 05 Feb 2021 16:10:42 GMT",

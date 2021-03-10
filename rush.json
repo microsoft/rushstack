@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.38.0",
+  "rushVersion": "5.41.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -602,12 +602,6 @@
     {
       "packageName": "heft-oldest-compiler-test",
       "projectFolder": "build-tests/heft-oldest-compiler-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "heft-rsc-test",
-      "projectFolder": "build-tests/heft-rsc-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },

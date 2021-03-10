@@ -5,7 +5,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import crypto from 'crypto';
-import colors from 'colors';
+import colors from 'colors/safe';
 import { FileSystem, AlreadyReportedError, Import } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
@@ -16,6 +16,7 @@ import {
 } from '../../api/RushConfiguration';
 import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
+import { RushConstants } from '../RushConstants';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
@@ -252,28 +253,40 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       throw new Error('The provided package manager options are not valid for PNPM shrinkwrap files.');
     }
 
-    // Only check the hash if allowShrinkwrapUpdates is false. If true, the shrinkwrap file
-    // may have changed and the hash could be invalid.
-    if (packageManagerOptionsConfig.preventManualShrinkwrapChanges && !policyOptions.allowShrinkwrapUpdates) {
-      if (!policyOptions.repoState.pnpmShrinkwrapHash) {
+    if (!policyOptions.allowShrinkwrapUpdates) {
+      if (!policyOptions.repoState.isValid) {
         console.log(
           colors.red(
-            'The existing shrinkwrap file hash could not be found. You may need to run "rush update" to ' +
-              'populate the hash. See the "preventManualShrinkwrapChanges" setting documentation for details.'
+            `The ${RushConstants.repoStateFilename} file is invalid. There may be a merge conflict marker ` +
+              'in the file. You may need to run "rush update" to refresh its contents.'
           ) + os.EOL
         );
         throw new AlreadyReportedError();
       }
 
-      if (this.getShrinkwrapHash() !== policyOptions.repoState.pnpmShrinkwrapHash) {
-        console.log(
-          colors.red(
-            'The shrinkwrap file hash does not match the expected hash. Please run "rush update" to ensure the ' +
-              'shrinkwrap file is up to date. See the "preventManualShrinkwrapChanges" setting documentation for ' +
-              'details.'
-          ) + os.EOL
-        );
-        throw new AlreadyReportedError();
+      // Only check the hash if allowShrinkwrapUpdates is false. If true, the shrinkwrap file
+      // may have changed and the hash could be invalid.
+      if (packageManagerOptionsConfig.preventManualShrinkwrapChanges) {
+        if (!policyOptions.repoState.pnpmShrinkwrapHash) {
+          console.log(
+            colors.red(
+              'The existing shrinkwrap file hash could not be found. You may need to run "rush update" to ' +
+                'populate the hash. See the "preventManualShrinkwrapChanges" setting documentation for details.'
+            ) + os.EOL
+          );
+          throw new AlreadyReportedError();
+        }
+
+        if (this.getShrinkwrapHash() !== policyOptions.repoState.pnpmShrinkwrapHash) {
+          console.log(
+            colors.red(
+              'The shrinkwrap file hash does not match the expected hash. Please run "rush update" to ensure the ' +
+                'shrinkwrap file is up to date. See the "preventManualShrinkwrapChanges" setting documentation for ' +
+                'details.'
+            ) + os.EOL
+          );
+          throw new AlreadyReportedError();
+        }
       }
     }
   }

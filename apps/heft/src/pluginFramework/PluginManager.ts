@@ -24,6 +24,7 @@ import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWe
 import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
 import { SassTypingsPlugin } from '../plugins/SassTypingsPlugin/SassTypingsPlugin';
 import { ProjectValidatorPlugin } from '../plugins/ProjectValidatorPlugin';
+import { ToolPackageResolver } from '../utilities/ToolPackageResolver';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
@@ -45,11 +46,13 @@ export class PluginManager {
   }
 
   public initializeDefaultPlugins(): void {
-    this._applyPlugin(new TypeScriptPlugin());
+    const taskPackageResolver: ToolPackageResolver = new ToolPackageResolver();
+
+    this._applyPlugin(new TypeScriptPlugin(taskPackageResolver));
     this._applyPlugin(new CopyStaticAssetsPlugin());
     this._applyPlugin(new CopyFilesPlugin());
     this._applyPlugin(new DeleteGlobsPlugin());
-    this._applyPlugin(new ApiExtractorPlugin());
+    this._applyPlugin(new ApiExtractorPlugin(taskPackageResolver));
     this._applyPlugin(new JestPlugin());
     this._applyPlugin(new BasicConfigureWebpackPlugin());
     this._applyPlugin(new WebpackPlugin());

@@ -112,7 +112,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
     return require('./serve.schema.json');
   }
 
-  public executeTask(gulp: typeof Gulp, completeCallback?: (error?: string) => void): void {
+  public async executeTask(gulp: typeof Gulp): Promise<void> {
     /* eslint-disable @typescript-eslint/typedef */
     const gulpConnect = require('gulp-connect');
     const open = require('gulp-open');
@@ -127,7 +127,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
     let { port, initialPage }: IServeTaskConfig = this.taskConfig;
     const { api, hostname }: IServeTaskConfig = this.taskConfig;
     const { rootPath }: IBuildConfig = this.buildConfig;
-    const httpsServerOptions: HttpsType.ServerOptions = this._loadHttpsServerOptions();
+    const httpsServerOptions: HttpsType.ServerOptions = await this._loadHttpsServerOptionsAsync();
 
     if (portArgumentIndex >= 0 && process.argv.length > portArgumentIndex + 1) {
       port = Number(process.argv[portArgumentIndex + 1]);
@@ -205,8 +205,6 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
         })
       );
     }
-
-    completeCallback();
   }
 
   private _logRequestsMiddleware(
@@ -254,7 +252,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
     next();
   }
 
-  private _loadHttpsServerOptions(): HttpsType.ServerOptions {
+  private async _loadHttpsServerOptionsAsync(): Promise<HttpsType.ServerOptions> {
     if (this.taskConfig.https) {
       const result: HttpsType.ServerOptions = {};
 
@@ -297,7 +295,7 @@ export class ServeTask<TExtendedConfig = {}> extends GulpTask<IServeTaskConfig &
         }
       } else {
         const certificateManager: CertificateManager = new CertificateManager();
-        const devCertificate: ICertificate = certificateManager.ensureCertificate(
+        const devCertificate: ICertificate = await certificateManager.ensureCertificateAsync(
           this.taskConfig.tryCreateDevCertificate,
           this._terminal
         );

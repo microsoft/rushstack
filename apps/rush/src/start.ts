@@ -18,7 +18,7 @@ const alreadyReportedNodeTooNewError: boolean = NodeJsCompatibility.warnAboutVer
   alreadyReportedNodeTooNewError: false
 });
 
-import * as colors from 'colors';
+import colors from 'colors/safe';
 import * as os from 'os';
 import * as semver from 'semver';
 

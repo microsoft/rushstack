@@ -1,6 +1,26 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 05 Feb 2021 16:10:42 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Mar 2021 05:10:05 GMT and should not be manually modified.
+
+## 0.25.0
+Wed, 10 Mar 2021 05:10:05 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Change the logic that resolves typescript, eslint, tslint, and api-extractor to look for a devDependency in the current project, and then for a dependency in the rig project, and then as any kind of dependency in the current project.
+
+## 0.24.4
+Thu, 04 Mar 2021 01:11:31 GMT
+
+_Version update only_
+
+## 0.24.3
+Tue, 02 Mar 2021 23:25:05 GMT
+
+### Patches
+
+- Fix an issue where build would continue even if TS reported errors.
+- Determine the default static assets destination folder from the TSConfig's "outDir" property, instead of hardcoding "lib."
 
 ## 0.24.2
 Fri, 05 Feb 2021 16:10:42 GMT

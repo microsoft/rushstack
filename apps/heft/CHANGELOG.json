@@ -2,6 +2,51 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.25.0",
+      "tag": "@rushstack/heft_v0.25.0",
+      "date": "Wed, 10 Mar 2021 05:10:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING CHANGE) Change the logic that resolves typescript, eslint, tslint, and api-extractor to look for a devDependency in the current project, and then for a dependency in the rig project, and then as any kind of dependency in the current project."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.24.4",
+      "tag": "@rushstack/heft_v0.24.4",
+      "date": "Thu, 04 Mar 2021 01:11:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.3.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.2.10`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.13.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.24.3",
+      "tag": "@rushstack/heft_v0.24.3",
+      "date": "Tue, 02 Mar 2021 23:25:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where build would continue even if TS reported errors."
+          },
+          {
+            "comment": "Determine the default static assets destination folder from the TSConfig's \"outDir\" property, instead of hardcoding \"lib.\""
+          }
+        ]
+      }
+    },
+    {
       "version": "0.24.2",
       "tag": "@rushstack/heft_v0.24.2",
       "date": "Fri, 05 Feb 2021 16:10:42 GMT",

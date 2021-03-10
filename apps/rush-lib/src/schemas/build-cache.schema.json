@@ -22,7 +22,7 @@
 
         "cacheProvider": {
           "type": "string",
-          "enum": ["local-only", "azure-blob-storage"]
+          "enum": ["local-only", "azure-blob-storage", "amazon-s3"]
         },
 
         "cacheEntryNamePattern": {
@@ -82,6 +82,42 @@
                   "description": "An optional prefix for cache item blob names."
                 },
 
+                "isCacheWriteAllowed": {
+                  "type": "boolean",
+                  "description": "If set to true, allow writing to the cache. Defaults to false."
+                }
+              }
+            }
+          }
+        },
+
+        {
+          "additionalProperties": false,
+          "required": ["amazonS3Configuration"],
+          "properties": {
+            "cacheProvider": {
+              "type": "string",
+              "enum": ["amazon-s3"]
+            },
+
+            "cacheEntryNamePattern": { "$ref": "#/definitions/anything" },
+
+            "amazonS3Configuration": {
+              "type": "object",
+              "required": ["s3Region", "s3Bucket"],
+              "properties": {
+                "s3Region": {
+                  "type": "string",
+                  "description": "The Amazon S3 region of the bucket to use for build cache (e.g. \"us-east-1\")."
+                },
+                "s3Bucket": {
+                  "type": "string",
+                  "description": "The name of the bucket in Amazon S3 to use for build cache."
+                },
+                "s3Prefix": {
+                  "type": "string",
+                  "description": "An optional prefix (\"folder\") for cache items."
+                },
                 "isCacheWriteAllowed": {
                   "type": "boolean",
                   "description": "If set to true, allow writing to the cache. Defaults to false."

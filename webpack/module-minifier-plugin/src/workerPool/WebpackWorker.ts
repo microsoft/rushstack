@@ -50,7 +50,7 @@ async function processTaskAsync(index: number): Promise<void> {
     ];
   }
 
-  await new Promise((resolve: () => void, reject: (err: Error) => void) => {
+  await new Promise<void>((resolve: () => void, reject: (err: Error) => void) => {
     const compiler: webpack.Compiler = webpack(config);
     compiler.run(async (err: Error | undefined, stats: webpack.Stats) => {
       if (err) {
