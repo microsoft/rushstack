@@ -14,6 +14,7 @@ import {
 } from '../utilities/CoreConfigFiles';
 
 // Default plugins
+import { CopyFilesPlugin } from '../plugins/CopyFilesPlugin';
 import { TypeScriptPlugin } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
 import { DeleteGlobsPlugin } from '../plugins/DeleteGlobsPlugin';
 import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
@@ -23,6 +24,7 @@ import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWe
 import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
 import { SassTypingsPlugin } from '../plugins/SassTypingsPlugin/SassTypingsPlugin';
 import { ProjectValidatorPlugin } from '../plugins/ProjectValidatorPlugin';
+import { ToolPackageResolver } from '../utilities/ToolPackageResolver';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
@@ -44,10 +46,13 @@ export class PluginManager {
   }
 
   public initializeDefaultPlugins(): void {
-    this._applyPlugin(new TypeScriptPlugin());
+    const taskPackageResolver: ToolPackageResolver = new ToolPackageResolver();
+
+    this._applyPlugin(new TypeScriptPlugin(taskPackageResolver));
     this._applyPlugin(new CopyStaticAssetsPlugin());
+    this._applyPlugin(new CopyFilesPlugin());
     this._applyPlugin(new DeleteGlobsPlugin());
-    this._applyPlugin(new ApiExtractorPlugin());
+    this._applyPlugin(new ApiExtractorPlugin(taskPackageResolver));
     this._applyPlugin(new JestPlugin());
     this._applyPlugin(new BasicConfigureWebpackPlugin());
     this._applyPlugin(new WebpackPlugin());
@@ -113,7 +118,7 @@ export class PluginManager {
       const loadedPluginPackage: IHeftPlugin | { default: IHeftPlugin } = require(resolvedPluginPath);
       pluginPackage = (loadedPluginPackage as { default: IHeftPlugin }).default || loadedPluginPackage;
     } catch (e) {
-      throw new InternalError(`Error loading plugin package: ${e}`);
+      throw new InternalError(`Error loading plugin package from "${resolvedPluginPath}": ${e}`);
     }
 
     this._terminal.writeVerboseLine(`Loaded plugin package from "${resolvedPluginPath}"`);

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as semver from 'semver';
 
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -143,7 +143,7 @@ export class PackageJsonUpdater {
       collectLogFile: false,
       variant: variant,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
-      toProjects: []
+      pnpmFilterArguments: []
     };
     const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
       this._rushConfiguration,
@@ -489,9 +489,7 @@ export class PackageJsonUpdater {
   private _collectAllDownstreamDependencies(
     project: RushConfigurationProject
   ): Set<RushConfigurationProject> {
-    const allProjectDownstreamDependencies: Set<RushConfigurationProject> = new Set<
-      RushConfigurationProject
-    >();
+    const allProjectDownstreamDependencies: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
 
     const collectDependencies: (rushProject: RushConfigurationProject) => void = (
       rushProject: RushConfigurationProject

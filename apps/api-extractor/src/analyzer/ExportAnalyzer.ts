@@ -483,9 +483,12 @@ export class ExportAnalyzer {
     declaration: ts.Declaration,
     declarationSymbol: ts.Symbol
   ): AstEntity | undefined {
-    const exportDeclaration: ts.ExportDeclaration | undefined = TypeScriptHelpers.findFirstParent<
-      ts.ExportDeclaration
-    >(declaration, ts.SyntaxKind.ExportDeclaration);
+    const exportDeclaration:
+      | ts.ExportDeclaration
+      | undefined = TypeScriptHelpers.findFirstParent<ts.ExportDeclaration>(
+      declaration,
+      ts.SyntaxKind.ExportDeclaration
+    );
 
     if (exportDeclaration) {
       let exportName: string | undefined = undefined;
@@ -543,9 +546,12 @@ export class ExportAnalyzer {
     declaration: ts.Declaration,
     declarationSymbol: ts.Symbol
   ): AstEntity | undefined {
-    const importDeclaration: ts.ImportDeclaration | undefined = TypeScriptHelpers.findFirstParent<
-      ts.ImportDeclaration
-    >(declaration, ts.SyntaxKind.ImportDeclaration);
+    const importDeclaration:
+      | ts.ImportDeclaration
+      | undefined = TypeScriptHelpers.findFirstParent<ts.ImportDeclaration>(
+      declaration,
+      ts.SyntaxKind.ImportDeclaration
+    );
 
     if (importDeclaration) {
       const externalModulePath: string | undefined = this._tryGetExternalModulePath(

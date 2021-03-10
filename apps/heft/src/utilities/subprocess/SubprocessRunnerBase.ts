@@ -22,6 +22,7 @@ import {
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { SubprocessLoggerManager } from './SubprocessLoggerManager';
 import { FileError } from '../../pluginFramework/logging/FileError';
+import { SubprocessTerminator } from './SubprocessTerminator';
 
 export interface ISubprocessInnerConfiguration {
   globalTerminalProviderId: number;
@@ -149,6 +150,8 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
           execArgv: this._processNodeArgsForSubprocess(this._globalTerminal, process.execArgv)
         }
       );
+
+      SubprocessTerminator.registerChildProcess(subprocess);
 
       this._terminalProviderManager.registerSubprocess(subprocess);
       this._scopedLoggerManager.registerSubprocess(subprocess);
@@ -375,18 +378,14 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
       }
 
       case SupportedSerializableArgType.Error: {
-        const typedArg: ISubprocessApiCallArgWithValue<ISerializedErrorValue> = arg as ISubprocessApiCallArgWithValue<
-          ISerializedErrorValue
-        >;
+        const typedArg: ISubprocessApiCallArgWithValue<ISerializedErrorValue> = arg as ISubprocessApiCallArgWithValue<ISerializedErrorValue>;
         const result: Error = new Error(typedArg.value.errorMessage);
         result.stack = typedArg.value.errorStack;
         return result;
       }
 
       case SupportedSerializableArgType.FileError: {
-        const typedArg: ISubprocessApiCallArgWithValue<ISerializedFileErrorValue> = arg as ISubprocessApiCallArgWithValue<
-          ISerializedFileErrorValue
-        >;
+        const typedArg: ISubprocessApiCallArgWithValue<ISerializedFileErrorValue> = arg as ISubprocessApiCallArgWithValue<ISerializedFileErrorValue>;
         const result: FileError = new FileError(
           typedArg.value.errorMessage,
           typedArg.value.filePath,

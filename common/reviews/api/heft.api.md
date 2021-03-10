@@ -53,12 +53,6 @@ export class CleanStageHooks extends StageHooksBase<ICleanStageProperties> {
 }
 
 // @public (undocumented)
-export class CompileSubstageHooks extends BuildSubstageHooksBase {
-    // @internal (undocumented)
-    readonly afterTypescriptFirstEmit: AsyncParallelHook;
-}
-
-// @public (undocumented)
 export type CopyFromCacheMode = 'hardlink' | 'copy';
 
 // @beta (undocumented)
@@ -70,7 +64,6 @@ export class HeftConfiguration {
     get buildFolder(): string;
     // @internal
     _checkForRigAsync(): Promise<void>;
-    get compilerPackage(): ICompilerPackage | undefined;
     get globalTerminal(): Terminal;
     get heftPackageJson(): IPackageJson;
     // @internal (undocumented)
@@ -159,19 +152,7 @@ export interface ICleanStageProperties {
 }
 
 // @public (undocumented)
-export interface ICompilerPackage {
-    // (undocumented)
-    apiExtractorPackagePath: string | undefined;
-    // (undocumented)
-    eslintPackagePath: string | undefined;
-    // (undocumented)
-    tslintPackagePath: string | undefined;
-    // (undocumented)
-    typeScriptPackagePath: string;
-}
-
-// @public (undocumented)
-export interface ICompileSubstage extends IBuildSubstage<CompileSubstageHooks, ICompileSubstageProperties> {
+export interface ICompileSubstage extends IBuildSubstage<BuildSubstageHooksBase, ICompileSubstageProperties> {
 }
 
 // @public (undocumented)

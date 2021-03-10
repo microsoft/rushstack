@@ -6,7 +6,6 @@ export {
   HeftConfiguration,
   IHeftActionConfiguration,
   IHeftActionConfigurationOptions,
-  ICompilerPackage,
   IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
 } from './configuration/HeftConfiguration';
 export {
@@ -39,7 +38,6 @@ export {
   BuildStageHooks,
   BuildSubstageHooksBase,
   BundleSubstageHooks,
-  CompileSubstageHooks,
   CopyFromCacheMode,
   IBuildStageContext,
   IBuildStageProperties,

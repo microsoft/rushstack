@@ -15,12 +15,11 @@ import {
   ICompileSubstage,
   IBuildStageProperties
 } from '../../stages/BuildStage';
-import { TaskPackageResolver, ITaskPackageResolution } from '../../utilities/TaskPackageResolver';
+import { ToolPackageResolver, IToolPackageResolution } from '../../utilities/ToolPackageResolver';
 import { JestTypeScriptDataFile } from '../JestPlugin/JestTypeScriptDataFile';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { ICleanStageContext, ICleanStageProperties } from '../../stages/CleanStage';
-import { CoreConfigFiles } from '../../utilities/CoreConfigFiles';
-import { ISharedCopyStaticAssetsConfiguration } from '../CopyStaticAssetsPlugin';
+import { CoreConfigFiles, ISharedCopyConfiguration } from '../../utilities/CoreConfigFiles';
 
 const PLUGIN_NAME: string = 'typescript';
 
@@ -41,6 +40,7 @@ interface IRunBuilderForTsconfigOptions {
   heftSession: HeftSession;
   heftConfiguration: HeftConfiguration;
 
+  toolPackageResolution: IToolPackageResolution;
   tsconfigFilePath: string;
   lintingEnabled: boolean;
   copyFromCacheMode?: CopyFromCacheMode;
@@ -79,7 +79,7 @@ export interface ISharedTypeScriptConfiguration {
    * Configures additional file types that should be copied into the TypeScript compiler's emit folders, for example
    * so that these files can be resolved by import statements.
    */
-  staticAssetsToCopy?: ISharedCopyStaticAssetsConfiguration;
+  staticAssetsToCopy?: ISharedCopyConfiguration;
 }
 
 export interface ITypeScriptConfigurationJson extends ISharedTypeScriptConfiguration {
@@ -94,7 +94,6 @@ interface ITypeScriptConfiguration extends ISharedTypeScriptConfiguration {
    */
   maxWriteParallelism: number;
 
-  tsconfigPaths: string[];
   isLintingEnabled: boolean | undefined;
 }
 
@@ -104,10 +103,16 @@ interface ITypeScriptConfigurationFileCacheEntry {
 
 export class TypeScriptPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
+
+  private readonly _taskPackageResolver: ToolPackageResolver;
   private _typeScriptConfigurationFileCache: Map<string, ITypeScriptConfigurationFileCacheEntry> = new Map<
     string,
     ITypeScriptConfigurationFileCacheEntry
   >();
+
+  public constructor(taskPackageResolver: ToolPackageResolver) {
+    this._taskPackageResolver = taskPackageResolver;
+  }
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     const logger: ScopedLogger = heftSession.requestScopedLogger('TypeScript Plugin');
@@ -121,12 +126,21 @@ export class TypeScriptPlugin implements IHeftPlugin {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
         compile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          await this._runTypeScriptAsync(logger, {
-            heftSession,
-            heftConfiguration,
-            buildProperties: build.properties,
-            watchMode: build.properties.watchMode,
-            firstEmitCallback: async () => compile.hooks.afterTypescriptFirstEmit.promise()
+          await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
+            this._runTypeScriptAsync(logger, {
+              heftSession,
+              heftConfiguration,
+              buildProperties: build.properties,
+              watchMode: build.properties.watchMode,
+              firstEmitCallback: () => {
+                if (build.properties.watchMode) {
+                  // Allow compilation to continue after the first emit
+                  resolve();
+                }
+              }
+            })
+              .then(resolve)
+              .catch(reject);
           });
         });
       });
@@ -189,12 +203,17 @@ export class TypeScriptPlugin implements IHeftPlugin {
         nocase: true
       }
     );
+
+    if (tsconfigPaths.length === 0) {
+      // If there are no TSConfigs, we have nothing to do
+      return;
+    }
+
     const typeScriptConfiguration: ITypeScriptConfiguration = {
       copyFromCacheMode: typescriptConfigurationJson?.copyFromCacheMode,
       additionalModuleKindsToEmit: typescriptConfigurationJson?.additionalModuleKindsToEmit,
       emitFolderNameForTests: typescriptConfigurationJson?.emitFolderNameForTests,
       maxWriteParallelism: typescriptConfigurationJson?.maxWriteParallelism || 50,
-      tsconfigPaths: tsconfigPaths,
       isLintingEnabled: !(buildProperties.lite || typescriptConfigurationJson?.disableTslint)
     };
 
@@ -212,10 +231,18 @@ export class TypeScriptPlugin implements IHeftPlugin {
           new Error(
             `The TypeScript copyFromCacheMode is set to "${typeScriptConfiguration.copyFromCacheMode}", ` +
               'but the the "private" field in package.json is not set to true. ' +
-              'Linked files are not handled correctly when package are packed for publishing.'
+              'Linked files are not handled correctly when packages are packed for publishing.'
           )
         );
       }
+    }
+
+    const toolPackageResolution: IToolPackageResolution = await this._taskPackageResolver.resolveToolPackagesAsync(
+      heftConfiguration,
+      logger.terminal
+    );
+    if (!toolPackageResolution.typeScriptPackagePath) {
+      throw new Error('Unable to resolve a TypeScript compiler package');
     }
 
     const builderOptions: Omit<
@@ -228,6 +255,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
     > = {
       heftSession: heftSession,
       heftConfiguration,
+      toolPackageResolution,
       lintingEnabled: !!typeScriptConfiguration.isLintingEnabled,
       copyFromCacheMode: typeScriptConfiguration.copyFromCacheMode,
       watchMode: watchMode,
@@ -253,11 +281,10 @@ export class TypeScriptPlugin implements IHeftPlugin {
       return callback;
     }
 
-    const tsconfigFilePaths: string[] = typeScriptConfiguration.tsconfigPaths;
-    if (tsconfigFilePaths.length === 1) {
-      await this._runBuilderForTsconfig(logger, {
+    if (tsconfigPaths.length === 1) {
+      await this._runBuilderForTsconfigAsync(logger, {
         ...builderOptions,
-        tsconfigFilePath: tsconfigFilePaths[0],
+        tsconfigFilePath: tsconfigPaths[0],
         terminalProvider: heftConfiguration.terminalProvider,
         additionalModuleKindsToEmit: typeScriptConfiguration.additionalModuleKindsToEmit,
         terminalPrefixLabel: undefined,
@@ -265,7 +292,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
       });
     } else {
       const builderProcesses: Promise<void>[] = [];
-      for (const tsconfigFilePath of tsconfigFilePaths) {
+      for (const tsconfigFilePath of tsconfigPaths) {
         const tsconfigFilename: string = path.basename(tsconfigFilePath, path.extname(tsconfigFilePath));
 
         // Only provide additionalModuleKindsToEmit to the default tsconfig.json
@@ -273,7 +300,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
           tsconfigFilename === 'tsconfig' ? typeScriptConfiguration.additionalModuleKindsToEmit : undefined;
 
         builderProcesses.push(
-          this._runBuilderForTsconfig(logger, {
+          this._runBuilderForTsconfigAsync(logger, {
             ...builderOptions,
             tsconfigFilePath,
             terminalProvider: heftConfiguration.terminalProvider,
@@ -288,53 +315,33 @@ export class TypeScriptPlugin implements IHeftPlugin {
     }
   }
 
-  private async _runBuilderForTsconfig(
+  private async _runBuilderForTsconfigAsync(
     logger: ScopedLogger,
     options: IRunBuilderForTsconfigOptions
   ): Promise<void> {
-    const {
-      heftSession,
-      heftConfiguration,
-      lintingEnabled,
-      tsconfigFilePath,
-      terminalProvider,
-      terminalPrefixLabel,
-      copyFromCacheMode,
-      additionalModuleKindsToEmit,
-      watchMode,
-      maxWriteParallelism,
-      firstEmitCallback
-    } = options;
+    const { heftSession, heftConfiguration, tsconfigFilePath, toolPackageResolution } = options;
 
     const fullTsconfigFilePath: string = path.resolve(heftConfiguration.buildFolder, tsconfigFilePath);
-    const resolution: ITaskPackageResolution | undefined = TaskPackageResolver.resolveTaskPackages(
-      fullTsconfigFilePath,
-      logger.terminal
-    );
-    if (!resolution) {
-      throw new Error(`Unable to resolve a compiler package for ${path.basename(tsconfigFilePath)}`);
-    }
-
     const typeScriptBuilderConfiguration: ITypeScriptBuilderConfiguration = {
       buildFolder: heftConfiguration.buildFolder,
-      typeScriptToolPath: resolution.typeScriptPackagePath,
-      tslintToolPath: resolution.tslintPackagePath,
-      eslintToolPath: resolution.eslintPackagePath,
+      typeScriptToolPath: toolPackageResolution.typeScriptPackagePath!,
+      tslintToolPath: toolPackageResolution.tslintPackagePath,
+      eslintToolPath: toolPackageResolution.eslintPackagePath,
 
       tsconfigPath: fullTsconfigFilePath,
-      lintingEnabled,
+      lintingEnabled: options.lintingEnabled,
       buildCacheFolder: options.heftConfiguration.buildCacheFolder,
-      additionalModuleKindsToEmit,
-      copyFromCacheMode,
-      watchMode,
-      loggerPrefixLabel: terminalPrefixLabel,
-      maxWriteParallelism
+      additionalModuleKindsToEmit: options.additionalModuleKindsToEmit,
+      copyFromCacheMode: options.copyFromCacheMode,
+      watchMode: options.watchMode,
+      loggerPrefixLabel: options.terminalPrefixLabel,
+      maxWriteParallelism: options.maxWriteParallelism
     };
     const typeScriptBuilder: TypeScriptBuilder = new TypeScriptBuilder(
-      terminalProvider,
+      options.terminalProvider,
       typeScriptBuilderConfiguration,
       heftSession,
-      firstEmitCallback
+      options.firstEmitCallback
     );
 
     if (heftSession.debugMode) {

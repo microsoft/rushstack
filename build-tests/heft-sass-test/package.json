@@ -8,7 +8,6 @@
     "start": "heft start"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.9": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@types/heft-jest": "1.0.1",

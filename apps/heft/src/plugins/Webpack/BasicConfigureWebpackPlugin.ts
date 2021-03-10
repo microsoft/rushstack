@@ -102,11 +102,9 @@ export class BasicConfigureWebpackPlugin implements IHeftPlugin {
           (webpackConfigJs as { default: IWebpackConfigJsExport }).default || webpackConfigJs;
 
         if (typeof webpackConfig === 'function') {
-          return await Promise.resolve(
-            webpackConfig({ prod: buildProperties.production, production: buildProperties.production })
-          );
+          return webpackConfig({ prod: buildProperties.production, production: buildProperties.production });
         } else {
-          return await Promise.resolve(webpackConfig);
+          return webpackConfig;
         }
       } else {
         return undefined;

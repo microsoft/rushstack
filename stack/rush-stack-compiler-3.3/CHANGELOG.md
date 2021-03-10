@@ -1,6 +1,53 @@
 # Change Log - @microsoft/rush-stack-compiler-3.3
 
-This log was last generated on Fri, 30 Oct 2020 06:38:39 GMT and should not be manually modified.
+This log was last generated on Thu, 04 Mar 2021 01:11:31 GMT and should not be manually modified.
+
+## 0.9.40
+Thu, 04 Mar 2021 01:11:31 GMT
+
+_Version update only_
+
+## 0.9.39
+Fri, 05 Feb 2021 16:10:42 GMT
+
+_Version update only_
+
+## 0.9.38
+Wed, 13 Jan 2021 01:11:06 GMT
+
+_Version update only_
+
+## 0.9.37
+Thu, 10 Dec 2020 23:25:50 GMT
+
+_Version update only_
+
+## 0.9.36
+Sat, 05 Dec 2020 01:11:23 GMT
+
+### Patches
+
+- Ensure rootDir is consistently specified.
+
+## 0.9.35
+Wed, 18 Nov 2020 08:19:54 GMT
+
+_Version update only_
+
+## 0.9.34
+Wed, 18 Nov 2020 06:21:57 GMT
+
+_Version update only_
+
+## 0.9.33
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 0.9.32
+Tue, 10 Nov 2020 23:13:12 GMT
+
+_Version update only_
 
 ## 0.9.31
 Fri, 30 Oct 2020 06:38:39 GMT

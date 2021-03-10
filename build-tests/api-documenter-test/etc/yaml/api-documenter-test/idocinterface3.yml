@@ -1,50 +1,47 @@
-### YamlMime:UniversalReference
-items:
-  - uid: 'api-documenter-test!IDocInterface3:interface'
-    summary: Some less common TypeScript declaration kinds.
-    name: IDocInterface3
-    fullName: IDocInterface3
-    langs:
-      - typeScript
-    type: interface
+### YamlMime:TSType
+name: IDocInterface3
+uid: 'api-documenter-test!IDocInterface3:interface'
+package: api-documenter-test!
+fullName: IDocInterface3
+summary: Some less common TypeScript declaration kinds.
+remarks: ''
+isPreview: false
+isDeprecated: false
+type: interface
+properties:
+  - name: '"[not.a.symbol]"'
+    uid: 'api-documenter-test!IDocInterface3#"[not.a.symbol]":member'
     package: api-documenter-test!
-    children:
-      - 'api-documenter-test!IDocInterface3#"[not.a.symbol]":member'
-      - 'api-documenter-test!IDocInterface3#[EcmaSmbols.example]:member'
-      - 'api-documenter-test!IDocInterface3#redundantQuotes:member'
-  - uid: 'api-documenter-test!IDocInterface3#"[not.a.symbol]":member'
-    summary: An identifier that does need quotes. It misleadingly looks like an ECMAScript symbol.
-    name: '"[not.a.symbol]"'
     fullName: '"[not.a.symbol]"'
-    langs:
-      - typeScript
-    type: property
+    summary: An identifier that does need quotes. It misleadingly looks like an ECMAScript symbol.
+    remarks: ''
+    isPreview: false
+    isDeprecated: false
     syntax:
       content: '"[not.a.symbol]": string;'
       return:
-        type:
-          - string
-  - uid: 'api-documenter-test!IDocInterface3#[EcmaSmbols.example]:member'
-    summary: ECMAScript symbol
-    name: '[EcmaSmbols.example]'
+        type: string
+  - name: '[EcmaSmbols.example]'
+    uid: 'api-documenter-test!IDocInterface3#[EcmaSmbols.example]:member'
+    package: api-documenter-test!
     fullName: '[EcmaSmbols.example]'
-    langs:
-      - typeScript
-    type: property
+    summary: ECMAScript symbol
+    remarks: ''
+    isPreview: false
+    isDeprecated: false
     syntax:
       content: '[EcmaSmbols.example]: string;'
       return:
-        type:
-          - string
-  - uid: 'api-documenter-test!IDocInterface3#redundantQuotes:member'
-    summary: A quoted identifier with redundant quotes.
-    name: redundantQuotes
+        type: string
+  - name: redundantQuotes
+    uid: 'api-documenter-test!IDocInterface3#redundantQuotes:member'
+    package: api-documenter-test!
     fullName: redundantQuotes
-    langs:
-      - typeScript
-    type: property
+    summary: A quoted identifier with redundant quotes.
+    remarks: ''
+    isPreview: false
+    isDeprecated: false
     syntax:
       content: '"redundantQuotes": string;'
       return:
-        type:
-          - string
+        type: string

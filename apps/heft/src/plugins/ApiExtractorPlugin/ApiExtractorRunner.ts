@@ -117,7 +117,7 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
                 : message.sourceFilePath;
               logMessage =
                 `${filePathForLog}:${message.sourceFileLine}:${message.sourceFileColumn} - ` +
-                `(${message.category}) ${message.text}`;
+                `(${message.messageId}) ${message.text}`;
             } else {
               logMessage = message.text;
             }

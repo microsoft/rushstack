@@ -143,6 +143,12 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
       indentedSyntax: path.extname(filePath).toLowerCase() === '.sass'
     });
 
+    // Register any @import files as dependencies.
+    const target: string = result.stats.entry;
+    for (const dependency of result.stats.includedFiles) {
+      this.registerDependency(target, dependency);
+    }
+
     return result.css.toString();
   }
 

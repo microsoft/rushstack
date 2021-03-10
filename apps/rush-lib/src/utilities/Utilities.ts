@@ -6,11 +6,12 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as tty from 'tty';
 import * as path from 'path';
-import wordwrap = require('wordwrap');
-import { JsonFile, IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
-import { RushConfiguration } from '../api/RushConfiguration';
-import { Stream } from 'stream';
+import wordwrap from 'wordwrap';
+import { JsonFile, IPackageJson, FileSystem, FileConstants, Terminal } from '@rushstack/node-core-library';
+import type * as stream from 'stream';
 import { CommandLineHelper } from '@rushstack/ts-command-line';
+
+import { RushConfiguration } from '../api/RushConfiguration';
 
 export interface IEnvironment {
   // NOTE: the process.env doesn't actually support "undefined" as a value.
@@ -90,6 +91,10 @@ export interface IEnvironmentPathOptions {
   additionalPathFolders?: string[] | undefined;
 }
 
+export interface IDisposable {
+  dispose(): void;
+}
+
 interface ICreateEnvironmentForRushCommandPathOptions extends IEnvironmentPathOptions {
   projectRoot: string | undefined;
   commonTempFolder: string | undefined;
@@ -117,7 +122,7 @@ export class Utilities {
    * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
    * this looks something like "/home/username/"
    */
-  public static getHomeDirectory(): string {
+  public static getHomeFolder(): string {
     const unresolvedUserFolder: string | undefined =
       process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
     const dirError: string = "Unable to determine the current user's home directory";
@@ -503,26 +508,6 @@ export class Utilities {
     );
   }
 
-  public static withFinally<T>(options: { promise: Promise<T>; finally: () => void }): Promise<T> {
-    return options.promise
-      .then<T>((result: T) => {
-        try {
-          options.finally();
-        } catch (error) {
-          return Promise.reject(error);
-        }
-        return result;
-      })
-      .catch<T>((error: Error) => {
-        try {
-          options.finally();
-        } catch (innerError) {
-          return Promise.reject(innerError);
-        }
-        return Promise.reject(error);
-      });
-  }
-
   /**
    * As a workaround, copyAndTrimNpmrcFile() copies the .npmrc file to the target folder, and also trims
    * unusable lines from the .npmrc file.
@@ -636,6 +621,55 @@ export class Utilities {
     return `package-deps_${command}.json`;
   }
 
+  public static printMessageInBox(
+    message: string,
+    terminal: Terminal,
+    boxWidth: number = Math.floor(Utilities.getConsoleWidth() / 2)
+  ): void {
+    const maxLineLength: number = boxWidth - 10;
+
+    const wrappedMessage: string = Utilities.wrapWords(message, maxLineLength);
+    const wrappedMessageLines: string[] = wrappedMessage.split('\n');
+
+    // ╔═══════════╗
+    // ║  Message  ║
+    // ╚═══════════╝
+    terminal.writeLine(` ╔${'═'.repeat(boxWidth - 2)}╗ `);
+    for (const line of wrappedMessageLines) {
+      const trimmedLine: string = line.trim();
+      const padding: number = boxWidth - trimmedLine.length - 2;
+      const leftPadding: number = Math.floor(padding / 2);
+      const rightPadding: number = padding - leftPadding;
+      terminal.writeLine(` ║${' '.repeat(leftPadding)}${trimmedLine}${' '.repeat(rightPadding)}║ `);
+    }
+    terminal.writeLine(` ╚${'═'.repeat(boxWidth - 2)}╝ `);
+  }
+
+  public static async usingAsync<TDisposable extends IDisposable>(
+    getDisposableAsync: () => Promise<TDisposable> | IDisposable,
+    doActionAsync: (disposable: TDisposable) => Promise<void> | void
+  ): Promise<void> {
+    let disposable: TDisposable | undefined;
+    try {
+      disposable = (await getDisposableAsync()) as TDisposable;
+      await doActionAsync(disposable);
+    } finally {
+      disposable?.dispose();
+    }
+  }
+
+  public static async readStreamToBufferAsync(stream: stream.Readable): Promise<Buffer> {
+    return await new Promise((resolve: (result: Buffer) => void, reject: (error: Error) => void) => {
+      const parts: Uint8Array[] = [];
+      stream.on('data', (chunk) => parts.push(chunk));
+      stream.on('error', (error) => reject(error));
+      stream.on('end', () => {
+        const result: Buffer = Buffer.concat(parts);
+        resolve(result);
+      });
+    });
+  }
+
   private static _executeLifecycleCommandInternal<TCommandResult>(
     command: string,
     spawnFunction: (
@@ -674,6 +708,10 @@ export class Utilities {
   /**
    * Returns a process.env environment suitable for executing lifecycle scripts.
    * @param initialEnvironment - an existing environment to copy instead of process.env
+   *
+   * @remarks
+   * Rush._assignRushInvokedFolder() assigns the `RUSH_INVOKED_FOLDER` variable globally
+   * via the parent process's environment.
    */
   private static _createEnvironmentForRushCommand(
     options: ICreateEnvironmentForRushCommandOptions
@@ -772,7 +810,7 @@ export class Utilities {
       | 'pipe'
       | 'ignore'
       | 'inherit'
-      | (number | 'pipe' | 'ignore' | 'inherit' | 'ipc' | Stream | null | undefined)[]
+      | (number | 'pipe' | 'ignore' | 'inherit' | 'ipc' | stream.Stream | null | undefined)[]
       | undefined,
     environment?: IEnvironment,
     keepEnvironment: boolean = false

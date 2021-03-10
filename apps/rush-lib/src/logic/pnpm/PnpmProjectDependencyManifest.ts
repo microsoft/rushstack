@@ -2,18 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as semver from 'semver';
 import crypto from 'crypto';
 import { JsonFile, InternalError, FileSystem } from '@rushstack/node-core-library';
 
-import {
-  PnpmShrinkwrapFile,
-  IPnpmShrinkwrapDependencyYaml,
-  parsePnpmDependencyKey
-} from './PnpmShrinkwrapFile';
+import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './PnpmShrinkwrapFile';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../RushConstants';
-import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
+import { DependencySpecifier } from '../DependencySpecifier';
 
 export interface IPnpmProjectDependencyManifestOptions {
   pnpmShrinkwrapFile: PnpmShrinkwrapFile;
@@ -168,141 +163,48 @@ export class PnpmProjectDependencyManifest {
       }
     }
 
+    // When using workspaces, hoisting of peer dependencies to a singular top-level project is not possible.
+    // Therefore, all packages that are consumed should be specified in the dependency tree. Given this, there
+    // is no need to look for peer dependencies, since it is simply a constraint to be validated by the
+    // package manager. Also return if we have no peer dependencies to scavenge through.
     if (
-      this._project.rushConfiguration.pnpmOptions &&
-      this._project.rushConfiguration.pnpmOptions.useWorkspaces
+      (this._project.rushConfiguration.pnpmOptions &&
+        this._project.rushConfiguration.pnpmOptions.useWorkspaces) ||
+      !shrinkwrapEntry.peerDependencies
     ) {
-      // When using workspaces, hoisting of dependencies is not possible. Therefore, all packages that are consumed
-      // should be specified as direct dependencies in the shrinkwrap. Given this, there is no need to look for peer
-      // dependencies, since it is simply a constraint to be validated by the package manager.
       return;
     }
 
-    for (const [peerDependencyName, peerDependencyVersion] of Object.entries(
-      shrinkwrapEntry.peerDependencies || {}
-    )) {
+    for (const peerDependencyName of Object.keys(shrinkwrapEntry.peerDependencies)) {
       // Check to see if the peer dependency is satisfied with the current shrinkwrap
-      // entry and if not, check the parent shrinkwrap entry
+      // entry. If not, check the parent shrinkwrap entry. Finally, if neither have
+      // the specified dependency, check that the parent mentions the dependency in
+      // it's own peer dependencies. If it is, we can rely on the package manager and
+      // make the assumption that we've already found it further up the stack.
       if (
-        this._validatePeerDependencyVersion(shrinkwrapEntry, peerDependencyName, peerDependencyVersion) ||
-        this._validatePeerDependencyVersion(parentShrinkwrapEntry, peerDependencyName, peerDependencyVersion)
+        (shrinkwrapEntry.dependencies && shrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)) ||
+        (parentShrinkwrapEntry.dependencies &&
+          parentShrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)) ||
+        (parentShrinkwrapEntry.peerDependencies &&
+          parentShrinkwrapEntry.peerDependencies.hasOwnProperty(peerDependencyName))
       ) {
         continue;
       }
 
-      // The parent doesn't have a version that satisfies the range. As a last attempt, check
-      // if it's been hoisted up as a top-level dependency
+      // As a last attempt, check if it's been hoisted up as a top-level dependency. If
+      // we can't find it, we can assume that it's already been provided somewhere up the
+      // dependency tree.
       const topLevelDependencySpecifier:
         | DependencySpecifier
         | undefined = this._pnpmShrinkwrapFile.getTopLevelDependencyVersion(peerDependencyName);
 
-      // Sometimes peer dependencies are hoisted but are not represented in the shrinkwrap file
-      // (such as when implicitlyPreferredVersions is false) so we need to find the correct key
-      // and add it ourselves
-      if (!topLevelDependencySpecifier) {
-        const peerDependencyKeys: {
-          [peerDependencyName: string]: string;
-        } = this._parsePeerDependencyKeysFromSpecifier(specifier);
-        if (peerDependencyKeys.hasOwnProperty(peerDependencyName)) {
-          this._addDependencyInternal(
-            peerDependencyName,
-            peerDependencyKeys[peerDependencyName],
-            shrinkwrapEntry
-          );
-          continue;
-        }
-      }
-
-      if (!topLevelDependencySpecifier || !semver.valid(topLevelDependencySpecifier.versionSpecifier)) {
-        if (
-          !this._project.rushConfiguration.pnpmOptions ||
-          !this._project.rushConfiguration.pnpmOptions.strictPeerDependencies ||
-          (shrinkwrapEntry.peerDependenciesMeta &&
-            shrinkwrapEntry.peerDependenciesMeta.hasOwnProperty(peerDependencyName) &&
-            shrinkwrapEntry.peerDependenciesMeta[peerDependencyName].optional)
-        ) {
-          // We couldn't find the peer dependency, but we determined it's by design, skip this dependency...
-          continue;
-        }
-        throw new InternalError(
-          `Could not find peer dependency '${peerDependencyName}' that satisfies version '${peerDependencyVersion}'`
+      if (topLevelDependencySpecifier) {
+        this._addDependencyInternal(
+          peerDependencyName,
+          this._pnpmShrinkwrapFile.getTopLevelDependencyKey(peerDependencyName)!,
+          shrinkwrapEntry
         );
       }
-
-      this._addDependencyInternal(
-        peerDependencyName,
-        this._pnpmShrinkwrapFile.getTopLevelDependencyKey(peerDependencyName)!,
-        shrinkwrapEntry
-      );
     }
-  }
-
-  private _validatePeerDependencyVersion(
-    shrinkwrapEntry: Pick<
-      IPnpmShrinkwrapDependencyYaml,
-      'dependencies' | 'optionalDependencies' | 'peerDependencies'
-    >,
-    peerDependencyName: string,
-    peerDependencyVersion: string
-  ): boolean {
-    // Check the current package to see if the dependency is already satisfied
-    if (shrinkwrapEntry.dependencies && shrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)) {
-      let dependencySpecifier: DependencySpecifier | undefined = parsePnpmDependencyKey(
-        peerDependencyName,
-        shrinkwrapEntry.dependencies[peerDependencyName]
-      );
-      if (dependencySpecifier) {
-        if (
-          dependencySpecifier.specifierType === DependencySpecifierType.Alias &&
-          dependencySpecifier.aliasTarget
-        ) {
-          dependencySpecifier = dependencySpecifier.aliasTarget;
-        }
-
-        if (!semver.valid(dependencySpecifier.versionSpecifier)) {
-          throw new InternalError(
-            `The version '${peerDependencyVersion}' of peer dependency '${peerDependencyName}' is invalid`
-          );
-        }
-
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * The version specifier for a dependency can sometimes come in the form of
-   * '{semVer}_peerDep1@1.2.3+peerDep2@4.5.6'. This is parsed and returned as a dictionary mapping
-   * the peer dependency to it's appropriate PNPM dependency key.
-   */
-  private _parsePeerDependencyKeysFromSpecifier(specifier: string): { [peerDependencyName: string]: string } {
-    const parsedPeerDependencyKeys: { [peerDependencyName: string]: string } = {};
-
-    const specifierMatches: RegExpExecArray | null = /^[^_]+_(.+)$/.exec(specifier);
-    if (specifierMatches) {
-      const combinedPeerDependencies: string = specifierMatches[1];
-      // "eslint@6.6.0+typescript@3.6.4+@types+webpack@4.1.9" --> ["eslint@6.6.0", "typescript@3.6.4", "@types", "webpack@4.1.9"]
-      const peerDependencies: string[] = combinedPeerDependencies.split('+');
-      for (let i: number = 0; i < peerDependencies.length; i++) {
-        // Scopes are also separated by '+', so reduce the proceeding value into it
-        if (peerDependencies[i].indexOf('@') === 0) {
-          peerDependencies[i] = `${peerDependencies[i]}/${peerDependencies[i + 1]}`;
-          peerDependencies.splice(i + 1, 1);
-        }
-
-        // Parse "eslint@6.6.0" --> "eslint", "6.6.0"
-        const peerMatches: RegExpExecArray | null = /^(@?[^+@]+)@(.+)$/.exec(peerDependencies[i]);
-        if (peerMatches) {
-          const peerDependencyName: string = peerMatches[1];
-          const peerDependencyVersion: string = peerMatches[2];
-          const peerDependencyKey: string = `/${peerDependencyName}/${peerDependencyVersion}`;
-          parsedPeerDependencyKeys[peerDependencyName] = peerDependencyKey;
-        }
-      }
-    }
-
-    return parsedPeerDependencyKeys;
   }
 }

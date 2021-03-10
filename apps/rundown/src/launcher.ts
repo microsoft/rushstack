@@ -2,9 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import moduleApi = require('module');
-import * as process from 'process';
+import process from 'process';
 
-import { /* type */ LauncherAction, IIpcTrace, IIpcDone, IIpcTraceRecord } from './LauncherTypes';
+import { LauncherAction } from './LauncherTypes'; // "import type" doesn't work with const enums
+import type { IIpcTrace, IIpcDone, IIpcTraceRecord } from './LauncherTypes';
 
 // The _ipcTraceRecordsBatch will get transmitted when this many items are accumulated
 const IPC_BATCH_SIZE: number = 300;
@@ -47,6 +48,13 @@ class Launcher {
         records: batch
       } as IIpcTrace);
     }
+  }
+
+  /**
+   * Synchronously delay for the specified time interval.
+   */
+  private static _delayMs(milliseconds: number): void {
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
   }
 
   public installHook(): void {
@@ -110,6 +118,12 @@ class Launcher {
       process.send!({
         id: 'done'
       } as IIpcDone);
+
+      // The Node.js "exit" event is synchronous, and the process will terminate as soon as this function returns.
+      // To avoid a race condition, allow some time for IPC messages to be transmitted to the parent process.
+      // TODO: There should be a way to eliminate this delay by intercepting earlier in the shutdown sequence,
+      // but it needs to consider every way that Node.js can exit.
+      Launcher._delayMs(500);
     });
   }
 }

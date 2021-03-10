@@ -8,7 +8,6 @@ import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack
 import { BumpType, LockStepVersionPolicy } from '../../api/VersionPolicy';
 import { VersionPolicyConfiguration } from '../../api/VersionPolicyConfiguration';
 import { RushConfiguration } from '../../api/RushConfiguration';
-import { VersionControl } from '../../utilities/VersionControl';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
@@ -16,11 +15,12 @@ import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
 import { Git } from '../../logic/Git';
 
-// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
-import * as VersionManagerTypes from '../../logic/VersionManager';
+import type * as VersionManagerTypes from '../../logic/VersionManager';
 const versionManagerModule: typeof VersionManagerTypes = Import.lazy('../../logic/VersionManager', require);
 
 export const DEFAULT_PACKAGE_UPDATE_MESSAGE: string = 'Applying package updates.';
+export const DEFAULT_CHANGELOG_UPDATE_MESSAGE: string =
+  'Deleting change files and updating change logs for package updates.';
 
 export class VersionAction extends BaseRushAction {
   private _ensureVersionPolicy!: CommandLineFlagParameter;
@@ -35,9 +35,8 @@ export class VersionAction extends BaseRushAction {
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'version',
-      summary: '(EXPERIMENTAL) Manage package versions in the repo.',
-      documentation:
-        '(EXPERIMENTAL) use this "rush version" command to ensure version policies and bump versions.',
+      summary: 'Manage package versions in the repo.',
+      documentation: 'use this "rush version" command to ensure version policies and bump versions.',
       parser
     });
   }
@@ -95,7 +94,8 @@ export class VersionAction extends BaseRushAction {
 
   protected async runAsync(): Promise<void> {
     PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: this._bypassPolicy.value });
-    const userEmail: string = Git.getGitEmail(this.rushConfiguration);
+    const git: Git = new Git(this.rushConfiguration);
+    const userEmail: string = git.getGitEmail();
 
     this._validateInput();
     const versionManager: VersionManagerTypes.VersionManager = new versionManagerModule.VersionManager(
@@ -116,7 +116,7 @@ export class VersionAction extends BaseRushAction {
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
       if (updatedPackages.size > 0) {
         console.log(`${updatedPackages.size} packages are getting updated.`);
-        this._gitProcess(tempBranch);
+        this._gitProcess(tempBranch, this._targetBranch.value);
       }
     } else if (this._bumpVersion.value) {
       const tempBranch: string = 'version/bump-' + new Date().getTime();
@@ -126,7 +126,7 @@ export class VersionAction extends BaseRushAction {
         this._prereleaseIdentifier.value,
         true
       );
-      this._gitProcess(tempBranch);
+      this._gitProcess(tempBranch, this._targetBranch.value);
     }
   }
 
@@ -209,16 +209,17 @@ export class VersionAction extends BaseRushAction {
     }
   }
 
-  private _gitProcess(tempBranch: string): void {
+  private _gitProcess(tempBranch: string, targetBranch: string | undefined): void {
     // Validate the result before commit.
     this._validateResult();
 
-    const git: PublishGit = new PublishGit(this._targetBranch.value);
+    const git: Git = new Git(this.rushConfiguration);
+    const publishGit: PublishGit = new PublishGit(git, targetBranch);
 
     // Make changes in temp branch.
-    git.checkout(tempBranch, true);
+    publishGit.checkout(tempBranch, true);
 
-    const uncommittedChanges: ReadonlyArray<string> = VersionControl.getUncommittedChanges();
+    const uncommittedChanges: ReadonlyArray<string> = git.getUncommittedChanges();
 
     // Stage, commit, and push the changes to remote temp branch.
     // Need to commit the change log updates in its own commit
@@ -227,10 +228,12 @@ export class VersionAction extends BaseRushAction {
     });
 
     if (changeLogUpdated) {
-      git.addChanges('.', this.rushConfiguration.changesFolder);
-      git.addChanges(':/**/CHANGELOG.json');
-      git.addChanges(':/**/CHANGELOG.md');
-      git.commit('Deleting change files and updating change logs for package updates.');
+      publishGit.addChanges('.', this.rushConfiguration.changesFolder);
+      publishGit.addChanges(':/**/CHANGELOG.json');
+      publishGit.addChanges(':/**/CHANGELOG.md');
+      publishGit.commit(
+        this.rushConfiguration.gitChangeLogUpdateCommitMessage || DEFAULT_CHANGELOG_UPDATE_MESSAGE
+      );
     }
 
     // Commit the package.json and change files updates.
@@ -239,26 +242,26 @@ export class VersionAction extends BaseRushAction {
     });
 
     if (packageJsonUpdated) {
-      git.addChanges(this.rushConfiguration.versionPolicyConfigurationFilePath);
-      git.addChanges(':/**/package.json');
-      git.commit(this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE);
+      publishGit.addChanges(this.rushConfiguration.versionPolicyConfigurationFilePath);
+      publishGit.addChanges(':/**/package.json');
+      publishGit.commit(this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE);
     }
 
     if (changeLogUpdated || packageJsonUpdated) {
-      git.push(tempBranch);
+      publishGit.push(tempBranch);
 
       // Now merge to target branch.
-      git.fetch();
-      git.checkout(this._targetBranch.value);
-      git.pull();
-      git.merge(tempBranch);
-      git.push(this._targetBranch.value);
-      git.deleteBranch(tempBranch);
+      publishGit.fetch();
+      publishGit.checkout(targetBranch);
+      publishGit.pull();
+      publishGit.merge(tempBranch);
+      publishGit.push(targetBranch);
+      publishGit.deleteBranch(tempBranch);
     } else {
       // skip commits
-      git.fetch();
-      git.checkout(this._targetBranch.value);
-      git.deleteBranch(tempBranch, false);
+      publishGit.fetch();
+      publishGit.checkout(targetBranch);
+      publishGit.deleteBranch(tempBranch, false);
     }
   }
 }

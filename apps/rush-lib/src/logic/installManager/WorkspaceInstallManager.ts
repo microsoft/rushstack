@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -114,16 +114,24 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
     }
 
-    // If preferred versions have been updated, then we can't be certain of the state of the shrinkwrap
+    // If preferred versions have been updated, or if the repo-state.json is invalid,
+    // we can't be certain of the state of the shrinkwrap
     const repoState: RepoStateFile = this.rushConfiguration.getRepoState(this.options.variant);
-    const commonVersions: CommonVersionsConfiguration = this.rushConfiguration.getCommonVersions(
-      this.options.variant
-    );
-    if (repoState.preferredVersionsHash !== commonVersions.getPreferredVersionsHash()) {
+    if (!repoState.isValid) {
       shrinkwrapWarnings.push(
-        `Preferred versions from ${RushConstants.commonVersionsFilename} have been modified.`
+        `The ${RushConstants.repoStateFilename} file is invalid. There may be a merge conflict marker in the file.`
       );
       shrinkwrapIsUpToDate = false;
+    } else {
+      const commonVersions: CommonVersionsConfiguration = this.rushConfiguration.getCommonVersions(
+        this.options.variant
+      );
+      if (repoState.preferredVersionsHash !== commonVersions.getPreferredVersionsHash()) {
+        shrinkwrapWarnings.push(
+          `Preferred versions from ${RushConstants.commonVersionsFilename} have been modified.`
+        );
+        shrinkwrapIsUpToDate = false;
+      }
     }
 
     // To generate the workspace file, we will add each project to the file as we loop through and validate
@@ -522,7 +530,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (!workspaceImporter) {
       // Filtered installs will not contain all projects in the shrinkwrap, but if one is
       // missing during a full install, something has gone wrong
-      if (this.options.toProjects.length === 0) {
+      if (this.options.pnpmFilterArguments.length === 0) {
         throw new InternalError(
           `Cannot find shrinkwrap entry using importer key for workspace project: ${importerKey}`
         );
@@ -531,7 +539,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     }
 
     const localDependencyProjectNames: Set<string> = new Set<string>(
-      project.localDependencyProjects.map((x) => x.packageName)
+      [...project.dependencyProjects].map((x) => x.packageName)
     );
 
     // Loop through non-local dependencies. Skip peer dependencies because they're only a constraint
@@ -587,9 +595,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       args.push('--recursive');
       args.push('--link-workspace-packages', 'false');
 
-      // "<package>..." selects the specified package and all direct and indirect dependencies
-      for (const toProject of this.options.toProjects) {
-        args.push('--filter', `${toProject.packageName}...`);
+      for (const arg of this.options.pnpmFilterArguments) {
+        args.push(arg);
       }
     }
   }

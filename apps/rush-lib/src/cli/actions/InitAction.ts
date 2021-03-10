@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -79,19 +79,17 @@ export class InitAction extends BaseConfiglessRushAction {
     });
   }
 
-  protected runAsync(): Promise<void> {
+  protected async runAsync(): Promise<void> {
     const initFolder: string = process.cwd();
 
     if (!this._overwriteParameter.value) {
       if (!this._validateFolderIsEmpty(initFolder)) {
-        return Promise.reject(new AlreadyReportedError());
+        throw new AlreadyReportedError();
       }
     }
 
     this._defineMacroSections();
     this._copyTemplateFiles(initFolder);
-
-    return Promise.resolve();
   }
 
   private _defineMacroSections(): void {
@@ -160,6 +158,7 @@ export class InitAction extends BaseConfiglessRushAction {
       '[dot]travis.yml',
       'common/config/rush/[dot]npmrc',
       'common/config/rush/[dot]npmrc-publish',
+      'common/config/rush/artifactory.json',
       'common/config/rush/command-line.json',
       'common/config/rush/common-versions.json',
       'common/config/rush/experiments.json',

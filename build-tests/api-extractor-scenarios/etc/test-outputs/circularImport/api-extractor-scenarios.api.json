@@ -47,6 +47,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "releaseTag": "Public",
               "name": "containingFolder",
               "propertyTypeTokenRange": {
@@ -94,6 +95,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "releaseTag": "Public",
               "name": "containingFolder",
               "propertyTypeTokenRange": {
@@ -125,6 +127,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "releaseTag": "Public",
               "name": "files",
               "propertyTypeTokenRange": {

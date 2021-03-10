@@ -123,6 +123,7 @@ export abstract class HeftActionBase extends CommandLineAction {
     let encounteredError: boolean = false;
     try {
       await this.actionExecuteAsync();
+      await this.afterExecuteAsync();
     } catch (e) {
       encounteredError = true;
       throw e;
@@ -171,16 +172,21 @@ export abstract class HeftActionBase extends CommandLineAction {
     }
   }
 
+  protected abstract actionExecuteAsync(): Promise<void>;
+
   /**
    * @virtual
    */
-  protected abstract actionExecuteAsync(): Promise<void>;
+  protected async afterExecuteAsync(): Promise<void> {
+    /* no-op by default */
+  }
 
   private _validateDefinedParameter(options: IBaseCommandLineDefinition): void {
-    if (options.parameterLongName === Constants.pluginParameterLongName) {
-      throw new Error(
-        `Actions must not register a parameter with longName "${Constants.pluginParameterLongName}".`
-      );
+    if (
+      options.parameterLongName === Constants.pluginParameterLongName ||
+      options.parameterLongName === Constants.debugParameterLongName
+    ) {
+      throw new Error(`Actions must not register a parameter with longName "${options.parameterLongName}".`);
     }
   }
 }

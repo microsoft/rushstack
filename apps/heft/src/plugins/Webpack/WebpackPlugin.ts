@@ -89,6 +89,23 @@ export class WebpackPlugin implements IHeftPlugin {
         options = { ...defaultDevServerOptions, ...webpackConfiguration.devServer };
       }
 
+      // Register a plugin to callback after webpack is done with the first compilation
+      // so we can move on to post-build
+      let firstCompilationDoneCallback: (() => void) | undefined;
+      const originalBeforeCallback: typeof options.before | undefined = options.before;
+      options.before = (app, devServer, compiler: webpack.Compiler) => {
+        compiler.hooks.done.tap('heft-webpack-plugin', () => {
+          if (firstCompilationDoneCallback) {
+            firstCompilationDoneCallback();
+            firstCompilationDoneCallback = undefined;
+          }
+        });
+
+        if (originalBeforeCallback) {
+          return originalBeforeCallback(app, devServer, compiler);
+        }
+      };
+
       // The webpack-dev-server package has a design flaw, where merely loading its package will set the
       // WEBPACK_DEV_SERVER environment variable -- even if no APIs are accessed. This environment variable
       // causes incorrect behavior if Heft is not running in serve mode. Thus, we need to be careful to call require()
@@ -96,9 +113,11 @@ export class WebpackPlugin implements IHeftPlugin {
       const WebpackDevServer: typeof TWebpackDevServer = require(WEBPACK_DEV_SERVER_PACKAGE_NAME);
       // TODO: the WebpackDevServer accepts a third parameter for a logger. We should make
       // use of that to make logging cleaner
-      const devServer: TWebpackDevServer = new WebpackDevServer(compiler, options);
-      await new Promise((resolve: () => void, reject: (error: Error) => void) => {
-        devServer.listen(options.port!, options.host!, (error: Error | undefined) => {
+      const webpackDevServer: TWebpackDevServer = new WebpackDevServer(compiler, options);
+      await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
+        firstCompilationDoneCallback = resolve;
+
+        webpackDevServer.listen(options.port!, options.host!, (error: Error | undefined) => {
           if (error) {
             reject(error);
           }

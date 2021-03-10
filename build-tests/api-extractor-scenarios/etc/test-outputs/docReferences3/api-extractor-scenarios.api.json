@@ -46,6 +46,7 @@
                   "text": ";"
                 }
               ],
+              "isOptional": false,
               "releaseTag": "Public",
               "name": "myProperty",
               "propertyTypeTokenRange": {
@@ -100,6 +101,7 @@
                       "text": ";"
                     }
                   ],
+                  "isOptional": false,
                   "isStatic": false,
                   "returnTypeTokenRange": {
                     "startIndex": 1,

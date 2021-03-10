@@ -89,7 +89,37 @@ export const enum EnvironmentVariableNames {
    *
    * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
    */
-  RUSH_GLOBAL_FOLDER = 'RUSH_GLOBAL_FOLDER'
+  RUSH_GLOBAL_FOLDER = 'RUSH_GLOBAL_FOLDER',
+
+  /**
+   * Provides a credential for a remote build cache, if configured. Setting this environment variable
+   * overrides a "isCacheWriteAllowed": false setting.
+   *
+   * @remarks
+   * This credential overrides any cached credentials.
+   *
+   * If Azure Blob Storage is used to store cache entries, this must be a SAS token serialized as query
+   * parameters.
+   *
+   * For information on SAS tokens, see here: https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview
+   */
+  RUSH_BUILD_CACHE_WRITE_CREDENTIAL = 'RUSH_BUILD_CACHE_WRITE_CREDENTIAL',
+
+  /**
+   * Allows the git binary path to be explicitly specified.
+   */
+  RUSH_GIT_BINARY_PATH = 'RUSH_GIT_BINARY_PATH',
+
+  /**
+   * When Rush executes shell scripts, it sometimes changes the working directory to be a project folder or
+   * the repository root folder.  The original working directory (where the Rush command was invoked) is assigned
+   * to the the child process's `RUSH_INVOKED_FOLDER` environment variable, in case it is needed by the script.
+   *
+   * @remarks
+   * The `RUSH_INVOKED_FOLDER` variable is the same idea as the `INIT_CWD` variable that package managers
+   * assign when they execute lifecycle scripts.
+   */
+  RUSH_INVOKED_FOLDER = 'RUSH_INVOKED_FOLDER'
 }
 
 /**
@@ -111,6 +141,10 @@ export class EnvironmentConfiguration {
   private static _pnpmStorePathOverride: string | undefined;
 
   private static _rushGlobalFolderOverride: string | undefined;
+
+  private static _buildCacheCredential: string | undefined;
+
+  private static _gitBinaryPath: string | undefined;
 
   /**
    * An override for the common/temp folder path.
@@ -157,6 +191,24 @@ export class EnvironmentConfiguration {
   public static get rushGlobalFolderOverride(): string | undefined {
     EnvironmentConfiguration._ensureInitialized();
     return EnvironmentConfiguration._rushGlobalFolderOverride;
+  }
+
+  /**
+   * Provides a credential for reading from and writing to a remote build cache, if configured.
+   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_CONNECTION_STRING}
+   */
+  public static get buildCacheWriteCredential(): string | undefined {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._buildCacheCredential;
+  }
+
+  /**
+   * Allows the git binary path to be explicitly provided.
+   * See {@link EnvironmentVariableNames.RUSH_GIT_BINARY_PATH}
+   */
+  public static get gitBinaryPath(): string | undefined {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._gitBinaryPath;
   }
 
   /**
@@ -220,12 +272,27 @@ export class EnvironmentConfiguration {
             break;
           }
 
+          case EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_CREDENTIAL: {
+            EnvironmentConfiguration._buildCacheCredential = value;
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_GIT_BINARY_PATH: {
+            EnvironmentConfiguration._gitBinaryPath = value;
+            break;
+          }
+
           case EnvironmentVariableNames.RUSH_PARALLELISM:
           case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:
           case EnvironmentVariableNames.RUSH_VARIANT:
           case EnvironmentVariableNames.RUSH_DEPLOY_TARGET_FOLDER:
             // Handled by @microsoft/rush front end
             break;
+
+          case EnvironmentVariableNames.RUSH_INVOKED_FOLDER:
+            // Assigned by Rush itself
+            break;
+
           default:
             unknownEnvVariables.push(envVarName);
             break;

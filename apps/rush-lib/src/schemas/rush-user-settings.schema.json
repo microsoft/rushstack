@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Rush per-user settings file",
+  "description": "For use with the Rush tool, this file stores user-specific settings options. See http://rushjs.io for details.",
+
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "buildCacheFolder": {
+      "type": "string",
+      "description": "If provided, store build cache in the specified folder. Must be an absolute path."
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,6 +1,166 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 03 Nov 2020 01:11:18 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Mar 2021 05:10:05 GMT and should not be manually modified.
+
+## 0.25.0
+Wed, 10 Mar 2021 05:10:05 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Change the logic that resolves typescript, eslint, tslint, and api-extractor to look for a devDependency in the current project, and then for a dependency in the rig project, and then as any kind of dependency in the current project.
+
+## 0.24.4
+Thu, 04 Mar 2021 01:11:31 GMT
+
+_Version update only_
+
+## 0.24.3
+Tue, 02 Mar 2021 23:25:05 GMT
+
+### Patches
+
+- Fix an issue where build would continue even if TS reported errors.
+- Determine the default static assets destination folder from the TSConfig's "outDir" property, instead of hardcoding "lib."
+
+## 0.24.2
+Fri, 05 Feb 2021 16:10:42 GMT
+
+_Version update only_
+
+## 0.24.1
+Fri, 22 Jan 2021 05:39:22 GMT
+
+### Patches
+
+- Fix an issue with webpack in "heft start" mode where "bundle" would continue too quickly.
+
+## 0.24.0
+Thu, 21 Jan 2021 04:19:00 GMT
+
+### Minor changes
+
+- Update jest-shared.config.json to specify a default "collectCoverageFrom" that includes all "src" files excluding test files
+- Update jest-shared.config.json to configure "coverageDirectory" to use "./temp/coverage" (instead of "./coverage")
+
+## 0.23.2
+Wed, 13 Jan 2021 01:11:06 GMT
+
+_Version update only_
+
+## 0.23.1
+Wed, 06 Jan 2021 16:10:43 GMT
+
+_Version update only_
+
+## 0.23.0
+Mon, 14 Dec 2020 16:12:20 GMT
+
+### Minor changes
+
+- Delay build stages in --watch mode until the previous stage reports an initial completion.
+
+## 0.22.7
+Thu, 10 Dec 2020 23:25:49 GMT
+
+### Patches
+
+- Fix an issue where using CTRL+C to terminate "--watch" mode would sometimes leave a background process running (GitHub #2387)
+
+## 0.22.6
+Sat, 05 Dec 2020 01:11:23 GMT
+
+_Version update only_
+
+## 0.22.5
+Tue, 01 Dec 2020 01:10:38 GMT
+
+### Patches
+
+- Fix a typo in a logging message.
+
+## 0.22.4
+Mon, 30 Nov 2020 16:11:49 GMT
+
+_Version update only_
+
+## 0.22.3
+Wed, 18 Nov 2020 08:19:54 GMT
+
+_Version update only_
+
+## 0.22.2
+Wed, 18 Nov 2020 06:21:58 GMT
+
+_Version update only_
+
+## 0.22.1
+Tue, 17 Nov 2020 01:17:38 GMT
+
+### Patches
+
+- Fix an issue where .map files were not being published
+
+## 0.22.0
+Mon, 16 Nov 2020 01:57:58 GMT
+
+### Minor changes
+
+- Add "webpack-dev-server" as a dependency since its types are part of Heft's API contract
+
+### Patches
+
+- Fix an issue where API Extractor errors/warnings did not show the message ID
+
+## 0.21.3
+Fri, 13 Nov 2020 01:11:00 GMT
+
+### Patches
+
+- Update Sass typings generation to update in watch mode when a dependency changes.
+
+## 0.21.2
+Thu, 12 Nov 2020 01:11:10 GMT
+
+### Patches
+
+- Fix a minor issue with heft.schema.json
+
+## 0.21.1
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 0.21.0
+Tue, 10 Nov 2020 23:13:11 GMT
+
+### Minor changes
+
+- Add new built-in Heft action "copyFiles" to copy or hardlink files during specified Heft events
+
+### Patches
+
+- Fix an incorrectly formatted error message
+
+## 0.20.1
+Tue, 10 Nov 2020 16:11:42 GMT
+
+### Patches
+
+- Improve error handling and make --debug print stacks of errors that occur in heft's internal initialization.
+
+## 0.20.0
+Sun, 08 Nov 2020 22:52:49 GMT
+
+### Minor changes
+
+- Update jest-shared.config.json with more file extension mappings for "jest-string-mock-transform"
+
+## 0.19.5
+Fri, 06 Nov 2020 16:09:30 GMT
+
+### Patches
+
+- Fix an issue where an extended "typescript.json" config file with omitted optional staticAssetsToCopy fields would cause schema validation to fail.
 
 ## 0.19.4
 Tue, 03 Nov 2020 01:11:18 GMT

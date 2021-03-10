@@ -3,7 +3,7 @@
  * Rush features. For full documentation, please see https://rushjs.io
  */
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/experiments.schema.json"
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/experiments.schema.json",
 
   /**
    * Rush 5.14.0 improved incremental builds to ignore spurious changes in the pnpm-lock.json file.
@@ -24,5 +24,13 @@
    * If true, the chmod field in temporary project tar headers will not be normalized.
    * This normalization can help ensure consistent tarball integrity across platforms.
    */
-  // "noChmodFieldInTarHeaderNormalization": true
+  // "noChmodFieldInTarHeaderNormalization": true,
+
+  /**
+   * If true, the build cache feature is enabled. To use this feature, a common/config/rush/build-cache.json
+   * file must be created with configuration options.
+   *
+   * See https://github.com/microsoft/rushstack/issues/2393 for details about this experimental feature.
+   */
+  "buildCache": true
 }

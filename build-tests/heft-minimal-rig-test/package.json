@@ -8,9 +8,7 @@
     "build": ""
   },
   "dependencies": {
-    "typescript": "~3.9.7"
-  },
-  "devDependencies": {
+    "typescript": "~3.9.7",
     "@microsoft/api-extractor": "workspace:*"
   }
 }

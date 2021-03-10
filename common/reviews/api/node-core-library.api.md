@@ -142,7 +142,23 @@ export class Enum {
 }
 
 // @public
+export class EnvironmentMap {
+    constructor(environmentObject?: Record<string, string | undefined>);
+    readonly caseSensitive: boolean;
+    clear(): void;
+    entries(): IterableIterator<IEnvironmentEntry>;
+    get(name: string): string | undefined;
+    mergeFrom(environmentMap: EnvironmentMap): void;
+    mergeFromObject(environmentObject?: Record<string, string | undefined>): void;
+    names(): IterableIterator<string>;
+    set(name: string, value: string): void;
+    toObject(): Record<string, string>;
+    unset(name: string): void;
+}
+
+// @public
 export class Executable {
+    static spawn(filename: string, args: string[], options?: IExecutableSpawnOptions): child_process.ChildProcess;
     static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
     static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
     }
@@ -168,6 +184,7 @@ export class FileSystem {
     static copyFileAsync(options: IFileSystemCopyFileOptions): Promise<void>;
     static copyFiles(options: IFileSystemCopyFilesOptions): void;
     static copyFilesAsync(options: IFileSystemCopyFilesOptions): Promise<void>;
+    static copyFileToManyAsync(options: IFileSystemCopyFileToManyOptions): Promise<void>;
     static createHardLink(options: IFileSystemCreateLinkOptions): void;
     static createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void>;
     static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void;
@@ -263,9 +280,21 @@ export interface IConsoleTerminalProviderOptions {
 }
 
 // @public
+export interface IEnvironmentEntry {
+    name: string;
+    value: string;
+}
+
+// @public
 export interface IExecutableResolveOptions {
     currentWorkingDirectory?: string;
     environment?: NodeJS.ProcessEnv;
+    environmentMap?: EnvironmentMap;
+}
+
+// @public
+export interface IExecutableSpawnOptions extends IExecutableResolveOptions {
+    stdio?: ExecutableStdioMapping;
 }
 
 // @public
@@ -276,11 +305,15 @@ export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
     timeoutMs?: number;
 }
 
-// @public
-export interface IFileSystemCopyFileOptions {
+// @public (undocumented)
+export interface IFileSystemCopyFileBaseOptions {
     alreadyExistsBehavior?: AlreadyExistsBehavior;
-    destinationPath: string;
     sourcePath: string;
+}
+
+// @public
+export interface IFileSystemCopyFileOptions extends IFileSystemCopyFileBaseOptions {
+    destinationPath: string;
 }
 
 // @public
@@ -299,7 +332,13 @@ export interface IFileSystemCopyFilesOptions extends IFileSystemCopyFilesAsyncOp
 }
 
 // @public
+export interface IFileSystemCopyFileToManyOptions extends IFileSystemCopyFileBaseOptions {
+    destinationPaths: string[];
+}
+
+// @public
 export interface IFileSystemCreateLinkOptions {
+    alreadyExistsBehavior?: AlreadyExistsBehavior;
     linkTargetPath: string;
     newLinkPath: string;
 }

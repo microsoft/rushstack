@@ -1,6 +1,45 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Fri, 30 Oct 2020 06:38:39 GMT and should not be manually modified.
+This log was last generated on Thu, 04 Mar 2021 01:11:31 GMT and should not be manually modified.
+
+## 0.3.17
+Thu, 04 Mar 2021 01:11:31 GMT
+
+_Version update only_
+
+## 0.3.16
+Fri, 05 Feb 2021 16:10:42 GMT
+
+_Version update only_
+
+## 0.3.15
+Thu, 10 Dec 2020 23:25:49 GMT
+
+_Version update only_
+
+## 0.3.14
+Tue, 17 Nov 2020 01:17:38 GMT
+
+### Patches
+
+- Fix an issue where .map files were not being published
+
+## 0.3.13
+Wed, 11 Nov 2020 01:08:59 GMT
+
+_Version update only_
+
+## 0.3.12
+Tue, 10 Nov 2020 23:13:12 GMT
+
+_Version update only_
+
+## 0.3.11
+Fri, 06 Nov 2020 16:09:30 GMT
+
+### Patches
+
+- Fix an issue where an error would be thrown if a value was omitted in a parent configuration file.
 
 ## 0.3.10
 Fri, 30 Oct 2020 06:38:39 GMT

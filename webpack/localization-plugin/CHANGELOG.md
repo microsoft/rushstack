@@ -1,6 +1,141 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Tue, 03 Nov 2020 01:11:19 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Mar 2021 06:23:29 GMT and should not be manually modified.
+
+## 0.5.31
+Wed, 10 Mar 2021 06:23:29 GMT
+
+_Version update only_
+
+## 0.5.30
+Wed, 10 Mar 2021 05:10:06 GMT
+
+_Version update only_
+
+## 0.5.29
+Thu, 04 Mar 2021 01:11:31 GMT
+
+_Version update only_
+
+## 0.5.28
+Tue, 02 Mar 2021 23:25:05 GMT
+
+_Version update only_
+
+## 0.5.27
+Fri, 05 Feb 2021 16:10:42 GMT
+
+_Version update only_
+
+## 0.5.26
+Fri, 22 Jan 2021 05:39:22 GMT
+
+_Version update only_
+
+## 0.5.25
+Thu, 21 Jan 2021 04:19:00 GMT
+
+_Version update only_
+
+## 0.5.24
+Wed, 13 Jan 2021 01:11:06 GMT
+
+_Version update only_
+
+## 0.5.23
+Fri, 08 Jan 2021 07:28:50 GMT
+
+_Version update only_
+
+## 0.5.22
+Wed, 06 Jan 2021 16:10:43 GMT
+
+_Version update only_
+
+## 0.5.21
+Mon, 14 Dec 2020 16:12:21 GMT
+
+_Version update only_
+
+## 0.5.20
+Thu, 10 Dec 2020 23:25:50 GMT
+
+_Version update only_
+
+## 0.5.19
+Tue, 08 Dec 2020 01:10:30 GMT
+
+_Version update only_
+
+## 0.5.18
+Sat, 05 Dec 2020 01:11:23 GMT
+
+_Version update only_
+
+## 0.5.17
+Tue, 01 Dec 2020 01:10:38 GMT
+
+_Version update only_
+
+## 0.5.16
+Mon, 30 Nov 2020 16:11:50 GMT
+
+_Version update only_
+
+## 0.5.15
+Wed, 18 Nov 2020 08:19:54 GMT
+
+_Version update only_
+
+## 0.5.14
+Wed, 18 Nov 2020 06:21:58 GMT
+
+_Version update only_
+
+## 0.5.13
+Tue, 17 Nov 2020 01:17:38 GMT
+
+_Version update only_
+
+## 0.5.12
+Mon, 16 Nov 2020 01:57:58 GMT
+
+_Version update only_
+
+## 0.5.11
+Fri, 13 Nov 2020 01:11:01 GMT
+
+_Version update only_
+
+## 0.5.10
+Thu, 12 Nov 2020 01:11:10 GMT
+
+_Version update only_
+
+## 0.5.9
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 0.5.8
+Tue, 10 Nov 2020 23:13:11 GMT
+
+_Version update only_
+
+## 0.5.7
+Tue, 10 Nov 2020 16:11:42 GMT
+
+_Version update only_
+
+## 0.5.6
+Sun, 08 Nov 2020 22:52:49 GMT
+
+_Version update only_
+
+## 0.5.5
+Fri, 06 Nov 2020 16:09:30 GMT
+
+_Version update only_
 
 ## 0.5.4
 Tue, 03 Nov 2020 01:11:19 GMT

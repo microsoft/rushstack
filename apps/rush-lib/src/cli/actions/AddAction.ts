@@ -11,8 +11,7 @@ import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { DependencySpecifier } from '../../logic/DependencySpecifier';
 
-// TODO: Convert this to "import type" after we upgrade to TypeScript 3.8
-import * as PackageJsonUpdaterTypes from '../../logic/PackageJsonUpdater';
+import type * as PackageJsonUpdaterTypes from '../../logic/PackageJsonUpdater';
 const packageJsonUpdaterModule: typeof PackageJsonUpdaterTypes = Import.lazy(
   '../../logic/PackageJsonUpdater',
   require
@@ -156,13 +155,13 @@ export class AddAction extends BaseRushAction {
         );
       }
 
-      rangeStyle = PackageJsonUpdaterTypes.SemVerStyle.Passthrough;
+      rangeStyle = packageJsonUpdaterModule.SemVerStyle.Passthrough;
     } else {
       rangeStyle = this._caretFlag.value
-        ? PackageJsonUpdaterTypes.SemVerStyle.Caret
+        ? packageJsonUpdaterModule.SemVerStyle.Caret
         : this._exactFlag.value
-        ? PackageJsonUpdaterTypes.SemVerStyle.Exact
-        : PackageJsonUpdaterTypes.SemVerStyle.Tilde;
+        ? packageJsonUpdaterModule.SemVerStyle.Exact
+        : packageJsonUpdaterModule.SemVerStyle.Tilde;
     }
 
     await updater.doRushAdd({

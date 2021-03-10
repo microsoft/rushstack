@@ -1,6 +1,54 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 30 Oct 2020 06:38:38 GMT and should not be manually modified.
+This log was last generated on Thu, 04 Mar 2021 01:11:31 GMT and should not be manually modified.
+
+## 7.13.2
+Thu, 04 Mar 2021 01:11:31 GMT
+
+_Version update only_
+
+## 7.13.1
+Fri, 05 Feb 2021 16:10:42 GMT
+
+_Version update only_
+
+## 7.13.0
+Wed, 13 Jan 2021 01:11:06 GMT
+
+### Minor changes
+
+- Upgrade the bundled compiler engine to TypeScript 4.1
+
+## 7.12.1
+Thu, 10 Dec 2020 23:25:49 GMT
+
+### Patches
+
+- Upgrade to TSDoc 0.12.24
+
+## 7.12.0
+Wed, 18 Nov 2020 08:19:54 GMT
+
+### Minor changes
+
+- The "isOptional" .api.json field is now applied to both methods and properties
+
+## 7.11.5
+Wed, 18 Nov 2020 06:21:57 GMT
+
+### Patches
+
+- Update .api.json file format to store a new field "isOptional" for documenting optional properties
+
+## 7.11.4
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 7.11.3
+Tue, 10 Nov 2020 23:13:12 GMT
+
+_Version update only_
 
 ## 7.11.2
 Fri, 30 Oct 2020 06:38:38 GMT

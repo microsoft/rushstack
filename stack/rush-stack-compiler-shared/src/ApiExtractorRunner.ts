@@ -63,72 +63,66 @@ export class ApiExtractorRunner extends RushStackCompilerBase {
     this._extractorOptions = extractorOptions;
   }
 
-  public invoke(): Promise<void> {
-    try {
-      const extractorOptions: ApiExtractor.IExtractorInvokeOptions = {
-        ...this._extractorOptions,
-        messageCallback: (message: ApiExtractor.ExtractorMessage) => {
-          switch (message.logLevel) {
-            case ApiExtractor.ExtractorLogLevel.Error: {
-              if (message.sourceFilePath) {
-                this._fileError(
-                  message.sourceFilePath,
-                  message.sourceFileLine!,
-                  message.sourceFileColumn!,
-                  message.category,
-                  message.text
-                );
-              } else {
-                this._terminal.writeErrorLine(message.text);
-              }
-
-              break;
+  public async invoke(): Promise<void> {
+    const extractorOptions: ApiExtractor.IExtractorInvokeOptions = {
+      ...this._extractorOptions,
+      messageCallback: (message: ApiExtractor.ExtractorMessage) => {
+        switch (message.logLevel) {
+          case ApiExtractor.ExtractorLogLevel.Error: {
+            if (message.sourceFilePath) {
+              this._fileError(
+                message.sourceFilePath,
+                message.sourceFileLine!,
+                message.sourceFileColumn!,
+                message.category,
+                message.text
+              );
+            } else {
+              this._terminal.writeErrorLine(message.text);
             }
 
-            case ApiExtractor.ExtractorLogLevel.Warning: {
-              if (message.sourceFilePath) {
-                this._fileWarning(
-                  message.sourceFilePath,
-                  message.sourceFileLine!,
-                  message.sourceFileColumn!,
-                  message.category,
-                  message.text
-                );
-              } else {
-                this._terminal.writeWarningLine(message.text);
-              }
-              break;
-            }
-
-            case ApiExtractor.ExtractorLogLevel.Info: {
-              this._terminal.writeLine(message.text);
-              break;
-            }
-
-            case ApiExtractor.ExtractorLogLevel.Verbose: {
-              this._terminal.writeVerboseLine(message.text);
-              break;
-            }
-
-            default: {
-              return;
-            }
+            break;
           }
-          message.handled = true;
+
+          case ApiExtractor.ExtractorLogLevel.Warning: {
+            if (message.sourceFilePath) {
+              this._fileWarning(
+                message.sourceFilePath,
+                message.sourceFileLine!,
+                message.sourceFileColumn!,
+                message.category,
+                message.text
+              );
+            } else {
+              this._terminal.writeWarningLine(message.text);
+            }
+            break;
+          }
+
+          case ApiExtractor.ExtractorLogLevel.Info: {
+            this._terminal.writeLine(message.text);
+            break;
+          }
+
+          case ApiExtractor.ExtractorLogLevel.Verbose: {
+            this._terminal.writeVerboseLine(message.text);
+            break;
+          }
+
+          default: {
+            return;
+          }
         }
-        // In the past we configured API Extractor to use the TypeScript runtime declarations from
-        // the local compiler, however lately it seems to work better without this option.
-        //
-        // typescriptCompilerFolder: ToolPaths.typescriptPackagePath
-      };
+        message.handled = true;
+      }
+      // In the past we configured API Extractor to use the TypeScript runtime declarations from
+      // the local compiler, however lately it seems to work better without this option.
+      //
+      // typescriptCompilerFolder: ToolPaths.typescriptPackagePath
+    };
 
-      // NOTE: ExtractorResult.succeeded indicates whether errors or warnings occurred, however we
-      // already handle this above via our customLogger
-      ApiExtractor.Extractor.invoke(this._extractorConfig, extractorOptions);
-
-      return Promise.resolve();
-    } catch (e) {
-      return Promise.reject(e);
-    }
+    // NOTE: ExtractorResult.succeeded indicates whether errors or warnings occurred, however we
+    // already handle this above via our customLogger
+    ApiExtractor.Extractor.invoke(this._extractorConfig, extractorOptions);
   }
 }

@@ -34,6 +34,12 @@ export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> {
  * @public
  */
 export class TypingsGenerator {
+  // Map of target file path -> Set<dependency file path>
+  private _targetMap: Map<string, Set<string>>;
+
+  // Map of dependency file path -> Set<target file path>
+  private _dependencyMap: Map<string, Set<string>>;
+
   protected _options: ITypingsGeneratorOptions;
 
   public constructor(options: ITypingsGeneratorOptions) {
@@ -70,6 +76,10 @@ export class TypingsGenerator {
     }
 
     this._options.fileExtensions = this._normalizeFileExtensions(this._options.fileExtensions);
+
+    this._targetMap = new Map();
+
+    this._dependencyMap = new Map();
   }
 
   public async generateTypingsAsync(): Promise<void> {
@@ -100,7 +110,7 @@ export class TypingsGenerator {
   }
 
   public async runWatcherAsync(): Promise<void> {
-    await FileSystem.ensureEmptyFolderAsync(this._options.generatedTsFolder);
+    await FileSystem.ensureFolderAsync(this._options.generatedTsFolder);
 
     const globBase: string = path.resolve(this._options.srcFolder, '**');
 
@@ -121,7 +131,37 @@ export class TypingsGenerator {
     });
   }
 
+  /**
+   * Register file dependencies that may effect the typings of a target file.
+   * Note: This feature is only useful in watch mode.
+   * The registerDependency method must be called in the body of parseAndGenerateTypings every
+   * time because the registry for a file is cleared at the beginning of processing.
+   */
+  public registerDependency(target: string, dependency: string): void {
+    let targetDependencySet: Set<string> | undefined = this._targetMap.get(target);
+    if (!targetDependencySet) {
+      targetDependencySet = new Set();
+      this._targetMap.set(target, targetDependencySet);
+    }
+    targetDependencySet.add(dependency);
+
+    let dependencyTargetSet: Set<string> | undefined = this._dependencyMap.get(dependency);
+    if (!dependencyTargetSet) {
+      dependencyTargetSet = new Set();
+      this._dependencyMap.set(dependency, dependencyTargetSet);
+    }
+    dependencyTargetSet.add(target);
+  }
+
   private async _parseFileAndGenerateTypingsAsync(locFilePath: string): Promise<void> {
+    // Clear registered dependencies prior to reprocessing.
+    this._clearDependencies(locFilePath);
+
+    // Check for targets that register this file as a dependency, and reprocess them too.
+    for (const target of this._getDependencyTargets(locFilePath)) {
+      await this._parseFileAndGenerateTypingsAsync(target);
+    }
+
     try {
       const fileContents: string = await FileSystem.readFileAsync(locFilePath);
       const typingsData: string | undefined = await this._options.parseAndGenerateTypings(
@@ -150,6 +190,20 @@ export class TypingsGenerator {
         `Error occurred parsing and generating typings for file "${locFilePath}": ${e}`
       );
     }
+  }
+
+  private _clearDependencies(target: string): void {
+    const targetDependencySet: Set<string> | undefined = this._targetMap.get(target);
+    if (targetDependencySet) {
+      for (const dependency of targetDependencySet) {
+        this._dependencyMap.get(dependency)!.delete(target);
+      }
+      targetDependencySet.clear();
+    }
+  }
+
+  private _getDependencyTargets(dependency: string): string[] {
+    return [...(this._dependencyMap.get(dependency)?.keys() || [])];
   }
 
   private _getTypingsFilePath(locFilePath: string): string {

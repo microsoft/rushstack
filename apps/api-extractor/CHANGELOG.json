@@ -2,6 +2,147 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.13.2",
+      "tag": "@microsoft/api-extractor_v7.13.2",
+      "date": "Thu, 04 Mar 2021 01:11:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.2.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.13.1",
+      "tag": "@microsoft/api-extractor_v7.13.1",
+      "date": "Fri, 05 Feb 2021 16:10:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.12.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.36.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.13.0",
+      "tag": "@microsoft/api-extractor_v7.13.0",
+      "date": "Wed, 13 Jan 2021 01:11:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade the bundled compiler engine to TypeScript 4.1"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.12.1",
+      "tag": "@microsoft/api-extractor_v7.12.1",
+      "date": "Thu, 10 Dec 2020 23:25:49 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade to TSDoc 0.12.24"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.12.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.35.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.2.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.7.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.3.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.12.0",
+      "tag": "@microsoft/api-extractor_v7.12.0",
+      "date": "Wed, 18 Nov 2020 08:19:54 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "The \"isOptional\" .api.json field is now applied to both methods and properties"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.12.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.11.5",
+      "tag": "@microsoft/api-extractor_v7.11.5",
+      "date": "Wed, 18 Nov 2020 06:21:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update .api.json file format to store a new field \"isOptional\" for documenting optional properties"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.11.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.11.4",
+      "tag": "@microsoft/api-extractor_v7.11.4",
+      "date": "Wed, 11 Nov 2020 01:08:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.10.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.35.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.2.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.7.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.11.3",
+      "tag": "@microsoft/api-extractor_v7.11.3",
+      "date": "Tue, 10 Nov 2020 23:13:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.10.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.35.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.11.2",
       "tag": "@microsoft/api-extractor_v7.11.2",
       "date": "Fri, 30 Oct 2020 06:38:38 GMT",

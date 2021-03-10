@@ -5,8 +5,6 @@ import * as child_process from 'child_process';
 import * as path from 'path';
 import { Executable } from '@rushstack/node-core-library';
 
-import { IPackageDeps } from './IPackageDeps';
-
 /**
  * Parses a quoted filename sourced from the output of the "git status" command.
  *
@@ -58,7 +56,8 @@ export function parseGitLsTree(output: string): Map<string, string> {
     const gitRegex: RegExp = /([0-9]{6})\s(blob|commit)\s([a-f0-9]{40})\s*(.*)/;
 
     // Note: The output of git ls-tree uses \n newlines regardless of OS.
-    output.split('\n').forEach((line) => {
+    const outputLines: string[] = output.trim().split('\n');
+    for (const line of outputLines) {
       if (line) {
         // Take everything after the "100644 blob", which is just the hash and filename
         const matches: RegExpMatchArray | null = line.match(gitRegex);
@@ -71,7 +70,7 @@ export function parseGitLsTree(output: string): Map<string, string> {
           throw new Error(`Cannot parse git ls-tree input: "${line}"`);
         }
       }
-    });
+    }
   }
 
   return changes;
@@ -96,40 +95,38 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
   }
 
   // Note: The output of git hash-object uses \n newlines regardless of OS.
-  output
-    .trim()
-    .split('\n')
-    .forEach((line) => {
-      /*
-       * changeType is in the format of "XY" where "X" is the status of the file in the index and "Y" is the status of
-       * the file in the working tree. Some example statuses:
-       *   - 'D' == deletion
-       *   - 'M' == modification
-       *   - 'A' == addition
-       *   - '??' == untracked
-       *   - 'R' == rename
-       *   - 'RM' == rename with modifications
-       *   - '[MARC]D' == deleted in work tree
-       * Full list of examples: https://git-scm.com/docs/git-status#_short_format
-       */
-      const match: RegExpMatchArray | null = line.match(/("(\\"|[^"])+")|(\S+\s*)/g);
+  const outputLines: string[] = output.trim().split('\n');
+  for (const line of outputLines) {
+    /*
+     * changeType is in the format of "XY" where "X" is the status of the file in the index and "Y" is the status of
+     * the file in the working tree. Some example statuses:
+     *   - 'D' == deletion
+     *   - 'M' == modification
+     *   - 'A' == addition
+     *   - '??' == untracked
+     *   - 'R' == rename
+     *   - 'RM' == rename with modifications
+     *   - '[MARC]D' == deleted in work tree
+     * Full list of examples: https://git-scm.com/docs/git-status#_short_format
+     */
+    const match: RegExpMatchArray | null = line.match(/("(\\"|[^"])+")|(\S+\s*)/g);
 
-      if (match && match.length > 1) {
-        const [changeType, ...filenameMatches] = match;
+    if (match && match.length > 1) {
+      const [changeType, ...filenameMatches] = match;
 
-        // We always care about the last filename in the filenames array. In the case of non-rename changes,
-        // the filenames array only contains one file, so we can join all segments that were split on spaces.
-        // In the case of rename changes, the last item in the array is the path to the file in the working tree,
-        // which is the only one that we care about. It is also surrounded by double-quotes if spaces are
-        // included, so no need to worry about joining different segments
-        let lastFilename: string = changeType.startsWith('R')
-          ? filenameMatches[filenameMatches.length - 1]
-          : filenameMatches.join('');
-        lastFilename = parseGitFilename(lastFilename);
+      // We always care about the last filename in the filenames array. In the case of non-rename changes,
+      // the filenames array only contains one file, so we can join all segments that were split on spaces.
+      // In the case of rename changes, the last item in the array is the path to the file in the working tree,
+      // which is the only one that we care about. It is also surrounded by double-quotes if spaces are
+      // included, so no need to worry about joining different segments
+      let lastFilename: string = changeType.startsWith('R')
+        ? filenameMatches[filenameMatches.length - 1]
+        : filenameMatches.join('');
+      lastFilename = parseGitFilename(lastFilename);
 
-        changes.set(lastFilename, changeType.trimRight());
-      }
-    });
+      changes.set(lastFilename, changeType.trimRight());
+    }
+  }
 
   return changes;
 }
@@ -139,14 +136,18 @@ export function parseGitStatus(output: string, packagePath: string): Map<string,
  *
  * @public
  */
-export function getGitHashForFiles(filesToHash: string[], packagePath: string): Map<string, string> {
+export function getGitHashForFiles(
+  filesToHash: string[],
+  packagePath: string,
+  gitPath?: string
+): Map<string, string> {
   const changes: Map<string, string> = new Map<string, string>();
 
   if (filesToHash.length) {
     // Use --stdin-paths arg to pass the list of files to git in order to avoid issues with
     // command length
     const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
-      'git',
+      gitPath || 'git',
       ['hash-object', '--stdin-paths'],
       { input: filesToHash.map((x) => path.resolve(packagePath, x)).join('\n') }
     );
@@ -179,9 +180,9 @@ export function getGitHashForFiles(filesToHash: string[], packagePath: string): 
 /**
  * Executes "git ls-tree" in a folder
  */
-export function gitLsTree(path: string): string {
+export function gitLsTree(path: string, gitPath?: string): string {
   const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
-    'git',
+    gitPath || 'git',
     ['ls-tree', 'HEAD', '-r'],
     {
       currentWorkingDirectory: path
@@ -198,7 +199,7 @@ export function gitLsTree(path: string): string {
 /**
  * Executes "git status" in a folder
  */
-export function gitStatus(path: string): string {
+export function gitStatus(path: string, gitPath?: string): string {
   /**
    * -s - Short format. Will be printed as 'XY PATH' or 'XY ORIG_PATH -> PATH'. Paths with non-standard
    *      characters will be escaped using double-quotes, and non-standard characters will be backslash
@@ -208,7 +209,7 @@ export function gitStatus(path: string): string {
    * See documentation here: https://git-scm.com/docs/git-status
    */
   const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(
-    'git',
+    gitPath || 'git',
     ['status', '-s', '-u', '.'],
     {
       currentWorkingDirectory: path
@@ -232,47 +233,47 @@ export function gitStatus(path: string): string {
  *
  * @public
  */
-export function getPackageDeps(packagePath: string = process.cwd(), excludedPaths?: string[]): IPackageDeps {
-  const excludedHashes: { [key: string]: boolean } = {};
-
-  if (excludedPaths) {
-    excludedPaths.forEach((path) => {
-      excludedHashes[path] = true;
-    });
-  }
-
-  const changes: IPackageDeps = {
-    files: {}
-  };
-
-  const gitLsOutput: string = gitLsTree(packagePath);
+export function getPackageDeps(
+  packagePath: string = process.cwd(),
+  excludedPaths?: string[],
+  gitPath?: string
+): Map<string, string> {
+  const gitLsOutput: string = gitLsTree(packagePath, gitPath);
 
   // Add all the checked in hashes
-  parseGitLsTree(gitLsOutput).forEach((hash: string, filename: string) => {
-    if (!excludedHashes[filename]) {
-      changes.files[filename] = hash;
+  const result: Map<string, string> = parseGitLsTree(gitLsOutput);
+
+  // Remove excluded paths
+  if (excludedPaths) {
+    for (const excludedPath of excludedPaths) {
+      result.delete(excludedPath);
     }
-  });
+  }
 
   // Update the checked in hashes with the current repo status
-  const gitStatusOutput: string = gitStatus(packagePath);
+  const gitStatusOutput: string = gitStatus(packagePath, gitPath);
   const currentlyChangedFiles: Map<string, string> = parseGitStatus(gitStatusOutput, packagePath);
-
   const filesToHash: string[] = [];
-  currentlyChangedFiles.forEach((changeType: string, filename: string) => {
+  const excludedPathSet: Set<string> = new Set<string>(excludedPaths);
+  for (const [filename, changeType] of currentlyChangedFiles) {
     // See comments inside parseGitStatus() for more information
     if (changeType === 'D' || (changeType.length === 2 && changeType.charAt(1) === 'D')) {
-      delete changes.files[filename];
+      result.delete(filename);
     } else {
-      if (!excludedHashes[filename]) {
+      if (!excludedPathSet.has(filename)) {
         filesToHash.push(filename);
       }
     }
-  });
+  }
 
-  getGitHashForFiles(filesToHash, packagePath).forEach((hash: string, filename: string) => {
-    changes.files[filename] = hash;
-  });
+  const currentlyChangedFileHashes: Map<string, string> = getGitHashForFiles(
+    filesToHash,
+    packagePath,
+    gitPath
+  );
+  for (const [filename, hash] of currentlyChangedFileHashes) {
+    result.set(filename, hash);
+  }
 
-  return changes;
+  return result;
 }

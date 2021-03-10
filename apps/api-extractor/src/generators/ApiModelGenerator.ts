@@ -636,12 +636,15 @@ export class ApiModelGenerator {
       if (releaseTag === ReleaseTag.Internal || releaseTag === ReleaseTag.Alpha) {
         return; // trim out items marked as "@internal" or "@alpha"
       }
+      const isOptional: boolean =
+        (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
 
       apiMethod = new ApiMethod({
         name,
         docComment,
         releaseTag,
         isStatic,
+        isOptional,
         typeParameters,
         parameters,
         overloadIndex,
@@ -689,11 +692,14 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isOptional: boolean =
+        (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
 
       apiMethodSignature = new ApiMethodSignature({
         name,
         docComment,
         releaseTag,
+        isOptional,
         typeParameters,
         parameters,
         overloadIndex,
@@ -755,12 +761,15 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isOptional: boolean =
+        (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
 
       apiProperty = new ApiProperty({
         name,
         docComment,
         releaseTag,
         isStatic,
+        isOptional,
         excerptTokens,
         propertyTypeTokenRange
       });
@@ -795,11 +804,14 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isOptional: boolean =
+        (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
 
       apiPropertySignature = new ApiPropertySignature({
         name,
         docComment,
         releaseTag,
+        isOptional,
         excerptTokens,
         propertyTypeTokenRange
       });

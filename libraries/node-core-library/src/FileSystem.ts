@@ -105,10 +105,9 @@ export interface IFileSystemMoveOptions {
 }
 
 /**
- * The options for {@link FileSystem.copyFile}
  * @public
  */
-export interface IFileSystemCopyFileOptions {
+export interface IFileSystemCopyFileBaseOptions {
   /**
    * The path of the existing object to be copied.
    * The path may be absolute or relative.
@@ -116,16 +115,34 @@ export interface IFileSystemCopyFileOptions {
   sourcePath: string;
 
   /**
-   * The path that the object will be copied to.
-   * The path may be absolute or relative.
-   */
-  destinationPath: string;
-
-  /**
    * Specifies what to do if the target object already exists.
    * @defaultValue {@link AlreadyExistsBehavior.Overwrite}
    */
   alreadyExistsBehavior?: AlreadyExistsBehavior;
+}
+
+/**
+ * The options for {@link FileSystem.copyFile}
+ * @public
+ */
+export interface IFileSystemCopyFileOptions extends IFileSystemCopyFileBaseOptions {
+  /**
+   * The path that the object will be copied to.
+   * The path may be absolute or relative.
+   */
+  destinationPath: string;
+}
+
+/**
+ * The options for {@link FileSystem.copyFile}
+ * @public
+ */
+export interface IFileSystemCopyFileToManyOptions extends IFileSystemCopyFileBaseOptions {
+  /**
+   * The path that the object will be copied to.
+   * The path may be absolute or relative.
+   */
+  destinationPaths: string[];
 }
 
 /**
@@ -260,6 +277,11 @@ export interface IFileSystemCreateLinkOptions {
    * The new path for the new symlink link to be created.
    */
   newLinkPath: string;
+
+  /**
+   * Specifies what to do if the target object already exists. Defaults to `AlreadyExistsBehavior.Error`.
+   */
+  alreadyExistsBehavior?: AlreadyExistsBehavior;
 }
 
 const MOVE_DEFAULT_OPTIONS: Partial<IFileSystemMoveOptions> = {
@@ -912,6 +934,100 @@ export class FileSystem {
   }
 
   /**
+   * Copies a single file from one location to one or more other locations.
+   * By default, the file at the destination is overwritten if it already exists.
+   *
+   * @remarks
+   * The `copyFileToManyAsync()` API cannot be used to copy folders.  It copies at most one file.
+   *
+   * The implementation is based on `createReadStream()` and `createWriteStream()` from the
+   * `fs-extra` package.
+   */
+  public static async copyFileToManyAsync(options: IFileSystemCopyFileToManyOptions): Promise<void> {
+    options = {
+      ...COPY_FILE_DEFAULT_OPTIONS,
+      ...options
+    };
+
+    if (FileSystem.getStatistics(options.sourcePath).isDirectory()) {
+      throw new Error(
+        'The specified path refers to a folder; this operation expects a file path:\n' + options.sourcePath
+      );
+    }
+
+    await FileSystem._wrapExceptionAsync(async () => {
+      // See flags documentation: https://nodejs.org/api/fs.html#fs_file_system_flags
+      const writeFlags: string[] = [];
+      switch (options.alreadyExistsBehavior) {
+        case AlreadyExistsBehavior.Error:
+        case AlreadyExistsBehavior.Ignore:
+          writeFlags.push('wx');
+          break;
+        case AlreadyExistsBehavior.Overwrite:
+        default:
+          writeFlags.push('w');
+      }
+      const flags: string = writeFlags.join();
+
+      const createPipePromise: (sourceStream: fs.ReadStream, destinationPath: string) => Promise<void> = (
+        sourceStream: fs.ReadStream,
+        destinationPath: string
+      ) => {
+        return new Promise((resolve: () => void, reject: (error: Error) => void) => {
+          const destinationStream: fs.WriteStream = fs.createWriteStream(destinationPath);
+          const streamsToDestroy: fs.WriteStream[] = [destinationStream];
+          sourceStream.on('error', (e: Error) => {
+            for (const streamToDestroy of streamsToDestroy) {
+              streamToDestroy.destroy();
+            }
+            reject(e);
+          });
+          sourceStream
+            .pipe(destinationStream)
+            .on('close', () => {
+              resolve();
+            })
+            .on('error', (e: Error) => {
+              if (FileSystem.isNotExistError(e)) {
+                destinationStream.destroy();
+                FileSystem.ensureFolder(nodeJsPath.dirname(destinationStream.path as string));
+                const retryDestinationStream: fs.WriteStream = fsx.createWriteStream(destinationPath, {
+                  flags
+                });
+                streamsToDestroy.push(retryDestinationStream);
+                sourceStream
+                  .pipe(retryDestinationStream)
+                  .on('close', () => {
+                    resolve();
+                  })
+                  .on('error', (e2: Error) => {
+                    reject(e2);
+                  });
+              } else if (
+                options.alreadyExistsBehavior === AlreadyExistsBehavior.Ignore &&
+                FileSystem.isErrnoException(e) &&
+                e.code === 'EEXIST'
+              ) {
+                resolve();
+              } else {
+                reject(e);
+              }
+            });
+        });
+      };
+
+      const sourceStream: fs.ReadStream = fsx.createReadStream(options.sourcePath);
+      const uniqueDestinationPaths: Set<string> = new Set(options.destinationPaths);
+      const pipePromises: Promise<void>[] = [];
+      for (const destinationPath of uniqueDestinationPaths) {
+        pipePromises.push(createPipePromise(sourceStream, destinationPath));
+      }
+
+      await Promise.all(pipePromises);
+    });
+  }
+
+  /**
    * Copies a file or folder from one location to another, recursively copying any folder contents.
    * By default, destinationPath is overwritten if it already exists.
    *
@@ -1119,7 +1235,30 @@ export class FileSystem {
    */
   public static createHardLink(options: IFileSystemCreateLinkOptions): void {
     FileSystem._wrapException(() => {
-      fsx.linkSync(options.linkTargetPath, options.newLinkPath);
+      try {
+        fsx.linkSync(options.linkTargetPath, options.newLinkPath);
+      } catch (error) {
+        if (error.code === 'EEXIST') {
+          switch (options.alreadyExistsBehavior) {
+            case AlreadyExistsBehavior.Ignore:
+              return;
+            case AlreadyExistsBehavior.Overwrite:
+              this.deleteFile(options.newLinkPath);
+              break;
+            case AlreadyExistsBehavior.Error:
+            default:
+              throw error;
+          }
+        } else {
+          const linkTargetExists: boolean = FileSystem.exists(options.linkTargetPath);
+          if (FileSystem.isNotExistError(error) && linkTargetExists) {
+            this.ensureFolder(nodeJsPath.dirname(options.newLinkPath));
+            this.createHardLink(options);
+          } else {
+            throw error;
+          }
+        }
+      }
     });
   }
 
@@ -1127,8 +1266,31 @@ export class FileSystem {
    * An async version of {@link FileSystem.createHardLink}.
    */
   public static async createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    await FileSystem._wrapExceptionAsync(() => {
-      return fsx.link(options.linkTargetPath, options.newLinkPath);
+    await FileSystem._wrapExceptionAsync(async () => {
+      try {
+        await fsx.link(options.linkTargetPath, options.newLinkPath);
+      } catch (error) {
+        if (error.code === 'EEXIST') {
+          switch (options.alreadyExistsBehavior) {
+            case AlreadyExistsBehavior.Ignore:
+              return;
+            case AlreadyExistsBehavior.Overwrite:
+              await this.deleteFileAsync(options.newLinkPath);
+              break;
+            case AlreadyExistsBehavior.Error:
+            default:
+              throw error;
+          }
+        } else {
+          const linkTargetExists: boolean = await FileSystem.exists(options.linkTargetPath);
+          if (FileSystem.isNotExistError(error) && linkTargetExists) {
+            await this.ensureFolderAsync(nodeJsPath.dirname(options.newLinkPath));
+            await this.createHardLinkAsync(options);
+          } else {
+            throw error;
+          }
+        }
+      }
     });
   }
 

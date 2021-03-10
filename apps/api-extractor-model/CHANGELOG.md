@@ -1,6 +1,42 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Fri, 30 Oct 2020 06:38:39 GMT and should not be manually modified.
+This log was last generated on Fri, 05 Feb 2021 16:10:42 GMT and should not be manually modified.
+
+## 7.12.2
+Fri, 05 Feb 2021 16:10:42 GMT
+
+_Version update only_
+
+## 7.12.1
+Thu, 10 Dec 2020 23:25:49 GMT
+
+### Patches
+
+- Enable support for @decorator
+
+## 7.12.0
+Wed, 18 Nov 2020 08:19:54 GMT
+
+### Minor changes
+
+- Introduce an ApiOptionalMixin base class for representing optional properties and methods
+
+## 7.11.0
+Wed, 18 Nov 2020 06:21:57 GMT
+
+### Minor changes
+
+- Update .api.json file format to store a new field "isOptional" for documenting optional properties
+
+## 7.10.10
+Wed, 11 Nov 2020 01:08:59 GMT
+
+_Version update only_
+
+## 7.10.9
+Tue, 10 Nov 2020 23:13:12 GMT
+
+_Version update only_
 
 ## 7.10.8
 Fri, 30 Oct 2020 06:38:39 GMT

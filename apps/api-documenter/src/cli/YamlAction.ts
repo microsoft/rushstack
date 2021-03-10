@@ -42,7 +42,7 @@ export class YamlAction extends BaseAction {
     });
   }
 
-  protected onExecute(): Promise<void> {
+  protected async onExecute(): Promise<void> {
     // override
     const { apiModel, inputFolder, outputFolder } = this.buildApiModel();
 
@@ -51,6 +51,5 @@ export class YamlAction extends BaseAction {
       : new YamlDocumenter(apiModel, this._newDocfxNamespacesParameter.value);
 
     yamlDocumenter.generateFiles(outputFolder);
-    return Promise.resolve();
   }
 }

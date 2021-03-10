@@ -6,7 +6,7 @@ import * as webpack from 'webpack';
 import { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
 
 import { StageBase, StageHooksBase, IStageContext } from './StageBase';
-import { Logging } from '../utilities/Logging';
+import { IFinishedWords, Logging } from '../utilities/Logging';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import {
   CommandLineAction,
@@ -42,16 +42,6 @@ export type CopyFromCacheMode = 'hardlink' | 'copy';
 /**
  * @public
  */
-export class CompileSubstageHooks extends BuildSubstageHooksBase {
-  /**
-   * @internal
-   */
-  public readonly afterTypescriptFirstEmit: AsyncParallelHook = new AsyncParallelHook();
-}
-
-/**
- * @public
- */
 export interface IWebpackConfigurationWithDevServer extends webpack.Configuration {
   devServer?: WebpackDevServerConfiguration;
 }
@@ -68,9 +58,9 @@ export type IWebpackConfiguration =
  * @public
  */
 export class BundleSubstageHooks extends BuildSubstageHooksBase {
-  public readonly configureWebpack: AsyncSeriesWaterfallHook<
-    IWebpackConfiguration
-  > = new AsyncSeriesWaterfallHook<IWebpackConfiguration>(['webpackConfiguration']);
+  public readonly configureWebpack: AsyncSeriesWaterfallHook<IWebpackConfiguration> = new AsyncSeriesWaterfallHook<IWebpackConfiguration>(
+    ['webpackConfiguration']
+  );
   public readonly afterConfigureWebpack: AsyncSeriesHook = new AsyncSeriesHook();
 }
 
@@ -102,7 +92,8 @@ export interface IPreCompileSubstage extends IBuildSubstage<BuildSubstageHooksBa
 /**
  * @public
  */
-export interface ICompileSubstage extends IBuildSubstage<CompileSubstageHooks, ICompileSubstageProperties> {}
+export interface ICompileSubstage
+  extends IBuildSubstage<BuildSubstageHooksBase, ICompileSubstageProperties> {}
 
 /**
  * @public
@@ -166,6 +157,17 @@ export interface IBuildStageStandardParameters {
   typescriptMaxWriteParallelismParameter: CommandLineIntegerParameter;
   maxOldSpaceSizeParameter: CommandLineStringParameter;
 }
+
+interface IRunSubstageWithLoggingOptions {
+  buildStageName: string;
+  buildStage: IBuildSubstage<BuildSubstageHooksBase, object>;
+  watchMode: boolean;
+}
+
+const WATCH_MODE_FINISHED_LOGGING_WORDS: IFinishedWords = {
+  success: 'ready to continue',
+  failure: 'continuing with errors'
+};
 
 export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties, IBuildStageOptions> {
   public constructor(heftConfiguration: HeftConfiguration, loggingManager: LoggingManager) {
@@ -240,7 +242,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
     this.stageHooks.preCompile.call(preCompileSubstage);
 
     const compileStage: ICompileSubstage = {
-      hooks: new CompileSubstageHooks(),
+      hooks: new BuildSubstageHooksBase(),
       properties: {
         typescriptMaxWriteParallelism: this.stageOptions.typescriptMaxWriteParallelism
       }
@@ -259,65 +261,58 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
     };
     this.stageHooks.postBuild.call(postBuildStage);
 
-    if (this.stageProperties.watchMode) {
-      // In --watch mode, run all configuration upfront and then kick off all stages
-      // concurrently with the expectation that the their promises will never resolve
-      // and that they will handle watching filesystem changes
+    const watchMode: boolean = this.stageProperties.watchMode;
 
-      await bundleStage.hooks.configureWebpack
-        .promise(undefined)
-        .then((webpackConfiguration) => (bundleStage.properties.webpackConfiguration = webpackConfiguration));
-      await bundleStage.hooks.afterConfigureWebpack.promise();
+    await this._runSubstageWithLoggingAsync({
+      buildStageName: 'Pre-compile',
+      buildStage: preCompileSubstage,
+      watchMode: watchMode
+    });
 
-      compileStage.hooks.afterTypescriptFirstEmit.tapPromise(
-        'build-stage',
-        async () =>
-          await Promise.all([
-            this._runSubstageWithLoggingAsync('Bundle', bundleStage),
-            this._runSubstageWithLoggingAsync('Post-build', postBuildStage)
-          ])
-      );
-
-      await Promise.all([
-        this._runSubstageWithLoggingAsync('Pre-compile', preCompileSubstage),
-        this._runSubstageWithLoggingAsync('Compile', compileStage)
-      ]);
-    } else {
-      await this._runSubstageWithLoggingAsync('Pre-compile', preCompileSubstage);
-
-      if (this.loggingManager.errorsHaveBeenEmitted) {
-        return;
-      }
-
-      await this._runSubstageWithLoggingAsync('Compile', compileStage);
-
-      if (this.loggingManager.errorsHaveBeenEmitted) {
-        return;
-      }
-
-      await bundleStage.hooks.configureWebpack
-        .promise(undefined)
-        .then((webpackConfiguration) => (bundleStage.properties.webpackConfiguration = webpackConfiguration));
-      await bundleStage.hooks.afterConfigureWebpack.promise();
-      await this._runSubstageWithLoggingAsync('Bundle', bundleStage);
-
-      if (this.loggingManager.errorsHaveBeenEmitted) {
-        return;
-      }
-
-      await this._runSubstageWithLoggingAsync('Post-build', postBuildStage);
+    if (this.loggingManager.errorsHaveBeenEmitted && !watchMode) {
+      return;
     }
+
+    await this._runSubstageWithLoggingAsync({
+      buildStageName: 'Compile',
+      buildStage: compileStage,
+      watchMode: watchMode
+    });
+
+    if (this.loggingManager.errorsHaveBeenEmitted && !watchMode) {
+      return;
+    }
+
+    bundleStage.properties.webpackConfiguration = await bundleStage.hooks.configureWebpack.promise(undefined);
+    await bundleStage.hooks.afterConfigureWebpack.promise();
+    await this._runSubstageWithLoggingAsync({
+      buildStageName: 'Bundle',
+      buildStage: bundleStage,
+      watchMode: watchMode
+    });
+
+    if (this.loggingManager.errorsHaveBeenEmitted && !watchMode) {
+      return;
+    }
+
+    await this._runSubstageWithLoggingAsync({
+      buildStageName: 'Post-build',
+      buildStage: postBuildStage,
+      watchMode: watchMode
+    });
   }
 
-  private async _runSubstageWithLoggingAsync(
-    buildStageName: string,
-    buildStage: IBuildSubstage<BuildSubstageHooksBase, object>
-  ): Promise<void> {
+  private async _runSubstageWithLoggingAsync({
+    buildStageName,
+    buildStage,
+    watchMode
+  }: IRunSubstageWithLoggingOptions): Promise<void> {
     if (buildStage.hooks.run.isUsed()) {
       await Logging.runFunctionWithLoggingBoundsAsync(
         this.globalTerminal,
         buildStageName,
-        async () => await buildStage.hooks.run.promise()
+        async () => await buildStage.hooks.run.promise(),
+        watchMode ? WATCH_MODE_FINISHED_LOGGING_WORDS : undefined
       );
     }
   }

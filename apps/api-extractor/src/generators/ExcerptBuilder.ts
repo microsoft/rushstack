@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ExcerptTokenKind, IExcerptToken, IExcerptTokenRange } from '@microsoft/api-extractor-model';
 
 import { Span } from '../analyzer/Span';

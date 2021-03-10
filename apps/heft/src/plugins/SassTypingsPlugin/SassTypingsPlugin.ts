@@ -8,6 +8,7 @@ import { IBuildStageContext, IPreCompileSubstage } from '../../stages/BuildStage
 import { ISassConfiguration, SassTypingsGenerator } from './SassTypingsGenerator';
 import { CoreConfigFiles } from '../../utilities/CoreConfigFiles';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
+import { Async } from '../../utilities/Async';
 
 export interface ISassConfigurationJson extends ISassConfiguration {}
 
@@ -23,37 +24,42 @@ export class SassTypingsPlugin implements IHeftPlugin {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.preCompile.tap(PLUGIN_NAME, (preCompile: IPreCompileSubstage) => {
         preCompile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          await this._runSassTypingsGenerator(heftSession, heftConfiguration, build.properties.watchMode);
+          await this._runSassTypingsGeneratorAsync(
+            heftSession,
+            heftConfiguration,
+            build.properties.watchMode
+          );
         });
       });
     });
   }
 
-  private async _runSassTypingsGenerator(
+  private async _runSassTypingsGeneratorAsync(
     heftSession: HeftSession,
     heftConfiguration: HeftConfiguration,
     isWatchMode: boolean
   ): Promise<void> {
+    const logger: ScopedLogger = heftSession.requestScopedLogger('sass-typings-generator');
     const sassConfiguration: ISassConfiguration = await this._loadSassConfigurationAsync(
-      heftSession,
-      heftConfiguration
+      heftConfiguration,
+      logger
     );
     const sassTypingsGenerator: SassTypingsGenerator = new SassTypingsGenerator({
       buildFolder: heftConfiguration.buildFolder,
       sassConfiguration
     });
+
     await sassTypingsGenerator.generateTypingsAsync();
     if (isWatchMode) {
-      await sassTypingsGenerator.runWatcherAsync();
+      Async.runWatcherWithErrorHandling(async () => await sassTypingsGenerator.runWatcherAsync(), logger);
     }
   }
 
   private async _loadSassConfigurationAsync(
-    heftSession: HeftSession,
-    heftConfiguration: HeftConfiguration
+    heftConfiguration: HeftConfiguration,
+    logger: ScopedLogger
   ): Promise<ISassConfiguration> {
     const { buildFolder } = heftConfiguration;
-    const logger: ScopedLogger = heftSession.requestScopedLogger('sass-typings-plugin');
     const sassConfigurationJson:
       | ISassConfigurationJson
       | undefined = await CoreConfigFiles.sassConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(

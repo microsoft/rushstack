@@ -32,6 +32,7 @@ import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { ExperimentsConfiguration } from './ExperimentsConfiguration';
 import { PackageNameParsers } from './PackageNameParsers';
 import { RepoStateFile } from '../logic/RepoStateFile';
+import { LookupByPath } from '../logic/LookupByPath';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -42,17 +43,18 @@ const DEFAULT_REMOTE: string = 'origin';
  * To avoid confusion/mistakes, any extra files will be reported as an error.
  */
 const knownRushConfigFilenames: string[] = [
-  '.npmrc',
   '.npmrc-publish',
-  RushConstants.pinnedVersionsFilename,
-  RushConstants.commonVersionsFilename,
-  RushConstants.repoStateFilename,
+  '.npmrc',
+  'deploy.json',
+  RushConstants.artifactoryFilename,
   RushConstants.browserApprovedPackagesFilename,
-  RushConstants.nonbrowserApprovedPackagesFilename,
-  RushConstants.versionPoliciesFilename,
   RushConstants.commandLineFilename,
+  RushConstants.commonVersionsFilename,
   RushConstants.experimentsFilename,
-  'deploy.json'
+  RushConstants.nonbrowserApprovedPackagesFilename,
+  RushConstants.pinnedVersionsFilename,
+  RushConstants.repoStateFilename,
+  RushConstants.versionPoliciesFilename
 ];
 
 /**
@@ -70,6 +72,7 @@ export interface IRushGitPolicyJson {
   allowedEmailRegExps?: string[];
   sampleEmail?: string;
   versionBumpCommitMessage?: string;
+  changeLogUpdateCommitMessage?: string;
 }
 
 /**
@@ -458,6 +461,7 @@ export class RushConfiguration {
   private _ensureConsistentVersions: boolean;
   private _suppressNodeLtsWarning: boolean;
   private _variants: Set<string>;
+  private _projectByRelativePath: LookupByPath<RushConfigurationProject>;
 
   // "approvedPackagesPolicy" feature
   private _approvedPackagesPolicy: ApprovedPackagesPolicy;
@@ -466,6 +470,7 @@ export class RushConfiguration {
   private _gitAllowedEmailRegExps: string[];
   private _gitSampleEmail: string;
   private _gitVersionBumpCommitMessage: string | undefined;
+  private _gitChangeLogUpdateCommitMessage: string | undefined;
 
   // "hotfixChangeEnabled" feature
   private _hotfixChangeEnabled: boolean;
@@ -631,7 +636,8 @@ export class RushConfiguration {
     RushConfiguration._validateCommonRushConfigFolder(
       this._commonRushConfigFolder,
       this.packageManager,
-      this._shrinkwrapFilename
+      this._shrinkwrapFilename,
+      this._experimentsConfiguration
     );
 
     this._projectFolderMinDepth =
@@ -678,6 +684,10 @@ export class RushConfiguration {
       if (rushConfigurationJson.gitPolicy.versionBumpCommitMessage) {
         this._gitVersionBumpCommitMessage = rushConfigurationJson.gitPolicy.versionBumpCommitMessage;
       }
+
+      if (rushConfigurationJson.gitPolicy.changeLogUpdateCommitMessage) {
+        this._gitChangeLogUpdateCommitMessage = rushConfigurationJson.gitPolicy.changeLogUpdateCommitMessage;
+      }
     }
 
     this._hotfixChangeEnabled = false;
@@ -717,6 +727,13 @@ export class RushConfiguration {
         this._variants.add(variantName);
       }
     }
+
+    const pathTree: LookupByPath<RushConfigurationProject> = new LookupByPath<RushConfigurationProject>();
+    for (const project of this.projects) {
+      const relativePath: string = Path.convertToSlashes(project.projectRelativeFolder);
+      pathTree.setItem(relativePath, project);
+    }
+    this._projectByRelativePath = pathTree;
   }
 
   private _initializeAndValidateLocalProjects(): void {
@@ -767,6 +784,7 @@ export class RushConfiguration {
       // Compute the downstream dependencies within the list of Rush projects.
       this._populateDownstreamDependencies(project.packageJson.dependencies, project.packageName);
       this._populateDownstreamDependencies(project.packageJson.devDependencies, project.packageName);
+      this._populateDownstreamDependencies(project.packageJson.optionalDependencies, project.packageName);
       this._versionPolicyConfiguration.validate(this.projectsByName);
     }
   }
@@ -920,7 +938,8 @@ export class RushConfiguration {
   private static _validateCommonRushConfigFolder(
     commonRushConfigFolder: string,
     packageManager: PackageManagerName,
-    shrinkwrapFilename: string
+    shrinkwrapFilename: string,
+    experiments: ExperimentsConfiguration
   ): void {
     if (!FileSystem.exists(commonRushConfigFolder)) {
       console.log(`Creating folder: ${commonRushConfigFolder}`);
@@ -952,6 +971,11 @@ export class RushConfiguration {
       }
 
       const knownSet: Set<string> = new Set<string>(knownRushConfigFilenames.map((x) => x.toUpperCase()));
+
+      // If the buildCache experiment is enabled, add its configuration file
+      if (experiments.configuration.buildCache) {
+        knownSet.add(RushConstants.buildCacheFilename.toUpperCase());
+      }
 
       // Add the shrinkwrap filename for the package manager to the known set.
       knownSet.add(shrinkwrapFilename.toUpperCase());
@@ -1292,6 +1316,14 @@ export class RushConfiguration {
   }
 
   /**
+   * [Part of the "gitPolicy" feature.]
+   * The commit message to use when committing change log files 'rush version'
+   */
+  public get gitChangeLogUpdateCommitMessage(): string | undefined {
+    return this._gitChangeLogUpdateCommitMessage;
+  }
+
+  /**
    * [Part of the "hotfixChange" feature.]
    * Enables creating hotfix changes
    */
@@ -1581,6 +1613,15 @@ export class RushConfiguration {
   }
 
   /**
+   * Finds the project that owns the specified POSIX relative path (e.g. apps/rush-lib).
+   * The path is case-sensitive, so will only return a project if its projectRelativePath matches the casing.
+   * @returns The found project, or undefined if no match was found
+   */
+  public findProjectForPosixRelativePath(posixRelativePath: string): RushConfigurationProject | undefined {
+    return this._projectByRelativePath.findChildPath(posixRelativePath);
+  }
+
+  /**
    * @beta
    */
   public get versionPolicyConfiguration(): VersionPolicyConfiguration {
@@ -1629,7 +1670,7 @@ export class RushConfiguration {
       const depProject: RushConfigurationProject | undefined = this.projectsByName.get(dependencyName);
 
       if (depProject) {
-        depProject.downstreamDependencyProjects.push(packageName);
+        depProject._consumingProjectNames.add(packageName);
       }
     });
   }

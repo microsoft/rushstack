@@ -2,6 +2,464 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.12.11",
+      "tag": "@microsoft/api-documenter_v7.12.11",
+      "date": "Wed, 10 Mar 2021 06:23:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.0.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.12.10",
+      "tag": "@microsoft/api-documenter_v7.12.10",
+      "date": "Wed, 10 Mar 2021 05:10:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.25.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.2.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.12.9",
+      "tag": "@microsoft/api-documenter_v7.12.9",
+      "date": "Thu, 04 Mar 2021 01:11:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.24.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.2.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.12.8",
+      "tag": "@microsoft/api-documenter_v7.12.8",
+      "date": "Tue, 02 Mar 2021 23:25:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.24.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.2.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.12.7",
+      "tag": "@microsoft/api-documenter_v7.12.7",
+      "date": "Fri, 05 Feb 2021 16:10:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.12.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.36.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.24.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.2.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.12.6",
+      "tag": "@microsoft/api-documenter_v7.12.6",
+      "date": "Fri, 22 Jan 2021 05:39:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.24.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.2.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.12.5",
+      "tag": "@microsoft/api-documenter_v7.12.5",
+      "date": "Thu, 21 Jan 2021 04:19:00 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.24.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.2.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.12.4",
+      "tag": "@microsoft/api-documenter_v7.12.4",
+      "date": "Wed, 13 Jan 2021 01:11:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.23.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.2.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.12.3",
+      "tag": "@microsoft/api-documenter_v7.12.3",
+      "date": "Fri, 08 Jan 2021 07:28:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.2.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.12.2",
+      "tag": "@microsoft/api-documenter_v7.12.2",
+      "date": "Wed, 06 Jan 2021 16:10:43 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.23.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.34`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.12.1",
+      "tag": "@microsoft/api-documenter_v7.12.1",
+      "date": "Mon, 14 Dec 2020 16:12:20 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "change udp to sdp"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.23.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.33`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.12.0",
+      "tag": "@microsoft/api-documenter_v7.12.0",
+      "date": "Thu, 10 Dec 2020 23:25:49 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Implement rendering of the \"@decorator\" TSDoc tag"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.12.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.35.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.7.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.3.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.22.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.32`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.11.3",
+      "tag": "@microsoft/api-documenter_v7.11.3",
+      "date": "Sat, 05 Dec 2020 01:11:23 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.22.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.31`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.11.2",
+      "tag": "@microsoft/api-documenter_v7.11.2",
+      "date": "Tue, 01 Dec 2020 01:10:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.22.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.30`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.11.1",
+      "tag": "@microsoft/api-documenter_v7.11.1",
+      "date": "Mon, 30 Nov 2020 16:11:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.22.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.29`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.11.0",
+      "tag": "@microsoft/api-documenter_v7.11.0",
+      "date": "Wed, 18 Nov 2020 08:19:54 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Both methods and properties can now be displayed as \"optional\" in the documentation"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.12.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.22.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.28`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.10.1",
+      "tag": "@microsoft/api-documenter_v7.10.1",
+      "date": "Wed, 18 Nov 2020 06:21:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.11.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.22.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.27`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.10.0",
+      "tag": "@microsoft/api-documenter_v7.10.0",
+      "date": "Wed, 18 Nov 2020 03:15:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Marking optional properties on interface reference docs"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Support for generating hyperlinks from type aliases"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.9.33",
+      "tag": "@microsoft/api-documenter_v7.9.33",
+      "date": "Tue, 17 Nov 2020 01:17:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.22.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.26`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.9.32",
+      "tag": "@microsoft/api-documenter_v7.9.32",
+      "date": "Mon, 16 Nov 2020 01:57:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.22.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.25`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.9.31",
+      "tag": "@microsoft/api-documenter_v7.9.31",
+      "date": "Fri, 13 Nov 2020 01:11:00 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.21.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.24`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.9.30",
+      "tag": "@microsoft/api-documenter_v7.9.30",
+      "date": "Thu, 12 Nov 2020 01:11:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.21.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.23`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.9.29",
+      "tag": "@microsoft/api-documenter_v7.9.29",
+      "date": "Wed, 11 Nov 2020 01:08:58 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.10.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.35.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.7.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.21.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.22`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.9.28",
+      "tag": "@microsoft/api-documenter_v7.9.28",
+      "date": "Tue, 10 Nov 2020 23:13:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.10.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.35.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.21.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.21`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.9.27",
+      "tag": "@microsoft/api-documenter_v7.9.27",
+      "date": "Tue, 10 Nov 2020 16:11:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.20.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.9.26",
+      "tag": "@microsoft/api-documenter_v7.9.26",
+      "date": "Sun, 08 Nov 2020 22:52:49 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.20.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.9.25",
+      "tag": "@microsoft/api-documenter_v7.9.25",
+      "date": "Fri, 06 Nov 2020 16:09:30 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.19.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `0.1.18`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.9.24",
       "tag": "@microsoft/api-documenter_v7.9.24",
       "date": "Tue, 03 Nov 2020 01:11:18 GMT",

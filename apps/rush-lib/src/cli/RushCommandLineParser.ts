@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
 
@@ -32,6 +32,8 @@ import { UnlinkAction } from './actions/UnlinkAction';
 import { UpdateAction } from './actions/UpdateAction';
 import { UpdateAutoinstallerAction } from './actions/UpdateAutoinstallerAction';
 import { VersionAction } from './actions/VersionAction';
+import { UpdateCloudCredentialsAction } from './actions/UpdateCloudCredentialsAction';
+import { WriteBuildCacheAction } from './actions/WriteBuildCacheAction';
 
 import { BulkScriptAction } from './scriptActions/BulkScriptAction';
 import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
@@ -39,6 +41,7 @@ import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
 import { Telemetry } from '../logic/Telemetry';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
+import { SetupAction } from './actions/SetupAction';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -51,7 +54,7 @@ export interface IRushCommandLineParserOptions {
 export class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
   public rushGlobalFolder!: RushGlobalFolder;
-  public rushConfiguration!: RushConfiguration;
+  public readonly rushConfiguration!: RushConfiguration;
 
   private _debugParameter!: CommandLineFlagParameter;
   private _rushOptions: IRushCommandLineParserOptions;
@@ -112,7 +115,7 @@ export class RushCommandLineParser extends CommandLineParser {
     });
   }
 
-  protected onExecute(): Promise<void> {
+  protected async onExecute(): Promise<void> {
     // Defensively set the exit code to 1 so if Rush crashes for whatever reason, we'll have a nonzero exit code.
     // For example, Node.js currently has the inexcusable design of terminating with zero exit code when
     // there is an uncaught promise exception.  This will supposedly be fixed in Node.js 9.
@@ -124,14 +127,13 @@ export class RushCommandLineParser extends CommandLineParser {
       InternalError.breakInDebugger = true;
     }
 
-    return this._wrapOnExecute()
-      .catch((error: Error) => {
-        this._reportErrorAndSetExitCode(error);
-      })
-      .then(() => {
-        // If we make it here, everything went fine, so reset the exit code back to 0
-        process.exitCode = 0;
-      });
+    try {
+      await this._wrapOnExecuteAsync();
+      // If we make it here, everything went fine, so reset the exit code back to 0
+      process.exitCode = 0;
+    } catch (error) {
+      this._reportErrorAndSetExitCode(error);
+    }
   }
 
   private _normalizeOptions(options: Partial<IRushCommandLineParserOptions>): IRushCommandLineParserOptions {
@@ -141,18 +143,14 @@ export class RushCommandLineParser extends CommandLineParser {
     };
   }
 
-  private _wrapOnExecute(): Promise<void> {
-    try {
-      if (this.rushConfiguration) {
-        this.telemetry = new Telemetry(this.rushConfiguration);
-      }
-      return super.onExecute().then(() => {
-        if (this.telemetry) {
-          this.flushTelemetry();
-        }
-      });
-    } catch (error) {
-      return Promise.reject(error);
+  private async _wrapOnExecuteAsync(): Promise<void> {
+    if (this.rushConfiguration) {
+      this.telemetry = new Telemetry(this.rushConfiguration);
+    }
+
+    await super.onExecute();
+    if (this.telemetry) {
+      this.flushTelemetry();
     }
   }
 
@@ -173,10 +171,16 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new PublishAction(this));
       this.addAction(new PurgeAction(this));
       this.addAction(new ScanAction(this));
+      this.addAction(new SetupAction(this));
       this.addAction(new UnlinkAction(this));
       this.addAction(new UpdateAction(this));
       this.addAction(new UpdateAutoinstallerAction(this));
+      this.addAction(new UpdateCloudCredentialsAction(this));
       this.addAction(new VersionAction(this));
+
+      if (this.rushConfiguration?.experimentsConfiguration.configuration.buildCache) {
+        this.addAction(new WriteBuildCacheAction(this));
+      }
 
       this._populateScriptActions();
     } catch (error) {
@@ -190,12 +194,12 @@ export class RushCommandLineParser extends CommandLineParser {
     // If there is not a rush.json file, we still want "build" and "rebuild" to appear in the
     // command-line help
     if (this.rushConfiguration) {
-      const commandLineConfigFile: string = path.join(
+      const commandLineConfigFilePath: string = path.join(
         this.rushConfiguration.commonRushConfigFolder,
         RushConstants.commandLineFilename
       );
 
-      commandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFile);
+      commandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFilePath);
     }
 
     // Build actions from the command line configuration supersede default build actions.
@@ -267,7 +271,10 @@ export class RushCommandLineParser extends CommandLineParser {
             ignoreMissingScript: command.ignoreMissingScript || false,
             ignoreDependencyOrder: command.ignoreDependencyOrder || false,
             incremental: command.incremental || false,
-            allowWarningsInSuccessfulBuild: !!command.allowWarningsInSuccessfulBuild
+            allowWarningsInSuccessfulBuild: !!command.allowWarningsInSuccessfulBuild,
+
+            watchForChanges: command.watchForChanges || false,
+            disableBuildCache: command.disableBuildCache || false
           })
         );
         break;

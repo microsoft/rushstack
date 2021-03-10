@@ -3,10 +3,6 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
   "packages": [
     {
-      "name": "@rushstack/heft-web-rig",
-      "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
       "name": "react",
       "allowedCategories": [ "tests" ]
     },

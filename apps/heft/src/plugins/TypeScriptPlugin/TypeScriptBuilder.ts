@@ -12,7 +12,8 @@ import {
   InternalError,
   ITerminalProvider,
   FileSystem,
-  Path
+  Path,
+  AlreadyExistsBehavior
 } from '@rushstack/node-core-library';
 import * as crypto from 'crypto';
 import type * as TTypescript from 'typescript';
@@ -70,9 +71,7 @@ export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfig
   maxWriteParallelism: number;
 }
 
-type TWatchCompilerHost = TTypescript.WatchCompilerHostOfFilesAndCompilerOptions<
-  TTypescript.EmitAndSemanticDiagnosticsBuilderProgram
->;
+type TWatchCompilerHost = TTypescript.WatchCompilerHostOfFilesAndCompilerOptions<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram>;
 
 const EMPTY_JSON: object = {};
 
@@ -166,7 +165,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     const parsedVersion: semver.SemVer | null = semver.parse(this._typescriptVersion);
     if (!parsedVersion) {
       throw new Error(
-        'Unable to parse version "${this._typescriptVersion}" for TypeScript compiler package in: ' +
+        `Unable to parse version "${this._typescriptVersion}" for TypeScript compiler package in: ` +
           compilerPackageJsonFilename
       );
     }
@@ -510,11 +509,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           queueLinkOrCopy = (options: IFileSystemCreateLinkOptions) => {
             linkPromises.push(
               this._cachedFileSystem
-                .createHardLinkExtendedAsync({ ...options, preserveExisting: true })
-                .then((successful) => {
-                  if (successful) {
-                    linkCount++;
-                  }
+                .createHardLinkAsync({ ...options, alreadyExistsBehavior: AlreadyExistsBehavior.Ignore })
+                .then(() => {
+                  linkCount++;
                 })
                 .catch((error) => {
                   if (!FileSystem.isNotExistError(error)) {
@@ -605,12 +602,22 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     this._firstEmitCompletedCallbackManager.callback();
     //#endregion
 
+    let typeScriptErrorCount: number = 0;
     if (diagnostics.length > 0) {
       this._typescriptTerminal.writeLine(
         `Encountered ${diagnostics.length} TypeScript issue${diagnostics.length > 1 ? 's' : ''}:`
       );
       for (const diagnostic of diagnostics) {
-        this._printDiagnosticMessage(ts, diagnostic);
+        const diagnosticCategory: TTypescript.DiagnosticCategory = this._getAdjustedDiagnosticCategory(
+          diagnostic,
+          ts
+        );
+
+        if (diagnosticCategory === ts.DiagnosticCategory.Error) {
+          typeScriptErrorCount++;
+        }
+
+        this._printDiagnosticMessage(ts, diagnostic, diagnosticCategory);
       }
     }
 
@@ -621,9 +628,17 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     if (tslint) {
       tslint.reportFailures();
     }
+
+    if (typeScriptErrorCount > 0) {
+      throw new Error(`Encountered TypeScript error${typeScriptErrorCount > 1 ? 's' : ''}`);
+    }
   }
 
-  private _printDiagnosticMessage(ts: ExtendedTypeScript, diagnostic: TTypescript.Diagnostic): void {
+  private _printDiagnosticMessage(
+    ts: ExtendedTypeScript,
+    diagnostic: TTypescript.Diagnostic,
+    diagnosticCategory: TTypescript.DiagnosticCategory = this._getAdjustedDiagnosticCategory(diagnostic, ts)
+  ): void {
     // Code taken from reference example
     let diagnosticMessage: string;
     let errorObject: Error;
@@ -642,12 +657,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       errorObject = new Error(diagnosticMessage);
     }
 
-    const adjustedCategory: TTypescript.DiagnosticCategory = this._getAdjustedDiagnosticCategory(
-      diagnostic,
-      ts
-    );
-
-    switch (adjustedCategory) {
+    switch (diagnosticCategory) {
       case ts.DiagnosticCategory.Error: {
         this._typescriptLogger.emitError(errorObject);
         break;

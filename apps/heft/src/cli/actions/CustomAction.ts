@@ -96,9 +96,7 @@ export class CustomAction<TParameters> extends HeftActionBase {
 
       let getParameterValue: () => CustomActionParameterType;
 
-      const parameterOption: ICustomActionParameterBase<CustomActionParameterType> = untypedParameterOption as ICustomActionParameterBase<
-        CustomActionParameterType
-      >;
+      const parameterOption: ICustomActionParameterBase<CustomActionParameterType> = untypedParameterOption as ICustomActionParameterBase<CustomActionParameterType>;
       switch (parameterOption.kind) {
         case 'flag': {
           const parameter: CommandLineFlagParameter = this.defineFlagParameter({

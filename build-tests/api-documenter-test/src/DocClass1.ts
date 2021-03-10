@@ -289,6 +289,23 @@ export interface IDocInterface6 {
   typeReferenceProperty: Generic<IDocInterface1>;
   genericReferenceMethod<T>(x: T): T;
 }
+/**
+ * Interface for testing optional properties
+ * @public
+ */
+export interface IDocInterface7 {
+  /** Description of optionalField */
+  optionalField?: boolean;
+
+  // Missing description
+  optionalUndocumentedField?: boolean;
+
+  /** Description of optionalReadonlyField */
+  readonly optionalReadonlyField?: boolean;
+
+  /** Description of optionalMember */
+  optionalMember?();
+}
 
 /**
  * Class that merges with interface

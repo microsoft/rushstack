@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as glob from 'glob';
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -159,6 +159,12 @@ export class RushInstallManager extends BaseInstallManager {
           shrinkwrapIsUpToDate = false;
         }
       });
+
+      if (this._findMissingTempProjects(shrinkwrapFile)) {
+        // If any Rush project's tarball is missing from the shrinkwrap file, then we need to update
+        // the shrinkwrap file.
+        shrinkwrapIsUpToDate = false;
+      }
 
       if (this._findOrphanedTempProjects(shrinkwrapFile)) {
         // If there are any orphaned projects, then "npm install" would fail because the shrinkwrap
@@ -755,6 +761,33 @@ export class RushInstallManager extends BaseInstallManager {
             colors.yellow(
               Utilities.wrapWords(
                 `Your ${this.rushConfiguration.shrinkwrapFilePhrase} references a project "${tempProjectName}" which no longer exists.`
+              )
+            ) +
+            os.EOL
+        );
+        return true; // found one
+      }
+    }
+
+    return false; // none found
+  }
+
+  /**
+   * Checks for temp projects that exist in the shrinkwrap file, but don't exist
+   * in rush.json.  This might occur, e.g. if a project was recently deleted or renamed.
+   *
+   * @returns true if orphans were found, or false if everything is okay
+   */
+  private _findMissingTempProjects(shrinkwrapFile: BaseShrinkwrapFile): boolean {
+    const tempProjectNames: Set<string> = new Set(shrinkwrapFile.getTempProjectNames());
+
+    for (const rushProject of this.rushConfiguration.projects) {
+      if (!tempProjectNames.has(rushProject.tempProjectName)) {
+        console.log(
+          os.EOL +
+            colors.yellow(
+              Utilities.wrapWords(
+                `Your ${this.rushConfiguration.shrinkwrapFilePhrase} is missing the project "${rushProject.packageName}".`
               )
             ) +
             os.EOL

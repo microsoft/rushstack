@@ -57,7 +57,7 @@ export class CmdRunner {
     this._options = options;
   }
 
-  public runCmd(options: IRunCmdOptions): Promise<void> {
+  public async runCmdAsync(options: IRunCmdOptions): Promise<void> {
     const {
       args,
       onData = this._onData.bind(this),
@@ -68,7 +68,7 @@ export class CmdRunner {
     const packageJson: IPackageJson | undefined = this._options.packageJson;
 
     if (!packageJson) {
-      return Promise.reject(new Error(`Unable to find the package.json file for ${this._options}.`));
+      throw new Error(`Unable to find the package.json file for ${this._options}.`);
     }
 
     // Print the version
@@ -76,15 +76,13 @@ export class CmdRunner {
 
     const binaryPath: string = path.resolve(this._options.packagePath, this._options.packageBinPath);
     if (!FileSystem.exists(binaryPath)) {
-      return Promise.reject(
-        new Error(
-          `The binary is missing. This indicates that ${this._options.packageBinPath} is not ` +
-            'installed correctly.'
-        )
+      throw new Error(
+        `The binary is missing. This indicates that ${this._options.packageBinPath} is not ` +
+          'installed correctly.'
       );
     }
 
-    return new Promise((resolve: () => void, reject: (error: Error) => void) => {
+    await new Promise((resolve: () => void, reject: (error: Error) => void) => {
       const nodePath: string | undefined = CmdRunner._nodePath;
       if (!nodePath) {
         reject(new Error('Unable to find node executable'));
