@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 02 Mar 2021 23:27:41 GMT and should not be manually modified.
+This log was last generated on Wed, 10 Mar 2021 05:12:41 GMT and should not be manually modified.
+
+## 5.41.0
+Wed, 10 Mar 2021 05:12:41 GMT
+
+### Updates
+
+- Fix an issue where "rush install" could stall indefinitely because a network request did not handle timeouts properly
+- Allow merge conflicts in repo-state.json to be automatically resolved.
+- Add a RUSH_INVOKED_FOLDER environment variable so that custom scripts can determine the folder path where Rush was invoked (GitHub #2497)
+- Add `preferFrozenLockfileForUpdate` option to minimize lockfile churn by passing --prefer-frozen-lockfile to pnpm during default `rush update`.
 
 ## 5.40.7
 Tue, 02 Mar 2021 23:27:41 GMT
