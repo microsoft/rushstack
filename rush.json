@@ -606,12 +606,6 @@
       "shouldPublish": false
     },
     {
-      "packageName": "heft-rsc-test",
-      "projectFolder": "build-tests/heft-rsc-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
       "packageName": "heft-sass-test",
       "projectFolder": "build-tests/heft-sass-test",
       "reviewCategory": "tests",

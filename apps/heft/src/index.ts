@@ -6,7 +6,6 @@ export {
   HeftConfiguration,
   IHeftActionConfiguration,
   IHeftActionConfigurationOptions,
-  ICompilerPackage,
   IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
 } from './configuration/HeftConfiguration';
 export {

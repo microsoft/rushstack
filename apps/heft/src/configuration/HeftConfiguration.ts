@@ -12,7 +12,6 @@ import {
 import { trueCasePathSync } from 'true-case-path';
 import { RigConfig } from '@rushstack/rig-package';
 
-import { TaskPackageResolver, ITaskPackageResolution } from '../utilities/TaskPackageResolver';
 import { Constants } from '../utilities/Constants';
 
 /**
@@ -53,16 +52,6 @@ export interface IHeftActionConfigurationOptions {
 /**
  * @public
  */
-export interface ICompilerPackage {
-  apiExtractorPackagePath: string | undefined;
-  typeScriptPackagePath: string;
-  tslintPackagePath: string | undefined;
-  eslintPackagePath: string | undefined;
-}
-
-/**
- * @public
- */
 export class HeftConfiguration {
   private _buildFolder!: string;
   private _projectHeftDataFolder: string | undefined;
@@ -71,9 +60,6 @@ export class HeftConfiguration {
   private _rigConfig: RigConfig | undefined;
   private _globalTerminal!: Terminal;
   private _terminalProvider!: ITerminalProvider;
-
-  private _compilerPackage: ICompilerPackage | undefined;
-  private _hasCompilerPackageBeenAccessed: boolean = false;
 
   /**
    * Project build folder. This is the folder containing the project's package.json file.
@@ -156,26 +142,6 @@ export class HeftConfiguration {
    */
   public get projectPackageJson(): IPackageJson {
     return PackageJsonLookup.instance.tryLoadPackageJsonFor(this.buildFolder)!;
-  }
-
-  /**
-   * If used by the project being built, the tool package paths exported from
-   * the rush-stack-compiler-* package.
-   */
-  public get compilerPackage(): ICompilerPackage | undefined {
-    if (!this._hasCompilerPackageBeenAccessed) {
-      const resolution: ITaskPackageResolution | undefined = TaskPackageResolver.resolveTaskPackages(
-        this._buildFolder,
-        this.globalTerminal
-      );
-
-      this._hasCompilerPackageBeenAccessed = true;
-      if (resolution) {
-        this._compilerPackage = resolution;
-      }
-    }
-
-    return this._compilerPackage;
   }
 
   private constructor() {}

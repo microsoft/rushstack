@@ -64,7 +64,6 @@ export class HeftConfiguration {
     get buildFolder(): string;
     // @internal
     _checkForRigAsync(): Promise<void>;
-    get compilerPackage(): ICompilerPackage | undefined;
     get globalTerminal(): Terminal;
     get heftPackageJson(): IPackageJson;
     // @internal (undocumented)
@@ -150,18 +149,6 @@ export interface ICleanStageProperties {
     deleteCache: boolean;
     // (undocumented)
     pathsToDelete: Set<string>;
-}
-
-// @public (undocumented)
-export interface ICompilerPackage {
-    // (undocumented)
-    apiExtractorPackagePath: string | undefined;
-    // (undocumented)
-    eslintPackagePath: string | undefined;
-    // (undocumented)
-    tslintPackagePath: string | undefined;
-    // (undocumented)
-    typeScriptPackagePath: string;
 }
 
 // @public (undocumented)
