@@ -571,9 +571,8 @@ importers:
       typescript: ~3.9.7
   ../../build-tests/heft-minimal-rig-test:
     dependencies:
-      typescript: 3.9.9
-    devDependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
+      typescript: 3.9.9
     specifiers:
       '@microsoft/api-extractor': workspace:*
       typescript: ~3.9.7
@@ -615,24 +614,17 @@ importers:
       typescript: ~3.9.7
   ../../build-tests/heft-oldest-compiler-test:
     devDependencies:
-      '@microsoft/rush-stack-compiler-2.9': link:../../stack/rush-stack-compiler-2.9
       '@rushstack/eslint-config': link:../../stack/eslint-config
       '@rushstack/heft': link:../../apps/heft
+      eslint: 7.12.1
+      tslint: 5.20.1_typescript@2.9.2
+      typescript: 2.9.2
     specifiers:
-      '@microsoft/rush-stack-compiler-2.9': workspace:*
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
-  ../../build-tests/heft-rsc-test:
-    devDependencies:
-      '@microsoft/rush-stack-compiler-3.9': link:../../stack/rush-stack-compiler-3.9
-      '@rushstack/eslint-config': link:../../stack/eslint-config
-      '@rushstack/heft': link:../../apps/heft
-      '@types/heft-jest': 1.0.1
-    specifiers:
-      '@microsoft/rush-stack-compiler-3.9': workspace:*
-      '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': workspace:*
-      '@types/heft-jest': 1.0.1
+      eslint: ~7.12.1
+      tslint: ~5.20.1
+      typescript: ~2.9.2
   ../../build-tests/heft-sass-test:
     dependencies:
       buttono: 1.0.2
@@ -1451,7 +1443,6 @@ importers:
       '@types/node': 10.17.13
   ../../libraries/rig-package:
     dependencies:
-      '@types/node': 10.17.13
       resolve: 1.17.0
       strip-json-comments: 3.1.1
     devDependencies:
@@ -1459,6 +1450,7 @@ importers:
       '@rushstack/heft': 0.23.1
       '@rushstack/heft-node-rig': 0.2.0_@rushstack+heft@0.23.1
       '@types/heft-jest': 1.0.1
+      '@types/node': 10.17.13
       '@types/resolve': 1.17.1
       ajv: 6.12.6
     specifiers:
@@ -13215,7 +13207,6 @@ packages:
       tslib: 1.14.1
       tsutils: 2.29.0_typescript@2.9.2
       typescript: 2.9.2
-    dev: false
     engines:
       node: '>=4.8.0'
     hasBin: true
@@ -13618,7 +13609,6 @@ packages:
     dependencies:
       tslib: 1.14.1
       typescript: 2.9.2
-    dev: false
     peerDependencies:
       typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev || >= 3.0.0-dev || >= 3.1.0-dev'
     resolution:
@@ -13816,7 +13806,6 @@ packages:
     resolution:
       integrity: sha512-IIU5cN1mR5J3z9jjdESJbnxikTrEz3lzAw/D0Tf45jHpBp55nY31UkUvmVHoffCfKHTqJs3fCLPDxknQTTFegQ==
   /typescript/2.9.2:
-    dev: false
     engines:
       node: '>=4.2.0'
     hasBin: true
@@ -14257,7 +14246,7 @@ packages:
       mime: 2.5.0
       mkdirp: 0.5.5
       range-parser: 1.2.1
-      webpack: 4.44.2
+      webpack: 4.44.2_webpack-cli@3.3.12
       webpack-log: 2.0.0
     engines:
       node: '>= 6'
@@ -14776,3 +14765,4 @@ packages:
       commander: 2.20.3
     resolution:
       integrity: sha512-DUOKC/IhbkdLKKiV89gw9DUauTV8U/8yJl1sjf6MtDmzevLKOF2duNJ495S3MFVjqZarr+qNGCPbkg4mu4PpLw==
+registry: ''
