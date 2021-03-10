@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.25.0",
+      "tag": "@rushstack/heft_v0.25.0",
+      "date": "Wed, 10 Mar 2021 05:10:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING CHANGE) Change the logic that resolves typescript, eslint, tslint, and api-extractor to look for a devDependency in the current project, and then for a dependency in the rig project, and then as any kind of dependency in the current project."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.24.4",
       "tag": "@rushstack/heft_v0.24.4",
       "date": "Thu, 04 Mar 2021 01:11:31 GMT",
