@@ -3,6 +3,22 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
   "packages": [
     {
+      "name": "@aws-sdk/client-s3",
+      "allowedCategories": ["libraries"]
+    },
+    {
+      "name": "@aws-sdk/credential-provider-node",
+      "allowedCategories": ["libraries"]
+    },
+    {
+      "name": "@aws-sdk/node-http-handler",
+      "allowedCategories": ["libraries"]
+    },
+    {
+      "name": "@aws-sdk/types",
+      "allowedCategories": ["libraries"]
+    },
+    {
       "name": "@azure/identity",
       "allowedCategories": ["libraries"]
     },

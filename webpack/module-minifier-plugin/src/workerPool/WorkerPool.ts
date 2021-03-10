@@ -122,7 +122,7 @@ export class WorkerPool {
     }
 
     // There are still active workers, wait for them to clean up.
-    await new Promise((resolve, reject) => this._onComplete.push([resolve, reject]));
+    await new Promise<void>((resolve, reject) => this._onComplete.push([resolve, reject]));
   }
 
   /**

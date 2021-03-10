@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add AWS S3 support to the experimental build cache feature",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "raihle@users.noreply.github.com"
+}
