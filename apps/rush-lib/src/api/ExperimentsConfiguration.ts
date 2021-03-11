@@ -29,6 +29,13 @@ export interface IExperimentsJson {
   usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
 
   /**
+   * If using the 'preventManualShrinkwrapChanges' option, restricts the hash to only include the layout of external dependencies.
+   * Used to allow links between workspace projects or the addition/removal of references to existing dependency versions to not
+   * cause hash changes.
+   */
+  omitImportersFromPreventManualShrinkwrapChanges?: boolean;
+
+  /**
    * If true, the chmod field in temporary project tar headers will not be normalized.
    * This normalization can help ensure consistent tarball integrity across platforms.
    */

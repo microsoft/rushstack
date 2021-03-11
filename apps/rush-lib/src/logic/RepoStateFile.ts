@@ -154,10 +154,18 @@ export class RepoStateFile {
       rushConfiguration.pnpmOptions &&
       rushConfiguration.pnpmOptions.preventManualShrinkwrapChanges;
     if (preventShrinkwrapChanges) {
+      const {
+        omitImportersFromPreventManualShrinkwrapChanges
+      } = rushConfiguration.experimentsConfiguration.configuration;
+
       const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
         rushConfiguration.getCommittedShrinkwrapFilename(this._variant),
-        rushConfiguration.pnpmOptions
+        rushConfiguration.pnpmOptions,
+        {
+          omitImporters: omitImportersFromPreventManualShrinkwrapChanges
+        }
       );
+
       if (pnpmShrinkwrapFile) {
         const shrinkwrapFileHash: string = pnpmShrinkwrapFile.getShrinkwrapHash();
         if (this._pnpmShrinkwrapHash !== shrinkwrapFileHash) {
