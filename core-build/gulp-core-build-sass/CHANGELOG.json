@@ -2,6 +2,23 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.14.0",
+      "tag": "@microsoft/gulp-core-build-sass_v4.14.0",
+      "date": "Fri, 12 Mar 2021 01:13:27 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update node-sass to support Node 15."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `1.10.151`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.13.49",
       "tag": "@microsoft/gulp-core-build-sass_v4.13.49",
       "date": "Wed, 10 Mar 2021 05:10:06 GMT",

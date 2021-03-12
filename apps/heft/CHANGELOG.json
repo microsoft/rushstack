@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.25.1",
+      "tag": "@rushstack/heft_v0.25.1",
+      "date": "Fri, 12 Mar 2021 01:13:27 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update node-sass to support Node 15."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.25.0",
       "tag": "@rushstack/heft_v0.25.0",
       "date": "Wed, 10 Mar 2021 05:10:05 GMT",

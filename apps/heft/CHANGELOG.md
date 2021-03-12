@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 10 Mar 2021 05:10:05 GMT and should not be manually modified.
+This log was last generated on Fri, 12 Mar 2021 01:13:27 GMT and should not be manually modified.
+
+## 0.25.1
+Fri, 12 Mar 2021 01:13:27 GMT
+
+### Patches
+
+- Update node-sass to support Node 15.
 
 ## 0.25.0
 Wed, 10 Mar 2021 05:10:05 GMT
