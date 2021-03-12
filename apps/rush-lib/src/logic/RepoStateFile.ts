@@ -205,7 +205,7 @@ export class RepoStateFile {
   private _saveIfModified(): boolean {
     if (this._modified) {
       const content: string =
-        '// DO NOT MODIFY THIS FILE. It is generated and used by Rush.' +
+        '// DO NOT MODIFY THIS FILE MANUALLY BUT DO COMMIT IT. It is generated and used by Rush.' +
         `${NewlineKind.Lf}${this._serialize()}`;
       FileSystem.writeFile(this._repoStateFilePath, content);
       this._modified = false;
