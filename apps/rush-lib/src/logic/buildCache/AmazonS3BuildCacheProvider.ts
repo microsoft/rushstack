@@ -4,7 +4,7 @@
 import { Readable } from 'stream';
 import { Terminal } from '@rushstack/node-core-library';
 import { S3Client, GetObjectCommand, PutObjectCommand, GetObjectCommandOutput } from '@aws-sdk/client-s3';
-import { defaultProvider as awsCredentialsProvider } from '@aws-sdk/credential-provider-node';
+// import { defaultProvider as awsCredentialsProvider } from '@aws-sdk/credential-provider-node';
 
 import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
@@ -104,16 +104,22 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
             credentials = this._deserializeCredentials(cacheEntry?.credential);
           }
         } else {
-          try {
-            credentials = await awsCredentialsProvider()();
-          } catch {
-            throw new Error(
-              "An Amazon S3 credential hasn't been provided, or has expired. " +
-                `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}", ` +
-                `or provide an <AccessKeyId>:<SecretAccessKey> pair in the ` +
-                `${EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_CREDENTIAL} environment variable`
-            );
-          }
+          // This logic was temporarily disabled to eliminate the dependency on @aws-sdk/credential-provider-node
+          // which caused this issue:
+          //
+          // "[rush] Broken peer dependency error when installing @microsoft/rush-lib"
+          // https://github.com/microsoft/rushstack/issues/2547
+
+          // try {
+          //  credentials = await awsCredentialsProvider()();
+          // } catch {
+          throw new Error(
+            "An Amazon S3 credential hasn't been provided, or has expired. " +
+              `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}", ` +
+              `or provide an <AccessKeyId>:<SecretAccessKey> pair in the ` +
+              `${EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_CREDENTIAL} environment variable`
+          );
+          // }
         }
       }
 
