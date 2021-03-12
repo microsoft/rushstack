@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 10 Mar 2021 06:25:44 GMT and should not be manually modified.
+This log was last generated on Fri, 12 Mar 2021 02:11:24 GMT and should not be manually modified.
+
+## 5.42.1
+Fri, 12 Mar 2021 02:11:24 GMT
+
+### Updates
+
+- Temporarily disable the AWS S3 credential provider logic to mitigate a problematic peer dependency (GitHub #2547)
 
 ## 5.42.0
 Wed, 10 Mar 2021 06:25:44 GMT
