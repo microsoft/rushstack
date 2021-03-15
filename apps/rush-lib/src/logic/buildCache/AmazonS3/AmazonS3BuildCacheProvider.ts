@@ -6,11 +6,11 @@ import { Terminal } from '@rushstack/node-core-library';
 import { S3Client, GetObjectCommand, PutObjectCommand, GetObjectCommandOutput } from '@aws-sdk/client-s3';
 // import { defaultProvider as awsCredentialsProvider } from '@aws-sdk/credential-provider-node';
 
-import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
-import { CredentialCache, ICredentialCacheEntry } from '../CredentialCache';
-import { RushConstants } from '../RushConstants';
-import { Utilities } from '../../utilities/Utilities';
+import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../../api/EnvironmentConfiguration';
+import { CloudBuildCacheProviderBase } from '../CloudBuildCacheProviderBase';
+import { CredentialCache, ICredentialCacheEntry } from '../../CredentialCache';
+import { RushConstants } from '../../RushConstants';
+import { Utilities } from '../../../utilities/Utilities';
 
 interface IAmazonS3Credentials {
   accessKeyId: string;
