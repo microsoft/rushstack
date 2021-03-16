@@ -100,6 +100,14 @@ interface IPnpmShrinkwrapYaml {
   specifiers: { [dependency: string]: string };
 }
 
+export interface IPnpmShrinkWrapFileSerializeOptions {
+  /**
+   * If set to true, remove the "importers" section during serialization. Used for
+   * scoping the preventManualShrinkwrapChanges option.
+   */
+  omitImporters?: boolean;
+}
+
 /**
  * Given an encoded "dependency key" from the PNPM shrinkwrap file, this parses it into an equivalent
  * DependencySpecifier.
@@ -196,12 +204,18 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    */
   public readonly shrinkwrapFilename: string;
 
-  private _shrinkwrapJson: IPnpmShrinkwrapYaml;
+  private readonly _shrinkwrapJson: IPnpmShrinkwrapYaml;
+  private readonly _hashSerializeOptions: IPnpmShrinkWrapFileSerializeOptions;
 
-  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string) {
+  private constructor(
+    shrinkwrapJson: IPnpmShrinkwrapYaml,
+    shrinkwrapFilename: string,
+    hashSerializeOptions: IPnpmShrinkWrapFileSerializeOptions
+  ) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
     this.shrinkwrapFilename = shrinkwrapFilename;
+    this._hashSerializeOptions = hashSerializeOptions;
 
     // Normalize the data
     if (!this._shrinkwrapJson.registry) {
@@ -223,7 +237,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   public static loadFromFile(
     shrinkwrapYamlFilename: string,
-    pnpmOptions: PnpmOptionsConfiguration
+    pnpmOptions: PnpmOptionsConfiguration,
+    hashSerializeOptions?: IPnpmShrinkWrapFileSerializeOptions
   ): PnpmShrinkwrapFile | undefined {
     try {
       if (!FileSystem.exists(shrinkwrapYamlFilename)) {
@@ -232,14 +247,14 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
       const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilename);
       const parsedData: IPnpmShrinkwrapYaml = yamlModule.safeLoad(shrinkwrapContent);
-      return new PnpmShrinkwrapFile(parsedData, shrinkwrapYamlFilename);
+      return new PnpmShrinkwrapFile(parsedData, shrinkwrapYamlFilename, hashSerializeOptions || {});
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${error.message}`);
     }
   }
 
   public getShrinkwrapHash(): string {
-    const shrinkwrapContent: string = this.serialize();
+    const shrinkwrapContent: string = this.serialize(this._hashSerializeOptions);
     return crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
   }
 
@@ -427,13 +442,20 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    *
    * @override
    */
-  protected serialize(): string {
+  protected serialize(serializeOptions?: IPnpmShrinkWrapFileSerializeOptions): string {
     // Ensure that if any of the top-level properties are provided but empty are removed. We populate the object
     // properties when we read the shrinkwrap but PNPM does not set these top-level properties unless they are present.
-    const shrinkwrapToSerialize: { [key: string]: unknown } = { ...this._shrinkwrapJson };
-    for (const [key, value] of Object.entries(shrinkwrapToSerialize)) {
-      if (typeof value === 'object' && Object.entries(value || {}).length === 0) {
-        delete shrinkwrapToSerialize[key];
+    const shrinkwrapToSerialize: { [key: string]: unknown } = {};
+    const { omitImporters } = serializeOptions || {};
+    for (const [key, value] of Object.entries(this._shrinkwrapJson)) {
+      // The 'omitImportersFromPreventManualShrinkwrapChanges' experiment skips the 'importers' section
+      // when computing the hash, since the main concern is changes to the overall external dependency footprint
+      if (omitImporters && key === 'importers') {
+        continue;
+      }
+
+      if (!value || typeof value !== 'object' || Object.keys(value).length > 0) {
+        shrinkwrapToSerialize[key] = value;
       }
     }
 

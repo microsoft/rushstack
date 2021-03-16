@@ -22,6 +22,10 @@
       "description": "By default, 'rush update' passes --no-prefer-frozen-lockfile to 'pnpm install'. Set this option to true to pass '--prefer-frozen-lockfile' instead.",
       "type": "boolean"
     },
+    "omitImportersFromPreventManualShrinkwrapChanges": {
+      "description": "If using the 'preventManualShrinkwrapChanges' option, only prevent manual changes to the total set of external dependencies referenced by the repository, not which projects reference which dependencies. This offers a balance between lockfile integrity and merge conflicts.",
+      "type": "boolean"
+    },
     "noChmodFieldInTarHeaderNormalization": {
       "description": "If true, the chmod field in temporary project tar headers will not be normalized. This normalization can help ensure consistent tarball integrity across platforms.",
       "type": "boolean"

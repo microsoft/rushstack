@@ -154,10 +154,18 @@ export class RepoStateFile {
       rushConfiguration.pnpmOptions &&
       rushConfiguration.pnpmOptions.preventManualShrinkwrapChanges;
     if (preventShrinkwrapChanges) {
+      const {
+        omitImportersFromPreventManualShrinkwrapChanges
+      } = rushConfiguration.experimentsConfiguration.configuration;
+
       const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
         rushConfiguration.getCommittedShrinkwrapFilename(this._variant),
-        rushConfiguration.pnpmOptions
+        rushConfiguration.pnpmOptions,
+        {
+          omitImporters: omitImportersFromPreventManualShrinkwrapChanges
+        }
       );
+
       if (pnpmShrinkwrapFile) {
         const shrinkwrapFileHash: string = pnpmShrinkwrapFile.getShrinkwrapHash();
         if (this._pnpmShrinkwrapHash !== shrinkwrapFileHash) {
@@ -197,7 +205,7 @@ export class RepoStateFile {
   private _saveIfModified(): boolean {
     if (this._modified) {
       const content: string =
-        '// DO NOT MODIFY THIS FILE. It is generated and used by Rush.' +
+        '// DO NOT MODIFY THIS FILE MANUALLY BUT DO COMMIT IT. It is generated and used by Rush.' +
         `${NewlineKind.Lf}${this._serialize()}`;
       FileSystem.writeFile(this._repoStateFilePath, content);
       this._modified = false;
