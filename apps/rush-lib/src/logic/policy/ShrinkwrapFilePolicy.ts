@@ -11,7 +11,6 @@ import { RepoStateFile } from '../RepoStateFile';
 
 export interface IShrinkwrapFilePolicyValidatorOptions extends IPolicyValidatorOptions {
   repoState: RepoStateFile;
-  validateOnlyExternalPackageLayout?: boolean;
 }
 
 /**
@@ -32,12 +31,13 @@ export class ShrinkwrapFilePolicy {
     }
 
     // Run shrinkwrap-specific validation
-    shrinkwrapFile.validate(rushConfiguration.packageManagerOptions, {
-      ...options,
-      repoState: rushConfiguration.getRepoState(options.shrinkwrapVariant),
-      validateOnlyExternalPackageLayout:
-        rushConfiguration.experimentsConfiguration.configuration
-          .omitImportersFromPreventManualShrinkwrapChanges
-    });
+    shrinkwrapFile.validate(
+      rushConfiguration.packageManagerOptions,
+      {
+        ...options,
+        repoState: rushConfiguration.getRepoState(options.shrinkwrapVariant)
+      },
+      rushConfiguration.experimentsConfiguration.configuration
+    );
   }
 }

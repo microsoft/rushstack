@@ -17,6 +17,7 @@ import {
 import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 import { RushConstants } from '../RushConstants';
+import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
@@ -98,14 +99,6 @@ interface IPnpmShrinkwrapYaml {
   registry: string;
   /** The list of specifiers used to resolve direct dependency versions */
   specifiers: { [dependency: string]: string };
-}
-
-export interface IPnpmShrinkWrapFileSerializeOptions {
-  /**
-   * If set to true, remove the "importers" section during serialization. Used for
-   * scoping the preventManualShrinkwrapChanges option.
-   */
-  omitImporters?: boolean;
 }
 
 /**
@@ -246,15 +239,16 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
   }
 
-  public getShrinkwrapHash(hashSerializeOptions?: IPnpmShrinkWrapFileSerializeOptions): string {
-    const shrinkwrapContent: string = this.serialize(hashSerializeOptions);
+  public getShrinkwrapHash(experimentsConfig?: IExperimentsJson): string {
+    const shrinkwrapContent: string = this.serialize(experimentsConfig);
     return crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
   }
 
   /** @override */
   public validate(
     packageManagerOptionsConfig: PackageManagerOptionsConfigurationBase,
-    policyOptions: IShrinkwrapFilePolicyValidatorOptions
+    policyOptions: IShrinkwrapFilePolicyValidatorOptions,
+    experimentsConfig?: IExperimentsJson
   ): void {
     super.validate(packageManagerOptionsConfig, policyOptions);
     if (!(packageManagerOptionsConfig instanceof PnpmOptionsConfiguration)) {
@@ -285,11 +279,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
           throw new AlreadyReportedError();
         }
 
-        const hashSerializeOptions: IPnpmShrinkWrapFileSerializeOptions = {
-          omitImporters: policyOptions.validateOnlyExternalPackageLayout
-        };
-
-        if (this.getShrinkwrapHash(hashSerializeOptions) !== policyOptions.repoState.pnpmShrinkwrapHash) {
+        if (this.getShrinkwrapHash(experimentsConfig) !== policyOptions.repoState.pnpmShrinkwrapHash) {
           console.log(
             colors.red(
               'The shrinkwrap file hash does not match the expected hash. Please run "rush update" to ensure the ' +
@@ -439,15 +429,15 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    *
    * @override
    */
-  protected serialize(serializeOptions?: IPnpmShrinkWrapFileSerializeOptions): string {
+  protected serialize(experiments?: IExperimentsJson): string {
     // Ensure that if any of the top-level properties are provided but empty are removed. We populate the object
     // properties when we read the shrinkwrap but PNPM does not set these top-level properties unless they are present.
     const shrinkwrapToSerialize: { [key: string]: unknown } = {};
-    const { omitImporters } = serializeOptions || {};
+    const { omitImportersFromPreventManualShrinkwrapChanges } = experiments || {};
     for (const [key, value] of Object.entries(this._shrinkwrapJson)) {
       // The 'omitImportersFromPreventManualShrinkwrapChanges' experiment skips the 'importers' section
       // when computing the hash, since the main concern is changes to the overall external dependency footprint
-      if (omitImporters && key === 'importers') {
+      if (omitImportersFromPreventManualShrinkwrapChanges && key === 'importers') {
         continue;
       }
 
