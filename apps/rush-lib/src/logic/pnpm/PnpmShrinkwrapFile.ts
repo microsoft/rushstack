@@ -102,7 +102,8 @@ interface IPnpmShrinkwrapYaml {
 
 export interface IPnpmShrinkWrapFileSerializeOptions {
   /**
-   * If set, remove the "importers" section during serialization. Used for scoping the preventManualShrinkwrapChanges option.
+   * If set to true, remove the "importers" section during serialization. Used for
+   * scoping the preventManualShrinkwrapChanges option.
    */
   omitImporters?: boolean;
 }
