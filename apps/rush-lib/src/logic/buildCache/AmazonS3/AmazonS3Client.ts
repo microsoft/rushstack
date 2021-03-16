@@ -92,6 +92,17 @@ export class AmazonS3Client {
     // Compute the authorization header. See https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
     const host: string = `${this._s3Bucket}.s3.amazonaws.com`;
     const signedHeaderNames: string = `${HOST_HEADER_NAME};${CONTENT_HASH_HEADER_NAME};${DATE_HEADER_NAME}`;
+    // The canonical request looks like this:
+    //  GET
+    // /test.txt
+    //
+    // host:examplebucket.s3.amazonaws.com
+    // range:bytes=0-9
+    // x-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    // x-amz-date:20130524T000000Z
+    //
+    // host;range;x-amz-content-sha256;x-amz-date
+    // e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
     const canonicalRequest: string = [
       verb,
       `/${objectName}`,
@@ -106,6 +117,11 @@ export class AmazonS3Client {
     const canonicalRequestHash: string = this._getSha256(canonicalRequest);
 
     const scope: string = `${isoDateString.date}/${this._s3Region}/s3/aws4_request`;
+    // The string to sign looks like this:
+    // AWS4-HMAC-SHA256
+    // 20130524T423589Z
+    // 20130524/us-east-1/s3/aws4_request
+    // 7344ae5b7ee6c3e7e6b0fe0640412a37625d1fbfff95c48bbb2dc43964946972
     const stringToSign: string = [
       'AWS4-HMAC-SHA256',
       isoDateString.dateTime,
@@ -160,6 +176,7 @@ export class AmazonS3Client {
       hash.update(data);
       return hash.digest('hex');
     } else {
+      // This is the null SHA256 hash
       return 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
     }
   }
@@ -169,6 +186,8 @@ export class AmazonS3Client {
     dateString = dateString.replace(/[-:]/g, ''); // Remove separator characters
     dateString = dateString.substring(0, 15); // Drop milliseconds
 
+    // dateTime is an ISO8601 date. It looks like "20130524T423589"
+    // date is an ISO date. It looks like "20130524"
     return {
       dateTime: `${dateString}Z`,
       date: dateString.substring(0, 8)
