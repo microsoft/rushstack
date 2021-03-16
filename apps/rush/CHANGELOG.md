@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 12 Mar 2021 02:11:24 GMT and should not be manually modified.
+This log was last generated on Tue, 16 Mar 2021 00:30:38 GMT and should not be manually modified.
+
+## 5.42.2
+Tue, 16 Mar 2021 00:30:38 GMT
+
+### Updates
+
+- Add experiment to exclude the "importers" section of "pnpm-lock.yaml" from the "preventManualShrinkwrapChanges" feature.
 
 ## 5.42.1
 Fri, 12 Mar 2021 02:11:24 GMT

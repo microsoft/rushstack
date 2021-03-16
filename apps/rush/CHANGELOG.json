@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.42.2",
+      "tag": "@microsoft/rush_v5.42.2",
+      "date": "Tue, 16 Mar 2021 00:30:38 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add experiment to exclude the \"importers\" section of \"pnpm-lock.yaml\" from the \"preventManualShrinkwrapChanges\" feature."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.42.1",
       "tag": "@microsoft/rush_v5.42.1",
       "date": "Fri, 12 Mar 2021 02:11:24 GMT",
