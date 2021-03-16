@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/ts-command-line",
-      "comment": "fix documentation sample code",
-      "type": "patch"
+      "comment": "Fix a mistake in sample code in the README.",
+      "type": "none"
     }
   ],
   "packageName": "@rushstack/ts-command-line",
