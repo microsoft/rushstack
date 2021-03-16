@@ -205,17 +205,11 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly shrinkwrapFilename: string;
 
   private readonly _shrinkwrapJson: IPnpmShrinkwrapYaml;
-  private readonly _hashSerializeOptions: IPnpmShrinkWrapFileSerializeOptions;
 
-  private constructor(
-    shrinkwrapJson: IPnpmShrinkwrapYaml,
-    shrinkwrapFilename: string,
-    hashSerializeOptions: IPnpmShrinkWrapFileSerializeOptions
-  ) {
+  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string) {
     super();
     this._shrinkwrapJson = shrinkwrapJson;
     this.shrinkwrapFilename = shrinkwrapFilename;
-    this._hashSerializeOptions = hashSerializeOptions;
 
     // Normalize the data
     if (!this._shrinkwrapJson.registry) {
@@ -237,8 +231,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   public static loadFromFile(
     shrinkwrapYamlFilename: string,
-    pnpmOptions: PnpmOptionsConfiguration,
-    hashSerializeOptions?: IPnpmShrinkWrapFileSerializeOptions
+    pnpmOptions: PnpmOptionsConfiguration
   ): PnpmShrinkwrapFile | undefined {
     try {
       if (!FileSystem.exists(shrinkwrapYamlFilename)) {
@@ -247,14 +240,14 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
       const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilename);
       const parsedData: IPnpmShrinkwrapYaml = yamlModule.safeLoad(shrinkwrapContent);
-      return new PnpmShrinkwrapFile(parsedData, shrinkwrapYamlFilename, hashSerializeOptions || {});
+      return new PnpmShrinkwrapFile(parsedData, shrinkwrapYamlFilename);
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${error.message}`);
     }
   }
 
-  public getShrinkwrapHash(): string {
-    const shrinkwrapContent: string = this.serialize(this._hashSerializeOptions);
+  public getShrinkwrapHash(hashSerializeOptions?: IPnpmShrinkWrapFileSerializeOptions): string {
+    const shrinkwrapContent: string = this.serialize(hashSerializeOptions);
     return crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
   }
 
@@ -292,7 +285,11 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
           throw new AlreadyReportedError();
         }
 
-        if (this.getShrinkwrapHash() !== policyOptions.repoState.pnpmShrinkwrapHash) {
+        const hashSerializeOptions: IPnpmShrinkWrapFileSerializeOptions = {
+          omitImporters: policyOptions.validateOnlyExternalPackageLayout
+        };
+
+        if (this.getShrinkwrapHash(hashSerializeOptions) !== policyOptions.repoState.pnpmShrinkwrapHash) {
           console.log(
             colors.red(
               'The shrinkwrap file hash does not match the expected hash. Please run "rush update" to ensure the ' +
