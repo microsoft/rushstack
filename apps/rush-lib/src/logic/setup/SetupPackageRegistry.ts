@@ -297,7 +297,7 @@ export class SetupPackageRegistry {
 
     let response: WebClientResponse;
     try {
-      response = await webClient.fetch(queryUrl);
+      response = await webClient.fetchAsync(queryUrl);
     } catch (e) {
       console.log(e.toString());
       return;
