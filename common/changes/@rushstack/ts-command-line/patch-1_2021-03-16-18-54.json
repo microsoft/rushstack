@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "Fix a mistake in sample code in the README.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line",
+  "email": "6276426+kbkk@users.noreply.github.com"
+}
