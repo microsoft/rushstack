@@ -129,8 +129,19 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
         await blockBlobClient.upload(entryStream, entryStream.length);
         return true;
       } catch (e) {
-        terminal.writeWarningLine(`Error uploading cache entry to Azure Storage: ${e}`);
-        return false;
+        if (e.statusCode === 409 /* conflict */) {
+          // If something else has written to the blob at the same time,
+          // it's probably a concurrent process that is attempting to write
+          // the same cache entry. That is an effective success.
+          terminal.writeVerboseLine(
+            'Azure Storage returned status 409 (conflict). The cache entry has ' +
+              `probably already been set by another builder. Code: "${e.code}".`
+          );
+          return true;
+        } else {
+          terminal.writeWarningLine(`Error uploading cache entry to Azure Storage: ${e}`);
+          return false;
+        }
       }
     }
   }
