@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 12 Mar 2021 01:13:27 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Mar 2021 05:04:37 GMT and should not be manually modified.
+
+## 0.25.2
+Wed, 17 Mar 2021 05:04:37 GMT
+
+### Patches
+
+- Fix an issue where heft would crash when copying static assets in --watch mode.
 
 ## 0.25.1
 Fri, 12 Mar 2021 01:13:27 GMT
