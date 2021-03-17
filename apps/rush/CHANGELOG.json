@@ -2,6 +2,27 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.42.3",
+      "tag": "@microsoft/rush_v5.42.3",
+      "date": "Wed, 17 Mar 2021 05:07:02 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix installation-time behavior of \"omitImportersFromPreventManualShrinkwrapChanges\" experiment."
+          },
+          {
+            "comment": "Don't upload build cache entries to Azure if the cache entry already exists."
+          },
+          {
+            "comment": "Replace the AWS dependencies with use of the Amazon S3 REST API."
+          },
+          {
+            "comment": "Add support for anonymous read from an Amazon S3-hosted cache."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.42.2",
       "tag": "@microsoft/rush_v5.42.2",
       "date": "Tue, 16 Mar 2021 00:30:38 GMT",

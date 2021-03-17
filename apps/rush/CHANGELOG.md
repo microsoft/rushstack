@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 16 Mar 2021 00:30:38 GMT and should not be manually modified.
+This log was last generated on Wed, 17 Mar 2021 05:07:02 GMT and should not be manually modified.
+
+## 5.42.3
+Wed, 17 Mar 2021 05:07:02 GMT
+
+### Updates
+
+- Fix installation-time behavior of "omitImportersFromPreventManualShrinkwrapChanges" experiment.
+- Don't upload build cache entries to Azure if the cache entry already exists.
+- Replace the AWS dependencies with use of the Amazon S3 REST API.
+- Add support for anonymous read from an Amazon S3-hosted cache.
 
 ## 5.42.2
 Tue, 16 Mar 2021 00:30:38 GMT
