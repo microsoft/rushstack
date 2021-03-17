@@ -3,6 +3,7 @@
 
 import * as crypto from 'crypto';
 import * as fetch from 'node-fetch';
+
 import { IAmazonS3BuildCacheProviderOptions } from './AmazonS3BuildCacheProvider';
 import { IPutFetchOptions, IGetFetchOptions, WebClient } from '../../../utilities/WebClient';
 
@@ -38,6 +39,8 @@ export class AmazonS3Client {
 
     this._accessKeyId = credentials.accessKeyId || '';
     this._secretAccessKey = credentials.secretAccessKey || '';
+
+    this._validateBucketName(options.s3Bucket);
 
     this._s3Bucket = options.s3Bucket;
     this._s3Region = options.s3Region;
@@ -196,5 +199,48 @@ export class AmazonS3Client {
 
   private _throwS3Error(response: fetch.Response): never {
     throw new Error(`Amazon S3 responded with status code ${response.status} (${response.statusText})`);
+  }
+
+  /**
+   * Validates a S3 bucket name.
+   * {@link https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-s3-bucket-naming-requirements.html}
+   */
+  private _validateBucketName(s3BucketName: string): void {
+    if (!s3BucketName) {
+      throw new Error('A S3 bucket name must be provided');
+    }
+
+    if (!s3BucketName.match(/^[a-z\d-.]{3,63}$/)) {
+      throw new Error(
+        `The bucket name "${s3BucketName}" is invalid. A S3 bucket name must only contain lowercase ` +
+          'alphanumerical characters, dashes, and periods and must be between 3 and 63 characters long.'
+      );
+    }
+
+    if (!s3BucketName.match(/^[a-z\d]/)) {
+      throw new Error(
+        `The bucket name "${s3BucketName}" is invalid. A S3 bucket name must start with a lowercase ` +
+          'alphanumerical character.'
+      );
+    }
+
+    if (s3BucketName.match(/-$/)) {
+      throw new Error(
+        `The bucket name "${s3BucketName}" is invalid. A S3 bucket name must not end in a dash.`
+      );
+    }
+
+    if (s3BucketName.match(/(\.\.)|(\.-)|(-\.)/)) {
+      throw new Error(
+        `The bucket name "${s3BucketName}" is invalid. A S3 bucket name must not have consecutive periods or ` +
+          'dashes adjacent to periods.'
+      );
+    }
+
+    if (s3BucketName.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)) {
+      throw new Error(
+        `The bucket name "${s3BucketName}" is invalid. A S3 bucket name must not be formatted as an IP address.`
+      );
+    }
   }
 }

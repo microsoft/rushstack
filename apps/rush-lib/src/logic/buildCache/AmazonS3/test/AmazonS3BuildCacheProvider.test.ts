@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+
 import { EnvironmentConfiguration } from '../../../../api/EnvironmentConfiguration';
 import { AmazonS3BuildCacheProvider } from '../AmazonS3BuildCacheProvider';
-import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import { RushUserConfiguration } from '../../../../api/RushUserConfiguration';
 import { CredentialCache } from '../../../CredentialCache';
 
