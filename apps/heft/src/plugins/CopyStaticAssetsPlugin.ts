@@ -9,9 +9,9 @@ import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IBuildStageContext, ICompileSubstage } from '../stages/BuildStage';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
-import { CoreConfigFiles, IExtendedSharedCopyConfiguration } from '../utilities/CoreConfigFiles';
+import { CoreConfigFiles } from '../utilities/CoreConfigFiles';
 import { ITypeScriptConfigurationJson } from './TypeScriptPlugin/TypeScriptPlugin';
-import { CopyFilesPlugin } from './CopyFilesPlugin';
+import { CopyFilesPlugin, IResolvedDestinationCopyConfiguration } from './CopyFilesPlugin';
 
 const PLUGIN_NAME: string = 'CopyStaticAssetsPlugin';
 
@@ -79,7 +79,7 @@ export class CopyStaticAssetsPlugin extends CopyFilesPlugin {
         compile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
           const logger: ScopedLogger = heftSession.requestScopedLogger('copy-static-assets');
 
-          const copyStaticAssetsConfiguration: IExtendedSharedCopyConfiguration = await this._loadCopyStaticAssetsConfigurationAsync(
+          const copyStaticAssetsConfiguration: IResolvedDestinationCopyConfiguration = await this._loadCopyStaticAssetsConfigurationAsync(
             logger.terminal,
             heftConfiguration
           );
@@ -98,7 +98,7 @@ export class CopyStaticAssetsPlugin extends CopyFilesPlugin {
   private async _loadCopyStaticAssetsConfigurationAsync(
     terminal: Terminal,
     heftConfiguration: HeftConfiguration
-  ): Promise<IExtendedSharedCopyConfiguration> {
+  ): Promise<IResolvedDestinationCopyConfiguration> {
     const typescriptConfiguration:
       | ITypeScriptConfigurationJson
       | undefined = await CoreConfigFiles.typeScriptConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
@@ -107,18 +107,23 @@ export class CopyStaticAssetsPlugin extends CopyFilesPlugin {
       heftConfiguration.rigConfig
     );
 
-    const destinationFolders: Set<string> = new Set<string>();
+    const resolvedDestinationFolderPaths: Set<string> = new Set<string>();
+    const destinationFolderNames: Set<string> = new Set<string>();
 
-    const tsconfigDestinationFolder: string | undefined = await this._tryGetTsconfigOutDirAsync(
+    const tsconfigDestinationFolderPath: string | undefined = await this._tryGetTsconfigOutDirPathAsync(
       heftConfiguration.buildFolder,
       terminal
     );
-    if (tsconfigDestinationFolder) {
-      destinationFolders.add(tsconfigDestinationFolder);
+    if (tsconfigDestinationFolderPath) {
+      resolvedDestinationFolderPaths.add(tsconfigDestinationFolderPath);
+      destinationFolderNames.add(path.relative(heftConfiguration.buildFolder, tsconfigDestinationFolderPath));
     }
 
     for (const emitModule of typescriptConfiguration?.additionalModuleKindsToEmit || []) {
-      destinationFolders.add(emitModule.outFolderName);
+      resolvedDestinationFolderPaths.add(
+        path.resolve(heftConfiguration.buildFolder, emitModule.outFolderName)
+      );
+      destinationFolderNames.add(emitModule.outFolderName);
     }
 
     return {
@@ -126,13 +131,14 @@ export class CopyStaticAssetsPlugin extends CopyFilesPlugin {
 
       // For now - these may need to be revised later
       sourceFolder: 'src',
-      destinationFolders: Array.from(destinationFolders),
+      destinationFolders: Array.from(destinationFolderNames),
+      resolvedDestinationFolderPaths: Array.from(resolvedDestinationFolderPaths),
       flatten: false,
       hardlink: false
     };
   }
 
-  private async _tryGetTsconfigOutDirAsync(
+  private async _tryGetTsconfigOutDirPathAsync(
     projectFolder: string,
     terminal: Terminal
   ): Promise<string | undefined> {
