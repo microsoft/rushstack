@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`AmazonS3Client Does not allow upload without credentials 1`] = `[Error: Credentials are required to upload objects to S3.]`;
+
 exports[`AmazonS3Client Rejects invalid S3 bucket names 1`] = `"A S3 bucket name must be provided"`;
 
 exports[`AmazonS3Client Rejects invalid S3 bucket names 2`] = `"The bucket name \\"-abc\\" is invalid. A S3 bucket name must start with a lowercase alphanumerical character."`;

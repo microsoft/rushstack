@@ -22,8 +22,7 @@ interface IIsoDateString {
 }
 
 export class AmazonS3Client {
-  private readonly _accessKeyId: string;
-  private readonly _secretAccessKey: string;
+  private readonly _credentials: IAmazonS3Credentials | undefined;
   private readonly _s3Bucket: string;
   private readonly _s3Region: string;
 
@@ -33,12 +32,7 @@ export class AmazonS3Client {
     credentials: IAmazonS3Credentials | undefined,
     options: IAmazonS3BuildCacheProviderOptions
   ) {
-    if (!credentials) {
-      throw new Error('Amazon S3 credential is required.');
-    }
-
-    this._accessKeyId = credentials.accessKeyId || '';
-    this._secretAccessKey = credentials.secretAccessKey || '';
+    this._credentials = credentials;
 
     this._validateBucketName(options.s3Bucket);
 
@@ -72,12 +66,18 @@ export class AmazonS3Client {
       return await response.buffer();
     } else if (response.status === 404) {
       return undefined;
+    } else if (response.status === 403 && !this._credentials) {
+      return undefined;
     } else {
       this._throwS3Error(response);
     }
   }
 
   public async uploadObjectAsync(objectName: string, objectBuffer: Buffer): Promise<void> {
+    if (!this._credentials) {
+      throw new Error('Credentials are required to upload objects to S3.');
+    }
+
     const response: fetch.Response = await this._makeRequestAsync('PUT', objectName, objectBuffer);
     if (!response.ok) {
       this._throwS3Error(response);
@@ -91,59 +91,65 @@ export class AmazonS3Client {
   ): Promise<fetch.Response> {
     const isoDateString: IIsoDateString = this._getIsoDateString();
     const bodyHash: string = this._getSha256(body);
-
-    // Compute the authorization header. See https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
     const host: string = `${this._s3Bucket}.s3.amazonaws.com`;
-    const signedHeaderNames: string = `${HOST_HEADER_NAME};${CONTENT_HASH_HEADER_NAME};${DATE_HEADER_NAME}`;
-    // The canonical request looks like this:
-    //  GET
-    // /test.txt
-    //
-    // host:examplebucket.s3.amazonaws.com
-    // range:bytes=0-9
-    // x-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-    // x-amz-date:20130524T000000Z
-    //
-    // host;range;x-amz-content-sha256;x-amz-date
-    // e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-    const canonicalRequest: string = [
-      verb,
-      `/${objectName}`,
-      '', // we don't use query strings for these requests
-      `${HOST_HEADER_NAME}:${host}`,
-      `${CONTENT_HASH_HEADER_NAME}:${bodyHash}`,
-      `${DATE_HEADER_NAME}:${isoDateString.dateTime}`,
-      '',
-      signedHeaderNames,
-      bodyHash
-    ].join('\n');
-    const canonicalRequestHash: string = this._getSha256(canonicalRequest);
-
-    const scope: string = `${isoDateString.date}/${this._s3Region}/s3/aws4_request`;
-    // The string to sign looks like this:
-    // AWS4-HMAC-SHA256
-    // 20130524T423589Z
-    // 20130524/us-east-1/s3/aws4_request
-    // 7344ae5b7ee6c3e7e6b0fe0640412a37625d1fbfff95c48bbb2dc43964946972
-    const stringToSign: string = [
-      'AWS4-HMAC-SHA256',
-      isoDateString.dateTime,
-      scope,
-      canonicalRequestHash
-    ].join('\n');
-
-    const dateKey: Buffer = this._getSha256Hmac(`AWS4${this._secretAccessKey}`, isoDateString.date);
-    const dateRegionKey: Buffer = this._getSha256Hmac(dateKey, this._s3Region);
-    const dateRegionServiceKey: Buffer = this._getSha256Hmac(dateRegionKey, 's3');
-    const signingKey: Buffer = this._getSha256Hmac(dateRegionServiceKey, 'aws4_request');
-    const signature: string = this._getSha256Hmac(signingKey, stringToSign, 'hex');
-
-    const authorizationHeader: string = `AWS4-HMAC-SHA256 Credential=${this._accessKeyId}/${scope},SignedHeaders=${signedHeaderNames},Signature=${signature}`;
 
     const headers: fetch.Headers = new fetch.Headers();
-    headers.set('Authorization', authorizationHeader);
     headers.set(DATE_HEADER_NAME, isoDateString.dateTime);
     headers.set(CONTENT_HASH_HEADER_NAME, bodyHash);
+
+    if (this._credentials) {
+      // Compute the authorization header. See https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
+      const signedHeaderNames: string = `${HOST_HEADER_NAME};${CONTENT_HASH_HEADER_NAME};${DATE_HEADER_NAME}`;
+      // The canonical request looks like this:
+      //  GET
+      // /test.txt
+      //
+      // host:examplebucket.s3.amazonaws.com
+      // range:bytes=0-9
+      // x-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      // x-amz-date:20130524T000000Z
+      //
+      // host;range;x-amz-content-sha256;x-amz-date
+      // e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      const canonicalRequest: string = [
+        verb,
+        `/${objectName}`,
+        '', // we don't use query strings for these requests
+        `${HOST_HEADER_NAME}:${host}`,
+        `${CONTENT_HASH_HEADER_NAME}:${bodyHash}`,
+        `${DATE_HEADER_NAME}:${isoDateString.dateTime}`,
+        '',
+        signedHeaderNames,
+        bodyHash
+      ].join('\n');
+      const canonicalRequestHash: string = this._getSha256(canonicalRequest);
+
+      const scope: string = `${isoDateString.date}/${this._s3Region}/s3/aws4_request`;
+      // The string to sign looks like this:
+      // AWS4-HMAC-SHA256
+      // 20130524T423589Z
+      // 20130524/us-east-1/s3/aws4_request
+      // 7344ae5b7ee6c3e7e6b0fe0640412a37625d1fbfff95c48bbb2dc43964946972
+      const stringToSign: string = [
+        'AWS4-HMAC-SHA256',
+        isoDateString.dateTime,
+        scope,
+        canonicalRequestHash
+      ].join('\n');
+
+      const dateKey: Buffer = this._getSha256Hmac(
+        `AWS4${this._credentials.secretAccessKey}`,
+        isoDateString.date
+      );
+      const dateRegionKey: Buffer = this._getSha256Hmac(dateKey, this._s3Region);
+      const dateRegionServiceKey: Buffer = this._getSha256Hmac(dateRegionKey, 's3');
+      const signingKey: Buffer = this._getSha256Hmac(dateRegionServiceKey, 'aws4_request');
+      const signature: string = this._getSha256Hmac(signingKey, stringToSign, 'hex');
+
+      const authorizationHeader: string = `AWS4-HMAC-SHA256 Credential=${this._credentials.accessKeyId}/${scope},SignedHeaders=${signedHeaderNames},Signature=${signature}`;
+
+      headers.set('Authorization', authorizationHeader);
+    }
 
     const webFetchOptions: IGetFetchOptions | IPutFetchOptions = {
       verb,
