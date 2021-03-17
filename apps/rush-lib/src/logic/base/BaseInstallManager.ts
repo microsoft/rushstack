@@ -610,7 +610,7 @@ export abstract class BaseInstallManager {
     webClient.userAgent = `pnpm/? npm/? node/${process.version} ${os.platform()} ${os.arch()}`;
     webClient.accept = 'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*';
 
-    const response: WebClientResponse = await webClient.fetch(queryUrl);
+    const response: WebClientResponse = await webClient.fetchAsync(queryUrl);
     if (!response.ok) {
       throw new Error('Failed to query');
     }
@@ -634,7 +634,7 @@ export abstract class BaseInstallManager {
     // Make sure the tarball wasn't deleted from the CDN
     webClient.accept = '*/*';
 
-    const response2: fetch.Response = await webClient.fetch(url);
+    const response2: fetch.Response = await webClient.fetchAsync(url);
 
     if (!response2.ok) {
       if (response2.status === 404) {

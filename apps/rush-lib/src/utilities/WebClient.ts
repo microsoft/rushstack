@@ -8,8 +8,19 @@ const createHttpsProxyAgent: typeof import('https-proxy-agent') = Import.lazy('h
 
 export type WebClientResponse = fetch.Response;
 
-export interface IWebFetchOptions {
+export interface IWebFetchOptionsBase {
+  timeoutMs?: number;
+  verb?: 'GET' | 'PUT';
   headers?: fetch.Headers;
+}
+
+export interface IGetFetchOptions extends IWebFetchOptionsBase {
+  verb: 'GET' | never;
+}
+
+export interface IPutFetchOptions extends IWebFetchOptionsBase {
+  verb: 'PUT';
+  body?: Buffer;
 }
 
 export enum WebClientProxy {
@@ -41,16 +52,15 @@ export class WebClient {
     );
   }
 
-  public async fetch(url: string, options?: IWebFetchOptions): Promise<WebClientResponse> {
-    if (!options) {
-      options = {};
-    }
-
+  public async fetchAsync(
+    url: string,
+    options?: IGetFetchOptions | IPutFetchOptions
+  ): Promise<WebClientResponse> {
     const headers: fetch.Headers = new fetch.Headers();
 
     WebClient.mergeHeaders(headers, this.standardHeaders);
 
-    if (options.headers) {
+    if (options?.headers) {
       WebClient.mergeHeaders(headers, options.headers);
     }
 
@@ -85,10 +95,18 @@ export class WebClient {
       agent = createHttpsProxyAgent(proxyUrl);
     }
 
-    return await fetch.default(url, {
+    const timeoutMs: number = options?.timeoutMs !== undefined ? options.timeoutMs : 15 * 1000; // 15 seconds
+    const requestInit: fetch.RequestInit = {
+      method: options?.verb,
       headers: headers,
       agent: agent,
-      timeout: 15 * 1000 // 15 seconds
-    });
+      timeout: timeoutMs
+    };
+    const putOptions: IPutFetchOptions | undefined = options as IPutFetchOptions | undefined;
+    if (putOptions?.body) {
+      requestInit.body = putOptions.body;
+    }
+
+    return await fetch.default(url, requestInit);
   }
 }

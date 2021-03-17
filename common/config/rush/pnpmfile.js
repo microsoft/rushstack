@@ -36,9 +36,5 @@ function readPackage(packageJson, context) {
     packageJson.dependencies['ajv'] = '~6.12.5';
   }
 
-  if (packageJson.name === '@aws-sdk/middleware-retry') {
-    delete packageJson.dependencies['react-native-get-random-values'];
-  }
-
   return packageJson;
 }

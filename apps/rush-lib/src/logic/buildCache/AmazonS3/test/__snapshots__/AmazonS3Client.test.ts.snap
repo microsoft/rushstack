@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AmazonS3Client Does not allow upload without credentials 1`] = `[Error: Credentials are required to upload objects to S3.]`;
+
+exports[`AmazonS3Client Rejects invalid S3 bucket names 1`] = `"A S3 bucket name must be provided"`;
+
+exports[`AmazonS3Client Rejects invalid S3 bucket names 2`] = `"The bucket name \\"-abc\\" is invalid. A S3 bucket name must start with a lowercase alphanumerical character."`;
+
+exports[`AmazonS3Client Rejects invalid S3 bucket names 3`] = `"The bucket name \\"a!bc\\" is invalid. A S3 bucket name must only contain lowercase alphanumerical characters, dashes, and periods and must be between 3 and 63 characters long."`;
+
+exports[`AmazonS3Client Rejects invalid S3 bucket names 4`] = `"The bucket name \\"a\\" is invalid. A S3 bucket name must only contain lowercase alphanumerical characters, dashes, and periods and must be between 3 and 63 characters long."`;
+
+exports[`AmazonS3Client Rejects invalid S3 bucket names 5`] = `"The bucket name \\"10.10.10.10\\" is invalid. A S3 bucket name must not be formatted as an IP address."`;
+
+exports[`AmazonS3Client Rejects invalid S3 bucket names 6`] = `"The bucket name \\"abc..d\\" is invalid. A S3 bucket name must not have consecutive periods or dashes adjacent to periods."`;
+
+exports[`AmazonS3Client Rejects invalid S3 bucket names 7`] = `"The bucket name \\"abc.-d\\" is invalid. A S3 bucket name must not have consecutive periods or dashes adjacent to periods."`;
+
+exports[`AmazonS3Client Rejects invalid S3 bucket names 8`] = `"The bucket name \\"abc-.d\\" is invalid. A S3 bucket name must not have consecutive periods or dashes adjacent to periods."`;
+
+exports[`AmazonS3Client Rejects invalid S3 bucket names 9`] = `"The bucket name \\"abc-\\" is invalid. A S3 bucket name must not end in a dash."`;
