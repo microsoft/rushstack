@@ -18,6 +18,10 @@ export class PolicyValidator {
     }
 
     GitEmailPolicy.validate(rushConfiguration);
-    ShrinkwrapFilePolicy.validate(rushConfiguration, options);
+    if (!options.allowShrinkwrapUpdates) {
+      // Don't validate the shrinkwrap if updates are allowed, as it's likely to change
+      // It also may have merge conflict markers, which PNPM can gracefully handle, but the validator cannot
+      ShrinkwrapFilePolicy.validate(rushConfiguration, options);
+    }
   }
 }
