@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.25.3",
+      "tag": "@rushstack/heft_v0.25.3",
+      "date": "Fri, 19 Mar 2021 22:31:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve README.md"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.25.2",
       "tag": "@rushstack/heft_v0.25.2",
       "date": "Wed, 17 Mar 2021 05:04:37 GMT",
