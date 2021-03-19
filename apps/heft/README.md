@@ -12,7 +12,7 @@
 <!-- Text below this line should stay in sync with the Rush Stack web site content -->
 <!-- ----------------------------------------------------------------------------- -->
 
-Heft is a config-based toolchain that invokes other popular tools such as TypeScript, ESLint, Jest, Webpack,
+Heft is a config-driven toolchain that invokes other popular tools such as TypeScript, ESLint, Jest, Webpack,
 and API Extractor. You can use it to build web applications, Node.js services, command-line tools, libraries,
 and more. Heft builds all your JavaScript projects the same way: A way that works.
 
