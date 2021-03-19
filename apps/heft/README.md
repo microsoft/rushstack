@@ -44,7 +44,7 @@ similar systems, Heft has some unique design goals:
   toolkit that works well for a broad range of scenarios, then work together on the deep investments that will
   make that a great experience.
 
-- **Familiar**: Like RUsh, Heft is an everyday Node.js application -- developers don't need to install native
+- **Familiar**: Like Rush, Heft is a regular Node.js application -- developers don't need to install native
   prerequisites such as Python, MSYS2, or the .NET Framework.  Heft's source code is easy to understand and debug
   because it's 100% TypeScript, the same programming language as your web projects.  Developing for native targets
   is still possible, of course.
