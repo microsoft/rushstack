@@ -1,7 +1,7 @@
 {
   "name": "@rushstack/heft",
   "version": "0.25.2",
-  "description": "The Rush Stack extensible build system",
+  "description": "Build all your JavaScript projects the same way: A way that works.",
   "keywords": [
     "toolchain",
     "watch",
