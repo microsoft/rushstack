@@ -13,5 +13,36 @@
       "tagName": "@preapproved",
       "syntaxKind": "modifier"
     }
-  ]
+  ],
+  "supportForTags": {
+    "@alpha": true,
+    "@beta": true,
+    "@defaultValue": true,
+    "@decorator": true,
+    "@deprecated": true,
+    "@eventProperty": true,
+    "@example": true,
+    "@experimental": true,
+    "@inheritDoc": true,
+    "@internal": true,
+    "@label": true,
+    "@link": true,
+    "@override": true,
+    "@packageDocumentation": true,
+    "@param": true,
+    "@privateRemarks": true,
+    "@public": true,
+    "@readonly": true,
+    "@remarks": true,
+    "@returns": true,
+    "@sealed": true,
+    "@see": true,
+    "@throws": true,
+    "@typeParam": true,
+    "@virtual": true,
+
+    "@betaDocumentation": true,
+    "@internalRemarks": true,
+    "@preapproved": true
+  }
 }

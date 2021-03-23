@@ -7,7 +7,6 @@
 import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { DocDeclarationReference } from '@microsoft/tsdoc';
 import { IJsonFileSaveOptions } from '@rushstack/node-core-library';
-import { ITSDocTagDefinitionParameters } from '@microsoft/tsdoc';
 import * as tsdoc from '@microsoft/tsdoc';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
 import { TSDocTagDefinition } from '@microsoft/tsdoc';
@@ -444,10 +443,9 @@ export class ApiPackage extends ApiPackage_base {
     get kind(): ApiItemKind;
     // (undocumented)
     static loadFromJsonFile(apiJsonFilename: string): ApiPackage;
-    readonly nonStandardTSDocTags: ITSDocTagDefinitionParameters[] | void;
     // (undocumented)
     saveToJsonFile(apiJsonFilename: string, options?: IApiPackageSaveOptions): void;
-}
+    }
 
 // @public
 export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiParameterListMixin);
@@ -747,7 +745,8 @@ export interface IApiOptionalMixinOptions extends IApiItemOptions {
 
 // @public
 export interface IApiPackageOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiDocumentedItemOptions {
-    nonStandardTSDocTags?: ITSDocTagDefinitionParameters[];
+    // Warning: (ae-forgotten-export) The symbol "ITSDocConfigJson" needs to be exported by the entry point index.d.ts
+    tsDocConfig: ITSDocConfigJson;
 }
 
 // @public

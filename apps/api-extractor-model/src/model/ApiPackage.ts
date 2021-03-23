@@ -14,7 +14,18 @@ import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocume
 import { ApiEntryPoint } from './ApiEntryPoint';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import { DeserializerContext, ApiJsonSchemaVersion } from './DeserializerContext';
-import { ITSDocTagDefinitionParameters, TSDocConfiguration, TSDocTagDefinition } from '@microsoft/tsdoc';
+import { TSDocConfiguration, TSDocTagDefinition, TSDocTagSyntaxKind } from '@microsoft/tsdoc';
+
+interface ITagConfigJson {
+  tagName: string;
+  syntaxKind: 'inline' | 'block' | 'modifier';
+  allowMultiple?: boolean;
+}
+
+interface ITSDocConfigJson {
+  tagDefinitions: ITagConfigJson[];
+  supportForTags: { [tagName: string]: boolean };
+}
 
 /**
  * Constructor options for {@link ApiPackage}.
@@ -25,9 +36,9 @@ export interface IApiPackageOptions
     IApiNameMixinOptions,
     IApiDocumentedItemOptions {
   /**
-   * Any non-standard TSDoc tag definitions the package uses.
+   * The TSDoc tag definitions and support for the package
    */
-  nonStandardTSDocTags?: ITSDocTagDefinitionParameters[];
+  tsDocConfig: ITSDocConfigJson;
 }
 
 export interface IApiPackageMetadataJson {
@@ -68,7 +79,7 @@ export interface IApiPackageMetadataJson {
   /**
    * The TSDoc tags used by the package
    */
-  nonStandardTSDocTags?: ITSDocTagDefinitionParameters[];
+  tsDocConfig: ITSDocConfigJson;
 }
 
 export interface IApiPackageJson extends IApiItemJson {
@@ -117,16 +128,14 @@ export interface IApiPackageSaveOptions extends IJsonFileSaveOptions {
  */
 export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumentedItem)) {
   /**
-   * Non-standard TSDoc Tags associated to the package.
+   * TSDoc Tags for to the package.
    */
-  public readonly nonStandardTSDocTags: ITSDocTagDefinitionParameters[] | void;
+  private readonly _tsdocConfig: ITSDocConfigJson;
 
   public constructor(options: IApiPackageOptions) {
     super(options);
 
-    if (Array.isArray(options.nonStandardTSDocTags)) {
-      this.nonStandardTSDocTags = options.nonStandardTSDocTags;
-    }
+    this._tsdocConfig = options.tsDocConfig;
   }
 
   public static loadFromJsonFile(apiJsonFilename: string): ApiPackage {
@@ -178,18 +187,27 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
     }
 
     const tsdocConfiguration: TSDocConfiguration = new TSDocConfiguration();
+    tsdocConfiguration.clear(true);
+    const { tagDefinitions, supportForTags } = jsonObject.metadata.tsDocConfig;
+    tsdocConfiguration.addTagDefinitions(
+      tagDefinitions.map((definition) => {
+        const { syntaxKind } = definition;
+        const formattedSyntaxKind: TSDocTagSyntaxKind =
+          syntaxKind === 'block'
+            ? TSDocTagSyntaxKind.BlockTag
+            : syntaxKind === 'inline'
+            ? TSDocTagSyntaxKind.InlineTag
+            : TSDocTagSyntaxKind.ModifierTag;
+        return new TSDocTagDefinition({ ...definition, syntaxKind: formattedSyntaxKind });
+      })
+    );
 
-    // Set support for standard tags
-    tsdocConfiguration.setSupportForTags(tsdocConfiguration.tagDefinitions, true);
-
-    if (Array.isArray(jsonObject.metadata.nonStandardTSDocTags)) {
-      tsdocConfiguration.addTagDefinitions(
-        jsonObject.metadata.nonStandardTSDocTags.map(
-          (tag: ITSDocTagDefinitionParameters) => new TSDocTagDefinition(tag)
-        ),
-        true
-      );
-    }
+    Object.entries(supportForTags).forEach(([name, supported]) => {
+      const tag: TSDocTagDefinition | undefined = tsdocConfiguration.tryGetTagDefinition(name);
+      if (tag) {
+        tsdocConfiguration.setSupportForTag(tag, supported);
+      }
+    });
 
     const context: DeserializerContext = new DeserializerContext({
       apiJsonFilename,
@@ -244,7 +262,7 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
         toolVersion: options.testMode ? '[test mode]' : options.toolVersion || packageJson.version,
         schemaVersion: ApiJsonSchemaVersion.LATEST,
         oldestForwardsCompatibleVersion: ApiJsonSchemaVersion.OLDEST_FORWARDS_COMPATIBLE,
-        nonStandardTSDocTags: this.nonStandardTSDocTags
+        tsDocConfig: this._tsdocConfig
       }
     } as IApiPackageJson;
     this.serializeInto(jsonObject);
