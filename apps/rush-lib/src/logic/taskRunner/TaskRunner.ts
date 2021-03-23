@@ -66,7 +66,7 @@ export class TaskRunner {
       repoCommandLineConfiguration
     } = options;
     this._tasks = orderedTasks;
-    this._buildQueue = orderedTasks.slice(0);
+    this._buildQueue = orderedTasks.slice(0).reverse();
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._hasAnyWarnings = false;
@@ -195,17 +195,18 @@ export class TaskRunner {
    * Removes any non-ready tasks from the build queue (this should only be blocked tasks)
    */
   private _getNextTask(): Task | undefined {
-    for (let i: number = 0; i < this._buildQueue.length; i++) {
-      const task: Task = this._buildQueue[i];
+    const { _buildQueue: buildQueue } = this;
+
+    for (let i: number = buildQueue.length - 1; i >= 0; i--) {
+      const task: Task = buildQueue[i];
 
       if (task.status !== TaskStatus.Ready) {
         // It shouldn't be on the queue, remove it
-        this._buildQueue.splice(i, 1);
-        // Decrement since we modified the array
-        i--;
+        // This should be a blocked task
+        buildQueue.splice(i, 1);
       } else if (task.dependencies.size === 0 && task.status === TaskStatus.Ready) {
         // this is a task which is ready to go. remove it and return it
-        return this._buildQueue.splice(i, 1)[0];
+        return buildQueue.splice(i, 1)[0];
       }
       // Otherwise task is still waiting
     }
