@@ -40,6 +40,14 @@ export class Stopwatch {
     return this._state;
   }
 
+  public get startTime(): number | undefined {
+    return this._startTime;
+  }
+
+  public get endTime(): number | undefined {
+    return this._endTime;
+  }
+
   /**
    * Starts the stopwatch. Note that if end() has been called,
    * reset() should be called before calling start() again.

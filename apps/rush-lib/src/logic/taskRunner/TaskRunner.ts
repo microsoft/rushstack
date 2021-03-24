@@ -18,6 +18,7 @@ import { Task } from './Task';
 import { TaskStatus } from './TaskStatus';
 import { IBuilderContext } from './BaseBuilder';
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
+import { IProfilerAsyncEventOptions, Tracer } from '../tracer/Tracer';
 
 export interface ITaskRunnerOptions {
   quietMode: boolean;
@@ -26,6 +27,7 @@ export interface ITaskRunnerOptions {
   allowWarningsInSuccessfulBuild: boolean;
   repoCommandLineConfiguration: CommandLineConfiguration | undefined;
   destination?: TerminalWritable;
+  tracer?: Tracer | undefined;
 }
 
 /**
@@ -47,13 +49,15 @@ export class TaskRunner {
   private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
   private _hasAnyFailures: boolean;
   private _hasAnyWarnings: boolean;
-  private _currentActiveTasks!: number;
+
   private _totalTasks!: number;
   private _completedTasks!: number;
+  private readonly _waitingWorkers: [(result: IteratorResult<Task>) => void, (err: Error) => void][];
 
   private readonly _outputWritable: TerminalWritable;
   private readonly _colorsNewlinesTransform: TextRewriterTransform;
   private readonly _streamCollator: StreamCollator;
+  private readonly _tracer: Tracer | undefined;
 
   private _terminal: CollatedTerminal;
 
@@ -63,10 +67,12 @@ export class TaskRunner {
       parallelism,
       changedProjectsOnly,
       allowWarningsInSuccessfulBuild,
-      repoCommandLineConfiguration
+      repoCommandLineConfiguration,
+      tracer
     } = options;
     this._tasks = orderedTasks;
     this._buildQueue = orderedTasks.slice(0).reverse();
+    this._waitingWorkers = [];
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._hasAnyWarnings = false;
@@ -89,6 +95,7 @@ export class TaskRunner {
       onWriterActive: this._streamCollator_onWriterActive
     });
     this._terminal = this._streamCollator.terminal;
+    this._tracer = tracer;
 
     const numberOfCores: number = os.cpus().length;
 
@@ -159,7 +166,6 @@ export class TaskRunner {
    * tasks are completed successfully, or rejects when any task fails.
    */
   public async executeAsync(): Promise<void> {
-    this._currentActiveTasks = 0;
     this._completedTasks = 0;
     this._totalTasks = this._tasks.length;
 
@@ -177,7 +183,13 @@ export class TaskRunner {
 
     this._terminal.writeStdoutLine(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
 
-    await this._startAvailableTasksAsync();
+    const maxParallelism: number = Math.min(this._buildQueue.length, this._parallelism);
+    const workers: Promise<void>[] = [];
+    for (let i: number = 0; i < maxParallelism; i++) {
+      workers[i] = this._taskWorker(i);
+    }
+
+    await Promise.all(workers);
 
     this._printTaskStatus();
 
@@ -194,7 +206,7 @@ export class TaskRunner {
    * Pulls the next task with no dependencies off the build queue
    * Removes any non-ready tasks from the build queue (this should only be blocked tasks)
    */
-  private _getNextTask(): Task | undefined {
+  private _getNextTaskSync(): IteratorResult<Task | undefined> {
     const { _buildQueue: buildQueue } = this;
 
     for (let i: number = buildQueue.length - 1; i >= 0; i--) {
@@ -206,36 +218,63 @@ export class TaskRunner {
         buildQueue.splice(i, 1);
       } else if (task.dependencies.size === 0 && task.status === TaskStatus.Ready) {
         // this is a task which is ready to go. remove it and return it
-        return buildQueue.splice(i, 1)[0];
+        return {
+          done: false,
+          value: buildQueue.splice(i, 1)[0]
+        };
       }
       // Otherwise task is still waiting
     }
-    return undefined; // There are no tasks ready to go at this time
+
+    return {
+      done: buildQueue.length === 0,
+      value: undefined
+    }; // There are no tasks ready to go at this time
   }
 
-  /**
-   * Helper function which finds any tasks which are available to run and begins executing them.
-   * It calls the complete callback when all tasks are completed, or rejects if any task fails.
-   */
-  private async _startAvailableTasksAsync(): Promise<void> {
-    const taskPromises: Promise<void>[] = [];
-    let ctask: Task | undefined;
-    while (this._currentActiveTasks < this._parallelism && (ctask = this._getNextTask())) {
-      this._currentActiveTasks++;
-      const task: Task = ctask;
-      task.status = TaskStatus.Executing;
+  private _getTaskIterable(): AsyncIterable<Task> {
+    return {
+      [Symbol.asyncIterator]: (): AsyncIterator<Task, void, undefined> => {
+        return {
+          next: (): Promise<IteratorResult<Task, void>> => {
+            const syncResult: IteratorResult<Task | undefined> = this._getNextTaskSync();
 
-      task.stopwatch = Stopwatch.start();
-      task.collatedWriter = this._streamCollator.registerTask(task.name);
-      task.stdioSummarizer = new StdioSummarizer();
+            if (syncResult.value || syncResult.done) {
+              return Promise.resolve(syncResult as IteratorResult<Task, void>);
+            }
 
-      taskPromises.push(this._executeTaskAndChainAsync(task));
+            return new Promise(
+              (resolve: (result: IteratorResult<Task, void>) => void, reject: (err: Error) => void) => {
+                this._waitingWorkers.push([resolve, reject]);
+              }
+            );
+          }
+        };
+      }
+    };
+  }
+
+  private async _taskWorker(tid: number): Promise<void> {
+    for await (const task of this._getTaskIterable()) {
+      await this._executeTaskAsync(task, tid);
+
+      while (this._waitingWorkers.length) {
+        const syncResult: IteratorResult<Task | undefined> = this._getNextTaskSync();
+        if (syncResult.done || syncResult.value) {
+          this._waitingWorkers.pop()![0](syncResult as IteratorResult<Task>);
+        } else {
+          break;
+        }
+      }
     }
-
-    await Promise.all(taskPromises);
   }
 
-  private async _executeTaskAndChainAsync(task: Task): Promise<void> {
+  private async _executeTaskAsync(task: Task, tid: number): Promise<void> {
+    task.status = TaskStatus.Executing;
+    task.stopwatch = Stopwatch.start();
+    task.collatedWriter = this._streamCollator.registerTask(task.name);
+    task.stdioSummarizer = new StdioSummarizer();
+
     const context: IBuilderContext = {
       repoCommandLineConfiguration: this._repoCommandLineConfiguration,
       stdioSummarizer: task.stdioSummarizer,
@@ -244,12 +283,21 @@ export class TaskRunner {
     };
 
     try {
+      const traceMetadata: IProfilerAsyncEventOptions = {
+        cat: 'project',
+        name: task.name,
+        tid
+      };
+
+      if (this._tracer) {
+        this._tracer.logAsyncStart(traceMetadata, task.stopwatch.startTime!);
+      }
+
       const result: TaskStatus = await task.builder.executeAsync(context);
 
       task.stopwatch.stop();
       task.stdioSummarizer.close();
 
-      this._currentActiveTasks--;
       switch (result) {
         case TaskStatus.Success:
           this._markTaskAsSuccess(task);
@@ -269,10 +317,12 @@ export class TaskRunner {
           this._markTaskAsFailed(task);
           break;
       }
+
+      if (this._tracer) {
+        this._tracer.logAsyncEnd(traceMetadata, task.stopwatch.endTime!);
+      }
     } catch (error) {
       task.stdioSummarizer.close();
-
-      this._currentActiveTasks--;
 
       this._hasAnyFailures = true;
 
@@ -283,8 +333,6 @@ export class TaskRunner {
     }
 
     task.collatedWriter.close();
-
-    await this._startAvailableTasksAsync();
   }
 
   /**

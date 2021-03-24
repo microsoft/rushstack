@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
+import * as path from 'path';
 import colors from 'colors/safe';
 
 import { AlreadyReportedError, ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
@@ -26,6 +27,7 @@ import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { Selection } from '../../logic/Selection';
 import { SelectionParameterSet } from '../SelectionParameterSet';
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
+import { Tracer } from '../../logic/tracer/Tracer';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -76,6 +78,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private _changedProjectsOnly!: CommandLineFlagParameter;
   private _selectionParameters!: SelectionParameterSet;
   private _verboseParameter!: CommandLineFlagParameter;
+  private _traceParameter!: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
   private _ignoreHooksParameter!: CommandLineFlagParameter;
   private _disableBuildCacheFlag: CommandLineFlagParameter | undefined;
@@ -149,12 +152,22 @@ export class BulkScriptAction extends BaseScriptAction {
       packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun)
     };
 
+    const tracer: Tracer | undefined = this._traceParameter.value
+      ? new Tracer({
+          traceFilePath: path.join(
+            this.rushConfiguration.commonTempFolder,
+            `${this.actionName}.${Date.now()}.trace.json`
+          )
+        })
+      : undefined;
+
     const taskRunnerOptions: ITaskRunnerOptions = {
       quietMode: isQuietMode,
       parallelism: parallelism,
       changedProjectsOnly: changedProjectsOnly,
       allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild,
-      repoCommandLineConfiguration: this._repoCommandLineConfiguration
+      repoCommandLineConfiguration: this._repoCommandLineConfiguration,
+      tracer
     };
 
     const executeOptions: IExecuteInternalOptions = {
@@ -168,6 +181,10 @@ export class BulkScriptAction extends BaseScriptAction {
       await this._runWatch(executeOptions);
     } else {
       await this._runOnce(executeOptions);
+    }
+
+    if (tracer) {
+      tracer.close();
     }
   }
 
@@ -315,6 +332,11 @@ export class BulkScriptAction extends BaseScriptAction {
         description: '(EXPERIMENTAL) Disables the build cache for this command invocation.'
       });
     }
+
+    this._traceParameter = this.defineFlagParameter({
+      parameterLongName: '--trace',
+      description: '(EXPERIMENTAL) Enables generation of tracing metadata in the Chrome Trace Events format.'
+    });
 
     this.defineScriptParameters();
   }
