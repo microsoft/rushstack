@@ -252,9 +252,9 @@ export class CertificateManager {
       terminal.writeErrorLine(`Error finding certUtil command: "${whereErr}"`);
       return undefined;
     } else {
-      const lines: string[] = where.stdout.toString().trim().split(EOL);
-      // eslint-disable-next-line require-atomic-updates
-      return lines[0].trim();
+      const lines: string[] = where.stdout;
+      // The first line should be the path of certutil.exe
+      return lines[0];
     }
   }
 
