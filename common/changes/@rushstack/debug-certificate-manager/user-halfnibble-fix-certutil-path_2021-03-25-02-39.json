@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/debug-certificate-manager",
+      "comment": "Fix bug resolving the path of certutil.exe on Windows.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/debug-certificate-manager",
+  "email": "halfnibble@users.noreply.github.com"
+}
