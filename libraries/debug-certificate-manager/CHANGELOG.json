@@ -2,6 +2,18 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.0.6",
+      "tag": "@rushstack/debug-certificate-manager_v1.0.6",
+      "date": "Thu, 25 Mar 2021 04:57:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix bug resolving the path of certutil.exe on Windows."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.5",
       "tag": "@rushstack/debug-certificate-manager_v1.0.5",
       "date": "Fri, 19 Mar 2021 22:31:38 GMT",
