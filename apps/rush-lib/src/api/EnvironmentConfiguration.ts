@@ -20,6 +20,9 @@ export const enum EnvironmentVariableNames {
   /**
    * This variable overrides the temporary folder used by Rush.
    * The default value is "common/temp" under the repository root.
+   *
+   * @deprecated This environment variable is not compatible with workspace installs and
+   * will be removed in a future version of Rush.
    */
   RUSH_TEMP_FOLDER = 'RUSH_TEMP_FOLDER',
 

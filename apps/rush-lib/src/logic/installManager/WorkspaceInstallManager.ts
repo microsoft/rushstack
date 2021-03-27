@@ -30,6 +30,7 @@ import { IPnpmfileShimSettings } from '../pnpm/IPnpmfileShimSettings';
 import { PnpmProjectDependencyManifest } from '../pnpm/PnpmProjectDependencyManifest';
 import { PnpmShrinkwrapFile, IPnpmShrinkwrapImporterYaml } from '../pnpm/PnpmShrinkwrapFile';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -65,6 +66,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
     const stopwatch: Stopwatch = Stopwatch.start();
+
+    // Block use of the RUSH_TEMP_FOLDER environment variable
+    if (EnvironmentConfiguration.rushTempFolderOverride !== undefined) {
+      throw new Error('The RUSH_TEMP_FOLDER environment variable is not compatible with workspace installs.');
+    }
 
     console.log(
       os.EOL + colors.bold('Updating workspace files in ' + this.rushConfiguration.commonTempFolder)
