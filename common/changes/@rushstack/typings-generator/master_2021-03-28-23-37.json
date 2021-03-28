@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/typings-generator",
+      "comment": "fixes a bug where watched files would not honor typings generation excludeFiles settings",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/typings-generator",
+  "email": "scamden@users.noreply.github.com"
+}
