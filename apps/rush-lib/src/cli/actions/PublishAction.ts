@@ -83,7 +83,7 @@ export class PublishAction extends BaseRushAction {
     this._publish = this.defineFlagParameter({
       parameterLongName: '--publish',
       parameterShortName: '-p',
-      description: 'If this flag is specified, applied changes will be published to npm.'
+      description: 'If this flag is specified, applied changes will be published to the NPM registry.'
     });
     this._addCommitDetails = this.defineFlagParameter({
       parameterLongName: '--add-commit-details',

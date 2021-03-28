@@ -723,7 +723,7 @@ Optional arguments:
                         deleted change requests will be committed and merged 
                         into the target branch.
   -p, --publish         If this flag is specified, applied changes will be 
-                        published to npm.
+                        published to the NPM registry.
   --add-commit-details  Adds commit author and hash to the changelog.json 
                         files for each change.
   --regenerate-changelogs
