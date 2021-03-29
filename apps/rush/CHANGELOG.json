@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.42.4",
+      "tag": "@microsoft/rush_v5.42.4",
+      "date": "Mon, 29 Mar 2021 05:57:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Don't validate the shrinkwrap when running 'rush update'"
+          },
+          {
+            "comment": "Gracefully handle a simultaneous upload to Azure Storage."
+          },
+          {
+            "comment": "Update rush publish -p flag description"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.42.3",
       "tag": "@microsoft/rush_v5.42.3",
       "date": "Wed, 17 Mar 2021 05:07:02 GMT",

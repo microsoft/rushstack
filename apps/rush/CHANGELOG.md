@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 17 Mar 2021 05:07:02 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Mar 2021 05:57:18 GMT and should not be manually modified.
+
+## 5.42.4
+Mon, 29 Mar 2021 05:57:18 GMT
+
+### Updates
+
+- Don't validate the shrinkwrap when running 'rush update'
+- Gracefully handle a simultaneous upload to Azure Storage.
+- Update rush publish -p flag description
 
 ## 5.42.3
 Wed, 17 Mar 2021 05:07:02 GMT
