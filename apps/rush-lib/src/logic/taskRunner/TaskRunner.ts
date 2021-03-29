@@ -18,7 +18,8 @@ import { Task } from './Task';
 import { TaskStatus } from './TaskStatus';
 import { IBuilderContext } from './BaseBuilder';
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
-import { IProfilerAsyncEventOptions, Tracer } from '../tracer/Tracer';
+import { Tracer } from '../tracer/Tracer';
+import { Utilities } from '../../utilities/Utilities';
 
 export interface ITaskRunnerOptions {
   quietMode: boolean;
@@ -183,10 +184,14 @@ export class TaskRunner {
 
     this._terminal.writeStdoutLine(`Executing a maximum of ${this._parallelism} simultaneous processes...`);
 
+    if (this._tracer) {
+      this._traceQueueStatus();
+    }
+
     const maxParallelism: number = Math.min(this._buildQueue.length, this._parallelism);
     const workers: Promise<void>[] = [];
     for (let i: number = 0; i < maxParallelism; i++) {
-      workers[i] = this._taskWorker(i);
+      workers[i] = this._taskWorker(i + 1);
     }
 
     await Promise.all(workers);
@@ -283,16 +288,6 @@ export class TaskRunner {
     };
 
     try {
-      const traceMetadata: IProfilerAsyncEventOptions = {
-        cat: 'project',
-        name: task.name,
-        tid
-      };
-
-      if (this._tracer) {
-        this._tracer.logAsyncStart(traceMetadata, task.stopwatch.startTime!);
-      }
-
       const result: TaskStatus = await task.builder.executeAsync(context);
 
       task.stopwatch.stop();
@@ -319,7 +314,16 @@ export class TaskRunner {
       }
 
       if (this._tracer) {
-        this._tracer.logAsyncEnd(traceMetadata, task.stopwatch.endTime!);
+        this._tracer.logCompleteEvent(
+          {
+            cat: 'devtools.timeline,project',
+            name: task.name,
+            tid
+          },
+          task.stopwatch.startTime!,
+          task.stopwatch.endTime!
+        );
+        this._traceQueueStatus();
       }
     } catch (error) {
       task.stdioSummarizer.close();
@@ -427,6 +431,39 @@ export class TaskRunner {
     task.dependents.forEach((dependent: Task) => {
       dependent.dependencies.delete(task);
     });
+  }
+
+  /**
+   * Records the current status of the task queue as perf counters to the timeline trace, if enabled
+   */
+  private _traceQueueStatus(): void {
+    if (!this._tracer) {
+      return;
+    }
+
+    const taskSummary: { [P in TaskStatus]: number } = {
+      [TaskStatus.Skipped]: 0,
+      [TaskStatus.FromCache]: 0,
+      [TaskStatus.Success]: 0,
+      [TaskStatus.SuccessWithWarning]: 0,
+      [TaskStatus.Blocked]: 0,
+      [TaskStatus.Failure]: 0,
+      [TaskStatus.Ready]: 0,
+      [TaskStatus.Executing]: 0
+    };
+
+    for (const task of this._tasks) {
+      taskSummary[task.status]++;
+    }
+
+    this._tracer.logCounterEvent(
+      {
+        cat: 'stats',
+        name: 'task-queue',
+        args: taskSummary
+      },
+      Utilities.getTimeInMs()
+    );
   }
 
   /**

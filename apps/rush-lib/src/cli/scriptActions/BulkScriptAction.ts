@@ -109,6 +109,20 @@ export class BulkScriptAction extends BaseScriptAction {
       }
     }
 
+    const traceFilePath: string = this._traceParameter.value
+      ? path.join(this.rushConfiguration.rushJsonFolder, `${this.actionName}.${Date.now()}.trace.json`)
+      : '';
+
+    if (traceFilePath) {
+      console.log(`Trace will be written to ${traceFilePath}`);
+    }
+
+    const tracer: Tracer | undefined = traceFilePath
+      ? new Tracer({
+          traceFilePath
+        })
+      : undefined;
+
     this._doBeforeTask();
 
     const stopwatch: Stopwatch = Stopwatch.start();
@@ -152,15 +166,6 @@ export class BulkScriptAction extends BaseScriptAction {
       packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun)
     };
 
-    const tracer: Tracer | undefined = this._traceParameter.value
-      ? new Tracer({
-          traceFilePath: path.join(
-            this.rushConfiguration.commonTempFolder,
-            `${this.actionName}.${Date.now()}.trace.json`
-          )
-        })
-      : undefined;
-
     const taskRunnerOptions: ITaskRunnerOptions = {
       quietMode: isQuietMode,
       parallelism: parallelism,
@@ -184,7 +189,11 @@ export class BulkScriptAction extends BaseScriptAction {
     }
 
     if (tracer) {
-      tracer.close();
+      tracer.logCompleteEvent(
+        { cat: 'devtools.timeline', name: this.actionName, tid: 0 },
+        stopwatch.startTime!,
+        stopwatch.endTime!
+      );
     }
   }
 
