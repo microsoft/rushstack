@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-documenter",
-      "comment": "split events and methods",
+      "comment": "split events from properties",
       "type": "patch"
     }
   ],
