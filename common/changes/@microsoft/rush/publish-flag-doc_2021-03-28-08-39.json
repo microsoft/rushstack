@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update rush publish -p flag description",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "bbenoist@users.noreply.github.com"
+}
