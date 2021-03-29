@@ -69,7 +69,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // Block use of the RUSH_TEMP_FOLDER environment variable
     if (EnvironmentConfiguration.rushTempFolderOverride !== undefined) {
-      throw new Error('The RUSH_TEMP_FOLDER environment variable is not compatible with workspace installs.');
+      throw new Error(
+        'The RUSH_TEMP_FOLDER environment variable is not compatible with workspace installs. If attempting ' +
+          'to move the PNPM store path, see the `RUSH_PNPM_STORE_PATH` environment variable.'
+      );
     }
 
     console.log(
