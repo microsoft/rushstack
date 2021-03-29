@@ -79,7 +79,7 @@ export class Tracer {
     this._destination.write(
       `,\n${JSON.stringify({
         ...options,
-        ph: 'B',
+        ph: 'X',
         pid: process.pid,
         ts: startTimeMs * 1e3,
         dur: (endTimeMs - startTimeMs) * 1e3
