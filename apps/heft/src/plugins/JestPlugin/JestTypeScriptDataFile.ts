@@ -9,7 +9,7 @@ import { JsonFile } from '@rushstack/node-core-library';
  */
 export interface IJestTypeScriptDataFileJson {
   /**
-   * The "emitFolderNameForTests" from .heft/typescript.json
+   * The "emitFolderNameForTests" from config/typescript.json
    */
   emitFolderNameForTests: string;
 
