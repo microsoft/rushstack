@@ -4,7 +4,6 @@
   "description": "For use with the Rush tool, this file tracks changes that are made to individual packages within the Rush repo. See http://rushjs.io for details.",
 
   "type": "object",
-  "required": ["changes", "packageName", "email"],
   "properties": {
     "$schema": {
       "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
