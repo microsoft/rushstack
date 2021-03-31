@@ -1,6 +1,11 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Mon, 29 Mar 2021 05:02:06 GMT and should not be manually modified.
+This log was last generated on Wed, 31 Mar 2021 15:10:36 GMT and should not be manually modified.
+
+## 7.5.58
+Wed, 31 Mar 2021 15:10:36 GMT
+
+_Version update only_
 
 ## 7.5.57
 Mon, 29 Mar 2021 05:02:06 GMT

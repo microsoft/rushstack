@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.25.5",
+      "tag": "@rushstack/heft_v0.25.5",
+      "date": "Wed, 31 Mar 2021 15:10:36 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an outdated path in an error message."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.25.4",
       "tag": "@rushstack/heft_v0.25.4",
       "date": "Mon, 29 Mar 2021 05:02:06 GMT",
