@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "\"Validate changefiles against a schema when running 'rush change --verify'\"",
+      "comment": "Validate changefiles against a schema when running 'rush change --verify'",
       "type": "none"
     }
   ],
