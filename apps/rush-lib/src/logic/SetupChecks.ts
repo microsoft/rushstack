@@ -119,7 +119,31 @@ export class SetupChecks {
       // If there is a node_modules folder under this folder, add it to the list of bad folders
       const nodeModulesFolder: string = path.join(folder, RushConstants.nodeModulesFolderName);
       if (FileSystem.exists(nodeModulesFolder)) {
-        phantomFolders.push(nodeModulesFolder);
+        // Collect the names of files/folders in that node_modules folder
+        const filenames: string[] = FileSystem.readFolder(nodeModulesFolder).filter(
+          (x) => !x.startsWith('.')
+        );
+
+        let ignore: boolean = false;
+
+        if (filenames.length === 0) {
+          // If the node_modules folder is completely empty, then it's not a concern
+          ignore = true;
+        } else if (filenames.length === 1 && filenames[0] === 'vso-task-lib') {
+          // Special case:  The Azure DevOps build agent installs the "vso-task-lib" NPM package
+          // in a top-level path such as:
+          //
+          //   /home/vsts/work/node_modules/vso-task-lib
+          //
+          // It is always the only package in that node_modules folder.  The "vso-task-lib" package
+          // is now deprecated, so it is unlikely to be a real dependency of any modern project.
+          // To avoid false alarms, we ignore this specific case.
+          ignore = true;
+        }
+
+        if (!ignore) {
+          phantomFolders.push(nodeModulesFolder);
+        }
       }
 
       // Walk upwards
