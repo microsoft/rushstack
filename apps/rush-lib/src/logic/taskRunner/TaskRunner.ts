@@ -14,6 +14,7 @@ import { StreamCollator, CollatedTerminal, CollatedWriter } from '@rushstack/str
 import { AlreadyReportedError, NewlineKind, InternalError, Sort } from '@rushstack/node-core-library';
 
 import { Stopwatch } from '../../utilities/Stopwatch';
+import { AsyncTaskQueue } from './AsyncTaskQueue';
 import { Task } from './Task';
 import { TaskStatus } from './TaskStatus';
 import { IBuilderContext } from './BaseBuilder';
@@ -44,7 +45,6 @@ export class TaskRunner {
   private readonly _tasks: Task[];
   private readonly _changedProjectsOnly: boolean;
   private readonly _allowWarningsInSuccessfulBuild: boolean;
-  private readonly _buildQueue: Task[];
   private readonly _quietMode: boolean;
   private readonly _parallelism: number;
   private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
@@ -53,7 +53,6 @@ export class TaskRunner {
 
   private _totalTasks!: number;
   private _completedTasks!: number;
-  private readonly _waitingWorkers: [(result: IteratorResult<Task>) => void, (err: Error) => void][];
 
   private readonly _outputWritable: TerminalWritable;
   private readonly _colorsNewlinesTransform: TextRewriterTransform;
@@ -72,8 +71,6 @@ export class TaskRunner {
       tracer
     } = options;
     this._tasks = orderedTasks;
-    this._buildQueue = orderedTasks.slice(0).reverse();
-    this._waitingWorkers = [];
     this._quietMode = quietMode;
     this._hasAnyFailures = false;
     this._hasAnyWarnings = false;
@@ -188,13 +185,21 @@ export class TaskRunner {
       this._traceQueueStatus();
     }
 
-    const maxParallelism: number = Math.min(this._buildQueue.length, this._parallelism);
-    const workers: Promise<void>[] = [];
-    for (let i: number = 0; i < maxParallelism; i++) {
-      workers[i] = this._taskWorker(i + 1);
-    }
+    const maxParallelism: number = Math.min(this._tasks.length, this._parallelism);
+    const taskQueue: AsyncTaskQueue = new AsyncTaskQueue(this._tasks);
 
-    await Promise.all(workers);
+    // Array(n).map() iterates 0 elements, but using the iteration protocol it iterates n, hence Array.from()
+    await Promise.all(
+      Array.from(
+        Array(maxParallelism),
+        async (unused: unknown, index: number): Promise<void> => {
+          const laneId: number = index + 1;
+          for await (const task of taskQueue) {
+            await this._executeTaskAsync(task, laneId);
+          }
+        }
+      )
+    );
 
     this._printTaskStatus();
 
@@ -204,73 +209,6 @@ export class TaskRunner {
     } else if (this._hasAnyWarnings && !this._allowWarningsInSuccessfulBuild) {
       this._terminal.writeStderrLine(colors.yellow('Projects succeeded with warnings.') + '\n');
       throw new AlreadyReportedError();
-    }
-  }
-
-  /**
-   * Pulls the next task with no dependencies off the build queue
-   * Removes any non-ready tasks from the build queue (this should only be blocked tasks)
-   */
-  private _getNextTaskSync(): IteratorResult<Task | undefined> {
-    const { _buildQueue: buildQueue } = this;
-
-    for (let i: number = buildQueue.length - 1; i >= 0; i--) {
-      const task: Task = buildQueue[i];
-
-      if (task.status !== TaskStatus.Ready) {
-        // It shouldn't be on the queue, remove it
-        // This should be a blocked task
-        buildQueue.splice(i, 1);
-      } else if (task.dependencies.size === 0 && task.status === TaskStatus.Ready) {
-        // this is a task which is ready to go. remove it and return it
-        return {
-          done: false,
-          value: buildQueue.splice(i, 1)[0]
-        };
-      }
-      // Otherwise task is still waiting
-    }
-
-    return {
-      done: buildQueue.length === 0,
-      value: undefined
-    }; // There are no tasks ready to go at this time
-  }
-
-  private _getTaskIterable(): AsyncIterable<Task> {
-    return {
-      [Symbol.asyncIterator]: (): AsyncIterator<Task, void, undefined> => {
-        return {
-          next: (): Promise<IteratorResult<Task, void>> => {
-            const syncResult: IteratorResult<Task | undefined> = this._getNextTaskSync();
-
-            if (syncResult.value || syncResult.done) {
-              return Promise.resolve(syncResult as IteratorResult<Task, void>);
-            }
-
-            return new Promise(
-              (resolve: (result: IteratorResult<Task, void>) => void, reject: (err: Error) => void) => {
-                this._waitingWorkers.push([resolve, reject]);
-              }
-            );
-          }
-        };
-      }
-    };
-  }
-
-  private async _taskWorker(tid: number): Promise<void> {
-    for await (const task of this._getTaskIterable()) {
-      await this._executeTaskAsync(task, tid);
-
-      while (this._waitingWorkers.length) {
-        const syncResult: IteratorResult<Task | undefined> = this._getNextTaskSync();
-        if (syncResult.done || syncResult.value) {
-          this._waitingWorkers.pop()![0](syncResult as IteratorResult<Task>);
-        } else {
-          break;
-        }
-      }
     }
   }
 
