@@ -19,13 +19,14 @@ export class AsyncTaskQueue implements AsyncIterable<Task>, AsyncIterator<Task> 
   private readonly _pendingIterators: ((result: IteratorResult<Task>) => void)[];
 
   public constructor(tasks: ReadonlyArray<Task>) {
+    // Reverse the sequence so that early tasks are at the end, to minimize copies
     this._queue = tasks.slice().reverse();
     this._pendingIterators = [];
   }
 
   /**
    * For use with `for await (const task of taskQueue)`
-   * @see {AsyncIterable}
+   * @see {AsyncIterator}
    */
   public next(): Promise<IteratorResult<Task>> {
     const { _queue: taskQueue, _pendingIterators: waitingIterators } = this;
@@ -36,7 +37,7 @@ export class AsyncTaskQueue implements AsyncIterable<Task>, AsyncIterator<Task> 
       }
     );
 
-    // By iterating in reverse order we do less array shuffling when removing items
+    // By iterating in reverse order we do less array shuffling when removing tasks
     for (let i: number = taskQueue.length - 1; waitingIterators.length > 0 && i >= 0; i--) {
       const task: Task = taskQueue[i];
 

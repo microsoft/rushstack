@@ -5,13 +5,13 @@ import { Task } from '../Task';
 import { TaskStatus } from '../TaskStatus';
 import { AsyncTaskQueue } from '../AsyncTaskQueue';
 
-function link(dependent: Task, dependency: Task): void {
+function addDependency(dependent: Task, dependency: Task): void {
   dependent.dependencies.add(dependency);
   dependency.dependents.add(dependent);
 }
 
 describe('AsyncTaskQueue', () => {
-  it('iterates tasks in the expected order', async () => {
+  it('iterates tasks in topological order', async () => {
     const tasks = [
       new Task(undefined!, TaskStatus.Ready),
       new Task(undefined!, TaskStatus.Ready),
@@ -19,9 +19,9 @@ describe('AsyncTaskQueue', () => {
       new Task(undefined!, TaskStatus.Ready)
     ];
 
-    link(tasks[0], tasks[2]);
-    link(tasks[3], tasks[1]);
-    link(tasks[1], tasks[0]);
+    addDependency(tasks[0], tasks[2]);
+    addDependency(tasks[3], tasks[1]);
+    addDependency(tasks[1], tasks[0]);
 
     const expectedOrder = [tasks[2], tasks[0], tasks[1], tasks[3]];
     const actualOrder = [];
@@ -46,10 +46,10 @@ describe('AsyncTaskQueue', () => {
     ];
 
     // Set up to allow (0,1) -> (2) -> (3,4)
-    link(tasks[2], tasks[0]);
-    link(tasks[2], tasks[1]);
-    link(tasks[3], tasks[2]);
-    link(tasks[4], tasks[2]);
+    addDependency(tasks[2], tasks[0]);
+    addDependency(tasks[2], tasks[1]);
+    addDependency(tasks[3], tasks[2]);
+    addDependency(tasks[4], tasks[2]);
 
     const expectedConcurrency = new Map([
       [tasks[0], 2],
@@ -63,8 +63,9 @@ describe('AsyncTaskQueue', () => {
     const queue: AsyncTaskQueue = new AsyncTaskQueue(tasks);
     let concurrency: number = 0;
 
+    // Use 3 concurrent iterators to verify that it handles having more than the task concurrency
     await Promise.all(
-      Array.from(Array(2), async (unused: unknown, worker: number) => {
+      Array.from({ length: 3 }, async () => {
         for await (const task of queue) {
           ++concurrency;
           await Promise.resolve();

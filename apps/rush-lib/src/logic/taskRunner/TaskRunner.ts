@@ -188,11 +188,12 @@ export class TaskRunner {
     const maxParallelism: number = Math.min(this._tasks.length, this._parallelism);
     const taskQueue: AsyncTaskQueue = new AsyncTaskQueue(this._tasks);
 
-    // Array(n).map() iterates 0 elements, but using the iteration protocol it iterates n, hence Array.from()
+    // Iterate in parallel with maxParallelism concurrent lanes
     await Promise.all(
       Array.from(
-        Array(maxParallelism),
-        async (unused: unknown, index: number): Promise<void> => {
+        { length: maxParallelism },
+        async (unused: undefined, index: number): Promise<void> => {
+          // laneId is used for --trace to render the concurrency
           const laneId: number = index + 1;
           for await (const task of taskQueue) {
             await this._executeTaskAsync(task, laneId);
