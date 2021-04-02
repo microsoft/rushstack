@@ -57,6 +57,13 @@ export type IWebpackConfiguration =
 /**
  * @public
  */
+export class CompileSubstageHooks extends BuildSubstageHooksBase {
+  public readonly afterCompile: AsyncParallelHook = new AsyncParallelHook();
+}
+
+/**
+ * @public
+ */
 export class BundleSubstageHooks extends BuildSubstageHooksBase {
   public readonly configureWebpack: AsyncSeriesWaterfallHook<IWebpackConfiguration> = new AsyncSeriesWaterfallHook<IWebpackConfiguration>(
     ['webpackConfiguration']
@@ -92,8 +99,7 @@ export interface IPreCompileSubstage extends IBuildSubstage<BuildSubstageHooksBa
 /**
  * @public
  */
-export interface ICompileSubstage
-  extends IBuildSubstage<BuildSubstageHooksBase, ICompileSubstageProperties> {}
+export interface ICompileSubstage extends IBuildSubstage<CompileSubstageHooks, ICompileSubstageProperties> {}
 
 /**
  * @public
@@ -242,7 +248,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
     this.stageHooks.preCompile.call(preCompileSubstage);
 
     const compileStage: ICompileSubstage = {
-      hooks: new BuildSubstageHooksBase(),
+      hooks: new CompileSubstageHooks(),
       properties: {
         typescriptMaxWriteParallelism: this.stageOptions.typescriptMaxWriteParallelism
       }
@@ -278,6 +284,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       buildStage: compileStage,
       watchMode: watchMode
     });
+    await compileStage.hooks.afterCompile.promise();
 
     if (this.loggingManager.errorsHaveBeenEmitted && !watchMode) {
       return;
