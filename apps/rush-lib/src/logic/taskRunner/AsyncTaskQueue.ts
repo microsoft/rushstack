@@ -19,7 +19,7 @@ export class AsyncTaskQueue implements AsyncIterable<Task>, AsyncIterator<Task> 
   private readonly _pendingIterators: ((result: IteratorResult<Task>) => void)[];
 
   public constructor(tasks: ReadonlyArray<Task>) {
-    // Reverse the sequence so that early tasks are at the end, to minimize copies
+    // Reverse the sequence so that early tasks are at the end, to minimize splice() overhead
     this._queue = tasks.slice().reverse();
     this._pendingIterators = [];
   }
