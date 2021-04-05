@@ -1301,7 +1301,7 @@ export class FileSystem {
    */
   public static getRealPath(linkPath: string): string {
     return FileSystem._wrapException(() => {
-      return fsx.realpathSync(linkPath);
+      return fs.realpathSync.native(linkPath);
     });
   }
 
