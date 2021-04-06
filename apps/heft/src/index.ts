@@ -37,6 +37,7 @@ export { StageHooksBase, IStageContext } from './stages/StageBase';
 export {
   BuildStageHooks,
   BuildSubstageHooksBase,
+  CompileSubstageHooks,
   BundleSubstageHooks,
   CopyFromCacheMode,
   IBuildStageContext,
