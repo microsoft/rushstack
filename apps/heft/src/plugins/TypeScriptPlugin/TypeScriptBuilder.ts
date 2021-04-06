@@ -770,7 +770,12 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     }
 
     if (this._configuration.emitCjsExtensionForCommonJS) {
-      this._addModuleKindToEmit(ts.ModuleKind.CommonJS, tsconfig.options.outDir!, false, '.cjs');
+      this._addModuleKindToEmit(
+        ts.ModuleKind.CommonJS,
+        tsconfig.options.outDir!,
+        tsconfig.options.module === ts.ModuleKind.CommonJS,
+        '.cjs'
+      );
 
       const cjsReason: IModuleKindReason = {
         outDir: tsconfig.options.outDir!,
@@ -780,11 +785,16 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       };
 
       specifiedKinds.set(ts.ModuleKind.CommonJS, cjsReason);
-      specifiedOutDirs.set(`${tsconfig.options.outDir!}:.js`, cjsReason);
+      specifiedOutDirs.set(`${tsconfig.options.outDir!}:.cjs`, cjsReason);
     }
 
     if (this._configuration.emitMjsExtensionForESModule) {
-      this._addModuleKindToEmit(ts.ModuleKind.ESNext, tsconfig.options.outDir!, false, '.mjs');
+      this._addModuleKindToEmit(
+        ts.ModuleKind.ESNext,
+        tsconfig.options.outDir!,
+        tsconfig.options.module === ts.ModuleKind.ESNext,
+        '.mjs'
+      );
 
       const mjsReason: IModuleKindReason = {
         outDir: tsconfig.options.outDir!,
@@ -794,7 +804,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       };
 
       specifiedKinds.set(ts.ModuleKind.CommonJS, mjsReason);
-      specifiedOutDirs.set(`${tsconfig.options.outDir!}:.js`, mjsReason);
+      specifiedOutDirs.set(`${tsconfig.options.outDir!}:.mjs`, mjsReason);
     }
 
     if (!specifiedKinds.has(tsconfig.options.module)) {
@@ -834,11 +844,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         const existingKind: IModuleKindReason | undefined = specifiedKinds.get(moduleKind);
         const existingDir: IModuleKindReason | undefined = specifiedOutDirs.get(outDirKey);
 
-        if (tsconfig.options.module === moduleKind) {
-          throw new Error(
-            `Module kind "${additionalModuleKindToEmit.moduleKind}" is already specified in the tsconfig file.`
-          );
-        } else if (existingKind) {
+        if (existingKind) {
           throw new Error(
             `Module kind "${additionalModuleKindToEmit.moduleKind}" is already emitted at ${existingKind.outDir} with extension '${existingKind.extension}' by option ${existingKind.reason}.`
           );

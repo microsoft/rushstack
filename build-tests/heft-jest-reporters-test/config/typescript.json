@@ -28,12 +28,17 @@
     //    */
     //    "outFolderName": "lib-amd"
     // }
-    {
-      "moduleKind": "commonjs",
-      "outFolderName": "lib",
-      "jsExtensionOverride": ".cjs"
-    }
   ],
+
+  /**
+   * If true, will emit CommonJS module output to \"lib\" with the .cjs extension alongside (or instead of, if TSConfig specifies CommonJS) the default compilation output.
+   */
+  "emitCjsExtensionForCommonJS": true,
+
+  /**
+   * If true, will emit ESNext module output to \"lib\" with the .mjs extension alongside (or instead of, if TSConfig specifies ESNext) the default compilation output.
+   */
+  // "emitMjsExtensionForESModule": true,
 
   /**
    * Specifies the intermediary folder that tests will use.  Because Jest uses the

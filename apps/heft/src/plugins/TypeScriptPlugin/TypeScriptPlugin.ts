@@ -51,6 +51,8 @@ interface IRunBuilderForTsconfigOptions {
 
   terminalProvider: ITerminalProvider;
   terminalPrefixLabel: string | undefined;
+  emitCjsExtensionForCommonJS: boolean;
+  emitMjsExtensionForESModule: boolean;
   additionalModuleKindsToEmit: IEmitModuleKind[] | undefined;
 }
 
@@ -71,12 +73,12 @@ export interface ISharedTypeScriptConfiguration {
   /**
    * If 'true', will emit CommonJS output into the TSConfig outDir with the file extension '.cjs'
    */
-  emitCjsExtensionForCommonJS?: boolean;
+  emitCjsExtensionForCommonJS?: boolean | undefined;
 
   /**
    * If 'true', will emit ESModule output into the TSConfig outDir with the file extension '.mjs'
    */
-  emitMjsExtensionForESModule?: boolean;
+  emitMjsExtensionForESModule?: boolean | undefined;
 
   /**
    * Specifies the intermediary folder that tests will use.  Because Jest uses the
@@ -263,14 +265,14 @@ export class TypeScriptPlugin implements IHeftPlugin {
       | 'terminalProvider'
       | 'tsconfigFilePath'
       | 'additionalModuleKindsToEmit'
-      | 'emitCjsExtensionForCommonJS'
-      | 'emitMjsExtensionForESModule'
       | 'terminalPrefixLabel'
       | 'firstEmitCallback'
     > = {
       heftSession: heftSession,
       heftConfiguration,
       toolPackageResolution,
+      emitCjsExtensionForCommonJS: !!typeScriptConfiguration.emitCjsExtensionForCommonJS,
+      emitMjsExtensionForESModule: !!typeScriptConfiguration.emitMjsExtensionForESModule,
       lintingEnabled: !!typeScriptConfiguration.isLintingEnabled,
       copyFromCacheMode: typeScriptConfiguration.copyFromCacheMode,
       watchMode: watchMode,
@@ -348,6 +350,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
       lintingEnabled: options.lintingEnabled,
       buildCacheFolder: options.heftConfiguration.buildCacheFolder,
       additionalModuleKindsToEmit: options.additionalModuleKindsToEmit,
+      emitCjsExtensionForCommonJS: options.emitCjsExtensionForCommonJS,
+      emitMjsExtensionForESModule: options.emitMjsExtensionForESModule,
       copyFromCacheMode: options.copyFromCacheMode,
       watchMode: options.watchMode,
       loggerPrefixLabel: options.terminalPrefixLabel,

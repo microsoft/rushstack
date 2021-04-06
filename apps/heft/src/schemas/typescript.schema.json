@@ -44,13 +44,13 @@
     },
 
     "emitCjsExtensionForCommonJS": {
-      "description": "If specified, will emit CommonJS module output to \"lib\" with the .cjs extension alongside (or instead of, if TSConfig specifies CommonJS) the default compilation output.",
-      "type": "string"
+      "description": "If true, will emit CommonJS module output to \"lib\" with the .cjs extension alongside (or instead of, if TSConfig specifies CommonJS) the default compilation output.",
+      "type": "boolean"
     },
 
     "emitMjsExtensionForESModule": {
-      "description": "If specified, will emit ESNext module output to \"lib\" with the .mjs extension alongside (or instead of, if TSConfig specifies ESNext) the default compilation output.",
-      "type": "string"
+      "description": "If true, will emit ESNext module output to \"lib\" with the .mjs extension alongside (or instead of, if TSConfig specifies ESNext) the default compilation output.",
+      "type": "boolean"
     },
 
     "emitFolderNameForTests": {
