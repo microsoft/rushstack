@@ -31,6 +31,7 @@ export class VersionAction extends BaseRushAction {
   private _targetBranch!: CommandLineStringParameter;
   private _overwriteBump!: CommandLineStringParameter;
   private _prereleaseIdentifier!: CommandLineStringParameter;
+  private _ignoreGitHooksParameter!: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -89,6 +90,10 @@ export class VersionAction extends BaseRushAction {
         'This setting only works for lock-step version policy. ' +
         'This setting increases to new prerelease id when "--bump" is provided but only replaces the ' +
         'prerelease name when "--ensure-version-policy" is provided.'
+    });
+    this._ignoreGitHooksParameter = this.defineFlagParameter({
+      parameterLongName: '--ignore-git-hooks',
+      description: `Skips execution of all git hooks. Make sure you know what you are skipping.`
     });
   }
 
@@ -232,7 +237,8 @@ export class VersionAction extends BaseRushAction {
       publishGit.addChanges(':/**/CHANGELOG.json');
       publishGit.addChanges(':/**/CHANGELOG.md');
       publishGit.commit(
-        this.rushConfiguration.gitChangeLogUpdateCommitMessage || DEFAULT_CHANGELOG_UPDATE_MESSAGE
+        this.rushConfiguration.gitChangeLogUpdateCommitMessage || DEFAULT_CHANGELOG_UPDATE_MESSAGE,
+        !this._ignoreGitHooksParameter.value
       );
     }
 
@@ -244,24 +250,27 @@ export class VersionAction extends BaseRushAction {
     if (packageJsonUpdated) {
       publishGit.addChanges(this.rushConfiguration.versionPolicyConfigurationFilePath);
       publishGit.addChanges(':/**/package.json');
-      publishGit.commit(this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE);
+      publishGit.commit(
+        this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE,
+        !this._ignoreGitHooksParameter.value
+      );
     }
 
     if (changeLogUpdated || packageJsonUpdated) {
-      publishGit.push(tempBranch);
+      publishGit.push(tempBranch, !this._ignoreGitHooksParameter.value);
 
       // Now merge to target branch.
       publishGit.fetch();
       publishGit.checkout(targetBranch);
-      publishGit.pull();
-      publishGit.merge(tempBranch);
-      publishGit.push(targetBranch);
-      publishGit.deleteBranch(tempBranch);
+      publishGit.pull(!this._ignoreGitHooksParameter.value);
+      publishGit.merge(tempBranch, !this._ignoreGitHooksParameter.value);
+      publishGit.push(targetBranch, !this._ignoreGitHooksParameter.value);
+      publishGit.deleteBranch(tempBranch, true, !this._ignoreGitHooksParameter.value);
     } else {
       // skip commits
       publishGit.fetch();
       publishGit.checkout(targetBranch);
-      publishGit.deleteBranch(tempBranch, false);
+      publishGit.deleteBranch(tempBranch, false, !this._ignoreGitHooksParameter.value);
     }
   }
 }
