@@ -20,8 +20,6 @@ import { DeleteGlobsPlugin } from '../plugins/DeleteGlobsPlugin';
 import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
 import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
 import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
-import { BasicConfigureWebpackPlugin } from '../plugins/Webpack/BasicConfigureWebpackPlugin';
-import { WebpackPlugin } from '../plugins/Webpack/WebpackPlugin';
 import { SassTypingsPlugin } from '../plugins/SassTypingsPlugin/SassTypingsPlugin';
 import { ProjectValidatorPlugin } from '../plugins/ProjectValidatorPlugin';
 import { ToolPackageResolver } from '../utilities/ToolPackageResolver';
@@ -54,8 +52,6 @@ export class PluginManager {
     this._applyPlugin(new DeleteGlobsPlugin());
     this._applyPlugin(new ApiExtractorPlugin(taskPackageResolver));
     this._applyPlugin(new JestPlugin());
-    this._applyPlugin(new BasicConfigureWebpackPlugin());
-    this._applyPlugin(new WebpackPlugin());
     this._applyPlugin(new SassTypingsPlugin());
     this._applyPlugin(new ProjectValidatorPlugin());
   }

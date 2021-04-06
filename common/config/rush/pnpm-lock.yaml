@@ -106,8 +106,6 @@ importers:
       '@rushstack/ts-command-line': link:../../libraries/ts-command-line
       '@rushstack/typings-generator': link:../../libraries/typings-generator
       '@types/tapable': 1.0.6
-      '@types/webpack': 4.41.24
-      '@types/webpack-dev-server': 3.11.0
       argparse: 1.0.10
       chokidar: 3.4.3
       fast-glob: 3.2.5
@@ -121,8 +119,6 @@ importers:
       semver: 7.3.4
       tapable: 1.1.3
       true-case-path: 2.2.1
-      webpack: 4.44.2
-      webpack-dev-server: 3.11.2_webpack@4.44.2
     devDependencies:
       '@jest/types': 25.4.0
       '@microsoft/api-extractor': link:../api-extractor
@@ -161,8 +157,6 @@ importers:
       '@types/node-sass': 4.11.1
       '@types/semver': ~7.3.1
       '@types/tapable': 1.0.6
-      '@types/webpack': 4.41.24
-      '@types/webpack-dev-server': 3.11.0
       argparse: ~1.0.9
       chokidar: ~3.4.0
       colors: ~1.2.1
@@ -179,8 +173,6 @@ importers:
       true-case-path: ~2.2.1
       tslint: ~5.20.1
       typescript: ~3.9.7
-      webpack: ~4.44.2
-      webpack-dev-server: ~3.11.0
   ../../apps/rundown:
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
@@ -1328,6 +1320,28 @@ importers:
       '@types/node': 10.17.13
       gulp: ~4.0.2
       gulp-replace: ^0.5.4
+  ../../heft-plugins/heft-webpack4-plugin:
+    dependencies:
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      webpack: 4.44.2
+      webpack-dev-server: 3.11.2_webpack@4.44.2
+    devDependencies:
+      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/node': 10.17.13
+      '@types/webpack': 4.41.24
+      '@types/webpack-dev-server': 3.11.0
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@types/node': 10.17.13
+      '@types/webpack': 4.41.24
+      '@types/webpack-dev-server': 3.11.0
+      webpack: ~4.44.2
+      webpack-dev-server: ~3.11.0
   ../../libraries/debug-certificate-manager:
     dependencies:
       '@rushstack/node-core-library': link:../node-core-library
@@ -3489,6 +3503,7 @@ packages:
     dependencies:
       '@types/connect': 3.4.34
       '@types/node': 10.17.13
+    dev: true
     resolution:
       integrity: sha512-W98JrE0j2K78swW4ukqMleo8R7h/pFETjM2DQ90MF6XK2i4LO4W3gQ71Lt4w3bfm2EvVSyWHplECvB5sK22yFQ==
   /@types/browserslist/4.15.0:
@@ -3515,11 +3530,13 @@ packages:
     dependencies:
       '@types/express-serve-static-core': 4.11.0
       '@types/node': 10.17.13
+    dev: true
     resolution:
       integrity: sha512-7SxFCd+FLlxCfwVwbyPxbR4khL9aNikJhrorw8nUIOqeuooc9gifBuDQOJw5kzN7i6i3vLn9G8Wde/4QDihpYw==
   /@types/connect/3.4.34:
     dependencies:
       '@types/node': 10.17.13
+    dev: true
     resolution:
       integrity: sha512-ePPA/JuI+X0vb+gSWlPKOY0NdNAie/rPUqX2GUPpbZwiKTkSPhjXWuee47E4MtE54QVzGCQMQkAL6JhV2E1+cQ==
   /@types/eslint-visitor-keys/1.0.0:
@@ -3542,6 +3559,7 @@ packages:
   /@types/express-serve-static-core/4.11.0:
     dependencies:
       '@types/node': 10.17.13
+    dev: true
     resolution:
       integrity: sha512-hOi1QNb+4G+UjDt6CEJ6MjXHy+XceY7AxIa28U9HgJ80C+3gIbj7h5dJNxOI7PU3DO1LIhGP5Bs47Dbf5l8+MA==
   /@types/express/4.11.0:
@@ -3549,6 +3567,7 @@ packages:
       '@types/body-parser': 1.19.0
       '@types/express-serve-static-core': 4.11.0
       '@types/serve-static': 1.13.1
+    dev: true
     resolution:
       integrity: sha512-N1Wdp3v4KmdO3W/CM7KXrDwM4xcVZjlHF2dAOs7sNrTUX8PY3G4n9NkaHlfjGFEfgFeHmRRjywoBd4VkujDs9w==
   /@types/fs-extra/7.0.0:
@@ -3609,11 +3628,13 @@ packages:
       '@types/connect': 3.4.34
       '@types/http-proxy': 1.17.5
       '@types/node': 10.17.13
+    dev: true
     resolution:
       integrity: sha512-lnBTx6HCOUeIJMLbI/LaL5EmdKLhczJY5oeXZpX/cXE4rRqb3RmV7VcMpiEfYkmTjipv3h7IAyIINe4plEv7cA==
   /@types/http-proxy/1.17.5:
     dependencies:
       '@types/node': 10.17.13
+    dev: true
     resolution:
       integrity: sha512-GNkDE7bTv6Sf8JbV2GksknKOsk7OznNYHSdrtvPJXO0qJ9odZig6IZKUi5RFGi6d1bf6dgIAe4uXi3DBc7069Q==
   /@types/inquirer/7.3.1:
@@ -3669,6 +3690,7 @@ packages:
     resolution:
       integrity: sha512-1w52Nyx4Gq47uuu0EVcsHBxZFJgurQ+rTKS3qMHxR1GY2T8c2AJYd6vZoZ9q1rupaDjU0yT+Jc2XTyXkjeMA+Q==
   /@types/mime/0.0.29:
+    dev: true
     resolution:
       integrity: sha1-+8/TMFc7kS71nu7hRgK/rOYwdUs=
   /@types/minimatch/2.0.29:
@@ -3777,6 +3799,7 @@ packages:
     dependencies:
       '@types/express-serve-static-core': 4.11.0
       '@types/mime': 0.0.29
+    dev: true
     resolution:
       integrity: sha512-jDMH+3BQPtvqZVIcsH700Dfi8Q3MIcEx16g/VdxjoqiGR/NntekB10xdBpirMKnPe9z2C5cBmL0vte0YttOr3Q==
   /@types/source-list-map/0.1.2:
@@ -3863,6 +3886,7 @@ packages:
       '@types/http-proxy-middleware': 0.19.3
       '@types/serve-static': 1.13.1
       '@types/webpack': 4.41.24
+    dev: true
     resolution:
       integrity: sha512-3+86AgSzl18n5P1iUP9/lz3G3GMztCp+wxdDvVuNhx1sr1jE79GpYfKHL8k+Vht3N74K2n98CuAEw4YPJCYtDA==
   /@types/webpack-env/1.13.0:
@@ -14310,7 +14334,7 @@ packages:
       mime: 2.5.0
       mkdirp: 0.5.5
       range-parser: 1.2.1
-      webpack: 4.44.2_webpack-cli@3.3.12
+      webpack: 4.44.2
       webpack-log: 2.0.0
     engines:
       node: '>= 6'

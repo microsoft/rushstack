@@ -4,18 +4,17 @@
 import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
 import * as webpack from 'webpack';
-
-import { HeftConfiguration } from '../../configuration/HeftConfiguration';
-import { HeftSession } from '../../pluginFramework/HeftSession';
-import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 import {
+  HeftConfiguration,
+  HeftSession,
   IBuildStageContext,
+  IBuildStageProperties,
   IBundleSubstage,
   IBundleSubstageProperties,
-  IBuildStageProperties,
-  IWebpackConfiguration
-} from '../../stages/BuildStage';
-import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
+  IHeftPlugin,
+  ScopedLogger
+} from '@rushstack/heft';
+import { IWebpackConfiguration, IWebpackVersions, getWebpackVersions } from './shared';
 
 /**
  * See https://webpack.js.org/api/cli/#environment-options
@@ -43,24 +42,32 @@ export class BasicConfigureWebpackPlugin implements IHeftPlugin {
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
-        bundle.hooks.configureWebpack.tapPromise(
-          PLUGIN_NAME,
-          async (existingConfiguration: IWebpackConfiguration) => {
-            return await this._loadWebpackConfigAsync(
-              existingConfiguration,
-              heftSession,
-              heftConfiguration.buildFolder,
-              build.properties,
-              bundle.properties
-            );
+        bundle.hooks.configureWebpack.tap(
+          { name: PLUGIN_NAME, stage: Number.MIN_SAFE_INTEGER },
+          (webpackConfiguration: unknown) => {
+            const webpackVersions: IWebpackVersions = getWebpackVersions();
+            bundle.properties.webpackVersion = webpackVersions.webpackVersion;
+            bundle.properties.webpackDevServerVersion = webpackVersions.webpackDevServerVersion;
+
+            return webpackConfiguration;
           }
         );
+
+        bundle.hooks.configureWebpack.tapPromise(PLUGIN_NAME, async (existingConfiguration: unknown) => {
+          return await this._loadWebpackConfigAsync(
+            existingConfiguration as IWebpackConfiguration | undefined,
+            heftSession,
+            heftConfiguration.buildFolder,
+            build.properties,
+            bundle.properties
+          );
+        });
       });
     });
   }
 
   private async _loadWebpackConfigAsync(
-    existingConfiguration: IWebpackConfiguration,
+    existingConfiguration: IWebpackConfiguration | undefined,
     heftSession: HeftSession,
     buildFolder: string,
     buildProperties: IBuildStageProperties,
@@ -128,3 +135,5 @@ export class BasicConfigureWebpackPlugin implements IHeftPlugin {
     }
   }
 }
+
+export default new BasicConfigureWebpackPlugin();

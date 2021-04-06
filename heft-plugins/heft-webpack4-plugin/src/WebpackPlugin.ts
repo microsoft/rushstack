@@ -4,17 +4,23 @@
 import webpack from 'webpack';
 import type TWebpackDevServer from 'webpack-dev-server';
 import { LegacyAdapters } from '@rushstack/node-core-library';
-
-import { HeftConfiguration } from '../../configuration/HeftConfiguration';
-import { HeftSession } from '../../pluginFramework/HeftSession';
-import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 import {
+  HeftConfiguration,
+  HeftSession,
   IBuildStageContext,
-  IBundleSubstage,
   IBuildStageProperties,
-  IWebpackConfiguration
-} from '../../stages/BuildStage';
-import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
+  IBundleSubstage,
+  IHeftPlugin,
+  ScopedLogger
+} from '@rushstack/heft';
+import {
+  IWebpackConfiguration,
+  IWebpackBundleSubstageProperties,
+  IWebpackBuildStageProperties,
+  WEBPACK_STATS_SYMBOL,
+  IWebpackVersions,
+  getWebpackVersions
+} from './shared';
 
 const PLUGIN_NAME: string = 'WebpackPlugin';
 const WEBPACK_DEV_SERVER_PACKAGE_NAME: string = 'webpack-dev-server';
@@ -29,7 +35,7 @@ export class WebpackPlugin implements IHeftPlugin {
         bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
           await this._runWebpackAsync(
             heftSession,
-            bundle.properties.webpackConfiguration,
+            bundle.properties as IWebpackBundleSubstageProperties,
             build.properties,
             heftConfiguration.terminalProvider.supportsColor
           );
@@ -40,16 +46,38 @@ export class WebpackPlugin implements IHeftPlugin {
 
   private async _runWebpackAsync(
     heftSession: HeftSession,
-    webpackConfiguration: IWebpackConfiguration,
+    bundleSubstageProperties: IWebpackBundleSubstageProperties,
     buildProperties: IBuildStageProperties,
     supportsColor: boolean
   ): Promise<void> {
+    const webpackConfiguration: IWebpackConfiguration = bundleSubstageProperties.webpackConfiguration;
     if (!webpackConfiguration) {
       return;
     }
 
     const logger: ScopedLogger = heftSession.requestScopedLogger('webpack');
-    logger.terminal.writeLine(`Using Webpack version ${webpack.version}`);
+    const webpackVersions: IWebpackVersions = getWebpackVersions();
+    if (bundleSubstageProperties.webpackVersion !== webpackVersions.webpackVersion) {
+      logger.emitError(
+        new Error(
+          `The Webpack plugin expected to be configured with Webpack version ${webpackVersions.webpackVersion}, ` +
+            `but the configuration specifies version ${bundleSubstageProperties.webpackVersion}. ` +
+            'Are multiple versions of the Webpack plugin present?'
+        )
+      );
+    }
+
+    if (bundleSubstageProperties.webpackDevServerVersion !== webpackVersions.webpackDevServerVersion) {
+      logger.emitError(
+        new Error(
+          `The Webpack plugin expected to be configured with webpack-dev-server version ${webpackVersions.webpackDevServerVersion}, ` +
+            `but the configuration specifies version ${bundleSubstageProperties.webpackDevServerVersion}. ` +
+            'Are multiple versions of the Webpack plugin present?'
+        )
+      );
+    }
+
+    logger.terminal.writeLine(`Using Webpack version ${webpackVersions.webpackVersion}`);
 
     const compiler: webpack.Compiler | webpack.MultiCompiler = Array.isArray(webpackConfiguration)
       ? webpack(webpackConfiguration) /* (webpack.Compilation[]) => webpack.MultiCompiler */
@@ -156,7 +184,7 @@ export class WebpackPlugin implements IHeftPlugin {
 
       if (stats) {
         // eslint-disable-next-line require-atomic-updates
-        buildProperties.webpackStats = stats;
+        (buildProperties as IWebpackBuildStageProperties)[WEBPACK_STATS_SYMBOL] = stats;
 
         this._emitErrors(logger, stats);
       }
@@ -177,3 +205,5 @@ export class WebpackPlugin implements IHeftPlugin {
     }
   }
 }
+
+export default new WebpackPlugin();

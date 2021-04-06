@@ -10,6 +10,7 @@
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-webpack4-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/webpack-env": "1.13.0",
     "eslint": "~7.12.1",
