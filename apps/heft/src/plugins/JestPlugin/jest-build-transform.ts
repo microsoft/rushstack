@@ -65,7 +65,7 @@ export function process(
       jestOptions.rootDir,
       jestTypeScriptDataFile.emitFolderNameForTests,
       srcRelativeFolderPath,
-      `${parsedFilename.name}.js`
+      `${parsedFilename.name}${jestTypeScriptDataFile.extensionForTests}`
     );
 
     const startOfLoopMs: number = new Date().getTime();

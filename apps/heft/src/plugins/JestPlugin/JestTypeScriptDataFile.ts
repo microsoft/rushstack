@@ -14,6 +14,11 @@ export interface IJestTypeScriptDataFileJson {
   emitFolderNameForTests: string;
 
   /**
+   * The file extension attached to compiled test files.
+   */
+  extensionForTests: '.js' | '.cjs' | '.mjs';
+
+  /**
    * Normally the jest-build-transform compares the timestamps of the .js output file and .ts source file
    * to determine whether the TypeScript compiler has completed.  However this heuristic is only necessary
    * in the interactive "--watch" mode, since otherwise Heft doesn't invoke Jest until after the compiler

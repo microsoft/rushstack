@@ -69,6 +69,16 @@ export interface ISharedTypeScriptConfiguration {
   additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
 
   /**
+   * If 'true', will emit CommonJS output into the TSConfig outDir with the file extension '.cjs'
+   */
+  emitCjsExtensionForCommonJS?: boolean;
+
+  /**
+   * If 'true', will emit ESModule output into the TSConfig outDir with the file extension '.mjs'
+   */
+  emitMjsExtensionForESModule?: boolean;
+
+  /**
    * Specifies the intermediary folder that tests will use.  Because Jest uses the
    * Node.js runtime to execute tests, the module format must be CommonJS.
    *
@@ -213,6 +223,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
     const typeScriptConfiguration: ITypeScriptConfiguration = {
       copyFromCacheMode: typescriptConfigurationJson?.copyFromCacheMode,
       additionalModuleKindsToEmit: typescriptConfigurationJson?.additionalModuleKindsToEmit,
+      emitCjsExtensionForCommonJS: typescriptConfigurationJson?.emitCjsExtensionForCommonJS,
+      emitMjsExtensionForESModule: typescriptConfigurationJson?.emitMjsExtensionForESModule,
       emitFolderNameForTests: typescriptConfigurationJson?.emitFolderNameForTests,
       maxWriteParallelism: typescriptConfigurationJson?.maxWriteParallelism || 50,
       isLintingEnabled: !(buildProperties.lite || typescriptConfigurationJson?.disableTslint)
@@ -251,6 +263,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
       | 'terminalProvider'
       | 'tsconfigFilePath'
       | 'additionalModuleKindsToEmit'
+      | 'emitCjsExtensionForCommonJS'
+      | 'emitMjsExtensionForESModule'
       | 'terminalPrefixLabel'
       | 'firstEmitCallback'
     > = {
@@ -264,8 +278,9 @@ export class TypeScriptPlugin implements IHeftPlugin {
     };
 
     JestTypeScriptDataFile.saveForProject(heftConfiguration.buildFolder, {
-      emitFolderNameForTests: typescriptConfigurationJson?.emitFolderNameForTests || 'lib',
-      skipTimestampCheck: !options.watchMode
+      emitFolderNameForTests: typeScriptConfiguration.emitFolderNameForTests || 'lib',
+      skipTimestampCheck: !options.watchMode,
+      extensionForTests: typeScriptConfiguration.emitCjsExtensionForCommonJS ? '.cjs' : '.js'
     });
 
     const callbacksForTsconfigs: Set<() => void> = new Set<() => void>();
