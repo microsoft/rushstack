@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-web-rig",
+      "comment": "For compatibility with Heft 0.25.5 and earlier versions, add a dependency on the \"@rushstack/heft-webpack4-plugin\" package and update heft.json to load it.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig",
+  "email": "iclanton@users.noreply.github.com"
+}
