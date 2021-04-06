@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin",
+      "comment": "Fix unlisted dependency on @typescript-eslint/experimental-utils",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin",
+  "email": "sargun.vohra@gmail.com"
+}
