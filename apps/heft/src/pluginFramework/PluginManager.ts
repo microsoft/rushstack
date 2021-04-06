@@ -23,6 +23,7 @@ import { JestPlugin } from '../plugins/JestPlugin/JestPlugin';
 import { SassTypingsPlugin } from '../plugins/SassTypingsPlugin/SassTypingsPlugin';
 import { ProjectValidatorPlugin } from '../plugins/ProjectValidatorPlugin';
 import { ToolPackageResolver } from '../utilities/ToolPackageResolver';
+import { WebpackWarningPlugin } from '../plugins/WebpackWarningPlugin';
 
 export interface IPluginManagerOptions {
   terminal: Terminal;
@@ -54,6 +55,7 @@ export class PluginManager {
     this._applyPlugin(new JestPlugin());
     this._applyPlugin(new SassTypingsPlugin());
     this._applyPlugin(new ProjectValidatorPlugin());
+    this._applyPlugin(new WebpackWarningPlugin());
   }
 
   public initializePlugin(pluginSpecifier: string, options?: object): void {
