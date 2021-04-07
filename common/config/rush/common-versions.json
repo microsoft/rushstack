@@ -93,6 +93,8 @@
       // the latest Heft due to a regression from PR #2073 that prevents the same plugin from
       // being applied multiple times
       "0.8.0"
-    ]
+    ],
+
+    "webpack": ["~5.31.0"]
   }
 }
