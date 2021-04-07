@@ -122,6 +122,8 @@ export interface IBuildStageProperties {
     serveMode: boolean;
     // (undocumented)
     watchMode: boolean;
+    // (undocumented)
+    webpackStats?: unknown;
 }
 
 // @public (undocumented)

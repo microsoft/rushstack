@@ -3,8 +3,8 @@
 
 import { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
 import * as webpack from 'webpack';
-import { IBuildStageProperties, IBundleSubstageProperties } from '@rushstack/heft';
-import { IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
+import type { IBuildStageProperties, IBundleSubstageProperties } from '@rushstack/heft';
+import { Import, IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
 
 /**
  * @public
@@ -37,13 +37,8 @@ export interface IWebpackBundleSubstageProperties extends IBundleSubstagePropert
 /**
  * @public
  */
-export const WEBPACK_STATS_SYMBOL: unique symbol = Symbol('webpack-stats');
-
-/**
- * @public
- */
 export interface IWebpackBuildStageProperties extends IBuildStageProperties {
-  [WEBPACK_STATS_SYMBOL]?: webpack.Stats | webpack.compilation.MultiStats;
+  webpackStats?: webpack.Stats | webpack.compilation.MultiStats;
 }
 
 export interface IWebpackVersions {
@@ -54,11 +49,16 @@ export interface IWebpackVersions {
 let _webpackVersions: IWebpackVersions | undefined;
 export function getWebpackVersions(): IWebpackVersions {
   if (!_webpackVersions) {
-    const packageJson: IPackageJson = PackageJsonLookup.loadOwnPackageJson(__dirname);
+    const webpackDevServerPackageJsonPath: string = Import.resolveModule({
+      modulePath: 'webpack-dev-server/package.json',
+      baseFolderPath: __dirname
+    });
+    const webpackDevServerPackageJson: IPackageJson = PackageJsonLookup.instance.loadPackageJson(
+      webpackDevServerPackageJsonPath
+    );
     _webpackVersions = {
-      // eslint-disable-next-line dot-notation
-      webpackVersion: packageJson.dependencies!['webpack'],
-      webpackDevServerVersion: packageJson.dependencies!['webpack-dev-server']
+      webpackVersion: webpack.version!,
+      webpackDevServerVersion: webpackDevServerPackageJson.version
     };
   }
 

@@ -4,7 +4,7 @@
 import webpack from 'webpack';
 import type TWebpackDevServer from 'webpack-dev-server';
 import { LegacyAdapters } from '@rushstack/node-core-library';
-import {
+import type {
   HeftConfiguration,
   HeftSession,
   IBuildStageContext,
@@ -17,10 +17,10 @@ import {
   IWebpackConfiguration,
   IWebpackBundleSubstageProperties,
   IWebpackBuildStageProperties,
-  WEBPACK_STATS_SYMBOL,
   IWebpackVersions,
   getWebpackVersions
 } from './shared';
+import { WebpackConfigurationLoader } from './WebpackConfigurationLoader';
 
 const PLUGIN_NAME: string = 'WebpackPlugin';
 const WEBPACK_DEV_SERVER_PACKAGE_NAME: string = 'webpack-dev-server';
@@ -32,6 +32,33 @@ export class WebpackPlugin implements IHeftPlugin {
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
+        bundle.hooks.configureWebpack.tap(
+          { name: PLUGIN_NAME, stage: Number.MIN_SAFE_INTEGER },
+          (webpackConfiguration: unknown) => {
+            const webpackVersions: IWebpackVersions = getWebpackVersions();
+            bundle.properties.webpackVersion = webpack.version;
+            bundle.properties.webpackDevServerVersion = webpackVersions.webpackDevServerVersion;
+
+            return webpackConfiguration;
+          }
+        );
+
+        bundle.hooks.configureWebpack.tapPromise(PLUGIN_NAME, async (existingConfiguration: unknown) => {
+          const logger: ScopedLogger = heftSession.requestScopedLogger('configure-webpack');
+          if (existingConfiguration) {
+            logger.terminal.writeVerboseLine(
+              'Skipping loading webpack config file because the webpack config has already been set.'
+            );
+            return existingConfiguration;
+          } else {
+            return await WebpackConfigurationLoader.tryLoadWebpackConfigAsync(
+              logger,
+              heftConfiguration.buildFolder,
+              build.properties
+            );
+          }
+        });
+
         bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
           await this._runWebpackAsync(
             heftSession,
@@ -77,7 +104,7 @@ export class WebpackPlugin implements IHeftPlugin {
       );
     }
 
-    logger.terminal.writeLine(`Using Webpack version ${webpackVersions.webpackVersion}`);
+    logger.terminal.writeLine(`Using Webpack version ${webpack.version}`);
 
     const compiler: webpack.Compiler | webpack.MultiCompiler = Array.isArray(webpackConfiguration)
       ? webpack(webpackConfiguration) /* (webpack.Compilation[]) => webpack.MultiCompiler */
@@ -184,7 +211,7 @@ export class WebpackPlugin implements IHeftPlugin {
 
       if (stats) {
         // eslint-disable-next-line require-atomic-updates
-        (buildProperties as IWebpackBuildStageProperties)[WEBPACK_STATS_SYMBOL] = stats;
+        (buildProperties as IWebpackBuildStageProperties).webpackStats = stats;
 
         this._emitErrors(logger, stats);
       }
@@ -205,5 +232,3 @@ export class WebpackPlugin implements IHeftPlugin {
     }
   }
 }
-
-export default new WebpackPlugin();

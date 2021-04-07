@@ -5,24 +5,24 @@
 ```ts
 
 import { Configuration } from 'webpack-dev-server';
-import { HeftConfiguration } from '@rushstack/heft';
-import { HeftSession } from '@rushstack/heft';
-import { IBuildStageProperties } from '@rushstack/heft';
-import { IBundleSubstageProperties } from '@rushstack/heft';
-import { IHeftPlugin } from '@rushstack/heft';
+import type { HeftConfiguration } from '@rushstack/heft';
+import type { HeftSession } from '@rushstack/heft';
+import type { IBuildStageProperties } from '@rushstack/heft';
+import type { IBundleSubstageProperties } from '@rushstack/heft';
+import type { IHeftPlugin } from '@rushstack/heft';
 import * as webpack from 'webpack';
 
-// Warning: (ae-forgotten-export) The symbol "IncorrectlySpecifiedPluginPlugin" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "WebpackPlugin" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-const _default: IncorrectlySpecifiedPluginPlugin;
+const _default: WebpackPlugin;
 
 export default _default;
 
 // @public (undocumented)
 export interface IWebpackBuildStageProperties extends IBuildStageProperties {
     // (undocumented)
-    [WEBPACK_STATS_SYMBOL]?: webpack.Stats | webpack.compilation.MultiStats;
+    webpackStats?: webpack.Stats | webpack.compilation.MultiStats;
 }
 
 // @public (undocumented)
@@ -38,9 +38,6 @@ export interface IWebpackConfigurationWithDevServer extends webpack.Configuratio
     // (undocumented)
     devServer?: Configuration;
 }
-
-// @public (undocumented)
-export const WEBPACK_STATS_SYMBOL: unique symbol;
 
 
 // (No @packageDocumentation comment for this package)

@@ -5,16 +5,13 @@
 This release of Heft removed the Webpack plugins from the `@rushstack/heft` package
 and moved them into their own package (`@rushstack/heft-webpack4-plugin`). To re-include
 Webpack support in a project, include a dependency on `@rushstack/heft-webpack4-plugin`
-and add the following options the project's `config/heft.json` file:
+and add the following option to the project's `config/heft.json` file:
 
 ```JSON
 {
   "heftPlugins": [
     {
-      "plugin": "@rushstack/heft-webpack4-plugin/lib/WebpackPlugin"
-    },
-    {
-      "plugin": "@rushstack/heft-webpack4-plugin/lib/BasicConfigureWebpackPlugin"
+      "plugin": "@rushstack/heft-webpack4-plugin"
     }
   ]
 }
