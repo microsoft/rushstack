@@ -8,14 +8,11 @@ module.exports = {
     rules: [
       {
         test: /\.png$/i,
-        use: [
-          {
-            loader: 'file-loader'
-          }
-        ]
+        type: 'asset/resource'
       }
     ]
   },
+  target: ['web', 'es5'],
   resolve: {
     extensions: ['.js', '.jsx', '.json']
   },
@@ -26,6 +23,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'dist'),
     filename: '[name]_[contenthash].js',
-    chunkFilename: '[id].[name]_[contenthash].js'
+    chunkFilename: '[id].[name]_[contenthash].js',
+    assetModuleFilename: '[name]_[contenthash][ext][query]'
   }
 };
