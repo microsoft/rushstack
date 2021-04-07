@@ -1388,6 +1388,7 @@ importers:
       '@types/node': 10.17.13
       colors: 1.2.5
       fs-extra: 7.0.1
+      glob: 7.0.6
       import-lazy: 4.0.0
       jju: 1.4.0
       resolve: 1.17.0
@@ -1399,6 +1400,7 @@ importers:
       '@rushstack/heft': 0.23.1
       '@rushstack/heft-node-rig': 0.2.0_@rushstack+heft@0.23.1
       '@types/fs-extra': 7.0.0
+      '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
       '@types/jju': 1.4.1
       '@types/resolve': 1.17.1
@@ -1410,6 +1412,7 @@ importers:
       '@rushstack/heft': 0.23.1
       '@rushstack/heft-node-rig': 0.2.0
       '@types/fs-extra': 7.0.0
+      '@types/glob': 7.1.1
       '@types/heft-jest': 1.0.1
       '@types/jju': 1.4.1
       '@types/node': 10.17.13
@@ -1419,6 +1422,7 @@ importers:
       '@types/z-schema': 3.16.31
       colors: ~1.2.1
       fs-extra: ~7.0.1
+      glob: ~7.0.5
       import-lazy: ~4.0.0
       jju: ~1.4.0
       resolve: ~1.17.0

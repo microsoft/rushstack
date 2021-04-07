@@ -4,7 +4,9 @@
 import * as nodeJsPath from 'path';
 import * as fs from 'fs';
 import * as fsx from 'fs-extra';
+import glob from 'glob';
 
+import { LegacyAdapters } from './LegacyAdapters';
 import { Text, NewlineKind, Encoding } from './Text';
 import { PosixModeBits } from './PosixModeBits';
 
@@ -1310,9 +1312,19 @@ export class FileSystem {
    */
   public static async getRealPathAsync(linkPath: string): Promise<string> {
     return await FileSystem._wrapExceptionAsync(() => {
-      return fsx.realpath(linkPath);
+      // return fsx.realpath(linkPath);
+      return LegacyAdapters.convertCallbackToPromise(
+        glob,
+        fs.realpath.native(linkPath, (error) => {
+          console.log(error);
+        })
+      );
     });
   }
+
+  //   const expandedGlob: string[] = await LegacyAdapters.convertCallbackToPromise(glob, globPattern, {
+  //   cwd: buildFolder
+  // });
 
   // ===============
   // UTILITY FUNCTIONS
