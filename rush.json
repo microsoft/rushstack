@@ -807,6 +807,14 @@
       "shouldPublish": true
     },
 
+    // "heft-plugins" folder (alphabetical order)
+    {
+      "packageName": "@rushstack/heft-webpack4-plugin",
+      "projectFolder": "heft-plugins/heft-webpack4-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+
     // "libraries" folder (alphabetical order)
     {
       "packageName": "@rushstack/debug-certificate-manager",
