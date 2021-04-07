@@ -1312,7 +1312,6 @@ export class FileSystem {
    */
   public static async getRealPathAsync(linkPath: string): Promise<string> {
     return await FileSystem._wrapExceptionAsync(() => {
-      // return fsx.realpath(linkPath);
       return LegacyAdapters.convertCallbackToPromise(
         glob,
         fs.realpath.native(linkPath, (error) => {
@@ -1321,10 +1320,6 @@ export class FileSystem {
       );
     });
   }
-
-  //   const expandedGlob: string[] = await LegacyAdapters.convertCallbackToPromise(glob, globPattern, {
-  //   cwd: buildFolder
-  // });
 
   // ===============
   // UTILITY FUNCTIONS
