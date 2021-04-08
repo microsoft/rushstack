@@ -28,6 +28,6 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/node": "10.17.13",
     "@types/webpack": "4.41.24",
-    "@types/webpack-dev-server": "3.11.0"
+    "@types/webpack-dev-server": "3.11.2"
   }
 }

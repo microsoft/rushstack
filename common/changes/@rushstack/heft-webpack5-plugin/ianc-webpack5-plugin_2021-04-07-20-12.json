@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-webpack5-plugin",
+      "comment": "Initial project creation.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack5-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

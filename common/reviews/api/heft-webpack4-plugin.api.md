@@ -5,17 +5,13 @@
 ```ts
 
 import { Configuration } from 'webpack-dev-server';
-import type { HeftConfiguration } from '@rushstack/heft';
-import type { HeftSession } from '@rushstack/heft';
 import type { IBuildStageProperties } from '@rushstack/heft';
 import type { IBundleSubstageProperties } from '@rushstack/heft';
 import type { IHeftPlugin } from '@rushstack/heft';
 import * as webpack from 'webpack';
 
-// Warning: (ae-forgotten-export) The symbol "WebpackPlugin" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
-const _default: WebpackPlugin;
+const _default: IHeftPlugin<void>;
 
 export default _default;
 
