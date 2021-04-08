@@ -474,7 +474,27 @@ export class PublishAction extends BaseRushAction {
       env,
       args
     );
-    return publishedVersions.indexOf(packageConfig.packageJson.version) >= 0;
+
+    const packageVersion: string = packageConfig.packageJsonEditor.version;
+
+    // SemVer supports an obscure (and generally deprecated) feature where "build metadata" can be
+    // appended to a version.  For example if our version is "1.2.3-beta.4+extra567", then "+extra567" is the
+    // build metadata part.  The suffix has no effect on version comparisons and is mostly ignored by
+    // the NPM registry.  Importantly, the queried version number will not include it, so we need to discard
+    // it before comparing against the list of already published versions.
+    const parsedVersion: semver.SemVer | null = semver.parse(packageVersion);
+    if (!parsedVersion) {
+      throw new Error(`The package "${packageConfig.packageName}" has an invalid "version" value`);
+    }
+
+    // For example, normalize "1.2.3-beta.4+extra567" -->"1.2.3-beta.4".
+    //
+    // This is redundant in the current API, but might change in the future:
+    // https://github.com/npm/node-semver/issues/264
+    parsedVersion.build = [];
+    const normalizedVersion: string = parsedVersion.format();
+
+    return publishedVersions.indexOf(normalizedVersion) >= 0;
   }
 
   private _npmPack(packageName: string, project: RushConfigurationProject): void {
