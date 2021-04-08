@@ -26,6 +26,9 @@ const PLUGIN_NAME: string = 'WebpackPlugin';
 const WEBPACK_DEV_SERVER_PACKAGE_NAME: string = 'webpack-dev-server';
 const WEBPACK_DEV_SERVER_ENV_VAR_NAME: string = 'WEBPACK_DEV_SERVER';
 
+/**
+ * @internal
+ */
 export class WebpackPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
 
