@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 08 Apr 2021 00:10:18 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Apr 2021 06:05:31 GMT and should not be manually modified.
+
+## 0.28.0
+Thu, 08 Apr 2021 06:05:31 GMT
+
+### Minor changes
+
+- Fix parameter name typo.
 
 ## 0.27.0
 Thu, 08 Apr 2021 00:10:18 GMT

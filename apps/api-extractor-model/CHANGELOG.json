@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.12.4",
+      "tag": "@microsoft/api-extractor-model_v7.12.4",
+      "date": "Thu, 08 Apr 2021 06:05:31 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix minor typo in README.md"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.12.3",
       "tag": "@microsoft/api-extractor-model_v7.12.3",
       "date": "Tue, 06 Apr 2021 15:14:22 GMT",
