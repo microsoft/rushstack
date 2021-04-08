@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-plugin",
+      "comment": "Fix parameter name typo.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/localization-plugin",
+  "email": "halfnibble@users.noreply.github.com"
+}

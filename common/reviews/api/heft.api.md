@@ -193,7 +193,7 @@ export interface ICustomActionParameterBase<TParameter extends CustomActionParam
     // (undocumented)
     kind: 'flag' | 'integer' | 'string' | 'stringList';
     // (undocumented)
-    paramterLongName: string;
+    parameterLongName: string;
 }
 
 // @beta (undocumented)
