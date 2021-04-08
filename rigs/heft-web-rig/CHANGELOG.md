@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Tue, 06 Apr 2021 15:14:22 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Apr 2021 00:10:18 GMT and should not be manually modified.
+
+## 0.2.14
+Thu, 08 Apr 2021 00:10:18 GMT
+
+### Patches
+
+- For compatibility with Heft 0.25.5 and earlier versions, add a dependency on the "@rushstack/heft-webpack4-plugin" package and update heft.json to load it.
 
 ## 0.2.13
 Tue, 06 Apr 2021 15:14:22 GMT

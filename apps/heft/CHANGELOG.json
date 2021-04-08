@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.27.0",
+      "tag": "@rushstack/heft_v0.27.0",
+      "date": "Thu, 08 Apr 2021 00:10:18 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING) Move Webpack functionality into its own package (@rushstack/heft-webpack4-plugin)."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.26.0",
       "tag": "@rushstack/heft_v0.26.0",
       "date": "Tue, 06 Apr 2021 15:14:22 GMT",
