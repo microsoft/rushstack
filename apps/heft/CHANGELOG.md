@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 08 Apr 2021 06:05:31 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Apr 2021 20:41:54 GMT and should not be manually modified.
+
+## 0.28.1
+Thu, 08 Apr 2021 20:41:54 GMT
+
+### Patches
+
+- Include mention of heft-webpack5-plugin in an error message.
 
 ## 0.28.0
 Thu, 08 Apr 2021 06:05:31 GMT
