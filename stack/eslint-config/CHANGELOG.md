@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Thu, 10 Dec 2020 23:25:49 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Apr 2021 15:14:22 GMT and should not be manually modified.
+
+## 2.3.3
+Tue, 06 Apr 2021 15:14:22 GMT
+
+### Patches
+
+- Switch to range version specifier for Typescript experimental utils
 
 ## 2.3.2
 Thu, 10 Dec 2020 23:25:49 GMT

@@ -1,5 +1,25 @@
 # Upgrade notes for @rushstack/heft
 
+### Heft 0.26.0
+
+This release of Heft removed the Webpack plugins from the `@rushstack/heft` package
+and moved them into their own package (`@rushstack/heft-webpack4-plugin`). To re-include
+Webpack support in a project, include a dependency on `@rushstack/heft-webpack4-plugin`
+and add the following option to the project's `config/heft.json` file:
+
+```JSON
+{
+  "heftPlugins": [
+    {
+      "plugin": "@rushstack/heft-webpack4-plugin"
+    }
+  ]
+}
+```
+
+If you are using `@rushstack/heft-web-rig`, upgrading the rig package will bring 
+Webpack support automatically.
+
 ### Heft 0.14.0
 
 This release of Heft consolidated several config files and introduced support

@@ -34,7 +34,7 @@ export interface ICustomActionParameterStringList extends ICustomActionParameter
 export interface ICustomActionParameterBase<TParameter extends CustomActionParameterType> {
   kind: 'flag' | 'integer' | 'string' | 'stringList'; // TODO: Add "choice"
 
-  paramterLongName: string;
+  parameterLongName: string;
   description: string;
 }
 
@@ -100,7 +100,7 @@ export class CustomAction<TParameters> extends HeftActionBase {
       switch (parameterOption.kind) {
         case 'flag': {
           const parameter: CommandLineFlagParameter = this.defineFlagParameter({
-            parameterLongName: parameterOption.paramterLongName,
+            parameterLongName: parameterOption.parameterLongName,
             description: parameterOption.description
           });
           getParameterValue = () => parameter.value;
@@ -109,7 +109,7 @@ export class CustomAction<TParameters> extends HeftActionBase {
 
         case 'string': {
           const parameter: CommandLineStringParameter = this.defineStringParameter({
-            parameterLongName: parameterOption.paramterLongName,
+            parameterLongName: parameterOption.parameterLongName,
             description: parameterOption.description,
             argumentName: 'VALUE'
           });
@@ -119,7 +119,7 @@ export class CustomAction<TParameters> extends HeftActionBase {
 
         case 'integer': {
           const parameter: CommandLineIntegerParameter = this.defineIntegerParameter({
-            parameterLongName: parameterOption.paramterLongName,
+            parameterLongName: parameterOption.parameterLongName,
             description: parameterOption.description,
             argumentName: 'VALUE'
           });
@@ -129,7 +129,7 @@ export class CustomAction<TParameters> extends HeftActionBase {
 
         case 'stringList': {
           const parameter: CommandLineStringListParameter = this.defineStringListParameter({
-            parameterLongName: parameterOption.paramterLongName,
+            parameterLongName: parameterOption.parameterLongName,
             description: parameterOption.description,
             argumentName: 'VALUE'
           });
@@ -139,7 +139,7 @@ export class CustomAction<TParameters> extends HeftActionBase {
 
         default: {
           throw new Error(
-            `Unrecognized parameter kind "${parameterOption.kind}" for parameter "${parameterOption.paramterLongName}`
+            `Unrecognized parameter kind "${parameterOption.kind}" for parameter "${parameterOption.parameterLongName}`
           );
         }
       }

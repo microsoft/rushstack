@@ -2,6 +2,36 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.43.0",
+      "tag": "@microsoft/rush_v5.43.0",
+      "date": "Thu, 08 Apr 2021 06:09:52 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add \"--ignore-git-hooks\" flags to \"publish\" and \"version\" commands to prevent the execution of all git hooks"
+          },
+          {
+            "comment": "Fix parameter name typo."
+          },
+          {
+            "comment": "Eliminate a spurious warning that was displayed on Azure DevOps build agents: A phantom \"node_modules\" folder was found."
+          },
+          {
+            "comment": "Fix an issue where \"rush change\" reported \"Unable to find a git remote matching the repository URL\" when used with SSH auth"
+          },
+          {
+            "comment": "Fix an issue where \"rush publish\" reported 403 errors if the package version included a SemVer build metadata suffix"
+          },
+          {
+            "comment": "Partially deprecate RUSH_TEMP_FOLDER environment variable"
+          },
+          {
+            "comment": "Validate changefiles against a schema when running 'rush change --verify'"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.42.4",
       "tag": "@microsoft/rush_v5.42.4",
       "date": "Mon, 29 Mar 2021 05:57:18 GMT",

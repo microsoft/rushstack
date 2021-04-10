@@ -19,7 +19,7 @@ class HeftActionPlugin implements IHeftPlugin {
       parameters: {
         production: {
           kind: 'flag',
-          paramterLongName: '--production',
+          parameterLongName: '--production',
           description: 'Run in production mode'
         }
       },

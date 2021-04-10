@@ -1,6 +1,19 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 29 Mar 2021 05:57:18 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Apr 2021 06:09:52 GMT and should not be manually modified.
+
+## 5.43.0
+Thu, 08 Apr 2021 06:09:52 GMT
+
+### Updates
+
+- Add "--ignore-git-hooks" flags to "publish" and "version" commands to prevent the execution of all git hooks
+- Fix parameter name typo.
+- Eliminate a spurious warning that was displayed on Azure DevOps build agents: A phantom "node_modules" folder was found.
+- Fix an issue where "rush change" reported "Unable to find a git remote matching the repository URL" when used with SSH auth
+- Fix an issue where "rush publish" reported 403 errors if the package version included a SemVer build metadata suffix
+- Partially deprecate RUSH_TEMP_FOLDER environment variable
+- Validate changefiles against a schema when running 'rush change --verify'
 
 ## 5.42.4
 Mon, 29 Mar 2021 05:57:18 GMT

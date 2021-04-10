@@ -12,13 +12,11 @@ import { CommandLineAction } from '@rushstack/ts-command-line';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
-import { Configuration } from 'webpack-dev-server';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
 import { SyncHook } from 'tapable';
 import { Terminal } from '@rushstack/node-core-library';
-import * as webpack from 'webpack';
 
 // @public (undocumented)
 export class BuildStageHooks extends StageHooksBase<IBuildStageProperties> {
@@ -43,13 +41,19 @@ export class BundleSubstageHooks extends BuildSubstageHooksBase {
     // (undocumented)
     readonly afterConfigureWebpack: AsyncSeriesHook;
     // (undocumented)
-    readonly configureWebpack: AsyncSeriesWaterfallHook<IWebpackConfiguration>;
+    readonly configureWebpack: AsyncSeriesWaterfallHook<unknown>;
 }
 
 // @public (undocumented)
 export class CleanStageHooks extends StageHooksBase<ICleanStageProperties> {
     // (undocumented)
     readonly run: AsyncParallelHook;
+}
+
+// @public (undocumented)
+export class CompileSubstageHooks extends BuildSubstageHooksBase {
+    // (undocumented)
+    readonly afterCompile: AsyncParallelHook;
 }
 
 // @public (undocumented)
@@ -119,7 +123,7 @@ export interface IBuildStageProperties {
     // (undocumented)
     watchMode: boolean;
     // (undocumented)
-    webpackStats?: webpack.Stats | webpack.compilation.MultiStats;
+    webpackStats?: unknown;
 }
 
 // @public (undocumented)
@@ -136,7 +140,9 @@ export interface IBundleSubstage extends IBuildSubstage<BundleSubstageHooks, IBu
 
 // @public (undocumented)
 export interface IBundleSubstageProperties {
-    webpackConfiguration?: webpack.Configuration | webpack.Configuration[];
+    webpackConfiguration?: unknown;
+    webpackDevServerVersion?: string | undefined;
+    webpackVersion?: string | undefined;
 }
 
 // @public (undocumented)
@@ -152,7 +158,7 @@ export interface ICleanStageProperties {
 }
 
 // @public (undocumented)
-export interface ICompileSubstage extends IBuildSubstage<BuildSubstageHooksBase, ICompileSubstageProperties> {
+export interface ICompileSubstage extends IBuildSubstage<CompileSubstageHooks, ICompileSubstageProperties> {
 }
 
 // @public (undocumented)
@@ -187,7 +193,7 @@ export interface ICustomActionParameterBase<TParameter extends CustomActionParam
     // (undocumented)
     kind: 'flag' | 'integer' | 'string' | 'stringList';
     // (undocumented)
-    paramterLongName: string;
+    parameterLongName: string;
 }
 
 // @beta (undocumented)
@@ -324,15 +330,6 @@ export interface ITestStageProperties {
     updateSnapshots: boolean;
     // (undocumented)
     watchMode: boolean;
-}
-
-// @public (undocumented)
-export type IWebpackConfiguration = IWebpackConfigurationWithDevServer | IWebpackConfigurationWithDevServer[] | undefined;
-
-// @public (undocumented)
-export interface IWebpackConfigurationWithDevServer extends webpack.Configuration {
-    // (undocumented)
-    devServer?: Configuration;
 }
 
 // @internal

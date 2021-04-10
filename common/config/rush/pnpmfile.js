@@ -34,6 +34,34 @@ function readPackage(packageJson, context) {
     }
 
     packageJson.dependencies['ajv'] = '~6.12.5';
+  } else if (packageJson.name === '@types/webpack-dev-server') {
+    delete packageJson.dependencies['@types/webpack'];
+
+    if (!packageJson.peerDependencies) {
+      packageJson.peerDependencies = {};
+    }
+
+    switch (packageJson.version) {
+      case '3.11.2': {
+        // This is for heft-webpack4-plugin and the other projects that use Webpack 4
+        packageJson.peerDependencies['@types/webpack'] = '^4.0.0';
+        break;
+      }
+
+      case '3.11.3': {
+        // This is for heft-webpack5-plugin and the other projects that use Webpack 5.
+        // Webpack 5 brings its own typings
+        packageJson.peerDependencies['webpack'] = '^5.0.0';
+        break;
+      }
+
+      default: {
+        throw new Error(
+          `Unexpected version of @types/webpack-dev-server: "${packageJson.version}". ` +
+            'Update pnpmfile.js to add support for this version.'
+        );
+      }
+    }
   }
 
   return packageJson;

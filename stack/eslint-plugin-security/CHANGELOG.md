@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin-security
 
-This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+This log was last generated on Tue, 06 Apr 2021 15:14:22 GMT and should not be manually modified.
+
+## 0.1.4
+Tue, 06 Apr 2021 15:14:22 GMT
+
+### Patches
+
+- Fix unlisted dependency on @typescript-eslint/experimental-utils
 
 ## 0.1.3
 Wed, 30 Sep 2020 18:39:17 GMT

@@ -1,0 +1,69 @@
+{
+  "name": "@rushstack/heft-webpack4-plugin",
+  "entries": [
+    {
+      "version": "0.1.2",
+      "tag": "@rushstack/heft-webpack4-plugin_v0.1.2",
+      "date": "Thu, 08 Apr 2021 20:41:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Clean up README."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.28.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.0.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.28.0` to `^0.28.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.1",
+      "tag": "@rushstack/heft-webpack4-plugin_v0.1.1",
+      "date": "Thu, 08 Apr 2021 06:05:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.28.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.0.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.27.0` to `^0.28.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/heft-webpack4-plugin_v0.1.0",
+      "date": "Thu, 08 Apr 2021 00:10:18 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial project creation."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.27.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.0.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.25.5` to `^0.27.0`"
+          }
+        ]
+      }
+    }
+  ]
+}

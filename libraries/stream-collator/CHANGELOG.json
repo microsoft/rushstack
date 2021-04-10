@@ -2,6 +2,84 @@
   "name": "@rushstack/stream-collator",
   "entries": [
     {
+      "version": "4.0.72",
+      "tag": "@rushstack/stream-collator_v4.0.72",
+      "date": "Thu, 08 Apr 2021 20:41:55 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.1.71`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.28.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.0.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.71",
+      "tag": "@rushstack/stream-collator_v4.0.71",
+      "date": "Thu, 08 Apr 2021 06:05:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.1.70`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.28.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.0.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.70",
+      "tag": "@rushstack/stream-collator_v4.0.70",
+      "date": "Thu, 08 Apr 2021 00:10:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.1.69`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.27.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.0.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.0.69",
+      "tag": "@rushstack/stream-collator_v4.0.69",
+      "date": "Tue, 06 Apr 2021 15:14:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.36.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.1.68`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.3.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.26.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.0.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.68",
       "tag": "@rushstack/stream-collator_v4.0.68",
       "date": "Wed, 31 Mar 2021 15:10:36 GMT",
