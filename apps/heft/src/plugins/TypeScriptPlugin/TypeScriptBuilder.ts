@@ -906,6 +906,10 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     compilerHost.getDirectories = (folderPath: string) =>
       this._cachedFileSystem.readFolderFilesAndDirectories(folderPath).directories;
 
+    compilerHost.getCurrentDirectory = () => {
+      /* return the build directory from heft config*/
+      return this._configuration.buildFolder;
+    };
     return compilerHost;
   }
 

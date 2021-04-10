@@ -4,7 +4,6 @@
 import * as nodeJsPath from 'path';
 import * as fs from 'fs';
 import * as fsx from 'fs-extra';
-import glob from 'glob';
 
 import { LegacyAdapters } from './LegacyAdapters';
 import { Text, NewlineKind, Encoding } from './Text';
@@ -1312,12 +1311,7 @@ export class FileSystem {
    */
   public static async getRealPathAsync(linkPath: string): Promise<string> {
     return await FileSystem._wrapExceptionAsync(() => {
-      return LegacyAdapters.convertCallbackToPromise(
-        glob,
-        fs.realpath.native(linkPath, (error) => {
-          console.log(error);
-        })
-      );
+      return LegacyAdapters.convertCallbackToPromise(fs.realpath.native, linkPath);
     });
   }
 
