@@ -200,24 +200,46 @@ export class ScanAction extends BaseConfiglessRushAction {
     if (this._jsonFlag.value) {
       console.log(JSON.stringify(output, undefined, 2));
     } else if (this._allFlag.value) {
-      console.log('Dependencies that seem to be imported by this project:');
-      for (const packageName of detectedPackageNames) {
-        console.log('  ' + packageName);
+      if (detectedPackageNames.length !== 0) {
+        console.log('Dependencies that seem to be imported by this project:');
+        for (const packageName of detectedPackageNames) {
+          console.log('  ' + packageName);
+        }
+      } else {
+        console.log('This project does not seem to import any NPM packages.');
       }
     } else {
-      console.log(
-        `Possible phantom dependencies - these seem to be imported but aren't listed in package.json:`
-      );
-      for (const packageName of missingDependencies) {
-        console.log('  ' + packageName);
+      let wroteAnything: boolean = false;
+
+      if (missingDependencies.length > 0) {
+        console.log(
+          colors.yellow('Possible phantom dependencies') +
+            " - these seem to be imported but aren't listed in package.json:"
+        );
+        for (const packageName of missingDependencies) {
+          console.log('  ' + packageName);
+        }
+        wroteAnything = true;
       }
 
-      console.log('');
-      console.log(
-        `Possible unused dependencies - these are listed in package.json but don't seem to be imported:`
-      );
-      for (const packageName of unusedDependencies) {
-        console.log('  ' + packageName);
+      if (unusedDependencies.length > 0) {
+        if (wroteAnything) {
+          console.log('');
+        }
+        console.log(
+          colors.yellow('Possible unused dependencies') +
+            " - these are listed in package.json but don't seem to be imported:"
+        );
+        for (const packageName of unusedDependencies) {
+          console.log('  ' + packageName);
+        }
+        wroteAnything = true;
+      }
+
+      if (!wroteAnything) {
+        console.log(
+          colors.green('Everything looks good.') + '  No missing or unused dependencies were found.'
+        );
       }
     }
   }
