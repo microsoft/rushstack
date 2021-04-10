@@ -1,6 +1,92 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 22 Jan 2021 05:39:22 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Apr 2021 20:41:54 GMT and should not be manually modified.
+
+## 0.28.1
+Thu, 08 Apr 2021 20:41:54 GMT
+
+### Patches
+
+- Include mention of heft-webpack5-plugin in an error message.
+
+## 0.28.0
+Thu, 08 Apr 2021 06:05:31 GMT
+
+### Minor changes
+
+- Fix parameter name typo.
+
+## 0.27.0
+Thu, 08 Apr 2021 00:10:18 GMT
+
+### Minor changes
+
+- (BREAKING) Move Webpack functionality into its own package (@rushstack/heft-webpack4-plugin).
+
+## 0.26.0
+Tue, 06 Apr 2021 15:14:22 GMT
+
+### Minor changes
+
+- Add an "afterCompile" hook that runs after compilation.
+
+## 0.25.5
+Wed, 31 Mar 2021 15:10:36 GMT
+
+### Patches
+
+- Fix an outdated path in an error message.
+
+## 0.25.4
+Mon, 29 Mar 2021 05:02:06 GMT
+
+_Version update only_
+
+## 0.25.3
+Fri, 19 Mar 2021 22:31:37 GMT
+
+### Patches
+
+- Improve README.md
+
+## 0.25.2
+Wed, 17 Mar 2021 05:04:37 GMT
+
+### Patches
+
+- Fix an issue where heft would crash when copying static assets in --watch mode.
+
+## 0.25.1
+Fri, 12 Mar 2021 01:13:27 GMT
+
+### Patches
+
+- Update node-sass to support Node 15.
+
+## 0.25.0
+Wed, 10 Mar 2021 05:10:05 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Change the logic that resolves typescript, eslint, tslint, and api-extractor to look for a devDependency in the current project, and then for a dependency in the rig project, and then as any kind of dependency in the current project.
+
+## 0.24.4
+Thu, 04 Mar 2021 01:11:31 GMT
+
+_Version update only_
+
+## 0.24.3
+Tue, 02 Mar 2021 23:25:05 GMT
+
+### Patches
+
+- Fix an issue where build would continue even if TS reported errors.
+- Determine the default static assets destination folder from the TSConfig's "outDir" property, instead of hardcoding "lib."
+
+## 0.24.2
+Fri, 05 Feb 2021 16:10:42 GMT
+
+_Version update only_
 
 ## 0.24.1
 Fri, 22 Jan 2021 05:39:22 GMT

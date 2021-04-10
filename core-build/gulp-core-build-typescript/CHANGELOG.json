@@ -2,6 +2,81 @@
   "name": "@microsoft/gulp-core-build-typescript",
   "entries": [
     {
+      "version": "8.5.21",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.5.21",
+      "date": "Thu, 08 Apr 2021 06:05:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.13.4`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.1\" to `0.13.42`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.5.20",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.5.20",
+      "date": "Tue, 06 Apr 2021 15:14:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" to `3.17.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.36.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.13.3`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.1\" to `0.13.41`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.5.19",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.5.19",
+      "date": "Thu, 04 Mar 2021 01:11:31 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.13.2`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.1\" to `0.13.40`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "8.5.18",
+      "tag": "@microsoft/gulp-core-build-typescript_v8.5.18",
+      "date": "Fri, 05 Feb 2021 16:10:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" to `3.17.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.36.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.13.1`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/rush-stack-compiler-3.1\" to `0.13.39`"
+          }
+        ]
+      }
+    },
+    {
       "version": "8.5.17",
       "tag": "@microsoft/gulp-core-build-typescript_v8.5.17",
       "date": "Wed, 13 Jan 2021 01:11:06 GMT",

@@ -2,6 +2,33 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.36.1",
+      "tag": "@rushstack/node-core-library_v3.36.1",
+      "date": "Tue, 06 Apr 2021 15:14:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.36.0",
+      "tag": "@rushstack/node-core-library_v3.36.0",
+      "date": "Fri, 05 Feb 2021 16:10:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add EnvironmentMap API"
+          },
+          {
+            "comment": "Add Executable.spawn() API"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.35.2",
       "tag": "@rushstack/node-core-library_v3.35.2",
       "date": "Thu, 10 Dec 2020 23:25:49 GMT",

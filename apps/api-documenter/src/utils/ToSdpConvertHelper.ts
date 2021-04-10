@@ -15,11 +15,7 @@ import {
   CommonYamlModel
 } from '../yaml/ISDPYamlFile';
 import path from 'path';
-import {
-  FileSystem,
-  Encoding,
-  NewlineKind
-} from '@rushstack/node-core-library';
+import { FileSystem, Encoding, NewlineKind } from '@rushstack/node-core-library';
 import yaml = require('js-yaml');
 
 export function convertUDPYamlToSDP(folderPath: string): void {
@@ -56,19 +52,16 @@ function convert(inputPath: string, outputPath: string): void {
         const stringified: string = `### YamlMime:TS${result.type}\n${yaml.safeDump(result.model, {
           lineWidth: 120
         })}`;
-        FileSystem.writeFile(
-          `${outputPath}/${name}`, stringified,
-          {
-            convertLineEndings: NewlineKind.CrLf,
-            ensureFolderExists: true
-          }
-        );
+        FileSystem.writeFile(`${outputPath}/${name}`, stringified, {
+          convertLineEndings: NewlineKind.CrLf,
+          ensureFolderExists: true
+        });
       } else {
         console.log('not target file ', fpath);
       }
     } else {
       // read contents
-      convert(fpath,  path.join(outputPath, name));
+      convert(fpath, path.join(outputPath, name));
     }
   });
 }

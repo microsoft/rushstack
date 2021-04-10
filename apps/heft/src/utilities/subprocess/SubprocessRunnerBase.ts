@@ -378,18 +378,14 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
       }
 
       case SupportedSerializableArgType.Error: {
-        const typedArg: ISubprocessApiCallArgWithValue<ISerializedErrorValue> = arg as ISubprocessApiCallArgWithValue<
-          ISerializedErrorValue
-        >;
+        const typedArg: ISubprocessApiCallArgWithValue<ISerializedErrorValue> = arg as ISubprocessApiCallArgWithValue<ISerializedErrorValue>;
         const result: Error = new Error(typedArg.value.errorMessage);
         result.stack = typedArg.value.errorStack;
         return result;
       }
 
       case SupportedSerializableArgType.FileError: {
-        const typedArg: ISubprocessApiCallArgWithValue<ISerializedFileErrorValue> = arg as ISubprocessApiCallArgWithValue<
-          ISerializedFileErrorValue
-        >;
+        const typedArg: ISubprocessApiCallArgWithValue<ISerializedFileErrorValue> = arg as ISubprocessApiCallArgWithValue<ISerializedFileErrorValue>;
         const result: FileError = new FileError(
           typedArg.value.errorMessage,
           typedArg.value.filePath,

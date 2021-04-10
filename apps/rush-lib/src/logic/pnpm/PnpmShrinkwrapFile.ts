@@ -5,7 +5,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import crypto from 'crypto';
-import colors from 'colors';
+import colors from 'colors/safe';
 import { FileSystem, AlreadyReportedError, Import } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
@@ -16,6 +16,8 @@ import {
 } from '../../api/RushConfiguration';
 import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
+import { RushConstants } from '../RushConstants';
+import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
@@ -195,7 +197,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    */
   public readonly shrinkwrapFilename: string;
 
-  private _shrinkwrapJson: IPnpmShrinkwrapYaml;
+  private readonly _shrinkwrapJson: IPnpmShrinkwrapYaml;
 
   private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string) {
     super();
@@ -237,43 +239,56 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
   }
 
-  public getShrinkwrapHash(): string {
-    const shrinkwrapContent: string = this.serialize();
+  public getShrinkwrapHash(experimentsConfig?: IExperimentsJson): string {
+    const shrinkwrapContent: string = this.serialize(experimentsConfig);
     return crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
   }
 
   /** @override */
   public validate(
     packageManagerOptionsConfig: PackageManagerOptionsConfigurationBase,
-    policyOptions: IShrinkwrapFilePolicyValidatorOptions
+    policyOptions: IShrinkwrapFilePolicyValidatorOptions,
+    experimentsConfig?: IExperimentsJson
   ): void {
     super.validate(packageManagerOptionsConfig, policyOptions);
     if (!(packageManagerOptionsConfig instanceof PnpmOptionsConfiguration)) {
       throw new Error('The provided package manager options are not valid for PNPM shrinkwrap files.');
     }
 
-    // Only check the hash if allowShrinkwrapUpdates is false. If true, the shrinkwrap file
-    // may have changed and the hash could be invalid.
-    if (packageManagerOptionsConfig.preventManualShrinkwrapChanges && !policyOptions.allowShrinkwrapUpdates) {
-      if (!policyOptions.repoState.pnpmShrinkwrapHash) {
+    if (!policyOptions.allowShrinkwrapUpdates) {
+      if (!policyOptions.repoState.isValid) {
         console.log(
           colors.red(
-            'The existing shrinkwrap file hash could not be found. You may need to run "rush update" to ' +
-              'populate the hash. See the "preventManualShrinkwrapChanges" setting documentation for details.'
+            `The ${RushConstants.repoStateFilename} file is invalid. There may be a merge conflict marker ` +
+              'in the file. You may need to run "rush update" to refresh its contents.'
           ) + os.EOL
         );
         throw new AlreadyReportedError();
       }
 
-      if (this.getShrinkwrapHash() !== policyOptions.repoState.pnpmShrinkwrapHash) {
-        console.log(
-          colors.red(
-            'The shrinkwrap file hash does not match the expected hash. Please run "rush update" to ensure the ' +
-              'shrinkwrap file is up to date. See the "preventManualShrinkwrapChanges" setting documentation for ' +
-              'details.'
-          ) + os.EOL
-        );
-        throw new AlreadyReportedError();
+      // Only check the hash if allowShrinkwrapUpdates is false. If true, the shrinkwrap file
+      // may have changed and the hash could be invalid.
+      if (packageManagerOptionsConfig.preventManualShrinkwrapChanges) {
+        if (!policyOptions.repoState.pnpmShrinkwrapHash) {
+          console.log(
+            colors.red(
+              'The existing shrinkwrap file hash could not be found. You may need to run "rush update" to ' +
+                'populate the hash. See the "preventManualShrinkwrapChanges" setting documentation for details.'
+            ) + os.EOL
+          );
+          throw new AlreadyReportedError();
+        }
+
+        if (this.getShrinkwrapHash(experimentsConfig) !== policyOptions.repoState.pnpmShrinkwrapHash) {
+          console.log(
+            colors.red(
+              'The shrinkwrap file hash does not match the expected hash. Please run "rush update" to ensure the ' +
+                'shrinkwrap file is up to date. See the "preventManualShrinkwrapChanges" setting documentation for ' +
+                'details.'
+            ) + os.EOL
+          );
+          throw new AlreadyReportedError();
+        }
       }
     }
   }
@@ -414,13 +429,20 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    *
    * @override
    */
-  protected serialize(): string {
+  protected serialize(experiments?: IExperimentsJson): string {
     // Ensure that if any of the top-level properties are provided but empty are removed. We populate the object
     // properties when we read the shrinkwrap but PNPM does not set these top-level properties unless they are present.
-    const shrinkwrapToSerialize: { [key: string]: unknown } = { ...this._shrinkwrapJson };
-    for (const [key, value] of Object.entries(shrinkwrapToSerialize)) {
-      if (typeof value === 'object' && Object.entries(value || {}).length === 0) {
-        delete shrinkwrapToSerialize[key];
+    const shrinkwrapToSerialize: { [key: string]: unknown } = {};
+    const { omitImportersFromPreventManualShrinkwrapChanges } = experiments || {};
+    for (const [key, value] of Object.entries(this._shrinkwrapJson)) {
+      // The 'omitImportersFromPreventManualShrinkwrapChanges' experiment skips the 'importers' section
+      // when computing the hash, since the main concern is changes to the overall external dependency footprint
+      if (omitImportersFromPreventManualShrinkwrapChanges && key === 'importers') {
+        continue;
+      }
+
+      if (!value || typeof value !== 'object' || Object.keys(value).length > 0) {
+        shrinkwrapToSerialize[key] = value;
       }
     }
 

@@ -1,24 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
 
-import {
-  CommandLineAction,
-  ICommandLineActionOptions,
-  CommandLineStringListParameter
-} from '@rushstack/ts-command-line';
-import {
-  LockFile,
-  PackageJsonLookup,
-  IPackageJson,
-  AlreadyReportedError
-} from '@rushstack/node-core-library';
+import { CommandLineAction, ICommandLineActionOptions } from '@rushstack/ts-command-line';
+import { LockFile } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { EventHooksManager } from '../../logic/EventHooksManager';
 import { RushCommandLineParser } from './../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
@@ -73,7 +63,7 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
     if (this.rushConfiguration) {
       if (!this._safeForSimultaneousRushProcesses) {
         if (!LockFile.tryAcquire(this.rushConfiguration.commonTempFolder, 'rush')) {
-          console.log(colors.red(`Another rush command is already running in this repository.`));
+          console.log(colors.red(`Another Rush command is already running in this repository.`));
           process.exit(1);
         }
       }
@@ -129,66 +119,5 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
     }
 
     return super.onExecute();
-  }
-
-  protected *evaluateProjectParameter(
-    projectsParameters: CommandLineStringListParameter
-  ): Iterable<RushConfigurationProject> {
-    const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-
-    for (const projectParameter of projectsParameters.values) {
-      if (projectParameter === '.') {
-        const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(process.cwd());
-        if (packageJson) {
-          const project: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(
-            packageJson.name
-          );
-          if (project) {
-            yield project;
-          } else {
-            console.log(
-              colors.red(
-                'Rush is not currently running in a project directory specified in rush.json. ' +
-                  `The "." value for the ${projectsParameters.longName} parameter is not allowed.`
-              )
-            );
-            throw new AlreadyReportedError();
-          }
-        } else {
-          console.log(
-            colors.red(
-              'Rush is not currently running in a project directory. ' +
-                `The "." value for the ${projectsParameters.longName} parameter is not allowed.`
-            )
-          );
-          throw new AlreadyReportedError();
-        }
-      } else {
-        const project:
-          | RushConfigurationProject
-          | undefined = this.rushConfiguration.findProjectByShorthandName(projectParameter);
-        if (!project) {
-          console.log(colors.red(`The project '${projectParameter}' does not exist in rush.json.`));
-          throw new AlreadyReportedError();
-        }
-
-        yield project;
-      }
-    }
-  }
-
-  protected *evaluateVersionPolicyProjects(
-    versionPoliciesParameters: CommandLineStringListParameter
-  ): Iterable<RushConfigurationProject> {
-    if (versionPoliciesParameters.values && versionPoliciesParameters.values.length > 0) {
-      for (const project of this.rushConfiguration.projects) {
-        const matches: boolean = versionPoliciesParameters.values.some((policyName) => {
-          return project.versionPolicyName === policyName;
-        });
-        if (matches) {
-          yield project;
-        }
-      }
-    }
   }
 }

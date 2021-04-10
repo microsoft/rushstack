@@ -11,7 +11,8 @@ import { TaskCollection } from './taskRunner/TaskCollection';
 export interface ITaskSelectorConstructor {
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration: BuildCacheConfiguration | undefined;
-  selection: Set<RushConfigurationProject>;
+  selection: ReadonlySet<RushConfigurationProject>;
+  commandName: string;
   commandToRun: string;
   customParameterValues: string[];
   isQuietMode: boolean;
@@ -19,6 +20,7 @@ export interface ITaskSelectorConstructor {
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
   packageDepsFilename: string;
+  packageChangeAnalyzer?: PackageChangeAnalyzer;
 }
 
 /**
@@ -34,7 +36,9 @@ export class TaskSelector {
   public constructor(options: ITaskSelectorConstructor) {
     this._options = options;
 
-    this._packageChangeAnalyzer = new PackageChangeAnalyzer(options.rushConfiguration);
+    const { packageChangeAnalyzer = new PackageChangeAnalyzer(options.rushConfiguration) } = options;
+
+    this._packageChangeAnalyzer = packageChangeAnalyzer;
   }
 
   public static getScriptToRun(
@@ -57,12 +61,12 @@ export class TaskSelector {
   }
 
   public registerTasks(): TaskCollection {
-    const selectedProjects: Set<RushConfigurationProject> = this._computeSelectedProjects();
+    const selectedProjects: ReadonlySet<RushConfigurationProject> = this._computeSelectedProjects();
 
     return this._createTaskCollection(selectedProjects);
   }
 
-  private _computeSelectedProjects(): Set<RushConfigurationProject> {
+  private _computeSelectedProjects(): ReadonlySet<RushConfigurationProject> {
     const { selection } = this._options;
 
     if (selection.size) {
@@ -81,16 +85,34 @@ export class TaskSelector {
       this._registerTask(rushProject, taskCollection);
     }
 
-    function* getDependencyTaskNames(project: RushConfigurationProject): Iterable<string> {
-      for (const dep of project.dependencyProjects) {
-        // Only add relationships for projects in the set
-        if (projects.has(dep)) {
-          yield ProjectBuilder.getTaskName(dep);
-        }
-      }
-    }
-
     if (!this._options.ignoreDependencyOrder) {
+      const dependencyMap: Map<RushConfigurationProject, Set<string>> = new Map();
+
+      // Generate the filtered dependency graph for selected projects
+      function getDependencyTaskNames(project: RushConfigurationProject): Set<string> {
+        const cached: Set<string> | undefined = dependencyMap.get(project);
+        if (cached) {
+          return cached;
+        }
+
+        const dependencyTaskNames: Set<string> = new Set();
+        dependencyMap.set(project, dependencyTaskNames);
+
+        for (const dep of project.dependencyProjects) {
+          if (projects.has(dep)) {
+            // Add direct relationships for projects in the set
+            dependencyTaskNames.add(ProjectBuilder.getTaskName(dep));
+          } else {
+            // Add indirect relationships for projects not in the set
+            for (const indirectDep of getDependencyTaskNames(dep)) {
+              dependencyTaskNames.add(indirectDep);
+            }
+          }
+        }
+
+        return dependencyTaskNames;
+      }
+
       // Add ordering relationships for each dependency
       for (const project of projects) {
         taskCollection.addDependencies(ProjectBuilder.getTaskName(project), getDependencyTaskNames(project));
@@ -122,6 +144,7 @@ export class TaskSelector {
         rushConfiguration: this._options.rushConfiguration,
         buildCacheConfiguration: this._options.buildCacheConfiguration,
         commandToRun: commandToRun || '',
+        commandName: this._options.commandName,
         isIncrementalBuildAllowed: this._options.isIncrementalBuildAllowed,
         packageChangeAnalyzer: this._packageChangeAnalyzer,
         packageDepsFilename: this._options.packageDepsFilename

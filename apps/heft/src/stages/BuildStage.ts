@@ -2,8 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import { SyncHook, AsyncParallelHook, AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable';
-import * as webpack from 'webpack';
-import { Configuration as WebpackDevServerConfiguration } from 'webpack-dev-server';
 
 import { StageBase, StageHooksBase, IStageContext } from './StageBase';
 import { IFinishedWords, Logging } from '../utilities/Logging';
@@ -42,25 +40,17 @@ export type CopyFromCacheMode = 'hardlink' | 'copy';
 /**
  * @public
  */
-export interface IWebpackConfigurationWithDevServer extends webpack.Configuration {
-  devServer?: WebpackDevServerConfiguration;
+export class CompileSubstageHooks extends BuildSubstageHooksBase {
+  public readonly afterCompile: AsyncParallelHook = new AsyncParallelHook();
 }
 
 /**
  * @public
  */
-export type IWebpackConfiguration =
-  | IWebpackConfigurationWithDevServer
-  | IWebpackConfigurationWithDevServer[]
-  | undefined;
-
-/**
- * @public
- */
 export class BundleSubstageHooks extends BuildSubstageHooksBase {
-  public readonly configureWebpack: AsyncSeriesWaterfallHook<
-    IWebpackConfiguration
-  > = new AsyncSeriesWaterfallHook<IWebpackConfiguration>(['webpackConfiguration']);
+  public readonly configureWebpack: AsyncSeriesWaterfallHook<unknown> = new AsyncSeriesWaterfallHook<unknown>(
+    ['webpackConfiguration']
+  );
   public readonly afterConfigureWebpack: AsyncSeriesHook = new AsyncSeriesHook();
 }
 
@@ -76,12 +66,22 @@ export interface ICompileSubstageProperties {
  */
 export interface IBundleSubstageProperties {
   /**
+   * If webpack is used, this will be set to the version of the webpack package
+   */
+  webpackVersion?: string | undefined;
+
+  /**
+   * If webpack is used, this will be set to the version of the webpack-dev-server package
+   */
+  webpackDevServerVersion?: string | undefined;
+
+  /**
    * The configuration used by the Webpack plugin. This must be populated
    * for Webpack to run. If webpackConfigFilePath is specified,
    * this will be populated automatically with the exports of the
    * config file referenced in that property.
    */
-  webpackConfiguration?: webpack.Configuration | webpack.Configuration[];
+  webpackConfiguration?: unknown;
 }
 
 /**
@@ -92,8 +92,7 @@ export interface IPreCompileSubstage extends IBuildSubstage<BuildSubstageHooksBa
 /**
  * @public
  */
-export interface ICompileSubstage
-  extends IBuildSubstage<BuildSubstageHooksBase, ICompileSubstageProperties> {}
+export interface ICompileSubstage extends IBuildSubstage<CompileSubstageHooks, ICompileSubstageProperties> {}
 
 /**
  * @public
@@ -132,7 +131,7 @@ export interface IBuildStageProperties {
   maxOldSpaceSize?: string;
   watchMode: boolean;
   serveMode: boolean;
-  webpackStats?: webpack.Stats | webpack.compilation.MultiStats;
+  webpackStats?: unknown;
 }
 
 /**
@@ -242,7 +241,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
     this.stageHooks.preCompile.call(preCompileSubstage);
 
     const compileStage: ICompileSubstage = {
-      hooks: new BuildSubstageHooksBase(),
+      hooks: new CompileSubstageHooks(),
       properties: {
         typescriptMaxWriteParallelism: this.stageOptions.typescriptMaxWriteParallelism
       }
@@ -278,6 +277,7 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
       buildStage: compileStage,
       watchMode: watchMode
     });
+    await compileStage.hooks.afterCompile.promise();
 
     if (this.loggingManager.errorsHaveBeenEmitted && !watchMode) {
       return;

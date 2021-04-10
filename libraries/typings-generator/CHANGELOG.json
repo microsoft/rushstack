@@ -2,6 +2,45 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.3.3",
+      "tag": "@rushstack/typings-generator_v0.3.3",
+      "date": "Tue, 06 Apr 2021 15:14:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.36.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.3.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.2",
+      "tag": "@rushstack/typings-generator_v0.3.2",
+      "date": "Mon, 29 Mar 2021 05:02:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a bug where watched files would not honor typings generation excludeFiles settings"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.1",
+      "tag": "@rushstack/typings-generator_v0.3.1",
+      "date": "Fri, 05 Feb 2021 16:10:42 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.36.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.0",
       "tag": "@rushstack/typings-generator_v0.3.0",
       "date": "Wed, 06 Jan 2021 16:10:43 GMT",

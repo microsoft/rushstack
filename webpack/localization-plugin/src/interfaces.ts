@@ -101,7 +101,7 @@ export interface ILocalizedData {
   translatedStrings: ILocalizedStrings;
 
   /**
-   * Use this paramter to specify a function used to load translations missing from
+   * Use this parameter to specify a function used to load translations missing from
    * the {@link ILocalizedData.translatedStrings} parameter.
    */
   resolveMissingTranslatedStrings?: (locales: string[], filePath: string) => IResolvedMissingTranslations;

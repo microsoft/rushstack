@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
 
@@ -41,6 +41,7 @@ import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
 import { Telemetry } from '../logic/Telemetry';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
+import { SetupAction } from './actions/SetupAction';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -53,7 +54,7 @@ export interface IRushCommandLineParserOptions {
 export class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
   public rushGlobalFolder!: RushGlobalFolder;
-  public rushConfiguration!: RushConfiguration;
+  public readonly rushConfiguration!: RushConfiguration;
 
   private _debugParameter!: CommandLineFlagParameter;
   private _rushOptions: IRushCommandLineParserOptions;
@@ -170,11 +171,12 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new PublishAction(this));
       this.addAction(new PurgeAction(this));
       this.addAction(new ScanAction(this));
+      this.addAction(new SetupAction(this));
       this.addAction(new UnlinkAction(this));
       this.addAction(new UpdateAction(this));
       this.addAction(new UpdateAutoinstallerAction(this));
-      this.addAction(new VersionAction(this));
       this.addAction(new UpdateCloudCredentialsAction(this));
+      this.addAction(new VersionAction(this));
 
       if (this.rushConfiguration?.experimentsConfiguration.configuration.buildCache) {
         this.addAction(new WriteBuildCacheAction(this));
@@ -192,12 +194,12 @@ export class RushCommandLineParser extends CommandLineParser {
     // If there is not a rush.json file, we still want "build" and "rebuild" to appear in the
     // command-line help
     if (this.rushConfiguration) {
-      const commandLineConfigFile: string = path.join(
+      const commandLineConfigFilePath: string = path.join(
         this.rushConfiguration.commonRushConfigFolder,
         RushConstants.commandLineFilename
       );
 
-      commandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFile);
+      commandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFilePath);
     }
 
     // Build actions from the command line configuration supersede default build actions.
@@ -269,7 +271,10 @@ export class RushCommandLineParser extends CommandLineParser {
             ignoreMissingScript: command.ignoreMissingScript || false,
             ignoreDependencyOrder: command.ignoreDependencyOrder || false,
             incremental: command.incremental || false,
-            allowWarningsInSuccessfulBuild: !!command.allowWarningsInSuccessfulBuild
+            allowWarningsInSuccessfulBuild: !!command.allowWarningsInSuccessfulBuild,
+
+            watchForChanges: command.watchForChanges || false,
+            disableBuildCache: command.disableBuildCache || false
           })
         );
         break;

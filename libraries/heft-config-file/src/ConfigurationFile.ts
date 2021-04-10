@@ -529,9 +529,7 @@ export class ConfigurationFile<TConfigurationFile> {
           }
 
           case InheritanceType.custom: {
-            const customInheritance: ICustomPropertyInheritance<unknown> = propertyInheritance as ICustomPropertyInheritance<
-              unknown
-            >;
+            const customInheritance: ICustomPropertyInheritance<unknown> = propertyInheritance as ICustomPropertyInheritance<unknown>;
             if (
               !customInheritance.inheritanceFunction ||
               typeof customInheritance.inheritanceFunction !== 'function'

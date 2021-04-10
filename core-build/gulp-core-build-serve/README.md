@@ -112,7 +112,7 @@ Because of this issue `gulp-core-build-serve` also provides functionality to gen
 
 1. By setting the `ServeTask`'s `tryCreateDevCertificate` configuration option to `true`. This option
 will make the serve task attempt to generate and trust a development certificate before starting the
-server if a certificate wasn't specified using the `keyPath` and `certPath` paramters or the `pfxPath`
+server if a certificate wasn't specified using the `keyPath` and `certPath` parameters or the `pfxPath`
 parameter.
 
 2. By invoking the `TrustCertTask` build task.

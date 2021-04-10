@@ -42,15 +42,18 @@ export class RepoStateFile {
   private _variant: string | undefined;
   private _pnpmShrinkwrapHash: string | undefined;
   private _preferredVersionsHash: string | undefined;
+  private _isValid: boolean;
   private _modified: boolean = false;
 
   private constructor(
     repoStateJson: IRepoStateJson | undefined,
+    isValid: boolean,
     filePath: string,
     variant: string | undefined
   ) {
     this._repoStateFilePath = filePath;
     this._variant = variant;
+    this._isValid = isValid;
 
     if (repoStateJson) {
       this._pnpmShrinkwrapHash = repoStateJson.pnpmShrinkwrapHash;
@@ -80,6 +83,13 @@ export class RepoStateFile {
   }
 
   /**
+   * If false, the repo-state.json file is not valid and its values cannot be relied upon
+   */
+  public get isValid(): boolean {
+    return this._isValid;
+  }
+
+  /**
    * Loads the repo-state.json data from the specified file path.
    * If the file has not been created yet, then an empty object is returned.
    *
@@ -87,16 +97,46 @@ export class RepoStateFile {
    * @param variant - The variant currently being used by Rush.
    */
   public static loadFromFile(jsonFilename: string, variant: string | undefined): RepoStateFile {
-    let repoStateJson: IRepoStateJson | undefined = undefined;
+    let fileContents: string | undefined;
     try {
-      repoStateJson = JsonFile.loadAndValidate(jsonFilename, RepoStateFile._jsonSchema);
+      fileContents = FileSystem.readFile(jsonFilename);
     } catch (error) {
       if (!FileSystem.isNotExistError(error)) {
         throw error;
       }
     }
 
-    return new RepoStateFile(repoStateJson, jsonFilename, variant);
+    let foundMergeConflictMarker: boolean = false;
+    let repoStateJson: IRepoStateJson | undefined = undefined;
+    if (fileContents) {
+      try {
+        repoStateJson = JsonFile.parseString(fileContents);
+      } catch (error) {
+        // Look for a Git merge conflict marker. PNPM gracefully handles merge conflicts in pnpm-lock.yaml,
+        // so a user should be able to just run "rush update" if they get conflicts in pnpm-lock.yaml
+        // and repo-state.json and have Rush update both.
+        for (
+          let nextNewlineIndex: number = 0;
+          nextNewlineIndex > -1;
+          nextNewlineIndex = fileContents.indexOf('\n', nextNewlineIndex + 1)
+        ) {
+          if (fileContents.substr(nextNewlineIndex + 1, 7) === '<<<<<<<') {
+            foundMergeConflictMarker = true;
+            repoStateJson = {
+              preferredVersionsHash: 'INVALID',
+              pnpmShrinkwrapHash: 'INVALID'
+            };
+            break;
+          }
+        }
+      }
+
+      if (repoStateJson) {
+        this._jsonSchema.validateObject(repoStateJson, jsonFilename);
+      }
+    }
+
+    return new RepoStateFile(repoStateJson, !foundMergeConflictMarker, jsonFilename, variant);
   }
 
   /**
@@ -118,8 +158,12 @@ export class RepoStateFile {
         rushConfiguration.getCommittedShrinkwrapFilename(this._variant),
         rushConfiguration.pnpmOptions
       );
+
       if (pnpmShrinkwrapFile) {
-        const shrinkwrapFileHash: string = pnpmShrinkwrapFile.getShrinkwrapHash();
+        const shrinkwrapFileHash: string = pnpmShrinkwrapFile.getShrinkwrapHash(
+          rushConfiguration.experimentsConfiguration.configuration
+        );
+
         if (this._pnpmShrinkwrapHash !== shrinkwrapFileHash) {
           this._pnpmShrinkwrapHash = shrinkwrapFileHash;
           this._modified = true;
@@ -145,6 +189,9 @@ export class RepoStateFile {
       this._modified = true;
     }
 
+    // Now that the file has been refreshed, we know its contents are valid
+    this._isValid = true;
+
     return this._saveIfModified();
   }
 
@@ -154,7 +201,7 @@ export class RepoStateFile {
   private _saveIfModified(): boolean {
     if (this._modified) {
       const content: string =
-        '// DO NOT MODIFY THIS FILE. It is generated and used by Rush.' +
+        '// DO NOT MODIFY THIS FILE MANUALLY BUT DO COMMIT IT. It is generated and used by Rush.' +
         `${NewlineKind.Lf}${this._serialize()}`;
       FileSystem.writeFile(this._repoStateFilePath, content);
       this._modified = false;

@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as fetch from 'node-fetch';
 import * as fs from 'fs';
-import * as http from 'http';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -13,8 +12,7 @@ import {
   JsonFile,
   PosixModeBits,
   NewlineKind,
-  AlreadyReportedError,
-  Import
+  AlreadyReportedError
 } from '@rushstack/node-core-library';
 
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
@@ -34,9 +32,8 @@ import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from '../installManager/InstallHelpers';
 import { PolicyValidator } from '../policy/PolicyValidator';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-
-const HttpsProxyAgent: typeof import('https-proxy-agent') = Import.lazy('https-proxy-agent', require);
+import { WebClient, WebClientResponse } from '../../utilities/WebClient';
+import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
 
 export interface IInstallManagerOptions {
   /**
@@ -99,14 +96,10 @@ export interface IInstallManagerOptions {
   maxInstallAttempts: number;
 
   /**
-   * The set of projects that should be installed, along with project dependencies.
+   * Filters to be passed to PNPM during installation, if applicable.
+   * These restrict the scope of a workspace installation.
    */
-  toProjects: ReadonlySet<RushConfigurationProject>;
-
-  /**
-   * The set of projects that should be installed, along with dependencies of the project.
-   */
-  fromProjects: ReadonlySet<RushConfigurationProject>;
+  pnpmFilterArguments: string[];
 }
 
 /**
@@ -118,6 +111,8 @@ export abstract class BaseInstallManager {
   private _commonTempInstallFlag: LastInstallFlag;
   private _commonTempLinkFlag: LastLinkFlag;
   private _installRecycler: AsyncRecycler;
+  private _npmSetupValidated: boolean = false;
+  private _syncNpmrcAlreadyCalled: boolean = false;
 
   private _options: IInstallManagerOptions;
 
@@ -153,7 +148,7 @@ export abstract class BaseInstallManager {
   }
 
   public async doInstall(): Promise<void> {
-    const isFilteredInstall: boolean = this.options.toProjects.size > 0 || this.options.fromProjects.size > 0;
+    const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
 
@@ -198,6 +193,9 @@ export abstract class BaseInstallManager {
     };
 
     if (cleanInstall || !shrinkwrapIsUpToDate || !variantIsUpToDate || !canSkipInstall()) {
+      console.log();
+      await this.validateNpmSetup();
+
       let publishedRelease: boolean | undefined;
       try {
         publishedRelease = await this._checkIfReleaseIsPublished();
@@ -386,6 +384,7 @@ export abstract class BaseInstallManager {
       this._rushConfiguration.commonRushConfigFolder,
       this._rushConfiguration.commonTempFolder
     );
+    this._syncNpmrcAlreadyCalled = true;
 
     // also, copy the pnpmfile.js if it exists
     if (this._rushConfiguration.packageManager === 'pnpm') {
@@ -494,15 +493,17 @@ export abstract class BaseInstallManager {
         args.push('--no-lock');
       }
 
-      if (
-        this._rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall &&
-        !this._options.allowShrinkwrapUpdates
-      ) {
+      const { configuration: experiments } = this._rushConfiguration.experimentsConfiguration;
+
+      if (experiments.usePnpmFrozenLockfileForRushInstall && !this._options.allowShrinkwrapUpdates) {
         if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
           args.push('--frozen-lockfile');
         } else {
           args.push('--frozen-shrinkwrap');
         }
+      } else if (experiments.usePnpmPreferFrozenLockfileForRushUpdate) {
+        // In workspaces, we want to avoid unnecessary lockfile churn
+        args.push('--prefer-frozen-lockfile');
       } else {
         // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
         // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
@@ -605,21 +606,11 @@ export abstract class BaseInstallManager {
     // Note that the "@" symbol does not normally get URL-encoded
     queryUrl += RushConstants.rushPackageName.replace('/', '%2F');
 
-    const userAgent: string = `pnpm/? npm/? node/${process.version} ${os.platform()} ${os.arch()}`;
+    const webClient: WebClient = new WebClient();
+    webClient.userAgent = `pnpm/? npm/? node/${process.version} ${os.platform()} ${os.arch()}`;
+    webClient.accept = 'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*';
 
-    const headers: fetch.Headers = new fetch.Headers();
-    headers.append('user-agent', userAgent);
-    headers.append('accept', 'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*');
-
-    let agent: http.Agent | undefined = undefined;
-    if (process.env.HTTP_PROXY) {
-      agent = new HttpsProxyAgent(process.env.HTTP_PROXY);
-    }
-
-    const response: fetch.Response = await fetch.default(queryUrl, {
-      headers: headers,
-      agent: agent
-    });
+    const response: WebClientResponse = await webClient.fetchAsync(queryUrl);
     if (!response.ok) {
       throw new Error('Failed to query');
     }
@@ -641,11 +632,9 @@ export abstract class BaseInstallManager {
     }
 
     // Make sure the tarball wasn't deleted from the CDN
-    headers.set('accept', '*/*');
-    const response2: fetch.Response = await fetch.default(url, {
-      headers: headers,
-      agent: agent
-    });
+    webClient.accept = '*/*';
+
+    const response2: fetch.Response = await webClient.fetchAsync(url);
 
     if (!response2.ok) {
       if (response2.status === 404) {
@@ -687,5 +676,33 @@ export abstract class BaseInstallManager {
         );
       }
     }
+  }
+
+  protected async validateNpmSetup(): Promise<void> {
+    if (this._npmSetupValidated) {
+      return;
+    }
+
+    if (!this.options.bypassPolicy) {
+      const setupPackageRegistry: SetupPackageRegistry = new SetupPackageRegistry({
+        rushConfiguration: this.rushConfiguration,
+        isDebug: this.options.debug,
+        syncNpmrcAlreadyCalled: this._syncNpmrcAlreadyCalled
+      });
+      const valid: boolean = await setupPackageRegistry.checkOnly();
+      if (!valid) {
+        console.error();
+        console.error(colors.red('ERROR: NPM credentials are missing or expired'));
+        console.error();
+        console.error(
+          colors.bold(
+            '==> Please run "rush setup" to update your NPM token.  (Or append "--bypass-policy" to proceed anyway.)'
+          )
+        );
+        throw new AlreadyReportedError();
+      }
+    }
+
+    this._npmSetupValidated = true;
   }
 }

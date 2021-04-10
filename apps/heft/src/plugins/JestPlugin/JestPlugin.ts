@@ -126,7 +126,7 @@ export class JestPlugin implements IHeftPlugin {
         'The transpiler output folder does not exist:\n  ' +
           emitFolderPathForJest +
           '\nWas the compiler invoked? Is the "emitFolderNameForTests" setting correctly' +
-          ' specified in .heft/typescript.json?\n'
+          ' specified in config/typescript.json?\n'
       );
     }
   }

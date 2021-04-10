@@ -197,3 +197,25 @@ test('Executable.spawnSync("npm-binary-wrapper") bad characters', () => {
     );
   }
 });
+
+test('Executable.spawn("npm-binary-wrapper")', async () => {
+  const executablePath: string = path.join(executableFolder, 'success', 'npm-binary-wrapper');
+
+  await expect(
+    (() => {
+      const childProcess: child_process.ChildProcess = Executable.spawn(executablePath, ['1', '2', '3'], {
+        environment,
+        currentWorkingDirectory: executableFolder
+      });
+
+      return new Promise<string>((resolve, reject) => {
+        childProcess.on('exit', (code: number) => {
+          resolve(`Exit with code=${code}`);
+        });
+        childProcess.on('error', (error: Error) => {
+          reject(`Failed with error: ${error.message}`);
+        });
+      });
+    })()
+  ).resolves.toBe('Exit with code=0');
+});

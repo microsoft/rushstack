@@ -1,6 +1,71 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Fri, 22 Jan 2021 05:39:22 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Apr 2021 20:41:54 GMT and should not be manually modified.
+
+## 1.10.159
+Thu, 08 Apr 2021 20:41:54 GMT
+
+_Version update only_
+
+## 1.10.158
+Thu, 08 Apr 2021 06:05:32 GMT
+
+_Version update only_
+
+## 1.10.157
+Thu, 08 Apr 2021 00:10:18 GMT
+
+_Version update only_
+
+## 1.10.156
+Tue, 06 Apr 2021 15:14:22 GMT
+
+_Version update only_
+
+## 1.10.155
+Wed, 31 Mar 2021 15:10:36 GMT
+
+_Version update only_
+
+## 1.10.154
+Mon, 29 Mar 2021 05:02:06 GMT
+
+_Version update only_
+
+## 1.10.153
+Fri, 19 Mar 2021 22:31:37 GMT
+
+_Version update only_
+
+## 1.10.152
+Wed, 17 Mar 2021 05:04:38 GMT
+
+_Version update only_
+
+## 1.10.151
+Fri, 12 Mar 2021 01:13:27 GMT
+
+_Version update only_
+
+## 1.10.150
+Wed, 10 Mar 2021 05:10:05 GMT
+
+_Version update only_
+
+## 1.10.149
+Thu, 04 Mar 2021 01:11:31 GMT
+
+_Version update only_
+
+## 1.10.148
+Tue, 02 Mar 2021 23:25:05 GMT
+
+_Version update only_
+
+## 1.10.147
+Fri, 05 Feb 2021 16:10:42 GMT
+
+_Version update only_
 
 ## 1.10.146
 Fri, 22 Jan 2021 05:39:22 GMT

@@ -4,7 +4,7 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
-import colors from 'colors';
+import colors from 'colors/safe';
 
 import {
   CommandLineFlagParameter,
@@ -203,7 +203,7 @@ export class ChangeAction extends BaseRushAction {
       if (!email) {
         throw new Error(
           "Unable to detect Git email and an email address wasn't provided using the " +
-            `${this._changeEmailParameter.longName} paramter.`
+            `${this._changeEmailParameter.longName} parameter.`
         );
       }
 

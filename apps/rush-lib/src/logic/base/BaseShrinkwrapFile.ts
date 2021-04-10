@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as semver from 'semver';
 import { FileSystem } from '@rushstack/node-core-library';
 
@@ -10,6 +10,7 @@ import { DependencySpecifier, DependencySpecifierType } from '../DependencySpeci
 import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
 import { PackageManagerOptionsConfigurationBase } from '../../api/RushConfiguration';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
+import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
 
 /**
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.
@@ -38,7 +39,8 @@ export abstract class BaseShrinkwrapFile {
    */
   public validate(
     packageManagerOptionsConfig: PackageManagerOptionsConfigurationBase,
-    policyOptions: IShrinkwrapFilePolicyValidatorOptions
+    policyOptions: IShrinkwrapFilePolicyValidatorOptions,
+    experimentsConfig?: IExperimentsJson
   ): void {}
 
   /**

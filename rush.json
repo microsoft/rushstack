@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.36.1",
+  "rushVersion": "5.42.4",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -144,7 +144,7 @@
    * uncomment this line. This is effectively similar to running "rush check" before any
    * of the following commands:
    *
-   *   rush install, rush update, rush version, rush publish
+   *   rush install, rush update, rush link, rush version, rush publish
    *
    * In some cases you may want this turned on, but need to allow certain packages to use a different
    * version. In those cases, you will need to add an entry to the "allowedAlternativeVersions"
@@ -239,7 +239,7 @@
      * They are case-insensitive anchored JavaScript RegExps.  Example: ".*@example\.com"
      *
      * IMPORTANT: Because these are regular expressions encoded as JSON string literals,
-     * RegExp escapes need two backlpashes, and ordinary periods should be "\\.".
+     * RegExp escapes need two backslashes, and ordinary periods should be "\\.".
      */
     "allowedEmailRegExps": ["[^@]+@users\\.noreply\\.github\\.com"],
 
@@ -257,7 +257,16 @@
      * you might configure your system's trigger to look for a special string such as "[skip-ci]"
      * in the commit message, and then customize Rush's message to contain that string.
      */
-    // "versionBumpCommitMessage": "Applying package updates. [skip-ci]"
+    // "versionBumpCommitMessage": "Applying package updates. [skip-ci]",
+
+    /**
+     * The commit message to use when committing changes during 'rush version'.
+     *
+     * For example, if you want to prevent these commits from triggering a CI build,
+     * you might configure your system's trigger to look for a special string such as "[skip-ci]"
+     * in the commit message, and then customize Rush's message to contain that string.
+     */
+    // "changeLogUpdateCommitMessage": "Applying package updates. [skip-ci]"
   },
 
   "repository": {
@@ -414,6 +423,15 @@
     //    * NOTE: "versionPolicyName" and "shouldPublish" are alternatives; you cannot specify them both.
     //    */
     //   // "shouldPublish": false,
+    //
+    //   /**
+    //    * Facilitates postprocessing of a project's files prior to publishing.
+    //    *
+    //    * If specified, the "publishFolder" is the relative path to a subfolder of the project folder.
+    //    * The "rush publish" command will publish the subfolder instead of the project folder.  The subfolder
+    //    * must contain its own package.json file, which is typically a build output.
+    //    */
+    //   // "publishFolder": "temp/publish",
     //
     //   /**
     //    * An optional version policy associated with the project.  Version policies are defined
@@ -588,12 +606,6 @@
       "shouldPublish": false
     },
     {
-      "packageName": "heft-rsc-test",
-      "projectFolder": "build-tests/heft-rsc-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
       "packageName": "heft-sass-test",
       "projectFolder": "build-tests/heft-sass-test",
       "reviewCategory": "tests",
@@ -606,8 +618,14 @@
       "shouldPublish": false
     },
     {
-      "packageName": "heft-webpack-everything-test",
-      "projectFolder": "build-tests/heft-webpack-everything-test",
+      "packageName": "heft-webpack4-everything-test",
+      "projectFolder": "build-tests/heft-webpack4-everything-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-webpack5-everything-test",
+      "projectFolder": "build-tests/heft-webpack5-everything-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -791,6 +809,20 @@
     {
       "packageName": "@microsoft/web-library-build",
       "projectFolder": "core-build/web-library-build",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+
+    // "heft-plugins" folder (alphabetical order)
+    {
+      "packageName": "@rushstack/heft-webpack4-plugin",
+      "projectFolder": "heft-plugins/heft-webpack4-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-webpack5-plugin",
+      "projectFolder": "heft-plugins/heft-webpack5-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },

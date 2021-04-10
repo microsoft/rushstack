@@ -1,6 +1,86 @@
 # Change Log - @microsoft/web-library-build
 
-This log was last generated on Fri, 22 Jan 2021 05:39:22 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Apr 2021 20:41:54 GMT and should not be manually modified.
+
+## 7.5.62
+Thu, 08 Apr 2021 20:41:54 GMT
+
+_Version update only_
+
+## 7.5.61
+Thu, 08 Apr 2021 06:05:32 GMT
+
+_Version update only_
+
+## 7.5.60
+Thu, 08 Apr 2021 00:10:18 GMT
+
+_Version update only_
+
+## 7.5.59
+Tue, 06 Apr 2021 15:14:22 GMT
+
+_Version update only_
+
+## 7.5.58
+Wed, 31 Mar 2021 15:10:36 GMT
+
+_Version update only_
+
+## 7.5.57
+Mon, 29 Mar 2021 05:02:06 GMT
+
+_Version update only_
+
+## 7.5.56
+Thu, 25 Mar 2021 04:57:54 GMT
+
+_Version update only_
+
+## 7.5.55
+Fri, 19 Mar 2021 22:31:37 GMT
+
+_Version update only_
+
+## 7.5.54
+Wed, 17 Mar 2021 05:04:38 GMT
+
+_Version update only_
+
+## 7.5.53
+Fri, 12 Mar 2021 01:13:27 GMT
+
+_Version update only_
+
+## 7.5.52
+Wed, 10 Mar 2021 06:23:29 GMT
+
+_Version update only_
+
+## 7.5.51
+Wed, 10 Mar 2021 05:10:06 GMT
+
+_Version update only_
+
+## 7.5.50
+Tue, 09 Mar 2021 23:31:46 GMT
+
+_Version update only_
+
+## 7.5.49
+Thu, 04 Mar 2021 01:11:31 GMT
+
+_Version update only_
+
+## 7.5.48
+Tue, 02 Mar 2021 23:25:05 GMT
+
+_Version update only_
+
+## 7.5.47
+Fri, 05 Feb 2021 16:10:42 GMT
+
+_Version update only_
 
 ## 7.5.46
 Fri, 22 Jan 2021 05:39:22 GMT

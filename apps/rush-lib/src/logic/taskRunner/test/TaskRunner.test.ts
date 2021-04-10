@@ -4,7 +4,7 @@
 // The TaskRunner prints "x.xx seconds" in TestRunner.test.ts.snap; ensure that the Stopwatch timing is deterministic
 jest.mock('../../../utilities/Utilities');
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import { EOL } from 'os';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 import { MockWritable } from '@rushstack/terminal';
@@ -66,7 +66,8 @@ describe('TaskRunner', () => {
             parallelism: 'tequila',
             changedProjectsOnly: false,
             destination: mockWritable,
-            allowWarningsInSuccessfulBuild: false
+            allowWarningsInSuccessfulBuild: false,
+            repoCommandLineConfiguration: undefined
           })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -79,7 +80,8 @@ describe('TaskRunner', () => {
         parallelism: '1',
         changedProjectsOnly: false,
         destination: mockWritable,
-        allowWarningsInSuccessfulBuild: false
+        allowWarningsInSuccessfulBuild: false,
+        repoCommandLineConfiguration: undefined
       };
     });
 
@@ -135,7 +137,8 @@ describe('TaskRunner', () => {
           parallelism: '1',
           changedProjectsOnly: false,
           destination: mockWritable,
-          allowWarningsInSuccessfulBuild: false
+          allowWarningsInSuccessfulBuild: false,
+          repoCommandLineConfiguration: undefined
         };
       });
 
@@ -169,7 +172,8 @@ describe('TaskRunner', () => {
           parallelism: '1',
           changedProjectsOnly: false,
           destination: mockWritable,
-          allowWarningsInSuccessfulBuild: true
+          allowWarningsInSuccessfulBuild: true,
+          repoCommandLineConfiguration: undefined
         };
       });
 

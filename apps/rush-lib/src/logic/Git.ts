@@ -5,7 +5,8 @@ import child_process from 'child_process';
 import gitInfo = require('git-repo-info');
 import * as os from 'os';
 import * as path from 'path';
-import colors from 'colors';
+import * as url from 'url';
+import colors from 'colors/safe';
 import { Executable, AlreadyReportedError, Path } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
@@ -253,7 +254,10 @@ export class Git {
         ['remote'],
         this._rushConfiguration.rushJsonFolder
       ).trim();
-      const normalizedRepositoryUrl: string = repositoryUrl.toUpperCase();
+
+      // Apply toUpperCase() for a case-insensitive comparison
+      const normalizedRepositoryUrl: string = Git.normalizeGitUrlForComparison(repositoryUrl).toUpperCase();
+
       const matchingRemotes: string[] = output.split('\n').filter((remoteName) => {
         if (remoteName) {
           const remoteUrl: string = Utilities.executeCommandAndCaptureOutput(
@@ -266,15 +270,9 @@ export class Git {
             return false;
           }
 
-          const normalizedRemoteUrl: string = remoteUrl.toUpperCase();
-          if (normalizedRemoteUrl.toUpperCase() === normalizedRepositoryUrl) {
-            return true;
-          }
-
-          // When you copy a URL from the GitHub web site, they append the ".git" file extension to the URL.
-          // We allow that to be specified in rush.json, even though the file extension gets dropped
-          // by "git clone".
-          if (`${normalizedRemoteUrl}.GIT` === normalizedRepositoryUrl) {
+          // Also apply toUpperCase() for a case-insensitive comparison
+          const normalizedRemoteUrl: string = Git.normalizeGitUrlForComparison(remoteUrl).toUpperCase();
+          if (normalizedRemoteUrl === normalizedRepositoryUrl) {
             return true;
           }
         }
@@ -325,6 +323,75 @@ export class Git {
     return changes.filter((change) => {
       return change.trim().length > 0;
     });
+  }
+
+  /**
+   * Git remotes can use different URL syntaxes; this converts them all to a normalized HTTPS
+   * representation for matching purposes.  IF THE INPUT IS NOT ALREADY HTTPS, THE OUTPUT IS
+   * NOT NECESSARILY A VALID GIT URL.
+   *
+   * @example
+   * `git@github.com:ExampleOrg/ExampleProject.git` --> `https://github.com/ExampleOrg/ExampleProject`
+   */
+  public static normalizeGitUrlForComparison(gitUrl: string): string {
+    // Git URL formats are documented here: https://www.git-scm.com/docs/git-clone#_git_urls
+
+    let result: string = gitUrl.trim();
+
+    // [user@]host.xz:path/to/repo.git/
+    // "This syntax is only recognized if there are no slashes before the first colon. This helps
+    // differentiate a local path that contains a colon."
+    //
+    // Match patterns like this:
+    //   user@host.ext:path/to/repo
+    //   host.ext:path/to/repo
+    //   localhost:/~user/path/to/repo
+    //
+    // But not:
+    //   http://blah
+    //   c:/windows/path.txt
+    //
+    const scpLikeSyntaxRegExp: RegExp = /^(?:[^@:\/]+\@)?([^:\/]{2,})\:((?!\/\/).+)$/;
+
+    // Example: "user@host.ext:path/to/repo"
+    const scpLikeSyntaxMatch: RegExpExecArray | null = scpLikeSyntaxRegExp.exec(gitUrl);
+    if (scpLikeSyntaxMatch) {
+      // Example: "host.ext"
+      const host: string = scpLikeSyntaxMatch[1];
+      // Example: "path/to/repo"
+      const path: string = scpLikeSyntaxMatch[2];
+
+      if (path.startsWith('/')) {
+        result = `https://${host}${path}`;
+      } else {
+        result = `https://${host}/${path}`;
+      }
+    }
+
+    const parsedUrl: url.UrlWithStringQuery = url.parse(result);
+
+    // Only convert recognized schemes
+
+    switch (parsedUrl.protocol) {
+      case 'http:':
+      case 'https:':
+      case 'ssh:':
+      case 'ftp:':
+      case 'ftps:':
+      case 'git:':
+      case 'git+http:':
+      case 'git+https:':
+      case 'git+ssh:':
+      case 'git+ftp:':
+      case 'git+ftps:':
+        // Assemble the parts we want:
+        result = `https://${parsedUrl.host}${parsedUrl.pathname}`;
+        break;
+    }
+
+    // Trim ".git" or ".git/" from the end
+    result = result.replace(/.git\/?$/, '');
+    return result;
   }
 
   private _tryGetGitEmail(): IResultOrError<string> {
