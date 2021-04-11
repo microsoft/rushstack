@@ -18,30 +18,6 @@ isPreview: false
 isDeprecated: false
 type: class
 properties:
-  - name: malformedEvent
-    uid: 'api-documenter-test!DocClass1#malformedEvent:member'
-    package: api-documenter-test!
-    fullName: malformedEvent
-    summary: This event should have been marked as readonly.
-    remarks: ''
-    isPreview: false
-    isDeprecated: false
-    syntax:
-      content: 'malformedEvent: SystemEvent;'
-      return:
-        type: '<xref uid="api-documenter-test!SystemEvent:class" />'
-  - name: modifiedEvent
-    uid: 'api-documenter-test!DocClass1#modifiedEvent:member'
-    package: api-documenter-test!
-    fullName: modifiedEvent
-    summary: This event is fired whenever the object is modified.
-    remarks: ''
-    isPreview: false
-    isDeprecated: false
-    syntax:
-      content: 'readonly modifiedEvent: SystemEvent;'
-      return:
-        type: '<xref uid="api-documenter-test!SystemEvent:class" />'
   - name: readonlyProperty
     uid: 'api-documenter-test!DocClass1#readonlyProperty:member'
     package: api-documenter-test!
@@ -182,4 +158,29 @@ methods:
       return:
         type: void
         description: ''
+events:
+  - name: malformedEvent
+    uid: 'api-documenter-test!DocClass1#malformedEvent:member'
+    package: api-documenter-test!
+    fullName: malformedEvent
+    summary: This event should have been marked as readonly.
+    remarks: ''
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'malformedEvent: SystemEvent;'
+      return:
+        type: '<xref uid="api-documenter-test!SystemEvent:class" />'
+  - name: modifiedEvent
+    uid: 'api-documenter-test!DocClass1#modifiedEvent:member'
+    package: api-documenter-test!
+    fullName: modifiedEvent
+    summary: This event is fired whenever the object is modified.
+    remarks: ''
+    isPreview: false
+    isDeprecated: false
+    syntax:
+      content: 'readonly modifiedEvent: SystemEvent;'
+      return:
+        type: '<xref uid="api-documenter-test!SystemEvent:class" />'
 extends: '<xref uid="api-documenter-test!DocBaseClass:class" />'
