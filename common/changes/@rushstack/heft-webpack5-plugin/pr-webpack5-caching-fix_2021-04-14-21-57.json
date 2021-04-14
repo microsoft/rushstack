@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-webpack5-plugin",
+      "comment": "Fix webpack5 persistent cache in production mode",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack5-plugin",
+  "email": "scamden@users.noreply.github.com"
+}
