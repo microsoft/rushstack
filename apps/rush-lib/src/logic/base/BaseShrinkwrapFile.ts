@@ -73,13 +73,11 @@ export abstract class BaseShrinkwrapFile {
    */
   public tryEnsureCompatibleDependency(
     dependencySpecifier: DependencySpecifier,
-    tempProjectName: string,
-    tryReusingPackageVersionsFromShrinkwrap: boolean = true
+    tempProjectName: string
   ): boolean {
     const shrinkwrapDependency: DependencySpecifier | undefined = this.tryEnsureDependencyVersion(
       dependencySpecifier,
-      tempProjectName,
-      tryReusingPackageVersionsFromShrinkwrap
+      tempProjectName
     );
     if (!shrinkwrapDependency) {
       return false;
@@ -99,8 +97,7 @@ export abstract class BaseShrinkwrapFile {
   /** @virtual */
   protected abstract tryEnsureDependencyVersion(
     dependencySpecifier: DependencySpecifier,
-    tempProjectName: string,
-    tryReusingPackageVersionsFromShrinkwrap: boolean
+    tempProjectName: string
   ): DependencySpecifier | undefined;
 
   /** @virtual */
