@@ -398,6 +398,8 @@ export abstract class BaseInstallManager {
     let { shrinkwrapIsUpToDate, shrinkwrapWarnings } = await this.prepareCommonTempAsync(shrinkwrapFile);
     shrinkwrapIsUpToDate = shrinkwrapIsUpToDate && !this.options.recheckShrinkwrap;
 
+    this._syncTempShrinkwrap(shrinkwrapFile);
+
     // Write out the reported warnings
     if (shrinkwrapWarnings.length > 0) {
       console.log();
@@ -414,8 +416,6 @@ export abstract class BaseInstallManager {
       }
       console.log();
     }
-
-    this._syncTempShrinkwrap(shrinkwrapFile);
 
     // Force update if the shrinkwrap is out of date
     if (!shrinkwrapIsUpToDate) {
