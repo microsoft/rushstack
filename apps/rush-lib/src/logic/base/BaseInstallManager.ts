@@ -220,12 +220,7 @@ export abstract class BaseInstallManager {
       // Perform the actual install
       await this.installAsync(cleanInstall);
 
-      const usePnpmFrozenLockfile: boolean =
-        this._rushConfiguration.packageManager === 'pnpm' &&
-        this._rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall ===
-          true;
-
-      if (this.options.allowShrinkwrapUpdates && (usePnpmFrozenLockfile || !shrinkwrapIsUpToDate)) {
+      if (this.options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
         // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
         Utilities.syncFile(
           this._rushConfiguration.tempShrinkwrapFilename,
@@ -649,9 +644,14 @@ export abstract class BaseInstallManager {
 
   private _syncTempShrinkwrap(shrinkwrapFile: BaseShrinkwrapFile | undefined): void {
     if (shrinkwrapFile) {
-      // If we have a (possibly incomplete) shrinkwrap file, save it as the temporary file.
-      shrinkwrapFile.save(this.rushConfiguration.tempShrinkwrapFilename);
-      shrinkwrapFile.save(this.rushConfiguration.tempShrinkwrapPreinstallFilename);
+      Utilities.syncFile(
+        this._rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant),
+        this.rushConfiguration.tempShrinkwrapFilename
+      );
+      Utilities.syncFile(
+        this._rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant),
+        this.rushConfiguration.tempShrinkwrapPreinstallFilename
+      );
     } else {
       // Otherwise delete the temporary file
       FileSystem.deleteFile(this.rushConfiguration.tempShrinkwrapFilename);

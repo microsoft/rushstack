@@ -69,28 +69,6 @@ export class RushInstallManager extends BaseInstallManager {
     this._tempProjectHelper = new TempProjectHelper(this.rushConfiguration);
   }
 
-  protected async prepareAsync(): Promise<{ variantIsUpToDate: boolean; shrinkwrapIsUpToDate: boolean }> {
-    const result: { variantIsUpToDate: boolean; shrinkwrapIsUpToDate: boolean } = await super.prepareAsync();
-
-    // We have already done prep work to ensure that the package.json files are "up to date". Some changes
-    // (such as local package version bumps, or adding a reference to another existing local package) do
-    // not need a "rush update" to be run, and as such can be changed manually in the temp shrinkwrap. These
-    // changes will eventually be picked up during a "rush update".
-    if (
-      this.rushConfiguration.packageManager === 'pnpm' &&
-      !this.options.allowShrinkwrapUpdates &&
-      this.rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall
-    ) {
-      const tempShrinkwrap: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-        this.rushConfiguration.tempShrinkwrapFilename,
-        this.rushConfiguration.pnpmOptions
-      );
-      await this._updatePnpmShrinkwrapTarballIntegritiesAsync(tempShrinkwrap);
-    }
-
-    return result;
-  }
-
   /**
    * Regenerates the common/package.json and all temp_modules projects.
    * If shrinkwrapFile is provided, this function also validates whether it contains
@@ -344,14 +322,23 @@ export class RushInstallManager extends BaseInstallManager {
         }
       }
 
-      // Remove the workspace file if it exists
-      if (this.rushConfiguration.packageManager === 'pnpm') {
-        const workspaceFilePath: string = path.join(
-          this.rushConfiguration.commonTempFolder,
-          'pnpm-workspace.yaml'
+      // When using frozen shrinkwrap, we need to validate that the tarball integrities are up-to-date
+      // with the shrinkwrap file, since these will cause install to fail.
+      if (
+        shrinkwrapFile &&
+        this.rushConfiguration.packageManager === 'pnpm' &&
+        this.rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall
+      ) {
+        const pnpmShrinkwrapFile: PnpmShrinkwrapFile = shrinkwrapFile as PnpmShrinkwrapFile;
+        const tarballIntegrityValid: boolean = await this._validateRushProjectTarballIntegrityAsync(
+          pnpmShrinkwrapFile,
+          rushProject
         );
-        if (FileSystem.exists(workspaceFilePath)) {
-          FileSystem.deleteFile(workspaceFilePath);
+        if (!tarballIntegrityValid) {
+          shrinkwrapIsUpToDate = false;
+          shrinkwrapWarnings.push(
+            `Invalid or missing tarball integrity hash in shrinkwrap for "${rushProject.packageName}"`
+          );
         }
       }
 
@@ -363,6 +350,17 @@ export class RushInstallManager extends BaseInstallManager {
               'notation. The package.json has been modified and must be committed to source control.'
           )
         );
+      }
+    }
+
+    // Remove the workspace file if it exists
+    if (this.rushConfiguration.packageManager === 'pnpm') {
+      const workspaceFilePath: string = path.join(
+        this.rushConfiguration.commonTempFolder,
+        'pnpm-workspace.yaml'
+      );
+      if (FileSystem.exists(workspaceFilePath)) {
+        FileSystem.deleteFile(workspaceFilePath);
       }
     }
 
@@ -396,54 +394,34 @@ export class RushInstallManager extends BaseInstallManager {
     return true;
   }
 
-  private async _updatePnpmShrinkwrapTarballIntegritiesAsync(
-    tempShrinkwrapFile: PnpmShrinkwrapFile | undefined
-  ): Promise<void> {
-    if (!tempShrinkwrapFile) {
-      return;
-    }
+  private async _validateRushProjectTarballIntegrityAsync(
+    shrinkwrapFile: PnpmShrinkwrapFile | undefined,
+    rushProject: RushConfigurationProject
+  ): Promise<boolean> {
+    if (shrinkwrapFile) {
+      console.log(
+        `Checking shrinkwrap local dependency tarball hashes in ${shrinkwrapFile.shrinkwrapFilename}`
+      );
 
-    const tempProjectHelper: TempProjectHelper = new TempProjectHelper(this.rushConfiguration);
-
-    console.log(
-      `Checking shrinkwrap local dependency tarball hashes in ${tempShrinkwrapFile.shrinkwrapFilename}`
-    );
-
-    let shrinkwrapFileUpdated: boolean = false;
-    for (const rushProject of this.rushConfiguration.projects) {
-      const tempProjectDependencyKey: string | undefined = tempShrinkwrapFile.getTempProjectDependencyKey(
+      const tempProjectDependencyKey: string | undefined = shrinkwrapFile.getTempProjectDependencyKey(
         rushProject.tempProjectName
       );
-
       if (!tempProjectDependencyKey) {
-        throw new Error(`Cannot get dependency key for temp project: ${rushProject.tempProjectName}`);
+        return false;
       }
 
-      const parentShrinkwrapEntry:
-        | IPnpmShrinkwrapDependencyYaml
-        | undefined = tempShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(
+      const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml = shrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(
         tempProjectDependencyKey
-      );
-      if (!parentShrinkwrapEntry) {
-        throw new InternalError(
-          `Cannot find shrinkwrap entry using dependency key for temp project: ${rushProject.tempProjectName}`
-        );
-      }
-
+      )!;
       const newIntegrity: string = (
-        await ssri.fromStream(fs.createReadStream(tempProjectHelper.getTarballFilePath(rushProject)))
+        await ssri.fromStream(fs.createReadStream(this._tempProjectHelper.getTarballFilePath(rushProject)))
       ).toString();
 
       if (parentShrinkwrapEntry.resolution.integrity !== newIntegrity) {
-        shrinkwrapFileUpdated = true;
-        parentShrinkwrapEntry.resolution.integrity = newIntegrity;
+        return false;
       }
     }
-
-    tempShrinkwrapFile.save(tempShrinkwrapFile.shrinkwrapFilename);
-    if (shrinkwrapFileUpdated) {
-      console.log('Shrinkwrap local dependency tarball hashes were updated.');
-    }
+    return true;
   }
 
   /**

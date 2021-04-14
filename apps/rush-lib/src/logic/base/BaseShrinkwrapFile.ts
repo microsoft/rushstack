@@ -3,7 +3,6 @@
 
 import colors from 'colors/safe';
 import * as semver from 'semver';
-import { FileSystem } from '@rushstack/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
@@ -23,13 +22,6 @@ export abstract class BaseShrinkwrapFile {
       return dictionary[key];
     }
     return undefined;
-  }
-
-  /**
-   * Serializes and saves the shrinkwrap file to specified location
-   */
-  public save(filePath: string): void {
-    FileSystem.writeFile(filePath, this.serialize());
   }
 
   /**
