@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Mon, 12 Apr 2021 15:10:29 GMT and should not be manually modified.
+This log was last generated on Thu, 15 Apr 2021 02:59:25 GMT and should not be manually modified.
+
+## 1.0.11
+Thu, 15 Apr 2021 02:59:25 GMT
+
+### Patches
+
+- Explicitly set the noEmitOnError TypeScript compiler option to false in the base tsconfig.
 
 ## 1.0.10
 Mon, 12 Apr 2021 15:10:29 GMT

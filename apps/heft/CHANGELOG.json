@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.28.3",
+      "tag": "@rushstack/heft_v0.28.3",
+      "date": "Thu, 15 Apr 2021 02:59:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix incremental TypeScript compilation, optimize architecture"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.28.2",
       "tag": "@rushstack/heft_v0.28.2",
       "date": "Mon, 12 Apr 2021 15:10:29 GMT",

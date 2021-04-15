@@ -2,6 +2,26 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "1.0.11",
+      "tag": "@rushstack/heft-node-rig_v1.0.11",
+      "date": "Thu, 15 Apr 2021 02:59:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Explicitly set the noEmitOnError TypeScript compiler option to false in the base tsconfig."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.28.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.28.2` to `^0.28.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.10",
       "tag": "@rushstack/heft-node-rig_v1.0.10",
       "date": "Mon, 12 Apr 2021 15:10:29 GMT",
