@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-web-rig",
+      "comment": "Explicitly set noEmitOnError: false",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
