@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-webpack5-plugin",
   "entries": [
     {
+      "version": "0.1.3",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.1.3",
+      "date": "Thu, 15 Apr 2021 15:09:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix webpack5 persistent cache in production mode"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.2",
       "tag": "@rushstack/heft-webpack5-plugin_v0.1.2",
       "date": "Thu, 15 Apr 2021 02:59:25 GMT",

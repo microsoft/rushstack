@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-webpack5-plugin
 
-This log was last generated on Thu, 15 Apr 2021 02:59:25 GMT and should not be manually modified.
+This log was last generated on Thu, 15 Apr 2021 15:09:34 GMT and should not be manually modified.
+
+## 0.1.3
+Thu, 15 Apr 2021 15:09:34 GMT
+
+### Patches
+
+- Fix webpack5 persistent cache in production mode
 
 ## 0.1.2
 Thu, 15 Apr 2021 02:59:25 GMT
