@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import { Path, InternalError } from '@rushstack/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 import type * as TTypescript from 'typescript';
 import {
   ExtendedTypeScript,
@@ -37,9 +36,6 @@ export class EmitFilesPatch {
   // eslint-disable-next-line
   private static _baseEmitFiles: any | undefined = undefined;
 
-  private static _originalOutDir: string | undefined = undefined;
-  private static _redirectedOutDir: string | undefined = undefined;
-
   public static install(
     ts: ExtendedTypeScript,
     tsconfig: TTypescript.ParsedCommandLine,
@@ -58,7 +54,12 @@ export class EmitFilesPatch {
     let foundPrimary: boolean = false;
     let defaultModuleKind: TTypescript.ModuleKind;
 
+    const compilerOptionsMap: Map<ICachedEmitModuleKind, TTypescript.CompilerOptions> = new Map();
+
     for (const moduleKindToEmit of moduleKindsToEmit) {
+      const outDir: string = useBuildCache
+        ? moduleKindToEmit.cacheOutFolderPath
+        : moduleKindToEmit.outFolderPath;
       if (moduleKindToEmit.isPrimary) {
         if (foundPrimary) {
           throw new Error('Multiple primary module emit kinds encountered.');
@@ -66,6 +67,19 @@ export class EmitFilesPatch {
           foundPrimary = true;
         }
         defaultModuleKind = moduleKindToEmit.moduleKind;
+        compilerOptionsMap.set(moduleKindToEmit, {
+          ...tsconfig.options,
+          outDir
+        });
+      } else {
+        compilerOptionsMap.set(moduleKindToEmit, {
+          ...tsconfig.options,
+          outDir,
+          module: moduleKindToEmit.moduleKind,
+          // Don't emit declarations for secondary module kinds
+          declaration: false,
+          declarationMap: false
+        });
       }
     }
 
@@ -99,28 +113,11 @@ export class EmitFilesPatch {
         let defaultModuleKindResult: TTypescript.EmitResult;
         let emitSkipped: boolean = false;
         for (const moduleKindToEmit of moduleKindsToEmit) {
-          const compilerOptions: TTypescript.CompilerOptions = moduleKindToEmit.isPrimary
-            ? {
-                ...tsconfig.options
-              }
-            : {
-                ...tsconfig.options,
-                module: moduleKindToEmit.moduleKind,
-
-                // Don't emit declarations for secondary module kinds
-                declaration: false,
-                declarationMap: false
-              };
+          const compilerOptions: TTypescript.CompilerOptions = compilerOptionsMap.get(moduleKindToEmit)!;
 
           if (!compilerOptions.outDir) {
             throw new InternalError('Expected compilerOptions.outDir to be assigned');
           }
-
-          // Redirect from "path/to/lib" --> "path/to/.heft/build-cache/lib"
-          EmitFilesPatch._originalOutDir = compilerOptions.outDir;
-          EmitFilesPatch._redirectedOutDir = useBuildCache
-            ? moduleKindToEmit.cacheOutFolderPath
-            : moduleKindToEmit.outFolderPath;
 
           const flavorResult: TTypescript.EmitResult = EmitFilesPatch._baseEmitFiles(
             resolver,
@@ -139,9 +136,6 @@ export class EmitFilesPatch {
           if (moduleKindToEmit.moduleKind === defaultModuleKind) {
             defaultModuleKindResult = flavorResult;
           }
-
-          EmitFilesPatch._originalOutDir = undefined;
-          EmitFilesPatch._redirectedOutDir = undefined;
           // Should results be aggregated, in case for whatever reason the diagnostics are not the same?
         }
         return {
@@ -154,29 +148,6 @@ export class EmitFilesPatch {
 
   public static get isInstalled(): boolean {
     return this._patchedTs !== undefined;
-  }
-
-  public static getRedirectedFilePath(filePath: string): string {
-    if (!EmitFilesPatch.isInstalled) {
-      throw new InternalError(
-        'EmitFilesPatch.getRedirectedFilePath() cannot be used unless the patch is installed'
-      );
-    }
-
-    // Redirect from "path/to/lib" --> "path/to/.heft/build-cache/lib"
-    let redirectedFilePath: string = filePath;
-    if (EmitFilesPatch._redirectedOutDir !== undefined) {
-      if (Path.isUnderOrEqual(filePath, EmitFilesPatch._originalOutDir!)) {
-        redirectedFilePath = path.resolve(
-          EmitFilesPatch._redirectedOutDir,
-          path.relative(EmitFilesPatch._originalOutDir!, filePath)
-        );
-      } else {
-        // The compiler is writing some other output, for example:
-        // ./.heft/build-cache/ts_a7cd263b9f06b2440c0f2b2264746621c192f2e2.json
-      }
-    }
-    return redirectedFilePath;
   }
 
   public static uninstall(ts: ExtendedTypeScript): void {

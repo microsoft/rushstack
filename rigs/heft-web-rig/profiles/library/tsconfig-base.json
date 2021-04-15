@@ -15,6 +15,7 @@
     "experimentalDecorators": true,
     "strict": true,
     "esModuleInterop": true,
+    "noEmitOnError": false,
     "types": [],
 
     "module": "esnext",
