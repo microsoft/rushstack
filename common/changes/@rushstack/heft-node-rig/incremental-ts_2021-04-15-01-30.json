@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-node-rig",
-      "comment": "Explicitly set noEmitOnError: false",
+      "comment": "Explicitly set the noEmitOnError TypeScript compiler option to false in the base tsconfig.",
       "type": "patch"
     }
   ],
