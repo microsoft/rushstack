@@ -10,10 +10,14 @@ import { IPutFetchOptions, IGetFetchOptions, WebClient } from '../../../utilitie
 const CONTENT_HASH_HEADER_NAME: 'x-amz-content-sha256' = 'x-amz-content-sha256';
 const DATE_HEADER_NAME: 'x-amz-date' = 'x-amz-date';
 const HOST_HEADER_NAME: 'host' = 'host';
+const SECURITY_TOKEN_HEADER_NAME: 'x-amz-security-token' = 'x-amz-security-token';
+
+const DEFAULT_S3_REGION: 'us-east-1' = 'us-east-1';
 
 export interface IAmazonS3Credentials {
   accessKeyId: string;
   secretAccessKey: string;
+  sessionToken: string | undefined;
 }
 
 interface IIsoDateString {
@@ -49,14 +53,15 @@ export class AmazonS3Client {
       return undefined;
     }
 
-    const splitIndex: number = credentialString.indexOf(':');
-    if (splitIndex === -1) {
+    const fields: string[] = credentialString.split(':');
+    if (fields.length < 2 || fields.length > 3) {
       throw new Error('Amazon S3 credential is in an unexpected format.');
     }
 
     return {
-      accessKeyId: credentialString.substring(0, splitIndex),
-      secretAccessKey: credentialString.substring(splitIndex + 1)
+      accessKeyId: fields[0],
+      secretAccessKey: fields[1],
+      sessionToken: fields[2]
     };
   }
 
@@ -91,15 +96,26 @@ export class AmazonS3Client {
   ): Promise<fetch.Response> {
     const isoDateString: IIsoDateString = this._getIsoDateString();
     const bodyHash: string = this._getSha256(body);
-    const host: string = `${this._s3Bucket}.s3.amazonaws.com`;
-
+    const host: string = this._getHost();
     const headers: fetch.Headers = new fetch.Headers();
     headers.set(DATE_HEADER_NAME, isoDateString.dateTime);
     headers.set(CONTENT_HASH_HEADER_NAME, bodyHash);
 
     if (this._credentials) {
       // Compute the authorization header. See https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
-      const signedHeaderNames: string = `${HOST_HEADER_NAME};${CONTENT_HASH_HEADER_NAME};${DATE_HEADER_NAME}`;
+      const signedHeaderNames: string[] = [HOST_HEADER_NAME, CONTENT_HASH_HEADER_NAME, DATE_HEADER_NAME];
+      const canonicalHeaders: string[] = [
+        `${HOST_HEADER_NAME}:${host}`,
+        `${CONTENT_HASH_HEADER_NAME}:${bodyHash}`,
+        `${DATE_HEADER_NAME}:${isoDateString.dateTime}`
+      ];
+
+      // Handle signing with temporary credentials (via sts:assume-role)
+      if (this._credentials.sessionToken) {
+        signedHeaderNames.push(SECURITY_TOKEN_HEADER_NAME);
+        canonicalHeaders.push(`${SECURITY_TOKEN_HEADER_NAME}:${this._credentials.sessionToken}`);
+      }
+
       // The canonical request looks like this:
       //  GET
       // /test.txt
@@ -115,9 +131,7 @@ export class AmazonS3Client {
         verb,
         `/${objectName}`,
         '', // we don't use query strings for these requests
-        `${HOST_HEADER_NAME}:${host}`,
-        `${CONTENT_HASH_HEADER_NAME}:${bodyHash}`,
-        `${DATE_HEADER_NAME}:${isoDateString.dateTime}`,
+        ...canonicalHeaders,
         '',
         signedHeaderNames,
         bodyHash
@@ -149,6 +163,10 @@ export class AmazonS3Client {
       const authorizationHeader: string = `AWS4-HMAC-SHA256 Credential=${this._credentials.accessKeyId}/${scope},SignedHeaders=${signedHeaderNames},Signature=${signature}`;
 
       headers.set('Authorization', authorizationHeader);
+      if (this._credentials.sessionToken) {
+        // Handle signing with temporary credentials (via sts:assume-role)
+        headers.set('X-Amz-Security-Token', this._credentials.sessionToken);
+      }
     }
 
     const webFetchOptions: IGetFetchOptions | IPutFetchOptions = {
@@ -205,6 +223,14 @@ export class AmazonS3Client {
 
   private _throwS3Error(response: fetch.Response): never {
     throw new Error(`Amazon S3 responded with status code ${response.status} (${response.statusText})`);
+  }
+
+  private _getHost(): string {
+    if (this._s3Region === DEFAULT_S3_REGION) {
+      return `${this._s3Bucket}.s3.amazonaws.com`;
+    } else {
+      return `${this._s3Bucket}.s3-${this._s3Region}.amazonaws.com`;
+    }
   }
 
   /**
