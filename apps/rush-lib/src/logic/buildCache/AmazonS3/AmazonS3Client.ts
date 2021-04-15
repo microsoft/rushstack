@@ -133,7 +133,7 @@ export class AmazonS3Client {
         '', // we don't use query strings for these requests
         ...canonicalHeaders,
         '',
-        signedHeaderNames,
+        signedHeaderNames.join(';'),
         bodyHash
       ].join('\n');
       const canonicalRequestHash: string = this._getSha256(canonicalRequest);
