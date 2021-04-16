@@ -1,6 +1,20 @@
 # Change Log - @rushstack/eslint-plugin-packlets
 
-This log was last generated on Wed, 11 Nov 2020 01:08:58 GMT and should not be manually modified.
+This log was last generated on Mon, 12 Apr 2021 15:10:28 GMT and should not be manually modified.
+
+## 0.2.2
+Mon, 12 Apr 2021 15:10:28 GMT
+
+### Patches
+
+- Fix an issue where the @rushstack/packlets/circular-deps rule did not work correctly with TypeScript 4.2
+
+## 0.2.1
+Tue, 06 Apr 2021 15:14:22 GMT
+
+### Patches
+
+- Fix unlisted dependency on @typescript-eslint/experimental-utils
 
 ## 0.2.0
 Wed, 11 Nov 2020 01:08:58 GMT

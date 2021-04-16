@@ -2,6 +2,30 @@
   "name": "@rushstack/eslint-plugin-packlets",
   "entries": [
     {
+      "version": "0.2.2",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.2.2",
+      "date": "Mon, 12 Apr 2021 15:10:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the @rushstack/packlets/circular-deps rule did not work correctly with TypeScript 4.2"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.1",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.2.1",
+      "date": "Tue, 06 Apr 2021 15:14:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix unlisted dependency on @typescript-eslint/experimental-utils"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@rushstack/eslint-plugin-packlets_v0.2.0",
       "date": "Wed, 11 Nov 2020 01:08:58 GMT",

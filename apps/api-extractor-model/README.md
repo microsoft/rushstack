@@ -43,7 +43,7 @@ might look like this:
         - ApiMethodSignature
         - ApiPropertySignature
       - ApiNamespace
-        - (ApiClass, ApiEnum, ApiInterace, ...)
+        - (ApiClass, ApiEnum, ApiInterface, ...)
 ```
 
 You can use the `ApiItem.members` property to traverse this tree.

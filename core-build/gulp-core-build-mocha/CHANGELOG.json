@@ -2,6 +2,36 @@
   "name": "@microsoft/gulp-core-build-mocha",
   "entries": [
     {
+      "version": "3.9.14",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.9.14",
+      "date": "Mon, 12 Apr 2021 15:10:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" to `3.17.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.3.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.9.13",
+      "tag": "@microsoft/gulp-core-build-mocha_v3.9.13",
+      "date": "Tue, 06 Apr 2021 15:14:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build\" to `3.17.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.3.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.9.12",
       "tag": "@microsoft/gulp-core-build-mocha_v3.9.12",
       "date": "Fri, 05 Feb 2021 16:10:42 GMT",

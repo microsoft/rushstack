@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin-security",
   "entries": [
     {
+      "version": "0.1.4",
+      "tag": "@rushstack/eslint-plugin-security_v0.1.4",
+      "date": "Tue, 06 Apr 2021 15:14:22 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix unlisted dependency on @typescript-eslint/experimental-utils"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.3",
       "tag": "@rushstack/eslint-plugin-security_v0.1.3",
       "date": "Wed, 30 Sep 2020 18:39:17 GMT",

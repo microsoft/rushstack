@@ -1,6 +1,58 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 19 Mar 2021 22:31:37 GMT and should not be manually modified.
+This log was last generated on Thu, 15 Apr 2021 02:59:25 GMT and should not be manually modified.
+
+## 0.28.3
+Thu, 15 Apr 2021 02:59:25 GMT
+
+### Patches
+
+- Fix incremental TypeScript compilation, optimize architecture
+
+## 0.28.2
+Mon, 12 Apr 2021 15:10:29 GMT
+
+_Version update only_
+
+## 0.28.1
+Thu, 08 Apr 2021 20:41:54 GMT
+
+### Patches
+
+- Include mention of heft-webpack5-plugin in an error message.
+
+## 0.28.0
+Thu, 08 Apr 2021 06:05:31 GMT
+
+### Minor changes
+
+- Fix parameter name typo.
+
+## 0.27.0
+Thu, 08 Apr 2021 00:10:18 GMT
+
+### Minor changes
+
+- (BREAKING) Move Webpack functionality into its own package (@rushstack/heft-webpack4-plugin).
+
+## 0.26.0
+Tue, 06 Apr 2021 15:14:22 GMT
+
+### Minor changes
+
+- Add an "afterCompile" hook that runs after compilation.
+
+## 0.25.5
+Wed, 31 Mar 2021 15:10:36 GMT
+
+### Patches
+
+- Fix an outdated path in an error message.
+
+## 0.25.4
+Mon, 29 Mar 2021 05:02:06 GMT
+
+_Version update only_
 
 ## 0.25.3
 Fri, 19 Mar 2021 22:31:37 GMT

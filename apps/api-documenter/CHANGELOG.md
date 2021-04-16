@@ -1,6 +1,48 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 19 Mar 2021 22:31:37 GMT and should not be manually modified.
+This log was last generated on Thu, 15 Apr 2021 02:59:25 GMT and should not be manually modified.
+
+## 7.12.22
+Thu, 15 Apr 2021 02:59:25 GMT
+
+_Version update only_
+
+## 7.12.21
+Mon, 12 Apr 2021 15:10:28 GMT
+
+### Patches
+
+- split events from properties
+
+## 7.12.20
+Thu, 08 Apr 2021 20:41:54 GMT
+
+_Version update only_
+
+## 7.12.19
+Thu, 08 Apr 2021 06:05:31 GMT
+
+_Version update only_
+
+## 7.12.18
+Thu, 08 Apr 2021 00:10:18 GMT
+
+_Version update only_
+
+## 7.12.17
+Tue, 06 Apr 2021 15:14:22 GMT
+
+_Version update only_
+
+## 7.12.16
+Wed, 31 Mar 2021 15:10:36 GMT
+
+_Version update only_
+
+## 7.12.15
+Mon, 29 Mar 2021 05:02:06 GMT
+
+_Version update only_
 
 ## 7.12.14
 Fri, 19 Mar 2021 22:31:37 GMT

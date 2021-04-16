@@ -34,6 +34,7 @@ export type TypeYamlModel = CommonYamlModel & {
   constructors?: Array<FunctionYamlModel>;
   properties?: Array<FunctionYamlModel>;
   methods?: Array<FunctionYamlModel>;
+  events?: Array<FunctionYamlModel>;
   type: 'class' | 'interface';
   extends?: IType | string;
 };

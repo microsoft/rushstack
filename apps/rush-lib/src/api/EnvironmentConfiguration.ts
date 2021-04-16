@@ -20,6 +20,9 @@ export const enum EnvironmentVariableNames {
   /**
    * This variable overrides the temporary folder used by Rush.
    * The default value is "common/temp" under the repository root.
+   *
+   * @remarks This environment variable is not compatible with workspace installs. If attempting
+   * to move the PNPM store path, see the `RUSH_PNPM_STORE_PATH` environment variable.
    */
   RUSH_TEMP_FOLDER = 'RUSH_TEMP_FOLDER',
 

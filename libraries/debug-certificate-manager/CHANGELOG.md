@@ -1,6 +1,53 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Fri, 19 Mar 2021 22:31:38 GMT and should not be manually modified.
+This log was last generated on Thu, 15 Apr 2021 02:59:25 GMT and should not be manually modified.
+
+## 1.0.14
+Thu, 15 Apr 2021 02:59:25 GMT
+
+_Version update only_
+
+## 1.0.13
+Mon, 12 Apr 2021 15:10:29 GMT
+
+_Version update only_
+
+## 1.0.12
+Thu, 08 Apr 2021 20:41:54 GMT
+
+_Version update only_
+
+## 1.0.11
+Thu, 08 Apr 2021 06:05:32 GMT
+
+_Version update only_
+
+## 1.0.10
+Thu, 08 Apr 2021 00:10:18 GMT
+
+_Version update only_
+
+## 1.0.9
+Tue, 06 Apr 2021 15:14:22 GMT
+
+_Version update only_
+
+## 1.0.8
+Wed, 31 Mar 2021 15:10:36 GMT
+
+_Version update only_
+
+## 1.0.7
+Mon, 29 Mar 2021 05:02:06 GMT
+
+_Version update only_
+
+## 1.0.6
+Thu, 25 Mar 2021 04:57:54 GMT
+
+### Patches
+
+- Fix bug resolving the path of certutil.exe on Windows.
 
 ## 1.0.5
 Fri, 19 Mar 2021 22:31:38 GMT

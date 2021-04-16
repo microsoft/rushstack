@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.41.0",
+  "rushVersion": "5.42.4",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -618,8 +618,14 @@
       "shouldPublish": false
     },
     {
-      "packageName": "heft-webpack-everything-test",
-      "projectFolder": "build-tests/heft-webpack-everything-test",
+      "packageName": "heft-webpack4-everything-test",
+      "projectFolder": "build-tests/heft-webpack4-everything-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-webpack5-everything-test",
+      "projectFolder": "build-tests/heft-webpack5-everything-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -803,6 +809,20 @@
     {
       "packageName": "@microsoft/web-library-build",
       "projectFolder": "core-build/web-library-build",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+
+    // "heft-plugins" folder (alphabetical order)
+    {
+      "packageName": "@rushstack/heft-webpack4-plugin",
+      "projectFolder": "heft-plugins/heft-webpack4-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-webpack5-plugin",
+      "projectFolder": "heft-plugins/heft-webpack5-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },

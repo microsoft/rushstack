@@ -37,6 +37,7 @@ export { StageHooksBase, IStageContext } from './stages/StageBase';
 export {
   BuildStageHooks,
   BuildSubstageHooksBase,
+  CompileSubstageHooks,
   BundleSubstageHooks,
   CopyFromCacheMode,
   IBuildStageContext,
@@ -47,9 +48,7 @@ export {
   ICompileSubstage,
   ICompileSubstageProperties,
   IPostBuildSubstage,
-  IPreCompileSubstage,
-  IWebpackConfiguration,
-  IWebpackConfigurationWithDevServer
+  IPreCompileSubstage
 } from './stages/BuildStage';
 export { ICleanStageProperties, CleanStageHooks, ICleanStageContext } from './stages/CleanStage';
 export { ITestStageProperties, TestStageHooks, ITestStageContext } from './stages/TestStage';

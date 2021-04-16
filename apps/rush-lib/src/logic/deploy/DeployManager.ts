@@ -170,7 +170,7 @@ export class DeployManager {
     for (const name of Object.keys(packageJson.dependencies || {})) {
       dependencyNamesToProcess.add(name);
     }
-    if (deployState.scenarioConfiguration.json.includeDevDependencies) {
+    if (deployState.scenarioConfiguration.json.includeDevDependencies && sourceFolderInfo?.isRushProject) {
       for (const name of Object.keys(packageJson.devDependencies || {})) {
         dependencyNamesToProcess.add(name);
       }

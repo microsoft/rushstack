@@ -1,6 +1,50 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Fri, 19 Mar 2021 22:31:38 GMT and should not be manually modified.
+This log was last generated on Thu, 15 Apr 2021 02:59:25 GMT and should not be manually modified.
+
+## 0.2.18
+Thu, 15 Apr 2021 02:59:25 GMT
+
+### Patches
+
+- Explicitly set the noEmitOnError TypeScript compiler option to false in the base tsconfig.
+
+## 0.2.17
+Mon, 12 Apr 2021 15:10:29 GMT
+
+_Version update only_
+
+## 0.2.16
+Thu, 08 Apr 2021 20:41:54 GMT
+
+_Version update only_
+
+## 0.2.15
+Thu, 08 Apr 2021 06:05:32 GMT
+
+_Version update only_
+
+## 0.2.14
+Thu, 08 Apr 2021 00:10:18 GMT
+
+### Patches
+
+- For compatibility with Heft 0.25.5 and earlier versions, add a dependency on the "@rushstack/heft-webpack4-plugin" package and update heft.json to load it.
+
+## 0.2.13
+Tue, 06 Apr 2021 15:14:22 GMT
+
+_Version update only_
+
+## 0.2.12
+Wed, 31 Mar 2021 15:10:36 GMT
+
+_Version update only_
+
+## 0.2.11
+Mon, 29 Mar 2021 05:02:07 GMT
+
+_Version update only_
 
 ## 0.2.10
 Fri, 19 Mar 2021 22:31:38 GMT

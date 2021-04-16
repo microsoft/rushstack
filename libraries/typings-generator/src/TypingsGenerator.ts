@@ -42,6 +42,8 @@ export class TypingsGenerator {
 
   protected _options: ITypingsGeneratorOptions;
 
+  private _filesToIgnoreVal: Set<string> | undefined;
+
   public constructor(options: ITypingsGeneratorOptions) {
     this._options = {
       ...options
@@ -85,12 +87,6 @@ export class TypingsGenerator {
   public async generateTypingsAsync(): Promise<void> {
     await FileSystem.ensureEmptyFolderAsync(this._options.generatedTsFolder);
 
-    const filesToIgnore: Set<string> = new Set<string>(
-      this._options.filesToIgnore!.map((fileToIgnore) => {
-        return path.resolve(this._options.srcFolder, fileToIgnore);
-      })
-    );
-
     const filePaths: string[] = glob.sync(path.join('**', `*+(${this._options.fileExtensions.join('|')})`), {
       cwd: this._options.srcFolder,
       absolute: true,
@@ -100,11 +96,6 @@ export class TypingsGenerator {
 
     for (let filePath of filePaths) {
       filePath = path.resolve(this._options.srcFolder, filePath);
-
-      if (filesToIgnore.has(filePath)) {
-        continue;
-      }
-
       await this._parseFileAndGenerateTypingsAsync(filePath);
     }
   }
@@ -154,6 +145,9 @@ export class TypingsGenerator {
   }
 
   private async _parseFileAndGenerateTypingsAsync(locFilePath: string): Promise<void> {
+    if (this._filesToIgnore.has(locFilePath)) {
+      return;
+    }
     // Clear registered dependencies prior to reprocessing.
     this._clearDependencies(locFilePath);
 
@@ -190,6 +184,17 @@ export class TypingsGenerator {
         `Error occurred parsing and generating typings for file "${locFilePath}": ${e}`
       );
     }
+  }
+
+  private get _filesToIgnore(): Set<string> {
+    if (!this._filesToIgnoreVal) {
+      this._filesToIgnoreVal = new Set<string>(
+        this._options.filesToIgnore!.map((fileToIgnore) => {
+          return path.resolve(this._options.srcFolder, fileToIgnore);
+        })
+      );
+    }
+    return this._filesToIgnoreVal;
   }
 
   private _clearDependencies(target: string): void {

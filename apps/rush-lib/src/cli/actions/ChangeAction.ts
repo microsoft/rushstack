@@ -203,7 +203,7 @@ export class ChangeAction extends BaseRushAction {
       if (!email) {
         throw new Error(
           "Unable to detect Git email and an email address wasn't provided using the " +
-            `${this._changeEmailParameter.longName} paramter.`
+            `${this._changeEmailParameter.longName} parameter.`
         );
       }
 

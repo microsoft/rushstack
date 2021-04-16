@@ -399,7 +399,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       });
     }
 
-    const genericProgram: TTypescript.BuilderProgram | TTypescript.Program = tsProgram;
+    // Prefer the builder program, since it is what gives us incremental builds
+    const genericProgram: TTypescript.BuilderProgram | TTypescript.Program = builderProgram || tsProgram;
 
     this._typescriptTerminal.writeVerboseLine(
       `I/O Read: ${ts.performance.getDuration('I/O Read')}ms (${ts.performance.getCount(
@@ -415,19 +416,19 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     //#endregion
 
     //#region ANALYSIS
-    const { duration: diagnosticsDurationMs, diagnostics } = measureTsPerformance('Analyze', () => {
-      const rawDiagnostics: TTypescript.Diagnostic[] = [
-        ...genericProgram.getConfigFileParsingDiagnostics(),
-        ...genericProgram.getOptionsDiagnostics(),
-        ...genericProgram.getSyntacticDiagnostics(),
-        ...genericProgram.getGlobalDiagnostics(),
-        ...genericProgram.getSemanticDiagnostics()
-      ];
-      const _diagnostics: ReadonlyArray<TTypescript.Diagnostic> = ts.sortAndDeduplicateDiagnostics(
-        rawDiagnostics
-      );
-      return { diagnostics: _diagnostics };
-    });
+    const { duration: diagnosticsDurationMs, diagnostics: preDiagnostics } = measureTsPerformance(
+      'Analyze',
+      () => {
+        const rawDiagnostics: TTypescript.Diagnostic[] = [
+          ...genericProgram.getConfigFileParsingDiagnostics(),
+          ...genericProgram.getOptionsDiagnostics(),
+          ...genericProgram.getSyntacticDiagnostics(),
+          ...genericProgram.getGlobalDiagnostics(),
+          ...genericProgram.getSemanticDiagnostics()
+        ];
+        return { diagnostics: rawDiagnostics };
+      }
+    );
     this._typescriptTerminal.writeVerboseLine(`Analyze: ${diagnosticsDurationMs}ms`);
     //#endregion
 
@@ -448,6 +449,15 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     this._typescriptTerminal.writeVerboseLine(
       `Emit: ${ts.performance.getDuration('Emit')}ms (Includes Print)`
     );
+
+    //#region FINAL_ANALYSIS
+    // Need to ensure that we include emit diagnostics, since they might not be part of the other sets
+    const { duration: mergeDiagnosticDurationMs, diagnostics } = measureTsPerformance('Diagnostics', () => {
+      const rawDiagnostics: TTypescript.Diagnostic[] = [...preDiagnostics, ...emitResult.diagnostics];
+      return { diagnostics: ts.sortAndDeduplicateDiagnostics(rawDiagnostics) };
+    });
+    this._typescriptTerminal.writeVerboseLine(`Diagnostics: ${mergeDiagnosticDurationMs}ms`);
+    //#endregion
 
     //#region WRITE
     const writePromise: Promise<{ duration: number }> = measureTsPerformanceAsync('Write', () =>
@@ -713,8 +723,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     EmitFilesPatch.install(ts, tsconfig, this._moduleKindsToEmit, /* useBuildCache */ true, changedFiles);
 
     const writeFileCallback: TTypescript.WriteFileCallback = (filePath: string, data: string) => {
-      const redirectedFilePath: string = EmitFilesPatch.getRedirectedFilePath(filePath);
-      filesToWrite.push({ filePath: redirectedFilePath, data });
+      filesToWrite.push({ filePath, data });
     };
 
     const result: TTypescript.EmitResult = genericProgram.emit(
@@ -812,7 +821,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     }
 
     this._moduleKindsToEmit.push({
-      outFolderPath: outFolderPath,
+      outFolderPath: Path.convertToSlashes(outFolderPath),
       moduleKind,
       cacheOutFolderPath: Path.convertToSlashes(
         path.resolve(this._configuration.buildCacheFolder, outFolderName)
@@ -929,13 +938,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         if (compilerHost === undefined) {
           throw new InternalError('_buildWatchCompilerHost() expects a compilerHost to be configured');
         }
-
-        const originalWriteFile: TTypescript.WriteFileCallback = compilerHost.writeFile;
-        compilerHost.writeFile = (filePath: string, ...rest: unknown[]) => {
-          const redirectedFilePath: string = EmitFilesPatch.getRedirectedFilePath(filePath);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (originalWriteFile as any).call(this, redirectedFilePath, ...rest);
-        };
 
         return ts.createEmitAndSemanticDiagnosticsBuilderProgram(
           rootNames,

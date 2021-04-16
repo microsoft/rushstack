@@ -155,10 +155,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@microsoft/tsdoc-config",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@microsoft/web-library-build",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -209,6 +205,14 @@
     {
       "name": "@rushstack/heft-web-rig",
       "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@rushstack/heft-webpack4-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
+      "name": "@rushstack/heft-webpack5-plugin",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "@rushstack/localization-plugin",

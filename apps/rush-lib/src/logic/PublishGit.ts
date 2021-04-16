@@ -28,11 +28,20 @@ export class PublishGit {
     PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, params);
   }
 
-  public merge(branchName: string): void {
-    PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, ['merge', branchName, '--no-edit']);
+  public merge(branchName: string, verify: boolean = false): void {
+    PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, [
+      'merge',
+      branchName,
+      '--no-edit',
+      ...(verify ? [] : ['--no-verify'])
+    ]);
   }
 
-  public deleteBranch(branchName: string | undefined, hasRemote: boolean = true): void {
+  public deleteBranch(
+    branchName: string | undefined,
+    hasRemote: boolean = true,
+    verify: boolean = false
+  ): void {
     if (!branchName) {
       branchName = DUMMY_BRANCH_NAME;
     }
@@ -43,15 +52,19 @@ export class PublishGit {
         'push',
         'origin',
         '--delete',
-        branchName
+        branchName,
+        ...(verify ? [] : ['--no-verify'])
       ]);
     }
   }
 
-  public pull(): void {
+  public pull(verify: boolean = false): void {
     const params: string[] = ['pull', 'origin'];
     if (this._targetBranch) {
       params.push(this._targetBranch);
+    }
+    if (!verify) {
+      params.push('--no-verify');
     }
 
     PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, params);
@@ -105,16 +118,16 @@ export class PublishGit {
     return tagOutput === tagName;
   }
 
-  public commit(commitMessage: string): void {
+  public commit(commitMessage: string, verify: boolean = false): void {
     PublishUtilities.execCommand(!!this._targetBranch, this._gitPath, [
       'commit',
       '-m',
       commitMessage,
-      '--no-verify'
+      ...(verify ? [] : ['--no-verify'])
     ]);
   }
 
-  public push(branchName: string | undefined): void {
+  public push(branchName: string | undefined, verify: boolean = false): void {
     PublishUtilities.execCommand(
       !!this._targetBranch,
       this._gitPath,
@@ -126,7 +139,7 @@ export class PublishGit {
         `HEAD:${branchName || DUMMY_BRANCH_NAME}`,
         '--follow-tags',
         '--verbose',
-        '--no-verify'
+        ...(verify ? [] : ['--no-verify'])
       ]
     );
   }

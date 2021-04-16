@@ -13,6 +13,7 @@ enum RefFileKind {
 }
 
 // TypeScript compiler internal:
+// Version range: >= 3.6.0, <= 4.2.0
 // https://github.com/microsoft/TypeScript/blob/5ecdcef4cecfcdc86bd681b377636422447507d7/src/compiler/program.ts#L541
 interface RefFile {
   // The absolute path of the module that was imported.
@@ -26,6 +27,41 @@ interface RefFile {
   // The absolute path of the source file containing the import statement.
   // (Normalized to an all lowercase ts.Path string.)
   file: string;
+}
+
+// TypeScript compiler internal:
+// Version range: > 4.2.0
+// https://github.com/microsoft/TypeScript/blob/2eca17d7c1a3fb2b077f3a910d5019d74b6f07a0/src/compiler/types.ts#L3693
+enum FileIncludeKind {
+  RootFile,
+  SourceFromProjectReference,
+  OutputFromProjectReference,
+  Import,
+  ReferenceFile,
+  TypeReferenceDirective,
+  LibFile,
+  LibReferenceDirective,
+  AutomaticTypeDirectiveFile
+}
+
+// TypeScript compiler internal:
+// Version range: > 4.2.0
+// https://github.com/microsoft/TypeScript/blob/2eca17d7c1a3fb2b077f3a910d5019d74b6f07a0/src/compiler/types.ts#L3748
+type FileIncludeReason = {
+  kind: FileIncludeKind;
+  file: string | undefined;
+};
+
+interface ITsProgramInternals extends ts.Program {
+  // TypeScript compiler internal:
+  // Version range: >= 3.6.0, <= 4.2.0
+  // https://github.com/microsoft/TypeScript/blob/5ecdcef4cecfcdc86bd681b377636422447507d7/src/compiler/types.ts#L3723
+  getRefFileMap?: () => Map<string, RefFile[]> | undefined;
+
+  // TypeScript compiler internal:
+  // Version range: > 4.2.0
+  // https://github.com/microsoft/TypeScript/blob/2eca17d7c1a3fb2b077f3a910d5019d74b6f07a0/src/compiler/types.ts#L3871
+  getFileIncludeReasons?: () => Map<string, FileIncludeReason[]>;
 }
 
 /**
@@ -59,6 +95,7 @@ export class DependencyAnalyzer {
    * @param startingPackletName - the packlet that we started with; if the traversal reaches this packlet,
    *   then a circular dependency has been detected
    * @param refFileMap - the compiler's `refFileMap` data structure describing import relationships
+   * @param fileIncludeReasonsMap - the compiler's data structure describing import relationships
    * @param program - the compiler's `ts.Program` object
    * @param packletsFolderPath - the absolute path of the "src/packlets" folder.
    * @param visitedPacklets - the set of packlets that have already been visited in this traversal
@@ -67,7 +104,8 @@ export class DependencyAnalyzer {
   private static _walkImports(
     packletName: string,
     startingPackletName: string,
-    refFileMap: Map<string, RefFile[]>,
+    refFileMap: Map<string, RefFile[]> | undefined,
+    fileIncludeReasonsMap: Map<string, FileIncludeReason[]> | undefined,
     program: ts.Program,
     packletsFolderPath: string,
     visitedPacklets: Set<string>,
@@ -83,41 +121,46 @@ export class DependencyAnalyzer {
       return undefined;
     }
 
-    const refFiles: RefFile[] | undefined = refFileMap.get((tsSourceFile as any).path as any);
-    if (!refFiles) {
-      return undefined;
-    }
+    const referencingFilePaths: string[] = [];
 
-    for (const refFile of refFiles) {
-      if (refFile.kind === RefFileKind.Import) {
-        const referencingFilePath: string = refFile.file;
-
-        // Is it a reference to a packlet?
-        if (Path.isUnder(referencingFilePath, packletsFolderPath)) {
-          const referencingRelativePath: string = Path.relative(packletsFolderPath, referencingFilePath);
-          const referencingPathParts: string[] = referencingRelativePath.split(/[\/\\]+/);
-          const referencingPackletName: string = referencingPathParts[0];
-
-          // Did we return to where we started from?
-          if (referencingPackletName === startingPackletName) {
-            // Ignore the degenerate case where the starting node imports itself,
-            // since @rushstack/packlets/mechanics will already report that.
-            if (previousNode) {
-              // Make a new linked list node to record this step of the traversal
-              const importListNode: IImportListNode = {
-                previousNode: previousNode,
-                fromFilePath: referencingFilePath,
-                packletName: packletName
-              };
-
-              // The traversal has returned to the packlet that we started from;
-              // this means we have detected a circular dependency
-              return importListNode;
+    if (refFileMap) {
+      // TypeScript version range: >= 3.6.0, <= 4.2.0
+      const refFiles: RefFile[] | undefined = refFileMap.get((tsSourceFile as any).path as any);
+      if (refFiles) {
+        for (const refFile of refFiles) {
+          if (refFile.kind === RefFileKind.Import) {
+            referencingFilePaths.push(refFile.file);
+          }
+        }
+      }
+    } else if (fileIncludeReasonsMap) {
+      // Typescript version range: > 4.2.0
+      const fileIncludeReasons: FileIncludeReason[] | undefined = fileIncludeReasonsMap.get(
+        (tsSourceFile as any).path as any
+      );
+      if (fileIncludeReasons) {
+        for (const fileIncludeReason of fileIncludeReasons) {
+          if (fileIncludeReason.kind === FileIncludeKind.Import) {
+            if (fileIncludeReason.file) {
+              referencingFilePaths.push(fileIncludeReason.file);
             }
           }
+        }
+      }
+    }
 
-          // Have we already analyzed this packlet?
-          if (!visitedPacklets.has(referencingPackletName)) {
+    for (const referencingFilePath of referencingFilePaths) {
+      // Is it a reference to a packlet?
+      if (Path.isUnder(referencingFilePath, packletsFolderPath)) {
+        const referencingRelativePath: string = Path.relative(packletsFolderPath, referencingFilePath);
+        const referencingPathParts: string[] = referencingRelativePath.split(/[\/\\]+/);
+        const referencingPackletName: string = referencingPathParts[0];
+
+        // Did we return to where we started from?
+        if (referencingPackletName === startingPackletName) {
+          // Ignore the degenerate case where the starting node imports itself,
+          // since @rushstack/packlets/mechanics will already report that.
+          if (previousNode) {
             // Make a new linked list node to record this step of the traversal
             const importListNode: IImportListNode = {
               previousNode: previousNode,
@@ -125,18 +168,33 @@ export class DependencyAnalyzer {
               packletName: packletName
             };
 
-            const result: IImportListNode | undefined = DependencyAnalyzer._walkImports(
-              referencingPackletName,
-              startingPackletName,
-              refFileMap,
-              program,
-              packletsFolderPath,
-              visitedPacklets,
-              importListNode
-            );
-            if (result) {
-              return result;
-            }
+            // The traversal has returned to the packlet that we started from;
+            // this means we have detected a circular dependency
+            return importListNode;
+          }
+        }
+
+        // Have we already analyzed this packlet?
+        if (!visitedPacklets.has(referencingPackletName)) {
+          // Make a new linked list node to record this step of the traversal
+          const importListNode: IImportListNode = {
+            previousNode: previousNode,
+            fromFilePath: referencingFilePath,
+            packletName: packletName
+          };
+
+          const result: IImportListNode | undefined = DependencyAnalyzer._walkImports(
+            referencingPackletName,
+            startingPackletName,
+            refFileMap,
+            fileIncludeReasonsMap,
+            program,
+            packletsFolderPath,
+            visitedPacklets,
+            importListNode
+          );
+          if (result) {
+            return result;
           }
         }
       }
@@ -176,13 +234,32 @@ export class DependencyAnalyzer {
     packletAnalyzer: PackletAnalyzer,
     program: ts.Program
   ): IPackletImport[] | undefined {
-    const refFileMap: Map<string, RefFile[]> = (program as any).getRefFileMap();
+    const programInternals: ITsProgramInternals = program;
+
+    let refFileMap: Map<string, RefFile[]> | undefined;
+    let fileIncludeReasonsMap: Map<string, FileIncludeReason[]> | undefined;
+
+    if (programInternals.getRefFileMap) {
+      // TypeScript version range: >= 3.6.0, <= 4.2.0
+      refFileMap = programInternals.getRefFileMap();
+    } else if (programInternals.getFileIncludeReasons) {
+      // Typescript version range: > 4.2.0
+      fileIncludeReasonsMap = programInternals.getFileIncludeReasons();
+    } else {
+      // If you encounter this error, please report a bug
+      throw new Error(
+        'Your TypeScript compiler version is not supported; please upgrade @rushstack/eslint-plugin-packlets' +
+          ' or report a GitHub issue'
+      );
+    }
+
     const visitedPacklets: Set<string> = new Set();
 
     const listNode: IImportListNode | undefined = DependencyAnalyzer._walkImports(
       packletName,
       packletName,
       refFileMap,
+      fileIncludeReasonsMap,
       program,
       packletAnalyzer.packletsFolderPath!,
       visitedPacklets,
