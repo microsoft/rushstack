@@ -39,7 +39,7 @@ importers:
     dependencies:
       '@microsoft/api-extractor-model': link:../api-extractor-model
       '@microsoft/tsdoc': 0.13.0
-      '@microsoft/tsdoc-config': 0.14.0
+      '@microsoft/tsdoc-config': 0.15.0
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/rig-package': link:../../libraries/rig-package
       '@rushstack/ts-command-line': link:../../libraries/ts-command-line
@@ -61,7 +61,7 @@ importers:
     specifiers:
       '@microsoft/api-extractor-model': workspace:*
       '@microsoft/tsdoc': 0.13.0
-      '@microsoft/tsdoc-config': ~0.14.0
+      '@microsoft/tsdoc-config': ~0.15.0
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': 0.28.0
       '@rushstack/heft-node-rig': 1.0.8
@@ -3215,6 +3215,15 @@ packages:
       resolve: 1.19.0
     resolution:
       integrity: sha512-KSj15FwyaxMCGJkC320rvNXxuJNCOVO02pNqIEdf5cbLakvHK8afoHTmcjdBEWl0cfBFZlMu/1DhL4VCzZq0rQ==
+  /@microsoft/tsdoc-config/0.15.0:
+    dependencies:
+      '@microsoft/tsdoc': 0.13.0
+      ajv: 6.12.6
+      jju: 1.4.0
+      resolve: 1.19.0
+    dev: false
+    resolution:
+      integrity: sha512-bd8CLWwB61cfXO3f5Vm6mlt/9pBVWaYWc5EV+jKRf332DhWv6QVqJ48sIatjqeQEyYEYhM0XMHFrO2Rj/n+NHw==
   /@microsoft/tsdoc/0.12.24:
     dev: true
     resolution:
