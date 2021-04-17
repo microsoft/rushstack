@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "The build cache can now use buckets outside the default region",
+      "comment": "The Amazon S3 build cloud cache provider can now use buckets outside the default region",
       "type": "none"
     }
   ],
