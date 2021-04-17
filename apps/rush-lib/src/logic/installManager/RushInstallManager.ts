@@ -346,8 +346,12 @@ export class RushInstallManager extends BaseInstallManager {
         this.rushConfiguration.commonTempFolder,
         'pnpm-workspace.yaml'
       );
-      if (FileSystem.exists(workspaceFilePath)) {
-        FileSystem.deleteFile(workspaceFilePath);
+      try {
+        await FileSystem.deleteFileAsync(workspaceFilePath);
+      } catch (e) {
+        if (!FileSystem.isNotExistError(e)) {
+          throw e;
+        }
       }
     }
 
