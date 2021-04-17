@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor-model",
-      "comment": "Implements package-defined TSDoc tags in",
+      "comment": "The .api.json file format now stores the TSDoc configuration used for parsing doc comments",
       "type": "minor"
     }
   ],
