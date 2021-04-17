@@ -910,10 +910,17 @@ export class ExtractorConfig {
           break;
       }
 
-      const packageTSDocConfigPath: string = TSDocConfigFile.findConfigPathForFolder(projectFolder);
-      const tsdocConfigFile: TSDocConfigFile = TSDocConfigFile.loadForFolder(
-        FileSystem.exists(packageTSDocConfigPath) ? packageTSDocConfigPath : __filename
-      );
+      // Example: "my-project/tsdoc.json"
+      let packageTSDocConfigPath: string = TSDocConfigFile.findConfigPathForFolder(projectFolder);
+
+      if (!packageTSDocConfigPath || !FileSystem.exists(packageTSDocConfigPath)) {
+        // If the project does not have a tsdoc.json config file, then use API Extractor's base file.
+        packageTSDocConfigPath = path.resolve(__dirname, '../../extends/tsdoc-base.json');
+        if (!FileSystem.exists(packageTSDocConfigPath)) {
+          throw new InternalError('Unable to load the built-in TSDoc config file: ' + packageTSDocConfigPath);
+        }
+      }
+      const tsdocConfigFile: TSDocConfigFile = TSDocConfigFile.loadFile(packageTSDocConfigPath);
 
       if (tsdocConfigFile.hasErrors) {
         throw new Error(tsdocConfigFile.getErrorSummary());

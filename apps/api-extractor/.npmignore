@@ -28,3 +28,5 @@
 #--------------------------------------------
 
 # (Add your project-specific overrides here)
+
+!/extends/*.json

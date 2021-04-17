@@ -2,6 +2,8 @@
  * A class used to exposed events.
  * @public
  * {@docCategory SystemEvent}
+ *
+ * @myCustomTag
  */
 export class SystemEvent {
   /**

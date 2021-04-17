@@ -125,6 +125,10 @@
         {
           "tagName": "@preapproved",
           "syntaxKind": "modifier"
+        },
+        {
+          "tagName": "@myCustomTag",
+          "syntaxKind": "modifier"
         }
       ],
       "supportForTags": {
@@ -155,7 +159,8 @@
         "@virtual": true,
         "@betaDocumentation": true,
         "@internalRemarks": true,
-        "@preapproved": true
+        "@preapproved": true,
+        "@myCustomTag": true
       }
     }
   },
@@ -2204,7 +2209,7 @@
         {
           "kind": "Class",
           "canonicalReference": "api-documenter-test!SystemEvent:class",
-          "docComment": "/**\n * A class used to exposed events.\n *\n * {@docCategory SystemEvent}\n *\n * @public\n */\n",
+          "docComment": "/**\n * A class used to exposed events.\n *\n * {@docCategory SystemEvent}\n *\n * @public @myCustomTag\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
