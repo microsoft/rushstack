@@ -128,6 +128,13 @@ export interface IExtractorConfigPrepareOptions {
    * the default value for `projectFolder` setting while still honoring a manually specified value.
    */
   projectFolderLookupToken?: string;
+
+  /**
+   * Allow customization of the tsdoc.json config file.  If omitted, this file will be loaded from its default
+   * location.  If the file does not exist, then the standard definitions will be used from
+   * `@microsoft/api-extractor/extends/tsdoc-base.json`.
+   */
+  tsdocConfigFile?: TSDocConfigFile;
 }
 
 interface IExtractorConfigParameters {
@@ -151,6 +158,7 @@ interface IExtractorConfigParameters {
   omitTrimmingComments: boolean;
   tsdocMetadataEnabled: boolean;
   tsdocMetadataFilePath: string;
+  tsdocConfigFile: TSDocConfigFile;
   tsdocConfiguration: TSDocConfiguration;
   newlineKind: NewlineKind;
   messages: IExtractorMessagesConfig;
@@ -173,6 +181,16 @@ export class ExtractorConfig {
    * The config file name "api-extractor.json".
    */
   public static readonly FILENAME: string = 'api-extractor.json';
+
+  /**
+   * The full path to `extends/tsdoc-base.json` which contains the standard TSDoc configuration
+   * for API Extractor.
+   * @internal
+   */
+  public static readonly _tsdocBaseFilePath: string = path.resolve(
+    __dirname,
+    '../../extends/tsdoc-base.json'
+  );
 
   private static readonly _defaultConfig: Partial<IConfigFile> = JsonFile.load(
     path.join(__dirname, '../schemas/api-extractor-defaults.json')
@@ -240,7 +258,12 @@ export class ExtractorConfig {
   public readonly tsdocMetadataFilePath: string;
 
   /**
-   * The TSDocConfiguration to use for parsing TSDoc comments
+   * The tsdoc.json configuration that will be used when parsing doc comments.
+   */
+  public readonly tsdocConfigFile: TSDocConfigFile;
+
+  /**
+   * The `TSDocConfiguration` loaded from {@link ExtractorConfig.tsdocConfigFile}.
    */
   public readonly tsdocConfiguration: TSDocConfiguration;
 
@@ -277,6 +300,7 @@ export class ExtractorConfig {
     this.omitTrimmingComments = parameters.omitTrimmingComments;
     this.tsdocMetadataEnabled = parameters.tsdocMetadataEnabled;
     this.tsdocMetadataFilePath = parameters.tsdocMetadataFilePath;
+    this.tsdocConfigFile = parameters.tsdocConfigFile;
     this.tsdocConfiguration = parameters.tsdocConfiguration;
     this.newlineKind = parameters.newlineKind;
     this.messages = parameters.messages;
@@ -292,7 +316,19 @@ export class ExtractorConfig {
    * its format may be changed at any time.
    */
   public getDiagnosticDump(): string {
-    const result: object = MessageRouter.buildJsonDumpObject(this);
+    // Handle the simple JSON-serializable properties using buildJsonDumpObject()
+    const result: object = MessageRouter.buildJsonDumpObject(this, {
+      keyNamesToOmit: ['tsdocConfigFile', 'tsdocConfiguration']
+    });
+
+    // Implement custom formatting for tsdocConfigFile and tsdocConfiguration
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (result as any).tsdocConfigFile = {
+      filePath: this.tsdocConfigFile.filePath,
+      log: this.tsdocConfigFile.log.messages.map((x) => x.toString())
+    };
+
     return JSON.stringify(result, undefined, 2);
   }
 
@@ -666,6 +702,10 @@ export class ExtractorConfig {
       packageFolder = path.dirname(packageJsonFullPath);
     }
 
+    // "tsdocConfigFile" and "tsdocConfiguration" are prepared outside the try-catch block,
+    // so that if exceptions are thrown, it will not get the "Error parsing api-extractor.json:" header
+    let extractorConfigParameters: Omit<IExtractorConfigParameters, 'tsdocConfigFile' | 'tsdocConfiguration'>;
+
     try {
       if (!configObject.compiler) {
         // A merged configuration should have this
@@ -909,27 +949,7 @@ export class ExtractorConfig {
           newlineKind = NewlineKind.CrLf;
           break;
       }
-
-      // Example: "my-project/tsdoc.json"
-      let packageTSDocConfigPath: string = TSDocConfigFile.findConfigPathForFolder(projectFolder);
-
-      if (!packageTSDocConfigPath || !FileSystem.exists(packageTSDocConfigPath)) {
-        // If the project does not have a tsdoc.json config file, then use API Extractor's base file.
-        packageTSDocConfigPath = path.resolve(__dirname, '../../extends/tsdoc-base.json');
-        if (!FileSystem.exists(packageTSDocConfigPath)) {
-          throw new InternalError('Unable to load the built-in TSDoc config file: ' + packageTSDocConfigPath);
-        }
-      }
-      const tsdocConfigFile: TSDocConfigFile = TSDocConfigFile.loadFile(packageTSDocConfigPath);
-
-      if (tsdocConfigFile.hasErrors) {
-        throw new Error(tsdocConfigFile.getErrorSummary());
-      }
-
-      const tsdocConfiguration: TSDocConfiguration = new TSDocConfiguration();
-      tsdocConfigFile.configureParser(tsdocConfiguration);
-
-      return new ExtractorConfig({
+      extractorConfigParameters = {
         projectFolder: projectFolder,
         packageJson,
         packageFolder,
@@ -950,14 +970,40 @@ export class ExtractorConfig {
         omitTrimmingComments,
         tsdocMetadataEnabled,
         tsdocMetadataFilePath,
-        tsdocConfiguration,
         newlineKind,
         messages: configObject.messages || {},
         testMode: !!configObject.testMode
-      });
+      };
     } catch (e) {
       throw new Error(`Error parsing ${filenameForErrors}:\n` + e.message);
     }
+
+    let tsdocConfigFile: TSDocConfigFile | undefined = options.tsdocConfigFile;
+
+    if (!tsdocConfigFile) {
+      // Example: "my-project/tsdoc.json"
+      let packageTSDocConfigPath: string = TSDocConfigFile.findConfigPathForFolder(
+        extractorConfigParameters.projectFolder
+      );
+
+      if (!packageTSDocConfigPath || !FileSystem.exists(packageTSDocConfigPath)) {
+        // If the project does not have a tsdoc.json config file, then use API Extractor's base file.
+        packageTSDocConfigPath = ExtractorConfig._tsdocBaseFilePath;
+        if (!FileSystem.exists(packageTSDocConfigPath)) {
+          throw new InternalError('Unable to load the built-in TSDoc config file: ' + packageTSDocConfigPath);
+        }
+      }
+      tsdocConfigFile = TSDocConfigFile.loadFile(packageTSDocConfigPath);
+    }
+
+    if (tsdocConfigFile.hasErrors) {
+      throw new Error(tsdocConfigFile.getErrorSummary());
+    }
+
+    const tsdocConfiguration: TSDocConfiguration = new TSDocConfiguration();
+    tsdocConfigFile.configureParser(tsdocConfiguration);
+
+    return new ExtractorConfig({ ...extractorConfigParameters, tsdocConfigFile, tsdocConfiguration });
   }
 
   private static _resolvePathWithTokens(

@@ -10,7 +10,8 @@ import {
   NewlineKind,
   PackageJsonLookup,
   IPackageJson,
-  INodePackageJson
+  INodePackageJson,
+  Path
 } from '@rushstack/node-core-library';
 
 import { ExtractorConfig } from './ExtractorConfig';
@@ -26,6 +27,7 @@ import { CompilerState } from './CompilerState';
 import { ExtractorMessage } from './ExtractorMessage';
 import { MessageRouter } from '../collector/MessageRouter';
 import { ConsoleMessageId } from './ConsoleMessageId';
+import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 
 /**
  * Runtime options for Extractor.
@@ -209,6 +211,15 @@ export class Extractor {
       tsdocConfiguration: extractorConfig.tsdocConfiguration
     });
 
+    if (extractorConfig.tsdocConfigFile.filePath && !extractorConfig.tsdocConfigFile.fileNotFound) {
+      if (!Path.isEqual(extractorConfig.tsdocConfigFile.filePath, ExtractorConfig._tsdocBaseFilePath)) {
+        messageRouter.logVerbose(
+          ConsoleMessageId.UsingCustomTSDocConfig,
+          'Using custom TSDoc config from ' + extractorConfig.tsdocConfigFile.filePath
+        );
+      }
+    }
+
     this._checkCompilerCompatibility(extractorConfig, messageRouter);
 
     if (messageRouter.showDiagnostics) {
@@ -218,10 +229,21 @@ export class Extractor {
       messageRouter.logDiagnosticFooter();
 
       messageRouter.logDiagnosticHeader('Compiler options');
-      const serializedOptions: object = MessageRouter.buildJsonDumpObject(
+      const serializedCompilerOptions: object = MessageRouter.buildJsonDumpObject(
         (compilerState.program as ts.Program).getCompilerOptions()
       );
-      messageRouter.logDiagnostic(JSON.stringify(serializedOptions, undefined, 2));
+      messageRouter.logDiagnostic(JSON.stringify(serializedCompilerOptions, undefined, 2));
+      messageRouter.logDiagnosticFooter();
+
+      messageRouter.logDiagnosticHeader('TSDoc configuration');
+      // Convert the TSDocConfiguration into a tsdoc.json representation
+      const combinedConfigFile: TSDocConfigFile = TSDocConfigFile.loadFromParser(
+        extractorConfig.tsdocConfiguration
+      );
+      const serializedTSDocConfig: object = MessageRouter.buildJsonDumpObject(
+        combinedConfigFile.saveToObject()
+      );
+      messageRouter.logDiagnostic(JSON.stringify(serializedTSDocConfig, undefined, 2));
       messageRouter.logDiagnosticFooter();
     }
 

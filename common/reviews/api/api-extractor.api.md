@@ -10,6 +10,7 @@ import { NewlineKind } from '@rushstack/node-core-library';
 import { PackageJsonLookup } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
 import * as tsdoc from '@microsoft/tsdoc';
+import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 import { TSDocConfiguration } from '@microsoft/tsdoc';
 
 // @public
@@ -29,6 +30,7 @@ export const enum ConsoleMessageId {
     Diagnostics = "console-diagnostics",
     FoundTSDocMetadata = "console-found-tsdoc-metadata",
     Preamble = "console-preamble",
+    UsingCustomTSDocConfig = "console-using-custom-tsdoc-config",
     WritingDocModelFile = "console-writing-doc-model-file",
     WritingDtsRollup = "console-writing-dts-rollup"
 }
@@ -73,6 +75,9 @@ export class ExtractorConfig {
     readonly testMode: boolean;
     static tryLoadForFolder(options: IExtractorConfigLoadForFolderOptions): IExtractorConfigPrepareOptions | undefined;
     readonly tsconfigFilePath: string;
+    // @internal
+    static readonly _tsdocBaseFilePath: string;
+    readonly tsdocConfigFile: TSDocConfigFile;
     readonly tsdocConfiguration: TSDocConfiguration;
     readonly tsdocMetadataEnabled: boolean;
     readonly tsdocMetadataFilePath: string;
@@ -235,6 +240,7 @@ export interface IExtractorConfigPrepareOptions {
     packageJson?: INodePackageJson | undefined;
     packageJsonFullPath: string | undefined;
     projectFolderLookupToken?: string;
+    tsdocConfigFile?: TSDocConfigFile;
 }
 
 // @public
