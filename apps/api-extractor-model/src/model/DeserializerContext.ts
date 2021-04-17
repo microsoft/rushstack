@@ -28,12 +28,20 @@ export enum ApiJsonSchemaVersion {
   V_1003 = 1003,
 
   /**
+   * Add a "tsdocConfig" field that tracks the TSDoc configuration for parsing doc comments.
+   *
+   * This is not a breaking change because an older implementation will still work correctly.  The
+   * custom tags will be skipped over by the parser.
+   */
+  V_1004 = 1004,
+
+  /**
    * The current latest .api.json schema version.
    *
    * IMPORTANT: When incrementing this number, consider whether `OLDEST_SUPPORTED` or `OLDEST_FORWARDS_COMPATIBLE`
    * should be updated.
    */
-  LATEST = V_1003,
+  LATEST = V_1004,
 
   /**
    * The oldest .api.json schema version that is still supported for backwards compatibility.

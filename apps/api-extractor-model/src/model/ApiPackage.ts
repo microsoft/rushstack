@@ -177,13 +177,18 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
       }
     }
 
-    const tsdocConfigFile: TSDocConfigFile = TSDocConfigFile.loadFromObject(jsonObject.metadata.tsdocConfig);
-    if (tsdocConfigFile.hasErrors) {
-      throw new Error(`Error loading ${apiJsonFilename}:\n` + tsdocConfigFile.getErrorSummary());
-    }
-
     const tsdocConfiguration: TSDocConfiguration = new TSDocConfiguration();
-    tsdocConfigFile.configureParser(tsdocConfiguration);
+
+    if (versionToDeserialize >= ApiJsonSchemaVersion.V_1004) {
+      const tsdocConfigFile: TSDocConfigFile = TSDocConfigFile.loadFromObject(
+        jsonObject.metadata.tsdocConfig
+      );
+      if (tsdocConfigFile.hasErrors) {
+        throw new Error(`Error loading ${apiJsonFilename}:\n` + tsdocConfigFile.getErrorSummary());
+      }
+
+      tsdocConfigFile.configureParser(tsdocConfiguration);
+    }
 
     const context: DeserializerContext = new DeserializerContext({
       apiJsonFilename,
