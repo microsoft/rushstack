@@ -10,6 +10,7 @@ import { NewlineKind } from '@rushstack/node-core-library';
 import { PackageJsonLookup } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
 import * as tsdoc from '@microsoft/tsdoc';
+import { TSDocConfiguration } from '@microsoft/tsdoc';
 
 // @public
 export class CompilerState {
@@ -72,6 +73,7 @@ export class ExtractorConfig {
     readonly testMode: boolean;
     static tryLoadForFolder(options: IExtractorConfigLoadForFolderOptions): IExtractorConfigPrepareOptions | undefined;
     readonly tsconfigFilePath: string;
+    readonly tsdocConfiguration: TSDocConfiguration;
     readonly tsdocMetadataEnabled: boolean;
     readonly tsdocMetadataFilePath: string;
     readonly untrimmedFilePath: string;

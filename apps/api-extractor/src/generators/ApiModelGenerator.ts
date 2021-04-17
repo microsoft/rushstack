@@ -67,7 +67,8 @@ export class ApiModelGenerator {
 
     const apiPackage: ApiPackage = new ApiPackage({
       name: this._collector.workingPackage.name,
-      docComment: packageDocComment
+      docComment: packageDocComment,
+      tsdocConfiguration: this._collector.extractorConfig.tsdocConfiguration
     });
     this._apiModel.addMember(apiPackage);
 

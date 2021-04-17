@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { TSDocConfiguration } from '@microsoft/tsdoc';
+
 export enum ApiJsonSchemaVersion {
   /**
    * The initial release.
@@ -26,12 +28,20 @@ export enum ApiJsonSchemaVersion {
   V_1003 = 1003,
 
   /**
+   * Add a "tsdocConfig" field that tracks the TSDoc configuration for parsing doc comments.
+   *
+   * This is not a breaking change because an older implementation will still work correctly.  The
+   * custom tags will be skipped over by the parser.
+   */
+  V_1004 = 1004,
+
+  /**
    * The current latest .api.json schema version.
    *
    * IMPORTANT: When incrementing this number, consider whether `OLDEST_SUPPORTED` or `OLDEST_FORWARDS_COMPATIBLE`
    * should be updated.
    */
-  LATEST = V_1003,
+  LATEST = V_1004,
 
   /**
    * The oldest .api.json schema version that is still supported for backwards compatibility.
@@ -72,10 +82,16 @@ export class DeserializerContext {
    */
   public readonly versionToDeserialize: ApiJsonSchemaVersion;
 
+  /**
+   * The TSDoc configuration for the context.
+   */
+  public readonly tsdocConfiguration: TSDocConfiguration;
+
   public constructor(options: DeserializerContext) {
     this.apiJsonFilename = options.apiJsonFilename;
     this.toolPackage = options.toolPackage;
     this.toolVersion = options.toolVersion;
     this.versionToDeserialize = options.versionToDeserialize;
+    this.tsdocConfiguration = options.tsdocConfiguration;
   }
 }

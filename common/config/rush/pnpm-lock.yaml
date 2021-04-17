@@ -4,7 +4,7 @@ importers:
   ../../apps/api-documenter:
     dependencies:
       '@microsoft/api-extractor-model': link:../api-extractor-model
-      '@microsoft/tsdoc': 0.12.24
+      '@microsoft/tsdoc': 0.13.0
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/ts-command-line': link:../../libraries/ts-command-line
       colors: 1.2.5
@@ -21,7 +21,7 @@ importers:
       jest: 25.4.0
     specifiers:
       '@microsoft/api-extractor-model': workspace:*
-      '@microsoft/tsdoc': 0.12.24
+      '@microsoft/tsdoc': 0.13.0
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
@@ -38,7 +38,8 @@ importers:
   ../../apps/api-extractor:
     dependencies:
       '@microsoft/api-extractor-model': link:../api-extractor-model
-      '@microsoft/tsdoc': 0.12.24
+      '@microsoft/tsdoc': 0.13.0
+      '@microsoft/tsdoc-config': 0.15.0
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/rig-package': link:../../libraries/rig-package
       '@rushstack/ts-command-line': link:../../libraries/ts-command-line
@@ -59,7 +60,8 @@ importers:
       '@types/semver': 7.3.4
     specifiers:
       '@microsoft/api-extractor-model': workspace:*
-      '@microsoft/tsdoc': 0.12.24
+      '@microsoft/tsdoc': 0.13.0
+      '@microsoft/tsdoc-config': ~0.15.0
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': 0.28.0
       '@rushstack/heft-node-rig': 1.0.8
@@ -79,7 +81,8 @@ importers:
       typescript: ~4.1.3
   ../../apps/api-extractor-model:
     dependencies:
-      '@microsoft/tsdoc': 0.12.24
+      '@microsoft/tsdoc': 0.13.0
+      '@microsoft/tsdoc-config': 0.15.0
       '@rushstack/node-core-library': link:../../libraries/node-core-library
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
@@ -88,7 +91,8 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
     specifiers:
-      '@microsoft/tsdoc': 0.12.24
+      '@microsoft/tsdoc': 0.13.0
+      '@microsoft/tsdoc-config': ~0.15.0
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': 0.28.0
       '@rushstack/heft-node-rig': 1.0.8
@@ -707,7 +711,6 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/webpack-env': 1.13.0
       eslint: 7.12.1
-      file-loader: 6.0.0
       tslint: 5.20.1_typescript@3.9.9
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.9.9
       typescript: 3.9.9
@@ -718,7 +721,6 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/webpack-env': 1.13.0
       eslint: ~7.12.1
-      file-loader: ~6.0.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
       typescript: ~3.9.7
@@ -1635,7 +1637,7 @@ importers:
     dependencies:
       '@microsoft/api-documenter': link:../../apps/api-documenter
       '@microsoft/api-extractor-model': link:../../apps/api-extractor-model
-      '@microsoft/tsdoc': 0.12.24
+      '@microsoft/tsdoc': 0.13.0
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       js-yaml: 3.13.1
     devDependencies:
@@ -1647,7 +1649,7 @@ importers:
     specifiers:
       '@microsoft/api-documenter': workspace:*
       '@microsoft/api-extractor-model': workspace:*
-      '@microsoft/tsdoc': 0.12.24
+      '@microsoft/tsdoc': 0.13.0
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
@@ -3215,7 +3217,17 @@ packages:
       resolve: 1.19.0
     resolution:
       integrity: sha512-KSj15FwyaxMCGJkC320rvNXxuJNCOVO02pNqIEdf5cbLakvHK8afoHTmcjdBEWl0cfBFZlMu/1DhL4VCzZq0rQ==
+  /@microsoft/tsdoc-config/0.15.0:
+    dependencies:
+      '@microsoft/tsdoc': 0.13.0
+      ajv: 6.12.6
+      jju: 1.4.0
+      resolve: 1.19.0
+    dev: false
+    resolution:
+      integrity: sha512-bd8CLWwB61cfXO3f5Vm6mlt/9pBVWaYWc5EV+jKRf332DhWv6QVqJ48sIatjqeQEyYEYhM0XMHFrO2Rj/n+NHw==
   /@microsoft/tsdoc/0.12.24:
+    dev: true
     resolution:
       integrity: sha512-Mfmij13RUTmHEMi9vRUhMXD7rnGR2VvxeNYtaGtaJ4redwwjT4UXYJ+nzmVJF7hhd4pn/Fx5sncDKxMVFJSWPg==
   /@microsoft/tsdoc/0.13.0:
@@ -7032,17 +7044,6 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha512-bCg29ictuBaKUwwArK4ouCaqDgLZcysCFLmM/Yn/FDoqndh/9vNuQfXRDvTuXKLxfD/JtZQGKFT8MGcJBK644g==
-  /file-loader/6.0.0:
-    dependencies:
-      loader-utils: 2.0.0
-      schema-utils: 2.7.1
-    dev: true
-    engines:
-      node: '>= 10.13.0'
-    peerDependencies:
-      webpack: ^4.0.0 || ^5.0.0
-    resolution:
-      integrity: sha512-/aMOAYEFXDdjG0wytpTL5YQLfZnnTmLNjn+AIrJ/6HVnTfDqLsVKUUwkDf4I4kgex36BvjuXEn/TX9B/1ESyqQ==
   /file-loader/6.0.0_webpack@4.44.2:
     dependencies:
       loader-utils: 2.0.0

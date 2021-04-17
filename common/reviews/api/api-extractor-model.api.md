@@ -13,7 +13,7 @@ import { TSDocTagDefinition } from '@microsoft/tsdoc';
 
 // Warning: (ae-internal-missing-underscore) The name "AedocDefinitions" should be prefixed with an underscore because the declaration is marked as @internal
 //
-// @internal (undocumented)
+// @internal @deprecated (undocumented)
 export class AedocDefinitions {
     // (undocumented)
     static readonly betaDocumentation: TSDocTagDefinition;
@@ -445,7 +445,8 @@ export class ApiPackage extends ApiPackage_base {
     static loadFromJsonFile(apiJsonFilename: string): ApiPackage;
     // (undocumented)
     saveToJsonFile(apiJsonFilename: string, options?: IApiPackageSaveOptions): void;
-}
+    get tsdocConfiguration(): TSDocConfiguration;
+    }
 
 // @public
 export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiParameterListMixin);
@@ -745,6 +746,8 @@ export interface IApiOptionalMixinOptions extends IApiItemOptions {
 
 // @public
 export interface IApiPackageOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiDocumentedItemOptions {
+    // (undocumented)
+    tsdocConfiguration: TSDocConfiguration;
 }
 
 // @public
