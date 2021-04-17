@@ -9,11 +9,11 @@ import * as semver from 'semver';
 import colors from 'colors/safe';
 
 import {
-  Text,
+  AlreadyReportedError,
   FileSystem,
   FileConstants,
   InternalError,
-  AlreadyReportedError
+  Path
 } from '@rushstack/node-core-library';
 
 import { BaseLinkManager } from '../base/BaseLinkManager';
@@ -223,7 +223,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fpresentation-integration-tests.tgz_jsdom@11.12.0
     //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fbuild-tools.tgz_2a665c89609864b4e75bc5365d7f8f56
     let folderNameInLocalInstallationRoot: string =
-      uriEncode(Text.replaceAll(absolutePathToTgzFile, path.sep, '/')) + folderNameSuffix;
+      uriEncode(Path.convertToSlashes(absolutePathToTgzFile)) + folderNameSuffix;
 
     // PNPM 6 changed formatting to replace all special chars with '+'
     // e.g.: C++dev+imodeljs+imodeljs+common+temp+projects+presentation-integration-tests.tgz_jsdom@11.12.0
