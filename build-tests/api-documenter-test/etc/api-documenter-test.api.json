@@ -4,7 +4,7 @@
     "toolVersion": "[test mode]",
     "schemaVersion": 1003,
     "oldestForwardsCompatibleVersion": 1001,
-    "tsDocConfig": {
+    "tsdocConfig": {
       "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
       "noStandardTags": true,
       "tagDefinitions": [

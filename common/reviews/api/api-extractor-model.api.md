@@ -445,6 +445,7 @@ export class ApiPackage extends ApiPackage_base {
     static loadFromJsonFile(apiJsonFilename: string): ApiPackage;
     // (undocumented)
     saveToJsonFile(apiJsonFilename: string, options?: IApiPackageSaveOptions): void;
+    get tsdocConfiguration(): TSDocConfiguration;
     }
 
 // @public
@@ -745,8 +746,8 @@ export interface IApiOptionalMixinOptions extends IApiItemOptions {
 
 // @public
 export interface IApiPackageOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiDocumentedItemOptions {
-    // Warning: (ae-forgotten-export) The symbol "ITSDocConfigJson" needs to be exported by the entry point index.d.ts
-    tsDocConfig: ITSDocConfigJson;
+    // (undocumented)
+    tsdocConfiguration: TSDocConfiguration;
 }
 
 // @public

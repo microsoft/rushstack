@@ -30,8 +30,7 @@ import {
   ApiVariable,
   ApiTypeAlias,
   ApiCallSignature,
-  IApiTypeParameterOptions,
-  IApiPackageOptions
+  IApiTypeParameterOptions
 } from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
@@ -41,7 +40,6 @@ import { AstSymbol } from '../analyzer/AstSymbol';
 import { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator';
 import { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
-import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 
 export class ApiModelGenerator {
   private readonly _collector: Collector;
@@ -66,14 +64,11 @@ export class ApiModelGenerator {
 
   public buildApiPackage(): ApiPackage {
     const packageDocComment: tsdoc.DocComment | undefined = this._collector.workingPackage.tsdocComment;
-    const tsDocConfig: IApiPackageOptions['tsDocConfig'] = TSDocConfigFile.loadFromParser(
-      this._collector.extractorConfig.tsdocConfiguration
-    ).saveToObject() as IApiPackageOptions['tsDocConfig'];
 
     const apiPackage: ApiPackage = new ApiPackage({
       name: this._collector.workingPackage.name,
       docComment: packageDocComment,
-      tsDocConfig
+      tsdocConfiguration: this._collector.extractorConfig.tsdocConfiguration
     });
     this._apiModel.addMember(apiPackage);
 

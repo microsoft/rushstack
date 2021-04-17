@@ -8,24 +8,15 @@ import {
   JsonFile,
   IJsonFileSaveOptions,
   PackageJsonLookup,
-  IPackageJson
+  IPackageJson,
+  JsonObject
 } from '@rushstack/node-core-library';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
 import { ApiEntryPoint } from './ApiEntryPoint';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import { DeserializerContext, ApiJsonSchemaVersion } from './DeserializerContext';
-import { TSDocConfiguration, TSDocTagDefinition, TSDocTagSyntaxKind } from '@microsoft/tsdoc';
-
-interface ITagConfigJson {
-  tagName: string;
-  syntaxKind: 'inline' | 'block' | 'modifier';
-  allowMultiple?: boolean;
-}
-
-interface ITSDocConfigJson {
-  tagDefinitions: ITagConfigJson[];
-  supportForTags: { [tagName: string]: boolean };
-}
+import { TSDocConfiguration } from '@microsoft/tsdoc';
+import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 
 /**
  * Constructor options for {@link ApiPackage}.
@@ -35,10 +26,7 @@ export interface IApiPackageOptions
   extends IApiItemContainerMixinOptions,
     IApiNameMixinOptions,
     IApiDocumentedItemOptions {
-  /**
-   * The TSDoc tag definitions and support for the package
-   */
-  tsDocConfig: ITSDocConfigJson;
+  tsdocConfiguration: TSDocConfiguration;
 }
 
 export interface IApiPackageMetadataJson {
@@ -77,9 +65,15 @@ export interface IApiPackageMetadataJson {
   oldestForwardsCompatibleVersion?: ApiJsonSchemaVersion;
 
   /**
-   * The TSDoc tags used by the package
+   * The TSDoc configuration that was used when analyzing the API for this package.
+   *
+   * @remarks
+   *
+   * The structure of this objet is defined by the `@microsoft/tsdoc-config` library.
+   * Normally this configuration is loaded from the project's tsdoc.json file.  It is stored
+   * in the .api.json file so that doc comments can be parsed accurately when loading the file.
    */
-  tsDocConfig: ITSDocConfigJson;
+  tsdocConfig: JsonObject;
 }
 
 export interface IApiPackageJson extends IApiItemJson {
@@ -127,15 +121,12 @@ export interface IApiPackageSaveOptions extends IJsonFileSaveOptions {
  * @public
  */
 export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumentedItem)) {
-  /**
-   * TSDoc Tags for to the package.
-   */
-  private readonly _tsdocConfig: ITSDocConfigJson;
+  private readonly _tsdocConfiguration: TSDocConfiguration;
 
   public constructor(options: IApiPackageOptions) {
     super(options);
 
-    this._tsdocConfig = options.tsDocConfig;
+    this._tsdocConfiguration = options.tsdocConfiguration;
   }
 
   public static loadFromJsonFile(apiJsonFilename: string): ApiPackage {
@@ -186,28 +177,13 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
       }
     }
 
-    const tsdocConfiguration: TSDocConfiguration = new TSDocConfiguration();
-    tsdocConfiguration.clear(true);
-    const { tagDefinitions, supportForTags } = jsonObject.metadata.tsDocConfig;
-    tsdocConfiguration.addTagDefinitions(
-      tagDefinitions.map((definition) => {
-        const { syntaxKind } = definition;
-        const formattedSyntaxKind: TSDocTagSyntaxKind =
-          syntaxKind === 'block'
-            ? TSDocTagSyntaxKind.BlockTag
-            : syntaxKind === 'inline'
-            ? TSDocTagSyntaxKind.InlineTag
-            : TSDocTagSyntaxKind.ModifierTag;
-        return new TSDocTagDefinition({ ...definition, syntaxKind: formattedSyntaxKind });
-      })
-    );
+    const tsdocConfigFile: TSDocConfigFile = TSDocConfigFile.loadFromObject(jsonObject.metadata.tsdocConfig);
+    if (tsdocConfigFile.hasErrors) {
+      throw new Error(`Error loading ${apiJsonFilename}:\n` + tsdocConfigFile.getErrorSummary());
+    }
 
-    Object.entries(supportForTags).forEach(([name, supported]) => {
-      const tag: TSDocTagDefinition | undefined = tsdocConfiguration.tryGetTagDefinition(name);
-      if (tag) {
-        tsdocConfiguration.setSupportForTag(tag, supported);
-      }
-    });
+    const tsdocConfiguration: TSDocConfiguration = new TSDocConfiguration();
+    tsdocConfigFile.configureParser(tsdocConfiguration);
 
     const context: DeserializerContext = new DeserializerContext({
       apiJsonFilename,
@@ -235,6 +211,18 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
     return this.members as ReadonlyArray<ApiEntryPoint>;
   }
 
+  /**
+   * The TSDoc configuration that was used when analyzing the API for this package.
+   *
+   * @remarks
+   *
+   * Normally this configuration is loaded from the project's tsdoc.json file.  It is stored
+   * in the .api.json file so that doc comments can be parsed accurately when loading the file.
+   */
+  public get tsdocConfiguration(): TSDocConfiguration {
+    return this._tsdocConfiguration;
+  }
+
   /** @override */
   public addMember(member: ApiEntryPoint): void {
     if (member.kind !== ApiItemKind.EntryPoint) {
@@ -254,6 +242,9 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
 
     const packageJson: IPackageJson = PackageJsonLookup.loadOwnPackageJson(__dirname);
 
+    const tsdocConfigFile: TSDocConfigFile = TSDocConfigFile.loadFromParser(this.tsdocConfiguration);
+    const tsdocConfig: JsonObject = tsdocConfigFile.saveToObject();
+
     const jsonObject: IApiPackageJson = {
       metadata: {
         toolPackage: options.toolPackage || packageJson.name,
@@ -262,7 +253,7 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
         toolVersion: options.testMode ? '[test mode]' : options.toolVersion || packageJson.version,
         schemaVersion: ApiJsonSchemaVersion.LATEST,
         oldestForwardsCompatibleVersion: ApiJsonSchemaVersion.OLDEST_FORWARDS_COMPATIBLE,
-        tsDocConfig: this._tsdocConfig
+        tsdocConfig
       }
     } as IApiPackageJson;
     this.serializeInto(jsonObject);
