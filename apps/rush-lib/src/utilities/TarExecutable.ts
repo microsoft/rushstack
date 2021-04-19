@@ -82,6 +82,7 @@ export class TarExecutable {
     // The log file looks like this:
     //
     // Windows:
+    // Start time: Mon Apr 19 2021 13:06:40 GMT-0700 (Pacific Daylight Time)
     // Invoking "C:\WINDOWS\system32\tar.exe -x -f E:\rush-cache\d18105f7f83eb610b468be4e2421681f4a52e44d"
     //
     // ======= BEGIN PROCESS OUTPUT =======
@@ -92,6 +93,7 @@ export class TarExecutable {
     // Exited with code "0"
     //
     // Linux:
+    // Start time: Mon Apr 19 2021 13:06:40 GMT-0700 (Pacific Daylight Time)
     // Invoking "/bin/tar -x -f /home/username/rush-cache/d18105f7f83eb610b468be4e2421681f4a52e44d"
     //
     // ======= BEGIN PROCESS OUTPUT =======
@@ -105,6 +107,7 @@ export class TarExecutable {
     const fileWriter: FileWriter = FileWriter.open(logFilePath);
     fileWriter.write(
       [
+        `Start time: ${new Date().toString()}`,
         `Invoking "${this._tarExecutablePath} ${args.join(' ')}"`,
         '',
         '======= BEGIN PROCESS OUTPUT =======',
