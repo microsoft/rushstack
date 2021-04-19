@@ -1,10 +1,27 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Executable, FileSystem, Terminal } from '@rushstack/node-core-library';
+import * as path from 'path';
+import { Executable, FileSystem, FileWriter, Terminal } from '@rushstack/node-core-library';
 import { ChildProcess } from 'child_process';
 import * as events from 'events';
+
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
+
+export interface ITarOptionsBase {
+  logFilePath: string;
+}
+
+export interface IUntarOptions extends ITarOptionsBase {
+  archivePath: string;
+  outputFolderPath: string;
+}
+
+export interface ICreateArchiveOptions extends ITarOptionsBase {
+  archivePath: string;
+  paths: string[];
+  project: RushConfigurationProject;
+}
 
 export class TarExecutable {
   private _tarExecutablePath: string;
@@ -28,36 +45,63 @@ export class TarExecutable {
    * @returns
    * The "tar" exit code
    */
-  public async tryUntarAsync(archivePath: string, outputFolderPath: string): Promise<number> {
-    const childProcess: ChildProcess = Executable.spawn(this._tarExecutablePath, ['-x', '-f', archivePath], {
-      currentWorkingDirectory: outputFolderPath
-    });
-    const [tarExitCode] = await events.once(childProcess, 'exit');
-    return tarExitCode;
+  public async tryUntarAsync(options: IUntarOptions): Promise<number> {
+    return await this._spawnTarWithLoggingAsync(
+      ['-x', '-f', options.archivePath],
+      options.outputFolderPath,
+      options.logFilePath
+    );
   }
 
   /**
    * @returns
    * The "tar" exit code
    */
-  public async tryCreateArchiveFromProjectPathsAsync(
-    archivePath: string,
-    paths: string[],
-    project: RushConfigurationProject
-  ): Promise<number> {
+  public async tryCreateArchiveFromProjectPathsAsync(options: ICreateArchiveOptions): Promise<number> {
+    const { project, archivePath, paths, logFilePath } = options;
     const pathsListFilePath: string = `${project.projectRushTempFolder}/tarPaths_${Date.now()}`;
     await FileSystem.writeFileAsync(pathsListFilePath, paths.join('\n'));
 
     const projectFolderPath: string = project.projectFolder;
-    const childProcess: ChildProcess = Executable.spawn(
-      this._tarExecutablePath,
+    const tarExitCode: number = await this._spawnTarWithLoggingAsync(
       ['-c', '-f', archivePath, '-z', '-C', projectFolderPath, '--files-from', pathsListFilePath],
-      {
-        currentWorkingDirectory: projectFolderPath
-      }
+      projectFolderPath,
+      logFilePath
     );
-    const [tarExitCode] = await events.once(childProcess, 'exit');
     await FileSystem.deleteFileAsync(pathsListFilePath);
+
+    return tarExitCode;
+  }
+
+  private async _spawnTarWithLoggingAsync(
+    args: string[],
+    currentWorkingDirectory: string,
+    logFilePath: string
+  ): Promise<number> {
+    await FileSystem.ensureFolderAsync(path.dirname(logFilePath));
+    const fileWriter: FileWriter = FileWriter.open(logFilePath);
+    fileWriter.write(
+      [
+        `Invoking "${this._tarExecutablePath} ${args.join(' ')}"`,
+        '',
+        '======= BEGIN PROCESS OUTPUT =======',
+        ''
+      ].join('\n')
+    );
+
+    const childProcess: ChildProcess = Executable.spawn(this._tarExecutablePath, args, {
+      currentWorkingDirectory: currentWorkingDirectory
+    });
+
+    childProcess.stdout.on('data', (chunk) => fileWriter.write(`[stdout] ${chunk}`));
+    childProcess.stderr.on('data', (chunk) => fileWriter.write(`[stderr] ${chunk}`));
+
+    const [tarExitCode] = await events.once(childProcess, 'exit');
+
+    fileWriter.write(
+      ['======== END PROCESS OUTPUT ========', '', `Exited with code "${tarExitCode}"`].join('\n')
+    );
+    fileWriter.close();
 
     return tarExitCode;
   }
