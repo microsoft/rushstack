@@ -78,6 +78,29 @@ export class TarExecutable {
     currentWorkingDirectory: string,
     logFilePath: string
   ): Promise<number> {
+    // Runs "tar" with the specified args and logs its output to the specified location.
+    // The log file looks like this:
+    //
+    // Windows:
+    // Invoking "C:\WINDOWS\system32\tar.exe -x -f E:\rush-cache\d18105f7f83eb610b468be4e2421681f4a52e44d"
+    //
+    // ======= BEGIN PROCESS OUTPUT =======
+    // [stdout] <tar stdout output>
+    // [stderr] <tar stderr output>
+    // ======== END PROCESS OUTPUT ========
+    //
+    // Exited with code "0"
+    //
+    // Linux:
+    // Invoking "/bin/tar -x -f /home/username/rush-cache/d18105f7f83eb610b468be4e2421681f4a52e44d"
+    //
+    // ======= BEGIN PROCESS OUTPUT =======
+    // [stdout] <tar stdout output>
+    // [stderr] <tar stderr output>
+    // ======== END PROCESS OUTPUT ========
+    //
+    // Exited with code "0"
+
     await FileSystem.ensureFolderAsync(path.dirname(logFilePath));
     const fileWriter: FileWriter = FileWriter.open(logFilePath);
     fileWriter.write(
