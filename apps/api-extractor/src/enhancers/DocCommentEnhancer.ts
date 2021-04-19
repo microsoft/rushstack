@@ -8,7 +8,7 @@ import { Collector } from '../collector/Collector';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { ApiItemMetadata } from '../collector/ApiItemMetadata';
-import { AedocDefinitions, ReleaseTag } from '@microsoft/api-extractor-model';
+import { ReleaseTag } from '@microsoft/api-extractor-model';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { VisitorState } from '../collector/VisitorState';
 import { ResolverFailure } from '../analyzer/AstReferenceResolver';
@@ -74,7 +74,7 @@ export class DocCommentEnhancer {
       // The class that contains this constructor
       const classDeclaration: AstDeclaration = astDeclaration.parent!;
 
-      const configuration: tsdoc.TSDocConfiguration = AedocDefinitions.tsdocConfiguration;
+      const configuration: tsdoc.TSDocConfiguration = this._collector.extractorConfig.tsdocConfiguration;
 
       if (!metadata.tsdocComment) {
         metadata.tsdocComment = new tsdoc.DocComment({ configuration });

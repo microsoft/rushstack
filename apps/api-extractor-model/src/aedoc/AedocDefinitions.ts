@@ -5,6 +5,7 @@ import { TSDocConfiguration, TSDocTagDefinition, TSDocTagSyntaxKind, StandardTag
 
 /**
  * @internal
+ * @deprecated - tsdoc configuration is now constructed from tsdoc.json files associated with each package.
  */
 export class AedocDefinitions {
   public static readonly betaDocumentation: TSDocTagDefinition = new TSDocTagDefinition({

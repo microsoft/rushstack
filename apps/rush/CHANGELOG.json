@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.44.0",
+      "tag": "@microsoft/rush_v5.44.0",
+      "date": "Sat, 17 Apr 2021 00:17:51 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add --json and --all param to rush scan"
+          },
+          {
+            "comment": "Fix \"rush deploy\" having \"includeDevDependencies\" turned on to deploy \"devDependencies\" for rush projects only"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.43.0",
       "tag": "@microsoft/rush_v5.43.0",
       "date": "Thu, 08 Apr 2021 06:09:52 GMT",

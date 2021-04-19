@@ -210,6 +210,7 @@ export class WebpackPlugin implements IHeftPlugin {
           stats = await LegacyAdapters.convertCallbackToPromise(
             (compiler as webpack.Compiler).run.bind(compiler)
           );
+          await LegacyAdapters.convertCallbackToPromise(compiler.close.bind(compiler));
         } catch (e) {
           logger.emitError(e);
         }

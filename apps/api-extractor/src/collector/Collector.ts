@@ -4,7 +4,7 @@
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 import { PackageJsonLookup, Sort, InternalError } from '@rushstack/node-core-library';
-import { ReleaseTag, AedocDefinitions } from '@microsoft/api-extractor-model';
+import { ReleaseTag } from '@microsoft/api-extractor-model';
 
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
@@ -120,7 +120,7 @@ export class Collector {
     this.typeChecker = options.program.getTypeChecker();
     this.globalVariableAnalyzer = TypeScriptInternals.getGlobalVariableAnalyzer(this.program);
 
-    this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
+    this._tsdocParser = new tsdoc.TSDocParser(this.extractorConfig.tsdocConfiguration);
 
     this.bundledPackageNames = new Set<string>(this.extractorConfig.bundledPackages);
 
@@ -716,8 +716,11 @@ export class Collector {
       options.isOverride = modifierTagSet.isOverride();
       options.isSealed = modifierTagSet.isSealed();
       options.isVirtual = modifierTagSet.isVirtual();
+      const preapprovedTag: tsdoc.TSDocTagDefinition | void = this.extractorConfig.tsdocConfiguration.tryGetTagDefinition(
+        '@preapproved'
+      );
 
-      if (modifierTagSet.hasTag(AedocDefinitions.preapprovedTag)) {
+      if (preapprovedTag && modifierTagSet.hasTag(preapprovedTag)) {
         // This feature only makes sense for potentially big declarations.
         switch (astDeclaration.declaration.kind) {
           case ts.SyntaxKind.ClassDeclaration:

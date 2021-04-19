@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 08 Apr 2021 06:09:52 GMT and should not be manually modified.
+This log was last generated on Sat, 17 Apr 2021 00:17:51 GMT and should not be manually modified.
+
+## 5.44.0
+Sat, 17 Apr 2021 00:17:51 GMT
+
+### Updates
+
+- Add --json and --all param to rush scan
+- Fix "rush deploy" having "includeDevDependencies" turned on to deploy "devDependencies" for rush projects only
 
 ## 5.43.0
 Thu, 08 Apr 2021 06:09:52 GMT

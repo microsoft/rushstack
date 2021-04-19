@@ -2,10 +2,10 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor-model",
-      "comment": "",
-      "type": "none"
+      "comment": "Implements package-defined TSDoc tags in",
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/api-extractor-model",
-  "email": "iclanton@users.noreply.github.com"
+  "email": "nicholasrice@users.noreply.github.com"
 }

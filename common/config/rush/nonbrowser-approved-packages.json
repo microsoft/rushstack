@@ -155,6 +155,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@microsoft/tsdoc-config",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@microsoft/web-library-build",
       "allowedCategories": [ "libraries", "tests" ]
     },

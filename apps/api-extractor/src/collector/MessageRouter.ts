@@ -5,7 +5,6 @@ import colors from 'colors';
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 import { Sort, InternalError, LegacyAdapters } from '@rushstack/node-core-library';
-import { AedocDefinitions } from '@microsoft/api-extractor-model';
 
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { AstSymbol } from '../analyzer/AstSymbol';
@@ -32,6 +31,7 @@ export interface IMessageRouterOptions {
   messagesConfig: IExtractorMessagesConfig;
   showVerboseMessages: boolean;
   showDiagnostics: boolean;
+  tsdocConfiguration: tsdoc.TSDocConfiguration;
 }
 
 export class MessageRouter {
@@ -48,6 +48,8 @@ export class MessageRouter {
   private readonly _associatedMessagesForAstDeclaration: Map<AstDeclaration, ExtractorMessage[]>;
 
   private readonly _sourceMapper: SourceMapper;
+
+  private readonly _tsdocConfiguration: tsdoc.TSDocConfiguration;
 
   // Normalized representation of the routing rules from api-extractor.json
   private _reportingRuleByMessageId: Map<string, IReportingRule> = new Map<string, IReportingRule>();
@@ -81,6 +83,7 @@ export class MessageRouter {
     this._messages = [];
     this._associatedMessagesForAstDeclaration = new Map<AstDeclaration, ExtractorMessage[]>();
     this._sourceMapper = new SourceMapper();
+    this._tsdocConfiguration = options.tsdocConfiguration;
 
     // showDiagnostics implies showVerboseMessages
     this.showVerboseMessages = options.showVerboseMessages || options.showDiagnostics;
@@ -149,7 +152,7 @@ export class MessageRouter {
             `Error in API Extractor config: The messages.tsdocMessageReporting table contains` +
               ` an invalid entry "${messageId}".  The name should begin with the "tsdoc-" prefix.`
           );
-        } else if (!AedocDefinitions.tsdocConfiguration.isKnownMessageId(messageId)) {
+        } else if (!this._tsdocConfiguration.isKnownMessageId(messageId)) {
           throw new Error(
             `Error in API Extractor config: The messages.tsdocMessageReporting table contains` +
               ` an unrecognized identifier "${messageId}".  Is it spelled correctly?`

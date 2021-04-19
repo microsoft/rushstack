@@ -205,7 +205,8 @@ export class Extractor {
       messageCallback: options.messageCallback,
       messagesConfig: extractorConfig.messages || {},
       showVerboseMessages: !!options.showVerboseMessages,
-      showDiagnostics: !!options.showDiagnostics
+      showDiagnostics: !!options.showDiagnostics,
+      tsdocConfiguration: extractorConfig.tsdocConfiguration
     });
 
     this._checkCompilerCompatibility(extractorConfig, messageRouter);
