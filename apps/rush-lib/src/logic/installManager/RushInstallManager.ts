@@ -390,10 +390,6 @@ export class RushInstallManager extends BaseInstallManager {
     rushProject: RushConfigurationProject
   ): Promise<boolean> {
     if (shrinkwrapFile) {
-      console.log(
-        `Checking shrinkwrap local dependency tarball hashes in ${shrinkwrapFile.shrinkwrapFilename}`
-      );
-
       const tempProjectDependencyKey: string | undefined = shrinkwrapFile.getTempProjectDependencyKey(
         rushProject.tempProjectName
       );
@@ -421,14 +417,6 @@ export class RushInstallManager extends BaseInstallManager {
    * @override
    */
   protected canSkipInstall(lastModifiedDate: Date): boolean {
-    console.log(
-      os.EOL +
-        colors.bold(
-          `Checking ${RushConstants.nodeModulesFolderName} in ${this.rushConfiguration.commonTempFolder}`
-        ) +
-        os.EOL
-    );
-
     // Based on timestamps, can we skip this install entirely?
     const potentiallyChangedFiles: string[] = [];
 

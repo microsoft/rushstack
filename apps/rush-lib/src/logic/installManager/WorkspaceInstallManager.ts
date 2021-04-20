@@ -21,7 +21,6 @@ import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../../
 import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../../logic/RushConstants';
-import { Stopwatch } from '../../utilities/Stopwatch';
 import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from './InstallHelpers';
 import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
@@ -65,8 +64,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   protected async prepareCommonTempAsync(
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
-    const stopwatch: Stopwatch = Stopwatch.start();
-
     // Block use of the RUSH_TEMP_FOLDER environment variable
     if (EnvironmentConfiguration.rushTempFolderOverride !== undefined) {
       throw new Error(
@@ -264,21 +261,10 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // since "rush install" will consider this timestamp
     workspaceFile.save(workspaceFile.workspaceFilename, { onlyIfChanged: true });
 
-    stopwatch.stop();
-    console.log(`Finished creating workspace (${stopwatch.toString()})`);
-
     return { shrinkwrapIsUpToDate, shrinkwrapWarnings };
   }
 
   protected canSkipInstall(lastModifiedDate: Date): boolean {
-    console.log(
-      os.EOL +
-        colors.bold(
-          `Checking ${RushConstants.nodeModulesFolderName} in ${this.rushConfiguration.commonTempFolder}`
-        ) +
-        os.EOL
-    );
-
     // Based on timestamps, can we skip this install entirely?
     const potentiallyChangedFiles: string[] = [];
 

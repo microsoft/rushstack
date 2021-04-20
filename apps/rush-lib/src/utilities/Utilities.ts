@@ -522,7 +522,8 @@ export class Utilities {
    * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _copyAndTrimNpmrcFile() FROM scripts/install-run.ts
    */
   public static copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): void {
-    console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`); // Verbose
+    console.log(`Transforming ${sourceNpmrcPath}`); // Verbose
+    console.log(`  --> "${targetNpmrcPath}"`);
     let npmrcFileLines: string[] = FileSystem.readFile(sourceNpmrcPath).split('\n');
     npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
     const resultLines: string[] = [];
@@ -573,7 +574,8 @@ export class Utilities {
    */
   public static syncFile(sourcePath: string, destinationPath: string): void {
     if (FileSystem.exists(sourcePath)) {
-      console.log(`Updating ${destinationPath}`);
+      console.log(`Copying "${sourcePath}"`);
+      console.log(`  --> "${destinationPath}"`);
       FileSystem.copyFile({ sourcePath, destinationPath });
     } else {
       if (FileSystem.exists(destinationPath)) {

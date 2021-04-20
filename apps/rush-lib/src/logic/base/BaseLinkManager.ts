@@ -186,7 +186,7 @@ export abstract class BaseLinkManager {
    *   if true, this option forces the links to be recreated.
    */
   public async createSymlinksForProjects(force: boolean): Promise<void> {
-    console.log('Linking projects together...');
+    console.log(os.EOL + colors.bold('Linking local projects'));
     const stopwatch: Stopwatch = Stopwatch.start();
 
     await this._linkProjects();

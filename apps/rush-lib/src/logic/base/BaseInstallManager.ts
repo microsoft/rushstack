@@ -178,6 +178,10 @@ export abstract class BaseInstallManager {
 
     const { shrinkwrapIsUpToDate, variantIsUpToDate } = await this.prepareAsync();
 
+    console.log(
+      os.EOL + colors.bold(`Checking installation in "${this.rushConfiguration.commonTempFolder}"`)
+    );
+
     // This marker file indicates that the last "rush install" completed successfully.
     // Always perform a clean install if filter flags were provided. Additionally, if
     // "--purge" was specified, or if the last install was interrupted, then we will
@@ -245,6 +249,8 @@ export abstract class BaseInstallManager {
       if (!isFilteredInstall) {
         this._commonTempInstallFlag.create();
       }
+    } else {
+      console.log('Installation is already up-to-date.');
     }
 
     // Perform any post-install work the install manager requires
