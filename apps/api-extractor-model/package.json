@@ -14,8 +14,8 @@
     "build": "heft test --clean"
   },
   "dependencies": {
-    "@microsoft/tsdoc": "0.13.1",
-    "@microsoft/tsdoc-config": "~0.15.1",
+    "@microsoft/tsdoc": "0.13.2",
+    "@microsoft/tsdoc-config": "~0.15.2",
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
