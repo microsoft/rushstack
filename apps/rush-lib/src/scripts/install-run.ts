@@ -65,7 +65,8 @@ function _parsePackageSpecifier(rawPackageSpecifier: string): IPackageSpecifier 
  * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH Utilities.copyAndTrimNpmrcFile()
  */
 function _copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): void {
-  console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`); // Verbose
+  console.log(`Transforming ${sourceNpmrcPath}`); // Verbose
+  console.log(`  --> "${targetNpmrcPath}"`);
   let npmrcFileLines: string[] = fs.readFileSync(sourceNpmrcPath).toString().split('\n');
   npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
   const resultLines: string[] = [];

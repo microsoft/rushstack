@@ -236,8 +236,8 @@ export class InstallHelpers {
       `${packageManager}-local`
     );
 
-    console.log(os.EOL + 'Symlinking "' + localPackageManagerToolFolder + '"');
-    console.log('  --> "' + packageManagerToolFolder + '"');
+    console.log(os.EOL + `Symlinking "${localPackageManagerToolFolder}"`);
+    console.log(`  --> "${packageManagerToolFolder}"`);
 
     // We cannot use FileSystem.exists() to test the existence of a symlink, because it will
     // return false for broken symlinks.  There is no way to test without catching an exception.
