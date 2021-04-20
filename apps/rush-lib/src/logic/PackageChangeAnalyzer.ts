@@ -15,9 +15,6 @@ import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from './RushConstants';
 
 export class PackageChangeAnalyzer {
-  // Allow this function to be overwritten during unit tests
-  public static getPackageDeps: typeof getPackageDeps;
-
   /**
    * null === we haven't looked
    * undefined === data isn't available (i.e. - git isn't present)
@@ -30,7 +27,6 @@ export class PackageChangeAnalyzer {
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
     this._git = new Git(this._rushConfiguration);
-    this._data = this._getData();
   }
 
   public getPackageDeps(projectName: string): Map<string, string> | undefined {
@@ -76,29 +72,8 @@ export class PackageChangeAnalyzer {
   }
 
   private _getData(): Map<string, Map<string, string>> | undefined {
-    // If we are not in a unit test, use the correct resources
-    if (!PackageChangeAnalyzer.getPackageDeps) {
-      PackageChangeAnalyzer.getPackageDeps = getPackageDeps;
-    }
-
-    let repoDeps: Map<string, string>;
-    try {
-      if (this._git.isPathUnderGitWorkingTree()) {
-        // Load the package deps hash for the whole repository
-        const gitPath: string = this._git.getGitPathOrThrow();
-        repoDeps = PackageChangeAnalyzer.getPackageDeps(this._rushConfiguration.rushJsonFolder, [], gitPath);
-      } else {
-        return undefined;
-      }
-    } catch (e) {
-      // If getPackageDeps fails, don't fail the whole build. Treat this case as if we don't know anything about
-      // the state of the files in the repo. This can happen if the environment doesn't have Git.
-      console.log(
-        colors.yellow(
-          `Error calculating the state of the repo. (inner error: ${e}). Continuing without diffing files.`
-        )
-      );
-
+    const repoDeps: Map<string, string> | undefined = this._getRepoDeps();
+    if (!repoDeps) {
       return undefined;
     }
 
@@ -185,5 +160,27 @@ export class PackageChangeAnalyzer {
     }
 
     return projectHashDeps;
+  }
+
+  private _getRepoDeps(): Map<string, string> | undefined {
+    try {
+      if (this._git.isPathUnderGitWorkingTree()) {
+        // Load the package deps hash for the whole repository
+        const gitPath: string = this._git.getGitPathOrThrow();
+        return getPackageDeps(this._rushConfiguration.rushJsonFolder, [], gitPath);
+      } else {
+        return undefined;
+      }
+    } catch (e) {
+      // If getPackageDeps fails, don't fail the whole build. Treat this case as if we don't know anything about
+      // the state of the files in the repo. This can happen if the environment doesn't have Git.
+      console.log(
+        colors.yellow(
+          `Error calculating the state of the repo. (inner error: ${e}). Continuing without diffing files.`
+        )
+      );
+
+      return undefined;
+    }
   }
 }

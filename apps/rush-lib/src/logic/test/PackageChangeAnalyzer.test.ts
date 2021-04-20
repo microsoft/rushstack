@@ -1,24 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
-import { LookupByPath } from '../LookupByPath';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-
-const packageA: string = 'project-a';
-// Git will always return paths with '/' as the delimiter
-const packageAPath: string = path.posix.join('tools', packageA);
-const fileA: string = path.posix.join(packageAPath, 'src/index.ts');
-// const packageB: string = 'project-b';
-// const packageBPath: string = path.join('tools', packageB);
-// const fileB: string = path.join(packageBPath, 'src/index.ts');
-// const packageBPath: string = path.join('tools', packageB);
-const HASH: string = '12345abcdef';
-// const looseFile: string = 'some/other/folder/index.ts';
 
 describe('PackageChangeAnalyzer', () => {
   beforeEach(() => {
@@ -29,75 +15,142 @@ describe('PackageChangeAnalyzer', () => {
     jest.resetAllMocks();
   });
 
-  it('can associate a file in a project folder with a project', () => {
-    const repoHashDeps: Map<string, string> = new Map<string, string>([
-      [fileA, HASH],
-      [path.posix.join('common', 'config', 'rush', 'pnpm-lock.yaml'), HASH]
-    ]);
-
-    const project: RushConfigurationProject = {
-      packageName: packageA,
-      projectRelativeFolder: packageAPath
-    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-    const pathTree: LookupByPath<RushConfigurationProject> = new LookupByPath([
-      [packageAPath.replace(/\\/g, '/'), project]
-    ]);
-
-    PackageChangeAnalyzer.getPackageDeps = () => repoHashDeps;
+  function createTestSubject(
+    projects: RushConfigurationProject[],
+    files: Map<string, string>
+  ): PackageChangeAnalyzer {
     const rushConfiguration: RushConfiguration = {
       commonRushConfigFolder: '',
-      projects: [project],
+      projects,
       rushJsonFolder: '',
       getCommittedShrinkwrapFilename(): string {
         return 'common/config/rush/pnpm-lock.yaml';
       },
       findProjectForPosixRelativePath(path: string): object | undefined {
-        return pathTree.findChildPath(path);
+        return projects.find((project) => path.startsWith(project.projectRelativeFolder));
       }
-    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    } as RushConfiguration;
 
-    const packageChangeAnalyzer: PackageChangeAnalyzer = new PackageChangeAnalyzer(rushConfiguration);
-    const packageDeps: Map<string, string> | undefined = packageChangeAnalyzer.getPackageDeps(packageA);
-    expect(packageDeps).toEqual(repoHashDeps);
-  });
+    const subject: PackageChangeAnalyzer = new PackageChangeAnalyzer(rushConfiguration);
 
-  /*
-  it('associates a file that is not in a project with all projects', () => {
-    const repoHashDeps: IPackageDeps = {
-      files: {
-        [looseFile]: HASH,
-        [fileA]: HASH,
-        [fileB]: HASH
-      }
-    };
-
-    PackageChangeAnalyzer.getPackageDeps = (path: string, ignored: string[]) => repoHashDeps;
-    PackageChangeAnalyzer.rushConfig = {
-      projects: [{
-        packageName: packageA,
-        projectRelativeFolder: packageAPath
-      },
-      {
-        packageName: packageB,
-        projectRelativeFolder: packageBPath
-      }]
-    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-    let packageDeps: IPackageDeps = PackageChangeAnalyzer.instance.getPackageDepsHash(packageA);
-    expect(packageDeps).toEqual({
-      files: {
-        [looseFile]: HASH,
-        [fileA]: HASH
-      }
+    subject['_getRepoDeps'] = jest.fn(() => {
+      return files;
     });
 
-    packageDeps = PackageChangeAnalyzer.instance.getPackageDepsHash(packageB);
-    expect(packageDeps).toEqual({
-      files: {
-        [looseFile]: HASH,
-        [fileB]: HASH
-      }
+    return subject;
+  }
+
+  describe('getPackageDeps', () => {
+    it('returns the files for the specified project', () => {
+      const projects: RushConfigurationProject[] = [
+        { packageName: 'apple', projectRelativeFolder: 'apps/apple' } as RushConfigurationProject,
+        { packageName: 'banana', projectRelativeFolder: 'apps/banana' } as RushConfigurationProject
+      ];
+      const files: Map<string, string> = new Map([
+        ['apps/apple/core.js', 'a101'],
+        ['apps/banana/peel.js', 'b201']
+      ]);
+      const subject: PackageChangeAnalyzer = createTestSubject(projects, files);
+
+      expect(subject.getPackageDeps('apple')).toEqual(new Map([['apps/apple/core.js', 'a101']]));
+      expect(subject.getPackageDeps('banana')).toEqual(new Map([['apps/banana/peel.js', 'b201']]));
+    });
+
+    it('includes the committed shrinkwrap file as a dep for all projects', () => {
+      const projects: RushConfigurationProject[] = [
+        { packageName: 'apple', projectRelativeFolder: 'apps/apple' } as RushConfigurationProject,
+        { packageName: 'banana', projectRelativeFolder: 'apps/banana' } as RushConfigurationProject
+      ];
+      const files: Map<string, string> = new Map([
+        ['apps/apple/core.js', 'a101'],
+        ['apps/banana/peel.js', 'b201'],
+        ['common/config/rush/pnpm-lock.yaml', 'ffff'],
+        ['tools/random-file.js', 'e00e']
+      ]);
+      const subject: PackageChangeAnalyzer = createTestSubject(projects, files);
+
+      expect(subject.getPackageDeps('apple')).toEqual(
+        new Map([
+          ['apps/apple/core.js', 'a101'],
+          ['common/config/rush/pnpm-lock.yaml', 'ffff']
+        ])
+      );
+      expect(subject.getPackageDeps('banana')).toEqual(
+        new Map([
+          ['apps/banana/peel.js', 'b201'],
+          ['common/config/rush/pnpm-lock.yaml', 'ffff']
+        ])
+      );
+    });
+
+    it('returns undefined if the specified project does not exist', () => {
+      const projects: RushConfigurationProject[] = [
+        { packageName: 'apple', projectRelativeFolder: 'apps/apple' } as RushConfigurationProject
+      ];
+      const files: Map<string, string> = new Map([['apps/apple/core.js', 'a101']]);
+      const subject: PackageChangeAnalyzer = createTestSubject(projects, files);
+
+      expect(subject.getPackageDeps('carrot')).toBeUndefined();
+    });
+
+    it('lazy-loads project data and caches it for future calls', () => {
+      const projects: RushConfigurationProject[] = [
+        { packageName: 'apple', projectRelativeFolder: 'apps/apple' } as RushConfigurationProject
+      ];
+      const files: Map<string, string> = new Map([['apps/apple/core.js', 'a101']]);
+      const subject: PackageChangeAnalyzer = createTestSubject(projects, files);
+
+      // Because other unit tests rely on the fact that a freshly instantiated
+      // PackageChangeAnalyzer is inert until someone actually requests project data,
+      // this test makes that expectation explicit.
+
+      expect(subject['_data']).toBeNull();
+      expect(subject.getPackageDeps('apple')).toEqual(new Map([['apps/apple/core.js', 'a101']]));
+      expect(subject['_data']).toBeDefined();
+      expect(subject.getPackageDeps('apple')).toEqual(new Map([['apps/apple/core.js', 'a101']]));
+      expect(subject['_getRepoDeps']).toHaveBeenCalledTimes(1);
     });
   });
-  */
+
+  describe('getProjectStateHash', () => {
+    it('returns a fixed hash snapshot for a set of project deps', () => {
+      const projects: RushConfigurationProject[] = [
+        { packageName: 'apple', projectRelativeFolder: 'apps/apple' } as RushConfigurationProject
+      ];
+      const files: Map<string, string> = new Map([
+        ['apps/apple/core.js', 'a101'],
+        ['apps/apple/juice.js', 'e333'],
+        ['apps/apple/slices.js', 'a102']
+      ]);
+      const subject: PackageChangeAnalyzer = createTestSubject(projects, files);
+
+      expect(subject.getProjectStateHash('apple')).toMatchInlineSnapshot(
+        `"265536e325cdfac3fa806a51873d927a712fc6c9"`
+      );
+    });
+
+    it('returns the same hash regardless of dep order', () => {
+      const projectsA: RushConfigurationProject[] = [
+        { packageName: 'apple', projectRelativeFolder: 'apps/apple' } as RushConfigurationProject
+      ];
+      const filesA: Map<string, string> = new Map([
+        ['apps/apple/core.js', 'a101'],
+        ['apps/apple/juice.js', 'e333'],
+        ['apps/apple/slices.js', 'a102']
+      ]);
+      const subjectA: PackageChangeAnalyzer = createTestSubject(projectsA, filesA);
+
+      const projectsB: RushConfigurationProject[] = [
+        { packageName: 'apple', projectRelativeFolder: 'apps/apple' } as RushConfigurationProject
+      ];
+      const filesB: Map<string, string> = new Map([
+        ['apps/apple/slices.js', 'a102'],
+        ['apps/apple/core.js', 'a101'],
+        ['apps/apple/juice.js', 'e333']
+      ]);
+      const subjectB: PackageChangeAnalyzer = createTestSubject(projectsB, filesB);
+
+      expect(subjectA.getProjectStateHash('apple')).toEqual(subjectB.getProjectStateHash('apple'));
+    });
+  });
 });
