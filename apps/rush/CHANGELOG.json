@@ -2,6 +2,24 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.45.0",
+      "tag": "@microsoft/rush_v5.45.0",
+      "date": "Tue, 20 Apr 2021 19:04:04 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Print diagnostic information to a log file \"<project-root>/.rush/build-cache-tar.log\" when the native \"tar\" is invoked."
+          },
+          {
+            "comment": "The Amazon S3 build cloud cache provider can now use buckets outside the default region"
+          },
+          {
+            "comment": "Add support for PNPM 6"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.44.0",
       "tag": "@microsoft/rush_v5.44.0",
       "date": "Sat, 17 Apr 2021 00:17:51 GMT",

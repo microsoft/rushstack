@@ -458,8 +458,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    */
   protected tryEnsureDependencyVersion(
     dependencySpecifier: DependencySpecifier,
-    tempProjectName: string,
-    tryReusingPackageVersionsFromShrinkwrap: boolean
+    tempProjectName: string
   ): DependencySpecifier | undefined {
     // PNPM doesn't have the same advantage of NPM, where we can skip generate as long as the
     // shrinkwrap file puts our dependency in either the top of the node_modules folder
@@ -479,44 +478,11 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined = this._getPackageDescription(
       tempProjectDependencyKey
     );
-    if (!packageDescription || !packageDescription.dependencies) {
-      return undefined;
-    }
-
-    if (!packageDescription.dependencies.hasOwnProperty(packageName)) {
-      if (tryReusingPackageVersionsFromShrinkwrap && dependencySpecifier.versionSpecifier) {
-        // this means the current temp project doesn't provide this dependency,
-        // however, we may be able to use a different version. we prefer the latest version
-        let latestVersion: string | undefined = undefined;
-
-        for (const otherTempProject of this.getTempProjectNames()) {
-          const otherVersionSpecifier: DependencySpecifier | undefined = this._getDependencyVersion(
-            dependencySpecifier.packageName,
-            otherTempProject
-          );
-
-          if (otherVersionSpecifier) {
-            const otherVersion: string = otherVersionSpecifier.versionSpecifier;
-
-            if (semver.satisfies(otherVersion, dependencySpecifier.versionSpecifier)) {
-              if (!latestVersion || semver.gt(otherVersion, latestVersion)) {
-                latestVersion = otherVersion;
-              }
-            }
-          }
-        }
-
-        if (latestVersion) {
-          // go ahead and fixup the shrinkwrap file to point at this
-          const dependencies: { [key: string]: string } | undefined =
-            this._shrinkwrapJson.packages[tempProjectDependencyKey].dependencies || {};
-          dependencies[packageName] = latestVersion;
-          this._shrinkwrapJson.packages[tempProjectDependencyKey].dependencies = dependencies;
-
-          return new DependencySpecifier(dependencySpecifier.packageName, latestVersion);
-        }
-      }
-
+    if (
+      !packageDescription ||
+      !packageDescription.dependencies ||
+      !packageDescription.dependencies.hasOwnProperty(packageName)
+    ) {
       return undefined;
     }
 

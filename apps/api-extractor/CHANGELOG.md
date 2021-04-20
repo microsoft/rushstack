@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 12 Apr 2021 15:10:28 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Apr 2021 04:59:51 GMT and should not be manually modified.
+
+## 7.14.0
+Tue, 20 Apr 2021 04:59:51 GMT
+
+### Minor changes
+
+- Projects can now define custom tags using a tsdoc.json file
 
 ## 7.13.5
 Mon, 12 Apr 2021 15:10:28 GMT

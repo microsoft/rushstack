@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Thu, 15 Apr 2021 02:59:25 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Apr 2021 04:59:51 GMT and should not be manually modified.
+
+## 7.13.0
+Tue, 20 Apr 2021 04:59:51 GMT
+
+### Minor changes
+
+- Add support for projects that define custom tags using a tsdoc.json file
 
 ## 7.12.22
 Thu, 15 Apr 2021 02:59:25 GMT

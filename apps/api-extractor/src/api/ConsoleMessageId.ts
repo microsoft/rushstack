@@ -24,6 +24,11 @@ export const enum ConsoleMessageId {
   CompilerVersionNotice = 'console-compiler-version-notice',
 
   /**
+   * "Using custom TSDoc config from ___"
+   */
+  UsingCustomTSDocConfig = 'console-using-custom-tsdoc-config',
+
+  /**
    * "Found metadata in ___"
    */
   FoundTSDocMetadata = 'console-found-tsdoc-metadata',

@@ -18,13 +18,5 @@
     "enabled": false
   },
 
-  "testMode": true,
-
-  "messages": {
-    "tsdocMessageReporting": {
-      "tsdoc-undefined-tag": {
-        "logLevel": "none"
-      }
-    }
-  }
+  "testMode": true
 }

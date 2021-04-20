@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
 import * as events from 'events';
 import * as crypto from 'crypto';
 import type * as stream from 'stream';
@@ -164,13 +165,19 @@ export class ProjectBuildCache {
     const tarUtility: TarExecutable | undefined = ProjectBuildCache._tryGetTarUtility(terminal);
     let restoreSuccess: boolean = false;
     if (tarUtility && localCacheEntryPath) {
-      const tarExitCode: number = await tarUtility.tryUntarAsync(localCacheEntryPath, projectFolderPath);
+      const logFilePath: string = this._getTarLogFilePath();
+      const tarExitCode: number = await tarUtility.tryUntarAsync({
+        archivePath: localCacheEntryPath,
+        outputFolderPath: projectFolderPath,
+        logFilePath
+      });
       if (tarExitCode === 0) {
         restoreSuccess = true;
       } else {
         terminal.writeWarningLine(
           `"tar" exited with code ${tarExitCode} while attempting to restore cache entry. ` +
-            'Rush will attempt to extract from the cache entry with a JavaScript implementation of tar.'
+            'Rush will attempt to extract from the cache entry with a JavaScript implementation of tar. ' +
+            `See "${logFilePath}" for logs from the tar process.`
         );
       }
     }
@@ -232,17 +239,20 @@ export class ProjectBuildCache {
     const tarUtility: TarExecutable | undefined = ProjectBuildCache._tryGetTarUtility(terminal);
     if (tarUtility) {
       const tempLocalCacheEntryPath: string = this._localBuildCacheProvider.getCacheEntryPath(cacheId);
-      const tarExitCode: number = await tarUtility.tryCreateArchiveFromProjectPathsAsync(
-        tempLocalCacheEntryPath,
-        filesToCache.outputFilePaths,
-        this._project
-      );
+      const logFilePath: string = this._getTarLogFilePath();
+      const tarExitCode: number = await tarUtility.tryCreateArchiveFromProjectPathsAsync({
+        archivePath: tempLocalCacheEntryPath,
+        paths: filesToCache.outputFilePaths,
+        project: this._project,
+        logFilePath
+      });
       if (tarExitCode === 0) {
         localCacheEntryPath = tempLocalCacheEntryPath;
       } else {
         terminal.writeWarningLine(
           `"tar" exited with code ${tarExitCode} while attempting to create the cache entry. ` +
-            'Rush will attempt to create the cache entry with a JavaScript implementation of tar.'
+            'Rush will attempt to create the cache entry with a JavaScript implementation of tar. ' +
+            `See "${logFilePath}" for logs from the tar process.`
         );
       }
     }
@@ -385,6 +395,10 @@ export class ProjectBuildCache {
         yield entryPath;
       }
     }
+  }
+
+  private _getTarLogFilePath(): string {
+    return path.join(this._project.projectRushTempFolder, 'build-cache-tar.log');
   }
 
   private static _getCacheId(options: Omit<IProjectBuildCacheOptions, 'terminal'>): string | undefined {

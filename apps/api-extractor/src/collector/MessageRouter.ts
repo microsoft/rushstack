@@ -34,6 +34,13 @@ export interface IMessageRouterOptions {
   tsdocConfiguration: tsdoc.TSDocConfiguration;
 }
 
+export interface IBuildJsonDumpObjectOptions {
+  /**
+   * {@link MessageRouter.buildJsonDumpObject} will omit any objects keys with these names.
+   */
+  keyNamesToOmit?: string[];
+}
+
 export class MessageRouter {
   public static readonly DIAGNOSTICS_LINE: string =
     '============================================================';
@@ -277,7 +284,18 @@ export class MessageRouter {
    *          or `undefined` if the input cannot be represented as JSON
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static buildJsonDumpObject(input: any): any | undefined {
+  public static buildJsonDumpObject(input: any, options?: IBuildJsonDumpObjectOptions): any | undefined {
+    if (!options) {
+      options = {};
+    }
+
+    const keyNamesToOmit: Set<string> = new Set(options.keyNamesToOmit);
+
+    return MessageRouter._buildJsonDumpObject(input, keyNamesToOmit);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private static _buildJsonDumpObject(input: any, keyNamesToOmit: Set<string>): any | undefined {
     if (input === null || input === undefined) {
       return null; // JSON uses null instead of undefined
     }
@@ -293,7 +311,7 @@ export class MessageRouter {
           const outputArray: any[] = [];
           for (const element of input) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const serializedElement: any = MessageRouter.buildJsonDumpObject(element);
+            const serializedElement: any = MessageRouter._buildJsonDumpObject(element, keyNamesToOmit);
             if (serializedElement !== undefined) {
               outputArray.push(serializedElement);
             }
@@ -303,11 +321,15 @@ export class MessageRouter {
 
         const outputObject: object = {};
         for (const key of Object.getOwnPropertyNames(input)) {
+          if (keyNamesToOmit.has(key)) {
+            continue;
+          }
+
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const value: any = input[key];
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const serializedValue: any = MessageRouter.buildJsonDumpObject(value);
+          const serializedValue: any = MessageRouter._buildJsonDumpObject(value, keyNamesToOmit);
 
           if (serializedValue !== undefined) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

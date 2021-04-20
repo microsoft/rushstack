@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.42.4",
+  "rushVersion": "5.44.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -446,20 +446,20 @@
       "packageName": "@microsoft/api-documenter",
       "projectFolder": "apps/api-documenter",
       "reviewCategory": "libraries",
-      "shouldPublish": false
+      "shouldPublish": true
     },
     {
       "packageName": "@microsoft/api-extractor",
       "projectFolder": "apps/api-extractor",
       "reviewCategory": "libraries",
-      "shouldPublish": false,
+      "shouldPublish": true,
       "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
     {
       "packageName": "@microsoft/api-extractor-model",
       "projectFolder": "apps/api-extractor-model",
       "reviewCategory": "libraries",
-      "shouldPublish": false,
+      "shouldPublish": true,
       "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
     {

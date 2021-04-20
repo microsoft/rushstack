@@ -178,6 +178,10 @@ export abstract class BaseInstallManager {
 
     const { shrinkwrapIsUpToDate, variantIsUpToDate } = await this.prepareAsync();
 
+    console.log(
+      os.EOL + colors.bold(`Checking installation in "${this.rushConfiguration.commonTempFolder}"`)
+    );
+
     // This marker file indicates that the last "rush install" completed successfully.
     // Always perform a clean install if filter flags were provided. Additionally, if
     // "--purge" was specified, or if the last install was interrupted, then we will
@@ -220,12 +224,7 @@ export abstract class BaseInstallManager {
       // Perform the actual install
       await this.installAsync(cleanInstall);
 
-      const usePnpmFrozenLockfile: boolean =
-        this._rushConfiguration.packageManager === 'pnpm' &&
-        this._rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall ===
-          true;
-
-      if (this.options.allowShrinkwrapUpdates && (usePnpmFrozenLockfile || !shrinkwrapIsUpToDate)) {
+      if (this.options.allowShrinkwrapUpdates && !shrinkwrapIsUpToDate) {
         // Copy (or delete) common\temp\pnpm-lock.yaml --> common\config\rush\pnpm-lock.yaml
         Utilities.syncFile(
           this._rushConfiguration.tempShrinkwrapFilename,
@@ -250,6 +249,8 @@ export abstract class BaseInstallManager {
       if (!isFilteredInstall) {
         this._commonTempInstallFlag.create();
       }
+    } else {
+      console.log('Installation is already up-to-date.');
     }
 
     // Perform any post-install work the install manager requires
@@ -403,6 +404,8 @@ export abstract class BaseInstallManager {
     let { shrinkwrapIsUpToDate, shrinkwrapWarnings } = await this.prepareCommonTempAsync(shrinkwrapFile);
     shrinkwrapIsUpToDate = shrinkwrapIsUpToDate && !this.options.recheckShrinkwrap;
 
+    this._syncTempShrinkwrap(shrinkwrapFile);
+
     // Write out the reported warnings
     if (shrinkwrapWarnings.length > 0) {
       console.log();
@@ -419,8 +422,6 @@ export abstract class BaseInstallManager {
       }
       console.log();
     }
-
-    this._syncTempShrinkwrap(shrinkwrapFile);
 
     // Force update if the shrinkwrap is out of date
     if (!shrinkwrapIsUpToDate) {
@@ -649,9 +650,14 @@ export abstract class BaseInstallManager {
 
   private _syncTempShrinkwrap(shrinkwrapFile: BaseShrinkwrapFile | undefined): void {
     if (shrinkwrapFile) {
-      // If we have a (possibly incomplete) shrinkwrap file, save it as the temporary file.
-      shrinkwrapFile.save(this.rushConfiguration.tempShrinkwrapFilename);
-      shrinkwrapFile.save(this.rushConfiguration.tempShrinkwrapPreinstallFilename);
+      Utilities.syncFile(
+        this._rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant),
+        this.rushConfiguration.tempShrinkwrapFilename
+      );
+      Utilities.syncFile(
+        this._rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant),
+        this.rushConfiguration.tempShrinkwrapPreinstallFilename
+      );
     } else {
       // Otherwise delete the temporary file
       FileSystem.deleteFile(this.rushConfiguration.tempShrinkwrapFilename);

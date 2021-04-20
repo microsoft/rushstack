@@ -3,7 +3,6 @@
 
 import colors from 'colors/safe';
 import * as semver from 'semver';
-import { FileSystem } from '@rushstack/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
@@ -23,13 +22,6 @@ export abstract class BaseShrinkwrapFile {
       return dictionary[key];
     }
     return undefined;
-  }
-
-  /**
-   * Serializes and saves the shrinkwrap file to specified location
-   */
-  public save(filePath: string): void {
-    FileSystem.writeFile(filePath, this.serialize());
   }
 
   /**
@@ -81,13 +73,11 @@ export abstract class BaseShrinkwrapFile {
    */
   public tryEnsureCompatibleDependency(
     dependencySpecifier: DependencySpecifier,
-    tempProjectName: string,
-    tryReusingPackageVersionsFromShrinkwrap: boolean = true
+    tempProjectName: string
   ): boolean {
     const shrinkwrapDependency: DependencySpecifier | undefined = this.tryEnsureDependencyVersion(
       dependencySpecifier,
-      tempProjectName,
-      tryReusingPackageVersionsFromShrinkwrap
+      tempProjectName
     );
     if (!shrinkwrapDependency) {
       return false;
@@ -107,8 +97,7 @@ export abstract class BaseShrinkwrapFile {
   /** @virtual */
   protected abstract tryEnsureDependencyVersion(
     dependencySpecifier: DependencySpecifier,
-    tempProjectName: string,
-    tryReusingPackageVersionsFromShrinkwrap: boolean
+    tempProjectName: string
   ): DependencySpecifier | undefined;
 
   /** @virtual */

@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.14.0",
+      "tag": "@microsoft/api-extractor_v7.14.0",
+      "date": "Tue, 20 Apr 2021 04:59:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Projects can now define custom tags using a tsdoc.json file"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.13.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.13.5",
       "tag": "@microsoft/api-extractor_v7.13.5",
       "date": "Mon, 12 Apr 2021 15:10:28 GMT",

@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 17 Apr 2021 00:17:51 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Apr 2021 19:04:04 GMT and should not be manually modified.
+
+## 5.45.0
+Tue, 20 Apr 2021 19:04:04 GMT
+
+### Updates
+
+- Print diagnostic information to a log file "<project-root>/.rush/build-cache-tar.log" when the native "tar" is invoked.
+- The Amazon S3 build cloud cache provider can now use buckets outside the default region
+- Add support for PNPM 6
 
 ## 5.44.0
 Sat, 17 Apr 2021 00:17:51 GMT
