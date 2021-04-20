@@ -996,12 +996,18 @@ export class ExtractorConfig {
       tsdocConfigFile = TSDocConfigFile.loadFile(packageTSDocConfigPath);
     }
 
+    // IMPORTANT: After calling TSDocConfigFile.loadFile(), we need to check for errors.
     if (tsdocConfigFile.hasErrors) {
       throw new Error(tsdocConfigFile.getErrorSummary());
     }
 
     const tsdocConfiguration: TSDocConfiguration = new TSDocConfiguration();
     tsdocConfigFile.configureParser(tsdocConfiguration);
+
+    // IMPORTANT: After calling TSDocConfigFile.configureParser(), we need to check for errors a second time.
+    if (tsdocConfigFile.hasErrors) {
+      throw new Error(tsdocConfigFile.getErrorSummary());
+    }
 
     return new ExtractorConfig({ ...extractorConfigParameters, tsdocConfigFile, tsdocConfiguration });
   }
