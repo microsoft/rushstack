@@ -773,7 +773,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       this._addModuleKindToEmit(
         ts.ModuleKind.CommonJS,
         tsconfig.options.outDir!,
-        tsconfig.options.module === ts.ModuleKind.CommonJS,
+        /* isPrimary */ tsconfig.options.module === ts.ModuleKind.CommonJS,
         '.cjs'
       );
 
@@ -792,7 +792,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       this._addModuleKindToEmit(
         ts.ModuleKind.ESNext,
         tsconfig.options.outDir!,
-        tsconfig.options.module === ts.ModuleKind.ESNext,
+        /* isPrimary */ tsconfig.options.module === ts.ModuleKind.ESNext,
         '.mjs'
       );
 
@@ -856,7 +856,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           const outFolderKey: string = this._addModuleKindToEmit(
             moduleKind,
             additionalModuleKindToEmit.outFolderName,
-            false,
+            /* isPrimary */ false,
             undefined
           );
 

@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "Support jsExtensionOverride to emit e.g. \".cjs\" files for commonjs or \".mjs\" files for esnext modules in Heft",
+      "comment": "Add emitCjsExtensionForCommonJS and emitMjsExtensionForESModule options to config/typescript.json to support emitting commonJS and ESModule output files with the \".cjs\" and \".mjs\" respectively, alongside the normal \".js\" output files.",
       "type": "minor"
     }
   ],

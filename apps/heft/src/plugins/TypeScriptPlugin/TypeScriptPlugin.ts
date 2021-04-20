@@ -71,12 +71,12 @@ export interface ISharedTypeScriptConfiguration {
   additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
 
   /**
-   * If 'true', will emit CommonJS output into the TSConfig outDir with the file extension '.cjs'
+   * If 'true', emit CommonJS output into the TSConfig outDir with the file extension '.cjs'
    */
   emitCjsExtensionForCommonJS?: boolean | undefined;
 
   /**
-   * If 'true', will emit ESModule output into the TSConfig outDir with the file extension '.mjs'
+   * If 'true', emit ESModule output into the TSConfig outDir with the file extension '.mjs'
    */
   emitMjsExtensionForESModule?: boolean | undefined;
 
