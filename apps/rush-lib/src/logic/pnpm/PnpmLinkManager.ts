@@ -3,6 +3,7 @@
 
 import * as os from 'os';
 import * as path from 'path';
+import * as crypto from 'crypto';
 import uriEncode = require('strict-uri-encode');
 import pnpmLinkBins from '@pnpm/link-bins';
 import * as semver from 'semver';
@@ -218,23 +219,10 @@ export class PnpmLinkManager extends BaseLinkManager {
         ? tempProjectDependencyKey.slice(tarballEntry.length)
         : '';
 
-    // e.g.:
-    //   C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz
-    //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fpresentation-integration-tests.tgz_jsdom@11.12.0
-    //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fbuild-tools.tgz_2a665c89609864b4e75bc5365d7f8f56
-    let folderNameInLocalInstallationRoot: string =
-      uriEncode(Path.convertToSlashes(absolutePathToTgzFile)) + folderNameSuffix;
-
-    // PNPM 6 changed formatting to replace all special chars with '+'
-    // e.g.: C++dev+imodeljs+imodeljs+common+temp+projects+presentation-integration-tests.tgz_jsdom@11.12.0
-    if (this._pnpmVersion.major >= 6) {
-      const specialCharRegex: RegExp = /%[a-fA-FA-F0-9]{2}/g;
-      folderNameInLocalInstallationRoot = folderNameInLocalInstallationRoot.replace(specialCharRegex, '+');
-    }
-
     // e.g.: C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules
     const pathToLocalInstallation: string = this._getPathToLocalInstallation(
-      folderNameInLocalInstallationRoot
+      absolutePathToTgzFile,
+      folderNameSuffix
     );
 
     const parentShrinkwrapEntry:
@@ -305,34 +293,61 @@ export class PnpmLinkManager extends BaseLinkManager {
     });
   }
 
-  private _getPathToLocalInstallation(folderNameInLocalInstallationRoot: string): string {
+  private _getPathToLocalInstallation(absolutePathToTgzFile: string, folderSuffix: string): string {
     if (this._pnpmVersion.major >= 6) {
+      // PNPM 6 changed formatting to replace all ':' and '/' chars with '+'. Additionally, folder names > 120
+      // are trimmed and hashed. NOTE: PNPM internally uses fs.realpath.native, which will cause additional
+      // issues in environments that do not support long paths.
       // See https://github.com/pnpm/pnpm/releases/tag/v6.0.0
+      // e.g.:
+      //   C++dev+imodeljs+imodeljs+common+temp+projects+presentation-integration-tests.tgz_jsdom@11.12.0
+      //   C++dev+imodeljs+imodeljs+common+temp+projects+presentation-integrat_089eb799caf0f998ab34e4e1e9254956
+      const specialCharRegex: RegExp = /\/|:/g;
+      let folderName: string = `local+${Path.convertToSlashes(absolutePathToTgzFile).replace(
+        specialCharRegex,
+        '+'
+      )}${folderSuffix}`;
+      if (folderName.length > 120) {
+        folderName = `${folderName.substring(0, 50)}_${crypto
+          .createHash('md5')
+          .update(folderName)
+          .digest('hex')}`;
+      }
+
       return path.join(
         this._rushConfiguration.commonTempFolder,
         RushConstants.nodeModulesFolderName,
         '.pnpm',
-        `local+${folderNameInLocalInstallationRoot}`,
-        RushConstants.nodeModulesFolderName
-      );
-    } else if (this._pnpmVersion.major >= 4) {
-      // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0
-      return path.join(
-        this._rushConfiguration.commonTempFolder,
-        RushConstants.nodeModulesFolderName,
-        '.pnpm',
-        'local',
-        folderNameInLocalInstallationRoot,
+        folderName,
         RushConstants.nodeModulesFolderName
       );
     } else {
-      return path.join(
-        this._rushConfiguration.commonTempFolder,
-        RushConstants.nodeModulesFolderName,
-        '.local',
-        folderNameInLocalInstallationRoot,
-        RushConstants.nodeModulesFolderName
-      );
+      // e.g.:
+      //   C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz
+      //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fpresentation-integration-tests.tgz_jsdom@11.12.0
+      //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fbuild-tools.tgz_2a665c89609864b4e75bc5365d7f8f56
+      const folderNameInLocalInstallationRoot: string =
+        uriEncode(Path.convertToSlashes(absolutePathToTgzFile)) + folderSuffix;
+
+      if (this._pnpmVersion.major >= 4) {
+        // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0
+        return path.join(
+          this._rushConfiguration.commonTempFolder,
+          RushConstants.nodeModulesFolderName,
+          '.pnpm',
+          'local',
+          folderNameInLocalInstallationRoot,
+          RushConstants.nodeModulesFolderName
+        );
+      } else {
+        return path.join(
+          this._rushConfiguration.commonTempFolder,
+          RushConstants.nodeModulesFolderName,
+          '.local',
+          folderNameInLocalInstallationRoot,
+          RushConstants.nodeModulesFolderName
+        );
+      }
     }
   }
   private _createLocalPackageForDependency(
