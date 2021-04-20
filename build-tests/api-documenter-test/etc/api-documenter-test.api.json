@@ -127,6 +127,10 @@
           "syntaxKind": "modifier"
         },
         {
+          "tagName": "@docCategory",
+          "syntaxKind": "inline"
+        },
+        {
           "tagName": "@myCustomTag",
           "syntaxKind": "modifier"
         }
@@ -160,6 +164,7 @@
         "@betaDocumentation": true,
         "@internalRemarks": true,
         "@preapproved": true,
+        "@docCategory": true,
         "@myCustomTag": true
       }
     }
