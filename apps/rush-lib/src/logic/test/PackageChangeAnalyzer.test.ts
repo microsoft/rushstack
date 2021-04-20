@@ -124,7 +124,9 @@ describe('PackageChangeAnalyzer', () => {
       ]);
       const subject: PackageChangeAnalyzer = createTestSubject(projects, files);
 
-      expect(subject.getProjectStateHash('apple')).toMatchSnapshot();
+      expect(subject.getProjectStateHash('apple')).toMatchInlineSnapshot(
+        `"265536e325cdfac3fa806a51873d927a712fc6c9"`
+      );
     });
 
     it('returns the same hash regardless of dep order', () => {

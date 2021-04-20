@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`PackageChangeAnalyzer getProjectStateHash returns a fixed hash snapshot for a set of project deps 1`] = `"265536e325cdfac3fa806a51873d927a712fc6c9"`;
