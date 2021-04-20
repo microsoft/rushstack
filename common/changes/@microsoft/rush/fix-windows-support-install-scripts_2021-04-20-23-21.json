@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where Rush fails to run on Windows when the repository absolute path contains a space",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "manrueda@users.noreply.github.com"
+}
