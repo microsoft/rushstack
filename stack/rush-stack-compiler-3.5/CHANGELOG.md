@@ -1,6 +1,11 @@
 # Change Log - @microsoft/rush-stack-compiler-3.5
 
-This log was last generated on Mon, 12 Apr 2021 15:10:28 GMT and should not be manually modified.
+This log was last generated on Tue, 20 Apr 2021 04:59:51 GMT and should not be manually modified.
+
+## 0.8.44
+Tue, 20 Apr 2021 04:59:51 GMT
+
+_Version update only_
 
 ## 0.8.43
 Mon, 12 Apr 2021 15:10:28 GMT

@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.13.0",
+      "tag": "@microsoft/api-extractor-model_v7.13.0",
+      "date": "Tue, 20 Apr 2021 04:59:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "The .api.json file format now stores the TSDoc configuration used for parsing doc comments"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.12.5",
       "tag": "@microsoft/api-extractor-model_v7.12.5",
       "date": "Mon, 12 Apr 2021 15:10:28 GMT",
