@@ -5,11 +5,16 @@
 
   "tagDefinitions": [
     {
+      "tagName": "@docCategory",
+      "syntaxKind": "inline"
+    },
+    {
       "tagName": "@myCustomTag",
       "syntaxKind": "modifier"
     }
   ],
   "supportForTags": {
-    "@myCustomTag": true
+    "@myCustomTag": true,
+    "@docCategory": true
   }
 }
