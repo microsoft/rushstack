@@ -1,6 +1,14 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 20 Apr 2021 19:04:04 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Apr 2021 23:38:22 GMT and should not be manually modified.
+
+## 5.45.1
+Wed, 21 Apr 2021 23:38:22 GMT
+
+### Updates
+
+- Ensure that pnpm-workspace.yaml is always fully regenerated during "rush install" or "rush update"
+- Fix support for pnpmfile in PNPM 6.
 
 ## 5.45.0
 Tue, 20 Apr 2021 19:04:04 GMT

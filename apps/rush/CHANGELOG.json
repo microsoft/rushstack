@@ -2,6 +2,21 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.45.1",
+      "tag": "@microsoft/rush_v5.45.1",
+      "date": "Wed, 21 Apr 2021 23:38:22 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Ensure that pnpm-workspace.yaml is always fully regenerated during \"rush install\" or \"rush update\""
+          },
+          {
+            "comment": "Fix support for pnpmfile in PNPM 6."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.45.0",
       "tag": "@microsoft/rush_v5.45.0",
       "date": "Tue, 20 Apr 2021 19:04:04 GMT",
