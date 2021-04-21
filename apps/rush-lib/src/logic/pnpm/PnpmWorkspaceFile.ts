@@ -60,9 +60,11 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
 
   /** @override */
   protected serialize(): string {
+    // Ensure stable sort order when serializing
+    Sort.sortSet(this._workspacePackages);
+
     const workspaceYaml: IPnpmWorkspaceYaml = {
-      // Ensure stable sort order when serializing
-      packages: Sort.sort(Array.from(this._workspacePackages))
+      packages: Array.from(this._workspacePackages)
     };
     return yamlModule.safeDump(workspaceYaml, PNPM_SHRINKWRAP_YAML_FORMAT);
   }
