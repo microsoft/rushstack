@@ -42,15 +42,9 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     super();
 
     this.workspaceFilename = workspaceYamlFilename;
-    let workspaceYaml: IPnpmWorkspaceYaml;
-    try {
-      // Populate with the existing file, or an empty list if the file doesn't exist
-      workspaceYaml = FileSystem.exists(workspaceYamlFilename)
-        ? yamlModule.safeLoad(FileSystem.readFile(workspaceYamlFilename).toString())
-        : { packages: [] };
-    } catch (error) {
-      throw new Error(`Error reading "${workspaceYamlFilename}":${os.EOL}  ${error.message}`);
-    }
+    // Ignore any existing file since this file is generated and we need to handle deleting packages
+    // If we need to support manual customization, that should be an additional parameter for "base file"
+    const workspaceYaml: IPnpmWorkspaceYaml = { packages: [] };
 
     this._workspacePackages = new Set<string>(workspaceYaml.packages);
   }
