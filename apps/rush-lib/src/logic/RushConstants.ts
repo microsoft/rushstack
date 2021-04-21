@@ -87,9 +87,14 @@ export class RushConstants {
   public static readonly pnpmV3ShrinkwrapFilename: string = 'pnpm-lock.yaml';
 
   /**
-   * The filename ("pnpmfile.js") used to add custom configuration to PNPM
+   * The filename ("pnpmfile.js") used to add custom configuration to PNPM (PNPM version 1.x and later).
    */
-  public static readonly pnpmfileFilename: string = 'pnpmfile.js';
+  public static readonly pnpmfileV1Filename: string = 'pnpmfile.js';
+
+  /**
+   * The filename (".pnpmfile.cjs") used to add custom configuration to PNPM (PNPM version 6.x and later).
+   */
+  public static readonly pnpmfileV6Filename: string = '.pnpmfile.cjs';
 
   /**
    * The filename ("shrinkwrap.yaml") used to store state for pnpm

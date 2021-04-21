@@ -62,7 +62,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
    * @override
    */
   protected async prepareCommonTempAsync(
-    shrinkwrapFile: BaseShrinkwrapFile | undefined
+    shrinkwrapFile: BaseShrinkwrapFile | undefined,
+    variant: string | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
     // Block use of the RUSH_TEMP_FOLDER environment variable
     if (EnvironmentConfiguration.rushTempFolderOverride !== undefined) {
@@ -82,7 +83,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (this.rushConfiguration.packageManager === 'pnpm') {
       const tempPnpmFilePath: string = path.join(
         this.rushConfiguration.commonTempFolder,
-        RushConstants.pnpmfileFilename
+        path.basename(this.rushConfiguration.getPnpmfilePath(variant))
       );
       await this.createShimPnpmfileAsync(tempPnpmFilePath);
     }
@@ -460,7 +461,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // Attempt to move the existing pnpmfile if there is one
       await FileSystem.moveAsync({
         sourcePath: filename,
-        destinationPath: path.join(pnpmfileDir, 'clientPnpmfile.js')
+        destinationPath: path.join(pnpmfileDir, `clientPnpmfile${path.extname(filename)}`)
       });
       pnpmfileExists = true;
     } catch (error) {

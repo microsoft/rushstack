@@ -260,7 +260,8 @@ export abstract class BaseInstallManager {
   }
 
   protected abstract prepareCommonTempAsync(
-    shrinkwrapFile: BaseShrinkwrapFile | undefined
+    shrinkwrapFile: BaseShrinkwrapFile | undefined,
+    variant: string | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }>;
 
   protected abstract canSkipInstall(lastInstallDate: Date): boolean;
@@ -392,7 +393,7 @@ export abstract class BaseInstallManager {
       const committedPnpmFilePath: string = this._rushConfiguration.getPnpmfilePath(this._options.variant);
       const tempPnpmFilePath: string = path.join(
         this._rushConfiguration.commonTempFolder,
-        RushConstants.pnpmfileFilename
+        path.basename(committedPnpmFilePath)
       );
 
       // ensure that we remove any old one that may be hanging around
@@ -401,7 +402,10 @@ export abstract class BaseInstallManager {
 
     // Allow for package managers to do their own preparation and check that the shrinkwrap is up to date
     // eslint-disable-next-line prefer-const
-    let { shrinkwrapIsUpToDate, shrinkwrapWarnings } = await this.prepareCommonTempAsync(shrinkwrapFile);
+    let { shrinkwrapIsUpToDate, shrinkwrapWarnings } = await this.prepareCommonTempAsync(
+      shrinkwrapFile,
+      this._options.variant
+    );
     shrinkwrapIsUpToDate = shrinkwrapIsUpToDate && !this.options.recheckShrinkwrap;
 
     this._syncTempShrinkwrap(shrinkwrapFile);

@@ -78,7 +78,8 @@ export class RushInstallManager extends BaseInstallManager {
    * @override
    */
   public async prepareCommonTempAsync(
-    shrinkwrapFile: BaseShrinkwrapFile | undefined
+    shrinkwrapFile: BaseShrinkwrapFile | undefined,
+    variant: string | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
     const stopwatch: Stopwatch = Stopwatch.start();
 
