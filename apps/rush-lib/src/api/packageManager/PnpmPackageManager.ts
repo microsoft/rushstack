@@ -10,6 +10,8 @@ import * as path from 'path';
  * Support for interacting with the PNPM package manager.
  */
 export class PnpmPackageManager extends PackageManager {
+  protected _pnpmfileFilename: string;
+
   /**
    * PNPM only.  True if `--resolution-strategy` is supported.
    */
@@ -25,6 +27,13 @@ export class PnpmPackageManager extends PackageManager {
     const parsedVersion: semver.SemVer = new semver.SemVer(version);
 
     this.supportsResolutionStrategy = false;
+
+    if (parsedVersion.major >= 6) {
+      // Introduced in version 6.0.0
+      this._pnpmfileFilename = RushConstants.pnpmfileV6Filename;
+    } else {
+      this._pnpmfileFilename = RushConstants.pnpmfileV1Filename;
+    }
 
     if (parsedVersion.major >= 3) {
       this._shrinkwrapFilename = RushConstants.pnpmV3ShrinkwrapFilename;
@@ -49,5 +58,15 @@ export class PnpmPackageManager extends PackageManager {
       // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0 for more details.
       this.internalShrinkwrapRelativePath = path.join('node_modules', '.pnpm', 'lock.yaml');
     }
+  }
+
+  /**
+   * The filename of the shrinkwrap file that is used by the package manager.
+   *
+   * @remarks
+   * Example: `pnpmfile.js` or `.pnpmfile.cjs`
+   */
+  public get pnpmfileFilename(): string {
+    return this._pnpmfileFilename;
   }
 }

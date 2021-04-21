@@ -28,6 +28,7 @@ import { RepoStateFile } from '../RepoStateFile';
 import { IPnpmfileShimSettings } from '../pnpm/IPnpmfileShimSettings';
 import { PnpmProjectDependencyManifest } from '../pnpm/PnpmProjectDependencyManifest';
 import { PnpmShrinkwrapFile, IPnpmShrinkwrapImporterYaml } from '../pnpm/PnpmShrinkwrapFile';
+import { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
@@ -82,7 +83,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (this.rushConfiguration.packageManager === 'pnpm') {
       const tempPnpmFilePath: string = path.join(
         this.rushConfiguration.commonTempFolder,
-        RushConstants.pnpmfileFilename
+        (this.rushConfiguration.packageManagerWrapper as PnpmPackageManager).pnpmfileFilename
       );
       await this.createShimPnpmfileAsync(tempPnpmFilePath);
     }
@@ -460,7 +461,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // Attempt to move the existing pnpmfile if there is one
       await FileSystem.moveAsync({
         sourcePath: filename,
-        destinationPath: path.join(pnpmfileDir, 'clientPnpmfile.js')
+        destinationPath: path.join(pnpmfileDir, `clientPnpmfile${path.extname(filename)}`)
       });
       pnpmfileExists = true;
     } catch (error) {

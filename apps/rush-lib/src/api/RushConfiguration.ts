@@ -635,8 +635,7 @@ export class RushConfiguration {
 
     RushConfiguration._validateCommonRushConfigFolder(
       this._commonRushConfigFolder,
-      this.packageManager,
-      this._shrinkwrapFilename,
+      this._packageManagerWrapper,
       this._experimentsConfiguration
     );
 
@@ -937,8 +936,7 @@ export class RushConfiguration {
    */
   private static _validateCommonRushConfigFolder(
     commonRushConfigFolder: string,
-    packageManager: PackageManagerName,
-    shrinkwrapFilename: string,
+    packageManagerWrapper: PackageManager,
     experiments: ExperimentsConfiguration
   ): void {
     if (!FileSystem.exists(commonRushConfigFolder)) {
@@ -978,11 +976,11 @@ export class RushConfiguration {
       }
 
       // Add the shrinkwrap filename for the package manager to the known set.
-      knownSet.add(shrinkwrapFilename.toUpperCase());
+      knownSet.add(packageManagerWrapper.shrinkwrapFilename.toUpperCase());
 
       // If the package manager is pnpm, then also add the pnpm file to the known set.
-      if (packageManager === 'pnpm') {
-        knownSet.add(RushConstants.pnpmfileFilename.toUpperCase());
+      if (packageManagerWrapper.packageManager === 'pnpm') {
+        knownSet.add((packageManagerWrapper as PnpmPackageManager).pnpmfileFilename.toUpperCase());
       }
 
       // Is the filename something we know?  If not, report an error.
@@ -1560,7 +1558,10 @@ export class RushConfiguration {
   public getPnpmfilePath(variant?: string | undefined): string {
     const variantConfigFolderPath: string = this._getVariantConfigFolderPath(variant);
 
-    return path.join(variantConfigFolderPath, RushConstants.pnpmfileFilename);
+    return path.join(
+      variantConfigFolderPath,
+      (this.packageManagerWrapper as PnpmPackageManager).pnpmfileFilename
+    );
   }
 
   /**
