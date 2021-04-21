@@ -5,7 +5,6 @@ import * as nodeJsPath from 'path';
 import * as fs from 'fs';
 import * as fsx from 'fs-extra';
 
-import { LegacyAdapters } from './LegacyAdapters';
 import { Text, NewlineKind, Encoding } from './Text';
 import { PosixModeBits } from './PosixModeBits';
 
@@ -1302,7 +1301,7 @@ export class FileSystem {
    */
   public static getRealPath(linkPath: string): string {
     return FileSystem._wrapException(() => {
-      return fs.realpathSync.native(linkPath);
+      return fsx.realpathSync(linkPath);
     });
   }
 
@@ -1311,7 +1310,7 @@ export class FileSystem {
    */
   public static async getRealPathAsync(linkPath: string): Promise<string> {
     return await FileSystem._wrapExceptionAsync(() => {
-      return LegacyAdapters.convertCallbackToPromise(fs.realpath.native, linkPath);
+      return fsx.realpath(linkPath);
     });
   }
 
