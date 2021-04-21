@@ -260,8 +260,7 @@ export abstract class BaseInstallManager {
   }
 
   protected abstract prepareCommonTempAsync(
-    shrinkwrapFile: BaseShrinkwrapFile | undefined,
-    variant: string | undefined
+    shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }>;
 
   protected abstract canSkipInstall(lastInstallDate: Date): boolean;
@@ -402,10 +401,7 @@ export abstract class BaseInstallManager {
 
     // Allow for package managers to do their own preparation and check that the shrinkwrap is up to date
     // eslint-disable-next-line prefer-const
-    let { shrinkwrapIsUpToDate, shrinkwrapWarnings } = await this.prepareCommonTempAsync(
-      shrinkwrapFile,
-      this._options.variant
-    );
+    let { shrinkwrapIsUpToDate, shrinkwrapWarnings } = await this.prepareCommonTempAsync(shrinkwrapFile);
     shrinkwrapIsUpToDate = shrinkwrapIsUpToDate && !this.options.recheckShrinkwrap;
 
     this._syncTempShrinkwrap(shrinkwrapFile);

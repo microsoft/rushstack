@@ -28,6 +28,7 @@ import { RepoStateFile } from '../RepoStateFile';
 import { IPnpmfileShimSettings } from '../pnpm/IPnpmfileShimSettings';
 import { PnpmProjectDependencyManifest } from '../pnpm/PnpmProjectDependencyManifest';
 import { PnpmShrinkwrapFile, IPnpmShrinkwrapImporterYaml } from '../pnpm/PnpmShrinkwrapFile';
+import { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
@@ -62,8 +63,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
    * @override
    */
   protected async prepareCommonTempAsync(
-    shrinkwrapFile: BaseShrinkwrapFile | undefined,
-    variant: string | undefined
+    shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
     // Block use of the RUSH_TEMP_FOLDER environment variable
     if (EnvironmentConfiguration.rushTempFolderOverride !== undefined) {
@@ -83,7 +83,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (this.rushConfiguration.packageManager === 'pnpm') {
       const tempPnpmFilePath: string = path.join(
         this.rushConfiguration.commonTempFolder,
-        path.basename(this.rushConfiguration.getPnpmfilePath(variant))
+        (this.rushConfiguration.packageManagerWrapper as PnpmPackageManager).pnpmfileFilename
       );
       await this.createShimPnpmfileAsync(tempPnpmFilePath);
     }

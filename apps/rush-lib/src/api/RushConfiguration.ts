@@ -635,9 +635,7 @@ export class RushConfiguration {
 
     RushConfiguration._validateCommonRushConfigFolder(
       this._commonRushConfigFolder,
-      this.packageManager,
-      this._packageManagerToolVersion,
-      this._shrinkwrapFilename,
+      this._packageManagerWrapper,
       this._experimentsConfiguration
     );
 
@@ -930,15 +928,6 @@ export class RushConfiguration {
   }
 
   /**
-   * Returns the pnpmfile filename for the version of PNPM supplied.
-   */
-  private static _getPnpmfileFilename(packageManagerToolVersion: string): string {
-    return semver.gte(packageManagerToolVersion, '6.0.0')
-      ? RushConstants.pnpmfileV6Filename
-      : RushConstants.pnpmfileV1Filename;
-  }
-
-  /**
    * If someone adds a config file in the "common/rush/config" folder, it would be a bad
    * experience for Rush to silently ignore their file simply because they misspelled the
    * filename, or maybe it's an old format that's no longer supported.  The
@@ -947,9 +936,7 @@ export class RushConfiguration {
    */
   private static _validateCommonRushConfigFolder(
     commonRushConfigFolder: string,
-    packageManager: PackageManagerName,
-    packageManagerToolVersion: string,
-    shrinkwrapFilename: string,
+    packageManagerWrapper: PackageManager,
     experiments: ExperimentsConfiguration
   ): void {
     if (!FileSystem.exists(commonRushConfigFolder)) {
@@ -989,11 +976,11 @@ export class RushConfiguration {
       }
 
       // Add the shrinkwrap filename for the package manager to the known set.
-      knownSet.add(shrinkwrapFilename.toUpperCase());
+      knownSet.add(packageManagerWrapper.shrinkwrapFilename.toUpperCase());
 
       // If the package manager is pnpm, then also add the pnpm file to the known set.
-      if (packageManager === 'pnpm') {
-        knownSet.add(RushConfiguration._getPnpmfileFilename(packageManagerToolVersion).toUpperCase());
+      if (packageManagerWrapper.packageManager === 'pnpm') {
+        knownSet.add((packageManagerWrapper as PnpmPackageManager).pnpmfileFilename.toUpperCase());
       }
 
       // Is the filename something we know?  If not, report an error.
@@ -1573,7 +1560,7 @@ export class RushConfiguration {
 
     return path.join(
       variantConfigFolderPath,
-      RushConfiguration._getPnpmfileFilename(this.packageManagerToolVersion)
+      (this.packageManagerWrapper as PnpmPackageManager).pnpmfileFilename
     );
   }
 
