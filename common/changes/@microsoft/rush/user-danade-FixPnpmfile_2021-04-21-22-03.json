@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix support for PNPM 6 and use .pnpmfile.cjs",
+      "comment": "Fix support for pnpmfile in PNPM 6.",
       "type": "none"
     }
   ],
