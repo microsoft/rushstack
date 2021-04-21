@@ -392,7 +392,7 @@ export abstract class BaseInstallManager {
       const committedPnpmFilePath: string = this._rushConfiguration.getPnpmfilePath(this._options.variant);
       const tempPnpmFilePath: string = path.join(
         this._rushConfiguration.commonTempFolder,
-        path.basename(committedPnpmFilePath)
+        (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager).pnpmfileFilename
       );
 
       // ensure that we remove any old one that may be hanging around
