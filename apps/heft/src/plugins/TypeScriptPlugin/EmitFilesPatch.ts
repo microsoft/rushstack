@@ -43,6 +43,11 @@ export class EmitFilesPatch {
     useBuildCache: boolean,
     changedFiles?: Set<IExtendedSourceFile>
   ): void {
+    if (EmitFilesPatch._patchedTs === ts) {
+      // We already patched this instance of TS
+      return;
+    }
+
     if (EmitFilesPatch._patchedTs !== undefined) {
       throw new InternalError(
         'EmitFilesPatch.install() cannot be called without first uninstalling the existing patch'
