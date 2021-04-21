@@ -43,9 +43,7 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     this.workspaceFilename = workspaceYamlFilename;
     // Ignore any existing file since this file is generated and we need to handle deleting packages
     // If we need to support manual customization, that should be an additional parameter for "base file"
-    const workspaceYaml: IPnpmWorkspaceYaml = { packages: [] };
-
-    this._workspacePackages = new Set<string>(workspaceYaml.packages);
+    this._workspacePackages = new Set<string>();
   }
 
   /** @override */
@@ -62,11 +60,9 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
 
   /** @override */
   protected serialize(): string {
-    // Ensure stable sort order when serializing
-    Sort.sortSet(this._workspacePackages);
-
     const workspaceYaml: IPnpmWorkspaceYaml = {
-      packages: Array.from(this._workspacePackages)
+      // Ensure stable sort order when serializing
+      packages: Sort.sort(Array.from(this._workspacePackages))
     };
     return yamlModule.safeDump(workspaceYaml, PNPM_SHRINKWRAP_YAML_FORMAT);
   }
