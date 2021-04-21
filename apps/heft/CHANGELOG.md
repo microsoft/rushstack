@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 20 Apr 2021 04:59:51 GMT and should not be manually modified.
+This log was last generated on Wed, 21 Apr 2021 15:12:27 GMT and should not be manually modified.
+
+## 0.28.5
+Wed, 21 Apr 2021 15:12:27 GMT
+
+### Patches
+
+- Fix an issue where an exception is thrown when running multiple TypeScript compilations in --debug mode
 
 ## 0.28.4
 Tue, 20 Apr 2021 04:59:51 GMT
