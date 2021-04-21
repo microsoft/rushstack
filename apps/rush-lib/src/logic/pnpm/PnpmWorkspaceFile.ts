@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as os from 'os';
 import * as path from 'path';
-import { FileSystem, Sort, Text, Import } from '@rushstack/node-core-library';
+import { Sort, Text, Import } from '@rushstack/node-core-library';
 
 import { BaseWorkspaceFile } from '../base/BaseWorkspaceFile';
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
@@ -42,17 +41,9 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     super();
 
     this.workspaceFilename = workspaceYamlFilename;
-    let workspaceYaml: IPnpmWorkspaceYaml;
-    try {
-      // Populate with the existing file, or an empty list if the file doesn't exist
-      workspaceYaml = FileSystem.exists(workspaceYamlFilename)
-        ? yamlModule.safeLoad(FileSystem.readFile(workspaceYamlFilename).toString())
-        : { packages: [] };
-    } catch (error) {
-      throw new Error(`Error reading "${workspaceYamlFilename}":${os.EOL}  ${error.message}`);
-    }
-
-    this._workspacePackages = new Set<string>(workspaceYaml.packages);
+    // Ignore any existing file since this file is generated and we need to handle deleting packages
+    // If we need to support manual customization, that should be an additional parameter for "base file"
+    this._workspacePackages = new Set<string>();
   }
 
   /** @override */
