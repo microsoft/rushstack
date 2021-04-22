@@ -461,7 +461,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       // Attempt to move the existing pnpmfile if there is one
       await FileSystem.moveAsync({
         sourcePath: filename,
-        destinationPath: path.join(pnpmfileDir, `clientPnpmfile${path.extname(filename)}`)
+        destinationPath: path.join(pnpmfileDir, `clientPnpmfile.js`)
       });
       pnpmfileExists = true;
     } catch (error) {
