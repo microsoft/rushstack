@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.45.2",
+      "tag": "@microsoft/rush_v5.45.2",
+      "date": "Thu, 22 Apr 2021 23:07:51 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix bad installs with when using pnpmfile in PNPM 6"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.45.1",
       "tag": "@microsoft/rush_v5.45.1",
       "date": "Wed, 21 Apr 2021 23:38:22 GMT",

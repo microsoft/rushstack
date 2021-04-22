@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 21 Apr 2021 23:38:22 GMT and should not be manually modified.
+This log was last generated on Thu, 22 Apr 2021 23:07:51 GMT and should not be manually modified.
+
+## 5.45.2
+Thu, 22 Apr 2021 23:07:51 GMT
+
+### Updates
+
+- Fix bad installs with when using pnpmfile in PNPM 6
 
 ## 5.45.1
 Wed, 21 Apr 2021 23:38:22 GMT
