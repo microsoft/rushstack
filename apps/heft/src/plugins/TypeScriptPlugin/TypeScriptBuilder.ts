@@ -977,6 +977,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     compilerHost.getDirectories = (folderPath: string) =>
       this._cachedFileSystem.readFolderFilesAndDirectories(folderPath).directories;
 
+    /* Use the Heft config's build folder because it has corrected casing */
+    compilerHost.getCurrentDirectory = () => this._configuration.buildFolder;
     return compilerHost;
   }
 
