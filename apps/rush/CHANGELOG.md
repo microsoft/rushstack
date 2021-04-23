@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 22 Apr 2021 23:07:51 GMT and should not be manually modified.
+This log was last generated on Fri, 23 Apr 2021 22:03:08 GMT and should not be manually modified.
+
+## 5.45.3
+Fri, 23 Apr 2021 22:03:08 GMT
+
+### Updates
+
+- Allow prerelease versions of PNPM to be used in workspaces mode
 
 ## 5.45.2
 Thu, 22 Apr 2021 23:07:51 GMT

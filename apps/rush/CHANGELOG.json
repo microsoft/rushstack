@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.45.3",
+      "tag": "@microsoft/rush_v5.45.3",
+      "date": "Fri, 23 Apr 2021 22:03:08 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Allow prerelease versions of PNPM to be used in workspaces mode"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.45.2",
       "tag": "@microsoft/rush_v5.45.2",
       "date": "Thu, 22 Apr 2021 23:07:51 GMT",
