@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "return the build directory from heft config",
+      "comment": "Ensure TypeScript uses file paths with correct casing.",
       "type": "patch"
     }
   ],
