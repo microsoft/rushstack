@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 23 Apr 2021 15:11:20 GMT and should not be manually modified.
+This log was last generated on Fri, 23 Apr 2021 22:00:06 GMT and should not be manually modified.
+
+## 0.29.1
+Fri, 23 Apr 2021 22:00:06 GMT
+
+### Patches
+
+- Ensure TypeScript uses file paths with correct casing.
 
 ## 0.29.0
 Fri, 23 Apr 2021 15:11:20 GMT

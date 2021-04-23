@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.29.1",
+      "tag": "@rushstack/heft_v0.29.1",
+      "date": "Fri, 23 Apr 2021 22:00:06 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Ensure TypeScript uses file paths with correct casing."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.29.0",
       "tag": "@rushstack/heft_v0.29.0",
       "date": "Fri, 23 Apr 2021 15:11:20 GMT",
