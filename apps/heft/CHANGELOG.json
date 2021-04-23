@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.29.0",
+      "tag": "@rushstack/heft_v0.29.0",
+      "date": "Fri, 23 Apr 2021 15:11:20 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add emitCjsExtensionForCommonJS and emitMjsExtensionForESModule options to config/typescript.json to support emitting commonJS and ESModule output files with the \".cjs\" and \".mjs\" respectively, alongside the normal \".js\" output files."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.28.5",
       "tag": "@rushstack/heft_v0.28.5",
       "date": "Wed, 21 Apr 2021 15:12:27 GMT",

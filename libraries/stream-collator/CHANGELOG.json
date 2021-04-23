@@ -2,6 +2,24 @@
   "name": "@rushstack/stream-collator",
   "entries": [
     {
+      "version": "4.0.77",
+      "tag": "@rushstack/stream-collator_v4.0.77",
+      "date": "Fri, 23 Apr 2021 15:11:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/terminal\" to `0.1.76`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.29.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.0.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.0.76",
       "tag": "@rushstack/stream-collator_v4.0.76",
       "date": "Wed, 21 Apr 2021 15:12:28 GMT",

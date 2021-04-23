@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 21 Apr 2021 15:12:27 GMT and should not be manually modified.
+This log was last generated on Fri, 23 Apr 2021 15:11:20 GMT and should not be manually modified.
+
+## 0.29.0
+Fri, 23 Apr 2021 15:11:20 GMT
+
+### Minor changes
+
+- Add emitCjsExtensionForCommonJS and emitMjsExtensionForESModule options to config/typescript.json to support emitting commonJS and ESModule output files with the ".cjs" and ".mjs" respectively, alongside the normal ".js" output files.
 
 ## 0.28.5
 Wed, 21 Apr 2021 15:12:27 GMT
