@@ -89,7 +89,7 @@ export class JestPlugin implements IHeftPlugin {
 
     if (test.properties.findRelatedTests && test.properties.findRelatedTests.length > 0) {
       jestArgv.findRelatedTests = true;
-      // This is Jest's weird way of representing space-delimited CLI parameters
+      // Pass test names as the command line remainder
       jestArgv._ = [...test.properties.findRelatedTests];
     }
 

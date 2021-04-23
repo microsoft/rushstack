@@ -28,11 +28,17 @@
     //    */
     //    "outFolderName": "lib-amd"
     // }
-    {
-      "moduleKind": "commonjs",
-      "outFolderName": "lib-commonjs"
-    }
   ],
+
+  /**
+   * If true, emit ESNext module output to the folder specified in the tsconfig "outDir" compiler option with the .mjs extension alongside (or instead of, if TSConfig specifies ESNext) the default compilation output.
+   */
+  "emitCjsExtensionForCommonJS": true,
+
+  /**
+   * If true, emit ESNext module output to the folder specified in the tsconfig "outDir" compiler option with the .mjs extension alongside (or instead of, if TSConfig specifies ESNext) the default compilation output.
+   */
+  // "emitMjsExtensionForESModule": true,
 
   /**
    * Specifies the intermediary folder that tests will use.  Because Jest uses the
@@ -40,7 +46,7 @@
    *
    * The default value is "lib".
    */
-  "emitFolderNameForTests": "lib-commonjs",
+  // "emitFolderNameForTests": "lib",
 
   /**
    * If set to "true", the TSlint task will not be invoked.

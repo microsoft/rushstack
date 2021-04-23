@@ -7,7 +7,7 @@
   "rootDir": "../../../../",
 
   "//": ["Adding '<rootDir>/src' here enables src/__mocks__ to be used for mocking Node.js system modules."],
-  "roots": ["<rootDir>", "<rootDir>/src"],
+  "roots": ["<rootDir>/src"],
 
   "testURL": "http://localhost/",
 
@@ -48,7 +48,9 @@
     "  <rootDir>/src/file.ts",
     "...and ignores anything else under <rootDir>"
   ],
-  "modulePathIgnorePatterns": ["^<rootDir>/(?!(?:src/)|(?:src$))"],
+  "modulePathIgnorePatterns": [],
+  "//": "Prefer .cjs to .js to catch explicit commonjs output. Optimize for local files, which will be .ts or .tsx.",
+  "moduleFileExtensions": ["ts", "tsx", "cjs", "js", "json"],
 
   "setupFiles": ["@rushstack/heft/lib/exports/jest-global-setup.js"],
   "resolver": "@rushstack/heft/lib/exports/jest-improved-resolver.js",

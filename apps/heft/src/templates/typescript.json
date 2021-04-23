@@ -37,6 +37,16 @@
   ],
 
   /**
+   * If true, emit CommonJS module output to the folder specified in the tsconfig "outDir" compiler option with the .cjs extension alongside (or instead of, if TSConfig specifies CommonJS) the default compilation output.
+   */
+  // "emitCjsExtensionForCommonJS": true,
+
+  /**
+   * If true, emit ESNext module output to the folder specified in the tsconfig "outDir" compiler option with the .mjs extension alongside (or instead of, if TSConfig specifies ESNext) the default compilation output.
+   */
+  // "emitMjsExtensionForESModule": true,
+
+  /**
    * Specifies the intermediary folder that tests will use.  Because Jest uses the
    * Node.js runtime to execute tests, the module format must be CommonJS.
    *

@@ -88,6 +88,13 @@ interface IFileToWrite {
   data: string;
 }
 
+interface IModuleKindReason {
+  kind: keyof typeof TTypescript.ModuleKind;
+  outDir: string;
+  extension: '.js' | '.cjs' | '.mjs';
+  reason: string;
+}
+
 interface IExtendedEmitResult extends TTypescript.EmitResult {
   changedSourceFiles: Set<IExtendedSourceFile>;
   filesToWrite: IFileToWrite[];
@@ -559,7 +566,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
               ts.getExternalModuleNameFromPath(resolverHost, filename)
             );
 
-            for (const { cacheOutFolderPath, outFolderPath, isPrimary } of this._moduleKindsToEmit) {
+            for (const { cacheOutFolderPath, outFolderPath, jsExtensionOverride = '.js', isPrimary } of this
+              ._moduleKindsToEmit) {
               // Only primary module kinds emit declarations
               if (isPrimary) {
                 if (tsconfig.options.declarationMap) {
@@ -580,7 +588,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
               }
 
               if (tsconfig.options.sourceMap && !sourceFile.isDeclarationFile) {
-                const jsMapFilename: string = `${relativeFilenameWithoutExtension}.js.map`;
+                const jsMapFilename: string = `${relativeFilenameWithoutExtension}${jsExtensionOverride}.map`;
                 queueLinkOrCopy({
                   linkTargetPath: path.join(cacheOutFolderPath, jsMapFilename),
                   newLinkPath: path.join(outFolderPath, jsMapFilename)
@@ -589,7 +597,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
               // Write the .js file last in case something is watching its timestamp
               if (!sourceFile.isDeclarationFile) {
-                const jsFilename: string = `${relativeFilenameWithoutExtension}.js`;
+                const jsFilename: string = `${relativeFilenameWithoutExtension}${jsExtensionOverride}`;
                 queueLinkOrCopy({
                   linkTargetPath: path.join(cacheOutFolderPath, jsFilename),
                   newLinkPath: path.join(outFolderPath, jsFilename)
@@ -751,57 +759,109 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     }
 
     this._moduleKindsToEmit = [];
+    const specifiedKinds: Map<TTypescript.ModuleKind, IModuleKindReason> = new Map();
+    const specifiedOutDirs: Map<string, IModuleKindReason> = new Map();
 
-    let tsconfigOutFolderName: string;
     if (!tsconfig.options.module) {
       throw new Error(
         'If the module tsconfig compilerOption is not provided, the builder must be provided with the ' +
           'additionalModuleKindsToEmit configuration option.'
       );
-    } else {
-      tsconfigOutFolderName = this._addModuleKindToEmit(
+    }
+
+    if (this._configuration.emitCjsExtensionForCommonJS) {
+      this._addModuleKindToEmit(
+        ts.ModuleKind.CommonJS,
+        tsconfig.options.outDir!,
+        /* isPrimary */ tsconfig.options.module === ts.ModuleKind.CommonJS,
+        '.cjs'
+      );
+
+      const cjsReason: IModuleKindReason = {
+        outDir: tsconfig.options.outDir!,
+        kind: 'CommonJS',
+        extension: '.cjs',
+        reason: 'emitCjsExtensionForCommonJS'
+      };
+
+      specifiedKinds.set(ts.ModuleKind.CommonJS, cjsReason);
+      specifiedOutDirs.set(`${tsconfig.options.outDir!}:.cjs`, cjsReason);
+    }
+
+    if (this._configuration.emitMjsExtensionForESModule) {
+      this._addModuleKindToEmit(
+        ts.ModuleKind.ESNext,
+        tsconfig.options.outDir!,
+        /* isPrimary */ tsconfig.options.module === ts.ModuleKind.ESNext,
+        '.mjs'
+      );
+
+      const mjsReason: IModuleKindReason = {
+        outDir: tsconfig.options.outDir!,
+        kind: 'ESNext',
+        extension: '.mjs',
+        reason: 'emitMjsExtensionForESModule'
+      };
+
+      specifiedKinds.set(ts.ModuleKind.CommonJS, mjsReason);
+      specifiedOutDirs.set(`${tsconfig.options.outDir!}:.mjs`, mjsReason);
+    }
+
+    if (!specifiedKinds.has(tsconfig.options.module)) {
+      this._addModuleKindToEmit(
         tsconfig.options.module,
         tsconfig.options.outDir!,
-        true
+        /* isPrimary */ true,
+        /* jsExtensionOverride */ undefined
       );
+
+      const tsConfigReason: IModuleKindReason = {
+        outDir: tsconfig.options.outDir!,
+        kind: ts.ModuleKind[tsconfig.options.module] as keyof typeof TTypescript.ModuleKind,
+        extension: '.js',
+        reason: 'tsconfig.json'
+      };
+
+      specifiedKinds.set(tsconfig.options.module, tsConfigReason);
+      specifiedOutDirs.set(`${tsconfig.options.outDir!}:.js`, tsConfigReason);
     }
 
     if (this._configuration.additionalModuleKindsToEmit) {
-      const specifiedKinds: Set<TTypescript.ModuleKind> = new Set<TTypescript.ModuleKind>();
-      const specifiedOutDirs: Set<string> = new Set<string>();
-
       for (const additionalModuleKindToEmit of this._configuration.additionalModuleKindsToEmit) {
         const moduleKind: TTypescript.ModuleKind = this._parseModuleKind(
           ts,
           additionalModuleKindToEmit.moduleKind
         );
 
-        if (tsconfig.options.module === moduleKind) {
+        const outDirKey: string = `${additionalModuleKindToEmit.outFolderName}:.js`;
+        const moduleKindReason: IModuleKindReason = {
+          kind: ts.ModuleKind[moduleKind] as keyof typeof TTypescript.ModuleKind,
+          outDir: additionalModuleKindToEmit.outFolderName,
+          extension: '.js',
+          reason: `additionalModuleKindsToEmit`
+        };
+
+        const existingKind: IModuleKindReason | undefined = specifiedKinds.get(moduleKind);
+        const existingDir: IModuleKindReason | undefined = specifiedOutDirs.get(outDirKey);
+
+        if (existingKind) {
           throw new Error(
-            `Module kind "${additionalModuleKindToEmit.moduleKind}" is already specified in the tsconfig file.`
+            `Module kind "${additionalModuleKindToEmit.moduleKind}" is already emitted at ${existingKind.outDir} with extension '${existingKind.extension}' by option ${existingKind.reason}.`
           );
-        } else if (tsconfigOutFolderName === additionalModuleKindToEmit.outFolderName) {
+        } else if (existingDir) {
           throw new Error(
-            `Output folder "${additionalModuleKindToEmit.outFolderName}" is already specified in the tsconfig file.`
-          );
-        } else if (specifiedKinds.has(moduleKind)) {
-          throw new Error(
-            `Module kind "${additionalModuleKindToEmit.moduleKind}" is specified in more than one ` +
-              'additionalModuleKindsToEmit entry.'
-          );
-        } else if (specifiedOutDirs.has(additionalModuleKindToEmit.outFolderName)) {
-          throw new Error(
-            `Output folder "${additionalModuleKindToEmit.outFolderName}" is specified in more than one ` +
-              'additionalModuleKindsToEmit entry.'
+            `Output folder "${additionalModuleKindToEmit.outFolderName}" already contains module kind ${existingDir.kind} with extension '${existingDir.extension}', specified by option ${existingDir.reason}.`
           );
         } else {
-          const outFolderPath: string = this._addModuleKindToEmit(
+          const outFolderKey: string = this._addModuleKindToEmit(
             moduleKind,
             additionalModuleKindToEmit.outFolderName,
-            false
+            /* isPrimary */ false,
+            undefined
           );
-          specifiedKinds.add(moduleKind);
-          specifiedOutDirs.add(outFolderPath);
+
+          specifiedKinds.set(moduleKind, moduleKindReason);
+          specifiedOutDirs.set(outFolderKey, moduleKindReason);
         }
       }
     }
@@ -810,7 +870,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _addModuleKindToEmit(
     moduleKind: TTypescript.ModuleKind,
     outFolderPath: string,
-    isPrimary: boolean
+    isPrimary: boolean,
+    jsExtensionOverride: string | undefined
   ): string {
     let outFolderName: string;
     if (path.isAbsolute(outFolderPath)) {
@@ -826,11 +887,12 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       cacheOutFolderPath: Path.convertToSlashes(
         path.resolve(this._configuration.buildCacheFolder, outFolderName)
       ),
+      jsExtensionOverride,
 
       isPrimary
     });
 
-    return outFolderName;
+    return `${outFolderName}:${jsExtensionOverride || '.js'}`;
   }
 
   private _loadTsconfig(ts: ExtendedTypeScript): TTypescript.ParsedCommandLine {

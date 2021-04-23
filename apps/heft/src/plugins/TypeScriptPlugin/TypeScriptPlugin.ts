@@ -34,6 +34,7 @@ interface IRunTypeScriptOptions {
 interface IEmitModuleKind {
   moduleKind: 'commonjs' | 'amd' | 'umd' | 'system' | 'es2015' | 'esnext';
   outFolderName: string;
+  jsExtensionOverride?: string;
 }
 
 interface IRunBuilderForTsconfigOptions {
@@ -50,6 +51,8 @@ interface IRunBuilderForTsconfigOptions {
 
   terminalProvider: ITerminalProvider;
   terminalPrefixLabel: string | undefined;
+  emitCjsExtensionForCommonJS: boolean;
+  emitMjsExtensionForESModule: boolean;
   additionalModuleKindsToEmit: IEmitModuleKind[] | undefined;
 }
 
@@ -66,6 +69,16 @@ export interface ISharedTypeScriptConfiguration {
    * Note that this option only applies to the main tsconfig.json configuration.
    */
   additionalModuleKindsToEmit?: IEmitModuleKind[] | undefined;
+
+  /**
+   * If 'true', emit CommonJS output into the TSConfig outDir with the file extension '.cjs'
+   */
+  emitCjsExtensionForCommonJS?: boolean | undefined;
+
+  /**
+   * If 'true', emit ESModule output into the TSConfig outDir with the file extension '.mjs'
+   */
+  emitMjsExtensionForESModule?: boolean | undefined;
 
   /**
    * Specifies the intermediary folder that tests will use.  Because Jest uses the
@@ -212,6 +225,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
     const typeScriptConfiguration: ITypeScriptConfiguration = {
       copyFromCacheMode: typescriptConfigurationJson?.copyFromCacheMode,
       additionalModuleKindsToEmit: typescriptConfigurationJson?.additionalModuleKindsToEmit,
+      emitCjsExtensionForCommonJS: typescriptConfigurationJson?.emitCjsExtensionForCommonJS,
+      emitMjsExtensionForESModule: typescriptConfigurationJson?.emitMjsExtensionForESModule,
       emitFolderNameForTests: typescriptConfigurationJson?.emitFolderNameForTests,
       maxWriteParallelism: typescriptConfigurationJson?.maxWriteParallelism || 50,
       isLintingEnabled: !(buildProperties.lite || typescriptConfigurationJson?.disableTslint)
@@ -256,6 +271,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
       heftSession: heftSession,
       heftConfiguration,
       toolPackageResolution,
+      emitCjsExtensionForCommonJS: !!typeScriptConfiguration.emitCjsExtensionForCommonJS,
+      emitMjsExtensionForESModule: !!typeScriptConfiguration.emitMjsExtensionForESModule,
       lintingEnabled: !!typeScriptConfiguration.isLintingEnabled,
       copyFromCacheMode: typeScriptConfiguration.copyFromCacheMode,
       watchMode: watchMode,
@@ -263,8 +280,9 @@ export class TypeScriptPlugin implements IHeftPlugin {
     };
 
     JestTypeScriptDataFile.saveForProject(heftConfiguration.buildFolder, {
-      emitFolderNameForTests: typescriptConfigurationJson?.emitFolderNameForTests || 'lib',
-      skipTimestampCheck: !options.watchMode
+      emitFolderNameForTests: typeScriptConfiguration.emitFolderNameForTests || 'lib',
+      skipTimestampCheck: !options.watchMode,
+      extensionForTests: typeScriptConfiguration.emitCjsExtensionForCommonJS ? '.cjs' : '.js'
     });
 
     const callbacksForTsconfigs: Set<() => void> = new Set<() => void>();
@@ -332,6 +350,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
       lintingEnabled: options.lintingEnabled,
       buildCacheFolder: options.heftConfiguration.buildCacheFolder,
       additionalModuleKindsToEmit: options.additionalModuleKindsToEmit,
+      emitCjsExtensionForCommonJS: options.emitCjsExtensionForCommonJS,
+      emitMjsExtensionForESModule: options.emitMjsExtensionForESModule,
       copyFromCacheMode: options.copyFromCacheMode,
       watchMode: options.watchMode,
       loggerPrefixLabel: options.terminalPrefixLabel,
