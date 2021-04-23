@@ -28,7 +28,11 @@ export class InstallManagerFactory {
       rushConfiguration.pnpmOptions &&
       rushConfiguration.pnpmOptions.useWorkspaces
     ) {
-      if (!semver.satisfies(rushConfiguration.packageManagerToolVersion, '>=4.14.3')) {
+      if (
+        !semver.satisfies(rushConfiguration.packageManagerToolVersion, '>=4.14.3', {
+          includePrerelease: true
+        })
+      ) {
         console.log();
         console.log(
           colors.red(
