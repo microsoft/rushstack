@@ -100,7 +100,47 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
         return undefined;
       }
     } catch (e) {
-      terminal.writeWarningLine(`Error getting cache entry from Azure Storage: ${e}`);
+      const errorMessage: string =
+        'Error getting cache entry from Azure Storage: ' +
+        [e.name, e.message, e.response?.status, e.response?.parsedHeaders?.errorCode]
+          .filter((piece: string | undefined) => piece)
+          .join(' ');
+
+      if (e.response?.parsedHeaders?.errorCode === 'PublicAccessNotPermitted') {
+        // This error means we tried to read the cache with no credentials, but credentials are required.
+        // We'll assume that the configuration of the cache is correct and the user has to take action.
+        terminal.writeWarningLine(
+          `${errorMessage}\n\n` +
+            `You need to configure Azure Storage SAS credentials to access the build cache.\n` +
+            `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}", \n` +
+            `or provide a SAS in the ` +
+            `${EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_CREDENTIAL} environment variable.`
+        );
+      } else if (e.response?.parsedHeaders?.errorCode === 'AuthenticationFailed') {
+        // This error means the user's credentials are incorrect, but not expired normally. They might have
+        // gotten corrupted somehow, or revoked manually in Azure Portal.
+        terminal.writeWarningLine(
+          `${errorMessage}\n\n` +
+            `Your Azure Storage SAS credentials are not valid.\n` +
+            `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}", \n` +
+            `or provide a SAS in the ` +
+            `${EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_CREDENTIAL} environment variable.`
+        );
+      } else if (e.response?.parsedHeaders?.errorCode === 'AuthorizationPermissionMismatch') {
+        // This error is not solvable by the user, so we'll assume it is a configuration error, and revert
+        // to providing likely next steps on configuration. (Hopefully this error is rare for a regular
+        // developer, more likely this error will appear while someone is configuring the cache for the
+        // first time.)
+        terminal.writeWarningLine(
+          `${errorMessage}\n\n` +
+            `Your Azure Storage SAS credentials are valid, but do not have permission to read the build cache.\n` +
+            `Make sure you have added the role 'Storage Blob Data Reader' to the appropriate user(s) or group(s)\n` +
+            `on your storage account in the Azure Portal.`
+        );
+      } else {
+        // We don't know what went wrong, hopefully we'll print something useful.
+        terminal.writeWarningLine(errorMessage);
+      }
       return undefined;
     }
   }
@@ -119,8 +159,24 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
 
     const blobClient: BlobClient = await this._getBlobClientForCacheIdAsync(cacheId);
     const blockBlobClient: BlockBlobClient = blobClient.getBlockBlobClient();
+    let blobAlreadyExists: boolean = false;
 
-    const blobAlreadyExists: boolean = await blockBlobClient.exists();
+    try {
+      blobAlreadyExists = await blockBlobClient.exists();
+    } catch (e) {
+      // If RUSH_BUILD_CACHE_WRITE_CREDENTIAL is set but is corrupted or has been rotated
+      // in Azure Portal, or the user's own cached credentials have been corrupted or
+      // invalidated, we'll print the error and continue (this way we don't fail the
+      // actual rush build).
+      const errorMessage: string =
+        'Error checking if cache entry exists in Azure Storage: ' +
+        [e.name, e.message, e.response?.status, e.response?.parsedHeaders?.errorCode]
+          .filter((piece: string | undefined) => piece)
+          .join(' ');
+
+      terminal.writeWarningLine(errorMessage);
+    }
+
     if (blobAlreadyExists) {
       terminal.writeVerboseLine('Build cache entry blob already exists.');
       return true;
