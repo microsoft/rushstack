@@ -1372,14 +1372,14 @@ importers:
   ../../heft-plugins/heft-webpack5-plugin:
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
-      webpack: 5.31.2
-      webpack-dev-server: 3.11.2_webpack@5.31.2
+      webpack: 5.35.1
+      webpack-dev-server: 3.11.2_webpack@5.35.1
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/node': 10.17.13
-      '@types/webpack-dev-server': 3.11.3_webpack@5.31.2
+      '@types/webpack-dev-server': 3.11.3_webpack@5.35.1
     specifiers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
@@ -1387,7 +1387,7 @@ importers:
       '@rushstack/node-core-library': workspace:*
       '@types/node': 10.17.13
       '@types/webpack-dev-server': 3.11.3
-      webpack: ~5.31.0
+      webpack: ~5.35.1
       webpack-dev-server: ~3.11.0
   ../../libraries/debug-certificate-manager:
     dependencies:
@@ -3645,10 +3645,10 @@ packages:
   /@types/estree/0.0.44:
     resolution:
       integrity: sha512-iaIVzr+w2ZJ5HkidlZ3EJM8VTZb2MJLCjw3V+505yVts0gRC4UMvjw0d1HPtGqI/HQC/KdsYtayfzl+AXY2R8g==
-  /@types/estree/0.0.46:
+  /@types/estree/0.0.47:
     dev: false
     resolution:
-      integrity: sha512-laIjwTQaD+5DukBZaygQ79K1Z0jb1bPEMRrkXSLjtCcZm+abyp5YbrqpSLzD42FwWW6gK/aS4NYpJ804nG2brg==
+      integrity: sha512-c5ciR06jK8u9BstrmJyO97m+klJrrhCf9u3rLu3DEAJBirxRqSCvDQoYKmxuYwQI5SZChAWu+tq9oVlGRuzPAg==
   /@types/events/3.0.0:
     resolution:
       integrity: sha512-EaObqwIvayI5a8dCzhFrjKzVwKLxjoG9T6Ppd5CEo07LRKfQ8Yokw54r5+Wq7FaBQ+yXRvQAYPrHwya1/UFt9g==
@@ -3985,13 +3985,13 @@ packages:
       '@types/webpack': ^4.0.0
     resolution:
       integrity: sha512-13w1VhaghN+G1rYjkBPgN/GFRoHd9uI2fwK9cSKvLutdmZ22L9iicFEvt69by40DP2I6uNcClaGTyPY6nYhIgQ==
-  /@types/webpack-dev-server/3.11.3_webpack@5.31.2:
+  /@types/webpack-dev-server/3.11.3_webpack@5.35.1:
     dependencies:
       '@types/connect-history-api-fallback': 1.3.4
       '@types/express': 4.11.0
       '@types/serve-static': 1.13.1
       http-proxy-middleware: 1.2.0
-      webpack: 5.31.2
+      webpack: 5.35.1
     dev: true
     peerDependencies:
       webpack: ^5.0.0
@@ -13240,7 +13240,7 @@ packages:
       webpack: ^4.0.0
     resolution:
       integrity: sha512-04Rfe496lN8EYruwi6oPQkG0vo8C+HT49X687FZnpPF0qMAIHONI6HEXYPKDOE8e5HjXTyKfqRd/agHtH0kOtw==
-  /terser-webpack-plugin/5.1.1_webpack@5.31.2:
+  /terser-webpack-plugin/5.1.1_webpack@5.35.1:
     dependencies:
       jest-worker: 26.6.2
       p-limit: 3.1.0
@@ -13248,7 +13248,7 @@ packages:
       serialize-javascript: 5.0.1
       source-map: 0.6.1
       terser: 5.6.1
-      webpack: 5.31.2
+      webpack: 5.35.1
     dev: false
     engines:
       node: '>= 10.13.0'
@@ -14798,13 +14798,13 @@ packages:
       webpack: ^4.0.0 || ^5.0.0
     resolution:
       integrity: sha512-djelc/zGiz9nZj/U7PTBi2ViorGJXEWo/3ltkPbDyxCXhhEXkW0ce99falaok4TPj+AsxLiXJR0EBOb0zh9fKQ==
-  /webpack-dev-middleware/3.7.3_webpack@5.31.2:
+  /webpack-dev-middleware/3.7.3_webpack@5.35.1:
     dependencies:
       memory-fs: 0.4.1
       mime: 2.5.2
       mkdirp: 0.5.5
       range-parser: 1.2.1
-      webpack: 5.31.2
+      webpack: 5.35.1
       webpack-log: 2.0.0
     dev: false
     engines:
@@ -14910,7 +14910,7 @@ packages:
         optional: true
     resolution:
       integrity: sha512-A80BkuHRQfCiNtGBS1EMf2ChTUs0x+B3wGDFmOeT4rmJOHhHTCH2naNxIHhmkr0/UillP4U3yeIyv1pNp+QDLQ==
-  /webpack-dev-server/3.11.2_webpack@5.31.2:
+  /webpack-dev-server/3.11.2_webpack@5.35.1:
     dependencies:
       ansi-html: 0.0.7
       bonjour: 3.5.0
@@ -14941,8 +14941,8 @@ packages:
       strip-ansi: 3.0.1
       supports-color: 6.1.0
       url: 0.11.0
-      webpack: 5.31.2
-      webpack-dev-middleware: 3.7.3_webpack@5.31.2
+      webpack: 5.35.1
+      webpack-dev-middleware: 3.7.3_webpack@5.35.1
       webpack-log: 2.0.0
       ws: 6.2.1
       yargs: 13.3.2
@@ -15060,10 +15060,10 @@ packages:
         optional: true
     resolution:
       integrity: sha512-6KJVGlCxYdISyurpQ0IPTklv+DULv05rs2hseIXer6D7KrUicRDLFb4IUM1S6LUAKypPM/nSiVSuv8jHu1m3/Q==
-  /webpack/5.31.2:
+  /webpack/5.35.1:
     dependencies:
       '@types/eslint-scope': 3.7.0
-      '@types/estree': 0.0.46
+      '@types/estree': 0.0.47
       '@webassemblyjs/ast': 1.11.0
       '@webassemblyjs/wasm-edit': 1.11.0
       '@webassemblyjs/wasm-parser': 1.11.0
@@ -15082,7 +15082,7 @@ packages:
       neo-async: 2.6.2
       schema-utils: 3.0.0
       tapable: 2.2.0
-      terser-webpack-plugin: 5.1.1_webpack@5.31.2
+      terser-webpack-plugin: 5.1.1_webpack@5.35.1
       watchpack: 2.1.1
       webpack-sources: 2.2.0
     dev: false
@@ -15095,7 +15095,7 @@ packages:
       webpack-cli:
         optional: true
     resolution:
-      integrity: sha512-0bCQe4ybo7T5Z0SC5axnIAH+1WuIdV4FwLYkaAlLtvfBhIx8bPS48WHTfiRZS1VM+pSiYt7e/rgLs3gLrH82lQ==
+      integrity: sha512-uWKYStqJ23+N6/EnMEwUjPSSKUG1tFmcuKhALEh/QXoUxwN8eb3ATNIZB38A+fO6QZ0xfc7Cu7KNV9LXNhDCsw==
   /websocket-driver/0.7.4:
     dependencies:
       http-parser-js: 0.5.3
@@ -15429,3 +15429,4 @@ packages:
       commander: 2.20.3
     resolution:
       integrity: sha512-DUOKC/IhbkdLKKiV89gw9DUauTV8U/8yJl1sjf6MtDmzevLKOF2duNJ495S3MFVjqZarr+qNGCPbkg4mu4PpLw==
+registry: ''
