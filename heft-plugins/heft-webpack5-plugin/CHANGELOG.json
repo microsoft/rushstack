@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-webpack5-plugin",
   "entries": [
     {
+      "version": "0.1.8",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.1.8",
+      "date": "Tue, 27 Apr 2021 00:11:19 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrades webpack 5 to get a bug fix when resolving modules with a # in the path"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.7",
       "tag": "@rushstack/heft-webpack5-plugin_v0.1.7",
       "date": "Fri, 23 Apr 2021 22:00:07 GMT",
