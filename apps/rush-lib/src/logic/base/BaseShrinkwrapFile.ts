@@ -10,6 +10,7 @@ import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFileP
 import { PackageManagerOptionsConfigurationBase } from '../../api/RushConfiguration';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
 import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
+import { PackageJsonEditor } from '../../api/PackageJsonEditor';
 
 /**
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.
@@ -104,35 +105,6 @@ export abstract class BaseShrinkwrapFile {
   protected abstract getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined;
 
   /**
-   * Returns true if the specified workspace in the shrinkwrap file includes a package that would
-   * satisfy the specified SemVer version range.
-   *
-   * Consider this example:
-   *
-   * - project-a\
-   *   - lib-a@1.2.3
-   *   - lib-b@1.0.0
-   * - lib-b@2.0.0
-   *
-   * In this example, hasCompatibleWorkspaceDependency("lib-b", ">= 1.1.0", "workspace-key-for-project-a")
-   * would fail because it finds lib-b@1.0.0 which does not satisfy the pattern ">= 1.1.0".
-   *
-   * @virtual
-   */
-  public hasCompatibleWorkspaceDependency(
-    dependencySpecifier: DependencySpecifier,
-    workspaceKey: string
-  ): boolean {
-    const shrinkwrapDependency: DependencySpecifier | undefined = this.getWorkspaceDependencyVersion(
-      dependencySpecifier,
-      workspaceKey
-    );
-    return shrinkwrapDependency
-      ? this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency)
-      : false;
-  }
-
-  /**
    * Returns the list of keys to workspace projects specified in the shrinkwrap.
    * Example: [ '../../apps/project1', '../../apps/project2' ]
    *
@@ -148,11 +120,13 @@ export abstract class BaseShrinkwrapFile {
    */
   public abstract getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string;
 
-  /** @virtual */
-  protected abstract getWorkspaceDependencyVersion(
-    dependencySpecifier: DependencySpecifier,
-    workspaceKey: string
-  ): DependencySpecifier | undefined;
+  /**
+   * Returns whether or not the workspace specified by the shrinkwrap matches the state of
+   * a given package.json. Returns true if any dependencies are not aligned with the shrinkwrap.
+   *
+   * @virtual
+   */
+  public abstract isWorkspaceProjectModified(workspaceKey: string, packageJson: PackageJsonEditor): boolean;
 
   /** @virtual */
   protected abstract serialize(): string;

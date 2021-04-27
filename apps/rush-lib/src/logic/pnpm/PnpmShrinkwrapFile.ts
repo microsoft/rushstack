@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import crypto from 'crypto';
 import colors from 'colors/safe';
-import { FileSystem, AlreadyReportedError, Import } from '@rushstack/node-core-library';
+import { FileSystem, AlreadyReportedError, Import, Path } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
@@ -18,6 +18,8 @@ import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFileP
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 import { RushConstants } from '../RushConstants';
 import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
+import { DependencyType, PackageJsonEditor } from '../../api/PackageJsonEditor';
+import { InternalError } from '@rushstack/node-core-library';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
@@ -505,75 +507,53 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   /** @override */
   public getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string {
-    return path.relative(workspaceRoot, projectFolder).replace(new RegExp(`\\${path.sep}`, 'g'), '/');
+    return Path.convertToSlashes(path.relative(workspaceRoot, projectFolder));
   }
 
   public getWorkspaceImporter(importerPath: string): IPnpmShrinkwrapImporterYaml | undefined {
     return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.importers, importerPath);
   }
 
-  /**
-   * Gets the resolved version number of a dependency for a specific temp project.
-   * For PNPM, we can reuse the version that another project is using.
-   * Note that this function modifies the shrinkwrap data.
-   *
-   * @override
-   */
-  protected getWorkspaceDependencyVersion(
-    dependencySpecifier: DependencySpecifier,
-    workspaceKey: string
-  ): DependencySpecifier | undefined {
-    // PNPM doesn't have the same advantage of NPM, where we can skip generate as long as the
-    // shrinkwrap file puts our dependency in either the top of the node_modules folder
-    // or underneath the package we are looking at.
-    // This is because the PNPM shrinkwrap file describes the exact links that need to be created
-    // to recreate the graph..
-    // Because of this, we actually need to check for a version that this package is directly
-    // linked to.
-
-    const packageName: string = dependencySpecifier.packageName;
-    const projectImporter: IPnpmShrinkwrapImporterYaml | undefined = this.getWorkspaceImporter(workspaceKey);
-    if (!projectImporter) {
-      return undefined;
+  /** @override */
+  public isWorkspaceProjectModified(workspaceKey: string, packageJson: PackageJsonEditor): boolean {
+    const importer: IPnpmShrinkwrapImporterYaml | undefined = this.getWorkspaceImporter(workspaceKey);
+    if (!importer) {
+      throw new InternalError(`Unable to find importer for workspace key "${workspaceKey}".`);
     }
 
-    const allDependencies: { [dependency: string]: string } = {
-      ...(projectImporter.optionalDependencies || {}),
-      ...(projectImporter.dependencies || {}),
-      ...(projectImporter.devDependencies || {})
-    };
-    if (!allDependencies.hasOwnProperty(packageName)) {
-      return undefined;
+    // First, get the unique package names and map them to package versions. We will also filter out peer
+    // dependencies since these are not included by the shrinkwrap.
+    const dependencyVersions: Map<string, Set<string>> = new Map();
+    for (const packageDependency of [...packageJson.dependencyList, ...packageJson.devDependencyList]) {
+      if (packageDependency.dependencyType === DependencyType.Peer) {
+        continue;
+      }
+
+      let existingVersions: Set<string> | undefined = dependencyVersions.get(packageDependency.name);
+      if (!existingVersions) {
+        existingVersions = new Set();
+        existingVersions.add(packageDependency.version);
+        dependencyVersions.set(packageDependency.name, existingVersions);
+      } else {
+        existingVersions.add(packageDependency.version);
+      }
     }
 
-    const dependencyKey: string = allDependencies[packageName];
-    return this._parsePnpmDependencyKey(packageName, dependencyKey);
-  }
-
-  /**
-   * Returns the version of a dependency being used by a given project
-   */
-  private _getDependencyVersion(
-    dependencyName: string,
-    tempProjectName: string
-  ): DependencySpecifier | undefined {
-    const tempProjectDependencyKey: string | undefined = this.getTempProjectDependencyKey(tempProjectName);
-    if (!tempProjectDependencyKey) {
-      throw new Error(`Cannot get dependency key for temp project: ${tempProjectName}`);
+    // Then validate the length matches between the importer and the dependency list, since duplicates are
+    // a valid use-case. Importers will only take one of these values, so no need to do more work here.
+    if (dependencyVersions.size !== Object.keys(importer.specifiers).length) {
+      return true;
     }
 
-    const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined = this._getPackageDescription(
-      tempProjectDependencyKey
-    );
-    if (!packageDescription || !packageDescription.dependencies) {
-      return undefined;
+    // Finally, validate that the values in the importer are also present in the dependency list.
+    for (const [importerPackageName, importerVersionSpecifier] of Object.entries(importer.specifiers)) {
+      const foundPackageVersions: Set<string> | undefined = dependencyVersions.get(importerPackageName);
+      if (!foundPackageVersions || !foundPackageVersions.has(importerVersionSpecifier)) {
+        return true;
+      }
     }
 
-    if (!packageDescription.dependencies.hasOwnProperty(dependencyName)) {
-      return undefined;
-    }
-
-    return this._parsePnpmDependencyKey(dependencyName, packageDescription.dependencies[dependencyName]);
+    return false;
   }
 
   /**

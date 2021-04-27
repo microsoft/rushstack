@@ -7,6 +7,7 @@ import { FileSystem, IParsedPackageNameOrError, InternalError, Import } from '@r
 import { RushConstants } from '../RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
+import { PackageJsonEditor } from '../../api/PackageJsonEditor';
 
 /**
  * @yarnpkg/lockfile doesn't have types
@@ -276,10 +277,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  protected getWorkspaceDependencyVersion(
-    dependencySpecifier: DependencySpecifier,
-    workspaceKey: string
-  ): DependencySpecifier | undefined {
+  public isWorkspaceProjectModified(workspaceKey: string, packageJson: PackageJsonEditor): boolean {
     throw new InternalError('Not implemented');
   }
 }

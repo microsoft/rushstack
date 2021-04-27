@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Sort, Text, Import } from '@rushstack/node-core-library';
+import { Sort, Import, Path } from '@rushstack/node-core-library';
 
 import { BaseWorkspaceFile } from '../base/BaseWorkspaceFile';
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
@@ -54,7 +54,7 @@ export class PnpmWorkspaceFile extends BaseWorkspaceFile {
     }
 
     // Glob can't handle Windows paths
-    const globPath: string = Text.replaceAll(packagePath, '\\', '/');
+    const globPath: string = Path.convertToSlashes(packagePath);
     this._workspacePackages.add(globEscape(globPath));
   }
 
