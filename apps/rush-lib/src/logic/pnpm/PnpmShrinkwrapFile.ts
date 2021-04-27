@@ -19,7 +19,6 @@ import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 import { RushConstants } from '../RushConstants';
 import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
 import { DependencyType, PackageJsonEditor } from '../../api/PackageJsonEditor';
-import { InternalError } from '@rushstack/node-core-library';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
@@ -518,7 +517,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public isWorkspaceProjectModified(workspaceKey: string, packageJson: PackageJsonEditor): boolean {
     const importer: IPnpmShrinkwrapImporterYaml | undefined = this.getWorkspaceImporter(workspaceKey);
     if (!importer) {
-      throw new InternalError(`Unable to find importer for workspace key "${workspaceKey}".`);
+      return true;
     }
 
     // First, get the unique package names and map them to package versions. We will also filter out peer
