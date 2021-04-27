@@ -18,7 +18,7 @@ import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFileP
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 import { RushConstants } from '../RushConstants';
 import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
-import { DependencyType, PackageJsonEditor } from '../../api/PackageJsonEditor';
+import { DependencyType, PackageJsonDependency, PackageJsonEditor } from '../../api/PackageJsonEditor';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
@@ -520,21 +520,50 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       return true;
     }
 
-    // First, get the unique package names and map them to package versions. We will also filter out peer
-    // dependencies since these are not included by the shrinkwrap.
-    const dependencyVersions: Map<string, Set<string>> = new Map();
+    // First, get the unique package names and map them to package versions.
+    const dependencyVersions: Map<string, PackageJsonDependency> = new Map();
     for (const packageDependency of [...packageJson.dependencyList, ...packageJson.devDependencyList]) {
+      // We will also filter out peer dependencies since these are not included by the shrinkwrap.
       if (packageDependency.dependencyType === DependencyType.Peer) {
         continue;
       }
-
-      let existingVersions: Set<string> | undefined = dependencyVersions.get(packageDependency.name);
-      if (!existingVersions) {
-        existingVersions = new Set();
-        existingVersions.add(packageDependency.version);
-        dependencyVersions.set(packageDependency.name, existingVersions);
+      const foundDependency: PackageJsonDependency | undefined = dependencyVersions.get(
+        packageDependency.name
+      );
+      if (!foundDependency) {
+        dependencyVersions.set(packageDependency.name, packageDependency);
       } else {
-        existingVersions.add(packageDependency.version);
+        // Shrinkwrap will prioritize optional dependencies, followed by regular dependencies, with dev being
+        // the least prioritized. We will only keep the most prioritized option.
+        // See: https://github.com/pnpm/pnpm/blob/main/packages/lockfile-utils/src/satisfiesPackageManifest.ts
+        switch (foundDependency.dependencyType) {
+          case DependencyType.Optional:
+            break;
+          case DependencyType.Regular:
+            if (packageDependency.dependencyType === DependencyType.Optional) {
+              dependencyVersions.set(packageDependency.name, packageDependency);
+            }
+            break;
+          case DependencyType.Dev:
+            dependencyVersions.set(packageDependency.name, packageDependency);
+            break;
+        }
+      }
+    }
+
+    // Then validate that the dependency fields are as expected in the shrinkwrap to avoid false-negatives
+    // when moving a package from one field to the other.
+    for (const dependencyVersion of dependencyVersions.values()) {
+      switch (dependencyVersion.dependencyType) {
+        case DependencyType.Optional:
+          if (!importer.optionalDependencies[dependencyVersion.name]) return true;
+          break;
+        case DependencyType.Regular:
+          if (!importer.dependencies[dependencyVersion.name]) return true;
+          break;
+        case DependencyType.Dev:
+          if (!importer.devDependencies[dependencyVersion.name]) return true;
+          break;
       }
     }
 
@@ -544,10 +573,10 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       return true;
     }
 
-    // Finally, validate that the values in the importer are also present in the dependency list.
+    // Finally, validate that all values in the importer are also present in the dependency list.
     for (const [importerPackageName, importerVersionSpecifier] of Object.entries(importer.specifiers)) {
-      const foundPackageVersions: Set<string> | undefined = dependencyVersions.get(importerPackageName);
-      if (!foundPackageVersions || !foundPackageVersions.has(importerVersionSpecifier)) {
+      const foundDependency: PackageJsonDependency | undefined = dependencyVersions.get(importerPackageName);
+      if (!foundDependency || foundDependency.version !== importerVersionSpecifier) {
         return true;
       }
     }
