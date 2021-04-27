@@ -523,10 +523,11 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     // First, get the unique package names and map them to package versions.
     const dependencyVersions: Map<string, PackageJsonDependency> = new Map();
     for (const packageDependency of [...packageJson.dependencyList, ...packageJson.devDependencyList]) {
-      // We will also filter out peer dependencies since these are not included by the shrinkwrap.
+      // We will also filter out peer dependencies since these are not installed at development time.
       if (packageDependency.dependencyType === DependencyType.Peer) {
         continue;
       }
+
       const foundDependency: PackageJsonDependency | undefined = dependencyVersions.get(
         packageDependency.name
       );
