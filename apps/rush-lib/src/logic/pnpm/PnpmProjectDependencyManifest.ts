@@ -97,7 +97,8 @@ export class PnpmProjectDependencyManifest {
       | undefined = this._pnpmShrinkwrapFile.getShrinkwrapEntry(name, version);
 
     if (!shrinkwrapEntry) {
-      if (throwIfShrinkwrapEntryMissing) {
+      // We don't support linked dependencies inside the shrinkwrap file.
+      if (throwIfShrinkwrapEntryMissing && !version.startsWith('link:')) {
         throw new InternalError(`Unable to find dependency ${name} with version ${version} in shrinkwrap.`);
       }
       return;

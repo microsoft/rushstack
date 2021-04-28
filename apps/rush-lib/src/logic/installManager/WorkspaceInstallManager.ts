@@ -557,6 +557,11 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         continue;
       }
 
+      // We want to skip linked versions, as we don't have an automatically-computed integrity for them.
+      if (version.startsWith('link:')) {
+        continue;
+      }
+
       // Add to the manifest and provide all the parent dependencies
       pnpmProjectDependencyManifest.addDependency(name, version, {
         dependencies: { ...workspaceImporter.dependencies, ...workspaceImporter.devDependencies },
