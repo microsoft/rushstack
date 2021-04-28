@@ -4,11 +4,13 @@
 import * as path from 'path';
 import colors from 'colors/safe';
 import * as crypto from 'crypto';
+import ignore, { Ignore } from 'ignore';
 
 import { getPackageDeps, getGitHashForFiles } from '@rushstack/package-deps-hash';
-import { Path, InternalError, FileSystem } from '@rushstack/node-core-library';
+import { Path, InternalError, FileSystem, Terminal, Async } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
+import { RushProjectConfiguration } from '../api/RushProjectConfiguration';
 import { Git } from './Git';
 import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
@@ -29,9 +31,12 @@ export class PackageChangeAnalyzer {
     this._git = new Git(this._rushConfiguration);
   }
 
-  public getPackageDeps(projectName: string): Map<string, string> | undefined {
+  public async getPackageDeps(
+    projectName: string,
+    terminal: Terminal
+  ): Promise<Map<string, string> | undefined> {
     if (this._data === null) {
-      this._data = this._getData();
+      this._data = await this._getData(terminal);
     }
 
     return this._data?.get(projectName);
@@ -47,10 +52,10 @@ export class PackageChangeAnalyzer {
    *   Git SHA is fed into the hash
    * - A hex digest of the hash is returned
    */
-  public getProjectStateHash(projectName: string): string | undefined {
+  public async getProjectStateHash(projectName: string, terminal: Terminal): Promise<string | undefined> {
     let projectState: string | undefined = this._projectStateCache.get(projectName);
     if (!projectState) {
-      const packageDeps: Map<string, string> | undefined = this.getPackageDeps(projectName);
+      const packageDeps: Map<string, string> | undefined = await this.getPackageDeps(projectName, terminal);
       if (!packageDeps) {
         return undefined;
       } else {
@@ -71,18 +76,23 @@ export class PackageChangeAnalyzer {
     return projectState;
   }
 
-  private _getData(): Map<string, Map<string, string>> | undefined {
+  private async _getData(terminal: Terminal): Promise<Map<string, Map<string, string>> | undefined> {
     const repoDeps: Map<string, string> | undefined = this._getRepoDeps();
     if (!repoDeps) {
       return undefined;
     }
 
     const projectHashDeps: Map<string, Map<string, string>> = new Map<string, Map<string, string>>();
+    const ignoreMatcherForProject: Map<string, Ignore> = new Map<string, Ignore>();
 
-    // pre-populate the map with the projects from the config
-    for (const project of this._rushConfiguration.projects) {
+    // Initialize maps for each project asynchronously, up to 10 projects concurrently.
+    await Async.forEachAsync(this._rushConfiguration.projects, async (project: RushConfigurationProject): Promise<void> => {
       projectHashDeps.set(project.packageName, new Map<string, string>());
-    }
+      ignoreMatcherForProject.set(
+        project.packageName,
+        await this._getIgnoreMatcherForProject(project, terminal)
+      );
+    }, { concurrency: 10 });
 
     // Sort each project folder into its own package deps hash
     for (const [filePath, fileHash] of repoDeps) {
@@ -92,7 +102,13 @@ export class PackageChangeAnalyzer {
         | RushConfigurationProject
         | undefined = this._rushConfiguration.findProjectForPosixRelativePath(filePath);
       if (owningProject) {
-        projectHashDeps.get(owningProject.packageName)!.set(filePath, fileHash);
+        const relativePath: string = filePath
+          .replace(owningProject.projectRelativeFolder, '')
+          .replace(/^\//, '');
+        const ignoreMatcher: Ignore | undefined = ignoreMatcherForProject.get(owningProject.packageName);
+        if (!ignoreMatcher || !ignoreMatcher.ignores(relativePath)) {
+          projectHashDeps.get(owningProject.packageName)!.set(filePath, fileHash);
+        }
       }
     }
 
@@ -155,6 +171,22 @@ export class PackageChangeAnalyzer {
     }
 
     return projectHashDeps;
+  }
+
+  private async _getIgnoreMatcherForProject(
+    project: RushConfigurationProject,
+    terminal: Terminal
+  ): Promise<Ignore> {
+    const projectConfiguration:
+      | RushProjectConfiguration
+      | undefined = await RushProjectConfiguration.tryLoadForProjectAsync(project, undefined, terminal);
+    const ignoreMatcher: Ignore = ignore();
+
+    if (projectConfiguration && projectConfiguration.incrementalBuildIgnoredGlobs) {
+      ignoreMatcher.add(projectConfiguration.incrementalBuildIgnoredGlobs);
+    }
+
+    return ignoreMatcher;
   }
 
   private _getRepoDeps(): Map<string, string> | undefined {

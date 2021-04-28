@@ -17,7 +17,7 @@ interface ITestOptions {
 }
 
 describe('ProjectBuildCache', () => {
-  function prepareSubject(options: Partial<ITestOptions>): ProjectBuildCache | undefined {
+  async function prepareSubject(options: Partial<ITestOptions>): Promise<ProjectBuildCache | undefined> {
     const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
     const packageChangeAnalyzer = ({
       getProjectStateHash: () => {
@@ -25,7 +25,7 @@ describe('ProjectBuildCache', () => {
       }
     } as unknown) as PackageChangeAnalyzer;
 
-    const subject: ProjectBuildCache | undefined = ProjectBuildCache.tryGetProjectBuildCache({
+    const subject: ProjectBuildCache | undefined = await ProjectBuildCache.tryGetProjectBuildCache({
       buildCacheConfiguration: ({
         buildCacheEnabled: options.hasOwnProperty('enabled') ? options.enabled : true,
         getCacheEntryId: (options: IGenerateCacheEntryIdOptions) =>
@@ -53,16 +53,16 @@ describe('ProjectBuildCache', () => {
   }
 
   describe('tryGetProjectBuildCache', () => {
-    it('returns a ProjectBuildCache with a calculated cacheId value', () => {
-      const subject: ProjectBuildCache = prepareSubject({})!;
+    it('returns a ProjectBuildCache with a calculated cacheId value', async () => {
+      const subject: ProjectBuildCache = (await prepareSubject({}))!;
       expect(subject['_cacheId']).toMatchInlineSnapshot(
         `"acme-wizard/e229f8765b7d450a8a84f711a81c21e37935d661"`
       );
     });
 
-    it('returns undefined if the tracked file list is undefined', () => {
+    it('returns undefined if the tracked file list is undefined', async () => {
       expect(
-        prepareSubject({
+        await prepareSubject({
           trackedProjectFiles: undefined
         })
       ).toBe(undefined);
