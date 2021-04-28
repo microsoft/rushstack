@@ -239,7 +239,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
       // Now validate that the shrinkwrap file matches what is in the package.json
       if (shrinkwrapFile?.isWorkspaceProjectModified(rushProject)) {
-        shrinkwrapWarnings.push(`Modified package.json found for "${rushProject.packageName}"`);
+        shrinkwrapWarnings.push(`Dependencies of project "${rushProject.packageName}" do not match the current shinkwrap.`);
         shrinkwrapIsUpToDate = false;
       }
     }
