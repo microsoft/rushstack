@@ -39,7 +39,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   /**
    * @override
    */
-  public async doInstall(): Promise<void> {
+  public async doInstallAsync(): Promise<void> {
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     if (this.options.noLink) {
       console.log(
@@ -51,7 +51,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       throw new AlreadyReportedError();
     }
 
-    await super.doInstall();
+    await super.doInstallAsync();
   }
 
   /**
