@@ -147,7 +147,7 @@ export abstract class BaseInstallManager {
     return this._options;
   }
 
-  public async doInstall(): Promise<void> {
+  public async doInstallAsync(): Promise<void> {
     const isFilteredInstall: boolean = this.options.pnpmFilterArguments.length > 0;
     const useWorkspaces: boolean =
       this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;

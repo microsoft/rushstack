@@ -242,7 +242,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   public getShrinkwrapHash(experimentsConfig?: IExperimentsJson): string {
-    const shrinkwrapContent: string = this.serialize(experimentsConfig);
+    // The 'omitImportersFromPreventManualShrinkwrapChanges' experiment skips the 'importers' section
+    // when computing the hash, since the main concern is changes to the overall external dependency footprint
+    const { omitImportersFromPreventManualShrinkwrapChanges } = experimentsConfig || {};
+
+    const shrinkwrapContent: string = this._serializeInternal(
+      omitImportersFromPreventManualShrinkwrapChanges
+    );
     return crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
   }
 
@@ -431,24 +437,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    *
    * @override
    */
-  protected serialize(experiments?: IExperimentsJson): string {
-    // Ensure that if any of the top-level properties are provided but empty are removed. We populate the object
-    // properties when we read the shrinkwrap but PNPM does not set these top-level properties unless they are present.
-    const shrinkwrapToSerialize: { [key: string]: unknown } = {};
-    const { omitImportersFromPreventManualShrinkwrapChanges } = experiments || {};
-    for (const [key, value] of Object.entries(this._shrinkwrapJson)) {
-      // The 'omitImportersFromPreventManualShrinkwrapChanges' experiment skips the 'importers' section
-      // when computing the hash, since the main concern is changes to the overall external dependency footprint
-      if (omitImportersFromPreventManualShrinkwrapChanges && key === 'importers') {
-        continue;
-      }
-
-      if (!value || typeof value !== 'object' || Object.keys(value).length > 0) {
-        shrinkwrapToSerialize[key] = value;
-      }
-    }
-
-    return yamlModule.safeDump(shrinkwrapToSerialize, PNPM_SHRINKWRAP_YAML_FORMAT);
+  protected serialize(): string {
+    return this._serializeInternal(false);
   }
 
   /**
@@ -630,5 +620,22 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     } else {
       return undefined;
     }
+  }
+
+  private _serializeInternal(omitImporters: boolean = false): string {
+    // Ensure that if any of the top-level properties are provided but empty are removed. We populate the object
+    // properties when we read the shrinkwrap but PNPM does not set these top-level properties unless they are present.
+    const shrinkwrapToSerialize: { [key: string]: unknown } = {};
+    for (const [key, value] of Object.entries(this._shrinkwrapJson)) {
+      if (omitImporters && key === 'importers') {
+        continue;
+      }
+
+      if (!value || typeof value !== 'object' || Object.keys(value).length > 0) {
+        shrinkwrapToSerialize[key] = value;
+      }
+    }
+
+    return yamlModule.safeDump(shrinkwrapToSerialize, PNPM_SHRINKWRAP_YAML_FORMAT);
   }
 }
