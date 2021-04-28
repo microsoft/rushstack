@@ -225,23 +225,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           // Already specified as a local project. Allow the package manager to validate this
           continue;
         }
-
-        // It is not a local dependency, validate that it is compatible
-        if (
-          shrinkwrapFile &&
-          !shrinkwrapFile.hasCompatibleWorkspaceDependency(
-            dependencySpecifier,
-            shrinkwrapFile.getWorkspaceKeyByPath(
-              this.rushConfiguration.commonTempFolder,
-              rushProject.projectFolder
-            )
-          )
-        ) {
-          shrinkwrapWarnings.push(
-            `Missing dependency "${name}" (${version}) required by "${rushProject.packageName}"`
-          );
-          shrinkwrapIsUpToDate = false;
-        }
       }
 
       // Save the package.json if we modified the version references and warn that the package.json was modified
@@ -252,6 +235,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
               'notation. The package.json has been modified and must be committed to source control.'
           )
         );
+      }
+
+      // Now validate that the shrinkwrap file matches what is in the package.json
+      if (shrinkwrapFile?.isWorkspaceProjectModified(rushProject)) {
+        shrinkwrapWarnings.push(`Dependencies of project "${rushProject.packageName}" do not match the current shinkwrap.`);
+        shrinkwrapIsUpToDate = false;
       }
     }
 
