@@ -10,7 +10,7 @@ import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFileP
 import { PackageManagerOptionsConfigurationBase } from '../../api/RushConfiguration';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
 import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
-import { PackageJsonEditor } from '../../api/PackageJsonEditor';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 /**
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.
@@ -126,7 +126,7 @@ export abstract class BaseShrinkwrapFile {
    *
    * @virtual
    */
-  public abstract isWorkspaceProjectModified(workspaceKey: string, packageJson: PackageJsonEditor): boolean;
+  public abstract isWorkspaceProjectModified(project: RushConfigurationProject): boolean;
 
   /** @virtual */
   protected abstract serialize(): string;

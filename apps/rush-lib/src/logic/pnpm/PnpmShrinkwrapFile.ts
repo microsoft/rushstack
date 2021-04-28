@@ -18,7 +18,8 @@ import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFileP
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 import { RushConstants } from '../RushConstants';
 import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
-import { DependencyType, PackageJsonDependency, PackageJsonEditor } from '../../api/PackageJsonEditor';
+import { DependencyType, PackageJsonDependency } from '../../api/PackageJsonEditor';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
@@ -514,15 +515,20 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public isWorkspaceProjectModified(workspaceKey: string, packageJson: PackageJsonEditor): boolean {
+  public isWorkspaceProjectModified(project: RushConfigurationProject): boolean {
+    const workspaceKey: string = this.getWorkspaceKeyByPath(
+      project.rushConfiguration.commonTempFolder,
+      project.projectFolder
+    );
     const importer: IPnpmShrinkwrapImporterYaml | undefined = this.getWorkspaceImporter(workspaceKey);
     if (!importer) {
       return true;
     }
 
     // First, get the unique package names and map them to package versions.
+    const { dependencyList, devDependencyList } = project.packageJsonEditor;
     const dependencyVersions: Map<string, PackageJsonDependency> = new Map();
-    for (const packageDependency of [...packageJson.dependencyList, ...packageJson.devDependencyList]) {
+    for (const packageDependency of [...dependencyList, ...devDependencyList]) {
       // We will also filter out peer dependencies since these are not installed at development time.
       if (packageDependency.dependencyType === DependencyType.Peer) {
         continue;
