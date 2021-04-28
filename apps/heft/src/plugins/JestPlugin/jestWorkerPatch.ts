@@ -5,7 +5,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Import } from '@rushstack/node-core-library';
 
-// This patch is a fix for this code from jest-worker/src/base/BaseWorkerPool.ts:
+// This patch is a fix for a problem where Jest reports this error spuriously on a machine that is under heavy load:
+//
+// "A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests
+// leaking due to improper teardown. Try running with --runInBand --detectOpenHandles to find leaks."
+//
+// The upstream issue is here: https://github.com/facebook/jest/issues/11354
+//
+// The relevant code is in jest-worker/src/base/BaseWorkerPool.ts:
 // https://github.com/facebook/jest/blob/64d5983d20a628d68644a3a4cd0f510dc304805a/packages/jest-worker/src/base/BaseWorkerPool.ts#L110
 //
 //      // Schedule a force exit in case worker fails to exit gracefully so
@@ -16,8 +23,10 @@ import { Import } from '@rushstack/node-core-library';
 //        forceExited = true;
 //      }, FORCE_EXIT_DELAY);
 //
-// The problem is that Jest hardwires FORCE_EXIT_DELAY to be 500 ms, which causes spurious failures on a
-// machine that is under heavy load.
+// The problem is that Jest hardwires FORCE_EXIT_DELAY to be 500 ms.  On a machine that is under heavy load,
+// the IPC message is not received from the child process before the timeout elapses.  The mitigation is to
+// increase the delay.  (Jest itself seems to be a significant contributor to machine load, so perhaps reducing
+// Jest's parallelism could also help.)
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type BaseWorkerPoolModule = any;
@@ -25,7 +34,7 @@ type BaseWorkerPoolModule = any;
 // Follow the NPM dependency chain to find the module path for BaseWorkerPool.js
 // heft --> @jest/core --> @jest/reporters --> jest-worker
 
-const PATCHED_FORCE_EXIT_DELAY: number = 10000; // milliseconds
+const PATCHED_FORCE_EXIT_DELAY: number = 7000; // milliseconds
 
 try {
   let contextFolder: string = __dirname;
@@ -70,7 +79,7 @@ try {
   //
   // with this:
   //
-  //    const FORCE_EXIT_DELAY = 10000;
+  //    const FORCE_EXIT_DELAY = 7000;
   let matched: boolean = false;
   patchedCode = patchedCode.replace(
     /(const\s+FORCE_EXIT_DELAY\s*=\s*)(\d+)(\s*\;)/,
