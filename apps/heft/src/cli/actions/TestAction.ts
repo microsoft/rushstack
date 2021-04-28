@@ -22,6 +22,7 @@ export class TestAction extends BuildAction {
   private _testNamePattern!: CommandLineStringParameter;
   private _testPathPattern!: CommandLineStringListParameter;
   private _testTimeout!: CommandLineIntegerParameter;
+  private _detectOpenHandles!: CommandLineFlagParameter;
   private _debugHeftReporter!: CommandLineFlagParameter;
   private _maxWorkers!: CommandLineStringParameter;
 
@@ -101,6 +102,14 @@ export class TestAction extends BuildAction {
         ' This corresponds to the "--testTimeout" parameter in Jest\'s documentation.'
     });
 
+    this._detectOpenHandles = this.defineFlagParameter({
+      parameterLongName: '--detect-open-handles',
+      description:
+        'Attempt to collect and print open handles preventing Jest from exiting cleanly.' +
+        ' This option has a significant performance penalty and should only be used for debugging.' +
+        ' This corresponds to the "--detectOpenHandles" parameter in Jest\'s documentation.'
+    });
+
     this._debugHeftReporter = this.defineFlagParameter({
       parameterLongName: '--debug-heft-reporter',
       description:
@@ -158,6 +167,7 @@ export class TestAction extends BuildAction {
         testNamePattern: this._testNamePattern.value,
         testPathPattern: this._testPathPattern.values,
         testTimeout: this._testTimeout.value,
+        detectOpenHandles: this._detectOpenHandles.value,
         debugHeftReporter: this._debugHeftReporter.value,
         maxWorkers: this._maxWorkers.value
       };

@@ -61,6 +61,7 @@ export class JestPlugin implements IHeftPlugin {
       // In debug mode, avoid forking separate processes that are difficult to debug
       runInBand: heftSession.debugMode,
       debug: heftSession.debugMode,
+      detectOpenHandles: !!test.properties.detectOpenHandles,
 
       config: expectedConfigPath,
       cacheDirectory: this._getJestCacheFolder(heftConfiguration),
@@ -93,7 +94,8 @@ export class JestPlugin implements IHeftPlugin {
       jestArgv._ = [...test.properties.findRelatedTests];
     }
 
-    const { results: jestResults } = await runCLI(jestArgv, [buildFolder]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { globalConfig, results: jestResults } = await runCLI(jestArgv, [buildFolder]);
 
     if (jestResults.numFailedTests > 0) {
       jestLogger.emitError(

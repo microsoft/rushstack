@@ -94,8 +94,8 @@ exports[`CommandLineHelp prints the help for each action: test 1`] = `
                  [--max-old-space-size SIZE] [--watch] [--clean] [--no-test]
                  [--no-build] [-u] [--find-related-tests SOURCE_FILE]
                  [--silent] [-t REGEXP] [--test-path-pattern REGEXP]
-                 [--test-timeout-ms INTEGER] [--debug-heft-reporter]
-                 [--max-workers COUNT_OR_PERCENTAGE]
+                 [--test-timeout-ms INTEGER] [--detect-open-handles]
+                 [--debug-heft-reporter] [--max-workers COUNT_OR_PERCENTAGE]
                  
 
 Optional arguments:
@@ -146,6 +146,13 @@ Optional arguments:
                         If unspecified, the default is normally 5000 ms. This 
                         corresponds to the \\"--testTimeout\\" parameter in 
                         Jest's documentation.
+  --detect-open-handles
+                        Attempt to collect and print open handles preventing 
+                        Jest from exiting cleanly. This option has a 
+                        significant performance penalty and should only be 
+                        used for debugging. This corresponds to the 
+                        \\"--detectOpenHandles\\" parameter in Jest's 
+                        documentation.
   --debug-heft-reporter
                         Normally Heft installs a custom Jest reporter so that 
                         test results are presented consistently with other 
