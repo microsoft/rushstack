@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { PackageJsonLookup, IPackageJson, JsonFile } from '@rushstack/node-core-library';
+import { PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
 import * as path from 'path';
 
 /**
@@ -9,9 +9,13 @@ import * as path from 'path';
  */
 export class ToolPaths {
   private static _typescriptPackagePath: string | undefined;
+  private static _typescriptPackageJson: IPackageJson | undefined;
   private static _eslintPackagePath: string | undefined;
+  private static _eslintPackageJson: IPackageJson | undefined;
   private static _tslintPackagePath: string | undefined;
+  private static _tslintPackageJson: IPackageJson | undefined;
   private static _apiExtractorPackagePath: string | undefined;
+  private static _apiExtractorPackageJson: IPackageJson | undefined;
 
   public static get typescriptPackagePath(): string {
     if (!ToolPaths._typescriptPackagePath) {
@@ -26,7 +30,13 @@ export class ToolPaths {
   }
 
   public static get typescriptPackageJson(): IPackageJson {
-    return JsonFile.load(path.join(ToolPaths.typescriptPackagePath, 'package.json'));
+    if (!ToolPaths._typescriptPackageJson) {
+      ToolPaths._typescriptPackageJson = PackageJsonLookup.instance.loadPackageJson(
+        path.join(ToolPaths.typescriptPackagePath, 'package.json')
+      );
+    }
+
+    return ToolPaths._typescriptPackageJson;
   }
 
   public static get eslintPackagePath(): string {
@@ -42,7 +52,13 @@ export class ToolPaths {
   }
 
   public static get eslintPackageJson(): IPackageJson {
-    return JsonFile.load(path.join(ToolPaths.eslintPackagePath, 'package.json'));
+    if (!ToolPaths._eslintPackageJson) {
+      ToolPaths._eslintPackageJson = PackageJsonLookup.instance.loadPackageJson(
+        path.join(ToolPaths.eslintPackagePath, 'package.json')
+      );
+    }
+
+    return ToolPaths._eslintPackageJson;
   }
 
   public static get tslintPackagePath(): string {
@@ -50,7 +66,15 @@ export class ToolPaths {
       ToolPaths._tslintPackagePath = ToolPaths._getPackagePath('tslint');
 
       if (!ToolPaths._tslintPackagePath) {
-        throw new Error('Unable to find "tslint" package.');
+        const typeScriptPackageVersion: string = this.typescriptPackageJson.version;
+        const typeScriptMajorVersion: number = Number(
+          typeScriptPackageVersion.substr(0, typeScriptPackageVersion.indexOf('.'))
+        );
+        if (typeScriptMajorVersion >= 4) {
+          throw new Error('TSLint is not supported for rush-stack-compiler-4.X packages.');
+        } else {
+          throw new Error('Unable to find "tslint" package.');
+        }
       }
     }
 
@@ -58,7 +82,13 @@ export class ToolPaths {
   }
 
   public static get tslintPackageJson(): IPackageJson {
-    return JsonFile.load(path.join(ToolPaths.tslintPackagePath, 'package.json'));
+    if (!ToolPaths._tslintPackageJson) {
+      ToolPaths._tslintPackageJson = PackageJsonLookup.instance.loadPackageJson(
+        path.join(ToolPaths.tslintPackagePath, 'package.json')
+      );
+    }
+
+    return ToolPaths._tslintPackageJson;
   }
 
   public static get apiExtractorPackagePath(): string {
@@ -74,7 +104,13 @@ export class ToolPaths {
   }
 
   public static get apiExtractorPackageJson(): IPackageJson {
-    return JsonFile.load(path.join(ToolPaths.apiExtractorPackagePath, 'package.json'));
+    if (!ToolPaths._apiExtractorPackageJson) {
+      ToolPaths._apiExtractorPackageJson = PackageJsonLookup.instance.loadPackageJson(
+        path.join(ToolPaths.apiExtractorPackagePath, 'package.json')
+      );
+    }
+
+    return ToolPaths._apiExtractorPackageJson;
   }
 
   private static _getPackagePath(packageName: string): string | undefined {
