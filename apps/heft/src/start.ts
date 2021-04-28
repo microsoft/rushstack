@@ -3,6 +3,9 @@
 
 import { HeftToolsCommandLineParser } from './cli/HeftToolsCommandLineParser';
 
+// Load the Jest patch
+import './plugins/JestPlugin/jest-worker-patch';
+
 // Launching via lib/start.js bypasses the version selector.  Use that for debugging Heft.
 
 const parser: HeftToolsCommandLineParser = new HeftToolsCommandLineParser();
