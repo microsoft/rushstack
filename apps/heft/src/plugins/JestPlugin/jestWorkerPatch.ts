@@ -27,8 +27,9 @@ import { Import, FileSystem } from '@rushstack/node-core-library';
 // increase the delay.  (Jest itself seems to be a significant contributor to machine load, so perhaps reducing
 // Jest's parallelism could also help.)
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type BaseWorkerPoolModule = { default: unknown };
+interface IBaseWorkerPoolModule {
+  default: unknown;
+}
 
 // Follow the NPM dependency chain to find the module path for BaseWorkerPool.js
 // heft --> @jest/core --> @jest/reporters --> jest-worker
@@ -54,7 +55,7 @@ try {
   }
 
   // Load the module
-  const baseWorkerPoolModule: BaseWorkerPoolModule = require(baseWorkerPoolPath);
+  const baseWorkerPoolModule: IBaseWorkerPoolModule = require(baseWorkerPoolPath);
 
   // Obtain the metadata for the module
   const baseWorkerPoolModuleMetadata: NodeModule | undefined = module.children.filter(
@@ -92,7 +93,7 @@ try {
     throw new Error('The expected pattern was not found in the file:\n' + baseWorkerPoolPath);
   }
 
-  function evalInContext(): BaseWorkerPoolModule {
+  function evalInContext(): IBaseWorkerPoolModule {
     // Remap the require() function for the eval() context
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -104,7 +105,7 @@ try {
     return eval(patchedCode);
   }
 
-  const patchedModule: BaseWorkerPoolModule = evalInContext();
+  const patchedModule: IBaseWorkerPoolModule = evalInContext();
 
   baseWorkerPoolModule.default = patchedModule.default;
 } catch (e) {
