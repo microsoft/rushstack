@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build",
   "entries": [
     {
+      "version": "3.17.15",
+      "tag": "@microsoft/gulp-core-build_v3.17.15",
+      "date": "Thu, 29 Apr 2021 23:26:50 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Lock the version for \"@types/semver\", since they broke SemVer in a PATCH release"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.17.14",
       "tag": "@microsoft/gulp-core-build_v3.17.14",
       "date": "Mon, 12 Apr 2021 15:10:28 GMT",
