@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build",
+      "comment": "Lock the version for \"@types/semver\", since they broke SemVer in a PATCH release",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
