@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 // Load the Jest patch
-import './plugins/JestPlugin/jestWorkerPatch';
+import './jestWorkerPatch';
 
 import * as path from 'path';
 import { runCLI } from '@jest/core';
