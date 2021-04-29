@@ -36,86 +36,97 @@ interface IBaseWorkerPoolModule {
 
 const PATCHED_FORCE_EXIT_DELAY: number = 7000; // milliseconds
 
-try {
-  let contextFolder: string = __dirname;
-  // Resolve the "@jest/core" package relative to Heft
-  contextFolder = Import.resolvePackage({ packageName: '@jest/core', baseFolderPath: contextFolder });
-  // Resolve the "@jest/reporters" package relative to "@jest/core"
-  contextFolder = Import.resolvePackage({ packageName: '@jest/reporters', baseFolderPath: contextFolder });
-  // Resolve the "jest-worker" package relative to "@jest/reporters"
-  const jestWorkerFolder: string = Import.resolvePackage({
-    packageName: 'jest-worker',
-    baseFolderPath: contextFolder
-  });
+function applyPatch(): void {
+  try {
+    let contextFolder: string = __dirname;
+    // Resolve the "@jest/core" package relative to Heft
+    contextFolder = Import.resolvePackage({ packageName: '@jest/core', baseFolderPath: contextFolder });
+    // Resolve the "@jest/reporters" package relative to "@jest/core"
+    contextFolder = Import.resolvePackage({ packageName: '@jest/reporters', baseFolderPath: contextFolder });
+    // Resolve the "jest-worker" package relative to "@jest/reporters"
+    const jestWorkerFolder: string = Import.resolvePackage({
+      packageName: 'jest-worker',
+      baseFolderPath: contextFolder
+    });
 
-  const baseWorkerPoolPath: string = path.join(jestWorkerFolder, 'build/base/BaseWorkerPool.js');
-  const baseWorkerPoolFilename: string = path.basename(baseWorkerPoolPath); // BaseWorkerPool.js
+    const baseWorkerPoolPath: string = path.join(jestWorkerFolder, 'build/base/BaseWorkerPool.js');
+    const baseWorkerPoolFilename: string = path.basename(baseWorkerPoolPath); // BaseWorkerPool.js
 
-  if (!FileSystem.exists(baseWorkerPoolPath)) {
-    throw new Error(
-      'The BaseWorkerPool.js file was not found in the expected location:\n' + baseWorkerPoolPath
+    if (!FileSystem.exists(baseWorkerPoolPath)) {
+      throw new Error(
+        'The BaseWorkerPool.js file was not found in the expected location:\n' + baseWorkerPoolPath
+      );
+    }
+
+    // Load the module
+    const baseWorkerPoolModule: IBaseWorkerPoolModule = require(baseWorkerPoolPath);
+
+    // Obtain the metadata for the module
+    const baseWorkerPoolModuleMetadata: NodeModule | undefined = module.children.filter(
+      (x) => path.basename(x.filename || '').toUpperCase() === baseWorkerPoolFilename.toUpperCase()
+    )[0];
+
+    if (!baseWorkerPoolModuleMetadata) {
+      throw new Error('Failed to detect the Node.js module metadata for BaseWorkerPool.js');
+    }
+
+    // Load the original file contents
+    const originalFileContent: string = FileSystem.readFile(baseWorkerPoolPath);
+
+    // Add boilerplate so that eval() will return the exports
+    let patchedCode: string =
+      '// PATCHED BY HEFT USING eval()\n\nexports = {}\n' +
+      originalFileContent +
+      '\n// return value:\nexports';
+
+    // Apply the patch.  We will replace this:
+    //
+    //    const FORCE_EXIT_DELAY = 500;
+    //
+    // with this:
+    //
+    //    const FORCE_EXIT_DELAY = 7000;
+    let matched: boolean = false;
+    patchedCode = patchedCode.replace(
+      /(const\s+FORCE_EXIT_DELAY\s*=\s*)(\d+)(\s*\;)/,
+      (matchedString: string, leftPart: string, middlePart: string, rightPart: string): string => {
+        matched = true;
+        return leftPart + PATCHED_FORCE_EXIT_DELAY.toString() + rightPart;
+      }
     );
-  }
 
-  // Load the module
-  const baseWorkerPoolModule: IBaseWorkerPoolModule = require(baseWorkerPoolPath);
-
-  // Obtain the metadata for the module
-  const baseWorkerPoolModuleMetadata: NodeModule | undefined = module.children.filter(
-    (x) => path.basename(x.filename || '').toUpperCase() === baseWorkerPoolFilename.toUpperCase()
-  )[0];
-
-  if (!baseWorkerPoolModuleMetadata) {
-    throw new Error('Failed to detect the Node.js module metadata for BaseWorkerPool.js');
-  }
-
-  // Load the original file contents
-  const originalFileContent: string = FileSystem.readFile(baseWorkerPoolPath);
-
-  // Add boilerplate so that eval() will return the exports
-  let patchedCode: string =
-    '// PATCHED BY HEFT USING eval()\n\nexports = {}\n' + originalFileContent + '\n// return value:\nexports';
-
-  // Apply the patch.  We will replace this:
-  //
-  //    const FORCE_EXIT_DELAY = 500;
-  //
-  // with this:
-  //
-  //    const FORCE_EXIT_DELAY = 7000;
-  let matched: boolean = false;
-  patchedCode = patchedCode.replace(
-    /(const\s+FORCE_EXIT_DELAY\s*=\s*)(\d+)(\s*\;)/,
-    (matchedString: string, leftPart: string, middlePart: string, rightPart: string): string => {
-      matched = true;
-      return leftPart + PATCHED_FORCE_EXIT_DELAY.toString() + rightPart;
-    }
-  );
-
-  if (!matched) {
-    throw new Error('The expected pattern was not found in the file:\n' + baseWorkerPoolPath);
-  }
-
-  function evalInContext(): IBaseWorkerPoolModule {
-    // Remap the require() function for the eval() context
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    function require(modulePath: string): void {
-      return baseWorkerPoolModuleMetadata!.require(modulePath);
+    if (!matched) {
+      throw new Error('The expected pattern was not found in the file:\n' + baseWorkerPoolPath);
     }
 
-    // eslint-disable-next-line no-eval
-    return eval(patchedCode);
+    function evalInContext(): IBaseWorkerPoolModule {
+      // Remap the require() function for the eval() context
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      function require(modulePath: string): void {
+        return baseWorkerPoolModuleMetadata!.require(modulePath);
+      }
+
+      // eslint-disable-next-line no-eval
+      return eval(patchedCode);
+    }
+
+    const patchedModule: IBaseWorkerPoolModule = evalInContext();
+
+    baseWorkerPoolModule.default = patchedModule.default;
+  } catch (e) {
+    console.error();
+    console.error('ERROR: jest-worker-patch.ts failed to patch the "jest-worker" package:');
+    console.error(e.toString());
+    console.error();
+
+    throw e;
   }
+}
 
-  const patchedModule: IBaseWorkerPoolModule = evalInContext();
-
-  baseWorkerPoolModule.default = patchedModule.default;
-} catch (e) {
-  console.error();
-  console.error('ERROR: jest-worker-patch.ts failed to patch the "jest-worker" package:');
-  console.error(e.toString());
-  console.error();
-
-  throw e;
+if (typeof jest !== 'undefined' || process.env.JEST_WORKER_ID) {
+  // This patch is incompatible with Jest's proprietary require() implementation
+  console.log("\nJEST ENVIRONMENT DETECTED - Skipping Heft's jestWorkerPatch.js\n");
+} else {
+  applyPatch();
 }
