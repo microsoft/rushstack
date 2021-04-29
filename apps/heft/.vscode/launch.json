@@ -24,12 +24,22 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Debug Jest tests",
+      "program": "${workspaceFolder}/node_modules/@rushstack/heft/lib/start.js",
+      "cwd": "${workspaceFolder}",
+      "args": ["--debug", "test", "--clean"],
+      "console": "integratedTerminal",
+      "sourceMaps": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "node-basic build",
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/heft-node-basic-test/",
       "args": ["--debug", "build", "--clean"],
       "console": "integratedTerminal",
-      "sourceMaps": false
+      "sourceMaps": true
     },
     {
       "type": "node",
@@ -39,7 +49,7 @@
       "cwd": "${workspaceFolder}/../../tutorials/heft-node-basic-tutorial/",
       "args": ["--debug", "test", "--clean"],
       "console": "integratedTerminal",
-      "sourceMaps": false
+      "sourceMaps": true
     },
     {
       "type": "node",
@@ -49,7 +59,7 @@
       "cwd": "${workspaceFolder}/../../tutorials/heft-node-basic-tutorial/",
       "args": ["--debug", "test", "--watch", "--clean"],
       "console": "integratedTerminal",
-      "sourceMaps": false
+      "sourceMaps": true
     },
     {
       "type": "node",
@@ -59,7 +69,7 @@
       "cwd": "${workspaceFolder}/../../tutorials/heft-webpack-basic-tutorial/",
       "args": ["--debug", "build", "--clean"],
       "console": "integratedTerminal",
-      "sourceMaps": false
+      "sourceMaps": true
     },
     {
       "type": "node",
@@ -69,7 +79,7 @@
       "cwd": "${workspaceFolder}/../../tutorials/heft-webpack-basic-tutorial/",
       "args": ["--debug", "test", "--clean"],
       "console": "integratedTerminal",
-      "sourceMaps": false
+      "sourceMaps": true
     },
     {
       "type": "node",
@@ -79,7 +89,7 @@
       "cwd": "${workspaceFolder}/../../tutorials/heft-webpack-basic-tutorial/",
       "args": ["--debug", "start", "--clean"],
       "console": "integratedTerminal",
-      "sourceMaps": false
+      "sourceMaps": true
     }
   ]
 }
