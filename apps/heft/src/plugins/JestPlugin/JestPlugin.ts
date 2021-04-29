@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// Load the Jest patch
+import './plugins/JestPlugin/jestWorkerPatch';
+
 import * as path from 'path';
 import { runCLI } from '@jest/core';
 import { FileSystem, JsonFile } from '@rushstack/node-core-library';
