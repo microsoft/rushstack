@@ -30,7 +30,7 @@
     "@types/heft-jest": "1.0.1",
     "@types/jju": "1.4.1",
     "@types/resolve": "1.17.1",
-    "@types/semver": "~7.3.1",
+    "@types/semver": "7.3.5",
     "@types/timsort": "0.3.0",
     "@types/z-schema": "3.16.31"
   }

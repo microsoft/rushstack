@@ -55,6 +55,6 @@
     "@types/lodash": "4.14.116",
     "@types/node": "10.17.13",
     "@types/resolve": "1.17.1",
-    "@types/semver": "~7.3.1"
+    "@types/semver": "7.3.5"
   }
 }
