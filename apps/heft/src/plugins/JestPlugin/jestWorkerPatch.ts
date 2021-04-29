@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'fs';
 import * as path from 'path';
-import { Import } from '@rushstack/node-core-library';
+import { Import, FileSystem } from '@rushstack/node-core-library';
 
 // This patch is a fix for a problem where Jest reports this error spuriously on a machine that is under heavy load:
 //
@@ -29,7 +28,7 @@ import { Import } from '@rushstack/node-core-library';
 // Jest's parallelism could also help.)
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type BaseWorkerPoolModule = any;
+type BaseWorkerPoolModule = { default: unknown };
 
 // Follow the NPM dependency chain to find the module path for BaseWorkerPool.js
 // heft --> @jest/core --> @jest/reporters --> jest-worker
@@ -46,8 +45,9 @@ try {
   });
 
   const baseWorkerPoolPath: string = path.join(jestWorkerFolder, 'build/base/BaseWorkerPool.js');
+  const baseWorkerPoolFilename: string = path.basename(baseWorkerPoolPath); // BaseWorkerPool.js
 
-  if (!fs.existsSync(baseWorkerPoolPath)) {
+  if (!FileSystem.exists(baseWorkerPoolPath)) {
     throw new Error(
       'The BaseWorkerPool.js file was not found in the expected location:\n' + baseWorkerPoolPath
     );
@@ -57,17 +57,16 @@ try {
   const baseWorkerPoolModule: BaseWorkerPoolModule = require(baseWorkerPoolPath);
 
   // Obtain the metadata for the module
-  const baseWorkerPoolModuleMetadata: NodeModule = module.children[module.children.length - 1];
+  const baseWorkerPoolModuleMetadata: NodeModule | undefined = module.children.filter(
+    (x) => path.basename(x.filename || '').toUpperCase() === baseWorkerPoolFilename.toUpperCase()
+  )[0];
 
-  if (
-    !baseWorkerPoolModuleMetadata ||
-    path.basename(baseWorkerPoolModuleMetadata.filename) !== path.basename(baseWorkerPoolPath)
-  ) {
+  if (!baseWorkerPoolModuleMetadata) {
     throw new Error('Failed to detect the Node.js module metadata for BaseWorkerPool.js');
   }
 
   // Load the original file contents
-  const originalFileContent: string = fs.readFileSync(baseWorkerPoolPath).toString();
+  const originalFileContent: string = FileSystem.readFile(baseWorkerPoolPath);
 
   // Add boilerplate so that eval() will return the exports
   let patchedCode: string =
@@ -93,12 +92,12 @@ try {
     throw new Error('The expected pattern was not found in the file:\n' + baseWorkerPoolPath);
   }
 
-  function evalInContext(): void {
+  function evalInContext(): BaseWorkerPoolModule {
     // Remap the require() function for the eval() context
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     function require(modulePath: string): void {
-      return baseWorkerPoolModuleMetadata.require(modulePath);
+      return baseWorkerPoolModuleMetadata!.require(modulePath);
     }
 
     // eslint-disable-next-line no-eval
