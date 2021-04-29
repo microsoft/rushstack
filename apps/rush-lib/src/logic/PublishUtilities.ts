@@ -555,7 +555,7 @@ export class PublishUtilities {
       currentChange.changeType = ChangeType.none;
     } else {
       if (change.changeType === ChangeType.hotfix) {
-        const prereleaseComponents: ReadonlyArray<string> | null = semver.prerelease(pkg.version);
+        const prereleaseComponents: ReadonlyArray<string | number> | null = semver.prerelease(pkg.version);
         if (!rushConfiguration.hotfixChangeEnabled) {
           throw new Error(`Cannot add hotfix change; hotfixChangeEnabled is false in configuration.`);
         }
