@@ -233,7 +233,7 @@ export class PackageJsonUpdater {
       console.log(colors.green('Running "rush update"'));
       console.log();
       try {
-        await installManager.doInstall();
+        await installManager.doInstallAsync();
       } finally {
         purgeManager.deleteAll();
       }

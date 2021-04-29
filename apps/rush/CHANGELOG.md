@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 23 Apr 2021 22:48:23 GMT and should not be manually modified.
+This log was last generated on Wed, 28 Apr 2021 17:54:16 GMT and should not be manually modified.
+
+## 5.45.5
+Wed, 28 Apr 2021 17:54:16 GMT
+
+### Updates
+
+- Improve diagnostic messages printed by the rush build cache
+- Fix an issue where Rush fails to run on Windows when the repository absolute path contains a space
+- Use simpler and more accurate check before skipping installs
 
 ## 5.45.4
 Fri, 23 Apr 2021 22:48:23 GMT

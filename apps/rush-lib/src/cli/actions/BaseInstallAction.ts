@@ -142,7 +142,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     let installSuccessful: boolean = true;
     try {
-      await installManager.doInstall();
+      await installManager.doInstallAsync();
 
       this.eventHooksManager.handle(
         Event.postRushInstall,
