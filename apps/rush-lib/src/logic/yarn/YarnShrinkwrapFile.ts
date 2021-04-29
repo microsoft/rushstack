@@ -8,6 +8,7 @@ import { RushConstants } from '../RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 
 /**
  * @yarnpkg/lockfile doesn't have types
@@ -267,13 +268,13 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public getWorkspaceKeys(): ReadonlyArray<string> {
-    throw new InternalError('Not implemented');
+  public getProjectShrinkwrap(project: RushConfigurationProject): BaseProjectShrinkwrapFile | undefined {
+    return undefined;
   }
 
   /** @override */
-  public getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string {
-    throw new InternalError('Not implemented');
+  public isWorkspaceCompatible(): boolean {
+    return false;
   }
 
   /** @override */

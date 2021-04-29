@@ -10,7 +10,7 @@ import { Path, InternalError, FileSystem } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Git } from './Git';
-import { PnpmProjectDependencyManifest } from './pnpm/PnpmProjectDependencyManifest';
+import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from './RushConstants';
 
@@ -105,22 +105,20 @@ export class PackageChangeAnalyzer {
       const projectDependencyManifestPaths: string[] = [];
 
       for (const project of this._rushConfiguration.projects) {
-        const dependencyManifestFilePath: string = PnpmProjectDependencyManifest.getFilePathForProject(
-          project
-        );
-        const relativeDependencyManifestFilePath: string = Path.convertToSlashes(
-          path.relative(this._rushConfiguration.rushJsonFolder, dependencyManifestFilePath)
+        const projectShrinkwrapFilePath: string = BaseProjectShrinkwrapFile.getFilePathForProject(project);
+        const relativeProjectShrinkwrapFilePath: string = Path.convertToSlashes(
+          path.relative(this._rushConfiguration.rushJsonFolder, projectShrinkwrapFilePath)
         );
 
-        if (!FileSystem.exists(dependencyManifestFilePath)) {
+        if (!FileSystem.exists(projectShrinkwrapFilePath)) {
           throw new Error(
-            `A project dependency file (${relativeDependencyManifestFilePath}) is missing. You may need to run ` +
+            `A project dependency file (${relativeProjectShrinkwrapFilePath}) is missing. You may need to run ` +
               '"rush install" or "rush update".'
           );
         }
 
         projects.push(project);
-        projectDependencyManifestPaths.push(relativeDependencyManifestFilePath);
+        projectDependencyManifestPaths.push(relativeProjectShrinkwrapFilePath);
       }
 
       const gitPath: string = this._git.getGitPathOrThrow();

@@ -12,7 +12,8 @@ import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
 import {
   PackageManagerOptionsConfigurationBase,
-  PnpmOptionsConfiguration
+  PnpmOptionsConfiguration,
+  RushConfiguration
 } from '../../api/RushConfiguration';
 import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
@@ -20,6 +21,7 @@ import { RushConstants } from '../RushConstants';
 import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
 import { DependencyType, PackageJsonDependency } from '../../api/PackageJsonEditor';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { PnpmProjectShrinkwrapFile } from './PnpmProjectShrinkwrapFile';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
@@ -29,7 +31,7 @@ export interface IPeerDependenciesMetaYaml {
 
 export interface IPnpmShrinkwrapDependencyYaml {
   /** Information about the resolved package */
-  resolution: {
+  resolution?: {
     /** The hash of the tarball, to ensure archive integrity */
     integrity: string;
     /** The name of the tarball, if this was from a TGX file */
@@ -50,11 +52,11 @@ export interface IPnpmShrinkwrapDependencyYaml {
 
 export interface IPnpmShrinkwrapImporterYaml {
   /** The list of resolved version numbers for direct dependencies */
-  dependencies: { [dependency: string]: string };
+  dependencies?: { [dependency: string]: string };
   /** The list of resolved version numbers for dev dependencies */
-  devDependencies: { [dependency: string]: string };
+  devDependencies?: { [dependency: string]: string };
   /** The list of resolved version numbers for optional dependencies */
-  optionalDependencies: { [dependency: string]: string };
+  optionalDependencies?: { [dependency: string]: string };
   /** The list of specifiers used to resolve dependency versions */
   specifiers: { [dependency: string]: string };
 }
@@ -308,7 +310,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public getTarballPath(packageName: string): string | undefined {
     const dependency: IPnpmShrinkwrapDependencyYaml = this._shrinkwrapJson.packages[packageName];
 
-    if (!dependency) {
+    if (!dependency || !dependency.resolution) {
       return undefined;
     }
 
@@ -493,34 +495,56 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public getWorkspaceKeys(): ReadonlyArray<string> {
-    const result: string[] = [];
-    for (const key of Object.keys(this._shrinkwrapJson.importers)) {
-      // Avoid including the common workspace
-      if (key !== '.') {
-        result.push(key);
+  public findOrphanedProjects(rushConfiguration: RushConfiguration): ReadonlyArray<string> {
+    // The base shrinkwrap handles orphaned projects the same across all package managers,
+    // but this is only valid for non-workspace installs
+    if (!this.isWorkspaceCompatible()) {
+      return super.findOrphanedProjects(rushConfiguration);
+    }
+
+    const orphanedProjectPaths: string[] = [];
+    for (const importerKey of this.getImporterKeys()) {
+      // PNPM importer keys are relative paths from the workspace root, which is the common temp folder
+      const rushProjectPath: string = path.resolve(rushConfiguration.commonTempFolder, importerKey);
+      if (!rushConfiguration.tryGetProjectForPath(rushProjectPath)) {
+        orphanedProjectPaths.push(rushProjectPath);
       }
     }
-    result.sort(); // make the result deterministic
-    return result;
+    return orphanedProjectPaths;
   }
 
   /** @override */
-  public getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string {
+  public getProjectShrinkwrap(project: RushConfigurationProject): PnpmProjectShrinkwrapFile | undefined {
+    return new PnpmProjectShrinkwrapFile(this, project);
+  }
+
+  /** @override */
+  public getImporterKeys(): ReadonlyArray<string> {
+    // Filter out the root importer used for the generated package.json in the root
+    // of the install, since we do not use this.
+    return Object.keys(this._shrinkwrapJson.importers).filter((k) => k !== '.');
+  }
+
+  /** @override */
+  public getImporterKeyByPath(workspaceRoot: string, projectFolder: string): string {
     return Path.convertToSlashes(path.relative(workspaceRoot, projectFolder));
   }
 
-  public getWorkspaceImporter(importerPath: string): IPnpmShrinkwrapImporterYaml | undefined {
-    return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.importers, importerPath);
+  public getImporter(importerKey: string): IPnpmShrinkwrapImporterYaml | undefined {
+    return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.importers, importerKey);
+  }
+
+  public isWorkspaceCompatible(): boolean {
+    return this.getImporterKeys().length > 0;
   }
 
   /** @override */
   public isWorkspaceProjectModified(project: RushConfigurationProject): boolean {
-    const workspaceKey: string = this.getWorkspaceKeyByPath(
+    const importerKey: string = this.getImporterKeyByPath(
       project.rushConfiguration.commonTempFolder,
       project.projectFolder
     );
-    const importer: IPnpmShrinkwrapImporterYaml | undefined = this.getWorkspaceImporter(workspaceKey);
+    const importer: IPnpmShrinkwrapImporterYaml | undefined = this.getImporter(importerKey);
     if (!importer) {
       return true;
     }
@@ -563,13 +587,14 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     for (const dependencyVersion of dependencyVersions.values()) {
       switch (dependencyVersion.dependencyType) {
         case DependencyType.Optional:
-          if (!importer.optionalDependencies[dependencyVersion.name]) return true;
+          if (!importer.optionalDependencies || !importer.optionalDependencies[dependencyVersion.name])
+            return true;
           break;
         case DependencyType.Regular:
-          if (!importer.dependencies[dependencyVersion.name]) return true;
+          if (!importer.dependencies || !importer.dependencies[dependencyVersion.name]) return true;
           break;
         case DependencyType.Dev:
-          if (!importer.devDependencies[dependencyVersion.name]) return true;
+          if (!importer.devDependencies || !importer.devDependencies[dependencyVersion.name]) return true;
           break;
       }
     }

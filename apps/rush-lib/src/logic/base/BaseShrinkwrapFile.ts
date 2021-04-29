@@ -7,10 +7,11 @@ import * as semver from 'semver';
 import { RushConstants } from '../../logic/RushConstants';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
-import { PackageManagerOptionsConfigurationBase } from '../../api/RushConfiguration';
+import { PackageManagerOptionsConfigurationBase, RushConfiguration } from '../../api/RushConfiguration';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
 import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { BaseProjectShrinkwrapFile } from './BaseProjectShrinkwrapFile';
 
 /**
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.
@@ -105,20 +106,38 @@ export abstract class BaseShrinkwrapFile {
   protected abstract getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined;
 
   /**
-   * Returns the list of keys to workspace projects specified in the shrinkwrap.
-   * Example: [ '../../apps/project1', '../../apps/project2' ]
+   * Check for projects that exist in the shrinkwrap file, but don't exist
+   * in rush.json.  This might occur, e.g. if a project was recently deleted or renamed.
    *
-   * @virtual
+   * @returns a list of orphaned projects.
    */
-  public abstract getWorkspaceKeys(): ReadonlyArray<string>;
+  public findOrphanedProjects(rushConfiguration: RushConfiguration): ReadonlyArray<string> {
+    const orphanedProjectNames: string[] = [];
+    // We can recognize temp projects because they are under the "@rush-temp" NPM scope.
+    for (const tempProjectName of this.getTempProjectNames()) {
+      if (!rushConfiguration.findProjectByTempName(tempProjectName)) {
+        orphanedProjectNames.push(tempProjectName);
+      }
+    }
+    return orphanedProjectNames;
+  }
 
   /**
-   * Returns the key to the project in the workspace specified by the shrinkwrap.
-   * Example: '../../apps/project1'
+   * Returns a project shrinkwrap file for the specified project that contains all dependencies and transitive
+   * dependencies.
    *
    * @virtual
-   */
-  public abstract getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string;
+   **/
+  public abstract getProjectShrinkwrap(
+    project: RushConfigurationProject
+  ): BaseProjectShrinkwrapFile | undefined;
+
+  /**
+   * Returns whether or not the current state of the shrinkwrap file is compatible with workspace installs.
+   *
+   * @virtual
+   **/
+  public abstract isWorkspaceCompatible(): boolean;
 
   /**
    * Returns whether or not the workspace specified by the shrinkwrap matches the state of
