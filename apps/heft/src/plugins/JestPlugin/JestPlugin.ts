@@ -97,8 +97,13 @@ export class JestPlugin implements IHeftPlugin {
       jestArgv._ = [...test.properties.findRelatedTests];
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { globalConfig, results: jestResults } = await runCLI(jestArgv, [buildFolder]);
+    const {
+      // Config.Argv is weakly typed.  After updating the jestArgv object, it's a good idea to inspect "globalConfig"
+      // in the debugger to validate that your changes are being applied as expected.
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      globalConfig,
+      results: jestResults
+    } = await runCLI(jestArgv, [buildFolder]);
 
     if (jestResults.numFailedTests > 0) {
       jestLogger.emitError(

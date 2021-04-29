@@ -34,7 +34,8 @@ interface IBaseWorkerPoolModule {
 // Follow the NPM dependency chain to find the module path for BaseWorkerPool.js
 // heft --> @jest/core --> @jest/reporters --> jest-worker
 
-const PATCHED_FORCE_EXIT_DELAY: number = 7000; // milliseconds
+const PATCHED_FORCE_EXIT_DELAY: number = 7000; // 7 seconds
+const patchName: string = path.basename(__filename);
 
 function applyPatch(): void {
   try {
@@ -62,9 +63,15 @@ function applyPatch(): void {
     const baseWorkerPoolModule: IBaseWorkerPoolModule = require(baseWorkerPoolPath);
 
     // Obtain the metadata for the module
-    const baseWorkerPoolModuleMetadata: NodeModule | undefined = module.children.filter(
-      (x) => path.basename(x.filename || '').toUpperCase() === baseWorkerPoolFilename.toUpperCase()
-    )[0];
+    let baseWorkerPoolModuleMetadata: NodeModule | undefined = undefined;
+    for (const childModule of module.children) {
+      if (path.basename(childModule.filename || '').toUpperCase() === baseWorkerPoolFilename.toUpperCase()) {
+        if (baseWorkerPoolModuleMetadata) {
+          throw new Error('More than one child module matched while detecting Node.js module metadata');
+        }
+        baseWorkerPoolModuleMetadata = childModule;
+      }
+    }
 
     if (!baseWorkerPoolModuleMetadata) {
       throw new Error('Failed to detect the Node.js module metadata for BaseWorkerPool.js');
@@ -116,7 +123,7 @@ function applyPatch(): void {
     baseWorkerPoolModule.default = patchedModule.default;
   } catch (e) {
     console.error();
-    console.error('ERROR: jest-worker-patch.ts failed to patch the "jest-worker" package:');
+    console.error(`ERROR: ${patchName} failed to patch the "jest-worker" package:`);
     console.error(e.toString());
     console.error();
 
@@ -126,7 +133,7 @@ function applyPatch(): void {
 
 if (typeof jest !== 'undefined' || process.env.JEST_WORKER_ID) {
   // This patch is incompatible with Jest's proprietary require() implementation
-  console.log("\nJEST ENVIRONMENT DETECTED - Skipping Heft's jestWorkerPatch.js\n");
+  console.log(`\nJEST ENVIRONMENT DETECTED - Skipping Heft's ${patchName}\n`);
 } else {
   applyPatch();
 }
