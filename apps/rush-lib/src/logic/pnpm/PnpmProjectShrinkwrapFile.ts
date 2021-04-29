@@ -135,8 +135,9 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
       integrity = `${name}@${version}:${sha256Digest}:`;
     }
 
-    if (projectShrinkwrapMap.has(specifier)) {
-      if (projectShrinkwrapMap.get(specifier) !== integrity) {
+    const existingSpecifier: string | undefined = projectShrinkwrapMap.get(specifier);
+    if (existingSpecifier) {
+      if (existingSpecifier !== integrity) {
         throw new Error(`Collision: ${specifier} already exists in with a different integrity`);
       }
       return;
@@ -146,19 +147,16 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
     projectShrinkwrapMap.set(specifier, integrity);
 
     // Add the dependencies of the dependency
-    for (const dependencyName of Object.keys(shrinkwrapEntry.dependencies || {})) {
-      const dependencyVersion: string = shrinkwrapEntry.dependencies![dependencyName];
-      this._addDependencyRecursive(projectShrinkwrapMap, dependencyName, dependencyVersion, shrinkwrapEntry);
+    for (const [name, version] of Object.entries(shrinkwrapEntry.dependencies || {})) {
+      this._addDependencyRecursive(projectShrinkwrapMap, name, version, shrinkwrapEntry);
     }
 
-    // Add the optional dependencies of the dependency
-    for (const optionalDependencyName of Object.keys(shrinkwrapEntry.optionalDependencies || {})) {
-      // Optional dependencies may not exist. Don't blow up if it can't be found
-      const dependencyVersion: string = shrinkwrapEntry.optionalDependencies![optionalDependencyName];
+    // Add the optional dependencies of the dependency, and don't blow up if they don't exist
+    for (const [name, version] of Object.entries(shrinkwrapEntry.optionalDependencies || {})) {
       this._addDependencyRecursive(
         projectShrinkwrapMap,
-        optionalDependencyName,
-        dependencyVersion,
+        name,
+        version,
         shrinkwrapEntry,
         (throwIfShrinkwrapEntryMissing = false)
       );
