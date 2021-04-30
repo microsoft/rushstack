@@ -1,6 +1,13 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Thu, 29 Apr 2021 23:26:50 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Apr 2021 00:30:52 GMT and should not be manually modified.
+
+## 1.0.21
+Fri, 30 Apr 2021 00:30:52 GMT
+
+### Patches
+
+- Fix an issue where certmgr.exe sometimes could not be found on Windows.
 
 ## 1.0.20
 Thu, 29 Apr 2021 23:26:50 GMT

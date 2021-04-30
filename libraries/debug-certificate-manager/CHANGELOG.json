@@ -2,6 +2,18 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.0.21",
+      "tag": "@rushstack/debug-certificate-manager_v1.0.21",
+      "date": "Fri, 30 Apr 2021 00:30:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where certmgr.exe sometimes could not be found on Windows."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.20",
       "tag": "@rushstack/debug-certificate-manager_v1.0.20",
       "date": "Thu, 29 Apr 2021 23:26:50 GMT",
