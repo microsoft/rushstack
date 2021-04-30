@@ -196,38 +196,30 @@ export function parsePnpmDependencyKey(
 }
 
 export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
-  /**
-   * The filename of the shrinkwrap file.
-   */
   public readonly shrinkwrapFilename: string;
+  public readonly isWorkspaceCompatible: boolean;
+  public readonly registry: string;
+  public readonly dependencies: ReadonlyMap<string, string>;
+  public readonly importers: ReadonlyMap<string, IPnpmShrinkwrapImporterYaml>;
+  public readonly specifiers: ReadonlyMap<string, string>;
+  public readonly packages: ReadonlyMap<string, IPnpmShrinkwrapDependencyYaml>;
 
   private readonly _shrinkwrapJson: IPnpmShrinkwrapYaml;
-  private readonly _isWorkspaceCompatible: boolean;
 
   private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string) {
     super();
-    this._shrinkwrapJson = shrinkwrapJson;
     this.shrinkwrapFilename = shrinkwrapFilename;
+    this._shrinkwrapJson = shrinkwrapJson;
 
     // Normalize the data
-    if (!this._shrinkwrapJson.registry) {
-      this._shrinkwrapJson.registry = '';
-    }
-    if (!this._shrinkwrapJson.dependencies) {
-      this._shrinkwrapJson.dependencies = {};
-    }
-    if (!this._shrinkwrapJson.importers) {
-      this._shrinkwrapJson.importers = {};
-    }
-    if (!this._shrinkwrapJson.specifiers) {
-      this._shrinkwrapJson.specifiers = {};
-    }
-    if (!this._shrinkwrapJson.packages) {
-      this._shrinkwrapJson.packages = {};
-    }
+    this.registry = shrinkwrapJson.registry || '';
+    this.dependencies = new Map(Object.entries(shrinkwrapJson.dependencies || {}));
+    this.importers = new Map(Object.entries(shrinkwrapJson.importers || {}));
+    this.specifiers = new Map(Object.entries(shrinkwrapJson.specifiers || {}));
+    this.packages = new Map(Object.entries(shrinkwrapJson.packages || {}));
 
     // Importers only exist in workspaces
-    this._isWorkspaceCompatible = Object.keys(this._shrinkwrapJson.importers).length > 0;
+    this.isWorkspaceCompatible = this.importers.size > 0;
   }
 
   public static loadFromFile(
@@ -303,7 +295,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   /** @override */
   public getTempProjectNames(): ReadonlyArray<string> {
-    return this._getTempProjectNames(this._shrinkwrapJson.dependencies);
+    return this._getTempProjectNames(this._shrinkwrapJson.dependencies || {});
   }
 
   /**
@@ -312,17 +304,12 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * Example of return value: file:projects/build-tools.tgz
    */
   public getTarballPath(packageName: string): string | undefined {
-    const dependency: IPnpmShrinkwrapDependencyYaml = this._shrinkwrapJson.packages[packageName];
-
-    if (!dependency || !dependency.resolution) {
-      return undefined;
-    }
-
-    return dependency.resolution.tarball;
+    const dependency: IPnpmShrinkwrapDependencyYaml | undefined = this.packages.get(packageName);
+    return dependency?.resolution?.tarball;
   }
 
   public getTopLevelDependencyKey(dependencyName: string): string | undefined {
-    return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.dependencies, dependencyName);
+    return this.dependencies.get(dependencyName);
   }
 
   /**
@@ -336,10 +323,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * @override
    */
   public getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined {
-    let value: string | undefined = BaseShrinkwrapFile.tryGetValue(
-      this._shrinkwrapJson.dependencies,
-      dependencyName
-    );
+    let value: string | undefined = this.dependencies.get(dependencyName);
     if (value) {
       // Getting the top level dependency version from a PNPM lockfile version 5.1
       // --------------------------------------------------------------------------
@@ -368,14 +352,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
       // The below code is also compatible with lockfile versions < 5.1
 
-      const dependency: IPnpmShrinkwrapDependencyYaml = this._shrinkwrapJson.packages[value];
-
-      if (
-        dependency &&
-        dependency.resolution &&
-        dependency.resolution.tarball &&
-        value.startsWith(dependency.resolution.tarball)
-      ) {
+      const dependency: IPnpmShrinkwrapDependencyYaml | undefined = this.packages.get(value);
+      if (dependency?.resolution?.tarball && value.startsWith(dependency.resolution.tarball)) {
         return new DependencySpecifier(dependencyName, dependency.resolution.tarball);
       } else {
         const underscoreIndex: number = value.indexOf('_');
@@ -408,28 +386,20 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    * of the temp project '@rush-temp/my-app'.
    */
   public getTempProjectDependencyKey(tempProjectName: string): string | undefined {
-    const tempProjectDependencyKey: string | undefined = BaseShrinkwrapFile.tryGetValue(
-      this._shrinkwrapJson.dependencies,
-      tempProjectName
-    );
-
-    if (tempProjectDependencyKey) {
-      return tempProjectDependencyKey;
-    }
-
-    return undefined;
+    const tempProjectDependencyKey: string | undefined = this.dependencies.get(tempProjectName);
+    return tempProjectDependencyKey ? tempProjectDependencyKey : undefined;
   }
 
   public getShrinkwrapEntryFromTempProjectDependencyKey(
     tempProjectDependencyKey: string
   ): IPnpmShrinkwrapDependencyYaml | undefined {
-    return this._shrinkwrapJson.packages[tempProjectDependencyKey];
+    return this.packages.get(tempProjectDependencyKey);
   }
 
   public getShrinkwrapEntry(name: string, version: string): IPnpmShrinkwrapDependencyYaml | undefined {
     // Version can sometimes be in the form of a path that's already in the /name/version format.
     const packageId: string = version.indexOf('/') !== -1 ? version : `/${name}/${version}`;
-    return this._shrinkwrapJson.packages[packageId];
+    return this.packages.get(packageId);
   }
 
   /**
@@ -525,7 +495,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public getImporterKeys(): ReadonlyArray<string> {
     // Filter out the root importer used for the generated package.json in the root
     // of the install, since we do not use this.
-    return Object.keys(this._shrinkwrapJson.importers).filter((k) => k !== '.');
+    return [...this.importers.keys()].filter((k) => k !== '.');
   }
 
   public getImporterKeyByPath(workspaceRoot: string, projectFolder: string): string {
@@ -533,12 +503,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   public getImporter(importerKey: string): IPnpmShrinkwrapImporterYaml | undefined {
-    return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.importers, importerKey);
-  }
-
-  /** @override */
-  public get isWorkspaceCompatible(): boolean {
-    return this._isWorkspaceCompatible;
+    return this.importers.get(importerKey);
   }
 
   /** @override */
@@ -625,16 +590,11 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _getPackageDescription(
     tempProjectDependencyKey: string
   ): IPnpmShrinkwrapDependencyYaml | undefined {
-    const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined = BaseShrinkwrapFile.tryGetValue(
-      this._shrinkwrapJson.packages,
+    const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined = this.packages.get(
       tempProjectDependencyKey
     );
 
-    if (!packageDescription || !packageDescription.dependencies) {
-      return undefined;
-    }
-
-    return packageDescription;
+    return packageDescription && packageDescription.dependencies ? packageDescription : undefined;
   }
 
   private _parsePnpmDependencyKey(

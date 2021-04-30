@@ -22,14 +22,6 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
    * @returns True if the project shrinkwrap was created or updated, false otherwise.
    */
   public async updateProjectShrinkwrapAsync(): Promise<void> {
-    // If the feature is not enabled, clean up the shrinkwrap and return
-    if (
-      this.project.rushConfiguration.experimentsConfiguration.configuration
-        .legacyIncrementalBuildDependencyDetection
-    ) {
-      return this.deleteIfExistsAsync();
-    }
-
     const projectShrinkwrapMap: Map<string, string> | undefined = this.shrinkwrapFile.isWorkspaceCompatible
       ? this.generateWorkspaceProjectShrinkwrapMap()
       : this.generateLegacyProjectShrinkwrapMap();
@@ -158,7 +150,7 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
         name,
         version,
         shrinkwrapEntry,
-        (throwIfShrinkwrapEntryMissing = false)
+        /* throwIfShrinkwrapEntryMissing */ false
       );
     }
 
@@ -188,13 +180,9 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
       // it's own peer dependencies. If it is, we can rely on the package manager and
       // make the assumption that we've already found it further up the stack.
       if (
-        (shrinkwrapEntry.dependencies && shrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)) ||
-        (parentShrinkwrapEntry &&
-          parentShrinkwrapEntry.dependencies &&
-          parentShrinkwrapEntry.dependencies.hasOwnProperty(peerDependencyName)) ||
-        (parentShrinkwrapEntry &&
-          parentShrinkwrapEntry.peerDependencies &&
-          parentShrinkwrapEntry.peerDependencies.hasOwnProperty(peerDependencyName))
+        shrinkwrapEntry.dependencies?.hasOwnProperty(peerDependencyName) ||
+        parentShrinkwrapEntry?.dependencies?.hasOwnProperty(peerDependencyName) ||
+        parentShrinkwrapEntry?.peerDependencies?.hasOwnProperty(peerDependencyName)
       ) {
         continue;
       }

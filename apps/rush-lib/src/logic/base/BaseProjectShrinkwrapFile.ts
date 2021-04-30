@@ -31,14 +31,14 @@ export abstract class BaseProjectShrinkwrapFile {
    * for the specified project.
    */
   public static getFilePathForProject(project: RushConfigurationProject): string {
-    return path.join(project.projectRushTempFolder, RushConstants.projectDependencyManifestFilename);
+    return path.join(project.projectRushTempFolder, RushConstants.projectShrinkwrapFilename);
   }
 
   /**
    * If the <project>/.rush/temp/shrinkwrap-deps.json file exists, delete it. Otherwise, do nothing.
    */
-  public deleteIfExistsAsync(): Promise<void> {
-    return FileSystem.deleteFileAsync(this.projectShrinkwrapFilePath, { throwIfNotExists: false });
+  public async deleteIfExistsAsync(): Promise<void> {
+    await FileSystem.deleteFileAsync(this.projectShrinkwrapFilePath, { throwIfNotExists: false });
   }
 
   /**
@@ -48,6 +48,9 @@ export abstract class BaseProjectShrinkwrapFile {
    */
   public abstract updateProjectShrinkwrapAsync(): Promise<void>;
 
+  /**
+   * The shrinkwrap file that the project shrinkwrap file is based off of.
+   */
   protected get shrinkwrapFile(): BaseShrinkwrapFile {
     return this._shrinkwrapFile;
   }

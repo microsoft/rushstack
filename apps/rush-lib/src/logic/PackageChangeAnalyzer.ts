@@ -96,11 +96,8 @@ export class PackageChangeAnalyzer {
       }
     }
 
-    if (
-      this._rushConfiguration.packageManager === 'pnpm' &&
-      !this._rushConfiguration.experimentsConfiguration.configuration
-        .legacyIncrementalBuildDependencyDetection
-    ) {
+    // Currently, only pnpm handles project shrinkwraps
+    if (this._rushConfiguration.packageManager === 'pnpm') {
       const projects: RushConfigurationProject[] = [];
       const projectDependencyManifestPaths: string[] = [];
 

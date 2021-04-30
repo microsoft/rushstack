@@ -17,6 +17,7 @@ import { BaseProjectShrinkwrapFile } from './BaseProjectShrinkwrapFile';
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.
  */
 export abstract class BaseShrinkwrapFile {
+  public abstract readonly isWorkspaceCompatible: boolean;
   protected _alreadyWarnedSpecs: Set<string> = new Set<string>();
 
   protected static tryGetValue<T>(dictionary: { [key2: string]: T }, key: string): T | undefined {
@@ -131,13 +132,6 @@ export abstract class BaseShrinkwrapFile {
   public abstract getProjectShrinkwrap(
     project: RushConfigurationProject
   ): BaseProjectShrinkwrapFile | undefined;
-
-  /**
-   * Returns whether or not the current state of the shrinkwrap file is compatible with workspace installs.
-   *
-   * @virtual
-   **/
-  public abstract get isWorkspaceCompatible(): boolean;
 
   /**
    * Returns whether or not the workspace specified by the shrinkwrap matches the state of

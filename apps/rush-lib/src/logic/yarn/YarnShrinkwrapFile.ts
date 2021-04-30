@@ -94,6 +94,8 @@ interface IYarnShrinkwrapJson {
  * logging messages to use terminology more consistent with Yarn's own documentation.
  */
 export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
+  public readonly isWorkspaceCompatible: boolean;
+
   // Example inputs:
   // "js-tokens@^3.0.0 || ^4.0.0"
   // "@rush-temp/api-extractor-test-03@file:./projects/api-extractor-test-03.tgz"
@@ -158,6 +160,9 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     this._tempProjectNames.sort(); // make the result deterministic
+
+    // We don't support Yarn workspaces yet
+    this.isWorkspaceCompatible = false;
   }
 
   public static loadFromFile(shrinkwrapFilename: string): YarnShrinkwrapFile | undefined {
@@ -270,11 +275,6 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   /** @override */
   public getProjectShrinkwrap(project: RushConfigurationProject): BaseProjectShrinkwrapFile | undefined {
     return undefined;
-  }
-
-  /** @override */
-  public get isWorkspaceCompatible(): boolean {
-    return false;
   }
 
   /** @override */

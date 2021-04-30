@@ -24,6 +24,7 @@ interface INpmShrinkwrapJson {
 }
 
 export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
+  public readonly isWorkspaceCompatible: boolean;
   private _shrinkwrapJson: INpmShrinkwrapJson;
 
   private constructor(shrinkwrapJson: INpmShrinkwrapJson) {
@@ -40,6 +41,9 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     if (!this._shrinkwrapJson.dependencies) {
       this._shrinkwrapJson.dependencies = {};
     }
+
+    // Workspaces not supported in NPM
+    this.isWorkspaceCompatible = false;
   }
 
   public static loadFromFile(shrinkwrapJsonFilename: string): NpmShrinkwrapFile | undefined {
@@ -123,11 +127,6 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   /** @override */
   public getProjectShrinkwrap(project: RushConfigurationProject): BaseProjectShrinkwrapFile | undefined {
     return undefined;
-  }
-
-  /** @override */
-  public get isWorkspaceCompatible(): boolean {
-    return false;
   }
 
   /** @override */

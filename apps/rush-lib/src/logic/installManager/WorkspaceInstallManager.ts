@@ -29,7 +29,6 @@ import { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager'
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
-import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -429,15 +428,12 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       this.rushConfiguration.tempShrinkwrapFilename
     )!;
 
-    const projectShrinkwrapPromises: Promise<void>[] = this.rushConfiguration.projects.map((x) => {
-      const projectShrinkwrapFile:
-        | BaseProjectShrinkwrapFile
-        | undefined = tempShrinkwrapFile.getProjectShrinkwrap(x);
-      return projectShrinkwrapFile?.updateProjectShrinkwrapAsync() ?? Promise.resolve();
-    });
-    console.log(`have promises (${new Date().getTime()})`);
-    await Promise.all(projectShrinkwrapPromises);
-    console.log(`done writes (${new Date().getTime()})`);
+    // Write or delete all project shrinkwraps related to the install
+    await Promise.all(
+      this.rushConfiguration.projects.map(async (x) => {
+        await tempShrinkwrapFile.getProjectShrinkwrap(x)?.updateProjectShrinkwrapAsync();
+      })
+    );
 
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration).create();
