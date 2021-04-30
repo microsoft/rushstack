@@ -116,6 +116,8 @@ export class AmazonS3Client {
         canonicalHeaders.push(`${SECURITY_TOKEN_HEADER_NAME}:${this._credentials.sessionToken}`);
       }
 
+      const signedHeaderNamesString: string = signedHeaderNames.join(';');
+
       // The canonical request looks like this:
       //  GET
       // /test.txt
@@ -133,7 +135,7 @@ export class AmazonS3Client {
         '', // we don't use query strings for these requests
         ...canonicalHeaders,
         '',
-        signedHeaderNames.join(';'),
+        signedHeaderNamesString,
         bodyHash
       ].join('\n');
       const canonicalRequestHash: string = this._getSha256(canonicalRequest);
@@ -160,7 +162,7 @@ export class AmazonS3Client {
       const signingKey: Buffer = this._getSha256Hmac(dateRegionServiceKey, 'aws4_request');
       const signature: string = this._getSha256Hmac(signingKey, stringToSign, 'hex');
 
-      const authorizationHeader: string = `AWS4-HMAC-SHA256 Credential=${this._credentials.accessKeyId}/${scope},SignedHeaders=${signedHeaderNames},Signature=${signature}`;
+      const authorizationHeader: string = `AWS4-HMAC-SHA256 Credential=${this._credentials.accessKeyId}/${scope},SignedHeaders=${signedHeaderNamesString},Signature=${signature}`;
 
       headers.set('Authorization', authorizationHeader);
       if (this._credentials.sessionToken) {
