@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/debug-certificate-manager",
+      "comment": "Fix an issue where certmgr.exe sometimes could not be found on Windows.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/debug-certificate-manager",
+  "email": "iclanton@users.noreply.github.com"
+}
