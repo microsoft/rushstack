@@ -70,7 +70,9 @@ export class ProjectWatcher {
 
     const pathsToWatch: Set<string> = new Set();
 
-    const isRecursiveSupported: boolean = os.platform() === 'win32';
+    // Node 12 supports the "recursive" parameter to fs.watch only on win32 and OSX
+    // https://nodejs.org/docs/latest-v12.x/api/fs.html#fs_caveats
+    const useNativeRecursiveWatch: boolean = os.platform() === 'win32' || os.platform() === 'darwin';
 
     for (const project of this._projectsToWatch) {
       const projectState: Map<string, string> = (await previousState.getPackageDeps(project.packageName, this._terminal))!;
@@ -80,7 +82,7 @@ export class ProjectWatcher {
         for (const pathToWatch of ProjectWatcher._enumeratePathsToWatch(
           fileName,
           projectFolder,
-          isRecursiveSupported
+          useNativeRecursiveWatch
         )) {
           pathsToWatch.add(`${repoRoot}/${pathToWatch}`);
         }
@@ -141,7 +143,7 @@ export class ProjectWatcher {
             watchedPath,
             {
               encoding: 'utf-8',
-              recursive: isRecursiveSupported
+              recursive: useNativeRecursiveWatch
             },
             listener
           );
@@ -159,7 +161,7 @@ export class ProjectWatcher {
             }
 
             // Handling for added directories
-            if (!isRecursiveSupported) {
+            if (!useNativeRecursiveWatch) {
               const decodedName: string = fileName && fileName.toString();
               const normalizedName: string = decodedName && Path.convertToSlashes(decodedName);
 
@@ -279,7 +281,7 @@ export class ProjectWatcher {
   private static *_enumeratePathsToWatch(
     path: string,
     projectRelativeFolder: string,
-    isRecursiveSupported: boolean
+    useNativeRecursiveWatch: boolean
   ): Iterable<string> {
     const rootSlashIndex: number = path.indexOf('/', projectRelativeFolder.length + 2);
 
@@ -290,7 +292,8 @@ export class ProjectWatcher {
 
     yield path.slice(0, rootSlashIndex);
 
-    if (isRecursiveSupported) {
+    if (useNativeRecursiveWatch) {
+      // Only need the root folder if fs.watch can be called with recursive: true
       return;
     }
 
