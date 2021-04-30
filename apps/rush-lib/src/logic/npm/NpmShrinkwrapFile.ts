@@ -126,7 +126,7 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public isWorkspaceCompatible(): boolean {
+  public get isWorkspaceCompatible(): boolean {
     return false;
   }
 

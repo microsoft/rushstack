@@ -202,6 +202,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly shrinkwrapFilename: string;
 
   private readonly _shrinkwrapJson: IPnpmShrinkwrapYaml;
+  private readonly _isWorkspaceCompatible: boolean;
 
   private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string) {
     super();
@@ -224,6 +225,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     if (!this._shrinkwrapJson.packages) {
       this._shrinkwrapJson.packages = {};
     }
+
+    // Importers only exist in workspaces
+    this._isWorkspaceCompatible = Object.keys(this._shrinkwrapJson.importers).length > 0;
   }
 
   public static loadFromFile(
@@ -498,7 +502,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public findOrphanedProjects(rushConfiguration: RushConfiguration): ReadonlyArray<string> {
     // The base shrinkwrap handles orphaned projects the same across all package managers,
     // but this is only valid for non-workspace installs
-    if (!this.isWorkspaceCompatible()) {
+    if (!this.isWorkspaceCompatible) {
       return super.findOrphanedProjects(rushConfiguration);
     }
 
@@ -518,14 +522,12 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return new PnpmProjectShrinkwrapFile(this, project);
   }
 
-  /** @override */
   public getImporterKeys(): ReadonlyArray<string> {
     // Filter out the root importer used for the generated package.json in the root
     // of the install, since we do not use this.
     return Object.keys(this._shrinkwrapJson.importers).filter((k) => k !== '.');
   }
 
-  /** @override */
   public getImporterKeyByPath(workspaceRoot: string, projectFolder: string): string {
     return Path.convertToSlashes(path.relative(workspaceRoot, projectFolder));
   }
@@ -534,8 +536,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.importers, importerKey);
   }
 
-  public isWorkspaceCompatible(): boolean {
-    return this.getImporterKeys().length > 0;
+  /** @override */
+  public get isWorkspaceCompatible(): boolean {
+    return this._isWorkspaceCompatible;
   }
 
   /** @override */

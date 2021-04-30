@@ -14,14 +14,16 @@ import { BaseShrinkwrapFile } from './BaseShrinkwrapFile';
  * to better determine which projects should be rebuilt when dependencies are updated.
  */
 export abstract class BaseProjectShrinkwrapFile {
-  private readonly _projectShrinkwrapFilename: string;
+  public readonly projectShrinkwrapFilePath: string;
+  protected readonly project: RushConfigurationProject;
+
   private readonly _shrinkwrapFile: BaseShrinkwrapFile;
-  private readonly _project: RushConfigurationProject;
 
   public constructor(shrinkwrapFile: BaseShrinkwrapFile, project: RushConfigurationProject) {
+    this.project = project;
+    this.projectShrinkwrapFilePath = BaseProjectShrinkwrapFile.getFilePathForProject(this.project);
+
     this._shrinkwrapFile = shrinkwrapFile;
-    this._project = project;
-    this._projectShrinkwrapFilename = BaseProjectShrinkwrapFile.getFilePathForProject(this._project);
   }
 
   /**
@@ -36,7 +38,7 @@ export abstract class BaseProjectShrinkwrapFile {
    * If the <project>/.rush/temp/shrinkwrap-deps.json file exists, delete it. Otherwise, do nothing.
    */
   public deleteIfExistsAsync(): Promise<void> {
-    return FileSystem.deleteFileAsync(this._projectShrinkwrapFilename, { throwIfNotExists: false });
+    return FileSystem.deleteFileAsync(this.projectShrinkwrapFilePath, { throwIfNotExists: false });
   }
 
   /**
@@ -45,14 +47,6 @@ export abstract class BaseProjectShrinkwrapFile {
    * @virtual
    */
   public abstract updateProjectShrinkwrapAsync(): Promise<void>;
-
-  public get projectShrinkwrapFilename(): string {
-    return this._projectShrinkwrapFilename;
-  }
-
-  protected get project(): RushConfigurationProject {
-    return this._project;
-  }
 
   protected get shrinkwrapFile(): BaseShrinkwrapFile {
     return this._shrinkwrapFile;

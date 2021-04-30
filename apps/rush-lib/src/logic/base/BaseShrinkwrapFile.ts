@@ -137,7 +137,7 @@ export abstract class BaseShrinkwrapFile {
    *
    * @virtual
    **/
-  public abstract isWorkspaceCompatible(): boolean;
+  public abstract get isWorkspaceCompatible(): boolean;
 
   /**
    * Returns whether or not the workspace specified by the shrinkwrap matches the state of

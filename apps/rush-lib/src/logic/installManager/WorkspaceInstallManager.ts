@@ -96,7 +96,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (!shrinkwrapFile) {
       shrinkwrapIsUpToDate = false;
     } else {
-      if (!shrinkwrapFile.isWorkspaceCompatible() && !this.options.fullUpgrade) {
+      if (!shrinkwrapFile.isWorkspaceCompatible && !this.options.fullUpgrade) {
         console.log();
         console.log(
           colors.red(

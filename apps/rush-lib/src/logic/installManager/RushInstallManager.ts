@@ -100,7 +100,7 @@ export class RushInstallManager extends BaseInstallManager {
 
     if (!shrinkwrapFile) {
       shrinkwrapIsUpToDate = false;
-    } else if (shrinkwrapFile.isWorkspaceCompatible() && !this.options.fullUpgrade) {
+    } else if (shrinkwrapFile.isWorkspaceCompatible && !this.options.fullUpgrade) {
       console.log();
       console.log(
         colors.red(

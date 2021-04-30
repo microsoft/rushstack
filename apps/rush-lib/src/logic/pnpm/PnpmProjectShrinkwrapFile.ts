@@ -30,7 +30,7 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
       return this.deleteIfExistsAsync();
     }
 
-    const projectShrinkwrapMap: Map<string, string> | undefined = this.shrinkwrapFile.isWorkspaceCompatible()
+    const projectShrinkwrapMap: Map<string, string> | undefined = this.shrinkwrapFile.isWorkspaceCompatible
       ? this.generateWorkspaceProjectShrinkwrapMap()
       : this.generateLegacyProjectShrinkwrapMap();
 
@@ -166,7 +166,7 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
     // Therefore, all packages that are consumed should be specified in the dependency tree. Given this, there
     // is no need to look for peer dependencies, since it is simply a constraint to be validated by the
     // package manager.
-    if (!this.shrinkwrapFile.isWorkspaceCompatible()) {
+    if (!this.shrinkwrapFile.isWorkspaceCompatible) {
       this._resolveAndAddPeerDependencies(projectShrinkwrapMap, shrinkwrapEntry, parentShrinkwrapEntry);
     }
   }
@@ -226,7 +226,7 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
     for (const key of keys) {
       file[key] = projectShrinkwrapMap.get(key)!;
     }
-    await JsonFile.saveAsync(file, this.projectShrinkwrapFilename, { ensureFolderExists: true });
+    await JsonFile.saveAsync(file, this.projectShrinkwrapFilePath, { ensureFolderExists: true });
   }
 
   /**

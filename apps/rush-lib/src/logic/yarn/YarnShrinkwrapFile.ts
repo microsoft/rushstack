@@ -273,7 +273,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public isWorkspaceCompatible(): boolean {
+  public get isWorkspaceCompatible(): boolean {
     return false;
   }
 
