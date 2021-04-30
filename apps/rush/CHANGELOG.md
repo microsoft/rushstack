@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 28 Apr 2021 17:54:16 GMT and should not be manually modified.
+This log was last generated on Fri, 30 Apr 2021 00:32:16 GMT and should not be manually modified.
+
+## 5.45.6
+Fri, 30 Apr 2021 00:32:16 GMT
+
+### Updates
+
+- Fix a regression in the S3 cloud build cache provider
 
 ## 5.45.5
 Wed, 28 Apr 2021 17:54:16 GMT

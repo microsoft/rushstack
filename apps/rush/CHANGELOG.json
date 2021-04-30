@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.45.6",
+      "tag": "@microsoft/rush_v5.45.6",
+      "date": "Fri, 30 Apr 2021 00:32:16 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a regression in the S3 cloud build cache provider"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.45.5",
       "tag": "@microsoft/rush_v5.45.5",
       "date": "Wed, 28 Apr 2021 17:54:16 GMT",
