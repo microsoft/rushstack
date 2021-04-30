@@ -1,6 +1,23 @@
 # Change Log - @rushstack/heft-webpack5-plugin
 
-This log was last generated on Fri, 23 Apr 2021 22:00:07 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Apr 2021 23:26:50 GMT and should not be manually modified.
+
+## 0.1.10
+Thu, 29 Apr 2021 23:26:50 GMT
+
+_Version update only_
+
+## 0.1.9
+Thu, 29 Apr 2021 01:07:29 GMT
+
+_Version update only_
+
+## 0.1.8
+Tue, 27 Apr 2021 00:11:19 GMT
+
+### Patches
+
+- Upgrades webpack 5 to get a bug fix when resolving modules with a # in the path
 
 ## 0.1.7
 Fri, 23 Apr 2021 22:00:07 GMT

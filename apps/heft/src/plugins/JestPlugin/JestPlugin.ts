@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// Load the Jest patch
+import './jestWorkerPatch';
+
 import * as path from 'path';
 import { runCLI } from '@jest/core';
 import { FileSystem, JsonFile } from '@rushstack/node-core-library';
@@ -61,6 +64,7 @@ export class JestPlugin implements IHeftPlugin {
       // In debug mode, avoid forking separate processes that are difficult to debug
       runInBand: heftSession.debugMode,
       debug: heftSession.debugMode,
+      detectOpenHandles: !!test.properties.detectOpenHandles,
 
       config: expectedConfigPath,
       cacheDirectory: this._getJestCacheFolder(heftConfiguration),
@@ -93,7 +97,13 @@ export class JestPlugin implements IHeftPlugin {
       jestArgv._ = [...test.properties.findRelatedTests];
     }
 
-    const { results: jestResults } = await runCLI(jestArgv, [buildFolder]);
+    const {
+      // Config.Argv is weakly typed.  After updating the jestArgv object, it's a good idea to inspect "globalConfig"
+      // in the debugger to validate that your changes are being applied as expected.
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      globalConfig,
+      results: jestResults
+    } = await runCLI(jestArgv, [buildFolder]);
 
     if (jestResults.numFailedTests > 0) {
       jestLogger.emitError(

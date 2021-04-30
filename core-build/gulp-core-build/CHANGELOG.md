@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build
 
-This log was last generated on Mon, 12 Apr 2021 15:10:28 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Apr 2021 23:26:50 GMT and should not be manually modified.
+
+## 3.17.15
+Thu, 29 Apr 2021 23:26:50 GMT
+
+### Patches
+
+- Lock the version for "@types/semver", since they broke SemVer in a PATCH release
 
 ## 3.17.14
 Mon, 12 Apr 2021 15:10:28 GMT

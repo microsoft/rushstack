@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.15.0",
+      "tag": "@microsoft/api-extractor_v7.15.0",
+      "date": "Thu, 29 Apr 2021 23:26:50 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade the bundled compiler engine to TypeScript 4.2"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.14.0",
       "tag": "@microsoft/api-extractor_v7.14.0",
       "date": "Tue, 20 Apr 2021 04:59:51 GMT",

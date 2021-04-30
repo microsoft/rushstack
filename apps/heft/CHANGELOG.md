@@ -1,6 +1,22 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 23 Apr 2021 22:00:06 GMT and should not be manually modified.
+This log was last generated on Thu, 29 Apr 2021 23:26:50 GMT and should not be manually modified.
+
+## 0.30.1
+Thu, 29 Apr 2021 23:26:50 GMT
+
+_Version update only_
+
+## 0.30.0
+Thu, 29 Apr 2021 01:07:29 GMT
+
+### Minor changes
+
+- Add a command-line option "--detect-open-handles" for troubleshooting Jest issues
+
+### Patches
+
+- Implement a workaround for an intermittent Jest error "A worker process has failed to exit gracefully and has been force exited." (Jest issue #11354)
 
 ## 0.29.1
 Fri, 23 Apr 2021 22:00:06 GMT

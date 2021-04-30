@@ -12,13 +12,24 @@ import {
   SASQueryParameters,
   ServiceGetUserDelegationKeyResponse
 } from '@azure/storage-blob';
-import { AzureAuthorityHosts, DeviceCodeCredential, DeviceCodeInfo } from '@azure/identity';
+import { DeviceCodeCredential, DeviceCodeInfo } from '@azure/identity';
 
 import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { CredentialCache, ICredentialCacheEntry } from '../CredentialCache';
 import { RushConstants } from '../RushConstants';
 import { Utilities } from '../../utilities/Utilities';
 import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// TODO: This is a temporary workaround; it should be reverted when we upgrade to "@azure/identity" version 2.x
+// import { AzureAuthorityHosts } from '@azure/identity';
+export enum AzureAuthorityHosts {
+  AzureChina = 'https://login.chinacloudapi.cn',
+  AzureGermany = 'https://login.microsoftonline.de',
+  AzureGovernment = 'https://login.microsoftonline.us',
+  AzurePublicCloud = 'https://login.microsoftonline.com'
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 export type AzureEnvironmentNames = keyof typeof AzureAuthorityHosts;
 

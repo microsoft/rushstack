@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft",
-  "version": "0.29.1",
+  "version": "0.30.1",
   "description": "Build all your JavaScript projects the same way: A way that works.",
   "keywords": [
     "toolchain",
@@ -67,7 +67,7 @@
     "@types/heft-jest": "1.0.1",
     "@types/node": "10.17.13",
     "@types/node-sass": "4.11.1",
-    "@types/semver": "~7.3.1",
+    "@types/semver": "7.3.5",
     "colors": "~1.2.1",
     "tslint": "~5.20.1",
     "typescript": "~3.9.7"

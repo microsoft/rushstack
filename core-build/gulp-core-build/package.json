@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/gulp-core-build",
-  "version": "3.17.14",
+  "version": "3.17.15",
   "description": "Core gulp build tasks for building typescript, html, less, etc.",
   "repository": {
     "type": "git",
@@ -22,7 +22,7 @@
     "@types/node": "10.17.13",
     "@types/node-notifier": "0.0.28",
     "@types/orchestrator": "0.0.30",
-    "@types/semver": "~7.3.1",
+    "@types/semver": "7.3.5",
     "@types/through2": "2.0.32",
     "@types/vinyl": "2.0.3",
     "@types/yargs": "0.0.34",

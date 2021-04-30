@@ -26,6 +26,7 @@ export interface ITestStageProperties {
   testNamePattern: string | undefined;
   testPathPattern: ReadonlyArray<string> | undefined;
   testTimeout: number | undefined;
+  detectOpenHandles: boolean | undefined;
   debugHeftReporter: boolean | undefined;
   maxWorkers: string | undefined;
 }
@@ -44,6 +45,7 @@ export interface ITestStageOptions {
   testNamePattern: string | undefined;
   testPathPattern: ReadonlyArray<string> | undefined;
   testTimeout: number | undefined;
+  detectOpenHandles: boolean | undefined;
   debugHeftReporter: boolean | undefined;
   maxWorkers: string | undefined;
 }
@@ -63,6 +65,7 @@ export class TestStage extends StageBase<TestStageHooks, ITestStageProperties, I
       testNamePattern: options.testNamePattern,
       testPathPattern: options.testPathPattern,
       testTimeout: options.testTimeout,
+      detectOpenHandles: options.detectOpenHandles,
       debugHeftReporter: options.debugHeftReporter,
       maxWorkers: options.maxWorkers
     };

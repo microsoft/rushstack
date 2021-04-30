@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/node-library-build",
-  "version": "6.5.23",
+  "version": "6.5.24",
   "description": "",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",

@@ -2,6 +2,35 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.30.1",
+      "tag": "@rushstack/heft_v0.30.1",
+      "date": "Thu, 29 Apr 2021 23:26:50 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.15.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.30.0",
+      "tag": "@rushstack/heft_v0.30.0",
+      "date": "Thu, 29 Apr 2021 01:07:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Implement a workaround for an intermittent Jest error \"A worker process has failed to exit gracefully and has been force exited.\" (Jest issue #11354)"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add a command-line option \"--detect-open-handles\" for troubleshooting Jest issues"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.29.1",
       "tag": "@rushstack/heft_v0.29.1",
       "date": "Fri, 23 Apr 2021 22:00:06 GMT",

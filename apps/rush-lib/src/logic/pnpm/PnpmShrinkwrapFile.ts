@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import crypto from 'crypto';
 import colors from 'colors/safe';
-import { FileSystem, AlreadyReportedError, Import } from '@rushstack/node-core-library';
+import { FileSystem, AlreadyReportedError, Import, Path } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
@@ -18,6 +18,8 @@ import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFileP
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 import { RushConstants } from '../RushConstants';
 import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
+import { DependencyType, PackageJsonDependency } from '../../api/PackageJsonEditor';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
@@ -240,7 +242,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   public getShrinkwrapHash(experimentsConfig?: IExperimentsJson): string {
-    const shrinkwrapContent: string = this.serialize(experimentsConfig);
+    // The 'omitImportersFromPreventManualShrinkwrapChanges' experiment skips the 'importers' section
+    // when computing the hash, since the main concern is changes to the overall external dependency footprint
+    const { omitImportersFromPreventManualShrinkwrapChanges } = experimentsConfig || {};
+
+    const shrinkwrapContent: string = this._serializeInternal(
+      omitImportersFromPreventManualShrinkwrapChanges
+    );
     return crypto.createHash('sha1').update(shrinkwrapContent).digest('hex');
   }
 
@@ -429,24 +437,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
    *
    * @override
    */
-  protected serialize(experiments?: IExperimentsJson): string {
-    // Ensure that if any of the top-level properties are provided but empty are removed. We populate the object
-    // properties when we read the shrinkwrap but PNPM does not set these top-level properties unless they are present.
-    const shrinkwrapToSerialize: { [key: string]: unknown } = {};
-    const { omitImportersFromPreventManualShrinkwrapChanges } = experiments || {};
-    for (const [key, value] of Object.entries(this._shrinkwrapJson)) {
-      // The 'omitImportersFromPreventManualShrinkwrapChanges' experiment skips the 'importers' section
-      // when computing the hash, since the main concern is changes to the overall external dependency footprint
-      if (omitImportersFromPreventManualShrinkwrapChanges && key === 'importers') {
-        continue;
-      }
-
-      if (!value || typeof value !== 'object' || Object.keys(value).length > 0) {
-        shrinkwrapToSerialize[key] = value;
-      }
-    }
-
-    return yamlModule.safeDump(shrinkwrapToSerialize, PNPM_SHRINKWRAP_YAML_FORMAT);
+  protected serialize(): string {
+    return this._serializeInternal(false);
   }
 
   /**
@@ -505,75 +497,88 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
   /** @override */
   public getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string {
-    return path.relative(workspaceRoot, projectFolder).replace(new RegExp(`\\${path.sep}`, 'g'), '/');
+    return Path.convertToSlashes(path.relative(workspaceRoot, projectFolder));
   }
 
   public getWorkspaceImporter(importerPath: string): IPnpmShrinkwrapImporterYaml | undefined {
     return BaseShrinkwrapFile.tryGetValue(this._shrinkwrapJson.importers, importerPath);
   }
 
-  /**
-   * Gets the resolved version number of a dependency for a specific temp project.
-   * For PNPM, we can reuse the version that another project is using.
-   * Note that this function modifies the shrinkwrap data.
-   *
-   * @override
-   */
-  protected getWorkspaceDependencyVersion(
-    dependencySpecifier: DependencySpecifier,
-    workspaceKey: string
-  ): DependencySpecifier | undefined {
-    // PNPM doesn't have the same advantage of NPM, where we can skip generate as long as the
-    // shrinkwrap file puts our dependency in either the top of the node_modules folder
-    // or underneath the package we are looking at.
-    // This is because the PNPM shrinkwrap file describes the exact links that need to be created
-    // to recreate the graph..
-    // Because of this, we actually need to check for a version that this package is directly
-    // linked to.
-
-    const packageName: string = dependencySpecifier.packageName;
-    const projectImporter: IPnpmShrinkwrapImporterYaml | undefined = this.getWorkspaceImporter(workspaceKey);
-    if (!projectImporter) {
-      return undefined;
-    }
-
-    const allDependencies: { [dependency: string]: string } = {
-      ...(projectImporter.optionalDependencies || {}),
-      ...(projectImporter.dependencies || {}),
-      ...(projectImporter.devDependencies || {})
-    };
-    if (!allDependencies.hasOwnProperty(packageName)) {
-      return undefined;
-    }
-
-    const dependencyKey: string = allDependencies[packageName];
-    return this._parsePnpmDependencyKey(packageName, dependencyKey);
-  }
-
-  /**
-   * Returns the version of a dependency being used by a given project
-   */
-  private _getDependencyVersion(
-    dependencyName: string,
-    tempProjectName: string
-  ): DependencySpecifier | undefined {
-    const tempProjectDependencyKey: string | undefined = this.getTempProjectDependencyKey(tempProjectName);
-    if (!tempProjectDependencyKey) {
-      throw new Error(`Cannot get dependency key for temp project: ${tempProjectName}`);
-    }
-
-    const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined = this._getPackageDescription(
-      tempProjectDependencyKey
+  /** @override */
+  public isWorkspaceProjectModified(project: RushConfigurationProject): boolean {
+    const workspaceKey: string = this.getWorkspaceKeyByPath(
+      project.rushConfiguration.commonTempFolder,
+      project.projectFolder
     );
-    if (!packageDescription || !packageDescription.dependencies) {
-      return undefined;
+    const importer: IPnpmShrinkwrapImporterYaml | undefined = this.getWorkspaceImporter(workspaceKey);
+    if (!importer) {
+      return true;
     }
 
-    if (!packageDescription.dependencies.hasOwnProperty(dependencyName)) {
-      return undefined;
+    // First, get the unique package names and map them to package versions.
+    const { dependencyList, devDependencyList } = project.packageJsonEditor;
+    const dependencyVersions: Map<string, PackageJsonDependency> = new Map();
+    for (const packageDependency of [...dependencyList, ...devDependencyList]) {
+      // We will also filter out peer dependencies since these are not installed at development time.
+      if (packageDependency.dependencyType === DependencyType.Peer) {
+        continue;
+      }
+
+      const foundDependency: PackageJsonDependency | undefined = dependencyVersions.get(
+        packageDependency.name
+      );
+      if (!foundDependency) {
+        dependencyVersions.set(packageDependency.name, packageDependency);
+      } else {
+        // Shrinkwrap will prioritize optional dependencies, followed by regular dependencies, with dev being
+        // the least prioritized. We will only keep the most prioritized option.
+        // See: https://github.com/pnpm/pnpm/blob/main/packages/lockfile-utils/src/satisfiesPackageManifest.ts
+        switch (foundDependency.dependencyType) {
+          case DependencyType.Optional:
+            break;
+          case DependencyType.Regular:
+            if (packageDependency.dependencyType === DependencyType.Optional) {
+              dependencyVersions.set(packageDependency.name, packageDependency);
+            }
+            break;
+          case DependencyType.Dev:
+            dependencyVersions.set(packageDependency.name, packageDependency);
+            break;
+        }
+      }
     }
 
-    return this._parsePnpmDependencyKey(dependencyName, packageDescription.dependencies[dependencyName]);
+    // Then validate that the dependency fields are as expected in the shrinkwrap to avoid false-negatives
+    // when moving a package from one field to the other.
+    for (const dependencyVersion of dependencyVersions.values()) {
+      switch (dependencyVersion.dependencyType) {
+        case DependencyType.Optional:
+          if (!importer.optionalDependencies[dependencyVersion.name]) return true;
+          break;
+        case DependencyType.Regular:
+          if (!importer.dependencies[dependencyVersion.name]) return true;
+          break;
+        case DependencyType.Dev:
+          if (!importer.devDependencies[dependencyVersion.name]) return true;
+          break;
+      }
+    }
+
+    // Then validate the length matches between the importer and the dependency list, since duplicates are
+    // a valid use-case. Importers will only take one of these values, so no need to do more work here.
+    if (dependencyVersions.size !== Object.keys(importer.specifiers).length) {
+      return true;
+    }
+
+    // Finally, validate that all values in the importer are also present in the dependency list.
+    for (const [importerPackageName, importerVersionSpecifier] of Object.entries(importer.specifiers)) {
+      const foundDependency: PackageJsonDependency | undefined = dependencyVersions.get(importerPackageName);
+      if (!foundDependency || foundDependency.version !== importerVersionSpecifier) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -615,5 +620,22 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     } else {
       return undefined;
     }
+  }
+
+  private _serializeInternal(omitImporters: boolean = false): string {
+    // Ensure that if any of the top-level properties are provided but empty are removed. We populate the object
+    // properties when we read the shrinkwrap but PNPM does not set these top-level properties unless they are present.
+    const shrinkwrapToSerialize: { [key: string]: unknown } = {};
+    for (const [key, value] of Object.entries(this._shrinkwrapJson)) {
+      if (omitImporters && key === 'importers') {
+        continue;
+      }
+
+      if (!value || typeof value !== 'object' || Object.keys(value).length > 0) {
+        shrinkwrapToSerialize[key] = value;
+      }
+    }
+
+    return yamlModule.safeDump(shrinkwrapToSerialize, PNPM_SHRINKWRAP_YAML_FORMAT);
   }
 }
