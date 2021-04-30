@@ -311,9 +311,10 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
       throw new Error(`Unexpected Azure environment: ${this._azureEnvironment}`);
     }
 
+    const DeveloperSignOnClientId: string = '04b07795-8ddb-461a-bbee-02f9e1bf7b46';
     const deviceCodeCredential: DeviceCodeCredential = new DeviceCodeCredential(
-      undefined,
-      undefined,
+      'organizations',
+      DeveloperSignOnClientId,
       (deviceCodeInfo: DeviceCodeInfo) => {
         Utilities.printMessageInBox(deviceCodeInfo.message, terminal);
       },
