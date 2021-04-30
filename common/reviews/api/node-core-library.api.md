@@ -28,6 +28,13 @@ export class AnsiEscape {
     }
 
 // @public
+export class Async {
+    static forEachLimitAsync<TEntry>(array: TEntry[], parallelismLimit: number, fn: ((entry: TEntry) => Promise<void>) | ((entry: TEntry, index: number) => Promise<void>)): Promise<void>;
+    static mapLimitAsync<TEntry, TRetVal>(array: TEntry[], parallelismLimit: number, fn: ((entry: TEntry) => Promise<TRetVal>) | ((entry: TEntry, index: number) => Promise<TRetVal>)): Promise<TRetVal[]>;
+    static sleep(ms: number): Promise<void>;
+}
+
+// @public
 export type Brand<T, BrandTag extends string> = T & {
     __brand: BrandTag;
 };
