@@ -3,9 +3,9 @@
 
 import * as path from 'path';
 import * as child_process from 'child_process';
-import { setTimeout } from 'timers';
 import { FileSystem } from './FileSystem';
 import { FileWriter } from './FileWriter';
+import { Async } from './Async';
 
 /**
  * http://man7.org/linux/man-pages/man5/proc.5.html
@@ -231,19 +231,11 @@ export class LockFile {
         throw new Error(`Exceeded maximum wait time to acquire lock for resource "${resourceName}"`);
       }
 
-      await LockFile._sleepForMs(interval);
+      await Async.sleep(interval);
       return retryLoop();
     };
 
     return retryLoop();
-  }
-
-  private static _sleepForMs(timeout: number): Promise<void> {
-    return new Promise<void>((resolve: () => void, reject: () => void) => {
-      setTimeout(() => {
-        resolve();
-      }, timeout);
-    });
   }
 
   /**

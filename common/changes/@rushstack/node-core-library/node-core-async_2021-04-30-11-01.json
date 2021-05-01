@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Add a new API \"Async\" with some utilities for working with promises",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "elliot-nelson@users.noreply.github.com"
+}
