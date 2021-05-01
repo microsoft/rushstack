@@ -100,23 +100,15 @@ export class RushInstallManager extends BaseInstallManager {
 
     if (!shrinkwrapFile) {
       shrinkwrapIsUpToDate = false;
-    } else {
-      let workspaceKeys: ReadonlyArray<string> = [];
-      try {
-        workspaceKeys = shrinkwrapFile.getWorkspaceKeys();
-      } catch {
-        // Swallow errors since not all shrinkwrap types support workspaces
-      }
-      if (workspaceKeys.length !== 0 && !this.options.fullUpgrade) {
-        console.log();
-        console.log(
-          colors.red(
-            'The shrinkwrap file had previously been updated to support workspaces. Run "rush update --full" ' +
-              'to update the shrinkwrap file.'
-          )
-        );
-        throw new AlreadyReportedError();
-      }
+    } else if (shrinkwrapFile.isWorkspaceCompatible && !this.options.fullUpgrade) {
+      console.log();
+      console.log(
+        colors.red(
+          'The shrinkwrap file had previously been updated to support workspaces. Run "rush update --full" ' +
+            'to update the shrinkwrap file.'
+        )
+      );
+      throw new AlreadyReportedError();
     }
 
     // dependency name --> version specifier
@@ -144,10 +136,17 @@ export class RushInstallManager extends BaseInstallManager {
         shrinkwrapIsUpToDate = false;
       }
 
-      if (this._findOrphanedTempProjects(shrinkwrapFile)) {
-        // If there are any orphaned projects, then "npm install" would fail because the shrinkwrap
-        // contains references such as "resolved": "file:projects\\project1" that refer to nonexistent
-        // file paths.
+      // If there are orphaned projects, we need to update
+      const orphanedProjects: ReadonlyArray<string> = shrinkwrapFile.findOrphanedProjects(
+        this.rushConfiguration
+      );
+      if (orphanedProjects.length > 0) {
+        for (const orhpanedProject of orphanedProjects) {
+          shrinkwrapWarnings.push(
+            `Your ${this.rushConfiguration.shrinkwrapFilePhrase} references "${orhpanedProject}" ` +
+              'which was not found in rush.json'
+          );
+        }
         shrinkwrapIsUpToDate = false;
       }
     }
@@ -404,7 +403,7 @@ export class RushInstallManager extends BaseInstallManager {
         await ssri.fromStream(fs.createReadStream(this._tempProjectHelper.getTarballFilePath(rushProject)))
       ).toString();
 
-      if (parentShrinkwrapEntry.resolution.integrity !== newIntegrity) {
+      if (!parentShrinkwrapEntry.resolution || parentShrinkwrapEntry.resolution.integrity !== newIntegrity) {
         return false;
       }
     }
@@ -701,32 +700,6 @@ export class RushInstallManager extends BaseInstallManager {
     if (anyChanges) {
       console.log(os.EOL + colors.yellow(Utilities.wrapWords(`Applied workaround for NPM 5 bug`)) + os.EOL);
     }
-  }
-
-  /**
-   * Checks for temp projects that exist in the shrinkwrap file, but don't exist
-   * in rush.json.  This might occur, e.g. if a project was recently deleted or renamed.
-   *
-   * @returns true if orphans were found, or false if everything is okay
-   */
-  private _findOrphanedTempProjects(shrinkwrapFile: BaseShrinkwrapFile): boolean {
-    // We can recognize temp projects because they are under the "@rush-temp" NPM scope.
-    for (const tempProjectName of shrinkwrapFile.getTempProjectNames()) {
-      if (!this.rushConfiguration.findProjectByTempName(tempProjectName)) {
-        console.log(
-          os.EOL +
-            colors.yellow(
-              Utilities.wrapWords(
-                `Your ${this.rushConfiguration.shrinkwrapFilePhrase} references a project "${tempProjectName}" which no longer exists.`
-              )
-            ) +
-            os.EOL
-        );
-        return true; // found one
-      }
-    }
-
-    return false; // none found
   }
 
   /**
