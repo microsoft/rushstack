@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Move forEachLimitAsync implementation into node-core-library",
+      "comment": "Add a new API \"Async\" with some utilities for working with promises",
       "type": "minor"
     }
   ],
