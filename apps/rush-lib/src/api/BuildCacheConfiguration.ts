@@ -36,6 +36,7 @@ import type { AmazonS3BuildCacheProvider } from '../logic/buildCache/AmazonS3/Am
  * Describes the file structure for the "common/config/rush/build-cache.json" config file.
  */
 interface IBaseBuildCacheJson {
+  buildCacheEnabled: boolean;
   cacheProvider: 'azure-blob-storage' | 'amazon-s3' | 'local-only';
   cacheEntryNamePattern?: string;
 }
@@ -124,11 +125,19 @@ export class BuildCacheConfiguration {
     path.join(__dirname, '..', 'schemas', 'build-cache.schema.json')
   );
 
+  /**
+   * Indicates whether the build cache feature is enabled.
+   * Typically it is enabled in the build-cache.json config file.
+   */
+  public readonly buildCacheEnabled: boolean;
+
   public readonly getCacheEntryId: GetCacheEntryIdFunction;
   public readonly localCacheProvider: FileSystemBuildCacheProvider;
   public readonly cloudCacheProvider: CloudBuildCacheProviderBase | undefined;
 
   private constructor(options: IBuildCacheConfigurationOptions) {
+    this.buildCacheEnabled = options.buildCacheJson.buildCacheEnabled;
+
     this.getCacheEntryId = options.getCacheEntryId;
     this.localCacheProvider = new FileSystemBuildCacheProvider({
       rushUserConfiguration: options.rushUserConfiguration,

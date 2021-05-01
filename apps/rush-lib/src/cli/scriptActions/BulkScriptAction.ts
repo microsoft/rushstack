@@ -306,15 +306,10 @@ export class BulkScriptAction extends BaseScriptAction {
       description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
     });
 
-    if (
-      !this._disableBuildCache &&
-      this.rushConfiguration?.experimentsConfiguration.configuration.buildCache
-    ) {
-      this._disableBuildCacheFlag = this.defineFlagParameter({
-        parameterLongName: '--disable-build-cache',
-        description: '(EXPERIMENTAL) Disables the build cache for this command invocation.'
-      });
-    }
+    this._disableBuildCacheFlag = this.defineFlagParameter({
+      parameterLongName: '--disable-build-cache',
+      description: '(EXPERIMENTAL) Disables the build cache for this command invocation.'
+    });
 
     this.defineScriptParameters();
   }

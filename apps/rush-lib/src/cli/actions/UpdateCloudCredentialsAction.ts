@@ -47,13 +47,6 @@ export class UpdateCloudCredentialsAction extends BaseRushAction {
   protected async runAsync(): Promise<void> {
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
 
-    if (!this.rushConfiguration.experimentsConfiguration.configuration.buildCache) {
-      terminal.writeErrorLine(
-        `The buildCache feature has not been enabled in ${RushConstants.experimentsFilename}.`
-      );
-      throw new AlreadyReportedError();
-    }
-
     const buildCacheConfiguration:
       | BuildCacheConfiguration
       | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(terminal, this.rushConfiguration);
@@ -63,8 +56,15 @@ export class UpdateCloudCredentialsAction extends BaseRushAction {
         this.rushConfiguration
       );
       terminal.writeErrorLine(
-        `The a build cache has not been configured. Configure it by creating a ` +
+        `The build cache has not been configured. Configure it by creating a ` +
           `"${buildCacheConfigurationFilePath}" file.`
+      );
+      throw new AlreadyReportedError();
+    }
+
+    if (!buildCacheConfiguration.buildCacheEnabled) {
+      terminal.writeErrorLine(
+        `The buildCache feature has not been enabled in ${RushConstants.experimentsFilename}.`
       );
       throw new AlreadyReportedError();
     }

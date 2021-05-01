@@ -15,11 +15,16 @@
       "type": "object",
 
       "additionalProperties": false,
-      "required": ["cacheProvider"],
+      "required": ["buildCacheEnabled", "cacheProvider"],
       "properties": {
         "$schema": {
           "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
           "type": "string"
+        },
+
+        "buildCacheEnabled": {
+          "description": "Set this to true to enable the build cache feature.",
+          "type": "boolean"
         },
 
         "cacheProvider": {

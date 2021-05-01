@@ -158,6 +158,7 @@ export class RushCommandLineParser extends CommandLineParser {
     try {
       this.rushGlobalFolder = new RushGlobalFolder();
 
+      // Alphabetical order
       this.addAction(new AddAction(this));
       this.addAction(new ChangeAction(this));
       this.addAction(new CheckAction(this));
@@ -177,10 +178,7 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new UpdateAutoinstallerAction(this));
       this.addAction(new UpdateCloudCredentialsAction(this));
       this.addAction(new VersionAction(this));
-
-      if (this.rushConfiguration?.experimentsConfiguration.configuration.buildCache) {
-        this.addAction(new WriteBuildCacheAction(this));
-      }
+      this.addAction(new WriteBuildCacheAction(this));
 
       this._populateScriptActions();
     } catch (error) {
