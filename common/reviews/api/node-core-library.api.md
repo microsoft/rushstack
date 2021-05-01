@@ -29,8 +29,8 @@ export class AnsiEscape {
 
 // @beta
 export class Async {
-    static forEachAsync<TEntry>(array: TEntry[], fn: (entry: TEntry, index: number) => Promise<void>, options?: IAsyncParallelismOptions | undefined): Promise<void>;
-    static mapAsync<TEntry, TRetVal>(array: TEntry[], fn: (entry: TEntry, index: number) => Promise<TRetVal>, options?: IAsyncParallelismOptions | undefined): Promise<TRetVal[]>;
+    static forEachAsync<TEntry>(array: TEntry[], callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: IAsyncParallelismOptions | undefined): Promise<void>;
+    static mapAsync<TEntry, TRetVal>(array: TEntry[], callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: IAsyncParallelismOptions | undefined): Promise<TRetVal[]>;
     static sleep(ms: number): Promise<void>;
 }
 
