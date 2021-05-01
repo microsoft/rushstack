@@ -11,7 +11,7 @@ export class Async {
     fn: (entry: TEntry) => Promise<void>
   ): Promise<void> {
     // Defer to the implementation in node-core-library
-    return CoreAsync.forEachLimitAsync(array, parallelismLimit, fn);
+    return CoreAsync.forEachAsync(array, fn, { concurrency: parallelismLimit });
   }
 
   public static runWatcherWithErrorHandling(fn: () => Promise<void>, scopedLogger: ScopedLogger): void {

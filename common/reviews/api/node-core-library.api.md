@@ -27,10 +27,10 @@ export class AnsiEscape {
     static removeCodes(text: string): string;
     }
 
-// @public
+// @beta
 export class Async {
-    static forEachLimitAsync<TEntry>(array: TEntry[], parallelismLimit: number, fn: ((entry: TEntry) => Promise<void>) | ((entry: TEntry, index: number) => Promise<void>)): Promise<void>;
-    static mapLimitAsync<TEntry, TRetVal>(array: TEntry[], parallelismLimit: number, fn: ((entry: TEntry) => Promise<TRetVal>) | ((entry: TEntry, index: number) => Promise<TRetVal>)): Promise<TRetVal[]>;
+    static forEachAsync<TEntry>(array: TEntry[], fn: (entry: TEntry, index: number) => Promise<void>, options?: IAsyncParallelismOptions | undefined): Promise<void>;
+    static mapAsync<TEntry, TRetVal>(array: TEntry[], fn: (entry: TEntry, index: number) => Promise<TRetVal>, options?: IAsyncParallelismOptions | undefined): Promise<TRetVal[]>;
     static sleep(ms: number): Promise<void>;
 }
 
@@ -265,6 +265,11 @@ export const enum FolderConstants {
 // @public
 export interface IAnsiEscapeConvertForTestsOptions {
     encodeNewlines?: boolean;
+}
+
+// @beta
+export interface IAsyncParallelismOptions {
+    concurrency?: number;
 }
 
 // @beta (undocumented)
