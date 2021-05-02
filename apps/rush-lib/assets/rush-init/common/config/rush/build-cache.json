@@ -32,15 +32,15 @@
     /**
      * (Required) The name of the the Azure storage account to use for build cache.
      */
-    // "storageAccountName": "my-account",
+    // "storageAccountName": "example",
 
     /**
-     * The name of the container in the Azure storage account to use for build cache.
+     * (Required) The name of the container in the Azure storage account to use for build cache.
      */
     // "storageContainerName": "my-container",
 
     /**
-     * (Required) The Azure environment the storage account exists in. Defaults to AzurePublicCloud.
+     * The Azure environment the storage account exists in. Defaults to AzurePublicCloud.
      *
      * Possible values: "AzurePublicCloud", "AzureChina", "AzureGermany", "AzureGovernment"
      */
