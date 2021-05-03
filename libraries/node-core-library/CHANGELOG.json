@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.37.0",
+      "tag": "@rushstack/node-core-library_v3.37.0",
+      "date": "Mon, 03 May 2021 15:10:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new API \"Async\" with some utilities for working with promises"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.36.2",
       "tag": "@rushstack/node-core-library_v3.36.2",
       "date": "Mon, 12 Apr 2021 15:10:28 GMT",
