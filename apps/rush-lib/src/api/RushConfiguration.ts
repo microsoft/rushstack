@@ -33,6 +33,7 @@ import { ExperimentsConfiguration } from './ExperimentsConfiguration';
 import { PackageNameParsers } from './PackageNameParsers';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import { LookupByPath } from '../logic/LookupByPath';
+import { PackageJsonDependency } from './PackageJsonEditor';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -497,6 +498,9 @@ export class RushConfiguration {
 
   // Lazily loaded when the projectsByName() getter is called.
   private _projectsByName: Map<string, RushConfigurationProject> | undefined;
+
+  private _commonVersionsConfigurations: Map<string, CommonVersionsConfiguration> | undefined;
+  private _implicitlyPreferredVersions: Map<string, Map<string, string>> | undefined;
 
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
   private _versionPolicyConfigurationFilePath: string;
@@ -1501,8 +1505,80 @@ export class RushConfiguration {
    * @param variant - The name of the current variant in use by the active command.
    */
   public getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration {
-    const commonVersionsFilename: string = this.getCommonVersionsFilePath(variant);
-    return CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
+    if (!this._commonVersionsConfigurations) {
+      this._commonVersionsConfigurations = new Map();
+    }
+
+    const variantKey: string = variant || '';
+    let commonVersionsConfiguration:
+      | CommonVersionsConfiguration
+      | undefined = this._commonVersionsConfigurations.get(variantKey);
+    if (!commonVersionsConfiguration) {
+      const commonVersionsFilename: string = this.getCommonVersionsFilePath(variant);
+      commonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
+      this._commonVersionsConfigurations.set(variantKey, commonVersionsConfiguration);
+    }
+
+    return commonVersionsConfiguration;
+  }
+
+  /**
+   * Returns a map of all direct dependencies that only have a single semantic version specifier.
+   * @param variant - The name of the current variant in use by the active command.
+   *
+   * @returns A map of dependency name --\> version specifier for implicitly preferred versions.
+   */
+  public getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string> {
+    if (!this._implicitlyPreferredVersions) {
+      this._implicitlyPreferredVersions = new Map();
+    }
+
+    const variantKey: string = variant || '';
+    let implicitlyPreferredVersions: Map<string, string> | undefined = this._implicitlyPreferredVersions.get(
+      variantKey
+    );
+    if (!implicitlyPreferredVersions) {
+      // First, collect all the direct dependencies of all local projects, and their versions:
+      // direct dependency name --> set of version specifiers
+      const versionsForDependencies: Map<string, Set<string>> = new Map<string, Set<string>>();
+
+      // Only generate implicitly preferred versions for variants that request it
+      const commonVersionsConfiguration: CommonVersionsConfiguration = this.getCommonVersions(variant);
+      const useImplicitlyPreferredVersions: boolean =
+        commonVersionsConfiguration.implicitlyPreferredVersions !== undefined
+          ? commonVersionsConfiguration.implicitlyPreferredVersions
+          : true;
+
+      if (useImplicitlyPreferredVersions) {
+        for (const project of this.projects) {
+          this._collectVersionsForDependencies(
+            versionsForDependencies,
+            [...project.packageJsonEditor.dependencyList, ...project.packageJsonEditor.devDependencyList],
+            project.cyclicDependencyProjects,
+            variant
+          );
+        }
+
+        // If any dependency has more than one version, then filter it out (since we don't know which version
+        // should be preferred).  What remains will be the list of preferred dependencies.
+        // dependency --> version specifier
+        const implicitlyPreferred: Map<string, string> = new Map<string, string>();
+        for (const [dep, versions] of versionsForDependencies) {
+          if (versions.size === 1) {
+            const version: string = Array.from(versions)[0];
+            implicitlyPreferred.set(dep, version);
+          }
+        }
+
+        implicitlyPreferredVersions = implicitlyPreferred;
+      } else {
+        implicitlyPreferredVersions = new Map();
+      }
+
+      this._implicitlyPreferredVersions.set(variantKey, implicitlyPreferredVersions);
+    }
+
+    return implicitlyPreferredVersions;
   }
 
   /**
@@ -1658,6 +1734,59 @@ export class RushConfiguration {
       }
     }
     return undefined;
+  }
+
+  private _collectVersionsForDependencies(
+    versionsForDependencies: Map<string, Set<string>>,
+    dependencies: ReadonlyArray<PackageJsonDependency>,
+    cyclicDependencies: Set<string>,
+    variant: string | undefined
+  ): void {
+    const commonVersions: CommonVersionsConfiguration = this.getCommonVersions(variant);
+    const allowedAlternativeVersions: Map<string, ReadonlyArray<string>> =
+      commonVersions.allowedAlternativeVersions;
+
+    for (const dependency of dependencies) {
+      const alternativesForThisDependency: ReadonlyArray<string> =
+        allowedAlternativeVersions.get(dependency.name) || [];
+
+      // For each dependency, collectImplicitlyPreferredVersions() is collecting the set of all version specifiers
+      // that appear across the repo.  If there is only one version specifier, then that's the "preferred" one.
+      // However, there are a few cases where additional version specifiers can be safely ignored.
+      let ignoreVersion: boolean = false;
+
+      // 1. If the version specifier was listed in "allowedAlternativeVersions", then it's never a candidate.
+      //    (Even if it's the only version specifier anywhere in the repo, we still ignore it, because
+      //    otherwise the rule would be difficult to explain.)
+      if (alternativesForThisDependency.indexOf(dependency.version) > 0) {
+        ignoreVersion = true;
+      } else {
+        // Is it a local project?
+        const localProject: RushConfigurationProject | undefined = this.getProjectByName(dependency.name);
+        if (localProject) {
+          // 2. If it's a symlinked local project, then it's not a candidate, because the package manager will
+          //    never even see it.
+          // However there are two ways that a local project can NOT be symlinked:
+          // - if the local project doesn't satisfy the referenced semver specifier; OR
+          // - if the local project was specified in "cyclicDependencyProjects" in rush.json
+          if (
+            semver.satisfies(localProject.packageJsonEditor.version, dependency.version) &&
+            !cyclicDependencies.has(dependency.name)
+          ) {
+            ignoreVersion = true;
+          }
+        }
+
+        if (!ignoreVersion) {
+          let versionForDependency: Set<string> | undefined = versionsForDependencies.get(dependency.name);
+          if (!versionForDependency) {
+            versionForDependency = new Set<string>();
+            versionsForDependencies.set(dependency.name, versionForDependency);
+          }
+          versionForDependency!.add(dependency.version);
+        }
+      }
+    }
   }
 
   private _populateDownstreamDependencies(

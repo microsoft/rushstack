@@ -155,6 +155,10 @@ export class PackageJsonEditor {
     return new PackageJsonEditor(filename, object);
   }
 
+  public toObject(): IPackageJson {
+    return { ...this._data };
+  }
+
   public get name(): string {
     return this._data.name;
   }

@@ -29,7 +29,7 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { DeployScenarioConfiguration, IDeployScenarioProjectJson } from './DeployScenarioConfiguration';
-import { PnpmfileConfiguration } from './PnpmfileConfiguration';
+import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import { matchesWithStar } from './Utils';
 
 // (@types/npm-packlist is missing this API)

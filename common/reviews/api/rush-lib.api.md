@@ -264,6 +264,8 @@ export class PackageJsonEditor {
     // (undocumented)
     saveIfModified(): boolean;
     // (undocumented)
+    toObject(): IPackageJson;
+    // (undocumented)
     tryGetDependency(packageName: string): PackageJsonDependency | undefined;
     // (undocumented)
     tryGetDevDependency(packageName: string): PackageJsonDependency | undefined;
@@ -354,6 +356,7 @@ export class RushConfiguration {
     getCommittedShrinkwrapFilename(variant?: string | undefined): string;
     getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration;
     getCommonVersionsFilePath(variant?: string | undefined): string;
+    getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string>;
     getPnpmfilePath(variant?: string | undefined): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
     getRepoState(variant?: string | undefined): RepoStateFile;

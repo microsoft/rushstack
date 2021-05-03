@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import crypto from 'crypto';
 import colors from 'colors/safe';
-import { FileSystem, AlreadyReportedError, Import, Path } from '@rushstack/node-core-library';
+import { FileSystem, AlreadyReportedError, Import, Path, IPackageJson } from '@rushstack/node-core-library';
 
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
@@ -18,8 +18,9 @@ import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFileP
 import { PNPM_SHRINKWRAP_YAML_FORMAT } from './PnpmYamlCommon';
 import { RushConstants } from '../RushConstants';
 import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
-import { DependencyType, PackageJsonDependency } from '../../api/PackageJsonEditor';
+import { DependencyType, PackageJsonDependency, PackageJsonEditor } from '../../api/PackageJsonEditor';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { PnpmfileConfiguration } from './PnpmfileConfiguration';
 
 const yamlModule: typeof import('js-yaml') = Import.lazy('js-yaml', require);
 
@@ -90,7 +91,7 @@ export interface IPnpmShrinkwrapImporterYaml {
  *    }
  *  }
  */
-interface IPnpmShrinkwrapYaml {
+export interface IPnpmShrinkwrapYaml {
   /** The list of resolved version numbers for direct dependencies */
   dependencies: { [dependency: string]: string };
   /** The list of importers for local workspace projects */
@@ -200,6 +201,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly shrinkwrapFilename: string;
 
   private readonly _shrinkwrapJson: IPnpmShrinkwrapYaml;
+  private _pnpmfileConfiguration: PnpmfileConfiguration | undefined;
 
   private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string) {
     super();
@@ -515,8 +517,25 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       return true;
     }
 
-    // First, get the unique package names and map them to package versions.
-    const { dependencyList, devDependencyList } = project.packageJsonEditor;
+    // First, let's transform the package.json using the pnpmfile
+    const packageJson: IPackageJson = project.packageJsonEditor.toObject();
+
+    // Initialize the pnpmfile if it doesn't exist
+    if (!this._pnpmfileConfiguration) {
+      this._pnpmfileConfiguration = new PnpmfileConfiguration(project.rushConfiguration, {
+        includePreferredVersions: true,
+        clientPnpmfilePath: project.rushConfiguration.getPnpmfilePath()
+      });
+    }
+
+    // Use a new PackageJsonEditor since it will classify each dependency type, making tracking the
+    // found versions much simpler.
+    const { dependencyList, devDependencyList } = PackageJsonEditor.fromObject(
+      this._pnpmfileConfiguration.transform(packageJson),
+      project.packageJsonEditor.filePath
+    );
+
+    // Then get the unique package names and map them to package versions.
     const dependencyVersions: Map<string, PackageJsonDependency> = new Map();
     for (const packageDependency of [...dependencyList, ...devDependencyList]) {
       // We will also filter out peer dependencies since these are not installed at development time.

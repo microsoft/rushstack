@@ -4,115 +4,15 @@
 import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
-import * as semver from 'semver';
-import {
-  FileConstants,
-  FileSystem,
-  IPackageJson,
-  JsonFile,
-  LockFile,
-  MapExtensions
-} from '@rushstack/node-core-library';
+import { FileConstants, FileSystem, IPackageJson, JsonFile, LockFile } from '@rushstack/node-core-library';
 
-import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import { LastInstallFlag } from '../../api/LastInstallFlag';
-import { PackageJsonDependency } from '../../api/PackageJsonEditor';
 import { PackageManagerName } from '../../api/packageManager/PackageManager';
 import { RushConfiguration, IConfigurationEnvironment } from '../../api/RushConfiguration';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
 import { Utilities } from '../../utilities/Utilities';
 
 export class InstallHelpers {
-  /**
-   * Returns a map containing all preferred versions for a Rush project.
-   * Returns a map: dependency name --> version specifier
-   */
-  public static collectPreferredVersions(
-    rushConfiguration: RushConfiguration,
-    options: {
-      explicitPreferredVersions?: Map<string, string>;
-      variant?: string | undefined;
-    } = {}
-  ): Map<string, string> {
-    // dependency name --> version specifier
-    const allExplicitPreferredVersions: Map<string, string> = options.explicitPreferredVersions
-      ? options.explicitPreferredVersions
-      : rushConfiguration.getCommonVersions(options.variant).getAllPreferredVersions();
-
-    // dependency name --> version specifier
-    const allPreferredVersions: Map<string, string> = new Map<string, string>();
-
-    // Should we add implicitly preferred versions?
-    let useImplicitlyPinnedVersions: boolean;
-    if (rushConfiguration.commonVersions.implicitlyPreferredVersions !== undefined) {
-      // Use the manually configured setting
-      useImplicitlyPinnedVersions = rushConfiguration.commonVersions.implicitlyPreferredVersions;
-    } else {
-      // Default to true.
-      useImplicitlyPinnedVersions = true;
-    }
-
-    if (useImplicitlyPinnedVersions) {
-      // Add in the implicitly preferred versions.
-      // These are any first-level dependencies for which we only consume a single version range
-      // (e.g. every package that depends on react uses an identical specifier)
-      const implicitlyPreferredVersions: Map<
-        string,
-        string
-      > = InstallHelpers.collectImplicitlyPreferredVersions(rushConfiguration, options);
-      MapExtensions.mergeFromMap(allPreferredVersions, implicitlyPreferredVersions);
-    }
-
-    // Add in the explicitly preferred versions.
-    // Note that these take precedence over implicitly preferred versions.
-    MapExtensions.mergeFromMap(allPreferredVersions, allExplicitPreferredVersions);
-    return allPreferredVersions;
-  }
-
-  /**
-   * Returns a map of all direct dependencies that only have a single semantic version specifier.
-   * Returns a map: dependency name --> version specifier
-   */
-  public static collectImplicitlyPreferredVersions(
-    rushConfiguration: RushConfiguration,
-    options: {
-      variant?: string | undefined;
-    } = {}
-  ): Map<string, string> {
-    // First, collect all the direct dependencies of all local projects, and their versions:
-    // direct dependency name --> set of version specifiers
-    const versionsForDependencies: Map<string, Set<string>> = new Map<string, Set<string>>();
-
-    rushConfiguration.projects.forEach((project: RushConfigurationProject) => {
-      InstallHelpers._collectVersionsForDependencies(rushConfiguration, {
-        versionsForDependencies,
-        dependencies: project.packageJsonEditor.dependencyList,
-        cyclicDependencies: project.cyclicDependencyProjects,
-        variant: options.variant
-      });
-
-      InstallHelpers._collectVersionsForDependencies(rushConfiguration, {
-        versionsForDependencies,
-        dependencies: project.packageJsonEditor.devDependencyList,
-        cyclicDependencies: project.cyclicDependencyProjects,
-        variant: options.variant
-      });
-    });
-
-    // If any dependency has more than one version, then filter it out (since we don't know which version
-    // should be preferred).  What remains will be the list of preferred dependencies.
-    // dependency --> version specifier
-    const implicitlyPreferred: Map<string, string> = new Map<string, string>();
-    versionsForDependencies.forEach((versions: Set<string>, dep: string) => {
-      if (versions.size === 1) {
-        const version: string = Array.from(versions)[0];
-        implicitlyPreferred.set(dep, version);
-      }
-    });
-    return implicitlyPreferred;
-  }
-
   public static generateCommonPackageJson(
     rushConfiguration: RushConfiguration,
     dependencies: Map<string, string> = new Map<string, string>()
@@ -255,79 +155,6 @@ export class InstallHelpers {
     });
 
     lock.release();
-  }
-
-  // Helper for collectImplicitlyPreferredVersions()
-  private static _collectVersionsForDependencies(
-    rushConfiguration: RushConfiguration,
-    options: {
-      versionsForDependencies: Map<string, Set<string>>;
-      dependencies: ReadonlyArray<PackageJsonDependency>;
-      cyclicDependencies: Set<string>;
-      variant: string | undefined;
-    }
-  ): void {
-    const { variant, dependencies, versionsForDependencies, cyclicDependencies } = options;
-
-    const commonVersions: CommonVersionsConfiguration = rushConfiguration.getCommonVersions(variant);
-
-    const allowedAlternativeVersions: Map<string, ReadonlyArray<string>> =
-      commonVersions.allowedAlternativeVersions;
-
-    for (const dependency of dependencies) {
-      const alternativesForThisDependency: ReadonlyArray<string> =
-        allowedAlternativeVersions.get(dependency.name) || [];
-
-      // For each dependency, collectImplicitlyPreferredVersions() is collecting the set of all version specifiers
-      // that appear across the repo.  If there is only one version specifier, then that's the "preferred" one.
-      // However, there are a few cases where additional version specifiers can be safely ignored.
-      let ignoreVersion: boolean = false;
-
-      // 1. If the version specifier was listed in "allowedAlternativeVersions", then it's never a candidate.
-      //    (Even if it's the only version specifier anywhere in the repo, we still ignore it, because
-      //    otherwise the rule would be difficult to explain.)
-      if (alternativesForThisDependency.indexOf(dependency.version) > 0) {
-        ignoreVersion = true;
-      } else {
-        // Is it a local project?
-        const localProject: RushConfigurationProject | undefined = rushConfiguration.getProjectByName(
-          dependency.name
-        );
-        if (localProject) {
-          // 2. If it's a symlinked local project, then it's not a candidate, because the package manager will
-          //    never even see it.
-          // However there are two ways that a local project can NOT be symlinked:
-          // - if the local project doesn't satisfy the referenced semver specifier; OR
-          // - if the local project was specified in "cyclicDependencyProjects" in rush.json
-          if (
-            semver.satisfies(localProject.packageJsonEditor.version, dependency.version) &&
-            !cyclicDependencies.has(dependency.name)
-          ) {
-            ignoreVersion = true;
-          }
-        }
-
-        if (!ignoreVersion) {
-          InstallHelpers._updateVersionsForDependencies(
-            versionsForDependencies,
-            dependency.name,
-            dependency.version
-          );
-        }
-      }
-    }
-  }
-
-  // Helper for collectImplicitlyPreferredVersions()
-  private static _updateVersionsForDependencies(
-    versionsForDependencies: Map<string, Set<string>>,
-    dependency: string,
-    version: string
-  ): void {
-    if (!versionsForDependencies.has(dependency)) {
-      versionsForDependencies.set(dependency, new Set<string>());
-    }
-    versionsForDependencies.get(dependency)!.add(version);
   }
 
   // Helper for getPackageManagerEnvironment
