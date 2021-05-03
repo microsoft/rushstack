@@ -326,7 +326,7 @@ export class JsonFile {
   }
 
   /**
-   * An async version of {@link JsonFile.loadAndValidateWithCallback}.
+   * An async version of {@link JsonFile.save}.
    */
   public static async saveAsync(
     jsonObject: JsonObject,

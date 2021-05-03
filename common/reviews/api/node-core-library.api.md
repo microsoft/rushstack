@@ -27,6 +27,13 @@ export class AnsiEscape {
     static removeCodes(text: string): string;
     }
 
+// @beta
+export class Async {
+    static forEachAsync<TEntry>(array: TEntry[], callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: IAsyncParallelismOptions | undefined): Promise<void>;
+    static mapAsync<TEntry, TRetVal>(array: TEntry[], callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: IAsyncParallelismOptions | undefined): Promise<TRetVal[]>;
+    static sleep(ms: number): Promise<void>;
+}
+
 // @public
 export type Brand<T, BrandTag extends string> = T & {
     __brand: BrandTag;
@@ -258,6 +265,11 @@ export const enum FolderConstants {
 // @public
 export interface IAnsiEscapeConvertForTestsOptions {
     encodeNewlines?: boolean;
+}
+
+// @beta
+export interface IAsyncParallelismOptions {
+    concurrency?: number;
 }
 
 // @beta (undocumented)

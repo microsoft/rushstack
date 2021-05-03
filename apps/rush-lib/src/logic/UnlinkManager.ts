@@ -7,7 +7,7 @@ import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Utilities } from '../utilities/Utilities';
-import { PnpmProjectDependencyManifest } from './pnpm/PnpmProjectDependencyManifest';
+import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { LastLinkFlagFactory } from '../api/LastLinkFlag';
 
 /**
@@ -61,12 +61,10 @@ export class UnlinkManager {
         didDeleteAnything = true;
       }
 
-      const projectDependencyManifestFilePath: string = PnpmProjectDependencyManifest.getFilePathForProject(
-        rushProject
-      );
-      if (FileSystem.exists(projectDependencyManifestFilePath)) {
-        console.log(`Deleting ${projectDependencyManifestFilePath}`);
-        FileSystem.deleteFile(projectDependencyManifestFilePath);
+      const projectShrinkwrapFilePath: string = BaseProjectShrinkwrapFile.getFilePathForProject(rushProject);
+      if (FileSystem.exists(projectShrinkwrapFilePath)) {
+        console.log(`Deleting ${projectShrinkwrapFilePath}`);
+        FileSystem.deleteFile(projectShrinkwrapFilePath);
         didDeleteAnything = true;
       }
     }

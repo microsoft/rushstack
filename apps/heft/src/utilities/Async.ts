@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Async as CoreAsync } from '@rushstack/node-core-library';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 
 export class Async {
@@ -9,34 +10,8 @@ export class Async {
     parallelismLimit: number,
     fn: (entry: TEntry) => Promise<void>
   ): Promise<void> {
-    return new Promise((resolve: () => void, reject: (error: Error) => void) => {
-      if (parallelismLimit < 1) {
-        throw new Error('parallelismLimit must be at least 1');
-      }
-
-      let operationsInProgress: number = 1;
-      let index: number = 0;
-
-      function onOperationCompletion(): void {
-        operationsInProgress--;
-        if (operationsInProgress === 0 && index >= array.length) {
-          resolve();
-        }
-
-        while (operationsInProgress < parallelismLimit) {
-          if (index < array.length) {
-            operationsInProgress++;
-            fn(array[index++])
-              .then(() => onOperationCompletion())
-              .catch(reject);
-          } else {
-            break;
-          }
-        }
-      }
-
-      onOperationCompletion();
-    });
+    // Defer to the implementation in node-core-library
+    return CoreAsync.forEachAsync(array, fn, { concurrency: parallelismLimit });
   }
 
   public static runWatcherWithErrorHandling(fn: () => Promise<void>, scopedLogger: ScopedLogger): void {

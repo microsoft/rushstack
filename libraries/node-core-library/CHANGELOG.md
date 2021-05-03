@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Mon, 12 Apr 2021 15:10:28 GMT and should not be manually modified.
+This log was last generated on Mon, 03 May 2021 15:10:28 GMT and should not be manually modified.
+
+## 3.37.0
+Mon, 03 May 2021 15:10:28 GMT
+
+### Minor changes
+
+- Add a new API "Async" with some utilities for working with promises
 
 ## 3.36.2
 Mon, 12 Apr 2021 15:10:28 GMT

@@ -8,6 +8,7 @@ import { JsonFile, FileSystem, InternalError } from '@rushstack/node-core-librar
 import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
 
 interface INpmShrinkwrapDependencyJson {
   version: string;
@@ -23,6 +24,7 @@ interface INpmShrinkwrapJson {
 }
 
 export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
+  public readonly isWorkspaceCompatible: boolean;
   private _shrinkwrapJson: INpmShrinkwrapJson;
 
   private constructor(shrinkwrapJson: INpmShrinkwrapJson) {
@@ -39,6 +41,9 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
     if (!this._shrinkwrapJson.dependencies) {
       this._shrinkwrapJson.dependencies = {};
     }
+
+    // Workspaces not supported in NPM
+    this.isWorkspaceCompatible = false;
   }
 
   public static loadFromFile(shrinkwrapJsonFilename: string): NpmShrinkwrapFile | undefined {
@@ -120,13 +125,8 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public getWorkspaceKeys(): ReadonlyArray<string> {
-    throw new InternalError('Not implemented');
-  }
-
-  /** @override */
-  public getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string {
-    throw new InternalError('Not implemented');
+  public getProjectShrinkwrap(project: RushConfigurationProject): BaseProjectShrinkwrapFile | undefined {
+    return undefined;
   }
 
   /** @override */
