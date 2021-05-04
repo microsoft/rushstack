@@ -12,7 +12,6 @@ import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import { PackageJsonEditor, DependencyType } from '../../api/PackageJsonEditor';
 import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
-import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../../logic/RushConstants';
 import { Utilities } from '../../utilities/Utilities';
@@ -67,15 +66,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     console.log(
       os.EOL + colors.bold('Updating workspace files in ' + this.rushConfiguration.commonTempFolder)
     );
-
-    // Shim support for common versions resolution into the pnpmfile. When using workspaces, there are no
-    // "hoisted" packages, so we need to apply the correct versions to indirect dependencies through the
-    // pnpmfile.
-    if (this.rushConfiguration.packageManager === 'pnpm') {
-      await PnpmfileConfiguration.writeCommonTempPnpmfileShimAsync(this.rushConfiguration, {
-        includePreferredVersions: true
-      });
-    }
 
     const shrinkwrapWarnings: string[] = [];
 
@@ -229,7 +219,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
 
       // Now validate that the shrinkwrap file matches what is in the package.json
-      if (shrinkwrapFile?.isWorkspaceProjectModified(rushProject)) {
+      if (shrinkwrapFile?.isWorkspaceProjectModified(rushProject, this.options.variant)) {
         shrinkwrapWarnings.push(
           `Dependencies of project "${rushProject.packageName}" do not match the current shinkwrap.`
         );
@@ -248,29 +238,13 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   }
 
   protected canSkipInstall(lastModifiedDate: Date): boolean {
-    // Based on timestamps, can we skip this install entirely?
+    if (!super.canSkipInstall(lastModifiedDate)) {
+      return false;
+    }
+
     const potentiallyChangedFiles: string[] = [];
 
-    // Consider the timestamp on the node_modules folder; if someone tampered with it
-    // or deleted it entirely, then we can't skip this install
-    potentiallyChangedFiles.push(
-      path.join(this.rushConfiguration.commonTempFolder, RushConstants.nodeModulesFolderName)
-    );
-
-    // Additionally, if they pulled an updated shrinkwrap file from Git, then we can't skip this install
-    potentiallyChangedFiles.push(this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant));
-
-    // Add common-versions.json file to the potentially changed files list.
-    potentiallyChangedFiles.push(this.rushConfiguration.getCommonVersionsFilePath(this.options.variant));
-
     if (this.rushConfiguration.packageManager === 'pnpm') {
-      // If the repo is using pnpmfile.js, consider that also
-      const pnpmFileFilename: string = this.rushConfiguration.getPnpmfilePath(this.options.variant);
-
-      if (FileSystem.exists(pnpmFileFilename)) {
-        potentiallyChangedFiles.push(pnpmFileFilename);
-      }
-
       // Add workspace file. This file is only modified when workspace packages change.
       const pnpmWorkspaceFilename: string = path.join(
         this.rushConfiguration.commonTempFolder,

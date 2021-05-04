@@ -137,9 +137,12 @@ export abstract class BaseShrinkwrapFile {
    * Returns whether or not the workspace specified by the shrinkwrap matches the state of
    * a given package.json. Returns true if any dependencies are not aligned with the shrinkwrap.
    *
+   * @param project - the Rush project that is being validated against the shrinkwrap
+   * @param variant - the variant that is being validated
+   *
    * @virtual
    */
-  public abstract isWorkspaceProjectModified(project: RushConfigurationProject): boolean;
+  public abstract isWorkspaceProjectModified(project: RushConfigurationProject, variant?: string): boolean;
 
   /** @virtual */
   protected abstract serialize(): string;

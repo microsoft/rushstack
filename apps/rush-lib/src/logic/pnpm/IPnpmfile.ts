@@ -10,8 +10,8 @@ import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
  */
 export interface IPnpmfileShimSettings {
   semverPath: string;
-  allPreferredVersions?: { [dependencyName: string]: string };
-  allowedAlternativeVersions?: { [dependencyName: string]: ReadonlyArray<string> };
+  allPreferredVersions: { [dependencyName: string]: string };
+  allowedAlternativeVersions: { [dependencyName: string]: ReadonlyArray<string> };
   clientPnpmfilePath?: string;
 }
 
