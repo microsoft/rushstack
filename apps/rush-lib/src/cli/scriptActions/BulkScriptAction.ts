@@ -127,10 +127,7 @@ export class BulkScriptAction extends BaseScriptAction {
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
     let buildCacheConfiguration: BuildCacheConfiguration | undefined;
     if (!this._disableBuildCacheFlag?.value && !this._disableBuildCache) {
-      buildCacheConfiguration = await BuildCacheConfiguration.loadFromDefaultPathAsync(
-        terminal,
-        this.rushConfiguration
-      );
+      buildCacheConfiguration = await BuildCacheConfiguration.tryLoadAsync(terminal, this.rushConfiguration);
     }
 
     const selection: Set<RushConfigurationProject> = this._selectionParameters.getSelectedProjects();

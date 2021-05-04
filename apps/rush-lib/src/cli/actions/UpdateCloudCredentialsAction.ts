@@ -47,27 +47,10 @@ export class UpdateCloudCredentialsAction extends BaseRushAction {
   protected async runAsync(): Promise<void> {
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
 
-    const buildCacheConfiguration:
-      | BuildCacheConfiguration
-      | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(terminal, this.rushConfiguration);
-
-    if (!buildCacheConfiguration) {
-      const buildCacheConfigurationFilePath: string = BuildCacheConfiguration.getBuildCacheConfigFilePath(
-        this.rushConfiguration
-      );
-      terminal.writeErrorLine(
-        `The build cache has not been configured. Configure it by creating a ` +
-          `"${buildCacheConfigurationFilePath}" file.`
-      );
-      throw new AlreadyReportedError();
-    }
-
-    if (!buildCacheConfiguration.buildCacheEnabled) {
-      terminal.writeErrorLine(
-        `The buildCache feature has not been enabled in ${RushConstants.experimentsFilename}.`
-      );
-      throw new AlreadyReportedError();
-    }
+    const buildCacheConfiguration: BuildCacheConfiguration = await BuildCacheConfiguration.loadAndRequireEnabledAsync(
+      terminal,
+      this.rushConfiguration
+    );
 
     if (this._deleteFlag.value) {
       if (this._interactiveModeFlag.value || this._credentialParameter.value !== undefined) {
