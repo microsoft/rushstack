@@ -88,23 +88,4 @@ describe('ProjectBuildCache', () => {
     test(true, false, false);
     test(false, false, false);
   });
-
-  describe('buildCacheWriteAllowed', () => {
-    function test(configValue: boolean, envValue: boolean | undefined, expectedValue: boolean): void {
-      it(`returns ${expectedValue} if isCacheWriteAllowed=${configValue} and RUSH_BUILD_CACHE_WRITE_ALLOWED=${envValue}`, () => {
-        jest.spyOn(EnvironmentConfiguration, 'buildCacheWriteAllowed', 'get').mockReturnValue(envValue);
-        const subject: ProjectBuildCache = prepareSubject({
-          writeAllowed: configValue
-        })!;
-        expect(subject.buildCacheWriteAllowed).toBe(expectedValue);
-      });
-    }
-
-    test(true, undefined, true);
-    test(false, undefined, false);
-    test(true, true, true);
-    test(false, true, true);
-    test(true, false, false);
-    test(false, false, false);
-  });
 });

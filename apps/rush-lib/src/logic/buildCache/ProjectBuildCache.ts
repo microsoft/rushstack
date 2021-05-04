@@ -52,13 +52,6 @@ export class ProjectBuildCache {
     return EnvironmentConfiguration.buildCacheEnabled ?? this._buildCacheEnabled;
   }
 
-  public get buildCacheWriteAllowed(): boolean {
-    return (
-      EnvironmentConfiguration.buildCacheWriteAllowed ??
-      this._cloudBuildCacheProvider?.isCacheWriteAllowed === true
-    );
-  }
-
   private constructor(options: Omit<IProjectBuildCacheOptions, 'terminal'>) {
     this._project = options.projectConfiguration.project;
     this._localBuildCacheProvider = options.buildCacheConfiguration.localCacheProvider;
@@ -310,7 +303,7 @@ export class ProjectBuildCache {
     // the configured CLOUD cache. If the cache is enabled, rush is always allowed to read from and
     // write to the local build cache.
 
-    if (this.buildCacheWriteAllowed) {
+    if (this._cloudBuildCacheProvider?.isCacheWriteAllowed) {
       if (!cacheEntryBuffer) {
         if (localCacheEntryPath) {
           cacheEntryBuffer = await FileSystem.readFileToBufferAsync(localCacheEntryPath);
