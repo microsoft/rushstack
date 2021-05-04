@@ -9,49 +9,48 @@ import { RushUserConfiguration } from '../../../../api/RushUserConfiguration';
 import { CredentialCache } from '../../../CredentialCache';
 
 describe('AmazonS3BuildCacheProvider', () => {
-  let buildCacheWriteCredentialEnvValue: string | undefined;
-
   beforeEach(() => {
-    buildCacheWriteCredentialEnvValue = undefined;
-    jest
-      .spyOn(EnvironmentConfiguration, 'buildCacheWriteCredential', 'get')
-      .mockImplementation(() => buildCacheWriteCredentialEnvValue);
+    jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue(undefined);
+    jest.spyOn(EnvironmentConfiguration, 'buildCacheEnabled', 'get').mockReturnValue(undefined);
+    jest.spyOn(EnvironmentConfiguration, 'buildCacheWriteAllowed', 'get').mockReturnValue(undefined);
   });
 
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  it("Isn't writable if isCacheWriteAllowed is set to false and there is no env write credential", () => {
-    const cacheProvider: AmazonS3BuildCacheProvider = new AmazonS3BuildCacheProvider({
-      s3Region: 'region-name',
-      s3Bucket: 'bucket-name',
-      isCacheWriteAllowed: false
+  describe('isCacheWriteAllowed', () => {
+    function prepareSubject(
+      optionValue: boolean,
+      envVarValue: boolean | undefined
+    ): AmazonS3BuildCacheProvider {
+      jest.spyOn(EnvironmentConfiguration, 'buildCacheWriteAllowed', 'get').mockReturnValue(envVarValue);
+      return new AmazonS3BuildCacheProvider({
+        s3Region: 'region-name',
+        s3Bucket: 'bucket-name',
+        isCacheWriteAllowed: optionValue
+      });
+    }
+
+    it('is false if isCacheWriteAllowed is false', () => {
+      const subject: AmazonS3BuildCacheProvider = prepareSubject(false, undefined);
+      expect(subject.isCacheWriteAllowed).toBe(false);
     });
 
-    expect(cacheProvider.isCacheWriteAllowed).toBe(false);
-  });
-
-  it('Is writable if isCacheWriteAllowed is set to true and there is no env write credential', () => {
-    const cacheProvider: AmazonS3BuildCacheProvider = new AmazonS3BuildCacheProvider({
-      s3Region: 'region-name',
-      s3Bucket: 'bucket-name',
-      isCacheWriteAllowed: true
+    it('is true if isCacheWriteAllowed is true', () => {
+      const subject: AmazonS3BuildCacheProvider = prepareSubject(true, undefined);
+      expect(subject.isCacheWriteAllowed).toBe(true);
     });
 
-    expect(cacheProvider.isCacheWriteAllowed).toBe(true);
-  });
-
-  it('Is writable if isCacheWriteAllowed is set to false and there is an env write credential', () => {
-    buildCacheWriteCredentialEnvValue = 'token';
-
-    const cacheProvider: AmazonS3BuildCacheProvider = new AmazonS3BuildCacheProvider({
-      s3Region: 'region-name',
-      s3Bucket: 'bucket-name',
-      isCacheWriteAllowed: false
+    it('is false if isCacheWriteAllowed is true but the env var is false', () => {
+      const subject: AmazonS3BuildCacheProvider = prepareSubject(true, false);
+      expect(subject.isCacheWriteAllowed).toBe(false);
     });
 
-    expect(cacheProvider.isCacheWriteAllowed).toBe(true);
+    it('is true if the env var is true', () => {
+      const subject: AmazonS3BuildCacheProvider = prepareSubject(false, true);
+      expect(subject.isCacheWriteAllowed).toBe(true);
+    });
   });
 
   async function testCredentialCache(isCacheWriteAllowed: boolean): Promise<void> {

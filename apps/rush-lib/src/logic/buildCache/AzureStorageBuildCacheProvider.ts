@@ -48,12 +48,12 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
   private readonly _storageContainerName: string;
   private readonly _azureEnvironment: AzureEnvironmentNames;
   private readonly _blobPrefix: string | undefined;
-  private readonly _environmentWriteCredential: string | undefined;
+  private readonly _environmentCredential: string | undefined;
   private readonly _isCacheWriteAllowedByConfiguration: boolean;
   private __credentialCacheId: string | undefined;
 
   public get isCacheWriteAllowed(): boolean {
-    return this._isCacheWriteAllowedByConfiguration || !!this._environmentWriteCredential;
+    return EnvironmentConfiguration.buildCacheWriteAllowed ?? this._isCacheWriteAllowedByConfiguration;
   }
 
   private _containerClient: ContainerClient | undefined;
@@ -64,7 +64,7 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
     this._storageContainerName = options.storageContainerName;
     this._azureEnvironment = options.azureEnvironment || 'AzurePublicCloud';
     this._blobPrefix = options.blobPrefix;
-    this._environmentWriteCredential = EnvironmentConfiguration.buildCacheWriteCredential;
+    this._environmentCredential = EnvironmentConfiguration.buildCacheCredential;
     this._isCacheWriteAllowedByConfiguration = options.isCacheWriteAllowed;
 
     if (!(this._azureEnvironment in AzureAuthorityHosts)) {
@@ -125,7 +125,7 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
             `You need to configure Azure Storage SAS credentials to access the build cache.\n` +
             `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}", \n` +
             `or provide a SAS in the ` +
-            `${EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_CREDENTIAL} environment variable.`
+            `${EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL} environment variable.`
         );
       } else if (e.response?.parsedHeaders?.errorCode === 'AuthenticationFailed') {
         // This error means the user's credentials are incorrect, but not expired normally. They might have
@@ -135,7 +135,7 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
             `Your Azure Storage SAS credentials are not valid.\n` +
             `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}", \n` +
             `or provide a SAS in the ` +
-            `${EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_CREDENTIAL} environment variable.`
+            `${EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL} environment variable.`
         );
       } else if (e.response?.parsedHeaders?.errorCode === 'AuthorizationPermissionMismatch') {
         // This error is not solvable by the user, so we'll assume it is a configuration error, and revert
@@ -175,7 +175,7 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
     try {
       blobAlreadyExists = await blockBlobClient.exists();
     } catch (e) {
-      // If RUSH_BUILD_CACHE_WRITE_CREDENTIAL is set but is corrupted or has been rotated
+      // If RUSH_BUILD_CACHE_CREDENTIAL is set but is corrupted or has been rotated
       // in Azure Portal, or the user's own cached credentials have been corrupted or
       // invalidated, we'll print the error and continue (this way we don't fail the
       // actual rush build).
@@ -260,7 +260,7 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
 
   private async _getContainerClientAsync(): Promise<ContainerClient> {
     if (!this._containerClient) {
-      let sasString: string | undefined = this._environmentWriteCredential;
+      let sasString: string | undefined = this._environmentCredential;
       if (!sasString) {
         let cacheEntry: ICredentialCacheEntry | undefined;
         await CredentialCache.usingAsync(
@@ -295,7 +295,7 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
           "An Azure Storage SAS credential hasn't been provided, or has expired. " +
             `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}", ` +
             `or provide a SAS in the ` +
-            `${EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_CREDENTIAL} environment variable`
+            `${EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL} environment variable`
         );
       }
 

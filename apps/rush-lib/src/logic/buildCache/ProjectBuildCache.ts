@@ -18,6 +18,7 @@ import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
 import { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
 import { TarExecutable } from '../../utilities/TarExecutable';
 import { Utilities } from '../../utilities/Utilities';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
 interface IProjectBuildCacheOptions {
   buildCacheConfiguration: BuildCacheConfiguration;
@@ -43,6 +44,7 @@ export class ProjectBuildCache {
   private readonly _project: RushConfigurationProject;
   private readonly _localBuildCacheProvider: FileSystemBuildCacheProvider;
   private readonly _cloudBuildCacheProvider: CloudBuildCacheProviderBase | undefined;
+  private readonly _buildCacheEnabled: boolean;
   private readonly _projectOutputFolderNames: string[];
   private readonly _cacheId: string | undefined;
 
@@ -50,6 +52,7 @@ export class ProjectBuildCache {
     this._project = options.projectConfiguration.project;
     this._localBuildCacheProvider = options.buildCacheConfiguration.localCacheProvider;
     this._cloudBuildCacheProvider = options.buildCacheConfiguration.cloudCacheProvider;
+    this._buildCacheEnabled = options.buildCacheConfiguration.buildCacheEnabled;
     this._projectOutputFolderNames = options.projectConfiguration.projectOutputFolderNames || [];
     this._cacheId = ProjectBuildCache._getCacheId(options);
   }
@@ -114,6 +117,11 @@ export class ProjectBuildCache {
     const cacheId: string | undefined = this._cacheId;
     if (!cacheId) {
       terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
+      return false;
+    }
+
+    if (!(EnvironmentConfiguration.buildCacheEnabled ?? this._buildCacheEnabled)) {
+      // Skip reading local and cloud build caches, without any noise
       return false;
     }
 
@@ -224,6 +232,11 @@ export class ProjectBuildCache {
       return false;
     }
 
+    if (!(EnvironmentConfiguration.buildCacheEnabled ?? this._buildCacheEnabled)) {
+      // Skip writing local and cloud build caches, without any noise
+      return false;
+    }
+
     const projectFolderPath: string = this._project.projectFolder;
     const filesToCache: IPathsToCache | undefined = await this._tryCollectPathsToCacheAsync(terminal);
     if (!filesToCache) {
@@ -281,7 +294,17 @@ export class ProjectBuildCache {
     }
 
     let setCloudCacheEntryPromise: Promise<boolean> | undefined;
-    if (this._cloudBuildCacheProvider?.isCacheWriteAllowed === true) {
+
+    if (EnvironmentConfiguration.buildCacheWriteAllowed === false) {
+      // Skip writing cloud build cache, without any noise
+      return false;
+    }
+
+    const writeAllowed: boolean =
+      EnvironmentConfiguration.buildCacheWriteAllowed ??
+      this._cloudBuildCacheProvider?.isCacheWriteAllowed === true;
+
+    if (writeAllowed) {
       if (!cacheEntryBuffer) {
         if (localCacheEntryPath) {
           cacheEntryBuffer = await FileSystem.readFileToBufferAsync(localCacheEntryPath);
@@ -290,7 +313,7 @@ export class ProjectBuildCache {
         }
       }
 
-      setCloudCacheEntryPromise = this._cloudBuildCacheProvider.trySetCacheEntryBufferAsync(
+      setCloudCacheEntryPromise = this._cloudBuildCacheProvider?.trySetCacheEntryBufferAsync(
         terminal,
         cacheId,
         cacheEntryBuffer

@@ -96,7 +96,8 @@ export const enum EnvironmentVariableNames {
 
   /**
    * Provides a credential for a remote build cache, if configured. Setting this environment variable
-   * overrides a "isCacheWriteAllowed": false setting.
+   * overrides whatever credential has been saved in the local cloud cache credentials using
+   * `rush update-cloud-credentials`.
    *
    * @remarks
    * This credential overrides any cached credentials.
@@ -106,7 +107,23 @@ export const enum EnvironmentVariableNames {
    *
    * For information on SAS tokens, see here: https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview
    */
-  RUSH_BUILD_CACHE_WRITE_CREDENTIAL = 'RUSH_BUILD_CACHE_WRITE_CREDENTIAL',
+  RUSH_BUILD_CACHE_CREDENTIAL = 'RUSH_BUILD_CACHE_CREDENTIAL',
+
+  /**
+   * Setting this environment variable overrides the value of `buildCacheEnabled` in the `build-cache.json`
+   * configuration file. If the environment variable is missing or anything other than the value `true`
+   * or `false`, it is ignored.
+   *
+   * If set to `false`, this is equivalent to passing the `--disable-build-cache` flag.
+   */
+  RUSH_BUILD_CACHE_ENABLED = 'RUSH_BUILD_CACHE_ENABLED',
+
+  /**
+   * Setting this environment variable overrides the value of `isCacheWriteAllowed` in the `build-cache.json`
+   * configuration file. If the environment variable is missing or anything other than the value `true`
+   * or `false`, it is ignored.
+   */
+  RUSH_BUILD_CACHE_WRITE_ALLOWED = 'RUSH_BUILD_CACHE_WRITE_ALLOWED',
 
   /**
    * Allows the git binary path to be explicitly specified.
@@ -146,6 +163,10 @@ export class EnvironmentConfiguration {
   private static _rushGlobalFolderOverride: string | undefined;
 
   private static _buildCacheCredential: string | undefined;
+
+  private static _buildCacheEnabled: boolean | undefined;
+
+  private static _buildCacheWriteAllowed: boolean | undefined;
 
   private static _gitBinaryPath: string | undefined;
 
@@ -198,11 +219,29 @@ export class EnvironmentConfiguration {
 
   /**
    * Provides a credential for reading from and writing to a remote build cache, if configured.
-   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_CONNECTION_STRING}
+   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL}
    */
-  public static get buildCacheWriteCredential(): string | undefined {
+  public static get buildCacheCredential(): string | undefined {
     EnvironmentConfiguration._ensureInitialized();
     return EnvironmentConfiguration._buildCacheCredential;
+  }
+
+  /**
+   * If set, enables or disables the cloud build cache feature.
+   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_ENABLED}
+   */
+  public static get buildCacheEnabled(): boolean | undefined {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._buildCacheEnabled;
+  }
+
+  /**
+   * If set, enables or disables writing to the cloud build cache.
+   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED}
+   */
+  public static get buildCacheWriteAllowed(): boolean | undefined {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._buildCacheWriteAllowed;
   }
 
   /**
@@ -275,8 +314,26 @@ export class EnvironmentConfiguration {
             break;
           }
 
-          case EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_CREDENTIAL: {
+          case EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL: {
             EnvironmentConfiguration._buildCacheCredential = value;
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_BUILD_CACHE_ENABLED: {
+            if (value === 'true') {
+              EnvironmentConfiguration._buildCacheEnabled = true;
+            } else if (value === 'false') {
+              EnvironmentConfiguration._buildCacheEnabled = false;
+            }
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED: {
+            if (value === 'true') {
+              EnvironmentConfiguration._buildCacheWriteAllowed = true;
+            } else if (value === 'false') {
+              EnvironmentConfiguration._buildCacheWriteAllowed = false;
+            }
             break;
           }
 
