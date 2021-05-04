@@ -65,19 +65,11 @@ export class WriteBuildCacheAction extends BaseRushAction {
     const terminal: Terminal = new Terminal(
       new ConsoleTerminalProvider({ verboseEnabled: this._verboseFlag.value })
     );
-    const buildCacheConfiguration:
-      | BuildCacheConfiguration
-      | undefined = await BuildCacheConfiguration.loadFromDefaultPathAsync(terminal, this.rushConfiguration);
-    if (!buildCacheConfiguration) {
-      const buildCacheConfigurationFilePath: string = BuildCacheConfiguration.getBuildCacheConfigFilePath(
-        this.rushConfiguration
-      );
-      terminal.writeErrorLine(
-        `The a build cache has not been configured. Configure it by creating a ` +
-          `"${buildCacheConfigurationFilePath}" file.`
-      );
-      throw new AlreadyReportedError();
-    }
+
+    const buildCacheConfiguration: BuildCacheConfiguration = await BuildCacheConfiguration.loadAndRequireEnabledAsync(
+      terminal,
+      this.rushConfiguration
+    );
 
     const command: string = this._command.value!;
     const commandToRun: string | undefined = TaskSelector.getScriptToRun(project, command, []);

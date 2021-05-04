@@ -143,7 +143,6 @@ export interface IConfigurationEnvironmentVariable {
 
 // @beta
 export interface IExperimentsJson {
-    buildCache?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
