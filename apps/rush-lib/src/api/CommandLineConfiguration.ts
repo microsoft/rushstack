@@ -15,6 +15,8 @@ import {
   IPhasedCommandJson
 } from './CommandLineJson';
 
+const EXPECTED_PHASE_NAME_PREFIX: '_phase:' = '_phase:';
+
 /**
  * Custom Commands and Options for the Rush Command Line
  */
@@ -74,8 +76,10 @@ export class CommandLineConfiguration {
 
   /**
    * Use CommandLineConfiguration.loadFromFile()
+   *
+   * @internal
    */
-  private constructor(commandLineJson: ICommandLineJson | undefined) {
+  public constructor(commandLineJson: ICommandLineJson | undefined) {
     if (commandLineJson) {
       if (commandLineJson.phases) {
         for (const phase of commandLineJson.phases) {
@@ -86,8 +90,49 @@ export class CommandLineConfiguration {
             );
           }
 
+          if (phase.name.substring(0, 7 /* '_phase:'.length */) !== EXPECTED_PHASE_NAME_PREFIX) {
+            throw new Error(
+              `In ${RushConstants.commandLineFilename}, the phase "${phase.name}"'s name ` +
+                `does not begin with the required prefix "${EXPECTED_PHASE_NAME_PREFIX}".`
+            );
+          }
+
+          if (phase.name.length <= 7) {
+            throw new Error(
+              `In ${RushConstants.commandLineFilename}, the phase "${phase.name}"'s name ` +
+                `must have characters after "${EXPECTED_PHASE_NAME_PREFIX}"`
+            );
+          }
+
           this.phases.set(phase.name, phase);
         }
+      }
+
+      for (const phase of this.phases.values()) {
+        if (phase.dependencies?.self) {
+          for (const dependencyName of phase.dependencies.self) {
+            const dependency: IPhaseJson | undefined = this.phases.get(dependencyName);
+            if (!dependency) {
+              throw new Error(
+                `In ${RushConstants.commandLineFilename}, in the phase "${phase.name}", the self ` +
+                  `dependency phase "${dependencyName}" does not exist.`
+              );
+            }
+          }
+        }
+
+        if (phase.dependencies?.upstream) {
+          for (const dependency of phase.dependencies.upstream) {
+            if (!this.phases.has(dependency)) {
+              throw new Error(
+                `In ${RushConstants.commandLineFilename}, in the phase "${phase.name}", the upstream ` +
+                  `dependency phase "${dependency}" does not exist.`
+              );
+            }
+          }
+        }
+
+        this._checkForSelfPhaseCycles(phase);
       }
 
       if (commandLineJson.commands) {
@@ -101,25 +146,12 @@ export class CommandLineConfiguration {
 
           if (command.commandKind === 'phased') {
             const phasedCommand: IPhasedCommandJson = command as IPhasedCommandJson;
-            if (phasedCommand.dependencies?.self) {
-              for (const phase of phasedCommand.dependencies.self) {
-                if (!this.phases.has(phase)) {
-                  throw new Error(
-                    `In ${RushConstants.commandLineFilename}, in the command "${command.name}", the self ` +
-                      `dependency phase "${phase}" does not exist.`
-                  );
-                }
-              }
-            }
-
-            if (phasedCommand.dependencies?.upstream) {
-              for (const phase of phasedCommand.dependencies.upstream) {
-                if (!this.phases.has(phase)) {
-                  throw new Error(
-                    `In ${RushConstants.commandLineFilename}, in the command "${command.name}", the upstream ` +
-                      `dependency phase "${phase}" does not exist.`
-                  );
-                }
+            for (const phase of phasedCommand.phases) {
+              if (!this.phases.has(phase)) {
+                throw new Error(
+                  `In ${RushConstants.commandLineFilename}, in the command "${command.name}", the ` +
+                    `phase "${phase}" does not exist.`
+                );
               }
             }
           }
@@ -178,6 +210,36 @@ export class CommandLineConfiguration {
               `${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}"` +
                 ` that lists no associated commands or phases.`
             );
+          }
+        }
+      }
+    }
+  }
+
+  private _checkForSelfPhaseCycles(phase: IPhaseJson, checkedPhases: Set<string> = new Set<string>()): void {
+    const dependencies: string[] | undefined = phase.dependencies?.self;
+    if (dependencies) {
+      for (const dependencyName of dependencies) {
+        if (checkedPhases.has(dependencyName)) {
+          throw new Error(
+            `In ${RushConstants.commandLineFilename}, there exists a cycle within the ` +
+              `set of ${dependencyName} dependencies: ${Array.from(checkedPhases).join(', ')}`
+          );
+        } else {
+          checkedPhases.add(dependencyName);
+          const dependency: IPhaseJson | undefined = this.phases.get(dependencyName);
+          if (!dependency) {
+            return; // Ignore, we check for this separately
+          } else {
+            if (dependencies.length > 1) {
+              this._checkForSelfPhaseCycles(
+                dependency,
+                // Clone the set of checked phases if there are multiple branches we need to check
+                new Set<string>(checkedPhases)
+              );
+            } else {
+              this._checkForSelfPhaseCycles(dependency, checkedPhases);
+            }
           }
         }
       }

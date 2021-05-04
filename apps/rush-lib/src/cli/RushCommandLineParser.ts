@@ -325,11 +325,14 @@ export class RushCommandLineParser extends CommandLineParser {
       return;
     }
 
-    if (command.commandKind === RushConstants.globalCommandKind) {
+    if (
+      command.commandKind !== RushConstants.bulkCommandKind &&
+      command.commandKind !== RushConstants.phasedCommandKind
+    ) {
       throw new Error(
         `${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
           `the command kind "${RushConstants.globalCommandKind}". This command can only be designated as a command ` +
-          `kind "${RushConstants.bulkCommandKind}".`
+          `kind "${RushConstants.bulkCommandKind}" or "${RushConstants.phasedCommandKind}".`
       );
     }
     if (command.safeForSimultaneousRushProcesses) {
