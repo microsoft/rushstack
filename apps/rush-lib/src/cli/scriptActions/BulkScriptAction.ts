@@ -13,7 +13,7 @@ import {
 
 import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
-import { ITaskSelectorOptions, TaskSelector } from '../../logic/TaskSelector';
+import { ITaskSelectorOptions, TaskSelectorBase } from '../../logic/taskSelector/TaskSelectorBase';
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { ITaskRunnerOptions, TaskRunner } from '../../logic/taskRunner/TaskRunner';
@@ -26,6 +26,10 @@ import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { Selection } from '../../logic/Selection';
 import { SelectionParameterSet } from '../SelectionParameterSet';
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
+import {
+  IProjectCommandTaskSelectorOptions,
+  ProjectCommandTaskSelector
+} from '../../logic/taskSelector/ProjectCommandTaskSelector';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -45,8 +49,16 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   commandToRun?: string;
 }
 
-interface IExecuteInternalOptions {
+interface IRunWatchOptions extends IExecuteInternalOptions {
   taskSelectorOptions: ITaskSelectorOptions;
+  projectCommandTaskSelectorOptions: IProjectCommandTaskSelectorOptions;
+}
+
+interface IRunOnceOptions extends IExecuteInternalOptions {
+  taskSelector: TaskSelectorBase;
+}
+
+interface IExecuteInternalOptions {
   taskRunnerOptions: ITaskRunnerOptions;
   stopwatch: Stopwatch;
   ignoreHooks?: boolean;
@@ -136,10 +148,13 @@ export class BulkScriptAction extends BaseScriptAction {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
       selection,
+      isQuietMode: isQuietMode
+    };
+
+    const projectCommandTaskSelectorOptions: IProjectCommandTaskSelectorOptions = {
       commandName: this.actionName,
       commandToRun: this._commandToRun,
       customParameterValues,
-      isQuietMode: isQuietMode,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
       ignoreMissingScript: this._ignoreMissingScript,
       ignoreDependencyOrder: this._ignoreDependencyOrder,
@@ -155,16 +170,18 @@ export class BulkScriptAction extends BaseScriptAction {
     };
 
     const executeOptions: IExecuteInternalOptions = {
-      taskSelectorOptions,
       taskRunnerOptions,
       stopwatch,
       terminal
     };
 
     if (this._watchForChanges) {
-      await this._runWatch(executeOptions);
+      await this._runWatch({ ...executeOptions, taskSelectorOptions, projectCommandTaskSelectorOptions });
     } else {
-      await this._runOnce(executeOptions);
+      await this._runOnce({
+        ...executeOptions,
+        taskSelector: new ProjectCommandTaskSelector(taskSelectorOptions, projectCommandTaskSelectorOptions)
+      });
     }
   }
 
@@ -175,7 +192,7 @@ export class BulkScriptAction extends BaseScriptAction {
    *    Uses the same algorithm as --impacted-by
    * 3) Goto (1)
    */
-  private async _runWatch(options: IExecuteInternalOptions): Promise<void> {
+  private async _runWatch(options: IRunWatchOptions): Promise<void> {
     const {
       taskSelectorOptions: {
         buildCacheConfiguration: initialBuildCacheConfiguration,
@@ -229,18 +246,21 @@ export class BulkScriptAction extends BaseScriptAction {
         selection = Selection.intersection(Selection.expandAllConsumers(selection), projectsToWatch);
       }
 
-      const executeOptions: IExecuteInternalOptions = {
-        taskSelectorOptions: {
-          ...options.taskSelectorOptions,
-          // Current implementation of the build cache deletes output folders before repopulating them;
-          // this tends to break `webpack --watch`, etc.
-          // Also, skipping writes to the local cache reduces CPU overhead and saves disk usage.
-          buildCacheConfiguration: isInitialPass ? initialBuildCacheConfiguration : undefined,
-          // Revise down the set of projects to execute the command on
-          selection,
-          // Pass the PackageChangeAnalyzer from the state differ to save a bit of overhead
-          packageChangeAnalyzer: state
-        },
+      const executeOptions: IRunOnceOptions = {
+        taskSelector: new ProjectCommandTaskSelector(
+          {
+            ...options.taskSelectorOptions,
+            // Current implementation of the build cache deletes output folders before repopulating them;
+            // this tends to break `webpack --watch`, etc.
+            // Also, skipping writes to the local cache reduces CPU overhead and saves disk usage.
+            buildCacheConfiguration: isInitialPass ? initialBuildCacheConfiguration : undefined,
+            // Revise down the set of projects to execute the command on
+            selection,
+            // Pass the PackageChangeAnalyzer from the state differ to save a bit of overhead
+            packageChangeAnalyzer: state
+          },
+          options.projectCommandTaskSelectorOptions
+        ),
         taskRunnerOptions: options.taskRunnerOptions,
         stopwatch,
         // For now, don't run pre-build or post-build in watch mode
@@ -314,13 +334,10 @@ export class BulkScriptAction extends BaseScriptAction {
   /**
    * Runs a single invocation of the command
    */
-  private async _runOnce(options: IExecuteInternalOptions): Promise<void> {
-    const taskSelector: TaskSelector = new TaskSelector(options.taskSelectorOptions);
-
-    // Register all tasks with the task collection
-
+  private async _runOnce(options: IRunOnceOptions): Promise<void> {
     const taskRunner: TaskRunner = new TaskRunner(
-      taskSelector.registerTasks().getOrderedTasks(),
+      // Register all tasks with the task collection
+      options.taskSelector.registerTasks().getOrderedTasks(),
       options.taskRunnerOptions
     );
 
