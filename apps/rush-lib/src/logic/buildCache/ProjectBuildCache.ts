@@ -48,6 +48,10 @@ export class ProjectBuildCache {
   private readonly _projectOutputFolderNames: string[];
   private readonly _cacheId: string | undefined;
 
+  public get buildCacheEnabled(): boolean {
+    return EnvironmentConfiguration.buildCacheEnabled ?? this._buildCacheEnabled;
+  }
+
   private constructor(options: Omit<IProjectBuildCacheOptions, 'terminal'>) {
     this._project = options.projectConfiguration.project;
     this._localBuildCacheProvider = options.buildCacheConfiguration.localCacheProvider;
@@ -120,7 +124,7 @@ export class ProjectBuildCache {
       return false;
     }
 
-    if (!(EnvironmentConfiguration.buildCacheEnabled ?? this._buildCacheEnabled)) {
+    if (!this.buildCacheEnabled) {
       // Skip reading local and cloud build caches, without any noise
       return false;
     }
@@ -232,8 +236,8 @@ export class ProjectBuildCache {
       return false;
     }
 
-    if (!(EnvironmentConfiguration.buildCacheEnabled ?? this._buildCacheEnabled)) {
-      // Skip writing local and cloud build caches, without any noise
+    if (!this.buildCacheEnabled) {
+      // Skip reading local and cloud build caches, without any noise
       return false;
     }
 
