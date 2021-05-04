@@ -184,7 +184,7 @@ export class RushConstants {
    * The name of the file to drop in project-folder/.rush/temp/ containing a listing of the project's direct
    * and indirect dependencies. This is used to detect if a project's dependencies have changed since the last build.
    */
-  public static readonly projectDependencyManifestFilename: string = 'shrinkwrap-deps.json';
+  public static readonly projectShrinkwrapFilename: string = 'shrinkwrap-deps.json';
 
   /**
    * The value of the "commandKind" property for a bulk command in command-line.json

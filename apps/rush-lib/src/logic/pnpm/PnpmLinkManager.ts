@@ -22,7 +22,6 @@ import { BasePackage } from '../base/BasePackage';
 import { RushConstants } from '../../logic/RushConstants';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './PnpmShrinkwrapFile';
-import { PnpmProjectDependencyManifest } from './PnpmProjectDependencyManifest';
 
 // special flag for debugging, will print extra diagnostic information,
 // but comes with performance cost
@@ -236,14 +235,8 @@ export class PnpmLinkManager extends BaseLinkManager {
       );
     }
 
-    const pnpmProjectDependencyManifest: PnpmProjectDependencyManifest = new PnpmProjectDependencyManifest({
-      pnpmShrinkwrapFile,
-      project
-    });
-
     for (const dependencyName of Object.keys(commonPackage.packageJson!.dependencies || {})) {
       const newLocalPackage: BasePackage = this._createLocalPackageForDependency(
-        pnpmProjectDependencyManifest,
         project,
         parentShrinkwrapEntry,
         localPackage,
@@ -257,7 +250,6 @@ export class PnpmLinkManager extends BaseLinkManager {
     // support is added
     // for (const dependencyName of Object.keys(commonPackage.packageJson!.optionalDependencies || {})) {
     //   const newLocalPackage: BasePackage | undefined = this._createLocalPackageForDependency(
-    //     pnpmProjectDependencyManifest,
     //     project,
     //     parentShrinkwrapEntry,
     //     localPackage,
@@ -273,16 +265,9 @@ export class PnpmLinkManager extends BaseLinkManager {
       localPackage.printTree();
     }
 
-    PnpmLinkManager._createSymlinksForTopLevelProject(localPackage);
+    await pnpmShrinkwrapFile.getProjectShrinkwrap(project)!.updateProjectShrinkwrapAsync();
 
-    if (
-      !this._rushConfiguration.experimentsConfiguration.configuration
-        .legacyIncrementalBuildDependencyDetection
-    ) {
-      await pnpmProjectDependencyManifest.saveAsync();
-    } else {
-      await pnpmProjectDependencyManifest.deleteIfExistsAsync();
-    }
+    PnpmLinkManager._createSymlinksForTopLevelProject(localPackage);
 
     // Also symlink the ".bin" folder
     const projectFolder: string = path.join(localPackage.folderPath, 'node_modules');
@@ -351,7 +336,6 @@ export class PnpmLinkManager extends BaseLinkManager {
     }
   }
   private _createLocalPackageForDependency(
-    pnpmProjectDependencyManifest: PnpmProjectDependencyManifest,
     project: RushConfigurationProject,
     parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml,
     localPackage: BasePackage,
@@ -405,18 +389,6 @@ export class PnpmLinkManager extends BaseLinkManager {
     // The dependencyLocalInstallationSymlink is just a symlink to another folder. To reduce the number of filesystem
     // reads that are needed, we will link to where that symlink pointed, rather than linking to a link.
     newLocalPackage.symlinkTargetFolderPath = FileSystem.getRealPath(dependencyLocalInstallationSymlink);
-
-    if (
-      !this._rushConfiguration.experimentsConfiguration.configuration
-        .legacyIncrementalBuildDependencyDetection
-    ) {
-      pnpmProjectDependencyManifest.addDependency(
-        newLocalPackage.name,
-        newLocalPackage.version!,
-        parentShrinkwrapEntry
-      );
-    }
-
     return newLocalPackage;
   }
 }

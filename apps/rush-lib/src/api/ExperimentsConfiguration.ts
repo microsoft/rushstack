@@ -11,12 +11,6 @@ import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
  */
 export interface IExperimentsJson {
   /**
-   * If this setting is enabled, incremental builds should use repo-wide dependency tracking
-   * instead of project-specific tracking.
-   */
-  legacyIncrementalBuildDependencyDetection?: boolean;
-
-  /**
    * By default, 'rush install' passes --no-prefer-frozen-lockfile to 'pnpm install'.
    * Set this option to true to pass '--frozen-lockfile' instead.
    */

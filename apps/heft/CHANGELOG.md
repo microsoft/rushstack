@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 29 Apr 2021 23:26:50 GMT and should not be manually modified.
+This log was last generated on Mon, 03 May 2021 15:10:28 GMT and should not be manually modified.
+
+## 0.30.2
+Mon, 03 May 2021 15:10:28 GMT
+
+### Patches
+
+- Move forEachLimitAsync implementation out of heft
 
 ## 0.30.1
 Thu, 29 Apr 2021 23:26:50 GMT
