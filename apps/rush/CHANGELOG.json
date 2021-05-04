@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.46.1",
+      "tag": "@microsoft/rush_v5.46.1",
+      "date": "Tue, 04 May 2021 20:26:15 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the buildCacheEnabled setting was not applied correctly"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.46.0",
       "tag": "@microsoft/rush_v5.46.0",
       "date": "Tue, 04 May 2021 02:45:20 GMT",
