@@ -31,6 +31,10 @@ export interface IProjectChangeResult {
 /**
  * This class is for incrementally watching a set of projects in the repository for changes.
  *
+ * We are manually using fs.watch() instead of `chokidar` because all we want from the file system watcher is a boolean
+ * signal indicating that "at least 1 file in a watched project changed". We then defer to PackageChangeAnalyzer (which
+ * is responsible for change detection in all incremental builds) to determine what actually chanaged.
+ *
  * Calling `waitForChange()` will return a promise that resolves when the package-deps of one or
  * more projects differ from the value the previous time it was invoked. The first time will always resolve with the full selection.
  */
@@ -138,7 +142,7 @@ export class ProjectWatcher {
         const addWatcher = (
           watchedPath: string,
           listener: (event: string, fileName: string | Buffer) => void
-        ) => {
+        ): void => {
           const watcher: fs.FSWatcher = fs.watch(
             watchedPath,
             {
