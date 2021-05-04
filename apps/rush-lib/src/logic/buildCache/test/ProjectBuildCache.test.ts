@@ -11,11 +11,14 @@ import { FileSystemBuildCacheProvider } from '../FileSystemBuildCacheProvider';
 
 import { ProjectBuildCache } from '../ProjectBuildCache';
 
+interface ITestOptions {
+  enabled: boolean;
+  writeAllowed: boolean;
+  trackedProjectFiles: string[] | undefined;
+}
+
 describe('ProjectBuildCache', () => {
-  function prepareSubject(
-    enabled: boolean,
-    trackedProjectFiles: string[] | undefined
-  ): ProjectBuildCache | undefined {
+  function prepareSubject(options: Partial<ITestOptions>): ProjectBuildCache | undefined {
     const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
     const packageChangeAnalyzer = ({
       getProjectStateHash: () => {
@@ -25,11 +28,13 @@ describe('ProjectBuildCache', () => {
 
     const subject: ProjectBuildCache | undefined = ProjectBuildCache.tryGetProjectBuildCache({
       buildCacheConfiguration: ({
-        buildCacheEnabled: enabled,
+        buildCacheEnabled: options.hasOwnProperty('enabled') ? options.enabled : true,
         getCacheEntryId: (options: IGenerateCacheEntryIdOptions) =>
           `${options.projectName}/${options.projectStateHash}`,
         localCacheProvider: (undefined as unknown) as FileSystemBuildCacheProvider,
-        cloudCacheProvider: undefined
+        cloudCacheProvider: {
+          isCacheWriteAllowed: options.hasOwnProperty('writeAllowed') ? options.writeAllowed : false
+        }
       } as unknown) as BuildCacheConfiguration,
       projectConfiguration: ({
         projectOutputFolderNames: ['dist'],
@@ -40,7 +45,7 @@ describe('ProjectBuildCache', () => {
         }
       } as unknown) as RushProjectConfiguration,
       command: 'build',
-      trackedProjectFiles,
+      trackedProjectFiles: options.hasOwnProperty('trackedProjectFiles') ? options.trackedProjectFiles : [],
       packageChangeAnalyzer,
       terminal
     });
@@ -50,14 +55,18 @@ describe('ProjectBuildCache', () => {
 
   describe('tryGetProjectBuildCache', () => {
     it('returns a ProjectBuildCache with a calculated cacheId value', () => {
-      const subject: ProjectBuildCache = prepareSubject(true, [])!;
+      const subject: ProjectBuildCache = prepareSubject({})!;
       expect(subject['_cacheId']).toMatchInlineSnapshot(
         `"acme-wizard/e229f8765b7d450a8a84f711a81c21e37935d661"`
       );
     });
 
     it('returns undefined if the tracked file list is undefined', () => {
-      expect(prepareSubject(true, undefined)).toBe(undefined);
+      expect(
+        prepareSubject({
+          trackedProjectFiles: undefined
+        })
+      ).toBe(undefined);
     });
   });
 
@@ -65,8 +74,29 @@ describe('ProjectBuildCache', () => {
     function test(configValue: boolean, envValue: boolean | undefined, expectedValue: boolean): void {
       it(`returns ${expectedValue} if buildCacheEnabled=${configValue} and RUSH_BUILD_CACHE_ENABLED=${envValue}`, () => {
         jest.spyOn(EnvironmentConfiguration, 'buildCacheEnabled', 'get').mockReturnValue(envValue);
-        const subject: ProjectBuildCache = prepareSubject(configValue, [])!;
+        const subject: ProjectBuildCache = prepareSubject({
+          enabled: configValue
+        })!;
         expect(subject.buildCacheEnabled).toBe(expectedValue);
+      });
+    }
+
+    test(true, undefined, true);
+    test(false, undefined, false);
+    test(true, true, true);
+    test(false, true, true);
+    test(true, false, false);
+    test(false, false, false);
+  });
+
+  describe('buildCacheWriteAllowed', () => {
+    function test(configValue: boolean, envValue: boolean | undefined, expectedValue: boolean): void {
+      it(`returns ${expectedValue} if isCacheWriteAllowed=${configValue} and RUSH_BUILD_CACHE_WRITE_ALLOWED=${envValue}`, () => {
+        jest.spyOn(EnvironmentConfiguration, 'buildCacheWriteAllowed', 'get').mockReturnValue(envValue);
+        const subject: ProjectBuildCache = prepareSubject({
+          writeAllowed: configValue
+        })!;
+        expect(subject.buildCacheWriteAllowed).toBe(expectedValue);
       });
     }
 

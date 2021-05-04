@@ -52,6 +52,13 @@ export class ProjectBuildCache {
     return EnvironmentConfiguration.buildCacheEnabled ?? this._buildCacheEnabled;
   }
 
+  public get buildCacheWriteAllowed(): boolean {
+    return (
+      EnvironmentConfiguration.buildCacheWriteAllowed ??
+      this._cloudBuildCacheProvider?.isCacheWriteAllowed === true
+    );
+  }
+
   private constructor(options: Omit<IProjectBuildCacheOptions, 'terminal'>) {
     this._project = options.projectConfiguration.project;
     this._localBuildCacheProvider = options.buildCacheConfiguration.localCacheProvider;
@@ -237,7 +244,7 @@ export class ProjectBuildCache {
     }
 
     if (!this.buildCacheEnabled) {
-      // Skip reading local and cloud build caches, without any noise
+      // Skip writing local and cloud build caches, without any noise
       return false;
     }
 
@@ -299,16 +306,11 @@ export class ProjectBuildCache {
 
     let setCloudCacheEntryPromise: Promise<boolean> | undefined;
 
-    if (EnvironmentConfiguration.buildCacheWriteAllowed === false) {
-      // Skip writing cloud build cache, without any noise
-      return false;
-    }
+    // Note that "writeAllowed" settings (whether in config or environment) always apply to
+    // the configured CLOUD cache. If the cache is enabled, rush is always allowed to read from and
+    // write to the local build cache.
 
-    const writeAllowed: boolean =
-      EnvironmentConfiguration.buildCacheWriteAllowed ??
-      this._cloudBuildCacheProvider?.isCacheWriteAllowed === true;
-
-    if (writeAllowed) {
+    if (this.buildCacheWriteAllowed) {
       if (!cacheEntryBuffer) {
         if (localCacheEntryPath) {
           cacheEntryBuffer = await FileSystem.readFileToBufferAsync(localCacheEntryPath);
