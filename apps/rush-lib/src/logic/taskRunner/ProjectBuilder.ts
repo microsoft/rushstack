@@ -66,6 +66,9 @@ function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
   return true;
 }
 
+const UNINITIALIZED: 'UNINITIALIZED' = 'UNINITIALIZED';
+type UNINITIALIZED = 'UNINITIALIZED';
+
 /**
  * A `BaseBuilder` subclass that builds a Rush project and updates its package-deps-hash
  * incremental state.
@@ -87,10 +90,10 @@ export class ProjectBuilder extends BaseBuilder {
   private readonly _packageDepsFilename: string;
 
   /**
-   * null === we haven't tried to initialize yet
-   * undefined === can't be initialized
+   * UNINITIALIZED === we haven't tried to initialize yet
+   * undefined === we didn't create one because the feature is not enabled
    */
-  private _projectBuildCache: ProjectBuildCache | undefined | null = null;
+  private _projectBuildCache: ProjectBuildCache | undefined | UNINITIALIZED = UNINITIALIZED;
 
   public constructor(options: IProjectBuilderOptions) {
     super();
@@ -365,10 +368,10 @@ export class ProjectBuilder extends BaseBuilder {
     trackedProjectFiles: string[] | undefined,
     commandLineConfiguration: CommandLineConfiguration | undefined
   ): Promise<ProjectBuildCache | undefined> {
-    if (this._projectBuildCache === null) {
+    if (this._projectBuildCache === UNINITIALIZED) {
       this._projectBuildCache = undefined;
 
-      if (this._buildCacheConfiguration) {
+      if (this._buildCacheConfiguration && this._buildCacheConfiguration.buildCacheEnabled) {
         const projectConfiguration:
           | RushProjectConfiguration
           | undefined = await RushProjectConfiguration.tryLoadForProjectAsync(
