@@ -17,7 +17,6 @@ import { ITaskSelectorOptions, TaskSelectorBase } from '../../logic/taskSelector
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { ITaskRunnerOptions, TaskRunner } from '../../logic/taskRunner/TaskRunner';
-import { Utilities } from '../../utilities/Utilities';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
@@ -26,32 +25,21 @@ import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { Selection } from '../../logic/Selection';
 import { SelectionParameterSet } from '../SelectionParameterSet';
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
-import {
-  IProjectCommandTaskSelectorOptions,
-  ProjectCommandTaskSelector
-} from '../../logic/taskSelector/ProjectCommandTaskSelector';
 
 /**
  * Constructor parameters for BulkScriptAction.
  */
 export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   enableParallelism: boolean;
-  ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
   incremental: boolean;
   allowWarningsInSuccessfulBuild: boolean;
   watchForChanges: boolean;
   disableBuildCache: boolean;
-
-  /**
-   * Optional command to run. Otherwise, use the `actionName` as the command to run.
-   */
-  commandToRun?: string;
 }
 
 interface IRunWatchOptions extends IExecuteInternalOptions {
   taskSelectorOptions: ITaskSelectorOptions;
-  projectCommandTaskSelectorOptions: IProjectCommandTaskSelectorOptions;
 }
 
 interface IRunOnceOptions extends IExecuteInternalOptions {
@@ -74,15 +62,13 @@ interface IExecuteInternalOptions {
  * and "rebuild" commands are also modeled as bulk commands, because they essentially just
  * execute scripts from package.json in the same as any custom command.
  */
-export class BulkScriptAction extends BaseScriptAction {
+export abstract class BulkScriptActionBase extends BaseScriptAction {
+  protected readonly _isIncrementalBuildAllowed: boolean;
+  protected readonly _ignoreDependencyOrder: boolean;
   private readonly _enableParallelism: boolean;
-  private readonly _ignoreMissingScript: boolean;
-  private readonly _isIncrementalBuildAllowed: boolean;
-  private readonly _commandToRun: string;
   private readonly _watchForChanges: boolean;
   private readonly _disableBuildCache: boolean;
   private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
-  private readonly _ignoreDependencyOrder: boolean;
   private readonly _allowWarningsInSuccessfulBuild: boolean;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
@@ -92,12 +78,10 @@ export class BulkScriptAction extends BaseScriptAction {
   private _ignoreHooksParameter!: CommandLineFlagParameter;
   private _disableBuildCacheFlag: CommandLineFlagParameter | undefined;
 
-  public constructor(options: IBulkScriptActionOptions) {
+  protected constructor(options: IBulkScriptActionOptions) {
     super(options);
     this._enableParallelism = options.enableParallelism;
-    this._ignoreMissingScript = options.ignoreMissingScript;
     this._isIncrementalBuildAllowed = options.incremental;
-    this._commandToRun = options.commandToRun || options.actionName;
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
     this._watchForChanges = options.watchForChanges;
@@ -128,12 +112,6 @@ export class BulkScriptAction extends BaseScriptAction {
     // if parallelism is not enabled, then restrict to 1 core
     const parallelism: string | undefined = this._enableParallelism ? this._parallelismParameter!.value : '1';
 
-    // Collect all custom parameter values
-    const customParameterValues: string[] = [];
-    for (const customParameter of this.customParameters) {
-      customParameter.appendToArgList(customParameterValues);
-    }
-
     const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
@@ -151,16 +129,6 @@ export class BulkScriptAction extends BaseScriptAction {
       isQuietMode: isQuietMode
     };
 
-    const projectCommandTaskSelectorOptions: IProjectCommandTaskSelectorOptions = {
-      commandName: this.actionName,
-      commandToRun: this._commandToRun,
-      customParameterValues,
-      isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
-      ignoreMissingScript: this._ignoreMissingScript,
-      ignoreDependencyOrder: this._ignoreDependencyOrder,
-      packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun)
-    };
-
     const taskRunnerOptions: ITaskRunnerOptions = {
       quietMode: isQuietMode,
       parallelism: parallelism,
@@ -176,14 +144,16 @@ export class BulkScriptAction extends BaseScriptAction {
     };
 
     if (this._watchForChanges) {
-      await this._runWatch({ ...executeOptions, taskSelectorOptions, projectCommandTaskSelectorOptions });
+      await this._runWatch({ ...executeOptions, taskSelectorOptions });
     } else {
       await this._runOnce({
         ...executeOptions,
-        taskSelector: new ProjectCommandTaskSelector(taskSelectorOptions, projectCommandTaskSelectorOptions)
+        taskSelector: this._getTaskSelector(taskSelectorOptions)
       });
     }
   }
+
+  protected abstract _getTaskSelector(taskSelectorOptions: ITaskSelectorOptions): TaskSelectorBase;
 
   /**
    * Runs the command in watch mode. Fundamentally is a simple loop:
@@ -247,20 +217,17 @@ export class BulkScriptAction extends BaseScriptAction {
       }
 
       const executeOptions: IRunOnceOptions = {
-        taskSelector: new ProjectCommandTaskSelector(
-          {
-            ...options.taskSelectorOptions,
-            // Current implementation of the build cache deletes output folders before repopulating them;
-            // this tends to break `webpack --watch`, etc.
-            // Also, skipping writes to the local cache reduces CPU overhead and saves disk usage.
-            buildCacheConfiguration: isInitialPass ? initialBuildCacheConfiguration : undefined,
-            // Revise down the set of projects to execute the command on
-            selection,
-            // Pass the PackageChangeAnalyzer from the state differ to save a bit of overhead
-            packageChangeAnalyzer: state
-          },
-          options.projectCommandTaskSelectorOptions
-        ),
+        taskSelector: this._getTaskSelector({
+          ...options.taskSelectorOptions,
+          // Current implementation of the build cache deletes output folders before repopulating them;
+          // this tends to break `webpack --watch`, etc.
+          // Also, skipping writes to the local cache reduces CPU overhead and saves disk usage.
+          buildCacheConfiguration: isInitialPass ? initialBuildCacheConfiguration : undefined,
+          // Revise down the set of projects to execute the command on
+          selection,
+          // Pass the PackageChangeAnalyzer from the state differ to save a bit of overhead
+          packageChangeAnalyzer: state
+        }),
         taskRunnerOptions: options.taskRunnerOptions,
         stopwatch,
         // For now, don't run pre-build or post-build in watch mode

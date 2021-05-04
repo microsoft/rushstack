@@ -6,7 +6,7 @@ import { ProjectBuilder } from '../taskRunner/ProjectBuilder';
 import { TaskCollection } from '../taskRunner/TaskCollection';
 import { ITaskSelectorOptions, TaskSelectorBase } from './TaskSelectorBase';
 
-export interface IProjectCommandTaskSelectorOptions {
+export interface INonPhasedCommandTaskSelectorOptions {
   commandName: string;
   commandToRun: string;
   customParameterValues: string[];
@@ -16,16 +16,16 @@ export interface IProjectCommandTaskSelectorOptions {
   packageDepsFilename: string;
 }
 
-export class ProjectCommandTaskSelector extends TaskSelectorBase {
-  private _projectCommandOptions: IProjectCommandTaskSelectorOptions;
+export class NonPhasedCommandTaskSelector extends TaskSelectorBase {
+  private _nonPhasedCommandTaskSelectorOptions: INonPhasedCommandTaskSelectorOptions;
 
   public constructor(
     options: ITaskSelectorOptions,
-    projectCommandOptions: IProjectCommandTaskSelectorOptions
+    nonPhasedCommandTaskSelectorOptions: INonPhasedCommandTaskSelectorOptions
   ) {
     super(options);
 
-    this._projectCommandOptions = projectCommandOptions;
+    this._nonPhasedCommandTaskSelectorOptions = nonPhasedCommandTaskSelectorOptions;
   }
 
   protected _createTaskCollection(projects: ReadonlySet<RushConfigurationProject>): TaskCollection {
@@ -36,7 +36,7 @@ export class ProjectCommandTaskSelector extends TaskSelectorBase {
       this._registerProjectTask(rushProject, taskCollection);
     }
 
-    if (!this._projectCommandOptions.ignoreDependencyOrder) {
+    if (!this._nonPhasedCommandTaskSelectorOptions.ignoreDependencyOrder) {
       const dependencyMap: Map<RushConfigurationProject, Set<string>> = new Map();
 
       // Generate the filtered dependency graph for selected projects
@@ -83,12 +83,12 @@ export class ProjectCommandTaskSelector extends TaskSelectorBase {
 
     const commandToRun: string | undefined = TaskSelectorBase.getScriptToRun(
       project,
-      this._projectCommandOptions.commandToRun,
-      this._projectCommandOptions.customParameterValues
+      this._nonPhasedCommandTaskSelectorOptions.commandToRun,
+      this._nonPhasedCommandTaskSelectorOptions.customParameterValues
     );
-    if (commandToRun === undefined && !this._projectCommandOptions.ignoreMissingScript) {
+    if (commandToRun === undefined && !this._nonPhasedCommandTaskSelectorOptions.ignoreMissingScript) {
       throw new Error(
-        `The project [${project.packageName}] does not define a '${this._projectCommandOptions.commandToRun}' command in the 'scripts' section of its package.json`
+        `The project [${project.packageName}] does not define a '${this._nonPhasedCommandTaskSelectorOptions.commandToRun}' command in the 'scripts' section of its package.json`
       );
     }
 
@@ -98,10 +98,10 @@ export class ProjectCommandTaskSelector extends TaskSelectorBase {
         rushConfiguration: this._options.rushConfiguration,
         buildCacheConfiguration: this._options.buildCacheConfiguration,
         commandToRun: commandToRun || '',
-        commandName: this._projectCommandOptions.commandName,
-        isIncrementalBuildAllowed: this._projectCommandOptions.isIncrementalBuildAllowed,
+        commandName: this._nonPhasedCommandTaskSelectorOptions.commandName,
+        isIncrementalBuildAllowed: this._nonPhasedCommandTaskSelectorOptions.isIncrementalBuildAllowed,
         packageChangeAnalyzer: this._packageChangeAnalyzer,
-        packageDepsFilename: this._projectCommandOptions.packageDepsFilename
+        packageDepsFilename: this._nonPhasedCommandTaskSelectorOptions.packageDepsFilename
       })
     );
   }

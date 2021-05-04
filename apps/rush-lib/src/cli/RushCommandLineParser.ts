@@ -34,7 +34,7 @@ import { VersionAction } from './actions/VersionAction';
 import { UpdateCloudCredentialsAction } from './actions/UpdateCloudCredentialsAction';
 import { WriteBuildCacheAction } from './actions/WriteBuildCacheAction';
 
-import { BulkScriptAction } from './scriptActions/BulkScriptAction';
+import { NonPhasedBulkScriptAction } from './scriptActions/NonPhasedBulkScriptAction';
 import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
 
 import { Telemetry } from '../logic/Telemetry';
@@ -249,7 +249,7 @@ export class RushCommandLineParser extends CommandLineParser {
     switch (command.commandKind) {
       case RushConstants.bulkCommandKind: {
         this.addAction(
-          new BulkScriptAction({
+          new NonPhasedBulkScriptAction({
             actionName: command.name,
 
             // By default, the "rebuild" action runs the "build" script. However, if the command-line.json file
