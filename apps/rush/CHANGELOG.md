@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 04 May 2021 02:45:20 GMT and should not be manually modified.
+This log was last generated on Tue, 04 May 2021 20:26:15 GMT and should not be manually modified.
+
+## 5.46.1
+Tue, 04 May 2021 20:26:15 GMT
+
+### Updates
+
+- Fix an issue where the buildCacheEnabled setting was not applied correctly
 
 ## 5.46.0
 Tue, 04 May 2021 02:45:20 GMT
