@@ -60,6 +60,7 @@ export interface IPhaseJson {
   description?: string;
   dependencies?: IPhaseDependencies;
   enableParallelism?: boolean;
+  incremental?: boolean;
 
   ignoreMissingScript?: boolean;
   allowWarningsOnSuccess?: boolean;

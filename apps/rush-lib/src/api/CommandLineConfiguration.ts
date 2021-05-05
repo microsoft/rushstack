@@ -15,8 +15,6 @@ import {
   IPhasedCommandJson
 } from './CommandLineJson';
 
-const EXPECTED_PHASE_NAME_PREFIX: '_phase:' = '_phase:';
-
 /**
  * Custom Commands and Options for the Rush Command Line
  */
@@ -90,17 +88,18 @@ export class CommandLineConfiguration {
             );
           }
 
-          if (phase.name.substring(0, 7 /* '_phase:'.length */) !== EXPECTED_PHASE_NAME_PREFIX) {
+          const phaseNamePrefixLength: number = RushConstants.phaseNamePrefix.length;
+          if (phase.name.substring(0, phaseNamePrefixLength) !== RushConstants.phaseNamePrefix) {
             throw new Error(
               `In ${RushConstants.commandLineFilename}, the phase "${phase.name}"'s name ` +
-                `does not begin with the required prefix "${EXPECTED_PHASE_NAME_PREFIX}".`
+                `does not begin with the required prefix "${RushConstants.phaseNamePrefix}".`
             );
           }
 
-          if (phase.name.length <= 7) {
+          if (phase.name.length <= phaseNamePrefixLength) {
             throw new Error(
               `In ${RushConstants.commandLineFilename}, the phase "${phase.name}"'s name ` +
-                `must have characters after "${EXPECTED_PHASE_NAME_PREFIX}"`
+                `must have characters after "${RushConstants.phaseNamePrefix}"`
             );
           }
 

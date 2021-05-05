@@ -29,11 +29,10 @@ import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 /**
  * Constructor parameters for BulkScriptAction.
  */
-export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
+export interface IBulkScriptActionBaseOptions extends IBaseScriptActionOptions {
   enableParallelism: boolean;
   ignoreDependencyOrder: boolean;
   incremental: boolean;
-  allowWarningsInSuccessfulBuild: boolean;
   watchForChanges: boolean;
   disableBuildCache: boolean;
 }
@@ -69,7 +68,6 @@ export abstract class BulkScriptActionBase extends BaseScriptAction {
   private readonly _watchForChanges: boolean;
   private readonly _disableBuildCache: boolean;
   private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
-  private readonly _allowWarningsInSuccessfulBuild: boolean;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
   private _selectionParameters!: SelectionParameterSet;
@@ -78,12 +76,11 @@ export abstract class BulkScriptActionBase extends BaseScriptAction {
   private _ignoreHooksParameter!: CommandLineFlagParameter;
   private _disableBuildCacheFlag: CommandLineFlagParameter | undefined;
 
-  protected constructor(options: IBulkScriptActionOptions) {
+  protected constructor(options: IBulkScriptActionBaseOptions) {
     super(options);
     this._enableParallelism = options.enableParallelism;
     this._isIncrementalBuildAllowed = options.incremental;
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
-    this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
     this._watchForChanges = options.watchForChanges;
     this._disableBuildCache = options.disableBuildCache;
     this._repoCommandLineConfiguration = options.commandLineConfiguration;
@@ -123,6 +120,7 @@ export abstract class BulkScriptActionBase extends BaseScriptAction {
     const selection: Set<RushConfigurationProject> = this._selectionParameters.getSelectedProjects();
 
     const taskSelectorOptions: ITaskSelectorOptions = {
+      commandName: this.actionName,
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
       selection,
@@ -133,7 +131,6 @@ export abstract class BulkScriptActionBase extends BaseScriptAction {
       quietMode: isQuietMode,
       parallelism: parallelism,
       changedProjectsOnly: changedProjectsOnly,
-      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild,
       repoCommandLineConfiguration: this._repoCommandLineConfiguration
     };
 
@@ -373,7 +370,7 @@ export abstract class BulkScriptActionBase extends BaseScriptAction {
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
     const extraData: { [key: string]: string } = this._selectionParameters.getTelemetry();
 
-    for (const customParameter of this.customParameters) {
+    for (const customParameter of this.customParameters.values()) {
       switch (customParameter.kind) {
         case CommandLineParameterKind.Flag:
         case CommandLineParameterKind.Choice:

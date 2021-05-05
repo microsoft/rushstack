@@ -263,6 +263,12 @@
           "type": "boolean"
         },
 
+        "incremental": {
+          "title": "Incremental",
+          "description": "If true then this command will be incremental like the built-in \"build\" and \"rebuild\" commands",
+          "type": "boolean"
+        },
+
         "ignoreMissingScript": {
           "title": "Ignore Missing Script",
           "description": "TBA",

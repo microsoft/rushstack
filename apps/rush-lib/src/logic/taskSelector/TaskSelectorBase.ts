@@ -10,6 +10,7 @@ import { TaskCollection } from '../taskRunner/TaskCollection';
 
 export interface ITaskSelectorOptions {
   rushConfiguration: RushConfiguration;
+  commandName: string;
   buildCacheConfiguration: BuildCacheConfiguration | undefined;
   selection: ReadonlySet<RushConfigurationProject>;
   isQuietMode: boolean;

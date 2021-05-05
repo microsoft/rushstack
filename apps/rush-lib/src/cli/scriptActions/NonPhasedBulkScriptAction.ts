@@ -7,16 +7,10 @@ import {
 } from '../../logic/taskSelector/NonPhasedCommandTaskSelector';
 import { ITaskSelectorOptions } from '../../logic/taskSelector/TaskSelectorBase';
 import { Utilities } from '../../utilities/Utilities';
-import { IBaseScriptActionOptions } from './BaseScriptAction';
-import { BulkScriptActionBase } from './BulkScriptActionBase';
+import { BulkScriptActionBase, IBulkScriptActionBaseOptions } from './BulkScriptActionBase';
 
-export interface INonPhasedBulkScriptActionOptions extends IBaseScriptActionOptions {
-  enableParallelism: boolean;
-  ignoreDependencyOrder: boolean;
-  incremental: boolean;
-  allowWarningsInSuccessfulBuild: boolean;
-  watchForChanges: boolean;
-  disableBuildCache: boolean;
+export interface INonPhasedBulkScriptActionOptions extends IBulkScriptActionBaseOptions {
+  allowWarningsOnSuccess: boolean;
   ignoreMissingScript: boolean;
 
   /**
@@ -28,25 +22,27 @@ export interface INonPhasedBulkScriptActionOptions extends IBaseScriptActionOpti
 export class NonPhasedBulkScriptAction extends BulkScriptActionBase {
   private readonly _ignoreMissingScript: boolean;
   private readonly _commandToRun: string;
+  private readonly _allowWarningsOnSuccess: boolean;
 
   public constructor(options: INonPhasedBulkScriptActionOptions) {
     super(options);
 
     this._commandToRun = options.commandToRun || options.actionName;
     this._ignoreMissingScript = options.ignoreMissingScript;
+    this._allowWarningsOnSuccess = options.allowWarningsOnSuccess;
   }
 
   public _getTaskSelector(taskSelectorOptions: ITaskSelectorOptions): NonPhasedCommandTaskSelector {
     // Collect all custom parameter values
     const customParameterValues: string[] = [];
-    for (const customParameter of this.customParameters) {
+    for (const customParameter of this.customParameters.values()) {
       customParameter.appendToArgList(customParameterValues);
     }
 
     const nonPhasedCommandTaskSelectorOptions: INonPhasedCommandTaskSelectorOptions = {
-      commandName: this.actionName,
       commandToRun: this._commandToRun,
       customParameterValues,
+      allowWarningsOnSuccess: this._allowWarningsOnSuccess,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
       ignoreMissingScript: this._ignoreMissingScript,
       ignoreDependencyOrder: this._ignoreDependencyOrder,

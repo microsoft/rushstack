@@ -224,4 +224,9 @@ export class RushConstants {
    * The name of the per-user Rush configuration data folder.
    */
   public static readonly rushUserConfigurationFolderName: string = '.rush-user';
+
+  /**
+   * A prefix that is required before all phase names.
+   */
+  public static readonly phaseNamePrefix: '_phase:' = '_phase:';
 }

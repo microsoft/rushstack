@@ -76,12 +76,14 @@ export class WriteBuildCacheAction extends BaseRushAction {
 
     const packageChangeAnalyzer: PackageChangeAnalyzer = new PackageChangeAnalyzer(this.rushConfiguration);
     const projectBuilder: ProjectBuilder = new ProjectBuilder({
+      name: ProjectBuilder.getTaskName(project),
       rushProject: project,
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
       commandName: command,
       commandToRun: commandToRun || '',
       isIncrementalBuildAllowed: false,
+      allowWarningsOnSuccess: false,
       packageChangeAnalyzer,
       packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(command)
     });

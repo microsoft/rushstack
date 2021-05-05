@@ -10,7 +10,7 @@ import { RushConstants } from '../../logic/RushConstants';
  * Constructor parameters for BaseScriptAction
  */
 export interface IBaseScriptActionOptions extends IBaseRushActionOptions {
-  commandLineConfiguration: CommandLineConfiguration | undefined;
+  commandLineConfiguration: CommandLineConfiguration;
 }
 
 /**
@@ -24,8 +24,11 @@ export interface IBaseScriptActionOptions extends IBaseRushActionOptions {
  * The two subclasses are BulkScriptAction and GlobalScriptAction.
  */
 export abstract class BaseScriptAction extends BaseRushAction {
-  protected readonly _commandLineConfiguration: CommandLineConfiguration | undefined;
-  protected readonly customParameters: CommandLineParameter[] = [];
+  protected readonly _commandLineConfiguration: CommandLineConfiguration;
+  protected readonly customParameters: Map<string, CommandLineParameter> = new Map<
+    string,
+    CommandLineParameter
+  >();
 
   public constructor(options: IBaseScriptActionOptions) {
     super(options);
@@ -85,7 +88,7 @@ export abstract class BaseScriptAction extends BaseRushAction {
         }
 
         if (customParameter) {
-          this.customParameters.push(customParameter);
+          this.customParameters.set(customParameter.longName, customParameter);
         }
       }
     }

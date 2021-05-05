@@ -41,6 +41,7 @@ import { Telemetry } from '../logic/Telemetry';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { SetupAction } from './actions/SetupAction';
+import { PhasedBulkScriptAction } from './scriptActions/PhasedBulkScriptAction';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -186,7 +187,7 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   private _populateScriptActions(): void {
-    let commandLineConfiguration: CommandLineConfiguration | undefined = undefined;
+    let commandLineConfiguration: CommandLineConfiguration;
 
     // If there is not a rush.json file, we still want "build" and "rebuild" to appear in the
     // command-line help
@@ -197,6 +198,8 @@ export class RushCommandLineParser extends CommandLineParser {
       );
 
       commandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFilePath);
+    } else {
+      commandLineConfiguration = new CommandLineConfiguration(undefined);
     }
 
     // Build actions from the command line configuration supersede default build actions.
@@ -204,7 +207,7 @@ export class RushCommandLineParser extends CommandLineParser {
     this._addDefaultBuildActions(commandLineConfiguration);
   }
 
-  private _addDefaultBuildActions(commandLineConfiguration?: CommandLineConfiguration): void {
+  private _addDefaultBuildActions(commandLineConfiguration: CommandLineConfiguration): void {
     if (!this.tryGetAction(RushConstants.buildCommandName)) {
       this._addCommandLineConfigAction(
         commandLineConfiguration,
@@ -233,7 +236,7 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   private _addCommandLineConfigAction(
-    commandLineConfiguration: CommandLineConfiguration | undefined,
+    commandLineConfiguration: CommandLineConfiguration,
     command: CommandJson,
     commandToRun?: string
   ): void {
@@ -267,7 +270,7 @@ export class RushCommandLineParser extends CommandLineParser {
             ignoreMissingScript: command.ignoreMissingScript || false,
             ignoreDependencyOrder: command.ignoreDependencyOrder || false,
             incremental: command.incremental || false,
-            allowWarningsInSuccessfulBuild: !!command.allowWarningsInSuccessfulBuild,
+            allowWarningsOnSuccess: !!command.allowWarningsInSuccessfulBuild,
 
             watchForChanges: command.watchForChanges || false,
             disableBuildCache: command.disableBuildCache || false
@@ -304,7 +307,21 @@ export class RushCommandLineParser extends CommandLineParser {
           );
         }
 
-        // TODO
+        this.addAction(
+          new PhasedBulkScriptAction({
+            actionName: command.name,
+            summary: command.summary,
+            documentation: command.description || command.summary,
+            safeForSimultaneousRushProcesses: command.safeForSimultaneousRushProcesses,
+            commandPhaseNames: command.phases,
+
+            parser: this,
+            commandLineConfiguration: commandLineConfiguration,
+
+            watchForChanges: false, // Add support for this later
+            disableBuildCache: command.disableBuildCache || false
+          })
+        );
         break;
       }
 

@@ -7,10 +7,10 @@ import { TaskCollection } from '../taskRunner/TaskCollection';
 import { ITaskSelectorOptions, TaskSelectorBase } from './TaskSelectorBase';
 
 export interface INonPhasedCommandTaskSelectorOptions {
-  commandName: string;
   commandToRun: string;
   customParameterValues: string[];
   isIncrementalBuildAllowed: boolean;
+  allowWarningsOnSuccess: boolean;
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
   packageDepsFilename: string;
@@ -41,22 +41,20 @@ export class NonPhasedCommandTaskSelector extends TaskSelectorBase {
 
       // Generate the filtered dependency graph for selected projects
       function getDependencyTaskNames(project: RushConfigurationProject): Set<string> {
-        const cached: Set<string> | undefined = dependencyMap.get(project);
-        if (cached) {
-          return cached;
-        }
+        let dependencyTaskNames: Set<string> | undefined = dependencyMap.get(project);
+        if (!dependencyTaskNames) {
+          dependencyTaskNames = new Set();
+          dependencyMap.set(project, dependencyTaskNames);
 
-        const dependencyTaskNames: Set<string> = new Set();
-        dependencyMap.set(project, dependencyTaskNames);
-
-        for (const dep of project.dependencyProjects) {
-          if (projects.has(dep)) {
-            // Add direct relationships for projects in the set
-            dependencyTaskNames.add(ProjectBuilder.getTaskName(dep));
-          } else {
-            // Add indirect relationships for projects not in the set
-            for (const indirectDep of getDependencyTaskNames(dep)) {
-              dependencyTaskNames.add(indirectDep);
+          for (const dep of project.dependencyProjects) {
+            if (projects.has(dep)) {
+              // Add direct relationships for projects in the set
+              dependencyTaskNames.add(ProjectBuilder.getTaskName(dep));
+            } else {
+              // Add indirect relationships for projects not in the set
+              for (const indirectDep of getDependencyTaskNames(dep)) {
+                dependencyTaskNames.add(indirectDep);
+              }
             }
           }
         }
@@ -73,11 +71,9 @@ export class NonPhasedCommandTaskSelector extends TaskSelectorBase {
     return taskCollection;
   }
 
-  private _registerProjectTask(
-    project: RushConfigurationProject | undefined,
-    taskCollection: TaskCollection
-  ): void {
-    if (!project || taskCollection.hasTask(ProjectBuilder.getTaskName(project))) {
+  private _registerProjectTask(project: RushConfigurationProject, taskCollection: TaskCollection): void {
+    const taskName: string = ProjectBuilder.getTaskName(project);
+    if (!project || taskCollection.hasTask(taskName)) {
       return;
     }
 
@@ -94,12 +90,14 @@ export class NonPhasedCommandTaskSelector extends TaskSelectorBase {
 
     taskCollection.addTask(
       new ProjectBuilder({
+        name: taskName,
         rushProject: project,
         rushConfiguration: this._options.rushConfiguration,
         buildCacheConfiguration: this._options.buildCacheConfiguration,
         commandToRun: commandToRun || '',
-        commandName: this._nonPhasedCommandTaskSelectorOptions.commandName,
+        commandName: this._options.commandName,
         isIncrementalBuildAllowed: this._nonPhasedCommandTaskSelectorOptions.isIncrementalBuildAllowed,
+        allowWarningsOnSuccess: this._nonPhasedCommandTaskSelectorOptions.allowWarningsOnSuccess,
         packageChangeAnalyzer: this._packageChangeAnalyzer,
         packageDepsFilename: this._nonPhasedCommandTaskSelectorOptions.packageDepsFilename
       })
