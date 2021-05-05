@@ -18,7 +18,6 @@ import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
 import { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
 import { TarExecutable } from '../../utilities/TarExecutable';
 import { Utilities } from '../../utilities/Utilities';
-import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
 interface IProjectBuildCacheOptions {
   buildCacheConfiguration: BuildCacheConfiguration;
