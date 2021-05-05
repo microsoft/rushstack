@@ -29,16 +29,20 @@ export class PnpmfileConfiguration {
   private _context: IPnpmfileContext | undefined;
 
   public constructor(rushConfiguration: RushConfiguration, pnpmfileShimOptions?: IPnpmfileShimOptions) {
-    if (rushConfiguration.packageManager === 'pnpm') {
-      // Set the context to swallow log output and store our settings
-      this._context = {
-        log: (message: string) => {},
-        pnpmfileShimSettings: PnpmfileConfiguration._getPnpmfileShimSettings(
-          rushConfiguration,
-          pnpmfileShimOptions
-        )
-      };
+    if (rushConfiguration.packageManager !== 'pnpm') {
+      throw new Error(
+        `PnpmfileConfiguration cannot be used with package manager "${rushConfiguration.packageManager}"`
+      );
     }
+
+    // Set the context to swallow log output and store our settings
+    this._context = {
+      log: (message: string) => {},
+      pnpmfileShimSettings: PnpmfileConfiguration._getPnpmfileShimSettings(
+        rushConfiguration,
+        pnpmfileShimOptions
+      )
+    };
   }
 
   public static async writeCommonTempPnpmfileShimAsync(
@@ -46,7 +50,9 @@ export class PnpmfileConfiguration {
     options?: IPnpmfileShimOptions
   ): Promise<void> {
     if (rushConfiguration.packageManager !== 'pnpm') {
-      return;
+      throw new Error(
+        `PnpmfileConfiguration cannot be used with package manager "${rushConfiguration.packageManager}"`
+      );
     }
 
     const targetDir: string = rushConfiguration.commonTempFolder;

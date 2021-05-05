@@ -116,7 +116,11 @@ export interface IDeployState {
 
   symlinkAnalyzer: SymlinkAnalyzer;
 
-  pnpmfileConfiguration: PnpmfileConfiguration;
+  /**
+   * The pnpmfile configuration if using PNPM, otherwise undefined. The configuration will be used to
+   * transform the package.json prior to deploy.
+   */
+  pnpmfileConfiguration: PnpmfileConfiguration | undefined;
 
   /**
    * The desired path to be used when archiving the target folder. Supported file extensions: .zip.
@@ -157,8 +161,10 @@ export class DeployManager {
       FileSystem.getRealPath(packageJsonFolderPath)
     );
 
-    // Transform packageJson using pnpmfile.js
-    const packageJson: IPackageJson = deployState.pnpmfileConfiguration.transform(originalPackageJson);
+    // Transform packageJson using pnpmfile.js if available
+    const packageJson: IPackageJson = deployState.pnpmfileConfiguration
+      ? deployState.pnpmfileConfiguration.transform(originalPackageJson)
+      : originalPackageJson;
 
     // Union of keys from regular dependencies, peerDependencies, optionalDependencies
     // (and possibly devDependencies if includeDevDependencies=true)
@@ -780,7 +786,10 @@ export class DeployManager {
       foldersToCopy: new Set(),
       folderInfosByPath: new Map(),
       symlinkAnalyzer: new SymlinkAnalyzer(),
-      pnpmfileConfiguration: new PnpmfileConfiguration(this._rushConfiguration),
+      pnpmfileConfiguration:
+        this._rushConfiguration.packageManager === 'pnpm'
+          ? new PnpmfileConfiguration(this._rushConfiguration)
+          : undefined,
       createArchiveFilePath
     };
 
