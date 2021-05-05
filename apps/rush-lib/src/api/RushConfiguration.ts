@@ -1511,7 +1511,7 @@ export class RushConfiguration {
       this._commonVersionsConfigurations = new Map();
     }
 
-    const variantKey: string = variant || '';
+    const variantKey: string = variant || 'default';
     let commonVersionsConfiguration:
       | CommonVersionsConfiguration
       | undefined = this._commonVersionsConfigurations.get(variantKey);
@@ -1535,7 +1535,7 @@ export class RushConfiguration {
       this._implicitlyPreferredVersions = new Map();
     }
 
-    const variantKey: string = variant || '';
+    const variantKey: string = variant || 'default';
     let implicitlyPreferredVersions: Map<string, string> | undefined = this._implicitlyPreferredVersions.get(
       variantKey
     );
