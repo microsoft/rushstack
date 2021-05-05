@@ -2,8 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
+import { Import, IPackageJson, JsonFile, Sort } from '@rushstack/node-core-library';
 
-import { IPackageJson, JsonFile, Sort } from '@rushstack/node-core-library';
+const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 /**
  * @beta
@@ -57,19 +58,19 @@ export class PackageJsonDependency {
  */
 export class PackageJsonEditor {
   private readonly _filePath: string;
-  private readonly _data: IPackageJson;
+  private readonly _sourceData: IPackageJson;
   private readonly _dependencies: Map<string, PackageJsonDependency>;
-
   // NOTE: The "devDependencies" section is tracked separately because sometimes people
   // will specify a specific version for development, while *also* specifying a broader
   // SemVer range in one of the other fields for consumers.  Thus "dependencies", "optionalDependencies",
   // and "peerDependencies" are mutually exclusive, but "devDependencies" is not.
   private readonly _devDependencies: Map<string, PackageJsonDependency>;
+
   private _modified: boolean;
 
   private constructor(filepath: string, data: IPackageJson) {
     this._filePath = filepath;
-    this._data = data;
+    this._sourceData = data;
     this._modified = false;
 
     this._dependencies = new Map<string, PackageJsonDependency>();
@@ -155,16 +156,12 @@ export class PackageJsonEditor {
     return new PackageJsonEditor(filename, object);
   }
 
-  public toObject(): IPackageJson {
-    return { ...this._data };
-  }
-
   public get name(): string {
-    return this._data.name;
+    return this._sourceData.name;
   }
 
   public get version(): string {
-    return this._data.version;
+    return this._sourceData.version;
   }
 
   public get filePath(): string {
@@ -221,22 +218,42 @@ export class PackageJsonEditor {
 
   public saveIfModified(): boolean {
     if (this._modified) {
-      JsonFile.save(this._normalize(), this._filePath, { updateExistingFile: true });
+      JsonFile.save(this._normalize(this._sourceData), this._filePath, { updateExistingFile: true });
       this._modified = false;
       return true;
     }
     return false;
   }
 
+  /**
+   * Get the normalized package.json that represents the current state of the
+   * PackageJsonEditor. This method does not save any changes that were made to the
+   * package.json, but instead returns the object representation of what would be saved
+   * if saveIfModified() is called.
+   */
+  public saveToObject(): IPackageJson {
+    // Only normalize if we need to
+    const packageJson: IPackageJson = this._modified ? this._sourceData : this._normalize(this._sourceData);
+    // Provide a clone to avoid reference back to the original data object
+    return lodash.cloneDeep(packageJson);
+  }
+
   private _onChange(): void {
     this._modified = true;
   }
 
-  private _normalize(): IPackageJson {
-    delete this._data.dependencies;
-    delete this._data.optionalDependencies;
-    delete this._data.peerDependencies;
-    delete this._data.devDependencies;
+  /**
+   * Create a normalized shallow copy of the provided package.json without modifying the
+   * original. If the result of this method is being returned via a public facing method,
+   * it will still need to be deep-cloned to avoid propogating changes back to the
+   * original dataset.
+   */
+  private _normalize(source: IPackageJson): IPackageJson {
+    const newData: IPackageJson = { ...source };
+    delete newData.dependencies;
+    delete newData.optionalDependencies;
+    delete newData.peerDependencies;
+    delete newData.devDependencies;
 
     const keys: string[] = [...this._dependencies.keys()].sort();
 
@@ -244,24 +261,24 @@ export class PackageJsonEditor {
       const dependency: PackageJsonDependency = this._dependencies.get(packageName)!;
 
       if (dependency.dependencyType === DependencyType.Regular) {
-        if (!this._data.dependencies) {
-          this._data.dependencies = {};
+        if (!newData.dependencies) {
+          newData.dependencies = {};
         }
-        this._data.dependencies[dependency.name] = dependency.version;
+        newData.dependencies[dependency.name] = dependency.version;
       }
 
       if (dependency.dependencyType === DependencyType.Optional) {
-        if (!this._data.optionalDependencies) {
-          this._data.optionalDependencies = {};
+        if (!newData.optionalDependencies) {
+          newData.optionalDependencies = {};
         }
-        this._data.optionalDependencies[dependency.name] = dependency.version;
+        newData.optionalDependencies[dependency.name] = dependency.version;
       }
 
       if (dependency.dependencyType === DependencyType.Peer) {
-        if (!this._data.peerDependencies) {
-          this._data.peerDependencies = {};
+        if (!newData.peerDependencies) {
+          newData.peerDependencies = {};
         }
-        this._data.peerDependencies[dependency.name] = dependency.version;
+        newData.peerDependencies[dependency.name] = dependency.version;
       }
     }
 
@@ -270,12 +287,12 @@ export class PackageJsonEditor {
     for (const packageName of devDependenciesKeys) {
       const dependency: PackageJsonDependency = this._devDependencies.get(packageName)!;
 
-      if (!this._data.devDependencies) {
-        this._data.devDependencies = {};
+      if (!newData.devDependencies) {
+        newData.devDependencies = {};
       }
-      this._data.devDependencies[dependency.name] = dependency.version;
+      newData.devDependencies[dependency.name] = dependency.version;
     }
 
-    return this._data;
+    return newData;
   }
 }

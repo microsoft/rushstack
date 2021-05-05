@@ -262,8 +262,7 @@ export class PackageJsonEditor {
     get name(): string;
     // (undocumented)
     saveIfModified(): boolean;
-    // (undocumented)
-    toObject(): IPackageJson;
+    saveToObject(): IPackageJson;
     // (undocumented)
     tryGetDependency(packageName: string): PackageJsonDependency | undefined;
     // (undocumented)

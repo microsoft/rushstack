@@ -15,8 +15,7 @@ import {
   FileConstants,
   Sort,
   InternalError,
-  AlreadyReportedError,
-  MapExtensions
+  AlreadyReportedError
 } from '@rushstack/node-core-library';
 
 import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
@@ -153,12 +152,10 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     // dependency name --> version specifier
-    const commonDependencies: Map<string, string> = new Map();
-    MapExtensions.mergeFromMap(commonDependencies, allExplicitPreferredVersions);
-    MapExtensions.mergeFromMap(
-      commonDependencies,
-      this.rushConfiguration.getImplicitlyPreferredVersions(this.options.variant)
-    );
+    const commonDependencies: Map<string, string> = new Map([
+      ...allExplicitPreferredVersions,
+      ...this.rushConfiguration.getImplicitlyPreferredVersions(this.options.variant)
+    ]);
 
     // To make the common/package.json file more readable, sort alphabetically
     // according to rushProject.tempProjectName instead of packageName.

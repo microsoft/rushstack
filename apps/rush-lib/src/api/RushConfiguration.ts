@@ -499,7 +499,9 @@ export class RushConfiguration {
   // Lazily loaded when the projectsByName() getter is called.
   private _projectsByName: Map<string, RushConfigurationProject> | undefined;
 
+  // variant || 'default' -> common-versions configuration
   private _commonVersionsConfigurations: Map<string, CommonVersionsConfiguration> | undefined;
+  // variant || 'default' -> map of package name -> implicitly preferred version
   private _implicitlyPreferredVersions: Map<string, Map<string, string>> | undefined;
 
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
@@ -1783,7 +1785,7 @@ export class RushConfiguration {
             versionForDependency = new Set<string>();
             versionsForDependencies.set(dependency.name, versionForDependency);
           }
-          versionForDependency!.add(dependency.version);
+          versionForDependency.add(dependency.version);
         }
       }
     }

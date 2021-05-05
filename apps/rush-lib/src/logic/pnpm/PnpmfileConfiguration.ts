@@ -98,9 +98,9 @@ export class PnpmfileConfiguration {
     };
 
     // Use the provided path if available. Otherwise, use the default path.
-    const clientPnpmfilePath: string | undefined = rushConfiguration.getPnpmfilePath(options?.variant);
-    if (clientPnpmfilePath && FileSystem.exists(clientPnpmfilePath)) {
-      settings.clientPnpmfilePath = clientPnpmfilePath;
+    const userPnpmfilePath: string | undefined = rushConfiguration.getPnpmfilePath(options?.variant);
+    if (userPnpmfilePath && FileSystem.exists(userPnpmfilePath)) {
+      settings.userPnpmfilePath = userPnpmfilePath;
     }
 
     return settings;

@@ -12,7 +12,7 @@ export interface IPnpmfileShimSettings {
   semverPath: string;
   allPreferredVersions: { [dependencyName: string]: string };
   allowedAlternativeVersions: { [dependencyName: string]: ReadonlyArray<string> };
-  clientPnpmfilePath?: string;
+  userPnpmfilePath?: string;
 }
 
 /**

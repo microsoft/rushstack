@@ -510,7 +510,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     // First, let's transform the package.json using the pnpmfile
-    const packageJson: IPackageJson = project.packageJsonEditor.toObject();
+    const packageJson: IPackageJson = project.packageJsonEditor.saveToObject();
 
     // Initialize the pnpmfile if it doesn't exist
     if (!this._pnpmfileConfiguration) {

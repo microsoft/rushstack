@@ -1,25 +1,35 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// The "rush install" or "rush update" commands will copy this template to
+// "common/temp/<pnpmfile.js|.pnpmfile.cjs>" so that it can implement Rush-specific features such as
+// implicitly preferred versions. It reads its input data from "common/temp/pnpmfileSettings.json",
+// which includes the path to the user's pnpmfile for the currently selected variant. The pnpmfile is
+// required directly by this shim and is called after Rush's transformations are applied.
+
+// This file can use "import type" but otherwise should not reference any other modules, since it will
+// be run from the "common/temp" directory
+import type * as TSemver from 'semver';
+import type { IPackageJson } from '@rushstack/node-core-library';
+
 import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
 import type { IPnpmfile, IPnpmfileShimSettings, IPnpmfileContext } from './IPnpmfile';
-import type { IPackageJson } from '@rushstack/node-core-library';
-import type * as TSemver from 'semver';
 
 let settings: IPnpmfileShimSettings;
-let clientPnpmfile: IPnpmfile | undefined;
+let allPreferredVersions: Map<string, string>;
+let allowedAlternativeVersions: Map<string, Set<string>> | undefined;
+let userPnpmfile: IPnpmfile | undefined;
 let semver: typeof TSemver | undefined;
 
 // Initialize all external aspects of the pnpmfile shim. When using the shim, settings
-// are always expected to be available. The rest can be considered additional and are
-// not guaranteed at runtime. Init must be called before running any hook that depends
-// on a resource obtained from or related to the settings, and will require modules
+// are always expected to be available. Init must be called before running any hook that
+// depends on a resource obtained from or related to the settings, and will require modules
 // once so they aren't repeatedly required in the hook functions.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function init(context: IPnpmfileContext | any): IPnpmfileContext {
   // Sometimes PNPM may provide us a context arg that doesn't fit spec, ex.:
   // https://github.com/pnpm/pnpm/blob/97c64bae4d14a8c8f05803f1d94075ee29c2df2f/packages/get-context/src/index.ts#L134
-  // So we need to ensure the context format before we move on
+  // So we need to normalize the context format before we move on
   if (typeof context !== 'object' || Array.isArray(context)) {
     context = {
       log: (message: string) => {},
@@ -36,12 +46,25 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
     // Reuse the already initialized settings
     context.pnpmfileShimSettings = settings;
   }
-  if (!clientPnpmfile && settings.clientPnpmfilePath) {
-    clientPnpmfile = require(settings.clientPnpmfilePath);
+  if (!allPreferredVersions && settings.allPreferredVersions) {
+    allPreferredVersions = new Map(Object.entries(settings.allPreferredVersions));
   }
+  if (!allowedAlternativeVersions && settings.allowedAlternativeVersions) {
+    allowedAlternativeVersions = new Map(
+      Object.entries(settings.allowedAlternativeVersions).map(([packageName, versions]) => {
+        return [packageName, new Set(versions)];
+      })
+    );
+  }
+  // If a userPnpmfilePath is provided, we expect it to exist
+  if (!userPnpmfile && settings.userPnpmfilePath) {
+    userPnpmfile = require(settings.userPnpmfilePath);
+  }
+  // If a semverPath is provided, we expect it to exist
   if (!semver && settings.semverPath) {
     semver = require(settings.semverPath);
   }
+  // Return the normalized context
   return context as IPnpmfileContext;
 }
 
@@ -49,24 +72,22 @@ function init(context: IPnpmfileContext | any): IPnpmfileContext {
 // then skip it. Otherwise, check to ensure that the common version is a subset of the specified version. If
 // it is, then replace the specified version with the preferredVersion
 function setPreferredVersions(dependencies: { [dependencyName: string]: string } | undefined): void {
-  for (const name of Object.keys(dependencies || {})) {
-    if (settings.allPreferredVersions?.hasOwnProperty(name)) {
-      const preferredVersion: string = settings.allPreferredVersions[name];
-      const version: string = dependencies![name];
-      if (settings.allowedAlternativeVersions?.hasOwnProperty(name)) {
-        const allowedAlternatives: ReadonlyArray<string> | undefined =
-          settings.allowedAlternativeVersions[name];
-        if (allowedAlternatives && allowedAlternatives.indexOf(version) > -1) {
-          continue;
-        }
-      }
-      let isValidRange: boolean = false;
+  for (const [name, version] of Object.entries(dependencies || {})) {
+    const preferredVersion: string | undefined = allPreferredVersions?.get(name);
+    if (preferredVersion && !allowedAlternativeVersions?.get(name)?.has(version)) {
+      let preferredVersionRange: TSemver.Range | undefined;
+      let versionRange: TSemver.Range | undefined;
       try {
-        isValidRange = !!semver!.validRange(preferredVersion) && !!semver!.validRange(version);
+        preferredVersionRange = new semver!.Range(preferredVersion);
+        versionRange = new semver!.Range(version);
       } catch {
         // Swallow invalid range errors
       }
-      if (isValidRange && semver!.subset(preferredVersion, version)) {
+      if (
+        preferredVersionRange &&
+        versionRange &&
+        semver!.subset(preferredVersionRange, versionRange, { includePrerelease: true })
+      ) {
         dependencies![name] = preferredVersion;
       }
     }
@@ -78,8 +99,8 @@ const pnpmfileShim: IPnpmfile = {
     // Call the original pnpmfile (if it exists)
     afterAllResolved: (lockfile: IPnpmShrinkwrapYaml, context: IPnpmfileContext) => {
       context = init(context);
-      return clientPnpmfile?.hooks?.afterAllResolved
-        ? clientPnpmfile.hooks.afterAllResolved(lockfile, context)
+      return userPnpmfile?.hooks?.afterAllResolved
+        ? userPnpmfile.hooks.afterAllResolved(lockfile, context)
         : lockfile;
     },
 
@@ -89,7 +110,7 @@ const pnpmfileShim: IPnpmfile = {
       setPreferredVersions(pkg.dependencies);
       setPreferredVersions(pkg.devDependencies);
       setPreferredVersions(pkg.optionalDependencies);
-      return clientPnpmfile?.hooks?.readPackage ? clientPnpmfile.hooks.readPackage(pkg, context) : pkg;
+      return userPnpmfile?.hooks?.readPackage ? userPnpmfile.hooks.readPackage(pkg, context) : pkg;
     }
   }
 };
