@@ -219,8 +219,8 @@ export class PackageJsonEditor {
   public saveIfModified(): boolean {
     if (this._modified) {
       this._sourceData = this._normalize(this._sourceData);
-      JsonFile.save(this._sourceData, this._filePath, { updateExistingFile: true });
       this._modified = false;
+      JsonFile.save(this._sourceData, this._filePath, { updateExistingFile: true });
       return true;
     }
     return false;
