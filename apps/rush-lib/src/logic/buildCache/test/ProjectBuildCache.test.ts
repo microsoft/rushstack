@@ -3,7 +3,6 @@
 
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
-import { EnvironmentConfiguration } from '../../../api/EnvironmentConfiguration';
 import { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
 import { PackageChangeAnalyzer } from '../../../logic/PackageChangeAnalyzer';
 import { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
@@ -68,24 +67,5 @@ describe('ProjectBuildCache', () => {
         })
       ).toBe(undefined);
     });
-  });
-
-  describe('buildCacheEnabled', () => {
-    function test(configValue: boolean, envValue: boolean | undefined, expectedValue: boolean): void {
-      it(`returns ${expectedValue} if buildCacheEnabled=${configValue} and RUSH_BUILD_CACHE_ENABLED=${envValue}`, () => {
-        jest.spyOn(EnvironmentConfiguration, 'buildCacheEnabled', 'get').mockReturnValue(envValue);
-        const subject: ProjectBuildCache = prepareSubject({
-          enabled: configValue
-        })!;
-        expect(subject.buildCacheEnabled).toBe(expectedValue);
-      });
-    }
-
-    test(true, undefined, true);
-    test(false, undefined, false);
-    test(true, true, true);
-    test(false, true, true);
-    test(true, false, false);
-    test(false, false, false);
   });
 });
