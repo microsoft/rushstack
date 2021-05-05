@@ -1772,8 +1772,8 @@ export class RushConfiguration {
           // - if the local project doesn't satisfy the referenced semver specifier; OR
           // - if the local project was specified in "cyclicDependencyProjects" in rush.json
           if (
-            semver.satisfies(localProject.packageJsonEditor.version, dependency.version) &&
-            !cyclicDependencies.has(dependency.name)
+            !cyclicDependencies.has(dependency.name) &&
+            semver.satisfies(localProject.packageJsonEditor.version, dependency.version)
           ) {
             ignoreVersion = true;
           }

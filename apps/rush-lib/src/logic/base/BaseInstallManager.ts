@@ -278,7 +278,7 @@ export abstract class BaseInstallManager {
       path.join(this.rushConfiguration.commonTempFolder, RushConstants.nodeModulesFolderName)
     );
 
-    // Additionally, if they pulled an updated npm-shrinkwrap.json file from Git,
+    // Additionally, if they pulled an updated shrinkwrap file from Git,
     // then we can't skip this install
     potentiallyChangedFiles.push(this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant));
 
