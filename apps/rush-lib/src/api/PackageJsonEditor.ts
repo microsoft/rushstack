@@ -58,7 +58,6 @@ export class PackageJsonDependency {
  */
 export class PackageJsonEditor {
   private readonly _filePath: string;
-  private readonly _sourceData: IPackageJson;
   private readonly _dependencies: Map<string, PackageJsonDependency>;
   // NOTE: The "devDependencies" section is tracked separately because sometimes people
   // will specify a specific version for development, while *also* specifying a broader
@@ -67,6 +66,7 @@ export class PackageJsonEditor {
   private readonly _devDependencies: Map<string, PackageJsonDependency>;
 
   private _modified: boolean;
+  private _sourceData: IPackageJson;
 
   private constructor(filepath: string, data: IPackageJson) {
     this._filePath = filepath;
@@ -218,7 +218,8 @@ export class PackageJsonEditor {
 
   public saveIfModified(): boolean {
     if (this._modified) {
-      JsonFile.save(this._normalize(this._sourceData), this._filePath, { updateExistingFile: true });
+      this._sourceData = this._normalize(this._sourceData);
+      JsonFile.save(this._sourceData, this._filePath, { updateExistingFile: true });
       this._modified = false;
       return true;
     }
@@ -233,9 +234,9 @@ export class PackageJsonEditor {
    */
   public saveToObject(): IPackageJson {
     // Only normalize if we need to
-    const packageJson: IPackageJson = this._modified ? this._sourceData : this._normalize(this._sourceData);
+    const sourceData: IPackageJson = this._modified ? this._normalize(this._sourceData) : this._sourceData;
     // Provide a clone to avoid reference back to the original data object
-    return lodash.cloneDeep(packageJson);
+    return lodash.cloneDeep(sourceData);
   }
 
   private _onChange(): void {
@@ -249,11 +250,11 @@ export class PackageJsonEditor {
    * original dataset.
    */
   private _normalize(source: IPackageJson): IPackageJson {
-    const newData: IPackageJson = { ...source };
-    delete newData.dependencies;
-    delete newData.optionalDependencies;
-    delete newData.peerDependencies;
-    delete newData.devDependencies;
+    const normalizedData: IPackageJson = { ...source };
+    delete normalizedData.dependencies;
+    delete normalizedData.optionalDependencies;
+    delete normalizedData.peerDependencies;
+    delete normalizedData.devDependencies;
 
     const keys: string[] = [...this._dependencies.keys()].sort();
 
@@ -261,24 +262,24 @@ export class PackageJsonEditor {
       const dependency: PackageJsonDependency = this._dependencies.get(packageName)!;
 
       if (dependency.dependencyType === DependencyType.Regular) {
-        if (!newData.dependencies) {
-          newData.dependencies = {};
+        if (!normalizedData.dependencies) {
+          normalizedData.dependencies = {};
         }
-        newData.dependencies[dependency.name] = dependency.version;
+        normalizedData.dependencies[dependency.name] = dependency.version;
       }
 
       if (dependency.dependencyType === DependencyType.Optional) {
-        if (!newData.optionalDependencies) {
-          newData.optionalDependencies = {};
+        if (!normalizedData.optionalDependencies) {
+          normalizedData.optionalDependencies = {};
         }
-        newData.optionalDependencies[dependency.name] = dependency.version;
+        normalizedData.optionalDependencies[dependency.name] = dependency.version;
       }
 
       if (dependency.dependencyType === DependencyType.Peer) {
-        if (!newData.peerDependencies) {
-          newData.peerDependencies = {};
+        if (!normalizedData.peerDependencies) {
+          normalizedData.peerDependencies = {};
         }
-        newData.peerDependencies[dependency.name] = dependency.version;
+        normalizedData.peerDependencies[dependency.name] = dependency.version;
       }
     }
 
@@ -287,12 +288,12 @@ export class PackageJsonEditor {
     for (const packageName of devDependenciesKeys) {
       const dependency: PackageJsonDependency = this._devDependencies.get(packageName)!;
 
-      if (!newData.devDependencies) {
-        newData.devDependencies = {};
+      if (!normalizedData.devDependencies) {
+        normalizedData.devDependencies = {};
       }
-      newData.devDependencies[dependency.name] = dependency.version;
+      normalizedData.devDependencies[dependency.name] = dependency.version;
     }
 
-    return newData;
+    return normalizedData;
   }
 }
