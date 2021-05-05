@@ -299,11 +299,17 @@ export class EnvironmentConfiguration {
           }
 
           case EnvironmentVariableNames.RUSH_ALLOW_UNSUPPORTED_NODEJS: {
-            EnvironmentConfiguration._allowUnsupportedNodeVersion =
-              EnvironmentConfiguration.parseBooleanEnvironmentVariable(
-                EnvironmentVariableNames.RUSH_ALLOW_UNSUPPORTED_NODEJS,
-                value
-              ) ?? false;
+            if (value === 'true' || value === 'false') {
+              // Small, undocumented acceptance of old "true" and "false" values for
+              // users of RUSH_ALLOW_UNSUPPORTED_NODEJS in rush pre-v5.46.
+              EnvironmentConfiguration._allowUnsupportedNodeVersion = value === 'true';
+            } else {
+              EnvironmentConfiguration._allowUnsupportedNodeVersion =
+                EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+                  EnvironmentVariableNames.RUSH_ALLOW_UNSUPPORTED_NODEJS,
+                  value
+                ) ?? false;
+            }
             break;
           }
 
