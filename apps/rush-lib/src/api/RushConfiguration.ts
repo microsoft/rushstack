@@ -499,9 +499,9 @@ export class RushConfiguration {
   // Lazily loaded when the projectsByName() getter is called.
   private _projectsByName: Map<string, RushConfigurationProject> | undefined;
 
-  // variant || 'default' -> common-versions configuration
+  // variant -> common-versions configuration
   private _commonVersionsConfigurations: Map<string, CommonVersionsConfiguration> | undefined;
-  // variant || 'default' -> map of package name -> implicitly preferred version
+  // variant -> map of package name -> implicitly preferred version
   private _implicitlyPreferredVersions: Map<string, Map<string, string>> | undefined;
 
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
@@ -1511,7 +1511,9 @@ export class RushConfiguration {
       this._commonVersionsConfigurations = new Map();
     }
 
-    const variantKey: string = variant || 'default';
+    // Use an empty string as the key when no variant provided. Anything else would possibly conflict
+    // with a varient created by the user
+    const variantKey: string = variant || '';
     let commonVersionsConfiguration:
       | CommonVersionsConfiguration
       | undefined = this._commonVersionsConfigurations.get(variantKey);
@@ -1535,7 +1537,9 @@ export class RushConfiguration {
       this._implicitlyPreferredVersions = new Map();
     }
 
-    const variantKey: string = variant || 'default';
+    // Use an empty string as the key when no variant provided. Anything else would possibly conflict
+    // with a varient created by the user
+    const variantKey: string = variant || '';
     let implicitlyPreferredVersions: Map<string, string> | undefined = this._implicitlyPreferredVersions.get(
       variantKey
     );
