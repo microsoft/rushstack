@@ -130,7 +130,7 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public isWorkspaceProjectModified(project: RushConfigurationProject): boolean {
+  public isWorkspaceProjectModified(project: RushConfigurationProject, variant?: string): boolean {
     throw new InternalError('Not implemented');
   }
 }

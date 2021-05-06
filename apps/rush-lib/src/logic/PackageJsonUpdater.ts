@@ -124,13 +124,9 @@ export class PackageJsonUpdater {
       variant
     } = options;
 
-    const implicitlyPinned: Map<string, string> = InstallHelpers.collectImplicitlyPreferredVersions(
-      this._rushConfiguration,
-      {
-        variant
-      }
+    const implicitlyPinned: Map<string, string> = this._rushConfiguration.getImplicitlyPreferredVersions(
+      variant
     );
-
     const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
     const installManagerOptions: IInstallManagerOptions = {
       debug: debugInstall,

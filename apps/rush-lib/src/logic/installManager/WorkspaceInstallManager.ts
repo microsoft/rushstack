@@ -5,13 +5,7 @@ import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import {
-  FileSystem,
-  MapExtensions,
-  JsonFile,
-  FileConstants,
-  AlreadyReportedError
-} from '@rushstack/node-core-library';
+import { FileSystem, FileConstants, AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
@@ -24,8 +18,6 @@ import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from './InstallHelpers';
 import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import { RepoStateFile } from '../RepoStateFile';
-import { IPnpmfileShimSettings } from '../pnpm/IPnpmfileShimSettings';
-import { PnpmPackageManager } from '../../api/packageManager/PnpmPackageManager';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
@@ -74,17 +66,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     console.log(
       os.EOL + colors.bold('Updating workspace files in ' + this.rushConfiguration.commonTempFolder)
     );
-
-    // Shim support for common versions resolution into the pnpmfile. When using workspaces, there are no
-    // "hoisted" packages, so we need to apply the correct versions to indirect dependencies through the
-    // pnpmfile.
-    if (this.rushConfiguration.packageManager === 'pnpm') {
-      const tempPnpmFilePath: string = path.join(
-        this.rushConfiguration.commonTempFolder,
-        (this.rushConfiguration.packageManagerWrapper as PnpmPackageManager).pnpmfileFilename
-      );
-      await this.createShimPnpmfileAsync(tempPnpmFilePath);
-    }
 
     const shrinkwrapWarnings: string[] = [];
 
@@ -238,7 +219,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       }
 
       // Now validate that the shrinkwrap file matches what is in the package.json
-      if (shrinkwrapFile?.isWorkspaceProjectModified(rushProject)) {
+      if (shrinkwrapFile?.isWorkspaceProjectModified(rushProject, this.options.variant)) {
         shrinkwrapWarnings.push(
           `Dependencies of project "${rushProject.packageName}" do not match the current shinkwrap.`
         );
@@ -257,29 +238,13 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   }
 
   protected canSkipInstall(lastModifiedDate: Date): boolean {
-    // Based on timestamps, can we skip this install entirely?
+    if (!super.canSkipInstall(lastModifiedDate)) {
+      return false;
+    }
+
     const potentiallyChangedFiles: string[] = [];
 
-    // Consider the timestamp on the node_modules folder; if someone tampered with it
-    // or deleted it entirely, then we can't skip this install
-    potentiallyChangedFiles.push(
-      path.join(this.rushConfiguration.commonTempFolder, RushConstants.nodeModulesFolderName)
-    );
-
-    // Additionally, if they pulled an updated shrinkwrap file from Git, then we can't skip this install
-    potentiallyChangedFiles.push(this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant));
-
-    // Add common-versions.json file to the potentially changed files list.
-    potentiallyChangedFiles.push(this.rushConfiguration.getCommonVersionsFilePath(this.options.variant));
-
     if (this.rushConfiguration.packageManager === 'pnpm') {
-      // If the repo is using pnpmfile.js, consider that also
-      const pnpmFileFilename: string = this.rushConfiguration.getPnpmfilePath(this.options.variant);
-
-      if (FileSystem.exists(pnpmFileFilename)) {
-        potentiallyChangedFiles.push(pnpmFileFilename);
-      }
-
       // Add workspace file. This file is only modified when workspace packages change.
       const pnpmWorkspaceFilename: string = path.join(
         this.rushConfiguration.commonTempFolder,
@@ -439,51 +404,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
 
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration).create();
-  }
-
-  /**
-   * Preferred versions are supported using pnpmfile by substituting any dependency version specifier
-   * for the preferred version during package resolution. This is only done if the preferred version range
-   * is a subset of the dependency version range. Allowed alternate versions are not modified. The pnpmfile
-   * shim will subsequently call into the provided pnpmfile, if one exists.
-   */
-  protected async createShimPnpmfileAsync(filename: string): Promise<void> {
-    const pnpmfileDir: string = path.dirname(filename);
-    let pnpmfileExists: boolean = false;
-    try {
-      // Attempt to move the existing pnpmfile if there is one
-      await FileSystem.moveAsync({
-        sourcePath: filename,
-        destinationPath: path.join(pnpmfileDir, `clientPnpmfile.js`)
-      });
-      pnpmfileExists = true;
-    } catch (error) {
-      if (!FileSystem.isNotExistError(error)) {
-        throw error;
-      }
-    }
-
-    const pnpmfileShimSettings: IPnpmfileShimSettings = {
-      allPreferredVersions: MapExtensions.toObject(
-        InstallHelpers.collectPreferredVersions(this.rushConfiguration, this.options)
-      ),
-      allowedAlternativeVersions: MapExtensions.toObject(
-        this.rushConfiguration.getCommonVersions(this.options.variant).allowedAlternativeVersions
-      ),
-      semverPath: require.resolve('semver'),
-      useClientPnpmfile: pnpmfileExists
-    };
-
-    // Write the settings to be consumed by the pnpmfile
-    await JsonFile.saveAsync(pnpmfileShimSettings, path.resolve(pnpmfileDir, 'pnpmfileSettings.json'), {
-      ensureFolderExists: true
-    });
-
-    // Copy the shim pnpmfile to the original path
-    await FileSystem.copyFileAsync({
-      sourcePath: path.resolve(__dirname, '..', 'pnpm', 'PnpmfileShim.js'),
-      destinationPath: filename
-    });
   }
 
   /**

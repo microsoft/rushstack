@@ -152,13 +152,10 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     // dependency name --> version specifier
-    const commonDependencies: Map<string, string> = InstallHelpers.collectPreferredVersions(
-      this.rushConfiguration,
-      {
-        explicitPreferredVersions: allExplicitPreferredVersions,
-        variant: this.options.variant
-      }
-    );
+    const commonDependencies: Map<string, string> = new Map([
+      ...allExplicitPreferredVersions,
+      ...this.rushConfiguration.getImplicitlyPreferredVersions(this.options.variant)
+    ]);
 
     // To make the common/package.json file more readable, sort alphabetically
     // according to rushProject.tempProjectName instead of packageName.
@@ -416,30 +413,11 @@ export class RushInstallManager extends BaseInstallManager {
    * @override
    */
   protected canSkipInstall(lastModifiedDate: Date): boolean {
-    // Based on timestamps, can we skip this install entirely?
-    const potentiallyChangedFiles: string[] = [];
-
-    // Consider the timestamp on the node_modules folder; if someone tampered with it
-    // or deleted it entirely, then we can't skip this install
-    potentiallyChangedFiles.push(
-      path.join(this.rushConfiguration.commonTempFolder, RushConstants.nodeModulesFolderName)
-    );
-
-    // Additionally, if they pulled an updated npm-shrinkwrap.json file from Git,
-    // then we can't skip this install
-    potentiallyChangedFiles.push(this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant));
-
-    // Add common-versions.json file to the potentially changed files list.
-    potentiallyChangedFiles.push(this.rushConfiguration.getCommonVersionsFilePath(this.options.variant));
-
-    if (this.rushConfiguration.packageManager === 'pnpm') {
-      // If the repo is using pnpmfile.js, consider that also
-      const pnpmFileFilename: string = this.rushConfiguration.getPnpmfilePath(this.options.variant);
-
-      if (FileSystem.exists(pnpmFileFilename)) {
-        potentiallyChangedFiles.push(pnpmFileFilename);
-      }
+    if (!super.canSkipInstall(lastModifiedDate)) {
+      return false;
     }
+
+    const potentiallyChangedFiles: string[] = [];
 
     // Also consider timestamps for all the temp tarballs. (createTempModulesAndCheckShrinkwrap() will
     // carefully preserve these timestamps unless something has changed.)

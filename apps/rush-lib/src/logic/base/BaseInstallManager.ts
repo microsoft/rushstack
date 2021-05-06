@@ -34,6 +34,7 @@ import { InstallHelpers } from '../installManager/InstallHelpers';
 import { PolicyValidator } from '../policy/PolicyValidator';
 import { WebClient, WebClientResponse } from '../../utilities/WebClient';
 import { SetupPackageRegistry } from '../setup/SetupPackageRegistry';
+import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 
 export interface IInstallManagerOptions {
   /**
@@ -263,11 +264,38 @@ export abstract class BaseInstallManager {
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }>;
 
-  protected abstract canSkipInstall(lastInstallDate: Date): boolean;
-
   protected abstract installAsync(cleanInstall: boolean): Promise<void>;
 
   protected abstract postInstallAsync(): Promise<void>;
+
+  protected canSkipInstall(lastModifiedDate: Date): boolean {
+    // Based on timestamps, can we skip this install entirely?
+    const potentiallyChangedFiles: string[] = [];
+
+    // Consider the timestamp on the node_modules folder; if someone tampered with it
+    // or deleted it entirely, then we can't skip this install
+    potentiallyChangedFiles.push(
+      path.join(this.rushConfiguration.commonTempFolder, RushConstants.nodeModulesFolderName)
+    );
+
+    // Additionally, if they pulled an updated shrinkwrap file from Git,
+    // then we can't skip this install
+    potentiallyChangedFiles.push(this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant));
+
+    // Add common-versions.json file to the potentially changed files list.
+    potentiallyChangedFiles.push(this.rushConfiguration.getCommonVersionsFilePath(this.options.variant));
+
+    if (this.rushConfiguration.packageManager === 'pnpm') {
+      // If the repo is using pnpmfile.js, consider that also
+      const pnpmFileFilename: string = this.rushConfiguration.getPnpmfilePath(this.options.variant);
+
+      if (FileSystem.exists(pnpmFileFilename)) {
+        potentiallyChangedFiles.push(pnpmFileFilename);
+      }
+    }
+
+    return Utilities.isFileTimestampCurrent(lastModifiedDate, potentiallyChangedFiles);
+  }
 
   protected async prepareAsync(): Promise<{ variantIsUpToDate: boolean; shrinkwrapIsUpToDate: boolean }> {
     // Check the policies
@@ -387,16 +415,10 @@ export abstract class BaseInstallManager {
     );
     this._syncNpmrcAlreadyCalled = true;
 
-    // also, copy the pnpmfile.js if it exists
-    if (this._rushConfiguration.packageManager === 'pnpm') {
-      const committedPnpmFilePath: string = this._rushConfiguration.getPnpmfilePath(this._options.variant);
-      const tempPnpmFilePath: string = path.join(
-        this._rushConfiguration.commonTempFolder,
-        (this._rushConfiguration.packageManagerWrapper as PnpmPackageManager).pnpmfileFilename
-      );
-
-      // ensure that we remove any old one that may be hanging around
-      Utilities.syncFile(committedPnpmFilePath, tempPnpmFilePath);
+    // Shim support for pnpmfile in. This shim will call back into the variant-specific pnpmfile.
+    // Additionally when in workspaces, the shim implements support for common versions.
+    if (this.rushConfiguration.packageManager === 'pnpm') {
+      await PnpmfileConfiguration.writeCommonTempPnpmfileShimAsync(this.rushConfiguration, this.options);
     }
 
     // Allow for package managers to do their own preparation and check that the shrinkwrap is up to date
