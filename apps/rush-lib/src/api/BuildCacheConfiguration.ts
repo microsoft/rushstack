@@ -36,6 +36,7 @@ import type { AmazonS3BuildCacheProvider } from '../logic/buildCache/AmazonS3/Am
  * Describes the file structure for the "common/config/rush/build-cache.json" config file.
  */
 interface IBaseBuildCacheJson {
+  buildCacheEnabled: boolean;
   cacheProvider: 'azure-blob-storage' | 'amazon-s3' | 'local-only';
   cacheEntryNamePattern?: string;
 }
@@ -124,11 +125,19 @@ export class BuildCacheConfiguration {
     path.join(__dirname, '..', 'schemas', 'build-cache.schema.json')
   );
 
+  /**
+   * Indicates whether the build cache feature is enabled.
+   * Typically it is enabled in the build-cache.json config file.
+   */
+  public readonly buildCacheEnabled: boolean;
+
   public readonly getCacheEntryId: GetCacheEntryIdFunction;
   public readonly localCacheProvider: FileSystemBuildCacheProvider;
   public readonly cloudCacheProvider: CloudBuildCacheProviderBase | undefined;
 
   private constructor(options: IBuildCacheConfigurationOptions) {
+    this.buildCacheEnabled = options.buildCacheJson.buildCacheEnabled;
+
     this.getCacheEntryId = options.getCacheEntryId;
     this.localCacheProvider = new FileSystemBuildCacheProvider({
       rushUserConfiguration: options.rushUserConfiguration,
@@ -163,40 +172,80 @@ export class BuildCacheConfiguration {
   }
 
   /**
-   * Loads the build-cache.json data from the repo's default file path (/common/config/rush/build-cache.json).
+   * Attempts to load the build-cache.json data from the standard file path `common/config/rush/build-cache.json`.
    * If the file has not been created yet, then undefined is returned.
    */
-  public static async loadFromDefaultPathAsync(
+  public static async tryLoadAsync(
     terminal: Terminal,
     rushConfiguration: RushConfiguration
   ): Promise<BuildCacheConfiguration | undefined> {
     const jsonFilePath: string = BuildCacheConfiguration.getBuildCacheConfigFilePath(rushConfiguration);
-    if (FileSystem.exists(jsonFilePath)) {
-      const buildCacheJson: IBuildCacheJson = await JsonFile.loadAndValidateAsync(
-        jsonFilePath,
-        BuildCacheConfiguration._jsonSchema
-      );
-      const rushUserConfiguration: RushUserConfiguration = await RushUserConfiguration.initializeAsync();
-
-      let getCacheEntryId: GetCacheEntryIdFunction;
-      try {
-        getCacheEntryId = CacheEntryId.parsePattern(buildCacheJson.cacheEntryNamePattern);
-      } catch (e) {
-        terminal.writeErrorLine(
-          `Error parsing cache entry name pattern "${buildCacheJson.cacheEntryNamePattern}": ${e}`
-        );
-        throw new AlreadyReportedError();
-      }
-
-      return new BuildCacheConfiguration({
-        buildCacheJson,
-        getCacheEntryId,
-        rushConfiguration,
-        rushUserConfiguration
-      });
-    } else {
+    if (!FileSystem.exists(jsonFilePath)) {
       return undefined;
     }
+    return await BuildCacheConfiguration._loadAsync(jsonFilePath, terminal, rushConfiguration);
+  }
+
+  /**
+   * Loads the build-cache.json data from the standard file path `common/config/rush/build-cache.json`.
+   * If the file has not been created yet, or if the feature is not enabled, then an error is reported.
+   */
+  public static async loadAndRequireEnabledAsync(
+    terminal: Terminal,
+    rushConfiguration: RushConfiguration
+  ): Promise<BuildCacheConfiguration> {
+    const jsonFilePath: string = BuildCacheConfiguration.getBuildCacheConfigFilePath(rushConfiguration);
+    if (!FileSystem.exists(jsonFilePath)) {
+      terminal.writeErrorLine(
+        `The build cache feature is not enabled. This config file is missing:\n` + jsonFilePath
+      );
+      terminal.writeLine(`\nThe Rush website documentation has instructions for enabling the build cache.`);
+      throw new AlreadyReportedError();
+    }
+
+    const buildCacheConfiguration: BuildCacheConfiguration = await BuildCacheConfiguration._loadAsync(
+      jsonFilePath,
+      terminal,
+      rushConfiguration
+    );
+
+    if (!buildCacheConfiguration.buildCacheEnabled) {
+      terminal.writeErrorLine(
+        `The build cache feature is not enabled. You can enable it by editing this config file:\n` +
+          jsonFilePath
+      );
+      throw new AlreadyReportedError();
+    }
+    return buildCacheConfiguration;
+  }
+
+  private static async _loadAsync(
+    jsonFilePath: string,
+    terminal: Terminal,
+    rushConfiguration: RushConfiguration
+  ): Promise<BuildCacheConfiguration> {
+    const buildCacheJson: IBuildCacheJson = await JsonFile.loadAndValidateAsync(
+      jsonFilePath,
+      BuildCacheConfiguration._jsonSchema
+    );
+    const rushUserConfiguration: RushUserConfiguration = await RushUserConfiguration.initializeAsync();
+
+    let getCacheEntryId: GetCacheEntryIdFunction;
+    try {
+      getCacheEntryId = CacheEntryId.parsePattern(buildCacheJson.cacheEntryNamePattern);
+    } catch (e) {
+      terminal.writeErrorLine(
+        `Error parsing cache entry name pattern "${buildCacheJson.cacheEntryNamePattern}": ${e}`
+      );
+      throw new AlreadyReportedError();
+    }
+
+    return new BuildCacheConfiguration({
+      buildCacheJson,
+      getCacheEntryId,
+      rushConfiguration,
+      rushUserConfiguration
+    });
   }
 
   public static getBuildCacheConfigFilePath(rushConfiguration: RushConfiguration): string {

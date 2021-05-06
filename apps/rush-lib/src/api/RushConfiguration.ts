@@ -49,6 +49,7 @@ const knownRushConfigFilenames: string[] = [
   'deploy.json',
   RushConstants.artifactoryFilename,
   RushConstants.browserApprovedPackagesFilename,
+  RushConstants.buildCacheFilename,
   RushConstants.commandLineFilename,
   RushConstants.commonVersionsFilename,
   RushConstants.experimentsFilename,
@@ -975,11 +976,6 @@ export class RushConfiguration {
       }
 
       const knownSet: Set<string> = new Set<string>(knownRushConfigFilenames.map((x) => x.toUpperCase()));
-
-      // If the buildCache experiment is enabled, add its configuration file
-      if (experiments.configuration.buildCache) {
-        knownSet.add(RushConstants.buildCacheFilename.toUpperCase());
-      }
 
       // Add the shrinkwrap filename for the package manager to the known set.
       knownSet.add(packageManagerWrapper.shrinkwrapFilename.toUpperCase());

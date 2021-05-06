@@ -1,6 +1,22 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 30 Apr 2021 00:32:16 GMT and should not be manually modified.
+This log was last generated on Tue, 04 May 2021 20:26:15 GMT and should not be manually modified.
+
+## 5.46.1
+Tue, 04 May 2021 20:26:15 GMT
+
+### Updates
+
+- Fix an issue where the buildCacheEnabled setting was not applied correctly
+
+## 5.46.0
+Tue, 04 May 2021 02:45:20 GMT
+
+### Updates
+
+- Remove "buildCache" setting from experiments.json; it is superseded by "buildCacheEnabled" in build-cache.json
+- Add a "rush init" template for build-cache.json
+- Temporarily downgrade the "@azure/identity" to eliminate the keytar native dependency (GitHub issue #2492)
 
 ## 5.45.6
 Fri, 30 Apr 2021 00:32:16 GMT
