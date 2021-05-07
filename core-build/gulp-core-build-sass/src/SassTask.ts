@@ -9,7 +9,7 @@ import { GulpTask } from '@microsoft/gulp-core-build';
 import { splitStyles } from '@microsoft/load-themed-styles';
 import { FileSystem, JsonFile, LegacyAdapters, JsonObject } from '@rushstack/node-core-library';
 import * as glob from 'glob';
-import * as nodeSass from 'node-sass';
+import * as sass from 'sass';
 import * as postcss from 'postcss';
 import * as CleanCss from 'clean-css';
 import * as autoprefixer from 'autoprefixer';
@@ -153,7 +153,7 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       cssOutputPathAbsolute = path.join(this.buildConfig.rootPath, cssOutputPath);
     }
 
-    return LegacyAdapters.convertCallbackToPromise(nodeSass.render, {
+    return LegacyAdapters.convertCallbackToPromise(sass.render, {
       file: filePath,
       importer: (url: string) => ({ file: this._patchSassUrl(url) }),
       sourceMap: this.taskConfig.dropCssFiles,
@@ -161,11 +161,11 @@ export class SassTask extends GulpTask<ISassTaskConfig> {
       omitSourceMapUrl: true,
       outFile: cssOutputPath
     })
-      .catch((error: nodeSass.SassError) => {
+      .catch((error: sass.SassException) => {
         this.fileError(filePath, error.line, error.column, error.name, error.message);
         throw new Error(error.message);
       })
-      .then((result: nodeSass.Result) => {
+      .then((result: sass.Result) => {
         const options: postcss.ProcessOptions = {
           from: filePath
         };

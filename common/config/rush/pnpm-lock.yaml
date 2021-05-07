@@ -1151,9 +1151,9 @@ importers:
       autoprefixer: 9.8.6
       clean-css: 4.2.1
       glob: 7.0.6
-      node-sass: 5.0.0
       postcss: 7.0.32
       postcss-modules: 1.5.0
+      sass: 1.32.12
     devDependencies:
       '@microsoft/node-library-build': link:../node-library-build
       '@microsoft/rush-stack-compiler-3.9': link:../../stack/rush-stack-compiler-3.9
@@ -1162,7 +1162,7 @@ importers:
       '@types/clean-css': 4.2.1
       '@types/glob': 7.1.1
       '@types/jest': 25.2.1
-      '@types/node-sass': 4.11.1
+      '@types/sass': 1.16.0
       gulp: 4.0.2
       jest: 25.4.0
     specifiers:
@@ -1178,15 +1178,15 @@ importers:
       '@types/gulp': 4.0.6
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
-      '@types/node-sass': 4.11.1
+      '@types/sass': 1.16.0
       autoprefixer: ~9.8.0
       clean-css: 4.2.1
       glob: ~7.0.5
       gulp: ~4.0.2
       jest: ~25.4.0
-      node-sass: 5.0.0
       postcss: 7.0.32
       postcss-modules: ~1.5.0
+      sass: 1.32.12
   ../../core-build/gulp-core-build-serve:
     dependencies:
       '@microsoft/gulp-core-build': link:../gulp-core-build
@@ -3868,6 +3868,12 @@ packages:
     dev: true
     resolution:
       integrity: sha512-yy7HuzQhj0dhGpD8RLXSZWEkLsV9ibvxvi6EiJ3bkqLAO1RGo0WbkWQiwpRlSFymTJRz0d3k5LM3kkx8ArDbLw==
+  /@types/sass/1.16.0:
+    dependencies:
+      '@types/node': 10.17.13
+    dev: true
+    resolution:
+      integrity: sha512-2XZovu4NwcqmtZtsBR5XYLw18T8cBCnU2USFHTnYLLHz9fkhnoEMoDsqShJIOFsFhn5aJHjweiUUdTrDGujegA==
   /@types/semver/7.3.5:
     resolution:
       integrity: sha512-iotVxtCCsPLRAvxMFFgxL8HD2l4mAZ2Oin7/VJ2ooWO0VOK4EGOGmZWZn1uCq7RofR3I/1IOSjCHlFT71eVK0Q==
@@ -12060,6 +12066,15 @@ packages:
         optional: true
     resolution:
       integrity: sha512-W6gVDXAd5hR/WHsPicvZdjAWHBcEJ44UahgxcIE196fW2ong0ZHMPO1kZuI5q0VlvMQZh32gpv69PLWQm70qrw==
+  /sass/1.32.12:
+    dependencies:
+      chokidar: 3.4.3
+    dev: false
+    engines:
+      node: '>=8.9.0'
+    hasBin: true
+    resolution:
+      integrity: sha512-zmXn03k3hN0KaiVTjohgkg98C3UowhL1/VSGdj4/VAAiMKGQOE80PFPxFP2Kyq0OUskPKcY5lImkhBKEHlypJA==
   /sax/1.2.4:
     resolution:
       integrity: sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==
@@ -15153,3 +15168,4 @@ packages:
       commander: 2.20.3
     resolution:
       integrity: sha512-DUOKC/IhbkdLKKiV89gw9DUauTV8U/8yJl1sjf6MtDmzevLKOF2duNJ495S3MFVjqZarr+qNGCPbkg4mu4PpLw==
+registry: ''

@@ -9,6 +9,10 @@
     {
       "name": "react-dom",
       "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "sass",
+      "allowedCategories": [ "libraries" ]
     }
   ]
 }
