@@ -16,6 +16,7 @@ import { FileSystemBuildCacheProvider } from '../logic/buildCache/FileSystemBuil
 import { RushConstants } from '../logic/RushConstants';
 import { CloudBuildCacheProviderBase } from '../logic/buildCache/CloudBuildCacheProviderBase';
 import { RushUserConfiguration } from './RushUserConfiguration';
+import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import { CacheEntryId, GetCacheEntryIdFunction } from '../logic/buildCache/CacheEntryId';
 
 const AzureStorageBuildCacheProviderModule: typeof import('../logic/buildCache/AzureStorageBuildCacheProvider') = Import.lazy(
@@ -136,7 +137,8 @@ export class BuildCacheConfiguration {
   public readonly cloudCacheProvider: CloudBuildCacheProviderBase | undefined;
 
   private constructor(options: IBuildCacheConfigurationOptions) {
-    this.buildCacheEnabled = options.buildCacheJson.buildCacheEnabled;
+    this.buildCacheEnabled =
+      EnvironmentConfiguration.buildCacheEnabled ?? options.buildCacheJson.buildCacheEnabled;
 
     this.getCacheEntryId = options.getCacheEntryId;
     this.localCacheProvider = new FileSystemBuildCacheProvider({

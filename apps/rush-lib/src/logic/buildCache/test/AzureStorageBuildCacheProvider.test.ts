@@ -8,20 +8,17 @@ import { CredentialCache } from '../../CredentialCache';
 import { AzureEnvironmentNames, AzureStorageBuildCacheProvider } from '../AzureStorageBuildCacheProvider';
 
 describe('AzureStorageBuildCacheProvider', () => {
-  let buildCacheWriteCredentialEnvValue: string | undefined;
-
   beforeEach(() => {
-    buildCacheWriteCredentialEnvValue = undefined;
-    jest
-      .spyOn(EnvironmentConfiguration, 'buildCacheWriteCredential', 'get')
-      .mockImplementation(() => buildCacheWriteCredentialEnvValue);
+    jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue(undefined);
+    jest.spyOn(EnvironmentConfiguration, 'buildCacheEnabled', 'get').mockReturnValue(undefined);
+    jest.spyOn(EnvironmentConfiguration, 'buildCacheWriteAllowed', 'get').mockReturnValue(undefined);
   });
 
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  it('Uses a correct list of Azure authority hosts', async () => {
+  it('uses a correct list of Azure authority hosts', async () => {
     await expect(
       () =>
         new AzureStorageBuildCacheProvider({
@@ -33,36 +30,38 @@ describe('AzureStorageBuildCacheProvider', () => {
     ).toThrowErrorMatchingSnapshot();
   });
 
-  it("Isn't writable if isCacheWriteAllowed is set to false and there is no env write credential", () => {
-    const cacheProvider: AzureStorageBuildCacheProvider = new AzureStorageBuildCacheProvider({
-      storageAccountName: 'storage-account',
-      storageContainerName: 'container-name',
-      isCacheWriteAllowed: false
+  describe('isCacheWriteAllowed', () => {
+    function prepareSubject(
+      optionValue: boolean,
+      envVarValue: boolean | undefined
+    ): AzureStorageBuildCacheProvider {
+      jest.spyOn(EnvironmentConfiguration, 'buildCacheWriteAllowed', 'get').mockReturnValue(envVarValue);
+      return new AzureStorageBuildCacheProvider({
+        storageAccountName: 'storage-account',
+        storageContainerName: 'container-name',
+        isCacheWriteAllowed: optionValue
+      });
+    }
+
+    it('is false if isCacheWriteAllowed is false', () => {
+      const subject: AzureStorageBuildCacheProvider = prepareSubject(false, undefined);
+      expect(subject.isCacheWriteAllowed).toBe(false);
     });
 
-    expect(cacheProvider.isCacheWriteAllowed).toBe(false);
-  });
-
-  it('Is writable if isCacheWriteAllowed is set to true and there is no env write credential', () => {
-    const cacheProvider: AzureStorageBuildCacheProvider = new AzureStorageBuildCacheProvider({
-      storageAccountName: 'storage-account',
-      storageContainerName: 'container-name',
-      isCacheWriteAllowed: true
+    it('is true if isCacheWriteAllowed is true', () => {
+      const subject: AzureStorageBuildCacheProvider = prepareSubject(true, undefined);
+      expect(subject.isCacheWriteAllowed).toBe(true);
     });
 
-    expect(cacheProvider.isCacheWriteAllowed).toBe(true);
-  });
-
-  it('Is writable if isCacheWriteAllowed is set to false and there is an env write credential', () => {
-    buildCacheWriteCredentialEnvValue = 'token';
-
-    const cacheProvider: AzureStorageBuildCacheProvider = new AzureStorageBuildCacheProvider({
-      storageAccountName: 'storage-account',
-      storageContainerName: 'container-name',
-      isCacheWriteAllowed: false
+    it('is false if isCacheWriteAllowed is true but the env var is false', () => {
+      const subject: AzureStorageBuildCacheProvider = prepareSubject(true, false);
+      expect(subject.isCacheWriteAllowed).toBe(false);
     });
 
-    expect(cacheProvider.isCacheWriteAllowed).toBe(true);
+    it('is true if the env var is true', () => {
+      const subject: AzureStorageBuildCacheProvider = prepareSubject(false, true);
+      expect(subject.isCacheWriteAllowed).toBe(true);
+    });
   });
 
   async function testCredentialCache(isCacheWriteAllowed: boolean): Promise<void> {

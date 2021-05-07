@@ -19,12 +19,12 @@ export interface IAmazonS3BuildCacheProviderOptions {
 export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
   private readonly _options: IAmazonS3BuildCacheProviderOptions;
   private readonly _s3Prefix: string | undefined;
-  private readonly _environmentWriteCredential: string | undefined;
+  private readonly _environmentCredential: string | undefined;
   private readonly _isCacheWriteAllowedByConfiguration: boolean;
   private __credentialCacheId: string | undefined;
 
   public get isCacheWriteAllowed(): boolean {
-    return this._isCacheWriteAllowedByConfiguration || !!this._environmentWriteCredential;
+    return EnvironmentConfiguration.buildCacheWriteAllowed ?? this._isCacheWriteAllowedByConfiguration;
   }
 
   private __s3Client: AmazonS3Client | undefined;
@@ -33,7 +33,7 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
     super();
     this._options = options;
     this._s3Prefix = options.s3Prefix;
-    this._environmentWriteCredential = EnvironmentConfiguration.buildCacheWriteCredential;
+    this._environmentCredential = EnvironmentConfiguration.buildCacheCredential;
     this._isCacheWriteAllowedByConfiguration = options.isCacheWriteAllowed;
   }
 
@@ -54,7 +54,7 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
   private async _getS3ClientAsync(): Promise<AmazonS3Client> {
     if (!this.__s3Client) {
       let credentials: IAmazonS3Credentials | undefined = AmazonS3Client.tryDeserializeCredentials(
-        this._environmentWriteCredential
+        this._environmentCredential
       );
       if (!credentials) {
         let cacheEntry: ICredentialCacheEntry | undefined;
@@ -82,7 +82,7 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
             "An Amazon S3 credential hasn't been provided, or has expired. " +
               `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}", ` +
               `or provide an <AccessKeyId>:<SecretAccessKey> pair in the ` +
-              `${EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_CREDENTIAL} environment variable`
+              `${EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL} environment variable`
           );
         }
       }

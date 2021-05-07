@@ -34,7 +34,7 @@ export const enum EnvironmentVariableNames {
   RUSH_PREVIEW_VERSION = 'RUSH_PREVIEW_VERSION',
 
   /**
-   * If this variable is set to "true", Rush will not fail the build when running a version
+   * If this variable is set to "1", Rush will not fail the build when running a version
    * of Node that does not match the criteria specified in the "nodeSupportedVersionRange"
    * field from rush.json.
    */
@@ -55,7 +55,7 @@ export const enum EnvironmentVariableNames {
   RUSH_PARALLELISM = 'RUSH_PARALLELISM',
 
   /**
-   * If this variable is set to "true", Rush will create symlinks with absolute paths instead
+   * If this variable is set to "1", Rush will create symlinks with absolute paths instead
    * of relative paths. This can be necessary when a repository is moved during a build or
    * if parts of a repository are moved into a sandbox.
    */
@@ -96,7 +96,8 @@ export const enum EnvironmentVariableNames {
 
   /**
    * Provides a credential for a remote build cache, if configured. Setting this environment variable
-   * overrides a "isCacheWriteAllowed": false setting.
+   * overrides whatever credential has been saved in the local cloud cache credentials using
+   * `rush update-cloud-credentials`.
    *
    * @remarks
    * This credential overrides any cached credentials.
@@ -106,7 +107,21 @@ export const enum EnvironmentVariableNames {
    *
    * For information on SAS tokens, see here: https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview
    */
-  RUSH_BUILD_CACHE_WRITE_CREDENTIAL = 'RUSH_BUILD_CACHE_WRITE_CREDENTIAL',
+  RUSH_BUILD_CACHE_CREDENTIAL = 'RUSH_BUILD_CACHE_CREDENTIAL',
+
+  /**
+   * Setting this environment variable overrides the value of `buildCacheEnabled` in the `build-cache.json`
+   * configuration file. Specify `1` to enable the build cache or `0` to disable it.
+   *
+   * If set to `0`, this is equivalent to passing the `--disable-build-cache` flag.
+   */
+  RUSH_BUILD_CACHE_ENABLED = 'RUSH_BUILD_CACHE_ENABLED',
+
+  /**
+   * Setting this environment variable overrides the value of `isCacheWriteAllowed` in the `build-cache.json`
+   * configuration file. Specify `1` to allow cache write and `0` to disable it.
+   */
+  RUSH_BUILD_CACHE_WRITE_ALLOWED = 'RUSH_BUILD_CACHE_WRITE_ALLOWED',
 
   /**
    * Allows the git binary path to be explicitly specified.
@@ -147,6 +162,10 @@ export class EnvironmentConfiguration {
 
   private static _buildCacheCredential: string | undefined;
 
+  private static _buildCacheEnabled: boolean | undefined;
+
+  private static _buildCacheWriteAllowed: boolean | undefined;
+
   private static _gitBinaryPath: string | undefined;
 
   /**
@@ -158,7 +177,7 @@ export class EnvironmentConfiguration {
   }
 
   /**
-   * If "true", create symlinks with absolute paths instead of relative paths.
+   * If "1", create symlinks with absolute paths instead of relative paths.
    * See {@link EnvironmentVariableNames.RUSH_ABSOLUTE_SYMLINKS}
    */
   public static get absoluteSymlinks(): boolean {
@@ -167,7 +186,7 @@ export class EnvironmentConfiguration {
   }
 
   /**
-   * If this environment variable is set to "true", the Node.js version check will print a warning
+   * If this environment variable is set to "1", the Node.js version check will print a warning
    * instead of causing a hard error if the environment's Node.js version doesn't match the
    * version specifier in `rush.json`'s "nodeSupportedVersionRange" property.
    *
@@ -198,11 +217,29 @@ export class EnvironmentConfiguration {
 
   /**
    * Provides a credential for reading from and writing to a remote build cache, if configured.
-   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_CONNECTION_STRING}
+   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL}
    */
-  public static get buildCacheWriteCredential(): string | undefined {
+  public static get buildCacheCredential(): string | undefined {
     EnvironmentConfiguration._ensureInitialized();
     return EnvironmentConfiguration._buildCacheCredential;
+  }
+
+  /**
+   * If set, enables or disables the cloud build cache feature.
+   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_ENABLED}
+   */
+  public static get buildCacheEnabled(): boolean | undefined {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._buildCacheEnabled;
+  }
+
+  /**
+   * If set, enables or disables writing to the cloud build cache.
+   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED}
+   */
+  public static get buildCacheWriteAllowed(): boolean | undefined {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._buildCacheWriteAllowed;
   }
 
   /**
@@ -253,12 +290,26 @@ export class EnvironmentConfiguration {
           }
 
           case EnvironmentVariableNames.RUSH_ABSOLUTE_SYMLINKS: {
-            EnvironmentConfiguration._absoluteSymlinks = value === 'true';
+            EnvironmentConfiguration._absoluteSymlinks =
+              EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+                EnvironmentVariableNames.RUSH_ABSOLUTE_SYMLINKS,
+                value
+              ) ?? false;
             break;
           }
 
           case EnvironmentVariableNames.RUSH_ALLOW_UNSUPPORTED_NODEJS: {
-            EnvironmentConfiguration._allowUnsupportedNodeVersion = value === 'true';
+            if (value === 'true' || value === 'false') {
+              // Small, undocumented acceptance of old "true" and "false" values for
+              // users of RUSH_ALLOW_UNSUPPORTED_NODEJS in rush pre-v5.46.
+              EnvironmentConfiguration._allowUnsupportedNodeVersion = value === 'true';
+            } else {
+              EnvironmentConfiguration._allowUnsupportedNodeVersion =
+                EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+                  EnvironmentVariableNames.RUSH_ALLOW_UNSUPPORTED_NODEJS,
+                  value
+                ) ?? false;
+            }
             break;
           }
 
@@ -275,8 +326,24 @@ export class EnvironmentConfiguration {
             break;
           }
 
-          case EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_CREDENTIAL: {
+          case EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL: {
             EnvironmentConfiguration._buildCacheCredential = value;
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_BUILD_CACHE_ENABLED: {
+            EnvironmentConfiguration._buildCacheEnabled = EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+              EnvironmentVariableNames.RUSH_BUILD_CACHE_ENABLED,
+              value
+            );
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED: {
+            EnvironmentConfiguration._buildCacheWriteAllowed = EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+              EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED,
+              value
+            );
             break;
           }
 
@@ -332,6 +399,23 @@ export class EnvironmentConfiguration {
     if (!EnvironmentConfiguration._hasBeenInitialized) {
       throw new InternalError(
         'The EnvironmentConfiguration must be initialized before values can be accessed.'
+      );
+    }
+  }
+
+  public static parseBooleanEnvironmentVariable(
+    name: string,
+    value: string | undefined
+  ): boolean | undefined {
+    if (value === '' || value === undefined) {
+      return undefined;
+    } else if (value === '0') {
+      return false;
+    } else if (value === '1') {
+      return true;
+    } else {
+      throw new Error(
+        `Invalid value "${value}" for the environment variable ${name}. Valid choices are 0 or 1.`
       );
     }
   }
