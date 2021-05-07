@@ -43,6 +43,12 @@ export interface IAzureStorageBuildCacheProviderOptions {
 
 const SAS_TTL_MILLISECONDS: number = 7 * 24 * 60 * 60 * 1000; // Seven days
 
+enum CacheWarningType {
+  CacheCredentialsRequired = 'CacheCredentialsRequired',
+  CacheCredentialsInvalid = 'CacheCredentialsInvalid',
+  CacheCredentialsNotAuthorized = 'CacheCredentialsNotAuthorized'
+}
+
 export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase {
   private readonly _storageAccountName: string;
   private readonly _storageContainerName: string;
@@ -50,6 +56,7 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
   private readonly _blobPrefix: string | undefined;
   private readonly _environmentWriteCredential: string | undefined;
   private readonly _isCacheWriteAllowedByConfiguration: boolean;
+  private readonly _warningsAlreadyEncountered: Set<CacheWarningType>;
   private __credentialCacheId: string | undefined;
 
   public get isCacheWriteAllowed(): boolean {
@@ -66,6 +73,7 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
     this._blobPrefix = options.blobPrefix;
     this._environmentWriteCredential = EnvironmentConfiguration.buildCacheWriteCredential;
     this._isCacheWriteAllowedByConfiguration = options.isCacheWriteAllowed;
+    this._warningsAlreadyEncountered = new Set<CacheWarningType>();
 
     if (!(this._azureEnvironment in AzureAuthorityHosts)) {
       throw new Error(
@@ -116,12 +124,15 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
         [e.name, e.message, e.response?.status, e.response?.parsedHeaders?.errorCode]
           .filter((piece: string | undefined) => piece)
           .join(' ');
+      const friendlyMessage: string = 'You could be missing out on a faster build!';
 
       if (e.response?.parsedHeaders?.errorCode === 'PublicAccessNotPermitted') {
         // This error means we tried to read the cache with no credentials, but credentials are required.
         // We'll assume that the configuration of the cache is correct and the user has to take action.
-        terminal.writeWarningLine(
-          `${errorMessage}\n\n` +
+        this._emitWarningOnce(
+          CacheWarningType.CacheCredentialsRequired,
+          terminal,
+          `${friendlyMessage}\n\n` +
             `You need to configure Azure Storage SAS credentials to access the build cache.\n` +
             `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}", \n` +
             `or provide a SAS in the ` +
@@ -130,8 +141,10 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
       } else if (e.response?.parsedHeaders?.errorCode === 'AuthenticationFailed') {
         // This error means the user's credentials are incorrect, but not expired normally. They might have
         // gotten corrupted somehow, or revoked manually in Azure Portal.
-        terminal.writeWarningLine(
-          `${errorMessage}\n\n` +
+        this._emitWarningOnce(
+          CacheWarningType.CacheCredentialsInvalid,
+          terminal,
+          `${friendlyMessage}\n\n` +
             `Your Azure Storage SAS credentials are not valid.\n` +
             `Update the credentials by running "rush ${RushConstants.updateCloudCredentialsCommandName}", \n` +
             `or provide a SAS in the ` +
@@ -142,8 +155,10 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
         // to providing likely next steps on configuration. (Hopefully this error is rare for a regular
         // developer, more likely this error will appear while someone is configuring the cache for the
         // first time.)
-        terminal.writeWarningLine(
-          `${errorMessage}\n\n` +
+        this._emitWarningOnce(
+          CacheWarningType.CacheCredentialsNotAuthorized,
+          terminal,
+          `${friendlyMessage}\n\n` +
             `Your Azure Storage SAS credentials are valid, but do not have permission to read the build cache.\n` +
             `Make sure you have added the role 'Storage Blob Data Reader' to the appropriate user(s) or group(s)\n` +
             `on your storage account in the Azure Portal.`
@@ -357,6 +372,19 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
       return connectionString;
     } else {
       return blobEndpoint;
+    }
+  }
+
+  // Note: the life cycle of a BuildCacheProvider is that it is created once, while the
+  // BuildCacheConfiguration is loaded, and is used by multiple ProjectBuildCache instances.
+  // This allows us to easily track whether a given warning type has already been emitted
+  // across the (potentially parallel) ProjectBuilder instances.
+  private _emitWarningOnce(type: CacheWarningType, terminal: Terminal, message: string): void {
+    if (this._warningsAlreadyEncountered.has(type)) {
+      terminal.writeVerboseLine(message);
+    } else {
+      this._warningsAlreadyEncountered.add(type);
+      terminal.writeWarningLine(message);
     }
   }
 }
