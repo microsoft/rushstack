@@ -695,6 +695,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "sass",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "sass-loader",
       "allowedCategories": [ "tests" ]
     },

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/gulp-core-build-sass",
+      "comment": "Replace deprecated node-sass with sass",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@microsoft/gulp-core-build-sass",
+  "email": "KevinTCoughlin@users.noreply.github.com"
+}
