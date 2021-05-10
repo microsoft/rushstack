@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Update \"rush init\" assets to use newer versions of Rush and PNPM",
+      "comment": "Update \"rush init\" assets to use newer versions of Rush and PNPM. If you are looking to use PNPM < 6, you must rename the initialized \".pnpmfile.cjs\" file to \"pnpmfile.js\". For more information, see: https://pnpm.io/5.x/pnpmfile",
       "type": "none"
     }
   ],
