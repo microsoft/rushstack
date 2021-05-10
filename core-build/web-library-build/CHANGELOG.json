@@ -2,6 +2,18 @@
   "name": "@microsoft/web-library-build",
   "entries": [
     {
+      "version": "7.5.73",
+      "tag": "@microsoft/web-library-build_v7.5.73",
+      "date": "Mon, 10 May 2021 15:08:37 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/gulp-core-build-sass\" to `4.14.18`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.5.72",
       "tag": "@microsoft/web-library-build_v7.5.72",
       "date": "Mon, 03 May 2021 15:10:28 GMT",

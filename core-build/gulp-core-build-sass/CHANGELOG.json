@@ -2,6 +2,18 @@
   "name": "@microsoft/gulp-core-build-sass",
   "entries": [
     {
+      "version": "4.14.18",
+      "tag": "@microsoft/gulp-core-build-sass_v4.14.18",
+      "date": "Mon, 10 May 2021 15:08:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace deprecated node-sass with sass"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.14.17",
       "tag": "@microsoft/gulp-core-build-sass_v4.14.17",
       "date": "Mon, 03 May 2021 15:10:28 GMT",

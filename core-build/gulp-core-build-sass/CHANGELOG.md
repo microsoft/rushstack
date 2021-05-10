@@ -1,6 +1,13 @@
 # Change Log - @microsoft/gulp-core-build-sass
 
-This log was last generated on Mon, 03 May 2021 15:10:28 GMT and should not be manually modified.
+This log was last generated on Mon, 10 May 2021 15:08:37 GMT and should not be manually modified.
+
+## 4.14.18
+Mon, 10 May 2021 15:08:37 GMT
+
+### Patches
+
+- Replace deprecated node-sass with sass
 
 ## 4.14.17
 Mon, 03 May 2021 15:10:28 GMT
