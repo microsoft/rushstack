@@ -7,8 +7,6 @@ jobs:
     condition: succeeded()
     strategy:
       matrix:
-        'NodeJs 10':
-          NodeVersion: 10
         'NodeJs 12':
           NodeVersion: 12
         'NodeJs 14':
