@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "5.15.2",
+  "pnpmVersion": "6.3.0",
 
   /*[LINE "HYPOTHETICAL"]*/ "npmVersion": "4.5.0",
   /*[LINE "HYPOTHETICAL"]*/ "yarnVersion": "1.9.4",
@@ -63,20 +63,6 @@
      * It is strongly recommended to set strictPeerDependencies=true.
      */
     /*[LINE "DEMO"]*/ "strictPeerDependencies": true,
-
-    /**
-     * Configures the strategy used to select versions during installation.
-     *
-     * This feature requires PNPM version 3.1 or newer.  It corresponds to the "--resolution-strategy" command-line
-     * option for PNPM.  Possible values are "fast" and "fewer-dependencies".  PNPM's default is "fast", but this may
-     * be incompatible with certain packages, for example the "@types" packages from DefinitelyTyped.  Rush's default
-     * is "fewer-dependencies", which causes PNPM to avoid installing a newer version if an already installed version
-     * can be reused; this is more similar to NPM's algorithm.
-     *
-     * After modifying this field, it's recommended to run "rush update --full" so that the package manager
-     * will recalculate all version selections.
-     */
-    /*[LINE "HYPOTHETICAL"]*/ "resolutionStrategy": "fast",
 
     /**
      * If true, then `rush install` will report an error if manual modifications
