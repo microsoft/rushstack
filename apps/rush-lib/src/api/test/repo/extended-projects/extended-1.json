@@ -1,0 +1,15 @@
+{
+  "projects": [
+    {
+      "packageName": "project1",
+      "projectFolder": "project1",
+      "reviewCategory": "third-party"
+    },
+    {
+      "packageName": "project2",
+      "projectFolder": "project2",
+      "reviewCategory": "third-party",
+      "skipRushCheck": true
+    }
+  ]
+}

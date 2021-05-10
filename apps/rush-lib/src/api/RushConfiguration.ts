@@ -212,6 +212,14 @@ export interface IRushVariantOptionsJson {
 }
 
 /**
+ * This represents the JSON data structure for the "projects-extended.json" configuration files
+ * See projects-extended.schema.json for documentation
+ */
+export interface IRushConfigurationProjectsExtendedJson {
+  projects: IRushConfigurationProjectJson[];
+}
+
+/**
  * This represents the JSON data structure for the "rush.json" configuration file.
  * See rush.schema.json for documentation.
  */
@@ -230,6 +238,7 @@ export interface IRushConfigurationJson {
   approvedPackagesPolicy?: IApprovedPackagesPolicyJson;
   gitPolicy?: IRushGitPolicyJson;
   telemetryEnabled?: boolean;
+  projectsExtended: string[];
   projects: IRushConfigurationProjectJson[];
   eventHooks?: IEventHooksJson;
   hotfixChangeEnabled?: boolean;
@@ -438,6 +447,9 @@ export class RushConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
     path.join(__dirname, '../schemas/rush.schema.json')
   );
+  private static _projectsSchemaExtended: JsonSchema = JsonSchema.fromFile(
+    path.join(__dirname, '../schemas/projects-extended.schema.json')
+  );
 
   private _rushJsonFile: string;
   private _rushJsonFolder: string;
@@ -493,6 +505,8 @@ export class RushConfiguration {
   private readonly _packageNameParser: PackageNameParser;
 
   private _telemetryEnabled: boolean;
+
+  private _projectsExtended: string[] | undefined;
 
   // Lazily loaded when the projects() getter is called.
   private _projects: RushConfigurationProject[] | undefined;
@@ -740,6 +754,7 @@ export class RushConfiguration {
       pathTree.setItem(relativePath, project);
     }
     this._projectByRelativePath = pathTree;
+    this._projectsExtended = this._rushConfigurationJson.projectsExtended;
   }
 
   private _initializeAndValidateLocalProjects(): void {
@@ -748,7 +763,19 @@ export class RushConfiguration {
 
     // We sort the projects array in alphabetical order.  This ensures that the packages
     // are processed in a deterministic order by the various Rush algorithms.
-    const sortedProjectJsons: IRushConfigurationProjectJson[] = this._rushConfigurationJson.projects.slice(0);
+
+    const projectsExtended: string[] = this._projectsExtended || [];
+    const extraProjects: IRushConfigurationProjectJson[][] = projectsExtended.map((jsonPath: string) => {
+      // Paths should be resolved relative to rush.json
+      const resolvedFilePath: string = path.resolve(this._rushJsonFolder, jsonPath);
+      const extendedProjectsJson: IRushConfigurationProjectsExtendedJson = JsonFile.load(resolvedFilePath);
+      RushConfiguration._projectsSchemaExtended.validateObject(extendedProjectsJson, resolvedFilePath);
+      return extendedProjectsJson.projects;
+    });
+    // .concat() accepts multiple arrays and creates a new array
+    const sortedProjectJsons: IRushConfigurationProjectJson[] = this._rushConfigurationJson.projects.concat(
+      ...extraProjects
+    );
     sortedProjectJsons.sort((a: IRushConfigurationProjectJson, b: IRushConfigurationProjectJson) =>
       a.packageName.localeCompare(b.packageName)
     );
@@ -1389,6 +1416,14 @@ export class RushConfiguration {
    */
   public get telemetryEnabled(): boolean {
     return this._telemetryEnabled;
+  }
+
+  public get projectsExtended(): string[] {
+    return this._projectsExtended || [];
+  }
+
+  public set projectsExtended(vals: string[]) {
+    this._projectsExtended = vals;
   }
 
   public get projects(): RushConfigurationProject[] {
