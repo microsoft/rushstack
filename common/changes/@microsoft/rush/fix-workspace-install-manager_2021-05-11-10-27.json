@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "treat pnpm workspace file as a potentiallyChangedFile",
+      "comment": "Take pnpm-workspace.yaml file into consideration during install skip checks for PNPM",
       "type": "none"
     }
   ],
