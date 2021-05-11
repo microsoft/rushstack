@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "treat pnpm workspace file as a potentiallyChangedFile",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "liucheng.tech@outlook.com"
+}
