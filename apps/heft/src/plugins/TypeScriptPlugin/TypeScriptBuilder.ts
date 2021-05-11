@@ -731,7 +731,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     EmitFilesPatch.install(ts, tsconfig, this._moduleKindsToEmit, /* useBuildCache */ true, changedFiles);
 
     const writeFileCallback: TTypescript.WriteFileCallback = (filePath: string, data: string) => {
-      filesToWrite.push({ filePath, data });
+      const redirectedFilePath: string = EmitFilesPatch.getRedirectedFilePath(filePath);
+      filesToWrite.push({ filePath: redirectedFilePath, data });
     };
 
     const result: TTypescript.EmitResult = genericProgram.emit(
@@ -1002,6 +1003,21 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         if (compilerHost === undefined) {
           throw new InternalError('_buildWatchCompilerHost() expects a compilerHost to be configured');
         }
+
+        const originalWriteFile: TTypescript.WriteFileCallback = compilerHost.writeFile;
+        compilerHost.writeFile = (
+          filePath: string,
+          // Do this with a "rest" argument in case the TS API changes
+          ...rest: [
+            string,
+            boolean,
+            ((message: string) => void) | undefined,
+            readonly TTypescript.SourceFile[] | undefined
+          ]
+        ) => {
+          const redirectedFilePath: string = EmitFilesPatch.getRedirectedFilePath(filePath);
+          originalWriteFile.call(this, redirectedFilePath, ...rest);
+        };
 
         return ts.createEmitAndSemanticDiagnosticsBuilderProgram(
           rootNames,
