@@ -732,6 +732,24 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
+    {
+      "packageName": "rush-stack-compiler-4.0-library-test",
+      "projectFolder": "build-tests/rush-stack-compiler-4.0-library-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "rush-stack-compiler-4.1-library-test",
+      "projectFolder": "build-tests/rush-stack-compiler-4.1-library-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "rush-stack-compiler-4.2-library-test",
+      "projectFolder": "build-tests/rush-stack-compiler-4.2-library-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
 
     {
       "packageName": "ts-command-line-test",
@@ -1063,6 +1081,27 @@
         "@rushstack/heft",
         "@rushstack/heft-node-rig"
       ]
+    },
+    {
+      "packageName": "@microsoft/rush-stack-compiler-4.0",
+      "projectFolder": "stack/rush-stack-compiler-4.0",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
+    },
+    {
+      "packageName": "@microsoft/rush-stack-compiler-4.1",
+      "projectFolder": "stack/rush-stack-compiler-4.1",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
+    },
+    {
+      "packageName": "@microsoft/rush-stack-compiler-4.2",
+      "projectFolder": "stack/rush-stack-compiler-4.2",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
     },
     {
       "packageName": "@microsoft/rush-stack-compiler-shared",

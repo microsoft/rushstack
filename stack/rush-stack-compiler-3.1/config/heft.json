@@ -19,7 +19,12 @@
         {
           "sourceFolder": "node_modules/@microsoft/rush-stack-compiler-shared/src",
           "destinationFolders": ["src"],
-          "fileExtensions": [".ts", ".js"]
+          "includeGlobs": ["*.ts", "*.js"]
+        },
+        {
+          "sourceFolder": "node_modules/@microsoft/rush-stack-compiler-shared/src/pre-v4",
+          "destinationFolders": ["src"],
+          "includeGlobs": ["*.ts", "*.js"]
         }
       ]
     }
