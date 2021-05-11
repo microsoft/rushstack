@@ -1,0 +1,17 @@
+{
+  "name": "@microsoft/rush-stack-compiler-4.1",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@microsoft/rush-stack-compiler-4.1_v0.1.0",
+      "date": "Tue, 11 May 2021 22:57:42 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Initial package creation."
+          }
+        ]
+      }
+    }
+  ]
+}
