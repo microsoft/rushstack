@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.30.3",
+      "tag": "@rushstack/heft_v0.30.3",
+      "date": "Tue, 11 May 2021 22:19:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix the \"sources\" paths in emitted sourcemap files."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.30.2",
       "tag": "@rushstack/heft_v0.30.2",
       "date": "Mon, 03 May 2021 15:10:28 GMT",
