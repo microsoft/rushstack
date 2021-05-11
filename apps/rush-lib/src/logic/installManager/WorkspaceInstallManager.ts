@@ -252,7 +252,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       );
 
       if (FileSystem.exists(pnpmWorkspaceFilename)) {
-        potentiallyChangedFiles.push();
+        potentiallyChangedFiles.push(pnpmWorkspaceFilename);
       }
     }
 
