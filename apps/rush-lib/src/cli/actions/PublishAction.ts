@@ -432,10 +432,7 @@ export class PublishAction extends BaseRushAction {
         args.push(`--access`, this._npmAccessLevel.value);
       }
 
-      if (
-        this.rushConfiguration.packageManager === 'pnpm' &&
-        semver.gte(this.rushConfiguration.packageManagerToolVersion, '4.11.0')
-      ) {
+      if (this.rushConfiguration.packageManager === 'pnpm') {
         // PNPM 4.11.0 introduced a feature that may interrupt publishing and prompt the user for input.
         // See this issue for details: https://github.com/microsoft/rushstack/issues/1940
         args.push('--no-git-checks');
