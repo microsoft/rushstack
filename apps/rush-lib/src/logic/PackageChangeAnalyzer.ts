@@ -86,13 +86,17 @@ export class PackageChangeAnalyzer {
     const ignoreMatcherForProject: Map<string, Ignore> = new Map<string, Ignore>();
 
     // Initialize maps for each project asynchronously, up to 10 projects concurrently.
-    await Async.forEachAsync(this._rushConfiguration.projects, async (project: RushConfigurationProject): Promise<void> => {
-      projectHashDeps.set(project.packageName, new Map<string, string>());
-      ignoreMatcherForProject.set(
-        project.packageName,
-        await this._getIgnoreMatcherForProject(project, terminal)
-      );
-    }, { concurrency: 10 });
+    await Async.forEachAsync(
+      this._rushConfiguration.projects,
+      async (project: RushConfigurationProject): Promise<void> => {
+        projectHashDeps.set(project.packageName, new Map<string, string>());
+        ignoreMatcherForProject.set(
+          project.packageName,
+          await this._getIgnoreMatcherForProject(project, terminal)
+        );
+      },
+      { concurrency: 10 }
+    );
 
     // Sort each project folder into its own package deps hash
     for (const [filePath, fileHash] of repoDeps) {
@@ -102,9 +106,10 @@ export class PackageChangeAnalyzer {
         | RushConfigurationProject
         | undefined = this._rushConfiguration.findProjectForPosixRelativePath(filePath);
       if (owningProject) {
-        const relativePath: string = filePath
-          .replace(owningProject.projectRelativeFolder, '')
-          .replace(/^\//, '');
+        // At this point, `filePath` is guaranteed to start with `projectRelativeFolder`, so
+        // we can safely slice off the first N characters to get the file path relative to the
+        // root of the `owningProject`.
+        const relativePath: string = filePath.slice(owningProject.projectRelativeFolder.length + 1);
         const ignoreMatcher: Ignore | undefined = ignoreMatcherForProject.get(owningProject.packageName);
         if (!ignoreMatcher || !ignoreMatcher.ignores(relativePath)) {
           projectHashDeps.get(owningProject.packageName)!.set(filePath, fileHash);
