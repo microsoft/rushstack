@@ -36,5 +36,15 @@ describe('JsonFile tests', () => {
         }
       )
     ).toMatchSnapshot();
+
+    expect(
+      JsonFile.stringify(
+        { abc: undefined },
+        {
+          dropUndefinedValues: true,
+          prettyFormatting: true
+        }
+      )
+    ).toMatchSnapshot();
   });
 });
