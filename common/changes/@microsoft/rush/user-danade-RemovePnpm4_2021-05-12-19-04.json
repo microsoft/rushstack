@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Remove support for PNPM < 5.0.0 and deprecate \"resolutionStrategy\" option",
+      "comment": "Remove support for PNPM < 5.0.0 and remove the \"resolutionStrategy\" option",
       "type": "none"
     }
   ],
