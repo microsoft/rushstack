@@ -178,9 +178,19 @@ export function process(
     const encodedSourceMap: string =
       'data:application/json;charset=utf-8;base64,' +
       Buffer.from(correctedSourceMap, 'utf8').toString('base64');
-    const stringToFind: string = 'sourceMappingURL=';
-    const libCodeWithSourceMap: string =
-      libCode.slice(0, libCode.lastIndexOf(stringToFind) + stringToFind.length) + encodedSourceMap;
+
+    const sourceMappingUrlToken: string = 'sourceMappingURL=';
+    const sourceMappingCommentIndex: number = libCode.lastIndexOf(sourceMappingUrlToken);
+    let libCodeWithSourceMap: string;
+    if (sourceMappingCommentIndex !== -1) {
+      libCodeWithSourceMap =
+        libCode.slice(0, sourceMappingCommentIndex + sourceMappingUrlToken.length) + encodedSourceMap;
+    } else {
+      // If there isn't a sourceMappingURL comment, inject one
+      const sourceMapComment: string =
+        (libCode.endsWith('\n') ? '' : '\n') + `//# ${sourceMappingUrlToken}${encodedSourceMap}`;
+      libCodeWithSourceMap = libCode + sourceMapComment;
+    }
 
     return libCodeWithSourceMap;
   } else {
