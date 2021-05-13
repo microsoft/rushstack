@@ -175,10 +175,6 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    */
   strictPeerDependencies?: boolean;
   /**
-   * Defines the dependency resolution strategy PNPM will use
-   */
-  resolutionStrategy?: ResolutionStrategy;
-  /**
    * {@inheritDoc PnpmOptionsConfiguration.preventManualShrinkwrapChanges}
    */
   preventManualShrinkwrapChanges?: boolean;
@@ -321,22 +317,6 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   public readonly strictPeerDependencies: boolean;
 
   /**
-   * The resolution strategy that will be used by PNPM.
-   *
-   * @remarks
-   * Configures the strategy used to select versions during installation.
-   *
-   * This feature requires PNPM version 3.1 or newer.  It corresponds to the `--resolution-strategy` command-line
-   * option for PNPM.  Possible values are `"fast"` and `"fewer-dependencies"`.  PNPM's default is `"fast"`, but this
-   * may be incompatible with certain packages, for example the `@types` packages from DefinitelyTyped.  Rush's default
-   * is `"fewer-dependencies"`, which causes PNPM to avoid installing a newer version if an already installed version
-   * can be reused; this is more similar to NPM's algorithm.
-   *
-   * For more background, see this discussion: {@link https://github.com/pnpm/pnpm/issues/1187}
-   */
-  public readonly resolutionStrategy: ResolutionStrategy;
-
-  /**
    * If true, then `rush install` will report an error if manual modifications
    * were made to the PNPM shrinkwrap file without running `rush update` afterwards.
    *
@@ -375,7 +355,6 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
       this.pnpmStorePath = path.resolve(path.join(commonTempFolder, 'pnpm-store'));
     }
     this.strictPeerDependencies = !!json.strictPeerDependencies;
-    this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
     this.preventManualShrinkwrapChanges = !!json.preventManualShrinkwrapChanges;
     this.useWorkspaces = !!json.useWorkspaces;
   }
@@ -422,12 +401,6 @@ export interface ITryFindRushJsonLocationOptions {
    */
   startingFolder?: string; // Defaults to cwd
 }
-
-/**
- * This represents the available PNPM resolution strategies as a string
- * @public
- */
-export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
 
 /**
  * This represents the Rush configuration for a repository, based on the "rush.json"

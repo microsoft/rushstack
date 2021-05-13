@@ -70,12 +70,6 @@ export class RushConstants {
   public static readonly npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
 
   /**
-   * The filename ("shrinkwrap.yaml") used to store an installation plan for the PNPM package manger
-   * (PNPM version 2.x and earlier).
-   */
-  public static readonly pnpmV1ShrinkwrapFilename: string = 'shrinkwrap.yaml';
-
-  /**
    * Number of installation attempts
    */
   public static readonly defaultMaxInstallAttempts: number = 3;

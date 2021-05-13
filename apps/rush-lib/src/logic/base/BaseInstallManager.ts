@@ -505,36 +505,17 @@ export abstract class BaseInstallManager {
         args.push('--store', this._rushConfiguration.pnpmOptions.pnpmStorePath);
       }
 
-      // we are using the --no-lock flag for now, which unfortunately prints a warning, but should be OK
-      // since rush already has its own install lock file which will invalidate the cache for us.
-      // we theoretically could use the lock file, but we would need to clean the store if the
-      // lockfile existed, otherwise PNPM would hang indefinitely. it is simpler to rely on Rush's
-      // last install flag, which encapsulates the entire installation
-
-      // This setting was removed in 5.0.0. See https://github.com/pnpm/pnpm/releases/tag/v5.0.0
-      if (semver.lt(this._rushConfiguration.packageManagerToolVersion, '5.0.0')) {
-        args.push('--no-lock');
-      }
-
       const { configuration: experiments } = this._rushConfiguration.experimentsConfiguration;
 
       if (experiments.usePnpmFrozenLockfileForRushInstall && !this._options.allowShrinkwrapUpdates) {
-        if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
-          args.push('--frozen-lockfile');
-        } else {
-          args.push('--frozen-shrinkwrap');
-        }
+        args.push('--frozen-lockfile');
       } else if (experiments.usePnpmPreferFrozenLockfileForRushUpdate) {
         // In workspaces, we want to avoid unnecessary lockfile churn
         args.push('--prefer-frozen-lockfile');
       } else {
         // Ensure that Rush's tarball dependencies get synchronized properly with the pnpm-lock.yaml file.
         // See this GitHub issue: https://github.com/pnpm/pnpm/issues/1342
-        if (semver.gte(this._rushConfiguration.packageManagerToolVersion, '3.0.0')) {
-          args.push('--no-prefer-frozen-lockfile');
-        } else {
-          args.push('--no-prefer-frozen-shrinkwrap');
-        }
+        args.push('--no-prefer-frozen-lockfile');
       }
 
       if (options.collectLogFile) {
@@ -547,10 +528,6 @@ export abstract class BaseInstallManager {
 
       if (this._rushConfiguration.pnpmOptions.strictPeerDependencies) {
         args.push('--strict-peer-dependencies');
-      }
-
-      if ((this._rushConfiguration.packageManagerWrapper as PnpmPackageManager).supportsResolutionStrategy) {
-        args.push(`--resolution-strategy=${this._rushConfiguration.pnpmOptions.resolutionStrategy}`);
       }
     } else if (this._rushConfiguration.packageManager === 'yarn') {
       args.push('--link-folder', 'yarn-link');

@@ -184,7 +184,6 @@ export interface IPackageManagerOptionsJsonBase {
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     pnpmStore?: PnpmStoreOptions;
     preventManualShrinkwrapChanges?: boolean;
-    resolutionStrategy?: ResolutionStrategy;
     strictPeerDependencies?: boolean;
     useWorkspaces?: boolean;
 }
@@ -300,7 +299,6 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly pnpmStore: PnpmStoreOptions;
     readonly pnpmStorePath: string;
     readonly preventManualShrinkwrapChanges: boolean;
-    readonly resolutionStrategy: ResolutionStrategy;
     readonly strictPeerDependencies: boolean;
     readonly useWorkspaces: boolean;
 }
@@ -317,9 +315,6 @@ export class RepoStateFile {
     get preferredVersionsHash(): string | undefined;
     refreshState(rushConfiguration: RushConfiguration): boolean;
     }
-
-// @public
-export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
 
 // @public
 export class Rush {

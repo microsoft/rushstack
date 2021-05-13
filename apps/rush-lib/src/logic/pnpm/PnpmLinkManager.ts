@@ -288,10 +288,11 @@ export class PnpmLinkManager extends BaseLinkManager {
       //   C++dev+imodeljs+imodeljs+common+temp+projects+presentation-integration-tests.tgz_jsdom@11.12.0
       //   C++dev+imodeljs+imodeljs+common+temp+projects+presentation-integrat_089eb799caf0f998ab34e4e1e9254956
       const specialCharRegex: RegExp = /\/|:/g;
-      let folderName: string = `local+${Path.convertToSlashes(absolutePathToTgzFile).replace(
+      const escapedLocalPath: string = Path.convertToSlashes(absolutePathToTgzFile).replace(
         specialCharRegex,
         '+'
-      )}${folderSuffix}`;
+      );
+      let folderName: string = `local+${escapedLocalPath}${folderSuffix}`;
       if (folderName.length > 120) {
         folderName = `${folderName.substring(0, 50)}_${crypto
           .createHash('md5')
@@ -314,25 +315,15 @@ export class PnpmLinkManager extends BaseLinkManager {
       const folderNameInLocalInstallationRoot: string =
         uriEncode(Path.convertToSlashes(absolutePathToTgzFile)) + folderSuffix;
 
-      if (this._pnpmVersion.major >= 4) {
-        // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0
-        return path.join(
-          this._rushConfiguration.commonTempFolder,
-          RushConstants.nodeModulesFolderName,
-          '.pnpm',
-          'local',
-          folderNameInLocalInstallationRoot,
-          RushConstants.nodeModulesFolderName
-        );
-      } else {
-        return path.join(
-          this._rushConfiguration.commonTempFolder,
-          RushConstants.nodeModulesFolderName,
-          '.local',
-          folderNameInLocalInstallationRoot,
-          RushConstants.nodeModulesFolderName
-        );
-      }
+      // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0
+      return path.join(
+        this._rushConfiguration.commonTempFolder,
+        RushConstants.nodeModulesFolderName,
+        '.pnpm',
+        'local',
+        folderNameInLocalInstallationRoot,
+        RushConstants.nodeModulesFolderName
+      );
     }
   }
   private _createLocalPackageForDependency(
