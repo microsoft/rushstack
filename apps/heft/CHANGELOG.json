@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.30.4",
+      "tag": "@rushstack/heft_v0.30.4",
+      "date": "Thu, 13 May 2021 01:52:46 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where Heft would return only the sourcemap if the compiled .js file is missing the sourceMappingURL comment."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.30.3",
       "tag": "@rushstack/heft_v0.30.3",
       "date": "Tue, 11 May 2021 22:19:17 GMT",

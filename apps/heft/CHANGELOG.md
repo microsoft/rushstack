@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 11 May 2021 22:19:17 GMT and should not be manually modified.
+This log was last generated on Thu, 13 May 2021 01:52:46 GMT and should not be manually modified.
+
+## 0.30.4
+Thu, 13 May 2021 01:52:46 GMT
+
+### Patches
+
+- Fix an issue where Heft would return only the sourcemap if the compiled .js file is missing the sourceMappingURL comment.
 
 ## 0.30.3
 Tue, 11 May 2021 22:19:17 GMT
