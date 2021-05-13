@@ -27,4 +27,14 @@ describe('JsonFile tests', () => {
       )
     ).toMatchSnapshot();
   });
+  it('allows undefined values when asked', () => {
+    expect(
+      JsonFile.stringify(
+        { abc: undefined },
+        {
+          dropUndefinedValues: true
+        }
+      )
+    ).toMatchSnapshot();
+  });
 });
