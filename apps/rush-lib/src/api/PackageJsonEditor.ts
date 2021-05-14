@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
-import { Import, IPackageJson, JsonFile, Sort } from '@rushstack/node-core-library';
+import { Import, InternalError, IPackageJson, JsonFile, Sort } from '@rushstack/node-core-library';
 
 const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
@@ -13,7 +13,8 @@ export const enum DependencyType {
   Regular = 'dependencies',
   Dev = 'devDependencies',
   Optional = 'optionalDependencies',
-  Peer = 'peerDependencies'
+  Peer = 'peerDependencies',
+  YarnResolutions = 'resolutions'
 }
 
 /**
@@ -67,7 +68,7 @@ export class PackageJsonEditor {
 
   // NOTE: The "resolutions" field is a yarn specific feature that controls package
   // resolution override within yarn.
-  private readonly _resolutions: { [name: string]: string };
+  private readonly _resolutions: Map<string, PackageJsonDependency>;
   private _modified: boolean;
   private _sourceData: IPackageJson;
 
@@ -78,7 +79,7 @@ export class PackageJsonEditor {
 
     this._dependencies = new Map<string, PackageJsonDependency>();
     this._devDependencies = new Map<string, PackageJsonDependency>();
-    this._resolutions = {};
+    this._resolutions = new Map<string, PackageJsonDependency>();
 
     const dependencies: { [key: string]: string } = data.dependencies || {};
     const optionalDependencies: { [key: string]: string } = data.optionalDependencies || {};
@@ -145,8 +146,19 @@ export class PackageJsonEditor {
         );
       });
 
-      this._resolutions = data.resolutions || {};
+      Object.keys(data.resolutions || {}).forEach((packageName: string) => {
+        this._resolutions.set(
+          packageName,
+          new PackageJsonDependency(
+            packageName,
+            devDependencies[packageName],
+            DependencyType.YarnResolutions,
+            _onChange
+          )
+        );
+      });
 
+      // (Do not sort this._resolutions because order may be significant; the RFC is unclear about that.)
       Sort.sortMapKeys(this._dependencies);
       Sort.sortMapKeys(this._devDependencies);
     } catch (e) {
@@ -190,9 +202,12 @@ export class PackageJsonEditor {
 
   /**
    * This field is a Yarn-specific feature that allows overriding of package resolution.
+   *
+   * @see {@link https://github.com/yarnpkg/rfcs/blob/master/implemented/0000-selective-versions-resolutions.md
+   * | 0000-selective-versions-resolutions.md RFC}
    */
-  public get resolutions(): { [name: string]: string } {
-    return { ...this._resolutions };
+  public get resolutionsList(): ReadonlyArray<PackageJsonDependency> {
+    return [...this._resolutions.values()];
   }
 
   public tryGetDependency(packageName: string): PackageJsonDependency | undefined {
@@ -216,16 +231,23 @@ export class PackageJsonEditor {
     );
 
     // Rush collapses everything that isn't a devDependency into the dependencies
-    // field, so we need to set the value dependening on dependency type
-    if (
-      dependencyType === DependencyType.Regular ||
-      dependencyType === DependencyType.Optional ||
-      dependencyType === DependencyType.Peer
-    ) {
-      this._dependencies.set(packageName, dependency);
-    } else {
-      this._devDependencies.set(packageName, dependency);
+    // field, so we need to set the value depending on dependency type
+    switch (dependencyType) {
+      case DependencyType.Regular:
+      case DependencyType.Optional:
+      case DependencyType.Peer:
+        this._dependencies.set(packageName, dependency);
+        break;
+      case DependencyType.Dev:
+        this._devDependencies.set(packageName, dependency);
+        break;
+      case DependencyType.YarnResolutions:
+        this._resolutions.set(packageName, dependency);
+        break;
+      default:
+        throw new InternalError('Unsupported DependencyType');
     }
+
     this._modified = true;
   }
 
@@ -268,31 +290,36 @@ export class PackageJsonEditor {
     delete normalizedData.optionalDependencies;
     delete normalizedData.peerDependencies;
     delete normalizedData.devDependencies;
+    delete normalizedData.resolutions;
 
     const keys: string[] = [...this._dependencies.keys()].sort();
 
     for (const packageName of keys) {
       const dependency: PackageJsonDependency = this._dependencies.get(packageName)!;
 
-      if (dependency.dependencyType === DependencyType.Regular) {
-        if (!normalizedData.dependencies) {
-          normalizedData.dependencies = {};
-        }
-        normalizedData.dependencies[dependency.name] = dependency.version;
-      }
-
-      if (dependency.dependencyType === DependencyType.Optional) {
-        if (!normalizedData.optionalDependencies) {
-          normalizedData.optionalDependencies = {};
-        }
-        normalizedData.optionalDependencies[dependency.name] = dependency.version;
-      }
-
-      if (dependency.dependencyType === DependencyType.Peer) {
-        if (!normalizedData.peerDependencies) {
-          normalizedData.peerDependencies = {};
-        }
-        normalizedData.peerDependencies[dependency.name] = dependency.version;
+      switch (dependency.dependencyType) {
+        case DependencyType.Regular:
+          if (!normalizedData.dependencies) {
+            normalizedData.dependencies = {};
+          }
+          normalizedData.dependencies[dependency.name] = dependency.version;
+          break;
+        case DependencyType.Optional:
+          if (!normalizedData.optionalDependencies) {
+            normalizedData.optionalDependencies = {};
+          }
+          normalizedData.optionalDependencies[dependency.name] = dependency.version;
+          break;
+        case DependencyType.Peer:
+          if (!normalizedData.peerDependencies) {
+            normalizedData.peerDependencies = {};
+          }
+          normalizedData.peerDependencies[dependency.name] = dependency.version;
+          break;
+        case DependencyType.Dev: // uses this._devDependencies instead
+        case DependencyType.YarnResolutions: // uses this._resolutions instead
+        default:
+          throw new InternalError('Unsupported DependencyType');
       }
     }
 
@@ -305,6 +332,16 @@ export class PackageJsonEditor {
         normalizedData.devDependencies = {};
       }
       normalizedData.devDependencies[dependency.name] = dependency.version;
+    }
+
+    // (Do not sort this._resolutions because order may be significant; the RFC is unclear about that.)
+    for (const packageName of this._resolutions.keys()) {
+      const dependency: PackageJsonDependency = this._resolutions.get(packageName)!;
+
+      if (!normalizedData.resolutions) {
+        normalizedData.resolutions = {};
+      }
+      normalizedData.resolutions[dependency.name] = dependency.version;
     }
 
     return normalizedData;

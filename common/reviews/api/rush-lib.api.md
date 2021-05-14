@@ -87,7 +87,9 @@ export const enum DependencyType {
     // (undocumented)
     Peer = "peerDependencies",
     // (undocumented)
-    Regular = "dependencies"
+    Regular = "dependencies",
+    // (undocumented)
+    YarnResolutions = "resolutions"
 }
 
 // @public
@@ -260,9 +262,7 @@ export class PackageJsonEditor {
     static load(filePath: string): PackageJsonEditor;
     // (undocumented)
     get name(): string;
-    get resolutions(): {
-        [name: string]: string;
-    };
+    get resolutionsList(): ReadonlyArray<PackageJsonDependency>;
     // (undocumented)
     saveIfModified(): boolean;
     saveToObject(): IPackageJson;

@@ -8,7 +8,6 @@ import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import * as ssri from 'ssri';
-import { isEmpty } from 'lodash';
 import {
   JsonFile,
   Text,
@@ -257,15 +256,15 @@ export class RushInstallManager extends BaseInstallManager {
         }
       }
 
-      if (!isEmpty(packageJson.resolutions)) {
+      if (packageJson.resolutionsList.length > 0) {
         // We do not expect resolutions key to be provided for package managers other than yarn
         if (this.rushConfiguration.packageManager !== 'yarn') {
           throw new Error(
-            "Unexpected 'resolutions' section found in package.json. Only yarn supports this feature."
+            "Unexpected 'resolutions' section found in package.json. Only Yarn supports this feature."
           );
         }
 
-        tempPackageJson.resolutions = packageJson.resolutions;
+        tempPackageJson.resolutions = packageJson.saveToObject().resolutions;
       }
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2"
