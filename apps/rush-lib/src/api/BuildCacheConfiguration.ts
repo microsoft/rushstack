@@ -19,18 +19,14 @@ import { RushUserConfiguration } from './RushUserConfiguration';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import { CacheEntryId, GetCacheEntryIdFunction } from '../logic/buildCache/CacheEntryId';
 
-const AzureStorageBuildCacheProviderModule: typeof import('../logic/buildCache/AzureStorageBuildCacheProvider') = Import.lazy(
-  '../logic/buildCache/AzureStorageBuildCacheProvider',
-  require
-);
+const AzureStorageBuildCacheProviderModule: typeof import('../logic/buildCache/AzureStorageBuildCacheProvider') =
+  Import.lazy('../logic/buildCache/AzureStorageBuildCacheProvider', require);
 import type {
   AzureEnvironmentNames,
   AzureStorageBuildCacheProvider
 } from '../logic/buildCache/AzureStorageBuildCacheProvider';
-const AmazonS3BuildCacheProviderModule: typeof import('../logic/buildCache/AmazonS3/AmazonS3BuildCacheProvider') = Import.lazy(
-  '../logic/buildCache/AmazonS3/AmazonS3BuildCacheProvider',
-  require
-);
+const AmazonS3BuildCacheProviderModule: typeof import('../logic/buildCache/AmazonS3/AmazonS3BuildCacheProvider') =
+  Import.lazy('../logic/buildCache/AmazonS3/AmazonS3BuildCacheProvider', require);
 import type { AmazonS3BuildCacheProvider } from '../logic/buildCache/AmazonS3/AmazonS3BuildCacheProvider';
 
 /**

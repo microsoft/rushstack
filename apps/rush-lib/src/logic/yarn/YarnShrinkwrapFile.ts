@@ -190,9 +190,8 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
    * Example output: { packageName: "js-tokens", semVerRange: "^3.0.0 || ^4.0.0" }
    */
   private static _decodePackageNameAndSemVer(packageNameAndSemVer: string): IPackageNameAndSemVer {
-    const result: RegExpExecArray | null = YarnShrinkwrapFile._packageNameAndSemVerRegExp.exec(
-      packageNameAndSemVer
-    );
+    const result: RegExpExecArray | null =
+      YarnShrinkwrapFile._packageNameAndSemVerRegExp.exec(packageNameAndSemVer);
     if (!result) {
       // Sanity check -- this should never happen
       throw new Error(

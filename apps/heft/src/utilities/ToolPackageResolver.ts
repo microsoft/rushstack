@@ -30,9 +30,8 @@ export class ToolPackageResolver {
       throw new Error(`Unable to find a package.json file for "${buildFolder}" `);
     }
 
-    let resolutionPromise: Promise<IToolPackageResolution> | undefined = this._resolverCache.get(
-      projectFolder
-    );
+    let resolutionPromise: Promise<IToolPackageResolution> | undefined =
+      this._resolverCache.get(projectFolder);
     if (!resolutionPromise) {
       resolutionPromise = this._resolveToolPackagesInnerAsync(heftConfiguration, terminal);
       this._resolverCache.set(projectFolder, resolutionPromise);
@@ -74,17 +73,13 @@ export class ToolPackageResolver {
       terminal
     );
 
-    const [
-      typeScriptPackagePath,
-      tslintPackagePath,
-      eslintPackagePath,
-      apiExtractorPackagePath
-    ] = await Promise.all([
-      typeScriptPackageResolvePromise,
-      tslintPackageResolvePromise,
-      eslintPackageResolvePromise,
-      apiExtractorPackageResolvePromise
-    ]);
+    const [typeScriptPackagePath, tslintPackagePath, eslintPackagePath, apiExtractorPackagePath] =
+      await Promise.all([
+        typeScriptPackageResolvePromise,
+        tslintPackageResolvePromise,
+        eslintPackageResolvePromise,
+        apiExtractorPackageResolvePromise
+      ]);
     return {
       apiExtractorPackagePath,
       typeScriptPackagePath,
@@ -122,17 +117,15 @@ export class ToolPackageResolver {
     const rigConfiguration: RigConfig = heftConfiguration.rigConfig;
     if (rigConfiguration.rigFound) {
       const rigFolder: string = rigConfiguration.getResolvedProfileFolder();
-      const rigPackageJsonPath: string | undefined = this._packageJsonLookup.tryGetPackageJsonFilePathFor(
-        rigFolder
-      );
+      const rigPackageJsonPath: string | undefined =
+        this._packageJsonLookup.tryGetPackageJsonFilePathFor(rigFolder);
       if (!rigPackageJsonPath) {
         throw new Error(
           `Unable to resolve the package.json file for the "${rigConfiguration.rigPackageName}" rig package.`
         );
       }
-      const rigPackageJson: INodePackageJson = this._packageJsonLookup.loadNodePackageJson(
-        rigPackageJsonPath
-      );
+      const rigPackageJson: INodePackageJson =
+        this._packageJsonLookup.loadNodePackageJson(rigPackageJsonPath);
       if (rigPackageJson.dependencies && rigPackageJson.dependencies[toolPackageName]) {
         try {
           const resolvedPackageFolder: string = Import.resolvePackage({

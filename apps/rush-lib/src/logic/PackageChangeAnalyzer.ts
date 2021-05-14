@@ -102,9 +102,8 @@ export class PackageChangeAnalyzer {
     for (const [filePath, fileHash] of repoDeps) {
       // findProjectForPosixRelativePath uses LookupByPath, for which lookups are O(K)
       // K being the maximum folder depth of any project in rush.json (usually on the order of 3)
-      const owningProject:
-        | RushConfigurationProject
-        | undefined = this._rushConfiguration.findProjectForPosixRelativePath(filePath);
+      const owningProject: RushConfigurationProject | undefined =
+        this._rushConfiguration.findProjectForPosixRelativePath(filePath);
       if (owningProject) {
         // At this point, `filePath` is guaranteed to start with `projectRelativeFolder`, so
         // we can safely slice off the first N characters to get the file path relative to the
@@ -182,9 +181,8 @@ export class PackageChangeAnalyzer {
     project: RushConfigurationProject,
     terminal: Terminal
   ): Promise<Ignore> {
-    const projectConfiguration:
-      | RushProjectConfiguration
-      | undefined = await RushProjectConfiguration.tryLoadForProjectAsync(project, undefined, terminal);
+    const projectConfiguration: RushProjectConfiguration | undefined =
+      await RushProjectConfiguration.tryLoadForProjectAsync(project, undefined, terminal);
     const ignoreMatcher: Ignore = ignore();
 
     if (projectConfiguration && projectConfiguration.incrementalBuildIgnoredGlobs) {

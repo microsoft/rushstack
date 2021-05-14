@@ -127,9 +127,8 @@ export class ProjectBuildCache {
       return false;
     }
 
-    let localCacheEntryPath:
-      | string
-      | undefined = await this._localBuildCacheProvider.tryGetCacheEntryPathByIdAsync(terminal, cacheId);
+    let localCacheEntryPath: string | undefined =
+      await this._localBuildCacheProvider.tryGetCacheEntryPathByIdAsync(terminal, cacheId);
     let cacheEntryBuffer: Buffer | undefined;
     let updateLocalCacheSuccess: boolean | undefined;
     if (!localCacheEntryPath && this._cloudBuildCacheProvider) {

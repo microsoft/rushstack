@@ -71,7 +71,8 @@ export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfig
   maxWriteParallelism: number;
 }
 
-type TWatchCompilerHost = TTypescript.WatchCompilerHostOfFilesAndCompilerOptions<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram>;
+type TWatchCompilerHost =
+  TTypescript.WatchCompilerHostOfFilesAndCompilerOptions<TTypescript.EmitAndSemanticDiagnosticsBuilderProgram>;
 
 const EMPTY_JSON: object = {};
 
@@ -329,17 +330,18 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
   public async _runWatch(ts: ExtendedTypeScript, measureTsPerformance: PerformanceMeasurer): Promise<void> {
     //#region CONFIGURE
-    const { duration: configureDurationMs, tsconfig, compilerHost } = measureTsPerformance(
-      'Configure',
-      () => {
-        const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
-        const _compilerHost: TWatchCompilerHost = this._buildWatchCompilerHost(ts, _tsconfig);
-        return {
-          tsconfig: _tsconfig,
-          compilerHost: _compilerHost
-        };
-      }
-    );
+    const {
+      duration: configureDurationMs,
+      tsconfig,
+      compilerHost
+    } = measureTsPerformance('Configure', () => {
+      const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
+      const _compilerHost: TWatchCompilerHost = this._buildWatchCompilerHost(ts, _tsconfig);
+      return {
+        tsconfig: _tsconfig,
+        compilerHost: _compilerHost
+      };
+    });
     this._typescriptTerminal.writeVerboseLine(`Configure: ${configureDurationMs}ms`);
     //#endregion
 
@@ -365,18 +367,19 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     this._cachedFileSystem.ensureFolder(this._configuration.buildCacheFolder);
 
     //#region CONFIGURE
-    const { duration: configureDurationMs, tsconfig, compilerHost } = measureTsPerformance(
-      'Configure',
-      () => {
-        this._overrideTypeScriptReadJson(ts);
-        const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
-        const _compilerHost: TTypescript.CompilerHost = this._buildIncrementalCompilerHost(ts, _tsconfig);
-        return {
-          tsconfig: _tsconfig,
-          compilerHost: _compilerHost
-        };
-      }
-    );
+    const {
+      duration: configureDurationMs,
+      tsconfig,
+      compilerHost
+    } = measureTsPerformance('Configure', () => {
+      this._overrideTypeScriptReadJson(ts);
+      const _tsconfig: TTypescript.ParsedCommandLine = this._loadTsconfig(ts);
+      const _compilerHost: TTypescript.CompilerHost = this._buildIncrementalCompilerHost(ts, _tsconfig);
+      return {
+        tsconfig: _tsconfig,
+        compilerHost: _compilerHost
+      };
+    });
     this._typescriptTerminal.writeVerboseLine(`Configure: ${configureDurationMs}ms`);
     //#endregion
 

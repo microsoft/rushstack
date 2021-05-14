@@ -332,7 +332,8 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
             const externalNames: Map<string, string> = new Map();
 
             const chunkModuleSet: Set<string | number> = new Set();
-            const allChunkModules: Iterable<IExtendedModule> = chunk.modulesIterable as Iterable<IExtendedModule>;
+            const allChunkModules: Iterable<IExtendedModule> =
+              chunk.modulesIterable as Iterable<IExtendedModule>;
             let hasNonNumber: boolean = false;
             for (const mod of allChunkModules) {
               if (mod.id !== null) {
@@ -472,7 +473,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
       );
 
       for (const template of [compilation.chunkTemplate, compilation.mainTemplate]) {
-        ((template as unknown) as IExtendedChunkTemplate).hooks.modules.tap(TAP_AFTER, dehydrateAsset);
+        (template as unknown as IExtendedChunkTemplate).hooks.modules.tap(TAP_AFTER, dehydrateAsset);
       }
     });
   }

@@ -70,9 +70,8 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
     }
 
     const configObjectFullPath: string = this._configuration.apiExtractorJsonFilePath;
-    const configObject: TApiExtractor.IConfigFile = apiExtractor.ExtractorConfig.loadFile(
-      configObjectFullPath
-    );
+    const configObject: TApiExtractor.IConfigFile =
+      apiExtractor.ExtractorConfig.loadFile(configObjectFullPath);
 
     const extractorConfig: TApiExtractor.ExtractorConfig = apiExtractor.ExtractorConfig.prepare({
       configObject,

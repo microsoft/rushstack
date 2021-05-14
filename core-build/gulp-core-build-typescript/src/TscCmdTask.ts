@@ -85,15 +85,16 @@ export class TscCmdTask extends RSCTask<ITscCmdTaskConfig> {
     );
 
     const rushStackCompiler: typeof TRushStackCompiler = this._rushStackCompiler as typeof TRushStackCompiler;
-    const typescriptCompiler: TRushStackCompiler.TypescriptCompiler = new rushStackCompiler.TypescriptCompiler(
-      {
-        customArgs: this.taskConfig.customArgs,
-        fileError: this.fileError.bind(this),
-        fileWarning: this.fileWarning.bind(this)
-      },
-      this.buildFolder,
-      this._terminalProvider
-    );
+    const typescriptCompiler: TRushStackCompiler.TypescriptCompiler =
+      new rushStackCompiler.TypescriptCompiler(
+        {
+          customArgs: this.taskConfig.customArgs,
+          fileError: this.fileError.bind(this),
+          fileWarning: this.fileWarning.bind(this)
+        },
+        this.buildFolder,
+        this._terminalProvider
+      );
     const basePromise: Promise<void> | undefined = typescriptCompiler.invoke();
 
     if (basePromise) {

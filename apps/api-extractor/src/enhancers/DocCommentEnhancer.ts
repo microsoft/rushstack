@@ -157,9 +157,8 @@ export class DocCommentEnhancer {
           node.codeDestination.packageName === undefined ||
           node.codeDestination.packageName === this._collector.workingPackage.name
         ) {
-          const referencedAstDeclaration:
-            | AstDeclaration
-            | ResolverFailure = this._collector.astReferenceResolver.resolve(node.codeDestination);
+          const referencedAstDeclaration: AstDeclaration | ResolverFailure =
+            this._collector.astReferenceResolver.resolve(node.codeDestination);
 
           if (referencedAstDeclaration instanceof ResolverFailure) {
             this._collector.messageRouter.addAnalyzerIssue(
@@ -206,9 +205,8 @@ export class DocCommentEnhancer {
       return;
     }
 
-    const referencedAstDeclaration:
-      | AstDeclaration
-      | ResolverFailure = this._collector.astReferenceResolver.resolve(inheritDocTag.declarationReference);
+    const referencedAstDeclaration: AstDeclaration | ResolverFailure =
+      this._collector.astReferenceResolver.resolve(inheritDocTag.declarationReference);
 
     if (referencedAstDeclaration instanceof ResolverFailure) {
       this._collector.messageRouter.addAnalyzerIssue(
@@ -221,9 +219,8 @@ export class DocCommentEnhancer {
 
     this._analyzeApiItem(referencedAstDeclaration);
 
-    const referencedMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(
-      referencedAstDeclaration
-    );
+    const referencedMetadata: ApiItemMetadata =
+      this._collector.fetchApiItemMetadata(referencedAstDeclaration);
 
     if (referencedMetadata.tsdocComment) {
       this._copyInheritedDocs(docComment, referencedMetadata.tsdocComment);

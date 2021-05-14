@@ -79,10 +79,8 @@ export class CopyStaticAssetsPlugin extends CopyFilesPlugin {
         compile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
           const logger: ScopedLogger = heftSession.requestScopedLogger('copy-static-assets');
 
-          const copyStaticAssetsConfiguration: IResolvedDestinationCopyConfiguration = await this._loadCopyStaticAssetsConfigurationAsync(
-            logger.terminal,
-            heftConfiguration
-          );
+          const copyStaticAssetsConfiguration: IResolvedDestinationCopyConfiguration =
+            await this._loadCopyStaticAssetsConfigurationAsync(logger.terminal, heftConfiguration);
 
           await this.runCopyAsync({
             logger,
@@ -99,13 +97,12 @@ export class CopyStaticAssetsPlugin extends CopyFilesPlugin {
     terminal: Terminal,
     heftConfiguration: HeftConfiguration
   ): Promise<IResolvedDestinationCopyConfiguration> {
-    const typescriptConfiguration:
-      | ITypeScriptConfigurationJson
-      | undefined = await CoreConfigFiles.typeScriptConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
-      terminal,
-      heftConfiguration.buildFolder,
-      heftConfiguration.rigConfig
-    );
+    const typescriptConfiguration: ITypeScriptConfigurationJson | undefined =
+      await CoreConfigFiles.typeScriptConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
+        terminal,
+        heftConfiguration.buildFolder,
+        heftConfiguration.rigConfig
+      );
 
     const resolvedDestinationFolderPaths: Set<string> = new Set<string>();
     const destinationFolderNames: Set<string> = new Set<string>();
@@ -142,12 +139,11 @@ export class CopyStaticAssetsPlugin extends CopyFilesPlugin {
     projectFolder: string,
     terminal: Terminal
   ): Promise<string | undefined> {
-    const partialTsconfig:
-      | IPartialTsconfig
-      | undefined = await CopyStaticAssetsPlugin._partialTsconfigFileLoader.tryLoadConfigurationFileForProjectAsync(
-      terminal,
-      projectFolder
-    );
+    const partialTsconfig: IPartialTsconfig | undefined =
+      await CopyStaticAssetsPlugin._partialTsconfigFileLoader.tryLoadConfigurationFileForProjectAsync(
+        terminal,
+        projectFolder
+      );
     return partialTsconfig?.compilerOptions?.outDir;
   }
 }

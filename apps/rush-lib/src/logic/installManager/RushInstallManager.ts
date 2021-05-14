@@ -221,9 +221,8 @@ export class RushInstallManager extends BaseInstallManager {
         // If so, then we will symlink to the project folder rather than to common/temp/node_modules.
         // In this case, we don't want "npm install" to process this package, but we do need
         // to record this decision for linking later, so we add it to a special 'rushDependencies' field.
-        const localProject: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(
-          packageName
-        );
+        const localProject: RushConfigurationProject | undefined =
+          this.rushConfiguration.getProjectByName(packageName);
 
         if (localProject) {
           // Don't locally link if it's listed in the cyclicDependencyProjects
@@ -400,9 +399,8 @@ export class RushInstallManager extends BaseInstallManager {
         return false;
       }
 
-      const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml = shrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(
-        tempProjectDependencyKey
-      )!;
+      const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml =
+        shrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey)!;
       const newIntegrity: string = (
         await ssri.fromStream(fs.createReadStream(this._tempProjectHelper.getTarballFilePath(rushProject)))
       ).toString();

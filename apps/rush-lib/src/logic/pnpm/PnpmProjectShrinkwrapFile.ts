@@ -68,9 +68,8 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
     if (!tempProjectDependencyKey) {
       throw new Error(`Cannot get dependency key for temp project: ${this.project.tempProjectName}`);
     }
-    const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml = this.shrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(
-      tempProjectDependencyKey
-    )!;
+    const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml =
+      this.shrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey)!;
 
     // Only select the shrinkwrap dependencies that are non-local since we already handle local
     // project changes
@@ -190,9 +189,8 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
       // As a last attempt, check if it's been hoisted up as a top-level dependency. If
       // we can't find it, we can assume that it's already been provided somewhere up the
       // dependency tree.
-      const topLevelDependencySpecifier:
-        | DependencySpecifier
-        | undefined = this.shrinkwrapFile.getTopLevelDependencyVersion(peerDependencyName);
+      const topLevelDependencySpecifier: DependencySpecifier | undefined =
+        this.shrinkwrapFile.getTopLevelDependencyVersion(peerDependencyName);
 
       if (topLevelDependencySpecifier) {
         this._addDependencyRecursive(

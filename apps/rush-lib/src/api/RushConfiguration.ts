@@ -726,10 +726,8 @@ export class RushConfiguration {
       a.packageName.localeCompare(b.packageName)
     );
 
-    const tempNamesByProject: Map<
-      IRushConfigurationProjectJson,
-      string
-    > = RushConfiguration._generateTempNamesForProjects(sortedProjectJsons);
+    const tempNamesByProject: Map<IRushConfigurationProjectJson, string> =
+      RushConfiguration._generateTempNamesForProjects(sortedProjectJsons);
 
     for (const projectJson of sortedProjectJsons) {
       const tempProjectName: string | undefined = tempNamesByProject.get(projectJson);
@@ -1483,9 +1481,8 @@ export class RushConfiguration {
     // Use an empty string as the key when no variant provided. Anything else would possibly conflict
     // with a varient created by the user
     const variantKey: string = variant || '';
-    let commonVersionsConfiguration:
-      | CommonVersionsConfiguration
-      | undefined = this._commonVersionsConfigurations.get(variantKey);
+    let commonVersionsConfiguration: CommonVersionsConfiguration | undefined =
+      this._commonVersionsConfigurations.get(variantKey);
     if (!commonVersionsConfiguration) {
       const commonVersionsFilename: string = this.getCommonVersionsFilePath(variant);
       commonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
@@ -1509,9 +1506,8 @@ export class RushConfiguration {
     // Use an empty string as the key when no variant provided. Anything else would possibly conflict
     // with a varient created by the user
     const variantKey: string = variant || '';
-    let implicitlyPreferredVersions: Map<string, string> | undefined = this._implicitlyPreferredVersions.get(
-      variantKey
-    );
+    let implicitlyPreferredVersions: Map<string, string> | undefined =
+      this._implicitlyPreferredVersions.get(variantKey);
     if (!implicitlyPreferredVersions) {
       // First, collect all the direct dependencies of all local projects, and their versions:
       // direct dependency name --> set of version specifiers

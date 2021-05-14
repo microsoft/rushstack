@@ -220,7 +220,8 @@ export class AssetProcessor {
           }
 
           case 'localized': {
-            const localizedElement: ILocalizedReconstructionElement = element as ILocalizedReconstructionElement;
+            const localizedElement: ILocalizedReconstructionElement =
+              element as ILocalizedReconstructionElement;
             let newValue: string | undefined = localizedElement.values[locale];
             if (!newValue) {
               if (fillMissingTranslationStrings) {
@@ -296,7 +297,8 @@ export class AssetProcessor {
         }
 
         case 'localized': {
-          const localizedElement: ILocalizedReconstructionElement = element as ILocalizedReconstructionElement;
+          const localizedElement: ILocalizedReconstructionElement =
+            element as ILocalizedReconstructionElement;
           issues.push(
             `The string "${localizedElement.stringName}" in "${localizedElement.locFilePath}" appeared in an asset ` +
               'that is not expected to contain localized resources.'

@@ -46,9 +46,8 @@ export class RushGlobalFolder {
   public constructor() {
     // Because RushGlobalFolder is used by the front-end VersionSelector before EnvironmentConfiguration
     // is initialized, we need to read it using a special internal API.
-    const rushGlobalFolderOverride:
-      | string
-      | undefined = EnvironmentConfiguration._getRushGlobalFolderOverride(process.env);
+    const rushGlobalFolderOverride: string | undefined =
+      EnvironmentConfiguration._getRushGlobalFolderOverride(process.env);
     if (rushGlobalFolderOverride !== undefined) {
       this._rushGlobalFolder = rushGlobalFolderOverride;
     } else {

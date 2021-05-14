@@ -292,9 +292,8 @@ export class DeclarationReferenceGenerator {
       }
     }
 
-    let navigation: Navigation | 'global' = DeclarationReferenceGenerator._getNavigationToSymbol(
-      followedSymbol
-    );
+    let navigation: Navigation | 'global' =
+      DeclarationReferenceGenerator._getNavigationToSymbol(followedSymbol);
     if (navigation === 'global') {
       if (parentRef.source !== GlobalSource.instance) {
         parentRef = new DeclarationReference(GlobalSource.instance);

@@ -371,9 +371,8 @@ export class ExtractorConfig {
     const startingFolder: string = options.startingFolder;
 
     // Figure out which project we're in and look for the config file at the project root
-    const packageJsonFullPath: string | undefined = packageJsonLookup.tryGetPackageJsonFilePathFor(
-      startingFolder
-    );
+    const packageJsonFullPath: string | undefined =
+      packageJsonLookup.tryGetPackageJsonFilePathFor(startingFolder);
     const packageFolder: string | undefined = packageJsonFullPath
       ? path.dirname(packageJsonFullPath)
       : undefined;
@@ -458,9 +457,8 @@ export class ExtractorConfig {
     const configObject: IConfigFile = ExtractorConfig.loadFile(configObjectFullPath);
 
     const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-    const packageJsonFullPath: string | undefined = packageJsonLookup.tryGetPackageJsonFilePathFor(
-      configObjectFullPath
-    );
+    const packageJsonFullPath: string | undefined =
+      packageJsonLookup.tryGetPackageJsonFilePathFor(configObjectFullPath);
 
     const extractorConfig: ExtractorConfig = ExtractorConfig.prepare({
       configObject,

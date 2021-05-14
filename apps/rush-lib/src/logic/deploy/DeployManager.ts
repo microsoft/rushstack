@@ -326,9 +326,8 @@ export class DeployManager {
       throw new InternalError(`Error resolving ${packageName} from ${startingFolder}`);
     }
 
-    const dependencyPackageFolderPath: string | undefined = this._packageJsonLookup.tryGetPackageFolderFor(
-      resolvedDependency
-    );
+    const dependencyPackageFolderPath: string | undefined =
+      this._packageJsonLookup.tryGetPackageFolderFor(resolvedDependency);
 
     if (!dependencyPackageFolderPath) {
       throw new Error(`Error finding package.json folder for ${resolvedDependency}`);
@@ -536,9 +535,8 @@ export class DeployManager {
     }
     includedProjectNamesSet.add(projectName);
 
-    const projectSettings:
-      | IDeployScenarioProjectJson
-      | undefined = deployState.scenarioConfiguration.projectJsonsByName.get(projectName);
+    const projectSettings: IDeployScenarioProjectJson | undefined =
+      deployState.scenarioConfiguration.projectJsonsByName.get(projectName);
     if (projectSettings && projectSettings.additionalProjectsToInclude) {
       for (const additionalProjectToInclude of projectSettings.additionalProjectsToInclude) {
         this._collectAdditionalProjectsToInclude(
@@ -626,9 +624,8 @@ export class DeployManager {
 
     for (const rushProject of this._rushConfiguration.projects) {
       const projectFolder: string = FileSystem.getRealPath(rushProject.projectFolder);
-      const projectSettings:
-        | IDeployScenarioProjectJson
-        | undefined = deployState.scenarioConfiguration.projectJsonsByName.get(rushProject.packageName);
+      const projectSettings: IDeployScenarioProjectJson | undefined =
+        deployState.scenarioConfiguration.projectJsonsByName.get(rushProject.packageName);
 
       deployState.folderInfosByPath.set(projectFolder, {
         folderPath: projectFolder,
@@ -639,9 +636,8 @@ export class DeployManager {
 
     for (const projectName of includedProjectNamesSet) {
       console.log(colors.cyan('Analyzing project: ') + projectName);
-      const project: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
-        projectName
-      );
+      const project: RushConfigurationProject | undefined =
+        this._rushConfiguration.getProjectByName(projectName);
 
       if (!project) {
         throw new Error(`The project ${projectName} is not defined in rush.json`);

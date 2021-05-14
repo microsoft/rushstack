@@ -54,11 +54,8 @@ export class ApiExtractorPlugin implements IHeftPlugin {
           // API Extractor provides an ExtractorConfig.tryLoadForFolder() API that will probe for api-extractor.json
           // including support for rig.json.  However, Heft does not load the @microsoft/api-extractor package at all
           // unless it sees a config/api-extractor.json file.  Thus we need to do our own lookup here.
-          const apiExtractorJsonFilePath:
-            | string
-            | undefined = await heftConfiguration.rigConfig.tryResolveConfigFilePathAsync(
-            CONFIG_FILE_LOCATION
-          );
+          const apiExtractorJsonFilePath: string | undefined =
+            await heftConfiguration.rigConfig.tryResolveConfigFilePathAsync(CONFIG_FILE_LOCATION);
 
           if (apiExtractorJsonFilePath !== undefined) {
             await this._runApiExtractorAsync(heftSession, {
@@ -83,25 +80,20 @@ export class ApiExtractorPlugin implements IHeftPlugin {
 
     const logger: ScopedLogger = heftSession.requestScopedLogger('API Extractor Plugin');
 
-    const apiExtractorTaskConfiguration:
-      | IApiExtractorPluginConfiguration
-      | undefined = await CoreConfigFiles.apiExtractorTaskConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
-      logger.terminal,
-      heftConfiguration.buildFolder,
-      heftConfiguration.rigConfig
-    );
+    const apiExtractorTaskConfiguration: IApiExtractorPluginConfiguration | undefined =
+      await CoreConfigFiles.apiExtractorTaskConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
+        logger.terminal,
+        heftConfiguration.buildFolder,
+        heftConfiguration.rigConfig
+      );
 
     if (watchMode) {
       logger.terminal.writeWarningLine("API Extractor isn't currently supported in --watch mode.");
       return;
     }
 
-    const resolution:
-      | IToolPackageResolution
-      | undefined = await this._toolPackageResolver.resolveToolPackagesAsync(
-      options.heftConfiguration,
-      logger.terminal
-    );
+    const resolution: IToolPackageResolution | undefined =
+      await this._toolPackageResolver.resolveToolPackagesAsync(options.heftConfiguration, logger.terminal);
 
     if (!resolution) {
       logger.emitError(new Error('Unable to resolve a compiler package for tsconfig.json'));

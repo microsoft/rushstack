@@ -349,9 +349,8 @@ export class MessageRouter {
     extractorMessage: ExtractorMessage,
     astDeclaration: AstDeclaration
   ): void {
-    let associatedMessages: ExtractorMessage[] | undefined = this._associatedMessagesForAstDeclaration.get(
-      astDeclaration
-    );
+    let associatedMessages: ExtractorMessage[] | undefined =
+      this._associatedMessagesForAstDeclaration.get(astDeclaration);
 
     if (!associatedMessages) {
       associatedMessages = [];

@@ -202,9 +202,8 @@ export class Collector {
     // Build the entry point
     const entryPointSourceFile: ts.SourceFile = this.workingPackage.entryPointSourceFile;
 
-    const astEntryPoint: AstModule = this.astSymbolTable.fetchAstModuleFromWorkingPackage(
-      entryPointSourceFile
-    );
+    const astEntryPoint: AstModule =
+      this.astSymbolTable.fetchAstModuleFromWorkingPackage(entryPointSourceFile);
     this._astEntryPoint = astEntryPoint;
 
     const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
@@ -230,9 +229,8 @@ export class Collector {
 
     // Create a CollectorEntity for each top-level export
 
-    const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(
-      astEntryPoint
-    );
+    const astModuleExportInfo: AstModuleExportInfo =
+      this.astSymbolTable.fetchAstModuleExportInfo(astEntryPoint);
     for (const [exportName, astEntity] of astModuleExportInfo.exportedLocalEntities) {
       this._createCollectorEntity(astEntity, exportName);
 
@@ -599,8 +597,10 @@ export class Collector {
     mainAstDeclaration: AstDeclaration,
     ancillaryAstDeclaration: AstDeclaration
   ): void {
-    const mainMetadata: InternalDeclarationMetadata = mainAstDeclaration.declarationMetadata as InternalDeclarationMetadata;
-    const ancillaryMetadata: InternalDeclarationMetadata = ancillaryAstDeclaration.declarationMetadata as InternalDeclarationMetadata;
+    const mainMetadata: InternalDeclarationMetadata =
+      mainAstDeclaration.declarationMetadata as InternalDeclarationMetadata;
+    const ancillaryMetadata: InternalDeclarationMetadata =
+      ancillaryAstDeclaration.declarationMetadata as InternalDeclarationMetadata;
 
     if (mainMetadata.ancillaryDeclarations.indexOf(ancillaryAstDeclaration) >= 0) {
       return; // already added
@@ -638,7 +638,8 @@ export class Collector {
   }
 
   private _calculateApiItemMetadata(astDeclaration: AstDeclaration): void {
-    const declarationMetadata: InternalDeclarationMetadata = astDeclaration.declarationMetadata as InternalDeclarationMetadata;
+    const declarationMetadata: InternalDeclarationMetadata =
+      astDeclaration.declarationMetadata as InternalDeclarationMetadata;
     if (declarationMetadata.isAncillary) {
       if (astDeclaration.declaration.kind === ts.SyntaxKind.SetAccessor) {
         if (declarationMetadata.tsdocParserContext) {
@@ -716,9 +717,8 @@ export class Collector {
       options.isOverride = modifierTagSet.isOverride();
       options.isSealed = modifierTagSet.isSealed();
       options.isVirtual = modifierTagSet.isVirtual();
-      const preapprovedTag: tsdoc.TSDocTagDefinition | void = this.extractorConfig.tsdocConfiguration.tryGetTagDefinition(
-        '@preapproved'
-      );
+      const preapprovedTag: tsdoc.TSDocTagDefinition | void =
+        this.extractorConfig.tsdocConfiguration.tryGetTagDefinition('@preapproved');
 
       if (preapprovedTag && modifierTagSet.hasTag(preapprovedTag)) {
         // This feature only makes sense for potentially big declarations.

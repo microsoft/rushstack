@@ -444,9 +444,8 @@ export class Extractor {
         preserveSymlinks: false
       });
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
-      const packageJson: INodePackageJson | undefined = packageJsonLookup.tryLoadNodePackageJsonFor(
-        typescriptPath
-      );
+      const packageJson: INodePackageJson | undefined =
+        packageJsonLookup.tryLoadNodePackageJsonFor(typescriptPath);
       if (packageJson && packageJson.version && semver.valid(packageJson.version)) {
         // Consider a newer MINOR release to be incompatible
         const ourMajor: number = semver.major(ts.version);

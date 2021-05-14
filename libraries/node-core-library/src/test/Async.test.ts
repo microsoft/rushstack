@@ -97,9 +97,9 @@ describe('Async', () => {
       // function is going to return a promise. This situation is not very likely in a
       // TypeScript project, but it's such a common problem in JavaScript projects that
       // it's worth doing an explicit test.
-      const fn: (item: number) => Promise<void> = (jest.fn((item) => {
+      const fn: (item: number) => Promise<void> = jest.fn((item) => {
         if (item === 3) throw new Error('Something broke');
-      }) as unknown) as (item: number) => Promise<void>;
+      }) as unknown as (item: number) => Promise<void>;
 
       await expect(() => Async.forEachAsync(array, fn, { concurrency: 3 })).rejects.toThrowError(
         'Something broke'

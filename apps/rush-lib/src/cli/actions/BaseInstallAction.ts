@@ -133,12 +133,13 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     const installManagerOptions: IInstallManagerOptions = this.buildInstallOptions();
 
-    const installManager: BaseInstallManager = installManagerFactoryModule.InstallManagerFactory.getInstallManager(
-      this.rushConfiguration,
-      this.rushGlobalFolder,
-      purgeManager,
-      installManagerOptions
-    );
+    const installManager: BaseInstallManager =
+      installManagerFactoryModule.InstallManagerFactory.getInstallManager(
+        this.rushConfiguration,
+        this.rushGlobalFolder,
+        purgeManager,
+        installManagerOptions
+      );
 
     let installSuccessful: boolean = true;
     try {

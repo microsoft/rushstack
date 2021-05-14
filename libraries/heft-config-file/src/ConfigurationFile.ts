@@ -191,10 +191,8 @@ export class ConfigurationFile<TConfigurationFile> {
     return this.__schema;
   }
 
-  private readonly _configurationFileCache: Map<
-    string,
-    IConfigurationFileCacheEntry<TConfigurationFile>
-  > = new Map<string, IConfigurationFileCacheEntry<TConfigurationFile>>();
+  private readonly _configurationFileCache: Map<string, IConfigurationFileCacheEntry<TConfigurationFile>> =
+    new Map<string, IConfigurationFileCacheEntry<TConfigurationFile>>();
   private readonly _fileExistsCache: Map<string, boolean> = new Map<string, boolean>();
   private readonly _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
@@ -302,9 +300,8 @@ export class ConfigurationFile<TConfigurationFile> {
     visitedConfigurationFilePaths: Set<string>,
     rigConfig: RigConfig | undefined
   ): Promise<TConfigurationFile> {
-    let cacheEntry:
-      | IConfigurationFileCacheEntry<TConfigurationFile>
-      | undefined = this._configurationFileCache.get(resolvedConfigurationFilePath);
+    let cacheEntry: IConfigurationFileCacheEntry<TConfigurationFile> | undefined =
+      this._configurationFileCache.get(resolvedConfigurationFilePath);
     if (!cacheEntry) {
       try {
         cacheEntry = {
@@ -442,9 +439,9 @@ export class ConfigurationFile<TConfigurationFile> {
       configurationFilePath: resolvedConfigurationFilePath,
       originalValues: {} as TConfigurationFile
     };
-    const result: TConfigurationFile = ({
+    const result: TConfigurationFile = {
       [CONFIGURATION_FILE_FIELD_ANNOTATION]: resultAnnotation
-    } as unknown) as TConfigurationFile;
+    } as unknown as TConfigurationFile;
     for (const propertyName of propertyNames) {
       if (propertyName === '$schema' || propertyName === 'extends') {
         continue;
@@ -514,7 +511,7 @@ export class ConfigurationFile<TConfigurationFile> {
               }
 
               newValue = [...parentPropertyValue, ...propertyValue];
-              ((newValue as unknown) as IAnnotatedField<unknown[]>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
+              (newValue as unknown as IAnnotatedField<unknown[]>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
                 configurationFilePath: undefined,
                 originalValues: {
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -529,7 +526,8 @@ export class ConfigurationFile<TConfigurationFile> {
           }
 
           case InheritanceType.custom: {
-            const customInheritance: ICustomPropertyInheritance<unknown> = propertyInheritance as ICustomPropertyInheritance<unknown>;
+            const customInheritance: ICustomPropertyInheritance<unknown> =
+              propertyInheritance as ICustomPropertyInheritance<unknown>;
             if (
               !customInheritance.inheritanceFunction ||
               typeof customInheritance.inheritanceFunction !== 'function'
@@ -618,7 +616,7 @@ export class ConfigurationFile<TConfigurationFile> {
     }
 
     if (typeof obj === 'object') {
-      ((obj as unknown) as IAnnotatedField<TObject>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
+      (obj as unknown as IAnnotatedField<TObject>)[CONFIGURATION_FILE_FIELD_ANNOTATION] = {
         configurationFilePath: resolvedConfigurationFilePath,
         originalValues: { ...obj }
       };
@@ -636,9 +634,8 @@ export class ConfigurationFile<TConfigurationFile> {
       }
 
       case PathResolutionMethod.resolvePathRelativeToProjectRoot: {
-        const packageRoot: string | undefined = this._packageJsonLookup.tryGetPackageFolderFor(
-          configurationFilePath
-        );
+        const packageRoot: string | undefined =
+          this._packageJsonLookup.tryGetPackageFolderFor(configurationFilePath);
         if (!packageRoot) {
           throw new Error(
             `Could not find a package root for path "${ConfigurationFile._formatPathForLogging(

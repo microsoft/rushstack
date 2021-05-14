@@ -66,10 +66,8 @@ export class WriteBuildCacheAction extends BaseRushAction {
       new ConsoleTerminalProvider({ verboseEnabled: this._verboseFlag.value })
     );
 
-    const buildCacheConfiguration: BuildCacheConfiguration = await BuildCacheConfiguration.loadAndRequireEnabledAsync(
-      terminal,
-      this.rushConfiguration
-    );
+    const buildCacheConfiguration: BuildCacheConfiguration =
+      await BuildCacheConfiguration.loadAndRequireEnabledAsync(terminal, this.rushConfiguration);
 
     const command: string = this._command.value!;
     const commandToRun: string | undefined = TaskSelector.getScriptToRun(project, command, []);
@@ -93,9 +91,8 @@ export class WriteBuildCacheAction extends BaseRushAction {
       this.rushConfiguration.commonRushConfigFolder,
       RushConstants.commandLineFilename
     );
-    const repoCommandLineConfiguration:
-      | CommandLineConfiguration
-      | undefined = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFilePath);
+    const repoCommandLineConfiguration: CommandLineConfiguration | undefined =
+      CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFilePath);
 
     const cacheWriteSuccess: boolean | undefined = await projectBuilder.tryWriteCacheEntryAsync(
       terminal,

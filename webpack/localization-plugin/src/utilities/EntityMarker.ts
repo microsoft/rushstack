@@ -12,10 +12,10 @@ export interface IMarkable {
  */
 export class EntityMarker {
   public static markEntity<TModule>(module: TModule, value: boolean): void {
-    ((module as unknown) as IMarkable)[LABEL] = value;
+    (module as unknown as IMarkable)[LABEL] = value;
   }
 
   public static getMark<TModule>(module: TModule): boolean | undefined {
-    return ((module as unknown) as IMarkable)[LABEL];
+    return (module as unknown as IMarkable)[LABEL];
   }
 }

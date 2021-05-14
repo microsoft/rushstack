@@ -52,13 +52,13 @@ describe('ConfigurationFile', () => {
     }
 
     it('Correctly loads the config file', async () => {
-      const configFileLoader: ConfigurationFile<ISimplestConfigFile> = new ConfigurationFile<ISimplestConfigFile>(
-        { projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath }
-      );
-      const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
-        terminal,
-        __dirname
-      );
+      const configFileLoader: ConfigurationFile<ISimplestConfigFile> =
+        new ConfigurationFile<ISimplestConfigFile>({
+          projectRelativeFilePath: projectRelativeFilePath,
+          jsonSchemaPath: schemaPath
+        });
+      const loadedConfigFile: ISimplestConfigFile =
+        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
       const expectedConfigFile: ISimplestConfigFile = { thing: 'A' };
 
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
@@ -71,8 +71,8 @@ describe('ConfigurationFile', () => {
     });
 
     it('Correctly resolves paths relative to the config file', async () => {
-      const configFileLoader: ConfigurationFile<ISimplestConfigFile> = new ConfigurationFile<ISimplestConfigFile>(
-        {
+      const configFileLoader: ConfigurationFile<ISimplestConfigFile> =
+        new ConfigurationFile<ISimplestConfigFile>({
           projectRelativeFilePath: projectRelativeFilePath,
           jsonSchemaPath: schemaPath,
           jsonPathMetadata: {
@@ -80,12 +80,9 @@ describe('ConfigurationFile', () => {
               pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
             }
           }
-        }
-      );
-      const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
-        terminal,
-        __dirname
-      );
+        });
+      const loadedConfigFile: ISimplestConfigFile =
+        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
       const expectedConfigFile: ISimplestConfigFile = {
         thing: nodeJsPath.resolve(__dirname, configFileFolderName, 'A')
       };
@@ -99,8 +96,8 @@ describe('ConfigurationFile', () => {
     });
 
     it('Correctly resolves paths relative to the project root', async () => {
-      const configFileLoader: ConfigurationFile<ISimplestConfigFile> = new ConfigurationFile<ISimplestConfigFile>(
-        {
+      const configFileLoader: ConfigurationFile<ISimplestConfigFile> =
+        new ConfigurationFile<ISimplestConfigFile>({
           projectRelativeFilePath: projectRelativeFilePath,
           jsonSchemaPath: schemaPath,
           jsonPathMetadata: {
@@ -108,12 +105,9 @@ describe('ConfigurationFile', () => {
               pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
             }
           }
-        }
-      );
-      const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
-        terminal,
-        __dirname
-      );
+        });
+      const loadedConfigFile: ISimplestConfigFile =
+        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
       const expectedConfigFile: ISimplestConfigFile = {
         thing: nodeJsPath.resolve(projectRoot, 'A')
       };
@@ -342,8 +336,8 @@ describe('ConfigurationFile', () => {
       );
       const schemaPath: string = nodeJsPath.resolve(__dirname, 'complexConfigFile', 'plugins.schema.json');
 
-      const configFileLoader: ConfigurationFile<IComplexConfigFile> = new ConfigurationFile<IComplexConfigFile>(
-        {
+      const configFileLoader: ConfigurationFile<IComplexConfigFile> =
+        new ConfigurationFile<IComplexConfigFile>({
           projectRelativeFilePath: projectRelativeFilePath,
           jsonSchemaPath: schemaPath,
           jsonPathMetadata: {
@@ -351,12 +345,9 @@ describe('ConfigurationFile', () => {
               pathResolutionMethod: PathResolutionMethod.NodeResolve
             }
           }
-        }
-      );
-      const loadedConfigFile: IComplexConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
-        terminal,
-        __dirname
-      );
+        });
+      const loadedConfigFile: IComplexConfigFile =
+        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
       const expectedConfigFile: IComplexConfigFile = {
         plugins: [
           {
@@ -433,14 +424,13 @@ describe('ConfigurationFile', () => {
 
     it('correctly loads a config file inside a rig', async () => {
       const projectRelativeFilePath: string = 'config/simplestConfigFile.json';
-      const configFileLoader: ConfigurationFile<ISimplestConfigFile> = new ConfigurationFile<ISimplestConfigFile>(
-        { projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath }
-      );
-      const loadedConfigFile: ISimplestConfigFile = await configFileLoader.loadConfigurationFileForProjectAsync(
-        terminal,
-        projectFolder,
-        rigConfig
-      );
+      const configFileLoader: ConfigurationFile<ISimplestConfigFile> =
+        new ConfigurationFile<ISimplestConfigFile>({
+          projectRelativeFilePath: projectRelativeFilePath,
+          jsonSchemaPath: schemaPath
+        });
+      const loadedConfigFile: ISimplestConfigFile =
+        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, projectFolder, rigConfig);
       const expectedConfigFile: ISimplestConfigFile = { thing: 'A' };
 
       expect(JSON.stringify(loadedConfigFile)).toEqual(JSON.stringify(expectedConfigFile));
@@ -461,16 +451,13 @@ describe('ConfigurationFile', () => {
 
     it('correctly loads a config file inside a rig via tryLoadConfigurationFileForProjectAsync', async () => {
       const projectRelativeFilePath: string = 'config/simplestConfigFile.json';
-      const configFileLoader: ConfigurationFile<ISimplestConfigFile> = new ConfigurationFile<ISimplestConfigFile>(
-        { projectRelativeFilePath: projectRelativeFilePath, jsonSchemaPath: schemaPath }
-      );
-      const loadedConfigFile:
-        | ISimplestConfigFile
-        | undefined = await configFileLoader.tryLoadConfigurationFileForProjectAsync(
-        terminal,
-        projectFolder,
-        rigConfig
-      );
+      const configFileLoader: ConfigurationFile<ISimplestConfigFile> =
+        new ConfigurationFile<ISimplestConfigFile>({
+          projectRelativeFilePath: projectRelativeFilePath,
+          jsonSchemaPath: schemaPath
+        });
+      const loadedConfigFile: ISimplestConfigFile | undefined =
+        await configFileLoader.tryLoadConfigurationFileForProjectAsync(terminal, projectFolder, rigConfig);
       const expectedConfigFile: ISimplestConfigFile = { thing: 'A' };
 
       expect(loadedConfigFile).not.toBeUndefined();

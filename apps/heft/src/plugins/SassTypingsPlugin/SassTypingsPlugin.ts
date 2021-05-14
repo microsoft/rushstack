@@ -60,13 +60,12 @@ export class SassTypingsPlugin implements IHeftPlugin {
     logger: ScopedLogger
   ): Promise<ISassConfiguration> {
     const { buildFolder } = heftConfiguration;
-    const sassConfigurationJson:
-      | ISassConfigurationJson
-      | undefined = await CoreConfigFiles.sassConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
-      logger.terminal,
-      buildFolder,
-      heftConfiguration.rigConfig
-    );
+    const sassConfigurationJson: ISassConfigurationJson | undefined =
+      await CoreConfigFiles.sassConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
+        logger.terminal,
+        buildFolder,
+        heftConfiguration.rigConfig
+      );
 
     return {
       ...sassConfigurationJson

@@ -326,9 +326,8 @@ export class AstSymbolTable {
           );
 
           if (identifierNode) {
-            let referencedAstEntity: AstEntity | undefined = this._entitiesByIdentifierNode.get(
-              identifierNode
-            );
+            let referencedAstEntity: AstEntity | undefined =
+              this._entitiesByIdentifierNode.get(identifierNode);
             if (!referencedAstEntity) {
               const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(identifierNode);
               if (!symbol) {

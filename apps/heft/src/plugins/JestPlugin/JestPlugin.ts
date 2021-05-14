@@ -124,9 +124,8 @@ export class JestPlugin implements IHeftPlugin {
 
   private _validateJestTypeScriptDataFile(buildFolder: string): void {
     // Full path to jest-typescript-data.json
-    const jestTypeScriptDataFile: IJestTypeScriptDataFileJson = JestTypeScriptDataFile.loadForProject(
-      buildFolder
-    );
+    const jestTypeScriptDataFile: IJestTypeScriptDataFileJson =
+      JestTypeScriptDataFile.loadForProject(buildFolder);
     const emitFolderPathForJest: string = path.join(
       buildFolder,
       jestTypeScriptDataFile.emitFolderNameForTests

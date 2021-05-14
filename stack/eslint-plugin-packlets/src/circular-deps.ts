@@ -54,13 +54,12 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
       // https://github.com/estools/esquery/issues/114
       Program: (node: TSESTree.Node): void => {
         if (packletAnalyzer.isEntryPoint && !packletAnalyzer.error) {
-          const packletImports:
-            | IPackletImport[]
-            | undefined = DependencyAnalyzer.checkEntryPointForCircularImport(
-            packletAnalyzer.inputFilePackletName!,
-            packletAnalyzer,
-            program
-          );
+          const packletImports: IPackletImport[] | undefined =
+            DependencyAnalyzer.checkEntryPointForCircularImport(
+              packletAnalyzer.inputFilePackletName!,
+              packletAnalyzer,
+              program
+            );
 
           if (packletImports) {
             const tsconfigFileFolder: string = Path.dirname(tsconfigFilePath);

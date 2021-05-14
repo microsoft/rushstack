@@ -31,9 +31,8 @@ import { RushVersionSelector } from './RushVersionSelector';
 import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
 // Load the configuration
-const configuration:
-  | MinimalRushConfiguration
-  | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
+const configuration: MinimalRushConfiguration | undefined =
+  MinimalRushConfiguration.loadFromDefaultLocation();
 
 const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 

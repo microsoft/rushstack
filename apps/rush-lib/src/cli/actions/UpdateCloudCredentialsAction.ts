@@ -47,10 +47,8 @@ export class UpdateCloudCredentialsAction extends BaseRushAction {
   protected async runAsync(): Promise<void> {
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
 
-    const buildCacheConfiguration: BuildCacheConfiguration = await BuildCacheConfiguration.loadAndRequireEnabledAsync(
-      terminal,
-      this.rushConfiguration
-    );
+    const buildCacheConfiguration: BuildCacheConfiguration =
+      await BuildCacheConfiguration.loadAndRequireEnabledAsync(terminal, this.rushConfiguration);
 
     if (this._deleteFlag.value) {
       if (this._interactiveModeFlag.value || this._credentialParameter.value !== undefined) {

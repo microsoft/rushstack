@@ -143,13 +143,13 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     this._tslintConfiguration = this._tslint.Configuration.loadConfigurationFromPath(
       this._linterConfigFilePath
     );
-    this._linter = (new this._tslint.Linter(
+    this._linter = new this._tslint.Linter(
       {
         fix: false,
         rulesDirectory: this._tslintConfiguration.rulesDirectory
       },
       tsProgram
-    ) as unknown) as IExtendedLinter;
+    ) as unknown as IExtendedLinter;
 
     this._enabledRules = this._linter.getEnabledRules(this._tslintConfiguration, false);
 

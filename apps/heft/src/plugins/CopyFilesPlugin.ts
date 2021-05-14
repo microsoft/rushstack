@@ -233,9 +233,8 @@ export class CopyFilesPlugin implements IHeftPlugin {
           );
 
           // Throw if a duplicate copy target with a different source or options is specified
-          const existingDestinationCopyDescriptor:
-            | ICopyFileDescriptor
-            | undefined = destinationCopyDescriptors.get(resolvedDestinationFilePath);
+          const existingDestinationCopyDescriptor: ICopyFileDescriptor | undefined =
+            destinationCopyDescriptors.get(resolvedDestinationFilePath);
           if (existingDestinationCopyDescriptor) {
             if (
               existingDestinationCopyDescriptor.sourceFilePath === resolvedSourceFilePath &&
@@ -250,9 +249,8 @@ export class CopyFilesPlugin implements IHeftPlugin {
           }
 
           // Finally, add to the map and default hardlink to false
-          let sourceCopyDescriptor: ICopyFileDescriptor | undefined = sourceCopyDescriptors.get(
-            resolvedSourceFilePath
-          );
+          let sourceCopyDescriptor: ICopyFileDescriptor | undefined =
+            sourceCopyDescriptors.get(resolvedSourceFilePath);
           if (!sourceCopyDescriptor) {
             sourceCopyDescriptor = {
               sourceFilePath: resolvedSourceFilePath,

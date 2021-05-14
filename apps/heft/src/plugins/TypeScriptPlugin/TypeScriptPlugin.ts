@@ -165,17 +165,17 @@ export class TypeScriptPlugin implements IHeftPlugin {
     heftConfiguration: HeftConfiguration
   ): Promise<ITypeScriptConfigurationJson | undefined> {
     const buildFolder: string = heftConfiguration.buildFolder;
-    let typescriptConfigurationFileCacheEntry:
-      | ITypeScriptConfigurationFileCacheEntry
-      | undefined = this._typeScriptConfigurationFileCache.get(buildFolder);
+    let typescriptConfigurationFileCacheEntry: ITypeScriptConfigurationFileCacheEntry | undefined =
+      this._typeScriptConfigurationFileCache.get(buildFolder);
 
     if (!typescriptConfigurationFileCacheEntry) {
       typescriptConfigurationFileCacheEntry = {
-        configurationFile: await CoreConfigFiles.typeScriptConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
-          terminal,
-          buildFolder,
-          heftConfiguration.rigConfig
-        )
+        configurationFile:
+          await CoreConfigFiles.typeScriptConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
+            terminal,
+            buildFolder,
+            heftConfiguration.rigConfig
+          )
       };
 
       this._typeScriptConfigurationFileCache.set(buildFolder, typescriptConfigurationFileCacheEntry);
@@ -189,9 +189,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
     heftConfiguration: HeftConfiguration,
     cleanProperties: ICleanStageProperties
   ): Promise<void> {
-    const configurationFile:
-      | ITypeScriptConfigurationJson
-      | undefined = await this._ensureConfigFileLoadedAsync(logger.terminal, heftConfiguration);
+    const configurationFile: ITypeScriptConfigurationJson | undefined =
+      await this._ensureConfigFileLoadedAsync(logger.terminal, heftConfiguration);
 
     if (configurationFile?.additionalModuleKindsToEmit) {
       for (const additionalModuleKindToEmit of configurationFile.additionalModuleKindsToEmit) {
@@ -205,9 +204,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
   private async _runTypeScriptAsync(logger: ScopedLogger, options: IRunTypeScriptOptions): Promise<void> {
     const { heftSession, heftConfiguration, buildProperties, watchMode, firstEmitCallback } = options;
 
-    const typescriptConfigurationJson:
-      | ITypeScriptConfigurationJson
-      | undefined = await this._ensureConfigFileLoadedAsync(logger.terminal, heftConfiguration);
+    const typescriptConfigurationJson: ITypeScriptConfigurationJson | undefined =
+      await this._ensureConfigFileLoadedAsync(logger.terminal, heftConfiguration);
     const tsconfigPaths: string[] = await LegacyAdapters.convertCallbackToPromise(
       glob,
       'tsconfig?(-*).json',
@@ -252,10 +250,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
       }
     }
 
-    const toolPackageResolution: IToolPackageResolution = await this._taskPackageResolver.resolveToolPackagesAsync(
-      heftConfiguration,
-      logger.terminal
-    );
+    const toolPackageResolution: IToolPackageResolution =
+      await this._taskPackageResolver.resolveToolPackagesAsync(heftConfiguration, logger.terminal);
     if (!toolPackageResolution.typeScriptPackagePath) {
       throw new Error('Unable to resolve a TypeScript compiler package');
     }

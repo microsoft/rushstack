@@ -135,9 +135,8 @@ export abstract class RSCTask<TTaskConfig extends IRSCTaskConfig> extends GulpTa
 
     if (!tsconfig.extends) {
       // Does the chain end with a file in the rush-stack-compiler package?
-      const packageJsonPath: string | undefined = RSCTask._packageJsonLookup.tryGetPackageJsonFilePathFor(
-        tsconfigPath
-      );
+      const packageJsonPath: string | undefined =
+        RSCTask._packageJsonLookup.tryGetPackageJsonFilePathFor(tsconfigPath);
       if (packageJsonPath) {
         const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
         if (packageJson.name.match(/^@microsoft\/rush-stack-compiler-[0-9\.]+$/)) {
