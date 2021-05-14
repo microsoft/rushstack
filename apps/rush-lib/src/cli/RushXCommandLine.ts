@@ -103,12 +103,21 @@ export class RushXCommandLine {
       }
 
       const remainingArgs: string[] = args.slice(1);
+
       let commandWithArgs: string = scriptBody;
+      let commandWithArgsForDisplay: string = scriptBody;
       if (remainingArgs.length > 0) {
-        commandWithArgs += ' ' + remainingArgs.join(' ');
+        // This escaping is based on what PNPM does here:
+        // https://github.com/pnpm/pnpm/blob/a468d2b3f8e4a456b3e57ad8a013af65b29c0484/packages/lifecycle/src/runLifecycleHook.ts#L38
+        const escapedRemainingArgs: string[] = remainingArgs.map((x) => Utilities.escapeShellParameter(x));
+
+        commandWithArgs += ' ' + escapedRemainingArgs.join(' ');
+
+        // Display it nicely without the extra quotes
+        commandWithArgsForDisplay += ' ' + remainingArgs.join(' ');
       }
 
-      console.log('Executing: ' + JSON.stringify(commandWithArgs) + os.EOL);
+      console.log('Executing: ' + JSON.stringify(commandWithArgsForDisplay) + os.EOL);
 
       const packageFolder: string = path.dirname(packageJsonFilePath);
 
