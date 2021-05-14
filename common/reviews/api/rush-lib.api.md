@@ -260,6 +260,9 @@ export class PackageJsonEditor {
     static load(filePath: string): PackageJsonEditor;
     // (undocumented)
     get name(): string;
+    get resolutions(): {
+        [name: string]: string;
+    };
     // (undocumented)
     saveIfModified(): boolean;
     saveToObject(): IPackageJson;
