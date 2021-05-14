@@ -210,8 +210,9 @@ export class ProjectBuilder extends BaseBuilder {
       let projectBuildDeps: IProjectBuildDeps | undefined;
       let trackedFiles: string[] | undefined;
       try {
-        const fileHashes: Map<string, string> | undefined = this._packageChangeAnalyzer.getPackageDeps(
-          this._rushProject.packageName
+        const fileHashes: Map<string, string> | undefined = await this._packageChangeAnalyzer.getPackageDeps(
+          this._rushProject.packageName,
+          terminal
         );
 
         if (fileHashes) {
@@ -391,7 +392,7 @@ export class ProjectBuilder extends BaseBuilder {
                 `Caching has been disabled for this project's "${this._commandName}" command.`
               );
             } else {
-              this._projectBuildCache = ProjectBuildCache.tryGetProjectBuildCache({
+              this._projectBuildCache = await ProjectBuildCache.tryGetProjectBuildCache({
                 projectConfiguration,
                 buildCacheConfiguration: this._buildCacheConfiguration,
                 terminal,

@@ -191,7 +191,8 @@ export class BulkScriptAction extends BaseScriptAction {
     const projectWatcher: typeof ProjectWatcher.prototype = new ProjectWatcher({
       debounceMilliseconds: 1000,
       rushConfiguration: this.rushConfiguration,
-      projectsToWatch
+      projectsToWatch,
+      terminal
     });
 
     let isInitialPass: boolean = true;

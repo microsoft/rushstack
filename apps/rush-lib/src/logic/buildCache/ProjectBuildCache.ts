@@ -45,15 +45,15 @@ export class ProjectBuildCache {
   private readonly _cloudBuildCacheProvider: CloudBuildCacheProviderBase | undefined;
   private readonly _buildCacheEnabled: boolean;
   private readonly _projectOutputFolderNames: string[];
-  private readonly _cacheId: string | undefined;
+  private _cacheId: string | undefined;
 
-  private constructor(options: Omit<IProjectBuildCacheOptions, 'terminal'>) {
+  private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
     this._project = options.projectConfiguration.project;
     this._localBuildCacheProvider = options.buildCacheConfiguration.localCacheProvider;
     this._cloudBuildCacheProvider = options.buildCacheConfiguration.cloudCacheProvider;
     this._buildCacheEnabled = options.buildCacheConfiguration.buildCacheEnabled;
     this._projectOutputFolderNames = options.projectConfiguration.projectOutputFolderNames || [];
-    this._cacheId = ProjectBuildCache._getCacheId(options);
+    this._cacheId = cacheId;
   }
 
   private static _tryGetTarUtility(terminal: Terminal): TarExecutable | undefined {
@@ -64,7 +64,9 @@ export class ProjectBuildCache {
     return ProjectBuildCache._tarUtility;
   }
 
-  public static tryGetProjectBuildCache(options: IProjectBuildCacheOptions): ProjectBuildCache | undefined {
+  public static async tryGetProjectBuildCache(
+    options: IProjectBuildCacheOptions
+  ): Promise<ProjectBuildCache | undefined> {
     const { terminal, projectConfiguration, trackedProjectFiles } = options;
     if (!trackedProjectFiles) {
       return undefined;
@@ -74,7 +76,8 @@ export class ProjectBuildCache {
       return undefined;
     }
 
-    return new ProjectBuildCache(options);
+    const cacheId: string | undefined = await ProjectBuildCache._getCacheId(options);
+    return new ProjectBuildCache(cacheId, options);
   }
 
   private static _validateProject(
@@ -418,7 +421,7 @@ export class ProjectBuildCache {
     return path.join(this._project.projectRushTempFolder, 'build-cache-tar.log');
   }
 
-  private static _getCacheId(options: Omit<IProjectBuildCacheOptions, 'terminal'>): string | undefined {
+  private static async _getCacheId(options: IProjectBuildCacheOptions): Promise<string | undefined> {
     // The project state hash is calculated in the following method:
     // - The current project's hash (see PackageChangeAnalyzer.getProjectStateHash) is
     //   calculated and appended to an array
@@ -442,8 +445,9 @@ export class ProjectBuildCache {
       for (const projectToProcess of projectsToProcess) {
         projectsThatHaveBeenProcessed.add(projectToProcess);
 
-        const projectState: string | undefined = packageChangeAnalyzer.getProjectStateHash(
-          projectToProcess.packageName
+        const projectState: string | undefined = await packageChangeAnalyzer.getProjectStateHash(
+          projectToProcess.packageName,
+          options.terminal
         );
         if (!projectState) {
           // If we hit any projects with unknown state, return unknown cache ID

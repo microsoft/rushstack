@@ -21,6 +21,18 @@ interface IRushProjectJson {
    */
   projectOutputFolderNames?: string[];
 
+  /**
+   * The incremental analyzer can skip Rush commands for projects whose input files have
+   * not changed since the last build. Normally, every Git-tracked file under the project
+   * folder is assumed to be an input. Set incrementalBuildIgnoredGlobs to ignore specific
+   * files, specified as globs relative to the project folder. The list of file globs will
+   * be interpreted the same way your .gitignore file is.
+   */
+  incrementalBuildIgnoredGlobs?: string[];
+
+  /**
+   * Additional project-specific options related to build caching.
+   */
   buildCacheOptions?: IBuildCacheOptionsJson;
 }
 
@@ -86,6 +98,9 @@ export class RushProjectConfiguration {
         projectOutputFolderNames: {
           inheritanceType: InheritanceType.append
         },
+        incrementalBuildIgnoredGlobs: {
+          inheritanceType: InheritanceType.replace
+        },
         buildCacheOptions: {
           inheritanceType: InheritanceType.custom,
           inheritanceFunction: (
@@ -122,6 +137,15 @@ export class RushProjectConfiguration {
   public readonly projectOutputFolderNames?: string[];
 
   /**
+   * The incremental analyzer can skip Rush commands for projects whose input files have
+   * not changed since the last build. Normally, every Git-tracked file under the project
+   * folder is assumed to be an input. Set incrementalBuildIgnoredGlobs to ignore specific
+   * files, specified as globs relative to the project folder. The list of file globs will
+   * be interpreted the same way your .gitignore file is.
+   */
+  public readonly incrementalBuildIgnoredGlobs?: string[];
+
+  /**
    * Project-specific cache options.
    */
   public readonly cacheOptions: IBuildCacheOptions;
@@ -130,6 +154,8 @@ export class RushProjectConfiguration {
     this.project = project;
 
     this.projectOutputFolderNames = rushProjectJson.projectOutputFolderNames;
+
+    this.incrementalBuildIgnoredGlobs = rushProjectJson.incrementalBuildIgnoredGlobs;
 
     const optionsForCommandsByName: Map<string, ICacheOptionsForCommand> = new Map<
       string,

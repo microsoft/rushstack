@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Import, Path } from '@rushstack/node-core-library';
+import { Import, Path, Terminal } from '@rushstack/node-core-library';
 
 import { PackageChangeAnalyzer } from './PackageChangeAnalyzer';
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -14,6 +14,7 @@ export interface IProjectWatcherOptions {
   debounceMilliseconds?: number;
   rushConfiguration: RushConfiguration;
   projectsToWatch: ReadonlySet<RushConfigurationProject>;
+  terminal: Terminal;
 }
 
 export interface IProjectChangeResult {
@@ -37,16 +38,18 @@ export class ProjectWatcher {
   private readonly _debounceMilliseconds: number;
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _projectsToWatch: ReadonlySet<RushConfigurationProject>;
+  private readonly _terminal: Terminal;
 
   private _initialState: PackageChangeAnalyzer | undefined;
   private _previousState: PackageChangeAnalyzer | undefined;
 
   public constructor(options: IProjectWatcherOptions) {
-    const { debounceMilliseconds = 1000, rushConfiguration, projectsToWatch } = options;
+    const { debounceMilliseconds = 1000, rushConfiguration, projectsToWatch, terminal } = options;
 
     this._debounceMilliseconds = debounceMilliseconds;
     this._rushConfiguration = rushConfiguration;
     this._projectsToWatch = projectsToWatch;
+    this._terminal = terminal;
   }
 
   /**
@@ -55,7 +58,7 @@ export class ProjectWatcher {
    * If no change is currently present, watches the source tree of all selected projects for file changes.
    */
   public async waitForChange(): Promise<IProjectChangeResult> {
-    const initialChangeResult: IProjectChangeResult = this._computeChanged();
+    const initialChangeResult: IProjectChangeResult = await this._computeChanged();
     // Ensure that the new state is recorded so that we don't loop infinitely
     this._commitChanges(initialChangeResult.state);
     if (initialChangeResult.changedProjects.size) {
@@ -82,14 +85,14 @@ export class ProjectWatcher {
         let timeout: NodeJS.Timeout | undefined;
         let terminated: boolean = false;
 
-        const resolveIfChanged = (): void => {
+        const resolveIfChanged = async (): Promise<void> => {
           timeout = undefined;
           if (terminated) {
             return;
           }
 
           try {
-            const result: IProjectChangeResult = this._computeChanged();
+            const result: IProjectChangeResult = await this._computeChanged();
 
             // Need an async tick to allow for more file system events to be handled
             process.nextTick(() => {
@@ -106,6 +109,7 @@ export class ProjectWatcher {
               }
             });
           } catch (err) {
+            // eslint-disable-next-line require-atomic-updates
             terminated = true;
             reject(err);
           }
@@ -139,7 +143,7 @@ export class ProjectWatcher {
   /**
    * Determines which, if any, projects (within the selection) have new hashes for files that are not in .gitignore
    */
-  private _computeChanged(): IProjectChangeResult {
+  private async _computeChanged(): Promise<IProjectChangeResult> {
     const state: PackageChangeAnalyzer = new PackageChangeAnalyzer(this._rushConfiguration);
 
     const previousState: PackageChangeAnalyzer | undefined = this._previousState;
@@ -157,8 +161,8 @@ export class ProjectWatcher {
 
       if (
         ProjectWatcher._haveProjectDepsChanged(
-          previousState.getPackageDeps(packageName)!,
-          state.getPackageDeps(packageName)!
+          (await previousState.getPackageDeps(packageName, this._terminal))!,
+          (await state.getPackageDeps(packageName, this._terminal))!
         )
       ) {
         // May need to detect if the nature of the change will break the process, e.g. changes to package.json

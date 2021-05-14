@@ -52,6 +52,14 @@
         "type": "string"
       },
       "uniqueItems": true
+    },
+
+    "incrementalBuildIgnoredGlobs": {
+      "type": "array",
+      "description": "The incremental analyzer can skip Rush commands for projects whose input files have not changed since the last build. Normally, every Git-tracked file under the project folder is assumed to be an input. Set incrementalBuildIgnoredGlobs to ignore specific files, specified as globs relative to the project folder. The list of file globs will be interpreted the same way your .gitignore file is.",
+      "items": {
+        "type": "string"
+      }
     }
   }
 }
