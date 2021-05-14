@@ -62,6 +62,10 @@ export class TarExecutable {
     const pathsListFilePath: string = `${project.projectRushTempFolder}/tarPaths_${Date.now()}`;
     await FileSystem.writeFileAsync(pathsListFilePath, paths.join('\n'));
 
+    // On Windows, tar.exe will report a "Failed to clean up compressor" error if the target folder
+    // does not exist (GitHub #2622)
+    await FileSystem.ensureFolderAsync(path.dirname(archivePath));
+
     const projectFolderPath: string = project.projectFolder;
     const tarExitCode: number = await this._spawnTarWithLoggingAsync(
       ['-c', '-f', archivePath, '-z', '-C', projectFolderPath, '--files-from', pathsListFilePath],
