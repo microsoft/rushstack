@@ -139,10 +139,13 @@ export interface INodePackageJson {
   scripts?: IPackageJsonScriptTable;
 
   /**
-   * A table of package version resolutions. This feature is only available in
-   * yarn.
+   * A table of package version resolutions. This feature is only implemented by the Yarn package manager.
+   *
+   * @remarks
+   * See the {@link https://github.com/yarnpkg/rfcs/blob/master/implemented/0000-selective-versions-resolutions.md
+   * | 0000-selective-versions-resolutions.md RFC} for details.
    */
-  resolutions?: { [name: string]: string };
+  resolutions?: Record<string, string>;
 }
 
 /**

@@ -203,8 +203,9 @@ export class PackageJsonEditor {
   /**
    * This field is a Yarn-specific feature that allows overriding of package resolution.
    *
-   * @see {@link https://github.com/yarnpkg/rfcs/blob/master/implemented/0000-selective-versions-resolutions.md
-   * | 0000-selective-versions-resolutions.md RFC}
+   * @remarks
+   * See the {@link https://github.com/yarnpkg/rfcs/blob/master/implemented/0000-selective-versions-resolutions.md
+   * | 0000-selective-versions-resolutions.md RFC} for details.
    */
   public get resolutionsList(): ReadonlyArray<PackageJsonDependency> {
     return [...this._resolutions.values()];
