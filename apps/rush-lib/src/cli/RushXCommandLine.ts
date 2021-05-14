@@ -103,12 +103,21 @@ export class RushXCommandLine {
       }
 
       const remainingArgs: string[] = args.slice(1);
+
       let commandWithArgs: string = scriptBody;
+      let commandWithArgsForDisplay: string = scriptBody;
       if (remainingArgs.length > 0) {
-        commandWithArgs += ' ' + remainingArgs.join(' ');
+        // This approach is based on what NPM 7 now does:
+        // https://github.com/npm/run-script/blob/47a4d539fb07220e7215cc0e482683b76407ef9b/lib/run-script-pkg.js#L34
+        const escapedRemainingArgs: string[] = remainingArgs.map((x) => Utilities.escapeShellParameter(x));
+
+        commandWithArgs += ' ' + escapedRemainingArgs.join(' ');
+
+        // Display it nicely without the extra quotes
+        commandWithArgsForDisplay += ' ' + remainingArgs.join(' ');
       }
 
-      console.log('Executing: ' + JSON.stringify(commandWithArgs) + os.EOL);
+      console.log('Executing: ' + JSON.stringify(commandWithArgsForDisplay) + os.EOL);
 
       const packageFolder: string = path.dirname(packageJsonFilePath);
 

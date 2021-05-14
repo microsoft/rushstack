@@ -464,7 +464,9 @@ export class Utilities {
    * Example: 'hello there' --> '"hello there"'
    */
   public static escapeShellParameter(parameter: string): string {
-    return `"${parameter}"`;
+    // This approach is based on what NPM 7 now does:
+    // https://github.com/npm/run-script/blob/47a4d539fb07220e7215cc0e482683b76407ef9b/lib/run-script-pkg.js#L34
+    return JSON.stringify(parameter);
   }
 
   /**
@@ -854,6 +856,9 @@ export class Utilities {
     if (result.error && (result.error as any).errno === 'ENOENT') {
       // This is a workaround for GitHub issue #25330
       // https://github.com/nodejs/node-v0.x-archive/issues/25330
+      //
+      // TODO: The fully worked out solution for this problem is now provided by the "Executable" API
+      // from @rushstack/node-core-library
       result = child_process.spawnSync(command + '.cmd', args, options);
     }
 
