@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix a build cache warning that was sometimes displayed on Windows OS: \"'tar' exited with code 1 while attempting to create the cache entry\" (GitHub #2622)",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
