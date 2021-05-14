@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require("tslint/bin/tslint");
+require('tslint/bin/tslint');

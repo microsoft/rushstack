@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require("eslint/bin/eslint");
+require('eslint/bin/eslint');

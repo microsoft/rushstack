@@ -256,6 +256,13 @@ export class RushInstallManager extends BaseInstallManager {
         }
       }
 
+      if (this.rushConfiguration.packageManager === 'yarn') {
+        // This feature is only implemented by the Yarn package manager
+        if (packageJson.resolutionsList.length > 0) {
+          tempPackageJson.resolutions = packageJson.saveToObject().resolutions;
+        }
+      }
+
       // Example: "C:\MyRepo\common\temp\projects\my-project-2"
       const tempProjectFolder: string = this._tempProjectHelper.getTempProjectFolder(rushProject);
 

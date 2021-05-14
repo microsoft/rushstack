@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require("@microsoft/api-extractor/bin/api-extractor");
+require('@microsoft/api-extractor/bin/api-extractor');

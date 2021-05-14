@@ -137,6 +137,15 @@ export interface INodePackageJson {
    * A table of script hooks that a package manager or build tool may invoke.
    */
   scripts?: IPackageJsonScriptTable;
+
+  /**
+   * A table of package version resolutions. This feature is only implemented by the Yarn package manager.
+   *
+   * @remarks
+   * See the {@link https://github.com/yarnpkg/rfcs/blob/master/implemented/0000-selective-versions-resolutions.md
+   * | 0000-selective-versions-resolutions.md RFC} for details.
+   */
+  resolutions?: Record<string, string>;
 }
 
 /**
