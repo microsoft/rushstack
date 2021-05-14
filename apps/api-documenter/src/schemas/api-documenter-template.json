@@ -28,7 +28,7 @@
    * This setting currently only affects the 'docfx' output target.  It is equivalent to the `--new-docfx-namespaces`
    * command-line parameter.
    */
-   // "newDocfxNamespaces": false,
+  // "newDocfxNamespaces": false,
 
   /**
    * Describes plugin packages to be loaded, and which features to enable.
@@ -58,7 +58,6 @@
     //     ]
     //   }
     // ],
-
     /**
      * Optional category name that is recommended to include in the `tocConfig`,
      * along with one of the filters: `filterByApiItemName` or `filterByInlineTag`.
@@ -68,7 +67,6 @@
      * DEFAULT VALUE: (none)
      */
     // "catchAllCategory": "References",
-
     /**
      * When loading more than one api.json files that might include the same API items,
      * toggle either to show duplicates or not.
@@ -76,7 +74,6 @@
      * DEFAULT VALUE: false
      */
     // "noDuplicateEntries": true,
-
     /**
      * Toggle either sorting of the API items should be made based on category name presence
      * in the API item's name.
@@ -84,7 +81,6 @@
      * DEFAULT VALUE: false
      */
     // "filterByApiItemName": false,
-
     /**
      * Filter that can be used to sort the API items according to an inline custom tag
      * that is present on them.

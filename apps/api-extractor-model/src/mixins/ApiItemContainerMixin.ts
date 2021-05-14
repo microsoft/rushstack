@@ -11,7 +11,7 @@ import {
 } from '../items/ApiItem';
 import { ApiNameMixin } from './ApiNameMixin';
 import { DeserializerContext } from '../model/DeserializerContext';
-import { InternalError, LegacyAdapters } from '@microsoft/node-core-library';
+import { InternalError, LegacyAdapters } from '@rushstack/node-core-library';
 
 /**
  * Constructor options for {@link (ApiItemContainerMixin:interface)}.
@@ -47,17 +47,12 @@ const _membersByKind: unique symbol = Symbol('ApiItemContainerMixin._membersByKi
  * Examples of `ApiItemContainerMixin` child classes include `ApiModel`, `ApiPackage`, `ApiEntryPoint`,
  * and `ApiEnum`.  But note that `Parameter` is not considered a "member" of an `ApiMethod`; this relationship
  * is modeled using {@link (ApiParameterListMixin:interface).parameters} instead
- * of {@link (ApiItemContainerMixin:interface).members}.
+ * of {@link ApiItem.members}.
  *
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface ApiItemContainerMixin extends ApiItem {
-  /**
-   * Returns the members of this container, sorted alphabetically.
-   */
-  readonly members: ReadonlyArray<ApiItem>;
-
   /**
    * Adds a new member to the container.
    *
@@ -100,9 +95,10 @@ export interface ApiItemContainerMixin extends ApiItem {
  *
  * @public
  */
-export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiItemContainerMixin) { // eslint-disable-line @typescript-eslint/no-explicit-any
-
+export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
+  baseClass: TBaseClass
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): TBaseClass & (new (...args: any[]) => ApiItemContainerMixin) {
   abstract class MixedClass extends baseClass implements ApiItemContainerMixin {
     public readonly [_members]: ApiItem[];
     public [_membersSorted]: boolean;
@@ -114,7 +110,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
 
     // For members of this container that do NOT extend ApiNameMixin, this stores the list of members
     // that share a common ApiItemKind.  Examples include overloaded constructors or index signatures.
-    public [_membersByKind]: Map<string, ApiItem[]> | undefined;  // key is ApiItemKind
+    public [_membersByKind]: Map<string, ApiItem[]> | undefined; // key is ApiItemKind
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public constructor(...args: any[]) {
@@ -132,9 +128,11 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
     }
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiItemContainerMixinOptions>,
-      context: DeserializerContext, jsonObject: IApiItemContainerJson): void {
-
+    public static onDeserializeInto(
+      options: Partial<IApiItemContainerMixinOptions>,
+      context: DeserializerContext,
+      jsonObject: IApiItemContainerJson
+    ): void {
       baseClass.onDeserializeInto(options, context, jsonObject);
 
       options.members = [];
@@ -143,6 +141,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
       }
     }
 
+    /** @override */
     public get members(): ReadonlyArray<ApiItem> {
       if (!this[_membersSorted]) {
         LegacyAdapters.sortStable(this[_members], (x, y) => x.getSortKey().localeCompare(y.getSortKey()));
@@ -154,13 +153,17 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(ba
 
     public addMember(member: ApiItem): void {
       if (this[_membersByContainerKey].has(member.containerKey)) {
-        throw new Error(`Another member has already been added with the same name (${member.displayName})` +
-          ` and containerKey (${member.containerKey})`);
+        throw new Error(
+          `Another member has already been added with the same name (${member.displayName})` +
+            ` and containerKey (${member.containerKey})`
+        );
       }
 
       const existingParent: ApiItem | undefined = member.parent;
       if (existingParent !== undefined) {
-        throw new Error(`This item has already been added to another container: "${existingParent.displayName}"`);
+        throw new Error(
+          `This item has already been added to another container: "${existingParent.displayName}"`
+        );
       }
 
       this[_members].push(member);

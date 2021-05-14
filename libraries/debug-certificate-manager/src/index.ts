@@ -16,8 +16,5 @@
  * @packageDocumentation
  */
 
-export {
-  ICertificate,
-  CertificateManager
-} from './CertificateManager';
+export { ICertificate, CertificateManager } from './CertificateManager';
 export { CertificateStore } from './CertificateStore';

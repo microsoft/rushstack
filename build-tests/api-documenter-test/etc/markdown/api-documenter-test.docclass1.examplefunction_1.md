@@ -16,9 +16,9 @@ exampleFunction(x: number): number;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  x | <code>number</code> | the number |
+|  x | number | the number |
 
 <b>Returns:</b>
 
-`number`
+number
 

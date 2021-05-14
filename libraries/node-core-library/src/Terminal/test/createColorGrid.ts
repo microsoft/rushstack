@@ -5,10 +5,7 @@
  * This file is a little program that prints all of the colors to the console
  */
 
-import {
-  Colors,
-  IColorableSequence
-} from '../../index';
+import { Colors, IColorableSequence } from '../../index';
 
 export function createColorGrid(
   attributeFunction?: (text: string | IColorableSequence) => IColorableSequence

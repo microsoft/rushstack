@@ -5,7 +5,7 @@ import * as ts from 'typescript';
 
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { Collector } from './Collector';
-import { Sort } from '@microsoft/node-core-library';
+import { Sort } from '@rushstack/node-core-library';
 import { AstEntity } from '../analyzer/AstSymbolTable';
 
 /**
@@ -73,7 +73,7 @@ export class CollectorEntity {
    * In all other cases, it is undefined.
    */
   public get singleExportName(): string | undefined {
-   return this._singleExportName;
+    return this._singleExportName;
   }
 
   /**

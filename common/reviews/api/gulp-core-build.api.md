@@ -4,12 +4,12 @@
 
 ```ts
 
-import { ConsoleTerminalProvider } from '@microsoft/node-core-library';
+import { ConsoleTerminalProvider } from '@rushstack/node-core-library';
 import gulp = require('gulp');
 import * as gulp_2 from 'gulp';
-import { JsonObject } from '@microsoft/node-core-library';
+import { JsonObject } from '@rushstack/node-core-library';
 import Orchestrator = require('orchestrator');
-import { TerminalProviderSeverity } from '@microsoft/node-core-library';
+import { TerminalProviderSeverity } from '@rushstack/node-core-library';
 
 // @public
 export function addSuppression(suppression: string | RegExp): void;
@@ -121,7 +121,7 @@ export abstract class GulpTask<TTaskConfig> implements IExecutable {
     readJSONSync(localPath: string): JsonObject | undefined;
     replaceConfig(taskConfig: TTaskConfig): void;
     resolvePath(localPath: string): string;
-    readonly schema: JsonObject | undefined;
+    get schema(): JsonObject | undefined;
     setConfig(taskConfig: Partial<TTaskConfig>): void;
     taskConfig: TTaskConfig;
 }
@@ -219,7 +219,9 @@ export function _isJestEnabled(rootFolder: string): boolean;
 // Warning: (ae-incompatible-release-tags) The symbol "jest" is marked as @public, but its signature references "JestTask" which is marked as @alpha
 //
 // @public (undocumented)
-export const jest: JestTask;
+const jest_2: JestTask;
+
+export { jest_2 as jest }
 
 // @alpha
 export class JestTask extends GulpTask<IJestConfig> {

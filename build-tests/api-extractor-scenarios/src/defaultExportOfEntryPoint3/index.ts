@@ -4,4 +4,4 @@
 /**
  * @public
  */
-export default function defaultFunctionDeclaration() { };
+export default function defaultFunctionDeclaration() {}

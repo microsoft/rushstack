@@ -1,38 +1,25 @@
-### YamlMime:UniversalReference
-items:
-  - uid: 'api-documenter-test!DocEnum:enum'
-    summary: Docs for DocEnum
-    name: DocEnum
-    fullName: DocEnum
-    langs:
-      - typeScript
-    type: enum
+### YamlMime:TSEnum
+name: DocEnum
+uid: 'api-documenter-test!DocEnum:enum'
+package: api-documenter-test!
+fullName: DocEnum
+summary: Docs for DocEnum
+remarks: ''
+isPreview: false
+isDeprecated: false
+fields:
+  - name: One
+    uid: 'api-documenter-test!DocEnum.One:member'
     package: api-documenter-test!
-    children:
-      - 'api-documenter-test!DocEnum.One:member'
-      - 'api-documenter-test!DocEnum.Two:member'
-      - 'api-documenter-test!DocEnum.Zero:member'
-  - uid: 'api-documenter-test!DocEnum.One:member'
     summary: These are some docs for One
-    name: One
-    fullName: One
-    langs:
-      - typeScript
-    type: field
-    numericValue: '1'
-  - uid: 'api-documenter-test!DocEnum.Two:member'
+    value: '1'
+  - name: Two
+    uid: 'api-documenter-test!DocEnum.Two:member'
+    package: api-documenter-test!
     summary: These are some docs for Two
-    name: Two
-    fullName: Two
-    langs:
-      - typeScript
-    type: field
-    numericValue: '2'
-  - uid: 'api-documenter-test!DocEnum.Zero:member'
+    value: '2'
+  - name: Zero
+    uid: 'api-documenter-test!DocEnum.Zero:member'
+    package: api-documenter-test!
     summary: These are some docs for Zero
-    name: Zero
-    fullName: Zero
-    langs:
-      - typeScript
-    type: field
-    numericValue: '0'
+    value: '0'

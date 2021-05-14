@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 /**
- * Interface respresenting a changelog json object for a package used to represent the parsed
+ * Interface representing a changelog json object for a package used to represent the parsed
  * content of CHANGELOG.json
  */
 export interface IChangelog {
@@ -15,6 +15,24 @@ export interface IChangelog {
    * Entries within the changelog corresponding to each published version.
    */
   entries: IChangeLogEntry[];
+}
+
+/**
+ * Interface representing a single published entry in the changelog.
+ */
+export interface IChangeLogEntryComments {
+  /** Describes changes which cause a patch-level SemVer bump */
+  patch?: IChangeLogComment[];
+  /** Describes changes which cause a minor-level SemVer bump */
+  minor?: IChangeLogComment[];
+  /** Describes changes which cause a major-level SemVer bump */
+  major?: IChangeLogComment[];
+  /** Describes changes to the package's dependencies */
+  dependency?: IChangeLogComment[];
+  /** Describe changes that do not have version information */
+  none?: IChangeLogComment[];
+  /** Describe changes that do not have version information */
+  hotfix?: IChangeLogComment[];
 }
 
 /**
@@ -37,20 +55,9 @@ export interface IChangeLogEntry {
   date: string | undefined;
 
   /**
-   * Comments for the entry, where key respresents the ChangeType string (Example: major)
+   * Comments for the entry, where key represents the ChangeType string (Example: major)
    */
-  comments: {
-    /** Describes changes which cause a patch-level SemVer bump */
-    patch?: IChangeLogComment[];
-    /** Describes changes which cause a minor-level SemVer bump */
-    minor?: IChangeLogComment[];
-    /** Describes changes which cause a major-level SemVer bump */
-    major?: IChangeLogComment[];
-    /** Describes changes to the package's dependencies */
-    dependency?: IChangeLogComment[];
-    /** Describe changes that do not have version information */
-    none?: IChangeLogComment[];
-  };
+  comments: IChangeLogEntryComments;
 }
 
 /**

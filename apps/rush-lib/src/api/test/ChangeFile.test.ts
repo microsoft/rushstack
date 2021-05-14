@@ -12,11 +12,14 @@ describe('ChangeFile', () => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-npm.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
-    const changeFile: ChangeFile = new ChangeFile({
-      packageName: 'a',
-      changes: [],
-      email: 'fake@microsoft.com'
-    }, rushConfiguration);
+    const changeFile: ChangeFile = new ChangeFile(
+      {
+        packageName: 'a',
+        changes: [],
+        email: 'fake@microsoft.com'
+      },
+      rushConfiguration
+    );
 
     changeFile.addChange({
       packageName: 'a',
@@ -30,7 +33,7 @@ describe('ChangeFile', () => {
       comment: 'for patch'
     });
 
-    expect(changeFile.getChanges('a').length).toEqual(2);
+    expect(changeFile.getChanges('a')).toHaveLength(2);
     expect(changeFile.getChanges('a')[0].comment).toEqual('for minor');
     expect(changeFile.getChanges('a')[1].comment).toEqual('for patch');
   });

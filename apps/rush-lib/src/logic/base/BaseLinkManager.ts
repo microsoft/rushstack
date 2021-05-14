@@ -1,18 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors/safe';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { FileSystem, IFileSystemCreateLinkOptions, InternalError } from '@microsoft/node-core-library';
+import { FileSystem, IFileSystemCreateLinkOptions, InternalError } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { BasePackage } from './BasePackage';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
 
 export enum SymlinkKind {
   File,
@@ -36,13 +37,10 @@ export abstract class BaseLinkManager {
 
     let targetPath: string;
     if (EnvironmentConfiguration.absoluteSymlinks) {
-        targetPath = options.linkTargetPath;
+      targetPath = options.linkTargetPath;
     } else {
       // Link to the relative path, to avoid going outside containers such as a Docker image
-      targetPath = path.relative(
-        fs.realpathSync(newLinkFolder),
-        options.linkTargetPath
-      );
+      targetPath = path.relative(fs.realpathSync(newLinkFolder), options.linkTargetPath);
     }
 
     if (process.platform === 'win32') {
@@ -149,7 +147,6 @@ export abstract class BaseLinkManager {
           const linkStats: fs.Stats = FileSystem.getLinkStatistics(linkTarget);
 
           if (linkStats.isSymbolicLink()) {
-
             const targetStats: fs.Stats = FileSystem.getStatistics(FileSystem.getRealPath(linkTarget));
             if (targetStats.isDirectory()) {
               // Neither a junction nor a directory-symlink can have a directory-symlink
@@ -189,21 +186,13 @@ export abstract class BaseLinkManager {
    *   if true, this option forces the links to be recreated.
    */
   public async createSymlinksForProjects(force: boolean): Promise<void> {
-    if (!force) {
-      if (FileSystem.exists(this._rushConfiguration.rushLinkJsonFilename)) {
-        console.log(colors.green(`Skipping linking -- everything is already up to date.`));
-        return;
-      }
-    }
-
-    console.log('Linking projects together...');
+    console.log(os.EOL + colors.bold('Linking local projects'));
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    // Delete the flag file if it exists; if we get interrupted, this will ensure that
-    // a full "rush link" is required next time
-    Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
+    await this._linkProjects();
 
-    await this._linkProjects()
+    // TODO: Remove when "rush link" and "rush unlink" are deprecated
+    LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration).create();
 
     stopwatch.stop();
     console.log(os.EOL + colors.green(`Linking finished successfully. (${stopwatch.toString()})`));

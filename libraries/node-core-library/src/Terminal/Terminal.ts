@@ -1,16 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  ITerminalProvider,
-  TerminalProviderSeverity
-} from './ITerminalProvider';
+import { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider';
 import {
   IColorableSequence,
   ColorValue,
   Colors,
   eolSequence,
-  TextAttribute
+  TextAttribute,
+  ConsoleColorCodes
 } from './Colors';
 
 /**
@@ -186,7 +184,10 @@ export class Terminal {
     });
   }
 
-  private _serializeFormattableTextSegments(segments: (string | IColorableSequence)[], withColor: boolean): string[] {
+  private _serializeFormattableTextSegments(
+    segments: (string | IColorableSequence)[],
+    withColor: boolean
+  ): string[] {
     const lines: string[] = [];
     let segmentsToJoin: string[] = [];
     let lastSegmentWasEol: boolean = false;
@@ -197,117 +198,116 @@ export class Terminal {
         lines.push(segmentsToJoin.join(''));
         segmentsToJoin = [];
       } else {
-
         if (withColor) {
           const startColorCodes: number[] = [];
           const endColorCodes: number[] = [];
           switch (segment.foregroundColor) {
             case ColorValue.Black: {
-              startColorCodes.push(30);
-              endColorCodes.push(39);
+              startColorCodes.push(ConsoleColorCodes.BlackForeground);
+              endColorCodes.push(ConsoleColorCodes.DefaultForeground);
               break;
             }
 
             case ColorValue.Red: {
-              startColorCodes.push(31);
-              endColorCodes.push(39);
+              startColorCodes.push(ConsoleColorCodes.RedForeground);
+              endColorCodes.push(ConsoleColorCodes.DefaultForeground);
               break;
             }
 
             case ColorValue.Green: {
-              startColorCodes.push(32);
-              endColorCodes.push(39);
+              startColorCodes.push(ConsoleColorCodes.GreenForeground);
+              endColorCodes.push(ConsoleColorCodes.DefaultForeground);
               break;
             }
 
             case ColorValue.Yellow: {
-              startColorCodes.push(33);
-              endColorCodes.push(39);
+              startColorCodes.push(ConsoleColorCodes.YellowForeground);
+              endColorCodes.push(ConsoleColorCodes.DefaultForeground);
               break;
             }
 
             case ColorValue.Blue: {
-              startColorCodes.push(34);
-              endColorCodes.push(39);
+              startColorCodes.push(ConsoleColorCodes.BlueForeground);
+              endColorCodes.push(ConsoleColorCodes.DefaultForeground);
               break;
             }
 
             case ColorValue.Magenta: {
-              startColorCodes.push(35);
-              endColorCodes.push(39);
+              startColorCodes.push(ConsoleColorCodes.MagentaForeground);
+              endColorCodes.push(ConsoleColorCodes.DefaultForeground);
               break;
             }
 
             case ColorValue.Cyan: {
-              startColorCodes.push(36);
-              endColorCodes.push(39);
+              startColorCodes.push(ConsoleColorCodes.CyanForeground);
+              endColorCodes.push(ConsoleColorCodes.DefaultForeground);
               break;
             }
 
             case ColorValue.White: {
-              startColorCodes.push(37);
-              endColorCodes.push(39);
+              startColorCodes.push(ConsoleColorCodes.WhiteForeground);
+              endColorCodes.push(ConsoleColorCodes.DefaultForeground);
               break;
             }
 
             case ColorValue.Gray: {
-              startColorCodes.push(90);
-              endColorCodes.push(39);
+              startColorCodes.push(ConsoleColorCodes.GrayForeground);
+              endColorCodes.push(ConsoleColorCodes.DefaultForeground);
               break;
             }
           }
 
           switch (segment.backgroundColor) {
             case ColorValue.Black: {
-              startColorCodes.push(40);
-              endColorCodes.push(49);
+              startColorCodes.push(ConsoleColorCodes.BlackBackground);
+              endColorCodes.push(ConsoleColorCodes.DefaultBackground);
               break;
             }
 
             case ColorValue.Red: {
-              startColorCodes.push(41);
-              endColorCodes.push(49);
+              startColorCodes.push(ConsoleColorCodes.RedBackground);
+              endColorCodes.push(ConsoleColorCodes.DefaultBackground);
               break;
             }
 
             case ColorValue.Green: {
-              startColorCodes.push(42);
-              endColorCodes.push(49);
+              startColorCodes.push(ConsoleColorCodes.GreenBackground);
+              endColorCodes.push(ConsoleColorCodes.DefaultBackground);
               break;
             }
 
             case ColorValue.Yellow: {
-              startColorCodes.push(43);
-              endColorCodes.push(49);
+              startColorCodes.push(ConsoleColorCodes.YellowBackground);
+              endColorCodes.push(ConsoleColorCodes.DefaultBackground);
               break;
             }
 
             case ColorValue.Blue: {
-              startColorCodes.push(44);
-              endColorCodes.push(49);
+              startColorCodes.push(ConsoleColorCodes.BlueBackground);
+              endColorCodes.push(ConsoleColorCodes.DefaultBackground);
               break;
             }
 
             case ColorValue.Magenta: {
-              startColorCodes.push(45);
-              endColorCodes.push(49);
+              startColorCodes.push(ConsoleColorCodes.MagentaBackground);
+              endColorCodes.push(ConsoleColorCodes.DefaultBackground);
               break;
             }
 
             case ColorValue.Cyan: {
-              startColorCodes.push(46);
-              endColorCodes.push(49);
+              startColorCodes.push(ConsoleColorCodes.CyanBackground);
+              endColorCodes.push(ConsoleColorCodes.DefaultBackground);
               break;
             }
 
             case ColorValue.White: {
-              startColorCodes.push(47);
-              endColorCodes.push(49);
+              startColorCodes.push(ConsoleColorCodes.WhiteBackground);
+              endColorCodes.push(ConsoleColorCodes.DefaultBackground);
               break;
             }
 
             case ColorValue.Gray: {
-              startColorCodes.push(100);
+              startColorCodes.push(ConsoleColorCodes.GrayBackground);
               endColorCodes.push(49);
               break;
             }
@@ -317,38 +317,38 @@ export class Terminal {
             for (const textAttribute of segment.textAttributes) {
               switch (textAttribute) {
                 case TextAttribute.Bold: {
-                  startColorCodes.push(1);
-                  endColorCodes.push(21);
+                  startColorCodes.push(ConsoleColorCodes.Bold);
+                  endColorCodes.push(ConsoleColorCodes.NormalColorOrIntensity);
                   break;
                 }
 
                 case TextAttribute.Dim: {
-                  startColorCodes.push(2);
-                  endColorCodes.push(22);
+                  startColorCodes.push(ConsoleColorCodes.Dim);
+                  endColorCodes.push(ConsoleColorCodes.NormalColorOrIntensity);
                   break;
                 }
 
                 case TextAttribute.Underline: {
-                  startColorCodes.push(4);
-                  endColorCodes.push(24);
+                  startColorCodes.push(ConsoleColorCodes.Underline);
+                  endColorCodes.push(ConsoleColorCodes.UnderlineOff);
                   break;
                 }
 
                 case TextAttribute.Blink: {
-                  startColorCodes.push(5);
-                  endColorCodes.push(25);
+                  startColorCodes.push(ConsoleColorCodes.Blink);
+                  endColorCodes.push(ConsoleColorCodes.BlinkOff);
                   break;
                 }
 
                 case TextAttribute.InvertColor: {
-                  startColorCodes.push(7);
-                  endColorCodes.push(27);
+                  startColorCodes.push(ConsoleColorCodes.InvertColor);
+                  endColorCodes.push(ConsoleColorCodes.InvertColorOff);
                   break;
                 }
 
                 case TextAttribute.Hidden: {
-                  startColorCodes.push(8);
-                  endColorCodes.push(28);
+                  startColorCodes.push(ConsoleColorCodes.Hidden);
+                  endColorCodes.push(ConsoleColorCodes.HiddenOff);
                   break;
                 }
               }
@@ -357,22 +357,14 @@ export class Terminal {
 
           for (let j: number = 0; j < startColorCodes.length; j++) {
             const code: number = startColorCodes[j];
-            segmentsToJoin.push(...[
-              '\u001b[',
-              code.toString(),
-              'm'
-            ]);
+            segmentsToJoin.push(...['\u001b[', code.toString(), 'm']);
           }
 
           segmentsToJoin.push(segment.text);
 
           for (let j: number = endColorCodes.length - 1; j >= 0; j--) {
             const code: number = endColorCodes[j];
-            segmentsToJoin.push(...[
-              '\u001b[',
-              code.toString(),
-              'm'
-            ]);
+            segmentsToJoin.push(...['\u001b[', code.toString(), 'm']);
           }
         } else {
           segmentsToJoin.push(segment.text);

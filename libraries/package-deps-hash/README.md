@@ -1,4 +1,4 @@
-# @microsoft/package-deps-hash
+# @rushstack/package-deps-hash
 
 The `package-deps-hash` library generates a JSON object containing the git hashes of all files used to produce
 a given package.  This is useful for scenarios where you want to define a "change receipt" file to be published
@@ -16,7 +16,7 @@ NOTE: Git is required to be accessible in the command line path.
 
 ```ts
 let _ = require('lodash');
-let { getPackageDeps } = require('@microsoft/package-deps-hash');
+let { getPackageDeps } = require('@rushstack/package-deps-hash');
 
 // Gets the current deps object for the current working directory
 let deps = getPackageDeps();
@@ -29,4 +29,11 @@ if (_.isEqual(deps, existingDeps)) {
 }
 ```
 
-API documentation for this package: https://rushstack.io/pages/api/package-deps-hash/
+## Links
+
+- [CHANGELOG.md](
+  https://github.com/microsoft/rushstack/blob/master/libraries/package-deps-hash/CHANGELOG.md) - Find
+  out what's new in the latest version
+- [API Reference](https://rushstack.io/pages/api/package-deps-hash/)
+
+`@rushstack/package-deps-hash` is part of the [Rush Stack](https://rushstack.io/) family of projects.

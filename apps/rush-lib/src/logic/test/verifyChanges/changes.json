@@ -1,12 +1,14 @@
 {
-  "changes": [{
-    "packageName": "a",
-    "type": "patch",
-    "comment": "Patching a"
-  },
-  {
-    "packageName": "b",
-    "type": "patch",
-    "comment": "Patching b"
-  }]
+  "changes": [
+    {
+      "packageName": "a",
+      "type": "patch",
+      "comment": "Patching a"
+    },
+    {
+      "packageName": "b",
+      "type": "patch",
+      "comment": "Patching b"
+    }
+  ]
 }

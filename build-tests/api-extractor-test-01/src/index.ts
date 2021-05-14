@@ -16,8 +16,7 @@
  * A simple, normal definition
  * @public
  */
-export interface ISimpleInterface {
-}
+export interface ISimpleInterface {}
 
 /**
  * Test different kinds of ambient definitions
@@ -35,15 +34,17 @@ export class AmbientConsumer {
    * Found via tsconfig.json's "lib" setting, which specifies the built-in "es2015.promise"
    */
   public builtinDefinition2(): Promise<void> {
-    return new Promise<void>(() => { /* */ });
+    return new Promise<void>(() => {
+      /* */
+    });
   }
 
   /**
    * Configured via tsconfig.json's "lib" setting, which specifies `@types/jest`.
    * The emitted index.d.ts gets a reference like this:  <reference types="jest" />
    */
-  public definitelyTyped(): jest.Context {
-    return {} as jest.Context;
+  public definitelyTyped(): jest.MockContext<number, any> {
+    return {} as jest.MockContext<number, any>;
   }
 
   /**
@@ -60,8 +61,11 @@ export class AmbientConsumer {
  * Example decorator
  * @public
  */
-export function virtual(target: Object, propertyKey: string | symbol,
-  descriptor: TypedPropertyDescriptor<any>): void {
+export function virtual(
+  target: Object,
+  propertyKey: string | symbol,
+  descriptor: TypedPropertyDescriptor<any>
+): void {
   // Eventually we may implement runtime validation (e.g. in DEBUG builds)
   // but currently this decorator is only used by the build tools.
 }
@@ -91,15 +95,12 @@ export * from './DeclarationMerging';
 
 export * from './Enums';
 
-export {
-  DefaultExportEdgeCase,
-  default as ClassExportedAsDefault
-} from './DefaultExportEdgeCase';
+export { DefaultExportEdgeCase, default as ClassExportedAsDefault } from './DefaultExportEdgeCase';
 
 /**
  * Test that we can correctly carry default imports into the rollup .d.ts file
  */
-import Long, { MAX_UNSIGNED_VALUE } from "long";
+import Long, { MAX_UNSIGNED_VALUE } from 'long';
 export { MAX_UNSIGNED_VALUE };
 /** @public */
 export declare class UseLong {

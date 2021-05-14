@@ -13,6 +13,7 @@ export interface IBaseCommandJson {
    */
   description?: string;
   safeForSimultaneousRushProcesses: boolean;
+  autoinstallerName?: string;
 }
 
 /**
@@ -25,6 +26,8 @@ export interface IBulkCommandJson extends IBaseCommandJson {
   ignoreMissingScript?: boolean;
   incremental?: boolean;
   allowWarningsInSuccessfulBuild?: boolean;
+  watchForChanges?: boolean;
+  disableBuildCache?: boolean;
 }
 
 /**
@@ -46,6 +49,7 @@ export interface IBaseParameterJson {
   shortName?: string;
   description: string;
   associatedCommands: string[];
+  required?: boolean;
 }
 
 /**

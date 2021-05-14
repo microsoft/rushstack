@@ -12,9 +12,10 @@ export class UnlinkAction extends BaseRushAction {
     super({
       actionName: 'unlink',
       summary: 'Delete node_modules symlinks for all projects in the repo',
-      documentation: 'This removes the symlinks created by the "rush link" command. This is useful for'
-        + ' cleaning a repo using "git clean" without accidentally deleting source files, or for using standard NPM'
-        + ' commands on a project.',
+      documentation:
+        'This removes the symlinks created by the "rush link" command. This is useful for' +
+        ' cleaning a repo using "git clean" without accidentally deleting source files, or for using standard NPM' +
+        ' commands on a project.',
       parser
     });
   }
@@ -23,15 +24,13 @@ export class UnlinkAction extends BaseRushAction {
     // No parameters
   }
 
-  protected run(): Promise<void> {
-    return Promise.resolve().then(() => {
-      const unlinkManager: UnlinkManager = new UnlinkManager(this.rushConfiguration);
+  protected async runAsync(): Promise<void> {
+    const unlinkManager: UnlinkManager = new UnlinkManager(this.rushConfiguration);
 
-      if (!unlinkManager.unlink()) {
-        console.log('Nothing to do.');
-      } else {
-        console.log(os.EOL + 'Done.');
-      }
-    });
+    if (!unlinkManager.unlink()) {
+      console.log('Nothing to do.');
+    } else {
+      console.log(os.EOL + 'Done.');
+    }
   }
 }

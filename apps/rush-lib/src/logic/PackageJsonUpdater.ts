@@ -1,22 +1,22 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors/safe';
 import * as semver from 'semver';
 
 import { RushConfiguration } from '../api/RushConfiguration';
-import { InstallManager, IInstallManagerOptions } from './InstallManager';
+import { BaseInstallManager, IInstallManagerOptions } from './base/BaseInstallManager';
+import { InstallManagerFactory } from './InstallManagerFactory';
 import { VersionMismatchFinder } from './versionMismatch/VersionMismatchFinder';
 import { PurgeManager } from './PurgeManager';
 import { Utilities } from '../utilities/Utilities';
-import {
-  DependencyType,
-  PackageJsonDependency
-} from '../api/PackageJsonEditor';
+import { DependencyType, PackageJsonDependency } from '../api/PackageJsonEditor';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { VersionMismatchFinderEntity } from './versionMismatch/VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './versionMismatch/VersionMismatchFinderProject';
+import { RushConstants } from './RushConstants';
+import { InstallHelpers } from './installManager/InstallHelpers';
 
 /**
  * The type of SemVer range specifier that is prepended to the version
@@ -124,13 +124,9 @@ export class PackageJsonUpdater {
       variant
     } = options;
 
-    const implicitlyPinned: Map<string, string> = InstallManager.collectImplicitlyPreferredVersions(
-      this._rushConfiguration,
-      {
-        variant
-      }
+    const implicitlyPinned: Map<string, string> = this._rushConfiguration.getImplicitlyPreferredVersions(
+      variant
     );
-
     const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
     const installManagerOptions: IInstallManagerOptions = {
       debug: debugInstall,
@@ -141,9 +137,11 @@ export class PackageJsonUpdater {
       recheckShrinkwrap: false,
       networkConcurrency: undefined,
       collectLogFile: false,
-      variant: variant
+      variant: variant,
+      maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
+      pnpmFilterArguments: []
     };
-    const installManager: InstallManager = new InstallManager(
+    const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
       this._rushConfiguration,
       this._rushGlobalFolder,
       purgeManager,
@@ -178,18 +176,23 @@ export class PackageJsonUpdater {
 
       if (this._rushConfiguration.ensureConsistentVersions || updateOtherPackages) {
         // we need to do a mismatch check
-        const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(this._rushConfiguration, {
-          variant: variant
-        });
+        const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
+          this._rushConfiguration,
+          {
+            variant: variant
+          }
+        );
 
         const mismatches: string[] = mismatchFinder.getMismatches().filter((mismatch) => {
           return !projects.find((proj) => proj.packageName === mismatch);
         });
         if (mismatches.length) {
           if (!updateOtherPackages) {
-            throw new Error(`Adding '${packageName}@${version}' to ${project.packageName}`
-              + ` causes mismatched dependencies. Use the "--make-consistent" flag to update other packages to use`
-              + ` this version, or do not specify a SemVer range.`);
+            throw new Error(
+              `Adding '${packageName}@${version}' to ${project.packageName}` +
+                ` causes mismatched dependencies. Use the "--make-consistent" flag to update other packages to use` +
+                ` this version, or do not specify a SemVer range.`
+            );
           }
 
           // otherwise we need to go update a bunch of other projects
@@ -226,7 +229,7 @@ export class PackageJsonUpdater {
       console.log(colors.green('Running "rush update"'));
       console.log();
       try {
-        await installManager.doInstall();
+        await installManager.doInstallAsync();
       } finally {
         purgeManager.deleteAll();
       }
@@ -247,18 +250,16 @@ export class PackageJsonUpdater {
    */
   public updateProject(options: IUpdateProjectOptions): void {
     let { dependencyType } = options;
-    const {
-      project,
-      packageName,
-      newVersion
-    } = options;
+    const { project, packageName, newVersion } = options;
 
     const oldDependency: PackageJsonDependency | undefined = project.tryGetDependency(packageName);
     const oldDevDependency: PackageJsonDependency | undefined = project.tryGetDevDependency(packageName);
 
     const oldDependencyType: DependencyType | undefined = oldDevDependency
       ? oldDevDependency.dependencyType
-      : (oldDependency ? oldDependency.dependencyType : undefined);
+      : oldDependency
+      ? oldDependency.dependencyType
+      : undefined;
 
     dependencyType = dependencyType || oldDependencyType || DependencyType.Regular;
 
@@ -278,7 +279,7 @@ export class PackageJsonUpdater {
    */
   private async _getNormalizedVersionSpec(
     projects: RushConfigurationProject[],
-    installManager: InstallManager,
+    installManager: BaseInstallManager,
     packageName: string,
     initialSpec: string | undefined,
     implicitlyPinnedVersion: string | undefined,
@@ -293,25 +294,50 @@ export class PackageJsonUpdater {
     console.log();
 
     // determine if the package is a project in the local repository and if the version exists
-    const localProject: RushConfigurationProject | undefined = this._tryGetLocalProject(packageName, projects);
+    const localProject: RushConfigurationProject | undefined = this._tryGetLocalProject(
+      packageName,
+      projects
+    );
 
     // if ensureConsistentVersions => reuse the pinned version
     // else, query the registry and use the latest that satisfies semver spec
     if (initialSpec && implicitlyPinnedVersion && initialSpec === implicitlyPinnedVersion) {
-      console.log(colors.green('Assigning "')
-        + colors.cyan(initialSpec)
-        + colors.green(`" for "${packageName}" because it matches what other projects are using in this repo.`));
+      console.log(
+        colors.green('Assigning "') +
+          colors.cyan(initialSpec) +
+          colors.green(
+            `" for "${packageName}" because it matches what other projects are using in this repo.`
+          )
+      );
       return initialSpec;
     }
 
     if (this._rushConfiguration.ensureConsistentVersions && !initialSpec && implicitlyPinnedVersion) {
-      console.log(`Assigning the version range "${colors.cyan(implicitlyPinnedVersion)}" for "${packageName}" because`
-        + ` it is already used by other projects in this repo.`);
+      console.log(
+        `Assigning the version range "${colors.cyan(implicitlyPinnedVersion)}" for "${packageName}" because` +
+          ` it is already used by other projects in this repo.`
+      );
       return implicitlyPinnedVersion;
     }
 
-    await installManager.ensureLocalPackageManager();
+    await InstallHelpers.ensureLocalPackageManager(
+      this._rushConfiguration,
+      this._rushGlobalFolder,
+      RushConstants.defaultMaxInstallAttempts
+    );
+
+    const useWorkspaces: boolean = !!(
+      this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces
+    );
+    const workspacePrefix: string = 'workspace:';
+
+    // Trim 'workspace:' notation from the spec, since we're going to be tweaking the range
+    if (useWorkspaces && initialSpec && initialSpec.startsWith(workspacePrefix)) {
+      initialSpec = initialSpec.substring(workspacePrefix.length).trim();
+    }
+
     let selectedVersion: string | undefined;
+    let selectedVersionPrefix: string = '';
 
     if (initialSpec && initialSpec !== 'latest') {
       console.log(colors.gray('Finding versions that satisfy the selector: ') + initialSpec);
@@ -320,14 +346,21 @@ export class PackageJsonUpdater {
       if (localProject !== undefined) {
         const version: string = localProject.packageJson.version;
         if (semver.satisfies(version, initialSpec)) {
-          selectedVersion = version;
+          // For workspaces, assume that specifying the exact version means you always want to consume
+          // the local project. Otherwise, use the exact local package version
+          if (useWorkspaces) {
+            selectedVersion = initialSpec === version ? '*' : initialSpec;
+            selectedVersionPrefix = workspacePrefix;
+          } else {
+            selectedVersion = version;
+          }
         } else {
           throw new Error(
             `The dependency being added ("${packageName}") is a project in the local Rush repository, ` +
-            `but the version specifier provided (${initialSpec}) does not match the local project's version ` +
-            `(${version}). Correct the version specifier, omit a version specifier, or include "${packageName}" as a ` +
-            `cyclicDependencyProject if it is intended for "${packageName}" to come from an external feed and not ` +
-            'from the local Rush repository.'
+              `but the version specifier provided (${initialSpec}) does not match the local project's version ` +
+              `(${version}). Correct the version specifier, omit a version specifier, or include "${packageName}" as a ` +
+              `cyclicDependencyProject if it is intended for "${packageName}" to come from an external feed and not ` +
+              'from the local Rush repository.'
           );
         }
       } else {
@@ -340,12 +373,11 @@ export class PackageJsonUpdater {
           commandArgs = ['view', packageName, 'versions', '--json'];
         }
 
-        const allVersions: string =
-          Utilities.executeCommandAndCaptureOutput(
-            this._rushConfiguration.packageManagerToolFilename,
-            commandArgs,
-            this._rushConfiguration.commonTempFolder
-          );
+        const allVersions: string = Utilities.executeCommandAndCaptureOutput(
+          this._rushConfiguration.packageManagerToolFilename,
+          commandArgs,
+          this._rushConfiguration.commonTempFolder
+        );
 
         let versionList: string[];
         if (this._rushConfiguration.packageManager === 'yarn') {
@@ -365,19 +397,31 @@ export class PackageJsonUpdater {
         }
 
         if (!selectedVersion) {
-          throw new Error(`Unable to find a version of "${packageName}" that satisfies`
-            + ` the version specifier "${initialSpec}"`);
+          throw new Error(
+            `Unable to find a version of "${packageName}" that satisfies` +
+              ` the version specifier "${initialSpec}"`
+          );
         }
       }
     } else {
       if (!this._rushConfiguration.ensureConsistentVersions) {
-        console.log(colors.gray(`The "ensureConsistentVersions" policy is NOT active,`
-          + ` so we will assign the latest version.`));
+        console.log(
+          colors.gray(
+            `The "ensureConsistentVersions" policy is NOT active, so we will assign the latest version.`
+          )
+        );
         console.log();
       }
 
       if (localProject !== undefined) {
-        selectedVersion = localProject.packageJson.version;
+        // For workspaces, assume that no specified version range means you always want to consume
+        // the local project. Otherwise, use the exact local package version
+        if (useWorkspaces) {
+          selectedVersion = '*';
+          selectedVersionPrefix = workspacePrefix;
+        } else {
+          selectedVersion = localProject.packageJson.version;
+        }
       } else {
         console.log(`Querying NPM registry for latest version of "${packageName}"...`);
 
@@ -397,41 +441,50 @@ export class PackageJsonUpdater {
 
       console.log();
 
-      console.log(`Found latest version: ${colors.cyan(selectedVersion)}`);
+      console.log(`Found latest version: ${colors.cyan(selectedVersion!)}`);
     }
 
     console.log();
 
-    switch (rangeStyle) {
-      case SemVerStyle.Caret: {
-        console.log(colors.grey(`Assigning version "^${selectedVersion}" for "${packageName}" because the "--caret"`
-          + ` flag was specified.`));
-        return `^${selectedVersion}`;
-      }
+    let reasonForModification: string = '';
+    if (selectedVersion !== '*') {
+      switch (rangeStyle) {
+        case SemVerStyle.Caret: {
+          selectedVersionPrefix += '^';
+          reasonForModification = ' because the "--caret" flag was specified';
+          break;
+        }
 
-      case SemVerStyle.Exact: {
-        console.log(colors.grey(`Assigning version "${selectedVersion}" for "${packageName}" because the "--exact"`
-          + ` flag was specified.`));
-        return selectedVersion;
-      }
+        case SemVerStyle.Exact: {
+          reasonForModification = ' because the "--exact" flag was specified';
+          break;
+        }
 
-      case SemVerStyle.Tilde: {
-        console.log(colors.gray(`Assigning version "~${selectedVersion}" for "${packageName}".`));
-        return `~${selectedVersion}`;
-      }
+        case SemVerStyle.Tilde: {
+          selectedVersionPrefix += '~';
+          break;
+        }
 
-      case SemVerStyle.Passthrough: {
-        console.log(colors.gray(`Assigning version "${selectedVersion}" for "${packageName}".`));
-        return selectedVersion;
-      }
+        case SemVerStyle.Passthrough: {
+          break;
+        }
 
-      default: {
-        throw new Error(`Unexpected SemVerStyle ${rangeStyle}.`);
+        default: {
+          throw new Error(`Unexpected SemVerStyle ${rangeStyle}.`);
+        }
       }
     }
+
+    const normalizedVersion: string = selectedVersionPrefix + selectedVersion;
+    console.log(
+      colors.gray(`Assigning version "${normalizedVersion}" for "${packageName}"${reasonForModification}.`)
+    );
+    return normalizedVersion;
   }
 
-  private _collectAllDownstreamDependencies(project: RushConfigurationProject): Set<RushConfigurationProject> {
+  private _collectAllDownstreamDependencies(
+    project: RushConfigurationProject
+  ): Set<RushConfigurationProject> {
     const allProjectDownstreamDependencies: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
 
     const collectDependencies: (rushProject: RushConfigurationProject) => void = (
@@ -451,11 +504,11 @@ export class PackageJsonUpdater {
         }
 
         if (!allProjectDownstreamDependencies.has(foundProject)) {
-          allProjectDownstreamDependencies.add(foundProject)
+          allProjectDownstreamDependencies.add(foundProject);
           collectDependencies(foundProject);
         }
       }
-    }
+    };
 
     collectDependencies(project);
     return allProjectDownstreamDependencies;
@@ -497,16 +550,18 @@ export class PackageJsonUpdater {
     if (project === foundProject) {
       throw new Error(
         'Unable to add a project as a dependency of itself unless the dependency is listed as a cyclic dependency ' +
-        `in rush.json. This command attempted to add "${foundProject.packageName}" as a dependency of itself.`
+          `in rush.json. This command attempted to add "${foundProject.packageName}" as a dependency of itself.`
       );
     }
 
     // Are we attempting to create a cycle?
-    const downstreamDependencies: Set<RushConfigurationProject> = this._collectAllDownstreamDependencies(project);
+    const downstreamDependencies: Set<RushConfigurationProject> = this._collectAllDownstreamDependencies(
+      project
+    );
     if (downstreamDependencies.has(foundProject)) {
       throw new Error(
         `Adding "${foundProject.packageName}" as a direct or indirect dependency of ` +
-        `"${project.packageName}" would create a dependency cycle.`
+          `"${project.packageName}" would create a dependency cycle.`
       );
     }
 

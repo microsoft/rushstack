@@ -13,6 +13,22 @@
  */
 export const enum ConsoleMessageId {
   /**
+   * "Analysis will use the bundled TypeScript version ___"
+   */
+  Preamble = 'console-preamble',
+
+  /**
+   * "The target project appears to use TypeScript ___ which is newer than the bundled compiler engine;
+   * consider upgrading API Extractor."
+   */
+  CompilerVersionNotice = 'console-compiler-version-notice',
+
+  /**
+   * "Using custom TSDoc config from ___"
+   */
+  UsingCustomTSDocConfig = 'console-using-custom-tsdoc-config',
+
+  /**
    * "Found metadata in ___"
    */
   FoundTSDocMetadata = 'console-found-tsdoc-metadata',

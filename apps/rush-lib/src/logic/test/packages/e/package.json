@@ -1,0 +1,11 @@
+{
+  "name": "e",
+  "version": "1.0.0",
+  "description": "Test package e",
+  "devDependencies": {
+    "a": ">=1.0.0 <2.0.0"
+  },
+  "peerDependencies": {
+    "a": ">=1.0.0 <2.0.0"
+  }
+}

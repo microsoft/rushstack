@@ -1,10 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  PackageJsonDependency,
-  DependencyType
-} from '../../api/PackageJsonEditor';
+import { PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
 
 export interface IVersionMismatchFinderEntityOptions {
   friendlyName: string;
@@ -23,11 +20,15 @@ export abstract class VersionMismatchFinderEntity {
     this.skipRushCheck = options.skipRushCheck;
   }
 
-  public abstract filePath: string;
-  public abstract allDependencies: ReadonlyArray<PackageJsonDependency>;
+  public abstract get filePath(): string;
+  public abstract get allDependencies(): ReadonlyArray<PackageJsonDependency>;
 
   public abstract tryGetDependency(packageName: string): PackageJsonDependency | undefined;
   public abstract tryGetDevDependency(packageName: string): PackageJsonDependency | undefined;
-  public abstract addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
+  public abstract addOrUpdateDependency(
+    packageName: string,
+    newVersion: string,
+    dependencyType: DependencyType
+  ): void;
   public abstract saveIfModified(): boolean;
 }

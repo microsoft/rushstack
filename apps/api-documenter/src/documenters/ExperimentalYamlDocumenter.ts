@@ -16,7 +16,7 @@ import { DocumenterConfig } from './DocumenterConfig';
 export class ExperimentalYamlDocumenter extends YamlDocumenter {
   private _config: IConfigTableOfContents;
   private _tocPointerMap: { [key: string]: IYamlTocItem };
-  private _catchAllPointer: IYamlTocItem;
+  private _catchAllPointer: IYamlTocItem | undefined;
 
   public constructor(apiModel: ApiModel, documenterConfig: DocumenterConfig) {
     super(apiModel, documenterConfig.configFile.newDocfxNamespaces);
@@ -98,10 +98,9 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
 
     // First we attempt to filter by inline tag if provided.
     if (apiItem instanceof ApiDocumentedItem) {
-      const docInlineTag: DocInlineTag | undefined =
-        categoryInlineTag
-          ? this._findInlineTagByName(categoryInlineTag, apiItem.tsdocComment)
-          : undefined;
+      const docInlineTag: DocInlineTag | undefined = categoryInlineTag
+        ? this._findInlineTagByName(categoryInlineTag, apiItem.tsdocComment)
+        : undefined;
 
       const tagContent: string | undefined =
         docInlineTag && docInlineTag.tagContent && docInlineTag.tagContent.trim();
@@ -134,7 +133,10 @@ export class ExperimentalYamlDocumenter extends YamlDocumenter {
 
   // This is a direct copy of a @docCategory inline tag finder in office-ui-fabric-react,
   // but is generic enough to be used for any inline tag
-  private _findInlineTagByName(tagName: string, docComment: DocComment | undefined): DocInlineTag | undefined {
+  private _findInlineTagByName(
+    tagName: string,
+    docComment: DocComment | undefined
+  ): DocInlineTag | undefined {
     const tagNameToCheck: string = `@${tagName}`;
 
     if (docComment instanceof DocInlineTag) {

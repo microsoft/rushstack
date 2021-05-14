@@ -4,5 +4,4 @@
 /// <reference lib="es2018.intl" />
 
 /** @public */
-export class ReferenceLibDirective extends Intl.PluralRules {
-}
+export class ReferenceLibDirective extends Intl.PluralRules {}

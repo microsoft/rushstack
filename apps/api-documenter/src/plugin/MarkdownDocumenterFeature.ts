@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { PluginFeature } from './PluginFeature';
 import { ApiItem, ApiModel } from '@microsoft/api-extractor-model';
+import { TypeUuid } from '@rushstack/node-core-library';
+import { PluginFeature } from './PluginFeature';
 import { MarkdownDocumenterAccessor } from './MarkdownDocumenterAccessor';
 
 /**
@@ -61,8 +62,9 @@ export interface IMarkdownDocumenterFeatureOnBeforeWritePageArgs {
  * Event arguments for MarkdownDocumenterFeature.onFinished()
  * @public
  */
-export interface IMarkdownDocumenterFeatureOnFinishedArgs {
-}
+export interface IMarkdownDocumenterFeatureOnFinishedArgs {}
+
+const uuidMarkdownDocumenterFeature: string = '34196154-9eb3-4de0-a8c8-7e9539dfe216';
 
 /**
  * Inherit from this base class to implement an API Documenter plugin feature that customizes
@@ -72,7 +74,7 @@ export interface IMarkdownDocumenterFeatureOnFinishedArgs {
  */
 export class MarkdownDocumenterFeature extends PluginFeature {
   /** {@inheritdoc PluginFeature.context} */
-  public context: MarkdownDocumenterFeatureContext;
+  public context!: MarkdownDocumenterFeatureContext;
 
   /**
    * This event occurs before each markdown file is written.  It provides an opportunity to customize the
@@ -90,4 +92,10 @@ export class MarkdownDocumenterFeature extends PluginFeature {
   public onFinished(eventArgs: IMarkdownDocumenterFeatureOnFinishedArgs): void {
     // (implemented by child class)
   }
+
+  public static [Symbol.hasInstance](instance: object): boolean {
+    return TypeUuid.isInstanceOf(instance, uuidMarkdownDocumenterFeature);
+  }
 }
+
+TypeUuid.registerClass(MarkdownDocumenterFeature, uuidMarkdownDocumenterFeature);

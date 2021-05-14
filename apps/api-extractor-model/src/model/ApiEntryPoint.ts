@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ApiItem, ApiItemKind } from '../items/ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
@@ -11,8 +11,7 @@ import { ApiPackage } from './ApiPackage';
  * Constructor options for {@link ApiEntryPoint}.
  * @public
  */
-export interface IApiEntryPointOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions {
-}
+export interface IApiEntryPointOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions {}
 
 /**
  * Represents the entry point for an NPM package.
@@ -75,7 +74,6 @@ export class ApiEntryPoint extends ApiItemContainerMixin(ApiNameMixin(ApiItem)) 
 
   /** @beta @override */
   public buildCanonicalReference(): DeclarationReference {
-
     if (this.parent instanceof ApiPackage) {
       return DeclarationReference.package(this.parent.name, this.importPath);
     }

@@ -20,7 +20,7 @@
         }
       },
       "additionalProperties": false,
-      "required": [ "value" ]
+      "required": ["value"]
     }
   },
   "additionalProperties": false,

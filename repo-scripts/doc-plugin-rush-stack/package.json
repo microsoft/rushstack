@@ -7,21 +7,20 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "gulp test --clean"
+    "build": "heft build --clean"
   },
   "dependencies": {
-    "@microsoft/api-documenter": "7.7.12",
-    "@microsoft/api-extractor-model": "7.7.7",
-    "@microsoft/node-core-library": "3.19.3",
-    "@microsoft/tsdoc": "0.12.14",
+    "@microsoft/api-documenter": "workspace:*",
+    "@microsoft/api-extractor-model": "workspace:*",
+    "@microsoft/tsdoc": "0.13.2",
+    "@rushstack/node-core-library": "workspace:*",
     "js-yaml": "~3.13.1"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.4.3",
-    "@microsoft/node-library-build": "6.4.4",
-    "@rushstack/eslint-config": "0.5.4",
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
     "@types/js-yaml": "3.12.1",
-    "@types/node": "10.17.13",
-    "gulp": "~4.0.2"
+    "@types/node": "10.17.13"
   }
 }

@@ -5,7 +5,7 @@ import * as Gulp from 'gulp';
 import * as path from 'path';
 import globEscape = require('glob-escape');
 import { GulpTask } from '../GulpTask';
-import { JsonObject } from '@microsoft/node-core-library';
+import { JsonObject } from '@rushstack/node-core-library';
 
 /**
  * Configuration for CopyStaticAssetsTask
@@ -47,15 +47,12 @@ export interface ICopyStaticAssetsTaskConfig {
  */
 export class CopyStaticAssetsTask extends GulpTask<ICopyStaticAssetsTaskConfig> {
   public constructor() {
-    super(
-      'copy-static-assets',
-      {
-        includeExtensions: [],
-        excludeExtensions: [],
-        includeFiles: [],
-        excludeFiles: []
-      }
-    );
+    super('copy-static-assets', {
+      includeExtensions: [],
+      excludeExtensions: [],
+      includeFiles: [],
+      excludeFiles: []
+    });
   }
 
   public loadSchema(): JsonObject {
@@ -68,7 +65,12 @@ export class CopyStaticAssetsTask extends GulpTask<ICopyStaticAssetsTaskConfig> 
 
     const globPatterns: string[] = [];
 
-    const allExtensions: string[] = (this.taskConfig.includeExtensions || []).concat(['json', 'html', 'css', 'md']);
+    const allExtensions: string[] = (this.taskConfig.includeExtensions || []).concat([
+      'json',
+      'html',
+      'css',
+      'md'
+    ]);
 
     for (let ext of allExtensions) {
       if (this.taskConfig.excludeExtensions) {
@@ -98,8 +100,9 @@ export class CopyStaticAssetsTask extends GulpTask<ICopyStaticAssetsTaskConfig> 
       globPatterns.push(`!${path.join(rootPath, file)}`);
     }
 
-    return gulp.src(globPatterns, { base: rootPath })
-               .pipe(gulp.dest(libPath))
-               .on('finish', () => completeCallback());
+    return gulp
+      .src(globPatterns, { base: rootPath })
+      .pipe(gulp.dest(libPath))
+      .on('finish', () => completeCallback());
   }
 }

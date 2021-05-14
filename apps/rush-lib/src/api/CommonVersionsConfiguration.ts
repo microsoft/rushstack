@@ -1,15 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import crypto from 'crypto';
 import * as path from 'path';
 import {
   JsonFile,
   JsonSchema,
   MapExtensions,
-  PackageName,
   ProtectableMap,
-  FileSystem
-} from '@microsoft/node-core-library';
+  FileSystem,
+  Sort
+} from '@rushstack/node-core-library';
+import { PackageNameParsers } from './PackageNameParsers';
 import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
 
 /**
@@ -56,18 +58,20 @@ interface ICommonVersionsJson {
  */
 export class CommonVersionsConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/common-versions.schema.json'));
+    path.join(__dirname, '../schemas/common-versions.schema.json')
+  );
 
   private _filePath: string;
   private _preferredVersions: ProtectableMap<string, string>;
   private _implicitlyPreferredVersions: boolean | undefined;
   private _xstitchPreferredVersions: ProtectableMap<string, string>;
   private _allowedAlternativeVersions: ProtectableMap<string, string[]>;
-  private _modified: boolean;
+  private _modified: boolean = false;
 
   private constructor(commonVersionsJson: ICommonVersionsJson | undefined, filePath: string) {
-    this._preferredVersions = new ProtectableMap<string, string>(
-      { onSet: this._onSetPreferredVersions.bind(this) });
+    this._preferredVersions = new ProtectableMap<string, string>({
+      onSet: this._onSetPreferredVersions.bind(this)
+    });
 
     if (commonVersionsJson && commonVersionsJson.implicitlyPreferredVersions !== undefined) {
       this._implicitlyPreferredVersions = commonVersionsJson.implicitlyPreferredVersions;
@@ -75,20 +79,28 @@ export class CommonVersionsConfiguration {
       this._implicitlyPreferredVersions = undefined;
     }
 
-    this._xstitchPreferredVersions = new ProtectableMap<string, string>(
-      { onSet: this._onSetPreferredVersions.bind(this) });
+    this._xstitchPreferredVersions = new ProtectableMap<string, string>({
+      onSet: this._onSetPreferredVersions.bind(this)
+    });
 
-    this._allowedAlternativeVersions = new ProtectableMap<string, string[]>(
-      { onSet: this._onSetAllowedAlternativeVersions.bind(this) });
+    this._allowedAlternativeVersions = new ProtectableMap<string, string[]>({
+      onSet: this._onSetAllowedAlternativeVersions.bind(this)
+    });
 
     if (commonVersionsJson) {
       try {
-        CommonVersionsConfiguration._deserializeTable(this.preferredVersions,
-          commonVersionsJson.preferredVersions);
-        CommonVersionsConfiguration._deserializeTable(this.xstitchPreferredVersions,
-          commonVersionsJson.xstitchPreferredVersions);
-        CommonVersionsConfiguration._deserializeTable(this.allowedAlternativeVersions,
-          commonVersionsJson.allowedAlternativeVersions);
+        CommonVersionsConfiguration._deserializeTable(
+          this.preferredVersions,
+          commonVersionsJson.preferredVersions
+        );
+        CommonVersionsConfiguration._deserializeTable(
+          this.xstitchPreferredVersions,
+          commonVersionsJson.xstitchPreferredVersions
+        );
+        CommonVersionsConfiguration._deserializeTable(
+          this.allowedAlternativeVersions,
+          commonVersionsJson.allowedAlternativeVersions
+        );
       } catch (e) {
         throw new Error(`Error loading "${path.basename(filePath)}": ${e.message}`);
       }
@@ -110,22 +122,24 @@ export class CommonVersionsConfiguration {
     return new CommonVersionsConfiguration(commonVersionsJson, jsonFilename);
   }
 
-  private static _deserializeTable<TValue>(map: Map<string, TValue>, object: {} | undefined): void {
+  private static _deserializeTable<TValue>(
+    map: Map<string, TValue>,
+    object: { [key: string]: TValue } | undefined
+  ): void {
     if (object) {
-      for (const key of Object.getOwnPropertyNames(object)) {
-        const value: TValue = object[key];
+      for (const [key, value] of Object.entries(object)) {
         map.set(key, value);
       }
     }
   }
 
-  private static _serializeTable<TValue>(map: Map<string, TValue>): { } {
-    const table: { } = { };
+  private static _serializeTable<TValue>(map: Map<string, TValue>): { [key: string]: TValue } {
+    const table: { [key: string]: TValue } = {};
 
     const keys: string[] = [...map.keys()];
     keys.sort();
     for (const key of keys) {
-      table[key] = map.get(key);
+      table[key] = map.get(key)!;
     }
 
     return table;
@@ -136,6 +150,23 @@ export class CommonVersionsConfiguration {
    */
   public get filePath(): string {
     return this._filePath;
+  }
+
+  /**
+   * Get a sha1 hash of the preferred versions.
+   */
+  public getPreferredVersionsHash(): string {
+    // Sort so that the hash is stable
+    const orderedPreferredVersions: Map<string, string> = new Map<string, string>(
+      this._preferredVersions.protectedView
+    );
+    Sort.sortMapKeys(orderedPreferredVersions);
+
+    // JSON.stringify does not support maps, so we need to convert to an object first
+    const preferredVersionsObj: { [dependency: string]: string } = MapExtensions.toObject(
+      orderedPreferredVersions
+    );
+    return crypto.createHash('sha1').update(JSON.stringify(preferredVersionsObj)).digest('hex');
   }
 
   /**
@@ -219,18 +250,26 @@ export class CommonVersionsConfiguration {
     return allPreferredVersions;
   }
 
-  private _onSetPreferredVersions(source: ProtectableMap<string, string>, key: string, value: string): string {
-    PackageName.validate(key);
+  private _onSetPreferredVersions(
+    source: ProtectableMap<string, string>,
+    key: string,
+    value: string
+  ): string {
+    PackageNameParsers.permissive.validate(key);
 
     if (source === this._preferredVersions) {
       if (this._xstitchPreferredVersions.has(key)) {
-        throw new Error(`The package "${key}" cannot be added to preferredVersions because it was already`
-          + ` added to xstitchPreferredVersions`);
+        throw new Error(
+          `The package "${key}" cannot be added to preferredVersions because it was already` +
+            ` added to xstitchPreferredVersions`
+        );
       }
     } else {
       if (this._preferredVersions.has(key)) {
-        throw new Error(`The package "${key}" cannot be added to xstitchPreferredVersions because it was already`
-          + ` added to preferredVersions`);
+        throw new Error(
+          `The package "${key}" cannot be added to xstitchPreferredVersions because it was already` +
+            ` added to preferredVersions`
+        );
       }
     }
 
@@ -239,8 +278,12 @@ export class CommonVersionsConfiguration {
     return value;
   }
 
-  private _onSetAllowedAlternativeVersions(source: ProtectableMap<string, string>, key: string, value: string): string {
-    PackageName.validate(key);
+  private _onSetAllowedAlternativeVersions(
+    source: ProtectableMap<string, string[]>,
+    key: string,
+    value: string[]
+  ): string[] {
+    PackageNameParsers.permissive.validate(key);
 
     this._modified = true;
 
@@ -257,11 +300,15 @@ export class CommonVersionsConfiguration {
     }
 
     if (this._xstitchPreferredVersions.size) {
-      result.xstitchPreferredVersions = CommonVersionsConfiguration._serializeTable(this.xstitchPreferredVersions);
+      result.xstitchPreferredVersions = CommonVersionsConfiguration._serializeTable(
+        this.xstitchPreferredVersions
+      );
     }
 
     if (this._allowedAlternativeVersions.size) {
-      result.allowedAlternativeVersions = CommonVersionsConfiguration._serializeTable(this.allowedAlternativeVersions);
+      result.allowedAlternativeVersions = CommonVersionsConfiguration._serializeTable(
+        this.allowedAlternativeVersions
+      ) as ICommonVersionsJsonVersionsMap;
     }
 
     return result;

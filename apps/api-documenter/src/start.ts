@@ -2,16 +2,18 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import * as colors from 'colors';
+import colors from 'colors';
 
-import { PackageJsonLookup } from '@microsoft/node-core-library';
+import { PackageJsonLookup } from '@rushstack/node-core-library';
 
 import { ApiDocumenterCommandLine } from './cli/ApiDocumenterCommandLine';
 
 const myPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
-console.log(os.EOL + colors.bold(`api-documenter ${myPackageVersion} `
-  + colors.cyan(' - https://api-extractor.com/') + os.EOL));
+console.log(
+  os.EOL +
+    colors.bold(`api-documenter ${myPackageVersion} ` + colors.cyan(' - https://api-extractor.com/') + os.EOL)
+);
 
 const parser: ApiDocumenterCommandLine = new ApiDocumenterCommandLine();
 

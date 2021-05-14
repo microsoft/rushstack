@@ -6,16 +6,17 @@ import { IApiDeclaredItemOptions, ApiDeclaredItem, IApiDeclaredItemJson } from '
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import { DeserializerContext } from '../model/DeserializerContext';
+import { ApiOptionalMixin, IApiOptionalMixinOptions } from '../mixins/ApiOptionalMixin';
 
 /**
  * Constructor options for {@link ApiPropertyItem}.
  * @public
  */
-export interface IApiPropertyItemOptions extends
-  IApiNameMixinOptions,
-  IApiReleaseTagMixinOptions,
-  IApiDeclaredItemOptions {
-
+export interface IApiPropertyItemOptions
+  extends IApiNameMixinOptions,
+    IApiReleaseTagMixinOptions,
+    IApiOptionalMixinOptions,
+    IApiDeclaredItemOptions {
   propertyTypeTokenRange: IExcerptTokenRange;
 }
 
@@ -28,7 +29,7 @@ export interface IApiPropertyItemJson extends IApiDeclaredItemJson {
  *
  * @public
  */
-export class ApiPropertyItem extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem)) {
+export class ApiPropertyItem extends ApiNameMixin(ApiReleaseTagMixin(ApiOptionalMixin(ApiDeclaredItem))) {
   /**
    * An {@link Excerpt} that describes the type of the property.
    */
@@ -41,9 +42,11 @@ export class ApiPropertyItem extends ApiNameMixin(ApiReleaseTagMixin(ApiDeclared
   }
 
   /** @override */
-  public static onDeserializeInto(options: Partial<IApiPropertyItemOptions>, context: DeserializerContext,
-    jsonObject: IApiPropertyItemJson): void {
-
+  public static onDeserializeInto(
+    options: Partial<IApiPropertyItemOptions>,
+    context: DeserializerContext,
+    jsonObject: IApiPropertyItemJson
+  ): void {
     super.onDeserializeInto(options, context, jsonObject);
 
     options.propertyTypeTokenRange = jsonObject.propertyTypeTokenRange;

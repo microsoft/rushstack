@@ -3,13 +3,10 @@
 
 import * as path from 'path';
 import * as tsdoc from '@microsoft/tsdoc';
-import * as colors from 'colors';
+import colors from 'colors';
 
-import {
-  CommandLineAction,
-  CommandLineStringParameter
-} from '@microsoft/ts-command-line';
-import { FileSystem } from '@microsoft/node-core-library';
+import { CommandLineAction, CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { FileSystem } from '@rushstack/node-core-library';
 import {
   ApiModel,
   ApiItem,
@@ -18,82 +15,93 @@ import {
   IResolveDeclarationReferenceResult
 } from '@microsoft/api-extractor-model';
 
+export interface IBuildApiModelResult {
+  apiModel: ApiModel;
+  inputFolder: string;
+  outputFolder: string;
+}
+
 export abstract class BaseAction extends CommandLineAction {
-  protected inputFolder: string;
-  protected outputFolder: string;
+  private _inputFolderParameter!: CommandLineStringParameter;
+  private _outputFolderParameter!: CommandLineStringParameter;
 
-  private _inputFolderParameter: CommandLineStringParameter;
-  private _outputFolderParameter: CommandLineStringParameter;
-
-  protected onDefineParameters(): void { // override
+  protected onDefineParameters(): void {
+    // override
     this._inputFolderParameter = this.defineStringParameter({
       parameterLongName: '--input-folder',
       parameterShortName: '-i',
       argumentName: 'FOLDER1',
-      description: `Specifies the input folder containing the *.api.json files to be processed.`
-        + ` If omitted, the default is "./input"`
+      description:
+        `Specifies the input folder containing the *.api.json files to be processed.` +
+        ` If omitted, the default is "./input"`
     });
 
     this._outputFolderParameter = this.defineStringParameter({
       parameterLongName: '--output-folder',
       parameterShortName: '-o',
       argumentName: 'FOLDER2',
-      description: `Specifies the output folder where the documentation will be written.`
-        + ` ANY EXISTING CONTENTS WILL BE DELETED!`
-        + ` If omitted, the default is "./${this.actionName}"`
+      description:
+        `Specifies the output folder where the documentation will be written.` +
+        ` ANY EXISTING CONTENTS WILL BE DELETED!` +
+        ` If omitted, the default is "./${this.actionName}"`
     });
   }
 
-  protected buildApiModel(): ApiModel {
+  protected buildApiModel(): IBuildApiModelResult {
     const apiModel: ApiModel = new ApiModel();
 
-    this.inputFolder = this._inputFolderParameter.value || './input';
-    if (!FileSystem.exists(this.inputFolder)) {
-      throw new Error('The input folder does not exist: ' + this.inputFolder);
+    const inputFolder: string = this._inputFolderParameter.value || './input';
+    if (!FileSystem.exists(inputFolder)) {
+      throw new Error('The input folder does not exist: ' + inputFolder);
     }
 
-    this.outputFolder = this._outputFolderParameter.value || `./${this.actionName}`;
-    FileSystem.ensureFolder(this.outputFolder);
+    const outputFolder: string = this._outputFolderParameter.value || `./${this.actionName}`;
+    FileSystem.ensureFolder(outputFolder);
 
-    for (const filename of FileSystem.readFolder(this.inputFolder)) {
+    for (const filename of FileSystem.readFolder(inputFolder)) {
       if (filename.match(/\.api\.json$/i)) {
         console.log(`Reading ${filename}`);
-        const filenamePath: string = path.join(this.inputFolder, filename);
+        const filenamePath: string = path.join(inputFolder, filename);
         apiModel.loadPackage(filenamePath);
       }
     }
 
     this._applyInheritDoc(apiModel, apiModel);
 
-    return apiModel;
+    return { apiModel, inputFolder, outputFolder };
   }
 
   // TODO: This is a temporary workaround.  The long term plan is for API Extractor's DocCommentEnhancer
   // to apply all @inheritDoc tags before the .api.json file is written.
   // See DocCommentEnhancer._applyInheritDoc() for more info.
   private _applyInheritDoc(apiItem: ApiItem, apiModel: ApiModel): void {
-
     if (apiItem instanceof ApiDocumentedItem) {
       if (apiItem.tsdocComment) {
         const inheritDocTag: tsdoc.DocInheritDocTag | undefined = apiItem.tsdocComment.inheritDocTag;
 
         if (inheritDocTag && inheritDocTag.declarationReference) {
           // Attempt to resolve the declaration reference
-          const result: IResolveDeclarationReferenceResult
-            = apiModel.resolveDeclarationReference(inheritDocTag.declarationReference, apiItem);
+          const result: IResolveDeclarationReferenceResult = apiModel.resolveDeclarationReference(
+            inheritDocTag.declarationReference,
+            apiItem
+          );
 
           if (result.errorMessage) {
-            console.log(colors.yellow(`Warning: Unresolved @inheritDoc tag for ${apiItem.displayName}: `
-              + result.errorMessage));
+            console.log(
+              colors.yellow(
+                `Warning: Unresolved @inheritDoc tag for ${apiItem.displayName}: ` + result.errorMessage
+              )
+            );
           } else {
-            if (result.resolvedApiItem instanceof ApiDocumentedItem
-              && result.resolvedApiItem.tsdocComment
-              && result.resolvedApiItem !== apiItem) {
+            if (
+              result.resolvedApiItem instanceof ApiDocumentedItem &&
+              result.resolvedApiItem.tsdocComment &&
+              result.resolvedApiItem !== apiItem
+            ) {
               this._copyInheritedDocs(apiItem.tsdocComment, result.resolvedApiItem.tsdocComment);
             }
           }
         }
-
       }
     }
 
@@ -124,5 +132,4 @@ export abstract class BaseAction extends CommandLineAction {
 
     targetDocComment.inheritDocTag = undefined;
   }
-
 }

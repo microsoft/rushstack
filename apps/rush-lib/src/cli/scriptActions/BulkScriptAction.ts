@@ -2,28 +2,30 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import * as colors from 'colors';
+import colors from 'colors/safe';
 
-import {
-  Event
-} from '../../index';
-
+import { AlreadyReportedError, ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
-  CommandLineStringListParameter,
   CommandLineParameterKind
-} from '@microsoft/ts-command-line';
+} from '@rushstack/ts-command-line';
 
+import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
-import { TaskSelector } from '../../logic/TaskSelector';
-import { Stopwatch } from '../../utilities/Stopwatch';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
+import { ITaskSelectorConstructor, TaskSelector } from '../../logic/TaskSelector';
+import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
-import { FileSystem } from '@microsoft/node-core-library';
-import { TaskRunner } from '../../logic/taskRunner/TaskRunner';
-import { TaskCollection } from '../../logic/taskRunner/TaskCollection';
+import { ITaskRunnerOptions, TaskRunner } from '../../logic/taskRunner/TaskRunner';
 import { Utilities } from '../../utilities/Utilities';
+import { RushConstants } from '../../logic/RushConstants';
+import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
+import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import { Selection } from '../../logic/Selection';
+import { SelectionParameterSet } from '../SelectionParameterSet';
+import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -34,11 +36,21 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   ignoreDependencyOrder: boolean;
   incremental: boolean;
   allowWarningsInSuccessfulBuild: boolean;
+  watchForChanges: boolean;
+  disableBuildCache: boolean;
 
   /**
    * Optional command to run. Otherwise, use the `actionName` as the command to run.
    */
   commandToRun?: string;
+}
+
+interface IExecuteInternalOptions {
+  taskSelectorOptions: ITaskSelectorConstructor;
+  taskRunnerOptions: ITaskRunnerOptions;
+  stopwatch: Stopwatch;
+  ignoreHooks?: boolean;
+  terminal: Terminal;
 }
 
 /**
@@ -51,20 +63,22 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
  * execute scripts from package.json in the same as any custom command.
  */
 export class BulkScriptAction extends BaseScriptAction {
-  private _enableParallelism: boolean;
-  private _ignoreMissingScript: boolean;
-  private _isIncrementalBuildAllowed: boolean;
-  private _commandToRun: string;
+  private readonly _enableParallelism: boolean;
+  private readonly _ignoreMissingScript: boolean;
+  private readonly _isIncrementalBuildAllowed: boolean;
+  private readonly _commandToRun: string;
+  private readonly _watchForChanges: boolean;
+  private readonly _disableBuildCache: boolean;
+  private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
+  private readonly _ignoreDependencyOrder: boolean;
+  private readonly _allowWarningsInSuccessfulBuild: boolean;
 
-  private _changedProjectsOnly: CommandLineFlagParameter;
-  private _fromFlag: CommandLineStringListParameter;
-  private _toFlag: CommandLineStringListParameter;
-  private _fromVersionPolicy: CommandLineStringListParameter;
-  private _toVersionPolicy: CommandLineStringListParameter;
-  private _verboseParameter: CommandLineFlagParameter;
+  private _changedProjectsOnly!: CommandLineFlagParameter;
+  private _selectionParameters!: SelectionParameterSet;
+  private _verboseParameter!: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
-  private _ignoreDependencyOrder: boolean;
-  private _allowWarningsInSuccessfulBuild: boolean;
+  private _ignoreHooksParameter!: CommandLineFlagParameter;
+  private _disableBuildCacheFlag: CommandLineFlagParameter | undefined;
 
   public constructor(options: IBulkScriptActionOptions) {
     super(options);
@@ -74,24 +88,33 @@ export class BulkScriptAction extends BaseScriptAction {
     this._commandToRun = options.commandToRun || options.actionName;
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
+    this._watchForChanges = options.watchForChanges;
+    this._disableBuildCache = options.disableBuildCache;
+    this._repoCommandLineConfiguration = options.commandLineConfiguration;
   }
 
-  public run(): Promise<void> {
-    if (!FileSystem.exists(this.rushConfiguration.rushLinkJsonFilename)) {
-      throw new Error(`File not found: ${this.rushConfiguration.rushLinkJsonFilename}` +
-        `${os.EOL}Did you run "rush link"?`);
+  public async runAsync(): Promise<void> {
+    // TODO: Replace with last-install.flag when "rush link" and "rush unlink" are deprecated
+    const lastLinkFlag: LastLinkFlag = LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration);
+    if (!lastLinkFlag.isValid()) {
+      const useWorkspaces: boolean =
+        this.rushConfiguration.pnpmOptions && this.rushConfiguration.pnpmOptions.useWorkspaces;
+      if (useWorkspaces) {
+        throw new Error(`Link flag invalid.${os.EOL}Did you run "rush install" or "rush update"?`);
+      } else {
+        throw new Error(`Link flag invalid.${os.EOL}Did you run "rush link"?`);
+      }
     }
+
     this._doBeforeTask();
 
     const stopwatch: Stopwatch = Stopwatch.start();
 
-    const isQuietMode: boolean = !(this._verboseParameter.value);
+    const isQuietMode: boolean = !this._verboseParameter.value;
 
     // if this is parallelizable, then use the value from the flag (undefined or a number),
     // if parallelism is not enabled, then restrict to 1 core
-    const parallelism: string | undefined = this._enableParallelism
-      ? this._parallelismParameter!.value
-      : '1';
+    const parallelism: string | undefined = this._enableParallelism ? this._parallelismParameter!.value : '1';
 
     // Collect all custom parameter values
     const customParameterValues: string[] = [];
@@ -101,10 +124,19 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
-    const taskSelector: TaskSelector = new TaskSelector({
+    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
+    let buildCacheConfiguration: BuildCacheConfiguration | undefined;
+    if (!this._disableBuildCacheFlag?.value && !this._disableBuildCache) {
+      buildCacheConfiguration = await BuildCacheConfiguration.tryLoadAsync(terminal, this.rushConfiguration);
+    }
+
+    const selection: Set<RushConfigurationProject> = this._selectionParameters.getSelectedProjects();
+
+    const taskSelectorOptions: ITaskSelectorConstructor = {
       rushConfiguration: this.rushConfiguration,
-      toFlags: this._mergeProjectsWithVersionPolicy(this._toFlag, this._toVersionPolicy),
-      fromFlags: this._mergeProjectsWithVersionPolicy(this._fromFlag, this._fromVersionPolicy),
+      buildCacheConfiguration,
+      selection,
+      commandName: this.actionName,
       commandToRun: this._commandToRun,
       customParameterValues,
       isQuietMode: isQuietMode,
@@ -112,40 +144,123 @@ export class BulkScriptAction extends BaseScriptAction {
       ignoreMissingScript: this._ignoreMissingScript,
       ignoreDependencyOrder: this._ignoreDependencyOrder,
       packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun)
+    };
+
+    const taskRunnerOptions: ITaskRunnerOptions = {
+      quietMode: isQuietMode,
+      parallelism: parallelism,
+      changedProjectsOnly: changedProjectsOnly,
+      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild,
+      repoCommandLineConfiguration: this._repoCommandLineConfiguration
+    };
+
+    const executeOptions: IExecuteInternalOptions = {
+      taskSelectorOptions,
+      taskRunnerOptions,
+      stopwatch,
+      terminal
+    };
+
+    if (this._watchForChanges) {
+      await this._runWatch(executeOptions);
+    } else {
+      await this._runOnce(executeOptions);
+    }
+  }
+
+  /**
+   * Runs the command in watch mode. Fundamentally is a simple loop:
+   * 1) Wait for a change to one or more projects in the selection (skipped initially)
+   * 2) Invoke the command on the changed projects, and, if applicable, impacted projects
+   *    Uses the same algorithm as --impacted-by
+   * 3) Goto (1)
+   */
+  private async _runWatch(options: IExecuteInternalOptions): Promise<void> {
+    const {
+      taskSelectorOptions: {
+        buildCacheConfiguration: initialBuildCacheConfiguration,
+        selection: projectsToWatch
+      },
+      stopwatch,
+      terminal
+    } = options;
+
+    // Use async import so that we don't pay the cost for sync builds
+    const { ProjectWatcher } = await import('../../logic/ProjectWatcher');
+
+    const projectWatcher: typeof ProjectWatcher.prototype = new ProjectWatcher({
+      debounceMilliseconds: 1000,
+      rushConfiguration: this.rushConfiguration,
+      projectsToWatch,
+      terminal
     });
 
-    // Register all tasks with the task collection
-    const taskCollection: TaskCollection = taskSelector.registerTasks();
+    let isInitialPass: boolean = true;
 
-    const taskRunner: TaskRunner = new TaskRunner(
-      taskCollection.getOrderedTasks(),
-      {
-        quietMode: isQuietMode,
-        parallelism: parallelism,
-        changedProjectsOnly: changedProjectsOnly,
-        allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild
+    // Loop until Ctrl+C
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      // Report so that the developer can always see that it is in watch mode as the latest console line.
+      terminal.writeLine(
+        `Watching for changes to ${projectsToWatch.size} ${
+          projectsToWatch.size === 1 ? 'project' : 'projects'
+        }. Press Ctrl+C to exit.`
+      );
+
+      // On the initial invocation, this promise will return immediately with the full set of projects
+      const { changedProjects, state } = await projectWatcher.waitForChange();
+
+      let selection: ReadonlySet<RushConfigurationProject> = changedProjects;
+
+      if (stopwatch.state === StopwatchState.Stopped) {
+        // Clear and reset the stopwatch so that we only report time from a single execution at a time
+        stopwatch.reset();
+        stopwatch.start();
       }
-    );
 
-    return taskRunner.execute().then(() => {
-      stopwatch.stop();
-      console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
-      this._doAfterTask(stopwatch, true);
-    }).catch((error: Error) => {
-      stopwatch.stop();
-      if (error instanceof AlreadyReportedError) {
-        console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
-      } else {
-        if (error && error.message) {
-          console.log('Error: ' + error.message);
+      terminal.writeLine(`Detected changes in ${selection.size} project${selection.size === 1 ? '' : 's'}:`);
+      const names: string[] = [...selection].map((x) => x.packageName).sort();
+      for (const name of names) {
+        terminal.writeLine(`    ${colors.cyan(name)}`);
+      }
+
+      // If the command ignores dependency order, that means that only the changed projects should be affected
+      // That said, running watch for commands that ignore dependency order may have unexpected results
+      if (!this._ignoreDependencyOrder) {
+        selection = Selection.intersection(Selection.expandAllConsumers(selection), projectsToWatch);
+      }
+
+      const executeOptions: IExecuteInternalOptions = {
+        taskSelectorOptions: {
+          ...options.taskSelectorOptions,
+          // Current implementation of the build cache deletes output folders before repopulating them;
+          // this tends to break `webpack --watch`, etc.
+          // Also, skipping writes to the local cache reduces CPU overhead and saves disk usage.
+          buildCacheConfiguration: isInitialPass ? initialBuildCacheConfiguration : undefined,
+          // Revise down the set of projects to execute the command on
+          selection,
+          // Pass the PackageChangeAnalyzer from the state differ to save a bit of overhead
+          packageChangeAnalyzer: state
+        },
+        taskRunnerOptions: options.taskRunnerOptions,
+        stopwatch,
+        // For now, don't run pre-build or post-build in watch mode
+        ignoreHooks: true,
+        terminal
+      };
+
+      try {
+        // Delegate the the underlying command, for only the projects that need reprocessing
+        await this._runOnce(executeOptions);
+      } catch (err) {
+        // In watch mode, we want to rebuild even if the original build failed.
+        if (!(err instanceof AlreadyReportedError)) {
+          throw err;
         }
-
-        console.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
       }
 
-      this._doAfterTask(stopwatch, false);
-      throw new AlreadyReportedError();
-    });
+      isInitialPass = false;
+    }
   }
 
   protected onDefineParameters(): void {
@@ -154,94 +269,126 @@ export class BulkScriptAction extends BaseScriptAction {
         parameterLongName: '--parallelism',
         parameterShortName: '-p',
         argumentName: 'COUNT',
-        description: 'Specify the number of concurrent build processes'
-          + ' The value "max" can be specified to indicate the number of CPU cores.'
-          + ' If this parameter omitted, the default value depends on the operating system and number of CPU cores.'
+        environmentVariable: EnvironmentVariableNames.RUSH_PARALLELISM,
+        description:
+          'Specifies the maximum number of concurrent processes to launch during a build.' +
+          ' The COUNT should be a positive integer or else the word "max" to specify a count that is equal to' +
+          ' the number of CPU cores. If this parameter is omitted, then the default value depends on the' +
+          ' operating system and number of CPU cores.'
       });
     }
-    this._toFlag = this.defineStringListParameter({
-      parameterLongName: '--to',
-      parameterShortName: '-t',
-      argumentName: 'PROJECT1',
-      description: 'Run command in the specified project and all of its dependencies'
-    });
-    this._fromVersionPolicy =  this.defineStringListParameter({
-      parameterLongName: '--from-version-policy',
-      argumentName: 'VERSION_POLICY_NAME',
-      description: 'Run command in all projects with the specified version policy '
-        + 'and all projects that directly or indirectly depend on projects with the specified version policy'
-    });
-    this._toVersionPolicy =  this.defineStringListParameter({
-      parameterLongName: '--to-version-policy',
-      argumentName: 'VERSION_POLICY_NAME',
-      description: 'Run command in all projects with the specified version policy and all of their dependencies'
-    });
-    this._fromFlag = this.defineStringListParameter({
-      parameterLongName: '--from',
-      parameterShortName: '-f',
-      argumentName: 'PROJECT2',
-      description: 'Run command in all projects that directly or indirectly depend on the specified project'
-    });
+
+    this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this);
+
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
       description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
+
     if (this._isIncrementalBuildAllowed) {
       this._changedProjectsOnly = this.defineFlagParameter({
         parameterLongName: '--changed-projects-only',
-        parameterShortName: '-o',
-        description: 'If specified, the incremental build will only rebuild projects that have changed, '
-          + 'but not any projects that directly or indirectly depend on the changed package.'
+        parameterShortName: '-c',
+        description:
+          'Normally the incremental build logic will rebuild changed projects as well as' +
+          ' any projects that directly or indirectly depend on a changed project. Specify "--changed-projects-only"' +
+          ' to ignore dependent projects, only rebuilding those projects whose files were changed.' +
+          ' Note that this parameter is "unsafe"; it is up to the developer to ensure that the ignored projects' +
+          ' are okay to ignore.'
       });
     }
+
+    this._ignoreHooksParameter = this.defineFlagParameter({
+      parameterLongName: '--ignore-hooks',
+      description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
+    });
+
+    this._disableBuildCacheFlag = this.defineFlagParameter({
+      parameterLongName: '--disable-build-cache',
+      description: '(EXPERIMENTAL) Disables the build cache for this command invocation.'
+    });
 
     this.defineScriptParameters();
   }
 
-  private _mergeProjectsWithVersionPolicy(flags: CommandLineStringListParameter,
-    versionPolicies: CommandLineStringListParameter): string[] {
+  /**
+   * Runs a single invocation of the command
+   */
+  private async _runOnce(options: IExecuteInternalOptions): Promise<void> {
+    const taskSelector: TaskSelector = new TaskSelector(options.taskSelectorOptions);
 
-    const projects: string[] = [...flags.values];
-    if (versionPolicies.values && versionPolicies.values.length > 0) {
-      this.rushConfiguration.projects.forEach(project => {
-        const matches: boolean = versionPolicies.values.some(policyName => {
-          return project.versionPolicyName === policyName;
-        });
-        if (matches) {
-          projects.push(project.packageName);
+    // Register all tasks with the task collection
+
+    const taskRunner: TaskRunner = new TaskRunner(
+      taskSelector.registerTasks().getOrderedTasks(),
+      options.taskRunnerOptions
+    );
+
+    const { ignoreHooks, stopwatch } = options;
+
+    try {
+      await taskRunner.executeAsync();
+
+      stopwatch.stop();
+      console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
+
+      if (!ignoreHooks) {
+        this._doAfterTask(stopwatch, true);
+      }
+    } catch (error) {
+      stopwatch.stop();
+
+      if (error instanceof AlreadyReportedError) {
+        console.log(`rush ${this.actionName} (${stopwatch.toString()})`);
+      } else {
+        if (error && error.message) {
+          if (this.parser.isDebug) {
+            console.log('Error: ' + error.stack);
+          } else {
+            console.log('Error: ' + error.message);
+          }
         }
-      });
+
+        console.log(colors.red(`rush ${this.actionName} - Errors! (${stopwatch.toString()})`));
+      }
+
+      if (!ignoreHooks) {
+        this._doAfterTask(stopwatch, false);
+      }
+      throw new AlreadyReportedError();
     }
-    return projects;
   }
 
   private _doBeforeTask(): void {
-    if (this.actionName !== 'build' && this.actionName !== 'rebuild') {
+    if (
+      this.actionName !== RushConstants.buildCommandName &&
+      this.actionName !== RushConstants.rebuildCommandName
+    ) {
       // Only collects information for built-in tasks like build or rebuild.
       return;
     }
 
     SetupChecks.validate(this.rushConfiguration);
 
-    this.eventHooksManager.handle(Event.preRushBuild, this.parser.isDebug);
+    this.eventHooksManager.handle(Event.preRushBuild, this.parser.isDebug, this._ignoreHooksParameter.value);
   }
 
   private _doAfterTask(stopwatch: Stopwatch, success: boolean): void {
-    if (this.actionName !== 'build' && this.actionName !== 'rebuild') {
+    if (
+      this.actionName !== RushConstants.buildCommandName &&
+      this.actionName !== RushConstants.rebuildCommandName
+    ) {
       // Only collects information for built-in tasks like build or rebuild.
       return;
     }
     this._collectTelemetry(stopwatch, success);
     this.parser.flushTelemetry();
-    this.eventHooksManager.handle(Event.postRushBuild, this.parser.isDebug);
+    this.eventHooksManager.handle(Event.postRushBuild, this.parser.isDebug, this._ignoreHooksParameter.value);
   }
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
-    const extraData: { [key: string]: string } = {
-      command_to: (this._toFlag.values.length > 0).toString(),
-      command_from: (this._fromFlag.values.length > 0).toString()
-    };
+    const extraData: { [key: string]: string } = this._selectionParameters.getTelemetry();
 
     for (const customParameter of this.customParameters) {
       switch (customParameter.kind) {

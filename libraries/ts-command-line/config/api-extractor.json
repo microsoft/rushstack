@@ -14,6 +14,8 @@
   },
 
   "dtsRollup": {
-    "enabled": true
+    "enabled": true,
+    "untrimmedFilePath": "",
+    "publicTrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>.d.ts"
   }
 }

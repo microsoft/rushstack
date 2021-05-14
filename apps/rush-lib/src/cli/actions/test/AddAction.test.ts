@@ -15,11 +15,10 @@ describe('AddAction', () => {
     let oldArgs: string[];
 
     beforeEach(() => {
-      doRushAddMock = jest.spyOn(
-        PackageJsonUpdater.prototype,
-        'doRushAdd'
-      ).mockImplementation(() => Promise.resolve());
-      jest.spyOn(process, 'exit').mockImplementation(() => { /* stub */ });
+      doRushAddMock = jest
+        .spyOn(PackageJsonUpdater.prototype, 'doRushAdd')
+        .mockImplementation(() => Promise.resolve());
+      jest.spyOn(process, 'exit').mockImplementation();
       oldExitCode = process.exitCode;
       oldArgs = process.argv;
     });
@@ -31,7 +30,7 @@ describe('AddAction', () => {
     });
 
     describe(`'add' action`, () => {
-      it(`adds a dependency to just one repo in the workspace`, () => {
+      it(`adds a dependency to just one repo in the workspace`, async () => {
         const startPath: string = path.resolve(__dirname, 'addRepo');
         const aPath: string = path.resolve(__dirname, 'addRepo', 'a');
 
@@ -47,18 +46,16 @@ describe('AddAction', () => {
         // Mock the command
         process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'add', '-p', 'assert'];
 
-        return expect(parser.execute()).resolves.toEqual(true)
-          .then(() => {
-            expect(doRushAddMock).toHaveBeenCalledTimes(1);
-            expect(doRushAddMock.mock.calls[0][0].projects.length).toEqual(1);
-            expect(doRushAddMock.mock.calls[0][0].projects[0].packageName).toEqual('a');
-            expect(doRushAddMock.mock.calls[0][0].packageName).toEqual('assert');
-          });
+        await expect(parser.execute()).resolves.toEqual(true);
+        expect(doRushAddMock).toHaveBeenCalledTimes(1);
+        expect(doRushAddMock.mock.calls[0][0].projects).toHaveLength(1);
+        expect(doRushAddMock.mock.calls[0][0].projects[0].packageName).toEqual('a');
+        expect(doRushAddMock.mock.calls[0][0].packageName).toEqual('assert');
       });
     });
 
     describe(`'add' action with --all`, () => {
-      it(`adds a dependency to all repos in the workspace`, () => {
+      it(`adds a dependency to all repos in the workspace`, async () => {
         const startPath: string = path.resolve(__dirname, 'addRepo');
         const aPath: string = path.resolve(__dirname, 'addRepo', 'a');
 
@@ -74,14 +71,12 @@ describe('AddAction', () => {
         // Mock the command
         process.argv = ['pretend-this-is-node.exe', 'pretend-this-is-rush', 'add', '-p', 'assert', '--all'];
 
-        return expect(parser.execute()).resolves.toEqual(true)
-          .then(() => {
-            expect(doRushAddMock).toHaveBeenCalledTimes(1);
-            expect(doRushAddMock.mock.calls[0][0].projects.length).toEqual(2);
-            expect(doRushAddMock.mock.calls[0][0].projects[0].packageName).toEqual('a');
-            expect(doRushAddMock.mock.calls[0][0].projects[1].packageName).toEqual('b');
-            expect(doRushAddMock.mock.calls[0][0].packageName).toEqual('assert');
-          });
+        await expect(parser.execute()).resolves.toEqual(true);
+        expect(doRushAddMock).toHaveBeenCalledTimes(1);
+        expect(doRushAddMock.mock.calls[0][0].projects).toHaveLength(2);
+        expect(doRushAddMock.mock.calls[0][0].projects[0].packageName).toEqual('a');
+        expect(doRushAddMock.mock.calls[0][0].projects[1].packageName).toEqual('b');
+        expect(doRushAddMock.mock.calls[0][0].packageName).toEqual('assert');
       });
     });
   });

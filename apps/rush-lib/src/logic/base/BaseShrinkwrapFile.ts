@@ -1,17 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors/safe';
 import * as semver from 'semver';
-import { PackageName, FileSystem } from '@microsoft/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
-import { DependencySpecifier } from '../DependencySpecifier';
+import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
+import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
+import { PackageManagerOptionsConfigurationBase, RushConfiguration } from '../../api/RushConfiguration';
+import { PackageNameParsers } from '../../api/PackageNameParsers';
+import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { BaseProjectShrinkwrapFile } from './BaseProjectShrinkwrapFile';
 
 /**
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.
  */
 export abstract class BaseShrinkwrapFile {
+  public abstract readonly isWorkspaceCompatible: boolean;
   protected _alreadyWarnedSpecs: Set<string> = new Set<string>();
 
   protected static tryGetValue<T>(dictionary: { [key2: string]: T }, key: string): T | undefined {
@@ -22,11 +28,15 @@ export abstract class BaseShrinkwrapFile {
   }
 
   /**
-   * Serializes and saves the shrinkwrap file to specified location
+   * Validate the shrinkwrap using the provided policy options.
+   *
+   * @virtual
    */
-  public save(filePath: string): void {
-    FileSystem.writeFile(filePath, this.serialize());
-  }
+  public validate(
+    packageManagerOptionsConfig: PackageManagerOptionsConfigurationBase,
+    policyOptions: IShrinkwrapFilePolicyValidatorOptions,
+    experimentsConfig?: IExperimentsJson
+  ): void {}
 
   /**
    * Returns true if the shrinkwrap file includes a top-level package that would satisfy the specified
@@ -35,8 +45,9 @@ export abstract class BaseShrinkwrapFile {
    * @virtual
    */
   public hasCompatibleTopLevelDependency(dependencySpecifier: DependencySpecifier): boolean {
-    const shrinkwrapDependency: DependencySpecifier | undefined
-      = this.getTopLevelDependencyVersion(dependencySpecifier.packageName);
+    const shrinkwrapDependency: DependencySpecifier | undefined = this.getTopLevelDependencyVersion(
+      dependencySpecifier.packageName
+    );
     if (!shrinkwrapDependency) {
       return false;
     }
@@ -63,9 +74,14 @@ export abstract class BaseShrinkwrapFile {
    *
    * @virtual
    */
-  public tryEnsureCompatibleDependency(dependencySpecifier: DependencySpecifier, tempProjectName: string): boolean {
-    const shrinkwrapDependency: DependencySpecifier | undefined =
-      this.tryEnsureDependencyVersion(dependencySpecifier, tempProjectName);
+  public tryEnsureCompatibleDependency(
+    dependencySpecifier: DependencySpecifier,
+    tempProjectName: string
+  ): boolean {
+    const shrinkwrapDependency: DependencySpecifier | undefined = this.tryEnsureDependencyVersion(
+      dependencySpecifier,
+      tempProjectName
+    );
     if (!shrinkwrapDependency) {
       return false;
     }
@@ -82,30 +98,71 @@ export abstract class BaseShrinkwrapFile {
   public abstract getTempProjectNames(): ReadonlyArray<string>;
 
   /** @virtual */
-  protected abstract tryEnsureDependencyVersion(dependencySpecifier: DependencySpecifier,
-    tempProjectName: string): DependencySpecifier | undefined;
+  protected abstract tryEnsureDependencyVersion(
+    dependencySpecifier: DependencySpecifier,
+    tempProjectName: string
+  ): DependencySpecifier | undefined;
 
   /** @virtual */
   protected abstract getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined;
 
+  /**
+   * Check for projects that exist in the shrinkwrap file, but don't exist
+   * in rush.json.  This might occur, e.g. if a project was recently deleted or renamed.
+   *
+   * @returns a list of orphaned projects.
+   */
+  public findOrphanedProjects(rushConfiguration: RushConfiguration): ReadonlyArray<string> {
+    const orphanedProjectNames: string[] = [];
+    // We can recognize temp projects because they are under the "@rush-temp" NPM scope.
+    for (const tempProjectName of this.getTempProjectNames()) {
+      if (!rushConfiguration.findProjectByTempName(tempProjectName)) {
+        orphanedProjectNames.push(tempProjectName);
+      }
+    }
+    return orphanedProjectNames;
+  }
+
+  /**
+   * Returns a project shrinkwrap file for the specified project that contains all dependencies and transitive
+   * dependencies.
+   *
+   * @virtual
+   **/
+  public abstract getProjectShrinkwrap(
+    project: RushConfigurationProject
+  ): BaseProjectShrinkwrapFile | undefined;
+
+  /**
+   * Returns whether or not the workspace specified by the shrinkwrap matches the state of
+   * a given package.json. Returns true if any dependencies are not aligned with the shrinkwrap.
+   *
+   * @param project - the Rush project that is being validated against the shrinkwrap
+   * @param variant - the variant that is being validated
+   *
+   * @virtual
+   */
+  public abstract isWorkspaceProjectModified(project: RushConfigurationProject, variant?: string): boolean;
+
   /** @virtual */
   protected abstract serialize(): string;
 
-  protected _getTempProjectNames(dependencies: { [key: string]: {} } ): ReadonlyArray<string> {
+  protected _getTempProjectNames(dependencies: { [key: string]: {} }): ReadonlyArray<string> {
     const result: string[] = [];
     for (const key of Object.keys(dependencies)) {
       // If it starts with @rush-temp, then include it:
-      if (PackageName.getScope(key) === RushConstants.rushTempNpmScope) {
+      if (PackageNameParsers.permissive.getScope(key) === RushConstants.rushTempNpmScope) {
         result.push(key);
       }
     }
-    result.sort();  // make the result deterministic
+    result.sort(); // make the result deterministic
     return result;
   }
 
-  private _checkDependencyVersion(projectDependency: DependencySpecifier,
-    shrinkwrapDependency: DependencySpecifier): boolean {
-
+  private _checkDependencyVersion(
+    projectDependency: DependencySpecifier,
+    shrinkwrapDependency: DependencySpecifier
+  ): boolean {
     let normalizedProjectDependency: DependencySpecifier = projectDependency;
     let normalizedShrinkwrapDependency: DependencySpecifier = shrinkwrapDependency;
 
@@ -117,9 +174,9 @@ export abstract class BaseShrinkwrapFile {
     //
     // In this case, the shrinkwrap file will have a key equivalent to "npm:target-name@1.2.5",
     // and so we need to unwrap the target and compare "1.2.5" with "^1.2.3".
-    if (projectDependency.specifierType === 'alias') {
+    if (projectDependency.specifierType === DependencySpecifierType.Alias) {
       // Does the shrinkwrap install it as an alias?
-      if (shrinkwrapDependency.specifierType === 'alias') {
+      if (shrinkwrapDependency.specifierType === DependencySpecifierType.Alias) {
         // Does the shrinkwrap have the right package name?
         if (projectDependency.packageName === shrinkwrapDependency.packageName) {
           // Yes, the aliases match, so let's compare their targets in the logic below
@@ -136,10 +193,12 @@ export abstract class BaseShrinkwrapFile {
     }
 
     switch (normalizedProjectDependency.specifierType) {
-      case 'version':
-      case 'range':
-        return semver.satisfies(normalizedShrinkwrapDependency.versionSpecifier,
-          normalizedProjectDependency.versionSpecifier);
+      case DependencySpecifierType.Version:
+      case DependencySpecifierType.Range:
+        return semver.satisfies(
+          normalizedShrinkwrapDependency.versionSpecifier,
+          normalizedProjectDependency.versionSpecifier
+        );
       default:
         // For other version specifier types like "file:./blah.tgz" or "git://github.com/npm/cli.git#v1.0.27"
         // we allow the installation to continue but issue a warning.  The "rush install" checks will not work
@@ -148,8 +207,12 @@ export abstract class BaseShrinkwrapFile {
         // Only warn once for each versionSpecifier
         if (!this._alreadyWarnedSpecs.has(projectDependency.versionSpecifier)) {
           this._alreadyWarnedSpecs.add(projectDependency.versionSpecifier);
-          console.log(colors.yellow(`WARNING: Not validating ${projectDependency.specifierType}-based`
-            + ` specifier: "${projectDependency.versionSpecifier}"`));
+          console.log(
+            colors.yellow(
+              `WARNING: Not validating ${projectDependency.specifierType}-based` +
+                ` specifier: "${projectDependency.versionSpecifier}"`
+            )
+          );
         }
         return true;
     }

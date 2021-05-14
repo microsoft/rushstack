@@ -2,4 +2,4 @@
 // See LICENSE in the project root for license information.
 
 /** @public */
-export default "literal";
+export default 'literal';

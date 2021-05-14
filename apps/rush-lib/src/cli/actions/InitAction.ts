@@ -1,16 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors/safe';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseConfiglessRushAction } from './BaseRushAction';
-import { AlreadyReportedError } from '../../utilities/AlreadyReportedError';
-import { FileSystem, NewlineKind, InternalError } from '@microsoft/node-core-library';
-import { CommandLineFlagParameter } from '@microsoft/ts-command-line';
+import { FileSystem, NewlineKind, InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
+import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { Rush } from '../../api/Rush';
 
 export class InitAction extends BaseConfiglessRushAction {
@@ -45,8 +44,8 @@ export class InitAction extends BaseConfiglessRushAction {
   // Used to catch malformed macro expressions
   private static _anyMacroRegExp: RegExp = /\/\*\s*\[.*\]\s*\*\//;
 
-  private _overwriteParameter: CommandLineFlagParameter;
-  private _rushExampleParameter: CommandLineFlagParameter;
+  private _overwriteParameter!: CommandLineFlagParameter;
+  private _rushExampleParameter!: CommandLineFlagParameter;
 
   // template section name --> whether it should be commented out
   private _commentedBySectionName: Map<string, boolean> = new Map<string, boolean>();
@@ -55,40 +54,42 @@ export class InitAction extends BaseConfiglessRushAction {
     super({
       actionName: 'init',
       summary: 'Initializes a new repository to be managed by Rush',
-      documentation: 'When invoked in an empty folder, this command provisions a standard'
-        + ' set of config file templates to start managing projects using Rush.',
+      documentation:
+        'When invoked in an empty folder, this command provisions a standard' +
+        ' set of config file templates to start managing projects using Rush.',
       parser
     });
   }
 
-  protected onDefineParameters(): void { // abstract
+  protected onDefineParameters(): void {
+    // abstract
     this._overwriteParameter = this.defineFlagParameter({
       parameterLongName: '--overwrite-existing',
-      description: 'By default "rush init" will not overwrite existing config files.'
-        + ' Specify this switch to override that. This can be useful when upgrading'
-        + ' your repo to a newer release of Rush. WARNING: USE WITH CARE!'
+      description:
+        'By default "rush init" will not overwrite existing config files.' +
+        ' Specify this switch to override that. This can be useful when upgrading' +
+        ' your repo to a newer release of Rush. WARNING: USE WITH CARE!'
     });
     this._rushExampleParameter = this.defineFlagParameter({
       parameterLongName: '--rush-example-repo',
-      description: 'When copying the template config files, this uncomments fragments that are used'
-        + ' by the "rush-example" GitHub repo, which is a sample monorepo that illustrates many Rush'
-        + ' features. This option is primarily intended for maintaining that example.'
+      description:
+        'When copying the template config files, this uncomments fragments that are used' +
+        ' by the "rush-example" GitHub repo, which is a sample monorepo that illustrates many Rush' +
+        ' features. This option is primarily intended for maintaining that example.'
     });
   }
 
-  protected run(): Promise<void> {
+  protected async runAsync(): Promise<void> {
     const initFolder: string = process.cwd();
 
     if (!this._overwriteParameter.value) {
       if (!this._validateFolderIsEmpty(initFolder)) {
-        return Promise.reject(new AlreadyReportedError());
+        throw new AlreadyReportedError();
       }
     }
 
     this._defineMacroSections();
     this._copyTemplateFiles(initFolder);
-
-    return Promise.resolve();
   }
 
   private _defineMacroSections(): void {
@@ -106,10 +107,14 @@ export class InitAction extends BaseConfiglessRushAction {
   // Check whether it's safe to run "rush init" in the current working directory.
   private _validateFolderIsEmpty(initFolder: string): boolean {
     if (this.rushConfiguration !== undefined) {
-      console.error(colors.red('ERROR: Found an existing configuration in: '
-      + this.rushConfiguration.rushJsonFile));
-      console.log(os.EOL + 'The "rush init" command must be run in a new folder without '
-        + 'an existing Rush configuration.');
+      console.error(
+        colors.red('ERROR: Found an existing configuration in: ' + this.rushConfiguration.rushJsonFile)
+      );
+      console.log(
+        os.EOL +
+          'The "rush init" command must be run in a new folder without ' +
+          'an existing Rush configuration.'
+      );
       return false;
     }
 
@@ -126,12 +131,16 @@ export class InitAction extends BaseConfiglessRushAction {
       // or "CONTRIBUTING.md"
       if (stats.isDirectory()) {
         console.error(colors.red(`ERROR: Found a subdirectory: "${itemName}"`));
-        console.log(os.EOL + 'The "rush init" command must be run in a new folder with no projects added yet.');
+        console.log(
+          os.EOL + 'The "rush init" command must be run in a new folder with no projects added yet.'
+        );
         return false;
       } else {
         if (itemName.toLowerCase() === 'package.json') {
           console.error(colors.red(`ERROR: Found a package.json file in this folder`));
-          console.log(os.EOL + 'The "rush init" command must be run in a new folder with no projects added yet.');
+          console.log(
+            os.EOL + 'The "rush init" command must be run in a new folder with no projects added yet.'
+          );
           return false;
         }
       }
@@ -148,11 +157,15 @@ export class InitAction extends BaseConfiglessRushAction {
       '[dot]gitignore',
       '[dot]travis.yml',
       'common/config/rush/[dot]npmrc',
+      'common/config/rush/[dot]npmrc-publish',
+      'common/config/rush/artifactory.json',
+      'common/config/rush/build-cache.json',
       'common/config/rush/command-line.json',
       'common/config/rush/common-versions.json',
       'common/config/rush/experiments.json',
-      'common/config/rush/pnpmfile.js',
-      'common/config/rush/version-policies.json'
+      'common/config/rush/.pnpmfile.cjs',
+      'common/config/rush/version-policies.json',
+      'common/git-hooks/commit-msg.sample'
     ];
 
     const assetsSubfolder: string = path.resolve(__dirname, '../../../assets/rush-init');
@@ -165,8 +178,7 @@ export class InitAction extends BaseConfiglessRushAction {
         throw new InternalError('Unable to find template input file: ' + sourcePath);
       }
 
-      const destinationPath: string = path.join(initFolder, templateFilePath)
-        .replace('[dot]', '.');
+      const destinationPath: string = path.join(initFolder, templateFilePath).replace('[dot]', '.');
 
       this._copyTemplateFile(sourcePath, destinationPath);
     }
@@ -220,8 +232,9 @@ export class InitAction extends BaseConfiglessRushAction {
     }
 
     const outputLines: string[] = [];
-    const lines: string[] = FileSystem.readFile(sourcePath, { convertLineEndings: NewlineKind.Lf })
-      .split('\n');
+    const lines: string[] = FileSystem.readFile(sourcePath, { convertLineEndings: NewlineKind.Lf }).split(
+      '\n'
+    );
 
     let activeBlockSectionName: string | undefined = undefined;
     let activeBlockIndent: string = '';
@@ -235,7 +248,9 @@ export class InitAction extends BaseConfiglessRushAction {
       if (match) {
         if (activeBlockSectionName) {
           // If this happens, please report a Rush bug
-          throw new InternalError(`The template contains an unmatched BEGIN macro for "${activeBlockSectionName}"`);
+          throw new InternalError(
+            `The template contains an unmatched BEGIN macro for "${activeBlockSectionName}"`
+          );
         }
 
         activeBlockSectionName = match[2];
@@ -250,18 +265,23 @@ export class InitAction extends BaseConfiglessRushAction {
       if (match) {
         if (activeBlockSectionName === undefined) {
           // If this happens, please report a Rush bug
-          throw new InternalError(`The template contains an unmatched END macro for "${activeBlockSectionName}"`);
+          throw new InternalError(
+            `The template contains an unmatched END macro for "${activeBlockSectionName}"`
+          );
         }
 
         if (activeBlockSectionName !== match[2]) {
           // If this happens, please report a Rush bug
-          throw new InternalError(`The template contains an mismatched END macro for "${activeBlockSectionName}"`);
+          throw new InternalError(
+            `The template contains an mismatched END macro for "${activeBlockSectionName}"`
+          );
         }
 
         if (activeBlockIndent !== match[1]) {
           // If this happens, please report a Rush bug
-          throw new InternalError(`The template contains an inconsistently indented section`
-            + ` "${activeBlockSectionName}"`);
+          throw new InternalError(
+            `The template contains an inconsistently indented section "${activeBlockSectionName}"`
+          );
         }
 
         activeBlockSectionName = undefined;
@@ -293,7 +313,9 @@ export class InitAction extends BaseConfiglessRushAction {
       match = transformedLine.match(InitAction._anyMacroRegExp);
       if (match) {
         // If this happens, please report a Rush bug
-        throw new InternalError('The template contains a malformed macro expression: ' + JSON.stringify(match[0]));
+        throw new InternalError(
+          'The template contains a malformed macro expression: ' + JSON.stringify(match[0])
+        );
       }
 
       // If we are inside a block section that is commented out, then insert the "//" after indentation
@@ -302,8 +324,10 @@ export class InitAction extends BaseConfiglessRushAction {
           // Is the line indented properly?
           if (transformedLine.substr(0, activeBlockIndent.length).trim().length > 0) {
             // If this happens, please report a Rush bug
-            throw new InternalError(`The template contains inconsistently indented lines inside`
-              + ` the "${activeBlockSectionName}" section`);
+            throw new InternalError(
+              `The template contains inconsistently indented lines inside` +
+                ` the "${activeBlockSectionName}" section`
+            );
           }
 
           // Insert comment characters after the indentation

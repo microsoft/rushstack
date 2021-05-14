@@ -14,19 +14,15 @@ describe('EventHooks', () => {
 
   it('loads empty rush hooks', () => {
     const eventHooks: EventHooks = new EventHooks({});
-    expect(eventHooks.get(Event.postRushBuild).length).toEqual(0);
+    expect(eventHooks.get(Event.postRushBuild)).toHaveLength(0);
   });
 
   it('loads two rush hooks', () => {
-    const expectedHooks: string[] = [
-        'do one',
-        'do two'
-      ];
+    const expectedHooks: string[] = ['do one', 'do two'];
     const eventHooks: EventHooks = new EventHooks({
       postRushBuild: expectedHooks
     });
     const resultHooks: string[] = eventHooks.get(Event.postRushBuild);
     expect(resultHooks).toEqual(expectedHooks);
   });
-
 });

@@ -10,8 +10,20 @@
       "type": "string"
     },
 
-    "legacyIncrementalBuildDependencyDetection": {
-      "description": "Rush 5.14.0 improved incremental builds to ignore spurious changes in the pnpm-lock.json file. This optimization is enabled by default. If you encounter a problem where \"rush build\" is neglecting to build some projects, please open a GitHub issue. As a workaround you can uncomment this line to temporarily restore the old behavior where everything must be rebuilt whenever pnpm-lock.json is modified.",
+    "usePnpmFrozenLockfileForRushInstall": {
+      "description": "By default, 'rush install' passes --no-prefer-frozen-lockfile to 'pnpm install'. Set this option to true to pass '--frozen-lockfile' instead.",
+      "type": "boolean"
+    },
+    "usePnpmPreferFrozenLockfileForRushUpdate": {
+      "description": "By default, 'rush update' passes --no-prefer-frozen-lockfile to 'pnpm install'. Set this option to true to pass '--prefer-frozen-lockfile' instead.",
+      "type": "boolean"
+    },
+    "omitImportersFromPreventManualShrinkwrapChanges": {
+      "description": "If using the 'preventManualShrinkwrapChanges' option, only prevent manual changes to the total set of external dependencies referenced by the repository, not which projects reference which dependencies. This offers a balance between lockfile integrity and merge conflicts.",
+      "type": "boolean"
+    },
+    "noChmodFieldInTarHeaderNormalization": {
+      "description": "If true, the chmod field in temporary project tar headers will not be normalized. This normalization can help ensure consistent tarball integrity across platforms.",
       "type": "boolean"
     }
   },

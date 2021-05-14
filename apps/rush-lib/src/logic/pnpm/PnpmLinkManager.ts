@@ -3,60 +3,80 @@
 
 import * as os from 'os';
 import * as path from 'path';
+import * as crypto from 'crypto';
 import uriEncode = require('strict-uri-encode');
 import pnpmLinkBins from '@pnpm/link-bins';
 import * as semver from 'semver';
-import * as colors from 'colors';
+import colors from 'colors/safe';
 
 import {
-  JsonFile,
-  Text,
-  PackageName,
+  AlreadyReportedError,
   FileSystem,
   FileConstants,
-  InternalError
-} from '@microsoft/node-core-library';
+  InternalError,
+  Path
+} from '@rushstack/node-core-library';
 
-import {
-  BaseLinkManager
-} from '../base/BaseLinkManager';
+import { BaseLinkManager } from '../base/BaseLinkManager';
 import { BasePackage } from '../base/BasePackage';
 import { RushConstants } from '../../logic/RushConstants';
-import { IRushLinkJson } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './PnpmShrinkwrapFile';
-import { PnpmProjectDependencyManifest } from './PnpmProjectDependencyManifest';
 
 // special flag for debugging, will print extra diagnostic information,
 // but comes with performance cost
 const DEBUG: boolean = false;
 
 export class PnpmLinkManager extends BaseLinkManager {
+  private readonly _pnpmVersion: semver.SemVer = new semver.SemVer(
+    this._rushConfiguration.packageManagerToolVersion
+  );
 
-  private readonly _pnpmVersion: semver.SemVer = new semver.SemVer(this._rushConfiguration.packageManagerToolVersion);
+  /**
+   * @override
+   */
+  public async createSymlinksForProjects(force: boolean): Promise<void> {
+    const useWorkspaces: boolean =
+      this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces;
+    if (useWorkspaces) {
+      console.log(
+        colors.red(
+          'Linking is not supported when using workspaces. Run "rush install" or "rush update" ' +
+            'to restore project node_modules folders.'
+        )
+      );
+      throw new AlreadyReportedError();
+    }
+
+    await super.createSymlinksForProjects(force);
+  }
 
   protected async _linkProjects(): Promise<void> {
-    const rushLinkJson: IRushLinkJson = {
-      localLinks: {}
-    };
+    if (this._rushConfiguration.projects.length > 0) {
+      // Use shrinkwrap from temp as the committed shrinkwrap may not always be up to date
+      // See https://github.com/microsoft/rushstack/issues/1273#issuecomment-492779995
+      const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
+        this._rushConfiguration.tempShrinkwrapFilename,
+        this._rushConfiguration.pnpmOptions
+      );
 
-    // Use shrinkwrap from temp as the committed shrinkwrap may not always be up to date
-    // See https://github.com/microsoft/rushstack/issues/1273#issuecomment-492779995
-    const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-      this._rushConfiguration.tempShrinkwrapFilename
-    );
+      if (!pnpmShrinkwrapFile) {
+        throw new InternalError(
+          `Cannot load shrinkwrap at "${this._rushConfiguration.tempShrinkwrapFilename}"`
+        );
+      }
 
-    if (!pnpmShrinkwrapFile) {
-      throw new InternalError(`Cannot load shrinkwrap at "${this._rushConfiguration.tempShrinkwrapFilename}"`);
+      for (const rushProject of this._rushConfiguration.projects) {
+        await this._linkProject(rushProject, pnpmShrinkwrapFile);
+      }
+    } else {
+      console.log(
+        colors.yellow(
+          '\nWarning: Nothing to do. Please edit rush.json and add at least one project' +
+            ' to the "projects" section.\n'
+        )
+      );
     }
-
-    for (const rushProject of this._rushConfiguration.projects) {
-      console.log(os.EOL + 'LINKING: ' + rushProject.packageName);
-      await this._linkProject(rushProject, rushLinkJson, pnpmShrinkwrapFile);
-    }
-
-    console.log(`Writing "${this._rushConfiguration.rushLinkJsonFilename}"`);
-    JsonFile.save(rushLinkJson, this._rushConfiguration.rushLinkJsonFilename);
   }
 
   /**
@@ -66,18 +86,22 @@ export class PnpmLinkManager extends BaseLinkManager {
    */
   private async _linkProject(
     project: RushConfigurationProject,
-    rushLinkJson: IRushLinkJson,
     pnpmShrinkwrapFile: PnpmShrinkwrapFile
   ): Promise<void> {
+    console.log(os.EOL + 'LINKING: ' + project.packageName);
 
     // first, read the temp package.json information
-
     // Example: "project1"
-    const unscopedTempProjectName: string = PackageName.getUnscopedName(project.tempProjectName);
+    const unscopedTempProjectName: string = this._rushConfiguration.packageNameParser.getUnscopedName(
+      project.tempProjectName
+    );
 
     // Example: "C:\MyRepo\common\temp\projects\project1
-    const extractedFolder: string = path.join(this._rushConfiguration.commonTempFolder,
-      RushConstants.rushTempProjectsFolderName, unscopedTempProjectName);
+    const extractedFolder: string = path.join(
+      this._rushConfiguration.commonTempFolder,
+      RushConstants.rushTempProjectsFolderName,
+      unscopedTempProjectName
+    );
 
     // Example: "C:\MyRepo\common\temp\projects\project1\package.json"
     const packageJsonFilename: string = path.join(extractedFolder, FileConstants.PackageJson);
@@ -90,10 +114,13 @@ export class PnpmLinkManager extends BaseLinkManager {
       unscopedTempProjectName
     );
 
-    const commonPackage: BasePackage = BasePackage.createVirtualTempPackage(packageJsonFilename, installFolderName);
+    const commonPackage: BasePackage = BasePackage.createVirtualTempPackage(
+      packageJsonFilename,
+      installFolderName
+    );
 
     const localPackage: BasePackage = BasePackage.createLinkedPackage(
-      project.packageJsonEditor.name,
+      project.packageName,
       commonPackage.version,
       project.projectFolder
     );
@@ -102,20 +129,14 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     // first, start with the rush dependencies, we just need to link to the project folder
     for (const dependencyName of Object.keys(commonPackage.packageJson!.rushDependencies || {})) {
-      const matchedRushPackage: RushConfigurationProject | undefined =
-        this._rushConfiguration.getProjectByName(dependencyName);
+      const matchedRushPackage:
+        | RushConfigurationProject
+        | undefined = this._rushConfiguration.getProjectByName(dependencyName);
 
       if (matchedRushPackage) {
         // We found a suitable match, so place a new local package that
         // symlinks to the Rush project
         const matchedVersion: string = matchedRushPackage.packageJsonEditor.version;
-
-        let localLinks: string[] = rushLinkJson.localLinks[localPackage.name];
-        if (!localLinks) {
-          localLinks = [];
-          rushLinkJson.localLinks[localPackage.name] = localLinks;
-        }
-        localLinks.push(dependencyName);
 
         // e.g. "C:\my-repo\project-a\node_modules\project-b" if project-b is a rush dependency of project-a
         const newLocalFolderPath: string = path.join(localPackage.folderPath, 'node_modules', dependencyName);
@@ -149,7 +170,7 @@ export class PnpmLinkManager extends BaseLinkManager {
     // creates for the installed version of each .TGZ package, all we need to do
     // is re-use that symlink in order to get linked to whatever PNPM thought was
     // appropriate. This folder is usually something like:
-    // C:\{uri-encoed-path-to-tgz}\node_modules\{package-name}
+    // C:\{uri-encoded-path-to-tgz}\node_modules\{package-name}
 
     // e.g.:
     //   file:projects/bentleyjs-core.tgz
@@ -173,7 +194,10 @@ export class PnpmLinkManager extends BaseLinkManager {
     const relativePathToTgzFile: string | undefined = tarballEntry.slice(`file:`.length);
 
     // e.g.: C:\wbt\common\temp\projects\api-documenter.tgz
-    const absolutePathToTgzFile: string = path.resolve(this._rushConfiguration.commonTempFolder, relativePathToTgzFile);
+    const absolutePathToTgzFile: string = path.resolve(
+      this._rushConfiguration.commonTempFolder,
+      relativePathToTgzFile
+    );
 
     // The folder name in `.local` is constructed as:
     //   UriEncode(absolutePathToTgzFile) + _suffix
@@ -189,42 +213,36 @@ export class PnpmLinkManager extends BaseLinkManager {
     //   '' [empty string]
     //   _jsdom@11.12.0
     //   _2a665c89609864b4e75bc5365d7f8f56
-    const folderNameSuffix: string = tarballEntry && tarballEntry.length < tempProjectDependencyKey.length
-      ? tempProjectDependencyKey.slice(tarballEntry.length)
-      : '';
-
-    // e.g.:
-    //   C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz
-    //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fpresentation-integration-tests.tgz_jsdom@11.12.0
-    //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fbuild-tools.tgz_2a665c89609864b4e75bc5365d7f8f56
-    const folderNameInLocalInstallationRoot: string = uriEncode(Text.replaceAll(absolutePathToTgzFile, path.sep, '/')) +
-      folderNameSuffix;
+    const folderNameSuffix: string =
+      tarballEntry && tarballEntry.length < tempProjectDependencyKey.length
+        ? tempProjectDependencyKey.slice(tarballEntry.length)
+        : '';
 
     // e.g.: C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules
+    const pathToLocalInstallation: string = this._getPathToLocalInstallation(
+      absolutePathToTgzFile,
+      folderNameSuffix
+    );
 
-    const pathToLocalInstallation: string = this._getPathToLocalInstallation(folderNameInLocalInstallationRoot);
-
-    const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined =
-      pnpmShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey);
+    const parentShrinkwrapEntry:
+      | IPnpmShrinkwrapDependencyYaml
+      | undefined = pnpmShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(
+      tempProjectDependencyKey
+    );
     if (!parentShrinkwrapEntry) {
       throw new InternalError(
-        'Cannot find shrinkwrap entry using dependency key for temp project: ' +
-        `${project.tempProjectName}`);
+        `Cannot find shrinkwrap entry using dependency key for temp project: ${project.tempProjectName}`
+      );
     }
-
-    const pnpmProjectDependencyManifest: PnpmProjectDependencyManifest = new PnpmProjectDependencyManifest({
-      pnpmShrinkwrapFile,
-      project
-    });
 
     for (const dependencyName of Object.keys(commonPackage.packageJson!.dependencies || {})) {
       const newLocalPackage: BasePackage = this._createLocalPackageForDependency(
-        pnpmProjectDependencyManifest,
         project,
         parentShrinkwrapEntry,
         localPackage,
         pathToLocalInstallation,
-        dependencyName)!;
+        dependencyName
+      )!;
       localPackage.addChild(newLocalPackage);
     }
 
@@ -232,7 +250,6 @@ export class PnpmLinkManager extends BaseLinkManager {
     // support is added
     // for (const dependencyName of Object.keys(commonPackage.packageJson!.optionalDependencies || {})) {
     //   const newLocalPackage: BasePackage | undefined = this._createLocalPackageForDependency(
-    //     pnpmProjectDependencyManifest,
     //     project,
     //     parentShrinkwrapEntry,
     //     localPackage,
@@ -248,46 +265,68 @@ export class PnpmLinkManager extends BaseLinkManager {
       localPackage.printTree();
     }
 
-    PnpmLinkManager._createSymlinksForTopLevelProject(localPackage);
+    await pnpmShrinkwrapFile.getProjectShrinkwrap(project)!.updateProjectShrinkwrapAsync();
 
-    if (!this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection) {
-      pnpmProjectDependencyManifest.save();
-    } else {
-      pnpmProjectDependencyManifest.deleteIfExists();
-    }
+    PnpmLinkManager._createSymlinksForTopLevelProject(localPackage);
 
     // Also symlink the ".bin" folder
     const projectFolder: string = path.join(localPackage.folderPath, 'node_modules');
     const projectBinFolder: string = path.join(localPackage.folderPath, 'node_modules', '.bin');
 
-    await pnpmLinkBins(
-      projectFolder,
-      projectBinFolder,
-      {
-        warn: (msg: string) => console.warn(colors.yellow(msg))
-      }
-    );
+    await pnpmLinkBins(projectFolder, projectBinFolder, {
+      warn: (msg: string) => console.warn(colors.yellow(msg))
+    });
   }
 
-  private _getPathToLocalInstallation(folderNameInLocalInstallationRoot: string): string {
-    // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0
-    if (this._pnpmVersion.major >= 4) {
-      return path.join(this._rushConfiguration.commonTempFolder,
+  private _getPathToLocalInstallation(absolutePathToTgzFile: string, folderSuffix: string): string {
+    if (this._pnpmVersion.major >= 6) {
+      // PNPM 6 changed formatting to replace all ':' and '/' chars with '+'. Additionally, folder names > 120
+      // are trimmed and hashed. NOTE: PNPM internally uses fs.realpath.native, which will cause additional
+      // issues in environments that do not support long paths.
+      // See https://github.com/pnpm/pnpm/releases/tag/v6.0.0
+      // e.g.:
+      //   C++dev+imodeljs+imodeljs+common+temp+projects+presentation-integration-tests.tgz_jsdom@11.12.0
+      //   C++dev+imodeljs+imodeljs+common+temp+projects+presentation-integrat_089eb799caf0f998ab34e4e1e9254956
+      const specialCharRegex: RegExp = /\/|:/g;
+      const escapedLocalPath: string = Path.convertToSlashes(absolutePathToTgzFile).replace(
+        specialCharRegex,
+        '+'
+      );
+      let folderName: string = `local+${escapedLocalPath}${folderSuffix}`;
+      if (folderName.length > 120) {
+        folderName = `${folderName.substring(0, 50)}_${crypto
+          .createHash('md5')
+          .update(folderName)
+          .digest('hex')}`;
+      }
+
+      return path.join(
+        this._rushConfiguration.commonTempFolder,
+        RushConstants.nodeModulesFolderName,
+        '.pnpm',
+        folderName,
+        RushConstants.nodeModulesFolderName
+      );
+    } else {
+      // e.g.:
+      //   C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz
+      //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fpresentation-integration-tests.tgz_jsdom@11.12.0
+      //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fbuild-tools.tgz_2a665c89609864b4e75bc5365d7f8f56
+      const folderNameInLocalInstallationRoot: string =
+        uriEncode(Path.convertToSlashes(absolutePathToTgzFile)) + folderSuffix;
+
+      // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0
+      return path.join(
+        this._rushConfiguration.commonTempFolder,
         RushConstants.nodeModulesFolderName,
         '.pnpm',
         'local',
         folderNameInLocalInstallationRoot,
-        RushConstants.nodeModulesFolderName);
-    } else {
-      return path.join(this._rushConfiguration.commonTempFolder,
-        RushConstants.nodeModulesFolderName,
-        '.local',
-        folderNameInLocalInstallationRoot,
-        RushConstants.nodeModulesFolderName);
+        RushConstants.nodeModulesFolderName
+      );
     }
   }
   private _createLocalPackageForDependency(
-    pnpmProjectDependencyManifest: PnpmProjectDependencyManifest,
     project: RushConfigurationProject,
     parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml,
     localPackage: BasePackage,
@@ -300,21 +339,24 @@ export class PnpmLinkManager extends BaseLinkManager {
     // FYI dependencyName might contain an NPM scope, here it gets converted into a filesystem folder name
     // e.g. if the dependency is supi:
     // "C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules\supi"
-    const dependencyLocalInstallationSymlink: string = path.join(
-      pathToLocalInstallation,
-      dependencyName);
+    const dependencyLocalInstallationSymlink: string = path.join(pathToLocalInstallation, dependencyName);
 
     if (!FileSystem.exists(dependencyLocalInstallationSymlink)) {
       // if this occurs, it is a bug in Rush algorithm or unexpected PNPM behavior
-      throw new InternalError(`Cannot find installed dependency "${dependencyName}" in "${pathToLocalInstallation}"`);
+      throw new InternalError(
+        `Cannot find installed dependency "${dependencyName}" in "${pathToLocalInstallation}"`
+      );
     }
 
     if (!FileSystem.getLinkStatistics(dependencyLocalInstallationSymlink).isSymbolicLink()) {
       // if this occurs, it is a bug in Rush algorithm or unexpected PNPM behavior
-      throw new InternalError(`Dependency "${dependencyName}" is not a symlink in "${pathToLocalInstallation}`);
+      throw new InternalError(
+        `Dependency "${dependencyName}" is not a symlink in "${pathToLocalInstallation}`
+      );
     }
 
-    // read the version number from the shrinkwrap entry
+    // read the version number from the shrinkwrap entry and return if no version is specified
+    // and the dependency is optional
     const version: string | undefined = isOptional
       ? (parentShrinkwrapEntry.optionalDependencies || {})[dependencyName]
       : (parentShrinkwrapEntry.dependencies || {})[dependencyName];
@@ -322,7 +364,8 @@ export class PnpmLinkManager extends BaseLinkManager {
       if (!isOptional) {
         throw new InternalError(
           `Cannot find shrinkwrap entry dependency "${dependencyName}" for temp project: ` +
-          `${project.tempProjectName}`);
+            `${project.tempProjectName}`
+        );
       }
       return;
     }
@@ -337,11 +380,6 @@ export class PnpmLinkManager extends BaseLinkManager {
     // The dependencyLocalInstallationSymlink is just a symlink to another folder. To reduce the number of filesystem
     // reads that are needed, we will link to where that symlink pointed, rather than linking to a link.
     newLocalPackage.symlinkTargetFolderPath = FileSystem.getRealPath(dependencyLocalInstallationSymlink);
-
-    if (!this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection) {
-      pnpmProjectDependencyManifest.addDependency(newLocalPackage, parentShrinkwrapEntry);
-    }
-
     return newLocalPackage;
   }
 }

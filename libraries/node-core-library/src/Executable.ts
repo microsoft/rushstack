@@ -4,6 +4,7 @@
 import * as child_process from 'child_process';
 import * as os from 'os';
 import * as path from 'path';
+import { EnvironmentMap } from './EnvironmentMap';
 
 import { FileSystem } from './FileSystem';
 import { PosixModeBits } from './PosixModeBits';
@@ -12,12 +13,18 @@ import { PosixModeBits } from './PosixModeBits';
  * Typings for one of the streams inside IExecutableSpawnSyncOptions.stdio.
  * @public
  */
-export type ExecutableStdioStreamMapping = 'pipe' | 'ignore' | 'inherit'
-  | NodeJS.WritableStream | NodeJS.ReadableStream
-  | number | undefined;
+export type ExecutableStdioStreamMapping =
+  | 'pipe'
+  | 'ignore'
+  | 'inherit'
+  | NodeJS.WritableStream
+  | NodeJS.ReadableStream
+  | number
+  | undefined;
 
 /**
- * Typings for IExecutableSpawnSyncOptions.stdio.
+ * Types for {@link IExecutableSpawnSyncOptions.stdio}
+ * and {@link IExecutableSpawnOptions.stdio}
  * @public
  */
 export type ExecutableStdioMapping = 'pipe' | 'ignore' | 'inherit' | ExecutableStdioStreamMapping[];
@@ -33,13 +40,26 @@ export interface IExecutableResolveOptions {
   currentWorkingDirectory?: string;
 
   /**
-   * The environment variables for the child process.  If omitted, process.env will be used.
+   * The environment variables for the child process.
+   *
+   * @remarks
+   * If `environment` and `environmentMap` are both omitted, then `process.env` will be used.
+   * If `environment` and `environmentMap` cannot both be specified.
    */
   environment?: NodeJS.ProcessEnv;
+
+  /**
+   * The environment variables for the child process.
+   *
+   * @remarks
+   * If `environment` and `environmentMap` are both omitted, then `process.env` will be used.
+   * If `environment` and `environmentMap` cannot both be specified.
+   */
+  environmentMap?: EnvironmentMap;
 }
 
 /**
- * Options for Executable.execute().
+ * Options for {@link Executable.spawnSync}
  * @public
  */
 export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
@@ -65,18 +85,37 @@ export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
   timeoutMs?: number;
 
   /**
-   * The largest amount of bytes allowed on stdout or stderr for this synchonous operation.
+   * The largest amount of bytes allowed on stdout or stderr for this synchronous operation.
    * If exceeded, the child process will be terminated.  The default is 200 * 1024.
    */
   maxBuffer?: number;
 }
 
+/**
+ * Options for {@link Executable.spawn}
+ * @public
+ */
+export interface IExecutableSpawnOptions extends IExecutableResolveOptions {
+  /**
+   * The stdio mappings for the child process.
+   *
+   * NOTE: If IExecutableSpawnSyncOptions.input is provided, it will take precedence
+   * over the stdin mapping (stdio[0]).
+   */
+  stdio?: ExecutableStdioMapping;
+}
+
 // Common environmental state used by Executable members
 interface IExecutableContext {
   currentWorkingDirectory: string;
-  environment: NodeJS.ProcessEnv;
+  environmentMap: EnvironmentMap;
   // For Windows, the parsed PATHEXT environment variable
   windowsExecutableExtensions: string[];
+}
+
+interface ICommandLineFixup {
+  path: string;
+  args: string[];
 }
 
 /**
@@ -139,11 +178,13 @@ export class Executable {
    * wants binary output or a non-default text encoding, we will introduce a separate API function
    * with a name like "spawnWithBufferSync".
    */
-  public static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions):
-    child_process.SpawnSyncReturns<string> {
-
+  public static spawnSync(
+    filename: string,
+    args: string[],
+    options?: IExecutableSpawnSyncOptions
+  ): child_process.SpawnSyncReturns<string> {
     if (!options) {
-      options = { };
+      options = {};
     }
 
     const context: IExecutableContext = Executable._getExecutableContext(options);
@@ -155,9 +196,9 @@ export class Executable {
 
     const spawnOptions: child_process.SpawnSyncOptionsWithStringEncoding = {
       cwd: context.currentWorkingDirectory,
-      env: context.environment,
+      env: context.environmentMap.toObject(),
       input: options.input,
-      stdio: options.stdio,
+      stdio: options.stdio as child_process.StdioOptions,
       timeout: options.timeoutMs,
       maxBuffer: options.maxBuffer,
 
@@ -165,28 +206,96 @@ export class Executable {
       // if we want the result to be SpawnSyncReturns<string> instead of SpawnSyncReturns<Buffer>.
       encoding: 'utf8',
 
-      // NOTE: This is always false, because Rushell is recommended instead of relying on the OS shell.
+      // NOTE: This is always false, because Rushell will be recommended instead of relying on the OS shell.
       shell: false
-    } as child_process.SpawnSyncOptionsWithStringEncoding;
+    };
 
-    // PROBLEM: Given an "args" array of strings that may contain special characters (e.g. spaces,
-    // backslashes, quotes), ensure that these strings pass through to the child process's ARGV array
-    // without anything getting corrupted along the way.
-    //
-    // On Unix you just pass the array to spawnSync().  But on Windows, this is a very complex problem:
-    // - The Win32 CreateProcess() API expects the args to be encoded as a single text string
-    // - The decoding of this string is up to the application (not the OS), and there are 3 different
-    //   algorithms in common usage:  the cmd.exe shell, the Microsoft CRT library init code, and
-    //   the Win32 CommandLineToArgvW()
-    // - The encodings are counterintuitive and have lots of special cases
-    // - NodeJS spawnSync() tries do the encoding without knowing which decoder will be used
-    //
-    // See these articles for a full analysis:
-    // http://www.windowsinspired.com/understanding-the-command-line-string-and-arguments-received-by-a-windows-program/
-    // http://www.windowsinspired.com/how-a-windows-programs-splits-its-command-line-into-individual-arguments/
+    const normalizedCommandLine: ICommandLineFixup = Executable._buildCommandLineFixup(
+      resolvedPath,
+      args,
+      context
+    );
 
-    const environment: NodeJS.ProcessEnv = options && options.environment
-      || process.env;
+    return child_process.spawnSync(normalizedCommandLine.path, normalizedCommandLine.args, spawnOptions);
+  }
+
+  /**
+   * Start a child process.
+   *
+   * @remarks
+   * This function is similar to child_process.spawn().  The main differences are:
+   *
+   * - It does not invoke the OS shell unless the executable file is a shell script.
+   * - Command-line arguments containing special characters are more accurately passed
+   *   through to the child process.
+   * - If the filename is missing a path, then the shell's default PATH will be searched.
+   * - If the filename is missing a file extension, then Windows default file extensions
+   *   will be searched.
+   *
+   * This command is asynchronous, but it does not return a `Promise`.  Instead it returns
+   * a Node.js `ChildProcess` supporting event notifications.
+   *
+   * @param filename - The name of the executable file.  This string must not contain any
+   * command-line arguments.  If the name contains any path delimiters, then the shell's
+   * default PATH will not be searched.
+   * @param args - The command-line arguments to be passed to the process.
+   * @param options - Additional options
+   * @returns the same data type as returned by the NodeJS child_process.spawnSync() API
+   */
+  public static spawn(
+    filename: string,
+    args: string[],
+    options?: IExecutableSpawnOptions
+  ): child_process.ChildProcess {
+    if (!options) {
+      options = {};
+    }
+
+    const context: IExecutableContext = Executable._getExecutableContext(options);
+
+    const resolvedPath: string | undefined = Executable._tryResolve(filename, options, context);
+    if (!resolvedPath) {
+      throw new Error(`The executable file was not found: "${filename}"`);
+    }
+
+    const spawnOptions: child_process.SpawnOptions = {
+      cwd: context.currentWorkingDirectory,
+      env: context.environmentMap.toObject(),
+      stdio: options.stdio as child_process.StdioOptions,
+
+      // NOTE: This is always false, because Rushell will be recommended instead of relying on the OS shell.
+      shell: false
+    };
+
+    const normalizedCommandLine: ICommandLineFixup = Executable._buildCommandLineFixup(
+      resolvedPath,
+      args,
+      context
+    );
+
+    return child_process.spawn(normalizedCommandLine.path, normalizedCommandLine.args, spawnOptions);
+  }
+
+  // PROBLEM: Given an "args" array of strings that may contain special characters (e.g. spaces,
+  // backslashes, quotes), ensure that these strings pass through to the child process's ARGV array
+  // without anything getting corrupted along the way.
+  //
+  // On Unix you just pass the array to spawnSync().  But on Windows, this is a very complex problem:
+  // - The Win32 CreateProcess() API expects the args to be encoded as a single text string
+  // - The decoding of this string is up to the application (not the OS), and there are 3 different
+  //   algorithms in common usage:  the cmd.exe shell, the Microsoft CRT library init code, and
+  //   the Win32 CommandLineToArgvW()
+  // - The encodings are counterintuitive and have lots of special cases
+  // - NodeJS spawnSync() tries do the encoding without knowing which decoder will be used
+  //
+  // See these articles for a full analysis:
+  // http://www.windowsinspired.com/understanding-the-command-line-string-and-arguments-received-by-a-windows-program/
+  // http://www.windowsinspired.com/how-a-windows-programs-splits-its-command-line-into-individual-arguments/
+  private static _buildCommandLineFixup(
+    resolvedPath: string,
+    args: string[],
+    context: IExecutableContext
+  ): ICommandLineFixup {
     const fileExtension: string = path.extname(resolvedPath);
 
     if (os.platform() === 'win32') {
@@ -201,13 +310,15 @@ export class Executable {
           Executable._validateArgsForWindowsShell(args);
 
           // These file types must be invoked via the Windows shell
-          let shellPath: string | undefined = environment.COMSPEC;
+          let shellPath: string | undefined = context.environmentMap.get('COMSPEC');
           if (!shellPath || !Executable._canExecute(shellPath, context)) {
             shellPath = Executable.tryResolve('cmd.exe');
           }
           if (!shellPath) {
-            throw new Error(`Unable to execute "${path.basename(resolvedPath)}" `
-              + `because CMD.exe was not found in the PATH`);
+            throw new Error(
+              `Unable to execute "${path.basename(resolvedPath)}" ` +
+                `because CMD.exe was not found in the PATH`
+            );
           }
 
           const shellArgs: string[] = [];
@@ -223,14 +334,19 @@ export class Executable {
           shellArgs.push(Executable._getEscapedForWindowsShell(resolvedPath));
           shellArgs.push(...args);
 
-          return child_process.spawnSync(shellPath, shellArgs, spawnOptions);
+          return { path: shellPath, args: shellArgs };
         }
         default:
-          throw new Error(`Cannot execute "${path.basename(resolvedPath)}" because the file type is not supported`);
+          throw new Error(
+            `Cannot execute "${path.basename(resolvedPath)}" because the file type is not supported`
+          );
       }
     }
 
-    return child_process.spawnSync(resolvedPath, args, spawnOptions);
+    return {
+      path: resolvedPath,
+      args: args
+    };
   }
 
   /**
@@ -250,16 +366,18 @@ export class Executable {
    * @returns the absolute path of the executable, or undefined if it was not found
    */
   public static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined {
-    return Executable._tryResolve(filename, options || { }, Executable._getExecutableContext(options));
+    return Executable._tryResolve(filename, options || {}, Executable._getExecutableContext(options));
   }
 
-  private static _tryResolve(filename: string, options: IExecutableResolveOptions,
-    context: IExecutableContext): string | undefined {
-
+  private static _tryResolve(
+    filename: string,
+    options: IExecutableResolveOptions,
+    context: IExecutableContext
+  ): string | undefined {
     // NOTE: Since "filename" cannot contain command-line arguments, the "/" here
     // must be interpreted as a path delimiter
-    const hasPathSeparators: boolean = filename.indexOf('/') >= 0
-      || (os.platform() === 'win32' && filename.indexOf('\\') >= 0);
+    const hasPathSeparators: boolean =
+      filename.indexOf('/') >= 0 || (os.platform() === 'win32' && filename.indexOf('\\') >= 0);
 
     // Are there any path separators?
     if (hasPathSeparators) {
@@ -283,7 +401,10 @@ export class Executable {
     }
   }
 
-  private static _tryResolveFileExtension(resolvedPath: string, context: IExecutableContext): string | undefined {
+  private static _tryResolveFileExtension(
+    resolvedPath: string,
+    context: IExecutableContext
+  ): string | undefined {
     if (Executable._canExecute(resolvedPath, context)) {
       return resolvedPath;
     }
@@ -298,6 +419,24 @@ export class Executable {
     }
 
     return undefined;
+  }
+
+  private static _buildEnvironmentMap(options: IExecutableResolveOptions): EnvironmentMap {
+    const environmentMap: EnvironmentMap = new EnvironmentMap();
+    if (options.environment !== undefined && options.environmentMap !== undefined) {
+      throw new Error(
+        'IExecutableResolveOptions.environment and IExecutableResolveOptions.environmentMap' +
+          ' cannot both be specified'
+      );
+    }
+    if (options.environment !== undefined) {
+      environmentMap.mergeFromObject(options.environment);
+    } else if (options.environmentMap !== undefined) {
+      environmentMap.mergeFrom(options.environmentMap);
+    } else {
+      environmentMap.mergeFromObject(process.env);
+    }
+    return environmentMap;
   }
 
   /**
@@ -321,7 +460,6 @@ export class Executable {
       if (path.extname(filePath) === '') {
         return false;
       }
-
     } else {
       // For Unix, check whether any of the POSIX execute bits are set
       try {
@@ -343,8 +481,7 @@ export class Executable {
    * based on the PATH environment variable.
    */
   private static _getSearchFolders(context: IExecutableContext): string[] {
-
-    const pathList: string = context.environment.PATH || '';
+    const pathList: string = context.environmentMap.get('PATH') || '';
 
     const folders: string[] = [];
 
@@ -383,10 +520,10 @@ export class Executable {
 
   private static _getExecutableContext(options: IExecutableResolveOptions | undefined): IExecutableContext {
     if (!options) {
-      options = { };
+      options = {};
     }
 
-    const environment: NodeJS.ProcessEnv = options.environment || process.env;
+    const environment: EnvironmentMap = Executable._buildEnvironmentMap(options);
 
     let currentWorkingDirectory: string;
     if (options.currentWorkingDirectory) {
@@ -398,7 +535,7 @@ export class Executable {
     const windowsExecutableExtensions: string[] = [];
 
     if (os.platform() === 'win32') {
-      const pathExtVariable: string = environment.PATHEXT || '';
+      const pathExtVariable: string = environment.get('PATHEXT') || '';
       for (const splitValue of pathExtVariable.split(';')) {
         const trimmed: string = splitValue.trim().toLowerCase();
         // Ignore malformed extensions
@@ -412,7 +549,7 @@ export class Executable {
     }
 
     return {
-      environment,
+      environmentMap: environment,
       currentWorkingDirectory,
       windowsExecutableExtensions
     };
@@ -448,8 +585,10 @@ export class Executable {
         // We could work around that by adding double carets, but in general there
         // is no way to predict how many times the variable will get expanded.
         // Thus, there is no generally reliable way to pass these characters.
-        throw new Error(`The command line argument ${JSON.stringify(arg)} contains a`
-          + ` special character ${JSON.stringify(match[0])} that cannot be escaped for the Windows shell`);
+        throw new Error(
+          `The command line argument ${JSON.stringify(arg)} contains a` +
+            ` special character ${JSON.stringify(match[0])} that cannot be escaped for the Windows shell`
+        );
       }
     }
   }

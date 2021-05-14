@@ -18,12 +18,11 @@ import {
   DocErrorText,
   DocBlockTag
 } from '@microsoft/tsdoc';
-import { InternalError } from '@microsoft/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 
 import { IndentedWriter } from '../utils/IndentedWriter';
 
-export interface IMarkdownEmitterOptions {
-}
+export interface IMarkdownEmitterOptions {}
 
 export interface IMarkdownEmitterContext<TOptions = IMarkdownEmitterOptions> {
   writer: IndentedWriter;
@@ -43,7 +42,6 @@ export interface IMarkdownEmitterContext<TOptions = IMarkdownEmitterOptions> {
  * For more info:  https://en.wikipedia.org/wiki/Markdown
  */
 export class MarkdownEmitter {
-
   public emit(stringBuilder: StringBuilder, docNode: DocNode, options: IMarkdownEmitterOptions): string {
     const writer: IndentedWriter = new IndentedWriter(stringBuilder);
 
@@ -69,7 +67,7 @@ export class MarkdownEmitter {
 
   protected getEscapedText(text: string): string {
     const textWithBackslashes: string = text
-      .replace(/\\/g, '\\\\')  // first replace the escape character
+      .replace(/\\/g, '\\\\') // first replace the escape character
       .replace(/[*#[\]_|`~]/g, (x) => '\\' + x) // then escape any special characters
       .replace(/---/g, '\\-\\-\\-') // hyphens only if it's 3 or more
       .replace(/&/g, '&amp;')
@@ -204,15 +202,14 @@ export class MarkdownEmitter {
 
   /** @virtual */
   protected writeLinkTagWithCodeDestination(docLinkTag: DocLinkTag, context: IMarkdownEmitterContext): void {
-
     // The subclass needs to implement this to support code destinations
     throw new InternalError('writeLinkTagWithCodeDestination()');
   }
 
   /** @virtual */
   protected writeLinkTagWithUrlDestination(docLinkTag: DocLinkTag, context: IMarkdownEmitterContext): void {
-    const linkText: string = docLinkTag.linkText !== undefined ? docLinkTag.linkText
-      : docLinkTag.urlDestination!;
+    const linkText: string =
+      docLinkTag.linkText !== undefined ? docLinkTag.linkText : docLinkTag.urlDestination!;
 
     const encodedLinkText: string = this.getEscapedText(linkText.replace(/\s+/g, ' '));
 
@@ -227,7 +224,7 @@ export class MarkdownEmitter {
     // split out the [ leading whitespace, content, trailing whitespace ]
     const parts: string[] = text.match(/^(\s*)(.*?)(\s*)$/) || [];
 
-    writer.write(parts[1]);  // write leading whitespace
+    writer.write(parts[1]); // write leading whitespace
 
     const middle: string = parts[2];
 
@@ -265,7 +262,7 @@ export class MarkdownEmitter {
       }
     }
 
-    writer.write(parts[3]);  // write trailing whitespace
+    writer.write(parts[3]); // write trailing whitespace
   }
 
   protected writeNodes(docNodes: ReadonlyArray<DocNode>, context: IMarkdownEmitterContext): void {

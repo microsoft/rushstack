@@ -19,4 +19,19 @@ export class MapExtensions {
       targetMap.set(pair[0], pair[1]);
     }
   }
+
+  /**
+   * Converts a string-keyed map to an object.
+   * @remarks
+   * This function has the same effect as Object.fromEntries(map.entries())
+   * in supported versions of Node (\>= 12.0.0).
+   * @param map - The map that the object properties will be sourced from
+   */
+  public static toObject<TValue>(map: Map<string, TValue>): { [key: string]: TValue } {
+    const object: { [key: string]: TValue } = {};
+    for (const [key, value] of map.entries()) {
+      object[key] = value;
+    }
+    return object;
+  }
 }

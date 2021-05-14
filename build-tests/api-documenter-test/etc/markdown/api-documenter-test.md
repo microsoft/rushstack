@@ -12,6 +12,7 @@ This project tests various documentation generation scenarios and doc comment sy
 
 |  Class | Description |
 |  --- | --- |
+|  [DecoratorExample](./api-documenter-test.decoratorexample.md) |  |
 |  [DocBaseClass](./api-documenter-test.docbaseclass.md) | Example base class |
 |  [DocClass1](./api-documenter-test.docclass1.md) | This is an example class. |
 |  [DocClassInterfaceMerge](./api-documenter-test.docclassinterfacemerge.md) | Class that merges with interface |
@@ -23,12 +24,13 @@ This project tests various documentation generation scenarios and doc comment sy
 |  Enumeration | Description |
 |  --- | --- |
 |  [DocEnum](./api-documenter-test.docenum.md) | Docs for DocEnum |
+|  [DocEnumNamespaceMerge](./api-documenter-test.docenumnamespacemerge.md) | Enum that merges with namespace |
 
 ## Functions
 
 |  Function | Description |
 |  --- | --- |
-|  [globalFunction(x)](./api-documenter-test.globalfunction.md) | An exported function |
+|  [exampleFunction(x, y)](./api-documenter-test.examplefunction.md) | An exported function with hyperlinked parameters and return value. |
 |  [yamlReferenceUniquenessTest()](./api-documenter-test.yamlreferenceuniquenesstest.md) |  |
 
 ## Interfaces
@@ -42,11 +44,13 @@ This project tests various documentation generation scenarios and doc comment sy
 |  [IDocInterface4](./api-documenter-test.idocinterface4.md) | Type union in an interface. |
 |  [IDocInterface5](./api-documenter-test.idocinterface5.md) | Interface without inline tag to test custom TOC |
 |  [IDocInterface6](./api-documenter-test.idocinterface6.md) | Interface without inline tag to test custom TOC with injection |
+|  [IDocInterface7](./api-documenter-test.idocinterface7.md) | Interface for testing optional properties |
 
 ## Namespaces
 
 |  Namespace | Description |
 |  --- | --- |
+|  [DocEnumNamespaceMerge](./api-documenter-test.docenumnamespacemerge.md) | Namespace that merges with enum |
 |  [EcmaSmbols](./api-documenter-test.ecmasmbols.md) | A namespace containing an ECMAScript symbol |
 |  [OuterNamespace](./api-documenter-test.outernamespace.md) | A top-level namespace |
 
@@ -60,7 +64,9 @@ This project tests various documentation generation scenarios and doc comment sy
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [ExampleDuplicateTypeAlias](./api-documenter-test.exampleduplicatetypealias.md) | A type alias that has duplicate references. |
 |  [ExampleTypeAlias](./api-documenter-test.exampletypealias.md) | A type alias |
+|  [ExampleUnionTypeAlias](./api-documenter-test.exampleuniontypealias.md) | A type alias that references multiple other types. |
 |  [GenericTypeAlias](./api-documenter-test.generictypealias.md) |  |
 |  [TypeAlias](./api-documenter-test.typealias.md) |  |
 

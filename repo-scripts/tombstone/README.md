@@ -1,5 +1,3 @@
-# @microsoft/eslint-config-scalable-ts
+# @microsoft/rush-buildxl
 
-This package has been renamed to
-[@rushstack/eslint-config](https://www.npmjs.com/package/@rushstack/eslint-config).
-Please use that package instead.
+@microsoft/rush-buildxl has been deprecated in favor of BuildXL's built-in [Rush frontend](https://github.com/microsoft/BuildXL/blob/master/Documentation/Wiki/Frontends/rush-onboarding.md).

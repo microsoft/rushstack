@@ -6,15 +6,12 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as tty from 'tty';
 import * as path from 'path';
-import * as wordwrap from 'wordwrap';
-import {
-  JsonFile,
-  IPackageJson,
-  FileSystem,
-  FileConstants
-} from '@microsoft/node-core-library';
+import wordwrap from 'wordwrap';
+import { JsonFile, IPackageJson, FileSystem, FileConstants, Terminal } from '@rushstack/node-core-library';
+import type * as stream from 'stream';
+import { CommandLineHelper } from '@rushstack/ts-command-line';
+
 import { RushConfiguration } from '../api/RushConfiguration';
-import { Stream } from 'stream';
 
 export interface IEnvironment {
   // NOTE: the process.env doesn't actually support "undefined" as a value.
@@ -22,6 +19,18 @@ export interface IEnvironment {
   // But this typing is needed for reading values from the dictionary, and for
   // subsets that get combined.
   [environmentVariableName: string]: string | undefined;
+}
+
+/**
+ * Options for Utilities.executeCommand().
+ */
+export interface IExecuteCommandOptions {
+  command: string;
+  args: string[];
+  workingDirectory: string;
+  environment?: IEnvironment;
+  suppressOutput?: boolean;
+  keepEnvironment?: boolean;
 }
 
 /**
@@ -75,6 +84,15 @@ export interface IEnvironmentPathOptions {
    * If true, include <repo root>/common/temp/node_modules/.bin in the PATH.
    */
   includeRepoBin?: boolean;
+
+  /**
+   * Additional folders to be prepended to the search PATH.
+   */
+  additionalPathFolders?: string[] | undefined;
+}
+
+export interface IDisposable {
+  dispose(): void;
 }
 
 interface ICreateEnvironmentForRushCommandPathOptions extends IEnvironmentPathOptions {
@@ -102,13 +120,12 @@ interface ICreateEnvironmentForRushCommandOptions {
 export class Utilities {
   /**
    * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
-   * this looks something like "/usr/username/"
+   * this looks something like "/home/username/"
    */
-  public static getHomeDirectory(): string {
-    const unresolvedUserFolder: string | undefined = process.env[
-      (process.platform === 'win32') ? 'USERPROFILE' : 'HOME'
-    ];
-    const dirError: string = 'Unable to determine the current user\'s home directory';
+  public static getHomeFolder(): string {
+    const unresolvedUserFolder: string | undefined =
+      process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
+    const dirError: string = "Unable to determine the current user's home directory";
     if (unresolvedUserFolder === undefined) {
       throw new Error(dirError);
     }
@@ -200,11 +217,12 @@ export class Utilities {
     return Utilities.retryUntilTimeout(
       () => FileSystem.ensureFolder(folderName),
       maxWaitTimeMs,
-      (e) => new Error(
-        `Error: ${e}${os.EOL}Often this is caused by a file lock ` +
-        'from a process such as your text editor, command prompt, ' +
-        'or "gulp serve"'
-      ),
+      (e) =>
+        new Error(
+          `Error: ${e}${os.EOL}Often this is caused by a file lock ` +
+            'from a process such as your text editor, command prompt, ' +
+            'or a filesystem watcher.'
+        ),
       'createFolderWithRetry'
     );
   }
@@ -218,7 +236,9 @@ export class Utilities {
     try {
       const lstat: fs.Stats = FileSystem.getLinkStatistics(filePath);
       exists = lstat.isFile();
-    } catch (e) { /* no-op */ }
+    } catch (e) {
+      /* no-op */
+    }
 
     return exists;
   }
@@ -232,7 +252,9 @@ export class Utilities {
     try {
       const lstat: fs.Stats = FileSystem.getLinkStatistics(directoryPath);
       exists = lstat.isDirectory();
-    } catch (e) { /* no-op */ }
+    } catch (e) {
+      /* no-op */
+    }
 
     return exists;
   }
@@ -246,8 +268,10 @@ export class Utilities {
     try {
       FileSystem.deleteFolder(folderPath);
     } catch (e) {
-      throw new Error(e.message + os.EOL + 'Often this is caused by a file lock'
-        + ' from a process such as your text editor, command prompt, or "gulp serve"');
+      throw new Error(
+        `${e.message}${os.EOL}Often this is caused by a file lock from a process ` +
+          'such as your text editor, command prompt, or a filesystem watcher'
+      );
     }
   }
 
@@ -262,25 +286,20 @@ export class Utilities {
   }
 
   /*
-   * Returns true if outputFilename has a more recent last modified timestamp
-   * than all of the inputFilenames, which would imply that we don't need to rebuild it.
-   * Returns false if any of the files does not exist.
+   * Returns true if dateToCompare is more recent than all of the inputFilenames, which
+   * would imply that we don't need to rebuild it. Returns false if any of the files
+   * does not exist.
    * NOTE: The filenames can also be paths for directories, in which case the directory
    * timestamp is compared.
    */
-  public static isFileTimestampCurrent(outputFilename: string, inputFilenames: string[]): boolean {
-    if (!FileSystem.exists(outputFilename)) {
-      return false;
-    }
-    const outputStats: fs.Stats = FileSystem.getStatistics(outputFilename);
-
+  public static isFileTimestampCurrent(dateToCompare: Date, inputFilenames: string[]): boolean {
     for (const inputFilename of inputFilenames) {
       if (!FileSystem.exists(inputFilename)) {
         return false;
       }
 
       const inputStats: fs.Stats = FileSystem.getStatistics(inputFilename);
-      if (outputStats.mtime < inputStats.mtime) {
+      if (dateToCompare < inputStats.mtime) {
         return false;
       }
     }
@@ -320,15 +339,14 @@ export class Utilities {
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
-  public static executeCommand(command: string, args: string[], workingDirectory: string,
-    environment?: IEnvironment, suppressOutput: boolean = false,
-    keepEnvironment: boolean = false
-  ): void {
-
-    Utilities._executeCommandInternal(command, args, workingDirectory,
-      suppressOutput ? undefined : [0, 1, 2],
-      environment,
-      keepEnvironment
+  public static executeCommand(options: IExecuteCommandOptions): void {
+    Utilities._executeCommandInternal(
+      options.command,
+      options.args,
+      options.workingDirectory,
+      options.suppressOutput ? undefined : [0, 1, 2],
+      options.environment,
+      options.keepEnvironment
     );
   }
 
@@ -336,12 +354,14 @@ export class Utilities {
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
-  public static executeCommandAndCaptureOutput(command: string, args: string[], workingDirectory: string,
+  public static executeCommandAndCaptureOutput(
+    command: string,
+    args: string[],
+    workingDirectory: string,
     environment?: IEnvironment,
     keepEnvironment: boolean = false
   ): string {
-
-    const  result: child_process.SpawnSyncReturns<Buffer> = Utilities._executeCommandInternal(
+    const result: child_process.SpawnSyncReturns<Buffer> = Utilities._executeCommandInternal(
       command,
       args,
       workingDirectory,
@@ -356,10 +376,11 @@ export class Utilities {
   /**
    * Attempts to run Utilities.executeCommand() up to maxAttempts times before giving up.
    */
-  public static executeCommandWithRetry(maxAttempts: number, command: string, args: string[],
-    workingDirectory: string,  environment?: IEnvironment, suppressOutput: boolean = false,
-    retryCallback?: () => void): void {
-
+  public static executeCommandWithRetry(
+    options: IExecuteCommandOptions,
+    maxAttempts: number,
+    retryCallback?: () => void
+  ): void {
     if (maxAttempts < 1) {
       throw new Error('The maxAttempts parameter cannot be less than 1');
     }
@@ -368,10 +389,10 @@ export class Utilities {
 
     for (;;) {
       try {
-        Utilities.executeCommand(command, args, workingDirectory, environment, suppressOutput);
+        Utilities.executeCommand(options);
       } catch (error) {
         console.log(os.EOL + 'The command failed:');
-        console.log(` ${command} ` + args.join(' '));
+        console.log(` ${options.command} ` + options.args.join(' '));
         console.log(`ERROR: ${error.toString()}`);
 
         if (attemptNumber < maxAttempts) {
@@ -397,10 +418,7 @@ export class Utilities {
    * @param command - the command to run on shell
    * @param options - options for how the command should be run
    */
-  public static executeLifecycleCommand(
-    command: string,
-    options: ILifecycleCommandOptions
-  ): number {
+  public static executeLifecycleCommand(command: string, options: ILifecycleCommandOptions): number {
     const result: child_process.SpawnSyncReturns<Buffer> = Utilities._executeLifecycleCommandInternal(
       command,
       child_process.spawnSync,
@@ -427,10 +445,15 @@ export class Utilities {
     command: string,
     options: ILifecycleCommandOptions
   ): child_process.ChildProcess {
-    return Utilities._executeLifecycleCommandInternal(
-      command,
-      child_process.spawn,
-      options
+    return Utilities._executeLifecycleCommandInternal(command, child_process.spawn, options);
+  }
+
+  /**
+   * Utility to determine if the app should restrict writing to the console.
+   */
+  public static shouldRestrictConsoleOutput(): boolean {
+    return (
+      CommandLineHelper.isTabCompletionActionRequest(process.argv) || process.argv.indexOf('--json') !== -1
     );
   }
 
@@ -474,37 +497,20 @@ export class Utilities {
 
     // NOTE: Here we use whatever version of NPM we happen to find in the PATH
     Utilities.executeCommandWithRetry(
-      options.maxInstallAttempts,
-      'npm',
-      ['install'],
-      directory,
-      Utilities._createEnvironmentForRushCommand({}),
-      options.suppressOutput
+      {
+        command: 'npm',
+        args: ['install'],
+        workingDirectory: directory,
+        environment: Utilities._createEnvironmentForRushCommand({}),
+        suppressOutput: options.suppressOutput
+      },
+      options.maxInstallAttempts
     );
   }
 
-  public static withFinally<T>(options: { promise: Promise<T>, finally: () => void }): Promise<T> {
-    return options.promise.then<T>((result: T) => {
-      try {
-        options.finally();
-      } catch (error) {
-        return Promise.reject(error);
-      }
-      return result;
-    }).catch<T>((error: Error) => {
-      try {
-        options.finally();
-      } catch (innerError) {
-        return Promise.reject(innerError);
-      }
-      return Promise.reject(error);
-    });
-  }
-
   /**
-   * As a workaround, syncNpmrc() copies the .npmrc file to the target folder, and also trims
-   * unusable lines from the .npmrc file.  If the source .npmrc file not exist, then syncNpmrc()
-   * will delete an .npmrc that is found in the target folder.
+   * As a workaround, copyAndTrimNpmrcFile() copies the .npmrc file to the target folder, and also trims
+   * unusable lines from the .npmrc file.
    *
    * Why are we trimming the .npmrc lines?  NPM allows environment variables to be specified in
    * the .npmrc file to provide different authentication tokens for different registry.
@@ -513,47 +519,95 @@ export class Utilities {
    * we'd prefer to skip that line and continue looking in other places such as the user's
    * home directory.
    *
+   * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _copyAndTrimNpmrcFile() FROM scripts/install-run.ts
+   */
+  public static copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): void {
+    console.log(`Transforming ${sourceNpmrcPath}`); // Verbose
+    console.log(`  --> "${targetNpmrcPath}"`);
+    let npmrcFileLines: string[] = FileSystem.readFile(sourceNpmrcPath).split('\n');
+    npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
+    const resultLines: string[] = [];
+
+    // This finds environment variable tokens that look like "${VAR_NAME}"
+    const expansionRegExp: RegExp = /\$\{([^\}]+)\}/g;
+
+    // Comment lines start with "#" or ";"
+    const commentRegExp: RegExp = /^\s*[#;]/;
+
+    // Trim out lines that reference environment variables that aren't defined
+    for (const line of npmrcFileLines) {
+      let lineShouldBeTrimmed: boolean = false;
+
+      // Ignore comment lines
+      if (!commentRegExp.test(line)) {
+        const environmentVariables: string[] | null = line.match(expansionRegExp);
+        if (environmentVariables) {
+          for (const token of environmentVariables) {
+            // Remove the leading "${" and the trailing "}" from the token
+            const environmentVariableName: string = token.substring(2, token.length - 1);
+
+            // Is the environment variable defined?
+            if (!process.env[environmentVariableName]) {
+              // No, so trim this line
+              lineShouldBeTrimmed = true;
+              break;
+            }
+          }
+        }
+      }
+
+      if (lineShouldBeTrimmed) {
+        // Example output:
+        // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
+        resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
+      } else {
+        resultLines.push(line);
+      }
+    }
+
+    FileSystem.writeFile(targetNpmrcPath, resultLines.join(os.EOL));
+  }
+
+  /**
+   * Copies the file "sourcePath" to "destinationPath", overwriting the target file location.
+   * If the source file does not exist, then the target file is deleted.
+   */
+  public static syncFile(sourcePath: string, destinationPath: string): void {
+    if (FileSystem.exists(sourcePath)) {
+      console.log(`Copying "${sourcePath}"`);
+      console.log(`  --> "${destinationPath}"`);
+      FileSystem.copyFile({ sourcePath, destinationPath });
+    } else {
+      if (FileSystem.exists(destinationPath)) {
+        // If the source file doesn't exist and there is one in the target, delete the one in the target
+        console.log(`Deleting ${destinationPath}`);
+        FileSystem.deleteFile(destinationPath);
+      }
+    }
+  }
+
+  /**
+   * syncNpmrc() copies the .npmrc file to the target folder, and also trims unusable lines from the .npmrc file.
+   * If the source .npmrc file not exist, then syncNpmrc() will delete an .npmrc that is found in the target folder.
+   *
    * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _syncNpmrc() FROM scripts/install-run.ts
    */
-  public static syncNpmrc(sourceNpmrcFolder: string, targetNpmrcFolder: string): void {
-    const sourceNpmrcPath: string = path.join(sourceNpmrcFolder, '.npmrc');
+  public static syncNpmrc(
+    sourceNpmrcFolder: string,
+    targetNpmrcFolder: string,
+    useNpmrcPublish?: boolean
+  ): void {
+    const sourceNpmrcPath: string = path.join(
+      sourceNpmrcFolder,
+      !useNpmrcPublish ? '.npmrc' : '.npmrc-publish'
+    );
     const targetNpmrcPath: string = path.join(targetNpmrcFolder, '.npmrc');
     try {
       if (FileSystem.exists(sourceNpmrcPath)) {
-        console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`);
-        let npmrcFileLines: string[] = FileSystem.readFile(sourceNpmrcPath).split('\n');
-        npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
-        const resultLines: string[] = [];
-        // Trim out lines that reference environment variables that aren't defined
-        for (const line of npmrcFileLines) {
-          // This finds environment variable tokens that look like "${VAR_NAME}"
-          const regex: RegExp = /\$\{([^\}]+)\}/g;
-          const environmentVariables: string[] | null = line.match(regex);
-          let lineShouldBeTrimmed: boolean = false;
-          if (environmentVariables) {
-            for (const token of environmentVariables) {
-              // Remove the leading "${" and the trailing "}" from the token
-              const environmentVariableName: string = token.substring(2, token.length - 1);
-              if (!process.env[environmentVariableName]) {
-                lineShouldBeTrimmed = true;
-                break;
-              }
-            }
-          }
-
-          if (lineShouldBeTrimmed) {
-            // Example output:
-            // "; MISSING ENVIRONMENT VARIABLE: //my-registry.com/npm/:_authToken=${MY_AUTH_TOKEN}"
-            resultLines.push('; MISSING ENVIRONMENT VARIABLE: ' + line);
-          } else {
-            resultLines.push(line);
-          }
-        }
-
-        FileSystem.writeFile(targetNpmrcPath, resultLines.join(os.EOL));
+        Utilities.copyAndTrimNpmrcFile(sourceNpmrcPath, targetNpmrcPath);
       } else if (FileSystem.exists(targetNpmrcPath)) {
         // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
-        console.log(`Deleting ${targetNpmrcPath}`);
+        console.log(`Deleting ${targetNpmrcPath}`); // Verbose
         FileSystem.deleteFile(targetNpmrcPath);
       }
     } catch (e) {
@@ -569,9 +623,62 @@ export class Utilities {
     return `package-deps_${command}.json`;
   }
 
+  public static printMessageInBox(
+    message: string,
+    terminal: Terminal,
+    boxWidth: number = Math.floor(Utilities.getConsoleWidth() / 2)
+  ): void {
+    const maxLineLength: number = boxWidth - 10;
+
+    const wrappedMessage: string = Utilities.wrapWords(message, maxLineLength);
+    const wrappedMessageLines: string[] = wrappedMessage.split('\n');
+
+    // ╔═══════════╗
+    // ║  Message  ║
+    // ╚═══════════╝
+    terminal.writeLine(` ╔${'═'.repeat(boxWidth - 2)}╗ `);
+    for (const line of wrappedMessageLines) {
+      const trimmedLine: string = line.trim();
+      const padding: number = boxWidth - trimmedLine.length - 2;
+      const leftPadding: number = Math.floor(padding / 2);
+      const rightPadding: number = padding - leftPadding;
+      terminal.writeLine(` ║${' '.repeat(leftPadding)}${trimmedLine}${' '.repeat(rightPadding)}║ `);
+    }
+    terminal.writeLine(` ╚${'═'.repeat(boxWidth - 2)}╝ `);
+  }
+
+  public static async usingAsync<TDisposable extends IDisposable>(
+    getDisposableAsync: () => Promise<TDisposable> | IDisposable,
+    doActionAsync: (disposable: TDisposable) => Promise<void> | void
+  ): Promise<void> {
+    let disposable: TDisposable | undefined;
+    try {
+      disposable = (await getDisposableAsync()) as TDisposable;
+      await doActionAsync(disposable);
+    } finally {
+      disposable?.dispose();
+    }
+  }
+
+  public static async readStreamToBufferAsync(stream: stream.Readable): Promise<Buffer> {
+    return await new Promise((resolve: (result: Buffer) => void, reject: (error: Error) => void) => {
+      const parts: Uint8Array[] = [];
+      stream.on('data', (chunk) => parts.push(chunk));
+      stream.on('error', (error) => reject(error));
+      stream.on('end', () => {
+        const result: Buffer = Buffer.concat(parts);
+        resolve(result);
+      });
+    });
+  }
+
   private static _executeLifecycleCommandInternal<TCommandResult>(
     command: string,
-    spawnFunction: (command: string, args: string[], spawnOptions: child_process.SpawnOptions) => TCommandResult,
+    spawnFunction: (
+      command: string,
+      args: string[],
+      spawnOptions: child_process.SpawnOptions
+    ) => TCommandResult,
     options: ILifecycleCommandOptions
   ): TCommandResult {
     let shellCommand: string = process.env.comspec || 'cmd';
@@ -583,34 +690,34 @@ export class Utilities {
       useShell = false;
     }
 
-    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand(
-      {
-        initCwd: options.initCwd,
-        pathOptions: {
-          ...options.environmentPathOptions,
-          projectRoot: options.workingDirectory,
-          commonTempFolder: options.rushConfiguration ? options.rushConfiguration.commonTempFolder : undefined
-        }
+    const environment: IEnvironment = Utilities._createEnvironmentForRushCommand({
+      initCwd: options.initCwd,
+      pathOptions: {
+        ...options.environmentPathOptions,
+        projectRoot: options.workingDirectory,
+        commonTempFolder: options.rushConfiguration ? options.rushConfiguration.commonTempFolder : undefined
       }
-    );
+    });
 
-    return spawnFunction(
-      shellCommand,
-      [commandFlags, command],
-      {
-        cwd: options.workingDirectory,
-        shell: useShell,
-        env: environment,
-        stdio: options.handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
-      }
-    );
+    return spawnFunction(shellCommand, [commandFlags, command], {
+      cwd: options.workingDirectory,
+      shell: useShell,
+      env: environment,
+      stdio: options.handleOutput ? ['pipe', 'pipe', 'pipe'] : [0, 1, 2]
+    });
   }
 
   /**
    * Returns a process.env environment suitable for executing lifecycle scripts.
    * @param initialEnvironment - an existing environment to copy instead of process.env
+   *
+   * @remarks
+   * Rush._assignRushInvokedFolder() assigns the `RUSH_INVOKED_FOLDER` variable globally
+   * via the parent process's environment.
    */
-  private static _createEnvironmentForRushCommand(options: ICreateEnvironmentForRushCommandOptions): IEnvironment {
+  private static _createEnvironmentForRushCommand(
+    options: ICreateEnvironmentForRushCommandOptions
+  ): IEnvironment {
     if (options.initialEnvironment === undefined) {
       options.initialEnvironment = process.env;
     }
@@ -665,6 +772,12 @@ export class Utilities {
           options.pathOptions.projectRoot
         );
       }
+
+      if (options.pathOptions.additionalPathFolders) {
+        environment.PATH = [...options.pathOptions.additionalPathFolders, environment.PATH].join(
+          path.delimiter
+        );
+      }
     }
 
     return environment;
@@ -675,7 +788,10 @@ export class Utilities {
    * if `rootDirectory` is "/foobar" and `existingPath` is "/bin", this function will return
    * "/foobar/node_modules/.bin:/bin"
    */
-  private static _prependNodeModulesBinToPath(existingPath: string | undefined, rootDirectory: string): string {
+  private static _prependNodeModulesBinToPath(
+    existingPath: string | undefined,
+    rootDirectory: string
+  ): string {
     const binPath: string = path.resolve(rootDirectory, 'node_modules', '.bin');
     if (existingPath) {
       return `${binPath}${path.delimiter}${existingPath}`;
@@ -689,8 +805,15 @@ export class Utilities {
    * The current directory will be set to the specified workingDirectory.
    */
   private static _executeCommandInternal(
-    command: string, args: string[], workingDirectory: string,
-    stdio: 'pipe'|'ignore'|'inherit'|(number|'pipe'|'ignore'|'inherit'|'ipc'|Stream|null|undefined)[]|undefined,
+    command: string,
+    args: string[],
+    workingDirectory: string,
+    stdio:
+      | 'pipe'
+      | 'ignore'
+      | 'inherit'
+      | (number | 'pipe' | 'ignore' | 'inherit' | 'ipc' | stream.Stream | null | undefined)[]
+      | undefined,
     environment?: IEnvironment,
     keepEnvironment: boolean = false
   ): child_process.SpawnSyncReturns<Buffer> {
@@ -716,16 +839,19 @@ export class Utilities {
     // into node-core-library, but for now this hack will unblock people:
 
     // Only escape the command if it actually contains spaces:
-    const escapedCommand: string = command.indexOf(' ') < 0
-      ? command
-      : Utilities.escapeShellParameter(command);
+    const escapedCommand: string =
+      command.indexOf(' ') < 0 ? command : Utilities.escapeShellParameter(command);
 
     const escapedArgs: string[] = args.map((x) => Utilities.escapeShellParameter(x));
 
-    let result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(escapedCommand,
-      escapedArgs, options);
+    let result: child_process.SpawnSyncReturns<Buffer> = child_process.spawnSync(
+      escapedCommand,
+      escapedArgs,
+      options
+    );
 
-    if (result.error && (result.error as any).errno === 'ENOENT') { // eslint-disable-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (result.error && (result.error as any).errno === 'ENOENT') {
       // This is a workaround for GitHub issue #25330
       // https://github.com/nodejs/node-v0.x-archive/issues/25330
       result = child_process.spawnSync(command + '.cmd', args, options);
@@ -742,8 +868,12 @@ export class Utilities {
     }
 
     if (result.status) {
-      throw new Error('The command failed with exit code ' + result.status + os.EOL +
-        (result.stderr ? result.stderr.toString() : ''));
+      throw new Error(
+        'The command failed with exit code ' +
+          result.status +
+          os.EOL +
+          (result.stderr ? result.stderr.toString() : '')
+      );
     }
   }
 }

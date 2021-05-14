@@ -79,5 +79,4 @@ describe('ProtectableMap', () => {
       exampleApi.studentAgesByName.set('Jane', 23);
     }).toThrowError('The key must be all upper case: Jane');
   });
-
 });

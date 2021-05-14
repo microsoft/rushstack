@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import * as os from 'os';
-import { JsonFile, JsonSchema, FileSystem, NewlineKind, InternalError } from '@microsoft/node-core-library';
+import { JsonFile, JsonSchema, FileSystem, NewlineKind, InternalError } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
 import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
@@ -40,6 +40,13 @@ export class ApprovedPackagesItem {
    * The project categories that are allowed to use this package.
    */
   public allowedCategories: Set<string> = new Set<string>();
+
+  /**
+   * @internal
+   */
+  public constructor(packageName: string) {
+    this.packageName = packageName;
+  }
 }
 
 /**
@@ -48,13 +55,14 @@ export class ApprovedPackagesItem {
  */
 export class ApprovedPackagesConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, '../schemas/approved-packages.schema.json'));
+    path.join(__dirname, '../schemas/approved-packages.schema.json')
+  );
 
   public items: ApprovedPackagesItem[] = [];
 
   private _itemsByName: Map<string, ApprovedPackagesItem> = new Map<string, ApprovedPackagesItem>();
 
-  private _loadedJson: IApprovedPackagesJson;
+  private _loadedJson!: IApprovedPackagesJson;
   private _jsonFilename: string;
 
   public constructor(jsonFilename: string) {
@@ -83,8 +91,7 @@ export class ApprovedPackagesConfiguration {
 
     let item: ApprovedPackagesItem | undefined = this._itemsByName.get(packageName);
     if (!item) {
-      item = new ApprovedPackagesItem();
-      item.packageName = packageName;
+      item = new ApprovedPackagesItem(packageName);
       this._addItem(item);
       changed = true;
     }
@@ -108,8 +115,10 @@ export class ApprovedPackagesConfiguration {
     this.loadFromFile();
 
     if (!approvedPackagesPolicyEnabled) {
-      console.log(`Warning: Ignoring "${path.basename(this._jsonFilename)}" because the`
-        + ` "approvedPackagesPolicy" setting was not specified in rush.json`);
+      console.log(
+        `Warning: Ignoring "${path.basename(this._jsonFilename)}" because the` +
+          ` "approvedPackagesPolicy" setting was not specified in rush.json`
+      );
     }
 
     return false;
@@ -119,8 +128,10 @@ export class ApprovedPackagesConfiguration {
    * Loads the configuration data from the filename that was passed to the constructor.
    */
   public loadFromFile(): void {
-    const approvedPackagesJson: IApprovedPackagesJson = JsonFile.loadAndValidate(this._jsonFilename,
-      ApprovedPackagesConfiguration._jsonSchema);
+    const approvedPackagesJson: IApprovedPackagesJson = JsonFile.loadAndValidate(
+      this._jsonFilename,
+      ApprovedPackagesConfiguration._jsonSchema
+    );
 
     this.clear();
 
@@ -162,16 +173,12 @@ export class ApprovedPackagesConfiguration {
     let body: string = JsonFile.stringify(this._loadedJson);
 
     // Unindent the allowedCategories array to improve readability
-    body = body.replace(
-      /("allowedCategories": +\[)([^\]]+)/g,
-      (substring: string, ...args: string[]) => {
-        return args[0] + args[1].replace(/\s+/g, ' ');
-      }
-    );
+    body = body.replace(/("allowedCategories": +\[)([^\]]+)/g, (substring: string, ...args: string[]) => {
+      return args[0] + args[1].replace(/\s+/g, ' ');
+    });
 
     // Add a header
-    body = '// DO NOT ADD COMMENTS IN THIS FILE.'
-      + '  They will be lost when the Rush tool resaves it.\n' + body;
+    body = '// DO NOT ADD COMMENTS IN THIS FILE.  They will be lost when the Rush tool resaves it.\n' + body;
 
     FileSystem.writeFile(this._jsonFilename, body, {
       convertLineEndings: NewlineKind.CrLf
@@ -183,12 +190,14 @@ export class ApprovedPackagesConfiguration {
    */
   private _addItemJson(itemJson: IApprovedPackagesItemJson, jsonFilename: string): void {
     if (this._itemsByName.has(itemJson.name)) {
-      throw new Error(`Error loading package review file ${jsonFilename}:` + os.EOL
-        + ` the name "${itemJson.name}" appears more than once`);
+      throw new Error(
+        `Error loading package review file ${jsonFilename}:` +
+          os.EOL +
+          ` the name "${itemJson.name}" appears more than once`
+      );
     }
 
-    const item: ApprovedPackagesItem = new ApprovedPackagesItem();
-    item.packageName = itemJson.name;
+    const item: ApprovedPackagesItem = new ApprovedPackagesItem(itemJson.name);
     if (itemJson.allowedCategories) {
       for (const allowedCategory of itemJson.allowedCategories) {
         item.allowedCategories.add(allowedCategory);

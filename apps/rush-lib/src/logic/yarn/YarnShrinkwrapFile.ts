@@ -1,11 +1,29 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
 import * as os from 'os';
-import * as lockfile from '@yarnpkg/lockfile';
-import {
-  BaseShrinkwrapFile
-} from '../base/BaseShrinkwrapFile';
-import { FileSystem, PackageName, IParsedPackageNameOrError, InternalError } from '@microsoft/node-core-library';
+import { BaseShrinkwrapFile } from '../base/BaseShrinkwrapFile';
+import { FileSystem, IParsedPackageNameOrError, InternalError, Import } from '@rushstack/node-core-library';
 import { RushConstants } from '../RushConstants';
 import { DependencySpecifier } from '../DependencySpecifier';
+import { PackageNameParsers } from '../../api/PackageNameParsers';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
+
+/**
+ * @yarnpkg/lockfile doesn't have types
+ */
+// eslint-disable-next-line
+declare module YarnPkgLockfileTypes {
+  export class ParseResult {
+    public object: IYarnShrinkwrapJson;
+  }
+
+  export function parse(shrinkwrapJson: string): ParseResult;
+
+  export function stringify(shrinkwrap: IYarnShrinkwrapJson): string;
+}
+const lockfileModule: typeof YarnPkgLockfileTypes = Import.lazy('@yarnpkg/lockfile', require);
 
 /**
  * Used with YarnShrinkwrapFile._encodePackageNameAndSemVer() and _decodePackageNameAndSemVer().
@@ -76,6 +94,8 @@ interface IYarnShrinkwrapJson {
  * logging messages to use terminology more consistent with Yarn's own documentation.
  */
 export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
+  public readonly isWorkspaceCompatible: boolean;
+
   // Example inputs:
   // "js-tokens@^3.0.0 || ^4.0.0"
   // "@rush-temp/api-extractor-test-03@file:./projects/api-extractor-test-03.tgz"
@@ -96,18 +116,25 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
       const packageNameAndSemVer: IPackageNameAndSemVer = YarnShrinkwrapFile._decodePackageNameAndSemVer(key);
 
       // If it starts with @rush-temp, then include it:
-      if (PackageName.getScope(packageNameAndSemVer.packageName) === RushConstants.rushTempNpmScope) {
+      if (
+        PackageNameParsers.permissive.getScope(packageNameAndSemVer.packageName) ===
+        RushConstants.rushTempNpmScope
+      ) {
         if (!/^file:/i.test(packageNameAndSemVer.semVerRange)) {
           // Sanity check to make sure this is a real package.
           // (Nobody should ever have an actual dependency on an "@rush-temp/" package.
-          throw new Error('Unexpected package/semver expression found in the Yarn shrinkwrap file (yarn.lock): '
-            + JSON.stringify(key));
+          throw new Error(
+            'Unexpected package/semver expression found in the Yarn shrinkwrap file (yarn.lock): ' +
+              JSON.stringify(key)
+          );
         }
 
         if (!seenEntries.add(packageNameAndSemVer.packageName)) {
           // Sanity check -- this should never happen
-          throw new Error('Duplicate @rush-temp package found in the Yarn shrinkwrap file (yarn.lock): '
-            + JSON.stringify(key));
+          throw new Error(
+            'Duplicate @rush-temp package found in the Yarn shrinkwrap file (yarn.lock): ' +
+              JSON.stringify(key)
+          );
         }
 
         this._tempProjectNames.push(packageNameAndSemVer.packageName);
@@ -132,24 +159,27 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
       }
     }
 
-    this._tempProjectNames.sort();  // make the result deterministic
+    this._tempProjectNames.sort(); // make the result deterministic
+
+    // We don't support Yarn workspaces yet
+    this.isWorkspaceCompatible = false;
   }
 
   public static loadFromFile(shrinkwrapFilename: string): YarnShrinkwrapFile | undefined {
     let shrinkwrapString: string;
-    let shrinkwrapJson: lockfile.ParseResult;
+    let shrinkwrapJson: YarnPkgLockfileTypes.ParseResult;
     try {
       if (!FileSystem.exists(shrinkwrapFilename)) {
         return undefined; // file does not exist
       }
 
       shrinkwrapString = FileSystem.readFile(shrinkwrapFilename);
-      shrinkwrapJson = lockfile.parse(shrinkwrapString);
+      shrinkwrapJson = lockfileModule.parse(shrinkwrapString);
     } catch (error) {
       throw new Error(`Error reading "${shrinkwrapFilename}":` + os.EOL + `  ${error.message}`);
     }
 
-    return new YarnShrinkwrapFile(shrinkwrapJson.object as IYarnShrinkwrapJson);
+    return new YarnShrinkwrapFile(shrinkwrapJson.object);
   }
 
   /**
@@ -160,19 +190,27 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
    * Example output: { packageName: "js-tokens", semVerRange: "^3.0.0 || ^4.0.0" }
    */
   private static _decodePackageNameAndSemVer(packageNameAndSemVer: string): IPackageNameAndSemVer {
-    const result: RegExpExecArray | null = YarnShrinkwrapFile._packageNameAndSemVerRegExp.exec(packageNameAndSemVer);
+    const result: RegExpExecArray | null = YarnShrinkwrapFile._packageNameAndSemVerRegExp.exec(
+      packageNameAndSemVer
+    );
     if (!result) {
       // Sanity check -- this should never happen
-      throw new Error('Unable to parse package/semver expression in the Yarn shrinkwrap file (yarn.lock): '
-        + JSON.stringify(packageNameAndSemVer));
+      throw new Error(
+        'Unable to parse package/semver expression in the Yarn shrinkwrap file (yarn.lock): ' +
+          JSON.stringify(packageNameAndSemVer)
+      );
     }
 
     const packageName: string = result[1] || '';
-    const parsedPackageName: IParsedPackageNameOrError = PackageName.tryParse(packageName);
+    const parsedPackageName: IParsedPackageNameOrError = PackageNameParsers.permissive.tryParse(packageName);
     if (parsedPackageName.error) {
       // Sanity check -- this should never happen
-      throw new Error('Invalid package name the Yarn shrinkwrap file (yarn.lock): '
-        + JSON.stringify(packageNameAndSemVer) + '\n' + parsedPackageName.error);
+      throw new Error(
+        'Invalid package name the Yarn shrinkwrap file (yarn.lock): ' +
+          JSON.stringify(packageNameAndSemVer) +
+          '\n' +
+          parsedPackageName.error
+      );
     }
 
     return {
@@ -209,13 +247,16 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public tryEnsureCompatibleDependency(dependencySpecifier: DependencySpecifier, tempProjectName: string): boolean {
+  public tryEnsureCompatibleDependency(
+    dependencySpecifier: DependencySpecifier,
+    tempProjectName: string
+  ): boolean {
     return this.hasCompatibleTopLevelDependency(dependencySpecifier);
   }
 
   /** @override */
   protected serialize(): string {
-    return lockfile.stringify(this._shrinkwrapJson);
+    return lockfileModule.stringify(this._shrinkwrapJson);
   }
 
   /** @override */
@@ -224,9 +265,20 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  protected tryEnsureDependencyVersion(dependencySpecifier: DependencySpecifier,
-    tempProjectName: string): DependencySpecifier | undefined {
+  protected tryEnsureDependencyVersion(
+    dependencySpecifier: DependencySpecifier,
+    tempProjectName: string
+  ): DependencySpecifier | undefined {
+    throw new InternalError('Not implemented');
+  }
 
+  /** @override */
+  public getProjectShrinkwrap(project: RushConfigurationProject): BaseProjectShrinkwrapFile | undefined {
+    return undefined;
+  }
+
+  /** @override */
+  public isWorkspaceProjectModified(project: RushConfigurationProject, variant?: string): boolean {
     throw new InternalError('Not implemented');
   }
 }

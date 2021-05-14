@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor",
-  "version": "7.7.8",
+  "version": "7.15.1",
   "description": "Analyze the exported API for a TypeScript library and generate reviews, documentation, and .d.ts rollups",
   "keywords": [
     "typescript",
@@ -11,8 +11,10 @@
     "generate",
     "documentation",
     "declaration",
+    "dts",
     ".d.ts",
     "rollup",
+    "bundle",
     "compiler",
     "alpha",
     "beta"
@@ -29,26 +31,30 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "gulp test --clean"
+    "build": "heft test --clean"
   },
   "dependencies": {
-    "@microsoft/api-extractor-model": "7.7.7",
-    "@microsoft/node-core-library": "3.19.3",
-    "@microsoft/ts-command-line": "4.3.10",
-    "@microsoft/tsdoc": "0.12.14",
+    "@microsoft/api-extractor-model": "workspace:*",
+    "@microsoft/tsdoc-config": "~0.15.2",
+    "@microsoft/tsdoc": "0.13.2",
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rig-package": "workspace:*",
+    "@rushstack/ts-command-line": "workspace:*",
     "colors": "~1.2.1",
     "lodash": "~4.17.15",
-    "resolve": "1.8.1",
+    "resolve": "~1.17.0",
+    "semver": "~7.3.0",
     "source-map": "~0.6.1",
-    "typescript": "~3.7.2"
+    "typescript": "~4.2.4"
   },
   "devDependencies": {
-    "@microsoft/node-library-build": "6.3.11",
-    "@microsoft/rush-stack-compiler-3.5": "0.3.11",
-    "@rushstack/eslint-config": "0.5.4",
-    "@types/jest": "23.3.11",
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "0.28.0",
+    "@rushstack/heft-node-rig": "1.0.8",
+    "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
     "@types/node": "10.17.13",
-    "gulp": "~4.0.2"
+    "@types/resolve": "1.17.1",
+    "@types/semver": "7.3.5"
   }
 }

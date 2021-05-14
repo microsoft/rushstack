@@ -1,0 +1,21 @@
+/**
+ * This configuration file manages Rush's build cache feature.
+ * More documentation is available on the Rush website: https://rushjs.io
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/build-cache.schema.json",
+
+  /**
+   * (Required) EXPERIMENTAL - Set this to true to enable the build cache feature.
+   *
+   * See https://rushjs.io/pages/maintainer/build_cache/ for details about this experimental feature.
+   */
+  "buildCacheEnabled": true,
+
+  /**
+   * (Required) Choose where project build outputs will be cached.
+   *
+   * Possible values: "local-only", "azure-blob-storage", "amazon-s3"
+   */
+  "cacheProvider": "local-only"
+}

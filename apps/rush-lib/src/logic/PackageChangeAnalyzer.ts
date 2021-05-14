@@ -2,166 +2,148 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as colors from 'colors';
+import colors from 'colors/safe';
+import * as crypto from 'crypto';
+import ignore, { Ignore } from 'ignore';
 
-import {
-  getPackageDeps,
-  getGitHashForFiles,
-  IPackageDeps
-} from '@microsoft/package-deps-hash';
-import {
-  Path,
-  InternalError,
-  FileSystem
-} from '@microsoft/node-core-library';
+import { getPackageDeps, getGitHashForFiles } from '@rushstack/package-deps-hash';
+import { Path, InternalError, FileSystem, Terminal, Async } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
+import { RushProjectConfiguration } from '../api/RushProjectConfiguration';
 import { Git } from './Git';
-import { PnpmProjectDependencyManifest } from './pnpm/PnpmProjectDependencyManifest';
+import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import { RushConstants } from './RushConstants';
 
 export class PackageChangeAnalyzer {
-  // Allow this function to be overwritten during unit tests
-  public static getPackageDeps: (path: string, ignoredFiles: string[]) => IPackageDeps;
-
-  private _data: Map<string, IPackageDeps>;
+  /**
+   * null === we haven't looked
+   * undefined === data isn't available (i.e. - git isn't present)
+   */
+  private _data: Map<string, Map<string, string>> | undefined | null = null;
+  private _projectStateCache: Map<string, string> = new Map<string, string>();
   private _rushConfiguration: RushConfiguration;
-  private _isGitSupported: boolean;
+  private readonly _git: Git;
 
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
-    this._isGitSupported = Git.isPathUnderGitWorkingTree();
-    this._data = this._getData();
+    this._git = new Git(this._rushConfiguration);
   }
 
-  public getPackageDepsHash(projectName: string): IPackageDeps | undefined {
-    if (!this._data) {
-      this._data = this._getData();
+  public async getPackageDeps(
+    projectName: string,
+    terminal: Terminal
+  ): Promise<Map<string, string> | undefined> {
+    if (this._data === null) {
+      this._data = await this._getData(terminal);
     }
 
-    return this._data.get(projectName);
+    return this._data?.get(projectName);
   }
 
-  private _getData(): Map<string, IPackageDeps> {
-    // If we are not in a unit test, use the correct resources
-    if (!PackageChangeAnalyzer.getPackageDeps) {
-      PackageChangeAnalyzer.getPackageDeps = getPackageDeps;
-    }
-
-    const projectHashDeps: Map<string, IPackageDeps> = new Map<string, IPackageDeps>();
-
-    // pre-populate the map with the projects from the config
-    for (const project of this._rushConfiguration.projects) {
-      projectHashDeps.set(project.packageName, {
-        files: {}
-      });
-    }
-
-    const noProjectHashes: { [key: string]: string } = {};
-
-    let repoDeps: IPackageDeps;
-    try {
-      if (this._isGitSupported) {
-        // Load the package deps hash for the whole repository
-        repoDeps = PackageChangeAnalyzer.getPackageDeps(this._rushConfiguration.rushJsonFolder, []);
+  /**
+   * The project state hash is calculated in the following way:
+   * - Project dependencies are collected (see PackageChangeAnalyzer.getPackageDeps)
+   *   - If project dependencies cannot be collected (i.e. - if Git isn't available),
+   *     this function returns `undefined`
+   * - The (path separator normalized) repo-root-relative dependencies' file paths are sorted
+   * - A SHA1 hash is created and each (sorted) file path is fed into the hash and then its
+   *   Git SHA is fed into the hash
+   * - A hex digest of the hash is returned
+   */
+  public async getProjectStateHash(projectName: string, terminal: Terminal): Promise<string | undefined> {
+    let projectState: string | undefined = this._projectStateCache.get(projectName);
+    if (!projectState) {
+      const packageDeps: Map<string, string> | undefined = await this.getPackageDeps(projectName, terminal);
+      if (!packageDeps) {
+        return undefined;
       } else {
-        return projectHashDeps;
-      }
-    } catch (e) {
-      // If getPackageDeps fails, don't fail the whole build. Treat this case as if we don't know anything about
-      // the state of the files in the repo. This can happen if the environment doesn't have Git.
-      console.log(colors.yellow(
-        `Error calculating the state of the repo. (inner error: ${e}). Continuing without diffing files.`
-      ));
+        const sortedPackageDepsFiles: string[] = Array.from(packageDeps.keys()).sort();
+        const hash: crypto.Hash = crypto.createHash('sha1');
+        for (const packageDepsFile of sortedPackageDepsFiles) {
+          hash.update(packageDepsFile);
+          hash.update(RushConstants.hashDelimiter);
+          hash.update(packageDeps.get(packageDepsFile)!);
+          hash.update(RushConstants.hashDelimiter);
+        }
 
-      return projectHashDeps;
+        projectState = hash.digest('hex');
+        this._projectStateCache.set(projectName, projectState);
+      }
     }
+
+    return projectState;
+  }
+
+  private async _getData(terminal: Terminal): Promise<Map<string, Map<string, string>> | undefined> {
+    const repoDeps: Map<string, string> | undefined = this._getRepoDeps();
+    if (!repoDeps) {
+      return undefined;
+    }
+
+    const projectHashDeps: Map<string, Map<string, string>> = new Map<string, Map<string, string>>();
+    const ignoreMatcherForProject: Map<string, Ignore> = new Map<string, Ignore>();
+
+    // Initialize maps for each project asynchronously, up to 10 projects concurrently.
+    await Async.forEachAsync(
+      this._rushConfiguration.projects,
+      async (project: RushConfigurationProject): Promise<void> => {
+        projectHashDeps.set(project.packageName, new Map<string, string>());
+        ignoreMatcherForProject.set(
+          project.packageName,
+          await this._getIgnoreMatcherForProject(project, terminal)
+        );
+      },
+      { concurrency: 10 }
+    );
 
     // Sort each project folder into its own package deps hash
-    Object.keys(repoDeps.files).forEach((filePath: string) => {
-      const fileHash: string = repoDeps.files[filePath];
-
-      const projectName: string | undefined = this._getProjectForFile(filePath);
-
-      // If we found a project for the file, go ahead and store this file's hash
-      if (projectName) {
-        projectHashDeps.get(projectName)!.files[filePath] = fileHash;
-      } else {
-        noProjectHashes[filePath] = fileHash;
+    for (const [filePath, fileHash] of repoDeps) {
+      // findProjectForPosixRelativePath uses LookupByPath, for which lookups are O(K)
+      // K being the maximum folder depth of any project in rush.json (usually on the order of 3)
+      const owningProject:
+        | RushConfigurationProject
+        | undefined = this._rushConfiguration.findProjectForPosixRelativePath(filePath);
+      if (owningProject) {
+        // At this point, `filePath` is guaranteed to start with `projectRelativeFolder`, so
+        // we can safely slice off the first N characters to get the file path relative to the
+        // root of the `owningProject`.
+        const relativePath: string = filePath.slice(owningProject.projectRelativeFolder.length + 1);
+        const ignoreMatcher: Ignore | undefined = ignoreMatcherForProject.get(owningProject.packageName);
+        if (!ignoreMatcher || !ignoreMatcher.ignores(relativePath)) {
+          projectHashDeps.get(owningProject.packageName)!.set(filePath, fileHash);
+        }
       }
-    });
+    }
 
-    /* Incremental Build notes:
-     *
-     * Temporarily revert below code in favor of replacing this solution with something more
-     * flexible. Idea is essentially that we should have gulp-core-build (or other build tool)
-     * create the package-deps_<command>.json. The build tool would default to using the 'simple'
-     * algorithm (e.g. only files that are in a project folder are associated with the project), however it would
-     * also provide a hook which would allow certain tasks to modify the package-deps-hash before being written.
-     * At the end of the build, a we would create a package-deps_<command>.json file like so:
-     *
-     *  {
-     *    commandLine: ["--production"],
-     *    files: {
-     *      "src/index.ts": "478789a7fs8a78989afd8",
-     *      "src/fileOne.ts": "a8sfa8979871fdjiojlk",
-     *      "common/api/review": "324598afasfdsd",                      // this entry was added by the API Extractor
-     *                                                                  //  task (for example)
-     *      ".rush/temp/shrinkwrap-deps.json": "3428789dsafdsfaf"       // this is a file which will be created by rush
-     *                                                                  //  link describing the state of the
-     *                                                                  //  node_modules folder
-     *    }
-     *  }
-     *
-     * Verifying this file should be fairly straightforward, we would simply need to check if:
-     *   A) no files were added or deleted from the current folder
-     *   B) all file hashes match
-     *   C) the node_modules hash/contents match
-     *   D) the command line parameters match or are compatible
-     *
-     *   Notes:
-     *   * We need to store the command line arguments, which is currently done by rush instead of GCB
-     *   * We need to store the hash/text of the a file which describes the state of the node_modules folder
-     *   * The package-deps_<command>.json should be a complete list of dependencies, and it should be extremely cheap
-     *       to validate/check the file (even if creating it is more computationally costly).
-     */
-
-    // Add the "NO_PROJECT" files to every project's dependencies
-    // for (const project of PackageChangeAnalyzer.rushConfig.projects) {
-    //  Object.keys(noProjectHashes).forEach((filePath: string) => {
-    //    const fileHash: string = noProjectHashes[filePath];
-    //    projectHashDeps.get(project.packageName).files[filePath] = fileHash;
-    //  });
-    // }
-
-    if (
-      this._rushConfiguration.packageManager === 'pnpm' &&
-      !this._rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection
-    ) {
+    // Currently, only pnpm handles project shrinkwraps
+    if (this._rushConfiguration.packageManager === 'pnpm') {
       const projects: RushConfigurationProject[] = [];
       const projectDependencyManifestPaths: string[] = [];
 
       for (const project of this._rushConfiguration.projects) {
-        const dependencyManifestFilePath: string = PnpmProjectDependencyManifest.getFilePathForProject(project);
-        const relativeDependencyManifestFilePath: string = path.relative(
-          this._rushConfiguration.rushJsonFolder,
-          dependencyManifestFilePath
-        ).replace(/\\/g, '/');
+        const projectShrinkwrapFilePath: string = BaseProjectShrinkwrapFile.getFilePathForProject(project);
+        const relativeProjectShrinkwrapFilePath: string = Path.convertToSlashes(
+          path.relative(this._rushConfiguration.rushJsonFolder, projectShrinkwrapFilePath)
+        );
 
-        if (!FileSystem.exists(dependencyManifestFilePath)) {
+        if (!FileSystem.exists(projectShrinkwrapFilePath)) {
           throw new Error(
-            `A project dependency file (${relativeDependencyManifestFilePath}) is missing. You may need to run ` +
-            '"rush unlink" and "rush link".'
+            `A project dependency file (${relativeProjectShrinkwrapFilePath}) is missing. You may need to run ` +
+              '"rush install" or "rush update".'
           );
         }
 
         projects.push(project);
-        projectDependencyManifestPaths.push(relativeDependencyManifestFilePath);
+        projectDependencyManifestPaths.push(relativeProjectShrinkwrapFilePath);
       }
 
+      const gitPath: string = this._git.getGitPathOrThrow();
       const hashes: Map<string, string> = getGitHashForFiles(
         projectDependencyManifestPaths,
-        this._rushConfiguration.rushJsonFolder
+        this._rushConfiguration.rushJsonFolder,
+        gitPath
       );
       for (let i: number = 0; i < projects.length; i++) {
         const project: RushConfigurationProject = projects[i];
@@ -169,23 +151,26 @@ export class PackageChangeAnalyzer {
         if (!hashes.has(projectDependencyManifestPath)) {
           throw new InternalError(`Expected to get a hash for ${projectDependencyManifestPath}`);
         }
+
         const hash: string = hashes.get(projectDependencyManifestPath)!;
-        projectHashDeps.get(project.packageName)!.files[projectDependencyManifestPath] = hash;
+        projectHashDeps.get(project.packageName)!.set(projectDependencyManifestPath, hash);
       }
     } else {
       // Determine the current variant from the link JSON.
       const variant: string | undefined = this._rushConfiguration.currentInstalledVariant;
 
       // Add the shrinkwrap file to every project's dependencies
-      const shrinkwrapFile: string = path.relative(
-        this._rushConfiguration.rushJsonFolder,
-        this._rushConfiguration.getCommittedShrinkwrapFilename(variant)
-      ).replace(/\\/g, '/');
+      const shrinkwrapFile: string = Path.convertToSlashes(
+        path.relative(
+          this._rushConfiguration.rushJsonFolder,
+          this._rushConfiguration.getCommittedShrinkwrapFilename(variant)
+        )
+      );
 
       for (const project of this._rushConfiguration.projects) {
-        const shrinkwrapHash: string | undefined = noProjectHashes[shrinkwrapFile];
+        const shrinkwrapHash: string | undefined = repoDeps!.get(shrinkwrapFile);
         if (shrinkwrapHash) {
-          projectHashDeps.get(project.packageName)!.files[shrinkwrapFile] = shrinkwrapHash;
+          projectHashDeps.get(project.packageName)!.set(shrinkwrapFile, shrinkwrapHash);
         }
       }
     }
@@ -193,16 +178,41 @@ export class PackageChangeAnalyzer {
     return projectHashDeps;
   }
 
-  private _getProjectForFile(filePath: string): string | undefined {
-    for (const project of this._rushConfiguration.projects) {
-      if (this._fileExistsInFolder(filePath, project.projectRelativeFolder)) {
-        return project.packageName;
-      }
+  private async _getIgnoreMatcherForProject(
+    project: RushConfigurationProject,
+    terminal: Terminal
+  ): Promise<Ignore> {
+    const projectConfiguration:
+      | RushProjectConfiguration
+      | undefined = await RushProjectConfiguration.tryLoadForProjectAsync(project, undefined, terminal);
+    const ignoreMatcher: Ignore = ignore();
+
+    if (projectConfiguration && projectConfiguration.incrementalBuildIgnoredGlobs) {
+      ignoreMatcher.add(projectConfiguration.incrementalBuildIgnoredGlobs);
     }
-    return undefined;
+
+    return ignoreMatcher;
   }
 
-  private _fileExistsInFolder(filePath: string, folderPath: string): boolean {
-    return Path.isUnder(filePath, folderPath);
+  private _getRepoDeps(): Map<string, string> | undefined {
+    try {
+      if (this._git.isPathUnderGitWorkingTree()) {
+        // Load the package deps hash for the whole repository
+        const gitPath: string = this._git.getGitPathOrThrow();
+        return getPackageDeps(this._rushConfiguration.rushJsonFolder, [], gitPath);
+      } else {
+        return undefined;
+      }
+    } catch (e) {
+      // If getPackageDeps fails, don't fail the whole build. Treat this case as if we don't know anything about
+      // the state of the files in the repo. This can happen if the environment doesn't have Git.
+      console.log(
+        colors.yellow(
+          `Error calculating the state of the repo. (inner error: ${e}). Continuing without diffing files.`
+        )
+      );
+
+      return undefined;
+    }
   }
 }

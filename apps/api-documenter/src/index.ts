@@ -9,10 +9,7 @@
  * @packageDocumentation
  */
 
-export {
-  IFeatureDefinition,
-  IApiDocumenterPluginManifest
-} from './plugin/IApiDocumenterPluginManifest';
+export { IFeatureDefinition, IApiDocumenterPluginManifest } from './plugin/IApiDocumenterPluginManifest';
 export { MarkdownDocumenterAccessor } from './plugin/MarkdownDocumenterAccessor';
 export {
   MarkdownDocumenterFeatureContext,
@@ -20,8 +17,4 @@ export {
   IMarkdownDocumenterFeatureOnFinishedArgs,
   MarkdownDocumenterFeature
 } from './plugin/MarkdownDocumenterFeature';
-export {
-  PluginFeature,
-  PluginFeatureContext,
-  PluginFeatureInitialization
-} from './plugin/PluginFeature';
+export { PluginFeature, PluginFeatureContext, PluginFeatureInitialization } from './plugin/PluginFeature';

@@ -1,16 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
 
-import {
-  CommandLineAction,
-  ICommandLineActionOptions
-} from '@microsoft/ts-command-line';
-
-import { LockFile } from '@microsoft/node-core-library';
+import { CommandLineAction, ICommandLineActionOptions } from '@rushstack/ts-command-line';
+import { LockFile } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { EventHooksManager } from '../../logic/EventHooksManager';
@@ -67,28 +63,32 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
     if (this.rushConfiguration) {
       if (!this._safeForSimultaneousRushProcesses) {
         if (!LockFile.tryAcquire(this.rushConfiguration.commonTempFolder, 'rush')) {
-          console.log(colors.red(`Another rush command is already running in this repository.`));
+          console.log(colors.red(`Another Rush command is already running in this repository.`));
           process.exit(1);
         }
       }
     }
 
-    console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
-    return this.run();
+    if (!Utilities.shouldRestrictConsoleOutput()) {
+      console.log(`Starting "rush ${this.actionName}"${os.EOL}`);
+    }
+    return this.runAsync();
   }
 
   /**
    * All Rush actions need to implement this method. This method runs after
    * environment has been set up by the base class.
    */
-  protected abstract run(): Promise<void>;
+  protected abstract runAsync(): Promise<void>;
 
   private _ensureEnvironment(): void {
     if (this.rushConfiguration) {
       // eslint-disable-next-line dot-notation
       let environmentPath: string | undefined = process.env['PATH'];
-      environmentPath = path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin') +
-        path.delimiter + environmentPath;
+      environmentPath =
+        path.join(this.rushConfiguration.commonTempFolder, 'node_modules', '.bin') +
+        path.delimiter +
+        environmentPath;
       // eslint-disable-next-line dot-notation
       process.env['PATH'] = environmentPath;
     }
@@ -99,7 +99,15 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
  * The base class that most Rush command-line actions should extend.
  */
 export abstract class BaseRushAction extends BaseConfiglessRushAction {
-  private _eventHooksManager: EventHooksManager;
+  private _eventHooksManager: EventHooksManager | undefined;
+
+  protected get eventHooksManager(): EventHooksManager {
+    if (!this._eventHooksManager) {
+      this._eventHooksManager = new EventHooksManager(this.rushConfiguration);
+    }
+
+    return this._eventHooksManager;
+  }
 
   protected get rushConfiguration(): RushConfiguration {
     return super.rushConfiguration!;
@@ -111,13 +119,5 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
     }
 
     return super.onExecute();
-  }
-
-  protected get eventHooksManager(): EventHooksManager {
-    if (!this._eventHooksManager) {
-      this._eventHooksManager = new EventHooksManager(this.rushConfiguration);
-    }
-
-    return this._eventHooksManager;
   }
 }

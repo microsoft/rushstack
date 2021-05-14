@@ -4,21 +4,23 @@
 
 ```ts
 
-import { Terminal } from '@microsoft/node-core-library';
+import { Terminal } from '@rushstack/node-core-library';
 
 // @public
 export class CertificateManager {
     constructor();
-    ensureCertificate(canGenerateNewCertificate: boolean, terminal: Terminal): ICertificate;
-    untrustCertificate(terminal: Terminal): boolean;
+    ensureCertificateAsync(canGenerateNewCertificate: boolean, terminal: Terminal): Promise<ICertificate>;
+    untrustCertificateAsync(terminal: Terminal): Promise<boolean>;
 }
 
 // @public
 export class CertificateStore {
     constructor();
-    certificateData: string | undefined;
-    readonly certificatePath: string;
-    keyData: string | undefined;
+    get certificateData(): string | undefined;
+    set certificateData(certificate: string | undefined);
+    get certificatePath(): string;
+    get keyData(): string | undefined;
+    set keyData(key: string | undefined);
     }
 
 // @public

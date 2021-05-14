@@ -1,15 +1,15 @@
-
 /**
  * A class used to exposed events.
  * @public
  * {@docCategory SystemEvent}
+ *
+ * @myCustomTag
  */
 export class SystemEvent {
   /**
    * Adds an handler for the event.
    */
-  public addHandler(handler: () => void): void {
-  }
+  public addHandler(handler: () => void): void {}
 }
 
 /**
@@ -28,8 +28,7 @@ export class DocBaseClass {
    */
   public constructor(x: number);
 
-  public constructor(x?: number) {
-  }
+  public constructor(x?: number) {}
 }
 
 /**
@@ -80,7 +79,7 @@ export interface IDocInterface3 {
   /**
    * Construct signature
    */
-  new(): IDocInterface1;
+  new (): IDocInterface1;
 
   /**
    * Indexer
@@ -96,19 +95,21 @@ export interface IDocInterface3 {
   /**
    * A quoted identifier with redundant quotes.
    */
+  // prettier-ignore
   "redundantQuotes": string;
 
   /**
-   * An identifier that does needs quotes.  It misleadingly looks like an ECMAScript symbol.
+   * An identifier that does need quotes.  It misleadingly looks like an ECMAScript symbol.
    */
-  "[not.a.symbol]": string
+  // prettier-ignore
+  "[not.a.symbol]": string;
 }
 
 /**
  * Generic class.
  * @public
  */
-export class Generic<T> { }
+export class Generic<T> {}
 
 /**
  * Type union in an interface.
@@ -185,8 +186,7 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
   public get writeableProperty(): string {
     return 'hello';
   }
-  public set writeableProperty(value: string) {
-  }
+  public set writeableProperty(value: string) {}
 
   /**
    * This event is fired whenever the object is modified.
@@ -215,22 +215,19 @@ export class DocClass1 extends DocBaseClass implements IDocInterface1, IDocInter
    *  </tr>
    * </table>
    */
-  tableExample(): void {
-  }
+  tableExample(): void {}
 
   /**
    * Example: "\{ \\"maxItemsToShow\\": 123 \}"
    *
    * The regular expression used to validate the constraints is /^[a-zA-Z0-9\\-_]+$/
    */
-  interestingEdgeCases(): void {
-  }
+  interestingEdgeCases(): void {}
 
   /**
    * @deprecated Use `otherThing()` instead.
    */
-  public deprecatedExample(): void {
-  }
+  public deprecatedExample(): void {}
 
   /**
    * Returns the sum of two numbers.
@@ -294,17 +291,38 @@ export interface IDocInterface6 {
   typeReferenceProperty: Generic<IDocInterface1>;
   genericReferenceMethod<T>(x: T): T;
 }
+/**
+ * Interface for testing optional properties
+ * @public
+ */
+export interface IDocInterface7 {
+  /** Description of optionalField */
+  optionalField?: boolean;
+
+  // Missing description
+  optionalUndocumentedField?: boolean;
+
+  /** Description of optionalReadonlyField */
+  readonly optionalReadonlyField?: boolean;
+
+  /** Description of optionalMember */
+  optionalMember?();
+}
 
 /**
  * Class that merges with interface
+ *
+ * @remarks
+ * {@link (DocClassInterfaceMerge:class)|Link to class}
+ *
+ * {@link (DocClassInterfaceMerge:interface)|Link to interface}
+ *
  * @public
  */
-export class DocClassInterfaceMerge {
-}
+export class DocClassInterfaceMerge {}
 
 /**
  * Interface that merges with class
  * @public
  */
-export interface DocClassInterfaceMerge {
-}
+export interface DocClassInterfaceMerge {}

@@ -9,6 +9,5 @@ export class InternalClass {
   /**
    * This is a comment
    */
-  public undecoratedMember(): void {
-  }
+  public undecoratedMember(): void {}
 }

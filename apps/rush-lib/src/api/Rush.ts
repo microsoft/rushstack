@@ -2,14 +2,16 @@
 // See LICENSE in the project root for license information.
 
 import { EOL } from 'os';
-import * as colors from 'colors';
-import { PackageJsonLookup } from '@microsoft/node-core-library';
+import colors from 'colors/safe';
+import { PackageJsonLookup } from '@rushstack/node-core-library';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
 import { RushConstants } from '../logic/RushConstants';
 import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
+import { Utilities } from '../utilities/Utilities';
+import { EnvironmentVariableNames } from './EnvironmentConfiguration';
 
 /**
  * Options to pass to the rush "launch" functions.
@@ -37,6 +39,8 @@ export interface ILaunchOptions {
  * @public
  */
 export class Rush {
+  private static _version: string | undefined = undefined;
+
   /**
    * This API is used by the `@microsoft/rush` front end to launch the "rush" command-line.
    * Third-party tools should not use this API.  Instead, they should execute the "rush" binary
@@ -53,7 +57,9 @@ export class Rush {
   public static launch(launcherVersion: string, arg: ILaunchOptions): void {
     const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
 
-    Rush._printStartupBanner(options.isManaged);
+    if (!Utilities.shouldRestrictConsoleOutput()) {
+      Rush._printStartupBanner(options.isManaged);
+    }
 
     if (!CommandLineMigrationAdvisor.checkArgv(process.argv)) {
       // The migration advisor recognized an obsolete command-line
@@ -61,6 +67,7 @@ export class Rush {
       return;
     }
 
+    Rush._assignRushInvokedFolder();
     const parser: RushCommandLineParser = new RushCommandLineParser({
       alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
     });
@@ -79,6 +86,7 @@ export class Rush {
 
     Rush._printStartupBanner(options.isManaged);
 
+    Rush._assignRushInvokedFolder();
     RushXCommandLine._launchRushXInternal(launcherVersion, { ...options });
   }
 
@@ -87,31 +95,54 @@ export class Rush {
    * This is the same as the Rush tool version for that release.
    */
   public static get version(): string {
-    return PackageJsonLookup.loadOwnPackageJson(__dirname).version;
+    if (!this._version) {
+      this._version = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
+    }
+
+    return this._version!;
+  }
+
+  /**
+   * Assign the `RUSH_INVOKED_FOLDER` environment variable during startup.  This is only applied when
+   * Rush is invoked via the CLI, not via the `@microsoft/rush-lib` automation API.
+   *
+   * @remarks
+   * Modifying the parent process's environment is not a good design.  The better design is (1) to consolidate
+   * Rush's code paths that invoke scripts, and (2) to pass down the invoked folder with each code path,
+   * so that it can finally be applied in a centralized helper like `Utilities._createEnvironmentForRushCommand()`.
+   * The natural time to do that refactoring is when we rework `Utilities.executeCommand()` to use
+   * `Executable.spawn()` or rushell.
+   */
+  private static _assignRushInvokedFolder(): void {
+    process.env[EnvironmentVariableNames.RUSH_INVOKED_FOLDER] = process.cwd();
   }
 
   /**
    * This function normalizes legacy options to the current {@link ILaunchOptions} object.
    */
   private static _normalizeLaunchOptions(arg: ILaunchOptions): ILaunchOptions {
-    return (typeof arg === 'boolean')
+    return typeof arg === 'boolean'
       ? { isManaged: arg } // In older versions of Rush, this the `launch` functions took a boolean arg for "isManaged"
       : arg;
   }
 
   private static _printStartupBanner(isManaged: boolean): void {
     const nodeVersion: string = process.versions.node;
-    const nodeReleaseLabel: string = (NodeJsCompatibility.isOddNumberedVersion)
-    ? 'unstable'
-    : (NodeJsCompatibility.isLtsVersion ? 'LTS' : 'pre-LTS');
+    const nodeReleaseLabel: string = NodeJsCompatibility.isOddNumberedVersion
+      ? 'unstable'
+      : NodeJsCompatibility.isLtsVersion
+      ? 'LTS'
+      : 'pre-LTS';
 
     console.log(
       EOL +
-      colors.bold(`Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')) +
-      colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
-      EOL +
-      `Node.js version is ${nodeVersion} (${nodeReleaseLabel})` +
-      EOL
+        colors.bold(
+          `Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')
+        ) +
+        colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
+        EOL +
+        `Node.js version is ${nodeVersion} (${nodeReleaseLabel})` +
+        EOL
     );
   }
 }

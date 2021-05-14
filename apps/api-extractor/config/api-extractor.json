@@ -15,6 +15,6 @@
 
   "dtsRollup": {
     "enabled": true,
-    "untrimmedFilePath": "<projectFolder>/dist/rollup.d.ts",
+    "untrimmedFilePath": "<projectFolder>/dist/rollup.d.ts"
   }
 }

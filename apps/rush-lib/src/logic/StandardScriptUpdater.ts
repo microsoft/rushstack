@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Text, FileSystem } from '@microsoft/node-core-library';
+import { Text, FileSystem } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 
@@ -50,8 +50,11 @@ export class StandardScriptUpdater {
    * If throwInsteadOfCopy=false, then an outdated or missing script will be recopied;
    * otherwise, an exception is thrown.
    */
-  private static _updateScriptOrThrow(scriptName: string, rushConfiguration: RushConfiguration,
-    throwInsteadOfCopy: boolean): boolean {
+  private static _updateScriptOrThrow(
+    scriptName: string,
+    rushConfiguration: RushConfiguration,
+    throwInsteadOfCopy: boolean
+  ): boolean {
     const targetFilePath: string = path.join(rushConfiguration.commonScriptsFolder, scriptName);
     const sourceFilePath: string = path.resolve(__dirname, '../scripts', scriptName);
 
@@ -74,8 +77,10 @@ export class StandardScriptUpdater {
 
     if (!filesAreSame) {
       if (throwInsteadOfCopy) {
-        throw new Error('The standard files in the "common/scripts" folders need to be updated'
-          + ' for this Rush version.  Please run "rush update" and commit the changes.');
+        throw new Error(
+          'The standard files in the "common/scripts" folders need to be updated' +
+            ' for this Rush version.  Please run "rush update" and commit the changes.'
+        );
       } else {
         console.log(`Script is out of date; updating "${targetFilePath}"`);
         FileSystem.copyFile({
@@ -90,8 +95,12 @@ export class StandardScriptUpdater {
 
   private static _normalize(content: string): string {
     // Ignore newline differences from .gitattributes
-    return Text.convertToLf(content)
-      // Ignore trailing whitespace
-      .split('\n').map(x => x.trimRight()).join('\n');
+    return (
+      Text.convertToLf(content)
+        // Ignore trailing whitespace
+        .split('\n')
+        .map((x) => x.trimRight())
+        .join('\n')
+    );
   }
 }

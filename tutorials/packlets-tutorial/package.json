@@ -1,0 +1,18 @@
+{
+  "name": "packlets-tutorial",
+  "description": "This project illustrates how to use @rushstack/eslint-plugin-packlets",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean",
+    "start": "node lib/start.js"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/node": "10.17.13",
+    "eslint": "~7.12.1",
+    "typescript": "~3.9.7"
+  }
+}

@@ -1,16 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import {
-  GulpTask,
-  GCBTerminalProvider
-} from '@microsoft/gulp-core-build';
-import { Terminal } from '@microsoft/node-core-library';
-import * as Gulp from 'gulp';
-import {
-  CertificateStore,
-  CertificateManager
-} from '@rushstack/debug-certificate-manager';
+import { GulpTask, GCBTerminalProvider } from '@microsoft/gulp-core-build';
+import { Terminal } from '@rushstack/node-core-library';
+import { CertificateStore, CertificateManager } from '@rushstack/debug-certificate-manager';
 
 /**
  * On Windows, this task removes the certificate with the expected serial number from the user's
@@ -30,19 +23,17 @@ export class UntrustCertTask extends GulpTask<void> {
     this._terminal = new Terminal(this._terminalProvider);
   }
 
-  public executeTask(gulp: typeof Gulp, completeCallback: (error?: string) => void): void {
+  public async executeTask(): Promise<void> {
     const certificateManager: CertificateManager = new CertificateManager();
-    const untrustCertResult: boolean = certificateManager.untrustCertificate(this._terminal);
+    const untrustCertResult: boolean = await certificateManager.untrustCertificateAsync(this._terminal);
     const certificateStore: CertificateStore = new CertificateStore();
 
     // Clear out the certificate store
     certificateStore.certificateData = undefined;
     certificateStore.keyData = undefined;
 
-    if (untrustCertResult) {
-      completeCallback();
-    } else {
-      completeCallback('Error untrusting certificate.');
+    if (!untrustCertResult) {
+      throw new Error('Error untrusting certificate.');
     }
   }
 }

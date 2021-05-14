@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as process from 'process';
+import process from 'process';
 
 import { Npm } from '../Npm';
 import { Utilities } from '../Utilities';
@@ -30,14 +30,17 @@ describe('npm', () => {
     }`;
     stub.mockImplementationOnce(() => json);
 
-    const versions: string[] = Npm.publishedVersions(packageName,
-      __dirname,
-      process.env);
+    const versions: string[] = Npm.publishedVersions(packageName, __dirname, process.env);
 
-    expect(stub).toHaveBeenCalledWith('npm', `view ${packageName} time --json`.split(' '),
-    expect.anything(), expect.anything(), expect.anything());
+    expect(stub).toHaveBeenCalledWith(
+      'npm',
+      `view ${packageName} time --json`.split(' '),
+      expect.anything(),
+      expect.anything(),
+      expect.anything()
+    );
 
-    expect(versions.length).toEqual(4);
+    expect(versions).toHaveLength(4);
     expect(versions).toMatchObject(['0.0.0', '1.4.0', '1.4.1', '2.4.0-alpha.1']);
   });
 
@@ -51,16 +54,24 @@ describe('npm', () => {
     stub.mockImplementationOnce(() => '');
     stub.mockImplementationOnce(() => json);
 
-    const versions: string[] = Npm.publishedVersions(packageName,
-      __dirname,
-      process.env);
+    const versions: string[] = Npm.publishedVersions(packageName, __dirname, process.env);
 
-    expect(stub).toHaveBeenCalledWith('npm', `view ${packageName} time --json`.split(' '),
-      expect.anything(), expect.anything(), expect.anything());
-    expect(stub).toHaveBeenCalledWith('npm', `view ${packageName} versions --json`.split(' '),
-    expect.anything(), expect.anything(), expect.anything());
+    expect(stub).toHaveBeenCalledWith(
+      'npm',
+      `view ${packageName} time --json`.split(' '),
+      expect.anything(),
+      expect.anything(),
+      expect.anything()
+    );
+    expect(stub).toHaveBeenCalledWith(
+      'npm',
+      `view ${packageName} versions --json`.split(' '),
+      expect.anything(),
+      expect.anything(),
+      expect.anything()
+    );
 
-    expect(versions.length).toEqual(4);
+    expect(versions).toHaveLength(4);
     expect(versions).toMatchObject(['0.0.0', '1.4.0', '1.4.1', '2.4.0-alpha.1']);
   });
 });

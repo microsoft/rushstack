@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import colors from 'colors/safe';
 import * as path from 'path';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Utilities } from '../utilities/Utilities';
-import { PnpmProjectDependencyManifest } from './pnpm/PnpmProjectDependencyManifest';
+import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
+import { LastLinkFlagFactory } from '../api/LastLinkFlag';
 
 /**
  * This class implements the logic for "rush unlink"
@@ -24,8 +26,20 @@ export class UnlinkManager {
    *
    * Returns true if anything was deleted.
    */
-  public unlink(): boolean {
-    this._deleteFlagFile();
+  public unlink(force: boolean = false): boolean {
+    const useWorkspaces: boolean =
+      this._rushConfiguration.pnpmOptions && this._rushConfiguration.pnpmOptions.useWorkspaces;
+    if (!force && useWorkspaces) {
+      console.log(
+        colors.red(
+          'Unlinking is not supported when using workspaces. Run "rush purge" to remove ' +
+            'project node_modules folders.'
+        )
+      );
+      throw new AlreadyReportedError();
+    }
+
+    LastLinkFlagFactory.getCommonTempFlag(this._rushConfiguration).clear();
     return this._deleteProjectFiles();
   }
 
@@ -47,24 +61,14 @@ export class UnlinkManager {
         didDeleteAnything = true;
       }
 
-      const projectDependencyManifestFilePath: string = PnpmProjectDependencyManifest.getFilePathForProject(
-        rushProject
-      );
-      if (FileSystem.exists(projectDependencyManifestFilePath)) {
-        console.log(`Deleting ${projectDependencyManifestFilePath}`);
-        FileSystem.deleteFile(projectDependencyManifestFilePath);
+      const projectShrinkwrapFilePath: string = BaseProjectShrinkwrapFile.getFilePathForProject(rushProject);
+      if (FileSystem.exists(projectShrinkwrapFilePath)) {
+        console.log(`Deleting ${projectShrinkwrapFilePath}`);
+        FileSystem.deleteFile(projectShrinkwrapFilePath);
         didDeleteAnything = true;
       }
     }
 
     return didDeleteAnything;
-  }
-
-  /**
-   * Delete the flag file if it exists; this will ensure that
-   * a full "rush link" is required next time
-   */
-  private _deleteFlagFile(): void {
-    Utilities.deleteFile(this._rushConfiguration.rushLinkJsonFilename);
   }
 }

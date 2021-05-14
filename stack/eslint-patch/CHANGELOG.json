@@ -1,0 +1,77 @@
+{
+  "name": "@rushstack/eslint-patch",
+  "entries": [
+    {
+      "version": "1.0.6",
+      "tag": "@rushstack/eslint-patch_v1.0.6",
+      "date": "Fri, 30 Oct 2020 00:10:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the \"modern-module-resolution\" patch to support ESLint 7.8.0 and newer"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.5",
+      "tag": "@rushstack/eslint-patch_v1.0.5",
+      "date": "Wed, 30 Sep 2020 18:39:17 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update to build with @rushstack/heft-node-rig"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.4",
+      "tag": "@rushstack/eslint-patch_v1.0.4",
+      "date": "Wed, 30 Sep 2020 06:53:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update README.md"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.3",
+      "tag": "@rushstack/eslint-patch_v1.0.3",
+      "date": "Wed, 12 Aug 2020 00:10:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated project to build with Heft"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.2",
+      "tag": "@rushstack/eslint-patch_v1.0.2",
+      "date": "Wed, 24 Jun 2020 09:50:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue with the published file set"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.1",
+      "tag": "@rushstack/eslint-patch_v1.0.1",
+      "date": "Wed, 24 Jun 2020 09:04:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Initial release"
+          }
+        ]
+      }
+    }
+  ]
+}

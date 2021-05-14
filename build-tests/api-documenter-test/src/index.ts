@@ -12,7 +12,9 @@
 
 export * from './DocClass1';
 export * from './DocEnums';
-import { IDocInterface1 } from './DocClass1';
+import { IDocInterface1, IDocInterface3, SystemEvent } from './DocClass1';
+
+export { DecoratorExample } from './DecoratorExample';
 
 /**
  * A type alias
@@ -21,17 +23,33 @@ import { IDocInterface1 } from './DocClass1';
 export type ExampleTypeAlias = Promise<boolean>;
 
 /**
+ * A type alias that references multiple other types.
+ * @public
+ */
+export type ExampleUnionTypeAlias = IDocInterface1 | IDocInterface3;
+
+/**
+ * A type alias that has duplicate references.
+ * @public
+ */
+export type ExampleDuplicateTypeAlias = SystemEvent | typeof SystemEvent;
+
+/**
  * An exported variable declaration.
  * @public
  */
 export const constVariable: number = 123;
 
 /**
- * An exported function
+ * An exported function with hyperlinked parameters and return value.
+ *
+ * @param x - an API item that should get hyperlinked
+ * @param y - a system type that should NOT get hyperlinked
+ * @returns an interface that should get hyperlinked
  * @public
  */
-export function globalFunction(x: number): number {
-  return x;
+export function exampleFunction(x: ExampleTypeAlias, y: number): IDocInterface1 {
+  return (undefined as unknown) as IDocInterface1;
 }
 
 /**

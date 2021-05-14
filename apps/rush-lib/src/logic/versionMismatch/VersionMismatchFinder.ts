@@ -1,13 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
+import colors from 'colors/safe';
+import { AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
-import {
-  PackageJsonDependency,
-  DependencyType
-} from '../../api/PackageJsonEditor';
+import { PackageJsonDependency, DependencyType } from '../../api/PackageJsonEditor';
 import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import { VersionMismatchFinderEntity } from './VersionMismatchFinderEntity';
 import { VersionMismatchFinderProject } from './VersionMismatchFinderProject';
@@ -15,6 +13,7 @@ import { VersionMismatchFinderCommonVersions } from './VersionMismatchFinderComm
 
 export interface IVersionMismatchFinderRushCheckOptions {
   variant?: string | undefined;
+  printAsJson?: boolean | undefined;
 }
 
 export interface IVersionMismatchFinderEnsureConsistentVersionsOptions {
@@ -25,15 +24,29 @@ export interface IVersionMismatchFinderGetMismatchesOptions {
   variant?: string | undefined;
 }
 
+export interface IMismatchDependency {
+  dependencyName: string;
+  versions: IMismatchDependencyVersion[];
+}
+
+export interface IMismatchDependencyVersion {
+  version: string;
+  projects: string[];
+}
+
+export interface IMismatchDependencies {
+  mismatchedVersions: IMismatchDependency[];
+}
+
 export class VersionMismatchFinder {
- /* store it like this:
-  * {
-  *   "@types/node": {
-  *     "1.0.0": [ '@ms/rush' ]
-  *   }
-  * }
-  */
-  private _allowedAlternativeVersion:  Map<string, ReadonlyArray<string>>;
+  /* store it like this:
+   * {
+   *   "@types/node": {
+   *     "1.0.0": [ '@ms/rush' ]
+   *   }
+   * }
+   */
+  private _allowedAlternativeVersion: Map<string, ReadonlyArray<string>>;
   private _mismatches: Map<string, Map<string, VersionMismatchFinderEntity[]>>;
   private _projects: VersionMismatchFinderEntity[];
 
@@ -85,10 +98,7 @@ export class VersionMismatchFinder {
     // or xstitchPreferredVersions from common-versions.json
     projects.push(new VersionMismatchFinderCommonVersions(commonVersions));
 
-    return new VersionMismatchFinder(
-      projects,
-      commonVersions.allowedAlternativeVersions
-    );
+    return new VersionMismatchFinder(projects, commonVersions.allowedAlternativeVersions);
   }
 
   private static _checkForInconsistentVersions(
@@ -96,26 +106,33 @@ export class VersionMismatchFinder {
     options: {
       isRushCheckCommand: boolean;
       variant?: string | undefined;
+      printAsJson?: boolean | undefined;
     }
   ): void {
-
     if (rushConfiguration.ensureConsistentVersions || options.isRushCheckCommand) {
-      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(rushConfiguration, options);
+      const mismatchFinder: VersionMismatchFinder = VersionMismatchFinder.getMismatches(
+        rushConfiguration,
+        options
+      );
 
-      mismatchFinder.print();
-
-      if (mismatchFinder.numberOfMismatches) {
-        console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
-        process.exit(1);
+      if (options.printAsJson) {
+        mismatchFinder.printAsJson();
       } else {
-        if (options.isRushCheckCommand) {
-          console.log(colors.green(`Found no mis-matching dependencies!`));
+        mismatchFinder.print();
+
+        if (mismatchFinder.numberOfMismatches > 0) {
+          console.log(colors.red(`Found ${mismatchFinder.numberOfMismatches} mis-matching dependencies!`));
+          throw new AlreadyReportedError();
+        } else {
+          if (options.isRushCheckCommand) {
+            console.log(colors.green(`Found no mis-matching dependencies!`));
+          }
         }
       }
     }
   }
 
-    public get numberOfMismatches(): number {
+  public get numberOfMismatches(): number {
     return this._mismatches.size;
   }
 
@@ -124,19 +141,52 @@ export class VersionMismatchFinder {
   }
 
   public getVersionsOfMismatch(mismatch: string): string[] | undefined {
-    return this._mismatches.has(mismatch)
-      ? this._getKeys(this._mismatches.get(mismatch))
-      : undefined;
+    return this._mismatches.has(mismatch) ? this._getKeys(this._mismatches.get(mismatch)) : undefined;
   }
 
-  public getConsumersOfMismatch(mismatch: string, version: string): VersionMismatchFinderEntity[] | undefined {
-    const mismatchedPackage: Map<string, VersionMismatchFinderEntity[]> | undefined = this._mismatches.get(mismatch);
+  public getConsumersOfMismatch(
+    mismatch: string,
+    version: string
+  ): VersionMismatchFinderEntity[] | undefined {
+    const mismatchedPackage: Map<string, VersionMismatchFinderEntity[]> | undefined = this._mismatches.get(
+      mismatch
+    );
     if (!mismatchedPackage) {
       return undefined;
     }
 
     const mismatchedVersion: VersionMismatchFinderEntity[] | undefined = mismatchedPackage.get(version);
     return mismatchedVersion;
+  }
+
+  public printAsJson(): void {
+    const mismatchDependencies: IMismatchDependency[] = [];
+
+    this.getMismatches().forEach((dependency: string) => {
+      const mismatchDependencyVersionArray: IMismatchDependencyVersion[] = [];
+      this.getVersionsOfMismatch(dependency)!.forEach((version: string) => {
+        const projects: string[] = [];
+        this.getConsumersOfMismatch(dependency, version)!.forEach((project: VersionMismatchFinderEntity) => {
+          projects.push(project.friendlyName);
+        });
+        const mismatchDependencyVersion: IMismatchDependencyVersion = {
+          version: version,
+          projects: projects
+        };
+        mismatchDependencyVersionArray.push(mismatchDependencyVersion);
+      });
+      const mismatchDependency: IMismatchDependency = {
+        dependencyName: dependency,
+        versions: mismatchDependencyVersionArray
+      };
+      mismatchDependencies.push(mismatchDependency);
+    });
+
+    const output: IMismatchDependencies = {
+      mismatchedVersions: mismatchDependencies
+    };
+
+    console.log(JSON.stringify(output, undefined, 2));
   }
 
   public print(): void {
@@ -179,7 +229,9 @@ export class VersionMismatchFinder {
               this._mismatches.set(name, new Map<string, VersionMismatchFinderEntity[]>());
             }
 
-            const dependencyVersions: Map<string, VersionMismatchFinderEntity[]> = this._mismatches.get(name)!;
+            const dependencyVersions: Map<string, VersionMismatchFinderEntity[]> = this._mismatches.get(
+              name
+            )!;
 
             if (!dependencyVersions.has(version)) {
               dependencyVersions.set(version, []);
@@ -198,11 +250,10 @@ export class VersionMismatchFinder {
     });
   }
 
-  private _isVersionAllowedAlternative(
-    dependency: string,
-    version: string): boolean {
-
-    const allowedAlternatives: ReadonlyArray<string> | undefined = this._allowedAlternativeVersion.get(dependency);
+  private _isVersionAllowedAlternative(dependency: string, version: string): boolean {
+    const allowedAlternatives: ReadonlyArray<string> | undefined = this._allowedAlternativeVersion.get(
+      dependency
+    );
     return Boolean(allowedAlternatives && allowedAlternatives.indexOf(version) > -1);
   }
 

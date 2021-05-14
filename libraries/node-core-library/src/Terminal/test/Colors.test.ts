@@ -4,6 +4,7 @@
 import { Terminal } from '../Terminal';
 import { StringBufferTerminalProvider } from '../StringBufferTerminalProvider';
 import { createColorGrid } from './createColorGrid';
+import { AnsiEscape } from '../AnsiEscape';
 
 describe('Colors', () => {
   let terminal: Terminal;
@@ -20,5 +21,15 @@ describe('Colors', () => {
     }
 
     expect(provider.getOutput()).toMatchSnapshot();
+  });
+
+  test('correctly normalizes color codes for tests', () => {
+    for (const line of createColorGrid()) {
+      terminal.writeLine(...line);
+    }
+
+    expect(
+      AnsiEscape.formatForTests(provider.getOutput({ normalizeSpecialCharacters: false }))
+    ).toMatchSnapshot();
   });
 });

@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.s
 
+import { Enum } from '@rushstack/node-core-library';
+
 import { ApiItem, IApiItemJson, IApiItemConstructor, IApiItemOptions } from '../items/ApiItem';
 import { ReleaseTag } from '../aedoc/ReleaseTag';
 import { DeserializerContext } from '../model/DeserializerContext';
@@ -35,7 +37,7 @@ const _releaseTag: unique symbol = Symbol('ApiReleaseTagMixin._releaseTag');
  *
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface ApiReleaseTagMixin extends ApiItem {
   /**
    * The effective release tag for this declaration.  If it is not explicitly specified, the value may be
@@ -58,9 +60,10 @@ export interface ApiReleaseTagMixin extends ApiItem {
  *
  * @public
  */
-export function ApiReleaseTagMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass):
-  TBaseClass & (new (...args: any[]) => ApiReleaseTagMixin) { // eslint-disable-line @typescript-eslint/no-explicit-any
-
+export function ApiReleaseTagMixin<TBaseClass extends IApiItemConstructor>(
+  baseClass: TBaseClass
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): TBaseClass & (new (...args: any[]) => ApiReleaseTagMixin) {
   abstract class MixedClass extends baseClass implements ApiReleaseTagMixin {
     public [_releaseTag]: ReleaseTag;
 
@@ -73,12 +76,17 @@ export function ApiReleaseTagMixin<TBaseClass extends IApiItemConstructor>(baseC
     }
 
     /** @override */
-    public static onDeserializeInto(options: Partial<IApiReleaseTagMixinOptions>, context: DeserializerContext,
-      jsonObject: IApiReleaseTagMixinJson): void {
-
+    public static onDeserializeInto(
+      options: Partial<IApiReleaseTagMixinOptions>,
+      context: DeserializerContext,
+      jsonObject: IApiReleaseTagMixinJson
+    ): void {
       baseClass.onDeserializeInto(options, context, jsonObject);
 
-      const deserializedReleaseTag: ReleaseTag | undefined = ReleaseTag[jsonObject.releaseTag];
+      const deserializedReleaseTag: ReleaseTag | undefined = Enum.tryGetValueByKey<ReleaseTag>(
+        ReleaseTag as any, // eslint-disable-line
+        jsonObject.releaseTag
+      );
       if (deserializedReleaseTag === undefined) {
         throw new Error(`Failed to deserialize release tag ${JSON.stringify(jsonObject.releaseTag)}`);
       }

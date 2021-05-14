@@ -1,23 +1,32 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ApiItem, ApiItemKind, IApiItemJson } from '../items/ApiItem';
 import { ApiItemContainerMixin, IApiItemContainerMixinOptions } from '../mixins/ApiItemContainerMixin';
-import { JsonFile, IJsonFileSaveOptions, PackageJsonLookup, IPackageJson } from '@microsoft/node-core-library';
+import {
+  JsonFile,
+  IJsonFileSaveOptions,
+  PackageJsonLookup,
+  IPackageJson,
+  JsonObject
+} from '@rushstack/node-core-library';
 import { ApiDocumentedItem, IApiDocumentedItemOptions } from '../items/ApiDocumentedItem';
 import { ApiEntryPoint } from './ApiEntryPoint';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
 import { DeserializerContext, ApiJsonSchemaVersion } from './DeserializerContext';
+import { TSDocConfiguration } from '@microsoft/tsdoc';
+import { TSDocConfigFile } from '@microsoft/tsdoc-config';
 
 /**
  * Constructor options for {@link ApiPackage}.
  * @public
  */
-export interface IApiPackageOptions extends
-  IApiItemContainerMixinOptions,
-  IApiNameMixinOptions,
-  IApiDocumentedItemOptions {
+export interface IApiPackageOptions
+  extends IApiItemContainerMixinOptions,
+    IApiNameMixinOptions,
+    IApiDocumentedItemOptions {
+  tsdocConfiguration: TSDocConfiguration;
 }
 
 export interface IApiPackageMetadataJson {
@@ -54,6 +63,17 @@ export interface IApiPackageMetadataJson {
    * `IApiPackageMetadataJson.schemaVersion`.
    */
   oldestForwardsCompatibleVersion?: ApiJsonSchemaVersion;
+
+  /**
+   * The TSDoc configuration that was used when analyzing the API for this package.
+   *
+   * @remarks
+   *
+   * The structure of this objet is defined by the `@microsoft/tsdoc-config` library.
+   * Normally this configuration is loaded from the project's tsdoc.json file.  It is stored
+   * in the .api.json file so that doc comments can be parsed accurately when loading the file.
+   */
+  tsdocConfig: JsonObject;
 }
 
 export interface IApiPackageJson extends IApiItemJson {
@@ -101,35 +121,42 @@ export interface IApiPackageSaveOptions extends IJsonFileSaveOptions {
  * @public
  */
 export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumentedItem)) {
+  private readonly _tsdocConfiguration: TSDocConfiguration;
 
   public constructor(options: IApiPackageOptions) {
     super(options);
+
+    this._tsdocConfiguration = options.tsdocConfiguration;
   }
 
   public static loadFromJsonFile(apiJsonFilename: string): ApiPackage {
     const jsonObject: IApiPackageJson = JsonFile.load(apiJsonFilename);
 
-    if (!jsonObject
-      || !jsonObject.metadata
-      || typeof jsonObject.metadata.schemaVersion !== 'number') {
-        throw new Error(`Error loading ${apiJsonFilename}:`
-        + `\nThe file format is not recognized; the "metadata.schemaVersion" field is missing or invalid`);
+    if (!jsonObject || !jsonObject.metadata || typeof jsonObject.metadata.schemaVersion !== 'number') {
+      throw new Error(
+        `Error loading ${apiJsonFilename}:` +
+          `\nThe file format is not recognized; the "metadata.schemaVersion" field is missing or invalid`
+      );
     }
 
     const schemaVersion: number = jsonObject.metadata.schemaVersion;
 
     if (schemaVersion < ApiJsonSchemaVersion.OLDEST_SUPPORTED) {
-      throw new Error(`Error loading ${apiJsonFilename}:`
-        + `\nThe file format is version ${schemaVersion},`
-        + ` whereas ${ApiJsonSchemaVersion.OLDEST_SUPPORTED} is the oldest version supported by this tool`);
+      throw new Error(
+        `Error loading ${apiJsonFilename}:` +
+          `\nThe file format is version ${schemaVersion},` +
+          ` whereas ${ApiJsonSchemaVersion.OLDEST_SUPPORTED} is the oldest version supported by this tool`
+      );
     }
 
     let oldestForwardsCompatibleVersion: number = schemaVersion;
     if (jsonObject.metadata.oldestForwardsCompatibleVersion) {
       // Sanity check
       if (jsonObject.metadata.oldestForwardsCompatibleVersion > schemaVersion) {
-        throw new Error(`Error loading ${apiJsonFilename}:`
-        + `\nInvalid file format; "oldestForwardsCompatibleVersion" cannot be newer than "schemaVersion"`);
+        throw new Error(
+          `Error loading ${apiJsonFilename}:` +
+            `\nInvalid file format; "oldestForwardsCompatibleVersion" cannot be newer than "schemaVersion"`
+        );
       }
       oldestForwardsCompatibleVersion = jsonObject.metadata.oldestForwardsCompatibleVersion;
     }
@@ -142,17 +169,33 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
 
       if (versionToDeserialize > ApiJsonSchemaVersion.LATEST) {
         // Nope, still too new
-        throw new Error(`Error loading ${apiJsonFilename}:`
-        + `\nThe file format version ${schemaVersion} was written by a newer release of`
-        + ` the api-extractor-model library; you may need to upgrade your software`);
+        throw new Error(
+          `Error loading ${apiJsonFilename}:` +
+            `\nThe file format version ${schemaVersion} was written by a newer release of` +
+            ` the api-extractor-model library; you may need to upgrade your software`
+        );
       }
+    }
+
+    const tsdocConfiguration: TSDocConfiguration = new TSDocConfiguration();
+
+    if (versionToDeserialize >= ApiJsonSchemaVersion.V_1004) {
+      const tsdocConfigFile: TSDocConfigFile = TSDocConfigFile.loadFromObject(
+        jsonObject.metadata.tsdocConfig
+      );
+      if (tsdocConfigFile.hasErrors) {
+        throw new Error(`Error loading ${apiJsonFilename}:\n` + tsdocConfigFile.getErrorSummary());
+      }
+
+      tsdocConfigFile.configureParser(tsdocConfiguration);
     }
 
     const context: DeserializerContext = new DeserializerContext({
       apiJsonFilename,
       toolPackage: jsonObject.metadata.toolPackage,
       toolVersion: jsonObject.metadata.toolVersion,
-      versionToDeserialize: versionToDeserialize
+      versionToDeserialize: versionToDeserialize,
+      tsdocConfiguration
     });
 
     return ApiItem.deserialize(jsonObject, context) as ApiPackage;
@@ -171,6 +214,18 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
 
   public get entryPoints(): ReadonlyArray<ApiEntryPoint> {
     return this.members as ReadonlyArray<ApiEntryPoint>;
+  }
+
+  /**
+   * The TSDoc configuration that was used when analyzing the API for this package.
+   *
+   * @remarks
+   *
+   * Normally this configuration is loaded from the project's tsdoc.json file.  It is stored
+   * in the .api.json file so that doc comments can be parsed accurately when loading the file.
+   */
+  public get tsdocConfiguration(): TSDocConfiguration {
+    return this._tsdocConfiguration;
   }
 
   /** @override */
@@ -192,6 +247,9 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
 
     const packageJson: IPackageJson = PackageJsonLookup.loadOwnPackageJson(__dirname);
 
+    const tsdocConfigFile: TSDocConfigFile = TSDocConfigFile.loadFromParser(this.tsdocConfiguration);
+    const tsdocConfig: JsonObject = tsdocConfigFile.saveToObject();
+
     const jsonObject: IApiPackageJson = {
       metadata: {
         toolPackage: options.toolPackage || packageJson.name,
@@ -199,7 +257,8 @@ export class ApiPackage extends ApiItemContainerMixin(ApiNameMixin(ApiDocumented
         // the version is bumped.  Instead we write a placeholder string.
         toolVersion: options.testMode ? '[test mode]' : options.toolVersion || packageJson.version,
         schemaVersion: ApiJsonSchemaVersion.LATEST,
-        oldestForwardsCompatibleVersion: ApiJsonSchemaVersion.OLDEST_FORWARDS_COMPATIBLE
+        oldestForwardsCompatibleVersion: ApiJsonSchemaVersion.OLDEST_FORWARDS_COMPATIBLE,
+        tsdocConfig
       }
     } as IApiPackageJson;
     this.serializeInto(jsonObject);

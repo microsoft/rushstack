@@ -1,0 +1,6 @@
+{
+  "string1": {
+    "value": "\"String with quotemarks\"",
+    "comment": "string with quotemarks"
+  }
+}

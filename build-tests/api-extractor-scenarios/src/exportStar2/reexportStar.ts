@@ -4,4 +4,4 @@
 export * from 'api-extractor-lib1-test';
 
 /** @public */
-export class A { }
+export class A {}

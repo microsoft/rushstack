@@ -10,8 +10,7 @@ export class ClassWithAccessModifiers {
   private _privateField: number = 123;
 
   /** Doc comment */
-  private privateMethod(): void {
-  }
+  private privateMethod(): void {}
 
   /** Doc comment */
   private get privateGetter(): string {
@@ -19,17 +18,13 @@ export class ClassWithAccessModifiers {
   }
 
   /** Doc comment */
-  private privateSetter(x: string) {
-  }
+  private privateSetter(x: string) {}
 
   /** Doc comment */
-  private constructor() {
-  }
+  private constructor() {}
 
   /** Doc comment */
-  private static privateStaticMethod() {
-  }
-
+  private static privateStaticMethod() {}
 
   /** Doc comment */
   protected protectedField: number;
@@ -40,13 +35,11 @@ export class ClassWithAccessModifiers {
   }
 
   /** Doc comment */
-  protected protectedSetter(x: string) {
-  }
+  protected protectedSetter(x: string) {}
 
   /** Doc comment */
   public static publicStaticField: number = 123;
 
   /** Doc comment */
-  defaultPublicMethod(): void {
-  }
+  defaultPublicMethod(): void {}
 }

@@ -4,8 +4,9 @@
 /* eslint-disable no-bitwise */
 
 import * as ts from 'typescript';
-import { TypeScriptMessageFormatter } from './TypeScriptMessageFormatter';
+import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
 import { TypeScriptInternals } from './TypeScriptInternals';
+import { InternalError } from '@rushstack/node-core-library';
 
 export class TypeScriptHelpers {
   // Matches TypeScript's encoded names for well-known ECMAScript symbols like
@@ -79,8 +80,10 @@ export class TypeScriptHelpers {
       const firstDeclaration: ts.Declaration = followedSymbol.declarations[0];
 
       // Test 1: Are we inside the sinister "declare global {" construct?
-      const highestModuleDeclaration: ts.ModuleDeclaration | undefined
-        = TypeScriptHelpers.findHighestParent(firstDeclaration, ts.SyntaxKind.ModuleDeclaration);
+      const highestModuleDeclaration: ts.ModuleDeclaration | undefined = TypeScriptHelpers.findHighestParent(
+        firstDeclaration,
+        ts.SyntaxKind.ModuleDeclaration
+      );
       if (highestModuleDeclaration) {
         if (highestModuleDeclaration.name.getText().trim() === 'global') {
           return true;
@@ -105,20 +108,27 @@ export class TypeScriptHelpers {
    * cannot be found.
    */
   public static getSymbolForDeclaration(declaration: ts.Declaration, checker: ts.TypeChecker): ts.Symbol {
-    const symbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(declaration, checker);
+    const symbol: ts.Symbol | undefined = TypeScriptInternals.tryGetSymbolForDeclaration(
+      declaration,
+      checker
+    );
     if (!symbol) {
-      throw new Error(TypeScriptMessageFormatter.formatFileAndLineNumber(declaration) + ': '
-        + 'Unable to determine semantic information for this declaration');
+      throw new InternalError(
+        'Unable to determine semantic information for declaration:\n' +
+          SourceFileLocationFormatter.formatDeclaration(declaration)
+      );
     }
     return symbol;
   }
 
   // Return name of the module, which could be like "./SomeLocalFile' or like 'external-package/entry/point'
-  public static getModuleSpecifier(declarationWithModuleSpecifier: ts.ImportDeclaration
-    | ts.ExportDeclaration): string | undefined {
-
-    if (declarationWithModuleSpecifier.moduleSpecifier
-      && ts.isStringLiteralLike(declarationWithModuleSpecifier.moduleSpecifier)) {
+  public static getModuleSpecifier(
+    declarationWithModuleSpecifier: ts.ImportDeclaration | ts.ExportDeclaration
+  ): string | undefined {
+    if (
+      declarationWithModuleSpecifier.moduleSpecifier &&
+      ts.isStringLiteralLike(declarationWithModuleSpecifier.moduleSpecifier)
+    ) {
       return TypeScriptInternals.getTextOfIdentifierOrLiteral(declarationWithModuleSpecifier.moduleSpecifier);
     }
 
@@ -138,7 +148,10 @@ export class TypeScriptHelpers {
    *
    * Calling _matchAncestor(C, [ExportDeclaration]) would return C.
    */
-  public static matchAncestor<T extends ts.Node>(node: ts.Node, kindsToMatch: ts.SyntaxKind[]): T | undefined {
+  public static matchAncestor<T extends ts.Node>(
+    node: ts.Node,
+    kindsToMatch: ts.SyntaxKind[]
+  ): T | undefined {
     // (slice(0) clones an array)
     const reversedParentKinds: ts.SyntaxKind[] = kindsToMatch.slice(0).reverse();
 
@@ -167,7 +180,10 @@ export class TypeScriptHelpers {
    * Does a depth-first search of the children of the specified node.  Returns the first child
    * with the specified kind, or undefined if there is no match.
    */
-  public static findFirstChildNode<T extends ts.Node>(node: ts.Node, kindToMatch: ts.SyntaxKind): T | undefined {
+  public static findFirstChildNode<T extends ts.Node>(
+    node: ts.Node,
+    kindToMatch: ts.SyntaxKind
+  ): T | undefined {
     for (const child of node.getChildren()) {
       if (child.kind === kindToMatch) {
         return child as T;
@@ -203,7 +219,10 @@ export class TypeScriptHelpers {
    * @remarks
    * Whereas findFirstParent() returns the first match, findHighestParent() returns the last match.
    */
-  public static findHighestParent<T extends ts.Node>(node: ts.Node, kindToMatch: ts.SyntaxKind): T | undefined {
+  public static findHighestParent<T extends ts.Node>(
+    node: ts.Node,
+    kindToMatch: ts.SyntaxKind
+  ): T | undefined {
     let current: ts.Node | undefined = node;
     let highest: T | undefined = undefined;
 
@@ -248,15 +267,21 @@ export class TypeScriptHelpers {
   public static tryGetLateBoundName(declarationName: ts.ComputedPropertyName): string | undefined {
     // Create a node printer that ignores comments and indentation that we can use to convert
     // declarationName to a string.
-    const printer: ts.Printer = ts.createPrinter({ removeComments: true }, {
-      onEmitNode(hint: ts.EmitHint, node: ts.Node | undefined,
-        emit: (hint: ts.EmitHint, node: ts.Node | undefined) => void): void {
-        if (node) {
-          ts.setEmitFlags(declarationName, ts.EmitFlags.NoIndentation | ts.EmitFlags.SingleLine);
+    const printer: ts.Printer = ts.createPrinter(
+      { removeComments: true },
+      {
+        onEmitNode(
+          hint: ts.EmitHint,
+          node: ts.Node | undefined,
+          emit: (hint: ts.EmitHint, node: ts.Node | undefined) => void
+        ): void {
+          if (node) {
+            ts.setEmitFlags(declarationName, ts.EmitFlags.NoIndentation | ts.EmitFlags.SingleLine);
+          }
+          emit(hint, node);
         }
-        emit(hint, node);
       }
-    });
+    );
     const sourceFile: ts.SourceFile = declarationName.getSourceFile();
     const text: string = printer.printNode(ts.EmitHint.Unspecified, declarationName, sourceFile);
     // clean up any emit flags we've set on any nodes in the tree.

@@ -1,21 +1,15 @@
-
 function writeErrorInRed(message) {
   console.error('');
   console.error('\u001b[31m' + message + '\u001b[39m');
 }
 
-writeErrorInRed(`* * * * * * * * * * * THIS PACKAGE HAS BEEN DEPRECATED! * * * * * * * * * * * *`);
+writeErrorInRed(`* * * * * * * * * * * * * THIS PACKAGE WAS DEPRECATED! * * * * * * * * * * * * * *`);
 
 console.error(`
-OLD NAME:  @microsoft/eslint-config-scalable-ts
-NEW NAME:  @rushstack/eslint-config
+@microsoft/rush-buildxl has been deprecated in favor of BuildXL's built-in Rush frontend.
 
-Please uninstall the old package by running this command:
+See here: https://github.com/microsoft/BuildXL/blob/master/Documentation/Wiki/Frontends/rush-onboarding.md`);
 
-  npm uninstall --save-dev @microsoft/eslint-config-scalable-ts
+writeErrorInRed(`* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n`);
 
-Then install the new package:
-
-  npm install --save-dev @rushstack/eslint-config`);
-
-writeErrorInRed(`* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *`);
+process.exit(1);

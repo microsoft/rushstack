@@ -8,10 +8,7 @@
     "type": "object",
     "allOf": [
       {
-        "oneOf": [
-          { "$ref": "#/definitions/lockStepVersion" },
-          { "$ref": "#/definitions/individualVersion" }
-        ]
+        "oneOf": [{ "$ref": "#/definitions/lockStepVersion" }, { "$ref": "#/definitions/individualVersion" }]
       },
       {
         "type": "object",
@@ -45,14 +42,7 @@
 
   "definitions": {
     "any-value": {
-      "type": [
-        "array",
-        "boolean",
-        "integer",
-        "number",
-        "object",
-        "string"
-      ],
+      "type": ["array", "boolean", "integer", "number", "object", "string"],
       "items": {
         "$ref": "#/definitions/any-value"
       }

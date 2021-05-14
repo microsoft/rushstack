@@ -5,6 +5,5 @@
  * @public
  */
 export class Promise<T> {
-  public notTheRealPromise(arg: T): void {
-  }
+  public notTheRealPromise(arg: T): void {}
 }

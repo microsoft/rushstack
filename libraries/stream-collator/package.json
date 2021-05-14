@@ -1,7 +1,7 @@
 {
-  "name": "@microsoft/stream-collator",
-  "version": "3.2.4",
-  "description": "Display intelligible realtime output from your asynchronous streams",
+  "name": "@rushstack/stream-collator",
+  "version": "4.0.83",
+  "description": "Display intelligible realtime output from concurrent processes",
   "repository": {
     "type": "git",
     "url": "https://github.com/microsoft/rushstack/tree/master/libraries/stream-collator"
@@ -9,21 +9,18 @@
   "main": "lib/index.js",
   "typings": "dist/stream-collator.d.ts",
   "scripts": {
-    "build": "gulp test --clean"
+    "build": "heft test --clean"
   },
   "license": "MIT",
   "dependencies": {
-    "colors": "~1.2.1"
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/terminal": "workspace:*"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.4.3",
-    "@types/chai": "3.4.34",
-    "@types/mocha": "5.2.5",
-    "@types/node": "10.17.13",
-    "chai": "~3.5.0",
-    "gulp": "~4.0.2",
-    "mocha": "^5.2.0",
-    "@microsoft/node-library-build": "6.4.4",
-    "@rushstack/eslint-config": "0.5.4"
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "10.17.13"
   }
 }

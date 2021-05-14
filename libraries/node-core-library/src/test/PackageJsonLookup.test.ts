@@ -7,11 +7,9 @@ import { IPackageJson, INodePackageJson } from '../IPackageJson';
 import { FileConstants } from '../Constants';
 
 describe('PackageJsonLookup', () => {
-
   describe('basic tests', () => {
-
     test('', () => {
-      expect(PackageJsonLookup.loadOwnPackageJson(__dirname).name).toEqual('@microsoft/node-core-library');
+      expect(PackageJsonLookup.loadOwnPackageJson(__dirname).name).toEqual('@rushstack/node-core-library');
     });
 
     test('tryLoadPackageJsonFor() test', () => {
@@ -31,7 +29,9 @@ describe('PackageJsonLookup', () => {
     test('tryLoadNodePackageJsonFor() test package with no version', () => {
       const packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
       const sourceFilePath: string = path.join(__dirname, './test-data/example-package-no-version');
-      const packageJson: INodePackageJson | undefined = packageJsonLookup.tryLoadNodePackageJsonFor(sourceFilePath);
+      const packageJson: INodePackageJson | undefined = packageJsonLookup.tryLoadNodePackageJsonFor(
+        sourceFilePath
+      );
       expect(packageJson).toBeDefined();
       if (packageJson) {
         expect(packageJson.name).toEqual('example-package');

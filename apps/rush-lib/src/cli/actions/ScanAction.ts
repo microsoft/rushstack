@@ -1,38 +1,68 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as colors from 'colors';
-import * as glob from 'glob';
+import colors from 'colors/safe';
 import * as path from 'path';
-import * as builtinPackageNames from 'builtin-modules';
-import { FileSystem } from '@microsoft/node-core-library';
+import builtinPackageNames from 'builtin-modules';
 
+import { Import, FileSystem } from '@rushstack/node-core-library';
 import { RushCommandLineParser } from '../RushCommandLineParser';
+import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { BaseConfiglessRushAction } from './BaseRushAction';
 
+const glob: typeof import('glob') = Import.lazy('glob', require);
+
+export interface IJsonOutput {
+  /**
+   * Dependencies scan from source code
+   */
+  detectedDependencies: string[];
+  /**
+   * Dependencies detected but not declared in package.json
+   */
+  missingDependencies: string[];
+  /**
+   * Dependencies declared in package.json, but not used in source code
+   */
+  unusedDependencies: string[];
+}
+
 export class ScanAction extends BaseConfiglessRushAction {
+  private _jsonFlag!: CommandLineFlagParameter;
+  private _allFlag!: CommandLineFlagParameter;
+
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'scan',
-      summary: 'Scan the current project folder and display a report of imported packages.',
-      documentation: `The NPM system allows a project to import dependencies without explicitly`
-        + ` listing them in its package.json file. This is a dangerous practice, because`
-        + ` there is no guarantee you will get a compatible version. The "rush scan" command`
-        + ` reports a list of packages that are imported by your code, which you can`
-        + ` compare against your package.json file to find mistakes. It searches the "./src"`
-        + ` and "./lib" folders for typical import syntaxes such as "import __ from '__'",`
-        + ` "require('__')", "System.import('__'), etc.  The results are only approximate,`
-        + ` but generally pretty accurate.`,
+      summary:
+        'When migrating projects into a Rush repo, this command is helpful for detecting' +
+        ' undeclared dependencies.',
+      documentation:
+        `The Node.js module system allows a project to import NPM packages without explicitly` +
+        ` declaring them as dependencies in the package.json file.  Such "phantom dependencies"` +
+        ` can cause problems.  Rush and PNPM use symlinks specifically to protect against phantom dependencies.` +
+        ` These protections may cause runtime errors for existing projects when they are first migrated into` +
+        ` a Rush monorepo.  The "rush scan" command is a handy tool for fixing these errors. It scans the "./src"` +
+        ` and "./lib" folders for import syntaxes such as "import __ from '__'", "require('__')",` +
+        ` and "System.import('__').  It prints a report of the referenced packages.  This heuristic is` +
+        ` not perfect, but it can save a lot of time when migrating projects.`,
       safeForSimultaneousRushProcesses: true,
       parser
     });
   }
 
   protected onDefineParameters(): void {
-    // abstract
+    this._jsonFlag = this.defineFlagParameter({
+      parameterLongName: '--json',
+      description: 'If this flag is specified, output will be in JSON format.'
+    });
+    this._allFlag = this.defineFlagParameter({
+      parameterLongName: '--all',
+      description: 'If this flag is specified, output will list all detected dependencies.'
+    });
   }
 
-  protected run(): Promise<void> {
+  protected async runAsync(): Promise<void> {
     const packageJsonFilename: string = path.resolve('./package.json');
 
     if (!FileSystem.exists(packageJsonFilename)) {
@@ -40,19 +70,19 @@ export class ScanAction extends BaseConfiglessRushAction {
     }
 
     const requireRegExps: RegExp[] = [
-      // Example: require('someting')
+      // Example: require('something')
       /\brequire\s*\(\s*[']([^']+\s*)[']\)/,
       /\brequire\s*\(\s*["]([^"]+)["]\s*\)/,
 
-      // Example: require.ensure('someting')
+      // Example: require.ensure('something')
       /\brequire.ensure\s*\(\s*[']([^']+\s*)[']\)/,
       /\brequire.ensure\s*\(\s*["]([^"]+)["]\s*\)/,
 
-      // Example: require.resolve('someting')
+      // Example: require.resolve('something')
       /\brequire.resolve\s*\(\s*[']([^']+\s*)[']\)/,
       /\brequire.resolve\s*\(\s*["]([^"]+)["]\s*\)/,
 
-      // Example: System.import('someting')
+      // Example: System.import('something')
       /\bSystem.import\s*\(\s*[']([^']+\s*)[']\)/,
       /\bSystem.import\s*\(\s*["]([^"]+)["]\s*\)/,
 
@@ -106,20 +136,111 @@ export class ScanAction extends BaseConfiglessRushAction {
       }
     });
 
-    const packageNames: string[] = [];
+    const detectedPackageNames: string[] = [];
 
     packageMatches.forEach((packageName: string) => {
-      packageNames.push(packageName);
+      if (builtinPackageNames.indexOf(packageName) < 0) {
+        detectedPackageNames.push(packageName);
+      }
     });
 
-    packageNames.sort();
+    detectedPackageNames.sort();
 
-    console.log('Detected dependencies:');
-    for (const packageName of packageNames) {
-      if (builtinPackageNames.indexOf(packageName) < 0) {
-        console.log('  ' + packageName);
+    const declaredDependencies: Set<string> = new Set<string>();
+    const declaredDevDependencies: Set<string> = new Set<string>();
+    const missingDependencies: string[] = [];
+    const unusedDependencies: string[] = [];
+    const packageJsonContent: string = FileSystem.readFile(packageJsonFilename);
+    try {
+      const manifest: {
+        dependencies?: Record<string, string>;
+        devDependencies?: Record<string, string>;
+      } = JSON.parse(packageJsonContent);
+      if (manifest.dependencies) {
+        for (const depName of Object.keys(manifest.dependencies)) {
+          declaredDependencies.add(depName);
+        }
+      }
+      if (manifest.devDependencies) {
+        for (const depName of Object.keys(manifest.devDependencies)) {
+          declaredDevDependencies.add(depName);
+        }
+      }
+    } catch (e) {
+      console.error(`JSON.parse ${packageJsonFilename} error`);
+    }
+
+    for (const detectedPkgName of detectedPackageNames) {
+      /**
+       * Missing(phantom) dependencies are
+       * - used in source code
+       * - not decalred in dependencies and devDependencies in package.json
+       */
+      if (!declaredDependencies.has(detectedPkgName) && !declaredDevDependencies.has(detectedPkgName)) {
+        missingDependencies.push(detectedPkgName);
       }
     }
-    return Promise.resolve();
+    for (const declaredPkgName of declaredDependencies) {
+      /**
+       * Unused dependencies are
+       * - declared in dependencies in package.json (devDependencies not included)
+       * - not used in source code
+       */
+      if (!detectedPackageNames.includes(declaredPkgName) && !declaredPkgName.startsWith('@types/')) {
+        unusedDependencies.push(declaredPkgName);
+      }
+    }
+
+    const output: IJsonOutput = {
+      detectedDependencies: detectedPackageNames,
+      missingDependencies: missingDependencies,
+      unusedDependencies: unusedDependencies
+    };
+
+    if (this._jsonFlag.value) {
+      console.log(JSON.stringify(output, undefined, 2));
+    } else if (this._allFlag.value) {
+      if (detectedPackageNames.length !== 0) {
+        console.log('Dependencies that seem to be imported by this project:');
+        for (const packageName of detectedPackageNames) {
+          console.log('  ' + packageName);
+        }
+      } else {
+        console.log('This project does not seem to import any NPM packages.');
+      }
+    } else {
+      let wroteAnything: boolean = false;
+
+      if (missingDependencies.length > 0) {
+        console.log(
+          colors.yellow('Possible phantom dependencies') +
+            " - these seem to be imported but aren't listed in package.json:"
+        );
+        for (const packageName of missingDependencies) {
+          console.log('  ' + packageName);
+        }
+        wroteAnything = true;
+      }
+
+      if (unusedDependencies.length > 0) {
+        if (wroteAnything) {
+          console.log('');
+        }
+        console.log(
+          colors.yellow('Possible unused dependencies') +
+            " - these are listed in package.json but don't seem to be imported:"
+        );
+        for (const packageName of unusedDependencies) {
+          console.log('  ' + packageName);
+        }
+        wroteAnything = true;
+      }
+
+      if (!wroteAnything) {
+        console.log(
+          colors.green('Everything looks good.') + '  No missing or unused dependencies were found.'
+        );
+      }
+    }
   }
 }

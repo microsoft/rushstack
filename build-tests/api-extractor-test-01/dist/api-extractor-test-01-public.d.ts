@@ -12,7 +12,7 @@
 /// <reference types="jest" />
 /// <reference lib="es2015.symbol.wellknown" />
 /// <reference lib="es2018.intl" />
-import Long from 'long';
+import { default as Long_2 } from 'long';
 import { MAX_UNSIGNED_VALUE } from 'long';
 
 /**
@@ -59,7 +59,7 @@ export declare class AmbientConsumer {
      * Configured via tsconfig.json's "lib" setting, which specifies `@types/jest`.
      * The emitted index.d.ts gets a reference like this:  <reference types="jest" />
      */
-    definitelyTyped(): jest.Context;
+    definitelyTyped(): jest.MockContext<number, any>;
     /**
      * Found via tsconfig.json's "include" setting point to a *.d.ts file.
      * This is an old-style Definitely Typed definition, which is the worst possible kind,
@@ -302,7 +302,7 @@ declare const unexportedCustomSymbol: unique symbol;
 
 /** @public */
 export declare class UseLong {
-    use_long(): Long;
+    use_long(): Long_2;
 }
 
 /* Excluded from this release type: VARIABLE */

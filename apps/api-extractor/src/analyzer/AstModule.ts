@@ -46,7 +46,7 @@ export class AstModule {
   public readonly moduleSymbol: ts.Symbol;
 
   /**
-   * Example:  "@microsoft/node-core-library/lib/FileSystem"
+   * Example:  "@rushstack/node-core-library/lib/FileSystem"
    * but never: "./FileSystem"
    */
   public readonly externalModulePath: string | undefined;

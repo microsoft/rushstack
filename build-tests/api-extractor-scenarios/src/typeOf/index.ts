@@ -11,7 +11,7 @@ export function f(): typeof Lib1Class | undefined {
   return undefined;
 }
 
-class ForgottenExport { }
+class ForgottenExport {}
 
 /**
  * Reference IForgottenExport via "typeof"

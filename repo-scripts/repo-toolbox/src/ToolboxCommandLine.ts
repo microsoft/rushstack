@@ -1,13 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See the @microsoft/rush package's LICENSE file for license information.
 
-import {
-  CommandLineParser
-} from '@microsoft/ts-command-line';
+import { CommandLineParser } from '@rushstack/ts-command-line';
 import { ReadmeAction } from './ReadmeAction';
 
 export class ToolboxCommandLine extends CommandLineParser {
-
   public constructor() {
     super({
       toolFilename: 'toolbox',
@@ -17,10 +14,12 @@ export class ToolboxCommandLine extends CommandLineParser {
     this.addAction(new ReadmeAction());
   }
 
-  protected onDefineParameters(): void { // abstract
+  protected onDefineParameters(): void {
+    // abstract
   }
 
-  protected onExecute(): Promise<void> { // override
+  protected onExecute(): Promise<void> {
+    // override
     return super.onExecute();
   }
 }

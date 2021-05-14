@@ -5,7 +5,7 @@ import gulpType = require('gulp');
 import * as child_process from 'child_process';
 import * as os from 'os';
 import * as path from 'path';
-import { FileSystem } from '@microsoft/node-core-library';
+import { FileSystem } from '@rushstack/node-core-library';
 
 import { GulpTask } from './GulpTask';
 

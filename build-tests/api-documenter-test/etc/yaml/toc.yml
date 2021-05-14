@@ -39,16 +39,24 @@ items:
         items:
           - name: InjectedCustomItem
             uid: customUrl
+          - name: DecoratorExample
+            uid: 'api-documenter-test!DecoratorExample:class'
           - name: DocClassInterfaceMerge (Class)
             uid: 'api-documenter-test!DocClassInterfaceMerge:class'
           - name: DocClassInterfaceMerge (Interface)
             uid: 'api-documenter-test!DocClassInterfaceMerge:interface'
           - name: DocEnum
             uid: 'api-documenter-test!DocEnum:enum'
+          - name: DocEnumNamespaceMerge (Enum)
+            uid: 'api-documenter-test!DocEnumNamespaceMerge:enum'
+          - name: DocEnumNamespaceMerge (Namespace)
+            uid: 'api-documenter-test!DocEnumNamespaceMerge:namespace'
           - name: EcmaSmbols
             uid: 'api-documenter-test!EcmaSmbols:namespace'
           - name: Generic
             uid: 'api-documenter-test!Generic:class'
+          - name: IDocInterface7
+            uid: 'api-documenter-test!IDocInterface7:interface'
           - name: OuterNamespace
             uid: 'api-documenter-test!OuterNamespace:namespace'
           - name: OuterNamespace.InnerNamespace

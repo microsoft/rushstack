@@ -9,35 +9,18 @@
   "main": "lib/index.js",
   "typings": "dist/rushell.d.ts",
   "scripts": {
-    "build": "gulp test --clean",
-    "start": "jest --watch"
+    "build": "heft test --clean",
+    "start": "heft test --watch"
   },
   "license": "MIT",
   "dependencies": {
-    "@microsoft/node-core-library": "3.19.3"
+    "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
-    "@microsoft/rush-stack-compiler-3.5": "0.4.3",
-    "@microsoft/node-library-build": "6.4.4",
-    "@rushstack/eslint-config": "0.5.4",
-    "@types/jest": "23.3.11",
-    "@types/node": "10.17.13",
-    "gulp": "~4.0.2",
-    "jest": "~23.6.0",
-    "ts-jest": "~22.4.6"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx"
-    ],
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "testMatch": [
-      "<rootDir>/src/**/*.test.ts"
-    ]
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "10.17.13"
   }
 }

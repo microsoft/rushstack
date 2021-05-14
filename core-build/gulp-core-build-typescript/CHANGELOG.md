@@ -1,11 +1,391 @@
 # Change Log - @microsoft/gulp-core-build-typescript
 
-This log was last generated on Tue, 28 Jan 2020 02:23:44 GMT and should not be manually modified.
+This log was last generated on Mon, 03 May 2021 15:10:29 GMT and should not be manually modified.
+
+## 8.5.25
+Mon, 03 May 2021 15:10:29 GMT
+
+_Version update only_
+
+## 8.5.24
+Thu, 29 Apr 2021 23:26:50 GMT
+
+_Version update only_
+
+## 8.5.23
+Tue, 20 Apr 2021 04:59:51 GMT
+
+_Version update only_
+
+## 8.5.22
+Mon, 12 Apr 2021 15:10:28 GMT
+
+_Version update only_
+
+## 8.5.21
+Thu, 08 Apr 2021 06:05:31 GMT
+
+_Version update only_
+
+## 8.5.20
+Tue, 06 Apr 2021 15:14:22 GMT
+
+_Version update only_
+
+## 8.5.19
+Thu, 04 Mar 2021 01:11:31 GMT
+
+_Version update only_
+
+## 8.5.18
+Fri, 05 Feb 2021 16:10:42 GMT
+
+_Version update only_
+
+## 8.5.17
+Wed, 13 Jan 2021 01:11:06 GMT
+
+_Version update only_
+
+## 8.5.16
+Thu, 10 Dec 2020 23:25:49 GMT
+
+_Version update only_
+
+## 8.5.15
+Sat, 05 Dec 2020 01:11:23 GMT
+
+_Version update only_
+
+## 8.5.14
+Mon, 30 Nov 2020 16:11:50 GMT
+
+_Version update only_
+
+## 8.5.13
+Wed, 18 Nov 2020 08:19:54 GMT
+
+_Version update only_
+
+## 8.5.12
+Wed, 18 Nov 2020 06:21:57 GMT
+
+_Version update only_
+
+## 8.5.11
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 8.5.10
+Tue, 10 Nov 2020 23:13:12 GMT
+
+_Version update only_
+
+## 8.5.9
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 8.5.8
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 8.5.7
+Thu, 29 Oct 2020 06:14:19 GMT
+
+_Version update only_
+
+## 8.5.6
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 8.5.5
+Tue, 27 Oct 2020 15:10:13 GMT
+
+_Version update only_
+
+## 8.5.4
+Tue, 06 Oct 2020 00:24:06 GMT
+
+_Version update only_
+
+## 8.5.3
+Mon, 05 Oct 2020 22:36:57 GMT
+
+_Version update only_
+
+## 8.5.2
+Mon, 05 Oct 2020 15:10:42 GMT
+
+_Version update only_
+
+## 8.5.1
+Wed, 30 Sep 2020 18:39:17 GMT
+
+_Version update only_
+
+## 8.5.0
+Wed, 30 Sep 2020 06:53:53 GMT
+
+### Minor changes
+
+- Upgrade compiler; the API now requires TypeScript 3.9 or newer
+
+## 8.4.52
+Tue, 22 Sep 2020 05:45:56 GMT
+
+_Version update only_
+
+## 8.4.51
+Tue, 22 Sep 2020 01:45:31 GMT
+
+_Version update only_
+
+## 8.4.50
+Tue, 22 Sep 2020 00:08:53 GMT
+
+_Version update only_
+
+## 8.4.49
+Sat, 19 Sep 2020 04:37:26 GMT
+
+_Version update only_
+
+## 8.4.48
+Sat, 19 Sep 2020 03:33:06 GMT
+
+_Version update only_
+
+## 8.4.47
+Fri, 18 Sep 2020 22:57:24 GMT
+
+_Version update only_
+
+## 8.4.46
+Fri, 18 Sep 2020 21:49:54 GMT
+
+_Version update only_
+
+## 8.4.45
+Sun, 13 Sep 2020 01:53:20 GMT
+
+_Version update only_
+
+## 8.4.44
+Fri, 11 Sep 2020 02:13:35 GMT
+
+_Version update only_
+
+## 8.4.43
+Mon, 07 Sep 2020 07:37:37 GMT
+
+_Version update only_
+
+## 8.4.42
+Sat, 05 Sep 2020 18:56:34 GMT
+
+_Version update only_
+
+## 8.4.41
+Thu, 27 Aug 2020 11:27:06 GMT
+
+_Version update only_
+
+## 8.4.40
+Mon, 24 Aug 2020 07:35:20 GMT
+
+_Version update only_
+
+## 8.4.39
+Sat, 22 Aug 2020 05:55:42 GMT
+
+_Version update only_
+
+## 8.4.38
+Fri, 21 Aug 2020 01:21:18 GMT
+
+_Version update only_
+
+## 8.4.37
+Thu, 20 Aug 2020 15:13:53 GMT
+
+_Version update only_
+
+## 8.4.36
+Tue, 18 Aug 2020 23:59:42 GMT
+
+_Version update only_
+
+## 8.4.35
+Mon, 17 Aug 2020 04:53:23 GMT
+
+_Version update only_
+
+## 8.4.34
+Wed, 12 Aug 2020 00:10:05 GMT
+
+_Version update only_
+
+## 8.4.33
+Wed, 05 Aug 2020 18:27:32 GMT
+
+_Version update only_
+
+## 8.4.32
+Fri, 03 Jul 2020 15:09:04 GMT
+
+_Version update only_
+
+## 8.4.31
+Fri, 03 Jul 2020 05:46:41 GMT
+
+_Version update only_
+
+## 8.4.30
+Sat, 27 Jun 2020 00:09:37 GMT
+
+### Patches
+
+- Move rush-stack-compiler-3.1 back to devDependencies
+
+## 8.4.29
+Fri, 26 Jun 2020 22:16:39 GMT
+
+### Patches
+
+- Move rush-stack-compiler-3.1 from devDependencies to dependencies
+
+## 8.4.28
+Thu, 25 Jun 2020 06:43:34 GMT
+
+_Version update only_
+
+## 8.4.27
+Wed, 24 Jun 2020 09:50:48 GMT
+
+_Version update only_
+
+## 8.4.26
+Wed, 24 Jun 2020 09:04:28 GMT
+
+_Version update only_
+
+## 8.4.25
+Mon, 15 Jun 2020 22:17:17 GMT
+
+_Version update only_
+
+## 8.4.24
+Fri, 12 Jun 2020 09:19:21 GMT
+
+_Version update only_
+
+## 8.4.23
+Wed, 10 Jun 2020 20:48:30 GMT
+
+_Version update only_
+
+## 8.4.22
+Mon, 01 Jun 2020 08:34:17 GMT
+
+_Version update only_
+
+## 8.4.21
+Sat, 30 May 2020 02:59:54 GMT
+
+_Version update only_
+
+## 8.4.20
+Thu, 28 May 2020 05:59:02 GMT
+
+_Version update only_
+
+## 8.4.19
+Wed, 27 May 2020 05:15:10 GMT
+
+_Version update only_
+
+## 8.4.18
+Tue, 26 May 2020 23:00:25 GMT
+
+_Version update only_
+
+## 8.4.17
+Fri, 22 May 2020 15:08:42 GMT
+
+_Version update only_
+
+## 8.4.16
+Thu, 21 May 2020 23:09:44 GMT
+
+_Version update only_
+
+## 8.4.15
+Thu, 21 May 2020 15:41:59 GMT
+
+_Version update only_
+
+## 8.4.14
+Tue, 19 May 2020 15:08:19 GMT
+
+_Version update only_
+
+## 8.4.13
+Fri, 15 May 2020 08:10:59 GMT
+
+_Version update only_
+
+## 8.4.12
+Wed, 06 May 2020 08:23:45 GMT
+
+_Version update only_
+
+## 8.4.11
+Sat, 02 May 2020 00:08:16 GMT
+
+_Version update only_
+
+## 8.4.10
+Wed, 08 Apr 2020 04:07:33 GMT
+
+_Version update only_
+
+## 8.4.9
+Fri, 03 Apr 2020 15:10:15 GMT
+
+_Version update only_
+
+## 8.4.8
+Sun, 29 Mar 2020 00:04:12 GMT
+
+_Version update only_
+
+## 8.4.7
+Sat, 28 Mar 2020 00:37:16 GMT
+
+_Version update only_
+
+## 8.4.6
+Wed, 18 Mar 2020 15:07:47 GMT
+
+### Patches
+
+- Upgrade cyclic dependencies
+
+## 8.4.5
+Tue, 17 Mar 2020 23:55:58 GMT
+
+### Patches
+
+- Replace dependencies whose NPM scope was renamed from `@microsoft` to `@rushstack`
 
 ## 8.4.4
 Tue, 28 Jan 2020 02:23:44 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.4.3
 Fri, 24 Jan 2020 00:27:39 GMT
@@ -17,12 +397,12 @@ Fri, 24 Jan 2020 00:27:39 GMT
 ## 8.4.2
 Thu, 23 Jan 2020 01:07:56 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.4.1
 Tue, 21 Jan 2020 21:56:13 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.4.0
 Sun, 19 Jan 2020 02:26:52 GMT
@@ -34,77 +414,77 @@ Sun, 19 Jan 2020 02:26:52 GMT
 ## 8.3.16
 Fri, 17 Jan 2020 01:08:23 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.3.15
 Tue, 14 Jan 2020 01:34:15 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.3.14
 Sat, 11 Jan 2020 05:18:24 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.3.13
 Thu, 09 Jan 2020 06:44:12 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.3.12
 Wed, 08 Jan 2020 00:11:31 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.3.11
 Wed, 04 Dec 2019 23:17:55 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.3.10
 Tue, 03 Dec 2019 03:17:43 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.3.9
 Sun, 24 Nov 2019 00:54:04 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.3.8
 Wed, 20 Nov 2019 06:14:28 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.3.7
 Fri, 15 Nov 2019 04:50:50 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.3.6
 Mon, 11 Nov 2019 16:07:56 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.3.5
 Wed, 06 Nov 2019 22:44:18 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.3.4
 Tue, 05 Nov 2019 06:49:28 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.3.3
 Tue, 05 Nov 2019 01:08:39 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.3.2
 Fri, 25 Oct 2019 15:08:54 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.3.1
 Tue, 22 Oct 2019 06:24:44 GMT
@@ -123,17 +503,17 @@ Mon, 21 Oct 2019 05:22:43 GMT
 ## 8.2.6
 Fri, 18 Oct 2019 15:15:01 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.2.5
 Sun, 06 Oct 2019 00:27:39 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.2.4
 Fri, 04 Oct 2019 00:15:22 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.2.3
 Sun, 29 Sep 2019 23:56:29 GMT
@@ -145,12 +525,12 @@ Sun, 29 Sep 2019 23:56:29 GMT
 ## 8.2.2
 Wed, 25 Sep 2019 15:15:31 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.2.1
 Tue, 24 Sep 2019 02:58:49 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.2.0
 Mon, 23 Sep 2019 15:14:55 GMT
@@ -169,172 +549,172 @@ Fri, 20 Sep 2019 21:27:22 GMT
 ## 8.1.34
 Wed, 11 Sep 2019 19:56:23 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.33
 Tue, 10 Sep 2019 22:32:23 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.32
 Tue, 10 Sep 2019 20:38:33 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.31
 Wed, 04 Sep 2019 18:28:06 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.30
 Wed, 04 Sep 2019 15:15:37 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.29
 Fri, 30 Aug 2019 00:14:32 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.28
 Mon, 12 Aug 2019 15:15:14 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.27
 Thu, 08 Aug 2019 15:14:17 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.26
 Thu, 08 Aug 2019 00:49:05 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.25
 Mon, 05 Aug 2019 22:04:32 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.24
 Tue, 23 Jul 2019 19:14:38 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.23
 Tue, 23 Jul 2019 01:13:01 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.22
 Mon, 22 Jul 2019 19:13:10 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.21
 Fri, 12 Jul 2019 19:12:46 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.20
 Thu, 11 Jul 2019 19:13:08 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.19
 Tue, 09 Jul 2019 19:13:24 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.18
 Mon, 08 Jul 2019 19:12:18 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.17
 Sat, 29 Jun 2019 02:30:10 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.16
 Wed, 12 Jun 2019 19:12:33 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.15
 Tue, 11 Jun 2019 00:48:06 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.14
 Wed, 05 Jun 2019 19:12:34 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.13
 Tue, 04 Jun 2019 05:51:53 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.12
 Mon, 27 May 2019 04:13:44 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.11
 Mon, 13 May 2019 02:08:35 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.10
 Mon, 06 May 2019 20:46:21 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.9
 Mon, 06 May 2019 19:34:54 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.8
 Mon, 06 May 2019 19:11:16 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.7
 Tue, 30 Apr 2019 23:08:02 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.6
 Tue, 16 Apr 2019 11:01:37 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.5
 Fri, 12 Apr 2019 06:13:16 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.4
 Thu, 11 Apr 2019 07:14:01 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.3
 Tue, 09 Apr 2019 05:31:01 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.2
 Mon, 08 Apr 2019 19:12:52 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.1
 Sat, 06 Apr 2019 02:05:51 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.1.0
 Fri, 05 Apr 2019 04:16:17 GMT
@@ -346,112 +726,112 @@ Fri, 05 Apr 2019 04:16:17 GMT
 ## 8.0.23
 Wed, 03 Apr 2019 02:58:33 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.22
 Tue, 02 Apr 2019 01:12:02 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.21
 Sat, 30 Mar 2019 22:27:16 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.20
 Thu, 28 Mar 2019 19:14:27 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.19
 Tue, 26 Mar 2019 20:54:18 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.18
 Sat, 23 Mar 2019 03:48:31 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.17
 Thu, 21 Mar 2019 04:59:11 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.16
 Thu, 21 Mar 2019 01:15:32 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.15
 Wed, 20 Mar 2019 19:14:49 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.14
 Mon, 18 Mar 2019 04:28:43 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.13
 Fri, 15 Mar 2019 19:13:25 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.12
 Wed, 13 Mar 2019 19:13:14 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.11
 Wed, 13 Mar 2019 01:14:05 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.10
 Mon, 11 Mar 2019 16:13:36 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.9
 Tue, 05 Mar 2019 17:13:11 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.8
 Mon, 04 Mar 2019 17:13:19 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.7
 Wed, 27 Feb 2019 22:13:58 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.6
 Wed, 27 Feb 2019 17:13:17 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.5
 Mon, 18 Feb 2019 17:13:23 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.4
 Tue, 12 Feb 2019 17:13:12 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.3
 Mon, 11 Feb 2019 10:32:37 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.2
 Mon, 11 Feb 2019 03:31:55 GMT
 
-*Version update only*
+_Version update only_
 
 ## 8.0.1
 Wed, 30 Jan 2019 20:49:11 GMT
@@ -474,42 +854,42 @@ Sat, 19 Jan 2019 03:47:47 GMT
 ## 7.4.8
 Tue, 15 Jan 2019 17:04:09 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.4.7
 Thu, 10 Jan 2019 01:57:53 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.4.6
 Mon, 07 Jan 2019 17:04:07 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.4.5
 Wed, 19 Dec 2018 05:57:33 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.4.4
 Thu, 13 Dec 2018 02:58:11 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.4.3
 Wed, 12 Dec 2018 17:04:19 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.4.2
 Sat, 08 Dec 2018 06:35:36 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.4.1
 Fri, 07 Dec 2018 17:04:56 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.4.0
 Fri, 30 Nov 2018 23:34:57 GMT
@@ -521,7 +901,7 @@ Fri, 30 Nov 2018 23:34:57 GMT
 ## 7.3.1
 Thu, 29 Nov 2018 07:02:09 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.3.0
 Thu, 29 Nov 2018 00:35:38 GMT
@@ -533,37 +913,37 @@ Thu, 29 Nov 2018 00:35:38 GMT
 ## 7.2.7
 Wed, 28 Nov 2018 19:29:54 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.2.6
 Wed, 28 Nov 2018 02:17:11 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.2.5
 Fri, 16 Nov 2018 21:37:10 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.2.4
 Fri, 16 Nov 2018 00:59:00 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.2.3
 Fri, 09 Nov 2018 23:07:39 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.2.2
 Wed, 07 Nov 2018 21:04:35 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.2.1
 Wed, 07 Nov 2018 17:03:03 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.2.0
 Mon, 05 Nov 2018 17:04:24 GMT
@@ -582,7 +962,7 @@ Thu, 01 Nov 2018 21:33:51 GMT
 ## 7.1.1
 Thu, 01 Nov 2018 19:32:52 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.1.0
 Wed, 31 Oct 2018 21:17:50 GMT
@@ -594,17 +974,17 @@ Wed, 31 Oct 2018 21:17:50 GMT
 ## 7.0.3
 Wed, 31 Oct 2018 17:00:55 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.0.2
 Sat, 27 Oct 2018 03:45:51 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.0.1
 Sat, 27 Oct 2018 02:17:18 GMT
 
-*Version update only*
+_Version update only_
 
 ## 7.0.0
 Sat, 27 Oct 2018 00:26:56 GMT
@@ -616,17 +996,17 @@ Sat, 27 Oct 2018 00:26:56 GMT
 ## 6.1.12
 Thu, 25 Oct 2018 23:20:40 GMT
 
-*Version update only*
+_Version update only_
 
 ## 6.1.11
 Thu, 25 Oct 2018 08:56:02 GMT
 
-*Version update only*
+_Version update only_
 
 ## 6.1.10
 Wed, 24 Oct 2018 16:03:10 GMT
 
-*Version update only*
+_Version update only_
 
 ## 6.1.9
 Thu, 18 Oct 2018 05:30:14 GMT
@@ -638,42 +1018,42 @@ Thu, 18 Oct 2018 05:30:14 GMT
 ## 6.1.8
 Thu, 18 Oct 2018 01:32:21 GMT
 
-*Version update only*
+_Version update only_
 
 ## 6.1.7
 Wed, 17 Oct 2018 21:04:49 GMT
 
-*Version update only*
+_Version update only_
 
 ## 6.1.6
 Wed, 17 Oct 2018 14:43:24 GMT
 
-*Version update only*
+_Version update only_
 
 ## 6.1.5
 Thu, 11 Oct 2018 23:26:07 GMT
 
-*Version update only*
+_Version update only_
 
 ## 6.1.4
 Tue, 09 Oct 2018 06:58:01 GMT
 
-*Version update only*
+_Version update only_
 
 ## 6.1.3
 Mon, 08 Oct 2018 16:04:27 GMT
 
-*Version update only*
+_Version update only_
 
 ## 6.1.2
 Sun, 07 Oct 2018 06:15:56 GMT
 
-*Version update only*
+_Version update only_
 
 ## 6.1.1
 Fri, 28 Sep 2018 16:05:35 GMT
 
-*Version update only*
+_Version update only_
 
 ## 6.1.0
 Wed, 26 Sep 2018 21:39:40 GMT
@@ -685,7 +1065,7 @@ Wed, 26 Sep 2018 21:39:40 GMT
 ## 6.0.5
 Mon, 24 Sep 2018 23:06:40 GMT
 
-*Version update only*
+_Version update only_
 
 ## 6.0.4
 Mon, 24 Sep 2018 16:04:28 GMT
@@ -697,7 +1077,7 @@ Mon, 24 Sep 2018 16:04:28 GMT
 ## 6.0.3
 Fri, 21 Sep 2018 16:04:42 GMT
 
-*Version update only*
+_Version update only_
 
 ## 6.0.2
 Thu, 20 Sep 2018 23:57:21 GMT
@@ -709,7 +1089,7 @@ Thu, 20 Sep 2018 23:57:21 GMT
 ## 6.0.1
 Tue, 18 Sep 2018 21:04:55 GMT
 
-*Version update only*
+_Version update only_
 
 ## 6.0.0
 Mon, 10 Sep 2018 23:23:01 GMT
@@ -728,7 +1108,7 @@ Thu, 06 Sep 2018 01:25:26 GMT
 ## 5.0.1
 Tue, 04 Sep 2018 21:34:10 GMT
 
-*Version update only*
+_Version update only_
 
 ## 5.0.0
 Mon, 03 Sep 2018 16:04:45 GMT
@@ -747,17 +1127,17 @@ Thu, 30 Aug 2018 22:47:34 GMT
 ## 4.11.11
 Thu, 30 Aug 2018 19:23:16 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.11.10
 Thu, 30 Aug 2018 18:45:12 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.11.9
 Wed, 29 Aug 2018 21:43:23 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.11.8
 Wed, 29 Aug 2018 06:36:50 GMT
@@ -776,22 +1156,22 @@ Thu, 23 Aug 2018 18:18:53 GMT
 ## 4.11.6
 Wed, 22 Aug 2018 20:58:58 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.11.5
 Wed, 22 Aug 2018 16:03:25 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.11.4
 Tue, 21 Aug 2018 16:04:38 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.11.3
 Thu, 09 Aug 2018 21:03:22 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.11.2
 Thu, 09 Aug 2018 16:04:24 GMT
@@ -803,7 +1183,7 @@ Thu, 09 Aug 2018 16:04:24 GMT
 ## 4.11.1
 Tue, 07 Aug 2018 22:27:31 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.11.0
 Thu, 26 Jul 2018 23:53:43 GMT
@@ -815,7 +1195,7 @@ Thu, 26 Jul 2018 23:53:43 GMT
 ## 4.10.5
 Thu, 26 Jul 2018 16:04:17 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.10.4
 Wed, 25 Jul 2018 21:02:57 GMT
@@ -827,7 +1207,7 @@ Wed, 25 Jul 2018 21:02:57 GMT
 ## 4.10.3
 Tue, 17 Jul 2018 16:02:52 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.10.2
 Fri, 13 Jul 2018 19:04:50 GMT
@@ -839,7 +1219,7 @@ Fri, 13 Jul 2018 19:04:50 GMT
 ## 4.10.1
 Tue, 03 Jul 2018 21:03:31 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.10.0
 Fri, 29 Jun 2018 02:56:51 GMT
@@ -851,7 +1231,7 @@ Fri, 29 Jun 2018 02:56:51 GMT
 ## 4.9.19
 Sat, 23 Jun 2018 02:21:20 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.9.18
 Fri, 22 Jun 2018 16:05:15 GMT
@@ -863,52 +1243,52 @@ Fri, 22 Jun 2018 16:05:15 GMT
 ## 4.9.17
 Thu, 21 Jun 2018 08:27:29 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.9.16
 Tue, 19 Jun 2018 19:35:11 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.9.15
 Fri, 08 Jun 2018 08:43:52 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.9.14
 Thu, 31 May 2018 01:39:33 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.9.13
 Tue, 15 May 2018 02:26:45 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.9.12
 Tue, 15 May 2018 00:18:10 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.9.11
 Fri, 11 May 2018 22:43:14 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.9.10
 Fri, 04 May 2018 00:42:38 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.9.9
 Tue, 01 May 2018 22:03:20 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.9.8
 Fri, 27 Apr 2018 03:04:32 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.9.7
 Fri, 20 Apr 2018 16:06:11 GMT
@@ -920,7 +1300,7 @@ Fri, 20 Apr 2018 16:06:11 GMT
 ## 4.9.6
 Thu, 19 Apr 2018 21:25:56 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.9.5
 Thu, 19 Apr 2018 17:02:06 GMT
@@ -932,22 +1312,22 @@ Thu, 19 Apr 2018 17:02:06 GMT
 ## 4.9.4
 Tue, 03 Apr 2018 16:05:29 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.9.3
 Mon, 02 Apr 2018 16:05:24 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.9.2
 Tue, 27 Mar 2018 01:34:25 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.9.1
 Mon, 26 Mar 2018 19:12:42 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.9.0
 Sun, 25 Mar 2018 01:26:19 GMT
@@ -960,7 +1340,7 @@ Sun, 25 Mar 2018 01:26:19 GMT
 ## 4.8.1
 Fri, 23 Mar 2018 00:34:53 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.8.0
 Thu, 22 Mar 2018 18:34:13 GMT
@@ -972,12 +1352,12 @@ Thu, 22 Mar 2018 18:34:13 GMT
 ## 4.7.22
 Tue, 20 Mar 2018 02:44:45 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.7.21
 Sat, 17 Mar 2018 02:54:22 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.7.20
 Thu, 15 Mar 2018 20:00:50 GMT
@@ -989,7 +1369,7 @@ Thu, 15 Mar 2018 20:00:50 GMT
 ## 4.7.19
 Thu, 15 Mar 2018 16:05:43 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.7.18
 Tue, 13 Mar 2018 23:11:32 GMT
@@ -1001,22 +1381,22 @@ Tue, 13 Mar 2018 23:11:32 GMT
 ## 4.7.17
 Mon, 12 Mar 2018 20:36:19 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.7.16
 Tue, 06 Mar 2018 17:04:51 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.7.15
 Fri, 02 Mar 2018 01:13:59 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.7.14
 Tue, 27 Feb 2018 22:05:57 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.7.13
 Wed, 21 Feb 2018 22:04:19 GMT
@@ -1028,32 +1408,32 @@ Wed, 21 Feb 2018 22:04:19 GMT
 ## 4.7.12
 Wed, 21 Feb 2018 03:13:28 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.7.11
 Sat, 17 Feb 2018 02:53:49 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.7.10
 Fri, 16 Feb 2018 22:05:23 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.7.9
 Fri, 16 Feb 2018 17:05:11 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.7.8
 Wed, 07 Feb 2018 17:05:11 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.7.7
 Fri, 26 Jan 2018 22:05:30 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.7.6
 Fri, 26 Jan 2018 17:53:38 GMT
@@ -1072,7 +1452,7 @@ Fri, 26 Jan 2018 00:36:51 GMT
 ## 4.7.4
 Tue, 23 Jan 2018 17:05:28 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.7.3
 Thu, 18 Jan 2018 03:23:46 GMT
@@ -1084,7 +1464,7 @@ Thu, 18 Jan 2018 03:23:46 GMT
 ## 4.7.2
 Thu, 18 Jan 2018 00:48:06 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.7.1
 Thu, 18 Jan 2018 00:27:23 GMT
@@ -1110,7 +1490,7 @@ Fri, 12 Jan 2018 03:35:22 GMT
 ## 4.5.1
 Thu, 11 Jan 2018 22:31:51 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.5.0
 Wed, 10 Jan 2018 20:40:01 GMT
@@ -1136,17 +1516,17 @@ Sun, 07 Jan 2018 05:12:08 GMT
 ## 4.3.3
 Fri, 05 Jan 2018 20:26:45 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.3.2
 Fri, 05 Jan 2018 00:48:41 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.3.1
 Fri, 22 Dec 2017 17:04:46 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.3.0
 Tue, 12 Dec 2017 03:33:26 GMT
@@ -1158,32 +1538,32 @@ Tue, 12 Dec 2017 03:33:26 GMT
 ## 4.2.18
 Thu, 30 Nov 2017 23:59:09 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.2.17
 Thu, 30 Nov 2017 23:12:21 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.2.16
 Wed, 29 Nov 2017 17:05:37 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.2.15
 Tue, 28 Nov 2017 23:43:55 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.2.14
 Mon, 13 Nov 2017 17:04:50 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.2.13
 Mon, 06 Nov 2017 17:04:18 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.2.12
 Thu, 02 Nov 2017 16:05:24 GMT
@@ -1202,22 +1582,22 @@ Wed, 01 Nov 2017 21:06:08 GMT
 ## 4.2.10
 Tue, 31 Oct 2017 21:04:04 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.2.9
 Tue, 31 Oct 2017 16:04:55 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.2.8
 Wed, 25 Oct 2017 20:03:59 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.2.7
 Tue, 24 Oct 2017 18:17:12 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.2.6
 Mon, 23 Oct 2017 21:53:12 GMT
@@ -1229,12 +1609,12 @@ Mon, 23 Oct 2017 21:53:12 GMT
 ## 4.2.5
 Fri, 20 Oct 2017 19:57:12 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.2.4
 Fri, 20 Oct 2017 01:52:54 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.2.3
 Fri, 20 Oct 2017 01:04:44 GMT
@@ -1253,7 +1633,7 @@ Thu, 05 Oct 2017 01:05:02 GMT
 ## 4.2.1
 Thu, 28 Sep 2017 01:04:28 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.2.0
 Fri, 22 Sep 2017 01:04:02 GMT
@@ -1272,7 +1652,7 @@ Wed, 20 Sep 2017 22:10:17 GMT
 ## 4.0.7
 Mon, 11 Sep 2017 13:04:55 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.0.6
 Fri, 08 Sep 2017 01:28:04 GMT
@@ -1284,7 +1664,7 @@ Fri, 08 Sep 2017 01:28:04 GMT
 ## 4.0.5
 Thu, 07 Sep 2017 13:04:35 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.0.4
 Thu, 07 Sep 2017 00:11:11 GMT
@@ -1296,17 +1676,17 @@ Thu, 07 Sep 2017 00:11:11 GMT
 ## 4.0.3
 Wed, 06 Sep 2017 13:03:42 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.0.2
 Tue, 05 Sep 2017 19:03:56 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.0.1
 Sat, 02 Sep 2017 01:04:26 GMT
 
-*Version update only*
+_Version update only_
 
 ## 4.0.0
 Thu, 31 Aug 2017 18:41:18 GMT
@@ -1318,17 +1698,17 @@ Thu, 31 Aug 2017 18:41:18 GMT
 ## 3.5.3
 Thu, 31 Aug 2017 17:46:25 GMT
 
-*Version update only*
+_Version update only_
 
 ## 3.5.2
 Wed, 30 Aug 2017 01:04:34 GMT
 
-*Version update only*
+_Version update only_
 
 ## 3.5.1
 Thu, 24 Aug 2017 22:44:12 GMT
 
-*Version update only*
+_Version update only_
 
 ## 3.5.0
 Thu, 24 Aug 2017 01:04:33 GMT
@@ -1340,7 +1720,7 @@ Thu, 24 Aug 2017 01:04:33 GMT
 ## 3.4.2
 Tue, 22 Aug 2017 13:04:22 GMT
 
-*Version update only*
+_Version update only_
 
 ## 3.4.1
 Wed, 16 Aug 2017 23:16:55 GMT

@@ -24,12 +24,14 @@ describe('updateIndividualChangelog', () => {
         packageName: 'a',
         newVersion: '1.0.0',
         changeType: ChangeType.major,
-        changes: [{
-          packageName: 'a',
-          type: 'major',
-          changeType: ChangeType.major,
-          comment: 'Patching a'
-        }]
+        changes: [
+          {
+            packageName: 'a',
+            type: 'major',
+            changeType: ChangeType.major,
+            comment: 'Patching a'
+          }
+        ]
       },
       'rootMajorChange',
       false,
@@ -68,12 +70,14 @@ describe('updateIndividualChangelog', () => {
         packageName: 'a',
         newVersion: '1.0.0',
         changeType: ChangeType.major,
-        changes: [{
-          packageName: 'a',
-          type: 'major',
-          changeType: ChangeType.major,
-          comment: 'Patching a'
-        }]
+        changes: [
+          {
+            packageName: 'a',
+            type: 'major',
+            changeType: ChangeType.major,
+            comment: 'Patching a'
+          }
+        ]
       },
       path.resolve(__dirname, 'exampleChangelog'),
       false,
@@ -124,12 +128,14 @@ describe('updateIndividualChangelog', () => {
         packageName: 'a',
         newVersion: '0.0.1',
         changeType: ChangeType.patch,
-        changes: [{
-          packageName: 'a',
-          type: 'patch',
-          changeType: ChangeType.patch,
-          comment: 'Patching a'
-        }]
+        changes: [
+          {
+            packageName: 'a',
+            type: 'patch',
+            changeType: ChangeType.patch,
+            comment: 'Patching a'
+          }
+        ]
       },
       path.resolve(__dirname, 'exampleChangelog'),
       false,
@@ -145,12 +151,14 @@ describe('updateIndividualChangelog', () => {
         packageName: 'a',
         newVersion: '0.0.2',
         changeType: ChangeType.dependency,
-        changes: [{
-          packageName: 'a',
-          type: 'dependency',
-          changeType: ChangeType.dependency,
-          comment: 'Updating a'
-        }]
+        changes: [
+          {
+            packageName: 'a',
+            type: 'dependency',
+            changeType: ChangeType.dependency,
+            comment: 'Updating a'
+          }
+        ]
       },
       path.resolve(__dirname, 'exampleChangelog'),
       false,
@@ -201,12 +209,14 @@ describe('updateIndividualChangelog', () => {
         packageName: 'a',
         newVersion: '0.0.2',
         changeType: ChangeType.none,
-        changes: [{
-          packageName: 'a',
-          type: 'none',
-          changeType: ChangeType.none,
-          comment: ''
-        }]
+        changes: [
+          {
+            packageName: 'a',
+            type: 'none',
+            changeType: ChangeType.none,
+            comment: ''
+          }
+        ]
       },
       path.resolve(__dirname, 'exampleChangelog'),
       false,
@@ -275,7 +285,7 @@ describe('updateChangelogs', () => {
       rushConfiguration,
       false
     );
-    expect(updatedChangeLogs.length).toEqual(1);
+    expect(updatedChangeLogs).toHaveLength(1);
     expect(updatedChangeLogs[0].name).toEqual('b');
   });
 
@@ -305,7 +315,7 @@ describe('updateChangelogs', () => {
       rushConfiguration,
       false
     );
-    expect(updatedChangeLogs.length).toEqual(1);
+    expect(updatedChangeLogs).toHaveLength(1);
     expect(updatedChangeLogs[0].name).toEqual('b');
   });
 
@@ -335,7 +345,7 @@ describe('updateChangelogs', () => {
       rushConfiguration,
       false
     );
-    expect(updatedChangeLogs.length).toEqual(2);
+    expect(updatedChangeLogs).toHaveLength(2);
     expect(updatedChangeLogs[0].name).toEqual('a');
     expect(updatedChangeLogs[1].name).toEqual('b');
   });

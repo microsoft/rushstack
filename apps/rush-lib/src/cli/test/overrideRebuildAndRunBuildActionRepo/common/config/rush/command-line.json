@@ -14,7 +14,7 @@
       "longName": "--flag-for-build-and-rebuild",
       "description": "This flag should be usable for build and rebuild commands.",
       "parameterKind": "flag",
-      "associatedCommands": [ "build", "rebuild" ]
+      "associatedCommands": ["build", "rebuild"]
     }
   ]
 }

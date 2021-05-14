@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IPackageJson } from '@microsoft/node-core-library';
+import { IPackageJson } from '@rushstack/node-core-library';
 
 import { IChangeInfo } from '../api/ChangeManagement';
 import { IChangelog } from '../api/Changelog';
@@ -18,11 +18,11 @@ import { ChangelogGenerator } from './ChangelogGenerator';
  * can be applied to package.json and change logs.
  */
 export class ChangeManager {
-  private _prereleaseToken: PrereleaseToken;
-  private _orderedChanges: IChangeInfo[];
-  private _allPackages: Map<string, RushConfigurationProject>;
-  private _allChanges: IChangeInfoHash;
-  private _changeFiles: ChangeFiles;
+  private _prereleaseToken!: PrereleaseToken;
+  private _orderedChanges!: IChangeInfo[];
+  private _allPackages!: Map<string, RushConfigurationProject>;
+  private _allChanges!: IChangeInfoHash;
+  private _changeFiles!: ChangeFiles;
   private _rushConfiguration: RushConfiguration;
   private _lockStepProjectsToExclude: Set<string> | undefined;
 
@@ -57,7 +57,7 @@ export class ChangeManager {
       includeCommitDetails,
       this._prereleaseToken,
       this._lockStepProjectsToExclude
-      );
+    );
     this._orderedChanges = PublishUtilities.sortChangeRequests(this._allChanges);
   }
 
@@ -74,17 +74,15 @@ export class ChangeManager {
   }
 
   public validateChanges(versionConfig: VersionPolicyConfiguration): void {
-    Object
-      .keys(this._allChanges)
-      .filter((key) => {
-        const projectInfo: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(key);
-        if (projectInfo) {
-          if (projectInfo.versionPolicy) {
-            const changeInfo: IChangeInfo = this._allChanges[key];
-            projectInfo.versionPolicy.validate(changeInfo.newVersion!, key);
-          }
+    Object.keys(this._allChanges).filter((key) => {
+      const projectInfo: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(key);
+      if (projectInfo) {
+        if (projectInfo.versionPolicy) {
+          const changeInfo: IChangeInfo = this._allChanges[key];
+          projectInfo.versionPolicy.validate(changeInfo.newVersion!, key);
         }
-      });
+      }
+    });
   }
 
   /**
@@ -104,7 +102,8 @@ export class ChangeManager {
       this._rushConfiguration,
       shouldCommit,
       this._prereleaseToken,
-      this._lockStepProjectsToExclude);
+      this._lockStepProjectsToExclude
+    );
 
     return updatedPackages;
   }

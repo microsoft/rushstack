@@ -21,6 +21,24 @@ import { FileSystem } from './FileSystem';
 export type JsonObject = any;
 
 /**
+ * The Rush Stack lint rules discourage usage of `null`.  However, JSON parsers always return JavaScript's
+ * `null` to keep the two syntaxes consistent.  When creating interfaces that describe JSON structures,
+ * use `JsonNull` to avoid triggering the lint rule.  Do not use `JsonNull` for any other purpose.
+ *
+ * @remarks
+ * If you are designing a new JSON file format, it's a good idea to avoid `null` entirely.  In most cases
+ * there are better representations that convey more information about an item that is unknown, omitted, or disabled.
+ *
+ * To understand why `null` is deprecated, please see the `@rushstack/eslint-plugin` documentation here:
+ *
+ * {@link https://www.npmjs.com/package/@rushstack/eslint-plugin#rushstackno-null}
+ *
+ * @public
+ */
+// eslint-disable-next-line @rushstack/no-new-null
+export type JsonNull = null;
+
+/**
  * Options for JsonFile.stringify()
  *
  * @public
@@ -36,6 +54,15 @@ export interface IJsonFileStringifyOptions {
    * Note that this is slightly slower than the native JSON.stringify() implementation.
    */
   prettyFormatting?: boolean;
+
+  /**
+   * If specified, this header will be prepended to the start of the file.  The header must consist
+   * of lines prefixed by "//" characters.
+   * @remarks
+   * When used with {@link IJsonFileSaveOptions.updateExistingFile}
+   * or {@link JsonFile.updateString}, the header will ONLY be added for a newly created file.
+   */
+  headerComment?: string;
 }
 
 /**
@@ -65,34 +92,84 @@ export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
   updateExistingFile?: boolean;
 }
 
+const DEFAULT_ENCODING: string = 'utf8';
+
 /**
  * Utilities for reading/writing JSON files.
  * @public
  */
 export class JsonFile {
   /**
+   * @internal
+   */
+  public static _formatPathForError: (path: string) => string = (path: string) => path;
+
+  /**
    * Loads a JSON file.
    */
   public static load(jsonFilename: string): JsonObject {
-    if (!FileSystem.exists(jsonFilename)) {
-      throw new Error(`Input file not found: ${jsonFilename}`);
-    }
-
-    const contents: string = FileSystem.readFile(jsonFilename);
     try {
+      const contents: string = FileSystem.readFile(jsonFilename);
       return jju.parse(contents);
     } catch (error) {
-      throw new Error(`Error reading "${jsonFilename}":` + os.EOL + `  ${error.message}`);
+      if (FileSystem.isNotExistError(error)) {
+        throw error;
+      } else {
+        throw new Error(
+          `Error reading "${JsonFile._formatPathForError(jsonFilename)}":` + os.EOL + `  ${error.message}`
+        );
+      }
     }
+  }
+
+  /**
+   * An async version of {@link JsonFile.load}.
+   */
+  public static async loadAsync(jsonFilename: string): Promise<JsonObject> {
+    try {
+      const contents: string = await FileSystem.readFileAsync(jsonFilename);
+      return jju.parse(contents);
+    } catch (error) {
+      if (FileSystem.isNotExistError(error)) {
+        throw error;
+      } else {
+        throw new Error(
+          `Error reading "${JsonFile._formatPathForError(jsonFilename)}":` + os.EOL + `  ${error.message}`
+        );
+      }
+    }
+  }
+
+  /**
+   * Parses a JSON file's contents.
+   */
+  public static parseString(jsonContents: string): JsonObject {
+    return jju.parse(jsonContents);
   }
 
   /**
    * Loads a JSON file and validate its schema.
    */
-  public static loadAndValidate(jsonFilename: string, jsonSchema: JsonSchema,
-    options?: IJsonSchemaValidateOptions): JsonObject {
-
+  public static loadAndValidate(
+    jsonFilename: string,
+    jsonSchema: JsonSchema,
+    options?: IJsonSchemaValidateOptions
+  ): JsonObject {
     const jsonObject: JsonObject = JsonFile.load(jsonFilename);
+    jsonSchema.validateObject(jsonObject, jsonFilename, options);
+
+    return jsonObject;
+  }
+
+  /**
+   * An async version of {@link JsonFile.loadAndValidate}.
+   */
+  public static async loadAndValidateAsync(
+    jsonFilename: string,
+    jsonSchema: JsonSchema,
+    options?: IJsonSchemaValidateOptions
+  ): Promise<JsonObject> {
+    const jsonObject: JsonObject = await JsonFile.loadAsync(jsonFilename);
     jsonSchema.validateObject(jsonObject, jsonFilename, options);
 
     return jsonObject;
@@ -103,10 +180,26 @@ export class JsonFile {
    * @remarks
    * See JsonSchema.validateObjectWithCallback() for more info.
    */
-  public static loadAndValidateWithCallback(jsonFilename: string, jsonSchema: JsonSchema,
-    errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): JsonObject {
-
+  public static loadAndValidateWithCallback(
+    jsonFilename: string,
+    jsonSchema: JsonSchema,
+    errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void
+  ): JsonObject {
     const jsonObject: JsonObject = JsonFile.load(jsonFilename);
+    jsonSchema.validateObjectWithCallback(jsonObject, errorCallback);
+
+    return jsonObject;
+  }
+
+  /**
+   * An async version of {@link JsonFile.loadAndValidateWithCallback}.
+   */
+  public static async loadAndValidateWithCallbackAsync(
+    jsonFilename: string,
+    jsonSchema: JsonSchema,
+    errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void
+  ): Promise<JsonObject> {
+    const jsonObject: JsonObject = await JsonFile.loadAsync(jsonFilename);
     jsonSchema.validateObjectWithCallback(jsonObject, errorCallback);
 
     return jsonObject;
@@ -128,10 +221,13 @@ export class JsonFile {
    * @param options - other settings that control serialization
    * @returns a JSON string, with newlines, and indented with two spaces
    */
-  public static updateString(previousJson: string, newJsonObject: JsonObject,
-    options?: IJsonFileStringifyOptions): string {
+  public static updateString(
+    previousJson: string,
+    newJsonObject: JsonObject,
+    options?: IJsonFileStringifyOptions
+  ): string {
     if (!options) {
-      options = { };
+      options = {};
     }
 
     JsonFile.validateNoUndefinedMembers(newJsonObject);
@@ -149,8 +245,16 @@ export class JsonFile {
         mode: 'json',
         indent: 2
       });
+
+      if (options.headerComment !== undefined) {
+        stringified = JsonFile._formatJsonHeaderComment(options.headerComment) + stringified;
+      }
     } else {
       stringified = JSON.stringify(newJsonObject, undefined, 2);
+
+      if (options.headerComment !== undefined) {
+        stringified = JsonFile._formatJsonHeaderComment(options.headerComment) + stringified;
+      }
     }
 
     // Add the trailing newline
@@ -172,30 +276,29 @@ export class JsonFile {
    */
   public static save(jsonObject: JsonObject, jsonFilename: string, options?: IJsonFileSaveOptions): boolean {
     if (!options) {
-      options = { };
+      options = {};
     }
 
     // Do we need to read the previous file contents?
     let oldBuffer: Buffer | undefined = undefined;
     if (options.updateExistingFile || options.onlyIfChanged) {
-      if (FileSystem.exists(jsonFilename)) {
-        try {
-          oldBuffer = FileSystem.readFileToBuffer(jsonFilename);
-        } catch (error) {
-          // Ignore this error, and try writing a new file.  If that fails, then we should report that
-          // error instead.
+      try {
+        oldBuffer = FileSystem.readFileToBuffer(jsonFilename);
+      } catch (error) {
+        if (!FileSystem.isNotExistError(error)) {
+          throw error;
         }
       }
     }
 
     let jsonToUpdate: string = '';
     if (options.updateExistingFile && oldBuffer) {
-      jsonToUpdate = oldBuffer.toString();
+      jsonToUpdate = oldBuffer.toString(DEFAULT_ENCODING);
     }
 
     const newJson: string = JsonFile.updateString(jsonToUpdate, jsonObject, options);
 
-    const newBuffer: Buffer = Buffer.from(newJson); // utf8 encoding happens here
+    const newBuffer: Buffer = Buffer.from(newJson, DEFAULT_ENCODING);
 
     if (options.onlyIfChanged) {
       // Has the file changed?
@@ -205,7 +308,7 @@ export class JsonFile {
       }
     }
 
-    FileSystem.writeFile(jsonFilename, newBuffer.toString(), {
+    FileSystem.writeFile(jsonFilename, newBuffer.toString(DEFAULT_ENCODING), {
       ensureFolderExists: options.ensureFolderExists
     });
 
@@ -223,10 +326,67 @@ export class JsonFile {
   }
 
   /**
+   * An async version of {@link JsonFile.save}.
+   */
+  public static async saveAsync(
+    jsonObject: JsonObject,
+    jsonFilename: string,
+    options?: IJsonFileSaveOptions
+  ): Promise<boolean> {
+    if (!options) {
+      options = {};
+    }
+
+    // Do we need to read the previous file contents?
+    let oldBuffer: Buffer | undefined = undefined;
+    if (options.updateExistingFile || options.onlyIfChanged) {
+      try {
+        oldBuffer = await FileSystem.readFileToBufferAsync(jsonFilename);
+      } catch (error) {
+        if (!FileSystem.isNotExistError(error)) {
+          throw error;
+        }
+      }
+    }
+
+    let jsonToUpdate: string = '';
+    if (options.updateExistingFile && oldBuffer) {
+      jsonToUpdate = oldBuffer.toString(DEFAULT_ENCODING);
+    }
+
+    const newJson: string = JsonFile.updateString(jsonToUpdate, jsonObject, options);
+
+    const newBuffer: Buffer = Buffer.from(newJson, DEFAULT_ENCODING);
+
+    if (options.onlyIfChanged) {
+      // Has the file changed?
+      if (oldBuffer && Buffer.compare(newBuffer, oldBuffer) === 0) {
+        // Nothing has changed, so don't touch the file
+        return false;
+      }
+    }
+
+    await FileSystem.writeFileAsync(jsonFilename, newBuffer.toString(DEFAULT_ENCODING), {
+      ensureFolderExists: options.ensureFolderExists
+    });
+
+    // TEST CODE: Used to verify that onlyIfChanged isn't broken by a hidden transformation during saving.
+    /*
+    const oldBuffer2: Buffer = await FileSystem.readFileToBufferAsync(jsonFilename);
+    if (Buffer.compare(buffer, oldBuffer2) !== 0) {
+      console.log('new:' + buffer.toString('hex'));
+      console.log('old:' + oldBuffer2.toString('hex'));
+
+      throw new Error('onlyIfChanged logic is broken');
+    }
+    */
+    return true;
+  }
+
+  /**
    * Used to validate a data structure before writing.  Reports an error if there
    * are any undefined members.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static validateNoUndefinedMembers(jsonObject: JsonObject): void {
     return JsonFile._validateNoUndefinedMembers(jsonObject, []);
   }
@@ -273,11 +433,31 @@ export class JsonFile {
 
         // Convert this:     A path: "C:\file"
         // To this:          A path: \"C:\\file\"
-        const escapedKey: string = key.replace(/[\\]/g, '\\\\') // escape backslashes
+        const escapedKey: string = key
+          .replace(/[\\]/g, '\\\\') // escape backslashes
           .replace(/["]/g, '\\'); // escape quotes
         result += `["${escapedKey}"]`;
       }
     }
     return result;
+  }
+
+  private static _formatJsonHeaderComment(headerComment: string): string {
+    if (headerComment === '') {
+      return '';
+    }
+    const lines: string[] = headerComment.split('\n');
+    const result: string[] = [];
+    for (const line of lines) {
+      if (!/^\s*$/.test(line) && !/^\s*\/\//.test(line)) {
+        throw new Error(
+          'The headerComment lines must be blank or start with the "//" prefix.\n' +
+            'Invalid line' +
+            JSON.stringify(line)
+        );
+      }
+      result.push(Text.replaceAll(line, '\r', ''));
+    }
+    return lines.join('\n') + '\n';
   }
 }

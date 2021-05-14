@@ -38,16 +38,16 @@ export interface IPackageJsonScriptTable {
  *
  * However, NodeJS relaxes this requirement for its `require()` API.  The
  * {@link https://nodejs.org/dist/latest-v10.x/docs/api/modules.html#modules_folders_as_modules
-  * | "Folders as Modules" section} from the NodeJS documentation gives an example of a package.json file
-  * that has only the `name` and `main` fields.  NodeJS does not consider the `version` field during resolution,
-  * so it can be omitted.  Some libraries do this.
-  *
-  * Use the `INodePackageJson` interface when loading such files.  Use `IPackageJson` for package.json files
-  * that are installed from an NPM registry, or are otherwise known to have a `version` field.
-  *
-  * @public
-  */
- export interface INodePackageJson {
+ * | "Folders as Modules" section} from the NodeJS documentation gives an example of a package.json file
+ * that has only the `name` and `main` fields.  NodeJS does not consider the `version` field during resolution,
+ * so it can be omitted.  Some libraries do this.
+ *
+ * Use the `INodePackageJson` interface when loading such files.  Use `IPackageJson` for package.json files
+ * that are installed from an NPM registry, or are otherwise known to have a `version` field.
+ *
+ * @public
+ */
+export interface INodePackageJson {
   /**
    * The name of the package.
    */
