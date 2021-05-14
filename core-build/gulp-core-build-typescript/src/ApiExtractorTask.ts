@@ -39,20 +39,22 @@ export class ApiExtractorTask extends RSCTask<IApiExtractorTaskConfig> {
     };
 
     const rushStackCompiler: typeof TRushStackCompiler = this._rushStackCompiler as typeof TRushStackCompiler;
-    const extractorConfig: ExtractorConfig = rushStackCompiler.ApiExtractor.ExtractorConfig.loadFileAndPrepare(
-      this._getApiExtractorConfigFilePath(this.buildConfig.rootPath)
-    );
+    const extractorConfig: ExtractorConfig =
+      rushStackCompiler.ApiExtractor.ExtractorConfig.loadFileAndPrepare(
+        this._getApiExtractorConfigFilePath(this.buildConfig.rootPath)
+      );
 
-    const apiExtractorRunner: TRushStackCompiler.ApiExtractorRunner = new rushStackCompiler.ApiExtractorRunner(
-      {
-        fileError: this.fileError.bind(this),
-        fileWarning: this.fileWarning.bind(this)
-      },
-      extractorConfig,
-      extractorOptions,
-      this.buildFolder,
-      this._terminalProvider
-    );
+    const apiExtractorRunner: TRushStackCompiler.ApiExtractorRunner =
+      new rushStackCompiler.ApiExtractorRunner(
+        {
+          fileError: this.fileError.bind(this),
+          fileWarning: this.fileWarning.bind(this)
+        },
+        extractorConfig,
+        extractorOptions,
+        this.buildFolder,
+        this._terminalProvider
+      );
 
     return apiExtractorRunner.invoke();
   }

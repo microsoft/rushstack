@@ -69,9 +69,8 @@ export class InitDeployAction extends BaseRushAction {
     console.log(colors.green('Creating scenario file: ') + scenarioFilePath);
 
     const shortProjectName: string = this._project.value!;
-    const rushProject:
-      | RushConfigurationProject
-      | undefined = this.rushConfiguration.findProjectByShorthandName(shortProjectName);
+    const rushProject: RushConfigurationProject | undefined =
+      this.rushConfiguration.findProjectByShorthandName(shortProjectName);
     if (!rushProject) {
       throw new Error(`The specified project was not found in rush.json: "${shortProjectName}"`);
     }

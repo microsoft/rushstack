@@ -147,9 +147,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         const dependencySpecifier: DependencySpecifier = new DependencySpecifier(name, version);
 
         // Is there a locally built Rush project that could satisfy this dependency?
-        const referencedLocalProject:
-          | RushConfigurationProject
-          | undefined = this.rushConfiguration.getProjectByName(name);
+        const referencedLocalProject: RushConfigurationProject | undefined =
+          this.rushConfiguration.getProjectByName(name);
 
         // Validate that local projects are referenced with workspace notation. If not, and it is not a
         // cyclic dependency, then it needs to be updated to specify `workspace:*` explicitly. Currently only

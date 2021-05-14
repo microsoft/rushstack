@@ -48,9 +48,8 @@ export class Rundown {
     const importedPackageFolders: Set<string> = new Set();
 
     for (const importedPath of importedPaths) {
-      const importedPackageFolder: string | undefined = packageJsonLookup.tryGetPackageFolderFor(
-        importedPath
-      );
+      const importedPackageFolder: string | undefined =
+        packageJsonLookup.tryGetPackageFolderFor(importedPath);
       if (importedPackageFolder) {
         if (/[\\/]node_modules[\\/]/i.test(importedPackageFolder)) {
           importedPackageFolders.add(path.basename(importedPackageFolder));

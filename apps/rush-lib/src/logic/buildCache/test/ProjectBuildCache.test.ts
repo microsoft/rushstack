@@ -19,30 +19,30 @@ interface ITestOptions {
 describe('ProjectBuildCache', () => {
   async function prepareSubject(options: Partial<ITestOptions>): Promise<ProjectBuildCache | undefined> {
     const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
-    const packageChangeAnalyzer = ({
+    const packageChangeAnalyzer = {
       getProjectStateHash: () => {
         return 'state_hash';
       }
-    } as unknown) as PackageChangeAnalyzer;
+    } as unknown as PackageChangeAnalyzer;
 
     const subject: ProjectBuildCache | undefined = await ProjectBuildCache.tryGetProjectBuildCache({
-      buildCacheConfiguration: ({
+      buildCacheConfiguration: {
         buildCacheEnabled: options.hasOwnProperty('enabled') ? options.enabled : true,
         getCacheEntryId: (options: IGenerateCacheEntryIdOptions) =>
           `${options.projectName}/${options.projectStateHash}`,
-        localCacheProvider: (undefined as unknown) as FileSystemBuildCacheProvider,
+        localCacheProvider: undefined as unknown as FileSystemBuildCacheProvider,
         cloudCacheProvider: {
           isCacheWriteAllowed: options.hasOwnProperty('writeAllowed') ? options.writeAllowed : false
         }
-      } as unknown) as BuildCacheConfiguration,
-      projectConfiguration: ({
+      } as unknown as BuildCacheConfiguration,
+      projectConfiguration: {
         projectOutputFolderNames: ['dist'],
         project: {
           packageName: 'acme-wizard',
           projectRelativeFolder: 'apps/acme-wizard',
           dependencyProjects: []
         }
-      } as unknown) as RushProjectConfiguration,
+      } as unknown as RushProjectConfiguration,
       command: 'build',
       trackedProjectFiles: options.hasOwnProperty('trackedProjectFiles') ? options.trackedProjectFiles : [],
       packageChangeAnalyzer,

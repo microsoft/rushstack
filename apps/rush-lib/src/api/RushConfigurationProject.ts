@@ -408,9 +408,8 @@ export class RushConfigurationProject {
     const dependencyProjects: Set<RushConfigurationProject> = new Set();
     for (const dependency of Object.keys(dependencies)) {
       // Skip if we can't find the local project or it's a cyclic dependency
-      const localProject: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
-        dependency
-      );
+      const localProject: RushConfigurationProject | undefined =
+        this._rushConfiguration.getProjectByName(dependency);
       if (localProject && !this._cyclicDependencyProjects.has(dependency)) {
         // Set the value if it's a workspace project, or if we have a local project and the semver is satisfied
         const dependencySpecifier: DependencySpecifier = new DependencySpecifier(
@@ -439,9 +438,8 @@ export class RushConfigurationProject {
   private _getConsumingProjects(): Set<RushConfigurationProject> {
     const consumingProjects: Set<RushConfigurationProject> = new Set();
     for (const projectName of this._consumingProjectNames) {
-      const localProject: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
-        projectName
-      );
+      const localProject: RushConfigurationProject | undefined =
+        this._rushConfiguration.getProjectByName(projectName);
       if (localProject && localProject.dependencyProjects.has(this)) {
         consumingProjects.add(localProject);
       }

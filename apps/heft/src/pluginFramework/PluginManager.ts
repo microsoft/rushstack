@@ -64,13 +64,12 @@ export class PluginManager {
   }
 
   public async initializePluginsFromConfigFileAsync(): Promise<void> {
-    const heftConfigurationJson:
-      | IHeftConfigurationJson
-      | undefined = await CoreConfigFiles.heftConfigFileLoader.tryLoadConfigurationFileForProjectAsync(
-      this._heftConfiguration.globalTerminal,
-      this._heftConfiguration.buildFolder,
-      this._heftConfiguration.rigConfig
-    );
+    const heftConfigurationJson: IHeftConfigurationJson | undefined =
+      await CoreConfigFiles.heftConfigFileLoader.tryLoadConfigurationFileForProjectAsync(
+        this._heftConfiguration.globalTerminal,
+        this._heftConfiguration.buildFolder,
+        this._heftConfiguration.rigConfig
+      );
     const heftPluginSpecifiers: IHeftConfigurationJsonPluginSpecifier[] =
       heftConfigurationJson?.heftPlugins || [];
 

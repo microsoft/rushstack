@@ -90,8 +90,8 @@ export interface ICacheOptionsForCommand {
  * @public
  */
 export class RushProjectConfiguration {
-  private static _projectBuildCacheConfigurationFile: ConfigurationFile<IRushProjectJson> = new ConfigurationFile<IRushProjectJson>(
-    {
+  private static _projectBuildCacheConfigurationFile: ConfigurationFile<IRushProjectJson> =
+    new ConfigurationFile<IRushProjectJson>({
       projectRelativeFilePath: `config/${RushConstants.rushProjectConfigFilename}`,
       jsonSchemaPath: path.resolve(__dirname, '..', 'schemas', 'rush-project.schema.json'),
       propertyInheritance: {
@@ -124,8 +124,7 @@ export class RushProjectConfiguration {
           }
         }
       }
-    }
-  );
+    });
 
   public readonly project: RushConfigurationProject;
 
@@ -184,13 +183,12 @@ export class RushProjectConfiguration {
       projectFolderPath: project.projectFolder
     });
 
-    const rushProjectJson:
-      | IRushProjectJson
-      | undefined = await this._projectBuildCacheConfigurationFile.tryLoadConfigurationFileForProjectAsync(
-      terminal,
-      project.projectFolder,
-      rigConfig
-    );
+    const rushProjectJson: IRushProjectJson | undefined =
+      await this._projectBuildCacheConfigurationFile.tryLoadConfigurationFileForProjectAsync(
+        terminal,
+        project.projectFolder,
+        rigConfig
+      );
 
     if (rushProjectJson) {
       RushProjectConfiguration._validateConfiguration(

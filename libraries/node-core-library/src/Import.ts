@@ -308,9 +308,8 @@ export class Import {
   }
 
   private static _getPackageName(rootPath: string): IPackageDescriptor | undefined {
-    const packageJsonPath: string | undefined = PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(
-      rootPath
-    );
+    const packageJsonPath: string | undefined =
+      PackageJsonLookup.instance.tryGetPackageJsonFilePathFor(rootPath);
     if (packageJsonPath) {
       const packageJson: IPackageJson = PackageJsonLookup.instance.loadPackageJson(packageJsonPath);
       return {

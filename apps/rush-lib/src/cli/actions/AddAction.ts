@@ -97,9 +97,8 @@ export class AddAction extends BaseRushAction {
     if (this._allFlag.value) {
       projects = this.rushConfiguration.projects;
     } else {
-      const currentProject:
-        | RushConfigurationProject
-        | undefined = this.rushConfiguration.tryGetProjectForPath(process.cwd());
+      const currentProject: RushConfigurationProject | undefined =
+        this.rushConfiguration.tryGetProjectForPath(process.cwd());
 
       if (!currentProject) {
         throw new Error(
@@ -141,10 +140,8 @@ export class AddAction extends BaseRushAction {
       }
     }
 
-    const updater: PackageJsonUpdaterTypes.PackageJsonUpdater = new packageJsonUpdaterModule.PackageJsonUpdater(
-      this.rushConfiguration,
-      this.rushGlobalFolder
-    );
+    const updater: PackageJsonUpdaterTypes.PackageJsonUpdater =
+      new packageJsonUpdaterModule.PackageJsonUpdater(this.rushConfiguration, this.rushGlobalFolder);
 
     let rangeStyle: PackageJsonUpdaterTypes.SemVerStyle;
     if (version && version !== 'latest') {

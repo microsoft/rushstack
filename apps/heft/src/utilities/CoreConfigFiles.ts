@@ -142,17 +142,15 @@ export class CoreConfigFiles {
     terminal: Terminal,
     heftConfiguration: HeftConfiguration
   ): Promise<IHeftEventActions> {
-    let result: IHeftEventActions | undefined = CoreConfigFiles._heftConfigFileEventActionsCache.get(
-      heftConfiguration
-    );
+    let result: IHeftEventActions | undefined =
+      CoreConfigFiles._heftConfigFileEventActionsCache.get(heftConfiguration);
     if (!result) {
-      const heftConfigJson:
-        | IHeftConfigurationJson
-        | undefined = await CoreConfigFiles.heftConfigFileLoader.tryLoadConfigurationFileForProjectAsync(
-        terminal,
-        heftConfiguration.buildFolder,
-        heftConfiguration.rigConfig
-      );
+      const heftConfigJson: IHeftConfigurationJson | undefined =
+        await CoreConfigFiles.heftConfigFileLoader.tryLoadConfigurationFileForProjectAsync(
+          terminal,
+          heftConfiguration.buildFolder,
+          heftConfiguration.rigConfig
+        );
 
       result = {
         copyFiles: new Map<HeftEvent, IHeftConfigurationCopyFilesEventAction[]>(),
@@ -197,12 +195,11 @@ export class CoreConfigFiles {
   public static get apiExtractorTaskConfigurationLoader(): ConfigurationFile<IApiExtractorPluginConfiguration> {
     if (!CoreConfigFiles._apiExtractorTaskConfigurationLoader) {
       const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'api-extractor-task.schema.json');
-      CoreConfigFiles._apiExtractorTaskConfigurationLoader = new ConfigurationFile<IApiExtractorPluginConfiguration>(
-        {
+      CoreConfigFiles._apiExtractorTaskConfigurationLoader =
+        new ConfigurationFile<IApiExtractorPluginConfiguration>({
           projectRelativeFilePath: 'config/api-extractor-task.json',
           jsonSchemaPath: schemaPath
-        }
-      );
+        });
     }
 
     return CoreConfigFiles._apiExtractorTaskConfigurationLoader;
@@ -214,8 +211,8 @@ export class CoreConfigFiles {
   public static get typeScriptConfigurationFileLoader(): ConfigurationFile<ITypeScriptConfigurationJson> {
     if (!CoreConfigFiles._typeScriptConfigurationFileLoader) {
       const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'typescript.schema.json');
-      CoreConfigFiles._typeScriptConfigurationFileLoader = new ConfigurationFile<ITypeScriptConfigurationJson>(
-        {
+      CoreConfigFiles._typeScriptConfigurationFileLoader =
+        new ConfigurationFile<ITypeScriptConfigurationJson>({
           projectRelativeFilePath: 'config/typescript.json',
           jsonSchemaPath: schemaPath,
           propertyInheritance: {
@@ -235,8 +232,7 @@ export class CoreConfigFiles {
               }
             }
           }
-        } as IConfigurationFileOptions<ITypeScriptConfigurationJson>
-      );
+        } as IConfigurationFileOptions<ITypeScriptConfigurationJson>);
     }
 
     return CoreConfigFiles._typeScriptConfigurationFileLoader;

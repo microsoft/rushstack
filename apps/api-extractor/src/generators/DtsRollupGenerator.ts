@@ -297,8 +297,8 @@ export class DtsRollupGenerator {
             child.node,
             astDeclaration
           );
-          const releaseTag: ReleaseTag = collector.fetchApiItemMetadata(childAstDeclaration)
-            .effectiveReleaseTag;
+          const releaseTag: ReleaseTag =
+            collector.fetchApiItemMetadata(childAstDeclaration).effectiveReleaseTag;
 
           if (!this._shouldIncludeReleaseTag(releaseTag, dtsKind)) {
             let nodeToTrim: Span = child;

@@ -153,9 +153,8 @@ export class NpmLinkManager extends BaseLinkManager {
 
         // Should this be a "local link" to a top-level Rush project (i.e. versus a regular link
         // into the Common folder)?
-        const matchedRushPackage:
-          | RushConfigurationProject
-          | undefined = this._rushConfiguration.getProjectByName(dependency.name);
+        const matchedRushPackage: RushConfigurationProject | undefined =
+          this._rushConfiguration.getProjectByName(dependency.name);
 
         if (matchedRushPackage) {
           const matchedVersion: string = matchedRushPackage.packageJsonEditor.version;

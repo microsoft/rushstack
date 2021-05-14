@@ -171,7 +171,8 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       await this._heftConfiguration._checkForRigAsync();
 
       if (this._heftConfiguration.rigConfig.rigFound) {
-        const rigProfileFolder: string = await this._heftConfiguration.rigConfig.getResolvedProfileFolderAsync();
+        const rigProfileFolder: string =
+          await this._heftConfiguration.rigConfig.getResolvedProfileFolderAsync();
         const relativeRigFolderPath: string = Path.formatConcisely({
           pathToConvert: rigProfileFolder,
           baseFolder: this._heftConfiguration.buildFolder

@@ -109,9 +109,8 @@ export class TypingsGenerator {
       const watcher: chokidar.FSWatcher = chokidar.watch(
         this._options.fileExtensions.map((fileExtension) => path.join(globBase, `*${fileExtension}`))
       );
-      const boundGenerateTypingsFunction: (
-        filePath: string
-      ) => Promise<void> = this._parseFileAndGenerateTypingsAsync.bind(this);
+      const boundGenerateTypingsFunction: (filePath: string) => Promise<void> =
+        this._parseFileAndGenerateTypingsAsync.bind(this);
       watcher.on('add', boundGenerateTypingsFunction);
       watcher.on('change', boundGenerateTypingsFunction);
       watcher.on('unlink', async (filePath) => {

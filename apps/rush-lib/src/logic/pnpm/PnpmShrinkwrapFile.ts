@@ -445,9 +445,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       return undefined;
     }
 
-    const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined = this._getPackageDescription(
-      tempProjectDependencyKey
-    );
+    const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined =
+      this._getPackageDescription(tempProjectDependencyKey);
     if (
       !packageDescription ||
       !packageDescription.dependencies ||
@@ -596,9 +595,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private _getPackageDescription(
     tempProjectDependencyKey: string
   ): IPnpmShrinkwrapDependencyYaml | undefined {
-    const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined = this.packages.get(
-      tempProjectDependencyKey
-    );
+    const packageDescription: IPnpmShrinkwrapDependencyYaml | undefined =
+      this.packages.get(tempProjectDependencyKey);
 
     return packageDescription && packageDescription.dependencies ? packageDescription : undefined;
   }

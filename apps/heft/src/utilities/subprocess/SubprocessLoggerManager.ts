@@ -174,9 +174,8 @@ export class SubprocessLoggerManager extends SubprocessCommunicationManagerBase 
         const error: Error = SubprocessRunnerBase.deserializeFromIpcMessage(typedMessage.error) as Error;
         response.reject(error);
       } else if (typedMessage.terminalProviderId !== undefined) {
-        const terminalProvider: ITerminalProvider = this._terminalProviderManager.registerSubprocessTerminalProvider(
-          typedMessage.terminalProviderId
-        );
+        const terminalProvider: ITerminalProvider =
+          this._terminalProviderManager.registerSubprocessTerminalProvider(typedMessage.terminalProviderId);
 
         const sendErrorOrWarning: (errorOrWarning: Error, isError: boolean) => void = (
           errorOrWarning: Error,

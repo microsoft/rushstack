@@ -312,9 +312,8 @@ export class SelectionParameterSet {
           throw new AlreadyReportedError();
         }
       } else {
-        const project:
-          | RushConfigurationProject
-          | undefined = this._rushConfiguration.findProjectByShorthandName(projectParameter);
+        const project: RushConfigurationProject | undefined =
+          this._rushConfiguration.findProjectByShorthandName(projectParameter);
         if (!project) {
           console.log(colors.red(`The project '${projectParameter}' does not exist in rush.json.`));
           throw new AlreadyReportedError();

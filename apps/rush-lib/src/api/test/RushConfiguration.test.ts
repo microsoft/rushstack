@@ -247,9 +247,8 @@ describe('RushConfiguration', () => {
 
       it(`loads the correct path when pnpmStore = "local"`, (done: jest.DoneCallback) => {
         const EXPECT_STORE_PATH: string = path.resolve(__dirname, 'repo', 'common', 'temp', 'pnpm-store');
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-          RUSH_JSON_FILENAME
-        );
+        const rushConfiguration: RushConfiguration =
+          RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
@@ -263,9 +262,8 @@ describe('RushConfiguration', () => {
         const EXPECT_STORE_PATH: string = path.resolve('/var/temp');
         process.env[PNPM_STORE_PATH_ENV] = EXPECT_STORE_PATH;
 
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-          RUSH_JSON_FILENAME
-        );
+        const rushConfiguration: RushConfiguration =
+          RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
@@ -281,9 +279,8 @@ describe('RushConfiguration', () => {
 
       it(`loads the correct path when pnpmStore = "global"`, (done: jest.DoneCallback) => {
         const EXPECT_STORE_PATH: string = '';
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-          RUSH_JSON_FILENAME
-        );
+        const rushConfiguration: RushConfiguration =
+          RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('global');
@@ -296,9 +293,8 @@ describe('RushConfiguration', () => {
         const EXPECT_STORE_PATH: string = path.resolve('/var/temp');
         process.env[PNPM_STORE_PATH_ENV] = EXPECT_STORE_PATH;
 
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-          RUSH_JSON_FILENAME
-        );
+        const rushConfiguration: RushConfiguration =
+          RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('global');
@@ -313,9 +309,8 @@ describe('RushConfiguration', () => {
       expect(() => {
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-          RUSH_JSON_FILENAME
-        );
+        const rushConfiguration: RushConfiguration =
+          RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
       }).toThrow();
 
       done();

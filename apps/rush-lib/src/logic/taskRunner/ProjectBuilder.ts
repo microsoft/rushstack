@@ -373,20 +373,18 @@ export class ProjectBuilder extends BaseBuilder {
       this._projectBuildCache = undefined;
 
       if (this._buildCacheConfiguration && this._buildCacheConfiguration.buildCacheEnabled) {
-        const projectConfiguration:
-          | RushProjectConfiguration
-          | undefined = await RushProjectConfiguration.tryLoadForProjectAsync(
-          this._rushProject,
-          commandLineConfiguration,
-          terminal
-        );
+        const projectConfiguration: RushProjectConfiguration | undefined =
+          await RushProjectConfiguration.tryLoadForProjectAsync(
+            this._rushProject,
+            commandLineConfiguration,
+            terminal
+          );
         if (projectConfiguration) {
           if (projectConfiguration.cacheOptions?.disableBuildCache) {
             terminal.writeVerboseLine('Caching has been disabled for this project.');
           } else {
-            const commandOptions:
-              | ICacheOptionsForCommand
-              | undefined = projectConfiguration.cacheOptions.optionsForCommandsByName.get(this._commandName);
+            const commandOptions: ICacheOptionsForCommand | undefined =
+              projectConfiguration.cacheOptions.optionsForCommandsByName.get(this._commandName);
             if (commandOptions?.disableBuildCache) {
               terminal.writeVerboseLine(
                 `Caching has been disabled for this project's "${this._commandName}" command.`

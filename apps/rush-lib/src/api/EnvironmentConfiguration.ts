@@ -260,9 +260,8 @@ export class EnvironmentConfiguration {
   public static _getRushGlobalFolderOverride(processEnv: IEnvironment): string | undefined {
     const value: string | undefined = processEnv[EnvironmentVariableNames.RUSH_GLOBAL_FOLDER];
     if (value) {
-      const normalizedValue: string | undefined = EnvironmentConfiguration._normalizeDeepestParentFolderPath(
-        value
-      );
+      const normalizedValue: string | undefined =
+        EnvironmentConfiguration._normalizeDeepestParentFolderPath(value);
       return normalizedValue;
     }
   }
@@ -332,18 +331,20 @@ export class EnvironmentConfiguration {
           }
 
           case EnvironmentVariableNames.RUSH_BUILD_CACHE_ENABLED: {
-            EnvironmentConfiguration._buildCacheEnabled = EnvironmentConfiguration.parseBooleanEnvironmentVariable(
-              EnvironmentVariableNames.RUSH_BUILD_CACHE_ENABLED,
-              value
-            );
+            EnvironmentConfiguration._buildCacheEnabled =
+              EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+                EnvironmentVariableNames.RUSH_BUILD_CACHE_ENABLED,
+                value
+              );
             break;
           }
 
           case EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED: {
-            EnvironmentConfiguration._buildCacheWriteAllowed = EnvironmentConfiguration.parseBooleanEnvironmentVariable(
-              EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED,
-              value
-            );
+            EnvironmentConfiguration._buildCacheWriteAllowed =
+              EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+                EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED,
+                value
+              );
             break;
           }
 
@@ -379,9 +380,8 @@ export class EnvironmentConfiguration {
     }
 
     // See doc comment for EnvironmentConfiguration._getRushGlobalFolderOverride().
-    EnvironmentConfiguration._rushGlobalFolderOverride = EnvironmentConfiguration._getRushGlobalFolderOverride(
-      process.env
-    );
+    EnvironmentConfiguration._rushGlobalFolderOverride =
+      EnvironmentConfiguration._getRushGlobalFolderOverride(process.env);
 
     EnvironmentConfiguration._hasBeenInitialized = true;
   }

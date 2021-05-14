@@ -95,9 +95,7 @@ export interface IExtendedTypeScript {
     useCaseSensitiveFileNames: boolean,
     currentDirectory: string,
     depth: number | undefined,
-    getFileSystemEntries: (
-      path: string
-    ) => {
+    getFileSystemEntries: (path: string) => {
       readonly files: ReadonlyArray<string>;
       readonly directories: ReadonlyArray<string>;
     },

@@ -163,9 +163,8 @@ export class CommonVersionsConfiguration {
     Sort.sortMapKeys(orderedPreferredVersions);
 
     // JSON.stringify does not support maps, so we need to convert to an object first
-    const preferredVersionsObj: { [dependency: string]: string } = MapExtensions.toObject(
-      orderedPreferredVersions
-    );
+    const preferredVersionsObj: { [dependency: string]: string } =
+      MapExtensions.toObject(orderedPreferredVersions);
     return crypto.createHash('sha1').update(JSON.stringify(preferredVersionsObj)).digest('hex');
   }
 

@@ -148,9 +148,8 @@ export class VersionMismatchFinder {
     mismatch: string,
     version: string
   ): VersionMismatchFinderEntity[] | undefined {
-    const mismatchedPackage: Map<string, VersionMismatchFinderEntity[]> | undefined = this._mismatches.get(
-      mismatch
-    );
+    const mismatchedPackage: Map<string, VersionMismatchFinderEntity[]> | undefined =
+      this._mismatches.get(mismatch);
     if (!mismatchedPackage) {
       return undefined;
     }
@@ -229,9 +228,8 @@ export class VersionMismatchFinder {
               this._mismatches.set(name, new Map<string, VersionMismatchFinderEntity[]>());
             }
 
-            const dependencyVersions: Map<string, VersionMismatchFinderEntity[]> = this._mismatches.get(
-              name
-            )!;
+            const dependencyVersions: Map<string, VersionMismatchFinderEntity[]> =
+              this._mismatches.get(name)!;
 
             if (!dependencyVersions.has(version)) {
               dependencyVersions.set(version, []);
@@ -251,9 +249,8 @@ export class VersionMismatchFinder {
   }
 
   private _isVersionAllowedAlternative(dependency: string, version: string): boolean {
-    const allowedAlternatives: ReadonlyArray<string> | undefined = this._allowedAlternativeVersion.get(
-      dependency
-    );
+    const allowedAlternatives: ReadonlyArray<string> | undefined =
+      this._allowedAlternativeVersion.get(dependency);
     return Boolean(allowedAlternatives && allowedAlternatives.indexOf(version) > -1);
   }
 

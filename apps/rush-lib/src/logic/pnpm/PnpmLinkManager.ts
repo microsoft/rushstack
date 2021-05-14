@@ -129,9 +129,8 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     // first, start with the rush dependencies, we just need to link to the project folder
     for (const dependencyName of Object.keys(commonPackage.packageJson!.rushDependencies || {})) {
-      const matchedRushPackage:
-        | RushConfigurationProject
-        | undefined = this._rushConfiguration.getProjectByName(dependencyName);
+      const matchedRushPackage: RushConfigurationProject | undefined =
+        this._rushConfiguration.getProjectByName(dependencyName);
 
       if (matchedRushPackage) {
         // We found a suitable match, so place a new local package that
@@ -224,11 +223,8 @@ export class PnpmLinkManager extends BaseLinkManager {
       folderNameSuffix
     );
 
-    const parentShrinkwrapEntry:
-      | IPnpmShrinkwrapDependencyYaml
-      | undefined = pnpmShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(
-      tempProjectDependencyKey
-    );
+    const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined =
+      pnpmShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey);
     if (!parentShrinkwrapEntry) {
       throw new InternalError(
         `Cannot find shrinkwrap entry using dependency key for temp project: ${project.tempProjectName}`

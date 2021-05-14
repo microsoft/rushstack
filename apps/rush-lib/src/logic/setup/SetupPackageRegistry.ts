@@ -93,8 +93,8 @@ export class SetupPackageRegistry {
    * @returns - `true` if valid, `false` if not valid
    */
   public async checkOnly(): Promise<boolean> {
-    const packageRegistry: IArtifactoryPackageRegistryJson = this._artifactoryConfiguration.configuration
-      .packageRegistry;
+    const packageRegistry: IArtifactoryPackageRegistryJson =
+      this._artifactoryConfiguration.configuration.packageRegistry;
     if (!packageRegistry.enabled) {
       this._terminal.writeVerbose('Skipping package registry setup because packageRegistry.enabled=false');
       return true;
@@ -203,8 +203,8 @@ export class SetupPackageRegistry {
     this._terminal.writeWarningLine('NPM credentials are missing or expired');
     this._terminal.writeLine();
 
-    const packageRegistry: IArtifactoryPackageRegistryJson = this._artifactoryConfiguration.configuration
-      .packageRegistry;
+    const packageRegistry: IArtifactoryPackageRegistryJson =
+      this._artifactoryConfiguration.configuration.packageRegistry;
 
     const fixThisProblem: boolean = await TerminalInput.promptYesNo({
       message: 'Fix this problem now?',
@@ -230,8 +230,8 @@ export class SetupPackageRegistry {
     if (this._messages.visitWebsite) {
       this._writeInstructionBlock(this._messages.visitWebsite);
 
-      const artifactoryWebsiteUrl: string = this._artifactoryConfiguration.configuration.packageRegistry
-        .artifactoryWebsiteUrl;
+      const artifactoryWebsiteUrl: string =
+        this._artifactoryConfiguration.configuration.packageRegistry.artifactoryWebsiteUrl;
 
       if (artifactoryWebsiteUrl) {
         this._terminal.writeLine('  ', Colors.cyan(artifactoryWebsiteUrl));

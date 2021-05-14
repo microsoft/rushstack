@@ -156,7 +156,8 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
     }
 
     compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
-      const mainTemplate: IExtendedMainTemplate = (compilation.mainTemplate as unknown) as IExtendedMainTemplate;
+      const mainTemplate: IExtendedMainTemplate =
+        compilation.mainTemplate as unknown as IExtendedMainTemplate;
       mainTemplate.hooks.startup.tap(
         PLUGIN_NAME,
         (source: string, chunk: Webpack.compilation.Chunk, hash: string) => {

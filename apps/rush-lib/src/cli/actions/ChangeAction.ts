@@ -498,9 +498,8 @@ export class ChangeAction extends BaseRushAction {
           };
 
     if (packageName) {
-      const project: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(
-        packageName
-      );
+      const project: RushConfigurationProject | undefined =
+        this.rushConfiguration.getProjectByName(packageName);
       const versionPolicy: VersionPolicy | undefined = project!.versionPolicy;
 
       if (versionPolicy) {
