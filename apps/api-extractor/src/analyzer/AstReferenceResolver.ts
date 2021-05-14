@@ -6,7 +6,7 @@ import * as tsdoc from '@microsoft/tsdoc';
 
 import { AstSymbolTable, AstEntity } from './AstSymbolTable';
 import { AstDeclaration } from './AstDeclaration';
-import { WorkingPackage } from '../collector/WorkingPackage';
+import { WorkingPackage, IWorkingPackageEntryPoint } from '../collector/WorkingPackage';
 import { AstModule } from './AstModule';
 import { AstImport } from './AstImport';
 import { Collector } from '../collector/Collector';
@@ -64,8 +64,14 @@ export class AstReferenceResolver {
       return new ResolverFailure('Import paths are not supported');
     }
 
+    // I'm not sure what I'm doing :(
+    // Find the default entry point and use it. We probably should handle all entry points, but I couldn't find any real usage of this class to figure out what it actually does
+    const defaultEntryPoint: IWorkingPackageEntryPoint = this._workingPackage.entryPoints.find((ep) =>
+      this._workingPackage.isDefaultEntryPoint(ep)
+    )!;
+
     const astModule: AstModule = this._astSymbolTable.fetchAstModuleFromWorkingPackage(
-      this._workingPackage.entryPointSourceFile
+      defaultEntryPoint.sourceFile
     );
 
     if (declarationReference.memberReferences.length === 0) {

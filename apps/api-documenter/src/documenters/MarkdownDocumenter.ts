@@ -38,6 +38,7 @@ import {
   ApiNamespace,
   ExcerptTokenKind,
   IResolveDeclarationReferenceResult,
+  ApiEntryPoint,
   ApiTypeAlias,
   ExcerptToken,
   ApiOptionalMixin
@@ -149,9 +150,17 @@ export class MarkdownDocumenter {
         output.appendNode(new DocHeading({ configuration, title: `${scopedName} namespace` }));
         break;
       case ApiItemKind.Package:
-        console.log(`Writing ${apiItem.displayName} package`);
         const unscopedPackageName: string = PackageName.getUnscopedName(apiItem.displayName);
         output.appendNode(new DocHeading({ configuration, title: `${unscopedPackageName} package` }));
+        break;
+      case ApiItemKind.EntryPoint:
+        const packageName: string = apiItem.parent!.displayName;
+        output.appendNode(
+          new DocHeading({
+            configuration,
+            title: `${packageName}${apiItem.displayName && '/' + apiItem.displayName}`
+          })
+        );
         break;
       case ApiItemKind.Property:
       case ApiItemKind.PropertySignature:
@@ -267,13 +276,16 @@ export class MarkdownDocumenter {
         this._writeThrowsSection(output, apiItem);
         break;
       case ApiItemKind.Namespace:
-        this._writePackageOrNamespaceTables(output, apiItem as ApiNamespace);
+        this._writeEntryPointOrNamespaceTables(output, apiItem as ApiNamespace);
         break;
       case ApiItemKind.Model:
         this._writeModelTable(output, apiItem as ApiModel);
         break;
       case ApiItemKind.Package:
-        this._writePackageOrNamespaceTables(output, apiItem as ApiPackage);
+        this._writePackage(output, apiItem as ApiPackage);
+        break;
+      case ApiItemKind.EntryPoint:
+        this._writeEntryPointOrNamespaceTables(output, apiItem as ApiEntryPoint);
         break;
       case ApiItemKind.Property:
       case ApiItemKind.PropertySignature:
@@ -489,9 +501,47 @@ export class MarkdownDocumenter {
   }
 
   /**
-   * GENERATE PAGE: PACKAGE or NAMESPACE
+   * Generate a table of entry points if there are more than one entry points.
+   * Otherwise, generate the entry point directly in the package page.
    */
-  private _writePackageOrNamespaceTables(output: DocSection, apiContainer: ApiPackage | ApiNamespace): void {
+  private _writePackage(output: DocSection, apiContainer: ApiPackage): void {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+
+    // If a package has a single entry point, generate entry point page in the package page directly
+    if (apiContainer.entryPoints.length === 1) {
+      this._writeEntryPointOrNamespaceTables(output, apiContainer.members[0] as ApiEntryPoint);
+      return;
+    }
+
+    const entryPointsTable: DocTable = new DocTable({
+      configuration,
+      headerTitles: ['Entry Point', 'Description']
+    });
+
+    for (const entryPoint of apiContainer.entryPoints) {
+      const row: DocTableRow = new DocTableRow({ configuration }, [
+        this._createEntryPointTitleCell(entryPoint),
+        this._createDescriptionCell(entryPoint)
+      ]);
+
+      entryPointsTable.addRow(row);
+    }
+
+    output.appendNode(entryPointsTable);
+
+    // write entry point pages
+    for (const entryPoint of apiContainer.entryPoints) {
+      this._writeApiItemPage(entryPoint);
+    }
+  }
+
+  /**
+   * GENERATE PAGE: ENTRYPOINT or NAMESPACE
+   */
+  private _writeEntryPointOrNamespaceTables(
+    output: DocSection,
+    apiContainer: ApiEntryPoint | ApiNamespace
+  ): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     const classesTable: DocTable = new DocTable({
@@ -530,8 +580,8 @@ export class MarkdownDocumenter {
     });
 
     const apiMembers: ReadonlyArray<ApiItem> =
-      apiContainer.kind === ApiItemKind.Package
-        ? (apiContainer as ApiPackage).entryPoints[0].members
+      apiContainer.kind === ApiItemKind.EntryPoint
+        ? (apiContainer as ApiEntryPoint).members
         : (apiContainer as ApiNamespace).members;
 
     for (const apiMember of apiMembers) {
@@ -936,6 +986,21 @@ export class MarkdownDocumenter {
     docNodeContainer.appendNode(new DocPlainText({ configuration, text: unwrappedTokenText }));
   }
 
+  private _createEntryPointTitleCell(apiItem: ApiEntryPoint): DocTableCell {
+    const configuration: TSDocConfiguration = this._tsdocConfiguration;
+
+    return new DocTableCell({ configuration }, [
+      new DocParagraph({ configuration }, [
+        new DocLinkTag({
+          configuration,
+          tagName: '@link',
+          linkText: `/${apiItem.displayName}`,
+          urlDestination: this._getLinkFilenameForApiItem(apiItem)
+        })
+      ])
+    ]);
+  }
+
   private _createTitleCell(apiItem: ApiItem): DocTableCell {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
@@ -1033,28 +1098,40 @@ export class MarkdownDocumenter {
       })
     );
 
+    let multipleEntryPoints: boolean = false;
     for (const hierarchyItem of apiItem.getHierarchy()) {
-      switch (hierarchyItem.kind) {
-        case ApiItemKind.Model:
-        case ApiItemKind.EntryPoint:
-          // We don't show the model as part of the breadcrumb because it is the root-level container.
-          // We don't show the entry point because today API Extractor doesn't support multiple entry points;
-          // this may change in the future.
-          break;
-        default:
-          output.appendNodesInParagraph([
-            new DocPlainText({
-              configuration: this._tsdocConfiguration,
-              text: ' > '
-            }),
-            new DocLinkTag({
-              configuration: this._tsdocConfiguration,
-              tagName: '@link',
-              linkText: hierarchyItem.displayName,
-              urlDestination: this._getLinkFilenameForApiItem(hierarchyItem)
-            })
-          ]);
+      let customDisplayName: string = '';
+
+      if (hierarchyItem.kind === ApiItemKind.Model) {
+        // We don't show the model as part of the breadcrumb because it is the root-level container.
+        continue;
+      } else if (hierarchyItem.kind === ApiItemKind.EntryPoint) {
+        // In case the package has a single entry point, we don't generate entry point pages.
+        if (!multipleEntryPoints) {
+          continue;
+        } else {
+          // In case of the root entry point, display is empty string, so we just show '/'
+          // TODO: change api-extractor to generate '/' as the name for the root entry point
+          customDisplayName = hierarchyItem.displayName || '/';
+        }
+      } else if (hierarchyItem.kind === ApiItemKind.Package) {
+        if ((hierarchyItem as ApiPackage).entryPoints.length > 1) {
+          multipleEntryPoints = true;
+        }
       }
+
+      output.appendNodesInParagraph([
+        new DocPlainText({
+          configuration: this._tsdocConfiguration,
+          text: ' > '
+        }),
+        new DocLinkTag({
+          configuration: this._tsdocConfiguration,
+          tagName: '@link',
+          linkText: customDisplayName || hierarchyItem.displayName,
+          urlDestination: this._getLinkFilenameForApiItem(hierarchyItem)
+        })
+      ]);
     }
   }
 
@@ -1098,6 +1175,7 @@ export class MarkdownDocumenter {
     }
 
     let baseName: string = '';
+    let multipleEntryPoints: boolean = false;
     for (const hierarchyItem of apiItem.getHierarchy()) {
       // For overloaded methods, add a suffix such as "MyClass.myMethod_2".
       let qualifiedName: string = Utilities.getSafeFilenameForName(hierarchyItem.displayName);
@@ -1111,10 +1189,20 @@ export class MarkdownDocumenter {
 
       switch (hierarchyItem.kind) {
         case ApiItemKind.Model:
+          break;
         case ApiItemKind.EntryPoint:
+          const packageName: string = hierarchyItem.parent!.displayName;
+          let entryPointName: string = PackageName.getUnscopedName(packageName);
+          if (multipleEntryPoints) {
+            entryPointName = `${PackageName.getUnscopedName(packageName)}/${hierarchyItem.displayName}`;
+          }
+          baseName = Utilities.getSafeFilenameForName(entryPointName);
           break;
         case ApiItemKind.Package:
           baseName = Utilities.getSafeFilenameForName(PackageName.getUnscopedName(hierarchyItem.displayName));
+          if ((hierarchyItem as ApiPackage).entryPoints.length > 1) {
+            multipleEntryPoints = true;
+          }
           break;
         default:
           baseName += '.' + qualifiedName;

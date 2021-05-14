@@ -17,16 +17,23 @@ export class ValidationEnhancer {
   public static analyze(collector: Collector): void {
     const alreadyWarnedSymbols: Set<AstSymbol> = new Set<AstSymbol>();
 
-    for (const entity of collector.entities) {
-      if (entity.astEntity instanceof AstSymbol) {
-        if (entity.exported) {
-          entity.astEntity.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
-            ValidationEnhancer._checkReferences(collector, astDeclaration, alreadyWarnedSymbols);
-          });
+    for (const entities of collector.entities.values()) {
+      for (const entity of entities) {
+        if (entity.astEntity instanceof AstSymbol) {
+          if (entity.exported) {
+            entity.astEntity.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
+              ValidationEnhancer._checkReferences(collector, astDeclaration, alreadyWarnedSymbols);
+            });
 
-          const symbolMetadata: SymbolMetadata = collector.fetchSymbolMetadata(entity.astEntity);
-          ValidationEnhancer._checkForInternalUnderscore(collector, entity, entity.astEntity, symbolMetadata);
-          ValidationEnhancer._checkForInconsistentReleaseTags(collector, entity.astEntity, symbolMetadata);
+            const symbolMetadata: SymbolMetadata = collector.fetchSymbolMetadata(entity.astEntity);
+            ValidationEnhancer._checkForInternalUnderscore(
+              collector,
+              entity,
+              entity.astEntity,
+              symbolMetadata
+            );
+            ValidationEnhancer._checkForInconsistentReleaseTags(collector, entity.astEntity, symbolMetadata);
+          }
         }
       }
     }
@@ -189,8 +196,12 @@ export class ValidationEnhancer {
               );
             }
           } else {
+            // TODO: how to handle multiple entry points? e.g. how do we know from which entry point the symbol should be exported?
+            // We use the default entry point for now
             const entryPointFilename: string = path.basename(
-              collector.workingPackage.entryPointSourceFile.fileName
+              collector.workingPackage.entryPoints.find((ep) =>
+                collector.workingPackage.isDefaultEntryPoint(ep)
+              )!.sourceFile.fileName
             );
 
             if (!alreadyWarnedSymbols.has(referencedEntity)) {

@@ -4,6 +4,21 @@
 import { ExtractorLogLevel } from './ExtractorLogLevel';
 
 /**
+ * Represents an entry point in the package
+ * Example:
+ * ```
+ * {
+ *   modulePath: 'Shape/Square',
+ *   filePath: './dist/Shape/Square/index.d.ts'
+ * }
+ * ```
+ */
+export interface IConfigEntryPoint {
+  modulePath: string;
+  filePath: string;
+}
+
+/**
  * Determines how the TypeScript compiler engine will be invoked by API Extractor.
  *
  * @remarks
@@ -325,6 +340,11 @@ export interface IConfigFile {
    * The path is resolved relative to the "projectFolder" location.
    */
   mainEntryPointFilePath: string;
+
+  /**
+   * support multiple entry points.
+   */
+  additionalEntryPoints: IConfigEntryPoint[];
 
   /**
    * A list of NPM package names whose exports should be treated as part of this package.
