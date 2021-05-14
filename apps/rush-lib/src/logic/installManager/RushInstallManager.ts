@@ -256,15 +256,11 @@ export class RushInstallManager extends BaseInstallManager {
         }
       }
 
-      if (packageJson.resolutionsList.length > 0) {
-        // We do not expect resolutions key to be provided for package managers other than yarn
-        if (this.rushConfiguration.packageManager !== 'yarn') {
-          throw new Error(
-            "Unexpected 'resolutions' section found in package.json. Only Yarn supports this feature."
-          );
+      if (this.rushConfiguration.packageManager === 'yarn') {
+        // This feature is only implemented by the Yarn package manager
+        if (packageJson.resolutionsList.length > 0) {
+          tempPackageJson.resolutions = packageJson.saveToObject().resolutions;
         }
-
-        tempPackageJson.resolutions = packageJson.saveToObject().resolutions;
       }
 
       // Example: "C:\MyRepo\common\temp\projects\my-project-2"
