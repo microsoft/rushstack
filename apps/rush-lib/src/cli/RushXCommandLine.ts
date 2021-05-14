@@ -107,8 +107,8 @@ export class RushXCommandLine {
       let commandWithArgs: string = scriptBody;
       let commandWithArgsForDisplay: string = scriptBody;
       if (remainingArgs.length > 0) {
-        // This escaping is based on what PNPM does here:
-        // https://github.com/pnpm/pnpm/blob/a468d2b3f8e4a456b3e57ad8a013af65b29c0484/packages/lifecycle/src/runLifecycleHook.ts#L38
+        // This approach is based on what NPM 7 now does:
+        // https://github.com/npm/run-script/blob/47a4d539fb07220e7215cc0e482683b76407ef9b/lib/run-script-pkg.js#L34
         const escapedRemainingArgs: string[] = remainingArgs.map((x) => Utilities.escapeShellParameter(x));
 
         commandWithArgs += ' ' + escapedRemainingArgs.join(' ');
