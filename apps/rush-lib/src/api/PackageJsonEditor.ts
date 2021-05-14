@@ -86,6 +86,7 @@ export class PackageJsonEditor {
     const peerDependencies: { [key: string]: string } = data.peerDependencies || {};
 
     const devDependencies: { [key: string]: string } = data.devDependencies || {};
+    const resolutions: { [key: string]: string } = data.resolutions || {};
 
     const _onChange: () => void = this._onChange.bind(this);
 
@@ -146,12 +147,12 @@ export class PackageJsonEditor {
         );
       });
 
-      Object.keys(data.resolutions || {}).forEach((packageName: string) => {
+      Object.keys(resolutions || {}).forEach((packageName: string) => {
         this._resolutions.set(
           packageName,
           new PackageJsonDependency(
             packageName,
-            devDependencies[packageName],
+            resolutions[packageName],
             DependencyType.YarnResolutions,
             _onChange
           )
