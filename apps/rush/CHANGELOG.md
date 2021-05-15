@@ -1,6 +1,21 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 04 May 2021 20:26:15 GMT and should not be manually modified.
+This log was last generated on Sat, 15 May 2021 00:02:26 GMT and should not be manually modified.
+
+## 5.47.0
+Sat, 15 May 2021 00:02:26 GMT
+
+### Updates
+
+- For the experimental build cache feature, eliminate the RUSH_BUILD_CACHE_WRITE_CREDENTIAL environment variable; it is replaced by several new variables RUSH_BUILD_CACHE_CREDENTIAL, RUSH_BUILD_CACHE_WRITE_ALLOWED, and RUSH_BUILD_CACHE_ENABLED
+- Take pnpm-workspace.yaml file into consideration during install skip checks for PNPM
+- Fix a build cache warning that was sometimes displayed on Windows OS: "'tar' exited with code 1 while attempting to create the cache entry" (GitHub #2622)
+- Fix an issue where "rushx" CLI arguments were not escaped properly (GitHub #2695)
+- Allow rush-project.json to specify incrementalBuildIgnoredGlobs (GitHub issue #2618)
+- Remove support for PNPM < 5.0.0 and remove the "resolutionStrategy" option
+- Update "rush init" assets to use newer versions of Rush and PNPM. If you are looking to use PNPM < 6, you must rename the initialized ".pnpmfile.cjs" file to "pnpmfile.js". For more information, see: https://pnpm.io/5.x/pnpmfile
+- Transform package.json using pnpmfile before checking if a Rush project is up-to-date
+- Add support for the Yarn "resolutions" package.json feature.
 
 ## 5.46.1
 Tue, 04 May 2021 20:26:15 GMT
