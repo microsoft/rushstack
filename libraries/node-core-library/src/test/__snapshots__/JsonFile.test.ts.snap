@@ -15,3 +15,13 @@ exports[`JsonFile tests adds an empty header comment 1`] = `
 }
 "
 `;
+
+exports[`JsonFile tests allows undefined values when asked 1`] = `
+"{}
+"
+`;
+
+exports[`JsonFile tests allows undefined values when asked 2`] = `
+"{}
+"
+`;

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Add `ignoreUndefinedValues` option to JsonFile to discard keys with undefined values during serialization; this is the standard behavior of `JSON.stringify()` and other JSON serializers.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
