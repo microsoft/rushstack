@@ -32,7 +32,7 @@ describe('JsonFile tests', () => {
       JsonFile.stringify(
         { abc: undefined },
         {
-          dropUndefinedValues: true
+          ignoreUndefinedValues: true
         }
       )
     ).toMatchSnapshot();
@@ -41,7 +41,7 @@ describe('JsonFile tests', () => {
       JsonFile.stringify(
         { abc: undefined },
         {
-          dropUndefinedValues: true,
+          ignoreUndefinedValues: true,
           prettyFormatting: true
         }
       )

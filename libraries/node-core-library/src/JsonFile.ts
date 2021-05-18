@@ -53,7 +53,7 @@ export interface IJsonFileStringifyOptions {
    * If true, conforms to the standard behavior of JSON.stringify() when a property has the value `undefined`.
    * Specifically, the key will be dropped from the emitted object.
    */
-  dropUndefinedValues?: boolean;
+  ignoreUndefinedValues?: boolean;
 
   /**
    * If true, then the "jju" library will be used to improve the text formatting.
@@ -236,7 +236,7 @@ export class JsonFile {
       options = {};
     }
 
-    if (!options.dropUndefinedValues) {
+    if (!options.ignoreUndefinedValues) {
       // Standard handling of `undefined` in JSON stringification is to discard the key.
       JsonFile.validateNoUndefinedMembers(newJsonObject);
     }
