@@ -424,8 +424,8 @@ export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
 
 // @public
 export interface IJsonFileStringifyOptions {
-    dropUndefinedValues?: boolean;
     headerComment?: string;
+    ignoreUndefinedValues?: boolean;
     newlineConversion?: NewlineKind;
     prettyFormatting?: boolean;
 }
