@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Mon, 03 May 2021 15:10:28 GMT and should not be manually modified.
+This log was last generated on Wed, 19 May 2021 00:11:39 GMT and should not be manually modified.
+
+## 3.38.0
+Wed, 19 May 2021 00:11:39 GMT
+
+### Minor changes
+
+- Add `ignoreUndefinedValues` option to JsonFile to discard keys with undefined values during serialization; this is the standard behavior of `JSON.stringify()` and other JSON serializers.
 
 ## 3.37.0
 Mon, 03 May 2021 15:10:28 GMT
