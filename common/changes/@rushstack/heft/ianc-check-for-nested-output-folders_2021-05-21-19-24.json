@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "Emit an error if two different TypeScript module kinds are to be emitted to nested folders.",
+      "comment": "Report an error to prevent two different TypeScript module kinds from being emitted into nested folders",
       "type": "patch"
     }
   ],
