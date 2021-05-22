@@ -888,7 +888,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     }
 
     outFolderPath = Path.convertToSlashes(outFolderPath);
-    outFolderPath = outFolderPath.replace(/(\/*)$/, '/'); // Ensure the outFolderPath ends with a slash
+    outFolderPath = outFolderPath.replace(/\/*$/, '/'); // Ensure the outFolderPath ends with a slash
 
     for (const existingModuleKindToEmit of this._moduleKindsToEmit) {
       let errorText: string | undefined;
