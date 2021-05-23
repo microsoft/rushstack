@@ -198,7 +198,7 @@ exports[`ConfigurationFile error cases returns undefined when the file doesn't e
 Object {
   "error": "",
   "log": "",
-  "verbose": "",
+  "verbose": "Configuration file \\"<project root>/src/test/errorCases/invalidType/notExist.json\\" not found.[n]",
   "warning": "",
 }
 `;
@@ -218,7 +218,7 @@ exports[`ConfigurationFile loading a rig correctly loads a config file inside a 
 Object {
   "error": "",
   "log": "",
-  "verbose": "Configuration file \\"<project root>/src/test/project-referencing-rig/config/simplestConfigFile.json\\" not found.[n]",
+  "verbose": "Config file \\"<project root>/src/test/project-referencing-rig/config/simplestConfigFile.json\\" does not exist. Attempting to load via rig.[n]",
   "warning": "",
 }
 `;
@@ -238,7 +238,7 @@ exports[`ConfigurationFile loading a rig throws an error when a config file does
 Object {
   "error": "",
   "log": "",
-  "verbose": "Configuration file \\"<project root>/src/test/project-referencing-rig/config/notExist.json\\" not found.[n]Configuration file \\"<project root>/src/test/project-referencing-rig/node_modules/test-rig/profiles/default/config/notExist.json\\" not found.[n]Configuration file \\"config/notExist.json\\" not found in rig (\\"<project root>/src/test/project-referencing-rig/node_modules/test-rig/profiles/default\\")[n]",
+  "verbose": "Config file \\"<project root>/src/test/project-referencing-rig/config/notExist.json\\" does not exist. Attempting to load via rig.[n]Configuration file \\"<project root>/src/test/project-referencing-rig/node_modules/test-rig/profiles/default/config/notExist.json\\" not found.[n]Configuration file \\"config/notExist.json\\" not found in rig (\\"<project root>/src/test/project-referencing-rig/node_modules/test-rig/profiles/default\\")[n]",
   "warning": "",
 }
 `;
