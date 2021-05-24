@@ -857,15 +857,17 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
             `Output folder "${additionalModuleKindToEmit.outFolderName}" already contains module kind ${existingDir.kind} with extension '${existingDir.extension}', specified by option ${existingDir.reason}.`
           );
         } else {
-          const outFolderKey: string = this._addModuleKindToEmit(
+          const outFolderKey: string | undefined = this._addModuleKindToEmit(
             moduleKind,
             additionalModuleKindToEmit.outFolderName,
             /* isPrimary */ false,
             undefined
           );
 
-          specifiedKinds.set(moduleKind, moduleKindReason);
-          specifiedOutDirs.set(outFolderKey, moduleKindReason);
+          if (outFolderKey) {
+            specifiedKinds.set(moduleKind, moduleKindReason);
+            specifiedOutDirs.set(outFolderKey, moduleKindReason);
+          }
         }
       }
     }
@@ -876,7 +878,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     outFolderPath: string,
     isPrimary: boolean,
     jsExtensionOverride: string | undefined
-  ): string {
+  ): string | undefined {
     let outFolderName: string;
     if (path.isAbsolute(outFolderPath)) {
       outFolderName = path.relative(this._configuration.buildFolder, outFolderPath);
@@ -885,8 +887,45 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       outFolderPath = path.resolve(this._configuration.buildFolder, outFolderPath);
     }
 
+    outFolderPath = Path.convertToSlashes(outFolderPath);
+    outFolderPath = outFolderPath.replace(/\/*$/, '/'); // Ensure the outFolderPath ends with a slash
+
+    for (const existingModuleKindToEmit of this._moduleKindsToEmit) {
+      let errorText: string | undefined;
+
+      if (existingModuleKindToEmit.outFolderPath === outFolderPath) {
+        if (existingModuleKindToEmit.jsExtensionOverride === jsExtensionOverride) {
+          errorText =
+            'Unable to output two different module kinds with the same ' +
+            `module extension (${jsExtensionOverride || '.js'}) to the same ` +
+            `folder ("${outFolderPath}").`;
+        }
+      } else {
+        let parentFolder: string | undefined;
+        let childFolder: string | undefined;
+        if (outFolderPath.startsWith(existingModuleKindToEmit.outFolderPath)) {
+          parentFolder = outFolderPath;
+          childFolder = existingModuleKindToEmit.outFolderPath;
+        } else if (existingModuleKindToEmit.outFolderPath.startsWith(outFolderPath)) {
+          parentFolder = existingModuleKindToEmit.outFolderPath;
+          childFolder = outFolderPath;
+        }
+
+        if (parentFolder) {
+          errorText =
+            'Unable to output two different module kinds to nested folders ' +
+            `("${parentFolder}" and "${childFolder}").`;
+        }
+      }
+
+      if (errorText) {
+        this._typescriptLogger.emitError(new Error(errorText));
+        return undefined;
+      }
+    }
+
     this._moduleKindsToEmit.push({
-      outFolderPath: Path.convertToSlashes(outFolderPath),
+      outFolderPath,
       moduleKind,
       cacheOutFolderPath: Path.convertToSlashes(
         path.resolve(this._configuration.buildCacheFolder, outFolderName)
