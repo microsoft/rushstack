@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.30.6",
+      "tag": "@rushstack/heft_v0.30.6",
+      "date": "Tue, 25 May 2021 00:12:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Report an error to prevent two different TypeScript module kinds from being emitted into nested folders"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.30.5",
       "tag": "@rushstack/heft_v0.30.5",
       "date": "Wed, 19 May 2021 00:11:39 GMT",
