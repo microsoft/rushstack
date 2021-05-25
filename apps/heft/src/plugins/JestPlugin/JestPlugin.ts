@@ -5,8 +5,9 @@
 import './jestWorkerPatch';
 
 import * as path from 'path';
+import glob from 'glob';
 import { runCLI } from '@jest/core';
-import { FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, LegacyAdapters } from '@rushstack/node-core-library';
 
 import { IHeftJestReporterOptions } from './HeftJestReporter';
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
@@ -55,7 +56,18 @@ export class JestPlugin implements IHeftPlugin {
     // In watch mode, Jest starts up in parallel with the compiler, so there's no
     // guarantee that the output files would have been written yet.
     if (!test.properties.watchMode) {
-      this._validateJestTypeScriptDataFile(buildFolder);
+      const tsconfigPaths: string[] = await LegacyAdapters.convertCallbackToPromise(
+        glob,
+        'tsconfig?(-*).json',
+        {
+          cwd: heftConfiguration.buildFolder,
+          nocase: true
+        }
+      );
+      // If there are no TSConfigs, the project must be plain JavaScript
+      if (tsconfigPaths.length !== 0) {
+        this._validateJestTypeScriptDataFile(buildFolder);
+      }
     }
 
     const jestArgv: Config.Argv = {
