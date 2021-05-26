@@ -18,6 +18,19 @@ for large scale TypeScript monorepos.
 - [API Extractor](https://api-extractor.com/) - create .d.ts rollups and track your TypeScript API signatures
 - [API Documenter](https://api-extractor.com/pages/setup/generating_docs/) - use TSDoc comments to publish an API documentation website
 
+
+## Related Repos
+
+These GitHub repositories provide supplementary resources for Rush Stack:
+
+- [rushstack-samples](https://github.com/microsoft/rushstack-samples) - a monoprepo with sample projects that
+  illustrate various project setups, including how to use Heft with other popular JavaScript frameworks
+- [rush-example](https://github.com/microsoft/rush-example) - a minimal Rush repo that demonstrates the fundamentals
+  of Rush without relying on any other Rush Stack tooling
+- [rushstack-legacy](https://github.com/microsoft/rushstack-legacy) - older projects that are still maintained
+  but no longer actively developed
+
+
 <!-- GENERATED PROJECT SUMMARY START -->
 
 ## Published Packages
