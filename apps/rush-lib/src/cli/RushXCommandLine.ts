@@ -60,6 +60,10 @@ export class RushXCommandLine {
         return;
       }
 
+      if (rushConfiguration && !rushConfiguration?.tryGetProjectForPath(process.cwd())) {
+        console.log(colors.yellow('Warning: You are running rushx under a Rush repo but current project is not registered to Rush config.'));
+      }
+
       const packageJson: IPackageJson = packageJsonLookup.loadPackageJson(packageJsonFilePath);
 
       const projectCommandSet: ProjectCommandSet = new ProjectCommandSet(packageJson);

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "add rush project check before rushx command",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "m1heng@users.noreply.github.com"
+}
