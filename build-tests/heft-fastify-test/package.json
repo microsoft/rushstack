@@ -1,0 +1,19 @@
+{
+  "name": "heft-fastify-test",
+  "description": "This project tests Heft support for the Fastify framework for Node.js services",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft test --clean"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "10.17.13",
+    "eslint": "~7.12.1",
+    "typescript": "~3.9.7"
+  }
+}
