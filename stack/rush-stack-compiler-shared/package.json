@@ -1,9 +1,0 @@
-{
-  "name": "@microsoft/rush-stack-compiler-shared",
-  "version": "0.0.0",
-  "license": "MIT",
-  "private": true,
-  "scripts": {
-    "build": ""
-  }
-}
