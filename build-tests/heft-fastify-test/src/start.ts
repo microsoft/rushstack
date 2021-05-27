@@ -16,6 +16,9 @@ class MyApp {
     this.server.get('/', async (request, reply) => {
       return { hello: 'world' };
     });
+
+    console.log('Listening on http://localhost:3000');
+    await this.server.listen(3000);
   }
 
   public start(): void {
