@@ -28,6 +28,18 @@ interface IRunTypeScriptOptions {
   heftConfiguration: HeftConfiguration;
   buildProperties: IBuildStageProperties;
   watchMode: boolean;
+
+  /**
+   * Fired whenever the compiler emits an output.  In watch mode, this event occurs after each recompile.
+   * If there are multiple tsconfigs being processed in parallel, the event fires for each one.
+   */
+  emitCallback: () => void;
+
+  /**
+   * Fired exactly once after the compiler completes its first emit iteration.  In watch mode, this event unblocks
+   * the "bundle" stage to start, avoiding a race condition where Webpack might otherwise report errors about
+   * missing inputs.
+   */
   firstEmitCallback: () => void;
 }
 
@@ -47,7 +59,10 @@ interface IRunBuilderForTsconfigOptions {
   copyFromCacheMode?: CopyFromCacheMode;
   watchMode: boolean;
   maxWriteParallelism: number;
+
   firstEmitCallback: () => void;
+
+  emitCallback: () => void;
 
   terminalProvider: ITerminalProvider;
   terminalPrefixLabel: string | undefined;
@@ -145,6 +160,9 @@ export class TypeScriptPlugin implements IHeftPlugin {
               heftConfiguration,
               buildProperties: build.properties,
               watchMode: build.properties.watchMode,
+              emitCallback: () => {
+                compile.hooks.afterEachIteration.call();
+              },
               firstEmitCallback: () => {
                 if (build.properties.watchMode) {
                   // Allow compilation to continue after the first emit
@@ -202,7 +220,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
   }
 
   private async _runTypeScriptAsync(logger: ScopedLogger, options: IRunTypeScriptOptions): Promise<void> {
-    const { heftSession, heftConfiguration, buildProperties, watchMode, firstEmitCallback } = options;
+    const { heftSession, heftConfiguration, buildProperties, watchMode, emitCallback, firstEmitCallback } =
+      options;
 
     const typescriptConfigurationJson: ITypeScriptConfigurationJson | undefined =
       await this._ensureConfigFileLoadedAsync(logger.terminal, heftConfiguration);
@@ -262,6 +281,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
       | 'tsconfigFilePath'
       | 'additionalModuleKindsToEmit'
       | 'terminalPrefixLabel'
+      | 'emitCallback'
       | 'firstEmitCallback'
     > = {
       heftSession: heftSession,
@@ -281,9 +301,17 @@ export class TypeScriptPlugin implements IHeftPlugin {
       extensionForTests: typeScriptConfiguration.emitCjsExtensionForCommonJS ? '.cjs' : '.js'
     });
 
+    // Wrap the "firstEmitCallback" to fire only after all of the builder processes have completed.
     const callbacksForTsconfigs: Set<() => void> = new Set<() => void>();
     function getFirstEmitCallbackForTsconfig(): () => void {
+      let hasAlreadyReportedFirstEmit: boolean = false;
+
       const callback: () => void = () => {
+        if (hasAlreadyReportedFirstEmit) {
+          return;
+        }
+        hasAlreadyReportedFirstEmit = true;
+
         callbacksForTsconfigs.delete(callback);
         if (callbacksForTsconfigs.size === 0) {
           firstEmitCallback();
@@ -302,6 +330,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
         terminalProvider: heftConfiguration.terminalProvider,
         additionalModuleKindsToEmit: typeScriptConfiguration.additionalModuleKindsToEmit,
         terminalPrefixLabel: undefined,
+        emitCallback: emitCallback,
         firstEmitCallback: getFirstEmitCallbackForTsconfig()
       });
     } else {
@@ -320,6 +349,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
             terminalProvider: heftConfiguration.terminalProvider,
             additionalModuleKindsToEmit,
             terminalPrefixLabel: tsconfigFilename,
+            emitCallback: emitCallback,
             firstEmitCallback: getFirstEmitCallbackForTsconfig()
           })
         );
@@ -357,7 +387,10 @@ export class TypeScriptPlugin implements IHeftPlugin {
       options.terminalProvider,
       typeScriptBuilderConfiguration,
       heftSession,
-      options.firstEmitCallback
+      () => {
+        options.firstEmitCallback();
+        options.emitCallback();
+      }
     );
 
     if (heftSession.debugMode) {

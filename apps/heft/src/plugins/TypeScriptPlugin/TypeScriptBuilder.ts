@@ -34,7 +34,7 @@ import { FileError } from '../../pluginFramework/logging/FileError';
 
 import { EmitFilesPatch, ICachedEmitModuleKind } from './EmitFilesPatch';
 import { HeftSession } from '../../pluginFramework/HeftSession';
-import { FirstEmitCompletedCallbackManager } from './FirstEmitCompletedCallbackManager';
+import { EmitCompletedCallbackManager } from './EmitCompletedCallbackManager';
 import { ISharedTypeScriptConfiguration } from './TypeScriptPlugin';
 import { TypeScriptCachedFileSystem } from '../../utilities/fileSystem/TypeScriptCachedFileSystem';
 
@@ -115,7 +115,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _tslintConfigFilePath!: string;
   private _typescriptLogger!: IScopedLogger;
   private _typescriptTerminal!: Terminal;
-  private _firstEmitCompletedCallbackManager: FirstEmitCompletedCallbackManager;
+  private _emitCompletedCallbackManager: EmitCompletedCallbackManager;
 
   private __tsCacheFilePath!: string;
   private _tsReadJsonCache: Map<string, object> = new Map<string, object>();
@@ -148,12 +148,12 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     parentGlobalTerminalProvider: ITerminalProvider,
     configuration: ITypeScriptBuilderConfiguration,
     heftSession: HeftSession,
-    firstEmitCallback: () => void
+    emitCallback: () => void
   ) {
     super(parentGlobalTerminalProvider, configuration, heftSession);
 
-    this._firstEmitCompletedCallbackManager = new FirstEmitCompletedCallbackManager(firstEmitCallback);
-    this.registerSubprocessCommunicationManager(this._firstEmitCompletedCallbackManager);
+    this._emitCompletedCallbackManager = new EmitCompletedCallbackManager(emitCallback);
+    this.registerSubprocessCommunicationManager(this._emitCompletedCallbackManager);
   }
 
   public async invokeAsync(): Promise<void> {
@@ -620,7 +620,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       `${shouldHardlink ? 'Hardlink' : 'Copy from cache'}: ${hardlinkDuration}ms (${hardlinkCount} files)`
     );
 
-    this._firstEmitCompletedCallbackManager.callback();
+    // In non-watch mode, notify EmitCompletedCallbackManager once after we complete the compile step
+    this._emitCompletedCallbackManager.callback();
     //#endregion
 
     let typeScriptErrorCount: number = 0;
@@ -1029,7 +1030,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     ts: ExtendedTypeScript,
     tsconfig: TTypescript.ParsedCommandLine
   ): TWatchCompilerHost {
-    let hasAlreadyReportedFirstEmit: boolean = false;
     return ts.createWatchCompilerHost(
       tsconfig.fileNames,
       tsconfig.options,
@@ -1074,13 +1074,12 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       (diagnostic: TTypescript.Diagnostic) => {
         this._printDiagnosticMessage(ts, diagnostic);
 
+        // In watch mode, notify EmitCompletedCallbackManager every time we finish recompiling.
         if (
-          !hasAlreadyReportedFirstEmit &&
-          (diagnostic.code === ts.Diagnostics.Found_0_errors_Watching_for_file_changes.code ||
-            diagnostic.code === ts.Diagnostics.Found_1_error_Watching_for_file_changes.code)
+          diagnostic.code === ts.Diagnostics.Found_0_errors_Watching_for_file_changes.code ||
+          diagnostic.code === ts.Diagnostics.Found_1_error_Watching_for_file_changes.code
         ) {
-          this._firstEmitCompletedCallbackManager.callback();
-          hasAlreadyReportedFirstEmit = true;
+          this._emitCompletedCallbackManager.callback();
         }
       },
       tsconfig.projectReferences
