@@ -110,9 +110,9 @@ export interface IBuildStageContext extends IStageContext<BuildStageHooks, IBuil
 
 // @public (undocumented)
 export interface IBuildStageProperties {
-    // (undocumented)
+    // @beta (undocumented)
     emitExtensionForTests?: '.js' | '.cjs' | '.mjs';
-    // (undocumented)
+    // @beta (undocumented)
     emitFolderNameForTests?: string;
     // (undocumented)
     lite: boolean;

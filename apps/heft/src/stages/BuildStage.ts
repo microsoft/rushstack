@@ -135,7 +135,13 @@ export interface IBuildStageProperties {
   webpackStats?: unknown;
 
   // Output
+  /**
+   * @beta
+   */
   emitFolderNameForTests?: string;
+  /**
+   * @beta
+   */
   emitExtensionForTests?: '.js' | '.cjs' | '.mjs';
 }
 
