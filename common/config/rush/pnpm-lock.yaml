@@ -1247,10 +1247,12 @@ importers:
     specifiers:
       '@microsoft/api-extractor': workspace:*
       '@rushstack/heft': workspace:*
+      '@rushstack/heft-jest-plugin': workspace:*
       eslint: ~7.12.1
       typescript: ~3.9.7
     dependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
+      '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       eslint: 7.12.1
       typescript: 3.9.9
     devDependencies:

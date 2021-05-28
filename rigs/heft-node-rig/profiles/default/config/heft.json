@@ -47,5 +47,8 @@
     //   */
     //  // "options": { }
     // }
+    {
+      "plugin": "@rushstack/heft-jest-plugin"
+    }
   ]
 }
