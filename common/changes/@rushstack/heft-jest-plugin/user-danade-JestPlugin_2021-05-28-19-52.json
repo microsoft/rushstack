@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-jest-plugin",
+      "comment": "Initial implementation",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin",
+  "email": "3473356+D4N14L@users.noreply.github.com"
+}
