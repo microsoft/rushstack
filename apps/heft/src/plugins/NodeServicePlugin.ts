@@ -4,7 +4,7 @@
 import * as child_process from 'child_process';
 import * as process from 'process';
 import { performance } from 'perf_hooks';
-import { Executable, InternalError } from '@rushstack/node-core-library';
+import { InternalError } from '@rushstack/node-core-library';
 
 import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
@@ -12,6 +12,7 @@ import { IBuildStageContext, ICompileSubstage, IPostBuildSubstage } from '../sta
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { CoreConfigFiles } from '../utilities/CoreConfigFiles';
+import { SubprocessTerminator } from '../utilities/subprocess/SubprocessTerminator';
 
 const PLUGIN_NAME: string = 'NodeServicePlugin';
 
@@ -51,6 +52,9 @@ export class NodeServicePlugin implements IHeftPlugin {
   private _configuration!: INodeServicePluginCompleteConfiguration;
   private _nodeServiceConfiguration: INodeServicePluginConfiguration | undefined = undefined;
   private _shellCommand: string | undefined;
+
+  // If true, then we will not attempt to relaunch the service until it is rebuilt
+  private _childProcessFailed: boolean = false;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     this._logger = heftSession.requestScopedLogger('node-service');
@@ -157,6 +161,9 @@ export class NodeServicePlugin implements IHeftPlugin {
     }
 
     try {
+      // We've recompiled, so try launching again
+      this._childProcessFailed = false;
+
       if (this._state === State.Stopped) {
         // If we are already stopped, then extend the timeout
         this._scheduleRestart(this._configuration.waitBeforeRestartMs);
@@ -180,13 +187,15 @@ export class NodeServicePlugin implements IHeftPlugin {
 
     this._activeChildProcess = child_process.spawn(this._shellCommand!, {
       shell: true,
-      // On POSIX, set detached=true to create a new group so we can terminate
-      // the child process's children
-      detached: !this._isWindows,
-      stdio: ['inherit', 'inherit', 'inherit']
+      stdio: ['inherit', 'inherit', 'inherit'],
+      ...SubprocessTerminator.RECOMMENDED_OPTIONS
     });
-    const childPid: number = this._activeChildProcess.pid;
+    SubprocessTerminator.killProcessTreeOnExit(
+      this._activeChildProcess,
+      SubprocessTerminator.RECOMMENDED_OPTIONS
+    );
 
+    const childPid: number = this._activeChildProcess.pid;
     this._logger.terminal.writeVerboseLine(`Started child ${childPid}`);
 
     this._activeChildProcess.on('close', (code: number, signal: string): void => {
@@ -199,6 +208,7 @@ export class NodeServicePlugin implements IHeftPlugin {
         this._logger.terminal.writeWarningLine(
           `Child #${childPid} terminated unexpectedly code=${code} signal=${signal}`
         );
+        this._childProcessFailed = true;
         this._transitionToStopped();
         return;
       }
@@ -228,6 +238,7 @@ export class NodeServicePlugin implements IHeftPlugin {
 
       if (this._state === State.Running) {
         this._logger.terminal.writeErrorLine(`Failed to start: ` + err.toString());
+        this._childProcessFailed = true;
         this._transitionToStopped();
         return;
       }
@@ -253,46 +264,30 @@ export class NodeServicePlugin implements IHeftPlugin {
       return;
     }
 
-    if (!this._activeChildProcess) {
-      // All the code paths that set _activeChildProcess=undefined should also leave the Running state
-      throw new InternalError('_activeChildProcess should not be undefined');
-    }
-
-    this._state = State.Stopping;
-    this._clearTimeout();
-
     if (this._isWindows) {
-      this._logger.terminal.writeVerboseLine('Terminating child process tree');
-
-      // On Windows we have a problem that CMD.exe launches child processes, but when CMD.exe is killed
-      // the child processes may continue running.  Also if we send signals to CMD.exe the child processes
-      // will not receive them.  The safest solution is not to attempt a graceful shutdown, but simply
-      // kill the entire process tree.
-      const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync('TaskKill.exe', [
-        '/T', // "Terminates the specified process and any child processes which were started by it."
-        '/F', // Without this, TaskKill will try to use WM_CLOSE which doesn't work with CLI tools
-        '/PID',
-        this._activeChildProcess.pid.toString()
-      ]);
-
-      if (result.error) {
-        this._logger.terminal.writeErrorLine('TaskKill.exe failed: ' + result.error.toString());
-        this._transitionToStopped();
-        return;
-      }
+      // On Windows, SIGTERM can kill Cmd.exe and leave its children running in the background
+      this._transitionToKilling();
     } else {
+      if (!this._activeChildProcess) {
+        // All the code paths that set _activeChildProcess=undefined should also leave the Running state
+        throw new InternalError('_activeChildProcess should not be undefined');
+      }
+
+      this._state = State.Stopping;
+      this._clearTimeout();
+
       this._logger.terminal.writeVerboseLine('Sending SIGTERM');
 
       // Passing a negative PID terminates the entire group instead of just the one process
       process.kill(-this._activeChildProcess.pid, 'SIGTERM');
-    }
 
-    this._clearTimeout();
-    this._timeout = setTimeout(() => {
-      this._timeout = undefined;
-      this._logger.terminal.writeWarningLine('Child is taking too long to terminate');
-      this._transitionToKilling();
-    }, this._configuration.waitForTerminateMs);
+      this._clearTimeout();
+      this._timeout = setTimeout(() => {
+        this._timeout = undefined;
+        this._logger.terminal.writeWarningLine('Child is taking too long to terminate');
+        this._transitionToKilling();
+      }, this._configuration.waitForTerminateMs);
+    }
   }
 
   private _transitionToKilling(): void {
@@ -308,12 +303,7 @@ export class NodeServicePlugin implements IHeftPlugin {
 
     this._logger.terminal.writeVerboseLine('Sending SIGKILL');
 
-    if (this._isWindows) {
-      process.kill(this._activeChildProcess.pid, 'SIGKILL');
-    } else {
-      // Passing a negative PID terminates the entire group instead of just the one process
-      process.kill(-this._activeChildProcess.pid, 'SIGKILL');
-    }
+    SubprocessTerminator.killProcessTree(this._activeChildProcess, SubprocessTerminator.RECOMMENDED_OPTIONS);
 
     this._clearTimeout();
     this._timeout = setTimeout(() => {
@@ -331,7 +321,13 @@ export class NodeServicePlugin implements IHeftPlugin {
     this._activeChildProcess = undefined;
 
     // Once we have stopped, schedule a restart
-    this._scheduleRestart(this._configuration.waitBeforeRestartMs);
+    if (!this._childProcessFailed) {
+      this._scheduleRestart(this._configuration.waitBeforeRestartMs);
+    } else {
+      this._logger.terminal.writeLine(
+        'The child process failed. Waiting for a code change before restarting...'
+      );
+    }
   }
 
   private _scheduleRestart(msFromNow: number): void {
