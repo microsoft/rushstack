@@ -17,11 +17,6 @@
       "type": "string"
     },
 
-    "enabled": {
-      "description": "Set this to \"false\" to disable the node service plugin.",
-      "type": "boolean"
-    },
-
     "commandName": {
       "description": "Specifies the name of a \"scripts\" command from the project's package.json file. When \"heft start\" is invoked, it will use this shell command to launch the service process.",
       "type": "string"

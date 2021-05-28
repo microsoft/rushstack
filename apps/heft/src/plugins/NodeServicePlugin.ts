@@ -17,7 +17,6 @@ import { SubprocessTerminator } from '../utilities/subprocess/SubprocessTerminat
 const PLUGIN_NAME: string = 'NodeServicePlugin';
 
 export interface INodeServicePluginCompleteConfiguration {
-  enabled: boolean;
   commandName: string;
   ignoreMissingScript: boolean;
   waitBeforeRestartMs: number;
@@ -56,6 +55,8 @@ export class NodeServicePlugin implements IHeftPlugin {
   // If true, then we will not attempt to relaunch the service until it is rebuilt
   private _childProcessFailed: boolean = false;
 
+  private _pluginEnabled: boolean = false;
+
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     this._logger = heftSession.requestScopedLogger('node-service');
 
@@ -72,7 +73,6 @@ export class NodeServicePlugin implements IHeftPlugin {
 
         // defaults
         this._configuration = {
-          enabled: this._nodeServiceConfiguration !== undefined,
           commandName: 'serve',
           ignoreMissingScript: false,
           waitBeforeRestartMs: 2000,
@@ -82,9 +82,8 @@ export class NodeServicePlugin implements IHeftPlugin {
 
         // TODO: @rushstack/heft-config-file should be able to read a *.defaults.json file
         if (this._nodeServiceConfiguration) {
-          if (this._nodeServiceConfiguration.enabled !== undefined) {
-            this._configuration.enabled = this._nodeServiceConfiguration.enabled;
-          }
+          this._pluginEnabled = true;
+
           if (this._nodeServiceConfiguration.commandName !== undefined) {
             this._configuration.commandName = this._nodeServiceConfiguration.commandName;
           }
@@ -101,26 +100,22 @@ export class NodeServicePlugin implements IHeftPlugin {
             this._configuration.waitForKillMs = this._nodeServiceConfiguration.waitForKillMs;
           }
 
-          if (!this._configuration.enabled) {
-            this._logger.terminal.writeVerboseLine('The plugin is disabled');
-          } else {
-            this._shellCommand = (heftConfiguration.projectPackageJson.scripts || {})[
-              this._configuration.commandName
-            ];
+          this._shellCommand = (heftConfiguration.projectPackageJson.scripts || {})[
+            this._configuration.commandName
+          ];
 
-            if (this._shellCommand === undefined) {
-              if (this._configuration.ignoreMissingScript) {
-                this._logger.terminal.writeLine(
-                  `The plugin is disabled because the project's package.json` +
-                    ` does not have a "${this._configuration.commandName}" script`
-                );
-              } else {
-                this._logger.terminal.writeErrorLine(
-                  `The project's package.json does not have a "${this._configuration.commandName}" script`
-                );
-              }
-              this._configuration.enabled = false;
+          if (this._shellCommand === undefined) {
+            if (this._configuration.ignoreMissingScript) {
+              this._logger.terminal.writeLine(
+                `The plugin is disabled because the project's package.json` +
+                  ` does not have a "${this._configuration.commandName}" script`
+              );
+            } else {
+              this._logger.terminal.writeErrorLine(
+                `The project's package.json does not have a "${this._configuration.commandName}" script`
+              );
             }
+            this._pluginEnabled = false;
           }
         } else {
           this._logger.terminal.writeVerboseLine(
@@ -130,15 +125,17 @@ export class NodeServicePlugin implements IHeftPlugin {
         }
       });
 
-      build.hooks.postBuild.tap(PLUGIN_NAME, (bundle: IPostBuildSubstage) => {
-        bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          await this._runCommandAsync(heftSession, heftConfiguration);
+      if (this._pluginEnabled) {
+        build.hooks.postBuild.tap(PLUGIN_NAME, (bundle: IPostBuildSubstage) => {
+          bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
+            await this._runCommandAsync(heftSession, heftConfiguration);
+          });
         });
-      });
 
-      build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
-        compile.hooks.afterEachIteration.tap(PLUGIN_NAME, this._compileHooks_afterEachIteration);
-      });
+        build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
+          compile.hooks.afterEachIteration.tap(PLUGIN_NAME, this._compileHooks_afterEachIteration);
+        });
+      }
     });
   }
 
@@ -146,20 +143,12 @@ export class NodeServicePlugin implements IHeftPlugin {
     heftSession: HeftSession,
     heftConfiguration: HeftConfiguration
   ): Promise<void> {
-    if (!this._configuration.enabled) {
-      return;
-    }
-
     this._logger.terminal.writeLine(`Starting Node service...`);
 
     this._restartChild();
   }
 
   private _compileHooks_afterEachIteration = (): void => {
-    if (!this._configuration.enabled) {
-      return;
-    }
-
     try {
       // We've recompiled, so try launching again
       this._childProcessFailed = false;

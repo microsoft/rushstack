@@ -12,13 +12,6 @@
   // "extends": "base-project/config/serve-command.json",
 
   /**
-   * Set this to "false" to disable the node service plugin.
-   *
-   * Default value: true
-   */
-  // "enabled": true,
-
-  /**
    * Specifies the name of a "scripts" command from the project's package.json file.
    * When "heft start" is invoked, it will use this shell command to launch the
    * service process.
