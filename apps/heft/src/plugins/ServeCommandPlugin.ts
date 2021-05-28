@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
+import * as process from 'process';
 import { Executable, InternalError } from '@rushstack/node-core-library';
 
 import { HeftSession } from '../pluginFramework/HeftSession';
@@ -82,6 +83,9 @@ export class ServeCommandPlugin implements IHeftPlugin {
 
     this._activeChildProcess = child_process.spawn(this._serveCommand, {
       shell: true,
+      // On POSIX, set detched=true to create a new group so we can terminate
+      // the child process's children
+      detached: !this._isWindows,
       stdio: ['inherit', 'inherit', 'inherit']
     });
     const childPid: number = this._activeChildProcess.pid;
@@ -178,7 +182,9 @@ export class ServeCommandPlugin implements IHeftPlugin {
       this._logger.terminal.writeLine('Done invoking TaskKill');
     } else {
       this._logger.terminal.writeLine('Sending SIGTERM');
-      this._activeChildProcess.kill('SIGTERM');
+
+      // Passing a negative PID terminates the entire group instead of just the one process
+      process.kill(-this._activeChildProcess.pid, 'SIGTERM');
     }
 
     this._clearTimeout();
@@ -199,7 +205,13 @@ export class ServeCommandPlugin implements IHeftPlugin {
     }
 
     this._logger.terminal.writeLine('Sending SIGKILL');
-    this._activeChildProcess.kill('SIGKILL');
+
+    if (this._isWindows) {
+      process.kill(this._activeChildProcess.pid, 'SIGKILL');
+    } else {
+      // Passing a negative PID terminates the entire group instead of just the one process
+      process.kill(-this._activeChildProcess.pid, 'SIGKILL');
+    }
 
     this._clearTimeout();
     this._timeout = setTimeout(() => {

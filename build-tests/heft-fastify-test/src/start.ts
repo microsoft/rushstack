@@ -13,9 +13,11 @@ process.on('exit', () => {
 process.on('SIGINT', function () {
   console.error('CHILD SIGINT');
 });
+/*
 process.on('SIGTERM', function () {
   console.error('CHILD SIGTERM');
 });
+*/
 
 class MyApp {
   public readonly server: FastifyInstance;
@@ -51,4 +53,4 @@ class MyApp {
 
 const myApp: MyApp = new MyApp();
 myApp.start();
-//
+////
