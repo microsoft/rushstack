@@ -13,9 +13,9 @@ import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
 import { CoreConfigFiles } from '../utilities/CoreConfigFiles';
 
-const PLUGIN_NAME: string = 'ServeCommandPlugin';
+const PLUGIN_NAME: string = 'NodeServicePlugin';
 
-export interface IServeCommandPluginCompleteConfiguration {
+export interface INodeServicePluginCompleteConfiguration {
   enabled: boolean;
   commandName: string;
   ignoreMissingScript: boolean;
@@ -24,7 +24,7 @@ export interface IServeCommandPluginCompleteConfiguration {
   waitForKillMs: number;
 }
 
-export interface IServeCommandPluginConfiguration extends Partial<IServeCommandPluginCompleteConfiguration> {}
+export interface INodeServicePluginConfiguration extends Partial<INodeServicePluginCompleteConfiguration> {}
 
 enum State {
   Stopped,
@@ -33,7 +33,7 @@ enum State {
   Killing
 }
 
-export class ServeCommandPlugin implements IHeftPlugin {
+export class NodeServicePlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
   private _logger!: ScopedLogger;
 
@@ -48,8 +48,8 @@ export class ServeCommandPlugin implements IHeftPlugin {
   // The process will be automatically restarted when performance.now() exceeds this time
   private _restartTime: number | undefined = undefined;
 
-  private _configuration!: IServeCommandPluginCompleteConfiguration;
-  private _serveCommandConfiguration: IServeCommandPluginConfiguration | undefined = undefined;
+  private _configuration!: INodeServicePluginCompleteConfiguration;
+  private _nodeServiceConfiguration: INodeServicePluginConfiguration | undefined = undefined;
   private _shellCommand: string | undefined;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
@@ -59,8 +59,8 @@ export class ServeCommandPlugin implements IHeftPlugin {
 
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.loadStageConfiguration.tapPromise(PLUGIN_NAME, async () => {
-        this._serveCommandConfiguration =
-          await CoreConfigFiles.serveCommandConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
+        this._nodeServiceConfiguration =
+          await CoreConfigFiles.nodeServiceConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
             this._logger.terminal,
             heftConfiguration.buildFolder,
             heftConfiguration.rigConfig
@@ -68,7 +68,7 @@ export class ServeCommandPlugin implements IHeftPlugin {
 
         // defaults
         this._configuration = {
-          enabled: this._serveCommandConfiguration !== undefined,
+          enabled: this._nodeServiceConfiguration !== undefined,
           commandName: 'serve',
           ignoreMissingScript: false,
           waitBeforeRestartMs: 2000,
@@ -77,24 +77,24 @@ export class ServeCommandPlugin implements IHeftPlugin {
         };
 
         // TODO: @rushstack/heft-config-file should be able to read a *.defaults.json file
-        if (this._serveCommandConfiguration) {
-          if (this._serveCommandConfiguration.enabled !== undefined) {
-            this._configuration.enabled = this._serveCommandConfiguration.enabled;
+        if (this._nodeServiceConfiguration) {
+          if (this._nodeServiceConfiguration.enabled !== undefined) {
+            this._configuration.enabled = this._nodeServiceConfiguration.enabled;
           }
-          if (this._serveCommandConfiguration.commandName !== undefined) {
-            this._configuration.commandName = this._serveCommandConfiguration.commandName;
+          if (this._nodeServiceConfiguration.commandName !== undefined) {
+            this._configuration.commandName = this._nodeServiceConfiguration.commandName;
           }
-          if (this._serveCommandConfiguration.ignoreMissingScript !== undefined) {
-            this._configuration.ignoreMissingScript = this._serveCommandConfiguration.ignoreMissingScript;
+          if (this._nodeServiceConfiguration.ignoreMissingScript !== undefined) {
+            this._configuration.ignoreMissingScript = this._nodeServiceConfiguration.ignoreMissingScript;
           }
-          if (this._serveCommandConfiguration.waitBeforeRestartMs !== undefined) {
-            this._configuration.waitBeforeRestartMs = this._serveCommandConfiguration.waitBeforeRestartMs;
+          if (this._nodeServiceConfiguration.waitBeforeRestartMs !== undefined) {
+            this._configuration.waitBeforeRestartMs = this._nodeServiceConfiguration.waitBeforeRestartMs;
           }
-          if (this._serveCommandConfiguration.waitForTerminateMs !== undefined) {
-            this._configuration.waitForTerminateMs = this._serveCommandConfiguration.waitForTerminateMs;
+          if (this._nodeServiceConfiguration.waitForTerminateMs !== undefined) {
+            this._configuration.waitForTerminateMs = this._nodeServiceConfiguration.waitForTerminateMs;
           }
-          if (this._serveCommandConfiguration.waitForKillMs !== undefined) {
-            this._configuration.waitForKillMs = this._serveCommandConfiguration.waitForKillMs;
+          if (this._nodeServiceConfiguration.waitForKillMs !== undefined) {
+            this._configuration.waitForKillMs = this._nodeServiceConfiguration.waitForKillMs;
           }
 
           if (!this._configuration.enabled) {
@@ -121,7 +121,7 @@ export class ServeCommandPlugin implements IHeftPlugin {
         } else {
           this._logger.terminal.writeVerboseLine(
             'The plugin is disabled because its config file was not found: ' +
-              CoreConfigFiles.serveCommandConfigurationLoader.projectRelativeFilePath
+              CoreConfigFiles.nodeServiceConfigurationLoader.projectRelativeFilePath
           );
         }
       });
