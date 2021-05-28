@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "API Extractor Task Configuration",
+  "title": "Heft's api-extractor-task.json config file",
   "description": "Defines additional Heft-specific configuration for the API Extractor task.",
   "type": "object",
 

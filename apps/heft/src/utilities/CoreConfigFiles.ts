@@ -14,6 +14,7 @@ import { ITypeScriptConfigurationJson } from '../plugins/TypeScriptPlugin/TypeSc
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { Terminal } from '@rushstack/node-core-library';
 import { ISassConfigurationJson } from '../plugins/SassTypingsPlugin/SassTypingsPlugin';
+import { IServeCommandPluginConfiguration } from '../plugins/ServeCommandPlugin';
 
 export enum HeftEvent {
   clean = 'clean',
@@ -107,6 +108,9 @@ export class CoreConfigFiles {
     | undefined;
   private static _typeScriptConfigurationFileLoader:
     | ConfigurationFile<ITypeScriptConfigurationJson>
+    | undefined;
+  private static _serveCommandConfigurationLoader:
+    | ConfigurationFile<IServeCommandPluginConfiguration>
     | undefined;
   private static _sassConfigurationFileLoader: ConfigurationFile<ISassConfigurationJson> | undefined;
 
@@ -236,6 +240,22 @@ export class CoreConfigFiles {
     }
 
     return CoreConfigFiles._typeScriptConfigurationFileLoader;
+  }
+
+  /**
+   * Returns the loader for the `config/api-extractor-task.json` config file.
+   */
+  public static get serveCommandConfigurationLoader(): ConfigurationFile<IServeCommandPluginConfiguration> {
+    if (!CoreConfigFiles._serveCommandConfigurationLoader) {
+      const schemaPath: string = path.resolve(__dirname, '..', 'schemas', 'node-service.schema.json');
+      CoreConfigFiles._serveCommandConfigurationLoader =
+        new ConfigurationFile<IServeCommandPluginConfiguration>({
+          projectRelativeFilePath: 'config/node-service.json',
+          jsonSchemaPath: schemaPath
+        });
+    }
+
+    return CoreConfigFiles._serveCommandConfigurationLoader;
   }
 
   public static get sassConfigurationFileLoader(): ConfigurationFile<ISassConfigurationJson> {

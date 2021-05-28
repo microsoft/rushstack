@@ -11,8 +11,20 @@ import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IBuildStageContext, ICompileSubstage, IPostBuildSubstage } from '../stages/BuildStage';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
+import { CoreConfigFiles } from '../utilities/CoreConfigFiles';
 
-const PLUGIN_NAME: string = 'serve-command-plugin';
+const PLUGIN_NAME: string = 'ServeCommandPlugin';
+
+export interface IServeCommandPluginCompleteConfiguration {
+  enabled: boolean;
+  commandName: string;
+  ignoreMissingScript: boolean;
+  waitBeforeRestartMs: number;
+  waitForTerminateMs: number;
+  waitForKillMs: number;
+}
+
+export interface IServeCommandPluginConfiguration extends Partial<IServeCommandPluginCompleteConfiguration> {}
 
 enum State {
   Stopped,
@@ -21,17 +33,11 @@ enum State {
   Killing
 }
 
-const SIGTERM_WAIT_MS: number = 6000;
-const SIGKILL_WAIT_MS: number = 6000;
-const DELAY_AFTER_TERMINATED_MS: number = 6000;
-
 export class ServeCommandPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
   private _logger!: ScopedLogger;
 
   private _activeChildProcess: child_process.ChildProcess | undefined;
-
-  private _serveCommand!: string;
 
   private _state: State = State.Stopped;
 
@@ -42,32 +48,118 @@ export class ServeCommandPlugin implements IHeftPlugin {
   // The process will be automatically restarted when performance.now() exceeds this time
   private _restartTime: number | undefined = undefined;
 
+  private _configuration!: IServeCommandPluginCompleteConfiguration;
+  private _serveCommandConfiguration: IServeCommandPluginConfiguration | undefined = undefined;
+  private _shellCommand: string | undefined;
+
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    this._logger = heftSession.requestScopedLogger('serve-command');
+    this._logger = heftSession.requestScopedLogger('node-service');
 
     this._isWindows = process.platform === 'win32';
 
-    this._serveCommand = heftConfiguration.projectPackageJson.scripts?.serve || '';
-    if (this._serveCommand) {
-      heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-        build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
-          compile.hooks.afterEachIteration.tap(PLUGIN_NAME, this._compileHooks_afterEachIteration);
-        });
+    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
+      build.hooks.loadStageConfiguration.tapPromise(PLUGIN_NAME, async () => {
+        this._serveCommandConfiguration =
+          await CoreConfigFiles.serveCommandConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
+            this._logger.terminal,
+            heftConfiguration.buildFolder,
+            heftConfiguration.rigConfig
+          );
 
-        build.hooks.postBuild.tap(PLUGIN_NAME, (bundle: IPostBuildSubstage) => {
-          bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-            await this._runCommandAsync(heftSession, heftConfiguration);
-          });
+        // defaults
+        this._configuration = {
+          enabled: this._serveCommandConfiguration !== undefined,
+          commandName: 'serve',
+          ignoreMissingScript: false,
+          waitBeforeRestartMs: 2000,
+          waitForTerminateMs: 2000,
+          waitForKillMs: 2000
+        };
+
+        // TODO: @rushstack/heft-config-file should be able to read a *.defaults.json file
+        if (this._serveCommandConfiguration) {
+          if (this._serveCommandConfiguration.enabled !== undefined) {
+            this._configuration.enabled = this._serveCommandConfiguration.enabled;
+          }
+          if (this._serveCommandConfiguration.commandName !== undefined) {
+            this._configuration.commandName = this._serveCommandConfiguration.commandName;
+          }
+          if (this._serveCommandConfiguration.ignoreMissingScript !== undefined) {
+            this._configuration.ignoreMissingScript = this._serveCommandConfiguration.ignoreMissingScript;
+          }
+          if (this._serveCommandConfiguration.waitBeforeRestartMs !== undefined) {
+            this._configuration.waitBeforeRestartMs = this._serveCommandConfiguration.waitBeforeRestartMs;
+          }
+          if (this._serveCommandConfiguration.waitForTerminateMs !== undefined) {
+            this._configuration.waitForTerminateMs = this._serveCommandConfiguration.waitForTerminateMs;
+          }
+          if (this._serveCommandConfiguration.waitForKillMs !== undefined) {
+            this._configuration.waitForKillMs = this._serveCommandConfiguration.waitForKillMs;
+          }
+
+          if (!this._configuration.enabled) {
+            this._logger.terminal.writeVerboseLine('The plugin is disabled');
+          } else {
+            this._shellCommand = (heftConfiguration.projectPackageJson.scripts || {})[
+              this._configuration.commandName
+            ];
+
+            if (this._shellCommand === undefined) {
+              if (this._configuration.ignoreMissingScript) {
+                this._logger.terminal.writeLine(
+                  `The plugin is disabled because the project's package.json` +
+                    ` does not have a "${this._configuration.commandName}" script`
+                );
+              } else {
+                this._logger.terminal.writeErrorLine(
+                  `The project's package.json does not have a "${this._configuration.commandName}" script`
+                );
+              }
+              this._configuration.enabled = false;
+            }
+          }
+        } else {
+          this._logger.terminal.writeVerboseLine(
+            'The plugin is disabled because its config file was not found: ' +
+              CoreConfigFiles.serveCommandConfigurationLoader.projectRelativeFilePath
+          );
+        }
+      });
+
+      build.hooks.postBuild.tap(PLUGIN_NAME, (bundle: IPostBuildSubstage) => {
+        bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
+          await this._runCommandAsync(heftSession, heftConfiguration);
         });
       });
+
+      build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
+        compile.hooks.afterEachIteration.tap(PLUGIN_NAME, this._compileHooks_afterEachIteration);
+      });
+    });
+  }
+
+  private async _runCommandAsync(
+    heftSession: HeftSession,
+    heftConfiguration: HeftConfiguration
+  ): Promise<void> {
+    if (!this._configuration.enabled) {
+      return;
     }
+
+    this._logger.terminal.writeLine(`Starting Node service...`);
+
+    this._restartChild();
   }
 
   private _compileHooks_afterEachIteration = (): void => {
+    if (!this._configuration.enabled) {
+      return;
+    }
+
     try {
       if (this._state === State.Stopped) {
         // If we are already stopped, then extend the timeout
-        this._scheduleRestart(DELAY_AFTER_TERMINATED_MS);
+        this._scheduleRestart(this._configuration.waitBeforeRestartMs);
       } else {
         this._stopChild();
       }
@@ -75,15 +167,6 @@ export class ServeCommandPlugin implements IHeftPlugin {
       console.error('UNCAUGHT: ' + error.toString());
     }
   };
-
-  private async _runCommandAsync(
-    heftSession: HeftSession,
-    heftConfiguration: HeftConfiguration
-  ): Promise<void> {
-    this._logger.terminal.writeLine(`serve-command-plugin started`);
-
-    this._restartChild();
-  }
 
   private _restartChild(): void {
     if (this._state !== State.Stopped) {
@@ -93,11 +176,11 @@ export class ServeCommandPlugin implements IHeftPlugin {
     this._state = State.Running;
     this._clearTimeout();
 
-    this._logger.terminal.writeLine('Invoking command: ' + JSON.stringify(this._serveCommand));
+    this._logger.terminal.writeLine('Invoking command: ' + JSON.stringify(this._shellCommand!));
 
-    this._activeChildProcess = child_process.spawn(this._serveCommand, {
+    this._activeChildProcess = child_process.spawn(this._shellCommand!, {
       shell: true,
-      // On POSIX, set detched=true to create a new group so we can terminate
+      // On POSIX, set detached=true to create a new group so we can terminate
       // the child process's children
       detached: !this._isWindows,
       stdio: ['inherit', 'inherit', 'inherit']
@@ -209,7 +292,7 @@ export class ServeCommandPlugin implements IHeftPlugin {
       this._timeout = undefined;
       this._logger.terminal.writeWarningLine('Child is taking too long to terminate');
       this._transitionToKilling();
-    }, SIGTERM_WAIT_MS);
+    }, this._configuration.waitForTerminateMs);
   }
 
   private _transitionToKilling(): void {
@@ -237,7 +320,7 @@ export class ServeCommandPlugin implements IHeftPlugin {
       this._timeout = undefined;
       this._logger.terminal.writeErrorLine('Abandoning child process because SIGKILL did not work');
       this._transitionToStopped();
-    }, SIGKILL_WAIT_MS);
+    }, this._configuration.waitForKillMs);
   }
 
   private _transitionToStopped(): void {
@@ -248,7 +331,7 @@ export class ServeCommandPlugin implements IHeftPlugin {
     this._activeChildProcess = undefined;
 
     // Once we have stopped, schedule a restart
-    this._scheduleRestart(DELAY_AFTER_TERMINATED_MS);
+    this._scheduleRestart(this._configuration.waitBeforeRestartMs);
   }
 
   private _scheduleRestart(msFromNow: number): void {
