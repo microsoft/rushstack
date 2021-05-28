@@ -23,7 +23,7 @@
     },
 
     "ignoreMissingScript": {
-      "description": "If true, then an error is reported if the \"scripts\" command is not found in the project's package.json.  If false, then no action will be taken.",
+      "description": "If false, then an error is reported if the \"scripts\" command is not found in the project's package.json.  If true, then no action will be taken.",
       "type": "boolean"
     },
 
