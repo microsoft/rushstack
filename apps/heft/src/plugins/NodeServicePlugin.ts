@@ -27,32 +27,80 @@ export interface INodeServicePluginCompleteConfiguration {
 export interface INodeServicePluginConfiguration extends Partial<INodeServicePluginCompleteConfiguration> {}
 
 enum State {
+  /**
+   * The service process is not running, and _activeChildProcess is undefined.
+   *
+   * In this state, there may or may not be a timeout scheduled that will later restart the service.
+   */
   Stopped,
+
+  /**
+   * The service process is running normally.
+   */
   Running,
+
+  /**
+   * The SIGTERM signal has been sent to the service process, and we are waiting for it
+   * to shut down gracefully.
+   *
+   * NOTE: On Windows OS, SIGTERM is skipped and we proceed directly to SIGKILL.
+   */
   Stopping,
+
+  /**
+   * The SIGKILL signal has been sent to forcibly terminate the service process, and we are waiting
+   * to confirm that the operation has completed.
+   */
   Killing
 }
 
 export class NodeServicePlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
+
+  private static readonly _isWindows: boolean = process.platform === 'win32';
+
   private _logger!: ScopedLogger;
 
   private _activeChildProcess: child_process.ChildProcess | undefined;
 
   private _state: State = State.Stopped;
 
+  /**
+   * The state machine schedules at most one setInterval() timeout at any given time.  It is for:
+   *
+   * - waitBeforeRestartMs in State.Stopped
+   * - waitForTerminateMs in State.Stopping
+   * - waitForKillMs in State.Killing
+   */
   private _timeout: NodeJS.Timeout | undefined = undefined;
 
-  private _isWindows!: boolean;
-
-  // The process will be automatically restarted when performance.now() exceeds this time
+  /**
+   * Used by _scheduleRestart().  The process will be automatically restarted when performance.now()
+   * exceeds this time.
+   */
   private _restartTime: number | undefined = undefined;
 
+  /**
+   * The data read from the node-service.json config file, or "undefined" if the file is missing.
+   */
+  private _rawConfiguration: INodeServicePluginConfiguration | undefined = undefined;
+
+  /**
+   * The effective configuration, with defaults applied.
+   */
   private _configuration!: INodeServicePluginCompleteConfiguration;
-  private _nodeServiceConfiguration: INodeServicePluginConfiguration | undefined = undefined;
+
+  /**
+   * The script body obtained from the "scripts" section in the project's package.json.
+   */
   private _shellCommand: string | undefined;
 
-  // If true, then we will not attempt to relaunch the service until it is rebuilt
+  /**
+   * This is set to true when the child process terminates unexpectedly (for example, something like
+   * "the service listening port is already in use" or "unable to authenticate to the database").
+   * Rather than attempting to restart in a potentially endless loop, instead we will wait until "watch mode"
+   * recompiles the project.
+   */
   private _childProcessFailed: boolean = false;
 
   private _pluginEnabled: boolean = false;
@@ -60,11 +108,9 @@ export class NodeServicePlugin implements IHeftPlugin {
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     this._logger = heftSession.requestScopedLogger('node-service');
 
-    this._isWindows = process.platform === 'win32';
-
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.loadStageConfiguration.tapPromise(PLUGIN_NAME, async () => {
-        this._nodeServiceConfiguration =
+        this._rawConfiguration =
           await CoreConfigFiles.nodeServiceConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
             this._logger.terminal,
             heftConfiguration.buildFolder,
@@ -81,23 +127,23 @@ export class NodeServicePlugin implements IHeftPlugin {
         };
 
         // TODO: @rushstack/heft-config-file should be able to read a *.defaults.json file
-        if (this._nodeServiceConfiguration) {
+        if (this._rawConfiguration) {
           this._pluginEnabled = true;
 
-          if (this._nodeServiceConfiguration.commandName !== undefined) {
-            this._configuration.commandName = this._nodeServiceConfiguration.commandName;
+          if (this._rawConfiguration.commandName !== undefined) {
+            this._configuration.commandName = this._rawConfiguration.commandName;
           }
-          if (this._nodeServiceConfiguration.ignoreMissingScript !== undefined) {
-            this._configuration.ignoreMissingScript = this._nodeServiceConfiguration.ignoreMissingScript;
+          if (this._rawConfiguration.ignoreMissingScript !== undefined) {
+            this._configuration.ignoreMissingScript = this._rawConfiguration.ignoreMissingScript;
           }
-          if (this._nodeServiceConfiguration.waitBeforeRestartMs !== undefined) {
-            this._configuration.waitBeforeRestartMs = this._nodeServiceConfiguration.waitBeforeRestartMs;
+          if (this._rawConfiguration.waitBeforeRestartMs !== undefined) {
+            this._configuration.waitBeforeRestartMs = this._rawConfiguration.waitBeforeRestartMs;
           }
-          if (this._nodeServiceConfiguration.waitForTerminateMs !== undefined) {
-            this._configuration.waitForTerminateMs = this._nodeServiceConfiguration.waitForTerminateMs;
+          if (this._rawConfiguration.waitForTerminateMs !== undefined) {
+            this._configuration.waitForTerminateMs = this._rawConfiguration.waitForTerminateMs;
           }
-          if (this._nodeServiceConfiguration.waitForKillMs !== undefined) {
-            this._configuration.waitForKillMs = this._nodeServiceConfiguration.waitForKillMs;
+          if (this._rawConfiguration.waitForKillMs !== undefined) {
+            this._configuration.waitForKillMs = this._rawConfiguration.waitForKillMs;
           }
 
           this._shellCommand = (heftConfiguration.projectPackageJson.scripts || {})[
@@ -253,7 +299,7 @@ export class NodeServicePlugin implements IHeftPlugin {
       return;
     }
 
-    if (this._isWindows) {
+    if (NodeServicePlugin._isWindows) {
       // On Windows, SIGTERM can kill Cmd.exe and leave its children running in the background
       this._transitionToKilling();
     } else {
@@ -321,14 +367,18 @@ export class NodeServicePlugin implements IHeftPlugin {
 
   private _scheduleRestart(msFromNow: number): void {
     const newTime: number = performance.now() + msFromNow;
-    if (this._restartTime === undefined || newTime > this._restartTime) {
-      this._restartTime = newTime;
+    if (this._restartTime !== undefined && newTime < this._restartTime) {
+      return;
     }
+
+    this._restartTime = newTime;
     this._logger.terminal.writeVerboseLine('Extending timeout');
 
     this._clearTimeout();
     this._timeout = setTimeout(() => {
       this._timeout = undefined;
+      this._restartTime = undefined;
+
       this._logger.terminal.writeVerboseLine('Time to restart');
       this._restartChild();
     }, Math.max(0, this._restartTime - performance.now()));
