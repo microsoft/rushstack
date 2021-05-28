@@ -5,9 +5,9 @@
 import './jestWorkerPatch';
 
 import * as path from 'path';
-import { runCLI } from '@jest/core';
+import { getVersion, runCLI } from '@jest/core';
 import { Config } from '@jest/types';
-import { FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, Terminal } from '@rushstack/node-core-library';
 import {
   ICleanStageContext,
   ITestStageContext,
@@ -27,6 +27,8 @@ const JEST_CONFIGURATION_LOCATION: string = path.join('config', 'jest.config.jso
 
 export class JestPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
+
+  private _jestTerminal!: Terminal;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
@@ -58,6 +60,9 @@ export class JestPlugin implements IHeftPlugin {
   ): Promise<void> {
     const jestLogger: ScopedLogger = heftSession.requestScopedLogger('jest');
     const buildFolder: string = heftConfiguration.buildFolder;
+
+    this._jestTerminal = jestLogger.terminal;
+    this._jestTerminal.writeLine(`Using Jest version ${getVersion()}`);
 
     const expectedConfigPath: string = this._getJestConfigPath(heftConfiguration);
 
