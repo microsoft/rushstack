@@ -862,6 +862,21 @@ importers:
       fs-extra: 7.0.1
       typescript: 3.9.9
 
+  ../../heft-plugins/heft-jest-plugin:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': 0.30.7
+      '@rushstack/heft-node-rig': 1.0.23
+      '@rushstack/node-core-library': workspace:*
+      '@types/node': 10.17.13
+    dependencies:
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+    devDependencies:
+      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/heft': 0.30.7
+      '@rushstack/heft-node-rig': 1.0.23_@rushstack+heft@0.30.7
+      '@types/node': 10.17.13
+
   ../../heft-plugins/heft-webpack4-plugin:
     specifiers:
       '@rushstack/eslint-config': workspace:*
@@ -10240,6 +10255,7 @@ packages:
 
   /uuid/3.4.0:
     resolution: {integrity: sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==}
+    deprecated: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
     hasBin: true
 
   /uuid/8.3.2:
