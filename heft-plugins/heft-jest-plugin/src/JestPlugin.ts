@@ -14,7 +14,8 @@ import {
   IHeftPlugin,
   HeftConfiguration,
   HeftSession,
-  ScopedLogger
+  ScopedLogger,
+  IBuildStageContext
 } from '@rushstack/heft';
 
 import { IHeftJestReporterOptions } from './HeftJestReporter';
@@ -28,6 +29,17 @@ export class JestPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
+    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
+      build.hooks.postBuild.tapPromise(PLUGIN_NAME, async () => {
+        // Write the data file used by jest-build-transform
+        await JestTypeScriptDataFile.saveForProjectAsync(heftConfiguration.buildFolder, {
+          emitFolderNameForTests: build.properties.emitFolderNameForTests || 'lib',
+          extensionForTests: build.properties.emitExtensionForTests || '.js',
+          skipTimestampCheck: !build.properties.watchMode
+        });
+      });
+    });
+
     heftSession.hooks.test.tap(PLUGIN_NAME, (test: ITestStageContext) => {
       test.hooks.run.tapPromise(PLUGIN_NAME, async () => {
         await this._runJestAsync(heftSession, heftConfiguration, test);
