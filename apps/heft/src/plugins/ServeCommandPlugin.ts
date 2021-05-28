@@ -3,6 +3,7 @@
 
 import * as child_process from 'child_process';
 import * as process from 'process';
+import { performance } from 'perf_hooks';
 import { Executable, InternalError } from '@rushstack/node-core-library';
 
 import { HeftSession } from '../pluginFramework/HeftSession';
@@ -15,11 +16,14 @@ const PLUGIN_NAME: string = 'serve-command-plugin';
 
 enum State {
   Stopped,
-  WaitingToRestart,
   Running,
   Stopping,
   Killing
 }
+
+const SIGTERM_WAIT_MS: number = 6000;
+const SIGKILL_WAIT_MS: number = 6000;
+const DELAY_AFTER_TERMINATED_MS: number = 6000;
 
 export class ServeCommandPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
@@ -34,6 +38,9 @@ export class ServeCommandPlugin implements IHeftPlugin {
   private _timeout: NodeJS.Timeout | undefined = undefined;
 
   private _isWindows!: boolean;
+
+  // The process will be automatically restarted when performance.now() exceeds this time
+  private _restartTime: number | undefined = undefined;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     this._logger = heftSession.requestScopedLogger('serve-command');
@@ -58,7 +65,12 @@ export class ServeCommandPlugin implements IHeftPlugin {
 
   private _compileHooks_afterEachIteration = (): void => {
     try {
-      this._stopChild();
+      if (this._state === State.Stopped) {
+        // If we are already stopped, then extend the timeout
+        this._scheduleRestart(DELAY_AFTER_TERMINATED_MS);
+      } else {
+        this._stopChild();
+      }
     } catch (error) {
       console.error('UNCAUGHT: ' + error.toString());
     }
@@ -74,11 +86,13 @@ export class ServeCommandPlugin implements IHeftPlugin {
   }
 
   private _restartChild(): void {
-    if (this._state !== State.Stopped && this._state !== State.WaitingToRestart) {
+    if (this._state !== State.Stopped) {
       throw new InternalError('Invalid state');
     }
 
     this._state = State.Running;
+    this._clearTimeout();
+
     this._logger.terminal.writeLine('Invoking command: ' + JSON.stringify(this._serveCommand));
 
     this._activeChildProcess = child_process.spawn(this._serveCommand, {
@@ -90,7 +104,7 @@ export class ServeCommandPlugin implements IHeftPlugin {
     });
     const childPid: number = this._activeChildProcess.pid;
 
-    this._logger.terminal.writeLine(`Started child ${childPid}`);
+    this._logger.terminal.writeVerboseLine(`Started child ${childPid}`);
 
     this._activeChildProcess.on('close', (code: number, signal: string): void => {
       // The 'close' event is emitted after a process has ended and the stdio streams of a child process
@@ -99,7 +113,7 @@ export class ServeCommandPlugin implements IHeftPlugin {
       // or 'error' if the child failed to spawn.
 
       if (this._state === State.Running) {
-        this._logger.terminal.writeLine(
+        this._logger.terminal.writeWarningLine(
           `Child #${childPid} terminated unexpectedly code=${code} signal=${signal}`
         );
         this._transitionToStopped();
@@ -107,7 +121,7 @@ export class ServeCommandPlugin implements IHeftPlugin {
       }
 
       if (this._state === State.Stopping || this._state === State.Killing) {
-        this._logger.terminal.writeLine(
+        this._logger.terminal.writeVerboseLine(
           `Child #${childPid} terminated successfully code=${code} signal=${signal}`
         );
         this._transitionToStopped();
@@ -115,8 +129,9 @@ export class ServeCommandPlugin implements IHeftPlugin {
       }
     });
 
+    // This is event requires Node.js >= 15.x
     this._activeChildProcess.on('exit', (code: number | null, signal: string | null) => {
-      this._logger.terminal.writeLine(`Got EXIT event code=${code} signal=${signal}`);
+      this._logger.terminal.writeVerboseLine(`Got EXIT event code=${code} signal=${signal}`);
     });
 
     this._activeChildProcess.on('error', (err: Error) => {
@@ -129,19 +144,21 @@ export class ServeCommandPlugin implements IHeftPlugin {
       // and 'error' events, guard against accidentally invoking handler functions multiple times."
 
       if (this._state === State.Running) {
-        this._logger.terminal.writeLine(`Failed to start: ` + err.toString());
+        this._logger.terminal.writeErrorLine(`Failed to start: ` + err.toString());
         this._transitionToStopped();
         return;
       }
 
       if (this._state === State.Stopping) {
-        this._logger.terminal.writeLine(`Child #${childPid} rejected shutdown signal: ` + err.toString());
+        this._logger.terminal.writeWarningLine(
+          `Child #${childPid} rejected shutdown signal: ` + err.toString()
+        );
         this._transitionToKilling();
         return;
       }
 
       if (this._state === State.Killing) {
-        this._logger.terminal.writeLine(`Child #${childPid} rejected kill signal: ` + err.toString());
+        this._logger.terminal.writeErrorLine(`Child #${childPid} rejected kill signal: ` + err.toString());
         this._transitionToStopped();
         return;
       }
@@ -159,9 +176,10 @@ export class ServeCommandPlugin implements IHeftPlugin {
     }
 
     this._state = State.Stopping;
+    this._clearTimeout();
 
     if (this._isWindows) {
-      this._logger.terminal.writeLine('Terminating child process tree');
+      this._logger.terminal.writeVerboseLine('Terminating child process tree');
 
       // On Windows we have a problem that CMD.exe launches child processes, but when CMD.exe is killed
       // the child processes may continue running.  Also if we send signals to CMD.exe the child processes
@@ -175,13 +193,12 @@ export class ServeCommandPlugin implements IHeftPlugin {
       ]);
 
       if (result.error) {
-        this._logger.terminal.writeLine('TaskKill.exe failed: ' + result.error.toString());
+        this._logger.terminal.writeErrorLine('TaskKill.exe failed: ' + result.error.toString());
         this._transitionToStopped();
         return;
       }
-      this._logger.terminal.writeLine('Done invoking TaskKill');
     } else {
-      this._logger.terminal.writeLine('Sending SIGTERM');
+      this._logger.terminal.writeVerboseLine('Sending SIGTERM');
 
       // Passing a negative PID terminates the entire group instead of just the one process
       process.kill(-this._activeChildProcess.pid, 'SIGTERM');
@@ -190,21 +207,23 @@ export class ServeCommandPlugin implements IHeftPlugin {
     this._clearTimeout();
     this._timeout = setTimeout(() => {
       this._timeout = undefined;
-      this._logger.terminal.writeLine('Child is taking too long to terminate');
+      this._logger.terminal.writeWarningLine('Child is taking too long to terminate');
       this._transitionToKilling();
-    }, 6000);
+    }, SIGTERM_WAIT_MS);
   }
 
   private _transitionToKilling(): void {
     this._state = State.Killing;
-    this._logger.terminal.writeLine('Sending SIGKILL');
+    this._clearTimeout();
+
+    this._logger.terminal.writeVerboseLine('Sending SIGKILL');
 
     if (!this._activeChildProcess) {
       // All the code paths that set _activeChildProcess=undefined should also leave the Running state
       throw new InternalError('_activeChildProcess should not be undefined');
     }
 
-    this._logger.terminal.writeLine('Sending SIGKILL');
+    this._logger.terminal.writeVerboseLine('Sending SIGKILL');
 
     if (this._isWindows) {
       process.kill(this._activeChildProcess.pid, 'SIGKILL');
@@ -216,16 +235,35 @@ export class ServeCommandPlugin implements IHeftPlugin {
     this._clearTimeout();
     this._timeout = setTimeout(() => {
       this._timeout = undefined;
-      this._logger.terminal.writeLine('Abandoning child process because SIGKILL did not work');
+      this._logger.terminal.writeErrorLine('Abandoning child process because SIGKILL did not work');
       this._transitionToStopped();
-    }, 6000);
+    }, SIGKILL_WAIT_MS);
   }
 
   private _transitionToStopped(): void {
     // Failed to start
     this._state = State.Stopped;
-    this._activeChildProcess = undefined;
     this._clearTimeout();
+
+    this._activeChildProcess = undefined;
+
+    // Once we have stopped, schedule a restart
+    this._scheduleRestart(DELAY_AFTER_TERMINATED_MS);
+  }
+
+  private _scheduleRestart(msFromNow: number): void {
+    const newTime: number = performance.now() + msFromNow;
+    if (this._restartTime === undefined || newTime > this._restartTime) {
+      this._restartTime = newTime;
+    }
+    this._logger.terminal.writeVerboseLine('Extending timeout');
+
+    this._clearTimeout();
+    this._timeout = setTimeout(() => {
+      this._timeout = undefined;
+      this._logger.terminal.writeVerboseLine('Time to restart');
+      this._restartChild();
+    }, Math.max(0, this._restartTime - performance.now()));
   }
 
   private _clearTimeout(): void {
