@@ -18,12 +18,18 @@
     "@rushstack/heft": "^0.30.7"
   },
   "dependencies": {
-    "@rushstack/node-core-library": "workspace:*"
+    "@jest/core": "~25.4.0",
+    "@jest/reporters": "~25.4.0",
+    "@jest/transform": "~25.4.0",
+    "@rushstack/node-core-library": "workspace:*",
+    "jest-snapshot": "~25.4.0"
   },
   "devDependencies": {
+    "@jest/types": "~25.4.0",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "0.30.7",
     "@rushstack/heft-node-rig": "1.0.23",
-    "@types/node": "10.17.13"
+    "@types/node": "10.17.13",
+    "@types/heft-jest": "1.0.1"
   }
 }
