@@ -36,13 +36,10 @@ export class JestTypeScriptDataFile {
   /**
    * Called by TypeScriptPlugin to write the file.
    */
-  public static async saveForProjectAsync(
-    projectFolder: string,
-    json?: IJestTypeScriptDataFileJson
-  ): Promise<void> {
+  public static saveForProject(projectFolder: string, json?: IJestTypeScriptDataFileJson): void {
     const jsonFilePath: string = JestTypeScriptDataFile.getConfigFilePath(projectFolder);
 
-    await JsonFile.saveAsync(json, jsonFilePath, {
+    JsonFile.save(json, jsonFilePath, {
       ensureFolderExists: true,
       onlyIfChanged: true,
       headerComment: '// THIS DATA FILE IS INTERNAL TO HEFT; DO NOT MODIFY IT OR RELY ON ITS CONTENTS'

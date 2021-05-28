@@ -30,9 +30,9 @@ export class JestPlugin implements IHeftPlugin {
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-      build.hooks.postBuild.tapPromise(PLUGIN_NAME, async () => {
+      build.hooks.postBuild.tap(PLUGIN_NAME, () => {
         // Write the data file used by jest-build-transform
-        await JestTypeScriptDataFile.saveForProjectAsync(heftConfiguration.buildFolder, {
+        JestTypeScriptDataFile.saveForProject(heftConfiguration.buildFolder, {
           emitFolderNameForTests: build.properties.emitFolderNameForTests || 'lib',
           extensionForTests: build.properties.emitExtensionForTests || '.js',
           skipTimestampCheck: !build.properties.watchMode
