@@ -127,6 +127,7 @@ export class BuildStageHooks extends StageHooksBase<IBuildStageProperties> {
  * @public
  */
 export interface IBuildStageProperties {
+  // Input
   production: boolean;
   lite: boolean;
   locale?: string;
@@ -134,6 +135,16 @@ export interface IBuildStageProperties {
   watchMode: boolean;
   serveMode: boolean;
   webpackStats?: unknown;
+
+  // Output
+  /**
+   * @beta
+   */
+  emitFolderNameForTests?: string;
+  /**
+   * @beta
+   */
+  emitExtensionForTests?: '.js' | '.cjs' | '.mjs';
 }
 
 /**

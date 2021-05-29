@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.30.7",
+      "tag": "@rushstack/heft_v0.30.7",
+      "date": "Fri, 28 May 2021 06:19:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Prepare to split JestPlugin into a dedicated package"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.30.6",
       "tag": "@rushstack/heft_v0.30.6",
       "date": "Tue, 25 May 2021 00:12:21 GMT",
