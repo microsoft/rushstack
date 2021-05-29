@@ -2,6 +2,21 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "1.0.24",
+      "tag": "@rushstack/heft-node-rig_v1.0.24",
+      "date": "Sat, 29 May 2021 01:05:06 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.31.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.30.7` to `^0.31.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.23",
       "tag": "@rushstack/heft-node-rig_v1.0.23",
       "date": "Fri, 28 May 2021 06:19:58 GMT",
