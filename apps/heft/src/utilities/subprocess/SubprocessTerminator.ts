@@ -77,8 +77,10 @@ export class SubprocessTerminator {
     const pid: number = subprocess.pid;
 
     subprocess.on('close', (code: number, signal: string): void => {
-      SubprocessTerminator._logDebug(`untracking #${pid}`);
-      SubprocessTerminator._subprocessesByPid.delete(pid);
+      if (SubprocessTerminator._subprocessesByPid.has(pid)) {
+        SubprocessTerminator._logDebug(`untracking #${pid}`);
+        SubprocessTerminator._subprocessesByPid.delete(pid);
+      }
     });
     SubprocessTerminator._subprocessesByPid.set(pid, {
       subprocess,
@@ -92,6 +94,14 @@ export class SubprocessTerminator {
     subprocess: child_process.ChildProcess,
     subprocessOptions: ISubprocessOptions
   ): void {
+    const pid: number = subprocess.pid;
+
+    // Don't attempt to kill the same process twice
+    if (SubprocessTerminator._subprocessesByPid.has(pid)) {
+      SubprocessTerminator._logDebug(`untracking #${pid} via killProcessTree()`);
+      this._subprocessesByPid.delete(subprocess.pid);
+    }
+
     SubprocessTerminator._validateSubprocessOptions(subprocessOptions);
 
     if (typeof subprocess.exitCode === 'number') {
@@ -113,8 +123,16 @@ export class SubprocessTerminator {
         subprocess.pid.toString()
       ]);
 
-      if (result.error) {
-        console.error('TaskKill.exe failed: ' + result.error.toString());
+      if (result.status) {
+        const output: string = result.output.join('\n');
+        // Nonzero exit code
+        if (output.indexOf('not found') >= 0) {
+          // The PID does not exist
+        } else {
+          // Another error occurred, for example TaskKill.exe does not support
+          // the expected CLI syntax
+          throw new Error(`TaskKill.exe returned exit code ${result.status}:\n` + output + '\n');
+        }
       }
     } else {
       // Passing a negative PID terminates the entire group instead of just the one process
@@ -147,10 +165,29 @@ export class SubprocessTerminator {
       const trackedSubprocesses: ITrackedSubprocess[] = Array.from(
         SubprocessTerminator._subprocessesByPid.values()
       );
-      SubprocessTerminator._subprocessesByPid.clear();
+
+      let firstError: Error | undefined = undefined;
 
       for (const trackedSubprocess of trackedSubprocesses) {
-        SubprocessTerminator.killProcessTree(trackedSubprocess.subprocess, { detached: true });
+        try {
+          SubprocessTerminator.killProcessTree(trackedSubprocess.subprocess, { detached: true });
+        } catch (error) {
+          if (firstError === undefined) {
+            firstError = error;
+          }
+        }
+      }
+
+      if (firstError !== undefined) {
+        // This is generally an unexpected error such as the TaskKill.exe command not being found,
+        // not a trivial issue such as a nonexistent PID.   Since this occurs during process shutdown,
+        // we should not interfere with control flow by throwing an exception  or calling process.exit().
+        // So simply write to STDERR and ensure our exit code indicates the problem.
+        console.error('\nAn unexpected error was encountered while attempting to clean up child processes:');
+        console.error(firstError.toString());
+        if (!process.exitCode) {
+          process.exitCode = 1;
+        }
       }
     }
   }
@@ -186,8 +223,8 @@ export class SubprocessTerminator {
 
   // For debugging
   private static _logDebug(message: string): void {
-    // const logLine: string = `SubprocessTerminator: [${process.pid}] ${message}`;
+    //const logLine: string = `SubprocessTerminator: [${process.pid}] ${message}`;
     // fs.writeFileSync('trace.log', logLine + '\n', { flag: 'a' });
-    // console.log(logLine);
+    //console.log(logLine);
   }
 }

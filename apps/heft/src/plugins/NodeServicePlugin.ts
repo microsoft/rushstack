@@ -110,79 +110,84 @@ export class NodeServicePlugin implements IHeftPlugin {
 
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.loadStageConfiguration.tapPromise(PLUGIN_NAME, async () => {
-        this._rawConfiguration =
-          await CoreConfigFiles.nodeServiceConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
-            this._logger.terminal,
-            heftConfiguration.buildFolder,
-            heftConfiguration.rigConfig
-          );
+        await this._loadStageConfiguration(heftConfiguration);
 
-        // defaults
-        this._configuration = {
-          commandName: 'serve',
-          ignoreMissingScript: false,
-          waitBeforeRestartMs: 2000,
-          waitForTerminateMs: 2000,
-          waitForKillMs: 2000
-        };
+        if (this._pluginEnabled) {
+          build.hooks.postBuild.tap(PLUGIN_NAME, (bundle: IPostBuildSubstage) => {
+            bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
+              await this._runCommandAsync(heftSession, heftConfiguration);
+            });
+          });
 
-        // TODO: @rushstack/heft-config-file should be able to read a *.defaults.json file
-        if (this._rawConfiguration) {
-          this._pluginEnabled = true;
-
-          if (this._rawConfiguration.commandName !== undefined) {
-            this._configuration.commandName = this._rawConfiguration.commandName;
-          }
-          if (this._rawConfiguration.ignoreMissingScript !== undefined) {
-            this._configuration.ignoreMissingScript = this._rawConfiguration.ignoreMissingScript;
-          }
-          if (this._rawConfiguration.waitBeforeRestartMs !== undefined) {
-            this._configuration.waitBeforeRestartMs = this._rawConfiguration.waitBeforeRestartMs;
-          }
-          if (this._rawConfiguration.waitForTerminateMs !== undefined) {
-            this._configuration.waitForTerminateMs = this._rawConfiguration.waitForTerminateMs;
-          }
-          if (this._rawConfiguration.waitForKillMs !== undefined) {
-            this._configuration.waitForKillMs = this._rawConfiguration.waitForKillMs;
-          }
-
-          this._shellCommand = (heftConfiguration.projectPackageJson.scripts || {})[
-            this._configuration.commandName
-          ];
-
-          if (this._shellCommand === undefined) {
-            if (this._configuration.ignoreMissingScript) {
-              this._logger.terminal.writeLine(
-                `The plugin is disabled because the project's package.json` +
-                  ` does not have a "${this._configuration.commandName}" script`
-              );
-            } else {
-              this._logger.terminal.writeErrorLine(
-                `The project's package.json does not have a "${this._configuration.commandName}" script`
-              );
-            }
-            this._pluginEnabled = false;
-          }
-        } else {
-          this._logger.terminal.writeVerboseLine(
-            'The plugin is disabled because its config file was not found: ' +
-              CoreConfigFiles.nodeServiceConfigurationLoader.projectRelativeFilePath
-          );
+          build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
+            compile.hooks.afterEachIteration.tap(PLUGIN_NAME, this._compileHooks_afterEachIteration);
+          });
         }
       });
-
-      if (this._pluginEnabled) {
-        build.hooks.postBuild.tap(PLUGIN_NAME, (bundle: IPostBuildSubstage) => {
-          bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-            await this._runCommandAsync(heftSession, heftConfiguration);
-          });
-        });
-
-        build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
-          compile.hooks.afterEachIteration.tap(PLUGIN_NAME, this._compileHooks_afterEachIteration);
-        });
-      }
     });
+  }
+
+  private async _loadStageConfiguration(heftConfiguration: HeftConfiguration): Promise<void> {
+    this._rawConfiguration =
+      await CoreConfigFiles.nodeServiceConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
+        this._logger.terminal,
+        heftConfiguration.buildFolder,
+        heftConfiguration.rigConfig
+      );
+
+    // defaults
+    this._configuration = {
+      commandName: 'serve',
+      ignoreMissingScript: false,
+      waitBeforeRestartMs: 2000,
+      waitForTerminateMs: 2000,
+      waitForKillMs: 2000
+    };
+
+    // TODO: @rushstack/heft-config-file should be able to read a *.defaults.json file
+    if (this._rawConfiguration) {
+      this._pluginEnabled = true;
+
+      if (this._rawConfiguration.commandName !== undefined) {
+        this._configuration.commandName = this._rawConfiguration.commandName;
+      }
+      if (this._rawConfiguration.ignoreMissingScript !== undefined) {
+        this._configuration.ignoreMissingScript = this._rawConfiguration.ignoreMissingScript;
+      }
+      if (this._rawConfiguration.waitBeforeRestartMs !== undefined) {
+        this._configuration.waitBeforeRestartMs = this._rawConfiguration.waitBeforeRestartMs;
+      }
+      if (this._rawConfiguration.waitForTerminateMs !== undefined) {
+        this._configuration.waitForTerminateMs = this._rawConfiguration.waitForTerminateMs;
+      }
+      if (this._rawConfiguration.waitForKillMs !== undefined) {
+        this._configuration.waitForKillMs = this._rawConfiguration.waitForKillMs;
+      }
+
+      this._shellCommand = (heftConfiguration.projectPackageJson.scripts || {})[
+        this._configuration.commandName
+      ];
+
+      if (this._shellCommand === undefined) {
+        if (this._configuration.ignoreMissingScript) {
+          this._logger.terminal.writeLine(
+            `The plugin is disabled because the project's package.json` +
+              ` does not have a "${this._configuration.commandName}" script`
+          );
+        } else {
+          throw new Error(
+            `The node-service task cannot start because the project's package.json ` +
+              `does not have a "${this._configuration.commandName}" script`
+          );
+        }
+        this._pluginEnabled = false;
+      }
+    } else {
+      this._logger.terminal.writeVerboseLine(
+        'The plugin is disabled because its config file was not found: ' +
+          CoreConfigFiles.nodeServiceConfigurationLoader.projectRelativeFilePath
+      );
+    }
   }
 
   private async _runCommandAsync(
@@ -195,7 +200,7 @@ export class NodeServicePlugin implements IHeftPlugin {
   }
 
   private _compileHooks_afterEachIteration = (): void => {
-    try {
+    this._trapUnhandledException(() => {
       // We've recompiled, so try launching again
       this._childProcessFailed = false;
 
@@ -205,9 +210,7 @@ export class NodeServicePlugin implements IHeftPlugin {
       } else {
         this._stopChild();
       }
-    } catch (error) {
-      console.error('UNCAUGHT: ' + error.toString());
-    }
+    });
   };
 
   private _restartChild(): void {
@@ -231,67 +234,96 @@ export class NodeServicePlugin implements IHeftPlugin {
     );
 
     const childPid: number = this._activeChildProcess.pid;
-    this._logger.terminal.writeVerboseLine(`Started child ${childPid}`);
+    this._logger.terminal.writeVerboseLine(`Started service process #${childPid}`);
 
     this._activeChildProcess.on('close', (code: number, signal: string): void => {
-      // The 'close' event is emitted after a process has ended and the stdio streams of a child process
-      // have been closed. This is distinct from the 'exit' event, since multiple processes might share the
-      // same stdio streams. The 'close' event will always emit after 'exit' was already emitted,
-      // or 'error' if the child failed to spawn.
+      this._trapUnhandledException(() => {
+        // The 'close' event is emitted after a process has ended and the stdio streams of a child process
+        // have been closed. This is distinct from the 'exit' event, since multiple processes might share the
+        // same stdio streams. The 'close' event will always emit after 'exit' was already emitted,
+        // or 'error' if the child failed to spawn.
 
-      if (this._state === State.Running) {
-        this._logger.terminal.writeWarningLine(
-          `Child #${childPid} terminated unexpectedly code=${code} signal=${signal}`
-        );
-        this._childProcessFailed = true;
-        this._transitionToStopped();
-        return;
-      }
+        if (this._state === State.Running) {
+          this._logger.terminal.writeWarningLine(
+            `The service process #${childPid} terminated unexpectedly` +
+              this._formatCodeOrSignal(code, signal)
+          );
+          this._childProcessFailed = true;
+          this._transitionToStopped();
+          return;
+        }
 
-      if (this._state === State.Stopping || this._state === State.Killing) {
-        this._logger.terminal.writeVerboseLine(
-          `Child #${childPid} terminated successfully code=${code} signal=${signal}`
-        );
-        this._transitionToStopped();
-        return;
-      }
+        if (this._state === State.Stopping || this._state === State.Killing) {
+          this._logger.terminal.writeVerboseLine(
+            `The service process #${childPid} terminated successfully` +
+              this._formatCodeOrSignal(code, signal)
+          );
+          this._transitionToStopped();
+          return;
+        }
+      });
     });
 
-    // This is event requires Node.js >= 15.x
+    // This is event only fires for Node.js >= 15.x
+    this._activeChildProcess.on('spawn', () => {
+      this._trapUnhandledException(() => {
+        // Print a newline to separate the service's STDOUT from Heft's output
+        console.log();
+      });
+    });
+
     this._activeChildProcess.on('exit', (code: number | null, signal: string | null) => {
-      this._logger.terminal.writeVerboseLine(`Got EXIT event code=${code} signal=${signal}`);
+      this._trapUnhandledException(() => {
+        this._logger.terminal.writeVerboseLine(
+          `The service process fired its "exit" event` + this._formatCodeOrSignal(code, signal)
+        );
+      });
     });
 
     this._activeChildProcess.on('error', (err: Error) => {
-      // "The 'error' event is emitted whenever:
-      // 1. The process could not be spawned, or
-      // 2. The process could not be killed, or
-      // 3. Sending a message to the child process failed.
-      //
-      // The 'exit' event may or may not fire after an error has occurred. When listening to both the 'exit'
-      // and 'error' events, guard against accidentally invoking handler functions multiple times."
+      this._trapUnhandledException(() => {
+        // "The 'error' event is emitted whenever:
+        // 1. The process could not be spawned, or
+        // 2. The process could not be killed, or
+        // 3. Sending a message to the child process failed.
+        //
+        // The 'exit' event may or may not fire after an error has occurred. When listening to both the 'exit'
+        // and 'error' events, guard against accidentally invoking handler functions multiple times."
 
-      if (this._state === State.Running) {
-        this._logger.terminal.writeErrorLine(`Failed to start: ` + err.toString());
-        this._childProcessFailed = true;
-        this._transitionToStopped();
-        return;
-      }
+        if (this._state === State.Running) {
+          this._logger.terminal.writeErrorLine(`Failed to start: ` + err.toString());
+          this._childProcessFailed = true;
+          this._transitionToStopped();
+          return;
+        }
 
-      if (this._state === State.Stopping) {
-        this._logger.terminal.writeWarningLine(
-          `Child #${childPid} rejected shutdown signal: ` + err.toString()
-        );
-        this._transitionToKilling();
-        return;
-      }
+        if (this._state === State.Stopping) {
+          this._logger.terminal.writeWarningLine(
+            `The service process #${childPid} rejected the shutdown signal: ` + err.toString()
+          );
+          this._transitionToKilling();
+          return;
+        }
 
-      if (this._state === State.Killing) {
-        this._logger.terminal.writeErrorLine(`Child #${childPid} rejected kill signal: ` + err.toString());
-        this._transitionToStopped();
-        return;
-      }
+        if (this._state === State.Killing) {
+          this._logger.terminal.writeErrorLine(
+            `The service process #${childPid} could not be killed: ` + err.toString()
+          );
+          this._transitionToStopped();
+          return;
+        }
+      });
     });
+  }
+
+  private _formatCodeOrSignal(code: number | null | undefined, signal: string | null | undefined): string {
+    if (signal) {
+      return ` (signal=${code})`;
+    }
+    if (typeof code === 'number') {
+      return ` (exit code ${code})`;
+    }
+    return '';
   }
 
   private _stopChild(): void {
@@ -311,15 +343,16 @@ export class NodeServicePlugin implements IHeftPlugin {
       this._state = State.Stopping;
       this._clearTimeout();
 
-      this._logger.terminal.writeVerboseLine('Sending SIGTERM');
+      this._logger.terminal.writeVerboseLine('Sending SIGTERM to gracefully shut down the service process');
 
-      // Passing a negative PID terminates the entire group instead of just the one process
+      // Passing a negative PID terminates the entire group instead of just the one process.
+      // This works because we set detached=true for child_process.spawn()
       process.kill(-this._activeChildProcess.pid, 'SIGTERM');
 
       this._clearTimeout();
       this._timeout = setTimeout(() => {
         this._timeout = undefined;
-        this._logger.terminal.writeWarningLine('Child is taking too long to terminate');
+        this._logger.terminal.writeWarningLine('The service process is taking too long to terminate');
         this._transitionToKilling();
       }, this._configuration.waitForTerminateMs);
     }
@@ -329,21 +362,19 @@ export class NodeServicePlugin implements IHeftPlugin {
     this._state = State.Killing;
     this._clearTimeout();
 
-    this._logger.terminal.writeVerboseLine('Sending SIGKILL');
-
     if (!this._activeChildProcess) {
       // All the code paths that set _activeChildProcess=undefined should also leave the Running state
       throw new InternalError('_activeChildProcess should not be undefined');
     }
 
-    this._logger.terminal.writeVerboseLine('Sending SIGKILL');
+    this._logger.terminal.writeVerboseLine('Attempting to killing the service process');
 
     SubprocessTerminator.killProcessTree(this._activeChildProcess, SubprocessTerminator.RECOMMENDED_OPTIONS);
 
     this._clearTimeout();
     this._timeout = setTimeout(() => {
       this._timeout = undefined;
-      this._logger.terminal.writeErrorLine('Abandoning child process because SIGKILL did not work');
+      this._logger.terminal.writeErrorLine('Abandoning the service process because it could not be killed');
       this._transitionToStopped();
     }, this._configuration.waitForKillMs);
   }
@@ -360,7 +391,7 @@ export class NodeServicePlugin implements IHeftPlugin {
       this._scheduleRestart(this._configuration.waitBeforeRestartMs);
     } else {
       this._logger.terminal.writeLine(
-        'The child process failed. Waiting for a code change before restarting...'
+        'The service process has failed.  Waiting for watch mode to recompile before restarting...'
       );
     }
   }
@@ -372,7 +403,7 @@ export class NodeServicePlugin implements IHeftPlugin {
     }
 
     this._restartTime = newTime;
-    this._logger.terminal.writeVerboseLine('Extending timeout');
+    this._logger.terminal.writeVerboseLine(`Sleeping for ${msFromNow} milliseconds`);
 
     this._clearTimeout();
     this._timeout = setTimeout(() => {
@@ -388,6 +419,18 @@ export class NodeServicePlugin implements IHeftPlugin {
     if (this._timeout) {
       clearTimeout(this._timeout);
       this._timeout = undefined;
+    }
+  }
+
+  private _trapUnhandledException(action: () => void): void {
+    try {
+      action();
+    } catch (error) {
+      this._logger.emitError(error);
+      this._logger.terminal.writeErrorLine('An unexpected error occurred');
+
+      // TODO: Provide a Heft facility for this
+      process.exit(1);
     }
   }
 }

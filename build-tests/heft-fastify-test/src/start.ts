@@ -51,4 +51,3 @@ class MyApp {
 
 const myApp: MyApp = new MyApp();
 myApp.start();
-//
