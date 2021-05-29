@@ -147,11 +147,12 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
         path.resolve(__dirname, 'startSubprocess'),
         [this.filename, JSON.stringify(this._innerConfiguration), JSON.stringify(this._configuration)],
         {
-          execArgv: this._processNodeArgsForSubprocess(this._globalTerminal, process.execArgv)
+          execArgv: this._processNodeArgsForSubprocess(this._globalTerminal, process.execArgv),
+          ...SubprocessTerminator.RECOMMENDED_OPTIONS
         }
       );
 
-      SubprocessTerminator.registerChildProcess(subprocess);
+      SubprocessTerminator.killProcessTreeOnExit(subprocess, SubprocessTerminator.RECOMMENDED_OPTIONS);
 
       this._terminalProviderManager.registerSubprocess(subprocess);
       this._scopedLoggerManager.registerSubprocess(subprocess);

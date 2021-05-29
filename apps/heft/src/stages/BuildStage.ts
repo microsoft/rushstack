@@ -42,6 +42,8 @@ export type CopyFromCacheMode = 'hardlink' | 'copy';
  */
 export class CompileSubstageHooks extends BuildSubstageHooksBase {
   public readonly afterCompile: AsyncParallelHook = new AsyncParallelHook();
+
+  public readonly afterEachIteration: SyncHook = new SyncHook();
 }
 
 /**
