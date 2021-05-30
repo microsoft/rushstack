@@ -80,6 +80,6 @@
     "@types/wordwrap": "1.0.0",
     "@types/z-schema": "3.16.31",
     "jest": "~25.4.0",
-    "typescript": "~4.1.5"
+    "typescript": "~3.9.7"
   }
 }

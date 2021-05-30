@@ -63,34 +63,10 @@
      * For example, allow some projects to use an older TypeScript compiler
      * (in addition to whatever "usual" version is being used by other projects in the repo):
      */
-    "typescript": [
-      "~2.4.2",
-      "~2.7.2",
-      "~2.8.4",
-      "~2.9.2",
-      "~3.0.3",
-      "~3.1.6",
-      "~3.2.4",
-      "~3.4.3",
-      "~3.5.3",
-      "~3.6.4",
-      "~3.7.2",
-      "~3.8.3",
-      "~3.9.7",
-      "~4.0.7",
-      "~4.1.5",
-      "~4.2.4"
-    ],
+    "typescript": ["~2.4.2", "~2.9.2", "~4.2.4"],
 
     "source-map": [
       "~0.6.1" // API Extractor is using an older version of source-map because newer versions are async
-    ],
-
-    "@rushstack/heft": [
-      // This is needed for the rush-stack-compiler-x.x projects which cannot build using
-      // the latest Heft due to a regression from PR #2073 that prevents the same plugin from
-      // being applied multiple times
-      "0.8.0"
     ],
 
     "webpack": ["~5.35.1"],

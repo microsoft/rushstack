@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Wed, 19 May 2021 00:11:39 GMT and should not be manually modified.
+This log was last generated on Sat, 29 May 2021 01:05:06 GMT and should not be manually modified.
+
+## 0.4.0
+Sat, 29 May 2021 01:05:06 GMT
+
+### Minor changes
+
+- Expose the ConfigurationFile.projectRelativeFilePath property
 
 ## 0.3.22
 Wed, 19 May 2021 00:11:39 GMT

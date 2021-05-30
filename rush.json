@@ -427,6 +427,7 @@
     //   // "versionPolicyName": ""
     // },
     //
+
     // "apps" folder (alphabetical order)
     {
       "packageName": "@microsoft/api-documenter",
@@ -568,6 +569,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-fastify-test",
+      "projectFolder": "build-tests/heft-fastify-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-minimal-rig-test",
       "projectFolder": "build-tests/heft-minimal-rig-test",
       "reviewCategory": "tests",
@@ -634,187 +641,12 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
-    {
-      "packageName": "node-library-build-eslint-test",
-      "projectFolder": "build-tests/node-library-build-eslint-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "node-library-build-tslint-test",
-      "projectFolder": "build-tests/node-library-build-tslint-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-
-    // rush-stack-compiler-* projects
-    {
-      "packageName": "rush-stack-compiler-2.4-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-2.4-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-2.7-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-2.7-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-2.8-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-2.8-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-2.9-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-2.9-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.0-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.0-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.1-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.1-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.2-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.2-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.3-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.3-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.4-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.4-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.5-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.5-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.6-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.6-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.7-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.7-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.8-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.8-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.9-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.9-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-4.0-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-4.0-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-4.1-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-4.1-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-4.2-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-4.2-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
 
     {
       "packageName": "ts-command-line-test",
       "projectFolder": "build-tests/ts-command-line-test",
       "reviewCategory": "tests",
       "shouldPublish": false
-    },
-    {
-      "packageName": "web-library-build-test",
-      "projectFolder": "build-tests/web-library-build-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-
-    // "core-build" folder (alphabetical order)
-    {
-      "packageName": "@microsoft/gulp-core-build",
-      "projectFolder": "core-build/gulp-core-build",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.9"]
-    },
-    {
-      "packageName": "@microsoft/gulp-core-build-mocha",
-      "projectFolder": "core-build/gulp-core-build-mocha",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.9"]
-    },
-    {
-      "packageName": "@microsoft/gulp-core-build-sass",
-      "projectFolder": "core-build/gulp-core-build-sass",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@microsoft/gulp-core-build-serve",
-      "projectFolder": "core-build/gulp-core-build-serve",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@microsoft/gulp-core-build-typescript",
-      "projectFolder": "core-build/gulp-core-build-typescript",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.9"]
-    },
-    {
-      "packageName": "@microsoft/gulp-core-build-webpack",
-      "projectFolder": "core-build/gulp-core-build-webpack",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@microsoft/node-library-build",
-      "projectFolder": "core-build/node-library-build",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@microsoft/web-library-build",
-      "projectFolder": "core-build/web-library-build",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
     },
 
     // "heft-plugins" folder (alphabetical order)
@@ -979,134 +811,6 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-2.4",
-      "projectFolder": "stack/rush-stack-compiler-2.4",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-2.7",
-      "projectFolder": "stack/rush-stack-compiler-2.7",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-2.8",
-      "projectFolder": "stack/rush-stack-compiler-2.8",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-2.9",
-      "projectFolder": "stack/rush-stack-compiler-2.9",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.0",
-      "projectFolder": "stack/rush-stack-compiler-3.0",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.1",
-      "projectFolder": "stack/rush-stack-compiler-3.1",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.2",
-      "projectFolder": "stack/rush-stack-compiler-3.2",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.3",
-      "projectFolder": "stack/rush-stack-compiler-3.3",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.4",
-      "projectFolder": "stack/rush-stack-compiler-3.4",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.5",
-      "projectFolder": "stack/rush-stack-compiler-3.5",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.6",
-      "projectFolder": "stack/rush-stack-compiler-3.6",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.7",
-      "projectFolder": "stack/rush-stack-compiler-3.7",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.8",
-      "projectFolder": "stack/rush-stack-compiler-3.8",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.9",
-      "projectFolder": "stack/rush-stack-compiler-3.9",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": [
-        "@microsoft/rush-stack-compiler-3.9",
-        "@rushstack/heft",
-        "@rushstack/heft-node-rig"
-      ]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-4.0",
-      "projectFolder": "stack/rush-stack-compiler-4.0",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-4.1",
-      "projectFolder": "stack/rush-stack-compiler-4.1",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-4.2",
-      "projectFolder": "stack/rush-stack-compiler-4.2",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-shared",
-      "projectFolder": "stack/rush-stack-compiler-shared",
-      "reviewCategory": "libraries"
     },
 
     // "tutorials" folder (alphabetical order)

@@ -54,6 +54,8 @@ export class CleanStageHooks extends StageHooksBase<ICleanStageProperties> {
 export class CompileSubstageHooks extends BuildSubstageHooksBase {
     // (undocumented)
     readonly afterCompile: AsyncParallelHook;
+    // (undocumented)
+    readonly afterEachIteration: SyncHook;
 }
 
 // @public (undocumented)
@@ -110,6 +112,10 @@ export interface IBuildStageContext extends IStageContext<BuildStageHooks, IBuil
 
 // @public (undocumented)
 export interface IBuildStageProperties {
+    // @beta (undocumented)
+    emitExtensionForTests?: '.js' | '.cjs' | '.mjs';
+    // @beta (undocumented)
+    emitFolderNameForTests?: string;
     // (undocumented)
     lite: boolean;
     // (undocumented)

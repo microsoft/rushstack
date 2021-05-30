@@ -42,6 +42,8 @@ export type CopyFromCacheMode = 'hardlink' | 'copy';
  */
 export class CompileSubstageHooks extends BuildSubstageHooksBase {
   public readonly afterCompile: AsyncParallelHook = new AsyncParallelHook();
+
+  public readonly afterEachIteration: SyncHook = new SyncHook();
 }
 
 /**
@@ -125,6 +127,7 @@ export class BuildStageHooks extends StageHooksBase<IBuildStageProperties> {
  * @public
  */
 export interface IBuildStageProperties {
+  // Input
   production: boolean;
   lite: boolean;
   locale?: string;
@@ -132,6 +135,16 @@ export interface IBuildStageProperties {
   watchMode: boolean;
   serveMode: boolean;
   webpackStats?: unknown;
+
+  // Output
+  /**
+   * @beta
+   */
+  emitFolderNameForTests?: string;
+  /**
+   * @beta
+   */
+  emitExtensionForTests?: '.js' | '.cjs' | '.mjs';
 }
 
 /**

@@ -1,6 +1,27 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 19 May 2021 00:11:39 GMT and should not be manually modified.
+This log was last generated on Sat, 29 May 2021 01:05:06 GMT and should not be manually modified.
+
+## 0.31.0
+Sat, 29 May 2021 01:05:06 GMT
+
+### Minor changes
+
+- Add a new "node-service" task that enables "heft start" to launch a Node.js service (GitHub #2717)
+
+## 0.30.7
+Fri, 28 May 2021 06:19:57 GMT
+
+### Patches
+
+- Prepare to split JestPlugin into a dedicated package
+
+## 0.30.6
+Tue, 25 May 2021 00:12:21 GMT
+
+### Patches
+
+- Report an error to prevent two different TypeScript module kinds from being emitted into nested folders
 
 ## 0.30.5
 Wed, 19 May 2021 00:11:39 GMT

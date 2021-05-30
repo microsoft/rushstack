@@ -39,127 +39,19 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@microsoft/gulp-core-build",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "@microsoft/gulp-core-build-mocha",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "@microsoft/gulp-core-build-sass",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "@microsoft/gulp-core-build-serve",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "@microsoft/gulp-core-build-typescript",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "@microsoft/gulp-core-build-webpack",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "@microsoft/load-themed-styles",
-      "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
-      "name": "@microsoft/node-library-build",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@microsoft/rush-lib",
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@microsoft/rush-stack",
-      "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
-      "name": "@microsoft/rush-stack-compiler-2.4",
-      "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "@microsoft/rush-stack-compiler-2.7",
-      "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "@microsoft/rush-stack-compiler-2.8",
-      "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "@microsoft/rush-stack-compiler-2.9",
-      "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "@microsoft/rush-stack-compiler-3.0",
-      "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "@microsoft/rush-stack-compiler-3.1",
-      "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
-      "name": "@microsoft/rush-stack-compiler-3.2",
-      "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "@microsoft/rush-stack-compiler-3.3",
-      "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "@microsoft/rush-stack-compiler-3.4",
-      "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "@microsoft/rush-stack-compiler-3.5",
-      "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "@microsoft/rush-stack-compiler-3.6",
-      "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "@microsoft/rush-stack-compiler-3.7",
-      "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "@microsoft/rush-stack-compiler-3.8",
-      "allowedCategories": [ "tests" ]
-    },
-    {
       "name": "@microsoft/rush-stack-compiler-3.9",
-      "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
-      "name": "@microsoft/rush-stack-compiler-4.0",
       "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "@microsoft/rush-stack-compiler-4.1",
-      "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "@microsoft/rush-stack-compiler-4.2",
-      "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "@microsoft/rush-stack-compiler-shared",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "@microsoft/sp-tslint-rules",
-      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@microsoft/teams-js",
-      "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "@microsoft/ts-command-line",
       "allowedCategories": [ "tests" ]
     },
     {
@@ -171,19 +63,7 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@microsoft/web-library-build",
-      "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
       "name": "@pnpm/link-bins",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "@pnpm/logger",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "@rushstack/debug-certificate-manager",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -200,7 +80,7 @@
     },
     {
       "name": "@rushstack/eslint-plugin-packlets",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "@rushstack/eslint-plugin-security",
@@ -244,10 +124,6 @@
     },
     {
       "name": "@rushstack/package-deps-hash",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "@rushstack/pre-compile-hardlink-or-copy-plugin",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -328,7 +204,7 @@
     },
     {
       "name": "autoprefixer",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "builtin-modules",
@@ -339,15 +215,7 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "chalk",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "chokidar",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "clean-css",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -363,27 +231,11 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "deasync",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "decache",
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "decomment",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "del",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "doc-plugin-rush-stack",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "end-of-stream",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -399,20 +251,16 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "eslint-plugin-security",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "eslint-plugin-tsdoc",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "express",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "fast-glob",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "fastify",
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "file-loader",
@@ -421,10 +269,6 @@
     {
       "name": "fs-extra",
       "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
-      "name": "fsevents",
-      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "git-repo-info",
@@ -436,90 +280,6 @@
     },
     {
       "name": "glob-escape",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "globby",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp",
-      "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
-      "name": "gulp-cache",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp-changed",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp-clean-css",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp-clip-empty-files",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp-clone",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp-connect",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp-decomment",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp-flatten",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp-if",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp-istanbul",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp-mocha",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp-open",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp-plumber",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp-postcss",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp-replace",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp-sass",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp-sourcemaps",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp-texttojs",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "gulp-typescript",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -559,27 +319,7 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "istanbul-instrumenter-loader",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "jest",
-      "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
-      "name": "jest-cli",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "jest-environment-jsdom",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "jest-nunit-reporter",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "jest-resolve",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -592,10 +332,6 @@
     },
     {
       "name": "js-yaml",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "jsdom",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -615,31 +351,11 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "lodash.merge",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "lolex",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "long",
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "md5",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "merge2",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "minimatch",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "mocha",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -648,10 +364,6 @@
     },
     {
       "name": "node-forge",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "node-notifier",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -664,14 +376,6 @@
     },
     {
       "name": "npm-packlist",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "object-assign",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "orchestrator",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -691,10 +395,6 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "pretty-hrtime",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "pseudolocale",
       "allowedCategories": [ "libraries" ]
     },
@@ -705,10 +405,6 @@
     {
       "name": "resolve",
       "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "sass",
-      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "sass-loader",
@@ -763,20 +459,12 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "through2",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "timsort",
       "allowedCategories": [ "libraries" ]
     },
     {
       "name": "true-case-path",
       "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "ts-jest",
-      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "ts-loader",
@@ -788,19 +476,11 @@
     },
     {
       "name": "tslint-microsoft-contrib",
-      "allowedCategories": [ "libraries", "tests" ]
+      "allowedCategories": [ "tests" ]
     },
     {
       "name": "typescript",
       "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
-      "name": "uglify-js",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "vinyl",
-      "allowedCategories": [ "libraries" ]
     },
     {
       "name": "webpack",
@@ -827,15 +507,7 @@
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "xml",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "xmldoc",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "yargs",
       "allowedCategories": [ "libraries" ]
     },
     {

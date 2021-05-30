@@ -15,6 +15,7 @@ export class ConfigurationFile<TConfigurationFile> {
     getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
     getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue | undefined;
     loadConfigurationFileForProjectAsync(terminal: Terminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile>;
+    readonly projectRelativeFilePath: string;
     tryLoadConfigurationFileForProjectAsync(terminal: Terminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile | undefined>;
     }
 
