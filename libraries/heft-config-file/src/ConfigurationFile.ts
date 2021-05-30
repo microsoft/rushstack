@@ -197,7 +197,7 @@ export class ConfigurationFile<TConfigurationFile> {
   private readonly _configPromiseCache: Map<
     string,
     Promise<IConfigurationFileCacheEntry<TConfigurationFile>>
-  > = new Map<string, Promise<IConfigurationFileCacheEntry<TConfigurationFile>>>();
+  > = new Map();
   private readonly _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
   public constructor(options: IConfigurationFileOptions<TConfigurationFile>) {
