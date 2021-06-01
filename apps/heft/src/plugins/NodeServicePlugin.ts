@@ -109,6 +109,11 @@ export class NodeServicePlugin implements IHeftPlugin {
     this._logger = heftSession.requestScopedLogger('node-service');
 
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
+      if (!build.properties.serveMode) {
+        // This plugin is only used with "heft start"
+        return;
+      }
+
       build.hooks.loadStageConfiguration.tapPromise(PLUGIN_NAME, async () => {
         await this._loadStageConfiguration(heftConfiguration);
 
