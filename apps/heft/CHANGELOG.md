@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Sat, 29 May 2021 01:05:06 GMT and should not be manually modified.
+This log was last generated on Tue, 01 Jun 2021 18:29:25 GMT and should not be manually modified.
+
+## 0.31.1
+Tue, 01 Jun 2021 18:29:25 GMT
+
+### Patches
+
+- Fix an issue where NodeServicePlugin launched the service when "heft build --watch" was invoked
 
 ## 0.31.0
 Sat, 29 May 2021 01:05:06 GMT
