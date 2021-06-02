@@ -46,11 +46,14 @@ describe('CLI', () => {
       'node',
       [startPath, 'show-args', '1', '2', '-x'],
       path.join(__dirname, 'repo', 'rushx-not-in-rush-project')
-    )
+    );
 
+    console.log(output);
 
-    console.log(output)
-
-    expect(output).toEqual(expect.stringMatching('Warning: You are running rushx under a Rush repo but current project is not registered to Rush config.'));
+    expect(output).toEqual(
+      expect.stringMatching(
+        'Warning: You are invoking "rushx" inside a Rush repository, but this project is not registered in rush.json.'
+      )
+    );
   });
 });
