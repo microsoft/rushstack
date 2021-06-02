@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Heft Jest Plugin Options Configuration",
+  "description": "Defines additional Jest-related plugin configuration.",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "properties": {
+    "disablePresetRelativeModuleResolution": {
+      "title": "Disable Preset-Relative Module Resolution",
+      "description": "If set to true, module resolution will return to the Jest default and preset-relative module resolution will not be performed.",
+      "type": "boolean"
+    },
+    "passWithNoTests": {
+      "title": "Pass With No Tests",
+      "description": "If set to true, Jest will pass a test run when no tests are discovered.",
+      "type": "boolean"
+    }
+  }
+}

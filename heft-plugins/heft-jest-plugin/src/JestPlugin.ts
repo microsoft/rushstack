@@ -7,7 +7,7 @@ import './jestWorkerPatch';
 import * as path from 'path';
 import { getVersion, runCLI } from '@jest/core';
 import { Config } from '@jest/types';
-import { FileSystem, JsonFile, Terminal } from '@rushstack/node-core-library';
+import { FileSystem, JsonFile, JsonSchema, Terminal } from '@rushstack/node-core-library';
 import {
   ICleanStageContext,
   ITestStageContext,
@@ -20,17 +20,34 @@ import {
 
 import { IHeftJestReporterOptions } from './HeftJestReporter';
 import { JestTypeScriptDataFile, IJestTypeScriptDataFileJson } from './JestTypeScriptDataFile';
+import { JestConfigLoader } from './JestConfigLoader';
 
 type JestReporterConfig = string | Config.ReporterConfig;
 const PLUGIN_NAME: string = 'JestPlugin';
 const JEST_CONFIGURATION_LOCATION: string = path.join('config', 'jest.config.json');
 
-export class JestPlugin implements IHeftPlugin {
+interface IJestPluginOptions {
+  disablePresetRelativeModuleResolution?: boolean;
+  passWithNoTests?: boolean;
+}
+
+export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
   public readonly pluginName: string = PLUGIN_NAME;
 
   private _jestTerminal!: Terminal;
 
-  public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
+  /*
+   * @override
+   */
+  public apply(
+    heftSession: HeftSession,
+    heftConfiguration: HeftConfiguration,
+    options?: IJestPluginOptions
+  ): void {
+    if (options) {
+      JsonSchema.fromFile(path.join(__dirname, 'jestPlugin.schema.json')).validateObject(options, '');
+    }
+
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.postBuild.tap(PLUGIN_NAME, () => {
         // Write the data file used by jest-build-transform
@@ -44,7 +61,7 @@ export class JestPlugin implements IHeftPlugin {
 
     heftSession.hooks.test.tap(PLUGIN_NAME, (test: ITestStageContext) => {
       test.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-        await this._runJestAsync(heftSession, heftConfiguration, test);
+        await this._runJestAsync(heftSession, heftConfiguration, test, options);
       });
     });
 
@@ -56,7 +73,8 @@ export class JestPlugin implements IHeftPlugin {
   private async _runJestAsync(
     heftSession: HeftSession,
     heftConfiguration: HeftConfiguration,
-    test: ITestStageContext
+    test: ITestStageContext,
+    options?: IJestPluginOptions
   ): Promise<void> {
     const jestLogger: ScopedLogger = heftSession.requestScopedLogger('jest');
     const buildFolder: string = heftConfiguration.buildFolder;
@@ -77,6 +95,20 @@ export class JestPlugin implements IHeftPlugin {
       this._validateJestTypeScriptDataFile(buildFolder);
     }
 
+    let jestConfig: string;
+    if (options?.disablePresetRelativeModuleResolution) {
+      // If the feature isn't enabled, we will fall back to loading the config by path in Jest
+      jestConfig = expectedConfigPath;
+    } else {
+      // Load in the Jest config manually. This allows us to perform runtime module
+      // resolution for preset configs.
+      const configObj: Config.InitialOptions = await JestConfigLoader.loadConfigAsync(
+        expectedConfigPath,
+        buildFolder
+      );
+      jestConfig = JSON.stringify(configObj);
+    }
+
     const jestArgv: Config.Argv = {
       watch: test.properties.watchMode,
 
@@ -85,7 +117,7 @@ export class JestPlugin implements IHeftPlugin {
       debug: heftSession.debugMode,
       detectOpenHandles: !!test.properties.detectOpenHandles,
 
-      config: expectedConfigPath,
+      config: jestConfig,
       cacheDirectory: this._getJestCacheFolder(heftConfiguration),
       updateSnapshot: test.properties.updateSnapshots,
 
@@ -97,6 +129,8 @@ export class JestPlugin implements IHeftPlugin {
       testPathPattern: test.properties.testPathPattern ? [...test.properties.testPathPattern] : undefined,
       testTimeout: test.properties.testTimeout,
       maxWorkers: test.properties.maxWorkers,
+
+      passWithNoTests: options?.passWithNoTests,
 
       $0: process.argv0,
       _: []
