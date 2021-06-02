@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/heft",
       "comment": "Remove Jest plugin from Heft. To consume the Jest plugin, add @rushstack/heft-jest-plugin as a dependency and include it in heft.json",
-      "type": "major"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft",

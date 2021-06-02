@@ -95,15 +95,15 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/heft-jest-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "@rushstack/heft-node-rig",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/heft-web-rig",
-      "allowedCategories": [ "libraries", "tests" ]
-    },
-    {
-      "name": "@rushstack/heft-jest-plugin",
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
