@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "The \"rushx\" command now reports a warning when invoked in a project folder that is not registered in rush.json",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "m1heng@users.noreply.github.com"
+}

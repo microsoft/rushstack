@@ -1,5 +1,10 @@
 {
   "pnpmVersion": "4.5.0",
   "rushVersion": "5.0.0",
-  "projects": []
+  "projects": [
+    {
+      "packageName": "rushx-project",
+      "projectFolder": "rushx-project"
+    }
+  ]
 }
