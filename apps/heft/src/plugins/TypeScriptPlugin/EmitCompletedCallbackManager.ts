@@ -4,9 +4,9 @@
 import { SubprocessCommunicationManagerBase } from '../../utilities/subprocess/SubprocessCommunicationManagerBase';
 import { ISubprocessMessageBase } from '../../utilities/subprocess/SubprocessCommunication';
 
-const FIST_EMIT_COMPLETED_CALLBACK_MANAGER_MESSAGE: string = 'firstEmitCompletedCallbackManagerMessage';
+const EMIT_COMPLETED_CALLBACK_MANAGER_MESSAGE: string = 'emitCompletedCallbackManagerMessage';
 
-export class FirstEmitCompletedCallbackManager extends SubprocessCommunicationManagerBase {
+export class EmitCompletedCallbackManager extends SubprocessCommunicationManagerBase {
   private readonly _callback: () => void;
 
   public constructor(callback: () => void) {
@@ -16,15 +16,15 @@ export class FirstEmitCompletedCallbackManager extends SubprocessCommunicationMa
   }
 
   public callback(): void {
-    this.sendMessageToParentProcess({ type: FIST_EMIT_COMPLETED_CALLBACK_MANAGER_MESSAGE });
+    this.sendMessageToParentProcess({ type: EMIT_COMPLETED_CALLBACK_MANAGER_MESSAGE });
   }
 
   public canHandleMessageFromSubprocess(message: ISubprocessMessageBase): boolean {
-    return message.type === FIST_EMIT_COMPLETED_CALLBACK_MANAGER_MESSAGE;
+    return message.type === EMIT_COMPLETED_CALLBACK_MANAGER_MESSAGE;
   }
 
   public receiveMessageFromSubprocess(message: ISubprocessMessageBase): void {
-    if (message.type === FIST_EMIT_COMPLETED_CALLBACK_MANAGER_MESSAGE) {
+    if (message.type === EMIT_COMPLETED_CALLBACK_MANAGER_MESSAGE) {
       this._callback();
     }
   }

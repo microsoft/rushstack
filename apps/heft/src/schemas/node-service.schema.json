@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Node Service Configuration",
+  "description": "Configures the Node Service plugin for Heft",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+
+    "extends": {
+      "description": "Optionally specifies another JSON config file that this file extends from.  This provides a way for standard settings to be shared across multiple projects.",
+      "type": "string"
+    },
+
+    "commandName": {
+      "description": "Specifies the name of a \"scripts\" command from the project's package.json file. When \"heft start\" is invoked, it will use this shell command to launch the service process.",
+      "type": "string"
+    },
+
+    "ignoreMissingScript": {
+      "description": "If false, then an error is reported if the \"scripts\" command is not found in the project's package.json.  If true, then no action will be taken.",
+      "type": "boolean"
+    },
+
+    "waitBeforeRestartMs": {
+      "description": "Customizes the number of milliseconds to wait before restarting the child process, as measured from when the previous process exited.  If this interval is too small, then the new process may start while the developer is still saving changes, or while other monitoring processes are still holding OS locks.",
+      "type": "number"
+    },
+
+    "waitForTerminateMs": {
+      "description": "Customizes the number of milliseconds to wait for the child process to be terminated (SIGTERM) before forcibly killing it.",
+      "type": "number"
+    },
+
+    "waitForKillMs": {
+      "description": "Customizes the number of milliseconds to wait for the child process to be killed (SIGKILL) before giving up and abandoning it.",
+      "type": "number"
+    }
+  }
+}

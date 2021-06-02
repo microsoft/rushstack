@@ -2,6 +2,35 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.31.1",
+      "tag": "@rushstack/heft_v0.31.1",
+      "date": "Tue, 01 Jun 2021 18:29:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where NodeServicePlugin launched the service when \"heft build --watch\" was invoked"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.31.0",
+      "tag": "@rushstack/heft_v0.31.0",
+      "date": "Sat, 29 May 2021 01:05:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a new \"node-service\" task that enables \"heft start\" to launch a Node.js service (GitHub #2717)"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.30.7",
       "tag": "@rushstack/heft_v0.30.7",
       "date": "Fri, 28 May 2021 06:19:57 GMT",

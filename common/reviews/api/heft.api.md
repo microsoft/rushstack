@@ -54,6 +54,8 @@ export class CleanStageHooks extends StageHooksBase<ICleanStageProperties> {
 export class CompileSubstageHooks extends BuildSubstageHooksBase {
     // (undocumented)
     readonly afterCompile: AsyncParallelHook;
+    // (undocumented)
+    readonly afterEachIteration: SyncHook;
 }
 
 // @public (undocumented)

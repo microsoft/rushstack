@@ -569,6 +569,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-fastify-test",
+      "projectFolder": "build-tests/heft-fastify-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-minimal-rig-test",
       "projectFolder": "build-tests/heft-minimal-rig-test",
       "reviewCategory": "tests",

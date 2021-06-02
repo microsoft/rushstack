@@ -179,7 +179,10 @@ export interface IOriginalValueOptions<TParentProperty> {
  */
 export class ConfigurationFile<TConfigurationFile> {
   private readonly _schemaPath: string;
-  private readonly _projectRelativeFilePath: string;
+
+  /** {@inheritDoc IConfigurationFileOptions.projectRelativeFilePath} */
+  public readonly projectRelativeFilePath: string;
+
   private readonly _jsonPathMetadata: IJsonPathsMetadata;
   private readonly _propertyInheritanceTypes: IPropertiesInheritance<TConfigurationFile>;
   private __schema: JsonSchema | undefined;
@@ -197,7 +200,7 @@ export class ConfigurationFile<TConfigurationFile> {
   private readonly _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
   public constructor(options: IConfigurationFileOptions<TConfigurationFile>) {
-    this._projectRelativeFilePath = options.projectRelativeFilePath;
+    this.projectRelativeFilePath = options.projectRelativeFilePath;
     this._schemaPath = options.jsonSchemaPath;
     this._jsonPathMetadata = options.jsonPathMetadata || {};
     this._propertyInheritanceTypes = options.propertyInheritance || {};
@@ -571,7 +574,7 @@ export class ConfigurationFile<TConfigurationFile> {
       try {
         return await this._loadConfigurationFileInnerWithCacheAsync(
           terminal,
-          nodeJsPath.resolve(rigProfileFolder, this._projectRelativeFilePath),
+          nodeJsPath.resolve(rigProfileFolder, this.projectRelativeFilePath),
           visitedConfigurationFilePaths,
           undefined
         );
@@ -582,7 +585,7 @@ export class ConfigurationFile<TConfigurationFile> {
         } else {
           terminal.writeVerboseLine(
             `Configuration file "${
-              this._projectRelativeFilePath
+              this.projectRelativeFilePath
             }" not found in rig ("${ConfigurationFile._formatPathForLogging(rigProfileFolder)}")`
           );
         }
@@ -661,6 +664,6 @@ export class ConfigurationFile<TConfigurationFile> {
   }
 
   private _getConfigurationFilePathForProject(projectPath: string): string {
-    return nodeJsPath.resolve(projectPath, this._projectRelativeFilePath);
+    return nodeJsPath.resolve(projectPath, this.projectRelativeFilePath);
   }
 }

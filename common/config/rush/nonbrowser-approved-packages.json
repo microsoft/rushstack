@@ -263,6 +263,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "fastify",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "file-loader",
       "allowedCategories": [ "tests" ]
     },

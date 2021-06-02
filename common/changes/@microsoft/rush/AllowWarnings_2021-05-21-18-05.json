@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD environment variable",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "EmmanuelOluyomi@users.noreply.github.com"
+}
