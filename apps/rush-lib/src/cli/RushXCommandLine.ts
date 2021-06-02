@@ -60,6 +60,16 @@ export class RushXCommandLine {
         return;
       }
 
+      if (rushConfiguration && !rushConfiguration.tryGetProjectForPath(process.cwd())) {
+        // GitHub #2713: Users reported confusion resulting from a situation where "rush install"
+        // did not install the project's dependencies, because the project was not registered.
+        console.log(
+          colors.yellow(
+            'Warning: You are invoking "rushx" inside a Rush repository, but this project is not registered in rush.json.'
+          )
+        );
+      }
+
       const packageJson: IPackageJson = packageJsonLookup.loadPackageJson(packageJsonFilePath);
 
       const projectCommandSet: ProjectCommandSet = new ProjectCommandSet(packageJson);

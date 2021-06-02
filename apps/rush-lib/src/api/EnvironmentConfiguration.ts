@@ -41,6 +41,13 @@ export const enum EnvironmentVariableNames {
   RUSH_ALLOW_UNSUPPORTED_NODEJS = 'RUSH_ALLOW_UNSUPPORTED_NODEJS',
 
   /**
+   * Setting this environment variable overrides the value of `allowWarningsInSuccessfulBuild`
+   * in the `command-line.json` configuration file. Specify `1` to allow warnings in a successful build,
+   * or `0` to disallow them. (See the comments in the command-line.json file for more information).
+   */
+  RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD = 'RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD',
+
+  /**
    * This variable selects a specific installation variant for Rush to use when installing
    * and linking package dependencies.
    * For more information, see the command-line help for the `--variant` parameter
@@ -156,6 +163,8 @@ export class EnvironmentConfiguration {
 
   private static _allowUnsupportedNodeVersion: boolean = false;
 
+  private static _allowWarningsInSuccessfulBuild: boolean = false;
+
   private static _pnpmStorePathOverride: string | undefined;
 
   private static _rushGlobalFolderOverride: string | undefined;
@@ -195,6 +204,16 @@ export class EnvironmentConfiguration {
   public static get allowUnsupportedNodeVersion(): boolean {
     EnvironmentConfiguration._ensureInitialized();
     return EnvironmentConfiguration._allowUnsupportedNodeVersion;
+  }
+
+  /**
+   * Setting this environment variable overrides the value of `allowWarningsInSuccessfulBuild`
+   * in the `command-line.json` configuration file. Specify `1` to allow warnings in a successful build,
+   * or `0` to disallow them. (See the comments in the command-line.json file for more information).
+   */
+  public static get allowWarningsInSuccessfulBuild(): boolean {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._allowWarningsInSuccessfulBuild;
   }
 
   /**
@@ -309,6 +328,15 @@ export class EnvironmentConfiguration {
                   value
                 ) ?? false;
             }
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: {
+            EnvironmentConfiguration._allowWarningsInSuccessfulBuild =
+              EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+                EnvironmentVariableNames.RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD,
+                value
+              ) ?? false;
             break;
           }
 

@@ -37,4 +37,23 @@ describe('CLI', () => {
         .pop() || '';
     expect(lastLine).toEqual('build.js: ARGS=["1","2","-x"]');
   });
+
+  it('rushx should fail in un-rush project', () => {
+    // Invoke "rushx"
+    const startPath: string = path.resolve(path.join(__dirname, '../../../lib/startx.js'));
+
+    const output = Utilities.executeCommandAndCaptureOutput(
+      'node',
+      [startPath, 'show-args', '1', '2', '-x'],
+      path.join(__dirname, 'repo', 'rushx-not-in-rush-project')
+    );
+
+    console.log(output);
+
+    expect(output).toEqual(
+      expect.stringMatching(
+        'Warning: You are invoking "rushx" inside a Rush repository, but this project is not registered in rush.json.'
+      )
+    );
+  });
 });
