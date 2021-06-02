@@ -8,7 +8,8 @@ import type { Config } from '@jest/types';
  *
  */
 export class JestConfigLoader {
-  private static readonly _rootDirRegex: RegExp = new RegExp('<rootDir>', 'g');
+  private static readonly _rootDirRegex: RegExp = /<rootDir>/g;
+  private static readonly _defaultReporter: string = 'DEFAULT';
 
   /**
    * Load the full text of the final Jest config file, substituting specified tokens for
@@ -101,6 +102,42 @@ export class JestConfigLoader {
             }
           }
           break;
+        case 'reporters':
+          const reporterConfig: (string | Config.ReporterConfig)[] | undefined = presetConfig[key];
+          if (reporterConfig) {
+            presetConfig[key] = reporterConfig.map((reporterValue: string | Config.ReporterConfig) => {
+              if (Array.isArray(reporterValue)) {
+                if (reporterValue[0].toUpperCase() === JestConfigLoader._defaultReporter) {
+                  return reporterValue;
+                }
+                const newReporterPath: string | undefined = JestConfigLoader._transformModuleSpec(
+                  reporterValue[0],
+                  presetConfigPath,
+                  rootDir,
+                  key
+                );
+                if (newReporterPath) {
+                  const newReporter: Config.ReporterConfig = [...reporterValue];
+                  newReporter[0] = newReporterPath;
+                  return newReporter;
+                } else {
+                  return reporterValue;
+                }
+              } else {
+                if (reporterValue.toUpperCase() === JestConfigLoader._defaultReporter) {
+                  return reporterValue;
+                }
+                const newReporterPath: string | undefined = JestConfigLoader._transformModuleSpec(
+                  reporterValue,
+                  presetConfigPath,
+                  rootDir,
+                  key
+                );
+                return newReporterPath ?? reporterValue;
+              }
+            });
+          }
+          break;
         case 'transform':
           const transformConfig: { [regex: string]: string | Config.TransformerConfig } | undefined =
             presetConfig[key];
@@ -188,33 +225,33 @@ export class JestConfigLoader {
     // Adapted from setupPreset in jest-config:
     // https://github.com/facebook/jest/blob/0a902e10e0a5550b114340b87bd31764a7638729/packages/jest-config/src/normalize.ts#L124
     const manuallyMergedConfig: Config.InitialOptions = {};
-    if (config.setupFiles) {
-      manuallyMergedConfig.setupFiles = (preset.setupFiles || []).concat(config.setupFiles);
+    if (config.setupFiles || preset.setupFiles) {
+      manuallyMergedConfig.setupFiles = (preset.setupFiles || []).concat(config.setupFiles || []);
     }
-    if (config.setupFilesAfterEnv) {
+    if (config.setupFilesAfterEnv || preset.setupFilesAfterEnv) {
       manuallyMergedConfig.setupFilesAfterEnv = (preset.setupFilesAfterEnv || []).concat(
-        config.setupFilesAfterEnv
+        config.setupFilesAfterEnv || []
       );
     }
-    if (config.modulePathIgnorePatterns && preset.modulePathIgnorePatterns) {
-      manuallyMergedConfig.modulePathIgnorePatterns = preset.modulePathIgnorePatterns.concat(
-        config.modulePathIgnorePatterns
+    if (config.modulePathIgnorePatterns || preset.modulePathIgnorePatterns) {
+      manuallyMergedConfig.modulePathIgnorePatterns = (preset.modulePathIgnorePatterns || []).concat(
+        config.modulePathIgnorePatterns || []
       );
     }
-    if (config.moduleNameMapper && preset.moduleNameMapper) {
+    if (config.moduleNameMapper || preset.moduleNameMapper) {
       manuallyMergedConfig.moduleNameMapper = {
-        ...preset.moduleNameMapper,
-        ...config.moduleNameMapper
+        ...(preset.moduleNameMapper || {}),
+        ...(config.moduleNameMapper || {})
       };
     }
-    if (config.transform && preset.transform) {
+    if (config.transform || preset.transform) {
       manuallyMergedConfig.transform = {
-        ...preset.transform,
-        ...config.transform
+        ...(preset.transform || {}),
+        ...(config.transform || {})
       };
     }
-    if (config.globals && preset.globals) {
-      manuallyMergedConfig.globals = merge(preset.globals, config.globals);
+    if (config.globals || preset.globals) {
+      manuallyMergedConfig.globals = merge(preset.globals || {}, config.globals || {});
     }
     return { ...preset, ...config, ...manuallyMergedConfig };
   }
