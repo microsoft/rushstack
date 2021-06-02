@@ -36,16 +36,16 @@
    * The list of Heft plugins to be loaded.
    */
   "heftPlugins": [
-    // {
-    //  /**
-    //   * The path to the plugin package.
-    //   */
-    //  "plugin": "path/to/my-plugin",
-    //
-    //  /**
-    //   * An optional object that provides additional settings that may be defined by the plugin.
-    //   */
-    //  // "options": { }
-    // }
+    {
+      /**
+       * The path to the plugin package.
+       */
+      "plugin": "@rushstack/heft-jest-plugin"
+
+      /**
+       * An optional object that provides additional settings that may be defined by the plugin.
+       */
+      // "options": { }
+    }
   ]
 }
