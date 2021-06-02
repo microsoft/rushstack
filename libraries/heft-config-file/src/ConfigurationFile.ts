@@ -69,11 +69,6 @@ interface IConfigurationFileFieldAnnotation<TField> {
   originalValues: { [propertyName in keyof TField]: unknown };
 }
 
-interface IConfigurationFileCacheEntry<TConfigurationFile> {
-  configurationFile?: TConfigurationFile;
-  error?: Error;
-}
-
 /**
  * Used to specify how node(s) in a JSON object should be processed after being loaded.
  *
@@ -194,10 +189,7 @@ export class ConfigurationFile<TConfigurationFile> {
     return this.__schema;
   }
 
-  private readonly _configPromiseCache: Map<
-    string,
-    Promise<IConfigurationFileCacheEntry<TConfigurationFile>>
-  > = new Map();
+  private readonly _configPromiseCache: Map<string, Promise<TConfigurationFile>> = new Map();
   private readonly _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
   public constructor(options: IConfigurationFileOptions<TConfigurationFile>) {
@@ -289,16 +281,15 @@ export class ConfigurationFile<TConfigurationFile> {
     visitedConfigurationFilePaths: Set<string>,
     rigConfig: RigConfig | undefined
   ): Promise<TConfigurationFile> {
-    let cacheEntryPromise: Promise<IConfigurationFileCacheEntry<TConfigurationFile>> | undefined =
-      this._configPromiseCache.get(resolvedConfigurationFilePath);
+    let cacheEntryPromise: Promise<TConfigurationFile> | undefined = this._configPromiseCache.get(
+      resolvedConfigurationFilePath
+    );
     if (!cacheEntryPromise) {
-      cacheEntryPromise = this._createCacheEntryPromise(
-        this._loadConfigurationFileInnerAsync(
-          terminal,
-          resolvedConfigurationFilePath,
-          visitedConfigurationFilePaths,
-          rigConfig
-        )
+      cacheEntryPromise = this._loadConfigurationFileInnerAsync(
+        terminal,
+        resolvedConfigurationFilePath,
+        visitedConfigurationFilePaths,
+        rigConfig
       );
       this._configPromiseCache.set(resolvedConfigurationFilePath, cacheEntryPromise);
     }
@@ -317,28 +308,7 @@ export class ConfigurationFile<TConfigurationFile> {
     }
     visitedConfigurationFilePaths.add(resolvedConfigurationFilePath);
 
-    const cacheEntry: IConfigurationFileCacheEntry<TConfigurationFile> = await cacheEntryPromise;
-    if (cacheEntry.error) {
-      throw cacheEntry.error;
-    } else {
-      return cacheEntry.configurationFile! as TConfigurationFile;
-    }
-  }
-
-  // Convert a promise for a TConfigurationFile into a promise for a corresponding
-  // cache entry instead.
-  private async _createCacheEntryPromise(
-    configFilePromise: Promise<TConfigurationFile>
-  ): Promise<IConfigurationFileCacheEntry<TConfigurationFile>> {
-    try {
-      return {
-        configurationFile: await configFilePromise
-      };
-    } catch (e) {
-      return {
-        error: e
-      };
-    }
+    return await cacheEntryPromise;
   }
 
   // NOTE: Internal calls to load a configuration file should use `_loadConfigurationFileInnerWithCacheAsync`.
