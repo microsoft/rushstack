@@ -1,0 +1,18 @@
+{
+  "name": "heft-newest-compiler-test",
+  "description": "Building this project tests Heft with the newest supported TypeScript compiler version",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "typescript": "~4.3.2",
+    "tslint": "~5.20.1",
+    "eslint": "~7.12.1"
+  }
+}

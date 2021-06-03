@@ -587,6 +587,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-newest-compiler-test",
+      "projectFolder": "build-tests/heft-newest-compiler-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-node-everything-test",
       "projectFolder": "build-tests/heft-node-everything-test",
       "reviewCategory": "tests",
