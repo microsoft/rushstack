@@ -32,6 +32,9 @@ interface IJestPluginOptions {
   passWithNoTests?: boolean;
 }
 
+/**
+ * @internal
+ */
 export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
   public readonly pluginName: string = PLUGIN_NAME;
 
