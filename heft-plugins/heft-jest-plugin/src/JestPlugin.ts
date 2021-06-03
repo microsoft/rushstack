@@ -15,7 +15,8 @@ import {
   HeftConfiguration,
   HeftSession,
   ScopedLogger,
-  IBuildStageContext
+  IBuildStageContext,
+  ICompileSubstage
 } from '@rushstack/heft';
 
 import { IHeftJestReporterOptions } from './HeftJestReporter';
@@ -49,12 +50,14 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     }
 
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-      build.hooks.postBuild.tap(PLUGIN_NAME, () => {
-        // Write the data file used by jest-build-transform
-        JestTypeScriptDataFile.saveForProject(heftConfiguration.buildFolder, {
-          emitFolderNameForTests: build.properties.emitFolderNameForTests || 'lib',
-          extensionForTests: build.properties.emitExtensionForTests || '.js',
-          skipTimestampCheck: !build.properties.watchMode
+      build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
+        compile.hooks.afterCompile.tapPromise(PLUGIN_NAME, async () => {
+          // Write the data file used by jest-build-transform
+          await JestTypeScriptDataFile.saveForProjectAsync(heftConfiguration.buildFolder, {
+            emitFolderNameForTests: build.properties.emitFolderNameForTests || 'lib',
+            extensionForTests: build.properties.emitExtensionForTests || '.js',
+            skipTimestampCheck: !build.properties.watchMode
+          });
         });
       });
     });
