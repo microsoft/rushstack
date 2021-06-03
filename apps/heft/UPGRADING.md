@@ -20,12 +20,12 @@ and add the following option to the project's `config/heft.json` file:
 If you are using `@rushstack/heft-node-rig` or `@rushstack/heft-web-rig`, the Jest
 plugin should already be enabled.
 
-If you were using the included `@rushstack/heft/include/jest-shared.config.json` as
+If you are using the included `@rushstack/heft/include/jest-shared.config.json` as
 a Jest configuration preset, you will need modify this reference to use
 `@rushstack/heft-jest-plugin/include/jest-shared.config.json`. If you are using
 `@rushstack/heft-node-rig` or `@rushstack/heft-web-rig`, you must now reference
 `@rushstack/heft-node-rig/profiles/default/config/jest.config.json` or
-`@rushstack/heft-node-rig/profiles/default/library/jest.config.json`, respectively.
+`@rushstack/heft-node-rig/profiles/library/config/jest.config.json`, respectively.
 
 ### Heft 0.26.0
 
