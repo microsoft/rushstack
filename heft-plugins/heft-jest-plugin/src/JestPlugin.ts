@@ -37,9 +37,6 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
 
   private _jestTerminal!: Terminal;
 
-  /*
-   * @override
-   */
   public apply(
     heftSession: HeftSession,
     heftConfiguration: HeftConfiguration,
@@ -120,6 +117,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       debug: heftSession.debugMode,
       detectOpenHandles: !!test.properties.detectOpenHandles,
 
+      // Jest config being passed in can be either a serialized JSON string or a path to the config
       config: jestConfig,
       cacheDirectory: this._getJestCacheFolder(heftConfiguration),
       updateSnapshot: test.properties.updateSnapshots,
