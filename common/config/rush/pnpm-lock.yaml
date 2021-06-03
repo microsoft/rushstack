@@ -379,12 +379,12 @@ importers:
       '@microsoft/api-extractor': workspace:*
       '@types/node': 10.17.13
       fs-extra: ~7.0.1
-      typescript: ~2.4.2
+      typescript: ~2.9.2
     devDependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@types/node': 10.17.13
       fs-extra: 7.0.1
-      typescript: 2.4.2
+      typescript: 2.9.2
 
   ../../build-tests/api-extractor-lib2-test:
     specifiers:
@@ -631,6 +631,20 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       heft-minimal-rig-test: link:../heft-minimal-rig-test
+
+  ../../build-tests/heft-newest-compiler-test:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      eslint: ~7.12.1
+      tslint: ~5.20.1
+      typescript: ~4.3.2
+    devDependencies:
+      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      eslint: 7.12.1
+      tslint: 5.20.1_typescript@4.3.2
+      typescript: 4.3.2
 
   ../../build-tests/heft-node-everything-test:
     specifiers:
@@ -10310,6 +10324,29 @@ packages:
       tsutils: 2.29.0_typescript@3.9.9
       typescript: 3.9.9
 
+  /tslint/5.20.1_typescript@4.3.2:
+    resolution: {integrity: sha512-EcMxhzCFt8k+/UP5r8waCf/lzmeSyVlqxqMEDQE7rWYiQky8KpIBz1JAoYXfROHrPZ1XXd43q8yQnULOLiBRQg==}
+    engines: {node: '>=4.8.0'}
+    hasBin: true
+    peerDependencies:
+      typescript: '>=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev || >=3.0.0-dev || >= 3.1.0-dev || >= 3.2.0-dev'
+    dependencies:
+      '@babel/code-frame': 7.12.13
+      builtin-modules: 1.1.1
+      chalk: 2.4.2
+      commander: 2.20.3
+      diff: 4.0.2
+      glob: 7.1.7
+      js-yaml: 3.13.1
+      minimatch: 3.0.4
+      mkdirp: 0.5.5
+      resolve: 1.17.0
+      semver: 5.7.1
+      tslib: 1.14.1
+      tsutils: 2.29.0_typescript@4.3.2
+      typescript: 4.3.2
+    dev: true
+
   /tsutils/2.28.0_typescript@3.9.9:
     resolution: {integrity: sha512-bh5nAtW0tuhvOJnx1GLRn5ScraRLICGyJV5wJhtRWOLsxW70Kk5tZtpK3O/hW6LDnqKS9mlUMPZj9fEMJ0gxqA==}
     peerDependencies:
@@ -10334,6 +10371,15 @@ packages:
     dependencies:
       tslib: 1.14.1
       typescript: 3.9.9
+
+  /tsutils/2.29.0_typescript@4.3.2:
+    resolution: {integrity: sha512-g5JVHCIJwzfISaXpXE1qvNalca5Jwob6FjI4AoPlqMusJ6ftFE7IkkFoMhVLRgK+4Kx3gkzb8UZK5t5yTTvEmA==}
+    peerDependencies:
+      typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev || >= 3.0.0-dev || >= 3.1.0-dev'
+    dependencies:
+      tslib: 1.14.1
+      typescript: 4.3.2
+    dev: true
 
   /tsutils/3.21.0_typescript@3.9.9:
     resolution: {integrity: sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==}
@@ -10404,12 +10450,6 @@ packages:
   /typedarray/0.0.6:
     resolution: {integrity: sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=}
 
-  /typescript/2.4.2:
-    resolution: {integrity: sha1-+DlfhdRZJ2BnyYiqQYN6j4KHCEQ=}
-    engines: {node: '>=4.2.0'}
-    hasBin: true
-    dev: true
-
   /typescript/2.9.2:
     resolution: {integrity: sha512-Gr4p6nFNaoufRIY4NMdpQRNmgxVIGMs4Fcu/ujdYk3nAZqk7supzBE9idmvfZIlH/Cuj//dvi+019qEue9lV0w==}
     engines: {node: '>=4.2.0'}
@@ -10437,7 +10477,6 @@ packages:
     resolution: {integrity: sha512-zZ4hShnmnoVnAHpVHWpTcxdv7dWP60S2FsydQLV8V5PbS3FifjWFFRiHSWpDJahly88PRyV5teTSLoq4eG7mKw==}
     engines: {node: '>=4.2.0'}
     hasBin: true
-    dev: false
 
   /unbox-primitive/1.0.1:
     resolution: {integrity: sha512-tZU/3NqK3dA5gpE1KtyiJUrEB0lxnGkMFHptJ7q6ewdZ8s12QrODwNbhIJStmJkd1QDXa1NRA8aF2A1zk/Ypyw==}
