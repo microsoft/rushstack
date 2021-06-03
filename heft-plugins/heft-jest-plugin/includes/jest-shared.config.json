@@ -53,7 +53,7 @@
   ],
   "modulePathIgnorePatterns": [],
   "//": "Prefer .cjs to .js to catch explicit commonjs output. Optimize for local files, which will be .ts or .tsx.",
-  "moduleFileExtensions": ["ts", "tsx", "cjs", "js", "json"],
+  "moduleFileExtensions": ["ts", "tsx", "cjs", "js", "json", "node"],
 
   "//": "when using the heft-jest-plugin, these will be replaced with the resolved module location",
   "setupFiles": ["../lib/exports/jest-global-setup.js"],
