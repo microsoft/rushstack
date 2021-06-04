@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 04 Jun 2021 15:08:20 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Jun 2021 19:59:53 GMT and should not be manually modified.
+
+## 0.31.4
+Fri, 04 Jun 2021 19:59:53 GMT
+
+### Patches
+
+- Add IBuildStage output property 'isTypeScriptProject' and populate in TypeScriptPlugin
+- Fix bug in CopyFilesPlugin that caused 0-length files to be generated
 
 ## 0.31.3
 Fri, 04 Jun 2021 15:08:20 GMT

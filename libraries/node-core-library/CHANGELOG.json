@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.39.0",
+      "tag": "@rushstack/node-core-library_v3.39.0",
+      "date": "Fri, 04 Jun 2021 19:59:53 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "BREAKING CHANGE: Remove FileSystem.copyFileToManyAsync API. It was determined that this API was a likely source of 0-length file copies. Recommended replacement is to call copyFileAsync."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.38.0",
       "tag": "@rushstack/node-core-library_v3.38.0",
       "date": "Wed, 19 May 2021 00:11:39 GMT",
