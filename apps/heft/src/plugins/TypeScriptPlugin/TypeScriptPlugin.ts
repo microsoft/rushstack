@@ -238,7 +238,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
       // If there are no TSConfigs, we have nothing to do
       return;
     } else {
-      buildProperties.isTypescriptProject = true;
+      buildProperties.isTypeScriptProject = true;
     }
 
     const typeScriptConfiguration: ITypeScriptConfiguration = {

@@ -140,7 +140,7 @@ export interface IBuildStageProperties {
   /**
    * @beta
    */
-  isTypescriptProject?: boolean;
+  isTypeScriptProject?: boolean;
   /**
    * @beta
    */
