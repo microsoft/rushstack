@@ -298,6 +298,12 @@ export class TypeScriptPlugin implements IHeftPlugin {
     };
 
     // Set some properties used by the Jest plugin
+    JestTypeScriptDataFile.saveForProject(heftConfiguration.buildFolder, {
+      emitFolderNameForTests: typeScriptConfiguration.emitFolderNameForTests || 'lib',
+      skipTimestampCheck: !options.watchMode,
+      extensionForTests: typeScriptConfiguration.emitCjsExtensionForCommonJS ? '.cjs' : '.js'
+    });
+
     buildProperties.emitFolderNameForTests = typeScriptConfiguration.emitFolderNameForTests || 'lib';
     buildProperties.emitExtensionForTests = typeScriptConfiguration.emitCjsExtensionForCommonJS
       ? '.cjs'
