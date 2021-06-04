@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 19 May 2021 00:11:39 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Jun 2021 19:59:53 GMT and should not be manually modified.
+
+## 3.39.0
+Fri, 04 Jun 2021 19:59:53 GMT
+
+### Minor changes
+
+- BREAKING CHANGE: Remove FileSystem.copyFileToManyAsync API. It was determined that this API was a likely source of 0-length file copies. Recommended replacement is to call copyFileAsync.
 
 ## 3.38.0
 Wed, 19 May 2021 00:11:39 GMT

@@ -2,6 +2,35 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.31.4",
+      "tag": "@rushstack/heft_v0.31.4",
+      "date": "Fri, 04 Jun 2021 19:59:53 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add IBuildStage output property 'isTypeScriptProject' and populate in TypeScriptPlugin"
+          },
+          {
+            "comment": "Fix bug in CopyFilesPlugin that caused 0-length files to be generated"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.4.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.39.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.3.7`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.16.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.31.3",
       "tag": "@rushstack/heft_v0.31.3",
       "date": "Fri, 04 Jun 2021 15:08:20 GMT",
