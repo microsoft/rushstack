@@ -161,14 +161,14 @@ export class CopyFilesPlugin implements IHeftPlugin {
       async (copyDescriptor: ICopyFileDescriptor) => {
         if (copyDescriptor.hardlink) {
           linkedFileCount++;
-          return FileSystem.createHardLinkAsync({
+          await FileSystem.createHardLinkAsync({
             linkTargetPath: copyDescriptor.sourceFilePath,
             newLinkPath: copyDescriptor.destinationFilePath,
             alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
           });
         } else {
           copiedFileCount++;
-          return FileSystem.copyFileAsync({
+          await FileSystem.copyFileAsync({
             sourcePath: copyDescriptor.sourceFilePath,
             destinationPath: copyDescriptor.destinationFilePath,
             alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
