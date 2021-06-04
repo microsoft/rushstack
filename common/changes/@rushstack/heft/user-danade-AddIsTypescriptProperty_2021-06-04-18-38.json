@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Add IBuildStage output property 'isTypeScriptProject' and populate in TypeScriptPlugin",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "3473356+D4N14L@users.noreply.github.com"
+}
