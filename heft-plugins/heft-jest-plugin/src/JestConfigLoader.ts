@@ -20,7 +20,7 @@ export class JestConfigLoader {
 
     // If a preset exists, let's load it manually and unset the preset string so that Jest normalization
     // is not affected. This means that we can support a couple features here that stock Jest doesn't have:
-    // - support loading non-root presets that are not named 'jest-preset.json'
+    // - support loading non-root presets
     // - support for loading presets further than 1 level deep
     if (config.preset) {
       const presetConfigPath: string = JestConfigLoader._resolveConfigModule(
@@ -52,12 +52,7 @@ export class JestConfigLoader {
     presetConfigPath: string,
     rootDir: string
   ): Promise<Config.InitialOptions> {
-    let presetConfig: Config.InitialOptions;
-    try {
-      presetConfig = await JsonFile.loadAsync(presetConfigPath);
-    } catch (e) {
-      throw new Error(`Could not load Jest config at path "${presetConfigPath}".`);
-    }
+    const presetConfig: Config.InitialOptions = await JestConfigLoader._readConfigAsync(presetConfigPath);
 
     // Resolve all input module and relative path properties to absolute paths so there is no confusion where
     // the module should be resolved from.
@@ -73,7 +68,7 @@ export class JestConfigLoader {
           const arrayValue: string[] | undefined = presetConfig[key];
           if (arrayValue) {
             presetConfig[key] = arrayValue.map(
-              (value) => JestConfigLoader._transformModuleSpec(value, presetConfigPath, rootDir, key) ?? value
+              (value) => JestConfigLoader._resolveConfigModule(value, presetConfigPath, rootDir, key) ?? value
             );
           }
           break;
@@ -91,7 +86,7 @@ export class JestConfigLoader {
         case 'resolver':
           const stringValue: string | null | undefined = presetConfig[key];
           if (stringValue) {
-            const resolvedModulePath: string | undefined = JestConfigLoader._transformModuleSpec(
+            const resolvedModulePath: string | undefined = JestConfigLoader._resolveConfigModule(
               stringValue,
               presetConfigPath,
               rootDir,
@@ -110,7 +105,7 @@ export class JestConfigLoader {
                 if (reporterValue[0].toUpperCase() === JestConfigLoader._defaultReporter) {
                   return reporterValue;
                 }
-                const newReporterPath: string | undefined = JestConfigLoader._transformModuleSpec(
+                const newReporterPath: string | undefined = JestConfigLoader._resolveConfigModule(
                   reporterValue[0],
                   presetConfigPath,
                   rootDir,
@@ -127,7 +122,7 @@ export class JestConfigLoader {
                 if (reporterValue.toUpperCase() === JestConfigLoader._defaultReporter) {
                   return reporterValue;
                 }
-                const newReporterPath: string | undefined = JestConfigLoader._transformModuleSpec(
+                const newReporterPath: string | undefined = JestConfigLoader._resolveConfigModule(
                   reporterValue,
                   presetConfigPath,
                   rootDir,
@@ -143,7 +138,7 @@ export class JestConfigLoader {
             presetConfig[key];
           for (const [regex, transformValue] of Object.entries(transformConfig || {})) {
             if (Array.isArray(transformValue)) {
-              const newTransformerPath: string | undefined = JestConfigLoader._transformModuleSpec(
+              const newTransformerPath: string | undefined = JestConfigLoader._resolveConfigModule(
                 transformValue[0],
                 presetConfigPath,
                 rootDir,
@@ -153,7 +148,7 @@ export class JestConfigLoader {
                 transformValue[0] = newTransformerPath;
               }
             } else {
-              const newTransformerPath: string | undefined = JestConfigLoader._transformModuleSpec(
+              const newTransformerPath: string | undefined = JestConfigLoader._resolveConfigModule(
                 transformValue,
                 presetConfigPath,
                 rootDir,
@@ -175,24 +170,10 @@ export class JestConfigLoader {
     if (presetConfig.preset) {
       const childPresetConfig: Config.InitialOptions =
         await JestConfigLoader._loadPresetAndResolveModulesAsync(presetConfig.preset, rootDir);
-      presetConfig = JestConfigLoader._mergeConfig(presetConfig, childPresetConfig);
+      return JestConfigLoader._mergeConfig(presetConfig, childPresetConfig);
+    } else {
+      return presetConfig;
     }
-    return presetConfig;
-  }
-
-  private static _transformModuleSpec(
-    moduleSpec: string,
-    configPath: string,
-    rootDir: string,
-    propertyName: string
-  ): string {
-    const resolvedModulePath: string | undefined = JestConfigLoader._resolveConfigModule(
-      moduleSpec,
-      configPath,
-      rootDir,
-      propertyName
-    );
-    return path.relative(rootDir, resolvedModulePath);
   }
 
   private static _resolveConfigModule(

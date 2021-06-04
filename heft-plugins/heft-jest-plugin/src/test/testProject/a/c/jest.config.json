@@ -1,0 +1,9 @@
+{
+  "setupFiles": ["../b/setupFile2.js"],
+
+  "reporters": ["default", "./mockReporter1.js", ["./d/mockReporter2.js", { "key": "value" }]],
+
+  "transform": {
+    "\\.(yyy)$": ["../b/mockTransformModule2.js", { "key": "value" }]
+  }
+}
