@@ -8,14 +8,14 @@ import type { Config } from '@jest/types';
 
 describe('JestConfigLoader', () => {
   it('resolves preset config modules', async () => {
-    const configPath: string = path.join(__dirname, 'testProject', 'config', 'jest.config.json');
-    const rootDir: string = path.join(__dirname, 'testProject');
+    const rootDir: string = path.join(__dirname, 'project1');
+    const configPath: string = path.join(rootDir, 'config', 'jest.config.json');
     const loadedConfig: Config.InitialOptions = await JestConfigLoader.loadConfigAsync(configPath, rootDir);
 
+    // Resolution of string fields is validated implicitly during load since the preset is resolved and
+    // set to undefined
     expect(loadedConfig.preset).toBe(undefined);
 
-    // Resolution of string fields is validated implicitly during load since the preset field is
-    // parsed like this.
     // Validate string[]
     expect(loadedConfig.setupFiles?.length).toBe(2);
     expect(loadedConfig.setupFiles![0]).toBe(path.join(rootDir, 'a', 'b', 'setupFile2.js'));
@@ -30,5 +30,21 @@ describe('JestConfigLoader', () => {
     );
 
     // Validate transformers
+    expect(Object.keys(loadedConfig.transform || {}).length).toBe(2);
+    expect(loadedConfig.transform!['\\.(xxx)$']).toBe(
+      path.join(rootDir, 'a', 'b', 'mockTransformModule1.js')
+    );
+    expect((loadedConfig.transform!['\\.(yyy)$'] as Config.TransformerConfig)[0]).toBe(
+      path.join(rootDir, 'a', 'b', 'mockTransformModule2.js')
+    );
+  });
+
+  it('resolves preset package modules', async () => {
+    const rootDir: string = path.join(__dirname, 'project2');
+    const configPath: string = path.join(rootDir, 'config', 'jest.config.json');
+    const loadedConfig: Config.InitialOptions = await JestConfigLoader.loadConfigAsync(configPath, rootDir);
+
+    expect(loadedConfig.setupFiles?.length).toBe(1);
+    expect(loadedConfig.setupFiles![0]).toBe(require.resolve('@jest/core'));
   });
 });
