@@ -116,6 +116,8 @@ export interface IBuildStageProperties {
     emitExtensionForTests?: '.js' | '.cjs' | '.mjs';
     // @beta (undocumented)
     emitFolderNameForTests?: string;
+    // @beta (undocumented)
+    isTypeScriptProject?: boolean;
     // (undocumented)
     lite: boolean;
     // (undocumented)

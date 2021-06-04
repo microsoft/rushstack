@@ -140,6 +140,10 @@ export interface IBuildStageProperties {
   /**
    * @beta
    */
+  isTypeScriptProject?: boolean;
+  /**
+   * @beta
+   */
   emitFolderNameForTests?: string;
   /**
    * @beta

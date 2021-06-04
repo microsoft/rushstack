@@ -67,7 +67,6 @@ export {
   IFileSystemCopyFileOptions,
   IFileSystemCopyFilesAsyncOptions,
   IFileSystemCopyFilesOptions,
-  IFileSystemCopyFileToManyOptions,
   IFileSystemCreateLinkOptions,
   IFileSystemDeleteFileOptions,
   IFileSystemMoveOptions,

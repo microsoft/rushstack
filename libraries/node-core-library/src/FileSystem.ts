@@ -134,18 +134,6 @@ export interface IFileSystemCopyFileOptions extends IFileSystemCopyFileBaseOptio
 }
 
 /**
- * The options for {@link FileSystem.copyFile}
- * @public
- */
-export interface IFileSystemCopyFileToManyOptions extends IFileSystemCopyFileBaseOptions {
-  /**
-   * The path that the object will be copied to.
-   * The path may be absolute or relative.
-   */
-  destinationPaths: string[];
-}
-
-/**
  * Specifies the behavior of {@link FileSystem.copyFiles} in a situation where the target object
  * already exists.
  * @public
@@ -930,100 +918,6 @@ export class FileSystem {
         errorOnExist: options.alreadyExistsBehavior === AlreadyExistsBehavior.Error,
         overwrite: options.alreadyExistsBehavior === AlreadyExistsBehavior.Overwrite
       });
-    });
-  }
-
-  /**
-   * Copies a single file from one location to one or more other locations.
-   * By default, the file at the destination is overwritten if it already exists.
-   *
-   * @remarks
-   * The `copyFileToManyAsync()` API cannot be used to copy folders.  It copies at most one file.
-   *
-   * The implementation is based on `createReadStream()` and `createWriteStream()` from the
-   * `fs-extra` package.
-   */
-  public static async copyFileToManyAsync(options: IFileSystemCopyFileToManyOptions): Promise<void> {
-    options = {
-      ...COPY_FILE_DEFAULT_OPTIONS,
-      ...options
-    };
-
-    if (FileSystem.getStatistics(options.sourcePath).isDirectory()) {
-      throw new Error(
-        'The specified path refers to a folder; this operation expects a file path:\n' + options.sourcePath
-      );
-    }
-
-    await FileSystem._wrapExceptionAsync(async () => {
-      // See flags documentation: https://nodejs.org/api/fs.html#fs_file_system_flags
-      const writeFlags: string[] = [];
-      switch (options.alreadyExistsBehavior) {
-        case AlreadyExistsBehavior.Error:
-        case AlreadyExistsBehavior.Ignore:
-          writeFlags.push('wx');
-          break;
-        case AlreadyExistsBehavior.Overwrite:
-        default:
-          writeFlags.push('w');
-      }
-      const flags: string = writeFlags.join();
-
-      const createPipePromise: (sourceStream: fs.ReadStream, destinationPath: string) => Promise<void> = (
-        sourceStream: fs.ReadStream,
-        destinationPath: string
-      ) => {
-        return new Promise((resolve: () => void, reject: (error: Error) => void) => {
-          const destinationStream: fs.WriteStream = fs.createWriteStream(destinationPath);
-          const streamsToDestroy: fs.WriteStream[] = [destinationStream];
-          sourceStream.on('error', (e: Error) => {
-            for (const streamToDestroy of streamsToDestroy) {
-              streamToDestroy.destroy();
-            }
-            reject(e);
-          });
-          sourceStream
-            .pipe(destinationStream)
-            .on('close', () => {
-              resolve();
-            })
-            .on('error', (e: Error) => {
-              if (FileSystem.isNotExistError(e)) {
-                destinationStream.destroy();
-                FileSystem.ensureFolder(nodeJsPath.dirname(destinationStream.path as string));
-                const retryDestinationStream: fs.WriteStream = fsx.createWriteStream(destinationPath, {
-                  flags
-                });
-                streamsToDestroy.push(retryDestinationStream);
-                sourceStream
-                  .pipe(retryDestinationStream)
-                  .on('close', () => {
-                    resolve();
-                  })
-                  .on('error', (e2: Error) => {
-                    reject(e2);
-                  });
-              } else if (
-                options.alreadyExistsBehavior === AlreadyExistsBehavior.Ignore &&
-                FileSystem.isErrnoException(e) &&
-                e.code === 'EEXIST'
-              ) {
-                resolve();
-              } else {
-                reject(e);
-              }
-            });
-        });
-      };
-
-      const sourceStream: fs.ReadStream = fsx.createReadStream(options.sourcePath);
-      const uniqueDestinationPaths: Set<string> = new Set(options.destinationPaths);
-      const pipePromises: Promise<void>[] = [];
-      for (const destinationPath of uniqueDestinationPaths) {
-        pipePromises.push(createPipePromise(sourceStream, destinationPath));
-      }
-
-      await Promise.all(pipePromises);
     });
   }
 
