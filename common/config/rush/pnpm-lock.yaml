@@ -892,7 +892,7 @@ importers:
       '@jest/transform': ~25.4.0
       '@jest/types': ~25.4.0
       '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': workspace:*
+      '@rushstack/heft': 0.31.4
       '@rushstack/heft-node-rig': 1.0.28
       '@rushstack/node-core-library': workspace:*
       '@types/heft-jest': 1.0.1
@@ -909,8 +909,8 @@ importers:
     devDependencies:
       '@jest/types': 25.4.0
       '@rushstack/eslint-config': link:../../stack/eslint-config
-      '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-node-rig': 1.0.28
+      '@rushstack/heft': 0.31.4
+      '@rushstack/heft-node-rig': 1.0.28_@rushstack+heft@0.31.4
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
 
@@ -2698,18 +2698,6 @@ packages:
       '@rushstack/node-core-library': 3.39.0
       '@rushstack/rig-package': 0.2.12
       jsonpath-plus: 4.0.0
-    dev: true
-
-  /@rushstack/heft-node-rig/1.0.28:
-    resolution: {integrity: sha512-aqPVFMRlzgQIdlTgMavzhivfUBx9ZFQDCK5jXFO/TSjGdwI0vXnKz8wk3sBPipdJS7xeasJDL9FWWsw9YGNbMg==}
-    peerDependencies:
-      '@rushstack/heft': ^0.31.4
-    dependencies:
-      '@microsoft/api-extractor': 7.16.1
-      eslint: 7.12.1
-      typescript: 3.9.9
-    transitivePeerDependencies:
-      - supports-color
     dev: true
 
   /@rushstack/heft-node-rig/1.0.28_@rushstack+heft@0.31.4:
