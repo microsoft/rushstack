@@ -53,11 +53,13 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
         compile.hooks.afterCompile.tapPromise(PLUGIN_NAME, async () => {
           // Write the data file used by jest-build-transform
-          await JestTypeScriptDataFile.saveForProjectAsync(heftConfiguration.buildFolder, {
-            emitFolderNameForTests: build.properties.emitFolderNameForTests || 'lib',
-            extensionForTests: build.properties.emitExtensionForTests || '.js',
-            skipTimestampCheck: !build.properties.watchMode
-          });
+          if (build.properties.isTypeScriptProject) {
+            await JestTypeScriptDataFile.saveForProjectAsync(heftConfiguration.buildFolder, {
+              emitFolderNameForTests: build.properties.emitFolderNameForTests || 'lib',
+              extensionForTests: build.properties.emitExtensionForTests || '.js',
+              skipTimestampCheck: !build.properties.watchMode
+            });
+          }
         });
       });
     });
@@ -180,9 +182,18 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
   }
 
   private _validateJestTypeScriptDataFile(buildFolder: string): void {
-    // Full path to jest-typescript-data.json
-    const jestTypeScriptDataFile: IJestTypeScriptDataFileJson =
-      JestTypeScriptDataFile.loadForProject(buildFolder);
+    // We have no gurantee that the data file exists, since this would only get written
+    // during the build stage when running in a TypeScript project
+    let jestTypeScriptDataFile: IJestTypeScriptDataFileJson;
+    try {
+      jestTypeScriptDataFile = JestTypeScriptDataFile.loadForProject(buildFolder);
+    } catch (error) {
+      // Swallow and exit early since we cannot validate
+      if (FileSystem.isNotExistError(error)) {
+        return;
+      }
+      throw error;
+    }
     const emitFolderPathForJest: string = path.join(
       buildFolder,
       jestTypeScriptDataFile.emitFolderNameForTests
