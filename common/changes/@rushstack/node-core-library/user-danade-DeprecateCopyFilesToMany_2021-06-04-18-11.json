@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Deprecate copyFileToManyAsync API. It was determined that this API was a likely source of 0-length file copies. Recommended replacement is to call copyFileAsync.",
+      "comment": "BREAKING CHANGE: Remove FileSystem.copyFileToManyAsync API. It was determined that this API was a likely source of 0-length file copies. Recommended replacement is to call copyFileAsync.",
       "type": "minor"
     }
   ],
