@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.4.1",
+      "tag": "@rushstack/heft-config-file_v0.4.1",
+      "date": "Fri, 04 Jun 2021 00:08:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Reduce the number of extra file system calls made when loading many config files."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.0",
       "tag": "@rushstack/heft-config-file_v0.4.0",
       "date": "Sat, 29 May 2021 01:05:06 GMT",
