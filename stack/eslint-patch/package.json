@@ -23,8 +23,8 @@
   ],
   "dependencies": {},
   "devDependencies": {
-    "@rushstack/heft": "0.30.7",
-    "@rushstack/heft-node-rig": "1.0.23",
+    "@rushstack/heft": "0.31.4",
+    "@rushstack/heft-node-rig": "1.0.28",
     "@types/node": "10.17.13"
   }
 }
