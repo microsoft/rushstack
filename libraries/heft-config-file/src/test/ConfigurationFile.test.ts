@@ -524,13 +524,9 @@ describe('ConfigurationFile', () => {
           'config.schema.json'
         )
       });
-      try {
-        expect(
-          await configFileLoader.tryLoadConfigurationFileForProjectAsync(terminal, __dirname)
-        ).toBeUndefined();
-      } catch (e) {
-        fail();
-      }
+      expect(
+        await configFileLoader.tryLoadConfigurationFileForProjectAsync(terminal, __dirname)
+      ).toBeUndefined();
     });
 
     it("Throws an error when the file isn't valid JSON", async () => {

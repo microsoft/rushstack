@@ -69,11 +69,6 @@ interface IConfigurationFileFieldAnnotation<TField> {
   originalValues: { [propertyName in keyof TField]: unknown };
 }
 
-interface IConfigurationFileCacheEntry<TConfigurationFile> {
-  configurationFile?: TConfigurationFile;
-  error?: Error;
-}
-
 /**
  * Used to specify how node(s) in a JSON object should be processed after being loaded.
  *
@@ -194,9 +189,7 @@ export class ConfigurationFile<TConfigurationFile> {
     return this.__schema;
   }
 
-  private readonly _configurationFileCache: Map<string, IConfigurationFileCacheEntry<TConfigurationFile>> =
-    new Map<string, IConfigurationFileCacheEntry<TConfigurationFile>>();
-  private readonly _fileExistsCache: Map<string, boolean> = new Map<string, boolean>();
+  private readonly _configPromiseCache: Map<string, Promise<TConfigurationFile>> = new Map();
   private readonly _packageJsonLookup: PackageJsonLookup = new PackageJsonLookup();
 
   public constructor(options: IConfigurationFileOptions<TConfigurationFile>) {
@@ -206,6 +199,11 @@ export class ConfigurationFile<TConfigurationFile> {
     this._propertyInheritanceTypes = options.propertyInheritance || {};
   }
 
+  /**
+   * Find and return a configuration file for the specified project, automatically resolving
+   * `extends` properties and handling rigged configuration files. Will throw an error if a configuration
+   * file cannot be found in the rig or project config folder.
+   */
   public async loadConfigurationFileForProjectAsync(
     terminal: Terminal,
     projectPath: string,
@@ -222,40 +220,20 @@ export class ConfigurationFile<TConfigurationFile> {
 
   /**
    * This function is identical to {@link ConfigurationFile.loadConfigurationFileForProjectAsync}, except
-   * that a preliminary file existence check is performed and this function returns `undefined` if the
-   * configuration file doesn't exist.
+   * that it returns `undefined` instead of throwing an error if the configuration file cannot be found.
    */
   public async tryLoadConfigurationFileForProjectAsync(
     terminal: Terminal,
     projectPath: string,
     rigConfig?: RigConfig
   ): Promise<TConfigurationFile | undefined> {
-    const projectConfigurationFilePath: string = this._getConfigurationFilePathForProject(projectPath);
-    const projectConfigurationFilePathForLogging: string = ConfigurationFile._formatPathForLogging(
-      projectConfigurationFilePath
-    );
-    let exists: boolean | undefined = this._fileExistsCache.get(projectConfigurationFilePath);
-    if (exists === undefined) {
-      exists = await FileSystem.existsAsync(projectConfigurationFilePath);
-      this._fileExistsCache.set(projectConfigurationFilePath, exists);
-    }
-
-    if (!exists) {
-      if (rigConfig) {
-        terminal.writeVerboseLine(
-          `Config file "${projectConfigurationFilePathForLogging}" does not exist. Attempting to load via rig.`
-        );
-        return await this._tryLoadConfigurationFileInRigAsync(terminal, rigConfig, new Set<string>());
-      } else {
+    try {
+      return await this.loadConfigurationFileForProjectAsync(terminal, projectPath, rigConfig);
+    } catch (e) {
+      if (FileSystem.isNotExistError(e)) {
         return undefined;
       }
-    } else {
-      return await this._loadConfigurationFileInnerWithCacheAsync(
-        terminal,
-        projectConfigurationFilePath,
-        new Set<string>(),
-        undefined
-      );
+      throw e;
     }
   }
 
@@ -303,36 +281,39 @@ export class ConfigurationFile<TConfigurationFile> {
     visitedConfigurationFilePaths: Set<string>,
     rigConfig: RigConfig | undefined
   ): Promise<TConfigurationFile> {
-    let cacheEntry: IConfigurationFileCacheEntry<TConfigurationFile> | undefined =
-      this._configurationFileCache.get(resolvedConfigurationFilePath);
-    if (!cacheEntry) {
-      try {
-        cacheEntry = {
-          configurationFile: await this._loadConfigurationFileInnerAsync(
-            terminal,
-            resolvedConfigurationFilePath,
-            visitedConfigurationFilePaths,
-            rigConfig
-          )
-        };
-      } catch (e) {
-        cacheEntry = { error: e };
-      }
-    } else {
-      terminal.writeVerboseLine(
-        `Found "${ConfigurationFile._formatPathForLogging(
-          resolvedConfigurationFilePath
-        )}" in ConfigurationFile path.`
+    let cacheEntryPromise: Promise<TConfigurationFile> | undefined = this._configPromiseCache.get(
+      resolvedConfigurationFilePath
+    );
+    if (!cacheEntryPromise) {
+      cacheEntryPromise = this._loadConfigurationFileInnerAsync(
+        terminal,
+        resolvedConfigurationFilePath,
+        visitedConfigurationFilePaths,
+        rigConfig
+      );
+      this._configPromiseCache.set(resolvedConfigurationFilePath, cacheEntryPromise);
+    }
+
+    // We check for loops after caching a promise for this config file, but before attempting
+    // to resolve the promise. We can't handle loop detection in the `InnerAsync` function, because
+    // we could end up waiting for a cached promise (like A -> B -> A) that never resolves.
+    if (visitedConfigurationFilePaths.has(resolvedConfigurationFilePath)) {
+      const resolvedConfigurationFilePathForLogging: string = ConfigurationFile._formatPathForLogging(
+        resolvedConfigurationFilePath
+      );
+      throw new Error(
+        'A loop has been detected in the "extends" properties of configuration file at ' +
+          `"${resolvedConfigurationFilePathForLogging}".`
       );
     }
+    visitedConfigurationFilePaths.add(resolvedConfigurationFilePath);
 
-    if (cacheEntry.error) {
-      throw cacheEntry.error;
-    } else {
-      return cacheEntry.configurationFile! as TConfigurationFile;
-    }
+    return await cacheEntryPromise;
   }
 
+  // NOTE: Internal calls to load a configuration file should use `_loadConfigurationFileInnerWithCacheAsync`.
+  // Don't call this function directly, as it does not provide config file loop detection,
+  // and you won't get the advantage of queueing up for a config file that is already loading.
   private async _loadConfigurationFileInnerAsync(
     terminal: Terminal,
     resolvedConfigurationFilePath: string,
@@ -343,24 +324,15 @@ export class ConfigurationFile<TConfigurationFile> {
       resolvedConfigurationFilePath
     );
 
-    if (visitedConfigurationFilePaths.has(resolvedConfigurationFilePath)) {
-      throw new Error(
-        'A loop has been detected in the "extends" properties of configuration file at ' +
-          `"${resolvedConfigurationFilePathForLogging}".`
-      );
-    }
-
-    visitedConfigurationFilePaths.add(resolvedConfigurationFilePath);
-
     let fileText: string;
     try {
       fileText = await FileSystem.readFileAsync(resolvedConfigurationFilePath);
     } catch (e) {
       if (FileSystem.isNotExistError(e)) {
-        terminal.writeVerboseLine(
-          `Configuration file "${resolvedConfigurationFilePathForLogging}" not found.`
-        );
         if (rigConfig) {
+          terminal.writeVerboseLine(
+            `Config file "${resolvedConfigurationFilePathForLogging}" does not exist. Attempting to load via rig.`
+          );
           const rigResult: TConfigurationFile | undefined = await this._tryLoadConfigurationFileInRigAsync(
             terminal,
             rigConfig,
@@ -369,6 +341,10 @@ export class ConfigurationFile<TConfigurationFile> {
           if (rigResult) {
             return rigResult;
           }
+        } else {
+          terminal.writeVerboseLine(
+            `Configuration file "${resolvedConfigurationFilePathForLogging}" not found.`
+          );
         }
 
         e.message = `File does not exist: ${resolvedConfigurationFilePathForLogging}`;

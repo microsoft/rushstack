@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor",
-  "version": "7.15.2",
+  "version": "7.16.0",
   "description": "Analyze the exported API for a TypeScript library and generate reviews, documentation, and .d.ts rollups",
   "keywords": [
     "typescript",
@@ -45,7 +45,7 @@
     "resolve": "~1.17.0",
     "semver": "~7.3.0",
     "source-map": "~0.6.1",
-    "typescript": "~4.2.4"
+    "typescript": "~4.3.2"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",

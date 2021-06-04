@@ -2,6 +2,42 @@
   "name": "@rushstack/heft-webpack5-plugin",
   "entries": [
     {
+      "version": "0.1.20",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.1.20",
+      "date": "Fri, 04 Jun 2021 15:08:20 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.31.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.0.27`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.31.2` to `^0.31.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.1.19",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.1.19",
+      "date": "Fri, 04 Jun 2021 00:08:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.31.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.0.26`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.31.1` to `^0.31.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.18",
       "tag": "@rushstack/heft-webpack5-plugin_v0.1.18",
       "date": "Tue, 01 Jun 2021 18:29:26 GMT",
