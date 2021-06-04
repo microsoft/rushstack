@@ -131,7 +131,9 @@ export class ExportAnalyzer {
           );
 
           // Ignore virtual symbols that don't have any declarations
-          if (TypeScriptHelpers.hasAnyDeclarations(followedSymbol)) {
+          const arbitraryDeclaration: ts.Declaration | undefined =
+            TypeScriptHelpers.tryGetADeclaration(followedSymbol);
+          if (arbitraryDeclaration) {
             const astSymbol: AstSymbol | undefined = this._astSymbolTable.fetchAstSymbol({
               followedSymbol: followedSymbol,
               isExternal: astModule.isExternal,
@@ -142,7 +144,7 @@ export class ExportAnalyzer {
             if (!astSymbol) {
               throw new Error(
                 `Unsupported export ${JSON.stringify(exportedSymbol.name)}:\n` +
-                  SourceFileLocationFormatter.formatDeclaration(followedSymbol.declarations[0])
+                  SourceFileLocationFormatter.formatDeclaration(arbitraryDeclaration)
               );
             }
 

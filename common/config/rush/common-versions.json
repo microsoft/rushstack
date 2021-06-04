@@ -63,7 +63,7 @@
      * For example, allow some projects to use an older TypeScript compiler
      * (in addition to whatever "usual" version is being used by other projects in the repo):
      */
-    "typescript": ["~2.4.2", "~2.9.2", "~4.2.4"],
+    "typescript": ["~2.4.2", "~2.9.2", "~4.2.4", "~4.3.2"],
 
     "source-map": [
       "~0.6.1" // API Extractor is using an older version of source-map because newer versions are async
