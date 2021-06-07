@@ -13,7 +13,7 @@ import {
   Config
 } from '@jest/reporters';
 
-import { HeftConfiguration } from '@rushstack/heft';
+import type { HeftConfiguration } from '@rushstack/heft';
 
 export interface IHeftJestReporterOptions {
   heftConfiguration: HeftConfiguration;
