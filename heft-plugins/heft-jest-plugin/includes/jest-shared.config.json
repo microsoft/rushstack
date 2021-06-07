@@ -1,10 +1,12 @@
 {
+  "//": "THIS SHARED JEST CONFIGURATION FILE IS INTENDED TO BE REFERENCED BY THE JEST CONFIGURATION IN",
+  "//": "CONSUMING PACKAGE AND REQUIRES PRESET-RELATIVE MODULE RESOLUTION TO BE ENABLED. IF YOU HAVE",
+  "//": "DISABLED THIS FEATURE YOU MUST CREATE YOUR OWN JEST CONFIGURATION",
+
   "//": "By default, don't hide console output",
   "silent": false,
   "//": "In order for HeftJestReporter to receive console.log() events, we must set verbose=false",
   "verbose": false,
-
-  "rootDir": "../../../../",
 
   "//": ["Adding '<rootDir>/src' here enables src/__mocks__ to be used for mocking Node.js system modules."],
   "roots": ["<rootDir>/src"],
@@ -34,12 +36,13 @@
 
   "//": "jest-identity-mock-transform returns a proxy for exported key/value pairs, where Webpack would return a module",
   "//": "jest-string-mock-transform returns the filename, where Webpack would return a URL",
+  "//": "when using the heft-jest-plugin, these will be replaced with the resolved module location",
   "transform": {
-    "\\.(ts|tsx)$": "@rushstack/heft/lib/exports/jest-build-transform.js",
+    "\\.(ts|tsx)$": "../lib/exports/jest-build-transform.js",
 
-    "\\.(css|sass|scss)$": "@rushstack/heft/lib/exports/jest-identity-mock-transform.js",
+    "\\.(css|sass|scss)$": "../lib/exports/jest-identity-mock-transform.js",
 
-    "\\.(aac|eot|gif|jpeg|jpg|m4a|mp3|mp4|oga|otf|png|svg|ttf|wav|webm|webp|woff|woff2)$": "@rushstack/heft/lib/exports/jest-string-mock-transform.js"
+    "\\.(aac|eot|gif|jpeg|jpg|m4a|mp3|mp4|oga|otf|png|svg|ttf|wav|webm|webp|woff|woff2)$": "../lib/exports/jest-string-mock-transform.js"
   },
 
   "//": [
@@ -50,9 +53,11 @@
   ],
   "modulePathIgnorePatterns": [],
   "//": "Prefer .cjs to .js to catch explicit commonjs output. Optimize for local files, which will be .ts or .tsx.",
-  "moduleFileExtensions": ["ts", "tsx", "cjs", "js", "json"],
+  "moduleFileExtensions": ["ts", "tsx", "cjs", "js", "json", "node"],
 
-  "setupFiles": ["@rushstack/heft/lib/exports/jest-global-setup.js"],
-  "resolver": "@rushstack/heft/lib/exports/jest-improved-resolver.js",
-  "passWithNoTests": true
+  "//": "when using the heft-jest-plugin, these will be replaced with the resolved module location",
+  "setupFiles": ["../lib/exports/jest-global-setup.js"],
+
+  "//": "when using the heft-jest-plugin, these will be replaced with the resolved module location",
+  "resolver": "../lib/exports/jest-improved-resolver.js"
 }
