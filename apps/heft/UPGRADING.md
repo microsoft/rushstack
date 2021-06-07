@@ -23,7 +23,7 @@ plugin should already be enabled.
 If you are using the included `@rushstack/heft/include/jest-shared.config.json` as
 a Jest configuration preset, you will need modify this reference to use
 `@rushstack/heft-jest-plugin/include/jest-shared.config.json`. If you are using
-`@rushstack/heft-node-rig` or `@rushstack/heft-web-rig`, you must now reference
+`@rushstack/heft-node-rig` or `@rushstack/heft-web-rig`, you should now reference
 `@rushstack/heft-node-rig/profiles/default/config/jest.config.json` or
 `@rushstack/heft-node-rig/profiles/library/config/jest.config.json`, respectively.
 

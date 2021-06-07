@@ -13,7 +13,7 @@ const PLUGIN_NAME: string = 'jest-warning-plugin';
 export class JestWarningPlugin extends MissingPluginWarningPluginBase {
   public readonly pluginName: string = PLUGIN_NAME;
   public readonly missingPluginName: string = 'JestPlugin';
-  public readonly missingPluginPackageNames: ReadonlyArray<string> = ['@rushstack/heft-jest-plugin'];
+  public readonly missingPluginCandidatePackageNames: ReadonlyArray<string> = ['@rushstack/heft-jest-plugin'];
   public readonly missingPluginDocumentationUrl: string = 'https://rushstack.io/pages/heft_tasks/jest/';
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {

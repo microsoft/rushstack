@@ -13,7 +13,7 @@ import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 export abstract class MissingPluginWarningPluginBase implements IHeftPlugin {
   public abstract readonly pluginName: string;
   public abstract readonly missingPluginName: string;
-  public abstract readonly missingPluginPackageNames: ReadonlyArray<string>;
+  public abstract readonly missingPluginCandidatePackageNames: ReadonlyArray<string>;
   public abstract readonly missingPluginDocumentationUrl: string;
 
   public abstract apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void;
@@ -28,7 +28,7 @@ export abstract class MissingPluginWarningPluginBase implements IHeftPlugin {
   protected async checkForMissingPlugin(
     heftConfiguration: HeftConfiguration,
     heftSession: HeftSession,
-    hookToTap: Hook<any, any, any, any, any> // eslint-disable-line @typescript-eslint/no-explicit-any
+    hookToTap: Hook<unknown, unknown, unknown, unknown, unknown>
   ): Promise<boolean> {
     let hasPlugin: boolean = false;
     // If we have the plugin, we don't need to check anything else
@@ -51,9 +51,11 @@ export abstract class MissingPluginWarningPluginBase implements IHeftPlugin {
           'The configuration file at ' +
             `"${Path.convertToSlashes(path.relative(heftConfiguration.buildFolder, configFilePath))}" ` +
             'exists in your project, but the associated Heft plugin is not enabled. To fix this, you can add ' +
-            `${this.missingPluginPackageNames.map((packageName) => `"${packageName}"`).join(' or ')} ` +
+            `${this.missingPluginCandidatePackageNames
+              .map((packageName) => `"${packageName}"`)
+              .join(' or ')} ` +
             'to your package.json devDependencies and use config/heft.json to load it. ' +
-            `For details, see this documentation: ${this.missingPluginDocumentationUrl}`
+            `For details, see documentation at "${this.missingPluginDocumentationUrl}".`
         )
       );
     }
