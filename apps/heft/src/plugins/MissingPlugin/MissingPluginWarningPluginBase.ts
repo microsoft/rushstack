@@ -10,7 +10,7 @@ import { HeftSession } from '../../pluginFramework/HeftSession';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
 
-export abstract class MissingPluginBase implements IHeftPlugin {
+export abstract class MissingPluginWarningPluginBase implements IHeftPlugin {
   public abstract readonly pluginName: string;
   public abstract readonly missingPluginName: string;
   public abstract readonly missingPluginPackageNames: ReadonlyArray<string>;
@@ -31,13 +31,13 @@ export abstract class MissingPluginBase implements IHeftPlugin {
     hookToTap: Hook<any, any, any, any, any> // eslint-disable-line @typescript-eslint/no-explicit-any
   ): Promise<boolean> {
     let hasPlugin: boolean = false;
+    // If we have the plugin, we don't need to check anything else
     for (const tap of hookToTap.taps) {
       if (tap.name === this.missingPluginName) {
-        hasPlugin = true;
+        return false;
       }
     }
 
-    // If we have the plugin, we don't need to check anything else
     if (hasPlugin) {
       return false;
     }

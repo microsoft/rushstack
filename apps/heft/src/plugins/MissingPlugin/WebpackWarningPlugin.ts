@@ -8,11 +8,11 @@ import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { IBuildStageContext, IBundleSubstage } from '../../stages/BuildStage';
-import { MissingPluginBase } from './MissingPluginBase';
+import { MissingPluginWarningPluginBase } from './MissingPluginWarningPluginBase';
 
 const PLUGIN_NAME: string = 'webpack-warning-plugin';
 
-export class WebpackWarningPlugin extends MissingPluginBase {
+export class WebpackWarningPlugin extends MissingPluginWarningPluginBase {
   public readonly pluginName: string = PLUGIN_NAME;
   public readonly missingPluginName: string = 'WebpackPlugin';
   public readonly missingPluginPackageNames: ReadonlyArray<string> = [

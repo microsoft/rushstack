@@ -6,11 +6,11 @@ import * as path from 'path';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { ITestStageContext } from '../../stages/TestStage';
-import { MissingPluginBase } from './MissingPluginBase';
+import { MissingPluginWarningPluginBase } from './MissingPluginWarningPluginBase';
 
 const PLUGIN_NAME: string = 'jest-warning-plugin';
 
-export class JestWarningPlugin extends MissingPluginBase {
+export class JestWarningPlugin extends MissingPluginWarningPluginBase {
   public readonly pluginName: string = PLUGIN_NAME;
   public readonly missingPluginName: string = 'JestPlugin';
   public readonly missingPluginPackageNames: ReadonlyArray<string> = ['@rushstack/heft-jest-plugin'];
