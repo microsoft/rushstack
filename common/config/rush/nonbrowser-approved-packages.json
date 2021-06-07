@@ -239,6 +239,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "deepmerge",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "doc-plugin-rush-stack",
       "allowedCategories": [ "libraries" ]
     },
