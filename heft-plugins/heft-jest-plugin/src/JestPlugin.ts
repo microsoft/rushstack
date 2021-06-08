@@ -127,6 +127,9 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
         // reporters: (path | [ path, options ])[]
         '$.reporters[?(@ !== "default")]*@string()': nodeResolveMetadata, // string path, excluding "default"
         '$.reporters.*[?(@property == 0 && @ !== "default")]': nodeResolveMetadata, // First entry in [ path, options ], excluding "default"
+        // watchPlugins: (path | [ path, options ])[]
+        '$.watchPlugins.*@string()': nodeResolveMetadata, // string path
+        '$.watchPlugins.*[?(@property == 0)]': nodeResolveMetadata, // First entry in [ path, options ]
         // transform: { [regex]: path | [ path, options ] }
         '$.transform.*@string()': nodeResolveMetadata, // string path
         '$.transform.*[?(@property == 0)]': nodeResolveMetadata // First entry in [ path, options ]
