@@ -38,7 +38,7 @@ function fixup(packageJson, dependencies) {
       // This must be an absolute path, since a relative path would get resolved relative to an unknown folder
       const tarballSpecifier = 'file:' + path.join(tarballsJsonFolder, tarballFilename).split('\\').join('/');
 
-      console.log(`Remapping ${packageJson.name}: ${dependencyName} --> ${tarballSpecifier}`);
+      // console.log(`Remapping ${packageJson.name}: ${dependencyName} --> ${tarballSpecifier}`);
       dependencies[dependencyName] = tarballSpecifier;
     }
   }
