@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Terminal, InternalError, Import } from '@rushstack/node-core-library';
+import { Terminal, InternalError, Import, JsonSchema } from '@rushstack/node-core-library';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IHeftPlugin } from './IHeftPlugin';
@@ -87,7 +87,10 @@ export class PluginManager {
   }
 
   private _initializeResolvedPlugin(resolvedPluginPath: string, options?: object): void {
-    const plugin: IHeftPlugin<object | void> = this._loadAndValidatePluginPackage(resolvedPluginPath);
+    const plugin: IHeftPlugin<object | void> = this._loadAndValidatePluginPackage(
+      resolvedPluginPath,
+      options
+    );
 
     if (this._appliedPluginNames.has(plugin.pluginName)) {
       throw new Error(
@@ -110,7 +113,7 @@ export class PluginManager {
     }
   }
 
-  private _loadAndValidatePluginPackage(resolvedPluginPath: string): IHeftPlugin {
+  private _loadAndValidatePluginPackage(resolvedPluginPath: string, options?: object): IHeftPlugin {
     let pluginPackage: IHeftPlugin;
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -120,11 +123,11 @@ export class PluginManager {
       throw new InternalError(`Error loading plugin package from "${resolvedPluginPath}": ${e}`);
     }
 
-    this._terminal.writeVerboseLine(`Loaded plugin package from "${resolvedPluginPath}"`);
-
     if (!pluginPackage) {
       throw new InternalError(`Plugin package loaded from "${resolvedPluginPath}" is null or undefined.`);
     }
+
+    this._terminal.writeVerboseLine(`Loaded plugin package from "${resolvedPluginPath}"`);
 
     if (!pluginPackage.apply || typeof pluginPackage.apply !== 'function') {
       throw new InternalError(
@@ -138,6 +141,28 @@ export class PluginManager {
         `Plugin packages must define a "pluginName" property. The plugin loaded from "${resolvedPluginPath}" ` +
           'either doesn\'t define a "pluginName" property, or its value isn\'t a string.'
       );
+    }
+
+    if (pluginPackage.optionsSchemaFilePath) {
+      if (typeof pluginPackage.optionsSchemaFilePath !== 'string') {
+        throw new InternalError(
+          'Plugin packages cannot define a non-string "optionsSchemaFilePath" property. The plugin loaded from ' +
+            `"${resolvedPluginPath}" has a non-string value for this property.`
+        );
+      }
+
+      if (options) {
+        try {
+          JsonSchema.fromFile(pluginPackage.optionsSchemaFilePath).validateObject(
+            options,
+            'config/heft.json'
+          );
+        } catch (e) {
+          throw new Error(
+            `Provided options for plugin "${pluginPackage.pluginName}" did not match the plugin schema. ${e}`
+          );
+        }
+      }
     }
 
     return pluginPackage;

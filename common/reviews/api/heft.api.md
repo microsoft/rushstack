@@ -256,6 +256,8 @@ export interface IHeftPlugin<TOptions = void> {
     // (undocumented)
     apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration, options?: TOptions): void;
     // (undocumented)
+    readonly optionsSchemaFilePath?: string;
+    // (undocumented)
     readonly pluginName: string;
 }
 

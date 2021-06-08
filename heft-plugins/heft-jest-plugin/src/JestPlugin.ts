@@ -32,6 +32,7 @@ import type {
 
 type JestReporterConfig = string | Config.ReporterConfig;
 const PLUGIN_NAME: string = 'JestPlugin';
+const SCHEMA_PATH: string = path.join(__dirname, 'schemas', 'heft-jest-plugin.schema.json');
 const JEST_CONFIGURATION_LOCATION: string = path.join('config', 'jest.config.json');
 
 interface IJestPluginOptions {
@@ -46,6 +47,7 @@ export interface IHeftJestConfiguration extends Config.InitialOptions {}
  */
 export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
   public readonly pluginName: string = PLUGIN_NAME;
+  public readonly optionsSchemaFilePath: string = SCHEMA_PATH;
 
   private _jestTerminal!: Terminal;
 
@@ -53,8 +55,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
    * Returns the loader for the `config/api-extractor-task.json` config file.
    */
   public static getJestConfigurationLoader(rootDir: string): ConfigurationFile<IHeftJestConfiguration> {
-    // Our config file should really be as close to Jest default as possible, so we will
-    // validate against an "anything" schema
+    // Bypass Jest configuration validation
     const schemaPath: string = path.resolve(__dirname, 'schemas', 'anything.schema.json');
 
     // By default, ConfigurationFile will replace all objects, so we need to provide merge functions for these
@@ -127,11 +128,9 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     heftConfiguration: HeftConfiguration,
     options?: IJestPluginOptions
   ): void {
+    // TODO: Remove when newer version of Heft consumed
     if (options) {
-      JsonSchema.fromFile(path.join(__dirname, 'schemas', 'heft-jest-plugin.schema.json')).validateObject(
-        options,
-        ''
-      );
+      JsonSchema.fromFile(SCHEMA_PATH).validateObject(options, 'config/heft.json');
     }
 
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
@@ -198,7 +197,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       if (jestConfigObj.preset) {
         throw new Error(
           'The provided jest.config.json specifies a "preset" property while using resolved modules. ' +
-            'You must either remove all "preset" values from your Jest configuration, or disable the' +
+            'You must either remove all "preset" values from your Jest configuration, or disable the ' +
             '"resolveConfigurationModules" option on the Jest plugin in heft.json'
         );
       }
