@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Terminal, InternalError, Import, JsonSchema } from '@rushstack/node-core-library';
+import { Terminal, InternalError, Import } from '@rushstack/node-core-library';
 
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import { IHeftPlugin } from './IHeftPlugin';
@@ -22,8 +22,8 @@ import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPl
 import { SassTypingsPlugin } from '../plugins/SassTypingsPlugin/SassTypingsPlugin';
 import { ProjectValidatorPlugin } from '../plugins/ProjectValidatorPlugin';
 import { ToolPackageResolver } from '../utilities/ToolPackageResolver';
-import { JestWarningPlugin } from '../plugins/MissingPlugin/JestWarningPlugin';
-import { WebpackWarningPlugin } from '../plugins/MissingPlugin/WebpackWarningPlugin';
+import { JestWarningPlugin } from '../plugins/MissingPluginWarningPlugin/JestWarningPlugin';
+import { WebpackWarningPlugin } from '../plugins/MissingPluginWarningPlugin/WebpackWarningPlugin';
 import { NodeServicePlugin } from '../plugins/NodeServicePlugin';
 
 export interface IPluginManagerOptions {
@@ -143,25 +143,13 @@ export class PluginManager {
       );
     }
 
-    if (pluginPackage.optionsSchemaFilePath) {
-      if (typeof pluginPackage.optionsSchemaFilePath !== 'string') {
-        throw new InternalError(
-          'Plugin packages cannot define a non-string "optionsSchemaFilePath" property. The plugin loaded from ' +
-            `"${resolvedPluginPath}" has a non-string value for this property.`
+    if (options && pluginPackage.optionsSchema) {
+      try {
+        pluginPackage.optionsSchema.validateObject(options, 'config/heft.json');
+      } catch (e) {
+        throw new Error(
+          `Provided options for plugin "${pluginPackage.pluginName}" did not match the plugin schema. ${e}`
         );
-      }
-
-      if (options) {
-        try {
-          JsonSchema.fromFile(pluginPackage.optionsSchemaFilePath).validateObject(
-            options,
-            'config/heft.json'
-          );
-        } catch (e) {
-          throw new Error(
-            `Provided options for plugin "${pluginPackage.pluginName}" did not match the plugin schema. ${e}`
-          );
-        }
       }
     }
 

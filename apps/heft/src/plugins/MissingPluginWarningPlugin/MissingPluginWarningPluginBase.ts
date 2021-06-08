@@ -25,7 +25,7 @@ export abstract class MissingPluginWarningPluginBase implements IHeftPlugin {
    * requested plugin is installed and warns otherwise if related configuration files were
    * found. Returns false if the plugin was found, otherwise true.
    */
-  protected async checkForMissingPlugin(
+  protected async checkForMissingPluginAsync(
     heftConfiguration: HeftConfiguration,
     heftSession: HeftSession,
     hookToTap: Hook<unknown, unknown, unknown, unknown, unknown>

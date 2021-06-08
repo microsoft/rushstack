@@ -19,7 +19,7 @@ export class JestWarningPlugin extends MissingPluginWarningPluginBase {
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     heftSession.hooks.test.tap(PLUGIN_NAME, (test: ITestStageContext) => {
       test.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-        await this.checkForMissingPlugin(heftConfiguration, heftSession, test.hooks.run);
+        await this.checkForMissingPluginAsync(heftConfiguration, heftSession, test.hooks.run);
       });
     });
   }

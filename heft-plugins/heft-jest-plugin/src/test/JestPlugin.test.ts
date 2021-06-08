@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { IHeftJestConfiguration, JestPlugin } from '../JestPlugin';
-
 import type { Config } from '@jest/types';
 import { ConfigurationFile } from '@rushstack/heft-config-file';
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+
+import { IHeftJestConfiguration, JestPlugin } from '../JestPlugin';
 
 describe('JestConfigLoader', () => {
   let terminalProvider: StringBufferTerminalProvider;

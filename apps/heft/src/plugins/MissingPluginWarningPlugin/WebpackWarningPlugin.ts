@@ -25,7 +25,7 @@ export class WebpackWarningPlugin extends MissingPluginWarningPluginBase {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
         bundle.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          await this.checkForMissingPlugin(
+          await this.checkForMissingPluginAsync(
             heftConfiguration,
             heftSession,
             bundle.hooks.run,
@@ -43,13 +43,13 @@ export class WebpackWarningPlugin extends MissingPluginWarningPluginBase {
   /**
    * @override
    */
-  protected async checkForMissingPlugin(
+  protected async checkForMissingPluginAsync(
     heftConfiguration: HeftConfiguration,
     heftSession: HeftSession,
     hookToTap: Hook<unknown, unknown, unknown, unknown, unknown>,
     webpackConfigurationExists?: boolean
   ): Promise<boolean> {
-    const missingPlugin: boolean = await super.checkForMissingPlugin(
+    const missingPlugin: boolean = await super.checkForMissingPluginAsync(
       heftConfiguration,
       heftSession,
       hookToTap

@@ -50,6 +50,14 @@ export class JestTypeScriptDataFile {
   }
 
   /**
+   * Called by JestPlugin to load and validate the typescript data file before running Jest.
+   */
+  public static async loadForProjectAsync(projectFolder: string): Promise<IJestTypeScriptDataFileJson> {
+    const jsonFilePath: string = JestTypeScriptDataFile.getConfigFilePath(projectFolder);
+    return await JsonFile.loadAsync(jsonFilePath);
+  }
+
+  /**
    * Called by jest-build-transform.js to read the file.
    */
   public static loadForProject(projectFolder: string): IJestTypeScriptDataFileJson {
