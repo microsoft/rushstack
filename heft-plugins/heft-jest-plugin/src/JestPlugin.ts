@@ -275,27 +275,27 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
   private _validateJestTypeScriptDataFile(buildFolder: string): void {
     // We have no gurantee that the data file exists, since this would only get written
     // during the build stage when running in a TypeScript project
-    let jestTypeScriptDataFile: IJestTypeScriptDataFileJson;
+    let jestTypeScriptDataFile: IJestTypeScriptDataFileJson | undefined;
     try {
       jestTypeScriptDataFile = JestTypeScriptDataFile.loadForProject(buildFolder);
     } catch (error) {
       if (!FileSystem.isNotExistError(error)) {
         throw error;
       }
-      // Swallow and exit early since we cannot validate
-      return;
     }
-    const emitFolderPathForJest: string = path.join(
-      buildFolder,
-      jestTypeScriptDataFile.emitFolderNameForTests
-    );
-    if (!FileSystem.exists(emitFolderPathForJest)) {
-      throw new Error(
-        'The transpiler output folder does not exist:\n  ' +
-          emitFolderPathForJest +
-          '\nWas the compiler invoked? Is the "emitFolderNameForTests" setting correctly' +
-          ' specified in config/typescript.json?\n'
+    if (jestTypeScriptDataFile) {
+      const emitFolderPathForJest: string = path.join(
+        buildFolder,
+        jestTypeScriptDataFile.emitFolderNameForTests
       );
+      if (!FileSystem.exists(emitFolderPathForJest)) {
+        throw new Error(
+          'The transpiler output folder does not exist:\n  ' +
+            emitFolderPathForJest +
+            '\nWas the compiler invoked? Is the "emitFolderNameForTests" setting correctly' +
+            ' specified in config/typescript.json?\n'
+        );
+      }
     }
   }
 
