@@ -7,9 +7,9 @@
   "additionalProperties": false,
 
   "properties": {
-    "disablePresetRelativeModuleResolution": {
-      "title": "Disable Preset-Relative Module Resolution",
-      "description": "If set to true, module resolution will return to the Jest default and preset-relative module resolution will not be performed.",
+    "resolveConfigurationModules": {
+      "title": "Resolve Configuration Modules",
+      "description": "If set to true, modules specified in the Jest configuration will be resolved using Node resolution. Otherwise, Jest default (rootDir-relative) resolution will be used.",
       "type": "boolean"
     },
 

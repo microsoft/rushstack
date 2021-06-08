@@ -2,15 +2,30 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { JestConfigLoader } from '../JestConfigLoader';
+import { IHeftJestConfiguration, JestPlugin } from '../JestPlugin';
 
 import type { Config } from '@jest/types';
+import { ConfigurationFile } from '@rushstack/heft-config-file';
+import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 
 describe('JestConfigLoader', () => {
+  let terminalProvider: StringBufferTerminalProvider;
+  let terminal: Terminal;
+
+  beforeEach(() => {
+    terminalProvider = new StringBufferTerminalProvider(false);
+    terminal = new Terminal(terminalProvider);
+  });
+
   it('resolves preset config modules', async () => {
     const rootDir: string = path.join(__dirname, 'project1');
-    const configPath: string = path.join(rootDir, 'config', 'jest.config.json');
-    const loadedConfig: Config.InitialOptions = await JestConfigLoader.loadConfigAsync(configPath, rootDir);
+    const loader: ConfigurationFile<IHeftJestConfiguration> = await JestPlugin.getJestConfigurationLoader(
+      rootDir
+    );
+    const loadedConfig: IHeftJestConfiguration = await loader.loadConfigurationFileForProjectAsync(
+      terminal,
+      path.join(__dirname, 'project1')
+    );
 
     // Resolution of string fields is validated implicitly during load since the preset is resolved and
     // set to undefined
@@ -40,9 +55,14 @@ describe('JestConfigLoader', () => {
   });
 
   it('resolves preset package modules', async () => {
-    const rootDir: string = path.join(__dirname, 'project2');
-    const configPath: string = path.join(rootDir, 'config', 'jest.config.json');
-    const loadedConfig: Config.InitialOptions = await JestConfigLoader.loadConfigAsync(configPath, rootDir);
+    const rootDir: string = path.join(__dirname, 'project1');
+    const loader: ConfigurationFile<IHeftJestConfiguration> = await JestPlugin.getJestConfigurationLoader(
+      rootDir
+    );
+    const loadedConfig: IHeftJestConfiguration = await loader.loadConfigurationFileForProjectAsync(
+      terminal,
+      path.join(__dirname, 'project2')
+    );
 
     expect(loadedConfig.setupFiles?.length).toBe(1);
     expect(loadedConfig.setupFiles![0]).toBe(require.resolve('@jest/core'));

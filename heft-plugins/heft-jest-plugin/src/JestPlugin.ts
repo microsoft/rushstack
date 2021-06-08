@@ -5,10 +5,21 @@
 import './jestWorkerPatch';
 
 import * as path from 'path';
+import merge from 'deepmerge';
 import { getVersion, runCLI } from '@jest/core';
 import { Config } from '@jest/types';
-import { FileSystem, JsonFile, JsonSchema, Terminal } from '@rushstack/node-core-library';
 import {
+  ConfigurationFile,
+  IJsonPathMetadata,
+  InheritanceType,
+  PathResolutionMethod
+} from '@rushstack/heft-config-file';
+import { FileSystem, JsonFile, JsonSchema, Terminal } from '@rushstack/node-core-library';
+
+import { IHeftJestReporterOptions } from './HeftJestReporter';
+import { JestTypeScriptDataFile, IJestTypeScriptDataFileJson } from './JestTypeScriptDataFile';
+
+import type {
   ICleanStageContext,
   ITestStageContext,
   IHeftPlugin,
@@ -19,18 +30,16 @@ import {
   ICompileSubstage
 } from '@rushstack/heft';
 
-import { IHeftJestReporterOptions } from './HeftJestReporter';
-import { JestTypeScriptDataFile, IJestTypeScriptDataFileJson } from './JestTypeScriptDataFile';
-import { JestConfigLoader } from './JestConfigLoader';
-
 type JestReporterConfig = string | Config.ReporterConfig;
 const PLUGIN_NAME: string = 'JestPlugin';
 const JEST_CONFIGURATION_LOCATION: string = path.join('config', 'jest.config.json');
 
 interface IJestPluginOptions {
-  disablePresetRelativeModuleResolution?: boolean;
+  resolveConfigurationModules?: boolean;
   passWithNoTests?: boolean;
 }
+
+export interface IHeftJestConfiguration extends Config.InitialOptions {}
 
 /**
  * @internal
@@ -40,13 +49,89 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
 
   private _jestTerminal!: Terminal;
 
+  /**
+   * Returns the loader for the `config/api-extractor-task.json` config file.
+   */
+  public static getJestConfigurationLoader(rootDir: string): ConfigurationFile<IHeftJestConfiguration> {
+    // Our config file should really be as close to Jest default as possible, so we will
+    // validate against an "anything" schema
+    const schemaPath: string = path.resolve(__dirname, 'schemas', 'anything.schema.json');
+
+    // By default, ConfigurationFile will replace all objects, so we need to provide merge functions for these
+    const shallowObjectInheritanceFunc: <T>(currentObject: T, parentObject: T) => T = <
+      T extends { [key: string]: any } // eslint-disable-line @typescript-eslint/no-explicit-any
+    >(
+      currentObject: T,
+      parentObject: T
+    ): T => {
+      return { ...(parentObject || {}), ...(currentObject || {}) };
+    };
+    const deepObjectInheritanceFunc: <T>(currentObject: T, parentObject: T) => T = <T>(
+      currentObject: T,
+      parentObject: T
+    ): T => merge<T>(parentObject || {}, currentObject || {});
+
+    // Resolve all specified properties using Node resolution, and replace <rootDir> with the same rootDir
+    // that we provide to Jest
+    const nodeResolveMetadata: IJsonPathMetadata = {
+      preresolve: (jsonPath: string) => jsonPath.replace(/<rootDir>/g, rootDir),
+      pathResolutionMethod: PathResolutionMethod.NodeResolve
+    };
+
+    return new ConfigurationFile<IHeftJestConfiguration>({
+      projectRelativeFilePath: 'config/jest.config.json',
+      jsonSchemaPath: schemaPath,
+      propertyInheritance: {
+        moduleNameMapper: {
+          inheritanceType: InheritanceType.custom,
+          inheritanceFunction: shallowObjectInheritanceFunc
+        },
+        transform: {
+          inheritanceType: InheritanceType.custom,
+          inheritanceFunction: shallowObjectInheritanceFunc
+        },
+        globals: {
+          inheritanceType: InheritanceType.custom,
+          inheritanceFunction: deepObjectInheritanceFunc
+        }
+      },
+      jsonPathMetadata: {
+        // string
+        '$.dependencyExtractor': nodeResolveMetadata,
+        '$.globalSetup': nodeResolveMetadata,
+        '$.globalTeardown': nodeResolveMetadata,
+        '$.moduleLoader': nodeResolveMetadata,
+        '$.snapshotResolver': nodeResolveMetadata,
+        '$.testResultsProcessor': nodeResolveMetadata,
+        '$.testRunner': nodeResolveMetadata,
+        '$.filter': nodeResolveMetadata,
+        '$.runner': nodeResolveMetadata,
+        '$.prettierPath': nodeResolveMetadata,
+        '$.resolver': nodeResolveMetadata,
+        // string[]
+        '$.setupFiles.*': nodeResolveMetadata,
+        '$.setupFilesAfterEnv.*': nodeResolveMetadata,
+        '$.snapshotSerializers.*': nodeResolveMetadata,
+        // reporters: (path | [ path, options ])[]
+        '$.reporters[?(@ !== "default")]*@string()': nodeResolveMetadata, // string path, excluding "default"
+        '$.reporters.*[?(@property == 0 && @ !== "default")]': nodeResolveMetadata, // First entry in [ path, options ], excluding "default"
+        // transform: { [regex]: path | [ path, options ] }
+        '$.transform.*@string()': nodeResolveMetadata, // string path
+        '$.transform.*[?(@property == 0)]': nodeResolveMetadata // First entry in [ path, options ]
+      }
+    });
+  }
+
   public apply(
     heftSession: HeftSession,
     heftConfiguration: HeftConfiguration,
     options?: IJestPluginOptions
   ): void {
     if (options) {
-      JsonSchema.fromFile(path.join(__dirname, 'jestPlugin.schema.json')).validateObject(options, '');
+      JsonSchema.fromFile(path.join(__dirname, 'schemas', 'heft-jest-plugin.schema.json')).validateObject(
+        options,
+        ''
+      );
     }
 
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
@@ -87,13 +172,6 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     this._jestTerminal = jestLogger.terminal;
     this._jestTerminal.writeLine(`Using Jest version ${getVersion()}`);
 
-    const expectedConfigPath: string = this._getJestConfigPath(heftConfiguration);
-
-    if (!FileSystem.exists(expectedConfigPath)) {
-      jestLogger.emitError(new Error(`Expected to find jest config file at ${expectedConfigPath}`));
-      return;
-    }
-
     // In watch mode, Jest starts up in parallel with the compiler, so there's no
     // guarantee that the output files would have been written yet.
     if (!test.properties.watchMode) {
@@ -101,17 +179,30 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     }
 
     let jestConfig: string;
-    if (options?.disablePresetRelativeModuleResolution) {
-      // If the feature isn't enabled, we will fall back to loading the config by path in Jest
-      jestConfig = expectedConfigPath;
+    if (options?.resolveConfigurationModules === false) {
+      // Module resolution explicitly disabled, use the config as-is
+      jestConfig = this._getJestConfigPath(heftConfiguration);
+      if (!FileSystem.exists(jestConfig)) {
+        jestLogger.emitError(new Error(`Expected to find jest config file at "${jestConfig}".`));
+        return;
+      }
     } else {
-      // Load in the Jest config manually. This allows us to perform runtime module
-      // resolution for preset configs.
-      const configObj: Config.InitialOptions = await JestConfigLoader.loadConfigAsync(
-        expectedConfigPath,
-        buildFolder
+      // Load in and resolve the config file using the "extends" field
+      const jestConfigObj: IHeftJestConfiguration = await JestPlugin.getJestConfigurationLoader(
+        heftConfiguration.buildFolder
+      ).loadConfigurationFileForProjectAsync(
+        this._jestTerminal,
+        heftConfiguration.buildFolder,
+        heftConfiguration.rigConfig
       );
-      jestConfig = JSON.stringify(configObj);
+      if (jestConfigObj.preset) {
+        throw new Error(
+          'The provided jest.config.json specifies a "preset" property while using resolved modules. ' +
+            'You must either remove all "preset" values from your Jest configuration, or disable the' +
+            '"resolveConfigurationModules" option on the Jest plugin in heft.json'
+        );
+      }
+      jestConfig = JSON.stringify(jestConfigObj);
     }
 
     const jestArgv: Config.Argv = {
@@ -188,11 +279,11 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     try {
       jestTypeScriptDataFile = JestTypeScriptDataFile.loadForProject(buildFolder);
     } catch (error) {
-      // Swallow and exit early since we cannot validate
-      if (FileSystem.isNotExistError(error)) {
-        return;
+      if (!FileSystem.isNotExistError(error)) {
+        throw error;
       }
-      throw error;
+      // Swallow and exit early since we cannot validate
+      return;
     }
     const emitFolderPathForJest: string = path.join(
       buildFolder,

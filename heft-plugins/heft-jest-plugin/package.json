@@ -21,6 +21,7 @@
     "@jest/core": "~25.4.0",
     "@jest/reporters": "~25.4.0",
     "@jest/transform": "~25.4.0",
+    "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "deepmerge": "~4.2.2",
     "jest-snapshot": "~25.4.0"

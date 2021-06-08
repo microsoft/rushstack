@@ -1,5 +1,5 @@
 {
-  "preset": "./c/jest.config.json",
+  "extends": "./c/jest.config.json",
 
   "setupFiles": ["./b/setupFile1.js"],
 

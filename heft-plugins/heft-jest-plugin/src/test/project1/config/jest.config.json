@@ -1,3 +1,5 @@
 {
-  "preset": "<rootDir>/a/jest.config.json"
+  "extends": "../a/jest.config.json",
+
+  "globalSetup": "<rootDir>/a/b/globalSetupFile1.js"
 }

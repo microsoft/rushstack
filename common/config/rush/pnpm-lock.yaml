@@ -893,6 +893,7 @@ importers:
       '@jest/types': ~25.4.0
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': 0.31.4
+      '@rushstack/heft-config-file': workspace:*
       '@rushstack/heft-node-rig': 1.0.28
       '@rushstack/node-core-library': workspace:*
       '@types/heft-jest': 1.0.1
@@ -903,6 +904,7 @@ importers:
       '@jest/core': 25.4.0
       '@jest/reporters': 25.4.0
       '@jest/transform': 25.4.0
+      '@rushstack/heft-config-file': link:../../libraries/heft-config-file
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       deepmerge: 4.2.2
       jest-snapshot: 25.4.0
