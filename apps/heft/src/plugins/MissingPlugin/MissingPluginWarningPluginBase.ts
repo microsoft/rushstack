@@ -30,16 +30,11 @@ export abstract class MissingPluginWarningPluginBase implements IHeftPlugin {
     heftSession: HeftSession,
     hookToTap: Hook<unknown, unknown, unknown, unknown, unknown>
   ): Promise<boolean> {
-    let hasPlugin: boolean = false;
     // If we have the plugin, we don't need to check anything else
     for (const tap of hookToTap.taps) {
       if (tap.name === this.missingPluginName) {
         return false;
       }
-    }
-
-    if (hasPlugin) {
-      return false;
     }
 
     // Warn if any were found
