@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Upgrade the \"rush init\" template to use PNPM version 6.7.1; this avoids an important regression in PNPM 6.3.0 where .pnpmfile.cjs did not work correctly: https://github.com/pnpm/pnpm/issues/3453",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
