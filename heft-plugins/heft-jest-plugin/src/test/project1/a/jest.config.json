@@ -4,6 +4,6 @@
   "setupFiles": ["./b/setupFile1.js"],
 
   "transform": {
-    "\\.(xxx)$": "./b/mockTransformModule1.js"
+    "\\.(xxx)$": "./b/mockTransformModule2.js"
   }
 }

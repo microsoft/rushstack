@@ -25,9 +25,8 @@ describe('JestConfigLoader', () => {
       path.join(__dirname, 'project1')
     );
 
-    // Resolution of string fields is validated implicitly during load since the preset is resolved and
-    // set to undefined
     expect(loadedConfig.preset).toBe(undefined);
+    expect(loadedConfig.globalSetup).toBe(path.join(rootDir, 'a', 'b', 'globalSetupFile1.js'));
 
     // Validate string[]
     expect(loadedConfig.setupFiles?.length).toBe(2);
@@ -45,11 +44,26 @@ describe('JestConfigLoader', () => {
     // Validate transformers
     expect(Object.keys(loadedConfig.transform || {}).length).toBe(2);
     expect(loadedConfig.transform!['\\.(xxx)$']).toBe(
-      path.join(rootDir, 'a', 'b', 'mockTransformModule1.js')
-    );
-    expect((loadedConfig.transform!['\\.(yyy)$'] as Config.TransformerConfig)[0]).toBe(
       path.join(rootDir, 'a', 'b', 'mockTransformModule2.js')
     );
+    expect((loadedConfig.transform!['\\.(yyy)$'] as Config.TransformerConfig)[0]).toBe(
+      path.join(rootDir, 'a', 'c', 'mockTransformModule3.js')
+    );
+
+    // Validate globals
+    expect(Object.keys(loadedConfig.globals || {}).length).toBe(4);
+    expect(loadedConfig.globals!.key1).toBe('value5');
+    expect((loadedConfig.globals!.key2 as string[]).length).toBe(4);
+    expect((loadedConfig.globals!.key2 as string[])[0]).toBe('value2');
+    expect((loadedConfig.globals!.key2 as string[])[1]).toContain('value3');
+    expect((loadedConfig.globals!.key2 as string[])[2]).toContain('value2');
+    expect((loadedConfig.globals!.key2 as string[])[3]).toContain('value6');
+    const key3Obj: any = (loadedConfig.globals as any).key3; // eslint-disable-line @typescript-eslint/no-explicit-any
+    expect(Object.keys(key3Obj).length).toBe(3);
+    expect(key3Obj.key4).toBe('value7');
+    expect(key3Obj.key5).toBe('value5');
+    expect(key3Obj.key6).toBe('value8');
+    expect(loadedConfig.globals!.key7).toBe('value9');
   });
 
   it('resolves preset package modules', async () => {

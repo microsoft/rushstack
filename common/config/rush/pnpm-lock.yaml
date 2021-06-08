@@ -897,23 +897,25 @@ importers:
       '@rushstack/heft-node-rig': 1.0.28
       '@rushstack/node-core-library': workspace:*
       '@types/heft-jest': 1.0.1
+      '@types/lodash': 4.14.116
       '@types/node': 10.17.13
-      deepmerge: ~4.2.2
       jest-snapshot: ~25.4.0
+      lodash: ~4.17.15
     dependencies:
       '@jest/core': 25.4.0
       '@jest/reporters': 25.4.0
       '@jest/transform': 25.4.0
       '@rushstack/heft-config-file': link:../../libraries/heft-config-file
       '@rushstack/node-core-library': link:../../libraries/node-core-library
-      deepmerge: 4.2.2
       jest-snapshot: 25.4.0
+      lodash: 4.17.21
     devDependencies:
       '@jest/types': 25.4.0
       '@rushstack/eslint-config': link:../../stack/eslint-config
       '@rushstack/heft': 0.31.4
       '@rushstack/heft-node-rig': 1.0.28_@rushstack+heft@0.31.4
       '@types/heft-jest': 1.0.1
+      '@types/lodash': 4.14.116
       '@types/node': 10.17.13
 
   ../../heft-plugins/heft-webpack4-plugin:

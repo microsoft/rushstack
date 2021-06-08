@@ -1,9 +1,21 @@
 {
+  "globalSetup": "./d/globalSetupFile2.js",
+
   "setupFiles": ["../b/setupFile2.js"],
 
   "reporters": ["default", "./mockReporter1.js", ["./d/mockReporter2.js", { "key": "value" }]],
 
   "transform": {
-    "\\.(yyy)$": ["../b/mockTransformModule2.js", { "key": "value" }]
+    "\\.(xxx)$": ["../b/mockTransformModule1.js", { "key": "value" }],
+    "\\.(yyy)$": ["./mockTransformModule3.js", { "key": "value" }]
+  },
+
+  "globals": {
+    "key1": "value1",
+    "key2": ["value2", "value3"],
+    "key3": {
+      "key4": "value4",
+      "key5": "value5"
+    }
   }
 }

@@ -5,7 +5,7 @@
 import './jestWorkerPatch';
 
 import * as path from 'path';
-import merge from 'deepmerge';
+import * as lodash from 'lodash';
 import { getVersion, runCLI } from '@jest/core';
 import { Config } from '@jest/types';
 import {
@@ -59,23 +59,34 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     const schemaPath: string = path.resolve(__dirname, 'schemas', 'anything.schema.json');
 
     // By default, ConfigurationFile will replace all objects, so we need to provide merge functions for these
-    const shallowObjectInheritanceFunc: <T>(currentObject: T, parentObject: T) => T = <
-      T extends { [key: string]: any } // eslint-disable-line @typescript-eslint/no-explicit-any
-    >(
+    const shallowObjectInheritanceFunc: <T>(
       currentObject: T,
       parentObject: T
-    ): T => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) => T = <T extends { [key: string]: any }>(currentObject: T, parentObject: T): T => {
       return { ...(parentObject || {}), ...(currentObject || {}) };
     };
-    const deepObjectInheritanceFunc: <T>(currentObject: T, parentObject: T) => T = <T>(
+    const deepObjectInheritanceFunc: <T>(
       currentObject: T,
       parentObject: T
-    ): T => merge<T>(parentObject || {}, currentObject || {});
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) => T = <T extends { [key: string]: any }>(currentObject: T, parentObject: T): T => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return lodash.mergeWith(parentObject || {}, currentObject || {}, (value: any, source: any) => {
+        if (!lodash.isObject(source)) {
+          return source;
+        }
+        return Array.isArray(value) ? [...value, ...source] : { ...value, ...source };
+      });
+    };
 
     // Resolve all specified properties using Node resolution, and replace <rootDir> with the same rootDir
-    // that we provide to Jest
+    // that we provide to Jest. Resolve if we modified since paths containing <rootDir> should be absolute.
     const nodeResolveMetadata: IJsonPathMetadata = {
-      preresolve: (jsonPath: string) => jsonPath.replace(/<rootDir>/g, rootDir),
+      preresolve: (jsonPath: string) => {
+        const newJsonPath: string = jsonPath.replace(/<rootDir>/g, rootDir);
+        return jsonPath === newJsonPath ? jsonPath : path.resolve(newJsonPath);
+      },
       pathResolutionMethod: PathResolutionMethod.NodeResolve
     };
 
@@ -197,8 +208,8 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       if (jestConfigObj.preset) {
         throw new Error(
           'The provided jest.config.json specifies a "preset" property while using resolved modules. ' +
-            'You must either remove all "preset" values from your Jest configuration, or disable the ' +
-            '"resolveConfigurationModules" option on the Jest plugin in heft.json'
+            'You must either remove all "preset" values from your Jest configuration, use the "extends" ' +
+            'property, or disable the "resolveConfigurationModules" option on the Jest plugin in heft.json'
         );
       }
       jestConfig = JSON.stringify(jestConfigObj);
