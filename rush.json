@@ -587,20 +587,8 @@
       "shouldPublish": false
     },
     {
-      "packageName": "heft-newest-compiler-test",
-      "projectFolder": "build-tests/heft-newest-compiler-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
       "packageName": "heft-node-everything-test",
       "projectFolder": "build-tests/heft-node-everything-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "heft-oldest-compiler-test",
-      "projectFolder": "build-tests/heft-oldest-compiler-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -629,6 +617,12 @@
       "shouldPublish": false
     },
 
+    {
+      "packageName": "install-test-workspace",
+      "projectFolder": "build-tests/install-test-workspace",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
     {
       "packageName": "localization-plugin-test-01",
       "projectFolder": "build-tests/localization-plugin-test-01",
