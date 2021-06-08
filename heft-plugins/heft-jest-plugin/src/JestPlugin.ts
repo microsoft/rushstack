@@ -120,6 +120,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
         '$.runner': nodeResolveMetadata,
         '$.prettierPath': nodeResolveMetadata,
         '$.resolver': nodeResolveMetadata,
+        '$.testSequencer': nodeResolveMetadata,
         // string[]
         '$.setupFiles.*': nodeResolveMetadata,
         '$.setupFilesAfterEnv.*': nodeResolveMetadata,
