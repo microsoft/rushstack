@@ -20,7 +20,7 @@ and add the following option to the project's `config/heft.json` file:
 By default, configuration-relative module resolution will be performed for modules
 referenced in your Jest configuration. Existing "preset" configuration values will need
 to be replaced with "extends" configuration values. If you would like to retain legacy
-Jest functionality, set `resolveConfigurationModules` to `false` in the heft-jest-plugin
+Jest functionality, set `disableConfigurationModuleResolution` to `true` in the heft-jest-plugin
 options.
 
 If you are using `@rushstack/heft-node-rig` or `@rushstack/heft-web-rig`, the Jest

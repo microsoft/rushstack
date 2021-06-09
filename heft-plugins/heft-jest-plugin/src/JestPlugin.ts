@@ -35,7 +35,7 @@ const PLUGIN_SCHEMA_PATH: string = `${__dirname}/schemas/heft-jest-plugin.schema
 const JEST_CONFIGURATION_LOCATION: string = `config/jest.config.json`;
 
 interface IJestPluginOptions {
-  resolveConfigurationModules?: boolean;
+  disableConfigurationModuleResolution?: boolean;
   passWithNoTests?: boolean;
 }
 
@@ -190,10 +190,10 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     }
 
     let jestConfig: IHeftJestConfiguration;
-    if (options?.resolveConfigurationModules === false) {
+    if (options?.disableConfigurationModuleResolution) {
       // Module resolution explicitly disabled, use the config as-is
       const jestConfigPath: string = this._getJestConfigPath(heftConfiguration);
-      if (!FileSystem.exists(jestConfigPath)) {
+      if (!(await FileSystem.existsAsync(jestConfigPath))) {
         jestLogger.emitError(new Error(`Expected to find jest config file at "${jestConfigPath}".`));
         return;
       }
@@ -211,7 +211,8 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
         throw new Error(
           'The provided jest.config.json specifies a "preset" property while using resolved modules. ' +
             'You must either remove all "preset" values from your Jest configuration, use the "extends" ' +
-            'property, or disable the "resolveConfigurationModules" option on the Jest plugin in heft.json'
+            'property, or set the "disableConfigurationModuleResolution" option to "true" on the Jest ' +
+            'plugin in heft.json'
         );
       }
     }
