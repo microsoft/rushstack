@@ -183,7 +183,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
 
     const buildFolder: string = heftConfiguration.buildFolder;
 
-    await this._validateJestTypeScriptDataFileAsync(buildFolder);
+    await this._validateJestTypeScriptDataFileIfExistsAsync(buildFolder);
 
     let jestConfig: IHeftJestConfiguration;
     if (options?.disableConfigurationModuleResolution) {
@@ -287,7 +287,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     }
   }
 
-  private async _validateJestTypeScriptDataFileAsync(buildFolder: string): Promise<void> {
+  private async _validateJestTypeScriptDataFileIfExistsAsync(buildFolder: string): Promise<void> {
     // We have no gurantee that the data file exists, since this would only get written
     // during the build stage when running in a TypeScript project
     let jestTypeScriptDataFile: IJestTypeScriptDataFileJson | undefined;
