@@ -121,32 +121,18 @@ const pnpmInstallArgs = [
   rushConfiguration.pnpmOptions.pnpmStorePath,
   '--strict-peer-dependencies',
   '--recursive',
-  '--link-workspace-packages',
-  'false',
-  '--frozen-lockfile',
-  productionMode ? 'true' : 'false'
+  '--link-workspace-packages=false',
+  '--frozen-lockfile=false' // productionMode ? 'true' : 'false'
 ];
 
 console.log('\nInstalling:');
 console.log('  pnpm ' + pnpmInstallArgs.join(' '));
 
 checkSpawnResult(
-  Executable.spawnSync(
-    rushConfiguration.packageManagerToolFilename,
-    [
-      'install',
-      '--store',
-      rushConfiguration.pnpmOptions.pnpmStorePath,
-      '--strict-peer-dependencies',
-      '--recursive',
-      '--link-workspace-packages',
-      'false'
-    ],
-    {
-      currentWorkingDirectory: path.join(__dirname, 'workspace'),
-      stdio: 'inherit'
-    }
-  ),
+  Executable.spawnSync(rushConfiguration.packageManagerToolFilename, pnpmInstallArgs, {
+    currentWorkingDirectory: path.join(__dirname, 'workspace'),
+    stdio: 'inherit'
+  }),
   'pnpm install'
 );
 
