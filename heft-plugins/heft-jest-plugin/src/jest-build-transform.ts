@@ -6,11 +6,11 @@ import { Path, FileSystem, FileSystemStats, JsonObject } from '@rushstack/node-c
 import { InitialOptionsWithRootDir } from '@jest/types/build/Config';
 import { TransformedSource } from '@jest/transform';
 
-import { JestTypeScriptDataFile, IJestTypeScriptDataFileJson } from './JestTypeScriptDataFile';
+import { HeftJestDataFile, IHeftJestDataFileJson } from './HeftJestDataFile';
 
-// This caches jest-typescript-data.json file contents.
-// Map from jestOptions.rootDir --> IJestTypeScriptDataFileJson
-const dataFileJsonCache: Map<string, IJestTypeScriptDataFileJson> = new Map();
+// This caches heft-jest-data.json file contents.
+// Map from jestOptions.rootDir --> IHeftJestDataFileJson
+const dataFileJsonCache: Map<string, IHeftJestDataFileJson> = new Map();
 
 // Synchronous delay that doesn't burn CPU cycles
 function delayMs(milliseconds: number): void {
@@ -40,21 +40,12 @@ export function process(
   srcFilePath: string,
   jestOptions: InitialOptionsWithRootDir
 ): TransformedSource {
-  let jestTypeScriptDataFile: IJestTypeScriptDataFileJson | undefined = dataFileJsonCache.get(
-    jestOptions.rootDir
-  );
-  if (jestTypeScriptDataFile === undefined) {
-    // Read jest-typescript-data.json, which is created by Heft's TypeScript plugin.  It tells us
+  let heftJestDataFile: IHeftJestDataFileJson | undefined = dataFileJsonCache.get(jestOptions.rootDir);
+  if (heftJestDataFile === undefined) {
+    // Read heft-jest-data.json, which is created by the JestPlugin.  It tells us
     // which emitted output folder to use for Jest.
-    try {
-      jestTypeScriptDataFile = JestTypeScriptDataFile.loadForProject(jestOptions.rootDir);
-    } catch (e) {
-      if (FileSystem.isFileDoesNotExistError(e)) {
-        throw new Error('Could not find the Jest TypeScript metadata file. Did you run "heft build"?');
-      }
-      throw e;
-    }
-    dataFileJsonCache.set(jestOptions.rootDir, jestTypeScriptDataFile);
+    heftJestDataFile = HeftJestDataFile.loadForProject(jestOptions.rootDir);
+    dataFileJsonCache.set(jestOptions.rootDir, heftJestDataFile);
   }
 
   // Is the input file under the "src" folder?
@@ -70,15 +61,15 @@ export function process(
     // Example: /path/to/project/lib/folder1/folder2/Example.js
     const libFilePath: string = path.join(
       jestOptions.rootDir,
-      jestTypeScriptDataFile.emitFolderNameForTests,
+      heftJestDataFile.emitFolderNameForTests,
       srcRelativeFolderPath,
-      `${parsedFilename.name}${jestTypeScriptDataFile.extensionForTests}`
+      `${parsedFilename.name}${heftJestDataFile.extensionForTests}`
     );
 
     const startOfLoopMs: number = new Date().getTime();
     let stalled: boolean = false;
 
-    if (!jestTypeScriptDataFile.skipTimestampCheck) {
+    if (!heftJestDataFile.skipTimestampCheck) {
       for (;;) {
         let srcFileStatistics: FileSystemStats;
         try {

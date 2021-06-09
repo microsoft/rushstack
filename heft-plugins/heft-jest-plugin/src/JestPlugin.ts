@@ -27,7 +27,7 @@ import {
 import { FileSystem, JsonFile, JsonSchema, Terminal } from '@rushstack/node-core-library';
 
 import { IHeftJestReporterOptions } from './HeftJestReporter';
-import { JestTypeScriptDataFile, IJestTypeScriptDataFileJson } from './JestTypeScriptDataFile';
+import { HeftJestDataFile } from './HeftJestDataFile';
 
 type JestReporterConfig = string | Config.ReporterConfig;
 const PLUGIN_NAME: string = 'JestPlugin';
@@ -148,13 +148,12 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
         compile.hooks.afterCompile.tapPromise(PLUGIN_NAME, async () => {
           // Write the data file used by jest-build-transform
-          if (build.properties.isTypeScriptProject) {
-            await JestTypeScriptDataFile.saveForProjectAsync(heftConfiguration.buildFolder, {
-              emitFolderNameForTests: build.properties.emitFolderNameForTests || 'lib',
-              extensionForTests: build.properties.emitExtensionForTests || '.js',
-              skipTimestampCheck: !build.properties.watchMode
-            });
-          }
+          await HeftJestDataFile.saveForProjectAsync(heftConfiguration.buildFolder, {
+            emitFolderNameForTests: build.properties.emitFolderNameForTests || 'lib',
+            extensionForTests: build.properties.emitExtensionForTests || '.js',
+            skipTimestampCheck: !build.properties.watchMode,
+            isTypeScriptProject: build.properties.isTypeScriptProject!!
+          });
         });
       });
     });
@@ -181,8 +180,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     jestTerminal.writeLine(`Using Jest version ${getVersion()}`);
 
     const buildFolder: string = heftConfiguration.buildFolder;
-
-    await this._validateJestTypeScriptDataFileIfExistsAsync(buildFolder);
+    await HeftJestDataFile.loadAndValidateForProjectAsync(buildFolder);
 
     let jestConfig: IHeftJestConfiguration;
     if (options?.disableConfigurationModuleResolution) {
@@ -285,33 +283,6 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
           } failed`
         )
       );
-    }
-  }
-
-  private async _validateJestTypeScriptDataFileIfExistsAsync(buildFolder: string): Promise<void> {
-    // We have no gurantee that the data file exists, since this would only get written
-    // during the build stage when running in a TypeScript project
-    let jestTypeScriptDataFile: IJestTypeScriptDataFileJson | undefined;
-    try {
-      jestTypeScriptDataFile = await JestTypeScriptDataFile.loadForProjectAsync(buildFolder);
-    } catch (error) {
-      if (!FileSystem.isNotExistError(error)) {
-        throw error;
-      }
-    }
-    if (jestTypeScriptDataFile) {
-      const emitFolderPathForJest: string = path.join(
-        buildFolder,
-        jestTypeScriptDataFile.emitFolderNameForTests
-      );
-      if (!(await FileSystem.existsAsync(emitFolderPathForJest))) {
-        throw new Error(
-          'The transpiler output folder does not exist:\n  ' +
-            emitFolderPathForJest +
-            '\nWas the compiler invoked? Is the "emitFolderNameForTests" setting correctly' +
-            ' specified in config/typescript.json?\n'
-        );
-      }
     }
   }
 
