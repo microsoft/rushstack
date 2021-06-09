@@ -152,7 +152,9 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
             emitFolderNameForTests: build.properties.emitFolderNameForTests || 'lib',
             extensionForTests: build.properties.emitExtensionForTests || '.js',
             skipTimestampCheck: !build.properties.watchMode,
-            isTypeScriptProject: build.properties.isTypeScriptProject!!
+            // If the property isn't defined, assume it's a not a TypeScript project since this
+            // value should be set by the Heft TypeScriptPlugin during the compile hook
+            isTypeScriptProject: !!build.properties.isTypeScriptProject
           });
         });
       });
