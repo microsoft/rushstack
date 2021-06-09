@@ -148,7 +148,7 @@ export class PluginManager {
         pluginPackage.optionsSchema.validateObject(options, 'config/heft.json');
       } catch (e) {
         throw new Error(
-          `Provided options for plugin "${pluginPackage.pluginName}" did not match the plugin schema. ${e}`
+          `Provided options for plugin "${pluginPackage.pluginName}" did not match the plugin schema.\n${e}`
         );
       }
     }
