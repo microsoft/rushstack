@@ -26,6 +26,9 @@ function checkSpawnResult(result) {
 
 process.exitCode = 1;
 
+const productionMode = process.argv.indexOf('--production') >= 0;
+const skipPack = process.argv.indexOf('--skip-pack') >= 0;
+
 const rushConfiguration = RushConfiguration.loadFromDefaultLocation();
 const currentProject = rushConfiguration.tryGetProjectForPath(__dirname);
 if (!currentProject) {
@@ -36,39 +39,42 @@ const allDependencyProjects = new Set();
 collect(currentProject);
 
 const tarballFolder = path.join(__dirname, 'temp/tarballs');
-FileSystem.ensureEmptyFolder(tarballFolder);
 
-const tarballsJson = {};
+if (!skipPack) {
+  FileSystem.ensureEmptyFolder(tarballFolder);
 
-for (const project of allDependencyProjects) {
-  if (project.versionPolicy || project.shouldPublish) {
-    console.log('Invoking "pnpm pack" in ' + project.publishFolder);
-    const result = Executable.spawnSync(rushConfiguration.packageManagerToolFilename, ['pack'], {
-      currentWorkingDirectory: project.publishFolder,
-      stdio: ['ignore', 'pipe', 'pipe']
-    });
-    checkSpawnResult(result);
-    const tarballFilename = result.stdout.trimRight().split().pop().trim();
-    if (!tarballFilename) {
-      throw new Error('Failed to parse "pnpm pack" output');
+  const tarballsJson = {};
+
+  for (const project of allDependencyProjects) {
+    if (project.versionPolicy || project.shouldPublish) {
+      console.log('Invoking "pnpm pack" in ' + project.publishFolder);
+      const result = Executable.spawnSync(rushConfiguration.packageManagerToolFilename, ['pack'], {
+        currentWorkingDirectory: project.publishFolder,
+        stdio: ['ignore', 'pipe', 'pipe']
+      });
+      checkSpawnResult(result);
+      const tarballFilename = result.stdout.trimRight().split().pop().trim();
+      if (!tarballFilename) {
+        throw new Error('Failed to parse "pnpm pack" output');
+      }
+      const tarballPath = path.join(project.publishFolder, tarballFilename);
+      if (!FileSystem.exists(tarballPath)) {
+        throw new Error('Expecting a tarball: ' + tarballPath);
+      }
+
+      tarballsJson[project.packageName] = tarballFilename;
+
+      const targetPath = path.join(tarballFolder, tarballFilename);
+      FileSystem.move({
+        sourcePath: tarballPath,
+        destinationPath: targetPath,
+        overwrite: true
+      });
     }
-    const tarballPath = path.join(project.publishFolder, tarballFilename);
-    if (!FileSystem.exists(tarballPath)) {
-      throw new Error('Expecting a tarball: ' + tarballPath);
-    }
-
-    tarballsJson[project.packageName] = tarballFilename;
-
-    const targetPath = path.join(tarballFolder, tarballFilename);
-    FileSystem.move({
-      sourcePath: tarballPath,
-      destinationPath: targetPath,
-      overwrite: true
-    });
   }
-}
 
-JsonFile.save(tarballsJson, path.join(tarballFolder, 'tarballs.json'));
+  JsonFile.save(tarballsJson, path.join(tarballFolder, 'tarballs.json'));
+}
 
 // Look for folder names like this:
 //   local+C++Git+rushstack+build-tests+install-test-wo_7efa61ad1cd268a0ef451c2450ca0351
@@ -94,7 +100,9 @@ const pnpmInstallArgs = [
   '--strict-peer-dependencies',
   '--recursive',
   '--link-workspace-packages',
-  'false'
+  'false',
+  '--frozen-lockfile',
+  productionMode ? 'true' : 'false'
 ];
 
 console.log('\nInstalling:');
