@@ -48,10 +48,26 @@ if (!skipPack) {
   for (const project of allDependencyProjects) {
     if (project.versionPolicy || project.shouldPublish) {
       console.log('Invoking "pnpm pack" in ' + project.publishFolder);
-      const result = Executable.spawnSync(rushConfiguration.packageManagerToolFilename, ['pack'], {
-        currentWorkingDirectory: project.publishFolder,
-        stdio: ['ignore', 'pipe', 'pipe']
-      });
+
+      const packageJsonFilename = path.join(project.projectFolder, 'package.json');
+      const packageJson = FileSystem.readFile(packageJsonFilename);
+
+      let result;
+
+      try {
+        result = Executable.spawnSync(rushConfiguration.packageManagerToolFilename, ['pack'], {
+          currentWorkingDirectory: project.publishFolder,
+          stdio: ['ignore', 'pipe', 'pipe']
+        });
+      } finally {
+        // This is a workaround for an issue where "pnpm pack" modifies the project's package.json file
+        // before invoking "npm pack", and then does not restore it afterwards.
+        try {
+          FileSystem.writeFile(packageJsonFilename, packageJson);
+        } catch (error) {
+          console.error('Error restoring ' + packageJsonFilename);
+        }
+      }
       checkSpawnResult(result);
       const tarballFilename = result.stdout.trimRight().split().pop().trim();
       if (!tarballFilename) {
