@@ -77,11 +77,13 @@ JsonFile.save(tarballsJson, path.join(tarballFolder, 'tarballs.json'));
 const dotPnpmFolderPath = path.resolve(__dirname, 'workspace/node_modules/.pnpm');
 
 console.log('\nCleaning cached tarballs...');
-for (const filename of FileSystem.readFolder(dotPnpmFolderPath)) {
-  if (filename.startsWith('local+')) {
-    const filePath = path.join(dotPnpmFolderPath, filename);
-    console.log('  Deleting ' + filePath);
-    FileSystem.deleteFolder(filePath);
+if (FileSystem.exists(dotPnpmFolderPath)) {
+  for (const filename of FileSystem.readFolder(dotPnpmFolderPath)) {
+    if (filename.startsWith('local+')) {
+      const filePath = path.join(dotPnpmFolderPath, filename);
+      console.log('  Deleting ' + filePath);
+      FileSystem.deleteFolder(filePath);
+    }
   }
 }
 
