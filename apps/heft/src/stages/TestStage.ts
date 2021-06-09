@@ -22,6 +22,7 @@ export interface ITestStageProperties {
   updateSnapshots: boolean;
 
   findRelatedTests: ReadonlyArray<string> | undefined;
+  passWithNoTests: boolean | undefined;
   silent: boolean | undefined;
   testNamePattern: string | undefined;
   testPathPattern: ReadonlyArray<string> | undefined;
@@ -41,6 +42,7 @@ export interface ITestStageOptions {
   updateSnapshots: boolean;
 
   findRelatedTests: ReadonlyArray<string> | undefined;
+  passWithNoTests: boolean | undefined;
   silent: boolean | undefined;
   testNamePattern: string | undefined;
   testPathPattern: ReadonlyArray<string> | undefined;
@@ -61,6 +63,7 @@ export class TestStage extends StageBase<TestStageHooks, ITestStageProperties, I
       updateSnapshots: options.updateSnapshots,
 
       findRelatedTests: options.findRelatedTests,
+      passWithNoTests: options.passWithNoTests,
       silent: options.silent,
       testNamePattern: options.testNamePattern,
       testPathPattern: options.testPathPattern,

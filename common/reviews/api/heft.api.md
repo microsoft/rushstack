@@ -332,6 +332,8 @@ export interface ITestStageProperties {
     // (undocumented)
     maxWorkers: string | undefined;
     // (undocumented)
+    passWithNoTests: boolean | undefined;
+    // (undocumented)
     silent: boolean | undefined;
     // (undocumented)
     testNamePattern: string | undefined;

@@ -11,12 +11,6 @@
       "title": "Disable Configuration Module Resolution",
       "description": "If set to true, modules specified in the Jest configuration will be resolved using Jest default (rootDir-relative) resolution. Otherwise, modules will be resolved using Node module resolution.",
       "type": "boolean"
-    },
-
-    "passWithNoTests": {
-      "title": "Pass With No Tests",
-      "description": "If set to true, Jest will pass a test run when no tests are discovered.",
-      "type": "boolean"
     }
   }
 }

@@ -36,7 +36,6 @@ const JEST_CONFIGURATION_LOCATION: string = `config/jest.config.json`;
 
 interface IJestPluginOptions {
   disableConfigurationModuleResolution?: boolean;
-  passWithNoTests?: boolean;
 }
 
 export interface IHeftJestConfiguration extends Config.InitialOptions {}
@@ -233,7 +232,9 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       testTimeout: test.properties.testTimeout,
       maxWorkers: test.properties.maxWorkers,
 
-      passWithNoTests: options?.passWithNoTests,
+      // TODO: Remove cast when newer version of Heft consumed
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      passWithNoTests: (test.properties as any).passWithNoTests,
 
       $0: process.argv0,
       _: []
