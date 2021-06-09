@@ -50,7 +50,7 @@ export function process(
       jestTypeScriptDataFile = JestTypeScriptDataFile.loadForProject(jestOptions.rootDir);
     } catch (e) {
       if (FileSystem.isFileDoesNotExistError(e)) {
-        throw new Error('Could not find the Jest TypeScript metadata file. Did you run "rush build"?');
+        throw new Error('Could not find the Jest TypeScript metadata file. Did you run "heft build"?');
       }
       throw e;
     }
