@@ -13,14 +13,20 @@ function collect(project) {
   }
 }
 
-function checkSpawnResult(result) {
+function checkSpawnResult(result, commandName) {
   if (result.status !== 0) {
     if (result.stderr) {
       console.error('-----------------------');
       console.error(result.stderr);
       console.error('-----------------------');
+    } else {
+      if (result.stdout) {
+        console.error('-----------------------');
+        console.error(result.stdout);
+        console.error('-----------------------');
+      }
     }
-    throw new Error('Failed to execute "pnpm pack"');
+    throw new Error(`Failed to execute command "${commandName}" command`);
   }
 }
 
@@ -68,7 +74,7 @@ if (!skipPack) {
           console.error('Error restoring ' + packageJsonFilename);
         }
       }
-      checkSpawnResult(result);
+      checkSpawnResult(result, 'pnpm pack');
       const tarballFilename = result.stdout.trimRight().split().pop().trim();
       if (!tarballFilename) {
         throw new Error('Failed to parse "pnpm pack" output');
@@ -140,7 +146,8 @@ checkSpawnResult(
       currentWorkingDirectory: path.join(__dirname, 'workspace'),
       stdio: 'inherit'
     }
-  )
+  ),
+  'pnpm install'
 );
 
 console.log('\n\nInstallation completed successfully.');
@@ -151,7 +158,8 @@ checkSpawnResult(
   Executable.spawnSync(rushConfiguration.packageManagerToolFilename, ['run', '--recursive', 'build'], {
     currentWorkingDirectory: path.join(__dirname, 'workspace'),
     stdio: 'inherit'
-  })
+  }),
+  'pnpm run'
 );
 
 console.log('\n\nFinished build.js');
