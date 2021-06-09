@@ -46,7 +46,14 @@ export function process(
   if (jestTypeScriptDataFile === undefined) {
     // Read jest-typescript-data.json, which is created by Heft's TypeScript plugin.  It tells us
     // which emitted output folder to use for Jest.
-    jestTypeScriptDataFile = JestTypeScriptDataFile.loadForProject(jestOptions.rootDir);
+    try {
+      jestTypeScriptDataFile = JestTypeScriptDataFile.loadForProject(jestOptions.rootDir);
+    } catch (e) {
+      if (FileSystem.isFileDoesNotExistError(e)) {
+        throw new Error('Could not find the Jest TypeScript metadata file. Did you run "rush build"?');
+      }
+      throw e;
+    }
     dataFileJsonCache.set(jestOptions.rootDir, jestTypeScriptDataFile);
   }
 
