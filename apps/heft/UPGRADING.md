@@ -18,12 +18,14 @@ and add the following option to the project's `config/heft.json` file:
 ```
 
 By default, Node module resolution will be performed for all modules referenced in your
-Jest configuration. Additionally, all `preset` configuration values must be replaced with
-`extends` configuration values. *This feature is incompatible with Jest when invoked
-directly since it changes how modules are referenced in the Jest configuration.*
-If you would like to retain default Jest functionality, set
-`disableConfigurationModuleResolution` to `true` in the heft-jest-plugin options found in
-`config/heft.json`.
+Jest configuration. Additionally, the Jest configuration property `preset` has been
+replaced with `extends` to make support of secondary inheritance (i.e.
+"A-jest.config.json" -> "B-jest.config.json" -> "C-jest.config.json") explicit. *This
+feature is incompatible with Jest when invoked directly since it changes how modules
+are referenced in the Jest configuration.* If you would like to retain default Jest
+functionality, set
+`disableConfigurationModuleResolution` to `true` in the @rushstack/heft-jest-plugin
+options found in `config/heft.json`.
 
 If you are using `@rushstack/heft-node-rig` or `@rushstack/heft-web-rig`, the Jest
 plugin should already be enabled.
