@@ -593,12 +593,6 @@
       "shouldPublish": false
     },
     {
-      "packageName": "heft-oldest-compiler-test",
-      "projectFolder": "build-tests/heft-oldest-compiler-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
       "packageName": "heft-sass-test",
       "projectFolder": "build-tests/heft-sass-test",
       "reviewCategory": "tests",
@@ -623,6 +617,12 @@
       "shouldPublish": false
     },
 
+    {
+      "packageName": "install-test-workspace",
+      "projectFolder": "build-tests/install-test-workspace",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
     {
       "packageName": "localization-plugin-test-01",
       "projectFolder": "build-tests/localization-plugin-test-01",

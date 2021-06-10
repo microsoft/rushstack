@@ -63,7 +63,20 @@
      * For example, allow some projects to use an older TypeScript compiler
      * (in addition to whatever "usual" version is being used by other projects in the repo):
      */
-    "typescript": ["~2.4.2", "~2.9.2", "~4.2.4", "~4.3.2"],
+    "typescript": [
+      // "~3.9.7" is the (inferred, not alternative) range used by most projects in this repo
+
+      // The oldest supported compiler, used by build-tests/heft-oldest-compiler-test
+      // and also build-tests/api-extractor-lib1-test
+      "~2.9.2",
+
+      // Temporarily allowed until we finish migrating ESLint
+      "~4.2.4",
+
+      // The newest supported compiler, used by build-tests/heft-newest-compiler-test
+      // and used as the bundled compiler engine for API Extractor.
+      "~4.3.2"
+    ],
 
     "source-map": [
       "~0.6.1" // API Extractor is using an older version of source-map because newer versions are async
