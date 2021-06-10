@@ -22,8 +22,6 @@ import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPl
 import { SassTypingsPlugin } from '../plugins/SassTypingsPlugin/SassTypingsPlugin';
 import { ProjectValidatorPlugin } from '../plugins/ProjectValidatorPlugin';
 import { ToolPackageResolver } from '../utilities/ToolPackageResolver';
-import { JestWarningPlugin } from '../plugins/MissingPluginWarningPlugin/JestWarningPlugin';
-import { WebpackWarningPlugin } from '../plugins/MissingPluginWarningPlugin/WebpackWarningPlugin';
 import { NodeServicePlugin } from '../plugins/NodeServicePlugin';
 
 export interface IPluginManagerOptions {
@@ -55,8 +53,6 @@ export class PluginManager {
     this._applyPlugin(new ApiExtractorPlugin(taskPackageResolver));
     this._applyPlugin(new SassTypingsPlugin());
     this._applyPlugin(new ProjectValidatorPlugin());
-    this._applyPlugin(new JestWarningPlugin());
-    this._applyPlugin(new WebpackWarningPlugin());
     this._applyPlugin(new NodeServicePlugin());
   }
 
