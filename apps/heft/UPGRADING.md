@@ -1,5 +1,43 @@
 # Upgrade notes for @rushstack/heft
 
+### Heft 0.32.0
+
+This release of Heft removed the Jest plugin from the `@rushstack/heft` package
+and moved it to it's own package (`@rushstack/heft-jest-plugin`). To re-include
+Jest support in a project, include a dependency on `@rushstack/heft-jest-plugin`
+and add the following option to the project's `config/heft.json` file:
+
+```JSON
+{
+  "heftPlugins": [
+    {
+      "plugin": "@rushstack/heft-jest-plugin"
+    }
+  ]
+}
+```
+
+By default, Node module resolution will be performed for all modules referenced in your
+Jest configuration. Additionally, the Jest configuration property `preset` has been
+replaced with `extends` to make support of secondary inheritance (i.e.
+"A-jest.config.json" -> "B-jest.config.json" -> "C-jest.config.json") explicit. *This
+feature is incompatible with Jest when invoked directly since it changes how modules
+are referenced in the Jest configuration.* If you would like to retain default Jest
+functionality, set
+`disableConfigurationModuleResolution` to `true` in the `@rushstack/heft-jest-plugin`
+options found in `config/heft.json`.
+
+If you are using `@rushstack/heft-node-rig` or `@rushstack/heft-web-rig`, the Jest
+plugin should already be enabled.
+
+If you are using the included `@rushstack/heft/include/jest-shared.config.json` as
+a Jest configuration preset, you will need modify this to reference
+`@rushstack/heft-jest-plugin/include/jest-shared.config.json` using the `extends`
+field as described above. Similarly, if you are using `@rushstack/heft-node-rig` or
+`@rushstack/heft-web-rig`, you should now reference
+`@rushstack/heft-node-rig/profiles/default/config/jest.config.json` or
+`@rushstack/heft-node-rig/profiles/library/config/jest.config.json`, respectively.
+
 ### Heft 0.26.0
 
 This release of Heft removed the Webpack plugins from the `@rushstack/heft` package
@@ -17,7 +55,7 @@ and add the following option to the project's `config/heft.json` file:
 }
 ```
 
-If you are using `@rushstack/heft-web-rig`, upgrading the rig package will bring 
+If you are using `@rushstack/heft-web-rig`, upgrading the rig package will bring
 Webpack support automatically.
 
 ### Heft 0.14.0

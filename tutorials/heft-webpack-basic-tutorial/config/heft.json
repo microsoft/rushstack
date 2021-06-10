@@ -46,6 +46,14 @@
        * An optional object that provides additional settings that may be defined by the plugin.
        */
       // "options": { }
+    },
+    {
+      "plugin": "@rushstack/heft-jest-plugin"
+
+      /**
+       * An optional object that provides additional settings that may be defined by the plugin.
+       */
+      // "options": { }
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "preset": "./node_modules/@rushstack/heft/includes/jest-shared.config.json",
+  "extends": "@rushstack/heft-jest-plugin/includes/jest-shared.config.json",
   "collectCoverage": true,
   "coverageThreshold": {
     "global": {

@@ -25,8 +25,8 @@
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.28.0",
-    "@rushstack/heft-node-rig": "1.0.8",
+    "@rushstack/heft": "0.31.4",
+    "@rushstack/heft-node-rig": "1.0.28",
     "@types/glob": "7.1.1"
   }
 }

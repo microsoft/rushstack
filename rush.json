@@ -651,6 +651,13 @@
 
     // "heft-plugins" folder (alphabetical order)
     {
+      "packageName": "@rushstack/heft-jest-plugin",
+      "projectFolder": "heft-plugins/heft-jest-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft", "@rushstack/heft-node-rig"]
+    },
+    {
       "packageName": "@rushstack/heft-webpack4-plugin",
       "projectFolder": "heft-plugins/heft-webpack4-plugin",
       "reviewCategory": "libraries",

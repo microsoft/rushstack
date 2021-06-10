@@ -16,7 +16,6 @@ import {
   IBuildStageProperties
 } from '../../stages/BuildStage';
 import { ToolPackageResolver, IToolPackageResolution } from '../../utilities/ToolPackageResolver';
-import { JestTypeScriptDataFile } from '../JestPlugin/JestTypeScriptDataFile';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { ICleanStageContext, ICleanStageProperties } from '../../stages/CleanStage';
 import { CoreConfigFiles, ISharedCopyConfiguration } from '../../utilities/CoreConfigFiles';
@@ -297,12 +296,6 @@ export class TypeScriptPlugin implements IHeftPlugin {
     };
 
     // Set some properties used by the Jest plugin
-    JestTypeScriptDataFile.saveForProject(heftConfiguration.buildFolder, {
-      emitFolderNameForTests: typeScriptConfiguration.emitFolderNameForTests || 'lib',
-      skipTimestampCheck: !options.watchMode,
-      extensionForTests: typeScriptConfiguration.emitCjsExtensionForCommonJS ? '.cjs' : '.js'
-    });
-
     buildProperties.emitFolderNameForTests = typeScriptConfiguration.emitFolderNameForTests || 'lib';
     buildProperties.emitExtensionForTests = typeScriptConfiguration.emitCjsExtensionForCommonJS
       ? '.cjs'

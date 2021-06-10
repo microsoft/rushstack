@@ -76,6 +76,12 @@ interface IConfigurationFileFieldAnnotation<TField> {
  */
 export interface IJsonPathMetadata {
   /**
+   * If this property is set, it will be used for manual path modification before the
+   * specified `IJsonPathMetadata.pathResolutionMethod` is executed.
+   */
+  preresolve?: (path: string) => string;
+
+  /**
    * If this property describes a filesystem path, use this property to describe
    * how the path should be resolved.
    */
@@ -369,14 +375,20 @@ export class ConfigurationFile<TConfigurationFile> {
         path: jsonPath,
         json: configurationJson,
         callback: (payload: unknown, payloadType: string, fullPayload: IJsonPathCallbackObject) => {
+          let resolvedPath: string = fullPayload.value;
+          if (metadata.preresolve) {
+            resolvedPath = metadata.preresolve(resolvedPath);
+          }
           if (metadata.pathResolutionMethod !== undefined) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (fullPayload.parent as any)[fullPayload.parentProperty] = this._resolvePathProperty(
+            resolvedPath = this._resolvePathProperty(
               resolvedConfigurationFilePath,
-              fullPayload.value,
+              resolvedPath,
               metadata.pathResolutionMethod
             );
           }
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (fullPayload.parent as any)[fullPayload.parentProperty] = resolvedPath;
         },
         otherTypeCallback: () => {
           throw new Error('@other() tags are not supported');

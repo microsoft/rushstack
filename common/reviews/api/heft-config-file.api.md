@@ -35,6 +35,7 @@ export interface ICustomPropertyInheritance<TObject> extends IPropertyInheritanc
 // @beta
 export interface IJsonPathMetadata {
     pathResolutionMethod?: PathResolutionMethod;
+    preresolve?: (path: string) => string;
 }
 
 // @beta

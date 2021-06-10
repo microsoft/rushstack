@@ -11,8 +11,8 @@
   "types": "dist/heft-webpack4-plugin.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "heft test --clean",
-    "start": "heft test --clean --watch"
+    "build": "heft test --clean --pass-with-no-tests",
+    "start": "heft test --clean --pass-with-no-tests --watch"
   },
   "peerDependencies": {
     "@rushstack/heft": "^0.31.5"

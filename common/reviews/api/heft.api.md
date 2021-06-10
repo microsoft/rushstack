@@ -14,6 +14,7 @@ import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
+import { JsonSchema } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
 import { SyncHook } from 'tapable';
 import { Terminal } from '@rushstack/node-core-library';
@@ -256,6 +257,8 @@ export interface IHeftPlugin<TOptions = void> {
     // (undocumented)
     apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration, options?: TOptions): void;
     // (undocumented)
+    readonly optionsSchema?: JsonSchema;
+    // (undocumented)
     readonly pluginName: string;
 }
 
@@ -328,6 +331,8 @@ export interface ITestStageProperties {
     findRelatedTests: ReadonlyArray<string> | undefined;
     // (undocumented)
     maxWorkers: string | undefined;
+    // (undocumented)
+    passWithNoTests: boolean | undefined;
     // (undocumented)
     silent: boolean | undefined;
     // (undocumented)
