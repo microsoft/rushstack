@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Disable the allowUnreachableCode TypeScript compiler option.",
+      "type": "minor",
+      "packageName": "@rushstack/heft-web-rig"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig",
+  "email": "iclanton@users.noreply.github.com"
+}
