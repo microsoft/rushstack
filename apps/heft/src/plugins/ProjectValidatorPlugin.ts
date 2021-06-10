@@ -43,7 +43,7 @@ export class ProjectValidatorPlugin implements IHeftPlugin {
             '@rushstack/heft-webpack5-plugin'
           ];
           const missingPluginDocumentationUrl: string = 'https://rushstack.io/pages/heft_tasks/webpack/';
-          const missingPlugin = await this._checkPluginIsMissingAsync(
+          const missingPlugin: boolean = await this._checkPluginIsMissingAsync(
             'WebpackPlugin',
             Path.convertToSlashes(`${heftConfiguration.buildFolder}/webpack.config.js`),
             missingPluginCandidatePackageNames,
