@@ -223,7 +223,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         `The TypeScript compiler version ${this._typescriptVersion} is very old` +
           ` and has not been tested with Heft; it may not work correctly.`
       );
-    } else if (this._typescriptParsedVersion.major > 3) {
+    } else if (this._typescriptParsedVersion.major > 4) {
       this._typescriptTerminal.writeLine(
         `The TypeScript compiler version ${this._typescriptVersion} is newer` +
           ` than the latest version that was tested with Heft; it may not work correctly.`
