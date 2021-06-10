@@ -24,7 +24,7 @@ replaced with `extends` to make support of secondary inheritance (i.e.
 feature is incompatible with Jest when invoked directly since it changes how modules
 are referenced in the Jest configuration.* If you would like to retain default Jest
 functionality, set
-`disableConfigurationModuleResolution` to `true` in the @rushstack/heft-jest-plugin
+`disableConfigurationModuleResolution` to `true` in the `@rushstack/heft-jest-plugin`
 options found in `config/heft.json`.
 
 If you are using `@rushstack/heft-node-rig` or `@rushstack/heft-web-rig`, the Jest
