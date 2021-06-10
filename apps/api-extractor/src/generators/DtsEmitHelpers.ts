@@ -139,6 +139,8 @@ export class DtsEmitHelpers {
         typeArgumentsText = `<${typeArgumentsStrings.join(', ')}>`;
       }
 
+      const separatorAfter: string = /(\s*)$/.exec(span.getText())?.[1] ?? '';
+
       if (
         referencedEntity.astEntity instanceof AstImport &&
         referencedEntity.astEntity.importKind === AstImportKind.ImportType &&
@@ -152,7 +154,7 @@ export class DtsEmitHelpers {
         const nestedQualifiersText: string =
           nestedQualifiersStart >= 0 ? qualifiersText.substring(nestedQualifiersStart) : '';
 
-        const replacement: string = `${referencedEntity.nameForEmit}${nestedQualifiersText}${typeArgumentsText}`;
+        const replacement: string = `${referencedEntity.nameForEmit}${nestedQualifiersText}${typeArgumentsText}${separatorAfter}`;
 
         span.modification.skipAll();
         span.modification.prefix = replacement;
@@ -160,7 +162,7 @@ export class DtsEmitHelpers {
         // Replace with internal symbol or AstImport
 
         span.modification.skipAll();
-        span.modification.prefix = `${referencedEntity.nameForEmit}${typeArgumentsText}`;
+        span.modification.prefix = `${referencedEntity.nameForEmit}${typeArgumentsText}${separatorAfter}`;
       }
     }
   }

@@ -9,9 +9,9 @@ import { Lib1Namespace } from 'api-extractor-lib1-test';
 // @public (undocumented)
 export interface IExample {
     // (undocumented)
-    dottedImportType: Lib1Namespace.Inner.X;
+    dottedImportType: Lib1Namespace.Inner.X | undefined;
     // (undocumented)
-    dottedImportType2: Lib1Namespace.Y;
+    dottedImportType2: Lib1Namespace.Y | undefined;
 }
 
 

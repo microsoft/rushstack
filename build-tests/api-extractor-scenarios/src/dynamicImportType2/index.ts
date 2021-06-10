@@ -3,6 +3,6 @@
 
 /** @public */
 export interface IExample {
-  dottedImportType: import('api-extractor-lib1-test').Lib1Namespace.Inner.X;
-  dottedImportType2: import('api-extractor-lib1-test').Lib1Namespace.Y;
+  dottedImportType: import('api-extractor-lib1-test').Lib1Namespace.Inner.X | undefined;
+  dottedImportType2: import('api-extractor-lib1-test').Lib1Namespace.Y | undefined;
 }

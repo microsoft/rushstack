@@ -202,6 +202,10 @@
                 },
                 {
                   "kind": "Content",
+                  "text": " | undefined"
+                },
+                {
+                  "kind": "Content",
                   "text": ";"
                 }
               ],
@@ -210,7 +214,7 @@
               "name": "dottedImportType",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
-                "endIndex": 3
+                "endIndex": 4
               }
             },
             {
@@ -233,6 +237,10 @@
                 },
                 {
                   "kind": "Content",
+                  "text": " | undefined"
+                },
+                {
+                  "kind": "Content",
                   "text": ";"
                 }
               ],
@@ -241,7 +249,7 @@
               "name": "dottedImportType2",
               "propertyTypeTokenRange": {
                 "startIndex": 1,
-                "endIndex": 3
+                "endIndex": 4
               }
             }
           ],
