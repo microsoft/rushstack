@@ -62,12 +62,11 @@ To reenable Jest support for your project, follow these steps:
    }
    ```
 
-This `extends` field is a Heft-specific enhancement that will not work if the
-Jest command line is invoked without Heft.  (That use case was not generally useful,
-since Jest only runs tests; in our configuration Jest needs Heft to invoke the compiler
-and any other preprocessing steps.)
+This `extends` field is a Heft-specific enhancement that will not work if the Jest command line
+is invoked without Heft.  (Doing so was not generally useful; in our configuration Jest relies
+on Heft to invoke the compiler and any other preprocessing steps.)
 
-If for some reason your `jest.config.json` needs to be directly parsed by Jest, the
+If for some reason your `jest.config.json` needs to be directly readable by Jest, the
 `disableConfigurationModuleResolution` setting can be used to restore the old behavior.
 For example:
 
@@ -77,7 +76,7 @@ For example:
        {
          "plugin": "@rushstack/heft-jest-plugin",
          "options": {
-           // Disable rig support and the "extends" setting (not recommended)
+           // (Not recommended) Disable Heft's support for rigs and the "extends" field
            "disableConfigurationModuleResolution": true
          }
        }
