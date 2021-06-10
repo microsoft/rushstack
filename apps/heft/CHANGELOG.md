@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 04 Jun 2021 19:59:53 GMT and should not be manually modified.
+This log was last generated on Thu, 10 Jun 2021 15:08:15 GMT and should not be manually modified.
+
+## 0.31.5
+Thu, 10 Jun 2021 15:08:15 GMT
+
+### Patches
+
+- Update the version compatibility warning to indicate that TypeScript 4.x is supported by Heft
 
 ## 0.31.4
 Fri, 04 Jun 2021 19:59:53 GMT

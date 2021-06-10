@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.31.5",
+      "tag": "@rushstack/heft_v0.31.5",
+      "date": "Thu, 10 Jun 2021 15:08:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the version compatibility warning to indicate that TypeScript 4.x is supported by Heft"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.31.4",
       "tag": "@rushstack/heft_v0.31.4",
       "date": "Fri, 04 Jun 2021 19:59:53 GMT",
