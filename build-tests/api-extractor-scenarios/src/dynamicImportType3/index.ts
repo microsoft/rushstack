@@ -4,7 +4,7 @@
 /** @public */
 export interface IExample {
   generic: import('api-extractor-lib1-test').Lib1GenericType<
-    number,
+    number | undefined,
     import('api-extractor-lib1-test').Lib1Interface
   >;
 }

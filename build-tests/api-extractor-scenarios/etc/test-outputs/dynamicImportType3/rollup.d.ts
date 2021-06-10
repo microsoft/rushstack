@@ -3,7 +3,7 @@ import { Lib1Interface } from 'api-extractor-lib1-test';
 
 /** @public */
 export declare interface IExample {
-    generic: Lib1GenericType<number, Lib1Interface>;
+    generic: Lib1GenericType<number | undefined, Lib1Interface>;
 }
 
 export { }

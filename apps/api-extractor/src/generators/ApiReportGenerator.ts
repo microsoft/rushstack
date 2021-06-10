@@ -11,7 +11,7 @@ import { Span } from '../analyzer/Span';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { ApiItemMetadata } from '../collector/ApiItemMetadata';
-import { AstImport, AstImportKind } from '../analyzer/AstImport';
+import { AstImport } from '../analyzer/AstImport';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { ExtractorMessage } from '../api/ExtractorMessage';
 import { StringWriter } from './StringWriter';
@@ -301,84 +301,20 @@ export class ApiReportGenerator {
         break;
 
       case ts.SyntaxKind.ImportType:
-        {
-          const node: ts.ImportTypeNode = span.node as ts.ImportTypeNode;
-          const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityForNode(node);
-
-          if (referencedEntity) {
-            if (!referencedEntity.nameForEmit) {
-              // This should never happen
-              throw new InternalError('referencedEntry.nameForEmit is undefined');
-            }
-
-            let typeArgumentsText: string = '';
-
-            if (node.typeArguments && node.typeArguments.length > 0) {
-              // Type arguments have to be processed and written to the document
-              const lessThanTokenPos: number = span.children.findIndex(
-                (childSpan) => childSpan.node.kind === ts.SyntaxKind.LessThanToken
-              );
-              const greaterThanTokenPos: number = span.children.findIndex(
-                (childSpan) => childSpan.node.kind === ts.SyntaxKind.GreaterThanToken
-              );
-
-              if (lessThanTokenPos < 0 || greaterThanTokenPos <= lessThanTokenPos) {
-                throw new InternalError('Invalid type arguments:\n' + node.getText());
-              }
-
-              const typeArgumentsSpans: Span[] = span.children.slice(
-                lessThanTokenPos + 1,
-                greaterThanTokenPos
-              );
-
-              // Apply modifications to Span elements of typeArguments
-              typeArgumentsSpans.forEach((childSpan) => {
-                const childAstDeclaration: AstDeclaration = AstDeclaration.isSupportedSyntaxKind(
-                  childSpan.kind
-                )
-                  ? collector.astSymbolTable.getChildAstDeclarationByNode(childSpan.node, astDeclaration)
-                  : astDeclaration;
-
-                ApiReportGenerator._modifySpan(
-                  collector,
-                  childSpan,
-                  entity,
-                  childAstDeclaration,
-                  insideTypeLiteral
-                );
-              });
-
-              const typeArgumentsStrings: string[] = typeArgumentsSpans.map((childSpan) =>
-                childSpan.getModifiedText()
-              );
-              typeArgumentsText = `<${typeArgumentsStrings.join(', ')}>`;
-            }
-
-            if (
-              referencedEntity.astEntity instanceof AstImport &&
-              referencedEntity.astEntity.importKind === AstImportKind.ImportType &&
-              referencedEntity.astEntity.exportName
-            ) {
-              // For an ImportType with a namespace chain, only the top namespace is imported.
-              // Must add the original nested qualifiers to the rolled up import.
-              const qualifiersText: string = node.qualifier?.getText() ?? '';
-              const nestedQualifiersStart: number = qualifiersText.indexOf('.');
-              // Including the leading "."
-              const nestedQualifiersText: string =
-                nestedQualifiersStart >= 0 ? qualifiersText.substring(nestedQualifiersStart) : '';
-
-              const replacement: string = `${referencedEntity.nameForEmit}${nestedQualifiersText}${typeArgumentsText}`;
-
-              span.modification.skipAll();
-              span.modification.prefix = replacement;
-            } else {
-              // Replace with internal symbol or AstImport
-
-              span.modification.skipAll();
-              span.modification.prefix = `${referencedEntity.nameForEmit}${typeArgumentsText}`;
-            }
+        DtsEmitHelpers.modifyImportTypeSpan(
+          collector,
+          span,
+          astDeclaration,
+          (childSpan, childAstDeclaration) => {
+            ApiReportGenerator._modifySpan(
+              collector,
+              childSpan,
+              entity,
+              childAstDeclaration,
+              insideTypeLiteral
+            );
           }
-        }
+        );
         break;
     }
 
