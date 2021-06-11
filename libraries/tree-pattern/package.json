@@ -15,7 +15,7 @@
   "devDependencies": {
     "@rushstack/eslint-config": "2.3.3",
     "@rushstack/heft": "0.32.0",
-    "@rushstack/heft-node-rig": "1.0.30",
+    "@rushstack/heft-node-rig": "1.0.31",
     "@types/heft-jest": "1.0.1",
     "eslint": "~7.12.1",
     "typescript": "~3.9.7"
