@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.1.2",
+      "tag": "@rushstack/heft-jest-plugin_v0.1.2",
+      "date": "Fri, 11 Jun 2021 23:26:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Resolve the \"testEnvironment\" Jest configuration property in jest.config.json"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.1",
       "tag": "@rushstack/heft-jest-plugin_v0.1.1",
       "date": "Fri, 11 Jun 2021 00:34:02 GMT",
