@@ -9,10 +9,10 @@ disabled by default.
 
 To reenable Jest support for your project, follow these steps:
 
-1. Add the `@rushstack/heft-jest-plugin` dependency to your project's **package.json** file.
-
-2. If you are using `@rushstack/heft-node-rig` or `@rushstack/heft-web-rig`, the Jest
+1. If you are using `@rushstack/heft-node-rig` or `@rushstack/heft-web-rig`, the Jest
    plugin is already enabled.  Skip to step 4.
+
+2. Add the `@rushstack/heft-jest-plugin` dependency to your project's **package.json** file.
 
 3. Load the plugin by adding this setting to your `config/heft.json` file:
 
@@ -88,7 +88,7 @@ For example:
 ### Heft 0.26.0
 
 This release of Heft removed the Webpack plugins from the `@rushstack/heft` package
-and moved them into their own package (`@rushstack/heft-webpack4-plugin`). To re-include
+and moved them into their own package (`@rushstack/heft-webpack4-plugin`). To reenable
 Webpack support in a project, include a dependency on `@rushstack/heft-webpack4-plugin`
 and add the following option to the project's `config/heft.json` file:
 
