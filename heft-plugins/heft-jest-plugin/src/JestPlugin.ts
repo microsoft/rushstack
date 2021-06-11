@@ -106,16 +106,17 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       jsonPathMetadata: {
         // string
         '$.dependencyExtractor': nodeResolveMetadata,
+        '$.filter': nodeResolveMetadata,
         '$.globalSetup': nodeResolveMetadata,
         '$.globalTeardown': nodeResolveMetadata,
         '$.moduleLoader': nodeResolveMetadata,
-        '$.snapshotResolver': nodeResolveMetadata,
-        '$.testResultsProcessor': nodeResolveMetadata,
-        '$.testRunner': nodeResolveMetadata,
-        '$.filter': nodeResolveMetadata,
-        '$.runner': nodeResolveMetadata,
         '$.prettierPath': nodeResolveMetadata,
         '$.resolver': nodeResolveMetadata,
+        '$.runner': nodeResolveMetadata,
+        '$.snapshotResolver': nodeResolveMetadata,
+        '$.testEnvironment': nodeResolveMetadata,
+        '$.testResultsProcessor': nodeResolveMetadata,
+        '$.testRunner': nodeResolveMetadata,
         '$.testSequencer': nodeResolveMetadata,
         // string[]
         '$.setupFiles.*': nodeResolveMetadata,
@@ -124,12 +125,12 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
         // reporters: (path | [ path, options ])[]
         '$.reporters[?(@ !== "default")]*@string()': nodeResolveMetadata, // string path, excluding "default"
         '$.reporters.*[?(@property == 0 && @ !== "default")]': nodeResolveMetadata, // First entry in [ path, options ], excluding "default"
-        // watchPlugins: (path | [ path, options ])[]
-        '$.watchPlugins.*@string()': nodeResolveMetadata, // string path
-        '$.watchPlugins.*[?(@property == 0)]': nodeResolveMetadata, // First entry in [ path, options ]
         // transform: { [regex]: path | [ path, options ] }
         '$.transform.*@string()': nodeResolveMetadata, // string path
-        '$.transform.*[?(@property == 0)]': nodeResolveMetadata // First entry in [ path, options ]
+        '$.transform.*[?(@property == 0)]': nodeResolveMetadata, // First entry in [ path, options ]
+        // watchPlugins: (path | [ path, options ])[]
+        '$.watchPlugins.*@string()': nodeResolveMetadata, // string path
+        '$.watchPlugins.*[?(@property == 0)]': nodeResolveMetadata // First entry in [ path, options ]
       }
     });
   }
