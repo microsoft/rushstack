@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-jest-plugin",
-      "comment": "\"Resolve the 'testEnvironment' Jest configuration propery in jest.config.json\"",
+      "comment": "Resolve the \"testEnvironment\" Jest configuration property in jest.config.json",
       "type": "patch"
     }
   ],
