@@ -83,7 +83,7 @@ the Rush Stack website.
   out what's new in the latest version
 - [UPGRADING.md](
   https://github.com/microsoft/rushstack/blob/master/apps/heft/UPGRADING.md) - Instructions
-  for migrating existing projets to use a newer version of Heft
+  for migrating existing projects to use a newer version of Heft
 - [API Reference](https://rushstack.io/pages/api/heft/)
 
 Heft is part of the [Rush Stack](https://rushstack.io/) family of projects.
