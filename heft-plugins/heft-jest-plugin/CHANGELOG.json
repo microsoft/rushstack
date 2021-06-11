@@ -1,0 +1,22 @@
+{
+  "name": "@rushstack/heft-jest-plugin",
+  "entries": [
+    {
+      "version": "0.1.1",
+      "tag": "@rushstack/heft-jest-plugin_v0.1.1",
+      "date": "Fri, 11 Jun 2021 00:34:02 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Initial implementation"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.5.0`"
+          }
+        ]
+      }
+    }
+  ]
+}

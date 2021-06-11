@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 10 Jun 2021 15:08:15 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Jun 2021 00:34:02 GMT and should not be manually modified.
+
+## 0.32.0
+Fri, 11 Jun 2021 00:34:02 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Remove Jest plugin from Heft. To consume the Jest plugin, add @rushstack/heft-jest-plugin as a dependency and include it in heft.json. See UPGRADING.md for more information.
 
 ## 0.31.5
 Thu, 10 Jun 2021 15:08:15 GMT

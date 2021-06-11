@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Fri, 04 Jun 2021 19:59:53 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Jun 2021 00:34:02 GMT and should not be manually modified.
+
+## 0.5.0
+Fri, 11 Jun 2021 00:34:02 GMT
+
+### Minor changes
+
+- Add "preresolve" property to transform paths before resolution
 
 ## 0.4.2
 Fri, 04 Jun 2021 19:59:53 GMT

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Thu, 10 Jun 2021 15:08:16 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Jun 2021 00:34:02 GMT and should not be manually modified.
+
+## 1.0.30
+Fri, 11 Jun 2021 00:34:02 GMT
+
+### Patches
+
+- Add @rushstack/heft-jest-plugin to run during tests
 
 ## 1.0.29
 Thu, 10 Jun 2021 15:08:16 GMT
