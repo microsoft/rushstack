@@ -115,7 +115,7 @@ if (FileSystem.exists(dotPnpmFolderPath)) {
   }
 }
 
-const pnpmLockBeforePath = path.join(__dirname, 'workspace/pnpm-lock-git.yaml');
+const pnpmLockBeforePath = path.join(__dirname, 'workspace/common/pnpm-lock.yaml');
 const pnpmLockAfterPath = path.join(__dirname, 'workspace/pnpm-lock.yaml');
 let pnpmLockBeforeContent = '';
 
