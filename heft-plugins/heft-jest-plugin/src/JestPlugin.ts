@@ -139,11 +139,6 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     heftConfiguration: HeftConfiguration,
     options?: IJestPluginOptions
   ): void {
-    // TODO: Remove when newer version of Heft consumed
-    if (options) {
-      JsonSchema.fromFile(PLUGIN_SCHEMA_PATH).validateObject(options, 'config/heft.json');
-    }
-
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
         compile.hooks.afterCompile.tapPromise(PLUGIN_NAME, async () => {
@@ -232,9 +227,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       testTimeout: test.properties.testTimeout,
       maxWorkers: test.properties.maxWorkers,
 
-      // TODO: Remove cast when newer version of Heft consumed
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      passWithNoTests: (test.properties as any).passWithNoTests,
+      passWithNoTests: test.properties.passWithNoTests,
 
       $0: process.argv0,
       _: []
