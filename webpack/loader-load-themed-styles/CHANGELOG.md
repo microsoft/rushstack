@@ -1,6 +1,11 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Fri, 11 Jun 2021 00:34:02 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Jun 2021 23:26:16 GMT and should not be manually modified.
+
+## 1.9.62
+Fri, 11 Jun 2021 23:26:16 GMT
+
+_Version update only_
 
 ## 1.9.61
 Fri, 11 Jun 2021 00:34:02 GMT
