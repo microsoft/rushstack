@@ -7,8 +7,7 @@
     "reportFolder": "../../../common/reviews/api"
   },
   "docModel": {
-    "enabled": true,
-    "apiJsonFilePath": "../../../common/temp/api/<unscopedPackageName>.api.json"
+    "enabled": false
   },
   "dtsRollup": {
     "enabled": true,
