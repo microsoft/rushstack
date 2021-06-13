@@ -13,13 +13,15 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "@types/node": "10.17.13"
+    "@types/node": "10.17.13",
+    "wordwrap": "~1.0.0"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "colors": "~1.2.1"
+    "colors": "~1.2.1",
+    "@types/wordwrap": "~1.0.0"
   }
 }

@@ -7,6 +7,7 @@ import * as path from 'path';
 
 import { CommandLineParser, CommandLineFlagParameter, CommandLineAction } from '@rushstack/ts-command-line';
 import { InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
+import { PrintUtilities } from '@rushstack/terminal';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
@@ -361,7 +362,7 @@ export class RushCommandLineParser extends CommandLineParser {
   private _reportErrorAndSetExitCode(error: Error): void {
     if (!(error instanceof AlreadyReportedError)) {
       const prefix: string = 'ERROR: ';
-      console.error(os.EOL + colors.red(Utilities.wrapWords(prefix + error.message)));
+      console.error(os.EOL + colors.red(PrintUtilities.wrapWords(prefix + error.message)));
     }
 
     if (this._debugParameter.value) {

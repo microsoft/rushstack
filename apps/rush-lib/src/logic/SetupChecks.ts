@@ -5,9 +5,9 @@ import colors from 'colors/safe';
 import * as path from 'path';
 import * as semver from 'semver';
 import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
+import { PrintUtilities } from '@rushstack/terminal';
 
 import { RushConfiguration } from '../api/RushConfiguration';
-import { Utilities } from '../utilities/Utilities';
 import { RushConstants } from '../logic/RushConstants';
 
 // Refuses to run at all if the PNPM version is older than this, because there
@@ -33,7 +33,7 @@ export class SetupChecks {
     const errorMessage: string | undefined = SetupChecks._validate(rushConfiguration);
 
     if (errorMessage) {
-      console.error(colors.red(Utilities.wrapWords(errorMessage)));
+      console.error(colors.red(PrintUtilities.wrapWords(errorMessage)));
       throw new AlreadyReportedError();
     }
   }
@@ -77,7 +77,7 @@ export class SetupChecks {
       if (phantomFolders.length === 1) {
         console.log(
           colors.yellow(
-            Utilities.wrapWords(
+            PrintUtilities.wrapWords(
               'Warning: A phantom "node_modules" folder was found. This defeats Rush\'s protection against' +
                 ' NPM phantom dependencies and may cause confusing build errors. It is recommended to' +
                 ' delete this folder:'
@@ -87,7 +87,7 @@ export class SetupChecks {
       } else {
         console.log(
           colors.yellow(
-            Utilities.wrapWords(
+            PrintUtilities.wrapWords(
               'Warning: Phantom "node_modules" folders were found. This defeats Rush\'s protection against' +
                 ' NPM phantom dependencies and may cause confusing build errors. It is recommended to' +
                 ' delete these folders:'

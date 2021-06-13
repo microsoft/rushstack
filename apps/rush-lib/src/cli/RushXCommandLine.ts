@@ -4,8 +4,9 @@
 import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
-
 import { PackageJsonLookup, IPackageJson, Text } from '@rushstack/node-core-library';
+import { PrintUtilities } from '@rushstack/terminal';
+
 import { Utilities } from '../utilities/Utilities';
 import { ProjectCommandSet } from '../logic/ProjectCommandSet';
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -176,7 +177,7 @@ export class RushXCommandLine {
         const firstPartLength: number = 2 + maxLength + 2;
         // The length for truncating the escaped escapedScriptBody so it doesn't wrap
         // to the next line
-        const truncateLength: number = Math.max(0, Utilities.getConsoleWidth() - firstPartLength) - 1;
+        const truncateLength: number = Math.max(0, PrintUtilities.getConsoleWidth() - firstPartLength) - 1;
 
         console.log(
           // Example: "  command: "

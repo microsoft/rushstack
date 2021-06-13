@@ -17,6 +17,7 @@ import {
   InternalError,
   AlreadyReportedError
 } from '@rushstack/node-core-library';
+import { PrintUtilities } from '@rushstack/terminal';
 
 import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
@@ -681,7 +682,9 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     if (anyChanges) {
-      console.log(os.EOL + colors.yellow(Utilities.wrapWords(`Applied workaround for NPM 5 bug`)) + os.EOL);
+      console.log(
+        os.EOL + colors.yellow(PrintUtilities.wrapWords(`Applied workaround for NPM 5 bug`)) + os.EOL
+      );
     }
   }
 
@@ -699,7 +702,7 @@ export class RushInstallManager extends BaseInstallManager {
         console.log(
           os.EOL +
             colors.yellow(
-              Utilities.wrapWords(
+              PrintUtilities.wrapWords(
                 `Your ${this.rushConfiguration.shrinkwrapFilePhrase} is missing the project "${rushProject.packageName}".`
               )
             ) +
