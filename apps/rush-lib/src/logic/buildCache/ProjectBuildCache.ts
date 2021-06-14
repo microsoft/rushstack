@@ -202,7 +202,11 @@ export class ProjectBuildCache {
 
       // If we don't have tar on the PATH, if we failed to update the local cache entry,
       // or if the tar binary failed, untar in-memory
-      const tarStream: stream.Writable = tar.extract({ cwd: projectFolderPath });
+      const tarStream: stream.Writable = tar.extract({
+        cwd: projectFolderPath,
+        // Set to true to omit writing mtime value for extracted entries.
+        m: true
+      });
       try {
         const tarPromise: Promise<unknown> = events.once(tarStream, 'drain');
         tarStream.write(cacheEntryBuffer);
