@@ -6,6 +6,13 @@ import wordwrap from 'wordwrap';
 import { Terminal } from '@rushstack/node-core-library';
 
 /**
+ * A sensible fallback column width for consoles.
+ *
+ * @public
+ */
+export const DEFAULT_CONSOLE_WIDTH: number = 80;
+
+/**
  * A collection of utilities for printing messages to the console.
  *
  * @public
@@ -14,13 +21,11 @@ export class PrintUtilities {
   /**
    * Returns the width of the console, measured in columns
    */
-  public static getConsoleWidth(): number {
+  public static getConsoleWidth(): number | undefined {
     const stdout: tty.WriteStream = process.stdout as tty.WriteStream;
     if (stdout && stdout.columns) {
       return stdout.columns;
     }
-
-    return 80;
   }
 
   /**
@@ -33,7 +38,7 @@ export class PrintUtilities {
     }
 
     if (!maxLineLength) {
-      maxLineLength = PrintUtilities.getConsoleWidth();
+      maxLineLength = PrintUtilities.getConsoleWidth() || DEFAULT_CONSOLE_WIDTH;
     }
 
     const wrap: (textToWrap: string) => string = wordwrap(indent, maxLineLength, { mode: 'soft' });
@@ -42,12 +47,14 @@ export class PrintUtilities {
 
   /**
    * Displays a message in the console wrapped in a box UI.
+   *
+   * @param boxWidth - The width of the box, defaults to half of the console width.
    */
-  public static printMessageInBox(
-    message: string,
-    terminal: Terminal,
-    boxWidth: number = Math.floor(PrintUtilities.getConsoleWidth() / 2)
-  ): void {
+  public static printMessageInBox(message: string, terminal: Terminal, boxWidth?: number): void {
+    if (!boxWidth) {
+      const consoleWidth: number = PrintUtilities.getConsoleWidth() || DEFAULT_CONSOLE_WIDTH;
+      boxWidth = Math.floor(consoleWidth / 2);
+    }
     const maxLineLength: number = boxWidth - 10;
     const wrappedMessage: string = PrintUtilities.wrapWords(message, maxLineLength);
     const wrappedMessageLines: string[] = wrappedMessage.split('\n');

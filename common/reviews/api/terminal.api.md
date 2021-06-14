@@ -15,6 +15,9 @@ export class CallbackWritable extends TerminalWritable {
     protected onWriteChunk(chunk: ITerminalChunk): void;
 }
 
+// @public
+export const DEFAULT_CONSOLE_WIDTH: number;
+
 // @beta
 export class DiscardStdoutTransform extends TerminalTransform {
     constructor(options: IDiscardStdoutTransformOptions);
@@ -109,7 +112,7 @@ export class NormalizeNewlinesTextRewriter extends TextRewriter {
 
 // @public
 export class PrintUtilities {
-    static getConsoleWidth(): number;
+    static getConsoleWidth(): number | undefined;
     static printMessageInBox(message: string, terminal: Terminal, boxWidth?: number): void;
     static wrapWords(text: string, maxLineLength?: number, indent?: number): string;
 }

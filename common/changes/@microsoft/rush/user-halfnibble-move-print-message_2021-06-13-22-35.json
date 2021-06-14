@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Extract console printing utilities to @rushstack/terminal.",
+      "comment": "",
       "type": "none"
     }
   ],
