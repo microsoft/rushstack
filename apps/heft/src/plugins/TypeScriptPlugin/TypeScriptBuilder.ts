@@ -44,12 +44,6 @@ export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfig
   tslintToolPath: string | undefined;
   eslintToolPath: string | undefined;
 
-  /**
-   * If provided, this is included in the logging prefix. For example, if this
-   * is set to "other-tsconfig", logging lines will start with [typescript (other-tsconfig)].
-   */
-  loggerPrefixLabel: string | undefined;
-
   lintingEnabled: boolean;
 
   watchMode: boolean;
@@ -157,10 +151,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   }
 
   public async invokeAsync(): Promise<void> {
-    const loggerPrefixLabel: string | undefined = this._configuration.loggerPrefixLabel;
-    this._typescriptLogger = await this.requestScopedLoggerAsync(
-      loggerPrefixLabel ? `typescript (${loggerPrefixLabel})` : 'typescript'
-    );
+    this._typescriptLogger = await this.requestScopedLoggerAsync('typescript');
     this._typescriptTerminal = this._typescriptLogger.terminal;
 
     // Determine the compiler version
@@ -274,14 +265,11 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         throw new Error('Unable to resolve "tslint" package');
       }
 
-      const tslintScopedLogger: IScopedLogger = await this.requestScopedLoggerAsync(
-        loggerPrefixLabel ? `tslint (${loggerPrefixLabel})` : 'tslint'
-      );
+      const tslintLogger: IScopedLogger = await this.requestScopedLoggerAsync('tslint');
       tslint = new Tslint({
         ts: ts,
         tslintPackagePath: this._configuration.tslintToolPath,
-        terminalPrefixLabel: this._configuration.loggerPrefixLabel,
-        scopedLogger: tslintScopedLogger,
+        scopedLogger: tslintLogger,
         buildFolderPath: this._configuration.buildFolder,
         buildCacheFolderPath: this._configuration.buildCacheFolder,
         linterConfigFilePath: this._tslintConfigFilePath,
@@ -296,14 +284,11 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         throw new Error('Unable to resolve "eslint" package');
       }
 
-      const eslintScopedLogger: IScopedLogger = await this.requestScopedLoggerAsync(
-        loggerPrefixLabel ? `eslint (${loggerPrefixLabel})` : 'eslint'
-      );
+      const eslintLogger: IScopedLogger = await this.requestScopedLoggerAsync('eslint');
       eslint = new Eslint({
         ts: ts,
         eslintPackagePath: this._configuration.eslintToolPath,
-        terminalPrefixLabel: this._configuration.loggerPrefixLabel,
-        scopedLogger: eslintScopedLogger,
+        scopedLogger: eslintLogger,
         buildFolderPath: this._configuration.buildFolder,
         buildCacheFolderPath: this._configuration.buildCacheFolder,
         linterConfigFilePath: this._eslintConfigFilePath,
