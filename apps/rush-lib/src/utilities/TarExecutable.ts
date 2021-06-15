@@ -47,7 +47,16 @@ export class TarExecutable {
    */
   public async tryUntarAsync(options: IUntarOptions): Promise<number> {
     return await this._spawnTarWithLoggingAsync(
-      ['-x', '-f', options.archivePath],
+      // These parameters are chosen for compatibility with the very primitive bsdtar 3.3.2 shipped with Windows 10.
+      [
+        // [Windows bsdtar 3.3.2] Extract: tar -x [options] [<patterns>]
+        '-x',
+        // [Windows bsdtar 3.3.2] -m    Don't restore modification times
+        '-m',
+        // [Windows bsdtar 3.3.2] -f <filename>  Location of archive (default \\.\tape0)
+        '-f',
+        options.archivePath
+      ],
       options.outputFolderPath,
       options.logFilePath
     );
@@ -68,7 +77,24 @@ export class TarExecutable {
 
     const projectFolderPath: string = project.projectFolder;
     const tarExitCode: number = await this._spawnTarWithLoggingAsync(
-      ['-c', '-f', archivePath, '-z', '-C', projectFolderPath, '--files-from', pathsListFilePath],
+      // These parameters are chosen for compatibility with the very primitive bsdtar 3.3.2 shipped with Windows 10.
+      [
+        // [Windows bsdtar 3.3.2] -c Create
+        '-c',
+        // [Windows bsdtar 3.3.2] -f <filename>  Location of archive (default \\.\tape0)
+        '-f',
+        archivePath,
+        // [Windows bsdtar 3.3.2] -z, -j, -J, --lzma  Compress archive with gzip/bzip2/xz/lzma
+        '-z',
+        // [Windows bsdtar 3.3.2] -C <dir>  Change to <dir> before processing remaining files
+        '-C',
+        projectFolderPath,
+        // [GNU tar 1.33] -T, --files-from=FILE      get names to extract or create from FILE
+        //
+        // Windows bsdtar does not document this parameter, but seems to accept it.
+        '--files-from',
+        pathsListFilePath
+      ],
       projectFolderPath,
       logFilePath
     );
