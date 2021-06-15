@@ -24,7 +24,8 @@ export class ShrinkwrapFileFactory {
         );
       case 'yarn':
         return YarnShrinkwrapFile.loadFromFile(shrinkwrapFilename);
+      default:
+        throw new Error(`Invalid package manager: ${packageManager}`);
     }
-    throw new Error(`Invalid package manager: ${packageManager}`);
   }
 }
