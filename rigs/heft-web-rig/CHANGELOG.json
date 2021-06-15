@@ -2,6 +2,23 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@rushstack/heft-web-rig_v0.3.0",
+      "date": "Tue, 15 Jun 2021 20:38:35 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Disable the allowUnreachableCode TypeScript compiler option."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `0.1.25`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.38",
       "tag": "@rushstack/heft-web-rig_v0.2.38",
       "date": "Fri, 11 Jun 2021 23:26:16 GMT",

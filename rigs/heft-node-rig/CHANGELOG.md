@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Fri, 11 Jun 2021 23:26:16 GMT and should not be manually modified.
+This log was last generated on Tue, 15 Jun 2021 20:38:35 GMT and should not be manually modified.
+
+## 1.1.0
+Tue, 15 Jun 2021 20:38:35 GMT
+
+### Minor changes
+
+- Disable the allowUnreachableCode TypeScript compiler option.
 
 ## 1.0.31
 Fri, 11 Jun 2021 23:26:16 GMT
