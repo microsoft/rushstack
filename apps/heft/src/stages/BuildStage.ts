@@ -41,6 +41,11 @@ export type CopyFromCacheMode = 'hardlink' | 'copy';
  * @public
  */
 export class CompileSubstageHooks extends BuildSubstageHooksBase {
+  /**
+   * The `afterCompile` event is fired exactly once, after the "compile" stage completes its first operation.
+   * The "bundle" stage will not begin until all event handlers have resolved their promises.  The behavior
+   * of this event is the same in watch mode and non-watch mode.
+   */
   public readonly afterCompile: AsyncParallelHook = new AsyncParallelHook();
   public readonly afterRecompile: AsyncParallelHook = new AsyncParallelHook();
 }
