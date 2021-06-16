@@ -15,7 +15,6 @@ import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 export interface ILinterBaseOptions {
   ts: IExtendedTypeScript;
   scopedLogger: IScopedLogger;
-  terminalPrefixLabel: string | undefined;
   buildFolderPath: string;
   buildCacheFolderPath: string;
   linterConfigFilePath: string;

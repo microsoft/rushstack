@@ -2,8 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import glob from 'glob';
-import { LegacyAdapters, ITerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { Terminal, FileSystem } from '@rushstack/node-core-library';
 
 import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 import { HeftSession } from '../../pluginFramework/HeftSession';
@@ -30,7 +29,6 @@ interface IRunTypeScriptOptions {
 
   /**
    * Fired whenever the compiler emits an output.  In watch mode, this event occurs after each recompile.
-   * If there are multiple tsconfigs being processed in parallel, the event fires for each one.
    */
   emitCallback: () => void;
 
@@ -46,28 +44,6 @@ interface IEmitModuleKind {
   moduleKind: 'commonjs' | 'amd' | 'umd' | 'system' | 'es2015' | 'esnext';
   outFolderName: string;
   jsExtensionOverride?: string;
-}
-
-interface IRunBuilderForTsconfigOptions {
-  heftSession: HeftSession;
-  heftConfiguration: HeftConfiguration;
-
-  toolPackageResolution: IToolPackageResolution;
-  tsconfigFilePath: string;
-  lintingEnabled: boolean;
-  copyFromCacheMode?: CopyFromCacheMode;
-  watchMode: boolean;
-  maxWriteParallelism: number;
-
-  firstEmitCallback: () => void;
-
-  emitCallback: () => void;
-
-  terminalProvider: ITerminalProvider;
-  terminalPrefixLabel: string | undefined;
-  emitCjsExtensionForCommonJS: boolean;
-  emitMjsExtensionForESModule: boolean;
-  additionalModuleKindsToEmit: IEmitModuleKind[] | undefined;
 }
 
 export interface ISharedTypeScriptConfiguration {
@@ -219,23 +195,15 @@ export class TypeScriptPlugin implements IHeftPlugin {
   }
 
   private async _runTypeScriptAsync(logger: ScopedLogger, options: IRunTypeScriptOptions): Promise<void> {
-    const { heftSession, heftConfiguration, buildProperties, watchMode, emitCallback, firstEmitCallback } =
-      options;
+    const { heftSession, heftConfiguration, buildProperties, watchMode } = options;
 
     const typescriptConfigurationJson: ITypeScriptConfigurationJson | undefined =
       await this._ensureConfigFileLoadedAsync(logger.terminal, heftConfiguration);
-    const tsconfigPaths: string[] = await LegacyAdapters.convertCallbackToPromise(
-      glob,
-      'tsconfig?(-*).json',
-      {
-        cwd: heftConfiguration.buildFolder,
-        nocase: true
-      }
-    );
 
-    buildProperties.isTypeScriptProject = tsconfigPaths.length > 0;
+    const tsconfigFilePath: string = `${heftConfiguration.buildFolder}/tsconfig.json`;
+    buildProperties.isTypeScriptProject = await FileSystem.existsAsync(tsconfigFilePath);
     if (!buildProperties.isTypeScriptProject) {
-      // If there are no TSConfigs, we have nothing to do
+      // If there are no TSConfig, we have nothing to do
       return;
     }
 
@@ -275,120 +243,39 @@ export class TypeScriptPlugin implements IHeftPlugin {
       throw new Error('Unable to resolve a TypeScript compiler package');
     }
 
-    const builderOptions: Omit<
-      IRunBuilderForTsconfigOptions,
-      | 'terminalProvider'
-      | 'tsconfigFilePath'
-      | 'additionalModuleKindsToEmit'
-      | 'terminalPrefixLabel'
-      | 'emitCallback'
-      | 'firstEmitCallback'
-    > = {
-      heftSession: heftSession,
-      heftConfiguration,
-      toolPackageResolution,
-      emitCjsExtensionForCommonJS: !!typeScriptConfiguration.emitCjsExtensionForCommonJS,
-      emitMjsExtensionForESModule: !!typeScriptConfiguration.emitMjsExtensionForESModule,
-      lintingEnabled: !!typeScriptConfiguration.isLintingEnabled,
-      copyFromCacheMode: typeScriptConfiguration.copyFromCacheMode,
-      watchMode: watchMode,
-      maxWriteParallelism: typeScriptConfiguration.maxWriteParallelism
-    };
-
     // Set some properties used by the Jest plugin
     buildProperties.emitFolderNameForTests = typeScriptConfiguration.emitFolderNameForTests || 'lib';
     buildProperties.emitExtensionForTests = typeScriptConfiguration.emitCjsExtensionForCommonJS
       ? '.cjs'
       : '.js';
 
-    // Wrap the "firstEmitCallback" to fire only after all of the builder processes have completed.
-    const callbacksForTsconfigs: Set<() => void> = new Set<() => void>();
-    function getFirstEmitCallbackForTsconfig(): () => void {
-      let hasAlreadyReportedFirstEmit: boolean = false;
-
-      const callback: () => void = () => {
-        if (hasAlreadyReportedFirstEmit) {
-          return;
-        }
-        hasAlreadyReportedFirstEmit = true;
-
-        callbacksForTsconfigs.delete(callback);
-        if (callbacksForTsconfigs.size === 0) {
-          firstEmitCallback();
-        }
-      };
-
-      callbacksForTsconfigs.add(callback);
-
-      return callback;
-    }
-
-    if (tsconfigPaths.length === 1) {
-      await this._runBuilderForTsconfigAsync(logger, {
-        ...builderOptions,
-        tsconfigFilePath: tsconfigPaths[0],
-        terminalProvider: heftConfiguration.terminalProvider,
-        additionalModuleKindsToEmit: typeScriptConfiguration.additionalModuleKindsToEmit,
-        terminalPrefixLabel: undefined,
-        emitCallback: emitCallback,
-        firstEmitCallback: getFirstEmitCallbackForTsconfig()
-      });
-    } else {
-      const builderProcesses: Promise<void>[] = [];
-      for (const tsconfigFilePath of tsconfigPaths) {
-        const tsconfigFilename: string = path.basename(tsconfigFilePath, path.extname(tsconfigFilePath));
-
-        // Only provide additionalModuleKindsToEmit to the default tsconfig.json
-        const additionalModuleKindsToEmit: IEmitModuleKind[] | undefined =
-          tsconfigFilename === 'tsconfig' ? typeScriptConfiguration.additionalModuleKindsToEmit : undefined;
-
-        builderProcesses.push(
-          this._runBuilderForTsconfigAsync(logger, {
-            ...builderOptions,
-            tsconfigFilePath,
-            terminalProvider: heftConfiguration.terminalProvider,
-            additionalModuleKindsToEmit,
-            terminalPrefixLabel: tsconfigFilename,
-            emitCallback: emitCallback,
-            firstEmitCallback: getFirstEmitCallbackForTsconfig()
-          })
-        );
-      }
-
-      await Promise.all(builderProcesses);
-    }
-  }
-
-  private async _runBuilderForTsconfigAsync(
-    logger: ScopedLogger,
-    options: IRunBuilderForTsconfigOptions
-  ): Promise<void> {
-    const { heftSession, heftConfiguration, tsconfigFilePath, toolPackageResolution } = options;
-
-    const fullTsconfigFilePath: string = path.resolve(heftConfiguration.buildFolder, tsconfigFilePath);
     const typeScriptBuilderConfiguration: ITypeScriptBuilderConfiguration = {
       buildFolder: heftConfiguration.buildFolder,
       typeScriptToolPath: toolPackageResolution.typeScriptPackagePath!,
       tslintToolPath: toolPackageResolution.tslintPackagePath,
       eslintToolPath: toolPackageResolution.eslintPackagePath,
 
-      tsconfigPath: fullTsconfigFilePath,
-      lintingEnabled: options.lintingEnabled,
-      buildCacheFolder: options.heftConfiguration.buildCacheFolder,
-      additionalModuleKindsToEmit: options.additionalModuleKindsToEmit,
-      emitCjsExtensionForCommonJS: options.emitCjsExtensionForCommonJS,
-      emitMjsExtensionForESModule: options.emitMjsExtensionForESModule,
-      copyFromCacheMode: options.copyFromCacheMode,
-      watchMode: options.watchMode,
-      loggerPrefixLabel: options.terminalPrefixLabel,
-      maxWriteParallelism: options.maxWriteParallelism
+      tsconfigPath: tsconfigFilePath,
+      lintingEnabled: !!typeScriptConfiguration.isLintingEnabled,
+      buildCacheFolder: heftConfiguration.buildCacheFolder,
+      additionalModuleKindsToEmit: typeScriptConfiguration.additionalModuleKindsToEmit,
+      emitCjsExtensionForCommonJS: !!typeScriptConfiguration.emitCjsExtensionForCommonJS,
+      emitMjsExtensionForESModule: !!typeScriptConfiguration.emitMjsExtensionForESModule,
+      copyFromCacheMode: typeScriptConfiguration.copyFromCacheMode,
+      watchMode: watchMode,
+      maxWriteParallelism: typeScriptConfiguration.maxWriteParallelism
     };
+    let firstEmitAlreadyCalled: boolean = false;
     const typeScriptBuilder: TypeScriptBuilder = new TypeScriptBuilder(
-      options.terminalProvider,
+      heftConfiguration.terminalProvider,
       typeScriptBuilderConfiguration,
       heftSession,
       () => {
-        options.firstEmitCallback();
+        if (!firstEmitAlreadyCalled) {
+          firstEmitAlreadyCalled = true;
+          options.firstEmitCallback();
+        }
+
         options.emitCallback();
       }
     );
