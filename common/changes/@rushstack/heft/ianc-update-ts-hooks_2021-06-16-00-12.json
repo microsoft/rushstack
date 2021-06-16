@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "(BREAKING CHANGE) Remove the \"afterEachIteration\" compile substage and replace its functionality with a \"afterRecompile\" compile substage hook.",
+      "comment": "(BREAKING CHANGE) Remove the \"afterEachIteration\" compile substage and replace its functionality with a more versatile \"afterRecompile\" compile substage hook.",
       "type": "minor"
     }
   ],
