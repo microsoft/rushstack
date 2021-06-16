@@ -1,5 +1,8 @@
 # packlets-tutorial
 
-This code sample illustrates how to use "packlet" folders to organize source code within a project.
+This is a copy of the
+[packlets-tutorial](https://github.com/microsoft/rushstack-samples/tree/main/other/packlets-tutorial)
+tutorial project from the [rushstack-samples](https://github.com/microsoft/rushstack-samples) repo.
 
-For details, please see the [@rushstack/eslint-plugin-packlets](https://www.npmjs.com/package/@rushstack/eslint-plugin-packlets) documentation.
+The copy here serves as a regression test, by using `"workspace:*"` references to the local projects in this repo.
+Please update the copy from time to time to keep it in sync with the official tutorial.

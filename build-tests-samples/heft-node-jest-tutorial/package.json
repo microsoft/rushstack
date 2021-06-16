@@ -1,6 +1,6 @@
 {
   "name": "heft-node-jest-tutorial",
-  "description": "Building this project validates that various Jest features work correctly with Heft",
+  "description": "(Copy of sample project) Building this project is a regression test for Heft",
   "version": "1.0.0",
   "private": true,
   "license": "MIT",

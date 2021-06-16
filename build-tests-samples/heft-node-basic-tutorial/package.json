@@ -1,6 +1,6 @@
 {
   "name": "heft-node-basic-tutorial",
-  "description": "This project illustrates a minimal tutorial Heft project targeting the Node.js runtime",
+  "description": "(Copy of sample project) Building this project is a regression test for Heft",
   "version": "1.0.0",
   "private": true,
   "main": "lib/index.js",
