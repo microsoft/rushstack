@@ -1,6 +1,6 @@
 {
   "name": "packlets-tutorial",
-  "description": "This project illustrates how to use @rushstack/eslint-plugin-packlets",
+  "description": "(Copy of sample project) Building this project is a regression test for @rushstack/eslint-plugin-packlets",
   "version": "1.0.0",
   "private": true,
   "license": "MIT",
