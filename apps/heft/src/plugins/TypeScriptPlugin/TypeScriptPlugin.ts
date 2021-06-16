@@ -31,13 +31,6 @@ interface IRunTypeScriptOptions {
    * Fired whenever the compiler emits an output.  In watch mode, this event occurs after each recompile.
    */
   emitCallback: () => void;
-
-  /**
-   * Fired exactly once after the compiler completes its first emit iteration.  In watch mode, this event unblocks
-   * the "bundle" stage to start, avoiding a race condition where Webpack might otherwise report errors about
-   * missing inputs.
-   */
-  firstEmitCallback: () => void;
 }
 
 interface IEmitModuleKind {
@@ -130,18 +123,27 @@ export class TypeScriptPlugin implements IHeftPlugin {
       build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
         compile.hooks.run.tapPromise(PLUGIN_NAME, async () => {
           await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
+            let isFirstEmit: boolean = true;
             this._runTypeScriptAsync(logger, {
               heftSession,
               heftConfiguration,
               buildProperties: build.properties,
               watchMode: build.properties.watchMode,
               emitCallback: () => {
-                compile.hooks.afterEachIteration.call();
-              },
-              firstEmitCallback: () => {
-                if (build.properties.watchMode) {
-                  // Allow compilation to continue after the first emit
-                  resolve();
+                if (isFirstEmit) {
+                  isFirstEmit = false;
+
+                  // In watch mode, `_runTypeScriptAsync` will never resolve so we need to resolve the promise here
+                  // to allow the build to move on to the `afterCompile` substage.
+                  if (build.properties.watchMode) {
+                    resolve();
+                  }
+                } else {
+                  compile.hooks.afterRecompile.promise().catch((error) => {
+                    heftConfiguration.globalTerminal.writeErrorLine(
+                      `An error occurred in an afterRecompile hook: ${error}`
+                    );
+                  });
                 }
               }
             })
@@ -265,19 +267,11 @@ export class TypeScriptPlugin implements IHeftPlugin {
       watchMode: watchMode,
       maxWriteParallelism: typeScriptConfiguration.maxWriteParallelism
     };
-    let firstEmitAlreadyCalled: boolean = false;
     const typeScriptBuilder: TypeScriptBuilder = new TypeScriptBuilder(
       heftConfiguration.terminalProvider,
       typeScriptBuilderConfiguration,
       heftSession,
-      () => {
-        if (!firstEmitAlreadyCalled) {
-          firstEmitAlreadyCalled = true;
-          options.firstEmitCallback();
-        }
-
-        options.emitCallback();
-      }
+      options.emitCallback
     );
 
     if (heftSession.debugMode) {
