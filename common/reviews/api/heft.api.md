@@ -56,7 +56,7 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
     // (undocumented)
     readonly afterCompile: AsyncParallelHook;
     // (undocumented)
-    readonly afterEachIteration: SyncHook;
+    readonly afterRecompile: AsyncParallelHook;
 }
 
 // @public (undocumented)

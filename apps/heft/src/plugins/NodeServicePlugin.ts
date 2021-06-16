@@ -125,7 +125,8 @@ export class NodeServicePlugin implements IHeftPlugin {
           });
 
           build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
-            compile.hooks.afterEachIteration.tap(PLUGIN_NAME, this._compileHooks_afterEachIteration);
+            compile.hooks.afterCompile.tap(PLUGIN_NAME, this._compileHooks_afterEachIteration);
+            compile.hooks.afterRecompile.tap(PLUGIN_NAME, this._compileHooks_afterEachIteration);
           });
         }
       });
