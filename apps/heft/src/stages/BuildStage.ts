@@ -47,6 +47,11 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
    * of this event is the same in watch mode and non-watch mode.
    */
   public readonly afterCompile: AsyncParallelHook = new AsyncParallelHook();
+  /**
+   * The `afterRecompile` event is only used in watch mode.  It fires whenever the compiler's outputs have
+   * been rebuilt.  The initial compilation fires the `afterCompile` event only, and then all subsequent iterations
+   * fire the `afterRecompile` event only. Heft does not wait for the `afterRecompile` promises to resolve.
+   */
   public readonly afterRecompile: AsyncParallelHook = new AsyncParallelHook();
 }
 
