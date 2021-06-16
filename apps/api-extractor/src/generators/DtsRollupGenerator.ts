@@ -365,8 +365,8 @@ export class DtsRollupGenerator {
         );
       case DtsRollupKind.PublicRelease:
         return releaseTag === ReleaseTag.Public || releaseTag === ReleaseTag.None;
+      default:
+        throw new Error(`${DtsRollupKind[dtsKind]} is not implemented`);
     }
-
-    throw new Error(`${DtsRollupKind[dtsKind]} is not implemented`);
   }
 }
