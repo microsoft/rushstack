@@ -1,6 +1,7 @@
-import { DataModel, ExampleModel } from '../packlets/data-model';
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
+
+import { DataModel, ExampleModel } from '../packlets/data-model';
 
 import { Logger, MessageType } from '../packlets/logging';
 import { MainReport } from '../packlets/reports';
