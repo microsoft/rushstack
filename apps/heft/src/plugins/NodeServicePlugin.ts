@@ -125,8 +125,8 @@ export class NodeServicePlugin implements IHeftPlugin {
           });
 
           build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
-            compile.hooks.afterCompile.tap(PLUGIN_NAME, this._compileHooks_afterEachIteration);
-            compile.hooks.afterRecompile.tap(PLUGIN_NAME, this._compileHooks_afterEachIteration);
+            compile.hooks.afterCompile.tap(PLUGIN_NAME, this._compileHooks_afterEachCompile);
+            compile.hooks.afterRecompile.tap(PLUGIN_NAME, this._compileHooks_afterEachCompile);
           });
         }
       });
@@ -205,7 +205,7 @@ export class NodeServicePlugin implements IHeftPlugin {
     this._restartChild();
   }
 
-  private _compileHooks_afterEachIteration = (): void => {
+  private _compileHooks_afterEachCompile = (): void => {
     this._trapUnhandledException(() => {
       // We've recompiled, so try launching again
       this._childProcessFailed = false;
