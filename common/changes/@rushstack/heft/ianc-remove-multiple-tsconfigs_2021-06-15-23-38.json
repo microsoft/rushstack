@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "(BREAKING CHANGE) Remove the ability to run multiple TypeScript compilers in a project.",
+      "comment": "(BREAKING CHANGE) Simplify the plugin event hook lifecycle by eliminating an experimental feature that enabled side-by-side compiler configurations. We decided that this scenario is better approached by splitting the files into separate projects.",
       "type": "minor"
     }
   ],
