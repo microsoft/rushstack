@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 11 Jun 2021 00:34:02 GMT and should not be manually modified.
+This log was last generated on Wed, 16 Jun 2021 15:07:24 GMT and should not be manually modified.
+
+## 0.33.0
+Wed, 16 Jun 2021 15:07:24 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Simplify the plugin event hook lifecycle by eliminating an experimental feature that enabled side-by-side compiler configurations. We decided that this scenario is better approached by splitting the files into separate projects.
+- (BREAKING CHANGE) Remove the "afterEachIteration" compile substage and replace its functionality with a more versatile "afterRecompile" compile substage hook.
 
 ## 0.32.0
 Fri, 11 Jun 2021 00:34:02 GMT
