@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.1.3",
+      "tag": "@rushstack/heft-jest-plugin_v0.1.3",
+      "date": "Wed, 16 Jun 2021 18:53:52 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an incorrect \"peerDependencies\" entry that caused installation failures (GitHub #2754)"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.2",
       "tag": "@rushstack/heft-jest-plugin_v0.1.2",
       "date": "Fri, 11 Jun 2021 23:26:16 GMT",

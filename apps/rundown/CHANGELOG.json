@@ -2,6 +2,18 @@
   "name": "@rushstack/rundown",
   "entries": [
     {
+      "version": "1.0.114",
+      "tag": "@rushstack/rundown_v1.0.114",
+      "date": "Wed, 16 Jun 2021 18:53:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.1.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.113",
       "tag": "@rushstack/rundown_v1.0.113",
       "date": "Wed, 16 Jun 2021 15:07:24 GMT",
