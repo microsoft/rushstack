@@ -46,6 +46,7 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/apps/rundown](./apps/rundown/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Frundown.svg)](https://badge.fury.io/js/%40rushstack%2Frundown) | [changelog](./apps/rundown/CHANGELOG.md) | [@rushstack/rundown](https://www.npmjs.com/package/@rushstack/rundown) |
 | [/apps/rush](./apps/rush/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush.svg)](https://badge.fury.io/js/%40microsoft%2Frush) | [changelog](./apps/rush/CHANGELOG.md) | [@microsoft/rush](https://www.npmjs.com/package/@microsoft/rush) |
 | [/apps/rush-lib](./apps/rush-lib/) | [![npm version](https://badge.fury.io/js/%40microsoft%2Frush-lib.svg)](https://badge.fury.io/js/%40microsoft%2Frush-lib) | | [@microsoft/rush-lib](https://www.npmjs.com/package/@microsoft/rush-lib) |
+| [/heft-plugins/heft-jest-plugin](./heft-plugins/heft-jest-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fheft-jest-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fheft-jest-plugin) | [changelog](./heft-plugins/heft-jest-plugin/CHANGELOG.md) | [@rushstack/heft-jest-plugin](https://www.npmjs.com/package/@rushstack/heft-jest-plugin) |
 | [/heft-plugins/heft-webpack4-plugin](./heft-plugins/heft-webpack4-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fheft-webpack4-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fheft-webpack4-plugin) | [changelog](./heft-plugins/heft-webpack4-plugin/CHANGELOG.md) | [@rushstack/heft-webpack4-plugin](https://www.npmjs.com/package/@rushstack/heft-webpack4-plugin) |
 | [/heft-plugins/heft-webpack5-plugin](./heft-plugins/heft-webpack5-plugin/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fheft-webpack5-plugin.svg)](https://badge.fury.io/js/%40rushstack%2Fheft-webpack5-plugin) | [changelog](./heft-plugins/heft-webpack5-plugin/CHANGELOG.md) | [@rushstack/heft-webpack5-plugin](https://www.npmjs.com/package/@rushstack/heft-webpack5-plugin) |
 | [/libraries/debug-certificate-manager](./libraries/debug-certificate-manager/) | [![npm version](https://badge.fury.io/js/%40rushstack%2Fdebug-certificate-manager.svg)](https://badge.fury.io/js/%40rushstack%2Fdebug-certificate-manager) | [changelog](./libraries/debug-certificate-manager/CHANGELOG.md) | [@rushstack/debug-certificate-manager](https://www.npmjs.com/package/@rushstack/debug-certificate-manager) |
@@ -79,6 +80,11 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 
 | Folder | Description |
 | ------ | -----------|
+| [/build-tests-samples/heft-node-basic-tutorial](./build-tests-samples/heft-node-basic-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
+| [/build-tests-samples/heft-node-jest-tutorial](./build-tests-samples/heft-node-jest-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
+| [/build-tests-samples/heft-node-rig-tutorial](./build-tests-samples/heft-node-rig-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
+| [/build-tests-samples/heft-webpack-basic-tutorial](./build-tests-samples/heft-webpack-basic-tutorial/) | (Copy of sample project) Building this project is a regression test for Heft |
+| [/build-tests-samples/packlets-tutorial](./build-tests-samples/packlets-tutorial/) | (Copy of sample project) Building this project is a regression test for @rushstack/eslint-plugin-packlets |
 | [/build-tests/api-documenter-test](./build-tests/api-documenter-test/) | Building this project is a regression test for api-documenter |
 | [/build-tests/api-extractor-lib1-test](./build-tests/api-extractor-lib1-test/) | Building this project is a regression test for api-extractor |
 | [/build-tests/api-extractor-lib2-test](./build-tests/api-extractor-lib2-test/) | Building this project is a regression test for api-extractor |
@@ -93,15 +99,16 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/build-tests/heft-copy-files-test](./build-tests/heft-copy-files-test/) | Building this project tests copying files with Heft |
 | [/build-tests/heft-example-plugin-01](./build-tests/heft-example-plugin-01/) | This is an example heft plugin that exposes hooks for other plugins |
 | [/build-tests/heft-example-plugin-02](./build-tests/heft-example-plugin-02/) | This is an example heft plugin that taps the hooks exposed from heft-example-plugin-01 |
+| [/build-tests/heft-fastify-test](./build-tests/heft-fastify-test/) | This project tests Heft support for the Fastify framework for Node.js services |
 | [/build-tests/heft-jest-reporters-test](./build-tests/heft-jest-reporters-test/) | This project illustrates configuring Jest reporters in a minimal Heft project |
 | [/build-tests/heft-minimal-rig-test](./build-tests/heft-minimal-rig-test/) | This is a minimal rig package that is imported by the 'heft-minimal-rig-usage-test' project |
 | [/build-tests/heft-minimal-rig-usage-test](./build-tests/heft-minimal-rig-usage-test/) | A test project for Heft that resolves its compiler from the 'heft-minimal-rig-test' package |
 | [/build-tests/heft-node-everything-test](./build-tests/heft-node-everything-test/) | Building this project tests every task and config file for Heft when targeting the Node.js runtime |
-| [/build-tests/heft-oldest-compiler-test](./build-tests/heft-oldest-compiler-test/) | Building this project tests Heft with the oldest supported TypeScript compiler version |
 | [/build-tests/heft-sass-test](./build-tests/heft-sass-test/) | This project illustrates a minimal tutorial Heft project targeting the web browser runtime |
 | [/build-tests/heft-web-rig-library-test](./build-tests/heft-web-rig-library-test/) | A test project for Heft that exercises the '@rushstack/heft-web-rig' package |
 | [/build-tests/heft-webpack4-everything-test](./build-tests/heft-webpack4-everything-test/) | Building this project tests every task and config file for Heft when targeting the web browser runtime using Webpack 4 |
 | [/build-tests/heft-webpack5-everything-test](./build-tests/heft-webpack5-everything-test/) | Building this project tests every task and config file for Heft when targeting the web browser runtime using Webpack 5 |
+| [/build-tests/install-test-workspace](./build-tests/install-test-workspace/) |  |
 | [/build-tests/localization-plugin-test-01](./build-tests/localization-plugin-test-01/) | Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly without any localized resources. |
 | [/build-tests/localization-plugin-test-02](./build-tests/localization-plugin-test-02/) | Building this project exercises @microsoft/localization-plugin. This tests that the loader works correctly with the exportAsDefault option unset. |
 | [/build-tests/localization-plugin-test-03](./build-tests/localization-plugin-test-03/) | Building this project exercises @microsoft/localization-plugin. This tests that the plugin works correctly with the exportAsDefault option set to true. |
@@ -110,11 +117,6 @@ These GitHub repositories provide supplementary resources for Rush Stack:
 | [/repo-scripts/doc-plugin-rush-stack](./repo-scripts/doc-plugin-rush-stack/) | API Documenter plugin used with the rushstack.io website |
 | [/repo-scripts/generate-api-docs](./repo-scripts/generate-api-docs/) | Used to generate API docs for the rushstack.io website |
 | [/repo-scripts/repo-toolbox](./repo-scripts/repo-toolbox/) | Used to execute various operations specific to this repo |
-| [/tutorials/heft-node-basic-tutorial](./tutorials/heft-node-basic-tutorial/) | This project illustrates a minimal tutorial Heft project targeting the Node.js runtime |
-| [/tutorials/heft-node-jest-tutorial](./tutorials/heft-node-jest-tutorial/) | Building this project validates that various Jest features work correctly with Heft |
-| [/tutorials/heft-node-rig-tutorial](./tutorials/heft-node-rig-tutorial/) | This project illustrates a minimal tutorial Heft project targeting the Node.js runtime and using a rig package |
-| [/tutorials/heft-webpack-basic-tutorial](./tutorials/heft-webpack-basic-tutorial/) | This project illustrates a minimal tutorial Heft project targeting the web browser runtime |
-| [/tutorials/packlets-tutorial](./tutorials/packlets-tutorial/) | This project illustrates how to use @rushstack/eslint-plugin-packlets |
 <!-- GENERATED PROJECT SUMMARY END -->
 
 ## Contributor Notice
