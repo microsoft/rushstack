@@ -14,6 +14,7 @@ import {
   NewlineKind,
   AlreadyReportedError
 } from '@rushstack/node-core-library';
+import { PrintUtilities } from '@rushstack/terminal';
 
 import { ApprovedPackagesChecker } from '../ApprovedPackagesChecker';
 import { AsyncRecycler } from '../../utilities/AsyncRecycler';
@@ -433,7 +434,7 @@ export abstract class BaseInstallManager {
       console.log();
       console.log(
         colors.yellow(
-          Utilities.wrapWords(
+          PrintUtilities.wrapWords(
             `The ${this.rushConfiguration.shrinkwrapFilePhrase} contains the following issues:`
           )
         )

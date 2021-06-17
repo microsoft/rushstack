@@ -253,7 +253,6 @@ importers:
       '@types/ssri': ~7.1.0
       '@types/strict-uri-encode': 2.0.0
       '@types/tar': 4.0.3
-      '@types/wordwrap': 1.0.0
       '@types/z-schema': 3.16.31
       '@yarnpkg/lockfile': ~1.0.2
       builtin-modules: ~3.1.0
@@ -282,7 +281,6 @@ importers:
       tar: ~5.0.5
       true-case-path: ~2.2.1
       typescript: ~3.9.7
-      wordwrap: ~1.0.0
       z-schema: ~3.18.3
     dependencies:
       '@azure/identity': 1.0.3
@@ -320,7 +318,6 @@ importers:
       strict-uri-encode: 2.0.0
       tar: 5.0.5
       true-case-path: 2.2.1
-      wordwrap: 1.0.0
       z-schema: 3.18.4
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
@@ -343,7 +340,6 @@ importers:
       '@types/ssri': 7.1.0
       '@types/strict-uri-encode': 2.0.0
       '@types/tar': 4.0.3
-      '@types/wordwrap': 1.0.0
       '@types/z-schema': 3.16.31
       jest: 25.4.0
       typescript: 3.9.9
@@ -1243,15 +1239,19 @@ importers:
       '@rushstack/node-core-library': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
+      '@types/wordwrap': ~1.0.0
       colors: ~1.2.1
+      wordwrap: ~1.0.0
     dependencies:
       '@rushstack/node-core-library': link:../node-core-library
       '@types/node': 10.17.13
+      wordwrap: 1.0.0
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
+      '@types/wordwrap': 1.0.0
       colors: 1.2.5
 
   ../../libraries/tree-pattern:

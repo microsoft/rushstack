@@ -15,6 +15,7 @@ import {
   Terminal,
   Text
 } from '@rushstack/node-core-library';
+import { PrintUtilities } from '@rushstack/terminal';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { Utilities } from '../../utilities/Utilities';
@@ -83,7 +84,7 @@ export class SetupPackageRegistry {
       return;
     }
 
-    this._terminal.writeLine(Utilities.wrapWords(message));
+    this._terminal.writeLine(PrintUtilities.wrapWords(message));
     this._terminal.writeLine();
   }
 

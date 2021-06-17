@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Terminal } from '@rushstack/node-core-library';
+import { PrintUtilities } from '@rushstack/terminal';
 import {
   BlobClient,
   BlobServiceClient,
@@ -17,7 +18,6 @@ import { DeviceCodeCredential, DeviceCodeInfo } from '@azure/identity';
 import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { CredentialCache, ICredentialCacheEntry } from '../CredentialCache';
 import { RushConstants } from '../RushConstants';
-import { Utilities } from '../../utilities/Utilities';
 import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -316,7 +316,7 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
       'organizations',
       DeveloperSignOnClientId,
       (deviceCodeInfo: DeviceCodeInfo) => {
-        Utilities.printMessageInBox(deviceCodeInfo.message, terminal);
+        PrintUtilities.printMessageInBox(deviceCodeInfo.message, terminal);
       },
       { authorityHost: authorityHost }
     );
