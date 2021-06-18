@@ -47,6 +47,8 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
   public readonly pluginName: string = PLUGIN_NAME;
   public readonly optionsSchema: JsonSchema = JsonSchema.fromFile(PLUGIN_SCHEMA_PATH);
 
+  private static _ownPackageFolder: string = path.resolve(__dirname, '..');
+
   /**
    * Returns the loader for the `config/api-extractor-task.json` config file.
    */
@@ -80,8 +82,33 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     // that we provide to Jest. Resolve if we modified since paths containing <rootDir> should be absolute.
     const nodeResolveMetadata: IJsonPathMetadata = {
       preresolve: (jsonPath: string) => {
-        const newJsonPath: string = jsonPath.replace(/<rootDir>/g, buildFolder);
-        return jsonPath === newJsonPath ? jsonPath : path.resolve(newJsonPath);
+        // Compare with replaceRootDirInPath() from here:
+        // https://github.com/facebook/jest/blob/5f4dd187d89070d07617444186684c20d9213031/packages/jest-config/src/utils.ts#L58
+        const ROOTDIR_TOKEN: string = '<rootDir>';
+
+        // Example:  <rootDir>/path/to/file.js
+        if (jsonPath.startsWith(ROOTDIR_TOKEN)) {
+          const restOfPath: string = path.normalize('./' + jsonPath.substr(ROOTDIR_TOKEN.length));
+          return path.resolve(buildFolder, restOfPath);
+        }
+
+        // The normal PathResolutionMethod.NodeResolve will generally not be able to find @rushstack/heft-jest-plugin
+        // from a project that is using a rig.  Since it is important, and it is our own package, we resolve it
+        // manually as a special case.
+        const PLUGIN_PACKAGE_NAME: string = '@rushstack/heft-jest-plugin';
+
+        // Example:  @rushstack/heft-jest-plugin
+        if (jsonPath === PLUGIN_PACKAGE_NAME) {
+          return JestPlugin._ownPackageFolder;
+        }
+
+        // Example:  @rushstack/heft-jest-plugin/path/to/file.js
+        if (jsonPath.startsWith(PLUGIN_PACKAGE_NAME)) {
+          const restOfPath: string = path.normalize('./' + jsonPath.substr(PLUGIN_PACKAGE_NAME.length));
+          return path.join(JestPlugin._ownPackageFolder, restOfPath);
+        }
+
+        return jsonPath;
       },
       pathResolutionMethod: PathResolutionMethod.NodeResolve
     };
@@ -114,7 +141,8 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
         '$.resolver': nodeResolveMetadata,
         '$.runner': nodeResolveMetadata,
         '$.snapshotResolver': nodeResolveMetadata,
-        '$.testEnvironment': nodeResolveMetadata,
+        // This is a name like "jsdom" that gets mapped into a package name like "jest-environment-jsdom"
+        // '$.testEnvironment': string
         '$.testResultsProcessor': nodeResolveMetadata,
         '$.testRunner': nodeResolveMetadata,
         '$.testSequencer': nodeResolveMetadata,

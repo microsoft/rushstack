@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-jest-plugin",
+      "comment": "Fix a regression where \"testEnvironment\" did not resolve correctly (GitHub #2745)",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}
