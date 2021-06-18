@@ -1,25 +1,40 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ICommandLineStringListDefinition } from './CommandLineDefinition';
-import { CommandLineParameterWithArgument, CommandLineParameterKind } from './BaseClasses';
+import { ICommandLineChoiceListDefinition } from './CommandLineDefinition';
+import { CommandLineParameter, CommandLineParameterKind } from './BaseClasses';
 import { EnvironmentVariableParser } from './EnvironmentVariableParser';
 
 /**
- * The data type returned by {@link CommandLineParameterProvider.defineStringListParameter}.
+ * The data type returned by {@link CommandLineParameterProvider.defineChoiceListParameter}.
  * @public
  */
-export class CommandLineStringListParameter extends CommandLineParameterWithArgument {
+export class CommandLineChoiceListParameter extends CommandLineParameter {
+  /** {@inheritDoc ICommandLineChoiceListDefinition.alternatives} */
+  public readonly alternatives: ReadonlyArray<string>;
+
   private _values: string[] = [];
 
+  /** {@inheritDoc ICommandLineChoiceListDefinition.completions} */
+  public readonly completions: (() => Promise<string[]>) | undefined;
+
   /** @internal */
-  public constructor(definition: ICommandLineStringListDefinition) {
+  public constructor(definition: ICommandLineChoiceListDefinition) {
     super(definition);
+
+    if (definition.alternatives.length < 1) {
+      throw new Error(
+        `When defining a choice list parameter, the alternatives list must contain at least one value.`
+      );
+    }
+
+    this.alternatives = definition.alternatives;
+    this.completions = definition.completions;
   }
 
   /** {@inheritDoc CommandLineParameter.kind} */
   public get kind(): CommandLineParameterKind {
-    return CommandLineParameterKind.StringList;
+    return CommandLineParameterKind.ChoiceList;
   }
 
   /**
@@ -42,22 +57,30 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
       return;
     }
 
-    // If an environment variable exists, attempt to parse it as a list
     if (this.environmentVariable !== undefined) {
       const values: string[] | undefined = EnvironmentVariableParser.parseAsList(this.environmentVariable);
       if (values) {
+        for (const value of values) {
+          if (this.alternatives.indexOf(value) < 0) {
+            const choices: string = '"' + this.alternatives.join('", "') + '"';
+            throw new Error(
+              `Invalid value "${value}" for the environment variable` +
+                ` ${this.environmentVariable}.  Valid choices are: ${choices}`
+            );
+          }
+        }
         this._values = values;
         return;
       }
     }
 
-    // (No default value for string lists)
+    // (No default value for choice lists)
 
     this._values = [];
   }
 
   /**
-   * Returns the string arguments for a string list parameter that was parsed from the command line.
+   * Returns the string arguments for a choice list parameter that was parsed from the command line.
    *
    * @remarks
    * The array will be empty if the command-line has not been parsed yet,

@@ -3,11 +3,13 @@
 
 import * as argparse from 'argparse';
 import {
+  ICommandLineChoiceDefinition,
+  ICommandLineChoiceListDefinition,
+  ICommandLineIntegerDefinition,
+  ICommandLineIntegerListDefinition,
   ICommandLineFlagDefinition,
   ICommandLineStringDefinition,
   ICommandLineStringListDefinition,
-  ICommandLineIntegerDefinition,
-  ICommandLineChoiceDefinition,
   ICommandLineRemainderDefinition
 } from '../parameters/CommandLineDefinition';
 import {
@@ -15,11 +17,13 @@ import {
   CommandLineParameterWithArgument,
   CommandLineParameterKind
 } from '../parameters/BaseClasses';
+import { CommandLineChoiceParameter } from '../parameters/CommandLineChoiceParameter';
+import { CommandLineChoiceListParameter } from '../parameters/CommandLineChoiceListParameter';
+import { CommandLineIntegerParameter } from '../parameters/CommandLineIntegerParameter';
+import { CommandLineIntegerListParameter } from '../parameters/CommandLineIntegerListParameter';
 import { CommandLineFlagParameter } from '../parameters/CommandLineFlagParameter';
 import { CommandLineStringParameter } from '../parameters/CommandLineStringParameter';
 import { CommandLineStringListParameter } from '../parameters/CommandLineStringListParameter';
-import { CommandLineIntegerParameter } from '../parameters/CommandLineIntegerParameter';
-import { CommandLineChoiceParameter } from '../parameters/CommandLineChoiceParameter';
 import { CommandLineRemainder } from '../parameters/CommandLineRemainder';
 
 /**
@@ -93,6 +97,34 @@ export abstract class CommandLineParameterProvider {
   }
 
   /**
+   * Defines a command-line parameter whose value must be a string from a fixed set of
+   * allowable choices (similar to an enum). The parameter can be specified multiple times to
+   * build a list.
+   *
+   * @remarks
+   * Example of a choice list parameter:
+   * ```
+   * example-tool --allow-color red --allow-color green
+   * ```
+   */
+  public defineChoiceListParameter(
+    definition: ICommandLineChoiceListDefinition
+  ): CommandLineChoiceListParameter {
+    const parameter: CommandLineChoiceListParameter = new CommandLineChoiceListParameter(definition);
+    this._defineParameter(parameter);
+    return parameter;
+  }
+
+  /**
+   * Returns the CommandLineChoiceListParameter with the specified long name.
+   * @remarks
+   * This method throws an exception if the parameter is not defined.
+   */
+  public getChoiceListParameter(parameterLongName: string): CommandLineChoiceListParameter {
+    return this._getParameter(parameterLongName, CommandLineParameterKind.ChoiceList);
+  }
+
+  /**
    * Defines a command-line switch whose boolean value is true if the switch is provided,
    * and false otherwise.
    *
@@ -141,6 +173,32 @@ export abstract class CommandLineParameterProvider {
     return this._getParameter(parameterLongName, CommandLineParameterKind.Integer);
   }
 
+  /**
+   * Defines a command-line parameter whose argument is an integer. The parameter can be specified
+   * multiple times to build a list.
+   *
+   * @remarks
+   * Example usage of an integer list parameter:
+   * ```
+   * example-tool --avoid 4 --avoid 13
+   * ```
+   */
+  public defineIntegerListParameter(
+    definition: ICommandLineIntegerListDefinition
+  ): CommandLineIntegerListParameter {
+    const parameter: CommandLineIntegerListParameter = new CommandLineIntegerListParameter(definition);
+    this._defineParameter(parameter);
+    return parameter;
+  }
+
+  /**
+   * Returns the CommandLineIntegerParameter with the specified long name.
+   * @remarks
+   * This method throws an exception if the parameter is not defined.
+   */
+  public getIntegerListParameter(parameterLongName: string): CommandLineIntegerListParameter {
+    return this._getParameter(parameterLongName, CommandLineParameterKind.IntegerList);
+  }
   /**
    * Defines a command-line parameter whose argument is a single text string.
    *
@@ -316,15 +374,26 @@ export abstract class CommandLineParameterProvider {
     };
 
     switch (parameter.kind) {
-      case CommandLineParameterKind.Choice:
+      case CommandLineParameterKind.Choice: {
         const choiceParameter: CommandLineChoiceParameter = parameter as CommandLineChoiceParameter;
         argparseOptions.choices = choiceParameter.alternatives as string[];
         break;
+      }
+      case CommandLineParameterKind.ChoiceList: {
+        const choiceParameter: CommandLineChoiceListParameter = parameter as CommandLineChoiceListParameter;
+        argparseOptions.choices = choiceParameter.alternatives as string[];
+        argparseOptions.action = 'append';
+        break;
+      }
       case CommandLineParameterKind.Flag:
         argparseOptions.action = 'storeTrue';
         break;
       case CommandLineParameterKind.Integer:
         argparseOptions.type = 'int';
+        break;
+      case CommandLineParameterKind.IntegerList:
+        argparseOptions.type = 'int';
+        argparseOptions.action = 'append';
         break;
       case CommandLineParameterKind.String:
         break;

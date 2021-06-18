@@ -39,6 +39,15 @@ function createParser(): DynamicCommandLineParser {
     defaultValue: 'default'
   });
 
+  // Choice List
+  action.defineChoiceListParameter({
+    parameterLongName: '--choice-list',
+    parameterShortName: '-C',
+    description: 'This parameter may be specified multiple times to make a list of choices',
+    alternatives: ['red', 'green', 'blue'],
+    environmentVariable: 'ENV_CHOICE_LIST'
+  });
+
   // Flag
   action.defineFlagParameter({
     parameterLongName: '--flag',
@@ -71,6 +80,15 @@ function createParser(): DynamicCommandLineParser {
     required: true
   });
 
+  // Integer List
+  action.defineIntegerListParameter({
+    parameterLongName: '--integer-list',
+    parameterShortName: '-I',
+    description: 'This parameter may be specified multiple times to make a list of integers',
+    argumentName: 'LIST_ITEM',
+    environmentVariable: 'ENV_INTEGER_LIST'
+  });
+
   // String
   action.defineStringParameter({
     parameterLongName: '--string',
@@ -97,10 +115,11 @@ function createParser(): DynamicCommandLineParser {
   action.defineStringListParameter({
     parameterLongName: '--string-list',
     parameterShortName: '-l',
-    description: 'This parameter be specified multiple times to make a list of strings',
+    description: 'This parameter may be specified multiple times to make a list of strings',
     argumentName: 'LIST_ITEM',
     environmentVariable: 'ENV_STRING_LIST'
   });
+
   return commandLineParser;
 }
 
@@ -150,11 +169,19 @@ describe('CommandLineParameter', () => {
       'do:the-job',
       '--choice',
       'two',
+      '--choice-list',
+      'red',
+      '--choice-list',
+      'blue',
       '--flag',
       '--integer',
       '123',
       '--integer-required',
       '321',
+      '--integer-list',
+      '37',
+      '--integer-list',
+      '-404',
       '--string',
       'hello',
       '--string-list',
@@ -177,6 +204,7 @@ describe('CommandLineParameter', () => {
       action.getChoiceParameter('--choice-with-default'),
       snapshotPropertyNames
     );
+    expectPropertiesToMatchSnapshot(action.getChoiceListParameter('--choice-list'), snapshotPropertyNames);
     expectPropertiesToMatchSnapshot(action.getFlagParameter('--flag'), snapshotPropertyNames);
     expectPropertiesToMatchSnapshot(action.getIntegerParameter('--integer'), snapshotPropertyNames);
     expectPropertiesToMatchSnapshot(
@@ -184,6 +212,7 @@ describe('CommandLineParameter', () => {
       snapshotPropertyNames
     );
     expectPropertiesToMatchSnapshot(action.getIntegerParameter('--integer-required'), snapshotPropertyNames);
+    expectPropertiesToMatchSnapshot(action.getIntegerListParameter('--integer-list'), snapshotPropertyNames);
     expectPropertiesToMatchSnapshot(action.getStringParameter('--string'), snapshotPropertyNames);
     expectPropertiesToMatchSnapshot(
       action.getStringParameter('--string-with-default'),
@@ -218,6 +247,7 @@ describe('CommandLineParameter', () => {
       action.getChoiceParameter('--choice-with-default'),
       snapshotPropertyNames
     );
+    expectPropertiesToMatchSnapshot(action.getChoiceListParameter('--choice-list'), snapshotPropertyNames);
     expectPropertiesToMatchSnapshot(action.getFlagParameter('--flag'), snapshotPropertyNames);
     expectPropertiesToMatchSnapshot(action.getIntegerParameter('--integer'), snapshotPropertyNames);
     expectPropertiesToMatchSnapshot(
@@ -225,6 +255,7 @@ describe('CommandLineParameter', () => {
       snapshotPropertyNames
     );
     expectPropertiesToMatchSnapshot(action.getIntegerParameter('--integer-required'), snapshotPropertyNames);
+    expectPropertiesToMatchSnapshot(action.getIntegerListParameter('--integer-list'), snapshotPropertyNames);
     expectPropertiesToMatchSnapshot(action.getStringParameter('--string'), snapshotPropertyNames);
     expectPropertiesToMatchSnapshot(
       action.getStringParameter('--string-with-default'),
@@ -255,10 +286,12 @@ describe('CommandLineParameter', () => {
 
     process.env.ENV_CHOICE = 'one';
     process.env.ENV_CHOICE2 = 'two';
+    process.env.ENV_CHOICE_LIST = ' [ "red", "green" ] ';
     process.env.ENV_FLAG = '1';
     process.env.ENV_INTEGER = '111';
     process.env.ENV_INTEGER2 = '222';
     process.env.ENV_INTEGER_REQUIRED = '333';
+    process.env.ENV_INTEGER_LIST = ' [ 1 , 2 , 3 ] ';
     process.env.ENV_STRING = 'Hello, world!';
     process.env.ENV_STRING2 = 'Hello, world!';
     process.env.ENV_STRING_LIST = 'simple text';
@@ -298,5 +331,57 @@ describe('CommandLineParameter', () => {
       parameter.appendToArgList(copiedArgs);
     }
     expect(copiedArgs).toMatchSnapshot();
+  });
+
+  describe('choice list', () => {
+    function createHelloWorldParser(): CommandLineParser {
+      const commandLineParser: CommandLineParser = new DynamicCommandLineParser({
+        toolFilename: 'example',
+        toolDescription: 'An example project'
+      });
+      const action: DynamicCommandLineAction = new DynamicCommandLineAction({
+        actionName: 'hello-world',
+        summary: 'Hello World',
+        documentation: 'best program'
+      });
+      commandLineParser.addAction(action);
+
+      action.defineChoiceListParameter({
+        parameterLongName: '--color',
+        parameterShortName: '-c',
+        description: 'Your favorite colors',
+        alternatives: ['purple', 'yellow', 'pizza'],
+        environmentVariable: 'ENV_COLOR'
+      });
+
+      return commandLineParser;
+    }
+
+    it('raises an error if env var value is not valid json', () => {
+      const commandLineParser: CommandLineParser = createHelloWorldParser();
+      const args: string[] = ['hello-world'];
+      process.env.ENV_COLOR = '[u';
+
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      expect(commandLineParser.executeWithoutErrorHandling(args)).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    it('raises an error if env var value is json containing non-scalars', () => {
+      const commandLineParser: CommandLineParser = createHelloWorldParser();
+      const args: string[] = ['hello-world'];
+      process.env.ENV_COLOR = '[{}]';
+
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      expect(commandLineParser.executeWithoutErrorHandling(args)).rejects.toThrowErrorMatchingSnapshot();
+    });
+
+    it('raises an error if env var value is not a valid choice', () => {
+      const commandLineParser: CommandLineParser = createHelloWorldParser();
+      const args: string[] = ['hello-world'];
+      process.env.ENV_COLOR = 'oblong';
+
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      expect(commandLineParser.executeWithoutErrorHandling(args)).rejects.toThrowErrorMatchingSnapshot();
+    });
   });
 });
