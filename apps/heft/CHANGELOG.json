@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.33.1",
+      "tag": "@rushstack/heft_v0.33.1",
+      "date": "Fri, 18 Jun 2021 06:23:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a regression where Heft sometimes failed with \"No tests found, exiting with code 1\""
+          }
+        ]
+      }
+    },
+    {
       "version": "0.33.0",
       "tag": "@rushstack/heft_v0.33.0",
       "date": "Wed, 16 Jun 2021 15:07:24 GMT",

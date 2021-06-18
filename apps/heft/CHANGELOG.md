@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 16 Jun 2021 15:07:24 GMT and should not be manually modified.
+This log was last generated on Fri, 18 Jun 2021 06:23:05 GMT and should not be manually modified.
+
+## 0.33.1
+Fri, 18 Jun 2021 06:23:05 GMT
+
+### Patches
+
+- Fix a regression where Heft sometimes failed with "No tests found, exiting with code 1"
 
 ## 0.33.0
 Wed, 16 Jun 2021 15:07:24 GMT
