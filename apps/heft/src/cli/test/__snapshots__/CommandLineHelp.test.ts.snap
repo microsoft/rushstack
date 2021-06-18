@@ -93,10 +93,9 @@ exports[`CommandLineHelp prints the help for each action: test 1`] = `
                  [--typescript-max-write-parallelism PARALLEILSM]
                  [--max-old-space-size SIZE] [--watch] [--clean] [--no-test]
                  [--no-build] [-u] [--find-related-tests SOURCE_FILE]
-                 [--pass-with-no-tests] [--silent] [-t REGEXP]
-                 [--test-path-pattern REGEXP] [--test-timeout-ms INTEGER]
-                 [--detect-open-handles] [--debug-heft-reporter]
-                 [--max-workers COUNT_OR_PERCENTAGE]
+                 [--silent] [-t REGEXP] [--test-path-pattern REGEXP]
+                 [--test-timeout-ms INTEGER] [--detect-open-handles]
+                 [--debug-heft-reporter] [--max-workers COUNT_OR_PERCENTAGE]
                  
 
 Optional arguments:
@@ -124,9 +123,6 @@ Optional arguments:
                         Find and run the tests that cover a space separated 
                         list of source files that were passed in as arguments.
                          This corresponds to the \\"--findRelatedTests\\" 
-                        parameter in Jest's documentation.
-  --pass-with-no-tests  Allow the test suite to pass when no test files are 
-                        found. This corresponds to the \\"--passWithNoTests\\" 
                         parameter in Jest's documentation.
   --silent              Prevent tests from printing messages through the 
                         console. This corresponds to the \\"--silent\\" parameter 

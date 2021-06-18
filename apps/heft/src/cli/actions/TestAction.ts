@@ -18,7 +18,10 @@ export class TestAction extends BuildAction {
   private _noBuildFlag!: CommandLineFlagParameter;
   private _updateSnapshotsFlag!: CommandLineFlagParameter;
   private _findRelatedTests!: CommandLineStringListParameter;
+  /*
+  // Temporary workaround for https://github.com/microsoft/rushstack/issues/2759
   private _passWithNoTests!: CommandLineFlagParameter;
+  */
   private _silent!: CommandLineFlagParameter;
   private _testNamePattern!: CommandLineStringParameter;
   private _testPathPattern!: CommandLineStringListParameter;
@@ -65,14 +68,15 @@ export class TestAction extends BuildAction {
         ' were passed in as arguments.' +
         ' This corresponds to the "--findRelatedTests" parameter in Jest\'s documentation.'
     });
-
+    /*
+    // Temporary workaround for https://github.com/microsoft/rushstack/issues/2759
     this._passWithNoTests = this.defineFlagParameter({
       parameterLongName: '--pass-with-no-tests',
       description:
         'Allow the test suite to pass when no test files are found.' +
         ' This corresponds to the "--passWithNoTests" parameter in Jest\'s documentation.'
     });
-
+    */
     this._silent = this.defineFlagParameter({
       parameterLongName: '--silent',
       description:
@@ -171,7 +175,8 @@ export class TestAction extends BuildAction {
         updateSnapshots: this._updateSnapshotsFlag.value,
 
         findRelatedTests: this._findRelatedTests.values,
-        passWithNoTests: this._passWithNoTests.value,
+        // Temporary workaround for https://github.com/microsoft/rushstack/issues/2759
+        passWithNoTests: true, // this._passWithNoTests.value,
         silent: this._silent.value,
         testNamePattern: this._testNamePattern.value,
         testPathPattern: this._testPathPattern.values,
