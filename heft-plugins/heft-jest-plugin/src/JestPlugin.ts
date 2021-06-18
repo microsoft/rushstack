@@ -114,7 +114,8 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
         '$.resolver': nodeResolveMetadata,
         '$.runner': nodeResolveMetadata,
         '$.snapshotResolver': nodeResolveMetadata,
-        '$.testEnvironment': nodeResolveMetadata,
+        // This is a name like "jsdom" that gets mapped into a package name like "jest-environment-jsdom"
+        // '$.testEnvironment': string
         '$.testResultsProcessor': nodeResolveMetadata,
         '$.testRunner': nodeResolveMetadata,
         '$.testSequencer': nodeResolveMetadata,
