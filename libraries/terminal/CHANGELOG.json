@@ -2,6 +2,18 @@
   "name": "@rushstack/terminal",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/terminal_v0.2.0",
+      "date": "Fri, 18 Jun 2021 00:08:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Export console printing utilities from the PrintUtility class."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.96",
       "tag": "@rushstack/terminal_v0.1.96",
       "date": "Wed, 16 Jun 2021 18:53:52 GMT",
