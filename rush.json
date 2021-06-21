@@ -687,7 +687,7 @@
       "projectFolder": "heft-plugins/heft-jest-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig"]
+      "cyclicDependencyProjects": ["@rushstack/heft-jest-plugin"]
     },
     {
       "packageName": "@rushstack/heft-webpack4-plugin",
