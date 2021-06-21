@@ -15,7 +15,7 @@
     "start": "heft test --clean --watch"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.33.0"
+    "@rushstack/heft": "^0.33.1"
   },
   "dependencies": {
     "@jest/core": "~25.4.0",
@@ -29,7 +29,7 @@
   "devDependencies": {
     "@jest/types": "~25.4.0",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.32.0",
+    "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "1.0.31",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
