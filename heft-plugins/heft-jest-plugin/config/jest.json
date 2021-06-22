@@ -17,6 +17,9 @@
   "testMatch": ["<rootDir>/src/**/*.test.{ts,tsx}"],
   "testPathIgnorePatterns": ["/node_modules/"],
 
+  "//": "Use Heft Jest cache directory",
+  "cacheDirectory": "<rootDir>/.heft/build-cache/jest-cache",
+
   "//": "Code coverage tracking is disabled by default; set this to true to enable it",
   "collectCoverage": false,
 
