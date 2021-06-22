@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Terminal, Colors, InternalError, Text, IColorableSequence } from '@rushstack/node-core-library';
 import {
   Reporter,
   Test,
@@ -12,6 +11,14 @@ import {
   ReporterOnStartOptions,
   Config
 } from '@jest/reporters';
+import {
+  Terminal,
+  Colors,
+  InternalError,
+  Text,
+  IColorableSequence,
+  ConsoleTerminalProvider
+} from '@rushstack/node-core-library';
 
 import type { HeftConfiguration } from '@rushstack/heft';
 
@@ -37,9 +44,14 @@ export default class HeftJestReporter implements Reporter {
   private _debugMode: boolean;
 
   public constructor(jestConfig: Config.GlobalConfig, options: IHeftJestReporterOptions) {
-    this._terminal = options.heftConfiguration.globalTerminal;
-    this._buildFolder = options.heftConfiguration.buildFolder;
-    this._debugMode = options.debugMode;
+    this._terminal =
+      options?.heftConfiguration?.globalTerminal ||
+      new Terminal(new ConsoleTerminalProvider({ verboseEnabled: jestConfig.verbose || false }));
+
+    // If we don't have the build folder, assume it's the rootDir
+    this._buildFolder = options?.heftConfiguration?.buildFolder || jestConfig.rootDir;
+    // Default to debug so that all Jest messages that would normally be written are written
+    this._debugMode = options?.debugMode || true;
   }
 
   public async onTestStart(test: Test): Promise<void> {

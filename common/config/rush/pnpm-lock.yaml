@@ -987,12 +987,12 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-config-file': workspace:*
-      '@rushstack/heft-jest-plugin': ^0.1.4
       '@rushstack/node-core-library': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/lodash': 4.14.116
       '@types/node': 10.17.13
       eslint: ~7.12.1
+      jest: ~25.4.0
       jest-snapshot: ~25.4.0
       lodash: ~4.17.15
       typescript: ~3.9.7
@@ -1009,11 +1009,11 @@ importers:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@rushstack/eslint-config': link:../../stack/eslint-config
       '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-jest-plugin': 0.1.4
       '@types/heft-jest': 1.0.1
       '@types/lodash': 4.14.116
       '@types/node': 10.17.13
       eslint: 7.12.1
+      jest: 25.4.0
       typescript: 3.9.9
 
   ../../heft-plugins/heft-webpack4-plugin:
@@ -2741,25 +2741,6 @@ packages:
       '@jest/reporters': 25.4.0
       '@jest/transform': 25.4.0
       '@rushstack/heft': 0.32.0
-      '@rushstack/heft-config-file': 0.5.0
-      '@rushstack/node-core-library': 3.39.0
-      jest-snapshot: 25.4.0
-      lodash: 4.17.21
-    transitivePeerDependencies:
-      - bufferutil
-      - canvas
-      - supports-color
-      - utf-8-validate
-    dev: true
-
-  /@rushstack/heft-jest-plugin/0.1.4:
-    resolution: {integrity: sha512-gNm5b6LAbgQQssr1pa24QH5c2PmwuwTOmL1cxinJYynNctn8W387fU9igDwcqcjnPdwCDp8OC8L+chs2m028Zg==}
-    peerDependencies:
-      '@rushstack/heft': ^0.33.0
-    dependencies:
-      '@jest/core': 25.4.0
-      '@jest/reporters': 25.4.0
-      '@jest/transform': 25.4.0
       '@rushstack/heft-config-file': 0.5.0
       '@rushstack/node-core-library': 3.39.0
       jest-snapshot: 25.4.0

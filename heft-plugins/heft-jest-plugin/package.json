@@ -11,7 +11,7 @@
   "types": "dist/heft-jest-plugin.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "heft test --clean",
+    "build": "heft build --clean && jest --rootDir=./ --config=./config/jest.json",
     "start": "heft test --clean --watch"
   },
   "peerDependencies": {
@@ -31,11 +31,11 @@
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-jest-plugin": "^0.1.4",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
     "@types/node": "10.17.13",
     "eslint": "~7.12.1",
+    "jest": "~25.4.0",
     "typescript": "~3.9.7"
   }
 }
