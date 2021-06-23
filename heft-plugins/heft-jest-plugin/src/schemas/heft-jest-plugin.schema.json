@@ -11,6 +11,11 @@
       "title": "Disable Configuration Module Resolution",
       "description": "If set to true, modules specified in the Jest configuration will be resolved using Jest default (rootDir-relative) resolution. Otherwise, modules will be resolved using Node module resolution.",
       "type": "boolean"
+    },
+    "configurationPath": {
+      "title": "Configuration Path",
+      "description": "If provided, the Jest configuration will be loaded from this project-relative path. Otherwise, the configuration will be loaded from 'config/jest.config.json'.",
+      "type": "string"
     }
   }
 }

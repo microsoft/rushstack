@@ -27,8 +27,29 @@
 
       /**
        * Glob patterns to be deleted. The paths are resolved relative to the project folder.
+       * NOTE: Manually clean jest-cache since we are not using the JestPlugin directly
        */
-      "globsToDelete": ["dist", "lib", "temp"]
+      "globsToDelete": ["dist", "lib", "temp", ".heft/build-cache/jest-cache"]
+    },
+
+    /**
+     * Run the script to setup Jest tests in the post-compile hook
+     */
+    {
+      "actionKind": "runScript",
+      "heftEvent": "post-build",
+      "actionId": "setupJestPlugin",
+      "scriptPath": "../lib/scripts/setupJestPlugin.js"
+    },
+
+    /**
+     * Run the script to run Jest tests in the test run hook
+     */
+    {
+      "actionKind": "runScript",
+      "heftEvent": "test",
+      "actionId": "runJestPlugin",
+      "scriptPath": "../lib/scripts/runJestPlugin.js"
     }
   ]
 }
