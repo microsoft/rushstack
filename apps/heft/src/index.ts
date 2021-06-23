@@ -58,3 +58,5 @@ export {
   IHeftLifecycle as _IHeftLifecycle,
   HeftLifecycleHooks as _HeftLifecycleHooks
 } from './pluginFramework/HeftLifecycle';
+
+export { IRunScriptOptions } from './plugins/RunScriptPlugin';

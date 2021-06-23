@@ -32,7 +32,7 @@ export enum HeftEvent {
 
 export interface IHeftConfigurationJsonEventActionBase {
   actionKind: string;
-  heftEvent: 'clean' | 'pre-compile' | 'compile' | 'bundle' | 'post-build';
+  heftEvent: 'clean' | 'pre-compile' | 'compile' | 'bundle' | 'post-build' | 'test';
   actionId: string;
 }
 
@@ -146,7 +146,7 @@ export class CoreConfigFiles {
             pathResolutionMethod: PathResolutionMethod.NodeResolve
           },
           '$.eventActions.[?(@.actionKind==="runScript")].scriptPath': {
-            pathResolutionMethod: PathResolutionMethod.NodeResolve
+            pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
           }
         }
       });
@@ -334,6 +334,9 @@ export class CoreConfigFiles {
 
       case 'post-build':
         return HeftEvent.postBuild;
+
+      case 'test':
+        return HeftEvent.test;
 
       default:
         throw new Error(

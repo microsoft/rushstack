@@ -18,6 +18,7 @@ import { CopyFilesPlugin } from '../plugins/CopyFilesPlugin';
 import { TypeScriptPlugin } from '../plugins/TypeScriptPlugin/TypeScriptPlugin';
 import { DeleteGlobsPlugin } from '../plugins/DeleteGlobsPlugin';
 import { CopyStaticAssetsPlugin } from '../plugins/CopyStaticAssetsPlugin';
+import { RunScriptPlugin } from '../plugins/RunScriptPlugin';
 import { ApiExtractorPlugin } from '../plugins/ApiExtractorPlugin/ApiExtractorPlugin';
 import { SassTypingsPlugin } from '../plugins/SassTypingsPlugin/SassTypingsPlugin';
 import { ProjectValidatorPlugin } from '../plugins/ProjectValidatorPlugin';
@@ -50,6 +51,7 @@ export class PluginManager {
     this._applyPlugin(new CopyStaticAssetsPlugin());
     this._applyPlugin(new CopyFilesPlugin());
     this._applyPlugin(new DeleteGlobsPlugin());
+    this._applyPlugin(new RunScriptPlugin());
     this._applyPlugin(new ApiExtractorPlugin(taskPackageResolver));
     this._applyPlugin(new SassTypingsPlugin());
     this._applyPlugin(new ProjectValidatorPlugin());

@@ -299,6 +299,20 @@ export interface IPostBuildSubstage extends IBuildSubstage<BuildSubstageHooksBas
 export interface IPreCompileSubstage extends IBuildSubstage<BuildSubstageHooksBase, {}> {
 }
 
+// @beta
+export interface IRunScriptOptions<TStageProperties> {
+    // (undocumented)
+    debugMode: boolean;
+    // (undocumented)
+    heftConfiguration: HeftConfiguration;
+    // (undocumented)
+    properties: TStageProperties;
+    // (undocumented)
+    scopedLogger: ScopedLogger;
+    // (undocumented)
+    scriptOptions: Record<string, any>;
+}
+
 // @public (undocumented)
 export interface IScopedLogger {
     emitError(error: Error): void;
