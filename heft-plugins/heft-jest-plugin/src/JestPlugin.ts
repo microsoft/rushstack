@@ -8,13 +8,15 @@ import * as path from 'path';
 import { mergeWith, isObject } from 'lodash';
 import type {
   ICleanStageContext,
+  IBuildStageContext,
+  IBuildStageProperties,
+  IPostBuildSubstage,
   ITestStageContext,
+  ITestStageProperties,
   IHeftPlugin,
   HeftConfiguration,
   HeftSession,
-  ScopedLogger,
-  IBuildStageContext,
-  ICompileSubstage
+  ScopedLogger
 } from '@rushstack/heft';
 import { getVersion, runCLI } from '@jest/core';
 import { Config } from '@jest/types';
@@ -34,8 +36,9 @@ const PLUGIN_NAME: string = 'JestPlugin';
 const PLUGIN_SCHEMA_PATH: string = `${__dirname}/schemas/heft-jest-plugin.schema.json`;
 const JEST_CONFIGURATION_LOCATION: string = `config/jest.config.json`;
 
-interface IJestPluginOptions {
+export interface IJestPluginOptions {
   disableConfigurationModuleResolution?: boolean;
+  configurationPath?: string;
 }
 
 export interface IHeftJestConfiguration extends Config.InitialOptions {}
@@ -50,9 +53,157 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
   private static _ownPackageFolder: string = path.resolve(__dirname, '..');
 
   /**
+   * Runs required setup before running Jest through the JestPlugin.
+   */
+  public static async _setupJestAsync(
+    scopedLogger: ScopedLogger,
+    heftConfiguration: HeftConfiguration,
+    debugMode: boolean,
+    buildStageProperties: IBuildStageProperties,
+    options?: IJestPluginOptions
+  ): Promise<void> {
+    // Write the data file used by jest-build-transform
+    await HeftJestDataFile.saveForProjectAsync(heftConfiguration.buildFolder, {
+      emitFolderNameForTests: buildStageProperties.emitFolderNameForTests || 'lib',
+      extensionForTests: buildStageProperties.emitExtensionForTests || '.js',
+      skipTimestampCheck: !buildStageProperties.watchMode,
+      // If the property isn't defined, assume it's a not a TypeScript project since this
+      // value should be set by the Heft TypeScriptPlugin during the compile hook
+      isTypeScriptProject: !!buildStageProperties.isTypeScriptProject
+    });
+    scopedLogger.terminal.writeLine('Wrote heft-jest-config.json file');
+  }
+
+  /**
+   * Runs Jest using the provided options.
+   */
+  public static async _runJestAsync(
+    scopedLogger: ScopedLogger,
+    heftConfiguration: HeftConfiguration,
+    debugMode: boolean,
+    testStageProperties: ITestStageProperties,
+    options?: IJestPluginOptions
+  ): Promise<void> {
+    const terminal: Terminal = scopedLogger.terminal;
+    terminal.writeLine(`Using Jest version ${getVersion()}`);
+
+    const buildFolder: string = heftConfiguration.buildFolder;
+    const projectRelativeFilePath: string = options?.configurationPath ?? JEST_CONFIGURATION_LOCATION;
+    await HeftJestDataFile.loadAndValidateForProjectAsync(buildFolder);
+
+    let jestConfig: IHeftJestConfiguration;
+    if (options?.disableConfigurationModuleResolution) {
+      // Module resolution explicitly disabled, use the config as-is
+      const jestConfigPath: string = path.join(buildFolder, projectRelativeFilePath);
+      if (!(await FileSystem.existsAsync(jestConfigPath))) {
+        scopedLogger.emitError(new Error(`Expected to find jest config file at "${jestConfigPath}".`));
+        return;
+      }
+      jestConfig = await JsonFile.loadAsync(jestConfigPath);
+    } else {
+      // Load in and resolve the config file using the "extends" field
+      jestConfig = await JestPlugin._getJestConfigurationLoader(
+        buildFolder,
+        projectRelativeFilePath
+      ).loadConfigurationFileForProjectAsync(
+        terminal,
+        heftConfiguration.buildFolder,
+        heftConfiguration.rigConfig
+      );
+      if (jestConfig.preset) {
+        throw new Error(
+          'The provided jest.config.json specifies a "preset" property while using resolved modules. ' +
+            'You must either remove all "preset" values from your Jest configuration, use the "extends" ' +
+            'property, or set the "disableConfigurationModuleResolution" option to "true" on the Jest ' +
+            'plugin in heft.json'
+        );
+      }
+    }
+
+    const jestArgv: Config.Argv = {
+      watch: testStageProperties.watchMode,
+
+      // In debug mode, avoid forking separate processes that are difficult to debug
+      runInBand: debugMode,
+      debug: debugMode,
+      detectOpenHandles: !!testStageProperties.detectOpenHandles,
+
+      cacheDirectory: JestPlugin._getJestCacheFolder(heftConfiguration),
+      updateSnapshot: testStageProperties.updateSnapshots,
+
+      listTests: false,
+      rootDir: buildFolder,
+
+      silent: testStageProperties.silent,
+      testNamePattern: testStageProperties.testNamePattern,
+      testPathPattern: testStageProperties.testPathPattern
+        ? [...testStageProperties.testPathPattern]
+        : undefined,
+      testTimeout: testStageProperties.testTimeout,
+      maxWorkers: testStageProperties.maxWorkers,
+
+      passWithNoTests: testStageProperties.passWithNoTests,
+
+      $0: process.argv0,
+      _: []
+    };
+
+    if (!testStageProperties.debugHeftReporter) {
+      // Extract the reporters and transform to include the Heft reporter by default
+      jestArgv.reporters = JestPlugin._extractHeftJestReporters(
+        scopedLogger,
+        heftConfiguration,
+        debugMode,
+        jestConfig,
+        projectRelativeFilePath
+      );
+    } else {
+      scopedLogger.emitWarning(
+        new Error('The "--debug-heft-reporter" parameter was specified; disabling HeftJestReporter')
+      );
+    }
+
+    if (testStageProperties.findRelatedTests && testStageProperties.findRelatedTests.length > 0) {
+      // Pass test names as the command line remainder
+      jestArgv.findRelatedTests = true;
+      jestArgv._ = [...testStageProperties.findRelatedTests];
+    }
+
+    // Stringify the config and pass it into Jest directly
+    jestArgv.config = JSON.stringify(jestConfig);
+
+    const {
+      // Config.Argv is weakly typed.  After updating the jestArgv object, it's a good idea to inspect "globalConfig"
+      // in the debugger to validate that your changes are being applied as expected.
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      globalConfig,
+      results: jestResults
+    } = await runCLI(jestArgv, [buildFolder]);
+
+    if (jestResults.numFailedTests > 0) {
+      scopedLogger.emitError(
+        new Error(
+          `${jestResults.numFailedTests} Jest test${jestResults.numFailedTests > 1 ? 's' : ''} failed`
+        )
+      );
+    } else if (jestResults.numFailedTestSuites > 0) {
+      scopedLogger.emitError(
+        new Error(
+          `${jestResults.numFailedTestSuites} Jest test suite${
+            jestResults.numFailedTestSuites > 1 ? 's' : ''
+          } failed`
+        )
+      );
+    }
+  }
+
+  /**
    * Returns the loader for the `config/api-extractor-task.json` config file.
    */
-  public static getJestConfigurationLoader(buildFolder: string): ConfigurationFile<IHeftJestConfiguration> {
+  public static _getJestConfigurationLoader(
+    buildFolder: string,
+    projectRelativeFilePath: string
+  ): ConfigurationFile<IHeftJestConfiguration> {
     // Bypass Jest configuration validation
     const schemaPath: string = `${__dirname}/schemas/anything.schema.json`;
 
@@ -114,7 +265,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     };
 
     return new ConfigurationFile<IHeftJestConfiguration>({
-      projectRelativeFilePath: 'config/jest.config.json',
+      projectRelativeFilePath: projectRelativeFilePath,
       jsonSchemaPath: schemaPath,
       propertyInheritance: {
         moduleNameMapper: {
@@ -163,184 +314,27 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     });
   }
 
-  public apply(
-    heftSession: HeftSession,
+  private static _extractHeftJestReporters(
+    scopedLogger: ScopedLogger,
     heftConfiguration: HeftConfiguration,
-    options?: IJestPluginOptions
-  ): void {
-    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-      build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
-        compile.hooks.afterCompile.tapPromise(PLUGIN_NAME, async () => {
-          // Write the data file used by jest-build-transform
-          await HeftJestDataFile.saveForProjectAsync(heftConfiguration.buildFolder, {
-            emitFolderNameForTests: build.properties.emitFolderNameForTests || 'lib',
-            extensionForTests: build.properties.emitExtensionForTests || '.js',
-            skipTimestampCheck: !build.properties.watchMode,
-            // If the property isn't defined, assume it's a not a TypeScript project since this
-            // value should be set by the Heft TypeScriptPlugin during the compile hook
-            isTypeScriptProject: !!build.properties.isTypeScriptProject
-          });
-        });
-      });
-    });
-
-    heftSession.hooks.test.tap(PLUGIN_NAME, (test: ITestStageContext) => {
-      test.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-        await this._runJestAsync(heftSession, heftConfiguration, test, options);
-      });
-    });
-
-    heftSession.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanStageContext) => {
-      this._includeJestCacheWhenCleaning(heftConfiguration, clean);
-    });
-  }
-
-  private async _runJestAsync(
-    heftSession: HeftSession,
-    heftConfiguration: HeftConfiguration,
-    test: ITestStageContext,
-    options?: IJestPluginOptions
-  ): Promise<void> {
-    const jestLogger: ScopedLogger = heftSession.requestScopedLogger('jest');
-    const jestTerminal: Terminal = jestLogger.terminal;
-    jestTerminal.writeLine(`Using Jest version ${getVersion()}`);
-
-    const buildFolder: string = heftConfiguration.buildFolder;
-    await HeftJestDataFile.loadAndValidateForProjectAsync(buildFolder);
-
-    let jestConfig: IHeftJestConfiguration;
-    if (options?.disableConfigurationModuleResolution) {
-      // Module resolution explicitly disabled, use the config as-is
-      const jestConfigPath: string = this._getJestConfigPath(heftConfiguration);
-      if (!(await FileSystem.existsAsync(jestConfigPath))) {
-        jestLogger.emitError(new Error(`Expected to find jest config file at "${jestConfigPath}".`));
-        return;
-      }
-      jestConfig = await JsonFile.loadAsync(jestConfigPath);
-    } else {
-      // Load in and resolve the config file using the "extends" field
-      jestConfig = await JestPlugin.getJestConfigurationLoader(
-        heftConfiguration.buildFolder
-      ).loadConfigurationFileForProjectAsync(
-        jestTerminal,
-        heftConfiguration.buildFolder,
-        heftConfiguration.rigConfig
-      );
-      if (jestConfig.preset) {
-        throw new Error(
-          'The provided jest.config.json specifies a "preset" property while using resolved modules. ' +
-            'You must either remove all "preset" values from your Jest configuration, use the "extends" ' +
-            'property, or set the "disableConfigurationModuleResolution" option to "true" on the Jest ' +
-            'plugin in heft.json'
-        );
-      }
-    }
-
-    const jestArgv: Config.Argv = {
-      watch: test.properties.watchMode,
-
-      // In debug mode, avoid forking separate processes that are difficult to debug
-      runInBand: heftSession.debugMode,
-      debug: heftSession.debugMode,
-      detectOpenHandles: !!test.properties.detectOpenHandles,
-
-      cacheDirectory: this._getJestCacheFolder(heftConfiguration),
-      updateSnapshot: test.properties.updateSnapshots,
-
-      listTests: false,
-      rootDir: buildFolder,
-
-      silent: test.properties.silent,
-      testNamePattern: test.properties.testNamePattern,
-      testPathPattern: test.properties.testPathPattern ? [...test.properties.testPathPattern] : undefined,
-      testTimeout: test.properties.testTimeout,
-      maxWorkers: test.properties.maxWorkers,
-
-      passWithNoTests: test.properties.passWithNoTests,
-
-      $0: process.argv0,
-      _: []
-    };
-
-    if (!test.properties.debugHeftReporter) {
-      // Extract the reporters and transform to include the Heft reporter by default
-      jestArgv.reporters = this._extractHeftJestReporters(
-        jestConfig,
-        heftSession,
-        heftConfiguration,
-        jestLogger
-      );
-    } else {
-      jestLogger.emitWarning(
-        new Error('The "--debug-heft-reporter" parameter was specified; disabling HeftJestReporter')
-      );
-    }
-
-    if (test.properties.findRelatedTests && test.properties.findRelatedTests.length > 0) {
-      // Pass test names as the command line remainder
-      jestArgv.findRelatedTests = true;
-      jestArgv._ = [...test.properties.findRelatedTests];
-    }
-
-    // Stringify the config and pass it into Jest directly
-    jestArgv.config = JSON.stringify(jestConfig);
-
-    const {
-      // Config.Argv is weakly typed.  After updating the jestArgv object, it's a good idea to inspect "globalConfig"
-      // in the debugger to validate that your changes are being applied as expected.
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      globalConfig,
-      results: jestResults
-    } = await runCLI(jestArgv, [buildFolder]);
-
-    if (jestResults.numFailedTests > 0) {
-      jestLogger.emitError(
-        new Error(
-          `${jestResults.numFailedTests} Jest test${jestResults.numFailedTests > 1 ? 's' : ''} failed`
-        )
-      );
-    } else if (jestResults.numFailedTestSuites > 0) {
-      jestLogger.emitError(
-        new Error(
-          `${jestResults.numFailedTestSuites} Jest test suite${
-            jestResults.numFailedTestSuites > 1 ? 's' : ''
-          } failed`
-        )
-      );
-    }
-  }
-
-  private _includeJestCacheWhenCleaning(
-    heftConfiguration: HeftConfiguration,
-    clean: ICleanStageContext
-  ): void {
-    // Jest's cache is not reliable.  For example, if a Jest configuration change causes files to be
-    // transformed differently, the cache will continue to return the old results unless we manually
-    // clean it.  Thus we need to ensure that "heft clean" always cleans the Jest cache.
-    const cacheFolder: string = this._getJestCacheFolder(heftConfiguration);
-    clean.properties.pathsToDelete.add(cacheFolder);
-  }
-
-  private _extractHeftJestReporters(
+    debugMode: boolean,
     config: IHeftJestConfiguration,
-    heftSession: HeftSession,
-    heftConfiguration: HeftConfiguration,
-    jestLogger: ScopedLogger
+    projectRelativeFilePath: string
   ): JestReporterConfig[] {
     let isUsingHeftReporter: boolean = false;
 
+    const reporterOptions: IHeftJestReporterOptions = {
+      heftConfiguration,
+      debugMode
+    };
     if (Array.isArray(config.reporters)) {
       // Harvest all the array indices that need to modified before altering the array
-      const heftReporterIndices: number[] = this._findIndexes(config.reporters, 'default');
+      const heftReporterIndices: number[] = JestPlugin._findIndexes(config.reporters, 'default');
 
       // Replace 'default' reporter with the heft reporter
       // This may clobber default reporters options
       if (heftReporterIndices.length > 0) {
-        const heftReporter: Config.ReporterConfig = this._getHeftJestReporterConfig(
-          heftSession,
-          heftConfiguration
-        );
-
+        const heftReporter: Config.ReporterConfig = JestPlugin._getHeftJestReporterConfig(reporterOptions);
         for (const index of heftReporterIndices) {
           config.reporters[index] = heftReporter;
         }
@@ -348,21 +342,21 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       }
     } else if (typeof config.reporters === 'undefined' || config.reporters === null) {
       // Otherwise if no reporters are specified install only the heft reporter
-      config.reporters = [this._getHeftJestReporterConfig(heftSession, heftConfiguration)];
+      config.reporters = [JestPlugin._getHeftJestReporterConfig(reporterOptions)];
       isUsingHeftReporter = true;
     } else {
       // Making a note if Heft cannot understand the reporter entry in Jest config
       // Not making this an error or warning because it does not warrant blocking a dev or CI test pass
       // If the Jest config is truly wrong Jest itself is in a better position to report what is wrong with the config
-      jestLogger.terminal.writeVerboseLine(
-        `The 'reporters' entry in Jest config '${JEST_CONFIGURATION_LOCATION}' is in an unexpected format. Was ` +
+      scopedLogger.terminal.writeVerboseLine(
+        `The 'reporters' entry in Jest config '${projectRelativeFilePath}' is in an unexpected format. Was ` +
           'expecting an array of reporters'
       );
     }
 
     if (!isUsingHeftReporter) {
-      jestLogger.terminal.writeVerboseLine(
-        `HeftJestReporter was not specified in Jest config '${JEST_CONFIGURATION_LOCATION}'. Consider adding a ` +
+      scopedLogger.terminal.writeVerboseLine(
+        `HeftJestReporter was not specified in Jest config '${projectRelativeFilePath}'. Consider adding a ` +
           "'default' entry in the reporters array."
       );
     }
@@ -373,33 +367,22 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     return reporters;
   }
 
-  private _getHeftJestReporterConfig(
-    heftSession: HeftSession,
-    heftConfiguration: HeftConfiguration
+  /**
+   * Returns the reporter config using the HeftJestReporter and the provided options.
+   */
+  private static _getHeftJestReporterConfig(
+    reporterOptions: IHeftJestReporterOptions
   ): Config.ReporterConfig {
-    const reporterOptions: IHeftJestReporterOptions = {
-      heftConfiguration,
-      debugMode: heftSession.debugMode
-    };
-
     return [
       `${__dirname}/HeftJestReporter.js`,
       reporterOptions as Record<keyof IHeftJestReporterOptions, unknown>
     ];
   }
 
-  private _getJestConfigPath(heftConfiguration: HeftConfiguration): string {
-    return path.join(heftConfiguration.buildFolder, JEST_CONFIGURATION_LOCATION);
-  }
-
-  private _getJestCacheFolder(heftConfiguration: HeftConfiguration): string {
-    return path.join(heftConfiguration.buildCacheFolder, 'jest-cache');
-  }
-
   /**
    * Finds the indices of jest reporters with a given name
    */
-  private _findIndexes(items: JestReporterConfig[], search: string): number[] {
+  private static _findIndexes(items: JestReporterConfig[], search: string): number[] {
     const result: number[] = [];
 
     for (let index: number = 0; index < items.length; index++) {
@@ -414,5 +397,64 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     }
 
     return result;
+  }
+
+  /**
+   * Add the jest-cache folder to the list of paths to delete when running the "clean" stage.
+   */
+  private static _includeJestCacheWhenCleaning(
+    heftConfiguration: HeftConfiguration,
+    clean: ICleanStageContext
+  ): void {
+    // Jest's cache is not reliable.  For example, if a Jest configuration change causes files to be
+    // transformed differently, the cache will continue to return the old results unless we manually
+    // clean it.  Thus we need to ensure that "heft clean" always cleans the Jest cache.
+    const cacheFolder: string = JestPlugin._getJestCacheFolder(heftConfiguration);
+    clean.properties.pathsToDelete.add(cacheFolder);
+  }
+
+  /**
+   * Returns the absolute path to the jest-cache directory.
+   */
+  private static _getJestCacheFolder(heftConfiguration: HeftConfiguration): string {
+    return path.join(heftConfiguration.buildCacheFolder, 'jest-cache');
+  }
+
+  public apply(
+    heftSession: HeftSession,
+    heftConfiguration: HeftConfiguration,
+    options?: IJestPluginOptions
+  ): void {
+    const scopedLogger: ScopedLogger = heftSession.requestScopedLogger('jest');
+
+    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
+      build.hooks.postBuild.tap(PLUGIN_NAME, (postBuild: IPostBuildSubstage) => {
+        postBuild.hooks.run.tapPromise(PLUGIN_NAME, async () => {
+          await JestPlugin._setupJestAsync(
+            scopedLogger,
+            heftConfiguration,
+            heftSession.debugMode,
+            build.properties,
+            options
+          );
+        });
+      });
+    });
+
+    heftSession.hooks.test.tap(PLUGIN_NAME, (test: ITestStageContext) => {
+      test.hooks.run.tapPromise(PLUGIN_NAME, async () => {
+        await JestPlugin._runJestAsync(
+          scopedLogger,
+          heftConfiguration,
+          heftSession.debugMode,
+          test.properties,
+          options
+        );
+      });
+    });
+
+    heftSession.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanStageContext) => {
+      JestPlugin._includeJestCacheWhenCleaning(heftConfiguration, clean);
+    });
   }
 }
