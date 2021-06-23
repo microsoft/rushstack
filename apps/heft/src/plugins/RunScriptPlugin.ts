@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { TapOptions } from 'tapable';
 
 import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
@@ -140,10 +139,16 @@ export class RunScriptPlugin implements IHeftPlugin {
       Constants.maxParallelism,
       async (runScriptEventAction) => {
         // The scriptPath property should be fully resolved since it is included in the resolution logic used by
-        // HeftConfiguration. We don't need to resolve it any further, though we will provide a usable logger
-        // name by taking only the basename from the resolved path.
+        // HeftConfiguration
         const resolvedModulePath: string = runScriptEventAction.scriptPath;
-        const scriptLogger: ScopedLogger = heftSession.requestScopedLogger(path.basename(resolvedModulePath));
+
+        // Use the HeftEvent.actionId field for the logger since this should identify the HeftEvent that the
+        // script is sourced from. This is also a bit more user-friendly and customizable than simply using
+        // the script name for the logger. We will also prefix the logger name with the plugin name to clarify
+        // that the output is coming from the RunScriptPlugin.
+        const scriptLogger: ScopedLogger = heftSession.requestScopedLogger(
+          `${logger.loggerName}:${runScriptEventAction.actionId}`
+        );
 
         const runScript: IRunScript<TStageProperties> = require(resolvedModulePath);
         if (runScript.run && runScript.runAsync) {
