@@ -168,7 +168,7 @@
 
                   "scriptPath": {
                     "type": "string",
-                    "description": "Path to the script that will be run, relative to the project root. Package paths may also be used for scripts defined in dependency packages.",
+                    "description": "Path to the script that will be run, relative to the project root.",
                     "items": {
                       "type": "string",
                       "pattern": "[^\\\\]"

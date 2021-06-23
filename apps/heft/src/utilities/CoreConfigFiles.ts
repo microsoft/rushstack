@@ -146,7 +146,7 @@ export class CoreConfigFiles {
             pathResolutionMethod: PathResolutionMethod.NodeResolve
           },
           '$.eventActions.[?(@.actionKind==="runScript")].scriptPath': {
-            pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToConfigurationFile
+            pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
           }
         }
       });

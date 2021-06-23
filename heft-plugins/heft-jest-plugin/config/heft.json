@@ -39,7 +39,7 @@
       "actionKind": "runScript",
       "heftEvent": "post-build",
       "actionId": "setupJestPlugin",
-      "scriptPath": "../lib/scripts/setupJestPlugin.js"
+      "scriptPath": "./lib/scripts/setupJestPlugin.js"
     },
 
     /**
@@ -49,7 +49,7 @@
       "actionKind": "runScript",
       "heftEvent": "test",
       "actionId": "runJestPlugin",
-      "scriptPath": "../lib/scripts/runJestPlugin.js"
+      "scriptPath": "./lib/scripts/runJestPlugin.js"
     }
   ]
 }
