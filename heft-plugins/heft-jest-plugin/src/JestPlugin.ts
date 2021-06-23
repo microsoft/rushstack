@@ -71,7 +71,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       // value should be set by the Heft TypeScriptPlugin during the compile hook
       isTypeScriptProject: !!buildStageProperties.isTypeScriptProject
     });
-    scopedLogger.terminal.writeLine('Wrote heft-jest-config.json file');
+    scopedLogger.terminal.writeVerboseLine('Wrote heft-jest-data.json file');
   }
 
   /**
