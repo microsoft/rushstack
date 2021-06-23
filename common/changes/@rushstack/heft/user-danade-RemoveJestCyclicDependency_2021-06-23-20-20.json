@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Add RunScriptPlugin to allow for running custom scripts specified in \\\"heft.json\\\". Specified as a \\\"runScript\\\" event in the \\\"heftEvents\\\" field, paths to scripts are resolved relative to the configuration file they are specified in.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "3473356+D4N14L@users.noreply.github.com"
+}
