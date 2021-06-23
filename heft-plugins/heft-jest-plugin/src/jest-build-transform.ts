@@ -44,16 +44,8 @@ export function process(
   if (heftJestDataFile === undefined) {
     // Read heft-jest-data.json, which is created by the JestPlugin.  It tells us
     // which emitted output folder to use for Jest.
-    try {
-      heftJestDataFile = HeftJestDataFile.loadForProject(jestOptions.rootDir);
-      dataFileJsonCache.set(jestOptions.rootDir, heftJestDataFile);
-    } catch (e) {
-      // Swallow error when this file does not exist. This can happen if the build transform is being
-      // used directly by Jest without running through the heft-jest-plugin.
-      if (!FileSystem.isFileDoesNotExistError(e)) {
-        throw e;
-      }
-    }
+    heftJestDataFile = HeftJestDataFile.loadForProject(jestOptions.rootDir);
+    dataFileJsonCache.set(jestOptions.rootDir, heftJestDataFile);
   }
 
   // Is the input file under the "src" folder?
@@ -67,19 +59,17 @@ export function process(
     const srcRelativeFolderPath: string = path.relative(srcFolder, parsedFilename.dir);
 
     // Example: /path/to/project/lib/folder1/folder2/Example.js
-    // Default to 'lib' folder if no heftJestDataFile was loaded
-    // Default to '.js' extension if no heftJestDataFile was loaded
     const libFilePath: string = path.join(
       jestOptions.rootDir,
-      heftJestDataFile?.emitFolderNameForTests || 'lib',
+      heftJestDataFile.emitFolderNameForTests,
       srcRelativeFolderPath,
-      `${parsedFilename.name}${heftJestDataFile?.extensionForTests || '.js'}`
+      `${parsedFilename.name}${heftJestDataFile.extensionForTests}`
     );
 
     const startOfLoopMs: number = new Date().getTime();
     let stalled: boolean = false;
 
-    if (!(heftJestDataFile?.skipTimestampCheck ?? !jestOptions.watch)) {
+    if (!heftJestDataFile.skipTimestampCheck) {
       for (;;) {
         let srcFileStatistics: FileSystemStats;
         try {
