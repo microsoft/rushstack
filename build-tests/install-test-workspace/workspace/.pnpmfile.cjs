@@ -76,14 +76,15 @@ function afterAllResolved(lockfile, context) {
     }
   }
 
-  // Delete the resolution.integrity hash for tarball paths to avoid shrinkwrap churn.
+  // Set the resolution.integrity hash for tarball paths to a constant value to avoid shrinkwrap churn.
   // PNPM seems to ignore these hashes during installation.
   for (const packagePath of Object.keys(lockfile.packages || {})) {
     if (packagePath.startsWith('file:')) {
       const packageInfo = lockfile.packages[packagePath];
       const resolution = packageInfo.resolution;
       if (resolution && resolution.integrity && resolution.tarball) {
-        delete resolution.integrity;
+        resolution.integrity =
+          'sha512-EfB5OHNYp1F4px/LI/FEnGylop7nOqkQ1LRzCM0KccA2U8tvV8w01KBv37LbO7nW4H+YhKyo2LcJhRwjjV17QQ==';
       }
     }
   }

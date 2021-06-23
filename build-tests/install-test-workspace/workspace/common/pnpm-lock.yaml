@@ -2688,7 +2688,7 @@ packages:
     dev: true
 
   file:../temp/tarballs/rushstack-eslint-config-2.3.4.tgz_eslint@7.12.1+typescript@4.3.2:
-    resolution: {tarball: file:../temp/tarballs/rushstack-eslint-config-2.3.4.tgz}
+    resolution: {integrity: sha512-EfB5OHNYp1F4px/LI/FEnGylop7nOqkQ1LRzCM0KccA2U8tvV8w01KBv37LbO7nW4H+YhKyo2LcJhRwjjV17QQ==, tarball: file:../temp/tarballs/rushstack-eslint-config-2.3.4.tgz}
     id: file:../temp/tarballs/rushstack-eslint-config-2.3.4.tgz
     name: '@rushstack/eslint-config'
     version: 2.3.4
@@ -2714,13 +2714,13 @@ packages:
     dev: true
 
   file:../temp/tarballs/rushstack-eslint-patch-1.0.6.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-eslint-patch-1.0.6.tgz}
+    resolution: {integrity: sha512-EfB5OHNYp1F4px/LI/FEnGylop7nOqkQ1LRzCM0KccA2U8tvV8w01KBv37LbO7nW4H+YhKyo2LcJhRwjjV17QQ==, tarball: file:../temp/tarballs/rushstack-eslint-patch-1.0.6.tgz}
     name: '@rushstack/eslint-patch'
     version: 1.0.6
     dev: true
 
   file:../temp/tarballs/rushstack-eslint-plugin-0.7.3.tgz_eslint@7.12.1+typescript@4.3.2:
-    resolution: {tarball: file:../temp/tarballs/rushstack-eslint-plugin-0.7.3.tgz}
+    resolution: {integrity: sha512-EfB5OHNYp1F4px/LI/FEnGylop7nOqkQ1LRzCM0KccA2U8tvV8w01KBv37LbO7nW4H+YhKyo2LcJhRwjjV17QQ==, tarball: file:../temp/tarballs/rushstack-eslint-plugin-0.7.3.tgz}
     id: file:../temp/tarballs/rushstack-eslint-plugin-0.7.3.tgz
     name: '@rushstack/eslint-plugin'
     version: 0.7.3
@@ -2736,7 +2736,7 @@ packages:
     dev: true
 
   file:../temp/tarballs/rushstack-eslint-plugin-packlets-0.2.2.tgz_eslint@7.12.1+typescript@4.3.2:
-    resolution: {tarball: file:../temp/tarballs/rushstack-eslint-plugin-packlets-0.2.2.tgz}
+    resolution: {integrity: sha512-EfB5OHNYp1F4px/LI/FEnGylop7nOqkQ1LRzCM0KccA2U8tvV8w01KBv37LbO7nW4H+YhKyo2LcJhRwjjV17QQ==, tarball: file:../temp/tarballs/rushstack-eslint-plugin-packlets-0.2.2.tgz}
     id: file:../temp/tarballs/rushstack-eslint-plugin-packlets-0.2.2.tgz
     name: '@rushstack/eslint-plugin-packlets'
     version: 0.2.2
@@ -2752,7 +2752,7 @@ packages:
     dev: true
 
   file:../temp/tarballs/rushstack-eslint-plugin-security-0.1.4.tgz_eslint@7.12.1+typescript@4.3.2:
-    resolution: {tarball: file:../temp/tarballs/rushstack-eslint-plugin-security-0.1.4.tgz}
+    resolution: {integrity: sha512-EfB5OHNYp1F4px/LI/FEnGylop7nOqkQ1LRzCM0KccA2U8tvV8w01KBv37LbO7nW4H+YhKyo2LcJhRwjjV17QQ==, tarball: file:../temp/tarballs/rushstack-eslint-plugin-security-0.1.4.tgz}
     id: file:../temp/tarballs/rushstack-eslint-plugin-security-0.1.4.tgz
     name: '@rushstack/eslint-plugin-security'
     version: 0.1.4
@@ -2768,7 +2768,7 @@ packages:
     dev: true
 
   file:../temp/tarballs/rushstack-heft-0.33.1.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.33.1.tgz}
+    resolution: {integrity: sha512-EfB5OHNYp1F4px/LI/FEnGylop7nOqkQ1LRzCM0KccA2U8tvV8w01KBv37LbO7nW4H+YhKyo2LcJhRwjjV17QQ==, tarball: file:../temp/tarballs/rushstack-heft-0.33.1.tgz}
     name: '@rushstack/heft'
     version: 0.33.1
     engines: {node: '>=10.13.0'}
@@ -2795,7 +2795,7 @@ packages:
     dev: true
 
   file:../temp/tarballs/rushstack-heft-config-file-0.5.0.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-config-file-0.5.0.tgz}
+    resolution: {integrity: sha512-EfB5OHNYp1F4px/LI/FEnGylop7nOqkQ1LRzCM0KccA2U8tvV8w01KBv37LbO7nW4H+YhKyo2LcJhRwjjV17QQ==, tarball: file:../temp/tarballs/rushstack-heft-config-file-0.5.0.tgz}
     name: '@rushstack/heft-config-file'
     version: 0.5.0
     engines: {node: '>=10.13.0'}
@@ -2806,7 +2806,7 @@ packages:
     dev: true
 
   file:../temp/tarballs/rushstack-node-core-library-3.39.0.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-node-core-library-3.39.0.tgz}
+    resolution: {integrity: sha512-EfB5OHNYp1F4px/LI/FEnGylop7nOqkQ1LRzCM0KccA2U8tvV8w01KBv37LbO7nW4H+YhKyo2LcJhRwjjV17QQ==, tarball: file:../temp/tarballs/rushstack-node-core-library-3.39.0.tgz}
     name: '@rushstack/node-core-library'
     version: 3.39.0
     dependencies:
@@ -2822,7 +2822,7 @@ packages:
     dev: true
 
   file:../temp/tarballs/rushstack-rig-package-0.2.12.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-rig-package-0.2.12.tgz}
+    resolution: {integrity: sha512-EfB5OHNYp1F4px/LI/FEnGylop7nOqkQ1LRzCM0KccA2U8tvV8w01KBv37LbO7nW4H+YhKyo2LcJhRwjjV17QQ==, tarball: file:../temp/tarballs/rushstack-rig-package-0.2.12.tgz}
     name: '@rushstack/rig-package'
     version: 0.2.12
     dependencies:
@@ -2831,13 +2831,13 @@ packages:
     dev: true
 
   file:../temp/tarballs/rushstack-tree-pattern-0.2.1.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-tree-pattern-0.2.1.tgz}
+    resolution: {integrity: sha512-EfB5OHNYp1F4px/LI/FEnGylop7nOqkQ1LRzCM0KccA2U8tvV8w01KBv37LbO7nW4H+YhKyo2LcJhRwjjV17QQ==, tarball: file:../temp/tarballs/rushstack-tree-pattern-0.2.1.tgz}
     name: '@rushstack/tree-pattern'
     version: 0.2.1
     dev: true
 
   file:../temp/tarballs/rushstack-ts-command-line-4.7.10.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-ts-command-line-4.7.10.tgz}
+    resolution: {integrity: sha512-EfB5OHNYp1F4px/LI/FEnGylop7nOqkQ1LRzCM0KccA2U8tvV8w01KBv37LbO7nW4H+YhKyo2LcJhRwjjV17QQ==, tarball: file:../temp/tarballs/rushstack-ts-command-line-4.7.10.tgz}
     name: '@rushstack/ts-command-line'
     version: 4.7.10
     dependencies:
@@ -2848,7 +2848,7 @@ packages:
     dev: true
 
   file:../temp/tarballs/rushstack-typings-generator-0.3.7.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-typings-generator-0.3.7.tgz}
+    resolution: {integrity: sha512-EfB5OHNYp1F4px/LI/FEnGylop7nOqkQ1LRzCM0KccA2U8tvV8w01KBv37LbO7nW4H+YhKyo2LcJhRwjjV17QQ==, tarball: file:../temp/tarballs/rushstack-typings-generator-0.3.7.tgz}
     name: '@rushstack/typings-generator'
     version: 0.3.7
     dependencies:
