@@ -33,8 +33,6 @@ const HEFT_STAGE_TAP: TapOptions<'promise'> = {
 
 /**
  * Interface used by scripts that are run by the RunScriptPlugin.
- *
- * @beta
  */
 interface IRunScript<TStageProperties> {
   run?: (options: IRunScriptOptions<TStageProperties>) => void;
