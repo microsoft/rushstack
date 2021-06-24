@@ -33,7 +33,7 @@ With packlets, our folders would be reorganized as follows:
 - `src/packlets/reports/*.ts` - the report engine
 - `src/*.ts` - other arbitrary files such as startup code and the main application
 
-The [packlets-tutorial](https://github.com/microsoft/rushstack/tree/master/tutorials/packlets-tutorial) sample project illustrates this layout in full detail.
+The [packlets-tutorial](https://github.com/microsoft/rushstack-samples/tree/main/other/packlets-tutorial) sample project illustrates this layout in full detail.
 
 The basic design can be summarized in 5 rules:
 
