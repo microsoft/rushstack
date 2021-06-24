@@ -150,6 +150,23 @@ export class SelectionParameterSet {
    * If no parameters are specified, returns all projects in the Rush config file.
    */
   public getSelectedProjects(): Set<RushConfigurationProject> {
+    // Check if any of the selection parameters have a value specified on the command line
+    const isSelectionSpecified: boolean = [
+      this._onlyProject,
+      this._fromProject,
+      this._fromVersionPolicy,
+      this._toProject,
+      this._toVersionPolicy,
+      this._toExceptProject,
+      this._impactedByProject,
+      this._impactedByExceptProject
+    ].some((param: CommandLineStringListParameter) => param.values.length > 0);
+
+    // If no selection parameters are specified, return everything
+    if (!isSelectionSpecified) {
+      return new Set(this._rushConfiguration.projects);
+    }
+
     // Include exactly these projects (--only)
     const onlyProjects: Iterable<RushConfigurationProject> = this._evaluateProjectParameter(
       this._onlyProject
@@ -189,13 +206,6 @@ export class SelectionParameterSet {
       // Only dependents of these projects, not dependencies
       Selection.expandAllConsumers(impactedByProjects)
     );
-
-    // If no projects selected, select everything.
-    if (selection.size === 0) {
-      for (const project of this._rushConfiguration.projects) {
-        selection.add(project);
-      }
-    }
 
     return selection;
   }
