@@ -166,7 +166,7 @@ if (pnpmLockBeforeContent !== pnpmLockAfterContent) {
     // console.error('  Current copy: ' + pnpmLockAfterPath);
     // console.error('\nPlease commit the updated copy to Git\n');
     // process.exitCode = 1;
-    return;
+    // return;
   } else {
     // Automatically update the copy
     FileSystem.copyFile({
