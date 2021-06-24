@@ -1,34 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { TapOptions } from 'tapable';
-
-import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
+import { HeftEventPluginBase } from '../pluginFramework/HeftEventPluginBase';
+import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import {
   IHeftEventActions,
-  CoreConfigFiles,
-  HeftEvent,
-  IHeftConfigurationRunScriptEventAction
+  IHeftConfigurationRunScriptEventAction,
+  HeftEvent
 } from '../utilities/CoreConfigFiles';
+import { IBuildStageProperties } from '../stages/BuildStage';
+import { ITestStageProperties } from '../stages/TestStage';
 import { Async } from '../utilities/Async';
-import {
-  IBuildStageContext,
-  IBundleSubstage,
-  ICompileSubstage,
-  IPostBuildSubstage,
-  IPreCompileSubstage
-} from '../stages/BuildStage';
-import { ITestStageContext } from '../stages/TestStage';
 import { Constants } from '../utilities/Constants';
-
-const PLUGIN_NAME: string = 'RunScriptPlugin';
-const HEFT_STAGE_TAP: TapOptions<'promise'> = {
-  name: PLUGIN_NAME,
-  stage: Number.MIN_SAFE_INTEGER
-};
 
 /**
  * Interface used by scripts that are run by the RunScriptPlugin.
@@ -51,89 +36,58 @@ export interface IRunScriptOptions<TStageProperties> {
   scriptOptions: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
-export class RunScriptPlugin implements IHeftPlugin {
-  public readonly pluginName: string = PLUGIN_NAME;
+export class RunScriptPlugin extends HeftEventPluginBase<IHeftConfigurationRunScriptEventAction> {
+  public readonly pluginName: string = 'RunScriptPlugin';
+  protected readonly eventActionName: keyof IHeftEventActions = 'runScript';
+  protected readonly loggerName: string = 'run-script';
 
-  public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    const logger: ScopedLogger = heftSession.requestScopedLogger('run-script');
-
-    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-      build.hooks.preCompile.tap(PLUGIN_NAME, (preCompile: IPreCompileSubstage) => {
-        preCompile.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
-          await this._runScriptsForHeftEvent(
-            HeftEvent.preCompile,
-            logger,
-            heftSession,
-            heftConfiguration,
-            build.properties
-          );
-        });
-      });
-
-      build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
-        compile.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
-          await this._runScriptsForHeftEvent(
-            HeftEvent.compile,
-            logger,
-            heftSession,
-            heftConfiguration,
-            build.properties
-          );
-        });
-      });
-
-      build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
-        bundle.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
-          await this._runScriptsForHeftEvent(
-            HeftEvent.bundle,
-            logger,
-            heftSession,
-            heftConfiguration,
-            build.properties
-          );
-        });
-      });
-
-      build.hooks.postBuild.tap(PLUGIN_NAME, (postBuild: IPostBuildSubstage) => {
-        postBuild.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
-          await this._runScriptsForHeftEvent(
-            HeftEvent.postBuild,
-            logger,
-            heftSession,
-            heftConfiguration,
-            build.properties
-          );
-        });
-      });
-    });
-
-    heftSession.hooks.test.tap(PLUGIN_NAME, (test: ITestStageContext) => {
-      test.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
-        await this._runScriptsForHeftEvent(
-          HeftEvent.test,
-          logger,
-          heftSession,
-          heftConfiguration,
-          test.properties
-        );
-      });
-    });
-  }
-
-  private async _runScriptsForHeftEvent<TStageProperties>(
+  /**
+   * @override
+   */
+  protected async handleBuildEventActionsAsync(
     heftEvent: HeftEvent,
+    runScriptEventActions: IHeftConfigurationRunScriptEventAction[],
     logger: ScopedLogger,
     heftSession: HeftSession,
     heftConfiguration: HeftConfiguration,
-    stageProperties: TStageProperties
+    properties: IBuildStageProperties
   ): Promise<void> {
-    const eventActions: IHeftEventActions = await CoreConfigFiles.getConfigConfigFileEventActionsAsync(
-      logger.terminal,
-      heftConfiguration
+    await this._runScriptsForHeftEventActions(
+      runScriptEventActions,
+      logger,
+      heftSession,
+      heftConfiguration,
+      properties
     );
+  }
 
-    const runScriptEventActions: IHeftConfigurationRunScriptEventAction[] =
-      eventActions.runScript.get(heftEvent) || [];
+  /**
+   * @override
+   */
+  protected async handleTestEventActionsAsync(
+    heftEvent: HeftEvent,
+    runScriptEventActions: IHeftConfigurationRunScriptEventAction[],
+    logger: ScopedLogger,
+    heftSession: HeftSession,
+    heftConfiguration: HeftConfiguration,
+    properties: ITestStageProperties
+  ): Promise<void> {
+    await this._runScriptsForHeftEventActions(
+      runScriptEventActions,
+      logger,
+      heftSession,
+      heftConfiguration,
+      properties
+    );
+  }
+
+  private async _runScriptsForHeftEventActions<TStageProperties>(
+    runScriptEventActions: IHeftConfigurationRunScriptEventAction[],
+    logger: ScopedLogger,
+    heftSession: HeftSession,
+    heftConfiguration: HeftConfiguration,
+    properties: TStageProperties
+  ): Promise<void> {
     await Async.forEachLimitAsync(
       runScriptEventActions,
       Constants.maxParallelism,
@@ -164,9 +118,9 @@ export class RunScriptPlugin implements IHeftPlugin {
         const runScriptOptions: IRunScriptOptions<TStageProperties> = {
           scopedLogger: scriptLogger,
           debugMode: heftSession.debugMode,
-          properties: stageProperties,
           scriptOptions: runScriptEventAction.scriptOptions,
-          heftConfiguration
+          heftConfiguration,
+          properties
         };
         if (runScript.run) {
           runScript.run(runScriptOptions);
