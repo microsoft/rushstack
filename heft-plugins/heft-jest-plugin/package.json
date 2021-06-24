@@ -15,7 +15,7 @@
     "start": "heft test --clean --watch"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.33.0"
+    "@rushstack/heft": "^0.33.1"
   },
   "dependencies": {
     "@jest/core": "~25.4.0",
@@ -28,11 +28,13 @@
   },
   "devDependencies": {
     "@jest/types": "~25.4.0",
+    "@microsoft/api-extractor": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.32.0",
-    "@rushstack/heft-node-rig": "1.0.31",
+    "@rushstack/heft": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
-    "@types/node": "10.17.13"
+    "@types/node": "10.17.13",
+    "eslint": "~7.12.1",
+    "typescript": "~3.9.7"
   }
 }

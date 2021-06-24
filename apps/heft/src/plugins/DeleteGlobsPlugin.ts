@@ -4,77 +4,63 @@
 import * as path from 'path';
 import glob from 'glob';
 import { FileSystem, LegacyAdapters } from '@rushstack/node-core-library';
-import { TapOptions } from 'tapable';
 
-import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
+import { HeftEventPluginBase } from '../pluginFramework/HeftEventPluginBase';
+import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { ICleanStageContext } from '../stages/CleanStage';
-import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
-import { IHeftEventActions, CoreConfigFiles, HeftEvent } from '../utilities/CoreConfigFiles';
-import { Async } from '../utilities/Async';
 import {
-  IBuildStageContext,
-  IBundleSubstage,
-  ICompileSubstage,
-  IPostBuildSubstage,
-  IPreCompileSubstage
-} from '../stages/BuildStage';
+  IHeftEventActions,
+  HeftEvent,
+  IHeftConfigurationDeleteGlobsEventAction
+} from '../utilities/CoreConfigFiles';
+import { ICleanStageProperties } from '../stages/CleanStage';
+import { IBuildStageProperties } from '../stages/BuildStage';
+import { Async } from '../utilities/Async';
 import { Constants } from '../utilities/Constants';
 
 const globEscape: (unescaped: string) => string = require('glob-escape'); // No @types/glob-escape package exists
 
-const PLUGIN_NAME: string = 'DeleteGlobsPlugin';
-const HEFT_STAGE_TAP: TapOptions<'promise'> = {
-  name: PLUGIN_NAME,
-  stage: Number.MIN_SAFE_INTEGER
-};
+export class DeleteGlobsPlugin extends HeftEventPluginBase<IHeftConfigurationDeleteGlobsEventAction> {
+  public readonly pluginName: string = 'DeleteGlobsPlugin';
+  protected eventActionName: keyof IHeftEventActions = 'deleteGlobs';
+  protected loggerName: string = 'delete-globs';
 
-export class DeleteGlobsPlugin implements IHeftPlugin {
-  public readonly pluginName: string = PLUGIN_NAME;
-
-  public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    const logger: ScopedLogger = heftSession.requestScopedLogger('delete-globs');
-    heftSession.hooks.clean.tap(PLUGIN_NAME, (clean: ICleanStageContext) => {
-      clean.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
-        await this._runDeleteForHeftEvent(
-          HeftEvent.clean,
-          logger,
-          heftConfiguration,
-          clean.properties.pathsToDelete
-        );
-      });
-    });
-
-    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-      build.hooks.preCompile.tap(PLUGIN_NAME, (preCompile: IPreCompileSubstage) => {
-        preCompile.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
-          await this._runDeleteForHeftEvent(HeftEvent.preCompile, logger, heftConfiguration);
-        });
-      });
-
-      build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
-        compile.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
-          await this._runDeleteForHeftEvent(HeftEvent.compile, logger, heftConfiguration);
-        });
-      });
-
-      build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
-        bundle.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
-          await this._runDeleteForHeftEvent(HeftEvent.bundle, logger, heftConfiguration);
-        });
-      });
-
-      build.hooks.postBuild.tap(PLUGIN_NAME, (postBuild: IPostBuildSubstage) => {
-        postBuild.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
-          await this._runDeleteForHeftEvent(HeftEvent.postBuild, logger, heftConfiguration);
-        });
-      });
-    });
+  /**
+   * @override
+   */
+  protected async handleCleanEventActionsAsync(
+    heftEvent: HeftEvent,
+    heftEventActions: IHeftConfigurationDeleteGlobsEventAction[],
+    logger: ScopedLogger,
+    heftSession: HeftSession,
+    heftConfiguration: HeftConfiguration,
+    properties: ICleanStageProperties
+  ): Promise<void> {
+    await this._runDeleteForHeftEventActions(
+      heftEventActions,
+      logger,
+      heftConfiguration,
+      properties.pathsToDelete
+    );
   }
 
-  private async _runDeleteForHeftEvent(
+  /**
+   * @override
+   */
+  protected async handleBuildEventActionsAsync(
     heftEvent: HeftEvent,
+    heftEventActions: IHeftConfigurationDeleteGlobsEventAction[],
+    logger: ScopedLogger,
+    heftSession: HeftSession,
+    heftConfiguration: HeftConfiguration,
+    properties: IBuildStageProperties
+  ): Promise<void> {
+    await this._runDeleteForHeftEventActions(heftEventActions, logger, heftConfiguration);
+  }
+
+  private async _runDeleteForHeftEventActions(
+    heftEventActions: IHeftConfigurationDeleteGlobsEventAction[],
     logger: ScopedLogger,
     heftConfiguration: HeftConfiguration,
     additionalPathsToDelete?: Set<string>
@@ -82,13 +68,8 @@ export class DeleteGlobsPlugin implements IHeftPlugin {
     let deletedFiles: number = 0;
     let deletedFolders: number = 0;
 
-    const eventActions: IHeftEventActions = await CoreConfigFiles.getConfigConfigFileEventActionsAsync(
-      logger.terminal,
-      heftConfiguration
-    );
-
     const pathsToDelete: Set<string> = new Set<string>(additionalPathsToDelete);
-    for (const deleteGlobsEventAction of eventActions.deleteGlobs.get(heftEvent) || []) {
+    for (const deleteGlobsEventAction of heftEventActions) {
       for (const globPattern of deleteGlobsEventAction.globsToDelete) {
         const resolvedPaths: string[] = await this._resolvePathAsync(
           globPattern,

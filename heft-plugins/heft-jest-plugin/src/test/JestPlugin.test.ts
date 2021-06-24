@@ -19,7 +19,10 @@ describe('JestConfigLoader', () => {
 
   it('resolves preset config modules', async () => {
     const rootDir: string = path.join(__dirname, 'project1');
-    const loader: ConfigurationFile<IHeftJestConfiguration> = JestPlugin.getJestConfigurationLoader(rootDir);
+    const loader: ConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
+      rootDir,
+      'config/jest.config.json'
+    );
     const loadedConfig: IHeftJestConfiguration = await loader.loadConfigurationFileForProjectAsync(
       terminal,
       path.join(__dirname, 'project1')
@@ -68,7 +71,10 @@ describe('JestConfigLoader', () => {
 
   it('resolves preset package modules', async () => {
     const rootDir: string = path.join(__dirname, 'project1');
-    const loader: ConfigurationFile<IHeftJestConfiguration> = JestPlugin.getJestConfigurationLoader(rootDir);
+    const loader: ConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
+      rootDir,
+      'config/jest.config.json'
+    );
     const loadedConfig: IHeftJestConfiguration = await loader.loadConfigurationFileForProjectAsync(
       terminal,
       path.join(__dirname, 'project2')

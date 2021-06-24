@@ -17,22 +17,34 @@ import { ISassConfigurationJson } from '../plugins/SassTypingsPlugin/SassTypings
 import { INodeServicePluginConfiguration } from '../plugins/NodeServicePlugin';
 
 export enum HeftEvent {
+  // Part of the 'clean' stage
   clean = 'clean',
+
+  // Part of the 'build' stage
   preCompile = 'pre-compile',
   compile = 'compile',
   bundle = 'bundle',
-  postBuild = 'post-build'
+  postBuild = 'post-build',
+
+  // Part of the 'test' stage
+  test = 'test'
 }
 
 export interface IHeftConfigurationJsonEventActionBase {
   actionKind: string;
-  heftEvent: 'clean' | 'pre-compile' | 'compile' | 'bundle' | 'post-build';
+  heftEvent: 'clean' | 'pre-compile' | 'compile' | 'bundle' | 'post-build' | 'test';
   actionId: string;
 }
 
 export interface IHeftConfigurationDeleteGlobsEventAction extends IHeftConfigurationJsonEventActionBase {
   actionKind: 'deleteGlobs';
   globsToDelete: string[];
+}
+
+export interface IHeftConfigurationRunScriptEventAction extends IHeftConfigurationJsonEventActionBase {
+  actionKind: 'runScript';
+  scriptPath: string;
+  scriptOptions: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface ISharedCopyConfiguration {
@@ -93,6 +105,7 @@ export interface IHeftConfigurationJson {
 export interface IHeftEventActions {
   copyFiles: Map<HeftEvent, IHeftConfigurationCopyFilesEventAction[]>;
   deleteGlobs: Map<HeftEvent, IHeftConfigurationDeleteGlobsEventAction[]>;
+  runScript: Map<HeftEvent, IHeftConfigurationRunScriptEventAction[]>;
 }
 
 export class CoreConfigFiles {
@@ -131,6 +144,9 @@ export class CoreConfigFiles {
         jsonPathMetadata: {
           '$.heftPlugins.*.plugin': {
             pathResolutionMethod: PathResolutionMethod.NodeResolve
+          },
+          '$.eventActions.[?(@.actionKind==="runScript")].scriptPath': {
+            pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
           }
         }
       });
@@ -158,7 +174,8 @@ export class CoreConfigFiles {
 
       result = {
         copyFiles: new Map<HeftEvent, IHeftConfigurationCopyFilesEventAction[]>(),
-        deleteGlobs: new Map<HeftEvent, IHeftConfigurationDeleteGlobsEventAction[]>()
+        deleteGlobs: new Map<HeftEvent, IHeftConfigurationDeleteGlobsEventAction[]>(),
+        runScript: new Map<HeftEvent, IHeftConfigurationRunScriptEventAction[]>()
       };
       CoreConfigFiles._heftConfigFileEventActionsCache.set(heftConfiguration, result);
 
@@ -176,6 +193,14 @@ export class CoreConfigFiles {
             CoreConfigFiles._addEventActionToMap(
               eventAction as IHeftConfigurationDeleteGlobsEventAction,
               result.deleteGlobs
+            );
+            break;
+          }
+
+          case 'runScript': {
+            CoreConfigFiles._addEventActionToMap(
+              eventAction as IHeftConfigurationRunScriptEventAction,
+              result.runScript
             );
             break;
           }
@@ -309,6 +334,9 @@ export class CoreConfigFiles {
 
       case 'post-build':
         return HeftEvent.postBuild;
+
+      case 'test':
+        return HeftEvent.test;
 
       default:
         throw new Error(
