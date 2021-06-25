@@ -35,6 +35,7 @@
     "@types/lodash": "4.14.116",
     "@types/node": "10.17.13",
     "eslint": "~7.12.1",
+    "jest-environment-node": "~25.4.0",
     "typescript": "~3.9.7"
   }
 }

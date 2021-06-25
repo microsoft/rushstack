@@ -327,6 +327,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jest-environment-node",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jest-snapshot",
       "allowedCategories": [ "libraries" ]
     },

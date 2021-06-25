@@ -992,6 +992,7 @@ importers:
       '@types/lodash': 4.14.116
       '@types/node': 10.17.13
       eslint: ~7.12.1
+      jest-environment-node: ~25.4.0
       jest-snapshot: ~25.4.0
       lodash: ~4.17.15
       typescript: ~3.9.7
@@ -1012,6 +1013,7 @@ importers:
       '@types/lodash': 4.14.116
       '@types/node': 10.17.13
       eslint: 7.12.1
+      jest-environment-node: 25.4.0
       typescript: 3.9.10
 
   ../../heft-plugins/heft-webpack4-plugin:
@@ -7016,6 +7018,18 @@ packages:
       - bufferutil
       - canvas
       - utf-8-validate
+
+  /jest-environment-node/25.4.0:
+    resolution: {integrity: sha512-wryZ18vsxEAKFH7Z74zi/y/SyI1j6UkVZ6QsllBuT/bWlahNfQjLNwFsgh/5u7O957dYFoXj4yfma4n4X6kU9A==}
+    engines: {node: '>= 8.3'}
+    dependencies:
+      '@jest/environment': 25.5.0
+      '@jest/fake-timers': 25.5.0
+      '@jest/types': 25.4.0
+      jest-mock: 25.5.0
+      jest-util: 25.5.0
+      semver: 6.3.0
+    dev: true
 
   /jest-environment-node/25.5.0:
     resolution: {integrity: sha512-iuxK6rQR2En9EID+2k+IBs5fCFd919gVVK5BeND82fYeLWPqvRcFNPKu9+gxTwfB5XwBGBvZ0HFQa+cHtIoslA==}

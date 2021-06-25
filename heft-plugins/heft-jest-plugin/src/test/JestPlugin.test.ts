@@ -36,6 +36,9 @@ describe('JestConfigLoader', () => {
     expect(loadedConfig.setupFiles![0]).toBe(path.join(rootDir, 'a', 'b', 'setupFile2.js'));
     expect(loadedConfig.setupFiles![1]).toBe(path.join(rootDir, 'a', 'b', 'setupFile1.js'));
 
+    // Validate testEnvironment
+    expect(loadedConfig.testEnvironment).toBe(require.resolve('jest-environment-node'));
+
     // Validate reporters
     expect(loadedConfig.reporters?.length).toBe(3);
     expect(loadedConfig.reporters![0]).toBe('default');
@@ -107,5 +110,9 @@ describe('JestConfigLoader', () => {
 
     expect(loadedConfig.setupFiles?.length).toBe(1);
     expect(loadedConfig.setupFiles![0]).toBe(require.resolve('@jest/core'));
+
+    // Also validate that a test environment that we specified did not resolve. Done intentionally to ensure that
+    // Jest itself can attempt to satisfy certain fields
+    expect(loadedConfig.testEnvironment).toBe('jsdom');
   });
 });

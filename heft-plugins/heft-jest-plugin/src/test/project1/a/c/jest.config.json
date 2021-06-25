@@ -5,6 +5,8 @@
 
   "reporters": ["default", "./mockReporter1.js", ["./d/mockReporter2.js", { "key": "value" }]],
 
+  "testEnvironment": "node",
+
   "transform": {
     "\\.(xxx)$": ["../b/mockTransformModule1.js", { "key": "value" }],
     "\\.(yyy)$": ["./mockTransformModule3.js", { "key": "value" }]
