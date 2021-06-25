@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-config",
+      "comment": "Upgrade @typescript-eslint/* to 4.28.0 (Fixes #2389)",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-config",
+  "email": "relm923@users.noreply.github.com"
+}
