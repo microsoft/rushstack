@@ -651,8 +651,8 @@ export class ConfigurationFile<TConfigurationFile> {
       case PathResolutionMethod.custom: {
         if (!metadata.customResolver) {
           throw new Error(
-            `PathResolutionMethod "${PathResolutionMethod[resolutionMethod]}" was provided, but no custom ` +
-              'resolver was found.'
+            `The pathResolutionMethod was set to "${PathResolutionMethod[resolutionMethod]}", but a custom ` +
+              'resolver was not provided.'
           );
         }
         return metadata.customResolver(configurationFilePath, propertyValue);
