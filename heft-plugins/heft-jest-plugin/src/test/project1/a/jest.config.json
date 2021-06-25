@@ -5,5 +5,10 @@
 
   "transform": {
     "\\.(xxx)$": "./b/mockTransformModule2.js"
+  },
+
+  "moduleNameMapper": {
+    "\\.resx$": "<configDir>/some/path/to/overridden/module.js",
+    "^@1js/search-dispatcher/lib/(.+)": "@1js/search-dispatcher/lib-commonjs/$1"
   }
 }

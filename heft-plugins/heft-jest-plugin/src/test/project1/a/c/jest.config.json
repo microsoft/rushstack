@@ -10,6 +10,12 @@
     "\\.(yyy)$": ["./mockTransformModule3.js", { "key": "value" }]
   },
 
+  "moduleNameMapper": {
+    "\\.resx$": "<configDir>/some/path/to/module.js",
+    "\\.jpg$": "<configDir>/some/path/to/module.js",
+    "^!!file-loader": "<packageDir:@rushstack/heft>/some/path/to/module.js"
+  },
+
   "globals": {
     "key1": "value1",
     "key2": ["value2", "value3"],
