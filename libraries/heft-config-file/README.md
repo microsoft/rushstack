@@ -1,7 +1,5 @@
 # @rushstack/heft-config-file
 
-> 🚨 *This is an early preview release. Please report issues!* 🚨
-
 A library for loading config files for use with the [Heft](https://rushstack.io/pages/heft/overview/) build system.
 
 ## Links

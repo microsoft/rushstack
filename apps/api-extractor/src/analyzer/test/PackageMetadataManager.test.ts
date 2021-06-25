@@ -11,9 +11,10 @@ function resolveInTestPackage(testPackageName: string, ...args: string[]): strin
   return path.resolve(__dirname, 'test-data/tsdoc-metadata-path-inference', testPackageName, ...args);
 }
 
-function getPackageMetadata(
-  testPackageName: string
-): { packageFolder: string; packageJson: INodePackageJson } {
+function getPackageMetadata(testPackageName: string): {
+  packageFolder: string;
+  packageJson: INodePackageJson;
+} {
   const packageFolder: string = resolveInTestPackage(testPackageName);
   const packageJson: INodePackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(packageFolder);
   if (!packageJson) {

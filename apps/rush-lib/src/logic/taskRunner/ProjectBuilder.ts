@@ -9,7 +9,8 @@ import {
   FileSystem,
   JsonObject,
   NewlineKind,
-  InternalError
+  InternalError,
+  Terminal
 } from '@rushstack/node-core-library';
 import {
   TerminalChunkKind,
@@ -18,9 +19,7 @@ import {
   SplitterTransform,
   DiscardStdoutTransform
 } from '@rushstack/terminal';
-
 import { CollatedTerminal } from '@rushstack/stream-collator';
-import { IPackageDeps } from '@rushstack/package-deps-hash';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -30,15 +29,24 @@ import { TaskError } from './TaskError';
 import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
 import { BaseBuilder, IBuilderContext } from './BaseBuilder';
 import { ProjectLogWritable } from './ProjectLogWritable';
+import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
+import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import { ICacheOptionsForCommand, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
+import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
+import { RushConstants } from '../RushConstants';
 
-interface IPackageDependencies extends IPackageDeps {
+export interface IProjectBuildDeps {
+  files: { [filePath: string]: string };
   arguments: string;
 }
 
 export interface IProjectBuilderOptions {
   rushProject: RushConfigurationProject;
   rushConfiguration: RushConfiguration;
+  buildCacheConfiguration: BuildCacheConfiguration | undefined;
   commandToRun: string;
+  commandName: string;
   isIncrementalBuildAllowed: boolean;
   packageChangeAnalyzer: PackageChangeAnalyzer;
   packageDepsFilename: string;
@@ -58,6 +66,9 @@ function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
   return true;
 }
 
+const UNINITIALIZED: 'UNINITIALIZED' = 'UNINITIALIZED';
+type UNINITIALIZED = 'UNINITIALIZED';
+
 /**
  * A `BaseBuilder` subclass that builds a Rush project and updates its package-deps-hash
  * incremental state.
@@ -67,19 +78,29 @@ export class ProjectBuilder extends BaseBuilder {
     return ProjectBuilder.getTaskName(this._rushProject);
   }
 
-  public isIncrementalBuildAllowed: boolean;
+  public readonly isIncrementalBuildAllowed: boolean;
   public hadEmptyScript: boolean = false;
 
-  private _rushProject: RushConfigurationProject;
-  private _rushConfiguration: RushConfiguration;
-  private _commandToRun: string;
-  private _packageChangeAnalyzer: PackageChangeAnalyzer;
-  private _packageDepsFilename: string;
+  private readonly _rushProject: RushConfigurationProject;
+  private readonly _rushConfiguration: RushConfiguration;
+  private readonly _buildCacheConfiguration: BuildCacheConfiguration | undefined;
+  private readonly _commandName: string;
+  private readonly _commandToRun: string;
+  private readonly _packageChangeAnalyzer: PackageChangeAnalyzer;
+  private readonly _packageDepsFilename: string;
+
+  /**
+   * UNINITIALIZED === we haven't tried to initialize yet
+   * undefined === we didn't create one because the feature is not enabled
+   */
+  private _projectBuildCache: ProjectBuildCache | undefined | UNINITIALIZED = UNINITIALIZED;
 
   public constructor(options: IProjectBuilderOptions) {
     super();
     this._rushProject = options.rushProject;
     this._rushConfiguration = options.rushConfiguration;
+    this._buildCacheConfiguration = options.buildCacheConfiguration;
+    this._commandName = options.commandName;
     this._commandToRun = options.commandToRun;
     this.isIncrementalBuildAllowed = options.isIncrementalBuildAllowed;
     this._packageChangeAnalyzer = options.packageChangeAnalyzer;
@@ -99,35 +120,26 @@ export class ProjectBuilder extends BaseBuilder {
       if (!this._commandToRun) {
         this.hadEmptyScript = true;
       }
-      const dependencies: IPackageDependencies | undefined = this._getPackageDependencies(
-        context.collatedWriter.terminal
-      );
-      return await this._executeTaskAsync(dependencies, context);
+      return await this._executeTaskAsync(context);
     } catch (error) {
       throw new TaskError('executing', error.message);
     }
   }
 
-  private _getPackageDependencies(terminal: CollatedTerminal): IPackageDependencies | undefined {
-    let dependencies: IPackageDependencies | undefined = undefined;
-    try {
-      dependencies = {
-        files: this._packageChangeAnalyzer.getPackageDepsHash(this._rushProject.packageName)!.files,
-        arguments: this._commandToRun
-      };
-    } catch (error) {
-      terminal.writeStdoutLine(
-        'Unable to calculate incremental build state. Instead running full rebuild. ' + error.toString()
-      );
-    }
-
-    return dependencies;
+  public async tryWriteCacheEntryAsync(
+    terminal: Terminal,
+    trackedFilePaths: string[] | undefined,
+    repoCommandLineConfiguration: CommandLineConfiguration | undefined
+  ): Promise<boolean | undefined> {
+    const projectBuildCache: ProjectBuildCache | undefined = await this._getProjectBuildCacheAsync(
+      terminal,
+      trackedFilePaths,
+      repoCommandLineConfiguration
+    );
+    return projectBuildCache?.trySetCacheEntryAsync(terminal);
   }
 
-  private async _executeTaskAsync(
-    currentPackageDeps: IPackageDependencies | undefined,
-    context: IBuilderContext
-  ): Promise<TaskStatus> {
+  private async _executeTaskAsync(context: IBuilderContext): Promise<TaskStatus> {
     // TERMINAL PIPELINE:
     //
     //                             +--> quietModeTransform? --> collatedWriter
@@ -170,14 +182,13 @@ export class ProjectBuilder extends BaseBuilder {
         ensureNewlineAtEnd: true
       });
 
-      const terminal: CollatedTerminal = new CollatedTerminal(normalizeNewlineTransform);
+      const collatedTerminal: CollatedTerminal = new CollatedTerminal(normalizeNewlineTransform);
+      const terminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(collatedTerminal);
+      const terminal: Terminal = new Terminal(terminalProvider);
 
       let hasWarningOrError: boolean = false;
       const projectFolder: string = this._rushProject.projectFolder;
-      let lastPackageDeps: IPackageDependencies | undefined = undefined;
-
-      // TODO: Remove legacyDepsPath with the next major release of Rush
-      const legacyDepsPath: string = path.join(this._rushProject.projectFolder, 'package-deps.json');
+      let lastProjectBuildDeps: IProjectBuildDeps | undefined = undefined;
 
       const currentDepsPath: string = path.join(
         this._rushProject.projectRushTempFolder,
@@ -186,36 +197,80 @@ export class ProjectBuilder extends BaseBuilder {
 
       if (FileSystem.exists(currentDepsPath)) {
         try {
-          lastPackageDeps = JsonFile.load(currentDepsPath) as IPackageDependencies;
+          lastProjectBuildDeps = JsonFile.load(currentDepsPath);
         } catch (e) {
           // Warn and ignore - treat failing to load the file as the project being not built.
-          terminal.writeStdoutLine(
+          terminal.writeWarningLine(
             `Warning: error parsing ${this._packageDepsFilename}: ${e}. Ignoring and ` +
               `treating the command "${this._commandToRun}" as not run.`
           );
         }
       }
 
+      let projectBuildDeps: IProjectBuildDeps | undefined;
+      let trackedFiles: string[] | undefined;
+      try {
+        const fileHashes: Map<string, string> | undefined = await this._packageChangeAnalyzer.getPackageDeps(
+          this._rushProject.packageName,
+          terminal
+        );
+
+        if (fileHashes) {
+          const files: { [filePath: string]: string } = {};
+          trackedFiles = [];
+          for (const [filePath, fileHash] of fileHashes) {
+            files[filePath] = fileHash;
+            trackedFiles.push(filePath);
+          }
+
+          projectBuildDeps = {
+            files,
+            arguments: this._commandToRun
+          };
+        } else {
+          terminal.writeLine(
+            'Unable to calculate incremental build state. Instead running full rebuild. Ensure Git is present.'
+          );
+        }
+      } catch (error) {
+        terminal.writeLine(
+          'Error calculating incremental build state. Instead running full rebuild. ' + error.toString()
+        );
+      }
+
       const isPackageUnchanged: boolean = !!(
-        lastPackageDeps &&
-        currentPackageDeps &&
-        currentPackageDeps.arguments === lastPackageDeps.arguments &&
-        _areShallowEqual(currentPackageDeps.files, lastPackageDeps.files)
+        lastProjectBuildDeps &&
+        projectBuildDeps &&
+        projectBuildDeps.arguments === lastProjectBuildDeps.arguments &&
+        _areShallowEqual(projectBuildDeps.files, lastProjectBuildDeps.files)
       );
 
-      if (isPackageUnchanged && this.isIncrementalBuildAllowed) {
+      const projectBuildCache: ProjectBuildCache | undefined = await this._getProjectBuildCacheAsync(
+        terminal,
+        trackedFiles,
+        context.repoCommandLineConfiguration
+      );
+      const restoreFromCacheSuccess: boolean | undefined = await projectBuildCache?.tryRestoreFromCacheAsync(
+        terminal
+      );
+
+      if (restoreFromCacheSuccess) {
+        return TaskStatus.FromCache;
+      } else if (isPackageUnchanged && this.isIncrementalBuildAllowed) {
         return TaskStatus.Skipped;
       } else {
         // If the deps file exists, remove it before starting a build.
         FileSystem.deleteFile(currentDepsPath);
 
+        // TODO: Remove legacyDepsPath with the next major release of Rush
+        const legacyDepsPath: string = path.join(this._rushProject.projectFolder, 'package-deps.json');
         // Delete the legacy package-deps.json
         FileSystem.deleteFile(legacyDepsPath);
 
         if (!this._commandToRun) {
           // Write deps on success.
-          if (currentPackageDeps) {
-            JsonFile.save(currentPackageDeps, currentDepsPath, {
+          if (projectBuildDeps) {
+            JsonFile.save(projectBuildDeps, currentDepsPath, {
               ensureFolderExists: true
             });
           }
@@ -224,7 +279,7 @@ export class ProjectBuilder extends BaseBuilder {
         }
 
         // Run the task
-        terminal.writeStdoutLine('Invoking: ' + this._commandToRun);
+        terminal.writeLine('Invoking: ' + this._commandToRun);
 
         const task: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(this._commandToRun, {
           rushConfiguration: this._rushConfiguration,
@@ -240,40 +295,26 @@ export class ProjectBuilder extends BaseBuilder {
         if (task.stdout !== null) {
           task.stdout.on('data', (data: Buffer) => {
             const text: string = data.toString();
-            terminal.writeChunk({ text, kind: TerminalChunkKind.Stdout });
+            collatedTerminal.writeChunk({ text, kind: TerminalChunkKind.Stdout });
           });
         }
         if (task.stderr !== null) {
           task.stderr.on('data', (data: Buffer) => {
             const text: string = data.toString();
-            terminal.writeChunk({ text, kind: TerminalChunkKind.Stderr });
+            collatedTerminal.writeChunk({ text, kind: TerminalChunkKind.Stderr });
             hasWarningOrError = true;
           });
         }
 
-        return await new Promise(
+        let status: TaskStatus = await new Promise(
           (resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
             task.on('close', (code: number) => {
               try {
-                normalizeNewlineTransform.close();
-
-                // If the pipeline is wired up correctly, then closing normalizeNewlineTransform should
-                // have closed projectLogWritable.
-                if (projectLogWritable.isOpen) {
-                  throw new InternalError('The output file handle was not closed');
-                }
-
                 if (code !== 0) {
                   reject(new TaskError('error', `Returned error code: ${code}`));
                 } else if (hasWarningOrError) {
                   resolve(TaskStatus.SuccessWithWarning);
                 } else {
-                  // Write deps on success.
-                  if (currentPackageDeps) {
-                    JsonFile.save(currentPackageDeps, currentDepsPath, {
-                      ensureFolderExists: true
-                    });
-                  }
                   resolve(TaskStatus.Success);
                 }
               } catch (error) {
@@ -282,10 +323,93 @@ export class ProjectBuilder extends BaseBuilder {
             });
           }
         );
+
+        if (status === TaskStatus.Success && projectBuildDeps) {
+          // Write deps on success.
+          const writeProjectStatePromise: Promise<boolean> = JsonFile.saveAsync(
+            projectBuildDeps,
+            currentDepsPath,
+            {
+              ensureFolderExists: true
+            }
+          );
+
+          const setCacheEntryPromise: Promise<boolean | undefined> = this.tryWriteCacheEntryAsync(
+            terminal,
+            trackedFiles,
+            context.repoCommandLineConfiguration
+          );
+
+          const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
+
+          if (terminalProvider.hasErrors) {
+            status = TaskStatus.Failure;
+          } else if (cacheWriteSuccess === false) {
+            status = TaskStatus.SuccessWithWarning;
+          }
+        }
+
+        normalizeNewlineTransform.close();
+
+        // If the pipeline is wired up correctly, then closing normalizeNewlineTransform should
+        // have closed projectLogWritable.
+        if (projectLogWritable.isOpen) {
+          throw new InternalError('The output file handle was not closed');
+        }
+
+        return status;
       }
     } finally {
       projectLogWritable.close();
     }
+  }
+
+  private async _getProjectBuildCacheAsync(
+    terminal: Terminal,
+    trackedProjectFiles: string[] | undefined,
+    commandLineConfiguration: CommandLineConfiguration | undefined
+  ): Promise<ProjectBuildCache | undefined> {
+    if (this._projectBuildCache === UNINITIALIZED) {
+      this._projectBuildCache = undefined;
+
+      if (this._buildCacheConfiguration && this._buildCacheConfiguration.buildCacheEnabled) {
+        const projectConfiguration: RushProjectConfiguration | undefined =
+          await RushProjectConfiguration.tryLoadForProjectAsync(
+            this._rushProject,
+            commandLineConfiguration,
+            terminal
+          );
+        if (projectConfiguration) {
+          if (projectConfiguration.cacheOptions?.disableBuildCache) {
+            terminal.writeVerboseLine('Caching has been disabled for this project.');
+          } else {
+            const commandOptions: ICacheOptionsForCommand | undefined =
+              projectConfiguration.cacheOptions.optionsForCommandsByName.get(this._commandName);
+            if (commandOptions?.disableBuildCache) {
+              terminal.writeVerboseLine(
+                `Caching has been disabled for this project's "${this._commandName}" command.`
+              );
+            } else {
+              this._projectBuildCache = await ProjectBuildCache.tryGetProjectBuildCache({
+                projectConfiguration,
+                buildCacheConfiguration: this._buildCacheConfiguration,
+                terminal,
+                command: this._commandToRun,
+                trackedProjectFiles: trackedProjectFiles,
+                packageChangeAnalyzer: this._packageChangeAnalyzer
+              });
+            }
+          }
+        } else {
+          terminal.writeVerboseLine(
+            `Project does not have a ${RushConstants.rushProjectConfigFilename} configuration file, ` +
+              'or one provided by a rig, so it does not support caching.'
+          );
+        }
+      }
+    }
+
+    return this._projectBuildCache;
   }
 }
 

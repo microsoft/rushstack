@@ -105,10 +105,9 @@ export interface IFileSystemMoveOptions {
 }
 
 /**
- * The options for {@link FileSystem.copyFile}
  * @public
  */
-export interface IFileSystemCopyFileOptions {
+export interface IFileSystemCopyFileBaseOptions {
   /**
    * The path of the existing object to be copied.
    * The path may be absolute or relative.
@@ -116,16 +115,22 @@ export interface IFileSystemCopyFileOptions {
   sourcePath: string;
 
   /**
-   * The path that the object will be copied to.
-   * The path may be absolute or relative.
-   */
-  destinationPath: string;
-
-  /**
    * Specifies what to do if the target object already exists.
    * @defaultValue {@link AlreadyExistsBehavior.Overwrite}
    */
   alreadyExistsBehavior?: AlreadyExistsBehavior;
+}
+
+/**
+ * The options for {@link FileSystem.copyFile}
+ * @public
+ */
+export interface IFileSystemCopyFileOptions extends IFileSystemCopyFileBaseOptions {
+  /**
+   * The path that the object will be copied to.
+   * The path may be absolute or relative.
+   */
+  destinationPath: string;
 }
 
 /**
@@ -260,6 +265,11 @@ export interface IFileSystemCreateLinkOptions {
    * The new path for the new symlink link to be created.
    */
   newLinkPath: string;
+
+  /**
+   * Specifies what to do if the target object already exists. Defaults to `AlreadyExistsBehavior.Error`.
+   */
+  alreadyExistsBehavior?: AlreadyExistsBehavior;
 }
 
 const MOVE_DEFAULT_OPTIONS: Partial<IFileSystemMoveOptions> = {
@@ -1119,7 +1129,30 @@ export class FileSystem {
    */
   public static createHardLink(options: IFileSystemCreateLinkOptions): void {
     FileSystem._wrapException(() => {
-      fsx.linkSync(options.linkTargetPath, options.newLinkPath);
+      try {
+        fsx.linkSync(options.linkTargetPath, options.newLinkPath);
+      } catch (error) {
+        if (error.code === 'EEXIST') {
+          switch (options.alreadyExistsBehavior) {
+            case AlreadyExistsBehavior.Ignore:
+              return;
+            case AlreadyExistsBehavior.Overwrite:
+              this.deleteFile(options.newLinkPath);
+              break;
+            case AlreadyExistsBehavior.Error:
+            default:
+              throw error;
+          }
+        } else {
+          const linkTargetExists: boolean = FileSystem.exists(options.linkTargetPath);
+          if (FileSystem.isNotExistError(error) && linkTargetExists) {
+            this.ensureFolder(nodeJsPath.dirname(options.newLinkPath));
+            this.createHardLink(options);
+          } else {
+            throw error;
+          }
+        }
+      }
     });
   }
 
@@ -1127,8 +1160,31 @@ export class FileSystem {
    * An async version of {@link FileSystem.createHardLink}.
    */
   public static async createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    await FileSystem._wrapExceptionAsync(() => {
-      return fsx.link(options.linkTargetPath, options.newLinkPath);
+    await FileSystem._wrapExceptionAsync(async () => {
+      try {
+        await fsx.link(options.linkTargetPath, options.newLinkPath);
+      } catch (error) {
+        if (error.code === 'EEXIST') {
+          switch (options.alreadyExistsBehavior) {
+            case AlreadyExistsBehavior.Ignore:
+              return;
+            case AlreadyExistsBehavior.Overwrite:
+              await this.deleteFileAsync(options.newLinkPath);
+              break;
+            case AlreadyExistsBehavior.Error:
+            default:
+              throw error;
+          }
+        } else {
+          const linkTargetExists: boolean = await FileSystem.exists(options.linkTargetPath);
+          if (FileSystem.isNotExistError(error) && linkTargetExists) {
+            await this.ensureFolderAsync(nodeJsPath.dirname(options.newLinkPath));
+            await this.createHardLinkAsync(options);
+          } else {
+            throw error;
+          }
+        }
+      }
     });
   }
 

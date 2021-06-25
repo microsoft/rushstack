@@ -1,6 +1,143 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+This log was last generated on Fri, 11 Jun 2021 00:34:02 GMT and should not be manually modified.
+
+## 0.5.0
+Fri, 11 Jun 2021 00:34:02 GMT
+
+### Minor changes
+
+- Add "preresolve" property to transform paths before resolution
+
+## 0.4.2
+Fri, 04 Jun 2021 19:59:53 GMT
+
+_Version update only_
+
+## 0.4.1
+Fri, 04 Jun 2021 00:08:34 GMT
+
+### Patches
+
+- Reduce the number of extra file system calls made when loading many config files.
+
+## 0.4.0
+Sat, 29 May 2021 01:05:06 GMT
+
+### Minor changes
+
+- Expose the ConfigurationFile.projectRelativeFilePath property
+
+## 0.3.22
+Wed, 19 May 2021 00:11:39 GMT
+
+_Version update only_
+
+## 0.3.21
+Mon, 03 May 2021 15:10:29 GMT
+
+_Version update only_
+
+## 0.3.20
+Mon, 12 Apr 2021 15:10:29 GMT
+
+_Version update only_
+
+## 0.3.19
+Thu, 08 Apr 2021 20:41:54 GMT
+
+### Patches
+
+- Remove an outdated note from the README.
+
+## 0.3.18
+Tue, 06 Apr 2021 15:14:22 GMT
+
+_Version update only_
+
+## 0.3.17
+Thu, 04 Mar 2021 01:11:31 GMT
+
+_Version update only_
+
+## 0.3.16
+Fri, 05 Feb 2021 16:10:42 GMT
+
+_Version update only_
+
+## 0.3.15
+Thu, 10 Dec 2020 23:25:49 GMT
+
+_Version update only_
+
+## 0.3.14
+Tue, 17 Nov 2020 01:17:38 GMT
+
+### Patches
+
+- Fix an issue where .map files were not being published
+
+## 0.3.13
+Wed, 11 Nov 2020 01:08:59 GMT
+
+_Version update only_
+
+## 0.3.12
+Tue, 10 Nov 2020 23:13:12 GMT
+
+_Version update only_
+
+## 0.3.11
+Fri, 06 Nov 2020 16:09:30 GMT
+
+### Patches
+
+- Fix an issue where an error would be thrown if a value was omitted in a parent configuration file.
+
+## 0.3.10
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 0.3.9
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 0.3.8
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 0.3.7
+Tue, 27 Oct 2020 15:10:13 GMT
+
+_Version update only_
+
+## 0.3.6
+Thu, 15 Oct 2020 00:59:08 GMT
+
+_Version update only_
+
+## 0.3.5
+Tue, 06 Oct 2020 00:24:06 GMT
+
+_Version update only_
+
+## 0.3.4
+Mon, 05 Oct 2020 22:36:57 GMT
+
+_Version update only_
+
+## 0.3.3
+Mon, 05 Oct 2020 15:10:43 GMT
+
+_Version update only_
+
+## 0.3.2
+Thu, 01 Oct 2020 20:27:16 GMT
+
+_Version update only_
 
 ## 0.3.1
 Wed, 30 Sep 2020 18:39:17 GMT

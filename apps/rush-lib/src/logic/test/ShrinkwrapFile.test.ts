@@ -86,15 +86,6 @@ describe('pnpm ShrinkwrapFile', () => {
 
     expect(tempProjectNames).toEqual(['@rush-temp/project1', '@rush-temp/project2', '@rush-temp/project3']);
   });
-
-  it('can reuse the latest version that another temp package is providing', () => {
-    expect(
-      shrinkwrapFile.tryEnsureCompatibleDependency(
-        new DependencySpecifier('jquery', '>=2.0.0 <3.0.0'),
-        '@rush-temp/project3'
-      )
-    ).toEqual(true);
-  });
 });
 
 function testParsePnpmDependencyKey(packageName: string, key: string): string | undefined {

@@ -113,9 +113,8 @@ export class AstReferenceResolver {
         return memberName;
       }
 
-      const matchingChildren: ReadonlyArray<AstDeclaration> = currentDeclaration.findChildrenWithName(
-        memberName
-      );
+      const matchingChildren: ReadonlyArray<AstDeclaration> =
+        currentDeclaration.findChildrenWithName(memberName);
       if (matchingChildren.length === 0) {
         return new ResolverFailure(`No member was found with name "${memberName}"`);
       }
@@ -159,9 +158,8 @@ export class AstReferenceResolver {
       } else {
         // If we found multiple matches, but the extra ones are all ancillary declarations,
         // then return the main declaration.
-        const nonAncillaryMatch: AstDeclaration | undefined = this._tryDisambiguateAncillaryMatches(
-          astDeclarations
-        );
+        const nonAncillaryMatch: AstDeclaration | undefined =
+          this._tryDisambiguateAncillaryMatches(astDeclarations);
         if (nonAncillaryMatch) {
           return nonAncillaryMatch;
         }

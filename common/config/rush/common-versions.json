@@ -31,10 +31,7 @@
     "typescript": "~3.9.7",
 
     // Workaround for https://github.com/microsoft/rushstack/issues/1466
-    "eslint": "~7.2.0",
-
-    "@types/webpack": "4.39.8",
-    "webpack": "~4.31.0"
+    "eslint": "~7.12.1"
   },
 
   /**
@@ -67,30 +64,28 @@
      * (in addition to whatever "usual" version is being used by other projects in the repo):
      */
     "typescript": [
-      "~2.4.2",
-      "~2.7.2",
-      "~2.8.4",
+      // "~3.9.7" is the (inferred, not alternative) range used by most projects in this repo
+
+      // The oldest supported compiler, used by build-tests/heft-oldest-compiler-test
+      // and also build-tests/api-extractor-lib1-test
       "~2.9.2",
-      "~3.0.3",
-      "~3.1.6",
-      "~3.2.4",
-      "~3.4.3",
-      "~3.5.3",
-      "~3.6.4",
-      "~3.7.2",
-      "~3.8.3",
-      "~3.9.7"
+
+      // Temporarily allowed until we finish migrating ESLint
+      "~4.2.4",
+
+      // The newest supported compiler, used by build-tests/heft-newest-compiler-test
+      // and used as the bundled compiler engine for API Extractor.
+      "~4.3.2"
     ],
 
     "source-map": [
       "~0.6.1" // API Extractor is using an older version of source-map because newer versions are async
     ],
 
-    "@rushstack/heft": [
-      // This is needed for the rush-stack-compiler-x.x projects which cannot build using
-      // the latest Heft due to a regression from PR #2073 that prevents the same plugin from
-      // being applied multiple times
-      "0.8.0"
-    ]
+    "webpack": ["~5.35.1"],
+
+    // Use two different versions of @types/webpack-dev-server to allow pnpmfile.js to bring in
+    // two different versions of the webpack typings
+    "@types/webpack-dev-server": ["3.11.2"]
   }
 }

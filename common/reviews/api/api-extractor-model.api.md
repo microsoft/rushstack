@@ -4,7 +4,7 @@
 
 ```ts
 
-import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { DocDeclarationReference } from '@microsoft/tsdoc';
 import { IJsonFileSaveOptions } from '@rushstack/node-core-library';
 import * as tsdoc from '@microsoft/tsdoc';
@@ -13,7 +13,7 @@ import { TSDocTagDefinition } from '@microsoft/tsdoc';
 
 // Warning: (ae-internal-missing-underscore) The name "AedocDefinitions" should be prefixed with an underscore because the declaration is marked as @internal
 //
-// @internal (undocumented)
+// @internal @deprecated (undocumented)
 export class AedocDefinitions {
     // (undocumented)
     static readonly betaDocumentation: TSDocTagDefinition;
@@ -273,7 +273,6 @@ export interface ApiItemContainerMixin extends ApiItem {
     findMembersByName(name: string): ReadonlyArray<ApiItem>;
     // @internal
     _getMergedSiblingsForMember(memberApiItem: ApiItem): ReadonlyArray<ApiItem>;
-    readonly members: ReadonlyArray<ApiItem>;
     // @override (undocumented)
     serializeInto(jsonObject: Partial<IApiItemJson>): void;
     tryGetMemberByKey(containerKey: string): ApiItem | undefined;
@@ -410,6 +409,21 @@ export class ApiNamespace extends ApiNamespace_base {
     get kind(): ApiItemKind;
 }
 
+// @public
+export function ApiOptionalMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiOptionalMixin);
+
+// @public
+export interface ApiOptionalMixin extends ApiItem {
+    readonly isOptional: boolean;
+    // @override (undocumented)
+    serializeInto(jsonObject: Partial<IApiItemJson>): void;
+}
+
+// @public
+export namespace ApiOptionalMixin {
+    export function isBaseClassOf(apiItem: ApiItem): apiItem is ApiOptionalMixin;
+}
+
 // Warning: (ae-forgotten-export) The symbol "ApiPackage_base" needs to be exported by the entry point index.d.ts
 //
 // @public
@@ -431,7 +445,8 @@ export class ApiPackage extends ApiPackage_base {
     static loadFromJsonFile(apiJsonFilename: string): ApiPackage;
     // (undocumented)
     saveToJsonFile(apiJsonFilename: string, options?: IApiPackageSaveOptions): void;
-}
+    get tsdocConfiguration(): TSDocConfiguration;
+    }
 
 // @public
 export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiParameterListMixin);
@@ -706,11 +721,11 @@ export interface IApiItemOptions {
 }
 
 // @public
-export interface IApiMethodOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiStaticMixinOptions, IApiDeclaredItemOptions {
+export interface IApiMethodOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiStaticMixinOptions, IApiOptionalMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public (undocumented)
-export interface IApiMethodSignatureOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiDeclaredItemOptions {
+export interface IApiMethodSignatureOptions extends IApiNameMixinOptions, IApiTypeParameterListMixinOptions, IApiParameterListMixinOptions, IApiReleaseTagMixinOptions, IApiReturnTypeMixinOptions, IApiOptionalMixinOptions, IApiDeclaredItemOptions {
 }
 
 // @public
@@ -724,7 +739,15 @@ export interface IApiNamespaceOptions extends IApiItemContainerMixinOptions, IAp
 }
 
 // @public
+export interface IApiOptionalMixinOptions extends IApiItemOptions {
+    // (undocumented)
+    isOptional: boolean;
+}
+
+// @public
 export interface IApiPackageOptions extends IApiItemContainerMixinOptions, IApiNameMixinOptions, IApiDocumentedItemOptions {
+    // (undocumented)
+    tsdocConfiguration: TSDocConfiguration;
 }
 
 // @public
@@ -751,7 +774,7 @@ export interface IApiParameterOptions {
 }
 
 // @public
-export interface IApiPropertyItemOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiDeclaredItemOptions {
+export interface IApiPropertyItemOptions extends IApiNameMixinOptions, IApiReleaseTagMixinOptions, IApiOptionalMixinOptions, IApiDeclaredItemOptions {
     // (undocumented)
     propertyTypeTokenRange: IExcerptTokenRange;
 }

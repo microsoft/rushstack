@@ -220,7 +220,8 @@ export class AssetProcessor {
           }
 
           case 'localized': {
-            const localizedElement: ILocalizedReconstructionElement = element as ILocalizedReconstructionElement;
+            const localizedElement: ILocalizedReconstructionElement =
+              element as ILocalizedReconstructionElement;
             let newValue: string | undefined = localizedElement.values[locale];
             if (!newValue) {
               if (fillMissingTranslationStrings) {
@@ -296,7 +297,8 @@ export class AssetProcessor {
         }
 
         case 'localized': {
-          const localizedElement: ILocalizedReconstructionElement = element as ILocalizedReconstructionElement;
+          const localizedElement: ILocalizedReconstructionElement =
+            element as ILocalizedReconstructionElement;
           issues.push(
             `The string "${localizedElement.stringName}" in "${localizedElement.locFilePath}" appeared in an asset ` +
               'that is not expected to contain localized resources.'
@@ -422,15 +424,21 @@ export class AssetProcessor {
     chunkHasLocalizedModules: (chunk: Webpack.compilation.Chunk) => boolean,
     noStringsLocaleName: string
   ): (locale: string, chunkIdToken: string | undefined) => string {
-    const idsWithStrings: Set<string> = new Set<string>();
-    const idsWithoutStrings: Set<string> = new Set<string>();
+    const idsWithStrings: Set<number | string> = new Set<number | string>();
+    const idsWithoutStrings: Set<number | string> = new Set<number | string>();
 
     const asyncChunks: Set<Webpack.compilation.Chunk> = chunk.getAllAsyncChunks();
     for (const asyncChunk of asyncChunks) {
+      const chunkId: number | string | null = asyncChunk.id;
+
+      if (chunkId === null || chunkId === undefined) {
+        throw new Error(`Chunk "${asyncChunk.name}"'s ID is null or undefined.`);
+      }
+
       if (chunkHasLocalizedModules(asyncChunk)) {
-        idsWithStrings.add(asyncChunk.id);
+        idsWithStrings.add(chunkId);
       } else {
-        idsWithoutStrings.add(asyncChunk.id);
+        idsWithoutStrings.add(chunkId);
       }
     }
 

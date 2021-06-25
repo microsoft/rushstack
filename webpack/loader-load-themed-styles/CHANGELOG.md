@@ -1,6 +1,433 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Jun 2021 00:08:28 GMT and should not be manually modified.
+
+## 1.9.67
+Fri, 25 Jun 2021 00:08:28 GMT
+
+_Version update only_
+
+## 1.9.66
+Fri, 18 Jun 2021 06:23:05 GMT
+
+_Version update only_
+
+## 1.9.65
+Wed, 16 Jun 2021 18:53:52 GMT
+
+_Version update only_
+
+## 1.9.64
+Wed, 16 Jun 2021 15:07:24 GMT
+
+_Version update only_
+
+## 1.9.63
+Tue, 15 Jun 2021 20:38:35 GMT
+
+_Version update only_
+
+## 1.9.62
+Fri, 11 Jun 2021 23:26:16 GMT
+
+_Version update only_
+
+## 1.9.61
+Fri, 11 Jun 2021 00:34:02 GMT
+
+_Version update only_
+
+## 1.9.60
+Thu, 10 Jun 2021 15:08:16 GMT
+
+_Version update only_
+
+## 1.9.59
+Fri, 04 Jun 2021 19:59:53 GMT
+
+_Version update only_
+
+## 1.9.58
+Fri, 04 Jun 2021 15:08:20 GMT
+
+_Version update only_
+
+## 1.9.57
+Fri, 04 Jun 2021 00:08:34 GMT
+
+_Version update only_
+
+## 1.9.56
+Tue, 01 Jun 2021 18:29:26 GMT
+
+_Version update only_
+
+## 1.9.55
+Sat, 29 May 2021 01:05:06 GMT
+
+_Version update only_
+
+## 1.9.54
+Fri, 28 May 2021 06:19:58 GMT
+
+_Version update only_
+
+## 1.9.53
+Tue, 25 May 2021 00:12:21 GMT
+
+_Version update only_
+
+## 1.9.52
+Wed, 19 May 2021 00:11:39 GMT
+
+_Version update only_
+
+## 1.9.51
+Thu, 13 May 2021 01:52:46 GMT
+
+_Version update only_
+
+## 1.9.50
+Tue, 11 May 2021 22:19:17 GMT
+
+_Version update only_
+
+## 1.9.49
+Mon, 03 May 2021 15:10:28 GMT
+
+_Version update only_
+
+## 1.9.48
+Thu, 29 Apr 2021 23:26:50 GMT
+
+_Version update only_
+
+## 1.9.47
+Thu, 29 Apr 2021 01:07:29 GMT
+
+_Version update only_
+
+## 1.9.46
+Fri, 23 Apr 2021 22:00:07 GMT
+
+_Version update only_
+
+## 1.9.45
+Fri, 23 Apr 2021 15:11:20 GMT
+
+_Version update only_
+
+## 1.9.44
+Wed, 21 Apr 2021 15:12:28 GMT
+
+_Version update only_
+
+## 1.9.43
+Tue, 20 Apr 2021 04:59:51 GMT
+
+_Version update only_
+
+## 1.9.42
+Thu, 15 Apr 2021 02:59:25 GMT
+
+_Version update only_
+
+## 1.9.41
+Mon, 12 Apr 2021 15:10:29 GMT
+
+_Version update only_
+
+## 1.9.40
+Thu, 08 Apr 2021 20:41:54 GMT
+
+_Version update only_
+
+## 1.9.39
+Thu, 08 Apr 2021 06:05:32 GMT
+
+_Version update only_
+
+## 1.9.38
+Thu, 08 Apr 2021 00:10:18 GMT
+
+_Version update only_
+
+## 1.9.37
+Tue, 06 Apr 2021 15:14:22 GMT
+
+_Version update only_
+
+## 1.9.36
+Wed, 31 Mar 2021 15:10:36 GMT
+
+_Version update only_
+
+## 1.9.35
+Mon, 29 Mar 2021 05:02:06 GMT
+
+_Version update only_
+
+## 1.9.34
+Fri, 19 Mar 2021 22:31:38 GMT
+
+_Version update only_
+
+## 1.9.33
+Wed, 17 Mar 2021 05:04:38 GMT
+
+_Version update only_
+
+## 1.9.32
+Fri, 12 Mar 2021 01:13:27 GMT
+
+_Version update only_
+
+## 1.9.31
+Wed, 10 Mar 2021 06:23:29 GMT
+
+_Version update only_
+
+## 1.9.30
+Wed, 10 Mar 2021 05:10:06 GMT
+
+_Version update only_
+
+## 1.9.29
+Thu, 04 Mar 2021 01:11:31 GMT
+
+_Version update only_
+
+## 1.9.28
+Tue, 02 Mar 2021 23:25:05 GMT
+
+_Version update only_
+
+## 1.9.27
+Fri, 05 Feb 2021 16:10:42 GMT
+
+_Version update only_
+
+## 1.9.26
+Fri, 22 Jan 2021 05:39:22 GMT
+
+_Version update only_
+
+## 1.9.25
+Thu, 21 Jan 2021 04:19:00 GMT
+
+_Version update only_
+
+## 1.9.24
+Wed, 13 Jan 2021 01:11:06 GMT
+
+_Version update only_
+
+## 1.9.23
+Fri, 08 Jan 2021 07:28:50 GMT
+
+_Version update only_
+
+## 1.9.22
+Wed, 06 Jan 2021 16:10:43 GMT
+
+_Version update only_
+
+## 1.9.21
+Mon, 14 Dec 2020 16:12:21 GMT
+
+_Version update only_
+
+## 1.9.20
+Thu, 10 Dec 2020 23:25:50 GMT
+
+_Version update only_
+
+## 1.9.19
+Sat, 05 Dec 2020 01:11:23 GMT
+
+_Version update only_
+
+## 1.9.18
+Tue, 01 Dec 2020 01:10:38 GMT
+
+_Version update only_
+
+## 1.9.17
+Mon, 30 Nov 2020 16:11:50 GMT
+
+_Version update only_
+
+## 1.9.16
+Wed, 18 Nov 2020 08:19:54 GMT
+
+_Version update only_
+
+## 1.9.15
+Wed, 18 Nov 2020 06:21:58 GMT
+
+_Version update only_
+
+## 1.9.14
+Tue, 17 Nov 2020 01:17:38 GMT
+
+_Version update only_
+
+## 1.9.13
+Mon, 16 Nov 2020 01:57:58 GMT
+
+_Version update only_
+
+## 1.9.12
+Fri, 13 Nov 2020 01:11:01 GMT
+
+_Version update only_
+
+## 1.9.11
+Thu, 12 Nov 2020 01:11:10 GMT
+
+_Version update only_
+
+## 1.9.10
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 1.9.9
+Tue, 10 Nov 2020 23:13:11 GMT
+
+_Version update only_
+
+## 1.9.8
+Tue, 10 Nov 2020 16:11:42 GMT
+
+_Version update only_
+
+## 1.9.7
+Sun, 08 Nov 2020 22:52:49 GMT
+
+_Version update only_
+
+## 1.9.6
+Fri, 06 Nov 2020 16:09:30 GMT
+
+_Version update only_
+
+## 1.9.5
+Tue, 03 Nov 2020 01:11:18 GMT
+
+_Version update only_
+
+## 1.9.4
+Mon, 02 Nov 2020 16:12:05 GMT
+
+_Version update only_
+
+## 1.9.3
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 1.9.2
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 1.9.1
+Thu, 29 Oct 2020 06:14:19 GMT
+
+_Version update only_
+
+## 1.9.0
+Thu, 29 Oct 2020 00:11:33 GMT
+
+### Minor changes
+
+- Update Webpack dependency to ~4.44.2
+
+## 1.8.86
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 1.8.85
+Tue, 27 Oct 2020 15:10:13 GMT
+
+_Version update only_
+
+## 1.8.84
+Sat, 24 Oct 2020 00:11:19 GMT
+
+_Version update only_
+
+## 1.8.83
+Wed, 21 Oct 2020 05:09:44 GMT
+
+_Version update only_
+
+## 1.8.82
+Wed, 21 Oct 2020 02:28:17 GMT
+
+_Version update only_
+
+## 1.8.81
+Fri, 16 Oct 2020 23:32:58 GMT
+
+_Version update only_
+
+## 1.8.80
+Thu, 15 Oct 2020 00:59:08 GMT
+
+_Version update only_
+
+## 1.8.79
+Wed, 14 Oct 2020 23:30:14 GMT
+
+_Version update only_
+
+## 1.8.78
+Tue, 13 Oct 2020 15:11:28 GMT
+
+_Version update only_
+
+## 1.8.77
+Mon, 12 Oct 2020 15:11:16 GMT
+
+_Version update only_
+
+## 1.8.76
+Fri, 09 Oct 2020 15:11:09 GMT
+
+_Version update only_
+
+## 1.8.75
+Tue, 06 Oct 2020 00:24:06 GMT
+
+_Version update only_
+
+## 1.8.74
+Mon, 05 Oct 2020 22:36:57 GMT
+
+_Version update only_
+
+## 1.8.73
+Mon, 05 Oct 2020 15:10:42 GMT
+
+_Version update only_
+
+## 1.8.72
+Fri, 02 Oct 2020 00:10:59 GMT
+
+_Version update only_
+
+## 1.8.71
+Thu, 01 Oct 2020 20:27:16 GMT
+
+_Version update only_
+
+## 1.8.70
+Thu, 01 Oct 2020 18:51:21 GMT
+
+_Version update only_
 
 ## 1.8.69
 Wed, 30 Sep 2020 18:39:17 GMT

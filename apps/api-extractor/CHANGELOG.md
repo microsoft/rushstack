@@ -1,6 +1,147 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Jun 2021 19:59:53 GMT and should not be manually modified.
+
+## 7.16.1
+Fri, 04 Jun 2021 19:59:53 GMT
+
+_Version update only_
+
+## 7.16.0
+Fri, 04 Jun 2021 15:08:20 GMT
+
+### Minor changes
+
+- Upgrade the bundled compiler engine to TypeScript 4.3
+
+## 7.15.2
+Wed, 19 May 2021 00:11:39 GMT
+
+_Version update only_
+
+## 7.15.1
+Mon, 03 May 2021 15:10:29 GMT
+
+_Version update only_
+
+## 7.15.0
+Thu, 29 Apr 2021 23:26:50 GMT
+
+### Minor changes
+
+- Upgrade the bundled compiler engine to TypeScript 4.2
+
+## 7.14.0
+Tue, 20 Apr 2021 04:59:51 GMT
+
+### Minor changes
+
+- Projects can now define custom tags using a tsdoc.json file
+
+## 7.13.5
+Mon, 12 Apr 2021 15:10:28 GMT
+
+_Version update only_
+
+## 7.13.4
+Thu, 08 Apr 2021 06:05:31 GMT
+
+_Version update only_
+
+## 7.13.3
+Tue, 06 Apr 2021 15:14:22 GMT
+
+_Version update only_
+
+## 7.13.2
+Thu, 04 Mar 2021 01:11:31 GMT
+
+_Version update only_
+
+## 7.13.1
+Fri, 05 Feb 2021 16:10:42 GMT
+
+_Version update only_
+
+## 7.13.0
+Wed, 13 Jan 2021 01:11:06 GMT
+
+### Minor changes
+
+- Upgrade the bundled compiler engine to TypeScript 4.1
+
+## 7.12.1
+Thu, 10 Dec 2020 23:25:49 GMT
+
+### Patches
+
+- Upgrade to TSDoc 0.12.24
+
+## 7.12.0
+Wed, 18 Nov 2020 08:19:54 GMT
+
+### Minor changes
+
+- The "isOptional" .api.json field is now applied to both methods and properties
+
+## 7.11.5
+Wed, 18 Nov 2020 06:21:57 GMT
+
+### Patches
+
+- Update .api.json file format to store a new field "isOptional" for documenting optional properties
+
+## 7.11.4
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 7.11.3
+Tue, 10 Nov 2020 23:13:12 GMT
+
+_Version update only_
+
+## 7.11.2
+Fri, 30 Oct 2020 06:38:38 GMT
+
+_Version update only_
+
+## 7.11.1
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 7.11.0
+Thu, 29 Oct 2020 06:14:19 GMT
+
+### Minor changes
+
+- Upgrade the bundled compiler engine to TypeScript 4.0
+
+## 7.10.6
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 7.10.5
+Tue, 27 Oct 2020 15:10:13 GMT
+
+_Version update only_
+
+## 7.10.4
+Tue, 06 Oct 2020 00:24:06 GMT
+
+_Version update only_
+
+## 7.10.3
+Mon, 05 Oct 2020 22:36:57 GMT
+
+_Version update only_
+
+## 7.10.2
+Mon, 05 Oct 2020 15:10:42 GMT
+
+_Version update only_
 
 ## 7.10.1
 Wed, 30 Sep 2020 18:39:17 GMT

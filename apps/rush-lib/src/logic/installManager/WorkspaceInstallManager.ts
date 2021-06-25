@@ -1,35 +1,26 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-import {
-  FileSystem,
-  InternalError,
-  MapExtensions,
-  JsonFile,
-  FileConstants,
-  AlreadyReportedError
-} from '@rushstack/node-core-library';
+import { FileSystem, FileConstants, AlreadyReportedError } from '@rushstack/node-core-library';
 
 import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
-import { PackageJsonEditor, DependencyType, PackageJsonDependency } from '../../api/PackageJsonEditor';
+import { PackageJsonEditor, DependencyType } from '../../api/PackageJsonEditor';
 import { PnpmWorkspaceFile } from '../pnpm/PnpmWorkspaceFile';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushConstants } from '../../logic/RushConstants';
-import { Stopwatch } from '../../utilities/Stopwatch';
 import { Utilities } from '../../utilities/Utilities';
 import { InstallHelpers } from './InstallHelpers';
 import { CommonVersionsConfiguration } from '../../api/CommonVersionsConfiguration';
 import { RepoStateFile } from '../RepoStateFile';
-import { IPnpmfileShimSettings } from '../pnpm/IPnpmfileShimSettings';
-import { PnpmProjectDependencyManifest } from '../pnpm/PnpmProjectDependencyManifest';
-import { PnpmShrinkwrapFile, IPnpmShrinkwrapImporterYaml } from '../pnpm/PnpmShrinkwrapFile';
 import { LastLinkFlagFactory } from '../../api/LastLinkFlag';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
+import { ShrinkwrapFileFactory } from '../ShrinkwrapFileFactory';
 
 /**
  * This class implements common logic between "rush install" and "rush update".
@@ -38,7 +29,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   /**
    * @override
    */
-  public async doInstall(): Promise<void> {
+  public async doInstallAsync(): Promise<void> {
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     if (this.options.noLink) {
       console.log(
@@ -50,7 +41,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       throw new AlreadyReportedError();
     }
 
-    await super.doInstall();
+    await super.doInstallAsync();
   }
 
   /**
@@ -64,22 +55,17 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   protected async prepareCommonTempAsync(
     shrinkwrapFile: BaseShrinkwrapFile | undefined
   ): Promise<{ shrinkwrapIsUpToDate: boolean; shrinkwrapWarnings: string[] }> {
-    const stopwatch: Stopwatch = Stopwatch.start();
+    // Block use of the RUSH_TEMP_FOLDER environment variable
+    if (EnvironmentConfiguration.rushTempFolderOverride !== undefined) {
+      throw new Error(
+        'The RUSH_TEMP_FOLDER environment variable is not compatible with workspace installs. If attempting ' +
+          'to move the PNPM store path, see the `RUSH_PNPM_STORE_PATH` environment variable.'
+      );
+    }
 
     console.log(
       os.EOL + colors.bold('Updating workspace files in ' + this.rushConfiguration.commonTempFolder)
     );
-
-    // Shim support for common versions resolution into the pnpmfile. When using workspaces, there are no
-    // "hoisted" packages, so we need to apply the correct versions to indirect dependencies through the
-    // pnpmfile.
-    if (this.rushConfiguration.packageManager === 'pnpm') {
-      const tempPnpmFilePath: string = path.join(
-        this.rushConfiguration.commonTempFolder,
-        RushConstants.pnpmfileFilename
-      );
-      await this.createShimPnpmfileAsync(tempPnpmFilePath);
-    }
 
     const shrinkwrapWarnings: string[] = [];
 
@@ -90,11 +76,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     if (!shrinkwrapFile) {
       shrinkwrapIsUpToDate = false;
     } else {
-      if (
-        shrinkwrapFile.getWorkspaceKeys().length === 0 &&
-        this.rushConfiguration.projects.length !== 0 &&
-        !this.options.fullUpgrade
-      ) {
+      if (!shrinkwrapFile.isWorkspaceCompatible && !this.options.fullUpgrade) {
         console.log();
         console.log(
           colors.red(
@@ -104,26 +86,40 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         );
         throw new AlreadyReportedError();
       }
-    }
 
-    if (shrinkwrapFile) {
-      if (this._findOrphanedWorkspaceProjects(shrinkwrapFile)) {
-        // If there are any orphaned projects, then install would fail because the shrinkwrap
-        // contains references that refer to nonexistent file paths.
+      // If there are orphaned projects, we need to update
+      const orphanedProjects: ReadonlyArray<string> = shrinkwrapFile.findOrphanedProjects(
+        this.rushConfiguration
+      );
+      if (orphanedProjects.length > 0) {
+        for (const orhpanedProject of orphanedProjects) {
+          shrinkwrapWarnings.push(
+            `Your ${this.rushConfiguration.shrinkwrapFilePhrase} references "${orhpanedProject}" ` +
+              'which was not found in rush.json'
+          );
+        }
         shrinkwrapIsUpToDate = false;
       }
     }
 
-    // If preferred versions have been updated, then we can't be certain of the state of the shrinkwrap
+    // If preferred versions have been updated, or if the repo-state.json is invalid,
+    // we can't be certain of the state of the shrinkwrap
     const repoState: RepoStateFile = this.rushConfiguration.getRepoState(this.options.variant);
-    const commonVersions: CommonVersionsConfiguration = this.rushConfiguration.getCommonVersions(
-      this.options.variant
-    );
-    if (repoState.preferredVersionsHash !== commonVersions.getPreferredVersionsHash()) {
+    if (!repoState.isValid) {
       shrinkwrapWarnings.push(
-        `Preferred versions from ${RushConstants.commonVersionsFilename} have been modified.`
+        `The ${RushConstants.repoStateFilename} file is invalid. There may be a merge conflict marker in the file.`
       );
       shrinkwrapIsUpToDate = false;
+    } else {
+      const commonVersions: CommonVersionsConfiguration = this.rushConfiguration.getCommonVersions(
+        this.options.variant
+      );
+      if (repoState.preferredVersionsHash !== commonVersions.getPreferredVersionsHash()) {
+        shrinkwrapWarnings.push(
+          `Preferred versions from ${RushConstants.commonVersionsFilename} have been modified.`
+        );
+        shrinkwrapIsUpToDate = false;
+      }
     }
 
     // To generate the workspace file, we will add each project to the file as we loop through and validate
@@ -151,9 +147,8 @@ export class WorkspaceInstallManager extends BaseInstallManager {
         const dependencySpecifier: DependencySpecifier = new DependencySpecifier(name, version);
 
         // Is there a locally built Rush project that could satisfy this dependency?
-        const referencedLocalProject:
-          | RushConfigurationProject
-          | undefined = this.rushConfiguration.getProjectByName(name);
+        const referencedLocalProject: RushConfigurationProject | undefined =
+          this.rushConfiguration.getProjectByName(name);
 
         // Validate that local projects are referenced with workspace notation. If not, and it is not a
         // cyclic dependency, then it needs to be updated to specify `workspace:*` explicitly. Currently only
@@ -210,23 +205,6 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           // Already specified as a local project. Allow the package manager to validate this
           continue;
         }
-
-        // It is not a local dependency, validate that it is compatible
-        if (
-          shrinkwrapFile &&
-          !shrinkwrapFile.hasCompatibleWorkspaceDependency(
-            dependencySpecifier,
-            shrinkwrapFile.getWorkspaceKeyByPath(
-              this.rushConfiguration.commonTempFolder,
-              rushProject.projectFolder
-            )
-          )
-        ) {
-          shrinkwrapWarnings.push(
-            `Missing dependency "${name}" (${version}) required by "${rushProject.packageName}"`
-          );
-          shrinkwrapIsUpToDate = false;
-        }
       }
 
       // Save the package.json if we modified the version references and warn that the package.json was modified
@@ -238,6 +216,14 @@ export class WorkspaceInstallManager extends BaseInstallManager {
           )
         );
       }
+
+      // Now validate that the shrinkwrap file matches what is in the package.json
+      if (shrinkwrapFile?.isWorkspaceProjectModified(rushProject, this.options.variant)) {
+        shrinkwrapWarnings.push(
+          `Dependencies of project "${rushProject.packageName}" do not match the current shinkwrap.`
+        );
+        shrinkwrapIsUpToDate = false;
+      }
     }
 
     // Write the common package.json
@@ -247,44 +233,17 @@ export class WorkspaceInstallManager extends BaseInstallManager {
     // since "rush install" will consider this timestamp
     workspaceFile.save(workspaceFile.workspaceFilename, { onlyIfChanged: true });
 
-    stopwatch.stop();
-    console.log(`Finished creating workspace (${stopwatch.toString()})`);
-
     return { shrinkwrapIsUpToDate, shrinkwrapWarnings };
   }
 
   protected canSkipInstall(lastModifiedDate: Date): boolean {
-    console.log(
-      os.EOL +
-        colors.bold(
-          `Checking ${RushConstants.nodeModulesFolderName} in ${this.rushConfiguration.commonTempFolder}`
-        ) +
-        os.EOL
-    );
+    if (!super.canSkipInstall(lastModifiedDate)) {
+      return false;
+    }
 
-    // Based on timestamps, can we skip this install entirely?
     const potentiallyChangedFiles: string[] = [];
 
-    // Consider the timestamp on the node_modules folder; if someone tampered with it
-    // or deleted it entirely, then we can't skip this install
-    potentiallyChangedFiles.push(
-      path.join(this.rushConfiguration.commonTempFolder, RushConstants.nodeModulesFolderName)
-    );
-
-    // Additionally, if they pulled an updated shrinkwrap file from Git, then we can't skip this install
-    potentiallyChangedFiles.push(this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant));
-
-    // Add common-versions.json file to the potentially changed files list.
-    potentiallyChangedFiles.push(this.rushConfiguration.getCommonVersionsFilePath(this.options.variant));
-
     if (this.rushConfiguration.packageManager === 'pnpm') {
-      // If the repo is using pnpmfile.js, consider that also
-      const pnpmFileFilename: string = this.rushConfiguration.getPnpmfilePath(this.options.variant);
-
-      if (FileSystem.exists(pnpmFileFilename)) {
-        potentiallyChangedFiles.push(pnpmFileFilename);
-      }
-
       // Add workspace file. This file is only modified when workspace packages change.
       const pnpmWorkspaceFilename: string = path.join(
         this.rushConfiguration.commonTempFolder,
@@ -292,7 +251,7 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       );
 
       if (FileSystem.exists(pnpmWorkspaceFilename)) {
-        potentiallyChangedFiles.push();
+        potentiallyChangedFiles.push(pnpmWorkspaceFilename);
       }
     }
 
@@ -427,152 +386,23 @@ export class WorkspaceInstallManager extends BaseInstallManager {
   }
 
   protected async postInstallAsync(): Promise<void> {
-    // Per-project manifests can only be generated for PNPM currently
-    if (this.rushConfiguration.packageManager === 'pnpm' && this.rushConfiguration.pnpmOptions) {
-      // Base it off the temp shrinkwrap, as this was the most recently completed install
-      const tempShrinkwrapFile: PnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromFile(
-        this.rushConfiguration.tempShrinkwrapFilename,
-        this.rushConfiguration.pnpmOptions
-      )!;
+    // Grab the temp shrinkwrap, as this was the most recently completed install. It may also be
+    // more up-to-date than the checked-in shrinkwrap since filtered installs are not written back.
+    const tempShrinkwrapFile: BaseShrinkwrapFile = ShrinkwrapFileFactory.getShrinkwrapFile(
+      this.rushConfiguration.packageManager,
+      this.rushConfiguration.pnpmOptions,
+      this.rushConfiguration.tempShrinkwrapFilename
+    )!;
 
-      await Promise.all(
-        this.rushConfiguration.projects.map((x) => this._createPerProjectManifestAsync(tempShrinkwrapFile, x))
-      );
-    }
+    // Write or delete all project shrinkwraps related to the install
+    await Promise.all(
+      this.rushConfiguration.projects.map(async (x) => {
+        await tempShrinkwrapFile.getProjectShrinkwrap(x)?.updateProjectShrinkwrapAsync();
+      })
+    );
 
     // TODO: Remove when "rush link" and "rush unlink" are deprecated
     LastLinkFlagFactory.getCommonTempFlag(this.rushConfiguration).create();
-  }
-
-  /**
-   * Preferred versions are supported using pnpmfile by substituting any dependency version specifier
-   * for the preferred version during package resolution. This is only done if the preferred version range
-   * is a subset of the dependency version range. Allowed alternate versions are not modified. The pnpmfile
-   * shim will subsequently call into the provided pnpmfile, if one exists.
-   */
-  protected async createShimPnpmfileAsync(filename: string): Promise<void> {
-    const pnpmfileDir: string = path.dirname(filename);
-    let pnpmfileExists: boolean = false;
-    try {
-      // Attempt to move the existing pnpmfile if there is one
-      await FileSystem.moveAsync({
-        sourcePath: filename,
-        destinationPath: path.join(pnpmfileDir, 'clientPnpmfile.js')
-      });
-      pnpmfileExists = true;
-    } catch (error) {
-      if (!FileSystem.isNotExistError(error)) {
-        throw error;
-      }
-    }
-
-    const pnpmfileShimSettings: IPnpmfileShimSettings = {
-      allPreferredVersions: MapExtensions.toObject(
-        InstallHelpers.collectPreferredVersions(this.rushConfiguration, this.options)
-      ),
-      allowedAlternativeVersions: MapExtensions.toObject(
-        this.rushConfiguration.getCommonVersions(this.options.variant).allowedAlternativeVersions
-      ),
-      semverPath: require.resolve('semver'),
-      useClientPnpmfile: pnpmfileExists
-    };
-
-    // Write the settings to be consumed by the pnpmfile
-    await JsonFile.saveAsync(pnpmfileShimSettings, path.resolve(pnpmfileDir, 'pnpmfileSettings.json'), {
-      ensureFolderExists: true
-    });
-
-    // Copy the shim pnpmfile to the original path
-    await FileSystem.copyFileAsync({
-      sourcePath: path.resolve(__dirname, '..', 'pnpm', 'PnpmfileShim.js'),
-      destinationPath: filename
-    });
-  }
-
-  /**
-   * If the feature is enabled, creates shrinkwrap-deps.json files and places them in <projectFolder>/.rush/temp.
-   * These files contain the integrity hash of every dependency as well as dependencies of dependencies. This
-   * file can be used to track whether or not the packages consumed by this project changed between installs.
-   */
-  protected _createPerProjectManifestAsync(
-    pnpmShrinkwrapFile: PnpmShrinkwrapFile,
-    project: RushConfigurationProject
-  ): Promise<void> {
-    const pnpmProjectDependencyManifest: PnpmProjectDependencyManifest = new PnpmProjectDependencyManifest({
-      pnpmShrinkwrapFile,
-      project
-    });
-
-    // If the feature is not enabled, clean up the manifest and return
-    if (
-      this.rushConfiguration.experimentsConfiguration.configuration.legacyIncrementalBuildDependencyDetection
-    ) {
-      return pnpmProjectDependencyManifest.deleteIfExistsAsync();
-    }
-
-    // Obtain the workspace importer from the shrinkwrap, which lists resolved dependencies
-    const importerKey: string = pnpmShrinkwrapFile.getWorkspaceKeyByPath(
-      this.rushConfiguration.commonTempFolder,
-      project.projectFolder
-    );
-    const workspaceImporter:
-      | IPnpmShrinkwrapImporterYaml
-      | undefined = pnpmShrinkwrapFile.getWorkspaceImporter(importerKey);
-
-    if (!workspaceImporter) {
-      // Filtered installs will not contain all projects in the shrinkwrap, but if one is
-      // missing during a full install, something has gone wrong
-      if (this.options.toProjects.length === 0) {
-        throw new InternalError(
-          `Cannot find shrinkwrap entry using importer key for workspace project: ${importerKey}`
-        );
-      }
-      return pnpmProjectDependencyManifest.deleteIfExistsAsync();
-    }
-
-    const localDependencyProjectNames: Set<string> = new Set<string>(
-      project.localDependencyProjects.map((x) => x.packageName)
-    );
-
-    // Loop through non-local dependencies. Skip peer dependencies because they're only a constraint
-    const dependencies: PackageJsonDependency[] = [
-      ...project.packageJsonEditor.dependencyList,
-      ...project.packageJsonEditor.devDependencyList
-    ].filter((x) => x.dependencyType !== DependencyType.Peer && !localDependencyProjectNames.has(x.name));
-
-    for (const { name, dependencyType } of dependencies) {
-      // read the version number from the shrinkwrap entry
-      let version: string | undefined;
-      if (dependencyType === DependencyType.Regular) {
-        version = (workspaceImporter.dependencies || {})[name];
-      } else if (dependencyType === DependencyType.Dev) {
-        // Dev dependencies are folded into dependencies if there is a duplicate
-        // definition, so we should also check there
-        version =
-          (workspaceImporter.devDependencies || {})[name] || (workspaceImporter.dependencies || {})[name];
-      } else if (dependencyType === DependencyType.Optional) {
-        version = (workspaceImporter.optionalDependencies || {})[name];
-      }
-
-      if (!version) {
-        // Optional dependencies by definition may not exist, so avoid throwing on these
-        if (dependencyType !== DependencyType.Optional) {
-          throw new InternalError(
-            `Cannot find shrinkwrap entry dependency "${name}" for workspace project: ${project.packageName}`
-          );
-        }
-        continue;
-      }
-
-      // Add to the manifest and provide all the parent dependencies
-      pnpmProjectDependencyManifest.addDependency(name, version, {
-        dependencies: { ...workspaceImporter.dependencies, ...workspaceImporter.devDependencies },
-        optionalDependencies: { ...workspaceImporter.optionalDependencies },
-        peerDependencies: {}
-      });
-    }
-
-    return pnpmProjectDependencyManifest.saveAsync();
   }
 
   /**
@@ -587,45 +417,9 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       args.push('--recursive');
       args.push('--link-workspace-packages', 'false');
 
-      // "<package>..." selects the specified package and all direct and indirect dependencies
-      for (const toProject of this.options.toProjects) {
-        args.push('--filter', `${toProject.packageName}...`);
+      for (const arg of this.options.pnpmFilterArguments) {
+        args.push(arg);
       }
     }
-  }
-
-  /**
-   * Checks for projects that exist in the shrinkwrap file, but don't exist
-   * in rush.json.  This might occur, e.g. if a project was recently deleted or renamed.
-   *
-   * @returns true if orphans were found, or false if everything is okay
-   */
-  private _findOrphanedWorkspaceProjects(shrinkwrapFile: BaseShrinkwrapFile): boolean {
-    for (const workspaceKey of shrinkwrapFile.getWorkspaceKeys()) {
-      // Look for the RushConfigurationProject using the workspace key
-      let rushProjectPath: string;
-      if (this.rushConfiguration.packageManager === 'pnpm') {
-        // PNPM workspace keys are relative paths from the workspace root, which is the common temp folder
-        rushProjectPath = path.resolve(this.rushConfiguration.commonTempFolder, workspaceKey);
-      } else {
-        throw new InternalError('Orphaned workspaces cannot be checked for the provided package manager');
-      }
-
-      if (!this.rushConfiguration.tryGetProjectForPath(rushProjectPath)) {
-        console.log(
-          os.EOL +
-            colors.yellow(
-              Utilities.wrapWords(
-                `Your ${this.rushConfiguration.shrinkwrapFilePhrase} references a project at "${rushProjectPath}" ` +
-                  'which no longer exists.'
-              )
-            ) +
-            os.EOL
-        );
-        return true; // found one
-      }
-    }
-
-    return false; // none found
   }
 }

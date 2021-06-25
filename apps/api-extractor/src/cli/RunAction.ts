@@ -76,7 +76,7 @@ export class RunAction extends CommandLineAction {
     });
   }
 
-  protected onExecute(): Promise<void> {
+  protected async onExecute(): Promise<void> {
     // override
     const lookup: PackageJsonLookup = new PackageJsonLookup();
     let configFilename: string;
@@ -152,7 +152,5 @@ export class RunAction extends CommandLineAction {
         console.log(os.EOL + colors.yellow('API Extractor completed with warnings'));
       }
     }
-
-    return Promise.resolve();
   }
 }

@@ -66,8 +66,11 @@ export class TypeScriptHelpers {
    * sometimes return a "prototype" symbol for an object, even though there is no corresponding declaration in the
    * source code.  API Extractor generally ignores such symbols.
    */
-  public static hasAnyDeclarations(symbol: ts.Symbol): boolean {
-    return symbol.declarations && symbol.declarations.length > 0;
+  public static tryGetADeclaration(symbol: ts.Symbol): ts.Declaration | undefined {
+    if (symbol.declarations && symbol.declarations.length > 0) {
+      return symbol.declarations[0];
+    }
+    return undefined;
   }
 
   /**
@@ -272,13 +275,11 @@ export class TypeScriptHelpers {
       {
         onEmitNode(
           hint: ts.EmitHint,
-          node: ts.Node | undefined,
-          emit: (hint: ts.EmitHint, node: ts.Node | undefined) => void
+          node: ts.Node,
+          emitCallback: (hint: ts.EmitHint, node: ts.Node) => void
         ): void {
-          if (node) {
-            ts.setEmitFlags(declarationName, ts.EmitFlags.NoIndentation | ts.EmitFlags.SingleLine);
-          }
-          emit(hint, node);
+          ts.setEmitFlags(declarationName, ts.EmitFlags.NoIndentation | ts.EmitFlags.SingleLine);
+          emitCallback(hint, node);
         }
       }
     );

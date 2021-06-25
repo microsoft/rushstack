@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.9';
+import type * as TTypescript from 'typescript';
 
 // The specifics of these types aren't important
 /**
@@ -12,7 +12,9 @@ export interface IEmitResolver {}
 /**
  * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/types.ts#L5969-L5988
  */
-export interface IEmitHost {}
+export interface IEmitHost {
+  writeFile: TTypescript.WriteFileCallback;
+}
 
 /**
  * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/types.ts#L3338-L3341
@@ -93,9 +95,7 @@ export interface IExtendedTypeScript {
     useCaseSensitiveFileNames: boolean,
     currentDirectory: string,
     depth: number | undefined,
-    getFileSystemEntries: (
-      path: string
-    ) => {
+    getFileSystemEntries: (path: string) => {
       readonly files: ReadonlyArray<string>;
       readonly directories: ReadonlyArray<string>;
     },

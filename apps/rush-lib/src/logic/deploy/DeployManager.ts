@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as path from 'path';
 import * as resolve from 'resolve';
 import * as npmPacklist from 'npm-packlist';
@@ -29,7 +29,7 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { DeployScenarioConfiguration, IDeployScenarioProjectJson } from './DeployScenarioConfiguration';
-import { PnpmfileConfiguration } from './PnpmfileConfiguration';
+import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
 import { matchesWithStar } from './Utils';
 
 // (@types/npm-packlist is missing this API)
@@ -116,7 +116,11 @@ export interface IDeployState {
 
   symlinkAnalyzer: SymlinkAnalyzer;
 
-  pnpmfileConfiguration: PnpmfileConfiguration;
+  /**
+   * The pnpmfile configuration if using PNPM, otherwise undefined. The configuration will be used to
+   * transform the package.json prior to deploy.
+   */
+  pnpmfileConfiguration: PnpmfileConfiguration | undefined;
 
   /**
    * The desired path to be used when archiving the target folder. Supported file extensions: .zip.
@@ -157,8 +161,10 @@ export class DeployManager {
       FileSystem.getRealPath(packageJsonFolderPath)
     );
 
-    // Transform packageJson using pnpmfile.js
-    const packageJson: IPackageJson = deployState.pnpmfileConfiguration.transform(originalPackageJson);
+    // Transform packageJson using pnpmfile.js if available
+    const packageJson: IPackageJson = deployState.pnpmfileConfiguration
+      ? deployState.pnpmfileConfiguration.transform(originalPackageJson)
+      : originalPackageJson;
 
     // Union of keys from regular dependencies, peerDependencies, optionalDependencies
     // (and possibly devDependencies if includeDevDependencies=true)
@@ -170,7 +176,7 @@ export class DeployManager {
     for (const name of Object.keys(packageJson.dependencies || {})) {
       dependencyNamesToProcess.add(name);
     }
-    if (deployState.scenarioConfiguration.json.includeDevDependencies) {
+    if (deployState.scenarioConfiguration.json.includeDevDependencies && sourceFolderInfo?.isRushProject) {
       for (const name of Object.keys(packageJson.devDependencies || {})) {
         dependencyNamesToProcess.add(name);
       }
@@ -320,9 +326,8 @@ export class DeployManager {
       throw new InternalError(`Error resolving ${packageName} from ${startingFolder}`);
     }
 
-    const dependencyPackageFolderPath: string | undefined = this._packageJsonLookup.tryGetPackageFolderFor(
-      resolvedDependency
-    );
+    const dependencyPackageFolderPath: string | undefined =
+      this._packageJsonLookup.tryGetPackageFolderFor(resolvedDependency);
 
     if (!dependencyPackageFolderPath) {
       throw new Error(`Error finding package.json folder for ${resolvedDependency}`);
@@ -530,9 +535,8 @@ export class DeployManager {
     }
     includedProjectNamesSet.add(projectName);
 
-    const projectSettings:
-      | IDeployScenarioProjectJson
-      | undefined = deployState.scenarioConfiguration.projectJsonsByName.get(projectName);
+    const projectSettings: IDeployScenarioProjectJson | undefined =
+      deployState.scenarioConfiguration.projectJsonsByName.get(projectName);
     if (projectSettings && projectSettings.additionalProjectsToInclude) {
       for (const additionalProjectToInclude of projectSettings.additionalProjectsToInclude) {
         this._collectAdditionalProjectsToInclude(
@@ -620,9 +624,8 @@ export class DeployManager {
 
     for (const rushProject of this._rushConfiguration.projects) {
       const projectFolder: string = FileSystem.getRealPath(rushProject.projectFolder);
-      const projectSettings:
-        | IDeployScenarioProjectJson
-        | undefined = deployState.scenarioConfiguration.projectJsonsByName.get(rushProject.packageName);
+      const projectSettings: IDeployScenarioProjectJson | undefined =
+        deployState.scenarioConfiguration.projectJsonsByName.get(rushProject.packageName);
 
       deployState.folderInfosByPath.set(projectFolder, {
         folderPath: projectFolder,
@@ -633,9 +636,8 @@ export class DeployManager {
 
     for (const projectName of includedProjectNamesSet) {
       console.log(colors.cyan('Analyzing project: ') + projectName);
-      const project: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
-        projectName
-      );
+      const project: RushConfigurationProject | undefined =
+        this._rushConfiguration.getProjectByName(projectName);
 
       if (!project) {
         throw new Error(`The project ${projectName} is not defined in rush.json`);
@@ -780,7 +782,10 @@ export class DeployManager {
       foldersToCopy: new Set(),
       folderInfosByPath: new Map(),
       symlinkAnalyzer: new SymlinkAnalyzer(),
-      pnpmfileConfiguration: new PnpmfileConfiguration(this._rushConfiguration),
+      pnpmfileConfiguration:
+        this._rushConfiguration.packageManager === 'pnpm'
+          ? new PnpmfileConfiguration(this._rushConfiguration)
+          : undefined,
       createArchiveFilePath
     };
 

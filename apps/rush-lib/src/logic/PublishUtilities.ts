@@ -9,17 +9,17 @@
 import { EOL } from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
-
+import { execSync } from 'child_process';
 import { IPackageJson, JsonFile, FileConstants, Text, Enum } from '@rushstack/node-core-library';
 
 import { IChangeInfo, ChangeType } from '../api/ChangeManagement';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { Utilities, IEnvironment } from '../utilities/Utilities';
-import { execSync } from 'child_process';
 import { PrereleaseToken } from './PrereleaseToken';
 import { ChangeFiles } from './ChangeFiles';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { DependencySpecifier, DependencySpecifierType } from './DependencySpecifier';
+import { Git } from './Git';
 
 export interface IChangeInfoHash {
   [key: string]: IChangeInfo;
@@ -49,7 +49,8 @@ export class PublishUtilities {
       const changeRequest: IChangeInfo = JsonFile.load(fullPath);
 
       if (includeCommitDetails) {
-        PublishUtilities._updateCommitDetails(fullPath, changeRequest.changes);
+        const git: Git = new Git(rushConfiguration);
+        PublishUtilities._updateCommitDetails(git, fullPath, changeRequest.changes);
       }
 
       for (const change of changeRequest.changes!) {
@@ -84,7 +85,7 @@ export class PublishUtilities {
         const change: IChangeInfo = allChanges[packageName];
         const project: RushConfigurationProject = allPackages.get(packageName)!;
         const pkg: IPackageJson = project.packageJson;
-        const deps: string[] = project.downstreamDependencyProjects;
+        const deps: Set<string> = project._consumingProjectNames;
 
         // Write the new version expected for the change.
         const skipVersionBump: boolean = PublishUtilities._shouldSkipVersionBump(
@@ -293,9 +294,10 @@ export class PublishUtilities {
     );
   }
 
-  private static _updateCommitDetails(filename: string, changes: IChangeInfo[] | undefined): void {
+  private static _updateCommitDetails(git: Git, filename: string, changes: IChangeInfo[] | undefined): void {
     try {
-      const fileLog: string = execSync('git log -n 1 ' + filename, {
+      const gitPath: string = git.getGitPathOrThrow();
+      const fileLog: string = execSync(`${gitPath} log -n 1 ${filename}`, {
         cwd: path.dirname(filename)
       }).toString();
       const author: string = fileLog.match(/Author: (.*)/)![1];
@@ -553,7 +555,7 @@ export class PublishUtilities {
       currentChange.changeType = ChangeType.none;
     } else {
       if (change.changeType === ChangeType.hotfix) {
-        const prereleaseComponents: ReadonlyArray<string> | null = semver.prerelease(pkg.version);
+        const prereleaseComponents: ReadonlyArray<string | number> | null = semver.prerelease(pkg.version);
         if (!rushConfiguration.hotfixChangeEnabled) {
           throw new Error(`Cannot add hotfix change; hotfixChangeEnabled is false in configuration.`);
         }
@@ -594,13 +596,13 @@ export class PublishUtilities {
     projectsToExclude?: Set<string>
   ): void {
     const packageName: string = change.packageName;
-    const downstreamNames: string[] = allPackages.get(packageName)!.downstreamDependencyProjects;
+    const downstream: ReadonlySet<RushConfigurationProject> = allPackages.get(packageName)!.consumingProjects;
 
     // Iterate through all downstream dependencies for the package.
-    if (downstreamNames) {
+    if (downstream) {
       if (change.changeType! >= ChangeType.hotfix || (prereleaseToken && prereleaseToken.hasValue)) {
-        for (const depName of downstreamNames) {
-          const pkg: IPackageJson = allPackages.get(depName)!.packageJson;
+        for (const dependency of downstream) {
+          const pkg: IPackageJson = dependency.packageJson;
 
           PublishUtilities._updateDownstreamDependency(
             pkg.name,

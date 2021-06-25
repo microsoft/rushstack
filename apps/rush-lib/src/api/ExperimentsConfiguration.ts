@@ -11,16 +11,23 @@ import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
  */
 export interface IExperimentsJson {
   /**
-   * If this setting is enabled, incremental builds should use repo-wide dependency tracking
-   * instead of project-specific tracking.
-   */
-  legacyIncrementalBuildDependencyDetection?: boolean;
-
-  /**
-   * By default, rush passes --no-prefer-frozen-lockfile to 'pnpm install'.
+   * By default, 'rush install' passes --no-prefer-frozen-lockfile to 'pnpm install'.
    * Set this option to true to pass '--frozen-lockfile' instead.
    */
   usePnpmFrozenLockfileForRushInstall?: boolean;
+
+  /**
+   * By default, 'rush update' passes --no-prefer-frozen-lockfile to 'pnpm install'.
+   * Set this option to true to pass '--prefer-frozen-lockfile' instead.
+   */
+  usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
+
+  /**
+   * If using the 'preventManualShrinkwrapChanges' option, restricts the hash to only include the layout of external dependencies.
+   * Used to allow links between workspace projects or the addition/removal of references to existing dependency versions to not
+   * cause hash changes.
+   */
+  omitImportersFromPreventManualShrinkwrapChanges?: boolean;
 
   /**
    * If true, the chmod field in temporary project tar headers will not be normalized.

@@ -11,7 +11,6 @@ export { ApprovedPackagesPolicy } from './api/ApprovedPackagesPolicy';
 export {
   RushConfiguration,
   ITryFindRushJsonLocationOptions,
-  ResolutionStrategy,
   IPackageManagerOptionsJsonBase,
   IConfigurationEnvironment,
   IConfigurationEnvironmentVariable,

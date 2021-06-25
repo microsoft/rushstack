@@ -1,10 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
-import * as semver from 'semver';
-
-import { AlreadyReportedError, Import } from '@rushstack/node-core-library';
+import { Import } from '@rushstack/node-core-library';
 import { BaseInstallManager, IInstallManagerOptions } from './base/BaseInstallManager';
 import { WorkspaceInstallManager } from './installManager/WorkspaceInstallManager';
 import { PurgeManager } from './PurgeManager';
@@ -28,16 +25,6 @@ export class InstallManagerFactory {
       rushConfiguration.pnpmOptions &&
       rushConfiguration.pnpmOptions.useWorkspaces
     ) {
-      if (!semver.satisfies(rushConfiguration.packageManagerToolVersion, '>=4.14.3')) {
-        console.log();
-        console.log(
-          colors.red(
-            'Workspaces are only supported in Rush for PNPM >=4.14.3. Upgrade PNPM to use the workspaces feature.'
-          )
-        );
-        throw new AlreadyReportedError();
-      }
-
       return new WorkspaceInstallManager(rushConfiguration, rushGlobalFolder, purgeManager, options);
     }
 

@@ -9,7 +9,7 @@ import {
   GlobalSource,
   Navigation,
   Meaning
-} from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+} from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { PackageJsonLookup, INodePackageJson, InternalError } from '@rushstack/node-core-library';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { TypeScriptInternals } from '../analyzer/TypeScriptInternals';
@@ -292,9 +292,8 @@ export class DeclarationReferenceGenerator {
       }
     }
 
-    let navigation: Navigation | 'global' = DeclarationReferenceGenerator._getNavigationToSymbol(
-      followedSymbol
-    );
+    let navigation: Navigation | 'global' =
+      DeclarationReferenceGenerator._getNavigationToSymbol(followedSymbol);
     if (navigation === 'global') {
       if (parentRef.source !== GlobalSource.instance) {
         parentRef = new DeclarationReference(GlobalSource.instance);

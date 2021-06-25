@@ -70,12 +70,6 @@ export class RushConstants {
   public static readonly npmShrinkwrapFilename: string = 'npm-shrinkwrap.json';
 
   /**
-   * The filename ("shrinkwrap.yaml") used to store an installation plan for the PNPM package manger
-   * (PNPM version 2.x and earlier).
-   */
-  public static readonly pnpmV1ShrinkwrapFilename: string = 'shrinkwrap.yaml';
-
-  /**
    * Number of installation attempts
    */
   public static readonly defaultMaxInstallAttempts: number = 3;
@@ -87,9 +81,14 @@ export class RushConstants {
   public static readonly pnpmV3ShrinkwrapFilename: string = 'pnpm-lock.yaml';
 
   /**
-   * The filename ("pnpmfile.js") used to add custom configuration to PNPM
+   * The filename ("pnpmfile.js") used to add custom configuration to PNPM (PNPM version 1.x and later).
    */
-  public static readonly pnpmfileFilename: string = 'pnpmfile.js';
+  public static readonly pnpmfileV1Filename: string = 'pnpmfile.js';
+
+  /**
+   * The filename (".pnpmfile.cjs") used to add custom configuration to PNPM (PNPM version 6.x and later).
+   */
+  public static readonly pnpmfileV6Filename: string = '.pnpmfile.cjs';
 
   /**
    * The filename ("shrinkwrap.yaml") used to store state for pnpm
@@ -140,9 +139,24 @@ export class RushConstants {
   public static readonly versionPoliciesFilename: string = 'version-policies.json';
 
   /**
-   * Experiments configuration file, which
+   * Experiments configuration file.
    */
   public static readonly experimentsFilename: string = 'experiments.json';
+
+  /**
+   * The artifactory.json configuration file name.
+   */
+  public static readonly artifactoryFilename: string = 'artifactory.json';
+
+  /**
+   * Build cache configuration file.
+   */
+  public static readonly buildCacheFilename: string = 'build-cache.json';
+
+  /**
+   * Per-project configuration filename.
+   */
+  public static readonly rushProjectConfigFilename: string = 'rush-project.json';
 
   /**
    * The URL ("http://rushjs.io") for the Rush web site.
@@ -164,7 +178,7 @@ export class RushConstants {
    * The name of the file to drop in project-folder/.rush/temp/ containing a listing of the project's direct
    * and indirect dependencies. This is used to detect if a project's dependencies have changed since the last build.
    */
-  public static readonly projectDependencyManifestFilename: string = 'shrinkwrap-deps.json';
+  public static readonly projectShrinkwrapFilename: string = 'shrinkwrap-deps.json';
 
   /**
    * The value of the "commandKind" property for a bulk command in command-line.json
@@ -185,4 +199,18 @@ export class RushConstants {
    * The name of the non-incremental build command.
    */
   public static readonly rebuildCommandName: string = 'rebuild';
+
+  public static readonly updateCloudCredentialsCommandName: string = 'update-cloud-credentials';
+
+  /**
+   * When a hash generated that contains multiple input segments, this character may be used
+   * to separate them to avoid issues like
+   * crypto.createHash('sha1').update('a').update('bc').digest('hex') === crypto.createHash('sha1').update('ab').update('c').digest('hex')
+   */
+  public static readonly hashDelimiter: string = '|';
+
+  /**
+   * The name of the per-user Rush configuration data folder.
+   */
+  public static readonly rushUserConfigurationFolderName: string = '.rush-user';
 }

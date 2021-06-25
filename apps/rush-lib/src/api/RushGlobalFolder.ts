@@ -46,13 +46,12 @@ export class RushGlobalFolder {
   public constructor() {
     // Because RushGlobalFolder is used by the front-end VersionSelector before EnvironmentConfiguration
     // is initialized, we need to read it using a special internal API.
-    const rushGlobalFolderOverride:
-      | string
-      | undefined = EnvironmentConfiguration._getRushGlobalFolderOverride(process.env);
+    const rushGlobalFolderOverride: string | undefined =
+      EnvironmentConfiguration._getRushGlobalFolderOverride(process.env);
     if (rushGlobalFolderOverride !== undefined) {
       this._rushGlobalFolder = rushGlobalFolderOverride;
     } else {
-      this._rushGlobalFolder = path.join(Utilities.getHomeDirectory(), '.rush');
+      this._rushGlobalFolder = path.join(Utilities.getHomeFolder(), '.rush');
     }
 
     const normalizedNodeVersion: string = process.version.match(/^[a-z0-9\-\.]+$/i)

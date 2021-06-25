@@ -1,6 +1,95 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Jun 2021 19:59:53 GMT and should not be manually modified.
+
+## 3.39.0
+Fri, 04 Jun 2021 19:59:53 GMT
+
+### Minor changes
+
+- BREAKING CHANGE: Remove FileSystem.copyFileToManyAsync API. It was determined that this API was a likely source of 0-length file copies. Recommended replacement is to call copyFileAsync.
+
+## 3.38.0
+Wed, 19 May 2021 00:11:39 GMT
+
+### Minor changes
+
+- Add `ignoreUndefinedValues` option to JsonFile to discard keys with undefined values during serialization; this is the standard behavior of `JSON.stringify()` and other JSON serializers.
+
+## 3.37.0
+Mon, 03 May 2021 15:10:28 GMT
+
+### Minor changes
+
+- Add a new API "Async" with some utilities for working with promises
+
+## 3.36.2
+Mon, 12 Apr 2021 15:10:28 GMT
+
+_Version update only_
+
+## 3.36.1
+Tue, 06 Apr 2021 15:14:22 GMT
+
+_Version update only_
+
+## 3.36.0
+Fri, 05 Feb 2021 16:10:42 GMT
+
+### Minor changes
+
+- Add EnvironmentMap API
+- Add Executable.spawn() API
+
+## 3.35.2
+Thu, 10 Dec 2020 23:25:49 GMT
+
+_Version update only_
+
+## 3.35.1
+Wed, 11 Nov 2020 01:08:59 GMT
+
+_Version update only_
+
+## 3.35.0
+Tue, 10 Nov 2020 23:13:11 GMT
+
+### Minor changes
+
+- Add new "copyFileToMany" API to copy a single file to multiple locations
+- Add an alreadyExistsBehavior option to the options for creating links in FileSystem.
+
+## 3.34.7
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 3.34.6
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 3.34.5
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 3.34.4
+Tue, 27 Oct 2020 15:10:13 GMT
+
+### Patches
+
+- Fix an issue where the TextAttribute.Bold ANSI escape was not rendered correctly by Linux
+
+## 3.34.3
+Tue, 06 Oct 2020 00:24:06 GMT
+
+_Version update only_
+
+## 3.34.2
+Mon, 05 Oct 2020 22:36:57 GMT
+
+_Version update only_
 
 ## 3.34.1
 Wed, 30 Sep 2020 18:39:17 GMT

@@ -2,6 +2,625 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.47.0",
+      "tag": "@microsoft/rush_v5.47.0",
+      "date": "Sat, 15 May 2021 00:02:26 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "For the experimental build cache feature, eliminate the RUSH_BUILD_CACHE_WRITE_CREDENTIAL environment variable; it is replaced by several new variables RUSH_BUILD_CACHE_CREDENTIAL, RUSH_BUILD_CACHE_WRITE_ALLOWED, and RUSH_BUILD_CACHE_ENABLED"
+          },
+          {
+            "comment": "Take pnpm-workspace.yaml file into consideration during install skip checks for PNPM"
+          },
+          {
+            "comment": "Fix a build cache warning that was sometimes displayed on Windows OS: \"'tar' exited with code 1 while attempting to create the cache entry\" (GitHub #2622)"
+          },
+          {
+            "comment": "Fix an issue where \"rushx\" CLI arguments were not escaped properly (GitHub #2695)"
+          },
+          {
+            "comment": "Allow rush-project.json to specify incrementalBuildIgnoredGlobs (GitHub issue #2618)"
+          },
+          {
+            "comment": "Remove support for PNPM < 5.0.0 and remove the \"resolutionStrategy\" option"
+          },
+          {
+            "comment": "Update \"rush init\" assets to use newer versions of Rush and PNPM. If you are looking to use PNPM < 6, you must rename the initialized \".pnpmfile.cjs\" file to \"pnpmfile.js\". For more information, see: https://pnpm.io/5.x/pnpmfile"
+          },
+          {
+            "comment": "Transform package.json using pnpmfile before checking if a Rush project is up-to-date"
+          },
+          {
+            "comment": "Add support for the Yarn \"resolutions\" package.json feature."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.46.1",
+      "tag": "@microsoft/rush_v5.46.1",
+      "date": "Tue, 04 May 2021 20:26:15 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the buildCacheEnabled setting was not applied correctly"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.46.0",
+      "tag": "@microsoft/rush_v5.46.0",
+      "date": "Tue, 04 May 2021 02:45:20 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Remove \"buildCache\" setting from experiments.json; it is superseded by \"buildCacheEnabled\" in build-cache.json"
+          },
+          {
+            "comment": "Add a \"rush init\" template for build-cache.json"
+          },
+          {
+            "comment": "Temporarily downgrade the \"@azure/identity\" to eliminate the keytar native dependency (GitHub issue #2492)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.45.6",
+      "tag": "@microsoft/rush_v5.45.6",
+      "date": "Fri, 30 Apr 2021 00:32:16 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a regression in the S3 cloud build cache provider"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.45.5",
+      "tag": "@microsoft/rush_v5.45.5",
+      "date": "Wed, 28 Apr 2021 17:54:16 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve diagnostic messages printed by the rush build cache"
+          },
+          {
+            "comment": "Fix an issue where Rush fails to run on Windows when the repository absolute path contains a space"
+          },
+          {
+            "comment": "Use simpler and more accurate check before skipping installs"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.45.4",
+      "tag": "@microsoft/rush_v5.45.4",
+      "date": "Fri, 23 Apr 2021 22:48:23 GMT",
+      "comments": {}
+    },
+    {
+      "version": "5.45.3",
+      "tag": "@microsoft/rush_v5.45.3",
+      "date": "Fri, 23 Apr 2021 22:03:08 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Allow prerelease versions of PNPM to be used in workspaces mode"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.45.2",
+      "tag": "@microsoft/rush_v5.45.2",
+      "date": "Thu, 22 Apr 2021 23:07:51 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix bad installs with when using pnpmfile in PNPM 6"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.45.1",
+      "tag": "@microsoft/rush_v5.45.1",
+      "date": "Wed, 21 Apr 2021 23:38:22 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Ensure that pnpm-workspace.yaml is always fully regenerated during \"rush install\" or \"rush update\""
+          },
+          {
+            "comment": "Fix support for pnpmfile in PNPM 6."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.45.0",
+      "tag": "@microsoft/rush_v5.45.0",
+      "date": "Tue, 20 Apr 2021 19:04:04 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Print diagnostic information to a log file \"<project-root>/.rush/build-cache-tar.log\" when the native \"tar\" is invoked."
+          },
+          {
+            "comment": "The Amazon S3 build cloud cache provider can now use buckets outside the default region"
+          },
+          {
+            "comment": "Add support for PNPM 6"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.44.0",
+      "tag": "@microsoft/rush_v5.44.0",
+      "date": "Sat, 17 Apr 2021 00:17:51 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add --json and --all param to rush scan"
+          },
+          {
+            "comment": "Fix \"rush deploy\" having \"includeDevDependencies\" turned on to deploy \"devDependencies\" for rush projects only"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.43.0",
+      "tag": "@microsoft/rush_v5.43.0",
+      "date": "Thu, 08 Apr 2021 06:09:52 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add \"--ignore-git-hooks\" flags to \"publish\" and \"version\" commands to prevent the execution of all git hooks"
+          },
+          {
+            "comment": "Fix parameter name typo."
+          },
+          {
+            "comment": "Eliminate a spurious warning that was displayed on Azure DevOps build agents: A phantom \"node_modules\" folder was found."
+          },
+          {
+            "comment": "Fix an issue where \"rush change\" reported \"Unable to find a git remote matching the repository URL\" when used with SSH auth"
+          },
+          {
+            "comment": "Fix an issue where \"rush publish\" reported 403 errors if the package version included a SemVer build metadata suffix"
+          },
+          {
+            "comment": "Partially deprecate RUSH_TEMP_FOLDER environment variable"
+          },
+          {
+            "comment": "Validate changefiles against a schema when running 'rush change --verify'"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.42.4",
+      "tag": "@microsoft/rush_v5.42.4",
+      "date": "Mon, 29 Mar 2021 05:57:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Don't validate the shrinkwrap when running 'rush update'"
+          },
+          {
+            "comment": "Gracefully handle a simultaneous upload to Azure Storage."
+          },
+          {
+            "comment": "Update rush publish -p flag description"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.42.3",
+      "tag": "@microsoft/rush_v5.42.3",
+      "date": "Wed, 17 Mar 2021 05:07:02 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix installation-time behavior of \"omitImportersFromPreventManualShrinkwrapChanges\" experiment."
+          },
+          {
+            "comment": "Don't upload build cache entries to Azure if the cache entry already exists."
+          },
+          {
+            "comment": "Replace the AWS dependencies with use of the Amazon S3 REST API."
+          },
+          {
+            "comment": "Add support for anonymous read from an Amazon S3-hosted cache."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.42.2",
+      "tag": "@microsoft/rush_v5.42.2",
+      "date": "Tue, 16 Mar 2021 00:30:38 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add experiment to exclude the \"importers\" section of \"pnpm-lock.yaml\" from the \"preventManualShrinkwrapChanges\" feature."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.42.1",
+      "tag": "@microsoft/rush_v5.42.1",
+      "date": "Fri, 12 Mar 2021 02:11:24 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Temporarily disable the AWS S3 credential provider logic to mitigate a problematic peer dependency (GitHub #2547)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.42.0",
+      "tag": "@microsoft/rush_v5.42.0",
+      "date": "Wed, 10 Mar 2021 06:25:44 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add AWS S3 support to the experimental build cache feature"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.41.0",
+      "tag": "@microsoft/rush_v5.41.0",
+      "date": "Wed, 10 Mar 2021 05:12:41 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush install\" could stall indefinitely because a network request did not handle timeouts properly"
+          },
+          {
+            "comment": "Allow merge conflicts in repo-state.json to be automatically resolved."
+          },
+          {
+            "comment": "Add a RUSH_INVOKED_FOLDER environment variable so that custom scripts can determine the folder path where Rush was invoked (GitHub #2497)"
+          },
+          {
+            "comment": "Add `preferFrozenLockfileForUpdate` option to minimize lockfile churn by passing --prefer-frozen-lockfile to pnpm during default `rush update`."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.40.7",
+      "tag": "@microsoft/rush_v5.40.7",
+      "date": "Tue, 02 Mar 2021 23:27:41 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a regression where certain Rush operations reported a TypeError (GitHub #2526)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.40.6",
+      "tag": "@microsoft/rush_v5.40.6",
+      "date": "Tue, 02 Mar 2021 06:22:01 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve cache read/write perf by attempting to use the \"tar\" binary."
+          },
+          {
+            "comment": "Fix default text in rush.json generated by \"rush init.\""
+          },
+          {
+            "comment": "Fix an issue where Rush would fail to restore from cache but report success when Git isn't present."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.40.5",
+      "tag": "@microsoft/rush_v5.40.5",
+      "date": "Tue, 23 Feb 2021 03:26:25 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Account for indirect dependencies when ordering projects in \"rush build\" if the intermediary dependencies are excluded by selection parameters."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.40.4",
+      "tag": "@microsoft/rush_v5.40.4",
+      "date": "Tue, 23 Feb 2021 00:01:20 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Make Rush per-project manifest generation more reliable and remove PNPM shrinkwrap validation"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.40.3",
+      "tag": "@microsoft/rush_v5.40.3",
+      "date": "Sun, 21 Feb 2021 01:05:53 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where \"rush setup\" did not work correctly with NPM 7.x due to an NPM regression"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.40.2",
+      "tag": "@microsoft/rush_v5.40.2",
+      "date": "Fri, 19 Feb 2021 06:28:28 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Allow usage of Node.js 8.x since we received feedback that some projects are still supporting it"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.40.1",
+      "tag": "@microsoft/rush_v5.40.1",
+      "date": "Fri, 19 Feb 2021 01:45:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a minor issue with the \"rush init\" template"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.40.0",
+      "tag": "@microsoft/rush_v5.40.0",
+      "date": "Wed, 17 Feb 2021 01:35:11 GMT",
+      "comments": {}
+    },
+    {
+      "version": "5.39.2",
+      "tag": "@microsoft/rush_v5.39.2",
+      "date": "Wed, 17 Feb 2021 01:34:11 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "(EXPERIMENTAL) Add a \"--disable-cache\" parameter for disabling the build cache."
+          },
+          {
+            "comment": "(EXPERIMENTAL) Add a \"disableBuildCache\" setting in command-line.json for disabling the build cache."
+          },
+          {
+            "comment": "(EXPERIMENTAL) Add options in rush-project.json for disabling the build cache for entire projects, or for individual commands for that project."
+          },
+          {
+            "comment": "Normalize selection CLI parameters for \"rush install\""
+          },
+          {
+            "comment": "Add experimental \"rush setup\" command"
+          },
+          {
+            "comment": "Add an experimental new config file common/config/artifactory.json for enabling Artifactory integration"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.39.1",
+      "tag": "@microsoft/rush_v5.39.1",
+      "date": "Sat, 13 Feb 2021 03:14:52 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Disable build cache after initial build when \"--watch\" is specified. This saves disk space, reduces CPU usage, and improves compatibility with downstream file watcher processes (e.g. \"webpack --watch\")."
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Convert the experimental \"--watch\" parameter into a \"watchForChanges: true\" setting in command-line.json, based on user feedback"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.39.0",
+      "tag": "@microsoft/rush_v5.39.0",
+      "date": "Thu, 11 Feb 2021 04:06:02 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve the wording of some log messages"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add a new parameter \"--watch\" that watches for filesystem changes and rebuilds the affected Rush projects; this feature can also be used with custom bulk commands (GitHub #2458, #1122)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.38.0",
+      "tag": "@microsoft/rush_v5.38.0",
+      "date": "Mon, 01 Feb 2021 20:42:04 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add new command-line parameters for bulk commands: \"--to-except\", \"--from\", \"--only\", \"--impacted-by\", \"--impacted-by-except\", and \"--from-version-policy\" (GitHub #2354)"
+          },
+          {
+            "comment": "Change the short name for \"--changed-projects-only\" to be \"-c\" (so that \"-o\" can be used for the new \"--only\" parameter)"
+          },
+          {
+            "comment": "Change the \"--from\" parameter so that it now includes all dependencies as people expected.  To skip dependencies, use the new \"--impacted-by\" parameter.  (GitHub issue #1447)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.37.0",
+      "tag": "@microsoft/rush_v5.37.0",
+      "date": "Sat, 30 Jan 2021 01:50:27 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Improve performance of association of repo file states with projects to speed up build commands in large repos."
+          },
+          {
+            "comment": "Add `publishFolder` property to the project configuration to allow publishing a sub-folder of the project"
+          },
+          {
+            "comment": "Add support for --from flag for filtered installs when using workspaces"
+          },
+          {
+            "comment": "Fix an issue where the Rush cache feature did not correctly detect files that were both tracked by git and were expected to be cached build output."
+          },
+          {
+            "comment": "Improve logging for the \"rush write-build-cache\" command"
+          },
+          {
+            "comment": "Correct some spelling mistakes in rush.json"
+          },
+          {
+            "comment": "Fix an error \"Cannot get dependency key\" sometimes reported by \"rush install\" (GitHub #2460)"
+          },
+          {
+            "comment": "Updade the \"rush init\" template to specify PNPM 5.15.2, which fixes a performance regression introduced in PNPM 5.13.7"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.36.2",
+      "tag": "@microsoft/rush_v5.36.2",
+      "date": "Thu, 21 Jan 2021 04:51:19 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Update Node.js version checks to support the new LTS release"
+          },
+          {
+            "comment": "Update rush.json produced by rush init to use PNPM 5.14.3"
+          },
+          {
+            "comment": "Use forward slashes when creating deploy zip file for Unix compatibility"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.36.1",
+      "tag": "@microsoft/rush_v5.36.1",
+      "date": "Fri, 08 Jan 2021 06:12:37 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where projects with empty scripts would still have arguments appended."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.36.0",
+      "tag": "@microsoft/rush_v5.36.0",
+      "date": "Fri, 08 Jan 2021 05:36:55 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": " Allow the git binary path to be overridden via the RUSH_GIT_BINARY_PATH environment variable."
+          },
+          {
+            "comment": "Introduce an experimental build cache feature."
+          },
+          {
+            "comment": "Add the ability to customize the commit message used when \"rush version\" is run."
+          },
+          {
+            "comment": "Remove the \"experimental\" label from some Rush commands that are now stable."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.35.2",
+      "tag": "@microsoft/rush_v5.35.2",
+      "date": "Tue, 03 Nov 2020 23:34:30 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix bug where version process is using a wrong `git.addChanges` signature"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.35.1",
+      "tag": "@microsoft/rush_v5.35.1",
+      "date": "Fri, 30 Oct 2020 05:17:42 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix a recent \"rush scan\" regression (which resulted from enabling \"esModuleInterop\")"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.35.0",
+      "tag": "@microsoft/rush_v5.35.0",
+      "date": "Wed, 28 Oct 2020 21:44:10 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Adds an --ignore-hooks flag to every rush action that skips event hooks during execution of the action."
+          },
+          {
+            "comment": "Fix bug where version process was not adding version-policy configuration file changes into the version commit"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.34.4",
+      "tag": "@microsoft/rush_v5.34.4",
+      "date": "Sat, 17 Oct 2020 00:23:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "When running `rush version --bump`, only include package.json updates in the generated commit"
+          },
+          {
+            "comment": "Fix Rush peer dependency validation when satisfied with a package alias"
+          },
+          {
+            "comment": "Prevent `rush unlink` from breaking installs for non-workspace projects"
+          },
+          {
+            "comment": "Add documentation for incremental option for buld custom commands"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.34.3",
       "tag": "@microsoft/rush_v5.34.3",
       "date": "Wed, 30 Sep 2020 21:04:15 GMT",

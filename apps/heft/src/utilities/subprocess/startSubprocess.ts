@@ -8,13 +8,8 @@ import {
   SUBPROCESS_RUNNER_INNER_INVOKE
 } from './SubprocessRunnerBase';
 
-const [
-  ,
-  ,
-  subprocessModulePath,
-  serializedInnerConfiguration,
-  serializedSubprocessConfiguration
-] = process.argv;
+const [, , subprocessModulePath, serializedInnerConfiguration, serializedSubprocessConfiguration] =
+  process.argv;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const subprocessRunnerModule: any = require(subprocessModulePath);

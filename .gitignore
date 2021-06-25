@@ -79,5 +79,4 @@ dist
 .vscode
 
 # Heft
-*/*/.heft/build-cache/**
-*/*/.heft/temp/**
+.heft

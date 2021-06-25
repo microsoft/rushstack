@@ -5,18 +5,10 @@
 ```ts
 
 // @public
-export function getGitHashForFiles(filesToHash: string[], packagePath: string): Map<string, string>;
+export function getGitHashForFiles(filesToHash: string[], packagePath: string, gitPath?: string): Map<string, string>;
 
 // @public
-export function getPackageDeps(packagePath?: string, excludedPaths?: string[]): IPackageDeps;
-
-// @public
-export interface IPackageDeps {
-    arguments?: string;
-    files: {
-        [key: string]: string;
-    };
-}
+export function getPackageDeps(packagePath?: string, excludedPaths?: string[], gitPath?: string): Map<string, string>;
 
 
 ```

@@ -2,8 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as semver from 'semver';
+import { Import, InternalError, IPackageJson, JsonFile, Sort } from '@rushstack/node-core-library';
 
-import { IPackageJson, JsonFile, Sort } from '@rushstack/node-core-library';
+const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 /**
  * @beta
@@ -12,7 +13,8 @@ export const enum DependencyType {
   Regular = 'dependencies',
   Dev = 'devDependencies',
   Optional = 'optionalDependencies',
-  Peer = 'peerDependencies'
+  Peer = 'peerDependencies',
+  YarnResolutions = 'resolutions'
 }
 
 /**
@@ -57,29 +59,34 @@ export class PackageJsonDependency {
  */
 export class PackageJsonEditor {
   private readonly _filePath: string;
-  private readonly _data: IPackageJson;
   private readonly _dependencies: Map<string, PackageJsonDependency>;
-
   // NOTE: The "devDependencies" section is tracked separately because sometimes people
   // will specify a specific version for development, while *also* specifying a broader
   // SemVer range in one of the other fields for consumers.  Thus "dependencies", "optionalDependencies",
   // and "peerDependencies" are mutually exclusive, but "devDependencies" is not.
   private readonly _devDependencies: Map<string, PackageJsonDependency>;
+
+  // NOTE: The "resolutions" field is a yarn specific feature that controls package
+  // resolution override within yarn.
+  private readonly _resolutions: Map<string, PackageJsonDependency>;
   private _modified: boolean;
+  private _sourceData: IPackageJson;
 
   private constructor(filepath: string, data: IPackageJson) {
     this._filePath = filepath;
-    this._data = data;
+    this._sourceData = data;
     this._modified = false;
 
     this._dependencies = new Map<string, PackageJsonDependency>();
     this._devDependencies = new Map<string, PackageJsonDependency>();
+    this._resolutions = new Map<string, PackageJsonDependency>();
 
     const dependencies: { [key: string]: string } = data.dependencies || {};
     const optionalDependencies: { [key: string]: string } = data.optionalDependencies || {};
     const peerDependencies: { [key: string]: string } = data.peerDependencies || {};
 
     const devDependencies: { [key: string]: string } = data.devDependencies || {};
+    const resolutions: { [key: string]: string } = data.resolutions || {};
 
     const _onChange: () => void = this._onChange.bind(this);
 
@@ -140,6 +147,19 @@ export class PackageJsonEditor {
         );
       });
 
+      Object.keys(resolutions || {}).forEach((packageName: string) => {
+        this._resolutions.set(
+          packageName,
+          new PackageJsonDependency(
+            packageName,
+            resolutions[packageName],
+            DependencyType.YarnResolutions,
+            _onChange
+          )
+        );
+      });
+
+      // (Do not sort this._resolutions because order may be significant; the RFC is unclear about that.)
       Sort.sortMapKeys(this._dependencies);
       Sort.sortMapKeys(this._devDependencies);
     } catch (e) {
@@ -156,11 +176,11 @@ export class PackageJsonEditor {
   }
 
   public get name(): string {
-    return this._data.name;
+    return this._sourceData.name;
   }
 
   public get version(): string {
-    return this._data.version;
+    return this._sourceData.version;
   }
 
   public get filePath(): string {
@@ -179,6 +199,17 @@ export class PackageJsonEditor {
    */
   public get devDependencyList(): ReadonlyArray<PackageJsonDependency> {
     return [...this._devDependencies.values()];
+  }
+
+  /**
+   * This field is a Yarn-specific feature that allows overriding of package resolution.
+   *
+   * @remarks
+   * See the {@link https://github.com/yarnpkg/rfcs/blob/master/implemented/0000-selective-versions-resolutions.md
+   * | 0000-selective-versions-resolutions.md RFC} for details.
+   */
+  public get resolutionsList(): ReadonlyArray<PackageJsonDependency> {
+    return [...this._resolutions.values()];
   }
 
   public tryGetDependency(packageName: string): PackageJsonDependency | undefined {
@@ -202,62 +233,95 @@ export class PackageJsonEditor {
     );
 
     // Rush collapses everything that isn't a devDependency into the dependencies
-    // field, so we need to set the value dependening on dependency type
-    if (
-      dependencyType === DependencyType.Regular ||
-      dependencyType === DependencyType.Optional ||
-      dependencyType === DependencyType.Peer
-    ) {
-      this._dependencies.set(packageName, dependency);
-    } else {
-      this._devDependencies.set(packageName, dependency);
+    // field, so we need to set the value depending on dependency type
+    switch (dependencyType) {
+      case DependencyType.Regular:
+      case DependencyType.Optional:
+      case DependencyType.Peer:
+        this._dependencies.set(packageName, dependency);
+        break;
+      case DependencyType.Dev:
+        this._devDependencies.set(packageName, dependency);
+        break;
+      case DependencyType.YarnResolutions:
+        this._resolutions.set(packageName, dependency);
+        break;
+      default:
+        throw new InternalError('Unsupported DependencyType');
     }
+
     this._modified = true;
   }
 
   public saveIfModified(): boolean {
     if (this._modified) {
-      JsonFile.save(this._normalize(), this._filePath, { updateExistingFile: true });
       this._modified = false;
+      this._sourceData = this._normalize(this._sourceData);
+      JsonFile.save(this._sourceData, this._filePath, { updateExistingFile: true });
       return true;
     }
     return false;
+  }
+
+  /**
+   * Get the normalized package.json that represents the current state of the
+   * PackageJsonEditor. This method does not save any changes that were made to the
+   * package.json, but instead returns the object representation of what would be saved
+   * if saveIfModified() is called.
+   */
+  public saveToObject(): IPackageJson {
+    // Only normalize if we need to
+    const sourceData: IPackageJson = this._modified ? this._normalize(this._sourceData) : this._sourceData;
+    // Provide a clone to avoid reference back to the original data object
+    return lodash.cloneDeep(sourceData);
   }
 
   private _onChange(): void {
     this._modified = true;
   }
 
-  private _normalize(): IPackageJson {
-    delete this._data.dependencies;
-    delete this._data.optionalDependencies;
-    delete this._data.peerDependencies;
-    delete this._data.devDependencies;
+  /**
+   * Create a normalized shallow copy of the provided package.json without modifying the
+   * original. If the result of this method is being returned via a public facing method,
+   * it will still need to be deep-cloned to avoid propogating changes back to the
+   * original dataset.
+   */
+  private _normalize(source: IPackageJson): IPackageJson {
+    const normalizedData: IPackageJson = { ...source };
+    delete normalizedData.dependencies;
+    delete normalizedData.optionalDependencies;
+    delete normalizedData.peerDependencies;
+    delete normalizedData.devDependencies;
+    delete normalizedData.resolutions;
 
     const keys: string[] = [...this._dependencies.keys()].sort();
 
     for (const packageName of keys) {
       const dependency: PackageJsonDependency = this._dependencies.get(packageName)!;
 
-      if (dependency.dependencyType === DependencyType.Regular) {
-        if (!this._data.dependencies) {
-          this._data.dependencies = {};
-        }
-        this._data.dependencies[dependency.name] = dependency.version;
-      }
-
-      if (dependency.dependencyType === DependencyType.Optional) {
-        if (!this._data.optionalDependencies) {
-          this._data.optionalDependencies = {};
-        }
-        this._data.optionalDependencies[dependency.name] = dependency.version;
-      }
-
-      if (dependency.dependencyType === DependencyType.Peer) {
-        if (!this._data.peerDependencies) {
-          this._data.peerDependencies = {};
-        }
-        this._data.peerDependencies[dependency.name] = dependency.version;
+      switch (dependency.dependencyType) {
+        case DependencyType.Regular:
+          if (!normalizedData.dependencies) {
+            normalizedData.dependencies = {};
+          }
+          normalizedData.dependencies[dependency.name] = dependency.version;
+          break;
+        case DependencyType.Optional:
+          if (!normalizedData.optionalDependencies) {
+            normalizedData.optionalDependencies = {};
+          }
+          normalizedData.optionalDependencies[dependency.name] = dependency.version;
+          break;
+        case DependencyType.Peer:
+          if (!normalizedData.peerDependencies) {
+            normalizedData.peerDependencies = {};
+          }
+          normalizedData.peerDependencies[dependency.name] = dependency.version;
+          break;
+        case DependencyType.Dev: // uses this._devDependencies instead
+        case DependencyType.YarnResolutions: // uses this._resolutions instead
+        default:
+          throw new InternalError('Unsupported DependencyType');
       }
     }
 
@@ -266,12 +330,22 @@ export class PackageJsonEditor {
     for (const packageName of devDependenciesKeys) {
       const dependency: PackageJsonDependency = this._devDependencies.get(packageName)!;
 
-      if (!this._data.devDependencies) {
-        this._data.devDependencies = {};
+      if (!normalizedData.devDependencies) {
+        normalizedData.devDependencies = {};
       }
-      this._data.devDependencies[dependency.name] = dependency.version;
+      normalizedData.devDependencies[dependency.name] = dependency.version;
     }
 
-    return this._data;
+    // (Do not sort this._resolutions because order may be significant; the RFC is unclear about that.)
+    for (const packageName of this._resolutions.keys()) {
+      const dependency: PackageJsonDependency = this._resolutions.get(packageName)!;
+
+      if (!normalizedData.resolutions) {
+        normalizedData.resolutions = {};
+      }
+      normalizedData.resolutions[dependency.name] = dependency.version;
+    }
+
+    return normalizedData;
   }
 }

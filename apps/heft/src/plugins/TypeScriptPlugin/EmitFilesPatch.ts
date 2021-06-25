@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Path, InternalError } from '@rushstack/node-core-library';
-import type { Typescript as TTypescript } from '@microsoft/rush-stack-compiler-3.9';
+import { InternalError } from '@rushstack/node-core-library';
+import type * as TTypescript from 'typescript';
 import {
   ExtendedTypeScript,
   IEmitResolver,
@@ -25,8 +25,14 @@ export interface ICachedEmitModuleKind {
   cacheOutFolderPath: string;
 
   /**
+   * File extension to use instead of '.js' for emitted ECMAScript files.
+   * For example, '.cjs' to indicate commonjs content, or '.mjs' to indicate ECMAScript modules.
+   */
+  jsExtensionOverride: string | undefined;
+
+  /**
    * Set to true if this is the emit kind that is specified in the tsconfig.json.
-   * Sourcemaps and declarations are only emitted for the primary module kind.
+   * Declarations are only emitted for the primary module kind.
    */
   isPrimary: boolean;
 }
@@ -34,9 +40,7 @@ export interface ICachedEmitModuleKind {
 export class EmitFilesPatch {
   private static _patchedTs: ExtendedTypeScript | undefined = undefined;
 
-  // eslint-disable-next-line
-  private static _baseEmitFiles: any | undefined = undefined;
-
+  private static _baseEmitFiles: any | undefined = undefined; // eslint-disable-line
   private static _originalOutDir: string | undefined = undefined;
   private static _redirectedOutDir: string | undefined = undefined;
 
@@ -47,11 +51,17 @@ export class EmitFilesPatch {
     useBuildCache: boolean,
     changedFiles?: Set<IExtendedSourceFile>
   ): void {
+    if (EmitFilesPatch._patchedTs === ts) {
+      // We already patched this instance of TS
+      return;
+    }
+
     if (EmitFilesPatch._patchedTs !== undefined) {
       throw new InternalError(
         'EmitFilesPatch.install() cannot be called without first uninstalling the existing patch'
       );
     }
+
     EmitFilesPatch._patchedTs = ts;
     EmitFilesPatch._baseEmitFiles = ts.emitFiles;
 
@@ -65,6 +75,7 @@ export class EmitFilesPatch {
         } else {
           foundPrimary = true;
         }
+
         defaultModuleKind = moduleKindToEmit.moduleKind;
       }
     }
@@ -117,7 +128,8 @@ export class EmitFilesPatch {
           }
 
           // Redirect from "path/to/lib" --> "path/to/.heft/build-cache/lib"
-          EmitFilesPatch._originalOutDir = compilerOptions.outDir;
+          EmitFilesPatch._originalOutDir =
+            compilerOptions.outDir.replace(/([\\\/]+)$/, '') + '/'; /* Ensure trailing slash */
           EmitFilesPatch._redirectedOutDir = useBuildCache
             ? moduleKindToEmit.cacheOutFolderPath
             : moduleKindToEmit.outFolderPath;
@@ -126,6 +138,7 @@ export class EmitFilesPatch {
             resolver,
             {
               ...host,
+              writeFile: EmitFilesPatch.wrapWriteFile(host.writeFile, moduleKindToEmit.jsExtensionOverride),
               getCompilerOptions: () => compilerOptions
             },
             targetSourceFile,
@@ -156,6 +169,35 @@ export class EmitFilesPatch {
     return this._patchedTs !== undefined;
   }
 
+  /**
+   * Wraps the writeFile callback on the IEmitHost to override the .js extension, if applicable
+   */
+  public static wrapWriteFile(
+    baseWriteFile: TTypescript.WriteFileCallback,
+    jsExtensionOverride: string | undefined
+  ): TTypescript.WriteFileCallback {
+    if (!jsExtensionOverride) {
+      return baseWriteFile;
+    }
+
+    const replacementExtension: string = `${jsExtensionOverride}$1`;
+    return (
+      fileName: string,
+      data: string,
+      writeBOM: boolean,
+      onError?: ((message: string) => void) | undefined,
+      sourceFiles?: readonly TTypescript.SourceFile[] | undefined
+    ) => {
+      return baseWriteFile(
+        fileName.replace(/\.js(\.map)?$/g, replacementExtension),
+        data,
+        writeBOM,
+        onError,
+        sourceFiles
+      );
+    };
+  }
+
   public static getRedirectedFilePath(filePath: string): string {
     if (!EmitFilesPatch.isInstalled) {
       throw new InternalError(
@@ -166,7 +208,10 @@ export class EmitFilesPatch {
     // Redirect from "path/to/lib" --> "path/to/.heft/build-cache/lib"
     let redirectedFilePath: string = filePath;
     if (EmitFilesPatch._redirectedOutDir !== undefined) {
-      if (Path.isUnderOrEqual(filePath, EmitFilesPatch._originalOutDir!)) {
+      if (
+        /* This is significantly faster than Path.isUnderOrEqual */
+        filePath.startsWith(EmitFilesPatch._originalOutDir!)
+      ) {
         redirectedFilePath = path.resolve(
           EmitFilesPatch._redirectedOutDir,
           path.relative(EmitFilesPatch._originalOutDir!, filePath)
@@ -176,6 +221,7 @@ export class EmitFilesPatch {
         // ./.heft/build-cache/ts_a7cd263b9f06b2440c0f2b2264746621c192f2e2.json
       }
     }
+
     return redirectedFilePath;
   }
 

@@ -1,6 +1,156 @@
 # Change Log - @rushstack/typings-generator
 
-This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Jun 2021 19:59:53 GMT and should not be manually modified.
+
+## 0.3.7
+Fri, 04 Jun 2021 19:59:53 GMT
+
+_Version update only_
+
+## 0.3.6
+Wed, 19 May 2021 00:11:39 GMT
+
+_Version update only_
+
+## 0.3.5
+Mon, 03 May 2021 15:10:29 GMT
+
+_Version update only_
+
+## 0.3.4
+Mon, 12 Apr 2021 15:10:28 GMT
+
+_Version update only_
+
+## 0.3.3
+Tue, 06 Apr 2021 15:14:22 GMT
+
+_Version update only_
+
+## 0.3.2
+Mon, 29 Mar 2021 05:02:06 GMT
+
+### Patches
+
+- Fix a bug where watched files would not honor typings generation excludeFiles settings
+
+## 0.3.1
+Fri, 05 Feb 2021 16:10:42 GMT
+
+_Version update only_
+
+## 0.3.0
+Wed, 06 Jan 2021 16:10:43 GMT
+
+### Minor changes
+
+- Do not empty typings folder when running in watch mode.
+
+## 0.2.32
+Thu, 10 Dec 2020 23:25:49 GMT
+
+_Version update only_
+
+## 0.2.31
+Sat, 05 Dec 2020 01:11:23 GMT
+
+_Version update only_
+
+## 0.2.30
+Mon, 30 Nov 2020 16:11:49 GMT
+
+_Version update only_
+
+## 0.2.29
+Wed, 18 Nov 2020 08:19:54 GMT
+
+_Version update only_
+
+## 0.2.28
+Wed, 18 Nov 2020 06:21:57 GMT
+
+_Version update only_
+
+## 0.2.27
+Fri, 13 Nov 2020 01:11:00 GMT
+
+### Patches
+
+- Add register dependency feature for typings generation. 
+
+## 0.2.26
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 0.2.25
+Tue, 10 Nov 2020 23:13:12 GMT
+
+_Version update only_
+
+## 0.2.24
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 0.2.23
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 0.2.22
+Thu, 29 Oct 2020 06:14:19 GMT
+
+_Version update only_
+
+## 0.2.21
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 0.2.20
+Tue, 27 Oct 2020 15:10:13 GMT
+
+_Version update only_
+
+## 0.2.19
+Sat, 24 Oct 2020 00:11:18 GMT
+
+### Patches
+
+- Support `undefined` as a result from parseFileAndGenerateTypings.
+
+## 0.2.18
+Thu, 15 Oct 2020 00:59:08 GMT
+
+_Version update only_
+
+## 0.2.17
+Tue, 06 Oct 2020 00:24:06 GMT
+
+_Version update only_
+
+## 0.2.16
+Mon, 05 Oct 2020 22:36:57 GMT
+
+_Version update only_
+
+## 0.2.15
+Mon, 05 Oct 2020 15:10:42 GMT
+
+_Version update only_
+
+## 0.2.14
+Thu, 01 Oct 2020 20:27:16 GMT
+
+_Version update only_
+
+## 0.2.13
+Thu, 01 Oct 2020 18:51:21 GMT
+
+### Patches
+
+- Handle export names with special chars in exportAsDefault interface keys.
 
 ## 0.2.12
 Wed, 30 Sep 2020 18:39:17 GMT

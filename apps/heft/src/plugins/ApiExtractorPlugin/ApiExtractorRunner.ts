@@ -4,7 +4,7 @@
 import * as semver from 'semver';
 import * as path from 'path';
 import { Terminal, Path } from '@rushstack/node-core-library';
-import type { ApiExtractor as TApiExtractor } from '@microsoft/rush-stack-compiler-3.9';
+import type * as TApiExtractor from '@microsoft/api-extractor';
 
 import { SubprocessRunnerBase } from '../../utilities/subprocess/SubprocessRunnerBase';
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
@@ -70,9 +70,8 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
     }
 
     const configObjectFullPath: string = this._configuration.apiExtractorJsonFilePath;
-    const configObject: TApiExtractor.IConfigFile = apiExtractor.ExtractorConfig.loadFile(
-      configObjectFullPath
-    );
+    const configObject: TApiExtractor.IConfigFile =
+      apiExtractor.ExtractorConfig.loadFile(configObjectFullPath);
 
     const extractorConfig: TApiExtractor.ExtractorConfig = apiExtractor.ExtractorConfig.prepare({
       configObject,
@@ -117,7 +116,7 @@ export class ApiExtractorRunner extends SubprocessRunnerBase<IApiExtractorRunner
                 : message.sourceFilePath;
               logMessage =
                 `${filePathForLog}:${message.sourceFileLine}:${message.sourceFileColumn} - ` +
-                `(${message.category}) ${message.text}`;
+                `(${message.messageId}) ${message.text}`;
             } else {
               logMessage = message.text;
             }

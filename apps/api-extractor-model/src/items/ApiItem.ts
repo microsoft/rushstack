@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { DeclarationReference } from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+import { DeclarationReference } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { Constructor, PropertiesOf } from '../mixins/Mixin';
 import { ApiPackage } from '../model/ApiPackage';
 import { ApiParameterListMixin } from '../mixins/ApiParameterListMixin';
@@ -171,7 +171,7 @@ export class ApiItem {
 
   /**
    * This property supports a visitor pattern for walking the tree.
-   * For items with ApiItemContainerMixin, it returns the contained items.
+   * For items with ApiItemContainerMixin, it returns the contained items, sorted alphabetically.
    * Otherwise it returns an empty array.
    * @virtual
    */

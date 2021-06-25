@@ -27,6 +27,13 @@ export class AnsiEscape {
     static removeCodes(text: string): string;
     }
 
+// @beta
+export class Async {
+    static forEachAsync<TEntry>(array: TEntry[], callback: (entry: TEntry, arrayIndex: number) => Promise<void>, options?: IAsyncParallelismOptions | undefined): Promise<void>;
+    static mapAsync<TEntry, TRetVal>(array: TEntry[], callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>, options?: IAsyncParallelismOptions | undefined): Promise<TRetVal[]>;
+    static sleep(ms: number): Promise<void>;
+}
+
 // @public
 export type Brand<T, BrandTag extends string> = T & {
     __brand: BrandTag;
@@ -142,7 +149,23 @@ export class Enum {
 }
 
 // @public
+export class EnvironmentMap {
+    constructor(environmentObject?: Record<string, string | undefined>);
+    readonly caseSensitive: boolean;
+    clear(): void;
+    entries(): IterableIterator<IEnvironmentEntry>;
+    get(name: string): string | undefined;
+    mergeFrom(environmentMap: EnvironmentMap): void;
+    mergeFromObject(environmentObject?: Record<string, string | undefined>): void;
+    names(): IterableIterator<string>;
+    set(name: string, value: string): void;
+    toObject(): Record<string, string>;
+    unset(name: string): void;
+}
+
+// @public
 export class Executable {
+    static spawn(filename: string, args: string[], options?: IExecutableSpawnOptions): child_process.ChildProcess;
     static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
     static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
     }
@@ -243,6 +266,11 @@ export interface IAnsiEscapeConvertForTestsOptions {
     encodeNewlines?: boolean;
 }
 
+// @beta
+export interface IAsyncParallelismOptions {
+    concurrency?: number;
+}
+
 // @beta (undocumented)
 export interface IColorableSequence {
     // (undocumented)
@@ -263,9 +291,21 @@ export interface IConsoleTerminalProviderOptions {
 }
 
 // @public
+export interface IEnvironmentEntry {
+    name: string;
+    value: string;
+}
+
+// @public
 export interface IExecutableResolveOptions {
     currentWorkingDirectory?: string;
     environment?: NodeJS.ProcessEnv;
+    environmentMap?: EnvironmentMap;
+}
+
+// @public
+export interface IExecutableSpawnOptions extends IExecutableResolveOptions {
+    stdio?: ExecutableStdioMapping;
 }
 
 // @public
@@ -276,11 +316,15 @@ export interface IExecutableSpawnSyncOptions extends IExecutableResolveOptions {
     timeoutMs?: number;
 }
 
-// @public
-export interface IFileSystemCopyFileOptions {
+// @public (undocumented)
+export interface IFileSystemCopyFileBaseOptions {
     alreadyExistsBehavior?: AlreadyExistsBehavior;
-    destinationPath: string;
     sourcePath: string;
+}
+
+// @public
+export interface IFileSystemCopyFileOptions extends IFileSystemCopyFileBaseOptions {
+    destinationPath: string;
 }
 
 // @public
@@ -300,6 +344,7 @@ export interface IFileSystemCopyFilesOptions extends IFileSystemCopyFilesAsyncOp
 
 // @public
 export interface IFileSystemCreateLinkOptions {
+    alreadyExistsBehavior?: AlreadyExistsBehavior;
     linkTargetPath: string;
     newLinkPath: string;
 }
@@ -374,6 +419,7 @@ export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
 // @public
 export interface IJsonFileStringifyOptions {
     headerComment?: string;
+    ignoreUndefinedValues?: boolean;
     newlineConversion?: NewlineKind;
     prettyFormatting?: boolean;
 }
@@ -414,6 +460,7 @@ export interface INodePackageJson {
     peerDependencies?: IPackageJsonDependencyTable;
     private?: boolean;
     repository?: string;
+    resolutions?: Record<string, string>;
     scripts?: IPackageJsonScriptTable;
     // @beta
     tsdocMetadata?: string;

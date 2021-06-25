@@ -16,6 +16,7 @@ export * from './DiscardStdoutTransform';
 export * from './ITerminalChunk';
 export * from './MockWritable';
 export * from './NormalizeNewlinesTextRewriter';
+export * from './PrintUtilities';
 export * from './RemoveColorsTextRewriter';
 export * from './SplitterTransform';
 export * from './StdioLineTransform';

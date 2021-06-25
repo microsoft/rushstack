@@ -4,7 +4,7 @@
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 import { PackageJsonLookup, Sort, InternalError } from '@rushstack/node-core-library';
-import { ReleaseTag, AedocDefinitions } from '@microsoft/api-extractor-model';
+import { ReleaseTag } from '@microsoft/api-extractor-model';
 
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
@@ -123,7 +123,7 @@ export class Collector {
     this.typeChecker = options.program.getTypeChecker();
     this.globalVariableAnalyzer = TypeScriptInternals.getGlobalVariableAnalyzer(this.program);
 
-    this._tsdocParser = new tsdoc.TSDocParser(AedocDefinitions.tsdocConfiguration);
+    this._tsdocParser = new tsdoc.TSDocParser(this.extractorConfig.tsdocConfiguration);
 
     this.bundledPackageNames = new Set<string>(this.extractorConfig.bundledPackages);
 
@@ -205,9 +205,8 @@ export class Collector {
     // Build the entry point
     const entryPointSourceFile: ts.SourceFile = this.workingPackage.entryPointSourceFile;
 
-    const astEntryPoint: AstModule = this.astSymbolTable.fetchAstModuleFromWorkingPackage(
-      entryPointSourceFile
-    );
+    const astEntryPoint: AstModule =
+      this.astSymbolTable.fetchAstModuleFromWorkingPackage(entryPointSourceFile);
     this._astEntryPoint = astEntryPoint;
 
     const packageDocCommentTextRange: ts.TextRange | undefined = PackageDocComment.tryFindInSourceFile(
@@ -233,9 +232,8 @@ export class Collector {
 
     // Create a CollectorEntity for each top-level export
 
-    const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(
-      astEntryPoint
-    );
+    const astModuleExportInfo: AstModuleExportInfo =
+      this.astSymbolTable.fetchAstModuleExportInfo(astEntryPoint);
     for (const [exportName, astEntity] of astModuleExportInfo.exportedLocalEntities) {
       this._createCollectorEntity(astEntity, exportName);
 
@@ -613,8 +611,10 @@ export class Collector {
     mainAstDeclaration: AstDeclaration,
     ancillaryAstDeclaration: AstDeclaration
   ): void {
-    const mainMetadata: InternalDeclarationMetadata = mainAstDeclaration.declarationMetadata as InternalDeclarationMetadata;
-    const ancillaryMetadata: InternalDeclarationMetadata = ancillaryAstDeclaration.declarationMetadata as InternalDeclarationMetadata;
+    const mainMetadata: InternalDeclarationMetadata =
+      mainAstDeclaration.declarationMetadata as InternalDeclarationMetadata;
+    const ancillaryMetadata: InternalDeclarationMetadata =
+      ancillaryAstDeclaration.declarationMetadata as InternalDeclarationMetadata;
 
     if (mainMetadata.ancillaryDeclarations.indexOf(ancillaryAstDeclaration) >= 0) {
       return; // already added
@@ -652,7 +652,8 @@ export class Collector {
   }
 
   private _calculateApiItemMetadata(astDeclaration: AstDeclaration): void {
-    const declarationMetadata: InternalDeclarationMetadata = astDeclaration.declarationMetadata as InternalDeclarationMetadata;
+    const declarationMetadata: InternalDeclarationMetadata =
+      astDeclaration.declarationMetadata as InternalDeclarationMetadata;
     if (declarationMetadata.isAncillary) {
       if (astDeclaration.declaration.kind === ts.SyntaxKind.SetAccessor) {
         if (declarationMetadata.tsdocParserContext) {
@@ -730,8 +731,10 @@ export class Collector {
       options.isOverride = modifierTagSet.isOverride();
       options.isSealed = modifierTagSet.isSealed();
       options.isVirtual = modifierTagSet.isVirtual();
+      const preapprovedTag: tsdoc.TSDocTagDefinition | void =
+        this.extractorConfig.tsdocConfiguration.tryGetTagDefinition('@preapproved');
 
-      if (modifierTagSet.hasTag(AedocDefinitions.preapprovedTag)) {
+      if (preapprovedTag && modifierTagSet.hasTag(preapprovedTag)) {
         // This feature only makes sense for potentially big declarations.
         switch (astDeclaration.declaration.kind) {
           case ts.SyntaxKind.ClassDeclaration:

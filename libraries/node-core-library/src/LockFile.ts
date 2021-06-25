@@ -3,9 +3,9 @@
 
 import * as path from 'path';
 import * as child_process from 'child_process';
-import { setTimeout } from 'timers';
 import { FileSystem } from './FileSystem';
 import { FileWriter } from './FileWriter';
+import { Async } from './Async';
 
 /**
  * http://man7.org/linux/man-pages/man5/proc.5.html
@@ -222,31 +222,20 @@ export class LockFile {
     const interval: number = 100;
     const startTime: number = Date.now();
 
-    const retryLoop: () => Promise<LockFile> = () => {
+    const retryLoop: () => Promise<LockFile> = async () => {
       const lock: LockFile | undefined = LockFile.tryAcquire(resourceFolder, resourceName);
       if (lock) {
-        return Promise.resolve(lock);
+        return lock;
       }
       if (maxWaitMs && Date.now() > startTime + maxWaitMs) {
-        return Promise.reject(
-          new Error(`Exceeded maximum wait time to acquire lock for resource "${resourceName}"`)
-        );
+        throw new Error(`Exceeded maximum wait time to acquire lock for resource "${resourceName}"`);
       }
 
-      return LockFile._sleepForMs(interval).then(() => {
-        return retryLoop();
-      });
+      await Async.sleep(interval);
+      return retryLoop();
     };
 
     return retryLoop();
-  }
-
-  private static _sleepForMs(timeout: number): Promise<void> {
-    return new Promise<void>((resolve: () => void, reject: () => void) => {
-      setTimeout(() => {
-        resolve();
-      }, timeout);
-    });
   }
 
   /**

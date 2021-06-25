@@ -226,7 +226,7 @@ action.defineChoiceParameter({
 });
 
 // Parse the command line
-commandLineParser.execute(process.argv).then(() => {
+commandLineParser.execute().then(() => {
   console.log('The action is: ' + commandLineParser.selectedAction!.actionName);
   console.log('The force flag is: ' + action.getFlagParameter('--force').value);
 });

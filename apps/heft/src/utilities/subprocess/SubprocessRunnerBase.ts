@@ -22,6 +22,7 @@ import {
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { SubprocessLoggerManager } from './SubprocessLoggerManager';
 import { FileError } from '../../pluginFramework/logging/FileError';
+import { SubprocessTerminator } from './SubprocessTerminator';
 
 export interface ISubprocessInnerConfiguration {
   globalTerminalProviderId: number;
@@ -146,9 +147,12 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
         path.resolve(__dirname, 'startSubprocess'),
         [this.filename, JSON.stringify(this._innerConfiguration), JSON.stringify(this._configuration)],
         {
-          execArgv: this._processNodeArgsForSubprocess(this._globalTerminal, process.execArgv)
+          execArgv: this._processNodeArgsForSubprocess(this._globalTerminal, process.execArgv),
+          ...SubprocessTerminator.RECOMMENDED_OPTIONS
         }
       );
+
+      SubprocessTerminator.killProcessTreeOnExit(subprocess, SubprocessTerminator.RECOMMENDED_OPTIONS);
 
       this._terminalProviderManager.registerSubprocess(subprocess);
       this._scopedLoggerManager.registerSubprocess(subprocess);
@@ -244,7 +248,8 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
       throw new Error('Default subprocess communication managers have already been registered.');
     }
 
-    this._subprocessCommunicationManagerInitializationOptions = subprocessCommunicationManagerInitializationOptions;
+    this._subprocessCommunicationManagerInitializationOptions =
+      subprocessCommunicationManagerInitializationOptions;
 
     for (const communicationManager of this._subprocessCommunicationManagers) {
       communicationManager.initialize(this._subprocessCommunicationManagerInitializationOptions);
@@ -375,18 +380,16 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
       }
 
       case SupportedSerializableArgType.Error: {
-        const typedArg: ISubprocessApiCallArgWithValue<ISerializedErrorValue> = arg as ISubprocessApiCallArgWithValue<
-          ISerializedErrorValue
-        >;
+        const typedArg: ISubprocessApiCallArgWithValue<ISerializedErrorValue> =
+          arg as ISubprocessApiCallArgWithValue<ISerializedErrorValue>;
         const result: Error = new Error(typedArg.value.errorMessage);
         result.stack = typedArg.value.errorStack;
         return result;
       }
 
       case SupportedSerializableArgType.FileError: {
-        const typedArg: ISubprocessApiCallArgWithValue<ISerializedFileErrorValue> = arg as ISubprocessApiCallArgWithValue<
-          ISerializedFileErrorValue
-        >;
+        const typedArg: ISubprocessApiCallArgWithValue<ISerializedFileErrorValue> =
+          arg as ISubprocessApiCallArgWithValue<ISerializedFileErrorValue>;
         const result: FileError = new FileError(
           typedArg.value.errorMessage,
           typedArg.value.filePath,

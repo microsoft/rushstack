@@ -1,6 +1,118 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+This log was last generated on Fri, 04 Jun 2021 19:59:53 GMT and should not be manually modified.
+
+## 7.13.3
+Fri, 04 Jun 2021 19:59:53 GMT
+
+_Version update only_
+
+## 7.13.2
+Wed, 19 May 2021 00:11:39 GMT
+
+_Version update only_
+
+## 7.13.1
+Mon, 03 May 2021 15:10:29 GMT
+
+_Version update only_
+
+## 7.13.0
+Tue, 20 Apr 2021 04:59:51 GMT
+
+### Minor changes
+
+- The .api.json file format now stores the TSDoc configuration used for parsing doc comments
+
+## 7.12.5
+Mon, 12 Apr 2021 15:10:28 GMT
+
+_Version update only_
+
+## 7.12.4
+Thu, 08 Apr 2021 06:05:31 GMT
+
+### Patches
+
+- Fix minor typo in README.md
+
+## 7.12.3
+Tue, 06 Apr 2021 15:14:22 GMT
+
+_Version update only_
+
+## 7.12.2
+Fri, 05 Feb 2021 16:10:42 GMT
+
+_Version update only_
+
+## 7.12.1
+Thu, 10 Dec 2020 23:25:49 GMT
+
+### Patches
+
+- Enable support for @decorator
+
+## 7.12.0
+Wed, 18 Nov 2020 08:19:54 GMT
+
+### Minor changes
+
+- Introduce an ApiOptionalMixin base class for representing optional properties and methods
+
+## 7.11.0
+Wed, 18 Nov 2020 06:21:57 GMT
+
+### Minor changes
+
+- Update .api.json file format to store a new field "isOptional" for documenting optional properties
+
+## 7.10.10
+Wed, 11 Nov 2020 01:08:59 GMT
+
+_Version update only_
+
+## 7.10.9
+Tue, 10 Nov 2020 23:13:12 GMT
+
+_Version update only_
+
+## 7.10.8
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 7.10.7
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 7.10.6
+Thu, 29 Oct 2020 06:14:19 GMT
+
+### Patches
+
+- Fix .d.ts error when the library is imported by a project using TypeScript 4.0
+
+## 7.10.5
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 7.10.4
+Tue, 27 Oct 2020 15:10:14 GMT
+
+_Version update only_
+
+## 7.10.3
+Tue, 06 Oct 2020 00:24:06 GMT
+
+_Version update only_
+
+## 7.10.2
+Mon, 05 Oct 2020 22:36:57 GMT
+
+_Version update only_
 
 ## 7.10.1
 Wed, 30 Sep 2020 18:39:17 GMT

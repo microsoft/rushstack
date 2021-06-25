@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import { CommandLineStringParameter, CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
@@ -35,7 +35,7 @@ export class CheckAction extends BaseRushAction {
     });
   }
 
-  protected runAsync(): Promise<void> {
+  protected async runAsync(): Promise<void> {
     const variant: string | undefined = this.rushConfiguration.currentInstalledVariant;
 
     if (!this._variant.value && variant) {
@@ -51,6 +51,5 @@ export class CheckAction extends BaseRushAction {
       variant: this._variant.value,
       printAsJson: this._jsonFlag.value
     });
-    return Promise.resolve();
   }
 }

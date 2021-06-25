@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import { EOL } from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -22,11 +22,11 @@ import { PrereleaseToken } from '../../logic/PrereleaseToken';
 import { ChangeManager } from '../../logic/ChangeManager';
 import { BaseRushAction } from './BaseRushAction';
 import { PublishGit } from '../../logic/PublishGit';
-import { VersionControl } from '../../utilities/VersionControl';
 import { PolicyValidator } from '../../logic/policy/PolicyValidator';
 import { VersionPolicy } from '../../api/VersionPolicy';
 import { DEFAULT_PACKAGE_UPDATE_MESSAGE } from './VersionAction';
 import { Utilities } from '../../utilities/Utilities';
+import { Git } from '../../logic/Git';
 
 export class PublishAction extends BaseRushAction {
   private _addCommitDetails!: CommandLineFlagParameter;
@@ -48,6 +48,7 @@ export class PublishAction extends BaseRushAction {
   private _commitId!: CommandLineStringParameter;
   private _releaseFolder!: CommandLineStringParameter;
   private _pack!: CommandLineFlagParameter;
+  private _ignoreGitHooksParameter!: CommandLineFlagParameter;
 
   private _prereleaseToken!: PrereleaseToken;
   private _hotfixTagOverride!: string;
@@ -83,7 +84,7 @@ export class PublishAction extends BaseRushAction {
     this._publish = this.defineFlagParameter({
       parameterLongName: '--publish',
       parameterShortName: '-p',
-      description: 'If this flag is specified, applied changes will be published to npm.'
+      description: 'If this flag is specified, applied changes will be published to the NPM registry.'
     });
     this._addCommitDetails = this.defineFlagParameter({
       parameterLongName: '--add-commit-details',
@@ -203,46 +204,50 @@ export class PublishAction extends BaseRushAction {
         `Used in conjunction with git tagging -- apply git tags at the commit hash` +
         ` specified. If not provided, the current HEAD will be tagged.`
     });
+    this._ignoreGitHooksParameter = this.defineFlagParameter({
+      parameterLongName: '--ignore-git-hooks',
+      description: `Skips execution of all git hooks. Make sure you know what you are skipping.`
+    });
   }
 
   /**
    * Executes the publish action, which will read change request files, apply changes to package.jsons,
    */
-  protected runAsync(): Promise<void> {
-    return Promise.resolve().then(() => {
-      PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: false });
+  protected async runAsync(): Promise<void> {
+    PolicyValidator.validatePolicy(this.rushConfiguration, { bypassPolicy: false });
 
-      // Example: "common\temp\publish-home"
-      this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
+    // Example: "common\temp\publish-home"
+    this._targetNpmrcPublishFolder = path.join(this.rushConfiguration.commonTempFolder, 'publish-home');
 
-      // Example: "common\temp\publish-home\.npmrc"
-      this._targetNpmrcPublishPath = path.join(this._targetNpmrcPublishFolder, '.npmrc');
+    // Example: "common\temp\publish-home\.npmrc"
+    this._targetNpmrcPublishPath = path.join(this._targetNpmrcPublishFolder, '.npmrc');
 
-      const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
+    const allPackages: Map<string, RushConfigurationProject> = this.rushConfiguration.projectsByName;
 
-      if (this._regenerateChangelogs.value) {
-        console.log('Regenerating changelogs');
-        ChangelogGenerator.regenerateChangelogs(allPackages, this.rushConfiguration);
-        return Promise.resolve();
-      }
+    if (this._regenerateChangelogs.value) {
+      console.log('Regenerating changelogs');
+      ChangelogGenerator.regenerateChangelogs(allPackages, this.rushConfiguration);
+      return;
+    }
 
-      this._validate();
+    this._validate();
 
-      this._addNpmPublishHome();
+    this._addNpmPublishHome();
 
-      if (this._includeAll.value) {
-        this._publishAll(allPackages);
-      } else {
-        this._prereleaseToken = new PrereleaseToken(
-          this._prereleaseName.value,
-          this._suffix.value,
-          this._partialPrerelease.value
-        );
-        this._publishChanges(allPackages);
-      }
+    const git: Git = new Git(this.rushConfiguration);
+    const publishGit: PublishGit = new PublishGit(git, this._targetBranch.value);
+    if (this._includeAll.value) {
+      this._publishAll(publishGit, allPackages);
+    } else {
+      this._prereleaseToken = new PrereleaseToken(
+        this._prereleaseName.value,
+        this._suffix.value,
+        this._partialPrerelease.value
+      );
+      this._publishChanges(git, publishGit, allPackages);
+    }
 
-      console.log(EOL + colors.green('Rush publish finished successfully.'));
-    });
+    console.log(EOL + colors.green('Rush publish finished successfully.'));
   }
 
   /**
@@ -260,7 +265,11 @@ export class PublishAction extends BaseRushAction {
     }
   }
 
-  private _publishChanges(allPackages: Map<string, RushConfigurationProject>): void {
+  private _publishChanges(
+    git: Git,
+    publishGit: PublishGit,
+    allPackages: Map<string, RushConfigurationProject>
+  ): void {
     const changeManager: ChangeManager = new ChangeManager(this.rushConfiguration);
     changeManager.load(
       this.rushConfiguration.changesFolder,
@@ -270,11 +279,10 @@ export class PublishAction extends BaseRushAction {
 
     if (changeManager.hasChanges()) {
       const orderedChanges: IChangeInfo[] = changeManager.changes;
-      const git: PublishGit = new PublishGit(this._targetBranch.value);
-      const tempBranch: string = 'publish-' + new Date().getTime();
+      const tempBranchName: string = `publish-${Date.now()}`;
 
       // Make changes in temp branch.
-      git.checkout(tempBranch, true);
+      publishGit.checkout(tempBranchName, true);
 
       this._setDependenciesBeforePublish();
 
@@ -284,11 +292,14 @@ export class PublishAction extends BaseRushAction {
 
       this._setDependenciesBeforeCommit();
 
-      if (VersionControl.hasUncommittedChanges()) {
+      if (git.hasUncommittedChanges()) {
         // Stage, commit, and push the changes to remote temp branch.
-        git.addChanges(':/*');
-        git.commit(this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE);
-        git.push(tempBranch);
+        publishGit.addChanges(':/*');
+        publishGit.commit(
+          this.rushConfiguration.gitVersionBumpCommitMessage || DEFAULT_PACKAGE_UPDATE_MESSAGE,
+          !this._ignoreGitHooksParameter.value
+        );
+        publishGit.push(tempBranchName, !this._ignoreGitHooksParameter.value);
 
         this._setDependenciesBeforePublish();
 
@@ -306,7 +317,7 @@ export class PublishAction extends BaseRushAction {
             const project: RushConfigurationProject | undefined = allPackages.get(change.packageName);
             if (project) {
               if (!this._packageExists(project)) {
-                this._npmPublish(change.packageName, project.projectFolder);
+                this._npmPublish(change.packageName, project.publishFolder);
               } else {
                 console.log(`Skip ${change.packageName}. Package exists.`);
               }
@@ -319,27 +330,26 @@ export class PublishAction extends BaseRushAction {
         this._setDependenciesBeforeCommit();
 
         // Create and push appropriate Git tags.
-        this._gitAddTags(git, orderedChanges);
-        git.push(tempBranch);
+        this._gitAddTags(publishGit, orderedChanges);
+        publishGit.push(tempBranchName, !this._ignoreGitHooksParameter.value);
 
         // Now merge to target branch.
-        git.checkout(this._targetBranch.value);
-        git.pull();
-        git.merge(tempBranch);
-        git.push(this._targetBranch.value);
-        git.deleteBranch(tempBranch);
+        publishGit.checkout(this._targetBranch.value!);
+        publishGit.pull(!this._ignoreGitHooksParameter.value);
+        publishGit.merge(tempBranchName, !this._ignoreGitHooksParameter.value);
+        publishGit.push(this._targetBranch.value!, !this._ignoreGitHooksParameter.value);
+        publishGit.deleteBranch(tempBranchName, true, !this._ignoreGitHooksParameter.value);
       } else {
-        git.checkout(this._targetBranch.value);
-        git.deleteBranch(tempBranch, false);
+        publishGit.checkout(this._targetBranch.value!);
+        publishGit.deleteBranch(tempBranchName, false, !this._ignoreGitHooksParameter.value);
       }
     }
   }
 
-  private _publishAll(allPackages: Map<string, RushConfigurationProject>): void {
+  private _publishAll(git: PublishGit, allPackages: Map<string, RushConfigurationProject>): void {
     console.log(`Rush publish starts with includeAll and version policy ${this._versionPolicy.value}`);
 
     let updated: boolean = false;
-    const git: PublishGit = new PublishGit(this._targetBranch.value);
 
     allPackages.forEach((packageConfig, packageName) => {
       if (
@@ -371,15 +381,16 @@ export class PublishAction extends BaseRushAction {
           applyTag(this._applyGitTagsOnPack.value);
         } else if (this._force.value || !this._packageExists(packageConfig)) {
           // Publish to npm repository
-          this._npmPublish(packageName, packageConfig.projectFolder);
+          this._npmPublish(packageName, packageConfig.publishFolder);
           applyTag(true);
         } else {
           console.log(`Skip ${packageName}. Not updated.`);
         }
       }
     });
+
     if (updated) {
-      git.push(this._targetBranch.value);
+      git.push(this._targetBranch.value!, !this._ignoreGitHooksParameter.value);
     }
   }
 
@@ -421,10 +432,7 @@ export class PublishAction extends BaseRushAction {
         args.push(`--access`, this._npmAccessLevel.value);
       }
 
-      if (
-        this.rushConfiguration.packageManager === 'pnpm' &&
-        semver.gte(this.rushConfiguration.packageManagerToolVersion, '4.11.0')
-      ) {
+      if (this.rushConfiguration.packageManager === 'pnpm') {
         // PNPM 4.11.0 introduced a feature that may interrupt publishing and prompt the user for input.
         // See this issue for details: https://github.com/microsoft/rushstack/issues/1940
         args.push('--no-git-checks');
@@ -459,11 +467,31 @@ export class PublishAction extends BaseRushAction {
 
     const publishedVersions: string[] = Npm.publishedVersions(
       packageConfig.packageName,
-      packageConfig.projectFolder,
+      packageConfig.publishFolder,
       env,
       args
     );
-    return publishedVersions.indexOf(packageConfig.packageJson.version) >= 0;
+
+    const packageVersion: string = packageConfig.packageJsonEditor.version;
+
+    // SemVer supports an obscure (and generally deprecated) feature where "build metadata" can be
+    // appended to a version.  For example if our version is "1.2.3-beta.4+extra567", then "+extra567" is the
+    // build metadata part.  The suffix has no effect on version comparisons and is mostly ignored by
+    // the NPM registry.  Importantly, the queried version number will not include it, so we need to discard
+    // it before comparing against the list of already published versions.
+    const parsedVersion: semver.SemVer | null = semver.parse(packageVersion);
+    if (!parsedVersion) {
+      throw new Error(`The package "${packageConfig.packageName}" has an invalid "version" value`);
+    }
+
+    // For example, normalize "1.2.3-beta.4+extra567" -->"1.2.3-beta.4".
+    //
+    // This is redundant in the current API, but might change in the future:
+    // https://github.com/npm/node-semver/issues/264
+    parsedVersion.build = [];
+    const normalizedVersion: string = parsedVersion.format();
+
+    return publishedVersions.indexOf(normalizedVersion) >= 0;
   }
 
   private _npmPack(packageName: string, project: RushConfigurationProject): void {
@@ -474,14 +502,14 @@ export class PublishAction extends BaseRushAction {
       !!this._publish.value,
       this.rushConfiguration.packageManagerToolFilename,
       args,
-      project.projectFolder,
+      project.publishFolder,
       env
     );
 
     if (this._publish.value) {
       // Copy the tarball the release folder
       const tarballName: string = this._calculateTarballName(project);
-      const tarballPath: string = path.join(project.projectFolder, tarballName);
+      const tarballPath: string = path.join(project.publishFolder, tarballName);
       const destFolder: string = this._releaseFolder.value
         ? this._releaseFolder.value
         : path.join(this.rushConfiguration.commonTempFolder, 'artifacts', 'packages');

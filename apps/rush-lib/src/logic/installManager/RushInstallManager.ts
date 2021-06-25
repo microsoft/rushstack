@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as glob from 'glob';
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -17,6 +17,7 @@ import {
   InternalError,
   AlreadyReportedError
 } from '@rushstack/node-core-library';
+import { PrintUtilities } from '@rushstack/terminal';
 
 import { BaseInstallManager, IInstallManagerOptions } from '../base/BaseInstallManager';
 import { BaseShrinkwrapFile } from '../../logic/base/BaseShrinkwrapFile';
@@ -69,28 +70,6 @@ export class RushInstallManager extends BaseInstallManager {
     this._tempProjectHelper = new TempProjectHelper(this.rushConfiguration);
   }
 
-  protected async prepareAsync(): Promise<{ variantIsUpToDate: boolean; shrinkwrapIsUpToDate: boolean }> {
-    const result: { variantIsUpToDate: boolean; shrinkwrapIsUpToDate: boolean } = await super.prepareAsync();
-
-    // We have already done prep work to ensure that the package.json files are "up to date". Some changes
-    // (such as local package version bumps, or adding a reference to another existing local package) do
-    // not need a "rush update" to be run, and as such can be changed manually in the temp shrinkwrap. These
-    // changes will eventually be picked up during a "rush update".
-    if (
-      this.rushConfiguration.packageManager === 'pnpm' &&
-      !this.options.allowShrinkwrapUpdates &&
-      this.rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall
-    ) {
-      const tempShrinkwrap: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-        this.rushConfiguration.tempShrinkwrapFilename,
-        this.rushConfiguration.pnpmOptions
-      );
-      await this._updatePnpmShrinkwrapTarballIntegritiesAsync(tempShrinkwrap);
-    }
-
-    return result;
-  }
-
   /**
    * Regenerates the common/package.json and all temp_modules projects.
    * If shrinkwrapFile is provided, this function also validates whether it contains
@@ -122,23 +101,15 @@ export class RushInstallManager extends BaseInstallManager {
 
     if (!shrinkwrapFile) {
       shrinkwrapIsUpToDate = false;
-    } else {
-      let workspaceKeys: ReadonlyArray<string> = [];
-      try {
-        workspaceKeys = shrinkwrapFile.getWorkspaceKeys();
-      } catch {
-        // Swallow errors since not all shrinkwrap types support workspaces
-      }
-      if (workspaceKeys.length !== 0 && !this.options.fullUpgrade) {
-        console.log();
-        console.log(
-          colors.red(
-            'The shrinkwrap file had previously been updated to support workspaces. Run "rush update --full" ' +
-              'to update the shrinkwrap file.'
-          )
-        );
-        throw new AlreadyReportedError();
-      }
+    } else if (shrinkwrapFile.isWorkspaceCompatible && !this.options.fullUpgrade) {
+      console.log();
+      console.log(
+        colors.red(
+          'The shrinkwrap file had previously been updated to support workspaces. Run "rush update --full" ' +
+            'to update the shrinkwrap file.'
+        )
+      );
+      throw new AlreadyReportedError();
     }
 
     // dependency name --> version specifier
@@ -160,22 +131,32 @@ export class RushInstallManager extends BaseInstallManager {
         }
       });
 
-      if (this._findOrphanedTempProjects(shrinkwrapFile)) {
-        // If there are any orphaned projects, then "npm install" would fail because the shrinkwrap
-        // contains references such as "resolved": "file:projects\\project1" that refer to nonexistent
-        // file paths.
+      if (this._findMissingTempProjects(shrinkwrapFile)) {
+        // If any Rush project's tarball is missing from the shrinkwrap file, then we need to update
+        // the shrinkwrap file.
+        shrinkwrapIsUpToDate = false;
+      }
+
+      // If there are orphaned projects, we need to update
+      const orphanedProjects: ReadonlyArray<string> = shrinkwrapFile.findOrphanedProjects(
+        this.rushConfiguration
+      );
+      if (orphanedProjects.length > 0) {
+        for (const orhpanedProject of orphanedProjects) {
+          shrinkwrapWarnings.push(
+            `Your ${this.rushConfiguration.shrinkwrapFilePhrase} references "${orhpanedProject}" ` +
+              'which was not found in rush.json'
+          );
+        }
         shrinkwrapIsUpToDate = false;
       }
     }
 
     // dependency name --> version specifier
-    const commonDependencies: Map<string, string> = InstallHelpers.collectPreferredVersions(
-      this.rushConfiguration,
-      {
-        explicitPreferredVersions: allExplicitPreferredVersions,
-        variant: this.options.variant
-      }
-    );
+    const commonDependencies: Map<string, string> = new Map([
+      ...allExplicitPreferredVersions,
+      ...this.rushConfiguration.getImplicitlyPreferredVersions(this.options.variant)
+    ]);
 
     // To make the common/package.json file more readable, sort alphabetically
     // according to rushProject.tempProjectName instead of packageName.
@@ -241,9 +222,8 @@ export class RushInstallManager extends BaseInstallManager {
         // If so, then we will symlink to the project folder rather than to common/temp/node_modules.
         // In this case, we don't want "npm install" to process this package, but we do need
         // to record this decision for linking later, so we add it to a special 'rushDependencies' field.
-        const localProject: RushConfigurationProject | undefined = this.rushConfiguration.getProjectByName(
-          packageName
-        );
+        const localProject: RushConfigurationProject | undefined =
+          this.rushConfiguration.getProjectByName(packageName);
 
         if (localProject) {
           // Don't locally link if it's listed in the cyclicDependencyProjects
@@ -265,27 +245,21 @@ export class RushInstallManager extends BaseInstallManager {
         // We will NOT locally link this package; add it as a regular dependency.
         tempPackageJson.dependencies![packageName] = packageVersion;
 
-        let tryReusingPackageVersionsFromShrinkwrap: boolean = true;
-
-        if (this.rushConfiguration.packageManager === 'pnpm') {
-          // Shrinkwrap churn optimization doesn't make sense when --frozen-lockfile is true
-          tryReusingPackageVersionsFromShrinkwrap = !this.rushConfiguration.experimentsConfiguration
-            .configuration.usePnpmFrozenLockfileForRushInstall;
+        if (
+          shrinkwrapFile &&
+          !shrinkwrapFile.tryEnsureCompatibleDependency(dependencySpecifier, rushProject.tempProjectName)
+        ) {
+          shrinkwrapWarnings.push(
+            `Missing dependency "${packageName}" (${packageVersion}) required by "${rushProject.packageName}"`
+          );
+          shrinkwrapIsUpToDate = false;
         }
+      }
 
-        if (shrinkwrapFile) {
-          if (
-            !shrinkwrapFile.tryEnsureCompatibleDependency(
-              dependencySpecifier,
-              rushProject.tempProjectName,
-              tryReusingPackageVersionsFromShrinkwrap
-            )
-          ) {
-            shrinkwrapWarnings.push(
-              `Missing dependency "${packageName}" (${packageVersion}) required by "${rushProject.packageName}"`
-            );
-            shrinkwrapIsUpToDate = false;
-          }
+      if (this.rushConfiguration.packageManager === 'yarn') {
+        // This feature is only implemented by the Yarn package manager
+        if (packageJson.resolutionsList.length > 0) {
+          tempPackageJson.resolutions = packageJson.saveToObject().resolutions;
         }
       }
 
@@ -338,14 +312,23 @@ export class RushInstallManager extends BaseInstallManager {
         }
       }
 
-      // Remove the workspace file if it exists
-      if (this.rushConfiguration.packageManager === 'pnpm') {
-        const workspaceFilePath: string = path.join(
-          this.rushConfiguration.commonTempFolder,
-          'pnpm-workspace.yaml'
+      // When using frozen shrinkwrap, we need to validate that the tarball integrities are up-to-date
+      // with the shrinkwrap file, since these will cause install to fail.
+      if (
+        shrinkwrapFile &&
+        this.rushConfiguration.packageManager === 'pnpm' &&
+        this.rushConfiguration.experimentsConfiguration.configuration.usePnpmFrozenLockfileForRushInstall
+      ) {
+        const pnpmShrinkwrapFile: PnpmShrinkwrapFile = shrinkwrapFile as PnpmShrinkwrapFile;
+        const tarballIntegrityValid: boolean = await this._validateRushProjectTarballIntegrityAsync(
+          pnpmShrinkwrapFile,
+          rushProject
         );
-        if (FileSystem.exists(workspaceFilePath)) {
-          FileSystem.deleteFile(workspaceFilePath);
+        if (!tarballIntegrityValid) {
+          shrinkwrapIsUpToDate = false;
+          shrinkwrapWarnings.push(
+            `Invalid or missing tarball integrity hash in shrinkwrap for "${rushProject.packageName}"`
+          );
         }
       }
 
@@ -357,6 +340,21 @@ export class RushInstallManager extends BaseInstallManager {
               'notation. The package.json has been modified and must be committed to source control.'
           )
         );
+      }
+    }
+
+    // Remove the workspace file if it exists
+    if (this.rushConfiguration.packageManager === 'pnpm') {
+      const workspaceFilePath: string = path.join(
+        this.rushConfiguration.commonTempFolder,
+        'pnpm-workspace.yaml'
+      );
+      try {
+        await FileSystem.deleteFileAsync(workspaceFilePath);
+      } catch (e) {
+        if (!FileSystem.isNotExistError(e)) {
+          throw e;
+        }
       }
     }
 
@@ -390,54 +388,29 @@ export class RushInstallManager extends BaseInstallManager {
     return true;
   }
 
-  private async _updatePnpmShrinkwrapTarballIntegritiesAsync(
-    tempShrinkwrapFile: PnpmShrinkwrapFile | undefined
-  ): Promise<void> {
-    if (!tempShrinkwrapFile) {
-      return;
-    }
-
-    const tempProjectHelper: TempProjectHelper = new TempProjectHelper(this.rushConfiguration);
-
-    console.log(
-      `Checking shrinkwrap local dependency tarball hashes in ${tempShrinkwrapFile.shrinkwrapFilename}`
-    );
-
-    let shrinkwrapFileUpdated: boolean = false;
-    for (const rushProject of this.rushConfiguration.projects) {
-      const tempProjectDependencyKey: string | undefined = tempShrinkwrapFile.getTempProjectDependencyKey(
+  private async _validateRushProjectTarballIntegrityAsync(
+    shrinkwrapFile: PnpmShrinkwrapFile | undefined,
+    rushProject: RushConfigurationProject
+  ): Promise<boolean> {
+    if (shrinkwrapFile) {
+      const tempProjectDependencyKey: string | undefined = shrinkwrapFile.getTempProjectDependencyKey(
         rushProject.tempProjectName
       );
-
       if (!tempProjectDependencyKey) {
-        throw new Error(`Cannot get dependency key for temp project: ${rushProject.tempProjectName}`);
+        return false;
       }
 
-      const parentShrinkwrapEntry:
-        | IPnpmShrinkwrapDependencyYaml
-        | undefined = tempShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(
-        tempProjectDependencyKey
-      );
-      if (!parentShrinkwrapEntry) {
-        throw new InternalError(
-          `Cannot find shrinkwrap entry using dependency key for temp project: ${rushProject.tempProjectName}`
-        );
-      }
-
+      const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml =
+        shrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey)!;
       const newIntegrity: string = (
-        await ssri.fromStream(fs.createReadStream(tempProjectHelper.getTarballFilePath(rushProject)))
+        await ssri.fromStream(fs.createReadStream(this._tempProjectHelper.getTarballFilePath(rushProject)))
       ).toString();
 
-      if (parentShrinkwrapEntry.resolution.integrity !== newIntegrity) {
-        shrinkwrapFileUpdated = true;
-        parentShrinkwrapEntry.resolution.integrity = newIntegrity;
+      if (!parentShrinkwrapEntry.resolution || parentShrinkwrapEntry.resolution.integrity !== newIntegrity) {
+        return false;
       }
     }
-
-    tempShrinkwrapFile.save(tempShrinkwrapFile.shrinkwrapFilename);
-    if (shrinkwrapFileUpdated) {
-      console.log('Shrinkwrap local dependency tarball hashes were updated.');
-    }
+    return true;
   }
 
   /**
@@ -446,38 +419,11 @@ export class RushInstallManager extends BaseInstallManager {
    * @override
    */
   protected canSkipInstall(lastModifiedDate: Date): boolean {
-    console.log(
-      os.EOL +
-        colors.bold(
-          `Checking ${RushConstants.nodeModulesFolderName} in ${this.rushConfiguration.commonTempFolder}`
-        ) +
-        os.EOL
-    );
-
-    // Based on timestamps, can we skip this install entirely?
-    const potentiallyChangedFiles: string[] = [];
-
-    // Consider the timestamp on the node_modules folder; if someone tampered with it
-    // or deleted it entirely, then we can't skip this install
-    potentiallyChangedFiles.push(
-      path.join(this.rushConfiguration.commonTempFolder, RushConstants.nodeModulesFolderName)
-    );
-
-    // Additionally, if they pulled an updated npm-shrinkwrap.json file from Git,
-    // then we can't skip this install
-    potentiallyChangedFiles.push(this.rushConfiguration.getCommittedShrinkwrapFilename(this.options.variant));
-
-    // Add common-versions.json file to the potentially changed files list.
-    potentiallyChangedFiles.push(this.rushConfiguration.getCommonVersionsFilePath(this.options.variant));
-
-    if (this.rushConfiguration.packageManager === 'pnpm') {
-      // If the repo is using pnpmfile.js, consider that also
-      const pnpmFileFilename: string = this.rushConfiguration.getPnpmfilePath(this.options.variant);
-
-      if (FileSystem.exists(pnpmFileFilename)) {
-        potentiallyChangedFiles.push(pnpmFileFilename);
-      }
+    if (!super.canSkipInstall(lastModifiedDate)) {
+      return false;
     }
+
+    const potentiallyChangedFiles: string[] = [];
 
     // Also consider timestamps for all the temp tarballs. (createTempModulesAndCheckShrinkwrap() will
     // carefully preserve these timestamps unless something has changed.)
@@ -736,7 +682,9 @@ export class RushInstallManager extends BaseInstallManager {
     }
 
     if (anyChanges) {
-      console.log(os.EOL + colors.yellow(Utilities.wrapWords(`Applied workaround for NPM 5 bug`)) + os.EOL);
+      console.log(
+        os.EOL + colors.yellow(PrintUtilities.wrapWords(`Applied workaround for NPM 5 bug`)) + os.EOL
+      );
     }
   }
 
@@ -746,15 +694,16 @@ export class RushInstallManager extends BaseInstallManager {
    *
    * @returns true if orphans were found, or false if everything is okay
    */
-  private _findOrphanedTempProjects(shrinkwrapFile: BaseShrinkwrapFile): boolean {
-    // We can recognize temp projects because they are under the "@rush-temp" NPM scope.
-    for (const tempProjectName of shrinkwrapFile.getTempProjectNames()) {
-      if (!this.rushConfiguration.findProjectByTempName(tempProjectName)) {
+  private _findMissingTempProjects(shrinkwrapFile: BaseShrinkwrapFile): boolean {
+    const tempProjectNames: Set<string> = new Set(shrinkwrapFile.getTempProjectNames());
+
+    for (const rushProject of this.rushConfiguration.projects) {
+      if (!tempProjectNames.has(rushProject.tempProjectName)) {
         console.log(
           os.EOL +
             colors.yellow(
-              Utilities.wrapWords(
-                `Your ${this.rushConfiguration.shrinkwrapFilePhrase} references a project "${tempProjectName}" which no longer exists.`
+              PrintUtilities.wrapWords(
+                `Your ${this.rushConfiguration.shrinkwrapFilePhrase} is missing the project "${rushProject.packageName}".`
               )
             ) +
             os.EOL

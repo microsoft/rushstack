@@ -2,6 +2,8 @@
  * A class used to exposed events.
  * @public
  * {@docCategory SystemEvent}
+ *
+ * @myCustomTag
  */
 export class SystemEvent {
   /**
@@ -288,6 +290,23 @@ export interface IDocInterface6 {
   intersectionProperty: IDocInterface1 & IDocInterface2;
   typeReferenceProperty: Generic<IDocInterface1>;
   genericReferenceMethod<T>(x: T): T;
+}
+/**
+ * Interface for testing optional properties
+ * @public
+ */
+export interface IDocInterface7 {
+  /** Description of optionalField */
+  optionalField?: boolean;
+
+  // Missing description
+  optionalUndocumentedField?: boolean;
+
+  /** Description of optionalReadonlyField */
+  readonly optionalReadonlyField?: boolean;
+
+  /** Description of optionalMember */
+  optionalMember?();
 }
 
 /**

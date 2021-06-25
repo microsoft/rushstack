@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import colors from 'colors';
+import colors from 'colors/safe';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
@@ -21,9 +21,9 @@ export class InitDeployAction extends BaseRushAction {
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'init-deploy',
-      summary: '(EXPERIMENTAL) Creates a deployment scenario config file for use with "rush deploy".',
+      summary: 'Creates a deployment scenario config file for use with "rush deploy".',
       documentation:
-        '(EXPERIMENTAL) Use this command to initialize a new scenario config file for use with "rush deploy".' +
+        'Use this command to initialize a new scenario config file for use with "rush deploy".' +
         ' The default filename is common/config/rush/deploy.json. However, if you need to manage multiple' +
         ' deployments with different settings, you can use use "--scenario" to create additional config files.',
       parser
@@ -69,9 +69,8 @@ export class InitDeployAction extends BaseRushAction {
     console.log(colors.green('Creating scenario file: ') + scenarioFilePath);
 
     const shortProjectName: string = this._project.value!;
-    const rushProject:
-      | RushConfigurationProject
-      | undefined = this.rushConfiguration.findProjectByShorthandName(shortProjectName);
+    const rushProject: RushConfigurationProject | undefined =
+      this.rushConfiguration.findProjectByShorthandName(shortProjectName);
     if (!rushProject) {
       throw new Error(`The specified project was not found in rush.json: "${shortProjectName}"`);
     }

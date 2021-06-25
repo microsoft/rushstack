@@ -14,10 +14,10 @@ import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
+import { JsonSchema } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
 import { SyncHook } from 'tapable';
 import { Terminal } from '@rushstack/node-core-library';
-import * as webpack from 'webpack';
 
 // @public (undocumented)
 export class BuildStageHooks extends StageHooksBase<IBuildStageProperties> {
@@ -42,7 +42,7 @@ export class BundleSubstageHooks extends BuildSubstageHooksBase {
     // (undocumented)
     readonly afterConfigureWebpack: AsyncSeriesHook;
     // (undocumented)
-    readonly configureWebpack: AsyncSeriesWaterfallHook<IWebpackConfiguration>;
+    readonly configureWebpack: AsyncSeriesWaterfallHook<unknown>;
 }
 
 // @public (undocumented)
@@ -53,8 +53,8 @@ export class CleanStageHooks extends StageHooksBase<ICleanStageProperties> {
 
 // @public (undocumented)
 export class CompileSubstageHooks extends BuildSubstageHooksBase {
-    // @internal (undocumented)
-    readonly afterTypescriptFirstEmit: AsyncParallelHook;
+    readonly afterCompile: AsyncParallelHook;
+    readonly afterRecompile: AsyncParallelHook;
 }
 
 // @public (undocumented)
@@ -69,7 +69,6 @@ export class HeftConfiguration {
     get buildFolder(): string;
     // @internal
     _checkForRigAsync(): Promise<void>;
-    get compilerPackage(): ICompilerPackage | undefined;
     get globalTerminal(): Terminal;
     get heftPackageJson(): IPackageJson;
     // @internal (undocumented)
@@ -94,7 +93,7 @@ export class HeftSession {
     //
     // @internal
     constructor(options: IHeftSessionOptions, internalSessionOptions: IInternalHeftSessionOptions);
-    readonly debugMode: boolean;
+    get debugMode(): boolean;
     // (undocumented)
     readonly hooks: IHeftSessionHooks;
     // @internal (undocumented)
@@ -112,6 +111,12 @@ export interface IBuildStageContext extends IStageContext<BuildStageHooks, IBuil
 
 // @public (undocumented)
 export interface IBuildStageProperties {
+    // @beta (undocumented)
+    emitExtensionForTests?: '.js' | '.cjs' | '.mjs';
+    // @beta (undocumented)
+    emitFolderNameForTests?: string;
+    // @beta (undocumented)
+    isTypeScriptProject?: boolean;
     // (undocumented)
     lite: boolean;
     // (undocumented)
@@ -125,7 +130,7 @@ export interface IBuildStageProperties {
     // (undocumented)
     watchMode: boolean;
     // (undocumented)
-    webpackStats?: webpack.Stats;
+    webpackStats?: unknown;
 }
 
 // @public (undocumented)
@@ -142,7 +147,9 @@ export interface IBundleSubstage extends IBuildSubstage<BundleSubstageHooks, IBu
 
 // @public (undocumented)
 export interface IBundleSubstageProperties {
-    webpackConfiguration?: webpack.Configuration | webpack.Configuration[];
+    webpackConfiguration?: unknown;
+    webpackDevServerVersion?: string | undefined;
+    webpackVersion?: string | undefined;
 }
 
 // @public (undocumented)
@@ -155,18 +162,6 @@ export interface ICleanStageProperties {
     deleteCache: boolean;
     // (undocumented)
     pathsToDelete: Set<string>;
-}
-
-// @public (undocumented)
-export interface ICompilerPackage {
-    // (undocumented)
-    apiExtractorPackagePath: string | undefined;
-    // (undocumented)
-    eslintPackagePath: string | undefined;
-    // (undocumented)
-    tslintPackagePath: string | undefined;
-    // (undocumented)
-    typeScriptPackagePath: string;
 }
 
 // @public (undocumented)
@@ -205,7 +200,7 @@ export interface ICustomActionParameterBase<TParameter extends CustomActionParam
     // (undocumented)
     kind: 'flag' | 'integer' | 'string' | 'stringList';
     // (undocumented)
-    paramterLongName: string;
+    parameterLongName: string;
 }
 
 // @beta (undocumented)
@@ -260,6 +255,8 @@ export interface IHeftPlugin<TOptions = void> {
     // (undocumented)
     apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration, options?: TOptions): void;
     // (undocumented)
+    readonly optionsSchema?: JsonSchema;
+    // (undocumented)
     readonly pluginName: string;
 }
 
@@ -302,6 +299,20 @@ export interface IPostBuildSubstage extends IBuildSubstage<BuildSubstageHooksBas
 export interface IPreCompileSubstage extends IBuildSubstage<BuildSubstageHooksBase, {}> {
 }
 
+// @beta
+export interface IRunScriptOptions<TStageProperties> {
+    // (undocumented)
+    debugMode: boolean;
+    // (undocumented)
+    heftConfiguration: HeftConfiguration;
+    // (undocumented)
+    properties: TStageProperties;
+    // (undocumented)
+    scopedLogger: ScopedLogger;
+    // (undocumented)
+    scriptOptions: Record<string, any>;
+}
+
 // @public (undocumented)
 export interface IScopedLogger {
     emitError(error: Error): void;
@@ -327,9 +338,13 @@ export interface ITestStageProperties {
     // (undocumented)
     debugHeftReporter: boolean | undefined;
     // (undocumented)
+    detectOpenHandles: boolean | undefined;
+    // (undocumented)
     findRelatedTests: ReadonlyArray<string> | undefined;
     // (undocumented)
     maxWorkers: string | undefined;
+    // (undocumented)
+    passWithNoTests: boolean | undefined;
     // (undocumented)
     silent: boolean | undefined;
     // (undocumented)
@@ -343,9 +358,6 @@ export interface ITestStageProperties {
     // (undocumented)
     watchMode: boolean;
 }
-
-// @public (undocumented)
-export type IWebpackConfiguration = webpack.Configuration | webpack.Configuration[] | undefined;
 
 // @internal
 export class _MetricsCollector {

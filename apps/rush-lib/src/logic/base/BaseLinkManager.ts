@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -186,7 +186,7 @@ export abstract class BaseLinkManager {
    *   if true, this option forces the links to be recreated.
    */
   public async createSymlinksForProjects(force: boolean): Promise<void> {
-    console.log('Linking projects together...');
+    console.log(os.EOL + colors.bold('Linking local projects'));
     const stopwatch: Stopwatch = Stopwatch.start();
 
     await this._linkProjects();

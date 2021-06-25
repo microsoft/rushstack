@@ -92,9 +92,8 @@ export class PackageJsonLookup {
    * loading, an exception will be thrown instead.
    */
   public static loadOwnPackageJson(dirnameOfCaller: string): IPackageJson {
-    const packageJson: IPackageJson | undefined = PackageJsonLookup.instance.tryLoadPackageJsonFor(
-      dirnameOfCaller
-    );
+    const packageJson: IPackageJson | undefined =
+      PackageJsonLookup.instance.tryLoadPackageJsonFor(dirnameOfCaller);
 
     if (packageJson === undefined) {
       throw new Error(

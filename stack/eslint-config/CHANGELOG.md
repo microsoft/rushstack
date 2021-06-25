@@ -1,6 +1,62 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+This log was last generated on Mon, 12 Apr 2021 15:10:28 GMT and should not be manually modified.
+
+## 2.3.4
+Mon, 12 Apr 2021 15:10:28 GMT
+
+_Version update only_
+
+## 2.3.3
+Tue, 06 Apr 2021 15:14:22 GMT
+
+### Patches
+
+- Switch to range version specifier for Typescript experimental utils
+
+## 2.3.2
+Thu, 10 Dec 2020 23:25:49 GMT
+
+### Patches
+
+- Upgrade to TSDoc 0.12.24
+
+## 2.3.1
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 2.3.0
+Fri, 30 Oct 2020 06:38:38 GMT
+
+### Minor changes
+
+- Exclude *.d.ts from linting
+- Set "root"=true to prevent unintended loading of other ESLint config files found in parent folders (which may be outside the Git working directory)
+
+## 2.2.3
+Fri, 30 Oct 2020 00:10:14 GMT
+
+### Patches
+
+- Update the "modern-module-resolution" patch to support ESLint 7.8.0 and newer
+
+## 2.2.2
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 2.2.1
+Tue, 06 Oct 2020 00:24:06 GMT
+
+_Version update only_
+
+## 2.2.0
+Mon, 05 Oct 2020 22:36:57 GMT
+
+### Minor changes
+
+- Add a mixin to support @rushstack/eslint-plugin-packlets
 
 ## 2.1.3
 Wed, 30 Sep 2020 18:39:17 GMT

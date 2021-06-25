@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as os from 'os';
 
 import { Import } from '@rushstack/node-core-library';
@@ -38,6 +38,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected _networkConcurrencyParameter!: CommandLineIntegerParameter;
   protected _debugPackageManagerParameter!: CommandLineFlagParameter;
   protected _maxInstallAttempts!: CommandLineIntegerParameter;
+  protected _ignoreHooksParameter!: CommandLineFlagParameter;
 
   protected onDefineParameters(): void {
     this._purgeParameter = this.defineFlagParameter({
@@ -77,12 +78,16 @@ export abstract class BaseInstallAction extends BaseRushAction {
       description: `Overrides the default maximum number of install attempts.`,
       defaultValue: RushConstants.defaultMaxInstallAttempts
     });
+    this._ignoreHooksParameter = this.defineFlagParameter({
+      parameterLongName: '--ignore-hooks',
+      description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
+    });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
 
   protected abstract buildInstallOptions(): IInstallManagerOptions;
 
-  protected runAsync(): Promise<void> {
+  protected async runAsync(): Promise<void> {
     VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, {
       variant: this._variant.value
     });
@@ -97,7 +102,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
       StandardScriptUpdater.validate(this.rushConfiguration);
     }
 
-    this.eventHooksManager.handle(Event.preRushInstall, this.parser.isDebug);
+    this.eventHooksManager.handle(
+      Event.preRushInstall,
+      this.parser.isDebug,
+      this._ignoreHooksParameter.value
+    );
 
     const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration, this.rushGlobalFolder);
 
@@ -124,43 +133,46 @@ export abstract class BaseInstallAction extends BaseRushAction {
 
     const installManagerOptions: IInstallManagerOptions = this.buildInstallOptions();
 
-    const installManager: BaseInstallManager = installManagerFactoryModule.InstallManagerFactory.getInstallManager(
-      this.rushConfiguration,
-      this.rushGlobalFolder,
-      purgeManager,
-      installManagerOptions
-    );
+    const installManager: BaseInstallManager =
+      installManagerFactoryModule.InstallManagerFactory.getInstallManager(
+        this.rushConfiguration,
+        this.rushGlobalFolder,
+        purgeManager,
+        installManagerOptions
+      );
 
-    return installManager
-      .doInstall()
-      .then(() => {
-        purgeManager.deleteAll();
-        stopwatch.stop();
+    let installSuccessful: boolean = true;
+    try {
+      await installManager.doInstallAsync();
 
-        this._collectTelemetry(stopwatch, installManagerOptions, true);
-        this.eventHooksManager.handle(Event.postRushInstall, this.parser.isDebug);
+      this.eventHooksManager.handle(
+        Event.postRushInstall,
+        this.parser.isDebug,
+        this._ignoreHooksParameter.value
+      );
 
-        if (warnAboutScriptUpdate) {
-          console.log(
-            os.EOL +
-              colors.yellow(
-                'Rush refreshed some files in the "common/scripts" folder.' +
-                  '  Please commit this change to Git.'
-              )
-          );
-        }
-
+      if (warnAboutScriptUpdate) {
         console.log(
-          os.EOL + colors.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
+          os.EOL +
+            colors.yellow(
+              'Rush refreshed some files in the "common/scripts" folder.' +
+                '  Please commit this change to Git.'
+            )
         );
-      })
-      .catch((error) => {
-        purgeManager.deleteAll();
-        stopwatch.stop();
+      }
 
-        this._collectTelemetry(stopwatch, installManagerOptions, false);
-        throw error;
-      });
+      console.log(
+        os.EOL + colors.green(`Rush ${this.actionName} finished successfully. (${stopwatch.toString()})`)
+      );
+    } catch (error) {
+      installSuccessful = false;
+      throw error;
+    } finally {
+      purgeManager.deleteAll();
+      stopwatch.stop();
+
+      this._collectTelemetry(stopwatch, installManagerOptions, installSuccessful);
+    }
   }
 
   private _collectTelemetry(

@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
-
 import { PackageJsonLookup, IPackageJson, Text } from '@rushstack/node-core-library';
+import { DEFAULT_CONSOLE_WIDTH, PrintUtilities } from '@rushstack/terminal';
+
 import { Utilities } from '../utilities/Utilities';
 import { ProjectCommandSet } from '../logic/ProjectCommandSet';
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -60,6 +61,16 @@ export class RushXCommandLine {
         return;
       }
 
+      if (rushConfiguration && !rushConfiguration.tryGetProjectForPath(process.cwd())) {
+        // GitHub #2713: Users reported confusion resulting from a situation where "rush install"
+        // did not install the project's dependencies, because the project was not registered.
+        console.log(
+          colors.yellow(
+            'Warning: You are invoking "rushx" inside a Rush repository, but this project is not registered in rush.json.'
+          )
+        );
+      }
+
       const packageJson: IPackageJson = packageJsonLookup.loadPackageJson(packageJsonFilePath);
 
       const projectCommandSet: ProjectCommandSet = new ProjectCommandSet(packageJson);
@@ -103,12 +114,21 @@ export class RushXCommandLine {
       }
 
       const remainingArgs: string[] = args.slice(1);
+
       let commandWithArgs: string = scriptBody;
+      let commandWithArgsForDisplay: string = scriptBody;
       if (remainingArgs.length > 0) {
-        commandWithArgs += ' ' + remainingArgs.join(' ');
+        // This approach is based on what NPM 7 now does:
+        // https://github.com/npm/run-script/blob/47a4d539fb07220e7215cc0e482683b76407ef9b/lib/run-script-pkg.js#L34
+        const escapedRemainingArgs: string[] = remainingArgs.map((x) => Utilities.escapeShellParameter(x));
+
+        commandWithArgs += ' ' + escapedRemainingArgs.join(' ');
+
+        // Display it nicely without the extra quotes
+        commandWithArgsForDisplay += ' ' + remainingArgs.join(' ');
       }
 
-      console.log('Executing: ' + JSON.stringify(commandWithArgs) + os.EOL);
+      console.log('Executing: ' + JSON.stringify(commandWithArgsForDisplay) + os.EOL);
 
       const packageFolder: string = path.dirname(packageJsonFilePath);
 
@@ -157,7 +177,8 @@ export class RushXCommandLine {
         const firstPartLength: number = 2 + maxLength + 2;
         // The length for truncating the escaped escapedScriptBody so it doesn't wrap
         // to the next line
-        const truncateLength: number = Math.max(0, Utilities.getConsoleWidth() - firstPartLength) - 1;
+        const consoleWidth: number = PrintUtilities.getConsoleWidth() || DEFAULT_CONSOLE_WIDTH;
+        const truncateLength: number = Math.max(0, consoleWidth - firstPartLength) - 1;
 
         console.log(
           // Example: "  command: "

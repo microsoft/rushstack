@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/api-extractor-model",
-  "version": "7.10.1",
+  "version": "7.13.3",
   "description": "A helper library for loading and saving the .api.json files created by API Extractor",
   "repository": {
     "type": "git",
@@ -11,16 +11,17 @@
   "typings": "dist/rollup.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "heft test --clean"
+    "build": "heft test --clean --pass-with-no-tests"
   },
   "dependencies": {
-    "@microsoft/tsdoc": "0.12.19",
+    "@microsoft/tsdoc": "0.13.2",
+    "@microsoft/tsdoc-config": "~0.15.2",
     "@rushstack/node-core-library": "workspace:*"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.14.0",
-    "@rushstack/heft-node-rig": "0.1.0",
+    "@rushstack/heft": "0.32.0",
+    "@rushstack/heft-node-rig": "1.0.31",
     "@types/heft-jest": "1.0.1",
     "@types/node": "10.17.13"
   }

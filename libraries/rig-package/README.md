@@ -113,6 +113,7 @@ with a single file `config/rig.json` that delegates everything to the rig packag
    * It should be an NPM package name with the "-rig" suffix.
    */
   "rigPackageName": "example-rig",
+
   /**
    * (Optional) Selects a config profile from the rig package.  The name must consist of
    * lowercase alphanumeric words separated by hyphens, for example "sample-profile".
@@ -152,13 +153,14 @@ The result is a much shorter inventory of files:
 
 ```
 example-rig/package.json
+
 example-rig/profile/node-library/config/api-extractor.json
 example-rig/profile/node-library/config/other-tool2.json
 example-rig/profile/node-library/config/other-tool3.json
-example-rig/profile/node-library/config/api-extractor.json
-example-rig/profile/node-library/config/other-tool2.json
-example-rig/profile/node-library/config/other-tool3.json
+
 example-rig/profile/web-library/config/api-extractor.json
+example-rig/profile/web-library/config/other-tool2.json
+example-rig/profile/web-library/config/other-tool3.json
 
 project1/package.json
 project1/config/rig.json

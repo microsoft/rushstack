@@ -123,10 +123,16 @@ describe('RushConfiguration', () => {
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
     expect(rushConfiguration.packageManager).toEqual('pnpm');
+    expect(rushConfiguration.shrinkwrapFilename).toEqual('pnpm-lock.yaml');
     assertPathProperty(
       'committedShrinkwrapFilename',
-      rushConfiguration.committedShrinkwrapFilename,
+      rushConfiguration.getCommittedShrinkwrapFilename(),
       './repo/common/config/rush/pnpm-lock.yaml'
+    );
+    assertPathProperty(
+      'getPnpmfilePath',
+      rushConfiguration.getPnpmfilePath(),
+      './repo/common/config/rush/.pnpmfile.cjs'
     );
     assertPathProperty('commonFolder', rushConfiguration.commonFolder, './repo/common');
     assertPathProperty(
@@ -150,7 +156,7 @@ describe('RushConfiguration', () => {
     );
     assertPathProperty('rushJsonFolder', rushConfiguration.rushJsonFolder, './repo');
 
-    expect(rushConfiguration.packageManagerToolVersion).toEqual('4.5.0');
+    expect(rushConfiguration.packageManagerToolVersion).toEqual('6.0.0');
 
     expect(rushConfiguration.repositoryUrl).toEqual('someFakeUrl');
     expect(rushConfiguration.projectFolderMaxDepth).toEqual(99);
@@ -185,24 +191,18 @@ describe('RushConfiguration', () => {
     done();
   });
 
-  it('can load repo/rush-pnpm-2.json', (done: jest.DoneCallback) => {
-    const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm-2.json');
+  it('can load repo/rush-pnpm-5.json', (done: jest.DoneCallback) => {
+    const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm-5.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
     expect(rushConfiguration.packageManager).toEqual('pnpm');
-    expect(rushConfiguration.packageManagerToolVersion).toEqual('2.0.0');
-    expect(rushConfiguration.shrinkwrapFilename).toEqual('shrinkwrap.yaml');
-
-    done();
-  });
-
-  it('can load repo/rush-pnpm-3.json', (done: jest.DoneCallback) => {
-    const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm-3.json');
-    const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
-
-    expect(rushConfiguration.packageManager).toEqual('pnpm');
-    expect(rushConfiguration.packageManagerToolVersion).toEqual('3.0.0');
+    expect(rushConfiguration.packageManagerToolVersion).toEqual('5.0.0');
     expect(rushConfiguration.shrinkwrapFilename).toEqual('pnpm-lock.yaml');
+    assertPathProperty(
+      'getPnpmfilePath',
+      rushConfiguration.getPnpmfilePath(),
+      './repo/common/config/rush/pnpmfile.js'
+    );
 
     done();
   });
@@ -247,9 +247,8 @@ describe('RushConfiguration', () => {
 
       it(`loads the correct path when pnpmStore = "local"`, (done: jest.DoneCallback) => {
         const EXPECT_STORE_PATH: string = path.resolve(__dirname, 'repo', 'common', 'temp', 'pnpm-store');
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-          RUSH_JSON_FILENAME
-        );
+        const rushConfiguration: RushConfiguration =
+          RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
@@ -263,9 +262,8 @@ describe('RushConfiguration', () => {
         const EXPECT_STORE_PATH: string = path.resolve('/var/temp');
         process.env[PNPM_STORE_PATH_ENV] = EXPECT_STORE_PATH;
 
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-          RUSH_JSON_FILENAME
-        );
+        const rushConfiguration: RushConfiguration =
+          RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
@@ -281,9 +279,8 @@ describe('RushConfiguration', () => {
 
       it(`loads the correct path when pnpmStore = "global"`, (done: jest.DoneCallback) => {
         const EXPECT_STORE_PATH: string = '';
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-          RUSH_JSON_FILENAME
-        );
+        const rushConfiguration: RushConfiguration =
+          RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('global');
@@ -296,9 +293,8 @@ describe('RushConfiguration', () => {
         const EXPECT_STORE_PATH: string = path.resolve('/var/temp');
         process.env[PNPM_STORE_PATH_ENV] = EXPECT_STORE_PATH;
 
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-          RUSH_JSON_FILENAME
-        );
+        const rushConfiguration: RushConfiguration =
+          RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
 
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('global');
@@ -313,9 +309,8 @@ describe('RushConfiguration', () => {
       expect(() => {
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(
-          RUSH_JSON_FILENAME
-        );
+        const rushConfiguration: RushConfiguration =
+          RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
       }).toThrow();
 
       done();

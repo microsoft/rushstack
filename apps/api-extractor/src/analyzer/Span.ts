@@ -142,7 +142,16 @@ export class Span {
 
     let previousChildSpan: Span | undefined = undefined;
 
+    const visitedChildren: Set<ts.Node> = new Set();
+
     for (const childNode of this.node.getChildren() || []) {
+      // FIX ME: This is a temporary workaround for a problem introduced by TypeScript 4.3.
+      // https://github.com/microsoft/TypeScript/issues/44422
+      if (visitedChildren.has(childNode)) {
+        continue;
+      }
+      visitedChildren.add(childNode);
+
       const childSpan: Span = new Span(childNode);
       childSpan._parent = this;
       childSpan._previousSibling = previousChildSpan;

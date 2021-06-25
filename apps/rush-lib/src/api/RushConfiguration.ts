@@ -32,6 +32,8 @@ import { PnpmPackageManager } from './packageManager/PnpmPackageManager';
 import { ExperimentsConfiguration } from './ExperimentsConfiguration';
 import { PackageNameParsers } from './PackageNameParsers';
 import { RepoStateFile } from '../logic/RepoStateFile';
+import { LookupByPath } from '../logic/LookupByPath';
+import { PackageJsonDependency } from './PackageJsonEditor';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -42,17 +44,19 @@ const DEFAULT_REMOTE: string = 'origin';
  * To avoid confusion/mistakes, any extra files will be reported as an error.
  */
 const knownRushConfigFilenames: string[] = [
-  '.npmrc',
   '.npmrc-publish',
-  RushConstants.pinnedVersionsFilename,
-  RushConstants.commonVersionsFilename,
-  RushConstants.repoStateFilename,
+  '.npmrc',
+  'deploy.json',
+  RushConstants.artifactoryFilename,
   RushConstants.browserApprovedPackagesFilename,
-  RushConstants.nonbrowserApprovedPackagesFilename,
-  RushConstants.versionPoliciesFilename,
+  RushConstants.buildCacheFilename,
   RushConstants.commandLineFilename,
+  RushConstants.commonVersionsFilename,
   RushConstants.experimentsFilename,
-  'deploy.json'
+  RushConstants.nonbrowserApprovedPackagesFilename,
+  RushConstants.pinnedVersionsFilename,
+  RushConstants.repoStateFilename,
+  RushConstants.versionPoliciesFilename
 ];
 
 /**
@@ -70,6 +74,7 @@ export interface IRushGitPolicyJson {
   allowedEmailRegExps?: string[];
   sampleEmail?: string;
   versionBumpCommitMessage?: string;
+  changeLogUpdateCommitMessage?: string;
 }
 
 /**
@@ -169,10 +174,6 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    * Should PNPM fail if peer dependencies aren't installed?
    */
   strictPeerDependencies?: boolean;
-  /**
-   * Defines the dependency resolution strategy PNPM will use
-   */
-  resolutionStrategy?: ResolutionStrategy;
   /**
    * {@inheritDoc PnpmOptionsConfiguration.preventManualShrinkwrapChanges}
    */
@@ -316,22 +317,6 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
   public readonly strictPeerDependencies: boolean;
 
   /**
-   * The resolution strategy that will be used by PNPM.
-   *
-   * @remarks
-   * Configures the strategy used to select versions during installation.
-   *
-   * This feature requires PNPM version 3.1 or newer.  It corresponds to the `--resolution-strategy` command-line
-   * option for PNPM.  Possible values are `"fast"` and `"fewer-dependencies"`.  PNPM's default is `"fast"`, but this
-   * may be incompatible with certain packages, for example the `@types` packages from DefinitelyTyped.  Rush's default
-   * is `"fewer-dependencies"`, which causes PNPM to avoid installing a newer version if an already installed version
-   * can be reused; this is more similar to NPM's algorithm.
-   *
-   * For more background, see this discussion: {@link https://github.com/pnpm/pnpm/issues/1187}
-   */
-  public readonly resolutionStrategy: ResolutionStrategy;
-
-  /**
    * If true, then `rush install` will report an error if manual modifications
    * were made to the PNPM shrinkwrap file without running `rush update` afterwards.
    *
@@ -370,7 +355,6 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
       this.pnpmStorePath = path.resolve(path.join(commonTempFolder, 'pnpm-store'));
     }
     this.strictPeerDependencies = !!json.strictPeerDependencies;
-    this.resolutionStrategy = json.resolutionStrategy || 'fewer-dependencies';
     this.preventManualShrinkwrapChanges = !!json.preventManualShrinkwrapChanges;
     this.useWorkspaces = !!json.useWorkspaces;
   }
@@ -419,12 +403,6 @@ export interface ITryFindRushJsonLocationOptions {
 }
 
 /**
- * This represents the available PNPM resolution strategies as a string
- * @public
- */
-export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
-
-/**
  * This represents the Rush configuration for a repository, based on the "rush.json"
  * configuration file.
  * @public
@@ -458,6 +436,7 @@ export class RushConfiguration {
   private _ensureConsistentVersions: boolean;
   private _suppressNodeLtsWarning: boolean;
   private _variants: Set<string>;
+  private _projectByRelativePath: LookupByPath<RushConfigurationProject>;
 
   // "approvedPackagesPolicy" feature
   private _approvedPackagesPolicy: ApprovedPackagesPolicy;
@@ -466,6 +445,7 @@ export class RushConfiguration {
   private _gitAllowedEmailRegExps: string[];
   private _gitSampleEmail: string;
   private _gitVersionBumpCommitMessage: string | undefined;
+  private _gitChangeLogUpdateCommitMessage: string | undefined;
 
   // "hotfixChangeEnabled" feature
   private _hotfixChangeEnabled: boolean;
@@ -493,7 +473,13 @@ export class RushConfiguration {
   // Lazily loaded when the projectsByName() getter is called.
   private _projectsByName: Map<string, RushConfigurationProject> | undefined;
 
+  // variant -> common-versions configuration
+  private _commonVersionsConfigurations: Map<string, CommonVersionsConfiguration> | undefined;
+  // variant -> map of package name -> implicitly preferred version
+  private _implicitlyPreferredVersions: Map<string, Map<string, string>> | undefined;
+
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
+  private _versionPolicyConfigurationFilePath: string;
   private _experimentsConfiguration: ExperimentsConfiguration;
 
   private readonly _rushConfigurationJson: IRushConfigurationJson;
@@ -629,8 +615,8 @@ export class RushConfiguration {
 
     RushConfiguration._validateCommonRushConfigFolder(
       this._commonRushConfigFolder,
-      this.packageManager,
-      this._shrinkwrapFilename
+      this._packageManagerWrapper,
+      this._experimentsConfiguration
     );
 
     this._projectFolderMinDepth =
@@ -677,6 +663,10 @@ export class RushConfiguration {
       if (rushConfigurationJson.gitPolicy.versionBumpCommitMessage) {
         this._gitVersionBumpCommitMessage = rushConfigurationJson.gitPolicy.versionBumpCommitMessage;
       }
+
+      if (rushConfigurationJson.gitPolicy.changeLogUpdateCommitMessage) {
+        this._gitChangeLogUpdateCommitMessage = rushConfigurationJson.gitPolicy.changeLogUpdateCommitMessage;
+      }
     }
 
     this._hotfixChangeEnabled = false;
@@ -695,11 +685,13 @@ export class RushConfiguration {
     this._telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
     this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks || {});
 
-    const versionPolicyConfigFile: string = path.join(
+    this._versionPolicyConfigurationFilePath = path.join(
       this._commonRushConfigFolder,
       RushConstants.versionPoliciesFilename
     );
-    this._versionPolicyConfiguration = new VersionPolicyConfiguration(versionPolicyConfigFile);
+    this._versionPolicyConfiguration = new VersionPolicyConfiguration(
+      this._versionPolicyConfigurationFilePath
+    );
 
     this._variants = new Set<string>();
 
@@ -714,6 +706,13 @@ export class RushConfiguration {
         this._variants.add(variantName);
       }
     }
+
+    const pathTree: LookupByPath<RushConfigurationProject> = new LookupByPath<RushConfigurationProject>();
+    for (const project of this.projects) {
+      const relativePath: string = Path.convertToSlashes(project.projectRelativeFolder);
+      pathTree.setItem(relativePath, project);
+    }
+    this._projectByRelativePath = pathTree;
   }
 
   private _initializeAndValidateLocalProjects(): void {
@@ -727,10 +726,8 @@ export class RushConfiguration {
       a.packageName.localeCompare(b.packageName)
     );
 
-    const tempNamesByProject: Map<
-      IRushConfigurationProjectJson,
-      string
-    > = RushConfiguration._generateTempNamesForProjects(sortedProjectJsons);
+    const tempNamesByProject: Map<IRushConfigurationProjectJson, string> =
+      RushConfiguration._generateTempNamesForProjects(sortedProjectJsons);
 
     for (const projectJson of sortedProjectJsons) {
       const tempProjectName: string | undefined = tempNamesByProject.get(projectJson);
@@ -764,6 +761,7 @@ export class RushConfiguration {
       // Compute the downstream dependencies within the list of Rush projects.
       this._populateDownstreamDependencies(project.packageJson.dependencies, project.packageName);
       this._populateDownstreamDependencies(project.packageJson.devDependencies, project.packageName);
+      this._populateDownstreamDependencies(project.packageJson.optionalDependencies, project.packageName);
       this._versionPolicyConfiguration.validate(this.projectsByName);
     }
   }
@@ -916,8 +914,8 @@ export class RushConfiguration {
    */
   private static _validateCommonRushConfigFolder(
     commonRushConfigFolder: string,
-    packageManager: PackageManagerName,
-    shrinkwrapFilename: string
+    packageManagerWrapper: PackageManager,
+    experiments: ExperimentsConfiguration
   ): void {
     if (!FileSystem.exists(commonRushConfigFolder)) {
       console.log(`Creating folder: ${commonRushConfigFolder}`);
@@ -951,11 +949,11 @@ export class RushConfiguration {
       const knownSet: Set<string> = new Set<string>(knownRushConfigFilenames.map((x) => x.toUpperCase()));
 
       // Add the shrinkwrap filename for the package manager to the known set.
-      knownSet.add(shrinkwrapFilename.toUpperCase());
+      knownSet.add(packageManagerWrapper.shrinkwrapFilename.toUpperCase());
 
       // If the package manager is pnpm, then also add the pnpm file to the known set.
-      if (packageManager === 'pnpm') {
-        knownSet.add(RushConstants.pnpmfileFilename.toUpperCase());
+      if (packageManagerWrapper.packageManager === 'pnpm') {
+        knownSet.add((packageManagerWrapper as PnpmPackageManager).pnpmfileFilename.toUpperCase());
       }
 
       // Is the filename something we know?  If not, report an error.
@@ -1289,6 +1287,14 @@ export class RushConfiguration {
   }
 
   /**
+   * [Part of the "gitPolicy" feature.]
+   * The commit message to use when committing change log files 'rush version'
+   */
+  public get gitChangeLogUpdateCommitMessage(): string | undefined {
+    return this._gitChangeLogUpdateCommitMessage;
+  }
+
+  /**
    * [Part of the "hotfixChange" feature.]
    * Enables creating hotfix changes
    */
@@ -1468,8 +1474,82 @@ export class RushConfiguration {
    * @param variant - The name of the current variant in use by the active command.
    */
   public getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration {
-    const commonVersionsFilename: string = this.getCommonVersionsFilePath(variant);
-    return CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
+    if (!this._commonVersionsConfigurations) {
+      this._commonVersionsConfigurations = new Map();
+    }
+
+    // Use an empty string as the key when no variant provided. Anything else would possibly conflict
+    // with a varient created by the user
+    const variantKey: string = variant || '';
+    let commonVersionsConfiguration: CommonVersionsConfiguration | undefined =
+      this._commonVersionsConfigurations.get(variantKey);
+    if (!commonVersionsConfiguration) {
+      const commonVersionsFilename: string = this.getCommonVersionsFilePath(variant);
+      commonVersionsConfiguration = CommonVersionsConfiguration.loadFromFile(commonVersionsFilename);
+      this._commonVersionsConfigurations.set(variantKey, commonVersionsConfiguration);
+    }
+
+    return commonVersionsConfiguration;
+  }
+
+  /**
+   * Returns a map of all direct dependencies that only have a single semantic version specifier.
+   * @param variant - The name of the current variant in use by the active command.
+   *
+   * @returns A map of dependency name --\> version specifier for implicitly preferred versions.
+   */
+  public getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string> {
+    if (!this._implicitlyPreferredVersions) {
+      this._implicitlyPreferredVersions = new Map();
+    }
+
+    // Use an empty string as the key when no variant provided. Anything else would possibly conflict
+    // with a varient created by the user
+    const variantKey: string = variant || '';
+    let implicitlyPreferredVersions: Map<string, string> | undefined =
+      this._implicitlyPreferredVersions.get(variantKey);
+    if (!implicitlyPreferredVersions) {
+      // First, collect all the direct dependencies of all local projects, and their versions:
+      // direct dependency name --> set of version specifiers
+      const versionsForDependencies: Map<string, Set<string>> = new Map<string, Set<string>>();
+
+      // Only generate implicitly preferred versions for variants that request it
+      const commonVersionsConfiguration: CommonVersionsConfiguration = this.getCommonVersions(variant);
+      const useImplicitlyPreferredVersions: boolean =
+        commonVersionsConfiguration.implicitlyPreferredVersions !== undefined
+          ? commonVersionsConfiguration.implicitlyPreferredVersions
+          : true;
+
+      if (useImplicitlyPreferredVersions) {
+        for (const project of this.projects) {
+          this._collectVersionsForDependencies(
+            versionsForDependencies,
+            [...project.packageJsonEditor.dependencyList, ...project.packageJsonEditor.devDependencyList],
+            project.cyclicDependencyProjects,
+            variant
+          );
+        }
+
+        // If any dependency has more than one version, then filter it out (since we don't know which version
+        // should be preferred).  What remains will be the list of preferred dependencies.
+        // dependency --> version specifier
+        const implicitlyPreferred: Map<string, string> = new Map<string, string>();
+        for (const [dep, versions] of versionsForDependencies) {
+          if (versions.size === 1) {
+            const version: string = Array.from(versions)[0];
+            implicitlyPreferred.set(dep, version);
+          }
+        }
+
+        implicitlyPreferredVersions = implicitlyPreferred;
+      } else {
+        implicitlyPreferredVersions = new Map();
+      }
+
+      this._implicitlyPreferredVersions.set(variantKey, implicitlyPreferredVersions);
+    }
+
+    return implicitlyPreferredVersions;
   }
 
   /**
@@ -1525,7 +1605,10 @@ export class RushConfiguration {
   public getPnpmfilePath(variant?: string | undefined): string {
     const variantConfigFolderPath: string = this._getVariantConfigFolderPath(variant);
 
-    return path.join(variantConfigFolderPath, RushConstants.pnpmfileFilename);
+    return path.join(
+      variantConfigFolderPath,
+      (this.packageManagerWrapper as PnpmPackageManager).pnpmfileFilename
+    );
   }
 
   /**
@@ -1578,10 +1661,26 @@ export class RushConfiguration {
   }
 
   /**
+   * Finds the project that owns the specified POSIX relative path (e.g. apps/rush-lib).
+   * The path is case-sensitive, so will only return a project if its projectRelativePath matches the casing.
+   * @returns The found project, or undefined if no match was found
+   */
+  public findProjectForPosixRelativePath(posixRelativePath: string): RushConfigurationProject | undefined {
+    return this._projectByRelativePath.findChildPath(posixRelativePath);
+  }
+
+  /**
    * @beta
    */
   public get versionPolicyConfiguration(): VersionPolicyConfiguration {
     return this._versionPolicyConfiguration;
+  }
+
+  /**
+   * @beta
+   */
+  public get versionPolicyConfigurationFilePath(): string {
+    return this._versionPolicyConfigurationFilePath;
   }
 
   /**
@@ -1608,6 +1707,59 @@ export class RushConfiguration {
     return undefined;
   }
 
+  private _collectVersionsForDependencies(
+    versionsForDependencies: Map<string, Set<string>>,
+    dependencies: ReadonlyArray<PackageJsonDependency>,
+    cyclicDependencies: Set<string>,
+    variant: string | undefined
+  ): void {
+    const commonVersions: CommonVersionsConfiguration = this.getCommonVersions(variant);
+    const allowedAlternativeVersions: Map<string, ReadonlyArray<string>> =
+      commonVersions.allowedAlternativeVersions;
+
+    for (const dependency of dependencies) {
+      const alternativesForThisDependency: ReadonlyArray<string> =
+        allowedAlternativeVersions.get(dependency.name) || [];
+
+      // For each dependency, collectImplicitlyPreferredVersions() is collecting the set of all version specifiers
+      // that appear across the repo.  If there is only one version specifier, then that's the "preferred" one.
+      // However, there are a few cases where additional version specifiers can be safely ignored.
+      let ignoreVersion: boolean = false;
+
+      // 1. If the version specifier was listed in "allowedAlternativeVersions", then it's never a candidate.
+      //    (Even if it's the only version specifier anywhere in the repo, we still ignore it, because
+      //    otherwise the rule would be difficult to explain.)
+      if (alternativesForThisDependency.indexOf(dependency.version) > 0) {
+        ignoreVersion = true;
+      } else {
+        // Is it a local project?
+        const localProject: RushConfigurationProject | undefined = this.getProjectByName(dependency.name);
+        if (localProject) {
+          // 2. If it's a symlinked local project, then it's not a candidate, because the package manager will
+          //    never even see it.
+          // However there are two ways that a local project can NOT be symlinked:
+          // - if the local project doesn't satisfy the referenced semver specifier; OR
+          // - if the local project was specified in "cyclicDependencyProjects" in rush.json
+          if (
+            !cyclicDependencies.has(dependency.name) &&
+            semver.satisfies(localProject.packageJsonEditor.version, dependency.version)
+          ) {
+            ignoreVersion = true;
+          }
+        }
+
+        if (!ignoreVersion) {
+          let versionForDependency: Set<string> | undefined = versionsForDependencies.get(dependency.name);
+          if (!versionForDependency) {
+            versionForDependency = new Set<string>();
+            versionsForDependencies.set(dependency.name, versionForDependency);
+          }
+          versionForDependency.add(dependency.version);
+        }
+      }
+    }
+  }
+
   private _populateDownstreamDependencies(
     dependencies: { [key: string]: string } | undefined,
     packageName: string
@@ -1619,7 +1771,7 @@ export class RushConfiguration {
       const depProject: RushConfigurationProject | undefined = this.projectsByName.get(dependencyName);
 
       if (depProject) {
-        depProject.downstreamDependencyProjects.push(packageName);
+        depProject._consumingProjectNames.add(packageName);
       }
     });
   }

@@ -50,6 +50,12 @@ export interface IJsonFileStringifyOptions {
   newlineConversion?: NewlineKind;
 
   /**
+   * If true, conforms to the standard behavior of JSON.stringify() when a property has the value `undefined`.
+   * Specifically, the key will be dropped from the emitted object.
+   */
+  ignoreUndefinedValues?: boolean;
+
+  /**
    * If true, then the "jju" library will be used to improve the text formatting.
    * Note that this is slightly slower than the native JSON.stringify() implementation.
    */
@@ -230,7 +236,10 @@ export class JsonFile {
       options = {};
     }
 
-    JsonFile.validateNoUndefinedMembers(newJsonObject);
+    if (!options.ignoreUndefinedValues) {
+      // Standard handling of `undefined` in JSON stringification is to discard the key.
+      JsonFile.validateNoUndefinedMembers(newJsonObject);
+    }
 
     let stringified: string;
 
@@ -326,7 +335,7 @@ export class JsonFile {
   }
 
   /**
-   * An async version of {@link JsonFile.loadAndValidateWithCallback}.
+   * An async version of {@link JsonFile.save}.
    */
   public static async saveAsync(
     jsonObject: JsonObject,

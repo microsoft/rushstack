@@ -1,0 +1,26 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
+
+  "eventActions": [
+    {
+      "actionKind": "deleteGlobs",
+      "heftEvent": "clean",
+      "actionId": "defaultClean",
+      "globsToDelete": ["dist", "lib", "lib-commonjs", "temp"]
+    }
+  ],
+
+  /**
+   * The list of Heft plugins to be loaded.
+   */
+  "heftPlugins": [
+    {
+      "plugin": "@rushstack/heft-jest-plugin"
+
+      /**
+       * An optional object that provides additional settings that may be defined by the plugin.
+       */
+      // "options": { }
+    }
+  ]
+}

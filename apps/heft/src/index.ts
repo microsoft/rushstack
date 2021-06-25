@@ -6,7 +6,6 @@ export {
   HeftConfiguration,
   IHeftActionConfiguration,
   IHeftActionConfigurationOptions,
-  ICompilerPackage,
   IHeftConfigurationInitializationOptions as _IHeftConfigurationInitializationOptions
 } from './configuration/HeftConfiguration';
 export {
@@ -38,8 +37,8 @@ export { StageHooksBase, IStageContext } from './stages/StageBase';
 export {
   BuildStageHooks,
   BuildSubstageHooksBase,
-  BundleSubstageHooks,
   CompileSubstageHooks,
+  BundleSubstageHooks,
   CopyFromCacheMode,
   IBuildStageContext,
   IBuildStageProperties,
@@ -49,8 +48,7 @@ export {
   ICompileSubstage,
   ICompileSubstageProperties,
   IPostBuildSubstage,
-  IPreCompileSubstage,
-  IWebpackConfiguration
+  IPreCompileSubstage
 } from './stages/BuildStage';
 export { ICleanStageProperties, CleanStageHooks, ICleanStageContext } from './stages/CleanStage';
 export { ITestStageProperties, TestStageHooks, ITestStageContext } from './stages/TestStage';
@@ -60,3 +58,5 @@ export {
   IHeftLifecycle as _IHeftLifecycle,
   HeftLifecycleHooks as _HeftLifecycleHooks
 } from './pluginFramework/HeftLifecycle';
+
+export { IRunScriptOptions } from './plugins/RunScriptPlugin';

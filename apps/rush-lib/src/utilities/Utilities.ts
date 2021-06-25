@@ -4,13 +4,12 @@
 import * as child_process from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
-import * as tty from 'tty';
 import * as path from 'path';
-import wordwrap = require('wordwrap');
 import { JsonFile, IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
-import { RushConfiguration } from '../api/RushConfiguration';
-import { Stream } from 'stream';
+import type * as stream from 'stream';
 import { CommandLineHelper } from '@rushstack/ts-command-line';
+
+import { RushConfiguration } from '../api/RushConfiguration';
 
 export interface IEnvironment {
   // NOTE: the process.env doesn't actually support "undefined" as a value.
@@ -90,6 +89,10 @@ export interface IEnvironmentPathOptions {
   additionalPathFolders?: string[] | undefined;
 }
 
+export interface IDisposable {
+  dispose(): void;
+}
+
 interface ICreateEnvironmentForRushCommandPathOptions extends IEnvironmentPathOptions {
   projectRoot: string | undefined;
   commonTempFolder: string | undefined;
@@ -117,7 +120,7 @@ export class Utilities {
    * Get the user's home directory. On windows this looks something like "C:\users\username\" and on UNIX
    * this looks something like "/home/username/"
    */
-  public static getHomeDirectory(): string {
+  public static getHomeFolder(): string {
     const unresolvedUserFolder: string | undefined =
       process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
     const dirError: string = "Unable to determine the current user's home directory";
@@ -303,34 +306,6 @@ export class Utilities {
   }
 
   /**
-   * Returns the width of the console, measured in columns
-   */
-  public static getConsoleWidth(): number {
-    const stdout: tty.WriteStream = process.stdout as tty.WriteStream;
-    if (stdout && stdout.columns) {
-      return stdout.columns;
-    }
-
-    return 80;
-  }
-
-  /**
-   * Applies word wrapping.  If maxLineLength is unspecified, then it defaults to the console
-   * width.
-   */
-  public static wrapWords(text: string, maxLineLength?: number, indent?: number): string {
-    if (!indent) {
-      indent = 0;
-    }
-    if (!maxLineLength) {
-      maxLineLength = Utilities.getConsoleWidth();
-    }
-
-    const wrap: (textToWrap: string) => string = wordwrap(indent, maxLineLength, { mode: 'soft' });
-    return wrap(text);
-  }
-
-  /**
    * Executes the command with the specified command-line parameters, and waits for it to complete.
    * The current directory will be set to the specified workingDirectory.
    */
@@ -459,7 +434,9 @@ export class Utilities {
    * Example: 'hello there' --> '"hello there"'
    */
   public static escapeShellParameter(parameter: string): string {
-    return `"${parameter}"`;
+    // This approach is based on what NPM 7 now does:
+    // https://github.com/npm/run-script/blob/47a4d539fb07220e7215cc0e482683b76407ef9b/lib/run-script-pkg.js#L34
+    return JSON.stringify(parameter);
   }
 
   /**
@@ -503,26 +480,6 @@ export class Utilities {
     );
   }
 
-  public static withFinally<T>(options: { promise: Promise<T>; finally: () => void }): Promise<T> {
-    return options.promise
-      .then<T>((result: T) => {
-        try {
-          options.finally();
-        } catch (error) {
-          return Promise.reject(error);
-        }
-        return result;
-      })
-      .catch<T>((error: Error) => {
-        try {
-          options.finally();
-        } catch (innerError) {
-          return Promise.reject(innerError);
-        }
-        return Promise.reject(error);
-      });
-  }
-
   /**
    * As a workaround, copyAndTrimNpmrcFile() copies the .npmrc file to the target folder, and also trims
    * unusable lines from the .npmrc file.
@@ -537,7 +494,8 @@ export class Utilities {
    * IMPORTANT: THIS CODE SHOULD BE KEPT UP TO DATE WITH _copyAndTrimNpmrcFile() FROM scripts/install-run.ts
    */
   public static copyAndTrimNpmrcFile(sourceNpmrcPath: string, targetNpmrcPath: string): void {
-    console.log(`Copying ${sourceNpmrcPath} --> ${targetNpmrcPath}`); // Verbose
+    console.log(`Transforming ${sourceNpmrcPath}`); // Verbose
+    console.log(`  --> "${targetNpmrcPath}"`);
     let npmrcFileLines: string[] = FileSystem.readFile(sourceNpmrcPath).split('\n');
     npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
     const resultLines: string[] = [];
@@ -588,7 +546,8 @@ export class Utilities {
    */
   public static syncFile(sourcePath: string, destinationPath: string): void {
     if (FileSystem.exists(sourcePath)) {
-      console.log(`Updating ${destinationPath}`);
+      console.log(`Copying "${sourcePath}"`);
+      console.log(`  --> "${destinationPath}"`);
       FileSystem.copyFile({ sourcePath, destinationPath });
     } else {
       if (FileSystem.exists(destinationPath)) {
@@ -636,6 +595,31 @@ export class Utilities {
     return `package-deps_${command}.json`;
   }
 
+  public static async usingAsync<TDisposable extends IDisposable>(
+    getDisposableAsync: () => Promise<TDisposable> | IDisposable,
+    doActionAsync: (disposable: TDisposable) => Promise<void> | void
+  ): Promise<void> {
+    let disposable: TDisposable | undefined;
+    try {
+      disposable = (await getDisposableAsync()) as TDisposable;
+      await doActionAsync(disposable);
+    } finally {
+      disposable?.dispose();
+    }
+  }
+
+  public static async readStreamToBufferAsync(stream: stream.Readable): Promise<Buffer> {
+    return await new Promise((resolve: (result: Buffer) => void, reject: (error: Error) => void) => {
+      const parts: Uint8Array[] = [];
+      stream.on('data', (chunk) => parts.push(chunk));
+      stream.on('error', (error) => reject(error));
+      stream.on('end', () => {
+        const result: Buffer = Buffer.concat(parts);
+        resolve(result);
+      });
+    });
+  }
+
   private static _executeLifecycleCommandInternal<TCommandResult>(
     command: string,
     spawnFunction: (
@@ -674,6 +658,10 @@ export class Utilities {
   /**
    * Returns a process.env environment suitable for executing lifecycle scripts.
    * @param initialEnvironment - an existing environment to copy instead of process.env
+   *
+   * @remarks
+   * Rush._assignRushInvokedFolder() assigns the `RUSH_INVOKED_FOLDER` variable globally
+   * via the parent process's environment.
    */
   private static _createEnvironmentForRushCommand(
     options: ICreateEnvironmentForRushCommandOptions
@@ -772,7 +760,7 @@ export class Utilities {
       | 'pipe'
       | 'ignore'
       | 'inherit'
-      | (number | 'pipe' | 'ignore' | 'inherit' | 'ipc' | Stream | null | undefined)[]
+      | (number | 'pipe' | 'ignore' | 'inherit' | 'ipc' | stream.Stream | null | undefined)[]
       | undefined,
     environment?: IEnvironment,
     keepEnvironment: boolean = false
@@ -814,6 +802,9 @@ export class Utilities {
     if (result.error && (result.error as any).errno === 'ENOENT') {
       // This is a workaround for GitHub issue #25330
       // https://github.com/nodejs/node-v0.x-archive/issues/25330
+      //
+      // TODO: The fully worked out solution for this problem is now provided by the "Executable" API
+      // from @rushstack/node-core-library
       result = child_process.spawnSync(command + '.cmd', args, options);
     }
 

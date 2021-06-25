@@ -2,10 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import { SyncHook, AsyncParallelHook, AsyncSeriesHook, AsyncSeriesWaterfallHook } from 'tapable';
-import * as webpack from 'webpack';
 
 import { StageBase, StageHooksBase, IStageContext } from './StageBase';
-import { Logging } from '../utilities/Logging';
+import { IFinishedWords, Logging } from '../utilities/Logging';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
 import {
   CommandLineAction,
@@ -43,23 +42,26 @@ export type CopyFromCacheMode = 'hardlink' | 'copy';
  */
 export class CompileSubstageHooks extends BuildSubstageHooksBase {
   /**
-   * @internal
+   * The `afterCompile` event is fired exactly once, after the "compile" stage completes its first operation.
+   * The "bundle" stage will not begin until all event handlers have resolved their promises.  The behavior
+   * of this event is the same in watch mode and non-watch mode.
    */
-  public readonly afterTypescriptFirstEmit: AsyncParallelHook = new AsyncParallelHook();
+  public readonly afterCompile: AsyncParallelHook = new AsyncParallelHook();
+  /**
+   * The `afterRecompile` event is only used in watch mode.  It fires whenever the compiler's outputs have
+   * been rebuilt.  The initial compilation fires the `afterCompile` event only, and then all subsequent iterations
+   * fire the `afterRecompile` event only. Heft does not wait for the `afterRecompile` promises to resolve.
+   */
+  public readonly afterRecompile: AsyncParallelHook = new AsyncParallelHook();
 }
 
 /**
  * @public
  */
-export type IWebpackConfiguration = webpack.Configuration | webpack.Configuration[] | undefined;
-
-/**
- * @public
- */
 export class BundleSubstageHooks extends BuildSubstageHooksBase {
-  public readonly configureWebpack: AsyncSeriesWaterfallHook<
-    IWebpackConfiguration
-  > = new AsyncSeriesWaterfallHook<IWebpackConfiguration>(['webpackConfiguration']);
+  public readonly configureWebpack: AsyncSeriesWaterfallHook<unknown> = new AsyncSeriesWaterfallHook<unknown>(
+    ['webpackConfiguration']
+  );
   public readonly afterConfigureWebpack: AsyncSeriesHook = new AsyncSeriesHook();
 }
 
@@ -75,12 +77,22 @@ export interface ICompileSubstageProperties {
  */
 export interface IBundleSubstageProperties {
   /**
+   * If webpack is used, this will be set to the version of the webpack package
+   */
+  webpackVersion?: string | undefined;
+
+  /**
+   * If webpack is used, this will be set to the version of the webpack-dev-server package
+   */
+  webpackDevServerVersion?: string | undefined;
+
+  /**
    * The configuration used by the Webpack plugin. This must be populated
    * for Webpack to run. If webpackConfigFilePath is specified,
    * this will be populated automatically with the exports of the
    * config file referenced in that property.
    */
-  webpackConfiguration?: webpack.Configuration | webpack.Configuration[];
+  webpackConfiguration?: unknown;
 }
 
 /**
@@ -124,13 +136,28 @@ export class BuildStageHooks extends StageHooksBase<IBuildStageProperties> {
  * @public
  */
 export interface IBuildStageProperties {
+  // Input
   production: boolean;
   lite: boolean;
   locale?: string;
   maxOldSpaceSize?: string;
   watchMode: boolean;
   serveMode: boolean;
-  webpackStats?: webpack.Stats;
+  webpackStats?: unknown;
+
+  // Output
+  /**
+   * @beta
+   */
+  isTypeScriptProject?: boolean;
+  /**
+   * @beta
+   */
+  emitFolderNameForTests?: string;
+  /**
+   * @beta
+   */
+  emitExtensionForTests?: '.js' | '.cjs' | '.mjs';
 }
 
 /**
@@ -155,6 +182,17 @@ export interface IBuildStageStandardParameters {
   typescriptMaxWriteParallelismParameter: CommandLineIntegerParameter;
   maxOldSpaceSizeParameter: CommandLineStringParameter;
 }
+
+interface IRunSubstageWithLoggingOptions {
+  buildStageName: string;
+  buildStage: IBuildSubstage<BuildSubstageHooksBase, object>;
+  watchMode: boolean;
+}
+
+const WATCH_MODE_FINISHED_LOGGING_WORDS: IFinishedWords = {
+  success: 'ready to continue',
+  failure: 'continuing with errors'
+};
 
 export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties, IBuildStageOptions> {
   public constructor(heftConfiguration: HeftConfiguration, loggingManager: LoggingManager) {
@@ -248,65 +286,59 @@ export class BuildStage extends StageBase<BuildStageHooks, IBuildStageProperties
     };
     this.stageHooks.postBuild.call(postBuildStage);
 
-    if (this.stageProperties.watchMode) {
-      // In --watch mode, run all configuration upfront and then kick off all stages
-      // concurrently with the expectation that the their promises will never resolve
-      // and that they will handle watching filesystem changes
+    const watchMode: boolean = this.stageProperties.watchMode;
 
-      await bundleStage.hooks.configureWebpack
-        .promise(undefined)
-        .then((webpackConfiguration) => (bundleStage.properties.webpackConfiguration = webpackConfiguration));
-      await bundleStage.hooks.afterConfigureWebpack.promise();
+    await this._runSubstageWithLoggingAsync({
+      buildStageName: 'Pre-compile',
+      buildStage: preCompileSubstage,
+      watchMode: watchMode
+    });
 
-      compileStage.hooks.afterTypescriptFirstEmit.tapPromise(
-        'build-stage',
-        async () =>
-          await Promise.all([
-            this._runSubstageWithLoggingAsync('Bundle', bundleStage),
-            this._runSubstageWithLoggingAsync('Post-build', postBuildStage)
-          ])
-      );
-
-      await Promise.all([
-        this._runSubstageWithLoggingAsync('Pre-compile', preCompileSubstage),
-        this._runSubstageWithLoggingAsync('Compile', compileStage)
-      ]);
-    } else {
-      await this._runSubstageWithLoggingAsync('Pre-compile', preCompileSubstage);
-
-      if (this.loggingManager.errorsHaveBeenEmitted) {
-        return;
-      }
-
-      await this._runSubstageWithLoggingAsync('Compile', compileStage);
-
-      if (this.loggingManager.errorsHaveBeenEmitted) {
-        return;
-      }
-
-      await bundleStage.hooks.configureWebpack
-        .promise(undefined)
-        .then((webpackConfiguration) => (bundleStage.properties.webpackConfiguration = webpackConfiguration));
-      await bundleStage.hooks.afterConfigureWebpack.promise();
-      await this._runSubstageWithLoggingAsync('Bundle', bundleStage);
-
-      if (this.loggingManager.errorsHaveBeenEmitted) {
-        return;
-      }
-
-      await this._runSubstageWithLoggingAsync('Post-build', postBuildStage);
+    if (this.loggingManager.errorsHaveBeenEmitted && !watchMode) {
+      return;
     }
+
+    await this._runSubstageWithLoggingAsync({
+      buildStageName: 'Compile',
+      buildStage: compileStage,
+      watchMode: watchMode
+    });
+    await compileStage.hooks.afterCompile.promise();
+
+    if (this.loggingManager.errorsHaveBeenEmitted && !watchMode) {
+      return;
+    }
+
+    bundleStage.properties.webpackConfiguration = await bundleStage.hooks.configureWebpack.promise(undefined);
+    await bundleStage.hooks.afterConfigureWebpack.promise();
+    await this._runSubstageWithLoggingAsync({
+      buildStageName: 'Bundle',
+      buildStage: bundleStage,
+      watchMode: watchMode
+    });
+
+    if (this.loggingManager.errorsHaveBeenEmitted && !watchMode) {
+      return;
+    }
+
+    await this._runSubstageWithLoggingAsync({
+      buildStageName: 'Post-build',
+      buildStage: postBuildStage,
+      watchMode: watchMode
+    });
   }
 
-  private async _runSubstageWithLoggingAsync(
-    buildStageName: string,
-    buildStage: IBuildSubstage<BuildSubstageHooksBase, object>
-  ): Promise<void> {
+  private async _runSubstageWithLoggingAsync({
+    buildStageName,
+    buildStage,
+    watchMode
+  }: IRunSubstageWithLoggingOptions): Promise<void> {
     if (buildStage.hooks.run.isUsed()) {
       await Logging.runFunctionWithLoggingBoundsAsync(
         this.globalTerminal,
         buildStageName,
-        async () => await buildStage.hooks.run.promise()
+        async () => await buildStage.hooks.run.promise(),
+        watchMode ? WATCH_MODE_FINISHED_LOGGING_WORDS : undefined
       );
     }
   }

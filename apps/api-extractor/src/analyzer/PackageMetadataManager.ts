@@ -151,15 +151,13 @@ export class PackageMetadataManager {
    * is returned.  The results are cached.
    */
   public tryFetchPackageMetadata(sourceFilePath: string): PackageMetadata | undefined {
-    const packageJsonFilePath: string | undefined = this._packageJsonLookup.tryGetPackageJsonFilePathFor(
-      sourceFilePath
-    );
+    const packageJsonFilePath: string | undefined =
+      this._packageJsonLookup.tryGetPackageJsonFilePathFor(sourceFilePath);
     if (!packageJsonFilePath) {
       return undefined;
     }
-    let packageMetadata: PackageMetadata | undefined = this._packageMetadataByPackageJsonPath.get(
-      packageJsonFilePath
-    );
+    let packageMetadata: PackageMetadata | undefined =
+      this._packageMetadataByPackageJsonPath.get(packageJsonFilePath);
 
     if (!packageMetadata) {
       const packageJson: INodePackageJson = this._packageJsonLookup.loadNodePackageJson(packageJsonFilePath);

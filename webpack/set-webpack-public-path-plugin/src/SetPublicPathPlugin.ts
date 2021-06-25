@@ -5,7 +5,6 @@ import { EOL } from 'os';
 import { cloneDeep, escapeRegExp } from 'lodash';
 import * as Webpack from 'webpack';
 import * as Tapable from 'tapable';
-import * as lodash from 'lodash';
 
 import { IInternalOptions, getSetPublicPathCode } from './codeGenerator';
 
@@ -97,7 +96,7 @@ interface IAsset {
   source(): string;
 }
 
-interface IExtendedMainTemplate extends Webpack.compilation.MainTemplate {
+interface IExtendedMainTemplate {
   hooks: {
     jsonpScript?: Tapable.SyncWaterfallHook<string, Webpack.compilation.Chunk, string>;
     requireExtensions: Tapable.SyncWaterfallHook<string, Webpack.compilation.Chunk, string>;
@@ -157,8 +156,9 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
     }
 
     compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
-      const v4MainTemplate: IExtendedMainTemplate = compilation.mainTemplate as IExtendedMainTemplate;
-      v4MainTemplate.hooks.startup.tap(
+      const mainTemplate: IExtendedMainTemplate =
+        compilation.mainTemplate as unknown as IExtendedMainTemplate;
+      mainTemplate.hooks.startup.tap(
         PLUGIN_NAME,
         (source: string, chunk: Webpack.compilation.Chunk, hash: string) => {
           const extendedChunk: IExtendedChunk = chunk as IExtendedChunk;
@@ -169,7 +169,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
               source,
               chunk: extendedChunk,
               hash,
-              requireFn: v4MainTemplate.requireFn
+              requireFn: mainTemplate.requireFn
             });
           } else {
             return source;
@@ -186,11 +186,11 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
               let escapedAssetFilename: string;
               if (assetFilename.match(/\.map$/)) {
                 escapedAssetFilename = assetFilename.substr(0, assetFilename.length - 4 /* '.map'.length */); // Trim the ".map" extension
-                escapedAssetFilename = lodash.escapeRegExp(escapedAssetFilename);
+                escapedAssetFilename = escapeRegExp(escapedAssetFilename);
                 escapedAssetFilename = JSON.stringify(escapedAssetFilename); // source in sourcemaps is JSON-encoded
                 escapedAssetFilename = escapedAssetFilename.substring(1, escapedAssetFilename.length - 1); // Trim the quotes from the JSON encoding
               } else {
-                escapedAssetFilename = lodash.escapeRegExp(assetFilename);
+                escapedAssetFilename = escapeRegExp(assetFilename);
               }
 
               const asset: IAsset = compilation.assets[assetFilename];
@@ -213,8 +213,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
 
   private _detectAssetsOrChunks(chunk: IExtendedChunk): boolean {
     for (const chunkGroup of chunk.groupsIterable) {
-      const children: Webpack.compilation.Chunk[] = chunkGroup.getChildren();
-      if (children.length > 0) {
+      if (chunkGroup.childrenIterable.size > 0) {
         return true;
       }
     }
@@ -241,7 +240,7 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
         if (this.options.scriptName.isTokenized) {
           moduleOptions.regexName = moduleOptions.regexName
             .replace(/\[name\]/g, escapeRegExp(options.chunk.name))
-            .replace(/\[hash\]/g, options.chunk.renderedHash);
+            .replace(/\[hash\]/g, options.chunk.renderedHash || '');
         }
       } else if (this.options.scriptName.useAssetName) {
         options.chunk[SHOULD_REPLACE_ASSET_NAME_TOKEN] = true;

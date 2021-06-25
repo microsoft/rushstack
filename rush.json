@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.34.2",
+  "rushVersion": "5.46.1",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -26,7 +26,7 @@
    * Specify one of: "pnpmVersion", "npmVersion", or "yarnVersion".  See the Rush documentation
    * for details about these alternatives.
    */
-  "pnpmVersion": "4.14.4",
+  "pnpmVersion": "6.7.1",
 
   // "npmVersion": "4.5.0",
   // "yarnVersion": "1.9.4",
@@ -65,20 +65,6 @@
     "strictPeerDependencies": true,
 
     /**
-     * Configures the strategy used to select versions during installation.
-     *
-     * This feature requires PNPM version 3.1 or newer.  It corresponds to the "--resolution-strategy" command-line
-     * option for PNPM.  Possible values are "fast" and "fewer-dependencies".  PNPM's default is "fast", but this may
-     * be incompatible with certain packages, for example the "@types" packages from DefinitelyTyped.  Rush's default
-     * is "fewer-dependencies", which causes PNPM to avoid installing a newer version if an already installed version
-     * can be reused; this is more similar to NPM's algorithm.
-     *
-     * After modifying this field, it's recommended to run "rush update --full" so that the package manager
-     * will recalculate all version selections.
-     */
-    // "resolutionStrategy": "fast",
-
-    /**
      * If true, then `rush install` will report an error if manual modifications
      * were made to the PNPM shrinkwrap file without running "rush update" afterwards.
      *
@@ -100,7 +86,7 @@
      * If true, then `rush install` will use the PNPM workspaces feature to perform the
      * install.
      *
-     * This feature uses PNPM to peform the entire monorepo install. When using workspaces, Rush will
+     * This feature uses PNPM to perform the entire monorepo install. When using workspaces, Rush will
      * generate a "pnpm-workspace.yaml" file referencing all local projects to install. Rush will
      * also generate a "pnpmfile.js" which is used to provide preferred versions support. When install
      * is run, this pnpmfile will be used to replace dependency version ranges with a smaller subset
@@ -120,8 +106,11 @@
    *
    * Specify a SemVer range to ensure developers use a Node.js version that is appropriate
    * for your repo.
+   *
+   * LTS schedule: https://nodejs.org/en/about/releases/
+   * LTS versions: https://nodejs.org/en/download/releases/
    */
-  "nodeSupportedVersionRange": ">=10.13.0 <11.0.0 || >=12.13.0 <13.0.0",
+  "nodeSupportedVersionRange": ">=12.13.0 <13.0.0 || >=14.15.0 <15.0.0",
 
   /**
    * Odd-numbered major versions of Node.js are experimental.  Even-numbered releases
@@ -141,7 +130,7 @@
    * uncomment this line. This is effectively similar to running "rush check" before any
    * of the following commands:
    *
-   *   rush install, rush update, rush version, rush publish
+   *   rush install, rush update, rush link, rush version, rush publish
    *
    * In some cases you may want this turned on, but need to allow certain packages to use a different
    * version. In those cases, you will need to add an entry to the "allowedAlternativeVersions"
@@ -157,7 +146,7 @@
    *
    * The Rush developers recommend a "category folder" model, where buildable project folders
    * must always be exactly two levels below the repo root.  The parent folder acts as the category.
-   * This provides a basic facility for grouping related projects (e.g. "apps", "libaries",
+   * This provides a basic facility for grouping related projects (e.g. "apps", "libraries",
    * "tools", "prototypes") while still encouraging teams to organize their projects into
    * a unified taxonomy.  Limiting to 2 levels seems very restrictive at first, but if you have
    * 20 categories and 20 projects in each category, this scheme can easily accommodate hundreds
@@ -236,7 +225,7 @@
      * They are case-insensitive anchored JavaScript RegExps.  Example: ".*@example\.com"
      *
      * IMPORTANT: Because these are regular expressions encoded as JSON string literals,
-     * RegExp escapes need two backspashes, and ordinary periods should be "\\.".
+     * RegExp escapes need two backslashes, and ordinary periods should be "\\.".
      */
     "allowedEmailRegExps": ["[^@]+@users\\.noreply\\.github\\.com"],
 
@@ -254,7 +243,16 @@
      * you might configure your system's trigger to look for a special string such as "[skip-ci]"
      * in the commit message, and then customize Rush's message to contain that string.
      */
-    // "versionBumpCommitMessage": "Applying package updates. [skip-ci]"
+    // "versionBumpCommitMessage": "Applying package updates. [skip-ci]",
+
+    /**
+     * The commit message to use when committing changes during 'rush version'.
+     *
+     * For example, if you want to prevent these commits from triggering a CI build,
+     * you might configure your system's trigger to look for a special string such as "[skip-ci]"
+     * in the commit message, and then customize Rush's message to contain that string.
+     */
+    // "changeLogUpdateCommitMessage": "Applying package updates. [skip-ci]"
   },
 
   "repository": {
@@ -319,7 +317,7 @@
    * Installation variants allow you to maintain a parallel set of configuration files that can be
    * used to build the entire monorepo with an alternate set of dependencies.  For example, suppose
    * you upgrade all your projects to use a new release of an important framework, but during a transition period
-   * you intend to maintain compability with the old release.  In this situation, you probably want your
+   * you intend to maintain compatibility with the old release.  In this situation, you probably want your
    * CI validation to build the entire repo twice: once with the old release, and once with the new release.
    *
    * Rush "installation variants" correspond to sets of config files located under this folder:
@@ -413,6 +411,15 @@
     //   // "shouldPublish": false,
     //
     //   /**
+    //    * Facilitates postprocessing of a project's files prior to publishing.
+    //    *
+    //    * If specified, the "publishFolder" is the relative path to a subfolder of the project folder.
+    //    * The "rush publish" command will publish the subfolder instead of the project folder.  The subfolder
+    //    * must contain its own package.json file, which is typically a build output.
+    //    */
+    //   // "publishFolder": "temp/publish",
+    //
+    //   /**
     //    * An optional version policy associated with the project.  Version policies are defined
     //    * in "version-policies.json" file.  See the "rush publish" documentation for more info.
     //    * NOTE: "versionPolicyName" and "shouldPublish" are alternatives; you cannot specify them both.
@@ -420,6 +427,7 @@
     //   // "versionPolicyName": ""
     // },
     //
+
     // "apps" folder (alphabetical order)
     {
       "packageName": "@microsoft/api-documenter",
@@ -446,7 +454,7 @@
       "projectFolder": "apps/heft",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft"]
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
     {
       "packageName": "@rushstack/rundown",
@@ -523,6 +531,38 @@
       "shouldPublish": false
     },
 
+    // "build-tests-samples" folder (alphabetical order)
+    {
+      "packageName": "heft-node-basic-tutorial",
+      "projectFolder": "build-tests-samples/heft-node-basic-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-node-jest-tutorial",
+      "projectFolder": "build-tests-samples/heft-node-jest-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-node-rig-tutorial",
+      "projectFolder": "build-tests-samples/heft-node-rig-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-webpack-basic-tutorial",
+      "projectFolder": "build-tests-samples/heft-webpack-basic-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "packlets-tutorial",
+      "projectFolder": "build-tests-samples/packlets-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+
     // heft-* projects
     {
       "packageName": "heft-action-plugin",
@@ -537,6 +577,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-copy-files-test",
+      "projectFolder": "build-tests/heft-copy-files-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-example-plugin-01",
       "projectFolder": "build-tests/heft-example-plugin-01",
       "reviewCategory": "tests",
@@ -545,6 +591,18 @@
     {
       "packageName": "heft-example-plugin-02",
       "projectFolder": "build-tests/heft-example-plugin-02",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-jest-reporters-test",
+      "projectFolder": "build-tests/heft-jest-reporters-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-fastify-test",
+      "projectFolder": "build-tests/heft-fastify-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -567,18 +625,6 @@
       "shouldPublish": false
     },
     {
-      "packageName": "heft-oldest-compiler-test",
-      "projectFolder": "build-tests/heft-oldest-compiler-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "heft-rsc-test",
-      "projectFolder": "build-tests/heft-rsc-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
       "packageName": "heft-sass-test",
       "projectFolder": "build-tests/heft-sass-test",
       "reviewCategory": "tests",
@@ -591,12 +637,24 @@
       "shouldPublish": false
     },
     {
-      "packageName": "heft-webpack-everything-test",
-      "projectFolder": "build-tests/heft-webpack-everything-test",
+      "packageName": "heft-webpack4-everything-test",
+      "projectFolder": "build-tests/heft-webpack4-everything-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-webpack5-everything-test",
+      "projectFolder": "build-tests/heft-webpack5-everything-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
 
+    {
+      "packageName": "install-test-workspace",
+      "projectFolder": "build-tests/install-test-workspace",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
     {
       "packageName": "localization-plugin-test-01",
       "projectFolder": "build-tests/localization-plugin-test-01",
@@ -615,104 +673,6 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
-    {
-      "packageName": "node-library-build-eslint-test",
-      "projectFolder": "build-tests/node-library-build-eslint-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "node-library-build-tslint-test",
-      "projectFolder": "build-tests/node-library-build-tslint-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-
-    // rush-stack-compiler-* projects
-    {
-      "packageName": "rush-stack-compiler-2.4-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-2.4-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-2.7-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-2.7-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-2.8-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-2.8-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-2.9-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-2.9-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.0-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.0-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.1-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.1-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.2-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.2-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.3-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.3-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.4-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.4-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.5-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.5-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.6-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.6-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.7-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.7-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.8-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.8-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "rush-stack-compiler-3.9-library-test",
-      "projectFolder": "build-tests/rush-stack-compiler-3.9-library-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
 
     {
       "packageName": "ts-command-line-test",
@@ -720,72 +680,25 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
-    {
-      "packageName": "web-library-build-test",
-      "projectFolder": "build-tests/web-library-build-test",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-
-    // "core-build" folder (alphabetical order)
-    {
-      "packageName": "@microsoft/gulp-core-build",
-      "projectFolder": "core-build/gulp-core-build",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.9"]
-    },
-    {
-      "packageName": "@microsoft/gulp-core-build-mocha",
-      "projectFolder": "core-build/gulp-core-build-mocha",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.9"]
-    },
-    {
-      "packageName": "@microsoft/gulp-core-build-sass",
-      "projectFolder": "core-build/gulp-core-build-sass",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@microsoft/gulp-core-build-serve",
-      "projectFolder": "core-build/gulp-core-build-serve",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@microsoft/gulp-core-build-typescript",
-      "projectFolder": "core-build/gulp-core-build-typescript",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@microsoft/node-library-build", "@microsoft/rush-stack-compiler-3.9"]
-    },
-    {
-      "packageName": "@microsoft/gulp-core-build-webpack",
-      "projectFolder": "core-build/gulp-core-build-webpack",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@microsoft/node-library-build",
-      "projectFolder": "core-build/node-library-build",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@microsoft/web-library-build",
-      "projectFolder": "core-build/web-library-build",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
 
     // "heft-plugins" folder (alphabetical order)
     {
-      "packageName": "@rushstack/pre-compile-hardlink-or-copy-plugin",
-      "projectFolder": "heft-plugins/pre-compile-hardlink-or-copy-plugin",
+      "packageName": "@rushstack/heft-jest-plugin",
+      "projectFolder": "heft-plugins/heft-jest-plugin",
       "reviewCategory": "libraries",
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-webpack4-plugin",
+      "projectFolder": "heft-plugins/heft-webpack4-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-webpack5-plugin",
+      "projectFolder": "heft-plugins/heft-webpack5-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
     },
 
     // "libraries" folder (alphabetical order)
@@ -800,7 +713,7 @@
       "projectFolder": "libraries/heft-config-file",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft"]
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
     {
       "packageName": "@microsoft/load-themed-styles",
@@ -865,7 +778,7 @@
       "projectFolder": "libraries/typings-generator",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft"]
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
 
     // "repo-scripts" folder (alphabetical order)
@@ -924,140 +837,18 @@
       "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
     {
-      "packageName": "@rushstack/eslint-plugin-security",
-      "projectFolder": "stack/eslint-plugin-security",
+      "packageName": "@rushstack/eslint-plugin-packlets",
+      "projectFolder": "stack/eslint-plugin-packlets",
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
     {
-      "packageName": "@microsoft/rush-stack-compiler-2.4",
-      "projectFolder": "stack/rush-stack-compiler-2.4",
+      "packageName": "@rushstack/eslint-plugin-security",
+      "projectFolder": "stack/eslint-plugin-security",
       "reviewCategory": "libraries",
       "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-2.7",
-      "projectFolder": "stack/rush-stack-compiler-2.7",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-2.8",
-      "projectFolder": "stack/rush-stack-compiler-2.8",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-2.9",
-      "projectFolder": "stack/rush-stack-compiler-2.9",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.0",
-      "projectFolder": "stack/rush-stack-compiler-3.0",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.1",
-      "projectFolder": "stack/rush-stack-compiler-3.1",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.2",
-      "projectFolder": "stack/rush-stack-compiler-3.2",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.3",
-      "projectFolder": "stack/rush-stack-compiler-3.3",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.4",
-      "projectFolder": "stack/rush-stack-compiler-3.4",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.5",
-      "projectFolder": "stack/rush-stack-compiler-3.5",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.6",
-      "projectFolder": "stack/rush-stack-compiler-3.6",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.7",
-      "projectFolder": "stack/rush-stack-compiler-3.7",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.8",
-      "projectFolder": "stack/rush-stack-compiler-3.8",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-3.9",
-      "projectFolder": "stack/rush-stack-compiler-3.9",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@microsoft/rush-stack-compiler-3.9", "@rushstack/heft"]
-    },
-    {
-      "packageName": "@microsoft/rush-stack-compiler-shared",
-      "projectFolder": "stack/rush-stack-compiler-shared",
-      "reviewCategory": "libraries"
-    },
-
-    // "tutorials" folder (alphabetical order)
-    {
-      "packageName": "heft-node-basic-tutorial",
-      "projectFolder": "tutorials/heft-node-basic-tutorial",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "heft-node-jest-tutorial",
-      "projectFolder": "tutorials/heft-node-jest-tutorial",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "heft-node-rig-tutorial",
-      "projectFolder": "tutorials/heft-node-rig-tutorial",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "heft-webpack-basic-tutorial",
-      "projectFolder": "tutorials/heft-webpack-basic-tutorial",
-      "reviewCategory": "tests",
-      "shouldPublish": false
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
 
     // "webpack" folder (alphabetical order)

@@ -55,4 +55,10 @@ export class StartAction extends HeftActionBase {
     await buildStage.initializeAsync(buildStageOptions);
     await buildStage.executeAsync();
   }
+
+  protected async afterExecuteAsync(): Promise<void> {
+    await new Promise(() => {
+      /* start should never continue */
+    });
+  }
 }

@@ -13,9 +13,9 @@ export class ConfigurationFile<TConfigurationFile> {
     // @internal (undocumented)
     static _formatPathForLogging: (path: string) => string;
     getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
-    getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue;
-    // (undocumented)
+    getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue | undefined;
     loadConfigurationFileForProjectAsync(terminal: Terminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile>;
+    readonly projectRelativeFilePath: string;
     tryLoadConfigurationFileForProjectAsync(terminal: Terminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile | undefined>;
     }
 
@@ -35,6 +35,7 @@ export interface ICustomPropertyInheritance<TObject> extends IPropertyInheritanc
 // @beta
 export interface IJsonPathMetadata {
     pathResolutionMethod?: PathResolutionMethod;
+    preresolve?: (path: string) => string;
 }
 
 // @beta

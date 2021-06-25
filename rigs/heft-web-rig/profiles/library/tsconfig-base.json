@@ -3,7 +3,8 @@
 
   "compilerOptions": {
     "outDir": "../../../../../lib",
-    "rootDirs": ["../../../../../src/", "../../../../../temp/sass-ts/"],
+    "rootDir": "../../../../../src",
+    "rootDirs": ["../../../../../src", "../../../../../temp/sass-ts"],
 
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",
@@ -14,6 +15,9 @@
     "experimentalDecorators": true,
     "strict": true,
     "esModuleInterop": true,
+    "noEmitOnError": false,
+    "allowUnreachableCode": false,
+
     "types": [],
 
     "module": "esnext",

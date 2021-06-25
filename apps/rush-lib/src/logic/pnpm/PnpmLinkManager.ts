@@ -3,17 +3,18 @@
 
 import * as os from 'os';
 import * as path from 'path';
+import * as crypto from 'crypto';
 import uriEncode = require('strict-uri-encode');
 import pnpmLinkBins from '@pnpm/link-bins';
 import * as semver from 'semver';
-import colors from 'colors';
+import colors from 'colors/safe';
 
 import {
-  Text,
+  AlreadyReportedError,
   FileSystem,
   FileConstants,
   InternalError,
-  AlreadyReportedError
+  Path
 } from '@rushstack/node-core-library';
 
 import { BaseLinkManager } from '../base/BaseLinkManager';
@@ -21,7 +22,6 @@ import { BasePackage } from '../base/BasePackage';
 import { RushConstants } from '../../logic/RushConstants';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './PnpmShrinkwrapFile';
-import { PnpmProjectDependencyManifest } from './PnpmProjectDependencyManifest';
 
 // special flag for debugging, will print extra diagnostic information,
 // but comes with performance cost
@@ -129,9 +129,8 @@ export class PnpmLinkManager extends BaseLinkManager {
 
     // first, start with the rush dependencies, we just need to link to the project folder
     for (const dependencyName of Object.keys(commonPackage.packageJson!.rushDependencies || {})) {
-      const matchedRushPackage:
-        | RushConfigurationProject
-        | undefined = this._rushConfiguration.getProjectByName(dependencyName);
+      const matchedRushPackage: RushConfigurationProject | undefined =
+        this._rushConfiguration.getProjectByName(dependencyName);
 
       if (matchedRushPackage) {
         // We found a suitable match, so place a new local package that
@@ -218,38 +217,22 @@ export class PnpmLinkManager extends BaseLinkManager {
         ? tempProjectDependencyKey.slice(tarballEntry.length)
         : '';
 
-    // e.g.:
-    //   C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz
-    //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fpresentation-integration-tests.tgz_jsdom@11.12.0
-    //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fbuild-tools.tgz_2a665c89609864b4e75bc5365d7f8f56
-    const folderNameInLocalInstallationRoot: string =
-      uriEncode(Text.replaceAll(absolutePathToTgzFile, path.sep, '/')) + folderNameSuffix;
-
     // e.g.: C:\wbt\common\temp\node_modules\.local\C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz\node_modules
-
     const pathToLocalInstallation: string = this._getPathToLocalInstallation(
-      folderNameInLocalInstallationRoot
+      absolutePathToTgzFile,
+      folderNameSuffix
     );
 
-    const parentShrinkwrapEntry:
-      | IPnpmShrinkwrapDependencyYaml
-      | undefined = pnpmShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(
-      tempProjectDependencyKey
-    );
+    const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined =
+      pnpmShrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey);
     if (!parentShrinkwrapEntry) {
       throw new InternalError(
         `Cannot find shrinkwrap entry using dependency key for temp project: ${project.tempProjectName}`
       );
     }
 
-    const pnpmProjectDependencyManifest: PnpmProjectDependencyManifest = new PnpmProjectDependencyManifest({
-      pnpmShrinkwrapFile,
-      project
-    });
-
     for (const dependencyName of Object.keys(commonPackage.packageJson!.dependencies || {})) {
       const newLocalPackage: BasePackage = this._createLocalPackageForDependency(
-        pnpmProjectDependencyManifest,
         project,
         parentShrinkwrapEntry,
         localPackage,
@@ -263,7 +246,6 @@ export class PnpmLinkManager extends BaseLinkManager {
     // support is added
     // for (const dependencyName of Object.keys(commonPackage.packageJson!.optionalDependencies || {})) {
     //   const newLocalPackage: BasePackage | undefined = this._createLocalPackageForDependency(
-    //     pnpmProjectDependencyManifest,
     //     project,
     //     parentShrinkwrapEntry,
     //     localPackage,
@@ -279,16 +261,9 @@ export class PnpmLinkManager extends BaseLinkManager {
       localPackage.printTree();
     }
 
-    PnpmLinkManager._createSymlinksForTopLevelProject(localPackage);
+    await pnpmShrinkwrapFile.getProjectShrinkwrap(project)!.updateProjectShrinkwrapAsync();
 
-    if (
-      !this._rushConfiguration.experimentsConfiguration.configuration
-        .legacyIncrementalBuildDependencyDetection
-    ) {
-      await pnpmProjectDependencyManifest.saveAsync();
-    } else {
-      await pnpmProjectDependencyManifest.deleteIfExistsAsync();
-    }
+    PnpmLinkManager._createSymlinksForTopLevelProject(localPackage);
 
     // Also symlink the ".bin" folder
     const projectFolder: string = path.join(localPackage.folderPath, 'node_modules');
@@ -299,9 +274,44 @@ export class PnpmLinkManager extends BaseLinkManager {
     });
   }
 
-  private _getPathToLocalInstallation(folderNameInLocalInstallationRoot: string): string {
-    // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0
-    if (this._pnpmVersion.major >= 4) {
+  private _getPathToLocalInstallation(absolutePathToTgzFile: string, folderSuffix: string): string {
+    if (this._pnpmVersion.major >= 6) {
+      // PNPM 6 changed formatting to replace all ':' and '/' chars with '+'. Additionally, folder names > 120
+      // are trimmed and hashed. NOTE: PNPM internally uses fs.realpath.native, which will cause additional
+      // issues in environments that do not support long paths.
+      // See https://github.com/pnpm/pnpm/releases/tag/v6.0.0
+      // e.g.:
+      //   C++dev+imodeljs+imodeljs+common+temp+projects+presentation-integration-tests.tgz_jsdom@11.12.0
+      //   C++dev+imodeljs+imodeljs+common+temp+projects+presentation-integrat_089eb799caf0f998ab34e4e1e9254956
+      const specialCharRegex: RegExp = /\/|:/g;
+      const escapedLocalPath: string = Path.convertToSlashes(absolutePathToTgzFile).replace(
+        specialCharRegex,
+        '+'
+      );
+      let folderName: string = `local+${escapedLocalPath}${folderSuffix}`;
+      if (folderName.length > 120) {
+        folderName = `${folderName.substring(0, 50)}_${crypto
+          .createHash('md5')
+          .update(folderName)
+          .digest('hex')}`;
+      }
+
+      return path.join(
+        this._rushConfiguration.commonTempFolder,
+        RushConstants.nodeModulesFolderName,
+        '.pnpm',
+        folderName,
+        RushConstants.nodeModulesFolderName
+      );
+    } else {
+      // e.g.:
+      //   C%3A%2Fwbt%2Fcommon%2Ftemp%2Fprojects%2Fapi-documenter.tgz
+      //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fpresentation-integration-tests.tgz_jsdom@11.12.0
+      //   C%3A%2Fdev%2Fimodeljs%2Fimodeljs%2Fcommon%2Ftemp%2Fprojects%2Fbuild-tools.tgz_2a665c89609864b4e75bc5365d7f8f56
+      const folderNameInLocalInstallationRoot: string =
+        uriEncode(Path.convertToSlashes(absolutePathToTgzFile)) + folderSuffix;
+
+      // See https://github.com/pnpm/pnpm/releases/tag/v4.0.0
       return path.join(
         this._rushConfiguration.commonTempFolder,
         RushConstants.nodeModulesFolderName,
@@ -310,18 +320,9 @@ export class PnpmLinkManager extends BaseLinkManager {
         folderNameInLocalInstallationRoot,
         RushConstants.nodeModulesFolderName
       );
-    } else {
-      return path.join(
-        this._rushConfiguration.commonTempFolder,
-        RushConstants.nodeModulesFolderName,
-        '.local',
-        folderNameInLocalInstallationRoot,
-        RushConstants.nodeModulesFolderName
-      );
     }
   }
   private _createLocalPackageForDependency(
-    pnpmProjectDependencyManifest: PnpmProjectDependencyManifest,
     project: RushConfigurationProject,
     parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml,
     localPackage: BasePackage,
@@ -375,18 +376,6 @@ export class PnpmLinkManager extends BaseLinkManager {
     // The dependencyLocalInstallationSymlink is just a symlink to another folder. To reduce the number of filesystem
     // reads that are needed, we will link to where that symlink pointed, rather than linking to a link.
     newLocalPackage.symlinkTargetFolderPath = FileSystem.getRealPath(dependencyLocalInstallationSymlink);
-
-    if (
-      !this._rushConfiguration.experimentsConfiguration.configuration
-        .legacyIncrementalBuildDependencyDetection
-    ) {
-      pnpmProjectDependencyManifest.addDependency(
-        newLocalPackage.name,
-        newLocalPackage.version!,
-        parentShrinkwrapEntry
-      );
-    }
-
     return newLocalPackage;
   }
 }

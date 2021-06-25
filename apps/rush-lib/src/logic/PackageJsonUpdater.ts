@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as semver from 'semver';
 
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -124,13 +124,8 @@ export class PackageJsonUpdater {
       variant
     } = options;
 
-    const implicitlyPinned: Map<string, string> = InstallHelpers.collectImplicitlyPreferredVersions(
-      this._rushConfiguration,
-      {
-        variant
-      }
-    );
-
+    const implicitlyPinned: Map<string, string> =
+      this._rushConfiguration.getImplicitlyPreferredVersions(variant);
     const purgeManager: PurgeManager = new PurgeManager(this._rushConfiguration, this._rushGlobalFolder);
     const installManagerOptions: IInstallManagerOptions = {
       debug: debugInstall,
@@ -143,7 +138,7 @@ export class PackageJsonUpdater {
       collectLogFile: false,
       variant: variant,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
-      toProjects: []
+      pnpmFilterArguments: []
     };
     const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
       this._rushConfiguration,
@@ -233,7 +228,7 @@ export class PackageJsonUpdater {
       console.log(colors.green('Running "rush update"'));
       console.log();
       try {
-        await installManager.doInstall();
+        await installManager.doInstallAsync();
       } finally {
         purgeManager.deleteAll();
       }
@@ -489,17 +484,15 @@ export class PackageJsonUpdater {
   private _collectAllDownstreamDependencies(
     project: RushConfigurationProject
   ): Set<RushConfigurationProject> {
-    const allProjectDownstreamDependencies: Set<RushConfigurationProject> = new Set<
-      RushConfigurationProject
-    >();
+    const allProjectDownstreamDependencies: Set<RushConfigurationProject> =
+      new Set<RushConfigurationProject>();
 
     const collectDependencies: (rushProject: RushConfigurationProject) => void = (
       rushProject: RushConfigurationProject
     ) => {
       for (const downstreamDependencyProject of rushProject.downstreamDependencyProjects) {
-        const foundProject: RushConfigurationProject | undefined = this._rushConfiguration.projectsByName.get(
-          downstreamDependencyProject
-        );
+        const foundProject: RushConfigurationProject | undefined =
+          this._rushConfiguration.projectsByName.get(downstreamDependencyProject);
 
         if (!foundProject) {
           continue;
@@ -532,9 +525,8 @@ export class PackageJsonUpdater {
     packageName: string,
     projects: RushConfigurationProject[]
   ): RushConfigurationProject | undefined {
-    const foundProject: RushConfigurationProject | undefined = this._rushConfiguration.projectsByName.get(
-      packageName
-    );
+    const foundProject: RushConfigurationProject | undefined =
+      this._rushConfiguration.projectsByName.get(packageName);
 
     if (foundProject === undefined) {
       return undefined;
@@ -561,9 +553,8 @@ export class PackageJsonUpdater {
     }
 
     // Are we attempting to create a cycle?
-    const downstreamDependencies: Set<RushConfigurationProject> = this._collectAllDownstreamDependencies(
-      project
-    );
+    const downstreamDependencies: Set<RushConfigurationProject> =
+      this._collectAllDownstreamDependencies(project);
     if (downstreamDependencies.has(foundProject)) {
       throw new Error(
         `Adding "${foundProject.packageName}" as a direct or indirect dependency of ` +

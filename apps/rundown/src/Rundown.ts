@@ -48,9 +48,8 @@ export class Rundown {
     const importedPackageFolders: Set<string> = new Set();
 
     for (const importedPath of importedPaths) {
-      const importedPackageFolder: string | undefined = packageJsonLookup.tryGetPackageFolderFor(
-        importedPath
-      );
+      const importedPackageFolder: string | undefined =
+        packageJsonLookup.tryGetPackageFolderFor(importedPath);
       if (importedPackageFolder) {
         if (/[\\/]node_modules[\\/]/i.test(importedPackageFolder)) {
           importedPackageFolders.add(path.basename(importedPackageFolder));
@@ -132,7 +131,7 @@ export class Rundown {
       }
     });
 
-    return new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       childProcess.on('exit', (code: number | null, signal: string | null): void => {
         if (code !== 0 && !ignoreExitCode) {
           reject(new Error('Child process terminated with exit code ' + code));

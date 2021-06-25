@@ -90,257 +90,236 @@ describe('RushCommandLineParser', () => {
 
     describe('in basic repo', () => {
       describe(`'build' action`, () => {
-        it(`executes the package's 'build' script`, () => {
+        it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'basicAndRunBuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
 
-          expect.assertions(8);
-          return expect(instance.parser.execute())
-            .resolves.toEqual(true)
-            .then(() => {
-              // There should be 1 build per package
-              const packageCount: number = instance.spawnMock.mock.calls.length;
-              expect(packageCount).toEqual(2);
+          await expect(instance.parser.execute()).resolves.toEqual(true);
 
-              // Use regex for task name in case spaces were prepended or appended to spawned command
-              const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
+          // There should be 1 build per package
+          const packageCount: number = instance.spawnMock.mock.calls.length;
+          expect(packageCount).toEqual(2);
 
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
-              expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
-                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-              );
-              expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
+          // Use regex for task name in case spaces were prepended or appended to spawned command
+          const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
 
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
-              expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
-                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-              );
-              expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
-            });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
+          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
+          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
         });
       });
 
       describe(`'rebuild' action`, () => {
-        it(`executes the package's 'build' script`, () => {
+        it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'basicAndRunRebuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
 
-          expect.assertions(8);
-          return expect(instance.parser.execute())
-            .resolves.toEqual(true)
-            .then(() => {
-              // There should be 1 build per package
-              const packageCount: number = instance.spawnMock.mock.calls.length;
-              expect(packageCount).toEqual(2);
+          await expect(instance.parser.execute()).resolves.toEqual(true);
 
-              // Use regex for task name in case spaces were prepended or appended to spawned command
-              const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
+          // There should be 1 build per package
+          const packageCount: number = instance.spawnMock.mock.calls.length;
+          expect(packageCount).toEqual(2);
 
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
-              expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
-                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-              );
-              expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
+          // Use regex for task name in case spaces were prepended or appended to spawned command
+          const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
 
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
-              expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
-                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-              );
-              expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
-            });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
+          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
+          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
         });
       });
     });
 
     describe(`in repo with 'rebuild' command overridden`, () => {
       describe(`'build' action`, () => {
-        it(`executes the package's 'build' script`, () => {
+        it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'overrideRebuildAndRunBuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
 
-          expect.assertions(8);
-          return expect(instance.parser.execute())
-            .resolves.toEqual(true)
-            .then(() => {
-              // There should be 1 build per package
-              const packageCount: number = instance.spawnMock.mock.calls.length;
-              expect(packageCount).toEqual(2);
+          await expect(instance.parser.execute()).resolves.toEqual(true);
 
-              // Use regex for task name in case spaces were prepended or appended to spawned command
-              const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
+          // There should be 1 build per package
+          const packageCount: number = instance.spawnMock.mock.calls.length;
+          expect(packageCount).toEqual(2);
 
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
-              expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
-                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-              );
-              expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
+          // Use regex for task name in case spaces were prepended or appended to spawned command
+          const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
 
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
-              expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
-                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-              );
-              expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
-            });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
+          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
+          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
         });
       });
 
       describe(`'rebuild' action`, () => {
-        it(`executes the package's 'rebuild' script`, () => {
+        it(`executes the package's 'rebuild' script`, async () => {
           const repoName: string = 'overrideRebuildAndRunRebuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
 
-          expect.assertions(8);
-          return expect(instance.parser.execute())
-            .resolves.toEqual(true)
-            .then(() => {
-              // There should be 1 build per package
-              const packageCount: number = instance.spawnMock.mock.calls.length;
-              expect(packageCount).toEqual(2);
+          await expect(instance.parser.execute()).resolves.toEqual(true);
 
-              // Use regex for task name in case spaces were prepended or appended to spawned command
-              const expectedBuildTaskRegexp: RegExp = /fake_REbuild_task_but_works_with_mock/;
+          // There should be 1 build per package
+          const packageCount: number = instance.spawnMock.mock.calls.length;
+          expect(packageCount).toEqual(2);
 
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
-              expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
-                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-              );
-              expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
+          // Use regex for task name in case spaces were prepended or appended to spawned command
+          const expectedBuildTaskRegexp: RegExp = /fake_REbuild_task_but_works_with_mock/;
 
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
-              expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
-                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-              );
-              expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
-            });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
+          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
+          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
         });
       });
     });
 
     describe(`in repo with 'rebuild' or 'build' partially set`, () => {
       describe(`'build' action`, () => {
-        it(`executes the package's 'build' script`, () => {
+        it(`executes the package's 'build' script`, async () => {
           const repoName: string = 'overrideAndDefaultBuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'build');
-          expect.assertions(8);
-          return expect(instance.parser.execute())
-            .resolves.toEqual(true)
-            .then(() => {
-              // There should be 1 build per package
-              const packageCount: number = instance.spawnMock.mock.calls.length;
-              expect(packageCount).toEqual(2);
+          await expect(instance.parser.execute()).resolves.toEqual(true);
 
-              // Use regex for task name in case spaces were prepended or appended to spawned command
-              const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
+          // There should be 1 build per package
+          const packageCount: number = instance.spawnMock.mock.calls.length;
+          expect(packageCount).toEqual(2);
 
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
-              expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
-                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-              );
-              expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
+          // Use regex for task name in case spaces were prepended or appended to spawned command
+          const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
 
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
-              expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
-                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-              );
-              expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
-            });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
+          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
+          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
         });
       });
 
       describe(`'rebuild' action`, () => {
-        it(`executes the package's 'build' script`, () => {
+        it(`executes the package's 'build' script`, async () => {
+          // broken
           const repoName: string = 'overrideAndDefaultRebuildActionRepo';
           const instance: IParserTestInstance = getCommandLineParserInstance(repoName, 'rebuild');
-          expect.assertions(8);
-          return expect(instance.parser.execute())
-            .resolves.toEqual(true)
-            .then(() => {
-              // There should be 1 build per package
-              const packageCount: number = instance.spawnMock.mock.calls.length;
-              expect(packageCount).toEqual(2);
+          await expect(instance.parser.execute()).resolves.toEqual(true);
 
-              // Use regex for task name in case spaces were prepended or appended to spawned command
-              const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
+          // There should be 1 build per package
+          const packageCount: number = instance.spawnMock.mock.calls.length;
+          expect(packageCount).toEqual(2);
 
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
-              expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
-                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-              );
-              expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
+          // Use regex for task name in case spaces were prepended or appended to spawned command
+          const expectedBuildTaskRegexp: RegExp = /fake_build_task_but_works_with_mock/;
 
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
-              expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
-                expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
-              );
-              expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
-              expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
-            });
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const firstSpawn: any[] = instance.spawnMock.mock.calls[0];
+          expect(firstSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(firstSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          expect(firstSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/a`));
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const secondSpawn: any[] = instance.spawnMock.mock.calls[1];
+          expect(secondSpawn[SPAWN_ARG_ARGS]).toEqual(
+            expect.arrayContaining([expect.stringMatching(expectedBuildTaskRegexp)])
+          );
+          expect(secondSpawn[SPAWN_ARG_OPTIONS]).toEqual(expect.any(Object));
+          expect(secondSpawn[SPAWN_ARG_OPTIONS].cwd).toEqual(path.resolve(__dirname, `${repoName}/b`));
         });
       });
     });
 
     describe(`in repo with 'build' command overridden as a global command`, () => {
-      it(`throws an error when starting Rush`, () => {
+      it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideBuildAsGlobalCommandRepo';
 
-        expect.assertions(1);
-        return expect(() => {
+        await expect(() => {
           getCommandLineParserInstance(repoName, 'doesnt-matter');
         }).toThrowError('This command can only be designated as a command kind "bulk"');
       });
     });
 
     describe(`in repo with 'rebuild' command overridden as a global command`, () => {
-      it(`throws an error when starting Rush`, () => {
+      it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideRebuildAsGlobalCommandRepo';
 
-        expect.assertions(1);
-        return expect(() => {
+        await expect(() => {
           getCommandLineParserInstance(repoName, 'doesnt-matter');
         }).toThrowError('This command can only be designated as a command kind "bulk"');
       });
     });
 
     describe(`in repo with 'build' command overridden with 'safeForSimultaneousRushProcesses=true'`, () => {
-      it(`throws an error when starting Rush`, () => {
+      it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideBuildWithSimultaneousProcessesRepo';
 
-        expect.assertions(1);
-        return expect(() => {
+        await expect(() => {
           getCommandLineParserInstance(repoName, 'doesnt-matter');
         }).toThrowError('"safeForSimultaneousRushProcesses=true". This configuration is not supported');
       });
     });
 
     describe(`in repo with 'rebuild' command overridden with 'safeForSimultaneousRushProcesses=true'`, () => {
-      it(`throws an error when starting Rush`, () => {
+      it(`throws an error when starting Rush`, async () => {
         const repoName: string = 'overrideRebuildWithSimultaneousProcessesRepo';
 
-        expect.assertions(1);
-        return expect(() => {
+        await expect(() => {
           getCommandLineParserInstance(repoName, 'doesnt-matter');
         }).toThrowError('"safeForSimultaneousRushProcesses=true". This configuration is not supported');
       });

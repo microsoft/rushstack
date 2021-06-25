@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as path from 'path';
 import * as semver from 'semver';
 import { FileSystem, AlreadyReportedError } from '@rushstack/node-core-library';
+import { PrintUtilities } from '@rushstack/terminal';
 
 import { RushConfiguration } from '../api/RushConfiguration';
-import { Utilities } from '../utilities/Utilities';
 import { RushConstants } from '../logic/RushConstants';
 
 // Refuses to run at all if the PNPM version is older than this, because there
@@ -16,7 +16,7 @@ const MINIMUM_SUPPORTED_NPM_VERSION: string = '4.5.0';
 
 // Refuses to run at all if the PNPM version is older than this, because there
 // are known bugs or missing features in earlier releases.
-const MINIMUM_SUPPORTED_PNPM_VERSION: string = '2.6.2';
+const MINIMUM_SUPPORTED_PNPM_VERSION: string = '5.0.0';
 
 /**
  * Validate that the developer's setup is good.
@@ -33,7 +33,7 @@ export class SetupChecks {
     const errorMessage: string | undefined = SetupChecks._validate(rushConfiguration);
 
     if (errorMessage) {
-      console.error(colors.red(Utilities.wrapWords(errorMessage)));
+      console.error(colors.red(PrintUtilities.wrapWords(errorMessage)));
       throw new AlreadyReportedError();
     }
   }
@@ -77,7 +77,7 @@ export class SetupChecks {
       if (phantomFolders.length === 1) {
         console.log(
           colors.yellow(
-            Utilities.wrapWords(
+            PrintUtilities.wrapWords(
               'Warning: A phantom "node_modules" folder was found. This defeats Rush\'s protection against' +
                 ' NPM phantom dependencies and may cause confusing build errors. It is recommended to' +
                 ' delete this folder:'
@@ -87,7 +87,7 @@ export class SetupChecks {
       } else {
         console.log(
           colors.yellow(
-            Utilities.wrapWords(
+            PrintUtilities.wrapWords(
               'Warning: Phantom "node_modules" folders were found. This defeats Rush\'s protection against' +
                 ' NPM phantom dependencies and may cause confusing build errors. It is recommended to' +
                 ' delete these folders:'
@@ -119,7 +119,31 @@ export class SetupChecks {
       // If there is a node_modules folder under this folder, add it to the list of bad folders
       const nodeModulesFolder: string = path.join(folder, RushConstants.nodeModulesFolderName);
       if (FileSystem.exists(nodeModulesFolder)) {
-        phantomFolders.push(nodeModulesFolder);
+        // Collect the names of files/folders in that node_modules folder
+        const filenames: string[] = FileSystem.readFolder(nodeModulesFolder).filter(
+          (x) => !x.startsWith('.')
+        );
+
+        let ignore: boolean = false;
+
+        if (filenames.length === 0) {
+          // If the node_modules folder is completely empty, then it's not a concern
+          ignore = true;
+        } else if (filenames.length === 1 && filenames[0] === 'vso-task-lib') {
+          // Special case:  The Azure DevOps build agent installs the "vso-task-lib" NPM package
+          // in a top-level path such as:
+          //
+          //   /home/vsts/work/node_modules/vso-task-lib
+          //
+          // It is always the only package in that node_modules folder.  The "vso-task-lib" package
+          // is now deprecated, so it is unlikely to be a real dependency of any modern project.
+          // To avoid false alarms, we ignore this specific case.
+          ignore = true;
+        }
+
+        if (!ignore) {
+          phantomFolders.push(nodeModulesFolder);
+        }
       }
 
       // Walk upwards

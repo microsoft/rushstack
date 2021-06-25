@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { EOL } from 'os';
-import * as uglify from 'uglify-js';
-
 import { ISetWebpackPublicPathOptions } from './SetPublicPathPlugin';
 
 /**
@@ -28,8 +25,8 @@ function joinLines(lines: string[], linePrefix?: string): string {
         return line;
       }
     })
-    .join(EOL)
-    .replace(new RegExp(`${EOL}${EOL}+`, 'g'), `${EOL}${EOL}`);
+    .join('\n')
+    .replace(/\n\n+/g, '\n\n');
 }
 
 function escapeSingleQuotes(str: string): string | undefined {
@@ -141,31 +138,18 @@ export function getSetPublicPathCode(
  * @public
  */
 export function getGlobalRegisterCode(debug: boolean = false): string {
-  const lines: string[] = [
-    '(function(){',
-    `if (!${registryVariableName}) ${registryVariableName}={};`,
-    `var scripts = document.getElementsByTagName('script');`,
-    'if (scripts && scripts.length) {',
-    '  for (var i = 0; i < scripts.length; i++) {',
-    '    if (!scripts[i]) continue;',
-    `    var path = scripts[i].getAttribute('src');`,
-    `    if (path) ${registryVariableName}[path]=true;`,
-    '  }',
-    '}',
-    '})();'
-  ];
+  // Minified version of this code:
+  // (function(){
+  // if (!window.__setWebpackPublicPathLoaderSrcRegistry__) window.__setWebpackPublicPathLoaderSrcRegistry__={};
+  // var scripts = document.getElementsByTagName('script');
+  // if (scripts && scripts.length) {
+  //   for (var i = 0; i < scripts.length; i++) {
+  //     if (!scripts[i]) continue;
+  //     var path = scripts[i].getAttribute('src');
+  //     if (path) window.__setWebpackPublicPathLoaderSrcRegistry__[path]=true;
+  //   }
+  // }
+  // })()
 
-  const joinedScript: string = joinLines(lines);
-
-  if (debug) {
-    return `${EOL}${joinedScript}`;
-  } else {
-    const minifyOutput: uglify.MinifyOutput = uglify.minify(joinedScript, {
-      compress: {
-        dead_code: true
-      }
-    });
-
-    return `${EOL}${minifyOutput.code}`;
-  }
+  return `\n!function(){${registryVariableName}||(${registryVariableName}={});var e=document.getElementsByTagName("script");if(e&&e.length)for(var t=0;t<e.length;t++)if(e[t]){var r=e[t].getAttribute("src");r&&(${registryVariableName}[r]=!0)}}();`;
 }

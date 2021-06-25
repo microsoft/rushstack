@@ -117,39 +117,6 @@ Optionally, you can add some "mixins" to your `extends` array to opt-in to some 
 Important: Your **.eslintrc.js** `"extends"` field must load mixins after the profile entry.
 
 
-#### `@rushstack/eslint-config/mixins/react`
-
-For projects using the [React](https://reactjs.org/) library, the `"@rushstack/eslint-config/mixins/react"` mixin
-enables some recommended additional rules.  These rules are selected via a mixin because they require you to:
-
-- Add `"jsx": "react"` to your **tsconfig.json**
-- Configure your `settings.react.version` as shown below.  This determines which React APIs will be considered
-  to be deprecated.  (If you omit this, the React version will be detected automatically by
-  [loading the entire React library](https://github.com/yannickcr/eslint-plugin-react/blob/4da74518bd78f11c9c6875a159ffbae7d26be693/lib/util/version.js#L23)
-  into the linter's process, which is costly.)
-
-Add the mixin to your `"extends"` field like this:
-
-**.eslintrc.js**
-```ts
-// This is a workaround for https://github.com/eslint/eslint/issues/3458
-require('@rushstack/eslint-config/patch/modern-module-resolution');
-
-module.exports = {
-  extends: [
-    "@rushstack/eslint-config/profile/web-app",
-    "@rushstack/eslint-config/mixins/react" // <----
-  ],
-  parserOptions: { tsconfigRootDir: __dirname },
-
-  settings: {
-    react: {
-      "version": "16.9" // <----
-    }
-  }
-};
-```
-
 #### `@rushstack/eslint-config/mixins/friendly-locals`
 
 Requires explicit type declarations for local variables.
@@ -217,6 +184,28 @@ module.exports = {
 ```
 
 
+#### `@rushstack/eslint-config/mixins/packlets`
+
+Packlets provide a lightweight alternative to NPM packages for organizing source files within a single project.
+This system is described in the [@rushstack/eslint-plugin-packlets](https://www.npmjs.com/package/@rushstack/eslint-plugin-packlets)
+documentation.
+
+To use packlets, add the mixin to your `"extends"` field like this:
+
+**.eslintrc.js**
+```ts
+// This is a workaround for https://github.com/eslint/eslint/issues/3458
+require('@rushstack/eslint-config/patch/modern-module-resolution');
+
+module.exports = {
+  extends: [
+    "@rushstack/eslint-config/profile/node",
+    "@rushstack/eslint-config/profile/mixins/packlets" // <----
+  ],
+  parserOptions: { tsconfigRootDir: __dirname }
+};
+```
+
 
 #### `@rushstack/eslint-config/mixins/tsdoc`
 
@@ -240,6 +229,41 @@ module.exports = {
   parserOptions: { tsconfigRootDir: __dirname }
 };
 ```
+
+
+#### `@rushstack/eslint-config/mixins/react`
+
+For projects using the [React](https://reactjs.org/) library, the `"@rushstack/eslint-config/mixins/react"` mixin
+enables some recommended additional rules.  These rules are selected via a mixin because they require you to:
+
+- Add `"jsx": "react"` to your **tsconfig.json**
+- Configure your `settings.react.version` as shown below.  This determines which React APIs will be considered
+  to be deprecated.  (If you omit this, the React version will be detected automatically by
+  [loading the entire React library](https://github.com/yannickcr/eslint-plugin-react/blob/4da74518bd78f11c9c6875a159ffbae7d26be693/lib/util/version.js#L23)
+  into the linter's process, which is costly.)
+
+Add the mixin to your `"extends"` field like this:
+
+**.eslintrc.js**
+```ts
+// This is a workaround for https://github.com/eslint/eslint/issues/3458
+require('@rushstack/eslint-config/patch/modern-module-resolution');
+
+module.exports = {
+  extends: [
+    "@rushstack/eslint-config/profile/web-app",
+    "@rushstack/eslint-config/mixins/react" // <----
+  ],
+  parserOptions: { tsconfigRootDir: __dirname },
+
+  settings: {
+    react: {
+      "version": "16.9" // <----
+    }
+  }
+};
+```
+
 
 ## Links
 

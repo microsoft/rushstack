@@ -1,6 +1,442 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Wed, 30 Sep 2020 18:39:17 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Jun 2021 00:08:28 GMT and should not be manually modified.
+
+## 3.0.45
+Fri, 25 Jun 2021 00:08:28 GMT
+
+_Version update only_
+
+## 3.0.44
+Fri, 18 Jun 2021 06:23:05 GMT
+
+_Version update only_
+
+## 3.0.43
+Wed, 16 Jun 2021 18:53:52 GMT
+
+_Version update only_
+
+## 3.0.42
+Wed, 16 Jun 2021 15:07:24 GMT
+
+_Version update only_
+
+## 3.0.41
+Tue, 15 Jun 2021 20:38:35 GMT
+
+_Version update only_
+
+## 3.0.40
+Fri, 11 Jun 2021 23:26:16 GMT
+
+_Version update only_
+
+## 3.0.39
+Fri, 11 Jun 2021 00:34:02 GMT
+
+_Version update only_
+
+## 3.0.38
+Thu, 10 Jun 2021 15:08:16 GMT
+
+_Version update only_
+
+## 3.0.37
+Fri, 04 Jun 2021 19:59:53 GMT
+
+_Version update only_
+
+## 3.0.36
+Fri, 04 Jun 2021 15:08:20 GMT
+
+_Version update only_
+
+## 3.0.35
+Fri, 04 Jun 2021 00:08:34 GMT
+
+_Version update only_
+
+## 3.0.34
+Tue, 01 Jun 2021 18:29:26 GMT
+
+_Version update only_
+
+## 3.0.33
+Sat, 29 May 2021 01:05:06 GMT
+
+_Version update only_
+
+## 3.0.32
+Fri, 28 May 2021 06:19:58 GMT
+
+_Version update only_
+
+## 3.0.31
+Tue, 25 May 2021 00:12:21 GMT
+
+_Version update only_
+
+## 3.0.30
+Wed, 19 May 2021 00:11:39 GMT
+
+_Version update only_
+
+## 3.0.29
+Thu, 13 May 2021 01:52:47 GMT
+
+_Version update only_
+
+## 3.0.28
+Tue, 11 May 2021 22:19:17 GMT
+
+_Version update only_
+
+## 3.0.27
+Mon, 03 May 2021 15:10:28 GMT
+
+_Version update only_
+
+## 3.0.26
+Thu, 29 Apr 2021 23:26:50 GMT
+
+_Version update only_
+
+## 3.0.25
+Thu, 29 Apr 2021 01:07:29 GMT
+
+_Version update only_
+
+## 3.0.24
+Fri, 23 Apr 2021 22:00:07 GMT
+
+_Version update only_
+
+## 3.0.23
+Fri, 23 Apr 2021 15:11:21 GMT
+
+_Version update only_
+
+## 3.0.22
+Wed, 21 Apr 2021 15:12:28 GMT
+
+_Version update only_
+
+## 3.0.21
+Tue, 20 Apr 2021 04:59:51 GMT
+
+_Version update only_
+
+## 3.0.20
+Thu, 15 Apr 2021 02:59:25 GMT
+
+_Version update only_
+
+## 3.0.19
+Mon, 12 Apr 2021 15:10:29 GMT
+
+_Version update only_
+
+## 3.0.18
+Thu, 08 Apr 2021 20:41:55 GMT
+
+_Version update only_
+
+## 3.0.17
+Thu, 08 Apr 2021 06:05:32 GMT
+
+_Version update only_
+
+## 3.0.16
+Thu, 08 Apr 2021 00:10:18 GMT
+
+_Version update only_
+
+## 3.0.15
+Tue, 06 Apr 2021 15:14:22 GMT
+
+_Version update only_
+
+## 3.0.14
+Wed, 31 Mar 2021 15:10:36 GMT
+
+_Version update only_
+
+## 3.0.13
+Mon, 29 Mar 2021 05:02:07 GMT
+
+_Version update only_
+
+## 3.0.12
+Fri, 19 Mar 2021 22:31:38 GMT
+
+_Version update only_
+
+## 3.0.11
+Wed, 17 Mar 2021 05:04:38 GMT
+
+_Version update only_
+
+## 3.0.10
+Fri, 12 Mar 2021 01:13:27 GMT
+
+_Version update only_
+
+## 3.0.9
+Wed, 10 Mar 2021 06:23:29 GMT
+
+_Version update only_
+
+## 3.0.8
+Wed, 10 Mar 2021 05:10:06 GMT
+
+_Version update only_
+
+## 3.0.7
+Thu, 04 Mar 2021 01:11:31 GMT
+
+_Version update only_
+
+## 3.0.6
+Tue, 02 Mar 2021 23:25:05 GMT
+
+_Version update only_
+
+## 3.0.5
+Fri, 05 Feb 2021 16:10:42 GMT
+
+_Version update only_
+
+## 3.0.4
+Fri, 22 Jan 2021 05:39:22 GMT
+
+_Version update only_
+
+## 3.0.3
+Thu, 21 Jan 2021 04:19:01 GMT
+
+_Version update only_
+
+## 3.0.2
+Wed, 13 Jan 2021 01:11:06 GMT
+
+_Version update only_
+
+## 3.0.1
+Fri, 08 Jan 2021 07:28:50 GMT
+
+_Version update only_
+
+## 3.0.0
+Fri, 08 Jan 2021 05:24:33 GMT
+
+### Breaking changes
+
+- Refactor getPackageDeps to return a map.
+
+### Minor changes
+
+- Allow the git binary path to be explicitly provided.
+
+## 2.4.110
+Wed, 06 Jan 2021 16:10:43 GMT
+
+_Version update only_
+
+## 2.4.109
+Mon, 14 Dec 2020 16:12:21 GMT
+
+_Version update only_
+
+## 2.4.108
+Thu, 10 Dec 2020 23:25:50 GMT
+
+_Version update only_
+
+## 2.4.107
+Sat, 05 Dec 2020 01:11:23 GMT
+
+_Version update only_
+
+## 2.4.106
+Tue, 01 Dec 2020 01:10:38 GMT
+
+_Version update only_
+
+## 2.4.105
+Mon, 30 Nov 2020 16:11:50 GMT
+
+_Version update only_
+
+## 2.4.104
+Wed, 18 Nov 2020 08:19:54 GMT
+
+_Version update only_
+
+## 2.4.103
+Wed, 18 Nov 2020 06:21:58 GMT
+
+_Version update only_
+
+## 2.4.102
+Tue, 17 Nov 2020 01:17:38 GMT
+
+_Version update only_
+
+## 2.4.101
+Mon, 16 Nov 2020 01:57:58 GMT
+
+_Version update only_
+
+## 2.4.100
+Fri, 13 Nov 2020 01:11:01 GMT
+
+_Version update only_
+
+## 2.4.99
+Thu, 12 Nov 2020 01:11:10 GMT
+
+_Version update only_
+
+## 2.4.98
+Wed, 11 Nov 2020 01:08:58 GMT
+
+_Version update only_
+
+## 2.4.97
+Tue, 10 Nov 2020 23:13:12 GMT
+
+_Version update only_
+
+## 2.4.96
+Tue, 10 Nov 2020 16:11:42 GMT
+
+_Version update only_
+
+## 2.4.95
+Sun, 08 Nov 2020 22:52:49 GMT
+
+_Version update only_
+
+## 2.4.94
+Fri, 06 Nov 2020 16:09:30 GMT
+
+_Version update only_
+
+## 2.4.93
+Tue, 03 Nov 2020 01:11:19 GMT
+
+_Version update only_
+
+## 2.4.92
+Mon, 02 Nov 2020 16:12:05 GMT
+
+_Version update only_
+
+## 2.4.91
+Fri, 30 Oct 2020 06:38:39 GMT
+
+_Version update only_
+
+## 2.4.90
+Fri, 30 Oct 2020 00:10:14 GMT
+
+_Version update only_
+
+## 2.4.89
+Thu, 29 Oct 2020 06:14:19 GMT
+
+_Version update only_
+
+## 2.4.88
+Thu, 29 Oct 2020 00:11:33 GMT
+
+_Version update only_
+
+## 2.4.87
+Wed, 28 Oct 2020 01:18:03 GMT
+
+_Version update only_
+
+## 2.4.86
+Tue, 27 Oct 2020 15:10:14 GMT
+
+_Version update only_
+
+## 2.4.85
+Sat, 24 Oct 2020 00:11:19 GMT
+
+_Version update only_
+
+## 2.4.84
+Wed, 21 Oct 2020 05:09:44 GMT
+
+_Version update only_
+
+## 2.4.83
+Wed, 21 Oct 2020 02:28:17 GMT
+
+_Version update only_
+
+## 2.4.82
+Fri, 16 Oct 2020 23:32:58 GMT
+
+_Version update only_
+
+## 2.4.81
+Thu, 15 Oct 2020 00:59:08 GMT
+
+_Version update only_
+
+## 2.4.80
+Wed, 14 Oct 2020 23:30:14 GMT
+
+_Version update only_
+
+## 2.4.79
+Tue, 13 Oct 2020 15:11:28 GMT
+
+_Version update only_
+
+## 2.4.78
+Mon, 12 Oct 2020 15:11:16 GMT
+
+_Version update only_
+
+## 2.4.77
+Fri, 09 Oct 2020 15:11:09 GMT
+
+_Version update only_
+
+## 2.4.76
+Tue, 06 Oct 2020 00:24:06 GMT
+
+_Version update only_
+
+## 2.4.75
+Mon, 05 Oct 2020 22:36:57 GMT
+
+_Version update only_
+
+## 2.4.74
+Mon, 05 Oct 2020 15:10:43 GMT
+
+_Version update only_
+
+## 2.4.73
+Fri, 02 Oct 2020 00:10:59 GMT
+
+_Version update only_
+
+## 2.4.72
+Thu, 01 Oct 2020 20:27:16 GMT
+
+_Version update only_
+
+## 2.4.71
+Thu, 01 Oct 2020 18:51:21 GMT
+
+_Version update only_
 
 ## 2.4.70
 Wed, 30 Sep 2020 18:39:17 GMT

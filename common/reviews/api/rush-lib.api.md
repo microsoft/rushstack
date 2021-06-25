@@ -87,15 +87,23 @@ export const enum DependencyType {
     // (undocumented)
     Peer = "peerDependencies",
     // (undocumented)
-    Regular = "dependencies"
+    Regular = "dependencies",
+    // (undocumented)
+    YarnResolutions = "resolutions"
 }
 
 // @public
 export const enum EnvironmentVariableNames {
     RUSH_ABSOLUTE_SYMLINKS = "RUSH_ABSOLUTE_SYMLINKS",
     RUSH_ALLOW_UNSUPPORTED_NODEJS = "RUSH_ALLOW_UNSUPPORTED_NODEJS",
+    RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD = "RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD",
+    RUSH_BUILD_CACHE_CREDENTIAL = "RUSH_BUILD_CACHE_CREDENTIAL",
+    RUSH_BUILD_CACHE_ENABLED = "RUSH_BUILD_CACHE_ENABLED",
+    RUSH_BUILD_CACHE_WRITE_ALLOWED = "RUSH_BUILD_CACHE_WRITE_ALLOWED",
     RUSH_DEPLOY_TARGET_FOLDER = "RUSH_DEPLOY_TARGET_FOLDER",
+    RUSH_GIT_BINARY_PATH = "RUSH_GIT_BINARY_PATH",
     RUSH_GLOBAL_FOLDER = "RUSH_GLOBAL_FOLDER",
+    RUSH_INVOKED_FOLDER = "RUSH_INVOKED_FOLDER",
     RUSH_PARALLELISM = "RUSH_PARALLELISM",
     RUSH_PNPM_STORE_PATH = "RUSH_PNPM_STORE_PATH",
     RUSH_PREVIEW_VERSION = "RUSH_PREVIEW_VERSION",
@@ -140,9 +148,10 @@ export interface IConfigurationEnvironmentVariable {
 
 // @beta
 export interface IExperimentsJson {
-    legacyIncrementalBuildDependencyDetection?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
+    omitImportersFromPreventManualShrinkwrapChanges?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
+    usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
 }
 
 // @public
@@ -178,7 +187,6 @@ export interface IPackageManagerOptionsJsonBase {
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     pnpmStore?: PnpmStoreOptions;
     preventManualShrinkwrapChanges?: boolean;
-    resolutionStrategy?: ResolutionStrategy;
     strictPeerDependencies?: boolean;
     useWorkspaces?: boolean;
 }
@@ -255,8 +263,10 @@ export class PackageJsonEditor {
     static load(filePath: string): PackageJsonEditor;
     // (undocumented)
     get name(): string;
+    get resolutionsList(): ReadonlyArray<PackageJsonDependency>;
     // (undocumented)
     saveIfModified(): boolean;
+    saveToObject(): IPackageJson;
     // (undocumented)
     tryGetDependency(packageName: string): PackageJsonDependency | undefined;
     // (undocumented)
@@ -293,7 +303,6 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly pnpmStore: PnpmStoreOptions;
     readonly pnpmStorePath: string;
     readonly preventManualShrinkwrapChanges: boolean;
-    readonly resolutionStrategy: ResolutionStrategy;
     readonly strictPeerDependencies: boolean;
     readonly useWorkspaces: boolean;
 }
@@ -304,14 +313,12 @@ export type PnpmStoreOptions = 'local' | 'global';
 // @public
 export class RepoStateFile {
     get filePath(): string;
+    get isValid(): boolean;
     static loadFromFile(jsonFilename: string, variant: string | undefined): RepoStateFile;
     get pnpmShrinkwrapHash(): string | undefined;
     get preferredVersionsHash(): string | undefined;
     refreshState(rushConfiguration: RushConfiguration): boolean;
     }
-
-// @public
-export type ResolutionStrategy = 'fewer-dependencies' | 'fast';
 
 // @public
 export class Rush {
@@ -343,14 +350,17 @@ export class RushConfiguration {
     get experimentsConfiguration(): ExperimentsConfiguration;
     findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
     findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
+    findProjectForPosixRelativePath(posixRelativePath: string): RushConfigurationProject | undefined;
     getCommittedShrinkwrapFilename(variant?: string | undefined): string;
     getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration;
     getCommonVersionsFilePath(variant?: string | undefined): string;
+    getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string>;
     getPnpmfilePath(variant?: string | undefined): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
     getRepoState(variant?: string | undefined): RepoStateFile;
     getRepoStateFilePath(variant?: string | undefined): string;
     get gitAllowedEmailRegExps(): string[];
+    get gitChangeLogUpdateCommitMessage(): string | undefined;
     get gitSampleEmail(): string;
     get gitVersionBumpCommitMessage(): string | undefined;
     get hotfixChangeEnabled(): boolean;
@@ -395,6 +405,8 @@ export class RushConfiguration {
     tryGetProjectForPath(currentFolderPath: string): RushConfigurationProject | undefined;
     // @beta (undocumented)
     get versionPolicyConfiguration(): VersionPolicyConfiguration;
+    // @beta (undocumented)
+    get versionPolicyConfigurationFilePath(): string;
     get yarnCacheFolder(): string;
     get yarnOptions(): YarnOptionsConfiguration;
     }
@@ -405,10 +417,16 @@ export class RushConfigurationProject {
     //
     // @internal
     constructor(projectJson: IRushConfigurationProjectJson, rushConfiguration: RushConfiguration, tempProjectName: string);
+    // @internal
+    readonly _consumingProjectNames: Set<string>;
+    get consumingProjects(): ReadonlySet<RushConfigurationProject>;
     get cyclicDependencyProjects(): Set<string>;
+    get dependencyProjects(): ReadonlySet<RushConfigurationProject>;
+    // @deprecated
     get downstreamDependencyProjects(): string[];
     // @beta
     get isMainProject(): boolean;
+    // @deprecated
     get localDependencyProjects(): ReadonlyArray<RushConfigurationProject>;
     // @deprecated
     get packageJson(): IPackageJson;
@@ -417,7 +435,9 @@ export class RushConfigurationProject {
     get packageName(): string;
     get projectFolder(): string;
     get projectRelativeFolder(): string;
+    get projectRushConfigFolder(): string;
     get projectRushTempFolder(): string;
+    get publishFolder(): string;
     get reviewCategory(): string | undefined;
     get rushConfiguration(): RushConfiguration;
     get shouldPublish(): boolean;

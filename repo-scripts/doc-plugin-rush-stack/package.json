@@ -7,12 +7,12 @@
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "heft test --clean"
+    "build": "heft build --clean"
   },
   "dependencies": {
     "@microsoft/api-documenter": "workspace:*",
     "@microsoft/api-extractor-model": "workspace:*",
-    "@microsoft/tsdoc": "0.12.19",
+    "@microsoft/tsdoc": "0.13.2",
     "@rushstack/node-core-library": "workspace:*",
     "js-yaml": "~3.13.1"
   },

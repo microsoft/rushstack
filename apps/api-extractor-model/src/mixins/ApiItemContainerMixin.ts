@@ -47,17 +47,12 @@ const _membersByKind: unique symbol = Symbol('ApiItemContainerMixin._membersByKi
  * Examples of `ApiItemContainerMixin` child classes include `ApiModel`, `ApiPackage`, `ApiEntryPoint`,
  * and `ApiEnum`.  But note that `Parameter` is not considered a "member" of an `ApiMethod`; this relationship
  * is modeled using {@link (ApiParameterListMixin:interface).parameters} instead
- * of {@link (ApiItemContainerMixin:interface).members}.
+ * of {@link ApiItem.members}.
  *
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export interface ApiItemContainerMixin extends ApiItem {
-  /**
-   * Returns the members of this container, sorted alphabetically.
-   */
-  readonly members: ReadonlyArray<ApiItem>;
-
   /**
    * Adds a new member to the container.
    *
@@ -146,6 +141,7 @@ export function ApiItemContainerMixin<TBaseClass extends IApiItemConstructor>(
       }
     }
 
+    /** @override */
     public get members(): ReadonlyArray<ApiItem> {
       if (!this[_membersSorted]) {
         LegacyAdapters.sortStable(this[_members], (x, y) => x.getSortKey().localeCompare(y.getSortKey()));

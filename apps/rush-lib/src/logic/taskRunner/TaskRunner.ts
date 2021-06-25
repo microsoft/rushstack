@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
-import colors from 'colors';
+import colors from 'colors/safe';
 import {
   StdioSummarizer,
   TerminalWritable,
@@ -17,12 +17,14 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { Task } from './Task';
 import { TaskStatus } from './TaskStatus';
 import { IBuilderContext } from './BaseBuilder';
+import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 
 export interface ITaskRunnerOptions {
   quietMode: boolean;
   parallelism: string | undefined;
   changedProjectsOnly: boolean;
   allowWarningsInSuccessfulBuild: boolean;
+  repoCommandLineConfiguration: CommandLineConfiguration | undefined;
   destination?: TerminalWritable;
 }
 
@@ -36,14 +38,15 @@ export class TaskRunner {
   // Format "======" lines for a shell window with classic 80 columns
   private static readonly _ASCII_HEADER_WIDTH: number = 79;
 
-  private _tasks: Task[];
-  private _changedProjectsOnly: boolean;
-  private _allowWarningsInSuccessfulBuild: boolean;
-  private _buildQueue: Task[];
-  private _quietMode: boolean;
+  private readonly _tasks: Task[];
+  private readonly _changedProjectsOnly: boolean;
+  private readonly _allowWarningsInSuccessfulBuild: boolean;
+  private readonly _buildQueue: Task[];
+  private readonly _quietMode: boolean;
+  private readonly _parallelism: number;
+  private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
   private _hasAnyFailures: boolean;
   private _hasAnyWarnings: boolean;
-  private _parallelism: number;
   private _currentActiveTasks!: number;
   private _totalTasks!: number;
   private _completedTasks!: number;
@@ -55,7 +58,13 @@ export class TaskRunner {
   private _terminal: CollatedTerminal;
 
   public constructor(orderedTasks: Task[], options: ITaskRunnerOptions) {
-    const { quietMode, parallelism, changedProjectsOnly, allowWarningsInSuccessfulBuild } = options;
+    const {
+      quietMode,
+      parallelism,
+      changedProjectsOnly,
+      allowWarningsInSuccessfulBuild,
+      repoCommandLineConfiguration
+    } = options;
     this._tasks = orderedTasks;
     this._buildQueue = orderedTasks.slice(0);
     this._quietMode = quietMode;
@@ -63,6 +72,7 @@ export class TaskRunner {
     this._hasAnyWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
     this._allowWarningsInSuccessfulBuild = allowWarningsInSuccessfulBuild;
+    this._repoCommandLineConfiguration = repoCommandLineConfiguration;
 
     // TERMINAL PIPELINE:
     //
@@ -206,7 +216,7 @@ export class TaskRunner {
    * Helper function which finds any tasks which are available to run and begins executing them.
    * It calls the complete callback when all tasks are completed, or rejects if any task fails.
    */
-  private _startAvailableTasksAsync(): Promise<void> {
+  private async _startAvailableTasksAsync(): Promise<void> {
     const taskPromises: Promise<void>[] = [];
     let ctask: Task | undefined;
     while (this._currentActiveTasks < this._parallelism && (ctask = this._getNextTask())) {
@@ -221,13 +231,12 @@ export class TaskRunner {
       taskPromises.push(this._executeTaskAndChainAsync(task));
     }
 
-    return Promise.all(taskPromises).then(() => {
-      // collapse void[] to void
-    });
+    await Promise.all(taskPromises);
   }
 
   private async _executeTaskAndChainAsync(task: Task): Promise<void> {
     const context: IBuilderContext = {
+      repoCommandLineConfiguration: this._repoCommandLineConfiguration,
       stdioSummarizer: task.stdioSummarizer,
       collatedWriter: task.collatedWriter,
       quietMode: this._quietMode
@@ -247,6 +256,9 @@ export class TaskRunner {
         case TaskStatus.SuccessWithWarning:
           this._hasAnyWarnings = true;
           this._markTaskAsSuccessWithWarning(task);
+          break;
+        case TaskStatus.FromCache:
+          this._markTaskAsFromCache(task);
           break;
         case TaskStatus.Skipped:
           this._markTaskAsSkipped(task);
@@ -356,6 +368,19 @@ export class TaskRunner {
   }
 
   /**
+   * Marks a task as provided by cache.
+   */
+  private _markTaskAsFromCache(task: Task): void {
+    task.collatedWriter.terminal.writeStdoutLine(
+      colors.green(`${task.name} was restored from the build cache.`)
+    );
+    task.status = TaskStatus.FromCache;
+    task.dependents.forEach((dependent: Task) => {
+      dependent.dependencies.delete(task);
+    });
+  }
+
+  /**
    * Prints out a report of the status of each project
    */
   private _printTaskStatus(): void {
@@ -364,6 +389,7 @@ export class TaskRunner {
       switch (task.status) {
         // These are the sections that we will report below
         case TaskStatus.Skipped:
+        case TaskStatus.FromCache:
         case TaskStatus.Success:
         case TaskStatus.SuccessWithWarning:
         case TaskStatus.Blocked:
@@ -392,6 +418,13 @@ export class TaskRunner {
       tasksByStatus,
       colors.green,
       'These projects were already up to date:'
+    );
+
+    this._writeCondensedSummary(
+      TaskStatus.FromCache,
+      tasksByStatus,
+      colors.green,
+      'These projects were restored from the build cache:'
     );
 
     this._writeCondensedSummary(

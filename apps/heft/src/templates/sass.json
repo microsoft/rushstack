@@ -24,10 +24,24 @@
   // "exportAsDefault": true,
 
   /**
+   * Files with these extensions will pass through the Sass transpiler for typings generation.
+   */
+  // "fileExtensions": [
+  //   ".sass",
+  //   ".scss",
+  //   ".css
+  // ],
+
+  /**
    * A list of paths used when resolving Sass imports.
    */
-  // "includePaths": [
+  // "importIncludePaths": [
   //   "node_modules",
   //   "src"
-  // ]
+  // ],
+
+  /**
+   * A list of file paths relative to the "src" folder that should be excluded from typings generation.
+   */
+  // "excludeFiles": []
 }

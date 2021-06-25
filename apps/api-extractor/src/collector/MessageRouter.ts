@@ -5,7 +5,6 @@ import colors from 'colors';
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 import { Sort, InternalError, LegacyAdapters } from '@rushstack/node-core-library';
-import { AedocDefinitions } from '@microsoft/api-extractor-model';
 
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { AstSymbol } from '../analyzer/AstSymbol';
@@ -32,6 +31,14 @@ export interface IMessageRouterOptions {
   messagesConfig: IExtractorMessagesConfig;
   showVerboseMessages: boolean;
   showDiagnostics: boolean;
+  tsdocConfiguration: tsdoc.TSDocConfiguration;
+}
+
+export interface IBuildJsonDumpObjectOptions {
+  /**
+   * {@link MessageRouter.buildJsonDumpObject} will omit any objects keys with these names.
+   */
+  keyNamesToOmit?: string[];
 }
 
 export class MessageRouter {
@@ -48,6 +55,8 @@ export class MessageRouter {
   private readonly _associatedMessagesForAstDeclaration: Map<AstDeclaration, ExtractorMessage[]>;
 
   private readonly _sourceMapper: SourceMapper;
+
+  private readonly _tsdocConfiguration: tsdoc.TSDocConfiguration;
 
   // Normalized representation of the routing rules from api-extractor.json
   private _reportingRuleByMessageId: Map<string, IReportingRule> = new Map<string, IReportingRule>();
@@ -81,6 +90,7 @@ export class MessageRouter {
     this._messages = [];
     this._associatedMessagesForAstDeclaration = new Map<AstDeclaration, ExtractorMessage[]>();
     this._sourceMapper = new SourceMapper();
+    this._tsdocConfiguration = options.tsdocConfiguration;
 
     // showDiagnostics implies showVerboseMessages
     this.showVerboseMessages = options.showVerboseMessages || options.showDiagnostics;
@@ -149,7 +159,7 @@ export class MessageRouter {
             `Error in API Extractor config: The messages.tsdocMessageReporting table contains` +
               ` an invalid entry "${messageId}".  The name should begin with the "tsdoc-" prefix.`
           );
-        } else if (!AedocDefinitions.tsdocConfiguration.isKnownMessageId(messageId)) {
+        } else if (!this._tsdocConfiguration.isKnownMessageId(messageId)) {
           throw new Error(
             `Error in API Extractor config: The messages.tsdocMessageReporting table contains` +
               ` an unrecognized identifier "${messageId}".  Is it spelled correctly?`
@@ -274,7 +284,18 @@ export class MessageRouter {
    *          or `undefined` if the input cannot be represented as JSON
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static buildJsonDumpObject(input: any): any | undefined {
+  public static buildJsonDumpObject(input: any, options?: IBuildJsonDumpObjectOptions): any | undefined {
+    if (!options) {
+      options = {};
+    }
+
+    const keyNamesToOmit: Set<string> = new Set(options.keyNamesToOmit);
+
+    return MessageRouter._buildJsonDumpObject(input, keyNamesToOmit);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private static _buildJsonDumpObject(input: any, keyNamesToOmit: Set<string>): any | undefined {
     if (input === null || input === undefined) {
       return null; // JSON uses null instead of undefined
     }
@@ -290,7 +311,7 @@ export class MessageRouter {
           const outputArray: any[] = [];
           for (const element of input) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const serializedElement: any = MessageRouter.buildJsonDumpObject(element);
+            const serializedElement: any = MessageRouter._buildJsonDumpObject(element, keyNamesToOmit);
             if (serializedElement !== undefined) {
               outputArray.push(serializedElement);
             }
@@ -300,11 +321,15 @@ export class MessageRouter {
 
         const outputObject: object = {};
         for (const key of Object.getOwnPropertyNames(input)) {
+          if (keyNamesToOmit.has(key)) {
+            continue;
+          }
+
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const value: any = input[key];
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const serializedValue: any = MessageRouter.buildJsonDumpObject(value);
+          const serializedValue: any = MessageRouter._buildJsonDumpObject(value, keyNamesToOmit);
 
           if (serializedValue !== undefined) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -324,9 +349,8 @@ export class MessageRouter {
     extractorMessage: ExtractorMessage,
     astDeclaration: AstDeclaration
   ): void {
-    let associatedMessages: ExtractorMessage[] | undefined = this._associatedMessagesForAstDeclaration.get(
-      astDeclaration
-    );
+    let associatedMessages: ExtractorMessage[] | undefined =
+      this._associatedMessagesForAstDeclaration.get(astDeclaration);
 
     if (!associatedMessages) {
       associatedMessages = [];

@@ -7,8 +7,9 @@
 // shown a meaningful error message.
 import { NodeJsCompatibility } from '@microsoft/rush-lib/lib/logic/NodeJsCompatibility';
 
-if (NodeJsCompatibility.warnAboutVersionTooOld()) {
-  // We are on an ancient version of Node.js that is known not to work with Rush
+if (NodeJsCompatibility.reportAncientIncompatibleVersion()) {
+  // The Node.js version is known to have serious incompatibilities.  In that situation, the user
+  // should downgrade Rush to an older release that supported their Node.js version.
   process.exit(1);
 }
 
@@ -17,7 +18,7 @@ const alreadyReportedNodeTooNewError: boolean = NodeJsCompatibility.warnAboutVer
   alreadyReportedNodeTooNewError: false
 });
 
-import * as colors from 'colors';
+import colors from 'colors/safe';
 import * as os from 'os';
 import * as semver from 'semver';
 
@@ -30,9 +31,8 @@ import { RushVersionSelector } from './RushVersionSelector';
 import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 
 // Load the configuration
-const configuration:
-  | MinimalRushConfiguration
-  | undefined = MinimalRushConfiguration.loadFromDefaultLocation();
+const configuration: MinimalRushConfiguration | undefined =
+  MinimalRushConfiguration.loadFromDefaultLocation();
 
 const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 
@@ -89,7 +89,7 @@ const launchOptions: rushLib.ILaunchOptions = { isManaged, alreadyReportedNodeTo
 if (rushVersionToLoad && rushVersionToLoad !== currentPackageVersion) {
   const versionSelector: RushVersionSelector = new RushVersionSelector(currentPackageVersion);
   versionSelector
-    .ensureRushVersionInstalled(rushVersionToLoad, configuration, launchOptions)
+    .ensureRushVersionInstalledAsync(rushVersionToLoad, configuration, launchOptions)
     .catch((error: Error) => {
       console.log(colors.red('Error: ' + error.message));
     });

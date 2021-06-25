@@ -6,7 +6,7 @@ import {
   Meaning,
   Navigation,
   Component
-} from '@microsoft/tsdoc/lib/beta/DeclarationReference';
+} from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { ApiItemKind } from '../items/ApiItem';
 import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';

@@ -31,9 +31,13 @@ export class ShrinkwrapFilePolicy {
     }
 
     // Run shrinkwrap-specific validation
-    shrinkwrapFile.validate(rushConfiguration.packageManagerOptions, {
-      ...options,
-      repoState: rushConfiguration.getRepoState(options.shrinkwrapVariant)
-    });
+    shrinkwrapFile.validate(
+      rushConfiguration.packageManagerOptions,
+      {
+        ...options,
+        repoState: rushConfiguration.getRepoState(options.shrinkwrapVariant)
+      },
+      rushConfiguration.experimentsConfiguration.configuration
+    );
   }
 }

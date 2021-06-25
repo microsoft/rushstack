@@ -20,6 +20,9 @@ export const enum EnvironmentVariableNames {
   /**
    * This variable overrides the temporary folder used by Rush.
    * The default value is "common/temp" under the repository root.
+   *
+   * @remarks This environment variable is not compatible with workspace installs. If attempting
+   * to move the PNPM store path, see the `RUSH_PNPM_STORE_PATH` environment variable.
    */
   RUSH_TEMP_FOLDER = 'RUSH_TEMP_FOLDER',
 
@@ -31,11 +34,18 @@ export const enum EnvironmentVariableNames {
   RUSH_PREVIEW_VERSION = 'RUSH_PREVIEW_VERSION',
 
   /**
-   * If this variable is set to "true", Rush will not fail the build when running a version
+   * If this variable is set to "1", Rush will not fail the build when running a version
    * of Node that does not match the criteria specified in the "nodeSupportedVersionRange"
    * field from rush.json.
    */
   RUSH_ALLOW_UNSUPPORTED_NODEJS = 'RUSH_ALLOW_UNSUPPORTED_NODEJS',
+
+  /**
+   * Setting this environment variable overrides the value of `allowWarningsInSuccessfulBuild`
+   * in the `command-line.json` configuration file. Specify `1` to allow warnings in a successful build,
+   * or `0` to disallow them. (See the comments in the command-line.json file for more information).
+   */
+  RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD = 'RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD',
 
   /**
    * This variable selects a specific installation variant for Rush to use when installing
@@ -52,7 +62,7 @@ export const enum EnvironmentVariableNames {
   RUSH_PARALLELISM = 'RUSH_PARALLELISM',
 
   /**
-   * If this variable is set to "true", Rush will create symlinks with absolute paths instead
+   * If this variable is set to "1", Rush will create symlinks with absolute paths instead
    * of relative paths. This can be necessary when a repository is moved during a build or
    * if parts of a repository are moved into a sandbox.
    */
@@ -89,7 +99,52 @@ export const enum EnvironmentVariableNames {
    *
    * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
    */
-  RUSH_GLOBAL_FOLDER = 'RUSH_GLOBAL_FOLDER'
+  RUSH_GLOBAL_FOLDER = 'RUSH_GLOBAL_FOLDER',
+
+  /**
+   * Provides a credential for a remote build cache, if configured. Setting this environment variable
+   * overrides whatever credential has been saved in the local cloud cache credentials using
+   * `rush update-cloud-credentials`.
+   *
+   * @remarks
+   * This credential overrides any cached credentials.
+   *
+   * If Azure Blob Storage is used to store cache entries, this must be a SAS token serialized as query
+   * parameters.
+   *
+   * For information on SAS tokens, see here: https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview
+   */
+  RUSH_BUILD_CACHE_CREDENTIAL = 'RUSH_BUILD_CACHE_CREDENTIAL',
+
+  /**
+   * Setting this environment variable overrides the value of `buildCacheEnabled` in the `build-cache.json`
+   * configuration file. Specify `1` to enable the build cache or `0` to disable it.
+   *
+   * If set to `0`, this is equivalent to passing the `--disable-build-cache` flag.
+   */
+  RUSH_BUILD_CACHE_ENABLED = 'RUSH_BUILD_CACHE_ENABLED',
+
+  /**
+   * Setting this environment variable overrides the value of `isCacheWriteAllowed` in the `build-cache.json`
+   * configuration file. Specify `1` to allow cache write and `0` to disable it.
+   */
+  RUSH_BUILD_CACHE_WRITE_ALLOWED = 'RUSH_BUILD_CACHE_WRITE_ALLOWED',
+
+  /**
+   * Allows the git binary path to be explicitly specified.
+   */
+  RUSH_GIT_BINARY_PATH = 'RUSH_GIT_BINARY_PATH',
+
+  /**
+   * When Rush executes shell scripts, it sometimes changes the working directory to be a project folder or
+   * the repository root folder.  The original working directory (where the Rush command was invoked) is assigned
+   * to the the child process's `RUSH_INVOKED_FOLDER` environment variable, in case it is needed by the script.
+   *
+   * @remarks
+   * The `RUSH_INVOKED_FOLDER` variable is the same idea as the `INIT_CWD` variable that package managers
+   * assign when they execute lifecycle scripts.
+   */
+  RUSH_INVOKED_FOLDER = 'RUSH_INVOKED_FOLDER'
 }
 
 /**
@@ -108,9 +163,19 @@ export class EnvironmentConfiguration {
 
   private static _allowUnsupportedNodeVersion: boolean = false;
 
+  private static _allowWarningsInSuccessfulBuild: boolean = false;
+
   private static _pnpmStorePathOverride: string | undefined;
 
   private static _rushGlobalFolderOverride: string | undefined;
+
+  private static _buildCacheCredential: string | undefined;
+
+  private static _buildCacheEnabled: boolean | undefined;
+
+  private static _buildCacheWriteAllowed: boolean | undefined;
+
+  private static _gitBinaryPath: string | undefined;
 
   /**
    * An override for the common/temp folder path.
@@ -121,7 +186,7 @@ export class EnvironmentConfiguration {
   }
 
   /**
-   * If "true", create symlinks with absolute paths instead of relative paths.
+   * If "1", create symlinks with absolute paths instead of relative paths.
    * See {@link EnvironmentVariableNames.RUSH_ABSOLUTE_SYMLINKS}
    */
   public static get absoluteSymlinks(): boolean {
@@ -130,7 +195,7 @@ export class EnvironmentConfiguration {
   }
 
   /**
-   * If this environment variable is set to "true", the Node.js version check will print a warning
+   * If this environment variable is set to "1", the Node.js version check will print a warning
    * instead of causing a hard error if the environment's Node.js version doesn't match the
    * version specifier in `rush.json`'s "nodeSupportedVersionRange" property.
    *
@@ -139,6 +204,16 @@ export class EnvironmentConfiguration {
   public static get allowUnsupportedNodeVersion(): boolean {
     EnvironmentConfiguration._ensureInitialized();
     return EnvironmentConfiguration._allowUnsupportedNodeVersion;
+  }
+
+  /**
+   * Setting this environment variable overrides the value of `allowWarningsInSuccessfulBuild`
+   * in the `command-line.json` configuration file. Specify `1` to allow warnings in a successful build,
+   * or `0` to disallow them. (See the comments in the command-line.json file for more information).
+   */
+  public static get allowWarningsInSuccessfulBuild(): boolean {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._allowWarningsInSuccessfulBuild;
   }
 
   /**
@@ -160,6 +235,42 @@ export class EnvironmentConfiguration {
   }
 
   /**
+   * Provides a credential for reading from and writing to a remote build cache, if configured.
+   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL}
+   */
+  public static get buildCacheCredential(): string | undefined {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._buildCacheCredential;
+  }
+
+  /**
+   * If set, enables or disables the cloud build cache feature.
+   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_ENABLED}
+   */
+  public static get buildCacheEnabled(): boolean | undefined {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._buildCacheEnabled;
+  }
+
+  /**
+   * If set, enables or disables writing to the cloud build cache.
+   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED}
+   */
+  public static get buildCacheWriteAllowed(): boolean | undefined {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._buildCacheWriteAllowed;
+  }
+
+  /**
+   * Allows the git binary path to be explicitly provided.
+   * See {@link EnvironmentVariableNames.RUSH_GIT_BINARY_PATH}
+   */
+  public static get gitBinaryPath(): string | undefined {
+    EnvironmentConfiguration._ensureInitialized();
+    return EnvironmentConfiguration._gitBinaryPath;
+  }
+
+  /**
    * The front-end RushVersionSelector relies on `RUSH_GLOBAL_FOLDER`, so its value must be read before
    * `EnvironmentConfiguration` is initialized (and actually before the correct version of `EnvironmentConfiguration`
    * is even installed). Thus we need to read this environment variable differently from all the others.
@@ -168,9 +279,8 @@ export class EnvironmentConfiguration {
   public static _getRushGlobalFolderOverride(processEnv: IEnvironment): string | undefined {
     const value: string | undefined = processEnv[EnvironmentVariableNames.RUSH_GLOBAL_FOLDER];
     if (value) {
-      const normalizedValue: string | undefined = EnvironmentConfiguration._normalizeDeepestParentFolderPath(
-        value
-      );
+      const normalizedValue: string | undefined =
+        EnvironmentConfiguration._normalizeDeepestParentFolderPath(value);
       return normalizedValue;
     }
   }
@@ -198,12 +308,35 @@ export class EnvironmentConfiguration {
           }
 
           case EnvironmentVariableNames.RUSH_ABSOLUTE_SYMLINKS: {
-            EnvironmentConfiguration._absoluteSymlinks = value === 'true';
+            EnvironmentConfiguration._absoluteSymlinks =
+              EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+                EnvironmentVariableNames.RUSH_ABSOLUTE_SYMLINKS,
+                value
+              ) ?? false;
             break;
           }
 
           case EnvironmentVariableNames.RUSH_ALLOW_UNSUPPORTED_NODEJS: {
-            EnvironmentConfiguration._allowUnsupportedNodeVersion = value === 'true';
+            if (value === 'true' || value === 'false') {
+              // Small, undocumented acceptance of old "true" and "false" values for
+              // users of RUSH_ALLOW_UNSUPPORTED_NODEJS in rush pre-v5.46.
+              EnvironmentConfiguration._allowUnsupportedNodeVersion = value === 'true';
+            } else {
+              EnvironmentConfiguration._allowUnsupportedNodeVersion =
+                EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+                  EnvironmentVariableNames.RUSH_ALLOW_UNSUPPORTED_NODEJS,
+                  value
+                ) ?? false;
+            }
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD: {
+            EnvironmentConfiguration._allowWarningsInSuccessfulBuild =
+              EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+                EnvironmentVariableNames.RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD,
+                value
+              ) ?? false;
             break;
           }
 
@@ -220,12 +353,45 @@ export class EnvironmentConfiguration {
             break;
           }
 
+          case EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL: {
+            EnvironmentConfiguration._buildCacheCredential = value;
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_BUILD_CACHE_ENABLED: {
+            EnvironmentConfiguration._buildCacheEnabled =
+              EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+                EnvironmentVariableNames.RUSH_BUILD_CACHE_ENABLED,
+                value
+              );
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED: {
+            EnvironmentConfiguration._buildCacheWriteAllowed =
+              EnvironmentConfiguration.parseBooleanEnvironmentVariable(
+                EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED,
+                value
+              );
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_GIT_BINARY_PATH: {
+            EnvironmentConfiguration._gitBinaryPath = value;
+            break;
+          }
+
           case EnvironmentVariableNames.RUSH_PARALLELISM:
           case EnvironmentVariableNames.RUSH_PREVIEW_VERSION:
           case EnvironmentVariableNames.RUSH_VARIANT:
           case EnvironmentVariableNames.RUSH_DEPLOY_TARGET_FOLDER:
             // Handled by @microsoft/rush front end
             break;
+
+          case EnvironmentVariableNames.RUSH_INVOKED_FOLDER:
+            // Assigned by Rush itself
+            break;
+
           default:
             unknownEnvVariables.push(envVarName);
             break;
@@ -242,9 +408,8 @@ export class EnvironmentConfiguration {
     }
 
     // See doc comment for EnvironmentConfiguration._getRushGlobalFolderOverride().
-    EnvironmentConfiguration._rushGlobalFolderOverride = EnvironmentConfiguration._getRushGlobalFolderOverride(
-      process.env
-    );
+    EnvironmentConfiguration._rushGlobalFolderOverride =
+      EnvironmentConfiguration._getRushGlobalFolderOverride(process.env);
 
     EnvironmentConfiguration._hasBeenInitialized = true;
   }
@@ -262,6 +427,23 @@ export class EnvironmentConfiguration {
     if (!EnvironmentConfiguration._hasBeenInitialized) {
       throw new InternalError(
         'The EnvironmentConfiguration must be initialized before values can be accessed.'
+      );
+    }
+  }
+
+  public static parseBooleanEnvironmentVariable(
+    name: string,
+    value: string | undefined
+  ): boolean | undefined {
+    if (value === '' || value === undefined) {
+      return undefined;
+    } else if (value === '0') {
+      return false;
+    } else if (value === '1') {
+      return true;
+    } else {
+      throw new Error(
+        `Invalid value "${value}" for the environment variable ${name}. Valid choices are 0 or 1.`
       );
     }
   }

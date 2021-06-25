@@ -1,20 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as semver from 'semver';
-import { FileSystem } from '@rushstack/node-core-library';
 
 import { RushConstants } from '../../logic/RushConstants';
 import { DependencySpecifier, DependencySpecifierType } from '../DependencySpecifier';
 import { IShrinkwrapFilePolicyValidatorOptions } from '../policy/ShrinkwrapFilePolicy';
-import { PackageManagerOptionsConfigurationBase } from '../../api/RushConfiguration';
+import { PackageManagerOptionsConfigurationBase, RushConfiguration } from '../../api/RushConfiguration';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
+import { IExperimentsJson } from '../../api/ExperimentsConfiguration';
+import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import { BaseProjectShrinkwrapFile } from './BaseProjectShrinkwrapFile';
 
 /**
  * This class is a parser for both npm's npm-shrinkwrap.json and pnpm's pnpm-lock.yaml file formats.
  */
 export abstract class BaseShrinkwrapFile {
+  public abstract readonly isWorkspaceCompatible: boolean;
   protected _alreadyWarnedSpecs: Set<string> = new Set<string>();
 
   protected static tryGetValue<T>(dictionary: { [key2: string]: T }, key: string): T | undefined {
@@ -25,20 +28,14 @@ export abstract class BaseShrinkwrapFile {
   }
 
   /**
-   * Serializes and saves the shrinkwrap file to specified location
-   */
-  public save(filePath: string): void {
-    FileSystem.writeFile(filePath, this.serialize());
-  }
-
-  /**
    * Validate the shrinkwrap using the provided policy options.
    *
    * @virtual
    */
   public validate(
     packageManagerOptionsConfig: PackageManagerOptionsConfigurationBase,
-    policyOptions: IShrinkwrapFilePolicyValidatorOptions
+    policyOptions: IShrinkwrapFilePolicyValidatorOptions,
+    experimentsConfig?: IExperimentsJson
   ): void {}
 
   /**
@@ -79,13 +76,11 @@ export abstract class BaseShrinkwrapFile {
    */
   public tryEnsureCompatibleDependency(
     dependencySpecifier: DependencySpecifier,
-    tempProjectName: string,
-    tryReusingPackageVersionsFromShrinkwrap: boolean = true
+    tempProjectName: string
   ): boolean {
     const shrinkwrapDependency: DependencySpecifier | undefined = this.tryEnsureDependencyVersion(
       dependencySpecifier,
-      tempProjectName,
-      tryReusingPackageVersionsFromShrinkwrap
+      tempProjectName
     );
     if (!shrinkwrapDependency) {
       return false;
@@ -105,63 +100,49 @@ export abstract class BaseShrinkwrapFile {
   /** @virtual */
   protected abstract tryEnsureDependencyVersion(
     dependencySpecifier: DependencySpecifier,
-    tempProjectName: string,
-    tryReusingPackageVersionsFromShrinkwrap: boolean
+    tempProjectName: string
   ): DependencySpecifier | undefined;
 
   /** @virtual */
   protected abstract getTopLevelDependencyVersion(dependencyName: string): DependencySpecifier | undefined;
 
   /**
-   * Returns true if the specified workspace in the shrinkwrap file includes a package that would
-   * satisfy the specified SemVer version range.
+   * Check for projects that exist in the shrinkwrap file, but don't exist
+   * in rush.json.  This might occur, e.g. if a project was recently deleted or renamed.
    *
-   * Consider this example:
-   *
-   * - project-a\
-   *   - lib-a@1.2.3
-   *   - lib-b@1.0.0
-   * - lib-b@2.0.0
-   *
-   * In this example, hasCompatibleWorkspaceDependency("lib-b", ">= 1.1.0", "workspace-key-for-project-a")
-   * would fail because it finds lib-b@1.0.0 which does not satisfy the pattern ">= 1.1.0".
-   *
-   * @virtual
+   * @returns a list of orphaned projects.
    */
-  public hasCompatibleWorkspaceDependency(
-    dependencySpecifier: DependencySpecifier,
-    workspaceKey: string
-  ): boolean {
-    const shrinkwrapDependency: DependencySpecifier | undefined = this.getWorkspaceDependencyVersion(
-      dependencySpecifier,
-      workspaceKey
-    );
-    return shrinkwrapDependency
-      ? this._checkDependencyVersion(dependencySpecifier, shrinkwrapDependency)
-      : false;
+  public findOrphanedProjects(rushConfiguration: RushConfiguration): ReadonlyArray<string> {
+    const orphanedProjectNames: string[] = [];
+    // We can recognize temp projects because they are under the "@rush-temp" NPM scope.
+    for (const tempProjectName of this.getTempProjectNames()) {
+      if (!rushConfiguration.findProjectByTempName(tempProjectName)) {
+        orphanedProjectNames.push(tempProjectName);
+      }
+    }
+    return orphanedProjectNames;
   }
 
   /**
-   * Returns the list of keys to workspace projects specified in the shrinkwrap.
-   * Example: [ '../../apps/project1', '../../apps/project2' ]
+   * Returns a project shrinkwrap file for the specified project that contains all dependencies and transitive
+   * dependencies.
    *
    * @virtual
-   */
-  public abstract getWorkspaceKeys(): ReadonlyArray<string>;
+   **/
+  public abstract getProjectShrinkwrap(
+    project: RushConfigurationProject
+  ): BaseProjectShrinkwrapFile | undefined;
 
   /**
-   * Returns the key to the project in the workspace specified by the shrinkwrap.
-   * Example: '../../apps/project1'
+   * Returns whether or not the workspace specified by the shrinkwrap matches the state of
+   * a given package.json. Returns true if any dependencies are not aligned with the shrinkwrap.
+   *
+   * @param project - the Rush project that is being validated against the shrinkwrap
+   * @param variant - the variant that is being validated
    *
    * @virtual
    */
-  public abstract getWorkspaceKeyByPath(workspaceRoot: string, projectFolder: string): string;
-
-  /** @virtual */
-  protected abstract getWorkspaceDependencyVersion(
-    dependencySpecifier: DependencySpecifier,
-    workspaceKey: string
-  ): DependencySpecifier | undefined;
+  public abstract isWorkspaceProjectModified(project: RushConfigurationProject, variant?: string): boolean;
 
   /** @virtual */
   protected abstract serialize(): string;

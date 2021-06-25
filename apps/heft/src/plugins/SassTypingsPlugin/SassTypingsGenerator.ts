@@ -31,11 +31,22 @@ export interface ISassConfiguration {
   exportAsDefault?: boolean;
 
   /**
+   * Files with these extensions will pass through the Sass transpiler for typings generation.
+   * Defaults to [".sass", ".scss", ".css"]
+   */
+  fileExtensions?: string[];
+
+  /**
    * A list of paths used when resolving Sass imports.
    * The paths should be relative to the project root.
    * Defaults to ["node_modules", "src"]
    */
-  includePaths?: string[];
+  importIncludePaths?: string[];
+
+  /**
+   * A list of file paths relative to the "src" folder that should be excluded from typings generation.
+   */
+  excludeFiles?: string[];
 }
 
 /**
@@ -69,29 +80,32 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
    */
   public constructor(options: ISassTypingsGeneratorOptions) {
     const { buildFolder, sassConfiguration } = options;
-    const srcFolder: string = path.join(buildFolder, 'src');
-    const generatedTsFolder: string = path.join(buildFolder, 'temp', 'sass-ts');
-    const exportAsDefault: boolean = true;
+    const srcFolder: string = sassConfiguration.srcFolder || path.join(buildFolder, 'src');
+    const generatedTsFolder: string =
+      sassConfiguration.generatedTsFolder || path.join(buildFolder, 'temp', 'sass-ts');
+    const exportAsDefault: boolean =
+      sassConfiguration.exportAsDefault === undefined ? true : sassConfiguration.exportAsDefault;
     const exportAsDefaultInterfaceName: string = 'IExportStyles';
-    const fileExtensions: string[] = ['css', 'sass', 'scss'];
+    const fileExtensions: string[] = sassConfiguration.fileExtensions || ['.sass', '.scss', '.css'];
     super({
-      // Default configuration values
       srcFolder,
       generatedTsFolder,
       exportAsDefault,
       exportAsDefaultInterfaceName,
       fileExtensions,
-
-      // User configured overrides
-      ...sassConfiguration,
+      filesToIgnore: sassConfiguration.excludeFiles,
 
       // Generate typings function
       parseAndGenerateTypings: async (fileContents: string, filePath: string) => {
+        if (this._isSassPartial(filePath)) {
+          // Do not generate typings for Sass partials.
+          return;
+        }
         const css: string = await this._transpileSassAsync(
           fileContents,
           filePath,
           buildFolder,
-          sassConfiguration.includePaths
+          sassConfiguration.importIncludePaths
         );
         const classNames: string[] = await this._getClassNamesFromCSSAsync(css, filePath);
         const sortedClassNames: string[] = classNames.sort((a, b) => a.localeCompare(b));
@@ -105,27 +119,42 @@ export class SassTypingsGenerator extends StringValuesTypingsGenerator {
     });
   }
 
+  /**
+   * Sass partial files are snippets of CSS meant to be included in other Sass files.
+   * Partial filenames always begin with a leading underscore and do not produce a CSS output file.
+   */
+  private _isSassPartial(filePath: string): boolean {
+    return path.basename(filePath)[0] === '_';
+  }
+
   private async _transpileSassAsync(
     fileContents: string,
     filePath: string,
     buildFolder: string,
-    includePaths: string[] | undefined
+    importIncludePaths: string[] | undefined
   ): Promise<string> {
     const result: Result = await LegacyAdapters.convertCallbackToPromise(render, {
       data: fileContents,
+      file: filePath,
       importer: (url: string) => ({ file: this._patchSassUrl(url) }),
-      includePaths: includePaths
-        ? includePaths
+      includePaths: importIncludePaths
+        ? importIncludePaths
         : [path.join(buildFolder, 'node_modules'), path.join(buildFolder, 'src')],
       indentedSyntax: path.extname(filePath).toLowerCase() === '.sass'
     });
+
+    // Register any @import files as dependencies.
+    const target: string = result.stats.entry;
+    for (const dependency of result.stats.includedFiles) {
+      this.registerDependency(target, dependency);
+    }
 
     return result.css.toString();
   }
 
   private _patchSassUrl(url: string): string {
     if (url[0] === '~') {
-      url = 'node_modules/' + url.substr(1);
+      return 'node_modules/' + url.substr(1);
     }
 
     return url;

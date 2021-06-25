@@ -8,6 +8,7 @@ import { ApiExtractorRunner } from './ApiExtractorRunner';
 import { IBuildStageContext, IBundleSubstage } from '../../stages/BuildStage';
 import { CoreConfigFiles } from '../../utilities/CoreConfigFiles';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
+import { IToolPackageResolution, ToolPackageResolver } from '../../utilities/ToolPackageResolver';
 
 const PLUGIN_NAME: string = 'ApiExtractorPlugin';
 const CONFIG_FILE_LOCATION: string = './config/api-extractor.json';
@@ -38,6 +39,12 @@ interface IRunApiExtractorOptions {
 export class ApiExtractorPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
 
+  private readonly _toolPackageResolver: ToolPackageResolver;
+
+  public constructor(taskPackageResolver: ToolPackageResolver) {
+    this._toolPackageResolver = taskPackageResolver;
+  }
+
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     const { buildFolder } = heftConfiguration;
 
@@ -47,11 +54,8 @@ export class ApiExtractorPlugin implements IHeftPlugin {
           // API Extractor provides an ExtractorConfig.tryLoadForFolder() API that will probe for api-extractor.json
           // including support for rig.json.  However, Heft does not load the @microsoft/api-extractor package at all
           // unless it sees a config/api-extractor.json file.  Thus we need to do our own lookup here.
-          const apiExtractorJsonFilePath:
-            | string
-            | undefined = await heftConfiguration.rigConfig.tryResolveConfigFilePathAsync(
-            CONFIG_FILE_LOCATION
-          );
+          const apiExtractorJsonFilePath: string | undefined =
+            await heftConfiguration.rigConfig.tryResolveConfigFilePathAsync(CONFIG_FILE_LOCATION);
 
           if (apiExtractorJsonFilePath !== undefined) {
             await this._runApiExtractorAsync(heftSession, {
@@ -76,25 +80,27 @@ export class ApiExtractorPlugin implements IHeftPlugin {
 
     const logger: ScopedLogger = heftSession.requestScopedLogger('API Extractor Plugin');
 
-    const apiExtractorTaskConfiguration:
-      | IApiExtractorPluginConfiguration
-      | undefined = await CoreConfigFiles.apiExtractorTaskConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
-      logger.terminal,
-      heftConfiguration.buildFolder,
-      heftConfiguration.rigConfig
-    );
+    const apiExtractorTaskConfiguration: IApiExtractorPluginConfiguration | undefined =
+      await CoreConfigFiles.apiExtractorTaskConfigurationLoader.tryLoadConfigurationFileForProjectAsync(
+        logger.terminal,
+        heftConfiguration.buildFolder,
+        heftConfiguration.rigConfig
+      );
 
     if (watchMode) {
       logger.terminal.writeWarningLine("API Extractor isn't currently supported in --watch mode.");
       return;
     }
 
-    if (!heftConfiguration.compilerPackage) {
+    const resolution: IToolPackageResolution | undefined =
+      await this._toolPackageResolver.resolveToolPackagesAsync(options.heftConfiguration, logger.terminal);
+
+    if (!resolution) {
       logger.emitError(new Error('Unable to resolve a compiler package for tsconfig.json'));
       return;
     }
 
-    if (!heftConfiguration.compilerPackage.apiExtractorPackagePath) {
+    if (!resolution.apiExtractorPackagePath) {
       logger.emitError(
         new Error('Unable to resolve the "@microsoft/api-extractor" package for this project')
       );
@@ -105,9 +111,9 @@ export class ApiExtractorPlugin implements IHeftPlugin {
       heftConfiguration.terminalProvider,
       {
         apiExtractorJsonFilePath: options.apiExtractorJsonFilePath,
-        apiExtractorPackagePath: heftConfiguration.compilerPackage.apiExtractorPackagePath,
+        apiExtractorPackagePath: resolution.apiExtractorPackagePath,
         typescriptPackagePath: apiExtractorTaskConfiguration?.useProjectTypescriptVersion
-          ? heftConfiguration.compilerPackage.typeScriptPackagePath
+          ? resolution.typeScriptPackagePath
           : undefined,
         buildFolder: buildFolder,
         production: production

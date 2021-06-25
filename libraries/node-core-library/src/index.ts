@@ -9,14 +9,17 @@
 
 export { AlreadyReportedError } from './AlreadyReportedError';
 export { AnsiEscape, IAnsiEscapeConvertForTestsOptions } from './Terminal/AnsiEscape';
+export { Async, IAsyncParallelismOptions } from './Async';
 export { Brand } from './PrimitiveTypes';
 export { FileConstants, FolderConstants } from './Constants';
 export { Enum } from './Enum';
+export { EnvironmentMap, IEnvironmentEntry } from './EnvironmentMap';
 export {
   ExecutableStdioStreamMapping,
   ExecutableStdioMapping,
   IExecutableResolveOptions,
   IExecutableSpawnSyncOptions,
+  IExecutableSpawnOptions,
   Executable
 } from './Executable';
 export {
@@ -57,19 +60,20 @@ export { Sort } from './Sort';
 export {
   AlreadyExistsBehavior,
   FileSystem,
+  FileSystemCopyFilesAsyncFilter,
+  FileSystemCopyFilesFilter,
   FileSystemStats,
-  IFileSystemReadFolderOptions,
-  IFileSystemWriteFileOptions,
-  IFileSystemReadFileOptions,
-  IFileSystemMoveOptions,
+  IFileSystemCopyFileBaseOptions,
   IFileSystemCopyFileOptions,
-  IFileSystemDeleteFileOptions,
-  IFileSystemUpdateTimeParameters,
-  IFileSystemCreateLinkOptions,
   IFileSystemCopyFilesAsyncOptions,
   IFileSystemCopyFilesOptions,
-  FileSystemCopyFilesAsyncFilter,
-  FileSystemCopyFilesFilter
+  IFileSystemCreateLinkOptions,
+  IFileSystemDeleteFileOptions,
+  IFileSystemMoveOptions,
+  IFileSystemReadFileOptions,
+  IFileSystemReadFolderOptions,
+  IFileSystemUpdateTimeParameters,
+  IFileSystemWriteFileOptions
 } from './FileSystem';
 export { FileWriter, IFileWriterFlags } from './FileWriter';
 export { LegacyAdapters, LegacyCallback } from './LegacyAdapters';

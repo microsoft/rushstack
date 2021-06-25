@@ -1,6 +1,331 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 30 Sep 2020 21:04:15 GMT and should not be manually modified.
+This log was last generated on Sat, 15 May 2021 00:02:26 GMT and should not be manually modified.
+
+## 5.47.0
+Sat, 15 May 2021 00:02:26 GMT
+
+### Updates
+
+- For the experimental build cache feature, eliminate the RUSH_BUILD_CACHE_WRITE_CREDENTIAL environment variable; it is replaced by several new variables RUSH_BUILD_CACHE_CREDENTIAL, RUSH_BUILD_CACHE_WRITE_ALLOWED, and RUSH_BUILD_CACHE_ENABLED
+- Take pnpm-workspace.yaml file into consideration during install skip checks for PNPM
+- Fix a build cache warning that was sometimes displayed on Windows OS: "'tar' exited with code 1 while attempting to create the cache entry" (GitHub #2622)
+- Fix an issue where "rushx" CLI arguments were not escaped properly (GitHub #2695)
+- Allow rush-project.json to specify incrementalBuildIgnoredGlobs (GitHub issue #2618)
+- Remove support for PNPM < 5.0.0 and remove the "resolutionStrategy" option
+- Update "rush init" assets to use newer versions of Rush and PNPM. If you are looking to use PNPM < 6, you must rename the initialized ".pnpmfile.cjs" file to "pnpmfile.js". For more information, see: https://pnpm.io/5.x/pnpmfile
+- Transform package.json using pnpmfile before checking if a Rush project is up-to-date
+- Add support for the Yarn "resolutions" package.json feature.
+
+## 5.46.1
+Tue, 04 May 2021 20:26:15 GMT
+
+### Updates
+
+- Fix an issue where the buildCacheEnabled setting was not applied correctly
+
+## 5.46.0
+Tue, 04 May 2021 02:45:20 GMT
+
+### Updates
+
+- Remove "buildCache" setting from experiments.json; it is superseded by "buildCacheEnabled" in build-cache.json
+- Add a "rush init" template for build-cache.json
+- Temporarily downgrade the "@azure/identity" to eliminate the keytar native dependency (GitHub issue #2492)
+
+## 5.45.6
+Fri, 30 Apr 2021 00:32:16 GMT
+
+### Updates
+
+- Fix a regression in the S3 cloud build cache provider
+
+## 5.45.5
+Wed, 28 Apr 2021 17:54:16 GMT
+
+### Updates
+
+- Improve diagnostic messages printed by the rush build cache
+- Fix an issue where Rush fails to run on Windows when the repository absolute path contains a space
+- Use simpler and more accurate check before skipping installs
+
+## 5.45.4
+Fri, 23 Apr 2021 22:48:23 GMT
+
+_Version update only_
+
+## 5.45.3
+Fri, 23 Apr 2021 22:03:08 GMT
+
+### Updates
+
+- Allow prerelease versions of PNPM to be used in workspaces mode
+
+## 5.45.2
+Thu, 22 Apr 2021 23:07:51 GMT
+
+### Updates
+
+- Fix bad installs with when using pnpmfile in PNPM 6
+
+## 5.45.1
+Wed, 21 Apr 2021 23:38:22 GMT
+
+### Updates
+
+- Ensure that pnpm-workspace.yaml is always fully regenerated during "rush install" or "rush update"
+- Fix support for pnpmfile in PNPM 6.
+
+## 5.45.0
+Tue, 20 Apr 2021 19:04:04 GMT
+
+### Updates
+
+- Print diagnostic information to a log file "<project-root>/.rush/build-cache-tar.log" when the native "tar" is invoked.
+- The Amazon S3 build cloud cache provider can now use buckets outside the default region
+- Add support for PNPM 6
+
+## 5.44.0
+Sat, 17 Apr 2021 00:17:51 GMT
+
+### Updates
+
+- Add --json and --all param to rush scan
+- Fix "rush deploy" having "includeDevDependencies" turned on to deploy "devDependencies" for rush projects only
+
+## 5.43.0
+Thu, 08 Apr 2021 06:09:52 GMT
+
+### Updates
+
+- Add "--ignore-git-hooks" flags to "publish" and "version" commands to prevent the execution of all git hooks
+- Fix parameter name typo.
+- Eliminate a spurious warning that was displayed on Azure DevOps build agents: A phantom "node_modules" folder was found.
+- Fix an issue where "rush change" reported "Unable to find a git remote matching the repository URL" when used with SSH auth
+- Fix an issue where "rush publish" reported 403 errors if the package version included a SemVer build metadata suffix
+- Partially deprecate RUSH_TEMP_FOLDER environment variable
+- Validate changefiles against a schema when running 'rush change --verify'
+
+## 5.42.4
+Mon, 29 Mar 2021 05:57:18 GMT
+
+### Updates
+
+- Don't validate the shrinkwrap when running 'rush update'
+- Gracefully handle a simultaneous upload to Azure Storage.
+- Update rush publish -p flag description
+
+## 5.42.3
+Wed, 17 Mar 2021 05:07:02 GMT
+
+### Updates
+
+- Fix installation-time behavior of "omitImportersFromPreventManualShrinkwrapChanges" experiment.
+- Don't upload build cache entries to Azure if the cache entry already exists.
+- Replace the AWS dependencies with use of the Amazon S3 REST API.
+- Add support for anonymous read from an Amazon S3-hosted cache.
+
+## 5.42.2
+Tue, 16 Mar 2021 00:30:38 GMT
+
+### Updates
+
+- Add experiment to exclude the "importers" section of "pnpm-lock.yaml" from the "preventManualShrinkwrapChanges" feature.
+
+## 5.42.1
+Fri, 12 Mar 2021 02:11:24 GMT
+
+### Updates
+
+- Temporarily disable the AWS S3 credential provider logic to mitigate a problematic peer dependency (GitHub #2547)
+
+## 5.42.0
+Wed, 10 Mar 2021 06:25:44 GMT
+
+### Updates
+
+- Add AWS S3 support to the experimental build cache feature
+
+## 5.41.0
+Wed, 10 Mar 2021 05:12:41 GMT
+
+### Updates
+
+- Fix an issue where "rush install" could stall indefinitely because a network request did not handle timeouts properly
+- Allow merge conflicts in repo-state.json to be automatically resolved.
+- Add a RUSH_INVOKED_FOLDER environment variable so that custom scripts can determine the folder path where Rush was invoked (GitHub #2497)
+- Add `preferFrozenLockfileForUpdate` option to minimize lockfile churn by passing --prefer-frozen-lockfile to pnpm during default `rush update`.
+
+## 5.40.7
+Tue, 02 Mar 2021 23:27:41 GMT
+
+### Updates
+
+- Fix a regression where certain Rush operations reported a TypeError (GitHub #2526)
+
+## 5.40.6
+Tue, 02 Mar 2021 06:22:01 GMT
+
+### Updates
+
+- Improve cache read/write perf by attempting to use the "tar" binary.
+- Fix default text in rush.json generated by "rush init."
+- Fix an issue where Rush would fail to restore from cache but report success when Git isn't present.
+
+## 5.40.5
+Tue, 23 Feb 2021 03:26:25 GMT
+
+### Updates
+
+- Account for indirect dependencies when ordering projects in "rush build" if the intermediary dependencies are excluded by selection parameters.
+
+## 5.40.4
+Tue, 23 Feb 2021 00:01:20 GMT
+
+### Updates
+
+- Make Rush per-project manifest generation more reliable and remove PNPM shrinkwrap validation
+
+## 5.40.3
+Sun, 21 Feb 2021 01:05:53 GMT
+
+### Updates
+
+- Fix an issue where "rush setup" did not work correctly with NPM 7.x due to an NPM regression
+
+## 5.40.2
+Fri, 19 Feb 2021 06:28:28 GMT
+
+### Updates
+
+- Allow usage of Node.js 8.x since we received feedback that some projects are still supporting it
+
+## 5.40.1
+Fri, 19 Feb 2021 01:45:27 GMT
+
+### Updates
+
+- Fix a minor issue with the "rush init" template
+
+## 5.40.0
+Wed, 17 Feb 2021 01:35:11 GMT
+
+_Version update only_
+
+## 5.39.2
+Wed, 17 Feb 2021 01:34:11 GMT
+
+### Updates
+
+- (EXPERIMENTAL) Add a "--disable-cache" parameter for disabling the build cache.
+- (EXPERIMENTAL) Add a "disableBuildCache" setting in command-line.json for disabling the build cache.
+- (EXPERIMENTAL) Add options in rush-project.json for disabling the build cache for entire projects, or for individual commands for that project.
+- Normalize selection CLI parameters for "rush install"
+- Add experimental "rush setup" command
+- Add an experimental new config file common/config/artifactory.json for enabling Artifactory integration
+
+## 5.39.1
+Sat, 13 Feb 2021 03:14:52 GMT
+
+### Patches
+
+- Convert the experimental "--watch" parameter into a "watchForChanges: true" setting in command-line.json, based on user feedback
+
+### Updates
+
+- Disable build cache after initial build when "--watch" is specified. This saves disk space, reduces CPU usage, and improves compatibility with downstream file watcher processes (e.g. "webpack --watch").
+
+## 5.39.0
+Thu, 11 Feb 2021 04:06:02 GMT
+
+### Minor changes
+
+- Add a new parameter "--watch" that watches for filesystem changes and rebuilds the affected Rush projects; this feature can also be used with custom bulk commands (GitHub #2458, #1122)
+
+### Updates
+
+- Improve the wording of some log messages
+
+## 5.38.0
+Mon, 01 Feb 2021 20:42:04 GMT
+
+### Updates
+
+- Add new command-line parameters for bulk commands: "--to-except", "--from", "--only", "--impacted-by", "--impacted-by-except", and "--from-version-policy" (GitHub #2354)
+- Change the short name for "--changed-projects-only" to be "-c" (so that "-o" can be used for the new "--only" parameter)
+- Change the "--from" parameter so that it now includes all dependencies as people expected.  To skip dependencies, use the new "--impacted-by" parameter.  (GitHub issue #1447)
+
+## 5.37.0
+Sat, 30 Jan 2021 01:50:27 GMT
+
+### Updates
+
+- Improve performance of association of repo file states with projects to speed up build commands in large repos.
+- Add `publishFolder` property to the project configuration to allow publishing a sub-folder of the project
+- Add support for --from flag for filtered installs when using workspaces
+- Fix an issue where the Rush cache feature did not correctly detect files that were both tracked by git and were expected to be cached build output.
+- Improve logging for the "rush write-build-cache" command
+- Correct some spelling mistakes in rush.json
+- Fix an error "Cannot get dependency key" sometimes reported by "rush install" (GitHub #2460)
+- Updade the "rush init" template to specify PNPM 5.15.2, which fixes a performance regression introduced in PNPM 5.13.7
+
+## 5.36.2
+Thu, 21 Jan 2021 04:51:19 GMT
+
+### Updates
+
+- Update Node.js version checks to support the new LTS release
+- Update rush.json produced by rush init to use PNPM 5.14.3
+- Use forward slashes when creating deploy zip file for Unix compatibility
+
+## 5.36.1
+Fri, 08 Jan 2021 06:12:37 GMT
+
+### Updates
+
+- Fix an issue where projects with empty scripts would still have arguments appended.
+
+## 5.36.0
+Fri, 08 Jan 2021 05:36:55 GMT
+
+### Updates
+
+-  Allow the git binary path to be overridden via the RUSH_GIT_BINARY_PATH environment variable.
+- Introduce an experimental build cache feature.
+- Add the ability to customize the commit message used when "rush version" is run.
+- Remove the "experimental" label from some Rush commands that are now stable.
+
+## 5.35.2
+Tue, 03 Nov 2020 23:34:30 GMT
+
+### Updates
+
+- Fix bug where version process is using a wrong `git.addChanges` signature
+
+## 5.35.1
+Fri, 30 Oct 2020 05:17:42 GMT
+
+### Updates
+
+- Fix a recent "rush scan" regression (which resulted from enabling "esModuleInterop")
+
+## 5.35.0
+Wed, 28 Oct 2020 21:44:10 GMT
+
+### Updates
+
+- Adds an --ignore-hooks flag to every rush action that skips event hooks during execution of the action.
+- Fix bug where version process was not adding version-policy configuration file changes into the version commit
+
+## 5.34.4
+Sat, 17 Oct 2020 00:23:18 GMT
+
+### Updates
+
+- When running `rush version --bump`, only include package.json updates in the generated commit
+- Fix Rush peer dependency validation when satisfied with a package alias
+- Prevent `rush unlink` from breaking installs for non-workspace projects
+- Add documentation for incremental option for buld custom commands
 
 ## 5.34.3
 Wed, 30 Sep 2020 21:04:15 GMT

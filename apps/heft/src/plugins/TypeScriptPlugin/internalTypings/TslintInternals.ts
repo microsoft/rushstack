@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import type { Tslint as TTslint } from '@microsoft/rush-stack-compiler-3.9';
+import type * as TTslint from 'tslint';
 import { IExtendedSourceFile } from './TypeScriptInternals';
 
 type TrimmedLinter = Omit<TTslint.Linter, 'getAllFailures' | 'getEnabledRules' | 'failures'>;

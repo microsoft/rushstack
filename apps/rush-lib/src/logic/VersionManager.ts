@@ -149,9 +149,8 @@ export class VersionManager {
         projectVersionPolicyName &&
         (!versionPolicyName || projectVersionPolicyName === versionPolicyName)
       ) {
-        const versionPolicy: VersionPolicy = this._versionPolicyConfiguration.getVersionPolicy(
-          projectVersionPolicyName
-        );
+        const versionPolicy: VersionPolicy =
+          this._versionPolicyConfiguration.getVersionPolicy(projectVersionPolicyName);
         const updatedProject: IPackageJson | undefined = versionPolicy.ensure(rushProject.packageJson, force);
         if (updatedProject) {
           this._updatedProjects.set(updatedProject.name, updatedProject);
@@ -301,9 +300,8 @@ export class VersionManager {
     rushProject: RushConfigurationProject,
     dependencyName: string
   ): boolean {
-    const dependencyRushProject:
-      | RushConfigurationProject
-      | undefined = this._rushConfiguration.projectsByName.get(dependencyName);
+    const dependencyRushProject: RushConfigurationProject | undefined =
+      this._rushConfiguration.projectsByName.get(dependencyName);
 
     return (
       !!dependencyRushProject &&
@@ -368,9 +366,8 @@ export class VersionManager {
 
   private _updatePackageJsonFiles(): void {
     this._updatedProjects.forEach((newPackageJson, packageName) => {
-      const rushProject: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
-        packageName
-      );
+      const rushProject: RushConfigurationProject | undefined =
+        this._rushConfiguration.getProjectByName(packageName);
       // Update package.json
       if (rushProject) {
         const packagePath: string = path.join(rushProject.projectFolder, FileConstants.PackageJson);

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors';
+import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -153,9 +153,8 @@ export class NpmLinkManager extends BaseLinkManager {
 
         // Should this be a "local link" to a top-level Rush project (i.e. versus a regular link
         // into the Common folder)?
-        const matchedRushPackage:
-          | RushConfigurationProject
-          | undefined = this._rushConfiguration.getProjectByName(dependency.name);
+        const matchedRushPackage: RushConfigurationProject | undefined =
+          this._rushConfiguration.getProjectByName(dependency.name);
 
         if (matchedRushPackage) {
           const matchedVersion: string = matchedRushPackage.packageJsonEditor.version;

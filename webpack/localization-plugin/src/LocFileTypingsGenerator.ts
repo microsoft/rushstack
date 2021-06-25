@@ -28,7 +28,7 @@ export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
   public constructor(options: ITypingsGeneratorOptions) {
     super({
       ...options,
-      fileExtensions: ['resx', 'loc.json'],
+      fileExtensions: ['.resx', '.loc.json'],
       parseAndGenerateTypings: (fileContents: string, filePath: string) => {
         const locFileData: ILocalizationFile = LocFileParser.parseLocFile({
           filePath: filePath,

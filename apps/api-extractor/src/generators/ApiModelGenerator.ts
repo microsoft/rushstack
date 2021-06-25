@@ -70,7 +70,8 @@ export class ApiModelGenerator {
 
     const apiPackage: ApiPackage = new ApiPackage({
       name: this._collector.workingPackage.name,
-      docComment: packageDocComment
+      docComment: packageDocComment,
+      tsdocConfiguration: this._collector.extractorConfig.tsdocConfiguration
     });
     this._apiModel.addMember(apiPackage);
 
@@ -251,7 +252,8 @@ export class ApiModelGenerator {
     ) as ApiCallSignature;
 
     if (apiCallSignature === undefined) {
-      const callSignature: ts.CallSignatureDeclaration = astDeclaration.declaration as ts.CallSignatureDeclaration;
+      const callSignature: ts.CallSignatureDeclaration =
+        astDeclaration.declaration as ts.CallSignatureDeclaration;
 
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
@@ -300,7 +302,8 @@ export class ApiModelGenerator {
     ) as ApiConstructor;
 
     if (apiConstructor === undefined) {
-      const constructorDeclaration: ts.ConstructorDeclaration = astDeclaration.declaration as ts.ConstructorDeclaration;
+      const constructorDeclaration: ts.ConstructorDeclaration =
+        astDeclaration.declaration as ts.ConstructorDeclaration;
 
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
@@ -398,7 +401,8 @@ export class ApiModelGenerator {
     ) as ApiConstructSignature;
 
     if (apiConstructSignature === undefined) {
-      const constructSignature: ts.ConstructSignatureDeclaration = astDeclaration.declaration as ts.ConstructSignatureDeclaration;
+      const constructSignature: ts.ConstructSignatureDeclaration =
+        astDeclaration.declaration as ts.ConstructSignatureDeclaration;
 
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
@@ -507,7 +511,8 @@ export class ApiModelGenerator {
     let apiFunction: ApiFunction | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiFunction;
 
     if (apiFunction === undefined) {
-      const functionDeclaration: ts.FunctionDeclaration = astDeclaration.declaration as ts.FunctionDeclaration;
+      const functionDeclaration: ts.FunctionDeclaration =
+        astDeclaration.declaration as ts.FunctionDeclaration;
 
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
@@ -560,7 +565,8 @@ export class ApiModelGenerator {
     ) as ApiIndexSignature;
 
     if (apiIndexSignature === undefined) {
-      const indexSignature: ts.IndexSignatureDeclaration = astDeclaration.declaration as ts.IndexSignatureDeclaration;
+      const indexSignature: ts.IndexSignatureDeclaration =
+        astDeclaration.declaration as ts.IndexSignatureDeclaration;
 
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
@@ -603,7 +609,8 @@ export class ApiModelGenerator {
     ) as ApiInterface;
 
     if (apiInterface === undefined) {
-      const interfaceDeclaration: ts.InterfaceDeclaration = astDeclaration.declaration as ts.InterfaceDeclaration;
+      const interfaceDeclaration: ts.InterfaceDeclaration =
+        astDeclaration.declaration as ts.InterfaceDeclaration;
 
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
@@ -682,12 +689,15 @@ export class ApiModelGenerator {
       if (releaseTag === ReleaseTag.Internal || releaseTag === ReleaseTag.Alpha) {
         return; // trim out items marked as "@internal" or "@alpha"
       }
+      const isOptional: boolean =
+        (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
 
       apiMethod = new ApiMethod({
         name,
         docComment,
         releaseTag,
         isStatic,
+        isOptional,
         typeParameters,
         parameters,
         overloadIndex,
@@ -735,11 +745,14 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isOptional: boolean =
+        (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
 
       apiMethodSignature = new ApiMethodSignature({
         name,
         docComment,
         releaseTag,
+        isOptional,
         typeParameters,
         parameters,
         overloadIndex,
@@ -790,7 +803,8 @@ export class ApiModelGenerator {
     let apiProperty: ApiProperty | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiProperty;
 
     if (apiProperty === undefined) {
-      const propertyDeclaration: ts.PropertyDeclaration = astDeclaration.declaration as ts.PropertyDeclaration;
+      const propertyDeclaration: ts.PropertyDeclaration =
+        astDeclaration.declaration as ts.PropertyDeclaration;
 
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
@@ -801,12 +815,15 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isOptional: boolean =
+        (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
 
       apiProperty = new ApiProperty({
         name,
         docComment,
         releaseTag,
         isStatic,
+        isOptional,
         excerptTokens,
         propertyTypeTokenRange
       });
@@ -841,11 +858,14 @@ export class ApiModelGenerator {
       const apiItemMetadata: ApiItemMetadata = this._collector.fetchApiItemMetadata(astDeclaration);
       const docComment: tsdoc.DocComment | undefined = apiItemMetadata.tsdocComment;
       const releaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
+      const isOptional: boolean =
+        (astDeclaration.astSymbol.followedSymbol.flags & ts.SymbolFlags.Optional) !== 0;
 
       apiPropertySignature = new ApiPropertySignature({
         name,
         docComment,
         releaseTag,
+        isOptional,
         excerptTokens,
         propertyTypeTokenRange
       });
@@ -871,7 +891,8 @@ export class ApiModelGenerator {
     ) as ApiTypeAlias;
 
     if (apiTypeAlias === undefined) {
-      const typeAliasDeclaration: ts.TypeAliasDeclaration = astDeclaration.declaration as ts.TypeAliasDeclaration;
+      const typeAliasDeclaration: ts.TypeAliasDeclaration =
+        astDeclaration.declaration as ts.TypeAliasDeclaration;
 
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 
@@ -913,7 +934,8 @@ export class ApiModelGenerator {
     let apiVariable: ApiVariable | undefined = parentApiItem.tryGetMemberByKey(containerKey) as ApiVariable;
 
     if (apiVariable === undefined) {
-      const variableDeclaration: ts.VariableDeclaration = astDeclaration.declaration as ts.VariableDeclaration;
+      const variableDeclaration: ts.VariableDeclaration =
+        astDeclaration.declaration as ts.VariableDeclaration;
 
       const nodesToCapture: IExcerptBuilderNodeToCapture[] = [];
 

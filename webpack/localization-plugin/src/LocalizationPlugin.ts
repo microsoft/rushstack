@@ -198,10 +198,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
     if (isWebpackDevServer) {
       if (typingsPreprocessor) {
-        compiler.hooks.afterEnvironment.tapPromise(
-          PLUGIN_NAME,
-          async () => await typingsPreprocessor!.runWatcherAsync()
-        );
+        compiler.hooks.afterEnvironment.tap(PLUGIN_NAME, () => typingsPreprocessor!.runWatcherAsync());
 
         if (!compiler.options.plugins) {
           compiler.options.plugins = [];
@@ -230,7 +227,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
           PLUGIN_NAME,
           (untypedCompilation: Webpack.compilation.Compilation) => {
             const compilation: IExtendedConfiguration = untypedCompilation as IExtendedConfiguration;
-            ((compilation.mainTemplate as unknown) as IExtendedMainTemplate).hooks.assetPath.tap(
+            (compilation.mainTemplate as unknown as IExtendedMainTemplate).hooks.assetPath.tap(
               PLUGIN_NAME,
               (assetPath: string, options: IAssetPathOptions) => {
                 if (
@@ -238,7 +235,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
                   assetPath.match(Constants.LOCALE_FILENAME_TOKEN_REGEX)
                 ) {
                   // Does this look like an async chunk URL generator?
-                  if (typeof options.chunk.id === 'string' && options.chunk.id.match(/^\" \+/)) {
+                  if (typeof options.chunk.id === 'string' && (options.chunk.id as string).match(/^\" \+/)) {
                     return assetPath.replace(
                       Constants.LOCALE_FILENAME_TOKEN_REGEX,
                       `" + ${Constants.JSONP_PLACEHOLDER} + "`
@@ -367,21 +364,19 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
                 const asset: IAsset = compilation.assets[chunkFilename];
 
-                const resultingAssets: Map<
-                  string,
-                  IProcessAssetResult
-                > = AssetProcessor.processLocalizedAsset({
-                  plugin: this,
-                  compilation,
-                  assetName: chunkFilename,
-                  asset,
-                  chunk,
-                  chunkHasLocalizedModules: this._chunkHasLocalizedModules.bind(this),
-                  locales: this._locales,
-                  noStringsLocaleName: this._noStringsLocaleName,
-                  fillMissingTranslationStrings: this._fillMissingTranslationStrings,
-                  defaultLocale: this._defaultLocale
-                });
+                const resultingAssets: Map<string, IProcessAssetResult> =
+                  AssetProcessor.processLocalizedAsset({
+                    plugin: this,
+                    compilation,
+                    assetName: chunkFilename,
+                    asset,
+                    chunk,
+                    chunkHasLocalizedModules: this._chunkHasLocalizedModules.bind(this),
+                    locales: this._locales,
+                    noStringsLocaleName: this._noStringsLocaleName,
+                    fillMissingTranslationStrings: this._fillMissingTranslationStrings,
+                    defaultLocale: this._defaultLocale
+                  });
 
                 // Delete the existing asset because it's been renamed
                 delete compilation.assets[chunkFilename];
@@ -632,10 +627,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
     if (this._options.localizedData) {
       // START options.localizedData.passthroughLocale
       if (this._options.localizedData.passthroughLocale) {
-        const {
-          usePassthroughLocale,
-          passthroughLocaleName = 'passthrough'
-        } = this._options.localizedData.passthroughLocale;
+        const { usePassthroughLocale, passthroughLocaleName = 'passthrough' } =
+          this._options.localizedData.passthroughLocale;
         if (usePassthroughLocale) {
           this._passthroughLocaleName = passthroughLocaleName;
           this._locales.add(passthroughLocaleName);
@@ -689,9 +682,8 @@ export class LocalizationPlugin implements Webpack.Plugin {
                   ? path.resolve(configuration.context!, locFileDataFromOptions)
                   : locFileDataFromOptions;
 
-              this._resolvedTranslatedStringsFromOptions[localeName][
-                normalizedLocFilePath
-              ] = normalizedLocFileDataFromOptions;
+              this._resolvedTranslatedStringsFromOptions[localeName][normalizedLocFilePath] =
+                normalizedLocFileDataFromOptions;
             }
           }
         }
