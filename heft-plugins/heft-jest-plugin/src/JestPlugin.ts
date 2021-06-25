@@ -407,6 +407,11 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
         const configurationFileDir: string = path.dirname(configurationFilePath);
         let packageDirMatches: RegExpExecArray | null;
 
+        // The normal PathResolutionMethod.NodeResolve will generally not be able to find @rushstack/heft-jest-plugin
+        // from a project that is using a rig.  Since it is important, and it is our own package, we resolve it
+        // manually as a special case.
+        const PLUGIN_PACKAGE_NAME: string = '@rushstack/heft-jest-plugin';
+
         // Compare with replaceRootDirInPath() from here:
         // https://github.com/facebook/jest/blob/5f4dd187d89070d07617444186684c20d9213031/packages/jest-config/src/utils.ts#L58
         if (value.startsWith(JestPlugin._rootDirToken)) {
@@ -426,11 +431,15 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
                 `"${configurationFilePath}".`
             );
           }
-          // Resolve to the root of the package (not the module referenced by the package)
-          const resolvedPackagePath: string = Import.resolvePackage({
-            baseFolderPath: path.dirname(configurationFilePath),
-            packageName
-          });
+          // Resolve to the root of the package (not the module referenced by the package). Substitute
+          // the heft-jest-plugin root if package name matches.
+          const resolvedPackagePath: string =
+            packageName === PLUGIN_PACKAGE_NAME
+              ? JestPlugin._ownPackageFolder
+              : Import.resolvePackage({
+                  baseFolderPath: path.dirname(configurationFilePath),
+                  packageName
+                });
           // longestMatch should match the entire tag
           const longestMatch: number = Math.max(...packageDirMatches.map((match) => match.length));
           const restOfPath: string = path.normalize('./' + value.substr(longestMatch));
@@ -441,11 +450,6 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
         if (!options.resolveAsModule) {
           return value;
         }
-
-        // The normal PathResolutionMethod.NodeResolve will generally not be able to find @rushstack/heft-jest-plugin
-        // from a project that is using a rig.  Since it is important, and it is our own package, we resolve it
-        // manually as a special case.
-        const PLUGIN_PACKAGE_NAME: string = '@rushstack/heft-jest-plugin';
 
         // Example:  @rushstack/heft-jest-plugin
         if (value === PLUGIN_PACKAGE_NAME) {
