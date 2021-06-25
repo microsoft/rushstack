@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 18 Jun 2021 06:23:05 GMT and should not be manually modified.
+This log was last generated on Fri, 25 Jun 2021 00:08:28 GMT and should not be manually modified.
+
+## 0.34.0
+Fri, 25 Jun 2021 00:08:28 GMT
+
+### Minor changes
+
+- Add RunScriptPlugin to allow for running custom scripts specified in "heft.json". Specified as a "runScript" event in the "heftEvents" field, paths to scripts are resolved relative to the root of the project they are specified in.
 
 ## 0.33.1
 Fri, 18 Jun 2021 06:23:05 GMT

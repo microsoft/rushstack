@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.34.0",
+      "tag": "@rushstack/heft_v0.34.0",
+      "date": "Fri, 25 Jun 2021 00:08:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add RunScriptPlugin to allow for running custom scripts specified in \"heft.json\". Specified as a \"runScript\" event in the \"heftEvents\" field, paths to scripts are resolved relative to the root of the project they are specified in."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.33.1",
       "tag": "@rushstack/heft_v0.33.1",
       "date": "Fri, 18 Jun 2021 06:23:05 GMT",
