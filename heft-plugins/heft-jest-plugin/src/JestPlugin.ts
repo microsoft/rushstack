@@ -399,8 +399,13 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     ];
   }
 
-  // Resolve all specified properties using Node resolution, and replace <rootDir> with the same rootDir
-  // that we provide to Jest. Resolve if we modified since paths containing <rootDir> should be absolute.
+  /**
+   * Resolve all specified properties to an absolute path using Jest resolution. In addition, the following
+   * transforms will be applied to the provided propertyValue before resolution:
+   *   - replace <rootDir> with the same rootDir
+   *   - replace <configDir> with the directory containing the current configuration file
+   *   - replace <packageDir:...> with the path to the resolved package (NOT module)
+   */
   private static _getJsonPathMetadata(options: IJsonPathMetadataOptions): IJsonPathMetadata {
     return {
       customResolver: (configurationFilePath: string, propertyName: string, propertyValue: string) => {
