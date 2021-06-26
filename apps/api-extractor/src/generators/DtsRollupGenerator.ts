@@ -76,19 +76,26 @@ export class DtsRollupGenerator {
     stringWriter: StringWriter,
     dtsKind: DtsRollupKind
   ): void {
+    // Emit the @packageDocumentation comment at the top of the file
     if (collector.workingPackage.tsdocParserContext) {
       stringWriter.writeLine(collector.workingPackage.tsdocParserContext.sourceRange.toString());
       stringWriter.writeLine();
     }
 
     // Emit the triple slash directives
+    let directivesEmitted: boolean = false;
     for (const typeDirectiveReference of collector.dtsTypeReferenceDirectives) {
       // https://github.com/microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
       stringWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
+      directivesEmitted = true;
     }
 
     for (const libDirectiveReference of collector.dtsLibReferenceDirectives) {
       stringWriter.writeLine(`/// <reference lib="${libDirectiveReference}" />`);
+      directivesEmitted = true;
+    }
+    if (directivesEmitted) {
+      stringWriter.writeLine();
     }
 
     // Emit the imports
@@ -186,9 +193,8 @@ export class DtsRollupGenerator {
         // all local exports of local imported module are just references to top-level declarations
         stringWriter.writeLine('  export {');
         for (const [exportedName, exportedEntity] of astModuleExportInfo.exportedLocalEntities) {
-          const collectorEntity: CollectorEntity | undefined = collector.tryGetCollectorEntity(
-            exportedEntity
-          );
+          const collectorEntity: CollectorEntity | undefined =
+            collector.tryGetCollectorEntity(exportedEntity);
           if (collectorEntity === undefined) {
             // This should never happen
             // top-level exports of local imported module should be added as collector entities before

@@ -56,6 +56,22 @@ export class ApiReportGenerator {
     // Write the opening delimiter for the Markdown code fence
     stringWriter.writeLine('```ts\n');
 
+    // Emit the triple slash directives
+    let directivesEmitted: boolean = false;
+    for (const typeDirectiveReference of Array.from(collector.dtsTypeReferenceDirectives).sort()) {
+      // https://github.com/microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
+      stringWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
+      directivesEmitted = true;
+    }
+
+    for (const libDirectiveReference of Array.from(collector.dtsLibReferenceDirectives).sort()) {
+      stringWriter.writeLine(`/// <reference lib="${libDirectiveReference}" />`);
+      directivesEmitted = true;
+    }
+    if (directivesEmitted) {
+      stringWriter.writeLine();
+    }
+
     // Emit the imports
     let importsEmitted: boolean = false;
     for (const entity of collector.entities) {
@@ -165,9 +181,8 @@ export class ApiReportGenerator {
           // all local exports of local imported module are just references to top-level declarations
           stringWriter.writeLine('  export {');
           for (const [exportedName, exportedEntity] of astModuleExportInfo.exportedLocalEntities) {
-            const collectorEntity: CollectorEntity | undefined = collector.tryGetCollectorEntity(
-              exportedEntity
-            );
+            const collectorEntity: CollectorEntity | undefined =
+              collector.tryGetCollectorEntity(exportedEntity);
             if (collectorEntity === undefined) {
               // This should never happen
               // top-level exports of local imported module should be added as collector entities before
