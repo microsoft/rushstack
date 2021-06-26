@@ -84,7 +84,7 @@ export interface IJsonPathMetadata {
    * If `IJsonPathMetadata.pathResolutionMethod` is set to `PathResolutionMethod.custom`,
    * this property be used to resolve the path.
    */
-  customResolver?: (configurationFilePath: string, value: string) => string;
+  customResolver?: (configurationFilePath: string, propertyName: string, propertyValue: string) => string;
 
   /**
    * If this property describes a filesystem path, use this property to describe
@@ -382,6 +382,7 @@ export class ConfigurationFile<TConfigurationFile> {
         callback: (payload: unknown, payloadType: string, fullPayload: IJsonPathCallbackObject) => {
           const resolvedPath: string = this._resolvePathProperty(
             resolvedConfigurationFilePath,
+            fullPayload.path,
             fullPayload.value,
             metadata
           );
@@ -614,6 +615,7 @@ export class ConfigurationFile<TConfigurationFile> {
 
   private _resolvePathProperty(
     configurationFilePath: string,
+    propertyName: string,
     propertyValue: string,
     metadata: IJsonPathMetadata
   ): string {
@@ -655,7 +657,7 @@ export class ConfigurationFile<TConfigurationFile> {
               'resolver was not provided.'
           );
         }
-        return metadata.customResolver(configurationFilePath, propertyValue);
+        return metadata.customResolver(configurationFilePath, propertyName, propertyValue);
       }
 
       default: {

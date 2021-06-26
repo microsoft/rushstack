@@ -5,6 +5,7 @@
 import './jestWorkerPatch';
 
 import * as path from 'path';
+import { resolve as jestResolve, resolveWithPrefix as jestResolveWithPrefix } from 'jest-config/build/utils';
 import { mergeWith, isObject } from 'lodash';
 import type {
   ICleanStageContext,
@@ -32,9 +33,6 @@ import { IHeftJestReporterOptions } from './HeftJestReporter';
 import { HeftJestDataFile } from './HeftJestDataFile';
 
 type JestReporterConfig = string | Config.ReporterConfig;
-const PLUGIN_NAME: string = 'JestPlugin';
-const PLUGIN_SCHEMA_PATH: string = `${__dirname}/schemas/heft-jest-plugin.schema.json`;
-const JEST_CONFIGURATION_LOCATION: string = `config/jest.config.json`;
 
 interface IJsonPathMetadataOptions {
   buildFolder: string;
@@ -50,18 +48,20 @@ export interface IJestPluginOptions {
 
 export interface IHeftJestConfiguration extends Config.InitialOptions {}
 
+const PLUGIN_NAME: string = 'JestPlugin';
+const PLUGIN_SCHEMA_PATH: string = `${__dirname}/schemas/heft-jest-plugin.schema.json`;
+const JEST_CONFIGURATION_LOCATION: string = `config/jest.config.json`;
+const OWN_PACKAGE_FOLDER: string = path.resolve(__dirname, '..');
+
+const ROOTDIR_TOKEN: string = '<rootDir>';
+const CONFIGDIR_TOKEN: string = '<configDir>';
+const PACKAGE_CAPTUREGROUP: string = 'package';
+const PACKAGEDIR_REGEX: RegExp = new RegExp(`^<packageDir:\\s*(?<${PACKAGE_CAPTUREGROUP}>[^\\s^]*)\\s*>`);
+
 /**
  * @internal
  */
 export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
-  private static _ownPackageFolder: string = path.resolve(__dirname, '..');
-  private static _rootDirToken: string = '<rootDir>';
-  private static _configDirToken: string = '<configDir>';
-  private static _packageCaptureGroup: string = 'package';
-  private static _packageDirRegex: RegExp = new RegExp(
-    `^<packageDir:\\s*(?<${JestPlugin._packageCaptureGroup}>[^\\s^]*)\\s*>`
-  );
-
   public readonly pluginName: string = PLUGIN_NAME;
   public readonly optionsSchema: JsonSchema = JsonSchema.fromFile(PLUGIN_SCHEMA_PATH);
 
@@ -245,7 +245,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     const tokenResolveMetadata: IJsonPathMetadata = JestPlugin._getJsonPathMetadata({
       buildFolder
     });
-    const nodeResolveMetadata: IJsonPathMetadata = JestPlugin._getJsonPathMetadata({
+    const jestResolveMetadata: IJsonPathMetadata = JestPlugin._getJsonPathMetadata({
       buildFolder,
       resolveAsModule: true
     });
@@ -271,20 +271,20 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
         // string
         '$.cacheDirectory': tokenResolveMetadata,
         '$.coverageDirectory': tokenResolveMetadata,
-        '$.dependencyExtractor': nodeResolveMetadata,
-        '$.filter': nodeResolveMetadata,
-        '$.globalSetup': nodeResolveMetadata,
-        '$.globalTeardown': nodeResolveMetadata,
-        '$.moduleLoader': nodeResolveMetadata,
-        '$.prettierPath': nodeResolveMetadata,
-        '$.resolver': nodeResolveMetadata,
+        '$.dependencyExtractor': jestResolveMetadata,
+        '$.filter': jestResolveMetadata,
+        '$.globalSetup': jestResolveMetadata,
+        '$.globalTeardown': jestResolveMetadata,
+        '$.moduleLoader': jestResolveMetadata,
+        '$.prettierPath': jestResolveMetadata,
+        '$.resolver': jestResolveMetadata,
         '$.runner': JestPlugin._getJsonPathMetadata({
           buildFolder,
           resolveAsModule: true,
           modulePrefix: 'jest-runner-',
           ignoreMissingModule: true
         }),
-        '$.snapshotResolver': nodeResolveMetadata,
+        '$.snapshotResolver': jestResolveMetadata,
         // This is a name like "jsdom" that gets mapped into a package name like "jest-environment-jsdom"
         '$.testEnvironment': JestPlugin._getJsonPathMetadata({
           buildFolder,
@@ -292,8 +292,8 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
           modulePrefix: 'jest-environment-',
           ignoreMissingModule: true
         }),
-        '$.testResultsProcessor': nodeResolveMetadata,
-        '$.testRunner': nodeResolveMetadata,
+        '$.testResultsProcessor': jestResolveMetadata,
+        '$.testRunner': jestResolveMetadata,
         '$.testSequencer': JestPlugin._getJsonPathMetadata({
           buildFolder,
           resolveAsModule: true,
@@ -303,18 +303,18 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
         // string[]
         '$.modulePaths.*': tokenResolveMetadata,
         '$.roots.*': tokenResolveMetadata,
-        '$.setupFiles.*': nodeResolveMetadata,
-        '$.setupFilesAfterEnv.*': nodeResolveMetadata,
-        '$.snapshotSerializers.*': nodeResolveMetadata,
+        '$.setupFiles.*': jestResolveMetadata,
+        '$.setupFilesAfterEnv.*': jestResolveMetadata,
+        '$.snapshotSerializers.*': jestResolveMetadata,
         // moduleNameMapper: { [regex]: path | [ ...paths ] }
         '$.moduleNameMapper.*@string()': tokenResolveMetadata, // string path
         '$.moduleNameMapper.*.*': tokenResolveMetadata, // array of paths
         // reporters: (path | [ path, options ])[]
-        '$.reporters[?(@ !== "default")]*@string()': nodeResolveMetadata, // string path, excluding "default"
-        '$.reporters.*[?(@property == 0 && @ !== "default")]': nodeResolveMetadata, // First entry in [ path, options ], excluding "default"
+        '$.reporters[?(@ !== "default")]*@string()': jestResolveMetadata, // string path, excluding "default"
+        '$.reporters.*[?(@property == 0 && @ !== "default")]': jestResolveMetadata, // First entry in [ path, options ], excluding "default"
         // transform: { [regex]: path | [ path, options ] }
-        '$.transform.*@string()': nodeResolveMetadata, // string path
-        '$.transform.*[?(@property == 0)]': nodeResolveMetadata, // First entry in [ path, options ]
+        '$.transform.*@string()': jestResolveMetadata, // string path
+        '$.transform.*[?(@property == 0)]': jestResolveMetadata, // First entry in [ path, options ]
         // watchPlugins: (path | [ path, options ])[]
         '$.watchPlugins.*@string()': JestPlugin._getJsonPathMetadata({
           // string path
@@ -403,7 +403,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
   // that we provide to Jest. Resolve if we modified since paths containing <rootDir> should be absolute.
   private static _getJsonPathMetadata(options: IJsonPathMetadataOptions): IJsonPathMetadata {
     return {
-      customResolver: (configurationFilePath: string, value: string) => {
+      customResolver: (configurationFilePath: string, propertyName: string, propertyValue: string) => {
         const configurationFileDir: string = path.dirname(configurationFilePath);
         let packageDirMatches: RegExpExecArray | null;
 
@@ -414,85 +414,76 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
 
         // Compare with replaceRootDirInPath() from here:
         // https://github.com/facebook/jest/blob/5f4dd187d89070d07617444186684c20d9213031/packages/jest-config/src/utils.ts#L58
-        if (value.startsWith(JestPlugin._rootDirToken)) {
+        if (propertyValue.startsWith(ROOTDIR_TOKEN)) {
           // Example:  <rootDir>/path/to/file.js
-          const restOfPath: string = path.normalize('./' + value.substr(JestPlugin._rootDirToken.length));
-          value = path.resolve(options.buildFolder, restOfPath);
-        } else if (value.startsWith(JestPlugin._configDirToken)) {
+          const restOfPath: string = path.normalize('./' + propertyValue.substr(ROOTDIR_TOKEN.length));
+          propertyValue = path.resolve(options.buildFolder, restOfPath);
+        } else if (propertyValue.startsWith(CONFIGDIR_TOKEN)) {
           // Example:  <configDir>/path/to/file.js
-          const restOfPath: string = path.normalize('./' + value.substr(JestPlugin._configDirToken.length));
-          value = path.resolve(configurationFileDir, restOfPath);
-        } else if ((packageDirMatches = JestPlugin._packageDirRegex.exec(value)) !== null) {
+          const restOfPath: string = path.normalize('./' + propertyValue.substr(CONFIGDIR_TOKEN.length));
+          propertyValue = path.resolve(configurationFileDir, restOfPath);
+        } else if ((packageDirMatches = PACKAGEDIR_REGEX.exec(propertyValue)) !== null) {
           // Example:  <packageDir:@my/package>/path/to/file.js
-          const packageName: string | undefined = packageDirMatches.groups?.[JestPlugin._packageCaptureGroup];
+          const packageName: string | undefined = packageDirMatches.groups?.[PACKAGE_CAPTUREGROUP];
           if (!packageName) {
             throw new Error(
-              `Could not parse required field "${JestPlugin._packageCaptureGroup}" from "packageDir" tag in ` +
-                `"${configurationFilePath}".`
+              `Could not parse package name from "packageDir" token ` +
+                (propertyName ? `of property "${propertyName}" ` : '') +
+                `in "${configurationFilePath}".`
             );
           }
+          const slashCount: number = (packageName.match(/\//g) || []).length;
+          if (slashCount > 2 || (slashCount > 1 && !packageName.startsWith('@'))) {
+            throw new Error(
+              `Module paths are not supported when using the "packageDir" token ` +
+                (propertyName ? `of property "${propertyName}" ` : '') +
+                `in "${configurationFilePath}".`
+            );
+          }
+
           // Resolve to the root of the package (not the module referenced by the package). Substitute
           // the heft-jest-plugin root if package name matches.
           const resolvedPackagePath: string =
             packageName === PLUGIN_PACKAGE_NAME
-              ? JestPlugin._ownPackageFolder
+              ? OWN_PACKAGE_FOLDER
               : Import.resolvePackage({
                   baseFolderPath: path.dirname(configurationFilePath),
                   packageName
                 });
-          // longestMatch should match the entire tag
-          const longestMatch: number = Math.max(...packageDirMatches.map((match) => match.length));
-          const restOfPath: string = path.normalize('./' + value.substr(longestMatch));
-          value = path.resolve(resolvedPackagePath, restOfPath);
+          // First entry is the entire match
+          const restOfPath: string = path.normalize('./' + propertyValue.substr(packageDirMatches[0].length));
+          propertyValue = path.resolve(resolvedPackagePath, restOfPath);
         }
 
         // Return early, since the remainder of this function is used to resolve module paths
         if (!options.resolveAsModule) {
-          return value;
+          return propertyValue;
         }
 
         // Example:  @rushstack/heft-jest-plugin
-        if (value === PLUGIN_PACKAGE_NAME) {
-          return JestPlugin._ownPackageFolder;
+        if (propertyValue === PLUGIN_PACKAGE_NAME) {
+          return OWN_PACKAGE_FOLDER;
         }
 
         // Example:  @rushstack/heft-jest-plugin/path/to/file.js
-        if (value.startsWith(PLUGIN_PACKAGE_NAME)) {
-          const restOfPath: string = path.normalize('./' + value.substr(PLUGIN_PACKAGE_NAME.length));
-          return path.join(JestPlugin._ownPackageFolder, restOfPath);
+        if (propertyValue.startsWith(PLUGIN_PACKAGE_NAME)) {
+          const restOfPath: string = path.normalize('./' + propertyValue.substr(PLUGIN_PACKAGE_NAME.length));
+          return path.join(OWN_PACKAGE_FOLDER, restOfPath);
         }
 
-        // Attempt to resolve the specified module as we would using PathResolution.NodeResolve,
-        // using a prefix if one was provided.
-        try {
-          return Import.resolveModule({
-            baseFolderPath: configurationFileDir,
-            modulePath: `${options.modulePrefix || ''}${value}`
-          });
-        } catch (e) {
-          // Rethrow if the no prefix was provided and we should not ignore missing modules
-          if (!options.modulePrefix && !options.ignoreMissingModule) {
-            throw e;
-          }
-        }
-
-        // Finally, attempt to resolve the specified module without a prefix as we would using
-        // PathResolution.NodeResolve. Only throw if we shouldn't ignore missing modules. This
-        // option is generally provided to allow Jest to resolve modules that are sourced from
-        // Jest itself, ex. 'jest-environment-jsdom' is resolved from Jest by default
-        // See: https://github.com/facebook/jest/blob/0a902e10e0a5550b114340b87bd31764a7638729/packages/jest-config/src/utils.ts#L178
-        try {
-          return Import.resolveModule({
-            baseFolderPath: configurationFileDir,
-            modulePath: value
-          });
-        } catch (e) {
-          if (!options.ignoreMissingModule) {
-            throw e;
-          }
-        }
-
-        return value;
+        return !options.modulePrefix
+          ? jestResolve(/*resolver:*/ undefined, {
+              rootDir: configurationFileDir,
+              filePath: propertyValue,
+              key: propertyName
+            })
+          : jestResolveWithPrefix(/*resolver:*/ undefined, {
+              rootDir: configurationFileDir,
+              filePath: propertyValue,
+              prefix: options.modulePrefix,
+              humanOptionName: propertyName,
+              optionName: propertyName
+            });
       },
       pathResolutionMethod: PathResolutionMethod.custom
     };

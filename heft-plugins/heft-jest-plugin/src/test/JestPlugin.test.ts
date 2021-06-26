@@ -18,14 +18,16 @@ describe('JestConfigLoader', () => {
   });
 
   it('resolves extended config modules', async () => {
-    const rootDir: string = path.join(__dirname, 'project1');
+    // Because we require the built modules, we need to set our rootDir to be in the 'lib' folder, since transpilation
+    // means that we don't run on the built test assets directly
+    const rootDir: string = path.resolve(__dirname, '..', '..', 'lib', 'test', 'project1');
     const loader: ConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
       rootDir,
       'config/jest.config.json'
     );
     const loadedConfig: IHeftJestConfiguration = await loader.loadConfigurationFileForProjectAsync(
       terminal,
-      path.join(__dirname, 'project1')
+      path.join(__dirname, '..', '..', 'lib', 'test', 'project1')
     );
 
     expect(loadedConfig.preset).toBe(undefined);
@@ -98,21 +100,24 @@ describe('JestConfigLoader', () => {
   });
 
   it('resolves extended package modules', async () => {
-    const rootDir: string = path.join(__dirname, 'project1');
+    // Because we require the built modules, we need to set our rootDir to be in the 'lib' folder, since transpilation
+    // means that we don't run on the built test assets directly
+    const rootDir: string = path.resolve(__dirname, '..', '..', 'lib', 'test', 'project1');
     const loader: ConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
       rootDir,
       'config/jest.config.json'
     );
     const loadedConfig: IHeftJestConfiguration = await loader.loadConfigurationFileForProjectAsync(
       terminal,
-      path.join(__dirname, 'project2')
+      path.resolve(__dirname, '..', '..', 'lib', 'test', 'project2')
     );
 
     expect(loadedConfig.setupFiles?.length).toBe(1);
     expect(loadedConfig.setupFiles![0]).toBe(require.resolve('@jest/core'));
 
-    // Also validate that a test environment that we specified did not resolve. Done intentionally to ensure that
-    // Jest itself can attempt to satisfy certain fields
-    expect(loadedConfig.testEnvironment).toBe('jsdom');
+    // Also validate that a test environment that we specified as 'jsdom' (but have not added as a dependency)
+    // is resolved, implying it came from Jest directly
+    expect(loadedConfig.testEnvironment).toContain('jest-environment-jsdom');
+    expect(loadedConfig.testEnvironment).toMatch(/index.js$/);
   });
 });

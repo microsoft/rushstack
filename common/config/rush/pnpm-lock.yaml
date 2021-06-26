@@ -992,6 +992,7 @@ importers:
       '@types/lodash': 4.14.116
       '@types/node': 10.17.13
       eslint: ~7.12.1
+      jest-config: ~25.4.0
       jest-environment-node: ~25.4.0
       jest-snapshot: ~25.4.0
       lodash: ~4.17.15
@@ -1002,6 +1003,7 @@ importers:
       '@jest/transform': 25.4.0
       '@rushstack/heft-config-file': link:../../libraries/heft-config-file
       '@rushstack/node-core-library': link:../../libraries/node-core-library
+      jest-config: 25.4.0
       jest-snapshot: 25.4.0
       lodash: 4.17.21
     devDependencies:
@@ -2159,7 +2161,7 @@ packages:
       exit: 0.1.2
       graceful-fs: 4.2.6
       jest-changed-files: 25.5.0
-      jest-config: 25.5.4
+      jest-config: 25.4.0
       jest-haste-map: 25.5.1
       jest-message-util: 25.5.0
       jest-regex-util: 25.2.6
@@ -6950,6 +6952,34 @@ packages:
       - utf-8-validate
     dev: true
 
+  /jest-config/25.4.0:
+    resolution: {integrity: sha512-egT9aKYxMyMSQV1aqTgam0SkI5/I2P9qrKexN5r2uuM2+68ypnc+zPGmfUxK7p1UhE7dYH9SLBS7yb+TtmT1AA==}
+    engines: {node: '>= 8.3'}
+    dependencies:
+      '@babel/core': 7.14.6
+      '@jest/test-sequencer': 25.5.4
+      '@jest/types': 25.4.0
+      babel-jest: 25.5.1_@babel+core@7.14.6
+      chalk: 3.0.0
+      deepmerge: 4.2.2
+      glob: 7.1.7
+      jest-environment-jsdom: 25.5.0
+      jest-environment-node: 25.4.0
+      jest-get-type: 25.2.6
+      jest-jasmine2: 25.5.4
+      jest-regex-util: 25.2.6
+      jest-resolve: 25.5.1
+      jest-util: 25.5.0
+      jest-validate: 25.5.0
+      micromatch: 4.0.4
+      pretty-format: 25.5.0
+      realpath-native: 2.0.0
+    transitivePeerDependencies:
+      - bufferutil
+      - canvas
+      - supports-color
+      - utf-8-validate
+
   /jest-config/25.5.4:
     resolution: {integrity: sha512-SZwR91SwcdK6bz7Gco8qL7YY2sx8tFJYzvg216DLihTWf+LKY/DoJXpM9nTzYakSyfblbqeU48p/p7Jzy05Atg==}
     engines: {node: '>= 8.3'}
@@ -7029,7 +7059,6 @@ packages:
       jest-mock: 25.5.0
       jest-util: 25.5.0
       semver: 6.3.0
-    dev: true
 
   /jest-environment-node/25.5.0:
     resolution: {integrity: sha512-iuxK6rQR2En9EID+2k+IBs5fCFd919gVVK5BeND82fYeLWPqvRcFNPKu9+gxTwfB5XwBGBvZ0HFQa+cHtIoslA==}
