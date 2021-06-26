@@ -249,6 +249,12 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       buildFolder,
       resolveAsModule: true
     });
+    const watchPluginsJestResolveMetadata: IJsonPathMetadata = JestPlugin._getJsonPathMetadata({
+      buildFolder,
+      resolveAsModule: true,
+      modulePrefix: 'jest-watch-',
+      ignoreMissingModule: true
+    });
 
     return new ConfigurationFile<IHeftJestConfiguration>({
       projectRelativeFilePath: projectRelativeFilePath,
@@ -316,20 +322,8 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
         '$.transform.*@string()': jestResolveMetadata, // string path
         '$.transform.*[?(@property == 0)]': jestResolveMetadata, // First entry in [ path, options ]
         // watchPlugins: (path | [ path, options ])[]
-        '$.watchPlugins.*@string()': JestPlugin._getJsonPathMetadata({
-          // string path
-          buildFolder,
-          resolveAsModule: true,
-          modulePrefix: 'jest-watch-',
-          ignoreMissingModule: true
-        }),
-        '$.watchPlugins.*[?(@property == 0)]': JestPlugin._getJsonPathMetadata({
-          // First entry in [ path, options ]
-          buildFolder,
-          resolveAsModule: true,
-          modulePrefix: 'jest-watch-',
-          ignoreMissingModule: true
-        })
+        '$.watchPlugins.*@string()': watchPluginsJestResolveMetadata, // string path
+        '$.watchPlugins.*[?(@property == 0)]': watchPluginsJestResolveMetadata // First entry in [ path, options ]
       }
     });
   }
