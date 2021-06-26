@@ -442,7 +442,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
             throw new Error(
               `Module paths are not supported when using the "packageDir" token ` +
                 (propertyName ? `of property "${propertyName}" ` : '') +
-                `in "${configurationFilePath}".`
+                `in "${configurationFilePath}". Only a package name is allowed.`
             );
           }
 
