@@ -433,7 +433,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
           }
 
           // Prevent module paths from being specified by limiting the number of '/' characters present
-          if (packageName.match(/^((@[^\/]+\/)|([^@]))[^\/]+\/.*$/)) {
+          if (packageName.match(/^((@[^\/]+\/)|[^@])[^\/]+\/.*$/)) {
             throw new Error(
               `Module paths are not supported when using the "packageDir" token ` +
                 (propertyName ? `of property "${propertyName}" ` : '') +
