@@ -438,7 +438,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
             );
           }
           const slashCount: number = (packageName.match(/\//g) || []).length;
-          if (slashCount > 2 || (slashCount > 1 && !packageName.startsWith('@'))) {
+          if (slashCount > 1 || (slashCount === 0 && !packageName.startsWith('@'))) {
             throw new Error(
               `Module paths are not supported when using the "packageDir" token ` +
                 (propertyName ? `of property "${propertyName}" ` : '') +
