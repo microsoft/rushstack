@@ -179,6 +179,8 @@ export class ApiReportGenerator {
 
           // all local exports of local imported module are just references to top-level declarations
           stringWriter.writeLine('  export {');
+
+          const exportClauses: string[] = [];
           for (const [exportedName, exportedEntity] of astModuleExportInfo.exportedLocalEntities) {
             const collectorEntity: CollectorEntity | undefined =
               collector.tryGetCollectorEntity(exportedEntity);
@@ -191,11 +193,12 @@ export class ApiReportGenerator {
             }
 
             if (collectorEntity.nameForEmit === exportedName) {
-              stringWriter.writeLine(`    ${collectorEntity.nameForEmit},`);
+              exportClauses.push(collectorEntity.nameForEmit);
             } else {
-              stringWriter.writeLine(`    ${collectorEntity.nameForEmit} as ${exportedName},`);
+              exportClauses.push(`${collectorEntity.nameForEmit} as ${exportedName}`);
             }
           }
+          stringWriter.writeLine(exportClauses.map((x) => `    ${x}`).join(',\n'));
 
           stringWriter.writeLine('  }'); // end of "export { ... }"
           stringWriter.writeLine('}'); // end of "declare namespace { ... }"
