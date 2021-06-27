@@ -43,6 +43,7 @@ declare const calucatorVersion: string;
  * @param a - first number
  * @param b - second number
  * @returns Sum of subtract `b` from `a`
+ * @beta
  */
 declare function subtract(a: number, b: number): number;
 
@@ -51,6 +52,7 @@ declare function subtract(a: number, b: number): number;
  * @param a - first number
  * @param b - second number
  * @returns Sum of subtract `b` from `a`
+ * @beta
  */
 declare function subtract_2(a: bigint, b: bigint): bigint;
 

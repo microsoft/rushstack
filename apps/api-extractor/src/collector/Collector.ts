@@ -393,7 +393,7 @@ export class Collector {
     return overloadIndex;
   }
 
-  private _createCollectorEntity(astEntity: AstEntity, exportedName: string | undefined): void {
+  private _createCollectorEntity(astEntity: AstEntity, exportedName: string | undefined): CollectorEntity {
     let entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astEntity);
 
     if (!entity) {
@@ -407,6 +407,8 @@ export class Collector {
     if (exportedName) {
       entity.addExportName(exportedName);
     }
+
+    return entity;
   }
 
   private _createEntityForIndirectReferences(
@@ -441,9 +443,12 @@ export class Collector {
       const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(
         astEntity.astModule
       );
+
       for (const exportedEntity of astModuleExportInfo.exportedLocalEntities.values()) {
         // Create a CollectorEntity for each top-level export of AstImportInternal entity
-        this._createCollectorEntity(exportedEntity, undefined);
+        const entity: CollectorEntity = this._createCollectorEntity(exportedEntity, undefined);
+        entity.addAstNamespaceImports(astEntity);
+
         this._createEntityForIndirectReferences(exportedEntity, alreadySeenAstEntities);
 
         // TODO - create entity for module export
@@ -784,7 +789,7 @@ export class Collector {
         // Don't report missing release tags for forgotten exports
         const astSymbol: AstSymbol = astDeclaration.astSymbol;
         const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
-        if (entity && entity.exported) {
+        if (entity && entity.consumable) {
           // We also don't report errors for the default export of an entry point, since its doc comment
           // isn't easy to obtain from the .d.ts file
           if (astSymbol.rootAstSymbol.localName !== '_default') {

@@ -20,7 +20,7 @@ export class ValidationEnhancer {
 
     for (const entity of collector.entities) {
       if (entity.astEntity instanceof AstSymbol) {
-        if (entity.exported) {
+        if (entity.consumable) {
           entity.astEntity.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
             ValidationEnhancer._checkReferences(collector, astDeclaration, alreadyWarnedSymbols);
           });
@@ -180,7 +180,7 @@ export class ValidationEnhancer {
           // TODO: consider exported by local module import
           const collectorEntity: CollectorEntity | undefined = collector.tryGetCollectorEntity(rootSymbol);
 
-          if (collectorEntity && collectorEntity.exported) {
+          if (collectorEntity && collectorEntity.consumable) {
             const referencedMetadata: SymbolMetadata = collector.fetchSymbolMetadata(referencedEntity);
             const referencedReleaseTag: ReleaseTag = referencedMetadata.maxEffectiveReleaseTag;
 

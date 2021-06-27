@@ -284,9 +284,11 @@ export class AstSymbolTable {
     // mark before actual analyzing, to handle module cyclic reexport
     astNamespaceImport.analyzed = true;
 
-    for (const exportedEntity of this.fetchAstModuleExportInfo(
+    const exportedLocalEntities: Map<string, AstEntity> = this.fetchAstModuleExportInfo(
       astNamespaceImport.astModule
-    ).exportedLocalEntities.values()) {
+    ).exportedLocalEntities;
+
+    for (const exportedEntity of exportedLocalEntities.values()) {
       this.analyze(exportedEntity);
     }
   }

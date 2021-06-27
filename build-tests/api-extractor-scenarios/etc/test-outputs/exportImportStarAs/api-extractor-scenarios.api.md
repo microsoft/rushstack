@@ -4,6 +4,12 @@
 
 ```ts
 
+// @public (undocumented)
+function add(a: number, b: number): number;
+
+// @public (undocumented)
+function add_2(a: bigint, b: bigint): bigint;
+
 declare namespace calculator {
   export {
     add,
@@ -21,6 +27,15 @@ declare namespace calculator2 {
   }
 }
 export { calculator2 }
+
+// @public (undocumented)
+const calucatorVersion: string;
+
+// @beta (undocumented)
+function subtract(a: number, b: number): number;
+
+// @beta (undocumented)
+function subtract_2(a: bigint, b: bigint): bigint;
 
 
 // (No @packageDocumentation comment for this package)
