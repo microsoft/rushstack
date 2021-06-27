@@ -4,6 +4,7 @@
  * @param a - first number
  * @param b - second number
  * @returns Sum of adding `b` to `a`
+ * @public
  */
 declare function add(a: number, b: number): number;
 
@@ -12,6 +13,7 @@ declare function add(a: number, b: number): number;
  * @param a - first number
  * @param b - second number
  * @returns Sum of adding `b` to `a`
+ * @public
  */
 declare function add_2(a: bigint, b: bigint): bigint;
 
@@ -35,6 +37,7 @@ export { calculator2 }
 
 /**
  * Returns the version of the calculator.
+ * @public
  */
 declare const calucatorVersion: string;
 

@@ -180,7 +180,7 @@
             {
               "kind": "Function",
               "canonicalReference": "api-extractor-scenarios!calculator.add:function(1)",
-              "docComment": "/**\n * Returns the sum of adding `b` to `a`\n *\n * @param a - first number\n *\n * @param b - second number\n *\n * @returns Sum of adding `b` to `a`\n */\n",
+              "docComment": "/**\n * Returns the sum of adding `b` to `a`\n *\n * @param a - first number\n *\n * @param b - second number\n *\n * @returns Sum of adding `b` to `a`\n *\n * @public\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -238,7 +238,7 @@
             {
               "kind": "Variable",
               "canonicalReference": "api-extractor-scenarios!calculator.calucatorVersion:var",
-              "docComment": "/**\n * Returns the version of the calculator.\n */\n",
+              "docComment": "/**\n * Returns the version of the calculator.\n *\n * @public\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -327,7 +327,7 @@
             {
               "kind": "Function",
               "canonicalReference": "api-extractor-scenarios!calculator2.add:function(1)",
-              "docComment": "/**\n * Returns the sum of adding `b` to `a` for large integers\n *\n * @param a - first number\n *\n * @param b - second number\n *\n * @returns Sum of adding `b` to `a`\n */\n",
+              "docComment": "/**\n * Returns the sum of adding `b` to `a` for large integers\n *\n * @param a - first number\n *\n * @param b - second number\n *\n * @returns Sum of adding `b` to `a`\n *\n * @public\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
@@ -385,7 +385,7 @@
             {
               "kind": "Variable",
               "canonicalReference": "api-extractor-scenarios!calculator2.calucatorVersion:var",
-              "docComment": "/**\n * Returns the version of the calculator.\n */\n",
+              "docComment": "/**\n * Returns the version of the calculator.\n *\n * @public\n */\n",
               "excerptTokens": [
                 {
                   "kind": "Content",
