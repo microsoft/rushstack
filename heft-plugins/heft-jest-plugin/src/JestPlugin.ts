@@ -42,7 +42,8 @@ import { HeftJestDataFile } from './HeftJestDataFile';
 type JestReporterConfig = string | Config.ReporterConfig;
 
 /**
- *
+ * Options to use when performing resolution for paths and modules specified in the Jest
+ * configuration.
  */
 interface IJestResolutionOptions {
   /**
@@ -66,17 +67,6 @@ interface IJestResolutionOptions {
   ignoreMissingModule?: boolean;
 }
 
-/**
- *
- */
-interface IExtendedJestResolutionOptions extends IJestResolutionOptions {
-  /**
-   * The value that will be substituted for <configDir> tokens. It is also the directory that will be
-   * used as the base directory during module resolution.
-   */
-  configDir: string;
-}
-
 export interface IJestPluginOptions {
   disableConfigurationModuleResolution?: boolean;
   configurationPath?: string;
@@ -87,7 +77,7 @@ export interface IHeftJestConfiguration extends Config.InitialOptions {}
 const PLUGIN_NAME: string = 'JestPlugin';
 const PLUGIN_PACKAGE_NAME: string = '@rushstack/heft-jest-plugin';
 const PLUGIN_PACKAGE_FOLDER: string = path.resolve(__dirname, '..');
-const PLUGIN_SCHEMA_PATH: string = `${path.dirname()}/schemas/heft-jest-plugin.schema.json`;
+const PLUGIN_SCHEMA_PATH: string = path.resolve(__dirname, 'schemas', 'heft-jest-plugin.schema.json');
 const JEST_CONFIGURATION_LOCATION: string = `config/jest.config.json`;
 
 const ROOTDIR_TOKEN: string = '<rootDir>';
