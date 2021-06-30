@@ -4,6 +4,8 @@
 
 ```ts
 
+// Warning: (ae-forgotten-export) The symbol "forgottenNs" needs to be exported by the entry point index.d.ts
+//
 // @public (undocumented)
 function exportedApi(): forgottenNs.ForgottenClass;
 

@@ -102,6 +102,20 @@ export class ApiModelGenerator {
     }
 
     if (astEntity instanceof AstNamespaceImport) {
+      // Note that a single API item can belong to two different AstNamespaceImport namespaces.  For example:
+      //
+      //   // file.ts defines "thing()"
+      //   import * as example1 from "./file";
+      //   import * as example2 from "./file";
+      //
+      //   // ...so here we end up with example1.thing() and example2.thing()
+      //   export { example1, example2 }
+      //
+      // The current logic does not try to associate "thing()" with a specific parent.  Instead
+      // the API documentation will show duplicated entries for example1.thing() and example2.thing()./
+      //
+      // This could be improved in the future, but it requires a stable mechanism for choosing an associated parent.
+      // For thoughts about this:  https://github.com/microsoft/rushstack/issues/1308
       this._processAstModule(astEntity.astModule, exportedName, parentApiItem);
       return;
     }

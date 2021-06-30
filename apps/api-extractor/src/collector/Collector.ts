@@ -234,6 +234,7 @@ export class Collector {
 
     const astModuleExportInfo: AstModuleExportInfo =
       this.astSymbolTable.fetchAstModuleExportInfo(astEntryPoint);
+
     for (const [exportName, astEntity] of astModuleExportInfo.exportedLocalEntities) {
       this._createCollectorEntity(astEntity, exportName);
 
@@ -440,9 +441,7 @@ export class Collector {
     }
 
     if (astEntity instanceof AstNamespaceImport) {
-      const astModuleExportInfo: AstModuleExportInfo = this.astSymbolTable.fetchAstModuleExportInfo(
-        astEntity.astModule
-      );
+      const astModuleExportInfo: AstModuleExportInfo = astEntity.fetchAstModuleExportInfo(this);
 
       for (const exportedEntity of astModuleExportInfo.exportedLocalEntities.values()) {
         // Create a CollectorEntity for each top-level export of AstImportInternal entity
@@ -450,8 +449,6 @@ export class Collector {
         entity.addAstNamespaceImports(astEntity);
 
         this._createEntityForIndirectReferences(exportedEntity, alreadySeenAstEntities);
-
-        // TODO - create entity for module export
       }
     }
   }

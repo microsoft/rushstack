@@ -146,9 +146,7 @@ export class ApiReportGenerator {
         }
 
         if (astEntity instanceof AstNamespaceImport) {
-          const astModuleExportInfo: AstModuleExportInfo = collector.astSymbolTable.fetchAstModuleExportInfo(
-            astEntity.astModule
-          );
+          const astModuleExportInfo: AstModuleExportInfo = astEntity.fetchAstModuleExportInfo(collector);
 
           if (entity.nameForEmit === undefined) {
             // This should never happen
