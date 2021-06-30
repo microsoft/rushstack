@@ -259,7 +259,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       // merging like this will ensure that the returned transforms are executed in the correct order, stopping
       // after hitting the first pattern that applies:
       // {
-      //   "\\.(css)$": "..."
+      //   "\\.(css)$": "...",
       //   "\\.(css|sass|scss)$": "..."
       // }
       // https://github.com/facebook/jest/blob/0a902e10e0a5550b114340b87bd31764a7638729/packages/jest-config/src/normalize.ts#L102
