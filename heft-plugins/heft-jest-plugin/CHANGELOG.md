@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Wed, 30 Jun 2021 15:06:54 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Jun 2021 19:16:19 GMT and should not be manually modified.
+
+## 0.1.8
+Wed, 30 Jun 2021 19:16:19 GMT
+
+### Patches
+
+- Fix Jest configuration merging of "transform" and "moduleNameMapper" fields
 
 ## 0.1.7
 Wed, 30 Jun 2021 15:06:54 GMT
