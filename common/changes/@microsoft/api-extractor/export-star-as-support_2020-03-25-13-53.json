@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "Added support for \"import * as module from './local/module';\" (GitHub #1029) -- Big thanks to @adventure-yunfei, @mckn, @rbuckton, and @octogonz who all helped with this difficult PR!",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor",
+  "email": "mckn@users.noreply.github.com"
+}

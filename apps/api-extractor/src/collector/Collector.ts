@@ -9,7 +9,8 @@ import { ReleaseTag } from '@microsoft/api-extractor-model';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 
 import { CollectorEntity } from './CollectorEntity';
-import { AstSymbolTable, AstEntity } from '../analyzer/AstSymbolTable';
+import { AstSymbolTable } from '../analyzer/AstSymbolTable';
+import { AstEntity } from '../analyzer/AstEntity';
 import { AstModule, AstModuleExportInfo } from '../analyzer/AstModule';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
@@ -23,6 +24,8 @@ import { TypeScriptInternals, IGlobalVariableAnalyzer } from '../analyzer/TypeSc
 import { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 import { ExtractorConfig } from '../api/ExtractorConfig';
+import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
+import { AstImport } from '../analyzer/AstImport';
 
 /**
  * Options for Collector constructor.
@@ -231,6 +234,7 @@ export class Collector {
 
     const astModuleExportInfo: AstModuleExportInfo =
       this.astSymbolTable.fetchAstModuleExportInfo(astEntryPoint);
+
     for (const [exportName, astEntity] of astModuleExportInfo.exportedLocalEntities) {
       this._createCollectorEntity(astEntity, exportName);
 
@@ -311,9 +315,10 @@ export class Collector {
     if (astEntity instanceof AstSymbol) {
       return this.fetchSymbolMetadata(astEntity);
     }
-    if (astEntity.astSymbol) {
-      // astImport
-      return this.fetchSymbolMetadata(astEntity.astSymbol);
+    if (astEntity instanceof AstImport) {
+      if (astEntity.astSymbol) {
+        return this.fetchSymbolMetadata(astEntity.astSymbol);
+      }
     }
     return undefined;
   }
@@ -389,7 +394,7 @@ export class Collector {
     return overloadIndex;
   }
 
-  private _createCollectorEntity(astEntity: AstEntity, exportedName: string | undefined): void {
+  private _createCollectorEntity(astEntity: AstEntity, exportedName: string | undefined): CollectorEntity {
     let entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astEntity);
 
     if (!entity) {
@@ -397,15 +402,14 @@ export class Collector {
 
       this._entitiesByAstEntity.set(astEntity, entity);
       this._entities.push(entity);
-
-      if (astEntity instanceof AstSymbol) {
-        this._collectReferenceDirectives(astEntity);
-      }
+      this._collectReferenceDirectives(astEntity);
     }
 
     if (exportedName) {
       entity.addExportName(exportedName);
     }
+
+    return entity;
   }
 
   private _createEntityForIndirectReferences(
@@ -434,6 +438,18 @@ export class Collector {
           this._createEntityForIndirectReferences(referencedAstEntity, alreadySeenAstEntities);
         }
       });
+    }
+
+    if (astEntity instanceof AstNamespaceImport) {
+      const astModuleExportInfo: AstModuleExportInfo = astEntity.fetchAstModuleExportInfo(this);
+
+      for (const exportedEntity of astModuleExportInfo.exportedLocalEntities.values()) {
+        // Create a CollectorEntity for each top-level export of AstImportInternal entity
+        const entity: CollectorEntity = this._createCollectorEntity(exportedEntity, undefined);
+        entity.addAstNamespaceImports(astEntity);
+
+        this._createEntityForIndirectReferences(exportedEntity, alreadySeenAstEntities);
+      }
     }
   }
 
@@ -770,7 +786,7 @@ export class Collector {
         // Don't report missing release tags for forgotten exports
         const astSymbol: AstSymbol = astDeclaration.astSymbol;
         const entity: CollectorEntity | undefined = this._entitiesByAstEntity.get(astSymbol.rootAstSymbol);
-        if (entity && entity.exported) {
+        if (entity && entity.consumable) {
           // We also don't report errors for the default export of an entry point, since its doc comment
           // isn't easy to obtain from the .d.ts file
           if (astSymbol.rootAstSymbol.localName !== '_default') {
@@ -857,11 +873,24 @@ export class Collector {
     return parserContext;
   }
 
-  private _collectReferenceDirectives(astSymbol: AstSymbol): void {
+  private _collectReferenceDirectives(astEntity: AstEntity): void {
+    if (astEntity instanceof AstSymbol) {
+      const sourceFiles: ts.SourceFile[] = astEntity.astDeclarations.map((astDeclaration) =>
+        astDeclaration.declaration.getSourceFile()
+      );
+      return this._collectReferenceDirectivesFromSourceFiles(sourceFiles);
+    }
+
+    if (astEntity instanceof AstNamespaceImport) {
+      const sourceFiles: ts.SourceFile[] = [astEntity.astModule.sourceFile];
+      return this._collectReferenceDirectivesFromSourceFiles(sourceFiles);
+    }
+  }
+
+  private _collectReferenceDirectivesFromSourceFiles(sourceFiles: ts.SourceFile[]): void {
     const seenFilenames: Set<string> = new Set<string>();
 
-    for (const astDeclaration of astSymbol.astDeclarations) {
-      const sourceFile: ts.SourceFile = astDeclaration.declaration.getSourceFile();
+    for (const sourceFile of sourceFiles) {
       if (sourceFile && sourceFile.fileName) {
         if (!seenFilenames.has(sourceFile.fileName)) {
           seenFilenames.add(sourceFile.fileName);

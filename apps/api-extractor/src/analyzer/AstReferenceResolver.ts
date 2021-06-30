@@ -4,13 +4,14 @@
 import * as ts from 'typescript';
 import * as tsdoc from '@microsoft/tsdoc';
 
-import { AstSymbolTable, AstEntity } from './AstSymbolTable';
+import { AstSymbolTable } from './AstSymbolTable';
+import { AstEntity } from './AstEntity';
 import { AstDeclaration } from './AstDeclaration';
 import { WorkingPackage } from '../collector/WorkingPackage';
 import { AstModule } from './AstModule';
-import { AstImport } from './AstImport';
 import { Collector } from '../collector/Collector';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { AstSymbol } from './AstSymbol';
 
 /**
  * Used by `AstReferenceResolver` to report a failed resolution.
@@ -90,8 +91,8 @@ export class AstReferenceResolver {
       );
     }
 
-    if (rootAstEntity instanceof AstImport) {
-      return new ResolverFailure('Reexported declarations are not supported');
+    if (!(rootAstEntity instanceof AstSymbol)) {
+      return new ResolverFailure('This type of declaration is not supported yet by the resolver');
     }
 
     let currentDeclaration: AstDeclaration | ResolverFailure = this._selectDeclaration(

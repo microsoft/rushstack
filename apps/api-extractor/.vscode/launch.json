@@ -74,7 +74,13 @@
       "name": "scenario",
       "program": "${workspaceFolder}/lib/start.js",
       "cwd": "${workspaceFolder}/../../build-tests/api-extractor-scenarios",
-      "args": ["--debug", "run", "--local", "--config", "./temp/configs/api-extractor-typeof.json"],
+      "args": [
+        "--debug",
+        "run",
+        "--local",
+        "--config",
+        "./temp/configs/api-extractor-exportImportStarAs2.json"
+      ],
       "sourceMaps": true
     }
   ]

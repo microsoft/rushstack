@@ -16,6 +16,10 @@ import { AstSymbol } from '../analyzer/AstSymbol';
 import { ExtractorMessage } from '../api/ExtractorMessage';
 import { StringWriter } from './StringWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
+import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
+import { AstEntity } from '../analyzer/AstEntity';
+import { AstModuleExportInfo } from '../analyzer/AstModule';
+import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
 
 export class ApiReportGenerator {
   private static _trimSpacesRegExp: RegExp = / +$/gm;
@@ -52,6 +56,22 @@ export class ApiReportGenerator {
     // Write the opening delimiter for the Markdown code fence
     stringWriter.writeLine('```ts\n');
 
+    // Emit the triple slash directives
+    let directivesEmitted: boolean = false;
+    for (const typeDirectiveReference of Array.from(collector.dtsTypeReferenceDirectives).sort()) {
+      // https://github.com/microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
+      stringWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
+      directivesEmitted = true;
+    }
+
+    for (const libDirectiveReference of Array.from(collector.dtsLibReferenceDirectives).sort()) {
+      stringWriter.writeLine(`/// <reference lib="${libDirectiveReference}" />`);
+      directivesEmitted = true;
+    }
+    if (directivesEmitted) {
+      stringWriter.writeLine();
+    }
+
     // Emit the imports
     let importsEmitted: boolean = false;
     for (const entity of collector.entities) {
@@ -60,14 +80,14 @@ export class ApiReportGenerator {
         importsEmitted = true;
       }
     }
-
     if (importsEmitted) {
       stringWriter.writeLine();
     }
 
     // Emit the regular declarations
     for (const entity of collector.entities) {
-      if (entity.exported) {
+      const astEntity: AstEntity = entity.astEntity;
+      if (entity.consumable) {
         // First, collect the list of export names for this symbol.  When reporting messages with
         // ExtractorMessage.properties.exportName, this will enable us to emit the warning comments alongside
         // the associated export statement.
@@ -83,9 +103,9 @@ export class ApiReportGenerator {
           }
         }
 
-        if (entity.astEntity instanceof AstSymbol) {
+        if (astEntity instanceof AstSymbol) {
           // Emit all the declarations for this entity
-          for (const astDeclaration of entity.astEntity.astDeclarations || []) {
+          for (const astDeclaration of astEntity.astDeclarations || []) {
             // Get the messages associated with this declaration
             const fetchedMessages: ExtractorMessage[] =
               collector.messageRouter.fetchAssociatedMessagesForReviewFile(astDeclaration);
@@ -123,6 +143,63 @@ export class ApiReportGenerator {
             span.writeModifiedText(stringWriter.stringBuilder);
             stringWriter.writeLine('\n');
           }
+        }
+
+        if (astEntity instanceof AstNamespaceImport) {
+          const astModuleExportInfo: AstModuleExportInfo = astEntity.fetchAstModuleExportInfo(collector);
+
+          if (entity.nameForEmit === undefined) {
+            // This should never happen
+            throw new InternalError('referencedEntry.nameForEmit is undefined');
+          }
+
+          if (astModuleExportInfo.starExportedExternalModules.size > 0) {
+            // We could support this, but we would need to find a way to safely represent it.
+            throw new Error(
+              `The ${entity.nameForEmit} namespace import includes a start export, which is not supported:\n` +
+                SourceFileLocationFormatter.formatDeclaration(astEntity.declaration)
+            );
+          }
+
+          // Emit a synthetic declaration for the namespace.  It will look like this:
+          //
+          //    declare namespace example {
+          //      export {
+          //        f1,
+          //        f2
+          //      }
+          //    }
+          //
+          // Note that we do not try to relocate f1()/f2() to be inside the namespace because other type
+          // signatures may reference them directly (without using the namespace qualifier).
+
+          stringWriter.writeLine(`declare namespace ${entity.nameForEmit} {`);
+
+          // all local exports of local imported module are just references to top-level declarations
+          stringWriter.writeLine('  export {');
+
+          const exportClauses: string[] = [];
+          for (const [exportedName, exportedEntity] of astModuleExportInfo.exportedLocalEntities) {
+            const collectorEntity: CollectorEntity | undefined =
+              collector.tryGetCollectorEntity(exportedEntity);
+            if (collectorEntity === undefined) {
+              // This should never happen
+              // top-level exports of local imported module should be added as collector entities before
+              throw new InternalError(
+                `Cannot find collector entity for ${entity.nameForEmit}.${exportedEntity.localName}`
+              );
+            }
+
+            if (collectorEntity.nameForEmit === exportedName) {
+              exportClauses.push(collectorEntity.nameForEmit);
+            } else {
+              exportClauses.push(`${collectorEntity.nameForEmit} as ${exportedName}`);
+            }
+          }
+          stringWriter.writeLine(exportClauses.map((x) => `    ${x}`).join(',\n'));
+
+          stringWriter.writeLine('  }'); // end of "export { ... }"
+          stringWriter.writeLine('}'); // end of "declare namespace { ... }"
         }
 
         // Now emit the export statements for this entity.
