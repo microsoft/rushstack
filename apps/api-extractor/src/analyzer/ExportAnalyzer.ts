@@ -445,6 +445,26 @@ export class ExportAnalyzer {
         // Example: " ExportName as RenamedName"
         const exportSpecifier: ts.ExportSpecifier = declaration as ts.ExportSpecifier;
         exportName = (exportSpecifier.propertyName || exportSpecifier.name).getText().trim();
+      } else if (declaration.kind === ts.SyntaxKind.NamespaceExport) {
+        // EXAMPLE:
+        // "export * as theLib from 'the-lib';"
+        //
+        // ExportDeclaration:
+        //   ExportKeyword:  pre=[export] sep=[ ]
+        //   NamespaceExport:
+        //     AsteriskToken:  pre=[*] sep=[ ]
+        //     AsKeyword:  pre=[as] sep=[ ]
+        //     Identifier:  pre=[theLib] sep=[ ]
+        //   FromKeyword:  pre=[from] sep=[ ]
+        //   StringLiteral:  pre=['the-lib']
+        //   SemicolonToken:  pre=[;]
+
+        // Issue tracking this feature: https://github.com/microsoft/rushstack/issues/2780
+        throw new Error(
+          `The "export * as ___" syntax is not supported yet; as a workaround,` +
+            ` use "import * as ___" with a separate "export { ___ }" declaration\n` +
+            SourceFileLocationFormatter.formatDeclaration(declaration)
+        );
       } else {
         throw new InternalError(
           `Unimplemented export declaration kind: ${declaration.getText()}\n` +
@@ -505,9 +525,8 @@ export class ExportAnalyzer {
 
         if (externalModulePath === undefined) {
           const astModule: AstModule = this._fetchSpecifierAstModule(importDeclaration, declarationSymbol);
-          let namespaceImport: AstNamespaceImport | undefined = this._astNamespaceImportByModule.get(
-            astModule
-          );
+          let namespaceImport: AstNamespaceImport | undefined =
+            this._astNamespaceImportByModule.get(astModule);
           if (namespaceImport === undefined) {
             namespaceImport = new AstNamespaceImport({
               namespaceName: declarationSymbol.name,
