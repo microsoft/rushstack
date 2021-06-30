@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Fri, 11 Jun 2021 00:34:02 GMT and should not be manually modified.
+This log was last generated on Wed, 30 Jun 2021 01:37:17 GMT and should not be manually modified.
+
+## 0.6.0
+Wed, 30 Jun 2021 01:37:17 GMT
+
+### Minor changes
+
+- Allow for specifying a custom resolver when resolving paths with heft-config-file. This change removes "preresolve" property for JsonPath module resolution options and replaces it with a more flexible "customResolver" property
 
 ## 0.5.0
 Fri, 11 Jun 2021 00:34:02 GMT
