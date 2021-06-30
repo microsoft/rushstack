@@ -253,7 +253,16 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       parentObject: T
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) => T = <T extends { [key: string]: any }>(currentObject: T, parentObject: T): T => {
-      return { ...(parentObject || {}), ...(currentObject || {}) };
+      // Done in this order to ensure that the currentObject properties take priority in order-of-declaration,
+      // since Jest cares about this internally. For example, if the extended Jest configuration contains a
+      // "\\.(css|sass|scss)$" transform but the extending Jest configuration contains a "\\.(css)$" override
+      // transform merging like this will ensure that the returned transforms are executed in the correct order:
+      // {
+      //   "\\.(css)$": "..."
+      //   "\\.(css|sass|scss)$": "..."
+      // }
+      // https://github.com/facebook/jest/blob/0a902e10e0a5550b114340b87bd31764a7638729/packages/jest-config/src/normalize.ts#L102
+      return { ...(currentObject || {}), ...(parentObject || {}), ...(currentObject || {}) };
     };
     const deepObjectInheritanceFunc: <T>(
       currentObject: T,
