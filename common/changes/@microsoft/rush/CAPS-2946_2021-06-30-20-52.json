@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "[rush] Prevent 'rush change' from prompting for an email address",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
