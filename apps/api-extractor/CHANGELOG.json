@@ -2,6 +2,23 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.17.0",
+      "tag": "@microsoft/api-extractor_v7.17.0",
+      "date": "Wed, 30 Jun 2021 15:06:54 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Added support for \"import * as module from './local/module';\" (GitHub #1029) -- Big thanks to @adventure-yunfei, @mckn, @rbuckton, and @octogonz who all helped with this difficult PR!"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Include /// directives in API report"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.16.1",
       "tag": "@microsoft/api-extractor_v7.16.1",
       "date": "Fri, 04 Jun 2021 19:59:53 GMT",
