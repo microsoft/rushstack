@@ -5,6 +5,7 @@
 import './jestWorkerPatch';
 
 import * as path from 'path';
+import { resolve as jestResolve, resolveWithPrefix as jestResolveWithPrefix } from 'jest-config/build/utils';
 import { mergeWith, isObject } from 'lodash';
 import type {
   ICleanStageContext,
@@ -26,15 +27,45 @@ import {
   InheritanceType,
   PathResolutionMethod
 } from '@rushstack/heft-config-file';
-import { FileSystem, JsonFile, JsonSchema, Terminal } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  Import,
+  JsonFile,
+  JsonSchema,
+  PackageName,
+  Terminal
+} from '@rushstack/node-core-library';
 
 import { IHeftJestReporterOptions } from './HeftJestReporter';
 import { HeftJestDataFile } from './HeftJestDataFile';
 
 type JestReporterConfig = string | Config.ReporterConfig;
-const PLUGIN_NAME: string = 'JestPlugin';
-const PLUGIN_SCHEMA_PATH: string = `${__dirname}/schemas/heft-jest-plugin.schema.json`;
-const JEST_CONFIGURATION_LOCATION: string = `config/jest.config.json`;
+
+/**
+ * Options to use when performing resolution for paths and modules specified in the Jest
+ * configuration.
+ */
+interface IJestResolutionOptions {
+  /**
+   * The value that will be substituted for <rootDir> tokens.
+   */
+  rootDir: string;
+  /**
+   * Whether the value should be resolved as a module relative to the configuration file after
+   * substituting special tokens.
+   */
+  resolveAsModule?: boolean;
+  /**
+   * The prefix that should initially be used when attempting to resolve the value. Only used if
+   * `IJestResolutionOptions.resolveAsModule` is true.
+   */
+  modulePrefix?: string;
+  /**
+   * Whether resolution should silently fail in the case of failed module resolution. Only used if
+   * `IJestResolutionOptions.resolveAsModule` is true.
+   */
+  ignoreMissingModule?: boolean;
+}
 
 export interface IJestPluginOptions {
   disableConfigurationModuleResolution?: boolean;
@@ -43,14 +74,23 @@ export interface IJestPluginOptions {
 
 export interface IHeftJestConfiguration extends Config.InitialOptions {}
 
+const PLUGIN_NAME: string = 'JestPlugin';
+const PLUGIN_PACKAGE_NAME: string = '@rushstack/heft-jest-plugin';
+const PLUGIN_PACKAGE_FOLDER: string = path.resolve(__dirname, '..');
+const PLUGIN_SCHEMA_PATH: string = path.resolve(__dirname, 'schemas', 'heft-jest-plugin.schema.json');
+const JEST_CONFIGURATION_LOCATION: string = `config/jest.config.json`;
+
+const ROOTDIR_TOKEN: string = '<rootDir>';
+const CONFIGDIR_TOKEN: string = '<configDir>';
+const PACKAGE_CAPTUREGROUP: string = 'package';
+const PACKAGEDIR_REGEX: RegExp = new RegExp(/^<packageDir:\s*(?<package>[^\s>]+)\s*>/);
+
 /**
  * @internal
  */
 export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
   public readonly pluginName: string = PLUGIN_NAME;
   public readonly optionsSchema: JsonSchema = JsonSchema.fromFile(PLUGIN_SCHEMA_PATH);
-
-  private static _ownPackageFolder: string = path.resolve(__dirname, '..');
 
   /**
    * Runs required setup before running Jest through the JestPlugin.
@@ -229,40 +269,21 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       });
     };
 
-    // Resolve all specified properties using Node resolution, and replace <rootDir> with the same rootDir
-    // that we provide to Jest. Resolve if we modified since paths containing <rootDir> should be absolute.
-    const nodeResolveMetadata: IJsonPathMetadata = {
-      preresolve: (jsonPath: string) => {
-        // Compare with replaceRootDirInPath() from here:
-        // https://github.com/facebook/jest/blob/5f4dd187d89070d07617444186684c20d9213031/packages/jest-config/src/utils.ts#L58
-        const ROOTDIR_TOKEN: string = '<rootDir>';
-
-        // Example:  <rootDir>/path/to/file.js
-        if (jsonPath.startsWith(ROOTDIR_TOKEN)) {
-          const restOfPath: string = path.normalize('./' + jsonPath.substr(ROOTDIR_TOKEN.length));
-          return path.resolve(buildFolder, restOfPath);
-        }
-
-        // The normal PathResolutionMethod.NodeResolve will generally not be able to find @rushstack/heft-jest-plugin
-        // from a project that is using a rig.  Since it is important, and it is our own package, we resolve it
-        // manually as a special case.
-        const PLUGIN_PACKAGE_NAME: string = '@rushstack/heft-jest-plugin';
-
-        // Example:  @rushstack/heft-jest-plugin
-        if (jsonPath === PLUGIN_PACKAGE_NAME) {
-          return JestPlugin._ownPackageFolder;
-        }
-
-        // Example:  @rushstack/heft-jest-plugin/path/to/file.js
-        if (jsonPath.startsWith(PLUGIN_PACKAGE_NAME)) {
-          const restOfPath: string = path.normalize('./' + jsonPath.substr(PLUGIN_PACKAGE_NAME.length));
-          return path.join(JestPlugin._ownPackageFolder, restOfPath);
-        }
-
-        return jsonPath;
-      },
-      pathResolutionMethod: PathResolutionMethod.NodeResolve
-    };
+    const tokenResolveMetadata: IJsonPathMetadata = JestPlugin._getJsonPathMetadata({
+      rootDir: buildFolder
+    });
+    const jestResolveMetadata: IJsonPathMetadata = JestPlugin._getJsonPathMetadata({
+      rootDir: buildFolder,
+      resolveAsModule: true
+    });
+    const watchPluginsJestResolveMetadata: IJsonPathMetadata = JestPlugin._getJsonPathMetadata({
+      rootDir: buildFolder,
+      resolveAsModule: true,
+      // Calls Jest's 'resolveWithPrefix()' using the 'jest-watch-' prefix to match 'jest-watch-<value>' packages
+      // https://github.com/facebook/jest/blob/d6fb0d8fb0d43a17f90c7a5a6590257df2f2f6f5/packages/jest-resolve/src/utils.ts#L140
+      modulePrefix: 'jest-watch-',
+      ignoreMissingModule: true
+    });
 
     return new ConfigurationFile<IHeftJestConfiguration>({
       projectRelativeFilePath: projectRelativeFilePath,
@@ -283,33 +304,61 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       },
       jsonPathMetadata: {
         // string
-        '$.dependencyExtractor': nodeResolveMetadata,
-        '$.filter': nodeResolveMetadata,
-        '$.globalSetup': nodeResolveMetadata,
-        '$.globalTeardown': nodeResolveMetadata,
-        '$.moduleLoader': nodeResolveMetadata,
-        '$.prettierPath': nodeResolveMetadata,
-        '$.resolver': nodeResolveMetadata,
-        '$.runner': nodeResolveMetadata,
-        '$.snapshotResolver': nodeResolveMetadata,
+        '$.cacheDirectory': tokenResolveMetadata,
+        '$.coverageDirectory': tokenResolveMetadata,
+        '$.dependencyExtractor': jestResolveMetadata,
+        '$.filter': jestResolveMetadata,
+        '$.globalSetup': jestResolveMetadata,
+        '$.globalTeardown': jestResolveMetadata,
+        '$.moduleLoader': jestResolveMetadata,
+        '$.prettierPath': jestResolveMetadata,
+        '$.resolver': jestResolveMetadata,
+        '$.runner': JestPlugin._getJsonPathMetadata({
+          rootDir: buildFolder,
+          resolveAsModule: true,
+          // Calls Jest's 'resolveWithPrefix()' using the 'jest-runner-' prefix to match 'jest-runner-<value>' packages
+          // https://github.com/facebook/jest/blob/d6fb0d8fb0d43a17f90c7a5a6590257df2f2f6f5/packages/jest-resolve/src/utils.ts#L170
+          modulePrefix: 'jest-runner-',
+          ignoreMissingModule: true
+        }),
+        '$.snapshotResolver': jestResolveMetadata,
         // This is a name like "jsdom" that gets mapped into a package name like "jest-environment-jsdom"
-        // '$.testEnvironment': string
-        '$.testResultsProcessor': nodeResolveMetadata,
-        '$.testRunner': nodeResolveMetadata,
-        '$.testSequencer': nodeResolveMetadata,
+        '$.testEnvironment': JestPlugin._getJsonPathMetadata({
+          rootDir: buildFolder,
+          resolveAsModule: true,
+          // Calls Jest's 'resolveWithPrefix()' using the 'jest-environment-' prefix to match 'jest-environment-<value>' packages
+          // https://github.com/facebook/jest/blob/d6fb0d8fb0d43a17f90c7a5a6590257df2f2f6f5/packages/jest-resolve/src/utils.ts#L110
+          modulePrefix: 'jest-environment-',
+          ignoreMissingModule: true
+        }),
+        '$.testResultsProcessor': jestResolveMetadata,
+        '$.testRunner': jestResolveMetadata,
+        '$.testSequencer': JestPlugin._getJsonPathMetadata({
+          rootDir: buildFolder,
+          resolveAsModule: true,
+          // Calls Jest's 'resolveWithPrefix()' using the 'jest-sequencer-' prefix to match 'jest-sequencer-<value>' packages
+          // https://github.com/facebook/jest/blob/d6fb0d8fb0d43a17f90c7a5a6590257df2f2f6f5/packages/jest-resolve/src/utils.ts#L192
+          modulePrefix: 'jest-sequencer-',
+          ignoreMissingModule: true
+        }),
         // string[]
-        '$.setupFiles.*': nodeResolveMetadata,
-        '$.setupFilesAfterEnv.*': nodeResolveMetadata,
-        '$.snapshotSerializers.*': nodeResolveMetadata,
+        '$.modulePaths.*': tokenResolveMetadata,
+        '$.roots.*': tokenResolveMetadata,
+        '$.setupFiles.*': jestResolveMetadata,
+        '$.setupFilesAfterEnv.*': jestResolveMetadata,
+        '$.snapshotSerializers.*': jestResolveMetadata,
+        // moduleNameMapper: { [regex]: path | [ ...paths ] }
+        '$.moduleNameMapper.*@string()': tokenResolveMetadata, // string path
+        '$.moduleNameMapper.*.*': tokenResolveMetadata, // array of paths
         // reporters: (path | [ path, options ])[]
-        '$.reporters[?(@ !== "default")]*@string()': nodeResolveMetadata, // string path, excluding "default"
-        '$.reporters.*[?(@property == 0 && @ !== "default")]': nodeResolveMetadata, // First entry in [ path, options ], excluding "default"
+        '$.reporters[?(@ !== "default")]*@string()': jestResolveMetadata, // string path, excluding "default"
+        '$.reporters.*[?(@property == 0 && @ !== "default")]': jestResolveMetadata, // First entry in [ path, options ], excluding "default"
         // transform: { [regex]: path | [ path, options ] }
-        '$.transform.*@string()': nodeResolveMetadata, // string path
-        '$.transform.*[?(@property == 0)]': nodeResolveMetadata, // First entry in [ path, options ]
+        '$.transform.*@string()': jestResolveMetadata, // string path
+        '$.transform.*[?(@property == 0)]': jestResolveMetadata, // First entry in [ path, options ]
         // watchPlugins: (path | [ path, options ])[]
-        '$.watchPlugins.*@string()': nodeResolveMetadata, // string path
-        '$.watchPlugins.*[?(@property == 0)]': nodeResolveMetadata // First entry in [ path, options ]
+        '$.watchPlugins.*@string()': watchPluginsJestResolveMetadata, // string path
+        '$.watchPlugins.*[?(@property == 0)]': watchPluginsJestResolveMetadata // First entry in [ path, options ]
       }
     });
   }
@@ -377,6 +426,102 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       `${__dirname}/HeftJestReporter.js`,
       reporterOptions as Record<keyof IHeftJestReporterOptions, unknown>
     ];
+  }
+
+  /**
+   * Resolve all specified properties to an absolute path using Jest resolution. In addition, the following
+   * transforms will be applied to the provided propertyValue before resolution:
+   *   - replace <rootDir> with the same rootDir
+   *   - replace <configDir> with the directory containing the current configuration file
+   *   - replace <packageDir:...> with the path to the resolved package (NOT module)
+   */
+  private static _getJsonPathMetadata(options: IJestResolutionOptions): IJsonPathMetadata {
+    return {
+      customResolver: (configurationFilePath: string, propertyName: string, propertyValue: string) => {
+        const configDir: string = path.dirname(configurationFilePath);
+
+        // Compare with replaceRootDirInPath() from here:
+        // https://github.com/facebook/jest/blob/5f4dd187d89070d07617444186684c20d9213031/packages/jest-config/src/utils.ts#L58
+        if (propertyValue.startsWith(ROOTDIR_TOKEN)) {
+          // Example:  <rootDir>/path/to/file.js
+          const restOfPath: string = path.normalize('./' + propertyValue.substr(ROOTDIR_TOKEN.length));
+          propertyValue = path.resolve(options.rootDir, restOfPath);
+        } else if (propertyValue.startsWith(CONFIGDIR_TOKEN)) {
+          // Example:  <configDir>/path/to/file.js
+          const restOfPath: string = path.normalize('./' + propertyValue.substr(CONFIGDIR_TOKEN.length));
+          propertyValue = path.resolve(configDir, restOfPath);
+        } else {
+          // Example:  <packageDir:@my/package>/path/to/file.js
+          const packageDirMatches: RegExpExecArray | null = PACKAGEDIR_REGEX.exec(propertyValue);
+          if (packageDirMatches !== null) {
+            const packageName: string | undefined = packageDirMatches.groups?.[PACKAGE_CAPTUREGROUP];
+            if (!packageName) {
+              throw new Error(
+                `Could not parse package name from "packageDir" token ` +
+                  (propertyName ? `of property "${propertyName}" ` : '') +
+                  `in "${configDir}".`
+              );
+            }
+
+            if (!PackageName.isValidName(packageName)) {
+              throw new Error(
+                `Module paths are not supported when using the "packageDir" token ` +
+                  (propertyName ? `of property "${propertyName}" ` : '') +
+                  `in "${configDir}". Only a package name is allowed.`
+              );
+            }
+
+            // Resolve to the package directory (not the module referenced by the package). The normal resolution
+            // method will generally not be able to find @rushstack/heft-jest-plugin from a project that is
+            // using a rig. Since it is important, and it is our own package, we resolve it manually as a special
+            // case.
+            const resolvedPackagePath: string =
+              packageName === PLUGIN_PACKAGE_NAME
+                ? PLUGIN_PACKAGE_FOLDER
+                : Import.resolvePackage({
+                    baseFolderPath: configDir,
+                    packageName
+                  });
+            // First entry is the entire match
+            const restOfPath: string = path.normalize(
+              './' + propertyValue.substr(packageDirMatches[0].length)
+            );
+            propertyValue = path.resolve(resolvedPackagePath, restOfPath);
+          }
+        }
+
+        // Return early, since the remainder of this function is used to resolve module paths
+        if (!options.resolveAsModule) {
+          return propertyValue;
+        }
+
+        // Example:  @rushstack/heft-jest-plugin
+        if (propertyValue === PLUGIN_PACKAGE_NAME) {
+          return PLUGIN_PACKAGE_FOLDER;
+        }
+
+        // Example:  @rushstack/heft-jest-plugin/path/to/file.js
+        if (propertyValue.startsWith(PLUGIN_PACKAGE_NAME)) {
+          const restOfPath: string = path.normalize('./' + propertyValue.substr(PLUGIN_PACKAGE_NAME.length));
+          return path.join(PLUGIN_PACKAGE_FOLDER, restOfPath);
+        }
+
+        return options.modulePrefix
+          ? jestResolveWithPrefix(/*resolver:*/ undefined, {
+              rootDir: configDir,
+              filePath: propertyValue,
+              prefix: options.modulePrefix,
+              humanOptionName: propertyName,
+              optionName: propertyName
+            })
+          : jestResolve(/*resolver:*/ undefined, {
+              rootDir: configDir,
+              filePath: propertyValue,
+              key: propertyName
+            });
+      },
+      pathResolutionMethod: PathResolutionMethod.custom
+    };
   }
 
   /**

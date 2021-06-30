@@ -4,7 +4,7 @@
 import * as path from 'path';
 import type { Config } from '@jest/types';
 import { ConfigurationFile } from '@rushstack/heft-config-file';
-import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { Import, StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 
 import { IHeftJestConfiguration, JestPlugin } from '../JestPlugin';
 
@@ -17,15 +17,17 @@ describe('JestConfigLoader', () => {
     terminal = new Terminal(terminalProvider);
   });
 
-  it('resolves preset config modules', async () => {
-    const rootDir: string = path.join(__dirname, 'project1');
+  it('resolves extended config modules', async () => {
+    // Because we require the built modules, we need to set our rootDir to be in the 'lib' folder, since transpilation
+    // means that we don't run on the built test assets directly
+    const rootDir: string = path.resolve(__dirname, '..', '..', 'lib', 'test', 'project1');
     const loader: ConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
       rootDir,
       'config/jest.config.json'
     );
     const loadedConfig: IHeftJestConfiguration = await loader.loadConfigurationFileForProjectAsync(
       terminal,
-      path.join(__dirname, 'project1')
+      path.join(__dirname, '..', '..', 'lib', 'test', 'project1')
     );
 
     expect(loadedConfig.preset).toBe(undefined);
@@ -35,6 +37,9 @@ describe('JestConfigLoader', () => {
     expect(loadedConfig.setupFiles?.length).toBe(2);
     expect(loadedConfig.setupFiles![0]).toBe(path.join(rootDir, 'a', 'b', 'setupFile2.js'));
     expect(loadedConfig.setupFiles![1]).toBe(path.join(rootDir, 'a', 'b', 'setupFile1.js'));
+
+    // Validate testEnvironment
+    expect(loadedConfig.testEnvironment).toBe(require.resolve('jest-environment-node'));
 
     // Validate reporters
     expect(loadedConfig.reporters?.length).toBe(3);
@@ -53,6 +58,31 @@ describe('JestConfigLoader', () => {
       path.join(rootDir, 'a', 'c', 'mockTransformModule3.js')
     );
 
+    // Validate moduleNameMapper
+    expect(Object.keys(loadedConfig.moduleNameMapper || {}).length).toBe(4);
+    expect(loadedConfig.moduleNameMapper!['\\.resx$']).toBe(
+      // Test overrides
+      path.join(rootDir, 'a', 'some', 'path', 'to', 'overridden', 'module.js')
+    );
+    expect(loadedConfig.moduleNameMapper!['\\.jpg$']).toBe(
+      // Test <configDir>
+      path.join(rootDir, 'a', 'c', 'some', 'path', 'to', 'module.js')
+    );
+    expect(loadedConfig.moduleNameMapper!['^!!file-loader']).toBe(
+      // Test <packageDir:...>
+      path.join(
+        Import.resolvePackage({ packageName: '@rushstack/heft', baseFolderPath: __dirname }),
+        'some',
+        'path',
+        'to',
+        'module.js'
+      )
+    );
+    expect(loadedConfig.moduleNameMapper!['^@1js/search-dispatcher/lib/(.+)']).toBe(
+      // Test unmodified
+      '@1js/search-dispatcher/lib-commonjs/$1'
+    );
+
     // Validate globals
     expect(Object.keys(loadedConfig.globals || {}).length).toBe(4);
     expect(loadedConfig.globals!.key1).toBe('value5');
@@ -69,18 +99,25 @@ describe('JestConfigLoader', () => {
     expect(loadedConfig.globals!.key7).toBe('value9');
   });
 
-  it('resolves preset package modules', async () => {
-    const rootDir: string = path.join(__dirname, 'project1');
+  it('resolves extended package modules', async () => {
+    // Because we require the built modules, we need to set our rootDir to be in the 'lib' folder, since transpilation
+    // means that we don't run on the built test assets directly
+    const rootDir: string = path.resolve(__dirname, '..', '..', 'lib', 'test', 'project1');
     const loader: ConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
       rootDir,
       'config/jest.config.json'
     );
     const loadedConfig: IHeftJestConfiguration = await loader.loadConfigurationFileForProjectAsync(
       terminal,
-      path.join(__dirname, 'project2')
+      path.resolve(__dirname, '..', '..', 'lib', 'test', 'project2')
     );
 
     expect(loadedConfig.setupFiles?.length).toBe(1);
     expect(loadedConfig.setupFiles![0]).toBe(require.resolve('@jest/core'));
+
+    // Also validate that a test environment that we specified as 'jsdom' (but have not added as a dependency)
+    // is resolved, implying it came from Jest directly
+    expect(loadedConfig.testEnvironment).toContain('jest-environment-jsdom');
+    expect(loadedConfig.testEnvironment).toMatch(/index.js$/);
   });
 });

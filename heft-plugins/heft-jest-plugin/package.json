@@ -24,6 +24,7 @@
     "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "lodash": "~4.17.15",
+    "jest-config": "~25.4.0",
     "jest-snapshot": "~25.4.0"
   },
   "devDependencies": {
@@ -35,6 +36,7 @@
     "@types/lodash": "4.14.116",
     "@types/node": "10.17.13",
     "eslint": "~7.12.1",
+    "jest-environment-node": "~25.4.0",
     "typescript": "~3.9.7"
   }
 }
