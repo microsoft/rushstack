@@ -1,14 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import * as path from 'path';
 import * as fs from 'fs';
 import builtinPackageNames from 'builtin-modules';
 import { parseHeaderOrFail, Header } from '@definitelytyped/header-parser';
 import { unmangleScopedPackage } from '@definitelytyped/utils';
 
-import { Import, FileSystem } from '@rushstack/node-core-library';
+import { Import, FileSystem, ConsoleTerminalProvider, Terminal, Colors } from '@rushstack/node-core-library';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { BaseConfiglessRushAction } from './BaseRushAction';
@@ -33,6 +32,7 @@ export interface IJsonOutput {
 export class ScanAction extends BaseConfiglessRushAction {
   private _jsonFlag!: CommandLineFlagParameter;
   private _allFlag!: CommandLineFlagParameter;
+  private _terminal: Terminal;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -52,6 +52,11 @@ export class ScanAction extends BaseConfiglessRushAction {
       safeForSimultaneousRushProcesses: true,
       parser
     });
+    this._terminal = new Terminal(
+      new ConsoleTerminalProvider({
+        verboseEnabled: this.parser.isDebug
+      })
+    );
   }
 
   protected onDefineParameters(): void {
@@ -130,7 +135,9 @@ export class ScanAction extends BaseConfiglessRushAction {
           }
         }
       } catch (error) {
-        console.log(colors.bold('Skipping file due to error: ' + filename));
+        this._terminal.writeErrorLine(
+          Colors.bold(`Skipping file(${filename}) due to error: ${error.message}`)
+        );
       }
     }
 
@@ -215,9 +222,11 @@ export class ScanAction extends BaseConfiglessRushAction {
         // no-catch
       }
       if (!typesPackageJsonPath) {
+        this._terminal.writeVerboseLine(`${typesDependencyName} is not installed`);
         continue;
       }
       if (!fs.existsSync(typesPackageJsonPath)) {
+        this._terminal.writeVerboseLine(`package.json does not exist: ${typesPackageJsonPath}`);
         continue;
       }
       const typesPackageDir: string = path.dirname(typesPackageJsonPath);
@@ -230,6 +239,7 @@ export class ScanAction extends BaseConfiglessRushAction {
         const typesHeader: Header = parseHeaderOrFail(typesIndex);
         if (typesHeader.nonNpm) {
           // skip nonNpm types, i.e. @types/node
+          this._terminal.writeVerboseLine(`${typesDependencyName} is non-npm package definition`);
           continue;
         }
 
@@ -240,6 +250,7 @@ export class ScanAction extends BaseConfiglessRushAction {
           unusedDependencies.push(typesDependencyName);
         }
       } catch (e) {
+        this._terminal.writeVerboseLine(`scan ${typesDependencyName} failed: ${e.message}`);
         continue;
       }
     }
@@ -265,24 +276,20 @@ export class ScanAction extends BaseConfiglessRushAction {
       let wroteAnything: boolean = false;
 
       if (missingDependencies.length > 0) {
-        console.log(
-          colors.yellow('Possible phantom dependencies') +
-            " - these seem to be imported but aren't listed in package.json:"
-        );
+        this._terminal.writeWarning('Possible phantom dependencies');
+        this._terminal.writeLine(" - these seem to be imported but aren't listed in package.json:");
         for (const packageName of missingDependencies) {
-          console.log('  ' + packageName);
+          this._terminal.writeLine('  ' + packageName);
         }
         wroteAnything = true;
       }
 
       if (unusedDependencies.length > 0) {
         if (wroteAnything) {
-          console.log('');
+          this._terminal.writeLine();
         }
-        console.log(
-          colors.yellow('Possible unused dependencies') +
-            " - these are listed in package.json but don't seem to be imported:"
-        );
+        this._terminal.writeWarning('Possible unused dependencies');
+        this._terminal.writeLine(" - these are listed in package.json but don't seem to be imported:");
         for (const packageName of unusedDependencies) {
           console.log('  ' + packageName);
         }
@@ -290,9 +297,8 @@ export class ScanAction extends BaseConfiglessRushAction {
       }
 
       if (!wroteAnything) {
-        console.log(
-          colors.green('Everything looks good.') + '  No missing or unused dependencies were found.'
-        );
+        this._terminal.write(Colors.green('Everything looks good.'));
+        this._terminal.writeLine('  No missing or unused dependencies were found.');
       }
     }
   }
