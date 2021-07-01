@@ -98,6 +98,10 @@ export class ScanAction extends BaseConfiglessRushAction {
       /\bimport\s*[']([^']+)[']\s*\;/,
       /\bimport\s*["]([^"]+)["]\s*\;/,
 
+      // Example:  import('something');
+      /(?<!\.)\bimport\([']([^']+)[']\)/,
+      /(?<!\.)\bimport\(["]([^"]+)["]\)/,
+
       // Example:
       // /// <reference types="something" />
       /\/\/\/\s*<\s*reference\s+types\s*=\s*["]([^"]+)["]\s*\/>/
