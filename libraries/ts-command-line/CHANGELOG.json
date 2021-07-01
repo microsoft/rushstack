@@ -2,6 +2,18 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.8.0",
+      "tag": "@rushstack/ts-command-line_v4.8.0",
+      "date": "Thu, 01 Jul 2021 15:08:27 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add ChoiceList and IntegerList parameter types"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.7.10",
       "tag": "@rushstack/ts-command-line_v4.7.10",
       "date": "Mon, 12 Apr 2021 15:10:28 GMT",
