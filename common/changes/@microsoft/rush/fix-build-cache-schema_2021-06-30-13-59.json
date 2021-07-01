@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "fix rush-lib build-cache cacheEntryNamePattern description of [normalize] token",
+      "comment": "Fix the build-cache.json cacheEntryNamePattern description of the [normalize] token.",
       "type": "none"
     }
   ],
