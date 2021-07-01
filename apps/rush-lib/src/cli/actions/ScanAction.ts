@@ -3,7 +3,10 @@
 
 import colors from 'colors/safe';
 import * as path from 'path';
+import * as fs from 'fs';
 import builtinPackageNames from 'builtin-modules';
+import { parseHeaderOrFail, Header } from '@definitelytyped/header-parser';
+import { unmangleScopedPackage } from '@definitelytyped/utils';
 
 import { Import, FileSystem } from '@rushstack/node-core-library';
 import { RushCommandLineParser } from '../RushCommandLineParser';
@@ -186,12 +189,58 @@ export class ScanAction extends BaseConfiglessRushAction {
     }
     for (const declaredPkgName of declaredDependencies) {
       /**
-       * Unused dependencies are
+       * Unused dependencies case 1:
        * - declared in dependencies in package.json (devDependencies not included)
        * - not used in source code
        */
       if (!detectedPackageNames.includes(declaredPkgName) && !declaredPkgName.startsWith('@types/')) {
         unusedDependencies.push(declaredPkgName);
+      }
+    }
+
+    const allTypesDependencies: string[] = Array.from(declaredDependencies)
+      .concat(Array.from(declaredDevDependencies))
+      .filter((pkgName) => pkgName.startsWith('@types/'));
+    for (const typesDependencyName of allTypesDependencies) {
+      /**
+       * Unused dependencies case 2:
+       * - dependencies starts with @types/ in package.json (devDependencies included)
+       * - not Type definitions for non-npm package
+       * - corresponding package is unused
+       */
+      let typesPackageJsonPath: string | null = null;
+      try {
+        typesPackageJsonPath = require.resolve(`${typesDependencyName}/package.json`);
+      } catch (e) {
+        // no-catch
+      }
+      if (!typesPackageJsonPath) {
+        continue;
+      }
+      if (!fs.existsSync(typesPackageJsonPath)) {
+        continue;
+      }
+      const typesPackageDir: string = path.dirname(typesPackageJsonPath);
+      try {
+        const { types = 'index.d.ts' }: { types: string } = JSON.parse(
+          fs.readFileSync(typesPackageJsonPath, 'utf8')
+        );
+        const typesIndexPath: string = path.resolve(typesPackageDir, types);
+        const typesIndex: string = fs.readFileSync(typesIndexPath, 'utf8');
+        const typesHeader: Header = parseHeaderOrFail(typesIndex);
+        if (typesHeader.nonNpm) {
+          // skip nonNpm types, i.e. @types/node
+          continue;
+        }
+
+        const mangledPackageName: string = typesDependencyName.slice('@types/'.length);
+        const unmangledPackageName: string = unmangleScopedPackage(mangledPackageName) || mangledPackageName;
+
+        if (!detectedPackageNames.includes(unmangledPackageName)) {
+          unusedDependencies.push(typesDependencyName);
+        }
+      } catch (e) {
+        continue;
       }
     }
 
