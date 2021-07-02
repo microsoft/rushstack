@@ -2,6 +2,113 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.34.3",
+      "tag": "@rushstack/heft_v0.34.3",
+      "date": "Thu, 01 Jul 2021 15:08:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.17.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.34.2",
+      "tag": "@rushstack/heft_v0.34.2",
+      "date": "Wed, 30 Jun 2021 15:06:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.17.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.34.1",
+      "tag": "@rushstack/heft_v0.34.1",
+      "date": "Wed, 30 Jun 2021 01:37:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.6.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.34.0",
+      "tag": "@rushstack/heft_v0.34.0",
+      "date": "Fri, 25 Jun 2021 00:08:28 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add RunScriptPlugin to allow for running custom scripts specified in \"heft.json\". Specified as a \"runScript\" event in the \"heftEvents\" field, paths to scripts are resolved relative to the root of the project they are specified in."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.33.1",
+      "tag": "@rushstack/heft_v0.33.1",
+      "date": "Fri, 18 Jun 2021 06:23:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a regression where Heft sometimes failed with \"No tests found, exiting with code 1\""
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.33.0",
+      "tag": "@rushstack/heft_v0.33.0",
+      "date": "Wed, 16 Jun 2021 15:07:24 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING CHANGE) Simplify the plugin event hook lifecycle by eliminating an experimental feature that enabled side-by-side compiler configurations. We decided that this scenario is better approached by splitting the files into separate projects."
+          },
+          {
+            "comment": "(BREAKING CHANGE) Remove the \"afterEachIteration\" compile substage and replace its functionality with a more versatile \"afterRecompile\" compile substage hook."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.32.0",
+      "tag": "@rushstack/heft_v0.32.0",
+      "date": "Fri, 11 Jun 2021 00:34:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING CHANGE) Remove Jest plugin from Heft. To consume the Jest plugin, add @rushstack/heft-jest-plugin as a dependency and include it in heft.json. See UPGRADING.md for more information."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.31.5",
+      "tag": "@rushstack/heft_v0.31.5",
+      "date": "Thu, 10 Jun 2021 15:08:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the version compatibility warning to indicate that TypeScript 4.x is supported by Heft"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.31.4",
       "tag": "@rushstack/heft_v0.31.4",
       "date": "Fri, 04 Jun 2021 19:59:53 GMT",

@@ -95,6 +95,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/heft-jest-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
+    },
+    {
       "name": "@rushstack/heft-node-rig",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -320,6 +324,14 @@
     },
     {
       "name": "jest",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-config",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-environment-node",
       "allowedCategories": [ "libraries" ]
     },
     {

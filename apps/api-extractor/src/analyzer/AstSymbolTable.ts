@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* eslint-disable no-bitwise */ // for ts.SymbolFlags
+
 import * as ts from 'typescript';
 import { PackageJsonLookup, InternalError } from '@rushstack/node-core-library';
 
@@ -10,13 +12,12 @@ import { AstSymbol } from './AstSymbol';
 import { AstModule, AstModuleExportInfo } from './AstModule';
 import { PackageMetadataManager } from './PackageMetadataManager';
 import { ExportAnalyzer } from './ExportAnalyzer';
-import { AstImport } from './AstImport';
+import { AstEntity } from './AstEntity';
+import { AstNamespaceImport } from './AstNamespaceImport';
 import { MessageRouter } from '../collector/MessageRouter';
 import { TypeScriptInternals, IGlobalVariableAnalyzer } from './TypeScriptInternals';
 import { StringChecks } from './StringChecks';
 import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
-
-export type AstEntity = AstSymbol | AstImport;
 
 /**
  * Options for `AstSymbolTable._fetchAstSymbol()`
@@ -148,41 +149,13 @@ export class AstSymbolTable {
    * or members.  (We do always construct its parents however, since AstDefinition.parent
    * is immutable, and needed e.g. to calculate release tag inheritance.)
    */
-  public analyze(astSymbol: AstSymbol): void {
-    if (astSymbol.analyzed) {
-      return;
+  public analyze(astEntity: AstEntity): void {
+    if (astEntity instanceof AstSymbol) {
+      return this._analyzeAstSymbol(astEntity);
     }
 
-    if (astSymbol.nominalAnalysis) {
-      // We don't analyze nominal symbols
-      astSymbol._notifyAnalyzed();
-      return;
-    }
-
-    // Start at the root of the tree
-    const rootAstSymbol: AstSymbol = astSymbol.rootAstSymbol;
-
-    // Calculate the full child tree for each definition
-    for (const astDeclaration of rootAstSymbol.astDeclarations) {
-      this._analyzeChildTree(astDeclaration.declaration, astDeclaration);
-    }
-
-    rootAstSymbol._notifyAnalyzed();
-
-    if (!astSymbol.isExternal) {
-      // If this symbol is non-external (i.e. it belongs to the working package), then we also analyze any
-      // referencedAstSymbols that are non-external.  For example, this ensures that forgotten exports
-      // get analyzed.
-      rootAstSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
-        for (const referencedAstEntity of astDeclaration.referencedAstEntities) {
-          // Walk up to the root of the tree, looking for any imports along the way
-          if (referencedAstEntity instanceof AstSymbol) {
-            if (!referencedAstEntity.isExternal) {
-              this.analyze(referencedAstEntity);
-            }
-          }
-        }
-      });
+    if (astEntity instanceof AstNamespaceImport) {
+      return this._analyzeAstNamespaceImport(astEntity);
     }
   }
 
@@ -303,6 +276,67 @@ export class AstSymbolTable {
     return unquotedName;
   }
 
+  private _analyzeAstNamespaceImport(astNamespaceImport: AstNamespaceImport): void {
+    if (astNamespaceImport.analyzed) {
+      return;
+    }
+
+    // mark before actual analyzing, to handle module cyclic reexport
+    astNamespaceImport.analyzed = true;
+
+    const exportedLocalEntities: Map<string, AstEntity> = this.fetchAstModuleExportInfo(
+      astNamespaceImport.astModule
+    ).exportedLocalEntities;
+
+    for (const exportedEntity of exportedLocalEntities.values()) {
+      this.analyze(exportedEntity);
+    }
+  }
+
+  private _analyzeAstSymbol(astSymbol: AstSymbol): void {
+    if (astSymbol.analyzed) {
+      return;
+    }
+
+    if (astSymbol.nominalAnalysis) {
+      // We don't analyze nominal symbols
+      astSymbol._notifyAnalyzed();
+      return;
+    }
+
+    // Start at the root of the tree
+    const rootAstSymbol: AstSymbol = astSymbol.rootAstSymbol;
+
+    // Calculate the full child tree for each definition
+    for (const astDeclaration of rootAstSymbol.astDeclarations) {
+      this._analyzeChildTree(astDeclaration.declaration, astDeclaration);
+    }
+
+    rootAstSymbol._notifyAnalyzed();
+
+    if (!astSymbol.isExternal) {
+      // If this symbol is non-external (i.e. it belongs to the working package), then we also analyze any
+      // referencedAstSymbols that are non-external.  For example, this ensures that forgotten exports
+      // get analyzed.
+      rootAstSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
+        for (const referencedAstEntity of astDeclaration.referencedAstEntities) {
+          // Walk up to the root of the tree, looking for any imports along the way
+          if (referencedAstEntity instanceof AstSymbol) {
+            if (!referencedAstEntity.isExternal) {
+              this._analyzeAstSymbol(referencedAstEntity);
+            }
+          }
+
+          if (referencedAstEntity instanceof AstNamespaceImport) {
+            if (!referencedAstEntity.astModule.isExternal) {
+              this._analyzeAstNamespaceImport(referencedAstEntity);
+            }
+          }
+        }
+      });
+    }
+  }
+
   /**
    * Used by analyze to recursively analyze the entire child tree.
    */
@@ -326,8 +360,7 @@ export class AstSymbolTable {
           );
 
           if (identifierNode) {
-            let referencedAstEntity: AstEntity | undefined =
-              this._entitiesByNode.get(identifierNode);
+            let referencedAstEntity: AstEntity | undefined = this._entitiesByNode.get(identifierNode);
             if (!referencedAstEntity) {
               const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(identifierNode);
               if (!symbol) {
@@ -513,13 +546,12 @@ export class AstSymbolTable {
     }
 
     if (
-      // eslint-disable-next-line no-bitwise
       followedSymbol.flags &
-        // eslint-disable-next-line no-bitwise
-        (ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral | ts.SymbolFlags.Transient) &&
-      !TypeScriptInternals.isLateBoundSymbol(followedSymbol)
+      (ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral | ts.SymbolFlags.Transient)
     ) {
-      return undefined;
+      if (!TypeScriptInternals.isLateBoundSymbol(followedSymbol)) {
+        return undefined;
+      }
     }
 
     // API Extractor doesn't analyze ambient declarations at all

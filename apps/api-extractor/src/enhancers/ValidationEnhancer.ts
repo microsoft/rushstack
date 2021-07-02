@@ -12,21 +12,52 @@ import { SymbolMetadata } from '../collector/SymbolMetadata';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { ExtractorMessageId } from '../api/ExtractorMessageId';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
+import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
+import { AstModuleExportInfo } from '../analyzer/AstModule';
+import { AstEntity } from '../analyzer/AstEntity';
 
 export class ValidationEnhancer {
   public static analyze(collector: Collector): void {
-    const alreadyWarnedSymbols: Set<AstSymbol> = new Set<AstSymbol>();
+    const alreadyWarnedEntities: Set<AstEntity> = new Set<AstEntity>();
 
     for (const entity of collector.entities) {
-      if (entity.astEntity instanceof AstSymbol) {
-        if (entity.exported) {
-          entity.astEntity.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
-            ValidationEnhancer._checkReferences(collector, astDeclaration, alreadyWarnedSymbols);
-          });
+      if (!entity.consumable) {
+        continue;
+      }
 
-          const symbolMetadata: SymbolMetadata = collector.fetchSymbolMetadata(entity.astEntity);
-          ValidationEnhancer._checkForInternalUnderscore(collector, entity, entity.astEntity, symbolMetadata);
-          ValidationEnhancer._checkForInconsistentReleaseTags(collector, entity.astEntity, symbolMetadata);
+      if (entity.astEntity instanceof AstSymbol) {
+        // A regular exported AstSymbol
+
+        const astSymbol: AstSymbol = entity.astEntity;
+
+        astSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
+          ValidationEnhancer._checkReferences(collector, astDeclaration, alreadyWarnedEntities);
+        });
+
+        const symbolMetadata: SymbolMetadata = collector.fetchSymbolMetadata(astSymbol);
+        ValidationEnhancer._checkForInternalUnderscore(collector, entity, astSymbol, symbolMetadata);
+        ValidationEnhancer._checkForInconsistentReleaseTags(collector, astSymbol, symbolMetadata);
+      } else if (entity.astEntity instanceof AstNamespaceImport) {
+        // A namespace created using "import * as ___ from ___"
+        const astNamespaceImport: AstNamespaceImport = entity.astEntity;
+
+        const astModuleExportInfo: AstModuleExportInfo =
+          astNamespaceImport.fetchAstModuleExportInfo(collector);
+
+        for (const namespaceMemberAstEntity of astModuleExportInfo.exportedLocalEntities.values()) {
+          if (namespaceMemberAstEntity instanceof AstSymbol) {
+            const astSymbol: AstSymbol = namespaceMemberAstEntity;
+
+            astSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
+              ValidationEnhancer._checkReferences(collector, astDeclaration, alreadyWarnedEntities);
+            });
+
+            const symbolMetadata: SymbolMetadata = collector.fetchSymbolMetadata(astSymbol);
+
+            // (Don't apply ValidationEnhancer._checkForInternalUnderscore() for AstNamespaceImport members)
+
+            ValidationEnhancer._checkForInconsistentReleaseTags(collector, astSymbol, symbolMetadata);
+          }
         }
       }
     }
@@ -158,12 +189,16 @@ export class ValidationEnhancer {
   private static _checkReferences(
     collector: Collector,
     astDeclaration: AstDeclaration,
-    alreadyWarnedSymbols: Set<AstSymbol>
+    alreadyWarnedEntities: Set<AstEntity>
   ): void {
     const apiItemMetadata: ApiItemMetadata = collector.fetchApiItemMetadata(astDeclaration);
     const declarationReleaseTag: ReleaseTag = apiItemMetadata.effectiveReleaseTag;
 
     for (const referencedEntity of astDeclaration.referencedAstEntities) {
+      let collectorEntity: CollectorEntity | undefined;
+      let referencedReleaseTag: ReleaseTag;
+      let localName: string;
+
       if (referencedEntity instanceof AstSymbol) {
         // If this is e.g. a member of a namespace, then we need to be checking the top-level scope to see
         // whether it's exported.
@@ -171,42 +206,58 @@ export class ValidationEnhancer {
         // TODO: Technically we should also check each of the nested scopes along the way.
         const rootSymbol: AstSymbol = referencedEntity.rootAstSymbol;
 
-        if (!rootSymbol.isExternal) {
-          const collectorEntity: CollectorEntity | undefined = collector.tryGetCollectorEntity(rootSymbol);
+        if (rootSymbol.isExternal) {
+          continue;
+        }
 
-          if (collectorEntity && collectorEntity.exported) {
-            const referencedMetadata: SymbolMetadata = collector.fetchSymbolMetadata(referencedEntity);
-            const referencedReleaseTag: ReleaseTag = referencedMetadata.maxEffectiveReleaseTag;
+        localName = rootSymbol.localName;
 
-            if (ReleaseTag.compare(declarationReleaseTag, referencedReleaseTag) > 0) {
-              collector.messageRouter.addAnalyzerIssue(
-                ExtractorMessageId.IncompatibleReleaseTags,
-                `The symbol "${astDeclaration.astSymbol.localName}"` +
-                  ` is marked as ${ReleaseTag.getTagName(declarationReleaseTag)},` +
-                  ` but its signature references "${referencedEntity.localName}"` +
-                  ` which is marked as ${ReleaseTag.getTagName(referencedReleaseTag)}`,
-                astDeclaration
-              );
-            }
+        collectorEntity = collector.tryGetCollectorEntity(rootSymbol);
+
+        const referencedMetadata: SymbolMetadata = collector.fetchSymbolMetadata(referencedEntity);
+        referencedReleaseTag = referencedMetadata.maxEffectiveReleaseTag;
+      } else if (referencedEntity instanceof AstNamespaceImport) {
+        collectorEntity = collector.tryGetCollectorEntity(referencedEntity);
+
+        // TODO: Currently the "import * as ___ from ___" syntax does not yet support doc comments
+        referencedReleaseTag = ReleaseTag.Public;
+
+        localName = referencedEntity.localName;
+      } else {
+        continue;
+      }
+
+      if (collectorEntity && collectorEntity.consumable) {
+        if (ReleaseTag.compare(declarationReleaseTag, referencedReleaseTag) > 0) {
+          collector.messageRouter.addAnalyzerIssue(
+            ExtractorMessageId.IncompatibleReleaseTags,
+            `The symbol "${astDeclaration.astSymbol.localName}"` +
+              ` is marked as ${ReleaseTag.getTagName(declarationReleaseTag)},` +
+              ` but its signature references "${referencedEntity.localName}"` +
+              ` which is marked as ${ReleaseTag.getTagName(referencedReleaseTag)}`,
+            astDeclaration
+          );
+        }
+      } else {
+        const entryPointFilename: string = path.basename(
+          collector.workingPackage.entryPointSourceFile.fileName
+        );
+
+        if (!alreadyWarnedEntities.has(referencedEntity)) {
+          alreadyWarnedEntities.add(referencedEntity);
+
+          if (
+            referencedEntity instanceof AstSymbol &&
+            ValidationEnhancer._isEcmaScriptSymbol(referencedEntity)
+          ) {
+            // The main usage scenario for ECMAScript symbols is to attach private data to a JavaScript object,
+            // so as a special case, we do NOT report them as forgotten exports.
           } else {
-            const entryPointFilename: string = path.basename(
-              collector.workingPackage.entryPointSourceFile.fileName
+            collector.messageRouter.addAnalyzerIssue(
+              ExtractorMessageId.ForgottenExport,
+              `The symbol "${localName}" needs to be exported by the entry point ${entryPointFilename}`,
+              astDeclaration
             );
-
-            if (!alreadyWarnedSymbols.has(referencedEntity)) {
-              alreadyWarnedSymbols.add(referencedEntity);
-
-              // The main usage scenario for ECMAScript symbols is to attach private data to a JavaScript object,
-              // so as a special case, we do NOT report them as forgotten exports.
-              if (!ValidationEnhancer._isEcmaScriptSymbol(referencedEntity)) {
-                collector.messageRouter.addAnalyzerIssue(
-                  ExtractorMessageId.ForgottenExport,
-                  `The symbol "${rootSymbol.localName}" needs to be exported` +
-                    ` by the entry point ${entryPointFilename}`,
-                  astDeclaration
-                );
-              }
-            }
           }
         }
       }

@@ -1,0 +1,59 @@
+/**
+ * Defines configuration used by core Heft.
+ */
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/heft/heft.schema.json",
+
+  "eventActions": [
+    {
+      /**
+       * The kind of built-in operation that should be performed.
+       * The "deleteGlobs" action deletes files or folders that match the
+       * specified glob patterns.
+       */
+      "actionKind": "deleteGlobs",
+
+      /**
+       * The stage of the Heft run during which this action should occur. Note that actions specified in heft.json
+       * occur at the end of the stage of the Heft run.
+       */
+      "heftEvent": "clean",
+
+      /**
+       * A user-defined tag whose purpose is to allow configs to replace/delete handlers that were added by other
+       * configs.
+       */
+      "actionId": "defaultClean",
+
+      /**
+       * Glob patterns to be deleted. The paths are resolved relative to the project folder.
+       */
+      "globsToDelete": ["dist", "lib", "lib-commonjs", "temp"]
+    }
+  ],
+
+  /**
+   * The list of Heft plugins to be loaded.
+   */
+  "heftPlugins": [
+    {
+      /**
+       * The path to the plugin package.
+       */
+      "plugin": "@rushstack/heft-webpack4-plugin"
+
+      /**
+       * An optional object that provides additional settings that may be defined by the plugin.
+       */
+      // "options": { }
+    },
+    {
+      "plugin": "@rushstack/heft-jest-plugin"
+
+      /**
+       * An optional object that provides additional settings that may be defined by the plugin.
+       */
+      // "options": { }
+    }
+  ]
+}

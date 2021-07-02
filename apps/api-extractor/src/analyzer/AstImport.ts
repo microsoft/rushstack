@@ -3,6 +3,7 @@
 
 import { AstSymbol } from './AstSymbol';
 import { InternalError } from '@rushstack/node-core-library';
+import { AstSyntheticEntity } from './AstEntity';
 
 /**
  * Indicates the import kind for an `AstImport`.
@@ -54,7 +55,7 @@ export interface IAstImportOptions {
  * For a symbol that was imported from an external package, this tracks the import
  * statement that was used to reach it.
  */
-export class AstImport {
+export class AstImport extends AstSyntheticEntity {
   public readonly importKind: AstImportKind;
 
   /**
@@ -118,6 +119,8 @@ export class AstImport {
   public readonly key: string;
 
   public constructor(options: IAstImportOptions) {
+    super();
+
     this.importKind = options.importKind;
     this.modulePath = options.modulePath;
     this.exportName = options.exportName;
@@ -128,11 +131,9 @@ export class AstImport {
     this.key = AstImport.getKey(options);
   }
 
-  /**
-   * Allows `AstEntity.localName` to be used as a convenient generalization of `AstSymbol.localName` and
-   * `AstImport.exportName`.
-   */
+  /** {@inheritdoc} */
   public get localName(): string | undefined {
+    // abstract
     return this.exportName;
   }
 

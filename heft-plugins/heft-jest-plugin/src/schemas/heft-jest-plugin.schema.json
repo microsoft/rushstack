@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Heft Jest Plugin Options Configuration",
+  "description": "Defines additional Jest-related plugin configuration.",
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "properties": {
+    "disableConfigurationModuleResolution": {
+      "title": "Disable Configuration Module Resolution",
+      "description": "If set to true, modules specified in the Jest configuration will be resolved using Jest default (rootDir-relative) resolution. Otherwise, modules will be resolved using Node module resolution.",
+      "type": "boolean"
+    }
+  }
+}

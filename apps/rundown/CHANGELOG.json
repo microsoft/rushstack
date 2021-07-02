@@ -2,6 +2,177 @@
   "name": "@rushstack/rundown",
   "entries": [
     {
+      "version": "1.0.120",
+      "tag": "@rushstack/rundown_v1.0.120",
+      "date": "Thu, 01 Jul 2021 15:08:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.34.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.1.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.119",
+      "tag": "@rushstack/rundown_v1.0.119",
+      "date": "Wed, 30 Jun 2021 19:16:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.1.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.118",
+      "tag": "@rushstack/rundown_v1.0.118",
+      "date": "Wed, 30 Jun 2021 15:06:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.34.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.1.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.117",
+      "tag": "@rushstack/rundown_v1.0.117",
+      "date": "Wed, 30 Jun 2021 01:37:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.34.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.1.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.116",
+      "tag": "@rushstack/rundown_v1.0.116",
+      "date": "Fri, 25 Jun 2021 00:08:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.34.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.1.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.115",
+      "tag": "@rushstack/rundown_v1.0.115",
+      "date": "Fri, 18 Jun 2021 06:23:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.33.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.1.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.114",
+      "tag": "@rushstack/rundown_v1.0.114",
+      "date": "Wed, 16 Jun 2021 18:53:52 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.1.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.113",
+      "tag": "@rushstack/rundown_v1.0.113",
+      "date": "Wed, 16 Jun 2021 15:07:24 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.33.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.1.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.112",
+      "tag": "@rushstack/rundown_v1.0.112",
+      "date": "Tue, 15 Jun 2021 20:38:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.1.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.111",
+      "tag": "@rushstack/rundown_v1.0.111",
+      "date": "Fri, 11 Jun 2021 23:26:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.0.31`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.110",
+      "tag": "@rushstack/rundown_v1.0.110",
+      "date": "Fri, 11 Jun 2021 00:34:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.32.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.0.30`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.109",
+      "tag": "@rushstack/rundown_v1.0.109",
+      "date": "Thu, 10 Jun 2021 15:08:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.31.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.0.29`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.108",
       "tag": "@rushstack/rundown_v1.0.108",
       "date": "Fri, 04 Jun 2021 19:59:53 GMT",

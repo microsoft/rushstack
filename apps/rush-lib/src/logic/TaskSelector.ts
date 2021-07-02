@@ -61,23 +61,7 @@ export class TaskSelector {
   }
 
   public registerTasks(): TaskCollection {
-    const selectedProjects: ReadonlySet<RushConfigurationProject> = this._computeSelectedProjects();
-
-    return this._createTaskCollection(selectedProjects);
-  }
-
-  private _computeSelectedProjects(): ReadonlySet<RushConfigurationProject> {
-    const { selection } = this._options;
-
-    if (selection.size) {
-      return selection;
-    }
-
-    // Default to all projects
-    return new Set(this._options.rushConfiguration.projects);
-  }
-
-  private _createTaskCollection(projects: ReadonlySet<RushConfigurationProject>): TaskCollection {
+    const projects: ReadonlySet<RushConfigurationProject> = this._options.selection;
     const taskCollection: TaskCollection = new TaskCollection();
 
     // Register all tasks

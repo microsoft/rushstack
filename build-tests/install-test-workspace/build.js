@@ -115,6 +115,22 @@ if (FileSystem.exists(dotPnpmFolderPath)) {
   }
 }
 
+const pnpmLockBeforePath = path.join(__dirname, 'workspace/common/pnpm-lock.yaml');
+const pnpmLockAfterPath = path.join(__dirname, 'workspace/pnpm-lock.yaml');
+let pnpmLockBeforeContent = '';
+
+if (FileSystem.exists(pnpmLockBeforePath)) {
+  pnpmLockBeforeContent = FileSystem.readFile(pnpmLockBeforePath).toString().replace(/\s+/g, ' ').trim();
+  FileSystem.copyFile({
+    sourcePath: pnpmLockBeforePath,
+    destinationPath: pnpmLockAfterPath,
+    alreadyExistsBehavior: 'overwrite'
+  });
+} else {
+  pnpmLockBeforeContent = '';
+  FileSystem.deleteFile(pnpmLockAfterPath);
+}
+
 const pnpmInstallArgs = [
   'install',
   '--store',
@@ -122,7 +138,8 @@ const pnpmInstallArgs = [
   '--strict-peer-dependencies',
   '--recursive',
   '--link-workspace-packages=false',
-  '--frozen-lockfile=false' // productionMode ? 'true' : 'false'
+  // PNPM gets confused by the rewriting performed by our .pnpmfile.cjs afterAllResolved hook
+  '--frozen-lockfile=false'
 ];
 
 console.log('\nInstalling:');
@@ -136,6 +153,33 @@ checkSpawnResult(
   'pnpm install'
 );
 
+// Now compare the before/after
+const pnpmLockAfterContent = FileSystem.readFile(pnpmLockAfterPath).toString().replace(/\s+/g, ' ').trim();
+
+let shrinkwrapUpdatedNotice = false;
+
+if (pnpmLockBeforeContent !== pnpmLockAfterContent) {
+  if (productionMode) {
+    // TODO: Re-enable when issue with lockfile diffing is resolved
+    // console.error('The shrinkwrap file is not up to date:');
+    // console.error('  Git copy:     ' + pnpmLockBeforePath);
+    // console.error('  Current copy: ' + pnpmLockAfterPath);
+    // console.error('\nPlease commit the updated copy to Git\n');
+    // process.exitCode = 1;
+    // return;
+  } else {
+    // Automatically update the copy
+    FileSystem.copyFile({
+      sourcePath: pnpmLockAfterPath,
+      destinationPath: pnpmLockBeforePath,
+      alreadyExistsBehavior: 'overwrite'
+    });
+
+    // Show the notice at the very end
+    shrinkwrapUpdatedNotice = true;
+  }
+}
+
 console.log('\n\nInstallation completed successfully.');
 
 console.log('\nBuilding projects...\n');
@@ -147,6 +191,11 @@ checkSpawnResult(
   }),
   'pnpm run'
 );
+
+if (shrinkwrapUpdatedNotice) {
+  console.error('\n==> The shrinkwrap file has been updated.  Please commit the changes to Git:');
+  console.error(`  ${pnpmLockBeforePath}`);
+}
 
 console.log('\n\nFinished build.js');
 

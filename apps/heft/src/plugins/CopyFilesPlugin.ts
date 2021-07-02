@@ -6,33 +6,20 @@ import * as path from 'path';
 import glob from 'fast-glob';
 import { performance } from 'perf_hooks';
 import { AlreadyExistsBehavior, FileSystem } from '@rushstack/node-core-library';
-import { TapOptions } from 'tapable';
 
-import { IHeftPlugin } from '../pluginFramework/IHeftPlugin';
+import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
+import { HeftEventPluginBase } from '../pluginFramework/HeftEventPluginBase';
 import { HeftSession } from '../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
-import { Async } from '../utilities/Async';
 import {
+  IExtendedSharedCopyConfiguration,
   IHeftEventActions,
-  CoreConfigFiles,
-  HeftEvent,
-  IExtendedSharedCopyConfiguration
+  IHeftConfigurationCopyFilesEventAction,
+  HeftEvent
 } from '../utilities/CoreConfigFiles';
-import {
-  IBuildStageContext,
-  IBundleSubstage,
-  ICompileSubstage,
-  IPostBuildSubstage,
-  IPreCompileSubstage
-} from '../stages/BuildStage';
+import { IBuildStageProperties } from '../stages/BuildStage';
+import { Async } from '../utilities/Async';
 import { Constants } from '../utilities/Constants';
-
-const PLUGIN_NAME: string = 'CopyFilesPlugin';
-const HEFT_STAGE_TAP: TapOptions<'promise'> = {
-  name: PLUGIN_NAME,
-  stage: Number.MAX_SAFE_INTEGER / 2 // This should give us some certainty that this will run after other plugins
-};
 
 interface ICopyFileDescriptor {
   sourceFilePath: string;
@@ -59,50 +46,32 @@ export interface ICopyFilesResult {
   linkedFileCount: number;
 }
 
-export class CopyFilesPlugin implements IHeftPlugin {
-  public readonly pluginName: string = PLUGIN_NAME;
+export class CopyFilesPlugin extends HeftEventPluginBase<IHeftConfigurationCopyFilesEventAction> {
+  public readonly pluginName: string = 'CopyFilesPlugin';
+  protected eventActionName: keyof IHeftEventActions = 'copyFiles';
+  protected loggerName: string = 'copy-files';
 
-  public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-      const logger: ScopedLogger = heftSession.requestScopedLogger('copy-files');
-      build.hooks.preCompile.tap(PLUGIN_NAME, (preCompile: IPreCompileSubstage) => {
-        preCompile.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
-          await this._runCopyFilesForHeftEvent(HeftEvent.preCompile, logger, heftConfiguration);
-        });
-      });
-
-      build.hooks.compile.tap(PLUGIN_NAME, (compile: ICompileSubstage) => {
-        compile.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
-          await this._runCopyFilesForHeftEvent(HeftEvent.compile, logger, heftConfiguration);
-        });
-      });
-
-      build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
-        bundle.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
-          await this._runCopyFilesForHeftEvent(HeftEvent.bundle, logger, heftConfiguration);
-        });
-      });
-
-      build.hooks.postBuild.tap(PLUGIN_NAME, (postBuild: IPostBuildSubstage) => {
-        postBuild.hooks.run.tapPromise(HEFT_STAGE_TAP, async () => {
-          await this._runCopyFilesForHeftEvent(HeftEvent.postBuild, logger, heftConfiguration);
-        });
-      });
-    });
+  /**
+   * @override
+   */
+  protected async handleBuildEventActionsAsync(
+    heftEvent: HeftEvent,
+    heftEventActions: IHeftConfigurationCopyFilesEventAction[],
+    logger: ScopedLogger,
+    heftSession: HeftSession,
+    heftConfiguration: HeftConfiguration,
+    properties: IBuildStageProperties
+  ): Promise<void> {
+    await this._runCopyFilesForHeftEventActions(heftEventActions, logger, heftConfiguration);
   }
 
-  private async _runCopyFilesForHeftEvent(
-    heftEvent: HeftEvent,
+  private async _runCopyFilesForHeftEventActions(
+    heftEventActions: IHeftConfigurationCopyFilesEventAction[],
     logger: ScopedLogger,
     heftConfiguration: HeftConfiguration
   ): Promise<void> {
-    const eventActions: IHeftEventActions = await CoreConfigFiles.getConfigConfigFileEventActionsAsync(
-      logger.terminal,
-      heftConfiguration
-    );
-
     const copyConfigurations: IResolvedDestinationCopyConfiguration[] = [];
-    for (const copyFilesEventAction of eventActions.copyFiles.get(heftEvent) || []) {
+    for (const copyFilesEventAction of heftEventActions) {
       for (const copyOperation of copyFilesEventAction.copyOperations) {
         copyConfigurations.push({
           ...copyOperation,

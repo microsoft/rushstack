@@ -17,7 +17,11 @@ export enum CommandLineParameterKind {
   /** Indicates a CommandLineStringParameter */
   String,
   /** Indicates a CommandLineStringListParameter */
-  StringList
+  StringList,
+  /** Indicates a CommandLineChoiceListParameter */
+  ChoiceList,
+  /** Indicates a CommandLineIntegerListParameter */
+  IntegerList
 }
 
 /**

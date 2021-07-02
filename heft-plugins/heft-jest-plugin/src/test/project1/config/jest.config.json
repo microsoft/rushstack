@@ -1,0 +1,15 @@
+{
+  "extends": "../a/jest.config.json",
+
+  "globalSetup": "<rootDir>/a/b/globalSetupFile1.js",
+
+  "globals": {
+    "key1": "value5",
+    "key2": ["value2", "value6"],
+    "key3": {
+      "key4": "value7",
+      "key6": "value8"
+    },
+    "key7": "value9"
+  }
+}

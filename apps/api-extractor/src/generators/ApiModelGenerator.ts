@@ -40,6 +40,9 @@ import { AstSymbol } from '../analyzer/AstSymbol';
 import { DeclarationReferenceGenerator } from './DeclarationReferenceGenerator';
 import { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
+import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
+import { AstEntity } from '../analyzer/AstEntity';
+import { AstModule } from '../analyzer/AstModule';
 
 export class ApiModelGenerator {
   private readonly _collector: Collector;
@@ -78,20 +81,77 @@ export class ApiModelGenerator {
     // Create a CollectorEntity for each top-level export
     for (const entity of this._collector.entities) {
       if (entity.exported) {
-        if (entity.astEntity instanceof AstSymbol) {
-          // Skip ancillary declarations; we will process them with the main declaration
-          for (const astDeclaration of this._collector.getNonAncillaryDeclarations(entity.astEntity)) {
-            this._processDeclaration(astDeclaration, entity.nameForEmit, apiEntryPoint);
-          }
-        } else {
-          // TODO: Figure out how to represent reexported AstImport objects.  Basically we need to introduce a new
-          // ApiItem subclass for "export alias", similar to a type alias, but representing declarations of the
-          // form "export { X } from 'external-package'".  We can also use this to solve GitHub issue #950.
-        }
+        this._processAstEntity(entity.astEntity, entity.nameForEmit, apiEntryPoint);
       }
     }
 
     return apiPackage;
+  }
+
+  private _processAstEntity(
+    astEntity: AstEntity,
+    exportedName: string | undefined,
+    parentApiItem: ApiItemContainerMixin
+  ): void {
+    if (astEntity instanceof AstSymbol) {
+      // Skip ancillary declarations; we will process them with the main declaration
+      for (const astDeclaration of this._collector.getNonAncillaryDeclarations(astEntity)) {
+        this._processDeclaration(astDeclaration, exportedName, parentApiItem);
+      }
+      return;
+    }
+
+    if (astEntity instanceof AstNamespaceImport) {
+      // Note that a single API item can belong to two different AstNamespaceImport namespaces.  For example:
+      //
+      //   // file.ts defines "thing()"
+      //   import * as example1 from "./file";
+      //   import * as example2 from "./file";
+      //
+      //   // ...so here we end up with example1.thing() and example2.thing()
+      //   export { example1, example2 }
+      //
+      // The current logic does not try to associate "thing()" with a specific parent.  Instead
+      // the API documentation will show duplicated entries for example1.thing() and example2.thing()./
+      //
+      // This could be improved in the future, but it requires a stable mechanism for choosing an associated parent.
+      // For thoughts about this:  https://github.com/microsoft/rushstack/issues/1308
+      this._processAstModule(astEntity.astModule, exportedName, parentApiItem);
+      return;
+    }
+
+    // TODO: Figure out how to represent reexported AstImport objects.  Basically we need to introduce a new
+    // ApiItem subclass for "export alias", similar to a type alias, but representing declarations of the
+    // form "export { X } from 'external-package'".  We can also use this to solve GitHub issue #950.
+  }
+
+  private _processAstModule(
+    astModule: AstModule,
+    exportedName: string | undefined,
+    parentApiItem: ApiItemContainerMixin
+  ): void {
+    const name: string = exportedName ? exportedName : astModule.moduleSymbol.name;
+    const containerKey: string = ApiNamespace.getContainerKey(name);
+
+    let apiNamespace: ApiNamespace | undefined = parentApiItem.tryGetMemberByKey(
+      containerKey
+    ) as ApiNamespace;
+
+    if (apiNamespace === undefined) {
+      apiNamespace = new ApiNamespace({
+        name,
+        docComment: undefined,
+        releaseTag: ReleaseTag.None,
+        excerptTokens: []
+      });
+      parentApiItem.addMember(apiNamespace);
+    }
+
+    astModule.astModuleExportInfo!.exportedLocalEntities.forEach(
+      (exportedEntity: AstEntity, exportedName: string) => {
+        this._processAstEntity(exportedEntity, exportedName, apiNamespace!);
+      }
+    );
   }
 
   private _processDeclaration(

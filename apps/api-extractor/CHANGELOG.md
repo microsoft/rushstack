@@ -1,6 +1,22 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 04 Jun 2021 19:59:53 GMT and should not be manually modified.
+This log was last generated on Thu, 01 Jul 2021 15:08:27 GMT and should not be manually modified.
+
+## 7.17.1
+Thu, 01 Jul 2021 15:08:27 GMT
+
+_Version update only_
+
+## 7.17.0
+Wed, 30 Jun 2021 15:06:54 GMT
+
+### Minor changes
+
+- Added support for "import * as module from './local/module';" (GitHub #1029) -- Big thanks to @adventure-yunfei, @mckn, @rbuckton, and @octogonz who all helped with this difficult PR!
+
+### Patches
+
+- Include /// directives in API report
 
 ## 7.16.1
 Fri, 04 Jun 2021 19:59:53 GMT

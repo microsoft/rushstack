@@ -132,6 +132,11 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const selection: Set<RushConfigurationProject> = this._selectionParameters.getSelectedProjects();
 
+    if (!selection.size) {
+      terminal.writeLine(colors.yellow(`The command line selection parameters did not match any projects.`));
+      return;
+    }
+
     const taskSelectorOptions: ITaskSelectorConstructor = {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,

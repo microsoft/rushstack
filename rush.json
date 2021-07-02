@@ -531,6 +531,38 @@
       "shouldPublish": false
     },
 
+    // "build-tests-samples" folder (alphabetical order)
+    {
+      "packageName": "heft-node-basic-tutorial",
+      "projectFolder": "build-tests-samples/heft-node-basic-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-node-jest-tutorial",
+      "projectFolder": "build-tests-samples/heft-node-jest-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-node-rig-tutorial",
+      "projectFolder": "build-tests-samples/heft-node-rig-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-webpack-basic-tutorial",
+      "projectFolder": "build-tests-samples/heft-webpack-basic-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "packlets-tutorial",
+      "projectFolder": "build-tests-samples/packlets-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+
     // heft-* projects
     {
       "packageName": "heft-action-plugin",
@@ -650,6 +682,12 @@
     },
 
     // "heft-plugins" folder (alphabetical order)
+    {
+      "packageName": "@rushstack/heft-jest-plugin",
+      "projectFolder": "heft-plugins/heft-jest-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
     {
       "packageName": "@rushstack/heft-webpack4-plugin",
       "projectFolder": "heft-plugins/heft-webpack4-plugin",
@@ -811,38 +849,6 @@
       "reviewCategory": "libraries",
       "shouldPublish": true,
       "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
-    },
-
-    // "tutorials" folder (alphabetical order)
-    {
-      "packageName": "heft-node-basic-tutorial",
-      "projectFolder": "tutorials/heft-node-basic-tutorial",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "heft-node-jest-tutorial",
-      "projectFolder": "tutorials/heft-node-jest-tutorial",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "heft-node-rig-tutorial",
-      "projectFolder": "tutorials/heft-node-rig-tutorial",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "heft-webpack-basic-tutorial",
-      "projectFolder": "tutorials/heft-webpack-basic-tutorial",
-      "reviewCategory": "tests",
-      "shouldPublish": false
-    },
-    {
-      "packageName": "packlets-tutorial",
-      "projectFolder": "tutorials/packlets-tutorial",
-      "reviewCategory": "tests",
-      "shouldPublish": false
     },
 
     // "webpack" folder (alphabetical order)

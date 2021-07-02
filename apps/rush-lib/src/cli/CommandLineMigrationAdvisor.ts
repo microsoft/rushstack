@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
+import { PrintUtilities } from '@rushstack/terminal';
 
 import { RushConstants } from '../logic/RushConstants';
-import { Utilities } from '../utilities/Utilities';
 
 export class CommandLineMigrationAdvisor {
   // NOTE: THIS RUNS BEFORE THE REAL COMMAND-LINE PARSING.
@@ -56,15 +56,15 @@ export class CommandLineMigrationAdvisor {
   private static _reportDeprecated(message: string): void {
     console.error(
       colors.red(
-        Utilities.wrapWords(
+        PrintUtilities.wrapWords(
           'ERROR: You specified an outdated command-line that is no longer supported by this version of Rush:'
         )
       )
     );
-    console.error(colors.yellow(Utilities.wrapWords(message)));
+    console.error(colors.yellow(PrintUtilities.wrapWords(message)));
     console.error();
     console.error(
-      Utilities.wrapWords(
+      PrintUtilities.wrapWords(
         `For command-line help, type "rush -h".  For migration instructions,` +
           ` please visit ${RushConstants.rushWebSiteUrl}`
       )

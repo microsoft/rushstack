@@ -1,0 +1,42 @@
+{
+  "name": "@rushstack/heft-jest-plugin",
+  "version": "0.1.9",
+  "description": "Heft plugin for Jest",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack/tree/master/heft-plugins/heft-jest-plugin"
+  },
+  "homepage": "https://rushstack.io/pages/heft/overview/",
+  "main": "lib/index.js",
+  "types": "dist/heft-jest-plugin.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft test --clean",
+    "start": "heft test --clean --watch"
+  },
+  "peerDependencies": {
+    "@rushstack/heft": "^0.34.3"
+  },
+  "dependencies": {
+    "@jest/core": "~25.4.0",
+    "@jest/reporters": "~25.4.0",
+    "@jest/transform": "~25.4.0",
+    "@rushstack/heft-config-file": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "lodash": "~4.17.15",
+    "jest-config": "~25.4.0",
+    "jest-snapshot": "~25.4.0"
+  },
+  "devDependencies": {
+    "@jest/types": "~25.4.0",
+    "@microsoft/api-extractor": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/lodash": "4.14.116",
+    "@types/node": "10.17.13",
+    "eslint": "~7.12.1",
+    "jest-environment-node": "~25.4.0",
+    "typescript": "~3.9.7"
+  }
+}

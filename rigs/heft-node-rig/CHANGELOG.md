@@ -1,6 +1,70 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Fri, 04 Jun 2021 19:59:53 GMT and should not be manually modified.
+This log was last generated on Thu, 01 Jul 2021 15:08:27 GMT and should not be manually modified.
+
+## 1.1.8
+Thu, 01 Jul 2021 15:08:27 GMT
+
+_Version update only_
+
+## 1.1.7
+Wed, 30 Jun 2021 19:16:19 GMT
+
+_Version update only_
+
+## 1.1.6
+Wed, 30 Jun 2021 15:06:54 GMT
+
+_Version update only_
+
+## 1.1.5
+Wed, 30 Jun 2021 01:37:17 GMT
+
+_Version update only_
+
+## 1.1.4
+Fri, 25 Jun 2021 00:08:28 GMT
+
+_Version update only_
+
+## 1.1.3
+Fri, 18 Jun 2021 06:23:05 GMT
+
+_Version update only_
+
+## 1.1.2
+Wed, 16 Jun 2021 18:53:52 GMT
+
+_Version update only_
+
+## 1.1.1
+Wed, 16 Jun 2021 15:07:24 GMT
+
+_Version update only_
+
+## 1.1.0
+Tue, 15 Jun 2021 20:38:35 GMT
+
+### Minor changes
+
+- Disable the allowUnreachableCode TypeScript compiler option.
+
+## 1.0.31
+Fri, 11 Jun 2021 23:26:16 GMT
+
+_Version update only_
+
+## 1.0.30
+Fri, 11 Jun 2021 00:34:02 GMT
+
+### Patches
+
+- Add @rushstack/heft-jest-plugin to run during tests
+
+## 1.0.29
+Thu, 10 Jun 2021 15:08:16 GMT
+
+_Version update only_
 
 ## 1.0.28
 Fri, 04 Jun 2021 19:59:53 GMT

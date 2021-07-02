@@ -6,6 +6,7 @@
 
 import { Brand } from '@rushstack/node-core-library';
 import { NewlineKind } from '@rushstack/node-core-library';
+import { Terminal } from '@rushstack/node-core-library';
 
 // @public
 export class CallbackWritable extends TerminalWritable {
@@ -13,6 +14,9 @@ export class CallbackWritable extends TerminalWritable {
     // (undocumented)
     protected onWriteChunk(chunk: ITerminalChunk): void;
 }
+
+// @public
+export const DEFAULT_CONSOLE_WIDTH: number;
 
 // @beta
 export class DiscardStdoutTransform extends TerminalTransform {
@@ -104,6 +108,13 @@ export class NormalizeNewlinesTextRewriter extends TextRewriter {
     readonly newlineKind: NewlineKind;
     // (undocumented)
     process(unknownState: TextRewriterState, text: string): string;
+}
+
+// @public
+export class PrintUtilities {
+    static getConsoleWidth(): number | undefined;
+    static printMessageInBox(message: string, terminal: Terminal, boxWidth?: number): void;
+    static wrapWords(text: string, maxLineLength?: number, indent?: number): string;
 }
 
 // @public

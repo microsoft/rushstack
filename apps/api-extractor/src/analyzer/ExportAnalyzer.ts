@@ -10,7 +10,9 @@ import { AstImport, IAstImportOptions, AstImportKind } from './AstImport';
 import { AstModule, AstModuleExportInfo } from './AstModule';
 import { TypeScriptInternals } from './TypeScriptInternals';
 import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
-import { IFetchAstSymbolOptions, AstEntity } from './AstSymbolTable';
+import { IFetchAstSymbolOptions } from './AstSymbolTable';
+import { AstEntity } from './AstEntity';
+import { AstNamespaceImport } from './AstNamespaceImport';
 
 /**
  * Exposes the minimal APIs from AstSymbolTable that are needed by ExportAnalyzer.
@@ -21,7 +23,7 @@ import { IFetchAstSymbolOptions, AstEntity } from './AstSymbolTable';
 export interface IAstSymbolTable {
   fetchAstSymbol(options: IFetchAstSymbolOptions): AstSymbol | undefined;
 
-  analyze(astSymbol: AstSymbol): void;
+  analyze(astEntity: AstEntity): void;
 }
 
 /**
@@ -72,6 +74,7 @@ export class ExportAnalyzer {
   private readonly _importableAmbientSourceFiles: Set<ts.SourceFile> = new Set<ts.SourceFile>();
 
   private readonly _astImportsByKey: Map<string, AstImport> = new Map<string, AstImport>();
+  private readonly _astNamespaceImportByModule: Map<AstModule, AstNamespaceImport> = new Map();
 
   public constructor(
     program: ts.Program,
@@ -327,6 +330,10 @@ export class ExportAnalyzer {
                     this._astSymbolTable.analyze(astEntity);
                   }
 
+                  if (astEntity instanceof AstNamespaceImport && !astEntity.astModule.isExternal) {
+                    this._astSymbolTable.analyze(astEntity);
+                  }
+
                   astModuleExportInfo.exportedLocalEntities.set(exportSymbol.name, astEntity);
                 }
               }
@@ -510,6 +517,26 @@ export class ExportAnalyzer {
         // Example: " ExportName as RenamedName"
         const exportSpecifier: ts.ExportSpecifier = declaration as ts.ExportSpecifier;
         exportName = (exportSpecifier.propertyName || exportSpecifier.name).getText().trim();
+      } else if (declaration.kind === ts.SyntaxKind.NamespaceExport) {
+        // EXAMPLE:
+        // "export * as theLib from 'the-lib';"
+        //
+        // ExportDeclaration:
+        //   ExportKeyword:  pre=[export] sep=[ ]
+        //   NamespaceExport:
+        //     AsteriskToken:  pre=[*] sep=[ ]
+        //     AsKeyword:  pre=[as] sep=[ ]
+        //     Identifier:  pre=[theLib] sep=[ ]
+        //   FromKeyword:  pre=[from] sep=[ ]
+        //   StringLiteral:  pre=['the-lib']
+        //   SemicolonToken:  pre=[;]
+
+        // Issue tracking this feature: https://github.com/microsoft/rushstack/issues/2780
+        throw new Error(
+          `The "export * as ___" syntax is not supported yet; as a workaround,` +
+            ` use "import * as ___" with a separate "export { ___ }" declaration\n` +
+            SourceFileLocationFormatter.formatDeclaration(declaration)
+        );
       } else {
         throw new InternalError(
           `Unimplemented export declaration kind: ${declaration.getText()}\n` +
@@ -569,12 +596,18 @@ export class ExportAnalyzer {
         //   SemicolonToken:  pre=[;]
 
         if (externalModulePath === undefined) {
-          // The implementation here only works when importing from an external module.
-          // The full solution is tracked by: https://github.com/microsoft/rushstack/issues/1029
-          throw new Error(
-            '"import * as ___ from ___;" is not supported yet for local files.\n' +
-              SourceFileLocationFormatter.formatDeclaration(importDeclaration)
-          );
+          const astModule: AstModule = this._fetchSpecifierAstModule(importDeclaration, declarationSymbol);
+          let namespaceImport: AstNamespaceImport | undefined =
+            this._astNamespaceImportByModule.get(astModule);
+          if (namespaceImport === undefined) {
+            namespaceImport = new AstNamespaceImport({
+              namespaceName: declarationSymbol.name,
+              astModule: astModule,
+              declaration: declaration
+            });
+            this._astNamespaceImportByModule.set(astModule, namespaceImport);
+          }
+          return namespaceImport;
         }
 
         // Here importSymbol=undefined because {@inheritDoc} and such are not going to work correctly for

@@ -4,6 +4,7 @@
 import * as ts from 'typescript';
 import { AstDeclaration } from './AstDeclaration';
 import { InternalError } from '@rushstack/node-core-library';
+import { AstEntity } from './AstEntity';
 
 /**
  * Constructor options for AstSymbol
@@ -50,18 +51,9 @@ export interface IAstSymbolOptions {
  *                              - g
  * ```
  */
-export class AstSymbol {
-  /**
-   * The original name of the symbol, as exported from the module (i.e. source file)
-   * containing the original TypeScript definition.  Constructs such as
-   * `import { X as Y } from` may introduce other names that differ from the local name.
-   *
-   * @remarks
-   * For the most part, `localName` corresponds to `followedSymbol.name`, but there
-   * are some edge cases.  For example, the symbol name for `export default class X { }`
-   * is actually `"default"`, not `"X"`.
-   */
-  public readonly localName: string;
+export class AstSymbol extends AstEntity {
+  /** {@inheritdoc} */
+  public readonly localName: string; // abstract
 
   /**
    * If true, then the `followedSymbol` (i.e. original declaration) of this symbol
@@ -121,6 +113,8 @@ export class AstSymbol {
   private _analyzed: boolean = false;
 
   public constructor(options: IAstSymbolOptions) {
+    super();
+
     this.followedSymbol = options.followedSymbol;
     this.localName = options.localName;
     this.isExternal = options.isExternal;

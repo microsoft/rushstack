@@ -23,6 +23,8 @@
     "exportImportedExternal",
     "exportImportedExternal2",
     "exportImportedExternalDefault",
+    "exportImportStarAs",
+    "exportImportStarAs2",
     "exportStar",
     "exportStar2",
     "exportStar3",

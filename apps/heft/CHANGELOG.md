@@ -1,6 +1,57 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 04 Jun 2021 19:59:53 GMT and should not be manually modified.
+This log was last generated on Thu, 01 Jul 2021 15:08:27 GMT and should not be manually modified.
+
+## 0.34.3
+Thu, 01 Jul 2021 15:08:27 GMT
+
+_Version update only_
+
+## 0.34.2
+Wed, 30 Jun 2021 15:06:54 GMT
+
+_Version update only_
+
+## 0.34.1
+Wed, 30 Jun 2021 01:37:17 GMT
+
+_Version update only_
+
+## 0.34.0
+Fri, 25 Jun 2021 00:08:28 GMT
+
+### Minor changes
+
+- Add RunScriptPlugin to allow for running custom scripts specified in "heft.json". Specified as a "runScript" event in the "heftEvents" field, paths to scripts are resolved relative to the root of the project they are specified in.
+
+## 0.33.1
+Fri, 18 Jun 2021 06:23:05 GMT
+
+### Patches
+
+- Fix a regression where Heft sometimes failed with "No tests found, exiting with code 1"
+
+## 0.33.0
+Wed, 16 Jun 2021 15:07:24 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Simplify the plugin event hook lifecycle by eliminating an experimental feature that enabled side-by-side compiler configurations. We decided that this scenario is better approached by splitting the files into separate projects.
+- (BREAKING CHANGE) Remove the "afterEachIteration" compile substage and replace its functionality with a more versatile "afterRecompile" compile substage hook.
+
+## 0.32.0
+Fri, 11 Jun 2021 00:34:02 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Remove Jest plugin from Heft. To consume the Jest plugin, add @rushstack/heft-jest-plugin as a dependency and include it in heft.json. See UPGRADING.md for more information.
+
+## 0.31.5
+Thu, 10 Jun 2021 15:08:15 GMT
+
+### Patches
+
+- Update the version compatibility warning to indicate that TypeScript 4.x is supported by Heft
 
 ## 0.31.4
 Fri, 04 Jun 2021 19:59:53 GMT

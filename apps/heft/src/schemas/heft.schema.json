@@ -4,6 +4,13 @@
   "description": "Defines configuration used by core Heft.",
   "type": "object",
 
+  "definitions": {
+    "anything": {
+      "type": ["array", "boolean", "integer", "number", "object", "string"],
+      "items": { "$ref": "#/definitions/anything" }
+    }
+  },
+
   "additionalProperties": false,
 
   "properties": {
@@ -30,13 +37,13 @@
               "actionKind": {
                 "type": "string",
                 "description": "The kind of built-in operation that should be performed.",
-                "enum": ["deleteGlobs", "copyFiles"]
+                "enum": ["deleteGlobs", "copyFiles", "runScript"]
               },
 
               "heftEvent": {
                 "type": "string",
                 "description": "The Heft stage when this action should be performed.  Note that heft.json event actions are scheduled after any plugin tasks have processed the event.  For example, a \"compile\" event action will be performed after the TypeScript compiler has been invoked.",
-                "enum": ["clean", "pre-compile", "compile", "bundle", "post-build"]
+                "enum": ["clean", "pre-compile", "compile", "bundle", "post-build", "test"]
               },
 
               "actionId": {
@@ -53,6 +60,11 @@
                   "actionKind": {
                     "type": "string",
                     "enum": ["deleteGlobs"]
+                  },
+
+                  "heftEvent": {
+                    "type": "string",
+                    "enum": ["clean", "pre-compile", "compile", "bundle", "post-build"]
                   },
 
                   "globsToDelete": {
@@ -137,6 +149,37 @@
                           "description": "If true, filesystem hard links will be created instead of copying the file.  Depending on the operating system, this may be faster. (But note that it may cause unexpected behavior if a tool modifies the link.)  The default value is false."
                         }
                       }
+                    }
+                  }
+                }
+              },
+              {
+                "required": ["scriptPath"],
+                "properties": {
+                  "actionKind": {
+                    "type": "string",
+                    "enum": ["runScript"]
+                  },
+
+                  "heftEvent": {
+                    "type": "string",
+                    "enum": ["pre-compile", "compile", "bundle", "post-build", "test"]
+                  },
+
+                  "scriptPath": {
+                    "type": "string",
+                    "description": "Path to the script that will be run, relative to the project root.",
+                    "items": {
+                      "type": "string",
+                      "pattern": "[^\\\\]"
+                    }
+                  },
+
+                  "scriptOptions": {
+                    "type": "object",
+                    "description": "Optional parameters that will be passed to the script at runtime.",
+                    "patternProperties": {
+                      "^.*$": { "$ref": "#/definitions/anything" }
                     }
                   }
                 }
