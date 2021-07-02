@@ -26,10 +26,6 @@ import { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 import { ExtractorConfig } from '../api/ExtractorConfig';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
-import { AstImport } from '../analyzer/AstImport';
-
-const toAlphaNumericCamelCase = (str: string): string =>
-  str.replace(/(\W+[a-z])/g, (g) => g[g.length - 1].toUpperCase()).replace(/\W/g, '');
 
 /**
  * Options for Collector constructor.
@@ -506,9 +502,6 @@ export class Collector {
         entity.singleExportName !== ts.InternalSymbolName.Default
       ) {
         idealNameForEmit = entity.singleExportName;
-      } else if (entity.astEntity instanceof AstImport) {
-        // otherwise use the local name or modulePath
-        idealNameForEmit = entity.astEntity.localName || toAlphaNumericCamelCase(entity.astEntity.modulePath);
       } else {
         // otherwise use the local name
         idealNameForEmit = entity.astEntity.localName;

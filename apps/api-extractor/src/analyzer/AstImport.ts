@@ -47,7 +47,7 @@ export enum AstImportKind {
 export interface IAstImportOptions {
   readonly importKind: AstImportKind;
   readonly modulePath: string;
-  readonly exportName: string | undefined;
+  readonly exportName: string;
   readonly isTypeOnly: boolean;
 }
 
@@ -90,7 +90,7 @@ export class AstImport extends AstSyntheticEntity {
    * interface foo { foo: import('bar').a.b.c };
    * ```
    */
-  public readonly exportName: string | undefined;
+  public readonly exportName: string;
 
   /**
    * Whether it is a type-only import, for example:
@@ -132,7 +132,7 @@ export class AstImport extends AstSyntheticEntity {
   }
 
   /** {@inheritdoc} */
-  public get localName(): string | undefined {
+  public get localName(): string {
     // abstract
     return this.exportName;
   }

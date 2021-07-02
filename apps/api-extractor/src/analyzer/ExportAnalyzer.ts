@@ -423,9 +423,19 @@ export class ExportAnalyzer {
     const externalModulePath: string | undefined = this._tryGetExternalModulePath(node);
 
     if (externalModulePath) {
+      let exportName: string;
+      if (node.qualifier) {
+        exportName = node.qualifier.getText().trim();
+      } else {
+        const toAlphaNumericCamelCase = (str: string): string =>
+          str.replace(/(\W+[a-z])/g, (g) => g[g.length - 1].toUpperCase()).replace(/\W/g, '');
+
+        exportName = toAlphaNumericCamelCase(externalModulePath);
+      }
+
       return this._fetchAstImport(undefined, {
         importKind: AstImportKind.ImportType,
-        exportName: node.qualifier ? node.qualifier.getText().trim() : undefined,
+        exportName: exportName,
         modulePath: externalModulePath,
         isTypeOnly: false
       });
