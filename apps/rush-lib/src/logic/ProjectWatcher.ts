@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Import, Path, Terminal } from '@rushstack/node-core-library';
+import * as fs from 'fs';
+import * as os from 'os';
+import { once } from 'events';
+import { Path, Terminal } from '@rushstack/node-core-library';
 
 import { PackageChangeAnalyzer } from './PackageChangeAnalyzer';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
-
-// Use lazy import because we don't need this immediately
-const chokidar: typeof import('chokidar') = Import.lazy('chokidar', require);
 
 export interface IProjectWatcherOptions {
   debounceMilliseconds?: number;
@@ -30,6 +30,10 @@ export interface IProjectChangeResult {
 
 /**
  * This class is for incrementally watching a set of projects in the repository for changes.
+ *
+ * We are manually using fs.watch() instead of `chokidar` because all we want from the file system watcher is a boolean
+ * signal indicating that "at least 1 file in a watched project changed". We then defer to PackageChangeAnalyzer (which
+ * is responsible for change detection in all incremental builds) to determine what actually chanaged.
  *
  * Calling `waitForChange()` will return a promise that resolves when the package-deps of one or
  * more projects differ from the value the previous time it was invoked. The first time will always resolve with the full selection.
@@ -57,7 +61,7 @@ export class ProjectWatcher {
    * Will return immediately the first time it is invoked, since no state has been recorded.
    * If no change is currently present, watches the source tree of all selected projects for file changes.
    */
-  public async waitForChange(): Promise<IProjectChangeResult> {
+  public async waitForChange(onWatchingFiles?: () => void): Promise<IProjectChangeResult> {
     const initialChangeResult: IProjectChangeResult = await this._computeChanged();
     // Ensure that the new state is recorded so that we don't loop infinitely
     this._commitChanges(initialChangeResult.state);
@@ -65,20 +69,31 @@ export class ProjectWatcher {
       return initialChangeResult;
     }
 
-    const watcher: import('chokidar').FSWatcher = new chokidar.FSWatcher({
-      persistent: true,
-      cwd: Path.convertToSlashes(this._rushConfiguration.rushJsonFolder),
-      followSymlinks: false,
-      ignoreInitial: true,
-      ignored: /(?:^|[\\\/])node_modules/g,
-      disableGlobbing: true,
-      interval: 1000
-    });
+    const previousState: PackageChangeAnalyzer = initialChangeResult.state;
+    const repoRoot: string = Path.convertToSlashes(this._rushConfiguration.rushJsonFolder);
 
-    // Only watch for changes in the requested project folders
+    const pathsToWatch: Set<string> = new Set();
+
+    // Node 12 supports the "recursive" parameter to fs.watch only on win32 and OSX
+    // https://nodejs.org/docs/latest-v12.x/api/fs.html#fs_caveats
+    const useNativeRecursiveWatch: boolean = os.platform() === 'win32' || os.platform() === 'darwin';
+
     for (const project of this._projectsToWatch) {
-      watcher.add(Path.convertToSlashes(project.projectFolder));
+      const projectState: Map<string, string> = (await previousState.getPackageDeps(project.packageName, this._terminal))!;
+      const projectFolder: string = project.projectRelativeFolder;
+      // Watch files in the root of the project, or
+      for (const fileName of projectState.keys()) {
+        for (const pathToWatch of ProjectWatcher._enumeratePathsToWatch(
+          fileName,
+          projectFolder,
+          useNativeRecursiveWatch
+        )) {
+          pathsToWatch.add(`${repoRoot}/${pathToWatch}`);
+        }
+      }
     }
+
+    const watchers: Map<string, fs.FSWatcher> = new Map();
 
     const watchedResult: IProjectChangeResult = await new Promise(
       (resolve: (result: IProjectChangeResult) => void, reject: (err: Error) => void) => {
@@ -115,10 +130,57 @@ export class ProjectWatcher {
           }
         };
 
-        watcher.on('all', () => {
+        const onError = (err: Error): void => {
+          if (terminated) {
+            return;
+          }
+
+          terminated = true;
+          reject(err);
+        };
+
+        const addWatcher = (
+          watchedPath: string,
+          listener: (event: string, fileName: string | Buffer) => void
+        ): void => {
+          const watcher: fs.FSWatcher = fs.watch(
+            watchedPath,
+            {
+              encoding: 'utf-8',
+              recursive: useNativeRecursiveWatch
+            },
+            listener
+          );
+          watchers.set(watchedPath, watcher);
+          watcher.on('error', (err) => {
+            watchers.delete(watchedPath);
+            onError(err);
+          });
+        };
+
+        const changeListener = (event: string, fileName: string | Buffer): void => {
           try {
             if (terminated) {
               return;
+            }
+
+            // Handling for added directories
+            if (!useNativeRecursiveWatch) {
+              const decodedName: string = fileName && fileName.toString();
+              const normalizedName: string = decodedName && Path.convertToSlashes(decodedName);
+
+              if (normalizedName && !watchers.has(normalizedName)) {
+                try {
+                  const stat: fs.Stats = fs.statSync(fileName);
+                  if (stat.isDirectory()) {
+                    addWatcher(normalizedName, changeListener);
+                  }
+                } catch (err) {
+                  if (err.code !== 'ENOENT' && err.code !== 'ENOTDIR') {
+                    throw err;
+                  }
+                }
+              }
             }
 
             // Use a timeout to debounce changes, e.g. bulk copying files into the directory while the watcher is running.
@@ -131,11 +193,29 @@ export class ProjectWatcher {
             terminated = true;
             reject(err);
           }
-        });
+        };
+
+        for (const pathToWatch of pathsToWatch) {
+          addWatcher(pathToWatch, changeListener);
+        }
+
+        if (onWatchingFiles) {
+          onWatchingFiles();
+        }
       }
     );
 
-    await watcher.close();
+    const closePromises: Promise<void>[] = [];
+    for (const [watchedPath, watcher] of watchers) {
+      closePromises.push(
+        once(watcher, 'close').then(() => {
+          watchers.delete(watchedPath);
+        })
+      );
+      watcher.close();
+    }
+
+    await Promise.all(closePromises);
 
     return watchedResult;
   }
@@ -200,5 +280,31 @@ export class ProjectWatcher {
     }
 
     return false;
+  }
+
+  private static *_enumeratePathsToWatch(
+    path: string,
+    projectRelativeFolder: string,
+    useNativeRecursiveWatch: boolean
+  ): Iterable<string> {
+    const rootSlashIndex: number = path.indexOf('/', projectRelativeFolder.length + 2);
+
+    if (rootSlashIndex < 0) {
+      yield path;
+      return;
+    }
+
+    yield path.slice(0, rootSlashIndex);
+
+    if (useNativeRecursiveWatch) {
+      // Only need the root folder if fs.watch can be called with recursive: true
+      return;
+    }
+
+    let slashIndex: number = path.lastIndexOf('/');
+    while (slashIndex > rootSlashIndex) {
+      yield path.slice(0, slashIndex);
+      slashIndex = path.lastIndexOf('/', slashIndex - 1);
+    }
   }
 }
