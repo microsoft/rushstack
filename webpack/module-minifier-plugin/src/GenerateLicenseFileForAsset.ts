@@ -4,7 +4,25 @@
 import * as path from 'path';
 import * as webpack from 'webpack';
 import { ConcatSource } from 'webpack-sources';
-import { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.types';
+import { IAssetInfo, IModuleMap, IModuleInfo, IExtendedModule } from './ModuleMinifierPlugin.types';
+
+function* iterateAllComments(moduleIds: (string | number)[], minifiedModules: IModuleMap): Iterable<string> {
+  for (const moduleId of moduleIds) {
+    const mod: IModuleInfo | undefined = minifiedModules.get(moduleId);
+    if (!mod) {
+      continue;
+    }
+
+    const { module: webpackModule } = mod;
+    const modules: IExtendedModule[] = webpackModule.modules || [webpackModule];
+    for (const submodule of modules) {
+      const { comments: subModuleComments } = submodule.factoryMeta;
+      if (subModuleComments) {
+        yield* subModuleComments;
+      }
+    }
+  }
+}
 
 /**
  * Generates a companion asset containing all extracted comments. If it is non-empty, returns a banner comment directing users to said companion asset.
@@ -22,15 +40,7 @@ export function generateLicenseFileForAsset(
 ): string {
   // Extracted comments from the minified asset and from the modules.
   // The former generally will be nonexistent (since it contains only the runtime), but the modules may have some.
-  const comments: Set<string> = new Set(asset.extractedComments);
-  for (const moduleId of asset.modules) {
-    const mod: IModuleInfo | undefined = minifiedModules.get(moduleId);
-    if (mod) {
-      for (const comment of mod.extractedComments) {
-        comments.add(comment);
-      }
-    }
-  }
+  const comments: Set<string> = new Set(iterateAllComments(asset.modules, minifiedModules));
 
   const assetName: string = asset.fileName;
 
