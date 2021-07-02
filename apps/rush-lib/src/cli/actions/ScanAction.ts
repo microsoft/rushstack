@@ -32,7 +32,7 @@ export interface IJsonOutput {
 export class ScanAction extends BaseConfiglessRushAction {
   private _jsonFlag!: CommandLineFlagParameter;
   private _allFlag!: CommandLineFlagParameter;
-  private _terminal: Terminal;
+  private _terminal!: Terminal;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -52,11 +52,6 @@ export class ScanAction extends BaseConfiglessRushAction {
       safeForSimultaneousRushProcesses: true,
       parser
     });
-    this._terminal = new Terminal(
-      new ConsoleTerminalProvider({
-        verboseEnabled: this.parser.isDebug
-      })
-    );
   }
 
   protected onDefineParameters(): void {
@@ -71,6 +66,12 @@ export class ScanAction extends BaseConfiglessRushAction {
   }
 
   protected async runAsync(): Promise<void> {
+    this._terminal = new Terminal(
+      new ConsoleTerminalProvider({
+        verboseEnabled: this.parser.isDebug
+      })
+    );
+
     const packageJsonFilename: string = path.resolve('./package.json');
 
     if (!FileSystem.exists(packageJsonFilename)) {
@@ -231,10 +232,23 @@ export class ScanAction extends BaseConfiglessRushAction {
       }
       const typesPackageDir: string = path.dirname(typesPackageJsonPath);
       try {
-        const { types = 'index.d.ts' }: { types: string } = JSON.parse(
+        const { types, typings }: { types?: string; typings?: string } = JSON.parse(
           fs.readFileSync(typesPackageJsonPath, 'utf8')
         );
-        const typesIndexPath: string = path.resolve(typesPackageDir, types);
+        let typesIndexPath: string = path.resolve(typesPackageDir, 'index.d.ts');
+        for (const t of [types, typings]) {
+          if (t) {
+            let resolvedTypes: string = t;
+            if (!t.endsWith('.d.ts')) {
+              resolvedTypes = t + '.d.ts';
+            }
+            const typesPath: string = path.resolve(typesPackageDir, resolvedTypes);
+            if (fs.existsSync(typesPath)) {
+              typesIndexPath = typesPath;
+              break;
+            }
+          }
+        }
         const typesIndex: string = fs.readFileSync(typesIndexPath, 'utf8');
         const typesHeader: Header = parseHeaderOrFail(typesIndex);
         if (typesHeader.nonNpm) {
