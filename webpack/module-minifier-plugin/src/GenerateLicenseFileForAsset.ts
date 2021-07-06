@@ -6,7 +6,9 @@ import * as webpack from 'webpack';
 import { ConcatSource } from 'webpack-sources';
 import { IAssetInfo, IModuleMap, IModuleInfo, IExtendedModule } from './ModuleMinifierPlugin.types';
 
-function* iterateAllComments(moduleIds: (string | number)[], minifiedModules: IModuleMap): Iterable<string> {
+function getAllComments(moduleIds: (string | number)[], minifiedModules: IModuleMap): Set<string> {
+  const allComments: Set<string> = new Set();
+
   for (const moduleId of moduleIds) {
     const mod: IModuleInfo | undefined = minifiedModules.get(moduleId);
     if (!mod) {
@@ -18,10 +20,14 @@ function* iterateAllComments(moduleIds: (string | number)[], minifiedModules: IM
     for (const submodule of modules) {
       const { comments: subModuleComments } = submodule.factoryMeta;
       if (subModuleComments) {
-        yield* subModuleComments;
+        for (const comment of subModuleComments) {
+          allComments.add(comment);
+        }
       }
     }
   }
+
+  return allComments;
 }
 
 /**
@@ -38,9 +44,8 @@ export function generateLicenseFileForAsset(
   asset: IAssetInfo,
   minifiedModules: IModuleMap
 ): string {
-  // Extracted comments from the minified asset and from the modules.
-  // The former generally will be nonexistent (since it contains only the runtime), but the modules may have some.
-  const comments: Set<string> = new Set(iterateAllComments(asset.modules, minifiedModules));
+  // Extracted comments from the modules.
+  const comments: Set<string> = getAllComments(asset.modules, minifiedModules);
 
   const assetName: string = asset.fileName;
 

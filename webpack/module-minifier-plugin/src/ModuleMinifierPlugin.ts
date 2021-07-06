@@ -245,7 +245,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
 
         const { minifier } = this;
 
-        const cleanupMinifier: (() => Promise<void>) | undefined = minifier.ref && minifier.ref();
+        const cleanupMinifier: (() => Promise<void>) | undefined = minifier.ref?.();
 
         const requestShortener: webpack.compilation.RequestShortener =
           compilation.runtimeTemplate.requestShortener;
@@ -386,6 +386,8 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
                   chunkModuleSet.add(mod.id);
 
                   if (mod.external) {
+                    // Match the identifiers generated in the AmdMainTemplatePlugin
+                    // https://github.com/webpack/webpack/blob/444e59f8a427f94f0064cae6765e5a3c4b78596d/lib/AmdMainTemplatePlugin.js#L49
                     const key: string = `__WEBPACK_EXTERNAL_MODULE_${webpack.Template.toIdentifier(
                       `${mod.id}`
                     )}__`;
