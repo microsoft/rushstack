@@ -116,7 +116,9 @@ function isMinificationResultError(
   return !!result.error;
 }
 
-function defaultLicenseCommentTest(comment: IAcornComment): boolean {
+// Matche behavior of terser's "some" option
+function isLicenseComment(comment: IAcornComment): boolean {
+  // https://github.com/terser/terser/blob/d3d924fa9e4c57bbe286b811c6068bcc7026e902/lib/output.js#L175
   return /@preserve|@lic|@cc_on|^\**!/i.test(comment.value);
 }
 
@@ -177,8 +179,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
 
         function addCommentExtraction(parser: webpack.compilation.normalModuleFactory.Parser): void {
           parser.hooks.program.tap(PLUGIN_NAME, (program: unknown, comments: IAcornComment[]) => {
-            (parser as IExtendedParser).state.module.factoryMeta.comments =
-              comments.filter(defaultLicenseCommentTest);
+            (parser as IExtendedParser).state.module.factoryMeta.comments = comments.filter(isLicenseComment);
           });
         }
 
