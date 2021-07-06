@@ -86,7 +86,7 @@
               "description": "(EXPERIMENTAL) Normally Rush terminates after the command finishes. If this option is set to \"true\" Rush will instead enter a loop where it watches the file system for changes to the selected projects. Whenever a change is detected, the command will be invoked again for the changed project and any selected projects that directly or indirectly depend on it. For details, refer to the website article \"Using watch mode\".",
               "type": "boolean"
             },
-            "disableBuildCache ": {
+            "disableBuildCache": {
               "title": "Disable build cache.",
               "description": "Disable build cache for this action. This may be useful if this command affects state outside of projects' own folders.",
               "type": "boolean"
@@ -104,6 +104,7 @@
             "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
             "allowWarningsInSuccessfulBuild": { "$ref": "#/definitions/anything" },
             "watchForChanges": { "$ref": "#/definitions/anything" },
+            "disableBuildCache": { "$ref": "#/definitions/anything" },
 
             "enableParallelism": { "$ref": "#/definitions/anything" },
             "ignoreDependencyOrder": { "$ref": "#/definitions/anything" },
