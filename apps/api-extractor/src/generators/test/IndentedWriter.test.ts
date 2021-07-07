@@ -35,7 +35,28 @@ test('02 Indent something', () => {
   expect(indentedWriter.toString()).toMatchSnapshot();
 });
 
-test('03 Two kinds of indents', () => {
+test('03 Indent something with indentBlankLines=true', () => {
+  const indentedWriter: IndentedWriter = new IndentedWriter();
+  indentedWriter.indentBlankLines = true;
+
+  indentedWriter.write('a');
+  indentedWriter.write('b');
+  indentedWriter.increaseIndent();
+  indentedWriter.writeLine('c');
+  indentedWriter.writeLine('d');
+  indentedWriter.decreaseIndent();
+  indentedWriter.writeLine('e');
+
+  indentedWriter.increaseIndent('>>> ');
+  indentedWriter.writeLine();
+  indentedWriter.writeLine();
+  indentedWriter.writeLine('g');
+  indentedWriter.decreaseIndent();
+
+  expect(indentedWriter.toString()).toMatchSnapshot();
+});
+
+test('04 Two kinds of indents', () => {
   const indentedWriter: IndentedWriter = new IndentedWriter();
 
   indentedWriter.writeLine('---');
@@ -51,7 +72,7 @@ test('03 Two kinds of indents', () => {
   expect(indentedWriter.toString()).toMatchSnapshot();
 });
 
-test('04 Edge cases for ensureNewLine()', () => {
+test('05 Edge cases for ensureNewLine()', () => {
   let indentedWriter: IndentedWriter = new IndentedWriter();
   indentedWriter.ensureNewLine();
   indentedWriter.write('line');
@@ -64,7 +85,7 @@ test('04 Edge cases for ensureNewLine()', () => {
   expect(indentedWriter.toString()).toMatchSnapshot();
 });
 
-test('04 Edge cases for ensureSkippedLine()', () => {
+test('06 Edge cases for ensureSkippedLine()', () => {
   let indentedWriter: IndentedWriter = new IndentedWriter();
   indentedWriter.ensureSkippedLine();
   indentedWriter.write('line');
@@ -74,5 +95,6 @@ test('04 Edge cases for ensureSkippedLine()', () => {
   indentedWriter.write('previous');
   indentedWriter.ensureSkippedLine();
   indentedWriter.write('line');
+  indentedWriter.ensureSkippedLine();
   expect(indentedWriter.toString()).toMatchSnapshot();
 });

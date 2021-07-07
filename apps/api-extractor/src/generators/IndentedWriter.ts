@@ -37,6 +37,11 @@ export class IndentedWriter {
    */
   public defaultIndentPrefix: string = '  ';
 
+  /**
+   * Whether to indent blank lines
+   */
+  public indentBlankLines: boolean = false;
+
   private readonly _builder: IStringBuilder;
 
   private _latestChunk: string | undefined;
@@ -46,12 +51,16 @@ export class IndentedWriter {
   private readonly _indentStack: string[];
   private _indentText: string;
 
+  private _previousLineIsBlank: boolean;
+  private _currentLineIsBlank: boolean;
+
   public constructor(builder?: IStringBuilder) {
     this._builder = builder === undefined ? new StringBuilder() : builder;
-
     this._latestChunk = undefined;
     this._previousChunk = undefined;
     this._atStartOfLine = true;
+    this._previousLineIsBlank = true;
+    this._currentLineIsBlank = true;
 
     this._indentStack = [];
     this._indentText = '';
@@ -110,15 +119,13 @@ export class IndentedWriter {
   }
 
   /**
-   * Adds up to two newlines to ensure that there is a blank line above the current line.
+   * Adds up to two newlines to ensure that there is a blank line above the current position.
+   * The start of the stream is considered to be a blank line, so `ensureSkippedLine()` has no effect
+   * unless some text has been written.
    */
   public ensureSkippedLine(): void {
-    if (this.peekLastCharacter() !== '\n') {
-      this._writeNewLine();
-    }
-
-    const secondLastCharacter: string = this.peekSecondLastCharacter();
-    if (secondLastCharacter !== '\n' && secondLastCharacter !== '') {
+    this.ensureNewLine();
+    if (!this._previousLineIsBlank) {
       this._writeNewLine();
     }
   }
@@ -199,16 +206,25 @@ export class IndentedWriter {
         this._write(this._indentText);
       }
       this._write(message);
+      if (this._currentLineIsBlank) {
+        if (/\S/.test(message)) {
+          this._currentLineIsBlank = false;
+        }
+      }
       this._atStartOfLine = false;
     }
   }
 
   private _writeNewLine(): void {
-    if (this._atStartOfLine && this._indentText.length > 0) {
-      this._write(this._indentText);
+    if (this.indentBlankLines) {
+      if (this._atStartOfLine && this._indentText.length > 0) {
+        this._write(this._indentText);
+      }
     }
 
+    this._previousLineIsBlank = this._currentLineIsBlank;
     this._write('\n');
+    this._currentLineIsBlank = true;
     this._atStartOfLine = true;
   }
 
