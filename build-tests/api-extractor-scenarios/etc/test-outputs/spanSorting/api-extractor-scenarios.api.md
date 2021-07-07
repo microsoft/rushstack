@@ -10,7 +10,7 @@ export class ExampleA {
     member1: string;
     // (undocumented)
     member2(): Promise<void>;
-    }
+}
 
 
 // (No @packageDocumentation comment for this package)

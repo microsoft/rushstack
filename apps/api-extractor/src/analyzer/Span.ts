@@ -3,7 +3,7 @@
 
 import * as ts from 'typescript';
 import { StringBuilder } from '@microsoft/tsdoc';
-import { Sort } from '@rushstack/node-core-library';
+import { InternalError, Sort } from '@rushstack/node-core-library';
 
 /**
  * Specifies various transformations that will be performed by Span.getModifiedText().
@@ -85,6 +85,20 @@ export class SpanModification {
     this.suffix = '';
     this.omitChildren = true;
     this.omitSeparatorAfter = true;
+  }
+
+  /**
+   * Returns true approximately if skipAll() was called.
+   * @remarks
+   * This is a cheap approximation for checking whether `Span.getModifiedText().length === 0`.  The following
+   * properties are guaranteed:
+   * - If `skipAll()` was called, then `isEmpty()` will return true.
+   * - If `isEmpty()` returns true, then `Span.getModifiedText()` will return an empty string.
+   */
+  public isEmpty(): boolean {
+    return (
+      this.omitChildren && this.omitSeparatorAfter && this.prefix.length === 0 && this.suffix.length === 0
+    );
   }
 }
 
@@ -170,7 +184,7 @@ export class Span {
       if (childSpan.endIndex > this.endIndex) {
         // This has never been observed empirically, but here's how we would handle it
         this.endIndex = childSpan.endIndex;
-        throw new Error('Unexpected AST case');
+        throw new InternalError('Unexpected AST case');
       }
 
       if (previousChildSpan) {
@@ -413,8 +427,12 @@ export class Span {
 
     if (!this.modification.omitChildren) {
       if (this.modification.sortChildren && childCount > 1) {
+        // When applying the sorting logic, don't consider children that were skipped.  This ensures that
+        // the firstSeparator/lastSeparator fixups work correctly.
+        const nonemptyChildren: Span[] = this.children.filter((x) => !x.modification.isEmpty());
+
         // We will only sort the items with a sortKey
-        const sortedSubset: Span[] = this.children.filter((x) => x.modification.sortKey !== undefined);
+        const sortedSubset: Span[] = nonemptyChildren.filter((x) => x.modification.sortKey !== undefined);
         const sortedSubsetCount: number = sortedSubset.length;
 
         // Is there at least one of them?
@@ -428,13 +446,13 @@ export class Span {
           const childOptions: IWriteModifiedTextOptions = { ...options };
 
           let sortedSubsetIndex: number = 0;
-          for (let index: number = 0; index < childCount; ++index) {
+          for (let index: number = 0; index < nonemptyChildren.length; ++index) {
             let current: Span;
 
             // Is this an item that we sorted?
-            if (this.children[index].modification.sortKey === undefined) {
+            if (nonemptyChildren[index].modification.sortKey === undefined) {
               // No, take the next item from the original array
-              current = this.children[index];
+              current = nonemptyChildren[index];
               childOptions.separatorOverride = undefined;
             } else {
               // Yes, take the next item from the sortedSubset
