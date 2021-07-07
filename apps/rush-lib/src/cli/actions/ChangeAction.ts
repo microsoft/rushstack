@@ -11,7 +11,7 @@ import {
   CommandLineStringParameter,
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
-import { FileSystem, Path, AlreadyReportedError, Import } from '@rushstack/node-core-library';
+import { FileSystem, AlreadyReportedError, Import } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { IChangeFile, IChangeInfo, ChangeType } from '../../api/ChangeManagement';
@@ -25,9 +25,10 @@ import {
   LockStepVersionPolicy,
   VersionPolicyDefinitionName
 } from '../../api/VersionPolicy';
+import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
+import { Git } from '../../logic/Git';
 
 import type * as inquirerTypes from 'inquirer';
-import { Git } from '../../logic/Git';
 const inquirer: typeof inquirerTypes = Import.lazy('inquirer', require);
 
 export class ChangeAction extends BaseRushAction {
@@ -171,7 +172,7 @@ export class ChangeAction extends BaseRushAction {
       return;
     }
 
-    const sortedProjectList: string[] = this._getChangedPackageNames().sort();
+    const sortedProjectList: string[] = this._getChangedProjectNames().sort();
     if (sortedProjectList.length === 0) {
       this._logNoChangeFileRequired();
       this._warnUncommittedChanges();
@@ -301,7 +302,7 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private _verify(): void {
-    const changedPackages: string[] = this._getChangedPackageNames();
+    const changedPackages: string[] = this._getChangedProjectNames();
     if (changedPackages.length > 0) {
       this._validateChangeFile(changedPackages);
     } else {
@@ -317,37 +318,25 @@ export class ChangeAction extends BaseRushAction {
     return this._targetBranchName;
   }
 
-  private _getChangedPackageNames(): string[] {
-    const changedFolders: string[] | undefined = this._git.getChangedFolders(
+  private _getChangedProjectNames(): string[] {
+    const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
+    const changedProjects: Iterable<RushConfigurationProject> = projectChangeAnalyzer.getChangedProjects(
       this._targetBranch,
-      !this._noFetchParameter.value
+      this._noFetchParameter.value
     );
-    if (!changedFolders) {
-      return [];
-    }
-    const changedPackageNames: Set<string> = new Set<string>();
-
-    const git: Git = new Git(this.rushConfiguration);
-    const repoRootFolder: string | undefined = git.getRepositoryRootPath();
     const projectHostMap: Map<string, string> = this._generateHostMap();
 
-    this.rushConfiguration.projects
-      .filter((project) => project.shouldPublish)
-      .filter((project) => !project.versionPolicy || !project.versionPolicy.exemptFromRushChange)
-      .filter((project) => {
-        const projectFolder: string = repoRootFolder
-          ? path.relative(repoRootFolder, project.projectFolder)
-          : project.projectRelativeFolder;
-        return this._hasProjectChanged(changedFolders, projectFolder);
-      })
-      .forEach((project) => {
-        const hostName: string | undefined = projectHostMap.get(project.packageName);
+    const changedProjectNames: Set<string> = new Set<string>();
+    for (const changedProject of changedProjects) {
+      if (changedProject.shouldPublish && !changedProject.versionPolicy?.exemptFromRushChange) {
+        const hostName: string | undefined = projectHostMap.get(changedProject.packageName);
         if (hostName) {
-          changedPackageNames.add(hostName);
+          changedProjectNames.add(hostName);
         }
-      });
+      }
+    }
 
-    return [...changedPackageNames];
+    return Array.from(changedProjectNames);
   }
 
   private _validateChangeFile(changedPackages: string[]): void {
@@ -359,16 +348,6 @@ export class ChangeAction extends BaseRushAction {
     return this._git.getChangedFiles(this._targetBranch, true, `common/changes/`).map((relativePath) => {
       return path.join(this.rushConfiguration.rushJsonFolder, relativePath);
     });
-  }
-
-  private _hasProjectChanged(changedFolders: string[], projectFolder: string): boolean {
-    for (const folder of changedFolders) {
-      if (Path.isUnderOrEqual(folder, projectFolder)) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   /**

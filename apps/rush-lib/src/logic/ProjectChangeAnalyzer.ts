@@ -114,7 +114,40 @@ export class ProjectChangeAnalyzer {
     return projectState;
   }
 
-  private async _getData(terminal: Terminal): Promise<Map<string, Map<string, string>> | undefined> {
+  /**
+   * Gets a list of projects that have changed in the current state of the repo
+   * when compared to the specified branch.
+   */
+  public *getChangedProjects(
+    targetBranch: string,
+    shouldFetch: boolean = false
+  ): Iterable<RushConfigurationProject> {
+    const changedFolders: string[] | undefined = this._git.getChangedFolders(targetBranch, shouldFetch);
+
+    if (changedFolders) {
+      const repoRootFolder: string | undefined = this._git.getRepositoryRootPath();
+      for (const project of this._rushConfiguration.projects) {
+        const projectFolder: string = repoRootFolder
+          ? path.relative(repoRootFolder, project.projectFolder)
+          : project.projectRelativeFolder;
+        if (this._hasProjectChanged(changedFolders, projectFolder)) {
+          yield project;
+        }
+      }
+    }
+  }
+
+  private _hasProjectChanged(changedFolders: string[], projectFolder: string): boolean {
+    for (const folder of changedFolders) {
+      if (Path.isUnderOrEqual(folder, projectFolder)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private async _getDataAsync(terminal: Terminal): Promise<Map<string, Map<string, string>> | undefined> {
     const repoDeps: Map<string, string> | undefined = this._getRepoDeps();
     if (!repoDeps) {
       return undefined;
