@@ -260,12 +260,15 @@ export class ChangeAction extends BaseRushAction {
         existingChangeComments
       );
 
-      if (this._isEmailRequired()) {
+      if (this._isEmailRequired(changeFileData)) {
         const email: string = this._changeEmailParameter.value
           ? this._changeEmailParameter.value
           : await this._detectOrAskForEmail(promptModule);
         changeFileData.forEach((changeFile: IChangeFile) => {
-          changeFile.email = email;
+          changeFile.email = this.rushConfiguration.getProjectByName(changeFile.packageName)?.versionPolicy
+            ?.includeEmailInChangeFile
+            ? email
+            : '';
         });
       }
     }
@@ -520,8 +523,12 @@ export class ChangeAction extends BaseRushAction {
     return bumpOptions;
   }
 
-  private _isEmailRequired(): boolean {
-    return this.rushConfiguration.projects.some((project) => !!project.versionPolicy?.includeEmailInChange);
+  private _isEmailRequired(changeFileData: Map<string, IChangeFile>): boolean {
+    return [...changeFileData.values()].some(
+      (changeFile) =>
+        !!this.rushConfiguration.getProjectByName(changeFile.packageName)?.versionPolicy
+          ?.includeEmailInChangeFile
+    );
   }
 
   /**

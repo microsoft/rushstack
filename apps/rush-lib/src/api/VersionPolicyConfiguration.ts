@@ -15,7 +15,7 @@ export interface IVersionPolicyJson {
   definitionName: string;
   dependencies?: IVersionPolicyDependencyJson;
   exemptFromRushChange?: boolean;
-  includeEmailInChange?: boolean;
+  includeEmailInChangeFile?: boolean;
 }
 
 /**

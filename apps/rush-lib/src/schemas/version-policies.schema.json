@@ -78,7 +78,7 @@
           "description": "If true, the version policy will not require changelog files.",
           "type": "boolean"
         },
-        "includeEmailInChange": {
+        "includeEmailInChangeFile": {
           "description": "If true, generated changelog files will include the author's email address.",
           "type": "boolean"
         }
@@ -108,7 +108,7 @@
           "description": "If true, the version policy will not require changelog files.",
           "type": "boolean"
         },
-        "includeEmailInChange": {
+        "includeEmailInChangeFile": {
           "description": "If true, the version policy will request users email on rush change.",
           "type": "boolean"
         }

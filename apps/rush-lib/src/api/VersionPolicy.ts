@@ -54,7 +54,7 @@ export abstract class VersionPolicy {
   private _policyName: string;
   private _definitionName: VersionPolicyDefinitionName;
   private _exemptFromRushChange: boolean;
-  private _includeEmailInChange: boolean;
+  private _includeEmailInChangeFile: boolean;
   private _versionFormatForCommit: VersionFormatForCommit;
   private _versionFormatForPublish: VersionFormatForPublish;
 
@@ -65,7 +65,7 @@ export abstract class VersionPolicy {
     this._policyName = versionPolicyJson.policyName;
     this._definitionName = Enum.getValueByKey(VersionPolicyDefinitionName, versionPolicyJson.definitionName);
     this._exemptFromRushChange = versionPolicyJson.exemptFromRushChange || false;
-    this._includeEmailInChange = versionPolicyJson.includeEmailInChange || false;
+    this._includeEmailInChangeFile = versionPolicyJson.includeEmailInChangeFile || false;
 
     const jsonDependencies: IVersionPolicyDependencyJson = versionPolicyJson.dependencies || {};
     this._versionFormatForCommit = jsonDependencies.versionFormatForCommit || VersionFormatForCommit.original;
@@ -126,8 +126,8 @@ export abstract class VersionPolicy {
   /**
    * Determines if a version policy wants to opt in to including email.
    */
-  public get includeEmailInChange(): boolean {
-    return this._includeEmailInChange;
+  public get includeEmailInChangeFile(): boolean {
+    return this._includeEmailInChangeFile;
   }
 
   /**
