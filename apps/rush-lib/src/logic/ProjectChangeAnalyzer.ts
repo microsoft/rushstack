@@ -118,10 +118,10 @@ export class ProjectChangeAnalyzer {
    * Gets a list of projects that have changed in the current state of the repo
    * when compared to the specified branch.
    */
-  public *getChangedProjects(
+  public async *getChangedProjectsAsync(
     targetBranch: string,
     shouldFetch: boolean = false
-  ): Iterable<RushConfigurationProject> {
+  ): AsyncIterable<RushConfigurationProject> {
     const changedFolders: string[] | undefined = this._git.getChangedFolders(targetBranch, shouldFetch);
 
     if (changedFolders) {

@@ -168,11 +168,11 @@ export class ChangeAction extends BaseRushAction {
         throw new AlreadyReportedError();
       }
 
-      this._verify();
+      await this._verifyAsync();
       return;
     }
 
-    const sortedProjectList: string[] = this._getChangedProjectNames().sort();
+    const sortedProjectList: string[] = (await this._getChangedProjectNamesAsync()).sort();
     if (sortedProjectList.length === 0) {
       this._logNoChangeFileRequired();
       this._warnUncommittedChanges();
@@ -301,8 +301,8 @@ export class ChangeAction extends BaseRushAction {
     return hostMap;
   }
 
-  private _verify(): void {
-    const changedPackages: string[] = this._getChangedProjectNames();
+  private async _verifyAsync(): Promise<void> {
+    const changedPackages: string[] = await this._getChangedProjectNamesAsync();
     if (changedPackages.length > 0) {
       this._validateChangeFile(changedPackages);
     } else {
@@ -318,16 +318,14 @@ export class ChangeAction extends BaseRushAction {
     return this._targetBranchName;
   }
 
-  private _getChangedProjectNames(): string[] {
+  private async _getChangedProjectNamesAsync(): Promise<string[]> {
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
-    const changedProjects: Iterable<RushConfigurationProject> = projectChangeAnalyzer.getChangedProjects(
-      this._targetBranch,
-      this._noFetchParameter.value
-    );
+    const changedProjects: AsyncIterable<RushConfigurationProject> =
+      projectChangeAnalyzer.getChangedProjectsAsync(this._targetBranch, this._noFetchParameter.value);
     const projectHostMap: Map<string, string> = this._generateHostMap();
 
     const changedProjectNames: Set<string> = new Set<string>();
-    for (const changedProject of changedProjects) {
+    for await (const changedProject of changedProjects) {
       if (changedProject.shouldPublish && !changedProject.versionPolicy?.exemptFromRushChange) {
         const hostName: string | undefined = projectHostMap.get(changedProject.packageName);
         if (hostName) {

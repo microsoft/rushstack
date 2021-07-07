@@ -314,7 +314,7 @@ export type PnpmStoreOptions = 'local' | 'global';
 // @beta (undocumented)
 export class ProjectChangeAnalyzer {
     constructor(rushConfiguration: RushConfiguration);
-    getChangedProjects(targetBranch: string, shouldFetch?: boolean): Iterable<RushConfigurationProject>;
+    getChangedProjectsAsync(targetBranch: string, shouldFetch?: boolean): AsyncIterable<RushConfigurationProject>;
     getProjectDependenciesAsync(projectName: string, terminal: Terminal): Promise<Map<string, string> | undefined>;
     tryGetProjectDependenciesAsync(projectName: string, terminal: Terminal): Promise<Map<string, string> | undefined>;
     tryGetProjectStateHashAsync(projectName: string, terminal: Terminal): Promise<string | undefined>;
