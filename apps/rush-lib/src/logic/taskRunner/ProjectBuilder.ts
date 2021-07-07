@@ -210,10 +210,11 @@ export class ProjectBuilder extends BaseBuilder {
       let projectBuildDeps: IProjectBuildDeps | undefined;
       let trackedFiles: string[] | undefined;
       try {
-        const fileHashes: Map<string, string> | undefined = await this._projectChangeAnalyzer.getPackageDeps(
-          this._rushProject.packageName,
-          terminal
-        );
+        const fileHashes: Map<string, string> | undefined =
+          await this._projectChangeAnalyzer.tryGetProjectDependenciesAsync(
+            this._rushProject.packageName,
+            terminal
+          );
 
         if (fileHashes) {
           const files: { [filePath: string]: string } = {};

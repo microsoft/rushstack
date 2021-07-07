@@ -16,6 +16,9 @@ import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from './RushConstants';
 
+/**
+ * @beta
+ */
 export class ProjectChangeAnalyzer {
   /**
    * null === we haven't looked
@@ -31,12 +34,41 @@ export class ProjectChangeAnalyzer {
     this._git = new Git(this._rushConfiguration);
   }
 
-  public async getPackageDeps(
+  /**
+   * Try to get a list of the specified project's dependencies and their hashes.
+   *
+   * @remarks
+   * If the data can't be generated (i.e. - if Git is not present), this throws an Error.
+   * If the project name is invalid, this returns undefined.
+   */
+  public async getProjectDependenciesAsync(
     projectName: string,
     terminal: Terminal
   ): Promise<Map<string, string> | undefined> {
     if (this._data === null) {
-      this._data = await this._getData(terminal);
+      this._data = await this._getDataAsync(terminal);
+    }
+
+    if (this._data === undefined) {
+      throw new Error('Unable to get current repo state.');
+    } else {
+      return this._data.get(projectName);
+    }
+  }
+
+  /**
+   * Try to get a list of the specified project's dependencies and their hashes.
+   *
+   * @remarks
+   * If the data can't be generated (i.e. - if Git is not present), or if the project name
+   * is invalid, this returns undefined.
+   */
+  public async tryGetProjectDependenciesAsync(
+    projectName: string,
+    terminal: Terminal
+  ): Promise<Map<string, string> | undefined> {
+    if (this._data === null) {
+      this._data = await this._getDataAsync(terminal);
     }
 
     return this._data?.get(projectName);
@@ -52,10 +84,16 @@ export class ProjectChangeAnalyzer {
    *   Git SHA is fed into the hash
    * - A hex digest of the hash is returned
    */
-  public async getProjectStateHash(projectName: string, terminal: Terminal): Promise<string | undefined> {
+  public async tryGetProjectStateHashAsync(
+    projectName: string,
+    terminal: Terminal
+  ): Promise<string | undefined> {
     let projectState: string | undefined = this._projectStateCache.get(projectName);
     if (!projectState) {
-      const packageDeps: Map<string, string> | undefined = await this.getPackageDeps(projectName, terminal);
+      const packageDeps: Map<string, string> | undefined = await this.tryGetProjectDependenciesAsync(
+        projectName,
+        terminal
+      );
       if (!packageDeps) {
         return undefined;
       } else {
@@ -92,7 +130,7 @@ export class ProjectChangeAnalyzer {
         projectHashDeps.set(project.packageName, new Map<string, string>());
         ignoreMatcherForProject.set(
           project.packageName,
-          await this._getIgnoreMatcherForProject(project, terminal)
+          await this._getIgnoreMatcherForProjectAsync(project, terminal)
         );
       },
       { concurrency: 10 }
@@ -177,7 +215,7 @@ export class ProjectChangeAnalyzer {
     return projectHashDeps;
   }
 
-  private async _getIgnoreMatcherForProject(
+  private async _getIgnoreMatcherForProjectAsync(
     project: RushConfigurationProject,
     terminal: Terminal
   ): Promise<Ignore> {

@@ -79,7 +79,7 @@ export class ProjectWatcher {
     const useNativeRecursiveWatch: boolean = os.platform() === 'win32' || os.platform() === 'darwin';
 
     for (const project of this._projectsToWatch) {
-      const projectState: Map<string, string> = (await previousState.getPackageDeps(
+      const projectState: Map<string, string> = (await previousState.tryGetProjectDependenciesAsync(
         project.packageName,
         this._terminal
       ))!;
@@ -244,8 +244,8 @@ export class ProjectWatcher {
 
       if (
         ProjectWatcher._haveProjectDepsChanged(
-          (await previousState.getPackageDeps(packageName, this._terminal))!,
-          (await state.getPackageDeps(packageName, this._terminal))!
+          (await previousState.tryGetProjectDependenciesAsync(packageName, this._terminal))!,
+          (await state.tryGetProjectDependenciesAsync(packageName, this._terminal))!
         )
       ) {
         // May need to detect if the nature of the change will break the process, e.g. changes to package.json

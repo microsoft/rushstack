@@ -7,6 +7,7 @@
 import { IPackageJson } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
+import { Terminal } from '@rushstack/node-core-library';
 
 // @public
 export class ApprovedPackagesConfiguration {
@@ -309,6 +310,14 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
 
 // @public
 export type PnpmStoreOptions = 'local' | 'global';
+
+// @beta (undocumented)
+export class ProjectChangeAnalyzer {
+    constructor(rushConfiguration: RushConfiguration);
+    getProjectDependenciesAsync(projectName: string, terminal: Terminal): Promise<Map<string, string> | undefined>;
+    tryGetProjectDependenciesAsync(projectName: string, terminal: Terminal): Promise<Map<string, string> | undefined>;
+    tryGetProjectStateHashAsync(projectName: string, terminal: Terminal): Promise<string | undefined>;
+}
 
 // @public
 export class RepoStateFile {
