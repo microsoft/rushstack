@@ -6,7 +6,7 @@ import * as os from 'os';
 import { once } from 'events';
 import { Path, Terminal } from '@rushstack/node-core-library';
 
-import { PackageChangeAnalyzer } from './PackageChangeAnalyzer';
+import { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 
@@ -25,14 +25,14 @@ export interface IProjectChangeResult {
   /**
    * Contains the git hashes for all tracked files in the repo
    */
-  state: PackageChangeAnalyzer;
+  state: ProjectChangeAnalyzer;
 }
 
 /**
  * This class is for incrementally watching a set of projects in the repository for changes.
  *
  * We are manually using fs.watch() instead of `chokidar` because all we want from the file system watcher is a boolean
- * signal indicating that "at least 1 file in a watched project changed". We then defer to PackageChangeAnalyzer (which
+ * signal indicating that "at least 1 file in a watched project changed". We then defer to ProjectChangeAnalyzer (which
  * is responsible for change detection in all incremental builds) to determine what actually chanaged.
  *
  * Calling `waitForChange()` will return a promise that resolves when the package-deps of one or
@@ -44,8 +44,8 @@ export class ProjectWatcher {
   private readonly _projectsToWatch: ReadonlySet<RushConfigurationProject>;
   private readonly _terminal: Terminal;
 
-  private _initialState: PackageChangeAnalyzer | undefined;
-  private _previousState: PackageChangeAnalyzer | undefined;
+  private _initialState: ProjectChangeAnalyzer | undefined;
+  private _previousState: ProjectChangeAnalyzer | undefined;
 
   public constructor(options: IProjectWatcherOptions) {
     const { debounceMilliseconds = 1000, rushConfiguration, projectsToWatch, terminal } = options;
@@ -69,7 +69,7 @@ export class ProjectWatcher {
       return initialChangeResult;
     }
 
-    const previousState: PackageChangeAnalyzer = initialChangeResult.state;
+    const previousState: ProjectChangeAnalyzer = initialChangeResult.state;
     const repoRoot: string = Path.convertToSlashes(this._rushConfiguration.rushJsonFolder);
 
     const pathsToWatch: Set<string> = new Set();
@@ -227,9 +227,9 @@ export class ProjectWatcher {
    * Determines which, if any, projects (within the selection) have new hashes for files that are not in .gitignore
    */
   private async _computeChanged(): Promise<IProjectChangeResult> {
-    const state: PackageChangeAnalyzer = new PackageChangeAnalyzer(this._rushConfiguration);
+    const state: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this._rushConfiguration);
 
-    const previousState: PackageChangeAnalyzer | undefined = this._previousState;
+    const previousState: ProjectChangeAnalyzer | undefined = this._previousState;
 
     if (!previousState) {
       return {
@@ -259,7 +259,7 @@ export class ProjectWatcher {
     };
   }
 
-  private _commitChanges(state: PackageChangeAnalyzer): void {
+  private _commitChanges(state: ProjectChangeAnalyzer): void {
     this._previousState = state;
     if (!this._initialState) {
       this._initialState = state;

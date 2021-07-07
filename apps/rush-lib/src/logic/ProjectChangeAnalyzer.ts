@@ -16,7 +16,7 @@ import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from './RushConstants';
 
-export class PackageChangeAnalyzer {
+export class ProjectChangeAnalyzer {
   /**
    * null === we haven't looked
    * undefined === data isn't available (i.e. - git isn't present)
@@ -44,7 +44,7 @@ export class PackageChangeAnalyzer {
 
   /**
    * The project state hash is calculated in the following way:
-   * - Project dependencies are collected (see PackageChangeAnalyzer.getPackageDeps)
+   * - Project dependencies are collected (see ProjectChangeAnalyzer.getPackageDeps)
    *   - If project dependencies cannot be collected (i.e. - if Git isn't available),
    *     this function returns `undefined`
    * - The (path separator normalized) repo-root-relative dependencies' file paths are sorted

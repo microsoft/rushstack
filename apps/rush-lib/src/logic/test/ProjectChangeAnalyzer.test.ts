@@ -2,13 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
-import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
+
+import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 
-describe('PackageChangeAnalyzer', () => {
+describe(ProjectChangeAnalyzer.name, () => {
   beforeEach(() => {
     jest.spyOn(EnvironmentConfiguration, 'gitBinaryPath', 'get').mockReturnValue(undefined);
     jest.spyOn(RushProjectConfiguration, 'tryLoadForProjectAsync').mockResolvedValue(undefined);
@@ -21,7 +22,7 @@ describe('PackageChangeAnalyzer', () => {
   function createTestSubject(
     projects: RushConfigurationProject[],
     files: Map<string, string>
-  ): PackageChangeAnalyzer {
+  ): ProjectChangeAnalyzer {
     const rushConfiguration: RushConfiguration = {
       commonRushConfigFolder: '',
       projects,
@@ -34,7 +35,7 @@ describe('PackageChangeAnalyzer', () => {
       }
     } as RushConfiguration;
 
-    const subject: PackageChangeAnalyzer = new PackageChangeAnalyzer(rushConfiguration);
+    const subject: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
 
     subject['_getRepoDeps'] = jest.fn(() => {
       return files;
@@ -43,7 +44,7 @@ describe('PackageChangeAnalyzer', () => {
     return subject;
   }
 
-  describe('getPackageDeps', () => {
+  describe(ProjectChangeAnalyzer.prototype.getPackageDeps.name, () => {
     it('returns the files for the specified project', async () => {
       const projects: RushConfigurationProject[] = [
         {
@@ -61,7 +62,7 @@ describe('PackageChangeAnalyzer', () => {
         ['apps/apple/core.js', 'a101'],
         ['apps/banana/peel.js', 'b201']
       ]);
-      const subject: PackageChangeAnalyzer = createTestSubject(projects, files);
+      const subject: ProjectChangeAnalyzer = createTestSubject(projects, files);
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
       expect(await subject.getPackageDeps('apple', terminal)).toEqual(
@@ -100,7 +101,7 @@ describe('PackageChangeAnalyzer', () => {
         ['apps/banana/peel.js', 'b201'],
         ['apps/banana/peel.js.map', 'b202']
       ]);
-      const subject: PackageChangeAnalyzer = createTestSubject(projects, files);
+      const subject: ProjectChangeAnalyzer = createTestSubject(projects, files);
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
       expect(await subject.getPackageDeps('apple', terminal)).toEqual(
@@ -138,7 +139,7 @@ describe('PackageChangeAnalyzer', () => {
         ['apps/apple/assets/important/five.psd', 'a105'],
         ['apps/apple/src/index.ts', 'a106']
       ]);
-      const subject: PackageChangeAnalyzer = createTestSubject(projects, files);
+      const subject: ProjectChangeAnalyzer = createTestSubject(projects, files);
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
       // In a dot-ignore file, the later rule '!assets/important/**' should override the previous
@@ -172,7 +173,7 @@ describe('PackageChangeAnalyzer', () => {
         ['common/config/rush/pnpm-lock.yaml', 'ffff'],
         ['tools/random-file.js', 'e00e']
       ]);
-      const subject: PackageChangeAnalyzer = createTestSubject(projects, files);
+      const subject: ProjectChangeAnalyzer = createTestSubject(projects, files);
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
       expect(await subject.getPackageDeps('apple', terminal)).toEqual(
@@ -198,7 +199,7 @@ describe('PackageChangeAnalyzer', () => {
         } as RushConfigurationProject
       ];
       const files: Map<string, string> = new Map([['apps/apple/core.js', 'a101']]);
-      const subject: PackageChangeAnalyzer = createTestSubject(projects, files);
+      const subject: ProjectChangeAnalyzer = createTestSubject(projects, files);
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
       expect(await subject.getPackageDeps('carrot', terminal)).toBeUndefined();
@@ -213,11 +214,11 @@ describe('PackageChangeAnalyzer', () => {
         } as RushConfigurationProject
       ];
       const files: Map<string, string> = new Map([['apps/apple/core.js', 'a101']]);
-      const subject: PackageChangeAnalyzer = createTestSubject(projects, files);
+      const subject: ProjectChangeAnalyzer = createTestSubject(projects, files);
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
       // Because other unit tests rely on the fact that a freshly instantiated
-      // PackageChangeAnalyzer is inert until someone actually requests project data,
+      // ProjectChangeAnalyzer is inert until someone actually requests project data,
       // this test makes that expectation explicit.
 
       expect(subject['_data']).toBeNull();
@@ -232,7 +233,7 @@ describe('PackageChangeAnalyzer', () => {
     });
   });
 
-  describe('getProjectStateHash', () => {
+  describe(ProjectChangeAnalyzer.prototype.getProjectStateHash.name, () => {
     it('returns a fixed hash snapshot for a set of project deps', async () => {
       const projects: RushConfigurationProject[] = [
         {
@@ -246,7 +247,7 @@ describe('PackageChangeAnalyzer', () => {
         ['apps/apple/juice.js', 'e333'],
         ['apps/apple/slices.js', 'a102']
       ]);
-      const subject: PackageChangeAnalyzer = createTestSubject(projects, files);
+      const subject: ProjectChangeAnalyzer = createTestSubject(projects, files);
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
       expect(await subject.getProjectStateHash('apple', terminal)).toMatchInlineSnapshot(
@@ -267,7 +268,7 @@ describe('PackageChangeAnalyzer', () => {
         ['apps/apple/juice.js', 'e333'],
         ['apps/apple/slices.js', 'a102']
       ]);
-      const subjectA: PackageChangeAnalyzer = createTestSubject(projectsA, filesA);
+      const subjectA: ProjectChangeAnalyzer = createTestSubject(projectsA, filesA);
 
       const projectsB: RushConfigurationProject[] = [
         {
@@ -281,7 +282,7 @@ describe('PackageChangeAnalyzer', () => {
         ['apps/apple/core.js', 'a101'],
         ['apps/apple/juice.js', 'e333']
       ]);
-      const subjectB: PackageChangeAnalyzer = createTestSubject(projectsB, filesB);
+      const subjectB: ProjectChangeAnalyzer = createTestSubject(projectsB, filesB);
 
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
       expect(await subjectA.getProjectStateHash('apple', terminal)).toEqual(

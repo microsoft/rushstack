@@ -10,7 +10,7 @@ import { FileSystem, LegacyAdapters, Path, Terminal } from '@rushstack/node-core
 import * as fs from 'fs';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
+import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { RushConstants } from '../RushConstants';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
@@ -24,7 +24,7 @@ interface IProjectBuildCacheOptions {
   projectConfiguration: RushProjectConfiguration;
   command: string;
   trackedProjectFiles: string[] | undefined;
-  packageChangeAnalyzer: PackageChangeAnalyzer;
+  projectChangeAnalyzer: ProjectChangeAnalyzer;
   terminal: Terminal;
 }
 
@@ -426,7 +426,7 @@ export class ProjectBuildCache {
 
   private static async _getCacheId(options: IProjectBuildCacheOptions): Promise<string | undefined> {
     // The project state hash is calculated in the following method:
-    // - The current project's hash (see PackageChangeAnalyzer.getProjectStateHash) is
+    // - The current project's hash (see ProjectChangeAnalyzer.getProjectStateHash) is
     //   calculated and appended to an array
     // - The current project's recursive dependency projects' hashes are calculated
     //   and appended to the array
@@ -437,7 +437,7 @@ export class ProjectBuildCache {
     //   3. Each dependency project hash (from the array constructed in previous steps),
     //      in sorted alphanumerical-sorted order
     // - A hex digest of the hash is returned
-    const packageChangeAnalyzer: PackageChangeAnalyzer = options.packageChangeAnalyzer;
+    const projectChangeAnalyzer: ProjectChangeAnalyzer = options.projectChangeAnalyzer;
     const projectStates: string[] = [];
     const projectsThatHaveBeenProcessed: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
     let projectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
@@ -448,7 +448,7 @@ export class ProjectBuildCache {
       for (const projectToProcess of projectsToProcess) {
         projectsThatHaveBeenProcessed.add(projectToProcess);
 
-        const projectState: string | undefined = await packageChangeAnalyzer.getProjectStateHash(
+        const projectState: string | undefined = await projectChangeAnalyzer.getProjectStateHash(
           projectToProcess.packageName,
           options.terminal
         );
