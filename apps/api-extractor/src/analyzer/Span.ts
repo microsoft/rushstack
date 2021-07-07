@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as ts from 'typescript';
-import { StringBuilder } from '@microsoft/tsdoc';
+import { IndentedWriter } from '../generators/IndentedWriter';
 import { InternalError, Sort } from '@rushstack/node-core-library';
 
 /**
@@ -378,19 +378,19 @@ export class Span {
    * Returns the text represented by this Span, after applying all requested modifications.
    */
   public getModifiedText(): string {
-    const output: StringBuilder = new StringBuilder();
+    const output: IndentedWriter = new IndentedWriter();
 
     this._writeModifiedText({
-      output,
+      writer: output,
       separatorOverride: undefined
     });
 
-    return output.toString();
+    return output.getText();
   }
 
-  public writeModifiedText(output: StringBuilder): void {
+  public writeModifiedText(output: IndentedWriter): void {
     this._writeModifiedText({
-      output,
+      writer: output,
       separatorOverride: undefined
     });
   }
@@ -421,7 +421,7 @@ export class Span {
   }
 
   private _writeModifiedText(options: IWriteModifiedTextOptions): void {
-    options.output.append(this.modification.prefix);
+    options.writer.write(this.modification.prefix);
 
     const childCount: number = this.children.length;
 
@@ -500,15 +500,15 @@ export class Span {
       }
     }
 
-    options.output.append(this.modification.suffix);
+    options.writer.write(this.modification.suffix);
 
     if (options.separatorOverride !== undefined) {
       if (this.separator || childCount === 0) {
-        options.output.append(options.separatorOverride);
+        options.writer.write(options.separatorOverride);
       }
     } else {
       if (!this.modification.omitSeparatorAfter) {
-        options.output.append(this.separator);
+        options.writer.write(this.separator);
       }
     }
   }
@@ -531,6 +531,6 @@ export class Span {
 }
 
 interface IWriteModifiedTextOptions {
-  output: StringBuilder;
+  writer: IndentedWriter;
   separatorOverride: string | undefined;
 }

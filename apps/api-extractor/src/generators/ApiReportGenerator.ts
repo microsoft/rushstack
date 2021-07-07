@@ -14,7 +14,7 @@ import { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { AstImport } from '../analyzer/AstImport';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { ExtractorMessage } from '../api/ExtractorMessage';
-import { StringWriter } from './StringWriter';
+import { IndentedWriter } from './IndentedWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 import { AstEntity } from '../analyzer/AstEntity';
@@ -42,9 +42,9 @@ export class ApiReportGenerator {
   }
 
   public static generateReviewFileContent(collector: Collector): string {
-    const stringWriter: StringWriter = new StringWriter();
+    const writer: IndentedWriter = new IndentedWriter();
 
-    stringWriter.writeLine(
+    writer.writeLine(
       [
         `## API Report File for "${collector.workingPackage.name}"`,
         ``,
@@ -54,34 +54,34 @@ export class ApiReportGenerator {
     );
 
     // Write the opening delimiter for the Markdown code fence
-    stringWriter.writeLine('```ts\n');
+    writer.writeLine('```ts\n');
 
     // Emit the triple slash directives
     let directivesEmitted: boolean = false;
     for (const typeDirectiveReference of Array.from(collector.dtsTypeReferenceDirectives).sort()) {
       // https://github.com/microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
-      stringWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
+      writer.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
       directivesEmitted = true;
     }
 
     for (const libDirectiveReference of Array.from(collector.dtsLibReferenceDirectives).sort()) {
-      stringWriter.writeLine(`/// <reference lib="${libDirectiveReference}" />`);
+      writer.writeLine(`/// <reference lib="${libDirectiveReference}" />`);
       directivesEmitted = true;
     }
     if (directivesEmitted) {
-      stringWriter.writeLine();
+      writer.writeLine();
     }
 
     // Emit the imports
     let importsEmitted: boolean = false;
     for (const entity of collector.entities) {
       if (entity.astEntity instanceof AstImport) {
-        DtsEmitHelpers.emitImport(stringWriter, entity, entity.astEntity);
+        DtsEmitHelpers.emitImport(writer, entity, entity.astEntity);
         importsEmitted = true;
       }
     }
     if (importsEmitted) {
-      stringWriter.writeLine();
+      writer.writeLine();
     }
 
     // Emit the regular declarations
@@ -127,9 +127,7 @@ export class ApiReportGenerator {
               messagesToReport.push(message);
             }
 
-            stringWriter.write(
-              ApiReportGenerator._getAedocSynopsis(collector, astDeclaration, messagesToReport)
-            );
+            writer.write(ApiReportGenerator._getAedocSynopsis(collector, astDeclaration, messagesToReport));
 
             const span: Span = new Span(astDeclaration.declaration);
 
@@ -140,8 +138,8 @@ export class ApiReportGenerator {
               ApiReportGenerator._modifySpan(collector, span, entity, astDeclaration, false);
             }
 
-            span.writeModifiedText(stringWriter.stringBuilder);
-            stringWriter.writeLine('\n');
+            span.writeModifiedText(writer);
+            writer.writeLine('\n');
           }
         }
 
@@ -173,10 +171,10 @@ export class ApiReportGenerator {
           // Note that we do not try to relocate f1()/f2() to be inside the namespace because other type
           // signatures may reference them directly (without using the namespace qualifier).
 
-          stringWriter.writeLine(`declare namespace ${entity.nameForEmit} {`);
+          writer.writeLine(`declare namespace ${entity.nameForEmit} {`);
 
           // all local exports of local imported module are just references to top-level declarations
-          stringWriter.writeLine('  export {');
+          writer.writeLine('  export {');
 
           const exportClauses: string[] = [];
           for (const [exportedName, exportedEntity] of astModuleExportInfo.exportedLocalEntities) {
@@ -196,10 +194,10 @@ export class ApiReportGenerator {
               exportClauses.push(`${collectorEntity.nameForEmit} as ${exportedName}`);
             }
           }
-          stringWriter.writeLine(exportClauses.map((x) => `    ${x}`).join(',\n'));
+          writer.writeLine(exportClauses.map((x) => `    ${x}`).join(',\n'));
 
-          stringWriter.writeLine('  }'); // end of "export { ... }"
-          stringWriter.writeLine('}'); // end of "declare namespace { ... }"
+          writer.writeLine('  }'); // end of "export { ... }"
+          writer.writeLine('}'); // end of "declare namespace { ... }"
         }
 
         // Now emit the export statements for this entity.
@@ -207,47 +205,44 @@ export class ApiReportGenerator {
           // Write any associated messages
           for (const message of exportToEmit.associatedMessages) {
             ApiReportGenerator._writeLineAsComments(
-              stringWriter,
+              writer,
               'Warning: ' + message.formatMessageWithoutLocation()
             );
           }
 
-          DtsEmitHelpers.emitNamedExport(stringWriter, exportToEmit.exportName, entity);
-          stringWriter.writeLine();
+          DtsEmitHelpers.emitNamedExport(writer, exportToEmit.exportName, entity);
+          writer.writeLine();
         }
       }
     }
 
-    DtsEmitHelpers.emitStarExports(stringWriter, collector);
+    DtsEmitHelpers.emitStarExports(writer, collector);
 
     // Write the unassociated warnings at the bottom of the file
     const unassociatedMessages: ExtractorMessage[] =
       collector.messageRouter.fetchUnassociatedMessagesForReviewFile();
     if (unassociatedMessages.length > 0) {
-      stringWriter.writeLine();
-      ApiReportGenerator._writeLineAsComments(stringWriter, 'Warnings were encountered during analysis:');
-      ApiReportGenerator._writeLineAsComments(stringWriter, '');
+      writer.writeLine();
+      ApiReportGenerator._writeLineAsComments(writer, 'Warnings were encountered during analysis:');
+      ApiReportGenerator._writeLineAsComments(writer, '');
       for (const unassociatedMessage of unassociatedMessages) {
         ApiReportGenerator._writeLineAsComments(
-          stringWriter,
+          writer,
           unassociatedMessage.formatMessageWithLocation(collector.workingPackage.packageFolder)
         );
       }
     }
 
     if (collector.workingPackage.tsdocComment === undefined) {
-      stringWriter.writeLine();
-      ApiReportGenerator._writeLineAsComments(
-        stringWriter,
-        '(No @packageDocumentation comment for this package)'
-      );
+      writer.writeLine();
+      ApiReportGenerator._writeLineAsComments(writer, '(No @packageDocumentation comment for this package)');
     }
 
     // Write the closing delimiter for the Markdown code fence
-    stringWriter.writeLine('\n```');
+    writer.writeLine('\n```');
 
     // Remove any trailing spaces
-    return stringWriter.toString().replace(ApiReportGenerator._trimSpacesRegExp, '');
+    return writer.toString().replace(ApiReportGenerator._trimSpacesRegExp, '');
   }
 
   /**
@@ -476,13 +471,10 @@ export class ApiReportGenerator {
     astDeclaration: AstDeclaration,
     messagesToReport: ExtractorMessage[]
   ): string {
-    const stringWriter: StringWriter = new StringWriter();
+    const writer: IndentedWriter = new IndentedWriter();
 
     for (const message of messagesToReport) {
-      ApiReportGenerator._writeLineAsComments(
-        stringWriter,
-        'Warning: ' + message.formatMessageWithoutLocation()
-      );
+      ApiReportGenerator._writeLineAsComments(writer, 'Warning: ' + message.formatMessageWithoutLocation());
     }
 
     if (!collector.isAncillaryDeclaration(astDeclaration)) {
@@ -522,22 +514,22 @@ export class ApiReportGenerator {
 
       if (footerParts.length > 0) {
         if (messagesToReport.length > 0) {
-          ApiReportGenerator._writeLineAsComments(stringWriter, ''); // skip a line after the warnings
+          ApiReportGenerator._writeLineAsComments(writer, ''); // skip a line after the warnings
         }
 
-        ApiReportGenerator._writeLineAsComments(stringWriter, footerParts.join(' '));
+        ApiReportGenerator._writeLineAsComments(writer, footerParts.join(' '));
       }
     }
 
-    return stringWriter.toString();
+    return writer.toString();
   }
 
-  private static _writeLineAsComments(stringWriter: StringWriter, line: string): void {
+  private static _writeLineAsComments(writer: IndentedWriter, line: string): void {
     const lines: string[] = Text.convertToLf(line).split('\n');
     for (const realLine of lines) {
-      stringWriter.write('// ');
-      stringWriter.write(realLine);
-      stringWriter.writeLine();
+      writer.write('// ');
+      writer.write(realLine);
+      writer.writeLine();
     }
   }
 

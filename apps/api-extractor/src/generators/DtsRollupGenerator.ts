@@ -16,7 +16,7 @@ import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { ApiItemMetadata } from '../collector/ApiItemMetadata';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { SymbolMetadata } from '../collector/SymbolMetadata';
-import { StringWriter } from './StringWriter';
+import { IndentedWriter } from './IndentedWriter';
 import { DtsEmitHelpers } from './DtsEmitHelpers';
 import { DeclarationMetadata } from '../collector/DeclarationMetadata';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
@@ -61,11 +61,11 @@ export class DtsRollupGenerator {
     dtsKind: DtsRollupKind,
     newlineKind: NewlineKind
   ): void {
-    const stringWriter: StringWriter = new StringWriter();
+    const writer: IndentedWriter = new IndentedWriter();
 
-    DtsRollupGenerator._generateTypingsFileContent(collector, stringWriter, dtsKind);
+    DtsRollupGenerator._generateTypingsFileContent(collector, writer, dtsKind);
 
-    FileSystem.writeFile(dtsFilename, stringWriter.toString(), {
+    FileSystem.writeFile(dtsFilename, writer.toString(), {
       convertLineEndings: newlineKind,
       ensureFolderExists: true
     });
@@ -73,29 +73,29 @@ export class DtsRollupGenerator {
 
   private static _generateTypingsFileContent(
     collector: Collector,
-    stringWriter: StringWriter,
+    writer: IndentedWriter,
     dtsKind: DtsRollupKind
   ): void {
     // Emit the @packageDocumentation comment at the top of the file
     if (collector.workingPackage.tsdocParserContext) {
-      stringWriter.writeLine(collector.workingPackage.tsdocParserContext.sourceRange.toString());
-      stringWriter.writeLine();
+      writer.writeLine(collector.workingPackage.tsdocParserContext.sourceRange.toString());
+      writer.writeLine();
     }
 
     // Emit the triple slash directives
     let directivesEmitted: boolean = false;
     for (const typeDirectiveReference of collector.dtsTypeReferenceDirectives) {
       // https://github.com/microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
-      stringWriter.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
+      writer.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
       directivesEmitted = true;
     }
 
     for (const libDirectiveReference of collector.dtsLibReferenceDirectives) {
-      stringWriter.writeLine(`/// <reference lib="${libDirectiveReference}" />`);
+      writer.writeLine(`/// <reference lib="${libDirectiveReference}" />`);
       directivesEmitted = true;
     }
     if (directivesEmitted) {
-      stringWriter.writeLine();
+      writer.writeLine();
     }
 
     // Emit the imports
@@ -111,7 +111,7 @@ export class DtsRollupGenerator {
           : ReleaseTag.None;
 
         if (this._shouldIncludeReleaseTag(maxEffectiveReleaseTag, dtsKind)) {
-          DtsEmitHelpers.emitImport(stringWriter, entity, astImport);
+          DtsEmitHelpers.emitImport(writer, entity, astImport);
         }
       }
     }
@@ -126,8 +126,8 @@ export class DtsRollupGenerator {
 
       if (!this._shouldIncludeReleaseTag(maxEffectiveReleaseTag, dtsKind)) {
         if (!collector.extractorConfig.omitTrimmingComments) {
-          stringWriter.writeLine();
-          stringWriter.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
+          writer.writeLine();
+          writer.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
         }
         continue;
       }
@@ -139,17 +139,15 @@ export class DtsRollupGenerator {
 
           if (!this._shouldIncludeReleaseTag(apiItemMetadata.effectiveReleaseTag, dtsKind)) {
             if (!collector.extractorConfig.omitTrimmingComments) {
-              stringWriter.writeLine();
-              stringWriter.writeLine(
-                `/* Excluded declaration from this release type: ${entity.nameForEmit} */`
-              );
+              writer.writeLine();
+              writer.writeLine(`/* Excluded declaration from this release type: ${entity.nameForEmit} */`);
             }
             continue;
           } else {
             const span: Span = new Span(astDeclaration.declaration);
             DtsRollupGenerator._modifySpan(collector, span, entity, astDeclaration, dtsKind);
-            stringWriter.writeLine();
-            stringWriter.writeLine(span.getModifiedText());
+            writer.writeLine();
+            writer.writeLine(span.getModifiedText());
           }
         }
       }
@@ -182,14 +180,14 @@ export class DtsRollupGenerator {
         // Note that we do not try to relocate f1()/f2() to be inside the namespace because other type
         // signatures may reference them directly (without using the namespace qualifier).
 
-        stringWriter.writeLine();
+        writer.writeLine();
         if (entity.shouldInlineExport) {
-          stringWriter.write('export ');
+          writer.write('export ');
         }
-        stringWriter.writeLine(`declare namespace ${entity.nameForEmit} {`);
+        writer.writeLine(`declare namespace ${entity.nameForEmit} {`);
 
         // all local exports of local imported module are just references to top-level declarations
-        stringWriter.writeLine('  export {');
+        writer.writeLine('  export {');
 
         const exportClauses: string[] = [];
         for (const [exportedName, exportedEntity] of astModuleExportInfo.exportedLocalEntities) {
@@ -209,25 +207,25 @@ export class DtsRollupGenerator {
             exportClauses.push(`${collectorEntity.nameForEmit} as ${exportedName}`);
           }
         }
-        stringWriter.writeLine(exportClauses.map((x) => `    ${x}`).join(',\n'));
+        writer.writeLine(exportClauses.map((x) => `    ${x}`).join(',\n'));
 
-        stringWriter.writeLine('  }'); // end of "export { ... }"
-        stringWriter.writeLine('}'); // end of "declare namespace { ... }"
+        writer.writeLine('  }'); // end of "export { ... }"
+        writer.writeLine('}'); // end of "declare namespace { ... }"
       }
 
       if (!entity.shouldInlineExport) {
         for (const exportName of entity.exportNames) {
-          DtsEmitHelpers.emitNamedExport(stringWriter, exportName, entity);
+          DtsEmitHelpers.emitNamedExport(writer, exportName, entity);
         }
       }
     }
 
-    DtsEmitHelpers.emitStarExports(stringWriter, collector);
+    DtsEmitHelpers.emitStarExports(writer, collector);
 
     // Emit "export { }" which is a special directive that prevents consumers from importing declarations
     // that don't have an explicit "export" modifier.
-    stringWriter.writeLine();
-    stringWriter.writeLine('export { }');
+    writer.writeLine();
+    writer.writeLine('export { }');
   }
 
   /**
