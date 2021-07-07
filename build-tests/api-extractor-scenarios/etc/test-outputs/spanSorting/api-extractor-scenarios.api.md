@@ -15,7 +15,7 @@ export class ExampleA {
 // @public
 export class ExampleB {
     tryLoadFromFile(approvedPackagesPolicyEnabled: boolean): boolean;
-    }
+}
 
 
 // (No @packageDocumentation comment for this package)

@@ -18,20 +18,20 @@ declare function add(a: number, b: number): number;
 declare function add_2(a: bigint, b: bigint): bigint;
 
 declare namespace calculator {
-  export {
-    add,
-    subtract,
-    calucatorVersion
-  }
+    export {
+        add,
+        subtract,
+        calucatorVersion
+    }
 }
 export { calculator }
 
 declare namespace calculator2 {
-  export {
-    add_2 as add,
-    subtract_2 as subtract,
-    calucatorVersion
-  }
+    export {
+        add_2 as add,
+        subtract_2 as subtract,
+        calucatorVersion
+    }
 }
 export { calculator2 }
 

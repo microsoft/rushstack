@@ -204,7 +204,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     getDataForSerialNumber(serialNumber: string): IStringSerialNumberData | undefined;
     // @internal (undocumented)
     stringKeys: Map<string, _IStringPlaceholder>;
-    }
+}
 
 // @internal (undocumented)
 export class _LocFileParser {

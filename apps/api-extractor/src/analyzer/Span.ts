@@ -5,6 +5,18 @@ import * as ts from 'typescript';
 import { IndentedWriter } from '../generators/IndentedWriter';
 import { InternalError, Sort } from '@rushstack/node-core-library';
 
+interface IWriteModifiedTextOptions {
+  writer: IndentedWriter;
+  separatorOverride: string | undefined;
+  indentDocComment: IndentDocCommentState;
+}
+
+enum IndentDocCommentState {
+  Idle,
+  AwaitingOpenDelimiter,
+  AwaitingCloseDelimiter
+}
+
 /**
  * Specifies various transformations that will be performed by Span.getModifiedText().
  */
@@ -32,6 +44,11 @@ export class SpanModification {
    * Used if the parent span has Span.sortChildren=true.
    */
   public sortKey: string | undefined;
+
+  /**
+   * If true, then getModifiedText() will search for a "/*" doc comment in this span and indent it.
+   */
+  public indentDocComment: boolean = false;
 
   private readonly _span: Span;
   private _prefix: string | undefined;
@@ -74,6 +91,7 @@ export class SpanModification {
     this.sortKey = undefined;
     this._prefix = undefined;
     this._suffix = undefined;
+    this.indentDocComment = this._span.kind === ts.SyntaxKind.JSDocComment;
   }
 
   /**
@@ -378,20 +396,23 @@ export class Span {
    * Returns the text represented by this Span, after applying all requested modifications.
    */
   public getModifiedText(): string {
-    const output: IndentedWriter = new IndentedWriter();
+    const writer: IndentedWriter = new IndentedWriter();
+    writer.trimLeadingSpaces = true;
 
     this._writeModifiedText({
-      writer: output,
-      separatorOverride: undefined
+      writer: writer,
+      separatorOverride: undefined,
+      indentDocComment: IndentDocCommentState.Idle
     });
 
-    return output.getText();
+    return writer.getText();
   }
 
   public writeModifiedText(output: IndentedWriter): void {
     this._writeModifiedText({
       writer: output,
-      separatorOverride: undefined
+      separatorOverride: undefined,
+      indentDocComment: IndentDocCommentState.Idle
     });
   }
 
@@ -421,7 +442,31 @@ export class Span {
   }
 
   private _writeModifiedText(options: IWriteModifiedTextOptions): void {
-    options.writer.write(this.modification.prefix);
+    if (this.modification.indentDocComment) {
+      if (options.indentDocComment !== IndentDocCommentState.Idle) {
+        throw new InternalError('indentDocComment cannot be nested');
+      }
+      options.indentDocComment = IndentDocCommentState.AwaitingOpenDelimiter;
+    }
+
+    if (this.prefix === '{') {
+      options.writer.increaseIndent();
+    } else if (this.prefix === '}') {
+      options.writer.decreaseIndent();
+    }
+
+    this._writeModifiedText2(options);
+
+    if (this.modification.indentDocComment) {
+      if (options.indentDocComment === IndentDocCommentState.AwaitingCloseDelimiter) {
+        throw new InternalError('missing "*/" delimiter for comment block');
+      }
+      options.indentDocComment = IndentDocCommentState.Idle;
+    }
+  }
+
+  private _writeModifiedText2(options: IWriteModifiedTextOptions): void {
+    this._write(this.modification.prefix, options);
 
     const childCount: number = this.children.length;
 
@@ -500,17 +545,47 @@ export class Span {
       }
     }
 
-    options.writer.write(this.modification.suffix);
+    this._write(this.modification.suffix, options);
 
     if (options.separatorOverride !== undefined) {
       if (this.separator || childCount === 0) {
-        options.writer.write(options.separatorOverride);
+        this._write(options.separatorOverride, options);
       }
     } else {
       if (!this.modification.omitSeparatorAfter) {
-        options.writer.write(this.separator);
+        this._write(this.separator, options);
       }
     }
+  }
+
+  private _write(text: string, options: IWriteModifiedTextOptions): void {
+    let parsedText: string = text;
+
+    if (options.indentDocComment === IndentDocCommentState.AwaitingOpenDelimiter) {
+      let index: number = parsedText.indexOf('/*');
+      if (index >= 0) {
+        index += '/*'.length;
+        options.writer.write(parsedText.substring(0, index));
+        parsedText = parsedText.substring(index);
+        options.indentDocComment = IndentDocCommentState.AwaitingCloseDelimiter;
+
+        options.writer.increaseIndent(' ');
+      }
+    }
+
+    if (options.indentDocComment === IndentDocCommentState.AwaitingCloseDelimiter) {
+      let index: number = parsedText.indexOf('*/');
+      if (index >= 0) {
+        index += '*/'.length;
+        options.writer.write(parsedText.substring(0, index));
+        parsedText = parsedText.substring(index);
+        options.indentDocComment = IndentDocCommentState.Idle;
+
+        options.writer.decreaseIndent();
+      }
+    }
+
+    options.writer.write(parsedText);
   }
 
   private _getTrimmed(text: string): string {
@@ -528,9 +603,4 @@ export class Span {
     }
     return this.node.getSourceFile().text.substring(startIndex, endIndex);
   }
-}
-
-interface IWriteModifiedTextOptions {
-  writer: IndentedWriter;
-  separatorOverride: string | undefined;
 }

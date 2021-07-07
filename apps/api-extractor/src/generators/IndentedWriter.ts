@@ -35,7 +35,7 @@ export class IndentedWriter {
    * The text characters used to create one level of indentation.
    * Two spaces by default.
    */
-  public defaultIndentPrefix: string = '  ';
+  public defaultIndentPrefix: string = '    ';
 
   /**
    * Whether to indent blank lines

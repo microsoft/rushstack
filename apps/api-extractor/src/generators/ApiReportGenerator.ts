@@ -43,6 +43,7 @@ export class ApiReportGenerator {
 
   public static generateReviewFileContent(collector: Collector): string {
     const writer: IndentedWriter = new IndentedWriter();
+    writer.trimLeadingSpaces = true;
 
     writer.writeLine(
       [
@@ -174,7 +175,9 @@ export class ApiReportGenerator {
           writer.writeLine(`declare namespace ${entity.nameForEmit} {`);
 
           // all local exports of local imported module are just references to top-level declarations
-          writer.writeLine('  export {');
+          writer.increaseIndent();
+          writer.writeLine('export {');
+          writer.increaseIndent();
 
           const exportClauses: string[] = [];
           for (const [exportedName, exportedEntity] of astModuleExportInfo.exportedLocalEntities) {
@@ -196,7 +199,9 @@ export class ApiReportGenerator {
           }
           writer.writeLine(exportClauses.map((x) => `    ${x}`).join(',\n'));
 
-          writer.writeLine('  }'); // end of "export { ... }"
+          writer.decreaseIndent();
+          writer.writeLine('}'); // end of "export { ... }"
+          writer.decreaseIndent();
           writer.writeLine('}'); // end of "declare namespace { ... }"
         }
 

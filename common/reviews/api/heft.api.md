@@ -78,7 +78,7 @@ export class HeftConfiguration {
     get projectPackageJson(): IPackageJson;
     get rigConfig(): RigConfig;
     get terminalProvider(): ITerminalProvider;
-    }
+}
 
 // @internal (undocumented)
 export class _HeftLifecycleHooks {
@@ -367,7 +367,7 @@ export class _MetricsCollector {
     readonly hooks: MetricsCollectorHooks;
     record(command: string, performanceData?: Partial<_IPerformanceData>): void;
     setStartTime(): void;
-    }
+}
 
 // @public
 export class MetricsCollectorHooks {
@@ -402,7 +402,7 @@ export class ScopedLogger implements IScopedLogger {
     readonly terminalProvider: ITerminalProvider;
     // (undocumented)
     get warnings(): ReadonlyArray<Error>;
-    }
+}
 
 // @public (undocumented)
 export abstract class StageHooksBase<TStageProperties extends object> {

@@ -2,14 +2,14 @@
 
 exports[`01 Demo from docs 1`] = `
 "begin
-  one
-  two
+    one
+    two
 end"
 `;
 
 exports[`02 Indent something 1`] = `
 "abc
-  d
+    d
 e
 
 
@@ -19,7 +19,7 @@ e
 
 exports[`03 Indent something with indentBlankLines=true 1`] = `
 "abc
-  d
+    d
 e
 >>> 
 >>> 
@@ -31,7 +31,7 @@ exports[`04 Two kinds of indents 1`] = `
 "---
 > a
 > bc
->   d
+>     d
 > e
 ---
 "

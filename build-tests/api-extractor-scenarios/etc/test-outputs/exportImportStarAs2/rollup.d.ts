@@ -11,15 +11,15 @@ declare class ForgottenClass {
 }
 
 declare namespace forgottenNs {
-  export {
-    ForgottenClass
-  }
+    export {
+        ForgottenClass
+    }
 }
 
 declare namespace ns {
-  export {
-    exportedApi
-  }
+    export {
+        exportedApi
+    }
 }
 export { ns }
 

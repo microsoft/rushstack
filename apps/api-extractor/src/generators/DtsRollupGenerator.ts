@@ -62,6 +62,7 @@ export class DtsRollupGenerator {
     newlineKind: NewlineKind
   ): void {
     const writer: IndentedWriter = new IndentedWriter();
+    writer.trimLeadingSpaces = true;
 
     DtsRollupGenerator._generateTypingsFileContent(collector, writer, dtsKind);
 
@@ -78,7 +79,9 @@ export class DtsRollupGenerator {
   ): void {
     // Emit the @packageDocumentation comment at the top of the file
     if (collector.workingPackage.tsdocParserContext) {
+      writer.trimLeadingSpaces = false;
       writer.writeLine(collector.workingPackage.tsdocParserContext.sourceRange.toString());
+      writer.trimLeadingSpaces = true;
       writer.writeLine();
     }
 
@@ -147,7 +150,8 @@ export class DtsRollupGenerator {
             const span: Span = new Span(astDeclaration.declaration);
             DtsRollupGenerator._modifySpan(collector, span, entity, astDeclaration, dtsKind);
             writer.writeLine();
-            writer.writeLine(span.getModifiedText());
+            span.writeModifiedText(writer);
+            writer.writeLine();
           }
         }
       }
@@ -187,7 +191,9 @@ export class DtsRollupGenerator {
         writer.writeLine(`declare namespace ${entity.nameForEmit} {`);
 
         // all local exports of local imported module are just references to top-level declarations
-        writer.writeLine('  export {');
+        writer.increaseIndent();
+        writer.writeLine('export {');
+        writer.increaseIndent();
 
         const exportClauses: string[] = [];
         for (const [exportedName, exportedEntity] of astModuleExportInfo.exportedLocalEntities) {
@@ -209,7 +215,9 @@ export class DtsRollupGenerator {
         }
         writer.writeLine(exportClauses.map((x) => `    ${x}`).join(',\n'));
 
-        writer.writeLine('  }'); // end of "export { ... }"
+        writer.decreaseIndent();
+        writer.writeLine('}'); // end of "export { ... }"
+        writer.decreaseIndent();
         writer.writeLine('}'); // end of "declare namespace { ... }"
       }
 
@@ -328,6 +336,7 @@ export class DtsRollupGenerator {
             if (!/\r?\n\s*$/.test(originalComment)) {
               originalComment += '\n';
             }
+            span.modification.indentDocComment = true;
             span.modification.prefix = originalComment + span.modification.prefix;
           }
         }

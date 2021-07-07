@@ -14,9 +14,9 @@ class ForgottenClass {
 }
 
 declare namespace ns {
-  export {
-    exportedApi
-  }
+    export {
+        exportedApi
+    }
 }
 export { ns }
 

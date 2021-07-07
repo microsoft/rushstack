@@ -6,7 +6,7 @@
 
 // @public (undocumented)
 export class Example {
-    }
+}
 
 
 // (No @packageDocumentation comment for this package)

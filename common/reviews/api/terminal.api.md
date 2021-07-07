@@ -23,7 +23,7 @@ export class DiscardStdoutTransform extends TerminalTransform {
     constructor(options: IDiscardStdoutTransformOptions);
     // (undocumented)
     protected onWriteChunk(chunk: ITerminalChunk): void;
-    }
+}
 
 // @public
 export interface ICallbackWritableOptions {
@@ -147,7 +147,7 @@ export class StderrLineTransform extends TerminalTransform {
     protected onClose(): void;
     // (undocumented)
     protected onWriteChunk(chunk: ITerminalChunk): void;
-    }
+}
 
 // @beta
 export class StdioSummarizer extends TerminalWritable {
@@ -155,7 +155,7 @@ export class StdioSummarizer extends TerminalWritable {
     getReport(): string;
     // (undocumented)
     onWriteChunk(chunk: ITerminalChunk): void;
-    }
+}
 
 // @public
 export class StdioWritable extends TerminalWritable {
