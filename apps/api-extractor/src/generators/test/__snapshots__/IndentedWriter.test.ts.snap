@@ -53,3 +53,13 @@ line
 
 "
 `;
+
+exports[`06 trimLeadingSpaces=true 1`] = `
+"    a
+    b  c
+
+>>a   b
+>>	tab
+>>c  
+"
+`;

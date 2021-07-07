@@ -42,6 +42,34 @@ export class IndentedWriter {
    */
   public indentBlankLines: boolean = false;
 
+  /**
+   * Trims leading spaces from the input text before applying the indent.
+   *
+   * @remarks
+   * Consider the following example:
+   *
+   * ```ts
+   * indentedWriter.increaseIndent('    '); // four spaces
+   * indentedWriter.write('  a\n  b  c\n');
+   * indentedWriter.decreaseIndent();
+   * ```
+   *
+   * Normally the output would be indented by 6 spaces: 4 from `increaseIndent()`, plus the 2 spaces
+   * from `write()`:
+   * ```
+   *       a
+   *       b  c
+   * ```
+   *
+   * Setting `trimLeadingSpaces=true` will trim the leading spaces, so that the lines are indented
+   * by 4 spaces only:
+   * ```
+   *     a
+   *     b  c
+   * ```
+   */
+  public trimLeadingSpaces: boolean = false;
+
   private readonly _builder: IStringBuilder;
 
   private _latestChunk: string | undefined;
@@ -201,13 +229,19 @@ export class IndentedWriter {
    * Writes a string that does not contain any newline characters.
    */
   private _writeLinePart(message: string): void {
-    if (message.length > 0) {
+    let trimmedMessage: string = message;
+
+    if (this.trimLeadingSpaces && this._atStartOfLine) {
+      trimmedMessage = message.replace(/^ +/, '');
+    }
+
+    if (trimmedMessage.length > 0) {
       if (this._atStartOfLine && this._indentText.length > 0) {
         this._write(this._indentText);
       }
-      this._write(message);
+      this._write(trimmedMessage);
       if (this._currentLineIsBlank) {
-        if (/\S/.test(message)) {
+        if (/\S/.test(trimmedMessage)) {
           this._currentLineIsBlank = false;
         }
       }

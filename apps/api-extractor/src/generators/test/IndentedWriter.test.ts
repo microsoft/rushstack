@@ -98,3 +98,22 @@ test('06 Edge cases for ensureSkippedLine()', () => {
   indentedWriter.ensureSkippedLine();
   expect(indentedWriter.toString()).toMatchSnapshot();
 });
+
+test('06 trimLeadingSpaces=true', () => {
+  const indentedWriter: IndentedWriter = new IndentedWriter();
+  indentedWriter.trimLeadingSpaces = true;
+
+  // Example from doc comment
+  indentedWriter.increaseIndent('    ');
+  indentedWriter.write('  a\n  b  c\n');
+  indentedWriter.decreaseIndent();
+  indentedWriter.ensureSkippedLine();
+  indentedWriter.increaseIndent('>>');
+  indentedWriter.write(' ');
+  indentedWriter.write('   ');
+  indentedWriter.write(' a');
+  indentedWriter.writeLine('   b');
+  indentedWriter.writeLine('\ttab'); // does not get indented
+  indentedWriter.writeLine('c  ');
+  expect(indentedWriter.toString()).toMatchSnapshot();
+});
