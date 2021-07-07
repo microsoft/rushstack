@@ -403,12 +403,8 @@ export class ApiReportGenerator {
               childAstDeclaration,
               messagesToReport
             );
-            const indentedAedocSynopsis: string = ApiReportGenerator._addIndentAfterNewlines(
-              aedocSynopsis,
-              child.getIndent()
-            );
 
-            child.modification.prefix = indentedAedocSynopsis + child.modification.prefix;
+            child.modification.prefix = aedocSynopsis + child.modification.prefix;
           }
         }
 
@@ -536,12 +532,5 @@ export class ApiReportGenerator {
       writer.write(realLine);
       writer.writeLine();
     }
-  }
-
-  private static _addIndentAfterNewlines(text: string, indent: string): string {
-    if (text.length === 0 || indent.length === 0) {
-      return text;
-    }
-    return Text.replaceAll(text, '\n', '\n' + indent);
   }
 }

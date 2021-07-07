@@ -327,44 +327,6 @@ export class Span {
   }
 
   /**
-   * Starting from the first character of this span, walk backwards until we find the start of the line,
-   * and return whitespace after that position.
-   *
-   * @remarks
-   * For example, suppose the character buffer contains this text:
-   * ```
-   *              1111111111222222
-   *  012345 6 7890123456789012345
-   * "line 1\r\n  line 2 Example"
-   * ```
-   *
-   * And suppose the span starts at index 17, i.e. the the "E" in example.  The `getIndent()` method would return
-   * two spaces corresponding to the range from index 8 through and including index 9.
-   */
-  public getIndent(): string {
-    const buffer: string = this.node.getSourceFile().text;
-
-    let lineStartIndex: number = 0;
-    let firstNonSpaceIndex: number = this.startIndex;
-
-    let i: number = this.startIndex - 1;
-    while (i >= 0) {
-      const c: number = buffer.charCodeAt(i);
-      if (c === 13 /* \r */ || c === 10 /* \n */) {
-        lineStartIndex = i + 1;
-        break;
-      }
-      if (c !== 32 /* space */ && c !== 9 /* tab */) {
-        // We encountered a non-spacing character, so move the firstNonSpaceIndex backwards
-        firstNonSpaceIndex = i;
-      }
-      --i;
-    }
-
-    return buffer.substring(lineStartIndex, firstNonSpaceIndex);
-  }
-
-  /**
    * Recursively invokes the callback on this Span and all its children.  The callback
    * can make changes to Span.modification for each node.
    */
