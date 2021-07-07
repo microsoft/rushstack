@@ -82,24 +82,18 @@ export class DtsRollupGenerator {
       writer.trimLeadingSpaces = false;
       writer.writeLine(collector.workingPackage.tsdocParserContext.sourceRange.toString());
       writer.trimLeadingSpaces = true;
-      writer.writeLine();
+      writer.ensureSkippedLine();
     }
 
     // Emit the triple slash directives
-    let directivesEmitted: boolean = false;
     for (const typeDirectiveReference of collector.dtsTypeReferenceDirectives) {
       // https://github.com/microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
       writer.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
-      directivesEmitted = true;
     }
-
     for (const libDirectiveReference of collector.dtsLibReferenceDirectives) {
       writer.writeLine(`/// <reference lib="${libDirectiveReference}" />`);
-      directivesEmitted = true;
     }
-    if (directivesEmitted) {
-      writer.writeLine();
-    }
+    writer.ensureSkippedLine();
 
     // Emit the imports
     for (const entity of collector.entities) {
@@ -118,6 +112,7 @@ export class DtsRollupGenerator {
         }
       }
     }
+    writer.ensureSkippedLine();
 
     // Emit the regular declarations
     for (const entity of collector.entities) {
@@ -129,7 +124,7 @@ export class DtsRollupGenerator {
 
       if (!this._shouldIncludeReleaseTag(maxEffectiveReleaseTag, dtsKind)) {
         if (!collector.extractorConfig.omitTrimmingComments) {
-          writer.writeLine();
+          writer.ensureSkippedLine();
           writer.writeLine(`/* Excluded from this release type: ${entity.nameForEmit} */`);
         }
         continue;
@@ -142,16 +137,16 @@ export class DtsRollupGenerator {
 
           if (!this._shouldIncludeReleaseTag(apiItemMetadata.effectiveReleaseTag, dtsKind)) {
             if (!collector.extractorConfig.omitTrimmingComments) {
-              writer.writeLine();
+              writer.ensureSkippedLine();
               writer.writeLine(`/* Excluded declaration from this release type: ${entity.nameForEmit} */`);
             }
             continue;
           } else {
             const span: Span = new Span(astDeclaration.declaration);
             DtsRollupGenerator._modifySpan(collector, span, entity, astDeclaration, dtsKind);
-            writer.writeLine();
+            writer.ensureSkippedLine();
             span.writeModifiedText(writer);
-            writer.writeLine();
+            writer.ensureNewLine();
           }
         }
       }
@@ -184,7 +179,7 @@ export class DtsRollupGenerator {
         // Note that we do not try to relocate f1()/f2() to be inside the namespace because other type
         // signatures may reference them directly (without using the namespace qualifier).
 
-        writer.writeLine();
+        writer.ensureSkippedLine();
         if (entity.shouldInlineExport) {
           writer.write('export ');
         }
@@ -213,7 +208,7 @@ export class DtsRollupGenerator {
             exportClauses.push(`${collectorEntity.nameForEmit} as ${exportedName}`);
           }
         }
-        writer.writeLine(exportClauses.map((x) => `    ${x}`).join(',\n'));
+        writer.writeLine(exportClauses.join(',\n'));
 
         writer.decreaseIndent();
         writer.writeLine('}'); // end of "export { ... }"
@@ -226,13 +221,15 @@ export class DtsRollupGenerator {
           DtsEmitHelpers.emitNamedExport(writer, exportName, entity);
         }
       }
+
+      writer.ensureSkippedLine();
     }
 
     DtsEmitHelpers.emitStarExports(writer, collector);
 
     // Emit "export { }" which is a special directive that prevents consumers from importing declarations
     // that don't have an explicit "export" modifier.
-    writer.writeLine();
+    writer.ensureSkippedLine();
     writer.writeLine('export { }');
   }
 

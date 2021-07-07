@@ -20,7 +20,6 @@ declare namespace ns {
 }
 export { ns }
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

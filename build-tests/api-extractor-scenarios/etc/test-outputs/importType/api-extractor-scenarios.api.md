@@ -19,7 +19,6 @@ export interface B extends Lib1Interface {
 export interface C extends Lib1Interface {
 }
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

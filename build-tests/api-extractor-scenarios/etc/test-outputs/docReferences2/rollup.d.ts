@@ -1,4 +1,3 @@
-
 /** @public */
 export declare class CyclicA {
     /** {@inheritDoc CyclicB.methodB2} */

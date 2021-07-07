@@ -1,4 +1,3 @@
-
 /** @public */
 export declare namespace A {
     export class B {

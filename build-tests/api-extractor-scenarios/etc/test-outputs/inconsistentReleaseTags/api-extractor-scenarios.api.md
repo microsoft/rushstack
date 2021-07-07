@@ -18,7 +18,6 @@ export interface IBeta {
 // @public
 export function publicFunctionReturnsBeta(): IBeta;
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

@@ -58,32 +58,22 @@ export class ApiReportGenerator {
     writer.writeLine('```ts\n');
 
     // Emit the triple slash directives
-    let directivesEmitted: boolean = false;
     for (const typeDirectiveReference of Array.from(collector.dtsTypeReferenceDirectives).sort()) {
       // https://github.com/microsoft/TypeScript/blob/611ebc7aadd7a44a4c0447698bfda9222a78cb66/src/compiler/declarationEmitter.ts#L162
       writer.writeLine(`/// <reference types="${typeDirectiveReference}" />`);
-      directivesEmitted = true;
     }
-
     for (const libDirectiveReference of Array.from(collector.dtsLibReferenceDirectives).sort()) {
       writer.writeLine(`/// <reference lib="${libDirectiveReference}" />`);
-      directivesEmitted = true;
     }
-    if (directivesEmitted) {
-      writer.writeLine();
-    }
+    writer.ensureSkippedLine();
 
     // Emit the imports
-    let importsEmitted: boolean = false;
     for (const entity of collector.entities) {
       if (entity.astEntity instanceof AstImport) {
         DtsEmitHelpers.emitImport(writer, entity, entity.astEntity);
-        importsEmitted = true;
       }
     }
-    if (importsEmitted) {
-      writer.writeLine();
-    }
+    writer.ensureSkippedLine();
 
     // Emit the regular declarations
     for (const entity of collector.entities) {
@@ -128,6 +118,7 @@ export class ApiReportGenerator {
               messagesToReport.push(message);
             }
 
+            writer.ensureSkippedLine();
             writer.write(ApiReportGenerator._getAedocSynopsis(collector, astDeclaration, messagesToReport));
 
             const span: Span = new Span(astDeclaration.declaration);
@@ -140,7 +131,7 @@ export class ApiReportGenerator {
             }
 
             span.writeModifiedText(writer);
-            writer.writeLine('\n');
+            writer.ensureNewLine();
           }
         }
 
@@ -172,6 +163,7 @@ export class ApiReportGenerator {
           // Note that we do not try to relocate f1()/f2() to be inside the namespace because other type
           // signatures may reference them directly (without using the namespace qualifier).
 
+          writer.ensureSkippedLine();
           writer.writeLine(`declare namespace ${entity.nameForEmit} {`);
 
           // all local exports of local imported module are just references to top-level declarations
@@ -197,7 +189,7 @@ export class ApiReportGenerator {
               exportClauses.push(`${collectorEntity.nameForEmit} as ${exportedName}`);
             }
           }
-          writer.writeLine(exportClauses.map((x) => `    ${x}`).join(',\n'));
+          writer.writeLine(exportClauses.join(',\n'));
 
           writer.decreaseIndent();
           writer.writeLine('}'); // end of "export { ... }"
@@ -208,16 +200,19 @@ export class ApiReportGenerator {
         // Now emit the export statements for this entity.
         for (const exportToEmit of exportsToEmit.values()) {
           // Write any associated messages
-          for (const message of exportToEmit.associatedMessages) {
-            ApiReportGenerator._writeLineAsComments(
-              writer,
-              'Warning: ' + message.formatMessageWithoutLocation()
-            );
+          if (exportToEmit.associatedMessages.length > 0) {
+            writer.ensureSkippedLine();
+            for (const message of exportToEmit.associatedMessages) {
+              ApiReportGenerator._writeLineAsComments(
+                writer,
+                'Warning: ' + message.formatMessageWithoutLocation()
+              );
+            }
           }
 
           DtsEmitHelpers.emitNamedExport(writer, exportToEmit.exportName, entity);
-          writer.writeLine();
         }
+        writer.ensureSkippedLine();
       }
     }
 
@@ -227,7 +222,7 @@ export class ApiReportGenerator {
     const unassociatedMessages: ExtractorMessage[] =
       collector.messageRouter.fetchUnassociatedMessagesForReviewFile();
     if (unassociatedMessages.length > 0) {
-      writer.writeLine();
+      writer.ensureSkippedLine();
       ApiReportGenerator._writeLineAsComments(writer, 'Warnings were encountered during analysis:');
       ApiReportGenerator._writeLineAsComments(writer, '');
       for (const unassociatedMessage of unassociatedMessages) {
@@ -239,12 +234,13 @@ export class ApiReportGenerator {
     }
 
     if (collector.workingPackage.tsdocComment === undefined) {
-      writer.writeLine();
+      writer.ensureSkippedLine();
       ApiReportGenerator._writeLineAsComments(writer, '(No @packageDocumentation comment for this package)');
     }
 
     // Write the closing delimiter for the Markdown code fence
-    writer.writeLine('\n```');
+    writer.ensureSkippedLine();
+    writer.writeLine('```');
 
     // Remove any trailing spaces
     return writer.toString().replace(ApiReportGenerator._trimSpacesRegExp, '');

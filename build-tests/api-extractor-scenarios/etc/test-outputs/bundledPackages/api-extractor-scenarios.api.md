@@ -21,7 +21,6 @@ export class Lib1Class extends Lib1ForgottenExport {
 
 export { Lib2Class }
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

@@ -1,4 +1,3 @@
-
 /**
  * Doc comment
  * @public

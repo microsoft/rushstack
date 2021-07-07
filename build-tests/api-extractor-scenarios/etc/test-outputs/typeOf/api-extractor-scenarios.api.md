@@ -14,7 +14,6 @@ export function f(): typeof Lib1Class | undefined;
 // @public
 export function g(): typeof ForgottenExport | undefined;
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

@@ -6,9 +6,7 @@
 
 // @public (undocumented)
 const _default: "literal";
-
 export default _default;
-
 
 // (No @packageDocumentation comment for this package)
 

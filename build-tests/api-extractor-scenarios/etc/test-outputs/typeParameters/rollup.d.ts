@@ -1,4 +1,3 @@
-
 /** @public */
 export declare class ClassWithGenericMethod {
     method<T>(): void;

@@ -1,4 +1,3 @@
-
 /**
  * Returns the sum of adding `b` to `a`
  * @param a - first number

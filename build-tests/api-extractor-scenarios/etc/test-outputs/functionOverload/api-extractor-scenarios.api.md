@@ -31,7 +31,6 @@ export class Combiner {
     combine(x: number, y: number): number;
 }
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

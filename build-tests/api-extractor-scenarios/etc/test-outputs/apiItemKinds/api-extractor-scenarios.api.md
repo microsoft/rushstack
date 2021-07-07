@@ -67,7 +67,6 @@ export class SimpleClass {
 // @public (undocumented)
 export const VARIABLE: string;
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

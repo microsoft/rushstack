@@ -37,7 +37,6 @@ function subtract(a: number, b: number): number;
 // @beta
 function subtract_2(a: bigint, b: bigint): bigint;
 
-
 // (No @packageDocumentation comment for this package)
 
 ```
