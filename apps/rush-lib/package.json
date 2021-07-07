@@ -20,6 +20,8 @@
   "dependencies": {
     "@azure/identity": "~1.0.0",
     "@azure/storage-blob": "~12.3.0",
+    "@definitelytyped/header-parser": "~0.0.85",
+    "@definitelytyped/utils": "~0.0.85",
     "@pnpm/link-bins": "~5.3.7",
     "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
