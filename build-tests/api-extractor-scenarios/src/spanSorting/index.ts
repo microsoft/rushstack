@@ -9,3 +9,22 @@ export class ExampleA {
   }
   public member1: string = '';
 }
+
+/**
+ * Doc comment
+ * @public
+ */
+export class ExampleB {
+  /**
+   * If the file exists, calls loadFromFile().
+   */
+  public tryLoadFromFile(approvedPackagesPolicyEnabled: boolean): boolean {
+    return false;
+  }
+
+  /**
+   * Helper function that adds an already created ApprovedPackagesItem to the
+   * list and set.
+   */
+  private _addItem(): void {}
+}

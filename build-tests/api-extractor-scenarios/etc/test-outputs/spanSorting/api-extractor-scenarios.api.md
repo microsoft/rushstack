@@ -12,6 +12,11 @@ export class ExampleA {
     member2(): Promise<void>;
 }
 
+// @public
+export class ExampleB {
+    tryLoadFromFile(approvedPackagesPolicyEnabled: boolean): boolean;
+    }
+
 
 // (No @packageDocumentation comment for this package)
 
