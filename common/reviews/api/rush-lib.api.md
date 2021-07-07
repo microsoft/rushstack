@@ -504,5 +504,4 @@ export class YarnOptionsConfiguration extends PackageManagerOptionsConfiguration
     readonly ignoreEngines: boolean;
 }
 
-
 ```

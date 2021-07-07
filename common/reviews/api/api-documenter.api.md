@@ -85,5 +85,4 @@ export class PluginFeatureInitialization {
     _context: PluginFeatureContext;
 }
 
-
 ```

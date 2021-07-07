@@ -209,7 +209,6 @@ export class WorkerPoolMinifier implements IModuleMinifier {
     ref(): () => Promise<void>;
 }
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

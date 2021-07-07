@@ -219,5 +219,4 @@ export class TextRewriterTransform extends TerminalTransform {
     readonly textRewriters: ReadonlyArray<TextRewriter>;
 }
 
-
 ```

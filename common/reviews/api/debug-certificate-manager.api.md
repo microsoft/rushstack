@@ -29,5 +29,4 @@ export interface ICertificate {
     pemKey: string | undefined;
 }
 
-
 ```
