@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 08 Jul 2021 06:00:48 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Jul 2021 23:41:16 GMT and should not be manually modified.
+
+## 7.18.1
+Thu, 08 Jul 2021 23:41:16 GMT
+
+### Patches
+
+- Fix a recent regression that reported "Internal Error: indentDocComment cannot be nested" (GitHub #2797)
 
 ## 7.18.0
 Thu, 08 Jul 2021 06:00:48 GMT
