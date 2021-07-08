@@ -13,6 +13,7 @@ import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
 import { IFetchAstSymbolOptions } from './AstSymbolTable';
 import { AstEntity } from './AstEntity';
 import { AstNamespaceImport } from './AstNamespaceImport';
+import { SyntaxHelpers } from './SyntaxHelpers';
 
 /**
  * Exposes the minimal APIs from AstSymbolTable that are needed by ExportAnalyzer.
@@ -425,12 +426,20 @@ export class ExportAnalyzer {
     if (externalModulePath) {
       let exportName: string;
       if (node.qualifier) {
+        // Example input:
+        //   import('api-extractor-lib1-test').Lib1GenericType<number>
+        //
+        // Extracted qualifier:
+        //   Lib1GenericType
         exportName = node.qualifier.getText().trim();
       } else {
-        const toAlphaNumericCamelCase = (str: string): string =>
-          str.replace(/(\W+[a-z])/g, (g) => g[g.length - 1].toUpperCase()).replace(/\W/g, '');
+        // Example input:
+        //   import('api-extractor-lib1-test')
+        //
+        // Extracted qualifier:
+        //   apiExtractorLib1Test
 
-        exportName = toAlphaNumericCamelCase(externalModulePath);
+        exportName = SyntaxHelpers.makeCamelCaseIdentifier(externalModulePath);
       }
 
       return this._fetchAstImport(undefined, {
