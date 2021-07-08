@@ -17,6 +17,11 @@ export class ExampleB {
     tryLoadFromFile(approvedPackagesPolicyEnabled: boolean): boolean;
 }
 
+// @public (undocumented)
+export class ExampleC {
+    member1(): void;
+}
+
 // (No @packageDocumentation comment for this package)
 
 ```

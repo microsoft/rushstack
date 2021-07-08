@@ -28,3 +28,14 @@ export class ExampleB {
    */
   private _addItem(): void {}
 }
+
+/** @public */
+export class ExampleC {
+  /**
+     * This comment is improperly formatted TSDoc.
+        * Note that Prettier doesn't try to format it.
+     @returns the return value
+     @throws an exception
+     */
+  public member1(): void {}
+}
