@@ -80,10 +80,15 @@ export class SpanModification {
   public sortKey: string | undefined;
 
   /**
-   * If true, then getModifiedText() will search for a "/*" doc comment in this span and indent it.
+   * Optionally configures getModifiedText() to search for a "/*" doc comment and indent it.
+   * At most one comment is detected.
    *
    * @remarks
-   * This feature is selectively enabled because (1) we do not want to accidentally match `/*` appearing
+   * The indentation can be applied to the `Span.modifier.prefix` only, or it can be applied to the
+   * full subtree of nodes (as needed for `ts.SyntaxKind.JSDocComment` trees).  However the enabled
+   * scopes must not overlap.
+   *
+   * This feature is enabled selectively because (1) we do not want to accidentally match `/*` appearing
    * in a string literal or other expression that is not a comment, and (2) parsing comments is relatively
    * expensive.
    */
