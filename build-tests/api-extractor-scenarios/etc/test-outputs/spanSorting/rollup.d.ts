@@ -37,6 +37,7 @@ export declare class ExampleC {
 
 /**
  * Outer description
+ * @public
  */
 export declare const exampleD: (o: {
     /**

@@ -42,6 +42,7 @@ export class ExampleC {
 
 /**
  * Outer description
+ * @public
  */
 export const exampleD = (o: {
   /**

@@ -355,7 +355,7 @@
         {
           "kind": "Variable",
           "canonicalReference": "api-extractor-scenarios!exampleD:var",
-          "docComment": "/**\n * Outer description\n */\n",
+          "docComment": "/**\n * Outer description\n *\n * @public\n */\n",
           "excerptTokens": [
             {
               "kind": "Content",
