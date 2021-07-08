@@ -26,7 +26,6 @@ export class IFolder {
     files: IFile[];
 }
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

@@ -26,7 +26,6 @@ export class FailWithSelfReference {
     method2(): void;
 }
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

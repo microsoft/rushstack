@@ -7,7 +7,6 @@ import { InternalError } from '@rushstack/node-core-library';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstImport, AstImportKind } from '../analyzer/AstImport';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
-import { StringWriter } from './StringWriter';
 import { Collector } from '../collector/Collector';
 import { Span } from '../analyzer/Span';
 
@@ -16,7 +15,7 @@ import { Span } from '../analyzer/Span';
  */
 export class DtsEmitHelpers {
   public static emitImport(
-    stringWriter: StringWriter,
+    writer: IndentedWriter,
     collectorEntity: CollectorEntity,
     astImport: AstImport
   ): void {
@@ -25,27 +24,27 @@ export class DtsEmitHelpers {
     switch (astImport.importKind) {
       case AstImportKind.DefaultImport:
         if (collectorEntity.nameForEmit !== astImport.exportName) {
-          stringWriter.write(`${importPrefix} { default as ${collectorEntity.nameForEmit} }`);
+          writer.write(`${importPrefix} { default as ${collectorEntity.nameForEmit} }`);
         } else {
-          stringWriter.write(`${importPrefix} ${astImport.exportName}`);
+          writer.write(`${importPrefix} ${astImport.exportName}`);
         }
-        stringWriter.writeLine(` from '${astImport.modulePath}';`);
+        writer.writeLine(` from '${astImport.modulePath}';`);
         break;
       case AstImportKind.NamedImport:
         if (collectorEntity.nameForEmit === astImport.exportName) {
           stringWriter.write(`${importPrefix} { ${astImport.exportName} }`);
         } else {
-          stringWriter.write(`${importPrefix} { ${astImport.exportName} as ${collectorEntity.nameForEmit} }`);
+          writer.write(`${importPrefix} { ${astImport.exportName} as ${collectorEntity.nameForEmit} }`);
         }
-        stringWriter.writeLine(` from '${astImport.modulePath}';`);
+        writer.writeLine(` from '${astImport.modulePath}';`);
         break;
       case AstImportKind.StarImport:
-        stringWriter.writeLine(
+        writer.writeLine(
           `${importPrefix} * as ${collectorEntity.nameForEmit} from '${astImport.modulePath}';`
         );
         break;
       case AstImportKind.EqualsImport:
-        stringWriter.writeLine(
+        writer.writeLine(
           `${importPrefix} ${collectorEntity.nameForEmit} = require('${astImport.modulePath}');`
         );
         break;
@@ -70,24 +69,24 @@ export class DtsEmitHelpers {
   }
 
   public static emitNamedExport(
-    stringWriter: StringWriter,
+    writer: IndentedWriter,
     exportName: string,
     collectorEntity: CollectorEntity
   ): void {
     if (exportName === ts.InternalSymbolName.Default) {
-      stringWriter.writeLine(`export default ${collectorEntity.nameForEmit};`);
+      writer.writeLine(`export default ${collectorEntity.nameForEmit};`);
     } else if (collectorEntity.nameForEmit !== exportName) {
-      stringWriter.writeLine(`export { ${collectorEntity.nameForEmit} as ${exportName} }`);
+      writer.writeLine(`export { ${collectorEntity.nameForEmit} as ${exportName} }`);
     } else {
-      stringWriter.writeLine(`export { ${exportName} }`);
+      writer.writeLine(`export { ${exportName} }`);
     }
   }
 
-  public static emitStarExports(stringWriter: StringWriter, collector: Collector): void {
+  public static emitStarExports(writer: IndentedWriter, collector: Collector): void {
     if (collector.starExportedExternalModulePaths.length > 0) {
-      stringWriter.writeLine();
+      writer.writeLine();
       for (const starExportedExternalModulePath of collector.starExportedExternalModulePaths) {
-        stringWriter.writeLine(`export * from "${starExportedExternalModulePath}";`);
+        writer.writeLine(`export * from "${starExportedExternalModulePath}";`);
       }
     }
   }

@@ -13,11 +13,8 @@ class ClassΞ {
     // (undocumented)
     'validChars'(): void;
 }
-
 export { ClassΞ }
-
 export { ClassΞ as ClassΣ }
-
 
 // (No @packageDocumentation comment for this package)
 

@@ -1,4 +1,3 @@
-
 /**
  * {@inheritDoc MyNamespace.MyClass.nonExistentMethod}
  * @public

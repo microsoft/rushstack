@@ -13,9 +13,7 @@ export { Lib1Class }
 export { Lib1Interface }
 
 export { Lib2Class as DoubleRenamedLib2Class }
-
 export { Lib2Class as RenamedLib2Class }
-
 
 // (No @packageDocumentation comment for this package)
 

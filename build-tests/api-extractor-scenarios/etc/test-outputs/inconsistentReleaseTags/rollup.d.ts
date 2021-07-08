@@ -1,4 +1,3 @@
-
 /**
  * It's okay for an "alpha" function to reference a "beta" symbol,
  * because "beta" is more public than "alpha".

@@ -16,7 +16,6 @@ interface _PreapprovedInterface { /* (preapproved) */ }
 // @internal (undocumented)
 namespace _PreapprovedNamespace { /* (preapproved) */ }
 
-
 // (No @packageDocumentation comment for this package)
 
 ```
