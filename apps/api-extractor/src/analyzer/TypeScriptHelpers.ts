@@ -134,11 +134,14 @@ export class TypeScriptHelpers {
         nodeWithModuleSpecifier.argument.kind !== ts.SyntaxKind.LiteralType ||
         (nodeWithModuleSpecifier.argument as ts.LiteralTypeNode).literal.kind !== ts.SyntaxKind.StringLiteral
       ) {
-        throw new InternalError('Invalid ImportTypeNode:\n' + nodeWithModuleSpecifier.getText());
+        throw new InternalError(
+          `Invalid ImportTypeNode: ${nodeWithModuleSpecifier.getText()}\n` +
+            SourceFileLocationFormatter.formatDeclaration(nodeWithModuleSpecifier)
+        );
       }
-
-      return ((nodeWithModuleSpecifier.argument as ts.LiteralTypeNode)
-        .literal as ts.StringLiteral).text.trim();
+      const literalTypeNode: ts.LiteralTypeNode = nodeWithModuleSpecifier.argument as ts.LiteralTypeNode;
+      const stringLiteral: ts.StringLiteral = literalTypeNode.literal as ts.StringLiteral;
+      return stringLiteral.text.trim();
     }
 
     // Node is a declaration

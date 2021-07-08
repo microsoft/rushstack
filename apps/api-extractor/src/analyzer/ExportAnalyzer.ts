@@ -460,7 +460,10 @@ export class ExportAnalyzer {
     // There is no symbol property in a ImportTypeNode, obtain the associated export symbol
     const exportSymbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(rightMostToken);
     if (!exportSymbol) {
-      throw new Error('Symbol not found for identifier: ' + node.getText());
+      throw new InternalError(
+        `Symbol not found for identifier: ${node.getText()}\n` +
+          SourceFileLocationFormatter.formatDeclaration(node)
+      );
     }
 
     let followedSymbol: ts.Symbol = exportSymbol;

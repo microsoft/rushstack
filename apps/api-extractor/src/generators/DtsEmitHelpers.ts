@@ -10,6 +10,7 @@ import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { Collector } from '../collector/Collector';
 import { Span } from '../analyzer/Span';
 import { IndentedWriter } from './IndentedWriter';
+import { SourceFileLocationFormatter } from '../analyzer/SourceFileLocationFormatter';
 
 /**
  * Some common code shared between DtsRollupGenerator and ApiReportGenerator.
@@ -104,6 +105,7 @@ export class DtsEmitHelpers {
     if (referencedEntity) {
       if (!referencedEntity.nameForEmit) {
         // This should never happen
+
         throw new InternalError('referencedEntry.nameForEmit is undefined');
       }
 
@@ -119,7 +121,10 @@ export class DtsEmitHelpers {
         );
 
         if (lessThanTokenPos < 0 || greaterThanTokenPos <= lessThanTokenPos) {
-          throw new InternalError('Invalid type arguments:\n' + node.getText());
+          throw new InternalError(
+            `Invalid type arguments: ${node.getText()}\n` +
+              SourceFileLocationFormatter.formatDeclaration(node)
+          );
         }
 
         const typeArgumentsSpans: Span[] = span.children.slice(lessThanTokenPos + 1, greaterThanTokenPos);
@@ -160,7 +165,6 @@ export class DtsEmitHelpers {
         span.modification.prefix = replacement;
       } else {
         // Replace with internal symbol or AstImport
-
         span.modification.skipAll();
         span.modification.prefix = `${referencedEntity.nameForEmit}${typeArgumentsText}${separatorAfter}`;
       }

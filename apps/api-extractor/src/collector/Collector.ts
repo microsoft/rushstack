@@ -13,7 +13,6 @@ import { AstSymbolTable } from '../analyzer/AstSymbolTable';
 import { AstEntity } from '../analyzer/AstEntity';
 import { AstModule, AstModuleExportInfo } from '../analyzer/AstModule';
 import { AstSymbol } from '../analyzer/AstSymbol';
-import { AstImport } from '../analyzer/AstImport';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
 import { WorkingPackage } from './WorkingPackage';
@@ -26,6 +25,7 @@ import { MessageRouter } from './MessageRouter';
 import { AstReferenceResolver } from '../analyzer/AstReferenceResolver';
 import { ExtractorConfig } from '../api/ExtractorConfig';
 import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
+import { AstImport } from '../analyzer/AstImport';
 
 /**
  * Options for Collector constructor.
