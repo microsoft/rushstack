@@ -6,7 +6,7 @@ import * as ts from 'typescript';
 /**
  * Helpers for validating various text string formats.
  */
-export class StringChecks {
+export class SyntaxHelpers {
   /**
    * Tests whether the input string is safe to use as an ECMAScript identifier without quotes.
    *

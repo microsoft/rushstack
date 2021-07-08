@@ -16,7 +16,7 @@ import { AstEntity } from './AstEntity';
 import { AstNamespaceImport } from './AstNamespaceImport';
 import { MessageRouter } from '../collector/MessageRouter';
 import { TypeScriptInternals, IGlobalVariableAnalyzer } from './TypeScriptInternals';
-import { StringChecks } from './StringChecks';
+import { SyntaxHelpers } from './SyntaxHelpers';
 import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
 
 /**
@@ -261,7 +261,7 @@ export class AstSymbolTable {
     // Otherwise that name may come from a quoted string or pseudonym like `__constructor`.
     // If the string is not a safe identifier, then we must add quotes.
     // Note that if it was quoted but did not need to be quoted, here we will remove the quotes.
-    if (!StringChecks.isSafeUnquotedMemberIdentifier(unquotedName)) {
+    if (!SyntaxHelpers.isSafeUnquotedMemberIdentifier(unquotedName)) {
       // For API Extractor's purposes, a canonical form is more appropriate than trying to reflect whatever
       // appeared in the source code.  The code is not even guaranteed to be consistent, for example:
       //
