@@ -13,7 +13,6 @@ export interface IExample {
     generic: Lib1GenericType<number | undefined, Lib1Interface>;
 }
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

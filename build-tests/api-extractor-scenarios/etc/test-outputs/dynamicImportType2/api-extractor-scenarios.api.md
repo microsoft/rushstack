@@ -14,7 +14,6 @@ export interface IExample {
     dottedImportType2: Lib1Namespace.Y | undefined;
 }
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

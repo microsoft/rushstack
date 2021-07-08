@@ -30,7 +30,6 @@ export { Lib1 }
 
 export { Lib2Interface }
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

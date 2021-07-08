@@ -9,6 +9,7 @@ import { AstImport, AstImportKind } from '../analyzer/AstImport';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
 import { Collector } from '../collector/Collector';
 import { Span } from '../analyzer/Span';
+import { IndentedWriter } from './IndentedWriter';
 
 /**
  * Some common code shared between DtsRollupGenerator and ApiReportGenerator.
@@ -32,7 +33,7 @@ export class DtsEmitHelpers {
         break;
       case AstImportKind.NamedImport:
         if (collectorEntity.nameForEmit === astImport.exportName) {
-          stringWriter.write(`${importPrefix} { ${astImport.exportName} }`);
+          writer.write(`${importPrefix} { ${astImport.exportName} }`);
         } else {
           writer.write(`${importPrefix} { ${astImport.exportName} as ${collectorEntity.nameForEmit} }`);
         }
@@ -50,17 +51,17 @@ export class DtsEmitHelpers {
         break;
       case AstImportKind.ImportType:
         if (!astImport.exportName) {
-          stringWriter.writeLine(
+          writer.writeLine(
             `${importPrefix} * as ${collectorEntity.nameForEmit} from '${astImport.modulePath}';`
           );
         } else {
           const topExportName: string = astImport.exportName.split('.')[0];
           if (collectorEntity.nameForEmit === topExportName) {
-            stringWriter.write(`${importPrefix} { ${topExportName} }`);
+            writer.write(`${importPrefix} { ${topExportName} }`);
           } else {
-            stringWriter.write(`${importPrefix} { ${topExportName} as ${collectorEntity.nameForEmit} }`);
+            writer.write(`${importPrefix} { ${topExportName} as ${collectorEntity.nameForEmit} }`);
           }
-          stringWriter.writeLine(` from '${astImport.modulePath}';`);
+          writer.writeLine(` from '${astImport.modulePath}';`);
         }
         break;
       default:

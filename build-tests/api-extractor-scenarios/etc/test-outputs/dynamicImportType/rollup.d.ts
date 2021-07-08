@@ -12,7 +12,9 @@ export declare class Item {
     lib3: Lib1Class;
     reExport: Lib2Class;
 }
+
 export { Lib1 }
+
 export { Lib2Interface }
 
 declare interface Options {
