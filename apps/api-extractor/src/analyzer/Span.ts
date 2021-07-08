@@ -83,8 +83,8 @@ export class SpanModification {
    * If true, then getModifiedText() will search for a "/*" doc comment in this span and indent it.
    *
    * @remarks
-   * This feature is selectively enabled because (1) we do not want to accidentally `/*` appearing
-   * in a string literal or other expression that is not a comment, and (2) parsing comments is potentially
+   * This feature is selectively enabled because (1) we do not want to accidentally match `/*` appearing
+   * in a string literal or other expression that is not a comment, and (2) parsing comments is relatively
    * expensive.
    */
   public indentDocComment: IndentDocCommentScope = IndentDocCommentScope.None;
