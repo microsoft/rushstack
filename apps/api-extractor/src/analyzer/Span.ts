@@ -404,6 +404,49 @@ export class Span {
   }
 
   /**
+   * Returns a diagnostic dump of the tree, showing the SpanModification settings for each nodde.
+   */
+  public getModifiedDump(indent: string = ''): string {
+    let result: string = indent + ts.SyntaxKind[this.node.kind] + ': ';
+
+    if (this.prefix) {
+      result += ' pre=[' + this._getTrimmed(this.modification.prefix) + ']';
+    }
+    if (this.suffix) {
+      result += ' suf=[' + this._getTrimmed(this.modification.suffix) + ']';
+    }
+    if (this.separator) {
+      result += ' sep=[' + this._getTrimmed(this.separator) + ']';
+    }
+    if (this.modification.indentDocComment !== IndentDocCommentScope.None) {
+      result += ' indentDocComment=' + IndentDocCommentScope[this.modification.indentDocComment];
+    }
+    if (this.modification.omitChildren) {
+      result += ' omitChildren';
+    }
+    if (this.modification.omitSeparatorAfter) {
+      result += ' omitSeparatorAfter';
+    }
+    if (this.modification.sortChildren) {
+      result += ' sortChildren';
+    }
+    if (this.modification.sortKey !== undefined) {
+      result += ` sortKey="${this.modification.sortKey}"`;
+    }
+    result += '\n';
+
+    if (!this.modification.omitChildren) {
+      for (const child of this.children) {
+        result += child.getModifiedDump(indent + '  ');
+      }
+    } else {
+      result += `${indent}  (${this.children.length} children)\n`;
+    }
+
+    return result;
+  }
+
+  /**
    * Recursive implementation of `getModifiedText()` and `writeModifiedText()`.
    */
   private _writeModifiedText(options: IWriteModifiedTextOptions): void {

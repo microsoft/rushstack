@@ -35,4 +35,19 @@ export declare class ExampleC {
     member1(): void;
 }
 
+/**
+ * Outer description
+ */
+export declare const exampleD: (o: {
+    /**
+     * Inner description
+     */
+    a: number;
+    /**
+     * @returns a string
+     * {@link http://example.com}
+     */
+    b(): string;
+}) => void;
+
 export { }
