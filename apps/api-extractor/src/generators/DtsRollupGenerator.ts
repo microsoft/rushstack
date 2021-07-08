@@ -9,7 +9,7 @@ import { ReleaseTag } from '@microsoft/api-extractor-model';
 
 import { Collector } from '../collector/Collector';
 import { TypeScriptHelpers } from '../analyzer/TypeScriptHelpers';
-import { Span, SpanModification } from '../analyzer/Span';
+import { IndentDocCommentScope, Span, SpanModification } from '../analyzer/Span';
 import { AstImport } from '../analyzer/AstImport';
 import { CollectorEntity } from '../collector/CollectorEntity';
 import { AstDeclaration } from '../analyzer/AstDeclaration';
@@ -333,7 +333,7 @@ export class DtsRollupGenerator {
             if (!/\r?\n\s*$/.test(originalComment)) {
               originalComment += '\n';
             }
-            span.modification.indentDocComment = true;
+            span.modification.indentDocComment = IndentDocCommentScope.PrefixOnly;
             span.modification.prefix = originalComment + span.modification.prefix;
           }
         }

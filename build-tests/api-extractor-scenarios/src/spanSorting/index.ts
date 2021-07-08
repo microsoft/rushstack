@@ -39,3 +39,20 @@ export class ExampleC {
      */
   public member1(): void {}
 }
+
+/**
+ * Outer description
+ * @public
+ */
+export const exampleD = (o: {
+  /**
+   * Inner description
+   */
+  a: number;
+
+  /**
+   * @returns a string
+   * {@link http://example.com}
+   */
+  b(): string;
+}) => {};

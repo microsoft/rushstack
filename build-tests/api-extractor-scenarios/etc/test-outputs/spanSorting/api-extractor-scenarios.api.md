@@ -22,6 +22,12 @@ export class ExampleC {
     member1(): void;
 }
 
+// @public
+export const exampleD: (o: {
+    a: number;
+    b(): string;
+}) => void;
+
 // (No @packageDocumentation comment for this package)
 
 ```

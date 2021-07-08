@@ -16,19 +16,39 @@ enum IndentDocCommentState {
   /**
    * `indentDocComment` was not requested for this subtree.
    */
-  Inactive,
+  Inactive = 0,
   /**
    * `indentDocComment` was requested and we are looking for the opening `/` `*`
    */
-  AwaitingOpenDelimiter,
+  AwaitingOpenDelimiter = 1,
   /**
    * `indentDocComment` was requested and we are looking for the closing `*` `/`
    */
-  AwaitingCloseDelimiter,
+  AwaitingCloseDelimiter = 2,
   /**
    * `indentDocComment` was requested and we have finished indenting the comment.
    */
-  Done
+  Done = 3
+}
+
+/**
+ * Choices for SpanModification.indentDocComment.
+ */
+export enum IndentDocCommentScope {
+  /**
+   * Do not detect and indent comments.
+   */
+  None = 0,
+
+  /**
+   * Look for one doc comment in the {@link Span.prefix} text only.
+   */
+  PrefixOnly = 1,
+
+  /**
+   * Look for one doc comment potentially distributed across the Span and its children.
+   */
+  SpanAndChildren = 2
 }
 
 /**
@@ -60,9 +80,19 @@ export class SpanModification {
   public sortKey: string | undefined;
 
   /**
-   * If true, then getModifiedText() will search for a "/*" doc comment in this span and indent it.
+   * Optionally configures getModifiedText() to search for a "/*" doc comment and indent it.
+   * At most one comment is detected.
+   *
+   * @remarks
+   * The indentation can be applied to the `Span.modifier.prefix` only, or it can be applied to the
+   * full subtree of nodes (as needed for `ts.SyntaxKind.JSDocComment` trees).  However the enabled
+   * scopes must not overlap.
+   *
+   * This feature is enabled selectively because (1) we do not want to accidentally match `/*` appearing
+   * in a string literal or other expression that is not a comment, and (2) parsing comments is relatively
+   * expensive.
    */
-  public indentDocComment: boolean = false;
+  public indentDocComment: IndentDocCommentScope = IndentDocCommentScope.None;
 
   private readonly _span: Span;
   private _prefix: string | undefined;
@@ -105,7 +135,9 @@ export class SpanModification {
     this.sortKey = undefined;
     this._prefix = undefined;
     this._suffix = undefined;
-    this.indentDocComment = this._span.kind === ts.SyntaxKind.JSDocComment;
+    if (this._span.kind === ts.SyntaxKind.JSDocComment) {
+      this.indentDocComment = IndentDocCommentScope.SpanAndChildren;
+    }
   }
 
   /**
@@ -404,38 +436,68 @@ export class Span {
   }
 
   /**
+   * Returns a diagnostic dump of the tree, showing the SpanModification settings for each nodde.
+   */
+  public getModifiedDump(indent: string = ''): string {
+    let result: string = indent + ts.SyntaxKind[this.node.kind] + ': ';
+
+    if (this.prefix) {
+      result += ' pre=[' + this._getTrimmed(this.modification.prefix) + ']';
+    }
+    if (this.suffix) {
+      result += ' suf=[' + this._getTrimmed(this.modification.suffix) + ']';
+    }
+    if (this.separator) {
+      result += ' sep=[' + this._getTrimmed(this.separator) + ']';
+    }
+    if (this.modification.indentDocComment !== IndentDocCommentScope.None) {
+      result += ' indentDocComment=' + IndentDocCommentScope[this.modification.indentDocComment];
+    }
+    if (this.modification.omitChildren) {
+      result += ' omitChildren';
+    }
+    if (this.modification.omitSeparatorAfter) {
+      result += ' omitSeparatorAfter';
+    }
+    if (this.modification.sortChildren) {
+      result += ' sortChildren';
+    }
+    if (this.modification.sortKey !== undefined) {
+      result += ` sortKey="${this.modification.sortKey}"`;
+    }
+    result += '\n';
+
+    if (!this.modification.omitChildren) {
+      for (const child of this.children) {
+        result += child.getModifiedDump(indent + '  ');
+      }
+    } else {
+      result += `${indent}  (${this.children.length} children)\n`;
+    }
+
+    return result;
+  }
+
+  /**
    * Recursive implementation of `getModifiedText()` and `writeModifiedText()`.
    */
   private _writeModifiedText(options: IWriteModifiedTextOptions): void {
-    if (this.modification.indentDocComment) {
-      if (options.indentDocCommentState !== IndentDocCommentState.Inactive) {
-        throw new InternalError('indentDocComment cannot be nested');
-      }
-      options.indentDocCommentState = IndentDocCommentState.AwaitingOpenDelimiter;
-    }
-
+    // Apply indentation based on "{" and "}"
     if (this.prefix === '{') {
       options.writer.increaseIndent();
     } else if (this.prefix === '}') {
       options.writer.decreaseIndent();
     }
 
-    this._writeModifiedTextContent(options);
-
-    if (this.modification.indentDocComment) {
-      if (options.indentDocCommentState === IndentDocCommentState.AwaitingCloseDelimiter) {
-        throw new InternalError('missing "*/" delimiter for comment block');
-      }
-      options.indentDocCommentState = IndentDocCommentState.Inactive;
+    if (this.modification.indentDocComment !== IndentDocCommentScope.None) {
+      this._beginIndentDocComment(options);
     }
-  }
 
-  /**
-   * This is a helper for `_writeModifiedText()`.  `_writeModifiedText()` configures indentation
-   * whereas `_writeModifiedTextContent()` does the actual writing.
-   */
-  private _writeModifiedTextContent(options: IWriteModifiedTextOptions): void {
     this._write(this.modification.prefix, options);
+
+    if (this.modification.indentDocComment === IndentDocCommentScope.PrefixOnly) {
+      this._endIndentDocComment(options);
+    }
 
     let sortedSubset: Span[] | undefined;
 
@@ -530,6 +592,24 @@ export class Span {
         }
       }
     }
+
+    if (this.modification.indentDocComment === IndentDocCommentScope.SpanAndChildren) {
+      this._endIndentDocComment(options);
+    }
+  }
+
+  private _beginIndentDocComment(options: IWriteModifiedTextOptions): void {
+    if (options.indentDocCommentState !== IndentDocCommentState.Inactive) {
+      throw new InternalError('indentDocComment cannot be nested');
+    }
+    options.indentDocCommentState = IndentDocCommentState.AwaitingOpenDelimiter;
+  }
+
+  private _endIndentDocComment(options: IWriteModifiedTextOptions): void {
+    if (options.indentDocCommentState === IndentDocCommentState.AwaitingCloseDelimiter) {
+      throw new InternalError('missing "*/" delimiter for comment block');
+    }
+    options.indentDocCommentState = IndentDocCommentState.Inactive;
   }
 
   /**

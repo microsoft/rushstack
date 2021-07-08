@@ -351,6 +351,27 @@
             }
           ],
           "implementsTokenRanges": []
+        },
+        {
+          "kind": "Variable",
+          "canonicalReference": "api-extractor-scenarios!exampleD:var",
+          "docComment": "/**\n * Outer description\n *\n * @public\n */\n",
+          "excerptTokens": [
+            {
+              "kind": "Content",
+              "text": "exampleD: "
+            },
+            {
+              "kind": "Content",
+              "text": "(o: {\n    a: number;\n    b(): string;\n}) => void"
+            }
+          ],
+          "releaseTag": "Public",
+          "name": "exampleD",
+          "variableTypeTokenRange": {
+            "startIndex": 1,
+            "endIndex": 2
+          }
         }
       ]
     }
