@@ -2,6 +2,21 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.18.0",
+      "tag": "@microsoft/api-extractor_v7.18.0",
+      "date": "Thu, 08 Jul 2021 06:00:48 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for import() type expressions (GitHub #1050) -- Thank you @javier-garcia-meteologica and @adventure-yunfei for solving this difficult problem!"
+          },
+          {
+            "comment": "Improve formatting of declarations in .d.ts rollup and .api.md files, fixing some indentation issues"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.17.1",
       "tag": "@microsoft/api-extractor_v7.17.1",
       "date": "Thu, 01 Jul 2021 15:08:27 GMT",

@@ -1,6 +1,14 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 01 Jul 2021 15:08:27 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Jul 2021 06:00:48 GMT and should not be manually modified.
+
+## 7.18.0
+Thu, 08 Jul 2021 06:00:48 GMT
+
+### Minor changes
+
+- Add support for import() type expressions (GitHub #1050) -- Thank you @javier-garcia-meteologica and @adventure-yunfei for solving this difficult problem!
+- Improve formatting of declarations in .d.ts rollup and .api.md files, fixing some indentation issues
 
 ## 7.17.1
 Thu, 01 Jul 2021 15:08:27 GMT
