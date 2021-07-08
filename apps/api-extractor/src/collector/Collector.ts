@@ -273,8 +273,8 @@ export class Collector {
    * @remarks
    * Throws an Error if the ts.Identifier is not part of node tree that was analyzed.
    */
-  public tryGetEntityForIdentifierNode(identifier: ts.Identifier): CollectorEntity | undefined {
-    const astEntity: AstEntity | undefined = this.astSymbolTable.tryGetEntityForIdentifierNode(identifier);
+  public tryGetEntityForNode(identifier: ts.Identifier | ts.ImportTypeNode): CollectorEntity | undefined {
+    const astEntity: AstEntity | undefined = this.astSymbolTable.tryGetEntityForNode(identifier);
     if (astEntity) {
       return this._entitiesByAstEntity.get(astEntity);
     }
@@ -347,7 +347,9 @@ export class Collector {
    * initially ignoring the underscore prefix, while still deterministically comparing it.
    * The star is used as a delimiter because it is not a legal  identifier character.
    */
-  public static getSortKeyIgnoringUnderscore(identifier: string): string {
+  public static getSortKeyIgnoringUnderscore(identifier: string | undefined): string {
+    if (!identifier) return '';
+
     let parts: string[];
 
     if (identifier[0] === '_') {
@@ -503,6 +505,11 @@ export class Collector {
       } else {
         // otherwise use the local name
         idealNameForEmit = entity.astEntity.localName;
+      }
+
+      if (idealNameForEmit.includes('.')) {
+        // For an ImportType with a namespace chain, only the top namespace is imported.
+        idealNameForEmit = idealNameForEmit.split('.')[0];
       }
 
       // If the idealNameForEmit happens to be the same as one of the exports, then we're safe to use that...

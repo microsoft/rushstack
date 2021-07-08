@@ -349,7 +349,7 @@ export class ApiReportGenerator {
         break;
 
       case ts.SyntaxKind.Identifier:
-        const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityForIdentifierNode(
+        const referencedEntity: CollectorEntity | undefined = collector.tryGetEntityForNode(
           span.node as ts.Identifier
         );
 
@@ -371,6 +371,23 @@ export class ApiReportGenerator {
 
       case ts.SyntaxKind.TypeLiteral:
         insideTypeLiteral = true;
+        break;
+
+      case ts.SyntaxKind.ImportType:
+        DtsEmitHelpers.modifyImportTypeSpan(
+          collector,
+          span,
+          astDeclaration,
+          (childSpan, childAstDeclaration) => {
+            ApiReportGenerator._modifySpan(
+              collector,
+              childSpan,
+              entity,
+              childAstDeclaration,
+              insideTypeLiteral
+            );
+          }
+        );
         break;
     }
 

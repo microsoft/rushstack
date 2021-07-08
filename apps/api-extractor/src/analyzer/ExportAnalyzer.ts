@@ -13,6 +13,7 @@ import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
 import { IFetchAstSymbolOptions } from './AstSymbolTable';
 import { AstEntity } from './AstEntity';
 import { AstNamespaceImport } from './AstNamespaceImport';
+import { SyntaxHelpers } from './SyntaxHelpers';
 
 /**
  * Exposes the minimal APIs from AstSymbolTable that are needed by ExportAnalyzer.
@@ -416,6 +417,99 @@ export class ExportAnalyzer {
     return astSymbol;
   }
 
+  public fetchReferencedAstEntityFromImportTypeNode(
+    node: ts.ImportTypeNode,
+    referringModuleIsExternal: boolean
+  ): AstEntity | undefined {
+    const externalModulePath: string | undefined = this._tryGetExternalModulePath(node);
+
+    if (externalModulePath) {
+      let exportName: string;
+      if (node.qualifier) {
+        // Example input:
+        //   import('api-extractor-lib1-test').Lib1GenericType<number>
+        //
+        // Extracted qualifier:
+        //   Lib1GenericType
+        exportName = node.qualifier.getText().trim();
+      } else {
+        // Example input:
+        //   import('api-extractor-lib1-test')
+        //
+        // Extracted qualifier:
+        //   apiExtractorLib1Test
+
+        exportName = SyntaxHelpers.makeCamelCaseIdentifier(externalModulePath);
+      }
+
+      return this._fetchAstImport(undefined, {
+        importKind: AstImportKind.ImportType,
+        exportName: exportName,
+        modulePath: externalModulePath,
+        isTypeOnly: false
+      });
+    }
+
+    // Internal reference: AstSymbol
+    const rightMostToken: ts.Identifier | ts.ImportTypeNode = node.qualifier
+      ? node.qualifier.kind === ts.SyntaxKind.QualifiedName
+        ? node.qualifier.right
+        : node.qualifier
+      : node;
+
+    // There is no symbol property in a ImportTypeNode, obtain the associated export symbol
+    const exportSymbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(rightMostToken);
+    if (!exportSymbol) {
+      throw new InternalError(
+        `Symbol not found for identifier: ${node.getText()}\n` +
+          SourceFileLocationFormatter.formatDeclaration(node)
+      );
+    }
+
+    let followedSymbol: ts.Symbol = exportSymbol;
+    for (;;) {
+      const referencedAstEntity: AstEntity | undefined = this.fetchReferencedAstEntity(
+        followedSymbol,
+        referringModuleIsExternal
+      );
+
+      if (referencedAstEntity) {
+        return referencedAstEntity;
+      }
+
+      const followedSymbolNode: ts.Node | ts.ImportTypeNode | undefined =
+        followedSymbol.declarations && (followedSymbol.declarations[0] as ts.Node | undefined);
+
+      if (followedSymbolNode && followedSymbolNode.kind === ts.SyntaxKind.ImportType) {
+        return this.fetchReferencedAstEntityFromImportTypeNode(
+          followedSymbolNode as ts.ImportTypeNode,
+          referringModuleIsExternal
+        );
+      }
+
+      // eslint-disable-next-line no-bitwise
+      if (!(followedSymbol.flags & ts.SymbolFlags.Alias)) {
+        break;
+      }
+
+      const currentAlias: ts.Symbol = this._typeChecker.getAliasedSymbol(followedSymbol);
+      if (!currentAlias || currentAlias === followedSymbol) {
+        break;
+      }
+
+      followedSymbol = currentAlias;
+    }
+
+    const astSymbol: AstSymbol | undefined = this._astSymbolTable.fetchAstSymbol({
+      followedSymbol: followedSymbol,
+      isExternal: referringModuleIsExternal,
+      includeNominalAnalysis: false,
+      addIfMissing: true
+    });
+
+    return astSymbol;
+  }
+
   private _tryMatchExportDeclaration(
     declaration: ts.Declaration,
     declarationSymbol: ts.Symbol
@@ -659,17 +753,6 @@ export class ExportAnalyzer {
       }
     }
 
-    const importTypeNode: ts.Node | undefined = TypeScriptHelpers.findFirstChildNode(
-      declaration,
-      ts.SyntaxKind.ImportType
-    );
-    if (importTypeNode) {
-      throw new Error(
-        'The expression contains an import() type, which is not yet supported by API Extractor:\n' +
-          SourceFileLocationFormatter.formatDeclaration(importTypeNode)
-      );
-    }
-
     return undefined;
   }
 
@@ -769,8 +852,8 @@ export class ExportAnalyzer {
   }
 
   private _tryGetExternalModulePath(
-    importOrExportDeclaration: ts.ImportDeclaration | ts.ExportDeclaration,
-    exportSymbol: ts.Symbol
+    importOrExportDeclaration: ts.ImportDeclaration | ts.ExportDeclaration | ts.ImportTypeNode,
+    exportSymbol?: ts.Symbol
   ): string | undefined {
     // The name of the module, which could be like "./SomeLocalFile' or like 'external-package/entry/point'
     const moduleSpecifier: string | undefined =

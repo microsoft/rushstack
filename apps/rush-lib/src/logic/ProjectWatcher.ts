@@ -79,7 +79,10 @@ export class ProjectWatcher {
     const useNativeRecursiveWatch: boolean = os.platform() === 'win32' || os.platform() === 'darwin';
 
     for (const project of this._projectsToWatch) {
-      const projectState: Map<string, string> = (await previousState.getPackageDeps(project.packageName, this._terminal))!;
+      const projectState: Map<string, string> = (await previousState.getPackageDeps(
+        project.packageName,
+        this._terminal
+      ))!;
       const projectFolder: string = project.projectRelativeFolder;
       // Watch files in the root of the project, or
       for (const fileName of projectState.keys()) {
