@@ -3,6 +3,8 @@
 
 /* eslint-disable no-bitwise */
 
+import * as path from 'path';
+
 import * as ts from 'typescript';
 import { FileSystem, NewlineKind, InternalError } from '@rushstack/node-core-library';
 import { ReleaseTag } from '@microsoft/api-extractor-model';
@@ -63,7 +65,7 @@ export class DtsRollupGenerator {
   ): void {
     const stringWriter: StringWriter = new StringWriter();
 
-    DtsRollupGenerator._generateTypingsFileContent(collector, stringWriter, dtsKind);
+    DtsRollupGenerator._generateTypingsFileContent(collector, dtsFilename, stringWriter, dtsKind);
 
     FileSystem.writeFile(dtsFilename, stringWriter.toString(), {
       convertLineEndings: newlineKind,
@@ -73,6 +75,7 @@ export class DtsRollupGenerator {
 
   private static _generateTypingsFileContent(
     collector: Collector,
+    dtsFilename: string,
     stringWriter: StringWriter,
     dtsKind: DtsRollupKind
   ): void {
@@ -96,6 +99,12 @@ export class DtsRollupGenerator {
     }
     if (directivesEmitted) {
       stringWriter.writeLine();
+    }
+
+    for (const fileDirectiveReference of collector.dtsFileReferenceDirectives) {
+      const dtsDirname: string = path.dirname(dtsFilename);
+      const correctedRelativePath: string = path.relative(dtsDirname, fileDirectiveReference);
+      stringWriter.writeLine(`/// <reference path="${correctedRelativePath}" />`);
     }
 
     // Emit the imports
