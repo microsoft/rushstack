@@ -1,4 +1,3 @@
-
 /** @internal */
 export declare interface _IInternalThing {
     title: string;

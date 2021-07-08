@@ -1,4 +1,3 @@
-
 /** @public */
 declare class DefaultClass {
 }

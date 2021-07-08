@@ -14,12 +14,11 @@ class ForgottenClass {
 }
 
 declare namespace ns {
-  export {
-    exportedApi
-  }
+    export {
+        exportedApi
+    }
 }
 export { ns }
-
 
 // (No @packageDocumentation comment for this package)
 

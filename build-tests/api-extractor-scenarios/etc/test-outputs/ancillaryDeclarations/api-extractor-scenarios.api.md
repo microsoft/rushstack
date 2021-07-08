@@ -17,7 +17,6 @@ export class MyClass {
     set _thing(value: _IInternalThing);
 }
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

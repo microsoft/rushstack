@@ -9,7 +9,6 @@ import colors = require('colors');
 // @public (undocumented)
 export function useColors(): typeof colors.zebra;
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

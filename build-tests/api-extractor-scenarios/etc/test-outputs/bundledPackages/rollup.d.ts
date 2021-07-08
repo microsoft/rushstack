@@ -11,6 +11,7 @@ export declare class Lib1Class extends Lib1ForgottenExport {
 
 declare class Lib1ForgottenExport {
 }
+
 export { Lib2Class }
 
 export { }

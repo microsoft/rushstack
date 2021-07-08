@@ -6,9 +6,7 @@
 
 // @public (undocumented)
 function defaultFunctionDeclaration(): void;
-
 export default defaultFunctionDeclaration;
-
 
 // (No @packageDocumentation comment for this package)
 

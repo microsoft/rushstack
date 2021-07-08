@@ -1,4 +1,3 @@
-
 /** @public */
 declare class ClassΞ {
     memberΔ(paramΩ: string): ClassΞ;

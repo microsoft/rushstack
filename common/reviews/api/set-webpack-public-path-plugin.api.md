@@ -41,5 +41,4 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
     options: ISetWebpackPublicPathPluginOptions;
 }
 
-
 ```

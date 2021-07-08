@@ -1,4 +1,3 @@
-
 /**
  * A function that references its own parameter type.
  * @public

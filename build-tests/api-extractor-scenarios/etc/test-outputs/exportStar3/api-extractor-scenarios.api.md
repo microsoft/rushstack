@@ -15,7 +15,6 @@ export { Lib1Class }
 
 export { RenamedLib2Interface }
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

@@ -17,11 +17,8 @@ export { A as C }
 // @public (undocumented)
 class X {
 }
-
 export { X }
-
 export { X as Y }
-
 
 // (No @packageDocumentation comment for this package)
 
