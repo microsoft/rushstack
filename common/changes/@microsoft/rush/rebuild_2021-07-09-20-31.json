@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "rush rebuild ignores existing build cache entries",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "elliot.nelson@users.noreply.github.com"
+}
