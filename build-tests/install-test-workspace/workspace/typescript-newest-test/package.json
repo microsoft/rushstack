@@ -11,7 +11,7 @@
   "devDependencies": {
     "@rushstack/eslint-config": "*",
     "@rushstack/heft": "*",
-    "typescript": "~4.3.2",
+    "typescript": "~4.3.5",
     "tslint": "~5.20.1",
     "eslint": "~7.12.1"
   }

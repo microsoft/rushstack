@@ -62,6 +62,12 @@ function readPackage(packageJson, context) {
         );
       }
     }
+  } else if (packageJson.name === '@typescript-eslint/types') {
+    // Workaround for https://github.com/typescript-eslint/typescript-eslint/issues/3622
+    if (!packageJson.peerDependencies) {
+      packageJson.peerDependencies = {};
+    }
+    packageJson.peerDependencies['typescript'] = '*';
   }
 
   return packageJson;

@@ -75,7 +75,7 @@
 
       // The newest supported compiler, used by build-tests/heft-newest-compiler-test
       // and used as the bundled compiler engine for API Extractor.
-      "~4.3.2"
+      "~4.3.5"
     ],
 
     "source-map": [
