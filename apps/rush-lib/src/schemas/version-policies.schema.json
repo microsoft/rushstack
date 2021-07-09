@@ -79,7 +79,7 @@
           "type": "boolean"
         },
         "includeEmailInChangeFile": {
-          "description": "If true, generated changelog files will include the author's email address.",
+          "description": "If true, the generated changelog files will include the author's email address.",
           "type": "boolean"
         }
       },
@@ -109,7 +109,7 @@
           "type": "boolean"
         },
         "includeEmailInChangeFile": {
-          "description": "If true, the version policy will request users email on rush change.",
+          "description": "If true, the generated changelog files will include the author's email address.",
           "type": "boolean"
         }
       },
