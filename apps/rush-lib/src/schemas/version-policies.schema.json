@@ -77,6 +77,10 @@
         "exemptFromRushChange": {
           "description": "If true, the version policy will not require changelog files.",
           "type": "boolean"
+        },
+        "includeEmailInChangeFile": {
+          "description": "If true, the generated changelog files will include the author's email address.",
+          "type": "boolean"
         }
       },
       "required": ["policyName", "definitionName", "version", "nextBump"],
@@ -102,6 +106,10 @@
         },
         "exemptFromRushChange": {
           "description": "If true, the version policy will not require changelog files.",
+          "type": "boolean"
+        },
+        "includeEmailInChangeFile": {
+          "description": "If true, the generated changelog files will include the author's email address.",
           "type": "boolean"
         }
       },

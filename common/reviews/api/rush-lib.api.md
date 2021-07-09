@@ -467,6 +467,7 @@ export abstract class VersionPolicy {
     get definitionName(): VersionPolicyDefinitionName;
     abstract ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
     get exemptFromRushChange(): boolean;
+    get includeEmailInChangeFile(): boolean;
     get isLockstepped(): boolean;
     // @internal
     abstract get _json(): IVersionPolicyJson;

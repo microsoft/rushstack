@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "[rush] Prevent \"rush change\" from prompting for an email address, since this feature was rarely used. To restore the old behavior, enable the \"includeEmailInChangeFile\" setting in version-policies.json",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
