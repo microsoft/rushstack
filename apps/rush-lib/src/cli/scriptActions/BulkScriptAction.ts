@@ -282,11 +282,6 @@ export class BulkScriptAction extends BaseScriptAction {
       description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
 
-    this._ignoreHooksParameter = this.defineFlagParameter({
-      parameterLongName: '--ignore-hooks',
-      description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
-    });
-
     if (this._isIncrementalBuildAllowed) {
       this._changedProjectsOnly = this.defineFlagParameter({
         parameterLongName: '--changed-projects-only',
@@ -298,12 +293,17 @@ export class BulkScriptAction extends BaseScriptAction {
           ' Note that this parameter is "unsafe"; it is up to the developer to ensure that the ignored projects' +
           ' are okay to ignore.'
       });
-
-      this._disableBuildCacheFlag = this.defineFlagParameter({
-        parameterLongName: '--disable-build-cache',
-        description: '(EXPERIMENTAL) Disables the build cache for this command invocation.'
-      });
     }
+
+    this._ignoreHooksParameter = this.defineFlagParameter({
+      parameterLongName: '--ignore-hooks',
+      description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
+    });
+
+    this._disableBuildCacheFlag = this.defineFlagParameter({
+      parameterLongName: '--disable-build-cache',
+      description: '(EXPERIMENTAL) Disables the build cache for this command invocation.'
+    });
 
     this.defineScriptParameters();
   }
