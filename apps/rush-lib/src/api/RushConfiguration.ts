@@ -490,7 +490,7 @@ export class RushConfiguration {
    */
   private constructor(rushConfigurationJson: IRushConfigurationJson, rushJsonFilename: string) {
     this._rushConfigurationJson = rushConfigurationJson;
-    EnvironmentConfiguration.initialize();
+    EnvironmentConfiguration.validate();
 
     if (rushConfigurationJson.nodeSupportedVersionRange) {
       if (!semver.validRange(rushConfigurationJson.nodeSupportedVersionRange)) {
