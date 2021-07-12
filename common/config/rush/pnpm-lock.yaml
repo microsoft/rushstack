@@ -963,6 +963,21 @@ importers:
       webpack-cli: 3.3.12_webpack@4.44.2
       webpack-dev-server: 3.11.2_93ca2875a658e9d1552850624e6b91c7
 
+  ../../build-tests/rush-project-change-analyzer-test:
+    specifiers:
+      '@microsoft/rush-lib': workspace:*
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@types/node': 10.17.13
+    dependencies:
+      '@microsoft/rush-lib': link:../../apps/rush-lib
+    devDependencies:
+      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/node': 10.17.13
+
   ../../build-tests/ts-command-line-test:
     specifiers:
       '@rushstack/ts-command-line': workspace:*

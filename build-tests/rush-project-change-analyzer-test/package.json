@@ -1,0 +1,19 @@
+{
+  "name": "rush-project-change-analyzer-test",
+  "description": "This is an example project that uses rush-lib's ProjectChangeAnalyzer to ",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "heft build --clean",
+    "start": "heft start"
+  },
+  "dependencies": {
+    "@microsoft/rush-lib": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/node": "10.17.13",
+    "@rushstack/heft-node-rig": "workspace:*"
+  }
+}
