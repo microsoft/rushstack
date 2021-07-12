@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin-security",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/eslint-plugin-security_v0.2.0",
+      "date": "Mon, 12 Jul 2021 23:08:26 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade @typescript-eslint/* packages to 4.28.0 (GitHub #2389)"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.4",
       "tag": "@rushstack/eslint-plugin-security_v0.1.4",
       "date": "Tue, 06 Apr 2021 15:14:22 GMT",
