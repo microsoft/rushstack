@@ -40,7 +40,7 @@ export class MarkdownDocumenterAccessor {
     // @internal
     constructor(implementation: IMarkdownDocumenterAccessorImplementation);
     getLinkForApiItem(apiItem: ApiItem): string | undefined;
-    }
+}
 
 // @public
 export class MarkdownDocumenterFeature extends PluginFeature {
@@ -84,6 +84,5 @@ export class PluginFeatureInitialization {
     // @internal (undocumented)
     _context: PluginFeatureContext;
 }
-
 
 ```

@@ -1,6 +1,37 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Fri, 04 Jun 2021 19:59:53 GMT and should not be manually modified.
+This log was last generated on Thu, 08 Jul 2021 23:41:16 GMT and should not be manually modified.
+
+## 7.18.1
+Thu, 08 Jul 2021 23:41:16 GMT
+
+### Patches
+
+- Fix a recent regression that reported "Internal Error: indentDocComment cannot be nested" (GitHub #2797)
+
+## 7.18.0
+Thu, 08 Jul 2021 06:00:48 GMT
+
+### Minor changes
+
+- Add support for import() type expressions (GitHub #1050) -- Thank you @javier-garcia-meteologica and @adventure-yunfei for solving this difficult problem!
+- Improve formatting of declarations in .d.ts rollup and .api.md files, fixing some indentation issues
+
+## 7.17.1
+Thu, 01 Jul 2021 15:08:27 GMT
+
+_Version update only_
+
+## 7.17.0
+Wed, 30 Jun 2021 15:06:54 GMT
+
+### Minor changes
+
+- Added support for "import * as module from './local/module';" (GitHub #1029) -- Big thanks to @adventure-yunfei, @mckn, @rbuckton, and @octogonz who all helped with this difficult PR!
+
+### Patches
+
+- Include /// directives in API report
 
 ## 7.16.1
 Fri, 04 Jun 2021 19:59:53 GMT

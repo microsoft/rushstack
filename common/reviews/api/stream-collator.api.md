@@ -58,5 +58,4 @@ export class StreamCollator {
     _writerWriteChunk(writer: CollatedWriter, chunk: ITerminalChunk, bufferedChunks: ITerminalChunk[]): void;
 }
 
-
 ```

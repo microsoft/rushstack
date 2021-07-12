@@ -1,4 +1,3 @@
-
 /** @internal */
 declare class A {
 }

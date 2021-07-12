@@ -7,9 +7,7 @@
 // @public (undocumented)
 class DefaultClass {
 }
-
 export default DefaultClass;
-
 
 // (No @packageDocumentation comment for this package)
 

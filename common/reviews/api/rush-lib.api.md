@@ -42,7 +42,7 @@ export class ApprovedPackagesPolicy {
     get ignoredNpmScopes(): Set<string>;
     get nonbrowserApprovedPackages(): ApprovedPackagesConfiguration;
     get reviewCategories(): Set<string>;
-    }
+}
 
 // @beta
 export enum BumpType {
@@ -76,7 +76,7 @@ export class CommonVersionsConfiguration {
     get preferredVersions(): Map<string, string>;
     save(): boolean;
     get xstitchPreferredVersions(): Map<string, string>;
-    }
+}
 
 // @beta (undocumented)
 export const enum DependencyType {
@@ -126,14 +126,14 @@ export class EventHooks {
     // @internal
     constructor(eventHooksJson: IEventHooksJson);
     get(event: Event): string[];
-    }
+}
 
 // @beta
 export class ExperimentsConfiguration {
     // @internal
     constructor(jsonFileName: string);
     get configuration(): Readonly<IExperimentsJson>;
-    }
+}
 
 // @public
 export interface IConfigurationEnvironment {
@@ -211,7 +211,7 @@ export class _LastInstallFlag {
     protected get flagName(): string;
     isValid(): boolean;
     get path(): string;
-    }
+}
 
 // @beta
 export class LockStepVersionPolicy extends VersionPolicy {
@@ -228,7 +228,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
     update(newVersionString: string): boolean;
     validate(versionString: string, packageName: string): void;
     get version(): string;
-    }
+}
 
 // @public
 export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
@@ -247,7 +247,7 @@ export class PackageJsonDependency {
     setVersion(newVersion: string): void;
     // (undocumented)
     get version(): string;
-    }
+}
 
 // @beta (undocumented)
 export class PackageJsonEditor {
@@ -318,14 +318,14 @@ export class RepoStateFile {
     get pnpmShrinkwrapHash(): string | undefined;
     get preferredVersionsHash(): string | undefined;
     refreshState(rushConfiguration: RushConfiguration): boolean;
-    }
+}
 
 // @public
 export class Rush {
     static launch(launcherVersion: string, arg: ILaunchOptions): void;
     static launchRushX(launcherVersion: string, options: ILaunchOptions): void;
     static get version(): string;
-    }
+}
 
 // @public
 export class RushConfiguration {
@@ -409,7 +409,7 @@ export class RushConfiguration {
     get versionPolicyConfigurationFilePath(): string;
     get yarnCacheFolder(): string;
     get yarnOptions(): YarnOptionsConfiguration;
-    }
+}
 
 // @public
 export class RushConfigurationProject {
@@ -448,14 +448,14 @@ export class RushConfigurationProject {
     get versionPolicy(): VersionPolicy | undefined;
     // @beta
     get versionPolicyName(): string | undefined;
-    }
+}
 
 // @internal
 export class _RushGlobalFolder {
     constructor();
     get nodeSpecificPath(): string;
     get path(): string;
-    }
+}
 
 // @beta
 export abstract class VersionPolicy {
@@ -467,6 +467,7 @@ export abstract class VersionPolicy {
     get definitionName(): VersionPolicyDefinitionName;
     abstract ensure(project: IPackageJson, force?: boolean): IPackageJson | undefined;
     get exemptFromRushChange(): boolean;
+    get includeEmailInChangeFile(): boolean;
     get isLockstepped(): boolean;
     // @internal
     abstract get _json(): IVersionPolicyJson;
@@ -476,7 +477,7 @@ export abstract class VersionPolicy {
     setDependenciesBeforeCommit(packageName: string, configuration: RushConfiguration): void;
     setDependenciesBeforePublish(packageName: string, configuration: RushConfiguration): void;
     abstract validate(versionString: string, packageName: string): void;
-    }
+}
 
 // @beta
 export class VersionPolicyConfiguration {
@@ -487,7 +488,7 @@ export class VersionPolicyConfiguration {
     update(versionPolicyName: string, newVersion: string): void;
     validate(projectsByName: Map<string, RushConfigurationProject>): void;
     get versionPolicies(): Map<string, VersionPolicy>;
-    }
+}
 
 // @beta
 export enum VersionPolicyDefinitionName {
@@ -503,6 +504,5 @@ export class YarnOptionsConfiguration extends PackageManagerOptionsConfiguration
     constructor(json: _IYarnOptionsJson);
     readonly ignoreEngines: boolean;
 }
-
 
 ```

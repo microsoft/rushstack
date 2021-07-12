@@ -16,7 +16,6 @@ export class B {
 export class C {
 }
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

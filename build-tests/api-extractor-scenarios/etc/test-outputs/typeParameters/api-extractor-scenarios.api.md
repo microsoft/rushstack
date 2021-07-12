@@ -44,7 +44,6 @@ export interface InterfaceWithGenericConstructSignature {
     new <T>(): T;
 }
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

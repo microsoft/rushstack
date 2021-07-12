@@ -3,6 +3,7 @@
 
 import { AstSymbol } from './AstSymbol';
 import { InternalError } from '@rushstack/node-core-library';
+import { AstSyntheticEntity } from './AstEntity';
 
 /**
  * Indicates the import kind for an `AstImport`.
@@ -26,7 +27,12 @@ export enum AstImportKind {
   /**
    * An import statement such as `import x = require("y");`.
    */
-  EqualsImport
+  EqualsImport,
+
+  /**
+   * An import statement such as `interface foo { foo: import("bar").a.b.c }`.
+   */
+  ImportType
 }
 
 /**
@@ -49,7 +55,7 @@ export interface IAstImportOptions {
  * For a symbol that was imported from an external package, this tracks the import
  * statement that was used to reach it.
  */
-export class AstImport {
+export class AstImport extends AstSyntheticEntity {
   public readonly importKind: AstImportKind;
 
   /**
@@ -79,6 +85,9 @@ export class AstImport {
    *
    * // For AstImportKind.EqualsImport style, exportName would be "x" in this example:
    * import x = require("y");
+   *
+   * // For AstImportKind.ImportType style, exportName would be "a.b.c" in this example:
+   * interface foo { foo: import('bar').a.b.c };
    * ```
    */
   public readonly exportName: string;
@@ -110,6 +119,8 @@ export class AstImport {
   public readonly key: string;
 
   public constructor(options: IAstImportOptions) {
+    super();
+
     this.importKind = options.importKind;
     this.modulePath = options.modulePath;
     this.exportName = options.exportName;
@@ -120,11 +131,9 @@ export class AstImport {
     this.key = AstImport.getKey(options);
   }
 
-  /**
-   * Allows `AstEntity.localName` to be used as a convenient generalization of `AstSymbol.localName` and
-   * `AstImport.exportName`.
-   */
+  /** {@inheritdoc} */
   public get localName(): string {
+    // abstract
     return this.exportName;
   }
 
@@ -141,6 +150,14 @@ export class AstImport {
         return `${options.modulePath}:*`;
       case AstImportKind.EqualsImport:
         return `${options.modulePath}:=`;
+      case AstImportKind.ImportType: {
+        const subKey: string = !options.exportName
+          ? '*' // Equivalent to StarImport
+          : options.exportName.includes('.') // Equivalent to a named export
+          ? options.exportName.split('.')[0]
+          : options.exportName;
+        return `${options.modulePath}:${subKey}`;
+      }
       default:
         throw new InternalError('Unknown AstImportKind');
     }

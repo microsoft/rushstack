@@ -15,7 +15,6 @@ export default default_2;
 
 export { Lib2Class }
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

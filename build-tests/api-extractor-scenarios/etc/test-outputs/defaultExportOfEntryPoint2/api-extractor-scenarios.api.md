@@ -6,9 +6,7 @@
 
 // @public (undocumented)
 const defaultFunctionStatement: () => void;
-
 export default defaultFunctionStatement;
-
 
 // (No @packageDocumentation comment for this package)
 

@@ -55,7 +55,12 @@ export enum PathResolutionMethod {
    * Treat the property as a NodeJS-style require/import reference and resolve using standard
    * NodeJS filesystem resolution
    */
-  NodeResolve
+  NodeResolve,
+
+  /**
+   * Resolve the property using a custom resolver.
+   */
+  custom
 }
 
 const CONFIGURATION_FILE_FIELD_ANNOTATION: unique symbol = Symbol('configuration-file-field-annotation');
@@ -76,10 +81,10 @@ interface IConfigurationFileFieldAnnotation<TField> {
  */
 export interface IJsonPathMetadata {
   /**
-   * If this property is set, it will be used for manual path modification before the
-   * specified `IJsonPathMetadata.pathResolutionMethod` is executed.
+   * If `IJsonPathMetadata.pathResolutionMethod` is set to `PathResolutionMethod.custom`,
+   * this property be used to resolve the path.
    */
-  preresolve?: (path: string) => string;
+  customResolver?: (configurationFilePath: string, propertyName: string, propertyValue: string) => string;
 
   /**
    * If this property describes a filesystem path, use this property to describe
@@ -375,18 +380,12 @@ export class ConfigurationFile<TConfigurationFile> {
         path: jsonPath,
         json: configurationJson,
         callback: (payload: unknown, payloadType: string, fullPayload: IJsonPathCallbackObject) => {
-          let resolvedPath: string = fullPayload.value;
-          if (metadata.preresolve) {
-            resolvedPath = metadata.preresolve(resolvedPath);
-          }
-          if (metadata.pathResolutionMethod !== undefined) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            resolvedPath = this._resolvePathProperty(
-              resolvedConfigurationFilePath,
-              resolvedPath,
-              metadata.pathResolutionMethod
-            );
-          }
+          const resolvedPath: string = this._resolvePathProperty(
+            resolvedConfigurationFilePath,
+            fullPayload.path,
+            fullPayload.value,
+            metadata
+          );
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (fullPayload.parent as any)[fullPayload.parentProperty] = resolvedPath;
         },
@@ -616,10 +615,16 @@ export class ConfigurationFile<TConfigurationFile> {
 
   private _resolvePathProperty(
     configurationFilePath: string,
+    propertyName: string,
     propertyValue: string,
-    resolutionMethod: PathResolutionMethod | undefined
+    metadata: IJsonPathMetadata
   ): string {
-    switch (resolutionMethod) {
+    const resolutionMethod: PathResolutionMethod | undefined = metadata.pathResolutionMethod;
+    if (resolutionMethod === undefined) {
+      return propertyValue;
+    }
+
+    switch (metadata.pathResolutionMethod) {
       case PathResolutionMethod.resolvePathRelativeToConfigurationFile: {
         return nodeJsPath.resolve(nodeJsPath.dirname(configurationFilePath), propertyValue);
       }
@@ -645,8 +650,20 @@ export class ConfigurationFile<TConfigurationFile> {
         });
       }
 
+      case PathResolutionMethod.custom: {
+        if (!metadata.customResolver) {
+          throw new Error(
+            `The pathResolutionMethod was set to "${PathResolutionMethod[resolutionMethod]}", but a custom ` +
+              'resolver was not provided.'
+          );
+        }
+        return metadata.customResolver(configurationFilePath, propertyName, propertyValue);
+      }
+
       default: {
-        return propertyValue;
+        throw new Error(
+          `Unsupported PathResolutionMethod: ${PathResolutionMethod[resolutionMethod]} (${resolutionMethod})`
+        );
       }
     }
   }

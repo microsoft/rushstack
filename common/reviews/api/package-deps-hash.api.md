@@ -10,5 +10,4 @@ export function getGitHashForFiles(filesToHash: string[], packagePath: string, g
 // @public
 export function getPackageDeps(packagePath?: string, excludedPaths?: string[], gitPath?: string): Map<string, string>;
 
-
 ```

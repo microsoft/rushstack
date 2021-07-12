@@ -1,6 +1,13 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Mon, 12 Apr 2021 15:10:28 GMT and should not be manually modified.
+This log was last generated on Thu, 01 Jul 2021 15:08:27 GMT and should not be manually modified.
+
+## 4.8.0
+Thu, 01 Jul 2021 15:08:27 GMT
+
+### Minor changes
+
+- Add ChoiceList and IntegerList parameter types
 
 ## 4.7.10
 Mon, 12 Apr 2021 15:10:28 GMT

@@ -1,4 +1,3 @@
-
 /** @public */
 export declare class IFile {
     containingFolder: IFolder;

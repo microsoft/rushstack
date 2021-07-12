@@ -1,4 +1,3 @@
-
 /** @public */
 export declare function f(): {
     a: number;

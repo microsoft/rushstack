@@ -30,7 +30,6 @@ export function succeedWithExternalReference(): void;
 // @public
 export function succeedWithSelector(): void;
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

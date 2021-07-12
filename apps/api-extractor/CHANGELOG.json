@@ -2,6 +2,62 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.18.1",
+      "tag": "@microsoft/api-extractor_v7.18.1",
+      "date": "Thu, 08 Jul 2021 23:41:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a recent regression that reported \"Internal Error: indentDocComment cannot be nested\" (GitHub #2797)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.18.0",
+      "tag": "@microsoft/api-extractor_v7.18.0",
+      "date": "Thu, 08 Jul 2021 06:00:48 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for import() type expressions (GitHub #1050) -- Thank you @javier-garcia-meteologica and @adventure-yunfei for solving this difficult problem!"
+          },
+          {
+            "comment": "Improve formatting of declarations in .d.ts rollup and .api.md files, fixing some indentation issues"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.17.1",
+      "tag": "@microsoft/api-extractor_v7.17.1",
+      "date": "Thu, 01 Jul 2021 15:08:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.8.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.17.0",
+      "tag": "@microsoft/api-extractor_v7.17.0",
+      "date": "Wed, 30 Jun 2021 15:06:54 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Added support for \"import * as module from './local/module';\" (GitHub #1029) -- Big thanks to @adventure-yunfei, @mckn, @rbuckton, and @octogonz who all helped with this difficult PR!"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Include /// directives in API report"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.16.1",
       "tag": "@microsoft/api-extractor_v7.16.1",
       "date": "Fri, 04 Jun 2021 19:59:53 GMT",

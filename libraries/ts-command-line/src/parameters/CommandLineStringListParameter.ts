@@ -3,6 +3,7 @@
 
 import { ICommandLineStringListDefinition } from './CommandLineDefinition';
 import { CommandLineParameterWithArgument, CommandLineParameterKind } from './BaseClasses';
+import { EnvironmentVariableParser } from './EnvironmentVariableParser';
 
 /**
  * The data type returned by {@link CommandLineParameterProvider.defineStringListParameter}.
@@ -27,7 +28,7 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public _setValue(data: any): void {
-    // abstract
+    // If argparse passed us a value, confirm it is valid
     if (data !== null && data !== undefined) {
       if (!Array.isArray(data)) {
         this.reportInvalidData(data);
@@ -41,48 +42,11 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
       return;
     }
 
+    // If an environment variable exists, attempt to parse it as a list
     if (this.environmentVariable !== undefined) {
-      // Try reading the environment variable
-      const environmentValue: string | undefined = process.env[this.environmentVariable];
-      if (environmentValue !== undefined) {
-        // NOTE: If the environment variable is defined as an empty string,
-        // here we will accept the empty string as our value.  (For number/flag we don't do that.)
-
-        if (environmentValue.trimLeft()[0] === '[') {
-          // Specifying multiple items in an environment variable is a somewhat rare case.  But environment
-          // variables are actually a pretty reliable way for a tool to avoid shell escaping problems
-          // when spawning another tool.  For this case, we need a reliable way to pass an array of strings
-          // that could contain any character.  For example, if we simply used ";" as the list delimiter,
-          // then what to do if a string contains that character?  We'd need to design an escaping mechanism.
-          // Since JSON is simple and standard and can escape every possible string, it's a better option
-          // than a custom delimiter.
-          try {
-            const parsedJson: unknown = JSON.parse(environmentValue);
-            if (
-              !Array.isArray(parsedJson) ||
-              !parsedJson.every(
-                (x) => typeof x === 'string' || typeof x === 'boolean' || typeof x === 'number'
-              )
-            ) {
-              throw new Error(
-                `The ${environmentValue} environment variable value must be a JSON ` +
-                  ` array containing only strings, numbers, and booleans.`
-              );
-            }
-            this._values = parsedJson.map((x) => x.toString());
-          } catch (ex) {
-            throw new Error(
-              `The ${environmentValue} environment variable value looks like a JSON array` +
-                ` but failed to parse: ` +
-                ex.message
-            );
-          }
-        } else {
-          // As a shorthand, a single value may be specified without JSON encoding, as long as it does not
-          // start with the "[" character.
-          this._values = [environmentValue];
-        }
-
+      const values: string[] | undefined = EnvironmentVariableParser.parseAsList(this.environmentVariable);
+      if (values) {
+        this._values = values;
         return;
       }
     }

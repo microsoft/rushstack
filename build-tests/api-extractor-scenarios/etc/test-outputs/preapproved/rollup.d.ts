@@ -1,4 +1,3 @@
-
 /** @internal @preapproved */
 export declare class _PreapprovedClass {
     member(): void;

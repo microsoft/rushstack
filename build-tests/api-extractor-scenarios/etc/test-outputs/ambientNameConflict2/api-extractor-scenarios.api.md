@@ -7,12 +7,10 @@
 // @public
 class Date_2 {
 }
-
 export { Date_2 as Date }
 
 // @public
 export function getDate(): Date;
-
 
 // (No @packageDocumentation comment for this package)
 

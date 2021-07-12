@@ -2,6 +2,96 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.13.30",
+      "tag": "@microsoft/api-documenter_v7.13.30",
+      "date": "Thu, 08 Jul 2021 23:41:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.34.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.1.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.13.29",
+      "tag": "@microsoft/api-documenter_v7.13.29",
+      "date": "Thu, 08 Jul 2021 06:00:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.34.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.1.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.13.28",
+      "tag": "@microsoft/api-documenter_v7.13.28",
+      "date": "Thu, 01 Jul 2021 15:08:27 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.8.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.34.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.1.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.13.27",
+      "tag": "@microsoft/api-documenter_v7.13.27",
+      "date": "Wed, 30 Jun 2021 19:16:19 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.1.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.13.26",
+      "tag": "@microsoft/api-documenter_v7.13.26",
+      "date": "Wed, 30 Jun 2021 15:06:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.34.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.1.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.13.25",
+      "tag": "@microsoft/api-documenter_v7.13.25",
+      "date": "Wed, 30 Jun 2021 01:37:17 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.34.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.1.5`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.13.24",
       "tag": "@microsoft/api-documenter_v7.13.24",
       "date": "Fri, 25 Jun 2021 00:08:28 GMT",

@@ -15,5 +15,4 @@ export class Rushell {
     execute(script: string): IRushellExecuteResult;
 }
 
-
 ```

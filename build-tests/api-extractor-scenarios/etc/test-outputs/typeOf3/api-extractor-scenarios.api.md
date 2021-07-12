@@ -13,7 +13,6 @@ export function f2(x: number): keyof typeof x;
 // @public
 export function f3(): typeof f3 | undefined;
 
-
 // (No @packageDocumentation comment for this package)
 
 ```
