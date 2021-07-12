@@ -36,15 +36,11 @@ export class ProjectChangeAnalyzer {
 
   /**
    * Try to get a list of the specified project's dependencies and their hashes.
-   *
-   * @remarks
-   * If the data can't be generated (i.e. - if Git is not present), this throws an Error.
-   * If the project name is invalid, this returns undefined.
    */
   public async getProjectDependenciesAsync(
     projectName: string,
     terminal: Terminal
-  ): Promise<Map<string, string> | undefined> {
+  ): Promise<Map<string, string>> {
     if (this._data === null) {
       this._data = await this._getDataAsync(terminal);
     }
@@ -52,7 +48,12 @@ export class ProjectChangeAnalyzer {
     if (this._data === undefined) {
       throw new Error('Unable to get current repo state.');
     } else {
-      return this._data.get(projectName);
+      const result: Map<string, string> | undefined = this._data.get(projectName);
+      if (!result) {
+        throw new Error(`Project "${projectName}" does not exist in the current Rush configuration.`);
+      } else {
+        return result;
+      }
     }
   }
 
@@ -60,8 +61,7 @@ export class ProjectChangeAnalyzer {
    * Try to get a list of the specified project's dependencies and their hashes.
    *
    * @remarks
-   * If the data can't be generated (i.e. - if Git is not present), or if the project name
-   * is invalid, this returns undefined.
+   * If the data can't be generated (i.e. - if Git is not present) this returns undefined.
    */
   public async tryGetProjectDependenciesAsync(
     projectName: string,
@@ -71,7 +71,16 @@ export class ProjectChangeAnalyzer {
       this._data = await this._getDataAsync(terminal);
     }
 
-    return this._data?.get(projectName);
+    if (this._data === undefined) {
+      return undefined;
+    } else {
+      const result: Map<string, string> | undefined = this._data.get(projectName);
+      if (!result) {
+        throw new Error(`Project "${projectName}" does not exist in the current Rush configuration.`);
+      } else {
+        return result;
+      }
+    }
   }
 
   /**

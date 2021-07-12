@@ -190,7 +190,7 @@ describe(ProjectChangeAnalyzer.name, () => {
       );
     });
 
-    it('returns undefined if the specified project does not exist', async () => {
+    it('throws an exception if the specified project does not exist', async () => {
       const projects: RushConfigurationProject[] = [
         {
           packageName: 'apple',
@@ -202,7 +202,12 @@ describe(ProjectChangeAnalyzer.name, () => {
       const subject: ProjectChangeAnalyzer = createTestSubject(projects, files);
       const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
 
-      expect(await subject.tryGetProjectDependenciesAsync('carrot', terminal)).toBeUndefined();
+      try {
+        await subject.tryGetProjectDependenciesAsync('carrot', terminal);
+        fail('Should have thrown error');
+      } catch (e) {
+        expect(e).toMatchSnapshot();
+      }
     });
 
     it('lazy-loads project data and caches it for future calls', async () => {
