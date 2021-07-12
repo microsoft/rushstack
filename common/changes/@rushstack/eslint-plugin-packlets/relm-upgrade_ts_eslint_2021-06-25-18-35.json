@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/eslint-plugin-packlets",
-      "comment": "Upgrade @typescript-eslint/* to 4.28.0 (Fixes #2389)",
-      "type": "patch"
+      "comment": "Upgrade @typescript-eslint/* packages to 4.28.0 (GitHub #2389)",
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/eslint-plugin-packlets",
