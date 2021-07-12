@@ -33,6 +33,7 @@
     "importType",
     "inconsistentReleaseTags",
     "internationalCharacters",
+    "namedDefaultImport",
     "preapproved",
     "spanSorting",
     "typeOf",
