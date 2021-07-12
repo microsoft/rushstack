@@ -182,10 +182,7 @@ export class BulkScriptAction extends BaseScriptAction {
    */
   private async _runWatch(options: IExecuteInternalOptions): Promise<void> {
     const {
-      taskSelectorOptions: {
-        buildCacheConfiguration: initialBuildCacheConfiguration,
-        selection: projectsToWatch
-      },
+      taskSelectorOptions: { selection: projectsToWatch },
       stopwatch,
       terminal
     } = options;
@@ -200,20 +197,20 @@ export class BulkScriptAction extends BaseScriptAction {
       terminal
     });
 
-    let isInitialPass: boolean = true;
-
-    // Loop until Ctrl+C
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
+    const onWatchingFiles = (): void => {
       // Report so that the developer can always see that it is in watch mode as the latest console line.
       terminal.writeLine(
         `Watching for changes to ${projectsToWatch.size} ${
           projectsToWatch.size === 1 ? 'project' : 'projects'
         }. Press Ctrl+C to exit.`
       );
+    };
 
+    // Loop until Ctrl+C
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
       // On the initial invocation, this promise will return immediately with the full set of projects
-      const { changedProjects, state } = await projectWatcher.waitForChange();
+      const { changedProjects, state } = await projectWatcher.waitForChange(onWatchingFiles);
 
       let selection: ReadonlySet<RushConfigurationProject> = changedProjects;
 
@@ -238,10 +235,6 @@ export class BulkScriptAction extends BaseScriptAction {
       const executeOptions: IExecuteInternalOptions = {
         taskSelectorOptions: {
           ...options.taskSelectorOptions,
-          // Current implementation of the build cache deletes output folders before repopulating them;
-          // this tends to break `webpack --watch`, etc.
-          // Also, skipping writes to the local cache reduces CPU overhead and saves disk usage.
-          buildCacheConfiguration: isInitialPass ? initialBuildCacheConfiguration : undefined,
           // Revise down the set of projects to execute the command on
           selection,
           // Pass the PackageChangeAnalyzer from the state differ to save a bit of overhead
@@ -263,8 +256,6 @@ export class BulkScriptAction extends BaseScriptAction {
           throw err;
         }
       }
-
-      isInitialPass = false;
     }
   }
 

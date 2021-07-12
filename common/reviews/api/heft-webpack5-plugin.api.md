@@ -12,7 +12,6 @@ import * as webpack from 'webpack';
 
 // @public (undocumented)
 const _default: IHeftPlugin<void>;
-
 export default _default;
 
 // @public (undocumented)
@@ -34,7 +33,6 @@ export interface IWebpackConfigurationWithDevServer extends webpack.Configuratio
     // (undocumented)
     devServer?: Configuration;
 }
-
 
 // (No @packageDocumentation comment for this package)
 

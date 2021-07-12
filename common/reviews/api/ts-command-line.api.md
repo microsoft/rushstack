@@ -25,6 +25,20 @@ export abstract class CommandLineAction extends CommandLineParameterProvider {
 }
 
 // @public
+export class CommandLineChoiceListParameter extends CommandLineParameter {
+    // @internal
+    constructor(definition: ICommandLineChoiceListDefinition);
+    readonly alternatives: ReadonlyArray<string>;
+    // @override
+    appendToArgList(argList: string[]): void;
+    readonly completions: (() => Promise<string[]>) | undefined;
+    get kind(): CommandLineParameterKind;
+    // @internal
+    _setValue(data: any): void;
+    get values(): ReadonlyArray<string>;
+    }
+
+// @public
 export class CommandLineChoiceParameter extends CommandLineParameter {
     // @internal
     constructor(definition: ICommandLineChoiceDefinition);
@@ -62,6 +76,18 @@ export class CommandLineFlagParameter extends CommandLineParameter {
 export class CommandLineHelper {
     static isTabCompletionActionRequest(argv: string[]): boolean;
 }
+
+// @public
+export class CommandLineIntegerListParameter extends CommandLineParameterWithArgument {
+    // @internal
+    constructor(definition: ICommandLineIntegerListDefinition);
+    // @override
+    appendToArgList(argList: string[]): void;
+    get kind(): CommandLineParameterKind;
+    // @internal
+    _setValue(data: any): void;
+    get values(): ReadonlyArray<number>;
+    }
 
 // @public
 export class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
@@ -104,8 +130,10 @@ export abstract class CommandLineParameter {
 // @public
 export enum CommandLineParameterKind {
     Choice = 0,
+    ChoiceList = 5,
     Flag = 1,
     Integer = 2,
+    IntegerList = 6,
     String = 3,
     StringList = 4
 }
@@ -114,16 +142,20 @@ export enum CommandLineParameterKind {
 export abstract class CommandLineParameterProvider {
     // @internal
     constructor();
+    defineChoiceListParameter(definition: ICommandLineChoiceListDefinition): CommandLineChoiceListParameter;
     defineChoiceParameter(definition: ICommandLineChoiceDefinition): CommandLineChoiceParameter;
     defineCommandLineRemainder(definition: ICommandLineRemainderDefinition): CommandLineRemainder;
     defineFlagParameter(definition: ICommandLineFlagDefinition): CommandLineFlagParameter;
+    defineIntegerListParameter(definition: ICommandLineIntegerListDefinition): CommandLineIntegerListParameter;
     defineIntegerParameter(definition: ICommandLineIntegerDefinition): CommandLineIntegerParameter;
     defineStringListParameter(definition: ICommandLineStringListDefinition): CommandLineStringListParameter;
     defineStringParameter(definition: ICommandLineStringDefinition): CommandLineStringParameter;
     // @internal
     protected abstract _getArgumentParser(): argparse.ArgumentParser;
+    getChoiceListParameter(parameterLongName: string): CommandLineChoiceListParameter;
     getChoiceParameter(parameterLongName: string): CommandLineChoiceParameter;
     getFlagParameter(parameterLongName: string): CommandLineFlagParameter;
+    getIntegerListParameter(parameterLongName: string): CommandLineIntegerListParameter;
     getIntegerParameter(parameterLongName: string): CommandLineIntegerParameter;
     getStringListParameter(parameterLongName: string): CommandLineStringListParameter;
     getStringParameter(parameterLongName: string): CommandLineStringParameter;
@@ -242,12 +274,22 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
 }
 
 // @public
+export interface ICommandLineChoiceListDefinition extends IBaseCommandLineDefinition {
+    alternatives: string[];
+    completions?: () => Promise<string[]>;
+}
+
+// @public
 export interface ICommandLineFlagDefinition extends IBaseCommandLineDefinition {
 }
 
 // @public
 export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitionWithArgument {
     defaultValue?: number;
+}
+
+// @public
+export interface ICommandLineIntegerListDefinition extends IBaseCommandLineDefinitionWithArgument {
 }
 
 // @internal

@@ -2,6 +2,42 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.48.0",
+      "tag": "@microsoft/rush_v5.48.0",
+      "date": "Fri, 09 Jul 2021 01:44:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD environment variable"
+          },
+          {
+            "comment": "Prevent \"rush change\" from prompting for an email address, since this feature was rarely used. To restore the old behavior, enable the \"includeEmailInChangeFile\" setting in version-policies.json"
+          },
+          {
+            "comment": "The \"rushx\" command now reports a warning when invoked in a project folder that is not registered in rush.json"
+          },
+          {
+            "comment": "Fix the build-cache.json cacheEntryNamePattern description of the [normalize] token."
+          },
+          {
+            "comment": "When selection CLI parameters are specified and applying them does not select any projects, log that the selection is empty and immediately exit."
+          },
+          {
+            "comment": "Fix an issue where files restored by the build cache did not have a current modification time"
+          },
+          {
+            "comment": "Upgrade the \"rush init\" template to use PNPM version 6.7.1; this avoids an important regression in PNPM 6.3.0 where .pnpmfile.cjs did not work correctly: https://github.com/pnpm/pnpm/issues/3453"
+          },
+          {
+            "comment": "Fix a JSON schema issue that prevented \"disableBuildCache\" from being specified in command-line.json"
+          },
+          {
+            "comment": "Removed dependency on chokidar from BulkScriptAction in watch mode, since it adds unnecessary overhead."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.47.0",
       "tag": "@microsoft/rush_v5.47.0",
       "date": "Sat, 15 May 2021 00:02:26 GMT",

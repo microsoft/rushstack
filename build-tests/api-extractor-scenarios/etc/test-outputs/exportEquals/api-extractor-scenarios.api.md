@@ -12,7 +12,6 @@ export interface ITeamsContext {
     context: Context;
 }
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

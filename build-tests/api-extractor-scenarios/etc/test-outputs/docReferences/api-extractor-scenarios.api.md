@@ -29,7 +29,6 @@ export function succeedForNow(): void;
 // @public
 export function testSimple(): void;
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

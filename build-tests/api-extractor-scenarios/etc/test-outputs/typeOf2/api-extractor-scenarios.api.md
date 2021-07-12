@@ -12,7 +12,6 @@ export function f(): {
 // @public (undocumented)
 export function g(callback: typeof f): typeof f;
 
-
 // (No @packageDocumentation comment for this package)
 
 ```

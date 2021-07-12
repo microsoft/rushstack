@@ -1,4 +1,3 @@
-
 /** @public */
 export declare abstract class AbstractClass {
     abstract member(): void;

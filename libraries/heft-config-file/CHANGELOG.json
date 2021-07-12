@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.6.0",
+      "tag": "@rushstack/heft-config-file_v0.6.0",
+      "date": "Wed, 30 Jun 2021 01:37:17 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow for specifying a custom resolver when resolving paths with heft-config-file. This change removes \"preresolve\" property for JsonPath module resolution options and replaces it with a more flexible \"customResolver\" property"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.0",
       "tag": "@rushstack/heft-config-file_v0.5.0",
       "date": "Fri, 11 Jun 2021 00:34:02 GMT",

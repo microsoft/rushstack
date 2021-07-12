@@ -167,7 +167,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
     readonly hooks: IModuleMinifierPluginHooks;
     // (undocumented)
     minifier: IModuleMinifier;
-    }
+}
 
 // @public
 export class NoopMinifier implements IModuleMinifier {
@@ -179,7 +179,7 @@ export class PortableMinifierModuleIdsPlugin implements Plugin {
     constructor(minifierHooks: IModuleMinifierPluginHooks);
     // (undocumented)
     apply(compiler: Compiler): void;
-    }
+}
 
 // @public
 export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner: string): Source;
@@ -207,8 +207,7 @@ export class WorkerPoolMinifier implements IModuleMinifier {
     minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
     // (undocumented)
     ref(): () => Promise<void>;
-    }
-
+}
 
 // (No @packageDocumentation comment for this package)
 

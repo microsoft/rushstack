@@ -6,7 +6,8 @@ import * as ts from 'typescript';
 import { AstSymbol } from '../analyzer/AstSymbol';
 import { Collector } from './Collector';
 import { Sort } from '@rushstack/node-core-library';
-import { AstEntity } from '../analyzer/AstSymbolTable';
+import { AstEntity } from '../analyzer/AstEntity';
+import { AstNamespaceImport } from '../analyzer/AstNamespaceImport';
 
 /**
  * This is a data structure used by the Collector to track an AstEntity that may be emitted in the *.d.ts file.
@@ -15,7 +16,7 @@ import { AstEntity } from '../analyzer/AstSymbolTable';
  * The additional contextual state beyond AstSymbol is:
  * - Whether it's an export of this entry point or not
  * - The nameForEmit, which may get renamed by DtsRollupGenerator._makeUniqueNames()
- * - The export name (or names, if the same declaration is exported multiple times)
+ * - The export name (or names, if the same symbol is exported multiple times)
  */
 export class CollectorEntity {
   /**
@@ -23,13 +24,15 @@ export class CollectorEntity {
    */
   public readonly astEntity: AstEntity;
 
-  private _exportNames: Set<string> = new Set<string>();
+  private _exportNames: Set<string> = new Set();
   private _exportNamesSorted: boolean = false;
   private _singleExportName: string | undefined = undefined;
 
   private _nameForEmit: string | undefined = undefined;
 
   private _sortKey: string | undefined = undefined;
+
+  private _astNamespaceImports: Set<AstNamespaceImport> = new Set();
 
   public constructor(astEntity: AstEntity) {
     this.astEntity = astEntity;
@@ -99,6 +102,48 @@ export class CollectorEntity {
    */
   public get exported(): boolean {
     return this.exportNames.size > 0;
+  }
+
+  /**
+   * Indicates that it is possible for a consumer of the API to access this declaration, either by importing
+   * it directly, or via some other alias such as a member of a namespace.  If a collector entity is not consumable,
+   * then API Extractor will report a ExtractorMessageId.ForgottenExport warning.
+   *
+   * @remarks
+   * Generally speaking, an API item is consumable if:
+   *
+   * - The collector encounters it while crawling the entry point, and it is a root symbol
+   *   (i.e. there is a corresponding a CollectorEntity)
+   *
+   * - AND it is exported by the entry point
+   *
+   * However a special case occurs with `AstNamespaceImport` which produces a rollup like this:
+   *
+   * ```ts
+   * declare interface IForgottenExport { }
+   *
+   * declare function member(): IForgottenExport;
+   *
+   * declare namespace ns {
+   *   export {
+   *     member
+   *   }
+   * }
+   * export { ns }
+   * ```
+   *
+   * In this example, `IForgottenExport` is not consumable.  Whereas `member()` is consumable as `ns.member()`
+   * even though `member()` itself is not exported.
+   */
+  public get consumable(): boolean {
+    return this.exported || this._astNamespaceImports.size > 0;
+  }
+
+  /**
+   * Associates this entity with a `AstNamespaceImport`.
+   */
+  public addAstNamespaceImports(astNamespaceImport: AstNamespaceImport): void {
+    this._astNamespaceImports.add(astNamespaceImport);
   }
 
   /**

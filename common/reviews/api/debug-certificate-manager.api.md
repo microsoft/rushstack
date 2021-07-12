@@ -21,13 +21,12 @@ export class CertificateStore {
     get certificatePath(): string;
     get keyData(): string | undefined;
     set keyData(key: string | undefined);
-    }
+}
 
 // @public
 export interface ICertificate {
     pemCertificate: string | undefined;
     pemKey: string | undefined;
 }
-
 
 ```

@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+/* eslint-disable no-bitwise */ // for ts.SymbolFlags
+
 import * as ts from 'typescript';
 import { PackageJsonLookup, InternalError } from '@rushstack/node-core-library';
 
@@ -10,13 +12,12 @@ import { AstSymbol } from './AstSymbol';
 import { AstModule, AstModuleExportInfo } from './AstModule';
 import { PackageMetadataManager } from './PackageMetadataManager';
 import { ExportAnalyzer } from './ExportAnalyzer';
-import { AstImport } from './AstImport';
+import { AstEntity } from './AstEntity';
+import { AstNamespaceImport } from './AstNamespaceImport';
 import { MessageRouter } from '../collector/MessageRouter';
 import { TypeScriptInternals, IGlobalVariableAnalyzer } from './TypeScriptInternals';
-import { StringChecks } from './StringChecks';
+import { SyntaxHelpers } from './SyntaxHelpers';
 import { SourceFileLocationFormatter } from './SourceFileLocationFormatter';
-
-export type AstEntity = AstSymbol | AstImport;
 
 /**
  * Options for `AstSymbolTable._fetchAstSymbol()`
@@ -87,7 +88,7 @@ export class AstSymbolTable {
 
   // Note that this is a mapping from specific AST nodes that we analyzed, based on the underlying symbol
   // for that node.
-  private readonly _entitiesByIdentifierNode: Map<ts.Identifier, AstEntity | undefined> = new Map<
+  private readonly _entitiesByNode: Map<ts.Identifier | ts.ImportTypeNode, AstEntity | undefined> = new Map<
     ts.Identifier,
     AstEntity | undefined
   >();
@@ -148,41 +149,13 @@ export class AstSymbolTable {
    * or members.  (We do always construct its parents however, since AstDefinition.parent
    * is immutable, and needed e.g. to calculate release tag inheritance.)
    */
-  public analyze(astSymbol: AstSymbol): void {
-    if (astSymbol.analyzed) {
-      return;
+  public analyze(astEntity: AstEntity): void {
+    if (astEntity instanceof AstSymbol) {
+      return this._analyzeAstSymbol(astEntity);
     }
 
-    if (astSymbol.nominalAnalysis) {
-      // We don't analyze nominal symbols
-      astSymbol._notifyAnalyzed();
-      return;
-    }
-
-    // Start at the root of the tree
-    const rootAstSymbol: AstSymbol = astSymbol.rootAstSymbol;
-
-    // Calculate the full child tree for each definition
-    for (const astDeclaration of rootAstSymbol.astDeclarations) {
-      this._analyzeChildTree(astDeclaration.declaration, astDeclaration);
-    }
-
-    rootAstSymbol._notifyAnalyzed();
-
-    if (!astSymbol.isExternal) {
-      // If this symbol is non-external (i.e. it belongs to the working package), then we also analyze any
-      // referencedAstSymbols that are non-external.  For example, this ensures that forgotten exports
-      // get analyzed.
-      rootAstSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
-        for (const referencedAstEntity of astDeclaration.referencedAstEntities) {
-          // Walk up to the root of the tree, looking for any imports along the way
-          if (referencedAstEntity instanceof AstSymbol) {
-            if (!referencedAstEntity.isExternal) {
-              this.analyze(referencedAstEntity);
-            }
-          }
-        }
-      });
+    if (astEntity instanceof AstNamespaceImport) {
+      return this._analyzeAstNamespaceImport(astEntity);
     }
   }
 
@@ -214,11 +187,11 @@ export class AstSymbolTable {
    * @remarks
    * Throws an Error if the ts.Identifier is not part of node tree that was analyzed.
    */
-  public tryGetEntityForIdentifierNode(identifier: ts.Identifier): AstEntity | undefined {
-    if (!this._entitiesByIdentifierNode.has(identifier)) {
+  public tryGetEntityForNode(identifier: ts.Identifier | ts.ImportTypeNode): AstEntity | undefined {
+    if (!this._entitiesByNode.has(identifier)) {
       throw new InternalError('tryGetEntityForIdentifier() called for an identifier that was not analyzed');
     }
-    return this._entitiesByIdentifierNode.get(identifier);
+    return this._entitiesByNode.get(identifier);
   }
 
   /**
@@ -288,7 +261,7 @@ export class AstSymbolTable {
     // Otherwise that name may come from a quoted string or pseudonym like `__constructor`.
     // If the string is not a safe identifier, then we must add quotes.
     // Note that if it was quoted but did not need to be quoted, here we will remove the quotes.
-    if (!StringChecks.isSafeUnquotedMemberIdentifier(unquotedName)) {
+    if (!SyntaxHelpers.isSafeUnquotedMemberIdentifier(unquotedName)) {
       // For API Extractor's purposes, a canonical form is more appropriate than trying to reflect whatever
       // appeared in the source code.  The code is not even guaranteed to be consistent, for example:
       //
@@ -301,6 +274,67 @@ export class AstSymbolTable {
     }
 
     return unquotedName;
+  }
+
+  private _analyzeAstNamespaceImport(astNamespaceImport: AstNamespaceImport): void {
+    if (astNamespaceImport.analyzed) {
+      return;
+    }
+
+    // mark before actual analyzing, to handle module cyclic reexport
+    astNamespaceImport.analyzed = true;
+
+    const exportedLocalEntities: Map<string, AstEntity> = this.fetchAstModuleExportInfo(
+      astNamespaceImport.astModule
+    ).exportedLocalEntities;
+
+    for (const exportedEntity of exportedLocalEntities.values()) {
+      this.analyze(exportedEntity);
+    }
+  }
+
+  private _analyzeAstSymbol(astSymbol: AstSymbol): void {
+    if (astSymbol.analyzed) {
+      return;
+    }
+
+    if (astSymbol.nominalAnalysis) {
+      // We don't analyze nominal symbols
+      astSymbol._notifyAnalyzed();
+      return;
+    }
+
+    // Start at the root of the tree
+    const rootAstSymbol: AstSymbol = astSymbol.rootAstSymbol;
+
+    // Calculate the full child tree for each definition
+    for (const astDeclaration of rootAstSymbol.astDeclarations) {
+      this._analyzeChildTree(astDeclaration.declaration, astDeclaration);
+    }
+
+    rootAstSymbol._notifyAnalyzed();
+
+    if (!astSymbol.isExternal) {
+      // If this symbol is non-external (i.e. it belongs to the working package), then we also analyze any
+      // referencedAstSymbols that are non-external.  For example, this ensures that forgotten exports
+      // get analyzed.
+      rootAstSymbol.forEachDeclarationRecursive((astDeclaration: AstDeclaration) => {
+        for (const referencedAstEntity of astDeclaration.referencedAstEntities) {
+          // Walk up to the root of the tree, looking for any imports along the way
+          if (referencedAstEntity instanceof AstSymbol) {
+            if (!referencedAstEntity.isExternal) {
+              this._analyzeAstSymbol(referencedAstEntity);
+            }
+          }
+
+          if (referencedAstEntity instanceof AstNamespaceImport) {
+            if (!referencedAstEntity.astModule.isExternal) {
+              this._analyzeAstNamespaceImport(referencedAstEntity);
+            }
+          }
+        }
+      });
+    }
   }
 
   /**
@@ -326,8 +360,7 @@ export class AstSymbolTable {
           );
 
           if (identifierNode) {
-            let referencedAstEntity: AstEntity | undefined =
-              this._entitiesByIdentifierNode.get(identifierNode);
+            let referencedAstEntity: AstEntity | undefined = this._entitiesByNode.get(identifierNode);
             if (!referencedAstEntity) {
               const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(identifierNode);
               if (!symbol) {
@@ -378,7 +411,7 @@ export class AstSymbolTable {
                   governingAstDeclaration.astSymbol.isExternal
                 );
 
-                this._entitiesByIdentifierNode.set(identifierNode, referencedAstEntity);
+                this._entitiesByNode.set(identifierNode, referencedAstEntity);
               }
             }
 
@@ -393,19 +426,38 @@ export class AstSymbolTable {
       case ts.SyntaxKind.Identifier:
         {
           const identifierNode: ts.Identifier = node as ts.Identifier;
-          if (!this._entitiesByIdentifierNode.has(identifierNode)) {
+          if (!this._entitiesByNode.has(identifierNode)) {
             const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(identifierNode);
 
             let referencedAstEntity: AstEntity | undefined = undefined;
 
             if (symbol === governingAstDeclaration.astSymbol.followedSymbol) {
-              referencedAstEntity = this._fetchEntityForIdentifierNode(
-                identifierNode,
-                governingAstDeclaration
-              );
+              referencedAstEntity = this._fetchEntityForNode(identifierNode, governingAstDeclaration);
             }
 
-            this._entitiesByIdentifierNode.set(identifierNode, referencedAstEntity);
+            this._entitiesByNode.set(identifierNode, referencedAstEntity);
+          }
+        }
+        break;
+
+      case ts.SyntaxKind.ImportType:
+        {
+          const importTypeNode: ts.ImportTypeNode = node as ts.ImportTypeNode;
+          let referencedAstEntity: AstEntity | undefined = this._entitiesByNode.get(importTypeNode);
+
+          if (!this._entitiesByNode.has(importTypeNode)) {
+            referencedAstEntity = this._fetchEntityForNode(importTypeNode, governingAstDeclaration);
+
+            if (!referencedAstEntity) {
+              // This should never happen
+              throw new Error('Failed to fetch entity for import() type node: ' + importTypeNode.getText());
+            }
+
+            this._entitiesByNode.set(importTypeNode, referencedAstEntity);
+          }
+
+          if (referencedAstEntity) {
+            governingAstDeclaration._notifyReferencedAstEntity(referencedAstEntity);
           }
         }
         break;
@@ -422,23 +474,30 @@ export class AstSymbolTable {
     }
   }
 
-  private _fetchEntityForIdentifierNode(
-    identifierNode: ts.Identifier,
+  private _fetchEntityForNode(
+    node: ts.Identifier | ts.ImportTypeNode,
     governingAstDeclaration: AstDeclaration
   ): AstEntity | undefined {
-    let referencedAstEntity: AstEntity | undefined = this._entitiesByIdentifierNode.get(identifierNode);
+    let referencedAstEntity: AstEntity | undefined = this._entitiesByNode.get(node);
     if (!referencedAstEntity) {
-      const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(identifierNode);
-      if (!symbol) {
-        throw new Error('Symbol not found for identifier: ' + identifierNode.getText());
+      if (node.kind === ts.SyntaxKind.ImportType) {
+        referencedAstEntity = this._exportAnalyzer.fetchReferencedAstEntityFromImportTypeNode(
+          node,
+          governingAstDeclaration.astSymbol.isExternal
+        );
+      } else {
+        const symbol: ts.Symbol | undefined = this._typeChecker.getSymbolAtLocation(node);
+        if (!symbol) {
+          throw new Error('Symbol not found for identifier: ' + node.getText());
+        }
+
+        referencedAstEntity = this._exportAnalyzer.fetchReferencedAstEntity(
+          symbol,
+          governingAstDeclaration.astSymbol.isExternal
+        );
       }
 
-      referencedAstEntity = this._exportAnalyzer.fetchReferencedAstEntity(
-        symbol,
-        governingAstDeclaration.astSymbol.isExternal
-      );
-
-      this._entitiesByIdentifierNode.set(identifierNode, referencedAstEntity);
+      this._entitiesByNode.set(node, referencedAstEntity);
     }
     return referencedAstEntity;
   }
@@ -487,13 +546,12 @@ export class AstSymbolTable {
     }
 
     if (
-      // eslint-disable-next-line no-bitwise
       followedSymbol.flags &
-        // eslint-disable-next-line no-bitwise
-        (ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral | ts.SymbolFlags.Transient) &&
-      !TypeScriptInternals.isLateBoundSymbol(followedSymbol)
+      (ts.SymbolFlags.TypeParameter | ts.SymbolFlags.TypeLiteral | ts.SymbolFlags.Transient)
     ) {
-      return undefined;
+      if (!TypeScriptInternals.isLateBoundSymbol(followedSymbol)) {
+        return undefined;
+      }
     }
 
     // API Extractor doesn't analyze ambient declarations at all

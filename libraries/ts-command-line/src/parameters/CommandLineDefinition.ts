@@ -104,8 +104,9 @@ export interface IBaseCommandLineDefinitionWithArgument extends IBaseCommandLine
 }
 
 /**
- * For use with CommandLineParser, this interface represents a parameter which is constrained to
- * a list of possible options
+ * For use with {@link CommandLineParameterProvider.defineChoiceParameter},
+ * this interface defines a command line parameter which is constrained to a list of possible
+ * options.
  *
  * @public
  */
@@ -119,6 +120,28 @@ export interface ICommandLineChoiceDefinition extends IBaseCommandLineDefinition
    * {@inheritDoc ICommandLineStringDefinition.defaultValue}
    */
   defaultValue?: string;
+
+  /**
+   * An optional callback that provides a list of custom choices for tab completion.
+   * @remarks
+   * This option is only used when `ICommandLineParserOptions.enableTabCompletionAction`
+   * is enabled.
+   */
+  completions?: () => Promise<string[]>;
+}
+
+/**
+ * For use with {@link CommandLineParameterProvider.defineChoiceListParameter},
+ * this interface defines a command line parameter which is constrained to a list of possible
+ * options. The parameter can be specified multiple times to build a list.
+ *
+ * @public
+ */
+export interface ICommandLineChoiceListDefinition extends IBaseCommandLineDefinition {
+  /**
+   * A list of strings (which contain no spaces), of possible options which can be selected
+   */
+  alternatives: string[];
 
   /**
    * An optional callback that provides a list of custom choices for tab completion.
@@ -149,6 +172,15 @@ export interface ICommandLineIntegerDefinition extends IBaseCommandLineDefinitio
    */
   defaultValue?: number;
 }
+
+/**
+ * For use with {@link CommandLineParameterProvider.defineIntegerListParameter},
+ * this interface defines a command line parameter whose argument is an integer value. The
+ * parameter can be specified multiple times to build a list.
+ *
+ * @public
+ */
+export interface ICommandLineIntegerListDefinition extends IBaseCommandLineDefinitionWithArgument {}
 
 /**
  * For use with {@link CommandLineParameterProvider.defineStringParameter},
