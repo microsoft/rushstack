@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.49.0",
+      "tag": "@microsoft/rush_v5.49.0",
+      "date": "Tue, 13 Jul 2021 06:22:09 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Expose APIs useful for determining which projects have changed on the current branch compared to another branch."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.48.0",
       "tag": "@microsoft/rush_v5.48.0",
       "date": "Fri, 09 Jul 2021 01:44:18 GMT",

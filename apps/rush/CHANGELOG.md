@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 09 Jul 2021 01:44:18 GMT and should not be manually modified.
+This log was last generated on Tue, 13 Jul 2021 06:22:09 GMT and should not be manually modified.
+
+## 5.49.0
+Tue, 13 Jul 2021 06:22:09 GMT
+
+### Updates
+
+- Expose APIs useful for determining which projects have changed on the current branch compared to another branch.
 
 ## 5.48.0
 Fri, 09 Jul 2021 01:44:18 GMT
