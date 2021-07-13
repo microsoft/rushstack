@@ -23,10 +23,10 @@ import { CollatedTerminal } from '@rushstack/stream-collator';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { Utilities } from '../../utilities/Utilities';
+import { Utilities, UNINITIALIZED } from '../../utilities/Utilities';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
-import { PackageChangeAnalyzer } from '../PackageChangeAnalyzer';
+import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import { BaseBuilder, IBuilderContext } from './BaseBuilder';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
@@ -48,7 +48,7 @@ export interface IProjectBuilderOptions {
   commandToRun: string;
   commandName: string;
   isIncrementalBuildAllowed: boolean;
-  packageChangeAnalyzer: PackageChangeAnalyzer;
+  projectChangeAnalyzer: ProjectChangeAnalyzer;
   packageDepsFilename: string;
 }
 
@@ -65,9 +65,6 @@ function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
   }
   return true;
 }
-
-const UNINITIALIZED: 'UNINITIALIZED' = 'UNINITIALIZED';
-type UNINITIALIZED = 'UNINITIALIZED';
 
 /**
  * A `BaseBuilder` subclass that builds a Rush project and updates its package-deps-hash
@@ -86,7 +83,7 @@ export class ProjectBuilder extends BaseBuilder {
   private readonly _buildCacheConfiguration: BuildCacheConfiguration | undefined;
   private readonly _commandName: string;
   private readonly _commandToRun: string;
-  private readonly _packageChangeAnalyzer: PackageChangeAnalyzer;
+  private readonly _projectChangeAnalyzer: ProjectChangeAnalyzer;
   private readonly _packageDepsFilename: string;
 
   /**
@@ -103,7 +100,7 @@ export class ProjectBuilder extends BaseBuilder {
     this._commandName = options.commandName;
     this._commandToRun = options.commandToRun;
     this.isIncrementalBuildAllowed = options.isIncrementalBuildAllowed;
-    this._packageChangeAnalyzer = options.packageChangeAnalyzer;
+    this._projectChangeAnalyzer = options.projectChangeAnalyzer;
     this._packageDepsFilename = options.packageDepsFilename;
   }
 
@@ -210,10 +207,11 @@ export class ProjectBuilder extends BaseBuilder {
       let projectBuildDeps: IProjectBuildDeps | undefined;
       let trackedFiles: string[] | undefined;
       try {
-        const fileHashes: Map<string, string> | undefined = await this._packageChangeAnalyzer.getPackageDeps(
-          this._rushProject.packageName,
-          terminal
-        );
+        const fileHashes: Map<string, string> | undefined =
+          await this._projectChangeAnalyzer._tryGetProjectDependenciesAsync(
+            this._rushProject.packageName,
+            terminal
+          );
 
         if (fileHashes) {
           const files: { [filePath: string]: string } = {};
@@ -396,7 +394,7 @@ export class ProjectBuilder extends BaseBuilder {
                 terminal,
                 command: this._commandToRun,
                 trackedProjectFiles: trackedProjectFiles,
-                packageChangeAnalyzer: this._packageChangeAnalyzer
+                projectChangeAnalyzer: this._projectChangeAnalyzer
               });
             }
           }
