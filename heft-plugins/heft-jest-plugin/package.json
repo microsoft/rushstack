@@ -23,9 +23,9 @@
     "@jest/transform": "~25.4.0",
     "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "lodash": "~4.17.15",
     "jest-config": "~25.4.0",
-    "jest-snapshot": "~25.4.0"
+    "jest-snapshot": "~25.4.0",
+    "lodash": "~4.17.15"
   },
   "devDependencies": {
     "@jest/types": "~25.4.0",
