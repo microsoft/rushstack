@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 13 Jul 2021 06:22:09 GMT and should not be manually modified.
+This log was last generated on Tue, 13 Jul 2021 23:03:01 GMT and should not be manually modified.
+
+## 5.49.1
+Tue, 13 Jul 2021 23:03:01 GMT
+
+### Updates
+
+- Fix an issue where the "--no-fetch" "rush change" parameter would cause a "git fetch" and absence of that parameter wouldn't fetch.
 
 ## 5.49.0
 Tue, 13 Jul 2021 06:22:09 GMT
