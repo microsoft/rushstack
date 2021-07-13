@@ -4,6 +4,8 @@
 
 ```ts
 
+/// <reference types="node" />
+
 import * as child_process from 'child_process';
 import * as fs from 'fs';
 
@@ -25,7 +27,7 @@ export class AlreadyReportedError extends Error {
 export class AnsiEscape {
     static formatForTests(text: string, options?: IAnsiEscapeConvertForTestsOptions): string;
     static removeCodes(text: string): string;
-    }
+}
 
 // @beta
 export class Async {
@@ -168,7 +170,7 @@ export class Executable {
     static spawn(filename: string, args: string[], options?: IExecutableSpawnOptions): child_process.ChildProcess;
     static spawnSync(filename: string, args: string[], options?: IExecutableSpawnSyncOptions): child_process.SpawnSyncReturns<string>;
     static tryResolve(filename: string, options?: IExecutableResolveOptions): string | undefined;
-    }
+}
 
 // @public
 export type ExecutableStdioMapping = 'pipe' | 'ignore' | 'inherit' | ExecutableStdioStreamMapping[];
@@ -561,7 +563,7 @@ export class JsonFile {
     static stringify(jsonObject: JsonObject, options?: IJsonFileStringifyOptions): string;
     static updateString(previousJson: string, newJsonObject: JsonObject, options?: IJsonFileStringifyOptions): string;
     static validateNoUndefinedMembers(jsonObject: JsonObject): void;
-    }
+}
 
 // @public
 export type JsonNull = null;
@@ -577,7 +579,7 @@ export class JsonSchema {
     get shortName(): string;
     validateObject(jsonObject: JsonObject, filenameForErrors: string, options?: IJsonSchemaValidateOptions): void;
     validateObjectWithCallback(jsonObject: JsonObject, errorCallback: (errorInfo: IJsonSchemaErrorInfo) => void): void;
-    }
+}
 
 // @public
 export class LegacyAdapters {
@@ -592,7 +594,7 @@ export class LegacyAdapters {
     static convertCallbackToPromise<TResult, TError, TArg1, TArg2, TArg3, TArg4>(fn: (arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4, cb: LegacyCallback<TResult, TError>) => void, arg1: TArg1, arg2: TArg2, arg3: TArg3, arg4: TArg4): Promise<TResult>;
     static scrubError(error: Error | string | any): Error;
     static sortStable<T>(array: T[], compare?: (a: T, b: T) => number): void;
-    }
+}
 
 // @public
 export type LegacyCallback<TResult, TError> = (error: TError | null | undefined, result: TResult) => void;
@@ -606,7 +608,7 @@ export class LockFile {
     get isReleased(): boolean;
     release(): void;
     static tryAcquire(resourceFolder: string, resourceName: string): LockFile | undefined;
-    }
+}
 
 // @public
 export class MapExtensions {
@@ -669,7 +671,7 @@ export class Path {
     static isEqual(path1: string, path2: string): boolean;
     static isUnder(childPath: string, parentFolderPath: string): boolean;
     static isUnderOrEqual(childPath: string, parentFolderPath: string): boolean;
-    }
+}
 
 // @public
 export const enum PosixModeBits {
@@ -791,7 +793,6 @@ export enum TextAttribute {
 export class TypeUuid {
     static isInstanceOf(targetObject: unknown, typeUuid: string): boolean;
     static registerClass(targetClass: any, typeUuid: string): void;
-    }
-
+}
 
 ```

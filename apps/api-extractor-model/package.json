@@ -11,7 +11,7 @@
   "typings": "dist/rollup.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "heft test --clean --pass-with-no-tests"
+    "build": "heft test --clean"
   },
   "dependencies": {
     "@microsoft/tsdoc": "0.13.2",

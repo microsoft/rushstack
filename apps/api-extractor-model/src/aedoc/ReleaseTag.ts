@@ -67,8 +67,9 @@ export namespace ReleaseTag {
         return '@beta';
       case ReleaseTag.Public:
         return '@public';
+      default:
+        throw new Error('Unsupported release tag');
     }
-    throw new Error('Unsupported release tag');
   }
 
   /**
