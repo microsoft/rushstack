@@ -1,6 +1,8 @@
 import { RushConfiguration, ProjectChangeAnalyzer, RushConfigurationProject } from '@microsoft/rush-lib';
+import { Terminal, ConsoleTerminalProvider } from '@rushstack/node-core-library';
 
 async function runAsync(): Promise<void> {
+  const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
   const rushConfiguration: RushConfiguration = RushConfiguration.loadFromDefaultLocation({
     startingFolder: process.cwd()
   });
@@ -22,7 +24,10 @@ async function runAsync(): Promise<void> {
   const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
 
   const changedProjects: AsyncIterable<RushConfigurationProject> =
-    projectChangeAnalyzer.getChangedProjectsAsync(rushConfiguration.repositoryDefaultBranch, false);
+    projectChangeAnalyzer.getChangedProjectsAsync({
+      targetBranchName: rushConfiguration.repositoryDefaultBranch,
+      terminal
+    });
   const projectsNeedingValidation: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
   function addProject(project: RushConfigurationProject): void {
     if (!projectsNeedingValidation.has(project)) {
@@ -37,12 +42,12 @@ async function runAsync(): Promise<void> {
     addProject(project);
   }
 
-  console.log('Projects needing validation due to changes: ');
+  terminal.writeLine('Projects needing validation due to changes: ');
   const namesOfProjectsNeedingValidation: string[] = Array.from(projectsNeedingValidation)
     .map((project) => project.packageName)
     .sort();
   for (const nameOfProjectsNeedingValidation of namesOfProjectsNeedingValidation) {
-    console.log(` - ${nameOfProjectsNeedingValidation}`);
+    terminal.writeLine(` - ${nameOfProjectsNeedingValidation}`);
   }
 }
 

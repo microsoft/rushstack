@@ -155,6 +155,16 @@ export interface IExperimentsJson {
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
 }
 
+// @beta (undocumented)
+export interface IGetChangedProjectsOptions {
+    // (undocumented)
+    shouldFetch?: boolean;
+    // (undocumented)
+    targetBranchName: string;
+    // (undocumented)
+    terminal: Terminal;
+}
+
 // @public
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
@@ -314,7 +324,7 @@ export type PnpmStoreOptions = 'local' | 'global';
 // @beta (undocumented)
 export class ProjectChangeAnalyzer {
     constructor(rushConfiguration: RushConfiguration);
-    getChangedProjectsAsync(targetBranch: string, shouldFetch?: boolean): AsyncIterable<RushConfigurationProject>;
+    getChangedProjectsAsync(options: IGetChangedProjectsOptions): AsyncIterable<RushConfigurationProject>;
     // @internal
     _tryGetProjectDependenciesAsync(projectName: string, terminal: Terminal): Promise<Map<string, string> | undefined>;
     // @internal

@@ -7,7 +7,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as url from 'url';
 import colors from 'colors/safe';
-import { Executable, AlreadyReportedError, Path } from '@rushstack/node-core-library';
+import { Executable, AlreadyReportedError, Path, Terminal } from '@rushstack/node-core-library';
 
 import { Utilities } from '../utilities/Utilities';
 import { GitEmailPolicy } from './policy/GitEmailPolicy';
@@ -176,9 +176,13 @@ export class Git {
     }
   }
 
-  public getChangedFolders(targetBranch: string, shouldFetch: boolean = false): string[] | undefined {
+  public getChangedFolders(
+    targetBranch: string,
+    terminal: Terminal,
+    shouldFetch: boolean = false
+  ): string[] | undefined {
     if (shouldFetch) {
-      this._fetchRemoteBranch(targetBranch);
+      this._fetchRemoteBranch(targetBranch, terminal);
     }
 
     const gitPath: string = this.getGitPathOrThrow();
@@ -208,9 +212,14 @@ export class Git {
    * those in the provided {@param targetBranch}. If a {@param pathPrefix} is provided,
    * this function only returns results under the that path.
    */
-  public getChangedFiles(targetBranch: string, skipFetch: boolean = false, pathPrefix?: string): string[] {
+  public getChangedFiles(
+    targetBranch: string,
+    terminal: Terminal,
+    skipFetch: boolean = false,
+    pathPrefix?: string
+  ): string[] {
     if (!skipFetch) {
-      this._fetchRemoteBranch(targetBranch);
+      this._fetchRemoteBranch(targetBranch, terminal);
     }
 
     const gitPath: string = this.getGitPathOrThrow();
@@ -458,14 +467,12 @@ export class Git {
     return spawnResult.status === 0;
   }
 
-  private _fetchRemoteBranch(remoteBranchName: string): void {
+  private _fetchRemoteBranch(remoteBranchName: string, terminal: Terminal): void {
     console.log(`Checking for updates to ${remoteBranchName}...`);
     const fetchResult: boolean = this._tryFetchRemoteBranch(remoteBranchName);
     if (!fetchResult) {
-      console.log(
-        colors.yellow(
-          `Error fetching git remote branch ${remoteBranchName}. Detected changed files may be incorrect.`
-        )
+      terminal.writeWarningLine(
+        `Error fetching git remote branch ${remoteBranchName}. Detected changed files may be incorrect.`
       );
     }
   }

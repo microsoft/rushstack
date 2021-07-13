@@ -11,7 +11,13 @@ import {
   CommandLineStringParameter,
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
-import { FileSystem, AlreadyReportedError, Import } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  AlreadyReportedError,
+  Import,
+  Terminal,
+  ConsoleTerminalProvider
+} from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { IChangeFile, IChangeInfo, ChangeType } from '../../api/ChangeManagement';
@@ -33,6 +39,7 @@ const inquirer: typeof inquirerTypes = Import.lazy('inquirer', require);
 
 export class ChangeAction extends BaseRushAction {
   private readonly _git: Git;
+  private readonly _terminal: Terminal;
   private _verifyParameter!: CommandLineFlagParameter;
   private _noFetchParameter!: CommandLineFlagParameter;
   private _targetBranchParameter!: CommandLineStringParameter;
@@ -82,6 +89,7 @@ export class ChangeAction extends BaseRushAction {
     });
 
     this._git = new Git(this.rushConfiguration);
+    this._terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: parser.isDebug }));
   }
 
   public onDefineParameters(): void {
@@ -321,7 +329,11 @@ export class ChangeAction extends BaseRushAction {
   private async _getChangedProjectNamesAsync(): Promise<string[]> {
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
     const changedProjects: AsyncIterable<RushConfigurationProject> =
-      projectChangeAnalyzer.getChangedProjectsAsync(this._targetBranch, this._noFetchParameter.value);
+      projectChangeAnalyzer.getChangedProjectsAsync({
+        targetBranchName: this._targetBranch,
+        terminal: this._terminal,
+        shouldFetch: this._noFetchParameter.value
+      });
     const projectHostMap: Map<string, string> = this._generateHostMap();
 
     const changedProjectNames: Set<string> = new Set<string>();
@@ -343,9 +355,11 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private _getChangeFiles(): string[] {
-    return this._git.getChangedFiles(this._targetBranch, true, `common/changes/`).map((relativePath) => {
-      return path.join(this.rushConfiguration.rushJsonFolder, relativePath);
-    });
+    return this._git
+      .getChangedFiles(this._targetBranch, this._terminal, true, `common/changes/`)
+      .map((relativePath) => {
+        return path.join(this.rushConfiguration.rushJsonFolder, relativePath);
+      });
   }
 
   /**

@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import colors from 'colors/safe';
 import * as crypto from 'crypto';
 import ignore, { Ignore } from 'ignore';
 
@@ -16,6 +15,15 @@ import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from './RushConstants';
 import { UNINITIALIZED } from '../utilities/Utilities';
+
+/**
+ * @beta
+ */
+export interface IGetChangedProjectsOptions {
+  targetBranchName: string;
+  terminal: Terminal;
+  shouldFetch?: boolean;
+}
 
 /**
  * @beta
@@ -110,10 +118,13 @@ export class ProjectChangeAnalyzer {
    * when compared to the specified branch.
    */
   public async *getChangedProjectsAsync(
-    targetBranch: string,
-    shouldFetch: boolean = false
+    options: IGetChangedProjectsOptions
   ): AsyncIterable<RushConfigurationProject> {
-    const changedFolders: string[] | undefined = this._git.getChangedFolders(targetBranch, shouldFetch);
+    const changedFolders: string[] | undefined = this._git.getChangedFolders(
+      options.targetBranchName,
+      options.terminal,
+      options.shouldFetch
+    );
 
     if (changedFolders) {
       const repoRootFolder: string | undefined = this._git.getRepositoryRootPath();
@@ -139,7 +150,7 @@ export class ProjectChangeAnalyzer {
   }
 
   private async _getDataAsync(terminal: Terminal): Promise<Map<string, Map<string, string>> | undefined> {
-    const repoDeps: Map<string, string> | undefined = this._getRepoDeps();
+    const repoDeps: Map<string, string> | undefined = this._getRepoDeps(terminal);
     if (!repoDeps) {
       return undefined;
     }
@@ -254,7 +265,7 @@ export class ProjectChangeAnalyzer {
     return ignoreMatcher;
   }
 
-  private _getRepoDeps(): Map<string, string> | undefined {
+  private _getRepoDeps(terminal: Terminal): Map<string, string> | undefined {
     try {
       if (this._git.isPathUnderGitWorkingTree()) {
         // Load the package deps hash for the whole repository
@@ -266,10 +277,8 @@ export class ProjectChangeAnalyzer {
     } catch (e) {
       // If getPackageDeps fails, don't fail the whole build. Treat this case as if we don't know anything about
       // the state of the files in the repo. This can happen if the environment doesn't have Git.
-      console.log(
-        colors.yellow(
-          `Error calculating the state of the repo. (inner error: ${e}). Continuing without diffing files.`
-        )
+      terminal.writeWarningLine(
+        `Error calculating the state of the repo. (inner error: ${e}). Continuing without diffing files.`
       );
 
       return undefined;
