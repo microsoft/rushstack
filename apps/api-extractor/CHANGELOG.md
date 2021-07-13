@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Mon, 12 Jul 2021 23:08:26 GMT and should not be manually modified.
+This log was last generated on Tue, 13 Jul 2021 23:00:33 GMT and should not be manually modified.
+
+## 7.18.3
+Tue, 13 Jul 2021 23:00:33 GMT
+
+### Patches
+
+- Revert a workaround for TypeScript issue #44422 which was fixed in 4.3.3
 
 ## 7.18.2
 Mon, 12 Jul 2021 23:08:26 GMT

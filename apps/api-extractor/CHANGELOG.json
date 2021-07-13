@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.18.3",
+      "tag": "@microsoft/api-extractor_v7.18.3",
+      "date": "Tue, 13 Jul 2021 23:00:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Revert a workaround for TypeScript issue #44422 which was fixed in 4.3.3"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.18.2",
       "tag": "@microsoft/api-extractor_v7.18.2",
       "date": "Mon, 12 Jul 2021 23:08:26 GMT",
