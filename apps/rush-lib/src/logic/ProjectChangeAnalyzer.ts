@@ -36,34 +36,13 @@ export class ProjectChangeAnalyzer {
 
   /**
    * Try to get a list of the specified project's dependencies and their hashes.
-   */
-  public async getProjectDependenciesAsync(
-    projectName: string,
-    terminal: Terminal
-  ): Promise<Map<string, string>> {
-    if (this._data === null) {
-      this._data = await this._getDataAsync(terminal);
-    }
-
-    if (this._data === undefined) {
-      throw new Error('Unable to get current repo state.');
-    } else {
-      const result: Map<string, string> | undefined = this._data.get(projectName);
-      if (!result) {
-        throw new Error(`Project "${projectName}" does not exist in the current Rush configuration.`);
-      } else {
-        return result;
-      }
-    }
-  }
-
-  /**
-   * Try to get a list of the specified project's dependencies and their hashes.
    *
    * @remarks
    * If the data can't be generated (i.e. - if Git is not present) this returns undefined.
+   *
+   * @internal
    */
-  public async tryGetProjectDependenciesAsync(
+  public async _tryGetProjectDependenciesAsync(
     projectName: string,
     terminal: Terminal
   ): Promise<Map<string, string> | undefined> {
@@ -92,14 +71,16 @@ export class ProjectChangeAnalyzer {
    * - A SHA1 hash is created and each (sorted) file path is fed into the hash and then its
    *   Git SHA is fed into the hash
    * - A hex digest of the hash is returned
+   *
+   * @internal
    */
-  public async tryGetProjectStateHashAsync(
+  public async _tryGetProjectStateHashAsync(
     projectName: string,
     terminal: Terminal
   ): Promise<string | undefined> {
     let projectState: string | undefined = this._projectStateCache.get(projectName);
     if (!projectState) {
-      const packageDeps: Map<string, string> | undefined = await this.tryGetProjectDependenciesAsync(
+      const packageDeps: Map<string, string> | undefined = await this._tryGetProjectDependenciesAsync(
         projectName,
         terminal
       );

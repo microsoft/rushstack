@@ -211,7 +211,7 @@ export class ProjectBuilder extends BaseBuilder {
       let trackedFiles: string[] | undefined;
       try {
         const fileHashes: Map<string, string> | undefined =
-          await this._projectChangeAnalyzer.tryGetProjectDependenciesAsync(
+          await this._projectChangeAnalyzer._tryGetProjectDependenciesAsync(
             this._rushProject.packageName,
             terminal
           );

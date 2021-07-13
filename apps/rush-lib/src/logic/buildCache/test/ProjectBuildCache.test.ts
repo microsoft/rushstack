@@ -20,7 +20,7 @@ describe('ProjectBuildCache', () => {
   async function prepareSubject(options: Partial<ITestOptions>): Promise<ProjectBuildCache | undefined> {
     const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
     const projectChangeAnalyzer = {
-      [ProjectChangeAnalyzer.prototype.tryGetProjectStateHashAsync.name]: async () => {
+      [ProjectChangeAnalyzer.prototype._tryGetProjectStateHashAsync.name]: async () => {
         return 'state_hash';
       }
     } as unknown as ProjectChangeAnalyzer;
