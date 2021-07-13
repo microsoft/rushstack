@@ -8,6 +8,7 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
+import { UNINITIALIZED } from '../../utilities/Utilities';
 
 describe(ProjectChangeAnalyzer.name, () => {
   beforeEach(() => {
@@ -226,7 +227,7 @@ describe(ProjectChangeAnalyzer.name, () => {
       // ProjectChangeAnalyzer is inert until someone actually requests project data,
       // this test makes that expectation explicit.
 
-      expect(subject['_data']).toBeNull();
+      expect(subject['_data']).toEqual(UNINITIALIZED);
       expect(await subject._tryGetProjectDependenciesAsync('apple', terminal)).toEqual(
         new Map([['apps/apple/core.js', 'a101']])
       );

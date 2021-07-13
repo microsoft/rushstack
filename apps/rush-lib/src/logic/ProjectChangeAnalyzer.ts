@@ -15,16 +15,17 @@ import { Git } from './Git';
 import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from './RushConstants';
+import { UNINITIALIZED } from '../utilities/Utilities';
 
 /**
  * @beta
  */
 export class ProjectChangeAnalyzer {
   /**
-   * null === we haven't looked
+   * UNINITIALIZED === we haven't looked
    * undefined === data isn't available (i.e. - git isn't present)
    */
-  private _data: Map<string, Map<string, string>> | undefined | null = null;
+  private _data: Map<string, Map<string, string>> | undefined | UNINITIALIZED = UNINITIALIZED;
   private _projectStateCache: Map<string, string> = new Map<string, string>();
   private _rushConfiguration: RushConfiguration;
   private readonly _git: Git;
@@ -46,7 +47,7 @@ export class ProjectChangeAnalyzer {
     projectName: string,
     terminal: Terminal
   ): Promise<Map<string, string> | undefined> {
-    if (this._data === null) {
+    if (this._data === UNINITIALIZED) {
       this._data = await this._getDataAsync(terminal);
     }
 

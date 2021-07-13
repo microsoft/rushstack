@@ -23,7 +23,7 @@ import { CollatedTerminal } from '@rushstack/stream-collator';
 
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { Utilities } from '../../utilities/Utilities';
+import { Utilities, UNINITIALIZED } from '../../utilities/Utilities';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
@@ -65,9 +65,6 @@ function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
   }
   return true;
 }
-
-const UNINITIALIZED: 'UNINITIALIZED' = 'UNINITIALIZED';
-type UNINITIALIZED = 'UNINITIALIZED';
 
 /**
  * A `BaseBuilder` subclass that builds a Rush project and updates its package-deps-hash
