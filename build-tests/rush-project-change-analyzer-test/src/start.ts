@@ -7,20 +7,23 @@ async function runAsync(): Promise<void> {
     startingFolder: process.cwd()
   });
 
-  const projectDiretDependentsMap: Map<RushConfigurationProject, Set<RushConfigurationProject>> = new Map<
+  //#region Step 1: Determine each project's downstream dependencies
+  const projectDirectDependentsMap: Map<RushConfigurationProject, Set<RushConfigurationProject>> = new Map<
     RushConfigurationProject,
     Set<RushConfigurationProject>
   >();
   for (const project of rushConfiguration.projects) {
-    projectDiretDependentsMap.set(project, new Set<RushConfigurationProject>());
+    projectDirectDependentsMap.set(project, new Set<RushConfigurationProject>());
   }
 
   for (const project of rushConfiguration.projects) {
     for (const dependencyProject of project.dependencyProjects) {
-      projectDiretDependentsMap.get(dependencyProject)!.add(project);
+      projectDirectDependentsMap.get(dependencyProject)!.add(project);
     }
   }
+  //#endregion
 
+  //#region Step 2: Get the list of changed projects and recursively collect their downstream dependencies
   const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
 
   const changedProjects: AsyncIterable<RushConfigurationProject> =
@@ -33,15 +36,17 @@ async function runAsync(): Promise<void> {
     if (!projectsNeedingValidation.has(project)) {
       projectsNeedingValidation.add(project);
 
-      for (const projectDiretDependent of projectDiretDependentsMap.get(project)!) {
-        addProject(projectDiretDependent);
+      for (const projectDirectDependent of projectDirectDependentsMap.get(project)!) {
+        addProject(projectDirectDependent);
       }
     }
   }
   for await (const project of changedProjects) {
     addProject(project);
   }
+  //#endregion
 
+  //#region Step 3: Print the list of projects that were changed and their downstream dependencies
   terminal.writeLine('Projects needing validation due to changes: ');
   const namesOfProjectsNeedingValidation: string[] = Array.from(projectsNeedingValidation)
     .map((project) => project.packageName)
@@ -49,6 +54,7 @@ async function runAsync(): Promise<void> {
   for (const nameOfProjectsNeedingValidation of namesOfProjectsNeedingValidation) {
     terminal.writeLine(` - ${nameOfProjectsNeedingValidation}`);
   }
+  //#endregion
 }
 
 runAsync().catch((error) => {
