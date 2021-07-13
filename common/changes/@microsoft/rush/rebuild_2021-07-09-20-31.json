@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "rush rebuild ignores existing build cache entries",
+      "comment": "When the experimental build cache is enabled, \"rush rebuild\" now forces cached projects to be rebuilt  (GitHub #2802)",
       "type": "none"
     }
   ],
