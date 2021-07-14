@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor",
-      "comment": "Fix to avoid \"default\" keyword as var name for dts rollup with default import",
+      "comment": "Fix an issue where the .d.ts rollup sometimes used \"default\" as an identifier name causing a syntax error (GitHub #2804)",
       "type": "patch"
     }
   ],
