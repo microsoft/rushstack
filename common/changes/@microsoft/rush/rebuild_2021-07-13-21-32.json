@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "(Breaking change) Remove the experimental \"--disable-build-cche\" command line parameter.",
+      "comment": "(Breaking change) Remove the experimental \"--disable-build-cache\" command line parameter.",
       "type": "minor"
     }
   ],
