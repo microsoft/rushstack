@@ -180,7 +180,6 @@ export class EnvironmentConfiguration {
    * An override for the common/temp folder path.
    */
   public static get rushTempFolderOverride(): string | undefined {
-    //EnvironmentConfiguration._ensureInitialized();
     return EnvironmentConfiguration._rushTempFolderOverride;
   }
 
