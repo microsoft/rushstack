@@ -529,7 +529,11 @@ export class Collector {
       let nameForEmit: string = idealNameForEmit;
 
       // Choose a name that doesn't conflict with usedNames or a global name
-      while (usedNames.has(nameForEmit) || this.globalVariableAnalyzer.hasGlobalName(nameForEmit)) {
+      while (
+        nameForEmit === 'default' ||
+        usedNames.has(nameForEmit) ||
+        this.globalVariableAnalyzer.hasGlobalName(nameForEmit)
+      ) {
         nameForEmit = `${idealNameForEmit}_${++suffix}`;
       }
       entity.nameForEmit = nameForEmit;
