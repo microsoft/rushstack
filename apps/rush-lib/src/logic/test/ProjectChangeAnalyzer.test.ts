@@ -31,8 +31,11 @@ describe(ProjectChangeAnalyzer.name, () => {
       getCommittedShrinkwrapFilename(): string {
         return 'common/config/rush/pnpm-lock.yaml';
       },
-      findProjectForPosixRelativePath(path: string): object | undefined {
+      findProjectForPosixRelativePath(path: string): RushConfigurationProject | undefined {
         return projects.find((project) => path.startsWith(project.projectRelativeFolder));
+      },
+      getProjectByName(name: string): RushConfigurationProject | undefined {
+        return projects.find((project) => project.packageName === name);
       }
     } as RushConfiguration;
 

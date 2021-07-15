@@ -6,7 +6,7 @@ import * as crypto from 'crypto';
 import ignore, { Ignore } from 'ignore';
 
 import { getPackageDeps, getGitHashForFiles } from '@rushstack/package-deps-hash';
-import { Path, InternalError, FileSystem, Terminal, Async } from '@rushstack/node-core-library';
+import { Path, InternalError, FileSystem, Terminal } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushProjectConfiguration } from '../api/RushProjectConfiguration';
@@ -34,6 +34,7 @@ export class ProjectChangeAnalyzer {
    * undefined === data isn't available (i.e. - git isn't present)
    */
   private _data: Map<string, Map<string, string>> | undefined | UNINITIALIZED = UNINITIALIZED;
+  private _filteredData: Map<string, Map<string, string>> = new Map<string, Map<string, string>>();
   private _projectStateCache: Map<string, string> = new Map<string, string>();
   private _rushConfiguration: RushConfiguration;
   private readonly _git: Git;
@@ -55,20 +56,48 @@ export class ProjectChangeAnalyzer {
     projectName: string,
     terminal: Terminal
   ): Promise<Map<string, string> | undefined> {
+    // Check the cache for any existing data
+    const existingData: Map<string, string> | undefined = this._filteredData.get(projectName);
+    if (existingData) {
+      return existingData;
+    }
+
     if (this._data === UNINITIALIZED) {
       this._data = await this._getDataAsync(terminal);
     }
 
     if (this._data === undefined) {
       return undefined;
-    } else {
-      const result: Map<string, string> | undefined = this._data.get(projectName);
-      if (!result) {
-        throw new Error(`Project "${projectName}" does not exist in the current Rush configuration.`);
-      } else {
-        return result;
-      }
     }
+
+    const project: RushConfigurationProject | undefined =
+      this._rushConfiguration.getProjectByName(projectName);
+    if (!project) {
+      throw new Error(`Project "${projectName}" does not exist in the current Rush configuration.`);
+    }
+
+    const unfilteredProjectData: Map<string, string> = this._data.get(projectName)!;
+    let filteredProjectData: Map<string, string> | undefined;
+
+    const ignoreMatcher: Ignore | undefined = await this._getIgnoreMatcherForProjectAsync(project, terminal);
+    if (ignoreMatcher) {
+      // At this point, `filePath` is guaranteed to start with `projectRelativeFolder`, so
+      // we can safely slice off the first N characters to get the file path relative to the
+      // root of the project.
+      filteredProjectData = new Map<string, string>();
+      for (const [filePath, fileHash] of unfilteredProjectData) {
+        const relativePath: string = filePath.slice(project.projectRelativeFolder.length + 1);
+        if (!ignoreMatcher.ignores(relativePath)) {
+          // Add the file path to the filtered data if it is not ignored
+          filteredProjectData.set(filePath, fileHash);
+        }
+      }
+    } else {
+      filteredProjectData = unfilteredProjectData;
+    }
+
+    this._filteredData.set(projectName, filteredProjectData);
+    return filteredProjectData;
   }
 
   /**
@@ -156,20 +185,6 @@ export class ProjectChangeAnalyzer {
     }
 
     const projectHashDeps: Map<string, Map<string, string>> = new Map<string, Map<string, string>>();
-    const ignoreMatcherForProject: Map<string, Ignore> = new Map<string, Ignore>();
-
-    // Initialize maps for each project asynchronously, up to 10 projects concurrently.
-    await Async.forEachAsync(
-      this._rushConfiguration.projects,
-      async (project: RushConfigurationProject): Promise<void> => {
-        projectHashDeps.set(project.packageName, new Map<string, string>());
-        ignoreMatcherForProject.set(
-          project.packageName,
-          await this._getIgnoreMatcherForProjectAsync(project, terminal)
-        );
-      },
-      { concurrency: 10 }
-    );
 
     // Sort each project folder into its own package deps hash
     for (const [filePath, fileHash] of repoDeps) {
@@ -178,14 +193,14 @@ export class ProjectChangeAnalyzer {
       const owningProject: RushConfigurationProject | undefined =
         this._rushConfiguration.findProjectForPosixRelativePath(filePath);
       if (owningProject) {
-        // At this point, `filePath` is guaranteed to start with `projectRelativeFolder`, so
-        // we can safely slice off the first N characters to get the file path relative to the
-        // root of the `owningProject`.
-        const relativePath: string = filePath.slice(owningProject.projectRelativeFolder.length + 1);
-        const ignoreMatcher: Ignore | undefined = ignoreMatcherForProject.get(owningProject.packageName);
-        if (!ignoreMatcher || !ignoreMatcher.ignores(relativePath)) {
-          projectHashDeps.get(owningProject.packageName)!.set(filePath, fileHash);
+        let owningProjectHashDeps: Map<string, string> | undefined = projectHashDeps.get(
+          owningProject.packageName
+        );
+        if (!owningProjectHashDeps) {
+          owningProjectHashDeps = new Map<string, string>();
+          projectHashDeps.set(owningProject.packageName, owningProjectHashDeps);
         }
+        owningProjectHashDeps.set(filePath, fileHash);
       }
     }
 
