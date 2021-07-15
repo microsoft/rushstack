@@ -32,7 +32,7 @@ describe('EnvironmentConfiguration', () => {
       expect(EnvironmentConfiguration.validate).toThrow();
     });
 
-    it('can be re-validated', () => {
+    it('can revalidate after a reset', () => {
       process.env['RUSH_TEMP_FOLDER'] = '/var/tempA'; // eslint-disable-line dot-notation
       EnvironmentConfiguration.validate({ doNotNormalizePaths: true });
 
@@ -46,10 +46,6 @@ describe('EnvironmentConfiguration', () => {
   });
 
   describe('rushTempDirOverride', () => {
-    /**it('throws if EnvironmentConfiguration is not validated', () => {
-      expect(() => EnvironmentConfiguration.rushTempFolderOverride).toThrow();
-    });**/
-
     it('returns undefined for unset environment variables', () => {
       EnvironmentConfiguration.validate();
 
@@ -67,9 +63,6 @@ describe('EnvironmentConfiguration', () => {
 
   describe('pnpmStorePathOverride', () => {
     const ENV_VAR: string = 'RUSH_PNPM_STORE_PATH';
-    /**it('throws if EnvironmentConfiguration is not validated', () => {
-      expect(() => EnvironmentConfiguration.pnpmStorePathOverride).toThrow();
-    });**/
 
     it('returns undefined for unset environment variable', () => {
       EnvironmentConfiguration.validate();
