@@ -34,6 +34,7 @@ export class ProjectChangeAnalyzer {
    * undefined === data isn't available (i.e. - git isn't present)
    */
   private _data: Map<string, Map<string, string>> | undefined | UNINITIALIZED = UNINITIALIZED;
+  private _filteredData: Map<string, Map<string, string>> = new Map<string, Map<string, string>>();
   private _projectStateCache: Map<string, string> = new Map<string, string>();
   private _rushConfiguration: RushConfiguration;
   private readonly _git: Git;
@@ -55,6 +56,12 @@ export class ProjectChangeAnalyzer {
     projectName: string,
     terminal: Terminal
   ): Promise<Map<string, string> | undefined> {
+    // Check the cache for any existing data
+    const existingData: Map<string, string> | undefined = this._filteredData.get(projectName);
+    if (existingData) {
+      return existingData;
+    }
+
     if (this._data === UNINITIALIZED) {
       this._data = await this._getDataAsync(terminal);
     }
@@ -70,22 +77,26 @@ export class ProjectChangeAnalyzer {
     }
 
     const unfilteredProjectData: Map<string, string> = this._data.get(projectName)!;
-    const filteredProjectData: Map<string, string> = new Map(unfilteredProjectData);
+    let filteredProjectData: Map<string, string> | undefined;
 
     const ignoreMatcher: Ignore | undefined = await this._getIgnoreMatcherForProjectAsync(project, terminal);
     if (ignoreMatcher) {
       // At this point, `filePath` is guaranteed to start with `projectRelativeFolder`, so
       // we can safely slice off the first N characters to get the file path relative to the
       // root of the project.
-      for (const [filePath] of unfilteredProjectData) {
+      filteredProjectData = new Map<string, string>();
+      for (const [filePath, fileHash] of unfilteredProjectData) {
         const relativePath: string = filePath.slice(project.projectRelativeFolder.length + 1);
-        if (ignoreMatcher.ignores(relativePath)) {
-          // Remove from the filtered data as we encounter the ignored files
-          filteredProjectData.delete(filePath);
+        if (!ignoreMatcher.ignores(relativePath)) {
+          // Add the file path to the filtered data if it is not ignored
+          filteredProjectData.set(filePath, fileHash);
         }
       }
+    } else {
+      filteredProjectData = unfilteredProjectData;
     }
 
+    this._filteredData.set(projectName, filteredProjectData);
     return filteredProjectData;
   }
 
@@ -189,7 +200,7 @@ export class ProjectChangeAnalyzer {
           owningProjectHashDeps = new Map<string, string>();
           projectHashDeps.set(owningProject.packageName, owningProjectHashDeps);
         }
-        owningProjectHashDeps!.set(filePath, fileHash);
+        owningProjectHashDeps.set(filePath, fileHash);
       }
     }
 
