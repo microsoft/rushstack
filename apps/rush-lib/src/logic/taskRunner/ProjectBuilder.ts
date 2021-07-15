@@ -229,23 +229,17 @@ export class ProjectBuilder extends BaseBuilder {
           };
         } else if (this.isIncrementalBuildAllowed) {
           terminal.writeLine(
-            'Unable to calculate incremental build state. Instead running full rebuild. Ensure Git is present.'
+            'Warning: incremental builds, caching, and change detection are disabled.\n' +
+              'Ensure this workspace is tracked by git and git is available.'
           );
         }
       } catch (error) {
-        if (this.isIncrementalBuildAllowed) {
-          terminal.writeLine(
-            'Error calculating incremental build state. Instead running full rebuild. ' + error.toString()
-          );
-        }
+        terminal.writeLine(
+          'Error encountered calculating incremental build state: ' +
+            error.toString() +
+            '\nIncremental builds, caching, and change detection are disabled.'
+        );
       }
-
-      const isPackageUnchanged: boolean = !!(
-        lastProjectBuildDeps &&
-        projectBuildDeps &&
-        projectBuildDeps.arguments === lastProjectBuildDeps.arguments &&
-        _areShallowEqual(projectBuildDeps.files, lastProjectBuildDeps.files)
-      );
 
       // If the current command is allowed to do incremental builds, attempt to retrieve
       // the project from the build cache or skip building, if appropriate.
@@ -260,7 +254,16 @@ export class ProjectBuilder extends BaseBuilder {
 
         if (restoreFromCacheSuccess) {
           return TaskStatus.FromCache;
-        } else if (isPackageUnchanged) {
+        }
+
+        const isPackageUnchanged: boolean = !!(
+          lastProjectBuildDeps &&
+          projectBuildDeps &&
+          projectBuildDeps.arguments === lastProjectBuildDeps.arguments &&
+          _areShallowEqual(projectBuildDeps.files, lastProjectBuildDeps.files)
+        );
+
+        if (isPackageUnchanged) {
           return TaskStatus.Skipped;
         }
       }
