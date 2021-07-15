@@ -33,6 +33,9 @@ describe(ProjectChangeAnalyzer.name, () => {
       },
       findProjectForPosixRelativePath(path: string): object | undefined {
         return projects.find((project) => path.startsWith(project.projectRelativeFolder));
+      },
+      getProjectByName(name: string): object | undefined {
+        return projects.find((project) => project.packageName === name);
       }
     } as RushConfiguration;
 
