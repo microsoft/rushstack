@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
+import * as path from 'path';
 import colors from 'colors/safe';
 
 import { AlreadyReportedError, ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
@@ -26,6 +27,7 @@ import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { Selection } from '../../logic/Selection';
 import { SelectionParameterSet } from '../SelectionParameterSet';
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
+import { Tracer } from '../../logic/tracer/Tracer';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -76,6 +78,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private _changedProjectsOnly!: CommandLineFlagParameter;
   private _selectionParameters!: SelectionParameterSet;
   private _verboseParameter!: CommandLineFlagParameter;
+  private _traceParameter!: CommandLineFlagParameter;
   private _parallelismParameter: CommandLineStringParameter | undefined;
   private _ignoreHooksParameter!: CommandLineFlagParameter;
   private _disableBuildCacheFlag: CommandLineFlagParameter | undefined;
@@ -105,6 +108,20 @@ export class BulkScriptAction extends BaseScriptAction {
         throw new Error(`Link flag invalid.${os.EOL}Did you run "rush link"?`);
       }
     }
+
+    const traceFilePath: string = this._traceParameter.value
+      ? path.join(this.rushConfiguration.rushJsonFolder, `${this.actionName}.${Date.now()}.trace.json`)
+      : '';
+
+    if (traceFilePath) {
+      console.log(`Trace will be written to ${traceFilePath}`);
+    }
+
+    const tracer: Tracer | undefined = traceFilePath
+      ? new Tracer({
+          traceFilePath
+        })
+      : undefined;
 
     this._doBeforeTask();
 
@@ -156,7 +173,8 @@ export class BulkScriptAction extends BaseScriptAction {
       parallelism: parallelism,
       changedProjectsOnly: changedProjectsOnly,
       allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild,
-      repoCommandLineConfiguration: this._repoCommandLineConfiguration
+      repoCommandLineConfiguration: this._repoCommandLineConfiguration,
+      tracer
     };
 
     const executeOptions: IExecuteInternalOptions = {
@@ -170,6 +188,14 @@ export class BulkScriptAction extends BaseScriptAction {
       await this._runWatch(executeOptions);
     } else {
       await this._runOnce(executeOptions);
+    }
+
+    if (tracer) {
+      tracer.logCompleteEvent(
+        { cat: 'devtools.timeline', name: this.actionName, tid: 0 },
+        stopwatch.startTime!,
+        stopwatch.endTime!
+      );
     }
   }
 
@@ -303,6 +329,11 @@ export class BulkScriptAction extends BaseScriptAction {
     this._disableBuildCacheFlag = this.defineFlagParameter({
       parameterLongName: '--disable-build-cache',
       description: '(EXPERIMENTAL) Disables the build cache for this command invocation.'
+    });
+
+    this._traceParameter = this.defineFlagParameter({
+      parameterLongName: '--trace',
+      description: '(EXPERIMENTAL) Enables generation of tracing metadata in the Chrome Trace Events format.'
     });
 
     this.defineScriptParameters();
