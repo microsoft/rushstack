@@ -5,7 +5,7 @@ import { BuildCacheConfiguration } from '../api/BuildCacheConfiguration';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { ProjectBuilder, convertSlashesForWindows } from '../logic/taskRunner/ProjectBuilder';
-import { PackageChangeAnalyzer } from './PackageChangeAnalyzer';
+import { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';
 import { TaskCollection } from './taskRunner/TaskCollection';
 
 export interface ITaskSelectorConstructor {
@@ -20,7 +20,7 @@ export interface ITaskSelectorConstructor {
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
   packageDepsFilename: string;
-  packageChangeAnalyzer?: PackageChangeAnalyzer;
+  projectChangeAnalyzer?: ProjectChangeAnalyzer;
 }
 
 /**
@@ -31,14 +31,14 @@ export interface ITaskSelectorConstructor {
  */
 export class TaskSelector {
   private _options: ITaskSelectorConstructor;
-  private _packageChangeAnalyzer: PackageChangeAnalyzer;
+  private _projectChangeAnalyzer: ProjectChangeAnalyzer;
 
   public constructor(options: ITaskSelectorConstructor) {
     this._options = options;
 
-    const { packageChangeAnalyzer = new PackageChangeAnalyzer(options.rushConfiguration) } = options;
+    const { projectChangeAnalyzer = new ProjectChangeAnalyzer(options.rushConfiguration) } = options;
 
-    this._packageChangeAnalyzer = packageChangeAnalyzer;
+    this._projectChangeAnalyzer = projectChangeAnalyzer;
   }
 
   public static getScriptToRun(
@@ -130,7 +130,7 @@ export class TaskSelector {
         commandToRun: commandToRun || '',
         commandName: this._options.commandName,
         isIncrementalBuildAllowed: this._options.isIncrementalBuildAllowed,
-        packageChangeAnalyzer: this._packageChangeAnalyzer,
+        projectChangeAnalyzer: this._projectChangeAnalyzer,
         packageDepsFilename: this._options.packageDepsFilename
       })
     );

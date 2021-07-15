@@ -14,7 +14,7 @@
     "@rushstack/heft-webpack5-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/webpack-env": "1.13.0",
-    "eslint": "~7.12.1",
+    "eslint": "~7.30.0",
     "tslint": "~5.20.1",
     "tslint-microsoft-contrib": "~6.2.0",
     "typescript": "~3.9.7"

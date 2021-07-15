@@ -93,8 +93,9 @@ export class Text {
         return '\n';
       case NewlineKind.OsDefault:
         return os.EOL;
+      default:
+        throw new Error('Unsupported newline kind');
     }
-    throw new Error('Unsupported newline kind');
   }
 
   /**

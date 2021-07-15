@@ -59,3 +59,5 @@ export { VersionPolicyConfiguration } from './api/VersionPolicyConfiguration';
 export { ILaunchOptions, Rush } from './api/Rush';
 
 export { ExperimentsConfiguration, IExperimentsJson } from './api/ExperimentsConfiguration';
+
+export { ProjectChangeAnalyzer, IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';

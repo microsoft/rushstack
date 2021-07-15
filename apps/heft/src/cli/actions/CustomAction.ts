@@ -31,6 +31,7 @@ export interface ICustomActionParameterStringList extends ICustomActionParameter
 }
 
 /** @beta */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface ICustomActionParameterBase<TParameter extends CustomActionParameterType> {
   kind: 'flag' | 'integer' | 'string' | 'stringList'; // TODO: Add "choice"
 

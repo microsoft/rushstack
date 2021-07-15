@@ -2,6 +2,69 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "1.1.13",
+      "tag": "@rushstack/heft-node-rig_v1.1.13",
+      "date": "Wed, 14 Jul 2021 15:06:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.1.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.34.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.34.7` to `^0.34.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.12",
+      "tag": "@rushstack/heft-node-rig_v1.1.12",
+      "date": "Tue, 13 Jul 2021 23:00:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.1.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.34.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.34.6` to `^0.34.7`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.11",
+      "tag": "@rushstack/heft-node-rig_v1.1.11",
+      "date": "Mon, 12 Jul 2021 23:08:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.1.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.34.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.34.5` to `^0.34.6`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.10",
       "tag": "@rushstack/heft-node-rig_v1.1.10",
       "date": "Thu, 08 Jul 2021 23:41:17 GMT",

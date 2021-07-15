@@ -236,8 +236,8 @@ export class BulkScriptAction extends BaseScriptAction {
           ...options.taskSelectorOptions,
           // Revise down the set of projects to execute the command on
           selection,
-          // Pass the PackageChangeAnalyzer from the state differ to save a bit of overhead
-          packageChangeAnalyzer: state
+          // Pass the ProjectChangeAnalyzer from the state differ to save a bit of overhead
+          projectChangeAnalyzer: state
         },
         taskRunnerOptions: options.taskRunnerOptions,
         stopwatch,

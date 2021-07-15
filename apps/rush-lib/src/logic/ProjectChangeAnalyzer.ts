@@ -2,12 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import colors from 'colors/safe';
 import * as crypto from 'crypto';
 import ignore, { Ignore } from 'ignore';
 
 import { getPackageDeps, getGitHashForFiles } from '@rushstack/package-deps-hash';
-import { Path, InternalError, FileSystem, Terminal, Async } from '@rushstack/node-core-library';
+import { Path, InternalError, FileSystem, Terminal } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushProjectConfiguration } from '../api/RushProjectConfiguration';
@@ -15,13 +14,27 @@ import { Git } from './Git';
 import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from './RushConstants';
+import { UNINITIALIZED } from '../utilities/Utilities';
 
-export class PackageChangeAnalyzer {
+/**
+ * @beta
+ */
+export interface IGetChangedProjectsOptions {
+  targetBranchName: string;
+  terminal: Terminal;
+  shouldFetch?: boolean;
+}
+
+/**
+ * @beta
+ */
+export class ProjectChangeAnalyzer {
   /**
-   * null === we haven't looked
+   * UNINITIALIZED === we haven't looked
    * undefined === data isn't available (i.e. - git isn't present)
    */
-  private _data: Map<string, Map<string, string>> | undefined | null = null;
+  private _data: Map<string, Map<string, string>> | undefined | UNINITIALIZED = UNINITIALIZED;
+  private _filteredData: Map<string, Map<string, string>> = new Map<string, Map<string, string>>();
   private _projectStateCache: Map<string, string> = new Map<string, string>();
   private _rushConfiguration: RushConfiguration;
   private readonly _git: Git;
@@ -31,31 +44,84 @@ export class PackageChangeAnalyzer {
     this._git = new Git(this._rushConfiguration);
   }
 
-  public async getPackageDeps(
+  /**
+   * Try to get a list of the specified project's dependencies and their hashes.
+   *
+   * @remarks
+   * If the data can't be generated (i.e. - if Git is not present) this returns undefined.
+   *
+   * @internal
+   */
+  public async _tryGetProjectDependenciesAsync(
     projectName: string,
     terminal: Terminal
   ): Promise<Map<string, string> | undefined> {
-    if (this._data === null) {
-      this._data = await this._getData(terminal);
+    // Check the cache for any existing data
+    const existingData: Map<string, string> | undefined = this._filteredData.get(projectName);
+    if (existingData) {
+      return existingData;
     }
 
-    return this._data?.get(projectName);
+    if (this._data === UNINITIALIZED) {
+      this._data = await this._getDataAsync(terminal);
+    }
+
+    if (this._data === undefined) {
+      return undefined;
+    }
+
+    const project: RushConfigurationProject | undefined =
+      this._rushConfiguration.getProjectByName(projectName);
+    if (!project) {
+      throw new Error(`Project "${projectName}" does not exist in the current Rush configuration.`);
+    }
+
+    const unfilteredProjectData: Map<string, string> = this._data.get(projectName)!;
+    let filteredProjectData: Map<string, string> | undefined;
+
+    const ignoreMatcher: Ignore | undefined = await this._getIgnoreMatcherForProjectAsync(project, terminal);
+    if (ignoreMatcher) {
+      // At this point, `filePath` is guaranteed to start with `projectRelativeFolder`, so
+      // we can safely slice off the first N characters to get the file path relative to the
+      // root of the project.
+      filteredProjectData = new Map<string, string>();
+      for (const [filePath, fileHash] of unfilteredProjectData) {
+        const relativePath: string = filePath.slice(project.projectRelativeFolder.length + 1);
+        if (!ignoreMatcher.ignores(relativePath)) {
+          // Add the file path to the filtered data if it is not ignored
+          filteredProjectData.set(filePath, fileHash);
+        }
+      }
+    } else {
+      filteredProjectData = unfilteredProjectData;
+    }
+
+    this._filteredData.set(projectName, filteredProjectData);
+    return filteredProjectData;
   }
 
   /**
    * The project state hash is calculated in the following way:
-   * - Project dependencies are collected (see PackageChangeAnalyzer.getPackageDeps)
+   * - Project dependencies are collected (see ProjectChangeAnalyzer.getPackageDeps)
    *   - If project dependencies cannot be collected (i.e. - if Git isn't available),
    *     this function returns `undefined`
    * - The (path separator normalized) repo-root-relative dependencies' file paths are sorted
    * - A SHA1 hash is created and each (sorted) file path is fed into the hash and then its
    *   Git SHA is fed into the hash
    * - A hex digest of the hash is returned
+   *
+   * @internal
    */
-  public async getProjectStateHash(projectName: string, terminal: Terminal): Promise<string | undefined> {
+  public async _tryGetProjectStateHashAsync(
+    projectName: string,
+    terminal: Terminal
+  ): Promise<string | undefined> {
     let projectState: string | undefined = this._projectStateCache.get(projectName);
     if (!projectState) {
-      const packageDeps: Map<string, string> | undefined = await this.getPackageDeps(projectName, terminal);
+      const packageDeps: Map<string, string> | undefined = await this._tryGetProjectDependenciesAsync(
+        projectName,
+        terminal
+      );
       if (!packageDeps) {
         return undefined;
       } else {
@@ -76,27 +142,49 @@ export class PackageChangeAnalyzer {
     return projectState;
   }
 
-  private async _getData(terminal: Terminal): Promise<Map<string, Map<string, string>> | undefined> {
-    const repoDeps: Map<string, string> | undefined = this._getRepoDeps();
+  /**
+   * Gets a list of projects that have changed in the current state of the repo
+   * when compared to the specified branch.
+   */
+  public async *getChangedProjectsAsync(
+    options: IGetChangedProjectsOptions
+  ): AsyncIterable<RushConfigurationProject> {
+    const changedFolders: string[] | undefined = this._git.getChangedFolders(
+      options.targetBranchName,
+      options.terminal,
+      options.shouldFetch
+    );
+
+    if (changedFolders) {
+      const repoRootFolder: string | undefined = this._git.getRepositoryRootPath();
+      for (const project of this._rushConfiguration.projects) {
+        const projectFolder: string = repoRootFolder
+          ? path.relative(repoRootFolder, project.projectFolder)
+          : project.projectRelativeFolder;
+        if (this._hasProjectChanged(changedFolders, projectFolder)) {
+          yield project;
+        }
+      }
+    }
+  }
+
+  private _hasProjectChanged(changedFolders: string[], projectFolder: string): boolean {
+    for (const folder of changedFolders) {
+      if (Path.isUnderOrEqual(folder, projectFolder)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private async _getDataAsync(terminal: Terminal): Promise<Map<string, Map<string, string>> | undefined> {
+    const repoDeps: Map<string, string> | undefined = this._getRepoDeps(terminal);
     if (!repoDeps) {
       return undefined;
     }
 
     const projectHashDeps: Map<string, Map<string, string>> = new Map<string, Map<string, string>>();
-    const ignoreMatcherForProject: Map<string, Ignore> = new Map<string, Ignore>();
-
-    // Initialize maps for each project asynchronously, up to 10 projects concurrently.
-    await Async.forEachAsync(
-      this._rushConfiguration.projects,
-      async (project: RushConfigurationProject): Promise<void> => {
-        projectHashDeps.set(project.packageName, new Map<string, string>());
-        ignoreMatcherForProject.set(
-          project.packageName,
-          await this._getIgnoreMatcherForProject(project, terminal)
-        );
-      },
-      { concurrency: 10 }
-    );
 
     // Sort each project folder into its own package deps hash
     for (const [filePath, fileHash] of repoDeps) {
@@ -105,14 +193,14 @@ export class PackageChangeAnalyzer {
       const owningProject: RushConfigurationProject | undefined =
         this._rushConfiguration.findProjectForPosixRelativePath(filePath);
       if (owningProject) {
-        // At this point, `filePath` is guaranteed to start with `projectRelativeFolder`, so
-        // we can safely slice off the first N characters to get the file path relative to the
-        // root of the `owningProject`.
-        const relativePath: string = filePath.slice(owningProject.projectRelativeFolder.length + 1);
-        const ignoreMatcher: Ignore | undefined = ignoreMatcherForProject.get(owningProject.packageName);
-        if (!ignoreMatcher || !ignoreMatcher.ignores(relativePath)) {
-          projectHashDeps.get(owningProject.packageName)!.set(filePath, fileHash);
+        let owningProjectHashDeps: Map<string, string> | undefined = projectHashDeps.get(
+          owningProject.packageName
+        );
+        if (!owningProjectHashDeps) {
+          owningProjectHashDeps = new Map<string, string>();
+          projectHashDeps.set(owningProject.packageName, owningProjectHashDeps);
         }
+        owningProjectHashDeps.set(filePath, fileHash);
       }
     }
 
@@ -177,7 +265,7 @@ export class PackageChangeAnalyzer {
     return projectHashDeps;
   }
 
-  private async _getIgnoreMatcherForProject(
+  private async _getIgnoreMatcherForProjectAsync(
     project: RushConfigurationProject,
     terminal: Terminal
   ): Promise<Ignore> {
@@ -192,7 +280,7 @@ export class PackageChangeAnalyzer {
     return ignoreMatcher;
   }
 
-  private _getRepoDeps(): Map<string, string> | undefined {
+  private _getRepoDeps(terminal: Terminal): Map<string, string> | undefined {
     try {
       if (this._git.isPathUnderGitWorkingTree()) {
         // Load the package deps hash for the whole repository
@@ -204,10 +292,8 @@ export class PackageChangeAnalyzer {
     } catch (e) {
       // If getPackageDeps fails, don't fail the whole build. Treat this case as if we don't know anything about
       // the state of the files in the repo. This can happen if the environment doesn't have Git.
-      console.log(
-        colors.yellow(
-          `Error calculating the state of the repo. (inner error: ${e}). Continuing without diffing files.`
-        )
+      terminal.writeWarningLine(
+        `Error calculating the state of the repo. (inner error: ${e}). Continuing without diffing files.`
       );
 
       return undefined;

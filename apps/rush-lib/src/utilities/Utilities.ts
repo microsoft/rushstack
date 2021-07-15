@@ -11,6 +11,9 @@ import { CommandLineHelper } from '@rushstack/ts-command-line';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 
+export type UNINITIALIZED = 'UNINITIALIZED';
+export const UNINITIALIZED: UNINITIALIZED = 'UNINITIALIZED';
+
 export interface IEnvironment {
   // NOTE: the process.env doesn't actually support "undefined" as a value.
   // If you try to assign it, it will be converted to the text string "undefined".
