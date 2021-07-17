@@ -10,14 +10,16 @@ import {
   JsonObject,
   NewlineKind,
   InternalError,
-  Terminal
+  Terminal,
+  ColorValue
 } from '@rushstack/node-core-library';
 import {
   TerminalChunkKind,
   TextRewriterTransform,
   StderrLineTransform,
   SplitterTransform,
-  DiscardStdoutTransform
+  DiscardStdoutTransform,
+  PrintUtilities
 } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 
@@ -226,17 +228,24 @@ export class ProjectBuilder extends BaseBuilder {
             arguments: this._commandToRun
           };
         } else if (this.isIncrementalBuildAllowed) {
-          terminal.writeLine(
-            'Warning: incremental builds, caching, and change detection are disabled.\n' +
-              'Ensure this workspace is tracked by git and git is available.'
-          );
+          // To test this code path:
+          // Remove the `.git` folder then run "rush build --verbose"
+          terminal.writeLine({
+            text: PrintUtilities.wrapWords(
+              'This workspace does not appear to be tracked by Git. ' +
+                'Rush will proceed without incremental build, caching, and change detection.'
+            ),
+            foregroundColor: ColorValue.Cyan
+          });
         }
       } catch (error) {
-        terminal.writeLine(
-          'Error encountered calculating incremental build state: ' +
-            error.toString() +
-            '\nIncremental builds, caching, and change detection are disabled.'
-        );
+        // To test this code path:
+        // Delete a project's ".rush/temp/shrinkwrap-deps.json" then run "rush build --verbose"
+        terminal.writeLine('Unable to calculate incremental build state: ' + error.toString());
+        terminal.writeLine({
+          text: 'Rush will proceed without incremental build, caching, and change detection.',
+          foregroundColor: ColorValue.Cyan
+        });
       }
 
       // If the current command is allowed to do incremental builds, attempt to retrieve
