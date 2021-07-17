@@ -1,6 +1,17 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 15 Jul 2021 01:47:18 GMT and should not be manually modified.
+This log was last generated on Sat, 17 Jul 2021 01:16:04 GMT and should not be manually modified.
+
+## 5.50.0
+Sat, 17 Jul 2021 01:16:04 GMT
+
+### Minor changes
+
+- (Breaking change) Remove the experimental "--disable-build-cache" command line parameter.
+
+### Patches
+
+- When the experimental build cache is enabled, "rush rebuild" now forces cached projects to be rebuilt  (GitHub #2802)
 
 ## 5.49.2
 Thu, 15 Jul 2021 01:47:18 GMT

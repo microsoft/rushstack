@@ -2,6 +2,23 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.50.0",
+      "tag": "@microsoft/rush_v5.50.0",
+      "date": "Sat, 17 Jul 2021 01:16:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "When the experimental build cache is enabled, \"rush rebuild\" now forces cached projects to be rebuilt  (GitHub #2802)"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "(Breaking change) Remove the experimental \"--disable-build-cache\" command line parameter."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.49.2",
       "tag": "@microsoft/rush_v5.49.2",
       "date": "Thu, 15 Jul 2021 01:47:18 GMT",
