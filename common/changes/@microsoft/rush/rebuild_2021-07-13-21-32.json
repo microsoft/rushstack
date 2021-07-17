@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(Breaking change) Remove the experimental \"--disable-build-cache\" command line parameter.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "elliot-nelson@users.noreply.github.com"
+}

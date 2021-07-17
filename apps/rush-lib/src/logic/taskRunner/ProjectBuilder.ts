@@ -10,14 +10,16 @@ import {
   JsonObject,
   NewlineKind,
   InternalError,
-  Terminal
+  Terminal,
+  ColorValue
 } from '@rushstack/node-core-library';
 import {
   TerminalChunkKind,
   TextRewriterTransform,
   StderrLineTransform,
   SplitterTransform,
-  DiscardStdoutTransform
+  DiscardStdoutTransform,
+  PrintUtilities
 } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 
@@ -225,138 +227,155 @@ export class ProjectBuilder extends BaseBuilder {
             files,
             arguments: this._commandToRun
           };
-        } else {
-          terminal.writeLine(
-            'Unable to calculate incremental build state. Instead running full rebuild. Ensure Git is present.'
-          );
+        } else if (this.isIncrementalBuildAllowed) {
+          // To test this code path:
+          // Remove the `.git` folder then run "rush build --verbose"
+          terminal.writeLine({
+            text: PrintUtilities.wrapWords(
+              'This workspace does not appear to be tracked by Git. ' +
+                'Rush will proceed without incremental build, caching, and change detection.'
+            ),
+            foregroundColor: ColorValue.Cyan
+          });
         }
       } catch (error) {
-        terminal.writeLine(
-          'Error calculating incremental build state. Instead running full rebuild. ' + error.toString()
-        );
-      }
-
-      const isPackageUnchanged: boolean = !!(
-        lastProjectBuildDeps &&
-        projectBuildDeps &&
-        projectBuildDeps.arguments === lastProjectBuildDeps.arguments &&
-        _areShallowEqual(projectBuildDeps.files, lastProjectBuildDeps.files)
-      );
-
-      const projectBuildCache: ProjectBuildCache | undefined = await this._getProjectBuildCacheAsync(
-        terminal,
-        trackedFiles,
-        context.repoCommandLineConfiguration
-      );
-      const restoreFromCacheSuccess: boolean | undefined = await projectBuildCache?.tryRestoreFromCacheAsync(
-        terminal
-      );
-
-      if (restoreFromCacheSuccess) {
-        return TaskStatus.FromCache;
-      } else if (isPackageUnchanged && this.isIncrementalBuildAllowed) {
-        return TaskStatus.Skipped;
-      } else {
-        // If the deps file exists, remove it before starting a build.
-        FileSystem.deleteFile(currentDepsPath);
-
-        // TODO: Remove legacyDepsPath with the next major release of Rush
-        const legacyDepsPath: string = path.join(this._rushProject.projectFolder, 'package-deps.json');
-        // Delete the legacy package-deps.json
-        FileSystem.deleteFile(legacyDepsPath);
-
-        if (!this._commandToRun) {
-          // Write deps on success.
-          if (projectBuildDeps) {
-            JsonFile.save(projectBuildDeps, currentDepsPath, {
-              ensureFolderExists: true
-            });
-          }
-
-          return TaskStatus.Success;
-        }
-
-        // Run the task
-        terminal.writeLine('Invoking: ' + this._commandToRun);
-
-        const task: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(this._commandToRun, {
-          rushConfiguration: this._rushConfiguration,
-          workingDirectory: projectFolder,
-          initCwd: this._rushConfiguration.commonTempFolder,
-          handleOutput: true,
-          environmentPathOptions: {
-            includeProjectBin: true
-          }
+        // To test this code path:
+        // Delete a project's ".rush/temp/shrinkwrap-deps.json" then run "rush build --verbose"
+        terminal.writeLine('Unable to calculate incremental build state: ' + error.toString());
+        terminal.writeLine({
+          text: 'Rush will proceed without incremental build, caching, and change detection.',
+          foregroundColor: ColorValue.Cyan
         });
+      }
 
-        // Hook into events, in order to get live streaming of build log
-        if (task.stdout !== null) {
-          task.stdout.on('data', (data: Buffer) => {
-            const text: string = data.toString();
-            collatedTerminal.writeChunk({ text, kind: TerminalChunkKind.Stdout });
+      // If the current command is allowed to do incremental builds, attempt to retrieve
+      // the project from the build cache or skip building, if appropriate.
+      if (this.isIncrementalBuildAllowed) {
+        const projectBuildCache: ProjectBuildCache | undefined = await this._getProjectBuildCacheAsync(
+          terminal,
+          trackedFiles,
+          context.repoCommandLineConfiguration
+        );
+        const restoreFromCacheSuccess: boolean | undefined =
+          await projectBuildCache?.tryRestoreFromCacheAsync(terminal);
+
+        if (restoreFromCacheSuccess) {
+          return TaskStatus.FromCache;
+        }
+
+        const isPackageUnchanged: boolean = !!(
+          lastProjectBuildDeps &&
+          projectBuildDeps &&
+          projectBuildDeps.arguments === lastProjectBuildDeps.arguments &&
+          _areShallowEqual(projectBuildDeps.files, lastProjectBuildDeps.files)
+        );
+
+        if (isPackageUnchanged) {
+          return TaskStatus.Skipped;
+        }
+      }
+
+      // If the deps file exists, remove it before starting a build.
+      FileSystem.deleteFile(currentDepsPath);
+
+      // TODO: Remove legacyDepsPath with the next major release of Rush
+      const legacyDepsPath: string = path.join(this._rushProject.projectFolder, 'package-deps.json');
+      // Delete the legacy package-deps.json
+      FileSystem.deleteFile(legacyDepsPath);
+
+      if (!this._commandToRun) {
+        // Write deps on success.
+        if (projectBuildDeps) {
+          JsonFile.save(projectBuildDeps, currentDepsPath, {
+            ensureFolderExists: true
           });
         }
-        if (task.stderr !== null) {
-          task.stderr.on('data', (data: Buffer) => {
-            const text: string = data.toString();
-            collatedTerminal.writeChunk({ text, kind: TerminalChunkKind.Stderr });
-            hasWarningOrError = true;
-          });
-        }
 
-        let status: TaskStatus = await new Promise(
-          (resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
-            task.on('close', (code: number) => {
-              try {
-                if (code !== 0) {
-                  reject(new TaskError('error', `Returned error code: ${code}`));
-                } else if (hasWarningOrError) {
-                  resolve(TaskStatus.SuccessWithWarning);
-                } else {
-                  resolve(TaskStatus.Success);
-                }
-              } catch (error) {
-                reject(error);
+        return TaskStatus.Success;
+      }
+
+      // Run the task
+      terminal.writeLine('Invoking: ' + this._commandToRun);
+
+      const task: child_process.ChildProcess = Utilities.executeLifecycleCommandAsync(this._commandToRun, {
+        rushConfiguration: this._rushConfiguration,
+        workingDirectory: projectFolder,
+        initCwd: this._rushConfiguration.commonTempFolder,
+        handleOutput: true,
+        environmentPathOptions: {
+          includeProjectBin: true
+        }
+      });
+
+      // Hook into events, in order to get live streaming of build log
+      if (task.stdout !== null) {
+        task.stdout.on('data', (data: Buffer) => {
+          const text: string = data.toString();
+          collatedTerminal.writeChunk({ text, kind: TerminalChunkKind.Stdout });
+        });
+      }
+      if (task.stderr !== null) {
+        task.stderr.on('data', (data: Buffer) => {
+          const text: string = data.toString();
+          collatedTerminal.writeChunk({ text, kind: TerminalChunkKind.Stderr });
+          hasWarningOrError = true;
+        });
+      }
+
+      let status: TaskStatus = await new Promise(
+        (resolve: (status: TaskStatus) => void, reject: (error: TaskError) => void) => {
+          task.on('close', (code: number) => {
+            try {
+              if (code !== 0) {
+                reject(new TaskError('error', `Returned error code: ${code}`));
+              } else if (hasWarningOrError) {
+                resolve(TaskStatus.SuccessWithWarning);
+              } else {
+                resolve(TaskStatus.Success);
               }
-            });
+            } catch (error) {
+              reject(error);
+            }
+          });
+        }
+      );
+
+      if (status === TaskStatus.Success && projectBuildDeps) {
+        // Write deps on success.
+        const writeProjectStatePromise: Promise<boolean> = JsonFile.saveAsync(
+          projectBuildDeps,
+          currentDepsPath,
+          {
+            ensureFolderExists: true
           }
         );
 
-        if (status === TaskStatus.Success && projectBuildDeps) {
-          // Write deps on success.
-          const writeProjectStatePromise: Promise<boolean> = JsonFile.saveAsync(
-            projectBuildDeps,
-            currentDepsPath,
-            {
-              ensureFolderExists: true
-            }
-          );
+        // If the command is successful and we can calculate project hash, we will write a
+        // new cache entry even if incremental builds are not allowed.
+        const setCacheEntryPromise: Promise<boolean | undefined> = this.tryWriteCacheEntryAsync(
+          terminal,
+          trackedFiles,
+          context.repoCommandLineConfiguration
+        );
 
-          const setCacheEntryPromise: Promise<boolean | undefined> = this.tryWriteCacheEntryAsync(
-            terminal,
-            trackedFiles,
-            context.repoCommandLineConfiguration
-          );
+        const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
 
-          const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
-
-          if (terminalProvider.hasErrors) {
-            status = TaskStatus.Failure;
-          } else if (cacheWriteSuccess === false) {
-            status = TaskStatus.SuccessWithWarning;
-          }
+        if (terminalProvider.hasErrors) {
+          status = TaskStatus.Failure;
+        } else if (cacheWriteSuccess === false) {
+          status = TaskStatus.SuccessWithWarning;
         }
-
-        normalizeNewlineTransform.close();
-
-        // If the pipeline is wired up correctly, then closing normalizeNewlineTransform should
-        // have closed projectLogWritable.
-        if (projectLogWritable.isOpen) {
-          throw new InternalError('The output file handle was not closed');
-        }
-
-        return status;
       }
+
+      normalizeNewlineTransform.close();
+
+      // If the pipeline is wired up correctly, then closing normalizeNewlineTransform should
+      // have closed projectLogWritable.
+      if (projectLogWritable.isOpen) {
+        throw new InternalError('The output file handle was not closed');
+      }
+
+      return status;
     } finally {
       projectLogWritable.close();
     }
