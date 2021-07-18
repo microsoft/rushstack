@@ -17,41 +17,37 @@ describe('EnvironmentConfiguration', () => {
     process.env = _oldEnv;
   });
 
-  describe('initialize', () => {
+  describe('validate', () => {
     it('correctly allows no environment variables', () => {
-      expect(EnvironmentConfiguration.initialize).not.toThrow();
+      expect(EnvironmentConfiguration.validate).not.toThrow();
     });
 
     it('allows known environment variables', () => {
       process.env['RUSH_TEMP_FOLDER'] = '/var/temp'; // eslint-disable-line dot-notation
-      expect(EnvironmentConfiguration.initialize).not.toThrow();
+      expect(EnvironmentConfiguration.validate).not.toThrow();
     });
 
     it('does not allow unknown environment variables', () => {
       process.env['rush_foobar'] = 'asdf'; // eslint-disable-line dot-notation
-      expect(EnvironmentConfiguration.initialize).toThrow();
+      expect(EnvironmentConfiguration.validate).toThrow();
     });
 
-    it('can be re-initialized', () => {
+    it('can revalidate after a reset', () => {
       process.env['RUSH_TEMP_FOLDER'] = '/var/tempA'; // eslint-disable-line dot-notation
-      EnvironmentConfiguration.initialize({ doNotNormalizePaths: true });
+      EnvironmentConfiguration.validate({ doNotNormalizePaths: true });
 
       expect(EnvironmentConfiguration.rushTempFolderOverride).toEqual('/var/tempA');
 
       process.env['RUSH_TEMP_FOLDER'] = '/var/tempB'; // eslint-disable-line dot-notation
-      EnvironmentConfiguration.initialize({ doNotNormalizePaths: true });
+      EnvironmentConfiguration.validate({ doNotNormalizePaths: true });
 
       expect(EnvironmentConfiguration.rushTempFolderOverride).toEqual('/var/tempB');
     });
   });
 
   describe('rushTempDirOverride', () => {
-    it('throws if EnvironmentConfiguration is not initialized', () => {
-      expect(() => EnvironmentConfiguration.rushTempFolderOverride).toThrow();
-    });
-
     it('returns undefined for unset environment variables', () => {
-      EnvironmentConfiguration.initialize();
+      EnvironmentConfiguration.validate();
 
       expect(EnvironmentConfiguration.rushTempFolderOverride).not.toBeDefined();
     });
@@ -59,7 +55,7 @@ describe('EnvironmentConfiguration', () => {
     it('returns the value for a set environment variable', () => {
       const expectedValue: string = '/var/temp';
       process.env['RUSH_TEMP_FOLDER'] = expectedValue; // eslint-disable-line dot-notation
-      EnvironmentConfiguration.initialize({ doNotNormalizePaths: true });
+      EnvironmentConfiguration.validate({ doNotNormalizePaths: true });
 
       expect(EnvironmentConfiguration.rushTempFolderOverride).toEqual(expectedValue);
     });
@@ -67,12 +63,9 @@ describe('EnvironmentConfiguration', () => {
 
   describe('pnpmStorePathOverride', () => {
     const ENV_VAR: string = 'RUSH_PNPM_STORE_PATH';
-    it('throws if EnvironmentConfiguration is not initialized', () => {
-      expect(() => EnvironmentConfiguration.pnpmStorePathOverride).toThrow();
-    });
 
     it('returns undefined for unset environment variable', () => {
-      EnvironmentConfiguration.initialize();
+      EnvironmentConfiguration.validate();
 
       expect(EnvironmentConfiguration.pnpmStorePathOverride).not.toBeDefined();
     });
@@ -80,7 +73,7 @@ describe('EnvironmentConfiguration', () => {
     it('returns the expected path from environment variable without normalization', () => {
       const expectedValue: string = '/var/temp';
       process.env[ENV_VAR] = expectedValue;
-      EnvironmentConfiguration.initialize({ doNotNormalizePaths: true });
+      EnvironmentConfiguration.validate({ doNotNormalizePaths: true });
 
       expect(EnvironmentConfiguration.pnpmStorePathOverride).toEqual(expectedValue);
     });
@@ -90,7 +83,7 @@ describe('EnvironmentConfiguration', () => {
       const envVar: string = './temp';
       process.env[ENV_VAR] = envVar;
 
-      EnvironmentConfiguration.initialize();
+      EnvironmentConfiguration.validate();
 
       expect(EnvironmentConfiguration.pnpmStorePathOverride).toEqual(expectedValue);
     });

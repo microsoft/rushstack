@@ -1,4 +1,3 @@
-import { InternalError } from '@rushstack/node-core-library';
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
@@ -155,7 +154,7 @@ export const enum EnvironmentVariableNames {
  * Initialize will throw if any unknown parameters are present.
  */
 export class EnvironmentConfiguration {
-  private static _hasBeenInitialized: boolean = false;
+  private static _hasBeenValidated: boolean = false;
 
   private static _rushTempFolderOverride: string | undefined;
 
@@ -181,7 +180,7 @@ export class EnvironmentConfiguration {
    * An override for the common/temp folder path.
    */
   public static get rushTempFolderOverride(): string | undefined {
-    EnvironmentConfiguration._ensureInitialized();
+    EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._rushTempFolderOverride;
   }
 
@@ -190,7 +189,7 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_ABSOLUTE_SYMLINKS}
    */
   public static get absoluteSymlinks(): boolean {
-    EnvironmentConfiguration._ensureInitialized();
+    EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._absoluteSymlinks;
   }
 
@@ -202,7 +201,7 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_ALLOW_UNSUPPORTED_NODEJS}.
    */
   public static get allowUnsupportedNodeVersion(): boolean {
-    EnvironmentConfiguration._ensureInitialized();
+    EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._allowUnsupportedNodeVersion;
   }
 
@@ -212,7 +211,7 @@ export class EnvironmentConfiguration {
    * or `0` to disallow them. (See the comments in the command-line.json file for more information).
    */
   public static get allowWarningsInSuccessfulBuild(): boolean {
-    EnvironmentConfiguration._ensureInitialized();
+    EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._allowWarningsInSuccessfulBuild;
   }
 
@@ -221,7 +220,7 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_PNPM_STORE_PATH}
    */
   public static get pnpmStorePathOverride(): string | undefined {
-    EnvironmentConfiguration._ensureInitialized();
+    EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._pnpmStorePathOverride;
   }
 
@@ -230,7 +229,7 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_GLOBAL_FOLDER}
    */
   public static get rushGlobalFolderOverride(): string | undefined {
-    EnvironmentConfiguration._ensureInitialized();
+    EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._rushGlobalFolderOverride;
   }
 
@@ -239,7 +238,7 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_CREDENTIAL}
    */
   public static get buildCacheCredential(): string | undefined {
-    EnvironmentConfiguration._ensureInitialized();
+    EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._buildCacheCredential;
   }
 
@@ -248,7 +247,7 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_ENABLED}
    */
   public static get buildCacheEnabled(): boolean | undefined {
-    EnvironmentConfiguration._ensureInitialized();
+    EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._buildCacheEnabled;
   }
 
@@ -257,7 +256,7 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_WRITE_ALLOWED}
    */
   public static get buildCacheWriteAllowed(): boolean | undefined {
-    EnvironmentConfiguration._ensureInitialized();
+    EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._buildCacheWriteAllowed;
   }
 
@@ -266,7 +265,7 @@ export class EnvironmentConfiguration {
    * See {@link EnvironmentVariableNames.RUSH_GIT_BINARY_PATH}
    */
   public static get gitBinaryPath(): string | undefined {
-    EnvironmentConfiguration._ensureInitialized();
+    EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._gitBinaryPath;
   }
 
@@ -288,7 +287,7 @@ export class EnvironmentConfiguration {
   /**
    * Reads and validates environment variables. If any are invalid, this function will throw.
    */
-  public static initialize(options: IEnvironmentConfigurationInitializeOptions = {}): void {
+  public static validate(options: IEnvironmentConfigurationInitializeOptions = {}): void {
     EnvironmentConfiguration.reset();
 
     const unknownEnvVariables: string[] = [];
@@ -411,7 +410,7 @@ export class EnvironmentConfiguration {
     EnvironmentConfiguration._rushGlobalFolderOverride =
       EnvironmentConfiguration._getRushGlobalFolderOverride(process.env);
 
-    EnvironmentConfiguration._hasBeenInitialized = true;
+    EnvironmentConfiguration._hasBeenValidated = true;
   }
 
   /**
@@ -420,14 +419,12 @@ export class EnvironmentConfiguration {
   public static reset(): void {
     EnvironmentConfiguration._rushTempFolderOverride = undefined;
 
-    EnvironmentConfiguration._hasBeenInitialized = false;
+    EnvironmentConfiguration._hasBeenValidated = false;
   }
 
-  private static _ensureInitialized(): void {
-    if (!EnvironmentConfiguration._hasBeenInitialized) {
-      throw new InternalError(
-        'The EnvironmentConfiguration must be initialized before values can be accessed.'
-      );
+  private static _ensureValidated(): void {
+    if (!EnvironmentConfiguration._hasBeenValidated) {
+      EnvironmentConfiguration.validate();
     }
   }
 

@@ -250,8 +250,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
     this._validateCommandLineConfigCommand(command);
 
-    const overrideAllowWarnings: boolean =
-      this.rushConfiguration && EnvironmentConfiguration.allowWarningsInSuccessfulBuild;
+    const overrideAllowWarnings: boolean = EnvironmentConfiguration.allowWarningsInSuccessfulBuild;
 
     switch (command.commandKind) {
       case RushConstants.bulkCommandKind:
