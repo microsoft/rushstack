@@ -1,6 +1,25 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Thu, 08 Jul 2021 23:41:16 GMT and should not be manually modified.
+This log was last generated on Wed, 14 Jul 2021 15:06:29 GMT and should not be manually modified.
+
+## 7.18.4
+Wed, 14 Jul 2021 15:06:29 GMT
+
+### Patches
+
+- Fix an issue where the .d.ts rollup sometimes used "default" as an identifier name causing a syntax error (GitHub #2804)
+
+## 7.18.3
+Tue, 13 Jul 2021 23:00:33 GMT
+
+### Patches
+
+- Revert a workaround for TypeScript issue #44422 which was fixed in 4.3.3
+
+## 7.18.2
+Mon, 12 Jul 2021 23:08:26 GMT
+
+_Version update only_
 
 ## 7.18.1
 Thu, 08 Jul 2021 23:41:16 GMT

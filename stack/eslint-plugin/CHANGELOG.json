@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.8.0",
+      "tag": "@rushstack/eslint-plugin_v0.8.0",
+      "date": "Mon, 12 Jul 2021 23:08:26 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade @typescript-eslint/* packages to 4.28.0 (GitHub #2389)"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.3",
       "tag": "@rushstack/eslint-plugin_v0.7.3",
       "date": "Tue, 06 Apr 2021 15:14:22 GMT",

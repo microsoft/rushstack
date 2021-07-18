@@ -4,7 +4,7 @@
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
 import { BuildCacheConfiguration } from '../../../api/BuildCacheConfiguration';
 import { RushProjectConfiguration } from '../../../api/RushProjectConfiguration';
-import { PackageChangeAnalyzer } from '../../../logic/PackageChangeAnalyzer';
+import { ProjectChangeAnalyzer } from '../../ProjectChangeAnalyzer';
 import { IGenerateCacheEntryIdOptions } from '../CacheEntryId';
 import { FileSystemBuildCacheProvider } from '../FileSystemBuildCacheProvider';
 
@@ -19,11 +19,11 @@ interface ITestOptions {
 describe('ProjectBuildCache', () => {
   async function prepareSubject(options: Partial<ITestOptions>): Promise<ProjectBuildCache | undefined> {
     const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
-    const packageChangeAnalyzer = {
-      getProjectStateHash: () => {
+    const projectChangeAnalyzer = {
+      [ProjectChangeAnalyzer.prototype._tryGetProjectStateHashAsync.name]: async () => {
         return 'state_hash';
       }
-    } as unknown as PackageChangeAnalyzer;
+    } as unknown as ProjectChangeAnalyzer;
 
     const subject: ProjectBuildCache | undefined = await ProjectBuildCache.tryGetProjectBuildCache({
       buildCacheConfiguration: {
@@ -45,7 +45,7 @@ describe('ProjectBuildCache', () => {
       } as unknown as RushProjectConfiguration,
       command: 'build',
       trackedProjectFiles: options.hasOwnProperty('trackedProjectFiles') ? options.trackedProjectFiles : [],
-      packageChangeAnalyzer,
+      projectChangeAnalyzer,
       terminal
     });
 

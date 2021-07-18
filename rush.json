@@ -673,7 +673,12 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
-
+    {
+      "packageName": "rush-project-change-analyzer-test",
+      "projectFolder": "build-tests/rush-project-change-analyzer-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
     {
       "packageName": "ts-command-line-test",
       "projectFolder": "build-tests/ts-command-line-test",

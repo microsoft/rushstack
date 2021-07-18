@@ -2,6 +2,54 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.18.4",
+      "tag": "@microsoft/api-extractor_v7.18.4",
+      "date": "Wed, 14 Jul 2021 15:06:29 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where the .d.ts rollup sometimes used \"default\" as an identifier name causing a syntax error (GitHub #2804)"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.18.3",
+      "tag": "@microsoft/api-extractor_v7.18.3",
+      "date": "Tue, 13 Jul 2021 23:00:33 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Revert a workaround for TypeScript issue #44422 which was fixed in 4.3.3"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.18.2",
+      "tag": "@microsoft/api-extractor_v7.18.2",
+      "date": "Mon, 12 Jul 2021 23:08:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.13.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.39.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/rig-package\" to `0.2.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/ts-command-line\" to `4.8.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.18.1",
       "tag": "@microsoft/api-extractor_v7.18.1",
       "date": "Thu, 08 Jul 2021 23:41:16 GMT",

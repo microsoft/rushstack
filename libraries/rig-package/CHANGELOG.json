@@ -2,6 +2,18 @@
   "name": "@rushstack/rig-package",
   "entries": [
     {
+      "version": "0.2.13",
+      "tag": "@rushstack/rig-package_v0.2.13",
+      "date": "Mon, 12 Jul 2021 23:08:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.12",
       "tag": "@rushstack/rig-package_v0.2.12",
       "date": "Mon, 12 Apr 2021 15:10:28 GMT",

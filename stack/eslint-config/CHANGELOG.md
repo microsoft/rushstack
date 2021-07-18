@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Mon, 12 Apr 2021 15:10:28 GMT and should not be manually modified.
+This log was last generated on Mon, 12 Jul 2021 23:08:26 GMT and should not be manually modified.
+
+## 2.4.0
+Mon, 12 Jul 2021 23:08:26 GMT
+
+### Minor changes
+
+- Upgrade @typescript-eslint/* packages to 4.28.0 (GitHub #2389)
 
 ## 2.3.4
 Mon, 12 Apr 2021 15:10:28 GMT

@@ -1,6 +1,23 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 08 Jul 2021 23:41:16 GMT and should not be manually modified.
+This log was last generated on Wed, 14 Jul 2021 15:06:29 GMT and should not be manually modified.
+
+## 0.34.8
+Wed, 14 Jul 2021 15:06:29 GMT
+
+_Version update only_
+
+## 0.34.7
+Tue, 13 Jul 2021 23:00:33 GMT
+
+_Version update only_
+
+## 0.34.6
+Mon, 12 Jul 2021 23:08:26 GMT
+
+### Patches
+
+- Disable eslint for no-unused-vars
 
 ## 0.34.5
 Thu, 08 Jul 2021 23:41:16 GMT

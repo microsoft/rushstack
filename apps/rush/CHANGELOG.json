@@ -2,6 +2,59 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.50.0",
+      "tag": "@microsoft/rush_v5.50.0",
+      "date": "Sat, 17 Jul 2021 01:16:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "When the experimental build cache is enabled, \"rush rebuild\" now forces cached projects to be rebuilt  (GitHub #2802)"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "(Breaking change) Remove the experimental \"--disable-build-cache\" command line parameter."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.49.2",
+      "tag": "@microsoft/rush_v5.49.2",
+      "date": "Thu, 15 Jul 2021 01:47:18 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix incremental build state calculation when using filtered installs"
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.49.1",
+      "tag": "@microsoft/rush_v5.49.1",
+      "date": "Tue, 13 Jul 2021 23:03:01 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the \"--no-fetch\" \"rush change\" parameter would cause a \"git fetch\" and absence of that parameter wouldn't fetch."
+          }
+        ]
+      }
+    },
+    {
+      "version": "5.49.0",
+      "tag": "@microsoft/rush_v5.49.0",
+      "date": "Tue, 13 Jul 2021 06:22:09 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Expose APIs useful for determining which projects have changed on the current branch compared to another branch."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.48.0",
       "tag": "@microsoft/rush_v5.48.0",
       "date": "Fri, 09 Jul 2021 01:44:18 GMT",

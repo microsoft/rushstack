@@ -11,7 +11,13 @@ import {
   CommandLineStringParameter,
   CommandLineChoiceParameter
 } from '@rushstack/ts-command-line';
-import { FileSystem, Path, AlreadyReportedError, Import } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  AlreadyReportedError,
+  Import,
+  Terminal,
+  ConsoleTerminalProvider
+} from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { IChangeFile, IChangeInfo, ChangeType } from '../../api/ChangeManagement';
@@ -25,13 +31,15 @@ import {
   LockStepVersionPolicy,
   VersionPolicyDefinitionName
 } from '../../api/VersionPolicy';
+import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
+import { Git } from '../../logic/Git';
 
 import type * as inquirerTypes from 'inquirer';
-import { Git } from '../../logic/Git';
 const inquirer: typeof inquirerTypes = Import.lazy('inquirer', require);
 
 export class ChangeAction extends BaseRushAction {
   private readonly _git: Git;
+  private readonly _terminal: Terminal;
   private _verifyParameter!: CommandLineFlagParameter;
   private _noFetchParameter!: CommandLineFlagParameter;
   private _targetBranchParameter!: CommandLineStringParameter;
@@ -81,6 +89,7 @@ export class ChangeAction extends BaseRushAction {
     });
 
     this._git = new Git(this.rushConfiguration);
+    this._terminal = new Terminal(new ConsoleTerminalProvider({ verboseEnabled: parser.isDebug }));
   }
 
   public onDefineParameters(): void {
@@ -167,11 +176,11 @@ export class ChangeAction extends BaseRushAction {
         throw new AlreadyReportedError();
       }
 
-      this._verify();
+      await this._verifyAsync();
       return;
     }
 
-    const sortedProjectList: string[] = this._getChangedPackageNames().sort();
+    const sortedProjectList: string[] = (await this._getChangedProjectNamesAsync()).sort();
     if (sortedProjectList.length === 0) {
       this._logNoChangeFileRequired();
       this._warnUncommittedChanges();
@@ -300,8 +309,8 @@ export class ChangeAction extends BaseRushAction {
     return hostMap;
   }
 
-  private _verify(): void {
-    const changedPackages: string[] = this._getChangedPackageNames();
+  private async _verifyAsync(): Promise<void> {
+    const changedPackages: string[] = await this._getChangedProjectNamesAsync();
     if (changedPackages.length > 0) {
       this._validateChangeFile(changedPackages);
     } else {
@@ -317,37 +326,27 @@ export class ChangeAction extends BaseRushAction {
     return this._targetBranchName;
   }
 
-  private _getChangedPackageNames(): string[] {
-    const changedFolders: string[] | undefined = this._git.getChangedFolders(
-      this._targetBranch,
-      !this._noFetchParameter.value
-    );
-    if (!changedFolders) {
-      return [];
-    }
-    const changedPackageNames: Set<string> = new Set<string>();
-
-    const git: Git = new Git(this.rushConfiguration);
-    const repoRootFolder: string | undefined = git.getRepositoryRootPath();
+  private async _getChangedProjectNamesAsync(): Promise<string[]> {
+    const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
+    const changedProjects: AsyncIterable<RushConfigurationProject> =
+      projectChangeAnalyzer.getChangedProjectsAsync({
+        targetBranchName: this._targetBranch,
+        terminal: this._terminal,
+        shouldFetch: !this._noFetchParameter.value
+      });
     const projectHostMap: Map<string, string> = this._generateHostMap();
 
-    this.rushConfiguration.projects
-      .filter((project) => project.shouldPublish)
-      .filter((project) => !project.versionPolicy || !project.versionPolicy.exemptFromRushChange)
-      .filter((project) => {
-        const projectFolder: string = repoRootFolder
-          ? path.relative(repoRootFolder, project.projectFolder)
-          : project.projectRelativeFolder;
-        return this._hasProjectChanged(changedFolders, projectFolder);
-      })
-      .forEach((project) => {
-        const hostName: string | undefined = projectHostMap.get(project.packageName);
+    const changedProjectNames: Set<string> = new Set<string>();
+    for await (const changedProject of changedProjects) {
+      if (changedProject.shouldPublish && !changedProject.versionPolicy?.exemptFromRushChange) {
+        const hostName: string | undefined = projectHostMap.get(changedProject.packageName);
         if (hostName) {
-          changedPackageNames.add(hostName);
+          changedProjectNames.add(hostName);
         }
-      });
+      }
+    }
 
-    return [...changedPackageNames];
+    return Array.from(changedProjectNames);
   }
 
   private _validateChangeFile(changedPackages: string[]): void {
@@ -356,19 +355,11 @@ export class ChangeAction extends BaseRushAction {
   }
 
   private _getChangeFiles(): string[] {
-    return this._git.getChangedFiles(this._targetBranch, true, `common/changes/`).map((relativePath) => {
-      return path.join(this.rushConfiguration.rushJsonFolder, relativePath);
-    });
-  }
-
-  private _hasProjectChanged(changedFolders: string[], projectFolder: string): boolean {
-    for (const folder of changedFolders) {
-      if (Path.isUnderOrEqual(folder, projectFolder)) {
-        return true;
-      }
-    }
-
-    return false;
+    return this._git
+      .getChangedFiles(this._targetBranch, this._terminal, true, `common/changes/`)
+      .map((relativePath) => {
+        return path.join(this.rushConfiguration.rushJsonFolder, relativePath);
+      });
   }
 
   /**

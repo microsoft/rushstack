@@ -11,7 +11,7 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { ProjectBuilder } from '../../logic/taskRunner/ProjectBuilder';
-import { PackageChangeAnalyzer } from '../../logic/PackageChangeAnalyzer';
+import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { Utilities } from '../../utilities/Utilities';
 import { TaskSelector } from '../../logic/TaskSelector';
 import { RushConstants } from '../../logic/RushConstants';
@@ -72,7 +72,7 @@ export class WriteBuildCacheAction extends BaseRushAction {
     const command: string = this._command.value!;
     const commandToRun: string | undefined = TaskSelector.getScriptToRun(project, command, []);
 
-    const packageChangeAnalyzer: PackageChangeAnalyzer = new PackageChangeAnalyzer(this.rushConfiguration);
+    const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
     const projectBuilder: ProjectBuilder = new ProjectBuilder({
       rushProject: project,
       rushConfiguration: this.rushConfiguration,
@@ -80,12 +80,12 @@ export class WriteBuildCacheAction extends BaseRushAction {
       commandName: command,
       commandToRun: commandToRun || '',
       isIncrementalBuildAllowed: false,
-      packageChangeAnalyzer,
+      projectChangeAnalyzer,
       packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(command)
     });
 
     const trackedFiles: string[] = Array.from(
-      (await packageChangeAnalyzer.getPackageDeps(project.packageName, terminal))!.keys()
+      (await projectChangeAnalyzer._tryGetProjectDependenciesAsync(project.packageName, terminal))!.keys()
     );
     const commandLineConfigFilePath: string = path.join(
       this.rushConfiguration.commonRushConfigFolder,

@@ -2,6 +2,18 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.8.1",
+      "tag": "@rushstack/ts-command-line_v4.8.1",
+      "date": "Mon, 12 Jul 2021 23:08:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.8.0",
       "tag": "@rushstack/ts-command-line_v4.8.0",
       "date": "Thu, 01 Jul 2021 15:08:27 GMT",

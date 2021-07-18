@@ -31,7 +31,7 @@
     "typescript": "~3.9.7",
 
     // Workaround for https://github.com/microsoft/rushstack/issues/1466
-    "eslint": "~7.12.1"
+    "eslint": "~7.30.0"
   },
 
   /**
@@ -70,12 +70,9 @@
       // and also build-tests/api-extractor-lib1-test
       "~2.9.2",
 
-      // Temporarily allowed until we finish migrating ESLint
-      "~4.2.4",
-
       // The newest supported compiler, used by build-tests/heft-newest-compiler-test
       // and used as the bundled compiler engine for API Extractor.
-      "~4.3.2"
+      "~4.3.5"
     ],
 
     "source-map": [
