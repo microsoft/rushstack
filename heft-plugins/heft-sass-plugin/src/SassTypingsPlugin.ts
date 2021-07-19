@@ -1,21 +1,28 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
-import { HeftSession } from '../../pluginFramework/HeftSession';
-import { HeftConfiguration } from '../../configuration/HeftConfiguration';
-import { IBuildStageContext, IPreCompileSubstage } from '../../stages/BuildStage';
+import {
+  HeftConfiguration,
+  HeftSession,
+  IBuildStageContext,
+  IHeftPlugin,
+  IPreCompileSubstage,
+  ScopedLogger
+} from '@rushstack/heft';
+import { ConfigurationFile, PathResolutionMethod } from '@rushstack/heft-config-file';
+import { JsonSchema } from '@rushstack/node-core-library';
+import * as path from 'path';
 import { ISassConfiguration, SassTypingsGenerator } from './SassTypingsGenerator';
-import { CoreConfigFiles } from '../../utilities/CoreConfigFiles';
-import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
-import { Async } from '../../utilities/Async';
 
 export interface ISassConfigurationJson extends ISassConfiguration {}
 
 const PLUGIN_NAME: string = 'SassTypingsPlugin';
+const PLUGIN_SCHEMA_PATH: string = path.resolve(__dirname, 'schemas', 'heft-sass-plugin.schema.json');
+const SASS_CONFIGURATION_LOCATION: string = `config/sass.json`;
 
 export class SassTypingsPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
+  public readonly optionsSchema: JsonSchema = JsonSchema.fromFile(PLUGIN_SCHEMA_PATH);
 
   /**
    * Generate typings for Sass files before TypeScript compilation.
@@ -51,7 +58,11 @@ export class SassTypingsPlugin implements IHeftPlugin {
 
     await sassTypingsGenerator.generateTypingsAsync();
     if (isWatchMode) {
-      Async.runWatcherWithErrorHandling(async () => await sassTypingsGenerator.runWatcherAsync(), logger);
+      try {
+        await sassTypingsGenerator.runWatcherAsync();
+      } catch (e) {
+        logger.emitError(e);
+      }
     }
   }
 
@@ -61,14 +72,30 @@ export class SassTypingsPlugin implements IHeftPlugin {
   ): Promise<ISassConfiguration> {
     const { buildFolder } = heftConfiguration;
     const sassConfigurationJson: ISassConfigurationJson | undefined =
-      await CoreConfigFiles.sassConfigurationFileLoader.tryLoadConfigurationFileForProjectAsync(
-        logger.terminal,
-        buildFolder,
-        heftConfiguration.rigConfig
-      );
+      await SassTypingsPlugin._getSassConfigurationLoader(
+        buildFolder
+      ).tryLoadConfigurationFileForProjectAsync(logger.terminal, buildFolder, heftConfiguration.rigConfig);
 
     return {
       ...sassConfigurationJson
     };
+  }
+
+  private static _getSassConfigurationLoader(buildFolder: string): ConfigurationFile<ISassConfigurationJson> {
+    return new ConfigurationFile<ISassConfigurationJson>({
+      projectRelativeFilePath: SASS_CONFIGURATION_LOCATION,
+      jsonSchemaPath: PLUGIN_SCHEMA_PATH,
+      jsonPathMetadata: {
+        '$.importIncludePaths.*': {
+          pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+        },
+        '$.generatedTsFolder.*': {
+          pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+        },
+        '$.srcFolder.*': {
+          pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+        }
+      }
+    });
   }
 }

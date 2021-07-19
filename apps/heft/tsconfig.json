@@ -5,5 +5,5 @@
     "typeRoots": ["./custom-typings", "./node_modules/@types/"],
     "types": ["heft-jest", "node"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "./custom-typings/**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
 }
