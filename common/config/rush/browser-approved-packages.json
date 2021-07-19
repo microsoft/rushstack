@@ -4,7 +4,7 @@
   "packages": [
     {
       "name": "@rushstack/heft-sass-plugin",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "react",

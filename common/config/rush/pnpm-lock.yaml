@@ -1440,12 +1440,14 @@ importers:
       '@microsoft/api-extractor': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-sass-plugin': workspace:*
       '@rushstack/heft-webpack4-plugin': workspace:*
       eslint: ~7.30.0
       typescript: ~3.9.7
     dependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-sass-plugin': link:../../heft-plugins/heft-sass-plugin
       '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
       eslint: 7.30.0
       typescript: 3.9.10
