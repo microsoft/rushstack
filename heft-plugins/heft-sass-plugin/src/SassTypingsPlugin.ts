@@ -13,6 +13,7 @@ import {
 import { ConfigurationFile, PathResolutionMethod } from '@rushstack/heft-config-file';
 import { JsonSchema } from '@rushstack/node-core-library';
 import { ISassConfiguration, SassTypingsGenerator } from './SassTypingsGenerator';
+import { Async } from './utilities/Async';
 
 export interface ISassConfigurationJson extends ISassConfiguration {}
 
@@ -58,11 +59,7 @@ export class SassTypingsPlugin implements IHeftPlugin {
 
     await sassTypingsGenerator.generateTypingsAsync();
     if (isWatchMode) {
-      try {
-        await sassTypingsGenerator.runWatcherAsync();
-      } catch (e) {
-        logger.emitError(e);
-      }
+      Async.runWatcherWithErrorHandling(async () => await sassTypingsGenerator.runWatcherAsync(), logger);
     }
   }
 
