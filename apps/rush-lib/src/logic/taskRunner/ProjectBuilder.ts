@@ -412,6 +412,7 @@ export class ProjectBuilder extends BaseBuilder {
                 buildCacheConfiguration: this._buildCacheConfiguration,
                 terminal,
                 command: this._commandToRun,
+                commandName: this._commandName,
                 trackedProjectFiles: trackedProjectFiles,
                 projectChangeAnalyzer: this._projectChangeAnalyzer
               });

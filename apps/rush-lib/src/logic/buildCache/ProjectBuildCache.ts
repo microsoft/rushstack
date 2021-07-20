@@ -23,6 +23,7 @@ interface IProjectBuildCacheOptions {
   buildCacheConfiguration: BuildCacheConfiguration;
   projectConfiguration: RushProjectConfiguration;
   command: string;
+  commandName: string;
   trackedProjectFiles: string[] | undefined;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
   terminal: Terminal;
@@ -424,6 +425,7 @@ export class ProjectBuildCache {
     return path.join(this._project.projectRushTempFolder, 'build-cache-tar.log');
   }
 
+  // todo: mess about with this to get restore-keys style functionality
   private static async _getCacheId(options: IProjectBuildCacheOptions): Promise<string | undefined> {
     // The project state hash is calculated in the following method:
     // - The current project's hash (see ProjectChangeAnalyzer.getProjectStateHash) is
@@ -482,7 +484,8 @@ export class ProjectBuildCache {
       hash.update(RushConstants.hashDelimiter);
     }
 
-    const projectStateHash: string = hash.digest('hex');
+    const projectStateHash: string =
+      options.projectConfiguration.project.packageName + '/' + options.commandName + '/' + hash.digest('hex') + '.tgz';
 
     return options.buildCacheConfiguration.getCacheEntryId({
       projectName: options.projectConfiguration.project.packageName,
