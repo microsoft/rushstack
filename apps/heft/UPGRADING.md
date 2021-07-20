@@ -1,6 +1,6 @@
 # Upgrade notes for @rushstack/heft
 
-### Heft 0.XX.0
+### Heft 0.35.0
 
 This release of Heft removed the Sass plugin from the `@rushstack/heft` package
 and moved it into its own package (`@rushstack/heft-sass-plugin`). To reenable
