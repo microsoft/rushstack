@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as path from 'path';
 import {
   HeftConfiguration,
   HeftSession,
@@ -11,14 +12,13 @@ import {
 } from '@rushstack/heft';
 import { ConfigurationFile, PathResolutionMethod } from '@rushstack/heft-config-file';
 import { JsonSchema } from '@rushstack/node-core-library';
-import * as path from 'path';
 import { ISassConfiguration, SassTypingsGenerator } from './SassTypingsGenerator';
 
 export interface ISassConfigurationJson extends ISassConfiguration {}
 
 const PLUGIN_NAME: string = 'SassTypingsPlugin';
 const PLUGIN_SCHEMA_PATH: string = path.resolve(__dirname, 'schemas', 'heft-sass-plugin.schema.json');
-const SASS_CONFIGURATION_LOCATION: string = `config/sass.json`;
+const SASS_CONFIGURATION_LOCATION: string = 'config/sass.json';
 
 export class SassTypingsPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
@@ -72,16 +72,18 @@ export class SassTypingsPlugin implements IHeftPlugin {
   ): Promise<ISassConfiguration> {
     const { buildFolder } = heftConfiguration;
     const sassConfigurationJson: ISassConfigurationJson | undefined =
-      await SassTypingsPlugin._getSassConfigurationLoader(
-        buildFolder
-      ).tryLoadConfigurationFileForProjectAsync(logger.terminal, buildFolder, heftConfiguration.rigConfig);
+      await SassTypingsPlugin._getSassConfigurationLoader().tryLoadConfigurationFileForProjectAsync(
+        logger.terminal,
+        buildFolder,
+        heftConfiguration.rigConfig
+      );
 
     return {
       ...sassConfigurationJson
     };
   }
 
-  private static _getSassConfigurationLoader(buildFolder: string): ConfigurationFile<ISassConfigurationJson> {
+  private static _getSassConfigurationLoader(): ConfigurationFile<ISassConfigurationJson> {
     return new ConfigurationFile<ISassConfigurationJson>({
       projectRelativeFilePath: SASS_CONFIGURATION_LOCATION,
       jsonSchemaPath: PLUGIN_SCHEMA_PATH,
