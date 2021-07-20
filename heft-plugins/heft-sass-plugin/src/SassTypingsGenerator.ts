@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { LegacyAdapters } from '@rushstack/node-core-library';
-import { IStringValueTypings, StringValuesTypingsGenerator } from '@rushstack/typings-generator';
-import { render, Result } from 'node-sass';
 import * as path from 'path';
+import { render, Result } from 'node-sass';
 import postcss from 'postcss';
 import cssModules from 'postcss-modules';
+import { LegacyAdapters } from '@rushstack/node-core-library';
+import { IStringValueTypings, StringValuesTypingsGenerator } from '@rushstack/typings-generator';
 
 /**
  * @public
