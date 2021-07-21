@@ -80,6 +80,19 @@ export class ProjectValidatorPlugin implements IHeftPlugin {
         );
       });
     });
+
+    heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
+      build.hooks.preCompile.tap(PLUGIN_NAME, async () => {
+        await this._checkPluginIsMissingAsync(
+          'SassTypingsPlugin',
+          Path.convertToSlashes(`${heftConfiguration.buildFolder}/config/sass.json`),
+          ['@rushstack/heft-sass-plugin'],
+          'https://rushstack.io/pages/heft_tasks/sass-typings/',
+          build.hooks.preCompile,
+          logger
+        );
+      });
+    });
   }
 
   private async _scanHeftDataFolderAsync(
@@ -140,7 +153,7 @@ export class ProjectValidatorPlugin implements IHeftPlugin {
     configFilePath: string,
     missingPluginCandidatePackageNames: string[],
     missingPluginDocumentationUrl: string,
-    hookToTap: Hook<unknown, unknown, unknown, unknown, unknown>,
+    hookToTap: Hook,
     logger: ScopedLogger
   ): Promise<boolean> {
     // If we have the plugin, we don't need to check anything else
