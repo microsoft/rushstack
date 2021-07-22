@@ -4,7 +4,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 const { LocalizationPlugin } = require('@rushstack/localization-plugin');
-const { ModuleMinifierPlugin, SynchronousMinifier } = require('@rushstack/module-minifier-plugin');
+const { ModuleMinifierPlugin, WorkerPoolMinifier } = require('@rushstack/module-minifier-plugin');
 const { SetPublicPathPlugin } = require('@rushstack/set-webpack-public-path-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -42,7 +42,9 @@ function generateConfiguration(mode, outputFolderName) {
     optimization: {
       minimizer: [
         new ModuleMinifierPlugin({
-          minifier: new SynchronousMinifier(),
+          minifier: new WorkerPoolMinifier({
+            verbose: true
+          }),
           sourceMap: true,
           usePortableModules: true
         })

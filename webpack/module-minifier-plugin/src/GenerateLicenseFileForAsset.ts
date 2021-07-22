@@ -4,7 +4,13 @@
 import * as path from 'path';
 import * as webpack from 'webpack';
 import { ConcatSource } from 'webpack-sources';
-import { IAssetInfo, IModuleMap, IModuleInfo, IExtendedModule } from './ModuleMinifierPlugin.types';
+import {
+  IAssetInfo,
+  IModuleMap,
+  IModuleInfo,
+  IExtendedModule,
+  _IAcornComment
+} from './ModuleMinifierPlugin.types';
 
 function getAllComments(moduleIds: (string | number)[], minifiedModules: IModuleMap): Set<string> {
   const allComments: Set<string> = new Set();
@@ -18,10 +24,13 @@ function getAllComments(moduleIds: (string | number)[], minifiedModules: IModule
     const { module: webpackModule } = mod;
     const modules: IExtendedModule[] = webpackModule.modules || [webpackModule];
     for (const submodule of modules) {
-      const { comments: subModuleComments } = submodule.factoryMeta;
+      const { comments: subModuleComments } = submodule.factoryMeta as {
+        comments?: Set<_IAcornComment>;
+      };
       if (subModuleComments) {
         for (const comment of subModuleComments) {
-          allComments.add(comment);
+          const value: string = comment.type === 'Line' ? `//${comment.value}\n` : `/*${comment.value}*/\n`;
+          allComments.add(value);
         }
       }
     }
