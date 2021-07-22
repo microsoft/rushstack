@@ -164,6 +164,7 @@ export interface _IWebpackCompilationData {
 export interface IWorkerPoolMinifierOptions {
     maxThreads?: number;
     terserOptions?: MinifyOptions;
+    verbose?: boolean;
 }
 
 // @public
