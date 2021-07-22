@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/module-minifier-plugin",
-      "comment": "Fix comment file generation logic. Add to build test.",
+      "comment": "Fix comment file generation logic. Fix WorkerPoolMinifier hanging the process.",
       "type": "patch"
     }
   ],
