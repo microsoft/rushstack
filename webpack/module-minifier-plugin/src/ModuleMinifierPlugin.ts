@@ -29,7 +29,8 @@ import {
   IExtendedModule,
   IModuleMinifierPluginHooks,
   IDehydratedAssets,
-  _IWebpackCompilationData
+  _IWebpackCompilationData,
+  _IAcornComment
 } from './ModuleMinifierPlugin.types';
 import { generateLicenseFileForAsset } from './GenerateLicenseFileForAsset';
 import { rehydrateAsset } from './RehydrateAsset';
@@ -52,13 +53,6 @@ interface IExtendedChunkTemplate {
   hooks: {
     modules: SyncWaterfallHook<Source, webpack.compilation.Chunk>;
   };
-}
-
-interface IAcornComment {
-  type: 'Line' | 'Block';
-  value: string;
-  start: number;
-  end: number;
 }
 
 interface IExtendedParser extends webpack.compilation.normalModuleFactory.Parser {
@@ -117,7 +111,7 @@ function isMinificationResultError(
 }
 
 // Matche behavior of terser's "some" option
-function isLicenseComment(comment: IAcornComment): boolean {
+function isLicenseComment(comment: _IAcornComment): boolean {
   // https://github.com/terser/terser/blob/d3d924fa9e4c57bbe286b811c6068bcc7026e902/lib/output.js#L175
   return /@preserve|@lic|@cc_on|^\**!/i.test(comment.value);
 }
@@ -178,7 +172,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
         const { normalModuleFactory } = compilationData;
 
         function addCommentExtraction(parser: webpack.compilation.normalModuleFactory.Parser): void {
-          parser.hooks.program.tap(PLUGIN_NAME, (program: unknown, comments: IAcornComment[]) => {
+          parser.hooks.program.tap(PLUGIN_NAME, (program: unknown, comments: _IAcornComment[]) => {
             (parser as IExtendedParser).state.module.factoryMeta.comments = comments.filter(isLicenseComment);
           });
         }

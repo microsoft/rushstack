@@ -313,3 +313,14 @@ export interface IModuleMinifierPluginHooks {
    */
   postProcessCodeFragment: SyncWaterfallHook<ReplaceSource, string>;
 }
+
+/**
+ * The comment objects from the Acorn parser inside of webpack
+ * @internal
+ */
+export interface _IAcornComment {
+  type: 'Line' | 'Block';
+  value: string;
+  start: number;
+  end: number;
+}
