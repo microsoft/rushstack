@@ -318,6 +318,7 @@ export interface IModuleMinifierPluginHooks {
  * The comment objects from the Acorn parser inside of webpack
  * @internal
  */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export interface _IAcornComment {
   type: 'Line' | 'Block';
   value: string;
