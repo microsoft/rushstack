@@ -5,6 +5,14 @@ import * as strings5 from './strings5.resx';
 console.log(string1);
 
 console.log(strings3.string2);
+/*! Preserved comment */
+//@preserve Another comment
+// Blah @lic Foo
+// Foo @cc_on bar
+/**
+ * Stuff
+ * @lic Blah
+ */
 
 import(/* webpackChunkName: 'chunk-with-strings' */ './chunks/chunkWithStrings').then(
   ({ ChunkWithStringsClass }) => {

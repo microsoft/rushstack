@@ -29,7 +29,8 @@ function getAllComments(moduleIds: (string | number)[], minifiedModules: IModule
       };
       if (subModuleComments) {
         for (const comment of subModuleComments) {
-          allComments.add(comment.value);
+          const value: string = comment.type === 'Line' ? `//${comment.value}\n` : `/*${comment.value}*/\n`;
+          allComments.add(value);
         }
       }
     }
