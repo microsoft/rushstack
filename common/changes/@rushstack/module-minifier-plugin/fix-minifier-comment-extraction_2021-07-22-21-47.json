@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/module-minifier-plugin",
+      "comment": "Fix comment file generation logic. Add to build test.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/module-minifier-plugin",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
