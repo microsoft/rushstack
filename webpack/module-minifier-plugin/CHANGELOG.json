@@ -2,6 +2,18 @@
   "name": "@rushstack/module-minifier-plugin",
   "entries": [
     {
+      "version": "0.4.1",
+      "tag": "@rushstack/module-minifier-plugin_v0.4.1",
+      "date": "Thu, 22 Jul 2021 22:31:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix comment file generation logic. Fix WorkerPoolMinifier hanging the process."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.0",
       "tag": "@rushstack/module-minifier-plugin_v0.4.0",
       "date": "Thu, 22 Jul 2021 15:07:19 GMT",

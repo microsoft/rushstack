@@ -1,6 +1,13 @@
 # Change Log - @rushstack/module-minifier-plugin
 
-This log was last generated on Thu, 22 Jul 2021 15:07:19 GMT and should not be manually modified.
+This log was last generated on Thu, 22 Jul 2021 22:31:41 GMT and should not be manually modified.
+
+## 0.4.1
+Thu, 22 Jul 2021 22:31:41 GMT
+
+### Patches
+
+- Fix comment file generation logic. Fix WorkerPoolMinifier hanging the process.
 
 ## 0.4.0
 Thu, 22 Jul 2021 15:07:19 GMT
