@@ -2,6 +2,18 @@
   "name": "@rushstack/module-minifier-plugin",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@rushstack/module-minifier-plugin_v0.4.0",
+      "date": "Thu, 22 Jul 2021 15:07:19 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Separate comment extraction from minification."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.75",
       "tag": "@rushstack/module-minifier-plugin_v0.3.75",
       "date": "Wed, 14 Jul 2021 15:06:29 GMT",
