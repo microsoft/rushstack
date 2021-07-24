@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "Extract default Sass plugin to separate @rushstack/heft-sass-plugin package",
+      "comment": "(BREAKING CHANGE) Extract default Sass plugin to separate @rushstack/heft-sass-plugin package",
       "type": "minor"
     }
   ],
