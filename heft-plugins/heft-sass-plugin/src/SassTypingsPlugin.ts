@@ -22,6 +22,8 @@ const PLUGIN_SCHEMA_PATH: string = path.resolve(__dirname, 'schemas', 'heft-sass
 const SASS_CONFIGURATION_LOCATION: string = 'config/sass.json';
 
 export class SassTypingsPlugin implements IHeftPlugin {
+  private static _sassConfigurationLoader: ConfigurationFile<ISassConfigurationJson> | undefined;
+
   public readonly pluginName: string = PLUGIN_NAME;
   public readonly optionsSchema: JsonSchema = JsonSchema.fromFile(PLUGIN_SCHEMA_PATH);
 
@@ -81,20 +83,23 @@ export class SassTypingsPlugin implements IHeftPlugin {
   }
 
   private static _getSassConfigurationLoader(): ConfigurationFile<ISassConfigurationJson> {
-    return new ConfigurationFile<ISassConfigurationJson>({
-      projectRelativeFilePath: SASS_CONFIGURATION_LOCATION,
-      jsonSchemaPath: PLUGIN_SCHEMA_PATH,
-      jsonPathMetadata: {
-        '$.importIncludePaths.*': {
-          pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
-        },
-        '$.generatedTsFolder.*': {
-          pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
-        },
-        '$.srcFolder.*': {
-          pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+    if (!SassTypingsPlugin._sassConfigurationLoader) {
+      SassTypingsPlugin._sassConfigurationLoader = new ConfigurationFile<ISassConfigurationJson>({
+        projectRelativeFilePath: SASS_CONFIGURATION_LOCATION,
+        jsonSchemaPath: PLUGIN_SCHEMA_PATH,
+        jsonPathMetadata: {
+          '$.importIncludePaths.*': {
+            pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+          },
+          '$.generatedTsFolder.*': {
+            pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+          },
+          '$.srcFolder.*': {
+            pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+          }
         }
-      }
-    });
+      });
+    }
+    return SassTypingsPlugin._sassConfigurationLoader;
   }
 }
