@@ -1,6 +1,13 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Wed, 14 Jul 2021 15:06:29 GMT and should not be manually modified.
+This log was last generated on Tue, 27 Jul 2021 22:31:02 GMT and should not be manually modified.
+
+## 1.0.50
+Tue, 27 Jul 2021 22:31:02 GMT
+
+### Patches
+
+- Update node-forge to version ~0.10.0.
 
 ## 1.0.49
 Wed, 14 Jul 2021 15:06:29 GMT

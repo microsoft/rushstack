@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-webpack5-plugin",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.2.0",
+      "date": "Tue, 27 Jul 2021 22:31:02 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update webpack to be lazy-loaded."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.38",
       "tag": "@rushstack/heft-webpack5-plugin_v0.1.38",
       "date": "Wed, 14 Jul 2021 15:06:29 GMT",

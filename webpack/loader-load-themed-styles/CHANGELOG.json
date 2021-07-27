@@ -2,6 +2,18 @@
   "name": "@microsoft/loader-load-themed-styles",
   "entries": [
     {
+      "version": "1.9.77",
+      "tag": "@microsoft/loader-load-themed-styles_v1.9.77",
+      "date": "Tue, 27 Jul 2021 22:31:02 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/load-themed-styles\" to `1.10.196`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.9.76",
       "tag": "@microsoft/loader-load-themed-styles_v1.9.76",
       "date": "Wed, 14 Jul 2021 15:06:29 GMT",
