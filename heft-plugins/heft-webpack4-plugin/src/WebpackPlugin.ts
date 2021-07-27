@@ -1,9 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import webpack from 'webpack';
+import type {
+  Compiler as WebpackCompiler,
+  MultiCompiler as WebpackMultiCompiler,
+  Stats as WebpackStats,
+  compilation as WebpackCompilation
+} from 'webpack';
 import type TWebpackDevServer from 'webpack-dev-server';
-import { LegacyAdapters } from '@rushstack/node-core-library';
+import { LegacyAdapters, Import, IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
   HeftSession,
@@ -13,18 +18,23 @@ import type {
   IHeftPlugin,
   ScopedLogger
 } from '@rushstack/heft';
-import {
+import type {
   IWebpackConfiguration,
   IWebpackBundleSubstageProperties,
-  IWebpackBuildStageProperties,
-  IWebpackVersions,
-  getWebpackVersions
+  IWebpackBuildStageProperties
 } from './shared';
 import { WebpackConfigurationLoader } from './WebpackConfigurationLoader';
+
+const webpack: typeof import('webpack') = Import.lazy('webpack', require);
 
 const PLUGIN_NAME: string = 'WebpackPlugin';
 const WEBPACK_DEV_SERVER_PACKAGE_NAME: string = 'webpack-dev-server';
 const WEBPACK_DEV_SERVER_ENV_VAR_NAME: string = 'WEBPACK_DEV_SERVER';
+
+interface IWebpackVersions {
+  webpackVersion: string;
+  webpackDevServerVersion: string;
+}
 
 /**
  * @internal
@@ -32,13 +42,32 @@ const WEBPACK_DEV_SERVER_ENV_VAR_NAME: string = 'WEBPACK_DEV_SERVER';
 export class WebpackPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
 
+  private static _webpackVersions: IWebpackVersions | undefined;
+  private static _getWebpackVersions(): IWebpackVersions {
+    if (!WebpackPlugin._webpackVersions) {
+      const webpackDevServerPackageJsonPath: string = Import.resolveModule({
+        modulePath: 'webpack-dev-server/package.json',
+        baseFolderPath: __dirname
+      });
+      const webpackDevServerPackageJson: IPackageJson = PackageJsonLookup.instance.loadPackageJson(
+        webpackDevServerPackageJsonPath
+      );
+      WebpackPlugin._webpackVersions = {
+        webpackVersion: webpack.version!,
+        webpackDevServerVersion: webpackDevServerPackageJson.version
+      };
+    }
+
+    return WebpackPlugin._webpackVersions;
+  }
+
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.bundle.tap(PLUGIN_NAME, (bundle: IBundleSubstage) => {
         bundle.hooks.configureWebpack.tap(
           { name: PLUGIN_NAME, stage: Number.MIN_SAFE_INTEGER },
           (webpackConfiguration: unknown) => {
-            const webpackVersions: IWebpackVersions = getWebpackVersions();
+            const webpackVersions: IWebpackVersions = WebpackPlugin._getWebpackVersions();
             bundle.properties.webpackVersion = webpack.version;
             bundle.properties.webpackDevServerVersion = webpackVersions.webpackDevServerVersion;
 
@@ -86,7 +115,7 @@ export class WebpackPlugin implements IHeftPlugin {
     }
 
     const logger: ScopedLogger = heftSession.requestScopedLogger('webpack');
-    const webpackVersions: IWebpackVersions = getWebpackVersions();
+    const webpackVersions: IWebpackVersions = WebpackPlugin._getWebpackVersions();
     if (bundleSubstageProperties.webpackVersion !== webpackVersions.webpackVersion) {
       logger.emitError(
         new Error(
@@ -109,7 +138,7 @@ export class WebpackPlugin implements IHeftPlugin {
 
     logger.terminal.writeLine(`Using Webpack version ${webpack.version}`);
 
-    const compiler: webpack.Compiler | webpack.MultiCompiler = Array.isArray(webpackConfiguration)
+    const compiler: WebpackCompiler | WebpackMultiCompiler = Array.isArray(webpackConfiguration)
       ? webpack(webpackConfiguration) /* (webpack.Compilation[]) => webpack.MultiCompiler */
       : webpack(webpackConfiguration); /* (webpack.Compilation) => webpack.Compiler */
 
@@ -151,7 +180,7 @@ export class WebpackPlugin implements IHeftPlugin {
       // so we can move on to post-build
       let firstCompilationDoneCallback: (() => void) | undefined;
       const originalBeforeCallback: typeof options.before | undefined = options.before;
-      options.before = (app, devServer, compiler: webpack.Compiler) => {
+      options.before = (app, devServer, compiler: WebpackCompiler) => {
         compiler.hooks.done.tap('heft-webpack-plugin', () => {
           if (firstCompilationDoneCallback) {
             firstCompilationDoneCallback();
@@ -192,11 +221,11 @@ export class WebpackPlugin implements IHeftPlugin {
         );
       }
 
-      let stats: webpack.Stats | webpack.compilation.MultiStats | undefined;
+      let stats: WebpackStats | WebpackCompilation.MultiStats | undefined;
       if (buildProperties.watchMode) {
         try {
           stats = await LegacyAdapters.convertCallbackToPromise(
-            (compiler as webpack.Compiler).watch.bind(compiler),
+            (compiler as WebpackCompiler).watch.bind(compiler),
             {}
           );
         } catch (e) {
@@ -205,7 +234,7 @@ export class WebpackPlugin implements IHeftPlugin {
       } else {
         try {
           stats = await LegacyAdapters.convertCallbackToPromise(
-            (compiler as webpack.Compiler).run.bind(compiler)
+            (compiler as WebpackCompiler).run.bind(compiler)
           );
         } catch (e) {
           logger.emitError(e);
@@ -221,9 +250,9 @@ export class WebpackPlugin implements IHeftPlugin {
     }
   }
 
-  private _emitErrors(logger: ScopedLogger, stats: webpack.Stats | webpack.compilation.MultiStats): void {
+  private _emitErrors(logger: ScopedLogger, stats: WebpackStats | WebpackCompilation.MultiStats): void {
     if (stats.hasErrors() || stats.hasWarnings()) {
-      const serializedStats: webpack.Stats.ToJsonOutput = stats.toJson('errors-warnings');
+      const serializedStats: WebpackStats.ToJsonOutput = stats.toJson('errors-warnings');
 
       for (const warning of serializedStats.warnings as (string | Error)[]) {
         logger.emitWarning(warning instanceof Error ? warning : new Error(warning));
