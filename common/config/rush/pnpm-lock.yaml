@@ -1085,12 +1085,12 @@ importers:
       '@rushstack/node-core-library': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
-      '@types/node-forge': 0.9.1
-      node-forge: ~0.7.1
+      '@types/node-forge': 0.10.2
+      node-forge: ~0.10.0
       sudo: ~1.0.3
     dependencies:
       '@rushstack/node-core-library': link:../node-core-library
-      node-forge: 0.7.6
+      node-forge: 0.10.0
       sudo: 1.0.3
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
@@ -1098,7 +1098,7 @@ importers:
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
-      '@types/node-forge': 0.9.1
+      '@types/node-forge': 0.10.2
 
   ../../libraries/heft-config-file:
     specifiers:
@@ -3165,8 +3165,8 @@ packages:
       form-data: 3.0.1
     dev: false
 
-  /@types/node-forge/0.9.1:
-    resolution: {integrity: sha512-xNO6BfB4Du8DSChdbqyTf488gQwCEUjkxVQq8CeigoG6N7INc8TTRHJK+88IcrnJ0Q8HWPLK4X8pwC8Rcx+sYg==}
+  /@types/node-forge/0.10.2:
+    resolution: {integrity: sha512-nEWO3mkJ1j7eGxGUu32jaGFJj+YSvUt/zG4sEAXbUDbjkQMf9u98Bf3peC4oGFR3zA1n3M3KaXcw6xQyZpl5jg==}
     dependencies:
       '@types/node': 10.17.13
     dev: true
@@ -8475,10 +8475,6 @@ packages:
   /node-forge/0.10.0:
     resolution: {integrity: sha512-PPmu8eEeG9saEUvI97fm4OYxXVB6bFvyNTyiUOBichBpFG8A1Ljw3bY62+5oOjDEMHRnd0Y7HQ+x7uzxOzC6JA==}
     engines: {node: '>= 6.0.0'}
-    dev: false
-
-  /node-forge/0.7.6:
-    resolution: {integrity: sha512-sol30LUpz1jQFBjOKwbjxijiE3b6pjd74YwfD0fJOKPjF+fONKb2Yg8rYgS6+bK6VDl+/wfr4IYpC7jDzLUIfw==}
     dev: false
 
   /node-gyp/7.1.2:

@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "node-forge": "~0.7.1",
+    "node-forge": "~0.10.0",
     "sudo": "~1.0.3"
   },
   "devDependencies": {
@@ -22,6 +22,6 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "10.17.13",
-    "@types/node-forge": "0.9.1"
+    "@types/node-forge": "0.10.2"
   }
 }
