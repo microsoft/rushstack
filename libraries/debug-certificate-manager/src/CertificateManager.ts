@@ -1,14 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as forge from 'node-forge';
+import type { pki } from 'node-forge';
 import * as path from 'path';
 import * as child_process from 'child_process';
 import { EOL } from 'os';
-import { FileSystem, Terminal } from '@rushstack/node-core-library';
+import { FileSystem, Terminal, Import } from '@rushstack/node-core-library';
 
 import { runSudoAsync, IRunResult, runAsync } from './exec';
 import { CertificateStore } from './CertificateStore';
+
+const forge: typeof import('node-forge') = Import.lazy('node-forge', require);
 
 const SERIAL_NUMBER: string = '731c321744e34650a202e3ef91c3c1b0';
 const FRIENDLY_NAME: string = 'debug-certificate-manager Development Certificate';
@@ -39,7 +41,6 @@ export interface ICertificate {
  */
 export class CertificateManager {
   private _certificateStore: CertificateStore;
-  private _getCertUtilPathPromise: Promise<string | undefined> | undefined;
 
   public constructor() {
     this._certificateStore = new CertificateStore();
@@ -171,8 +172,8 @@ export class CertificateManager {
   }
 
   private _createDevelopmentCertificate(): ICertificate {
-    const keys: forge.pki.KeyPair = forge.pki.rsa.generateKeyPair(2048);
-    const certificate: forge.pki.Certificate = forge.pki.createCertificate();
+    const keys: pki.KeyPair = forge.pki.rsa.generateKeyPair(2048);
+    const certificate: pki.Certificate = forge.pki.createCertificate();
     certificate.publicKey = keys.publicKey;
 
     certificate.serialNumber = SERIAL_NUMBER;
@@ -182,7 +183,7 @@ export class CertificateManager {
     // Valid for 3 years
     certificate.validity.notAfter.setFullYear(certificate.validity.notBefore.getFullYear() + 3);
 
-    const attrs: forge.pki.CertificateField[] = [
+    const attrs: pki.CertificateField[] = [
       {
         name: 'commonName',
         value: 'localhost'
@@ -400,7 +401,7 @@ export class CertificateManager {
     if (!certificateData) {
       return false;
     }
-    const certificate: forge.pki.Certificate = forge.pki.certificateFromPem(certificateData);
+    const certificate: pki.Certificate = forge.pki.certificateFromPem(certificateData);
     return !!certificate.getExtension('subjectAltName');
   }
 }
