@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { FileSystem } from '@rushstack/node-core-library';
-import * as webpack from 'webpack';
+import type * as webpack from 'webpack';
 import type { IBuildStageProperties, ScopedLogger } from '@rushstack/heft';
 
 import { IWebpackConfiguration } from './shared';
