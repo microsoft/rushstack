@@ -4,11 +4,11 @@
 
 ```ts
 
-import { Configuration } from 'webpack-dev-server';
+import type { Configuration } from 'webpack-dev-server';
 import type { IBuildStageProperties } from '@rushstack/heft';
 import type { IBundleSubstageProperties } from '@rushstack/heft';
 import type { IHeftPlugin } from '@rushstack/heft';
-import * as webpack from 'webpack';
+import type * as webpack from 'webpack';
 
 // @public (undocumented)
 const _default: IHeftPlugin<void>;

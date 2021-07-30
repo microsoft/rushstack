@@ -8,7 +8,6 @@ import {
   IModuleMinifier
 } from './ModuleMinifierPlugin.types';
 import { MinifyOptions } from 'terser';
-import { Worker } from 'worker_threads';
 import { WorkerPool } from './workerPool/WorkerPool';
 import { cpus } from 'os';
 
@@ -29,6 +28,11 @@ export interface IWorkerPoolMinifierOptions {
    * `output.comments` is currently not configurable and will always extract license comments to a separate file.
    */
   terserOptions?: MinifyOptions;
+
+  /**
+   * If true, log to the console about the minification results.
+   */
+  verbose?: boolean;
 }
 
 /**
@@ -37,32 +41,23 @@ export interface IWorkerPoolMinifierOptions {
  */
 export class WorkerPoolMinifier implements IModuleMinifier {
   private readonly _pool: WorkerPool;
+  private readonly _verbose: boolean;
 
   private _refCount: number;
   private _deduped: number;
   private _minified: number;
+
   private readonly _resultCache: Map<string, IModuleMinificationResult>;
   private readonly _activeRequests: Map<string, IModuleMinificationCallback[]>;
 
   public constructor(options: IWorkerPoolMinifierOptions) {
-    const { maxThreads = cpus().length, terserOptions = {} } = options || {};
+    const { maxThreads = cpus().length, terserOptions = {}, verbose = false } = options || {};
 
     const activeRequests: Map<string, IModuleMinificationCallback[]> = new Map();
     const resultCache: Map<string, IModuleMinificationResult> = new Map();
     const terserPool: WorkerPool = new WorkerPool({
       id: 'Minifier',
       maxWorkers: maxThreads,
-      prepareWorker: (worker: Worker) => {
-        worker.on('message', (message: IModuleMinificationResult) => {
-          const callbacks: IModuleMinificationCallback[] | undefined = activeRequests.get(message.hash)!;
-          activeRequests.delete(message.hash);
-          resultCache.set(message.hash, message);
-          for (const callback of callbacks) {
-            callback(message);
-          }
-          terserPool.checkinWorker(worker);
-        });
-      },
       workerData: terserOptions,
       workerScriptPath: require.resolve('./workerPool/MinifierWorker')
     });
@@ -71,6 +66,7 @@ export class WorkerPoolMinifier implements IModuleMinifier {
     this._refCount = 0;
     this._resultCache = resultCache;
     this._pool = terserPool;
+    this._verbose = verbose;
 
     this._deduped = 0;
     this._minified = 0;
@@ -112,6 +108,21 @@ export class WorkerPoolMinifier implements IModuleMinifier {
     this._pool
       .checkoutWorkerAsync(true)
       .then((worker) => {
+        const cb: (message: IModuleMinificationResult) => void = (
+          message: IModuleMinificationResult
+        ): void => {
+          worker.off('message', cb);
+          const callbacks: IModuleMinificationCallback[] | undefined = activeRequests.get(message.hash)!;
+          activeRequests.delete(message.hash);
+          this._resultCache.set(message.hash, message);
+          for (const callback of callbacks) {
+            callback(message);
+          }
+          // This should always be the last thing done with the worker
+          this._pool.checkinWorker(worker);
+        };
+
+        worker.on('message', cb);
         worker.postMessage(request);
       })
       .catch((error: Error) => {
@@ -121,8 +132,7 @@ export class WorkerPoolMinifier implements IModuleMinifier {
             hash,
             error,
             code: undefined,
-            map: undefined,
-            extractedComments: undefined
+            map: undefined
           });
         }
       });
@@ -135,8 +145,15 @@ export class WorkerPoolMinifier implements IModuleMinifier {
 
     return async () => {
       if (--this._refCount === 0) {
+        if (this._verbose) {
+          console.log(`Shutting down minifier worker pool`);
+        }
         await this._pool.finishAsync();
-        console.log(`Module minification: ${this._deduped} Deduped, ${this._minified} Processed`);
+        this._resultCache.clear();
+        this._activeRequests.clear();
+        if (this._verbose) {
+          console.log(`Module minification: ${this._deduped} Deduped, ${this._minified} Processed`);
+        }
       }
     };
   }

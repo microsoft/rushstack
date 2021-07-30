@@ -3,8 +3,6 @@
 
 import { Executable } from '@rushstack/node-core-library';
 import * as child_process from 'child_process';
-// eslint-disable-next-line
-const sudo: (args: string[], options: any) => child_process.ChildProcess = require('sudo');
 
 export interface IRunResult {
   stdout: string[];
@@ -13,6 +11,8 @@ export interface IRunResult {
 }
 
 export async function runSudoAsync(command: string, params: string[]): Promise<IRunResult> {
+  // eslint-disable-next-line
+  const sudo: (args: string[], options: any) => child_process.ChildProcess = require('sudo');
   const result: child_process.ChildProcess = sudo([command, ...params], {
     cachePassword: false,
     prompt: 'Enter your password: '
