@@ -18,7 +18,7 @@ import { Async } from './utilities/Async';
 export interface ISassConfigurationJson extends ISassConfiguration {}
 
 const PLUGIN_NAME: string = 'SassTypingsPlugin';
-const PLUGIN_SCHEMA_PATH: string = path.resolve(__dirname, 'schemas', 'heft-sass-plugin.schema.json');
+const PLUGIN_SCHEMA_PATH: string = `${__dirname}/schemas/heft-sass-plugin.schema.json`;
 const SASS_CONFIGURATION_LOCATION: string = 'config/sass.json';
 
 export class SassTypingsPlugin implements IHeftPlugin {
