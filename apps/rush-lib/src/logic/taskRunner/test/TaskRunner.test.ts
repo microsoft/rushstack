@@ -181,7 +181,7 @@ describe('TaskRunner', () => {
         };
       });
 
-      it.only('Logs warnings correctly', async () => {
+      it('Logs warnings correctly', async () => {
         taskRunner = createTaskRunner(
           taskRunnerOptions,
           new MockBuilder('success with warnings (success)', async (terminal: CollatedTerminal) => {
