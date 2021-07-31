@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.35.0",
+      "tag": "@rushstack/heft_v0.35.0",
+      "date": "Sat, 31 Jul 2021 00:52:11 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "(BREAKING CHANGE) Extract default Sass plugin to separate @rushstack/heft-sass-plugin package"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.34.8",
       "tag": "@rushstack/heft_v0.34.8",
       "date": "Wed, 14 Jul 2021 15:06:29 GMT",

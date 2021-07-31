@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 14 Jul 2021 15:06:29 GMT and should not be manually modified.
+This log was last generated on Sat, 31 Jul 2021 00:52:11 GMT and should not be manually modified.
+
+## 0.35.0
+Sat, 31 Jul 2021 00:52:11 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Extract default Sass plugin to separate @rushstack/heft-sass-plugin package
 
 ## 0.34.8
 Wed, 14 Jul 2021 15:06:29 GMT

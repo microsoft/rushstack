@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Tue, 27 Jul 2021 22:31:02 GMT and should not be manually modified.
+This log was last generated on Sat, 31 Jul 2021 00:52:11 GMT and should not be manually modified.
+
+## 0.3.15
+Sat, 31 Jul 2021 00:52:11 GMT
+
+### Patches
+
+- Use newly extracted Sass plugin (@rushstack/heft-sass-plugin)
 
 ## 0.3.14
 Tue, 27 Jul 2021 22:31:02 GMT

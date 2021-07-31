@@ -1,0 +1,28 @@
+{
+  "name": "@rushstack/heft-sass-plugin",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/heft-sass-plugin_v0.1.0",
+      "date": "Sat, 31 Jul 2021 00:52:11 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Extract default Sass plugin to separate package"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.35.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.1.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.34.8` to `^0.35.0`"
+          }
+        ]
+      }
+    }
+  ]
+}
