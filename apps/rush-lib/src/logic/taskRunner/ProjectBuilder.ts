@@ -52,6 +52,7 @@ export interface IProjectBuilderOptions {
   isIncrementalBuildAllowed: boolean;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
   packageDepsFilename: string;
+  allowWarningsInSuccessfulBuild?: boolean;
 }
 
 function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
@@ -91,6 +92,7 @@ export class ProjectBuilder extends BaseBuilder {
   private readonly _isCacheReadAllowed: boolean;
   private readonly _projectChangeAnalyzer: ProjectChangeAnalyzer;
   private readonly _packageDepsFilename: string;
+  private readonly _allowWarningsInSuccessfulBuild: boolean;
 
   /**
    * UNINITIALIZED === we haven't tried to initialize yet
@@ -109,6 +111,7 @@ export class ProjectBuilder extends BaseBuilder {
     this.isSkipAllowed = options.isIncrementalBuildAllowed;
     this._projectChangeAnalyzer = options.projectChangeAnalyzer;
     this._packageDepsFilename = options.packageDepsFilename;
+    this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild || false;
   }
 
   /**
@@ -349,7 +352,11 @@ export class ProjectBuilder extends BaseBuilder {
         }
       );
 
-      if (status === TaskStatus.Success && projectBuildDeps) {
+      const taskIsSuccessful: boolean =
+        status === TaskStatus.Success ||
+        (status === TaskStatus.SuccessWithWarning && this._allowWarningsInSuccessfulBuild);
+
+      if (taskIsSuccessful && projectBuildDeps) {
         // Write deps on success.
         const writeProjectStatePromise: Promise<boolean> = JsonFile.saveAsync(
           projectBuildDeps,
