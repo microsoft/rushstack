@@ -110,6 +110,7 @@ export class BulkScriptAction extends BaseScriptAction {
     const stopwatch: Stopwatch = Stopwatch.start();
 
     const isQuietMode: boolean = !this._verboseParameter.value;
+    const isDebugMode: boolean = !!this.parser.isDebug;
 
     // if this is parallelizable, then use the value from the flag (undefined or a number),
     // if parallelism is not enabled, then restrict to 1 core
@@ -144,6 +145,7 @@ export class BulkScriptAction extends BaseScriptAction {
       commandToRun: this._commandToRun,
       customParameterValues,
       isQuietMode: isQuietMode,
+      isDebugMode: isDebugMode,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
       ignoreMissingScript: this._ignoreMissingScript,
       ignoreDependencyOrder: this._ignoreDependencyOrder,
@@ -152,6 +154,7 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const taskRunnerOptions: ITaskRunnerOptions = {
       quietMode: isQuietMode,
+      debugMode: this.parser.isDebug,
       parallelism: parallelism,
       changedProjectsOnly: changedProjectsOnly,
       allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild,

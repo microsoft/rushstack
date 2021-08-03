@@ -21,6 +21,7 @@ import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 
 export interface ITaskRunnerOptions {
   quietMode: boolean;
+  debugMode: boolean;
   parallelism: string | undefined;
   changedProjectsOnly: boolean;
   allowWarningsInSuccessfulBuild: boolean;
@@ -43,6 +44,7 @@ export class TaskRunner {
   private readonly _allowWarningsInSuccessfulBuild: boolean;
   private readonly _buildQueue: Task[];
   private readonly _quietMode: boolean;
+  private readonly _debugMode: boolean;
   private readonly _parallelism: number;
   private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
   private _hasAnyFailures: boolean;
@@ -60,6 +62,7 @@ export class TaskRunner {
   public constructor(orderedTasks: Task[], options: ITaskRunnerOptions) {
     const {
       quietMode,
+      debugMode,
       parallelism,
       changedProjectsOnly,
       allowWarningsInSuccessfulBuild,
@@ -68,6 +71,7 @@ export class TaskRunner {
     this._tasks = orderedTasks;
     this._buildQueue = orderedTasks.slice(0);
     this._quietMode = quietMode;
+    this._debugMode = debugMode;
     this._hasAnyFailures = false;
     this._hasAnyWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
@@ -239,7 +243,8 @@ export class TaskRunner {
       repoCommandLineConfiguration: this._repoCommandLineConfiguration,
       stdioSummarizer: task.stdioSummarizer,
       collatedWriter: task.collatedWriter,
-      quietMode: this._quietMode
+      quietMode: this._quietMode,
+      debugMode: this._debugMode
     };
 
     try {

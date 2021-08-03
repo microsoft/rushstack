@@ -13,9 +13,16 @@ import { ITerminalProvider, TerminalProviderSeverity } from './ITerminalProvider
  */
 export interface IConsoleTerminalProviderOptions {
   /**
-   * If true, print verbose logging messages
+   * If true, print verbose logging messages.
    */
   verboseEnabled: boolean;
+
+  /**
+   * If true, print debug logging messages. Note that "verbose" and "debug" are considered
+   * separate message filters; if you want debug to imply verbose, it is up to your
+   * application code to enforce that.
+   */
+  debugEnabled: boolean;
 }
 
 /**
@@ -30,8 +37,14 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
    */
   public verboseEnabled: boolean = false;
 
+  /**
+   * If true, debug-level messages should be written to the console.
+   */
+  public debugEnabled: boolean = false;
+
   public constructor(options: Partial<IConsoleTerminalProviderOptions> = {}) {
     this.verboseEnabled = !!options.verboseEnabled;
+    this.debugEnabled = !!options.debugEnabled;
   }
 
   /**
@@ -47,6 +60,13 @@ export class ConsoleTerminalProvider implements ITerminalProvider {
 
       case TerminalProviderSeverity.verbose: {
         if (this.verboseEnabled) {
+          process.stdout.write(data);
+        }
+        break;
+      }
+
+      case TerminalProviderSeverity.debug: {
+        if (this.debugEnabled) {
           process.stdout.write(data);
         }
         break;

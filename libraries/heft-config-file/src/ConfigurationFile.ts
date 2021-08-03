@@ -341,7 +341,7 @@ export class ConfigurationFile<TConfigurationFile> {
     } catch (e) {
       if (FileSystem.isNotExistError(e)) {
         if (rigConfig) {
-          terminal.writeVerboseLine(
+          terminal.writeDebugLine(
             `Config file "${resolvedConfigurationFilePathForLogging}" does not exist. Attempting to load via rig.`
           );
           const rigResult: TConfigurationFile | undefined = await this._tryLoadConfigurationFileInRigAsync(
@@ -353,7 +353,7 @@ export class ConfigurationFile<TConfigurationFile> {
             return rigResult;
           }
         } else {
-          terminal.writeVerboseLine(
+          terminal.writeDebugLine(
             `Configuration file "${resolvedConfigurationFilePathForLogging}" not found.`
           );
         }
@@ -570,7 +570,7 @@ export class ConfigurationFile<TConfigurationFile> {
         if (!FileSystem.isNotExistError(e)) {
           throw e;
         } else {
-          terminal.writeVerboseLine(
+          terminal.writeDebugLine(
             `Configuration file "${
               this.projectRelativeFilePath
             }" not found in rig ("${ConfigurationFile._formatPathForLogging(rigProfileFolder)}")`
@@ -578,7 +578,7 @@ export class ConfigurationFile<TConfigurationFile> {
         }
       }
     } else {
-      terminal.writeVerboseLine(
+      terminal.writeDebugLine(
         `No rig found for "${ConfigurationFile._formatPathForLogging(rigConfig.projectFolderPath)}"`
       );
     }

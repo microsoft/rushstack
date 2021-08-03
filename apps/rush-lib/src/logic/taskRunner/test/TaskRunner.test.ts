@@ -63,6 +63,7 @@ describe('TaskRunner', () => {
         () =>
           new TaskRunner([], {
             quietMode: false,
+            debugMode: false,
             parallelism: 'tequila',
             changedProjectsOnly: false,
             destination: mockWritable,
@@ -77,6 +78,7 @@ describe('TaskRunner', () => {
     beforeEach(() => {
       taskRunnerOptions = {
         quietMode: false,
+        debugMode: false,
         parallelism: '1',
         changedProjectsOnly: false,
         destination: mockWritable,
@@ -134,6 +136,7 @@ describe('TaskRunner', () => {
       beforeEach(() => {
         taskRunnerOptions = {
           quietMode: false,
+          debugMode: false,
           parallelism: '1',
           changedProjectsOnly: false,
           destination: mockWritable,
@@ -169,6 +172,7 @@ describe('TaskRunner', () => {
       beforeEach(() => {
         taskRunnerOptions = {
           quietMode: false,
+          debugMode: false,
           parallelism: '1',
           changedProjectsOnly: false,
           destination: mockWritable,

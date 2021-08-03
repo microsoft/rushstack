@@ -9,7 +9,7 @@ import { TaskStatus } from '../TaskStatus';
 
 function checkConsoleOutput(terminalProvider: StringBufferTerminalProvider): void {
   expect(terminalProvider.getOutput()).toMatchSnapshot();
-  expect(terminalProvider.getVerbose()).toMatchSnapshot();
+  expect(terminalProvider.getVerboseOutput()).toMatchSnapshot();
   expect(terminalProvider.getWarningOutput()).toMatchSnapshot();
   expect(terminalProvider.getErrorOutput()).toMatchSnapshot();
 }

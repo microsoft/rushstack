@@ -120,6 +120,7 @@ export enum ColorValue {
 // @beta
 export class ConsoleTerminalProvider implements ITerminalProvider {
     constructor(options?: Partial<IConsoleTerminalProviderOptions>);
+    debugEnabled: boolean;
     get eolCharacter(): string;
     get supportsColor(): boolean;
     verboseEnabled: boolean;
@@ -289,6 +290,7 @@ export interface IColorableSequence {
 
 // @beta
 export interface IConsoleTerminalProviderOptions {
+    debugEnabled: boolean;
     verboseEnabled: boolean;
 }
 
@@ -718,9 +720,10 @@ export class Sort {
 export class StringBufferTerminalProvider implements ITerminalProvider {
     constructor(supportsColor?: boolean);
     get eolCharacter(): string;
+    getDebugOutput(options?: IStringBufferOutputOptions): string;
     getErrorOutput(options?: IStringBufferOutputOptions): string;
     getOutput(options?: IStringBufferOutputOptions): string;
-    getVerbose(options?: IStringBufferOutputOptions): string;
+    getVerboseOutput(options?: IStringBufferOutputOptions): string;
     getWarningOutput(options?: IStringBufferOutputOptions): string;
     get supportsColor(): boolean;
     write(data: string, severity: TerminalProviderSeverity): void;
@@ -739,6 +742,8 @@ export class Terminal {
     registerProvider(provider: ITerminalProvider): void;
     unregisterProvider(provider: ITerminalProvider): void;
     write(...messageParts: (string | IColorableSequence)[]): void;
+    writeDebug(...messageParts: (string | IColorableSequence)[]): void;
+    writeDebugLine(...messageParts: (string | IColorableSequence)[]): void;
     writeError(...messageParts: (string | IColorableSequence)[]): void;
     writeErrorLine(...messageParts: (string | IColorableSequence)[]): void;
     writeLine(...messageParts: (string | IColorableSequence)[]): void;
@@ -748,12 +753,14 @@ export class Terminal {
     writeWarningLine(...messageParts: (string | IColorableSequence)[]): void;
 }
 
-// @beta (undocumented)
+// @beta
 export enum TerminalProviderSeverity {
     // (undocumented)
-    error = 2,
+    debug = 4,
     // (undocumented)
-    log = 0,
+    error = 0,
+    // (undocumented)
+    log = 2,
     // (undocumented)
     verbose = 3,
     // (undocumented)
