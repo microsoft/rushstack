@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Added new message severity \"debug\", below verbose.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "elliot-nelson@users.noreply.github.com"
+}

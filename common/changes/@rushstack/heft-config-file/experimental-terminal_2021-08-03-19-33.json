@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-config-file",
+      "comment": "Detailed logging moved from verbose to debug severity.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-config-file",
+  "email": "elliot-nelson@users.noreply.github.com"
+}
