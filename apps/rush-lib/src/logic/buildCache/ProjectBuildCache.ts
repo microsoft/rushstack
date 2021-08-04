@@ -425,7 +425,6 @@ export class ProjectBuildCache {
     return path.join(this._project.projectRushTempFolder, 'build-cache-tar.log');
   }
 
-  // todo: mess about with this to get restore-keys style functionality
   private static async _getCacheId(options: IProjectBuildCacheOptions): Promise<string | undefined> {
     // The project state hash is calculated in the following method:
     // - The current project's hash (see ProjectChangeAnalyzer.getProjectStateHash) is
