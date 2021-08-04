@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add project, command name, and file extension to build-cache files",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "misha.kaletsky@gmail.com"
+}
