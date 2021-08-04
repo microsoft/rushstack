@@ -21,6 +21,7 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
+import { SelectionParameterSet } from '../SelectionParameterSet';
 
 const installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory') = Import.lazy(
   '../../logic/InstallManagerFactory',
@@ -39,6 +40,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected _debugPackageManagerParameter!: CommandLineFlagParameter;
   protected _maxInstallAttempts!: CommandLineIntegerParameter;
   protected _ignoreHooksParameter!: CommandLineFlagParameter;
+  protected _selectionParameters?: SelectionParameterSet;
 
   protected onDefineParameters(): void {
     this._purgeParameter = this.defineFlagParameter({
@@ -181,15 +183,30 @@ export abstract class BaseInstallAction extends BaseRushAction {
     success: boolean
   ): void {
     if (this.parser.telemetry) {
+      let extraData: { [key: string]: string } = {
+        mode: this.actionName,
+        clean: (!!this._purgeParameter.value).toString(),
+        bypassPolicy: (!!this._bypassPolicyParameter.value).toString(),
+        noLink: (!!this._noLinkParameter.value).toString(),
+        networkConcurrency: this._networkConcurrencyParameter.value
+          ? this._networkConcurrencyParameter.toString()
+          : 'unspecified',
+        debugPackageManager: (!!this._debugPackageManagerParameter).toString(),
+        maxInstallAttempts: this._maxInstallAttempts.value
+          ? this._maxInstallAttempts.value.toString()
+          : 'unspecified',
+        ignoreHooks: (!!this._ignoreHooksParameter.value).toString(),
+        debug: installManagerOptions.debug.toString(),
+        full: installManagerOptions.fullUpgrade.toString()
+      };
+      if (this._selectionParameters) {
+        extraData = { ...extraData, ...this._selectionParameters.getTelemetry() };
+      }
       this.parser.telemetry.log({
         name: 'install',
         duration: stopwatch.duration,
         result: success ? 'Succeeded' : 'Failed',
-        extraData: {
-          mode: this.actionName,
-          clean: (!!this._purgeParameter.value).toString(),
-          full: installManagerOptions.fullUpgrade.toString()
-        }
+        extraData
       });
     }
   }
