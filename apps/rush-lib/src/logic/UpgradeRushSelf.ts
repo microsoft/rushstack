@@ -29,6 +29,10 @@ export interface IUpgradeRushSelfOptions {
 export interface IUpgradeResult {
   needRushUpdate: boolean;
 }
+export interface IPackageInfo {
+  versions: string[];
+  distTags: Record<string, string>;
+}
 
 export class UpgradeRushSelf {
   private readonly _rushConfiguration: RushConfiguration;
@@ -39,49 +43,76 @@ export class UpgradeRushSelf {
     this._terminal = options.terminal;
   }
 
-  public getAvaiableRushVersions(): string[] {
+  public getRushPackageInfo(): IPackageInfo {
     this._terminal.writeLine('Fetching rush versions');
 
-    const { versions }: { versions: string[] } = this._npmView('@microsoft/rush');
+    const viewResult: JsonObject = this._npmView('@microsoft/rush');
+    const versions: string[] = viewResult.versions;
+    const distTags: Record<string, string> = viewResult['dist-tags'] || {};
     if (!Array.isArray(versions)) {
       throw new Error('Unable to retrieve @microsoft/rush versions');
     }
 
-    return versions;
+    return {
+      versions,
+      distTags
+    };
   }
 
-  public async upgradeAsync(): Promise<IUpgradeResult> {
-    const versions: string[] = this.getAvaiableRushVersions();
+  public async upgradeAsync(version?: string): Promise<IUpgradeResult> {
+    let needRushUpdate: boolean = false;
+    let targetVersion: string | null = null;
+    const { versions, distTags }: IPackageInfo = this.getRushPackageInfo();
 
-    const promptModule: inquirerTypes.PromptModule = inquirer.createPromptModule();
-    const { version } = await promptModule({
-      type: 'list',
-      name: 'version',
-      message: `Select the version to update the repo to use`,
-      choices: versions.sort((a, b) => semver.rcompare(a, b))
-    });
+    if (version) {
+      const versionRange: string | null = semver.validRange(version);
+      if (versionRange) {
+        targetVersion = semver.maxSatisfying(versions, version);
+        this._terminal.writeLine(Colors.green(`Version ${version} is resolved to ${targetVersion}`));
+      } else if (Object.keys(distTags).includes(version)) {
+        targetVersion = distTags[version];
+        this._terminal.writeLine(Colors.green(`Version tag ${version} is resolved to ${targetVersion}`));
+      } else {
+        this._terminal.writeErrorLine(`Version ${version} resolve failed... Please check`);
+        process.exit(1);
+      }
+    }
+
+    if (targetVersion === null) {
+      const promptModule: inquirerTypes.PromptModule = inquirer.createPromptModule();
+      const { version: selectedVersion } = await promptModule({
+        type: 'list',
+        name: 'version',
+        message: `Select the version to update the repo to use`,
+        choices: versions.sort((a, b) => semver.rcompare(a, b))
+      });
+      targetVersion = selectedVersion;
+    }
 
     // update rush.json
     const rushJsonFile: string = this._rushConfiguration.rushJsonFile;
     const json: JsonObject = await JsonFile.loadAsync(rushJsonFile);
-    if (json.rushVersion === version) {
+    if (json.rushVersion === targetVersion) {
       this._terminal.writeWarningLine(
-        `Rush version "${version}" is the version that is already used in this repository.`
+        `Rush version "${targetVersion}" is the version that is already used in this repository.`
       );
       return {
-        needRushUpdate: false
+        needRushUpdate
       };
     }
-    json.rushVersion = version;
+    needRushUpdate = true;
+    json.rushVersion = targetVersion;
     await JsonFile.saveAsync(json, rushJsonFile, { updateExistingFile: true, onlyIfChanged: true });
-    this._terminal.writeVerbose(Colors.gray(`upgrade rushVersion in rush.json to ${version}`));
+    this._terminal.writeVerbose(Colors.gray(`Upgrade rushVersion in rush.json to ${targetVersion}`));
 
-    const dependencies: Record<string, string> = this._npmView(`@microsoft/rush@${version}`, 'dependencies');
+    const dependencies: Record<string, string> = this._npmView(
+      `@microsoft/rush@${targetVersion}`,
+      'dependencies'
+    );
     /**
      * Currently, we only update @microsoft/rush-lib dependencies in package.json
      */
     const targetPackageNames: string[] = Object.keys(dependencies).filter((k) => k === '@microsoft/rush-lib');
-    let needRushUpdate: boolean = false;
     if (targetPackageNames.length) {
       const targetPackages: Record<string, string> = {};
       for (const packageName of targetPackageNames) {
@@ -99,8 +130,7 @@ export class UpgradeRushSelf {
 
         const saved: boolean = versionMismatchFinderProject.saveIfModified();
         if (saved) {
-          this._terminal.writeVerbose(Colors.gray(`${project.packageName} package.json changed`));
-          needRushUpdate = true;
+          this._terminal.writeVerboseLine(Colors.gray(`${project.packageName} package.json changed`));
         }
       }
 
@@ -121,7 +151,9 @@ export class UpgradeRushSelf {
 
         if (saved) {
           autoinstaller.update();
-          this._terminal.writeVerbose(Colors.gray(`autoinstaller ${autoinstallerName} updated`));
+          this._terminal.writeVerbose(
+            Colors.gray(`Updated Rush version in autoinstaller ${autoinstallerName}`)
+          );
         }
       }
     }

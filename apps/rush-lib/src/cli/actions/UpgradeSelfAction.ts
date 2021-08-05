@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { ConsoleTerminalProvider, Colors, Terminal } from '@rushstack/node-core-library';
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
@@ -13,7 +13,8 @@ import { InstallManagerFactory } from '../../logic/InstallManagerFactory';
 
 export class UpgradeSelfAction extends BaseRushAction {
   private _skipUpdateFlag!: CommandLineFlagParameter;
-  private readonly _terminal: Terminal;
+  private _versionParameter!: CommandLineStringParameter;
+  private _terminal: Terminal;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -25,11 +26,7 @@ export class UpgradeSelfAction extends BaseRushAction {
         ' dependency of rush self, and update lockfile in autoinstallers if changed.',
       parser
     });
-    this._terminal = new Terminal(
-      new ConsoleTerminalProvider({
-        verboseEnabled: this.parser.isDebug
-      })
-    );
+    this._terminal = new Terminal(new ConsoleTerminalProvider());
   }
 
   protected onDefineParameters(): void {
@@ -39,15 +36,27 @@ export class UpgradeSelfAction extends BaseRushAction {
       description:
         'If specified, the "rush update" command will not be run after updating the package.json files.'
     });
+    this._versionParameter = this.defineStringParameter({
+      parameterLongName: '--version',
+      argumentName: 'VERSION',
+      description:
+        'Specify the version of the rush to be upgraded. It receives simple version(1.0.0), version range(^5), ' +
+        'version tag(latest). If not specified, prompt the user to select a version'
+    });
   }
 
   protected async runAsync(): Promise<void> {
+    this._terminal = new Terminal(
+      new ConsoleTerminalProvider({
+        verboseEnabled: this.parser.isDebug
+      })
+    );
     const upgradeRushSelf: UpgradeRushSelf = new UpgradeRushSelf({
       rushConfiguration: this.rushConfiguration,
       terminal: this._terminal
     });
 
-    const { needRushUpdate } = await upgradeRushSelf.upgradeAsync();
+    const { needRushUpdate } = await upgradeRushSelf.upgradeAsync(this._versionParameter.value);
 
     if (needRushUpdate && !this._skipUpdateFlag.value) {
       const executeResult: boolean = await this._runRushUpdate();

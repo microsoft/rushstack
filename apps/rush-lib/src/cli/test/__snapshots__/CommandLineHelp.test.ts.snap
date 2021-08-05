@@ -1168,7 +1168,7 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: upgrade-self 1`] = `
-"usage: rush upgrade-self [-h] [-s]
+"usage: rush upgrade-self [-h] [-s] [--version VERSION]
 
 The \\"rush upgrade-self\\" command is used to upgrade rush version in current 
 repository. It helps maintainer to upgrade rushVersion in rush.json, settle 
@@ -1179,6 +1179,10 @@ Optional arguments:
   -h, --help         Show this help message and exit.
   -s, --skip-update  If specified, the \\"rush update\\" command will not be run 
                      after updating the package.json files.
+  --version VERSION  Specify the version of the rush to be upgraded. It 
+                     receives simple version(1.0.0), version range(^5), 
+                     version tag(latest). If not specified, prompt the user 
+                     to select a version
 "
 `;
 
