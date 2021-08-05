@@ -6,6 +6,10 @@ import { ConsoleTerminalProvider, Colors, Terminal } from '@rushstack/node-core-
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { UpgradeRushSelf } from '../../logic/UpgradeRushSelf';
+import { RushConstants } from '../../logic/RushConstants';
+import { BaseInstallManager, IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
+import { PurgeManager } from '../../logic/PurgeManager';
+import { InstallManagerFactory } from '../../logic/InstallManagerFactory';
 
 export class UpgradeSelfAction extends BaseRushAction {
   private _skipUpdateFlag!: CommandLineFlagParameter;
@@ -56,7 +60,35 @@ export class UpgradeSelfAction extends BaseRushAction {
   }
 
   private async _runRushUpdate(): Promise<boolean> {
-    const parser: RushCommandLineParser = new RushCommandLineParser();
-    return await parser.execute(['update']);
+    const purgeManager: PurgeManager = new PurgeManager(this.rushConfiguration, this.rushGlobalFolder);
+    const installManagerOptions: IInstallManagerOptions = {
+      debug: this.parser.isDebug,
+      allowShrinkwrapUpdates: true,
+      bypassPolicy: false,
+      noLink: false,
+      fullUpgrade: false,
+      recheckShrinkwrap: false,
+      networkConcurrency: undefined,
+      collectLogFile: false,
+      variant: undefined,
+      maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
+      pnpmFilterArguments: []
+    };
+    const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
+      this.rushConfiguration,
+      this.rushGlobalFolder,
+      purgeManager,
+      installManagerOptions
+    );
+
+    this._terminal.writeLine(Colors.green(`Running "rush update"...`));
+    try {
+      await installManager.doInstallAsync();
+      return true;
+    } catch (e) {
+      return false;
+    } finally {
+      purgeManager.deleteAll();
+    }
   }
 }
