@@ -28,8 +28,7 @@ describe('ProjectBuildCache', () => {
     const subject: ProjectBuildCache | undefined = await ProjectBuildCache.tryGetProjectBuildCache({
       buildCacheConfiguration: {
         buildCacheEnabled: options.hasOwnProperty('enabled') ? options.enabled : true,
-        getCacheEntryId: (options: IGenerateCacheEntryIdOptions) =>
-          `${options.projectName}/${options.projectStateHash}`,
+        getCacheEntryId: (options: IGenerateCacheEntryIdOptions) => options.projectStateHash,
         localCacheProvider: undefined as unknown as FileSystemBuildCacheProvider,
         cloudCacheProvider: {
           isCacheWriteAllowed: options.hasOwnProperty('writeAllowed') ? options.writeAllowed : false
@@ -44,6 +43,7 @@ describe('ProjectBuildCache', () => {
         }
       } as unknown as RushProjectConfiguration,
       command: 'build',
+      commandName: 'build',
       trackedProjectFiles: options.hasOwnProperty('trackedProjectFiles') ? options.trackedProjectFiles : [],
       projectChangeAnalyzer,
       terminal
@@ -56,7 +56,7 @@ describe('ProjectBuildCache', () => {
     it('returns a ProjectBuildCache with a calculated cacheId value', async () => {
       const subject: ProjectBuildCache = (await prepareSubject({}))!;
       expect(subject['_cacheId']).toMatchInlineSnapshot(
-        `"acme-wizard/e229f8765b7d450a8a84f711a81c21e37935d661"`
+        `"acme-wizard/build/e229f8765b7d450a8a84f711a81c21e37935d661.tgz"`
       );
     });
 
