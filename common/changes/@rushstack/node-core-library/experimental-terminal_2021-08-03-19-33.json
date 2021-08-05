@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/node-core-library",
-      "comment": "Added new message severity \"debug\", below verbose.",
+      "comment": "Added new Terminal message severity \"debug\", below verbose.",
       "type": "major"
     }
   ],
