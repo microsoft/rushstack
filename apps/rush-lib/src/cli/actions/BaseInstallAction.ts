@@ -40,6 +40,10 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected _debugPackageManagerParameter!: CommandLineFlagParameter;
   protected _maxInstallAttempts!: CommandLineIntegerParameter;
   protected _ignoreHooksParameter!: CommandLineFlagParameter;
+  /*
+   * Subclasses can initialize the _selectionParameters property in order for
+   * the parameters to be written to the telemetry file
+   */
   protected _selectionParameters?: SelectionParameterSet;
 
   protected onDefineParameters(): void {
@@ -189,9 +193,9 @@ export abstract class BaseInstallAction extends BaseRushAction {
         bypassPolicy: (!!this._bypassPolicyParameter.value).toString(),
         noLink: (!!this._noLinkParameter.value).toString(),
         networkConcurrency: this._networkConcurrencyParameter.value
-          ? this._networkConcurrencyParameter.toString()
+          ? this._networkConcurrencyParameter.value.toString()
           : 'unspecified',
-        debugPackageManager: (!!this._debugPackageManagerParameter).toString(),
+        debugPackageManager: (!!this._debugPackageManagerParameter.value).toString(),
         maxInstallAttempts: this._maxInstallAttempts.value
           ? this._maxInstallAttempts.value.toString()
           : 'unspecified',

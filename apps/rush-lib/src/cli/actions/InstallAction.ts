@@ -7,6 +7,8 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../SelectionParameterSet';
 
 export class InstallAction extends BaseInstallAction {
+  // must match name of _selectionParameters in BaseInstallAction for telemetry to work
+  // worthy of the override parameter in TypeScript > 4.3
   protected _selectionParameters!: SelectionParameterSet;
 
   public constructor(parser: RushCommandLineParser) {
