@@ -130,7 +130,9 @@ export class UpgradeRushSelf {
 
         const saved: boolean = versionMismatchFinderProject.saveIfModified();
         if (saved) {
-          this._terminal.writeVerboseLine(Colors.gray(`${project.packageName} package.json changed`));
+          this._terminal.writeVerboseLine(
+            Colors.gray(`The Rush version in the ${project.packageName} package.json was updated`)
+          );
         }
       }
 
