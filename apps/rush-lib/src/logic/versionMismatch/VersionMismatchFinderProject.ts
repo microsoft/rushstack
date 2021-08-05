@@ -44,12 +44,12 @@ export class VersionMismatchFinderProject extends VersionMismatchFinderEntity {
     return this._fileManager.addOrUpdateDependency(packageName, newVersion, dependencyType);
   }
 
-  public updateDependencyOnlyExists(
+  public updateDependencyIfItExists(
     packageName: string,
     newVersion: string,
     dependencyType: DependencyType
   ): void {
-    return this._fileManager.updateDependencyOnlyExists(packageName, newVersion, dependencyType);
+    return this._fileManager.updateDependencyIfItExists(packageName, newVersion, dependencyType);
   }
 
   public saveIfModified(): boolean {

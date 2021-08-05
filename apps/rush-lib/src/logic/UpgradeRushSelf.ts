@@ -93,8 +93,8 @@ export class UpgradeRushSelf {
           project
         );
         for (const [k, v] of Object.entries(targetPackages)) {
-          versionMismatchFinderProject.updateDependencyOnlyExists(k, v, DependencyType.Regular);
-          versionMismatchFinderProject.updateDependencyOnlyExists(k, v, DependencyType.Dev);
+          versionMismatchFinderProject.updateDependencyIfItExists(k, v, DependencyType.Regular);
+          versionMismatchFinderProject.updateDependencyIfItExists(k, v, DependencyType.Dev);
         }
 
         const saved: boolean = versionMismatchFinderProject.saveIfModified();
@@ -113,8 +113,8 @@ export class UpgradeRushSelf {
         const packageJsonFile: string = autoinstaller.packageJsonPath;
         const packageJsonEditor: PackageJsonEditor = PackageJsonEditor.load(packageJsonFile);
         for (const [k, v] of Object.entries(targetPackages)) {
-          packageJsonEditor.updateDependencyOnlyExists(k, v, DependencyType.Regular);
-          packageJsonEditor.updateDependencyOnlyExists(k, v, DependencyType.Dev);
+          packageJsonEditor.updateDependencyIfItExists(k, v, DependencyType.Regular);
+          packageJsonEditor.updateDependencyIfItExists(k, v, DependencyType.Dev);
         }
 
         const saved: boolean = packageJsonEditor.saveIfModified();

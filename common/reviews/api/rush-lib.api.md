@@ -283,7 +283,7 @@ export class PackageJsonEditor {
     // (undocumented)
     tryGetDevDependency(packageName: string): PackageJsonDependency | undefined;
     // (undocumented)
-    updateDependencyOnlyExists(packageName: string, newVersion: string, dependencyType: DependencyType): void;
+    updateDependencyIfItExists(packageName: string, newVersion: string, dependencyType: DependencyType): void;
     // (undocumented)
     get version(): string;
 }

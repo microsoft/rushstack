@@ -253,7 +253,7 @@ export class PackageJsonEditor {
     this._modified = true;
   }
 
-  public updateDependencyOnlyExists(
+  public updateDependencyIfItExists(
     packageName: string,
     newVersion: string,
     dependencyType: DependencyType
