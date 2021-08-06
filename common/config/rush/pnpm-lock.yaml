@@ -1122,6 +1122,29 @@ importers:
       eslint: 7.30.0
       typescript: 3.9.10
 
+  ../../heft-plugins/heft-storybook-plugin:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@types/node': 10.17.13
+      '@types/webpack': 4.41.24
+      '@types/webpack-dev-server': 3.11.2
+      webpack: ~4.44.2
+      webpack-dev-server: ~3.11.0
+    dependencies:
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      webpack: 4.44.2
+      webpack-dev-server: 3.11.2_webpack@4.44.2
+    devDependencies:
+      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/node': 10.17.13
+      '@types/webpack': 4.41.24
+      '@types/webpack-dev-server': 3.11.2_@types+webpack@4.41.24
+
   ../../heft-plugins/heft-webpack4-plugin:
     specifiers:
       '@rushstack/eslint-config': workspace:*
