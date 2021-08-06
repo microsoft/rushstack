@@ -384,6 +384,44 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
 
+  ../../build-tests-samples/heft-storybook-react-tutorial:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-jest-plugin': workspace:*
+      '@rushstack/heft-webpack4-plugin': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/react': 16.9.45
+      '@types/react-dom': 16.9.8
+      '@types/webpack-env': 1.13.0
+      css-loader: ~4.2.1
+      eslint: ~7.30.0
+      html-webpack-plugin: ~4.5.0
+      react: ~16.13.1
+      react-dom: ~16.13.1
+      source-map-loader: ~1.1.2
+      style-loader: ~1.2.1
+      typescript: ~3.9.7
+      webpack: ~4.44.2
+    devDependencies:
+      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
+      '@types/heft-jest': 1.0.1
+      '@types/react': 16.9.45
+      '@types/react-dom': 16.9.8
+      '@types/webpack-env': 1.13.0
+      css-loader: 4.2.2_webpack@4.44.2
+      eslint: 7.30.0
+      html-webpack-plugin: 4.5.2_webpack@4.44.2
+      react: 16.13.1
+      react-dom: 16.13.1_react@16.13.1
+      source-map-loader: 1.1.3_webpack@4.44.2
+      style-loader: 1.2.1_webpack@4.44.2
+      typescript: 3.9.10
+      webpack: 4.44.2
+
   ../../build-tests-samples/heft-webpack-basic-tutorial:
     specifiers:
       '@rushstack/eslint-config': workspace:*
@@ -9751,7 +9789,7 @@ packages:
   /querystring/0.2.0:
     resolution: {integrity: sha1-sgmEkgO7Jd+CDadW50cAWHhSFiA=}
     engines: {node: '>=0.4.x'}
-    deprecated: The
+    deprecated: The querystring API is considered Legacy. new code should use the URLSearchParams API instead.
 
   /querystringify/2.2.0:
     resolution: {integrity: sha512-FIqgj2EUvTa7R50u0rGsyTftzjYmv/a3hO345bZNrqabNqjtgiDMgmo4mkUjd+nzU5oF3dClKqFIPUKybUyqoQ==}
