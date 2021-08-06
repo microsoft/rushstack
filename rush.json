@@ -712,6 +712,12 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@rushstack/heft-storybook-plugin",
+      "projectFolder": "heft-plugins/heft-storybook-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-webpack4-plugin",
       "projectFolder": "heft-plugins/heft-webpack4-plugin",
       "reviewCategory": "libraries",
