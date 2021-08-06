@@ -1,0 +1,29 @@
+{
+  "name": "heft-storybook-react-tutorial",
+  "description": "(Copy of sample project) Building this project is a regression test for Heft",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "heft test --clean",
+    "start": "heft start"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-jest-plugin": "workspace:*",
+    "@rushstack/heft-webpack4-plugin": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/react": "16.9.45",
+    "@types/react-dom": "16.9.8",
+    "@types/webpack-env": "1.13.0",
+    "css-loader": "~4.2.1",
+    "eslint": "~7.30.0",
+    "html-webpack-plugin": "~4.5.0",
+    "react": "~16.13.1",
+    "react-dom": "~16.13.1",
+    "style-loader": "~1.2.1",
+    "typescript": "~3.9.7",
+    "webpack": "~4.44.2",
+    "source-map-loader": "~1.1.2"
+  }
+}
