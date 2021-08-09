@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/node-core-library",
       "comment": "Added new message severity \"debug\", below verbose.",
-      "type": "major"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/node-core-library",

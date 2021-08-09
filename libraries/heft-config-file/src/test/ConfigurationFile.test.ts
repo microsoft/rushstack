@@ -34,7 +34,7 @@ describe('ConfigurationFile', () => {
       log: terminalProvider.getOutput(),
       warning: terminalProvider.getWarningOutput(),
       error: terminalProvider.getErrorOutput(),
-      verbose: terminalProvider.getVerboseOutput(),
+      verbose: terminalProvider.getVerbose(),
       debug: terminalProvider.getDebugOutput()
     }).toMatchSnapshot();
   });

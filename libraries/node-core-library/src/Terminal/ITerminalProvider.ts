@@ -20,9 +20,9 @@
  * @beta
  */
 export enum TerminalProviderSeverity {
-  error,
-  warning,
   log,
+  warning,
+  error,
   verbose,
   debug
 }
