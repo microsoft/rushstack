@@ -758,9 +758,9 @@ export enum TerminalProviderSeverity {
     // (undocumented)
     debug = 4,
     // (undocumented)
-    error = 0,
+    error = 2,
     // (undocumented)
-    log = 2,
+    log = 0,
     // (undocumented)
     verbose = 3,
     // (undocumented)
