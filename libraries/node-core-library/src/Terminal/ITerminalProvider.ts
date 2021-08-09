@@ -11,9 +11,9 @@
  *
  *   Severity  | Purpose
  *   --------- | -------
- *   error     | Build errors and fatal issues in rush
+ *   error     | Build errors and fatal issues
  *   warning   | Not necessarily fatal, but indicate a problem the user should fix
- *   log       | Informational messages from the rush system
+ *   log       | Informational messages
  *   verbose   | Additional information that may not always be necessary
  *   debug     | Highest detail level, best used for troubleshooting information
  *
