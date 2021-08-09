@@ -11,6 +11,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@babel/core",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@jest/core",
       "allowedCategories": [ "libraries" ]
     },
@@ -107,6 +111,10 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
+      "name": "@rushstack/heft-storybook-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@rushstack/heft-web-rig",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -163,6 +171,38 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@storybook/addon-actions",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@storybook/addon-essentials",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@storybook/addon-links",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@storybook/cli",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@storybook/components",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@storybook/core-events",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@storybook/react",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "@storybook/theming",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "@typescript-eslint/eslint-plugin",
       "allowedCategories": [ "libraries" ]
     },
@@ -212,6 +252,10 @@
     },
     {
       "name": "autoprefixer",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "babel-loader",
       "allowedCategories": [ "tests" ]
     },
     {
@@ -307,6 +351,14 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "heft-storybook-react-tutorial",
+      "allowedCategories": [ "tests" ]
+    },
+    {
+      "name": "heft-storybook-react-tutorial-storybook",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "html-webpack-plugin",
       "allowedCategories": [ "tests" ]
     },
@@ -328,7 +380,7 @@
     },
     {
       "name": "jest",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "jest-config",
