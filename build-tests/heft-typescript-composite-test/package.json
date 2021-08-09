@@ -1,0 +1,22 @@
+{
+  "name": "heft-typescript-composite-test",
+  "description": "Building this project tests behavior of Heft when the tsconfig.json file uses project references.",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "heft test --clean",
+    "start": "heft start"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-jest-plugin": "workspace:*",
+    "@rushstack/heft-webpack5-plugin": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/webpack-env": "1.13.0",
+    "eslint": "~7.30.0",
+    "tslint": "~5.20.1",
+    "tslint-microsoft-contrib": "~6.2.0",
+    "typescript": "~3.9.7"
+  }
+}

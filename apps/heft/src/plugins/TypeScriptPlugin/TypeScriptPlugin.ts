@@ -64,6 +64,19 @@ export interface ISharedTypeScriptConfiguration {
   emitMjsExtensionForESModule?: boolean | undefined;
 
   /**
+   * If true, enable behavior analogous to the "tsc --build" command. Will build projects referenced by the main project in dependency order.
+   * Note that this will effectively enable \"noEmitOnError\".
+   */
+  buildProjectReferences?: string;
+
+  /*
+   * Specifies the tsconfig.json file that will be used for compilation. Equivalent to the same property in the 'tsc' command line.
+   *
+   * The default value is "./tsconfig.json"
+   */
+  project?: string;
+
+  /**
    * Specifies the intermediary folder that tests will use.  Because Jest uses the
    * Node.js runtime to execute tests, the module format must be CommonJS.
    *
@@ -202,7 +215,10 @@ export class TypeScriptPlugin implements IHeftPlugin {
     const typescriptConfigurationJson: ITypeScriptConfigurationJson | undefined =
       await this._ensureConfigFileLoadedAsync(logger.terminal, heftConfiguration);
 
-    const tsconfigFilePath: string = `${heftConfiguration.buildFolder}/tsconfig.json`;
+    const { project = './tsconfig.json' } = typescriptConfigurationJson || {};
+
+    const tsconfigFilePath: string = path.resolve(heftConfiguration.buildFolder, project);
+    logger.terminal.writeVerboseLine(`Looking for tsconfig at ${tsconfigFilePath}`);
     buildProperties.isTypeScriptProject = await FileSystem.existsAsync(tsconfigFilePath);
     if (!buildProperties.isTypeScriptProject) {
       // If there are no TSConfig, we have nothing to do
@@ -212,6 +228,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
     const typeScriptConfiguration: ITypeScriptConfiguration = {
       copyFromCacheMode: typescriptConfigurationJson?.copyFromCacheMode,
       additionalModuleKindsToEmit: typescriptConfigurationJson?.additionalModuleKindsToEmit,
+      buildProjectReferences: typescriptConfigurationJson?.buildProjectReferences,
       emitCjsExtensionForCommonJS: typescriptConfigurationJson?.emitCjsExtensionForCommonJS,
       emitMjsExtensionForESModule: typescriptConfigurationJson?.emitMjsExtensionForESModule,
       emitFolderNameForTests: typescriptConfigurationJson?.emitFolderNameForTests,
@@ -256,6 +273,8 @@ export class TypeScriptPlugin implements IHeftPlugin {
       typeScriptToolPath: toolPackageResolution.typeScriptPackagePath!,
       tslintToolPath: toolPackageResolution.tslintPackagePath,
       eslintToolPath: toolPackageResolution.eslintPackagePath,
+
+      buildProjectReferences: typescriptConfigurationJson?.buildProjectReferences,
 
       tsconfigPath: tsconfigFilePath,
       lintingEnabled: !!typeScriptConfiguration.isLintingEnabled,

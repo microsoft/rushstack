@@ -11,6 +11,7 @@ import {
 } from './internalTypings/TypeScriptInternals';
 import { PerformanceMeasurer } from '../../utilities/Performance';
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
+import { createHash, Hash } from 'crypto';
 
 export interface ILinterBaseOptions {
   ts: IExtendedTypeScript;
@@ -87,8 +88,17 @@ export abstract class LinterBase<TLintResult> {
   public async performLintingAsync(options: IRunLinterOptions): Promise<void> {
     await this.initializeAsync(options.tsProgram);
 
+    const fileHash: Hash = createHash('md5');
+    for (const file of options.typeScriptFilenames) {
+      fileHash.update(file);
+    }
+    const hashSuffix: string = fileHash.digest('base64').replace(/\+/g, '-').replace(/\//g, '_').slice(0, 8);
+
     const tslintConfigVersion: string = this.cacheVersion;
-    const cacheFilePath: string = path.join(this._buildCacheFolderPath, `${this._linterName}.json`);
+    const cacheFilePath: string = path.join(
+      this._buildCacheFolderPath,
+      `${this._linterName}-${hashSuffix}.json`
+    );
 
     let tslintCacheData: ITsLintCacheData | undefined;
     try {

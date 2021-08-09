@@ -58,6 +58,16 @@
       "type": "string"
     },
 
+    "buildProjectReferences": {
+      "description": "If true, enable behavior analogous to the \"tsc --build\" command. Will build projects referenced by the main project. Note that this will effectively enable \"noEmitOnError\".",
+      "type": "boolean"
+    },
+
+    "project": {
+      "description": "Specifies the tsconfig.json file that will be used for compilation. Equivalent to the same property in the \"tsc\" command line.",
+      "type": "string"
+    },
+
     "disableTslint": {
       "description": "If set to \"true\", disable TSlint.",
       "type": "boolean"

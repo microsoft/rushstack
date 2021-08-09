@@ -631,6 +631,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-typescript-composite-test",
+      "projectFolder": "build-tests/heft-typescript-composite-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-web-rig-library-test",
       "projectFolder": "build-tests/heft-web-rig-library-test",
       "reviewCategory": "tests",
