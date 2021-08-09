@@ -557,6 +557,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-storybook-react-tutorial-storybook",
+      "projectFolder": "build-tests-samples/heft-storybook-react-tutorial-storybook",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-webpack-basic-tutorial",
       "projectFolder": "build-tests-samples/heft-webpack-basic-tutorial",
       "reviewCategory": "tests",

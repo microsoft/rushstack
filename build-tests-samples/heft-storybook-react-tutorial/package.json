@@ -9,21 +9,23 @@
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
+    "@rushstack/heft-storybook-plugin": "workspace:*",
     "@rushstack/heft-webpack4-plugin": "workspace:*",
+    "@rushstack/heft": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/react": "16.9.45",
     "@types/react-dom": "16.9.8",
+    "@types/react": "16.9.45",
     "@types/webpack-env": "1.13.0",
     "css-loader": "~4.2.1",
     "eslint": "~7.30.0",
+    "heft-storybook-react-tutorial-storybook": "workspace:*",
     "html-webpack-plugin": "~4.5.0",
-    "react": "~16.13.1",
     "react-dom": "~16.13.1",
+    "react": "~16.13.1",
+    "source-map-loader": "~1.1.2",
     "style-loader": "~1.2.1",
     "typescript": "~3.9.7",
-    "webpack": "~4.44.2",
-    "source-map-loader": "~1.1.2"
+    "webpack": "~4.44.2"
   }
 }
