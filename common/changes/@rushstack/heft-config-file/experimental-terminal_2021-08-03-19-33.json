@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-config-file",
-      "comment": "Moved detailed logging from verbose to debug severity.",
+      "comment": "Move detailed logging from verbose to debug severity.",
       "type": "patch"
     }
   ],
