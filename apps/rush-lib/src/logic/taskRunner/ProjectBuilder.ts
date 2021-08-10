@@ -167,12 +167,12 @@ export class ProjectBuilder extends BaseBuilder {
         newlineKind: NewlineKind.Lf // for StdioSummarizer
       });
 
-      const quietModeTransform: DiscardStdoutTransform = new DiscardStdoutTransform({
+      const discardTransform: DiscardStdoutTransform = new DiscardStdoutTransform({
         destination: context.collatedWriter
       });
 
       const splitterTransform1: SplitterTransform = new SplitterTransform({
-        destinations: [context.quietMode ? quietModeTransform : context.collatedWriter, stderrLineTransform]
+        destinations: [context.quietMode ? discardTransform : context.collatedWriter, stderrLineTransform]
       });
 
       const normalizeNewlineTransform: TextRewriterTransform = new TextRewriterTransform({
@@ -182,7 +182,9 @@ export class ProjectBuilder extends BaseBuilder {
       });
 
       const collatedTerminal: CollatedTerminal = new CollatedTerminal(normalizeNewlineTransform);
-      const terminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(collatedTerminal);
+      const terminalProvider: CollatedTerminalProvider = new CollatedTerminalProvider(collatedTerminal, {
+        debugEnabled: context.debugMode
+      });
       const terminal: Terminal = new Terminal(terminalProvider);
 
       let hasWarningOrError: boolean = false;

@@ -120,6 +120,7 @@ export enum ColorValue {
 // @beta
 export class ConsoleTerminalProvider implements ITerminalProvider {
     constructor(options?: Partial<IConsoleTerminalProviderOptions>);
+    debugEnabled: boolean;
     get eolCharacter(): string;
     get supportsColor(): boolean;
     verboseEnabled: boolean;
@@ -289,6 +290,7 @@ export interface IColorableSequence {
 
 // @beta
 export interface IConsoleTerminalProviderOptions {
+    debugEnabled: boolean;
     verboseEnabled: boolean;
 }
 
@@ -718,6 +720,7 @@ export class Sort {
 export class StringBufferTerminalProvider implements ITerminalProvider {
     constructor(supportsColor?: boolean);
     get eolCharacter(): string;
+    getDebugOutput(options?: IStringBufferOutputOptions): string;
     getErrorOutput(options?: IStringBufferOutputOptions): string;
     getOutput(options?: IStringBufferOutputOptions): string;
     getVerbose(options?: IStringBufferOutputOptions): string;
@@ -739,6 +742,8 @@ export class Terminal {
     registerProvider(provider: ITerminalProvider): void;
     unregisterProvider(provider: ITerminalProvider): void;
     write(...messageParts: (string | IColorableSequence)[]): void;
+    writeDebug(...messageParts: (string | IColorableSequence)[]): void;
+    writeDebugLine(...messageParts: (string | IColorableSequence)[]): void;
     writeError(...messageParts: (string | IColorableSequence)[]): void;
     writeErrorLine(...messageParts: (string | IColorableSequence)[]): void;
     writeLine(...messageParts: (string | IColorableSequence)[]): void;
@@ -748,8 +753,10 @@ export class Terminal {
     writeWarningLine(...messageParts: (string | IColorableSequence)[]): void;
 }
 
-// @beta (undocumented)
+// @beta
 export enum TerminalProviderSeverity {
+    // (undocumented)
+    debug = 4,
     // (undocumented)
     error = 2,
     // (undocumented)

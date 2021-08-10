@@ -12,6 +12,7 @@ export interface IBuilderContext {
   collatedWriter: CollatedWriter;
   stdioSummarizer: StdioSummarizer;
   quietMode: boolean;
+  debugMode: boolean;
 }
 
 /**

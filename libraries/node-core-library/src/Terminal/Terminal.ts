@@ -146,6 +146,20 @@ export class Terminal {
     this.writeVerbose(...messageParts, eolSequence);
   }
 
+  /**
+   * Write a debug-level message.
+   */
+  public writeDebug(...messageParts: (string | IColorableSequence)[]): void {
+    this._writeSegmentsToProviders(messageParts, TerminalProviderSeverity.debug);
+  }
+
+  /**
+   * Write a debug-level message followed by a newline.
+   */
+  public writeDebugLine(...messageParts: (string | IColorableSequence)[]): void {
+    this.writeDebug(...messageParts, eolSequence);
+  }
+
   private _writeSegmentsToProviders(
     segments: (string | IColorableSequence)[],
     severity: TerminalProviderSeverity
