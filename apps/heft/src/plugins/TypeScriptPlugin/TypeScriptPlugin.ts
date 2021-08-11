@@ -278,7 +278,6 @@ export class TypeScriptPlugin implements IHeftPlugin {
 
       tsconfigPath: tsconfigFilePath,
       lintingEnabled: !!typeScriptConfiguration.isLintingEnabled,
-      buildCacheFolder: heftConfiguration.buildCacheFolder,
       additionalModuleKindsToEmit: typeScriptConfiguration.additionalModuleKindsToEmit,
       emitCjsExtensionForCommonJS: !!typeScriptConfiguration.emitCjsExtensionForCommonJS,
       emitMjsExtensionForESModule: !!typeScriptConfiguration.emitMjsExtensionForESModule,
