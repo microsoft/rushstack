@@ -2,6 +2,27 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.51.0",
+      "tag": "@microsoft/rush_v5.51.0",
+      "date": "Wed, 11 Aug 2021 23:16:09 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "The --debug flag now also shows additional diagnostic information."
+          },
+          {
+            "comment": "Update JSZip dependency."
+          },
+          {
+            "comment": "Adds support for the project subset selection parameters (\"--to\", \"--from\", etc., documented at https://rushjs.io/pages/developer/selecting_subsets/) to the \"rush list\" command."
+          },
+          {
+            "comment": "Allow the tar binary path to be overridden via the RUSH_TAR_BINARY_PATH environment variable."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.50.0",
       "tag": "@microsoft/rush_v5.50.0",
       "date": "Sat, 17 Jul 2021 01:16:04 GMT",

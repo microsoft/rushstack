@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Sat, 17 Jul 2021 01:16:04 GMT and should not be manually modified.
+This log was last generated on Wed, 11 Aug 2021 23:16:09 GMT and should not be manually modified.
+
+## 5.51.0
+Wed, 11 Aug 2021 23:16:09 GMT
+
+### Updates
+
+- The --debug flag now also shows additional diagnostic information.
+- Update JSZip dependency.
+- Adds support for the project subset selection parameters ("--to", "--from", etc., documented at https://rushjs.io/pages/developer/selecting_subsets/) to the "rush list" command.
+- Allow the tar binary path to be overridden via the RUSH_TAR_BINARY_PATH environment variable.
 
 ## 5.50.0
 Sat, 17 Jul 2021 01:16:04 GMT
