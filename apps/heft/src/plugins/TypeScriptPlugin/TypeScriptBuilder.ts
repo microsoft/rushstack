@@ -369,11 +369,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
     //#region FINAL_ANALYSIS
     // Need to ensure that we include emit diagnostics, since they might not be part of the other sets
-    const { duration: mergeDiagnosticDurationMs, diagnostics } = measureTsPerformance('Diagnostics', () => {
-      const rawDiagnostics: TTypescript.Diagnostic[] = [...preDiagnostics, ...emitResult.diagnostics];
-      return { diagnostics: ts.sortAndDeduplicateDiagnostics(rawDiagnostics) };
-    });
-    this._typescriptTerminal.writeVerboseLine(`Diagnostics: ${mergeDiagnosticDurationMs}ms`);
+    const rawDiagnostics: TTypescript.Diagnostic[] = [...preDiagnostics, ...emitResult.diagnostics];
     //#endregion
 
     //#region WRITE
@@ -418,7 +414,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
     const linters: LinterBase<unknown>[] = await Promise.all(lintPromises);
 
-    this._logDiagnostics(ts, diagnostics, linters);
+    this._logDiagnostics(ts, rawDiagnostics, linters);
   }
 
   public async _runSolutionBuildAsync(

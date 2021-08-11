@@ -8,12 +8,7 @@ import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScript
 import { HeftSession } from '../../pluginFramework/HeftSession';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { IHeftPlugin } from '../../pluginFramework/IHeftPlugin';
-import {
-  CopyFromCacheMode,
-  IBuildStageContext,
-  ICompileSubstage,
-  IBuildStageProperties
-} from '../../stages/BuildStage';
+import { IBuildStageContext, ICompileSubstage, IBuildStageProperties } from '../../stages/BuildStage';
 import { ToolPackageResolver, IToolPackageResolution } from '../../utilities/ToolPackageResolver';
 import { ScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { ICleanStageContext, ICleanStageProperties } from '../../stages/CleanStage';

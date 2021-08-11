@@ -35,11 +35,6 @@ export interface IBuildSubstage<
 /**
  * @public
  */
-export type CopyFromCacheMode = 'hardlink' | 'copy';
-
-/**
- * @public
- */
 export class CompileSubstageHooks extends BuildSubstageHooksBase {
   /**
    * The `afterCompile` event is fired exactly once, after the "compile" stage completes its first operation.
