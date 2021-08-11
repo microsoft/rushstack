@@ -2,6 +2,23 @@
   "name": "@rushstack/heft-config-file",
   "entries": [
     {
+      "version": "0.6.2",
+      "tag": "@rushstack/heft-config-file_v0.6.2",
+      "date": "Wed, 11 Aug 2021 00:07:21 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Move detailed logging from verbose to debug severity."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.1",
       "tag": "@rushstack/heft-config-file_v0.6.1",
       "date": "Mon, 12 Jul 2021 23:08:26 GMT",

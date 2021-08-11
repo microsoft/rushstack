@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.40.0",
+      "tag": "@rushstack/node-core-library_v3.40.0",
+      "date": "Wed, 11 Aug 2021 00:07:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add new Terminal message severity \"debug\", below verbose."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.39.1",
       "tag": "@rushstack/node-core-library_v3.39.1",
       "date": "Mon, 12 Jul 2021 23:08:26 GMT",

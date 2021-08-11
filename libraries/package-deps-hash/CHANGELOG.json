@@ -2,6 +2,27 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "3.0.56",
+      "tag": "@rushstack/package-deps-hash_v3.0.56",
+      "date": "Wed, 11 Aug 2021 00:07:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.35.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.1.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.0.55",
       "tag": "@rushstack/package-deps-hash_v3.0.55",
       "date": "Sat, 31 Jul 2021 00:52:11 GMT",

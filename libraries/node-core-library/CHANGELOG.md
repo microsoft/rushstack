@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Mon, 12 Jul 2021 23:08:26 GMT and should not be manually modified.
+This log was last generated on Wed, 11 Aug 2021 00:07:21 GMT and should not be manually modified.
+
+## 3.40.0
+Wed, 11 Aug 2021 00:07:21 GMT
+
+### Minor changes
+
+- Add new Terminal message severity "debug", below verbose.
 
 ## 3.39.1
 Mon, 12 Jul 2021 23:08:26 GMT

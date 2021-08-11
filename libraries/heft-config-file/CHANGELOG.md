@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Mon, 12 Jul 2021 23:08:26 GMT and should not be manually modified.
+This log was last generated on Wed, 11 Aug 2021 00:07:21 GMT and should not be manually modified.
+
+## 0.6.2
+Wed, 11 Aug 2021 00:07:21 GMT
+
+### Patches
+
+- Move detailed logging from verbose to debug severity.
 
 ## 0.6.1
 Mon, 12 Jul 2021 23:08:26 GMT
