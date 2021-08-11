@@ -55,10 +55,10 @@ export interface ISharedTypeScriptConfiguration {
    * If true, enable behavior analogous to the "tsc --build" command. Will build projects referenced by the main project in dependency order.
    * Note that this will effectively enable \"noEmitOnError\".
    */
-  buildProjectReferences?: string;
+  buildProjectReferences?: boolean;
 
   /*
-   * Specifies the tsconfig.json file that will be used for compilation. Equivalent to the same property in the 'tsc' command line.
+   * Specifies the tsconfig.json file that will be used for compilation. Equivalent to the "project" argument for the 'tsc' and 'tslint' command line tools.
    *
    * The default value is "./tsconfig.json"
    */

@@ -58,7 +58,7 @@
     },
 
     "project": {
-      "description": "Specifies the tsconfig.json file that will be used for compilation. Equivalent to the same property in the \"tsc\" command line.",
+      "description": "Specifies the tsconfig.json file that will be used for compilation. Equivalent to the \"project\" argument for the 'tsc' and 'tslint' command line tools. The default value is \"./tsconfig.json\".",
       "type": "string"
     },
 

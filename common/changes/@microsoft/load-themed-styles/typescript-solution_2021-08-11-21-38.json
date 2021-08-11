@@ -1,7 +1,7 @@
 {
   "changes": [
     {
-      "comment": "Remove copyFromCacheMode in typescript.json",
+      "comment": "",
       "type": "none",
       "packageName": "@microsoft/load-themed-styles"
     }
