@@ -17,6 +17,9 @@
     "noEmitOnError": false,
     "allowUnreachableCode": false,
 
+    "incremental": true,
+    "tsBuildInfoFile": "../../../../../temp/_tsBuildInfo.json",
+
     "types": [],
 
     "module": "commonjs",

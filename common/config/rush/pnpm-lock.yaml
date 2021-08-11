@@ -795,6 +795,28 @@ importers:
       typescript: 3.9.10
       webpack: 4.44.2
 
+  ../../build-tests/heft-typescript-composite-test:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-jest-plugin': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/webpack-env': 1.13.0
+      eslint: ~7.30.0
+      tslint: ~5.20.1
+      tslint-microsoft-contrib: ~6.2.0
+      typescript: ~3.9.7
+    devDependencies:
+      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
+      '@types/heft-jest': 1.0.1
+      '@types/webpack-env': 1.13.0
+      eslint: 7.30.0
+      tslint: 5.20.1_typescript@3.9.10
+      tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.9.10
+      typescript: 3.9.10
+
   ../../build-tests/heft-web-rig-library-test:
     specifiers:
       '@rushstack/heft': workspace:*

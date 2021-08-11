@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Terminal, FileSystem, JsonFile } from '@rushstack/node-core-library';
+import { Terminal, FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 
 import {
   IExtendedSourceFile,
@@ -11,12 +11,16 @@ import {
 } from './internalTypings/TypeScriptInternals';
 import { PerformanceMeasurer } from '../../utilities/Performance';
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
+import { createHash, Hash } from 'crypto';
 
 export interface ILinterBaseOptions {
   ts: IExtendedTypeScript;
   scopedLogger: IScopedLogger;
   buildFolderPath: string;
-  buildCacheFolderPath: string;
+  /**
+   * The path where the linter state will be written to.
+   */
+  buildMetadataFolderPath: string;
   linterConfigFilePath: string;
 
   /**
@@ -62,7 +66,7 @@ export abstract class LinterBase<TLintResult> {
   protected readonly _scopedLogger: IScopedLogger;
   protected readonly _terminal: Terminal;
   protected readonly _buildFolderPath: string;
-  protected readonly _buildCacheFolderPath: string;
+  protected readonly _buildMetadataFolderPath: string;
   protected readonly _linterConfigFilePath: string;
   protected readonly _measurePerformance: PerformanceMeasurer;
 
@@ -74,7 +78,7 @@ export abstract class LinterBase<TLintResult> {
     this._terminal = this._scopedLogger.terminal;
     this._ts = options.ts;
     this._buildFolderPath = options.buildFolderPath;
-    this._buildCacheFolderPath = options.buildCacheFolderPath;
+    this._buildMetadataFolderPath = options.buildMetadataFolderPath;
     this._linterConfigFilePath = options.linterConfigFilePath;
     this._linterName = linterName;
     this._measurePerformance = options.measurePerformance;
@@ -87,8 +91,24 @@ export abstract class LinterBase<TLintResult> {
   public async performLintingAsync(options: IRunLinterOptions): Promise<void> {
     await this.initializeAsync(options.tsProgram);
 
+    const commonDirectory: string = options.tsProgram.getCommonSourceDirectory();
+
+    const relativePaths: Map<string, string> = new Map();
+
+    const fileHash: Hash = createHash('md5');
+    for (const file of options.typeScriptFilenames) {
+      // Need to use relative paths to ensure portability.
+      const relative: string = Path.convertToSlashes(path.relative(commonDirectory, file));
+      relativePaths.set(file, relative);
+      fileHash.update(relative);
+    }
+    const hashSuffix: string = fileHash.digest('base64').replace(/\+/g, '-').replace(/\//g, '_').slice(0, 8);
+
     const tslintConfigVersion: string = this.cacheVersion;
-    const cacheFilePath: string = path.join(this._buildCacheFolderPath, `${this._linterName}.json`);
+    const cacheFilePath: string = path.resolve(
+      this._buildMetadataFolderPath,
+      `_${this._linterName}-${hashSuffix}.json`
+    );
 
     let tslintCacheData: ITsLintCacheData | undefined;
     try {
@@ -116,13 +136,15 @@ export abstract class LinterBase<TLintResult> {
     for (const sourceFile of options.tsProgram.getSourceFiles()) {
       const filePath: string = sourceFile.fileName;
 
-      if (!options.typeScriptFilenames.has(filePath) || (await this.isFileExcludedAsync(filePath))) {
+      const relative: string | undefined = relativePaths.get(filePath);
+
+      if (relative === undefined || (await this.isFileExcludedAsync(filePath))) {
         continue;
       }
 
       // Older compilers don't compute the ts.SourceFile.version.  If it is missing, then we can't skip processing
       const version: string = sourceFile.version || '';
-      const cachedVersion: string = cachedNoFailureFileVersions.get(filePath) || '';
+      const cachedVersion: string = cachedNoFailureFileVersions.get(relative) || '';
       if (
         cachedVersion === '' ||
         version === '' ||
@@ -132,13 +154,13 @@ export abstract class LinterBase<TLintResult> {
         this._measurePerformance(this._linterName, () => {
           const failures: TLintResult[] = this.lintFile(sourceFile);
           if (failures.length === 0) {
-            newNoFailureFileVersions.set(filePath, version);
+            newNoFailureFileVersions.set(relative, version);
           } else {
             lintFailures.push(...failures);
           }
         });
       } else {
-        newNoFailureFileVersions.set(filePath, version);
+        newNoFailureFileVersions.set(relative, version);
       }
     }
     //#endregion

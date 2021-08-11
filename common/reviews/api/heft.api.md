@@ -57,9 +57,6 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
     readonly afterRecompile: AsyncParallelHook;
 }
 
-// @public (undocumented)
-export type CopyFromCacheMode = 'hardlink' | 'copy';
-
 // @beta (undocumented)
 export type CustomActionParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
 

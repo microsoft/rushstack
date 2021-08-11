@@ -39,7 +39,6 @@ export {
   BuildSubstageHooksBase,
   CompileSubstageHooks,
   BundleSubstageHooks,
-  CopyFromCacheMode,
   IBuildStageContext,
   IBuildStageProperties,
   IBuildSubstage,
