@@ -109,7 +109,8 @@ export class WebpackPlugin implements IHeftPlugin {
     buildProperties: IBuildStageProperties,
     supportsColor: boolean
   ): Promise<void> {
-    const webpackConfiguration: IWebpackConfiguration = bundleSubstageProperties.webpackConfiguration;
+    const webpackConfiguration: IWebpackConfiguration | undefined | null =
+      bundleSubstageProperties.webpackConfiguration;
     if (!webpackConfiguration) {
       return;
     }

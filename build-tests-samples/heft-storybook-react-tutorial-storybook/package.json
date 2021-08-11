@@ -4,7 +4,7 @@
   "private": true,
   "description": "Storybook build dependencies for heft-storybook-react-tutorial",
   "scripts": {
-    "test": ""
+    "build": ""
   },
   "devDependencies": {
     "@babel/core": "^7.14.8",
