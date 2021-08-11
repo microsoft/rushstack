@@ -41,13 +41,6 @@ interface IEmitModuleKind {
 
 export interface ISharedTypeScriptConfiguration {
   /**
-   * Can be set to 'copy' or 'hardlink'. If set to 'copy', copy files from cache. If set to 'hardlink', files will be
-   * hardlinked to the cache location. This option is useful when producing a tarball of build output as TAR files
-   * don't handle these hardlinks correctly. 'hardlink' is the default behavior.
-   */
-  copyFromCacheMode?: CopyFromCacheMode | undefined;
-
-  /**
    * If provided, emit these module kinds in addition to the modules specified in the tsconfig.
    * Note that this option only applies to the main tsconfig.json configuration.
    */
@@ -226,7 +219,6 @@ export class TypeScriptPlugin implements IHeftPlugin {
     }
 
     const typeScriptConfiguration: ITypeScriptConfiguration = {
-      copyFromCacheMode: typescriptConfigurationJson?.copyFromCacheMode,
       additionalModuleKindsToEmit: typescriptConfigurationJson?.additionalModuleKindsToEmit,
       buildProjectReferences: typescriptConfigurationJson?.buildProjectReferences,
       emitCjsExtensionForCommonJS: typescriptConfigurationJson?.emitCjsExtensionForCommonJS,
@@ -235,26 +227,6 @@ export class TypeScriptPlugin implements IHeftPlugin {
       maxWriteParallelism: typescriptConfigurationJson?.maxWriteParallelism || 50,
       isLintingEnabled: !(buildProperties.lite || typescriptConfigurationJson?.disableTslint)
     };
-
-    if (heftConfiguration.projectPackageJson.private !== true) {
-      if (typeScriptConfiguration.copyFromCacheMode === undefined) {
-        logger.terminal.writeVerboseLine(
-          'Setting TypeScript copyFromCacheMode to "copy" because the "private" field ' +
-            'in package.json is not set to true. Linked files are not handled correctly ' +
-            'when package are packed for publishing.'
-        );
-        // Copy if the package is intended to be published
-        typeScriptConfiguration.copyFromCacheMode = 'copy';
-      } else if (typeScriptConfiguration.copyFromCacheMode !== 'copy') {
-        logger.emitWarning(
-          new Error(
-            `The TypeScript copyFromCacheMode is set to "${typeScriptConfiguration.copyFromCacheMode}", ` +
-              'but the the "private" field in package.json is not set to true. ' +
-              'Linked files are not handled correctly when packages are packed for publishing.'
-          )
-        );
-      }
-    }
 
     const toolPackageResolution: IToolPackageResolution =
       await this._taskPackageResolver.resolveToolPackagesAsync(heftConfiguration, logger.terminal);
@@ -281,7 +253,6 @@ export class TypeScriptPlugin implements IHeftPlugin {
       additionalModuleKindsToEmit: typeScriptConfiguration.additionalModuleKindsToEmit,
       emitCjsExtensionForCommonJS: !!typeScriptConfiguration.emitCjsExtensionForCommonJS,
       emitMjsExtensionForESModule: !!typeScriptConfiguration.emitMjsExtensionForESModule,
-      copyFromCacheMode: typeScriptConfiguration.copyFromCacheMode,
       watchMode: watchMode,
       maxWriteParallelism: typeScriptConfiguration.maxWriteParallelism
     };
