@@ -61,6 +61,26 @@ describe('EnvironmentConfiguration', () => {
     });
   });
 
+  describe('binaryOverride', () => {
+    it('returns undefined for unset environment variables', () => {
+      EnvironmentConfiguration.validate();
+
+      expect(EnvironmentConfiguration.gitBinaryPath).not.toBeDefined();
+      expect(EnvironmentConfiguration.tarBinaryPath).not.toBeDefined();
+    });
+
+    it('returns the value for a set environment variable', () => {
+      const gitPath: string = '/usr/bin/git';
+      const tarPath: string = '/usr/bin/tar';
+      process.env.RUSH_GIT_BINARY_PATH = gitPath;
+      process.env.RUSH_TAR_BINARY_PATH = tarPath;
+      EnvironmentConfiguration.validate({ doNotNormalizePaths: true });
+
+      expect(EnvironmentConfiguration.gitBinaryPath).toEqual(gitPath);
+      expect(EnvironmentConfiguration.tarBinaryPath).toEqual(tarPath);
+    });
+  });
+
   describe('pnpmStorePathOverride', () => {
     const ENV_VAR: string = 'RUSH_PNPM_STORE_PATH';
 
