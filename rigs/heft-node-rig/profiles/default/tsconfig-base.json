@@ -18,7 +18,7 @@
     "allowUnreachableCode": false,
 
     "incremental": true,
-    "tsBuildInfoFile": "../../../../../lib/_tsBuildInfo.json",
+    "tsBuildInfoFile": "../../../../../temp/_tsBuildInfo.json",
 
     "types": [],
 

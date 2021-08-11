@@ -27,6 +27,7 @@
 
       /**
        * Glob patterns to be deleted. The paths are resolved relative to the project folder.
+       * Recommend exactly matching with "projectOutputFolderNames" in rush-project.json.
        */
       "globsToDelete": ["dist", "lib", "temp"]
     }
