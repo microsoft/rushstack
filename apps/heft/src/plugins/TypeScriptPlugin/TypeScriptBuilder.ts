@@ -106,7 +106,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _typescriptParsedVersion!: semver.SemVer;
 
   private _capabilities!: ICompilerCapabilities;
-  private _useIncrementalProgram!: boolean;
   private _useSolutionBuilder!: boolean;
 
   private _eslintEnabled!: boolean;
@@ -170,11 +169,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     ) {
       this._capabilities.incrementalProgram = true;
     }
-
-    // Disable incremental "useIncrementalProgram" in watch mode because its compiler configuration is
-    // different, which will invalidate the incremental build cache.  In order to support this, we'd need
-    // to delete the cache when switching modes, or else maintain two separate cache folders.
-    this._useIncrementalProgram = this._capabilities.incrementalProgram && !this._configuration.watchMode;
 
     this._useSolutionBuilder = !!this._configuration.buildProjectReferences;
     if (this._useSolutionBuilder && !this._capabilities.solutionBuilder) {
@@ -325,7 +319,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     let builderProgram: TTypescript.BuilderProgram | undefined = undefined;
     let tsProgram: TTypescript.Program;
 
-    if (this._useIncrementalProgram) {
+    if (tsconfig.options.incremental) {
       builderProgram = ts.createIncrementalProgram({
         rootNames: tsconfig.fileNames,
         options: tsconfig.options,
@@ -981,11 +975,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       currentFolder
     );
 
-    if (this._useIncrementalProgram) {
-      tsconfig.options.incremental = true;
-      tsconfig.options.tsBuildInfoFile = `${tsconfig.options.outDir}/_tsBuildInfo.json`;
-    }
-
     return tsconfig;
   }
 
@@ -1014,7 +1003,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     ts: ExtendedTypeScript,
     tsconfig: TTypescript.ParsedCommandLine
   ): TTypescript.CompilerHost {
-    if (this._useIncrementalProgram) {
+    if (tsconfig.options.incremental) {
       return ts.createIncrementalCompilerHost(tsconfig.options, this._getCachingTypeScriptSystem(ts));
     } else {
       return ts.createCompilerHost(tsconfig.options);
