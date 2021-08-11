@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow the tar binary path to be overridden via the RUSH_TAR_BINARY_PATH environment variable.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "dmichon-msft@users.noreply.github.com"
+}

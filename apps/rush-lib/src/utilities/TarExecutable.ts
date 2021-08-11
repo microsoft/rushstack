@@ -7,6 +7,7 @@ import { ChildProcess } from 'child_process';
 import * as events from 'events';
 
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
+import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 
 export interface ITarOptionsBase {
   logFilePath: string;
@@ -32,7 +33,8 @@ export class TarExecutable {
 
   public static tryInitialize(terminal: Terminal): TarExecutable | undefined {
     terminal.writeVerboseLine('Trying to find "tar" binary');
-    const tarExecutablePath: string | undefined = Executable.tryResolve('tar');
+    const tarExecutablePath: string | undefined =
+      EnvironmentConfiguration.tarBinaryPath || Executable.tryResolve('tar');
     if (!tarExecutablePath) {
       terminal.writeVerboseLine('"tar" was not found on the PATH');
       return undefined;
