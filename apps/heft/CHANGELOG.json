@@ -2,6 +2,26 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.36.0",
+      "tag": "@rushstack/heft_v0.36.0",
+      "date": "Wed, 11 Aug 2021 23:14:17 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support to TypeScriptPlugin for composite TypeScript projects, with behavior analogous to \"tsc --build\"."
+          },
+          {
+            "comment": "Retired the use of the .heft/build-cache folder for persisting build state across the \"heft clean\" or \"--clean\" invocation. Incremental TypeScript compilation is now performed either by running \"heft build\" (without \"--clean\"), or using watch mode, and requires the tsconfig to manually opt in. The feature reduced performance of cold builds and introduced bugs due to stale caches that confused users."
+          }
+        ],
+        "none": [
+          {
+            "comment": "Remove copyFromCacheMode in typescript.json"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.35.1",
       "tag": "@rushstack/heft_v0.35.1",
       "date": "Wed, 11 Aug 2021 00:07:21 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Wed, 11 Aug 2021 00:07:21 GMT and should not be manually modified.
+This log was last generated on Wed, 11 Aug 2021 23:14:17 GMT and should not be manually modified.
+
+## 0.4.0
+Wed, 11 Aug 2021 23:14:17 GMT
+
+### Minor changes
+
+- Enable "incremental: true" by default in tsconfig-base.json
 
 ## 0.3.16
 Wed, 11 Aug 2021 00:07:21 GMT

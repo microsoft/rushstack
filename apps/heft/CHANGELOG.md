@@ -1,6 +1,14 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 11 Aug 2021 00:07:21 GMT and should not be manually modified.
+This log was last generated on Wed, 11 Aug 2021 23:14:17 GMT and should not be manually modified.
+
+## 0.36.0
+Wed, 11 Aug 2021 23:14:17 GMT
+
+### Minor changes
+
+- Add support to TypeScriptPlugin for composite TypeScript projects, with behavior analogous to "tsc --build".
+- Retired the use of the .heft/build-cache folder for persisting build state across the "heft clean" or "--clean" invocation. Incremental TypeScript compilation is now performed either by running "heft build" (without "--clean"), or using watch mode, and requires the tsconfig to manually opt in. The feature reduced performance of cold builds and introduced bugs due to stale caches that confused users.
 
 ## 0.35.1
 Wed, 11 Aug 2021 00:07:21 GMT
