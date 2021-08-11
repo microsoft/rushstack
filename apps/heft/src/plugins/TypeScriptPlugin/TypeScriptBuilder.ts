@@ -42,6 +42,10 @@ interface ILinterWrapper {
 
 export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfiguration {
   buildFolder: string;
+  /**
+   * The folder to write build metadata.
+   */
+  buildMetadataFolder: string;
   typeScriptToolPath: string;
   tslintToolPath: string | undefined;
   eslintToolPath: string | undefined;
@@ -611,11 +615,12 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   ): Promise<Eslint> {
     const eslint: Eslint = new Eslint({
       ts: linter.ts,
-      eslintPackagePath: this._configuration.eslintToolPath!,
       scopedLogger: linter.logger,
       buildFolderPath: this._configuration.buildFolder,
+      buildMetadataFolderPath: this._configuration.buildMetadataFolder,
       linterConfigFilePath: this._eslintConfigFilePath,
-      measurePerformance: linter.measureTsPerformance
+      measurePerformance: linter.measureTsPerformance,
+      eslintPackagePath: this._configuration.eslintToolPath!
     });
 
     eslint.printVersionHeader();
@@ -637,12 +642,13 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   ): Promise<Tslint> {
     const tslint: Tslint = new Tslint({
       ts: linter.ts,
-      tslintPackagePath: this._configuration.tslintToolPath!,
       scopedLogger: linter.logger,
       buildFolderPath: this._configuration.buildFolder,
+      buildMetadataFolderPath: this._configuration.buildMetadataFolder,
       linterConfigFilePath: this._tslintConfigFilePath,
+      measurePerformance: linter.measureTsPerformance,
       cachedFileSystem: this._cachedFileSystem,
-      measurePerformance: linter.measureTsPerformance
+      tslintPackagePath: this._configuration.tslintToolPath!
     });
 
     tslint.printVersionHeader();

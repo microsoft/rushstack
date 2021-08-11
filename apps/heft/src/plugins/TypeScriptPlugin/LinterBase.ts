@@ -17,6 +17,10 @@ export interface ILinterBaseOptions {
   ts: IExtendedTypeScript;
   scopedLogger: IScopedLogger;
   buildFolderPath: string;
+  /**
+   * The path where the linter state will be written to.
+   */
+  buildMetadataFolderPath: string;
   linterConfigFilePath: string;
 
   /**
@@ -62,6 +66,7 @@ export abstract class LinterBase<TLintResult> {
   protected readonly _scopedLogger: IScopedLogger;
   protected readonly _terminal: Terminal;
   protected readonly _buildFolderPath: string;
+  protected readonly _buildMetadataFolderPath: string;
   protected readonly _linterConfigFilePath: string;
   protected readonly _measurePerformance: PerformanceMeasurer;
 
@@ -73,6 +78,7 @@ export abstract class LinterBase<TLintResult> {
     this._terminal = this._scopedLogger.terminal;
     this._ts = options.ts;
     this._buildFolderPath = options.buildFolderPath;
+    this._buildMetadataFolderPath = options.buildMetadataFolderPath;
     this._linterConfigFilePath = options.linterConfigFilePath;
     this._linterName = linterName;
     this._measurePerformance = options.measurePerformance;
@@ -100,8 +106,7 @@ export abstract class LinterBase<TLintResult> {
 
     const tslintConfigVersion: string = this.cacheVersion;
     const cacheFilePath: string = path.resolve(
-      this._buildFolderPath,
-      options.tsProgram.getCompilerOptions().outDir || '',
+      this._buildMetadataFolderPath,
       `_${this._linterName}-${hashSuffix}.json`
     );
 

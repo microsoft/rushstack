@@ -237,6 +237,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
 
     const typeScriptBuilderConfiguration: ITypeScriptBuilderConfiguration = {
       buildFolder: heftConfiguration.buildFolder,
+      buildMetadataFolder: path.join(heftConfiguration.buildFolder, 'temp'),
       typeScriptToolPath: toolPackageResolution.typeScriptPackagePath!,
       tslintToolPath: toolPackageResolution.tslintPackagePath,
       eslintToolPath: toolPackageResolution.eslintPackagePath,
