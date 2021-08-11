@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-web-rig",
+      "comment": "Enable \"incremental: true\" by default in tsconfig-base.json",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
