@@ -19,7 +19,7 @@
     "@types/webpack-env": "1.13.0",
     "css-loader": "~4.2.1",
     "eslint": "~7.30.0",
-    "heft-storybook-react-tutorial-storybook": "workspace:*",
+    "heft-storybook-react-tutorial-storykit": "workspace:*",
     "html-webpack-plugin": "~4.5.0",
     "react-dom": "~16.13.1",
     "react": "~16.13.1",

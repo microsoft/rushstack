@@ -557,8 +557,8 @@
       "shouldPublish": false
     },
     {
-      "packageName": "heft-storybook-react-tutorial-storybook",
-      "projectFolder": "build-tests-samples/heft-storybook-react-tutorial-storybook",
+      "packageName": "heft-storybook-react-tutorial-storykit",
+      "projectFolder": "build-tests-samples/heft-storybook-react-tutorial-storykit",
       "reviewCategory": "tests",
       "shouldPublish": false
     },

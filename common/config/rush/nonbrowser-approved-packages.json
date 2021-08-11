@@ -359,6 +359,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "heft-storybook-react-tutorial-storykit",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "html-webpack-plugin",
       "allowedCategories": [ "tests" ]
     },
