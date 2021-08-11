@@ -7,6 +7,16 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Debug fake.js",
+      "program": "${workspaceFolder}/fake.js",
+      "args": [ "-p", "6006"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": false
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Debug \"heft start\"",
       "program": "${workspaceFolder}/node_modules/@rushstack/heft/lib/start.js",
       "cwd": "${workspaceFolder}",
