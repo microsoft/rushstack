@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/heft",
       "comment": "Retired the use of the .heft/build-cache folder for persisting build state across the \"heft clean\" or \"--clean\" invocation. Incremental TypeScript compilation is now performed either by running \"heft build\" (without \"--clean\"), or using watch mode, and requires the tsconfig to manually opt in. The feature reduced performance of cold builds and introduced bugs due to stale caches that confused users.",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft",
