@@ -17,8 +17,6 @@
     "noEmitOnError": false,
     "allowUnreachableCode": false,
 
-    "incremental": true,
-
     "types": [],
 
     "module": "commonjs",
