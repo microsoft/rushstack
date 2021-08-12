@@ -33,6 +33,15 @@ export interface ISubprocessInnerConfiguration {
 export const SUBPROCESS_RUNNER_CLASS_LABEL: unique symbol = Symbol('IsSubprocessModule');
 export const SUBPROCESS_RUNNER_INNER_INVOKE: unique symbol = Symbol('SubprocessInnerInvoke');
 
+export interface ISubprocessRunnerBaseConfiguration {
+  /**
+   * The folder of the project being built
+   *
+   * For example, /home/username/code/repo/project
+   */
+  buildFolder: string;
+}
+
 interface ISubprocessExitMessage extends ISubprocessMessageBase {
   type: 'exit';
   error: ISubprocessApiCallArg;
@@ -45,7 +54,9 @@ interface ISubprocessExitMessage extends ISubprocessMessageBase {
  * The subprocess can be provided with a configuration, which must be JSON-serializable,
  * and the subprocess can log data via a Terminal object.
  */
-export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
+export abstract class SubprocessRunnerBase<
+  TSubprocessConfiguration extends ISubprocessRunnerBaseConfiguration
+> {
   public static [SUBPROCESS_RUNNER_CLASS_LABEL]: boolean = true;
   private static _subprocessInspectorPort: number = 9229 + 1; // 9229 is the default port
 
@@ -105,7 +116,7 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
     }
   }
 
-  public static initializeSubprocess<TSubprocessConfiguration>(
+  public static initializeSubprocess<TSubprocessConfiguration extends ISubprocessRunnerBaseConfiguration>(
     thisType: new (
       parentGlobalTerminalProvider: ITerminalProvider,
       configuration: TSubprocessConfiguration,
@@ -148,6 +159,7 @@ export abstract class SubprocessRunnerBase<TSubprocessConfiguration> {
         [this.filename, JSON.stringify(this._innerConfiguration), JSON.stringify(this._configuration)],
         {
           execArgv: this._processNodeArgsForSubprocess(this._globalTerminal, process.execArgv),
+          cwd: this._configuration.buildFolder,
           ...SubprocessTerminator.RECOMMENDED_OPTIONS
         }
       );

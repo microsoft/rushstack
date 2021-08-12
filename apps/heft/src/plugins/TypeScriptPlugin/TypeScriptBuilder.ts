@@ -20,7 +20,10 @@ import {
   IExtendedSourceFile
 } from './internalTypings/TypeScriptInternals';
 
-import { SubprocessRunnerBase } from '../../utilities/subprocess/SubprocessRunnerBase';
+import {
+  ISubprocessRunnerBaseConfiguration,
+  SubprocessRunnerBase
+} from '../../utilities/subprocess/SubprocessRunnerBase';
 import { Async } from '../../utilities/Async';
 import { PerformanceMeasurer, PerformanceMeasurerAsync } from '../../utilities/Performance';
 import { Tslint } from './Tslint';
@@ -41,8 +44,9 @@ interface ILinterWrapper {
   measureTsPerformance: PerformanceMeasurer;
 }
 
-export interface ITypeScriptBuilderConfiguration extends ISharedTypeScriptConfiguration {
-  buildFolder: string;
+export interface ITypeScriptBuilderConfiguration
+  extends ISharedTypeScriptConfiguration,
+    ISubprocessRunnerBaseConfiguration {
   /**
    * The folder to write build metadata.
    */
