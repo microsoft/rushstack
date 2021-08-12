@@ -122,7 +122,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _typescriptTerminal!: Terminal;
   private _emitCompletedCallbackManager: EmitCompletedCallbackManager;
 
-  private __tsCacheFilePath!: string;
+  private __tsCacheFilePath: string | undefined;
   private _tsReadJsonCache: Map<string, object> = new Map<string, object>();
   private _cachedFileSystem: TypeScriptCachedFileSystem = new TypeScriptCachedFileSystem();
 
@@ -132,18 +132,18 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
   private get _tsCacheFilePath(): string {
     if (!this.__tsCacheFilePath) {
-      const configHash: crypto.Hash = Tslint.getConfigHash(
-        this._configuration.tsconfigPath,
-        this._typescriptTerminal,
-        this._cachedFileSystem
-      );
-      configHash.update(JSON.stringify(this._configuration.additionalModuleKindsToEmit || {}));
-      const serializedConfigHash: string = configHash.digest('hex');
+      // TypeScript internally handles if the tsconfig options have changed from when the tsbuildinfo file was created.
+      // We only need to hash our additional Heft configuration.
+      const configHash: crypto.Hash = crypto.createHash('sha1');
 
-      this.__tsCacheFilePath = path.posix.join(
-        this._configuration.buildMetadataFolder,
-        `ts_${serializedConfigHash}.json`
-      );
+      configHash.update(JSON.stringify(this._configuration.additionalModuleKindsToEmit || {}));
+      const serializedConfigHash: string = configHash
+        .digest('base64')
+        .slice(0, 8)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_');
+
+      this.__tsCacheFilePath = `${this._configuration.buildMetadataFolder}/ts_${serializedConfigHash}.json`;
     }
 
     return this.__tsCacheFilePath;
