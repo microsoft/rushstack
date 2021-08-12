@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as crypto from 'crypto';
 import * as path from 'path';
 import * as semver from 'semver';
 import {
@@ -121,11 +122,31 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _typescriptTerminal!: Terminal;
   private _emitCompletedCallbackManager: EmitCompletedCallbackManager;
 
+  private __tsCacheFilePath!: string;
   private _tsReadJsonCache: Map<string, object> = new Map<string, object>();
   private _cachedFileSystem: TypeScriptCachedFileSystem = new TypeScriptCachedFileSystem();
 
   public get filename(): string {
     return __filename;
+  }
+
+  private get _tsCacheFilePath(): string {
+    if (!this.__tsCacheFilePath) {
+      const configHash: crypto.Hash = Tslint.getConfigHash(
+        this._configuration.tsconfigPath,
+        this._typescriptTerminal,
+        this._cachedFileSystem
+      );
+      configHash.update(JSON.stringify(this._configuration.additionalModuleKindsToEmit || {}));
+      const serializedConfigHash: string = configHash.digest('hex');
+
+      this.__tsCacheFilePath = path.posix.join(
+        this._configuration.buildMetadataFolder,
+        `ts_${serializedConfigHash}.json`
+      );
+    }
+
+    return this.__tsCacheFilePath;
   }
 
   public constructor(
@@ -976,6 +997,10 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       },
       currentFolder
     );
+
+    if (tsconfig.options.incremental) {
+      tsconfig.options.tsBuildInfoFile = this._tsCacheFilePath;
+    }
 
     return tsconfig;
   }
