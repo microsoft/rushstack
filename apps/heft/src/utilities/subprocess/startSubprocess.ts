@@ -5,7 +5,8 @@ import {
   SubprocessRunnerBase,
   ISubprocessInnerConfiguration,
   SUBPROCESS_RUNNER_CLASS_LABEL,
-  SUBPROCESS_RUNNER_INNER_INVOKE
+  SUBPROCESS_RUNNER_INNER_INVOKE,
+  ISubprocessRunnerBaseConfiguration
 } from './SubprocessRunnerBase';
 
 const [, , subprocessModulePath, serializedInnerConfiguration, serializedSubprocessConfiguration] =
@@ -22,7 +23,7 @@ if (subprocessRunnerModuleExports.length !== 1) {
   );
 }
 
-declare class SubprocessRunnerSubclass extends SubprocessRunnerBase<object> {
+declare class SubprocessRunnerSubclass extends SubprocessRunnerBase<ISubprocessRunnerBaseConfiguration> {
   public filename: string;
   public invokeAsync(): Promise<void>;
 }
@@ -37,7 +38,9 @@ if (!SubprocessRunnerClass[SUBPROCESS_RUNNER_CLASS_LABEL]) {
 }
 
 const innerConfiguration: ISubprocessInnerConfiguration = JSON.parse(serializedInnerConfiguration);
-const subprocessConfiguration: object = JSON.parse(serializedSubprocessConfiguration);
+const subprocessConfiguration: ISubprocessRunnerBaseConfiguration = JSON.parse(
+  serializedSubprocessConfiguration
+);
 
 const subprocessRunner: SubprocessRunnerSubclass = SubprocessRunnerClass.initializeSubprocess(
   SubprocessRunnerClass,
