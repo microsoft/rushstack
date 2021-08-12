@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 12 Aug 2021 01:28:38 GMT and should not be manually modified.
+This log was last generated on Thu, 12 Aug 2021 18:11:18 GMT and should not be manually modified.
+
+## 0.36.2
+Thu, 12 Aug 2021 18:11:18 GMT
+
+### Patches
+
+- Fix an issue with the TypeScript compilation when Heft is invoked in a terminal with incorrect casing in the CWD.
 
 ## 0.36.1
 Thu, 12 Aug 2021 01:28:38 GMT
