@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Remove default use of incremental: true in tsconfig-base.json",
+      "type": "patch",
+      "packageName": "@rushstack/heft-web-rig"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig",
+  "email": "dmichon-msft@users.noreply.github.com"
+}

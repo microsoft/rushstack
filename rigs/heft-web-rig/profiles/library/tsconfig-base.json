@@ -18,8 +18,6 @@
     "noEmitOnError": false,
     "allowUnreachableCode": false,
 
-    "incremental": true,
-
     "types": [],
 
     "module": "esnext",
