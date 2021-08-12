@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Restore automatic generation of tsBuildInfo.json file path to work around odd path resolution behavior.",
+      "type": "patch",
+      "packageName": "@rushstack/heft"
+    }
+  ],
+  "packageName": "@rushstack/heft",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
