@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Wed, 11 Aug 2021 23:16:09 GMT and should not be manually modified.
+This log was last generated on Fri, 13 Aug 2021 22:45:36 GMT and should not be manually modified.
+
+## 5.51.1
+Fri, 13 Aug 2021 22:45:36 GMT
+
+### Updates
+
+- When build cache is enabled in `rush build`, allow projects downstream to be satisfied from the cache if applicable. Cache reads will still be disabled for `rush rebuild`.
 
 ## 5.51.0
 Wed, 11 Aug 2021 23:16:09 GMT

@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.51.1",
+      "tag": "@microsoft/rush_v5.51.1",
+      "date": "Fri, 13 Aug 2021 22:45:36 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "When build cache is enabled in `rush build`, allow projects downstream to be satisfied from the cache if applicable. Cache reads will still be disabled for `rush rebuild`."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.51.0",
       "tag": "@microsoft/rush_v5.51.0",
       "date": "Wed, 11 Aug 2021 23:16:09 GMT",
