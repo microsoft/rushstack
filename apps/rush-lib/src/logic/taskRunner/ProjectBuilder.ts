@@ -77,7 +77,10 @@ export class ProjectBuilder extends BaseBuilder {
     return ProjectBuilder.getTaskName(this._rushProject);
   }
 
-  public readonly isIncrementalBuildAllowed: boolean;
+  /**
+   * This property is mutated by TaskRunner, so is not readonly
+   */
+  public isSkipAllowed: boolean;
   public hadEmptyScript: boolean = false;
 
   private readonly _rushProject: RushConfigurationProject;
@@ -85,6 +88,7 @@ export class ProjectBuilder extends BaseBuilder {
   private readonly _buildCacheConfiguration: BuildCacheConfiguration | undefined;
   private readonly _commandName: string;
   private readonly _commandToRun: string;
+  private readonly _isCacheReadAllowed: boolean;
   private readonly _projectChangeAnalyzer: ProjectChangeAnalyzer;
   private readonly _packageDepsFilename: string;
 
@@ -101,7 +105,8 @@ export class ProjectBuilder extends BaseBuilder {
     this._buildCacheConfiguration = options.buildCacheConfiguration;
     this._commandName = options.commandName;
     this._commandToRun = options.commandToRun;
-    this.isIncrementalBuildAllowed = options.isIncrementalBuildAllowed;
+    this._isCacheReadAllowed = options.isIncrementalBuildAllowed;
+    this.isSkipAllowed = options.isIncrementalBuildAllowed;
     this._projectChangeAnalyzer = options.projectChangeAnalyzer;
     this._packageDepsFilename = options.packageDepsFilename;
   }
@@ -229,7 +234,7 @@ export class ProjectBuilder extends BaseBuilder {
             files,
             arguments: this._commandToRun
           };
-        } else if (this.isIncrementalBuildAllowed) {
+        } else if (this.isSkipAllowed) {
           // To test this code path:
           // Remove the `.git` folder then run "rush build --verbose"
           terminal.writeLine({
@@ -250,9 +255,8 @@ export class ProjectBuilder extends BaseBuilder {
         });
       }
 
-      // If the current command is allowed to do incremental builds, attempt to retrieve
-      // the project from the build cache or skip building, if appropriate.
-      if (this.isIncrementalBuildAllowed) {
+      // If allowed to read from the build cache, try retrieving the cache entry.
+      if (this._isCacheReadAllowed) {
         const projectBuildCache: ProjectBuildCache | undefined = await this._getProjectBuildCacheAsync(
           terminal,
           trackedFiles,
@@ -264,7 +268,10 @@ export class ProjectBuilder extends BaseBuilder {
         if (restoreFromCacheSuccess) {
           return TaskStatus.FromCache;
         }
+      }
 
+      // If allowed, attempt to skip building.
+      if (this.isSkipAllowed) {
         const isPackageUnchanged: boolean = !!(
           lastProjectBuildDeps &&
           projectBuildDeps &&

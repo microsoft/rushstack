@@ -338,7 +338,7 @@ export class TaskRunner {
 
     task.dependents.forEach((dependent: Task) => {
       if (!this._changedProjectsOnly) {
-        dependent.builder.isIncrementalBuildAllowed = false;
+        dependent.builder.isSkipAllowed = false;
       }
       dependent.dependencies.delete(task);
     });
@@ -355,7 +355,7 @@ export class TaskRunner {
     task.status = TaskStatus.SuccessWithWarning;
     task.dependents.forEach((dependent: Task) => {
       if (!this._changedProjectsOnly) {
-        dependent.builder.isIncrementalBuildAllowed = false;
+        dependent.builder.isSkipAllowed = false;
       }
       dependent.dependencies.delete(task);
     });

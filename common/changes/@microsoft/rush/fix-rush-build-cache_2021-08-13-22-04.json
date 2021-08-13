@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "When build cache is enabled in `rush build`, allow projects downstream to be satisfied from the cache if applicable. Cache reads will still be disabled for `rush rebuild`.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
