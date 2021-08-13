@@ -27,7 +27,7 @@ export abstract class BaseBuilder {
   abstract readonly name: string;
 
   /**
-   * This flag determines if an the task is allowed to be skipped if up to date.
+   * This flag determines if the task is allowed to be skipped if up to date.
    */
   abstract isSkipAllowed: boolean;
 
