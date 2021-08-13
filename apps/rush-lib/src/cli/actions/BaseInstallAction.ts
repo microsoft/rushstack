@@ -8,7 +8,10 @@ import { Import } from '@rushstack/node-core-library';
 import {
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
-  CommandLineStringParameter
+  CommandLineStringParameter,
+  CommandLineParameterKind,
+  CommandLineIntegerListParameter,
+  CommandLineStringListParameter
 } from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
@@ -190,19 +193,31 @@ export abstract class BaseInstallAction extends BaseRushAction {
       let extraData: { [key: string]: string } = {
         mode: this.actionName,
         clean: (!!this._purgeParameter.value).toString(),
-        bypassPolicy: (!!this._bypassPolicyParameter.value).toString(),
-        noLink: (!!this._noLinkParameter.value).toString(),
-        networkConcurrency: this._networkConcurrencyParameter.value
-          ? this._networkConcurrencyParameter.value.toString()
-          : 'unspecified',
-        debugPackageManager: (!!this._debugPackageManagerParameter.value).toString(),
-        maxInstallAttempts: this._maxInstallAttempts.value
-          ? this._maxInstallAttempts.value.toString()
-          : 'unspecified',
-        ignoreHooks: (!!this._ignoreHooksParameter.value).toString(),
         debug: installManagerOptions.debug.toString(),
         full: installManagerOptions.fullUpgrade.toString()
       };
+
+      for (const parameter of this.parameters) {
+        switch (parameter.kind) {
+          case CommandLineParameterKind.Flag:
+          case CommandLineParameterKind.Choice:
+          case CommandLineParameterKind.String:
+          case CommandLineParameterKind.Integer:
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            extraData[parameter.longName] = JSON.stringify((parameter as any).value);
+            break;
+          case CommandLineParameterKind.StringList:
+          case CommandLineParameterKind.IntegerList:
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const arrayValue: ReadonlyArray<any> | undefined = (
+              parameter as CommandLineIntegerListParameter | CommandLineStringListParameter
+            ).values;
+            extraData[parameter.longName] = arrayValue ? arrayValue.join(',') : '';
+            break;
+          default:
+            extraData[parameter.longName] = '?';
+        }
+      }
       if (this._selectionParameters) {
         extraData = { ...extraData, ...this._selectionParameters.getTelemetry() };
       }

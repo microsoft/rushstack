@@ -7,10 +7,6 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../SelectionParameterSet';
 
 export class InstallAction extends BaseInstallAction {
-  // must match name of _selectionParameters in BaseInstallAction for telemetry to work
-  // worthy of the override parameter in TypeScript > 4.3
-  protected _selectionParameters!: SelectionParameterSet;
-
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'install',
@@ -54,7 +50,7 @@ export class InstallAction extends BaseInstallAction {
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
-      pnpmFilterArguments: this._selectionParameters.getPnpmFilterArguments()
+      pnpmFilterArguments: this._selectionParameters!.getPnpmFilterArguments()
     };
   }
 }
