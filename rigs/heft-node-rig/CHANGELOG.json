@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "1.2.3",
+      "tag": "@rushstack/heft-node-rig_v1.2.3",
+      "date": "Fri, 13 Aug 2021 00:09:14 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove default use of incremental: true in tsconfig-base.json"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.2",
       "tag": "@rushstack/heft-node-rig_v1.2.2",
       "date": "Thu, 12 Aug 2021 18:11:18 GMT",
