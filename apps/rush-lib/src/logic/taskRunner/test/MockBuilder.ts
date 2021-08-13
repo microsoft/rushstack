@@ -10,7 +10,7 @@ export class MockBuilder extends BaseBuilder {
   private readonly _action: ((terminal: CollatedTerminal) => Promise<TaskStatus>) | undefined;
   public readonly name: string;
   public readonly hadEmptyScript: boolean = false;
-  public readonly isIncrementalBuildAllowed: boolean = false;
+  public readonly isSkipAllowed: boolean = false;
 
   public constructor(name: string, action?: (terminal: CollatedTerminal) => Promise<TaskStatus>) {
     super();

@@ -27,9 +27,9 @@ export abstract class BaseBuilder {
   abstract readonly name: string;
 
   /**
-   * This flag determines if an incremental build is allowed for the task.
+   * This flag determines if an the task is allowed to be skipped if up to date.
    */
-  abstract isIncrementalBuildAllowed: boolean;
+  abstract isSkipAllowed: boolean;
 
   /**
    * Assigned by execute().  True if the build script was an empty string.  Operationally an empty string is
