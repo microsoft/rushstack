@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Adds properties to the extraData section of the telemetry file for parameter usage in the install commands",
+      "comment": "Add properties to the extraData section of the telemetry file for parameter usage in the install commands",
       "type": "none"
     }
   ],
