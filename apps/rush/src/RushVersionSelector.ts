@@ -73,12 +73,12 @@ export class RushVersionSelector {
 
     if (semver.lt(version, '3.0.20')) {
       // In old versions, requiring the entry point invoked the command-line parser immediately,
-      // so fail if "rushx" was used
+      // so fail if "rushx" or "rush-pnpm" was used
       RushCommandSelector.failIfNotInvokedAsRush(version);
       require(path.join(expectedRushPath, 'node_modules', '@microsoft', 'rush', 'lib', 'rush'));
     } else if (semver.lt(version, '4.0.0')) {
       // In old versions, requiring the entry point invoked the command-line parser immediately,
-      // so fail if "rushx" was used
+      // so fail if "rushx" or "rush-pnpm" was used
       RushCommandSelector.failIfNotInvokedAsRush(version);
       require(path.join(expectedRushPath, 'node_modules', '@microsoft', 'rush', 'lib', 'start'));
     } else {

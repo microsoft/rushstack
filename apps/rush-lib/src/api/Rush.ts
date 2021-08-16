@@ -12,6 +12,7 @@ import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor'
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { Utilities } from '../utilities/Utilities';
 import { EnvironmentVariableNames } from './EnvironmentConfiguration';
+import { RushPnpmCommandLine } from '../cli/RushPnpmCommandLine';
 
 /**
  * Options to pass to the rush "launch" functions.
@@ -46,8 +47,6 @@ export class Rush {
    * Third-party tools should not use this API.  Instead, they should execute the "rush" binary
    * and start a new Node.js process.
    *
-   * @param launcherVersion - The version of the `@microsoft/rush` wrapper used to call invoke the CLI.
-   *
    * @remarks
    * Earlier versions of the rush frontend used a different API contract. In the old contract,
    * the second argument was the `isManaged` value of the {@link ILaunchOptions} object.
@@ -78,16 +77,24 @@ export class Rush {
    * This API is used by the `@microsoft/rush` front end to launch the "rushx" command-line.
    * Third-party tools should not use this API.  Instead, they should execute the "rushx" binary
    * and start a new Node.js process.
-   *
-   * @param launcherVersion - The version of the `@microsoft/rush` wrapper used to call invoke the CLI.
    */
-  public static launchRushX(launcherVersion: string, options: ILaunchOptions): void {
+   public static launchRushX(launcherVersion: string, options: ILaunchOptions): void {
     options = Rush._normalizeLaunchOptions(options);
 
     Rush._printStartupBanner(options.isManaged);
 
     Rush._assignRushInvokedFolder();
     RushXCommandLine._launchRushXInternal(launcherVersion, { ...options });
+  }
+
+  /**
+   * This API is used by the `@microsoft/rush` front end to launch the "rush-pnpm" command-line.
+   * Third-party tools should not use this API.  Instead, they should execute the "rush-pnpm" binary
+   * and start a new Node.js process.
+   */
+   public static launchRushPnpm(launcherVersion: string, options: ILaunchOptions): void {
+    Rush._assignRushInvokedFolder();
+    RushPnpmCommandLine.launch(launcherVersion, { ...options });
   }
 
   /**
