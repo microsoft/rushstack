@@ -15,7 +15,47 @@ export interface ILaunchRushPnpmInternalOptions {
   alreadyReportedNodeTooNewError?: boolean;
 }
 
+const RUSH_SKIP_CHECKS_PARAMETER: string = '--rush-skip-checks';
+
+enum CommandKind {
+  KnownSafe,
+  ShowWarning,
+  Blocked
+}
+
 export class RushPnpmCommandLine {
+  private static _knownCommandMap: Map<string, CommandKind> = new Map<string, CommandKind>([
+    ['add', CommandKind.ShowWarning],
+    ['audit', CommandKind.KnownSafe],
+    ['exec', CommandKind.KnownSafe],
+    ['import', CommandKind.Blocked],
+    ['install', CommandKind.Blocked],
+    [/* synonym */ 'i', CommandKind.Blocked],
+    ['install-test', CommandKind.Blocked],
+    [/* synonym */ 'it', CommandKind.Blocked],
+    ['link', CommandKind.ShowWarning],
+    [/* synonym */ 'ln', CommandKind.ShowWarning],
+    ['list', CommandKind.KnownSafe],
+    [/* synonym */ 'ls', CommandKind.KnownSafe],
+    ['outdated', CommandKind.KnownSafe],
+    ['pack', CommandKind.KnownSafe],
+    ['prune', CommandKind.KnownSafe],
+    ['publish', CommandKind.KnownSafe],
+    ['rebuild', CommandKind.KnownSafe],
+    [/* synonym */ 'rb', CommandKind.KnownSafe],
+    ['remove', CommandKind.ShowWarning],
+    [/* synonym */ 'rm', CommandKind.ShowWarning],
+    ['root', CommandKind.KnownSafe],
+    ['run', CommandKind.KnownSafe],
+    ['start', CommandKind.KnownSafe],
+    ['store', CommandKind.KnownSafe],
+    ['test', CommandKind.KnownSafe],
+    [/* synonym */ 't', CommandKind.KnownSafe],
+    ['unlink', CommandKind.ShowWarning],
+    ['update', CommandKind.ShowWarning],
+    [/* synonym */ 'up', CommandKind.ShowWarning]
+  ]);
+
   public static launch(launcherVersion: string, options: ILaunchRushPnpmInternalOptions): void {
     // Node.js can sometimes accidentally terminate with a zero exit code  (e.g. for an uncaught
     // promise exception), so we start with the assumption that the exit code is 1
@@ -73,6 +113,8 @@ export class RushPnpmCommandLine {
       // 1 = rush-pnpm
       const pnpmArgs: string[] = process.argv.slice(2);
 
+      RushPnpmCommandLine._validatePnpmUsage(pnpmArgs);
+
       const pnpmEnvironmentMap: EnvironmentMap = new EnvironmentMap(process.env);
       pnpmEnvironmentMap.set('NPM_CONFIG_WORKSPACE_DIR', workspaceFolder);
 
@@ -95,12 +137,119 @@ export class RushPnpmCommandLine {
         throw new Error('Failed to invoke PNPM: Spawn completed without an exit code');
       }
       process.exitCode = result.status;
-
-      console.log('\nFinished rush-pnpm');
     } catch (error) {
       if (!(error instanceof AlreadyReportedError)) {
         const prefix: string = 'ERROR: ';
         console.error('\n' + colors.red(PrintUtilities.wrapWords(prefix + error.message)));
+      }
+    }
+  }
+
+  private static _validatePnpmUsage(pnpmArgs: string[]): void {
+    if (pnpmArgs[0] === RUSH_SKIP_CHECKS_PARAMETER) {
+      pnpmArgs.shift();
+      // Ignore other checks
+      return;
+    }
+
+    if (pnpmArgs.length === 0) {
+      return;
+    }
+    const firstArg: string = pnpmArgs[0];
+
+    // Detect common safe invocations
+    if (pnpmArgs.indexOf('-h') >= 0 || pnpmArgs.indexOf('--help') >= 0 || pnpmArgs.indexOf('-?') >= 0) {
+      return;
+    }
+
+    if (pnpmArgs.length === 1) {
+      if (firstArg === '-v' || firstArg === '--version') {
+        return;
+      }
+    }
+
+    if (!/^[a-z]+([a-z0-9\-])*$/.test(firstArg)) {
+      console.log(
+        colors.yellow(`Warning: The "rush-pnpm" wrapper expects a command verb before "${firstArg}"`) + '\n'
+      );
+    } else {
+      const commandName: string = firstArg;
+
+      // Also accept SKIP_RUSH_CHECKS_PARAMETER immediately after the command verb
+      if (pnpmArgs[1] === RUSH_SKIP_CHECKS_PARAMETER) {
+        pnpmArgs.splice(1, 1);
+        return;
+      }
+
+      // Warn about commands known not to work
+      switch (commandName) {
+        case 'install':
+        case 'i':
+        case 'install-test':
+        case 'it':
+          console.error(
+            colors.red(
+              PrintUtilities.wrapWords(
+                `Error: The "pnpm ${commandName}" command is incompatible with Rush's environment.` +
+                  ` Use the "rush install" or "rush update" commands instead.`
+              )
+            )
+          );
+          console.error(
+            '\n' +
+              colors.cyan(
+                `To bypass this check, add "${RUSH_SKIP_CHECKS_PARAMETER}" as the very first command line option.`
+              )
+          );
+          throw new AlreadyReportedError();
+      }
+
+      const commandKind: CommandKind | undefined = RushPnpmCommandLine._knownCommandMap.get(commandName);
+      switch (commandKind) {
+        case CommandKind.KnownSafe:
+          break;
+        case CommandKind.ShowWarning:
+          console.log(
+            colors.yellow(
+              PrintUtilities.wrapWords(
+                `Warning: The "pnpm ${commandName}" command makes changes that may invalidate Rush's workspace state.`
+              ) + '\n'
+            )
+          );
+          console.log(
+            colors.yellow(`==> Consider running "rush install" or "rush update" afterwards.`) + '\n'
+          );
+          break;
+        case CommandKind.Blocked:
+          console.error(
+            colors.red(
+              PrintUtilities.wrapWords(
+                `Error: The "pnpm ${commandName}" command is known to be incompatible with Rush's environment.`
+              )
+            )
+          );
+          console.error(
+            '\n' +
+              colors.cyan(
+                `To bypass this check, add "${RUSH_SKIP_CHECKS_PARAMETER}" as the very first command line option.`
+              )
+          );
+          throw new AlreadyReportedError();
+        default:
+          console.error(
+            colors.red(
+              PrintUtilities.wrapWords(
+                `Error: The "pnpm ${commandName}" command has not been tested with Rush's environment. It may be incompatible.`
+              )
+            )
+          );
+          console.error(
+            '\n' +
+              colors.cyan(
+                `To bypass this check, add "${RUSH_SKIP_CHECKS_PARAMETER}" as the very first command line option.`
+              )
+          );
+          throw new AlreadyReportedError();
       }
     }
   }
