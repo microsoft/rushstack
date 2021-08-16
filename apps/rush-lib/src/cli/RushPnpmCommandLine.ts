@@ -71,19 +71,14 @@ export class RushPnpmCommandLine {
 
       // 0 = node.exe
       // 1 = rush-pnpm
-      const originalArgs: string[] = process.argv.slice(2);
-
-      const pnpmArgs: string[] = [];
-
-      if (rushConfiguration.pnpmOptions.pnpmStorePath) {
-        pnpmArgs.push('--store');
-        pnpmArgs.push(rushConfiguration.pnpmOptions.pnpmStorePath);
-      }
-
-      pnpmArgs.push(...originalArgs);
+      const pnpmArgs: string[] = process.argv.slice(2);
 
       const pnpmEnvironmentMap: EnvironmentMap = new EnvironmentMap(process.env);
       pnpmEnvironmentMap.set('NPM_CONFIG_WORKSPACE_DIR', workspaceFolder);
+
+      if (rushConfiguration.pnpmOptions.pnpmStorePath) {
+        pnpmEnvironmentMap.set('NPM_CONFIG_STORE_DIR', rushConfiguration.pnpmOptions.pnpmStorePath);
+      }
 
       const result: SpawnSyncReturns<string> = Executable.spawnSync(
         rushConfiguration.packageManagerToolFilename,
