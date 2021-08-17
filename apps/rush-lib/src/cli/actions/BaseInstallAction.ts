@@ -8,10 +8,7 @@ import { Import } from '@rushstack/node-core-library';
 import {
   CommandLineFlagParameter,
   CommandLineIntegerParameter,
-  CommandLineStringParameter,
-  CommandLineParameterKind,
-  CommandLineIntegerListParameter,
-  CommandLineStringListParameter
+  CommandLineStringParameter
 } from '@rushstack/ts-command-line';
 
 import { BaseRushAction } from './BaseRushAction';
@@ -197,27 +194,8 @@ export abstract class BaseInstallAction extends BaseRushAction {
         full: installManagerOptions.fullUpgrade.toString()
       };
 
-      for (const parameter of this.parameters) {
-        switch (parameter.kind) {
-          case CommandLineParameterKind.Flag:
-          case CommandLineParameterKind.Choice:
-          case CommandLineParameterKind.String:
-          case CommandLineParameterKind.Integer:
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            extraData[parameter.longName] = JSON.stringify((parameter as any).value);
-            break;
-          case CommandLineParameterKind.StringList:
-          case CommandLineParameterKind.IntegerList:
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const arrayValue: ReadonlyArray<any> | undefined = (
-              parameter as CommandLineIntegerListParameter | CommandLineStringListParameter
-            ).values;
-            extraData[parameter.longName] = arrayValue ? arrayValue.join(',') : '';
-            break;
-          default:
-            extraData[parameter.longName] = '?';
-        }
-      }
+      extraData = { ...extraData, ...this.getParameterStringMap() };
+
       if (this._selectionParameters) {
         extraData = { ...extraData, ...this._selectionParameters.getTelemetry() };
       }

@@ -5,11 +5,7 @@ import * as os from 'os';
 import colors from 'colors/safe';
 
 import { AlreadyReportedError, ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
-import {
-  CommandLineFlagParameter,
-  CommandLineStringParameter,
-  CommandLineParameterKind
-} from '@rushstack/ts-command-line';
+import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
@@ -378,21 +374,9 @@ export class BulkScriptAction extends BaseScriptAction {
   }
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
-    const extraData: { [key: string]: string } = this._selectionParameters.getTelemetry();
+    let extraData: { [key: string]: string } = this._selectionParameters.getTelemetry();
 
-    for (const customParameter of this.customParameters) {
-      switch (customParameter.kind) {
-        case CommandLineParameterKind.Flag:
-        case CommandLineParameterKind.Choice:
-        case CommandLineParameterKind.String:
-        case CommandLineParameterKind.Integer:
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          extraData[customParameter.longName] = JSON.stringify((customParameter as any).value);
-          break;
-        default:
-          extraData[customParameter.longName] = '?';
-      }
-    }
+    extraData = { ...extraData, ...this.getParameterStringMap() };
 
     if (this.parser.telemetry) {
       this.parser.telemetry.log({

@@ -290,6 +290,45 @@ export abstract class CommandLineParameterProvider {
   }
 
   /**
+   * Returns a object which maps the long name of each parameter in this.parameters
+   * to the stringified form of its value. This is useful for logging telemetry, but
+   * it is not the proper way of accessing parameters or their values.
+   */
+  public getParameterStringMap(): { [key: string]: string } {
+    const parameterMap: { [key: string]: string } = {};
+    for (const parameter of this.parameters) {
+      switch (parameter.kind) {
+        case CommandLineParameterKind.Flag:
+        case CommandLineParameterKind.Choice:
+        case CommandLineParameterKind.String:
+        case CommandLineParameterKind.Integer:
+          parameterMap[parameter.longName] = JSON.stringify(
+            (
+              parameter as
+                | CommandLineFlagParameter
+                | CommandLineIntegerParameter
+                | CommandLineChoiceParameter
+                | CommandLineStringParameter
+            ).value
+          );
+          break;
+        case CommandLineParameterKind.StringList:
+        case CommandLineParameterKind.IntegerList:
+        case CommandLineParameterKind.ChoiceList:
+          const arrayValue: ReadonlyArray<string | number> | undefined = (
+            parameter as
+              | CommandLineIntegerListParameter
+              | CommandLineStringListParameter
+              | CommandLineChoiceListParameter
+          ).values;
+          parameterMap[parameter.longName] = arrayValue ? arrayValue.join(',') : '';
+          break;
+      }
+    }
+    return parameterMap;
+  }
+
+  /**
    * The child class should implement this hook to define its command-line parameters,
    * e.g. by calling defineFlagParameter().
    */
