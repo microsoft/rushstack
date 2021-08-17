@@ -451,7 +451,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
                     }
                   );
                 } else {
-                  // Skip minification for all other assets, though the modules still might be
+                  // This isn't a JS asset. Don't try to minify the asset wrapper, though if it contains modules, those might still get replaced with minified versions.
                   minifiedAssets.set(assetName, {
                     // Still need to restore ids
                     source: postProcessCode(new ReplaceSource(asset), assetName),
