@@ -8,13 +8,13 @@
     "start": "heft start"
   },
   "devDependencies": {
+    "@jest/reporters": "~26.6.2",
+    "@jest/types": "~26.6.2",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "eslint": "~7.30.0",
-    "typescript": "~3.9.7",
-    "@jest/reporters": "~25.4.0",
-    "@jest/types": "~25.4.0"
+    "typescript": "~3.9.7"
   }
 }

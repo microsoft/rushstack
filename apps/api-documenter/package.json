@@ -33,6 +33,6 @@
     "@types/js-yaml": "3.12.1",
     "@types/node": "10.17.13",
     "@types/resolve": "1.17.1",
-    "jest": "~25.4.0"
+    "jest": "~26.6.2"
   }
 }

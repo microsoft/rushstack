@@ -76,7 +76,7 @@
     "@types/strict-uri-encode": "2.0.0",
     "@types/tar": "4.0.3",
     "@types/z-schema": "3.16.31",
-    "jest": "~25.4.0",
+    "jest": "~26.6.2",
     "typescript": "~3.9.7"
   }
 }
