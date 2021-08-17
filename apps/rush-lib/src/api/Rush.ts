@@ -78,7 +78,7 @@ export class Rush {
    * Third-party tools should not use this API.  Instead, they should execute the "rushx" binary
    * and start a new Node.js process.
    */
-   public static launchRushX(launcherVersion: string, options: ILaunchOptions): void {
+  public static launchRushX(launcherVersion: string, options: ILaunchOptions): void {
     options = Rush._normalizeLaunchOptions(options);
 
     Rush._printStartupBanner(options.isManaged);
@@ -92,7 +92,7 @@ export class Rush {
    * Third-party tools should not use this API.  Instead, they should execute the "rush-pnpm" binary
    * and start a new Node.js process.
    */
-   public static launchRushPnpm(launcherVersion: string, options: ILaunchOptions): void {
+  public static launchRushPnpm(launcherVersion: string, options: ILaunchOptions): void {
     Rush._assignRushInvokedFolder();
     RushPnpmCommandLine.launch(launcherVersion, { ...options });
   }
