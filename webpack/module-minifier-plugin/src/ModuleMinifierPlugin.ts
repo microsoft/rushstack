@@ -226,7 +226,8 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
          */
         function dehydrateAsset(modules: Source, chunk: webpack.compilation.Chunk): Source {
           for (const mod of chunk.modulesIterable) {
-            if (mod.id === null || !submittedModules.has(mod.id)) {
+            // If the id is null, it won't be part of the chunk
+            if (mod.id !== null && !submittedModules.has(mod.id)) {
               console.error(
                 `Chunk ${chunk.id} failed to render module ${mod.id} for ${(mod as IExtendedModule).resource}`
               );
