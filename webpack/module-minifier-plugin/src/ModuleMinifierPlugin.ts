@@ -221,23 +221,6 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
           }
         }
 
-        /**
-         * Callback to invoke for a chunk during render to replace the modules with CHUNK_MODULES_TOKEN
-         */
-        function dehydrateAsset(modules: Source, chunk: webpack.compilation.Chunk): Source {
-          for (const mod of chunk.modulesIterable) {
-            // If the id is null, it won't be part of the chunk
-            if (mod.id !== null && !submittedModules.has(mod.id)) {
-              console.error(
-                `Chunk ${chunk.id} failed to render module ${mod.id} for ${(mod as IExtendedModule).resource}`
-              );
-            }
-          }
-
-          // Discard the rendered modules
-          return new RawSource(CHUNK_MODULES_TOKEN);
-        }
-
         const { minifier } = this;
 
         const cleanupMinifier: (() => Promise<void>) | undefined = minifier.ref?.();
@@ -468,7 +451,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
                     }
                   );
                 } else {
-                  // Skip minification for all other assets, though the modules still are
+                  // Skip minification for all other assets, though the modules still might be
                   minifiedAssets.set(assetName, {
                     // Still need to restore ids
                     source: postProcessCode(new ReplaceSource(asset), assetName),
@@ -510,9 +493,31 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
           }
         );
 
-        for (const template of [compilation.chunkTemplate, compilation.mainTemplate]) {
-          (template as unknown as IExtendedChunkTemplate).hooks.modules.tap(TAP_AFTER, dehydrateAsset);
-        }
+        (compilation.chunkTemplate as unknown as IExtendedChunkTemplate).hooks.modules.tap(
+          TAP_AFTER,
+          (source: Source, chunk: webpack.compilation.Chunk, moduleTemplate: unknown) => {
+            if (moduleTemplate !== compilation.moduleTemplates.javascript) {
+              // This is not a JavaScript asset
+              return source;
+            }
+
+            // Discard the rendered modules
+            return new RawSource(CHUNK_MODULES_TOKEN);
+          }
+        );
+
+        (compilation.mainTemplate as unknown as IExtendedChunkTemplate).hooks.modules.tap(
+          TAP_AFTER,
+          (source: Source, chunk: webpack.compilation.Chunk, hash: unknown, moduleTemplate: unknown) => {
+            if (moduleTemplate !== compilation.moduleTemplates.javascript) {
+              // This is not a JavaScript asset
+              return source;
+            }
+
+            // Discard the rendered modules
+            return new RawSource(CHUNK_MODULES_TOKEN);
+          }
+        );
       }
     );
   }

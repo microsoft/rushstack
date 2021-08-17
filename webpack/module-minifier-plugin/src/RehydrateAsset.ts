@@ -14,11 +14,15 @@ import { IAssetInfo, IModuleMap, IModuleInfo } from './ModuleMinifierPlugin.type
  * @public
  */
 export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner: string): Source {
-  const { source: assetSource, modules, externalNames } = asset;
+  const { source: assetSource, modules } = asset;
 
   const assetCode: string = assetSource.source() as string;
 
   const tokenIndex: number = assetCode.indexOf(CHUNK_MODULES_TOKEN);
+  if (tokenIndex < 0) {
+    // This is not a JS asset.
+    return handleExternals(assetSource, asset);
+  }
   const suffixStart: number = tokenIndex + CHUNK_MODULES_TOKEN.length;
   const suffix: string = assetCode.slice(suffixStart);
 
@@ -138,11 +142,15 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
 
   source.add(suffix);
 
-  const cached: CachedSource = new CachedSource(source);
+  return handleExternals(new CachedSource(source), asset);
+}
+
+function handleExternals(source: Source, asset: IAssetInfo): Source {
+  const { externalNames } = asset;
 
   if (externalNames.size) {
-    const replaceSource: ReplaceSource = new ReplaceSource(cached);
-    const code: string = cached.source() as string;
+    const replaceSource: ReplaceSource = new ReplaceSource(source);
+    const code: string = source.source() as string;
 
     const externalIdRegex: RegExp = /__WEBPACK_EXTERNAL_MODULE_[A-Za-z0-9_$]+/g;
 
@@ -162,5 +170,5 @@ export function rehydrateAsset(asset: IAssetInfo, moduleMap: IModuleMap, banner:
     return new CachedSource(replaceSource);
   }
 
-  return cached;
+  return source;
 }
