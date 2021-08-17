@@ -168,10 +168,15 @@ export class RushPnpmCommandLine {
       }
     }
 
+    const BYPASS_NOTICE: string = `To bypass this check, add "${RUSH_SKIP_CHECKS_PARAMETER}" as the very first command line option.`;
+
     if (!/^[a-z]+([a-z0-9\-])*$/.test(firstArg)) {
-      console.log(
-        colors.yellow(`Warning: The "rush-pnpm" wrapper expects a command verb before "${firstArg}"`) + '\n'
+      // We can't parse this CLI syntax
+      console.error(
+        colors.red(`Warning: The "rush-pnpm" wrapper expects a command verb before "${firstArg}"`) + '\n'
       );
+      console.error(colors.cyan(BYPASS_NOTICE));
+      throw new AlreadyReportedError();
     } else {
       const commandName: string = firstArg;
 
@@ -179,6 +184,19 @@ export class RushPnpmCommandLine {
       if (pnpmArgs[1] === RUSH_SKIP_CHECKS_PARAMETER) {
         pnpmArgs.splice(1, 1);
         return;
+      }
+
+      if (pnpmArgs.indexOf(RUSH_SKIP_CHECKS_PARAMETER) >= 0) {
+        // We do not attempt to parse PNPM's complete CLI syntax, so we cannot be sure how to interpret
+        // strings that appear outside of the specific patterns that this parser recognizes
+        console.error(
+          colors.red(
+            PrintUtilities.wrapWords(
+              `Error: The "${RUSH_SKIP_CHECKS_PARAMETER}" option must be the first parameter for the "rush-pnpm" command.`
+            )
+          )
+        );
+        throw new AlreadyReportedError();
       }
 
       // Warn about commands known not to work
@@ -193,14 +211,9 @@ export class RushPnpmCommandLine {
                 `Error: The "pnpm ${commandName}" command is incompatible with Rush's environment.` +
                   ` Use the "rush install" or "rush update" commands instead.`
               )
-            )
+            ) + '\n'
           );
-          console.error(
-            '\n' +
-              colors.cyan(
-                `To bypass this check, add "${RUSH_SKIP_CHECKS_PARAMETER}" as the very first command line option.`
-              )
-          );
+          console.error(colors.cyan(BYPASS_NOTICE));
           throw new AlreadyReportedError();
       }
 
@@ -226,14 +239,9 @@ export class RushPnpmCommandLine {
               PrintUtilities.wrapWords(
                 `Error: The "pnpm ${commandName}" command is known to be incompatible with Rush's environment.`
               )
-            )
+            ) + '\n'
           );
-          console.error(
-            '\n' +
-              colors.cyan(
-                `To bypass this check, add "${RUSH_SKIP_CHECKS_PARAMETER}" as the very first command line option.`
-              )
-          );
+          console.error(colors.cyan(BYPASS_NOTICE));
           throw new AlreadyReportedError();
         default:
           console.error(
@@ -241,14 +249,9 @@ export class RushPnpmCommandLine {
               PrintUtilities.wrapWords(
                 `Error: The "pnpm ${commandName}" command has not been tested with Rush's environment. It may be incompatible.`
               )
-            )
+            ) + '\n'
           );
-          console.error(
-            '\n' +
-              colors.cyan(
-                `To bypass this check, add "${RUSH_SKIP_CHECKS_PARAMETER}" as the very first command line option.`
-              )
-          );
+          console.error(colors.cyan(BYPASS_NOTICE));
           throw new AlreadyReportedError();
       }
     }
