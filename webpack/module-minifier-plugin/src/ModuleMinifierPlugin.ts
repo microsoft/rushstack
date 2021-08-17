@@ -493,6 +493,7 @@ export class ModuleMinifierPlugin implements webpack.Plugin {
           }
         );
 
+        // This function is written twice because the parameter order is not the same between the two hooks
         (compilation.chunkTemplate as unknown as IExtendedChunkTemplate).hooks.modules.tap(
           TAP_AFTER,
           (source: Source, chunk: webpack.compilation.Chunk, moduleTemplate: unknown) => {
