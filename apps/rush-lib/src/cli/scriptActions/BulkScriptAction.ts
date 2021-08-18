@@ -374,9 +374,10 @@ export class BulkScriptAction extends BaseScriptAction {
   }
 
   private _collectTelemetry(stopwatch: Stopwatch, success: boolean): void {
-    let extraData: { [key: string]: string } = this._selectionParameters.getTelemetry();
-
-    extraData = { ...extraData, ...this.getParameterStringMap() };
+    const extraData: Record<string, string> = {
+      ...this._selectionParameters.getTelemetry(),
+      ...this.getParameterStringMap()
+    };
 
     if (this.parser.telemetry) {
       this.parser.telemetry.log({

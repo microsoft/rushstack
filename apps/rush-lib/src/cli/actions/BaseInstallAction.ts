@@ -193,7 +193,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
         debug: installManagerOptions.debug.toString(),
         full: installManagerOptions.fullUpgrade.toString(),
         ...this.getParameterStringMap(),
-        ...this._selectionParameters?.getTelemetry() };
+        ...this._selectionParameters?.getTelemetry()
       };
       this.parser.telemetry.log({
         name: 'install',

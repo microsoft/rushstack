@@ -294,8 +294,8 @@ export abstract class CommandLineParameterProvider {
    * to the stringified form of its value. This is useful for logging telemetry, but
    * it is not the proper way of accessing parameters or their values.
    */
-  public getParameterStringMap(): { [key: string]: string } {
-    const parameterMap: { [key: string]: string } = {};
+  public getParameterStringMap(): Record<string, string> {
+    const parameterMap: Record<string, string> = {};
     for (const parameter of this.parameters) {
       switch (parameter.kind) {
         case CommandLineParameterKind.Flag:

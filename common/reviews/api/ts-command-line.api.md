@@ -157,9 +157,7 @@ export abstract class CommandLineParameterProvider {
     getFlagParameter(parameterLongName: string): CommandLineFlagParameter;
     getIntegerListParameter(parameterLongName: string): CommandLineIntegerListParameter;
     getIntegerParameter(parameterLongName: string): CommandLineIntegerParameter;
-    getParameterStringMap(): {
-        [key: string]: string;
-    };
+    getParameterStringMap(): Record<string, string>;
     getStringListParameter(parameterLongName: string): CommandLineStringListParameter;
     getStringParameter(parameterLongName: string): CommandLineStringParameter;
     protected abstract onDefineParameters(): void;
