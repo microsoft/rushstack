@@ -2,6 +2,18 @@
   "name": "@rushstack/module-minifier-plugin",
   "entries": [
     {
+      "version": "0.4.8",
+      "tag": "@rushstack/module-minifier-plugin_v0.4.8",
+      "date": "Wed, 18 Aug 2021 00:06:54 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix compatibility issue with mini-css-extract-plugin and other plugins that introduce non-JavaScript modules and asset types."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.7",
       "tag": "@rushstack/module-minifier-plugin_v0.4.7",
       "date": "Fri, 13 Aug 2021 00:09:14 GMT",
