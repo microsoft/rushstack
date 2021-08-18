@@ -187,18 +187,14 @@ export abstract class BaseInstallAction extends BaseRushAction {
     success: boolean
   ): void {
     if (this.parser.telemetry) {
-      let extraData: { [key: string]: string } = {
+      const extraData: Record<string, string> = {
         mode: this.actionName,
         clean: (!!this._purgeParameter.value).toString(),
         debug: installManagerOptions.debug.toString(),
-        full: installManagerOptions.fullUpgrade.toString()
+        full: installManagerOptions.fullUpgrade.toString(),
+        ...this.getParameterStringMap(),
+        ...this._selectionParameters?.getTelemetry() };
       };
-
-      extraData = { ...extraData, ...this.getParameterStringMap() };
-
-      if (this._selectionParameters) {
-        extraData = { ...extraData, ...this._selectionParameters.getTelemetry() };
-      }
       this.parser.telemetry.log({
         name: 'install',
         duration: stopwatch.duration,
