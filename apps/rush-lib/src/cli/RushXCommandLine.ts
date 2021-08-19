@@ -17,12 +17,13 @@ import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
  */
 export interface ILaunchRushXInternalOptions {
   isManaged: boolean;
+  showVerbose: boolean;
   alreadyReportedNodeTooNewError?: boolean;
 }
 
 export class RushXCommandLine {
-  public static launchRushX(launcherVersion: string, isManaged: boolean): void {
-    RushXCommandLine._launchRushXInternal(launcherVersion, { isManaged });
+  public static launchRushX(launcherVersion: string, isManaged: boolean, showVerbose: boolean): void {
+    RushXCommandLine._launchRushXInternal(launcherVersion, { isManaged, showVerbose });
   }
 
   /**
@@ -38,7 +39,7 @@ export class RushXCommandLine {
       // Are we in a Rush repo?
       let rushConfiguration: RushConfiguration | undefined = undefined;
       if (RushConfiguration.tryFindRushJsonLocation()) {
-        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: true });
+        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: options.showVerbose });
       }
 
       NodeJsCompatibility.warnAboutCompatibilityIssues({
@@ -79,14 +80,22 @@ export class RushXCommandLine {
       // 1 = rushx
       const args: string[] = process.argv.slice(2);
 
-      // Check for the following types of things:
-      //   rush
-      //   rush --help
-      //   rush -h
-      //   rush --unrecognized-option
-      if (args.length === 0 || args[0][0] === '-') {
-        RushXCommandLine._showUsage(packageJson, projectCommandSet);
-        return;
+      for (let idx = 0; idx < args.length; idx++) {
+        if (args[idx] === '-v' || args[idx] === '--verbose') {
+          // This flag was already consumed by Rush.earlyVerboseFlag() at startup, so
+          // we can ignore it here.
+          args.splice(idx, 1);
+          idx--;
+          continue;
+        }
+        if (args[idx].startsWith('-')) {
+          RushXCommandLine._showUsage(packageJson, projectCommandSet);
+          return;
+        } else {
+          // If we've encountered a command, like "build", stop checking args. Everything
+          // after this arg will be options for the specific command.
+          break;
+        }
       }
 
       const commandName: string = args[0];
@@ -128,7 +137,9 @@ export class RushXCommandLine {
         commandWithArgsForDisplay += ' ' + remainingArgs.join(' ');
       }
 
-      console.log('Executing: ' + JSON.stringify(commandWithArgsForDisplay) + os.EOL);
+      if (options.showVerbose) {
+        console.log('Executing: ' + JSON.stringify(commandWithArgsForDisplay) + os.EOL);
+      }
 
       const packageFolder: string = path.dirname(packageJsonFilePath);
 

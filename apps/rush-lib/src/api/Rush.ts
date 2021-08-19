@@ -58,7 +58,7 @@ export class Rush {
     const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
 
     if (!Utilities.shouldRestrictConsoleOutput()) {
-      Rush._printStartupBanner(options.isManaged);
+      Rush._printStartupBanner(options.isManaged, false);
     }
 
     if (!CommandLineMigrationAdvisor.checkArgv(process.argv)) {
@@ -84,10 +84,24 @@ export class Rush {
   public static launchRushX(launcherVersion: string, options: ILaunchOptions): void {
     options = Rush._normalizeLaunchOptions(options);
 
-    Rush._printStartupBanner(options.isManaged);
+    const showVerbose = Rush.earlyVerboseFlag();
 
+    Rush._printStartupBanner(options.isManaged, !showVerbose);
     Rush._assignRushInvokedFolder();
-    RushXCommandLine._launchRushXInternal(launcherVersion, { ...options });
+    RushXCommandLine._launchRushXInternal(launcherVersion, { ...options, showVerbose });
+  }
+
+  /**
+   * Retrieve the value of the "--verbose" flag, true if present and false if not.
+   * This check happens here because we want to control the display of the startup
+   * banner, and we haven't yet fully processed the command-line arguments.
+   */
+  public static earlyVerboseFlag(): boolean {
+    const args = process.argv.slice(2);
+    const cmdIndex = args.findIndex((arg) => !arg.startsWith('-'));
+    const flags = args.slice(0, cmdIndex);
+
+    return flags.includes('-v') || flags.includes('--verbose');
   }
 
   /**
@@ -126,7 +140,7 @@ export class Rush {
       : arg;
   }
 
-  private static _printStartupBanner(isManaged: boolean): void {
+  private static _printStartupBanner(isManaged: boolean, compact: boolean): void {
     const nodeVersion: string = process.versions.node;
     const nodeReleaseLabel: string = NodeJsCompatibility.isOddNumberedVersion
       ? 'unstable'
@@ -134,15 +148,24 @@ export class Rush {
       ? 'LTS'
       : 'pre-LTS';
 
-    console.log(
-      EOL +
-        colors.bold(
-          `Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')
-        ) +
-        colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
+    if (compact) {
+      console.log(
+        colors.bold(`Rush ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')) +
+          colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
+          ` (Node.js ${nodeVersion} ${nodeReleaseLabel})` +
+          EOL
+      );
+    } else {
+      console.log(
         EOL +
-        `Node.js version is ${nodeVersion} (${nodeReleaseLabel})` +
-        EOL
-    );
+          colors.bold(
+            `Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')
+          ) +
+          colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
+          EOL +
+          `Node.js version is ${nodeVersion} (${nodeReleaseLabel})` +
+          EOL
+      );
+    }
   }
 }
