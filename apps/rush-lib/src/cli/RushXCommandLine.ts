@@ -167,10 +167,11 @@ export class RushXCommandLine {
 
   private static _showUsage(packageJson: IPackageJson, projectCommandSet: ProjectCommandSet): void {
     console.log('usage: rushx [-h]');
-    console.log('       rushx <command> ...' + os.EOL);
+    console.log('       rushx [-v] <command> ...' + os.EOL);
 
     console.log('Optional arguments:');
-    console.log('  -h, --help            Show this help message and exit.' + os.EOL);
+    console.log('  -h, --help            Show this help message and exit.');
+    console.log('  -v, --verbose         Show more detailed information while starting.' + os.EOL);
 
     if (projectCommandSet.commandNames.length > 0) {
       console.log(`Project commands for ${colors.cyan(packageJson.name)}:`);

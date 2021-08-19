@@ -99,7 +99,7 @@ export class Rush {
   public static earlyVerboseFlag(): boolean {
     const args = process.argv.slice(2);
     const cmdIndex = args.findIndex((arg) => !arg.startsWith('-'));
-    const flags = args.slice(0, cmdIndex);
+    const flags = cmdIndex < 0 ? args : args.slice(0, cmdIndex);
 
     return flags.includes('-v') || flags.includes('--verbose');
   }
