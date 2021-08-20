@@ -9,6 +9,7 @@ import { DEFAULT_CONSOLE_WIDTH, PrintUtilities } from '@rushstack/terminal';
 
 import { Utilities } from '../utilities/Utilities';
 import { ProjectCommandSet } from '../logic/ProjectCommandSet';
+import { Rush } from '../api/Rush';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 
@@ -18,6 +19,7 @@ import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 export interface ILaunchRushXInternalOptions {
   isManaged: boolean;
   showVerbose: boolean;
+
   alreadyReportedNodeTooNewError?: boolean;
 }
 
@@ -166,6 +168,10 @@ export class RushXCommandLine {
   }
 
   private static _showUsage(packageJson: IPackageJson, projectCommandSet: ProjectCommandSet): void {
+    if (!Rush.earlyVerboseFlag()) {
+      Rush.printStartupBanner();
+    }
+
     console.log('usage: rushx [-h]');
     console.log('       rushx [-v] <command> ...' + os.EOL);
 

@@ -40,6 +40,7 @@ export interface ILaunchOptions {
  */
 export class Rush {
   private static _version: string | undefined = undefined;
+  private static _banner: string | undefined = undefined;
 
   /**
    * This API is used by the `@microsoft/rush` front end to launch the "rush" command-line.
@@ -56,9 +57,10 @@ export class Rush {
    */
   public static launch(launcherVersion: string, arg: ILaunchOptions): void {
     const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
+    Rush._generateStartupBanner(options.isManaged);
 
     if (!Utilities.shouldRestrictConsoleOutput()) {
-      Rush._printStartupBanner(options.isManaged, false);
+      Rush.printStartupBanner();
     }
 
     if (!CommandLineMigrationAdvisor.checkArgv(process.argv)) {
@@ -83,10 +85,14 @@ export class Rush {
    */
   public static launchRushX(launcherVersion: string, options: ILaunchOptions): void {
     options = Rush._normalizeLaunchOptions(options);
+    Rush._generateStartupBanner(options.isManaged);
 
     const showVerbose = Rush.earlyVerboseFlag();
 
-    Rush._printStartupBanner(options.isManaged, !showVerbose);
+    if (showVerbose) {
+      Rush.printStartupBanner();
+    }
+
     Rush._assignRushInvokedFolder();
     RushXCommandLine._launchRushXInternal(launcherVersion, { ...options, showVerbose });
   }
@@ -141,7 +147,7 @@ export class Rush {
       : arg;
   }
 
-  private static _printStartupBanner(isManaged: boolean, compact: boolean): void {
+  private static _generateStartupBanner(isManaged: boolean): void {
     const nodeVersion: string = process.versions.node;
     const nodeReleaseLabel: string = NodeJsCompatibility.isOddNumberedVersion
       ? 'unstable'
@@ -149,24 +155,20 @@ export class Rush {
       ? 'LTS'
       : 'pre-LTS';
 
-    if (compact) {
-      console.log(
-        colors.bold(`Rush ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')) +
-          colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
-          ` (Node.js ${nodeVersion} ${nodeReleaseLabel})` +
-          EOL
-      );
-    } else {
-      console.log(
-        EOL +
-          colors.bold(
-            `Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')
-          ) +
-          colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
-          EOL +
-          `Node.js version is ${nodeVersion} (${nodeReleaseLabel})` +
-          EOL
-      );
+    this._banner =
+      EOL +
+      colors.bold(
+        `Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')
+      ) +
+      colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
+      EOL +
+      `Node.js version is ${nodeVersion} (${nodeReleaseLabel})` +
+      EOL;
+  }
+
+  public static printStartupBanner(): void {
+    if (this._banner) {
+      console.log(this._banner);
     }
   }
 }
