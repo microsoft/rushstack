@@ -101,7 +101,8 @@ export class Rush {
     const cmdIndex = args.findIndex((arg) => !arg.startsWith('-'));
     const flags = cmdIndex < 0 ? args : args.slice(0, cmdIndex);
 
-    return flags.includes('-v') || flags.includes('--verbose');
+    // This functionality will be provided "for free" after converting to ts-command-line.
+    return flags.includes('-v') || flags.includes('--verbose') || process.env.VERBOSE === '1';
   }
 
   /**

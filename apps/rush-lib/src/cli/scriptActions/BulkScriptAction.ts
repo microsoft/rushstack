@@ -281,6 +281,7 @@ export class BulkScriptAction extends BaseScriptAction {
     this._verboseParameter = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
+      environmentVariable: 'VERBOSE',
       description: 'Display the logs during the build, rather than just displaying the build status summary'
     });
 

@@ -46,6 +46,7 @@ export class WriteBuildCacheAction extends BaseRushAction {
     this._verboseFlag = this.defineFlagParameter({
       parameterLongName: '--verbose',
       parameterShortName: '-v',
+      environmentVariable: 'VERBOSE',
       description: 'Display verbose log information.'
     });
   }
