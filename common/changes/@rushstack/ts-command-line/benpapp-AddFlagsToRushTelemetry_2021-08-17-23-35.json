@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "Add getParameterStringMap to CommandLineParameterProvider, to easily query parameter usage for telemetry",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line",
+  "email": "BPapp-MS@users.noreply.github.com"
+}

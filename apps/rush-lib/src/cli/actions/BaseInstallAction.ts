@@ -21,6 +21,7 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { VersionMismatchFinder } from '../../logic/versionMismatch/VersionMismatchFinder';
 import { Variants } from '../../api/Variants';
 import { RushConstants } from '../../logic/RushConstants';
+import { SelectionParameterSet } from '../SelectionParameterSet';
 
 const installManagerFactoryModule: typeof import('../../logic/InstallManagerFactory') = Import.lazy(
   '../../logic/InstallManagerFactory',
@@ -39,6 +40,11 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected _debugPackageManagerParameter!: CommandLineFlagParameter;
   protected _maxInstallAttempts!: CommandLineIntegerParameter;
   protected _ignoreHooksParameter!: CommandLineFlagParameter;
+  /*
+   * Subclasses can initialize the _selectionParameters property in order for
+   * the parameters to be written to the telemetry file
+   */
+  protected _selectionParameters?: SelectionParameterSet;
 
   protected onDefineParameters(): void {
     this._purgeParameter = this.defineFlagParameter({
@@ -181,15 +187,19 @@ export abstract class BaseInstallAction extends BaseRushAction {
     success: boolean
   ): void {
     if (this.parser.telemetry) {
+      const extraData: Record<string, string> = {
+        mode: this.actionName,
+        clean: (!!this._purgeParameter.value).toString(),
+        debug: installManagerOptions.debug.toString(),
+        full: installManagerOptions.fullUpgrade.toString(),
+        ...this.getParameterStringMap(),
+        ...this._selectionParameters?.getTelemetry()
+      };
       this.parser.telemetry.log({
         name: 'install',
         duration: stopwatch.duration,
         result: success ? 'Succeeded' : 'Failed',
-        extraData: {
-          mode: this.actionName,
-          clean: (!!this._purgeParameter.value).toString(),
-          full: installManagerOptions.fullUpgrade.toString()
-        }
+        extraData
       });
     }
   }
