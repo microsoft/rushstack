@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-jest-plugin",
+      "comment": "Upgrade jest dependency to Jest 26 (from Jest 25)",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin",
+  "email": "jonasb@users.noreply.github.com"
+}
