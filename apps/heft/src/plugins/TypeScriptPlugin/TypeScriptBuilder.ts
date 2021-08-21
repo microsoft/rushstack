@@ -207,7 +207,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     }
 
     this._tslintConfigFilePath = path.resolve(this._configuration.buildFolder, 'tslint.json');
-    this._eslintConfigFilePath = path.resolve(this._configuration.buildFolder, '.eslintrc.js');
     this._eslintEnabled = this._tslintEnabled =
       this._configuration.lintingEnabled && !this._configuration.watchMode; // Don't run lint in watch mode
 
@@ -215,8 +214,19 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       this._tslintEnabled = this._cachedFileSystem.exists(this._tslintConfigFilePath);
     }
 
+    this._eslintConfigFilePath = path.resolve(this._configuration.buildFolder, '.eslintrc.js');
     if (this._eslintEnabled) {
-      this._eslintEnabled = this._cachedFileSystem.exists(this._eslintConfigFilePath);
+      // When project is configured with "type": "module" in package.json, the config file must have a .cjs extension
+      // so use it if it exists
+      const alternativeEslintConfigFilePath: string = path.resolve(
+        this._configuration.buildFolder,
+        '.eslintrc.cjs'
+      );
+      if (this._cachedFileSystem.exists(alternativeEslintConfigFilePath)) {
+        this._eslintConfigFilePath = alternativeEslintConfigFilePath;
+      } else {
+        this._eslintEnabled = this._cachedFileSystem.exists(this._eslintConfigFilePath);
+      }
     }
 
     // Report a warning if the TypeScript version is too old/new.  The current oldest supported version is
