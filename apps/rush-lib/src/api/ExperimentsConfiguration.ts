@@ -34,6 +34,12 @@ export interface IExperimentsJson {
    * This normalization can help ensure consistent tarball integrity across platforms.
    */
   noChmodFieldInTarHeaderNormalization?: boolean;
+
+  /**
+   * If true, build caching will respect the allowWarningsInSuccessfulBuild flag and cache builds with warnings.
+   * This will not replay warnings from the cached build.
+   */
+  buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
 }
 
 /**

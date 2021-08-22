@@ -354,7 +354,10 @@ export class ProjectBuilder extends BaseBuilder {
 
       const taskIsSuccessful: boolean =
         status === TaskStatus.Success ||
-        (status === TaskStatus.SuccessWithWarning && this._allowWarningsInSuccessfulBuild);
+        (status === TaskStatus.SuccessWithWarning &&
+          this._allowWarningsInSuccessfulBuild &&
+          !!this._rushConfiguration.experimentsConfiguration.configuration
+            .buildCacheWithAllowWarningsInSuccessfulBuild);
 
       if (taskIsSuccessful && projectBuildDeps) {
         // Write deps on success.
