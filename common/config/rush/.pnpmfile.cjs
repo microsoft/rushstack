@@ -48,7 +48,7 @@ function readPackage(packageJson, context) {
         break;
       }
 
-      case '3.11.3': {
+      case '4.0.0': {
         // This is for heft-webpack5-plugin and the other projects that use Webpack 5.
         // Webpack 5 brings its own typings
         packageJson.peerDependencies['webpack'] = '^5.0.0';

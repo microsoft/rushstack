@@ -150,13 +150,16 @@ export class WebpackPlugin implements IHeftPlugin {
     if (buildProperties.serveMode) {
       const defaultDevServerOptions: TWebpackDevServer.Configuration = {
         host: 'localhost',
-        publicPath: '/',
-        filename: '[name]_[hash].js',
-        clientLogLevel: 'info',
-        stats: {
-          cached: false,
-          cachedAssets: false,
-          colors: supportsColor
+        devMiddleware: {
+          publicPath: '/',
+          stats: {
+            cached: false,
+            cachedAssets: false,
+            colors: supportsColor
+          }
+        },
+        client: {
+          logging: 'info'
         },
         port: 8080
       };
@@ -184,8 +187,9 @@ export class WebpackPlugin implements IHeftPlugin {
       // Register a plugin to callback after webpack is done with the first compilation
       // so we can move on to post-build
       let firstCompilationDoneCallback: (() => void) | undefined;
-      const originalBeforeCallback: typeof options.before | undefined = options.before;
-      options.before = (app, devServer, compiler: WebpackCompiler) => {
+      const originalBeforeCallback: typeof options.onBeforeSetupMiddleware | undefined =
+        options.onBeforeSetupMiddleware;
+      options.onBeforeSetupMiddleware = (devServer) => {
         compiler.hooks.done.tap('heft-webpack-plugin', () => {
           if (firstCompilationDoneCallback) {
             firstCompilationDoneCallback();
@@ -194,7 +198,7 @@ export class WebpackPlugin implements IHeftPlugin {
         });
 
         if (originalBeforeCallback) {
-          return originalBeforeCallback(app, devServer, compiler);
+          return originalBeforeCallback(devServer);
         }
       };
 
@@ -205,15 +209,14 @@ export class WebpackPlugin implements IHeftPlugin {
       const WebpackDevServer: typeof TWebpackDevServer = require(WEBPACK_DEV_SERVER_PACKAGE_NAME);
       // TODO: the WebpackDevServer accepts a third parameter for a logger. We should make
       // use of that to make logging cleaner
-      const webpackDevServer: TWebpackDevServer = new WebpackDevServer(compiler, options);
+      const webpackDevServer: TWebpackDevServer = new WebpackDevServer(options, compiler);
+
       await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
         firstCompilationDoneCallback = resolve;
 
-        webpackDevServer.listen(options.port!, options.host!, (error: Error | undefined) => {
-          if (error) {
-            reject(error);
-          }
-        });
+        // Wrap in promise.resolve due to small issue in the type declaration, return type should be
+        // webpackDevServer.start(): Promise<void>;
+        Promise.resolve(webpackDevServer.start()).catch(reject);
       });
     } else {
       if (process.env[WEBPACK_DEV_SERVER_ENV_VAR_NAME]) {
