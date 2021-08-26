@@ -42,7 +42,7 @@ interface IRigConfigOptions {
   rigFound: boolean;
   filePath: string;
   rigPackageName: string;
-  rigProfile: string;
+  rigProfile?: string;
 }
 
 /**
@@ -60,6 +60,11 @@ export interface ILoadForProjectFolderOptions {
    * If specified, instead of loading the `config/rig.json` from disk, this object will be substituted instead.
    */
   overrideRigJsonObject?: IRigConfigJson;
+
+  /**
+   * If specified, force a fresh load instead of returning a cached entry, if one existed.
+   */
+  bypassCache?: boolean;
 }
 
 /**
@@ -90,6 +95,8 @@ export class RigConfig {
    */
   public static jsonSchemaPath: string = path.resolve(__dirname, './schemas/rig.schema.json');
   private static _jsonSchemaObject: object | undefined = undefined;
+
+  private static readonly _configCache: Map<string, RigConfig> = new Map();
 
   /**
    * The project folder path that was passed to {@link RigConfig.loadForProjectFolder},
@@ -160,13 +167,15 @@ export class RigConfig {
   private _resolvedProfileFolder: string | undefined;
 
   private constructor(options: IRigConfigOptions) {
-    this.projectFolderOriginalPath = options.projectFolderPath;
-    this.projectFolderPath = path.resolve(options.projectFolderPath);
+    const { projectFolderPath, rigFound, filePath, rigPackageName, rigProfile = 'default' } = options;
 
-    this.rigFound = options.rigFound;
-    this.filePath = options.filePath;
-    this.rigPackageName = options.rigPackageName;
-    this.rigProfile = options.rigProfile;
+    this.projectFolderOriginalPath = projectFolderPath;
+    this.projectFolderPath = path.resolve(projectFolderPath);
+
+    this.rigFound = rigFound;
+    this.filePath = filePath;
+    this.rigPackageName = rigPackageName;
+    this.rigProfile = rigProfile;
 
     if (this.rigFound) {
       this.relativeProfileFolderPath = 'profiles/' + this.rigProfile;
@@ -199,80 +208,110 @@ export class RigConfig {
    * equal to `false`.
    */
   public static loadForProjectFolder(options: ILoadForProjectFolderOptions): RigConfig {
-    const rigConfigFilePath: string = path.join(options.projectFolderPath, 'config/rig.json');
+    const { overrideRigJsonObject, projectFolderPath } = options;
 
-    let json: IRigConfigJson;
+    const fromCache: RigConfig | undefined =
+      !options.bypassCache && !overrideRigJsonObject
+        ? RigConfig._configCache.get(projectFolderPath)
+        : undefined;
+
+    if (fromCache) {
+      return fromCache;
+    }
+
+    const rigConfigFilePath: string = path.join(projectFolderPath, 'config/rig.json');
+
+    let config: RigConfig | undefined;
+    let json: IRigConfigJson | undefined = overrideRigJsonObject;
     try {
-      if (options.overrideRigJsonObject) {
-        json = options.overrideRigJsonObject;
-      } else {
-        if (!fs.existsSync(rigConfigFilePath)) {
-          return new RigConfig({
-            projectFolderPath: options.projectFolderPath,
-
-            rigFound: false,
-            filePath: '',
-            rigPackageName: '',
-            rigProfile: ''
-          });
-        }
-
+      if (!json) {
         const rigConfigFileContent: string = fs.readFileSync(rigConfigFilePath).toString();
-        json = JSON.parse(stripJsonComments(rigConfigFileContent));
+        json = JSON.parse(stripJsonComments(rigConfigFileContent)) as IRigConfigJson;
       }
       RigConfig._validateSchema(json);
     } catch (error) {
-      throw new Error(error.message + '\nError loading config file: ' + rigConfigFilePath);
+      config = RigConfig._handleConfigError(error, projectFolderPath, rigConfigFilePath);
     }
 
-    return new RigConfig({
-      projectFolderPath: options.projectFolderPath,
+    if (!config) {
+      config = new RigConfig({
+        projectFolderPath: projectFolderPath,
 
-      rigFound: true,
-      filePath: rigConfigFilePath,
-      rigPackageName: json.rigPackageName,
-      rigProfile: json.rigProfile || 'default'
-    });
+        rigFound: true,
+        filePath: rigConfigFilePath,
+        rigPackageName: json!.rigPackageName,
+        rigProfile: json!.rigProfile
+      });
+    }
+
+    if (!overrideRigJsonObject) {
+      RigConfig._configCache.set(projectFolderPath, config);
+    }
+    return config;
   }
 
   /**
    * An async variant of {@link RigConfig.loadForProjectFolder}
    */
   public static async loadForProjectFolderAsync(options: ILoadForProjectFolderOptions): Promise<RigConfig> {
-    const rigConfigFilePath: string = path.join(options.projectFolderPath, 'config/rig.json');
+    const { overrideRigJsonObject, projectFolderPath } = options;
 
-    let json: IRigConfigJson;
+    const fromCache: RigConfig | false | undefined =
+      !options.bypassCache && !overrideRigJsonObject && RigConfig._configCache.get(projectFolderPath);
+
+    if (fromCache) {
+      return fromCache;
+    }
+
+    const rigConfigFilePath: string = path.join(projectFolderPath, 'config/rig.json');
+
+    let config: RigConfig | undefined;
+    let json: IRigConfigJson | undefined = overrideRigJsonObject;
     try {
-      if (options.overrideRigJsonObject) {
-        json = options.overrideRigJsonObject;
-      } else {
-        if (!(await Helpers.fsExistsAsync(rigConfigFilePath))) {
-          return new RigConfig({
-            projectFolderPath: options.projectFolderPath,
-
-            rigFound: false,
-            filePath: '',
-            rigPackageName: '',
-            rigProfile: ''
-          });
-        }
-
+      if (!json) {
         const rigConfigFileContent: string = (await fs.promises.readFile(rigConfigFilePath)).toString();
-        json = JSON.parse(stripJsonComments(rigConfigFileContent));
+        json = JSON.parse(stripJsonComments(rigConfigFileContent)) as IRigConfigJson;
       }
 
       RigConfig._validateSchema(json);
     } catch (error) {
+      config = RigConfig._handleConfigError(error, projectFolderPath, rigConfigFilePath);
+    }
+
+    if (!config) {
+      config = new RigConfig({
+        projectFolderPath: projectFolderPath,
+
+        rigFound: true,
+        filePath: rigConfigFilePath,
+        rigPackageName: json!.rigPackageName,
+        rigProfile: json!.rigProfile
+      });
+    }
+
+    if (!overrideRigJsonObject) {
+      RigConfig._configCache.set(projectFolderPath, config);
+    }
+    return config;
+  }
+
+  private static _handleConfigError(
+    error: NodeJS.ErrnoException,
+    projectFolderPath: string,
+    rigConfigFilePath: string
+  ): RigConfig {
+    if (error.code !== 'ENOENT' && error.code !== 'ENOTDIR') {
       throw new Error(error.message + '\nError loading config file: ' + rigConfigFilePath);
     }
 
+    // File not found, i.e. no rig config
     return new RigConfig({
-      projectFolderPath: options.projectFolderPath,
+      projectFolderPath,
 
-      rigFound: true,
-      filePath: rigConfigFilePath,
-      rigPackageName: json.rigPackageName,
-      rigProfile: json.rigProfile || 'default'
+      rigFound: false,
+      filePath: '',
+      rigPackageName: '',
+      rigProfile: ''
     });
   }
 

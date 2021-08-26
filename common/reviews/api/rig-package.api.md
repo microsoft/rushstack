@@ -6,6 +6,7 @@
 
 // @public
 export interface ILoadForProjectFolderOptions {
+    bypassCache?: boolean;
     overrideRigJsonObject?: IRigConfigJson;
     projectFolderPath: string;
 }
@@ -33,7 +34,6 @@ export class RigConfig {
     readonly rigProfile: string;
     tryResolveConfigFilePath(configFileRelativePath: string): string | undefined;
     tryResolveConfigFilePathAsync(configFileRelativePath: string): Promise<string | undefined>;
-    }
-
+}
 
 ```
