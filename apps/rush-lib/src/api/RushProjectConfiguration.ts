@@ -126,6 +126,9 @@ export class RushProjectConfiguration {
       }
     });
 
+  private static readonly _configCache: Map<RushConfigurationProject, RushProjectConfiguration | false> =
+    new Map();
+
   public readonly project: RushConfigurationProject;
 
   /**
@@ -177,8 +180,17 @@ export class RushProjectConfiguration {
   public static async tryLoadForProjectAsync(
     project: RushConfigurationProject,
     repoCommandLineConfiguration: CommandLineConfiguration | undefined,
-    terminal: Terminal
+    terminal: Terminal,
+    skipCache?: boolean
   ): Promise<RushProjectConfiguration | undefined> {
+    // false is a signal that the project config does not exist
+    const cacheEntry: RushProjectConfiguration | false | undefined = skipCache
+      ? undefined
+      : RushProjectConfiguration._configCache.get(project);
+    if (cacheEntry !== undefined) {
+      return cacheEntry || undefined;
+    }
+
     const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
       projectFolderPath: project.projectFolder
     });
@@ -197,8 +209,11 @@ export class RushProjectConfiguration {
         repoCommandLineConfiguration,
         terminal
       );
-      return new RushProjectConfiguration(project, rushProjectJson);
+      const result: RushProjectConfiguration = new RushProjectConfiguration(project, rushProjectJson);
+      RushProjectConfiguration._configCache.set(project, result);
+      return result;
     } else {
+      RushProjectConfiguration._configCache.set(project, false);
       return undefined;
     }
   }
