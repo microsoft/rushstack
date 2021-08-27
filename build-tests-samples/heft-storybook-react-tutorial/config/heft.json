@@ -54,7 +54,8 @@
     {
       "plugin": "@rushstack/heft-storybook-plugin",
       "options": {
-        "storykitPackageName": "heft-storybook-react-tutorial-storykit"
+        "storykitPackageName": "heft-storybook-react-tutorial-storykit",
+        "startupModulePath": "@storybook/react/bin/index.js"
       }
     }
   ]

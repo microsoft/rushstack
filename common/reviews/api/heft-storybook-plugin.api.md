@@ -13,7 +13,9 @@ export default _default;
 // @public (undocumented)
 export interface IStorybookPluginOptions {
     // (undocumented)
-    storykitPackageName?: string;
+    startupModulePath: string;
+    // (undocumented)
+    storykitPackageName: string;
 }
 
 ```
