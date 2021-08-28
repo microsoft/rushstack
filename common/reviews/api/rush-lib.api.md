@@ -81,7 +81,7 @@ export class CommonVersionsConfiguration {
 }
 
 // @public
-export type DefaultSemverStyle = "exact" | "tilde" | "caret";
+export type DefaultSemverStyle = 'exact' | 'tilde' | 'caret';
 
 // @beta (undocumented)
 export const enum DependencyType {
