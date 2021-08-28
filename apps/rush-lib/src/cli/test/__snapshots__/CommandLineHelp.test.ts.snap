@@ -73,7 +73,9 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: add 1`] = `
-"usage: rush add [-h] -p PACKAGE [--exact] [--caret] [--dev] [-m] [-s] [--all]
+"usage: rush add [-h] -p PACKAGE [--exact] [--caret] [--tilde] [--dev] [-m]
+                [-s] [--all]
+                
 
 Adds a specified package as a dependency of the current project (as 
 determined by the current working directory) and then runs \\"rush update\\". If 
@@ -101,6 +103,9 @@ Optional arguments:
   --caret               If specified, the SemVer specifier added to the 
                         package.json will be a prepended with a \\"caret\\" 
                         specifier (\\"^\\").
+  --tilde               If specified, the SemVer specifier added to the 
+                        package.json will be a prepended with a \\"tilde\\" 
+                        specifier (\\"~\\").
   --dev                 If specified, the package will be added to the 
                         \\"devDependencies\\" section of the package.json
   -m, --make-consistent
