@@ -36,6 +36,25 @@
           "type": "string"
         }
       }
+    },
+    "dependencyVersionDefaults": {
+      "description": "An array of patterns & semver styles that \"rush add\" will compare against the desired package, in order to select a default semver for it.  This is only a fallback that's used when no explicit semver is defined, or no other semver is able to be determined based on existing repository settings.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "packageNamePattern": {
+            "description": "This pattern will be matched against the package being installed.  May include wildcards, using \"*\".  E.g. \"@types/*\"",
+            "type": "string"
+          },
+          "semverStyle": {
+            "type": "string",
+            "enum": ["exact", "caret", "tilde"]
+          }
+        },
+        "required": ["packageNamePattern", "semverStyle"],
+        "additionalProperties": false
+      }
     }
   },
   "additionalProperties": false

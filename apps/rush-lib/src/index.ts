@@ -34,7 +34,11 @@ export { RushGlobalFolder as _RushGlobalFolder } from './api/RushGlobalFolder';
 
 export { ApprovedPackagesItem, ApprovedPackagesConfiguration } from './api/ApprovedPackagesConfiguration';
 
-export { CommonVersionsConfiguration } from './api/CommonVersionsConfiguration';
+export {
+  CommonVersionsConfiguration,
+  IChosenSemverStyle,
+  DefaultSemverStyle
+} from './api/CommonVersionsConfiguration';
 
 export { PackageJsonEditor, PackageJsonDependency, DependencyType } from './api/PackageJsonEditor';
 

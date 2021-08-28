@@ -13,6 +13,7 @@ import {
 } from '@rushstack/node-core-library';
 import { PackageNameParsers } from './PackageNameParsers';
 import { JsonSchemaUrls } from '../logic/JsonSchemaUrls';
+import { Utilities } from '../utilities/Utilities';
 
 /**
  * Part of the ICommonVersionsJson structure.
@@ -37,6 +38,40 @@ export declare interface ICommonVersionsJsonVersionsMap {
 }
 
 /**
+ * The possible semver styles that can be defined
+ * @public
+ */
+export type DefaultSemverStyle = 'exact' | 'tilde' | 'caret';
+
+/**
+ * The return type for the matched default semver style.
+ * @public
+ */
+export declare interface IChosenSemverStyle {
+  /**
+   * The chosen semver style type
+   */
+  semverStyle: DefaultSemverStyle;
+  /**
+   * This will be the symbol that should be used for the chosen semver
+   * when installing the package.
+   */
+  semverSymbol: string;
+}
+
+/**
+ * Structure of the dependency version defaults
+ */
+interface IDependencyVersionDefault {
+  /**
+   * A pattern to match the package name against, in order to apply
+   * this semver style
+   */
+  packageNamePattern: string;
+  semverStyle: DefaultSemverStyle;
+}
+
+/**
  * Describes the file structure for the "common/config/rush/common-versions.json" config file.
  */
 interface ICommonVersionsJson {
@@ -49,6 +84,8 @@ interface ICommonVersionsJson {
   xstitchPreferredVersions?: ICommonVersionsJsonVersionMap;
 
   allowedAlternativeVersions?: ICommonVersionsJsonVersionsMap;
+
+  dependencyVersionDefaults?: IDependencyVersionDefault[];
 }
 
 /**
@@ -66,6 +103,7 @@ export class CommonVersionsConfiguration {
   private _implicitlyPreferredVersions: boolean | undefined;
   private _xstitchPreferredVersions: ProtectableMap<string, string>;
   private _allowedAlternativeVersions: ProtectableMap<string, string[]>;
+  private _dependencyVersionDefaults: IDependencyVersionDefault[];
   private _modified: boolean = false;
 
   private constructor(commonVersionsJson: ICommonVersionsJson | undefined, filePath: string) {
@@ -86,6 +124,8 @@ export class CommonVersionsConfiguration {
     this._allowedAlternativeVersions = new ProtectableMap<string, string[]>({
       onSet: this._onSetAllowedAlternativeVersions.bind(this)
     });
+
+    this._dependencyVersionDefaults = commonVersionsJson?.dependencyVersionDefaults || [];
 
     if (commonVersionsJson) {
       try {
@@ -247,6 +287,37 @@ export class CommonVersionsConfiguration {
     MapExtensions.mergeFromMap(allPreferredVersions, this.preferredVersions);
     MapExtensions.mergeFromMap(allPreferredVersions, this.xstitchPreferredVersions);
     return allPreferredVersions;
+  }
+
+  /**
+   * Returns the desired semver default for the input `packageName`
+   */
+  public getDefaultSemverForPackage(packageName: string): IChosenSemverStyle {
+    const semverStyle: DefaultSemverStyle =
+      this._dependencyVersionDefaults.find(({ packageNamePattern }) => {
+        return Utilities.matchesWithStar(packageNamePattern, packageName);
+      })?.semverStyle || 'tilde';
+
+    let semverSymbol: string = '';
+    switch (semverStyle) {
+      case 'caret': {
+        semverSymbol = '^';
+        break;
+      }
+      case 'exact': {
+        semverSymbol = '';
+        break;
+      }
+      case 'tilde': {
+        semverSymbol = '~';
+        break;
+      }
+    }
+
+    return {
+      semverStyle,
+      semverSymbol
+    };
   }
 
   private _onSetPreferredVersions(
