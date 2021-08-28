@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/heft-webpack5-plugin",
       "comment": "Migrate to webpack-dev-server 4.x",
-      "type": "major"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft-webpack5-plugin",
