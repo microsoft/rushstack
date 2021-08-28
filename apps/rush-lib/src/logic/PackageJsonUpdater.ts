@@ -454,7 +454,7 @@ export class PackageJsonUpdater {
             .getCommonVersions()
             .getDefaultSemverForPackage(packageName);
           selectedVersionPrefix += semverSymbol;
-          reasonForModification = ` because the calculated default semver is ${semverStyle}`;
+          reasonForModification = ` because the calculated default semver is "${semverStyle}"`;
           break;
         }
         case SemVerStyle.Caret: {
