@@ -7,5 +7,19 @@
   },
   "allowedAlternativeVersions": {
     "library-3": ["^1.2.3"]
-  }
+  },
+  "dependencyVersionDefaults": [
+    {
+      "packageNamePattern": "@types/*",
+      "semverStyle": "exact"
+    },
+    {
+      "packageNamePattern": "tilde-library",
+      "semverStyle": "tilde"
+    },
+    {
+      "packageNamePattern": "*",
+      "semverStyle": "caret"
+    }
+  ]
 }
