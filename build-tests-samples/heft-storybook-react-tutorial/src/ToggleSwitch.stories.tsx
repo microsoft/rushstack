@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+
+import { ComponentStory, ComponentMeta } from 'heft-storybook-react-tutorial-storykit';
 
 import { ToggleSwitch } from './ToggleSwitch';
 
