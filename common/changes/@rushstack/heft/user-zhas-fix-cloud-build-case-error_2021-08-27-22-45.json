@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "Fix the cloud build error caused by process.chdir",
+      "comment": "Ensure `process.cwd()` is set to the project root with correct file path casing.",
       "type": "patch"
     }
   ],
