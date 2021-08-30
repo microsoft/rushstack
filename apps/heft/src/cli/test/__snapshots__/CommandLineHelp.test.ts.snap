@@ -67,7 +67,7 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: start 1`] = `
 "usage: heft start [-h] [-v] [--production] [--locale LOCALE] [-l]
                   [--typescript-max-write-parallelism PARALLEILSM]
-                  [--max-old-space-size SIZE] [--clean]
+                  [--max-old-space-size SIZE] [--clean] [--storybook]
                   
 
 Optional arguments:
@@ -85,6 +85,9 @@ Optional arguments:
                         Used to specify the max old space size.
   --clean               If specified, clean the package before starting the 
                         development server.
+  --storybook           (EXPERIMENTAL) Used by the 
+                        \\"@rushstack/heft-storybook-plugin\\" package to launch 
+                        Storybook.
 "
 `;
 

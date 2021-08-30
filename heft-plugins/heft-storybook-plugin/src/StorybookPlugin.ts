@@ -75,6 +75,18 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
     this._startupModulePath = options.startupModulePath;
 
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
+      // TODO: Expose an API for custom CLI parameters similar to HeftSession.registerAction()
+      if (process.argv.indexOf('--storybook') < 0) {
+        this._logger.terminal.writeVerboseLine(
+          'The command line does not include "--storybook", so bundling will proceed without Storybook'
+        );
+        return;
+      }
+
+      this._logger.terminal.writeVerboseLine(
+        'The command line includes "--storybook", redirecting Webpack to Storybook'
+      );
+
       build.hooks.preCompile.tap(PLUGIN_NAME, (preCompile: IPreCompileSubstage) => {
         preCompile.hooks.run.tap(PLUGIN_NAME, () => {
           this._onPreCompile(heftSession, heftConfiguration);
