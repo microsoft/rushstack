@@ -33,7 +33,6 @@ import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 import { ICustomActionOptions, CustomAction } from './actions/CustomAction';
 import { Constants } from '../utilities/Constants';
 import { IHeftLifecycle, HeftLifecycleHooks } from '../pluginFramework/HeftLifecycle';
-import { FileError } from '../pluginFramework/logging/FileError';
 
 /**
  * This interfaces specifies values for parameters that must be parsed before the CLI
