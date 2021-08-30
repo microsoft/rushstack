@@ -48,7 +48,7 @@ export interface IMetricsData {
   /**
    * A map of commandline parameter names to their effective values
    */
-  commandParameters?: Record<string, string>;
+  commandParameters: Record<string, string>;
 }
 
 /**
@@ -108,7 +108,7 @@ export class MetricsCollector {
    */
   public record(
     command: string,
-    parameterMap?: Record<string, string>,
+    parameterMap: Record<string, string>,
     performanceData?: Partial<IPerformanceData>
   ): void {
     if (this._startTimeMs === undefined) {
