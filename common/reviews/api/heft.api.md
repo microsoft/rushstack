@@ -274,6 +274,7 @@ export interface IHeftSessionHooks {
 // @public (undocumented)
 export interface IMetricsData {
     command: string;
+    commandParameters?: Record<string, string>;
     machineArch: string;
     machineCores: number;
     machineOs: string;
@@ -362,7 +363,7 @@ export class _MetricsCollector {
     flushAsync(): Promise<void>;
     // (undocumented)
     readonly hooks: MetricsCollectorHooks;
-    record(command: string, performanceData?: Partial<_IPerformanceData>): void;
+    record(command: string, parameterMap?: Record<string, string>, performanceData?: Partial<_IPerformanceData>): void;
     setStartTime(): void;
 }
 
