@@ -108,8 +108,8 @@ export class MetricsCollector {
    */
   public record(
     command: string,
-    parameterMap: Record<string, string>,
-    performanceData?: Partial<IPerformanceData>
+    performanceData?: Partial<IPerformanceData>,
+    parameters?: Record<string, string>
   ): void {
     if (this._startTimeMs === undefined) {
       throw new InternalError('MetricsCollector has not been initialized with setStartTime() yet');
@@ -136,7 +136,7 @@ export class MetricsCollector {
       machineCores: os.cpus().length,
       machineProcessor: os.cpus()[0].model,
       machineTotalMemoryMB: os.totalmem(),
-      commandParameters: parameterMap
+      commandParameters: parameters || {}
     };
 
     this.hooks.recordMetric.call('inner_loop_heft', metricsData);

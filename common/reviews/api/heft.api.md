@@ -363,7 +363,7 @@ export class _MetricsCollector {
     flushAsync(): Promise<void>;
     // (undocumented)
     readonly hooks: MetricsCollectorHooks;
-    record(command: string, parameterMap: Record<string, string>, performanceData?: Partial<_IPerformanceData>): void;
+    record(command: string, performanceData?: Partial<_IPerformanceData>, parameters?: Record<string, string>): void;
     setStartTime(): void;
 }
 
