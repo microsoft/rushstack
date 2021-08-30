@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-webpack5-plugin",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.3.0",
+      "date": "Mon, 30 Aug 2021 15:08:25 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Migrate to webpack-dev-server 4.x"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.8",
       "tag": "@rushstack/heft-webpack5-plugin_v0.2.8",
       "date": "Fri, 27 Aug 2021 00:07:25 GMT",
