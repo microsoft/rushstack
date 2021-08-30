@@ -33,6 +33,7 @@ import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 import { ICustomActionOptions, CustomAction } from './actions/CustomAction';
 import { Constants } from '../utilities/Constants';
 import { IHeftLifecycle, HeftLifecycleHooks } from '../pluginFramework/HeftLifecycle';
+import { FileError } from '../pluginFramework/logging/FileError';
 
 /**
  * This interfaces specifies values for parameters that must be parsed before the CLI
@@ -229,7 +230,9 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     if (currentCwd !== buildFolder) {
       // Update the CWD to the project's build root. Some tools, like Jest, use process.cwd()
       this._terminal.writeVerboseLine(`CWD is "${currentCwd}". Normalizing to project build folder.`);
-      process.chdir('.heft');
+      if (FileSystem.existsAsync('.heft')) {
+        process.chdir('.heft');
+      }
       process.chdir(buildFolder);
     }
   }
