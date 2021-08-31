@@ -230,6 +230,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       // Update the CWD to the project's build root. Some tools, like Jest, use process.cwd()
       this._terminal.writeVerboseLine(`CWD is "${currentCwd}". Normalizing to project build folder.`);
       await FileSystem.ensureFolderAsync(this._heftConfiguration.projectHeftDataFolder);
+      process.chdir(this._heftConfiguration.projectHeftDataFolder);
       process.chdir(buildFolder);
     }
   }
