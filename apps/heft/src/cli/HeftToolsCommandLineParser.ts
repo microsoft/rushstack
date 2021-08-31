@@ -164,7 +164,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     this._terminalProvider.verboseEnabled = this.isDebug;
 
     try {
-      await this._normalizeCwd();
+      await this._normalizeCwdAsync();
 
       await this._checkForUpgradeAsync();
 
@@ -222,7 +222,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     process.exitCode = 0;
   }
 
-  private async _normalizeCwd(): Promise<void> {
+  private async _normalizeCwdAsync(): Promise<void> {
     const buildFolder: string = this._heftConfiguration.buildFolder;
     this._terminal.writeLine(`Project build folder is "${buildFolder}"`);
     const currentCwd: string = process.cwd();
