@@ -23,10 +23,45 @@ import { StorybookRunner } from './StorybookRunner';
 const PLUGIN_NAME: string = 'StorybookPlugin';
 const TASK_NAME: string = 'heft-storybook';
 
-/** @public */
+/**
+ * Options for `StorybookPlugin`.
+ *
+ * @public
+ */
 export interface IStorybookPluginOptions {
+  /**
+   * Specifies an NPM package that will provide the Storybook dependencies for the project.
+   *
+   * @example
+   * `"storykitPackageName": "my-react-storykit"`
+   *
+   * @remarks
+   *
+   * Storybook's conventional approach is for your app project to have direct dependencies
+   * on NPM packages such as `@storybook/react` and `@storybook/addon-essentials`.  These packages have
+   * heavyweight dependencies such as Babel, Webpack, and the associated loaders and plugins needed to
+   * build the Storybook app (which is bundled completely independently from Heft).  Naively adding these
+   * dependencies to your app's package.json muddies the waters of two radically different toolchains,
+   * and is likely to lead to dependency conflicts, for example if Heft installs Webpack 5 but
+   * `@storybook/react` installs Webpack 4.
+   *
+   * To solve this problem, `heft-storybook-plugin` introduces the concept of a separate
+   * "storykit package".  All of your Storybook NPM packages are moved to be dependencies of the
+   * storykit.  Storybook's browser API unfortunately isn't separated into dedicated NPM packages,
+   * but instead is exported by the Node.js toolchain packages such as `@storybook/react`.  For
+   * an even cleaner separation the storykit package can simply reexport such APIs.
+   */
   storykitPackageName: string;
 
+  /**
+   * The module entry point that Heft should use to launch the Storybook toolchain.  Typically it
+   * is the path loaded the `start-storybook` shell script.
+   *
+   * @example
+   * If you are using `@storybook/react`, then the startup path would be:
+   *
+   * `"startupModulePath": "@storybook/react/bin/index.js"`
+   */
   startupModulePath: string;
 }
 

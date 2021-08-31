@@ -10,11 +10,9 @@ import type { IHeftPlugin } from '@rushstack/heft';
 const _default: IHeftPlugin<IStorybookPluginOptions>;
 export default _default;
 
-// @public (undocumented)
+// @public
 export interface IStorybookPluginOptions {
-    // (undocumented)
     startupModulePath: string;
-    // (undocumented)
     storykitPackageName: string;
 }
 
