@@ -14,6 +14,7 @@ import {
   Path,
   FileSystem
 } from '@rushstack/node-core-library';
+import { trueCasePathSync } from 'true-case-path';
 import { ArgumentParser } from 'argparse';
 import { SyncHook } from 'tapable';
 
@@ -223,14 +224,13 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
   }
 
   private async _normalizeCwdAsync(): Promise<void> {
-    const buildFolder: string = this._heftConfiguration.buildFolder;
+    let buildFolder: string = this._heftConfiguration.buildFolder;
     this._terminal.writeLine(`Project build folder is "${buildFolder}"`);
     const currentCwd: string = process.cwd();
     if (currentCwd !== buildFolder) {
       // Update the CWD to the project's build root. Some tools, like Jest, use process.cwd()
       this._terminal.writeVerboseLine(`CWD is "${currentCwd}". Normalizing to project build folder.`);
-      await FileSystem.ensureFolderAsync(this._heftConfiguration.projectHeftDataFolder);
-      process.chdir(this._heftConfiguration.projectHeftDataFolder);
+      buildFolder = trueCasePathSync(buildFolder);
       process.chdir(buildFolder);
     }
   }
