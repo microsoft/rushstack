@@ -164,7 +164,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     this._terminalProvider.verboseEnabled = this.isDebug;
 
     try {
-      this._normalizeCwd();
+      await this._normalizeCwd();
 
       await this._checkForUpgradeAsync();
 
@@ -222,16 +222,14 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     process.exitCode = 0;
   }
 
-  private _normalizeCwd(): void {
+  private async _normalizeCwd(): Promise<void> {
     const buildFolder: string = this._heftConfiguration.buildFolder;
     this._terminal.writeLine(`Project build folder is "${buildFolder}"`);
     const currentCwd: string = process.cwd();
     if (currentCwd !== buildFolder) {
       // Update the CWD to the project's build root. Some tools, like Jest, use process.cwd()
       this._terminal.writeVerboseLine(`CWD is "${currentCwd}". Normalizing to project build folder.`);
-      if (FileSystem.existsAsync('.heft')) {
-        process.chdir('.heft');
-      }
+      await FileSystem.ensureFolderAsync(this._heftConfiguration.projectHeftDataFolder);
       process.chdir(buildFolder);
     }
   }
