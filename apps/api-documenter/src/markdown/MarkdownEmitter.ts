@@ -162,7 +162,7 @@ export class MarkdownEmitter {
         writer.write(docFencedCode.language);
         writer.writeLine();
         writer.write(docFencedCode.code);
-        writer.writeLine();
+        writer.ensureNewLine();
         writer.writeLine('```');
         break;
       }
