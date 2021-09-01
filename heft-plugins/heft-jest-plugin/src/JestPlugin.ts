@@ -150,14 +150,6 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
         heftConfiguration.buildFolder,
         heftConfiguration.rigConfig
       );
-      if (jestConfig.preset) {
-        throw new Error(
-          'The provided jest.config.json specifies a "preset" property while using resolved modules. ' +
-            'You must either remove all "preset" values from your Jest configuration, use the "extends" ' +
-            'property, or set the "disableConfigurationModuleResolution" option to "true" on the Jest ' +
-            'plugin in heft.json'
-        );
-      }
     }
 
     const jestArgv: Config.Argv = {
