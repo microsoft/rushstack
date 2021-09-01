@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.37.0",
+      "tag": "@rushstack/heft_v0.37.0",
+      "date": "Tue, 31 Aug 2021 00:07:11 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add commandParameters to IMetricsData for recording parameter usage"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.36.4",
       "tag": "@rushstack/heft_v0.36.4",
       "date": "Fri, 27 Aug 2021 00:07:25 GMT",
