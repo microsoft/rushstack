@@ -35,6 +35,7 @@ export default class HeftJestReporter implements Reporter {
   private _terminal: Terminal;
   private _buildFolder: string;
   private _debugMode: boolean;
+  private _testStartTime: Map<string, number> = new Map<string, number>();
 
   public constructor(jestConfig: Config.GlobalConfig, options: IHeftJestReporterOptions) {
     this._terminal = options.heftConfiguration.globalTerminal;
@@ -47,6 +48,10 @@ export default class HeftJestReporter implements Reporter {
       Colors.whiteBackground(Colors.black('START')),
       ` ${this._getTestPath(test.path)}`
     );
+
+    // Test duration is not always available, so we'll use a map to track the start time
+    // of each test and diff against the end time
+    this._testStartTime.set(test.path, Date.now());
   }
 
   public async onTestResult(
@@ -54,6 +59,9 @@ export default class HeftJestReporter implements Reporter {
     testResult: TestResult,
     aggregatedResult: AggregatedResult
   ): Promise<void> {
+    // Default to the Jest-provided duration, and fallback to the duration we calculated
+    const durationMs: number = test.duration ?? Date.now() - this._testStartTime.get(test.path)!;
+
     this._writeConsoleOutput(testResult);
     const { numPassingTests, numFailingTests, failureMessage, testExecError } = testResult;
 
@@ -65,11 +73,10 @@ export default class HeftJestReporter implements Reporter {
       this._terminal.write(Colors.greenBackground(Colors.black('PASS')));
     }
 
-    const duration: string = test.duration ? `${test.duration / 1000}s` : '?';
     this._terminal.writeLine(
-      ` ${this._getTestPath(
-        test.path
-      )} (duration: ${duration}, ${numPassingTests} passed, ${numFailingTests} failed)`
+      ` ${this._getTestPath(test.path)} (duration: ${
+        durationMs / 1000
+      }s, ${numPassingTests} passed, ${numFailingTests} failed)`
     );
 
     if (failureMessage) {
