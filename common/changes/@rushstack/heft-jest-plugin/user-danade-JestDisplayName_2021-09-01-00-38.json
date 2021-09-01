@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-jest-plugin",
-      "comment": "Use package name as Jest 'displayName' by default",
+      "comment": "Use package name as Jest 'displayName' by default and always log a test duration.",
       "type": "patch"
     }
   ],
