@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-jest-plugin",
+      "comment": "Use package name as Jest 'displayName' by default",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin",
+  "email": "3473356+D4N14L@users.noreply.github.com"
+}
