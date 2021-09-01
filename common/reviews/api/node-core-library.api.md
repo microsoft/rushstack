@@ -222,6 +222,7 @@ export class FileSystem {
     static getStatistics(path: string): FileSystemStats;
     static getStatisticsAsync(path: string): Promise<FileSystemStats>;
     static isErrnoException(error: Error): error is NodeJS.ErrnoException;
+    static isExistError(error: Error): boolean;
     static isFileDoesNotExistError(error: Error): boolean;
     static isFolderDoesNotExistError(error: Error): boolean;
     static isNotExistError(error: Error): boolean;

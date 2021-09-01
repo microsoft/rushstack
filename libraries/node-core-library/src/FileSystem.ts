@@ -257,7 +257,7 @@ export interface IFileSystemUpdateTimeParameters {
  */
 export interface IFileSystemCreateLinkOptions {
   /**
-   * The existing path that the symbolic link will point to.
+   * The path that the symbolic link will point to.
    */
   linkTargetPath: string;
 
@@ -270,6 +270,13 @@ export interface IFileSystemCreateLinkOptions {
    * Specifies what to do if the target object already exists. Defaults to `AlreadyExistsBehavior.Error`.
    */
   alreadyExistsBehavior?: AlreadyExistsBehavior;
+}
+
+interface IInternalFileSystemCreateLinkOptions extends IFileSystemCreateLinkOptions {
+  /**
+   * Specifies if the link target must exist.
+   */
+  linkTargetPathMustExist?: boolean;
 }
 
 const MOVE_DEFAULT_OPTIONS: Partial<IFileSystemMoveOptions> = {
@@ -1070,8 +1077,10 @@ export class FileSystem {
    */
   public static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void {
     FileSystem._wrapException(() => {
-      // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
-      fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'junction');
+      return FileSystem._handleLink(() => {
+        // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
+        return fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'junction');
+      }, options);
     });
   }
 
@@ -1080,8 +1089,10 @@ export class FileSystem {
    */
   public static async createSymbolicLinkJunctionAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
     await FileSystem._wrapExceptionAsync(() => {
-      // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
-      return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'junction');
+      return FileSystem._handleLinkAsync(() => {
+        // For directories, we use a Windows "junction".  On POSIX operating systems, this produces a regular symlink.
+        return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'junction');
+      }, options);
     });
   }
 
@@ -1091,7 +1102,9 @@ export class FileSystem {
    */
   public static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void {
     FileSystem._wrapException(() => {
-      fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'file');
+      return FileSystem._handleLink(() => {
+        return fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'file');
+      }, options);
     });
   }
 
@@ -1100,7 +1113,9 @@ export class FileSystem {
    */
   public static async createSymbolicLinkFileAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
     await FileSystem._wrapExceptionAsync(() => {
-      return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'file');
+      return FileSystem._handleLinkAsync(() => {
+        return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'file');
+      }, options);
     });
   }
 
@@ -1110,7 +1125,9 @@ export class FileSystem {
    */
   public static createSymbolicLinkFolder(options: IFileSystemCreateLinkOptions): void {
     FileSystem._wrapException(() => {
-      fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'dir');
+      return FileSystem._handleLink(() => {
+        return fsx.symlinkSync(options.linkTargetPath, options.newLinkPath, 'dir');
+      }, options);
     });
   }
 
@@ -1119,7 +1136,9 @@ export class FileSystem {
    */
   public static async createSymbolicLinkFolderAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
     await FileSystem._wrapExceptionAsync(() => {
-      return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'dir');
+      return FileSystem._handleLinkAsync(() => {
+        return fsx.symlink(options.linkTargetPath, options.newLinkPath, 'dir');
+      }, options);
     });
   }
 
@@ -1129,30 +1148,12 @@ export class FileSystem {
    */
   public static createHardLink(options: IFileSystemCreateLinkOptions): void {
     FileSystem._wrapException(() => {
-      try {
-        fsx.linkSync(options.linkTargetPath, options.newLinkPath);
-      } catch (error) {
-        if (error.code === 'EEXIST') {
-          switch (options.alreadyExistsBehavior) {
-            case AlreadyExistsBehavior.Ignore:
-              return;
-            case AlreadyExistsBehavior.Overwrite:
-              this.deleteFile(options.newLinkPath);
-              break;
-            case AlreadyExistsBehavior.Error:
-            default:
-              throw error;
-          }
-        } else {
-          const linkTargetExists: boolean = FileSystem.exists(options.linkTargetPath);
-          if (FileSystem.isNotExistError(error) && linkTargetExists) {
-            this.ensureFolder(nodeJsPath.dirname(options.newLinkPath));
-            this.createHardLink(options);
-          } else {
-            throw error;
-          }
-        }
-      }
+      return FileSystem._handleLink(
+        () => {
+          return fsx.linkSync(options.linkTargetPath, options.newLinkPath);
+        },
+        { ...options, linkTargetPathMustExist: true }
+      );
     });
   }
 
@@ -1160,31 +1161,13 @@ export class FileSystem {
    * An async version of {@link FileSystem.createHardLink}.
    */
   public static async createHardLinkAsync(options: IFileSystemCreateLinkOptions): Promise<void> {
-    await FileSystem._wrapExceptionAsync(async () => {
-      try {
-        await fsx.link(options.linkTargetPath, options.newLinkPath);
-      } catch (error) {
-        if (error.code === 'EEXIST') {
-          switch (options.alreadyExistsBehavior) {
-            case AlreadyExistsBehavior.Ignore:
-              return;
-            case AlreadyExistsBehavior.Overwrite:
-              await this.deleteFileAsync(options.newLinkPath);
-              break;
-            case AlreadyExistsBehavior.Error:
-            default:
-              throw error;
-          }
-        } else {
-          const linkTargetExists: boolean = await FileSystem.exists(options.linkTargetPath);
-          if (FileSystem.isNotExistError(error) && linkTargetExists) {
-            await this.ensureFolderAsync(nodeJsPath.dirname(options.newLinkPath));
-            await this.createHardLinkAsync(options);
-          } else {
-            throw error;
-          }
-        }
-      }
+    await FileSystem._wrapExceptionAsync(() => {
+      return FileSystem._handleLinkAsync(
+        () => {
+          return fsx.link(options.linkTargetPath, options.newLinkPath);
+        },
+        { ...options, linkTargetPathMustExist: true }
+      );
     });
   }
 
@@ -1211,6 +1194,13 @@ export class FileSystem {
   // ===============
   // UTILITY FUNCTIONS
   // ===============
+
+  /**
+   * Returns true if the error provided indicates the file or folder already exists.
+   */
+  public static isExistError(error: Error): boolean {
+    return FileSystem.isErrnoException(error) && error.code === 'EEXIST';
+  }
 
   /**
    * Returns true if the error provided indicates the file or folder does not exist.
@@ -1246,6 +1236,97 @@ export class FileSystem {
     );
   }
 
+  private static _handleLink(linkFn: () => void, options: IInternalFileSystemCreateLinkOptions): void {
+    try {
+      linkFn();
+    } catch (error) {
+      if (FileSystem.isExistError(error)) {
+        // Link exists, handle it
+        switch (options.alreadyExistsBehavior) {
+          case AlreadyExistsBehavior.Ignore:
+            return;
+          case AlreadyExistsBehavior.Overwrite:
+            // fsx.linkSync does not allow overwriting so we must manually delete.
+            // We don't know if it is a file or a folder, so check first. We also
+            // want to use getLinkStatistics because getStatistics does not work
+            // for symlinks.
+            const stats: fs.Stats = this.getLinkStatistics(options.newLinkPath);
+            if (stats.isDirectory()) {
+              this.deleteFolder(options.newLinkPath);
+            } else {
+              this.deleteFile(options.newLinkPath);
+            }
+            linkFn();
+            break;
+          case AlreadyExistsBehavior.Error:
+          default:
+            throw error;
+        }
+      } else {
+        // When attempting to create a link in a directory that does not exist, an ENOENT
+        // error is thrown, so we should ensure the directory exists before retrying. There
+        // are also cases where the target file must exist, so validate in those cases to
+        // avoid confusing the missing directory with the missing target file.
+        if (
+          FileSystem.isNotExistError(error) &&
+          (!options.linkTargetPathMustExist || FileSystem.exists(options.linkTargetPath))
+        ) {
+          this.ensureFolder(nodeJsPath.dirname(options.newLinkPath));
+          linkFn();
+        } else {
+          throw error;
+        }
+      }
+    }
+  }
+
+  private static async _handleLinkAsync(
+    linkFn: () => Promise<void>,
+    options: IInternalFileSystemCreateLinkOptions
+  ): Promise<void> {
+    try {
+      await linkFn();
+    } catch (error) {
+      if (FileSystem.isExistError(error)) {
+        // Link exists, handle it
+        switch (options.alreadyExistsBehavior) {
+          case AlreadyExistsBehavior.Ignore:
+            return;
+          case AlreadyExistsBehavior.Overwrite:
+            // fsx.linkSync does not allow overwriting so we must manually delete.
+            // We don't know if it is a file or a folder, so check first. We also
+            // want to use getLinkStatistics because getStatistics does not work
+            // for symlinks.
+            const stats: fs.Stats = await this.getLinkStatisticsAsync(options.newLinkPath);
+            if (stats.isDirectory()) {
+              await this.deleteFolder(options.newLinkPath);
+            } else {
+              await this.deleteFile(options.newLinkPath);
+            }
+            await linkFn();
+            break;
+          case AlreadyExistsBehavior.Error:
+          default:
+            throw error;
+        }
+      } else {
+        // When attempting to create a link in a directory that does not exist, an ENOENT
+        // error is thrown, so we should ensure the directory exists before retrying. There
+        // are also cases where the target file must exist, so validate in those cases to
+        // avoid confusing the missing directory with the missing target file.
+        if (
+          FileSystem.isNotExistError(error) &&
+          (!options.linkTargetPathMustExist || (await FileSystem.existsAsync(options.linkTargetPath)))
+        ) {
+          await this.ensureFolderAsync(nodeJsPath.dirname(options.newLinkPath));
+          await linkFn();
+        } else {
+          throw error;
+        }
+      }
+    }
+  }
+
   private static _wrapException<TResult>(fn: () => TResult): TResult {
     try {
       return fn();
@@ -1272,6 +1353,12 @@ export class FileSystem {
       } else if (FileSystem.isFolderDoesNotExistError(error)) {
         // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `Folder does not exist: ${error.path}\n${error.message}`;
+      } else if (FileSystem.isExistError(error)) {
+        // Oddly, the typing does not include the `dest` property even though the documentation
+        // indicates it is there: https://nodejs.org/docs/latest-v10.x/api/errors.html#errors_error_dest
+        const extendedError: NodeJS.ErrnoException & { dest?: string } = error;
+        // eslint-disable-line @typescript-eslint/no-use-before-define
+        error.message = `File or folder already exists: ${extendedError.dest}\n${error.message}`;
       }
     }
   }
