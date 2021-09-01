@@ -65,9 +65,9 @@ export default class HeftJestReporter implements Reporter {
       this._terminal.write(Colors.greenBackground(Colors.black('PASS')));
     }
 
-    // Calculate the suite duration time from the test result if the duration isn't provided.
-    // This is necessary because Jest doesn't provide the duration for each test (at least not
-    // as of Jest 25), and other reporters (ex. jest-junit) only use perfStats:
+    // Calculate the suite duration time from the test result. This is necessary because Jest doesn't
+    // provide the duration on the 'test' object (at least not as of Jest 25), and other reporters
+    // (ex. jest-junit) only use perfStats:
     // https://github.com/jest-community/jest-junit/blob/12da1a20217a9b6f30858013175319c1256f5b15/utils/buildJsonResults.js#L112
     const duration: string = perfStats ? ((perfStats.end - perfStats.start) / 1000).toFixed(3) : '?';
     this._terminal.writeLine(
