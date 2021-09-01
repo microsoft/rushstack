@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-
+import * as path from 'path';
 import {
   CommandLineParser,
   CommandLineStringListParameter,
@@ -14,10 +14,8 @@ import {
   Path,
   FileSystem
 } from '@rushstack/node-core-library';
-import { trueCasePathSync } from 'true-case-path';
 import { ArgumentParser } from 'argparse';
 import { SyncHook } from 'tapable';
-
 import { MetricsCollector } from '../metrics/MetricsCollector';
 import { CleanAction } from './actions/CleanAction';
 import { BuildAction } from './actions/BuildAction';
@@ -230,7 +228,8 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     if (currentCwd !== buildFolder) {
       // Update the CWD to the project's build root. Some tools, like Jest, use process.cwd()
       this._terminal.writeVerboseLine(`CWD is "${currentCwd}". Normalizing to project build folder.`);
-      buildFolder = trueCasePathSync(buildFolder);
+      // The reason why we need to redirect to another directory first is to solve the sensitive casing issues in cloud buiild
+      process.chdir(path.resolve('..', __dirname));
       process.chdir(buildFolder);
     }
   }
