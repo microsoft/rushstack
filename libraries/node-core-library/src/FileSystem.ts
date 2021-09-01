@@ -1244,7 +1244,7 @@ export class FileSystem {
         // Link exists, handle it
         switch (options.alreadyExistsBehavior) {
           case AlreadyExistsBehavior.Ignore:
-            return;
+            break;
           case AlreadyExistsBehavior.Overwrite:
             // fsx.linkSync does not allow overwriting so we must manually delete.
             // We don't know if it is a file or a folder, so check first. We also
@@ -1291,7 +1291,7 @@ export class FileSystem {
         // Link exists, handle it
         switch (options.alreadyExistsBehavior) {
           case AlreadyExistsBehavior.Ignore:
-            return;
+            break;
           case AlreadyExistsBehavior.Overwrite:
             // fsx.linkSync does not allow overwriting so we must manually delete.
             // We don't know if it is a file or a folder, so check first. We also
