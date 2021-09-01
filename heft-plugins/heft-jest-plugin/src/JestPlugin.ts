@@ -74,6 +74,10 @@ export interface IJestPluginOptions {
 
 export interface IHeftJestConfiguration extends Config.InitialOptions {}
 
+interface IExtendedHeftJestConfiguration extends IHeftJestConfiguration {
+  extends: string | undefined;
+}
+
 const PLUGIN_NAME: string = 'JestPlugin';
 const PLUGIN_PACKAGE_NAME: string = '@rushstack/heft-jest-plugin';
 const PLUGIN_PACKAGE_FOLDER: string = path.resolve(__dirname, '..');
@@ -140,6 +144,15 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
         return;
       }
       jestConfig = await JsonFile.loadAsync(jestConfigPath);
+      const extendedJestConfig: IExtendedHeftJestConfiguration = jestConfig as IExtendedHeftJestConfiguration;
+      if (extendedJestConfig.extends) {
+        throw new Error(
+          'The provided jest.config.json specifies an "extends" property while resolved modules are disabled. ' +
+            'You must either remove the "extends" property from your Jest configuration, use the "preset" ' +
+            'property, or set the "disableConfigurationModuleResolution" option to "false" on the Jest ' +
+            'plugin in heft.json.'
+        );
+      }
     } else {
       // Load in and resolve the config file using the "extends" field
       jestConfig = await JestPlugin._getJestConfigurationLoader(
