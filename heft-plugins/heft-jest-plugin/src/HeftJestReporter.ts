@@ -65,8 +65,9 @@ export default class HeftJestReporter implements Reporter {
       this._terminal.write(Colors.greenBackground(Colors.black('PASS')));
     }
 
-    // Calculate the suite duration time from the test result
-    const duration: string = perfStats ? ((perfStats.end - perfStats.start) / 1000).toFixed(3) : '?';
+    // Calculate the suite duration time from the test result if the duration isn't provided.
+    const duration: string =
+      test.duration ?? perfStats ? ((perfStats.end - perfStats.start) / 1000).toFixed(3) : '?';
     this._terminal.writeLine(
       ` ${this._getTestPath(
         test.path
