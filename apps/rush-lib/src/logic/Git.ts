@@ -14,6 +14,8 @@ import { GitEmailPolicy } from './policy/GitEmailPolicy';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 
+export const DEFAULT_GIT_TAG_SEPARATOR: string = '_';
+
 interface IResultOrError<TResult> {
   error?: Error;
   result?: TResult;
@@ -332,6 +334,10 @@ export class Git {
     return changes.filter((change) => {
       return change.trim().length > 0;
     });
+  }
+
+  public getTagSeparator(): string {
+    return this._rushConfiguration.gitTagSeparator || DEFAULT_GIT_TAG_SEPARATOR;
   }
 
   /**
