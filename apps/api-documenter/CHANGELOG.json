@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.13.43",
+      "tag": "@microsoft/api-documenter_v7.13.43",
+      "date": "Thu, 02 Sep 2021 00:06:51 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove redundant newline in fenced code blocks"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.13.42",
       "tag": "@microsoft/api-documenter_v7.13.42",
       "date": "Tue, 31 Aug 2021 00:07:11 GMT",
