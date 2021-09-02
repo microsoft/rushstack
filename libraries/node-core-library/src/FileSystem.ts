@@ -267,7 +267,9 @@ export interface IFileSystemCreateLinkOptions {
   newLinkPath: string;
 
   /**
-   * Specifies what to do if the target object already exists. Defaults to `AlreadyExistsBehavior.Error`.
+   * Specifies what to do if the target object already exists. If set to `AlreadyExistsBehavior.overwrite`,
+   * the already existing file or folder at `IFileSystemCreateLinkOptions.newLinkPath` will be deleted before
+   * creating the new link. Defaults to `AlreadyExistsBehavior.Error`.
    */
   alreadyExistsBehavior?: AlreadyExistsBehavior;
 }
