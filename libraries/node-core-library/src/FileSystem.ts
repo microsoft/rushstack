@@ -1248,10 +1248,10 @@ export class FileSystem {
           case AlreadyExistsBehavior.Ignore:
             break;
           case AlreadyExistsBehavior.Overwrite:
-            // fsx.linkSync does not allow overwriting so we must manually delete.
-            // We don't know if it is a file or a folder, so check first. We also
-            // want to use getLinkStatistics because getStatistics does not work
-            // for symlinks.
+            // fsx.linkSync does not allow overwriting so we must manually delete. We don't
+            // know if it is a file or a folder, so check first. We also want to use
+            // getLinkStatistics when performing this check because we are concerned
+            // with the object in the directory, not the target of the link.
             const stats: fs.Stats = this.getLinkStatistics(options.newLinkPath);
             if (stats.isDirectory()) {
               this.deleteFolder(options.newLinkPath);
@@ -1266,9 +1266,9 @@ export class FileSystem {
         }
       } else {
         // When attempting to create a link in a directory that does not exist, an ENOENT
-        // error is thrown, so we should ensure the directory exists before retrying. There
-        // are also cases where the target file must exist, so validate in those cases to
-        // avoid confusing the missing directory with the missing target file.
+        // or ENOTDIR error is thrown, so we should ensure the directory exists before
+        // retrying. There are also cases where the target file must exist, so validate in
+        // those cases to avoid confusing the missing directory with the missing target file.
         if (
           FileSystem.isNotExistError(error) &&
           (!options.linkTargetMustExist || FileSystem.exists(options.linkTargetPath))
