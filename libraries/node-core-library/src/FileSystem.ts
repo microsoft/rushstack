@@ -276,7 +276,7 @@ interface IInternalFileSystemCreateLinkOptions extends IFileSystemCreateLinkOpti
   /**
    * Specifies if the link target must exist.
    */
-  linkTargetPathMustExist?: boolean;
+  linkTargetMustExist?: boolean;
 }
 
 const MOVE_DEFAULT_OPTIONS: Partial<IFileSystemMoveOptions> = {
@@ -1152,7 +1152,7 @@ export class FileSystem {
         () => {
           return fsx.linkSync(options.linkTargetPath, options.newLinkPath);
         },
-        { ...options, linkTargetPathMustExist: true }
+        { ...options, linkTargetMustExist: true }
       );
     });
   }
@@ -1166,7 +1166,7 @@ export class FileSystem {
         () => {
           return fsx.link(options.linkTargetPath, options.newLinkPath);
         },
-        { ...options, linkTargetPathMustExist: true }
+        { ...options, linkTargetMustExist: true }
       );
     });
   }
@@ -1269,7 +1269,7 @@ export class FileSystem {
         // avoid confusing the missing directory with the missing target file.
         if (
           FileSystem.isNotExistError(error) &&
-          (!options.linkTargetPathMustExist || FileSystem.exists(options.linkTargetPath))
+          (!options.linkTargetMustExist || FileSystem.exists(options.linkTargetPath))
         ) {
           this.ensureFolder(nodeJsPath.dirname(options.newLinkPath));
           linkFn();
@@ -1293,10 +1293,10 @@ export class FileSystem {
           case AlreadyExistsBehavior.Ignore:
             break;
           case AlreadyExistsBehavior.Overwrite:
-            // fsx.linkSync does not allow overwriting so we must manually delete.
-            // We don't know if it is a file or a folder, so check first. We also
-            // want to use getLinkStatistics because getStatistics does not work
-            // for symlinks.
+            // fsx.linkSync does not allow overwriting so we must manually delete. We don't
+            // know if it is a file or a folder, so check first. We also want to use
+            // getLinkStatistics when performing this check because we are concerned
+            // with the object in the directory, not the target of the link.
             const stats: fs.Stats = await this.getLinkStatisticsAsync(options.newLinkPath);
             if (stats.isDirectory()) {
               await this.deleteFolder(options.newLinkPath);
@@ -1311,12 +1311,12 @@ export class FileSystem {
         }
       } else {
         // When attempting to create a link in a directory that does not exist, an ENOENT
-        // error is thrown, so we should ensure the directory exists before retrying. There
-        // are also cases where the target file must exist, so validate in those cases to
-        // avoid confusing the missing directory with the missing target file.
+        // or ENOTDIR error is thrown, so we should ensure the directory exists before
+        // retrying. There are also cases where the target file must exist, so validate in
+        // those cases to avoid confusing the missing directory with the missing target file.
         if (
           FileSystem.isNotExistError(error) &&
-          (!options.linkTargetPathMustExist || (await FileSystem.existsAsync(options.linkTargetPath)))
+          (!options.linkTargetMustExist || (await FileSystem.existsAsync(options.linkTargetPath)))
         ) {
           await this.ensureFolderAsync(nodeJsPath.dirname(options.newLinkPath));
           await linkFn();
