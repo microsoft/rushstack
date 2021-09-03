@@ -214,19 +214,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       this._tslintEnabled = this._cachedFileSystem.exists(this._tslintConfigFilePath);
     }
 
-    this._eslintConfigFilePath = path.resolve(this._configuration.buildFolder, '.eslintrc.js');
+    this._eslintConfigFilePath = this._resolveEslintConfigFilePath(this._eslintEnabled);
     if (this._eslintEnabled) {
-      // When project is configured with "type": "module" in package.json, the config file must have a .cjs extension
-      // so use it if it exists
-      const alternativeEslintConfigFilePath: string = path.resolve(
-        this._configuration.buildFolder,
-        '.eslintrc.cjs'
-      );
-      if (this._cachedFileSystem.exists(alternativeEslintConfigFilePath)) {
-        this._eslintConfigFilePath = alternativeEslintConfigFilePath;
-      } else {
-        this._eslintEnabled = this._cachedFileSystem.exists(this._eslintConfigFilePath);
-      }
+      this._eslintEnabled = this._cachedFileSystem.exists(this._eslintConfigFilePath);
     }
 
     // Report a warning if the TypeScript version is too old/new.  The current oldest supported version is
@@ -296,6 +286,20 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     } else {
       await this._runBuildAsync(ts, measureTsPerformance, measureTsPerformanceAsync);
     }
+  }
+
+  private _resolveEslintConfigFilePath(eslintEnabled: boolean): string {
+    const defaultPath: string = path.resolve(this._configuration.buildFolder, '.eslintrc.js');
+    if (!eslintEnabled) {
+      return defaultPath; // No need to check the filesystem
+    }
+    // When project is configured with "type": "module" in package.json, the config file must have a .cjs extension
+    // so use it if it exists
+    const alternativePathPath: string = path.resolve(this._configuration.buildFolder, '.eslintrc.cjs');
+    if (this._cachedFileSystem.exists(alternativePathPath)) {
+      return alternativePathPath;
+    }
+    return defaultPath;
   }
 
   public async _runWatch(ts: ExtendedTypeScript, measureTsPerformance: PerformanceMeasurer): Promise<void> {
