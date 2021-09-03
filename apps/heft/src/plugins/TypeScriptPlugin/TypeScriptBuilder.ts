@@ -995,7 +995,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
             currentFolder,
             depth,
             this._cachedFileSystem.readFolderFilesAndDirectories.bind(this._cachedFileSystem),
-            this._cachedFileSystem.getRealPath.bind(this._cachedFileSystem)
+            this._cachedFileSystem.getRealPath.bind(this._cachedFileSystem),
+            this._cachedFileSystem.directoryExists.bind(this._cachedFileSystem)
           ),
         useCaseSensitiveFileNames: true
       },
