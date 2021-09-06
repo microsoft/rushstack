@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-deps-hash",
+      "comment": "getPackageDeps now takes an options hash instead of individual parameters.",
+      "type": "major"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash",
+  "email": "elliot-nelson@users.noreply.github.com"
+}
