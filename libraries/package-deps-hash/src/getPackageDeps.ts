@@ -6,6 +6,30 @@ import * as path from 'path';
 import { Executable } from '@rushstack/node-core-library';
 
 /**
+ * Options for the `getPackageDeps` function.
+ *
+ * @public
+ */
+export interface IGetPackageDepsOptions {
+  /**
+   * An optional array of file path exclusions. If a file should be omitted from the list of
+   * dependencies, use this to exclude it. Paths must be relative to the `packagePath`.
+   */
+  excludedPaths?: string[];
+
+  /**
+   * An optional path to the `git` executable. Defaults to `git`.
+   */
+  gitPath?: string;
+
+  /**
+   * An optional path string. If provided, the returned file paths will be transformed to be
+   * relative to this path, rather than the `packagePath` passed in.
+   */
+  relativeToPath?: string;
+}
+
+/**
  * Parses a quoted filename sourced from the output of the "git status" command.
  *
  * Paths with non-standard characters will be enclosed with double-quotes, and non-standard
@@ -227,34 +251,41 @@ export function gitStatus(path: string, gitPath?: string): string {
  * Builds an object containing hashes for the files under the specified `packagePath` folder.
  * @param packagePath - The folder path to derive the package dependencies from. This is typically the folder
  *                      containing package.json.  If omitted, the default value is the current working directory.
- * @param excludedPaths - An optional array of file path exclusions. If a file should be omitted from the list
- *                         of dependencies, use this to exclude it.
+ * @param options - Options controlling how the resulting map will be built.
  * @returns the package-deps.json file content
  *
  * @public
  */
 export function getPackageDeps(
   packagePath: string = process.cwd(),
-  excludedPaths?: string[],
-  gitPath?: string
+  options: IGetPackageDepsOptions = {}
 ): Map<string, string> {
-  const gitLsOutput: string = gitLsTree(packagePath, gitPath);
+  const gitLsOutput: string = gitLsTree(packagePath, options.gitPath);
 
   // Add all the checked in hashes
-  const result: Map<string, string> = parseGitLsTree(gitLsOutput);
+  let result: Map<string, string> = parseGitLsTree(gitLsOutput);
+
+  // If requested, transform all paths relative to a new root path
+  if (options.relativeToPath) {
+    const newResult: Map<string, string> = new Map();
+    for (const [key, value] of result.entries()) {
+      newResult.set(path.relative(options.relativeToPath, path.join(packagePath, key)), value);
+    }
+    result = newResult;
+  }
 
   // Remove excluded paths
-  if (excludedPaths) {
-    for (const excludedPath of excludedPaths) {
+  if (options.excludedPaths) {
+    for (const excludedPath of options.excludedPaths) {
       result.delete(excludedPath);
     }
   }
 
   // Update the checked in hashes with the current repo status
-  const gitStatusOutput: string = gitStatus(packagePath, gitPath);
+  const gitStatusOutput: string = gitStatus(packagePath, options.gitPath);
   const currentlyChangedFiles: Map<string, string> = parseGitStatus(gitStatusOutput, packagePath);
   const filesToHash: string[] = [];
-  const excludedPathSet: Set<string> = new Set<string>(excludedPaths);
+  const excludedPathSet: Set<string> = new Set<string>(options.excludedPaths);
   for (const [filename, changeType] of currentlyChangedFiles) {
     // See comments inside parseGitStatus() for more information
     if (changeType === 'D' || (changeType.length === 2 && changeType.charAt(1) === 'D')) {
@@ -269,7 +300,7 @@ export function getPackageDeps(
   const currentlyChangedFileHashes: Map<string, string> = getGitHashForFiles(
     filesToHash,
     packagePath,
-    gitPath
+    options.gitPath
   );
   for (const [filename, hash] of currentlyChangedFileHashes) {
     result.set(filename, hash);

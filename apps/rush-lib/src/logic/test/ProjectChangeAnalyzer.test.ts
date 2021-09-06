@@ -25,11 +25,11 @@ describe(ProjectChangeAnalyzer.name, () => {
     files: Map<string, string>
   ): ProjectChangeAnalyzer {
     const rushConfiguration: RushConfiguration = {
-      commonRushConfigFolder: '',
+      commonRushConfigFolder: '/dev/Acme/common/config/rush',
       projects,
-      rushJsonFolder: '',
+      rushJsonFolder: '/dev/Acme',
       getCommittedShrinkwrapFilename(): string {
-        return 'common/config/rush/pnpm-lock.yaml';
+        return '/dev/Acme/common/config/rush/pnpm-lock.yaml';
       },
       findProjectForPosixRelativePath(path: string): RushConfigurationProject | undefined {
         return projects.find((project) => path.startsWith(project.projectRelativeFolder));
@@ -239,6 +239,28 @@ describe(ProjectChangeAnalyzer.name, () => {
         new Map([['apps/apple/core.js', 'a101']])
       );
       expect(subject['_getRepoDeps']).toHaveBeenCalledTimes(1);
+    });
+
+    it('retrieves projects outside of the rush.json parent folder if necessary', async () => {
+      const projects: RushConfigurationProject[] = [
+        {
+          packageName: 'apple',
+          projectFolder: '/dev/Umbrella/apps/apple',
+          projectRelativeFolder: '../Umbrella/apps/apple'
+        } as RushConfigurationProject
+      ];
+      const files: Map<string, string> = new Map([['../Umbrella/apps/apple/core.js', 'a101']]);
+      const subject: ProjectChangeAnalyzer = createTestSubject(projects, files);
+      const terminal: Terminal = new Terminal(new StringBufferTerminalProvider());
+
+      expect(await subject._tryGetProjectDependenciesAsync('apple', terminal)).toEqual(
+        new Map([['../Umbrella/apps/apple/core.js', 'a101']])
+      );
+      expect(subject['_getRepoDeps']).toHaveBeenCalledWith('/dev', terminal);
+
+      expect((subject['_getRepoDeps'] as unknown as jest.SpyInstance).mock.calls).toEqual([
+        ['/dev', terminal]
+      ]);
     });
   });
 

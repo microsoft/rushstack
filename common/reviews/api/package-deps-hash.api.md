@@ -8,6 +8,13 @@
 export function getGitHashForFiles(filesToHash: string[], packagePath: string, gitPath?: string): Map<string, string>;
 
 // @public
-export function getPackageDeps(packagePath?: string, excludedPaths?: string[], gitPath?: string): Map<string, string>;
+export function getPackageDeps(packagePath?: string, options?: IGetPackageDepsOptions): Map<string, string>;
+
+// @public
+export interface IGetPackageDepsOptions {
+    excludedPaths?: string[];
+    gitPath?: string;
+    relativeToPath?: string;
+}
 
 ```

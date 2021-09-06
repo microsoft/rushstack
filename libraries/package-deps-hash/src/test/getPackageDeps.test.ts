@@ -235,11 +235,9 @@ describe('getPackageDeps', () => {
   });
 
   it('can exclude a committed file', (done) => {
-    const results: Map<string, string> = getPackageDeps(TEST_PROJECT_PATH, [
-      'file1.txt',
-      'file  2.txt',
-      'file蝴蝶.txt'
-    ]);
+    const results: Map<string, string> = getPackageDeps(TEST_PROJECT_PATH, {
+      excludedPaths: ['file1.txt', 'file  2.txt', 'file蝴蝶.txt']
+    });
     try {
       const expectedFiles: { [key: string]: string } = {
         [FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
@@ -264,7 +262,9 @@ describe('getPackageDeps', () => {
       done(e);
     }
 
-    const results: Map<string, string> = getPackageDeps(TEST_PROJECT_PATH, ['a.txt']);
+    const results: Map<string, string> = getPackageDeps(TEST_PROJECT_PATH, {
+      excludedPaths: ['a.txt']
+    });
     try {
       const expectedFiles: { [key: string]: string } = {
         'file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
@@ -406,5 +406,26 @@ describe('getPackageDeps', () => {
     }
 
     _done();
+  });
+
+  it('can return results relative to a specified root', (done) => {
+    const results: Map<string, string> = getPackageDeps(TEST_PROJECT_PATH, {
+      relativeToPath: path.join(TEST_PROJECT_PATH, 'inner/inner')
+    });
+    try {
+      const expectedFiles: { [key: string]: string } = {
+        '../../file1.txt': 'c7b2f707ac99ca522f965210a7b6b0b109863f34',
+        '../../file  2.txt': 'a385f754ec4fede884a4864d090064d9aeef8ccb',
+        '../../file蝴蝶.txt': 'ae814af81e16cb2ae8c57503c77e2cab6b5462ba',
+        ['../../' + FileConstants.PackageJson]: '18a1e415e56220fa5122428a4ef8eb8874756576'
+      };
+      const filePaths: string[] = Array.from(results.keys()).sort();
+
+      filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
+    } catch (e) {
+      return done(e);
+    }
+
+    done();
   });
 });

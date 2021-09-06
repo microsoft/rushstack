@@ -179,15 +179,22 @@ export class ProjectChangeAnalyzer {
   }
 
   private async _getDataAsync(terminal: Terminal): Promise<Map<string, Map<string, string>> | undefined> {
-    const repoDeps: Map<string, string> | undefined = this._getRepoDeps(terminal);
-    if (!repoDeps) {
-      return undefined;
-    }
-
     const projectHashDeps: Map<string, Map<string, string>> = new Map();
+    let analyzerRoot: string = this._rushConfiguration.rushJsonFolder;
 
     for (const project of this._rushConfiguration.projects) {
       projectHashDeps.set(project.packageName, new Map());
+
+      while (!Path.isUnder(project.projectFolder, analyzerRoot)) {
+        const newRoot: string = path.join(analyzerRoot, '..');
+        if (newRoot === analyzerRoot) break;
+        analyzerRoot = newRoot;
+      }
+    }
+
+    const repoDeps: Map<string, string> | undefined = this._getRepoDeps(analyzerRoot, terminal);
+    if (!repoDeps) {
+      return undefined;
     }
 
     // Sort each project folder into its own package deps hash
@@ -278,12 +285,15 @@ export class ProjectChangeAnalyzer {
     }
   }
 
-  private _getRepoDeps(terminal: Terminal): Map<string, string> | undefined {
+  private _getRepoDeps(rootPath: string, terminal: Terminal): Map<string, string> | undefined {
     try {
       if (this._git.isPathUnderGitWorkingTree()) {
         // Load the package deps hash for the whole repository
         const gitPath: string = this._git.getGitPathOrThrow();
-        return getPackageDeps(this._rushConfiguration.rushJsonFolder, [], gitPath);
+        return getPackageDeps(rootPath, {
+          gitPath,
+          relativeToPath: this._rushConfiguration.rushJsonFolder
+        });
       } else {
         return undefined;
       }
