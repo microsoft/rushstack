@@ -13,7 +13,8 @@ import { Executable } from '@rushstack/node-core-library';
 export interface IGetPackageDepsOptions {
   /**
    * An optional array of file path exclusions. If a file should be omitted from the list of
-   * dependencies, use this to exclude it. Paths must be relative to the `packagePath`.
+   * dependencies, use this to exclude it. Paths should be relative to the `relativeToPath`
+   * setting if it is provided, otherwise they should be relative to `packagePath`.
    */
   excludedPaths?: string[];
 
@@ -23,7 +24,7 @@ export interface IGetPackageDepsOptions {
   gitPath?: string;
 
   /**
-   * An optional path string. If provided, the returned file paths will be transformed to be
+   * An optional absolute path. If provided, the returned file paths will be transformed to be
    * relative to this path, rather than the `packagePath` passed in.
    */
   relativeToPath?: string;
@@ -249,7 +250,7 @@ export function gitStatus(path: string, gitPath?: string): string {
 
 /**
  * Builds an object containing hashes for the files under the specified `packagePath` folder.
- * @param packagePath - The folder path to derive the package dependencies from. This is typically the folder
+ * @param packagePath - The absolute folder path to derive the package dependencies from. This is typically the folder
  *                      containing package.json.  If omitted, the default value is the current working directory.
  * @param options - Options controlling how the resulting map will be built.
  * @returns the package-deps.json file content
@@ -266,7 +267,7 @@ export function getPackageDeps(
   let result: Map<string, string> = parseGitLsTree(gitLsOutput);
 
   // If requested, transform all paths relative to a new root path
-  if (options.relativeToPath) {
+  if (options.relativeToPath && options.relativeToPath !== packagePath) {
     const newResult: Map<string, string> = new Map();
     for (const [key, value] of result.entries()) {
       newResult.set(path.relative(options.relativeToPath, path.join(packagePath, key)), value);

@@ -257,10 +257,6 @@ describe(ProjectChangeAnalyzer.name, () => {
         new Map([['../Umbrella/apps/apple/core.js', 'a101']])
       );
       expect(subject['_getRepoDeps']).toHaveBeenCalledWith('/dev', terminal);
-
-      expect((subject['_getRepoDeps'] as unknown as jest.SpyInstance).mock.calls).toEqual([
-        ['/dev', terminal]
-      ]);
     });
   });
 
