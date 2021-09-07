@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Turn on the \"noUnusedLocals\" compiler option.",
+      "type": "minor",
+      "packageName": "@rushstack/heft-node-rig"
+    }
+  ],
+  "packageName": "@rushstack/heft-node-rig",
+  "email": "iclanton@users.noreply.github.com"
+}
