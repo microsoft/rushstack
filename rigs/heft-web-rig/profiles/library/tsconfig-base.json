@@ -17,6 +17,7 @@
     "esModuleInterop": true,
     "noEmitOnError": false,
     "allowUnreachableCode": false,
+    "noUnusedLocals": true,
 
     "types": [],
 
