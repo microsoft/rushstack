@@ -16,6 +16,7 @@ import {
 } from '@rushstack/node-core-library';
 import { ArgumentParser } from 'argparse';
 import { SyncHook } from 'tapable';
+
 import { MetricsCollector } from '../metrics/MetricsCollector';
 import { CleanAction } from './actions/CleanAction';
 import { BuildAction } from './actions/BuildAction';
