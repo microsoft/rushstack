@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { EOL } from 'os';
 import colors from 'colors/safe';
 import { PackageJsonLookup } from '@rushstack/node-core-library';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
-import { RushConstants } from '../logic/RushConstants';
+import { RushStartupBanner } from '../cli/RushStartupBanner';
 import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
-import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { Utilities } from '../utilities/Utilities';
 import { EnvironmentVariableNames } from './EnvironmentConfiguration';
 
@@ -40,7 +38,6 @@ export interface ILaunchOptions {
  */
 export class Rush {
   private static _version: string | undefined = undefined;
-  private static _banner: string | undefined = undefined;
 
   /**
    * This API is used by the `@microsoft/rush` front end to launch the "rush" command-line.
@@ -57,10 +54,9 @@ export class Rush {
    */
   public static launch(launcherVersion: string, arg: ILaunchOptions): void {
     const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
-    Rush._generateStartupBanner(options.isManaged);
 
     if (!Utilities.shouldRestrictConsoleOutput()) {
-      Rush.printStartupBanner();
+      RushStartupBanner.log(Rush.getVersionString(options.isManaged));
     }
 
     if (!CommandLineMigrationAdvisor.checkArgv(process.argv)) {
@@ -85,12 +81,11 @@ export class Rush {
    */
   public static launchRushX(launcherVersion: string, options: ILaunchOptions): void {
     options = Rush._normalizeLaunchOptions(options);
-    Rush._generateStartupBanner(options.isManaged);
 
-    const showVerbose = Rush.earlyVerboseFlag();
+    const showVerbose: boolean = Rush.earlyVerboseFlag();
 
     if (showVerbose) {
-      Rush.printStartupBanner();
+      RushStartupBanner.log(Rush.getVersionString(options.isManaged));
     }
 
     Rush._assignRushInvokedFolder();
@@ -103,9 +98,9 @@ export class Rush {
    * banner, and we haven't yet fully processed the command-line arguments.
    */
   public static earlyVerboseFlag(): boolean {
-    const args = process.argv.slice(2);
-    const cmdIndex = args.findIndex((arg) => !arg.startsWith('-'));
-    const flags = cmdIndex < 0 ? args : args.slice(0, cmdIndex);
+    const args: string[] = process.argv.slice(2);
+    const cmdIndex: number = args.findIndex((arg) => !arg.startsWith('-'));
+    const flags: string[] = cmdIndex < 0 ? args : args.slice(0, cmdIndex);
 
     // This functionality will be provided "for free" after converting to ts-command-line.
     return flags.includes('-v') || flags.includes('--verbose') || process.env.VERBOSE === '1';
@@ -121,6 +116,13 @@ export class Rush {
     }
 
     return this._version!;
+  }
+
+  /**
+   * The current version of rush-lib, as a formatted string for display.
+   */
+  public static getVersionString(isManaged: boolean): string {
+    return Rush.version + colors.yellow(isManaged ? '' : ' (unmanaged)');
   }
 
   /**
@@ -145,30 +147,5 @@ export class Rush {
     return typeof arg === 'boolean'
       ? { isManaged: arg } // In older versions of Rush, this the `launch` functions took a boolean arg for "isManaged"
       : arg;
-  }
-
-  private static _generateStartupBanner(isManaged: boolean): void {
-    const nodeVersion: string = process.versions.node;
-    const nodeReleaseLabel: string = NodeJsCompatibility.isOddNumberedVersion
-      ? 'unstable'
-      : NodeJsCompatibility.isLtsVersion
-      ? 'LTS'
-      : 'pre-LTS';
-
-    this._banner =
-      EOL +
-      colors.bold(
-        `Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')
-      ) +
-      colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
-      EOL +
-      `Node.js version is ${nodeVersion} (${nodeReleaseLabel})` +
-      EOL;
-  }
-
-  public static printStartupBanner(): void {
-    if (this._banner) {
-      console.log(this._banner);
-    }
   }
 }

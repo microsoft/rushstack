@@ -12,6 +12,7 @@ import { ProjectCommandSet } from '../logic/ProjectCommandSet';
 import { Rush } from '../api/Rush';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
+import { RushStartupBanner } from './RushStartupBanner';
 
 /**
  * @internal
@@ -81,23 +82,34 @@ export class RushXCommandLine {
       // 0 = node.exe
       // 1 = rushx
       const args: string[] = process.argv.slice(2);
-
-      for (let idx = 0; idx < args.length; idx++) {
+      let showHelp: boolean = false;
+      for (let idx: number = 0; idx < args.length; idx++) {
         if (args[idx] === '-v' || args[idx] === '--verbose') {
           // This flag was already consumed by Rush.earlyVerboseFlag() at startup, so
           // we can ignore it here.
           args.splice(idx, 1);
           idx--;
           continue;
-        }
-        if (args[idx].startsWith('-')) {
-          RushXCommandLine._showUsage(packageJson, projectCommandSet);
-          return;
+        } else if (args[idx].startsWith('-')) {
+          args.splice(idx, 1);
+          idx--;
+          showHelp = true;
+          continue;
         } else {
           // If we've encountered a command, like "build", stop checking args. Everything
           // after this arg will be options for the specific command.
           break;
         }
+      }
+
+      if (showHelp) {
+        // We always want to show the startup banner on the help screen, but
+        // not if we're in --verbose mode (otherwise we'll double-print it).
+        if (!Rush.earlyVerboseFlag()) {
+          RushStartupBanner.log(Rush.getVersionString(options.isManaged));
+        }
+        RushXCommandLine._showUsage(packageJson, projectCommandSet);
+        return;
       }
 
       const commandName: string = args[0];
@@ -168,10 +180,6 @@ export class RushXCommandLine {
   }
 
   private static _showUsage(packageJson: IPackageJson, projectCommandSet: ProjectCommandSet): void {
-    if (!Rush.earlyVerboseFlag()) {
-      Rush.printStartupBanner();
-    }
-
     console.log('usage: rushx [-h]');
     console.log('       rushx [-v] <command> ...' + os.EOL);
 

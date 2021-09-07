@@ -223,7 +223,9 @@ Optional arguments:
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
   -v, --verbose         Display the logs during the build, rather than just 
-                        displaying the build status summary
+                        displaying the build status summary. This parameter 
+                        may alternatively be specified via the VERBOSE 
+                        environment variable.
   -c, --changed-projects-only
                         Normally the incremental build logic will rebuild 
                         changed projects as well as any projects that 
@@ -456,7 +458,9 @@ Optional arguments:
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
   -v, --verbose         Display the logs during the build, rather than just 
-                        displaying the build status summary
+                        displaying the build status summary. This parameter 
+                        may alternatively be specified via the VERBOSE 
+                        environment variable.
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
@@ -994,7 +998,9 @@ Optional arguments:
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
   -v, --verbose         Display the logs during the build, rather than just 
-                        displaying the build status summary
+                        displaying the build status summary. This parameter 
+                        may alternatively be specified via the VERBOSE 
+                        environment variable.
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
                         in rush.json. Make sure you know what you are 
                         skipping.
@@ -1237,6 +1243,8 @@ Optional arguments:
   -c COMMAND, --command COMMAND
                         (Required) The command run in the current project 
                         that produced the current project state.
-  -v, --verbose         Display verbose log information.
+  -v, --verbose         Display verbose log information. This parameter may 
+                        alternatively be specified via the VERBOSE 
+                        environment variable.
 "
 `;
