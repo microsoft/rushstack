@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-jest-plugin",
   "entries": [
     {
+      "version": "0.1.23",
+      "tag": "@rushstack/heft-jest-plugin_v0.1.23",
+      "date": "Fri, 03 Sep 2021 00:09:09 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Use package name as Jest 'displayName' by default and always log a test duration."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.22",
       "tag": "@rushstack/heft-jest-plugin_v0.1.22",
       "date": "Tue, 31 Aug 2021 00:07:11 GMT",
