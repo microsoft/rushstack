@@ -2,6 +2,78 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "1.2.7",
+      "tag": "@rushstack/heft-node-rig_v1.2.7",
+      "date": "Fri, 03 Sep 2021 00:09:09 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.1.23`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.6",
+      "tag": "@rushstack/heft-node-rig_v1.2.6",
+      "date": "Tue, 31 Aug 2021 00:07:11 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.1.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.36.4` to `^0.37.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.5",
+      "tag": "@rushstack/heft-node-rig_v1.2.5",
+      "date": "Fri, 27 Aug 2021 00:07:25 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.1.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.36.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.36.3` to `^0.36.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.2.4",
+      "tag": "@rushstack/heft-node-rig_v1.2.4",
+      "date": "Fri, 20 Aug 2021 15:08:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.1.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.36.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.36.2` to `^0.36.3`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.2.3",
       "tag": "@rushstack/heft-node-rig_v1.2.3",
       "date": "Fri, 13 Aug 2021 00:09:14 GMT",

@@ -1,6 +1,23 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 12 Aug 2021 18:11:18 GMT and should not be manually modified.
+This log was last generated on Tue, 31 Aug 2021 00:07:11 GMT and should not be manually modified.
+
+## 0.37.0
+Tue, 31 Aug 2021 00:07:11 GMT
+
+### Minor changes
+
+- Add commandParameters to IMetricsData for recording parameter usage
+
+## 0.36.4
+Fri, 27 Aug 2021 00:07:25 GMT
+
+_Version update only_
+
+## 0.36.3
+Fri, 20 Aug 2021 15:08:10 GMT
+
+_Version update only_
 
 ## 0.36.2
 Thu, 12 Aug 2021 18:11:18 GMT

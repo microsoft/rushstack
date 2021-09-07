@@ -2,6 +2,18 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.9.0",
+      "tag": "@rushstack/ts-command-line_v4.9.0",
+      "date": "Fri, 20 Aug 2021 15:08:10 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add getParameterStringMap to CommandLineParameterProvider, to easily query parameter usage for telemetry"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.8.1",
       "tag": "@rushstack/ts-command-line_v4.8.1",
       "date": "Mon, 12 Jul 2021 23:08:26 GMT",

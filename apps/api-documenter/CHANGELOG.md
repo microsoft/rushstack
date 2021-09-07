@@ -1,6 +1,33 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 13 Aug 2021 00:09:14 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Sep 2021 00:09:09 GMT and should not be manually modified.
+
+## 7.13.44
+Fri, 03 Sep 2021 00:09:09 GMT
+
+_Version update only_
+
+## 7.13.43
+Thu, 02 Sep 2021 00:06:51 GMT
+
+### Patches
+
+- Remove redundant newline in fenced code blocks
+
+## 7.13.42
+Tue, 31 Aug 2021 00:07:11 GMT
+
+_Version update only_
+
+## 7.13.41
+Fri, 27 Aug 2021 00:07:25 GMT
+
+_Version update only_
+
+## 7.13.40
+Fri, 20 Aug 2021 15:08:10 GMT
+
+_Version update only_
 
 ## 7.13.39
 Fri, 13 Aug 2021 00:09:14 GMT
