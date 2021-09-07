@@ -231,7 +231,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       // If `process.cwd()` and `buildFolder` differ only by casing on Windows, the chdir operation will not fix the casing, which is the entire purpose of the exercise.
       // As such, chdir to a different directory first. That directory needs to exist, so use the parent of the current directory.
       // This will not work if the current folder is the drive root, but that is a rather exotic case.
-      process.chdir(path.resolve(__dirname, '..'));
+      process.chdir(__dirname);
       process.chdir(buildFolder);
     }
   }
