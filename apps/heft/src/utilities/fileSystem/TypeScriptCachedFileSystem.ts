@@ -51,6 +51,19 @@ export class TypeScriptCachedFileSystem {
     }
   };
 
+  public directoryExists: (path: string) => boolean = (path: string) => {
+    try {
+      const stats: FileSystemStats = this.getStatistics(path);
+      return stats.isDirectory();
+    } catch (e) {
+      if (FileSystem.isNotExistError(e)) {
+        return false;
+      } else {
+        throw e;
+      }
+    }
+  };
+
   public getStatistics: (path: string) => FileSystemStats = (path: string) => {
     return this._withCaching(path, FileSystem.getStatistics, this._statsCache);
   };
