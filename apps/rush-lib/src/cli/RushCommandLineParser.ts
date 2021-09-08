@@ -276,7 +276,9 @@ export class RushCommandLineParser extends CommandLineParser {
             allowWarningsInSuccessfulBuild: overrideAllowWarnings || !!command.allowWarningsInSuccessfulBuild,
 
             watchForChanges: command.watchForChanges || false,
-            disableBuildCache: command.disableBuildCache || false
+            disableBuildCache: command.disableBuildCache || false,
+
+            fallbackCommandsForCacheRead: command.fallbackCommandsForCacheRead
           })
         );
         break;
