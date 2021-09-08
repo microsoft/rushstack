@@ -94,7 +94,10 @@
             "fallbackCommandsForCacheRead": {
               "title": "Fallback Commands for Cache Read",
               "description": "Series of command names to test when trying to restore outputs from the cache.",
-              "type": "boolean"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         },
@@ -114,7 +117,8 @@
             "enableParallelism": { "$ref": "#/definitions/anything" },
             "ignoreDependencyOrder": { "$ref": "#/definitions/anything" },
             "ignoreMissingScript": { "$ref": "#/definitions/anything" },
-            "incremental": { "$ref": "#/definitions/anything" }
+            "incremental": { "$ref": "#/definitions/anything" },
+            "fallbackCommandsForCacheRead": { "$ref": "#/definitions/anything" }
           }
         }
       ]
