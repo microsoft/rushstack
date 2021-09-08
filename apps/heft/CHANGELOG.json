@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.37.2",
+      "tag": "@rushstack/heft_v0.37.2",
+      "date": "Wed, 08 Sep 2021 19:06:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-config-file\" to `0.6.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.37.1",
       "tag": "@rushstack/heft_v0.37.1",
       "date": "Wed, 08 Sep 2021 00:08:03 GMT",
