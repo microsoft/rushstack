@@ -2,6 +2,21 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.37.1",
+      "tag": "@rushstack/heft_v0.37.1",
+      "date": "Wed, 08 Sep 2021 00:08:03 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix building for Typescript 4.4 (Error: directoryExists is not a function)"
+          },
+          {
+            "comment": "Ensure `process.cwd()` is set to the project root with correct file path casing."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.37.0",
       "tag": "@rushstack/heft_v0.37.0",
       "date": "Tue, 31 Aug 2021 00:07:11 GMT",
