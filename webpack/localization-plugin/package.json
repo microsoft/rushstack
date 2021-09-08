@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/localization-plugin",
-  "version": "0.6.47",
+  "version": "0.6.48",
   "description": "This plugin facilitates localization with Webpack.",
   "main": "lib/index.js",
   "typings": "dist/localization-plugin.d.ts",
@@ -13,7 +13,7 @@
     "build": "heft build --clean"
   },
   "peerDependencies": {
-    "@rushstack/set-webpack-public-path-plugin": "^3.2.67",
+    "@rushstack/set-webpack-public-path-plugin": "^3.2.68",
     "@types/webpack": "^4.39.0",
     "webpack": "^4.31.0"
   },
