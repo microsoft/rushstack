@@ -14,6 +14,7 @@ interface ITestOptions {
   enabled: boolean;
   writeAllowed: boolean;
   trackedProjectFiles: string[] | undefined;
+  commandName: string;
 }
 
 describe('ProjectBuildCache', () => {
@@ -43,7 +44,7 @@ describe('ProjectBuildCache', () => {
         }
       } as unknown as RushProjectConfiguration,
       command: 'build',
-      commandName: 'build',
+      commandName: options.commandName ?? 'build',
       trackedProjectFiles: options.hasOwnProperty('trackedProjectFiles') ? options.trackedProjectFiles : [],
       projectChangeAnalyzer,
       terminal
@@ -55,6 +56,15 @@ describe('ProjectBuildCache', () => {
   describe('tryGetProjectBuildCache', () => {
     it('returns a ProjectBuildCache with a calculated cacheId value', async () => {
       const subject: ProjectBuildCache = (await prepareSubject({}))!;
+      expect(subject['_cacheId']).toMatchInlineSnapshot(
+        `"acme-wizard/build/e229f8765b7d450a8a84f711a81c21e37935d661.tgz"`
+      );
+    });
+
+    it('returns a ProjectBuildCache with a calculated cacheId value for "build" when commandName is "rebuild"', async () => {
+      const subject: ProjectBuildCache = (await prepareSubject({
+        commandName: 'rebuild'
+      }))!;
       expect(subject['_cacheId']).toMatchInlineSnapshot(
         `"acme-wizard/build/e229f8765b7d450a8a84f711a81c21e37935d661.tgz"`
       );

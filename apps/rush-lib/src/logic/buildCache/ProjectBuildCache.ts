@@ -483,8 +483,15 @@ export class ProjectBuildCache {
       hash.update(RushConstants.hashDelimiter);
     }
 
+    // The rebuild command is a special-case, and can use a cache from the build command.
+    const cacheableCommandName: string = options.commandName === 'rebuild' ? 'build' : options.commandName;
     const projectStateHash: string =
-      options.projectConfiguration.project.packageName + '/' + options.commandName + '/' + hash.digest('hex') + '.tgz';
+      options.projectConfiguration.project.packageName +
+      '/' +
+      cacheableCommandName +
+      '/' +
+      hash.digest('hex') +
+      '.tgz';
 
     return options.buildCacheConfiguration.getCacheEntryId({
       projectName: options.projectConfiguration.project.packageName,
