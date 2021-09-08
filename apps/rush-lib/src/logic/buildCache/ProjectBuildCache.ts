@@ -22,7 +22,7 @@ import { Utilities } from '../../utilities/Utilities';
 interface IProjectBuildCacheOptions {
   buildCacheConfiguration: BuildCacheConfiguration;
   projectConfiguration: RushProjectConfiguration;
-  command: string;
+  cacheKeys: ReadonlyArray<string>;
   trackedProjectFiles: string[] | undefined;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
   terminal: Terminal;
@@ -45,15 +45,15 @@ export class ProjectBuildCache {
   private readonly _cloudBuildCacheProvider: CloudBuildCacheProviderBase | undefined;
   private readonly _buildCacheEnabled: boolean;
   private readonly _projectOutputFolderNames: string[];
-  private _cacheId: string | undefined;
+  private readonly _cacheIds: ReadonlyArray<string> | undefined;
 
-  private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
+  private constructor(cacheIds: ReadonlyArray<string> | undefined, options: IProjectBuildCacheOptions) {
     this._project = options.projectConfiguration.project;
     this._localBuildCacheProvider = options.buildCacheConfiguration.localCacheProvider;
     this._cloudBuildCacheProvider = options.buildCacheConfiguration.cloudCacheProvider;
     this._buildCacheEnabled = options.buildCacheConfiguration.buildCacheEnabled;
     this._projectOutputFolderNames = options.projectConfiguration.projectOutputFolderNames || [];
-    this._cacheId = cacheId;
+    this._cacheIds = cacheIds;
   }
 
   private static _tryGetTarUtility(terminal: Terminal): TarExecutable | undefined {
@@ -76,8 +76,8 @@ export class ProjectBuildCache {
       return undefined;
     }
 
-    const cacheId: string | undefined = await ProjectBuildCache._getCacheId(options);
-    return new ProjectBuildCache(cacheId, options);
+    const cacheIds: ReadonlyArray<string> | undefined = await ProjectBuildCache._getCacheIds(options);
+    return new ProjectBuildCache(cacheIds, options);
   }
 
   private static _validateProject(
@@ -116,8 +116,8 @@ export class ProjectBuildCache {
   }
 
   public async tryRestoreFromCacheAsync(terminal: Terminal): Promise<boolean> {
-    const cacheId: string | undefined = this._cacheId;
-    if (!cacheId) {
+    const cacheIds: ReadonlyArray<string> | undefined = this._cacheIds;
+    if (!cacheIds) {
       terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
       return false;
     }
@@ -127,8 +127,17 @@ export class ProjectBuildCache {
       return false;
     }
 
-    let localCacheEntryPath: string | undefined =
-      await this._localBuildCacheProvider.tryGetCacheEntryPathByIdAsync(terminal, cacheId);
+    let localCacheEntryPath: string | undefined;
+    for (const cacheId of cacheIds) {
+      localCacheEntryPath = await this._localBuildCacheProvider.tryGetCacheEntryPathByIdAsync(
+        terminal,
+        cacheId
+      );
+      if (localCacheEntryPath) {
+        break;
+      }
+    }
+
     let cacheEntryBuffer: Buffer | undefined;
     let updateLocalCacheSuccess: boolean | undefined;
     if (!localCacheEntryPath && this._cloudBuildCacheProvider) {
@@ -136,20 +145,22 @@ export class ProjectBuildCache {
         'This project was not found in the local build cache. Querying the cloud build cache.'
       );
 
-      cacheEntryBuffer = await this._cloudBuildCacheProvider.tryGetCacheEntryBufferByIdAsync(
-        terminal,
-        cacheId
-      );
-      if (cacheEntryBuffer) {
-        try {
-          localCacheEntryPath = await this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
-            terminal,
-            cacheId,
-            cacheEntryBuffer
-          );
-          updateLocalCacheSuccess = true;
-        } catch (e) {
-          updateLocalCacheSuccess = false;
+      for (const cacheId of cacheIds) {
+        cacheEntryBuffer = await this._cloudBuildCacheProvider.tryGetCacheEntryBufferByIdAsync(
+          terminal,
+          cacheId
+        );
+        if (cacheEntryBuffer) {
+          try {
+            localCacheEntryPath = await this._localBuildCacheProvider.trySetCacheEntryBufferAsync(
+              terminal,
+              cacheId,
+              cacheEntryBuffer
+            );
+            updateLocalCacheSuccess = true;
+          } catch (e) {
+            updateLocalCacheSuccess = false;
+          }
         }
       }
     }
@@ -231,7 +242,8 @@ export class ProjectBuildCache {
   }
 
   public async trySetCacheEntryAsync(terminal: Terminal): Promise<boolean> {
-    const cacheId: string | undefined = this._cacheId;
+    // Use the first id in the list, as it is the exact match. Later entries are fallbacks.
+    const cacheId: string | undefined = this._cacheIds?.[0];
     if (!cacheId) {
       terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
       return false;
@@ -424,7 +436,7 @@ export class ProjectBuildCache {
     return path.join(this._project.projectRushTempFolder, 'build-cache-tar.log');
   }
 
-  private static async _getCacheId(options: IProjectBuildCacheOptions): Promise<string | undefined> {
+  private static async _getCacheIds(options: IProjectBuildCacheOptions): Promise<string[] | undefined> {
     // The project state hash is calculated in the following method:
     // - The current project's hash (see ProjectChangeAnalyzer.getProjectStateHash) is
     //   calculated and appended to an array
@@ -439,54 +451,54 @@ export class ProjectBuildCache {
     // - A hex digest of the hash is returned
     const projectChangeAnalyzer: ProjectChangeAnalyzer = options.projectChangeAnalyzer;
     const projectStates: string[] = [];
-    const projectsThatHaveBeenProcessed: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
-    let projectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
-    projectsToProcess.add(options.projectConfiguration.project);
 
-    while (projectsToProcess.size > 0) {
-      const newProjectsToProcess: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
-      for (const projectToProcess of projectsToProcess) {
-        projectsThatHaveBeenProcessed.add(projectToProcess);
+    const projectQueue: Set<RushConfigurationProject> = new Set<RushConfigurationProject>([
+      options.projectConfiguration.project
+    ]);
 
-        const projectState: string | undefined = await projectChangeAnalyzer._tryGetProjectStateHashAsync(
-          projectToProcess.packageName,
-          options.terminal
-        );
-        if (!projectState) {
-          // If we hit any projects with unknown state, return unknown cache ID
-          return undefined;
-        } else {
-          projectStates.push(projectState);
-          for (const dependency of projectToProcess.dependencyProjects) {
-            if (!projectsThatHaveBeenProcessed.has(dependency)) {
-              newProjectsToProcess.add(dependency);
-            }
-          }
+    for (const project of projectQueue) {
+      const projectState: string | undefined = await projectChangeAnalyzer._tryGetProjectStateHashAsync(
+        project.packageName,
+        options.terminal
+      );
+      if (!projectState) {
+        // If we hit any projects with unknown state, return unknown cache ID
+        return undefined;
+      } else {
+        projectStates.push(projectState);
+        for (const dependency of project.dependencyProjects) {
+          projectQueue.add(dependency);
         }
       }
-
-      projectsToProcess = newProjectsToProcess;
     }
 
     const sortedProjectStates: string[] = projectStates.sort();
-    const hash: crypto.Hash = crypto.createHash('sha1');
     const serializedOutputFolders: string = JSON.stringify(
       options.projectConfiguration.projectOutputFolderNames
     );
-    hash.update(serializedOutputFolders);
-    hash.update(RushConstants.hashDelimiter);
-    hash.update(options.command);
-    hash.update(RushConstants.hashDelimiter);
-    for (const projectHash of sortedProjectStates) {
-      hash.update(projectHash);
+
+    // Ensure there are no duplicates in the cache keys
+    const cacheKeySet: Set<string> = new Set(options.cacheKeys);
+
+    return Array.from(cacheKeySet, (key: string) => {
+      const hash: crypto.Hash = crypto.createHash('sha1');
+      hash.update(serializedOutputFolders);
       hash.update(RushConstants.hashDelimiter);
-    }
 
-    const projectStateHash: string = hash.digest('hex');
+      // When updating to node 12 typings, move "command" to the end and use hash.copy() to avoid duplicate work
+      hash.update(key);
+      hash.update(RushConstants.hashDelimiter);
+      for (const projectHash of sortedProjectStates) {
+        hash.update(projectHash);
+        hash.update(RushConstants.hashDelimiter);
+      }
 
-    return options.buildCacheConfiguration.getCacheEntryId({
-      projectName: options.projectConfiguration.project.packageName,
-      projectStateHash
+      const projectStateHash: string = hash.digest('hex');
+
+      return options.buildCacheConfiguration.getCacheEntryId({
+        projectName: options.projectConfiguration.project.packageName,
+        projectStateHash
+      });
     });
   }
 }

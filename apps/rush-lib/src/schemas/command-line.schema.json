@@ -90,6 +90,11 @@
               "title": "Disable build cache.",
               "description": "Disable build cache for this action. This may be useful if this command affects state outside of projects' own folders.",
               "type": "boolean"
+            },
+            "fallbackCommandsForCacheRead": {
+              "title": "Fallback Commands for Cache Read",
+              "description": "Series of command names to test when trying to restore outputs from the cache.",
+              "type": "boolean"
             }
           }
         },
@@ -199,6 +204,11 @@
           "title": "Required",
           "description": "If true, then this parameter must be included on the command line",
           "type": "boolean"
+        },
+        "ignoreForCacheRead": {
+          "title": "Ignore for Cache Read",
+          "description": "If true, then the build cache will discard this parameter value when looking for cache matches.",
+          "type": "boolean"
         }
       }
     },
@@ -226,7 +236,8 @@
             "shortName": { "$ref": "#/definitions/anything" },
             "description": { "$ref": "#/definitions/anything" },
             "associatedCommands": { "$ref": "#/definitions/anything" },
-            "required": { "$ref": "#/definitions/anything" }
+            "required": { "$ref": "#/definitions/anything" },
+            "ignoreForCacheRead": { "$ref": "#/definitions/anything" }
           }
         }
       ]
@@ -262,6 +273,7 @@
             "description": { "$ref": "#/definitions/anything" },
             "associatedCommands": { "$ref": "#/definitions/anything" },
             "required": { "$ref": "#/definitions/anything" },
+            "ignoreForCacheRead": { "$ref": "#/definitions/anything" },
 
             "argumentName": { "$ref": "#/definitions/anything" }
           }
@@ -322,6 +334,7 @@
             "description": { "$ref": "#/definitions/anything" },
             "associatedCommands": { "$ref": "#/definitions/anything" },
             "required": { "$ref": "#/definitions/anything" },
+            "ignoreForCacheRead": { "$ref": "#/definitions/anything" },
 
             "alternatives": { "$ref": "#/definitions/anything" },
             "defaultValue": { "$ref": "#/definitions/anything" }

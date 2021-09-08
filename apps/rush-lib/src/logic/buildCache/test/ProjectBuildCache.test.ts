@@ -43,7 +43,7 @@ describe('ProjectBuildCache', () => {
           dependencyProjects: []
         }
       } as unknown as RushProjectConfiguration,
-      command: 'build',
+      cacheKeys: ['build-incremental', 'build'],
       trackedProjectFiles: options.hasOwnProperty('trackedProjectFiles') ? options.trackedProjectFiles : [],
       projectChangeAnalyzer,
       terminal
@@ -55,9 +55,12 @@ describe('ProjectBuildCache', () => {
   describe('tryGetProjectBuildCache', () => {
     it('returns a ProjectBuildCache with a calculated cacheId value', async () => {
       const subject: ProjectBuildCache = (await prepareSubject({}))!;
-      expect(subject['_cacheId']).toMatchInlineSnapshot(
-        `"acme-wizard/e229f8765b7d450a8a84f711a81c21e37935d661"`
-      );
+      expect(subject['_cacheIds']).toMatchInlineSnapshot(`
+        Array [
+          "acme-wizard/1a5e13b20ee911a4e5b5a0a0fb38b01e7edb8246",
+          "acme-wizard/e229f8765b7d450a8a84f711a81c21e37935d661",
+        ]
+      `);
     });
 
     it('returns undefined if the tracked file list is undefined', async () => {

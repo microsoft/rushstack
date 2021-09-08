@@ -26,6 +26,7 @@ export interface IBaseScriptActionOptions extends IBaseRushActionOptions {
 export abstract class BaseScriptAction extends BaseRushAction {
   protected readonly _commandLineConfiguration: CommandLineConfiguration | undefined;
   protected readonly customParameters: CommandLineParameter[] = [];
+  protected readonly cacheReadCustomParameters: CommandLineParameter[] = [];
 
   public constructor(options: IBaseScriptActionOptions) {
     super(options);
@@ -86,6 +87,9 @@ export abstract class BaseScriptAction extends BaseRushAction {
 
         if (customParameter) {
           this.customParameters.push(customParameter);
+          if (!parameterJson.ignoreForCacheRead) {
+            this.cacheReadCustomParameters.push(customParameter);
+          }
         }
       }
     }

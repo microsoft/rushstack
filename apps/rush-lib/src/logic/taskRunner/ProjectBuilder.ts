@@ -47,6 +47,10 @@ export interface IProjectBuilderOptions {
   rushProject: RushConfigurationProject;
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration: BuildCacheConfiguration | undefined;
+  /**
+   * Primary and fallback command text for the build cache.
+   */
+  cacheKeys?: ReadonlyArray<string> | undefined;
   commandToRun: string;
   commandName: string;
   isIncrementalBuildAllowed: boolean;
@@ -89,6 +93,7 @@ export class ProjectBuilder extends BaseBuilder {
   private readonly _buildCacheConfiguration: BuildCacheConfiguration | undefined;
   private readonly _commandName: string;
   private readonly _commandToRun: string;
+  private readonly _cacheKeys: ReadonlyArray<string>;
   private readonly _isCacheReadAllowed: boolean;
   private readonly _projectChangeAnalyzer: ProjectChangeAnalyzer;
   private readonly _packageDepsFilename: string;
@@ -107,6 +112,7 @@ export class ProjectBuilder extends BaseBuilder {
     this._buildCacheConfiguration = options.buildCacheConfiguration;
     this._commandName = options.commandName;
     this._commandToRun = options.commandToRun;
+    this._cacheKeys = options.cacheKeys || [options.commandToRun];
     this._isCacheReadAllowed = options.isIncrementalBuildAllowed;
     this.isSkipAllowed = options.isIncrementalBuildAllowed;
     this._projectChangeAnalyzer = options.projectChangeAnalyzer;
@@ -430,7 +436,7 @@ export class ProjectBuilder extends BaseBuilder {
                 projectConfiguration,
                 buildCacheConfiguration: this._buildCacheConfiguration,
                 terminal,
-                command: this._commandToRun,
+                cacheKeys: this._cacheKeys,
                 trackedProjectFiles: trackedProjectFiles,
                 projectChangeAnalyzer: this._projectChangeAnalyzer
               });

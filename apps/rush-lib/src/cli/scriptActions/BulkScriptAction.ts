@@ -39,6 +39,11 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
    * Optional command to run. Otherwise, use the `actionName` as the command to run.
    */
   commandToRun?: string;
+
+  /**
+   * When reading from the build cache, try these command names in order if the main entry does not exist.
+   */
+  fallbackCommandsForCacheRead?: ReadonlyArray<string>;
 }
 
 interface IExecuteInternalOptions {
@@ -63,6 +68,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private readonly _ignoreMissingScript: boolean;
   private readonly _isIncrementalBuildAllowed: boolean;
   private readonly _commandToRun: string;
+  private readonly _fallbackCommandsForCacheRead: ReadonlyArray<string>;
   private readonly _watchForChanges: boolean;
   private readonly _disableBuildCache: boolean;
   private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
@@ -81,6 +87,7 @@ export class BulkScriptAction extends BaseScriptAction {
     this._ignoreMissingScript = options.ignoreMissingScript;
     this._isIncrementalBuildAllowed = options.incremental;
     this._commandToRun = options.commandToRun || options.actionName;
+    this._fallbackCommandsForCacheRead = options.fallbackCommandsForCacheRead || [this._commandToRun];
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
     this._watchForChanges = options.watchForChanges;
@@ -118,6 +125,11 @@ export class BulkScriptAction extends BaseScriptAction {
       customParameter.appendToArgList(customParameterValues);
     }
 
+    const cacheReadCustomParameterValues: string[] = [];
+    for (const customParameter of this.cacheReadCustomParameters) {
+      customParameter.appendToArgList(cacheReadCustomParameterValues);
+    }
+
     const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
@@ -139,7 +151,9 @@ export class BulkScriptAction extends BaseScriptAction {
       selection,
       commandName: this.actionName,
       commandToRun: this._commandToRun,
+      fallbackCommandsForCacheRead: this._fallbackCommandsForCacheRead,
       customParameterValues,
+      cacheReadCustomParameterValues: cacheReadCustomParameterValues,
       isQuietMode: isQuietMode,
       isDebugMode: isDebugMode,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
