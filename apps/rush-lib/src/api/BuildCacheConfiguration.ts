@@ -6,9 +6,9 @@ import {
   JsonFile,
   JsonSchema,
   FileSystem,
+  JsonObject,
   AlreadyReportedError,
-  ITerminal,
-  Import
+  ITerminal
 } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from './RushConfiguration';
@@ -18,98 +18,33 @@ import { CloudBuildCacheProviderBase } from '../logic/buildCache/CloudBuildCache
 import { RushUserConfiguration } from './RushUserConfiguration';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import { CacheEntryId, GetCacheEntryIdFunction } from '../logic/buildCache/CacheEntryId';
-
-const AzureStorageBuildCacheProviderModule: typeof import('../logic/buildCache/AzureStorageBuildCacheProvider') =
-  Import.lazy('../logic/buildCache/AzureStorageBuildCacheProvider', require);
-import type {
-  AzureEnvironmentNames,
-  AzureStorageBuildCacheProvider
-} from '../logic/buildCache/AzureStorageBuildCacheProvider';
-const AmazonS3BuildCacheProviderModule: typeof import('../logic/buildCache/AmazonS3/AmazonS3BuildCacheProvider') =
-  Import.lazy('../logic/buildCache/AmazonS3/AmazonS3BuildCacheProvider', require);
-import type { AmazonS3BuildCacheProvider } from '../logic/buildCache/AmazonS3/AmazonS3BuildCacheProvider';
+import { RushSession } from '../pluginFramework/RushSession';
 
 /**
  * Describes the file structure for the "common/config/rush/build-cache.json" config file.
  */
 interface IBaseBuildCacheJson {
   buildCacheEnabled: boolean;
-  cacheProvider: 'azure-blob-storage' | 'amazon-s3' | 'local-only';
+  cacheProvider: string;
   cacheEntryNamePattern?: string;
 }
-
-interface IAzureBlobStorageBuildCacheJson extends IBaseBuildCacheJson {
-  cacheProvider: 'azure-blob-storage';
-
-  azureBlobStorageConfiguration: IAzureStorageConfigurationJson;
-}
-
-interface IAmazonS3BuildCacheJson extends IBaseBuildCacheJson {
-  cacheProvider: 'amazon-s3';
-
-  amazonS3Configuration: IAmazonS3ConfigurationJson;
-}
-
 interface ILocalBuildCacheJson extends IBaseBuildCacheJson {
-  cacheProvider: 'local-only';
+  readonly cacheProvider: 'local-only';
 }
 
-type IBuildCacheJson = IAzureBlobStorageBuildCacheJson | IAmazonS3BuildCacheJson | ILocalBuildCacheJson;
-
-interface IAzureStorageConfigurationJson {
-  /**
-   * The name of the the Azure storage account to use for build cache.
-   */
-  storageAccountName: string;
-
-  /**
-   * The name of the container in the Azure storage account to use for build cache.
-   */
-  storageContainerName: string;
-
-  /**
-   * The Azure environment the storage account exists in. Defaults to AzureCloud.
-   */
-  azureEnvironment?: AzureEnvironmentNames;
-
-  /**
-   * An optional prefix for cache item blob names.
-   */
-  blobPrefix?: string;
-
-  /**
-   * If set to true, allow writing to the cache. Defaults to false.
-   */
-  isCacheWriteAllowed?: boolean;
+interface ICloudBuildCacheJson extends IBaseBuildCacheJson {
+  readonly cacheProvider: string;
+  [otherConfigKey: string]: JsonObject;
 }
 
-interface IAmazonS3ConfigurationJson {
-  /**
-   * The Amazon S3 region of the bucket to use for build cache (e.g. "us-east-1").
-   */
-  s3Region: string;
-
-  /**
-   * The name of the bucket in Amazon S3 to use for build cache.
-   */
-  s3Bucket: string;
-
-  /**
-   * An optional prefix ("folder") for cache items.
-   */
-  s3Prefix?: string;
-
-  /**
-   * If set to true, allow writing to the cache. Defaults to false.
-   */
-  isCacheWriteAllowed?: boolean;
-}
+export type IBuildCacheJson = ICloudBuildCacheJson | ILocalBuildCacheJson;
 
 interface IBuildCacheConfigurationOptions {
   buildCacheJson: IBuildCacheJson;
   getCacheEntryId: GetCacheEntryIdFunction;
   rushConfiguration: RushConfiguration;
   rushUserConfiguration: RushUserConfiguration;
+  rushSession: RushSession;
 }
 
 /**
@@ -143,29 +78,18 @@ export class BuildCacheConfiguration {
     });
 
     const { buildCacheJson } = options;
-    switch (buildCacheJson.cacheProvider) {
-      case 'local-only': {
-        // Don't configure a cloud cache provider
-        break;
+    // Don't configure a cloud cache provider if local-only
+    if (buildCacheJson.cacheProvider !== 'local-only') {
+      const cloudCacheProviderFactory:
+        | ((cacheProviderConfig: JsonObject, buildCacheFilename: string) => CloudBuildCacheProviderBase)
+        | undefined = options.rushSession.cloudCacheProviderFactories.get(buildCacheJson.cacheProvider);
+      if (!cloudCacheProviderFactory) {
+        throw new Error(`Unexpected cache provider: ${buildCacheJson.cacheProvider}`);
       }
-
-      case 'azure-blob-storage': {
-        this.cloudCacheProvider = this._createAzureStorageBuildCacheProvider(
-          buildCacheJson.azureBlobStorageConfiguration
-        );
-        break;
-      }
-
-      case 'amazon-s3': {
-        this.cloudCacheProvider = this._createAmazonS3BuildCacheProvider(
-          buildCacheJson.amazonS3Configuration
-        );
-        break;
-      }
-
-      default: {
-        throw new Error(`Unexpected cache provider: ${(buildCacheJson as IBuildCacheJson).cacheProvider}`);
-      }
+      this.cloudCacheProvider = cloudCacheProviderFactory(
+        buildCacheJson as ICloudBuildCacheJson,
+        BuildCacheConfiguration.getBuildCacheConfigFilePath(options.rushConfiguration)
+      );
     }
   }
 
@@ -175,13 +99,14 @@ export class BuildCacheConfiguration {
    */
   public static async tryLoadAsync(
     terminal: ITerminal,
-    rushConfiguration: RushConfiguration
+    rushConfiguration: RushConfiguration,
+    rushSession: RushSession
   ): Promise<BuildCacheConfiguration | undefined> {
     const jsonFilePath: string = BuildCacheConfiguration.getBuildCacheConfigFilePath(rushConfiguration);
     if (!FileSystem.exists(jsonFilePath)) {
       return undefined;
     }
-    return await BuildCacheConfiguration._loadAsync(jsonFilePath, terminal, rushConfiguration);
+    return await BuildCacheConfiguration._loadAsync(jsonFilePath, terminal, rushConfiguration, rushSession);
   }
 
   /**
@@ -190,7 +115,8 @@ export class BuildCacheConfiguration {
    */
   public static async loadAndRequireEnabledAsync(
     terminal: ITerminal,
-    rushConfiguration: RushConfiguration
+    rushConfiguration: RushConfiguration,
+    rushSession: RushSession
   ): Promise<BuildCacheConfiguration> {
     const jsonFilePath: string = BuildCacheConfiguration.getBuildCacheConfigFilePath(rushConfiguration);
     if (!FileSystem.exists(jsonFilePath)) {
@@ -204,7 +130,8 @@ export class BuildCacheConfiguration {
     const buildCacheConfiguration: BuildCacheConfiguration = await BuildCacheConfiguration._loadAsync(
       jsonFilePath,
       terminal,
-      rushConfiguration
+      rushConfiguration,
+      rushSession
     );
 
     if (!buildCacheConfiguration.buildCacheEnabled) {
@@ -220,7 +147,8 @@ export class BuildCacheConfiguration {
   private static async _loadAsync(
     jsonFilePath: string,
     terminal: ITerminal,
-    rushConfiguration: RushConfiguration
+    rushConfiguration: RushConfiguration,
+    rushSession: RushSession
   ): Promise<BuildCacheConfiguration> {
     const buildCacheJson: IBuildCacheJson = await JsonFile.loadAndValidateAsync(
       jsonFilePath,
@@ -242,34 +170,12 @@ export class BuildCacheConfiguration {
       buildCacheJson,
       getCacheEntryId,
       rushConfiguration,
-      rushUserConfiguration
+      rushUserConfiguration,
+      rushSession
     });
   }
 
   public static getBuildCacheConfigFilePath(rushConfiguration: RushConfiguration): string {
     return path.resolve(rushConfiguration.commonRushConfigFolder, RushConstants.buildCacheFilename);
-  }
-
-  private _createAzureStorageBuildCacheProvider(
-    azureStorageConfigurationJson: IAzureStorageConfigurationJson
-  ): AzureStorageBuildCacheProvider {
-    return new AzureStorageBuildCacheProviderModule.AzureStorageBuildCacheProvider({
-      storageAccountName: azureStorageConfigurationJson.storageAccountName,
-      storageContainerName: azureStorageConfigurationJson.storageContainerName,
-      azureEnvironment: azureStorageConfigurationJson.azureEnvironment,
-      blobPrefix: azureStorageConfigurationJson.blobPrefix,
-      isCacheWriteAllowed: !!azureStorageConfigurationJson.isCacheWriteAllowed
-    });
-  }
-
-  private _createAmazonS3BuildCacheProvider(
-    amazonS3ConfigurationJson: IAmazonS3ConfigurationJson
-  ): AmazonS3BuildCacheProvider {
-    return new AmazonS3BuildCacheProviderModule.AmazonS3BuildCacheProvider({
-      s3Region: amazonS3ConfigurationJson.s3Region,
-      s3Bucket: amazonS3ConfigurationJson.s3Bucket,
-      s3Prefix: amazonS3ConfigurationJson.s3Prefix,
-      isCacheWriteAllowed: !!amazonS3ConfigurationJson.isCacheWriteAllowed
-    });
   }
 }

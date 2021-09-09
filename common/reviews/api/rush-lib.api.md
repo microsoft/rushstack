@@ -4,9 +4,14 @@
 
 ```ts
 
+/// <reference types="node" />
+
+import { AsyncParallelHook } from 'tapable';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
+import { ITerminalProvider } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
+import { JsonSchema } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
 
 // @public
@@ -64,6 +69,22 @@ export enum BumpType {
 // @public
 export class ChangeManager {
     static createEmptyChangeFiles(rushConfiguration: RushConfiguration, projectName: string, emailAddress: string): string | undefined;
+}
+
+// @public (undocumented)
+export abstract class CloudBuildCacheProviderBase {
+    // (undocumented)
+    abstract deleteCachedCredentialsAsync(terminal: Terminal): Promise<void>;
+    // (undocumented)
+    abstract readonly isCacheWriteAllowed: boolean;
+    // (undocumented)
+    abstract tryGetCacheEntryBufferByIdAsync(terminal: Terminal, cacheId: string): Promise<Buffer | undefined>;
+    // (undocumented)
+    abstract trySetCacheEntryBufferAsync(terminal: Terminal, cacheId: string, entryBuffer: Buffer): Promise<boolean>;
+    // (undocumented)
+    abstract updateCachedCredentialAsync(terminal: Terminal, credential: string): Promise<void>;
+    // (undocumented)
+    abstract updateCachedCredentialInteractiveAsync(terminal: Terminal): Promise<void>;
 }
 
 // @public
@@ -137,6 +158,12 @@ export class ExperimentsConfiguration {
     get configuration(): Readonly<IExperimentsJson>;
 }
 
+// Warning: (ae-forgotten-export) The symbol "ICloudBuildCacheJson" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "ILocalBuildCacheJson" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type IBuildCacheJson = ICloudBuildCacheJson | ILocalBuildCacheJson;
+
 // @public
 export interface IConfigurationEnvironment {
     [environmentVariableName: string]: IConfigurationEnvironmentVariable;
@@ -174,6 +201,24 @@ export interface ILaunchOptions {
     isManaged: boolean;
 }
 
+// @public (undocumented)
+export interface ILogger {
+    emitError(error: Error): void;
+    emitWarning(warning: Error): void;
+    // (undocumented)
+    readonly terminal: Terminal;
+}
+
+// @public (undocumented)
+export interface ILoggerOptions {
+    // (undocumented)
+    getShouldPrintStacks: () => boolean;
+    // (undocumented)
+    loggerName: string;
+    // (undocumented)
+    terminalProvider: ITerminalProvider;
+}
+
 // @beta
 export class IndividualVersionPolicy extends VersionPolicy {
     // Warning: (ae-forgotten-export) The symbol "IIndividualVersionJson" needs to be exported by the entry point index.d.ts
@@ -203,6 +248,30 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     preventManualShrinkwrapChanges?: boolean;
     strictPeerDependencies?: boolean;
     useWorkspaces?: boolean;
+}
+
+// @public (undocumented)
+export interface IRushLifecycle {
+    // (undocumented)
+    hooks: RushLifecycleHooks;
+}
+
+// @public (undocumented)
+export interface IRushPlugin<TOptions = void> {
+    // (undocumented)
+    apply(rushSession: RushSession, rushConfiguration: RushConfiguration, options: TOptions): void;
+    // (undocumented)
+    readonly optionsSchema?: JsonSchema;
+    // (undocumented)
+    readonly pluginName: string;
+}
+
+// @public (undocumented)
+export interface IRushSessionOptions {
+    // (undocumented)
+    getIsDebugMode: () => boolean;
+    // (undocumented)
+    terminalProvider: ITerminalProvider;
 }
 
 // @public
@@ -242,6 +311,21 @@ export class LockStepVersionPolicy extends VersionPolicy {
     update(newVersionString: string): boolean;
     validate(versionString: string, packageName: string): void;
     get version(): string;
+}
+
+// @public (undocumented)
+export class Logger implements ILogger {
+    constructor(options: ILoggerOptions);
+    emitError(error: Error): void;
+    emitWarning(warning: Error): void;
+    // (undocumented)
+    get errors(): ReadonlyArray<Error>;
+    // (undocumented)
+    static getErrorMessage(error: Error): string;
+    // (undocumented)
+    readonly terminal: Terminal;
+    // (undocumented)
+    get warnings(): ReadonlyArray<Error>;
 }
 
 // @public
@@ -485,6 +569,23 @@ export class _RushGlobalFolder {
     constructor();
     get nodeSpecificPath(): string;
     get path(): string;
+}
+
+// @public (undocumented)
+export class RushLifecycleHooks {
+    // (undocumented)
+    initialize: AsyncParallelHook;
+}
+
+// @public (undocumented)
+export class RushSession implements IRushLifecycle {
+    constructor(options: IRushSessionOptions);
+    // (undocumented)
+    cloudCacheProviderFactories: Map<string, (buildCacheJson: IBuildCacheJson, buildCacheConfigFilePath: string) => CloudBuildCacheProviderBase>;
+    // (undocumented)
+    getLogger(name: string): Logger;
+    // (undocumented)
+    readonly hooks: RushLifecycleHooks;
 }
 
 // @beta

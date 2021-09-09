@@ -5,18 +5,9 @@ import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
 
-import {
-  FileSystem,
-  LockFile,
-  IPackageJson,
-  JsonFile,
-  AlreadyReportedError
-} from '@rushstack/node-core-library';
+import { FileSystem, IPackageJson, JsonFile, AlreadyReportedError } from '@rushstack/node-core-library';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { Utilities } from '../../utilities/Utilities';
-import { InstallHelpers } from '../../logic/installManager/InstallHelpers';
-import { RushConstants } from '../../logic/RushConstants';
-import { LastInstallFlag } from '../../api/LastInstallFlag';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 
 /**
@@ -89,69 +80,9 @@ export class GlobalScriptAction extends BaseScriptAction {
   }
 
   private async _prepareAutoinstallerName(): Promise<void> {
-    await InstallHelpers.ensureLocalPackageManager(
-      this.rushConfiguration,
-      this.rushGlobalFolder,
-      RushConstants.defaultMaxInstallAttempts
-    );
+    const autoInstaller: Autoinstaller = new Autoinstaller(this._autoinstallerName, this.rushConfiguration);
 
-    // Example: common/autoinstallers/my-task/package.json
-    const relativePathForLogs: string = path.relative(
-      this.rushConfiguration.rushJsonFolder,
-      this._autoinstallerFullPath
-    );
-
-    console.log(`Acquiring lock for "${relativePathForLogs}" folder...`);
-
-    const lock: LockFile = await LockFile.acquire(this._autoinstallerFullPath, 'autoinstaller');
-
-    // Example: .../common/autoinstallers/my-task/.rush/temp
-    const lastInstallFlagPath: string = path.join(
-      this._autoinstallerFullPath,
-      RushConstants.projectRushFolderName,
-      'temp'
-    );
-
-    const packageJsonPath: string = path.join(this._autoinstallerFullPath, 'package.json');
-    const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
-
-    const lastInstallFlag: LastInstallFlag = new LastInstallFlag(lastInstallFlagPath, {
-      node: process.versions.node,
-      packageManager: this.rushConfiguration.packageManager,
-      packageManagerVersion: this.rushConfiguration.packageManagerToolVersion,
-      packageJson: packageJson
-    });
-
-    if (!lastInstallFlag.isValid() || lock.dirtyWhenAcquired) {
-      // Example: ../common/autoinstallers/my-task/node_modules
-      const nodeModulesFolder: string = path.join(this._autoinstallerFullPath, 'node_modules');
-
-      if (FileSystem.exists(nodeModulesFolder)) {
-        console.log('Deleting old files from ' + nodeModulesFolder);
-        FileSystem.ensureEmptyFolder(nodeModulesFolder);
-      }
-
-      // Copy: .../common/autoinstallers/my-task/.npmrc
-      Utilities.syncNpmrc(this.rushConfiguration.commonRushConfigFolder, this._autoinstallerFullPath);
-
-      console.log(`Installing dependencies under ${this._autoinstallerFullPath}...\n`);
-
-      Utilities.executeCommand({
-        command: this.rushConfiguration.packageManagerToolFilename,
-        args: ['install', '--frozen-lockfile'],
-        workingDirectory: this._autoinstallerFullPath,
-        keepEnvironment: true
-      });
-
-      // Create file: ../common/autoinstallers/my-task/.rush/temp/last-install.flag
-      lastInstallFlag.create();
-
-      console.log('Autoinstall completed successfully\n');
-    } else {
-      console.log('Autoinstaller folder is already up to date\n');
-    }
-
-    lock.release();
+    await autoInstaller.prepareAsync();
   }
 
   public async runAsync(): Promise<void> {

@@ -2,13 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { EnvironmentConfiguration } from '../../../api/EnvironmentConfiguration';
+import { RushUserConfiguration } from '../../../api/RushUserConfiguration';
+import { CredentialCache } from '../../../logic/CredentialCache';
+import { AzureEnvironmentNames, AzureStorageBuildCacheProvider } from '../AzureStorageBuildCacheProvider';
 
-import { EnvironmentConfiguration } from '../../../../api/EnvironmentConfiguration';
-import { AmazonS3BuildCacheProvider } from '../AmazonS3BuildCacheProvider';
-import { RushUserConfiguration } from '../../../../api/RushUserConfiguration';
-import { CredentialCache } from '../../../CredentialCache';
-
-describe('AmazonS3BuildCacheProvider', () => {
+describe('AzureStorageBuildCacheProvider', () => {
   beforeEach(() => {
     jest.spyOn(EnvironmentConfiguration, 'buildCacheCredential', 'get').mockReturnValue(undefined);
     jest.spyOn(EnvironmentConfiguration, 'buildCacheEnabled', 'get').mockReturnValue(undefined);
@@ -19,44 +18,56 @@ describe('AmazonS3BuildCacheProvider', () => {
     jest.resetAllMocks();
   });
 
+  it('uses a correct list of Azure authority hosts', async () => {
+    await expect(
+      () =>
+        new AzureStorageBuildCacheProvider({
+          storageAccountName: 'storage-account',
+          storageContainerName: 'container-name',
+          azureEnvironment: 'INCORRECT_AZURE_ENVIRONMENT' as AzureEnvironmentNames,
+          isCacheWriteAllowed: false
+        })
+    ).toThrowErrorMatchingSnapshot();
+  });
+
   describe('isCacheWriteAllowed', () => {
     function prepareSubject(
       optionValue: boolean,
       envVarValue: boolean | undefined
-    ): AmazonS3BuildCacheProvider {
+    ): AzureStorageBuildCacheProvider {
       jest.spyOn(EnvironmentConfiguration, 'buildCacheWriteAllowed', 'get').mockReturnValue(envVarValue);
-      return new AmazonS3BuildCacheProvider({
-        s3Region: 'region-name',
-        s3Bucket: 'bucket-name',
+      return new AzureStorageBuildCacheProvider({
+        storageAccountName: 'storage-account',
+        storageContainerName: 'container-name',
         isCacheWriteAllowed: optionValue
       });
     }
 
     it('is false if isCacheWriteAllowed is false', () => {
-      const subject: AmazonS3BuildCacheProvider = prepareSubject(false, undefined);
+      const subject: AzureStorageBuildCacheProvider = prepareSubject(false, undefined);
       expect(subject.isCacheWriteAllowed).toBe(false);
     });
 
     it('is true if isCacheWriteAllowed is true', () => {
-      const subject: AmazonS3BuildCacheProvider = prepareSubject(true, undefined);
+      const subject: AzureStorageBuildCacheProvider = prepareSubject(true, undefined);
       expect(subject.isCacheWriteAllowed).toBe(true);
     });
 
     it('is false if isCacheWriteAllowed is true but the env var is false', () => {
-      const subject: AmazonS3BuildCacheProvider = prepareSubject(true, false);
+      const subject: AzureStorageBuildCacheProvider = prepareSubject(true, false);
       expect(subject.isCacheWriteAllowed).toBe(false);
     });
 
     it('is true if the env var is true', () => {
-      const subject: AmazonS3BuildCacheProvider = prepareSubject(false, true);
+      const subject: AzureStorageBuildCacheProvider = prepareSubject(false, true);
       expect(subject.isCacheWriteAllowed).toBe(true);
     });
   });
 
   async function testCredentialCache(isCacheWriteAllowed: boolean): Promise<void> {
-    const cacheProvider: AmazonS3BuildCacheProvider = new AmazonS3BuildCacheProvider({
-      s3Region: 'region-name',
-      s3Bucket: 'bucket-name',
+    const cacheProvider: AzureStorageBuildCacheProvider = new AzureStorageBuildCacheProvider({
+      storageAccountName: 'storage-account',
+      storageContainerName: 'container-name',
       isCacheWriteAllowed
     });
 
