@@ -3,10 +3,10 @@
 
 import { ITerminal } from '@rushstack/node-core-library';
 
-import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../../api/EnvironmentConfiguration';
-import { CloudBuildCacheProviderBase } from '../CloudBuildCacheProviderBase';
-import { CredentialCache, ICredentialCacheEntry } from '../../CredentialCache';
-import { RushConstants } from '../../RushConstants';
+import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
+import { CloudBuildCacheProviderBase } from '../../logic/buildCache/CloudBuildCacheProviderBase';
+import { CredentialCache, ICredentialCacheEntry } from '../../logic/CredentialCache';
+import { RushConstants } from '../../logic/RushConstants';
 import { AmazonS3Client, IAmazonS3Credentials } from './AmazonS3Client';
 
 export interface IAmazonS3BuildCacheProviderOptions {

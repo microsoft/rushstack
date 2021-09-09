@@ -13,6 +13,7 @@ import { EventHooksManager } from '../../logic/EventHooksManager';
 import { RushCommandLineParser } from './../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
+import { RushSession } from '../../pluginFramework/RushSession';
 
 export interface IBaseRushActionOptions extends ICommandLineActionOptions {
   /**
@@ -40,6 +41,10 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
 
   protected get rushConfiguration(): RushConfiguration | undefined {
     return this._parser.rushConfiguration;
+  }
+
+  protected get rushSession(): RushSession {
+    return this._parser.rushSession;
   }
 
   protected get rushGlobalFolder(): RushGlobalFolder {

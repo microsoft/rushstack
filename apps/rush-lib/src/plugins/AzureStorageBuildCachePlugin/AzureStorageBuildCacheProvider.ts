@@ -16,9 +16,9 @@ import {
 import { DeviceCodeCredential, DeviceCodeInfo } from '@azure/identity';
 
 import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import { CredentialCache, ICredentialCacheEntry } from '../CredentialCache';
-import { RushConstants } from '../RushConstants';
-import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
+import { CredentialCache, ICredentialCacheEntry } from '../../logic/CredentialCache';
+import { RushConstants } from '../../logic/RushConstants';
+import { CloudBuildCacheProviderBase } from '../../logic/buildCache/CloudBuildCacheProviderBase';
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // TODO: This is a temporary workaround; it should be reverted when we upgrade to "@azure/identity" version 2.x

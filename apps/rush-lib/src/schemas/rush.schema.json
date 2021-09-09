@@ -309,6 +309,35 @@
         }
       },
       "additionalProperties": false
+    },
+    "commonAutoinstallerName": {
+      "type": "string",
+      "description": "Specify an autoinstaller name, whose packages are used by the whole monorepo."
+    },
+    "rushPlugins": {
+      "type": "array",
+      "description": "Defines rush plugins.",
+
+      "items": {
+        "type": "object",
+        "required": ["plugin"],
+        "properties": {
+          "plugin": {
+            "description": "plugin package specifier",
+            "type": "string",
+            "pattern": "[^\\\\]"
+          },
+
+          "pluginVersion": {
+            "description": "plugin semver string",
+            "type": "string"
+          },
+
+          "options": {
+            "type": "object"
+          }
+        }
+      }
     }
   },
   "additionalProperties": false,

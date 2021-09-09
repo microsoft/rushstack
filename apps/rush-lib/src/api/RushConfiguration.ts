@@ -209,6 +209,14 @@ export interface IRushVariantOptionsJson {
 }
 
 /**
+ * Configuration for a rush plugin
+ */
+export interface IRushPluginConfigJson {
+  plugin: string;
+  options?: object;
+}
+
+/**
  * This represents the JSON data structure for the "rush.json" configuration file.
  * See rush.schema.json for documentation.
  */
@@ -235,6 +243,8 @@ export interface IRushConfigurationJson {
   yarnOptions?: IYarnOptionsJson;
   ensureConsistentVersions?: boolean;
   variants?: IRushVariantOptionsJson[];
+  commonAutoinstallerName?: string;
+  rushPlugins?: IRushPluginConfigJson[];
 }
 
 /**
@@ -1730,8 +1740,10 @@ export class RushConfiguration {
     variant: string | undefined
   ): void {
     const commonVersions: CommonVersionsConfiguration = this.getCommonVersions(variant);
-    const allowedAlternativeVersions: Map<string, ReadonlyArray<string>> =
-      commonVersions.allowedAlternativeVersions;
+    const allowedAlternativeVersions: Map<
+      string,
+      ReadonlyArray<string>
+    > = commonVersions.allowedAlternativeVersions;
 
     for (const dependency of dependencies) {
       const alternativesForThisDependency: ReadonlyArray<string> =

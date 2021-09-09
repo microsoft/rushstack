@@ -6,7 +6,12 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { CommandLineParser, CommandLineFlagParameter } from '@rushstack/ts-command-line';
-import { InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
+import {
+  InternalError,
+  AlreadyReportedError,
+  ConsoleTerminalProvider,
+  Terminal
+} from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -43,6 +48,9 @@ import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { SetupAction } from './actions/SetupAction';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
+import { PluginManager } from '../pluginFramework/PluginManager';
+import { RushSession } from '../pluginFramework/RushSession';
+import { Autoinstaller } from '../logic/Autoinstaller';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -56,9 +64,13 @@ export class RushCommandLineParser extends CommandLineParser {
   public telemetry: Telemetry | undefined;
   public rushGlobalFolder!: RushGlobalFolder;
   public readonly rushConfiguration!: RushConfiguration;
+  public readonly rushSession: RushSession;
 
   private _debugParameter!: CommandLineFlagParameter;
   private _rushOptions: IRushCommandLineParserOptions;
+  private _terminalProvider: ConsoleTerminalProvider;
+  private _terminal: Terminal;
+  private _pluginManager: PluginManager;
 
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {
     super({
@@ -74,6 +86,9 @@ export class RushCommandLineParser extends CommandLineParser {
         ' Rush is for you.',
       enableTabCompletionAction: true
     });
+
+    this._terminalProvider = new ConsoleTerminalProvider();
+    this._terminal = new Terminal(this._terminalProvider);
 
     this._rushOptions = this._normalizeOptions(options || {});
 
@@ -95,6 +110,17 @@ export class RushCommandLineParser extends CommandLineParser {
       rushConfiguration: this.rushConfiguration
     });
 
+    const rushSession: RushSession = new RushSession({
+      getIsDebugMode: () => this.isDebug,
+      terminalProvider: this._terminalProvider
+    });
+    this.rushSession = rushSession;
+    this._pluginManager = new PluginManager({
+      rushSession: rushSession,
+      rushConfiguration: this.rushConfiguration,
+      terminal: this._terminal
+    });
+
     this._populateActions();
   }
 
@@ -106,6 +132,28 @@ export class RushCommandLineParser extends CommandLineParser {
     if (this.telemetry) {
       this.telemetry.flush();
     }
+  }
+
+  public async execute(args?: string[]): Promise<boolean> {
+    this._terminalProvider.verboseEnabled = this.isDebug;
+
+    const commonAutoinstallerName: string | undefined =
+      this.rushConfiguration.rushConfigurationJson.commonAutoinstallerName;
+    if (commonAutoinstallerName) {
+      const autoinstaller: Autoinstaller = new Autoinstaller(commonAutoinstallerName, this.rushConfiguration);
+      await autoinstaller.prepareAsync();
+    }
+
+    if (!commonAutoinstallerName && this._pluginManager.rushPluginConfigurations.length > 0) {
+      this._terminal.writeErrorLine(
+        `Rush plugins are installed by autoinstaller, Please setup "commonAutoinstallerName" in rush.json`
+      );
+    }
+
+    await this._initializePluginsAsync();
+    await this.rushSession.hooks.initialize.promise();
+
+    return await super.execute(args);
   }
 
   protected onDefineParameters(): void {
@@ -153,6 +201,12 @@ export class RushCommandLineParser extends CommandLineParser {
     if (this.telemetry) {
       this.flushTelemetry();
     }
+  }
+
+  private async _initializePluginsAsync(): Promise<void> {
+    this._pluginManager.initializeDefaultPlugins();
+
+    await this._pluginManager.initializePluginsFromConfigFileAsync();
   }
 
   private _populateActions(): void {

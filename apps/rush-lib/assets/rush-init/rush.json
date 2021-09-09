@@ -387,6 +387,43 @@
   /*[LINE "HYPOTHETICAL"]*/ "hotfixChangeEnabled": false,
 
   /**
+   * Specify an autoinstaller name, whose packages are used by the whole monorepo.
+   * It will be auto installed before each rush commands run.
+   *
+   * Example: assume you want to use 'common-packages' autoinstaller:
+   *   rush init-autoinstaller --name common-packages
+   *   cd common/autoinstallers/common-packages
+   *   pnpm install some-rush-plugins
+   *   rush update-autoinstaller --name common-packages
+   */
+  /*[LINE "HYPOTHETICAL"]*/ "commonAutoinstallerName": "common-packages",
+
+  /**
+   * Rush plugins configuration.
+   */
+  /*[BEGIN "DEMO"]*/
+  "rushPlugins": [
+    {
+      /**
+       * (Required) Plugin specifier, i.e. "@scope/rush-plugin-foo".
+       */
+      "plugin": "",
+
+      /**
+       * Plugin options.
+       */
+      "options": {}
+    }
+  ],
+  /*[END "DEMO"]*/
+
+  /**
+   * Rush plugins allow you to extend Rush's behavior.  Plugins are specified as a list of package
+   * specifier with options.  When Rush starts up, it will load these plugins and allow them to extend
+   * the behavior of the rush process.
+   */
+
+  /**
    * (Required) This is the inventory of projects to be managed by Rush.
    *
    * Rush does not automatically scan for projects using wildcards, for a few reasons:
