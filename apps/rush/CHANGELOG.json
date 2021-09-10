@@ -2,6 +2,27 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.53.0",
+      "tag": "@microsoft/rush_v5.53.0",
+      "date": "Fri, 10 Sep 2021 23:20:00 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where the incremental build should use caching or skipping, but not both (GitHub #2891)"
+          },
+          {
+            "comment": "Cache rush-project.json reads"
+          },
+          {
+            "comment": "Fix an issue where the build cache did not respect \"allowWarningsInSuccessfulBuild\" (GitHub #2803)"
+          },
+          {
+            "comment": "Add an experiment \"buildCacheWithAllowWarningsInSuccessfulBuild\" to allow caching for projects with warnings (GitHub #2803)"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.52.0",
       "tag": "@microsoft/rush_v5.52.0",
       "date": "Mon, 23 Aug 2021 21:34:46 GMT",
