@@ -1,6 +1,33 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Fri, 20 Aug 2021 15:08:10 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Sep 2021 19:06:22 GMT and should not be manually modified.
+
+## 0.1.25
+Wed, 08 Sep 2021 19:06:22 GMT
+
+_Version update only_
+
+## 0.1.24
+Wed, 08 Sep 2021 00:08:03 GMT
+
+_Version update only_
+
+## 0.1.23
+Fri, 03 Sep 2021 00:09:09 GMT
+
+### Patches
+
+- Use package name as Jest 'displayName' by default and always log a test duration.
+
+## 0.1.22
+Tue, 31 Aug 2021 00:07:11 GMT
+
+_Version update only_
+
+## 0.1.21
+Fri, 27 Aug 2021 00:07:25 GMT
+
+_Version update only_
 
 ## 0.1.20
 Fri, 20 Aug 2021 15:08:10 GMT

@@ -1,6 +1,31 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 20 Aug 2021 15:08:10 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Sep 2021 19:06:22 GMT and should not be manually modified.
+
+## 0.37.2
+Wed, 08 Sep 2021 19:06:22 GMT
+
+_Version update only_
+
+## 0.37.1
+Wed, 08 Sep 2021 00:08:03 GMT
+
+### Patches
+
+- Fix building for Typescript 4.4 (Error: directoryExists is not a function)
+- Ensure `process.cwd()` is set to the project root with correct file path casing.
+
+## 0.37.0
+Tue, 31 Aug 2021 00:07:11 GMT
+
+### Minor changes
+
+- Add commandParameters to IMetricsData for recording parameter usage
+
+## 0.36.4
+Fri, 27 Aug 2021 00:07:25 GMT
+
+_Version update only_
 
 ## 0.36.3
 Fri, 20 Aug 2021 15:08:10 GMT

@@ -145,6 +145,7 @@ export class BulkScriptAction extends BaseScriptAction {
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
       ignoreMissingScript: this._ignoreMissingScript,
       ignoreDependencyOrder: this._ignoreDependencyOrder,
+      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild,
       packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun)
     };
 
