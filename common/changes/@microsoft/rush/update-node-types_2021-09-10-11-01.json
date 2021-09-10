@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "update `@types/node` version to v12",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "6643991+MichaelDeBoey@users.noreply.github.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-deps-hash",
+      "comment": "update `@types/node` version to v12",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash",
+  "email": "6643991+MichaelDeBoey@users.noreply.github.com"
+}

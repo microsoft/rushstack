@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin-packlets",
+      "comment": "update `@types/node` version to v12",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin-packlets",
+  "email": "6643991+MichaelDeBoey@users.noreply.github.com"
+}
