@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow custom commands and custom parameters to specify fallback behavior when looking for build cache entries.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "dmichon-msft@users.noreply.github.com"
+}
