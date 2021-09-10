@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Writing to build-cache should respect allowWarningsInSuccessfulBuild",
+      "comment": "Fix an issue where the build cache did not respect \"allowWarningsInSuccessfulBuild\" (GitHub #2803)",
       "type": "none"
     }
   ],

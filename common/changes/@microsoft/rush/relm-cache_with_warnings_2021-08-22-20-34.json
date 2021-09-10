@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Experiment to enable build caching with warnings",
+      "comment": "Add an experiment \"buildCacheWithAllowWarningsInSuccessfulBuild\" to allow caching for projects with warnings (GitHub #2803)",
       "type": "none"
     }
   ],

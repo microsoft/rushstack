@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Incremental build should use caching or skipping, but not both.",
+      "comment": "Fix an issue where the incremental build should use caching or skipping, but not both (GitHub #2891)",
       "type": "none"
     }
   ],
