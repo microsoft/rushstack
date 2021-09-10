@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 08 Sep 2021 19:06:22 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Sep 2021 15:08:28 GMT and should not be manually modified.
+
+## 0.37.3
+Fri, 10 Sep 2021 15:08:28 GMT
+
+### Patches
+
+- Support ESLint configuration in .eslintrc.cjs (instead of .eslintrc.js) to support projects with ESM modules ("type": "module" in package.json).
 
 ## 0.37.2
 Wed, 08 Sep 2021 19:06:22 GMT

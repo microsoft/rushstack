@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.37.3",
+      "tag": "@rushstack/heft_v0.37.3",
+      "date": "Fri, 10 Sep 2021 15:08:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Support ESLint configuration in .eslintrc.cjs (instead of .eslintrc.js) to support projects with ESM modules (\"type\": \"module\" in package.json)."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.37.2",
       "tag": "@rushstack/heft_v0.37.2",
       "date": "Wed, 08 Sep 2021 19:06:22 GMT",
