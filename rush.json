@@ -625,6 +625,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-node-everything-esm-module-test",
+      "projectFolder": "build-tests/heft-node-everything-esm-module-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-sass-test",
       "projectFolder": "build-tests/heft-sass-test",
       "reviewCategory": "tests",

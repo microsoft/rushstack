@@ -1,6 +1,16 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 23 Aug 2021 21:34:46 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Sep 2021 23:20:00 GMT and should not be manually modified.
+
+## 5.53.0
+Fri, 10 Sep 2021 23:20:00 GMT
+
+### Updates
+
+- Fix an issue where the incremental build should use caching or skipping, but not both (GitHub #2891)
+- Cache rush-project.json reads
+- Fix an issue where the build cache did not respect "allowWarningsInSuccessfulBuild" (GitHub #2803)
+- Add an experiment "buildCacheWithAllowWarningsInSuccessfulBuild" to allow caching for projects with warnings (GitHub #2803)
 
 ## 5.52.0
 Mon, 23 Aug 2021 21:34:46 GMT

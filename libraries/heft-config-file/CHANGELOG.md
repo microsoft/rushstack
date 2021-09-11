@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Fri, 27 Aug 2021 00:07:25 GMT and should not be manually modified.
+This log was last generated on Wed, 08 Sep 2021 19:06:22 GMT and should not be manually modified.
+
+## 0.6.4
+Wed, 08 Sep 2021 19:06:22 GMT
+
+### Patches
+
+- Fix issue with overwriting configuration properties using falsey values
 
 ## 0.6.3
 Fri, 27 Aug 2021 00:07:25 GMT
