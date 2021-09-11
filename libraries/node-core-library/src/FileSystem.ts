@@ -115,7 +115,7 @@ export interface IFileSystemCopyFileBaseOptions {
   sourcePath: string;
 
   /**
-   * Specifies what to do if the target object already exists.
+   * Specifies what to do if the destination path already exists.
    * @defaultValue {@link AlreadyExistsBehavior.Overwrite}
    */
   alreadyExistsBehavior?: AlreadyExistsBehavior;
@@ -134,24 +134,40 @@ export interface IFileSystemCopyFileOptions extends IFileSystemCopyFileBaseOptio
 }
 
 /**
- * Specifies the behavior of {@link FileSystem.copyFiles} in a situation where the target object
- * already exists.
+ * Specifies the behavior of APIs such as {@link FileSystem.copyFile} or
+ * {@link FileSystem.createSymbolicLinkFile} when the output file path already exists.
+ *
+ * @remarks
+ * For {@link FileSystem.copyFile} and related APIs, the "output file path" is
+ * {@link IFileSystemCopyFileOptions.destinationPath}.
+ *
+ * For {@link FileSystem.createSymbolicLinkFile} and related APIs, the "output file path" is
+ * {@link IFileSystemCreateLinkOptions.newLinkPath}.
+ *
  * @public
  */
 export const enum AlreadyExistsBehavior {
   /**
-   * If the destination object exists, overwrite it.
-   * This is the default behavior for {@link FileSystem.copyFiles}.
+   * If the output file path already exists, try to overwrite the existing object.
+   *
+   * @remarks
+   * If overwriting the object would require recursively deleting a folder tree,
+   * then the operation will fail.  As an example, suppose {@link FileSystem.copyFile}
+   * is copying a single file `/a/b/c` to the destination path `/d/e`, and `/d/e` is a
+   * nonempty folder.  In this situation, an error will be reported; specifying
+   * `AlreadyExistsBehavior.Overwrite` does not help.  Empty folders can be overwritten
+   * depending on the details of the implementation.
    */
   Overwrite = 'overwrite',
 
   /**
-   * If the destination object exists, report an error.
+   * If the output file path already exists, the operation will fail, and an error
+   * will be reported.
    */
   Error = 'error',
 
   /**
-   * If the destination object exists, skip it and continue the operation.
+   * If the output file path already exists, skip this item, and continue the operation.
    */
   Ignore = 'ignore'
 }
@@ -194,7 +210,12 @@ export interface IFileSystemCopyFilesAsyncOptions {
   dereferenceSymlinks?: boolean;
 
   /**
-   * Specifies what to do if the target object already exists.
+   * Specifies what to do if a destination path already exists.
+   *
+   * @remarks
+   * This setting is applied individually for each file being copied.
+   * For example, `AlreadyExistsBehavior.Overwrite` will not recursively delete a folder
+   * whose path corresponds to an individual file that is being copied to that location.
    */
   alreadyExistsBehavior?: AlreadyExistsBehavior;
 
@@ -257,19 +278,18 @@ export interface IFileSystemUpdateTimeParameters {
  */
 export interface IFileSystemCreateLinkOptions {
   /**
-   * The path that the symbolic link will point to.
+   * The newly created symbolic link will point to `linkTargetPath` as its target.
    */
   linkTargetPath: string;
 
   /**
-   * The new path for the new symlink link to be created.
+   * The newly created symbolic link will have this path.
    */
   newLinkPath: string;
 
   /**
-   * Specifies what to do if the target object already exists. If set to `AlreadyExistsBehavior.overwrite`,
-   * the already existing file or folder at `IFileSystemCreateLinkOptions.newLinkPath` will be deleted before
-   * creating the new link. Defaults to `AlreadyExistsBehavior.Error`.
+   * Specifies what to do if the path to create already exists.
+   * The default is `AlreadyExistsBehavior.Error`.
    */
   alreadyExistsBehavior?: AlreadyExistsBehavior;
 }
@@ -1198,33 +1218,37 @@ export class FileSystem {
   // ===============
 
   /**
-   * Returns true if the error provided indicates the file or folder already exists.
+   * Returns true if the error object indicates the file or folder already exists (`EEXIST`).
    */
   public static isExistError(error: Error): boolean {
     return FileSystem.isErrnoException(error) && error.code === 'EEXIST';
   }
 
   /**
-   * Returns true if the error provided indicates the file or folder does not exist.
+   * Returns true if the error object indicates the file or folder does not exist (`ENOENT` or `ENOTDIR`)
    */
   public static isNotExistError(error: Error): boolean {
     return FileSystem.isFileDoesNotExistError(error) || FileSystem.isFolderDoesNotExistError(error);
   }
 
   /**
-   * Returns true if the error provided indicates the file does not exist.
+   * Returns true if the error object indicates the file does not exist (`ENOENT`).
    */
   public static isFileDoesNotExistError(error: Error): boolean {
     return FileSystem.isErrnoException(error) && error.code === 'ENOENT';
   }
 
   /**
-   * Returns true if the error provided indicates the folder does not exist.
+   * Returns true if the error object indicates the folder does not exist (`ENOTDIR`).
    */
   public static isFolderDoesNotExistError(error: Error): boolean {
     return FileSystem.isErrnoException(error) && error.code === 'ENOTDIR';
   }
 
+  /**
+   * Returns true if the error object indicates that the `unlink` system call failed
+   * due to a permissions issue (`EPERM`).
+   */
   public static isUnlinkNotPermittedError(error: Error): boolean {
     return FileSystem.isErrnoException(error) && error.code === 'EPERM' && error.syscall === 'unlink';
   }
