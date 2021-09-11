@@ -226,6 +226,8 @@ export class FileSystem {
     static isFileDoesNotExistError(error: Error): boolean;
     static isFolderDoesNotExistError(error: Error): boolean;
     static isNotExistError(error: Error): boolean;
+    // (undocumented)
+    static isUnlinkNotPermittedError(error: Error): boolean;
     static move(options: IFileSystemMoveOptions): void;
     static moveAsync(options: IFileSystemMoveOptions): Promise<void>;
     static readFile(filePath: string, options?: IFileSystemReadFileOptions): string;
