@@ -5,8 +5,11 @@ import { BaseInstallAction } from './BaseInstallAction';
 import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../SelectionParameterSet';
+import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 export class InstallAction extends BaseInstallAction {
+  private _checkOnlyParameter!: CommandLineFlagParameter;
+
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'install',
@@ -33,6 +36,11 @@ export class InstallAction extends BaseInstallAction {
     super.onDefineParameters();
 
     this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this);
+
+    this._checkOnlyParameter = this.defineFlagParameter({
+      parameterLongName: '--check-only',
+      description: `Check only the validation before install, not actually install anything.`
+    });
   }
 
   protected buildInstallOptions(): IInstallManagerOptions {
@@ -50,7 +58,8 @@ export class InstallAction extends BaseInstallAction {
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
-      pnpmFilterArguments: this._selectionParameters!.getPnpmFilterArguments()
+      pnpmFilterArguments: this._selectionParameters!.getPnpmFilterArguments(),
+      checkOnly: this._checkOnlyParameter.value
     };
   }
 }
