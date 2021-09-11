@@ -656,8 +656,8 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
-  --check-only          Check only the validation before install, not 
-                        actually install anything.
+  --check-only          Only check the validity of the shrinkwrap file 
+                        without performing an install.
 "
 `;
 
