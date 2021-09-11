@@ -1225,6 +1225,10 @@ export class FileSystem {
     return FileSystem.isErrnoException(error) && error.code === 'ENOTDIR';
   }
 
+  public static isUnlinkNotPermittedError(error: Error): boolean {
+    return FileSystem.isErrnoException(error) && error.code === 'EPERM' && error.syscall === 'unlink';
+  }
+
   /**
    * Detects if the provided error object is a `NodeJS.ErrnoException`
    */
@@ -1248,16 +1252,9 @@ export class FileSystem {
           case AlreadyExistsBehavior.Ignore:
             break;
           case AlreadyExistsBehavior.Overwrite:
-            // fsx.linkSync does not allow overwriting so we must manually delete. We don't
-            // know if it is a file or a folder, so check first. We also want to use
-            // getLinkStatistics when performing this check because we are concerned
-            // with the object in the directory, not the target of the link.
-            const stats: fs.Stats = this.getLinkStatistics(options.newLinkPath);
-            if (stats.isDirectory()) {
-              this.deleteFolder(options.newLinkPath);
-            } else {
-              this.deleteFile(options.newLinkPath);
-            }
+            // fsx.linkSync does not allow overwriting so we must manually delete. If it's
+            // a folder, it will throw an error.
+            this.deleteFile(options.newLinkPath);
             linkFn();
             break;
           case AlreadyExistsBehavior.Error:
@@ -1295,16 +1292,9 @@ export class FileSystem {
           case AlreadyExistsBehavior.Ignore:
             break;
           case AlreadyExistsBehavior.Overwrite:
-            // fsx.linkSync does not allow overwriting so we must manually delete. We don't
-            // know if it is a file or a folder, so check first. We also want to use
-            // getLinkStatistics when performing this check because we are concerned
-            // with the object in the directory, not the target of the link.
-            const stats: fs.Stats = await this.getLinkStatisticsAsync(options.newLinkPath);
-            if (stats.isDirectory()) {
-              await this.deleteFolder(options.newLinkPath);
-            } else {
-              await this.deleteFile(options.newLinkPath);
-            }
+            // fsx.linkSync does not allow overwriting so we must manually delete. If it's
+            // a folder, it will throw an error.
+            await this.deleteFileAsync(options.newLinkPath);
             await linkFn();
             break;
           case AlreadyExistsBehavior.Error:
@@ -1361,6 +1351,9 @@ export class FileSystem {
         const extendedError: NodeJS.ErrnoException & { dest?: string } = error;
         // eslint-disable-line @typescript-eslint/no-use-before-define
         error.message = `File or folder already exists: ${extendedError.dest}\n${error.message}`;
+      } else if (FileSystem.isUnlinkNotPermittedError(error)) {
+        // eslint-disable-line @typescript-eslint/no-use-before-define
+        error.message = `File or folder could not be deleted: ${error.path}\n${error.message}`;
       }
     }
   }
