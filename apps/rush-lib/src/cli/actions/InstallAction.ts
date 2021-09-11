@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+
 import { BaseInstallAction } from './BaseInstallAction';
 import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../SelectionParameterSet';
-import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 export class InstallAction extends BaseInstallAction {
   private _checkOnlyParameter!: CommandLineFlagParameter;
@@ -39,7 +40,7 @@ export class InstallAction extends BaseInstallAction {
 
     this._checkOnlyParameter = this.defineFlagParameter({
       parameterLongName: '--check-only',
-      description: `Check only the validation before install, not actually install anything.`
+      description: `Only check the validity of the shrinkwrap file without performing an install.`
     });
   }
 
