@@ -2,11 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import { ITerminal } from '@rushstack/node-core-library';
+import {
+  EnvironmentConfiguration,
+  EnvironmentVariableNames,
+  RushConstants,
+  CloudBuildCacheProviderBase,
+  CredentialCache,
+  ICredentialCacheEntry
+} from '@microsoft/rush-lib';
 
-import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import { CloudBuildCacheProviderBase } from '../../logic/buildCache/CloudBuildCacheProviderBase';
-import { CredentialCache, ICredentialCacheEntry } from '../../logic/CredentialCache';
-import { RushConstants } from '../../logic/RushConstants';
 import { AmazonS3Client, IAmazonS3Credentials } from './AmazonS3Client';
 
 export interface IAmazonS3BuildCacheProviderOptions {

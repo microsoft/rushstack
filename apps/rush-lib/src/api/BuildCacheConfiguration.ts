@@ -28,15 +28,25 @@ interface IBaseBuildCacheJson {
   cacheProvider: string;
   cacheEntryNamePattern?: string;
 }
-interface ILocalBuildCacheJson extends IBaseBuildCacheJson {
+
+/**
+ * @public
+ */
+export interface ILocalBuildCacheJson extends IBaseBuildCacheJson {
   readonly cacheProvider: 'local-only';
 }
 
-interface ICloudBuildCacheJson extends IBaseBuildCacheJson {
+/**
+ * @public
+ */
+export interface ICloudBuildCacheJson extends IBaseBuildCacheJson {
   readonly cacheProvider: string;
   [otherConfigKey: string]: JsonObject;
 }
 
+/**
+ * @public
+ */
 export type IBuildCacheJson = ICloudBuildCacheJson | ILocalBuildCacheJson;
 
 interface IBuildCacheConfigurationOptions {

@@ -3,9 +3,7 @@
 
 import * as path from 'path';
 import { Import, JsonSchema } from '@rushstack/node-core-library';
-import { IRushPlugin } from '../../pluginFramework/IRushPlugin';
-import { RushSession } from '../../pluginFramework/RushSession';
-import { RushConfiguration } from '../../api/RushConfiguration';
+import { IRushPlugin, RushSession, RushConfiguration } from '@microsoft/rush-lib';
 
 const AmazonS3BuildCacheProviderModule: typeof import('./AmazonS3BuildCacheProvider') = Import.lazy(
   '../logic/buildCache/AmazonS3/AmazonS3BuildCacheProvider',
@@ -15,6 +13,9 @@ import type { AmazonS3BuildCacheProvider } from './AmazonS3BuildCacheProvider';
 
 const PLUGIN_NAME: string = 'AmazonS3BuildCachePlugin';
 
+/**
+ * @public
+ */
 export interface IAmazonS3ConfigurationJson {
   /**
    * The Amazon S3 region of the bucket to use for build cache (e.g. "us-east-1").
@@ -37,7 +38,10 @@ export interface IAmazonS3ConfigurationJson {
   isCacheWriteAllowed?: boolean;
 }
 
-class AmazonS3BuildCachePlugin implements IRushPlugin {
+/**
+ * @public
+ */
+export class RushAmazonS3BuildCachePlugin implements IRushPlugin {
   public pluginName: string = PLUGIN_NAME;
 
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
@@ -49,7 +53,7 @@ class AmazonS3BuildCachePlugin implements IRushPlugin {
       rushSession.cloudCacheProviderFactories.set(
         'amazon-s3',
         (buildCacheConfig, buildCacheConfigFilePath: string): AmazonS3BuildCacheProvider => {
-          AmazonS3BuildCachePlugin._jsonSchema.validateObject(buildCacheConfig, buildCacheConfigFilePath);
+          RushAmazonS3BuildCachePlugin._jsonSchema.validateObject(buildCacheConfig, buildCacheConfigFilePath);
           type IBuildCache = typeof buildCacheConfig & { amazonS3Configuration: IAmazonS3ConfigurationJson };
           const { amazonS3Configuration } = buildCacheConfig as IBuildCache;
           return new AmazonS3BuildCacheProviderModule.AmazonS3BuildCacheProvider({
@@ -63,5 +67,3 @@ class AmazonS3BuildCachePlugin implements IRushPlugin {
     });
   }
 }
-
-export default AmazonS3BuildCachePlugin;

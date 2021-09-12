@@ -3,9 +3,9 @@
 
 import * as crypto from 'crypto';
 import * as fetch from 'node-fetch';
+import { IPutFetchOptions, IGetFetchOptions, WebClient } from '@microsoft/rush-lib';
 
 import { IAmazonS3BuildCacheProviderOptions } from './AmazonS3BuildCacheProvider';
-import { IPutFetchOptions, IGetFetchOptions, WebClient } from '../../utilities/WebClient';
 
 const CONTENT_HASH_HEADER_NAME: 'x-amz-content-sha256' = 'x-amz-content-sha256';
 const DATE_HEADER_NAME: 'x-amz-date' = 'x-amz-date';
