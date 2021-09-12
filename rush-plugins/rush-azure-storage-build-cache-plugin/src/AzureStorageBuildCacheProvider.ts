@@ -4,6 +4,14 @@
 import { ITerminal } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 import {
+  EnvironmentConfiguration,
+  EnvironmentVariableNames,
+  CloudBuildCacheProviderBase,
+  CredentialCache,
+  ICredentialCacheEntry,
+  RushConstants
+} from '@microsoft/rush-lib';
+import {
   BlobClient,
   BlobServiceClient,
   BlockBlobClient,
@@ -14,11 +22,6 @@ import {
   ServiceGetUserDelegationKeyResponse
 } from '@azure/storage-blob';
 import { DeviceCodeCredential, DeviceCodeInfo } from '@azure/identity';
-
-import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import { CredentialCache, ICredentialCacheEntry } from '../../logic/CredentialCache';
-import { RushConstants } from '../../logic/RushConstants';
-import { CloudBuildCacheProviderBase } from '../../logic/buildCache/CloudBuildCacheProviderBase';
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // TODO: This is a temporary workaround; it should be reverted when we upgrade to "@azure/identity" version 2.x

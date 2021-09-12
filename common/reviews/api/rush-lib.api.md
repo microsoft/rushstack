@@ -7,6 +7,7 @@
 /// <reference types="node" />
 
 import { AsyncParallelHook } from 'tapable';
+import * as fetch from 'node-fetch';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
@@ -71,7 +72,7 @@ export class ChangeManager {
     static createEmptyChangeFiles(rushConfiguration: RushConfiguration, projectName: string, emailAddress: string): string | undefined;
 }
 
-// @public (undocumented)
+// @beta (undocumented)
 export abstract class CloudBuildCacheProviderBase {
     // (undocumented)
     abstract deleteCachedCredentialsAsync(terminal: Terminal): Promise<void>;
@@ -100,6 +101,28 @@ export class CommonVersionsConfiguration {
     get xstitchPreferredVersions(): Map<string, string>;
 }
 
+// Warning: (ae-forgotten-export) The symbol "IDisposable" needs to be exported by the entry point index.d.ts
+//
+// @beta (undocumented)
+export class CredentialCache implements IDisposable {
+    // (undocumented)
+    deleteCacheEntry(cacheId: string): void;
+    // (undocumented)
+    dispose(): void;
+    // (undocumented)
+    static initializeAsync(options: ICredentialCacheOptions): Promise<CredentialCache>;
+    // (undocumented)
+    saveIfModifiedAsync(): Promise<void>;
+    // (undocumented)
+    setCacheEntry(cacheId: string, credential: string, expires?: Date): void;
+    // (undocumented)
+    trimExpiredEntries(): void;
+    // (undocumented)
+    tryGetCacheEntry(cacheId: string): ICredentialCacheEntry | undefined;
+    // (undocumented)
+    static usingAsync(options: ICredentialCacheOptions, doActionAsync: (credentialCache: CredentialCache) => Promise<void> | void): Promise<void>;
+}
+
 // @beta (undocumented)
 export const enum DependencyType {
     // (undocumented)
@@ -112,6 +135,30 @@ export const enum DependencyType {
     Regular = "dependencies",
     // (undocumented)
     YarnResolutions = "resolutions"
+}
+
+// @public
+export class EnvironmentConfiguration {
+    static get absoluteSymlinks(): boolean;
+    static get allowUnsupportedNodeVersion(): boolean;
+    static get allowWarningsInSuccessfulBuild(): boolean;
+    static get buildCacheCredential(): string | undefined;
+    static get buildCacheEnabled(): boolean | undefined;
+    static get buildCacheWriteAllowed(): boolean | undefined;
+    // Warning: (ae-forgotten-export) The symbol "IEnvironment" needs to be exported by the entry point index.d.ts
+    //
+    // @internal
+    static _getRushGlobalFolderOverride(processEnv: IEnvironment): string | undefined;
+    static get gitBinaryPath(): string | undefined;
+    // (undocumented)
+    static parseBooleanEnvironmentVariable(name: string, value: string | undefined): boolean | undefined;
+    static get pnpmStorePathOverride(): string | undefined;
+    static reset(): void;
+    static get rushGlobalFolderOverride(): string | undefined;
+    static get rushTempFolderOverride(): string | undefined;
+    static get tarBinaryPath(): string | undefined;
+    // Warning: (ae-forgotten-export) The symbol "IEnvironmentConfigurationInitializeOptions" needs to be exported by the entry point index.d.ts
+    static validate(options?: IEnvironmentConfigurationInitializeOptions): void;
 }
 
 // @public
@@ -158,11 +205,18 @@ export class ExperimentsConfiguration {
     get configuration(): Readonly<IExperimentsJson>;
 }
 
-// Warning: (ae-forgotten-export) The symbol "ICloudBuildCacheJson" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "ILocalBuildCacheJson" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
 export type IBuildCacheJson = ICloudBuildCacheJson | ILocalBuildCacheJson;
+
+// Warning: (ae-forgotten-export) The symbol "IBaseBuildCacheJson" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export interface ICloudBuildCacheJson extends IBaseBuildCacheJson {
+    // (undocumented)
+    [otherConfigKey: string]: JsonObject;
+    // (undocumented)
+    readonly cacheProvider: string;
+}
 
 // @public
 export interface IConfigurationEnvironment {
@@ -173,6 +227,20 @@ export interface IConfigurationEnvironment {
 export interface IConfigurationEnvironmentVariable {
     override?: boolean;
     value: string;
+}
+
+// @beta (undocumented)
+export interface ICredentialCacheEntry {
+    // (undocumented)
+    credential: string;
+    // (undocumented)
+    expires?: Date;
+}
+
+// @beta (undocumented)
+export interface ICredentialCacheOptions {
+    // (undocumented)
+    supportEditing: boolean;
 }
 
 // @beta
@@ -195,10 +263,24 @@ export interface IGetChangedProjectsOptions {
     terminal: ITerminal;
 }
 
+// Warning: (ae-forgotten-export) The symbol "IWebFetchOptionsBase" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export interface IGetFetchOptions extends IWebFetchOptionsBase {
+    // (undocumented)
+    verb: 'GET' | never;
+}
+
 // @public
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
     isManaged: boolean;
+}
+
+// @public (undocumented)
+export interface ILocalBuildCacheJson extends IBaseBuildCacheJson {
+    // (undocumented)
+    readonly cacheProvider: 'local-only';
 }
 
 // @public (undocumented)
@@ -248,6 +330,14 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     preventManualShrinkwrapChanges?: boolean;
     strictPeerDependencies?: boolean;
     useWorkspaces?: boolean;
+}
+
+// @public (undocumented)
+export interface IPutFetchOptions extends IWebFetchOptionsBase {
+    // (undocumented)
+    body?: Buffer;
+    // (undocumented)
+    verb: 'PUT';
 }
 
 // @public (undocumented)
@@ -564,6 +654,49 @@ export class RushConfigurationProject {
     get versionPolicyName(): string | undefined;
 }
 
+// @public
+export class RushConstants {
+    static readonly artifactoryFilename: string;
+    static readonly browserApprovedPackagesFilename: string;
+    static readonly buildCacheFilename: string;
+    static readonly buildCommandName: string;
+    static readonly bulkCommandKind: 'bulk';
+    static readonly changeFilesFolderName: string;
+    static readonly commandLineFilename: string;
+    static readonly commonFolderName: string;
+    static readonly commonVersionsFilename: string;
+    static readonly defaultMaxInstallAttempts: number;
+    static readonly experimentsFilename: string;
+    static readonly globalCommandKind: 'global';
+    static readonly hashDelimiter: string;
+    static readonly nodeModulesFolderName: string;
+    static readonly nonbrowserApprovedPackagesFilename: string;
+    static readonly npmShrinkwrapFilename: string;
+    // @deprecated
+    static readonly pinnedVersionsFilename: string;
+    static readonly pnpmfileV1Filename: string;
+    static readonly pnpmfileV6Filename: string;
+    static readonly pnpmV3ShrinkwrapFilename: string;
+    static readonly projectRushFolderName: string;
+    static readonly projectShrinkwrapFilename: string;
+    static readonly rebuildCommandName: string;
+    static readonly repoStateFilename: string;
+    static readonly rushPackageName: string;
+    static readonly rushProjectConfigFilename: string;
+    static readonly rushRecyclerFolderName: string;
+    static readonly rushTempFolderName: string;
+    static readonly rushTempNpmScope: string;
+    static readonly rushTempProjectsFolderName: string;
+    static readonly rushUserConfigurationFolderName: string;
+    static readonly rushVariantsFolderName: string;
+    static readonly rushWebSiteUrl: string;
+    // (undocumented)
+    static readonly updateCloudCredentialsCommandName: string;
+    // (undocumented)
+    static readonly versionPoliciesFilename: string;
+    static readonly yarnShrinkwrapFilename: string;
+}
+
 // @internal
 export class _RushGlobalFolder {
     constructor();
@@ -580,12 +713,23 @@ export class RushLifecycleHooks {
 // @public (undocumented)
 export class RushSession implements IRushLifecycle {
     constructor(options: IRushSessionOptions);
+    // Warning: (ae-incompatible-release-tags) The symbol "cloudCacheProviderFactories" is marked as @public, but its signature references "CloudBuildCacheProviderBase" which is marked as @beta
+    //
     // (undocumented)
     cloudCacheProviderFactories: Map<string, (buildCacheJson: IBuildCacheJson, buildCacheConfigFilePath: string) => CloudBuildCacheProviderBase>;
     // (undocumented)
     getLogger(name: string): Logger;
     // (undocumented)
     readonly hooks: RushLifecycleHooks;
+}
+
+// @beta
+export class RushUserConfiguration {
+    readonly buildCacheFolder: string | undefined;
+    // (undocumented)
+    static getRushUserFolderPath(): string;
+    // (undocumented)
+    static initializeAsync(): Promise<RushUserConfiguration>;
 }
 
 // @beta
@@ -628,6 +772,38 @@ export enum VersionPolicyDefinitionName {
     // (undocumented)
     'lockStepVersion' = 0
 }
+
+// @public (undocumented)
+export class WebClient {
+    constructor();
+    // (undocumented)
+    accept: string | undefined;
+    // (undocumented)
+    addBasicAuthHeader(userName: string, password: string): void;
+    // (undocumented)
+    fetchAsync(url: string, options?: IGetFetchOptions | IPutFetchOptions): Promise<WebClientResponse>;
+    // (undocumented)
+    static mergeHeaders(target: fetch.Headers, source: fetch.Headers): void;
+    // (undocumented)
+    proxy: WebClientProxy;
+    // (undocumented)
+    readonly standardHeaders: fetch.Headers;
+    // (undocumented)
+    userAgent: string | undefined;
+}
+
+// @public (undocumented)
+export enum WebClientProxy {
+    // (undocumented)
+    Detect = 1,
+    // (undocumented)
+    Fiddler = 2,
+    // (undocumented)
+    None = 0
+}
+
+// @public (undocumented)
+export type WebClientResponse = fetch.Response;
 
 // @public
 export class YarnOptionsConfiguration extends PackageManagerOptionsConfigurationBase {

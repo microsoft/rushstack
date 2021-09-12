@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import { Response, ResponseInit } from 'node-fetch';
+import { WebClient } from '@microsoft/rush-lib';
 
 import { IAmazonS3BuildCacheProviderOptions } from '../AmazonS3BuildCacheProvider';
 import { AmazonS3Client, IAmazonS3Credentials } from '../AmazonS3Client';
-import { WebClient } from '../../../utilities/WebClient';
 
 const DUMMY_OPTIONS_WITHOUT_BUCKET: Omit<IAmazonS3BuildCacheProviderOptions, 's3Bucket'> = {
   s3Region: 'us-east-1',

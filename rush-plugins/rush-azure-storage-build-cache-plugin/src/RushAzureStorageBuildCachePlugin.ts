@@ -3,9 +3,7 @@
 
 import * as path from 'path';
 import { Import, JsonSchema } from '@rushstack/node-core-library';
-import { IRushPlugin } from '../../pluginFramework/IRushPlugin';
-import { RushSession } from '../../pluginFramework/RushSession';
-import { RushConfiguration } from '../../api/RushConfiguration';
+import { IRushPlugin, RushSession, RushConfiguration } from '@microsoft/rush-lib';
 
 import type { AzureEnvironmentNames } from './AzureStorageBuildCacheProvider';
 
@@ -16,6 +14,9 @@ const AzureStorageBuildCacheProviderModule: typeof import('./AzureStorageBuildCa
 
 const PLUGIN_NAME: string = 'AzureStorageBuildCachePlugin';
 
+/**
+ * @public
+ */
 interface IAzureStorageConfigurationJson {
   /**
    * The name of the the Azure storage account to use for build cache.
@@ -43,7 +44,10 @@ interface IAzureStorageConfigurationJson {
   isCacheWriteAllowed?: boolean;
 }
 
-class AzureStorageBuildCachePlugin implements IRushPlugin {
+/**
+ * @public
+ */
+export class RushAzureStorageBuildCachePlugin implements IRushPlugin {
   public pluginName: string = PLUGIN_NAME;
 
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
@@ -55,7 +59,10 @@ class AzureStorageBuildCachePlugin implements IRushPlugin {
       rushSession.cloudCacheProviderFactories.set(
         'azure-blob-storage',
         (buildCacheConfig, buildCacheConfigFilePath) => {
-          AzureStorageBuildCachePlugin._jsonSchema.validateObject(buildCacheConfig, buildCacheConfigFilePath);
+          RushAzureStorageBuildCachePlugin._jsonSchema.validateObject(
+            buildCacheConfig,
+            buildCacheConfigFilePath
+          );
           type IBuildCache = typeof buildCacheConfig & {
             azureStorageConfiguration: IAzureStorageConfigurationJson;
           };
@@ -72,4 +79,3 @@ class AzureStorageBuildCachePlugin implements IRushPlugin {
     });
   }
 }
-export default AzureStorageBuildCachePlugin;

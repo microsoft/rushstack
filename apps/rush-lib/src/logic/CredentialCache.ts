@@ -22,11 +22,17 @@ interface ICacheEntryJson {
   credential: string;
 }
 
+/**
+ * @beta
+ */
 export interface ICredentialCacheEntry {
   expires?: Date;
   credential: string;
 }
 
+/**
+ * @beta
+ */
 export interface ICredentialCacheOptions {
   supportEditing: boolean;
 }

@@ -26,7 +26,7 @@ export {
 
 export { PackageManagerName, PackageManager } from './api/packageManager/PackageManager';
 
-export { EnvironmentVariableNames } from './api/EnvironmentConfiguration';
+export { EnvironmentVariableNames, EnvironmentConfiguration } from './api/EnvironmentConfiguration';
 
 export { RushConfigurationProject } from './api/RushConfigurationProject';
 
@@ -70,6 +70,20 @@ export { Logger, ILogger, ILoggerOptions } from './pluginFramework/logging/Logge
 
 export { RushLifecycleHooks, IRushLifecycle } from './pluginFramework/RushLifeCycle';
 
-export { IBuildCacheJson } from './api/BuildCacheConfiguration';
+export { IBuildCacheJson, ILocalBuildCacheJson, ICloudBuildCacheJson } from './api/BuildCacheConfiguration';
 
 export { CloudBuildCacheProviderBase } from './logic/buildCache/CloudBuildCacheProviderBase';
+
+export { RushConstants } from './logic/RushConstants';
+
+export { CredentialCache, ICredentialCacheOptions, ICredentialCacheEntry } from './logic/CredentialCache';
+
+export { RushUserConfiguration } from './api/RushUserConfiguration';
+
+export {
+  WebClient,
+  IPutFetchOptions,
+  IGetFetchOptions,
+  WebClientResponse,
+  WebClientProxy
+} from './utilities/WebClient';

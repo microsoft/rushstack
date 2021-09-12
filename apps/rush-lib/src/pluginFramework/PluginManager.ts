@@ -2,10 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import { InternalError, Terminal } from '@rushstack/node-core-library';
+
 import { IRushPluginConfigJson, RushConfiguration } from '../api/RushConfiguration';
 import { Autoinstaller } from '../logic/Autoinstaller';
-import AmazonS3BuildCachePlugin from '../plugins/AmazonS3BuildCachePlugin';
-import AzureStorageBuildCachePlugin from '../plugins/AzureStorageBuildCachePlugin';
 import { IRushPlugin } from './IRushPlugin';
 import { RushSession } from './RushSession';
 
@@ -31,8 +30,6 @@ export class PluginManager {
   private _terminal: Terminal;
   private _rushConfiguration: RushConfiguration;
   private _rushSession: RushSession;
-  private _appliedPlugins: IRushPlugin[] = [];
-  private _appliedPluginNames: Set<string> = new Set<string>();
 
   public constructor(options: IPluginManagerOptions) {
     this._terminal = options.terminal;
@@ -44,10 +41,7 @@ export class PluginManager {
     return this._rushConfiguration.rushConfigurationJson.rushPlugins || [];
   }
 
-  public initializeDefaultPlugins(): void {
-    this._applyPlugin(new AzureStorageBuildCachePlugin());
-    this._applyPlugin(new AmazonS3BuildCachePlugin());
-  }
+  public initializeDefaultPlugins(): void {}
 
   public async initializePluginsFromConfigFileAsync(): Promise<void> {
     const rushPluginConfigurations: IRushPluginConfigJson[] = this.rushPluginConfigurations;
@@ -88,22 +82,16 @@ export class PluginManager {
       options
     );
 
-    if (this._appliedPluginNames.has(plugin.pluginName)) {
-      throw new Error(
-        `Error applying plugin "${resolvedPluginPath}": A plugin with name "${plugin.pluginName}" has ` +
-          'already been applied'
-      );
-    } else {
-      this._applyPlugin(plugin, options);
-    }
+    this._applyPlugin(plugin, options);
   }
 
   private _loadAndValidatePluginPackage(resolvedPluginPath: string, options?: object): IRushPlugin {
-    let pluginPackage: IRushPlugin;
+    type IRushPluginCtor = new () => IRushPlugin<object | void>;
+    let pluginPackage: IRushPluginCtor;
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const loadedPluginPackage: IRushPlugin | { default: IRushPlugin } = require(resolvedPluginPath);
-      pluginPackage = (loadedPluginPackage as { default: IRushPlugin }).default || loadedPluginPackage;
+      const loadedPluginPackage: IRushPluginCtor | { default: IRushPluginCtor } = require(resolvedPluginPath);
+      pluginPackage = (loadedPluginPackage as { default: IRushPluginCtor }).default || loadedPluginPackage;
     } catch (e) {
       throw new InternalError(`Error loading plugin package from "${resolvedPluginPath}": ${e}`);
     }
@@ -114,38 +102,38 @@ export class PluginManager {
 
     this._terminal.writeVerboseLine(`Loaded plugin package from "${resolvedPluginPath}"`);
 
-    if (!pluginPackage.apply || typeof pluginPackage.apply !== 'function') {
+    const plugin: IRushPlugin<object | void> = new pluginPackage();
+
+    if (!plugin.apply || typeof pluginPackage.apply !== 'function') {
       throw new InternalError(
         `Plugin packages must define an "apply" function. The plugin loaded from "${resolvedPluginPath}" ` +
           'either doesn\'t define an "apply" property, or its value isn\'t a function.'
       );
     }
 
-    if (!pluginPackage.pluginName || typeof pluginPackage.pluginName !== 'string') {
+    if (!plugin.pluginName || typeof plugin.pluginName !== 'string') {
       throw new InternalError(
         `Plugin packages must define a "pluginName" property. The plugin loaded from "${resolvedPluginPath}" ` +
           'either doesn\'t define a "pluginName" property, or its value isn\'t a string.'
       );
     }
 
-    if (options && pluginPackage.optionsSchema) {
+    if (options && plugin.optionsSchema) {
       try {
-        pluginPackage.optionsSchema.validateObject(options, 'rush.json');
+        plugin.optionsSchema.validateObject(options, 'rush.json');
       } catch (e) {
         throw new Error(
-          `Provided options for plugin "${pluginPackage.pluginName}" did not match the provided plugin schema.\n${e}`
+          `Provided options for plugin "${plugin.pluginName}" did not match the provided plugin schema.\n${e}`
         );
       }
     }
 
-    return pluginPackage;
+    return plugin;
   }
 
   private _applyPlugin(plugin: IRushPlugin<object | void>, options?: object): void {
     try {
       plugin.apply(this._rushSession, this._rushConfiguration, options);
-      this._appliedPlugins.push(plugin);
-      this._appliedPluginNames.add(plugin.pluginName);
     } catch (e) {
       throw new InternalError(`Error applying "${plugin.pluginName}": ${e}`);
     }
