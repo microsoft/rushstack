@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Optimize invocation of tar to use stdin instead of a temporary file.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
