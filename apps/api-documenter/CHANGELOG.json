@@ -2,6 +2,27 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.13.48",
+      "tag": "@microsoft/api-documenter_v7.13.48",
+      "date": "Mon, 13 Sep 2021 15:07:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.13.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.13.47",
       "tag": "@microsoft/api-documenter_v7.13.47",
       "date": "Fri, 10 Sep 2021 15:08:28 GMT",
