@@ -207,7 +207,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     }
 
     this._tslintConfigFilePath = path.resolve(this._configuration.buildFolder, 'tslint.json');
-    this._eslintConfigFilePath = path.resolve(this._configuration.buildFolder, '.eslintrc.js');
     this._eslintEnabled = this._tslintEnabled =
       this._configuration.lintingEnabled && !this._configuration.watchMode; // Don't run lint in watch mode
 
@@ -215,6 +214,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       this._tslintEnabled = this._cachedFileSystem.exists(this._tslintConfigFilePath);
     }
 
+    this._eslintConfigFilePath = this._resolveEslintConfigFilePath(this._eslintEnabled);
     if (this._eslintEnabled) {
       this._eslintEnabled = this._cachedFileSystem.exists(this._eslintConfigFilePath);
     }
@@ -286,6 +286,20 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     } else {
       await this._runBuildAsync(ts, measureTsPerformance, measureTsPerformanceAsync);
     }
+  }
+
+  private _resolveEslintConfigFilePath(eslintEnabled: boolean): string {
+    const defaultPath: string = path.resolve(this._configuration.buildFolder, '.eslintrc.js');
+    if (!eslintEnabled) {
+      return defaultPath; // No need to check the filesystem
+    }
+    // When project is configured with "type": "module" in package.json, the config file must have a .cjs extension
+    // so use it if it exists
+    const alternativePathPath: string = path.resolve(this._configuration.buildFolder, '.eslintrc.cjs');
+    if (this._cachedFileSystem.exists(alternativePathPath)) {
+      return alternativePathPath;
+    }
+    return defaultPath;
   }
 
   public async _runWatch(ts: ExtendedTypeScript, measureTsPerformance: PerformanceMeasurer): Promise<void> {
@@ -995,7 +1009,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
             currentFolder,
             depth,
             this._cachedFileSystem.readFolderFilesAndDirectories.bind(this._cachedFileSystem),
-            this._cachedFileSystem.getRealPath.bind(this._cachedFileSystem)
+            this._cachedFileSystem.getRealPath.bind(this._cachedFileSystem),
+            this._cachedFileSystem.directoryExists.bind(this._cachedFileSystem)
           ),
         useCaseSensitiveFileNames: true
       },

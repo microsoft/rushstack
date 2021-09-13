@@ -2,6 +2,114 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.6.51",
+      "tag": "@rushstack/localization-plugin_v0.6.51",
+      "date": "Mon, 13 Sep 2021 15:07:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.3.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.2.71`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.2.70` to `^3.2.71`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.50",
+      "tag": "@rushstack/localization-plugin_v0.6.50",
+      "date": "Fri, 10 Sep 2021 15:08:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.2.70`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.2.69` to `^3.2.70`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.49",
+      "tag": "@rushstack/localization-plugin_v0.6.49",
+      "date": "Wed, 08 Sep 2021 19:06:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.2.69`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.2.68` to `^3.2.69`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.48",
+      "tag": "@rushstack/localization-plugin_v0.6.48",
+      "date": "Wed, 08 Sep 2021 00:08:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.2.68`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.2.67` to `^3.2.68`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.6.47",
+      "tag": "@rushstack/localization-plugin_v0.6.47",
+      "date": "Fri, 03 Sep 2021 00:09:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.7`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.2.67`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.2.66` to `^3.2.67`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.46",
       "tag": "@rushstack/localization-plugin_v0.6.46",
       "date": "Tue, 31 Aug 2021 00:07:11 GMT",

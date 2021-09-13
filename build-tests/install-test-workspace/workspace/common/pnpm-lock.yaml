@@ -5,27 +5,27 @@ importers:
   typescript-newest-test:
     specifiers:
       '@rushstack/eslint-config': file:rushstack-eslint-config-2.4.0.tgz
-      '@rushstack/heft': file:rushstack-heft-0.37.0.tgz
+      '@rushstack/heft': file:rushstack-heft-0.37.2.tgz
       eslint: ~7.30.0
       tslint: ~5.20.1
-      typescript: ~4.3.5
+      typescript: ~4.4.2
     devDependencies:
-      '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.4.0.tgz_eslint@7.30.0+typescript@4.3.5
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.37.0.tgz
+      '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.4.0.tgz_eslint@7.30.0+typescript@4.4.2
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.37.2.tgz
       eslint: 7.30.0
-      tslint: 5.20.1_typescript@4.3.5
-      typescript: 4.3.5
+      tslint: 5.20.1_typescript@4.4.2
+      typescript: 4.4.2
 
   typescript-v3-test:
     specifiers:
       '@rushstack/eslint-config': file:rushstack-eslint-config-2.4.0.tgz
-      '@rushstack/heft': file:rushstack-heft-0.37.0.tgz
+      '@rushstack/heft': file:rushstack-heft-0.37.2.tgz
       eslint: ~7.30.0
       tslint: ~5.20.1
       typescript: ~3.9.7
     devDependencies:
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.4.0.tgz_eslint@7.30.0+typescript@3.9.10
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.37.0.tgz
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.37.2.tgz
       eslint: 7.30.0
       tslint: 5.20.1_typescript@3.9.10
       typescript: 3.9.10
@@ -138,31 +138,6 @@ packages:
     resolution: {integrity: sha512-W+bw9ds02rAQaMvaLYxAbJ6cvguW/iJXNT6lTssS1ps6QdrMKttqEAMEG/b5CR8TZl3/L7/lH0ZV5nNR1LXikA==}
     dev: true
 
-  /@typescript-eslint/eslint-plugin/4.28.3_8da3816a7c3fb8ebc9f4c4b3e4b2e38f:
-    resolution: {integrity: sha512-jW8sEFu1ZeaV8xzwsfi6Vgtty2jf7/lJmQmDkDruBjYAbx5DA8JtbcMnP0rNPUG+oH5GoQBTSp+9613BzuIpYg==}
-    engines: {node: ^10.12.0 || >=12.0.0}
-    peerDependencies:
-      '@typescript-eslint/parser': ^4.0.0
-      eslint: ^5.0.0 || ^6.0.0 || ^7.0.0
-      typescript: '*'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-    dependencies:
-      '@typescript-eslint/experimental-utils': 4.28.3_eslint@7.30.0+typescript@4.3.5
-      '@typescript-eslint/parser': 4.28.3_eslint@7.30.0+typescript@4.3.5
-      '@typescript-eslint/scope-manager': 4.28.3
-      debug: 4.3.1
-      eslint: 7.30.0
-      functional-red-black-tree: 1.0.1
-      regexpp: 3.1.0
-      semver: 7.3.5
-      tsutils: 3.21.0_typescript@4.3.5
-      typescript: 4.3.5
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
   /@typescript-eslint/eslint-plugin/4.28.3_c791be63d80b830096132a88d884d3c6:
     resolution: {integrity: sha512-jW8sEFu1ZeaV8xzwsfi6Vgtty2jf7/lJmQmDkDruBjYAbx5DA8JtbcMnP0rNPUG+oH5GoQBTSp+9613BzuIpYg==}
     engines: {node: ^10.12.0 || >=12.0.0}
@@ -188,6 +163,31 @@ packages:
       - supports-color
     dev: true
 
+  /@typescript-eslint/eslint-plugin/4.28.3_dea3c07b05ffc5d33aadcc92b8a0deed:
+    resolution: {integrity: sha512-jW8sEFu1ZeaV8xzwsfi6Vgtty2jf7/lJmQmDkDruBjYAbx5DA8JtbcMnP0rNPUG+oH5GoQBTSp+9613BzuIpYg==}
+    engines: {node: ^10.12.0 || >=12.0.0}
+    peerDependencies:
+      '@typescript-eslint/parser': ^4.0.0
+      eslint: ^5.0.0 || ^6.0.0 || ^7.0.0
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+    dependencies:
+      '@typescript-eslint/experimental-utils': 4.28.3_eslint@7.30.0+typescript@4.4.2
+      '@typescript-eslint/parser': 4.28.3_eslint@7.30.0+typescript@4.4.2
+      '@typescript-eslint/scope-manager': 4.28.3
+      debug: 4.3.1
+      eslint: 7.30.0
+      functional-red-black-tree: 1.0.1
+      regexpp: 3.1.0
+      semver: 7.3.5
+      tsutils: 3.21.0_typescript@4.4.2
+      typescript: 4.4.2
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
   /@typescript-eslint/experimental-utils/4.28.3_eslint@7.30.0+typescript@3.9.10:
     resolution: {integrity: sha512-zZYl9TnrxwEPi3FbyeX0ZnE8Hp7j3OCR+ELoUfbwGHGxWnHg9+OqSmkw2MoCVpZksPCZYpQzC559Ee9pJNHTQw==}
     engines: {node: ^10.12.0 || >=12.0.0}
@@ -206,7 +206,7 @@ packages:
       - typescript
     dev: true
 
-  /@typescript-eslint/experimental-utils/4.28.3_eslint@7.30.0+typescript@4.3.5:
+  /@typescript-eslint/experimental-utils/4.28.3_eslint@7.30.0+typescript@4.4.2:
     resolution: {integrity: sha512-zZYl9TnrxwEPi3FbyeX0ZnE8Hp7j3OCR+ELoUfbwGHGxWnHg9+OqSmkw2MoCVpZksPCZYpQzC559Ee9pJNHTQw==}
     engines: {node: ^10.12.0 || >=12.0.0}
     peerDependencies:
@@ -215,7 +215,7 @@ packages:
       '@types/json-schema': 7.0.7
       '@typescript-eslint/scope-manager': 4.28.3
       '@typescript-eslint/types': 4.28.3
-      '@typescript-eslint/typescript-estree': 4.28.3_typescript@4.3.5
+      '@typescript-eslint/typescript-estree': 4.28.3_typescript@4.4.2
       eslint: 7.30.0
       eslint-scope: 5.1.1
       eslint-utils: 3.0.0_eslint@7.30.0
@@ -244,7 +244,7 @@ packages:
       - supports-color
     dev: true
 
-  /@typescript-eslint/parser/4.28.3_eslint@7.30.0+typescript@4.3.5:
+  /@typescript-eslint/parser/4.28.3_eslint@7.30.0+typescript@4.4.2:
     resolution: {integrity: sha512-ZyWEn34bJexn/JNYvLQab0Mo5e+qqQNhknxmc8azgNd4XqspVYR5oHq9O11fLwdZMRcj4by15ghSlIEq+H5ltQ==}
     engines: {node: ^10.12.0 || >=12.0.0}
     peerDependencies:
@@ -256,10 +256,10 @@ packages:
     dependencies:
       '@typescript-eslint/scope-manager': 4.28.3
       '@typescript-eslint/types': 4.28.3
-      '@typescript-eslint/typescript-estree': 4.28.3_typescript@4.3.5
+      '@typescript-eslint/typescript-estree': 4.28.3_typescript@4.4.2
       debug: 4.3.1
       eslint: 7.30.0
-      typescript: 4.3.5
+      typescript: 4.4.2
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -298,7 +298,7 @@ packages:
       - supports-color
     dev: true
 
-  /@typescript-eslint/typescript-estree/4.28.3_typescript@4.3.5:
+  /@typescript-eslint/typescript-estree/4.28.3_typescript@4.4.2:
     resolution: {integrity: sha512-YAb1JED41kJsqCQt1NcnX5ZdTA93vKFCMP4lQYG6CFxd0VzDJcKttRlMrlG+1qiWAw8+zowmHU1H0OzjWJzR2w==}
     engines: {node: ^10.12.0 || >=12.0.0}
     peerDependencies:
@@ -313,8 +313,8 @@ packages:
       globby: 11.0.4
       is-glob: 4.0.1
       semver: 7.3.5
-      tsutils: 3.21.0_typescript@4.3.5
-      typescript: 4.3.5
+      tsutils: 3.21.0_typescript@4.4.2
+      typescript: 4.4.2
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -1637,7 +1637,7 @@ packages:
       typescript: 3.9.10
     dev: true
 
-  /tslint/5.20.1_typescript@4.3.5:
+  /tslint/5.20.1_typescript@4.4.2:
     resolution: {integrity: sha512-EcMxhzCFt8k+/UP5r8waCf/lzmeSyVlqxqMEDQE7rWYiQky8KpIBz1JAoYXfROHrPZ1XXd43q8yQnULOLiBRQg==}
     engines: {node: '>=4.8.0'}
     hasBin: true
@@ -1656,8 +1656,8 @@ packages:
       resolve: 1.20.0
       semver: 5.7.1
       tslib: 1.14.1
-      tsutils: 2.29.0_typescript@4.3.5
-      typescript: 4.3.5
+      tsutils: 2.29.0_typescript@4.4.2
+      typescript: 4.4.2
     dev: true
 
   /tsutils/2.29.0_typescript@3.9.10:
@@ -1669,13 +1669,13 @@ packages:
       typescript: 3.9.10
     dev: true
 
-  /tsutils/2.29.0_typescript@4.3.5:
+  /tsutils/2.29.0_typescript@4.4.2:
     resolution: {integrity: sha512-g5JVHCIJwzfISaXpXE1qvNalca5Jwob6FjI4AoPlqMusJ6ftFE7IkkFoMhVLRgK+4Kx3gkzb8UZK5t5yTTvEmA==}
     peerDependencies:
       typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev || >= 3.0.0-dev || >= 3.1.0-dev'
     dependencies:
       tslib: 1.14.1
-      typescript: 4.3.5
+      typescript: 4.4.2
     dev: true
 
   /tsutils/3.21.0_typescript@3.9.10:
@@ -1688,14 +1688,14 @@ packages:
       typescript: 3.9.10
     dev: true
 
-  /tsutils/3.21.0_typescript@4.3.5:
+  /tsutils/3.21.0_typescript@4.4.2:
     resolution: {integrity: sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==}
     engines: {node: '>= 6'}
     peerDependencies:
       typescript: '>=2.8.0 || >= 3.2.0-dev || >= 3.3.0-dev || >= 3.4.0-dev || >= 3.5.0-dev || >= 3.6.0-dev || >= 3.6.0-beta || >= 3.7.0-dev || >= 3.7.0-beta'
     dependencies:
       tslib: 1.14.1
-      typescript: 4.3.5
+      typescript: 4.4.2
     dev: true
 
   /type-check/0.4.0:
@@ -1716,8 +1716,8 @@ packages:
     hasBin: true
     dev: true
 
-  /typescript/4.3.5:
-    resolution: {integrity: sha512-DqQgihaQ9cUrskJo9kIyW/+g0Vxsk8cDtZ52a3NGh0YNTfpUSArXSohyUGnvbPazEPLu398C0UxmKSOrPumUzA==}
+  /typescript/4.4.2:
+    resolution: {integrity: sha512-gzP+t5W4hdy4c+68bfcv0t400HVJMMd2+H9B7gae1nQlBzCqvrXX+6GL/b3GAgyTH966pzrZ70/fRjwAtZksSQ==}
     engines: {node: '>=4.2.0'}
     hasBin: true
     dev: true
@@ -1819,7 +1819,7 @@ packages:
       - supports-color
     dev: true
 
-  file:../temp/tarballs/rushstack-eslint-config-2.4.0.tgz_eslint@7.30.0+typescript@4.3.5:
+  file:../temp/tarballs/rushstack-eslint-config-2.4.0.tgz_eslint@7.30.0+typescript@4.4.2:
     resolution: {tarball: file:../temp/tarballs/rushstack-eslint-config-2.4.0.tgz}
     id: file:../temp/tarballs/rushstack-eslint-config-2.4.0.tgz
     name: '@rushstack/eslint-config'
@@ -1829,18 +1829,18 @@ packages:
       typescript: '>=3.0.0'
     dependencies:
       '@rushstack/eslint-patch': file:../temp/tarballs/rushstack-eslint-patch-1.0.6.tgz
-      '@rushstack/eslint-plugin': file:../temp/tarballs/rushstack-eslint-plugin-0.8.0.tgz_eslint@7.30.0+typescript@4.3.5
-      '@rushstack/eslint-plugin-packlets': file:../temp/tarballs/rushstack-eslint-plugin-packlets-0.3.0.tgz_eslint@7.30.0+typescript@4.3.5
-      '@rushstack/eslint-plugin-security': file:../temp/tarballs/rushstack-eslint-plugin-security-0.2.0.tgz_eslint@7.30.0+typescript@4.3.5
-      '@typescript-eslint/eslint-plugin': 4.28.3_8da3816a7c3fb8ebc9f4c4b3e4b2e38f
-      '@typescript-eslint/experimental-utils': 4.28.3_eslint@7.30.0+typescript@4.3.5
-      '@typescript-eslint/parser': 4.28.3_eslint@7.30.0+typescript@4.3.5
-      '@typescript-eslint/typescript-estree': 4.28.3_typescript@4.3.5
+      '@rushstack/eslint-plugin': file:../temp/tarballs/rushstack-eslint-plugin-0.8.0.tgz_eslint@7.30.0+typescript@4.4.2
+      '@rushstack/eslint-plugin-packlets': file:../temp/tarballs/rushstack-eslint-plugin-packlets-0.3.0.tgz_eslint@7.30.0+typescript@4.4.2
+      '@rushstack/eslint-plugin-security': file:../temp/tarballs/rushstack-eslint-plugin-security-0.2.0.tgz_eslint@7.30.0+typescript@4.4.2
+      '@typescript-eslint/eslint-plugin': 4.28.3_dea3c07b05ffc5d33aadcc92b8a0deed
+      '@typescript-eslint/experimental-utils': 4.28.3_eslint@7.30.0+typescript@4.4.2
+      '@typescript-eslint/parser': 4.28.3_eslint@7.30.0+typescript@4.4.2
+      '@typescript-eslint/typescript-estree': 4.28.3_typescript@4.4.2
       eslint: 7.30.0
       eslint-plugin-promise: 4.2.1
       eslint-plugin-react: 7.20.6_eslint@7.30.0
       eslint-plugin-tsdoc: 0.2.14
-      typescript: 4.3.5
+      typescript: 4.4.2
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -1867,7 +1867,7 @@ packages:
       - typescript
     dev: true
 
-  file:../temp/tarballs/rushstack-eslint-plugin-0.8.0.tgz_eslint@7.30.0+typescript@4.3.5:
+  file:../temp/tarballs/rushstack-eslint-plugin-0.8.0.tgz_eslint@7.30.0+typescript@4.4.2:
     resolution: {tarball: file:../temp/tarballs/rushstack-eslint-plugin-0.8.0.tgz}
     id: file:../temp/tarballs/rushstack-eslint-plugin-0.8.0.tgz
     name: '@rushstack/eslint-plugin'
@@ -1876,7 +1876,7 @@ packages:
       eslint: ^6.0.0 || ^7.0.0
     dependencies:
       '@rushstack/tree-pattern': file:../temp/tarballs/rushstack-tree-pattern-0.2.1.tgz
-      '@typescript-eslint/experimental-utils': 4.28.3_eslint@7.30.0+typescript@4.3.5
+      '@typescript-eslint/experimental-utils': 4.28.3_eslint@7.30.0+typescript@4.4.2
       eslint: 7.30.0
     transitivePeerDependencies:
       - supports-color
@@ -1899,7 +1899,7 @@ packages:
       - typescript
     dev: true
 
-  file:../temp/tarballs/rushstack-eslint-plugin-packlets-0.3.0.tgz_eslint@7.30.0+typescript@4.3.5:
+  file:../temp/tarballs/rushstack-eslint-plugin-packlets-0.3.0.tgz_eslint@7.30.0+typescript@4.4.2:
     resolution: {tarball: file:../temp/tarballs/rushstack-eslint-plugin-packlets-0.3.0.tgz}
     id: file:../temp/tarballs/rushstack-eslint-plugin-packlets-0.3.0.tgz
     name: '@rushstack/eslint-plugin-packlets'
@@ -1908,7 +1908,7 @@ packages:
       eslint: ^6.0.0 || ^7.0.0
     dependencies:
       '@rushstack/tree-pattern': file:../temp/tarballs/rushstack-tree-pattern-0.2.1.tgz
-      '@typescript-eslint/experimental-utils': 4.28.3_eslint@7.30.0+typescript@4.3.5
+      '@typescript-eslint/experimental-utils': 4.28.3_eslint@7.30.0+typescript@4.4.2
       eslint: 7.30.0
     transitivePeerDependencies:
       - supports-color
@@ -1931,7 +1931,7 @@ packages:
       - typescript
     dev: true
 
-  file:../temp/tarballs/rushstack-eslint-plugin-security-0.2.0.tgz_eslint@7.30.0+typescript@4.3.5:
+  file:../temp/tarballs/rushstack-eslint-plugin-security-0.2.0.tgz_eslint@7.30.0+typescript@4.4.2:
     resolution: {tarball: file:../temp/tarballs/rushstack-eslint-plugin-security-0.2.0.tgz}
     id: file:../temp/tarballs/rushstack-eslint-plugin-security-0.2.0.tgz
     name: '@rushstack/eslint-plugin-security'
@@ -1940,21 +1940,21 @@ packages:
       eslint: ^6.0.0 || ^7.0.0
     dependencies:
       '@rushstack/tree-pattern': file:../temp/tarballs/rushstack-tree-pattern-0.2.1.tgz
-      '@typescript-eslint/experimental-utils': 4.28.3_eslint@7.30.0+typescript@4.3.5
+      '@typescript-eslint/experimental-utils': 4.28.3_eslint@7.30.0+typescript@4.4.2
       eslint: 7.30.0
     transitivePeerDependencies:
       - supports-color
       - typescript
     dev: true
 
-  file:../temp/tarballs/rushstack-heft-0.37.0.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.37.0.tgz}
+  file:../temp/tarballs/rushstack-heft-0.37.2.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.37.2.tgz}
     name: '@rushstack/heft'
-    version: 0.37.0
+    version: 0.37.2
     engines: {node: '>=10.13.0'}
     hasBin: true
     dependencies:
-      '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.6.3.tgz
+      '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.6.4.tgz
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.40.0.tgz
       '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.3.0.tgz
       '@rushstack/ts-command-line': file:../temp/tarballs/rushstack-ts-command-line-4.9.0.tgz
@@ -1971,10 +1971,10 @@ packages:
       true-case-path: 2.2.1
     dev: true
 
-  file:../temp/tarballs/rushstack-heft-config-file-0.6.3.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-config-file-0.6.3.tgz}
+  file:../temp/tarballs/rushstack-heft-config-file-0.6.4.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-heft-config-file-0.6.4.tgz}
     name: '@rushstack/heft-config-file'
-    version: 0.6.3
+    version: 0.6.4
     engines: {node: '>=10.13.0'}
     dependencies:
       '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.40.0.tgz

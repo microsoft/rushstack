@@ -2,6 +2,78 @@
   "name": "@rushstack/module-minifier-plugin",
   "entries": [
     {
+      "version": "0.4.16",
+      "tag": "@rushstack/module-minifier-plugin_v0.4.16",
+      "date": "Mon, 13 Sep 2021 15:07:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.15",
+      "tag": "@rushstack/module-minifier-plugin_v0.4.15",
+      "date": "Fri, 10 Sep 2021 15:08:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.14",
+      "tag": "@rushstack/module-minifier-plugin_v0.4.14",
+      "date": "Wed, 08 Sep 2021 19:06:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.13",
+      "tag": "@rushstack/module-minifier-plugin_v0.4.13",
+      "date": "Wed, 08 Sep 2021 00:08:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.12",
+      "tag": "@rushstack/module-minifier-plugin_v0.4.12",
+      "date": "Fri, 03 Sep 2021 00:09:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.11",
       "tag": "@rushstack/module-minifier-plugin_v0.4.11",
       "date": "Tue, 31 Aug 2021 00:07:11 GMT",

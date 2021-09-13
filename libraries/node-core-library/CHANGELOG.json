@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.40.1",
+      "tag": "@rushstack/node-core-library_v3.40.1",
+      "date": "Mon, 13 Sep 2021 15:07:05 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for AlreadyExistsBehavior in symlink and junction scenarios"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.40.0",
       "tag": "@rushstack/node-core-library_v3.40.0",
       "date": "Wed, 11 Aug 2021 00:07:21 GMT",

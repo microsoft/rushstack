@@ -2,6 +2,78 @@
   "name": "@rushstack/loader-raw-script",
   "entries": [
     {
+      "version": "1.3.177",
+      "tag": "@rushstack/loader-raw-script_v1.3.177",
+      "date": "Mon, 13 Sep 2021 15:07:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.11`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.176",
+      "tag": "@rushstack/loader-raw-script_v1.3.176",
+      "date": "Fri, 10 Sep 2021 15:08:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.10`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.175",
+      "tag": "@rushstack/loader-raw-script_v1.3.175",
+      "date": "Wed, 08 Sep 2021 19:06:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.9`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.174",
+      "tag": "@rushstack/loader-raw-script_v1.3.174",
+      "date": "Wed, 08 Sep 2021 00:08:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.8`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.173",
+      "tag": "@rushstack/loader-raw-script_v1.3.173",
+      "date": "Fri, 03 Sep 2021 00:09:10 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.7`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.172",
       "tag": "@rushstack/loader-raw-script_v1.3.172",
       "date": "Tue, 31 Aug 2021 00:07:11 GMT",
