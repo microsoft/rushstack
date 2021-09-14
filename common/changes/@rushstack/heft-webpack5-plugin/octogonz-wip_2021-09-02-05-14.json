@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-webpack5-plugin",
+      "comment": "Improve the type declaration for IWebpackBundleSubstageProperties.webpackConfiguration",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-webpack5-plugin",
+  "email": "4673363+octogonz@users.noreply.github.com"
+}

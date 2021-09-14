@@ -551,6 +551,18 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-storybook-react-tutorial",
+      "projectFolder": "build-tests-samples/heft-storybook-react-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-storybook-react-tutorial-storykit",
+      "projectFolder": "build-tests-samples/heft-storybook-react-tutorial-storykit",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-webpack-basic-tutorial",
       "projectFolder": "build-tests-samples/heft-webpack-basic-tutorial",
       "reviewCategory": "tests",
@@ -708,6 +720,12 @@
     {
       "packageName": "@rushstack/heft-sass-plugin",
       "projectFolder": "heft-plugins/heft-sass-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-storybook-plugin",
+      "projectFolder": "heft-plugins/heft-storybook-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
