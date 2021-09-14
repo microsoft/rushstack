@@ -12,7 +12,7 @@ import {
   NewlineKind,
   InternalError
 } from '@rushstack/node-core-library';
-import { StringBuilder, DocSection, DocComment } from '@microsoft/tsdoc';
+import { StringBuilder, DocSection, DocComment, DocBlock, StandardTags } from '@microsoft/tsdoc';
 import {
   ApiModel,
   ApiItem,
@@ -384,7 +384,7 @@ export class YamlDocumenter {
     if (apiItem.tsdocComment) {
       const tsdocComment: DocComment = apiItem.tsdocComment;
       if (tsdocComment.summarySection) {
-        const summary: string = this._renderMarkdown(tsdocComment.summarySection, apiItem);
+        const summary: string = 'xxxxx ' + this._renderMarkdown(tsdocComment.summarySection, apiItem);
         if (summary) {
           yamlItem.summary = summary;
         }
@@ -397,8 +397,38 @@ export class YamlDocumenter {
         }
       }
 
+      if (tsdocComment) {
+        // Write the @remarks block
+        // if (tsdocComment.remarksBlock) {
+        //   output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Remarks' }));
+        //   this._appendSection(output, tsdocComment.remarksBlock.content);
+        // }
+
+        // Write the @example blocks
+        const exampleBlocks: DocBlock[] = tsdocComment.customBlocks.filter(
+          (x) => x.blockTag.tagNameWithUpperCase === StandardTags.example.tagNameWithUpperCase
+        );
+
+        let exampleNumber: number = 1;
+        for (const exampleBlock of exampleBlocks) {
+          const example: string = this._renderMarkdown(exampleBlock.content, apiItem);
+          console.log(example);
+        if (example) {
+          console.log('xxxx we got an example xxxx');
+          yamlItem.examples = [example];
+        }
+          // const heading: string = exampleBlocks.length > 1 ? `Example ${exampleNumber}` : 'Example';
+
+          // output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: heading }));
+
+          // this._appendSection(output, exampleBlock.content);
+
+          ++exampleNumber;
+        }
+      }
+
       if (tsdocComment.deprecatedBlock) {
-        const deprecatedMessage: string = this._renderMarkdown(tsdocComment.deprecatedBlock.content, apiItem);
+        const deprecatedMessage: string = 'xxxxxxx' + this._renderMarkdown(tsdocComment.deprecatedBlock.content, apiItem);
         if (deprecatedMessage.length > 0) {
           yamlItem.deprecated = { content: deprecatedMessage };
         }
@@ -1033,7 +1063,7 @@ export class YamlDocumenter {
   }
 
   private _deleteOldOutputFiles(outputFolder: string): void {
-    console.log('Deleting old output from ' + outputFolder);
+    console.log('xxxxxxxxx Deleting old output from ' + outputFolder);
     FileSystem.ensureEmptyFolder(outputFolder);
   }
 }
