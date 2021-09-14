@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import {
+  AlreadyExistsBehavior,
   FileSystem,
   IFileSystemCreateLinkOptions,
   Import,
@@ -193,23 +194,14 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
     // Example:
     //   LINK FROM: "/path/to/my-project/.storybook/node_modules"
     //   TARGET:    "/path/to/my-project/node_modules/my-storykit/node_modules"
-    this._createFolderSymlink({
+    //
+    // For node_modules links it's standard to use createSymbolicLinkJunction(), which avoids
+    // administrator elevation on Windows; on other operating systems it will create a symbolic link.
+    FileSystem.createSymbolicLinkJunction({
       newLinkPath: dotStorybookModuleFolder,
-      linkTargetPath: storykitModuleFolder
+      linkTargetPath: storykitModuleFolder,
+      alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
     });
-  }
-
-  private _createFolderSymlink(options: IFileSystemCreateLinkOptions): void {
-    // TODO: createSymbolicLinkJunction() is supposed to implement alreadyExistsBehavior
-    FileSystem.deleteFile(options.newLinkPath);
-
-    // This is how Rush links node_modules folders, for some historical reasons
-    // related to filesystem permissions
-    if (process.platform === 'win32') {
-      FileSystem.createSymbolicLinkJunction(options);
-    } else {
-      FileSystem.createSymbolicLinkFolder(options);
-    }
   }
 
   private async _onBundleRunAsync(
