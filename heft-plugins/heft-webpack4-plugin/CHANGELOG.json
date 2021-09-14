@@ -2,6 +2,32 @@
   "name": "@rushstack/heft-webpack4-plugin",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@rushstack/heft-webpack4-plugin_v0.3.0",
+      "date": "Tue, 14 Sep 2021 01:17:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Improve the type declaration for IWebpackBundleSubstageProperties.webpackConfiguration"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.38.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.37.4` to `^0.38.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.14",
       "tag": "@rushstack/heft-webpack4-plugin_v0.2.14",
       "date": "Mon, 13 Sep 2021 15:07:05 GMT",

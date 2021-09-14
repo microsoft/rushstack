@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.40.2",
+      "tag": "@rushstack/node-core-library_v3.40.2",
+      "date": "Tue, 14 Sep 2021 01:17:04 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve documentation to clarify usage for FileSystem APIs related to symbolic links"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.40.1",
       "tag": "@rushstack/node-core-library_v3.40.1",
       "date": "Mon, 13 Sep 2021 15:07:05 GMT",

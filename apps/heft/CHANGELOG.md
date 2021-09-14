@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Mon, 13 Sep 2021 15:07:05 GMT and should not be manually modified.
+This log was last generated on Tue, 14 Sep 2021 01:17:04 GMT and should not be manually modified.
+
+## 0.38.0
+Tue, 14 Sep 2021 01:17:04 GMT
+
+### Minor changes
+
+- Temoprarily introduce a "--storybook" CLI parameter to support the experimental heft-storybook-plugin
 
 ## 0.37.4
 Mon, 13 Sep 2021 15:07:05 GMT
