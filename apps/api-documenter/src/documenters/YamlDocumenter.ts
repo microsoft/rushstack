@@ -57,6 +57,7 @@ import { IYamlTocFile, IYamlTocItem } from '../yaml/IYamlTocFile';
 import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
 import { convertUDPYamlToSDP } from '../utils/ToSdpConvertHelper';
+import { exit } from 'process';
 
 const yamlApiSchema: JsonSchema = JsonSchema.fromFile(
   path.join(__dirname, '..', 'yaml', 'typescript.schema.json')
@@ -187,6 +188,7 @@ export class YamlDocumenter {
         console.log('Writing ' + yamlFilePath);
       }
 
+      console.log(yamlFilePath);
       this._writeYamlFile(newYamlFile, yamlFilePath, 'UniversalReference', yamlApiSchema);
 
       if (parentYamlFile) {
@@ -412,7 +414,6 @@ export class YamlDocumenter {
         let exampleNumber: number = 1;
         for (const exampleBlock of exampleBlocks) {
           const example: string = this._renderMarkdown(exampleBlock.content, apiItem);
-          console.log(example);
           if (example) {
             console.log('xxxx we got an example xxxx');
             yamlItem.examples = [example];
@@ -760,7 +761,8 @@ export class YamlDocumenter {
       lineWidth: 120
     });
 
-    console.log(dataObject);
+    // console.log(stringified);
+    // console.log(filePath);
 
     if (yamlMimeType) {
       stringified = `### YamlMime:${yamlMimeType}\n` + stringified;
@@ -770,6 +772,11 @@ export class YamlDocumenter {
       convertLineEndings: NewlineKind.CrLf,
       ensureFolderExists: true
     });
+
+    if(filePath === "yaml/api-documenter-test/docclass1.yml") {
+      console.log("done");
+      // process.exit();
+    }
 
     if (schema) {
       schema.validateObject(dataObject, filePath);

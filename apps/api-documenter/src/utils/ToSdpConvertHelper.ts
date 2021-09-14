@@ -293,6 +293,12 @@ function convertCommonYamlModel(
     result.remarks = '';
   }
 
+  if (element.examples) {
+    result.examples = element.examples;
+  } else {
+    result.examples = [];
+  }
+
   result.isPreview = element.isPreview;
   if (!result.isPreview) {
     result.isPreview = false;
