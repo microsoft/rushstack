@@ -5,13 +5,13 @@ importers:
   typescript-newest-test:
     specifiers:
       '@rushstack/eslint-config': file:rushstack-eslint-config-2.4.0.tgz
-      '@rushstack/heft': file:rushstack-heft-0.37.2.tgz
+      '@rushstack/heft': file:rushstack-heft-0.37.4.tgz
       eslint: ~7.30.0
       tslint: ~5.20.1
       typescript: ~4.4.2
     devDependencies:
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.4.0.tgz_eslint@7.30.0+typescript@4.4.2
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.37.2.tgz
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.37.4.tgz
       eslint: 7.30.0
       tslint: 5.20.1_typescript@4.4.2
       typescript: 4.4.2
@@ -19,13 +19,13 @@ importers:
   typescript-v3-test:
     specifiers:
       '@rushstack/eslint-config': file:rushstack-eslint-config-2.4.0.tgz
-      '@rushstack/heft': file:rushstack-heft-0.37.2.tgz
+      '@rushstack/heft': file:rushstack-heft-0.37.4.tgz
       eslint: ~7.30.0
       tslint: ~5.20.1
       typescript: ~3.9.7
     devDependencies:
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.4.0.tgz_eslint@7.30.0+typescript@3.9.10
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.37.2.tgz
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.37.4.tgz
       eslint: 7.30.0
       tslint: 5.20.1_typescript@3.9.10
       typescript: 3.9.10
@@ -1947,18 +1947,18 @@ packages:
       - typescript
     dev: true
 
-  file:../temp/tarballs/rushstack-heft-0.37.2.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.37.2.tgz}
+  file:../temp/tarballs/rushstack-heft-0.37.4.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.37.4.tgz}
     name: '@rushstack/heft'
-    version: 0.37.2
+    version: 0.37.4
     engines: {node: '>=10.13.0'}
     hasBin: true
     dependencies:
-      '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.6.4.tgz
-      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.40.0.tgz
+      '@rushstack/heft-config-file': file:../temp/tarballs/rushstack-heft-config-file-0.6.5.tgz
+      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.40.1.tgz
       '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.3.0.tgz
       '@rushstack/ts-command-line': file:../temp/tarballs/rushstack-ts-command-line-4.9.0.tgz
-      '@rushstack/typings-generator': file:../temp/tarballs/rushstack-typings-generator-0.3.9.tgz
+      '@rushstack/typings-generator': file:../temp/tarballs/rushstack-typings-generator-0.3.10.tgz
       '@types/tapable': 1.0.6
       argparse: 1.0.10
       chokidar: 3.4.3
@@ -1971,21 +1971,21 @@ packages:
       true-case-path: 2.2.1
     dev: true
 
-  file:../temp/tarballs/rushstack-heft-config-file-0.6.4.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-config-file-0.6.4.tgz}
+  file:../temp/tarballs/rushstack-heft-config-file-0.6.5.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-heft-config-file-0.6.5.tgz}
     name: '@rushstack/heft-config-file'
-    version: 0.6.4
+    version: 0.6.5
     engines: {node: '>=10.13.0'}
     dependencies:
-      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.40.0.tgz
+      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.40.1.tgz
       '@rushstack/rig-package': file:../temp/tarballs/rushstack-rig-package-0.3.0.tgz
       jsonpath-plus: 4.0.0
     dev: true
 
-  file:../temp/tarballs/rushstack-node-core-library-3.40.0.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-node-core-library-3.40.0.tgz}
+  file:../temp/tarballs/rushstack-node-core-library-3.40.1.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-node-core-library-3.40.1.tgz}
     name: '@rushstack/node-core-library'
-    version: 3.40.0
+    version: 3.40.1
     dependencies:
       '@types/node': 10.17.13
       colors: 1.2.5
@@ -2024,12 +2024,12 @@ packages:
       string-argv: 0.3.1
     dev: true
 
-  file:../temp/tarballs/rushstack-typings-generator-0.3.9.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-typings-generator-0.3.9.tgz}
+  file:../temp/tarballs/rushstack-typings-generator-0.3.10.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-typings-generator-0.3.10.tgz}
     name: '@rushstack/typings-generator'
-    version: 0.3.9
+    version: 0.3.10
     dependencies:
-      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.40.0.tgz
+      '@rushstack/node-core-library': file:../temp/tarballs/rushstack-node-core-library-3.40.1.tgz
       '@types/node': 10.17.13
       chokidar: 3.4.3
       glob: 7.0.6
