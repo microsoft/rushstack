@@ -413,10 +413,10 @@ export class YamlDocumenter {
         for (const exampleBlock of exampleBlocks) {
           const example: string = this._renderMarkdown(exampleBlock.content, apiItem);
           console.log(example);
-        if (example) {
-          console.log('xxxx we got an example xxxx');
-          yamlItem.examples = [example];
-        }
+          if (example) {
+            console.log('xxxx we got an example xxxx');
+            yamlItem.examples = [example];
+          }
           // const heading: string = exampleBlocks.length > 1 ? `Example ${exampleNumber}` : 'Example';
 
           // output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: heading }));
@@ -428,7 +428,8 @@ export class YamlDocumenter {
       }
 
       if (tsdocComment.deprecatedBlock) {
-        const deprecatedMessage: string = 'xxxxxxx' + this._renderMarkdown(tsdocComment.deprecatedBlock.content, apiItem);
+        const deprecatedMessage: string =
+          'xxxxxxx' + this._renderMarkdown(tsdocComment.deprecatedBlock.content, apiItem);
         if (deprecatedMessage.length > 0) {
           yamlItem.deprecated = { content: deprecatedMessage };
         }
@@ -758,6 +759,8 @@ export class YamlDocumenter {
     let stringified: string = yaml.safeDump(dataObject, {
       lineWidth: 120
     });
+
+    console.log(dataObject);
 
     if (yamlMimeType) {
       stringified = `### YamlMime:${yamlMimeType}\n` + stringified;
