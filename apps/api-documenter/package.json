@@ -9,7 +9,7 @@
   "homepage": "https://api-extractor.com/",
   "license": "MIT",
   "scripts": {
-    "build": "heft test --clean"
+    "build": "npx @microsoft/heft test --clean"
   },
   "bin": {
     "api-documenter": "./bin/api-documenter"
@@ -17,18 +17,15 @@
   "main": "lib/index.js",
   "typings": "dist/rollup.d.ts",
   "dependencies": {
-    "@microsoft/api-extractor-model": "workspace:*",
     "@microsoft/tsdoc": "0.13.2",
-    "@rushstack/node-core-library": "workspace:*",
-    "@rushstack/ts-command-line": "workspace:*",
+    "@rushstack/eslint-config": "^2.4.0",
     "colors": "~1.2.1",
     "js-yaml": "~3.13.1",
     "resolve": "~1.17.0"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "workspace:*",
-    "@rushstack/heft-node-rig": "workspace:*",
+    "@rushstack/heft": "^0.38.0",
+    "@rushstack/heft-node-rig": "^1.2.12",
     "@types/heft-jest": "1.0.1",
     "@types/js-yaml": "3.12.1",
     "@types/node": "12.20.24",
