@@ -773,8 +773,8 @@ export class YamlDocumenter {
       ensureFolderExists: true
     });
 
-    if(filePath === "yaml/api-documenter-test/docclass1.yml") {
-      console.log("done");
+    if (filePath === 'yaml/api-documenter-test/docclass1.yml') {
+      console.log('done');
       // process.exit();
     }
 
