@@ -5,7 +5,6 @@ import * as path from 'path';
 import {
   AlreadyExistsBehavior,
   FileSystem,
-  IFileSystemCreateLinkOptions,
   Import,
   IParsedPackageNameOrError,
   PackageName
@@ -124,8 +123,8 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
       );
 
       build.hooks.preCompile.tap(PLUGIN_NAME, (preCompile: IPreCompileSubstage) => {
-        preCompile.hooks.run.tap(PLUGIN_NAME, () => {
-          this._onPreCompile(heftSession, heftConfiguration);
+        preCompile.hooks.run.tapPromise(PLUGIN_NAME, () => {
+          return this._onPreCompileAsync(heftSession, heftConfiguration);
         });
       });
 
@@ -145,7 +144,10 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
     });
   }
 
-  private _onPreCompile(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
+  private async _onPreCompileAsync(
+    heftSession: HeftSession,
+    heftConfiguration: HeftConfiguration
+  ): Promise<void> {
     this._logger.terminal.writeVerboseLine(`Probing for "${this._storykitPackageName}"`);
 
     // Example: "/path/to/my-project/node_modules/my-storykit"
@@ -163,7 +165,7 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
 
     // Example: "/path/to/my-project/node_modules/my-storykit/node_modules"
     const storykitModuleFolder: string = path.join(storykitFolder, 'node_modules');
-    if (!FileSystem.exists(storykitModuleFolder)) {
+    if (!(await FileSystem.existsAsync(storykitModuleFolder))) {
       throw new Error(
         `The ${TASK_NAME} task cannot start because the storykit module folder does not exist:\n` +
           storykitModuleFolder +
@@ -186,7 +188,7 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
 
     // Example: "/path/to/my-project/.storybook"
     const dotStorybookFolder: string = path.join(heftConfiguration.buildFolder, '.storybook');
-    FileSystem.ensureFolder(dotStorybookFolder);
+    await FileSystem.ensureFolderAsync(dotStorybookFolder);
 
     // Example: "/path/to/my-project/.storybook/node_modules"
     const dotStorybookModuleFolder: string = path.join(dotStorybookFolder, 'node_modules');
@@ -197,7 +199,7 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
     //
     // For node_modules links it's standard to use createSymbolicLinkJunction(), which avoids
     // administrator elevation on Windows; on other operating systems it will create a symbolic link.
-    FileSystem.createSymbolicLinkJunction({
+    await FileSystem.createSymbolicLinkJunctionAsync({
       newLinkPath: dotStorybookModuleFolder,
       linkTargetPath: storykitModuleFolder,
       alreadyExistsBehavior: AlreadyExistsBehavior.Overwrite
