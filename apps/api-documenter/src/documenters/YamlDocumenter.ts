@@ -114,7 +114,7 @@ export class YamlDocumenter {
       this._visitApiItems(outputFolder, apiPackage, undefined);
     }
 
-    // convertUDPYamlToSDP(outputFolder);
+    convertUDPYamlToSDP(outputFolder);
 
     this._writeTocFile(outputFolder, this._apiModel.packages);
   }
@@ -398,30 +398,16 @@ export class YamlDocumenter {
       }
 
       if (tsdocComment) {
-        // Write the @remarks block
-        // if (tsdocComment.remarksBlock) {
-        //   output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: 'Remarks' }));
-        //   this._appendSection(output, tsdocComment.remarksBlock.content);
-        // }
-
         // Write the @example blocks
         const exampleBlocks: DocBlock[] = tsdocComment.customBlocks.filter(
           (x) => x.blockTag.tagNameWithUpperCase === StandardTags.example.tagNameWithUpperCase
         );
 
-        let exampleNumber: number = 1;
         for (const exampleBlock of exampleBlocks) {
           const example: string = this._renderMarkdown(exampleBlock.content, apiItem);
           if (example) {
             yamlItem.example = [...(yamlItem.example || []), example];
           }
-          // const heading: string = exampleBlocks.length > 1 ? `Example ${exampleNumber}` : 'Example';
-
-          // output.appendNode(new DocHeading({ configuration: this._tsdocConfiguration, title: heading }));
-
-          // this._appendSection(output, exampleBlock.content);
-
-          ++exampleNumber;
         }
       }
 
@@ -1061,7 +1047,7 @@ export class YamlDocumenter {
   }
 
   private _deleteOldOutputFiles(outputFolder: string): void {
-    console.log('xxxxxxxxx Deleting old output from ' + outputFolder);
+    console.log('Deleting old output from ' + outputFolder);
     FileSystem.ensureEmptyFolder(outputFolder);
   }
 }
