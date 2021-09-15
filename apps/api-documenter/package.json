@@ -21,7 +21,7 @@
     "@microsoft/tsdoc": "0.13.2",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
-     "colors": "~1.2.1",
+    "colors": "~1.2.1",
     "js-yaml": "~3.13.1",
     "resolve": "~1.17.0"
   },
