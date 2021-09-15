@@ -115,7 +115,7 @@ export class YamlDocumenter {
       this._visitApiItems(outputFolder, apiPackage, undefined);
     }
 
-    convertUDPYamlToSDP(outputFolder);
+    // convertUDPYamlToSDP(outputFolder);
 
     this._writeTocFile(outputFolder, this._apiModel.packages);
   }
@@ -386,7 +386,7 @@ export class YamlDocumenter {
     if (apiItem.tsdocComment) {
       const tsdocComment: DocComment = apiItem.tsdocComment;
       if (tsdocComment.summarySection) {
-        const summary: string = 'xxxxx ' + this._renderMarkdown(tsdocComment.summarySection, apiItem);
+        const summary: string = this._renderMarkdown(tsdocComment.summarySection, apiItem);
         if (summary) {
           yamlItem.summary = summary;
         }
@@ -415,7 +415,6 @@ export class YamlDocumenter {
         for (const exampleBlock of exampleBlocks) {
           const example: string = this._renderMarkdown(exampleBlock.content, apiItem);
           if (example) {
-            console.log('xxxx we got an example xxxx');
             yamlItem.examples = [example];
           }
           // const heading: string = exampleBlocks.length > 1 ? `Example ${exampleNumber}` : 'Example';
@@ -430,7 +429,7 @@ export class YamlDocumenter {
 
       if (tsdocComment.deprecatedBlock) {
         const deprecatedMessage: string =
-          'xxxxxxx' + this._renderMarkdown(tsdocComment.deprecatedBlock.content, apiItem);
+          this._renderMarkdown(tsdocComment.deprecatedBlock.content, apiItem);
         if (deprecatedMessage.length > 0) {
           yamlItem.deprecated = { content: deprecatedMessage };
         }
