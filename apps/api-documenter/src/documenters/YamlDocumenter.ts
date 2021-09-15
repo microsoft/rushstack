@@ -413,7 +413,7 @@ export class YamlDocumenter {
         for (const exampleBlock of exampleBlocks) {
           const example: string = this._renderMarkdown(exampleBlock.content, apiItem);
           if (example) {
-            yamlItem.example = [example];
+            yamlItem.example = [...(yamlItem.example || []), example];
           }
           // const heading: string = exampleBlocks.length > 1 ? `Example ${exampleNumber}` : 'Example';
 
@@ -756,9 +756,6 @@ export class YamlDocumenter {
     let stringified: string = yaml.safeDump(dataObject, {
       lineWidth: 120
     });
-
-    // console.log(stringified);
-    // console.log(filePath);
 
     if (yamlMimeType) {
       stringified = `### YamlMime:${yamlMimeType}\n` + stringified;
