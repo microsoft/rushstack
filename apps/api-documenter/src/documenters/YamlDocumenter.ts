@@ -57,7 +57,6 @@ import { IYamlTocFile, IYamlTocItem } from '../yaml/IYamlTocFile';
 import { Utilities } from '../utils/Utilities';
 import { CustomMarkdownEmitter } from '../markdown/CustomMarkdownEmitter';
 import { convertUDPYamlToSDP } from '../utils/ToSdpConvertHelper';
-import { exit } from 'process';
 
 const yamlApiSchema: JsonSchema = JsonSchema.fromFile(
   path.join(__dirname, '..', 'yaml', 'typescript.schema.json')
@@ -188,7 +187,6 @@ export class YamlDocumenter {
         console.log('Writing ' + yamlFilePath);
       }
 
-      console.log(yamlFilePath);
       this._writeYamlFile(newYamlFile, yamlFilePath, 'UniversalReference', yamlApiSchema);
 
       if (parentYamlFile) {
@@ -415,7 +413,7 @@ export class YamlDocumenter {
         for (const exampleBlock of exampleBlocks) {
           const example: string = this._renderMarkdown(exampleBlock.content, apiItem);
           if (example) {
-            yamlItem.examples = [example];
+            yamlItem.example = [example];
           }
           // const heading: string = exampleBlocks.length > 1 ? `Example ${exampleNumber}` : 'Example';
 
@@ -428,8 +426,7 @@ export class YamlDocumenter {
       }
 
       if (tsdocComment.deprecatedBlock) {
-        const deprecatedMessage: string =
-          this._renderMarkdown(tsdocComment.deprecatedBlock.content, apiItem);
+        const deprecatedMessage: string = this._renderMarkdown(tsdocComment.deprecatedBlock.content, apiItem);
         if (deprecatedMessage.length > 0) {
           yamlItem.deprecated = { content: deprecatedMessage };
         }
@@ -771,11 +768,6 @@ export class YamlDocumenter {
       convertLineEndings: NewlineKind.CrLf,
       ensureFolderExists: true
     });
-
-    if (filePath === 'yaml/api-documenter-test/docclass1.yml') {
-      console.log('done');
-      // process.exit();
-    }
 
     if (schema) {
       schema.validateObject(dataObject, filePath);
