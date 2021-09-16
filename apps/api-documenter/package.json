@@ -9,7 +9,7 @@
   "homepage": "https://api-extractor.com/",
   "license": "MIT",
   "scripts": {
-    "build": "npx @rushstack/heft test --clean"
+    "build": "npx @rushstack/heft build"
   },
   "bin": {
     "api-documenter": "./bin/api-documenter"
