@@ -9,7 +9,7 @@
   "homepage": "https://api-extractor.com/",
   "license": "MIT",
   "scripts": {
-    "build": "npx @microsoft/heft test --clean"
+    "build": "npx @rushstack/heft test --clean"
   },
   "bin": {
     "api-documenter": "./bin/api-documenter"
@@ -21,11 +21,11 @@
     "@rushstack/eslint-config": "^2.4.0",
     "colors": "~1.2.1",
     "js-yaml": "~3.13.1",
+    "@rushstack/heft": "^0.38.0",
+    "@rushstack/heft-node-rig": "^1.2.12",
     "resolve": "~1.17.0"
   },
   "devDependencies": {
-    "@rushstack/heft": "^0.38.0",
-    "@rushstack/heft-node-rig": "^1.2.12",
     "@types/heft-jest": "1.0.1",
     "@types/js-yaml": "3.12.1",
     "@types/node": "12.20.24",
