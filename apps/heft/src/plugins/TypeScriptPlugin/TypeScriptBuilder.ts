@@ -853,7 +853,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         reason: 'emitMjsExtensionForESModule'
       };
 
-      specifiedKinds.set(ts.ModuleKind.CommonJS, mjsReason);
+      specifiedKinds.set(ts.ModuleKind.ESNext, mjsReason);
       specifiedOutDirs.set(`${tsconfig.options.outDir!}:.mjs`, mjsReason);
     }
 
