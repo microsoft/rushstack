@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.38.1",
+      "tag": "@rushstack/heft_v0.38.1",
+      "date": "Sat, 18 Sep 2021 03:05:57 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an issue where setting the emitMjsExtensionForESModule typescript.json option in a project whose tsconfig emits CommonJS will only emit .mjs files."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.38.0",
       "tag": "@rushstack/heft_v0.38.0",
       "date": "Tue, 14 Sep 2021 01:17:04 GMT",

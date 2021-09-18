@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 14 Sep 2021 01:17:04 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Sep 2021 03:05:57 GMT and should not be manually modified.
+
+## 0.38.1
+Sat, 18 Sep 2021 03:05:57 GMT
+
+### Patches
+
+- Fix an issue where setting the emitMjsExtensionForESModule typescript.json option in a project whose tsconfig emits CommonJS will only emit .mjs files.
 
 ## 0.38.0
 Tue, 14 Sep 2021 01:17:04 GMT
