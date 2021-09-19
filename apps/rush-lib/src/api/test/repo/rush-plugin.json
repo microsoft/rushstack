@@ -4,7 +4,7 @@
   "projectFolderMinDepth": 1,
   "projectFolderMaxDepth": 99,
 
-  "commonAutoinstallerName": "common",
+  "pluginsAutoinstallerName": "plugins",
   "rushPlugins": [
     {
       "plugin": "rush-plugin1",

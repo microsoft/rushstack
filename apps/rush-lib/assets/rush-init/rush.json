@@ -387,16 +387,16 @@
   /*[LINE "HYPOTHETICAL"]*/ "hotfixChangeEnabled": false,
 
   /**
-   * Specify an autoinstaller name, whose packages are used by the whole monorepo.
+   * Specify an autoinstaller name, whose packages are used by the rush plugins.
    * It will be auto installed before each rush commands run.
    *
-   * Example: assume you want to use 'common-packages' autoinstaller:
-   *   rush init-autoinstaller --name common-packages
-   *   cd common/autoinstallers/common-packages
+   * Example: assume you want to use an autoinstaller named "plugins":
+   *   rush init-autoinstaller --name plugins
+   *   cd common/autoinstallers/plugins
    *   pnpm install some-rush-plugins
-   *   rush update-autoinstaller --name common-packages
+   *   rush update-autoinstaller --name plugins
    */
-  /*[LINE "HYPOTHETICAL"]*/ "commonAutoinstallerName": "common-packages",
+  /*[LINE "HYPOTHETICAL"]*/ "pluginsAutoinstallerName": "plugins",
 
   /**
    * Rush plugins configuration.

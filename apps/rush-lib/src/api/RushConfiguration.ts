@@ -243,7 +243,7 @@ export interface IRushConfigurationJson {
   yarnOptions?: IYarnOptionsJson;
   ensureConsistentVersions?: boolean;
   variants?: IRushVariantOptionsJson[];
-  commonAutoinstallerName?: string;
+  pluginsAutoinstallerName?: string;
   rushPlugins?: IRushPluginConfigJson[];
 }
 
@@ -1740,10 +1740,8 @@ export class RushConfiguration {
     variant: string | undefined
   ): void {
     const commonVersions: CommonVersionsConfiguration = this.getCommonVersions(variant);
-    const allowedAlternativeVersions: Map<
-      string,
-      ReadonlyArray<string>
-    > = commonVersions.allowedAlternativeVersions;
+    const allowedAlternativeVersions: Map<string, ReadonlyArray<string>> =
+      commonVersions.allowedAlternativeVersions;
 
     for (const dependency of dependencies) {
       const alternativesForThisDependency: ReadonlyArray<string> =
