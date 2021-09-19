@@ -4,7 +4,7 @@
 import { InternalError, ITerminalProvider } from '@rushstack/node-core-library';
 import { IBuildCacheJson } from '../api/BuildCacheConfiguration';
 import { CloudBuildCacheProviderBase } from '../logic/buildCache/CloudBuildCacheProviderBase';
-import { Logger } from './logging/Logger';
+import { ILogger, ILoggerOptions, Logger } from './logging/Logger';
 import { IRushLifecycle, RushLifecycleHooks } from './RushLifeCycle';
 
 /**
@@ -34,15 +34,36 @@ export class RushSession implements IRushLifecycle {
     this.hooks = new RushLifecycleHooks();
   }
 
-  public getLogger(name: string): Logger {
+  public getLogger(name: string): ILogger {
     if (!name) {
       throw new InternalError('RushSession.getLogger(name) called without a name');
     }
-    return new Logger({
+
+    const terminalProvider: ITerminalProvider = this._options.terminalProvider;
+    const loggerOptions: ILoggerOptions = {
       loggerName: name,
       getShouldPrintStacks: () => this._options.getIsDebugMode(),
-      terminalProvider: this._options.terminalProvider
-    });
+      terminalProvider
+    };
+    if (this.hooks.loggerOptions.isUsed()) {
+      this.hooks.loggerOptions.call(loggerOptions);
+    } else {
+      // default prepend the logger name to the log message
+      const parentTerminalProvider: ITerminalProvider = terminalProvider;
+      const prefixProxyTerminalProvider: ITerminalProvider = {
+        write: (data, severity) => {
+          parentTerminalProvider.write(`[${name}] ${data}`, severity);
+        },
+        eolCharacter: parentTerminalProvider.eolCharacter,
+        supportsColor: parentTerminalProvider.supportsColor
+      };
+      loggerOptions.terminalProvider = prefixProxyTerminalProvider;
+    }
+    const customLogger: ILogger | undefined = this.hooks.logger.call(loggerOptions);
+    if (customLogger) {
+      return customLogger;
+    }
+    return new Logger(loggerOptions);
   }
 
   public get terminalProvider(): ITerminalProvider {
