@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { Import, JsonSchema } from '@rushstack/node-core-library';
-import type { IRushPlugin, RushSession, RushConfiguration } from '@microsoft/rush-lib';
+import type { IRushPlugin, RushSession, RushConfiguration, ILogger } from '@microsoft/rush-lib';
 import type { AzureEnvironmentNames } from './AzureStorageBuildCacheProvider';
 
 const AzureStorageBuildCacheProviderModule: typeof import('./AzureStorageBuildCacheProvider') = Import.lazy(
@@ -58,10 +58,15 @@ export class RushAzureStorageBuildCachePlugin implements IRushPlugin {
       rushSession.cloudCacheProviderFactories.set(
         'azure-blob-storage',
         (buildCacheConfig, buildCacheConfigFilePath) => {
-          RushAzureStorageBuildCachePlugin._getBuildCacheConfigJsonSchema().validateObject(
-            buildCacheConfig,
-            buildCacheConfigFilePath
-          );
+          const logger: ILogger = rushSession.getLogger(PLUGIN_NAME);
+          try {
+            RushAzureStorageBuildCachePlugin._getBuildCacheConfigJsonSchema().validateObject(
+              buildCacheConfig,
+              buildCacheConfigFilePath
+            );
+          } catch (e) {
+            logger.emitError(e);
+          }
           type IBuildCache = typeof buildCacheConfig & {
             azureStorageConfiguration: IAzureStorageConfigurationJson;
           };

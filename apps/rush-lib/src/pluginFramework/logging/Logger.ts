@@ -38,11 +38,6 @@ export class Logger implements ILogger {
 
   public constructor(options: ILoggerOptions) {
     this._options = options;
-    const terminalProvider: ITerminalProvider = options.terminalProvider;
-    const _write: ITerminalProvider['write'] = terminalProvider.write;
-    terminalProvider.write = (data, severity) => {
-      _write(`[${options.loggerName}] ${data}`, severity);
-    };
     this.terminal = new Terminal(options.terminalProvider);
   }
 

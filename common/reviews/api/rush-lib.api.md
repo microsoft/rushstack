@@ -6,13 +6,15 @@
 
 /// <reference types="node" />
 
-import { AsyncParallelHook } from 'tapable';
+import { AsyncSeriesHook } from 'tapable';
 import * as fetch from 'node-fetch';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
+import { SyncBailHook } from 'tapable';
+import { SyncHook } from 'tapable';
 
 // @public
 export class ApprovedPackagesConfiguration {
@@ -701,8 +703,9 @@ export class _RushGlobalFolder {
 
 // @public (undocumented)
 export class RushLifecycleHooks {
-    // (undocumented)
-    initialize: AsyncParallelHook;
+    initialize: AsyncSeriesHook;
+    logger: SyncBailHook;
+    loggerOptions: SyncHook;
 }
 
 // @public (undocumented)
@@ -713,7 +716,7 @@ export class RushSession implements IRushLifecycle {
     // (undocumented)
     cloudCacheProviderFactories: Map<string, (buildCacheJson: IBuildCacheJson, buildCacheConfigFilePath: string) => CloudBuildCacheProviderBase>;
     // (undocumented)
-    getLogger(name: string): Logger;
+    getLogger(name: string): ILogger;
     // (undocumented)
     readonly hooks: RushLifecycleHooks;
     // (undocumented)

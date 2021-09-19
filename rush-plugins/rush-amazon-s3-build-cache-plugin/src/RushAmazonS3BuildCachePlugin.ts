@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { Import, JsonSchema } from '@rushstack/node-core-library';
-import type { IRushPlugin, RushSession, RushConfiguration } from '@microsoft/rush-lib';
+import type { IRushPlugin, RushSession, RushConfiguration, ILogger } from '@microsoft/rush-lib';
 import type { AmazonS3BuildCacheProvider } from './AmazonS3BuildCacheProvider';
 
 const AmazonS3BuildCacheProviderModule: typeof import('./AmazonS3BuildCacheProvider') = Import.lazy(
@@ -53,11 +53,18 @@ export class RushAmazonS3BuildCachePlugin implements IRushPlugin {
       rushSession.cloudCacheProviderFactories.set(
         'amazon-s3',
         (buildCacheConfig, buildCacheConfigFilePath: string): AmazonS3BuildCacheProvider => {
-          RushAmazonS3BuildCachePlugin._getBuildCacheConfigJsonSchema().validateObject(
-            buildCacheConfig,
-            buildCacheConfigFilePath
-          );
-          type IBuildCache = typeof buildCacheConfig & { amazonS3Configuration: IAmazonS3ConfigurationJson };
+          const logger: ILogger = rushSession.getLogger(PLUGIN_NAME);
+          try {
+            RushAmazonS3BuildCachePlugin._getBuildCacheConfigJsonSchema().validateObject(
+              buildCacheConfig,
+              buildCacheConfigFilePath
+            );
+          } catch (e) {
+            logger.emitError(e);
+          }
+          type IBuildCache = typeof buildCacheConfig & {
+            amazonS3Configuration: IAmazonS3ConfigurationJson;
+          };
           const { amazonS3Configuration } = buildCacheConfig as IBuildCache;
           return new AmazonS3BuildCacheProviderModule.AmazonS3BuildCacheProvider({
             s3Region: amazonS3Configuration.s3Region,
