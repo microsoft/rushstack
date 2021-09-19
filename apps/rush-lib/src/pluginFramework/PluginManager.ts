@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { InternalError, Terminal } from '@rushstack/node-core-library';
+import { InternalError, JsonObject, Terminal } from '@rushstack/node-core-library';
 
 import { IRushPluginConfigJson, RushConfiguration } from '../api/RushConfiguration';
 import { Autoinstaller } from '../logic/Autoinstaller';
@@ -23,7 +23,7 @@ export interface IPluginConfig {
    * Semver of the plugin. target version will be installed
    */
   pluginVersion: string;
-  options?: object;
+  options?: JsonObject;
 }
 
 export class PluginManager {
@@ -68,7 +68,7 @@ export class PluginManager {
         rushPluginConfig.plugin,
         pluginsAutoinstallerFolder
       );
-      this._initializeResolvedPlugin(resolvedPluginPath, rushPluginConfig.options);
+      this._initializeResolvedPlugin(resolvedPluginPath, rushPluginConfig);
     }
   }
 
@@ -82,17 +82,20 @@ export class PluginManager {
     }
   }
 
-  private _initializeResolvedPlugin(resolvedPluginPath: string, options?: object): void {
-    const plugin: IRushPlugin<object | void> = this._loadAndValidatePluginPackage(
+  private _initializeResolvedPlugin(
+    resolvedPluginPath: string,
+    rushPluginConfig: IRushPluginConfigJson
+  ): void {
+    const plugin: IRushPlugin = this._loadAndValidatePluginPackage(
       resolvedPluginPath,
-      options
+      rushPluginConfig.options
     );
 
-    this._applyPlugin(plugin, options);
+    this._applyPlugin(plugin, rushPluginConfig);
   }
 
-  private _loadAndValidatePluginPackage(resolvedPluginPath: string, options?: object): IRushPlugin {
-    type IRushPluginCtor = new () => IRushPlugin<object | void>;
+  private _loadAndValidatePluginPackage(resolvedPluginPath: string, options?: JsonObject): IRushPlugin {
+    type IRushPluginCtor<T = JsonObject> = new (options: T) => IRushPlugin;
     let pluginPackage: IRushPluginCtor;
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -108,40 +111,23 @@ export class PluginManager {
 
     this._terminal.writeVerboseLine(`Loaded plugin package from "${resolvedPluginPath}"`);
 
-    const plugin: IRushPlugin<object | void> = new pluginPackage();
+    const plugin: IRushPlugin = new pluginPackage(options);
 
     if (!plugin.apply || typeof pluginPackage.apply !== 'function') {
       throw new InternalError(
-        `Plugin packages must define an "apply" function. The plugin loaded from "${resolvedPluginPath}" ` +
+        `Rush plugin must define an "apply" function. The plugin loaded from "${resolvedPluginPath}" ` +
           'either doesn\'t define an "apply" property, or its value isn\'t a function.'
       );
-    }
-
-    if (!plugin.pluginName || typeof plugin.pluginName !== 'string') {
-      throw new InternalError(
-        `Plugin packages must define a "pluginName" property. The plugin loaded from "${resolvedPluginPath}" ` +
-          'either doesn\'t define a "pluginName" property, or its value isn\'t a string.'
-      );
-    }
-
-    if (options && plugin.optionsSchema) {
-      try {
-        plugin.optionsSchema.validateObject(options, 'rush.json');
-      } catch (e) {
-        throw new Error(
-          `Provided options for plugin "${plugin.pluginName}" did not match the provided plugin schema.\n${e}`
-        );
-      }
     }
 
     return plugin;
   }
 
-  private _applyPlugin(plugin: IRushPlugin<object | void>, options?: object): void {
+  private _applyPlugin(plugin: IRushPlugin, rushPluginConfig: IRushPluginConfigJson): void {
     try {
-      plugin.apply(this._rushSession, this._rushConfiguration, options);
+      plugin.apply(this._rushSession, this._rushConfiguration);
     } catch (e) {
-      throw new InternalError(`Error applying "${plugin.pluginName}": ${e}`);
+      throw new InternalError(`Error applying "${rushPluginConfig.plugin}": ${e}`);
     }
   }
 }
