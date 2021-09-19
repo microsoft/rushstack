@@ -3,8 +3,7 @@
 
 import * as path from 'path';
 import { Import, JsonSchema } from '@rushstack/node-core-library';
-import { IRushPlugin, RushSession, RushConfiguration } from '@microsoft/rush-lib';
-
+import type { IRushPlugin, RushSession, RushConfiguration } from '@microsoft/rush-lib';
 import type { AzureEnvironmentNames } from './AzureStorageBuildCacheProvider';
 
 const AzureStorageBuildCacheProviderModule: typeof import('./AzureStorageBuildCacheProvider') = Import.lazy(
@@ -50,16 +49,16 @@ interface IAzureStorageConfigurationJson {
 export class RushAzureStorageBuildCachePlugin implements IRushPlugin {
   public pluginName: string = PLUGIN_NAME;
 
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, 'schemas', 'azure-blob-storage-config.schema.json')
-  );
+  private static _getBuildCacheConfigJsonSchema(): JsonSchema {
+    return JsonSchema.fromFile(path.join(__dirname, 'schemas', 'azure-blob-storage-config.schema.json'));
+  }
 
   public apply(rushSession: RushSession, rushConfig: RushConfiguration): void {
     rushSession.hooks.initialize.tap(PLUGIN_NAME, () => {
       rushSession.cloudCacheProviderFactories.set(
         'azure-blob-storage',
         (buildCacheConfig, buildCacheConfigFilePath) => {
-          RushAzureStorageBuildCachePlugin._jsonSchema.validateObject(
+          RushAzureStorageBuildCachePlugin._getBuildCacheConfigJsonSchema().validateObject(
             buildCacheConfig,
             buildCacheConfigFilePath
           );
