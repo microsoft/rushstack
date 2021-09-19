@@ -44,4 +44,8 @@ export class RushSession implements IRushLifecycle {
       terminalProvider: this._options.terminalProvider
     });
   }
+
+  public get terminalProvider(): ITerminalProvider {
+    return this._options.terminalProvider;
+  }
 }
