@@ -3,13 +3,13 @@
 
 import * as path from 'path';
 import { Import, JsonSchema } from '@rushstack/node-core-library';
-import { IRushPlugin, RushSession, RushConfiguration } from '@microsoft/rush-lib';
+import type { IRushPlugin, RushSession, RushConfiguration } from '@microsoft/rush-lib';
+import type { AmazonS3BuildCacheProvider } from './AmazonS3BuildCacheProvider';
 
 const AmazonS3BuildCacheProviderModule: typeof import('./AmazonS3BuildCacheProvider') = Import.lazy(
   '../logic/buildCache/AmazonS3/AmazonS3BuildCacheProvider',
   require
 );
-import type { AmazonS3BuildCacheProvider } from './AmazonS3BuildCacheProvider';
 
 const PLUGIN_NAME: string = 'AmazonS3BuildCachePlugin';
 
@@ -44,16 +44,19 @@ export interface IAmazonS3ConfigurationJson {
 export class RushAmazonS3BuildCachePlugin implements IRushPlugin {
   public pluginName: string = PLUGIN_NAME;
 
-  private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
-    path.join(__dirname, 'schemas', 'amazon-s3-config.schema.json')
-  );
+  private static _getBuildCacheConfigJsonSchema(): JsonSchema {
+    return JsonSchema.fromFile(path.join(__dirname, 'schemas', 'amazon-s3-config.schema.json'));
+  }
 
   public apply(rushSession: RushSession, rushConfig: RushConfiguration): void {
     rushSession.hooks.initialize.tap(PLUGIN_NAME, () => {
       rushSession.cloudCacheProviderFactories.set(
         'amazon-s3',
         (buildCacheConfig, buildCacheConfigFilePath: string): AmazonS3BuildCacheProvider => {
-          RushAmazonS3BuildCachePlugin._jsonSchema.validateObject(buildCacheConfig, buildCacheConfigFilePath);
+          RushAmazonS3BuildCachePlugin._getBuildCacheConfigJsonSchema().validateObject(
+            buildCacheConfig,
+            buildCacheConfigFilePath
+          );
           type IBuildCache = typeof buildCacheConfig & { amazonS3Configuration: IAmazonS3ConfigurationJson };
           const { amazonS3Configuration } = buildCacheConfig as IBuildCache;
           return new AmazonS3BuildCacheProviderModule.AmazonS3BuildCacheProvider({
