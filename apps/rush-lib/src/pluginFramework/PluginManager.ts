@@ -56,23 +56,23 @@ export class PluginManager {
   }
 
   private _resolveRemotePlugin(pluginSpecifier: string): string {
-    const commonAutoinstallerName: string | undefined =
-      this._rushConfiguration.rushConfigurationJson.commonAutoinstallerName;
-    if (!commonAutoinstallerName) {
+    const pluginsAutoinstallerName: string | undefined =
+      this._rushConfiguration.rushConfigurationJson.pluginsAutoinstallerName;
+    if (!pluginsAutoinstallerName) {
       throw new Error(
-        `Resolve plugin ${pluginSpecifier} failed, please setup "commonAutoinstallerName" in rush.json`
+        `Resolve plugin ${pluginSpecifier} failed, please setup "pluginsAutoinstallerName" in rush.json`
       );
     }
-    const commonAutoinstallerFolder: string = new Autoinstaller(
-      commonAutoinstallerName,
+    const pluginsAutoinstallerFolder: string = new Autoinstaller(
+      pluginsAutoinstallerName,
       this._rushConfiguration
     ).folderFullPath;
     try {
       return require.resolve(pluginSpecifier, {
-        paths: [commonAutoinstallerFolder]
+        paths: [pluginsAutoinstallerFolder]
       });
     } catch (e) {
-      throw new InternalError(`Resolve plugin ${pluginSpecifier} failed in ${commonAutoinstallerFolder}`);
+      throw new InternalError(`Resolve plugin ${pluginSpecifier} failed in ${pluginsAutoinstallerFolder}`);
     }
   }
 

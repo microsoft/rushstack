@@ -137,16 +137,19 @@ export class RushCommandLineParser extends CommandLineParser {
   public async execute(args?: string[]): Promise<boolean> {
     this._terminalProvider.verboseEnabled = this.isDebug;
 
-    const commonAutoinstallerName: string | undefined =
-      this.rushConfiguration.rushConfigurationJson.commonAutoinstallerName;
-    if (commonAutoinstallerName) {
-      const autoinstaller: Autoinstaller = new Autoinstaller(commonAutoinstallerName, this.rushConfiguration);
+    const pluginsAutoinstallerName: string | undefined =
+      this.rushConfiguration.rushConfigurationJson.pluginsAutoinstallerName;
+    if (pluginsAutoinstallerName) {
+      const autoinstaller: Autoinstaller = new Autoinstaller(
+        pluginsAutoinstallerName,
+        this.rushConfiguration
+      );
       await autoinstaller.prepareAsync();
     }
 
-    if (!commonAutoinstallerName && this._pluginManager.rushPluginConfigurations.length > 0) {
+    if (!pluginsAutoinstallerName && this._pluginManager.rushPluginConfigurations.length > 0) {
       this._terminal.writeErrorLine(
-        `Rush plugins are installed by autoinstaller, Please setup "commonAutoinstallerName" in rush.json`
+        `Rush plugins are installed by autoinstaller, Please setup "pluginsAutoinstallerName" in rush.json`
       );
     }
 

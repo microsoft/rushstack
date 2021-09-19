@@ -310,7 +310,7 @@
       },
       "additionalProperties": false
     },
-    "commonAutoinstallerName": {
+    "pluginsAutoinstallerName": {
       "type": "string",
       "description": "Specify an autoinstaller name, whose packages are used by the whole monorepo."
     },
