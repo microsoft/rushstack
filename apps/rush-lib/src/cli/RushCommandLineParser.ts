@@ -147,12 +147,6 @@ export class RushCommandLineParser extends CommandLineParser {
       await autoinstaller.prepareAsync();
     }
 
-    if (!pluginsAutoinstallerName && this._pluginManager.rushPluginConfigurations.length > 0) {
-      this._terminal.writeErrorLine(
-        `Rush plugins are installed by autoinstaller, Please setup "pluginsAutoinstallerName" in rush.json`
-      );
-    }
-
     await this._initializePluginsAsync();
     await this.rushSession.hooks.initialize.promise();
 

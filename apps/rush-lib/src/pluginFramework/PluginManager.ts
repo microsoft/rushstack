@@ -49,24 +49,30 @@ export class PluginManager {
       return;
     }
 
-    for (const rushPluginConfig of rushPluginConfigurations) {
-      const resolvedPluginPath: string = this._resolveRemotePlugin(rushPluginConfig.plugin);
-      this._initializeResolvedPlugin(resolvedPluginPath, rushPluginConfig.options);
-    }
-  }
-
-  private _resolveRemotePlugin(pluginSpecifier: string): string {
     const pluginsAutoinstallerName: string | undefined =
       this._rushConfiguration.rushConfigurationJson.pluginsAutoinstallerName;
+
     if (!pluginsAutoinstallerName) {
       throw new Error(
-        `Resolve plugin ${pluginSpecifier} failed, please setup "pluginsAutoinstallerName" in rush.json`
+        `Rush plugins are installed by autoinstaller, Please setup "pluginsAutoinstallerName" in rush.json`
       );
     }
+
     const pluginsAutoinstallerFolder: string = new Autoinstaller(
       pluginsAutoinstallerName,
       this._rushConfiguration
     ).folderFullPath;
+
+    for (const rushPluginConfig of rushPluginConfigurations) {
+      const resolvedPluginPath: string = this._resolveRemotePlugin(
+        rushPluginConfig.plugin,
+        pluginsAutoinstallerFolder
+      );
+      this._initializeResolvedPlugin(resolvedPluginPath, rushPluginConfig.options);
+    }
+  }
+
+  private _resolveRemotePlugin(pluginSpecifier: string, pluginsAutoinstallerFolder: string): string {
     try {
       return require.resolve(pluginSpecifier, {
         paths: [pluginsAutoinstallerFolder]
