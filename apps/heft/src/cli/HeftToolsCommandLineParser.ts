@@ -4,7 +4,9 @@
 import {
   CommandLineParser,
   CommandLineStringListParameter,
-  CommandLineFlagParameter
+  CommandLineFlagParameter,
+  CommandLineStringParameter,
+  CommandLineIntegerParameter
 } from '@rushstack/ts-command-line';
 import {
   Terminal,
@@ -24,15 +26,16 @@ import { StartAction } from './actions/StartAction';
 import { TestAction } from './actions/TestAction';
 import { PluginManager } from '../pluginFramework/PluginManager';
 import { HeftConfiguration } from '../configuration/HeftConfiguration';
-import { IHeftActionBaseOptions, IStages } from './actions/HeftActionBase';
+import { HeftActionBase, IHeftActionBaseOptions, IStages } from './actions/HeftActionBase';
 import { InternalHeftSession } from '../pluginFramework/InternalHeftSession';
 import { CleanStage } from '../stages/CleanStage';
 import { BuildStage } from '../stages/BuildStage';
 import { TestStage } from '../stages/TestStage';
 import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
-import { ICustomActionOptions, CustomAction } from './actions/CustomAction';
+import { CustomAction, ICustomActionOptions } from './actions/CustomAction';
+import { CustomParameterType, ICustomParameterOptions, ICustomParameter } from './actions/CustomParameters';
 import { Constants } from '../utilities/Constants';
-import { IHeftLifecycle, HeftLifecycleHooks } from '../pluginFramework/HeftLifecycle';
+import { HeftLifecycleHooks, IHeftLifecycle } from '../pluginFramework/HeftLifecycle';
 
 /**
  * This interfaces specifies values for parameters that must be parsed before the CLI
@@ -97,6 +100,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       cleanStage: new CleanStage(this._heftConfiguration, this._loggingManager),
       testStage: new TestStage(this._heftConfiguration, this._loggingManager)
     };
+
     const actionOptions: IHeftActionBaseOptions = {
       terminal: this._terminal,
       loggingManager: this._loggingManager,
@@ -115,6 +119,66 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       registerAction: <TParameters>(options: ICustomActionOptions<TParameters>) => {
         const action: CustomAction<TParameters> = new CustomAction(options, actionOptions);
         this.addAction(action);
+      },
+      registerParameters: <TParameters, TAction extends HeftActionBase>(
+        options: ICustomParameterOptions<TParameters>
+      ) => {
+        const action: TAction | undefined = this.tryGetAction(options.actionName) as TAction;
+        if (action) {
+          const parameters: Set<string> = new Set(action.parameters.map((parameter) => parameter.longName));
+          for (const [parameterName, untypedParameterOption] of Object.entries(options.parameters)) {
+            if (parameters.has(parameterName)) {
+              throw new Error(`Duplicate parameter name: ${parameterName}`);
+            }
+
+            const parameterOption: ICustomParameter<CustomParameterType> =
+              untypedParameterOption as ICustomParameter<CustomParameterType>;
+
+            switch (parameterOption.kind) {
+              case 'flag': {
+                const parameter: CommandLineFlagParameter = action.defineFlagParameter({
+                  parameterLongName: parameterOption.parameterLongName,
+                  description: parameterOption.description
+                });
+                action.customParametersMap.set(parameterName, () => parameter.value);
+                break;
+              }
+
+              case 'string': {
+                const parameter: CommandLineStringParameter = action.defineStringParameter({
+                  parameterLongName: parameterOption.parameterLongName,
+                  description: parameterOption.description,
+                  argumentName: 'VALUE'
+                });
+                action.customParametersMap.set(parameterName, () => parameter.value);
+                break;
+              }
+
+              case 'integer': {
+                const parameter: CommandLineIntegerParameter = action.defineIntegerParameter({
+                  parameterLongName: parameterOption.parameterLongName,
+                  description: parameterOption.description,
+                  argumentName: 'VALUE'
+                });
+                action.customParametersMap.set(parameterName, () => parameter.value);
+                break;
+              }
+
+              case 'stringList': {
+                const parameter: CommandLineStringListParameter = action.defineStringListParameter({
+                  parameterLongName: parameterOption.parameterLongName,
+                  description: parameterOption.description,
+                  argumentName: 'VALUE'
+                });
+                action.customParametersMap.set(parameterName, () => parameter.values);
+                break;
+              }
+            }
+          }
+          action.customParametersCallbacks.add(options.callback);
+        } else {
+          throw new Error('Unrecognized action: ' + options.actionName);
+        }
       }
     });
 

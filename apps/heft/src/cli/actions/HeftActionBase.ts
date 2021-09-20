@@ -32,6 +32,7 @@ import { CleanStage } from '../../stages/CleanStage';
 import { TestStage } from '../../stages/TestStage';
 import { LoggingManager } from '../../pluginFramework/logging/LoggingManager';
 import { Constants } from '../../utilities/Constants';
+import { CustomParameterType } from '../actions/CustomParameters';
 
 export interface IStages {
   buildStage: BuildStage;
@@ -54,6 +55,10 @@ export abstract class HeftActionBase extends CommandLineAction {
   protected readonly heftConfiguration: HeftConfiguration;
   protected readonly stages: IStages;
   protected verboseFlag!: CommandLineFlagParameter;
+  public customParametersMap: Map<string, () => CustomParameterType>;
+  public customParametersCallbacks: Set<
+    (parameters: Record<string, CustomParameterType>) => void | Promise<void>
+  >;
 
   public constructor(
     commandLineOptions: ICommandLineActionOptions,
@@ -65,6 +70,8 @@ export abstract class HeftActionBase extends CommandLineAction {
     this.metricsCollector = heftActionOptions.metricsCollector;
     this.heftConfiguration = heftActionOptions.heftConfiguration;
     this.stages = heftActionOptions.stages;
+    this.customParametersMap = new Map();
+    this.customParametersCallbacks = new Set();
     this.setStartTime();
   }
 
@@ -122,6 +129,7 @@ export abstract class HeftActionBase extends CommandLineAction {
 
     let encounteredError: boolean = false;
     try {
+      await this.parametersCallbackAsync();
       await this.actionExecuteAsync();
       await this.afterExecuteAsync();
     } catch (e) {
@@ -170,6 +178,14 @@ export abstract class HeftActionBase extends CommandLineAction {
     if (encounteredError) {
       throw new AlreadyReportedError();
     }
+  }
+
+  protected async parametersCallbackAsync(): Promise<void> {
+    const customParametersRecord: Record<string, CustomParameterType> = {};
+    for (const [parameterName, getParameterValue] of this.customParametersMap.entries()) {
+      customParametersRecord[parameterName] = getParameterValue();
+    }
+    this.customParametersCallbacks.forEach(async (callback) => await callback(customParametersRecord));
   }
 
   protected abstract actionExecuteAsync(): Promise<void>;

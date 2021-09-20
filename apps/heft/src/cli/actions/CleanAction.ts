@@ -5,6 +5,7 @@ import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 
 import { HeftActionBase, IHeftActionBaseOptions } from './HeftActionBase';
 import { CleanStage, ICleanStageOptions } from '../../stages/CleanStage';
+import { Constants } from '../../utilities/Constants';
 
 export class CleanAction extends HeftActionBase {
   private _deleteCacheFlag!: CommandLineFlagParameter;
@@ -12,7 +13,7 @@ export class CleanAction extends HeftActionBase {
   public constructor(options: IHeftActionBaseOptions) {
     super(
       {
-        actionName: 'clean',
+        actionName: Constants.baseActions.clean,
         summary: 'Clean the project',
         documentation: ''
       },

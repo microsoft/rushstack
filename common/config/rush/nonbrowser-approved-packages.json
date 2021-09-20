@@ -307,6 +307,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "heft-parameter-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "html-webpack-plugin",
       "allowedCategories": [ "tests" ]
     },

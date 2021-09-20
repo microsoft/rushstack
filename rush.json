@@ -625,6 +625,18 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-parameter-plugin",
+      "projectFolder": "build-tests/heft-parameter-plugin",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-parameter-plugin-test",
+      "projectFolder": "build-tests/heft-parameter-plugin-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-sass-test",
       "projectFolder": "build-tests/heft-sass-test",
       "reviewCategory": "tests",

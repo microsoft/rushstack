@@ -9,49 +9,7 @@ import {
 } from '@rushstack/ts-command-line';
 
 import { HeftActionBase, IHeftActionBaseOptions } from './HeftActionBase';
-
-/** @beta */
-export interface ICustomActionParameterFlag extends ICustomActionParameterBase<boolean> {
-  kind: 'flag';
-}
-
-/** @beta */
-export interface ICustomActionParameterInteger extends ICustomActionParameterBase<number> {
-  kind: 'integer';
-}
-
-/** @beta */
-export interface ICustomActionParameterString extends ICustomActionParameterBase<string> {
-  kind: 'string';
-}
-
-/** @beta */
-export interface ICustomActionParameterStringList extends ICustomActionParameterBase<ReadonlyArray<string>> {
-  kind: 'stringList';
-}
-
-/** @beta */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export interface ICustomActionParameterBase<TParameter extends CustomActionParameterType> {
-  kind: 'flag' | 'integer' | 'string' | 'stringList'; // TODO: Add "choice"
-
-  parameterLongName: string;
-  description: string;
-}
-
-/** @beta */
-export type ICustomActionParameter<TParameter> = TParameter extends boolean
-  ? ICustomActionParameterFlag
-  : TParameter extends number
-  ? ICustomActionParameterInteger
-  : TParameter extends string
-  ? ICustomActionParameterString
-  : TParameter extends ReadonlyArray<string>
-  ? ICustomActionParameterStringList
-  : never;
-
-/** @beta */
-export type CustomActionParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
+import { CustomParameterType, ICustomParameter } from './CustomParameters';
 
 /** @beta */
 export interface ICustomActionOptions<TParameters> {
@@ -59,14 +17,14 @@ export interface ICustomActionOptions<TParameters> {
   documentation: string;
   summary?: string;
 
-  parameters?: { [K in keyof TParameters]: ICustomActionParameter<TParameters[K]> };
+  parameters?: { [K in keyof TParameters]: ICustomParameter<TParameters[K]> };
 
   callback: (parameters: TParameters) => void | Promise<void>;
 }
 
 export class CustomAction<TParameters> extends HeftActionBase {
   private _customActionOptions: ICustomActionOptions<TParameters>;
-  private _parameterValues!: Map<string, () => CustomActionParameterType>;
+  private _parameterValues!: Map<string, () => CustomParameterType>;
 
   public constructor(
     customActionOptions: ICustomActionOptions<TParameters>,
@@ -87,7 +45,7 @@ export class CustomAction<TParameters> extends HeftActionBase {
   public onDefineParameters(): void {
     super.onDefineParameters();
 
-    this._parameterValues = new Map<string, () => CustomActionParameterType>();
+    this._parameterValues = new Map<string, () => CustomParameterType>();
     for (const [callbackValueName, untypedParameterOption] of Object.entries(
       this._customActionOptions.parameters || {}
     )) {
@@ -95,10 +53,10 @@ export class CustomAction<TParameters> extends HeftActionBase {
         throw new Error(`Duplicate callbackValueName: ${callbackValueName}`);
       }
 
-      let getParameterValue: () => CustomActionParameterType;
+      let getParameterValue: () => CustomParameterType;
 
-      const parameterOption: ICustomActionParameterBase<CustomActionParameterType> =
-        untypedParameterOption as ICustomActionParameterBase<CustomActionParameterType>;
+      const parameterOption: ICustomParameter<CustomParameterType> =
+        untypedParameterOption as ICustomParameter<CustomParameterType>;
       switch (parameterOption.kind) {
         case 'flag': {
           const parameter: CommandLineFlagParameter = this.defineFlagParameter({
@@ -137,12 +95,6 @@ export class CustomAction<TParameters> extends HeftActionBase {
           });
           getParameterValue = () => parameter.values;
           break;
-        }
-
-        default: {
-          throw new Error(
-            `Unrecognized parameter kind "${parameterOption.kind}" for parameter "${parameterOption.parameterLongName}`
-          );
         }
       }
 

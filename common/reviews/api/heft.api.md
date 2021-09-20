@@ -58,7 +58,30 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
 }
 
 // @beta (undocumented)
-export type CustomActionParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
+export class Constants {
+    // (undocumented)
+    static baseActions: {
+        build: 'build';
+        clean: 'clean';
+        start: 'start';
+        test: 'test';
+    };
+    // (undocumented)
+    static buildCacheFolderName: string;
+    // (undocumented)
+    static debugParameterLongName: string;
+    // (undocumented)
+    static maxParallelism: number;
+    // (undocumented)
+    static pluginParameterLongName: string;
+    // (undocumented)
+    static projectConfigFolderName: string;
+    // (undocumented)
+    static projectHeftFolderName: string;
+}
+
+// @beta (undocumented)
+export type CustomParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
 
 // @public (undocumented)
 export class HeftConfiguration {
@@ -97,6 +120,8 @@ export class HeftSession {
     readonly metricsCollector: _MetricsCollector;
     // @beta (undocumented)
     readonly registerAction: RegisterAction;
+    // @beta (undocumented)
+    readonly registerParameters: RegisterParameters;
     // @beta
     readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
     requestScopedLogger(loggerName: string): ScopedLogger;
@@ -181,17 +206,17 @@ export interface ICustomActionOptions<TParameters> {
     documentation: string;
     // (undocumented)
     parameters?: {
-        [K in keyof TParameters]: ICustomActionParameter<TParameters[K]>;
+        [K in keyof TParameters]: ICustomParameter<TParameters[K]>;
     };
     // (undocumented)
     summary?: string;
 }
 
 // @beta (undocumented)
-export type ICustomActionParameter<TParameter> = TParameter extends boolean ? ICustomActionParameterFlag : TParameter extends number ? ICustomActionParameterInteger : TParameter extends string ? ICustomActionParameterString : TParameter extends ReadonlyArray<string> ? ICustomActionParameterStringList : never;
+export type ICustomParameter<TParameter> = TParameter extends boolean ? ICustomParameterFlag : TParameter extends number ? ICustomParameterInteger : TParameter extends string ? ICustomParameterString : TParameter extends ReadonlyArray<string> ? ICustomParameterStringList : never;
 
 // @beta (undocumented)
-export interface ICustomActionParameterBase<TParameter extends CustomActionParameterType> {
+export interface ICustomParameterBase<CustomParameterType> {
     // (undocumented)
     description: string;
     // (undocumented)
@@ -201,25 +226,37 @@ export interface ICustomActionParameterBase<TParameter extends CustomActionParam
 }
 
 // @beta (undocumented)
-export interface ICustomActionParameterFlag extends ICustomActionParameterBase<boolean> {
+export interface ICustomParameterFlag extends ICustomParameterBase<boolean> {
     // (undocumented)
     kind: 'flag';
 }
 
 // @beta (undocumented)
-export interface ICustomActionParameterInteger extends ICustomActionParameterBase<number> {
+export interface ICustomParameterInteger extends ICustomParameterBase<number> {
     // (undocumented)
     kind: 'integer';
 }
 
 // @beta (undocumented)
-export interface ICustomActionParameterString extends ICustomActionParameterBase<string> {
+export interface ICustomParameterOptions<TParameters> {
+    // (undocumented)
+    actionName: string;
+    // (undocumented)
+    callback: (parameters: Record<string, CustomParameterType>) => void | Promise<void>;
+    // (undocumented)
+    parameters: {
+        [K in keyof TParameters]: ICustomParameter<TParameters[K]>;
+    };
+}
+
+// @beta (undocumented)
+export interface ICustomParameterString extends ICustomParameterBase<string> {
     // (undocumented)
     kind: 'string';
 }
 
 // @beta (undocumented)
-export interface ICustomActionParameterStringList extends ICustomActionParameterBase<ReadonlyArray<string>> {
+export interface ICustomParameterStringList extends ICustomParameterBase<ReadonlyArray<string>> {
     // (undocumented)
     kind: 'stringList';
 }
@@ -375,6 +412,9 @@ export class MetricsCollectorHooks {
 
 // @beta (undocumented)
 export type RegisterAction = <TParameters>(action: ICustomActionOptions<TParameters>) => void;
+
+// @beta (undocumented)
+export type RegisterParameters = <TParameters>(parameters: ICustomParameterOptions<TParameters>) => void;
 
 // @beta (undocumented)
 export type RequestAccessToPluginByNameCallback = (pluginToAccessName: string, pluginApply: (pluginAccessor: object) => void) => void;
