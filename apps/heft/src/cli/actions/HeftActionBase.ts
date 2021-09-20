@@ -107,8 +107,8 @@ export abstract class HeftActionBase extends CommandLineAction {
     this.metricsCollector.setStartTime();
   }
 
-  public recordMetrics(): void {
-    this.metricsCollector.record(this.actionName, undefined, this.getParameterStringMap());
+  public recordMetrics(errorEncountered: boolean): void {
+    this.metricsCollector.record(this.actionName, errorEncountered, undefined, this.getParameterStringMap());
   }
 
   public async onExecute(): Promise<void> {
@@ -128,7 +128,7 @@ export abstract class HeftActionBase extends CommandLineAction {
       encounteredError = true;
       throw e;
     } finally {
-      this.recordMetrics();
+      this.recordMetrics(encounteredError);
 
       const warningStrings: string[] = this.loggingManager.getWarningStrings();
       const errorStrings: string[] = this.loggingManager.getErrorStrings();
