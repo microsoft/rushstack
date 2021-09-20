@@ -160,6 +160,13 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       }
     }
 
+    // If no displayName is provided, use the package name. This field is used by Jest to
+    // differentiate in multi-project repositories, and since we have the context, we may
+    // as well provide it.
+    if (!jestConfig.displayName) {
+      jestConfig.displayName = heftConfiguration.projectPackageJson.name;
+    }
+
     const jestArgv: Config.Argv = {
       watch: testStageProperties.watchMode,
 

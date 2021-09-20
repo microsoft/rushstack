@@ -1,6 +1,65 @@
 # Change Log - @rushstack/heft-webpack5-plugin
 
-This log was last generated on Fri, 13 Aug 2021 00:09:14 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Sep 2021 03:05:57 GMT and should not be manually modified.
+
+## 0.4.1
+Sat, 18 Sep 2021 03:05:57 GMT
+
+_Version update only_
+
+## 0.4.0
+Tue, 14 Sep 2021 01:17:04 GMT
+
+### Minor changes
+
+- Improve the type declaration for IWebpackBundleSubstageProperties.webpackConfiguration
+
+## 0.3.6
+Mon, 13 Sep 2021 15:07:05 GMT
+
+_Version update only_
+
+## 0.3.5
+Fri, 10 Sep 2021 15:08:28 GMT
+
+_Version update only_
+
+## 0.3.4
+Wed, 08 Sep 2021 19:06:22 GMT
+
+_Version update only_
+
+## 0.3.3
+Wed, 08 Sep 2021 00:08:03 GMT
+
+_Version update only_
+
+## 0.3.2
+Fri, 03 Sep 2021 00:09:10 GMT
+
+_Version update only_
+
+## 0.3.1
+Tue, 31 Aug 2021 00:07:11 GMT
+
+_Version update only_
+
+## 0.3.0
+Mon, 30 Aug 2021 15:08:25 GMT
+
+### Minor changes
+
+- Migrate to webpack-dev-server 4.x
+
+## 0.2.8
+Fri, 27 Aug 2021 00:07:25 GMT
+
+_Version update only_
+
+## 0.2.7
+Fri, 20 Aug 2021 15:08:10 GMT
+
+_Version update only_
 
 ## 0.2.6
 Fri, 13 Aug 2021 00:09:14 GMT

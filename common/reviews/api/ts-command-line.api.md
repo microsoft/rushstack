@@ -36,7 +36,7 @@ export class CommandLineChoiceListParameter extends CommandLineParameter {
     // @internal
     _setValue(data: any): void;
     get values(): ReadonlyArray<string>;
-    }
+}
 
 // @public
 export class CommandLineChoiceParameter extends CommandLineParameter {
@@ -53,7 +53,7 @@ export class CommandLineChoiceParameter extends CommandLineParameter {
     // @internal
     _setValue(data: any): void;
     get value(): string | undefined;
-    }
+}
 
 // @public
 export const enum CommandLineConstants {
@@ -70,7 +70,7 @@ export class CommandLineFlagParameter extends CommandLineParameter {
     // @internal
     _setValue(data: any): void;
     get value(): boolean;
-    }
+}
 
 // @public
 export class CommandLineHelper {
@@ -87,7 +87,7 @@ export class CommandLineIntegerListParameter extends CommandLineParameterWithArg
     // @internal
     _setValue(data: any): void;
     get values(): ReadonlyArray<number>;
-    }
+}
 
 // @public
 export class CommandLineIntegerParameter extends CommandLineParameterWithArgument {
@@ -102,7 +102,7 @@ export class CommandLineIntegerParameter extends CommandLineParameterWithArgumen
     // @internal
     _setValue(data: any): void;
     get value(): number | undefined;
-    }
+}
 
 // @public
 export abstract class CommandLineParameter {
@@ -157,6 +157,7 @@ export abstract class CommandLineParameterProvider {
     getFlagParameter(parameterLongName: string): CommandLineFlagParameter;
     getIntegerListParameter(parameterLongName: string): CommandLineIntegerListParameter;
     getIntegerParameter(parameterLongName: string): CommandLineIntegerParameter;
+    getParameterStringMap(): Record<string, string>;
     getStringListParameter(parameterLongName: string): CommandLineStringListParameter;
     getStringParameter(parameterLongName: string): CommandLineStringParameter;
     protected abstract onDefineParameters(): void;
@@ -173,7 +174,7 @@ export abstract class CommandLineParameterWithArgument extends CommandLineParame
     constructor(definition: IBaseCommandLineDefinitionWithArgument);
     readonly argumentName: string;
     readonly completions: (() => Promise<string[]>) | undefined;
-    }
+}
 
 // @public
 export abstract class CommandLineParser extends CommandLineParameterProvider {
@@ -188,7 +189,7 @@ export abstract class CommandLineParser extends CommandLineParameterProvider {
     protected onExecute(): Promise<void>;
     selectedAction: CommandLineAction | undefined;
     tryGetAction(actionName: string): CommandLineAction | undefined;
-    }
+}
 
 // @public
 export class CommandLineRemainder {
@@ -200,7 +201,7 @@ export class CommandLineRemainder {
     // @internal
     _setValue(data: any): void;
     get values(): ReadonlyArray<string>;
-    }
+}
 
 // @public
 export class CommandLineStringListParameter extends CommandLineParameterWithArgument {
@@ -212,7 +213,7 @@ export class CommandLineStringListParameter extends CommandLineParameterWithArgu
     // @internal
     _setValue(data: any): void;
     get values(): ReadonlyArray<string>;
-    }
+}
 
 // @public
 export class CommandLineStringParameter extends CommandLineParameterWithArgument {
@@ -227,7 +228,7 @@ export class CommandLineStringParameter extends CommandLineParameterWithArgument
     // @internal
     _setValue(data: any): void;
     get value(): string | undefined;
-    }
+}
 
 // @public (undocumented)
 export class DynamicCommandLineAction extends CommandLineAction {
@@ -320,6 +321,5 @@ export interface ICommandLineStringDefinition extends IBaseCommandLineDefinition
 // @public
 export interface ICommandLineStringListDefinition extends IBaseCommandLineDefinitionWithArgument {
 }
-
 
 ```

@@ -471,9 +471,9 @@ export class ConfigurationFile<TConfigurationFile> {
         newValue = parentPropertyValue;
       };
 
-      if (propertyValue && !parentPropertyValue) {
+      if (propertyValue !== undefined && parentPropertyValue === undefined) {
         usePropertyValue();
-      } else if (parentPropertyValue && !propertyValue) {
+      } else if (parentPropertyValue !== undefined && propertyValue === undefined) {
         useParentPropertyValue();
       } else {
         switch (propertyInheritance.inheritanceType) {

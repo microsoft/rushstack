@@ -19,6 +19,10 @@
       "items": {
         "type": "string"
       }
+    },
+
+    "booleanProp": {
+      "type": "boolean"
     }
   }
 }
