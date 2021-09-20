@@ -1,6 +1,13 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Mon, 12 Jul 2021 23:08:26 GMT and should not be manually modified.
+This log was last generated on Fri, 20 Aug 2021 15:08:10 GMT and should not be manually modified.
+
+## 4.9.0
+Fri, 20 Aug 2021 15:08:10 GMT
+
+### Minor changes
+
+- Add getParameterStringMap to CommandLineParameterProvider, to easily query parameter usage for telemetry
 
 ## 4.8.1
 Mon, 12 Jul 2021 23:08:26 GMT

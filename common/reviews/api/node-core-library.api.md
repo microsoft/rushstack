@@ -222,9 +222,11 @@ export class FileSystem {
     static getStatistics(path: string): FileSystemStats;
     static getStatisticsAsync(path: string): Promise<FileSystemStats>;
     static isErrnoException(error: Error): error is NodeJS.ErrnoException;
+    static isExistError(error: Error): boolean;
     static isFileDoesNotExistError(error: Error): boolean;
     static isFolderDoesNotExistError(error: Error): boolean;
     static isNotExistError(error: Error): boolean;
+    static isUnlinkNotPermittedError(error: Error): boolean;
     static move(options: IFileSystemMoveOptions): void;
     static moveAsync(options: IFileSystemMoveOptions): Promise<void>;
     static readFile(filePath: string, options?: IFileSystemReadFileOptions): string;

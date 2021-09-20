@@ -115,7 +115,7 @@ export abstract class HeftActionBase extends CommandLineAction {
   }
 
   public recordMetrics(): void {
-    this.metricsCollector.record(this.actionName);
+    this.metricsCollector.record(this.actionName, undefined, this.getParameterStringMap());
   }
 
   public async onExecute(): Promise<void> {

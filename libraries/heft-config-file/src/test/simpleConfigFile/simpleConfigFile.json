@@ -1,4 +1,5 @@
 {
   "$schema": "http://schema.net/",
-  "things": ["A", "B", "C"]
+  "things": ["A", "B", "C"],
+  "booleanProp": true
 }

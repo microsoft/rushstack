@@ -22,6 +22,7 @@ export interface ITaskSelectorConstructor {
   ignoreDependencyOrder: boolean;
   packageDepsFilename: string;
   projectChangeAnalyzer?: ProjectChangeAnalyzer;
+  allowWarningsInSuccessfulBuild?: boolean;
 }
 
 /**
@@ -132,7 +133,8 @@ export class TaskSelector {
         commandName: this._options.commandName,
         isIncrementalBuildAllowed: this._options.isIncrementalBuildAllowed,
         projectChangeAnalyzer: this._projectChangeAnalyzer,
-        packageDepsFilename: this._options.packageDepsFilename
+        packageDepsFilename: this._options.packageDepsFilename,
+        allowWarningsInSuccessfulBuild: this._options.allowWarningsInSuccessfulBuild
       })
     );
   }

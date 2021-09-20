@@ -25,6 +25,10 @@
     "noChmodFieldInTarHeaderNormalization": {
       "description": "If true, the chmod field in temporary project tar headers will not be normalized. This normalization can help ensure consistent tarball integrity across platforms.",
       "type": "boolean"
+    },
+    "buildCacheWithAllowWarningsInSuccessfulBuild": {
+      "description": "If true, build caching will respect the allowWarningsInSuccessfulBuild flag and cache builds with warnings. This will not replay warnings from the cached build.",
+      "type": "boolean"
     }
   },
   "additionalProperties": false

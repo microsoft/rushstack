@@ -184,7 +184,11 @@ export class ProjectChangeAnalyzer {
       return undefined;
     }
 
-    const projectHashDeps: Map<string, Map<string, string>> = new Map<string, Map<string, string>>();
+    const projectHashDeps: Map<string, Map<string, string>> = new Map();
+
+    for (const project of this._rushConfiguration.projects) {
+      projectHashDeps.set(project.packageName, new Map());
+    }
 
     // Sort each project folder into its own package deps hash
     for (const [filePath, fileHash] of repoDeps) {
@@ -192,14 +196,9 @@ export class ProjectChangeAnalyzer {
       // K being the maximum folder depth of any project in rush.json (usually on the order of 3)
       const owningProject: RushConfigurationProject | undefined =
         this._rushConfiguration.findProjectForPosixRelativePath(filePath);
+
       if (owningProject) {
-        let owningProjectHashDeps: Map<string, string> | undefined = projectHashDeps.get(
-          owningProject.packageName
-        );
-        if (!owningProjectHashDeps) {
-          owningProjectHashDeps = new Map<string, string>();
-          projectHashDeps.set(owningProject.packageName, owningProjectHashDeps);
-        }
+        const owningProjectHashDeps: Map<string, string> = projectHashDeps.get(owningProject.packageName)!;
         owningProjectHashDeps.set(filePath, fileHash);
       }
     }
@@ -268,16 +267,15 @@ export class ProjectChangeAnalyzer {
   private async _getIgnoreMatcherForProjectAsync(
     project: RushConfigurationProject,
     terminal: Terminal
-  ): Promise<Ignore> {
+  ): Promise<Ignore | undefined> {
     const projectConfiguration: RushProjectConfiguration | undefined =
       await RushProjectConfiguration.tryLoadForProjectAsync(project, undefined, terminal);
-    const ignoreMatcher: Ignore = ignore();
 
     if (projectConfiguration && projectConfiguration.incrementalBuildIgnoredGlobs) {
+      const ignoreMatcher: Ignore = ignore();
       ignoreMatcher.add(projectConfiguration.incrementalBuildIgnoredGlobs);
+      return ignoreMatcher;
     }
-
-    return ignoreMatcher;
   }
 
   private _getRepoDeps(terminal: Terminal): Map<string, string> | undefined {

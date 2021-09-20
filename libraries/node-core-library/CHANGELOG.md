@@ -1,6 +1,20 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 11 Aug 2021 00:07:21 GMT and should not be manually modified.
+This log was last generated on Tue, 14 Sep 2021 01:17:04 GMT and should not be manually modified.
+
+## 3.40.2
+Tue, 14 Sep 2021 01:17:04 GMT
+
+### Patches
+
+- Improve documentation to clarify usage for FileSystem APIs related to symbolic links
+
+## 3.40.1
+Mon, 13 Sep 2021 15:07:05 GMT
+
+### Patches
+
+- Add support for AlreadyExistsBehavior in symlink and junction scenarios
 
 ## 3.40.0
 Wed, 11 Aug 2021 00:07:21 GMT

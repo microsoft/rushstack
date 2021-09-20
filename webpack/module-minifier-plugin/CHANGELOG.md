@@ -1,6 +1,63 @@
 # Change Log - @rushstack/module-minifier-plugin
 
-This log was last generated on Fri, 13 Aug 2021 00:09:14 GMT and should not be manually modified.
+This log was last generated on Sat, 18 Sep 2021 03:05:57 GMT and should not be manually modified.
+
+## 0.4.18
+Sat, 18 Sep 2021 03:05:57 GMT
+
+_Version update only_
+
+## 0.4.17
+Tue, 14 Sep 2021 01:17:04 GMT
+
+_Version update only_
+
+## 0.4.16
+Mon, 13 Sep 2021 15:07:05 GMT
+
+_Version update only_
+
+## 0.4.15
+Fri, 10 Sep 2021 15:08:28 GMT
+
+_Version update only_
+
+## 0.4.14
+Wed, 08 Sep 2021 19:06:22 GMT
+
+_Version update only_
+
+## 0.4.13
+Wed, 08 Sep 2021 00:08:03 GMT
+
+_Version update only_
+
+## 0.4.12
+Fri, 03 Sep 2021 00:09:10 GMT
+
+_Version update only_
+
+## 0.4.11
+Tue, 31 Aug 2021 00:07:11 GMT
+
+_Version update only_
+
+## 0.4.10
+Fri, 27 Aug 2021 00:07:25 GMT
+
+_Version update only_
+
+## 0.4.9
+Fri, 20 Aug 2021 15:08:10 GMT
+
+_Version update only_
+
+## 0.4.8
+Wed, 18 Aug 2021 00:06:54 GMT
+
+### Patches
+
+- Fix compatibility issue with mini-css-extract-plugin and other plugins that introduce non-JavaScript modules and asset types.
 
 ## 0.4.7
 Fri, 13 Aug 2021 00:09:14 GMT

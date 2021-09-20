@@ -1,6 +1,13 @@
 # Change Log - @rushstack/rig-package
 
-This log was last generated on Mon, 12 Jul 2021 23:08:26 GMT and should not be manually modified.
+This log was last generated on Fri, 27 Aug 2021 00:07:25 GMT and should not be manually modified.
+
+## 0.3.0
+Fri, 27 Aug 2021 00:07:25 GMT
+
+### Minor changes
+
+- Cache rig.json reads
 
 ## 0.2.13
 Mon, 12 Jul 2021 23:08:26 GMT
