@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/heft",
       "comment": "add \"encounteredErrors\" boolean to IMetricsData for heft recordMetric hook to use",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft",
