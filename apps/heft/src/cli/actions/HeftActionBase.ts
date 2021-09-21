@@ -128,13 +128,13 @@ export abstract class HeftActionBase extends CommandLineAction {
       encounteredError = true;
       throw e;
     } finally {
-      this.recordMetrics(encounteredError);
-
       const warningStrings: string[] = this.loggingManager.getWarningStrings();
       const errorStrings: string[] = this.loggingManager.getErrorStrings();
 
       const encounteredWarnings: boolean = warningStrings.length > 0;
       encounteredError = encounteredError || errorStrings.length > 0;
+
+      this.recordMetrics(encounteredError);
 
       this.terminal.writeLine(
         Colors.bold(
