@@ -147,7 +147,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         .replace(/\+/g, '-')
         .replace(/\//g, '_');
 
-      this.__tsCacheFilePath = `${this._configuration.buildMetadataFolder}/ts_${serializedConfigHash}.json`;
+      // Paranoia. If backslashes sneak it in breaks incremental compilation
+      const normalizedCacheFolder: string = Path.convertToSlashes(this._configuration.buildMetadataFolder);
+      this.__tsCacheFilePath = `${normalizedCacheFolder}/ts_${serializedConfigHash}.json`;
     }
 
     return this.__tsCacheFilePath;
