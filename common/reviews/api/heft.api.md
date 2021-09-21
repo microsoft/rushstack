@@ -275,7 +275,7 @@ export interface IHeftSessionHooks {
 export interface IMetricsData {
     command: string;
     commandParameters: Record<string, string>;
-    encounteredErrors: boolean;
+    encounteredError?: boolean;
     machineArch: string;
     machineCores: number;
     machineOs: string;
@@ -286,6 +286,8 @@ export interface IMetricsData {
 
 // @internal (undocumented)
 export interface _IPerformanceData {
+    // (undocumented)
+    encounteredError?: boolean;
     // (undocumented)
     taskTotalExecutionMs: number;
 }
@@ -364,7 +366,7 @@ export class _MetricsCollector {
     flushAsync(): Promise<void>;
     // (undocumented)
     readonly hooks: MetricsCollectorHooks;
-    record(command: string, encounteredErrors: boolean, performanceData?: Partial<_IPerformanceData>, parameters?: Record<string, string>): void;
+    record(command: string, performanceData?: Partial<_IPerformanceData>, parameters?: Record<string, string>): void;
     setStartTime(): void;
 }
 
