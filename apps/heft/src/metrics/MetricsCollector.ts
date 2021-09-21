@@ -18,7 +18,7 @@ export interface IMetricsData {
   /**
    * Whether or not the command ran into errors
    */
-  encounteredErrors: boolean;
+  encounteredError?: boolean;
 
   /**
    * The amount of time the command took to execute, in milliseconds.
@@ -86,6 +86,7 @@ export class MetricsCollectorHooks {
  */
 export interface IPerformanceData {
   taskTotalExecutionMs: number;
+  encounteredError?: boolean;
 }
 
 /**
@@ -113,7 +114,6 @@ export class MetricsCollector {
    */
   public record(
     command: string,
-    encounteredErrors: boolean,
     performanceData?: Partial<IPerformanceData>,
     parameters?: Record<string, string>
   ): void {
@@ -136,7 +136,7 @@ export class MetricsCollector {
 
     const metricsData: IMetricsData = {
       command: command,
-      encounteredErrors,
+      encounteredError: filledPerformanceData.encounteredError,
       taskTotalExecutionMs: filledPerformanceData.taskTotalExecutionMs,
       machineOs: process.platform,
       machineArch: process.arch,

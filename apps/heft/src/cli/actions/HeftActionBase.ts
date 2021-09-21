@@ -25,7 +25,7 @@ import {
 } from '@rushstack/node-core-library';
 import { performance } from 'perf_hooks';
 
-import { MetricsCollector } from '../../metrics/MetricsCollector';
+import { IPerformanceData, MetricsCollector } from '../../metrics/MetricsCollector';
 import { HeftConfiguration } from '../../configuration/HeftConfiguration';
 import { BuildStage } from '../../stages/BuildStage';
 import { CleanStage } from '../../stages/CleanStage';
@@ -107,8 +107,8 @@ export abstract class HeftActionBase extends CommandLineAction {
     this.metricsCollector.setStartTime();
   }
 
-  public recordMetrics(errorEncountered: boolean): void {
-    this.metricsCollector.record(this.actionName, errorEncountered, undefined, this.getParameterStringMap());
+  public recordMetrics(performanceData?: Partial<IPerformanceData>): void {
+    this.metricsCollector.record(this.actionName, performanceData, this.getParameterStringMap());
   }
 
   public async onExecute(): Promise<void> {
@@ -134,7 +134,7 @@ export abstract class HeftActionBase extends CommandLineAction {
       const encounteredWarnings: boolean = warningStrings.length > 0;
       encounteredError = encounteredError || errorStrings.length > 0;
 
-      this.recordMetrics(encounteredError);
+      this.recordMetrics({ encounteredError });
 
       this.terminal.writeLine(
         Colors.bold(
