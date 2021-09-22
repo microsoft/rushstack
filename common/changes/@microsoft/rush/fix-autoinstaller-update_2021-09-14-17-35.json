@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where `rush update-autoinstaller` does not use the repo's .npmrc",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "h-a-n-a@users.noreply.github.com"
+}
