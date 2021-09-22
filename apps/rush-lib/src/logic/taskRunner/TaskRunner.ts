@@ -18,6 +18,7 @@ import { Task } from './Task';
 import { TaskStatus } from './TaskStatus';
 import { IBuilderContext } from './BaseBuilder';
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
+import { TaskError } from './TaskError';
 
 export interface ITaskRunnerOptions {
   quietMode: boolean;
@@ -281,7 +282,7 @@ export class TaskRunner {
       this._hasAnyFailures = true;
 
       // eslint-disable-next-line require-atomic-updates
-      task.error = error;
+      task.error = error as TaskError;
 
       this._markTaskAsFailed(task);
     }

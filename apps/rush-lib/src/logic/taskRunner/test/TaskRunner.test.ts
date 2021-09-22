@@ -101,7 +101,7 @@ describe('TaskRunner', () => {
         await taskRunner.executeAsync();
         fail(EXPECTED_FAIL);
       } catch (err) {
-        expect(err.message).toMatchSnapshot();
+        expect((err as Error).message).toMatchSnapshot();
         const allMessages: string = mockWritable.getAllOutput();
         expect(allMessages).toContain('Error: step 1 failed');
         expect(mockWritable.getFormattedChunks()).toMatchSnapshot();
@@ -122,7 +122,7 @@ describe('TaskRunner', () => {
         await taskRunner.executeAsync();
         fail(EXPECTED_FAIL);
       } catch (err) {
-        expect(err.message).toMatchSnapshot();
+        expect((err as Error).message).toMatchSnapshot();
         const allOutput: string = mockWritable.getAllOutput();
         expect(allOutput).toMatch(/Build step 1/);
         expect(allOutput).toMatch(/Error: step 1 failed/);
@@ -159,7 +159,7 @@ describe('TaskRunner', () => {
           await taskRunner.executeAsync();
           fail(EXPECTED_FAIL);
         } catch (err) {
-          expect(err.message).toMatchSnapshot();
+          expect((err as Error).message).toMatchSnapshot();
           const allMessages: string = mockWritable.getAllOutput();
           expect(allMessages).toContain('Build step 1');
           expect(allMessages).toContain('step 1 succeeded with warnings');

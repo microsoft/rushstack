@@ -81,7 +81,7 @@ export class LegacyAdapters {
           fn(cb);
         }
       } catch (e) {
-        reject(e);
+        reject(e as Error);
       }
     });
   }

@@ -102,7 +102,7 @@ export class CommonVersionsConfiguration {
           commonVersionsJson.allowedAlternativeVersions
         );
       } catch (e) {
-        throw new Error(`Error loading "${path.basename(filePath)}": ${e.message}`);
+        throw new Error(`Error loading "${path.basename(filePath)}": ${(e as Error).message}`);
       }
     }
     this._filePath = filePath;

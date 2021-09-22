@@ -19,7 +19,7 @@
     "@rushstack/heft-sass-plugin": "workspace:*",
     "@rushstack/heft-webpack4-plugin": "workspace:*",
     "eslint": "~7.30.0",
-    "typescript": "~3.9.7"
+    "typescript": "~4.4.2"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*"

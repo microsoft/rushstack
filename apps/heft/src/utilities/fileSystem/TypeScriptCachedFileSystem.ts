@@ -43,7 +43,7 @@ export class TypeScriptCachedFileSystem {
       this.getStatistics(path);
       return true;
     } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
+      if (FileSystem.isNotExistError(e as Error)) {
         return false;
       } else {
         throw e;
@@ -56,7 +56,7 @@ export class TypeScriptCachedFileSystem {
       const stats: FileSystemStats = this.getStatistics(path);
       return stats.isDirectory();
     } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
+      if (FileSystem.isNotExistError(e as Error)) {
         return false;
       } else {
         throw e;
@@ -184,7 +184,7 @@ export class TypeScriptCachedFileSystem {
       try {
         cacheEntry = { entry: fn(path) };
       } catch (e) {
-        cacheEntry = { error: e, entry: undefined };
+        cacheEntry = { error: e as Error, entry: undefined };
       }
 
       cache.set(path, cacheEntry);

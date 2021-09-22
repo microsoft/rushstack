@@ -130,7 +130,7 @@ describe('AmazonS3Client', () => {
       try {
         result = await request(s3Client);
       } catch (e) {
-        error = e;
+        error = e as Error;
       }
 
       expect(spy).toHaveBeenCalledTimes(1);

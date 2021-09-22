@@ -416,7 +416,7 @@ export class Git {
         };
       } catch (e) {
         this._gitEmailResult = {
-          error: e
+          error: e as Error
         };
       }
     }

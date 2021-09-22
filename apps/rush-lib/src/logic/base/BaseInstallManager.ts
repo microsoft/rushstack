@@ -374,7 +374,7 @@ export abstract class BaseInstallManager {
         );
       } catch (ex) {
         console.log();
-        console.log(`Unable to load the ${this._rushConfiguration.shrinkwrapFilePhrase}: ${ex.message}`);
+        console.log(`Unable to load the ${this._rushConfiguration.shrinkwrapFilePhrase}: ${(ex as Error).message}`);
 
         if (!this.options.allowShrinkwrapUpdates) {
           console.log();

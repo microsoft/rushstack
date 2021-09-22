@@ -517,7 +517,7 @@ export class FileSystem {
         fsx.moveSync(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
       } catch (error) {
         if (options.ensureFolderExists) {
-          if (!FileSystem.isNotExistError(error)) {
+          if (!FileSystem.isNotExistError(error as Error)) {
             throw error;
           }
 
@@ -545,7 +545,7 @@ export class FileSystem {
         await fsx.move(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
       } catch (error) {
         if (options.ensureFolderExists) {
-          if (!FileSystem.isNotExistError(error)) {
+          if (!FileSystem.isNotExistError(error as Error)) {
             throw error;
           }
 
@@ -708,7 +708,7 @@ export class FileSystem {
         fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
       } catch (error) {
         if (options.ensureFolderExists) {
-          if (!FileSystem.isNotExistError(error)) {
+          if (!FileSystem.isNotExistError(error as Error)) {
             throw error;
           }
 
@@ -744,7 +744,7 @@ export class FileSystem {
         await fsx.writeFile(filePath, contents, { encoding: options.encoding });
       } catch (error) {
         if (options.ensureFolderExists) {
-          if (!FileSystem.isNotExistError(error)) {
+          if (!FileSystem.isNotExistError(error as Error)) {
             throw error;
           }
 
@@ -786,7 +786,7 @@ export class FileSystem {
         fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
       } catch (error) {
         if (options.ensureFolderExists) {
-          if (!FileSystem.isNotExistError(error)) {
+          if (!FileSystem.isNotExistError(error as Error)) {
             throw error;
           }
 
@@ -822,7 +822,7 @@ export class FileSystem {
         await fsx.appendFile(filePath, contents, { encoding: options.encoding });
       } catch (error) {
         if (options.ensureFolderExists) {
-          if (!FileSystem.isNotExistError(error)) {
+          if (!FileSystem.isNotExistError(error as Error)) {
             throw error;
           }
 
@@ -1013,7 +1013,7 @@ export class FileSystem {
       try {
         fsx.unlinkSync(filePath);
       } catch (error) {
-        if (options.throwIfNotExists || !FileSystem.isNotExistError(error)) {
+        if (options.throwIfNotExists || !FileSystem.isNotExistError(error as Error)) {
           throw error;
         }
       }
@@ -1036,7 +1036,7 @@ export class FileSystem {
       try {
         await fsx.unlink(filePath);
       } catch (error) {
-        if (options.throwIfNotExists || !FileSystem.isNotExistError(error)) {
+        if (options.throwIfNotExists || !FileSystem.isNotExistError(error as Error)) {
           throw error;
         }
       }
@@ -1313,7 +1313,7 @@ export class FileSystem {
     try {
       linkFn();
     } catch (error) {
-      if (FileSystem.isExistError(error)) {
+      if (FileSystem.isExistError(error as Error)) {
         // Link exists, handle it
         switch (options.alreadyExistsBehavior) {
           case AlreadyExistsBehavior.Ignore:
@@ -1334,7 +1334,7 @@ export class FileSystem {
         // retrying. There are also cases where the target file must exist, so validate in
         // those cases to avoid confusing the missing directory with the missing target file.
         if (
-          FileSystem.isNotExistError(error) &&
+          FileSystem.isNotExistError(error as Error) &&
           (!options.linkTargetMustExist || FileSystem.exists(options.linkTargetPath))
         ) {
           this.ensureFolder(nodeJsPath.dirname(options.newLinkPath));
@@ -1353,7 +1353,7 @@ export class FileSystem {
     try {
       await linkFn();
     } catch (error) {
-      if (FileSystem.isExistError(error)) {
+      if (FileSystem.isExistError(error as Error)) {
         // Link exists, handle it
         switch (options.alreadyExistsBehavior) {
           case AlreadyExistsBehavior.Ignore:
@@ -1374,7 +1374,7 @@ export class FileSystem {
         // retrying. There are also cases where the target file must exist, so validate in
         // those cases to avoid confusing the missing directory with the missing target file.
         if (
-          FileSystem.isNotExistError(error) &&
+          FileSystem.isNotExistError(error as Error) &&
           (!options.linkTargetMustExist || (await FileSystem.existsAsync(options.linkTargetPath)))
         ) {
           await this.ensureFolderAsync(nodeJsPath.dirname(options.newLinkPath));
@@ -1390,7 +1390,7 @@ export class FileSystem {
     try {
       return fn();
     } catch (error) {
-      FileSystem._updateErrorMessage(error);
+      FileSystem._updateErrorMessage(error as Error);
       throw error;
     }
   }
@@ -1399,7 +1399,7 @@ export class FileSystem {
     try {
       return await fn();
     } catch (error) {
-      FileSystem._updateErrorMessage(error);
+      FileSystem._updateErrorMessage(error as Error);
       throw error;
     }
   }

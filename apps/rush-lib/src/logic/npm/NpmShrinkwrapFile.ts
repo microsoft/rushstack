@@ -63,7 +63,7 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
 
       return new NpmShrinkwrapFile(JSON.parse(data));
     } catch (error) {
-      throw new Error(`Error reading "${shrinkwrapJsonFilename}":` + os.EOL + `  ${error.message}`);
+      throw new Error(`Error reading "${shrinkwrapJsonFilename}":` + os.EOL + `  ${(error as Error).message}`);
     }
   }
 

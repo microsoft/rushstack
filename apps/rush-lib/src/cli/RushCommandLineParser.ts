@@ -87,7 +87,7 @@ export class RushCommandLineParser extends CommandLineParser {
         this.rushConfiguration = RushConfiguration.loadFromConfigurationFile(rushJsonFilename);
       }
     } catch (error) {
-      this._reportErrorAndSetExitCode(error);
+      this._reportErrorAndSetExitCode(error as Error);
     }
 
     NodeJsCompatibility.warnAboutCompatibilityIssues({
@@ -134,7 +134,7 @@ export class RushCommandLineParser extends CommandLineParser {
       // If we make it here, everything went fine, so reset the exit code back to 0
       process.exitCode = 0;
     } catch (error) {
-      this._reportErrorAndSetExitCode(error);
+      this._reportErrorAndSetExitCode(error as Error);
     }
   }
 
@@ -184,7 +184,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
       this._populateScriptActions();
     } catch (error) {
-      this._reportErrorAndSetExitCode(error);
+      this._reportErrorAndSetExitCode(error as Error);
     }
   }
 
@@ -300,8 +300,8 @@ export class RushCommandLineParser extends CommandLineParser {
         break;
       default:
         throw new Error(
-          `${RushConstants.commandLineFilename} defines a command "${command!.name}"` +
-            ` using an unsupported command kind "${command!.commandKind}"`
+          `${RushConstants.commandLineFilename} defines a command "${(command as CommandJson).name}"` +
+            ` using an unsupported command kind "${(command as CommandJson).commandKind}"`
         );
     }
   }

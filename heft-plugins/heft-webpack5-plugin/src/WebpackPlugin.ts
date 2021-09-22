@@ -238,7 +238,7 @@ export class WebpackPlugin implements IHeftPlugin {
             {}
           );
         } catch (e) {
-          logger.emitError(e);
+          logger.emitError(e as Error);
         }
       } else {
         try {
@@ -247,7 +247,7 @@ export class WebpackPlugin implements IHeftPlugin {
           );
           await LegacyAdapters.convertCallbackToPromise(compiler.close.bind(compiler));
         } catch (e) {
-          logger.emitError(e);
+          logger.emitError(e as Error);
         }
       }
 

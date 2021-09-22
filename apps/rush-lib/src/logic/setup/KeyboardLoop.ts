@@ -114,7 +114,7 @@ export class KeyboardLoop {
     try {
       this.onKeypress(character, key);
     } catch (error) {
-      throw new InternalError('Uncaught exception in Prompter.onKeypress(): ' + error.toString());
+      throw new InternalError('Uncaught exception in Prompter.onKeypress(): ' + (error as Error).toString());
     }
   };
 }

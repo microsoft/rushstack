@@ -163,7 +163,7 @@ export class PackageJsonEditor {
       Sort.sortMapKeys(this._dependencies);
       Sort.sortMapKeys(this._devDependencies);
     } catch (e) {
-      throw new Error(`Error loading "${filepath}": ${e.message}`);
+      throw new Error(`Error loading "${filepath}": ${(e as Error).message}`);
     }
   }
 

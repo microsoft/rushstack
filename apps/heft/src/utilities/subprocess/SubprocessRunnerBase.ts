@@ -226,7 +226,7 @@ export abstract class SubprocessRunnerBase<
     try {
       await this.invokeAsync();
     } catch (e) {
-      error = e;
+      error = e as Error;
     } finally {
       process.removeAllListeners();
 
