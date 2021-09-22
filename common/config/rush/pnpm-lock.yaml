@@ -543,12 +543,10 @@ importers:
   ../../build-tests/api-extractor-lib1-test:
     specifiers:
       '@microsoft/api-extractor': workspace:*
-      '@types/node': 12.20.24
       fs-extra: ~7.0.1
       typescript: ~2.9.2
     devDependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
-      '@types/node': 12.20.24
       fs-extra: 7.0.1
       typescript: 2.9.2
 

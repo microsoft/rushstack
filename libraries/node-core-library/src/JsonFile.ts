@@ -98,7 +98,7 @@ export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
   updateExistingFile?: boolean;
 }
 
-const DEFAULT_ENCODING = 'utf8';
+const DEFAULT_ENCODING: 'utf8' = 'utf8';
 
 /**
  * Utilities for reading/writing JSON files.

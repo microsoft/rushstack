@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as events from 'events';
+import events from 'events';
 import * as crypto from 'crypto';
 import type * as stream from 'stream';
 import * as tar from 'tar';
