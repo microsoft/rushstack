@@ -482,7 +482,7 @@ export function runWithErrorAndStatusCode(fn: () => number): void {
     const exitCode: number = fn();
     process.exitCode = exitCode;
   } catch (e) {
-    console.error(os.EOL + os.EOL + e.toString() + os.EOL + os.EOL);
+    console.error(os.EOL + os.EOL + (e as Error).toString() + os.EOL + os.EOL);
   }
 }
 

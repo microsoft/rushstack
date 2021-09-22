@@ -2,6 +2,87 @@
   "name": "@rushstack/rundown",
   "entries": [
     {
+      "version": "1.0.143",
+      "tag": "@rushstack/rundown_v1.0.143",
+      "date": "Wed, 22 Sep 2021 03:27:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.39.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.142",
+      "tag": "@rushstack/rundown_v1.0.142",
+      "date": "Wed, 22 Sep 2021 00:09:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.38.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.14`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.141",
+      "tag": "@rushstack/rundown_v1.0.141",
+      "date": "Sat, 18 Sep 2021 03:05:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.38.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.13`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.140",
+      "tag": "@rushstack/rundown_v1.0.140",
+      "date": "Tue, 14 Sep 2021 01:17:04 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.38.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.12`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.139",
+      "tag": "@rushstack/rundown_v1.0.139",
+      "date": "Mon, 13 Sep 2021 15:07:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.11`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.138",
       "tag": "@rushstack/rundown_v1.0.138",
       "date": "Fri, 10 Sep 2021 15:08:28 GMT",

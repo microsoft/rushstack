@@ -147,7 +147,11 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         .replace(/\+/g, '-')
         .replace(/\//g, '_');
 
-      this.__tsCacheFilePath = `${this._configuration.buildMetadataFolder}/ts_${serializedConfigHash}.json`;
+      // This conversion is theoretically redundant, but it is here to make absolutely sure that the path is formatted
+      // using only '/' as the directory separator so that incremental builds don't break on Windows.
+      // TypeScript will normalize to '/' when serializing, but not on the direct input, and uses exact string equality.
+      const normalizedCacheFolder: string = Path.convertToSlashes(this._configuration.buildMetadataFolder);
+      this.__tsCacheFilePath = `${normalizedCacheFolder}/ts_${serializedConfigHash}.json`;
     }
 
     return this.__tsCacheFilePath;
@@ -853,7 +857,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         reason: 'emitMjsExtensionForESModule'
       };
 
-      specifiedKinds.set(ts.ModuleKind.CommonJS, mjsReason);
+      specifiedKinds.set(ts.ModuleKind.ESNext, mjsReason);
       specifiedOutDirs.set(`${tsconfig.options.outDir!}:.mjs`, mjsReason);
     }
 
@@ -1066,7 +1070,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           const stats: FileSystemStats = this._cachedFileSystem.getStatistics(directoryPath);
           return stats.isDirectory() || stats.isSymbolicLink();
         } catch (error) {
-          if (FileSystem.isNotExistError(error)) {
+          if (FileSystem.isNotExistError(error as Error)) {
             return false;
           } else {
             throw error;
@@ -1079,7 +1083,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           const stats: FileSystemStats = this._cachedFileSystem.getStatistics(filePath);
           return stats.isFile();
         } catch (error) {
-          if (FileSystem.isNotExistError(error)) {
+          if (FileSystem.isNotExistError(error as Error)) {
             return false;
           } else {
             throw error;

@@ -124,7 +124,7 @@ function applyPatch(): void {
   } catch (e) {
     console.error();
     console.error(`ERROR: ${patchName} failed to patch the "jest-worker" package:`);
-    console.error(e.toString());
+    console.error((e as Error).toString());
     console.error();
 
     throw e;

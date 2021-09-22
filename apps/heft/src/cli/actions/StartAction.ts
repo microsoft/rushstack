@@ -10,6 +10,7 @@ import { Logging } from '../../utilities/Logging';
 export class StartAction extends HeftActionBase {
   private _buildStandardParameters!: IBuildStageStandardParameters;
   private _cleanFlag!: CommandLineFlagParameter;
+  private _storybookFlag!: CommandLineFlagParameter;
 
   public constructor(heftActionOptions: IHeftActionBaseOptions) {
     super(
@@ -30,6 +31,13 @@ export class StartAction extends HeftActionBase {
     this._cleanFlag = this.defineFlagParameter({
       parameterLongName: '--clean',
       description: 'If specified, clean the package before starting the development server.'
+    });
+
+    // TODO: Expose an API for custom CLI parameters similar to HeftSession.registerAction()
+    this._storybookFlag = this.defineFlagParameter({
+      parameterLongName: '--storybook',
+      description:
+        '(EXPERIMENTAL) Used by the "@rushstack/heft-storybook-plugin" package to launch Storybook.'
     });
   }
 
@@ -52,6 +60,7 @@ export class StartAction extends HeftActionBase {
       watchMode: true,
       serveMode: true
     };
+
     await buildStage.initializeAsync(buildStageOptions);
     await buildStage.executeAsync();
   }

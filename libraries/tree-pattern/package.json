@@ -14,10 +14,10 @@
   "dependencies": {},
   "devDependencies": {
     "@rushstack/eslint-config": "2.4.0",
-    "@rushstack/heft": "0.34.6",
-    "@rushstack/heft-node-rig": "1.1.11",
+    "@rushstack/heft": "0.38.1",
+    "@rushstack/heft-node-rig": "1.2.13",
     "@types/heft-jest": "1.0.1",
     "eslint": "~7.30.0",
-    "typescript": "~3.9.7"
+    "typescript": "~4.4.2"
   }
 }

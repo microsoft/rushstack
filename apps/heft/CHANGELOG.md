@@ -1,6 +1,43 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 10 Sep 2021 15:08:28 GMT and should not be manually modified.
+This log was last generated on Wed, 22 Sep 2021 03:27:12 GMT and should not be manually modified.
+
+## 0.39.0
+Wed, 22 Sep 2021 03:27:12 GMT
+
+### Minor changes
+
+- Add "encounteredErrors" boolean to IMetricsData.
+
+### Patches
+
+- Fix typo in temp folder path.
+
+## 0.38.2
+Wed, 22 Sep 2021 00:09:32 GMT
+
+### Patches
+
+- Fix formatting of tsBuildInfoFile tsconfig option. TypeScript uses an exact string match for change detection and normalizes slashes to '/' upon saving the file. Therefore the inputs need to be normalized as well.
+
+## 0.38.1
+Sat, 18 Sep 2021 03:05:57 GMT
+
+### Patches
+
+- Fix an issue where setting the emitMjsExtensionForESModule typescript.json option in a project whose tsconfig emits CommonJS will only emit .mjs files.
+
+## 0.38.0
+Tue, 14 Sep 2021 01:17:04 GMT
+
+### Minor changes
+
+- Temoprarily introduce a "--storybook" CLI parameter to support the experimental heft-storybook-plugin
+
+## 0.37.4
+Mon, 13 Sep 2021 15:07:05 GMT
+
+_Version update only_
 
 ## 0.37.3
 Fri, 10 Sep 2021 15:08:28 GMT

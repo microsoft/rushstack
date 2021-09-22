@@ -518,7 +518,7 @@ export class ExtractorConfig {
                 basedir: currentConfigFolderPath
               });
             } catch (e) {
-              throw new Error(`Error resolving NodeJS path "${extendsField}": ${e.message}`);
+              throw new Error(`Error resolving NodeJS path "${extendsField}": ${(e as Error).message}`);
             }
           }
         }
@@ -534,7 +534,7 @@ export class ExtractorConfig {
         currentConfigFilePath = extendsField;
       } while (currentConfigFilePath);
     } catch (e) {
-      throw new Error(`Error loading ${currentConfigFilePath}:\n` + e.message);
+      throw new Error(`Error loading ${currentConfigFilePath}:\n` + (e as Error).message);
     }
 
     // Lastly, apply the defaults
@@ -973,7 +973,7 @@ export class ExtractorConfig {
         testMode: !!configObject.testMode
       };
     } catch (e) {
-      throw new Error(`Error parsing ${filenameForErrors}:\n` + e.message);
+      throw new Error(`Error parsing ${filenameForErrors}:\n` + (e as Error).message);
     }
 
     let tsdocConfigFile: TSDocConfigFile | undefined = options.tsdocConfigFile;

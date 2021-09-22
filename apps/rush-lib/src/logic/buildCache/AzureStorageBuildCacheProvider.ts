@@ -43,6 +43,17 @@ export interface IAzureStorageBuildCacheProviderOptions {
 
 const SAS_TTL_MILLISECONDS: number = 7 * 24 * 60 * 60 * 1000; // Seven days
 
+interface IBlobError extends Error {
+  statusCode: number;
+  code: string;
+  response?: {
+    status: string;
+    parsedHeaders?: {
+      errorCode: string;
+    };
+  };
+}
+
 export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase {
   private readonly _storageAccountName: string;
   private readonly _storageContainerName: string;
@@ -110,7 +121,8 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
       } else {
         return undefined;
       }
-    } catch (e) {
+    } catch (err) {
+      const e: IBlobError = err as IBlobError;
       const errorMessage: string =
         'Error getting cache entry from Azure Storage: ' +
         [e.name, e.message, e.response?.status, e.response?.parsedHeaders?.errorCode]
@@ -174,7 +186,9 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
 
     try {
       blobAlreadyExists = await blockBlobClient.exists();
-    } catch (e) {
+    } catch (err) {
+      const e: IBlobError = err as IBlobError;
+
       // If RUSH_BUILD_CACHE_CREDENTIAL is set but is corrupted or has been rotated
       // in Azure Portal, or the user's own cached credentials have been corrupted or
       // invalidated, we'll print the error and continue (this way we don't fail the
@@ -196,13 +210,13 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
         await blockBlobClient.upload(entryStream, entryStream.length);
         return true;
       } catch (e) {
-        if (e.statusCode === 409 /* conflict */) {
+        if ((e as IBlobError).statusCode === 409 /* conflict */) {
           // If something else has written to the blob at the same time,
           // it's probably a concurrent process that is attempting to write
           // the same cache entry. That is an effective success.
           terminal.writeVerboseLine(
             'Azure Storage returned status 409 (conflict). The cache entry has ' +
-              `probably already been set by another builder. Code: "${e.code}".`
+              `probably already been set by another builder. Code: "${(e as IBlobError).code}".`
           );
           return true;
         } else {

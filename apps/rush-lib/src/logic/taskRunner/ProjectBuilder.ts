@@ -129,7 +129,7 @@ export class ProjectBuilder extends BaseBuilder {
       }
       return await this._executeTaskAsync(context);
     } catch (error) {
-      throw new TaskError('executing', error.message);
+      throw new TaskError('executing', (error as Error).message);
     }
   }
 
@@ -251,7 +251,7 @@ export class ProjectBuilder extends BaseBuilder {
       } catch (error) {
         // To test this code path:
         // Delete a project's ".rush/temp/shrinkwrap-deps.json" then run "rush build --verbose"
-        terminal.writeLine('Unable to calculate incremental build state: ' + error.toString());
+        terminal.writeLine('Unable to calculate incremental build state: ' + (error as Error).toString());
         terminal.writeLine({
           text: 'Rush will proceed without incremental build, caching, and change detection.',
           foregroundColor: ColorValue.Cyan
@@ -362,7 +362,7 @@ export class ProjectBuilder extends BaseBuilder {
                 resolve(TaskStatus.Success);
               }
             } catch (error) {
-              reject(error);
+              reject(error as TaskError);
             }
           });
         }

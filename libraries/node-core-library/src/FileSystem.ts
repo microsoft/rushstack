@@ -517,7 +517,7 @@ export class FileSystem {
         fsx.moveSync(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
       } catch (error) {
         if (options.ensureFolderExists) {
-          if (!FileSystem.isNotExistError(error)) {
+          if (!FileSystem.isNotExistError(error as Error)) {
             throw error;
           }
 
@@ -545,7 +545,7 @@ export class FileSystem {
         await fsx.move(options.sourcePath, options.destinationPath, { overwrite: options.overwrite });
       } catch (error) {
         if (options.ensureFolderExists) {
-          if (!FileSystem.isNotExistError(error)) {
+          if (!FileSystem.isNotExistError(error as Error)) {
             throw error;
           }
 
@@ -708,7 +708,7 @@ export class FileSystem {
         fsx.writeFileSync(filePath, contents, { encoding: options.encoding });
       } catch (error) {
         if (options.ensureFolderExists) {
-          if (!FileSystem.isNotExistError(error)) {
+          if (!FileSystem.isNotExistError(error as Error)) {
             throw error;
           }
 
@@ -744,7 +744,7 @@ export class FileSystem {
         await fsx.writeFile(filePath, contents, { encoding: options.encoding });
       } catch (error) {
         if (options.ensureFolderExists) {
-          if (!FileSystem.isNotExistError(error)) {
+          if (!FileSystem.isNotExistError(error as Error)) {
             throw error;
           }
 
@@ -786,7 +786,7 @@ export class FileSystem {
         fsx.appendFileSync(filePath, contents, { encoding: options.encoding });
       } catch (error) {
         if (options.ensureFolderExists) {
-          if (!FileSystem.isNotExistError(error)) {
+          if (!FileSystem.isNotExistError(error as Error)) {
             throw error;
           }
 
@@ -822,7 +822,7 @@ export class FileSystem {
         await fsx.appendFile(filePath, contents, { encoding: options.encoding });
       } catch (error) {
         if (options.ensureFolderExists) {
-          if (!FileSystem.isNotExistError(error)) {
+          if (!FileSystem.isNotExistError(error as Error)) {
             throw error;
           }
 
@@ -1013,7 +1013,7 @@ export class FileSystem {
       try {
         fsx.unlinkSync(filePath);
       } catch (error) {
-        if (options.throwIfNotExists || !FileSystem.isNotExistError(error)) {
+        if (options.throwIfNotExists || !FileSystem.isNotExistError(error as Error)) {
           throw error;
         }
       }
@@ -1036,7 +1036,7 @@ export class FileSystem {
       try {
         await fsx.unlink(filePath);
       } catch (error) {
-        if (options.throwIfNotExists || !FileSystem.isNotExistError(error)) {
+        if (options.throwIfNotExists || !FileSystem.isNotExistError(error as Error)) {
           throw error;
         }
       }
@@ -1094,8 +1094,21 @@ export class FileSystem {
   }
 
   /**
-   * Creates a Windows "directory junction". Behaves like `createSymbolicLinkToFile()` on other platforms.
+   * Creates an NTFS "directory junction" on Windows operating systems; for other operating systems, it
+   * creates a regular symbolic link.  The link target must be a folder, not a file.
    * Behind the scenes it uses `fs.symlinkSync()`.
+   *
+   * @remarks
+   * For security reasons, Windows operating systems by default require administrator elevation to create
+   * symbolic links.  As a result, on Windows it's generally recommended for Node.js tools to use hard links
+   * (for files) or NTFS directory junctions (for folders), since regular users are allowed to create them.
+   * Hard links and junctions are less vulnerable to symlink attacks because they cannot reference a network share,
+   * and their target must exist at the time of link creation.  Non-Windows operating systems generally don't
+   * restrict symlink creation, and as such are more vulnerable to symlink attacks.  Note that Windows can be
+   * configured to permit regular users to create symlinks, for example by enabling Windows 10 "developer mode."
+   *
+   * A directory junction requires the link source and target to both be located on local disk volumes;
+   * if not, use a symbolic link instead.
    */
   public static createSymbolicLinkJunction(options: IFileSystemCreateLinkOptions): void {
     FileSystem._wrapException(() => {
@@ -1119,8 +1132,17 @@ export class FileSystem {
   }
 
   /**
-   * Creates a symbolic link to a file (on Windows this requires elevated permissionsBits).
+   * Creates a symbolic link to a file.  On Windows operating systems, this may require administrator elevation.
    * Behind the scenes it uses `fs.symlinkSync()`.
+   *
+   * @remarks
+   * To avoid administrator elevation on Windows, use {@link FileSystem.createHardLink} instead.
+   *
+   * On Windows operating systems, the NTFS file system distinguishes file symlinks versus directory symlinks:
+   * If the target is not the correct type, the symlink will be created successfully, but will fail to resolve.
+   * Other operating systems do not make this distinction, in which case {@link FileSystem.createSymbolicLinkFile}
+   * and {@link FileSystem.createSymbolicLinkFolder} can be used interchangeably, but doing so will make your
+   * tool incompatible with Windows.
    */
   public static createSymbolicLinkFile(options: IFileSystemCreateLinkOptions): void {
     FileSystem._wrapException(() => {
@@ -1142,8 +1164,17 @@ export class FileSystem {
   }
 
   /**
-   * Creates a symbolic link to a folder (on Windows this requires elevated permissionsBits).
+   * Creates a symbolic link to a folder.  On Windows operating systems, this may require administrator elevation.
    * Behind the scenes it uses `fs.symlinkSync()`.
+   *
+   * @remarks
+   * To avoid administrator elevation on Windows, use {@link FileSystem.createSymbolicLinkJunction} instead.
+   *
+   * On Windows operating systems, the NTFS file system distinguishes file symlinks versus directory symlinks:
+   * If the target is not the correct type, the symlink will be created successfully, but will fail to resolve.
+   * Other operating systems do not make this distinction, in which case {@link FileSystem.createSymbolicLinkFile}
+   * and {@link FileSystem.createSymbolicLinkFolder} can be used interchangeably, but doing so will make your
+   * tool incompatible with Windows.
    */
   public static createSymbolicLinkFolder(options: IFileSystemCreateLinkOptions): void {
     FileSystem._wrapException(() => {
@@ -1165,8 +1196,20 @@ export class FileSystem {
   }
 
   /**
-   * Creates a hard link.
+   * Creates a hard link.  The link target must be a file, not a folder.
    * Behind the scenes it uses `fs.linkSync()`.
+   *
+   * @remarks
+   * For security reasons, Windows operating systems by default require administrator elevation to create
+   * symbolic links.  As a result, on Windows it's generally recommended for Node.js tools to use hard links
+   * (for files) or NTFS directory junctions (for folders), since regular users are allowed to create them.
+   * Hard links and junctions are less vulnerable to symlink attacks because they cannot reference a network share,
+   * and their target must exist at the time of link creation.  Non-Windows operating systems generally don't
+   * restrict symlink creation, and as such are more vulnerable to symlink attacks.  Note that Windows can be
+   * configured to permit regular users to create symlinks, for example by enabling Windows 10 "developer mode."
+   *
+   * A hard link requires the link source and target to both be located on same disk volume;
+   * if not, use a symbolic link instead.
    */
   public static createHardLink(options: IFileSystemCreateLinkOptions): void {
     FileSystem._wrapException(() => {
@@ -1270,7 +1313,7 @@ export class FileSystem {
     try {
       linkFn();
     } catch (error) {
-      if (FileSystem.isExistError(error)) {
+      if (FileSystem.isExistError(error as Error)) {
         // Link exists, handle it
         switch (options.alreadyExistsBehavior) {
           case AlreadyExistsBehavior.Ignore:
@@ -1291,7 +1334,7 @@ export class FileSystem {
         // retrying. There are also cases where the target file must exist, so validate in
         // those cases to avoid confusing the missing directory with the missing target file.
         if (
-          FileSystem.isNotExistError(error) &&
+          FileSystem.isNotExistError(error as Error) &&
           (!options.linkTargetMustExist || FileSystem.exists(options.linkTargetPath))
         ) {
           this.ensureFolder(nodeJsPath.dirname(options.newLinkPath));
@@ -1310,7 +1353,7 @@ export class FileSystem {
     try {
       await linkFn();
     } catch (error) {
-      if (FileSystem.isExistError(error)) {
+      if (FileSystem.isExistError(error as Error)) {
         // Link exists, handle it
         switch (options.alreadyExistsBehavior) {
           case AlreadyExistsBehavior.Ignore:
@@ -1331,7 +1374,7 @@ export class FileSystem {
         // retrying. There are also cases where the target file must exist, so validate in
         // those cases to avoid confusing the missing directory with the missing target file.
         if (
-          FileSystem.isNotExistError(error) &&
+          FileSystem.isNotExistError(error as Error) &&
           (!options.linkTargetMustExist || (await FileSystem.existsAsync(options.linkTargetPath)))
         ) {
           await this.ensureFolderAsync(nodeJsPath.dirname(options.newLinkPath));
@@ -1347,7 +1390,7 @@ export class FileSystem {
     try {
       return fn();
     } catch (error) {
-      FileSystem._updateErrorMessage(error);
+      FileSystem._updateErrorMessage(error as Error);
       throw error;
     }
   }
@@ -1356,7 +1399,7 @@ export class FileSystem {
     try {
       return await fn();
     } catch (error) {
-      FileSystem._updateErrorMessage(error);
+      FileSystem._updateErrorMessage(error as Error);
       throw error;
     }
   }
