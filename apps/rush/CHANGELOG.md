@@ -1,6 +1,22 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 10 Sep 2021 23:20:00 GMT and should not be manually modified.
+This log was last generated on Wed, 22 Sep 2021 22:54:17 GMT and should not be manually modified.
+
+## 5.54.0
+Wed, 22 Sep 2021 22:54:17 GMT
+
+### Minor changes
+
+- Add ability to customize tag separator
+
+### Patches
+
+- Lock node-fetch dependency to 2.6.2 due to an incompatibility with 2.6.3 in the Azure Cloud Cache Provider.
+
+### Updates
+
+- Add a "--check-only" parameter to "rush install" to check the validity of the shrinkwrap without performing a full install.
+- Fix an issue where `rush update-autoinstaller` does not use the repo's .npmrc
 
 ## 5.53.0
 Fri, 10 Sep 2021 23:20:00 GMT
