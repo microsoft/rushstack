@@ -555,6 +555,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "type-fest",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "typescript",
       "allowedCategories": [ "libraries", "tests" ]
     },
