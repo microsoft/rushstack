@@ -290,7 +290,7 @@ export class ChangeAction extends BaseRushAction {
         interactiveMode
       );
     } catch (error) {
-      throw new Error(`There was an error creating a change file: ${error.toString()}`);
+      throw new Error(`There was an error creating a change file: ${(error as Error).toString()}`);
     }
   }
 

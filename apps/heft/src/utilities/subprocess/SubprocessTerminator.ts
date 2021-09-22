@@ -173,7 +173,7 @@ export class SubprocessTerminator {
           SubprocessTerminator.killProcessTree(trackedSubprocess.subprocess, { detached: true });
         } catch (error) {
           if (firstError === undefined) {
-            firstError = error;
+            firstError = error as Error;
           }
         }
       }

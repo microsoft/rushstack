@@ -114,7 +114,7 @@ export abstract class LinterBase<TLintResult> {
     try {
       tslintCacheData = await JsonFile.loadAsync(cacheFilePath);
     } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
+      if (FileSystem.isNotExistError(e as Error)) {
         tslintCacheData = undefined;
       } else {
         throw e;

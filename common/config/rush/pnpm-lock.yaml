@@ -46,8 +46,8 @@ importers:
       '@microsoft/tsdoc': 0.13.2
       '@microsoft/tsdoc-config': ~0.15.2
       '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13
       '@rushstack/node-core-library': workspace:*
       '@rushstack/rig-package': workspace:*
       '@rushstack/ts-command-line': workspace:*
@@ -61,7 +61,7 @@ importers:
       resolve: ~1.17.0
       semver: ~7.3.0
       source-map: ~0.6.1
-      typescript: ~4.3.5
+      typescript: ~4.4.2
     dependencies:
       '@microsoft/api-extractor-model': link:../api-extractor-model
       '@microsoft/tsdoc': 0.13.2
@@ -74,11 +74,11 @@ importers:
       resolve: 1.17.0
       semver: 7.3.5
       source-map: 0.6.1
-      typescript: 4.3.5
+      typescript: 4.4.3
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11_@rushstack+heft@0.34.6
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13_@rushstack+heft@0.38.1
       '@types/heft-jest': 1.0.1
       '@types/lodash': 4.14.116
       '@types/node': 10.17.13
@@ -90,8 +90,8 @@ importers:
       '@microsoft/tsdoc': 0.13.2
       '@microsoft/tsdoc-config': ~0.15.2
       '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13
       '@rushstack/node-core-library': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
@@ -101,8 +101,8 @@ importers:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11_@rushstack+heft@0.34.6
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13_@rushstack+heft@0.38.1
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
 
@@ -110,9 +110,9 @@ importers:
     specifiers:
       '@microsoft/api-extractor': workspace:*
       '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': 0.34.6
+      '@rushstack/heft': 0.38.1
       '@rushstack/heft-config-file': workspace:*
-      '@rushstack/heft-node-rig': 1.1.11
+      '@rushstack/heft-node-rig': 1.2.13
       '@rushstack/node-core-library': workspace:*
       '@rushstack/rig-package': workspace:*
       '@rushstack/ts-command-line': workspace:*
@@ -135,7 +135,7 @@ importers:
       tapable: 1.1.3
       true-case-path: ~2.2.1
       tslint: ~5.20.1
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     dependencies:
       '@rushstack/heft-config-file': link:../../libraries/heft-config-file
       '@rushstack/node-core-library': link:../../libraries/node-core-library
@@ -155,8 +155,8 @@ importers:
     devDependencies:
       '@microsoft/api-extractor': link:../api-extractor
       '@rushstack/eslint-config': link:../../stack/eslint-config
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11_@rushstack+heft@0.34.6
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13_@rushstack+heft@0.38.1
       '@types/argparse': 1.0.38
       '@types/eslint': 7.2.0
       '@types/glob': 7.1.1
@@ -164,8 +164,8 @@ importers:
       '@types/node': 10.17.13
       '@types/semver': 7.3.5
       colors: 1.2.5
-      tslint: 5.20.1_typescript@3.9.10
-      typescript: 3.9.10
+      tslint: 5.20.1_typescript@4.4.3
+      typescript: 4.4.3
 
   ../../apps/rundown:
     specifiers:
@@ -271,7 +271,7 @@ importers:
       strict-uri-encode: ~2.0.0
       tar: ~5.0.5
       true-case-path: ~2.2.1
-      typescript: ~3.9.7
+      typescript: ~4.4.2
       z-schema: ~3.18.3
     dependencies:
       '@azure/identity': 1.0.3
@@ -332,7 +332,7 @@ importers:
       '@types/tar': 4.0.3
       '@types/z-schema': 3.16.31
       jest: 25.4.0
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../build-tests-samples/heft-node-basic-tutorial:
     specifiers:
@@ -342,7 +342,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       eslint: ~7.30.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
       '@rushstack/heft': link:../../apps/heft
@@ -350,7 +350,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       eslint: 7.30.0
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../build-tests-samples/heft-node-jest-tutorial:
     specifiers:
@@ -360,7 +360,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       eslint: ~7.30.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
       '@rushstack/heft': link:../../apps/heft
@@ -368,7 +368,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       eslint: 7.30.0
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../build-tests-samples/heft-node-rig-tutorial:
     specifiers:
@@ -403,7 +403,7 @@ importers:
       react-dom: ~16.13.1
       source-map-loader: ~1.1.2
       style-loader: ~1.2.1
-      typescript: ~3.9.7
+      typescript: ~4.4.2
       webpack: ~4.44.2
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
@@ -423,7 +423,7 @@ importers:
       react-dom: 16.13.1_react@16.13.1
       source-map-loader: 1.1.3_webpack@4.44.2
       style-loader: 1.2.1_webpack@4.44.2
-      typescript: 3.9.10
+      typescript: 4.4.3
       webpack: 4.44.2
 
   ../../build-tests-samples/heft-storybook-react-tutorial-storykit:
@@ -489,7 +489,7 @@ importers:
       react-dom: ~16.13.1
       source-map-loader: ~1.1.2
       style-loader: ~1.2.1
-      typescript: ~3.9.7
+      typescript: ~4.4.2
       webpack: ~4.44.2
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
@@ -507,7 +507,7 @@ importers:
       react-dom: 16.13.1_react@16.13.1
       source-map-loader: 1.1.3_webpack@4.44.2
       style-loader: 1.2.1_webpack@4.44.2
-      typescript: 3.9.10
+      typescript: 4.4.3
       webpack: 4.44.2
 
   ../../build-tests-samples/packlets-tutorial:
@@ -516,13 +516,13 @@ importers:
       '@rushstack/heft': workspace:*
       '@types/node': 10.17.13
       eslint: ~7.30.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@types/node': 10.17.13
       eslint: 7.30.0
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../build-tests/api-documenter-test:
     specifiers:
@@ -531,14 +531,14 @@ importers:
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: ~7.0.1
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     devDependencies:
       '@microsoft/api-documenter': link:../../apps/api-documenter
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: 7.0.1
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../build-tests/api-extractor-lib1-test:
     specifiers:
@@ -558,13 +558,13 @@ importers:
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: ~7.0.1
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     devDependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: 7.0.1
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../build-tests/api-extractor-lib3-test:
     specifiers:
@@ -573,7 +573,7 @@ importers:
       '@types/node': 10.17.13
       api-extractor-lib1-test: workspace:*
       fs-extra: ~7.0.1
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     dependencies:
       api-extractor-lib1-test: link:../api-extractor-lib1-test
     devDependencies:
@@ -581,7 +581,7 @@ importers:
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
       fs-extra: 7.0.1
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../build-tests/api-extractor-scenarios:
     specifiers:
@@ -595,7 +595,7 @@ importers:
       api-extractor-lib3-test: workspace:*
       colors: ~1.2.1
       fs-extra: ~7.0.1
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     devDependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@microsoft/teams-js': 1.3.0-beta.4
@@ -607,7 +607,7 @@ importers:
       api-extractor-lib3-test: link:../api-extractor-lib3-test
       colors: 1.2.5
       fs-extra: 7.0.1
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../build-tests/api-extractor-test-01:
     specifiers:
@@ -618,7 +618,7 @@ importers:
       '@types/node': 10.17.13
       fs-extra: ~7.0.1
       long: ^4.0.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     dependencies:
       '@types/jest': 25.2.1
       '@types/long': 4.0.0
@@ -628,7 +628,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       fs-extra: 7.0.1
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../build-tests/api-extractor-test-02:
     specifiers:
@@ -638,7 +638,7 @@ importers:
       api-extractor-test-01: workspace:*
       fs-extra: ~7.0.1
       semver: ~7.3.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     dependencies:
       '@types/semver': 7.3.5
       api-extractor-test-01: link:../api-extractor-test-01
@@ -647,7 +647,7 @@ importers:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@types/node': 10.17.13
       fs-extra: 7.0.1
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../build-tests/api-extractor-test-03:
     specifiers:
@@ -655,25 +655,25 @@ importers:
       '@types/node': 10.17.13
       api-extractor-test-02: workspace:*
       fs-extra: ~7.0.1
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     devDependencies:
       '@types/jest': 25.2.1
       '@types/node': 10.17.13
       api-extractor-test-02: link:../api-extractor-test-02
       fs-extra: 7.0.1
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../build-tests/api-extractor-test-04:
     specifiers:
       '@microsoft/api-extractor': workspace:*
       api-extractor-lib1-test: workspace:*
       fs-extra: ~7.0.1
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     dependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       api-extractor-lib1-test: link:../api-extractor-lib1-test
       fs-extra: 7.0.1
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../build-tests/heft-action-plugin:
     specifiers:
@@ -682,7 +682,7 @@ importers:
       '@rushstack/node-core-library': workspace:*
       '@types/node': 10.17.13
       eslint: ~7.30.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
     devDependencies:
@@ -690,7 +690,7 @@ importers:
       '@rushstack/heft': link:../../apps/heft
       '@types/node': 10.17.13
       eslint: 7.30.0
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../build-tests/heft-action-plugin-test:
     specifiers:
@@ -714,7 +714,7 @@ importers:
       '@types/tapable': 1.0.6
       eslint: ~7.30.0
       tapable: 1.1.3
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     dependencies:
       tapable: 1.1.3
     devDependencies:
@@ -723,7 +723,7 @@ importers:
       '@types/node': 10.17.13
       '@types/tapable': 1.0.6
       eslint: 7.30.0
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../build-tests/heft-example-plugin-02:
     specifiers:
@@ -732,14 +732,14 @@ importers:
       '@types/node': 10.17.13
       eslint: ~7.30.0
       heft-example-plugin-01: workspace:*
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@types/node': 10.17.13
       eslint: 7.30.0
       heft-example-plugin-01: link:../heft-example-plugin-01
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../build-tests/heft-fastify-test:
     specifiers:
@@ -749,7 +749,7 @@ importers:
       '@types/node': 10.17.13
       eslint: ~7.30.0
       fastify: ~3.16.1
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     dependencies:
       fastify: 3.16.2
     devDependencies:
@@ -758,7 +758,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       eslint: 7.30.0
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../build-tests/heft-jest-reporters-test:
     specifiers:
@@ -769,7 +769,7 @@ importers:
       '@rushstack/heft-jest-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       eslint: ~7.30.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     devDependencies:
       '@jest/reporters': 25.4.0
       '@jest/types': 25.4.0
@@ -778,17 +778,17 @@ importers:
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@types/heft-jest': 1.0.1
       eslint: 7.30.0
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../build-tests/heft-minimal-rig-test:
     specifiers:
       '@microsoft/api-extractor': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     dependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../build-tests/heft-minimal-rig-usage-test:
     specifiers:
@@ -817,7 +817,7 @@ importers:
       heft-example-plugin-02: workspace:*
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     devDependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@rushstack/eslint-config': link:../../stack/eslint-config
@@ -828,9 +828,9 @@ importers:
       eslint: 7.30.0
       heft-example-plugin-01: link:../heft-example-plugin-01
       heft-example-plugin-02: link:../heft-example-plugin-02
-      tslint: 5.20.1_typescript@3.9.10
-      tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.9.10
-      typescript: 3.9.10
+      tslint: 5.20.1_typescript@4.4.3
+      tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@4.4.3
+      typescript: 4.4.3
 
   ../../build-tests/heft-node-everything-test:
     specifiers:
@@ -845,7 +845,7 @@ importers:
       heft-example-plugin-02: workspace:*
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     devDependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@rushstack/eslint-config': link:../../stack/eslint-config
@@ -856,9 +856,9 @@ importers:
       eslint: 7.30.0
       heft-example-plugin-01: link:../heft-example-plugin-01
       heft-example-plugin-02: link:../heft-example-plugin-02
-      tslint: 5.20.1_typescript@3.9.10
-      tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.9.10
-      typescript: 3.9.10
+      tslint: 5.20.1_typescript@4.4.3
+      tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@4.4.3
+      typescript: 4.4.3
 
   ../../build-tests/heft-sass-test:
     specifiers:
@@ -883,7 +883,7 @@ importers:
       react-dom: ~16.13.1
       sass-loader: ~10.1.1
       style-loader: ~1.2.1
-      typescript: ~3.9.7
+      typescript: ~4.4.2
       webpack: ~4.44.2
     dependencies:
       buttono: 1.0.4
@@ -908,7 +908,7 @@ importers:
       react-dom: 16.13.1_react@16.13.1
       sass-loader: 10.1.1_node-sass@5.0.0+webpack@4.44.2
       style-loader: 1.2.1_webpack@4.44.2
-      typescript: 3.9.10
+      typescript: 4.4.3
       webpack: 4.44.2
 
   ../../build-tests/heft-typescript-composite-test:
@@ -917,21 +917,23 @@ importers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
       '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       '@types/webpack-env': 1.13.0
       eslint: ~7.30.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@types/heft-jest': 1.0.1
+      '@types/jest': 25.2.1
       '@types/webpack-env': 1.13.0
       eslint: 7.30.0
-      tslint: 5.20.1_typescript@3.9.10
-      tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.9.10
-      typescript: 3.9.10
+      tslint: 5.20.1_typescript@4.4.3
+      tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@4.4.3
+      typescript: 4.4.3
 
   ../../build-tests/heft-web-rig-library-test:
     specifiers:
@@ -955,7 +957,7 @@ importers:
       file-loader: ~6.0.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
       webpack: ~4.44.2
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
@@ -966,9 +968,9 @@ importers:
       '@types/webpack-env': 1.13.0
       eslint: 7.30.0
       file-loader: 6.0.0_webpack@4.44.2
-      tslint: 5.20.1_typescript@3.9.10
-      tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.9.10
-      typescript: 3.9.10
+      tslint: 5.20.1_typescript@4.4.3
+      tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@4.4.3
+      typescript: 4.4.3
       webpack: 4.44.2
 
   ../../build-tests/heft-webpack5-everything-test:
@@ -982,7 +984,7 @@ importers:
       eslint: ~7.30.0
       tslint: ~5.20.1
       tslint-microsoft-contrib: ~6.2.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
       '@rushstack/heft': link:../../apps/heft
@@ -991,9 +993,9 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/webpack-env': 1.13.0
       eslint: 7.30.0
-      tslint: 5.20.1_typescript@3.9.10
-      tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.9.10
-      typescript: 3.9.10
+      tslint: 5.20.1_typescript@4.4.3
+      tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@4.4.3
+      typescript: 4.4.3
 
   ../../build-tests/install-test-workspace:
     specifiers:
@@ -1013,7 +1015,7 @@ importers:
       '@types/webpack-env': 1.13.0
       html-webpack-plugin: ~4.5.0
       ts-loader: 6.0.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
       webpack: ~4.44.2
       webpack-bundle-analyzer: ~3.6.0
       webpack-cli: ~3.3.2
@@ -1026,8 +1028,8 @@ importers:
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
       '@types/webpack-env': 1.13.0
       html-webpack-plugin: 4.5.2_webpack@4.44.2
-      ts-loader: 6.0.0_typescript@3.9.10
-      typescript: 3.9.10
+      ts-loader: 6.0.0_typescript@4.4.3
+      typescript: 4.4.3
       webpack: 4.44.2_webpack-cli@3.3.12
       webpack-bundle-analyzer: 3.6.1
       webpack-cli: 3.3.12_webpack@4.44.2
@@ -1045,7 +1047,7 @@ importers:
       html-webpack-plugin: ~4.5.0
       lodash: ~4.17.15
       ts-loader: 6.0.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
       webpack: ~4.44.2
       webpack-bundle-analyzer: ~3.6.0
       webpack-cli: ~3.3.2
@@ -1060,8 +1062,8 @@ importers:
       '@types/webpack-env': 1.13.0
       html-webpack-plugin: 4.5.2_webpack@4.44.2
       lodash: 4.17.21
-      ts-loader: 6.0.0_typescript@3.9.10
-      typescript: 3.9.10
+      ts-loader: 6.0.0_typescript@4.4.3
+      typescript: 4.4.3
       webpack: 4.44.2_webpack-cli@3.3.12
       webpack-bundle-analyzer: 3.6.1
       webpack-cli: 3.3.12_webpack@4.44.2
@@ -1076,7 +1078,7 @@ importers:
       '@types/webpack-env': 1.13.0
       html-webpack-plugin: ~4.5.0
       ts-loader: 6.0.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
       webpack: ~4.44.2
       webpack-bundle-analyzer: ~3.6.0
       webpack-cli: ~3.3.2
@@ -1088,8 +1090,8 @@ importers:
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
       '@types/webpack-env': 1.13.0
       html-webpack-plugin: 4.5.2_webpack@4.44.2
-      ts-loader: 6.0.0_typescript@3.9.10
-      typescript: 3.9.10
+      ts-loader: 6.0.0_typescript@4.4.3
+      typescript: 4.4.3
       webpack: 4.44.2_webpack-cli@3.3.12
       webpack-bundle-analyzer: 3.6.1
       webpack-cli: 3.3.12_webpack@4.44.2
@@ -1117,12 +1119,12 @@ importers:
       '@rushstack/ts-command-line': workspace:*
       '@types/node': 10.17.13
       fs-extra: ~7.0.1
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     devDependencies:
       '@rushstack/ts-command-line': link:../../libraries/ts-command-line
       '@types/node': 10.17.13
       fs-extra: 7.0.1
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../heft-plugins/heft-jest-plugin:
     specifiers:
@@ -1143,7 +1145,7 @@ importers:
       jest-environment-node: ~25.4.0
       jest-snapshot: ~25.4.0
       lodash: ~4.17.15
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     dependencies:
       '@jest/core': 25.4.0
       '@jest/reporters': 25.4.0
@@ -1163,7 +1165,7 @@ importers:
       '@types/node': 10.17.13
       eslint: 7.30.0
       jest-environment-node: 25.4.0
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../heft-plugins/heft-sass-plugin:
     specifiers:
@@ -1181,7 +1183,7 @@ importers:
       node-sass: 5.0.0
       postcss: 7.0.32
       postcss-modules: ~1.5.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     dependencies:
       '@rushstack/heft-config-file': link:../../libraries/heft-config-file
       '@rushstack/node-core-library': link:../../libraries/node-core-library
@@ -1198,7 +1200,7 @@ importers:
       '@types/node': 10.17.13
       '@types/node-sass': 4.11.1
       eslint: 7.30.0
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../heft-plugins/heft-storybook-plugin:
     specifiers:
@@ -1285,8 +1287,8 @@ importers:
   ../../libraries/heft-config-file:
     specifiers:
       '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13
       '@rushstack/node-core-library': workspace:*
       '@rushstack/rig-package': workspace:*
       '@types/heft-jest': 1.0.1
@@ -1298,8 +1300,8 @@ importers:
       jsonpath-plus: 4.0.0
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11_@rushstack+heft@0.34.6
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13_@rushstack+heft@0.38.1
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
 
@@ -1320,8 +1322,8 @@ importers:
   ../../libraries/node-core-library:
     specifiers:
       '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13
       '@types/fs-extra': 7.0.0
       '@types/heft-jest': 1.0.1
       '@types/jju': 1.4.1
@@ -1350,8 +1352,8 @@ importers:
       z-schema: 3.18.4
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11_@rushstack+heft@0.34.6
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13_@rushstack+heft@0.38.1
       '@types/fs-extra': 7.0.0
       '@types/heft-jest': 1.0.1
       '@types/jju': 1.4.1
@@ -1380,8 +1382,8 @@ importers:
   ../../libraries/rig-package:
     specifiers:
       '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       '@types/resolve': 1.17.1
@@ -1393,8 +1395,8 @@ importers:
       strip-json-comments: 3.1.1
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11_@rushstack+heft@0.34.6
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13_@rushstack+heft@0.38.1
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
       '@types/resolve': 1.17.1
@@ -1462,24 +1464,24 @@ importers:
   ../../libraries/tree-pattern:
     specifiers:
       '@rushstack/eslint-config': 2.4.0
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13
       '@types/heft-jest': 1.0.1
       eslint: ~7.30.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     devDependencies:
-      '@rushstack/eslint-config': 2.4.0_eslint@7.30.0+typescript@3.9.10
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11_@rushstack+heft@0.34.6
+      '@rushstack/eslint-config': 2.4.0_eslint@7.30.0+typescript@4.4.3
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13_@rushstack+heft@0.38.1
       '@types/heft-jest': 1.0.1
       eslint: 7.30.0
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../libraries/ts-command-line:
     specifiers:
       '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13
       '@types/argparse': 1.0.38
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
@@ -1493,16 +1495,16 @@ importers:
       string-argv: 0.3.1
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11_@rushstack+heft@0.34.6
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13_@rushstack+heft@0.38.1
       '@types/heft-jest': 1.0.1
       '@types/node': 10.17.13
 
   ../../libraries/typings-generator:
     specifiers:
       '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13
       '@rushstack/node-core-library': workspace:*
       '@types/glob': 7.1.1
       '@types/node': 10.17.13
@@ -1515,8 +1517,8 @@ importers:
       glob: 7.0.6
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11_@rushstack+heft@0.34.6
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13_@rushstack+heft@0.38.1
       '@types/glob': 7.1.1
 
   ../../repo-scripts/doc-plugin-rush-stack:
@@ -1579,12 +1581,12 @@ importers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
       eslint: ~7.30.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     dependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       eslint: 7.30.0
-      typescript: 3.9.10
+      typescript: 4.4.3
     devDependencies:
       '@rushstack/heft': link:../../apps/heft
 
@@ -1596,14 +1598,14 @@ importers:
       '@rushstack/heft-sass-plugin': workspace:*
       '@rushstack/heft-webpack4-plugin': workspace:*
       eslint: ~7.30.0
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     dependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@rushstack/heft-sass-plugin': link:../../heft-plugins/heft-sass-plugin
       '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
       eslint: 7.30.0
-      typescript: 3.9.10
+      typescript: 4.4.3
     devDependencies:
       '@rushstack/heft': link:../../apps/heft
 
@@ -1621,37 +1623,37 @@ importers:
       eslint-plugin-promise: ~4.2.1
       eslint-plugin-react: ~7.20.0
       eslint-plugin-tsdoc: ~0.2.10
-      typescript: ~3.9.7
+      typescript: ~4.4.2
     dependencies:
       '@rushstack/eslint-patch': link:../eslint-patch
       '@rushstack/eslint-plugin': link:../eslint-plugin
       '@rushstack/eslint-plugin-packlets': link:../eslint-plugin-packlets
       '@rushstack/eslint-plugin-security': link:../eslint-plugin-security
-      '@typescript-eslint/eslint-plugin': 4.28.5_807ba90a897c15d8025326b0ee53254e
-      '@typescript-eslint/experimental-utils': 4.28.5_eslint@7.30.0+typescript@3.9.10
-      '@typescript-eslint/parser': 4.28.5_eslint@7.30.0+typescript@3.9.10
-      '@typescript-eslint/typescript-estree': 4.28.5_typescript@3.9.10
+      '@typescript-eslint/eslint-plugin': 4.28.5_d3ea5ea3249d21f2ae3b3071477ae79b
+      '@typescript-eslint/experimental-utils': 4.28.5_eslint@7.30.0+typescript@4.4.3
+      '@typescript-eslint/parser': 4.28.5_eslint@7.30.0+typescript@4.4.3
+      '@typescript-eslint/typescript-estree': 4.28.5_typescript@4.4.3
       eslint-plugin-promise: 4.2.1
       eslint-plugin-react: 7.20.6_eslint@7.30.0
       eslint-plugin-tsdoc: 0.2.14
     devDependencies:
       eslint: 7.30.0
-      typescript: 3.9.10
+      typescript: 4.4.3
 
   ../../stack/eslint-patch:
     specifiers:
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13
       '@types/node': 10.17.13
     devDependencies:
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11_@rushstack+heft@0.34.6
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13_@rushstack+heft@0.38.1
       '@types/node': 10.17.13
 
   ../../stack/eslint-plugin:
     specifiers:
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13
       '@rushstack/tree-pattern': workspace:*
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
@@ -1666,8 +1668,8 @@ importers:
       '@rushstack/tree-pattern': link:../../libraries/tree-pattern
       '@typescript-eslint/experimental-utils': 4.28.5_eslint@7.30.0+typescript@4.3.5
     devDependencies:
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11_@rushstack+heft@0.34.6
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13_@rushstack+heft@0.38.1
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
       '@types/heft-jest': 1.0.1
@@ -1679,8 +1681,8 @@ importers:
 
   ../../stack/eslint-plugin-packlets:
     specifiers:
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13
       '@rushstack/tree-pattern': workspace:*
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
@@ -1695,8 +1697,8 @@ importers:
       '@rushstack/tree-pattern': link:../../libraries/tree-pattern
       '@typescript-eslint/experimental-utils': 4.28.5_eslint@7.30.0+typescript@4.3.5
     devDependencies:
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11_@rushstack+heft@0.34.6
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13_@rushstack+heft@0.38.1
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
       '@types/heft-jest': 1.0.1
@@ -1708,8 +1710,8 @@ importers:
 
   ../../stack/eslint-plugin-security:
     specifiers:
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13
       '@rushstack/tree-pattern': workspace:*
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
@@ -1724,8 +1726,8 @@ importers:
       '@rushstack/tree-pattern': link:../../libraries/tree-pattern
       '@typescript-eslint/experimental-utils': 4.28.5_eslint@7.30.0+typescript@4.3.5
     devDependencies:
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-node-rig': 1.1.11_@rushstack+heft@0.34.6
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-node-rig': 1.2.13_@rushstack+heft@0.38.1
       '@types/eslint': 7.2.0
       '@types/estree': 0.0.44
       '@types/heft-jest': 1.0.1
@@ -3513,6 +3515,7 @@ packages:
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
       - supports-color
+    dev: false
 
   /@eslint/eslintrc/0.4.3:
     resolution: {integrity: sha512-J6KFFz5QCYUJq3pf0mjEcCJVERbzv71PUIDczuh9JkwGEzced6CO5ADLHB1rbf/+oPBtoPfMYNOpGDzCANlbXw==}
@@ -3945,12 +3948,12 @@ packages:
       '@rushstack/node-core-library': 3.38.0
     dev: false
 
-  /@microsoft/api-extractor-model/7.13.4:
-    resolution: {integrity: sha512-NYaR3hJinh089/Gkee8fvmEFf9zKkoUvNxgkqUlKBCDXH2+Ou4tNDuL8G6zjhKBPicHkp2VcL8l7q9H6txUkjQ==}
+  /@microsoft/api-extractor-model/7.13.7:
+    resolution: {integrity: sha512-emwhcaSF/h3WdqBWps4UU0RtGOGzy53IsplxuoLwtCuMAx3namYvJSfUGa5ajGPBao4MCyRYGsMc3EZ6IdR8cQ==}
     dependencies:
       '@microsoft/tsdoc': 0.13.2
       '@microsoft/tsdoc-config': 0.15.2
-      '@rushstack/node-core-library': 3.39.1
+      '@rushstack/node-core-library': 3.40.2
     dev: true
 
   /@microsoft/api-extractor/7.15.2:
@@ -3971,16 +3974,16 @@ packages:
       typescript: 4.2.4
     dev: false
 
-  /@microsoft/api-extractor/7.18.2:
-    resolution: {integrity: sha512-xRzTZV6GkUraRiPQPYy6uvttyMvzqssAHXGPlrvR7Nf62/0arZPM+XQ7ik8WafnHZ6nqIQcNp0r9S+qQ9wsjEA==}
+  /@microsoft/api-extractor/7.18.9:
+    resolution: {integrity: sha512-N+fbG+6SwA1i6EW3iGRp/nAT8vQpRSDvZ1DzBUr8xIS7tNfJ0C75ndPPziUT8EmalhLixRnIw6Ncmur8AFELRg==}
     hasBin: true
     dependencies:
-      '@microsoft/api-extractor-model': 7.13.4
+      '@microsoft/api-extractor-model': 7.13.7
       '@microsoft/tsdoc': 0.13.2
       '@microsoft/tsdoc-config': 0.15.2
-      '@rushstack/node-core-library': 3.39.1
-      '@rushstack/rig-package': 0.2.13
-      '@rushstack/ts-command-line': 4.8.1
+      '@rushstack/node-core-library': 3.40.2
+      '@rushstack/rig-package': 0.3.0
+      '@rushstack/ts-command-line': 4.9.0
       colors: 1.2.5
       lodash: 4.17.21
       resolve: 1.17.0
@@ -4256,25 +4259,25 @@ packages:
       - supports-color
     dev: false
 
-  /@rushstack/eslint-config/2.4.0_eslint@7.30.0+typescript@3.9.10:
+  /@rushstack/eslint-config/2.4.0_eslint@7.30.0+typescript@4.4.3:
     resolution: {integrity: sha512-qH3Q++hoELDgmOV8Hh0h804TBeRSOFv/I2kI6V3qOJEy+reKneyIHAraZrBwFDvMHdBUbXWkWsR/gEpG2sq6QQ==}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0
       typescript: '>=3.0.0'
     dependencies:
       '@rushstack/eslint-patch': 1.0.6
-      '@rushstack/eslint-plugin': 0.8.0_eslint@7.30.0+typescript@3.9.10
-      '@rushstack/eslint-plugin-packlets': 0.3.0_eslint@7.30.0+typescript@3.9.10
-      '@rushstack/eslint-plugin-security': 0.2.0_eslint@7.30.0+typescript@3.9.10
-      '@typescript-eslint/eslint-plugin': 4.28.5_807ba90a897c15d8025326b0ee53254e
-      '@typescript-eslint/experimental-utils': 4.28.5_eslint@7.30.0+typescript@3.9.10
-      '@typescript-eslint/parser': 4.28.5_eslint@7.30.0+typescript@3.9.10
-      '@typescript-eslint/typescript-estree': 4.28.5_typescript@3.9.10
+      '@rushstack/eslint-plugin': 0.8.0_eslint@7.30.0+typescript@4.4.3
+      '@rushstack/eslint-plugin-packlets': 0.3.0_eslint@7.30.0+typescript@4.4.3
+      '@rushstack/eslint-plugin-security': 0.2.0_eslint@7.30.0+typescript@4.4.3
+      '@typescript-eslint/eslint-plugin': 4.28.5_d3ea5ea3249d21f2ae3b3071477ae79b
+      '@typescript-eslint/experimental-utils': 4.28.5_eslint@7.30.0+typescript@4.4.3
+      '@typescript-eslint/parser': 4.28.5_eslint@7.30.0+typescript@4.4.3
+      '@typescript-eslint/typescript-estree': 4.28.5_typescript@4.4.3
       eslint: 7.30.0
       eslint-plugin-promise: 4.2.1
       eslint-plugin-react: 7.20.6_eslint@7.30.0
       eslint-plugin-tsdoc: 0.2.14
-      typescript: 3.9.10
+      typescript: 4.4.3
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -4295,13 +4298,13 @@ packages:
       - typescript
     dev: false
 
-  /@rushstack/eslint-plugin-packlets/0.3.0_eslint@7.30.0+typescript@3.9.10:
+  /@rushstack/eslint-plugin-packlets/0.3.0_eslint@7.30.0+typescript@4.4.3:
     resolution: {integrity: sha512-TyB6HtghT9DxzeRM9lsqFsrNI5/mzI8j0ML5dXemfkGriIZS8sr3mIq4AA0WkG/pIzBelsKGM/7sbOX/gvGISA==}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0
     dependencies:
       '@rushstack/tree-pattern': 0.2.1
-      '@typescript-eslint/experimental-utils': 4.28.5_eslint@7.30.0+typescript@3.9.10
+      '@typescript-eslint/experimental-utils': 4.28.5_eslint@7.30.0+typescript@4.4.3
       eslint: 7.30.0
     transitivePeerDependencies:
       - supports-color
@@ -4321,13 +4324,13 @@ packages:
       - typescript
     dev: false
 
-  /@rushstack/eslint-plugin-security/0.2.0_eslint@7.30.0+typescript@3.9.10:
+  /@rushstack/eslint-plugin-security/0.2.0_eslint@7.30.0+typescript@4.4.3:
     resolution: {integrity: sha512-S99MIs5U7toN1Gdx2kEmCyDyCL6RaZmtarxAGX9l15lcji9GNRxePmbjvn0CRONtgcyXrQphMiuleYGkLVBG3g==}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0
     dependencies:
       '@rushstack/tree-pattern': 0.2.1
-      '@typescript-eslint/experimental-utils': 4.28.5_eslint@7.30.0+typescript@3.9.10
+      '@typescript-eslint/experimental-utils': 4.28.5_eslint@7.30.0+typescript@4.4.3
       eslint: 7.30.0
     transitivePeerDependencies:
       - supports-color
@@ -4347,39 +4350,39 @@ packages:
       - typescript
     dev: false
 
-  /@rushstack/eslint-plugin/0.8.0_eslint@7.30.0+typescript@3.9.10:
+  /@rushstack/eslint-plugin/0.8.0_eslint@7.30.0+typescript@4.4.3:
     resolution: {integrity: sha512-75qjEio/F/m7O7+p/xNTF72xDiTPUd7KjJeEv9c5V27mQok/Ok6oG9NV3rlpd2RJ8FJndBCDeaLg3T97LzQKLw==}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0
     dependencies:
       '@rushstack/tree-pattern': 0.2.1
-      '@typescript-eslint/experimental-utils': 4.28.5_eslint@7.30.0+typescript@3.9.10
+      '@typescript-eslint/experimental-utils': 4.28.5_eslint@7.30.0+typescript@4.4.3
       eslint: 7.30.0
     transitivePeerDependencies:
       - supports-color
       - typescript
     dev: true
 
-  /@rushstack/heft-config-file/0.6.1:
-    resolution: {integrity: sha512-fdVFN8qvAdn4YeQr7k9zQ6jWAzwvnuLfiCOK/5gN+2o3iY8M02ntDmNEXuGfH7jBX6yhRga9UjHqKBh5bzoLpA==}
+  /@rushstack/heft-config-file/0.6.6:
+    resolution: {integrity: sha512-XaY2boTJaIE51fDa6oENsRvmLu0SltynyhC9IzYFb1fzEoHOcIuRMr5HIcobhTDCj41UkbIXEv+QinS6c5GCGw==}
     engines: {node: '>=10.13.0'}
     dependencies:
-      '@rushstack/node-core-library': 3.39.1
-      '@rushstack/rig-package': 0.2.13
+      '@rushstack/node-core-library': 3.40.2
+      '@rushstack/rig-package': 0.3.0
       jsonpath-plus: 4.0.0
     dev: true
 
-  /@rushstack/heft-jest-plugin/0.1.12_@rushstack+heft@0.34.6:
-    resolution: {integrity: sha512-fqtCIWFOC168LKgL+fKEdnLcvL/pEmnqr1C1ZkdJuztdWCkW8lzmbbKnfEID9ZIItfVgBZI1rTZlPQZDOTKWWQ==}
+  /@rushstack/heft-jest-plugin/0.1.29_@rushstack+heft@0.38.1:
+    resolution: {integrity: sha512-5gURFujqSukHM04LOgZZCjxJ8Wnvr86//LfmSkepbXt1Pqko4JcdTqMFLdfhYKT0486FTiqcnoCSenz5u4rZYQ==}
     peerDependencies:
-      '@rushstack/heft': ^0.34.6
+      '@rushstack/heft': ^0.38.1
     dependencies:
       '@jest/core': 25.4.0
       '@jest/reporters': 25.4.0
       '@jest/transform': 25.4.0
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-config-file': 0.6.1
-      '@rushstack/node-core-library': 3.39.1
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-config-file': 0.6.6
+      '@rushstack/node-core-library': 3.40.2
       jest-config: 25.4.0
       jest-snapshot: 25.4.0
       lodash: 4.17.21
@@ -4390,15 +4393,15 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@rushstack/heft-node-rig/1.1.11_@rushstack+heft@0.34.6:
-    resolution: {integrity: sha512-UW7YKrmdumdrCfHrno0y5IDwGcvxZ71KIHj4QxDWV6hjdmoFCg2JLxP/HHgjH0GdIuwnSNQiVAdxonXOzu0Lrw==}
+  /@rushstack/heft-node-rig/1.2.13_@rushstack+heft@0.38.1:
+    resolution: {integrity: sha512-nBe+Zk2kZ/+szNxlEX/74mIY6F+7MQ0UgBhnOPoKAgqw2TpRZ8kGlwmVyitWFH8f46/AznmGg5adt91FAdz4+w==}
     peerDependencies:
-      '@rushstack/heft': ^0.34.6
+      '@rushstack/heft': ^0.38.1
     dependencies:
-      '@microsoft/api-extractor': 7.18.2
-      '@rushstack/heft': 0.34.6
-      '@rushstack/heft-jest-plugin': 0.1.12_@rushstack+heft@0.34.6
-      eslint: 7.12.1
+      '@microsoft/api-extractor': 7.18.9
+      '@rushstack/heft': 0.38.1
+      '@rushstack/heft-jest-plugin': 0.1.29_@rushstack+heft@0.38.1
+      eslint: 7.30.0
       typescript: 3.9.10
     transitivePeerDependencies:
       - bufferutil
@@ -4407,25 +4410,22 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@rushstack/heft/0.34.6:
-    resolution: {integrity: sha512-sWncn3SLpCpVZfVjGrRozOzVKzW/CF+xEYk1n9U4d1szmTmYRKfrFjMjgA8Txn5oeUfvoyo2JuILVcb6LFnZBg==}
+  /@rushstack/heft/0.38.1:
+    resolution: {integrity: sha512-fVG1REjEvvuVR0C9Rd0eBXHZNUELakHm0U15q3ZhQSpIvL1UYtQ46+6VSSKoWGjy+FpP1HHl/GiUyyMLTQKJAQ==}
     engines: {node: '>=10.13.0'}
     hasBin: true
     dependencies:
-      '@rushstack/heft-config-file': 0.6.1
-      '@rushstack/node-core-library': 3.39.1
-      '@rushstack/rig-package': 0.2.13
-      '@rushstack/ts-command-line': 4.8.1
-      '@rushstack/typings-generator': 0.3.8
+      '@rushstack/heft-config-file': 0.6.6
+      '@rushstack/node-core-library': 3.40.2
+      '@rushstack/rig-package': 0.3.0
+      '@rushstack/ts-command-line': 4.9.0
+      '@rushstack/typings-generator': 0.3.11
       '@types/tapable': 1.0.6
       argparse: 1.0.10
       chokidar: 3.4.3
       fast-glob: 3.2.7
       glob: 7.0.6
       glob-escape: 0.0.2
-      node-sass: 5.0.0
-      postcss: 7.0.32
-      postcss-modules: 1.5.0
       prettier: 2.3.2
       semver: 7.3.5
       tapable: 1.1.3
@@ -4446,8 +4446,8 @@ packages:
       z-schema: 3.18.4
     dev: false
 
-  /@rushstack/node-core-library/3.39.1:
-    resolution: {integrity: sha512-HHgMEHZTXQ3NjpQzWd5+fSt2Eod9yFwj6qBPbaeaNtDNkOL8wbLoxVimQNtcH0Qhn4wxF5u2NTDNFsxf2yd1jw==}
+  /@rushstack/node-core-library/3.40.2:
+    resolution: {integrity: sha512-wzcRucwnhOENTfx6hZ2M+CA1Zmp8Dr572mFFtjxmcQzBWTbNFRB1Mi1wLb7DLza+69OUBoSZcHUqydlwL+gvSA==}
     dependencies:
       '@types/node': 10.17.13
       colors: 1.2.5
@@ -4467,8 +4467,8 @@ packages:
       strip-json-comments: 3.1.1
     dev: false
 
-  /@rushstack/rig-package/0.2.13:
-    resolution: {integrity: sha512-qQMAFKvfb2ooaWU9DrGIK9d8QfyHy/HiuITJbWenlKgzcDXQvQgEduk57YF4Y7LLasDJ5ZzLaaXwlfX8qCRe5Q==}
+  /@rushstack/rig-package/0.3.0:
+    resolution: {integrity: sha512-Lj6noF7Q4BBm1hKiBDw94e6uZvq1xlBwM/d2cBFaPqXeGdV+G6r3qaCWfRiSXK0pcHpGGpV5Tb2MdfhVcO6G/g==}
     dependencies:
       resolve: 1.17.0
       strip-json-comments: 3.1.1
@@ -4486,8 +4486,8 @@ packages:
       string-argv: 0.3.1
     dev: false
 
-  /@rushstack/ts-command-line/4.8.1:
-    resolution: {integrity: sha512-rmxvYdCNRbyRs+DYAPye3g6lkCkWHleqO40K8UPvUAzFqEuj6+YCVssBiOmrUDCoM5gaegSNT0wFDYhz24DWtw==}
+  /@rushstack/ts-command-line/4.9.0:
+    resolution: {integrity: sha512-kmT8t+JfnvphISF1C5WwY56RefjwgajhSjs9J4ckvAFXZDXR6F5cvF5/RTh7fGCzIomg8esy2PHO/b52zFoZvA==}
     dependencies:
       '@types/argparse': 1.0.38
       argparse: 1.0.10
@@ -4495,10 +4495,10 @@ packages:
       string-argv: 0.3.1
     dev: true
 
-  /@rushstack/typings-generator/0.3.8:
-    resolution: {integrity: sha512-IiVzwZKlAzAyFIG8SXzBlpZ8EjPDNdioiGcefsIBR4SPXXYoy/HgXdMTj0X1gdpq0Ro4CyRaJ+5Hj+MhQ/OZEA==}
+  /@rushstack/typings-generator/0.3.11:
+    resolution: {integrity: sha512-dDafJz7OCqhVMGqHvdGLFZCne2ejiDqmJiFBL1hOj0hC3u+8Xv0Dcv+Y1I9QsSwllO3wn658F/sfYT9NYrjyxQ==}
     dependencies:
-      '@rushstack/node-core-library': 3.39.1
+      '@rushstack/node-core-library': 3.40.2
       '@types/node': 10.17.13
       chokidar: 3.4.3
       glob: 7.0.6
@@ -6231,7 +6231,7 @@ packages:
       - supports-color
     dev: false
 
-  /@typescript-eslint/eslint-plugin/4.28.5_807ba90a897c15d8025326b0ee53254e:
+  /@typescript-eslint/eslint-plugin/4.28.5_d3ea5ea3249d21f2ae3b3071477ae79b:
     resolution: {integrity: sha512-m31cPEnbuCqXtEZQJOXAHsHvtoDi9OVaeL5wZnO2KZTnkvELk+u6J6jHg+NzvWQxk+87Zjbc4lJS4NHmgImz6Q==}
     engines: {node: ^10.12.0 || >=12.0.0}
     peerDependencies:
@@ -6242,16 +6242,16 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@typescript-eslint/experimental-utils': 4.28.5_eslint@7.30.0+typescript@3.9.10
-      '@typescript-eslint/parser': 4.28.5_eslint@7.30.0+typescript@3.9.10
-      '@typescript-eslint/scope-manager': 4.28.5_typescript@3.9.10
+      '@typescript-eslint/experimental-utils': 4.28.5_eslint@7.30.0+typescript@4.4.3
+      '@typescript-eslint/parser': 4.28.5_eslint@7.30.0+typescript@4.4.3
+      '@typescript-eslint/scope-manager': 4.28.5_typescript@4.4.3
       debug: 4.3.2
       eslint: 7.30.0
       functional-red-black-tree: 1.0.1
       regexpp: 3.2.0
       semver: 7.3.5
-      tsutils: 3.21.0_typescript@3.9.10
-      typescript: 3.9.10
+      tsutils: 3.21.0_typescript@4.4.3
+      typescript: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -6288,23 +6288,6 @@ packages:
       - typescript
     dev: false
 
-  /@typescript-eslint/experimental-utils/4.28.5_eslint@7.30.0+typescript@3.9.10:
-    resolution: {integrity: sha512-bGPLCOJAa+j49hsynTaAtQIWg6uZd8VLiPcyDe4QPULsvQwLHGLSGKKcBN8/lBxIX14F74UEMK2zNDI8r0okwA==}
-    engines: {node: ^10.12.0 || >=12.0.0}
-    peerDependencies:
-      eslint: '*'
-    dependencies:
-      '@types/json-schema': 7.0.9
-      '@typescript-eslint/scope-manager': 4.28.5_typescript@3.9.10
-      '@typescript-eslint/types': 4.28.5_typescript@3.9.10
-      '@typescript-eslint/typescript-estree': 4.28.5_typescript@3.9.10
-      eslint: 7.30.0
-      eslint-scope: 5.1.1
-      eslint-utils: 3.0.0_eslint@7.30.0
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
-
   /@typescript-eslint/experimental-utils/4.28.5_eslint@7.30.0+typescript@4.3.5:
     resolution: {integrity: sha512-bGPLCOJAa+j49hsynTaAtQIWg6uZd8VLiPcyDe4QPULsvQwLHGLSGKKcBN8/lBxIX14F74UEMK2zNDI8r0okwA==}
     engines: {node: ^10.12.0 || >=12.0.0}
@@ -6322,6 +6305,23 @@ packages:
       - supports-color
       - typescript
     dev: false
+
+  /@typescript-eslint/experimental-utils/4.28.5_eslint@7.30.0+typescript@4.4.3:
+    resolution: {integrity: sha512-bGPLCOJAa+j49hsynTaAtQIWg6uZd8VLiPcyDe4QPULsvQwLHGLSGKKcBN8/lBxIX14F74UEMK2zNDI8r0okwA==}
+    engines: {node: ^10.12.0 || >=12.0.0}
+    peerDependencies:
+      eslint: '*'
+    dependencies:
+      '@types/json-schema': 7.0.9
+      '@typescript-eslint/scope-manager': 4.28.5_typescript@4.4.3
+      '@typescript-eslint/types': 4.28.5_typescript@4.4.3
+      '@typescript-eslint/typescript-estree': 4.28.5_typescript@4.4.3
+      eslint: 7.30.0
+      eslint-scope: 5.1.1
+      eslint-utils: 3.0.0_eslint@7.30.0
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
 
   /@typescript-eslint/parser/3.4.0_eslint@7.12.1+typescript@3.9.10:
     resolution: {integrity: sha512-ZUGI/de44L5x87uX5zM14UYcbn79HSXUR+kzcqU42gH0AgpdB/TjuJy3m4ezI7Q/jk3wTQd755mxSDLhQP79KA==}
@@ -6343,25 +6343,6 @@ packages:
       - supports-color
     dev: false
 
-  /@typescript-eslint/parser/4.28.5_eslint@7.30.0+typescript@3.9.10:
-    resolution: {integrity: sha512-NPCOGhTnkXGMqTznqgVbA5LqVsnw+i3+XA1UKLnAb+MG1Y1rP4ZSK9GX0kJBmAZTMIktf+dTwXToT6kFwyimbw==}
-    engines: {node: ^10.12.0 || >=12.0.0}
-    peerDependencies:
-      eslint: ^5.0.0 || ^6.0.0 || ^7.0.0
-      typescript: '*'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-    dependencies:
-      '@typescript-eslint/scope-manager': 4.28.5_typescript@3.9.10
-      '@typescript-eslint/types': 4.28.5_typescript@3.9.10
-      '@typescript-eslint/typescript-estree': 4.28.5_typescript@3.9.10
-      debug: 4.3.2
-      eslint: 7.30.0
-      typescript: 3.9.10
-    transitivePeerDependencies:
-      - supports-color
-
   /@typescript-eslint/parser/4.28.5_eslint@7.30.0+typescript@4.3.5:
     resolution: {integrity: sha512-NPCOGhTnkXGMqTznqgVbA5LqVsnw+i3+XA1UKLnAb+MG1Y1rP4ZSK9GX0kJBmAZTMIktf+dTwXToT6kFwyimbw==}
     engines: {node: ^10.12.0 || >=12.0.0}
@@ -6382,14 +6363,24 @@ packages:
       - supports-color
     dev: true
 
-  /@typescript-eslint/scope-manager/4.28.5_typescript@3.9.10:
-    resolution: {integrity: sha512-PHLq6n9nTMrLYcVcIZ7v0VY1X7dK309NM8ya9oL/yG8syFINIMHxyr2GzGoBYUdv3NUfCOqtuqps0ZmcgnZTfQ==}
-    engines: {node: ^8.10.0 || ^10.13.0 || >=11.10.1}
+  /@typescript-eslint/parser/4.28.5_eslint@7.30.0+typescript@4.4.3:
+    resolution: {integrity: sha512-NPCOGhTnkXGMqTznqgVbA5LqVsnw+i3+XA1UKLnAb+MG1Y1rP4ZSK9GX0kJBmAZTMIktf+dTwXToT6kFwyimbw==}
+    engines: {node: ^10.12.0 || >=12.0.0}
+    peerDependencies:
+      eslint: ^5.0.0 || ^6.0.0 || ^7.0.0
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
     dependencies:
-      '@typescript-eslint/types': 4.28.5_typescript@3.9.10
-      '@typescript-eslint/visitor-keys': 4.28.5_typescript@3.9.10
+      '@typescript-eslint/scope-manager': 4.28.5_typescript@4.4.3
+      '@typescript-eslint/types': 4.28.5_typescript@4.4.3
+      '@typescript-eslint/typescript-estree': 4.28.5_typescript@4.4.3
+      debug: 4.3.2
+      eslint: 7.30.0
+      typescript: 4.4.3
     transitivePeerDependencies:
-      - typescript
+      - supports-color
 
   /@typescript-eslint/scope-manager/4.28.5_typescript@4.3.5:
     resolution: {integrity: sha512-PHLq6n9nTMrLYcVcIZ7v0VY1X7dK309NM8ya9oL/yG8syFINIMHxyr2GzGoBYUdv3NUfCOqtuqps0ZmcgnZTfQ==}
@@ -6397,6 +6388,15 @@ packages:
     dependencies:
       '@typescript-eslint/types': 4.28.5_typescript@4.3.5
       '@typescript-eslint/visitor-keys': 4.28.5_typescript@4.3.5
+    transitivePeerDependencies:
+      - typescript
+
+  /@typescript-eslint/scope-manager/4.28.5_typescript@4.4.3:
+    resolution: {integrity: sha512-PHLq6n9nTMrLYcVcIZ7v0VY1X7dK309NM8ya9oL/yG8syFINIMHxyr2GzGoBYUdv3NUfCOqtuqps0ZmcgnZTfQ==}
+    engines: {node: ^8.10.0 || ^10.13.0 || >=11.10.1}
+    dependencies:
+      '@typescript-eslint/types': 4.28.5_typescript@4.4.3
+      '@typescript-eslint/visitor-keys': 4.28.5_typescript@4.4.3
     transitivePeerDependencies:
       - typescript
 
@@ -6409,14 +6409,6 @@ packages:
       typescript: 3.9.10
     dev: false
 
-  /@typescript-eslint/types/4.28.5_typescript@3.9.10:
-    resolution: {integrity: sha512-MruOu4ZaDOLOhw4f/6iudyks/obuvvZUAHBDSW80Trnc5+ovmViLT2ZMDXhUV66ozcl6z0LJfKs1Usldgi/WCA==}
-    engines: {node: ^8.10.0 || ^10.13.0 || >=11.10.1}
-    peerDependencies:
-      typescript: '*'
-    dependencies:
-      typescript: 3.9.10
-
   /@typescript-eslint/types/4.28.5_typescript@4.3.5:
     resolution: {integrity: sha512-MruOu4ZaDOLOhw4f/6iudyks/obuvvZUAHBDSW80Trnc5+ovmViLT2ZMDXhUV66ozcl6z0LJfKs1Usldgi/WCA==}
     engines: {node: ^8.10.0 || ^10.13.0 || >=11.10.1}
@@ -6424,6 +6416,14 @@ packages:
       typescript: '*'
     dependencies:
       typescript: 4.3.5
+
+  /@typescript-eslint/types/4.28.5_typescript@4.4.3:
+    resolution: {integrity: sha512-MruOu4ZaDOLOhw4f/6iudyks/obuvvZUAHBDSW80Trnc5+ovmViLT2ZMDXhUV66ozcl6z0LJfKs1Usldgi/WCA==}
+    engines: {node: ^8.10.0 || ^10.13.0 || >=11.10.1}
+    peerDependencies:
+      typescript: '*'
+    dependencies:
+      typescript: 4.4.3
 
   /@typescript-eslint/typescript-estree/3.10.1_typescript@3.9.10:
     resolution: {integrity: sha512-QbcXOuq6WYvnB3XPsZpIwztBoquEYLXh2MtwVU+kO8jgYCiv4G5xrSP/1wg4tkvrEE+esZVquIPX/dxPlePk1w==}
@@ -6468,26 +6468,6 @@ packages:
       - supports-color
     dev: false
 
-  /@typescript-eslint/typescript-estree/4.28.5_typescript@3.9.10:
-    resolution: {integrity: sha512-FzJUKsBX8poCCdve7iV7ShirP8V+ys2t1fvamVeD1rWpiAnIm550a+BX/fmTHrjEpQJ7ZAn+Z7ZZwJjytk9rZw==}
-    engines: {node: ^10.12.0 || >=12.0.0}
-    peerDependencies:
-      typescript: '*'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-    dependencies:
-      '@typescript-eslint/types': 4.28.5_typescript@3.9.10
-      '@typescript-eslint/visitor-keys': 4.28.5_typescript@3.9.10
-      debug: 4.3.2
-      globby: 11.0.4
-      is-glob: 4.0.1
-      semver: 7.3.5
-      tsutils: 3.21.0_typescript@3.9.10
-      typescript: 3.9.10
-    transitivePeerDependencies:
-      - supports-color
-
   /@typescript-eslint/typescript-estree/4.28.5_typescript@4.3.5:
     resolution: {integrity: sha512-FzJUKsBX8poCCdve7iV7ShirP8V+ys2t1fvamVeD1rWpiAnIm550a+BX/fmTHrjEpQJ7ZAn+Z7ZZwJjytk9rZw==}
     engines: {node: ^10.12.0 || >=12.0.0}
@@ -6508,6 +6488,26 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
+  /@typescript-eslint/typescript-estree/4.28.5_typescript@4.4.3:
+    resolution: {integrity: sha512-FzJUKsBX8poCCdve7iV7ShirP8V+ys2t1fvamVeD1rWpiAnIm550a+BX/fmTHrjEpQJ7ZAn+Z7ZZwJjytk9rZw==}
+    engines: {node: ^10.12.0 || >=12.0.0}
+    peerDependencies:
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+    dependencies:
+      '@typescript-eslint/types': 4.28.5_typescript@4.4.3
+      '@typescript-eslint/visitor-keys': 4.28.5_typescript@4.4.3
+      debug: 4.3.2
+      globby: 11.0.4
+      is-glob: 4.0.1
+      semver: 7.3.5
+      tsutils: 3.21.0_typescript@4.4.3
+      typescript: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
+
   /@typescript-eslint/visitor-keys/3.10.1:
     resolution: {integrity: sha512-9JgC82AaQeglebjZMgYR5wgmfUdUc+EitGUUMW8u2nDckaeimzW+VsoLV6FoimPv2id3VQzfjwBxEMVz08ameQ==}
     engines: {node: ^8.10.0 || ^10.13.0 || >=11.10.1}
@@ -6515,20 +6515,20 @@ packages:
       eslint-visitor-keys: 1.3.0
     dev: false
 
-  /@typescript-eslint/visitor-keys/4.28.5_typescript@3.9.10:
-    resolution: {integrity: sha512-dva/7Rr+EkxNWdJWau26xU/0slnFlkh88v3TsyTgRS/IIYFi5iIfpCFM4ikw0vQTFUR9FYSSyqgK4w64gsgxhg==}
-    engines: {node: ^8.10.0 || ^10.13.0 || >=11.10.1}
-    dependencies:
-      '@typescript-eslint/types': 4.28.5_typescript@3.9.10
-      eslint-visitor-keys: 2.1.0
-    transitivePeerDependencies:
-      - typescript
-
   /@typescript-eslint/visitor-keys/4.28.5_typescript@4.3.5:
     resolution: {integrity: sha512-dva/7Rr+EkxNWdJWau26xU/0slnFlkh88v3TsyTgRS/IIYFi5iIfpCFM4ikw0vQTFUR9FYSSyqgK4w64gsgxhg==}
     engines: {node: ^8.10.0 || ^10.13.0 || >=11.10.1}
     dependencies:
       '@typescript-eslint/types': 4.28.5_typescript@4.3.5
+      eslint-visitor-keys: 2.1.0
+    transitivePeerDependencies:
+      - typescript
+
+  /@typescript-eslint/visitor-keys/4.28.5_typescript@4.4.3:
+    resolution: {integrity: sha512-dva/7Rr+EkxNWdJWau26xU/0slnFlkh88v3TsyTgRS/IIYFi5iIfpCFM4ikw0vQTFUR9FYSSyqgK4w64gsgxhg==}
+    engines: {node: ^8.10.0 || ^10.13.0 || >=11.10.1}
+    dependencies:
+      '@typescript-eslint/types': 4.28.5_typescript@4.4.3
       eslint-visitor-keys: 2.1.0
     transitivePeerDependencies:
       - typescript
@@ -7603,6 +7603,7 @@ packages:
 
   /big.js/3.2.0:
     resolution: {integrity: sha512-+hN/Zh2D08Mx65pZ/4g5bsmNiZUuChDiQfTUQ7qJr4/kuopCr88xZsAXv6mBoZEsUI4OuGHlX59qE94K2mMW8Q==}
+    dev: false
 
   /big.js/5.2.2:
     resolution: {integrity: sha512-vyL2OymJxmarO8gxMr0mhChsO9QGwhynfuu4+MHTAW6czfq9humCB7rKpUjDd9YUiDPU4mzpyupFSvOClAwbmQ==}
@@ -8614,6 +8615,7 @@ packages:
       postcss-modules-local-by-default: 1.2.0
       postcss-modules-scope: 1.1.0
       postcss-modules-values: 1.3.0
+    dev: false
 
   /css-select/4.1.3:
     resolution: {integrity: sha512-gT3wBNd9Nj49rAbmtFHj1cljIAOLYSX1nZ8CB7TBO3INYckygm5B7LISU/szY//YmdiSLbJvDLOx9VnMVpMBxA==}
@@ -8629,6 +8631,7 @@ packages:
     dependencies:
       cssesc: 3.0.0
       fastparse: 1.1.2
+    dev: false
 
   /css-what/5.0.1:
     resolution: {integrity: sha512-FYDTSHb/7KXsWICVsxdmiExPjCfRC4qRFBdVwv7Ax9hMnvMmEjP9RfxTEZ3qPZGmADDn2vAKSo9UcN1jKVYscg==}
@@ -9134,6 +9137,7 @@ packages:
   /emojis-list/2.1.0:
     resolution: {integrity: sha1-TapNnbAPmBmIDHn6RXrlsJof04k=}
     engines: {node: '>= 0.10'}
+    dev: false
 
   /emojis-list/3.0.0:
     resolution: {integrity: sha512-/kyM18EfinwXZbno9FyUGeFh87KC8HRQBQGildHZbEuRyWFOmv1U10o9BBp8XVZDVNNuQKyIGIu5ZYAAXJ0V2Q==}
@@ -9464,6 +9468,7 @@ packages:
       v8-compile-cache: 2.3.0
     transitivePeerDependencies:
       - supports-color
+    dev: false
 
   /eslint/7.30.0:
     resolution: {integrity: sha512-VLqz80i3as3NdloY44BQSJpFw534L9Oh+6zJOUaViV4JPd+DaHwutqP7tcpkW3YiXbK6s05RZl7yl7cQn+lijg==}
@@ -9843,6 +9848,7 @@ packages:
 
   /fastparse/1.1.2:
     resolution: {integrity: sha512-483XLLxTVIwWK3QTrMGRqUfUpoOs/0hbQrl2oz4J0pAcm3A3bu84wxTFqGqkJzewCLdME38xJLJAxBABfQT8sQ==}
+    dev: false
 
   /fastq/1.13.0:
     resolution: {integrity: sha512-YpkpUnK8od0o1hmeSc7UUs/eB/vIPWJYjKck2QKIzAf71Vm1AAQ3EbuZB3g2JIy+pg+ERD0vqI79KyZiB2e2Nw==}
@@ -9888,6 +9894,7 @@ packages:
     engines: {node: '>=4'}
     dependencies:
       flat-cache: 2.0.1
+    dev: false
 
   /file-entry-cache/6.0.1:
     resolution: {integrity: sha512-7Gps/XWymbLk2QLYK4NzpMOrYjMhdIxXuIvy2QBsLE6ljuodKvdkWs/cpyJJ3CVIVpH0Oi1Hvg1ovbMzLdFBBg==}
@@ -10042,6 +10049,7 @@ packages:
       flatted: 2.0.2
       rimraf: 2.6.3
       write: 1.0.3
+    dev: false
 
   /flat-cache/3.0.4:
     resolution: {integrity: sha512-dm9s5Pw7Jc0GvMYbshN6zchCA9RgQlzzEZX3vylR9IqFfS8XciblUXOKfW6SiuJ0e13eDYZoZV5wdrev7P3Nwg==}
@@ -10056,6 +10064,7 @@ packages:
 
   /flatted/2.0.2:
     resolution: {integrity: sha512-r5wGx7YeOwNWNlCA0wQ86zKyDLMQr+/RB8xy74M4hTphfmjlijTSSXGuH8rnvKZnfT9i+75zmd8jcKdMR4O6jA==}
+    dev: false
 
   /flatted/3.2.2:
     resolution: {integrity: sha512-JaTY/wtrcSyvXJl4IMFHPKyFur1sE9AUqc0QnhOaJ0CxHtAoIV8pYDzeEfAaNEtGkOfq4gr3LBFmdXW5mOQFnA==}
@@ -10299,6 +10308,7 @@ packages:
     resolution: {integrity: sha512-kPCHWa1m9wGG/OwQpeweTwM/PYiQLrUIxXbt/P4Nic3LbGjCP0YwrALHW1uNLKZ0LIMg+RF+XRlj2ekT9ZlZAQ==}
     dependencies:
       loader-utils: 1.1.0
+    dev: false
 
   /gensync/1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
@@ -10494,6 +10504,7 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       type-fest: 0.8.1
+    dev: false
 
   /globals/13.11.0:
     resolution: {integrity: sha512-08/xrJ7wQjK9kkkRoI3OFUBbLx4f+6x3SGwcPvQ0QH6goFDrOU2oyAWrmh3dJezu65buo+HBMzAMQy6rovVC3g==}
@@ -10631,6 +10642,7 @@ packages:
   /has-flag/1.0.0:
     resolution: {integrity: sha1-nZ55MWXOAXoA8AQYxD+UKnsdEfo=}
     engines: {node: '>=0.10.0'}
+    dev: false
 
   /has-flag/3.0.0:
     resolution: {integrity: sha1-tdRU3CGZriJWmfNGfloH87lVuv0=}
@@ -11044,6 +11056,7 @@ packages:
 
   /icss-replace-symbols/1.1.0:
     resolution: {integrity: sha1-Bupvg2ead0njhs/h/oEq5dsiPe0=}
+    dev: false
 
   /icss-utils/4.1.1:
     resolution: {integrity: sha512-4aFq7wvWyMHKgxsH8QQtGpvbASCf+eM3wPRLI6R+MgAnTCZ6STYsRvttLvRWK0Nfif5piF394St3HeJDaljGPA==}
@@ -12369,6 +12382,7 @@ packages:
   /json5/0.5.1:
     resolution: {integrity: sha1-Hq3nrMASA0rYTiOWdn6tn6VJWCE=}
     hasBin: true
+    dev: false
 
   /json5/1.0.1:
     resolution: {integrity: sha512-aKS4WQjPenRxiQsC93MNfjx+nbF4PAdYzmd/1JIj8HYzqfbu86beTuNgXDzPknWk0n0uARlyewZo4s++ES36Ow==}
@@ -12587,6 +12601,7 @@ packages:
       big.js: 3.2.0
       emojis-list: 2.1.0
       json5: 0.5.1
+    dev: false
 
   /loader-utils/1.4.0:
     resolution: {integrity: sha512-qH0WSMBtn/oHuwjy/NucEgbx5dbxxnxup9s4PVXJUDHZBQY+s0NWA9rJf53RBnQZxfch7euUui7hpoAPvALZdA==}
@@ -12627,6 +12642,7 @@ packages:
 
   /lodash.camelcase/4.3.0:
     resolution: {integrity: sha1-soqmKIorn8ZRA1x3EfZathkDMaY=}
+    dev: false
 
   /lodash.clonedeep/4.5.0:
     resolution: {integrity: sha1-4j8/nE+Pvd6HJSnBBxhXoIblzO8=}
@@ -13989,6 +14005,7 @@ packages:
     resolution: {integrity: sha1-thTJcgvmgW6u41+zpfqh26agXds=}
     dependencies:
       postcss: 6.0.1
+    dev: false
 
   /postcss-modules-extract-imports/2.0.0:
     resolution: {integrity: sha512-LaYLDNS4SG8Q5WAWqIJgdHPJrDDr/Lv775rMBFUbgjTz6j34lUznACHcdRWroPvXANP2Vj7yNK57vp9eFqzLWQ==}
@@ -14002,6 +14019,7 @@ packages:
     dependencies:
       css-selector-tokenizer: 0.7.3
       postcss: 6.0.1
+    dev: false
 
   /postcss-modules-local-by-default/3.0.3:
     resolution: {integrity: sha512-e3xDq+LotiGesympRlKNgaJ0PCzoUIdpH0dj47iWAui/kyTgh3CiAr1qP54uodmJhl6p9rN6BoNcdEDVJx9RDw==}
@@ -14018,6 +14036,7 @@ packages:
     dependencies:
       css-selector-tokenizer: 0.7.3
       postcss: 6.0.1
+    dev: false
 
   /postcss-modules-scope/2.2.0:
     resolution: {integrity: sha512-YyEgsTMRpNd+HmyC7H/mh3y+MeFWevy7V1evVhJWewmMbjDHIbZbOXICC2y+m1xI1UVfIT1HMW/O04Hxyu9oXQ==}
@@ -14032,6 +14051,7 @@ packages:
     dependencies:
       icss-replace-symbols: 1.1.0
       postcss: 6.0.1
+    dev: false
 
   /postcss-modules-values/3.0.0:
     resolution: {integrity: sha512-1//E5jCBrZ9DmRX+zCtmQtRSV6PV42Ix7Bzj9GbwJceduuf7IqP8MgeTXuRDHOWj2m0VzZD5+roFWDuU8RQjcg==}
@@ -14048,6 +14068,7 @@ packages:
       lodash.camelcase: 4.3.0
       postcss: 7.0.32
       string-hash: 1.1.3
+    dev: false
 
   /postcss-selector-parser/6.0.6:
     resolution: {integrity: sha512-9LXrvaaX3+mcv5xkg5kFwqSzSH1JIObIx51PrndZwlmznwXRfxMddDvo9gve3gVR8ZTKgoFDdWkbRFmEhT4PMg==}
@@ -14068,6 +14089,7 @@ packages:
       chalk: 1.1.3
       source-map: 0.5.7
       supports-color: 3.2.3
+    dev: false
 
   /postcss/7.0.32:
     resolution: {integrity: sha512-03eXong5NLnNCD05xscnGKGDZ98CyzoqPSMjOe6SuoQY7Z2hIj0Ld1g/O/UQRuOle2aRtiIRDg9tDcTGAkLfKw==}
@@ -15524,6 +15546,7 @@ packages:
       ansi-styles: 3.2.1
       astral-regex: 1.0.0
       is-fullwidth-code-point: 2.0.0
+    dev: false
 
   /slice-ansi/4.0.0:
     resolution: {integrity: sha512-qMCMfhY040cVHT43K9BFygqYbUPFZKHOg7K73mtTWJRb8pyP3fzf4Ixd5SzdEJQ6MRUg/WBnOLxghZtKKurENQ==}
@@ -15850,6 +15873,7 @@ packages:
 
   /string-hash/1.1.3:
     resolution: {integrity: sha1-6Kr8CsGFW0Zmkp7X3RJ1311sgRs=}
+    dev: false
 
   /string-length/3.1.0:
     resolution: {integrity: sha512-Ttp5YvkGm5v9Ijagtaz1BnN+k9ObpvS0eIBblPMp2YWL8FBmi9qblQ9fexc2k/CXFgrTIteU3jAw3payCnwSTA==}
@@ -16050,6 +16074,7 @@ packages:
     engines: {node: '>=0.8.0'}
     dependencies:
       has-flag: 1.0.0
+    dev: false
 
   /supports-color/5.5.0:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}
@@ -16103,6 +16128,7 @@ packages:
       lodash: 4.17.21
       slice-ansi: 2.1.0
       string-width: 3.1.0
+    dev: false
 
   /table/6.7.1:
     resolution: {integrity: sha512-ZGum47Yi6KOOFDE8m223td53ath2enHcYLgOCjGr5ngu8bdIARQk6mN/wRMv4yMRcHnCSnHbCEha4sobQx5yWg==}
@@ -16465,7 +16491,7 @@ packages:
     resolution: {integrity: sha512-3IVX4nI6B5cc31/GFFE+i8ey/N2eA0CZDbo6n0yrz0zDX8ZJ8djmU1p+XRz7G3is0F3bB3pu2pAroFdAWQKU3w==}
     dev: true
 
-  /ts-loader/6.0.0_typescript@3.9.10:
+  /ts-loader/6.0.0_typescript@4.4.3:
     resolution: {integrity: sha512-lszy+D41R0Te2+loZxADWS+E1+Z55A+i3dFfFie1AZHL++65JRKVDBPQgeWgRrlv5tbxdU3zOtXp8b7AFR6KEg==}
     engines: {node: '>=8.6'}
     peerDependencies:
@@ -16476,7 +16502,7 @@ packages:
       loader-utils: 1.1.0
       micromatch: 4.0.4
       semver: 6.3.0
-      typescript: 3.9.10
+      typescript: 4.4.3
     dev: false
 
   /ts-pnp/1.2.0_typescript@4.3.5:
@@ -16501,11 +16527,23 @@ packages:
     resolution: {integrity: sha512-6tfi/2tHqV/3CL77pULBcK+foty11Rr0idRDxKnteTaKm6gWF9qmaCNU17HVssOuwlYNyOmd9Jsmjd+1t3a3qw==}
     peerDependencies:
       tslint: ^5.1.0
-      typescript: ^2.1.0 || ^3.0.0
+      typescript: '*'
     dependencies:
       tslint: 5.20.1_typescript@3.9.10
       tsutils: 2.28.0_typescript@3.9.10
       typescript: 3.9.10
+    dev: false
+
+  /tslint-microsoft-contrib/6.2.0_tslint@5.20.1+typescript@4.4.3:
+    resolution: {integrity: sha512-6tfi/2tHqV/3CL77pULBcK+foty11Rr0idRDxKnteTaKm6gWF9qmaCNU17HVssOuwlYNyOmd9Jsmjd+1t3a3qw==}
+    peerDependencies:
+      tslint: ^5.1.0
+      typescript: '*'
+    dependencies:
+      tslint: 5.20.1_typescript@4.4.3
+      tsutils: 2.28.0_typescript@4.4.3
+      typescript: 4.4.3
+    dev: true
 
   /tslint/5.20.1_typescript@3.9.10:
     resolution: {integrity: sha512-EcMxhzCFt8k+/UP5r8waCf/lzmeSyVlqxqMEDQE7rWYiQky8KpIBz1JAoYXfROHrPZ1XXd43q8yQnULOLiBRQg==}
@@ -16528,6 +16566,30 @@ packages:
       tslib: 1.14.1
       tsutils: 2.29.0_typescript@3.9.10
       typescript: 3.9.10
+    dev: false
+
+  /tslint/5.20.1_typescript@4.4.3:
+    resolution: {integrity: sha512-EcMxhzCFt8k+/UP5r8waCf/lzmeSyVlqxqMEDQE7rWYiQky8KpIBz1JAoYXfROHrPZ1XXd43q8yQnULOLiBRQg==}
+    engines: {node: '>=4.8.0'}
+    hasBin: true
+    peerDependencies:
+      typescript: '>=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev || >=3.0.0-dev || >= 3.1.0-dev || >= 3.2.0-dev'
+    dependencies:
+      '@babel/code-frame': 7.14.5
+      builtin-modules: 1.1.1
+      chalk: 2.4.2
+      commander: 2.20.3
+      diff: 4.0.2
+      glob: 7.1.7
+      js-yaml: 3.13.1
+      minimatch: 3.0.4
+      mkdirp: 0.5.5
+      resolve: 1.17.0
+      semver: 5.7.1
+      tslib: 1.14.1
+      tsutils: 2.29.0_typescript@4.4.3
+      typescript: 4.4.3
+    dev: true
 
   /tsutils/2.28.0_typescript@3.9.10:
     resolution: {integrity: sha512-bh5nAtW0tuhvOJnx1GLRn5ScraRLICGyJV5wJhtRWOLsxW70Kk5tZtpK3O/hW6LDnqKS9mlUMPZj9fEMJ0gxqA==}
@@ -16536,6 +16598,16 @@ packages:
     dependencies:
       tslib: 1.14.1
       typescript: 3.9.10
+    dev: false
+
+  /tsutils/2.28.0_typescript@4.4.3:
+    resolution: {integrity: sha512-bh5nAtW0tuhvOJnx1GLRn5ScraRLICGyJV5wJhtRWOLsxW70Kk5tZtpK3O/hW6LDnqKS9mlUMPZj9fEMJ0gxqA==}
+    peerDependencies:
+      typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev || >= 3.0.0-dev || >= 3.1.0-dev'
+    dependencies:
+      tslib: 1.14.1
+      typescript: 4.4.3
+    dev: true
 
   /tsutils/2.29.0_typescript@3.9.10:
     resolution: {integrity: sha512-g5JVHCIJwzfISaXpXE1qvNalca5Jwob6FjI4AoPlqMusJ6ftFE7IkkFoMhVLRgK+4Kx3gkzb8UZK5t5yTTvEmA==}
@@ -16544,6 +16616,16 @@ packages:
     dependencies:
       tslib: 1.14.1
       typescript: 3.9.10
+    dev: false
+
+  /tsutils/2.29.0_typescript@4.4.3:
+    resolution: {integrity: sha512-g5JVHCIJwzfISaXpXE1qvNalca5Jwob6FjI4AoPlqMusJ6ftFE7IkkFoMhVLRgK+4Kx3gkzb8UZK5t5yTTvEmA==}
+    peerDependencies:
+      typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev || >= 3.0.0-dev || >= 3.1.0-dev'
+    dependencies:
+      tslib: 1.14.1
+      typescript: 4.4.3
+    dev: true
 
   /tsutils/3.21.0_typescript@3.9.10:
     resolution: {integrity: sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==}
@@ -16553,6 +16635,7 @@ packages:
     dependencies:
       tslib: 1.14.1
       typescript: 3.9.10
+    dev: false
 
   /tsutils/3.21.0_typescript@4.3.5:
     resolution: {integrity: sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==}
@@ -16562,6 +16645,15 @@ packages:
     dependencies:
       tslib: 1.14.1
       typescript: 4.3.5
+
+  /tsutils/3.21.0_typescript@4.4.3:
+    resolution: {integrity: sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==}
+    engines: {node: '>= 6'}
+    peerDependencies:
+      typescript: '>=2.8.0 || >= 3.2.0-dev || >= 3.3.0-dev || >= 3.4.0-dev || >= 3.5.0-dev || >= 3.6.0-dev || >= 3.6.0-beta || >= 3.7.0-dev || >= 3.7.0-beta'
+    dependencies:
+      tslib: 1.14.1
+      typescript: 4.4.3
 
   /tty-browserify/0.0.0:
     resolution: {integrity: sha1-oVe6QC2iTpv5V/mqadUk7tQpAaY=}
@@ -16645,6 +16737,12 @@ packages:
 
   /typescript/4.3.5:
     resolution: {integrity: sha512-DqQgihaQ9cUrskJo9kIyW/+g0Vxsk8cDtZ52a3NGh0YNTfpUSArXSohyUGnvbPazEPLu398C0UxmKSOrPumUzA==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
+    dev: true
+
+  /typescript/4.4.3:
+    resolution: {integrity: sha512-4xfscpisVgqqDfPaJo5vkd+Qd/ItkoagnHpufr+i2QCHBsNYp+G7UAoyFl8aPtx879u38wPV65rZ8qbGZijalA==}
     engines: {node: '>=4.2.0'}
     hasBin: true
 
@@ -17633,6 +17731,7 @@ packages:
     engines: {node: '>=4'}
     dependencies:
       mkdirp: 0.5.5
+    dev: false
 
   /ws/6.2.2:
     resolution: {integrity: sha512-zmhltoSR8u1cnDsD43TX59mzoMZsLKqUweyYBAIvTngR3shc0W6aOZylZmq/7hqyVxPdi+5Ud2QInblgyE72fw==}

@@ -97,7 +97,7 @@ const readme: TSESLint.RuleModule<MessageIds, Options> = {
               context.report({
                 node: node,
                 messageId: 'error-reading-file',
-                data: { readmePath, errorMessage: error.toString() }
+                data: { readmePath, errorMessage: (error as Error).toString() }
               });
             }
           }

@@ -84,7 +84,7 @@ export class Async {
     callback: (entry: TEntry, arrayIndex: number) => Promise<void>,
     options?: IAsyncParallelismOptions | undefined
   ): Promise<void> {
-    await new Promise((resolve: () => void, reject: (error: Error) => void) => {
+    await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
       const concurrency: number =
         options?.concurrency && options.concurrency > 0 ? options.concurrency : Infinity;
       let operationsInProgress: number = 1;
@@ -104,7 +104,7 @@ export class Async {
                 .then(() => onOperationCompletion())
                 .catch(reject);
             } catch (error) {
-              reject(error);
+              reject(error as Error);
             }
           } else {
             break;

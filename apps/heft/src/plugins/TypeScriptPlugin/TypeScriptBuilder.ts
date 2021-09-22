@@ -1070,7 +1070,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           const stats: FileSystemStats = this._cachedFileSystem.getStatistics(directoryPath);
           return stats.isDirectory() || stats.isSymbolicLink();
         } catch (error) {
-          if (FileSystem.isNotExistError(error)) {
+          if (FileSystem.isNotExistError(error as Error)) {
             return false;
           } else {
             throw error;
@@ -1083,7 +1083,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           const stats: FileSystemStats = this._cachedFileSystem.getStatistics(filePath);
           return stats.isFile();
         } catch (error) {
-          if (FileSystem.isNotExistError(error)) {
+          if (FileSystem.isNotExistError(error as Error)) {
             return false;
           } else {
             throw error;

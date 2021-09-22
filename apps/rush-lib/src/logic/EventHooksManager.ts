@@ -55,7 +55,7 @@ export class EventHooksManager {
               )
           );
           if (isDebug) {
-            console.error(os.EOL + error.message);
+            console.error(os.EOL + (error as Error).message);
           }
         }
       });

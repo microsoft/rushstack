@@ -101,7 +101,7 @@ export class RepoStateFile {
     try {
       fileContents = FileSystem.readFile(jsonFilename);
     } catch (error) {
-      if (!FileSystem.isNotExistError(error)) {
+      if (!FileSystem.isNotExistError(error as Error)) {
         throw error;
       }
     }

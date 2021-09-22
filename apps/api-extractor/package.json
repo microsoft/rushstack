@@ -45,12 +45,12 @@
     "resolve": "~1.17.0",
     "semver": "~7.3.0",
     "source-map": "~0.6.1",
-    "typescript": "~4.3.5"
+    "typescript": "~4.4.2"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
-    "@rushstack/heft": "0.34.6",
-    "@rushstack/heft-node-rig": "1.1.11",
+    "@rushstack/heft": "0.38.1",
+    "@rushstack/heft-node-rig": "1.2.13",
     "@types/heft-jest": "1.0.1",
     "@types/lodash": "4.14.116",
     "@types/node": "10.17.13",

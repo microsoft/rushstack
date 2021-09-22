@@ -39,7 +39,7 @@ export class EnvironmentVariableParser {
           throw new Error(
             `The ${environmentValue} environment variable value looks like a JSON array` +
               ` but failed to parse: ` +
-              ex.message
+              (ex as Error).message
           );
         }
       } else {

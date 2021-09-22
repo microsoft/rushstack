@@ -237,7 +237,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       const parsedData: IPnpmShrinkwrapYaml = yamlModule.safeLoad(shrinkwrapContent);
       return new PnpmShrinkwrapFile(parsedData, shrinkwrapYamlFilename);
     } catch (error) {
-      throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${error.message}`);
+      throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${(error as Error).message}`);
     }
   }
 

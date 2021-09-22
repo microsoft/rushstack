@@ -158,7 +158,7 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
         baseFolderPath: heftConfiguration.buildFolder
       });
     } catch (ex) {
-      throw new Error(`The ${TASK_NAME} task cannot start: ` + ex.message);
+      throw new Error(`The ${TASK_NAME} task cannot start: ` + (ex as Error).message);
     }
 
     this._logger.terminal.writeVerboseLine(`Found "${this._storykitPackageName}" in ` + storykitFolder);
@@ -180,7 +180,7 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
         baseFolderPath: storykitModuleFolder
       });
     } catch (ex) {
-      throw new Error(`The ${TASK_NAME} task cannot start: ` + ex.message);
+      throw new Error(`The ${TASK_NAME} task cannot start: ` + (ex as Error).message);
     }
     this._logger.terminal.writeVerboseLine(
       `Resolved startupModulePath is "${this._resolvedStartupModulePath}"`
