@@ -102,7 +102,11 @@ export class ChangelogGenerator {
     if (!changelog.entries.some((entry) => entry.version === change.newVersion)) {
       const changelogEntry: IChangeLogEntry = {
         version: change.newVersion!,
-        tag: PublishUtilities.createTagname(change.packageName, change.newVersion!),
+        tag: PublishUtilities.createTagname(
+          change.packageName,
+          change.newVersion!,
+          rushConfiguration.gitTagSeparator
+        ),
         date: new Date().toUTCString(),
         comments: {}
       };

@@ -75,6 +75,7 @@ export interface IRushGitPolicyJson {
   sampleEmail?: string;
   versionBumpCommitMessage?: string;
   changeLogUpdateCommitMessage?: string;
+  tagSeparator?: string;
 }
 
 /**
@@ -446,6 +447,7 @@ export class RushConfiguration {
   private _gitSampleEmail: string;
   private _gitVersionBumpCommitMessage: string | undefined;
   private _gitChangeLogUpdateCommitMessage: string | undefined;
+  private _gitTagSeparator: string | undefined;
 
   // "hotfixChangeEnabled" feature
   private _hotfixChangeEnabled: boolean;
@@ -666,6 +668,10 @@ export class RushConfiguration {
 
       if (rushConfigurationJson.gitPolicy.changeLogUpdateCommitMessage) {
         this._gitChangeLogUpdateCommitMessage = rushConfigurationJson.gitPolicy.changeLogUpdateCommitMessage;
+      }
+
+      if (rushConfigurationJson.gitPolicy.tagSeparator) {
+        this._gitTagSeparator = rushConfigurationJson.gitPolicy.tagSeparator;
       }
     }
 
@@ -1292,6 +1298,14 @@ export class RushConfiguration {
    */
   public get gitChangeLogUpdateCommitMessage(): string | undefined {
     return this._gitChangeLogUpdateCommitMessage;
+  }
+
+  /**
+   * [Part of the "gitPolicy" feature.]
+   * The separator between package name and version in git tag.
+   */
+  public get gitTagSeparator(): string | undefined {
+    return this._gitTagSeparator;
   }
 
   /**
