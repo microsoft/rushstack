@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Lock node-fetch dependency to 2.6.2 to an incompatibility with 2.6.3 in the Azure Cloud Cache Provider.",
+      "comment": "Lock node-fetch dependency to 2.6.2 due to an incompatibility with 2.6.3 in the Azure Cloud Cache Provider.",
       "type": "patch"
     }
   ],
