@@ -261,7 +261,7 @@ importers:
       jszip: ~3.7.1
       lodash: ~4.17.15
       minimatch: ~3.0.2
-      node-fetch: ~2.6.1
+      node-fetch: 2.6.2
       npm-package-arg: ~6.1.0
       npm-packlist: ~2.1.2
       read-package-tree: ~5.1.5
@@ -859,39 +859,6 @@ importers:
       tslint: 5.20.1_typescript@3.9.10
       tslint-microsoft-contrib: 6.2.0_tslint@5.20.1+typescript@3.9.10
       typescript: 3.9.10
-
-  ../../build-tests/heft-parameter-plugin:
-    specifiers:
-      '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': workspace:*
-      '@rushstack/node-core-library': workspace:*
-      '@types/node': 10.17.13
-      eslint: ~7.30.0
-      typescript: ~4.3.5
-    dependencies:
-      '@rushstack/node-core-library': link:../../libraries/node-core-library
-    devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
-      '@rushstack/heft': link:../../apps/heft
-      '@types/node': 10.17.13
-      eslint: 7.30.0
-      typescript: 4.3.5
-
-  ../../build-tests/heft-parameter-plugin-test:
-    specifiers:
-      '@rushstack/heft': workspace:*
-      '@rushstack/heft-jest-plugin': workspace:*
-      '@rushstack/node-core-library': workspace:*
-      '@types/heft-jest': 1.0.1
-      heft-parameter-plugin: workspace:*
-      typescript: ~4.3.5
-    devDependencies:
-      '@rushstack/heft': link:../../apps/heft
-      '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
-      '@rushstack/node-core-library': link:../../libraries/node-core-library
-      '@types/heft-jest': 1.0.1
-      heft-parameter-plugin: link:../heft-parameter-plugin
-      typescript: 4.3.5
 
   ../../build-tests/heft-sass-test:
     specifiers:

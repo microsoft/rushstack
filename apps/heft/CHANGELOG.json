@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.38.2",
+      "tag": "@rushstack/heft_v0.38.2",
+      "date": "Wed, 22 Sep 2021 00:09:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix formatting of tsBuildInfoFile tsconfig option. TypeScript uses an exact string match for change detection and normalizes slashes to '/' upon saving the file. Therefore the inputs need to be normalized as well."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.38.1",
       "tag": "@rushstack/heft_v0.38.1",
       "date": "Sat, 18 Sep 2021 03:05:57 GMT",

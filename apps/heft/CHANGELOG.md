@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Sat, 18 Sep 2021 03:05:57 GMT and should not be manually modified.
+This log was last generated on Wed, 22 Sep 2021 00:09:32 GMT and should not be manually modified.
+
+## 0.38.2
+Wed, 22 Sep 2021 00:09:32 GMT
+
+### Patches
+
+- Fix formatting of tsBuildInfoFile tsconfig option. TypeScript uses an exact string match for change detection and normalizes slashes to '/' upon saving the file. Therefore the inputs need to be normalized as well.
 
 ## 0.38.1
 Sat, 18 Sep 2021 03:05:57 GMT
