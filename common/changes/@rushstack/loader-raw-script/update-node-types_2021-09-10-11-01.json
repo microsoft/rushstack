@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/loader-raw-script",
+      "comment": "Upgrade the `@types/node` dependency to version to version 12.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/loader-raw-script",
+  "email": "6643991+MichaelDeBoey@users.noreply.github.com"
+}

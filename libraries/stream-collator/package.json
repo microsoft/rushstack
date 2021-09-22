@@ -21,6 +21,6 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "10.17.13"
+    "@types/node": "12.20.24"
   }
 }

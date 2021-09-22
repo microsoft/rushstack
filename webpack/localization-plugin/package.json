@@ -28,7 +28,7 @@
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/typings-generator": "workspace:*",
-    "@types/node": "10.17.13",
+    "@types/node": "12.20.24",
     "@types/tapable": "1.0.6",
     "decache": "~4.5.1",
     "loader-utils": "~1.1.0",

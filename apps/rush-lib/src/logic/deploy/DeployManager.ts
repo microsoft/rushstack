@@ -205,7 +205,10 @@ export class DeployManager {
       try {
         this._traceResolveDependency(dependencyPackageName, packageJsonRealFolderPath, deployState);
       } catch (resolveErr) {
-        if ((resolveErr as NodeJS.ErrnoException).code === 'MODULE_NOT_FOUND' && optionalDependencyNames.has(dependencyPackageName)) {
+        if (
+          (resolveErr as NodeJS.ErrnoException).code === 'MODULE_NOT_FOUND' &&
+          optionalDependencyNames.has(dependencyPackageName)
+        ) {
           // Ignore missing optional dependency
           continue;
         }

@@ -80,8 +80,9 @@ export abstract class BaseScriptAction extends BaseRushAction {
             break;
           default:
             throw new Error(
-              `${RushConstants.commandLineFilename} defines a parameter "${(parameterJson as ParameterJson).longName}"` +
-                ` using an unsupported parameter kind "${(parameterJson as ParameterJson).parameterKind}"`
+              `${RushConstants.commandLineFilename} defines a parameter "${
+                (parameterJson as ParameterJson).longName
+              }" using an unsupported parameter kind "${(parameterJson as ParameterJson).parameterKind}"`
             );
         }
 

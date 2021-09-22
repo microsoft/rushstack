@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/module-minifier-plugin",
+      "comment": "Upgrade the `@types/node` dependency to version to version 12.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/module-minifier-plugin",
+  "email": "6643991+MichaelDeBoey@users.noreply.github.com"
+}

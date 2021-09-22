@@ -50,8 +50,8 @@ interface IBlobError extends Error {
     status: string;
     parsedHeaders?: {
       errorCode: string;
-    }
-  }
+    };
+  };
 }
 
 export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase {

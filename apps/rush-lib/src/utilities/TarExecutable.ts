@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { Executable, FileSystem, FileWriter, Terminal } from '@rushstack/node-core-library';
 import { ChildProcess } from 'child_process';
-import * as events from 'events';
+import events from 'events';
 
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
@@ -151,8 +151,8 @@ export class TarExecutable {
       currentWorkingDirectory: currentWorkingDirectory
     });
 
-    childProcess.stdout.on('data', (chunk) => fileWriter.write(`[stdout] ${chunk}`));
-    childProcess.stderr.on('data', (chunk) => fileWriter.write(`[stderr] ${chunk}`));
+    childProcess.stdout?.on('data', (chunk) => fileWriter.write(`[stdout] ${chunk}`));
+    childProcess.stderr?.on('data', (chunk) => fileWriter.write(`[stderr] ${chunk}`));
 
     const [tarExitCode] = await events.once(childProcess, 'exit');
 
