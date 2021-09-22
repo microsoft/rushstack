@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/eslint-plugin",
-      "comment": "update `@types/node` version to v12",
+      "comment": "Upgrade the `@types/node` dependency to version to version 12.",
       "type": "patch"
     }
   ],
