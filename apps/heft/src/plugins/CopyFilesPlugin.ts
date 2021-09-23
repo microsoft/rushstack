@@ -7,7 +7,7 @@ import glob from 'fast-glob';
 import { performance } from 'perf_hooks';
 import { AlreadyExistsBehavior, FileSystem, Async } from '@rushstack/node-core-library';
 
-import { HeftAsync as HeftAsync } from '../utilities/HeftAsync';
+import { HeftAsync } from '../utilities/HeftAsync';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import { HeftEventPluginBase } from '../pluginFramework/HeftEventPluginBase';
 import { HeftSession } from '../pluginFramework/HeftSession';
