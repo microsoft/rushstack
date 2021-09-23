@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fixed an output typo.",
+      "comment": "Fix typo when project dependencies do not match the current shrinkwrap",
       "type": "none"
     }
   ],
