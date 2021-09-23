@@ -1,6 +1,13 @@
 # Change Log - @rushstack/loader-raw-script
 
-This log was last generated on Wed, 22 Sep 2021 03:27:12 GMT and should not be manually modified.
+This log was last generated on Thu, 23 Sep 2021 00:10:40 GMT and should not be manually modified.
+
+## 1.3.182
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
 
 ## 1.3.181
 Wed, 22 Sep 2021 03:27:12 GMT

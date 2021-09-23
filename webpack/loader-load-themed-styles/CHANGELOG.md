@@ -1,6 +1,13 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Wed, 22 Sep 2021 03:27:12 GMT and should not be manually modified.
+This log was last generated on Thu, 23 Sep 2021 00:10:40 GMT and should not be manually modified.
+
+## 1.9.96
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
 
 ## 1.9.95
 Wed, 22 Sep 2021 03:27:12 GMT

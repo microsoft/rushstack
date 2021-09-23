@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-patch",
   "entries": [
     {
+      "version": "1.0.7",
+      "tag": "@rushstack/eslint-patch_v1.0.7",
+      "date": "Thu, 23 Sep 2021 00:10:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade the `@types/node` dependency to version to version 12."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.6",
       "tag": "@rushstack/eslint-patch_v1.0.6",
       "date": "Fri, 30 Oct 2020 00:10:14 GMT",

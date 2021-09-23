@@ -1,6 +1,13 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Fri, 20 Aug 2021 15:08:10 GMT and should not be manually modified.
+This log was last generated on Thu, 23 Sep 2021 00:10:41 GMT and should not be manually modified.
+
+## 4.9.1
+Thu, 23 Sep 2021 00:10:41 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
 
 ## 4.9.0
 Fri, 20 Aug 2021 15:08:10 GMT

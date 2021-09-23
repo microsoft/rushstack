@@ -1,6 +1,13 @@
 # Change Log - @rushstack/package-deps-hash
 
-This log was last generated on Wed, 22 Sep 2021 03:27:12 GMT and should not be manually modified.
+This log was last generated on Thu, 23 Sep 2021 00:10:41 GMT and should not be manually modified.
+
+## 3.0.73
+Thu, 23 Sep 2021 00:10:41 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
 
 ## 3.0.72
 Wed, 22 Sep 2021 03:27:12 GMT

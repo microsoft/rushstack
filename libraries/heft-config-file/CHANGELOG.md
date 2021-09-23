@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Tue, 14 Sep 2021 01:17:04 GMT and should not be manually modified.
+This log was last generated on Thu, 23 Sep 2021 00:10:40 GMT and should not be manually modified.
+
+## 0.6.7
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
 
 ## 0.6.6
 Tue, 14 Sep 2021 01:17:04 GMT
