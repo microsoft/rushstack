@@ -55,6 +55,72 @@ describe('Async', () => {
       ]);
       expect(maxRunning).toEqual(3);
     });
+
+    it('rejects if a sync iterator throws an error', async () => {
+      const expectedError: Error = new Error('iterator error');
+      let iteratorIndex: number = 0;
+      const syncIterator: Iterator<number> = {
+        next: () => {
+          if (iteratorIndex < 5) {
+            iteratorIndex++;
+            return { done: false, value: iteratorIndex };
+          } else {
+            throw expectedError;
+          }
+        }
+      };
+      const syncIterable: Iterable<number> = {
+        [Symbol.iterator]: () => syncIterator
+      };
+
+      await expect(() => Async.mapAsync(syncIterable, async (item) => `result ${item}`)).rejects.toThrow(
+        expectedError
+      );
+    });
+
+    it('rejects if an async iterator throws an error', async () => {
+      const expectedError: Error = new Error('iterator error');
+      let iteratorIndex: number = 0;
+      const asyncIterator: AsyncIterator<number> = {
+        next: () => {
+          if (iteratorIndex < 5) {
+            iteratorIndex++;
+            return Promise.resolve({ done: false, value: iteratorIndex });
+          } else {
+            throw expectedError;
+          }
+        }
+      };
+      const syncIterable: AsyncIterable<number> = {
+        [Symbol.asyncIterator]: () => asyncIterator
+      };
+
+      await expect(() => Async.mapAsync(syncIterable, async (item) => `result ${item}`)).rejects.toThrow(
+        expectedError
+      );
+    });
+
+    it('rejects if an async iterator rejects', async () => {
+      const expectedError: Error = new Error('iterator error');
+      let iteratorIndex: number = 0;
+      const asyncIterator: AsyncIterator<number> = {
+        next: () => {
+          if (iteratorIndex < 5) {
+            iteratorIndex++;
+            return Promise.resolve({ done: false, value: iteratorIndex });
+          } else {
+            return Promise.reject(expectedError);
+          }
+        }
+      };
+      const syncIterable: AsyncIterable<number> = {
+        [Symbol.asyncIterator]: () => asyncIterator
+      };
+
+      await expect(() => Async.mapAsync(syncIterable, async (item) => `result ${item}`)).rejects.toThrow(
+        expectedError
+      );
+    });
   });
 
   describe('forEachAsync', () => {
@@ -105,6 +171,72 @@ describe('Async', () => {
         'Something broke'
       );
       expect(fn).toHaveBeenCalledTimes(3);
+    });
+
+    it('rejects if a sync iterator throws an error', async () => {
+      const expectedError: Error = new Error('iterator error');
+      let iteratorIndex: number = 0;
+      const syncIterator: Iterator<number> = {
+        next: () => {
+          if (iteratorIndex < 5) {
+            iteratorIndex++;
+            return { done: false, value: iteratorIndex };
+          } else {
+            throw expectedError;
+          }
+        }
+      };
+      const syncIterable: Iterable<number> = {
+        [Symbol.iterator]: () => syncIterator
+      };
+
+      await expect(() =>
+        Async.forEachAsync(syncIterable, async (item) => await Async.sleep(1))
+      ).rejects.toThrow(expectedError);
+    });
+
+    it('rejects if an async iterator throws an error', async () => {
+      const expectedError: Error = new Error('iterator error');
+      let iteratorIndex: number = 0;
+      const asyncIterator: AsyncIterator<number> = {
+        next: () => {
+          if (iteratorIndex < 5) {
+            iteratorIndex++;
+            return Promise.resolve({ done: false, value: iteratorIndex });
+          } else {
+            throw expectedError;
+          }
+        }
+      };
+      const syncIterable: AsyncIterable<number> = {
+        [Symbol.asyncIterator]: () => asyncIterator
+      };
+
+      await expect(() =>
+        Async.forEachAsync(syncIterable, async (item) => await Async.sleep(1))
+      ).rejects.toThrow(expectedError);
+    });
+
+    it('rejects if an async iterator rejects', async () => {
+      const expectedError: Error = new Error('iterator error');
+      let iteratorIndex: number = 0;
+      const asyncIterator: AsyncIterator<number> = {
+        next: () => {
+          if (iteratorIndex < 5) {
+            iteratorIndex++;
+            return Promise.resolve({ done: false, value: iteratorIndex });
+          } else {
+            return Promise.reject(expectedError);
+          }
+        }
+      };
+      const syncIterable: AsyncIterable<number> = {
+        [Symbol.asyncIterator]: () => asyncIterator
+      };
+
+      await expect(() =>
+        Async.forEachAsync(syncIterable, async (item) => await Async.sleep(1))
+      ).rejects.toThrow(expectedError);
     });
   });
 });
