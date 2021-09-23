@@ -11,7 +11,8 @@ import {
   IPackageJson,
   ITerminalProvider,
   FileSystem,
-  Path
+  Path,
+  Async
 } from '@rushstack/node-core-library';
 import type * as TTypescript from 'typescript';
 import {
@@ -24,7 +25,6 @@ import {
   ISubprocessRunnerBaseConfiguration,
   SubprocessRunnerBase
 } from '../../utilities/subprocess/SubprocessRunnerBase';
-import { Async } from '../../utilities/Async';
 import { PerformanceMeasurer, PerformanceMeasurerAsync } from '../../utilities/Performance';
 import { Tslint } from './Tslint';
 import { Eslint } from './Eslint';
@@ -423,11 +423,11 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     // Using async file system I/O for theoretically better peak performance
     // Also allows to run concurrently with linting
     const writePromise: Promise<{ duration: number }> = measureTsPerformanceAsync('Write', () =>
-      Async.forEachLimitAsync(
+      Async.forEachAsync(
         emitResult.filesToWrite,
-        this._configuration.maxWriteParallelism,
         async ({ filePath, data }) =>
-          this._cachedFileSystem.writeFile(filePath, data, { ensureFolderExists: true })
+          this._cachedFileSystem.writeFile(filePath, data, { ensureFolderExists: true }),
+        { concurrency: this._configuration.maxWriteParallelism }
       )
     );
     //#endregion
