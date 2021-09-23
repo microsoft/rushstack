@@ -116,6 +116,12 @@ export class Async {
               reject(error as Error);
             }
           } else {
+            if (arrayIndex === 0) {
+              // If arrayIndex was never incremented and the iterator is done, we were handed an empty iterator
+              // and we should resolve
+              resolve();
+            }
+
             break;
           }
         }

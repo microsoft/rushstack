@@ -5,6 +5,11 @@ import { Async } from '../Async';
 
 describe('Async', () => {
   describe('mapAsync', () => {
+    it('handles an empty array correctly', async () => {
+      const result = await Async.mapAsync([] as number[], async (item) => `result ${item}`);
+      expect(result).toEqual([]);
+    });
+
     it('returns the same result as built-in Promise.all', async () => {
       const array: number[] = [1, 2, 3, 4, 5, 6, 7, 8];
       const fn: (item: number) => Promise<string> = async (item) => `result ${item}`;
@@ -124,6 +129,24 @@ describe('Async', () => {
   });
 
   describe('forEachAsync', () => {
+    it('handles an empty array correctly', async () => {
+      let running: number = 0;
+      let maxRunning: number = 0;
+
+      const array: number[] = [];
+
+      const fn: (item: number) => Promise<void> = jest.fn(async (item) => {
+        running++;
+        await Async.sleep(1);
+        maxRunning = Math.max(maxRunning, running);
+        running--;
+      });
+
+      await Async.forEachAsync(array, fn, { concurrency: 3 });
+      expect(fn).toHaveBeenCalledTimes(0);
+      expect(maxRunning).toEqual(0);
+    });
+
     it('if concurrency is set, ensures no more than N operations occur in parallel', async () => {
       let running: number = 0;
       let maxRunning: number = 0;
