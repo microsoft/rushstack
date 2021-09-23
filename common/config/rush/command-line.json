@@ -162,6 +162,18 @@
       "shellCommand": "pretty-quick --staged",
 
       "safeForSimultaneousRushProcesses": true
+    },
+    {
+      "name": "yeoman",
+      "commandKind": "global",
+      "summary": "Used by yeoman generator. This command invokes yeoman to do project scaffolding",
+
+      "autoinstallerName": "rush-yeoman",
+
+      // This will invoke common/autoinstall/rush-prettier/node_modules/.bin/pretty-quick
+      "shellCommand": "yo odspweb --skip-install",
+
+      "safeForSimultaneousRushProcesses": true
     }
   ],
 

@@ -1,0 +1,10 @@
+{
+  "name": "rush-yeoman",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "yeoman-generator": "5.4.2",
+    "yosay": "2.0.2",
+    "inquirer-npm-name": "^4.0.0"
+  }
+}
