@@ -96,7 +96,7 @@ export class Async {
     let arrayIndex: number = 0;
     let iteratorIsDone: boolean = false;
     await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
-      async function onOperationCompletion(): Promise<void> {
+      async function onOperationCompletionAsync(): Promise<void> {
         operationsInProgress--;
         if (operationsInProgress === 0 && iteratorIsDone) {
           resolve();
@@ -110,7 +110,7 @@ export class Async {
             operationsInProgress++;
             try {
               Promise.resolve(callback(nextIteratorResult.value, arrayIndex++))
-                .then(() => onOperationCompletion())
+                .then(() => onOperationCompletionAsync())
                 .catch(reject);
             } catch (error) {
               reject(error as Error);
@@ -121,7 +121,7 @@ export class Async {
         }
       }
 
-      onOperationCompletion().catch(reject);
+      onOperationCompletionAsync().catch(reject);
     });
   }
 
