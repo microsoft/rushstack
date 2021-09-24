@@ -140,7 +140,7 @@ describe('getPackageDeps', () => {
 
       filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
     } catch (e) {
-      return _done(e);
+      return _done(e as Error);
     }
 
     _done();
@@ -173,7 +173,7 @@ describe('getPackageDeps', () => {
 
       filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
     } catch (e) {
-      return _done(e);
+      return _done(e as Error);
     }
 
     _done();
@@ -200,7 +200,7 @@ describe('getPackageDeps', () => {
 
       filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
     } catch (e) {
-      return _done(e);
+      return _done(e as Error);
     }
 
     _done();
@@ -228,7 +228,7 @@ describe('getPackageDeps', () => {
 
       filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
     } catch (e) {
-      return _done(e);
+      return _done(e as Error);
     }
 
     _done();
@@ -278,7 +278,7 @@ describe('getPackageDeps', () => {
 
       filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
     } catch (e) {
-      return _done(e);
+      return _done(e as Error);
     }
 
     _done();
@@ -309,7 +309,7 @@ describe('getPackageDeps', () => {
 
       filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
     } catch (e) {
-      return _done(e);
+      return _done(e as Error);
     }
 
     _done();
@@ -340,7 +340,7 @@ describe('getPackageDeps', () => {
 
       filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
     } catch (e) {
-      return _done(e);
+      return _done(e as Error);
     }
 
     _done();
@@ -371,7 +371,7 @@ describe('getPackageDeps', () => {
 
       filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
     } catch (e) {
-      return _done(e);
+      return _done(e as Error);
     }
 
     _done();
@@ -402,7 +402,7 @@ describe('getPackageDeps', () => {
 
       filePaths.forEach((filePath) => expect(results.get(filePath)).toEqual(expectedFiles[filePath]));
     } catch (e) {
-      return _done(e);
+      return _done(e as Error);
     }
 
     _done();

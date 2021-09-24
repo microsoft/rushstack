@@ -50,6 +50,11 @@ export interface IInstallManagerOptions {
   allowShrinkwrapUpdates: boolean;
 
   /**
+   * Whether to check the validation before install only, without actually installing anything.
+   */
+  checkOnly: boolean;
+
+  /**
    * Whether to skip policy checks.
    */
   bypassPolicy: boolean;
@@ -179,6 +184,10 @@ export abstract class BaseInstallManager {
     }
 
     const { shrinkwrapIsUpToDate, variantIsUpToDate } = await this.prepareAsync();
+
+    if (this.options.checkOnly) {
+      return;
+    }
 
     console.log(
       os.EOL + colors.bold(`Checking installation in "${this.rushConfiguration.commonTempFolder}"`)
@@ -374,7 +383,9 @@ export abstract class BaseInstallManager {
         );
       } catch (ex) {
         console.log();
-        console.log(`Unable to load the ${this._rushConfiguration.shrinkwrapFilePhrase}: ${ex.message}`);
+        console.log(
+          `Unable to load the ${this._rushConfiguration.shrinkwrapFilePhrase}: ${(ex as Error).message}`
+        );
 
         if (!this.options.allowShrinkwrapUpdates) {
           console.log();

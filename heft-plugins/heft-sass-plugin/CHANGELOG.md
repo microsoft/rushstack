@@ -1,6 +1,28 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Sat, 18 Sep 2021 03:05:57 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Sep 2021 00:09:29 GMT and should not be manually modified.
+
+## 0.1.19
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 0.1.18
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 0.1.17
+Wed, 22 Sep 2021 03:27:12 GMT
+
+_Version update only_
+
+## 0.1.16
+Wed, 22 Sep 2021 00:09:32 GMT
+
+_Version update only_
 
 ## 0.1.15
 Sat, 18 Sep 2021 03:05:57 GMT

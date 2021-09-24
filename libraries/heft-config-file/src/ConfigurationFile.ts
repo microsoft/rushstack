@@ -241,7 +241,7 @@ export class ConfigurationFile<TConfigurationFile> {
     try {
       return await this.loadConfigurationFileForProjectAsync(terminal, projectPath, rigConfig);
     } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
+      if (FileSystem.isNotExistError(e as Error)) {
         return undefined;
       }
       throw e;
@@ -339,7 +339,7 @@ export class ConfigurationFile<TConfigurationFile> {
     try {
       fileText = await FileSystem.readFileAsync(resolvedConfigurationFilePath);
     } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
+      if (FileSystem.isNotExistError(e as Error)) {
         if (rigConfig) {
           terminal.writeDebugLine(
             `Config file "${resolvedConfigurationFilePathForLogging}" does not exist. Attempting to load via rig.`
@@ -358,7 +358,7 @@ export class ConfigurationFile<TConfigurationFile> {
           );
         }
 
-        e.message = `File does not exist: ${resolvedConfigurationFilePathForLogging}`;
+        (e as Error).message = `File does not exist: ${resolvedConfigurationFilePathForLogging}`;
       }
 
       throw e;
@@ -409,7 +409,7 @@ export class ConfigurationFile<TConfigurationFile> {
           undefined
         );
       } catch (e) {
-        if (FileSystem.isNotExistError(e)) {
+        if (FileSystem.isNotExistError(e as Error)) {
           throw new Error(
             `In file "${resolvedConfigurationFilePathForLogging}", file referenced in "extends" property ` +
               `("${configurationJson.extends}") cannot be resolved.`
@@ -567,7 +567,7 @@ export class ConfigurationFile<TConfigurationFile> {
         );
       } catch (e) {
         // Ignore cases where a configuration file doesn't exist in a rig
-        if (!FileSystem.isNotExistError(e)) {
+        if (!FileSystem.isNotExistError(e as Error)) {
           throw e;
         } else {
           terminal.writeDebugLine(

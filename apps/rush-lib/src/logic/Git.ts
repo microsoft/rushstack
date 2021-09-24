@@ -14,6 +14,8 @@ import { GitEmailPolicy } from './policy/GitEmailPolicy';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 
+export const DEFAULT_GIT_TAG_SEPARATOR: string = '_';
+
 interface IResultOrError<TResult> {
   error?: Error;
   result?: TResult;
@@ -334,6 +336,10 @@ export class Git {
     });
   }
 
+  public getTagSeparator(): string {
+    return this._rushConfiguration.gitTagSeparator || DEFAULT_GIT_TAG_SEPARATOR;
+  }
+
   /**
    * Git remotes can use different URL syntaxes; this converts them all to a normalized HTTPS
    * representation for matching purposes.  IF THE INPUT IS NOT ALREADY HTTPS, THE OUTPUT IS
@@ -416,7 +422,7 @@ export class Git {
         };
       } catch (e) {
         this._gitEmailResult = {
-          error: e
+          error: e as Error
         };
       }
     }

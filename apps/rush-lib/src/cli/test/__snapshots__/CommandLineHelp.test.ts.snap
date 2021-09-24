@@ -535,7 +535,7 @@ exports[`CommandLineHelp prints the help for each action: install 1`] = `
                     [--variant VARIANT] [-t PROJECT] [-T PROJECT] [-f PROJECT]
                     [-o PROJECT] [-i PROJECT] [-I PROJECT]
                     [--to-version-policy VERSION_POLICY_NAME]
-                    [--from-version-policy VERSION_POLICY_NAME]
+                    [--from-version-policy VERSION_POLICY_NAME] [--check-only]
                     
 
 The \\"rush install\\" command installs package dependencies for all your 
@@ -656,6 +656,8 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
+  --check-only          Only check the validity of the shrinkwrap file 
+                        without performing an install.
 "
 `;
 

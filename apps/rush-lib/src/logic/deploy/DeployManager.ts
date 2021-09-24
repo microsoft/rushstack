@@ -205,7 +205,10 @@ export class DeployManager {
       try {
         this._traceResolveDependency(dependencyPackageName, packageJsonRealFolderPath, deployState);
       } catch (resolveErr) {
-        if (resolveErr.code === 'MODULE_NOT_FOUND' && optionalDependencyNames.has(dependencyPackageName)) {
+        if (
+          (resolveErr as NodeJS.ErrnoException).code === 'MODULE_NOT_FOUND' &&
+          optionalDependencyNames.has(dependencyPackageName)
+        ) {
           // Ignore missing optional dependency
           continue;
         }
@@ -237,7 +240,7 @@ export class DeployManager {
           // }
           this._traceResolveDependency(packageJson.name, pnpmDotFolderPath, deployState);
         } catch (resolveErr) {
-          if (resolveErr.code === 'MODULE_NOT_FOUND') {
+          if ((resolveErr as NodeJS.ErrnoException).code === 'MODULE_NOT_FOUND') {
             // The workaround link isn't guaranteed to exist, so ignore if it's missing
             // NOTE: If you encounter this warning a lot, please report it to the Rush maintainers.
             console.log('Ignoring missing PNPM workaround link for ' + packageJsonFolderPath);
@@ -313,7 +316,7 @@ export class DeployManager {
           deployState.symlinkAnalyzer.analyzePath(filePath);
           return resolvedPath;
         } catch (realpathErr) {
-          if (realpathErr.code !== 'ENOENT') {
+          if ((realpathErr as NodeJS.ErrnoException).code !== 'ENOENT') {
             throw realpathErr;
           }
         }

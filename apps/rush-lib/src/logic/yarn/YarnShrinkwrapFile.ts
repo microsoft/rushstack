@@ -176,7 +176,7 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
       shrinkwrapString = FileSystem.readFile(shrinkwrapFilename);
       shrinkwrapJson = lockfileModule.parse(shrinkwrapString);
     } catch (error) {
-      throw new Error(`Error reading "${shrinkwrapFilename}":` + os.EOL + `  ${error.message}`);
+      throw new Error(`Error reading "${shrinkwrapFilename}":` + os.EOL + `  ${(error as Error).message}`);
     }
 
     return new YarnShrinkwrapFile(shrinkwrapJson.object);

@@ -26,7 +26,7 @@ function matchErrorSnapshot(input: string): void {
   try {
     parser.parse();
   } catch (e) {
-    error = e;
+    error = e as Error;
   }
   expect({
     input: escape(tokenizer.input.toString()),

@@ -129,7 +129,7 @@ export class ProjectWatcher {
           } catch (err) {
             // eslint-disable-next-line require-atomic-updates
             terminated = true;
-            reject(err);
+            reject(err as NodeJS.ErrnoException);
           }
         };
 
@@ -179,7 +179,9 @@ export class ProjectWatcher {
                     addWatcher(normalizedName, changeListener);
                   }
                 } catch (err) {
-                  if (err.code !== 'ENOENT' && err.code !== 'ENOTDIR') {
+                  const code: string | undefined = (err as NodeJS.ErrnoException).code;
+
+                  if (code !== 'ENOENT' && code !== 'ENOTDIR') {
                     throw err;
                   }
                 }
@@ -194,7 +196,7 @@ export class ProjectWatcher {
             timeout = setTimeout(resolveIfChanged, this._debounceMilliseconds);
           } catch (err) {
             terminated = true;
-            reject(err);
+            reject(err as NodeJS.ErrnoException);
           }
         };
 

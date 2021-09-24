@@ -68,7 +68,7 @@ function tryStartLocalHeft(): boolean {
       try {
         packageJson = JSON.parse(packageJsonContent);
       } catch (error) {
-        throw new Error(`Error parsing ${packageJsonPath}:` + error.message);
+        throw new Error(`Error parsing ${packageJsonPath}:` + (error as Error).message);
       }
 
       // Does package.json have a dependency on Heft?
@@ -91,7 +91,7 @@ function tryStartLocalHeft(): boolean {
       console.log(`Using local Heft from ${heftFolder}`);
       console.log();
     } catch (error) {
-      throw new Error('Error probing for local Heft version: ' + error.message);
+      throw new Error('Error probing for local Heft version: ' + (error as Error).message);
     }
 
     require(heftEntryPoint);

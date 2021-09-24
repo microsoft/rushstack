@@ -262,7 +262,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
 
       return await super.execute(args);
     } catch (e) {
-      await this._reportErrorAndSetExitCode(e);
+      await this._reportErrorAndSetExitCode(e as Error);
       return false;
     }
   }
@@ -286,7 +286,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       await super.onExecute();
       await this._metricsCollector.flushAndTeardownAsync();
     } catch (e) {
-      await this._reportErrorAndSetExitCode(e);
+      await this._reportErrorAndSetExitCode(e as Error);
     }
 
     // If we make it here, things are fine and reset the exit code back to 0

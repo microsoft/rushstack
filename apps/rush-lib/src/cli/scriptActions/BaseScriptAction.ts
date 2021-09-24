@@ -5,6 +5,7 @@ import { CommandLineParameter } from '@rushstack/ts-command-line';
 import { BaseRushAction, IBaseRushActionOptions } from '../actions/BaseRushAction';
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 import { RushConstants } from '../../logic/RushConstants';
+import type { ParameterJson } from '../../api/CommandLineJson';
 
 /**
  * Constructor parameters for BaseScriptAction
@@ -79,8 +80,9 @@ export abstract class BaseScriptAction extends BaseRushAction {
             break;
           default:
             throw new Error(
-              `${RushConstants.commandLineFilename} defines a parameter "${parameterJson!.longName}"` +
-                ` using an unsupported parameter kind "${parameterJson!.parameterKind}"`
+              `${RushConstants.commandLineFilename} defines a parameter "${
+                (parameterJson as ParameterJson).longName
+              }" using an unsupported parameter kind "${(parameterJson as ParameterJson).parameterKind}"`
             );
         }
 

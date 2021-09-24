@@ -332,11 +332,11 @@ export class BulkScriptAction extends BaseScriptAction {
       if (error instanceof AlreadyReportedError) {
         console.log(`rush ${this.actionName} (${stopwatch.toString()})`);
       } else {
-        if (error && error.message) {
+        if (error && (error as Error).message) {
           if (this.parser.isDebug) {
-            console.log('Error: ' + error.stack);
+            console.log('Error: ' + (error as Error).stack);
           } else {
-            console.log('Error: ' + error.message);
+            console.log('Error: ' + (error as Error).message);
           }
         }
 

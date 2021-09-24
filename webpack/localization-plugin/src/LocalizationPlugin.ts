@@ -511,7 +511,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
           localizedResourcePath
         );
       } catch (e) {
-        errors.push(e);
+        errors.push(e as Error);
       }
 
       if (resolvedTranslatedData) {

@@ -28,12 +28,12 @@ export async function runAsync(command: string, params: string[]): Promise<IRunR
 async function _handleChildProcess(childProcess: child_process.ChildProcess): Promise<IRunResult> {
   return await new Promise((resolve: (result: IRunResult) => void) => {
     const stderr: string[] = [];
-    childProcess.stderr.on('data', (data: Buffer) => {
+    childProcess.stderr?.on('data', (data: Buffer) => {
       stderr.push(data.toString());
     });
 
     const stdout: string[] = [];
-    childProcess.stdout.on('data', (data: Buffer) => {
+    childProcess.stdout?.on('data', (data: Buffer) => {
       stdout.push(data.toString());
     });
 

@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import {
-  Constants,
   HeftConfiguration,
   HeftSession,
   IHeftPlugin,

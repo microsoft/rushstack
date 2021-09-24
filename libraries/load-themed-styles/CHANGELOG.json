@@ -2,6 +2,69 @@
   "name": "@microsoft/load-themed-styles",
   "entries": [
     {
+      "version": "1.10.216",
+      "tag": "@microsoft/load-themed-styles_v1.10.216",
+      "date": "Fri, 24 Sep 2021 00:09:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.39.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.4.17`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.215",
+      "tag": "@microsoft/load-themed-styles_v1.10.215",
+      "date": "Thu, 23 Sep 2021 00:10:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.39.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.4.16`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.214",
+      "tag": "@microsoft/load-themed-styles_v1.10.214",
+      "date": "Wed, 22 Sep 2021 03:27:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.39.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.4.15`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.10.213",
+      "tag": "@microsoft/load-themed-styles_v1.10.213",
+      "date": "Wed, 22 Sep 2021 00:09:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.38.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-web-rig\" to `0.4.14`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.10.212",
       "tag": "@microsoft/load-themed-styles_v1.10.212",
       "date": "Sat, 18 Sep 2021 03:05:57 GMT",

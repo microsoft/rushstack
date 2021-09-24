@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { Async } from '@rushstack/node-core-library';
+
 import { HeftEventPluginBase } from '../pluginFramework/HeftEventPluginBase';
 import { ScopedLogger } from '../pluginFramework/logging/ScopedLogger';
 import { HeftSession } from '../pluginFramework/HeftSession';
@@ -12,7 +14,6 @@ import {
 } from '../utilities/CoreConfigFiles';
 import { IBuildStageProperties } from '../stages/BuildStage';
 import { ITestStageProperties } from '../stages/TestStage';
-import { Async } from '../utilities/Async';
 import { Constants } from '../utilities/Constants';
 
 /**
@@ -88,9 +89,8 @@ export class RunScriptPlugin extends HeftEventPluginBase<IHeftConfigurationRunSc
     heftConfiguration: HeftConfiguration,
     properties: TStageProperties
   ): Promise<void> {
-    await Async.forEachLimitAsync(
+    await Async.forEachAsync(
       runScriptEventActions,
-      Constants.maxParallelism,
       async (runScriptEventAction) => {
         // The scriptPath property should be fully resolved since it is included in the resolution logic used by
         // HeftConfiguration
@@ -127,7 +127,8 @@ export class RunScriptPlugin extends HeftEventPluginBase<IHeftConfigurationRunSc
         } else if (runScript.runAsync) {
           await runScript.runAsync(runScriptOptions);
         }
-      }
+      },
+      { concurrency: Constants.maxParallelism }
     );
   }
 }

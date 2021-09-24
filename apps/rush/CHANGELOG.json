@@ -2,6 +2,31 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.54.0",
+      "tag": "@microsoft/rush_v5.54.0",
+      "date": "Wed, 22 Sep 2021 22:54:17 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add a \"--check-only\" parameter to \"rush install\" to check the validity of the shrinkwrap without performing a full install."
+          },
+          {
+            "comment": "Fix an issue where `rush update-autoinstaller` does not use the repo's .npmrc"
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add ability to customize tag separator"
+          }
+        ],
+        "patch": [
+          {
+            "comment": "Lock node-fetch dependency to 2.6.2 due to an incompatibility with 2.6.3 in the Azure Cloud Cache Provider."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.53.0",
       "tag": "@microsoft/rush_v5.53.0",
       "date": "Fri, 10 Sep 2021 23:20:00 GMT",

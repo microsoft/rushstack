@@ -385,6 +385,7 @@ export class RushConfiguration {
     get gitAllowedEmailRegExps(): string[];
     get gitChangeLogUpdateCommitMessage(): string | undefined;
     get gitSampleEmail(): string;
+    get gitTagSeparator(): string | undefined;
     get gitVersionBumpCommitMessage(): string | undefined;
     get hotfixChangeEnabled(): boolean;
     static loadFromConfigurationFile(rushJsonFilename: string): RushConfiguration;

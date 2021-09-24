@@ -289,6 +289,7 @@ export interface IHeftSessionHooks {
 export interface IMetricsData {
     command: string;
     commandParameters: Record<string, string>;
+    encounteredError?: boolean;
     machineArch: string;
     machineCores: number;
     machineOs: string;
@@ -299,6 +300,8 @@ export interface IMetricsData {
 
 // @internal (undocumented)
 export interface _IPerformanceData {
+    // (undocumented)
+    encounteredError?: boolean;
     // (undocumented)
     taskTotalExecutionMs: number;
 }

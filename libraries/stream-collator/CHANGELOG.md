@@ -1,6 +1,28 @@
 # Change Log - @rushstack/stream-collator
 
-This log was last generated on Sat, 18 Sep 2021 03:05:57 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Sep 2021 00:09:29 GMT and should not be manually modified.
+
+## 4.0.129
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 4.0.128
+Thu, 23 Sep 2021 00:10:41 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 4.0.127
+Wed, 22 Sep 2021 03:27:12 GMT
+
+_Version update only_
+
+## 4.0.126
+Wed, 22 Sep 2021 00:09:32 GMT
+
+_Version update only_
 
 ## 4.0.125
 Sat, 18 Sep 2021 03:05:57 GMT

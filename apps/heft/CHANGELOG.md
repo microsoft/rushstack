@@ -1,6 +1,36 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Sat, 18 Sep 2021 03:05:57 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Sep 2021 00:09:29 GMT and should not be manually modified.
+
+## 0.39.2
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 0.39.1
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 0.39.0
+Wed, 22 Sep 2021 03:27:12 GMT
+
+### Minor changes
+
+- Add "encounteredErrors" boolean to IMetricsData.
+
+### Patches
+
+- Fix typo in temp folder path.
+
+## 0.38.2
+Wed, 22 Sep 2021 00:09:32 GMT
+
+### Patches
+
+- Fix formatting of tsBuildInfoFile tsconfig option. TypeScript uses an exact string match for change detection and normalizes slashes to '/' upon saving the file. Therefore the inputs need to be normalized as well.
 
 ## 0.38.1
 Sat, 18 Sep 2021 03:05:57 GMT

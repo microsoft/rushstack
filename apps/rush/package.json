@@ -1,6 +1,6 @@
 {
   "name": "@microsoft/rush",
-  "version": "5.53.0",
+  "version": "5.54.0",
   "description": "A professional solution for consolidating all your JavaScript projects in one Git repo",
   "keywords": [
     "install",
@@ -41,7 +41,7 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "10.17.13",
+    "@types/node": "12.20.24",
     "@types/semver": "7.3.5"
   }
 }
