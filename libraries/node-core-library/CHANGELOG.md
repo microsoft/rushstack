@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 23 Sep 2021 00:10:41 GMT and should not be manually modified.
+This log was last generated on Fri, 24 Sep 2021 00:09:29 GMT and should not be manually modified.
+
+## 3.41.0
+Fri, 24 Sep 2021 00:09:29 GMT
+
+### Minor changes
+
+- Allow Async.mapAsync and Async.forEachAsync to take an iterator.
 
 ## 3.40.3
 Thu, 23 Sep 2021 00:10:41 GMT

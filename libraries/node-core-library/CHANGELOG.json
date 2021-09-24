@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.41.0",
+      "tag": "@rushstack/node-core-library_v3.41.0",
+      "date": "Fri, 24 Sep 2021 00:09:29 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Allow Async.mapAsync and Async.forEachAsync to take an iterator."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.40.3",
       "tag": "@rushstack/node-core-library_v3.40.3",
       "date": "Thu, 23 Sep 2021 00:10:41 GMT",
