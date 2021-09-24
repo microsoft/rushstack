@@ -129,7 +129,7 @@ export abstract class HeftActionBase extends CommandLineAction {
 
     let encounteredError: boolean = false;
     try {
-      await this.parametersCallbackAsync();
+      await this.parametersCallbackExecuteAsync();
       await this.actionExecuteAsync();
       await this.afterExecuteAsync();
     } catch (e) {
@@ -180,12 +180,15 @@ export abstract class HeftActionBase extends CommandLineAction {
     }
   }
 
-  protected async parametersCallbackAsync(): Promise<void> {
+  protected async parametersCallbackExecuteAsync(): Promise<void> {
     const customParametersRecord: Record<string, CustomParameterType> = {};
     for (const [parameterName, getParameterValue] of this.customParametersMap.entries()) {
       customParametersRecord[parameterName] = getParameterValue();
     }
-    this.customParametersCallbacks.forEach(async (callback) => await callback(customParametersRecord));
+
+    await Promise.all(
+      [...this.customParametersCallbacks].map(async (callback) => await callback(customParametersRecord))
+    );
   }
 
   protected abstract actionExecuteAsync(): Promise<void>;

@@ -6,7 +6,6 @@ import { CommandLineFlagParameter, ICommandLineActionOptions } from '@rushstack/
 import { HeftActionBase, IHeftActionBaseOptions } from './HeftActionBase';
 import { CleanStage, ICleanStageOptions } from '../../stages/CleanStage';
 import { Logging } from '../../utilities/Logging';
-import { Constants } from '../../utilities/Constants';
 import { BuildStage, IBuildStageOptions, IBuildStageStandardParameters } from '../../stages/BuildStage';
 
 export class BuildAction extends HeftActionBase {
@@ -19,7 +18,7 @@ export class BuildAction extends HeftActionBase {
   public constructor(
     heftActionOptions: IHeftActionBaseOptions,
     commandLineActionOptions: ICommandLineActionOptions = {
-      actionName: Constants.baseActions.build,
+      actionName: 'build',
       summary: 'Build the project.',
       documentation: ''
     }

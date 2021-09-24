@@ -58,29 +58,6 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
 }
 
 // @beta (undocumented)
-export class Constants {
-    // (undocumented)
-    static baseActions: {
-        build: 'build';
-        clean: 'clean';
-        start: 'start';
-        test: 'test';
-    };
-    // (undocumented)
-    static buildCacheFolderName: string;
-    // (undocumented)
-    static debugParameterLongName: string;
-    // (undocumented)
-    static maxParallelism: number;
-    // (undocumented)
-    static pluginParameterLongName: string;
-    // (undocumented)
-    static projectConfigFolderName: string;
-    // (undocumented)
-    static projectHeftFolderName: string;
-}
-
-// @beta (undocumented)
 export type CustomParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
 
 // @public (undocumented)

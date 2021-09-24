@@ -12,7 +12,6 @@ import { BuildAction } from './BuildAction';
 import { IHeftActionBaseOptions } from './HeftActionBase';
 import { TestStage, ITestStageOptions } from '../../stages/TestStage';
 import { Logging } from '../../utilities/Logging';
-import { Constants } from '../../utilities/Constants';
 
 export class TestAction extends BuildAction {
   private _noTestFlag!: CommandLineFlagParameter;
@@ -33,7 +32,7 @@ export class TestAction extends BuildAction {
 
   public constructor(heftActionOptions: IHeftActionBaseOptions) {
     super(heftActionOptions, {
-      actionName: Constants.baseActions.test,
+      actionName: 'test',
       summary: 'Build the project and run tests.',
       documentation: ''
     });

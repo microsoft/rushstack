@@ -6,7 +6,6 @@ import { IBuildStageStandardParameters, BuildStage, IBuildStageOptions } from '.
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { ICleanStageOptions, CleanStage } from '../../stages/CleanStage';
 import { Logging } from '../../utilities/Logging';
-import { Constants } from '../../utilities/Constants';
 
 export class StartAction extends HeftActionBase {
   private _buildStandardParameters!: IBuildStageStandardParameters;
@@ -16,7 +15,7 @@ export class StartAction extends HeftActionBase {
   public constructor(heftActionOptions: IHeftActionBaseOptions) {
     super(
       {
-        actionName: Constants.baseActions.start,
+        actionName: 'start',
         summary: 'Run the local server for the current project',
         documentation: ''
       },

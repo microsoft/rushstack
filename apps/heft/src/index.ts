@@ -33,7 +33,6 @@ export {
   ICustomParameterStringList,
   ICustomParameterOptions
 } from './cli/actions/CustomParameters';
-export { Constants } from './utilities/Constants';
 
 // Stages
 export { StageHooksBase, IStageContext } from './stages/StageBase';

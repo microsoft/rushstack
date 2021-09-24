@@ -27,7 +27,7 @@ class HeftParameterPlugin implements IHeftPlugin {
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     heftSession.registerParameters<ICustomParameters>({
-      actionName: Constants.baseActions.test,
+      actionName: 'test',
       parameters: {
         customParameter: {
           kind: 'flag',

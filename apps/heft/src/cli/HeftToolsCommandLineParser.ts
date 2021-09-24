@@ -173,6 +173,13 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
                 action.customParametersMap.set(parameterName, () => parameter.values);
                 break;
               }
+
+              default: {
+                throw new Error(
+                  // @ts-expect-error All cases are handled above, therefore parameterOption is of type `never`
+                  `Unrecognized parameter kind "${parameterOption.kind}" for parameter "${parameterOption.parameterLongName}`
+                );
+              }
             }
           }
           action.customParametersCallbacks.add(options.callback);

@@ -96,6 +96,13 @@ export class CustomAction<TParameters> extends HeftActionBase {
           getParameterValue = () => parameter.values;
           break;
         }
+
+        default: {
+          throw new Error(
+            // @ts-expect-error All cases are handled above, therefore parameterOption is of type `never`
+            `Unrecognized parameter kind "${parameterOption.kind}" for parameter "${parameterOption.parameterLongName}`
+          );
+        }
       }
 
       this._parameterValues.set(callbackValueName, getParameterValue);
