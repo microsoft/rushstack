@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/ts-command-line",
+      "comment": "Add safety check parametersProcessed to CommandLineParameterProvider",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/ts-command-line",
+  "email": "halfnibble@users.noreply.github.com"
+}
