@@ -65,6 +65,10 @@ export interface IStorybookPluginOptions {
   startupModulePath: string;
 }
 
+interface IStorybookParameters {
+  storybookFlag?: boolean;
+}
+
 /** @public */
 export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
   public readonly pluginName: string = PLUGIN_NAME;
@@ -109,9 +113,20 @@ export class StorybookPlugin implements IHeftPlugin<IStorybookPluginOptions> {
     }
     this._startupModulePath = options.startupModulePath;
 
+    const { storybookFlag } = heftSession.registerParameters<IStorybookParameters>({
+      actionName: 'start',
+      parameters: {
+        storybookFlag: {
+          kind: 'flag',
+          parameterLongName: '--storybook',
+          description:
+            '(EXPERIMENTAL) Used by the "@rushstack/heft-storybook-plugin" package to launch Storybook.'
+        }
+      }
+    });
+
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
-      // TODO: Expose an API for custom CLI parameters similar to HeftSession.registerAction()
-      if (process.argv.indexOf('--storybook') < 0) {
+      if (!storybookFlag) {
         this._logger.terminal.writeVerboseLine(
           'The command line does not include "--storybook", so bundling will proceed without Storybook'
         );
