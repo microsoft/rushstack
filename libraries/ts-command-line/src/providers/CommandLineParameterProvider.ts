@@ -46,7 +46,7 @@ export abstract class CommandLineParameterProvider {
 
   private _parameters: CommandLineParameter[];
   private _parametersByLongName: Map<string, CommandLineParameter>;
-
+  private _parametersProcessed: boolean;
   private _remainder: CommandLineRemainder | undefined;
 
   /** @internal */
@@ -54,6 +54,7 @@ export abstract class CommandLineParameterProvider {
   public constructor() {
     this._parameters = [];
     this._parametersByLongName = new Map<string, CommandLineParameter>();
+    this._parametersProcessed = false;
   }
 
   /**
@@ -61,6 +62,13 @@ export abstract class CommandLineParameterProvider {
    */
   public get parameters(): ReadonlyArray<CommandLineParameter> {
     return this._parameters;
+  }
+
+  /**
+   * Informs the caller if the argparse data has been processed into parameters.
+   */
+  public get parametersProcessed(): boolean {
+    return this._parametersProcessed;
   }
 
   /**
@@ -342,6 +350,12 @@ export abstract class CommandLineParameterProvider {
 
   /** @internal */
   protected _processParsedData(data: ICommandLineParserData): void {
+    if (this._parametersProcessed) {
+      throw new Error('Command Line Parser Data was already processed');
+    } else {
+      this._parametersProcessed = true;
+    }
+
     // Fill in the values for the parameters
     for (const parameter of this._parameters) {
       const value: any = data[parameter._parserKey!]; // eslint-disable-line @typescript-eslint/no-explicit-any

@@ -19,7 +19,9 @@ import { IHeftLifecycle } from './HeftLifecycle';
 export type RegisterAction = <TParameters>(action: ICustomActionOptions<TParameters>) => void;
 
 /** @beta */
-export type RegisterParameters = <TParameters>(parameters: ICustomParameterOptions<TParameters>) => void;
+export type RegisterParameters = <TParameters>(
+  parameters: ICustomParameterOptions<TParameters>
+) => TParameters;
 
 /**
  * @public

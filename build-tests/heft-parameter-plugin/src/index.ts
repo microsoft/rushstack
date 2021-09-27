@@ -19,13 +19,10 @@ interface ICustomParameters {
 
 class HeftParameterPlugin implements IHeftPlugin {
   public readonly pluginName: string = 'heft-action-plugin';
-  private _customParameter?: boolean;
-  private _customStringParameter?: string;
-  private _customNumberParameter?: number;
-  private _customStringListParameter?: string[];
+  private _customParameters: ICustomParameters;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    heftSession.registerParameters<ICustomParameters>({
+    this._customParameters = heftSession.registerParameters<ICustomParameters>({
       actionName: 'test',
       parameters: {
         customParameter: {
@@ -48,12 +45,6 @@ class HeftParameterPlugin implements IHeftPlugin {
           parameterLongName: '--custom-string-list-parameter',
           description: 'Test running a custom string list parameter'
         }
-      },
-      callback: async (customParameters: ICustomParameters) => {
-        this._customParameter = customParameters.customParameter;
-        this._customStringParameter = customParameters.customStringParameter;
-        this._customNumberParameter = customParameters.customNumberParameter;
-        this._customStringListParameter = customParameters.customStringListParameter;
       }
     });
 
@@ -62,10 +53,10 @@ class HeftParameterPlugin implements IHeftPlugin {
     heftSession.hooks.build.tap(this.pluginName, (build: IBuildStageContext) => {
       build.hooks.compile.tap(this.pluginName, (compile: ICompileSubstage) => {
         compile.hooks.run.tapPromise(this.pluginName, async () => {
-          if (this._customParameter) {
-            const customContent: string = `${this._customStringParameter?.repeat(
-              this._customNumberParameter || 1
-            )}_${this._customStringListParameter?.join('_')}`;
+          if (this._customParameters.customParameter) {
+            const customContent: string = `${this._customParameters.customStringParameter?.repeat(
+              this._customParameters.customNumberParameter || 1
+            )}_${this._customParameters.customStringListParameter?.join('_')}`;
             await FileSystem.writeFileAsync(`${buildFolder}/lib/custom_output.txt`, customContent, {
               ensureFolderExists: true
             });

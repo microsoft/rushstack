@@ -48,5 +48,4 @@ export type ICustomParameter<TParameter> = TParameter extends boolean
 export interface ICustomParameterOptions<TParameters> {
   actionName: string;
   parameters: { [K in keyof TParameters]: ICustomParameter<TParameters[K]> };
-  callback: (parameters: Record<string, CustomParameterType>) => void | Promise<void>;
 }

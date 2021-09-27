@@ -219,8 +219,6 @@ export interface ICustomParameterOptions<TParameters> {
     // (undocumented)
     actionName: string;
     // (undocumented)
-    callback: (parameters: Record<string, CustomParameterType>) => void | Promise<void>;
-    // (undocumented)
     parameters: {
         [K in keyof TParameters]: ICustomParameter<TParameters[K]>;
     };
@@ -395,7 +393,7 @@ export class MetricsCollectorHooks {
 export type RegisterAction = <TParameters>(action: ICustomActionOptions<TParameters>) => void;
 
 // @beta (undocumented)
-export type RegisterParameters = <TParameters>(parameters: ICustomParameterOptions<TParameters>) => void;
+export type RegisterParameters = <TParameters>(parameters: ICustomParameterOptions<TParameters>) => TParameters;
 
 // @beta (undocumented)
 export type RequestAccessToPluginByNameCallback = (pluginToAccessName: string, pluginApply: (pluginAccessor: object) => void) => void;

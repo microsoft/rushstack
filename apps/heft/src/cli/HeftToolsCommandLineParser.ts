@@ -125,66 +125,10 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       ) => {
         const action: TAction | undefined = this.tryGetAction(options.actionName) as TAction;
         if (action) {
-          const parameters: Set<string> = new Set(action.parameters.map((parameter) => parameter.longName));
-          for (const [parameterName, untypedParameterOption] of Object.entries(options.parameters)) {
-            if (parameters.has(parameterName)) {
-              throw new Error(`Duplicate parameter name: ${parameterName}`);
-            }
-
-            const parameterOption: ICustomParameter<CustomParameterType> =
-              untypedParameterOption as ICustomParameter<CustomParameterType>;
-
-            switch (parameterOption.kind) {
-              case 'flag': {
-                const parameter: CommandLineFlagParameter = action.defineFlagParameter({
-                  parameterLongName: parameterOption.parameterLongName,
-                  description: parameterOption.description
-                });
-                action.customParametersMap.set(parameterName, () => parameter.value);
-                break;
-              }
-
-              case 'string': {
-                const parameter: CommandLineStringParameter = action.defineStringParameter({
-                  parameterLongName: parameterOption.parameterLongName,
-                  description: parameterOption.description,
-                  argumentName: 'VALUE'
-                });
-                action.customParametersMap.set(parameterName, () => parameter.value);
-                break;
-              }
-
-              case 'integer': {
-                const parameter: CommandLineIntegerParameter = action.defineIntegerParameter({
-                  parameterLongName: parameterOption.parameterLongName,
-                  description: parameterOption.description,
-                  argumentName: 'VALUE'
-                });
-                action.customParametersMap.set(parameterName, () => parameter.value);
-                break;
-              }
-
-              case 'stringList': {
-                const parameter: CommandLineStringListParameter = action.defineStringListParameter({
-                  parameterLongName: parameterOption.parameterLongName,
-                  description: parameterOption.description,
-                  argumentName: 'VALUE'
-                });
-                action.customParametersMap.set(parameterName, () => parameter.values);
-                break;
-              }
-
-              default: {
-                throw new Error(
-                  // @ts-expect-error All cases are handled above, therefore parameterOption is of type `never`
-                  `Unrecognized parameter kind "${parameterOption.kind}" for parameter "${parameterOption.parameterLongName}`
-                );
-              }
-            }
-          }
-          action.customParametersCallbacks.add(options.callback);
+          const customParameters: TParameters = this._addParametersForAction(action, options);
+          return customParameters;
         } else {
-          throw new Error('Unrecognized action: ' + options.actionName);
+          throw new Error(`Unrecognized action name in register parameters call: ${options.actionName}`);
         }
       }
     });
@@ -265,6 +209,101 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       await this._reportErrorAndSetExitCode(e as Error);
       return false;
     }
+  }
+
+  private _addParametersForAction<TAction extends HeftActionBase, TParameters>(
+    action: TAction,
+    options: ICustomParameterOptions<TParameters>
+  ): TParameters {
+    const existingParameterNames: Set<string> = new Set(
+      action.parameters.map((parameter) => parameter.longName)
+    );
+    const parametersRecord: Partial<TParameters> = {};
+    for (const [parameterName, untypedParameterOption] of Object.entries(options.parameters)) {
+      if (existingParameterNames.has(parameterName)) {
+        throw new Error(`Duplicate parameter name registered: ${parameterName}`);
+      }
+
+      const parameterOption: ICustomParameter<CustomParameterType> =
+        untypedParameterOption as ICustomParameter<CustomParameterType>;
+
+      const verifyParametersProcessed = (): void => {
+        if (!action.parametersProcessed) {
+          throw new Error(
+            `Unable to access parameter value for "${parameterName}" prior to argument processing`
+          );
+        }
+      };
+
+      switch (parameterOption.kind) {
+        case 'flag': {
+          const parameter: CommandLineFlagParameter = action.defineFlagParameter({
+            parameterLongName: parameterOption.parameterLongName,
+            description: parameterOption.description
+          });
+          Object.defineProperty(parametersRecord, parameterName, {
+            get: () => {
+              verifyParametersProcessed();
+              return parameter.value;
+            }
+          });
+          break;
+        }
+
+        case 'string': {
+          const parameter: CommandLineStringParameter = action.defineStringParameter({
+            parameterLongName: parameterOption.parameterLongName,
+            description: parameterOption.description,
+            argumentName: 'VALUE'
+          });
+          Object.defineProperty(parametersRecord, parameterName, {
+            get: () => {
+              verifyParametersProcessed();
+              return parameter.value;
+            }
+          });
+          break;
+        }
+
+        case 'integer': {
+          const parameter: CommandLineIntegerParameter = action.defineIntegerParameter({
+            parameterLongName: parameterOption.parameterLongName,
+            description: parameterOption.description,
+            argumentName: 'VALUE'
+          });
+          Object.defineProperty(parametersRecord, parameterName, {
+            get: () => {
+              verifyParametersProcessed();
+              return parameter.value;
+            }
+          });
+          break;
+        }
+
+        case 'stringList': {
+          const parameter: CommandLineStringListParameter = action.defineStringListParameter({
+            parameterLongName: parameterOption.parameterLongName,
+            description: parameterOption.description,
+            argumentName: 'VALUE'
+          });
+          Object.defineProperty(parametersRecord, parameterName, {
+            get: () => {
+              verifyParametersProcessed();
+              return parameter.values;
+            }
+          });
+          break;
+        }
+
+        default: {
+          throw new Error(
+            // @ts-expect-error All cases are handled above, therefore parameterOption is of type `never`
+            `Unrecognized parameter kind "${parameterOption.kind}" for parameter "${parameterOption.parameterLongName}`
+          );
+        }
+      }
+    }
+    return parametersRecord as TParameters;
   }
 
   private async _checkForUpgradeAsync(): Promise<void> {

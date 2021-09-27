@@ -56,9 +56,6 @@ export abstract class HeftActionBase extends CommandLineAction {
   protected readonly stages: IStages;
   protected verboseFlag!: CommandLineFlagParameter;
   public customParametersMap: Map<string, () => CustomParameterType>;
-  public customParametersCallbacks: Set<
-    (parameters: Record<string, CustomParameterType>) => void | Promise<void>
-  >;
 
   public constructor(
     commandLineOptions: ICommandLineActionOptions,
@@ -71,7 +68,6 @@ export abstract class HeftActionBase extends CommandLineAction {
     this.heftConfiguration = heftActionOptions.heftConfiguration;
     this.stages = heftActionOptions.stages;
     this.customParametersMap = new Map();
-    this.customParametersCallbacks = new Set();
     this.setStartTime();
   }
 
@@ -129,7 +125,6 @@ export abstract class HeftActionBase extends CommandLineAction {
 
     let encounteredError: boolean = false;
     try {
-      await this.parametersCallbackExecuteAsync();
       await this.actionExecuteAsync();
       await this.afterExecuteAsync();
     } catch (e) {
@@ -178,17 +173,6 @@ export abstract class HeftActionBase extends CommandLineAction {
     if (encounteredError) {
       throw new AlreadyReportedError();
     }
-  }
-
-  protected async parametersCallbackExecuteAsync(): Promise<void> {
-    const customParametersRecord: Record<string, CustomParameterType> = {};
-    for (const [parameterName, getParameterValue] of this.customParametersMap.entries()) {
-      customParametersRecord[parameterName] = getParameterValue();
-    }
-
-    await Promise.all(
-      [...this.customParametersCallbacks].map(async (callback) => await callback(customParametersRecord))
-    );
   }
 
   protected abstract actionExecuteAsync(): Promise<void>;
