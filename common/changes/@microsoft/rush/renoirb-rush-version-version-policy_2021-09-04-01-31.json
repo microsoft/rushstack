@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add a new parameter \"--detailed\" for the \"rush list\" command",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "contribs@renoirboulanger.com"
+}
