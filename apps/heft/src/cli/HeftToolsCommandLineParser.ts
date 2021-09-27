@@ -125,6 +125,11 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       ) => {
         const action: TAction | undefined = this.tryGetAction(options.actionName) as TAction;
         if (action) {
+          if (action.parametersProcessed) {
+            throw new Error(
+              `Unable to register parameters for action "${action.actionName}" after parameters are already processed`
+            );
+          }
           const customParameters: TParameters = this._addParametersForAction(action, options);
           return customParameters;
         } else {
