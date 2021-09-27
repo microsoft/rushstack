@@ -352,8 +352,6 @@ export abstract class CommandLineParameterProvider {
   protected _processParsedData(data: ICommandLineParserData): void {
     if (this._parametersProcessed) {
       throw new Error('Command Line Parser Data was already processed');
-    } else {
-      this._parametersProcessed = true;
     }
 
     // Fill in the values for the parameters
@@ -365,6 +363,8 @@ export abstract class CommandLineParameterProvider {
     if (this.remainder) {
       this.remainder._setValue(data[argparse.Const.REMAINDER]);
     }
+
+    this._parametersProcessed = true;
   }
 
   private _generateKey(): string {

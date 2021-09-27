@@ -11,18 +11,17 @@ import {
 import { FileSystem } from '@rushstack/node-core-library';
 
 interface ICustomParameters {
-  customParameter?: boolean;
-  customStringParameter?: string;
-  customNumberParameter?: number;
-  customStringListParameter?: string[];
+  readonly customParameter?: boolean;
+  readonly customStringParameter?: string;
+  readonly customNumberParameter?: number;
+  readonly customStringListParameter?: string[];
 }
 
 class HeftParameterPlugin implements IHeftPlugin {
   public readonly pluginName: string = 'heft-action-plugin';
-  private _customParameters: ICustomParameters;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
-    this._customParameters = heftSession.registerParameters<ICustomParameters>({
+    const customParameters: ICustomParameters = heftSession.registerParameters<ICustomParameters>({
       actionName: 'test',
       parameters: {
         customParameter: {
@@ -53,10 +52,10 @@ class HeftParameterPlugin implements IHeftPlugin {
     heftSession.hooks.build.tap(this.pluginName, (build: IBuildStageContext) => {
       build.hooks.compile.tap(this.pluginName, (compile: ICompileSubstage) => {
         compile.hooks.run.tapPromise(this.pluginName, async () => {
-          if (this._customParameters.customParameter) {
-            const customContent: string = `${this._customParameters.customStringParameter?.repeat(
-              this._customParameters.customNumberParameter || 1
-            )}_${this._customParameters.customStringListParameter?.join('_')}`;
+          if (customParameters.customParameter) {
+            const customContent: string = `${customParameters.customStringParameter?.repeat(
+              customParameters.customNumberParameter || 1
+            )}_${customParameters.customStringListParameter?.join('_')}`;
             await FileSystem.writeFileAsync(`${buildFolder}/lib/custom_output.txt`, customContent, {
               ensureFolderExists: true
             });

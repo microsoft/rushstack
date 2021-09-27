@@ -223,7 +223,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
     const existingParameterNames: Set<string> = new Set(
       action.parameters.map((parameter) => parameter.longName)
     );
-    const parametersRecord: Partial<TParameters> = {};
+    const parametersObject: Partial<TParameters> = {};
     for (const [parameterName, untypedParameterOption] of Object.entries(options.parameters)) {
       if (existingParameterNames.has(parameterName)) {
         throw new Error(`Duplicate parameter name registered: ${parameterName}`);
@@ -246,7 +246,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
             parameterLongName: parameterOption.parameterLongName,
             description: parameterOption.description
           });
-          Object.defineProperty(parametersRecord, parameterName, {
+          Object.defineProperty(parametersObject, parameterName, {
             get: () => {
               verifyParametersProcessed();
               return parameter.value;
@@ -261,7 +261,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
             description: parameterOption.description,
             argumentName: 'VALUE'
           });
-          Object.defineProperty(parametersRecord, parameterName, {
+          Object.defineProperty(parametersObject, parameterName, {
             get: () => {
               verifyParametersProcessed();
               return parameter.value;
@@ -276,7 +276,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
             description: parameterOption.description,
             argumentName: 'VALUE'
           });
-          Object.defineProperty(parametersRecord, parameterName, {
+          Object.defineProperty(parametersObject, parameterName, {
             get: () => {
               verifyParametersProcessed();
               return parameter.value;
@@ -291,7 +291,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
             description: parameterOption.description,
             argumentName: 'VALUE'
           });
-          Object.defineProperty(parametersRecord, parameterName, {
+          Object.defineProperty(parametersObject, parameterName, {
             get: () => {
               verifyParametersProcessed();
               return parameter.values;
@@ -308,7 +308,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
         }
       }
     }
-    return parametersRecord as TParameters;
+    return parametersObject as TParameters;
   }
 
   private async _checkForUpgradeAsync(): Promise<void> {
