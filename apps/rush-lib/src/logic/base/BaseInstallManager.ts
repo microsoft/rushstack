@@ -107,6 +107,12 @@ export interface IInstallManagerOptions {
    * These restrict the scope of a workspace installation.
    */
   pnpmFilterArguments: string[];
+
+  /**
+   * When true, only updates lockfile and repo-state.json, instead of
+   * checking node_modules and downloading dependencies.
+   */
+  lockfileOnly: boolean;
 }
 
 /**
@@ -540,6 +546,10 @@ export abstract class BaseInstallManager {
 
       if (this._rushConfiguration.pnpmOptions.strictPeerDependencies) {
         args.push('--strict-peer-dependencies');
+      }
+
+      if (options.lockfileOnly) {
+        args.push('--lockfile-only');
       }
     } else if (this._rushConfiguration.packageManager === 'yarn') {
       args.push('--link-folder', 'yarn-link');
