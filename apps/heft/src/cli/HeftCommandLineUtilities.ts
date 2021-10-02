@@ -159,7 +159,7 @@ export class HeftCommandLineUtilities {
     getValueIsProvided: (parameter: TTSCommandLineParameter) => boolean
   ): IHeftBaseParameter<TValue> {
     const actionParameterMap: Map<CommandLineAction, TTSCommandLineParameter> = new Map();
-    for (const action of this._getActions(options.associatedActionNames)) {
+    for (const action of this._getActions(options.associatedActionNames, options.parameterLongName)) {
       this._verifyUniqueParameterName(action, options);
       const parameter: TTSCommandLineParameter = defineParameterForAction(action);
       actionParameterMap.set(action, parameter);
@@ -208,20 +208,21 @@ export class HeftCommandLineUtilities {
     return parameterObject;
   }
 
-  private _getActions(actionNames: string[]): CommandLineAction[] {
+  private _getActions(actionNames: string[], parameterLongName: string): CommandLineAction[] {
     const actions: CommandLineAction[] = [];
     for (const actionName of actionNames) {
       const action: CommandLineAction | undefined = this._commandLineParser.tryGetAction(actionName);
       if (action) {
         if (action.parametersProcessed) {
           throw new Error(
-            `Unable to register parameters for action "${action.actionName}" after parameters have already been processed`
+            `Unable to register parameter "${parameterLongName}" for action "${action.actionName}". ` +
+              'Parameters have already been processed.'
           );
         }
         actions.push(action);
       } else {
         this._terminal.writeVerboseLine(
-          `Unable to get a reference for action "${actionName}" while registering custom parameters`
+          `Unable to find action "${actionName}" while registering the "${parameterLongName}" parameter`
         );
       }
     }
