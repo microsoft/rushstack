@@ -11,7 +11,10 @@ import { AsyncSeriesWaterfallHook } from 'tapable';
 import { CommandLineAction } from '@rushstack/ts-command-line';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
+import { CommandLineParser } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { IBaseCommandLineDefinition } from '@rushstack/ts-command-line';
+import { IBaseCommandLineDefinitionWithArgument } from '@rushstack/ts-command-line';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { JsonSchema } from '@rushstack/node-core-library';
@@ -60,6 +63,15 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
 // @beta (undocumented)
 export type CustomActionParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
 
+// @beta
+export class HeftCommandLineUtilities {
+    constructor(commandLineParser: CommandLineParser, terminal: Terminal);
+    registerFlagParameter(options: IRegisterParameterOptions): IHeftFlagParameter;
+    registerIntegerParameter(options: IRegisterParameterWithArgumentOptions): IHeftIntegerParameter;
+    registerStringListParameter(options: IRegisterParameterWithArgumentOptions): IHeftStringListParameter;
+    registerStringParameter(options: IRegisterParameterWithArgumentOptions): IHeftStringParameter;
+}
+
 // @public (undocumented)
 export class HeftConfiguration {
     get buildCacheFolder(): string;
@@ -90,6 +102,8 @@ export class HeftSession {
     //
     // @internal
     constructor(options: IHeftSessionOptions, internalSessionOptions: IInternalHeftSessionOptions);
+    // @beta
+    readonly commandLine: HeftCommandLineUtilities;
     get debugMode(): boolean;
     // (undocumented)
     readonly hooks: IHeftSessionHooks;
@@ -191,7 +205,7 @@ export interface ICustomActionOptions<TParameters> {
 export type ICustomActionParameter<TParameter> = TParameter extends boolean ? ICustomActionParameterFlag : TParameter extends number ? ICustomActionParameterInteger : TParameter extends string ? ICustomActionParameterString : TParameter extends ReadonlyArray<string> ? ICustomActionParameterStringList : never;
 
 // @beta (undocumented)
-export interface ICustomActionParameterBase<TParameter extends CustomActionParameterType> {
+export interface ICustomActionParameterBase<CustomActionParameterType> {
     // (undocumented)
     description: string;
     // (undocumented)
@@ -233,10 +247,26 @@ export interface IHeftActionConfigurationOptions {
     mergeArrays?: boolean;
 }
 
+// @beta
+export interface IHeftBaseParameter {
+    readonly actionAssociated: boolean;
+    readonly valueProvided: boolean;
+}
+
 // @internal (undocumented)
 export interface _IHeftConfigurationInitializationOptions {
     cwd: string;
     terminalProvider: ITerminalProvider;
+}
+
+// @beta
+export interface IHeftFlagParameter extends IHeftBaseParameter {
+    readonly value?: boolean;
+}
+
+// @beta
+export interface IHeftIntegerParameter extends IHeftBaseParameter {
+    readonly value?: number;
 }
 
 // @internal (undocumented)
@@ -271,6 +301,16 @@ export interface IHeftSessionHooks {
     test: SyncHook<ITestStageContext>;
 }
 
+// @beta
+export interface IHeftStringListParameter extends IHeftBaseParameter {
+    readonly values?: string[];
+}
+
+// @beta
+export interface IHeftStringParameter extends IHeftBaseParameter {
+    readonly value?: string;
+}
+
 // @public (undocumented)
 export interface IMetricsData {
     command: string;
@@ -298,6 +338,16 @@ export interface IPostBuildSubstage extends IBuildSubstage<BuildSubstageHooksBas
 
 // @public (undocumented)
 export interface IPreCompileSubstage extends IBuildSubstage<BuildSubstageHooksBase, {}> {
+}
+
+// @beta
+export interface IRegisterParameterOptions extends IBaseCommandLineDefinition {
+    associatedActionNames: string[];
+}
+
+// @beta
+export interface IRegisterParameterWithArgumentOptions extends IBaseCommandLineDefinitionWithArgument {
+    associatedActionNames: string[];
 }
 
 // @beta

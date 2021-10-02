@@ -22,15 +22,25 @@ export {
 } from './metrics/MetricsCollector';
 export { ScopedLogger, IScopedLogger } from './pluginFramework/logging/ScopedLogger';
 export {
-  CustomActionParameterType,
   ICustomActionOptions,
-  ICustomActionParameter,
-  ICustomActionParameterBase,
   ICustomActionParameterFlag,
   ICustomActionParameterInteger,
   ICustomActionParameterString,
-  ICustomActionParameterStringList
+  ICustomActionParameterStringList,
+  ICustomActionParameterBase,
+  ICustomActionParameter,
+  CustomActionParameterType
 } from './cli/actions/CustomAction';
+export {
+  IHeftBaseParameter,
+  IHeftFlagParameter,
+  IHeftStringParameter,
+  IHeftIntegerParameter,
+  IHeftStringListParameter,
+  IRegisterParameterOptions,
+  IRegisterParameterWithArgumentOptions,
+  HeftCommandLineUtilities
+} from './cli/HeftCommandLineUtilities';
 
 // Stages
 export { StageHooksBase, IStageContext } from './stages/StageBase';

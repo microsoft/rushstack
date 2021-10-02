@@ -351,6 +351,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "heft-parameter-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "heft-storybook-react-tutorial",
       "allowedCategories": [ "tests" ]
     },

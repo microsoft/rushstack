@@ -33,6 +33,7 @@ import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 import { ICustomActionOptions, CustomAction } from './actions/CustomAction';
 import { Constants } from '../utilities/Constants';
 import { IHeftLifecycle, HeftLifecycleHooks } from '../pluginFramework/HeftLifecycle';
+import { HeftCommandLineUtilities } from './HeftCommandLineUtilities';
 
 /**
  * This interfaces specifies values for parameters that must be parsed before the CLI
@@ -43,7 +44,7 @@ interface IPreInitializationArgumentValues {
   debug?: boolean;
 }
 
-export class HeftToolsCommandLineParser extends CommandLineParser {
+export class HeftCommandLineParser extends CommandLineParser {
   private _terminalProvider: ConsoleTerminalProvider;
   private _terminal: Terminal;
   private _loggingManager: LoggingManager;
@@ -97,6 +98,7 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       cleanStage: new CleanStage(this._heftConfiguration, this._loggingManager),
       testStage: new TestStage(this._heftConfiguration, this._loggingManager)
     };
+
     const actionOptions: IHeftActionBaseOptions = {
       terminal: this._terminal,
       loggingManager: this._loggingManager,
@@ -115,7 +117,8 @@ export class HeftToolsCommandLineParser extends CommandLineParser {
       registerAction: <TParameters>(options: ICustomActionOptions<TParameters>) => {
         const action: CustomAction<TParameters> = new CustomAction(options, actionOptions);
         this.addAction(action);
-      }
+      },
+      commandLine: new HeftCommandLineUtilities(this, this._terminal)
     });
 
     this._pluginManager = new PluginManager({
