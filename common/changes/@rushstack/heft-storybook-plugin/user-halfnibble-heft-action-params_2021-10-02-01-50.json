@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-storybook-plugin",
+      "comment": "Adopt new Heft RegisterParameter feature.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-storybook-plugin",
+  "email": "halfnibble@users.noreply.github.com"
+}
