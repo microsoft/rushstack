@@ -30,9 +30,9 @@ import { CleanStage } from '../stages/CleanStage';
 import { BuildStage } from '../stages/BuildStage';
 import { TestStage } from '../stages/TestStage';
 import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
-import { CustomAction, ICustomActionOptions } from './actions/CustomAction';
+import { ICustomActionOptions, CustomAction } from './actions/CustomAction';
 import { Constants } from '../utilities/Constants';
-import { HeftLifecycleHooks, IHeftLifecycle } from '../pluginFramework/HeftLifecycle';
+import { IHeftLifecycle, HeftLifecycleHooks } from '../pluginFramework/HeftLifecycle';
 import { HeftCommandLineUtilities } from './HeftCommandLineUtilities';
 
 /**

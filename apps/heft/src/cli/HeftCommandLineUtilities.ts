@@ -12,7 +12,7 @@ import { Terminal } from '@rushstack/node-core-library';
 
 /**
  * @beta
- * The base set of utility values provided in every return object when registering a parameter.
+ * The base set of utility values provided in every object returned when registering a parameter.
  */
 export interface IHeftBaseParameter {
   /**
@@ -77,7 +77,7 @@ export interface IHeftStringListParameter extends IHeftBaseParameter {
  */
 export interface IRegisterParameterOptions extends IBaseCommandLineDefinition {
   /**
-   * A string list of one or more action names to associate the paramter with
+   * A string list of one or more action names to associate the parameter with.
    */
   associatedActionNames: string[];
 }
@@ -89,7 +89,7 @@ export interface IRegisterParameterOptions extends IBaseCommandLineDefinition {
  */
 export interface IRegisterParameterWithArgumentOptions extends IBaseCommandLineDefinitionWithArgument {
   /**
-   * A string list of one or more action names to associate the paramter with
+   * A string list of one or more action names to associate the parameter with.
    */
   associatedActionNames: string[];
 }
