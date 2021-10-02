@@ -5,7 +5,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "build": "heft test --custom-parameter --custom-string-parameter test --custom-number-parameter 5 --custom-string-list-parameter litten --custom-string-list-parameter togepi --custom-string-list-parameter mareep"
+    "build": "heft test --clean --custom-parameter --custom-string-parameter test --custom-number-parameter 5 --custom-string-list-parameter eevee -x togepi -x mareep"
   },
   "devDependencies": {
     "@rushstack/heft": "workspace:*",

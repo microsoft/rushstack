@@ -4,13 +4,14 @@
 import { SyncHook } from 'tapable';
 
 import { IHeftPlugin } from './IHeftPlugin';
-import { HeftSession, RegisterAction, RegisterParameters } from './HeftSession';
+import { HeftSession, RegisterAction } from './HeftSession';
 import { BuildStage } from '../stages/BuildStage';
 import { CleanStage } from '../stages/CleanStage';
 import { TestStage } from '../stages/TestStage';
 import { MetricsCollector } from '../metrics/MetricsCollector';
 import { LoggingManager } from './logging/LoggingManager';
 import { IHeftLifecycle } from './HeftLifecycle';
+import { HeftCommandLineUtilities } from '../cli/HeftCommandLineUtilities';
 
 /**
  * @internal
@@ -25,7 +26,7 @@ export interface IInternalHeftSessionOptions {
   loggingManager: LoggingManager;
   getIsDebugMode(): boolean;
   registerAction: RegisterAction;
-  registerParameters: RegisterParameters;
+  commandLine: HeftCommandLineUtilities;
 }
 
 /**

@@ -11,7 +11,10 @@ import { AsyncSeriesWaterfallHook } from 'tapable';
 import { CommandLineAction } from '@rushstack/ts-command-line';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
+import { CommandLineParser } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
+import { IBaseCommandLineDefinition } from '@rushstack/ts-command-line';
+import { IBaseCommandLineDefinitionWithArgument } from '@rushstack/ts-command-line';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { JsonSchema } from '@rushstack/node-core-library';
@@ -58,7 +61,16 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
 }
 
 // @beta (undocumented)
-export type CustomParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
+export type CustomActionParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
+
+// @beta
+export class HeftCommandLineUtilities {
+    constructor(commandLineParser: CommandLineParser, terminal: Terminal);
+    registerFlagParameter(options: IRegisterParameterOptions): IHeftFlagParameter;
+    registerIntegerParameter(options: IRegisterParameterWithArgumentOptions): IHeftIntegerParameter;
+    registerStringListParameter(options: IRegisterParameterWithArgumentOptions): IHeftStringListParameter;
+    registerStringParameter(options: IRegisterParameterWithArgumentOptions): IHeftStringParameter;
+}
 
 // @public (undocumented)
 export class HeftConfiguration {
@@ -90,6 +102,8 @@ export class HeftSession {
     //
     // @internal
     constructor(options: IHeftSessionOptions, internalSessionOptions: IInternalHeftSessionOptions);
+    // @beta
+    readonly commandLine: HeftCommandLineUtilities;
     get debugMode(): boolean;
     // (undocumented)
     readonly hooks: IHeftSessionHooks;
@@ -97,8 +111,6 @@ export class HeftSession {
     readonly metricsCollector: _MetricsCollector;
     // @beta (undocumented)
     readonly registerAction: RegisterAction;
-    // @beta (undocumented)
-    readonly registerParameters: RegisterParameters;
     // @beta
     readonly requestAccessToPluginByName: RequestAccessToPluginByNameCallback;
     requestScopedLogger(loggerName: string): ScopedLogger;
@@ -183,17 +195,17 @@ export interface ICustomActionOptions<TParameters> {
     documentation: string;
     // (undocumented)
     parameters?: {
-        [K in keyof TParameters]: ICustomParameter<TParameters[K]>;
+        [K in keyof TParameters]: ICustomActionParameter<TParameters[K]>;
     };
     // (undocumented)
     summary?: string;
 }
 
 // @beta (undocumented)
-export type ICustomParameter<TParameter> = TParameter extends boolean ? ICustomParameterFlag : TParameter extends number ? ICustomParameterInteger : TParameter extends string ? ICustomParameterString : TParameter extends ReadonlyArray<string> ? ICustomParameterStringList : never;
+export type ICustomActionParameter<TParameter> = TParameter extends boolean ? ICustomActionParameterFlag : TParameter extends number ? ICustomActionParameterInteger : TParameter extends string ? ICustomActionParameterString : TParameter extends ReadonlyArray<string> ? ICustomActionParameterStringList : never;
 
 // @beta (undocumented)
-export interface ICustomParameterBase<CustomParameterType> {
+export interface ICustomActionParameterBase<CustomActionParameterType> {
     // (undocumented)
     description: string;
     // (undocumented)
@@ -203,35 +215,25 @@ export interface ICustomParameterBase<CustomParameterType> {
 }
 
 // @beta (undocumented)
-export interface ICustomParameterFlag extends ICustomParameterBase<boolean> {
+export interface ICustomActionParameterFlag extends ICustomActionParameterBase<boolean> {
     // (undocumented)
     kind: 'flag';
 }
 
 // @beta (undocumented)
-export interface ICustomParameterInteger extends ICustomParameterBase<number> {
+export interface ICustomActionParameterInteger extends ICustomActionParameterBase<number> {
     // (undocumented)
     kind: 'integer';
 }
 
 // @beta (undocumented)
-export interface ICustomParameterOptions<TParameters> {
-    // (undocumented)
-    actionName: string;
-    // (undocumented)
-    parameters: {
-        [K in keyof TParameters]: ICustomParameter<TParameters[K]>;
-    };
-}
-
-// @beta (undocumented)
-export interface ICustomParameterString extends ICustomParameterBase<string> {
+export interface ICustomActionParameterString extends ICustomActionParameterBase<string> {
     // (undocumented)
     kind: 'string';
 }
 
 // @beta (undocumented)
-export interface ICustomParameterStringList extends ICustomParameterBase<ReadonlyArray<string>> {
+export interface ICustomActionParameterStringList extends ICustomActionParameterBase<ReadonlyArray<string>> {
     // (undocumented)
     kind: 'stringList';
 }
@@ -245,10 +247,26 @@ export interface IHeftActionConfigurationOptions {
     mergeArrays?: boolean;
 }
 
+// @beta
+export interface IHeftBaseParameter {
+    readonly actionAssociated: boolean;
+    readonly valueProvided: boolean;
+}
+
 // @internal (undocumented)
 export interface _IHeftConfigurationInitializationOptions {
     cwd: string;
     terminalProvider: ITerminalProvider;
+}
+
+// @beta
+export interface IHeftFlagParameter extends IHeftBaseParameter {
+    readonly value?: boolean;
+}
+
+// @beta
+export interface IHeftIntegerParameter extends IHeftBaseParameter {
+    readonly value?: number;
 }
 
 // @internal (undocumented)
@@ -283,6 +301,16 @@ export interface IHeftSessionHooks {
     test: SyncHook<ITestStageContext>;
 }
 
+// @beta
+export interface IHeftStringListParameter extends IHeftBaseParameter {
+    readonly values?: string[];
+}
+
+// @beta
+export interface IHeftStringParameter extends IHeftBaseParameter {
+    readonly value?: string;
+}
+
 // @public (undocumented)
 export interface IMetricsData {
     command: string;
@@ -310,6 +338,16 @@ export interface IPostBuildSubstage extends IBuildSubstage<BuildSubstageHooksBas
 
 // @public (undocumented)
 export interface IPreCompileSubstage extends IBuildSubstage<BuildSubstageHooksBase, {}> {
+}
+
+// @beta
+export interface IRegisterParameterOptions extends IBaseCommandLineDefinition {
+    associatedActionNames: string[];
+}
+
+// @beta
+export interface IRegisterParameterWithArgumentOptions extends IBaseCommandLineDefinitionWithArgument {
+    associatedActionNames: string[];
 }
 
 // @beta
@@ -391,9 +429,6 @@ export class MetricsCollectorHooks {
 
 // @beta (undocumented)
 export type RegisterAction = <TParameters>(action: ICustomActionOptions<TParameters>) => void;
-
-// @beta (undocumented)
-export type RegisterParameters = <TParameters>(parameters: ICustomParameterOptions<TParameters>) => TParameters;
 
 // @beta (undocumented)
 export type RequestAccessToPluginByNameCallback = (pluginToAccessName: string, pluginApply: (pluginAccessor: object) => void) => void;

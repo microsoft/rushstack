@@ -12,8 +12,7 @@ export {
   HeftSession,
   IHeftSessionHooks,
   RequestAccessToPluginByNameCallback,
-  RegisterAction,
-  RegisterParameters
+  RegisterAction
 } from './pluginFramework/HeftSession';
 export {
   MetricsCollectorHooks,
@@ -22,17 +21,26 @@ export {
   MetricsCollector as _MetricsCollector
 } from './metrics/MetricsCollector';
 export { ScopedLogger, IScopedLogger } from './pluginFramework/logging/ScopedLogger';
-export { ICustomActionOptions } from './cli/actions/CustomAction';
 export {
-  CustomParameterType,
-  ICustomParameter,
-  ICustomParameterBase,
-  ICustomParameterFlag,
-  ICustomParameterInteger,
-  ICustomParameterString,
-  ICustomParameterStringList,
-  ICustomParameterOptions
-} from './cli/actions/CustomParameters';
+  ICustomActionOptions,
+  ICustomActionParameterFlag,
+  ICustomActionParameterInteger,
+  ICustomActionParameterString,
+  ICustomActionParameterStringList,
+  ICustomActionParameterBase,
+  ICustomActionParameter,
+  CustomActionParameterType
+} from './cli/actions/CustomAction';
+export {
+  IHeftBaseParameter,
+  IHeftFlagParameter,
+  IHeftStringParameter,
+  IHeftIntegerParameter,
+  IHeftStringListParameter,
+  IRegisterParameterOptions,
+  IRegisterParameterWithArgumentOptions,
+  HeftCommandLineUtilities
+} from './cli/HeftCommandLineUtilities';
 
 // Stages
 export { StageHooksBase, IStageContext } from './stages/StageBase';

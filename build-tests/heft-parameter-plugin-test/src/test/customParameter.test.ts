@@ -6,6 +6,6 @@ describe('CustomParameterOutput', () => {
     const outputContent: string = await FileSystem.readFileAsync(
       `${dirname(dirname(__dirname))}/lib/custom_output.txt`
     );
-    expect(outputContent).toBe('testtesttesttesttest_litten_togepi_mareep');
+    expect(outputContent).toBe('testtesttesttesttest_eevee_togepi_mareep');
   });
 });

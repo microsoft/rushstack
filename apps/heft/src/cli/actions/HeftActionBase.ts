@@ -32,7 +32,6 @@ import { CleanStage } from '../../stages/CleanStage';
 import { TestStage } from '../../stages/TestStage';
 import { LoggingManager } from '../../pluginFramework/logging/LoggingManager';
 import { Constants } from '../../utilities/Constants';
-import { CustomParameterType } from '../actions/CustomParameters';
 
 export interface IStages {
   buildStage: BuildStage;
@@ -55,7 +54,6 @@ export abstract class HeftActionBase extends CommandLineAction {
   protected readonly heftConfiguration: HeftConfiguration;
   protected readonly stages: IStages;
   protected verboseFlag!: CommandLineFlagParameter;
-  public customParametersMap: Map<string, () => CustomParameterType>;
 
   public constructor(
     commandLineOptions: ICommandLineActionOptions,
@@ -67,7 +65,6 @@ export abstract class HeftActionBase extends CommandLineAction {
     this.metricsCollector = heftActionOptions.metricsCollector;
     this.heftConfiguration = heftActionOptions.heftConfiguration;
     this.stages = heftActionOptions.stages;
-    this.customParametersMap = new Map();
     this.setStartTime();
   }
 
