@@ -6,15 +6,23 @@ import {
   CommandLineFlagParameter,
   CommandLineStringParameter,
   CommandLineIntegerParameter,
-  CommandLineStringListParameter
+  CommandLineStringListParameter,
+  CommandLineParameter
 } from '@rushstack/ts-command-line';
 import { Terminal } from '@rushstack/node-core-library';
+
+import { CustomActionParameterType } from './actions/CustomAction';
 
 /**
  * @beta
  * The base set of utility values provided in every object returned when registering a parameter.
  */
-export interface IHeftBaseParameter {
+export interface IHeftBaseParameter<TValue> {
+  /**
+   * The value specified on the command line for this parameter.
+   */
+  readonly value?: TValue;
+
   /**
    * The currently selected action was associated with the parameter.
    */
@@ -30,52 +38,30 @@ export interface IHeftBaseParameter {
  * @beta
  * The object returned when registering a flag type parameter.
  */
-export interface IHeftFlagParameter extends IHeftBaseParameter {
-  /**
-   * The boolean value `true` if specified on the command line.
-   */
-  readonly value?: boolean;
-}
+export type IHeftFlagParameter = IHeftBaseParameter<boolean>;
 
 /**
  * @beta
  * The object returned when registering a string type parameter.
  */
-export interface IHeftStringParameter extends IHeftBaseParameter {
-  /**
-   * The string value specified on the command line.
-   */
-  readonly value?: string;
-}
+export type IHeftStringParameter = IHeftBaseParameter<string>;
 
 /**
  * @beta
  * The object returned when registering an integer type parameter.
  */
-export interface IHeftIntegerParameter extends IHeftBaseParameter {
-  /**
-   * The integer value specified on the command line.
-   */
-  readonly value?: number;
-}
+export type IHeftIntegerParameter = IHeftBaseParameter<number>;
 
 /**
  * @beta
  * The object returned when registering a stringList type parameter.
  */
-export interface IHeftStringListParameter extends IHeftBaseParameter {
-  /**
-   * The array of string values specified on the command line.
-   */
-  readonly values?: string[];
-}
+export type IHeftStringListParameter = IHeftBaseParameter<readonly string[]>;
 
 /**
  * @beta
- * The options object provided to the command line parser when registering a parameter
- * in addition to the action names used to associate the parameter with.
  */
-export interface IRegisterParameterOptions extends IBaseCommandLineDefinition {
+export interface IParameterAssociatedActionNames {
   /**
    * A string list of one or more action names to associate the parameter with.
    */
@@ -87,12 +73,15 @@ export interface IRegisterParameterOptions extends IBaseCommandLineDefinition {
  * The options object provided to the command line parser when registering a parameter
  * in addition to the action names used to associate the parameter with.
  */
-export interface IRegisterParameterWithArgumentOptions extends IBaseCommandLineDefinitionWithArgument {
-  /**
-   * A string list of one or more action names to associate the parameter with.
-   */
-  associatedActionNames: string[];
-}
+export type IRegisterParameterOptions = IBaseCommandLineDefinition & IParameterAssociatedActionNames;
+
+/**
+ * @beta
+ * The options object provided to the command line parser when registering a parameter
+ * in addition to the action names used to associate the parameter with.
+ */
+export type IRegisterParameterWithArgumentOptions = IBaseCommandLineDefinitionWithArgument &
+  IParameterAssociatedActionNames;
 
 /**
  * @beta
@@ -102,6 +91,9 @@ export class HeftCommandLineUtilities {
   private readonly _commandLineParser: CommandLineParser;
   private readonly _terminal: Terminal;
 
+  /**
+   * @internal
+   */
   public constructor(commandLineParser: CommandLineParser, terminal: Terminal) {
     this._commandLineParser = commandLineParser;
     this._terminal = terminal;
@@ -111,136 +103,36 @@ export class HeftCommandLineUtilities {
    * Utility method used by Heft plugins to register a flag type parameter.
    */
   public registerFlagParameter(options: IRegisterParameterOptions): IHeftFlagParameter {
-    const actionParameterMap: Map<CommandLineAction, CommandLineFlagParameter> = new Map();
-    for (const action of this._getActions(options.associatedActionNames)) {
-      this._verifyUniqueParameterName(action, options);
-      const parameter: CommandLineFlagParameter = action.defineFlagParameter(options);
-      actionParameterMap.set(action, parameter);
-    }
-    const parameterObject: Partial<IHeftFlagParameter> = {};
-    Object.defineProperties(parameterObject, {
-      value: {
-        get: (): boolean | undefined => {
-          this._verifyParametersProcessed(options.parameterLongName);
-          if (this._commandLineParser.selectedAction) {
-            return actionParameterMap.get(this._commandLineParser.selectedAction)?.value;
-          }
-        }
-      },
-      actionAssociated: {
-        get: (): boolean => {
-          if (this._commandLineParser.selectedAction) {
-            if (actionParameterMap.get(this._commandLineParser.selectedAction)) {
-              return true;
-            }
-          }
-          return false;
-        }
-      },
-      valueProvided: {
-        get: (): boolean => {
-          if (this._commandLineParser.selectedAction) {
-            if (actionParameterMap.get(this._commandLineParser.selectedAction)?.value) {
-              return true;
-            }
-          }
-          return false;
-        }
-      }
-    });
-    return parameterObject as IHeftFlagParameter;
+    return this._registerParameter(
+      options,
+      (action: CommandLineAction) => action.defineFlagParameter(options),
+      (parameter: CommandLineFlagParameter) => parameter.value,
+      (parameter: CommandLineFlagParameter) => parameter.value
+    );
   }
 
   /**
    * Utility method used by Heft plugins to register a string type parameter.
    */
   public registerStringParameter(options: IRegisterParameterWithArgumentOptions): IHeftStringParameter {
-    const actionParameterMap: Map<CommandLineAction, CommandLineStringParameter> = new Map();
-    for (const action of this._getActions(options.associatedActionNames)) {
-      this._verifyUniqueParameterName(action, options);
-      const parameter: CommandLineStringParameter = action.defineStringParameter(options);
-      actionParameterMap.set(action, parameter);
-    }
-    const parameterObject: Partial<IHeftStringParameter> = {};
-    Object.defineProperties(parameterObject, {
-      value: {
-        get: (): string | undefined => {
-          this._verifyParametersProcessed(options.parameterLongName);
-          if (this._commandLineParser.selectedAction) {
-            return actionParameterMap.get(this._commandLineParser.selectedAction)?.value;
-          }
-        }
-      },
-      actionAssociated: {
-        get: (): boolean => {
-          if (this._commandLineParser.selectedAction) {
-            if (actionParameterMap.get(this._commandLineParser.selectedAction)) {
-              return true;
-            }
-          }
-          return false;
-        }
-      },
-      valueProvided: {
-        get: (): boolean => {
-          if (this._commandLineParser.selectedAction) {
-            if (
-              typeof actionParameterMap.get(this._commandLineParser.selectedAction)?.value !== 'undefined'
-            ) {
-              return true;
-            }
-          }
-          return false;
-        }
-      }
-    });
-    return parameterObject as IHeftStringParameter;
+    return this._registerParameter(
+      options,
+      (action: CommandLineAction) => action.defineStringParameter(options),
+      (parameter: CommandLineStringParameter) => parameter.value,
+      (parameter: CommandLineStringParameter) => typeof parameter.value !== 'undefined'
+    );
   }
 
   /**
    * Utility method used by Heft plugins to register an integer type parameter.
    */
   public registerIntegerParameter(options: IRegisterParameterWithArgumentOptions): IHeftIntegerParameter {
-    const actionParameterMap: Map<CommandLineAction, CommandLineIntegerParameter> = new Map();
-    for (const action of this._getActions(options.associatedActionNames)) {
-      this._verifyUniqueParameterName(action, options);
-      const parameter: CommandLineIntegerParameter = action.defineIntegerParameter(options);
-      actionParameterMap.set(action, parameter);
-    }
-    const parameterObject: Partial<IHeftIntegerParameter> = {};
-    Object.defineProperties(parameterObject, {
-      value: {
-        get: (): number | undefined => {
-          this._verifyParametersProcessed(options.parameterLongName);
-          if (this._commandLineParser.selectedAction) {
-            return actionParameterMap.get(this._commandLineParser.selectedAction)?.value;
-          }
-        }
-      },
-      actionAssociated: {
-        get: (): boolean => {
-          if (this._commandLineParser.selectedAction) {
-            if (actionParameterMap.get(this._commandLineParser.selectedAction)) {
-              return true;
-            }
-          }
-          return false;
-        }
-      },
-      valueProvided: {
-        get: (): boolean => {
-          if (this._commandLineParser.selectedAction) {
-            if (
-              typeof actionParameterMap.get(this._commandLineParser.selectedAction)?.value !== 'undefined'
-            ) {
-              return true;
-            }
-          }
-          return false;
-        }
-      }
-    });
-    return parameterObject as IHeftIntegerParameter;
+    return this._registerParameter(
+      options,
+      (action: CommandLineAction) => action.defineIntegerParameter(options),
+      (parameter: CommandLineIntegerParameter) => parameter.value,
+      (parameter: CommandLineIntegerParameter) => typeof parameter.value !== 'undefined'
+    );
   }
 
   /**
@@ -249,44 +141,71 @@ export class HeftCommandLineUtilities {
   public registerStringListParameter(
     options: IRegisterParameterWithArgumentOptions
   ): IHeftStringListParameter {
-    const actionParameterMap: Map<CommandLineAction, CommandLineStringListParameter> = new Map();
+    return this._registerParameter(
+      options,
+      (action: CommandLineAction) => action.defineStringListParameter(options),
+      (parameter: CommandLineStringListParameter) => parameter.values,
+      (parameter: CommandLineStringListParameter) => (parameter.values || []).length > 0
+    );
+  }
+
+  private _registerParameter<
+    TTSCommandLineParameter extends CommandLineParameter,
+    TValue extends CustomActionParameterType
+  >(
+    options: IRegisterParameterOptions,
+    defineParameterForAction: (action: CommandLineAction) => TTSCommandLineParameter,
+    getParameterValue: (parameter: TTSCommandLineParameter) => TValue | undefined,
+    getValueIsProvided: (parameter: TTSCommandLineParameter) => boolean
+  ): IHeftBaseParameter<TValue> {
+    const actionParameterMap: Map<CommandLineAction, TTSCommandLineParameter> = new Map();
     for (const action of this._getActions(options.associatedActionNames)) {
       this._verifyUniqueParameterName(action, options);
-      const parameter: CommandLineStringListParameter = action.defineStringListParameter(options);
+      const parameter: TTSCommandLineParameter = defineParameterForAction(action);
       actionParameterMap.set(action, parameter);
     }
-    const parameterObject: Partial<IHeftStringListParameter> = {};
-    Object.defineProperties(parameterObject, {
-      values: {
-        get: (): readonly string[] | undefined => {
-          this._verifyParametersProcessed(options.parameterLongName);
-          if (this._commandLineParser.selectedAction) {
-            return actionParameterMap.get(this._commandLineParser.selectedAction)?.values;
+
+    const self: HeftCommandLineUtilities = this;
+    const parameterObject: IHeftBaseParameter<TValue> = {
+      get value(): TValue | undefined {
+        self._verifyParametersProcessed(options.parameterLongName);
+        if (self._commandLineParser.selectedAction) {
+          const parameter: TTSCommandLineParameter | undefined = actionParameterMap.get(
+            self._commandLineParser.selectedAction
+          );
+          if (parameter) {
+            return getParameterValue(parameter);
           }
         }
+
+        return undefined;
       },
-      actionAssociated: {
-        get: (): boolean => {
-          if (this._commandLineParser.selectedAction) {
-            if (actionParameterMap.get(this._commandLineParser.selectedAction)) {
-              return true;
-            }
+
+      get actionAssociated(): boolean {
+        if (self._commandLineParser.selectedAction) {
+          if (actionParameterMap.get(self._commandLineParser.selectedAction)) {
+            return true;
           }
-          return false;
         }
+
+        return false;
       },
-      valueProvided: {
-        get: (): boolean => {
-          if (this._commandLineParser.selectedAction) {
-            if ((actionParameterMap.get(this._commandLineParser.selectedAction)?.values || []).length) {
-              return true;
-            }
+
+      get valueProvided(): boolean {
+        if (self._commandLineParser.selectedAction) {
+          const parameter: TTSCommandLineParameter | undefined = actionParameterMap.get(
+            self._commandLineParser.selectedAction
+          );
+          if (parameter) {
+            return getValueIsProvided(parameter);
           }
-          return false;
         }
+
+        return false;
       }
-    });
-    return parameterObject as IHeftStringListParameter;
+    };
+
+    return parameterObject;
   }
 
   private _getActions(actionNames: string[]): CommandLineAction[] {

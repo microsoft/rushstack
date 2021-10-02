@@ -56,7 +56,7 @@ class HeftParameterPlugin implements IHeftPlugin {
           if (customParameter.actionAssociated && customParameter.valueProvided) {
             const customContent: string = `${customStringParameter.value?.repeat(
               customNumberParameter.value || 1
-            )}_${customStringListParameter.values?.join('_')}`;
+            )}_${customStringListParameter.value?.join('_')}`;
             await FileSystem.writeFileAsync(`${buildFolder}/lib/custom_output.txt`, customContent, {
               ensureFolderExists: true
             });

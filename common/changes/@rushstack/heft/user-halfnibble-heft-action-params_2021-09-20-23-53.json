@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "Add register custom parameters feature to Heft.",
+      "comment": "Add an API (heftSession.commandLine.register[Kind]Parameter) to enable registering custom parameters to Heft actions.",
       "type": "minor"
     }
   ],

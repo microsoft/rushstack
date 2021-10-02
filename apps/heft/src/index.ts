@@ -32,14 +32,15 @@ export {
   CustomActionParameterType
 } from './cli/actions/CustomAction';
 export {
+  HeftCommandLineUtilities,
   IHeftBaseParameter,
   IHeftFlagParameter,
-  IHeftStringParameter,
   IHeftIntegerParameter,
   IHeftStringListParameter,
+  IHeftStringParameter,
+  IParameterAssociatedActionNames,
   IRegisterParameterOptions,
-  IRegisterParameterWithArgumentOptions,
-  HeftCommandLineUtilities
+  IRegisterParameterWithArgumentOptions
 } from './cli/HeftCommandLineUtilities';
 
 // Stages

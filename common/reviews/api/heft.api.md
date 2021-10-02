@@ -65,6 +65,7 @@ export type CustomActionParameterType = string | boolean | number | ReadonlyArra
 
 // @beta
 export class HeftCommandLineUtilities {
+    // @internal
     constructor(commandLineParser: CommandLineParser, terminal: Terminal);
     registerFlagParameter(options: IRegisterParameterOptions): IHeftFlagParameter;
     registerIntegerParameter(options: IRegisterParameterWithArgumentOptions): IHeftIntegerParameter;
@@ -248,8 +249,9 @@ export interface IHeftActionConfigurationOptions {
 }
 
 // @beta
-export interface IHeftBaseParameter {
+export interface IHeftBaseParameter<TValue> {
     readonly actionAssociated: boolean;
+    readonly value?: TValue;
     readonly valueProvided: boolean;
 }
 
@@ -260,14 +262,10 @@ export interface _IHeftConfigurationInitializationOptions {
 }
 
 // @beta
-export interface IHeftFlagParameter extends IHeftBaseParameter {
-    readonly value?: boolean;
-}
+export type IHeftFlagParameter = IHeftBaseParameter<boolean>;
 
 // @beta
-export interface IHeftIntegerParameter extends IHeftBaseParameter {
-    readonly value?: number;
-}
+export type IHeftIntegerParameter = IHeftBaseParameter<number>;
 
 // @internal (undocumented)
 export interface _IHeftLifecycle {
@@ -302,14 +300,10 @@ export interface IHeftSessionHooks {
 }
 
 // @beta
-export interface IHeftStringListParameter extends IHeftBaseParameter {
-    readonly values?: string[];
-}
+export type IHeftStringListParameter = IHeftBaseParameter<readonly string[]>;
 
 // @beta
-export interface IHeftStringParameter extends IHeftBaseParameter {
-    readonly value?: string;
-}
+export type IHeftStringParameter = IHeftBaseParameter<string>;
 
 // @public (undocumented)
 export interface IMetricsData {
@@ -322,6 +316,11 @@ export interface IMetricsData {
     machineProcessor: string;
     machineTotalMemoryMB: number;
     taskTotalExecutionMs: number;
+}
+
+// @beta (undocumented)
+export interface IParameterAssociatedActionNames {
+    associatedActionNames: string[];
 }
 
 // @internal (undocumented)
@@ -341,14 +340,10 @@ export interface IPreCompileSubstage extends IBuildSubstage<BuildSubstageHooksBa
 }
 
 // @beta
-export interface IRegisterParameterOptions extends IBaseCommandLineDefinition {
-    associatedActionNames: string[];
-}
+export type IRegisterParameterOptions = IBaseCommandLineDefinition & IParameterAssociatedActionNames;
 
 // @beta
-export interface IRegisterParameterWithArgumentOptions extends IBaseCommandLineDefinitionWithArgument {
-    associatedActionNames: string[];
-}
+export type IRegisterParameterWithArgumentOptions = IBaseCommandLineDefinitionWithArgument & IParameterAssociatedActionNames;
 
 // @beta
 export interface IRunScriptOptions<TStageProperties> {
