@@ -3,7 +3,7 @@
 
 import * as tty from 'tty';
 import wordwrap from 'wordwrap';
-import { Terminal } from '@rushstack/node-core-library';
+import { ITerminal } from '@rushstack/node-core-library';
 
 /**
  * A sensible fallback column width for consoles.
@@ -50,7 +50,7 @@ export class PrintUtilities {
    *
    * @param boxWidth - The width of the box, defaults to half of the console width.
    */
-  public static printMessageInBox(message: string, terminal: Terminal, boxWidth?: number): void {
+  public static printMessageInBox(message: string, terminal: ITerminal, boxWidth?: number): void {
     if (!boxWidth) {
       const consoleWidth: number = PrintUtilities.getConsoleWidth() || DEFAULT_CONSOLE_WIDTH;
       boxWidth = Math.floor(consoleWidth / 2);

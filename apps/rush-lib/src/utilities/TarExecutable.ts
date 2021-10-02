@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Executable, FileSystem, FileWriter, Terminal } from '@rushstack/node-core-library';
+import { Executable, FileSystem, FileWriter, ITerminal } from '@rushstack/node-core-library';
 import { ChildProcess } from 'child_process';
 import events from 'events';
 
@@ -31,7 +31,7 @@ export class TarExecutable {
     this._tarExecutablePath = tarExecutablePath;
   }
 
-  public static tryInitialize(terminal: Terminal): TarExecutable | undefined {
+  public static tryInitialize(terminal: ITerminal): TarExecutable | undefined {
     terminal.writeVerboseLine('Trying to find "tar" binary');
     const tarExecutablePath: string | undefined =
       EnvironmentConfiguration.tarBinaryPath || Executable.tryResolve('tar');

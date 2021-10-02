@@ -6,7 +6,7 @@ import * as crypto from 'crypto';
 import ignore, { Ignore } from 'ignore';
 
 import { getPackageDeps, getGitHashForFiles } from '@rushstack/package-deps-hash';
-import { Path, InternalError, FileSystem, Terminal } from '@rushstack/node-core-library';
+import { Path, InternalError, FileSystem, ITerminal } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushProjectConfiguration } from '../api/RushProjectConfiguration';
@@ -21,7 +21,7 @@ import { UNINITIALIZED } from '../utilities/Utilities';
  */
 export interface IGetChangedProjectsOptions {
   targetBranchName: string;
-  terminal: Terminal;
+  terminal: ITerminal;
   shouldFetch?: boolean;
 }
 
@@ -54,7 +54,7 @@ export class ProjectChangeAnalyzer {
    */
   public async _tryGetProjectDependenciesAsync(
     projectName: string,
-    terminal: Terminal
+    terminal: ITerminal
   ): Promise<Map<string, string> | undefined> {
     // Check the cache for any existing data
     const existingData: Map<string, string> | undefined = this._filteredData.get(projectName);
@@ -114,7 +114,7 @@ export class ProjectChangeAnalyzer {
    */
   public async _tryGetProjectStateHashAsync(
     projectName: string,
-    terminal: Terminal
+    terminal: ITerminal
   ): Promise<string | undefined> {
     let projectState: string | undefined = this._projectStateCache.get(projectName);
     if (!projectState) {
@@ -178,7 +178,7 @@ export class ProjectChangeAnalyzer {
     return false;
   }
 
-  private async _getDataAsync(terminal: Terminal): Promise<Map<string, Map<string, string>> | undefined> {
+  private async _getDataAsync(terminal: ITerminal): Promise<Map<string, Map<string, string>> | undefined> {
     const repoDeps: Map<string, string> | undefined = this._getRepoDeps(terminal);
     if (!repoDeps) {
       return undefined;
@@ -266,7 +266,7 @@ export class ProjectChangeAnalyzer {
 
   private async _getIgnoreMatcherForProjectAsync(
     project: RushConfigurationProject,
-    terminal: Terminal
+    terminal: ITerminal
   ): Promise<Ignore | undefined> {
     const projectConfiguration: RushProjectConfiguration | undefined =
       await RushProjectConfiguration.tryLoadForProjectAsync(project, undefined, terminal);
@@ -278,7 +278,7 @@ export class ProjectChangeAnalyzer {
     }
   }
 
-  private _getRepoDeps(terminal: Terminal): Map<string, string> | undefined {
+  private _getRepoDeps(terminal: ITerminal): Map<string, string> | undefined {
     try {
       if (this._git.isPathUnderGitWorkingTree()) {
         // Load the package deps hash for the whole repository

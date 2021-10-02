@@ -3,6 +3,7 @@
 
 import {
   FileSystem,
+  ITerminal,
   Terminal,
   ConsoleTerminalProvider,
   Path,
@@ -24,7 +25,7 @@ export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> {
     fileContents: string,
     filePath: string
   ) => TTypingsResult | Promise<TTypingsResult>;
-  terminal?: Terminal;
+  terminal?: ITerminal;
   filesToIgnore?: string[];
 }
 

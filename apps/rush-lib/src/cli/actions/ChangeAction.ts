@@ -16,6 +16,7 @@ import {
   AlreadyReportedError,
   Import,
   Terminal,
+  ITerminal,
   ConsoleTerminalProvider
 } from '@rushstack/node-core-library';
 
@@ -39,7 +40,7 @@ const inquirer: typeof inquirerTypes = Import.lazy('inquirer', require);
 
 export class ChangeAction extends BaseRushAction {
   private readonly _git: Git;
-  private readonly _terminal: Terminal;
+  private readonly _terminal: ITerminal;
   private _verifyParameter!: CommandLineFlagParameter;
   private _noFetchParameter!: CommandLineFlagParameter;
   private _targetBranchParameter!: CommandLineStringParameter;

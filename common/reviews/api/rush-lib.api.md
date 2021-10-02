@@ -5,9 +5,9 @@
 ```ts
 
 import { IPackageJson } from '@rushstack/node-core-library';
+import { ITerminal } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
-import { Terminal } from '@rushstack/node-core-library';
 
 // @public
 export class ApprovedPackagesConfiguration {
@@ -164,7 +164,7 @@ export interface IGetChangedProjectsOptions {
     // (undocumented)
     targetBranchName: string;
     // (undocumented)
-    terminal: Terminal;
+    terminal: ITerminal;
 }
 
 // @public
@@ -328,9 +328,9 @@ export class ProjectChangeAnalyzer {
     constructor(rushConfiguration: RushConfiguration);
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): AsyncIterable<RushConfigurationProject>;
     // @internal
-    _tryGetProjectDependenciesAsync(projectName: string, terminal: Terminal): Promise<Map<string, string> | undefined>;
+    _tryGetProjectDependenciesAsync(projectName: string, terminal: ITerminal): Promise<Map<string, string> | undefined>;
     // @internal
-    _tryGetProjectStateHashAsync(projectName: string, terminal: Terminal): Promise<string | undefined>;
+    _tryGetProjectStateHashAsync(projectName: string, terminal: ITerminal): Promise<string | undefined>;
 }
 
 // @public
