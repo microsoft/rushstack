@@ -9,7 +9,7 @@ import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack
 
 import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
-import { ITaskSelectorConstructor, TaskSelector } from '../../logic/TaskSelector';
+import { ITaskSelectorOptions, TaskSelector } from '../../logic/TaskSelector';
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { ITaskRunnerOptions, TaskRunner } from '../../logic/taskRunner/TaskRunner';
@@ -42,7 +42,7 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
 }
 
 interface IExecuteInternalOptions {
-  taskSelectorOptions: ITaskSelectorConstructor;
+  taskSelectorOptions: ITaskSelectorOptions;
   taskRunnerOptions: ITaskRunnerOptions;
   stopwatch: Stopwatch;
   ignoreHooks?: boolean;
@@ -133,7 +133,7 @@ export class BulkScriptAction extends BaseScriptAction {
       return;
     }
 
-    const taskSelectorOptions: ITaskSelectorConstructor = {
+    const taskSelectorOptions: ITaskSelectorOptions = {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
       selection,
