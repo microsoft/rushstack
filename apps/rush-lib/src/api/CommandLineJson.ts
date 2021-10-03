@@ -28,6 +28,8 @@ export interface IBulkCommandJson extends IBaseCommandJson {
   allowWarningsInSuccessfulBuild?: boolean;
   watchForChanges?: boolean;
   disableBuildCache?: boolean;
+
+  fallbackCommandsForCacheRead?: string[];
 }
 
 /**
@@ -50,6 +52,8 @@ export interface IBaseParameterJson {
   description: string;
   associatedCommands: string[];
   required?: boolean;
+
+  ignoreForCacheRead?: boolean;
 }
 
 /**

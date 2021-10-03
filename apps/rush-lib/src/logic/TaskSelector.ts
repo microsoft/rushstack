@@ -14,7 +14,9 @@ export interface ITaskSelectorConstructor {
   selection: ReadonlySet<RushConfigurationProject>;
   commandName: string;
   commandToRun: string;
+  fallbackCommandsForCacheRead: ReadonlyArray<string>;
   customParameterValues: string[];
+  cacheReadCustomParameterValues: ReadonlyArray<string>;
   isQuietMode: boolean;
   isDebugMode: boolean;
   isIncrementalBuildAllowed: boolean;
@@ -46,7 +48,7 @@ export class TaskSelector {
   public static getScriptToRun(
     rushProject: RushConfigurationProject,
     commandToRun: string,
-    customParameterValues: string[]
+    customParameterValues: ReadonlyArray<string>
   ): string | undefined {
     const script: string | undefined = TaskSelector._getScriptCommand(rushProject, commandToRun);
 
@@ -124,6 +126,22 @@ export class TaskSelector {
       );
     }
 
+    const cacheKeys: string[] = [];
+    if (commandToRun) {
+      cacheKeys.push(commandToRun);
+      for (const fallbackCommand of this._options.fallbackCommandsForCacheRead) {
+        const fallbackCommandString: string | undefined = TaskSelector.getScriptToRun(
+          project,
+          fallbackCommand,
+          this._options.cacheReadCustomParameterValues
+        );
+
+        if (fallbackCommandString) {
+          cacheKeys.push(fallbackCommandString);
+        }
+      }
+    }
+
     taskCollection.addTask(
       new ProjectBuilder({
         rushProject: project,
@@ -131,6 +149,7 @@ export class TaskSelector {
         buildCacheConfiguration: this._options.buildCacheConfiguration,
         commandToRun: commandToRun || '',
         commandName: this._options.commandName,
+        cacheKeys: cacheKeys,
         isIncrementalBuildAllowed: this._options.isIncrementalBuildAllowed,
         projectChangeAnalyzer: this._projectChangeAnalyzer,
         packageDepsFilename: this._options.packageDepsFilename,
