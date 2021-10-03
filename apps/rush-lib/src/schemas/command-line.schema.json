@@ -172,7 +172,7 @@
             },
             "phases": {
               "title": "Phases",
-              "description": "TBA",
+              "description": "List the phases associated with this command. Note that phases with dependencies will be implicitly included even if they aren't explicitly enumerated in this property.",
               "type": "array",
               "items": {
                 "type": "string"
@@ -198,26 +198,26 @@
 
     "phase": {
       "title": "Phase",
-      "description": "TBA",
+      "description": "A phase, used in the phased command feature.",
       "type": "object",
       "additionalProperties": false,
       "required": ["name"],
       "properties": {
         "name": {
           "title": "Name",
-          "description": "TBA",
+          "description": "The name of the phase. Note that this value must start with the \"_phase:\" prefix.",
           "type": "string"
         },
 
         "dependencies": {
           "title": "Dependencies",
-          "description": "TBA",
+          "description": "The dependencies of this phase.",
           "type": "object",
           "additionalProperties": false,
           "properties": {
             "self": {
               "title": "Self",
-              "description": "TBA",
+              "description": "Dependency phases within the same project.",
               "type": "array",
               "uniqueItems": true,
               "items": {
@@ -226,7 +226,7 @@
             },
             "upstream": {
               "title": "Upstream",
-              "description": "TBA",
+              "description": "Dependency phases in upstream projects.",
               "type": "array",
               "uniqueItems": true,
               "items": {
@@ -238,19 +238,19 @@
 
         "enableParallelism": {
           "title": "enableParallelism",
-          "description": "TBA",
+          "description": "If true then this phase can be run in parallel, i.e. executed simultaneously for multiple projects.",
           "type": "boolean"
         },
 
         "ignoreMissingScript": {
           "title": "Ignore Missing Script",
-          "description": "TBA",
+          "description": "Normally Rush requires that each project's package.json has a \"scripts\" entry matching the phase name. To disable this check, set \"ignoreMissingScript\" to true.",
           "type": "boolean"
         },
 
         "allowWarningsOnSuccess": {
           "title": "Allow Warnings on Success",
-          "description": "TBA",
+          "description": "By default, Rush returns a nonzero exit code if errors or warnings occur during a command. If this option is set to \"true\", Rush will return a zero exit code if warnings occur during the execution of this phase.",
           "type": "boolean"
         }
       }
@@ -294,7 +294,7 @@
         },
         "associatedPhases": {
           "title": "Associated Phases",
-          "description": "TBA",
+          "description": "A list of the names of the phases that this command-line parameter should be provided to.",
           "type": "array",
           "items": {
             "type": "string"
@@ -322,7 +322,7 @@
             },
             "addPhasesToCommand": {
               "title": "Add phases to command",
-              "description": "TBA",
+              "description": "Include the phases listed here in the command's execution if this parameter is specified.",
               "type": "array",
               "items": {
                 "type": "string"
@@ -330,7 +330,7 @@
             },
             "skipPhasesForCommand": {
               "title": "Skip phases for command",
-              "description": "TBA",
+              "description": "Exclude the phases listed here from the command's execution if this parameter is specified. Note that this may break dependency relationships between phases.",
               "type": "array",
               "items": {
                 "type": "string"
@@ -483,7 +483,7 @@
 
     "phases": {
       "title": "Phases",
-      "description": "TBA",
+      "description": "A list of phases that are associated with phased commands.",
       "type": "array",
       "items": {
         "$ref": "#/definitions/phase"
