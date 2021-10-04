@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 24 Sep 2021 00:09:29 GMT and should not be manually modified.
+This log was last generated on Mon, 04 Oct 2021 15:10:18 GMT and should not be manually modified.
+
+## 0.40.0
+Mon, 04 Oct 2021 15:10:18 GMT
+
+### Minor changes
+
+- Add register custom parameters feature to Heft.
 
 ## 0.39.2
 Fri, 24 Sep 2021 00:09:29 GMT
