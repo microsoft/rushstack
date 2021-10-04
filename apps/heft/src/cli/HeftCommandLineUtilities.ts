@@ -11,8 +11,6 @@ import {
 } from '@rushstack/ts-command-line';
 import { Terminal } from '@rushstack/node-core-library';
 
-import { CustomActionParameterType } from './actions/CustomAction';
-
 /**
  * @beta
  * The base set of utility values provided in every object returned when registering a parameter.
@@ -149,10 +147,7 @@ export class HeftCommandLineUtilities {
     );
   }
 
-  private _registerParameter<
-    TTSCommandLineParameter extends CommandLineParameter,
-    TValue extends CustomActionParameterType
-  >(
+  private _registerParameter<TTSCommandLineParameter extends CommandLineParameter, TValue>(
     options: IRegisterParameterOptions,
     defineParameterForAction: (action: CommandLineAction) => TTSCommandLineParameter,
     getParameterValue: (parameter: TTSCommandLineParameter) => TValue | undefined,
@@ -165,45 +160,53 @@ export class HeftCommandLineUtilities {
       actionParameterMap.set(action, parameter);
     }
 
-    const self: HeftCommandLineUtilities = this;
-    const parameterObject: IHeftBaseParameter<TValue> = {
-      get value(): TValue | undefined {
-        self._verifyParametersProcessed(options.parameterLongName);
-        if (self._commandLineParser.selectedAction) {
-          const parameter: TTSCommandLineParameter | undefined = actionParameterMap.get(
-            self._commandLineParser.selectedAction
-          );
-          if (parameter) {
-            return getParameterValue(parameter);
+    const parameterObject: IHeftBaseParameter<TValue> = Object.defineProperties(
+      {} as IHeftBaseParameter<TValue>,
+      {
+        value: {
+          get: (): TValue | undefined => {
+            this._verifyParametersProcessed(options.parameterLongName);
+            if (this._commandLineParser.selectedAction) {
+              const parameter: TTSCommandLineParameter | undefined = actionParameterMap.get(
+                this._commandLineParser.selectedAction
+              );
+              if (parameter) {
+                return getParameterValue(parameter);
+              }
+            }
+
+            return undefined;
+          }
+        },
+
+        actionAssociated: {
+          get: (): boolean => {
+            if (this._commandLineParser.selectedAction) {
+              if (actionParameterMap.get(this._commandLineParser.selectedAction)) {
+                return true;
+              }
+            }
+
+            return false;
+          }
+        },
+
+        valueProvided: {
+          get: (): boolean => {
+            if (this._commandLineParser.selectedAction) {
+              const parameter: TTSCommandLineParameter | undefined = actionParameterMap.get(
+                this._commandLineParser.selectedAction
+              );
+              if (parameter) {
+                return getValueIsProvided(parameter);
+              }
+            }
+
+            return false;
           }
         }
-
-        return undefined;
-      },
-
-      get actionAssociated(): boolean {
-        if (self._commandLineParser.selectedAction) {
-          if (actionParameterMap.get(self._commandLineParser.selectedAction)) {
-            return true;
-          }
-        }
-
-        return false;
-      },
-
-      get valueProvided(): boolean {
-        if (self._commandLineParser.selectedAction) {
-          const parameter: TTSCommandLineParameter | undefined = actionParameterMap.get(
-            self._commandLineParser.selectedAction
-          );
-          if (parameter) {
-            return getValueIsProvided(parameter);
-          }
-        }
-
-        return false;
       }
-    };
+    );
 
     return parameterObject;
   }
