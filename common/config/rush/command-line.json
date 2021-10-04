@@ -164,13 +164,13 @@
       "safeForSimultaneousRushProcesses": true
     },
     {
-      "name": "yeoman",
+      "name": "scaffold",
       "commandKind": "global",
       "summary": "Used by yeoman generator. This command invokes yeoman to do project scaffolding",
 
-      "autoinstallerName": "rush-yeoman",
+      "autoinstallerName": "rush-scaffold",
 
-      // This will invoke common/autoinstall/rush-prettier/node_modules/.bin/pretty-quick
+      // This will invoke common/autoinstall/rush-scaffold
       "shellCommand": "yo odspweb --skip-install",
 
       "safeForSimultaneousRushProcesses": true
