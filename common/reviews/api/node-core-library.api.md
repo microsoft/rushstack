@@ -544,6 +544,22 @@ export interface IStringBuilder {
     toString(): string;
 }
 
+// @beta (undocumented)
+export interface ITerminal {
+    registerProvider(provider: ITerminalProvider): void;
+    unregisterProvider(provider: ITerminalProvider): void;
+    write(...messageParts: (string | IColorableSequence)[]): void;
+    writeDebug(...messageParts: (string | IColorableSequence)[]): void;
+    writeDebugLine(...messageParts: (string | IColorableSequence)[]): void;
+    writeError(...messageParts: (string | IColorableSequence)[]): void;
+    writeErrorLine(...messageParts: (string | IColorableSequence)[]): void;
+    writeLine(...messageParts: (string | IColorableSequence)[]): void;
+    writeVerbose(...messageParts: (string | IColorableSequence)[]): void;
+    writeVerboseLine(...messageParts: (string | IColorableSequence)[]): void;
+    writeWarning(...messageParts: (string | IColorableSequence)[]): void;
+    writeWarningLine(...messageParts: (string | IColorableSequence)[]): void;
+}
+
 // @beta
 export interface ITerminalProvider {
     eolCharacter: string;
@@ -739,7 +755,7 @@ export class StringBuilder implements IStringBuilder {
 }
 
 // @beta
-export class Terminal {
+export class Terminal implements ITerminal {
     constructor(provider: ITerminalProvider);
     registerProvider(provider: ITerminalProvider): void;
     unregisterProvider(provider: ITerminalProvider): void;

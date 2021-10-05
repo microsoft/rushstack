@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { StringValuesTypingsGenerator, IStringValueTyping } from '@rushstack/typings-generator';
-import { Terminal, NewlineKind } from '@rushstack/node-core-library';
+import { ITerminal, NewlineKind } from '@rushstack/node-core-library';
 
 import { ILocalizationFile } from './interfaces';
 import { LocFileParser } from './utilities/LocFileParser';
@@ -13,7 +13,7 @@ import { LocFileParser } from './utilities/LocFileParser';
 export interface ITypingsGeneratorOptions {
   srcFolder: string;
   generatedTsFolder: string;
-  terminal?: Terminal;
+  terminal?: ITerminal;
   exportAsDefault?: boolean;
   filesToIgnore?: string[];
   resxNewlineNormalization?: NewlineKind | undefined;

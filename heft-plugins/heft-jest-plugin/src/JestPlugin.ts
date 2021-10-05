@@ -33,7 +33,7 @@ import {
   JsonFile,
   JsonSchema,
   PackageName,
-  Terminal
+  ITerminal
 } from '@rushstack/node-core-library';
 
 import { IHeftJestReporterOptions } from './HeftJestReporter';
@@ -124,7 +124,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
     testStageProperties: ITestStageProperties,
     options?: IJestPluginOptions
   ): Promise<void> {
-    const terminal: Terminal = scopedLogger.terminal;
+    const terminal: ITerminal = scopedLogger.terminal;
     terminal.writeLine(`Using Jest version ${getVersion()}`);
 
     const buildFolder: string = heftConfiguration.buildFolder;

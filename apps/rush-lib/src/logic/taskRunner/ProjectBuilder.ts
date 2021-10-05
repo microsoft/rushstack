@@ -10,6 +10,7 @@ import {
   JsonObject,
   NewlineKind,
   InternalError,
+  ITerminal,
   Terminal,
   ColorValue
 } from '@rushstack/node-core-library';
@@ -134,7 +135,7 @@ export class ProjectBuilder extends BaseBuilder {
   }
 
   public async tryWriteCacheEntryAsync(
-    terminal: Terminal,
+    terminal: ITerminal,
     trackedFilePaths: string[] | undefined,
     repoCommandLineConfiguration: CommandLineConfiguration | undefined
   ): Promise<boolean | undefined> {
@@ -417,7 +418,7 @@ export class ProjectBuilder extends BaseBuilder {
   }
 
   private async _getProjectBuildCacheAsync(
-    terminal: Terminal,
+    terminal: ITerminal,
     trackedProjectFiles: string[] | undefined,
     commandLineConfiguration: CommandLineConfiguration | undefined
   ): Promise<ProjectBuildCache | undefined> {

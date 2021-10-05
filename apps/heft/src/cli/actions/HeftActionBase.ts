@@ -17,7 +17,7 @@ import {
   ICommandLineStringListDefinition
 } from '@rushstack/ts-command-line';
 import {
-  Terminal,
+  ITerminal,
   IPackageJson,
   Colors,
   ConsoleTerminalProvider,
@@ -40,7 +40,7 @@ export interface IStages {
 }
 
 export interface IHeftActionBaseOptions {
-  terminal: Terminal;
+  terminal: ITerminal;
   loggingManager: LoggingManager;
   metricsCollector: MetricsCollector;
   heftConfiguration: HeftConfiguration;
@@ -48,7 +48,7 @@ export interface IHeftActionBaseOptions {
 }
 
 export abstract class HeftActionBase extends CommandLineAction {
-  protected readonly terminal: Terminal;
+  protected readonly terminal: ITerminal;
   protected readonly loggingManager: LoggingManager;
   protected readonly metricsCollector: MetricsCollector;
   protected readonly heftConfiguration: HeftConfiguration;

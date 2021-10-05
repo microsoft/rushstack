@@ -8,7 +8,7 @@ import {
   CommandLineIntegerParameter,
   CommandLineStringListParameter
 } from '@rushstack/ts-command-line';
-import { Terminal } from '@rushstack/node-core-library';
+import { ITerminal } from '@rushstack/node-core-library';
 
 /**
  * @beta
@@ -100,9 +100,9 @@ export interface IRegisterParameterWithArgumentOptions extends IBaseCommandLineD
  */
 export class HeftCommandLineUtilities {
   private readonly _commandLineParser: CommandLineParser;
-  private readonly _terminal: Terminal;
+  private readonly _terminal: ITerminal;
 
-  public constructor(commandLineParser: CommandLineParser, terminal: Terminal) {
+  public constructor(commandLineParser: CommandLineParser, terminal: ITerminal) {
     this._commandLineParser = commandLineParser;
     this._terminal = terminal;
   }

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Terminal, NewlineKind, JsonFile } from '@rushstack/node-core-library';
+import { ITerminal, NewlineKind, JsonFile } from '@rushstack/node-core-library';
 
 import { ILocalizationFile } from '../interfaces';
 import { ResxReader } from './ResxReader';
@@ -11,7 +11,7 @@ import { Constants } from './Constants';
  * @internal
  */
 export interface IParseLocFileOptions {
-  terminal: Terminal;
+  terminal: ITerminal;
   filePath: string;
   content: string;
   resxNewlineNormalization: NewlineKind | undefined;
