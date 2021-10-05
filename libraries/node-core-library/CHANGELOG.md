@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Fri, 24 Sep 2021 00:09:29 GMT and should not be manually modified.
+This log was last generated on Tue, 05 Oct 2021 15:08:38 GMT and should not be manually modified.
+
+## 3.42.0
+Tue, 05 Oct 2021 15:08:38 GMT
+
+### Minor changes
+
+- Expose an ITerminal interface.
 
 ## 3.41.0
 Fri, 24 Sep 2021 00:09:29 GMT

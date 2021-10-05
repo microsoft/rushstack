@@ -1,6 +1,13 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Mon, 04 Oct 2021 15:10:18 GMT and should not be manually modified.
+This log was last generated on Tue, 05 Oct 2021 15:08:37 GMT and should not be manually modified.
+
+## 1.1.0
+Tue, 05 Oct 2021 15:08:37 GMT
+
+### Minor changes
+
+- Use ITerminal instead of Terminal to allow for compatibility with other versions of @rushstack/node-core-library.
 
 ## 1.0.71
 Mon, 04 Oct 2021 15:10:18 GMT

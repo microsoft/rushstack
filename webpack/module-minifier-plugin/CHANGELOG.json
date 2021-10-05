@@ -2,6 +2,21 @@
   "name": "@rushstack/module-minifier-plugin",
   "entries": [
     {
+      "version": "0.4.24",
+      "tag": "@rushstack/module-minifier-plugin_v0.4.24",
+      "date": "Tue, 05 Oct 2021 15:08:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.19`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.23",
       "tag": "@rushstack/module-minifier-plugin_v0.4.23",
       "date": "Mon, 04 Oct 2021 15:10:18 GMT",
