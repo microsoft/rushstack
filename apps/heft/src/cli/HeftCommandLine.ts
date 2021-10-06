@@ -70,15 +70,15 @@ export type IHeftFlagParameter = IHeftBaseParameter<boolean, ICommandLineFlagDef
 
 /**
  * @beta
- * The object returned when registering a string type parameter.
- */
-export type IHeftStringParameter = IHeftBaseParameter<string, ICommandLineStringDefinition>;
-
-/**
- * @beta
  * The object returned when registering an integer type parameter.
  */
 export type IHeftIntegerParameter = IHeftBaseParameter<number, ICommandLineIntegerDefinition>;
+
+/**
+ * @beta
+ * The object returned when registering a string type parameter.
+ */
+export type IHeftStringParameter = IHeftBaseParameter<string, ICommandLineStringDefinition>;
 
 /**
  * @beta
