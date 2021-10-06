@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.41.2",
+      "tag": "@rushstack/heft_v0.41.2",
+      "date": "Wed, 06 Oct 2021 15:08:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Improve the HeftSession.commandLine.register<Type>Parameter interface and add support for choice and choice list parameters. "
+          }
+        ]
+      }
+    },
+    {
       "version": "0.41.1",
       "tag": "@rushstack/heft_v0.41.1",
       "date": "Wed, 06 Oct 2021 02:41:48 GMT",

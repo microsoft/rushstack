@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 06 Oct 2021 02:41:48 GMT and should not be manually modified.
+This log was last generated on Wed, 06 Oct 2021 15:08:25 GMT and should not be manually modified.
+
+## 0.41.2
+Wed, 06 Oct 2021 15:08:25 GMT
+
+### Patches
+
+- Improve the HeftSession.commandLine.register<Type>Parameter interface and add support for choice and choice list parameters. 
 
 ## 0.41.1
 Wed, 06 Oct 2021 02:41:48 GMT
