@@ -32,7 +32,7 @@ export {
   CustomActionParameterType
 } from './cli/actions/CustomAction';
 export {
-  HeftCommandLineUtilities,
+  HeftCommandLine,
   IHeftBaseParameter,
   IHeftChoiceParameter,
   IHeftChoiceListParameter,
@@ -42,7 +42,7 @@ export {
   IHeftStringListParameter,
   IParameterAssociatedActionNames,
   IHeftRegisterParameterOptions
-} from './cli/HeftCommandLineUtilities';
+} from './cli/HeftCommandLine';
 
 // Stages
 export { StageHooksBase, IStageContext } from './stages/StageBase';

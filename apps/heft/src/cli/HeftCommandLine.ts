@@ -111,7 +111,7 @@ export type IHeftRegisterParameterOptions<TCommandLineDefinition extends IBaseCo
  * @beta
  * Command line utilities provided for Heft plugin developers.
  */
-export class HeftCommandLineUtilities {
+export class HeftCommandLine {
   private readonly _commandLineParser: CommandLineParser;
   private readonly _terminal: Terminal;
 

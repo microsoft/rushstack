@@ -69,7 +69,7 @@ export class CompileSubstageHooks extends BuildSubstageHooksBase {
 export type CustomActionParameterType = string | boolean | number | ReadonlyArray<string> | undefined;
 
 // @beta
-export class HeftCommandLineUtilities {
+export class HeftCommandLine {
     // @internal
     constructor(commandLineParser: CommandLineParser, terminal: Terminal);
     registerChoiceListParameter(options: IHeftRegisterParameterOptions<ICommandLineChoiceListDefinition>): IHeftChoiceListParameter;
@@ -111,7 +111,7 @@ export class HeftSession {
     // @internal
     constructor(options: IHeftSessionOptions, internalSessionOptions: IInternalHeftSessionOptions);
     // @beta
-    readonly commandLine: HeftCommandLineUtilities;
+    readonly commandLine: HeftCommandLine;
     get debugMode(): boolean;
     // (undocumented)
     readonly hooks: IHeftSessionHooks;
