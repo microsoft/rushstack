@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 05 Oct 2021 15:08:37 GMT and should not be manually modified.
+This log was last generated on Wed, 06 Oct 2021 02:41:48 GMT and should not be manually modified.
+
+## 0.41.1
+Wed, 06 Oct 2021 02:41:48 GMT
+
+### Patches
+
+- Replace ITerminal with Terminal in data structure values to preserve compatability with plugins written before ITerminal.
 
 ## 0.41.0
 Tue, 05 Oct 2021 15:08:37 GMT

@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.41.1",
+      "tag": "@rushstack/heft_v0.41.1",
+      "date": "Wed, 06 Oct 2021 02:41:48 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Replace ITerminal with Terminal in data structure values to preserve compatability with plugins written before ITerminal."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.41.0",
       "tag": "@rushstack/heft_v0.41.0",
       "date": "Tue, 05 Oct 2021 15:08:37 GMT",
