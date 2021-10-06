@@ -1,12 +1,19 @@
 import {
   IBaseCommandLineDefinition,
-  IBaseCommandLineDefinitionWithArgument,
+  ICommandLineFlagDefinition,
+  ICommandLineIntegerDefinition,
+  ICommandLineStringDefinition,
+  ICommandLineStringListDefinition,
+  ICommandLineChoiceDefinition,
+  ICommandLineChoiceListDefinition,
   CommandLineAction,
   CommandLineParser,
   CommandLineFlagParameter,
-  CommandLineStringParameter,
   CommandLineIntegerParameter,
+  CommandLineStringParameter,
   CommandLineStringListParameter,
+  CommandLineChoiceParameter,
+  CommandLineChoiceListParameter,
   CommandLineParameter
 } from '@rushstack/ts-command-line';
 import { Terminal } from '@rushstack/node-core-library';
@@ -15,46 +22,72 @@ import { Terminal } from '@rushstack/node-core-library';
  * @beta
  * The base set of utility values provided in every object returned when registering a parameter.
  */
-export interface IHeftBaseParameter<TValue> {
+export interface IHeftBaseParameter<TValue, TCommandLineDefinition extends IBaseCommandLineDefinition> {
   /**
    * The value specified on the command line for this parameter.
    */
   readonly value?: TValue;
 
   /**
-   * The currently selected action was associated with the parameter.
+   * If true, then the user has invoked Heft with a command line action that supports this parameter
+   * (as defined by the {@link IParameterAssociatedActionNames.associatedActionNames} option).
+   *
+   * @remarks
+   * For example, if `build` is one of the associated action names for `--my-integer-parameter`,
+   * then `actionAssociated` will be true if the user invokes `heft build`.
+   *
+   * To test whether the parameter was actually included (e.g. `heft build --my-integer-parameter 123`),
+   * verify the {@link IHeftBaseParameter.value} property is not `undefined`.
    */
   readonly actionAssociated: boolean;
 
   /**
-   * The parameter was specified on the command line.
+   * The options {@link IHeftRegisterParameterOptions} used to create and register the parameter with a Heft command line action.
    */
-  readonly valueProvided: boolean;
+  readonly definition: IHeftRegisterParameterOptions<TCommandLineDefinition>;
 }
+
+/**
+ * @beta
+ * The object returned when registering a choice type parameter.
+ */
+export type IHeftChoiceParameter = IHeftBaseParameter<string, ICommandLineChoiceDefinition>;
+
+/**
+ * @beta
+ * The object returned when registering a choiceList type parameter.
+ */
+export type IHeftChoiceListParameter = IHeftBaseParameter<
+  readonly string[],
+  ICommandLineChoiceListDefinition
+>;
 
 /**
  * @beta
  * The object returned when registering a flag type parameter.
  */
-export type IHeftFlagParameter = IHeftBaseParameter<boolean>;
+export type IHeftFlagParameter = IHeftBaseParameter<boolean, ICommandLineFlagDefinition>;
 
 /**
  * @beta
  * The object returned when registering a string type parameter.
  */
-export type IHeftStringParameter = IHeftBaseParameter<string>;
+export type IHeftStringParameter = IHeftBaseParameter<string, ICommandLineStringDefinition>;
 
 /**
  * @beta
  * The object returned when registering an integer type parameter.
  */
-export type IHeftIntegerParameter = IHeftBaseParameter<number>;
+export type IHeftIntegerParameter = IHeftBaseParameter<number, ICommandLineIntegerDefinition>;
 
 /**
  * @beta
  * The object returned when registering a stringList type parameter.
  */
-export type IHeftStringListParameter = IHeftBaseParameter<readonly string[]>;
+export type IHeftStringListParameter = IHeftBaseParameter<
+  readonly string[],
+  ICommandLineStringListDefinition
+>;
 
 /**
  * @beta
@@ -71,15 +104,8 @@ export interface IParameterAssociatedActionNames {
  * The options object provided to the command line parser when registering a parameter
  * in addition to the action names used to associate the parameter with.
  */
-export type IRegisterParameterOptions = IBaseCommandLineDefinition & IParameterAssociatedActionNames;
-
-/**
- * @beta
- * The options object provided to the command line parser when registering a parameter
- * in addition to the action names used to associate the parameter with.
- */
-export type IRegisterParameterWithArgumentOptions = IBaseCommandLineDefinitionWithArgument &
-  IParameterAssociatedActionNames;
+export type IHeftRegisterParameterOptions<TCommandLineDefinition extends IBaseCommandLineDefinition> =
+  TCommandLineDefinition & IParameterAssociatedActionNames;
 
 /**
  * @beta
@@ -98,38 +124,67 @@ export class HeftCommandLineUtilities {
   }
 
   /**
-   * Utility method used by Heft plugins to register a flag type parameter.
+   * Utility method used by Heft plugins to register a choice type parameter.
    */
-  public registerFlagParameter(options: IRegisterParameterOptions): IHeftFlagParameter {
+  public registerChoiceParameter(
+    options: IHeftRegisterParameterOptions<ICommandLineChoiceDefinition>
+  ): IHeftChoiceParameter {
     return this._registerParameter(
       options,
-      (action: CommandLineAction) => action.defineFlagParameter(options),
-      (parameter: CommandLineFlagParameter) => parameter.value,
-      (parameter: CommandLineFlagParameter) => parameter.value
+      (action: CommandLineAction) => action.defineChoiceParameter(options),
+      (parameter: CommandLineChoiceParameter) => parameter.value
     );
   }
 
   /**
-   * Utility method used by Heft plugins to register a string type parameter.
+   * Utility method used by Heft plugins to register a choice type parameter.
    */
-  public registerStringParameter(options: IRegisterParameterWithArgumentOptions): IHeftStringParameter {
+  public registerChoiceListParameter(
+    options: IHeftRegisterParameterOptions<ICommandLineChoiceListDefinition>
+  ): IHeftChoiceListParameter {
     return this._registerParameter(
       options,
-      (action: CommandLineAction) => action.defineStringParameter(options),
-      (parameter: CommandLineStringParameter) => parameter.value,
-      (parameter: CommandLineStringParameter) => typeof parameter.value !== 'undefined'
+      (action: CommandLineAction) => action.defineChoiceListParameter(options),
+      (parameter: CommandLineChoiceListParameter) => parameter.values
+    );
+  }
+
+  /**
+   * Utility method used by Heft plugins to register a flag type parameter.
+   */
+  public registerFlagParameter(
+    options: IHeftRegisterParameterOptions<ICommandLineFlagDefinition>
+  ): IHeftFlagParameter {
+    return this._registerParameter(
+      options,
+      (action: CommandLineAction) => action.defineFlagParameter(options),
+      (parameter: CommandLineFlagParameter) => parameter.value
     );
   }
 
   /**
    * Utility method used by Heft plugins to register an integer type parameter.
    */
-  public registerIntegerParameter(options: IRegisterParameterWithArgumentOptions): IHeftIntegerParameter {
+  public registerIntegerParameter(
+    options: IHeftRegisterParameterOptions<ICommandLineIntegerDefinition>
+  ): IHeftIntegerParameter {
     return this._registerParameter(
       options,
       (action: CommandLineAction) => action.defineIntegerParameter(options),
-      (parameter: CommandLineIntegerParameter) => parameter.value,
-      (parameter: CommandLineIntegerParameter) => typeof parameter.value !== 'undefined'
+      (parameter: CommandLineIntegerParameter) => parameter.value
+    );
+  }
+
+  /**
+   * Utility method used by Heft plugins to register a string type parameter.
+   */
+  public registerStringParameter(
+    options: IHeftRegisterParameterOptions<ICommandLineStringDefinition>
+  ): IHeftStringParameter {
+    return this._registerParameter(
+      options,
+      (action: CommandLineAction) => action.defineStringParameter(options),
+      (parameter: CommandLineStringParameter) => parameter.value
     );
   }
 
@@ -137,37 +192,39 @@ export class HeftCommandLineUtilities {
    * Utility method used by Heft plugins to register a stringList type parameter.
    */
   public registerStringListParameter(
-    options: IRegisterParameterWithArgumentOptions
+    options: IHeftRegisterParameterOptions<ICommandLineStringListDefinition>
   ): IHeftStringListParameter {
     return this._registerParameter(
       options,
       (action: CommandLineAction) => action.defineStringListParameter(options),
-      (parameter: CommandLineStringListParameter) => parameter.values,
-      (parameter: CommandLineStringListParameter) => (parameter.values || []).length > 0
+      (parameter: CommandLineStringListParameter) => parameter.values
     );
   }
 
-  private _registerParameter<TTSCommandLineParameter extends CommandLineParameter, TValue>(
-    options: IRegisterParameterOptions,
-    defineParameterForAction: (action: CommandLineAction) => TTSCommandLineParameter,
-    getParameterValue: (parameter: TTSCommandLineParameter) => TValue | undefined,
-    getValueIsProvided: (parameter: TTSCommandLineParameter) => boolean
-  ): IHeftBaseParameter<TValue> {
-    const actionParameterMap: Map<CommandLineAction, TTSCommandLineParameter> = new Map();
+  private _registerParameter<
+    TCommandLineDefinition extends IBaseCommandLineDefinition,
+    TCommandLineParameter extends CommandLineParameter,
+    TValue
+  >(
+    options: IHeftRegisterParameterOptions<TCommandLineDefinition>,
+    defineParameterForAction: (action: CommandLineAction) => TCommandLineParameter,
+    getParameterValue: (parameter: TCommandLineParameter) => TValue | undefined
+  ): IHeftBaseParameter<TValue, TCommandLineDefinition> {
+    const actionParameterMap: Map<CommandLineAction, TCommandLineParameter> = new Map();
     for (const action of this._getActions(options.associatedActionNames, options.parameterLongName)) {
       this._verifyUniqueParameterName(action, options);
-      const parameter: TTSCommandLineParameter = defineParameterForAction(action);
+      const parameter: TCommandLineParameter = defineParameterForAction(action);
       actionParameterMap.set(action, parameter);
     }
 
-    const parameterObject: IHeftBaseParameter<TValue> = Object.defineProperties(
-      {} as IHeftBaseParameter<TValue>,
+    const parameterObject: IHeftBaseParameter<TValue, TCommandLineDefinition> = Object.defineProperties(
+      {} as IHeftBaseParameter<TValue, TCommandLineDefinition>,
       {
         value: {
           get: (): TValue | undefined => {
             this._verifyParametersProcessed(options.parameterLongName);
             if (this._commandLineParser.selectedAction) {
-              const parameter: TTSCommandLineParameter | undefined = actionParameterMap.get(
+              const parameter: TCommandLineParameter | undefined = actionParameterMap.get(
                 this._commandLineParser.selectedAction
               );
               if (parameter) {
@@ -181,28 +238,19 @@ export class HeftCommandLineUtilities {
 
         actionAssociated: {
           get: (): boolean => {
-            if (this._commandLineParser.selectedAction) {
-              if (actionParameterMap.get(this._commandLineParser.selectedAction)) {
-                return true;
-              }
+            if (!this._commandLineParser.selectedAction) {
+              throw new Error('Unable to determine the selected action prior to command line processing');
             }
-
+            if (actionParameterMap.get(this._commandLineParser.selectedAction)) {
+              return true;
+            }
             return false;
           }
         },
 
-        valueProvided: {
-          get: (): boolean => {
-            if (this._commandLineParser.selectedAction) {
-              const parameter: TTSCommandLineParameter | undefined = actionParameterMap.get(
-                this._commandLineParser.selectedAction
-              );
-              if (parameter) {
-                return getValueIsProvided(parameter);
-              }
-            }
-
-            return false;
+        definition: {
+          get: (): IHeftRegisterParameterOptions<TCommandLineDefinition> => {
+            return { ...options };
           }
         }
       }
@@ -232,7 +280,10 @@ export class HeftCommandLineUtilities {
     return actions;
   }
 
-  private _verifyUniqueParameterName(action: CommandLineAction, options: IRegisterParameterOptions): void {
+  private _verifyUniqueParameterName<TCommandLineDefinition extends IBaseCommandLineDefinition>(
+    action: CommandLineAction,
+    options: IHeftRegisterParameterOptions<TCommandLineDefinition>
+  ): void {
     const existingParameterLongNames: Set<string> = new Set(
       action.parameters.map((parameter) => parameter.longName)
     );

@@ -14,7 +14,12 @@ import { CommandLineIntegerParameter } from '@rushstack/ts-command-line';
 import { CommandLineParser } from '@rushstack/ts-command-line';
 import { CommandLineStringParameter } from '@rushstack/ts-command-line';
 import { IBaseCommandLineDefinition } from '@rushstack/ts-command-line';
-import { IBaseCommandLineDefinitionWithArgument } from '@rushstack/ts-command-line';
+import { ICommandLineChoiceDefinition } from '@rushstack/ts-command-line';
+import { ICommandLineChoiceListDefinition } from '@rushstack/ts-command-line';
+import { ICommandLineFlagDefinition } from '@rushstack/ts-command-line';
+import { ICommandLineIntegerDefinition } from '@rushstack/ts-command-line';
+import { ICommandLineStringDefinition } from '@rushstack/ts-command-line';
+import { ICommandLineStringListDefinition } from '@rushstack/ts-command-line';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { JsonSchema } from '@rushstack/node-core-library';
@@ -67,10 +72,12 @@ export type CustomActionParameterType = string | boolean | number | ReadonlyArra
 export class HeftCommandLineUtilities {
     // @internal
     constructor(commandLineParser: CommandLineParser, terminal: Terminal);
-    registerFlagParameter(options: IRegisterParameterOptions): IHeftFlagParameter;
-    registerIntegerParameter(options: IRegisterParameterWithArgumentOptions): IHeftIntegerParameter;
-    registerStringListParameter(options: IRegisterParameterWithArgumentOptions): IHeftStringListParameter;
-    registerStringParameter(options: IRegisterParameterWithArgumentOptions): IHeftStringParameter;
+    registerChoiceListParameter(options: IHeftRegisterParameterOptions<ICommandLineChoiceListDefinition>): IHeftChoiceListParameter;
+    registerChoiceParameter(options: IHeftRegisterParameterOptions<ICommandLineChoiceDefinition>): IHeftChoiceParameter;
+    registerFlagParameter(options: IHeftRegisterParameterOptions<ICommandLineFlagDefinition>): IHeftFlagParameter;
+    registerIntegerParameter(options: IHeftRegisterParameterOptions<ICommandLineIntegerDefinition>): IHeftIntegerParameter;
+    registerStringListParameter(options: IHeftRegisterParameterOptions<ICommandLineStringListDefinition>): IHeftStringListParameter;
+    registerStringParameter(options: IHeftRegisterParameterOptions<ICommandLineStringDefinition>): IHeftStringParameter;
 }
 
 // @public (undocumented)
@@ -249,11 +256,17 @@ export interface IHeftActionConfigurationOptions {
 }
 
 // @beta
-export interface IHeftBaseParameter<TValue> {
+export interface IHeftBaseParameter<TValue, TCommandLineDefinition extends IBaseCommandLineDefinition> {
     readonly actionAssociated: boolean;
+    readonly definition: IHeftRegisterParameterOptions<TCommandLineDefinition>;
     readonly value?: TValue;
-    readonly valueProvided: boolean;
 }
+
+// @beta
+export type IHeftChoiceListParameter = IHeftBaseParameter<readonly string[], ICommandLineChoiceListDefinition>;
+
+// @beta
+export type IHeftChoiceParameter = IHeftBaseParameter<string, ICommandLineChoiceDefinition>;
 
 // @internal (undocumented)
 export interface _IHeftConfigurationInitializationOptions {
@@ -262,10 +275,10 @@ export interface _IHeftConfigurationInitializationOptions {
 }
 
 // @beta
-export type IHeftFlagParameter = IHeftBaseParameter<boolean>;
+export type IHeftFlagParameter = IHeftBaseParameter<boolean, ICommandLineFlagDefinition>;
 
 // @beta
-export type IHeftIntegerParameter = IHeftBaseParameter<number>;
+export type IHeftIntegerParameter = IHeftBaseParameter<number, ICommandLineIntegerDefinition>;
 
 // @internal (undocumented)
 export interface _IHeftLifecycle {
@@ -285,6 +298,9 @@ export interface IHeftPlugin<TOptions = void> {
     readonly pluginName: string;
 }
 
+// @beta
+export type IHeftRegisterParameterOptions<TCommandLineDefinition extends IBaseCommandLineDefinition> = TCommandLineDefinition & IParameterAssociatedActionNames;
+
 // @public (undocumented)
 export interface IHeftSessionHooks {
     // (undocumented)
@@ -300,10 +316,10 @@ export interface IHeftSessionHooks {
 }
 
 // @beta
-export type IHeftStringListParameter = IHeftBaseParameter<readonly string[]>;
+export type IHeftStringListParameter = IHeftBaseParameter<readonly string[], ICommandLineStringListDefinition>;
 
 // @beta
-export type IHeftStringParameter = IHeftBaseParameter<string>;
+export type IHeftStringParameter = IHeftBaseParameter<string, ICommandLineStringDefinition>;
 
 // @public (undocumented)
 export interface IMetricsData {
@@ -338,12 +354,6 @@ export interface IPostBuildSubstage extends IBuildSubstage<BuildSubstageHooksBas
 // @public (undocumented)
 export interface IPreCompileSubstage extends IBuildSubstage<BuildSubstageHooksBase, {}> {
 }
-
-// @beta
-export type IRegisterParameterOptions = IBaseCommandLineDefinition & IParameterAssociatedActionNames;
-
-// @beta
-export type IRegisterParameterWithArgumentOptions = IBaseCommandLineDefinitionWithArgument & IParameterAssociatedActionNames;
 
 // @beta
 export interface IRunScriptOptions<TStageProperties> {

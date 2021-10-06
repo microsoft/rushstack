@@ -9,6 +9,8 @@ import {
   IHeftStringParameter,
   IHeftIntegerParameter,
   IHeftStringListParameter,
+  IHeftChoiceParameter,
+  IHeftChoiceListParameter,
   IBuildStageContext,
   ICompileSubstage
 } from '@rushstack/heft';
@@ -48,15 +50,34 @@ class HeftParameterPlugin implements IHeftPlugin {
         argumentName: 'LIST_ITEM'
       });
 
+    const customChoiceParameter: IHeftChoiceParameter = heftSession.commandLine.registerChoiceParameter({
+      associatedActionNames: ['build', 'test', 'start'],
+      parameterLongName: '--custom-choice-parameter',
+      alternatives: ['red', 'blue'],
+      description: 'Test running a custom choice parameter'
+    });
+
+    const customChoiceListParameter: IHeftChoiceListParameter =
+      heftSession.commandLine.registerChoiceListParameter({
+        associatedActionNames: ['build', 'test', 'start'],
+        parameterShortName: '-y',
+        parameterLongName: '--custom-choice-list-parameter',
+        alternatives: ['totodile', 'jynx', 'gudetama', 'impidimp', 'wobbuffet'],
+        description: 'Test running a custom choice list parameter'
+      });
+
     const { buildFolder } = heftConfiguration;
 
     heftSession.hooks.build.tap(this.pluginName, (build: IBuildStageContext) => {
       build.hooks.compile.tap(this.pluginName, (compile: ICompileSubstage) => {
         compile.hooks.run.tapPromise(this.pluginName, async () => {
-          if (customParameter.actionAssociated && customParameter.valueProvided) {
-            const customContent: string = `${customStringParameter.value?.repeat(
-              customNumberParameter.value || 1
-            )}_${customStringListParameter.value?.join('_')}`;
+          if (customParameter.actionAssociated && customParameter.value) {
+            const customContent: string =
+              `customIntegerParameter: ${customNumberParameter.value}\n` +
+              `customStringParameter: ${customStringParameter.value}\n` +
+              `customStringListParameter: ${customStringListParameter.value?.join(', ')}\n` +
+              `customChoiceParameter: ${customChoiceParameter.value}\n` +
+              `customChoiceListParameter: ${customChoiceListParameter.value?.join(', ')}`;
             await FileSystem.writeFileAsync(`${buildFolder}/lib/custom_output.txt`, customContent, {
               ensureFolderExists: true
             });

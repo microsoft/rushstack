@@ -34,13 +34,14 @@ export {
 export {
   HeftCommandLineUtilities,
   IHeftBaseParameter,
+  IHeftChoiceParameter,
+  IHeftChoiceListParameter,
   IHeftFlagParameter,
   IHeftIntegerParameter,
-  IHeftStringListParameter,
   IHeftStringParameter,
+  IHeftStringListParameter,
   IParameterAssociatedActionNames,
-  IRegisterParameterOptions,
-  IRegisterParameterWithArgumentOptions
+  IHeftRegisterParameterOptions
 } from './cli/HeftCommandLineUtilities';
 
 // Stages

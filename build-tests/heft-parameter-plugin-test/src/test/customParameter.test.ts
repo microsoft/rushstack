@@ -6,6 +6,12 @@ describe('CustomParameterOutput', () => {
     const outputContent: string = await FileSystem.readFileAsync(
       `${dirname(dirname(__dirname))}/lib/custom_output.txt`
     );
-    expect(outputContent).toBe('testtesttesttesttest_eevee_togepi_mareep');
+    expect(outputContent).toBe(
+      'customIntegerParameter: 5\n' +
+        'customStringParameter: test\n' +
+        'customStringListParameter: eevee, togepi, mareep\n' +
+        'customChoiceParameter: red\n' +
+        'customChoiceListParameter: totodile, gudetama, wobbuffet'
+    );
   });
 });
