@@ -6,7 +6,7 @@ import * as path from 'path';
 import * as semver from 'semver';
 import {
   FileSystemStats,
-  Terminal,
+  ITerminal,
   JsonFile,
   IPackageJson,
   ITerminalProvider,
@@ -123,7 +123,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _eslintConfigFilePath!: string;
   private _tslintConfigFilePath!: string;
   private _typescriptLogger!: IScopedLogger;
-  private _typescriptTerminal!: Terminal;
+  private _typescriptTerminal!: ITerminal;
   private _emitCompletedCallbackManager: EmitCompletedCallbackManager;
 
   private __tsCacheFilePath: string | undefined;

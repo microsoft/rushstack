@@ -2,6 +2,59 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.1.1",
+      "tag": "@rushstack/debug-certificate-manager_v1.1.1",
+      "date": "Wed, 06 Oct 2021 02:41:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.0",
+      "tag": "@rushstack/debug-certificate-manager_v1.1.0",
+      "date": "Tue, 05 Oct 2021 15:08:37 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Use ITerminal instead of Terminal to allow for compatibility with other versions of @rushstack/node-core-library."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.42.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.0.71",
+      "tag": "@rushstack/debug-certificate-manager_v1.0.71",
+      "date": "Mon, 04 Oct 2021 15:10:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.40.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.18`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.70",
       "tag": "@rushstack/debug-certificate-manager_v1.0.70",
       "date": "Fri, 24 Sep 2021 00:09:29 GMT",

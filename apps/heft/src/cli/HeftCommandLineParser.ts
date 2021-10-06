@@ -7,6 +7,7 @@ import {
   CommandLineFlagParameter
 } from '@rushstack/ts-command-line';
 import {
+  ITerminal,
   Terminal,
   InternalError,
   ConsoleTerminalProvider,
@@ -46,7 +47,7 @@ interface IPreInitializationArgumentValues {
 
 export class HeftCommandLineParser extends CommandLineParser {
   private _terminalProvider: ConsoleTerminalProvider;
-  private _terminal: Terminal;
+  private _terminal: ITerminal;
   private _loggingManager: LoggingManager;
   private _metricsCollector: MetricsCollector;
   private _pluginManager: PluginManager;
@@ -64,7 +65,7 @@ export class HeftCommandLineParser extends CommandLineParser {
     return !!this._preInitializationArgumentValues.debug;
   }
 
-  public get terminal(): Terminal {
+  public get terminal(): ITerminal {
     return this._terminal;
   }
 

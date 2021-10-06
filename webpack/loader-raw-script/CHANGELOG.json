@@ -2,6 +2,51 @@
   "name": "@rushstack/loader-raw-script",
   "entries": [
     {
+      "version": "1.3.186",
+      "tag": "@rushstack/loader-raw-script_v1.3.186",
+      "date": "Wed, 06 Oct 2021 02:41:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.20`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.185",
+      "tag": "@rushstack/loader-raw-script_v1.3.185",
+      "date": "Tue, 05 Oct 2021 15:08:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.19`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.184",
+      "tag": "@rushstack/loader-raw-script_v1.3.184",
+      "date": "Mon, 04 Oct 2021 15:10:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.40.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.18`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.183",
       "tag": "@rushstack/loader-raw-script_v1.3.183",
       "date": "Fri, 24 Sep 2021 00:09:29 GMT",

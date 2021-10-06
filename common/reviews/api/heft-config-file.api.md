@@ -4,8 +4,8 @@
 
 ```ts
 
+import { ITerminal } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
-import { Terminal } from '@rushstack/node-core-library';
 
 // @beta (undocumented)
 export class ConfigurationFile<TConfigurationFile> {
@@ -14,10 +14,10 @@ export class ConfigurationFile<TConfigurationFile> {
     static _formatPathForLogging: (path: string) => string;
     getObjectSourceFilePath<TObject extends object>(obj: TObject): string | undefined;
     getPropertyOriginalValue<TParentProperty extends object, TValue>(options: IOriginalValueOptions<TParentProperty>): TValue | undefined;
-    loadConfigurationFileForProjectAsync(terminal: Terminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile>;
+    loadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile>;
     readonly projectRelativeFilePath: string;
-    tryLoadConfigurationFileForProjectAsync(terminal: Terminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile | undefined>;
-    }
+    tryLoadConfigurationFileForProjectAsync(terminal: ITerminal, projectPath: string, rigConfig?: RigConfig): Promise<TConfigurationFile | undefined>;
+}
 
 // @beta (undocumented)
 export interface IConfigurationFileOptions<TConfigurationFile> {
@@ -80,7 +80,6 @@ export enum PathResolutionMethod {
 
 // @beta (undocumented)
 export type PropertyInheritanceCustomFunction<TObject> = (currentObject: TObject, parentObject: TObject) => TObject;
-
 
 // (No @packageDocumentation comment for this package)
 

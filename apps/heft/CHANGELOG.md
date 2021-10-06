@@ -1,6 +1,27 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 24 Sep 2021 00:09:29 GMT and should not be manually modified.
+This log was last generated on Wed, 06 Oct 2021 02:41:48 GMT and should not be manually modified.
+
+## 0.41.1
+Wed, 06 Oct 2021 02:41:48 GMT
+
+### Patches
+
+- Replace ITerminal with Terminal in data structure values to preserve compatability with plugins written before ITerminal.
+
+## 0.41.0
+Tue, 05 Oct 2021 15:08:37 GMT
+
+### Minor changes
+
+- Use ITerminal instead of Terminal to allow for compatibility with other versions of @rushstack/node-core-library.
+
+## 0.40.0
+Mon, 04 Oct 2021 15:10:18 GMT
+
+### Minor changes
+
+- Add register custom parameters feature to Heft.
 
 ## 0.39.2
 Fri, 24 Sep 2021 00:09:29 GMT

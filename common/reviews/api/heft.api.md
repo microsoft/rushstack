@@ -21,6 +21,7 @@ import { ICommandLineIntegerDefinition } from '@rushstack/ts-command-line';
 import { ICommandLineStringDefinition } from '@rushstack/ts-command-line';
 import { ICommandLineStringListDefinition } from '@rushstack/ts-command-line';
 import { IPackageJson } from '@rushstack/node-core-library';
+import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
 import { JsonSchema } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
@@ -71,7 +72,7 @@ export type CustomActionParameterType = string | boolean | number | ReadonlyArra
 // @beta
 export class HeftCommandLine {
     // @internal
-    constructor(commandLineParser: CommandLineParser, terminal: Terminal);
+    constructor(commandLineParser: CommandLineParser, terminal: ITerminal);
     registerChoiceListParameter(options: IHeftRegisterParameterOptions<ICommandLineChoiceListDefinition>): IHeftChoiceListParameter;
     registerChoiceParameter(options: IHeftRegisterParameterOptions<ICommandLineChoiceDefinition>): IHeftChoiceParameter;
     registerFlagParameter(options: IHeftRegisterParameterOptions<ICommandLineFlagDefinition>): IHeftFlagParameter;

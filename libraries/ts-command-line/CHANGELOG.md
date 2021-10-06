@@ -1,6 +1,13 @@
 # Change Log - @rushstack/ts-command-line
 
-This log was last generated on Thu, 23 Sep 2021 00:10:41 GMT and should not be manually modified.
+This log was last generated on Mon, 04 Oct 2021 15:10:18 GMT and should not be manually modified.
+
+## 4.10.0
+Mon, 04 Oct 2021 15:10:18 GMT
+
+### Minor changes
+
+- Add safety check parametersProcessed to CommandLineParameterProvider
 
 ## 4.9.1
 Thu, 23 Sep 2021 00:10:41 GMT

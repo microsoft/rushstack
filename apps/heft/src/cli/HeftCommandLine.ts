@@ -16,7 +16,7 @@ import {
   CommandLineChoiceListParameter,
   CommandLineParameter
 } from '@rushstack/ts-command-line';
-import { Terminal } from '@rushstack/node-core-library';
+import { ITerminal } from '@rushstack/node-core-library';
 
 /**
  * @beta
@@ -113,12 +113,12 @@ export type IHeftRegisterParameterOptions<TCommandLineDefinition extends IBaseCo
  */
 export class HeftCommandLine {
   private readonly _commandLineParser: CommandLineParser;
-  private readonly _terminal: Terminal;
+  private readonly _terminal: ITerminal;
 
   /**
    * @internal
    */
-  public constructor(commandLineParser: CommandLineParser, terminal: Terminal) {
+  public constructor(commandLineParser: CommandLineParser, terminal: ITerminal) {
     this._commandLineParser = commandLineParser;
     this._terminal = terminal;
   }
