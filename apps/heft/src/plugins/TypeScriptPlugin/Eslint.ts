@@ -7,8 +7,11 @@ import * as semver from 'semver';
 import * as TEslint from 'eslint';
 
 import { LinterBase, ILinterBaseOptions, ITiming } from './LinterBase';
-import { IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
+import { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
 import { FileError } from '../../pluginFramework/logging/FileError';
+import { Import } from '@rushstack/node-core-library';
+
+import type { SourceFile, Program } from 'typescript';
 
 interface IEslintOptions extends ILinterBaseOptions {
   eslintPackagePath: string;
@@ -17,6 +20,25 @@ interface IEslintOptions extends ILinterBaseOptions {
 interface IEslintTiming {
   enabled: boolean;
   time: (key: string, fn: (...args: unknown[]) => void) => (...args: unknown[]) => void;
+}
+
+interface IASTAndProgram {
+  ast: SourceFile;
+  program: Program;
+}
+
+interface IEstreeCreateProjectProgram {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  createProjectProgram: (
+    code: string,
+    createDefaultProgram: boolean,
+    extra: any
+  ) => IASTAndProgram | undefined;
+}
+
+interface IEstreeUseProvidedPrograms {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  useProvidedPrograms: (programInstances: Iterable<Program>, extra: any) => IASTAndProgram | undefined;
 }
 
 const enum EslintMessageSeverity {
@@ -29,15 +51,18 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   private readonly _eslintPackage: typeof TEslint;
   private readonly _eslintTimings: Map<string, string> = new Map<string, string>();
 
-  private _eslintCli!: TEslint.CLIEngine;
   private _eslint!: TEslint.ESLint;
   private _eslintBaseConfiguration: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   private _lintResult!: TEslint.ESLint.LintResult[];
 
+  private _tsProgram: IExtendedProgram | undefined;
+
   public constructor(options: IEslintOptions) {
     super('eslint', options);
 
-    this._patchTimer(options.eslintPackagePath); // This must happen before the rest of the linter package is loaded
+    // This must happen before the rest of the linter package is loaded
+    this._patchTimer(options.eslintPackagePath);
+    this._patchEstreeParser(options.eslintPackagePath);
 
     this._eslintPackagePath = options.eslintPackagePath;
     this._eslintPackage = require(options.eslintPackagePath);
@@ -124,25 +149,21 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     return eslintConfigVersion;
   }
 
-  protected async initializeAsync(): Promise<void> {
+  protected async initializeAsync(tsProgram: IExtendedProgram): Promise<void> {
+    this._tsProgram = tsProgram;
+
     this._eslint = new this._eslintPackage.ESLint({
       cwd: this._buildFolderPath,
       overrideConfigFile: this._linterConfigFilePath
     });
 
     this._eslintBaseConfiguration = await this._eslint.calculateConfigForFile(this._linterConfigFilePath);
-
-    this._eslintCli = new this._eslintPackage.CLIEngine({
-      cwd: this._buildFolderPath,
-      configFile: this._linterConfigFilePath
-    });
   }
 
-  protected lintFile(sourceFile: IExtendedSourceFile): TEslint.ESLint.LintResult[] {
-    const lintResults: TEslint.ESLint.LintResult[] = this._eslintCli.executeOnText(
-      sourceFile.text,
-      sourceFile.fileName
-    ).results;
+  protected async lintFileAsync(sourceFile: IExtendedSourceFile): Promise<TEslint.ESLint.LintResult[]> {
+    const lintResults: TEslint.ESLint.LintResult[] = await this._eslint.lintText(sourceFile.text, {
+      filePath: sourceFile.fileName
+    });
     const failures: TEslint.ESLint.LintResult[] = [];
     for (const lintResult of lintResults) {
       if (lintResult.messages.length > 0) {
@@ -182,6 +203,34 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
       const timingName: string = `Eslint${key}`;
       this._eslintTimings.set(key, timingName);
       return (...args: unknown[]) => this._measurePerformance(timingName, () => fn(...args));
+    };
+  }
+
+  private _patchEstreeParser(eslintPackagePath: string): void {
+    const estreePackagePath: string = Import.resolvePackage({
+      baseFolderPath: eslintPackagePath,
+      packageName: '@typescript-eslint/typescript-estree'
+    });
+    const createProjectProgram: IEstreeCreateProjectProgram = require(path.join(
+      estreePackagePath,
+      'dist',
+      'create-program',
+      'createProjectProgram'
+    ));
+    const useProvidedPrograms: IEstreeUseProvidedPrograms = require(path.join(
+      estreePackagePath,
+      'dist',
+      'create-program',
+      'useProvidedPrograms'
+    ));
+
+    const originalCreateProgramFunc: typeof createProjectProgram.createProjectProgram =
+      createProjectProgram.createProjectProgram.bind(createProjectProgram);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    createProjectProgram.createProjectProgram = (code: string, createDefaultProgram: boolean, extra: any) => {
+      return this._tsProgram
+        ? useProvidedPrograms.useProvidedPrograms([this._tsProgram], extra)
+        : originalCreateProgramFunc(code, createDefaultProgram, extra);
     };
   }
 }
