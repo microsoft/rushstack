@@ -137,7 +137,7 @@ export class HeftCommandLine {
   }
 
   /**
-   * Utility method used by Heft plugins to register a choice type parameter.
+   * Utility method used by Heft plugins to register a choiceList type parameter.
    */
   public registerChoiceListParameter(
     options: IHeftRegisterParameterOptions<ICommandLineChoiceListDefinition>
