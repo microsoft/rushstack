@@ -34,7 +34,7 @@ import { LoggingManager } from '../pluginFramework/logging/LoggingManager';
 import { ICustomActionOptions, CustomAction } from './actions/CustomAction';
 import { Constants } from '../utilities/Constants';
 import { IHeftLifecycle, HeftLifecycleHooks } from '../pluginFramework/HeftLifecycle';
-import { HeftCommandLineUtilities } from './HeftCommandLineUtilities';
+import { HeftCommandLine } from './HeftCommandLine';
 
 /**
  * This interfaces specifies values for parameters that must be parsed before the CLI
@@ -119,7 +119,7 @@ export class HeftCommandLineParser extends CommandLineParser {
         const action: CustomAction<TParameters> = new CustomAction(options, actionOptions);
         this.addAction(action);
       },
-      commandLine: new HeftCommandLineUtilities(this, this._terminal)
+      commandLine: new HeftCommandLine(this, this._terminal)
     });
 
     this._pluginManager = new PluginManager({
