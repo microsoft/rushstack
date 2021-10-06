@@ -335,7 +335,7 @@ export interface IMetricsData {
     taskTotalExecutionMs: number;
 }
 
-// @beta (undocumented)
+// @beta
 export interface IParameterAssociatedActionNames {
     associatedActionNames: string[];
 }

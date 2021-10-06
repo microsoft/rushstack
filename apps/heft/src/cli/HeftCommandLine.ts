@@ -42,7 +42,8 @@ export interface IHeftBaseParameter<TValue, TCommandLineDefinition extends IBase
   readonly actionAssociated: boolean;
 
   /**
-   * The options {@link IHeftRegisterParameterOptions} used to create and register the parameter with a Heft command line action.
+   * The options {@link IHeftRegisterParameterOptions} used to create and register the parameter with
+   * a Heft command line action.
    */
   readonly definition: IHeftRegisterParameterOptions<TCommandLineDefinition>;
 }
@@ -91,6 +92,8 @@ export type IHeftStringListParameter = IHeftBaseParameter<
 
 /**
  * @beta
+ * The configuration interface for associating a parameter definition with a Heft
+ * command line action in {@link IHeftRegisterParameterOptions}.
  */
 export interface IParameterAssociatedActionNames {
   /**
