@@ -21,6 +21,7 @@ import { ITerminalProvider } from '@rushstack/node-core-library';
 import { JsonSchema } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
 import { SyncHook } from 'tapable';
+import { Terminal } from '@rushstack/node-core-library';
 
 // @public (undocumented)
 export class BuildStageHooks extends StageHooksBase<IBuildStageProperties> {
@@ -78,7 +79,7 @@ export class HeftConfiguration {
     get buildFolder(): string;
     // @internal
     _checkForRigAsync(): Promise<void>;
-    get globalTerminal(): ITerminal;
+    get globalTerminal(): Terminal;
     get heftPackageJson(): IPackageJson;
     // @internal (undocumented)
     static initialize(options: _IHeftConfigurationInitializationOptions): HeftConfiguration;
@@ -369,7 +370,7 @@ export interface IScopedLogger {
     emitError(error: Error): void;
     emitWarning(warning: Error): void;
     // (undocumented)
-    readonly terminal: ITerminal;
+    readonly terminal: Terminal;
 }
 
 // @public (undocumented)
@@ -448,7 +449,7 @@ export class ScopedLogger implements IScopedLogger {
     // @internal (undocumented)
     readonly _requestingPlugin: IHeftPlugin;
     // (undocumented)
-    readonly terminal: ITerminal;
+    readonly terminal: Terminal;
     // (undocumented)
     readonly terminalProvider: ITerminalProvider;
     // (undocumented)
