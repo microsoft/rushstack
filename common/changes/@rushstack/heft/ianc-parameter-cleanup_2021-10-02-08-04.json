@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "",
-      "type": "none"
+      "comment": "Improve the HeftSession.commandLine.register<Type>Parameter interface and add support for choice and choice list parameters. ",
+      "type": "patch"
     }
   ],
   "packageName": "@rushstack/heft",
