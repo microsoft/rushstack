@@ -1037,7 +1037,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           ),
         useCaseSensitiveFileNames: true
       },
-      currentFolder
+      currentFolder,
+      /*existingOptions:*/ undefined,
+      this._configuration.tsconfigPath
     );
 
     if (tsconfig.options.incremental) {
