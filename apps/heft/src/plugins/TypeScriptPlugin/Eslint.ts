@@ -51,7 +51,7 @@ const enum EslintMessageSeverity {
 }
 
 export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
-  private static readonly _sourceFilePrograms: Map<string, IExtendedProgram | undefined> = new Map();
+  private static readonly _sourceFilePrograms: Set<IExtendedProgram> = new Set();
 
   private readonly _eslintPackagePath: string;
   private readonly _eslintPackage: typeof TEslint;
@@ -156,7 +156,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   }
 
   protected async initializeAsync(tsProgram: IExtendedProgram): Promise<void> {
-    this._tsProgram = tsProgram;
+    Eslint._sourceFilePrograms.add(tsProgram);
 
     this._eslint = new this._eslintPackage.ESLint({
       cwd: this._buildFolderPath,
@@ -167,7 +167,6 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   }
 
   protected async lintFileAsync(sourceFile: IExtendedSourceFile): Promise<TEslint.ESLint.LintResult[]> {
-    Eslint._sourceFilePrograms.set(sourceFile.fileName, this._tsProgram);
     const lintResults: TEslint.ESLint.LintResult[] = await this._eslint.lintText(sourceFile.text, {
       filePath: sourceFile.fileName
     });
@@ -214,6 +213,11 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   }
 
   private _patchEstreeParser(eslintPackagePath: string): void {
+    // While intercepting the "parse" method to inject our programs would be a better way to provide
+    // the programs, the method used to calculate the configuration is an instance member of the
+    // Eslint class, which means we would need to construct the linter to extract a config, modify the
+    // config.parse method to inject our programs, and then re-construct the linter using this config.
+    // Using this patch allows us to avoid initializing ESLint twice.
     const estreePackagePath: string = Import.resolvePackage({
       baseFolderPath: eslintPackagePath,
       packageName: '@typescript-eslint/typescript-estree'
@@ -228,9 +232,8 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
       createDefaultProgram: boolean,
       extra: IEslintExtraOptions
     ) => {
-      const sourceFileProgram: IExtendedProgram | undefined = Eslint._sourceFilePrograms.get(extra.filePath);
-      return sourceFileProgram
-        ? useProvidedPrograms.useProvidedPrograms([sourceFileProgram], extra)
+      return Eslint._sourceFilePrograms.size
+        ? useProvidedPrograms.useProvidedPrograms(Eslint._sourceFilePrograms, extra)
         : originalCreateProgramFunc(code, createDefaultProgram, extra);
     };
   }
