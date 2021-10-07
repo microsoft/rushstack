@@ -161,7 +161,7 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     );
   }
 
-  protected lintFile(sourceFile: IExtendedSourceFile): TTslint.RuleFailure[] {
+  protected async lintFileAsync(sourceFile: IExtendedSourceFile): Promise<TTslint.RuleFailure[]> {
     // Some of this code comes from here:
     // https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L161-L179
     // Modified to only lint files that have changed and that we care about

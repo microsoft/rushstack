@@ -42,6 +42,7 @@ interface ILinterWrapper {
   ts: ExtendedTypeScript;
   logger: IScopedLogger;
   measureTsPerformance: PerformanceMeasurer;
+  measureTsPerformanceAsync: PerformanceMeasurerAsync;
 }
 
 export interface ITypeScriptBuilderConfiguration
@@ -437,7 +438,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     const writePromise: Promise<{ duration: number }> = measureTsPerformanceAsync('Write', () =>
       Async.forEachAsync(
         emitResult.filesToWrite,
-        async ({ filePath, data }) =>
+        async ({ filePath, data }: { filePath: string; data: string }) =>
           this._cachedFileSystem.writeFile(filePath, data, { ensureFolderExists: true }),
         { concurrency: this._configuration.maxWriteParallelism }
       )
@@ -445,8 +446,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     //#endregion
 
     const [eslint, tslint] = await Promise.all([
-      this._initESlintAsync(ts, measureTsPerformance),
-      this._initTSlintAsync(ts, measureTsPerformance)
+      this._initESlintAsync(ts, measureTsPerformance, measureTsPerformanceAsync),
+      this._initTSlintAsync(ts, measureTsPerformance, measureTsPerformanceAsync)
     ]);
     const lintPromises: Promise<LinterBase<unknown>>[] = [];
 
@@ -501,8 +502,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       };
 
       const [eslint, tslint] = await Promise.all([
-        this._initESlintAsync(ts, measureTsPerformance),
-        this._initTSlintAsync(ts, measureTsPerformance)
+        this._initESlintAsync(ts, measureTsPerformance, measureTsPerformanceAsync),
+        this._initTSlintAsync(ts, measureTsPerformance, measureTsPerformanceAsync)
       ]);
 
       // TypeScript doesn't have a
@@ -629,7 +630,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
   private async _initTSlintAsync(
     ts: ExtendedTypeScript,
-    measureTsPerformance: PerformanceMeasurer
+    measureTsPerformance: PerformanceMeasurer,
+    measureTsPerformanceAsync: PerformanceMeasurerAsync
   ): Promise<ILinterWrapper | undefined> {
     if (this._tslintEnabled) {
       if (!this._configuration.tslintToolPath) {
@@ -640,14 +642,16 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       return {
         logger,
         ts,
-        measureTsPerformance
+        measureTsPerformance,
+        measureTsPerformanceAsync
       };
     }
   }
 
   private async _initESlintAsync(
     ts: ExtendedTypeScript,
-    measureTsPerformance: PerformanceMeasurer
+    measureTsPerformance: PerformanceMeasurer,
+    measureTsPerformanceAsync: PerformanceMeasurerAsync
   ): Promise<ILinterWrapper | undefined> {
     if (this._eslintEnabled) {
       if (!this._configuration.eslintToolPath) {
@@ -658,7 +662,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       return {
         logger,
         ts,
-        measureTsPerformance
+        measureTsPerformance,
+        measureTsPerformanceAsync
       };
     }
   }
@@ -675,6 +680,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       buildMetadataFolderPath: this._configuration.buildMetadataFolder,
       linterConfigFilePath: this._eslintConfigFilePath,
       measurePerformance: linter.measureTsPerformance,
+      measurePerformanceAsync: linter.measureTsPerformanceAsync,
       eslintPackagePath: this._configuration.eslintToolPath!
     });
 
@@ -702,6 +708,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       buildMetadataFolderPath: this._configuration.buildMetadataFolder,
       linterConfigFilePath: this._tslintConfigFilePath,
       measurePerformance: linter.measureTsPerformance,
+      measurePerformanceAsync: linter.measureTsPerformanceAsync,
       cachedFileSystem: this._cachedFileSystem,
       tslintPackagePath: this._configuration.tslintToolPath!
     });
@@ -1030,7 +1037,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           ),
         useCaseSensitiveFileNames: true
       },
-      currentFolder
+      currentFolder,
+      /*existingOptions:*/ undefined,
+      this._configuration.tsconfigPath
     );
 
     if (tsconfig.options.incremental) {
