@@ -245,7 +245,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       );
     } else if (
       this._typescriptParsedVersion.major > NEWEST_SUPPORTED_TS_MAJOR_VERSION ||
-      (this._typescriptParsedVersion.minor === NEWEST_SUPPORTED_TS_MINOR_VERSION &&
+      (this._typescriptParsedVersion.major === NEWEST_SUPPORTED_TS_MAJOR_VERSION &&
         this._typescriptParsedVersion.minor > NEWEST_SUPPORTED_TS_MINOR_VERSION)
     ) {
       this._typescriptTerminal.writeLine(
