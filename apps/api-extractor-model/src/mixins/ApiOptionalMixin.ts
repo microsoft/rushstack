@@ -65,7 +65,7 @@ export function ApiOptionalMixin<TBaseClass extends IApiItemConstructor>(
   baseClass: TBaseClass
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): TBaseClass & (new (...args: any[]) => ApiOptionalMixin) {
-  abstract class MixedClass extends baseClass implements ApiOptionalMixin {
+  class MixedClass extends baseClass implements ApiOptionalMixin {
     public [_isOptional]: boolean;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

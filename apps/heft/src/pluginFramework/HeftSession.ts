@@ -13,7 +13,7 @@ import { ScopedLogger } from './logging/ScopedLogger';
 import { LoggingManager } from './logging/LoggingManager';
 import { ICustomActionOptions } from '../cli/actions/CustomAction';
 import { IHeftLifecycle } from './HeftLifecycle';
-import { HeftCommandLineUtilities } from '../cli/HeftCommandLineUtilities';
+import { HeftCommandLine } from '../cli/HeftCommandLine';
 
 /** @beta */
 export type RegisterAction = <TParameters>(action: ICustomActionOptions<TParameters>) => void;
@@ -75,9 +75,9 @@ export class HeftSession {
 
   /**
    * @beta
-   * {@inheritDoc HeftCommandLineUtilities}
+   * {@inheritDoc HeftCommandLine}
    */
-  public readonly commandLine: HeftCommandLineUtilities;
+  public readonly commandLine: HeftCommandLine;
 
   /**
    * Call this function to receive a callback with the plugin if and after the specified plugin

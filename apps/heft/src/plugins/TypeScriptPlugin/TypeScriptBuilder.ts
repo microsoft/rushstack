@@ -111,6 +111,12 @@ interface IExtendedEmitResult extends TTypescript.EmitResult {
   filesToWrite: IFileToWrite[];
 }
 
+const OLDEST_SUPPORTED_TS_MAJOR_VERSION: number = 2;
+const OLDEST_SUPPORTED_TS_MINOR_VERSION: number = 9;
+
+const NEWEST_SUPPORTED_TS_MAJOR_VERSION: number = 4;
+const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 4;
+
 export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderConfiguration> {
   private _typescriptVersion!: string;
   private _typescriptParsedVersion!: semver.SemVer;
@@ -228,8 +234,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     // TypeScript 2.9. Prior to that the "ts.getConfigFileParsingDiagnostics()" API is missing; more fixups
     // would be required to deal with that.  We won't do that work unless someone requests it.
     if (
-      this._typescriptParsedVersion.major < 2 ||
-      (this._typescriptParsedVersion.major === 2 && this._typescriptParsedVersion.minor < 9)
+      this._typescriptParsedVersion.major < OLDEST_SUPPORTED_TS_MAJOR_VERSION ||
+      (this._typescriptParsedVersion.major === OLDEST_SUPPORTED_TS_MAJOR_VERSION &&
+        this._typescriptParsedVersion.minor < OLDEST_SUPPORTED_TS_MINOR_VERSION)
     ) {
       // We don't use writeWarningLine() here because, if the person wants to take their chances with
       // a seemingly unsupported compiler, their build should be allowed to succeed.
@@ -237,10 +244,15 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         `The TypeScript compiler version ${this._typescriptVersion} is very old` +
           ` and has not been tested with Heft; it may not work correctly.`
       );
-    } else if (this._typescriptParsedVersion.major > 4) {
+    } else if (
+      this._typescriptParsedVersion.major > NEWEST_SUPPORTED_TS_MAJOR_VERSION ||
+      (this._typescriptParsedVersion.major === NEWEST_SUPPORTED_TS_MAJOR_VERSION &&
+        this._typescriptParsedVersion.minor > NEWEST_SUPPORTED_TS_MINOR_VERSION)
+    ) {
       this._typescriptTerminal.writeLine(
         `The TypeScript compiler version ${this._typescriptVersion} is newer` +
-          ` than the latest version that was tested with Heft; it may not work correctly.`
+          ' than the latest version that was tested with Heft ' +
+          `(${NEWEST_SUPPORTED_TS_MAJOR_VERSION}.${NEWEST_SUPPORTED_TS_MINOR_VERSION}); it may not work correctly.`
       );
     }
 

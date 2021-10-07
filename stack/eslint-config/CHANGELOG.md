@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-config
 
-This log was last generated on Thu, 23 Sep 2021 00:10:40 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Oct 2021 07:13:35 GMT and should not be manually modified.
+
+## 2.4.2
+Thu, 07 Oct 2021 07:13:35 GMT
+
+### Patches
+
+- Update typescript-eslint to add support for TypeScript 4.4.
 
 ## 2.4.1
 Thu, 23 Sep 2021 00:10:40 GMT

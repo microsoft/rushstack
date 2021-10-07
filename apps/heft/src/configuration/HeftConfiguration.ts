@@ -3,7 +3,6 @@
 
 import * as path from 'path';
 import {
-  ITerminal,
   Terminal,
   ITerminalProvider,
   IPackageJson,
@@ -59,7 +58,7 @@ export class HeftConfiguration {
   private _projectConfigFolder: string | undefined;
   private _buildCacheFolder: string | undefined;
   private _rigConfig: RigConfig | undefined;
-  private _globalTerminal!: ITerminal;
+  private _globalTerminal!: Terminal;
   private _terminalProvider!: ITerminalProvider;
 
   /**
@@ -120,7 +119,7 @@ export class HeftConfiguration {
   /**
    * Terminal instance to facilitate logging.
    */
-  public get globalTerminal(): ITerminal {
+  public get globalTerminal(): Terminal {
     return this._globalTerminal;
   }
 

@@ -41,7 +41,7 @@ export class EventHooksManager {
             rushConfiguration: this._rushConfiguration,
             workingDirectory: this._rushConfiguration.rushJsonFolder,
             initCwd: this._commonTempFolder,
-            handleOutput: true,
+            handleOutput: !isDebug,
             environmentPathOptions: {
               includeRepoBin: true
             }
