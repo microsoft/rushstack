@@ -26,23 +26,16 @@ interface IAstAndProgram {
   program: Program;
 }
 
-interface IEslintExtraOptions {
-  filePath: string;
-}
-
 interface IEstreeCreateProjectProgram {
   createProjectProgram: (
     code: string,
     createDefaultProgram: boolean,
-    extra: IEslintExtraOptions
+    extra: unknown
   ) => IAstAndProgram | undefined;
 }
 
 interface IEstreeUseProvidedPrograms {
-  useProvidedPrograms: (
-    programInstances: Iterable<Program>,
-    extra: IEslintExtraOptions
-  ) => IAstAndProgram | undefined;
+  useProvidedPrograms: (programInstances: Iterable<Program>, extra: unknown) => IAstAndProgram | undefined;
 }
 
 const enum EslintMessageSeverity {
@@ -230,7 +223,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     createProjectProgram.createProjectProgram = (
       code: string,
       createDefaultProgram: boolean,
-      extra: IEslintExtraOptions
+      extra: unknown
     ) => {
       return Eslint._sourceFilePrograms.size
         ? useProvidedPrograms.useProvidedPrograms(Eslint._sourceFilePrograms, extra)
