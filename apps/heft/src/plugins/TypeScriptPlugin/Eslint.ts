@@ -26,16 +26,23 @@ interface IAstAndProgram {
   program: Program;
 }
 
+interface IEslintExtraOptions {
+  filePath: string;
+}
+
 interface IEstreeCreateProjectProgram {
   createProjectProgram: (
     code: string,
     createDefaultProgram: boolean,
-    extra: unknown
+    extra: IEslintExtraOptions
   ) => IAstAndProgram | undefined;
 }
 
 interface IEstreeUseProvidedPrograms {
-  useProvidedPrograms: (programInstances: Iterable<Program>, extra: unknown) => IAstAndProgram | undefined;
+  useProvidedPrograms: (
+    programInstances: Iterable<Program>,
+    extra: IEslintExtraOptions
+  ) => IAstAndProgram | undefined;
 }
 
 const enum EslintMessageSeverity {
@@ -44,6 +51,8 @@ const enum EslintMessageSeverity {
 }
 
 export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
+  private static readonly _sourceFilePrograms: Map<string, IExtendedProgram | undefined> = new Map();
+
   private readonly _eslintPackagePath: string;
   private readonly _eslintPackage: typeof TEslint;
   private readonly _eslintTimings: Map<string, string> = new Map<string, string>();
@@ -158,6 +167,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   }
 
   protected async lintFileAsync(sourceFile: IExtendedSourceFile): Promise<TEslint.ESLint.LintResult[]> {
+    Eslint._sourceFilePrograms.set(sourceFile.fileName, this._tsProgram);
     const lintResults: TEslint.ESLint.LintResult[] = await this._eslint.lintText(sourceFile.text, {
       filePath: sourceFile.fileName
     });
@@ -216,10 +226,11 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     createProjectProgram.createProjectProgram = (
       code: string,
       createDefaultProgram: boolean,
-      extra: unknown
+      extra: IEslintExtraOptions
     ) => {
-      return this._tsProgram
-        ? useProvidedPrograms.useProvidedPrograms([this._tsProgram], extra)
+      const sourceFileProgram: IExtendedProgram | undefined = Eslint._sourceFilePrograms.get(extra.filePath);
+      return sourceFileProgram
+        ? useProvidedPrograms.useProvidedPrograms([sourceFileProgram], extra)
         : originalCreateProgramFunc(code, createDefaultProgram, extra);
     };
   }
