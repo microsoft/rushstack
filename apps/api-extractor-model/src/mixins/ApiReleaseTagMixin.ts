@@ -64,7 +64,7 @@ export function ApiReleaseTagMixin<TBaseClass extends IApiItemConstructor>(
   baseClass: TBaseClass
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): TBaseClass & (new (...args: any[]) => ApiReleaseTagMixin) {
-  abstract class MixedClass extends baseClass implements ApiReleaseTagMixin {
+  class MixedClass extends baseClass implements ApiReleaseTagMixin {
     public [_releaseTag]: ReleaseTag;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

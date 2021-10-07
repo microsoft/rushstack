@@ -95,7 +95,7 @@ export function getProcessStartTime(pid: number): string | undefined {
     try {
       stat = FileSystem.readFile(`/proc/${pidString}/stat`);
     } catch (error) {
-      if (error.code !== 'ENOENT') {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
         throw error;
       }
       // Either no process with PID pid exists, or this version/configuration of linux is non-standard.
