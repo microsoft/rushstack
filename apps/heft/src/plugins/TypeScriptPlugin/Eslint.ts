@@ -217,7 +217,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     // the programs, the method used to calculate the configuration is an instance member of the
     // Eslint class, which means we would need to construct the linter to extract a config, modify the
     // config.parse method to inject our programs, and then re-construct the linter using this config.
-    // Using this patch allows us to avoid initializing ESLint twice.
+    // Using this patch allows us to avoid initializing ESLint twice while still providing the programs.
     const estreePackagePath: string = Import.resolvePackage({
       baseFolderPath: eslintPackagePath,
       packageName: '@typescript-eslint/typescript-estree'
