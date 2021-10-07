@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 07 Oct 2021 07:13:35 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Oct 2021 23:43:12 GMT and should not be manually modified.
+
+## 0.41.4
+Thu, 07 Oct 2021 23:43:12 GMT
+
+### Patches
+
+- Re-use the compiler TypeScript program when running ESLint to reduce overhead
 
 ## 0.41.3
 Thu, 07 Oct 2021 07:13:35 GMT

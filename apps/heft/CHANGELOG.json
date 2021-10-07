@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.41.4",
+      "tag": "@rushstack/heft_v0.41.4",
+      "date": "Thu, 07 Oct 2021 23:43:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Re-use the compiler TypeScript program when running ESLint to reduce overhead"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.41.3",
       "tag": "@rushstack/heft_v0.41.3",
       "date": "Thu, 07 Oct 2021 07:13:35 GMT",
