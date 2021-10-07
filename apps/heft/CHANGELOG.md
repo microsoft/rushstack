@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Wed, 06 Oct 2021 15:08:25 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Oct 2021 07:13:35 GMT and should not be manually modified.
+
+## 0.41.3
+Thu, 07 Oct 2021 07:13:35 GMT
+
+### Patches
+
+- Fix support for TypeScript 4.4 in --watch mode.
 
 ## 0.41.2
 Wed, 06 Oct 2021 15:08:25 GMT
