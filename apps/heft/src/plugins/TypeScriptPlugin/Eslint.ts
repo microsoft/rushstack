@@ -26,16 +26,23 @@ interface IAstAndProgram {
   program: Program;
 }
 
+interface IEslintExtraOptions {
+  filePath: string;
+}
+
 interface IEstreeCreateProjectProgram {
   createProjectProgram: (
     code: string,
     createDefaultProgram: boolean,
-    extra: unknown
+    extra: IEslintExtraOptions
   ) => IAstAndProgram | undefined;
 }
 
 interface IEstreeUseProvidedPrograms {
-  useProvidedPrograms: (programInstances: Iterable<Program>, extra: unknown) => IAstAndProgram | undefined;
+  useProvidedPrograms: (
+    programInstances: Iterable<Program>,
+    extra: IEslintExtraOptions
+  ) => IAstAndProgram | undefined;
 }
 
 const enum EslintMessageSeverity {
@@ -44,7 +51,7 @@ const enum EslintMessageSeverity {
 }
 
 export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
-  private static readonly _sourceFilePrograms: Set<IExtendedProgram> = new Set();
+  private static readonly _sourceFilePrograms: Map<string, IExtendedProgram | undefined> = new Map();
 
   private readonly _eslintPackagePath: string;
   private readonly _eslintPackage: typeof TEslint;
@@ -149,7 +156,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   }
 
   protected async initializeAsync(tsProgram: IExtendedProgram): Promise<void> {
-    Eslint._sourceFilePrograms.add(tsProgram);
+    this._tsProgram = tsProgram;
 
     this._eslint = new this._eslintPackage.ESLint({
       cwd: this._buildFolderPath,
@@ -160,9 +167,13 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   }
 
   protected async lintFileAsync(sourceFile: IExtendedSourceFile): Promise<TEslint.ESLint.LintResult[]> {
+    // Make the program available for the course of the linting run, then clean it up
+    Eslint._sourceFilePrograms.set(sourceFile.fileName, this._tsProgram);
     const lintResults: TEslint.ESLint.LintResult[] = await this._eslint.lintText(sourceFile.text, {
       filePath: sourceFile.fileName
     });
+    Eslint._sourceFilePrograms.delete(sourceFile.fileName);
+
     const failures: TEslint.ESLint.LintResult[] = [];
     for (const lintResult of lintResults) {
       if (lintResult.messages.length > 0) {
@@ -210,7 +221,7 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     // the programs, the method used to calculate the configuration is an instance member of the
     // Eslint class, which means we would need to construct the linter to extract a config, modify the
     // config.parse method to inject our programs, and then re-construct the linter using this config.
-    // Using this patch allows us to avoid initializing ESLint twice while still providing the programs.
+    // Using this patch allows us to avoid initializing ESLint twice.
     const estreePackagePath: string = Import.resolvePackage({
       baseFolderPath: eslintPackagePath,
       packageName: '@typescript-eslint/typescript-estree'
@@ -223,10 +234,11 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
     createProjectProgram.createProjectProgram = (
       code: string,
       createDefaultProgram: boolean,
-      extra: unknown
+      extra: IEslintExtraOptions
     ) => {
-      return Eslint._sourceFilePrograms.size
-        ? useProvidedPrograms.useProvidedPrograms(Eslint._sourceFilePrograms, extra)
+      const sourceFileProgram: IExtendedProgram | undefined = Eslint._sourceFilePrograms.get(extra.filePath);
+      return sourceFileProgram
+        ? useProvidedPrograms.useProvidedPrograms([sourceFileProgram], extra)
         : originalCreateProgramFunc(code, createDefaultProgram, extra);
     };
   }
