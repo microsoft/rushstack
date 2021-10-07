@@ -161,24 +161,22 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     );
   }
 
-  protected lintFileAsync(sourceFile: IExtendedSourceFile): Promise<TTslint.RuleFailure[]> {
-    return (async () => {
-      // Some of this code comes from here:
-      // https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L161-L179
-      // Modified to only lint files that have changed and that we care about
-      const failures: TTslint.RuleFailure[] = this._linter.getAllFailures(sourceFile, this._enabledRules);
+  protected async lintFileAsync(sourceFile: IExtendedSourceFile): Promise<TTslint.RuleFailure[]> {
+    // Some of this code comes from here:
+    // https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L161-L179
+    // Modified to only lint files that have changed and that we care about
+    const failures: TTslint.RuleFailure[] = this._linter.getAllFailures(sourceFile, this._enabledRules);
 
-      for (const failure of failures) {
-        const severity: TTslint.RuleSeverity | undefined = this._ruleSeverityMap.get(failure.getRuleName());
-        if (severity === undefined) {
-          throw new Error(`Severity for rule '${failure.getRuleName()}' not found`);
-        }
-
-        failure.setRuleSeverity(severity);
+    for (const failure of failures) {
+      const severity: TTslint.RuleSeverity | undefined = this._ruleSeverityMap.get(failure.getRuleName());
+      if (severity === undefined) {
+        throw new Error(`Severity for rule '${failure.getRuleName()}' not found`);
       }
 
-      return failures;
-    })();
+      failure.setRuleSeverity(severity);
+    }
+
+    return failures;
   }
 
   protected lintingFinished(failures: TTslint.RuleFailure[]): void {

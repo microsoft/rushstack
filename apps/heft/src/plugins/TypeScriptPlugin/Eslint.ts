@@ -5,13 +5,12 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import * as semver from 'semver';
 import * as TEslint from 'eslint';
+import type { SourceFile, Program } from 'typescript';
 
+import { Import } from '@rushstack/node-core-library';
 import { LinterBase, ILinterBaseOptions, ITiming } from './LinterBase';
 import { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
 import { FileError } from '../../pluginFramework/logging/FileError';
-import { Import } from '@rushstack/node-core-library';
-
-import type { SourceFile, Program } from 'typescript';
 
 interface IEslintOptions extends ILinterBaseOptions {
   eslintPackagePath: string;
@@ -22,23 +21,21 @@ interface IEslintTiming {
   time: (key: string, fn: (...args: unknown[]) => void) => (...args: unknown[]) => void;
 }
 
-interface IASTAndProgram {
+interface IAstAndProgram {
   ast: SourceFile;
   program: Program;
 }
 
 interface IEstreeCreateProjectProgram {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createProjectProgram: (
     code: string,
     createDefaultProgram: boolean,
-    extra: any
-  ) => IASTAndProgram | undefined;
+    extra: unknown
+  ) => IAstAndProgram | undefined;
 }
 
 interface IEstreeUseProvidedPrograms {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useProvidedPrograms: (programInstances: Iterable<Program>, extra: any) => IASTAndProgram | undefined;
+  useProvidedPrograms: (programInstances: Iterable<Program>, extra: unknown) => IAstAndProgram | undefined;
 }
 
 const enum EslintMessageSeverity {
@@ -211,23 +208,16 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
       baseFolderPath: eslintPackagePath,
       packageName: '@typescript-eslint/typescript-estree'
     });
-    const createProjectProgram: IEstreeCreateProjectProgram = require(path.join(
-      estreePackagePath,
-      'dist',
-      'create-program',
-      'createProjectProgram'
-    ));
-    const useProvidedPrograms: IEstreeUseProvidedPrograms = require(path.join(
-      estreePackagePath,
-      'dist',
-      'create-program',
-      'useProvidedPrograms'
-    ));
+    const createProjectProgram: IEstreeCreateProjectProgram = require(`${estreePackagePath}/dist/create-program/createProjectProgram`);
+    const useProvidedPrograms: IEstreeUseProvidedPrograms = require(`${estreePackagePath}/dist/create-program/useProvidedPrograms`);
 
     const originalCreateProgramFunc: typeof createProjectProgram.createProjectProgram =
       createProjectProgram.createProjectProgram.bind(createProjectProgram);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    createProjectProgram.createProjectProgram = (code: string, createDefaultProgram: boolean, extra: any) => {
+    createProjectProgram.createProjectProgram = (
+      code: string,
+      createDefaultProgram: boolean,
+      extra: unknown
+    ) => {
       return this._tsProgram
         ? useProvidedPrograms.useProvidedPrograms([this._tsProgram], extra)
         : originalCreateProgramFunc(code, createDefaultProgram, extra);
