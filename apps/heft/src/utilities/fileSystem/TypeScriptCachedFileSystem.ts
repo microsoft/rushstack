@@ -139,7 +139,22 @@ export class TypeScriptCachedFileSystem {
   };
 
   public getRealPath: (linkPath: string) => string = (linkPath: string) => {
-    return this._withCaching(linkPath, FileSystem.getRealPath, this._realPathCache);
+    return this._withCaching(
+      linkPath,
+      (linkPath: string) => {
+        try {
+          return FileSystem.getRealPath(linkPath);
+        } catch (e) {
+          if (FileSystem.isNotExistError(e as Error)) {
+            // TypeScript's ts.sys.realpath returns the path it's provided if that path doesn't exist
+            return linkPath;
+          } else {
+            throw e;
+          }
+        }
+      },
+      this._realPathCache
+    );
   };
 
   public readFolderFilesAndDirectories: (folderPath: string) => IReadFolderFilesAndDirectoriesResult = (
