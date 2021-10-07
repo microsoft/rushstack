@@ -59,7 +59,7 @@ export function ApiReturnTypeMixin<TBaseClass extends IApiItemConstructor>(
   baseClass: TBaseClass
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): TBaseClass & (new (...args: any[]) => ApiReturnTypeMixin) {
-  abstract class MixedClass extends baseClass implements ApiReturnTypeMixin {
+  class MixedClass extends baseClass implements ApiReturnTypeMixin {
     public [_returnTypeExcerpt]: Excerpt;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
