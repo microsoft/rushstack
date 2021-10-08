@@ -1,6 +1,13 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Thu, 07 Oct 2021 07:13:35 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Oct 2021 08:08:34 GMT and should not be manually modified.
+
+## 3.42.2
+Fri, 08 Oct 2021 08:08:34 GMT
+
+### Patches
+
+- Fix an issue where Async.foreEachAsync can never resolve when operating on a large array.
 
 ## 3.42.1
 Thu, 07 Oct 2021 07:13:35 GMT

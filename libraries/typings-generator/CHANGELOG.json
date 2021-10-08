@@ -2,6 +2,18 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.4.2",
+      "tag": "@rushstack/typings-generator_v0.4.2",
+      "date": "Fri, 08 Oct 2021 08:08:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.42.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.1",
       "tag": "@rushstack/typings-generator_v0.4.1",
       "date": "Thu, 07 Oct 2021 07:13:35 GMT",
