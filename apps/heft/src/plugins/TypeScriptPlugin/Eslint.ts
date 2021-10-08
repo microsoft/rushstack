@@ -5,9 +5,7 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import * as semver from 'semver';
 import * as TEslint from 'eslint';
-import type { SourceFile, Program } from 'typescript';
 
-import { Import } from '@rushstack/node-core-library';
 import { LinterBase, ILinterBaseOptions, ITiming } from './LinterBase';
 import { IExtendedProgram, IExtendedSourceFile } from './internalTypings/TypeScriptInternals';
 import { FileError } from '../../pluginFramework/logging/FileError';
@@ -21,38 +19,12 @@ interface IEslintTiming {
   time: (key: string, fn: (...args: unknown[]) => void) => (...args: unknown[]) => void;
 }
 
-interface IAstAndProgram {
-  ast: SourceFile;
-  program: Program;
-}
-
-interface IEslintExtraOptions {
-  filePath: string;
-}
-
-interface IEstreeCreateProjectProgram {
-  createProjectProgram: (
-    code: string,
-    createDefaultProgram: boolean,
-    extra: IEslintExtraOptions
-  ) => IAstAndProgram | undefined;
-}
-
-interface IEstreeUseProvidedPrograms {
-  useProvidedPrograms: (
-    programInstances: Iterable<Program>,
-    extra: IEslintExtraOptions
-  ) => IAstAndProgram | undefined;
-}
-
 const enum EslintMessageSeverity {
   warning = 1,
   error = 2
 }
 
 export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
-  private static readonly _sourceFilePrograms: Map<string, IExtendedProgram | undefined> = new Map();
-
   private readonly _eslintPackagePath: string;
   private readonly _eslintPackage: typeof TEslint;
   private readonly _eslintTimings: Map<string, string> = new Map<string, string>();
@@ -61,14 +33,11 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   private _eslintBaseConfiguration: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   private _lintResult!: TEslint.ESLint.LintResult[];
 
-  private _tsProgram: IExtendedProgram | undefined;
-
   public constructor(options: IEslintOptions) {
     super('eslint', options);
 
     // This must happen before the rest of the linter package is loaded
     this._patchTimer(options.eslintPackagePath);
-    this._patchEstreeParser(options.eslintPackagePath);
 
     this._eslintPackagePath = options.eslintPackagePath;
     this._eslintPackage = require(options.eslintPackagePath);
@@ -156,23 +125,25 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
   }
 
   protected async initializeAsync(tsProgram: IExtendedProgram): Promise<void> {
-    this._tsProgram = tsProgram;
-
+    // Override config takes precedence over overrideConfigFile, which allows us to provide
+    // the source TypeScript program.
     this._eslint = new this._eslintPackage.ESLint({
       cwd: this._buildFolderPath,
-      overrideConfigFile: this._linterConfigFilePath
+      overrideConfigFile: this._linterConfigFilePath,
+      overrideConfig: {
+        parserOptions: {
+          programs: [tsProgram]
+        }
+      }
     });
 
     this._eslintBaseConfiguration = await this._eslint.calculateConfigForFile(this._linterConfigFilePath);
   }
 
   protected async lintFileAsync(sourceFile: IExtendedSourceFile): Promise<TEslint.ESLint.LintResult[]> {
-    // Make the program available for the course of the linting run, then clean it up
-    Eslint._sourceFilePrograms.set(sourceFile.fileName, this._tsProgram);
     const lintResults: TEslint.ESLint.LintResult[] = await this._eslint.lintText(sourceFile.text, {
       filePath: sourceFile.fileName
     });
-    Eslint._sourceFilePrograms.delete(sourceFile.fileName);
 
     const failures: TEslint.ESLint.LintResult[] = [];
     for (const lintResult of lintResults) {
@@ -213,33 +184,6 @@ export class Eslint extends LinterBase<TEslint.ESLint.LintResult> {
       const timingName: string = `Eslint${key}`;
       this._eslintTimings.set(key, timingName);
       return (...args: unknown[]) => this._measurePerformance(timingName, () => fn(...args));
-    };
-  }
-
-  private _patchEstreeParser(eslintPackagePath: string): void {
-    // While intercepting the "parse" method to inject our programs would be a better way to provide
-    // the programs, the method used to calculate the configuration is an instance member of the
-    // Eslint class, which means we would need to construct the linter to extract a config, modify the
-    // config.parse method to inject our programs, and then re-construct the linter using this config.
-    // Using this patch allows us to avoid initializing ESLint twice.
-    const estreePackagePath: string = Import.resolvePackage({
-      baseFolderPath: eslintPackagePath,
-      packageName: '@typescript-eslint/typescript-estree'
-    });
-    const createProjectProgram: IEstreeCreateProjectProgram = require(`${estreePackagePath}/dist/create-program/createProjectProgram`);
-    const useProvidedPrograms: IEstreeUseProvidedPrograms = require(`${estreePackagePath}/dist/create-program/useProvidedPrograms`);
-
-    const originalCreateProgramFunc: typeof createProjectProgram.createProjectProgram =
-      createProjectProgram.createProjectProgram.bind(createProjectProgram);
-    createProjectProgram.createProjectProgram = (
-      code: string,
-      createDefaultProgram: boolean,
-      extra: IEslintExtraOptions
-    ) => {
-      const sourceFileProgram: IExtendedProgram | undefined = Eslint._sourceFilePrograms.get(extra.filePath);
-      return sourceFileProgram
-        ? useProvidedPrograms.useProvidedPrograms([sourceFileProgram], extra)
-        : originalCreateProgramFunc(code, createDefaultProgram, extra);
     };
   }
 }
