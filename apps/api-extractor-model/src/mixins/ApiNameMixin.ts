@@ -60,7 +60,7 @@ export function ApiNameMixin<TBaseClass extends IApiItemConstructor>(
   baseClass: TBaseClass
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): TBaseClass & (new (...args: any[]) => ApiNameMixin) {
-  abstract class MixedClass extends baseClass implements ApiNameMixin {
+  class MixedClass extends baseClass implements ApiNameMixin {
     public readonly [_name]: string;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

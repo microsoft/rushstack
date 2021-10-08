@@ -19,7 +19,7 @@ import { PrereleaseToken } from './PrereleaseToken';
 import { ChangeFiles } from './ChangeFiles';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { DependencySpecifier, DependencySpecifierType } from './DependencySpecifier';
-import { Git } from './Git';
+import { Git, DEFAULT_GIT_TAG_SEPARATOR } from './Git';
 
 export interface IChangeInfoHash {
   [key: string]: IChangeInfo;
@@ -165,8 +165,12 @@ export class PublishUtilities {
   /**
    * Returns the generated tagname to use for a published commit, given package name and version.
    */
-  public static createTagname(packageName: string, version: string): string {
-    return packageName + '_v' + version;
+  public static createTagname(
+    packageName: string,
+    version: string,
+    separator: string = DEFAULT_GIT_TAG_SEPARATOR
+  ): string {
+    return packageName + `${separator}v` + version;
   }
 
   public static isRangeDependency(version: string): boolean {

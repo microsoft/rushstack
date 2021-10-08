@@ -5,14 +5,6 @@ import { Executable } from '@rushstack/node-core-library';
 import * as child_process from 'child_process';
 import process from 'process';
 
-declare module 'child_process' {
-  /* eslint-disable */
-  interface ChildProcess {
-    exitCode?: number | null;
-  }
-  /* eslint-enable */
-}
-
 /**
  * Details about how the `child_process.ChildProcess` was created.
  */
@@ -173,7 +165,7 @@ export class SubprocessTerminator {
           SubprocessTerminator.killProcessTree(trackedSubprocess.subprocess, { detached: true });
         } catch (error) {
           if (firstError === undefined) {
-            firstError = error;
+            firstError = error as Error;
           }
         }
       }

@@ -2,6 +2,47 @@
   "name": "@rushstack/ts-command-line",
   "entries": [
     {
+      "version": "4.10.1",
+      "tag": "@rushstack/ts-command-line_v4.10.1",
+      "date": "Thu, 07 Oct 2021 07:13:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.10.0",
+      "tag": "@rushstack/ts-command-line_v4.10.0",
+      "date": "Mon, 04 Oct 2021 15:10:18 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add safety check parametersProcessed to CommandLineParameterProvider"
+          }
+        ]
+      }
+    },
+    {
+      "version": "4.9.1",
+      "tag": "@rushstack/ts-command-line_v4.9.1",
+      "date": "Thu, 23 Sep 2021 00:10:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade the `@types/node` dependency to version to version 12."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "4.9.0",
       "tag": "@rushstack/ts-command-line_v4.9.0",
       "date": "Fri, 20 Aug 2021 15:08:10 GMT",

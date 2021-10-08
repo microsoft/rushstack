@@ -43,7 +43,20 @@ export class TypeScriptCachedFileSystem {
       this.getStatistics(path);
       return true;
     } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
+      if (FileSystem.isNotExistError(e as Error)) {
+        return false;
+      } else {
+        throw e;
+      }
+    }
+  };
+
+  public directoryExists: (path: string) => boolean = (path: string) => {
+    try {
+      const stats: FileSystemStats = this.getStatistics(path);
+      return stats.isDirectory();
+    } catch (e) {
+      if (FileSystem.isNotExistError(e as Error)) {
         return false;
       } else {
         throw e;
@@ -126,7 +139,22 @@ export class TypeScriptCachedFileSystem {
   };
 
   public getRealPath: (linkPath: string) => string = (linkPath: string) => {
-    return this._withCaching(linkPath, FileSystem.getRealPath, this._realPathCache);
+    return this._withCaching(
+      linkPath,
+      (linkPath: string) => {
+        try {
+          return FileSystem.getRealPath(linkPath);
+        } catch (e) {
+          if (FileSystem.isNotExistError(e as Error)) {
+            // TypeScript's ts.sys.realpath returns the path it's provided if that path doesn't exist
+            return linkPath;
+          } else {
+            throw e;
+          }
+        }
+      },
+      this._realPathCache
+    );
   };
 
   public readFolderFilesAndDirectories: (folderPath: string) => IReadFolderFilesAndDirectoriesResult = (
@@ -171,7 +199,7 @@ export class TypeScriptCachedFileSystem {
       try {
         cacheEntry = { entry: fn(path) };
       } catch (e) {
-        cacheEntry = { error: e, entry: undefined };
+        cacheEntry = { error: e as Error, entry: undefined };
       }
 
       cache.set(path, cacheEntry);

@@ -85,7 +85,7 @@ export interface IExtendedTypeScript {
   readJson(filePath: string): object;
 
   /**
-   * https://github.com/microsoft/TypeScript/blob/5f597e69b2e3b48d788cb548df40bcb703c8adb1/src/compiler/utilities.ts#L5848-L5907
+   * https://github.com/microsoft/TypeScript/blob/782c09d783e006a697b4ba6d1e7ec2f718ce8393/src/compiler/utilities.ts#L6540
    */
   matchFiles(
     path: string,
@@ -99,7 +99,8 @@ export interface IExtendedTypeScript {
       readonly files: ReadonlyArray<string>;
       readonly directories: ReadonlyArray<string>;
     },
-    realpath: (path: string) => string
+    realpath: (path: string) => string,
+    directoryExists: (path: string) => boolean
   ): string[];
 
   /**

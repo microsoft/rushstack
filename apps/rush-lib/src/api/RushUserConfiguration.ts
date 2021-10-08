@@ -43,7 +43,7 @@ export class RushUserConfiguration {
         RushUserConfiguration._schema
       );
     } catch (e) {
-      if (!FileSystem.isNotExistError(e)) {
+      if (!FileSystem.isNotExistError(e as Error)) {
         throw e;
       }
     }

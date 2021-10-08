@@ -1,6 +1,96 @@
 # Change Log - @microsoft/load-themed-styles
 
-This log was last generated on Fri, 03 Sep 2021 00:09:10 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Oct 2021 09:35:07 GMT and should not be manually modified.
+
+## 1.10.224
+Fri, 08 Oct 2021 09:35:07 GMT
+
+_Version update only_
+
+## 1.10.223
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 1.10.222
+Thu, 07 Oct 2021 23:43:12 GMT
+
+_Version update only_
+
+## 1.10.221
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 1.10.220
+Wed, 06 Oct 2021 15:08:25 GMT
+
+_Version update only_
+
+## 1.10.219
+Wed, 06 Oct 2021 02:41:48 GMT
+
+_Version update only_
+
+## 1.10.218
+Tue, 05 Oct 2021 15:08:38 GMT
+
+_Version update only_
+
+## 1.10.217
+Mon, 04 Oct 2021 15:10:18 GMT
+
+_Version update only_
+
+## 1.10.216
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 1.10.215
+Thu, 23 Sep 2021 00:10:41 GMT
+
+_Version update only_
+
+## 1.10.214
+Wed, 22 Sep 2021 03:27:12 GMT
+
+_Version update only_
+
+## 1.10.213
+Wed, 22 Sep 2021 00:09:32 GMT
+
+_Version update only_
+
+## 1.10.212
+Sat, 18 Sep 2021 03:05:57 GMT
+
+_Version update only_
+
+## 1.10.211
+Tue, 14 Sep 2021 01:17:04 GMT
+
+_Version update only_
+
+## 1.10.210
+Mon, 13 Sep 2021 15:07:05 GMT
+
+_Version update only_
+
+## 1.10.209
+Fri, 10 Sep 2021 15:08:28 GMT
+
+_Version update only_
+
+## 1.10.208
+Wed, 08 Sep 2021 19:06:22 GMT
+
+_Version update only_
+
+## 1.10.207
+Wed, 08 Sep 2021 00:08:03 GMT
+
+_Version update only_
 
 ## 1.10.206
 Fri, 03 Sep 2021 00:09:10 GMT

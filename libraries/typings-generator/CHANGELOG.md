@@ -1,6 +1,45 @@
 # Change Log - @rushstack/typings-generator
 
-This log was last generated on Wed, 11 Aug 2021 00:07:21 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Oct 2021 08:08:34 GMT and should not be manually modified.
+
+## 0.4.2
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 0.4.1
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 0.4.0
+Tue, 05 Oct 2021 15:08:38 GMT
+
+### Minor changes
+
+- Use ITerminal instead of Terminal to allow for compatibility with other versions of @rushstack/node-core-library.
+
+## 0.3.13
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 0.3.12
+Thu, 23 Sep 2021 00:10:41 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 0.3.11
+Tue, 14 Sep 2021 01:17:04 GMT
+
+_Version update only_
+
+## 0.3.10
+Mon, 13 Sep 2021 15:07:06 GMT
+
+_Version update only_
 
 ## 0.3.9
 Wed, 11 Aug 2021 00:07:21 GMT

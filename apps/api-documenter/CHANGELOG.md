@@ -1,6 +1,98 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Fri, 03 Sep 2021 00:09:09 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Oct 2021 09:35:07 GMT and should not be manually modified.
+
+## 7.13.62
+Fri, 08 Oct 2021 09:35:07 GMT
+
+_Version update only_
+
+## 7.13.61
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 7.13.60
+Thu, 07 Oct 2021 23:43:12 GMT
+
+_Version update only_
+
+## 7.13.59
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 7.13.58
+Wed, 06 Oct 2021 15:08:25 GMT
+
+_Version update only_
+
+## 7.13.57
+Wed, 06 Oct 2021 02:41:48 GMT
+
+_Version update only_
+
+## 7.13.56
+Tue, 05 Oct 2021 15:08:38 GMT
+
+_Version update only_
+
+## 7.13.55
+Mon, 04 Oct 2021 15:10:18 GMT
+
+_Version update only_
+
+## 7.13.54
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 7.13.53
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 7.13.52
+Wed, 22 Sep 2021 03:27:12 GMT
+
+_Version update only_
+
+## 7.13.51
+Wed, 22 Sep 2021 00:09:32 GMT
+
+_Version update only_
+
+## 7.13.50
+Sat, 18 Sep 2021 03:05:57 GMT
+
+_Version update only_
+
+## 7.13.49
+Tue, 14 Sep 2021 01:17:04 GMT
+
+_Version update only_
+
+## 7.13.48
+Mon, 13 Sep 2021 15:07:05 GMT
+
+_Version update only_
+
+## 7.13.47
+Fri, 10 Sep 2021 15:08:28 GMT
+
+_Version update only_
+
+## 7.13.46
+Wed, 08 Sep 2021 19:06:22 GMT
+
+_Version update only_
+
+## 7.13.45
+Wed, 08 Sep 2021 00:08:03 GMT
+
+_Version update only_
 
 ## 7.13.44
 Fri, 03 Sep 2021 00:09:09 GMT

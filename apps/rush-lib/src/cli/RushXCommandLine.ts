@@ -175,7 +175,7 @@ export class RushXCommandLine {
 
       process.exitCode = exitCode;
     } catch (error) {
-      console.log(colors.red('Error: ' + error.message));
+      console.log(colors.red('Error: ' + (error as Error).message));
     }
   }
 

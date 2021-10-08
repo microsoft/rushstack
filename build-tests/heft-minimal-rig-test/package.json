@@ -8,7 +8,7 @@
     "build": ""
   },
   "dependencies": {
-    "typescript": "~3.9.7",
+    "typescript": "~4.4.2",
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*"
   }

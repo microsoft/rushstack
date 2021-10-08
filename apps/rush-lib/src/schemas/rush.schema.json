@@ -180,6 +180,10 @@
         "changeLogUpdateCommitMessage": {
           "description": "The commit message to use when committing change log files \"rush version\". Defaults to \"Deleting change files and updating change logs for package updates.\"",
           "type": "string"
+        },
+        "tagSeparator": {
+          "description": "The separator between package name and version in git tag. Defaults to \"_\"",
+          "type": "string"
         }
       },
       "additionalProperties": false

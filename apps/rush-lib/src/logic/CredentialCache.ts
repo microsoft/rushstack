@@ -68,7 +68,7 @@ export class CredentialCache implements IDisposable {
     try {
       loadedJson = await JsonFile.loadAndValidateAsync(cacheFilePath, jsonSchema);
     } catch (e) {
-      if (!FileSystem.isErrnoException(e)) {
+      if (!FileSystem.isErrnoException(e as Error)) {
         throw e;
       }
     }

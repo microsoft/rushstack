@@ -2,6 +2,30 @@
   "name": "@rushstack/eslint-plugin-security",
   "entries": [
     {
+      "version": "0.2.2",
+      "tag": "@rushstack/eslint-plugin-security_v0.2.2",
+      "date": "Thu, 07 Oct 2021 07:13:35 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update typescript-eslint to add support for TypeScript 4.4."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.2.1",
+      "tag": "@rushstack/eslint-plugin-security_v0.2.1",
+      "date": "Thu, 23 Sep 2021 00:10:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade the `@types/node` dependency to version to version 12."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.0",
       "tag": "@rushstack/eslint-plugin-security_v0.2.0",
       "date": "Mon, 12 Jul 2021 23:08:26 GMT",

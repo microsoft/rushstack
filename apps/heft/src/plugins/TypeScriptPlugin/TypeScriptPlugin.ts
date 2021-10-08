@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Terminal, FileSystem } from '@rushstack/node-core-library';
+import { ITerminal, FileSystem, Path } from '@rushstack/node-core-library';
 
 import { TypeScriptBuilder, ITypeScriptBuilderConfiguration } from './TypeScriptBuilder';
 import { HeftSession } from '../../pluginFramework/HeftSession';
@@ -157,7 +157,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
   }
 
   private async _ensureConfigFileLoadedAsync(
-    terminal: Terminal,
+    terminal: ITerminal,
     heftConfiguration: HeftConfiguration
   ): Promise<ITypeScriptConfigurationJson | undefined> {
     const buildFolder: string = heftConfiguration.buildFolder;
@@ -205,7 +205,9 @@ export class TypeScriptPlugin implements IHeftPlugin {
 
     const { project = './tsconfig.json' } = typescriptConfigurationJson || {};
 
-    const tsconfigFilePath: string = path.resolve(heftConfiguration.buildFolder, project);
+    const tsconfigFilePath: string = Path.convertToSlashes(
+      path.resolve(heftConfiguration.buildFolder, project)
+    );
     logger.terminal.writeVerboseLine(`Looking for tsconfig at ${tsconfigFilePath}`);
     buildProperties.isTypeScriptProject = await FileSystem.existsAsync(tsconfigFilePath);
     if (!buildProperties.isTypeScriptProject) {
@@ -237,7 +239,7 @@ export class TypeScriptPlugin implements IHeftPlugin {
 
     const typeScriptBuilderConfiguration: ITypeScriptBuilderConfiguration = {
       buildFolder: heftConfiguration.buildFolder,
-      buildMetadataFolder: path.join(heftConfiguration.buildFolder, 'temp'),
+      buildMetadataFolder: Path.convertToSlashes(`${heftConfiguration.buildFolder}/temp`),
       typeScriptToolPath: toolPackageResolution.typeScriptPackagePath!,
       tslintToolPath: toolPackageResolution.tslintPackagePath,
       eslintToolPath: toolPackageResolution.eslintPackagePath,

@@ -29,8 +29,14 @@ export interface IWebpackBundleSubstageProperties extends IBundleSubstagePropert
    * for Webpack to run. If webpackConfigFilePath is specified,
    * this will be populated automatically with the exports of the
    * config file referenced in that property.
+   *
+   * @remarks
+   * Tapable event handlers can return `null` instead of `undefined` to suppress
+   * other handlers from creating a configuration object.
    */
-  webpackConfiguration?: webpack.Configuration | webpack.Configuration[];
+  // We are inheriting this problem from Tapable's API
+  // eslint-disable-next-line @rushstack/no-new-null
+  webpackConfiguration?: webpack.Configuration | webpack.Configuration[] | null;
 }
 
 /**

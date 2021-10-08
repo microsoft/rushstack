@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Terminal } from '@rushstack/node-core-library';
+import { ITerminal } from '@rushstack/node-core-library';
 import { ConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
 import { RigConfig } from '@rushstack/rig-package';
 
@@ -180,7 +180,7 @@ export class RushProjectConfiguration {
   public static async tryLoadForProjectAsync(
     project: RushConfigurationProject,
     repoCommandLineConfiguration: CommandLineConfiguration | undefined,
-    terminal: Terminal,
+    terminal: ITerminal,
     skipCache?: boolean
   ): Promise<RushProjectConfiguration | undefined> {
     // false is a signal that the project config does not exist
@@ -222,7 +222,7 @@ export class RushProjectConfiguration {
     project: RushConfigurationProject,
     rushProjectJson: IRushProjectJson,
     repoCommandLineConfiguration: CommandLineConfiguration | undefined,
-    terminal: Terminal
+    terminal: ITerminal
   ): void {
     const invalidFolderNames: string[] = [];
     for (const projectOutputFolder of rushProjectJson.projectOutputFolderNames || []) {

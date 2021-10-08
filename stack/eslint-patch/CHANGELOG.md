@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-patch
 
-This log was last generated on Fri, 30 Oct 2020 00:10:14 GMT and should not be manually modified.
+This log was last generated on Thu, 23 Sep 2021 00:10:40 GMT and should not be manually modified.
+
+## 1.0.7
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
 
 ## 1.0.6
 Fri, 30 Oct 2020 00:10:14 GMT

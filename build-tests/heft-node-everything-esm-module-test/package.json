@@ -1,0 +1,26 @@
+{
+  "name": "heft-node-everything-esm-module-test",
+  "description": "Building this project tests every task and config file for Heft when targeting the Node.js runtime when configured to use ESM module support",
+  "version": "1.0.0",
+  "private": true,
+  "main": "lib/index.js",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft test --clean --verbose"
+  },
+  "devDependencies": {
+    "@microsoft/api-extractor": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-jest-plugin": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "12.20.24",
+    "eslint": "~7.30.0",
+    "heft-example-plugin-01": "workspace:*",
+    "heft-example-plugin-02": "workspace:*",
+    "tslint": "~5.20.1",
+    "tslint-microsoft-contrib": "~6.2.0",
+    "typescript": "~4.4.2"
+  }
+}

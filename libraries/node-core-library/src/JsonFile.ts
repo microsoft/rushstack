@@ -98,7 +98,7 @@ export interface IJsonFileSaveOptions extends IJsonFileStringifyOptions {
   updateExistingFile?: boolean;
 }
 
-const DEFAULT_ENCODING: string = 'utf8';
+const DEFAULT_ENCODING: 'utf8' = 'utf8';
 
 /**
  * Utilities for reading/writing JSON files.
@@ -118,11 +118,13 @@ export class JsonFile {
       const contents: string = FileSystem.readFile(jsonFilename);
       return jju.parse(contents);
     } catch (error) {
-      if (FileSystem.isNotExistError(error)) {
+      if (FileSystem.isNotExistError(error as Error)) {
         throw error;
       } else {
         throw new Error(
-          `Error reading "${JsonFile._formatPathForError(jsonFilename)}":` + os.EOL + `  ${error.message}`
+          `Error reading "${JsonFile._formatPathForError(jsonFilename)}":` +
+            os.EOL +
+            `  ${(error as Error).message}`
         );
       }
     }
@@ -136,11 +138,13 @@ export class JsonFile {
       const contents: string = await FileSystem.readFileAsync(jsonFilename);
       return jju.parse(contents);
     } catch (error) {
-      if (FileSystem.isNotExistError(error)) {
+      if (FileSystem.isNotExistError(error as Error)) {
         throw error;
       } else {
         throw new Error(
-          `Error reading "${JsonFile._formatPathForError(jsonFilename)}":` + os.EOL + `  ${error.message}`
+          `Error reading "${JsonFile._formatPathForError(jsonFilename)}":` +
+            os.EOL +
+            `  ${(error as Error).message}`
         );
       }
     }
@@ -294,7 +298,7 @@ export class JsonFile {
       try {
         oldBuffer = FileSystem.readFileToBuffer(jsonFilename);
       } catch (error) {
-        if (!FileSystem.isNotExistError(error)) {
+        if (!FileSystem.isNotExistError(error as Error)) {
           throw error;
         }
       }
@@ -352,7 +356,7 @@ export class JsonFile {
       try {
         oldBuffer = await FileSystem.readFileToBufferAsync(jsonFilename);
       } catch (error) {
-        if (!FileSystem.isNotExistError(error)) {
+        if (!FileSystem.isNotExistError(error as Error)) {
           throw error;
         }
       }

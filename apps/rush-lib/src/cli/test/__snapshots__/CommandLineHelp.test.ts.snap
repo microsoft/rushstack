@@ -539,7 +539,7 @@ exports[`CommandLineHelp prints the help for each action: install 1`] = `
                     [--variant VARIANT] [-t PROJECT] [-T PROJECT] [-f PROJECT]
                     [-o PROJECT] [-i PROJECT] [-I PROJECT]
                     [--to-version-policy VERSION_POLICY_NAME]
-                    [--from-version-policy VERSION_POLICY_NAME]
+                    [--from-version-policy VERSION_POLICY_NAME] [--check-only]
                     
 
 The \\"rush install\\" command installs package dependencies for all your 
@@ -660,6 +660,8 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
+  --check-only          Only check the validity of the shrinkwrap file 
+                        without performing an install.
 "
 `;
 
@@ -680,9 +682,10 @@ Optional arguments:
 `;
 
 exports[`CommandLineHelp prints the help for each action: list 1`] = `
-"usage: rush list [-h] [-v] [-p] [--full-path] [--json] [-t PROJECT]
-                 [-T PROJECT] [-f PROJECT] [-o PROJECT] [-i PROJECT]
-                 [-I PROJECT] [--to-version-policy VERSION_POLICY_NAME]
+"usage: rush list [-h] [-v] [-p] [--full-path] [--detailed] [--json]
+                 [-t PROJECT] [-T PROJECT] [-f PROJECT] [-o PROJECT]
+                 [-i PROJECT] [-I PROJECT]
+                 [--to-version-policy VERSION_POLICY_NAME]
                  [--from-version-policy VERSION_POLICY_NAME]
                  
 
@@ -697,6 +700,11 @@ Optional arguments:
                         displayed in a column along with the package name.
   --full-path           If this flag is specified, the project full path will 
                         be displayed in a column along with the package name.
+  --detailed            For the non --json view, if this flag is specified, 
+                        include path (-p), version (-v) columns along with 
+                        the project’s applicable: versionPolicy, 
+                        versionPolicyName, shouldPublish, and reviewPolicy 
+                        fields.
   --json                If this flag is specified, output will be in JSON 
                         format.
   -t PROJECT, --to PROJECT

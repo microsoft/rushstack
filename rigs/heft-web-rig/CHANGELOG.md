@@ -1,6 +1,96 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Fri, 03 Sep 2021 00:09:10 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Oct 2021 09:35:07 GMT and should not be manually modified.
+
+## 0.4.25
+Fri, 08 Oct 2021 09:35:07 GMT
+
+_Version update only_
+
+## 0.4.24
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 0.4.23
+Thu, 07 Oct 2021 23:43:12 GMT
+
+_Version update only_
+
+## 0.4.22
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 0.4.21
+Wed, 06 Oct 2021 15:08:26 GMT
+
+_Version update only_
+
+## 0.4.20
+Wed, 06 Oct 2021 02:41:48 GMT
+
+_Version update only_
+
+## 0.4.19
+Tue, 05 Oct 2021 15:08:38 GMT
+
+_Version update only_
+
+## 0.4.18
+Mon, 04 Oct 2021 15:10:18 GMT
+
+_Version update only_
+
+## 0.4.17
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 0.4.16
+Thu, 23 Sep 2021 00:10:40 GMT
+
+_Version update only_
+
+## 0.4.15
+Wed, 22 Sep 2021 03:27:12 GMT
+
+_Version update only_
+
+## 0.4.14
+Wed, 22 Sep 2021 00:09:32 GMT
+
+_Version update only_
+
+## 0.4.13
+Sat, 18 Sep 2021 03:05:57 GMT
+
+_Version update only_
+
+## 0.4.12
+Tue, 14 Sep 2021 01:17:04 GMT
+
+_Version update only_
+
+## 0.4.11
+Mon, 13 Sep 2021 15:07:05 GMT
+
+_Version update only_
+
+## 0.4.10
+Fri, 10 Sep 2021 15:08:28 GMT
+
+_Version update only_
+
+## 0.4.9
+Wed, 08 Sep 2021 19:06:22 GMT
+
+_Version update only_
+
+## 0.4.8
+Wed, 08 Sep 2021 00:08:03 GMT
+
+_Version update only_
 
 ## 0.4.7
 Fri, 03 Sep 2021 00:09:10 GMT

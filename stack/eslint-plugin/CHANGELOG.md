@@ -1,6 +1,20 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Mon, 12 Jul 2021 23:08:26 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Oct 2021 07:13:35 GMT and should not be manually modified.
+
+## 0.8.2
+Thu, 07 Oct 2021 07:13:35 GMT
+
+### Patches
+
+- Update typescript-eslint to add support for TypeScript 4.4.
+
+## 0.8.1
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
 
 ## 0.8.0
 Mon, 12 Jul 2021 23:08:26 GMT

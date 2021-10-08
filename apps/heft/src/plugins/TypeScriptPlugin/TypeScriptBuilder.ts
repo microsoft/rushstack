@@ -6,12 +6,13 @@ import * as path from 'path';
 import * as semver from 'semver';
 import {
   FileSystemStats,
-  Terminal,
+  ITerminal,
   JsonFile,
   IPackageJson,
   ITerminalProvider,
   FileSystem,
-  Path
+  Path,
+  Async
 } from '@rushstack/node-core-library';
 import type * as TTypescript from 'typescript';
 import {
@@ -24,7 +25,6 @@ import {
   ISubprocessRunnerBaseConfiguration,
   SubprocessRunnerBase
 } from '../../utilities/subprocess/SubprocessRunnerBase';
-import { Async } from '../../utilities/Async';
 import { PerformanceMeasurer, PerformanceMeasurerAsync } from '../../utilities/Performance';
 import { Tslint } from './Tslint';
 import { Eslint } from './Eslint';
@@ -42,6 +42,7 @@ interface ILinterWrapper {
   ts: ExtendedTypeScript;
   logger: IScopedLogger;
   measureTsPerformance: PerformanceMeasurer;
+  measureTsPerformanceAsync: PerformanceMeasurerAsync;
 }
 
 export interface ITypeScriptBuilderConfiguration
@@ -110,6 +111,12 @@ interface IExtendedEmitResult extends TTypescript.EmitResult {
   filesToWrite: IFileToWrite[];
 }
 
+const OLDEST_SUPPORTED_TS_MAJOR_VERSION: number = 2;
+const OLDEST_SUPPORTED_TS_MINOR_VERSION: number = 9;
+
+const NEWEST_SUPPORTED_TS_MAJOR_VERSION: number = 4;
+const NEWEST_SUPPORTED_TS_MINOR_VERSION: number = 4;
+
 export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderConfiguration> {
   private _typescriptVersion!: string;
   private _typescriptParsedVersion!: semver.SemVer;
@@ -123,7 +130,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
   private _eslintConfigFilePath!: string;
   private _tslintConfigFilePath!: string;
   private _typescriptLogger!: IScopedLogger;
-  private _typescriptTerminal!: Terminal;
+  private _typescriptTerminal!: ITerminal;
   private _emitCompletedCallbackManager: EmitCompletedCallbackManager;
 
   private __tsCacheFilePath: string | undefined;
@@ -147,7 +154,11 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         .replace(/\+/g, '-')
         .replace(/\//g, '_');
 
-      this.__tsCacheFilePath = `${this._configuration.buildMetadataFolder}/ts_${serializedConfigHash}.json`;
+      // This conversion is theoretically redundant, but it is here to make absolutely sure that the path is formatted
+      // using only '/' as the directory separator so that incremental builds don't break on Windows.
+      // TypeScript will normalize to '/' when serializing, but not on the direct input, and uses exact string equality.
+      const normalizedCacheFolder: string = Path.convertToSlashes(this._configuration.buildMetadataFolder);
+      this.__tsCacheFilePath = `${normalizedCacheFolder}/ts_${serializedConfigHash}.json`;
     }
 
     return this.__tsCacheFilePath;
@@ -207,7 +218,6 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     }
 
     this._tslintConfigFilePath = path.resolve(this._configuration.buildFolder, 'tslint.json');
-    this._eslintConfigFilePath = path.resolve(this._configuration.buildFolder, '.eslintrc.js');
     this._eslintEnabled = this._tslintEnabled =
       this._configuration.lintingEnabled && !this._configuration.watchMode; // Don't run lint in watch mode
 
@@ -215,6 +225,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       this._tslintEnabled = this._cachedFileSystem.exists(this._tslintConfigFilePath);
     }
 
+    this._eslintConfigFilePath = this._resolveEslintConfigFilePath(this._eslintEnabled);
     if (this._eslintEnabled) {
       this._eslintEnabled = this._cachedFileSystem.exists(this._eslintConfigFilePath);
     }
@@ -223,8 +234,9 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     // TypeScript 2.9. Prior to that the "ts.getConfigFileParsingDiagnostics()" API is missing; more fixups
     // would be required to deal with that.  We won't do that work unless someone requests it.
     if (
-      this._typescriptParsedVersion.major < 2 ||
-      (this._typescriptParsedVersion.major === 2 && this._typescriptParsedVersion.minor < 9)
+      this._typescriptParsedVersion.major < OLDEST_SUPPORTED_TS_MAJOR_VERSION ||
+      (this._typescriptParsedVersion.major === OLDEST_SUPPORTED_TS_MAJOR_VERSION &&
+        this._typescriptParsedVersion.minor < OLDEST_SUPPORTED_TS_MINOR_VERSION)
     ) {
       // We don't use writeWarningLine() here because, if the person wants to take their chances with
       // a seemingly unsupported compiler, their build should be allowed to succeed.
@@ -232,10 +244,15 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         `The TypeScript compiler version ${this._typescriptVersion} is very old` +
           ` and has not been tested with Heft; it may not work correctly.`
       );
-    } else if (this._typescriptParsedVersion.major > 4) {
+    } else if (
+      this._typescriptParsedVersion.major > NEWEST_SUPPORTED_TS_MAJOR_VERSION ||
+      (this._typescriptParsedVersion.major === NEWEST_SUPPORTED_TS_MAJOR_VERSION &&
+        this._typescriptParsedVersion.minor > NEWEST_SUPPORTED_TS_MINOR_VERSION)
+    ) {
       this._typescriptTerminal.writeLine(
         `The TypeScript compiler version ${this._typescriptVersion} is newer` +
-          ` than the latest version that was tested with Heft; it may not work correctly.`
+          ' than the latest version that was tested with Heft ' +
+          `(${NEWEST_SUPPORTED_TS_MAJOR_VERSION}.${NEWEST_SUPPORTED_TS_MINOR_VERSION}); it may not work correctly.`
       );
     }
 
@@ -286,6 +303,20 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     } else {
       await this._runBuildAsync(ts, measureTsPerformance, measureTsPerformanceAsync);
     }
+  }
+
+  private _resolveEslintConfigFilePath(eslintEnabled: boolean): string {
+    const defaultPath: string = path.resolve(this._configuration.buildFolder, '.eslintrc.js');
+    if (!eslintEnabled) {
+      return defaultPath; // No need to check the filesystem
+    }
+    // When project is configured with "type": "module" in package.json, the config file must have a .cjs extension
+    // so use it if it exists
+    const alternativePathPath: string = path.resolve(this._configuration.buildFolder, '.eslintrc.cjs');
+    if (this._cachedFileSystem.exists(alternativePathPath)) {
+      return alternativePathPath;
+    }
+    return defaultPath;
   }
 
   public async _runWatch(ts: ExtendedTypeScript, measureTsPerformance: PerformanceMeasurer): Promise<void> {
@@ -405,18 +436,18 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
     // Using async file system I/O for theoretically better peak performance
     // Also allows to run concurrently with linting
     const writePromise: Promise<{ duration: number }> = measureTsPerformanceAsync('Write', () =>
-      Async.forEachLimitAsync(
+      Async.forEachAsync(
         emitResult.filesToWrite,
-        this._configuration.maxWriteParallelism,
-        async ({ filePath, data }) =>
-          this._cachedFileSystem.writeFile(filePath, data, { ensureFolderExists: true })
+        async ({ filePath, data }: { filePath: string; data: string }) =>
+          this._cachedFileSystem.writeFile(filePath, data, { ensureFolderExists: true }),
+        { concurrency: this._configuration.maxWriteParallelism }
       )
     );
     //#endregion
 
     const [eslint, tslint] = await Promise.all([
-      this._initESlintAsync(ts, measureTsPerformance),
-      this._initTSlintAsync(ts, measureTsPerformance)
+      this._initESlintAsync(ts, measureTsPerformance, measureTsPerformanceAsync),
+      this._initTSlintAsync(ts, measureTsPerformance, measureTsPerformanceAsync)
     ]);
     const lintPromises: Promise<LinterBase<unknown>>[] = [];
 
@@ -471,8 +502,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       };
 
       const [eslint, tslint] = await Promise.all([
-        this._initESlintAsync(ts, measureTsPerformance),
-        this._initTSlintAsync(ts, measureTsPerformance)
+        this._initESlintAsync(ts, measureTsPerformance, measureTsPerformanceAsync),
+        this._initTSlintAsync(ts, measureTsPerformance, measureTsPerformanceAsync)
       ]);
 
       // TypeScript doesn't have a
@@ -599,7 +630,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
 
   private async _initTSlintAsync(
     ts: ExtendedTypeScript,
-    measureTsPerformance: PerformanceMeasurer
+    measureTsPerformance: PerformanceMeasurer,
+    measureTsPerformanceAsync: PerformanceMeasurerAsync
   ): Promise<ILinterWrapper | undefined> {
     if (this._tslintEnabled) {
       if (!this._configuration.tslintToolPath) {
@@ -610,14 +642,16 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       return {
         logger,
         ts,
-        measureTsPerformance
+        measureTsPerformance,
+        measureTsPerformanceAsync
       };
     }
   }
 
   private async _initESlintAsync(
     ts: ExtendedTypeScript,
-    measureTsPerformance: PerformanceMeasurer
+    measureTsPerformance: PerformanceMeasurer,
+    measureTsPerformanceAsync: PerformanceMeasurerAsync
   ): Promise<ILinterWrapper | undefined> {
     if (this._eslintEnabled) {
       if (!this._configuration.eslintToolPath) {
@@ -628,7 +662,8 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       return {
         logger,
         ts,
-        measureTsPerformance
+        measureTsPerformance,
+        measureTsPerformanceAsync
       };
     }
   }
@@ -645,6 +680,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       buildMetadataFolderPath: this._configuration.buildMetadataFolder,
       linterConfigFilePath: this._eslintConfigFilePath,
       measurePerformance: linter.measureTsPerformance,
+      measurePerformanceAsync: linter.measureTsPerformanceAsync,
       eslintPackagePath: this._configuration.eslintToolPath!
     });
 
@@ -672,6 +708,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
       buildMetadataFolderPath: this._configuration.buildMetadataFolder,
       linterConfigFilePath: this._tslintConfigFilePath,
       measurePerformance: linter.measureTsPerformance,
+      measurePerformanceAsync: linter.measureTsPerformanceAsync,
       cachedFileSystem: this._cachedFileSystem,
       tslintPackagePath: this._configuration.tslintToolPath!
     });
@@ -839,7 +876,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
         reason: 'emitMjsExtensionForESModule'
       };
 
-      specifiedKinds.set(ts.ModuleKind.CommonJS, mjsReason);
+      specifiedKinds.set(ts.ModuleKind.ESNext, mjsReason);
       specifiedOutDirs.set(`${tsconfig.options.outDir!}:.mjs`, mjsReason);
     }
 
@@ -995,11 +1032,14 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
             currentFolder,
             depth,
             this._cachedFileSystem.readFolderFilesAndDirectories.bind(this._cachedFileSystem),
-            this._cachedFileSystem.getRealPath.bind(this._cachedFileSystem)
+            this._cachedFileSystem.getRealPath.bind(this._cachedFileSystem),
+            this._cachedFileSystem.directoryExists.bind(this._cachedFileSystem)
           ),
         useCaseSensitiveFileNames: true
       },
-      currentFolder
+      currentFolder,
+      /*existingOptions:*/ undefined,
+      this._configuration.tsconfigPath
     );
 
     if (tsconfig.options.incremental) {
@@ -1051,7 +1091,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           const stats: FileSystemStats = this._cachedFileSystem.getStatistics(directoryPath);
           return stats.isDirectory() || stats.isSymbolicLink();
         } catch (error) {
-          if (FileSystem.isNotExistError(error)) {
+          if (FileSystem.isNotExistError(error as Error)) {
             return false;
           } else {
             throw error;
@@ -1064,7 +1104,7 @@ export class TypeScriptBuilder extends SubprocessRunnerBase<ITypeScriptBuilderCo
           const stats: FileSystemStats = this._cachedFileSystem.getStatistics(filePath);
           return stats.isFile();
         } catch (error) {
-          if (FileSystem.isNotExistError(error)) {
+          if (FileSystem.isNotExistError(error as Error)) {
             return false;
           } else {
             throw error;

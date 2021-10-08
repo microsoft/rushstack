@@ -1,6 +1,43 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Mon, 23 Aug 2021 21:34:46 GMT and should not be manually modified.
+This log was last generated on Thu, 07 Oct 2021 23:44:52 GMT and should not be manually modified.
+
+## 5.55.0
+Thu, 07 Oct 2021 23:44:52 GMT
+
+### Updates
+
+- Fix typo when project dependencies do not match the current shrinkwrap
+- Use ITerminal in the rush-lib API instead of Terminal to allow for compatibility with other versions of @rushstack/node-core-library.
+- Add a new parameter "--detailed" for the "rush list" command
+- Print the full event hooks output if the --debug paramter is specified.
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 5.54.0
+Wed, 22 Sep 2021 22:54:17 GMT
+
+### Minor changes
+
+- Add ability to customize tag separator
+
+### Patches
+
+- Lock node-fetch dependency to 2.6.2 due to an incompatibility with 2.6.3 in the Azure Cloud Cache Provider.
+
+### Updates
+
+- Add a "--check-only" parameter to "rush install" to check the validity of the shrinkwrap without performing a full install.
+- Fix an issue where `rush update-autoinstaller` does not use the repo's .npmrc
+
+## 5.53.0
+Fri, 10 Sep 2021 23:20:00 GMT
+
+### Updates
+
+- Fix an issue where the incremental build should use caching or skipping, but not both (GitHub #2891)
+- Cache rush-project.json reads
+- Fix an issue where the build cache did not respect "allowWarningsInSuccessfulBuild" (GitHub #2803)
+- Add an experiment "buildCacheWithAllowWarningsInSuccessfulBuild" to allow caching for projects with warnings (GitHub #2803)
 
 ## 5.52.0
 Mon, 23 Aug 2021 21:34:46 GMT

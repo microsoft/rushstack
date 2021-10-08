@@ -111,7 +111,7 @@ export class ProjectValidatorPlugin implements IHeftPlugin {
         }
       );
     } catch (e) {
-      if (!FileSystem.isNotExistError(e)) {
+      if (!FileSystem.isNotExistError(e as Error)) {
         throw e;
       } else {
         return;

@@ -1,0 +1,18 @@
+{
+  "name": "heft-parameter-plugin-test",
+  "description": "This project exercises a built-in Heft action with a custom parameter",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "heft test --clean --custom-parameter --custom-string-parameter test --custom-number-parameter 5 --custom-string-list-parameter eevee -x togepi -x mareep --custom-choice-parameter red --custom-choice-list-parameter totodile -y gudetama -y wobbuffet"
+  },
+  "devDependencies": {
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-jest-plugin": "workspace:*",
+    "@rushstack/node-core-library": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "heft-parameter-plugin": "workspace:*",
+    "typescript": "~4.4.2"
+  }
+}

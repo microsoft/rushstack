@@ -300,7 +300,7 @@ export class SetupPackageRegistry {
     try {
       response = await webClient.fetchAsync(queryUrl);
     } catch (e) {
-      console.log(e.toString());
+      console.log((e as Error).toString());
       return;
     }
 

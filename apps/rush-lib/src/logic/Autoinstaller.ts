@@ -80,6 +80,8 @@ export class Autoinstaller {
 
     console.log();
 
+    Utilities.syncNpmrc(this._rushConfiguration.commonRushConfigFolder, this.folderFullPath);
+
     Utilities.executeCommand({
       command: this._rushConfiguration.packageManagerToolFilename,
       args: ['install'],

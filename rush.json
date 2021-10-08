@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.46.1",
+  "rushVersion": "5.54.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -551,6 +551,18 @@
       "shouldPublish": false
     },
     {
+      "packageName": "heft-storybook-react-tutorial",
+      "projectFolder": "build-tests-samples/heft-storybook-react-tutorial",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-storybook-react-tutorial-storykit",
+      "projectFolder": "build-tests-samples/heft-storybook-react-tutorial-storykit",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "heft-webpack-basic-tutorial",
       "projectFolder": "build-tests-samples/heft-webpack-basic-tutorial",
       "reviewCategory": "tests",
@@ -621,6 +633,24 @@
     {
       "packageName": "heft-node-everything-test",
       "projectFolder": "build-tests/heft-node-everything-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-node-everything-esm-module-test",
+      "projectFolder": "build-tests/heft-node-everything-esm-module-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-parameter-plugin",
+      "projectFolder": "build-tests/heft-parameter-plugin",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "heft-parameter-plugin-test",
+      "projectFolder": "build-tests/heft-parameter-plugin-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -702,6 +732,12 @@
     {
       "packageName": "@rushstack/heft-sass-plugin",
       "projectFolder": "heft-plugins/heft-sass-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-storybook-plugin",
+      "projectFolder": "heft-plugins/heft-storybook-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },

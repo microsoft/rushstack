@@ -131,7 +131,7 @@ export function process(
     try {
       libCode = FileSystem.readFile(libFilePath);
     } catch (error) {
-      if (FileSystem.isNotExistError(error)) {
+      if (FileSystem.isNotExistError(error as Error)) {
         throw new Error(
           'jest-build-transform: The expected transpiler output file does not exist:\n' + libFilePath
         );
@@ -146,7 +146,7 @@ export function process(
     try {
       originalSourceMap = FileSystem.readFile(sourceMapFilePath);
     } catch (error) {
-      if (FileSystem.isNotExistError(error)) {
+      if (FileSystem.isNotExistError(error as Error)) {
         throw new Error(
           'jest-build-transform: The source map file is missing -- check your tsconfig.json settings:\n' +
             sourceMapFilePath

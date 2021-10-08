@@ -1,6 +1,52 @@
 # Change Log - @rushstack/heft-config-file
 
-This log was last generated on Fri, 27 Aug 2021 00:07:25 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Oct 2021 08:08:34 GMT and should not be manually modified.
+
+## 0.7.2
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 0.7.1
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 0.7.0
+Tue, 05 Oct 2021 15:08:37 GMT
+
+### Minor changes
+
+- Use ITerminal instead of Terminal to allow for compatibility with other versions of @rushstack/node-core-library.
+
+## 0.6.8
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 0.6.7
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 0.6.6
+Tue, 14 Sep 2021 01:17:04 GMT
+
+_Version update only_
+
+## 0.6.5
+Mon, 13 Sep 2021 15:07:06 GMT
+
+_Version update only_
+
+## 0.6.4
+Wed, 08 Sep 2021 19:06:22 GMT
+
+### Patches
+
+- Fix issue with overwriting configuration properties using falsey values
 
 ## 0.6.3
 Fri, 27 Aug 2021 00:07:25 GMT

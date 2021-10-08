@@ -78,6 +78,7 @@ export {
 export { FileWriter, IFileWriterFlags } from './FileWriter';
 export { LegacyAdapters, LegacyCallback } from './LegacyAdapters';
 export { StringBuilder, IStringBuilder } from './StringBuilder';
+export { ITerminal } from './Terminal/ITerminal';
 export { Terminal } from './Terminal/Terminal';
 export { Colors, IColorableSequence, ColorValue, TextAttribute } from './Terminal/Colors';
 export { ITerminalProvider, TerminalProviderSeverity } from './Terminal/ITerminalProvider';

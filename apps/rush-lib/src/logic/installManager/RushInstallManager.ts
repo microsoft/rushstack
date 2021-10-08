@@ -305,7 +305,7 @@ export class RushInstallManager extends BaseInstallManager {
 
           console.log(`Updating ${tarballFile}`);
         } catch (error) {
-          console.log(colors.yellow(error));
+          console.log(colors.yellow(error as string));
           // delete everything in case of any error
           FileSystem.deleteFile(tarballFile);
           FileSystem.deleteFile(tempPackageJsonFilename);
@@ -352,7 +352,7 @@ export class RushInstallManager extends BaseInstallManager {
       try {
         await FileSystem.deleteFileAsync(workspaceFilePath);
       } catch (e) {
-        if (!FileSystem.isNotExistError(e)) {
+        if (!FileSystem.isNotExistError(e as Error)) {
           throw e;
         }
       }

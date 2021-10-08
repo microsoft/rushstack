@@ -62,7 +62,7 @@ export class HeftJestDataFile {
     try {
       dataFile = await JsonFile.loadAsync(jsonFilePath);
     } catch (e) {
-      if (FileSystem.isFileDoesNotExistError(e)) {
+      if (FileSystem.isFileDoesNotExistError(e as Error)) {
         throw new Error(
           `Could not find the Jest TypeScript data file at "${jsonFilePath}". Was the compiler invoked?`
         );

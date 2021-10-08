@@ -10,6 +10,7 @@ import {
   JsonObject,
   NewlineKind,
   InternalError,
+  ITerminal,
   Terminal,
   ColorValue
 } from '@rushstack/node-core-library';
@@ -129,12 +130,12 @@ export class ProjectBuilder extends BaseBuilder {
       }
       return await this._executeTaskAsync(context);
     } catch (error) {
-      throw new TaskError('executing', error.message);
+      throw new TaskError('executing', (error as Error).message);
     }
   }
 
   public async tryWriteCacheEntryAsync(
-    terminal: Terminal,
+    terminal: ITerminal,
     trackedFilePaths: string[] | undefined,
     repoCommandLineConfiguration: CommandLineConfiguration | undefined
   ): Promise<boolean | undefined> {
@@ -251,20 +252,38 @@ export class ProjectBuilder extends BaseBuilder {
       } catch (error) {
         // To test this code path:
         // Delete a project's ".rush/temp/shrinkwrap-deps.json" then run "rush build --verbose"
-        terminal.writeLine('Unable to calculate incremental build state: ' + error.toString());
+        terminal.writeLine('Unable to calculate incremental build state: ' + (error as Error).toString());
         terminal.writeLine({
           text: 'Rush will proceed without incremental build, caching, and change detection.',
           foregroundColor: ColorValue.Cyan
         });
       }
 
-      // If allowed to read from the build cache, try retrieving the cache entry.
+      // If possible, we want to skip this build -- either by restoring it from the
+      // build cache, if build caching is enabled, or determining that the project
+      // is unchanged (using the older incremental build logic). These two approaches,
+      // "caching" and "skipping", are incompatible, so only one applies.
+      //
+      // Note that "build caching" and "build skipping" take two different approaches
+      // to tracking dependents:
+      //
+      //   - For build caching, "isCacheReadAllowed" is set if a project supports
+      //     incremental builds, and determining whether this project or a dependent
+      //     has changed happens inside the hashing logic.
+      //
+      //   - For build skipping, "isSkipAllowed" is set to true initially, and during
+      //     the process of building dependents, it will be changed by TaskRunner to
+      //     false if a dependency wasn't able to be skipped.
+      //
+      let buildCacheReadAttempted: boolean = false;
       if (this._isCacheReadAllowed) {
         const projectBuildCache: ProjectBuildCache | undefined = await this._getProjectBuildCacheAsync(
           terminal,
           trackedFiles,
           context.repoCommandLineConfiguration
         );
+
+        buildCacheReadAttempted = !!projectBuildCache;
         const restoreFromCacheSuccess: boolean | undefined =
           await projectBuildCache?.tryRestoreFromCacheAsync(terminal);
 
@@ -272,9 +291,7 @@ export class ProjectBuilder extends BaseBuilder {
           return TaskStatus.FromCache;
         }
       }
-
-      // If allowed, attempt to skip building.
-      if (this.isSkipAllowed) {
+      if (this.isSkipAllowed && !buildCacheReadAttempted) {
         const isPackageUnchanged: boolean = !!(
           lastProjectBuildDeps &&
           projectBuildDeps &&
@@ -346,7 +363,7 @@ export class ProjectBuilder extends BaseBuilder {
                 resolve(TaskStatus.Success);
               }
             } catch (error) {
-              reject(error);
+              reject(error as TaskError);
             }
           });
         }
@@ -401,7 +418,7 @@ export class ProjectBuilder extends BaseBuilder {
   }
 
   private async _getProjectBuildCacheAsync(
-    terminal: Terminal,
+    terminal: ITerminal,
     trackedProjectFiles: string[] | undefined,
     commandLineConfiguration: CommandLineConfiguration | undefined
   ): Promise<ProjectBuildCache | undefined> {

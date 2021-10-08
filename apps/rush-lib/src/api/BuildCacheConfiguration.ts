@@ -7,7 +7,7 @@ import {
   JsonSchema,
   FileSystem,
   AlreadyReportedError,
-  Terminal,
+  ITerminal,
   Import
 } from '@rushstack/node-core-library';
 
@@ -174,7 +174,7 @@ export class BuildCacheConfiguration {
    * If the file has not been created yet, then undefined is returned.
    */
   public static async tryLoadAsync(
-    terminal: Terminal,
+    terminal: ITerminal,
     rushConfiguration: RushConfiguration
   ): Promise<BuildCacheConfiguration | undefined> {
     const jsonFilePath: string = BuildCacheConfiguration.getBuildCacheConfigFilePath(rushConfiguration);
@@ -189,7 +189,7 @@ export class BuildCacheConfiguration {
    * If the file has not been created yet, or if the feature is not enabled, then an error is reported.
    */
   public static async loadAndRequireEnabledAsync(
-    terminal: Terminal,
+    terminal: ITerminal,
     rushConfiguration: RushConfiguration
   ): Promise<BuildCacheConfiguration> {
     const jsonFilePath: string = BuildCacheConfiguration.getBuildCacheConfigFilePath(rushConfiguration);
@@ -219,7 +219,7 @@ export class BuildCacheConfiguration {
 
   private static async _loadAsync(
     jsonFilePath: string,
-    terminal: Terminal,
+    terminal: ITerminal,
     rushConfiguration: RushConfiguration
   ): Promise<BuildCacheConfiguration> {
     const buildCacheJson: IBuildCacheJson = await JsonFile.loadAndValidateAsync(

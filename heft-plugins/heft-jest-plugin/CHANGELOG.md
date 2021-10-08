@@ -1,6 +1,98 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Fri, 03 Sep 2021 00:09:09 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Oct 2021 09:35:07 GMT and should not be manually modified.
+
+## 0.1.41
+Fri, 08 Oct 2021 09:35:07 GMT
+
+_Version update only_
+
+## 0.1.40
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 0.1.39
+Thu, 07 Oct 2021 23:43:12 GMT
+
+_Version update only_
+
+## 0.1.38
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 0.1.37
+Wed, 06 Oct 2021 15:08:26 GMT
+
+_Version update only_
+
+## 0.1.36
+Wed, 06 Oct 2021 02:41:48 GMT
+
+_Version update only_
+
+## 0.1.35
+Tue, 05 Oct 2021 15:08:37 GMT
+
+_Version update only_
+
+## 0.1.34
+Mon, 04 Oct 2021 15:10:18 GMT
+
+_Version update only_
+
+## 0.1.33
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 0.1.32
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 0.1.31
+Wed, 22 Sep 2021 03:27:12 GMT
+
+_Version update only_
+
+## 0.1.30
+Wed, 22 Sep 2021 00:09:32 GMT
+
+_Version update only_
+
+## 0.1.29
+Sat, 18 Sep 2021 03:05:57 GMT
+
+_Version update only_
+
+## 0.1.28
+Tue, 14 Sep 2021 01:17:04 GMT
+
+_Version update only_
+
+## 0.1.27
+Mon, 13 Sep 2021 15:07:05 GMT
+
+_Version update only_
+
+## 0.1.26
+Fri, 10 Sep 2021 15:08:28 GMT
+
+_Version update only_
+
+## 0.1.25
+Wed, 08 Sep 2021 19:06:22 GMT
+
+_Version update only_
+
+## 0.1.24
+Wed, 08 Sep 2021 00:08:03 GMT
+
+_Version update only_
 
 ## 0.1.23
 Fri, 03 Sep 2021 00:09:09 GMT

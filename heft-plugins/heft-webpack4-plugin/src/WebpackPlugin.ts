@@ -109,7 +109,8 @@ export class WebpackPlugin implements IHeftPlugin {
     buildProperties: IBuildStageProperties,
     supportsColor: boolean
   ): Promise<void> {
-    const webpackConfiguration: IWebpackConfiguration = bundleSubstageProperties.webpackConfiguration;
+    const webpackConfiguration: IWebpackConfiguration | undefined | null =
+      bundleSubstageProperties.webpackConfiguration;
     if (!webpackConfiguration) {
       return;
     }
@@ -229,7 +230,7 @@ export class WebpackPlugin implements IHeftPlugin {
             {}
           );
         } catch (e) {
-          logger.emitError(e);
+          logger.emitError(e as Error);
         }
       } else {
         try {
@@ -237,7 +238,7 @@ export class WebpackPlugin implements IHeftPlugin {
             (compiler as WebpackCompiler).run.bind(compiler)
           );
         } catch (e) {
-          logger.emitError(e);
+          logger.emitError(e as Error);
         }
       }
 

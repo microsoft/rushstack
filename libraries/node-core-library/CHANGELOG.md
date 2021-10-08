@@ -1,6 +1,53 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 11 Aug 2021 00:07:21 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Oct 2021 08:08:34 GMT and should not be manually modified.
+
+## 3.42.2
+Fri, 08 Oct 2021 08:08:34 GMT
+
+### Patches
+
+- Fix an issue where Async.foreEachAsync can never resolve when operating on a large array.
+
+## 3.42.1
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 3.42.0
+Tue, 05 Oct 2021 15:08:38 GMT
+
+### Minor changes
+
+- Expose an ITerminal interface.
+
+## 3.41.0
+Fri, 24 Sep 2021 00:09:29 GMT
+
+### Minor changes
+
+- Allow Async.mapAsync and Async.forEachAsync to take an iterator.
+
+## 3.40.3
+Thu, 23 Sep 2021 00:10:41 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 3.40.2
+Tue, 14 Sep 2021 01:17:04 GMT
+
+### Patches
+
+- Improve documentation to clarify usage for FileSystem APIs related to symbolic links
+
+## 3.40.1
+Mon, 13 Sep 2021 15:07:05 GMT
+
+### Patches
+
+- Add support for AlreadyExistsBehavior in symlink and junction scenarios
 
 ## 3.40.0
 Wed, 11 Aug 2021 00:07:21 GMT

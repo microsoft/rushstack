@@ -1,6 +1,43 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Wed, 11 Aug 2021 00:07:21 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Oct 2021 08:08:34 GMT and should not be manually modified.
+
+## 7.13.12
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 7.13.11
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 7.13.10
+Tue, 05 Oct 2021 15:08:38 GMT
+
+_Version update only_
+
+## 7.13.9
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 7.13.8
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 7.13.7
+Tue, 14 Sep 2021 01:17:04 GMT
+
+_Version update only_
+
+## 7.13.6
+Mon, 13 Sep 2021 15:07:06 GMT
+
+_Version update only_
 
 ## 7.13.5
 Wed, 11 Aug 2021 00:07:21 GMT

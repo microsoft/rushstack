@@ -1,6 +1,129 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Tue, 31 Aug 2021 00:07:11 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Oct 2021 09:35:07 GMT and should not be manually modified.
+
+## 0.41.6
+Fri, 08 Oct 2021 09:35:07 GMT
+
+### Patches
+
+- Fix reuse of TypeScript program to avoid breaking on older versions of @typescript-eslint/typescript-estree
+
+## 0.41.5
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 0.41.4
+Thu, 07 Oct 2021 23:43:12 GMT
+
+### Patches
+
+- Re-use the compiler TypeScript program when running ESLint to reduce overhead
+
+## 0.41.3
+Thu, 07 Oct 2021 07:13:35 GMT
+
+### Patches
+
+- Fix support for TypeScript 4.4 in --watch mode.
+
+## 0.41.2
+Wed, 06 Oct 2021 15:08:25 GMT
+
+### Patches
+
+- Improve the HeftSession.commandLine.register<Type>Parameter interface and add support for choice and choice list parameters. 
+
+## 0.41.1
+Wed, 06 Oct 2021 02:41:48 GMT
+
+### Patches
+
+- Replace ITerminal with Terminal in data structure values to preserve compatability with plugins written before ITerminal.
+
+## 0.41.0
+Tue, 05 Oct 2021 15:08:37 GMT
+
+### Minor changes
+
+- Use ITerminal instead of Terminal to allow for compatibility with other versions of @rushstack/node-core-library.
+
+## 0.40.0
+Mon, 04 Oct 2021 15:10:18 GMT
+
+### Minor changes
+
+- Add register custom parameters feature to Heft.
+
+## 0.39.2
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 0.39.1
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 0.39.0
+Wed, 22 Sep 2021 03:27:12 GMT
+
+### Minor changes
+
+- Add "encounteredErrors" boolean to IMetricsData.
+
+### Patches
+
+- Fix typo in temp folder path.
+
+## 0.38.2
+Wed, 22 Sep 2021 00:09:32 GMT
+
+### Patches
+
+- Fix formatting of tsBuildInfoFile tsconfig option. TypeScript uses an exact string match for change detection and normalizes slashes to '/' upon saving the file. Therefore the inputs need to be normalized as well.
+
+## 0.38.1
+Sat, 18 Sep 2021 03:05:57 GMT
+
+### Patches
+
+- Fix an issue where setting the emitMjsExtensionForESModule typescript.json option in a project whose tsconfig emits CommonJS will only emit .mjs files.
+
+## 0.38.0
+Tue, 14 Sep 2021 01:17:04 GMT
+
+### Minor changes
+
+- Temoprarily introduce a "--storybook" CLI parameter to support the experimental heft-storybook-plugin
+
+## 0.37.4
+Mon, 13 Sep 2021 15:07:05 GMT
+
+_Version update only_
+
+## 0.37.3
+Fri, 10 Sep 2021 15:08:28 GMT
+
+### Patches
+
+- Support ESLint configuration in .eslintrc.cjs (instead of .eslintrc.js) to support projects with ESM modules ("type": "module" in package.json).
+
+## 0.37.2
+Wed, 08 Sep 2021 19:06:22 GMT
+
+_Version update only_
+
+## 0.37.1
+Wed, 08 Sep 2021 00:08:03 GMT
+
+### Patches
+
+- Fix building for Typescript 4.4 (Error: directoryExists is not a function)
+- Ensure `process.cwd()` is set to the project root with correct file path casing.
 
 ## 0.37.0
 Tue, 31 Aug 2021 00:07:11 GMT

@@ -2,6 +2,367 @@
   "name": "@rushstack/heft-webpack5-plugin",
   "entries": [
     {
+      "version": "0.4.13",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.4.13",
+      "date": "Fri, 08 Oct 2021 09:35:07 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.25`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.41.5` to `^0.41.6`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.12",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.4.12",
+      "date": "Fri, 08 Oct 2021 08:08:34 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.42.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.24`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.41.4` to `^0.41.5`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.11",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.4.11",
+      "date": "Thu, 07 Oct 2021 23:43:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.23`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.41.3` to `^0.41.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.10",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.4.10",
+      "date": "Thu, 07 Oct 2021 07:13:35 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.42.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.22`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.41.2` to `^0.41.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.9",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.4.9",
+      "date": "Wed, 06 Oct 2021 15:08:26 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.21`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.41.1` to `^0.41.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.8",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.4.8",
+      "date": "Wed, 06 Oct 2021 02:41:48 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.20`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.41.0` to `^0.41.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.7",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.4.7",
+      "date": "Tue, 05 Oct 2021 15:08:38 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.42.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.41.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.40.0` to `^0.41.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.6",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.4.6",
+      "date": "Mon, 04 Oct 2021 15:10:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.40.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.39.2` to `^0.40.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.5",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.4.5",
+      "date": "Fri, 24 Sep 2021 00:09:29 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.41.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.39.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.17`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.39.1` to `^0.39.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.4",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.4.4",
+      "date": "Thu, 23 Sep 2021 00:10:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Upgrade the `@types/node` dependency to version to version 12."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.39.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.16`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.39.0` to `^0.39.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.3",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.4.3",
+      "date": "Wed, 22 Sep 2021 03:27:12 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.39.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.15`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.38.2` to `^0.39.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.2",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.4.2",
+      "date": "Wed, 22 Sep 2021 00:09:32 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.38.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.14`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.38.1` to `^0.38.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.1",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.4.1",
+      "date": "Sat, 18 Sep 2021 03:05:57 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.38.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.13`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.38.0` to `^0.38.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.0",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.4.0",
+      "date": "Tue, 14 Sep 2021 01:17:04 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Improve the type declaration for IWebpackBundleSubstageProperties.webpackConfiguration"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.38.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.12`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.37.4` to `^0.38.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.6",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.3.6",
+      "date": "Mon, 13 Sep 2021 15:07:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.40.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.11`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.37.3` to `^0.37.4`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.5",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.3.5",
+      "date": "Fri, 10 Sep 2021 15:08:28 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.10`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.37.2` to `^0.37.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.4",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.3.4",
+      "date": "Wed, 08 Sep 2021 19:06:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.9`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.37.1` to `^0.37.2`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.3.3",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.3.3",
+      "date": "Wed, 08 Sep 2021 00:08:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.37.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.8`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.37.0` to `^0.37.1`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.2",
       "tag": "@rushstack/heft-webpack5-plugin_v0.3.2",
       "date": "Fri, 03 Sep 2021 00:09:10 GMT",
