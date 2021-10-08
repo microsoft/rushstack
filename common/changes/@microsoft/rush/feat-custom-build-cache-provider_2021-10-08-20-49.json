@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add new `RUSH_BUILD_CACHE_PROVIDER` environment variable to control the Build Cache Provider configuration",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

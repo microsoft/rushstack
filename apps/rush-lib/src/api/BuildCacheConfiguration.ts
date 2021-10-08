@@ -29,12 +29,14 @@ const AmazonS3BuildCacheProviderModule: typeof import('../logic/buildCache/Amazo
   Import.lazy('../logic/buildCache/AmazonS3/AmazonS3BuildCacheProvider', require);
 import type { AmazonS3BuildCacheProvider } from '../logic/buildCache/AmazonS3/AmazonS3BuildCacheProvider';
 
+export type BuildCacheProvider = 'azure-blob-storage' | 'amazon-s3' | 'local-only';
+
 /**
  * Describes the file structure for the "common/config/rush/build-cache.json" config file.
  */
 interface IBaseBuildCacheJson {
   buildCacheEnabled: boolean;
-  cacheProvider: 'azure-blob-storage' | 'amazon-s3' | 'local-only';
+  cacheProvider: BuildCacheProvider;
   cacheEntryNamePattern?: string;
 }
 
@@ -143,6 +145,9 @@ export class BuildCacheConfiguration {
     });
 
     const { buildCacheJson } = options;
+    buildCacheJson.cacheProvider =
+      EnvironmentConfiguration.buildCacheProvider ?? buildCacheJson.cacheProvider;
+
     switch (buildCacheJson.cacheProvider) {
       case 'local-only': {
         // Don't configure a cloud cache provider

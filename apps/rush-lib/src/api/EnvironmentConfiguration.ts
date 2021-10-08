@@ -6,6 +6,7 @@ import * as path from 'path';
 import { trueCasePathSync } from 'true-case-path';
 
 import { IEnvironment } from '../utilities/Utilities';
+import { BuildCacheProvider } from '../api/BuildCacheConfiguration';
 
 export interface IEnvironmentConfigurationInitializeOptions {
   doNotNormalizePaths?: boolean;
@@ -124,6 +125,12 @@ export const enum EnvironmentVariableNames {
   RUSH_BUILD_CACHE_ENABLED = 'RUSH_BUILD_CACHE_ENABLED',
 
   /**
+   * Setting this environment variable overrides the value of `cacheProvider` in the `build-cache.json`
+   * configuration file.
+   */
+  RUSH_BUILD_CACHE_PROVIDER = 'RUSH_BUILD_CACHE_PROVIDER',
+
+  /**
    * Setting this environment variable overrides the value of `isCacheWriteAllowed` in the `build-cache.json`
    * configuration file. Specify `1` to allow cache write and `0` to disable it.
    */
@@ -176,6 +183,8 @@ export class EnvironmentConfiguration {
   private static _buildCacheCredential: string | undefined;
 
   private static _buildCacheEnabled: boolean | undefined;
+
+  private static _buildCacheProvider: BuildCacheProvider | undefined;
 
   private static _buildCacheWriteAllowed: boolean | undefined;
 
@@ -256,6 +265,15 @@ export class EnvironmentConfiguration {
   public static get buildCacheEnabled(): boolean | undefined {
     EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._buildCacheEnabled;
+  }
+
+  /**
+   * Provides a the provider use for the could build cache feature, if configured.
+   * See {@link EnvironmentVariableNames.RUSH_BUILD_CACHE_PROVIDER}
+   */
+  public static get buildCacheProvider(): BuildCacheProvider | undefined {
+    EnvironmentConfiguration._ensureValidated();
+    return EnvironmentConfiguration._buildCacheProvider;
   }
 
   /**
@@ -379,6 +397,11 @@ export class EnvironmentConfiguration {
                 EnvironmentVariableNames.RUSH_BUILD_CACHE_ENABLED,
                 value
               );
+            break;
+          }
+
+          case EnvironmentVariableNames.RUSH_BUILD_CACHE_PROVIDER: {
+            EnvironmentConfiguration._buildCacheProvider = value as BuildCacheProvider;
             break;
           }
 
