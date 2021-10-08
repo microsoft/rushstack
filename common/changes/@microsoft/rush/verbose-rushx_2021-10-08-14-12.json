@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Suppress rush startup banner if terminal is not TTY",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
