@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Fri, 08 Oct 2021 08:08:34 GMT and should not be manually modified.
+This log was last generated on Fri, 08 Oct 2021 09:35:07 GMT and should not be manually modified.
+
+## 0.41.6
+Fri, 08 Oct 2021 09:35:07 GMT
+
+### Patches
+
+- Fix reuse of TypeScript program to avoid breaking on older versions of @typescript-eslint/typescript-estree
 
 ## 0.41.5
 Fri, 08 Oct 2021 08:08:34 GMT
