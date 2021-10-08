@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Fix reuse of TypeScript program to avoid breaking on older versions of @typescript-eslint/typescript-estree",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}
