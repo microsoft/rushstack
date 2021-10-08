@@ -165,6 +165,15 @@ describe('Async', () => {
       expect(maxRunning).toEqual(3);
     });
 
+    it('returns when given an array with a large number of elements and a concurrency limit', async () => {
+      const array: number[] = [];
+      for (let i = 0; i < 250; i++) {
+        array.push(i);
+      }
+
+      await Async.forEachAsync(array, async () => await Async.sleep(1), { concurrency: 3 });
+    });
+
     it('rejects if any operation rejects', async () => {
       const array: number[] = [1, 2, 3];
 

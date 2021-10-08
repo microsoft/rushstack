@@ -84,50 +84,60 @@ export class Async {
     callback: (entry: TEntry, arrayIndex: number) => Promise<void>,
     options?: IAsyncParallelismOptions | undefined
   ): Promise<void> {
-    const concurrency: number =
-      options?.concurrency && options.concurrency > 0 ? options.concurrency : Infinity;
-    let operationsInProgress: number = 1;
-
-    const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (
-      (iterable as Iterable<TEntry>)[Symbol.iterator] ||
-      (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
-    ).call(iterable);
-
-    let arrayIndex: number = 0;
-    let iteratorIsDone: boolean = false;
     await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
-      async function onOperationCompletionAsync(): Promise<void> {
-        operationsInProgress--;
-        if (operationsInProgress === 0 && iteratorIsDone) {
-          resolve();
+      const concurrency: number =
+        options?.concurrency && options.concurrency > 0 ? options.concurrency : Infinity;
+      let operationsInProgress: number = 0;
+
+      const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (
+        (iterable as Iterable<TEntry>)[Symbol.iterator] ||
+        (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
+      ).call(iterable);
+
+      let arrayIndex: number = 0;
+      let iteratorIsComplete: boolean = false;
+      let promiseHasResolvedOrRejected: boolean = false;
+
+      async function queueOperationsAsync(): Promise<void> {
+        while (operationsInProgress < concurrency && !iteratorIsComplete && !promiseHasResolvedOrRejected) {
+          const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
+          // eslint-disable-next-line require-atomic-updates
+          iteratorIsComplete = !!currentIteratorResult.done;
+
+          if (!iteratorIsComplete) {
+            operationsInProgress++;
+            Promise.resolve(callback(currentIteratorResult.value, arrayIndex++))
+              .then(async () => {
+                operationsInProgress--;
+                await onOperationCompletionAsync();
+              })
+              .catch((error) => {
+                promiseHasResolvedOrRejected = true;
+                reject(error);
+              });
+          }
         }
 
-        while (operationsInProgress < concurrency) {
-          const nextIteratorResult: IteratorResult<TEntry> = await iterator.next();
-          // eslint-disable-next-line require-atomic-updates
-          iteratorIsDone = !!nextIteratorResult.done;
-          if (!iteratorIsDone) {
-            operationsInProgress++;
-            try {
-              Promise.resolve(callback(nextIteratorResult.value, arrayIndex++))
-                .then(() => onOperationCompletionAsync())
-                .catch(reject);
-            } catch (error) {
-              reject(error as Error);
-            }
-          } else {
-            if (arrayIndex === 0) {
-              // If arrayIndex was never incremented and the iterator is done, we were handed an empty iterator
-              // and we should resolve
-              resolve();
-            }
+        if (iteratorIsComplete) {
+          await onOperationCompletionAsync();
+        }
+      }
 
-            break;
+      async function onOperationCompletionAsync(): Promise<void> {
+        if (!promiseHasResolvedOrRejected) {
+          if (operationsInProgress === 0 && iteratorIsComplete) {
+            promiseHasResolvedOrRejected = true;
+            resolve();
+          } else if (!iteratorIsComplete) {
+            await queueOperationsAsync();
           }
         }
       }
 
-      onOperationCompletionAsync().catch(reject);
+      queueOperationsAsync().catch((error) => {
+        promiseHasResolvedOrRejected = true;
+        reject(error);
+      });
     });
   }
 
