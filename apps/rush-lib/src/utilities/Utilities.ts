@@ -422,12 +422,35 @@ export class Utilities {
   }
 
   /**
+   * Utility to determine if a user is executing this command at a terminal (that is, it's not
+   * another program or being piped into another program).
+   */
+  public static isUserTerminal(): boolean {
+    // The isTTY flag is reliable pretty much everywhere that matters -- Windows,
+    // MacOS, Linux, within Powershell, across SSH, in Cygwin, inside a remote
+    // Powershell session piped through SSH, etc.
+    //
+    // If we encounter a scenario where isTTY isn't sufficient, we can shore this
+    // up -- in the worst case, we'd be skipping a startup banner in a case
+    // where we could have shown it.
+    return !!process.stdout.isTTY;
+  }
+
+  /**
    * Utility to determine if the app should restrict writing to the console.
    */
   public static shouldRestrictConsoleOutput(): boolean {
-    return (
-      CommandLineHelper.isTabCompletionActionRequest(process.argv) || process.argv.indexOf('--json') !== -1
-    );
+    const isTab: boolean = CommandLineHelper.isTabCompletionActionRequest(process.argv);
+    const isHelp: boolean = process.argv.indexOf('-h') !== -1 || process.argv.indexOf('--help') !== -1;
+    const isJson: boolean = process.argv.indexOf('--json') !== -1;
+    const isUser: boolean = Utilities.isUserTerminal();
+
+    // A tab completion should never print startup info.
+    //
+    // Barring that, if the output is not a user terminal OR a --json flag exists, we want
+    // to suppress startup info -- unless the user is requesting help, in which case we
+    // should always show startup info anyway.
+    return isTab || ((isJson || !isUser) && !isHelp);
   }
 
   /**
