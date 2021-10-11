@@ -122,7 +122,7 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const terminal: Terminal = new Terminal(this.rushSession.terminalProvider);
     let buildCacheConfiguration: BuildCacheConfiguration | undefined;
-    if (!this._disableBuildCache) {
+    if (!this._disableBuildCache && ['build', 'rebuild'].includes(this.actionName)) {
       buildCacheConfiguration = await BuildCacheConfiguration.tryLoadAsync(
         terminal,
         this.rushConfiguration,

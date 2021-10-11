@@ -123,15 +123,23 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
       throw Utilities.getRushConfigNotFoundError();
     }
 
+    this._throwPluginErrorIfNeed();
+
+    await this.parser.pluginManager.tryInitializePluginsForCommand(this.actionName);
+
+    this._throwPluginErrorIfNeed();
+
+    await this.rushSession.hooks.initialize.promise();
+
+    return super.onExecute();
+  }
+
+  private _throwPluginErrorIfNeed(): void {
     if (!['update', 'init-autoinstaller', 'update-autoinstaller'].includes(this.actionName)) {
-      const pluginError: Error | null = this.parser.pluginManager.error;
+      const pluginError: Error | undefined = this.parser.pluginManager.error;
       if (pluginError) {
         throw pluginError;
       }
     }
-
-    await this.parser.pluginManager.tryInitializePluginsForCommand(this.actionName);
-
-    return super.onExecute();
   }
 }

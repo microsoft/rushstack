@@ -6,7 +6,7 @@ import type { IRushPlugin, RushSession, RushConfiguration } from '@microsoft/rus
 import type { AmazonS3BuildCacheProvider } from './AmazonS3BuildCacheProvider';
 
 const AmazonS3BuildCacheProviderModule: typeof import('./AmazonS3BuildCacheProvider') = Import.lazy(
-  '../logic/buildCache/AmazonS3/AmazonS3BuildCacheProvider',
+  './AmazonS3BuildCacheProvider',
   require
 );
 

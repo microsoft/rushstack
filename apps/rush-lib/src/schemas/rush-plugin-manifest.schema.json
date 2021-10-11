@@ -27,18 +27,11 @@
             "description": "Specifies options schema file path. This path is resolved relative to the package folder.",
             "type": "string"
           },
-          "conditionalInstall": {
-            "description": "Specifies when this plugin will be installed.",
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "commandNames": {
-                "description": "Specify a list of command name, trigger plugin installation when one of these commands run",
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
+          "associatedCommands": {
+            "description": "Specifies associated commands with this plugin, plugin will be only installed when a associated command runs.",
+            "type": "array",
+            "items": {
+              "type": "string"
             }
           }
         }

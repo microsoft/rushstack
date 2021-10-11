@@ -137,7 +137,6 @@ export class RushCommandLineParser extends CommandLineParser {
     this._terminalProvider.verboseEnabled = this.isDebug;
 
     await this.pluginManager.tryInitializePluginsAsync();
-    await this.rushSession.hooks.initialize.promise();
 
     return await super.execute(args);
   }
