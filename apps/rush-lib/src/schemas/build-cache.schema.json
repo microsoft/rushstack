@@ -95,6 +95,22 @@
               "description": "If set to true, allow writing to the cache. Defaults to false."
             }
           }
+        },
+
+        "customConfiguration": {
+          "type": "object",
+
+          "additionalProperties": false,
+          "properties": {
+            "modulePath": {
+              "type": "string",
+              "description": "(Required) Path relative to this configuration file to the module where the custom provided is defined"
+            },
+            "isCacheWriteAllowed": {
+              "type": "boolean",
+              "description": "If set to true, allow writing to the cache. Defaults to false."
+            }
+          }
         }
       },
 
@@ -152,6 +168,27 @@
               "properties": {
                 "s3Region": { "$ref": "#/definitions/anything" },
                 "s3Bucket": { "$ref": "#/definitions/anything" }
+              }
+            }
+          }
+        },
+
+        {
+          "type": "object",
+
+          "additionalProperties": true,
+          "properties": {
+            "cacheProvider": {
+              "type": "string",
+              "enum": ["custom"]
+            },
+            "customConfiguration": {
+              "type": "object",
+
+              "additionalProperties": true,
+              "required": ["modulePath"],
+              "properties": {
+                "modulePath": { "$ref": "#/definitions/anything" }
               }
             }
           }

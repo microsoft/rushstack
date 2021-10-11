@@ -28,8 +28,9 @@ import type {
 const AmazonS3BuildCacheProviderModule: typeof import('../logic/buildCache/AmazonS3/AmazonS3BuildCacheProvider') =
   Import.lazy('../logic/buildCache/AmazonS3/AmazonS3BuildCacheProvider', require);
 import type { AmazonS3BuildCacheProvider } from '../logic/buildCache/AmazonS3/AmazonS3BuildCacheProvider';
+import type { ICustomBuildCacheProvider } from '../logic/buildCache/CustomBuildCacheProvider';
 
-export type BuildCacheProvider = 'azure-blob-storage' | 'amazon-s3' | 'local-only';
+export type BuildCacheProvider = 'azure-blob-storage' | 'amazon-s3' | 'local-only' | 'custom';
 
 /**
  * Describes the file structure for the "common/config/rush/build-cache.json" config file.
@@ -56,7 +57,17 @@ interface ILocalBuildCacheJson extends IBaseBuildCacheJson {
   cacheProvider: 'local-only';
 }
 
-type IBuildCacheJson = IAzureBlobStorageBuildCacheJson | IAmazonS3BuildCacheJson | ILocalBuildCacheJson;
+interface ICustomBuildCacheJson extends IBaseBuildCacheJson {
+  cacheProvider: 'custom';
+
+  customConfiguration: ICustomConfigurationJson;
+}
+
+type IBuildCacheJson =
+  | IAzureBlobStorageBuildCacheJson
+  | IAmazonS3BuildCacheJson
+  | ILocalBuildCacheJson
+  | ICustomBuildCacheJson;
 
 interface IAzureStorageConfigurationJson {
   /**
@@ -107,6 +118,19 @@ interface IAmazonS3ConfigurationJson {
   isCacheWriteAllowed?: boolean;
 }
 
+interface ICustomConfigurationJson extends Record<string, unknown> {
+  /**
+   * Module name or relative path from the Rush configuration directory to the custom build cache provider
+   * The module must export a class that implements CloudBuildCacheProviderBase as the default export
+   */
+  modulePath: string;
+
+  /**
+   * If set to true, allow writing to the cache. Defaults to false.
+   */
+  isCacheWriteAllowed?: boolean;
+}
+
 interface IBuildCacheConfigurationOptions {
   buildCacheJson: IBuildCacheJson;
   getCacheEntryId: GetCacheEntryIdFunction;
@@ -133,6 +157,7 @@ export class BuildCacheConfiguration {
   public readonly getCacheEntryId: GetCacheEntryIdFunction;
   public readonly localCacheProvider: FileSystemBuildCacheProvider;
   public readonly cloudCacheProvider: CloudBuildCacheProviderBase | undefined;
+  public readonly commonRushConfigFolder: string;
 
   private constructor(options: IBuildCacheConfigurationOptions) {
     this.buildCacheEnabled =
@@ -143,6 +168,8 @@ export class BuildCacheConfiguration {
       rushUserConfiguration: options.rushUserConfiguration,
       rushConfiguration: options.rushConfiguration
     });
+
+    this.commonRushConfigFolder = options.rushConfiguration.commonRushConfigFolder;
 
     const { buildCacheJson } = options;
     buildCacheJson.cacheProvider =
@@ -165,6 +192,11 @@ export class BuildCacheConfiguration {
         this.cloudCacheProvider = this._createAmazonS3BuildCacheProvider(
           buildCacheJson.amazonS3Configuration
         );
+        break;
+      }
+
+      case 'custom': {
+        this.cloudCacheProvider = this._createCustomBuildCacheProvider(buildCacheJson.customConfiguration);
         break;
       }
 
@@ -276,5 +308,25 @@ export class BuildCacheConfiguration {
       s3Prefix: amazonS3ConfigurationJson.s3Prefix,
       isCacheWriteAllowed: !!amazonS3ConfigurationJson.isCacheWriteAllowed
     });
+  }
+
+  private _createCustomBuildCacheProvider(
+    customConfigurationJson: ICustomConfigurationJson
+  ): CloudBuildCacheProviderBase {
+    let modulePath: string = customConfigurationJson.modulePath;
+    if (
+      customConfigurationJson.modulePath.startsWith('.') ||
+      customConfigurationJson.modulePath.startsWith(path.sep)
+    ) {
+      modulePath = path.resolve(this.commonRushConfigFolder, customConfigurationJson.modulePath);
+      if (!FileSystem.exists(modulePath)) {
+        throw new Error(
+          `The custom build cache provider can not be found in ${modulePath}.\nThe Rush website documentation has instructions for using a custom build cache provider.`
+        );
+      }
+    }
+    const mod: ICustomBuildCacheProvider & { default?: ICustomBuildCacheProvider } = require(modulePath);
+    const provider: ICustomBuildCacheProvider = (mod.default ?? mod) as ICustomBuildCacheProvider;
+    return new provider(customConfigurationJson);
   }
 }
