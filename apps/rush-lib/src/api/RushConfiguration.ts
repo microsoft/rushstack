@@ -34,6 +34,7 @@ import { PackageNameParsers } from './PackageNameParsers';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import { LookupByPath } from '../logic/LookupByPath';
 import { PackageJsonDependency } from './PackageJsonEditor';
+import { RushPluginsConfiguration } from './RushPluginsConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -56,7 +57,8 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.nonbrowserApprovedPackagesFilename,
   RushConstants.pinnedVersionsFilename,
   RushConstants.repoStateFilename,
-  RushConstants.versionPoliciesFilename
+  RushConstants.versionPoliciesFilename,
+  RushConstants.rushPluginsConfigFilename
 ];
 
 /**
@@ -494,6 +496,8 @@ export class RushConfiguration {
   private _versionPolicyConfigurationFilePath: string;
   private _experimentsConfiguration: ExperimentsConfiguration;
 
+  private _rushPluginsConfiguration: RushPluginsConfiguration;
+
   private readonly _rushConfigurationJson: IRushConfigurationJson;
 
   /**
@@ -554,6 +558,12 @@ export class RushConfiguration {
       RushConstants.experimentsFilename
     );
     this._experimentsConfiguration = new ExperimentsConfiguration(experimentsConfigFile);
+
+    const rushPluginsConfigFilename: string = path.join(
+      this._commonRushConfigFolder,
+      RushConstants.rushPluginsConfigFilename
+    );
+    this._rushPluginsConfiguration = new RushPluginsConfiguration(rushPluginsConfigFilename);
 
     this._npmOptions = new NpmOptionsConfiguration(rushConfigurationJson.npmOptions || {});
     this._pnpmOptions = new PnpmOptionsConfiguration(
@@ -1085,6 +1095,22 @@ export class RushConfiguration {
    */
   public get commonAutoinstallersFolder(): string {
     return path.join(this._commonFolder, 'autoinstallers');
+  }
+
+  /**
+   * The folder where rush-plugin options json files are stored.
+   * Example: `C:\MyRepo\common\config\rush-plugins`
+   */
+  public get rushPluginOptionsFolder(): string {
+    return path.join(this._commonFolder, 'config', 'rush-plugins');
+  }
+
+  /**
+   * The folder where rush plugin manifest files are stored.
+   * Example: `C:\MyRepo\common\rush-plugin-manifests`
+   */
+  public get rushPluginManifestsFolder(): string {
+    return path.join(this._commonFolder, 'rush-plugin-manifests');
   }
 
   /**
@@ -1717,6 +1743,10 @@ export class RushConfiguration {
    */
   public get experimentsConfiguration(): ExperimentsConfiguration {
     return this._experimentsConfiguration;
+  }
+
+  public get rushPluginsConfiguration(): RushPluginsConfiguration {
+    return this._rushPluginsConfiguration;
   }
 
   /**
