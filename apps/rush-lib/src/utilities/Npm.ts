@@ -37,7 +37,7 @@ export class Npm {
           true
         );
         if (packageVersions && packageVersions.length > 0) {
-          JSON.parse(packageVersions).forEach((version: string) => {
+          JSON.parse(packageVersions[0] === '[' ? packageVersions : `[${packageVersions}]`).forEach((version: string) => {
             versions.push(version);
           });
         } else {
