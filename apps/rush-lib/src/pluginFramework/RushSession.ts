@@ -15,18 +15,18 @@ export interface IRushSessionOptions {
   getIsDebugMode: () => boolean;
 }
 
+export type ICloudBuildCacheProviderFactory = (
+  buildCacheJson: IBuildCacheJson
+) => CloudBuildCacheProviderBase;
+
 /**
  * @public
  */
 export class RushSession implements IRushLifecycle {
   private readonly _options: IRushSessionOptions;
+  private _cloudBuildCacheProviderFactories: Map<string, ICloudBuildCacheProviderFactory> = new Map();
 
   public readonly hooks: RushLifecycleHooks;
-
-  public cloudCacheProviderFactories: Map<
-    string,
-    (buildCacheJson: IBuildCacheJson, buildCacheConfigFilePath: string) => CloudBuildCacheProviderBase
-  > = new Map();
 
   public constructor(options: IRushSessionOptions) {
     this._options = options;
@@ -68,5 +68,21 @@ export class RushSession implements IRushLifecycle {
 
   public get terminalProvider(): ITerminalProvider {
     return this._options.terminalProvider;
+  }
+
+  public registerCloudBuildCacheProviderFactory(
+    cacheProviderName: string,
+    factory: ICloudBuildCacheProviderFactory
+  ): void {
+    if (this._cloudBuildCacheProviderFactories.has(cacheProviderName)) {
+      throw new Error(`A build cache provider factory for ${cacheProviderName} has already been registered`);
+    }
+    this._cloudBuildCacheProviderFactories.set(cacheProviderName, factory);
+  }
+
+  public getCloudBuildCacheProviderFactory(
+    cacheProviderName: string
+  ): ICloudBuildCacheProviderFactory | undefined {
+    return this._cloudBuildCacheProviderFactories.get(cacheProviderName);
   }
 }

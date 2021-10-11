@@ -145,6 +145,16 @@ export class RushConstants {
   public static readonly experimentsFilename: string = 'experiments.json';
 
   /**
+   * Rush plugins configuration file.
+   */
+  public static readonly rushPluginsConfigFilename: string = 'rush-plugins.json';
+
+  /**
+   *
+   */
+  public static readonly rushPluginManifestFilename: string = 'rush-plugin-manifest.json';
+
+  /**
    * The artifactory.json configuration file name.
    */
   public static readonly artifactoryFilename: string = 'artifactory.json';

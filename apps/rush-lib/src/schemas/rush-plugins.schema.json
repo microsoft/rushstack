@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "Rush rush-plugins.json config file",
+  "description": "This file defines plugins used by Rush",
+  "type": "object",
+  "required": ["plugins"],
+  "additionalProperties": false,
+  "properties": {
+    "plugins": {
+      "description": "A list of rush plugin definition.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["packageName", "pluginName", "autoinstallerName"],
+        "additionalProperties": false,
+        "properties": {
+          "packageName": {
+            "description": "The NPM package name of the rush plugin.",
+            "type": "string"
+          },
+          "pluginName": {
+            "description": "The plugin name provided by rush plugin package.",
+            "type": "string"
+          },
+          "autoinstallerName": {
+            "description": "Specifies an autoinstaller name where the rush plugin package is installed.",
+            "type": "string"
+          },
+          "optionsJsonFilePath": {
+            "description": "Specifies the path of the options json configuration file to be used by this plugin. The path is resolved relative to the common/rush-plugins folder.",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
