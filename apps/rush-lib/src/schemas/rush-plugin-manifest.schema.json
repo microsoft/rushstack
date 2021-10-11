@@ -11,7 +11,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["pluginName", "description", "entryPoint", "optionsSchema"],
+        "required": ["pluginName", "description", "entryPoint"],
         "properties": {
           "pluginName": {
             "type": "string"

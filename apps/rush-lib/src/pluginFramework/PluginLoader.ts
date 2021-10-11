@@ -21,7 +21,7 @@ export interface IRushPluginManifest {
   pluginName: string;
   description: string;
   entryPoint: string;
-  optionsSchema: string;
+  optionsSchema?: string;
   associatedCommands?: string[];
 }
 
@@ -133,11 +133,12 @@ export class PluginLoader {
     return this._manifestCache;
   }
 
-  private _getRushPluginOptionsSchema(): JsonSchema {
-    const optionsSchemaFilePath: string = path.join(
-      this._packageFolder,
-      this._getRushPluginManifest().optionsSchema
-    );
+  private _getRushPluginOptionsSchema(): JsonSchema | undefined {
+    const optionsSchema: string | undefined = this._getRushPluginManifest().optionsSchema;
+    if (!optionsSchema) {
+      return undefined;
+    }
+    const optionsSchemaFilePath: string = path.join(this._packageFolder);
     return JsonSchema.fromFile(optionsSchemaFilePath);
   }
 
@@ -176,9 +177,17 @@ export class PluginLoader {
   }
 
   private _getPluginOptions(): JsonObject {
-    const optionsJsonFilePath: string = this._pluginConfiguration.optionsJsonFilePath;
+    const optionsJsonFilePath: string | undefined = this._pluginConfiguration.optionsJsonFilePath;
+    const optionsSchema: JsonSchema | undefined = this._getRushPluginOptionsSchema();
+
     if (!optionsJsonFilePath) {
-      return {};
+      if (!optionsSchema) {
+        return {};
+      } else {
+        throw new Error(
+          `optionsJsonFilePath is required for rush plugin ${this._pluginConfiguration.pluginName} from package ${this._pluginConfiguration.packageName}, please check your rush-plugins.json.`
+        );
+      }
     }
 
     const resolvedOptionsJsonFilePath: string = path.join(
@@ -190,7 +199,11 @@ export class PluginLoader {
       throw new Error(`optionsJsonFile does not exist at ${resolvedOptionsJsonFilePath}`);
     }
 
-    return JsonFile.loadAndValidate(resolvedOptionsJsonFilePath, this._getRushPluginOptionsSchema());
+    if (optionsSchema) {
+      return JsonFile.loadAndValidate(resolvedOptionsJsonFilePath, optionsSchema);
+    } else {
+      return JsonFile.load(resolvedOptionsJsonFilePath);
+    }
   }
 
   private _getManifestPath(): string {
