@@ -136,10 +136,7 @@ export class RushCommandLineParser extends CommandLineParser {
   public async execute(args?: string[]): Promise<boolean> {
     this._terminalProvider.verboseEnabled = this.isDebug;
 
-    const initialized: boolean = await this.pluginManager.tryInitializePluginsAsync();
-    if (!initialized) {
-      this._terminal.writeWarningLine(`To use rush plugins, you need run 'rush update' first.`);
-    }
+    await this.pluginManager.tryInitializePluginsAsync();
     await this.rushSession.hooks.initialize.promise();
 
     return await super.execute(args);
