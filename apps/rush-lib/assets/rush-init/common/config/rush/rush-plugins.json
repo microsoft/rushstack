@@ -1,0 +1,30 @@
+/**
+ * This configuration file manages Rush's plugin feature.
+ */
+{
+  "plugins": [
+    /**
+     * Each item defines a plugin configuration used by Rush.
+     */
+    /*[BEGIN "DEMO"]*/
+    {
+      /**
+       * The name of the rush plugin package.
+       */
+      "packageName": "@scope/my-rush-plugin",
+      /**
+       * The name of the plugin provided by rush plugin package
+       */
+      "pluginName": "my-plugin-name",
+      /**
+       * Autoinstaller name used to install the plugin.
+       */
+      "autoinstallerName": "plugins",
+      /**
+       * The file path of a json file that contains the configuration for the plugin.
+       */
+      "optionsJsonFilePath": "my-plugin-options.json"
+    }
+    /*[END "DEMO"]*/
+  ]
+}

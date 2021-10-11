@@ -387,37 +387,6 @@
   /*[LINE "HYPOTHETICAL"]*/ "hotfixChangeEnabled": false,
 
   /**
-   * Specify an autoinstaller name, whose packages are used by the rush plugins.
-   * It will be auto installed before each rush commands run.
-   *
-   * Example: assume you want to use an autoinstaller named "plugins":
-   *   rush init-autoinstaller --name plugins
-   *   cd common/autoinstallers/plugins
-   *   pnpm install some-rush-plugins
-   *   rush update-autoinstaller --name plugins
-   */
-  /*[LINE "HYPOTHETICAL"]*/ "pluginsAutoinstallerName": "plugins",
-
-  /**
-   * Rush plugins configuration.
-   */
-  /*[BEGIN "DEMO"]*/
-  "rushPlugins": [
-    {
-      /**
-       * (Required) Plugin specifier, i.e. "@scope/rush-plugin-foo".
-       */
-      "plugin": "",
-
-      /**
-       * Plugin options.
-       */
-      "options": {}
-    }
-  ],
-  /*[END "DEMO"]*/
-
-  /**
    * Rush plugins allow you to extend Rush's behavior.  Plugins are specified as a list of package
    * specifier with options.  When Rush starts up, it will load these plugins and allow them to extend
    * the behavior of the rush process.
