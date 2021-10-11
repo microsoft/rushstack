@@ -316,20 +316,4 @@ describe('RushConfiguration', () => {
       done();
     });
   });
-
-  describe('rush plugins', () => {
-    it('should work with rush plugin', (done: jest.DoneCallback) => {
-      const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-plugin.json');
-      const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
-
-      expect(rushConfiguration.rushConfigurationJson.pluginsAutoinstallerName).toBeTruthy();
-      expect(rushConfiguration.rushConfigurationJson.rushPlugins).toEqual([
-        {
-          plugin: 'rush-plugin1',
-          options: {}
-        }
-      ]);
-      done();
-    });
-  });
 });
