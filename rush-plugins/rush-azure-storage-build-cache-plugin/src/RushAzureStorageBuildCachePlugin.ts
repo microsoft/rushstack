@@ -6,7 +6,7 @@ import type { IRushPlugin, RushSession, RushConfiguration } from '@microsoft/rus
 import type { AzureEnvironmentNames } from './AzureStorageBuildCacheProvider';
 
 const AzureStorageBuildCacheProviderModule: typeof import('./AzureStorageBuildCacheProvider') = Import.lazy(
-  '../logic/buildCache/AzureStorageBuildCacheProvider',
+  './AzureStorageBuildCacheProvider',
   require
 );
 

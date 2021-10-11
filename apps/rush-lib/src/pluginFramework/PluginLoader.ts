@@ -17,16 +17,12 @@ import { Autoinstaller } from '../logic/Autoinstaller';
 import { RushConstants } from '../logic/RushConstants';
 import { IRushPlugin } from './IRushPlugin';
 
-export interface IConditionalInstall {
-  commandNames?: string[];
-}
-
 export interface IRushPluginManifest {
   pluginName: string;
   description: string;
   entryPoint: string;
   optionsSchema: string;
-  conditionalInstall?: IConditionalInstall;
+  associatedCommands?: string[];
 }
 
 export interface IRushPluginManifestJson {
@@ -51,7 +47,7 @@ export class PluginLoader {
   private _rushConfiguration: RushConfiguration;
   private _terminal: ITerminal;
   private _autoinstaller: Autoinstaller;
-  private _packagePathCache!: string;
+  private _packageFolderCache!: string;
   private _manifestCache!: IRushPluginManifest;
 
   public constructor({ pluginConfiguration, rushConfiguration, terminal }: IPluginLoaderOptions) {
@@ -65,7 +61,7 @@ export class PluginLoader {
   }
 
   public update(): void {
-    const manifestPath: string = path.join(this._packagePath, RushConstants.rushPluginManifestFilename);
+    const manifestPath: string = path.join(this._packageFolder, RushConstants.rushPluginManifestFilename);
 
     // validate
     JsonFile.loadAndValidate(manifestPath, PluginLoader._jsonSchema);
@@ -95,16 +91,16 @@ export class PluginLoader {
     return this._getRushPluginManifest();
   }
 
-  private get _packagePath(): string {
-    if (!this._packagePathCache) {
+  private get _packageFolder(): string {
+    if (!this._packageFolderCache) {
       const packageName: string = this._pluginConfiguration.packageName;
       const packagePath: string = Import.resolvePackage({
         baseFolderPath: this._autoinstaller.folderFullPath,
         packageName
       });
-      this._packagePathCache = packagePath;
+      this._packageFolderCache = packagePath;
     }
-    return this._packagePathCache;
+    return this._packageFolderCache;
   }
 
   private _getRushPluginManifest(): IRushPluginManifest {
@@ -139,14 +135,14 @@ export class PluginLoader {
 
   private _getRushPluginOptionsSchema(): JsonSchema {
     const optionsSchemaFilePath: string = path.join(
-      this._packagePath,
+      this._packageFolder,
       this._getRushPluginManifest().optionsSchema
     );
     return JsonSchema.fromFile(optionsSchemaFilePath);
   }
 
   private _resolvePlugin(): string {
-    const modulePath: string = path.join(this._packagePath, this._getRushPluginManifest().entryPoint);
+    const modulePath: string = path.join(this._packageFolder, this._getRushPluginManifest().entryPoint);
     return modulePath;
   }
 

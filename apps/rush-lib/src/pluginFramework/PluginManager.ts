@@ -24,7 +24,7 @@ export class PluginManager {
   private _pluginLoaders: PluginLoader[];
   private _installedAutoinstallerNames: Set<string>;
 
-  private _error: Error | null;
+  private _error: Error | undefined;
 
   public constructor(options: IPluginManagerOptions) {
     this._terminal = options.terminal;
@@ -32,7 +32,6 @@ export class PluginManager {
     this._rushSession = options.rushSession;
 
     this._installedAutoinstallerNames = new Set<string>();
-    this._error = null;
 
     this._pluginLoaders = (this._rushConfiguration?.rushPluginsConfiguration.configuration.plugins ?? []).map(
       (pluginConfiguration) => {
@@ -45,7 +44,7 @@ export class PluginManager {
     );
   }
 
-  public get error(): Error | null {
+  public get error(): Error | undefined {
     return this._error;
   }
 
@@ -76,7 +75,7 @@ export class PluginManager {
 
   public async tryInitializePluginsAsync(): Promise<void> {
     try {
-      const pluginLoaders: PluginLoader[] = this._getUnconditionalInstallPluginLoaders();
+      const pluginLoaders: PluginLoader[] = this._getUnassociatedPluginLoaders();
       await this._preparePluginAutoinstallersAsync(pluginLoaders);
       await this._initializePluginsAsync(pluginLoaders);
     } catch (e) {
@@ -107,15 +106,15 @@ export class PluginManager {
     }
   }
 
-  private _getUnconditionalInstallPluginLoaders(): PluginLoader[] {
+  private _getUnassociatedPluginLoaders(): PluginLoader[] {
     return this._pluginLoaders.filter((pluginLoader) => {
-      return !pluginLoader.pluginManifest.conditionalInstall;
+      return !pluginLoader.pluginManifest.associatedCommands;
     });
   }
 
   private _getPluginLoadersForCommand(commandName: string): PluginLoader[] {
     return this._pluginLoaders.filter((pluginLoader) => {
-      return pluginLoader.pluginManifest.conditionalInstall?.commandNames?.includes(commandName);
+      return pluginLoader.pluginManifest.associatedCommands?.includes(commandName);
     });
   }
 
