@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import { Import, JsonSchema } from '@rushstack/node-core-library';
-import type { IRushPlugin, RushSession, RushConfiguration, ILogger } from '@microsoft/rush-lib';
+import { Import } from '@rushstack/node-core-library';
+import type { IRushPlugin, RushSession, RushConfiguration } from '@microsoft/rush-lib';
 import type { AzureEnvironmentNames } from './AzureStorageBuildCacheProvider';
 
 const AzureStorageBuildCacheProviderModule: typeof import('./AzureStorageBuildCacheProvider') = Import.lazy(
@@ -49,37 +48,21 @@ interface IAzureStorageConfigurationJson {
 export class RushAzureStorageBuildCachePlugin implements IRushPlugin {
   public pluginName: string = PLUGIN_NAME;
 
-  private static _getBuildCacheConfigJsonSchema(): JsonSchema {
-    return JsonSchema.fromFile(path.join(__dirname, 'schemas', 'azure-blob-storage-config.schema.json'));
-  }
-
   public apply(rushSession: RushSession, rushConfig: RushConfiguration): void {
     rushSession.hooks.initialize.tap(PLUGIN_NAME, () => {
-      rushSession.cloudCacheProviderFactories.set(
-        'azure-blob-storage',
-        (buildCacheConfig, buildCacheConfigFilePath) => {
-          const logger: ILogger = rushSession.getLogger(PLUGIN_NAME);
-          try {
-            RushAzureStorageBuildCachePlugin._getBuildCacheConfigJsonSchema().validateObject(
-              buildCacheConfig,
-              buildCacheConfigFilePath
-            );
-          } catch (e) {
-            logger.emitError(e);
-          }
-          type IBuildCache = typeof buildCacheConfig & {
-            azureStorageConfiguration: IAzureStorageConfigurationJson;
-          };
-          const { azureStorageConfiguration } = buildCacheConfig as IBuildCache;
-          return new AzureStorageBuildCacheProviderModule.AzureStorageBuildCacheProvider({
-            storageAccountName: azureStorageConfiguration.storageAccountName,
-            storageContainerName: azureStorageConfiguration.storageContainerName,
-            azureEnvironment: azureStorageConfiguration.azureEnvironment,
-            blobPrefix: azureStorageConfiguration.blobPrefix,
-            isCacheWriteAllowed: !!azureStorageConfiguration.isCacheWriteAllowed
-          });
-        }
-      );
+      rushSession.registerCloudBuildCacheProviderFactory('azure-blob-storage', (buildCacheConfig) => {
+        type IBuildCache = typeof buildCacheConfig & {
+          azureStorageConfiguration: IAzureStorageConfigurationJson;
+        };
+        const { azureStorageConfiguration } = buildCacheConfig as IBuildCache;
+        return new AzureStorageBuildCacheProviderModule.AzureStorageBuildCacheProvider({
+          storageAccountName: azureStorageConfiguration.storageAccountName,
+          storageContainerName: azureStorageConfiguration.storageContainerName,
+          azureEnvironment: azureStorageConfiguration.azureEnvironment,
+          blobPrefix: azureStorageConfiguration.blobPrefix,
+          isCacheWriteAllowed: !!azureStorageConfiguration.isCacheWriteAllowed
+        });
+      });
     });
   }
 }
