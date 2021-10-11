@@ -56,14 +56,20 @@ export class Autoinstaller {
   }
 
   public async prepareAsync(): Promise<void> {
+    const autoinstallerFullPath: string = this.folderFullPath;
+
+    if (!FileSystem.exists(autoinstallerFullPath)) {
+      throw new Error(
+        `The autoinstaller ${this.name} does not exist, Please run\nrush init-autoinstaller --name ${this.name}\n`
+      );
+    }
+
     const rushGlobalFolder: RushGlobalFolder = new RushGlobalFolder();
     await InstallHelpers.ensureLocalPackageManager(
       this._rushConfiguration,
       rushGlobalFolder,
       RushConstants.defaultMaxInstallAttempts
     );
-
-    const autoinstallerFullPath: string = this.folderFullPath;
 
     // Example: common/autoinstallers/my-task/package.json
     const relativePathForLogs: string = path.relative(

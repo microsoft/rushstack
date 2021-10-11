@@ -22,11 +22,17 @@ export class PluginManager {
   private _rushConfiguration: RushConfiguration;
   private _rushSession: RushSession;
   private _pluginLoaders: PluginLoader[];
+  private _installedAutoinstallerNames: Set<string>;
+
+  private _error: Error | null;
 
   public constructor(options: IPluginManagerOptions) {
     this._terminal = options.terminal;
     this._rushConfiguration = options.rushConfiguration;
     this._rushSession = options.rushSession;
+
+    this._installedAutoinstallerNames = new Set<string>();
+    this._error = null;
 
     this._pluginLoaders = (this._rushConfiguration?.rushPluginsConfiguration.configuration.plugins ?? []).map(
       (pluginConfiguration) => {
@@ -39,8 +45,12 @@ export class PluginManager {
     );
   }
 
+  public get error(): Error | null {
+    return this._error;
+  }
+
   public async updateAsync(): Promise<void> {
-    await this.prepareAsync();
+    await this._preparePluginAutoinstallersAsync(this._pluginLoaders);
     const uniqPluginPackageWithAutoinstallerName: PluginLoader[] = lodash.uniqBy(
       this._pluginLoaders,
       (pluginLoader) => {
@@ -52,39 +62,61 @@ export class PluginManager {
     }
   }
 
-  public async tryInitializePluginsAsync(): Promise<boolean> {
-    let loadFailed: boolean = false;
-    const pluginInfos: { plugin: IRushPlugin; pluginName: string }[] = [];
-    try {
-      for (const pluginLoader of this._pluginLoaders) {
-        pluginInfos.push({
-          plugin: pluginLoader.load(),
-          pluginName: pluginLoader.configuration.pluginName
-        });
-      }
-    } catch (e) {
-      if (e instanceof PluginLoader.NeedUpdateError) {
-        loadFailed = true;
-      } else {
-        throw e;
+  public async _preparePluginAutoinstallersAsync(pluginLoaders: PluginLoader[]): Promise<void> {
+    const autoinstallers: Autoinstaller[] = pluginLoaders.map((pluginLoader) => {
+      return pluginLoader.autoinstaller;
+    });
+    for (const autoInstaller of autoinstallers) {
+      if (!this._installedAutoinstallerNames.has(autoInstaller.name)) {
+        await autoInstaller.prepareAsync();
+        this._installedAutoinstallerNames.add(autoInstaller.name);
       }
     }
-    if (!loadFailed) {
-      for (const { plugin, pluginName } of pluginInfos) {
-        this._applyPlugin(plugin, pluginName);
-      }
-    }
-    return !loadFailed;
   }
 
-  public async prepareAsync(): Promise<void> {
-    const uniqAutoinstallers: Autoinstaller[] = lodash.uniqBy(
-      this._pluginLoaders.map((pluginLoader) => pluginLoader.autoinstaller),
-      (autoinstaller) => autoinstaller.name
-    );
-    for (const autoInstaller of uniqAutoinstallers) {
-      await autoInstaller.prepareAsync();
+  public async tryInitializePluginsAsync(): Promise<void> {
+    try {
+      const pluginLoaders: PluginLoader[] = this._getUnconditionalInstallPluginLoaders();
+      await this._preparePluginAutoinstallersAsync(pluginLoaders);
+      await this._initializePluginsAsync(pluginLoaders);
+    } catch (e) {
+      this._error = e as Error;
     }
+  }
+
+  public async tryInitializePluginsForCommand(commandName: string): Promise<void> {
+    try {
+      const pluginLoaders: PluginLoader[] = this._getPluginLoadersForCommand(commandName);
+      await this._preparePluginAutoinstallersAsync(pluginLoaders);
+      await this._initializePluginsAsync(pluginLoaders);
+    } catch (e) {
+      this._error = e as Error;
+    }
+  }
+
+  private async _initializePluginsAsync(pluginLoaders: PluginLoader[]): Promise<void> {
+    const pluginInfos: { plugin: IRushPlugin; pluginName: string }[] = [];
+    for (const pluginLoader of pluginLoaders) {
+      pluginInfos.push({
+        plugin: pluginLoader.load(),
+        pluginName: pluginLoader.configuration.pluginName
+      });
+    }
+    for (const { plugin, pluginName } of pluginInfos) {
+      this._applyPlugin(plugin, pluginName);
+    }
+  }
+
+  private _getUnconditionalInstallPluginLoaders(): PluginLoader[] {
+    return this._pluginLoaders.filter((pluginLoader) => {
+      return !pluginLoader.pluginManifest.conditionalInstall;
+    });
+  }
+
+  private _getPluginLoadersForCommand(commandName: string): PluginLoader[] {
+    return this._pluginLoaders.filter((pluginLoader) => {
+      return pluginLoader.pluginManifest.conditionalInstall?.commandNames?.includes(commandName);
+    });
   }
 
   private _applyPlugin(plugin: IRushPlugin, pluginName: string): void {

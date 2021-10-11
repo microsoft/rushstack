@@ -118,10 +118,19 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
     return super.rushConfiguration!;
   }
 
-  protected onExecute(): Promise<void> {
+  protected async onExecute(): Promise<void> {
     if (!this.rushConfiguration) {
       throw Utilities.getRushConfigNotFoundError();
     }
+
+    if (!['update', 'init-autoinstaller', 'update-autoinstaller'].includes(this.actionName)) {
+      const pluginError: Error | null = this.parser.pluginManager.error;
+      if (pluginError) {
+        throw pluginError;
+      }
+    }
+
+    await this.parser.pluginManager.tryInitializePluginsForCommand(this.actionName);
 
     return super.onExecute();
   }

@@ -17,11 +17,16 @@ import { Autoinstaller } from '../logic/Autoinstaller';
 import { RushConstants } from '../logic/RushConstants';
 import { IRushPlugin } from './IRushPlugin';
 
+export interface IConditionalInstall {
+  commandNames?: string[];
+}
+
 export interface IRushPluginManifest {
   pluginName: string;
   description: string;
   entryPoint: string;
   optionsSchema: string;
+  conditionalInstall?: IConditionalInstall;
 }
 
 export interface IRushPluginManifestJson {
@@ -33,8 +38,6 @@ export interface IPluginLoaderOptions {
   rushConfiguration: RushConfiguration;
   terminal: ITerminal;
 }
-
-export class NeedUpdateError extends Error {}
 
 /**
  * @beta
@@ -50,8 +53,6 @@ export class PluginLoader {
   private _autoinstaller: Autoinstaller;
   private _packagePathCache!: string;
   private _manifestCache!: IRushPluginManifest;
-
-  public static NeedUpdateError: typeof NeedUpdateError = NeedUpdateError;
 
   public constructor({ pluginConfiguration, rushConfiguration, terminal }: IPluginLoaderOptions) {
     this._pluginConfiguration = pluginConfiguration;
@@ -90,6 +91,10 @@ export class PluginLoader {
     return this._autoinstaller;
   }
 
+  public get pluginManifest(): IRushPluginManifest {
+    return this._getRushPluginManifest();
+  }
+
   private get _packagePath(): string {
     if (!this._packagePathCache) {
       const packageName: string = this._pluginConfiguration.packageName;
@@ -109,7 +114,9 @@ export class PluginLoader {
       const manifestPath: string = this._getManifestPath();
 
       if (!FileSystem.exists(manifestPath)) {
-        throw new NeedUpdateError();
+        throw new Error(
+          `Manifest for rush plugin package ${packageName} not found.\nPlease run 'rush update' first.`
+        );
       }
 
       const rushPluginManifestJson: IRushPluginManifestJson = JsonFile.loadAndValidate(
