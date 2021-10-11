@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
-import { Import, JsonSchema } from '@rushstack/node-core-library';
-import type { IRushPlugin, RushSession, RushConfiguration, ILogger } from '@microsoft/rush-lib';
+import { Import } from '@rushstack/node-core-library';
+import type { IRushPlugin, RushSession, RushConfiguration } from '@microsoft/rush-lib';
 import type { AmazonS3BuildCacheProvider } from './AmazonS3BuildCacheProvider';
 
 const AmazonS3BuildCacheProviderModule: typeof import('./AmazonS3BuildCacheProvider') = Import.lazy(
@@ -44,24 +43,11 @@ export interface IAmazonS3ConfigurationJson {
 export class RushAmazonS3BuildCachePlugin implements IRushPlugin {
   public pluginName: string = PLUGIN_NAME;
 
-  private static _getBuildCacheConfigJsonSchema(): JsonSchema {
-    return JsonSchema.fromFile(path.join(__dirname, 'schemas', 'amazon-s3-config.schema.json'));
-  }
-
   public apply(rushSession: RushSession, rushConfig: RushConfiguration): void {
     rushSession.hooks.initialize.tap(PLUGIN_NAME, () => {
-      rushSession.cloudCacheProviderFactories.set(
+      rushSession.registerCloudBuildCacheProviderFactory(
         'amazon-s3',
-        (buildCacheConfig, buildCacheConfigFilePath: string): AmazonS3BuildCacheProvider => {
-          const logger: ILogger = rushSession.getLogger(PLUGIN_NAME);
-          try {
-            RushAmazonS3BuildCachePlugin._getBuildCacheConfigJsonSchema().validateObject(
-              buildCacheConfig,
-              buildCacheConfigFilePath
-            );
-          } catch (e) {
-            logger.emitError(e);
-          }
+        (buildCacheConfig): AmazonS3BuildCacheProvider => {
           type IBuildCache = typeof buildCacheConfig & {
             amazonS3Configuration: IAmazonS3ConfigurationJson;
           };
