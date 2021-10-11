@@ -37,9 +37,12 @@ export class Npm {
           true
         );
         if (packageVersions && packageVersions.length > 0) {
-          JSON.parse(packageVersions[0] === '[' ? packageVersions : `[${packageVersions}]`).forEach((version: string) => {
-            versions.push(version);
-          });
+          const parsedPackageVersions: string | string[] = JSON.parse(packageVersions);
+          (Array.isArray(parsedPackageVersions) ? parsedPackageVersions : [parsedPackageVersions]).forEach(
+            (version: string) => {
+              versions.push(version);
+            }
+          );
         } else {
           console.log(`No version is found for ${packageName}`);
         }
