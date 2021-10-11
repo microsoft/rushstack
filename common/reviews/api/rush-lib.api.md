@@ -15,6 +15,7 @@ import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
 import { SyncBailHook } from 'tapable';
 import { SyncHook } from 'tapable';
+import { Terminal } from '@rushstack/node-core-library';
 
 // @public
 export class ApprovedPackagesConfiguration {
@@ -76,17 +77,17 @@ export class ChangeManager {
 // @beta (undocumented)
 export abstract class CloudBuildCacheProviderBase {
     // (undocumented)
-    abstract deleteCachedCredentialsAsync(terminal: Terminal): Promise<void>;
+    abstract deleteCachedCredentialsAsync(terminal: ITerminal): Promise<void>;
     // (undocumented)
     abstract readonly isCacheWriteAllowed: boolean;
     // (undocumented)
-    abstract tryGetCacheEntryBufferByIdAsync(terminal: Terminal, cacheId: string): Promise<Buffer | undefined>;
+    abstract tryGetCacheEntryBufferByIdAsync(terminal: ITerminal, cacheId: string): Promise<Buffer | undefined>;
     // (undocumented)
-    abstract trySetCacheEntryBufferAsync(terminal: Terminal, cacheId: string, entryBuffer: Buffer): Promise<boolean>;
+    abstract trySetCacheEntryBufferAsync(terminal: ITerminal, cacheId: string, entryBuffer: Buffer): Promise<boolean>;
     // (undocumented)
-    abstract updateCachedCredentialAsync(terminal: Terminal, credential: string): Promise<void>;
+    abstract updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void>;
     // (undocumented)
-    abstract updateCachedCredentialInteractiveAsync(terminal: Terminal): Promise<void>;
+    abstract updateCachedCredentialInteractiveAsync(terminal: ITerminal): Promise<void>;
 }
 
 // @public
@@ -595,6 +596,12 @@ export class RushConfiguration {
     get rushJsonFolder(): string;
     // @deprecated
     get rushLinkJsonFilename(): string;
+    get rushPluginManifestsFolder(): string;
+    get rushPluginOptionsFolder(): string;
+    // Warning: (ae-forgotten-export) The symbol "RushPluginsConfiguration" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    get rushPluginsConfiguration(): RushPluginsConfiguration;
     get shrinkwrapFilename(): string;
     get shrinkwrapFilePhrase(): string;
     get suppressNodeLtsWarning(): boolean;
@@ -679,6 +686,9 @@ export class RushConstants {
     static readonly rebuildCommandName: string;
     static readonly repoStateFilename: string;
     static readonly rushPackageName: string;
+    // (undocumented)
+    static readonly rushPluginManifestFilename: string;
+    static readonly rushPluginsConfigFilename: string;
     static readonly rushProjectConfigFilename: string;
     static readonly rushRecyclerFolderName: string;
     static readonly rushTempFolderName: string;
@@ -703,22 +713,24 @@ export class _RushGlobalFolder {
 
 // @public (undocumented)
 export class RushLifecycleHooks {
-    initialize: AsyncSeriesHook;
-    logger: SyncBailHook;
-    loggerOptions: SyncHook;
+    initialize: AsyncSeriesHook<void>;
+    logger: SyncBailHook<ILoggerOptions, ILogger>;
+    loggerOptions: SyncHook<ILoggerOptions>;
 }
 
 // @public (undocumented)
 export class RushSession implements IRushLifecycle {
     constructor(options: IRushSessionOptions);
-    // Warning: (ae-incompatible-release-tags) The symbol "cloudCacheProviderFactories" is marked as @public, but its signature references "CloudBuildCacheProviderBase" which is marked as @beta
-    //
     // (undocumented)
-    cloudCacheProviderFactories: Map<string, (buildCacheJson: IBuildCacheJson, buildCacheConfigFilePath: string) => CloudBuildCacheProviderBase>;
+    getCloudBuildCacheProviderFactory(cacheProviderName: string): ICloudBuildCacheProviderFactory | undefined;
     // (undocumented)
     getLogger(name: string): ILogger;
     // (undocumented)
     readonly hooks: RushLifecycleHooks;
+    // Warning: (ae-forgotten-export) The symbol "ICloudBuildCacheProviderFactory" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    registerCloudBuildCacheProviderFactory(cacheProviderName: string, factory: ICloudBuildCacheProviderFactory): void;
     // (undocumented)
     get terminalProvider(): ITerminalProvider;
 }
