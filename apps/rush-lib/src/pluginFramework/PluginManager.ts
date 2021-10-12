@@ -1,15 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Import, InternalError, ITerminal } from '@rushstack/node-core-library';
+import { InternalError, ITerminal } from '@rushstack/node-core-library';
+import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Autoinstaller } from '../logic/Autoinstaller';
 import { IRushPlugin } from './IRushPlugin';
 import { PluginLoader } from './PluginLoader';
 import { RushSession } from './RushSession';
-
-const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 export interface IPluginManagerOptions {
   terminal: ITerminal;
@@ -50,13 +49,7 @@ export class PluginManager {
 
   public async updateAsync(): Promise<void> {
     await this._preparePluginAutoinstallersAsync(this._pluginLoaders);
-    const uniqPluginPackageWithAutoinstallerName: PluginLoader[] = lodash.uniqBy(
-      this._pluginLoaders,
-      (pluginLoader) => {
-        return `${pluginLoader.configuration.packageName}$${pluginLoader.autoinstaller.name}`;
-      }
-    );
-    for (const pluginLoader of uniqPluginPackageWithAutoinstallerName) {
+    for (const pluginLoader of this._pluginLoaders) {
       pluginLoader.update();
     }
   }
@@ -73,7 +66,7 @@ export class PluginManager {
     }
   }
 
-  public async tryInitializePluginsAsync(): Promise<void> {
+  public async tryInitializeUnassociatedPluginsAsync(): Promise<void> {
     try {
       const pluginLoaders: PluginLoader[] = this._getUnassociatedPluginLoaders();
       await this._preparePluginAutoinstallersAsync(pluginLoaders);
@@ -83,7 +76,7 @@ export class PluginManager {
     }
   }
 
-  public async tryInitializePluginsForCommand(commandName: string): Promise<void> {
+  public async tryInitializeAssociatedCommandPluginsAsync(commandName: string): Promise<void> {
     try {
       const pluginLoaders: PluginLoader[] = this._getPluginLoadersForCommand(commandName);
       await this._preparePluginAutoinstallersAsync(pluginLoaders);
@@ -93,13 +86,28 @@ export class PluginManager {
     }
   }
 
+  public tryGetCustomCommandLineConfigurations(): CommandLineConfiguration[] {
+    const commandLineConfigurations: CommandLineConfiguration[] = [];
+    for (const pluginLoader of this._pluginLoaders) {
+      const commandLineConfiguration: CommandLineConfiguration | undefined =
+        pluginLoader.getCommandLineConfiguration();
+      if (commandLineConfiguration) {
+        commandLineConfigurations.push(commandLineConfiguration);
+      }
+    }
+    return commandLineConfigurations;
+  }
+
   private async _initializePluginsAsync(pluginLoaders: PluginLoader[]): Promise<void> {
     const pluginInfos: { plugin: IRushPlugin; pluginName: string }[] = [];
     for (const pluginLoader of pluginLoaders) {
-      pluginInfos.push({
-        plugin: pluginLoader.load(),
-        pluginName: pluginLoader.configuration.pluginName
-      });
+      const plugin: IRushPlugin | undefined = pluginLoader.load();
+      if (plugin) {
+        pluginInfos.push({
+          pluginName: pluginLoader.configuration.pluginName,
+          plugin
+        });
+      }
     }
     for (const { plugin, pluginName } of pluginInfos) {
       this._applyPlugin(plugin, pluginName);

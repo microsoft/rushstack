@@ -109,16 +109,22 @@ export class RushCommandLineParser extends CommandLineParser {
       rushConfiguration: this.rushConfiguration
     });
 
-    const rushSession: RushSession = new RushSession({
+    this.rushSession = new RushSession({
       getIsDebugMode: () => this.isDebug,
       terminalProvider: this._terminalProvider
     });
-    this.rushSession = rushSession;
     this.pluginManager = new PluginManager({
-      rushSession: rushSession,
+      rushSession: this.rushSession,
       rushConfiguration: this.rushConfiguration,
       terminal: this._terminal
     });
+
+    const pluginCommandLineConfigurations: CommandLineConfiguration[] =
+      this.pluginManager.tryGetCustomCommandLineConfigurations();
+    for (const commandLineConfiguration of pluginCommandLineConfigurations) {
+      this._addCommandLineConfigActions(commandLineConfiguration);
+      this._validateCommandLineConfigParameterAssociations(commandLineConfiguration);
+    }
 
     this._populateActions();
   }
@@ -136,7 +142,7 @@ export class RushCommandLineParser extends CommandLineParser {
   public async execute(args?: string[]): Promise<boolean> {
     this._terminalProvider.verboseEnabled = this.isDebug;
 
-    await this.pluginManager.tryInitializePluginsAsync();
+    await this.pluginManager.tryInitializeUnassociatedPluginsAsync();
 
     return await super.execute(args);
   }
