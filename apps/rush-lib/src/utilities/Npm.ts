@@ -38,6 +38,7 @@ export class Npm {
         );
         if (packageVersions && packageVersions.length > 0) {
           const parsedPackageVersions: string | string[] = JSON.parse(packageVersions);
+          // NPM <= 6 always returns an array, NPM >= 7 returns a string if the package has only one version available
           (Array.isArray(parsedPackageVersions) ? parsedPackageVersions : [parsedPackageVersions]).forEach(
             (version: string) => {
               versions.push(version);
