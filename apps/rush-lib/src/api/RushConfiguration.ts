@@ -1106,11 +1106,19 @@ export class RushConfiguration {
   }
 
   /**
+   * The folder where rush plugin related files are stored.
+   * Example: `C:\MyRepo\common\rush-plugins`
+   */
+  public get rushPluginsFolder(): string {
+    return path.join(this._commonFolder, 'rush-plugins');
+  }
+
+  /**
    * The folder where rush plugin manifest files are stored.
-   * Example: `C:\MyRepo\common\rush-plugin-manifests`
+   * Example: `C:\MyRepo\common\rush-plugins\manifests`
    */
   public get rushPluginManifestsFolder(): string {
-    return path.join(this._commonFolder, 'rush-plugin-manifests');
+    return path.join(this.rushPluginsFolder, 'manifests');
   }
 
   /**
