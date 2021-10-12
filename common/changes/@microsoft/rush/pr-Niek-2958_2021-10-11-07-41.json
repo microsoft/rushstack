@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix NPM version parsing",
+      "comment": "Fix an issue where a version field isn't parsed correctly when using NPM version 7 and newer.",
       "type": "none"
     }
   ],
