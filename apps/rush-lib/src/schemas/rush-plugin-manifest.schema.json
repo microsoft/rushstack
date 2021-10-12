@@ -10,8 +10,8 @@
       "type": "array",
       "items": {
         "type": "object",
+        "required": ["pluginName", "description"],
         "additionalProperties": false,
-        "required": ["pluginName", "description", "entryPoint"],
         "properties": {
           "pluginName": {
             "type": "string"
@@ -33,6 +33,10 @@
             "items": {
               "type": "string"
             }
+          },
+          "commandLineJsonFilePath": {
+            "description": "Specifies a command line config file path. The path is resolved relative to package folder. It defines custom command line commands, mostly same as command-line.json in Rush",
+            "type": "string"
           }
         }
       }

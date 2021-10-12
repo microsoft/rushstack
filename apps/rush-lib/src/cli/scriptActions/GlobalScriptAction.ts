@@ -5,10 +5,11 @@ import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
 
-import { FileSystem, IPackageJson, JsonFile, AlreadyReportedError } from '@rushstack/node-core-library';
+import { FileSystem, IPackageJson, JsonFile, AlreadyReportedError, Text } from '@rushstack/node-core-library';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { Utilities } from '../../utilities/Utilities';
 import { Autoinstaller } from '../../logic/Autoinstaller';
+import { IShellCommandTokenContext } from '../../api/CommandLineConfiguration';
 
 /**
  * Constructor parameters for GlobalScriptAction.
@@ -86,7 +87,8 @@ export class GlobalScriptAction extends BaseScriptAction {
   }
 
   public async runAsync(): Promise<void> {
-    const additionalPathFolders: string[] = [];
+    const additionalPathFolders: string[] =
+      this._commandLineConfiguration?.additionalPathFolders.slice() || [];
 
     if (this._autoinstallerName) {
       await this._prepareAutoinstallerName();
@@ -106,6 +108,13 @@ export class GlobalScriptAction extends BaseScriptAction {
     if (customParameterValues.length > 0) {
       shellCommand += ' ' + customParameterValues.join(' ');
     }
+
+    const shellCommandTokenContext: IShellCommandTokenContext | undefined =
+      this._commandLineConfiguration?.shellCommandTokenContext;
+    if (shellCommandTokenContext) {
+      shellCommand = this._expandShellCommandWithTokens(shellCommand, shellCommandTokenContext);
+    }
+    this._rejectAnyTokensInShellCommand(shellCommand);
 
     const exitCode: number = Utilities.executeLifecycleCommand(shellCommand, {
       rushConfiguration: this.rushConfiguration,
@@ -128,5 +137,28 @@ export class GlobalScriptAction extends BaseScriptAction {
 
   protected onDefineParameters(): void {
     this.defineScriptParameters();
+  }
+
+  private _expandShellCommandWithTokens(
+    shellCommand: string,
+    tokenContext: IShellCommandTokenContext
+  ): string {
+    let expandedShellCommand: string = shellCommand;
+    for (const [token, tokenReplacement] of Object.entries(tokenContext)) {
+      expandedShellCommand = Text.replaceAll(expandedShellCommand, `<${token}>`, tokenReplacement);
+    }
+    return expandedShellCommand;
+  }
+
+  private _rejectAnyTokensInShellCommand(shellCommand: string): void {
+    if (shellCommand.indexOf('<') < 0 && shellCommand.indexOf('>') < 0) {
+      return;
+    }
+    const tokenRegExp: RegExp = /(\<[^<]*?\>)/;
+    const match: RegExpExecArray | null = tokenRegExp.exec(shellCommand);
+    if (match) {
+      throw new Error(`The "shellCommand" value contains an unrecognized token "${match[1]}"`);
+    }
+    throw new Error(`The "shellCommand" value contains extra token characters ("<" or ">"): ${shellCommand}`);
   }
 }

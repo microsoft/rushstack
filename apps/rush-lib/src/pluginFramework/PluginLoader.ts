@@ -16,13 +16,15 @@ import { IRushPluginConfiguration } from '../api/RushPluginsConfiguration';
 import { Autoinstaller } from '../logic/Autoinstaller';
 import { RushConstants } from '../logic/RushConstants';
 import { IRushPlugin } from './IRushPlugin';
+import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
 
 export interface IRushPluginManifest {
   pluginName: string;
   description: string;
-  entryPoint: string;
+  entryPoint?: string;
   optionsSchema?: string;
   associatedCommands?: string[];
+  commandLineJsonFilePath?: string;
 }
 
 export interface IRushPluginManifestJson {
@@ -47,7 +49,6 @@ export class PluginLoader {
   private _rushConfiguration: RushConfiguration;
   private _terminal: ITerminal;
   private _autoinstaller: Autoinstaller;
-  private _packageFolderCache!: string;
   private _manifestCache!: IRushPluginManifest;
 
   public constructor({ pluginConfiguration, rushConfiguration, terminal }: IPluginLoaderOptions) {
@@ -61,22 +62,68 @@ export class PluginLoader {
   }
 
   public update(): void {
-    const manifestPath: string = path.join(this._packageFolder, RushConstants.rushPluginManifestFilename);
+    const { packageName, pluginName } = this._pluginConfiguration;
+    const packageFolder: string = this.packageFolder;
+    const manifestPath: string = path.join(packageFolder, RushConstants.rushPluginManifestFilename);
 
     // validate
-    JsonFile.loadAndValidate(manifestPath, PluginLoader._jsonSchema);
+    const manifest: IRushPluginManifestJson = JsonFile.loadAndValidate(
+      manifestPath,
+      PluginLoader._jsonSchema
+    );
 
     FileSystem.copyFile({
       sourcePath: manifestPath,
       destinationPath: this._getManifestPath()
     });
+
+    const pluginManifest: IRushPluginManifest | undefined = manifest.plugins.find(
+      (item) => item.pluginName === pluginName
+    );
+    if (!pluginManifest) {
+      throw new Error(`${pluginName} does not provided by rush plugin package ${packageName}`);
+    }
+
+    const commandLineJsonFilePath: string | undefined = pluginManifest.commandLineJsonFilePath;
+    if (commandLineJsonFilePath) {
+      const commandLineJsonFullFilePath: string = path.join(packageFolder, commandLineJsonFilePath);
+      if (!FileSystem.exists(commandLineJsonFullFilePath)) {
+        this._terminal.writeErrorLine(
+          `Rush plugin ${pluginName} from ${packageName} specifies commandLineJsonFilePath ${commandLineJsonFilePath} does not exist.`
+        );
+      }
+      FileSystem.copyFile({
+        sourcePath: commandLineJsonFullFilePath,
+        destinationPath: this._getCommandLineJsonFilePath()
+      });
+    }
   }
 
-  public load(): IRushPlugin {
-    const resolvedPluginPath: string = this._resolvePlugin();
+  public load(): IRushPlugin | undefined {
+    const resolvedPluginPath: string | undefined = this._resolvePlugin();
+    if (!resolvedPluginPath) {
+      return undefined;
+    }
     const pluginOptions: JsonObject = this._getPluginOptions();
 
     return this._loadAndValidatePluginPackage(resolvedPluginPath, pluginOptions);
+  }
+
+  public getCommandLineConfiguration(): CommandLineConfiguration | undefined {
+    const commandLineJsonFilePath: string = this._getCommandLineJsonFilePath();
+    if (!FileSystem.exists(commandLineJsonFilePath)) {
+      return undefined;
+    }
+    const commandLineConfiguration: CommandLineConfiguration =
+      CommandLineConfiguration.loadFromFileOrDefault(commandLineJsonFilePath);
+    commandLineConfiguration.prependAdditionalPathFolder(
+      // Example: `common/autoinstaller/plugins/node_modules/.bin`
+      path.join(this.autoinstaller.folderFullPath, 'node_modules', '.bin')
+    );
+    commandLineConfiguration.shellCommandTokenContext = {
+      packageFolder: this.packageFolder
+    };
+    return commandLineConfiguration;
   }
 
   public get configuration(): IRushPluginConfiguration {
@@ -91,16 +138,12 @@ export class PluginLoader {
     return this._getRushPluginManifest();
   }
 
-  private get _packageFolder(): string {
-    if (!this._packageFolderCache) {
-      const packageName: string = this._pluginConfiguration.packageName;
-      const packagePath: string = Import.resolvePackage({
-        baseFolderPath: this._autoinstaller.folderFullPath,
-        packageName
-      });
-      this._packageFolderCache = packagePath;
-    }
-    return this._packageFolderCache;
+  public get packageFolder(): string {
+    return path.join(
+      this._autoinstaller.folderFullPath,
+      'node_modules',
+      this._pluginConfiguration.packageName
+    );
   }
 
   private _getRushPluginManifest(): IRushPluginManifest {
@@ -138,12 +181,21 @@ export class PluginLoader {
     if (!optionsSchema) {
       return undefined;
     }
-    const optionsSchemaFilePath: string = path.join(this._packageFolder);
+    const optionsSchemaFilePath: string = path.join(this.packageFolder, optionsSchema);
     return JsonSchema.fromFile(optionsSchemaFilePath);
   }
 
-  private _resolvePlugin(): string {
-    const modulePath: string = path.join(this._packageFolder, this._getRushPluginManifest().entryPoint);
+  private _resolvePlugin(): string | undefined {
+    const entryPoint: string | undefined = this._getRushPluginManifest().entryPoint;
+    if (!entryPoint) {
+      return undefined;
+    }
+    // ensure module can be found installed
+    const packageFolder: string = Import.resolvePackage({
+      baseFolderPath: this.autoinstaller.folderFullPath,
+      packageName: this._pluginConfiguration.packageName
+    });
+    const modulePath: string = path.join(packageFolder, entryPoint);
     return modulePath;
   }
 
@@ -206,12 +258,23 @@ export class PluginLoader {
     }
   }
 
-  private _getManifestPath(): string {
+  private _getPluginStorePath(): string {
     return path.join(
       this._rushConfiguration.rushPluginManifestsFolder,
       this._pluginConfiguration.packageName,
-      this.autoinstaller.name,
-      RushConstants.rushPluginManifestFilename
+      this.autoinstaller.name
+    );
+  }
+
+  private _getManifestPath(): string {
+    return path.join(this._getPluginStorePath(), RushConstants.rushPluginManifestFilename);
+  }
+
+  private _getCommandLineJsonFilePath(): string {
+    return path.join(
+      this._getPluginStorePath(),
+      this._pluginConfiguration.pluginName,
+      RushConstants.commandLineFilename
     );
   }
 }

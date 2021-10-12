@@ -125,7 +125,7 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
 
     this._throwPluginErrorIfNeed();
 
-    await this.parser.pluginManager.tryInitializePluginsForCommand(this.actionName);
+    await this.parser.pluginManager.tryInitializeAssociatedCommandPluginsAsync(this.actionName);
 
     this._throwPluginErrorIfNeed();
 
