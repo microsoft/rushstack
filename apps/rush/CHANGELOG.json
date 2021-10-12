@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.55.1",
+      "tag": "@microsoft/rush_v5.55.1",
+      "date": "Tue, 12 Oct 2021 22:26:25 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue where a version field isn't parsed correctly when using NPM version 7 and newer."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.55.0",
       "tag": "@microsoft/rush_v5.55.0",
       "date": "Thu, 07 Oct 2021 23:44:52 GMT",

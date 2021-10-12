@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 07 Oct 2021 23:44:52 GMT and should not be manually modified.
+This log was last generated on Tue, 12 Oct 2021 22:26:25 GMT and should not be manually modified.
+
+## 5.55.1
+Tue, 12 Oct 2021 22:26:25 GMT
+
+### Updates
+
+- Fix an issue where a version field isn't parsed correctly when using NPM version 7 and newer.
 
 ## 5.55.0
 Thu, 07 Oct 2021 23:44:52 GMT
