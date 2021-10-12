@@ -141,7 +141,9 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
   public async updateCachedCredentialInteractiveAsync(terminal: ITerminal): Promise<void> {
     throw new Error(
       'The interactive cloud credentials flow is not supported for Amazon S3.\n' +
-        'Install and authenticate with aws-cli, or provide your credentials to rush using the --credential flag instead.'
+        'Provide your credentials to rush using the --credential flag instead. Credentials must be ' +
+        'in the form of <ACCESS KEY ID>:<SECRET ACCESS KEY> or ' +
+        '<ACCESS KEY ID>:<SECRET ACCESS KEY>:<SESSION TOKEN>.'
     );
   }
 
