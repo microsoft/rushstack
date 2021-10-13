@@ -8,7 +8,7 @@ import { RushConstants } from '../logic/RushConstants';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 
 export class RushStartupBanner {
-  public static log(rushVersion: string): void {
+  public static log(rushVersion: string, isManaged: boolean): void {
     const nodeVersion: string = process.versions.node;
     const nodeReleaseLabel: string = NodeJsCompatibility.isOddNumberedVersion
       ? 'unstable'
@@ -16,13 +16,19 @@ export class RushStartupBanner {
       ? 'LTS'
       : 'pre-LTS';
 
+    const versionSuffix: string = rushVersion ? ' ' + this._formatVersion(rushVersion, isManaged) : '';
+
     console.log(
       EOL +
-        colors.bold(`Rush Multi-Project Build Tool${rushVersion ? ` ${rushVersion}` : ''}`) +
+        colors.bold(`Rush Multi-Project Build Tool${versionSuffix}`) +
         colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
         EOL +
         `Node.js version is ${nodeVersion} (${nodeReleaseLabel})` +
         EOL
     );
+  }
+
+  private static _formatVersion(rushVersion: string, isManaged: boolean): string {
+    return rushVersion + colors.yellow(isManaged ? '' : ' (unmanaged)');
   }
 }

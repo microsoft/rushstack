@@ -345,8 +345,6 @@ export class RepoStateFile {
 
 // @public
 export class Rush {
-    static earlyVerboseFlag(): boolean;
-    static getVersionString(isManaged: boolean): string;
     static launch(launcherVersion: string, arg: ILaunchOptions): void;
     static launchRushX(launcherVersion: string, options: ILaunchOptions): void;
     static get version(): string;

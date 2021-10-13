@@ -19,14 +19,35 @@ import { RushStartupBanner } from './RushStartupBanner';
  */
 export interface ILaunchRushXInternalOptions {
   isManaged: boolean;
-  showVerbose: boolean;
 
   alreadyReportedNodeTooNewError?: boolean;
 }
 
+interface IRushXCommandLineArguments {
+  /**
+   * Flag indicating whether to display rushx startup information.
+   */
+  verbose: boolean;
+
+  /**
+   * Flag indicating whether the user has asked for help.
+   */
+  help: boolean;
+
+  /**
+   * The command to run (i.e., the target "script" in package.json.)
+   */
+  commandName: string;
+
+  /**
+   * Any additional arguments/parameters passed after the command name.
+   */
+  commandArgs: string[];
+}
+
 export class RushXCommandLine {
-  public static launchRushX(launcherVersion: string, isManaged: boolean, showVerbose: boolean): void {
-    RushXCommandLine._launchRushXInternal(launcherVersion, { isManaged, showVerbose });
+  public static launchRushX(launcherVersion: string, isManaged: boolean): void {
+    RushXCommandLine._launchRushXInternal(launcherVersion, { isManaged });
   }
 
   /**
@@ -38,11 +59,17 @@ export class RushXCommandLine {
     // and set it to 0 only on success.
     process.exitCode = 1;
 
+    const args: IRushXCommandLineArguments = this._getCommandLineArguments();
+
+    if (args.verbose || args.help) {
+      RushStartupBanner.log(Rush.version, options.isManaged);
+    }
+
     try {
       // Are we in a Rush repo?
       let rushConfiguration: RushConfiguration | undefined = undefined;
       if (RushConfiguration.tryFindRushJsonLocation()) {
-        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: options.showVerbose });
+        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: args.verbose });
       }
 
       NodeJsCompatibility.warnAboutCompatibilityIssues({
@@ -79,47 +106,17 @@ export class RushXCommandLine {
 
       const projectCommandSet: ProjectCommandSet = new ProjectCommandSet(packageJson);
 
-      // 0 = node.exe
-      // 1 = rushx
-      const args: string[] = process.argv.slice(2);
-      let showHelp: boolean = false;
-      for (let idx: number = 0; idx < args.length; idx++) {
-        if (args[idx] === '--verbose') {
-          // This flag was already consumed by Rush.earlyVerboseFlag() at startup, so
-          // we can ignore it here.
-          args.splice(idx, 1);
-          idx--;
-          continue;
-        } else if (args[idx].startsWith('-')) {
-          args.splice(idx, 1);
-          idx--;
-          showHelp = true;
-          continue;
-        } else {
-          // If we've encountered a command, like "build", stop checking args. Everything
-          // after this arg will be options for the specific command.
-          break;
-        }
-      }
-
-      if (showHelp) {
-        // We always want to show the startup banner on the help screen, but
-        // not if we're in --verbose mode (otherwise we'll double-print it).
-        if (!Rush.earlyVerboseFlag()) {
-          RushStartupBanner.log(Rush.getVersionString(options.isManaged));
-        }
+      if (args.help) {
         RushXCommandLine._showUsage(packageJson, projectCommandSet);
         return;
       }
 
-      const commandName: string = args[0];
-
-      const scriptBody: string | undefined = projectCommandSet.tryGetScriptBody(commandName);
+      const scriptBody: string | undefined = projectCommandSet.tryGetScriptBody(args.commandName);
 
       if (scriptBody === undefined) {
         console.log(
           colors.red(
-            `Error: The command "${commandName}" is not defined in the` +
+            `Error: The command "${args.commandName}" is not defined in the` +
               ` package.json file for this project.`
           )
         );
@@ -136,22 +133,20 @@ export class RushXCommandLine {
         return;
       }
 
-      const remainingArgs: string[] = args.slice(1);
-
       let commandWithArgs: string = scriptBody;
       let commandWithArgsForDisplay: string = scriptBody;
-      if (remainingArgs.length > 0) {
+      if (args.commandArgs.length > 0) {
         // This approach is based on what NPM 7 now does:
         // https://github.com/npm/run-script/blob/47a4d539fb07220e7215cc0e482683b76407ef9b/lib/run-script-pkg.js#L34
-        const escapedRemainingArgs: string[] = remainingArgs.map((x) => Utilities.escapeShellParameter(x));
+        const escapedRemainingArgs: string[] = args.commandArgs.map((x) => Utilities.escapeShellParameter(x));
 
         commandWithArgs += ' ' + escapedRemainingArgs.join(' ');
 
         // Display it nicely without the extra quotes
-        commandWithArgsForDisplay += ' ' + remainingArgs.join(' ');
+        commandWithArgsForDisplay += ' ' + args.commandArgs.join(' ');
       }
 
-      if (options.showVerbose) {
+      if (args.verbose) {
         console.log('Executing: ' + JSON.stringify(commandWithArgsForDisplay) + os.EOL);
       }
 
@@ -177,6 +172,51 @@ export class RushXCommandLine {
     } catch (error) {
       console.log(colors.red('Error: ' + (error as Error).message));
     }
+  }
+
+  private static _getCommandLineArguments(): IRushXCommandLineArguments {
+    // 0 = node.exe
+    // 1 = rushx
+    const args: string[] = process.argv.slice(2);
+    const unknownArgs: string[] = [];
+
+    let help: boolean = false;
+    let verbose: boolean = false;
+    let commandName: string = '';
+    const commandArgs: string[] = [];
+
+    for (let idx: number = 0; idx < args.length; idx++) {
+      if (!commandName) {
+        if (args[idx] === '--verbose') {
+          verbose = true;
+        } else if (args[idx] === '-h' || args[idx] === '--help') {
+          help = true;
+        } else if (args[idx].startsWith('-')) {
+          unknownArgs.push(args[idx]);
+        } else {
+          commandName = args[idx];
+        }
+      } else {
+        commandArgs.push(args[idx]);
+      }
+    }
+
+    if (!commandName) {
+      help = true;
+    }
+
+    if (unknownArgs.length > 0) {
+      // Future TODO: Instead of just displaying usage info, we could display a
+      // specific error about the unknown flag the user tried to pass to rushx.
+      help = true;
+    }
+
+    return {
+      help,
+      verbose,
+      commandName,
+      commandArgs
+    };
   }
 
   private static _showUsage(packageJson: IPackageJson, projectCommandSet: ProjectCommandSet): void {

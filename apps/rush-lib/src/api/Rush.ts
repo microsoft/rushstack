@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
 import { PackageJsonLookup } from '@rushstack/node-core-library';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
@@ -56,7 +55,7 @@ export class Rush {
     const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
 
     if (!Utilities.shouldRestrictConsoleOutput()) {
-      RushStartupBanner.log(Rush.getVersionString(options.isManaged));
+      RushStartupBanner.log(Rush.version, options.isManaged);
     }
 
     if (!CommandLineMigrationAdvisor.checkArgv(process.argv)) {
@@ -82,28 +81,8 @@ export class Rush {
   public static launchRushX(launcherVersion: string, options: ILaunchOptions): void {
     options = Rush._normalizeLaunchOptions(options);
 
-    const showVerbose: boolean = Rush.earlyVerboseFlag();
-
-    if (showVerbose) {
-      RushStartupBanner.log(Rush.getVersionString(options.isManaged));
-    }
-
     Rush._assignRushInvokedFolder();
-    RushXCommandLine._launchRushXInternal(launcherVersion, { ...options, showVerbose });
-  }
-
-  /**
-   * Retrieve the value of the "--verbose" flag, true if present and false if not.
-   * This check happens here because we want to control the display of the startup
-   * banner, and we haven't yet fully processed the command-line arguments.
-   */
-  public static earlyVerboseFlag(): boolean {
-    const args: string[] = process.argv.slice(2);
-    const cmdIndex: number = args.findIndex((arg) => !arg.startsWith('-'));
-    const flags: string[] = cmdIndex < 0 ? args : args.slice(0, cmdIndex);
-
-    // This functionality will be provided "for free" after converting to ts-command-line.
-    return flags.includes('--verbose');
+    RushXCommandLine._launchRushXInternal(launcherVersion, { ...options });
   }
 
   /**
@@ -116,13 +95,6 @@ export class Rush {
     }
 
     return this._version!;
-  }
-
-  /**
-   * The current version of rush-lib, as a formatted string for display.
-   */
-  public static getVersionString(isManaged: boolean): string {
-    return Rush.version + colors.yellow(isManaged ? '' : ' (unmanaged)');
   }
 
   /**
