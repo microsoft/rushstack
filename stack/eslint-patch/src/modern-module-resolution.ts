@@ -112,7 +112,7 @@ if (!versionMatch) {
 const eslintMajorVersion = Number(versionMatch[1]);
 if (!(eslintMajorVersion >= 6 && eslintMajorVersion <= 8)) {
   throw new Error(
-    'The patch-eslint.js script has only been tested with ESLint version 6.x, 7.x or 8.x.' +
+    'The patch-eslint.js script has only been tested with ESLint version 6.x, 7.x, and 8.x.' +
       ` (Your version: ${eslintPackageVersion})\n` +
       'Consider reporting a GitHub issue:\n' +
       'https://github.com/microsoft/rushstack/issues'
