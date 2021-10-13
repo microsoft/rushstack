@@ -59,6 +59,10 @@ export class UpdateAction extends BaseInstallAction {
   protected async runAsync(): Promise<void> {
     await this.parser.pluginManager.updateAsync();
 
+    if (this.parser.pluginManager.error) {
+      await this.parser.pluginManager.reinitializeAllPluginsForCommandAsync(this.actionName);
+    }
+
     return super.runAsync();
   }
 
