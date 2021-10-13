@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "rushx commands are now silent by default",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
