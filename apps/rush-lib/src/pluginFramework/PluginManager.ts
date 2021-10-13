@@ -54,6 +54,12 @@ export class PluginManager {
     }
   }
 
+  public async reinitializeAllPluginsForCommandAsync(commandName: string): Promise<void> {
+    this._error = undefined;
+    await this.tryInitializeUnassociatedPluginsAsync();
+    await this.tryInitializeAssociatedCommandPluginsAsync(commandName);
+  }
+
   public async _preparePluginAutoinstallersAsync(pluginLoaders: PluginLoader[]): Promise<void> {
     const autoinstallers: Autoinstaller[] = pluginLoaders.map((pluginLoader) => {
       return pluginLoader.autoinstaller;
