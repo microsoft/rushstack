@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import { EOL } from 'os';
-
 import colors from 'colors/safe';
 
 import { RushConstants } from '../logic/RushConstants';
