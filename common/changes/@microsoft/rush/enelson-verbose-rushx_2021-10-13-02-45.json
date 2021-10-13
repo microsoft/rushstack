@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "rushx commands are now silent by default",
+      "comment": "Change rushx commands to be silent by default.",
       "type": "none"
     }
   ],
