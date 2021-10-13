@@ -9,20 +9,24 @@ import { DEFAULT_CONSOLE_WIDTH, PrintUtilities } from '@rushstack/terminal';
 
 import { Utilities } from '../utilities/Utilities';
 import { ProjectCommandSet } from '../logic/ProjectCommandSet';
+import { Rush } from '../api/Rush';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
+import { RushStartupBanner } from './RushStartupBanner';
 
 /**
  * @internal
  */
 export interface ILaunchRushXInternalOptions {
   isManaged: boolean;
+  showVerbose: boolean;
+
   alreadyReportedNodeTooNewError?: boolean;
 }
 
 export class RushXCommandLine {
-  public static launchRushX(launcherVersion: string, isManaged: boolean): void {
-    RushXCommandLine._launchRushXInternal(launcherVersion, { isManaged });
+  public static launchRushX(launcherVersion: string, isManaged: boolean, showVerbose: boolean): void {
+    RushXCommandLine._launchRushXInternal(launcherVersion, { isManaged, showVerbose });
   }
 
   /**
@@ -38,7 +42,7 @@ export class RushXCommandLine {
       // Are we in a Rush repo?
       let rushConfiguration: RushConfiguration | undefined = undefined;
       if (RushConfiguration.tryFindRushJsonLocation()) {
-        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: true });
+        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: options.showVerbose });
       }
 
       NodeJsCompatibility.warnAboutCompatibilityIssues({
@@ -78,13 +82,32 @@ export class RushXCommandLine {
       // 0 = node.exe
       // 1 = rushx
       const args: string[] = process.argv.slice(2);
+      let showHelp: boolean = false;
+      for (let idx: number = 0; idx < args.length; idx++) {
+        if (args[idx] === '--verbose') {
+          // This flag was already consumed by Rush.earlyVerboseFlag() at startup, so
+          // we can ignore it here.
+          args.splice(idx, 1);
+          idx--;
+          continue;
+        } else if (args[idx].startsWith('-')) {
+          args.splice(idx, 1);
+          idx--;
+          showHelp = true;
+          continue;
+        } else {
+          // If we've encountered a command, like "build", stop checking args. Everything
+          // after this arg will be options for the specific command.
+          break;
+        }
+      }
 
-      // Check for the following types of things:
-      //   rush
-      //   rush --help
-      //   rush -h
-      //   rush --unrecognized-option
-      if (args.length === 0 || args[0][0] === '-') {
+      if (showHelp) {
+        // We always want to show the startup banner on the help screen, but
+        // not if we're in --verbose mode (otherwise we'll double-print it).
+        if (!Rush.earlyVerboseFlag()) {
+          RushStartupBanner.log(Rush.getVersionString(options.isManaged));
+        }
         RushXCommandLine._showUsage(packageJson, projectCommandSet);
         return;
       }
@@ -128,7 +151,9 @@ export class RushXCommandLine {
         commandWithArgsForDisplay += ' ' + remainingArgs.join(' ');
       }
 
-      console.log('Executing: ' + JSON.stringify(commandWithArgsForDisplay) + os.EOL);
+      if (options.showVerbose) {
+        console.log('Executing: ' + JSON.stringify(commandWithArgsForDisplay) + os.EOL);
+      }
 
       const packageFolder: string = path.dirname(packageJsonFilePath);
 
@@ -156,10 +181,11 @@ export class RushXCommandLine {
 
   private static _showUsage(packageJson: IPackageJson, projectCommandSet: ProjectCommandSet): void {
     console.log('usage: rushx [-h]');
-    console.log('       rushx <command> ...' + os.EOL);
+    console.log('       rushx [--verbose] <command> ...' + os.EOL);
 
     console.log('Optional arguments:');
-    console.log('  -h, --help            Show this help message and exit.' + os.EOL);
+    console.log('  -h, --help            Show this help message and exit.');
+    console.log('  --verbose             Show detailed information at startup.' + os.EOL);
 
     if (projectCommandSet.commandNames.length > 0) {
       console.log(`Project commands for ${colors.cyan(packageJson.name)}:`);
