@@ -7,13 +7,19 @@ import {
   PackageName,
   AlreadyReportedError,
   PackageJsonLookup,
-  IPackageJson
+  IPackageJson,
+  ITerminal
 } from '@rushstack/node-core-library';
-import { CommandLineParameterProvider, CommandLineStringListParameter } from '@rushstack/ts-command-line';
+import {
+  CommandLineParameterProvider,
+  CommandLineStringListParameter,
+  CommandLineStringParameter
+} from '@rushstack/ts-command-line';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { Selection } from '../logic/Selection';
+import { ProjectChangeAnalyzer } from '../logic/ProjectChangeAnalyzer';
 
 /**
  * This class is provides the set of command line parameters used to select projects
@@ -33,6 +39,9 @@ export class SelectionParameterSet {
 
   private readonly _fromVersionPolicy: CommandLineStringListParameter;
   private readonly _toVersionPolicy: CommandLineStringListParameter;
+
+  private readonly _changedSince: CommandLineStringParameter;
+  private readonly _changedSinceOnly: CommandLineStringParameter;
 
   public constructor(rushConfiguration: RushConfiguration, action: CommandLineParameterProvider) {
     this._rushConfiguration = rushConfiguration;
@@ -142,6 +151,28 @@ export class SelectionParameterSet {
         ' belonging to VERSION_POLICY_NAME.' +
         ' For details, refer to the website article "Selecting subsets of projects".'
     });
+    this._changedSince = action.defineStringParameter({
+      parameterLongName: '--changed-since',
+      argumentName: 'REF',
+      description:
+        'Normally all projects in the monorepo will be processed;' +
+        ' adding this parameter will instead select a subset of projects.' +
+        ' Will include all projects that Git reports committed or staged changes to since REF, then expand' +
+        ' the selection to include all affected projects and all dependencies thereof, analogous to "--from".' +
+        ' For details, refer to the website article "Selecting subsets of projects".',
+      completions: async () => ['HEAD', 'HEAD~1', this._rushConfiguration.repositoryDefaultBranch]
+    });
+    this._changedSinceOnly = action.defineStringParameter({
+      parameterLongName: '--changed-since-only',
+      argumentName: 'REF',
+      description:
+        'Normally all projects in the monorepo will be processed;' +
+        ' adding this parameter will instead select a subset of projects.' +
+        ' Will include all projects that Git reports committed or staged changes to since REF.' +
+        ' Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies.' +
+        ' For details, refer to the website article "Selecting subsets of projects".',
+      completions: async () => ['HEAD', 'HEAD~1', this._rushConfiguration.repositoryDefaultBranch]
+    });
   }
 
   /**
@@ -149,18 +180,24 @@ export class SelectionParameterSet {
    *
    * If no parameters are specified, returns all projects in the Rush config file.
    */
-  public getSelectedProjects(): Set<RushConfigurationProject> {
+  public async getSelectedProjectsAsync(terminal: ITerminal): Promise<Set<RushConfigurationProject>> {
+    const since: string | undefined = this._changedSince.value;
+    const sinceOnly: string | undefined = this._changedSinceOnly.value;
+
     // Check if any of the selection parameters have a value specified on the command line
-    const isSelectionSpecified: boolean = [
-      this._onlyProject,
-      this._fromProject,
-      this._fromVersionPolicy,
-      this._toProject,
-      this._toVersionPolicy,
-      this._toExceptProject,
-      this._impactedByProject,
-      this._impactedByExceptProject
-    ].some((param: CommandLineStringListParameter) => param.values.length > 0);
+    const isSelectionSpecified: boolean =
+      [
+        this._onlyProject,
+        this._fromProject,
+        this._fromVersionPolicy,
+        this._toProject,
+        this._toVersionPolicy,
+        this._toExceptProject,
+        this._impactedByProject,
+        this._impactedByExceptProject
+      ].some((param: CommandLineStringListParameter) => param.values.length > 0) ||
+      !!since ||
+      !!sinceOnly;
 
     // If no selection parameters are specified, return everything
     if (!isSelectionSpecified) {
@@ -172,12 +209,30 @@ export class SelectionParameterSet {
       this._onlyProject
     );
 
+    const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this._rushConfiguration);
+
+    const sinceProjects: Set<RushConfigurationProject> = since
+      ? await projectChangeAnalyzer.getChangedProjectsAsync({
+          terminal,
+          targetBranchName: since
+        })
+      : new Set();
+
+    const sinceOnlyProjects: Set<RushConfigurationProject> = sinceOnly
+      ? await projectChangeAnalyzer.getChangedProjectsAsync({
+          terminal,
+          targetBranchName: sinceOnly
+        })
+      : new Set();
+
     // Include all projects that depend on these projects, and all dependencies thereof
     const fromProjects: Set<RushConfigurationProject> = Selection.union(
       // --from
       this._evaluateProjectParameter(this._fromProject),
       // --from-version-policy
-      this._evaluateVersionPolicyProjects(this._fromVersionPolicy)
+      this._evaluateVersionPolicyProjects(this._fromVersionPolicy),
+      // --changed-since
+      sinceProjects
     );
 
     // Include dependencies of these projects
@@ -201,7 +256,10 @@ export class SelectionParameterSet {
     );
 
     const selection: Set<RushConfigurationProject> = Selection.union(
+      // --only
       onlyProjects,
+      // --changed-since-only
+      sinceOnlyProjects,
       Selection.expandAllDependencies(toProjects),
       // Only dependents of these projects, not dependencies
       Selection.expandAllConsumers(impactedByProjects)
