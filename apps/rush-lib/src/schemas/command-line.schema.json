@@ -175,6 +175,11 @@
               "description": "If true then this command can be run in parallel, i.e. executed simultaneously for multiple projects.",
               "type": "boolean"
             },
+            "incremental": {
+              "title": "Incremental",
+              "description": "If true then this command's phases will be incremental and support caching.",
+              "type": "boolean"
+            },
             "phases": {
               "title": "Phases",
               "description": "List the phases associated with this command. Note that phases with dependencies will be implicitly included even if they aren't explicitly enumerated in this property unless they are specifically excluded by the \"skipPhasesForCommand\" property.",
@@ -204,6 +209,7 @@
             "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
 
             "enableParallelism": { "$ref": "#/definitions/anything" },
+            "incremental": { "$ref": "#/definitions/anything" },
             "phases": { "$ref": "#/definitions/anything" },
             "skipPhasesForCommand": { "$ref": "#/definitions/anything" }
           }
@@ -260,12 +266,6 @@
         "allowWarningsOnSuccess": {
           "title": "Allow Warnings on Success",
           "description": "By default, Rush returns a nonzero exit code if errors or warnings occur during a command. If this option is set to \"true\", Rush will return a zero exit code if warnings occur during the execution of this phase.",
-          "type": "boolean"
-        },
-
-        "incremental": {
-          "title": "Incremental",
-          "description": "If true then this phase will support caching and skipping if the project hasn't changed.",
           "type": "boolean"
         }
       }

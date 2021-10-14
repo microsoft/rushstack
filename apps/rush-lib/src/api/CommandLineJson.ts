@@ -36,6 +36,7 @@ export interface IBulkCommandJson extends IBaseCommandJson {
 export interface IPhasedCommandJson extends IBaseCommandJson {
   commandKind: 'phased';
   enableParallelism: boolean;
+  incremental?: boolean;
   phases: string[];
   skipPhasesForCommand?: string[];
 }
@@ -60,7 +61,6 @@ export interface IPhaseJson {
   dependencies?: IPhaseDependencies;
   ignoreMissingScript?: boolean;
   allowWarningsOnSuccess?: boolean;
-  incremental?: boolean;
 }
 
 /**
