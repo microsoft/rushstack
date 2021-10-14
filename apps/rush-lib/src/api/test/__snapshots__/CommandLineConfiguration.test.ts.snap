@@ -2,7 +2,7 @@
 
 exports[`CommandLineConfiguration Detects a cycle among phases 1`] = `"In command-line.json, there exists a cycle within the set of _phase:B dependencies: _phase:B, _phase:C, _phase:A"`;
 
-exports[`CommandLineConfiguration Detects a missing phase 1`] = `"In command-line.json, in the command \\"example\\", the phase \\"_phase:A\\" does not exist."`;
+exports[`CommandLineConfiguration Detects a missing phase 1`] = `"In command-line.json, in the \\"phases\\" property of the \\"example\\" command, the phase \\"_phase:A\\" does not exist."`;
 
 exports[`CommandLineConfiguration Detects a missing phase dependency 1`] = `"In command-line.json, in the phase \\"_phase:A\\", the upstream dependency phase \\"_phase:B\\" does not exist."`;
 
