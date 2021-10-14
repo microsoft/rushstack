@@ -449,7 +449,7 @@ export class ProjectBuildCache {
         projectsThatHaveBeenProcessed.add(projectToProcess);
 
         const projectState: string | undefined = await projectChangeAnalyzer._tryGetProjectStateHashAsync(
-          projectToProcess.packageName,
+          projectToProcess,
           options.terminal
         );
         if (!projectState) {

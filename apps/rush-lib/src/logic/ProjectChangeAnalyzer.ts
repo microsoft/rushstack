@@ -5,7 +5,13 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import ignore, { Ignore } from 'ignore';
 
-import { getPackageDeps, getGitHashForFiles } from '@rushstack/package-deps-hash';
+import {
+  getRepoChanges,
+  getRepoRoot,
+  getRepoState,
+  getGitHashForFiles,
+  IFileDiffStatus
+} from '@rushstack/package-deps-hash';
 import { Path, InternalError, FileSystem, ITerminal } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -14,7 +20,7 @@ import { Git } from './Git';
 import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from './RushConstants';
-import { UNINITIALIZED } from '../utilities/Utilities';
+import { LookupByPath } from './LookupByPath';
 
 /**
  * @beta
@@ -25,6 +31,17 @@ export interface IGetChangedProjectsOptions {
   shouldFetch?: boolean;
 }
 
+interface IGitState {
+  gitPath: string;
+  hashes: Map<string, string>;
+  rootDir: string;
+}
+
+interface IRawRepoState {
+  projectState: Map<RushConfigurationProject, Map<string, string>> | undefined;
+  rootDir: string;
+}
+
 /**
  * @beta
  */
@@ -33,9 +50,9 @@ export class ProjectChangeAnalyzer {
    * UNINITIALIZED === we haven't looked
    * undefined === data isn't available (i.e. - git isn't present)
    */
-  private _data: Map<string, Map<string, string>> | undefined | UNINITIALIZED = UNINITIALIZED;
-  private _filteredData: Map<string, Map<string, string>> = new Map<string, Map<string, string>>();
-  private _projectStateCache: Map<string, string> = new Map<string, string>();
+  private _data: IRawRepoState | undefined = undefined;
+  private _filteredData: Map<RushConfigurationProject, Map<string, string>> = new Map();
+  private _projectStateCache: Map<RushConfigurationProject, string> = new Map();
   private _rushConfiguration: RushConfiguration;
   private readonly _git: Git;
 
@@ -53,50 +70,38 @@ export class ProjectChangeAnalyzer {
    * @internal
    */
   public async _tryGetProjectDependenciesAsync(
-    projectName: string,
+    project: RushConfigurationProject,
     terminal: ITerminal
   ): Promise<Map<string, string> | undefined> {
     // Check the cache for any existing data
-    const existingData: Map<string, string> | undefined = this._filteredData.get(projectName);
-    if (existingData) {
-      return existingData;
-    }
-
-    if (this._data === UNINITIALIZED) {
-      this._data = await this._getDataAsync(terminal);
+    let filteredProjectData: Map<string, string> | undefined = this._filteredData.get(project);
+    if (filteredProjectData) {
+      return filteredProjectData;
     }
 
     if (this._data === undefined) {
+      this._data = this._getData(terminal);
+    }
+
+    const { projectState, rootDir } = this._data;
+
+    if (projectState === undefined) {
       return undefined;
     }
 
-    const project: RushConfigurationProject | undefined =
-      this._rushConfiguration.getProjectByName(projectName);
-    if (!project) {
-      throw new Error(`Project "${projectName}" does not exist in the current Rush configuration.`);
+    const unfilteredProjectData: Map<string, string> | undefined = projectState.get(project);
+    if (!unfilteredProjectData) {
+      throw new Error(`Project "${project.packageName}" does not exist in the current Rush configuration.`);
     }
 
-    const unfilteredProjectData: Map<string, string> = this._data.get(projectName)!;
-    let filteredProjectData: Map<string, string> | undefined;
+    filteredProjectData = await this._filterProjectDataAsync(
+      project,
+      unfilteredProjectData,
+      rootDir,
+      terminal
+    );
 
-    const ignoreMatcher: Ignore | undefined = await this._getIgnoreMatcherForProjectAsync(project, terminal);
-    if (ignoreMatcher) {
-      // At this point, `filePath` is guaranteed to start with `projectRelativeFolder`, so
-      // we can safely slice off the first N characters to get the file path relative to the
-      // root of the project.
-      filteredProjectData = new Map<string, string>();
-      for (const [filePath, fileHash] of unfilteredProjectData) {
-        const relativePath: string = filePath.slice(project.projectRelativeFolder.length + 1);
-        if (!ignoreMatcher.ignores(relativePath)) {
-          // Add the file path to the filtered data if it is not ignored
-          filteredProjectData.set(filePath, fileHash);
-        }
-      }
-    } else {
-      filteredProjectData = unfilteredProjectData;
-    }
-
-    this._filteredData.set(projectName, filteredProjectData);
+    this._filteredData.set(project, filteredProjectData);
     return filteredProjectData;
   }
 
@@ -113,15 +118,16 @@ export class ProjectChangeAnalyzer {
    * @internal
    */
   public async _tryGetProjectStateHashAsync(
-    projectName: string,
+    project: RushConfigurationProject,
     terminal: ITerminal
   ): Promise<string | undefined> {
-    let projectState: string | undefined = this._projectStateCache.get(projectName);
+    let projectState: string | undefined = this._projectStateCache.get(project);
     if (!projectState) {
       const packageDeps: Map<string, string> | undefined = await this._tryGetProjectDependenciesAsync(
-        projectName,
+        project,
         terminal
       );
+
       if (!packageDeps) {
         return undefined;
       } else {
@@ -135,83 +141,133 @@ export class ProjectChangeAnalyzer {
         }
 
         projectState = hash.digest('hex');
-        this._projectStateCache.set(projectName, projectState);
+        this._projectStateCache.set(project, projectState);
       }
     }
 
     return projectState;
   }
 
+  public async _filterProjectDataAsync<T>(
+    project: RushConfigurationProject,
+    unfilteredProjectData: Map<string, T>,
+    rootDir: string,
+    terminal: ITerminal
+  ): Promise<Map<string, T>> {
+    const ignoreMatcher: Ignore | undefined = await this._getIgnoreMatcherForProjectAsync(project, terminal);
+    if (!ignoreMatcher) {
+      return unfilteredProjectData;
+    }
+
+    const projectKey: string = path.relative(rootDir, project.projectFolder);
+    const projectKeyLength: number = projectKey.length + 1;
+
+    // At this point, `filePath` is guaranteed to start with `projectKey`, so
+    // we can safely slice off the first N characters to get the file path relative to the
+    // root of the project.
+    const filteredProjectData: Map<string, T> = new Map<string, T>();
+    for (const [filePath, value] of unfilteredProjectData) {
+      const relativePath: string = filePath.slice(projectKeyLength);
+      if (!ignoreMatcher.ignores(relativePath)) {
+        // Add the file path to the filtered data if it is not ignored
+        filteredProjectData.set(filePath, value);
+      }
+    }
+    return filteredProjectData;
+  }
+
   /**
    * Gets a list of projects that have changed in the current state of the repo
    * when compared to the specified branch.
    */
-  public async *getChangedProjectsAsync(
+  public async getChangedProjectsAsync(
     options: IGetChangedProjectsOptions
-  ): AsyncIterable<RushConfigurationProject> {
-    const changedFolders: string[] | undefined = this._git.getChangedFolders(
+  ): Promise<Set<RushConfigurationProject>> {
+    const gitPath: string = this._git.getGitPathOrThrow();
+    const repoRoot: string = getRepoRoot(this._rushConfiguration.rushJsonFolder);
+    const repoChanges: Map<string, IFileDiffStatus> = getRepoChanges(
+      repoRoot,
       options.targetBranchName,
-      options.terminal,
-      options.shouldFetch
+      gitPath
+    );
+    const { terminal } = options;
+
+    const changedProjects: Set<RushConfigurationProject> = new Set();
+
+    // Determine the current variant from the link JSON.
+    const variant: string | undefined = this._rushConfiguration.currentInstalledVariant;
+
+    // Add the shrinkwrap file to every project's dependencies
+    const shrinkwrapFile: string = Path.convertToSlashes(
+      path.relative(repoRoot, this._rushConfiguration.getCommittedShrinkwrapFilename(variant))
     );
 
-    if (changedFolders) {
-      const repoRootFolder: string | undefined = this._git.getRepositoryRootPath();
-      for (const project of this._rushConfiguration.projects) {
-        const projectFolder: string = repoRootFolder
-          ? path.relative(repoRootFolder, project.projectFolder)
-          : project.projectRelativeFolder;
-        if (this._hasProjectChanged(changedFolders, projectFolder)) {
-          yield project;
+    if (repoChanges.has(shrinkwrapFile)) {
+      // TODO: Implement shrinkwrap diffing here.
+      return new Set(this._rushConfiguration.projects);
+    }
+
+    const changesByProject: Map<RushConfigurationProject, Map<string, IFileDiffStatus>> = new Map();
+    const lookup: LookupByPath<RushConfigurationProject> =
+      this._rushConfiguration.getProjectLookupForRoot(repoRoot);
+    for (const [file, diffStatus] of repoChanges) {
+      const project: RushConfigurationProject | undefined = lookup.findChildPath(file);
+      if (project) {
+        let projectChanges: Map<string, IFileDiffStatus> | undefined = changesByProject.get(project);
+        if (!projectChanges) {
+          changesByProject.set(project, (projectChanges = new Map()));
         }
-      }
-    }
-  }
-
-  private _hasProjectChanged(changedFolders: string[], projectFolder: string): boolean {
-    for (const folder of changedFolders) {
-      if (Path.isUnderOrEqual(folder, projectFolder)) {
-        return true;
+        projectChanges.set(file, diffStatus);
       }
     }
 
-    return false;
+    // Parallelize rush-project.json lookups
+    await Promise.all(
+      Array.from(changesByProject, async ([project, projectChanges]) => {
+        const filteredChanges: Map<string, IFileDiffStatus> = await this._filterProjectDataAsync(
+          project,
+          projectChanges,
+          repoRoot,
+          terminal
+        );
+        if (filteredChanges.size > 0) {
+          changedProjects.add(project);
+        }
+      })
+    );
+
+    return changedProjects;
   }
 
-  private async _getDataAsync(terminal: ITerminal): Promise<Map<string, Map<string, string>> | undefined> {
-    const repoDeps: Map<string, string> | undefined = this._getRepoDeps(terminal);
-    if (!repoDeps) {
-      return undefined;
+  private _getData(terminal: ITerminal): IRawRepoState {
+    const repoState: IGitState | undefined = this._getRepoDeps(terminal);
+    if (!repoState) {
+      // Mark as resolved, but no data
+      return {
+        projectState: undefined,
+        rootDir: this._rushConfiguration.rushJsonFolder
+      };
     }
 
-    const projectHashDeps: Map<string, Map<string, string>> = new Map();
+    const lookup: LookupByPath<RushConfigurationProject> = this._rushConfiguration.getProjectLookupForRoot(
+      repoState.rootDir
+    );
+    const projectHashDeps: Map<RushConfigurationProject, Map<string, string>> = new Map();
 
     for (const project of this._rushConfiguration.projects) {
-      projectHashDeps.set(project.packageName, new Map());
+      projectHashDeps.set(project, new Map());
     }
 
-    // Sort each project folder into its own package deps hash
-    for (const [filePath, fileHash] of repoDeps) {
-      // findProjectForPosixRelativePath uses LookupByPath, for which lookups are O(K)
-      // K being the maximum folder depth of any project in rush.json (usually on the order of 3)
-      const owningProject: RushConfigurationProject | undefined =
-        this._rushConfiguration.findProjectForPosixRelativePath(filePath);
-
-      if (owningProject) {
-        const owningProjectHashDeps: Map<string, string> = projectHashDeps.get(owningProject.packageName)!;
-        owningProjectHashDeps.set(filePath, fileHash);
-      }
-    }
+    const { hashes: repoDeps, rootDir } = repoState;
 
     // Currently, only pnpm handles project shrinkwraps
     if (this._rushConfiguration.packageManager === 'pnpm') {
-      const projects: RushConfigurationProject[] = [];
       const projectDependencyManifestPaths: string[] = [];
 
-      for (const project of this._rushConfiguration.projects) {
+      for (const project of projectHashDeps.keys()) {
         const projectShrinkwrapFilePath: string = BaseProjectShrinkwrapFile.getFilePathForProject(project);
         const relativeProjectShrinkwrapFilePath: string = Path.convertToSlashes(
-          path.relative(this._rushConfiguration.rushJsonFolder, projectShrinkwrapFilePath)
+          path.relative(rootDir, projectShrinkwrapFilePath)
         );
 
         if (!FileSystem.exists(projectShrinkwrapFilePath)) {
@@ -221,25 +277,26 @@ export class ProjectChangeAnalyzer {
           );
         }
 
-        projects.push(project);
         projectDependencyManifestPaths.push(relativeProjectShrinkwrapFilePath);
       }
 
       const gitPath: string = this._git.getGitPathOrThrow();
       const hashes: Map<string, string> = getGitHashForFiles(
         projectDependencyManifestPaths,
-        this._rushConfiguration.rushJsonFolder,
+        rootDir,
         gitPath
       );
-      for (let i: number = 0; i < projects.length; i++) {
-        const project: RushConfigurationProject = projects[i];
+
+      let i: number = 0;
+      for (const projectDeps of projectHashDeps.values()) {
         const projectDependencyManifestPath: string = projectDependencyManifestPaths[i];
         if (!hashes.has(projectDependencyManifestPath)) {
           throw new InternalError(`Expected to get a hash for ${projectDependencyManifestPath}`);
         }
 
         const hash: string = hashes.get(projectDependencyManifestPath)!;
-        projectHashDeps.get(project.packageName)!.set(projectDependencyManifestPath, hash);
+        projectDeps.set(projectDependencyManifestPath, hash);
+        i++;
       }
     } else {
       // Determine the current variant from the link JSON.
@@ -247,21 +304,34 @@ export class ProjectChangeAnalyzer {
 
       // Add the shrinkwrap file to every project's dependencies
       const shrinkwrapFile: string = Path.convertToSlashes(
-        path.relative(
-          this._rushConfiguration.rushJsonFolder,
-          this._rushConfiguration.getCommittedShrinkwrapFilename(variant)
-        )
+        path.relative(rootDir, this._rushConfiguration.getCommittedShrinkwrapFilename(variant))
       );
 
-      for (const project of this._rushConfiguration.projects) {
-        const shrinkwrapHash: string | undefined = repoDeps!.get(shrinkwrapFile);
+      const shrinkwrapHash: string | undefined = repoDeps.get(shrinkwrapFile);
+
+      for (const projectDeps of projectHashDeps.values()) {
         if (shrinkwrapHash) {
-          projectHashDeps.get(project.packageName)!.set(shrinkwrapFile, shrinkwrapHash);
+          projectDeps.set(shrinkwrapFile, shrinkwrapHash);
         }
       }
     }
 
-    return projectHashDeps;
+    // Sort each project folder into its own package deps hash
+    for (const [filePath, fileHash] of repoDeps) {
+      // lookups in findChildPath are O(K)
+      // K being the maximum folder depth of any project in rush.json (usually on the order of 3)
+      const owningProject: RushConfigurationProject | undefined = lookup.findChildPath(filePath);
+
+      if (owningProject) {
+        const owningProjectHashDeps: Map<string, string> = projectHashDeps.get(owningProject)!;
+        owningProjectHashDeps.set(filePath, fileHash);
+      }
+    }
+
+    return {
+      projectState: projectHashDeps,
+      rootDir
+    };
   }
 
   private async _getIgnoreMatcherForProjectAsync(
@@ -278,12 +348,18 @@ export class ProjectChangeAnalyzer {
     }
   }
 
-  private _getRepoDeps(terminal: ITerminal): Map<string, string> | undefined {
+  private _getRepoDeps(terminal: ITerminal): IGitState | undefined {
     try {
       if (this._git.isPathUnderGitWorkingTree()) {
         // Load the package deps hash for the whole repository
         const gitPath: string = this._git.getGitPathOrThrow();
-        return getPackageDeps(this._rushConfiguration.rushJsonFolder, [], gitPath);
+        const rootDir: string = getRepoRoot(this._rushConfiguration.rushJsonFolder, gitPath);
+        const hashes: Map<string, string> = getRepoState(rootDir, gitPath);
+        return {
+          gitPath,
+          hashes,
+          rootDir
+        };
       } else {
         return undefined;
       }

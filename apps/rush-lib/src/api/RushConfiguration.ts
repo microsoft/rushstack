@@ -3,6 +3,7 @@
 
 /* eslint max-lines: off */
 
+import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as semver from 'semver';
@@ -437,7 +438,7 @@ export class RushConfiguration {
   private _ensureConsistentVersions: boolean;
   private _suppressNodeLtsWarning: boolean;
   private _variants: Set<string>;
-  private _projectByRelativePath: LookupByPath<RushConfigurationProject>;
+  private readonly _pathTrees: Map<string, LookupByPath<RushConfigurationProject>>;
 
   // "approvedPackagesPolicy" feature
   private _approvedPackagesPolicy: ApprovedPackagesPolicy;
@@ -713,12 +714,7 @@ export class RushConfiguration {
       }
     }
 
-    const pathTree: LookupByPath<RushConfigurationProject> = new LookupByPath<RushConfigurationProject>();
-    for (const project of this.projects) {
-      const relativePath: string = Path.convertToSlashes(project.projectRelativeFolder);
-      pathTree.setItem(relativePath, project);
-    }
-    this._projectByRelativePath = pathTree;
+    this._pathTrees = new Map();
   }
 
   private _initializeAndValidateLocalProjects(): void {
@@ -1675,12 +1671,19 @@ export class RushConfiguration {
   }
 
   /**
-   * Finds the project that owns the specified POSIX relative path (e.g. apps/rush-lib).
-   * The path is case-sensitive, so will only return a project if its projectRelativePath matches the casing.
-   * @returns The found project, or undefined if no match was found
+   * @returns An optimized lookup engine to find a project by its path relative to the specified root.
+   * @beta
    */
-  public findProjectForPosixRelativePath(posixRelativePath: string): RushConfigurationProject | undefined {
-    return this._projectByRelativePath.findChildPath(posixRelativePath);
+  public getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject> {
+    let pathTree: LookupByPath<RushConfigurationProject> | undefined = this._pathTrees.get(rootPath);
+    if (!pathTree) {
+      this._pathTrees.set(rootPath, (pathTree = new LookupByPath()));
+      for (const project of this.projects) {
+        const relativePath: string = path.relative(rootPath, project.projectFolder);
+        pathTree.setItemFromSegments(LookupByPath.iteratePathSegments(relativePath, os.EOL), project);
+      }
+    }
+    return pathTree;
   }
 
   /**
