@@ -45,8 +45,7 @@ export interface IExperimentsJson {
    * If true, the multi-phase commands feature is enabled. To use this feature, create a "phased" command
    * in common/config/rush/command-line.json.
    *
-   * This is internal for now, while this feature isn't feature-complete.
-   * @internal
+   * THIS FEATURE IS NOT READY FOR USAGE YET. SEE GITHUB #2300 FOR STATUS.
    */
   _multiPhaseCommands?: boolean;
 }

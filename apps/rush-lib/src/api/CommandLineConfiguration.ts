@@ -90,14 +90,14 @@ export class CommandLineConfiguration {
             );
           }
 
-          if (phase.name.substring(0, 7 /* '_phase:'.length */) !== EXPECTED_PHASE_NAME_PREFIX) {
+          if (phase.name.substring(0, EXPECTED_PHASE_NAME_PREFIX.length) !== EXPECTED_PHASE_NAME_PREFIX) {
             throw new Error(
               `In ${RushConstants.commandLineFilename}, the phase "${phase.name}"'s name ` +
                 `does not begin with the required prefix "${EXPECTED_PHASE_NAME_PREFIX}".`
             );
           }
 
-          if (phase.name.length <= 7 /* '_phase:'.length */) {
+          if (phase.name.length <= EXPECTED_PHASE_NAME_PREFIX.length) {
             throw new Error(
               `In ${RushConstants.commandLineFilename}, the phase "${phase.name}"'s name ` +
                 `must have characters after "${EXPECTED_PHASE_NAME_PREFIX}"`
