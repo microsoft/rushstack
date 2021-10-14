@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { ITerminal } from '@rushstack/node-core-library';
+import { ITerminal, Path } from '@rushstack/node-core-library';
 import { ConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
 import { RigConfig } from '@rushstack/rig-package';
 
@@ -22,6 +22,11 @@ interface IRushProjectJson {
   projectOutputFolderNames?: string[];
 
   /**
+   * Options for individual phases.
+   */
+  phaseOptions?: IRushProjectJsonPhaseOptionsJson[];
+
+  /**
    * The incremental analyzer can skip Rush commands for projects whose input files have
    * not changed since the last build. Normally, every Git-tracked file under the project
    * folder is assumed to be an input. Set incrementalBuildIgnoredGlobs to ignore specific
@@ -34,6 +39,20 @@ interface IRushProjectJson {
    * Additional project-specific options related to build caching.
    */
   buildCacheOptions?: IBuildCacheOptionsJson;
+}
+
+interface IRushProjectJsonPhaseOptionsJson {
+  /**
+   * The name of the phase. This is the name that appears in command-line.json.
+   */
+  phaseName: string;
+
+  /**
+   * A list of folder names under the project root that should be cached.
+   *
+   * These folders should not be tracked by git.
+   */
+  projectOutputFolderNames?: string[];
 }
 
 interface IBuildCacheOptionsJson extends IBuildCacheOptionsBase {
@@ -98,6 +117,9 @@ export class RushProjectConfiguration {
         projectOutputFolderNames: {
           inheritanceType: InheritanceType.append
         },
+        phaseOptions: {
+          inheritanceType: InheritanceType.append
+        },
         incrementalBuildIgnoredGlobs: {
           inheritanceType: InheritanceType.replace
         },
@@ -136,7 +158,14 @@ export class RushProjectConfiguration {
    *
    * These folders should not be tracked by git.
    */
-  public readonly projectOutputFolderNames?: string[];
+  public readonly projectOutputFolderNames?: ReadonlyArray<string>;
+
+  /**
+   * A list of folder names under the project root that should be cached for each phase.
+   *
+   * These folders should not be tracked by git.
+   */
+  public readonly projectOutputFolderNamesForPhases?: ReadonlyMap<string, ReadonlyArray<string>>;
 
   /**
    * The incremental analyzer can skip Rush commands for projects whose input files have
@@ -145,17 +174,23 @@ export class RushProjectConfiguration {
    * files, specified as globs relative to the project folder. The list of file globs will
    * be interpreted the same way your .gitignore file is.
    */
-  public readonly incrementalBuildIgnoredGlobs?: string[];
+  public readonly incrementalBuildIgnoredGlobs?: ReadonlyArray<string>;
 
   /**
    * Project-specific cache options.
    */
   public readonly cacheOptions: IBuildCacheOptions;
 
-  private constructor(project: RushConfigurationProject, rushProjectJson: IRushProjectJson) {
+  private constructor(
+    project: RushConfigurationProject,
+    rushProjectJson: IRushProjectJson,
+    projectOutputFolderNamesForPhases: ReadonlyMap<string, ReadonlyArray<string>> | undefined
+  ) {
     this.project = project;
 
     this.projectOutputFolderNames = rushProjectJson.projectOutputFolderNames;
+
+    this.projectOutputFolderNamesForPhases = projectOutputFolderNamesForPhases;
 
     this.incrementalBuildIgnoredGlobs = rushProjectJson.incrementalBuildIgnoredGlobs;
 
@@ -209,7 +244,18 @@ export class RushProjectConfiguration {
         repoCommandLineConfiguration,
         terminal
       );
-      const result: RushProjectConfiguration = new RushProjectConfiguration(project, rushProjectJson);
+      const projectOutputFolderNamesForPhases: Map<string, string[]> | undefined =
+        RushProjectConfiguration._tryGetProjectOutputFolderNamesForPhases(
+          project,
+          rushProjectJson,
+          repoCommandLineConfiguration,
+          terminal
+        );
+      const result: RushProjectConfiguration = new RushProjectConfiguration(
+        project,
+        rushProjectJson,
+        projectOutputFolderNamesForPhases
+      );
       RushProjectConfiguration._configCache.set(project, result);
       return result;
     } else {
@@ -281,6 +327,70 @@ export class RushProjectConfiguration {
           'command names in cacheOptions.optionsForCommands are specified more than once: ' +
           Array.from(duplicateCommandNames).join(', ')
       );
+    }
+  }
+
+  private static _tryGetProjectOutputFolderNamesForPhases(
+    project: RushConfigurationProject,
+    rushProjectJson: IRushProjectJson,
+    repoCommandLineConfiguration: CommandLineConfiguration | undefined,
+    terminal: ITerminal
+  ): Map<string, string[]> | undefined {
+    if (rushProjectJson.phaseOptions) {
+      const projectOutputFolderNamesForPhases: Map<string, string[]> = new Map<string, string[]>();
+      const phaseOptionsByPhase: Map<string, IRushProjectJsonPhaseOptionsJson> = new Map<
+        string,
+        IRushProjectJsonPhaseOptionsJson
+      >();
+      for (const phaseOptions of rushProjectJson.phaseOptions) {
+        const phaseName: string = phaseOptions.phaseName;
+        const existingPhaseOptions: IRushProjectJsonPhaseOptionsJson | undefined =
+          phaseOptionsByPhase.get(phaseName);
+        if (existingPhaseOptions) {
+          const existingPhaseOptionsJsonPath: string | undefined =
+            RushProjectConfiguration._projectBuildCacheConfigurationFile.getObjectSourceFilePath(
+              existingPhaseOptions
+            );
+          const phaseOptionsJsonPath: string | undefined =
+            RushProjectConfiguration._projectBuildCacheConfigurationFile.getObjectSourceFilePath(
+              phaseOptions
+            );
+          let errorMessage: string =
+            `The phase "${phaseName}" appears multiple times in the "${project.packageName}" project's ` +
+            `${RushProjectConfiguration._projectBuildCacheConfigurationFile.projectRelativeFilePath} file's ` +
+            'phaseOptions property.';
+          if (existingPhaseOptionsJsonPath && phaseOptionsJsonPath) {
+            if (existingPhaseOptionsJsonPath !== phaseOptionsJsonPath) {
+              errorMessage +=
+                ` It first appears in "${existingPhaseOptionsJsonPath}" and again ` +
+                `in "${phaseOptionsJsonPath}".`;
+            } else if (
+              !Path.convertToSlashes(existingPhaseOptionsJsonPath).startsWith(
+                Path.convertToSlashes(project.projectFolder)
+              )
+            ) {
+              errorMessage += ` It appears multiple times in "${phaseOptionsJsonPath}".`;
+            }
+          }
+
+          terminal.writeErrorLine(errorMessage);
+        } else if (!repoCommandLineConfiguration?.phases.has(phaseName)) {
+          terminal.writeErrorLine(
+            `Invalid "${RushProjectConfiguration._projectBuildCacheConfigurationFile.projectRelativeFilePath}"` +
+              ` for project "${project.packageName}". Phase "${phaseName}" is not defined in the repo's ${RushConstants.commandLineFilename}.`
+          );
+        } else {
+          phaseOptionsByPhase.set(phaseOptions.phaseName, phaseOptions);
+          if (phaseOptions.projectOutputFolderNames) {
+            projectOutputFolderNamesForPhases.set(
+              phaseOptions.phaseName,
+              phaseOptions.projectOutputFolderNames
+            );
+          }
+        }
+      }
+
+      return projectOutputFolderNamesForPhases;
     }
   }
 }

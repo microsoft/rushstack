@@ -44,7 +44,7 @@ export class ProjectBuildCache {
   private readonly _localBuildCacheProvider: FileSystemBuildCacheProvider;
   private readonly _cloudBuildCacheProvider: CloudBuildCacheProviderBase | undefined;
   private readonly _buildCacheEnabled: boolean;
-  private readonly _projectOutputFolderNames: string[];
+  private readonly _projectOutputFolderNames: ReadonlyArray<string>;
   private _cacheId: string | undefined;
 
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {

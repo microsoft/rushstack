@@ -47,7 +47,7 @@
 
     "projectOutputFolderNames": {
       "type": "array",
-      "description": "Specify the folders where your toolchain writes its output files.  If enabled, the Rush build cache will restore these folders from the cache. The strings are folder names under the project root folder.  These folders should not be tracked by Git. They must not contain symlinks.",
+      "description": "Specify the folders where your toolchain writes its output files. If enabled, the Rush build cache will restore these folders from the cache. The strings are folder names under the project root folder. These folders should not be tracked by Git. They must not contain symlinks.",
       "items": {
         "type": "string"
       },
@@ -59,6 +59,30 @@
       "description": "The incremental analyzer can skip Rush commands for projects whose input files have not changed since the last build. Normally, every Git-tracked file under the project folder is assumed to be an input. Set incrementalBuildIgnoredGlobs to ignore specific files, specified as globs relative to the project folder. The list of file globs will be interpreted the same way your .gitignore file is.",
       "items": {
         "type": "string"
+      }
+    },
+
+    "phaseOptions": {
+      "type": "array",
+      "description": "Options for individual phases.",
+      "items": {
+        "type": "object",
+        "required": ["phaseName"],
+        "properties": {
+          "phaseName": {
+            "type": "string",
+            "description": "The name of the phase. This is the name that appears in command-line.json."
+          },
+
+          "projectOutputFolderNames": {
+            "type": "array",
+            "description": "Specify the folders where this phase writes its output files. If enabled, the Rush build cache will restore these folders from the cache. The strings are folder names under the project root folder. These folders should not be tracked by Git. They must not contain symlinks.",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          }
+        }
       }
     }
   }
