@@ -3,7 +3,6 @@
 
 /* eslint max-lines: off */
 
-import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as semver from 'semver';
@@ -1680,7 +1679,7 @@ export class RushConfiguration {
       this._pathTrees.set(rootPath, (pathTree = new LookupByPath()));
       for (const project of this.projects) {
         const relativePath: string = path.relative(rootPath, project.projectFolder);
-        pathTree.setItemFromSegments(LookupByPath.iteratePathSegments(relativePath, os.EOL), project);
+        pathTree.setItemFromSegments(LookupByPath.iteratePathSegments(relativePath, path.sep), project);
       }
     }
     return pathTree;
