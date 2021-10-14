@@ -59,6 +59,7 @@ export interface IPhaseJson {
   enableParallelism?: boolean;
   ignoreMissingScript?: boolean;
   allowWarningsOnSuccess?: boolean;
+  incremental?: boolean;
 }
 
 /**
