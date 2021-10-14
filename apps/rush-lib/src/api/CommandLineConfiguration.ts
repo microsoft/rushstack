@@ -149,9 +149,20 @@ export class CommandLineConfiguration {
             for (const phase of phasedCommand.phases) {
               if (!this.phases.has(phase)) {
                 throw new Error(
-                  `In ${RushConstants.commandLineFilename}, in the command "${command.name}", the ` +
-                    `phase "${phase}" does not exist.`
+                  `In ${RushConstants.commandLineFilename}, in the "phases" property of the ` +
+                    `"${command.name}" command, the phase "${phase}" does not exist.`
                 );
+              }
+            }
+
+            if (phasedCommand.skipPhasesForCommand) {
+              for (const phase of phasedCommand.skipPhasesForCommand) {
+                if (!this.phases.has(phase)) {
+                  throw new Error(
+                    `In ${RushConstants.commandLineFilename}, in the "skipPhasesForCommand" property of the ` +
+                      `"${command.name}" command, the phase "${phase}" does not exist.`
+                  );
+                }
               }
             }
           }

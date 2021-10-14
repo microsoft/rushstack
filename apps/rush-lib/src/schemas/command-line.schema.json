@@ -177,7 +177,15 @@
             },
             "phases": {
               "title": "Phases",
-              "description": "List the phases associated with this command. Note that phases with dependencies will be implicitly included even if they aren't explicitly enumerated in this property.",
+              "description": "List the phases associated with this command. Note that phases with dependencies will be implicitly included even if they aren't explicitly enumerated in this property unless they are specifically excluded by the \"skipPhasesForCommand\" property.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "skipPhasesForCommand": {
+              "title": "Skip phases for command",
+              "description": "Exclude the phases listed here from the command's execution. Note that this may change dependency relationships between phases.",
               "type": "array",
               "items": {
                 "type": "string"
@@ -196,7 +204,8 @@
             "safeForSimultaneousRushProcesses": { "$ref": "#/definitions/anything" },
 
             "enableParallelism": { "$ref": "#/definitions/anything" },
-            "phases": { "$ref": "#/definitions/anything" }
+            "phases": { "$ref": "#/definitions/anything" },
+            "skipPhasesForCommand": { "$ref": "#/definitions/anything" }
           }
         }
       ]
@@ -336,7 +345,7 @@
             },
             "skipPhasesForCommand": {
               "title": "Skip phases for command",
-              "description": "Exclude the phases listed here from the command's execution if this parameter is specified. Note that this may break dependency relationships between phases.",
+              "description": "Exclude the phases listed here from the command's execution if this parameter is specified. Note that this may change dependency relationships between phases.",
               "type": "array",
               "items": {
                 "type": "string"

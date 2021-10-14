@@ -37,6 +37,7 @@ export interface IPhasedCommandJson extends IBaseCommandJson {
   commandKind: 'phased';
   enableParallelism: boolean;
   phases: string[];
+  skipPhasesForCommand?: string[];
 }
 
 /**
