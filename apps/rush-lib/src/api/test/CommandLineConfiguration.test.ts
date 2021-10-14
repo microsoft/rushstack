@@ -39,6 +39,7 @@ describe('CommandLineConfiguration', () => {
               description: 'example',
               safeForSimultaneousRushProcesses: false,
 
+              enableParallelism: true,
               phases: ['_phase:A']
             }
           ]
