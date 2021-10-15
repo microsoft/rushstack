@@ -5,7 +5,7 @@
  * "baseCommand" from command-line.schema.json
  */
 export interface IBaseCommandJson {
-  commandKind: 'bulk' | 'global';
+  commandKind: 'bulk' | 'global' | 'phased';
   name: string;
   summary: string;
   /**
@@ -31,6 +31,17 @@ export interface IBulkCommandJson extends IBaseCommandJson {
 }
 
 /**
+ * "phasedCommand" from command-line.schema.json
+ */
+export interface IPhasedCommandJson extends IBaseCommandJson {
+  commandKind: 'phased';
+  enableParallelism: boolean;
+  incremental?: boolean;
+  phases: string[];
+  skipPhasesForCommand?: string[];
+}
+
+/**
  * "globalCommand" from command-line.schema.json
  */
 export interface IGlobalCommandJson extends IBaseCommandJson {
@@ -38,7 +49,19 @@ export interface IGlobalCommandJson extends IBaseCommandJson {
   shellCommand: string;
 }
 
-export type CommandJson = IBulkCommandJson | IGlobalCommandJson;
+export type CommandJson = IBulkCommandJson | IGlobalCommandJson | IPhasedCommandJson;
+
+export interface IPhaseDependencies {
+  self?: string[];
+  upstream?: string[];
+}
+
+export interface IPhaseJson {
+  name: string;
+  dependencies?: IPhaseDependencies;
+  ignoreMissingScript?: boolean;
+  allowWarningsOnSuccess?: boolean;
+}
 
 /**
  * "baseParameter" from command-line.schema.json
@@ -48,7 +71,8 @@ export interface IBaseParameterJson {
   longName: string;
   shortName?: string;
   description: string;
-  associatedCommands: string[];
+  associatedCommands?: string[];
+  associatedPhases?: string[];
   required?: boolean;
 }
 
@@ -57,6 +81,8 @@ export interface IBaseParameterJson {
  */
 export interface IFlagParameterJson extends IBaseParameterJson {
   parameterKind: 'flag';
+  addPhasesToCommand?: string[];
+  skipPhasesForCommand?: string[];
 }
 
 /**
@@ -88,5 +114,6 @@ export type ParameterJson = IFlagParameterJson | IChoiceParameterJson | IStringP
  */
 export interface ICommandLineJson {
   commands?: CommandJson[];
+  phases?: IPhaseJson[];
   parameters?: ParameterJson[];
 }
