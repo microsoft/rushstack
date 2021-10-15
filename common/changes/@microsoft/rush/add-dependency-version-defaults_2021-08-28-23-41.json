@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add `dependencyVersionDefaults` to common-versions.json, to allow the user to define a default semver fallback for certain packages or package patterns",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush",
+  "email": "1935258+Js-Brecht@users.noreply.github.com"
+}

@@ -623,6 +623,23 @@ export class Utilities {
     });
   }
 
+  public static escapeRegExp(literal: string): string {
+    return literal.replace(/[^A-Za-z0-9_]/g, '\\$&');
+  }
+
+  public static matchesWithStar(patternWithStar: string, input: string): boolean {
+    // Map "@types/*" --> "^\@types\/.*$"
+    const pattern: string =
+      '^' +
+      patternWithStar
+        .split('*')
+        .map((x) => Utilities.escapeRegExp(x))
+        .join('.*') +
+      '$';
+    const regExp: RegExp = new RegExp(pattern);
+    return regExp.test(input);
+  }
+
   private static _executeLifecycleCommandInternal<TCommandResult>(
     command: string,
     spawnFunction: (

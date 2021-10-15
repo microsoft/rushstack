@@ -30,7 +30,7 @@ import { SymlinkAnalyzer, ILinkInfo } from './SymlinkAnalyzer';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { DeployScenarioConfiguration, IDeployScenarioProjectJson } from './DeployScenarioConfiguration';
 import { PnpmfileConfiguration } from '../pnpm/PnpmfileConfiguration';
-import { matchesWithStar } from './Utils';
+import { Utilities } from '../../utilities/Utilities';
 
 // (@types/npm-packlist is missing this API)
 declare module 'npm-packlist' {
@@ -261,7 +261,7 @@ export class DeployManager {
 
     for (const patternWithStar of dependenciesToExclude) {
       for (const dependency of allDependencyNames) {
-        if (matchesWithStar(patternWithStar, dependency)) {
+        if (Utilities.matchesWithStar(patternWithStar, dependency)) {
           if (allDependencyNames.delete(dependency)) {
             extraExcludedPackageNames.push(dependency);
           }

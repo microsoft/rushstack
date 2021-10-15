@@ -21,6 +21,7 @@ export class AddAction extends BaseRushAction {
   private _allFlag!: CommandLineFlagParameter;
   private _exactFlag!: CommandLineFlagParameter;
   private _caretFlag!: CommandLineFlagParameter;
+  private _tildeFlag!: CommandLineFlagParameter;
   private _devDependencyFlag!: CommandLineFlagParameter;
   private _makeConsistentFlag!: CommandLineFlagParameter;
   private _skipUpdateFlag!: CommandLineFlagParameter;
@@ -67,6 +68,12 @@ export class AddAction extends BaseRushAction {
       description:
         'If specified, the SemVer specifier added to the' +
         ' package.json will be a prepended with a "caret" specifier ("^").'
+    });
+    this._tildeFlag = this.defineFlagParameter({
+      parameterLongName: '--tilde',
+      description:
+        'If specified, the SemVer specifier added to the' +
+        ' package.json will be a prepended with a "tilde" specifier ("~").'
     });
     this._devDependencyFlag = this.defineFlagParameter({
       parameterLongName: '--dev',
@@ -158,7 +165,9 @@ export class AddAction extends BaseRushAction {
         ? packageJsonUpdaterModule.SemVerStyle.Caret
         : this._exactFlag.value
         ? packageJsonUpdaterModule.SemVerStyle.Exact
-        : packageJsonUpdaterModule.SemVerStyle.Tilde;
+        : this._tildeFlag.value
+        ? packageJsonUpdaterModule.SemVerStyle.Tilde
+        : packageJsonUpdaterModule.SemVerStyle.Auto;
     }
 
     await updater.doRushAdd({

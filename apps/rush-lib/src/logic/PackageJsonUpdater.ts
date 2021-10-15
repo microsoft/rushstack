@@ -22,6 +22,7 @@ import { InstallHelpers } from './installManager/InstallHelpers';
  * The type of SemVer range specifier that is prepended to the version
  */
 export const enum SemVerStyle {
+  Auto = 'auto',
   Exact = 'exact',
   Caret = 'caret',
   Tilde = 'tilde',
@@ -449,6 +450,14 @@ export class PackageJsonUpdater {
     let reasonForModification: string = '';
     if (selectedVersion !== '*') {
       switch (rangeStyle) {
+        case SemVerStyle.Auto: {
+          const { semverStyle, semverSymbol } = this._rushConfiguration
+            .getCommonVersions()
+            .getDefaultSemverForPackage(packageName);
+          selectedVersionPrefix += semverSymbol;
+          reasonForModification = ` because the calculated default semver is "${semverStyle}"`;
+          break;
+        }
         case SemVerStyle.Caret: {
           selectedVersionPrefix += '^';
           reasonForModification = ' because the "--caret" flag was specified';
@@ -462,6 +471,7 @@ export class PackageJsonUpdater {
 
         case SemVerStyle.Tilde: {
           selectedVersionPrefix += '~';
+          reasonForModification = ' because the "--tilde" flag was specified';
           break;
         }
 

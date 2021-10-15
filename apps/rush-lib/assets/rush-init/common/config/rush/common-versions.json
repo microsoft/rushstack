@@ -58,5 +58,32 @@
     /*[LINE "HYPOTHETICAL"]*/ "typescript": [
     /*[LINE "HYPOTHETICAL"]*/   "~2.4.0"
     /*[LINE "HYPOTHETICAL"]*/ ]
-  }
+  },
+  
+  /**
+   * The "rush add" command will use this collection to calculate a default semver style to use for the
+   * package that it's installing.
+   *
+   * Assuming that the desired semver style could not be determined by any other means, the package name
+   * will be compared to `packageNamePattern`.  If it matches, the defined `semverStyle` will be used.
+   *
+   * Patterns will be checked in order and the first one matching will be used, so more general rules should
+   * be placed at the bottom.
+   */
+  "dependencyVersionDefaults": [
+    /*[LINE "HYPOTHETICAL"]*/ {
+      /**
+       * May contain "*", which will match zero or more characters
+       */
+    /*[LINE "HYPOTHETICAL"]*/   "packageNamePattern": "@types/*",
+      /**
+       * Can only be "exact", "tilde", or "caret"
+       */
+    /*[LINE "HYPOTHETICAL"]*/   "semverStyle": "exact"
+    /*[LINE "HYPOTHETICAL"]*/ },
+    /*[LINE "HYPOTHETICAL"]*/ {
+    /*[LINE "HYPOTHETICAL"]*/   "packageNamePattern": "*",
+    /*[LINE "HYPOTHETICAL"]*/   "semverStyle": "caret"
+    /*[LINE "HYPOTHETICAL"]*/ }
+  ]
 }

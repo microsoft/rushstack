@@ -71,6 +71,7 @@ export class CommonVersionsConfiguration {
     get allowedAlternativeVersions(): Map<string, ReadonlyArray<string>>;
     get filePath(): string;
     getAllPreferredVersions(): Map<string, string>;
+    getDefaultSemverForPackage(packageName: string): IChosenSemverStyle;
     getPreferredVersionsHash(): string;
     get implicitlyPreferredVersions(): boolean | undefined;
     static loadFromFile(jsonFilename: string): CommonVersionsConfiguration;
@@ -78,6 +79,9 @@ export class CommonVersionsConfiguration {
     save(): boolean;
     get xstitchPreferredVersions(): Map<string, string>;
 }
+
+// @public
+export type DefaultSemverStyle = 'exact' | 'tilde' | 'caret';
 
 // @beta (undocumented)
 export const enum DependencyType {
@@ -135,6 +139,12 @@ export class ExperimentsConfiguration {
     // @internal
     constructor(jsonFileName: string);
     get configuration(): Readonly<IExperimentsJson>;
+}
+
+// @public
+export interface IChosenSemverStyle {
+    semverStyle: DefaultSemverStyle;
+    semverSymbol: string;
 }
 
 // @public
