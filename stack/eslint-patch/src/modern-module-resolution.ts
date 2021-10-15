@@ -31,17 +31,34 @@ for (let currentModule = module; ; ) {
   if (!eslintrcBundlePath) {
     // For ESLint >=8.0.0, all @eslint/eslintrc code is bundled at this path:
     //   .../@eslint/eslintrc/dist/eslintrc.cjs
-    if (/[\\/]@eslint[\\/]eslintrc[\\/]dist[\\/]eslintrc\.cjs$/i.test(currentModule.filename)) {
-      const eslintrcFolder: string = path.join(path.dirname(currentModule.filename), '..');
-      eslintrcBundlePath = path.join(eslintrcFolder, 'dist/eslintrc.cjs');
-    }
+    try {
+      const eslintrcFolder = path.dirname(
+        require.resolve('@eslint/eslintrc/package.json', { paths: [currentModule.path] })
+      );
+
+      // Make sure we actually resolved the module in our call path
+      // and not some other spurious dependency.
+      if (path.join(eslintrcFolder, 'dist/eslintrc.cjs') == currentModule.filename) {
+        eslintrcBundlePath = path.join(eslintrcFolder, 'dist/eslintrc.cjs');
+      }
+    } catch {}
   } else {
     // Next look for a file in ESLint's folder
     //   .../eslint/lib/cli-engine/cli-engine.js
-    if (/[\\/]eslint[\\/]lib[\\/]cli-engine[\\/]cli-engine\.js$/i.test(currentModule.filename)) {
-      eslintFolder = path.join(path.dirname(currentModule.filename), '../..');
-      break;
-    }
+    try {
+      const eslintCandidateFolder = path.dirname(
+        require.resolve('eslint/package.json', {
+          paths: [currentModule.path]
+        })
+      );
+
+      // Make sure we actually resolved the module in our call path
+      // and not some other spurious dependency.
+      if (path.join(eslintCandidateFolder, 'lib/cli-engine/cli-engine.js') == currentModule.filename) {
+        eslintFolder = eslintCandidateFolder;
+        break;
+      }
+    } catch {}
   }
 
   if (!currentModule.parent) {
@@ -56,18 +73,33 @@ if (!eslintFolder) {
     if (!configArrayFactoryPath) {
       // For ESLint >=7.8.0, config-array-factory.js is at this path:
       //   .../@eslint/eslintrc/lib/config-array-factory.js
-      if (/[\\/]@eslint[\\/]eslintrc[\\/]lib[\\/]config-array-factory\.js$/i.test(currentModule.filename)) {
-        const eslintrcFolder: string = path.join(path.dirname(currentModule.filename), '..');
-        configArrayFactoryPath = path.join(eslintrcFolder, 'lib/config-array-factory');
-        moduleResolverPath = path.join(eslintrcFolder, 'lib/shared/relative-module-resolver');
-      }
+      try {
+        const eslintrcFolder = path.dirname(
+          require.resolve('@eslint/eslintrc/package.json', {
+            paths: [currentModule.path]
+          })
+        );
+
+        if (path.join(eslintrcFolder, '/lib/config-array-factory.js') == currentModule.filename) {
+          configArrayFactoryPath = path.join(eslintrcFolder, 'lib/config-array-factory.js');
+          moduleResolverPath = path.join(eslintrcFolder, 'lib/shared/relative-module-resolver');
+        }
+      } catch {}
     } else {
       // Next look for a file in ESLint's folder
       //   .../eslint/lib/cli-engine/cli-engine.js
-      if (/[\\/]eslint[\\/]lib[\\/]cli-engine[\\/]cli-engine\.js$/i.test(currentModule.filename)) {
-        eslintFolder = path.join(path.dirname(currentModule.filename), '../..');
-        break;
-      }
+      try {
+        const eslintCandidateFolder = path.dirname(
+          require.resolve('eslint/package.json', {
+            paths: [currentModule.path]
+          })
+        );
+
+        if (path.join(eslintCandidateFolder, 'lib/cli-engine/cli-engine.js') == currentModule.filename) {
+          eslintFolder = eslintCandidateFolder;
+          break;
+        }
+      } catch {}
     }
 
     if (!currentModule.parent) {

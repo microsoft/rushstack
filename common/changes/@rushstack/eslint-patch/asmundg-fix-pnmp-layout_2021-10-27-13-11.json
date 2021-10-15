@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-patch",
+      "comment": "feat(eslint-patch): Find patch targets independently of disk layout",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-patch"
+}
