@@ -117,16 +117,16 @@ export class AddAction extends BaseRushAction {
       );
     }
 
-    const specifeidPackageNameList: ReadonlyArray<string> = this._packageNameList.values!;
+    const specifiedPackageNameList: ReadonlyArray<string> = this._packageNameList.values!;
     const packageNames: string[] = [];
     const initialVersions: Map<string, string | undefined> = new Map();
     const rangeStyles: Map<string, PackageJsonUpdaterTypes.SemVerStyle> = new Map();
 
-    for (const specifeidPackageName of specifeidPackageNameList) {
+    for (const specifiedPackageName of specifiedPackageNameList) {
       /**
        * Name & Version
        */
-      let packageName: string = specifeidPackageName;
+      let packageName: string = specifiedPackageName;
       let version: string | undefined = undefined;
       const parts: string[] = packageName.split('@');
 
