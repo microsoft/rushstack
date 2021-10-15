@@ -273,7 +273,7 @@ export class ProjectChangeAnalyzer {
 
     if (projectConfiguration && projectConfiguration.incrementalBuildIgnoredGlobs) {
       const ignoreMatcher: Ignore = ignore();
-      ignoreMatcher.add(projectConfiguration.incrementalBuildIgnoredGlobs);
+      ignoreMatcher.add(projectConfiguration.incrementalBuildIgnoredGlobs as string[]);
       return ignoreMatcher;
     }
   }
