@@ -186,7 +186,7 @@ describe('getPackageDeps', () => {
       }
       expect(filteredResults.size).toEqual(expectedFiles.size);
     } finally {
-      execSync(`git checkout-index --force HEAD -- ${testFilePath}testProject/file1.txt`, {
+      execSync(`git checkout-index --force HEAD -- ${TEST_PREFIX}testProject/file1.txt`, {
         stdio: 'ignore',
         cwd: getRepoRoot(__dirname)
       });
