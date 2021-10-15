@@ -151,7 +151,6 @@ export interface IConfigurationEnvironmentVariable {
 // @beta
 export interface IExperimentsJson {
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
-    // @internal
     _multiPhaseCommands?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
