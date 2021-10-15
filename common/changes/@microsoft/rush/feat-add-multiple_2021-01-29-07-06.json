@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Rush add supports adding multiple packages",
+      "comment": "Include support for adding multiple packages with the \"rush add\" command.",
       "type": "none"
     }
   ],
