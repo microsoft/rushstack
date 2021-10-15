@@ -2,13 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { ITerminal, Path } from '@rushstack/node-core-library';
+import { AlreadyReportedError, ITerminal, Path } from '@rushstack/node-core-library';
 import { ConfigurationFile, InheritanceType } from '@rushstack/heft-config-file';
 import { RigConfig } from '@rushstack/rig-package';
 
 import { RushConfigurationProject } from './RushConfigurationProject';
 import { RushConstants } from '../logic/RushConstants';
 import { CommandLineConfiguration } from './CommandLineConfiguration';
+import { OverlappingPathAnalyzer } from '../utilities/OverlappingPathAnalyzer';
 
 /**
  * Describes the file structure for the "<project root>/config/rush-project.json" config file.
@@ -238,23 +239,11 @@ export class RushProjectConfiguration {
       );
 
     if (rushProjectJson) {
-      RushProjectConfiguration._validateConfiguration(
+      const result: RushProjectConfiguration = RushProjectConfiguration._getRushProjectConfiguration(
         project,
         rushProjectJson,
         repoCommandLineConfiguration,
         terminal
-      );
-      const projectOutputFolderNamesForPhases: Map<string, string[]> | undefined =
-        RushProjectConfiguration._tryGetProjectOutputFolderNamesForPhases(
-          project,
-          rushProjectJson,
-          repoCommandLineConfiguration,
-          terminal
-        );
-      const result: RushProjectConfiguration = new RushProjectConfiguration(
-        project,
-        rushProjectJson,
-        projectOutputFolderNamesForPhases
       );
       RushProjectConfiguration._configCache.set(project, result);
       return result;
@@ -264,25 +253,41 @@ export class RushProjectConfiguration {
     }
   }
 
-  private static _validateConfiguration(
+  private static _getRushProjectConfiguration(
     project: RushConfigurationProject,
     rushProjectJson: IRushProjectJson,
     repoCommandLineConfiguration: CommandLineConfiguration | undefined,
     terminal: ITerminal
-  ): void {
-    const invalidFolderNames: string[] = [];
-    for (const projectOutputFolder of rushProjectJson.projectOutputFolderNames || []) {
-      if (projectOutputFolder.match(/[\/\\]/)) {
-        invalidFolderNames.push(projectOutputFolder);
-      }
-    }
+  ): RushProjectConfiguration {
+    if (rushProjectJson.projectOutputFolderNames) {
+      const overlappingPathAnalyzer: OverlappingPathAnalyzer<boolean> =
+        new OverlappingPathAnalyzer<boolean>();
 
-    if (invalidFolderNames.length > 0) {
-      terminal.writeErrorLine(
-        `Invalid project configuration for project "${project.packageName}". Entries in ` +
-          '"projectOutputFolderNames" must not contain slashes and the following entries do: ' +
-          invalidFolderNames.join(', ')
-      );
+      const invalidFolderNames: string[] = [];
+      for (const projectOutputFolder of rushProjectJson.projectOutputFolderNames) {
+        if (projectOutputFolder.match(/[\\]/)) {
+          invalidFolderNames.push(projectOutputFolder);
+        }
+
+        const overlaps: boolean = !!overlappingPathAnalyzer.addPathAndGetFirstEncounteredLabels(
+          projectOutputFolder,
+          true
+        );
+        if (overlaps) {
+          terminal.writeErrorLine(
+            `The project output folder name "${projectOutputFolder}" is invalid because it overlaps with another folder name.`
+          );
+          throw new AlreadyReportedError();
+        }
+      }
+
+      if (invalidFolderNames.length > 0) {
+        terminal.writeErrorLine(
+          `Invalid project configuration for project "${project.packageName}". Entries in ` +
+            '"projectOutputFolderNames" must not contain backslashes and the following entries do: ' +
+            invalidFolderNames.join(', ')
+        );
+      }
     }
 
     const duplicateCommandNames: Set<string> = new Set<string>();
@@ -328,16 +333,12 @@ export class RushProjectConfiguration {
           Array.from(duplicateCommandNames).join(', ')
       );
     }
-  }
 
-  private static _tryGetProjectOutputFolderNamesForPhases(
-    project: RushConfigurationProject,
-    rushProjectJson: IRushProjectJson,
-    repoCommandLineConfiguration: CommandLineConfiguration | undefined,
-    terminal: ITerminal
-  ): Map<string, string[]> | undefined {
+    let projectOutputFolderNamesForPhases: Map<string, string[]> | undefined;
     if (rushProjectJson.phaseOptions) {
-      const projectOutputFolderNamesForPhases: Map<string, string[]> = new Map<string, string[]>();
+      const overlappingPathAnalyzer: OverlappingPathAnalyzer<string> = new OverlappingPathAnalyzer<string>();
+
+      projectOutputFolderNamesForPhases = new Map<string, string[]>();
       const phaseOptionsByPhase: Map<string, IRushProjectJsonPhaseOptionsJson> = new Map<
         string,
         IRushProjectJsonPhaseOptionsJson
@@ -388,9 +389,47 @@ export class RushProjectConfiguration {
             );
           }
         }
-      }
 
-      return projectOutputFolderNamesForPhases;
+        if (phaseOptions.projectOutputFolderNames) {
+          for (const projectOutputFolderName of phaseOptions.projectOutputFolderNames) {
+            const overlappingPhaseNames: string[] | undefined =
+              overlappingPathAnalyzer.addPathAndGetFirstEncounteredLabels(projectOutputFolderName, phaseName);
+            if (overlappingPhaseNames) {
+              const overlapsWithOwnPhase: boolean = overlappingPhaseNames?.includes(phaseName);
+              if (overlapsWithOwnPhase) {
+                if (overlappingPhaseNames.length === 1) {
+                  terminal.writeErrorLine(
+                    `Invalid "${RushProjectConfiguration._projectBuildCacheConfigurationFile.projectRelativeFilePath}" ` +
+                      `for project "${project.packageName}". The project output folder name "${projectOutputFolderName}" in ` +
+                      `phase ${phaseName} overlaps with other another folder name in the same phase.`
+                  );
+                } else {
+                  const otherPhaseNames: string[] = overlappingPhaseNames.filter(
+                    (overlappingPhaseName) => overlappingPhaseName !== phaseName
+                  );
+                  terminal.writeErrorLine(
+                    `Invalid "${RushProjectConfiguration._projectBuildCacheConfigurationFile.projectRelativeFilePath}" ` +
+                      `for project "${project.packageName}". The project output folder name "${projectOutputFolderName}" in ` +
+                      `phase ${phaseName} overlaps with other another folder names in the same phase and with ` +
+                      `folder names in the following other phases: ${otherPhaseNames.join(', ')}.`
+                  );
+                }
+              } else {
+                terminal.writeErrorLine(
+                  `Invalid "${RushProjectConfiguration._projectBuildCacheConfigurationFile.projectRelativeFilePath}" ` +
+                    `for project "${project.packageName}". The project output folder name "${projectOutputFolderName}" in ` +
+                    `phase ${phaseName} overlaps with other folder name(s) in the following other phases: ` +
+                    `${overlappingPhaseNames.join(', ')}.`
+                );
+              }
+
+              throw new AlreadyReportedError();
+            }
+          }
+        }
+      }
     }
+
+    return new RushProjectConfiguration(project, rushProjectJson, projectOutputFolderNamesForPhases);
   }
 }
