@@ -28,7 +28,7 @@ export class AddAction extends BaseRushAction {
 
   public constructor(parser: RushCommandLineParser) {
     const documentation: string[] = [
-      'Adds a specified package or specified packages as a dependency of the current project (as determined by the current working directory)' +
+      'Adds specified package(s) to the dependencies of the current project (as determined by the current working directory)' +
         ' and then runs "rush update". If no version is specified, a version will be automatically detected (typically' +
         ' either the latest version or a version that won\'t break the "ensureConsistentVersions" policy). If a version' +
         ' range (or a workspace range) is specified, the latest version in the range will be used. The version will be' +
@@ -37,7 +37,7 @@ export class AddAction extends BaseRushAction {
     ];
     super({
       actionName: 'add',
-      summary: 'Adds a dependency or dependencies to the package.json and runs rush upgrade.',
+      summary: 'Adds one or more dependencies to the package.json and runs rush upgrade.',
       documentation: documentation.join(os.EOL),
       safeForSimultaneousRushProcesses: false,
       parser
@@ -55,7 +55,7 @@ export class AddAction extends BaseRushAction {
         ' A SemVer version specifier can be appended after an "@" sign.  WARNING: Symbol characters' +
         " are usually interpreted by your shell, so it's recommended to use quotes." +
         ' For example, write "rush add --package "example@^1.2.3"" instead of "rush add --package example@^1.2.3".' +
-        ' To add multiple packges, write "rush add --package foo --package bar".'
+        ' To add multiple packages, write "rush add --package foo --package bar".'
     });
     this._exactFlag = this.defineFlagParameter({
       parameterLongName: '--exact',

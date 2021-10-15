@@ -162,8 +162,8 @@ export class PackageJsonUpdater {
       );
       updatePackages[packageName] = version;
       console.log(colors.green(`Updating projects to use `) + packageName + '@' + colors.cyan(version));
+      console.log();
     }
-    console.log();
 
     const allPackageUpdates: IUpdateProjectOptions[] = [];
 
