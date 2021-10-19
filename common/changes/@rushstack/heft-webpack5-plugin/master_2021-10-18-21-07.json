@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-webpack5-plugin",
-      "comment": "upgrade webpack 5 to latest",
-      "type": "patch"
+      "comment": "Update to latest version of Webpack 5 and change the dependency specifier to a carat (^) to automatically take the latest minor version.",
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft-webpack5-plugin"
