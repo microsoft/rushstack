@@ -12,6 +12,7 @@ import { RushXCommandLine } from '../RushXCommandLine';
 
 describe('RushXCommandLine', () => {
   let $argv: string[];
+  let $versions: NodeJS.ProcessVersions;
   let executeLifecycleCommandMock: jest.SpyInstance | undefined;
   let logMock: jest.SpyInstance | undefined;
   let rushConfiguration: RushConfiguration | undefined;
@@ -20,6 +21,10 @@ describe('RushXCommandLine', () => {
     // Mock process
     $argv = process.argv;
     process.argv = [...process.argv];
+    $versions = process.versions;
+    Object.defineProperty(process, 'versions', {
+      value: { ...process.versions, node: '12.12.12' }
+    });
     jest.spyOn(process, 'cwd').mockReturnValue('/Users/jdoe/bigrepo/apps/acme');
 
     // Mock rush version
@@ -67,6 +72,9 @@ describe('RushXCommandLine', () => {
 
   afterEach(() => {
     process.argv = $argv;
+    Object.defineProperty(process, 'versions', {
+      value: $versions
+    });
     executeLifecycleCommandMock = undefined;
     logMock = undefined;
     rushConfiguration = undefined;
