@@ -10,6 +10,10 @@
 const path = require('path');
 const fs = require('fs');
 
+// Module path for eslintrc.cjs
+// Example: ".../@eslint/eslintrc/dist/eslintrc.cjs"
+let eslintrcBundlePath: string | undefined = undefined;
+
 // Module path for config-array-factory.js
 // Example: ".../@eslint/eslintrc/lib/config-array-factory"
 let configArrayFactoryPath: string | undefined = undefined;
@@ -22,15 +26,14 @@ let moduleResolverPath: string | undefined = undefined;
 // Example: ".../node_modules/eslint"
 let eslintFolder: string | undefined = undefined;
 
-// Probe for the ESLint >=7.8.0 layout:
+// Probe for the ESLint >=8.0.0 layout:
 for (let currentModule = module; ; ) {
-  if (!configArrayFactoryPath) {
-    // For ESLint >=7.8.0, config-array-factory.js is at this path:
-    //   .../@eslint/eslintrc/lib/config-array-factory.js
-    if (/[\\/]@eslint[\\/]eslintrc[\\/]lib[\\/]config-array-factory\.js$/i.test(currentModule.filename)) {
+  if (!eslintrcBundlePath) {
+    // For ESLint >=8.0.0, all @eslint/eslintrc code is bundled at this path:
+    //   .../@eslint/eslintrc/dist/eslintrc.cjs
+    if (/[\\/]@eslint[\\/]eslintrc[\\/]dist[\\/]eslintrc\.cjs$/i.test(currentModule.filename)) {
       const eslintrcFolder: string = path.join(path.dirname(currentModule.filename), '..');
-      configArrayFactoryPath = path.join(eslintrcFolder, 'lib/config-array-factory');
-      moduleResolverPath = path.join(eslintrcFolder, 'lib/shared/relative-module-resolver');
+      eslintrcBundlePath = path.join(eslintrcFolder, 'dist/eslintrc.cjs');
     }
   } else {
     // Next look for a file in ESLint's folder
@@ -45,6 +48,33 @@ for (let currentModule = module; ; ) {
     break;
   }
   currentModule = currentModule.parent;
+}
+
+if (!eslintFolder) {
+  // Probe for the ESLint >=7.8.0 layout:
+  for (let currentModule = module; ; ) {
+    if (!configArrayFactoryPath) {
+      // For ESLint >=7.8.0, config-array-factory.js is at this path:
+      //   .../@eslint/eslintrc/lib/config-array-factory.js
+      if (/[\\/]@eslint[\\/]eslintrc[\\/]lib[\\/]config-array-factory\.js$/i.test(currentModule.filename)) {
+        const eslintrcFolder: string = path.join(path.dirname(currentModule.filename), '..');
+        configArrayFactoryPath = path.join(eslintrcFolder, 'lib/config-array-factory');
+        moduleResolverPath = path.join(eslintrcFolder, 'lib/shared/relative-module-resolver');
+      }
+    } else {
+      // Next look for a file in ESLint's folder
+      //   .../eslint/lib/cli-engine/cli-engine.js
+      if (/[\\/]eslint[\\/]lib[\\/]cli-engine[\\/]cli-engine\.js$/i.test(currentModule.filename)) {
+        eslintFolder = path.join(path.dirname(currentModule.filename), '../..');
+        break;
+      }
+    }
+
+    if (!currentModule.parent) {
+      break;
+    }
+    currentModule = currentModule.parent;
+  }
 }
 
 if (!eslintFolder) {
@@ -80,22 +110,30 @@ if (!versionMatch) {
   throw new Error('Unable to parse ESLint version: ' + eslintPackageVersion);
 }
 const eslintMajorVersion = Number(versionMatch[1]);
-if (!(eslintMajorVersion >= 6 && eslintMajorVersion <= 7)) {
+if (!(eslintMajorVersion >= 6 && eslintMajorVersion <= 8)) {
   throw new Error(
-    'The patch-eslint.js script has only been tested with ESLint version 6.x or 7.x.' +
+    'The patch-eslint.js script has only been tested with ESLint version 6.x, 7.x, and 8.x.' +
       ` (Your version: ${eslintPackageVersion})\n` +
       'Consider reporting a GitHub issue:\n' +
       'https://github.com/microsoft/rushstack/issues'
   );
 }
 
-const ConfigArrayFactory = require(configArrayFactoryPath!).ConfigArrayFactory;
-
+let ConfigArrayFactory;
+if (eslintMajorVersion === 8) {
+  ConfigArrayFactory = require(eslintrcBundlePath!).Legacy.ConfigArrayFactory;
+} else {
+  ConfigArrayFactory = require(configArrayFactoryPath!).ConfigArrayFactory;
+}
 if (!ConfigArrayFactory.__patched) {
   ConfigArrayFactory.__patched = true;
 
-  const ModuleResolver = require(moduleResolverPath!);
-
+  let ModuleResolver: { resolve: any };
+  if (eslintMajorVersion === 8) {
+    ModuleResolver = require(eslintrcBundlePath!).Legacy.ModuleResolver;
+  } else {
+    ModuleResolver = require(moduleResolverPath!);
+  }
   const originalLoadPlugin = ConfigArrayFactory.prototype._loadPlugin;
 
   if (eslintMajorVersion === 6) {
@@ -117,7 +155,7 @@ if (!ConfigArrayFactory.__patched) {
       }
     };
   } else {
-    // ESLint 7.x
+    // ESLint 7.x || 8.x
     ConfigArrayFactory.prototype._loadPlugin = function (name: string, ctx: Record<string, unknown>) {
       const originalResolve = ModuleResolver.resolve;
       try {

@@ -80,7 +80,7 @@ describe(ProjectChangeAnalyzer.name, () => {
     it('ignores files specified by project configuration files, relative to project folder', async () => {
       // rush-project.json configuration for 'apple'
       jest.spyOn(RushProjectConfiguration, 'tryLoadForProjectAsync').mockResolvedValueOnce({
-        incrementalBuildIgnoredGlobs: ['assets/*.png', '*.js.map']
+        incrementalBuildIgnoredGlobs: ['assets/*.png', '*.js.map'] as ReadonlyArray<string>
       } as RushProjectConfiguration);
       // rush-project.json configuration for 'banana' does not exist
       jest.spyOn(RushProjectConfiguration, 'tryLoadForProjectAsync').mockResolvedValueOnce(undefined);
@@ -125,7 +125,11 @@ describe(ProjectChangeAnalyzer.name, () => {
     it('interprets ignored globs as a dot-ignore file (not as individually handled globs)', async () => {
       // rush-project.json configuration for 'apple'
       jest.spyOn(RushProjectConfiguration, 'tryLoadForProjectAsync').mockResolvedValue({
-        incrementalBuildIgnoredGlobs: ['*.png', 'assets/*.psd', '!assets/important/**']
+        incrementalBuildIgnoredGlobs: [
+          '*.png',
+          'assets/*.psd',
+          '!assets/important/**'
+        ] as ReadonlyArray<string>
       } as RushProjectConfiguration);
 
       const projects: RushConfigurationProject[] = [
