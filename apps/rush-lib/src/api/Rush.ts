@@ -55,7 +55,7 @@ export class Rush {
     const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
 
     if (!Utilities.shouldRestrictConsoleOutput()) {
-      RushStartupBanner.log(Rush.version, options.isManaged);
+      RushStartupBanner.logBanner(Rush.version, options.isManaged);
     }
 
     if (!CommandLineMigrationAdvisor.checkArgv(process.argv)) {

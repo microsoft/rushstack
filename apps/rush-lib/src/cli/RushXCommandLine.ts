@@ -25,9 +25,9 @@ export interface ILaunchRushXInternalOptions {
 
 interface IRushXCommandLineArguments {
   /**
-   * Flag indicating whether to display rushx startup information.
+   * Flag indicating whether to suppress any rushx startup information.
    */
-  verbose: boolean;
+  quiet: boolean;
 
   /**
    * Flag indicating whether the user has asked for help.
@@ -61,15 +61,15 @@ export class RushXCommandLine {
 
     const args: IRushXCommandLineArguments = this._getCommandLineArguments();
 
-    if (args.verbose || args.help) {
-      RushStartupBanner.log(Rush.version, options.isManaged);
+    if (!args.quiet) {
+      RushStartupBanner.logStreamlinedBanner(Rush.version, options.isManaged);
     }
 
     try {
       // Are we in a Rush repo?
       let rushConfiguration: RushConfiguration | undefined = undefined;
       if (RushConfiguration.tryFindRushJsonLocation()) {
-        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: args.verbose });
+        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: false });
       }
 
       NodeJsCompatibility.warnAboutCompatibilityIssues({
@@ -146,8 +146,8 @@ export class RushXCommandLine {
         commandWithArgsForDisplay += ' ' + args.commandArgs.join(' ');
       }
 
-      if (args.verbose) {
-        console.log('Executing: ' + JSON.stringify(commandWithArgsForDisplay) + os.EOL);
+      if (!args.quiet) {
+        console.log('> ' + JSON.stringify(commandWithArgsForDisplay) + os.EOL);
       }
 
       const packageFolder: string = path.dirname(packageJsonFilePath);
@@ -181,23 +181,25 @@ export class RushXCommandLine {
     const unknownArgs: string[] = [];
 
     let help: boolean = false;
-    let verbose: boolean = false;
+    let quiet: boolean = false;
     let commandName: string = '';
     const commandArgs: string[] = [];
 
-    for (let idx: number = 0; idx < args.length; idx++) {
+    for (let index: number = 0; index < args.length; index++) {
+      const argValue: string = args[index];
+
       if (!commandName) {
-        if (args[idx] === '--verbose') {
-          verbose = true;
-        } else if (args[idx] === '-h' || args[idx] === '--help') {
+        if (argValue === '-q' || argValue === '--quiet') {
+          quiet = true;
+        } else if (argValue === '-h' || argValue === '--help') {
           help = true;
-        } else if (args[idx].startsWith('-')) {
-          unknownArgs.push(args[idx]);
+        } else if (argValue.startsWith('-')) {
+          unknownArgs.push(args[index]);
         } else {
-          commandName = args[idx];
+          commandName = args[index];
         }
       } else {
-        commandArgs.push(args[idx]);
+        commandArgs.push(args[index]);
       }
     }
 
@@ -213,7 +215,7 @@ export class RushXCommandLine {
 
     return {
       help,
-      verbose,
+      quiet,
       commandName,
       commandArgs
     };
@@ -221,11 +223,11 @@ export class RushXCommandLine {
 
   private static _showUsage(packageJson: IPackageJson, projectCommandSet: ProjectCommandSet): void {
     console.log('usage: rushx [-h]');
-    console.log('       rushx [--verbose] <command> ...' + os.EOL);
+    console.log('       rushx [-q/--quiet] <command> ...' + os.EOL);
 
     console.log('Optional arguments:');
     console.log('  -h, --help            Show this help message and exit.');
-    console.log('  --verbose             Show detailed information at startup.' + os.EOL);
+    console.log('  -q, --quiet           Hide rushx startup information.' + os.EOL);
 
     if (projectCommandSet.commandNames.length > 0) {
       console.log(`Project commands for ${colors.cyan(packageJson.name)}:`);
