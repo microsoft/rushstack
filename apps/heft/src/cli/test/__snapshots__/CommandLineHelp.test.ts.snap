@@ -118,7 +118,8 @@ Optional arguments:
   -u, --update-snapshots
                         Update Jest snapshots while running the tests. This 
                         corresponds to the \\"--updateSnapshots\\" parameter in 
-                        Jest
+                        Jest. This parameter may alternatively be specified 
+                        via the HEFT_UPDATE_SNAPSHOTS environment variable.
   --find-related-tests SOURCE_FILE
                         Find and run the tests that cover a space separated 
                         list of source files that were passed in as arguments.
@@ -145,14 +146,18 @@ Optional arguments:
                         will fail. Individual tests can override the default. 
                         If unspecified, the default is normally 5000 ms. This 
                         corresponds to the \\"--testTimeout\\" parameter in 
-                        Jest's documentation.
+                        Jest's documentation. This parameter may 
+                        alternatively be specified via the HEFT_TEST_TIMEOUT 
+                        environment variable.
   --detect-open-handles
                         Attempt to collect and print open handles preventing 
                         Jest from exiting cleanly. This option has a 
                         significant performance penalty and should only be 
                         used for debugging. This corresponds to the 
                         \\"--detectOpenHandles\\" parameter in Jest's 
-                        documentation.
+                        documentation. This parameter may alternatively be 
+                        specified via the HEFT_DETECT_OPEN_HANDLES 
+                        environment variable.
   --debug-heft-reporter
                         Normally Heft installs a custom Jest reporter so that 
                         test results are presented consistently with other 
@@ -170,6 +175,8 @@ Optional arguments:
                         representing the number of workers to spawn when 
                         running tests, or can be a string representing a 
                         percentage of the available CPUs on the machine to 
-                        utilize. Example values: \\"3\\", \\"25%\\"
+                        utilize. Example values: \\"3\\", \\"25%\\" This parameter 
+                        may alternatively be specified via the 
+                        HEFT_MAX_WORKERS environment variable.
 "
 `;
