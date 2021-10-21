@@ -108,7 +108,7 @@ export class TestAction extends BuildAction {
     this._testTimeout = this.defineIntegerParameter({
       parameterLongName: '--test-timeout-ms',
       argumentName: 'INTEGER',
-      environmentVariable: 'HEFT_TEST_TIMEOUT',
+      environmentVariable: 'HEFT_TEST_TIMEOUT_MS',
       description:
         "Change the default timeout for tests; if a test doesn't complete within this many" +
         ' milliseconds, it will fail. Individual tests can override the default. If unspecified, ' +

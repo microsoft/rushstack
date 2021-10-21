@@ -147,8 +147,8 @@ Optional arguments:
                         If unspecified, the default is normally 5000 ms. This 
                         corresponds to the \\"--testTimeout\\" parameter in 
                         Jest's documentation. This parameter may 
-                        alternatively be specified via the HEFT_TEST_TIMEOUT 
-                        environment variable.
+                        alternatively be specified via the 
+                        HEFT_TEST_TIMEOUT_MS environment variable.
   --detect-open-handles
                         Attempt to collect and print open handles preventing 
                         Jest from exiting cleanly. This option has a 
