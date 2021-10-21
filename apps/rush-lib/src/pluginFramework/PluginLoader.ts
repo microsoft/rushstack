@@ -120,6 +120,10 @@ export class PluginLoader {
       // Example: `common/autoinstaller/plugins/node_modules/.bin`
       path.join(this.autoinstaller.folderFullPath, 'node_modules', '.bin')
     );
+    commandLineConfiguration.prependAdditionalPathFolder(
+      // Example: `common/autoinstaller/plugins/node_modules/<packageName>/node_modules/.bin`
+      path.join(this.packageFolder, 'node_modules', '.bin')
+    );
     commandLineConfiguration.shellCommandTokenContext = {
       packageFolder: this.packageFolder
     };
