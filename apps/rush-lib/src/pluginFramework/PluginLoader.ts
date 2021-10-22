@@ -243,33 +243,33 @@ export class PluginLoader {
     return plugin;
   }
 
+  private _getPluginOptionsJsonFilePath(): string {
+    return path.join(
+      this._rushConfiguration.rushPluginOptionsFolder,
+      `${this._pluginConfiguration.pluginName}.json`
+    );
+  }
+
   private _getPluginOptions(): JsonObject {
-    const optionsJsonFilePath: string | undefined = this._pluginConfiguration.optionsJsonFilePath;
+    const optionsJsonFilePath: string = this._getPluginOptionsJsonFilePath();
     const optionsSchema: JsonSchema | undefined = this._getRushPluginOptionsSchema();
 
-    if (!optionsJsonFilePath) {
+    const isOptionsJsonFileExists: boolean = FileSystem.exists(optionsJsonFilePath);
+
+    if (!isOptionsJsonFileExists) {
       if (!optionsSchema) {
         return {};
       } else {
         throw new Error(
-          `optionsJsonFilePath is required for rush plugin ${this._pluginConfiguration.pluginName} from package ${this._pluginConfiguration.packageName}, please check your rush-plugins.json.`
+          `Plugin options are required by ${this._pluginConfiguration.pluginName} from package ${this._pluginConfiguration.packageName}, please create it at ${optionsJsonFilePath}.`
         );
       }
     }
 
-    const resolvedOptionsJsonFilePath: string = path.join(
-      this._rushConfiguration.rushPluginOptionsFolder,
-      optionsJsonFilePath
-    );
-
-    if (!FileSystem.exists(resolvedOptionsJsonFilePath)) {
-      throw new Error(`optionsJsonFile does not exist at ${resolvedOptionsJsonFilePath}`);
-    }
-
     if (optionsSchema) {
-      return JsonFile.loadAndValidate(resolvedOptionsJsonFilePath, optionsSchema);
+      return JsonFile.loadAndValidate(optionsJsonFilePath, optionsSchema);
     } else {
-      return JsonFile.load(resolvedOptionsJsonFilePath);
+      return JsonFile.load(optionsJsonFilePath);
     }
   }
 

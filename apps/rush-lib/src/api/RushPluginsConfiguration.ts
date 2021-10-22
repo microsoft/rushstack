@@ -11,7 +11,6 @@ export interface IRushPluginConfiguration {
   packageName: string;
   pluginName: string;
   autoinstallerName: string;
-  optionsJsonFilePath?: string;
 }
 
 /**
