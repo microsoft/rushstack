@@ -22,6 +22,7 @@ export class PluginManager {
   private _rushSession: RushSession;
   private _pluginLoaders: PluginLoader[];
   private _installedAutoinstallerNames: Set<string>;
+  private _loadedPluginNames: Set<string> = new Set<string>();
 
   private _error: Error | undefined;
 
@@ -105,12 +106,19 @@ export class PluginManager {
   private async _initializePluginsAsync(pluginLoaders: PluginLoader[]): Promise<void> {
     const pluginInfos: { plugin: IRushPlugin; pluginName: string }[] = [];
     for (const pluginLoader of pluginLoaders) {
+      const pluginName: string = pluginLoader.configuration.pluginName;
+      if (this._loadedPluginNames.has(pluginName)) {
+        throw new Error(
+          `Plugin "${pluginName}" has already been loaded. Please check your rush-plugins.json.`
+        );
+      }
       const plugin: IRushPlugin | undefined = pluginLoader.load();
       if (plugin) {
         pluginInfos.push({
-          pluginName: pluginLoader.configuration.pluginName,
+          pluginName,
           plugin
         });
+        this._loadedPluginNames.add(pluginName);
       }
     }
     for (const { plugin, pluginName } of pluginInfos) {

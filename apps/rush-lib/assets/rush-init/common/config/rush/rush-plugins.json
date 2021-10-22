@@ -19,11 +19,7 @@
       /**
        * Autoinstaller name used to install the plugin.
        */
-      "autoinstallerName": "plugins",
-      /**
-       * The file path of a json file that contains the configuration for the plugin.
-       */
-      "optionsJsonFilePath": "my-plugin-options.json"
+      "autoinstallerName": "plugins"
     }
     /*[END "DEMO"]*/
   ]
