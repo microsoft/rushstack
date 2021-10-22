@@ -25,11 +25,28 @@ export interface IPnpmfileContext {
 }
 
 /**
+ * The `log` parameter passed to {@link IPnpmfile.hooks.filterLog}.
+ */
+export type IPnpmLog = (
+  | {
+      level: 'debug' | 'error';
+    }
+  | {
+      level: 'info' | 'warn';
+      prefix: string;
+      message: string;
+    }
+) & {
+  [key: string]: unknown;
+};
+
+/**
  * The pnpmfile, as defined by the pnpmfile API contract.
  */
 export interface IPnpmfile {
   hooks?: {
     afterAllResolved?: (lockfile: IPnpmShrinkwrapYaml, context: IPnpmfileContext) => IPnpmShrinkwrapYaml;
     readPackage?: (pkg: IPackageJson, context: IPnpmfileContext) => IPackageJson;
+    filterLog?: (log: IPnpmLog) => boolean;
   };
 }
