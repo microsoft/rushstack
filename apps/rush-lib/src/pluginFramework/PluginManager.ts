@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { InternalError, ITerminal } from '@rushstack/node-core-library';
+import { FileSystem, InternalError, ITerminal } from '@rushstack/node-core-library';
 import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
 
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -61,13 +61,11 @@ export class PluginManager {
   }
 
   public async _preparePluginAutoinstallersAsync(pluginLoaders: PluginLoader[]): Promise<void> {
-    const autoinstallers: Autoinstaller[] = pluginLoaders.map((pluginLoader) => {
-      return pluginLoader.autoinstaller;
-    });
-    for (const autoInstaller of autoinstallers) {
-      if (!this._installedAutoinstallerNames.has(autoInstaller.name)) {
-        await autoInstaller.prepareAsync();
-        this._installedAutoinstallerNames.add(autoInstaller.name);
+    for (const { autoinstaller, configuration } of pluginLoaders) {
+      if (!this._installedAutoinstallerNames.has(autoinstaller.name)) {
+        await autoinstaller.prepareAsync();
+        FileSystem.ensureEmptyFolder(PluginLoader.getPluginStorePath(autoinstaller, configuration));
+        this._installedAutoinstallerNames.add(autoinstaller.name);
       }
     }
   }

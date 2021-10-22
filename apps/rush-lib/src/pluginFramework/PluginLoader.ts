@@ -61,6 +61,17 @@ export class PluginLoader {
     );
   }
 
+  /**
+   * The folder where rush plugins static files are stored.
+   * Example: `C:\MyRepo\common\autoinstallers\<autoinstaller_name>\rush-plugins\<package_name>`
+   */
+  public static getPluginStorePath(
+    autoinstaller: Autoinstaller,
+    pluginConfiguration: IRushPluginConfiguration
+  ): string {
+    return path.join(autoinstaller.folderFullPath, 'rush-plugins', pluginConfiguration.packageName);
+  }
+
   public update(): void {
     const { packageName, pluginName } = this._pluginConfiguration;
     const packageFolder: string = this.packageFolder;
@@ -262,21 +273,16 @@ export class PluginLoader {
     }
   }
 
-  private _getPluginStorePath(): string {
-    return path.join(
-      this._rushConfiguration.rushPluginManifestsFolder,
-      this._pluginConfiguration.packageName,
-      this.autoinstaller.name
-    );
-  }
-
   private _getManifestPath(): string {
-    return path.join(this._getPluginStorePath(), RushConstants.rushPluginManifestFilename);
+    return path.join(
+      PluginLoader.getPluginStorePath(this._autoinstaller, this._pluginConfiguration),
+      RushConstants.rushPluginManifestFilename
+    );
   }
 
   private _getCommandLineJsonFilePath(): string {
     return path.join(
-      this._getPluginStorePath(),
+      PluginLoader.getPluginStorePath(this._autoinstaller, this._pluginConfiguration),
       this._pluginConfiguration.pluginName,
       RushConstants.commandLineFilename
     );
