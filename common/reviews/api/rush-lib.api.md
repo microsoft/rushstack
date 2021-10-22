@@ -602,6 +602,7 @@ export class RushConfiguration {
     //
     // (undocumented)
     get rushPluginsConfiguration(): RushPluginsConfiguration;
+    get rushPluginsFolder(): string;
     get shrinkwrapFilename(): string;
     get shrinkwrapFilePhrase(): string;
     get suppressNodeLtsWarning(): boolean;

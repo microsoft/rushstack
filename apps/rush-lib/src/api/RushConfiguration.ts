@@ -1114,14 +1114,6 @@ export class RushConfiguration {
   }
 
   /**
-   * The folder where rush plugin manifest files are stored.
-   * Example: `C:\MyRepo\common\rush-plugins\manifests`
-   */
-  public get rushPluginManifestsFolder(): string {
-    return path.join(this.rushPluginsFolder, 'manifests');
-  }
-
-  /**
    * The local folder that will store the NPM package cache.  Rush does not rely on the
    * npm's default global cache folder, because npm's caching implementation does not
    * reliably handle multiple processes.  (For example, if a build box is running
