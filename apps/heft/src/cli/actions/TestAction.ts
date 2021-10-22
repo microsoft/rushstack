@@ -55,7 +55,6 @@ export class TestAction extends BuildAction {
     this._updateSnapshotsFlag = this.defineFlagParameter({
       parameterLongName: '--update-snapshots',
       parameterShortName: '-u',
-      environmentVariable: 'HEFT_UPDATE_SNAPSHOTS',
       description:
         'Update Jest snapshots while running the tests.' +
         ' This corresponds to the "--updateSnapshots" parameter in Jest'
