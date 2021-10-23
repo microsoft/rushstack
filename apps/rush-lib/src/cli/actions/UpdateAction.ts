@@ -72,7 +72,7 @@ export class UpdateAction extends BaseInstallAction {
       maxInstallAttempts: this._maxInstallAttempts.value!,
       pnpmFilterArguments: [],
       checkOnly: false,
-      ignoreScripts: this._ignoreScriptsParameter.value!
+      ignoreScripts: this._ignoreScriptsParameter.value
     };
   }
 }

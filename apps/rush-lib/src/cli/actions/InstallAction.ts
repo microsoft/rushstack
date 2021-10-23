@@ -61,7 +61,7 @@ export class InstallAction extends BaseInstallAction {
       // These are derived independently of the selection for command line brevity
       pnpmFilterArguments: this._selectionParameters!.getPnpmFilterArguments(),
       checkOnly: this._checkOnlyParameter.value,
-      ignoreScripts: this._ignoreScriptsParameter.value!
+      ignoreScripts: this._ignoreScriptsParameter.value
     };
   }
 }
