@@ -850,8 +850,8 @@
 
     // "repo-scripts" folder (alphabetical order)
     {
-      "packageName": "doc-plugin-rush-stack",
-      "projectFolder": "repo-scripts/doc-plugin-rush-stack",
+      "packageName": "doc-plugin-jekyll",
+      "projectFolder": "repo-scripts/doc-plugin-jekyll",
       "reviewCategory": "libraries",
       "shouldPublish": false
     },
