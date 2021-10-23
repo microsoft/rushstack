@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add --ignore-scripts option for rush update and install",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
