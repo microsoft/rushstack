@@ -1552,7 +1552,32 @@ importers:
       '@rushstack/heft-node-rig': 1.2.25_@rushstack+heft@0.41.6
       '@types/glob': 7.1.1
 
-  ../../repo-scripts/doc-plugin-rush-stack:
+  ../../repo-scripts/doc-plugin-docusaurus:
+    specifiers:
+      '@microsoft/api-documenter': workspace:*
+      '@microsoft/api-extractor-model': workspace:*
+      '@microsoft/tsdoc': 0.13.2
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@types/js-yaml': 3.12.1
+      '@types/node': 12.20.24
+      js-yaml: ~3.13.1
+    dependencies:
+      '@microsoft/api-documenter': link:../../apps/api-documenter
+      '@microsoft/api-extractor-model': link:../../apps/api-extractor-model
+      '@microsoft/tsdoc': 0.13.2
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      js-yaml: 3.13.1
+    devDependencies:
+      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/js-yaml': 3.12.1
+      '@types/node': 12.20.24
+
+  ../../repo-scripts/doc-plugin-jekyll:
     specifiers:
       '@microsoft/api-documenter': workspace:*
       '@microsoft/api-extractor-model': workspace:*
@@ -1581,11 +1606,11 @@ importers:
     specifiers:
       '@microsoft/api-documenter': workspace:*
       '@rushstack/eslint-config': workspace:*
-      doc-plugin-rush-stack: workspace:*
+      doc-plugin-jekyll: workspace:*
     devDependencies:
       '@microsoft/api-documenter': link:../../apps/api-documenter
       '@rushstack/eslint-config': link:../../stack/eslint-config
-      doc-plugin-rush-stack: link:../doc-plugin-rush-stack
+      doc-plugin-jekyll: link:../doc-plugin-jekyll
 
   ../../repo-scripts/repo-toolbox:
     specifiers:
