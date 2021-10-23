@@ -1,0 +1,26 @@
+{
+  "name": "doc-plugin-docusaurus",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API Documenter plugin that produces Docusaurus-flavored markdown",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft build --clean"
+  },
+  "dependencies": {
+    "@microsoft/api-documenter": "workspace:*",
+    "@microsoft/api-extractor-model": "workspace:*",
+    "@microsoft/tsdoc": "0.13.2",
+    "@rushstack/node-core-library": "workspace:*",
+    "js-yaml": "~3.13.1"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@types/js-yaml": "3.12.1",
+    "@types/node": "12.20.24"
+  }
+}

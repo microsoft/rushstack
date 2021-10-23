@@ -850,6 +850,12 @@
 
     // "repo-scripts" folder (alphabetical order)
     {
+      "packageName": "doc-plugin-docusaurus",
+      "projectFolder": "repo-scripts/doc-plugin-docusaurus",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
+    {
       "packageName": "doc-plugin-jekyll",
       "projectFolder": "repo-scripts/doc-plugin-jekyll",
       "reviewCategory": "libraries",
