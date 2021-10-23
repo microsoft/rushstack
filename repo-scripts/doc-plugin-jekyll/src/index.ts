@@ -2,15 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import { IApiDocumenterPluginManifest } from '@microsoft/api-documenter';
-import { RushStackFeature } from './RushStackFeature';
+import { JekyllMarkdownFeature } from './JekyllMarkdownFeature';
 
 export const apiDocumenterPluginManifest: IApiDocumenterPluginManifest = {
   manifestVersion: 1000,
   features: [
     {
-      featureName: 'rush-stack-markdown-documenter',
+      featureName: 'jekyll-markdown-documenter',
       kind: 'MarkdownDocumenterFeature',
-      subclass: RushStackFeature
+      subclass: JekyllMarkdownFeature
     }
   ]
 };

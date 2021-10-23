@@ -3,8 +3,8 @@
 
   "plugins": [
     {
-      "packageName": "doc-plugin-rush-stack",
-      "enabledFeatureNames": ["rush-stack-markdown-documenter"]
+      "packageName": "doc-plugin-jekyll",
+      "enabledFeatureNames": ["jekyll-markdown-documenter"]
     }
   ]
 }
