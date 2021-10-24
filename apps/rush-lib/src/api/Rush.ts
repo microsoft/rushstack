@@ -1,15 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { EOL } from 'os';
-import colors from 'colors/safe';
 import { PackageJsonLookup } from '@rushstack/node-core-library';
 
 import { RushCommandLineParser } from '../cli/RushCommandLineParser';
-import { RushConstants } from '../logic/RushConstants';
+import { RushStartupBanner } from '../cli/RushStartupBanner';
 import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
-import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { Utilities } from '../utilities/Utilities';
 import { EnvironmentVariableNames } from './EnvironmentConfiguration';
 
@@ -58,7 +55,7 @@ export class Rush {
     const options: ILaunchOptions = Rush._normalizeLaunchOptions(arg);
 
     if (!Utilities.shouldRestrictConsoleOutput()) {
-      Rush._printStartupBanner(options.isManaged);
+      RushStartupBanner.logBanner(Rush.version, options.isManaged);
     }
 
     if (!CommandLineMigrationAdvisor.checkArgv(process.argv)) {
@@ -83,8 +80,6 @@ export class Rush {
    */
   public static launchRushX(launcherVersion: string, options: ILaunchOptions): void {
     options = Rush._normalizeLaunchOptions(options);
-
-    Rush._printStartupBanner(options.isManaged);
 
     Rush._assignRushInvokedFolder();
     RushXCommandLine._launchRushXInternal(launcherVersion, { ...options });
@@ -124,25 +119,5 @@ export class Rush {
     return typeof arg === 'boolean'
       ? { isManaged: arg } // In older versions of Rush, this the `launch` functions took a boolean arg for "isManaged"
       : arg;
-  }
-
-  private static _printStartupBanner(isManaged: boolean): void {
-    const nodeVersion: string = process.versions.node;
-    const nodeReleaseLabel: string = NodeJsCompatibility.isOddNumberedVersion
-      ? 'unstable'
-      : NodeJsCompatibility.isLtsVersion
-      ? 'LTS'
-      : 'pre-LTS';
-
-    console.log(
-      EOL +
-        colors.bold(
-          `Rush Multi-Project Build Tool ${Rush.version}` + colors.yellow(isManaged ? '' : ' (unmanaged)')
-        ) +
-        colors.cyan(` - ${RushConstants.rushWebSiteUrl}`) +
-        EOL +
-        `Node.js version is ${nodeVersion} (${nodeReleaseLabel})` +
-        EOL
-    );
   }
 }

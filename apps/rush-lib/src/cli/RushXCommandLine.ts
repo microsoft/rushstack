@@ -9,15 +9,40 @@ import { DEFAULT_CONSOLE_WIDTH, PrintUtilities } from '@rushstack/terminal';
 
 import { Utilities } from '../utilities/Utilities';
 import { ProjectCommandSet } from '../logic/ProjectCommandSet';
+import { Rush } from '../api/Rush';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
+import { RushStartupBanner } from './RushStartupBanner';
 
 /**
  * @internal
  */
 export interface ILaunchRushXInternalOptions {
   isManaged: boolean;
+
   alreadyReportedNodeTooNewError?: boolean;
+}
+
+interface IRushXCommandLineArguments {
+  /**
+   * Flag indicating whether to suppress any rushx startup information.
+   */
+  quiet: boolean;
+
+  /**
+   * Flag indicating whether the user has asked for help.
+   */
+  help: boolean;
+
+  /**
+   * The command to run (i.e., the target "script" in package.json.)
+   */
+  commandName: string;
+
+  /**
+   * Any additional arguments/parameters passed after the command name.
+   */
+  commandArgs: string[];
 }
 
 export class RushXCommandLine {
@@ -34,11 +59,17 @@ export class RushXCommandLine {
     // and set it to 0 only on success.
     process.exitCode = 1;
 
+    const args: IRushXCommandLineArguments = this._getCommandLineArguments();
+
+    if (!args.quiet) {
+      RushStartupBanner.logStreamlinedBanner(Rush.version, options.isManaged);
+    }
+
     try {
       // Are we in a Rush repo?
       let rushConfiguration: RushConfiguration | undefined = undefined;
       if (RushConfiguration.tryFindRushJsonLocation()) {
-        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: true });
+        rushConfiguration = RushConfiguration.loadFromDefaultLocation({ showVerbose: false });
       }
 
       NodeJsCompatibility.warnAboutCompatibilityIssues({
@@ -75,28 +106,17 @@ export class RushXCommandLine {
 
       const projectCommandSet: ProjectCommandSet = new ProjectCommandSet(packageJson);
 
-      // 0 = node.exe
-      // 1 = rushx
-      const args: string[] = process.argv.slice(2);
-
-      // Check for the following types of things:
-      //   rush
-      //   rush --help
-      //   rush -h
-      //   rush --unrecognized-option
-      if (args.length === 0 || args[0][0] === '-') {
+      if (args.help) {
         RushXCommandLine._showUsage(packageJson, projectCommandSet);
         return;
       }
 
-      const commandName: string = args[0];
-
-      const scriptBody: string | undefined = projectCommandSet.tryGetScriptBody(commandName);
+      const scriptBody: string | undefined = projectCommandSet.tryGetScriptBody(args.commandName);
 
       if (scriptBody === undefined) {
         console.log(
           colors.red(
-            `Error: The command "${commandName}" is not defined in the` +
+            `Error: The command "${args.commandName}" is not defined in the` +
               ` package.json file for this project.`
           )
         );
@@ -113,22 +133,22 @@ export class RushXCommandLine {
         return;
       }
 
-      const remainingArgs: string[] = args.slice(1);
-
       let commandWithArgs: string = scriptBody;
       let commandWithArgsForDisplay: string = scriptBody;
-      if (remainingArgs.length > 0) {
+      if (args.commandArgs.length > 0) {
         // This approach is based on what NPM 7 now does:
         // https://github.com/npm/run-script/blob/47a4d539fb07220e7215cc0e482683b76407ef9b/lib/run-script-pkg.js#L34
-        const escapedRemainingArgs: string[] = remainingArgs.map((x) => Utilities.escapeShellParameter(x));
+        const escapedRemainingArgs: string[] = args.commandArgs.map((x) => Utilities.escapeShellParameter(x));
 
         commandWithArgs += ' ' + escapedRemainingArgs.join(' ');
 
         // Display it nicely without the extra quotes
-        commandWithArgsForDisplay += ' ' + remainingArgs.join(' ');
+        commandWithArgsForDisplay += ' ' + args.commandArgs.join(' ');
       }
 
-      console.log('Executing: ' + JSON.stringify(commandWithArgsForDisplay) + os.EOL);
+      if (!args.quiet) {
+        console.log('> ' + JSON.stringify(commandWithArgsForDisplay) + os.EOL);
+      }
 
       const packageFolder: string = path.dirname(packageJsonFilePath);
 
@@ -154,12 +174,60 @@ export class RushXCommandLine {
     }
   }
 
+  private static _getCommandLineArguments(): IRushXCommandLineArguments {
+    // 0 = node.exe
+    // 1 = rushx
+    const args: string[] = process.argv.slice(2);
+    const unknownArgs: string[] = [];
+
+    let help: boolean = false;
+    let quiet: boolean = false;
+    let commandName: string = '';
+    const commandArgs: string[] = [];
+
+    for (let index: number = 0; index < args.length; index++) {
+      const argValue: string = args[index];
+
+      if (!commandName) {
+        if (argValue === '-q' || argValue === '--quiet') {
+          quiet = true;
+        } else if (argValue === '-h' || argValue === '--help') {
+          help = true;
+        } else if (argValue.startsWith('-')) {
+          unknownArgs.push(args[index]);
+        } else {
+          commandName = args[index];
+        }
+      } else {
+        commandArgs.push(args[index]);
+      }
+    }
+
+    if (!commandName) {
+      help = true;
+    }
+
+    if (unknownArgs.length > 0) {
+      // Future TODO: Instead of just displaying usage info, we could display a
+      // specific error about the unknown flag the user tried to pass to rushx.
+      help = true;
+    }
+
+    return {
+      help,
+      quiet,
+      commandName,
+      commandArgs
+    };
+  }
+
   private static _showUsage(packageJson: IPackageJson, projectCommandSet: ProjectCommandSet): void {
     console.log('usage: rushx [-h]');
-    console.log('       rushx <command> ...' + os.EOL);
+    console.log('       rushx [-q/--quiet] <command> ...' + os.EOL);
 
     console.log('Optional arguments:');
-    console.log('  -h, --help            Show this help message and exit.' + os.EOL);
+    console.log('  -h, --help            Show this help message and exit.');
+    console.log('  -q, --quiet           Hide rushx startup information.' + os.EOL);
 
     if (projectCommandSet.commandNames.length > 0) {
       console.log(`Project commands for ${colors.cyan(packageJson.name)}:`);

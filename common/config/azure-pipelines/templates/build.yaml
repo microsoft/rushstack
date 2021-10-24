@@ -14,3 +14,7 @@ steps:
     displayName: 'Rush Install'
   - script: 'node common/scripts/install-run-rush.js rebuild --verbose --production'
     displayName: 'Rush Rebuild'
+    env:
+      # Prevent time-based browserslist update warning
+      # See https://github.com/microsoft/rushstack/issues/2981
+      BROWSERSLIST_IGNORE_OLD_DATA: 1
