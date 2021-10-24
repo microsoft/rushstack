@@ -556,6 +556,10 @@ export abstract class BaseInstallManager {
       if (this._rushConfiguration.yarnOptions.ignoreEngines) {
         args.push('--ignore-engines');
       }
+
+      if (options.collectLogFile) {
+        args.push('--verbose');
+      }
     }
   }
 
