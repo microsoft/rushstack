@@ -24,6 +24,8 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/package-deps-hash": "workspace:*",
     "@rushstack/rig-package": "workspace:*",
+    "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
+    "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:*",
     "@rushstack/stream-collator": "workspace:*",
     "@rushstack/terminal": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",

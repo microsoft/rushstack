@@ -7,9 +7,15 @@ import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 /**
  * @beta
  */
-export interface IRushPluginConfiguration {
+export interface IRushPluginConfigurationBase {
   packageName: string;
   pluginName: string;
+}
+
+/**
+ * @beta
+ */
+export interface IRushPluginConfiguration extends IRushPluginConfigurationBase {
   autoinstallerName: string;
 }
 

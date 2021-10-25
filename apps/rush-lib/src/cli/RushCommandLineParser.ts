@@ -123,7 +123,6 @@ export class RushCommandLineParser extends CommandLineParser {
       this.pluginManager.tryGetCustomCommandLineConfigurations();
     for (const commandLineConfiguration of pluginCommandLineConfigurations) {
       this._addCommandLineConfigActions(commandLineConfiguration);
-      this._validateCommandLineConfigParameterAssociations(commandLineConfiguration);
     }
 
     this._populateActions();
