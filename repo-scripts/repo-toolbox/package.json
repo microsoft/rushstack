@@ -13,6 +13,11 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "repo-scripts/repo-toolbox"
+  },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",

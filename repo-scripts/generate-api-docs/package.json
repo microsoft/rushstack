@@ -7,6 +7,11 @@
   "scripts": {
     "build": ""
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "repo-scripts/generate-api-docs"
+  },
   "devDependencies": {
     "@microsoft/api-documenter": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",

@@ -9,6 +9,11 @@
   "scripts": {
     "build": "heft build --clean"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "repo-scripts/doc-plugin-rush-stack"
+  },
   "dependencies": {
     "@microsoft/api-documenter": "workspace:*",
     "@microsoft/api-extractor-model": "workspace:*",
