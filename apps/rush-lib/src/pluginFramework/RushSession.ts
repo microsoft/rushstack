@@ -45,24 +45,6 @@ export class RushSession implements IRushLifecycle {
       getShouldPrintStacks: () => this._options.getIsDebugMode(),
       terminalProvider
     };
-    if (this.hooks.loggerOptions.isUsed()) {
-      this.hooks.loggerOptions.call(loggerOptions);
-    } else {
-      // default prepend the logger name to the log message
-      const parentTerminalProvider: ITerminalProvider = terminalProvider;
-      const prefixProxyTerminalProvider: ITerminalProvider = {
-        write: (data, severity) => {
-          parentTerminalProvider.write(`[${name}] ${data}`, severity);
-        },
-        eolCharacter: parentTerminalProvider.eolCharacter,
-        supportsColor: parentTerminalProvider.supportsColor
-      };
-      loggerOptions.terminalProvider = prefixProxyTerminalProvider;
-    }
-    const customLogger: ILogger | undefined = this.hooks.logger.call(loggerOptions);
-    if (customLogger) {
-      return customLogger;
-    }
     return new Logger(loggerOptions);
   }
 
