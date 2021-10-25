@@ -959,12 +959,14 @@
       "packageName": "@rushstack/rush-amazon-s3-build-cache-plugin",
       "projectFolder": "rush-plugins/rush-amazon-s3-build-cache-plugin",
       "reviewCategory": "libraries",
+      "cyclicDependencyProjects": ["@microsoft/rush-lib"],
       "shouldPublish": true
     },
     {
       "packageName": "@rushstack/rush-azure-storage-build-cache-plugin",
       "projectFolder": "rush-plugins/rush-azure-storage-build-cache-plugin",
       "reviewCategory": "libraries",
+      "cyclicDependencyProjects": ["@microsoft/rush-lib"],
       "shouldPublish": true
     },
     {

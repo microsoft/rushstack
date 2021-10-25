@@ -37,6 +37,16 @@ export class CommandLineConfiguration {
     RushConstants.rebuildCommandName
   ]);
 
+  /**
+   * These path will be prepended to the PATH environment variable
+   */
+  private _additionalPathFolders: string[] = [];
+
+  /**
+   * shellCommand from plugin custom command line configuration needs to be expanded with tokens
+   */
+  private _shellCommandTokenContext: IShellCommandTokenContext | undefined;
+
   public static readonly defaultBuildCommandJson: CommandJson = {
     commandKind: RushConstants.bulkCommandKind,
     name: RushConstants.buildCommandName,
@@ -365,14 +375,4 @@ export class CommandLineConfiguration {
   public set shellCommandTokenContext(tokenContext: IShellCommandTokenContext | undefined) {
     this._shellCommandTokenContext = tokenContext;
   }
-
-  /**
-   * These path will be prepended to the PATH environment variable
-   */
-  private _additionalPathFolders: string[] = [];
-
-  /**
-   * shellCommand from plugin custom command line configuration needs to be expanded with tokens
-   */
-  private _shellCommandTokenContext: IShellCommandTokenContext | undefined;
 }

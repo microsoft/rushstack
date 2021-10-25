@@ -1,0 +1,139 @@
+// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+// See LICENSE in the project root for license information.
+
+import * as path from 'path';
+import { FileSystem, JsonFile, JsonObject, JsonSchema, ITerminal } from '@rushstack/node-core-library';
+import { RushConfiguration } from '../../api/RushConfiguration';
+import { IRushPluginConfiguration } from '../../api/RushPluginsConfiguration';
+import { Autoinstaller } from '../../logic/Autoinstaller';
+import { RushConstants } from '../../logic/RushConstants';
+import { PluginLoaderBase } from './PluginLoaderBase';
+
+export interface IRushPluginManifest {
+  pluginName: string;
+  description: string;
+  entryPoint?: string;
+  optionsSchema?: string;
+  associatedCommands?: string[];
+  commandLineJsonFilePath?: string;
+}
+
+export interface IRushPluginManifestJson {
+  plugins: IRushPluginManifest[];
+}
+
+export interface IRemotePluginLoaderOptions {
+  pluginConfiguration: IRushPluginConfiguration;
+  rushConfiguration: RushConfiguration;
+  terminal: ITerminal;
+}
+
+/**
+ * @beta
+ */
+export class RemotePluginLoader extends PluginLoaderBase {
+  private _autoinstaller: Autoinstaller;
+
+  public constructor({ pluginConfiguration, rushConfiguration, terminal }: IRemotePluginLoaderOptions) {
+    super({
+      pluginConfiguration,
+      rushConfiguration,
+      terminal
+    });
+    this._autoinstaller = new Autoinstaller(pluginConfiguration.autoinstallerName, this._rushConfiguration);
+  }
+
+  /**
+   * The folder where rush plugins static files are stored.
+   * Example: `C:\MyRepo\common\autoinstallers\<autoinstaller_name>\rush-plugins\<package_name>`
+   */
+  public static getPluginStorePath(autoinstaller: Autoinstaller, packageName: string): string {
+    return path.join(autoinstaller.folderFullPath, 'rush-plugins', packageName);
+  }
+
+  public update(): void {
+    const packageName: string = this._packageName;
+    const pluginName: string = this._pluginName;
+    const packageFolder: string = this.getPackageFolder();
+    const manifestPath: string = path.join(packageFolder, RushConstants.rushPluginManifestFilename);
+
+    // validate
+    const manifest: IRushPluginManifestJson = JsonFile.loadAndValidate(
+      manifestPath,
+      RemotePluginLoader._jsonSchema
+    );
+
+    FileSystem.copyFile({
+      sourcePath: manifestPath,
+      destinationPath: this._getManifestPath()
+    });
+
+    const pluginManifest: IRushPluginManifest | undefined = manifest.plugins.find(
+      (item) => item.pluginName === pluginName
+    );
+    if (!pluginManifest) {
+      throw new Error(`${pluginName} does not provided by rush plugin package ${packageName}`);
+    }
+
+    const commandLineJsonFilePath: string | undefined = pluginManifest.commandLineJsonFilePath;
+    if (commandLineJsonFilePath) {
+      const commandLineJsonFullFilePath: string = path.join(packageFolder, commandLineJsonFilePath);
+      if (!FileSystem.exists(commandLineJsonFullFilePath)) {
+        this._terminal.writeErrorLine(
+          `Rush plugin ${pluginName} from ${packageName} specifies commandLineJsonFilePath ${commandLineJsonFilePath} does not exist.`
+        );
+      }
+      FileSystem.copyFile({
+        sourcePath: commandLineJsonFullFilePath,
+        destinationPath: this._getCommandLineJsonFilePath()
+      });
+    }
+  }
+
+  public get autoinstaller(): Autoinstaller {
+    return this._autoinstaller;
+  }
+
+  public override getPackageFolder(): string {
+    return path.join(this._autoinstaller.folderFullPath, 'node_modules', this._packageName);
+  }
+
+  protected override _getCommandLineAdditionalPathFolders(): string[] {
+    const additionalPathFolders: string[] = super._getCommandLineAdditionalPathFolders();
+    additionalPathFolders.push(
+      // Example: `common/autoinstaller/plugins/node_modules/.bin`
+      path.join(this._autoinstaller.folderFullPath, 'node_modules', '.bin')
+    );
+    return additionalPathFolders;
+  }
+
+  protected override _getPluginOptions(): JsonObject {
+    const optionsJsonFilePath: string = this._getPluginOptionsJsonFilePath();
+    const optionsSchema: JsonSchema | undefined = this._getRushPluginOptionsSchema();
+
+    const isOptionsJsonFileExists: boolean = FileSystem.exists(optionsJsonFilePath);
+
+    if (!isOptionsJsonFileExists && optionsSchema) {
+      throw new Error(
+        `Plugin options are required by ${this._pluginName} from package ${this._packageName}, please create it at ${optionsJsonFilePath}.`
+      );
+    }
+
+    return super._getPluginOptions();
+  }
+
+  protected override _getManifestPath(): string {
+    return path.join(
+      RemotePluginLoader.getPluginStorePath(this._autoinstaller, this._packageName),
+      RushConstants.rushPluginManifestFilename
+    );
+  }
+
+  protected override _getCommandLineJsonFilePath(): string {
+    return path.join(
+      RemotePluginLoader.getPluginStorePath(this._autoinstaller, this._packageName),
+      this._pluginName,
+      RushConstants.commandLineFilename
+    );
+  }
+}
