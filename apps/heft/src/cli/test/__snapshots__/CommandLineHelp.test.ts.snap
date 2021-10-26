@@ -147,7 +147,7 @@ Optional arguments:
                         corresponds to the \\"--testTimeout\\" parameter in 
                         Jest's documentation. This parameter may 
                         alternatively be specified via the 
-                        HEFT_TEST_TIMEOUT_MS environment variable.
+                        HEFT_JEST_TEST_TIMEOUT_MS environment variable.
   --detect-open-handles
                         Attempt to collect and print open handles preventing 
                         Jest from exiting cleanly. This option has a 
@@ -155,7 +155,7 @@ Optional arguments:
                         used for debugging. This corresponds to the 
                         \\"--detectOpenHandles\\" parameter in Jest's 
                         documentation. This parameter may alternatively be 
-                        specified via the HEFT_DETECT_OPEN_HANDLES 
+                        specified via the HEFT_JEST_DETECT_OPEN_HANDLES 
                         environment variable.
   --debug-heft-reporter
                         Normally Heft installs a custom Jest reporter so that 
@@ -176,6 +176,6 @@ Optional arguments:
                         percentage of the available CPUs on the machine to 
                         utilize. Example values: \\"3\\", \\"25%\\" This parameter 
                         may alternatively be specified via the 
-                        HEFT_MAX_WORKERS environment variable.
+                        HEFT_JEST_MAX_WORKERS environment variable.
 "
 `;
