@@ -2,10 +2,18 @@
 // See LICENSE in the project root for license information.
 
 import { Response, ResponseInit } from 'node-fetch';
-import { WebClient } from '@microsoft/rush-lib';
+import { RushSession } from '@microsoft/rush-lib';
+import { ConsoleTerminalProvider } from '@rushstack/node-core-library';
 
 import { IAmazonS3BuildCacheProviderOptions } from '../AmazonS3BuildCacheProvider';
 import { AmazonS3Client, IAmazonS3Credentials } from '../AmazonS3Client';
+
+const rushSession = new RushSession({
+  terminalProvider: new ConsoleTerminalProvider(),
+  getIsDebugMode: () => false
+});
+const { WebClient } = rushSession;
+const webClient = new WebClient();
 
 const DUMMY_OPTIONS_WITHOUT_BUCKET: Omit<IAmazonS3BuildCacheProviderOptions, 's3Bucket'> = {
   s3Region: 'us-east-1',
@@ -30,65 +38,73 @@ class MockedDate extends Date {
 describe('AmazonS3Client', () => {
   it('Rejects invalid S3 bucket names', () => {
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: undefined!, ...DUMMY_OPTIONS_WITHOUT_BUCKET })
+      () =>
+        new AmazonS3Client(undefined, { s3Bucket: undefined!, ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
     ).toThrowErrorMatchingSnapshot();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: '-abc', ...DUMMY_OPTIONS_WITHOUT_BUCKET })
+      () => new AmazonS3Client(undefined, { s3Bucket: '-abc', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
     ).toThrowErrorMatchingSnapshot();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'a!bc', ...DUMMY_OPTIONS_WITHOUT_BUCKET })
+      () => new AmazonS3Client(undefined, { s3Bucket: 'a!bc', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
     ).toThrowErrorMatchingSnapshot();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'a', ...DUMMY_OPTIONS_WITHOUT_BUCKET })
+      () => new AmazonS3Client(undefined, { s3Bucket: 'a', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
     ).toThrowErrorMatchingSnapshot();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: '10.10.10.10', ...DUMMY_OPTIONS_WITHOUT_BUCKET })
+      () =>
+        new AmazonS3Client(undefined, { s3Bucket: '10.10.10.10', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
     ).toThrowErrorMatchingSnapshot();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'abc..d', ...DUMMY_OPTIONS_WITHOUT_BUCKET })
+      () => new AmazonS3Client(undefined, { s3Bucket: 'abc..d', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
     ).toThrowErrorMatchingSnapshot();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'abc.-d', ...DUMMY_OPTIONS_WITHOUT_BUCKET })
+      () => new AmazonS3Client(undefined, { s3Bucket: 'abc.-d', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
     ).toThrowErrorMatchingSnapshot();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'abc-.d', ...DUMMY_OPTIONS_WITHOUT_BUCKET })
+      () => new AmazonS3Client(undefined, { s3Bucket: 'abc-.d', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
     ).toThrowErrorMatchingSnapshot();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'abc-', ...DUMMY_OPTIONS_WITHOUT_BUCKET })
+      () => new AmazonS3Client(undefined, { s3Bucket: 'abc-', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
     ).toThrowErrorMatchingSnapshot();
   });
 
   it('Accepts valid S3 bucket names', () => {
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'abc123', ...DUMMY_OPTIONS_WITHOUT_BUCKET })
+      () => new AmazonS3Client(undefined, { s3Bucket: 'abc123', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
     ).not.toThrow();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'abc', ...DUMMY_OPTIONS_WITHOUT_BUCKET })
+      () => new AmazonS3Client(undefined, { s3Bucket: 'abc', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
     ).not.toThrow();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'foo-bar-baz', ...DUMMY_OPTIONS_WITHOUT_BUCKET })
+      () =>
+        new AmazonS3Client(undefined, { s3Bucket: 'foo-bar-baz', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
     ).not.toThrow();
 
     expect(
-      () => new AmazonS3Client(undefined, { s3Bucket: 'foo.bar.baz', ...DUMMY_OPTIONS_WITHOUT_BUCKET })
+      () =>
+        new AmazonS3Client(undefined, { s3Bucket: 'foo.bar.baz', ...DUMMY_OPTIONS_WITHOUT_BUCKET }, webClient)
     ).not.toThrow();
   });
 
   it('Does not allow upload without credentials', async () => {
-    const client: AmazonS3Client = new AmazonS3Client(undefined, {
-      s3Bucket: 'foo.bar.baz',
-      ...DUMMY_OPTIONS_WITHOUT_BUCKET
-    });
+    const client: AmazonS3Client = new AmazonS3Client(
+      undefined,
+      {
+        s3Bucket: 'foo.bar.baz',
+        ...DUMMY_OPTIONS_WITHOUT_BUCKET
+      },
+      webClient
+    );
     try {
       await client.uploadObjectAsync('temp', undefined!);
       fail('Expected an exception to be thrown');
@@ -124,7 +140,7 @@ describe('AmazonS3Client', () => {
         .spyOn(WebClient.prototype, 'fetchAsync')
         .mockReturnValue(Promise.resolve(new Response(response.body, response.responseInit)));
 
-      const s3Client: AmazonS3Client = new AmazonS3Client(credentials, options);
+      const s3Client: AmazonS3Client = new AmazonS3Client(credentials, options, webClient);
       let result: TResponse;
       let error: Error | undefined;
       try {

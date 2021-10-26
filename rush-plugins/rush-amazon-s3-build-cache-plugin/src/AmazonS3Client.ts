@@ -3,7 +3,7 @@
 
 import * as crypto from 'crypto';
 import * as fetch from 'node-fetch';
-import { IPutFetchOptions, IGetFetchOptions, WebClient } from '@microsoft/rush-lib';
+import type { IPutFetchOptions, IGetFetchOptions, IWebClient } from '@microsoft/rush-lib';
 
 import { IAmazonS3BuildCacheProviderOptions } from './AmazonS3BuildCacheProvider';
 
@@ -30,11 +30,12 @@ export class AmazonS3Client {
   private readonly _s3Bucket: string;
   private readonly _s3Region: string;
 
-  private readonly _webClient: WebClient;
+  private readonly _webClient: IWebClient;
 
   public constructor(
     credentials: IAmazonS3Credentials | undefined,
-    options: IAmazonS3BuildCacheProviderOptions
+    options: IAmazonS3BuildCacheProviderOptions,
+    webClient: IWebClient
   ) {
     this._credentials = credentials;
 
@@ -43,7 +44,7 @@ export class AmazonS3Client {
     this._s3Bucket = options.s3Bucket;
     this._s3Region = options.s3Region;
 
-    this._webClient = new WebClient();
+    this._webClient = webClient;
   }
 
   public static tryDeserializeCredentials(

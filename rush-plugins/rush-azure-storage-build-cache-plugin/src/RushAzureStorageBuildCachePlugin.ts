@@ -55,13 +55,16 @@ export class RushAzureStorageBuildCachePlugin implements IRushPlugin {
           azureStorageConfiguration: IAzureStorageConfigurationJson;
         };
         const { azureStorageConfiguration } = buildCacheConfig as IBuildCache;
-        return new AzureStorageBuildCacheProviderModule.AzureStorageBuildCacheProvider({
-          storageAccountName: azureStorageConfiguration.storageAccountName,
-          storageContainerName: azureStorageConfiguration.storageContainerName,
-          azureEnvironment: azureStorageConfiguration.azureEnvironment,
-          blobPrefix: azureStorageConfiguration.blobPrefix,
-          isCacheWriteAllowed: !!azureStorageConfiguration.isCacheWriteAllowed
-        });
+        return new AzureStorageBuildCacheProviderModule.AzureStorageBuildCacheProvider(
+          {
+            storageAccountName: azureStorageConfiguration.storageAccountName,
+            storageContainerName: azureStorageConfiguration.storageContainerName,
+            azureEnvironment: azureStorageConfiguration.azureEnvironment,
+            blobPrefix: azureStorageConfiguration.blobPrefix,
+            isCacheWriteAllowed: !!azureStorageConfiguration.isCacheWriteAllowed
+          },
+          rushSession
+        );
       });
     });
   }

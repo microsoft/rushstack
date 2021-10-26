@@ -26,7 +26,7 @@ export {
 
 export { PackageManagerName, PackageManager } from './api/packageManager/PackageManager';
 
-export { EnvironmentVariableNames, EnvironmentConfiguration } from './api/EnvironmentConfiguration';
+export { EnvironmentVariableNames } from './api/EnvironmentConfiguration';
 
 export { RushConfigurationProject } from './api/RushConfigurationProject';
 
@@ -62,28 +62,22 @@ export { ExperimentsConfiguration, IExperimentsJson } from './api/ExperimentsCon
 
 export { ProjectChangeAnalyzer, IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
 
-export { IRushPlugin } from './pluginFramework/IRushPlugin';
-
 export { RushSession, IRushSessionOptions } from './pluginFramework/RushSession';
 
-export { Logger, ILogger, ILoggerOptions } from './pluginFramework/logging/Logger';
+export type { IRushPlugin } from './pluginFramework/IRushPlugin';
 
-export { RushLifecycleHooks, IRushLifecycle } from './pluginFramework/RushLifeCycle';
+export type {
+  IBuildCacheJson,
+  ILocalBuildCacheJson,
+  ICloudBuildCacheJson
+} from './api/BuildCacheConfiguration';
 
-export { IBuildCacheJson, ILocalBuildCacheJson, ICloudBuildCacheJson } from './api/BuildCacheConfiguration';
+export type { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCacheProvider';
 
-export { CloudBuildCacheProviderBase } from './logic/buildCache/CloudBuildCacheProviderBase';
+export type {
+  ICredentialCache,
+  ICredentialCacheOptions,
+  ICredentialCacheEntry
+} from './logic/CredentialCache';
 
-export { RushConstants } from './logic/RushConstants';
-
-export { CredentialCache, ICredentialCacheOptions, ICredentialCacheEntry } from './logic/CredentialCache';
-
-export { RushUserConfiguration } from './api/RushUserConfiguration';
-
-export {
-  WebClient,
-  IPutFetchOptions,
-  IGetFetchOptions,
-  WebClientResponse,
-  WebClientProxy
-} from './utilities/WebClient';
+export type { IWebClient, IGetFetchOptions, IPutFetchOptions } from './utilities/WebClient';

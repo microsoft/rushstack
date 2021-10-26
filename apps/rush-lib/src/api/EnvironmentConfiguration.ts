@@ -15,7 +15,7 @@ export interface IEnvironmentConfigurationInitializeOptions {
  * Names of environment variables used by Rush.
  * @public
  */
-export const enum EnvironmentVariableNames {
+export enum EnvironmentVariableNames {
   /**
    * This variable overrides the temporary folder used by Rush.
    * The default value is "common/temp" under the repository root.
@@ -184,6 +184,8 @@ export class EnvironmentConfiguration {
 
   private static _tarBinaryPath: string | undefined;
 
+  private static _rushUserFolderOverride: string | undefined;
+
   /**
    * An override for the common/temp folder path.
    */
@@ -239,6 +241,14 @@ export class EnvironmentConfiguration {
   public static get rushGlobalFolderOverride(): string | undefined {
     EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._rushGlobalFolderOverride;
+  }
+
+  /**
+   *
+   */
+  public static get rushUserFolderOverride(): string | undefined {
+    EnvironmentConfiguration._ensureValidated();
+    return EnvironmentConfiguration._rushUserFolderOverride;
   }
 
   /**

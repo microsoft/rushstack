@@ -52,12 +52,15 @@ export class RushAmazonS3BuildCachePlugin implements IRushPlugin {
             amazonS3Configuration: IAmazonS3ConfigurationJson;
           };
           const { amazonS3Configuration } = buildCacheConfig as IBuildCache;
-          return new AmazonS3BuildCacheProviderModule.AmazonS3BuildCacheProvider({
-            s3Region: amazonS3Configuration.s3Region,
-            s3Bucket: amazonS3Configuration.s3Bucket,
-            s3Prefix: amazonS3Configuration.s3Prefix,
-            isCacheWriteAllowed: !!amazonS3Configuration.isCacheWriteAllowed
-          });
+          return new AmazonS3BuildCacheProviderModule.AmazonS3BuildCacheProvider(
+            {
+              s3Region: amazonS3Configuration.s3Region,
+              s3Bucket: amazonS3Configuration.s3Bucket,
+              s3Prefix: amazonS3Configuration.s3Prefix,
+              isCacheWriteAllowed: !!amazonS3Configuration.isCacheWriteAllowed
+            },
+            rushSession
+          );
         }
       );
     });

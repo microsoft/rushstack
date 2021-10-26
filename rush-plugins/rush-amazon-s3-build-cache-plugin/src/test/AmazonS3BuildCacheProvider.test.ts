@@ -1,10 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
-import { EnvironmentConfiguration, RushUserConfiguration, CredentialCache } from '@microsoft/rush-lib';
+import {
+  ConsoleTerminalProvider,
+  StringBufferTerminalProvider,
+  Terminal
+} from '@rushstack/node-core-library';
+import { RushSession } from '@microsoft/rush-lib';
 
 import { AmazonS3BuildCacheProvider } from '../AmazonS3BuildCacheProvider';
+
+const rushSession = new RushSession({
+  terminalProvider: new ConsoleTerminalProvider(),
+  getIsDebugMode: () => false
+});
+const { EnvironmentConfiguration, RushUserConfiguration, CredentialCache } = rushSession;
 
 describe('AmazonS3BuildCacheProvider', () => {
   beforeEach(() => {
@@ -23,11 +33,14 @@ describe('AmazonS3BuildCacheProvider', () => {
       envVarValue: boolean | undefined
     ): AmazonS3BuildCacheProvider {
       jest.spyOn(EnvironmentConfiguration, 'buildCacheWriteAllowed', 'get').mockReturnValue(envVarValue);
-      return new AmazonS3BuildCacheProvider({
-        s3Region: 'region-name',
-        s3Bucket: 'bucket-name',
-        isCacheWriteAllowed: optionValue
-      });
+      return new AmazonS3BuildCacheProvider(
+        {
+          s3Region: 'region-name',
+          s3Bucket: 'bucket-name',
+          isCacheWriteAllowed: optionValue
+        },
+        rushSession
+      );
     }
 
     it('is false if isCacheWriteAllowed is false', () => {
@@ -52,11 +65,14 @@ describe('AmazonS3BuildCacheProvider', () => {
   });
 
   async function testCredentialCache(isCacheWriteAllowed: boolean): Promise<void> {
-    const cacheProvider: AmazonS3BuildCacheProvider = new AmazonS3BuildCacheProvider({
-      s3Region: 'region-name',
-      s3Bucket: 'bucket-name',
-      isCacheWriteAllowed
-    });
+    const cacheProvider: AmazonS3BuildCacheProvider = new AmazonS3BuildCacheProvider(
+      {
+        s3Region: 'region-name',
+        s3Bucket: 'bucket-name',
+        isCacheWriteAllowed
+      },
+      rushSession
+    );
 
     // Mock the user folder to the current folder so a real .rush-user folder doesn't interfere with the test
     jest.spyOn(RushUserConfiguration, 'getRushUserFolderPath').mockReturnValue(__dirname);

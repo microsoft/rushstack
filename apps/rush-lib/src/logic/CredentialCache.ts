@@ -40,6 +40,11 @@ export interface ICredentialCacheOptions {
 /**
  * @beta
  */
+export type ICredentialCache = CredentialCache;
+
+/**
+ * @beta
+ */
 export class CredentialCache implements IDisposable {
   private readonly _cacheFilePath: string;
   private readonly _cacheEntries: Map<string, ICacheEntryJson>;

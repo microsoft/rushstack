@@ -44,6 +44,11 @@ export enum WebClientProxy {
 /**
  * @public
  */
+export type IWebClient = WebClient;
+
+/**
+ * @public
+ */
 export class WebClient {
   public readonly standardHeaders: fetch.Headers = new fetch.Headers();
 

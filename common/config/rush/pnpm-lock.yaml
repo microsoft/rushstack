@@ -215,8 +215,6 @@ importers:
 
   ../../apps/rush-lib:
     specifiers:
-      '@azure/identity': ~1.0.0
-      '@azure/storage-blob': ~12.3.0
       '@pnpm/link-bins': ~5.3.7
       '@pnpm/logger': 4.0.0
       '@rushstack/eslint-config': workspace:*
@@ -226,6 +224,8 @@ importers:
       '@rushstack/node-core-library': workspace:*
       '@rushstack/package-deps-hash': workspace:*
       '@rushstack/rig-package': workspace:*
+      '@rushstack/rush-amazon-s3-build-cache-plugin': workspace:*
+      '@rushstack/rush-azure-storage-build-cache-plugin': workspace:*
       '@rushstack/stream-collator': workspace:*
       '@rushstack/terminal': workspace:*
       '@rushstack/ts-command-line': workspace:*
@@ -270,18 +270,19 @@ importers:
       semver: ~7.3.0
       ssri: ~8.0.0
       strict-uri-encode: ~2.0.0
+      tapable: 2.2.1
       tar: ~5.0.5
       true-case-path: ~2.2.1
       typescript: ~4.4.2
       z-schema: ~3.18.3
     dependencies:
-      '@azure/identity': 1.0.3
-      '@azure/storage-blob': 12.3.0
       '@pnpm/link-bins': 5.3.25
       '@rushstack/heft-config-file': link:../../libraries/heft-config-file
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/package-deps-hash': link:../../libraries/package-deps-hash
       '@rushstack/rig-package': link:../../libraries/rig-package
+      '@rushstack/rush-amazon-s3-build-cache-plugin': link:../../rush-plugins/rush-amazon-s3-build-cache-plugin
+      '@rushstack/rush-azure-storage-build-cache-plugin': link:../../rush-plugins/rush-azure-storage-build-cache-plugin
       '@rushstack/stream-collator': link:../../libraries/stream-collator
       '@rushstack/terminal': link:../../libraries/terminal
       '@rushstack/ts-command-line': link:../../libraries/ts-command-line
@@ -307,6 +308,7 @@ importers:
       semver: 7.3.5
       ssri: 8.0.1
       strict-uri-encode: 2.0.0
+      tapable: 2.2.1
       tar: 5.0.5
       true-case-path: 2.2.1
       z-schema: 3.18.4
@@ -1642,6 +1644,54 @@ importers:
     devDependencies:
       '@rushstack/heft': link:../../apps/heft
 
+  ../../rush-plugins/rush-amazon-s3-build-cache-plugin:
+    specifiers:
+      '@microsoft/rush-lib': workspace:*
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      '@types/node-fetch': 1.6.9
+      node-fetch: 2.6.2
+    dependencies:
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      node-fetch: 2.6.2
+    devDependencies:
+      '@microsoft/rush-lib': link:../../apps/rush-lib
+      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      '@types/node-fetch': 1.6.9
+
+  ../../rush-plugins/rush-azure-storage-build-cache-plugin:
+    specifiers:
+      '@azure/identity': ~1.0.0
+      '@azure/storage-blob': ~12.3.0
+      '@microsoft/rush-lib': workspace:*
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@rushstack/terminal': workspace:*
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+    dependencies:
+      '@azure/identity': 1.0.3
+      '@azure/storage-blob': 12.3.0
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      '@rushstack/terminal': link:../../libraries/terminal
+    devDependencies:
+      '@microsoft/rush-lib': link:../../apps/rush-lib
+      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+
   ../../stack/eslint-config:
     specifiers:
       '@rushstack/eslint-patch': workspace:*
@@ -1913,7 +1963,7 @@ packages:
     resolution: {integrity: sha512-lNUmDRVGpanCsiUN3NWxFTdwmdFI53xwhkTFfHDGTYk46ca7Ind3nanJc+U6Zj9Tv+9nTCWRBscWEW1DyKOpTw==}
     engines: {node: '>=8.0.0'}
     dependencies:
-      tslib: 2.2.0
+      tslib: 2.3.1
     dev: false
 
   /@azure/core-asynciterator-polyfill/1.0.0:
@@ -1925,7 +1975,7 @@ packages:
     engines: {node: '>=8.0.0'}
     dependencies:
       '@azure/abort-controller': 1.0.4
-      tslib: 2.2.0
+      tslib: 2.3.1
     dev: false
 
   /@azure/core-http/1.2.4:
@@ -1943,7 +1993,7 @@ packages:
       node-fetch: 2.6.2
       process: 0.11.10
       tough-cookie: 4.0.0
-      tslib: 2.2.0
+      tslib: 2.3.1
       tunnel: 0.0.6
       uuid: 8.3.2
       xml2js: 0.4.23
@@ -1957,7 +2007,7 @@ packages:
       '@azure/core-http': 1.2.4
       '@azure/core-tracing': 1.0.0-preview.11
       events: 3.3.0
-      tslib: 2.2.0
+      tslib: 2.3.1
     dev: false
 
   /@azure/core-paging/1.1.3:
@@ -1973,7 +2023,7 @@ packages:
     dependencies:
       '@opencensus/web-types': 0.0.7
       '@opentelemetry/api': 1.0.0-rc.0
-      tslib: 2.2.0
+      tslib: 2.3.1
     dev: false
 
   /@azure/core-tracing/1.0.0-preview.7:
@@ -1990,7 +2040,7 @@ packages:
     dependencies:
       '@opencensus/web-types': 0.0.7
       '@opentelemetry/api': 0.10.2
-      tslib: 2.2.0
+      tslib: 2.3.1
     dev: false
 
   /@azure/identity/1.0.3:
@@ -2012,7 +2062,7 @@ packages:
     resolution: {integrity: sha512-YZNjNV0vL3nN2nedmcjQBcpCTo3oqceXmgiQtEm6fLpucjRZyQKAQruhCmCpRlB1iykqKJJ/Y8CDmT5rIE6IJw==}
     engines: {node: '>=8.0.0'}
     dependencies:
-      tslib: 2.2.0
+      tslib: 2.3.1
     dev: false
 
   /@azure/storage-blob/12.3.0:
@@ -2026,7 +2076,7 @@ packages:
       '@azure/logger': 1.0.2
       '@opentelemetry/api': 0.10.2
       events: 3.3.0
-      tslib: 2.2.0
+      tslib: 2.3.1
     dev: false
 
   /@babel/code-frame/7.10.4:
@@ -6181,7 +6231,7 @@ packages:
     resolution: {integrity: sha512-S3WUtef//Vx6WETyWZkM45WqgRxWSaqbpWtPcKySNRhiQNyhCqM9EueggaMX3L9N2IbG4dJIK5PgYcAWUifUbA==}
     dependencies:
       '@types/connect': 3.4.34
-      tapable: 2.2.0
+      tapable: 2.2.1
       webpack: 5.53.0
     transitivePeerDependencies:
       - '@swc/core'
@@ -9260,7 +9310,7 @@ packages:
     engines: {node: '>=10.13.0'}
     dependencies:
       graceful-fs: 4.2.6
-      tapable: 2.2.0
+      tapable: 2.2.1
 
   /enquirer/2.3.6:
     resolution: {integrity: sha512-yjNnPr315/FjS4zIsUxYguYUPP2e1NK4d7E7ZOLiyYCcbFBiTMyID+2wvm2w6+pZ/odMA7cRkjhsPbltwBOrLg==}
@@ -10981,7 +11031,7 @@ packages:
       html-minifier-terser: 6.0.2
       lodash: 4.17.21
       pretty-error: 4.0.0
-      tapable: 2.2.0
+      tapable: 2.2.1
       webpack: 4.44.2
     dev: true
 
@@ -16256,8 +16306,8 @@ packages:
     resolution: {integrity: sha512-4WK/bYZmj8xLr+HUCODHGF1ZFzsYffasLUgEiMBY4fgtltdO6B4WJtlSbPaDTLpYTcGVwM2qLnFTICEcNxs3kA==}
     engines: {node: '>=6'}
 
-  /tapable/2.2.0:
-    resolution: {integrity: sha512-FBk4IesMV1rBxX2tfiK8RAmogtWn53puLOQlvO8XuwlgxcYbP4mVPS9Ph4aeamSyyVjOl24aYWAuc8U5kCVwMw==}
+  /tapable/2.2.1:
+    resolution: {integrity: sha512-GNzQvQTOIP6RyTfE2Qxb8ZVlNmw0n88vp1szwWRimP02mnTsx3Wtn5qRdqY9w2XduFNUgvOwhNnQsjwCp+kqaQ==}
     engines: {node: '>=6'}
 
   /tar/5.0.5:
@@ -16639,6 +16689,7 @@ packages:
 
   /tslib/2.2.0:
     resolution: {integrity: sha512-gS9GVHRU+RGn5KQM2rllAlR3dU6m7AcpJKdtH8gFvQiC4Otgk98XnmMU+nZenHt/+VhnBPWwgrJsyrdcw6i23w==}
+    dev: true
 
   /tslib/2.3.1:
     resolution: {integrity: sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==}
@@ -17649,7 +17700,7 @@ packages:
       mime-types: 2.1.30
       neo-async: 2.6.2
       schema-utils: 3.0.0
-      tapable: 2.2.0
+      tapable: 2.2.1
       terser-webpack-plugin: 5.1.2_webpack@5.35.1
       watchpack: 2.2.0
       webpack-sources: 2.2.0
@@ -17685,7 +17736,7 @@ packages:
       mime-types: 2.1.32
       neo-async: 2.6.2
       schema-utils: 3.1.1
-      tapable: 2.2.0
+      tapable: 2.2.1
       terser-webpack-plugin: 5.2.4_webpack@5.53.0
       watchpack: 2.2.0
       webpack-sources: 3.2.1
