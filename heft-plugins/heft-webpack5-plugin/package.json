@@ -4,7 +4,8 @@
   "description": "Heft plugin for Webpack 5",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/heft-plugins/heft-webpack5-plugin"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "heft-plugins/heft-webpack5-plugin"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
   "main": "lib/index.js",

@@ -7,7 +7,8 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/package-deps-hash"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "libraries/package-deps-hash"
   },
   "scripts": {
     "build": "heft test --clean"

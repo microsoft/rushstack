@@ -6,7 +6,9 @@
   "typings": "dist/rig-package.d.ts",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/rig-package"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "libraries/rig-package"
   },
   "scripts": {
     "build": "heft test --clean"

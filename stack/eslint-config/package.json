@@ -4,7 +4,9 @@
   "description": "A TypeScript ESLint ruleset designed for large teams and projects",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/microsoft/rushstack/tree/master/stack/eslint-config"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "stack/eslint-config"
   },
   "homepage": "https://rushstack.io",
   "scripts": {

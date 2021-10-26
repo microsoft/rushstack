@@ -5,7 +5,9 @@
   "main": "lib/usage.js",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/microsoft/rushstack/tree/master/stack/eslint-patch"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "stack/eslint-patch"
   },
   "homepage": "https://rushstack.io",
   "scripts": {

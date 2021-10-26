@@ -4,7 +4,8 @@
   "description": "Heft plugin for supporting UI development using Storybook",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/heft-plugins/heft-storybook-plugin"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "heft-plugins/heft-storybook-plugin"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
   "main": "lib/index.js",

@@ -8,7 +8,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/rigs/heft-web-rig"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "rigs/heft-web-rig"
   },
   "peerDependencies": {
     "@rushstack/heft": "^0.41.7"

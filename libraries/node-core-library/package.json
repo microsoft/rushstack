@@ -6,7 +6,9 @@
   "typings": "dist/node-core-library.d.ts",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/node-core-library"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "libraries/node-core-library"
   },
   "scripts": {
     "build": "heft test --clean"

@@ -4,7 +4,8 @@
   "description": "Display intelligible realtime output from concurrent processes",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/stream-collator"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "libraries/stream-collator"
   },
   "main": "lib/index.js",
   "typings": "dist/stream-collator.d.ts",

@@ -12,7 +12,8 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/typings-generator"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "libraries/typings-generator"
   },
   "scripts": {
     "build": "heft build --clean"
