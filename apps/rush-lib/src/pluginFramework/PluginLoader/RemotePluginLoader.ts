@@ -32,10 +32,10 @@ export class RemotePluginLoader extends PluginLoaderBase {
 
   /**
    * The folder where rush plugins static files are stored.
-   * Example: `C:\MyRepo\common\autoinstallers\<autoinstaller_name>\rush-plugins\<package_name>`
+   * Example: `C:\MyRepo\common\autoinstallers\<autoinstaller_name>\rush-plugins`
    */
-  public static getPluginStorePath(autoinstaller: Autoinstaller, packageName: string): string {
-    return path.join(autoinstaller.folderFullPath, 'rush-plugins', packageName);
+  public static getPluginAutoinstallerStorePath(autoinstaller: Autoinstaller): string {
+    return path.join(autoinstaller.folderFullPath, 'rush-plugins');
   }
 
   public update(): void {
@@ -111,14 +111,16 @@ export class RemotePluginLoader extends PluginLoaderBase {
 
   protected override _getManifestPath(): string {
     return path.join(
-      RemotePluginLoader.getPluginStorePath(this._autoinstaller, this._packageName),
+      RemotePluginLoader.getPluginAutoinstallerStorePath(this._autoinstaller),
+      this._packageName,
       RushConstants.rushPluginManifestFilename
     );
   }
 
   protected override _getCommandLineJsonFilePath(): string {
     return path.join(
-      RemotePluginLoader.getPluginStorePath(this._autoinstaller, this._packageName),
+      RemotePluginLoader.getPluginAutoinstallerStorePath(this._autoinstaller),
+      this._packageName,
       this._pluginName,
       RushConstants.commandLineFilename
     );

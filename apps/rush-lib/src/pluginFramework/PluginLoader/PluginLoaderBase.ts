@@ -77,10 +77,11 @@ export class PluginLoaderBase {
   }
 
   public getPackageFolder(): string {
-    return Import.resolvePackage({
+    const packageFolder: string = Import.resolvePackage({
       baseFolderPath: __dirname,
       packageName: this._packageName
     });
+    return packageFolder;
   }
 
   public getCommandLineConfiguration(): CommandLineConfiguration | undefined {

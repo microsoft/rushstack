@@ -48,7 +48,7 @@ import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { SetupAction } from './actions/SetupAction';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
-import { PluginManager } from '../pluginFramework/PluginManager';
+import { ICustomCommandLineConfigurationInfo, PluginManager } from '../pluginFramework/PluginManager';
 import { RushSession } from '../pluginFramework/RushSession';
 
 /**
@@ -119,13 +119,21 @@ export class RushCommandLineParser extends CommandLineParser {
       terminal: this._terminal
     });
 
-    const pluginCommandLineConfigurations: CommandLineConfiguration[] =
-      this.pluginManager.tryGetCustomCommandLineConfigurations();
-    for (const commandLineConfiguration of pluginCommandLineConfigurations) {
-      this._addCommandLineConfigActions(commandLineConfiguration);
-    }
-
     this._populateActions();
+
+    const pluginCommandLineConfigurations: ICustomCommandLineConfigurationInfo[] =
+      this.pluginManager.tryGetCustomCommandLineConfigurationInfos();
+    for (const { commandLineConfiguration, pluginLoader } of pluginCommandLineConfigurations) {
+      try {
+        this._addCommandLineConfigActions(commandLineConfiguration);
+      } catch (e) {
+        this._terminal.writeErrorLine(
+          `Error from plugin ${pluginLoader.pluginName} by ${pluginLoader.packageName}: ${
+            (e as Error).message
+          }`
+        );
+      }
+    }
   }
 
   public get isDebug(): boolean {
