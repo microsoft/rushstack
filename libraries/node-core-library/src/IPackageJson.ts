@@ -28,6 +28,28 @@ export interface IPackageJsonScriptTable {
 }
 
 /**
+ * This interface is part of the IPackageJson file format.  It is used for the
+ * "repository" field.
+ * @public
+ */
+export interface IPackageJsonRepository {
+  /**
+   * The source control type for the repository that hosts the project. This is typically "git".
+   */
+  type: string;
+
+  /**
+   * The URL of the repository that hosts the project.
+   */
+  url: string;
+
+  /**
+   * If the project does not exist at the root of the repository, its path is specified here.
+   */
+  directory?: string;
+}
+
+/**
  * An interface for accessing common fields from a package.json file whose version field may be missing.
  *
  * @remarks
@@ -71,7 +93,7 @@ export interface INodePackageJson {
   /**
    * The URL of the project's repository.
    */
-  repository?: string;
+  repository?: string | IPackageJsonRepository;
 
   /**
    * The URL to the project's web page.
