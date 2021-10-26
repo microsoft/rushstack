@@ -15,7 +15,7 @@ const PLUGIN_NAME: string = 'AzureStorageBuildCachePlugin';
 /**
  * @public
  */
-interface IAzureStorageConfigurationJson {
+interface IAzureBlobStorageConfigurationJson {
   /**
    * The name of the the Azure storage account to use for build cache.
    */
@@ -52,16 +52,16 @@ export class RushAzureStorageBuildCachePlugin implements IRushPlugin {
     rushSession.hooks.initialize.tap(PLUGIN_NAME, () => {
       rushSession.registerCloudBuildCacheProviderFactory('azure-blob-storage', (buildCacheConfig) => {
         type IBuildCache = typeof buildCacheConfig & {
-          azureStorageConfiguration: IAzureStorageConfigurationJson;
+          azureBlobStorageConfiguration: IAzureBlobStorageConfigurationJson;
         };
-        const { azureStorageConfiguration } = buildCacheConfig as IBuildCache;
+        const { azureBlobStorageConfiguration } = buildCacheConfig as IBuildCache;
         return new AzureStorageBuildCacheProviderModule.AzureStorageBuildCacheProvider(
           {
-            storageAccountName: azureStorageConfiguration.storageAccountName,
-            storageContainerName: azureStorageConfiguration.storageContainerName,
-            azureEnvironment: azureStorageConfiguration.azureEnvironment,
-            blobPrefix: azureStorageConfiguration.blobPrefix,
-            isCacheWriteAllowed: !!azureStorageConfiguration.isCacheWriteAllowed
+            storageAccountName: azureBlobStorageConfiguration.storageAccountName,
+            storageContainerName: azureBlobStorageConfiguration.storageContainerName,
+            azureEnvironment: azureBlobStorageConfiguration.azureEnvironment,
+            blobPrefix: azureBlobStorageConfiguration.blobPrefix,
+            isCacheWriteAllowed: !!azureBlobStorageConfiguration.isCacheWriteAllowed
           },
           rushSession
         );

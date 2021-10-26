@@ -18,6 +18,11 @@ export interface IPluginManagerOptions {
   rushSession: RushSession;
 }
 
+export interface ICustomCommandLineConfigurationInfo {
+  commandLineConfiguration: CommandLineConfiguration;
+  pluginLoader: PluginLoaderBase;
+}
+
 export class PluginManager {
   private _terminal: ITerminal;
   private _rushConfiguration: RushConfiguration;
@@ -71,6 +76,14 @@ export class PluginManager {
 
   public async updateAsync(): Promise<void> {
     await this._preparePluginAutoinstallersAsync(this._remotePluginLoaders);
+    const preparedAutoinstallerNames: Set<string> = new Set<string>();
+    for (const { autoinstaller } of this._remotePluginLoaders) {
+      const storePath: string = RemotePluginLoader.getPluginAutoinstallerStorePath(autoinstaller);
+      if (!preparedAutoinstallerNames.has(autoinstaller.name)) {
+        FileSystem.ensureEmptyFolder(storePath);
+        preparedAutoinstallerNames.add(autoinstaller.name);
+      }
+    }
     for (const pluginLoader of this._remotePluginLoaders) {
       pluginLoader.update();
     }
@@ -83,10 +96,9 @@ export class PluginManager {
   }
 
   public async _preparePluginAutoinstallersAsync(pluginLoaders: RemotePluginLoader[]): Promise<void> {
-    for (const { autoinstaller, packageName } of pluginLoaders) {
+    for (const { autoinstaller } of pluginLoaders) {
       if (!this._installedAutoinstallerNames.has(autoinstaller.name)) {
         await autoinstaller.prepareAsync();
-        FileSystem.ensureEmptyFolder(RemotePluginLoader.getPluginStorePath(autoinstaller, packageName));
         this._installedAutoinstallerNames.add(autoinstaller.name);
       }
     }
@@ -124,16 +136,19 @@ export class PluginManager {
     }
   }
 
-  public tryGetCustomCommandLineConfigurations(): CommandLineConfiguration[] {
-    const commandLineConfigurations: CommandLineConfiguration[] = [];
+  public tryGetCustomCommandLineConfigurationInfos(): ICustomCommandLineConfigurationInfo[] {
+    const commandLineConfigurationInfos: ICustomCommandLineConfigurationInfo[] = [];
     for (const pluginLoader of this._remotePluginLoaders) {
       const commandLineConfiguration: CommandLineConfiguration | undefined =
         pluginLoader.getCommandLineConfiguration();
       if (commandLineConfiguration) {
-        commandLineConfigurations.push(commandLineConfiguration);
+        commandLineConfigurationInfos.push({
+          commandLineConfiguration,
+          pluginLoader
+        });
       }
     }
-    return commandLineConfigurations;
+    return commandLineConfigurationInfos;
   }
 
   private async _initializePluginsAsync(pluginLoaders: PluginLoaderBase[]): Promise<void> {
