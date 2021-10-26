@@ -91,6 +91,18 @@ export class Autoinstaller {
 
     console.log();
 
+    if (this._rushConfiguration.packageManager === 'npm') {
+      console.log(colors.bold('Running "npm shrinkwrap"...'));
+      Utilities.executeCommand({
+        command: this._rushConfiguration.packageManagerToolFilename,
+        args: ['shrinkwrap'],
+        workingDirectory: this.folderFullPath,
+        keepEnvironment: true
+      });
+      console.log('"npm shrinkwrap" completed');
+      console.log();
+    }
+
     if (!FileSystem.exists(this.shrinkwrapFilePath)) {
       throw new Error(
         'The package manager did not create the expected shrinkwrap file: ' + this.shrinkwrapFilePath
