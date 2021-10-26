@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update the package.json repository field to include the directory property.",
+      "type": "patch",
+      "packageName": "@rushstack/stream-collator"
+    }
+  ],
+  "packageName": "@rushstack/stream-collator",
+  "email": "iclanton@users.noreply.github.com"
+}

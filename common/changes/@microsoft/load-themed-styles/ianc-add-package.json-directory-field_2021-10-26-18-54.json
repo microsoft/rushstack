@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update the package.json repository field to include the directory property.",
+      "type": "patch",
+      "packageName": "@microsoft/load-themed-styles"
+    }
+  ],
+  "packageName": "@microsoft/load-themed-styles",
+  "email": "iclanton@users.noreply.github.com"
+}

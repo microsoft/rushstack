@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update the package.json repository field to include the directory property.",
+      "type": "patch",
+      "packageName": "@rushstack/node-core-library"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "iclanton@users.noreply.github.com"
+}

@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Update the package.json repository field to include the directory property.",
+      "type": "patch",
+      "packageName": "@rushstack/heft-storybook-plugin"
+    }
+  ],
+  "packageName": "@rushstack/heft-storybook-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}
