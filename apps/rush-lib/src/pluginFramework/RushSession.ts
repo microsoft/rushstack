@@ -2,25 +2,28 @@
 // See LICENSE in the project root for license information.
 
 import { InternalError, ITerminalProvider } from '@rushstack/node-core-library';
+import { RushUserConfiguration } from '../api/RushUserConfiguration';
 import { IBuildCacheJson } from '../api/BuildCacheConfiguration';
-import { CloudBuildCacheProviderBase } from '../logic/buildCache/CloudBuildCacheProviderBase';
+import { EnvironmentConfiguration, EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
+import { ICloudBuildCacheProvider } from '../logic/buildCache/ICloudBuildCacheProvider';
+import { CredentialCache } from '../logic/CredentialCache';
+import { RushConstants } from '../logic/RushConstants';
+import { WebClient } from '../utilities/WebClient';
 import { ILogger, ILoggerOptions, Logger } from './logging/Logger';
 import { IRushLifecycle, RushLifecycleHooks } from './RushLifeCycle';
 
 /**
- * @public
+ * @beta
  */
 export interface IRushSessionOptions {
   terminalProvider: ITerminalProvider;
   getIsDebugMode: () => boolean;
 }
 
-export type ICloudBuildCacheProviderFactory = (
-  buildCacheJson: IBuildCacheJson
-) => CloudBuildCacheProviderBase;
+export type ICloudBuildCacheProviderFactory = (buildCacheJson: IBuildCacheJson) => ICloudBuildCacheProvider;
 
 /**
- * @public
+ * @beta
  */
 export class RushSession implements IRushLifecycle {
   private readonly _options: IRushSessionOptions;
@@ -66,5 +69,35 @@ export class RushSession implements IRushLifecycle {
     cacheProviderName: string
   ): ICloudBuildCacheProviderFactory | undefined {
     return this._cloudBuildCacheProviderFactories.get(cacheProviderName);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public get EnvironmentVariableNames(): typeof EnvironmentVariableNames {
+    return EnvironmentVariableNames;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public get EnvironmentConfiguration(): typeof EnvironmentConfiguration {
+    return EnvironmentConfiguration;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public get RushConstants(): typeof RushConstants {
+    return RushConstants;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public get CredentialCache(): typeof CredentialCache {
+    return CredentialCache;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public get RushUserConfiguration(): typeof RushUserConfiguration {
+    return RushUserConfiguration;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public get WebClient(): typeof WebClient {
+    return WebClient;
   }
 }

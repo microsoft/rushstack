@@ -14,7 +14,7 @@ import {
 import { RushConfiguration } from './RushConfiguration';
 import { FileSystemBuildCacheProvider } from '../logic/buildCache/FileSystemBuildCacheProvider';
 import { RushConstants } from '../logic/RushConstants';
-import { CloudBuildCacheProviderBase } from '../logic/buildCache/CloudBuildCacheProviderBase';
+import { ICloudBuildCacheProvider } from '../logic/buildCache/ICloudBuildCacheProvider';
 import { RushUserConfiguration } from './RushUserConfiguration';
 import { EnvironmentConfiguration } from './EnvironmentConfiguration';
 import { CacheEntryId, GetCacheEntryIdFunction } from '../logic/buildCache/CacheEntryId';
@@ -75,7 +75,7 @@ export class BuildCacheConfiguration {
 
   public readonly getCacheEntryId: GetCacheEntryIdFunction;
   public readonly localCacheProvider: FileSystemBuildCacheProvider;
-  public readonly cloudCacheProvider: CloudBuildCacheProviderBase | undefined;
+  public readonly cloudCacheProvider: ICloudBuildCacheProvider | undefined;
 
   private constructor(options: IBuildCacheConfigurationOptions) {
     this.buildCacheEnabled =

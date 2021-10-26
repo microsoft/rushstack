@@ -2,13 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import { ITerminal } from '@rushstack/node-core-library';
-import {
-  EnvironmentConfiguration,
-  EnvironmentVariableNames,
-  RushConstants,
-  CloudBuildCacheProviderBase,
-  CredentialCache,
-  ICredentialCacheEntry
+import type {
+  ICloudBuildCacheProvider,
+  ICredentialCacheEntry,
+  ICredentialCache,
+  RushSession
 } from '@microsoft/rush-lib';
 
 import { AmazonS3Client, IAmazonS3Credentials } from './AmazonS3Client';
@@ -20,24 +18,28 @@ export interface IAmazonS3BuildCacheProviderOptions {
   isCacheWriteAllowed: boolean;
 }
 
-export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
+export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
   private readonly _options: IAmazonS3BuildCacheProviderOptions;
   private readonly _s3Prefix: string | undefined;
   private readonly _environmentCredential: string | undefined;
   private readonly _isCacheWriteAllowedByConfiguration: boolean;
   private __credentialCacheId: string | undefined;
+  private _rushSession: RushSession;
 
   public get isCacheWriteAllowed(): boolean {
-    return EnvironmentConfiguration.buildCacheWriteAllowed ?? this._isCacheWriteAllowedByConfiguration;
+    return (
+      this._rushSession.EnvironmentConfiguration.buildCacheWriteAllowed ??
+      this._isCacheWriteAllowedByConfiguration
+    );
   }
 
   private __s3Client: AmazonS3Client | undefined;
 
-  public constructor(options: IAmazonS3BuildCacheProviderOptions) {
-    super();
+  public constructor(options: IAmazonS3BuildCacheProviderOptions, rushSession: RushSession) {
+    this._rushSession = rushSession;
     this._options = options;
     this._s3Prefix = options.s3Prefix;
-    this._environmentCredential = EnvironmentConfiguration.buildCacheCredential;
+    this._environmentCredential = rushSession.EnvironmentConfiguration.buildCacheCredential;
     this._isCacheWriteAllowedByConfiguration = options.isCacheWriteAllowed;
   }
 
@@ -60,13 +62,14 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
       let credentials: IAmazonS3Credentials | undefined = AmazonS3Client.tryDeserializeCredentials(
         this._environmentCredential
       );
+      const { RushConstants, CredentialCache, EnvironmentVariableNames } = this._rushSession;
       if (!credentials) {
         let cacheEntry: ICredentialCacheEntry | undefined;
         await CredentialCache.usingAsync(
           {
             supportEditing: false
           },
-          (credentialsCache: CredentialCache) => {
+          (credentialsCache: ICredentialCache) => {
             cacheEntry = credentialsCache.tryGetCacheEntry(this._credentialCacheId);
           }
         );
@@ -91,7 +94,7 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
         }
       }
 
-      this.__s3Client = new AmazonS3Client(credentials, this._options);
+      this.__s3Client = new AmazonS3Client(credentials, this._options, new this._rushSession.WebClient());
     }
 
     return this.__s3Client;
@@ -131,11 +134,12 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
   }
 
   public async updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void> {
+    const { CredentialCache } = this._rushSession;
     await CredentialCache.usingAsync(
       {
         supportEditing: true
       },
-      async (credentialsCache: CredentialCache) => {
+      async (credentialsCache: ICredentialCache) => {
         credentialsCache.setCacheEntry(this._credentialCacheId, credential);
         await credentialsCache.saveIfModifiedAsync();
       }
@@ -152,11 +156,12 @@ export class AmazonS3BuildCacheProvider extends CloudBuildCacheProviderBase {
   }
 
   public async deleteCachedCredentialsAsync(terminal: ITerminal): Promise<void> {
+    const { CredentialCache } = this._rushSession;
     await CredentialCache.usingAsync(
       {
         supportEditing: true
       },
-      async (credentialsCache: CredentialCache) => {
+      async (credentialsCache: ICredentialCache) => {
         credentialsCache.deleteCacheEntry(this._credentialCacheId);
         await credentialsCache.saveIfModifiedAsync();
       }

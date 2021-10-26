@@ -3,16 +3,10 @@
 
 import { AsyncSeriesHook } from 'tapable';
 
-/**
- * @public
- */
 export interface IRushLifecycle {
   hooks: RushLifecycleHooks;
 }
 
-/**
- * @public
- */
 export class RushLifecycleHooks {
   /**
    * The hook to run when all rush plugins is initialized.
