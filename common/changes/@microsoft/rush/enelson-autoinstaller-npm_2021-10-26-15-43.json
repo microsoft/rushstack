@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix update-autoinstaller with NPM",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Update suggested version of NPM",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
