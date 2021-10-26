@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "support `--debug-package-manager` install options for yarn",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
