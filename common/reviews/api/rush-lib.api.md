@@ -143,12 +143,12 @@ export class ExperimentsConfiguration {
     get configuration(): Readonly<IExperimentsJson>;
 }
 
-// @public (undocumented)
+// @beta (undocumented)
 export type IBuildCacheJson = ICloudBuildCacheJson | ILocalBuildCacheJson;
 
 // Warning: (ae-forgotten-export) The symbol "IBaseBuildCacheJson" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @beta (undocumented)
 export interface ICloudBuildCacheJson extends IBaseBuildCacheJson {
     // (undocumented)
     [otherConfigKey: string]: JsonObject;
@@ -526,7 +526,6 @@ export class RushConfiguration {
     //
     // (undocumented)
     get rushPluginsConfiguration(): RushPluginsConfiguration;
-    get rushPluginsFolder(): string;
     get shrinkwrapFilename(): string;
     get shrinkwrapFilePhrase(): string;
     get suppressNodeLtsWarning(): boolean;

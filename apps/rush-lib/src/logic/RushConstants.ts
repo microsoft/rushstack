@@ -145,12 +145,12 @@ export class RushConstants {
   public static readonly experimentsFilename: string = 'experiments.json';
 
   /**
-   * Rush plugins configuration file.
+   * Rush plugins configuration file name.
    */
   public static readonly rushPluginsConfigFilename: string = 'rush-plugins.json';
 
   /**
-   *
+   * Rush plugin manifest file name.
    */
   public static readonly rushPluginManifestFilename: string = 'rush-plugin-manifest.json';
 

@@ -114,7 +114,7 @@ export class GlobalScriptAction extends BaseScriptAction {
     if (shellCommandTokenContext) {
       shellCommand = this._expandShellCommandWithTokens(shellCommand, shellCommandTokenContext);
     }
-    this._rejectAnyTokensInShellCommand(shellCommand);
+    this._rejectAnyTokensInShellCommand(shellCommand, shellCommandTokenContext);
 
     const exitCode: number = Utilities.executeLifecycleCommand(shellCommand, {
       rushConfiguration: this.rushConfiguration,
@@ -150,14 +150,21 @@ export class GlobalScriptAction extends BaseScriptAction {
     return expandedShellCommand;
   }
 
-  private _rejectAnyTokensInShellCommand(shellCommand: string): void {
+  private _rejectAnyTokensInShellCommand(
+    shellCommand: string,
+    tokenContext?: IShellCommandTokenContext
+  ): void {
     if (shellCommand.indexOf('<') < 0 && shellCommand.indexOf('>') < 0) {
       return;
     }
     const tokenRegExp: RegExp = /(\<[^<]*?\>)/;
     const match: RegExpExecArray | null = tokenRegExp.exec(shellCommand);
     if (match) {
-      throw new Error(`The "shellCommand" value contains an unrecognized token "${match[1]}"`);
+      throw new Error(
+        `The "shellCommand" value contains an unrecognized token "${match[1]}".${
+          tokenContext ? ` Available tokens are ${Object.keys(tokenContext).join(', ')}.` : ''
+        }`
+      );
     }
     throw new Error(`The "shellCommand" value contains extra token characters ("<" or ">"): ${shellCommand}`);
   }

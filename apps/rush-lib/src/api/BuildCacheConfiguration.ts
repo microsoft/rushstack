@@ -37,7 +37,7 @@ export interface ILocalBuildCacheJson extends IBaseBuildCacheJson {
 }
 
 /**
- * @public
+ * @beta
  */
 export interface ICloudBuildCacheJson extends IBaseBuildCacheJson {
   readonly cacheProvider: string;
@@ -45,7 +45,7 @@ export interface ICloudBuildCacheJson extends IBaseBuildCacheJson {
 }
 
 /**
- * @public
+ * @beta
  */
 export type IBuildCacheJson = ICloudBuildCacheJson | ILocalBuildCacheJson;
 
