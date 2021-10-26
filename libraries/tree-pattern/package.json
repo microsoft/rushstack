@@ -6,7 +6,9 @@
   "typings": "dist/tree-pattern.d.ts",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/tree-pattern"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "libraries/tree-pattern"
   },
   "scripts": {
     "build": "heft test --clean"

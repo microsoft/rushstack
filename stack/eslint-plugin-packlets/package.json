@@ -4,7 +4,9 @@
   "description": "A lightweight alternative to NPM packages for organizing source files within a single project",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/microsoft/rushstack/tree/master/stack/eslint-plugin-packlets"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "stack/eslint-plugin-packlets"
   },
   "homepage": "https://rushstack.io",
   "keywords": [

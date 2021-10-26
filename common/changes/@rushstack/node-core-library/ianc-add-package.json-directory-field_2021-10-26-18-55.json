@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Add more elaborate \"repository\" field types in IPackageJson.",
+      "type": "minor",
+      "packageName": "@rushstack/node-core-library"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library",
+  "email": "iclanton@users.noreply.github.com"
+}

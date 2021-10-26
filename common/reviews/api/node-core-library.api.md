@@ -465,7 +465,7 @@ export interface INodePackageJson {
     optionalDependencies?: IPackageJsonDependencyTable;
     peerDependencies?: IPackageJsonDependencyTable;
     private?: boolean;
-    repository?: string;
+    repository?: string | IPackageJsonRepository;
     resolutions?: Record<string, string>;
     scripts?: IPackageJsonScriptTable;
     // @beta
@@ -497,6 +497,13 @@ export interface IPackageJsonDependencyTable {
 // @public
 export interface IPackageJsonLookupParameters {
     loadExtraFields?: boolean;
+}
+
+// @public
+export interface IPackageJsonRepository {
+    directory?: string;
+    type: string;
+    url: string;
 }
 
 // @public

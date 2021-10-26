@@ -15,7 +15,8 @@
   "preferGlobal": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/apps/rush"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "apps/rush"
   },
   "engines": {
     "node": ">=5.6.0"
