@@ -7,20 +7,7 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { IRushPluginConfiguration } from '../../api/RushPluginsConfiguration';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import { RushConstants } from '../../logic/RushConstants';
-import { PluginLoaderBase } from './PluginLoaderBase';
-
-export interface IRushPluginManifest {
-  pluginName: string;
-  description: string;
-  entryPoint?: string;
-  optionsSchema?: string;
-  associatedCommands?: string[];
-  commandLineJsonFilePath?: string;
-}
-
-export interface IRushPluginManifestJson {
-  plugins: IRushPluginManifest[];
-}
+import { IRushPluginManifest, IRushPluginManifestJson, PluginLoaderBase } from './PluginLoaderBase';
 
 export interface IRemotePluginLoaderOptions {
   pluginConfiguration: IRushPluginConfiguration;

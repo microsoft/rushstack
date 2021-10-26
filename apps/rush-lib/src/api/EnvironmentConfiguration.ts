@@ -184,8 +184,6 @@ export class EnvironmentConfiguration {
 
   private static _tarBinaryPath: string | undefined;
 
-  private static _rushUserFolderOverride: string | undefined;
-
   /**
    * An override for the common/temp folder path.
    */
@@ -241,14 +239,6 @@ export class EnvironmentConfiguration {
   public static get rushGlobalFolderOverride(): string | undefined {
     EnvironmentConfiguration._ensureValidated();
     return EnvironmentConfiguration._rushGlobalFolderOverride;
-  }
-
-  /**
-   *
-   */
-  public static get rushUserFolderOverride(): string | undefined {
-    EnvironmentConfiguration._ensureValidated();
-    return EnvironmentConfiguration._rushUserFolderOverride;
   }
 
   /**

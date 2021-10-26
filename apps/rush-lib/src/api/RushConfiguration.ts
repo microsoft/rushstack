@@ -211,14 +211,6 @@ export interface IRushVariantOptionsJson {
 }
 
 /**
- * Configuration for a rush plugin
- */
-export interface IRushPluginConfigJson {
-  plugin: string;
-  options?: object;
-}
-
-/**
  * This represents the JSON data structure for the "rush.json" configuration file.
  * See rush.schema.json for documentation.
  */
@@ -246,7 +238,6 @@ export interface IRushConfigurationJson {
   ensureConsistentVersions?: boolean;
   variants?: IRushVariantOptionsJson[];
   pluginsAutoinstallerName?: string;
-  rushPlugins?: IRushPluginConfigJson[];
 }
 
 /**
@@ -1106,14 +1097,6 @@ export class RushConfiguration {
   }
 
   /**
-   * The folder where rush plugin related files are stored.
-   * Example: `C:\MyRepo\common\rush-plugins`
-   */
-  public get rushPluginsFolder(): string {
-    return path.join(this._commonFolder, 'rush-plugins');
-  }
-
-  /**
    * The local folder that will store the NPM package cache.  Rush does not rely on the
    * npm's default global cache folder, because npm's caching implementation does not
    * reliably handle multiple processes.  (For example, if a build box is running
@@ -1770,8 +1753,10 @@ export class RushConfiguration {
     variant: string | undefined
   ): void {
     const commonVersions: CommonVersionsConfiguration = this.getCommonVersions(variant);
-    const allowedAlternativeVersions: Map<string, ReadonlyArray<string>> =
-      commonVersions.allowedAlternativeVersions;
+    const allowedAlternativeVersions: Map<
+      string,
+      ReadonlyArray<string>
+    > = commonVersions.allowedAlternativeVersions;
 
     for (const dependency of dependencies) {
       const alternativesForThisDependency: ReadonlyArray<string> =

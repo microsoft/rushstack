@@ -14,9 +14,6 @@
     "build": "heft test --clean",
     "start": "heft test --clean --watch"
   },
-  "peerDependencies": {
-    "@rushstack/rush-lib": "^5.52.0"
-  },
   "dependencies": {
     "@azure/identity": "~1.0.0",
     "@azure/storage-blob": "~12.3.0",

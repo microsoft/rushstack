@@ -387,12 +387,6 @@
   /*[LINE "HYPOTHETICAL"]*/ "hotfixChangeEnabled": false,
 
   /**
-   * Rush plugins allow you to extend Rush's behavior.  Plugins are specified as a list of package
-   * specifier with options.  When Rush starts up, it will load these plugins and allow them to extend
-   * the behavior of the rush process.
-   */
-
-  /**
    * (Required) This is the inventory of projects to be managed by Rush.
    *
    * Rush does not automatically scan for projects using wildcards, for a few reasons:
