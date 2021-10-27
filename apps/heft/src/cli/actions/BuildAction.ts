@@ -35,6 +35,7 @@ export class BuildAction extends HeftActionBase {
 
     this._watchFlag = this.defineFlagParameter({
       parameterLongName: '--watch',
+      parameterShortName: '-w',
       description: 'If provided, run tests in watch mode.'
     });
 

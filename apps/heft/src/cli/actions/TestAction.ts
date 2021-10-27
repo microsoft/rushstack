@@ -107,6 +107,7 @@ export class TestAction extends BuildAction {
     this._testTimeout = this.defineIntegerParameter({
       parameterLongName: '--test-timeout-ms',
       argumentName: 'INTEGER',
+      environmentVariable: 'HEFT_JEST_TEST_TIMEOUT_MS',
       description:
         "Change the default timeout for tests; if a test doesn't complete within this many" +
         ' milliseconds, it will fail. Individual tests can override the default. If unspecified, ' +
@@ -116,6 +117,7 @@ export class TestAction extends BuildAction {
 
     this._detectOpenHandles = this.defineFlagParameter({
       parameterLongName: '--detect-open-handles',
+      environmentVariable: 'HEFT_JEST_DETECT_OPEN_HANDLES',
       description:
         'Attempt to collect and print open handles preventing Jest from exiting cleanly.' +
         ' This option has a significant performance penalty and should only be used for debugging.' +
@@ -135,6 +137,7 @@ export class TestAction extends BuildAction {
     this._maxWorkers = this.defineStringParameter({
       parameterLongName: '--max-workers',
       argumentName: 'COUNT_OR_PERCENTAGE',
+      environmentVariable: 'HEFT_JEST_MAX_WORKERS',
       description:
         'Use this parameter to control maximum number of worker processes tests are allowed to use.' +
         ' This parameter is similar to the parameter noted in the Jest documentation, and can either be' +

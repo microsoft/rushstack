@@ -31,7 +31,7 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: build 1`] = `
 "usage: heft build [-h] [-v] [--production] [--locale LOCALE] [-l]
                   [--typescript-max-write-parallelism PARALLEILSM]
-                  [--max-old-space-size SIZE] [--watch] [--clean]
+                  [--max-old-space-size SIZE] [-w] [--clean]
                   
 
 Optional arguments:
@@ -47,7 +47,7 @@ Optional arguments:
                         json. The default is 50.
   --max-old-space-size SIZE
                         Used to specify the max old space size.
-  --watch               If provided, run tests in watch mode.
+  -w, --watch           If provided, run tests in watch mode.
   --clean               If specified, clean the package before building.
 "
 `;
@@ -91,7 +91,7 @@ Optional arguments:
 exports[`CommandLineHelp prints the help for each action: test 1`] = `
 "usage: heft test [-h] [-v] [--production] [--locale LOCALE] [-l]
                  [--typescript-max-write-parallelism PARALLEILSM]
-                 [--max-old-space-size SIZE] [--watch] [--clean] [--no-test]
+                 [--max-old-space-size SIZE] [-w] [--clean] [--no-test]
                  [--no-build] [-u] [--find-related-tests SOURCE_FILE]
                  [--silent] [-t REGEXP] [--test-path-pattern REGEXP]
                  [--test-timeout-ms INTEGER] [--detect-open-handles]
@@ -111,7 +111,7 @@ Optional arguments:
                         json. The default is 50.
   --max-old-space-size SIZE
                         Used to specify the max old space size.
-  --watch               If provided, run tests in watch mode.
+  -w, --watch           If provided, run tests in watch mode.
   --clean               If specified, clean the package before building.
   --no-test             If specified, run the build without testing.
   --no-build            If provided, only run tests. Do not build first.
@@ -145,14 +145,18 @@ Optional arguments:
                         will fail. Individual tests can override the default. 
                         If unspecified, the default is normally 5000 ms. This 
                         corresponds to the \\"--testTimeout\\" parameter in 
-                        Jest's documentation.
+                        Jest's documentation. This parameter may 
+                        alternatively be specified via the 
+                        HEFT_JEST_TEST_TIMEOUT_MS environment variable.
   --detect-open-handles
                         Attempt to collect and print open handles preventing 
                         Jest from exiting cleanly. This option has a 
                         significant performance penalty and should only be 
                         used for debugging. This corresponds to the 
                         \\"--detectOpenHandles\\" parameter in Jest's 
-                        documentation.
+                        documentation. This parameter may alternatively be 
+                        specified via the HEFT_JEST_DETECT_OPEN_HANDLES 
+                        environment variable.
   --debug-heft-reporter
                         Normally Heft installs a custom Jest reporter so that 
                         test results are presented consistently with other 
@@ -170,6 +174,8 @@ Optional arguments:
                         representing the number of workers to spawn when 
                         running tests, or can be a string representing a 
                         percentage of the available CPUs on the machine to 
-                        utilize. Example values: \\"3\\", \\"25%\\"
+                        utilize. Example values: \\"3\\", \\"25%\\" This parameter 
+                        may alternatively be specified via the 
+                        HEFT_JEST_MAX_WORKERS environment variable.
 "
 `;
