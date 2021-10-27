@@ -109,6 +109,7 @@ export interface IInstallManagerOptions {
   pnpmFilterArguments: string[];
 
   /**
+   * This parameter is ONLY works when using pnpm.
    * When true, only updates lockfile and repo-state.json, instead of
    * checking node_modules and downloading dependencies.
    */
@@ -262,8 +263,8 @@ export abstract class BaseInstallManager {
         }
       }
 
-      // Create the marker file to indicate a successful install if it's not a filtered install
-      if (!isFilteredInstall) {
+      // Create the marker file to indicate a successful install if it's not a filtered install or a lockfileOnly install
+      if (!isFilteredInstall && !this.options.lockfileOnly) {
         this._commonTempInstallFlag.create();
       }
     } else {
