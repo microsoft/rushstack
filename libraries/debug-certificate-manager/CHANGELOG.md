@@ -1,6 +1,13 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Wed, 13 Oct 2021 15:09:54 GMT and should not be manually modified.
+This log was last generated on Wed, 27 Oct 2021 00:08:15 GMT and should not be manually modified.
+
+## 1.1.8
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
 
 ## 1.1.7
 Wed, 13 Oct 2021 15:09:54 GMT

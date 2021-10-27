@@ -2,6 +2,26 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.13.14",
+      "tag": "@microsoft/api-extractor-model_v7.13.14",
+      "date": "Wed, 27 Oct 2021 00:08:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the package.json repository field to include the directory property."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.43.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.13.13",
       "tag": "@microsoft/api-extractor-model_v7.13.13",
       "date": "Wed, 13 Oct 2021 15:09:54 GMT",

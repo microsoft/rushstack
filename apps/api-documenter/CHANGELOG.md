@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Wed, 13 Oct 2021 15:09:54 GMT and should not be manually modified.
+This log was last generated on Wed, 27 Oct 2021 00:08:15 GMT and should not be manually modified.
+
+## 7.13.64
+Wed, 27 Oct 2021 00:08:14 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
 
 ## 7.13.63
 Wed, 13 Oct 2021 15:09:54 GMT

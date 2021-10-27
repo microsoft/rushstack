@@ -2,6 +2,23 @@
   "name": "@rushstack/eslint-plugin-packlets",
   "entries": [
     {
+      "version": "0.3.3",
+      "tag": "@rushstack/eslint-plugin-packlets_v0.3.3",
+      "date": "Wed, 27 Oct 2021 00:08:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the package.json repository field to include the directory property."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/tree-pattern\" to `0.2.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.2",
       "tag": "@rushstack/eslint-plugin-packlets_v0.3.2",
       "date": "Thu, 07 Oct 2021 07:13:35 GMT",

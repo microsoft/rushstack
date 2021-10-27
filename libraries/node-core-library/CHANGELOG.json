@@ -2,6 +2,28 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.43.0",
+      "tag": "@rushstack/node-core-library_v3.43.0",
+      "date": "Wed, 27 Oct 2021 00:08:15 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update the package.json repository field to include the directory property."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Add more elaborate \"repository\" field types in IPackageJson."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.42.3",
       "tag": "@rushstack/node-core-library_v3.42.3",
       "date": "Wed, 13 Oct 2021 15:09:54 GMT",

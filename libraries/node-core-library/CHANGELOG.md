@@ -1,6 +1,17 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 13 Oct 2021 15:09:54 GMT and should not be manually modified.
+This log was last generated on Wed, 27 Oct 2021 00:08:15 GMT and should not be manually modified.
+
+## 3.43.0
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Minor changes
+
+- Add more elaborate "repository" field types in IPackageJson.
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
 
 ## 3.42.3
 Wed, 13 Oct 2021 15:09:54 GMT
