@@ -148,6 +148,12 @@ describe('AmazonS3Client', () => {
         await fnAsync();
         fail('Expected an error to be thrown');
       } catch (e) {
+        // The way an error is formatted changed in Node 16. Normalize, so snapshots match.
+        (e as Error).message = (e as Error).message.replace(
+          /^Cannot read property '(.+)' of undefined$/g,
+          "Cannot read properties of undefined (reading '$1')"
+        );
+
         expect(e).toMatchSnapshot();
       }
     }

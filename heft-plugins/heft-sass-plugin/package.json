@@ -22,7 +22,7 @@
     "@rushstack/heft-config-file": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/typings-generator": "workspace:*",
-    "node-sass": "5.0.0",
+    "node-sass": "6.0.1",
     "postcss": "7.0.32",
     "postcss-modules": "~1.5.0"
   },
@@ -33,7 +33,7 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "12.20.24",
-    "@types/node-sass": "4.11.1",
+    "@types/node-sass": "4.11.2",
     "eslint": "~7.30.0",
     "typescript": "~4.4.2"
   }
