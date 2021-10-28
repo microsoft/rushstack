@@ -342,7 +342,7 @@ Array [
 ]
 `;
 
-exports[`AmazonS3Client Making requests Uploading an object Throws an error if credentials are not provided 1`] = `[TypeError: Cannot read property 'body' of undefined]`;
+exports[`AmazonS3Client Making requests Uploading an object Throws an error if credentials are not provided 1`] = `[TypeError: Cannot read properties of undefined (reading 'body')]`;
 
 exports[`AmazonS3Client Making requests Uploading an object With credentials Handles an unexpected error code 1`] = `
 Array [

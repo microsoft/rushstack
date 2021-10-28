@@ -15,7 +15,7 @@ import type { RushConfiguration } from '../api/RushConfiguration';
  * LTS schedule: https://nodejs.org/en/about/releases/
  * LTS versions: https://nodejs.org/en/download/releases/
  */
-const UPCOMING_NODE_LTS_VERSION: number = 16;
+const UPCOMING_NODE_LTS_VERSION: number = 18;
 const nodeVersion: string = process.versions.node;
 const nodeMajorVersion: number = semver.major(nodeVersion);
 
