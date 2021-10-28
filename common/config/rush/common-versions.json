@@ -86,6 +86,10 @@
 
     "webpack-dev-server": [
       "~3.11.0" // heft-plugins/heft-webpack4-plugin is using an older version of webpack-dev-server for compatibility
+    ],
+
+    "html-webpack-plugin": [
+      "~4.5.0" // Some test projects are still on Webpack 4 because some of our plugins don't support Webpack 5 yet
     ]
   }
 }

@@ -40,7 +40,7 @@
       /**
        * The path to the plugin package.
        */
-      "plugin": "@rushstack/heft-webpack4-plugin"
+      "plugin": "@rushstack/heft-webpack5-plugin"
 
       /**
        * An optional object that provides additional settings that may be defined by the plugin.

@@ -390,7 +390,7 @@ importers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
       '@rushstack/heft-storybook-plugin': workspace:*
-      '@rushstack/heft-webpack4-plugin': workspace:*
+      '@rushstack/heft-webpack5-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/react': 16.9.45
       '@types/react-dom': 16.9.8
@@ -398,7 +398,7 @@ importers:
       css-loader: ~4.2.1
       eslint: ~7.30.0
       heft-storybook-react-tutorial-storykit: workspace:*
-      html-webpack-plugin: ~4.5.0
+      html-webpack-plugin: ~5.5.0
       react: ~16.13.1
       react-dom: ~16.13.1
       source-map-loader: ~1.1.2
@@ -410,7 +410,7 @@ importers:
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@rushstack/heft-storybook-plugin': link:../../heft-plugins/heft-storybook-plugin
-      '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
+      '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
       '@types/heft-jest': 1.0.1
       '@types/react': 16.9.45
       '@types/react-dom': 16.9.8
@@ -418,7 +418,7 @@ importers:
       css-loader: 4.2.2_webpack@4.44.2
       eslint: 7.30.0
       heft-storybook-react-tutorial-storykit: link:../heft-storybook-react-tutorial-storykit
-      html-webpack-plugin: 4.5.2_webpack@4.44.2
+      html-webpack-plugin: 5.5.0_webpack@4.44.2
       react: 16.13.1
       react-dom: 16.13.1_react@16.13.1
       source-map-loader: 1.1.3_webpack@4.44.2
@@ -477,14 +477,14 @@ importers:
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
-      '@rushstack/heft-webpack4-plugin': workspace:*
+      '@rushstack/heft-webpack5-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/react': 16.9.45
       '@types/react-dom': 16.9.8
       '@types/webpack-env': 1.13.0
       css-loader: ~4.2.1
       eslint: ~7.30.0
-      html-webpack-plugin: ~4.5.0
+      html-webpack-plugin: ~5.5.0
       react: ~16.13.1
       react-dom: ~16.13.1
       source-map-loader: ~1.1.2
@@ -495,14 +495,14 @@ importers:
       '@rushstack/eslint-config': link:../../stack/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
-      '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
+      '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
       '@types/heft-jest': 1.0.1
       '@types/react': 16.9.45
       '@types/react-dom': 16.9.8
       '@types/webpack-env': 1.13.0
       css-loader: 4.2.2_webpack@4.44.2
       eslint: 7.30.0
-      html-webpack-plugin: 4.5.2_webpack@4.44.2
+      html-webpack-plugin: 5.5.0_webpack@4.44.2
       react: 16.13.1
       react-dom: 16.13.1_react@16.13.1
       source-map-loader: 1.1.3_webpack@4.44.2
@@ -897,7 +897,7 @@ importers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
       '@rushstack/heft-sass-plugin': workspace:*
-      '@rushstack/heft-webpack4-plugin': workspace:*
+      '@rushstack/heft-webpack5-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/react': 16.9.45
       '@types/react-dom': 16.9.8
@@ -906,13 +906,13 @@ importers:
       buttono: ~1.0.2
       css-loader: ~4.2.1
       eslint: ~7.30.0
-      html-webpack-plugin: ~4.5.0
+      html-webpack-plugin: ~5.5.0
       node-sass: 6.0.1
       postcss: 7.0.32
       postcss-loader: ~4.0.1
       react: ~16.13.1
       react-dom: ~16.13.1
-      sass-loader: ~10.1.1
+      sass-loader: ~12.3.0
       style-loader: ~1.2.1
       typescript: ~4.4.2
       webpack: ~4.44.2
@@ -923,7 +923,7 @@ importers:
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@rushstack/heft-sass-plugin': link:../../heft-plugins/heft-sass-plugin
-      '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
+      '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
       '@types/heft-jest': 1.0.1
       '@types/react': 16.9.45
       '@types/react-dom': 16.9.8
@@ -931,13 +931,13 @@ importers:
       autoprefixer: 9.8.6
       css-loader: 4.2.2_webpack@4.44.2
       eslint: 7.30.0
-      html-webpack-plugin: 4.5.2_webpack@4.44.2
+      html-webpack-plugin: 5.5.0_webpack@4.44.2
       node-sass: 6.0.1
       postcss: 7.0.32
       postcss-loader: 4.0.4_postcss@7.0.32+webpack@4.44.2
       react: 16.13.1
       react-dom: 16.13.1_react@16.13.1
-      sass-loader: 10.1.1_node-sass@6.0.1+webpack@4.44.2
+      sass-loader: 12.3.0_node-sass@6.0.1+webpack@4.44.2
       style-loader: 1.2.1_webpack@4.44.2
       typescript: 4.4.3
       webpack: 4.44.2
@@ -5862,6 +5862,10 @@ packages:
   /@types/html-minifier-terser/5.1.1:
     resolution: {integrity: sha512-giAlZwstKbmvMk1OO7WXSj4OZ0keXAcl2TQq4LWHiiPH2ByaH7WeUzng+Qej8UPxxv+8lRTuouo0iaNDBuzIBA==}
 
+  /@types/html-minifier-terser/6.0.0:
+    resolution: {integrity: sha512-NZwaaynfs1oIoLAV1vg18e7QMVDvw+6SQrdJc8w3BwUaoroVSf6EBj/Sk4PBWGxsq0dzhA2drbsuMC1/6C6KgQ==}
+    dev: true
+
   /@types/http-proxy/1.17.6:
     resolution: {integrity: sha512-+qsjqR75S/ib0ig0R9WN+CDoZeOBU6F2XLewgC4KVgdXiNHiKKHFEMRHOrs5PbYE97D5vataw5wPj4KLYfUkuQ==}
     dependencies:
@@ -7040,6 +7044,11 @@ packages:
     resolution: {integrity: sha512-bY6fj56OUQ0hU1KjFNDQuJFezqKdrAyFdIevADiqrWHwSlbmBNMHp5ak2f40Pm8JTFyM2mqxkG6ngkHO11f/lg==}
     engines: {node: '>=8'}
 
+  /ansi-regex/5.0.1:
+    resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
+    engines: {node: '>=8'}
+    dev: true
+
   /ansi-regex/6.0.1:
     resolution: {integrity: sha512-n5M855fKb2SsfMIiFFoVrABHJC8QtHwVx+mHWP3QcEqBHYienj5dHSgjbxtC0WEZXYt4wcD6zrQElDPhFuZgfA==}
     engines: {node: '>=12'}
@@ -7967,7 +7976,7 @@ packages:
     resolution: {integrity: sha512-gxGWBrTT1JuMx6R+o5PTXMmUnhnVzLQ9SNutD4YqKtI6ap897t3tKECYla6gCWEkplXnlNybEkZg9GEGxKFCgw==}
     dependencies:
       pascal-case: 3.1.2
-      tslib: 2.2.0
+      tslib: 2.3.1
 
   /camelcase-css/2.0.1:
     resolution: {integrity: sha512-QOSvevhslijgYwRx6Rv7zKdMF8lbRmx+uQGx2+vDc+KI/eBnsy9kit5aj23AgGu3pa4t9AgwbnXWqS+iOY+2aA==}
@@ -8149,6 +8158,13 @@ packages:
     dependencies:
       source-map: 0.6.1
 
+  /clean-css/5.2.2:
+    resolution: {integrity: sha512-/eR8ru5zyxKzpBLv9YZvMXgTSSQn7AdkMItMYynsFgGwTveCRVam9IUPFloE85B4vAIj05IuKmmEoV7/AQjT0w==}
+    engines: {node: '>= 10.0'}
+    dependencies:
+      source-map: 0.6.1
+    dev: true
+
   /clean-stack/2.2.0:
     resolution: {integrity: sha512-4diC9HaTE+KRAMWhDhrGOECgWZxoevMc5TlkObMqNSsVU62PYzXZ/SMTjzyGAFF1YusgxGcSWTEXBhp0CPwQ1A==}
     engines: {node: '>=6'}
@@ -8306,6 +8322,11 @@ packages:
     resolution: {integrity: sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==}
     engines: {node: '>= 10'}
     dev: false
+
+  /commander/8.3.0:
+    resolution: {integrity: sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==}
+    engines: {node: '>= 12'}
+    dev: true
 
   /commondir/1.0.1:
     resolution: {integrity: sha1-3dgA2gxmEnOTzKWVDqloo6rxJTs=}
@@ -8619,6 +8640,16 @@ packages:
       domutils: 1.7.0
       nth-check: 1.0.2
 
+  /css-select/4.1.3:
+    resolution: {integrity: sha512-gT3wBNd9Nj49rAbmtFHj1cljIAOLYSX1nZ8CB7TBO3INYckygm5B7LISU/szY//YmdiSLbJvDLOx9VnMVpMBxA==}
+    dependencies:
+      boolbase: 1.0.0
+      css-what: 5.1.0
+      domhandler: 4.2.2
+      domutils: 2.8.0
+      nth-check: 2.0.1
+    dev: true
+
   /css-selector-tokenizer/0.7.3:
     resolution: {integrity: sha512-jWQv3oCEL5kMErj4wRnK/OPoBi0D+P1FR2cDCKYPaMeD2eW3/mttav8HT4hT1CKopiJI/psEULjkClhvJo4Lvg==}
     dependencies:
@@ -8629,6 +8660,11 @@ packages:
   /css-what/3.4.2:
     resolution: {integrity: sha512-ACUm3L0/jiZTqfzRM3Hi9Q8eZqd6IK37mMWPLz9PJxkLWllYeRf+EHUSHYEtFop2Eqytaq1FizFVh7XfBnXCDQ==}
     engines: {node: '>= 6'}
+
+  /css-what/5.1.0:
+    resolution: {integrity: sha512-arSMRWIIFY0hV8pIxZMEfmMI47Wj3R/aWpZDDxWYCPEiOMv6tfOrnpDtgxBYPEQD4V0Y/958+1TdC3iWTFcUPw==}
+    engines: {node: '>= 6'}
+    dev: true
 
   /cssesc/3.0.0:
     resolution: {integrity: sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==}
@@ -8981,6 +9017,14 @@ packages:
       domelementtype: 2.2.0
       entities: 2.2.0
 
+  /dom-serializer/1.3.2:
+    resolution: {integrity: sha512-5c54Bk5Dw4qAxNOI1pFEizPSjVsx5+bpJKmL2kPn8JhBUq2q09tTCa3mjijun2NfK78NMouDYNMBkOrPZiS+ig==}
+    dependencies:
+      domelementtype: 2.2.0
+      domhandler: 4.2.2
+      entities: 2.2.0
+    dev: true
+
   /dom-walk/0.1.2:
     resolution: {integrity: sha512-6QvTW9mrGeIegrFXdtQi9pk7O/nSK6lSdXW2eqUspN5LWD7UTji2Fqw5V2YLjBpHEoU9Xl/eUWNpDeZvoyOv2w==}
     dev: true
@@ -9005,17 +9049,32 @@ packages:
     dependencies:
       domelementtype: 1.3.1
 
+  /domhandler/4.2.2:
+    resolution: {integrity: sha512-PzE9aBMsdZO8TK4BnuJwH0QT41wgMbRzuZrHUcpYncEjmQazq8QEaBWgLG7ZyC/DAZKEgglpIA6j4Qn/HmxS3w==}
+    engines: {node: '>= 4'}
+    dependencies:
+      domelementtype: 2.2.0
+    dev: true
+
   /domutils/1.7.0:
     resolution: {integrity: sha512-Lgd2XcJ/NjEw+7tFvfKxOzCYKZsdct5lczQ2ZaQY8Djz7pfAD3Gbp8ySJWtreII/vDlMVmxwa6pHmdxIYgttDg==}
     dependencies:
       dom-serializer: 0.2.2
       domelementtype: 1.3.1
 
+  /domutils/2.8.0:
+    resolution: {integrity: sha512-w96Cjofp72M5IIhpjgobBimYEfoPjx1Vx0BSX9P30WBdZW2WIKU0T1Bd0kz2eNZ9ikjKgHbEyKx8BB6H1L3h3A==}
+    dependencies:
+      dom-serializer: 1.3.2
+      domelementtype: 2.2.0
+      domhandler: 4.2.2
+    dev: true
+
   /dot-case/3.0.4:
     resolution: {integrity: sha512-Kv5nKlh6yRrdrGvxeJ2e5y2eRUpkUosIW4A2AS38zwSz27zu7ufDwQPi5Jhs3XAlGNetl3bmnGhQsMtkKJnj3w==}
     dependencies:
       no-case: 3.0.4
-      tslib: 2.2.0
+      tslib: 2.3.1
 
   /dot-prop/5.3.0:
     resolution: {integrity: sha512-QM8q3zDe58hqUqjraQOmzZ1LIH9SWQJTlEKCH4kJ2oQvLZk7RbQXvtDM2XEq3fwkV9CCvvH4LA0AV+ogFsBM2Q==}
@@ -10856,6 +10915,20 @@ packages:
       relateurl: 0.2.7
       terser: 4.7.0
 
+  /html-minifier-terser/6.0.2:
+    resolution: {integrity: sha512-AgYO3UGhMYQx2S/FBJT3EM0ZYcKmH6m9XL9c1v77BeK/tYJxGPxT1/AtsdUi4FcP8kZGmqqnItCcjFPcX9hk6A==}
+    engines: {node: '>=12'}
+    hasBin: true
+    dependencies:
+      camel-case: 4.1.2
+      clean-css: 5.2.2
+      commander: 8.3.0
+      he: 1.2.0
+      param-case: 3.0.4
+      relateurl: 0.2.7
+      terser: 5.9.0
+    dev: true
+
   /html-tags/3.1.0:
     resolution: {integrity: sha512-1qYz89hW3lFDEazhjW0yVAV87lw8lVkrJocr72XmBkMKsoSVJCQx3W8BXsC7hO2qAt8BoVjYjtAcZ9perqGnNg==}
     engines: {node: '>=8'}
@@ -10880,7 +10953,21 @@ packages:
       pretty-error: 2.1.2
       tapable: 1.1.3
       util.promisify: 1.0.0
+      webpack: 4.44.2_webpack-cli@3.3.12
+
+  /html-webpack-plugin/5.5.0_webpack@4.44.2:
+    resolution: {integrity: sha512-sy88PC2cRTVxvETRgUHFrL4No3UxvcH8G1NepGhqaTT+GXN2kTamqasot0inS5hXeg1cMbFDt27zzo9p35lZVw==}
+    engines: {node: '>=10.13.0'}
+    peerDependencies:
+      webpack: ^5.20.0
+    dependencies:
+      '@types/html-minifier-terser': 6.0.0
+      html-minifier-terser: 6.0.2
+      lodash: 4.17.21
+      pretty-error: 4.0.0
+      tapable: 2.2.0
       webpack: 4.44.2
+    dev: true
 
   /htmlparser2/3.10.1:
     resolution: {integrity: sha512-IgieNijUMbkDovyoKObU1DUhm1iwNYE/fuifEoEHfd1oZKZDaONBSkal7Y01shxsM49R4XaMdGez3WnF9UfiCQ==}
@@ -10891,6 +10978,15 @@ packages:
       entities: 1.1.2
       inherits: 2.0.4
       readable-stream: 3.6.0
+
+  /htmlparser2/6.1.0:
+    resolution: {integrity: sha512-gyyPk6rgonLFEDGoeRgQNaEUvdJ4ktTmmUh/h2t7s+M8oPpIPxgNACWa+6ESR57kXstwqPiCut0V8NRpcwgU7A==}
+    dependencies:
+      domelementtype: 2.2.0
+      domhandler: 4.2.2
+      domutils: 2.8.0
+      entities: 2.2.0
+    dev: true
 
   /http-cache-semantics/4.1.0:
     resolution: {integrity: sha512-carPklcUh7ROWRK7Cv27RPtdhYhUsela/ue5/jKzjegVvXDqM2ILE9Q2BGn9JZJh1g87cp56su/FgQSzcWS8cQ==}
@@ -13342,6 +13438,12 @@ packages:
     dependencies:
       boolbase: 1.0.0
 
+  /nth-check/2.0.1:
+    resolution: {integrity: sha512-it1vE95zF6dTT9lBsYbxvqh0Soy4SPowchj0UBGj/V6cTPnXXtQOPUbhZ6CmGzAD/rW22LQK6E96pcdJXk4A4w==}
+    dependencies:
+      boolbase: 1.0.0
+    dev: true
+
   /num2fraction/1.2.2:
     resolution: {integrity: sha1-b2gragJ6Tp3fpFZM0lidHU5mnt4=}
     dev: true
@@ -13696,7 +13798,7 @@ packages:
     resolution: {integrity: sha512-RXlj7zCYokReqWpOPH9oYivUzLYZ5vAPIfEmCTNViosC78F8F0H9y7T7gG2M39ymgutxF5gcFEsyZQSph9Bp3A==}
     dependencies:
       dot-case: 3.0.4
-      tslib: 2.2.0
+      tslib: 2.3.1
 
   /parent-module/1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
@@ -13753,7 +13855,7 @@ packages:
     resolution: {integrity: sha512-uWlGT3YSnK9x3BQJaOdcZwrnV6hPpd8jFH1/ucpiLRPh/2zCVJKS19E4GvYHvaCcACn3foXZ0cLB9Wrx1KGe5g==}
     dependencies:
       no-case: 3.0.4
-      tslib: 2.2.0
+      tslib: 2.3.1
 
   /pascalcase/0.1.1:
     resolution: {integrity: sha1-s2PlXoAGym/iF4TS2yK9FdeRfxQ=}
@@ -14112,6 +14214,13 @@ packages:
     dependencies:
       lodash: 4.17.21
       renderkid: 2.0.5
+
+  /pretty-error/4.0.0:
+    resolution: {integrity: sha512-AoJ5YMAcXKYxKhuJGdcvse+Voc6v1RgnsR3nWcYU7q4t6z0Q6T86sv5Zq8VIRbOWWFpvdGE83LtdSMNd+6Y0xw==}
+    dependencies:
+      lodash: 4.17.21
+      renderkid: 3.0.0
+    dev: true
 
   /pretty-format/25.5.0:
     resolution: {integrity: sha512-kbo/kq2LQ/A/is0PQwsEHM7Ca6//bGPPvU6UnsdDRSKTWxT/ru/xb88v4BJf6a69H+uTytOEsTusT9ksd/1iWQ==}
@@ -14917,6 +15026,16 @@ packages:
       lodash: 4.17.21
       strip-ansi: 3.0.1
 
+  /renderkid/3.0.0:
+    resolution: {integrity: sha512-q/7VIQA8lmM1hF+jn+sFSPWGlMkSAeNYcPLmDQx2zzuiDfaLrOmumR8iaUKlenFgh0XRPIUeSPlH3A+AW3Z5pg==}
+    dependencies:
+      css-select: 4.1.3
+      dom-converter: 0.2.0
+      htmlparser2: 6.1.0
+      lodash: 4.17.21
+      strip-ansi: 6.0.1
+    dev: true
+
   /repeat-element/1.1.4:
     resolution: {integrity: sha512-LFiNfRcSu7KK3evMyYOuCzv3L10TW7yC1G2/+StMjK8Y6Vqd2MG7r/Qjw4ghtuCOjFvlnms/iMmLqpvW/ES/WQ==}
     engines: {node: '>=0.10.0'}
@@ -15184,14 +15303,14 @@ packages:
       scss-tokenizer: 0.2.3
       yargs: 13.3.2
 
-  /sass-loader/10.1.1_node-sass@6.0.1+webpack@4.44.2:
-    resolution: {integrity: sha512-W6gVDXAd5hR/WHsPicvZdjAWHBcEJ44UahgxcIE196fW2ong0ZHMPO1kZuI5q0VlvMQZh32gpv69PLWQm70qrw==}
-    engines: {node: '>= 10.13.0'}
+  /sass-loader/12.3.0_node-sass@6.0.1+webpack@4.44.2:
+    resolution: {integrity: sha512-6l9qwhdOb7qSrtOu96QQ81LVl8v6Dp9j1w3akOm0aWHyrTYtagDt5+kS32N4yq4hHk3M+rdqoRMH+lIdqvW6HA==}
+    engines: {node: '>= 12.13.0'}
     peerDependencies:
       fibers: '>= 3.1.0'
-      node-sass: ^4.0.0 || ^5.0.0
+      node-sass: ^4.0.0 || ^5.0.0 || ^6.0.0
       sass: ^1.3.0
-      webpack: ^4.36.0 || ^5.0.0
+      webpack: ^5.0.0
     peerDependenciesMeta:
       fibers:
         optional: true
@@ -15201,11 +15320,8 @@ packages:
         optional: true
     dependencies:
       klona: 2.0.4
-      loader-utils: 2.0.0
       neo-async: 2.6.2
       node-sass: 6.0.1
-      schema-utils: 3.0.0
-      semver: 7.3.5
       webpack: 4.44.2
     dev: true
 
@@ -15942,6 +16058,13 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       ansi-regex: 5.0.0
+
+  /strip-ansi/6.0.1:
+    resolution: {integrity: sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==}
+    engines: {node: '>=8'}
+    dependencies:
+      ansi-regex: 5.0.1
+    dev: true
 
   /strip-ansi/7.0.1:
     resolution: {integrity: sha512-cXNxvT8dFNRVfhVME3JAe98mkXDYN2O1l7jmcwMnOslDeESg1rF/OZMtK0nRAhiari1unG5cD4jG3rapUAkLbw==}
