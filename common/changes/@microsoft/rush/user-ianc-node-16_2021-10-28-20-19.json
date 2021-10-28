@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Mark Node 16 as the current latest LTS version.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
