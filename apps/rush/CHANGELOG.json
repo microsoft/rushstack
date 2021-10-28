@@ -2,6 +2,42 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.56.0",
+      "tag": "@microsoft/rush_v5.56.0",
+      "date": "Thu, 28 Oct 2021 23:49:31 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Add CI skipping to default version & changelog commits"
+          },
+          {
+            "comment": "Update suggested version of NPM"
+          },
+          {
+            "comment": "Fix update-autoinstaller with NPM"
+          },
+          {
+            "comment": "Streamline rushx output and add quiet flag."
+          },
+          {
+            "comment": "Include support for adding multiple packages with the \"rush add\" command."
+          },
+          {
+            "comment": "Update the package.json repository field to include the directory property."
+          },
+          {
+            "comment": "Fix the error message printed when `--interactive` is passed to `rush update-cloud-credentials` and the cloud cache provider is Amazon S3."
+          },
+          {
+            "comment": "Mark Node 16 as the current latest LTS version."
+          },
+          {
+            "comment": "support `--debug-package-manager` install options for yarn"
+          }
+        ]
+      }
+    },
+    {
       "version": "5.55.1",
       "tag": "@microsoft/rush_v5.55.1",
       "date": "Tue, 12 Oct 2021 22:26:25 GMT",

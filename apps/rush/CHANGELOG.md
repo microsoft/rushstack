@@ -1,6 +1,21 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Tue, 12 Oct 2021 22:26:25 GMT and should not be manually modified.
+This log was last generated on Thu, 28 Oct 2021 23:49:31 GMT and should not be manually modified.
+
+## 5.56.0
+Thu, 28 Oct 2021 23:49:31 GMT
+
+### Updates
+
+- Add CI skipping to default version & changelog commits
+- Update suggested version of NPM
+- Fix update-autoinstaller with NPM
+- Streamline rushx output and add quiet flag.
+- Include support for adding multiple packages with the "rush add" command.
+- Update the package.json repository field to include the directory property.
+- Fix the error message printed when `--interactive` is passed to `rush update-cloud-credentials` and the cloud cache provider is Amazon S3.
+- Mark Node 16 as the current latest LTS version.
+- support `--debug-package-manager` install options for yarn
 
 ## 5.55.1
 Tue, 12 Oct 2021 22:26:25 GMT
