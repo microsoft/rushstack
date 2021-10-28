@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@rushstack/heft-sass-plugin_v0.2.0",
+      "date": "Thu, 28 Oct 2021 23:48:23 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update node-sass to version 6 to support Node 16."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.30",
       "tag": "@rushstack/heft-sass-plugin_v0.1.30",
       "date": "Thu, 28 Oct 2021 00:08:22 GMT",
