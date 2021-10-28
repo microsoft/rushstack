@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.42.0",
+      "tag": "@rushstack/heft_v0.42.0",
+      "date": "Thu, 28 Oct 2021 00:08:22 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add environment variables for common heft test parameters"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.41.8",
       "tag": "@rushstack/heft_v0.41.8",
       "date": "Wed, 27 Oct 2021 00:08:15 GMT",
