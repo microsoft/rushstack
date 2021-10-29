@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/set-webpack-public-path-plugin",
+      "comment": "Introduce a warning when running in Webpack 5.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/set-webpack-public-path-plugin"
+}
