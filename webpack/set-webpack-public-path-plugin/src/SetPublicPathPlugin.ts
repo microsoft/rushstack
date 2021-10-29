@@ -3,8 +3,9 @@
 
 import { EOL } from 'os';
 import { cloneDeep, escapeRegExp } from 'lodash';
-import * as Webpack from 'webpack';
-import * as Tapable from 'tapable';
+import type * as Webpack4 from 'webpack4';
+import type * as Webpack5 from 'webpack5';
+import type * as Tapable from 'tapable';
 
 import { IInternalOptions, getSetPublicPathCode } from './codeGenerator';
 
@@ -96,12 +97,14 @@ interface IAsset {
   source(): string;
 }
 
-interface IExtendedMainTemplate {
+// eslint-disable-next-line @typescript-eslint/naming-convention
+declare const __dummyWebpack4MainTemplate: Webpack4.compilation.MainTemplate;
+interface IWebpack4ExtendedMainTemplate extends Webpack4.compilation.MainTemplate {
   hooks: {
-    jsonpScript?: Tapable.SyncWaterfallHook<string, Webpack.compilation.Chunk, string>;
-    requireExtensions: Tapable.SyncWaterfallHook<string, Webpack.compilation.Chunk, string>;
-    startup: Tapable.SyncHook<string, Webpack.compilation.Chunk, string>;
-  };
+    jsonpScript?: Tapable.SyncWaterfallHook<string, Webpack4.compilation.Chunk, string>;
+    requireExtensions: Tapable.SyncWaterfallHook<string, Webpack4.compilation.Chunk, string>;
+    startup: Tapable.SyncHook<string, Webpack4.compilation.Chunk, string>;
+  } & typeof __dummyWebpack4MainTemplate.hooks;
   requireFn: string;
 }
 
@@ -109,9 +112,9 @@ const SHOULD_REPLACE_ASSET_NAME_TOKEN: unique symbol = Symbol(
   'set-public-path-plugin-should-replace-asset-name'
 );
 
-interface IExtendedChunk extends Webpack.compilation.Chunk {
+interface IExtendedChunk extends Webpack4.compilation.Chunk {
   [SHOULD_REPLACE_ASSET_NAME_TOKEN]: boolean;
-  forEachModule(callback: (module: Webpack.compilation.Module) => void): void;
+  forEachModule(callback: (module: Webpack4.compilation.Module) => void): void;
 }
 
 interface IStartupCodeOptions {
@@ -133,7 +136,7 @@ const ASSET_NAME_TOKEN_REGEX: RegExp = new RegExp(ASSET_NAME_TOKEN);
  *
  * @public
  */
-export class SetPublicPathPlugin implements Webpack.Plugin {
+export class SetPublicPathPlugin implements Webpack4.Plugin {
   public options: ISetWebpackPublicPathPluginOptions;
 
   public constructor(options: ISetWebpackPublicPathPluginOptions) {
@@ -148,67 +151,104 @@ export class SetPublicPathPlugin implements Webpack.Plugin {
     }
   }
 
-  public apply(compiler: Webpack.Compiler): void {
-    const isWebpack4: boolean = !!compiler.hooks;
+  public apply(compiler: Webpack4.Compiler | Webpack5.Compiler): void {
+    const isWebpack3OrEarlier: boolean = !compiler.hooks;
 
-    if (!isWebpack4) {
-      throw new Error(`The ${SetPublicPathPlugin.name} plugin requires Webpack 4`);
+    if (isWebpack3OrEarlier) {
+      throw new Error(`The ${SetPublicPathPlugin.name} plugin requires Webpack 4 or Webpack 5`);
     }
 
-    compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
-      const mainTemplate: IExtendedMainTemplate =
-        compilation.mainTemplate as unknown as IExtendedMainTemplate;
-      mainTemplate.hooks.startup.tap(
-        PLUGIN_NAME,
-        (source: string, chunk: Webpack.compilation.Chunk, hash: string) => {
-          const extendedChunk: IExtendedChunk = chunk as IExtendedChunk;
-          const assetOrChunkFound: boolean =
-            !!this.options.skipDetection || this._detectAssetsOrChunks(extendedChunk);
-          if (assetOrChunkFound) {
-            return this._getStartupCode({
-              source,
-              chunk: extendedChunk,
-              hash,
-              requireFn: mainTemplate.requireFn
-            });
-          } else {
-            return source;
-          }
-        }
-      );
-    });
+    const webpackVersion: string | undefined = (compiler as Webpack5.Compiler | { webpack: undefined })
+      .webpack?.version;
+    const webpackMajorVersion: number = webpackVersion
+      ? Number(webpackVersion.substr(0, webpackVersion.indexOf('.')))
+      : 4;
 
-    compiler.hooks.emit.tap(PLUGIN_NAME, (compilation: Webpack.compilation.Compilation) => {
-      for (const chunkGroup of compilation.chunkGroups) {
-        for (const chunk of chunkGroup.chunks) {
-          if (chunk[SHOULD_REPLACE_ASSET_NAME_TOKEN]) {
-            for (const assetFilename of chunk.files) {
-              let escapedAssetFilename: string;
-              if (assetFilename.match(/\.map$/)) {
-                escapedAssetFilename = assetFilename.substr(0, assetFilename.length - 4 /* '.map'.length */); // Trim the ".map" extension
-                escapedAssetFilename = escapeRegExp(escapedAssetFilename);
-                escapedAssetFilename = JSON.stringify(escapedAssetFilename); // source in sourcemaps is JSON-encoded
-                escapedAssetFilename = escapedAssetFilename.substring(1, escapedAssetFilename.length - 1); // Trim the quotes from the JSON encoding
+    compiler.hooks.compilation.tap(
+      PLUGIN_NAME,
+      (compilation: Webpack4.compilation.Compilation | Webpack5.Compilation) => {
+        if (webpackMajorVersion === 4) {
+          const webpack4Compilation: Webpack4.compilation.Compilation =
+            compilation as Webpack4.compilation.Compilation;
+          const mainTemplate: IWebpack4ExtendedMainTemplate =
+            webpack4Compilation.mainTemplate as IWebpack4ExtendedMainTemplate;
+          mainTemplate.hooks.startup.tap(
+            PLUGIN_NAME,
+            (source: string, chunk: Webpack4.compilation.Chunk, hash: string) => {
+              const extendedChunk: IExtendedChunk = chunk as IExtendedChunk;
+              const assetOrChunkFound: boolean =
+                !!this.options.skipDetection || this._detectAssetsOrChunks(extendedChunk);
+              if (assetOrChunkFound) {
+                return this._getStartupCode({
+                  source,
+                  chunk: extendedChunk,
+                  hash,
+                  requireFn: mainTemplate.requireFn
+                });
               } else {
-                escapedAssetFilename = escapeRegExp(assetFilename);
+                return source;
               }
+            }
+          );
+        } else {
+          // Webpack 5 has its own automatic public path code, so only apply for Webpack 4
+          const Webpack5Error: typeof Webpack5.WebpackError = (compiler as Webpack5.Compiler).webpack
+            .WebpackError;
+          // Don't bother importing node-core-library for this
+          const thisPackageJson: { name: string } = require('../package.json');
+          compilation.warnings.push(
+            new Webpack5Error(
+              `Webpack 5 supports its own automatic public path detection, ` +
+                `so ${thisPackageJson.name} won't do anything in this compilation.`
+            )
+          );
+        }
+      }
+    );
 
-              const asset: IAsset = compilation.assets[assetFilename];
-              const originalAssetSource: string = asset.source();
-              const originalAssetSize: number = asset.size();
+    // Webpack 5 has its own automatic public path code, so only apply for Webpack 4
+    if (webpackMajorVersion === 4) {
+      compiler.hooks.emit.tap(
+        PLUGIN_NAME,
+        (compilation: Webpack4.compilation.Compilation | Webpack5.Compilation) => {
+          for (const chunkGroup of compilation.chunkGroups) {
+            for (const chunk of chunkGroup.chunks) {
+              if (chunk[SHOULD_REPLACE_ASSET_NAME_TOKEN]) {
+                for (const assetFilename of chunk.files) {
+                  let escapedAssetFilename: string;
+                  if (assetFilename.match(/\.map$/)) {
+                    // Trim the ".map" extension
+                    escapedAssetFilename = assetFilename.substr(
+                      0,
+                      assetFilename.length - 4 /* '.map'.length */
+                    );
+                    escapedAssetFilename = escapeRegExp(escapedAssetFilename);
+                    // source in sourcemaps is JSON-encoded
+                    escapedAssetFilename = JSON.stringify(escapedAssetFilename);
+                    // Trim the quotes from the JSON encoding
+                    escapedAssetFilename = escapedAssetFilename.substring(1, escapedAssetFilename.length - 1);
+                  } else {
+                    escapedAssetFilename = escapeRegExp(assetFilename);
+                  }
 
-              const newAssetSource: string = originalAssetSource.replace(
-                ASSET_NAME_TOKEN_REGEX,
-                escapedAssetFilename
-              );
-              const sizeDifference: number = assetFilename.length - ASSET_NAME_TOKEN.length;
-              asset.source = () => newAssetSource;
-              asset.size = () => originalAssetSize + sizeDifference;
+                  const asset: IAsset = compilation.assets[assetFilename];
+                  const originalAssetSource: string = asset.source();
+                  const originalAssetSize: number = asset.size();
+
+                  const newAssetSource: string = originalAssetSource.replace(
+                    ASSET_NAME_TOKEN_REGEX,
+                    escapedAssetFilename
+                  );
+                  const sizeDifference: number = assetFilename.length - ASSET_NAME_TOKEN.length;
+                  asset.source = () => newAssetSource;
+                  asset.size = () => originalAssetSize + sizeDifference;
+                }
+              }
             }
           }
         }
-      }
-    });
+      );
+    }
   }
 
   private _detectAssetsOrChunks(chunk: IExtendedChunk): boolean {

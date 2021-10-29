@@ -33,6 +33,7 @@
     "@types/node": "12.20.24",
     "@types/tapable": "1.0.6",
     "@types/uglify-js": "2.6.29",
-    "@types/webpack": "4.41.24"
+    "webpack5": "npm:webpack@~5.35.1",
+    "webpack4": "npm:@types/webpack@4.41.24"
   }
 }
