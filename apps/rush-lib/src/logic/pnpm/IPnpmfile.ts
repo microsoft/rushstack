@@ -3,6 +3,7 @@
 
 import type { IPackageJson } from '@rushstack/node-core-library';
 import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
+import type { LogBase } from '@pnpm/logger';
 
 /**
  * The `settings` parameter passed to {@link IPnpmfileShim.hooks.readPackage} and
@@ -27,16 +28,7 @@ export interface IPnpmfileContext {
 /**
  * The `log` parameter passed to {@link IPnpmfile.hooks.filterLog}.
  */
-export type IPnpmLog = (
-  | {
-      level: 'debug' | 'error';
-    }
-  | {
-      level: 'info' | 'warn';
-      prefix: string;
-      message: string;
-    }
-) & {
+export type IPnpmLog = LogBase & {
   [key: string]: unknown;
 };
 
