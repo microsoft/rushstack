@@ -1151,6 +1151,26 @@ importers:
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/node': 12.20.24
 
+  ../../build-tests/set-webpack-public-path-plugin-webpack4-test:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-webpack4-plugin': workspace:*
+      '@rushstack/set-webpack-public-path-plugin': workspace:*
+      '@types/webpack-env': 1.13.0
+      eslint: ~7.30.0
+      html-webpack-plugin: ~4.5.0
+      typescript: ~4.4.2
+    devDependencies:
+      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
+      '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
+      '@types/webpack-env': 1.13.0
+      eslint: 7.30.0
+      html-webpack-plugin: 4.5.2
+      typescript: 4.4.3
+
   ../../build-tests/ts-command-line-test:
     specifiers:
       '@rushstack/ts-command-line': workspace:*
@@ -10980,6 +11000,23 @@ packages:
     resolution: {integrity: sha512-uE/TxKuyNIcx44cIWnjr/rfIATDH7ZaOMmstu0CwhFG1Dunhlp4OC6/NMbhiwoq5BpW0ubi303qnEk/PZj614w==}
     dev: true
 
+  /html-webpack-plugin/4.5.2:
+    resolution: {integrity: sha512-q5oYdzjKUIPQVjOosjgvCHQOv9Ett9CYYHlgvJeXG0qQvdSojnBq4vAdQBwn1+yGveAwHCoe/rMR86ozX3+c2A==}
+    engines: {node: '>=6.9'}
+    peerDependencies:
+      webpack: ^4.0.0 || ^5.0.0
+    dependencies:
+      '@types/html-minifier-terser': 5.1.1
+      '@types/tapable': 1.0.6
+      '@types/webpack': 4.41.29
+      html-minifier-terser: 5.1.1
+      loader-utils: 1.4.0
+      lodash: 4.17.21
+      pretty-error: 2.1.2
+      tapable: 1.1.3
+      util.promisify: 1.0.0
+    dev: true
+
   /html-webpack-plugin/4.5.2_webpack@4.44.2:
     resolution: {integrity: sha512-q5oYdzjKUIPQVjOosjgvCHQOv9Ett9CYYHlgvJeXG0qQvdSojnBq4vAdQBwn1+yGveAwHCoe/rMR86ozX3+c2A==}
     engines: {node: '>=6.9'}
@@ -15778,6 +15815,7 @@ packages:
     dependencies:
       buffer-from: 1.1.1
       source-map: 0.6.1
+    dev: true
 
   /source-map-support/0.5.20:
     resolution: {integrity: sha512-n1lZZ8Ve4ksRqizaBQgxXDgKwttHDhyfQjA6YZZn8+AroHbsIz+JjwxQDxbp+7y5OYCI8t1Yk7etjD9CRd2hIw==}
@@ -16429,7 +16467,7 @@ packages:
     dependencies:
       commander: 2.20.3
       source-map: 0.6.1
-      source-map-support: 0.5.19
+      source-map-support: 0.5.20
 
   /terser/5.7.0:
     resolution: {integrity: sha512-HP5/9hp2UaZt5fYkuhNBR8YyRcT8juw8+uFbAme53iN9hblvKnLUTKkmwJG6ocWpIKf8UK4DoeWG4ty0J6S6/g==}
