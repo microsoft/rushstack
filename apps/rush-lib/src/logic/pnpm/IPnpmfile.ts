@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import type { LogBase } from '@pnpm/logger';
 import type { IPackageJson } from '@rushstack/node-core-library';
 import type { IPnpmShrinkwrapYaml } from './PnpmShrinkwrapFile';
-import type { LogBase } from '@pnpm/logger';
 
 /**
  * The `settings` parameter passed to {@link IPnpmfileShim.hooks.readPackage} and
