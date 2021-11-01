@@ -120,8 +120,7 @@ exports[`CommandLineHelp prints the help for each action: build 1`] = `
 "usage: rush build [-h] [-p COUNT] [-t PROJECT] [-T PROJECT] [-f PROJECT]
                   [-o PROJECT] [-i PROJECT] [-I PROJECT]
                   [--to-version-policy VERSION_POLICY_NAME]
-                  [--from-version-policy VERSION_POLICY_NAME]
-                  [--changed-since REF] [--changed-since-only REF] [-v] [-c]
+                  [--from-version-policy VERSION_POLICY_NAME] [-v] [-c]
                   [--ignore-hooks] [-s] [-m]
                   
 
@@ -224,23 +223,6 @@ Optional arguments:
                         parameter is equivalent to specifying \\"--from\\" for 
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
-                        subsets of projects\\".
-  --changed-since REF   Normally all projects in the monorepo will be 
-                        processed; adding this parameter will instead select 
-                        a subset of projects. Will include all projects that 
-                        Git reports committed or staged changes to since REF, 
-                        then expand the selection to include all affected 
-                        projects and all dependencies thereof, analogous to 
-                        \\"--from\\". For details, refer to the website article 
-                        \\"Selecting subsets of projects\\".
-  --changed-since-only REF
-                        Normally all projects in the monorepo will be 
-                        processed; adding this parameter will instead select 
-                        a subset of projects. Will include all projects that 
-                        Git reports committed or staged changes to since REF. 
-                        Note that this parameter is \\"unsafe\\" as it may 
-                        produce a selection that excludes some dependencies. 
-                        For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
@@ -379,9 +361,8 @@ exports[`CommandLineHelp prints the help for each action: import-strings 1`] = `
 "usage: rush import-strings [-h] [-p COUNT] [-t PROJECT] [-T PROJECT]
                            [-f PROJECT] [-o PROJECT] [-i PROJECT] [-I PROJECT]
                            [--to-version-policy VERSION_POLICY_NAME]
-                           [--from-version-policy VERSION_POLICY_NAME]
-                           [--changed-since REF] [--changed-since-only REF]
-                           [-v] [--ignore-hooks]
+                           [--from-version-policy VERSION_POLICY_NAME] [-v]
+                           [--ignore-hooks]
                            [--locale {en-us,fr-fr,es-es,zh-cn}]
                            
 
@@ -476,23 +457,6 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
-  --changed-since REF   Normally all projects in the monorepo will be 
-                        processed; adding this parameter will instead select 
-                        a subset of projects. Will include all projects that 
-                        Git reports committed or staged changes to since REF, 
-                        then expand the selection to include all affected 
-                        projects and all dependencies thereof, analogous to 
-                        \\"--from\\". For details, refer to the website article 
-                        \\"Selecting subsets of projects\\".
-  --changed-since-only REF
-                        Normally all projects in the monorepo will be 
-                        processed; adding this parameter will instead select 
-                        a subset of projects. Will include all projects that 
-                        Git reports committed or staged changes to since REF. 
-                        Note that this parameter is \\"unsafe\\" as it may 
-                        produce a selection that excludes some dependencies. 
-                        For details, refer to the website article \\"Selecting 
-                        subsets of projects\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
   --ignore-hooks        Skips execution of the \\"eventHooks\\" scripts defined 
@@ -573,9 +537,7 @@ exports[`CommandLineHelp prints the help for each action: install 1`] = `
                     [--variant VARIANT] [-t PROJECT] [-T PROJECT] [-f PROJECT]
                     [-o PROJECT] [-i PROJECT] [-I PROJECT]
                     [--to-version-policy VERSION_POLICY_NAME]
-                    [--from-version-policy VERSION_POLICY_NAME]
-                    [--changed-since REF] [--changed-since-only REF]
-                    [--check-only]
+                    [--from-version-policy VERSION_POLICY_NAME] [--check-only]
                     
 
 The \\"rush install\\" command installs package dependencies for all your 
@@ -696,23 +658,6 @@ Optional arguments:
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
-  --changed-since REF   Normally all projects in the monorepo will be 
-                        processed; adding this parameter will instead select 
-                        a subset of projects. Will include all projects that 
-                        Git reports committed or staged changes to since REF, 
-                        then expand the selection to include all affected 
-                        projects and all dependencies thereof, analogous to 
-                        \\"--from\\". For details, refer to the website article 
-                        \\"Selecting subsets of projects\\".
-  --changed-since-only REF
-                        Normally all projects in the monorepo will be 
-                        processed; adding this parameter will instead select 
-                        a subset of projects. Will include all projects that 
-                        Git reports committed or staged changes to since REF. 
-                        Note that this parameter is \\"unsafe\\" as it may 
-                        produce a selection that excludes some dependencies. 
-                        For details, refer to the website article \\"Selecting 
-                        subsets of projects\\".
   --check-only          Only check the validity of the shrinkwrap file 
                         without performing an install.
 "
@@ -740,7 +685,6 @@ exports[`CommandLineHelp prints the help for each action: list 1`] = `
                  [-i PROJECT] [-I PROJECT]
                  [--to-version-policy VERSION_POLICY_NAME]
                  [--from-version-policy VERSION_POLICY_NAME]
-                 [--changed-since REF] [--changed-since-only REF]
                  
 
 List package names, and optionally version (--version) and path (--path) or 
@@ -837,23 +781,6 @@ Optional arguments:
                         parameter is equivalent to specifying \\"--from\\" for 
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
-                        subsets of projects\\".
-  --changed-since REF   Normally all projects in the monorepo will be 
-                        processed; adding this parameter will instead select 
-                        a subset of projects. Will include all projects that 
-                        Git reports committed or staged changes to since REF, 
-                        then expand the selection to include all affected 
-                        projects and all dependencies thereof, analogous to 
-                        \\"--from\\". For details, refer to the website article 
-                        \\"Selecting subsets of projects\\".
-  --changed-since-only REF
-                        Normally all projects in the monorepo will be 
-                        processed; adding this parameter will instead select 
-                        a subset of projects. Will include all projects that 
-                        Git reports committed or staged changes to since REF. 
-                        Note that this parameter is \\"unsafe\\" as it may 
-                        produce a selection that excludes some dependencies. 
-                        For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
 "
 `;
@@ -975,8 +902,7 @@ exports[`CommandLineHelp prints the help for each action: rebuild 1`] = `
 "usage: rush rebuild [-h] [-p COUNT] [-t PROJECT] [-T PROJECT] [-f PROJECT]
                     [-o PROJECT] [-i PROJECT] [-I PROJECT]
                     [--to-version-policy VERSION_POLICY_NAME]
-                    [--from-version-policy VERSION_POLICY_NAME]
-                    [--changed-since REF] [--changed-since-only REF] [-v]
+                    [--from-version-policy VERSION_POLICY_NAME] [-v]
                     [--ignore-hooks] [-s] [-m]
                     
 
@@ -1076,23 +1002,6 @@ Optional arguments:
                         parameter is equivalent to specifying \\"--from\\" for 
                         each of the projects belonging to VERSION_POLICY_NAME.
                          For details, refer to the website article \\"Selecting 
-                        subsets of projects\\".
-  --changed-since REF   Normally all projects in the monorepo will be 
-                        processed; adding this parameter will instead select 
-                        a subset of projects. Will include all projects that 
-                        Git reports committed or staged changes to since REF, 
-                        then expand the selection to include all affected 
-                        projects and all dependencies thereof, analogous to 
-                        \\"--from\\". For details, refer to the website article 
-                        \\"Selecting subsets of projects\\".
-  --changed-since-only REF
-                        Normally all projects in the monorepo will be 
-                        processed; adding this parameter will instead select 
-                        a subset of projects. Will include all projects that 
-                        Git reports committed or staged changes to since REF. 
-                        Note that this parameter is \\"unsafe\\" as it may 
-                        produce a selection that excludes some dependencies. 
-                        For details, refer to the website article \\"Selecting 
                         subsets of projects\\".
   -v, --verbose         Display the logs during the build, rather than just 
                         displaying the build status summary
