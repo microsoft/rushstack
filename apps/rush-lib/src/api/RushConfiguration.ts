@@ -237,7 +237,6 @@ export interface IRushConfigurationJson {
   yarnOptions?: IYarnOptionsJson;
   ensureConsistentVersions?: boolean;
   variants?: IRushVariantOptionsJson[];
-  pluginsAutoinstallerName?: string;
 }
 
 /**
