@@ -9,6 +9,11 @@ import {
 } from '@microsoft/tsdoc/lib-commonjs/beta/DeclarationReference';
 import { Excerpt, IExcerptTokenRange } from '../mixins/Excerpt';
 import { ApiItemKind } from '../items/ApiItem';
+import {
+  ApiItemContainerMixin,
+  IApiItemContainerMixinOptions,
+  IApiItemContainerJson
+} from '../mixins/ApiItemContainerMixin';
 import { ApiDeclaredItem, IApiDeclaredItemOptions, IApiDeclaredItemJson } from '../items/ApiDeclaredItem';
 import { ApiReleaseTagMixin, IApiReleaseTagMixinOptions } from '../mixins/ApiReleaseTagMixin';
 import { IApiNameMixinOptions, ApiNameMixin } from '../mixins/ApiNameMixin';
@@ -25,13 +30,17 @@ import { DeserializerContext } from './DeserializerContext';
  */
 export interface IApiTypeAliasOptions
   extends IApiNameMixinOptions,
+    IApiItemContainerMixinOptions,
     IApiReleaseTagMixinOptions,
     IApiDeclaredItemOptions,
     IApiTypeParameterListMixinOptions {
   typeTokenRange: IExcerptTokenRange;
 }
 
-export interface IApiTypeAliasJson extends IApiDeclaredItemJson, IApiTypeParameterListMixinJson {
+export interface IApiTypeAliasJson
+  extends IApiDeclaredItemJson,
+    IApiTypeParameterListMixinJson,
+    IApiItemContainerJson {
   typeTokenRange: IExcerptTokenRange;
 }
 
@@ -61,8 +70,8 @@ export interface IApiTypeAliasJson extends IApiDeclaredItemJson, IApiTypeParamet
  *
  * @public
  */
-export class ApiTypeAlias extends ApiTypeParameterListMixin(
-  ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem))
+export class ApiTypeAlias extends ApiItemContainerMixin(
+  ApiTypeParameterListMixin(ApiNameMixin(ApiReleaseTagMixin(ApiDeclaredItem)))
 ) {
   /**
    * An {@link Excerpt} that describes the type of the alias.

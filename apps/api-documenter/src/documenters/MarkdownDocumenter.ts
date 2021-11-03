@@ -33,6 +33,7 @@ import {
   ApiInterface,
   Excerpt,
   ApiParameterListMixin,
+  ApiItemContainerMixin,
   ApiReturnTypeMixin,
   ApiDeclaredItem,
   ApiNamespace,
@@ -256,7 +257,8 @@ export class MarkdownDocumenter {
         this._writeEnumTables(output, apiItem as ApiEnum);
         break;
       case ApiItemKind.Interface:
-        this._writeInterfaceTables(output, apiItem as ApiInterface);
+      case ApiItemKind.TypeAlias:
+        this._writeItemContainerTables(output, apiItem as ApiItemContainerMixin);
         break;
       case ApiItemKind.Constructor:
       case ApiItemKind.ConstructSignature:
@@ -277,8 +279,6 @@ export class MarkdownDocumenter {
         break;
       case ApiItemKind.Property:
       case ApiItemKind.PropertySignature:
-        break;
-      case ApiItemKind.TypeAlias:
         break;
       case ApiItemKind.Variable:
         break;
@@ -753,9 +753,9 @@ export class MarkdownDocumenter {
   }
 
   /**
-   * GENERATE PAGE: INTERFACE
+   * GENERATE PAGE: ITEM-CONTAINER
    */
-  private _writeInterfaceTables(output: DocSection, apiClass: ApiInterface): void {
+  private _writeItemContainerTables(output: DocSection, apiClass: ApiItemContainerMixin): void {
     const configuration: TSDocConfiguration = this._tsdocConfiguration;
 
     const eventsTable: DocTable = new DocTable({

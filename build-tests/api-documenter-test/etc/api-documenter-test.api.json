@@ -1031,6 +1031,7 @@
           ],
           "releaseTag": "Public",
           "name": "ExampleDuplicateTypeAlias",
+          "members": [],
           "typeTokenRange": {
             "startIndex": 1,
             "endIndex": 4
@@ -1121,6 +1122,7 @@
           ],
           "releaseTag": "Public",
           "name": "ExampleTypeAlias",
+          "members": [],
           "typeTokenRange": {
             "startIndex": 1,
             "endIndex": 3
@@ -1156,6 +1158,7 @@
           ],
           "releaseTag": "Public",
           "name": "ExampleUnionTypeAlias",
+          "members": [],
           "typeTokenRange": {
             "startIndex": 1,
             "endIndex": 4
@@ -1222,6 +1225,7 @@
               }
             }
           ],
+          "members": [],
           "typeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
@@ -2292,6 +2296,7 @@
           ],
           "releaseTag": "Public",
           "name": "TypeAlias",
+          "members": [],
           "typeTokenRange": {
             "startIndex": 1,
             "endIndex": 2

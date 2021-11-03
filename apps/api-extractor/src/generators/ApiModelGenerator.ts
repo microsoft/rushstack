@@ -934,6 +934,7 @@ export class ApiModelGenerator {
 
       parentApiItem.addMember(apiTypeAlias);
     }
+    this._processChildDeclarations(astDeclaration, exportedName, apiTypeAlias);
   }
 
   private _processApiVariable(
