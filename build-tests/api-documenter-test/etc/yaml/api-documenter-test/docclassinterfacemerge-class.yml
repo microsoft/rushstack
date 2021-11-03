@@ -8,6 +8,7 @@ remarks: |-
   [Link to class](xref:api-documenter-test!DocClassInterfaceMerge:class)
 
   [Link to interface](xref:api-documenter-test!DocClassInterfaceMerge:interface)
+example: []
 isPreview: false
 isDeprecated: false
 type: class

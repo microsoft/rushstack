@@ -5,6 +5,7 @@ package: api-documenter-test!
 fullName: IDocInterface3
 summary: Some less common TypeScript declaration kinds.
 remarks: ''
+example: []
 isPreview: false
 isDeprecated: false
 type: interface
@@ -15,6 +16,7 @@ properties:
     fullName: '"[not.a.symbol]"'
     summary: An identifier that does need quotes. It misleadingly looks like an ECMAScript symbol.
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -27,6 +29,7 @@ properties:
     fullName: '[EcmaSmbols.example]'
     summary: ECMAScript symbol
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -39,6 +42,7 @@ properties:
     fullName: redundantQuotes
     summary: A quoted identifier with redundant quotes.
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
