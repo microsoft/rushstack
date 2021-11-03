@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Workbox Build Configuration",
+  "description": "Defines optional options for Workbox serviceworker generation.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+    "extends": {
+      "description": "Optionally specifies another JSON config file that this file extends from.  This provides a way for standard settings to be shared across multiple projects.",
+      "type": "string"
+    },
+    "swSrc": {
+      "type": "string",
+      "description": "The path to the serviceworker source file"
+    },
+    "swDest": {
+      "type": "string",
+      "description": "The path to write the serviceworker output to"
+    },
+    "modifyURLPrefix": {
+      "type": "object",
+      "description": "A mapping of prefixes that if matched in a precache manifest entry will be replaced with the corresponding value",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "globDirectory": {
+      "type": "string",
+      "description": "The local directory you wish to match globPatterns against"
+    },
+    "globPatterns": {
+      "description": "Array of globPatterns to include in the precache manifest",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "globIgnores": {
+      "description": "A set of patterns matching files to always exclude when generating the precache manifest",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

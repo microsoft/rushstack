@@ -767,6 +767,12 @@
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
+    {
+      "packageName": "@rushstack/heft-workbox-plugin",
+      "projectFolder": "heft-plugins/heft-workbox-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
 
     // "libraries" folder (alphabetical order)
     {

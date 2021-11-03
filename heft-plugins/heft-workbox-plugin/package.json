@@ -1,0 +1,33 @@
+{
+  "name": "@rushstack/heft-workbox-plugin",
+  "version": "0.0.1",
+  "description": "Heft plugin for Workbox",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "heft-plugins/heft-workbox-plugin"
+  },
+  "homepage": "https://rushstack.io/pages/heft/overview/",
+  "main": "lib/index.js",
+  "types": "dist/heft-workbox-plugin.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft test --clean",
+    "start": "heft test --clean --watch"
+  },
+  "peerDependencies": {
+    "@rushstack/heft": "^0.42.0"
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/heft-config-file": "workspace:*",
+    "workbox-build": "~6.3.0"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "type-fest": "~2.5.0",
+    "@types/node": "12.20.24"
+  }
+}
