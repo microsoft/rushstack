@@ -10,6 +10,9 @@
 const path = require('path');
 const fs = require('fs');
 
+const isModuleResolutionError: (ex: unknown) => boolean = (ex) =>
+  typeof ex === 'object' && !!ex && 'code' in ex && (ex as { code: unknown }).code === 'MODULE_NOT_FOUND';
+
 // Module path for eslintrc.cjs
 // Example: ".../@eslint/eslintrc/dist/eslintrc.cjs"
 let eslintrcBundlePath: string | undefined = undefined;
@@ -38,10 +41,17 @@ for (let currentModule = module; ; ) {
 
       // Make sure we actually resolved the module in our call path
       // and not some other spurious dependency.
-      if (path.join(eslintrcFolder, 'dist/eslintrc.cjs') == currentModule.filename) {
+      if (path.join(eslintrcFolder, 'dist/eslintrc.cjs') === currentModule.filename) {
         eslintrcBundlePath = path.join(eslintrcFolder, 'dist/eslintrc.cjs');
       }
-    } catch {}
+    } catch (ex: unknown) {
+      // Module resolution failures are expected, as we're walking
+      // up our require stack to look for eslint. All other errors
+      // are rethrown.
+      if (!isModuleResolutionError(ex)) {
+        throw ex;
+      }
+    }
   } else {
     // Next look for a file in ESLint's folder
     //   .../eslint/lib/cli-engine/cli-engine.js
@@ -54,11 +64,18 @@ for (let currentModule = module; ; ) {
 
       // Make sure we actually resolved the module in our call path
       // and not some other spurious dependency.
-      if (path.join(eslintCandidateFolder, 'lib/cli-engine/cli-engine.js') == currentModule.filename) {
+      if (path.join(eslintCandidateFolder, 'lib/cli-engine/cli-engine.js') === currentModule.filename) {
         eslintFolder = eslintCandidateFolder;
         break;
       }
-    } catch {}
+    } catch (ex: unknown) {
+      // Module resolution failures are expected, as we're walking
+      // up our require stack to look for eslint. All other errors
+      // are rethrown.
+      if (!isModuleResolutionError(ex)) {
+        throw ex;
+      }
+    }
   }
 
   if (!currentModule.parent) {
@@ -84,7 +101,14 @@ if (!eslintFolder) {
           configArrayFactoryPath = path.join(eslintrcFolder, 'lib/config-array-factory.js');
           moduleResolverPath = path.join(eslintrcFolder, 'lib/shared/relative-module-resolver');
         }
-      } catch {}
+      } catch (ex: unknown) {
+        // Module resolution failures are expected, as we're walking
+        // up our require stack to look for eslint. All other errors
+        // are rethrown.
+        if (!isModuleResolutionError(ex)) {
+          throw ex;
+        }
+      }
     } else {
       // Next look for a file in ESLint's folder
       //   .../eslint/lib/cli-engine/cli-engine.js
@@ -99,7 +123,14 @@ if (!eslintFolder) {
           eslintFolder = eslintCandidateFolder;
           break;
         }
-      } catch {}
+      } catch (ex: unknown) {
+        // Module resolution failures are expected, as we're walking
+        // up our require stack to look for eslint. All other errors
+        // are rethrown.
+        if (!isModuleResolutionError(ex)) {
+          throw ex;
+        }
+      }
     }
 
     if (!currentModule.parent) {
