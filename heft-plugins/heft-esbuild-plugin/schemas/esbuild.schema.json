@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Esbuild Build Configuration",
+  "description": "Defines optional options for Esbuild build.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "description": "Part of the JSON Schema standard, this optional keyword declares the URL of the schema that the file conforms to. Editors may download the schema and use it to perform syntax highlighting.",
+      "type": "string"
+    },
+    "extends": {
+      "description": "Optionally specifies another JSON config file that this file extends from.  This provides a way for standard settings to be shared across multiple projects.",
+      "type": "string"
+    },
+    "builds": {
+      "type": "array",
+      "description": "The array of builds that Esbuild should run",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entryPoints": {
+            "type": "array",
+            "description": "The array of entrypoints that Esbuild should compile",
+            "items": {
+              "type": "string"
+            }
+          },
+          "outdir": {
+            "description": "The output directory for the build",
+            "type": "string"
+          },
+          "outbase": {
+            "description": "The output base for the build, see https://esbuild.github.io/api/#outbase",
+            "type": "string"
+          },
+          "bundle": {
+            "description": "If true, compile the entrypoints to bundles",
+            "type": "boolean"
+          },
+          "target": {
+            "description": "The target environment for generated code, see https://esbuild.github.io/api/#target",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "format": {
+            "description": "The output format for generated code: https://esbuild.github.io/api/#format",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

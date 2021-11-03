@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-esbuild-plugin",
+      "comment": "Adds initial implementation of heft-esbuild-plugin",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-esbuild-plugin"
+}

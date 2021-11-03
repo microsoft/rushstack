@@ -767,7 +767,12 @@
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
-
+    {
+      "packageName": "@rushstack/heft-esbuild-plugin",
+      "projectFolder": "heft-plugins/heft-esbuild-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
     // "libraries" folder (alphabetical order)
     {
       "packageName": "@rushstack/debug-certificate-manager",
