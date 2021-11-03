@@ -429,6 +429,7 @@
               }
             }
           ],
+          "members": [],
           "typeTokenRange": {
             "startIndex": 1,
             "endIndex": 2
