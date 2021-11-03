@@ -738,6 +738,12 @@
 
     // "heft-plugins" folder (alphabetical order)
     {
+      "packageName": "@rushstack/heft-browsersync-plugin",
+      "projectFolder": "heft-plugins/heft-browsersync-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@rushstack/heft-jest-plugin",
       "projectFolder": "heft-plugins/heft-jest-plugin",
       "reviewCategory": "libraries",
