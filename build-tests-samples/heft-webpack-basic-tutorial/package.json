@@ -17,7 +17,7 @@
     "@types/react-dom": "16.9.8",
     "@types/webpack-env": "1.13.0",
     "css-loader": "~4.2.1",
-    "eslint": "~7.30.0",
+    "eslint": "~8.1.0",
     "html-webpack-plugin": "~5.5.0",
     "react": "~16.13.1",
     "react-dom": "~16.13.1",

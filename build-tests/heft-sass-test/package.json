@@ -19,7 +19,7 @@
     "@types/webpack-env": "1.13.0",
     "autoprefixer": "~9.8.0",
     "css-loader": "~4.2.1",
-    "eslint": "~7.30.0",
+    "eslint": "~8.1.0",
     "html-webpack-plugin": "~5.5.0",
     "node-sass": "6.0.1",
     "postcss": "7.0.32",
