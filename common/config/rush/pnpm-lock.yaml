@@ -1494,14 +1494,14 @@ importers:
 
   ../../libraries/tree-pattern:
     specifiers:
-      '@rushstack/eslint-config': 2.4.2
+      '@rushstack/eslint-config': 2.4.4
       '@rushstack/heft': 0.41.6
       '@rushstack/heft-node-rig': 1.2.25
       '@types/heft-jest': 1.0.1
       eslint: ~8.1.0
       typescript: ~4.4.2
     devDependencies:
-      '@rushstack/eslint-config': 2.4.2_eslint@8.1.0+typescript@4.4.3
+      '@rushstack/eslint-config': 2.4.4_eslint@8.1.0+typescript@4.4.3
       '@rushstack/heft': 0.41.6
       '@rushstack/heft-node-rig': 1.2.25_@rushstack+heft@0.41.6
       '@types/heft-jest': 1.0.1
@@ -4333,16 +4333,16 @@ packages:
       - supports-color
     dev: false
 
-  /@rushstack/eslint-config/2.4.2_eslint@8.1.0+typescript@4.4.3:
-    resolution: {integrity: sha512-dMVcWAOcLGC4TgOM2bxglpfaYvQjfoupQiTUA+wJMvKtBs7nrclMMqR8ZOEg6flycrFC7s3UcB6FOiaxmryjmQ==}
+  /@rushstack/eslint-config/2.4.4_eslint@8.1.0+typescript@4.4.3:
+    resolution: {integrity: sha512-uq/n6wpqFR4iwbb2Z0VUps2zIXXlhmOREEAyUjXNYLAP4ySbrm5foI0XiMHikH4Ntt9KjE2Za2BZcLlM9arsDg==}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0
       typescript: '>=3.0.0'
     dependencies:
-      '@rushstack/eslint-patch': 1.0.7
-      '@rushstack/eslint-plugin': 0.8.2_eslint@8.1.0+typescript@4.4.3
-      '@rushstack/eslint-plugin-packlets': 0.3.2_eslint@8.1.0+typescript@4.4.3
-      '@rushstack/eslint-plugin-security': 0.2.2_eslint@8.1.0+typescript@4.4.3
+      '@rushstack/eslint-patch': 1.0.9
+      '@rushstack/eslint-plugin': 0.8.3_eslint@8.1.0+typescript@4.4.3
+      '@rushstack/eslint-plugin-packlets': 0.3.3_eslint@8.1.0+typescript@4.4.3
+      '@rushstack/eslint-plugin-security': 0.2.3_eslint@8.1.0+typescript@4.4.3
       '@typescript-eslint/eslint-plugin': 4.31.2_0f69fee3f36ff3abae21f28d1d2bed4c
       '@typescript-eslint/experimental-utils': 4.31.2_eslint@8.1.0+typescript@4.4.3
       '@typescript-eslint/parser': 4.31.2_eslint@8.1.0+typescript@4.4.3
@@ -4360,8 +4360,8 @@ packages:
     resolution: {integrity: sha512-Myxw//kzromB9yWgS8qYGuGVf91oBUUJpNvy5eM50sqvmKLbKjwLxohJnkWGTeeI9v9IBMtPLxz5Gc60FIfvCA==}
     dev: false
 
-  /@rushstack/eslint-patch/1.0.7:
-    resolution: {integrity: sha512-3Zi2LGbCLDz4IIL7ir6wD0u/ggHotLkK5SlVzFzTcYaNgPR4MAt/9JYZqXWKcofPWEoptfpnCJU8Bq9sxw8QUg==}
+  /@rushstack/eslint-patch/1.0.9:
+    resolution: {integrity: sha512-yk9Xj/3bUxyz3azMXW8qigLqXWEr2R0h9G7PVnnmjNQdlZLN+aESqCTnVN7ubtYUIQfW32/v8+AXsbpL1ryI1A==}
     dev: true
 
   /@rushstack/eslint-plugin-packlets/0.2.2_eslint@7.12.1+typescript@3.9.9:
@@ -4377,12 +4377,12 @@ packages:
       - typescript
     dev: false
 
-  /@rushstack/eslint-plugin-packlets/0.3.2_eslint@8.1.0+typescript@4.4.3:
-    resolution: {integrity: sha512-lWWg9OlGCg4OpHCs0K70s7BligasnrPOE3s7+ireDucju6/T36BtNOzP+u0o3IVznXzcuQxHxtfcIAoyC6gU7w==}
+  /@rushstack/eslint-plugin-packlets/0.3.3_eslint@8.1.0+typescript@4.4.3:
+    resolution: {integrity: sha512-6fslCsfk1mZho4uBsnywCO5Jzj7I21V1OKt40ZxbLO7LrMccm9orUYJiy5dI3Lx6NQtczuYrtqp8Xqp0ur9KPA==}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0
     dependencies:
-      '@rushstack/tree-pattern': 0.2.1
+      '@rushstack/tree-pattern': 0.2.2
       '@typescript-eslint/experimental-utils': 4.31.2_eslint@8.1.0+typescript@4.4.3
       eslint: 8.1.0
     transitivePeerDependencies:
@@ -4403,12 +4403,12 @@ packages:
       - typescript
     dev: false
 
-  /@rushstack/eslint-plugin-security/0.2.2_eslint@8.1.0+typescript@4.4.3:
-    resolution: {integrity: sha512-+d6qcMde6JPWmKmr6Y6CQmEAlgCKPslHRLy2jCa0VbrQMNk3XQnRrgho9QVMSjoKIgEXyQoRaQ1VRIjGxVCe+w==}
+  /@rushstack/eslint-plugin-security/0.2.3_eslint@8.1.0+typescript@4.4.3:
+    resolution: {integrity: sha512-OnngkJCx91og1U8a8gus2g+r5OOtkQ8Tpo8jcGrtI6YpIIujqLM6lIe7XM3e+iumYdKnnOAVs3NH14BN9rlIoQ==}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0
     dependencies:
-      '@rushstack/tree-pattern': 0.2.1
+      '@rushstack/tree-pattern': 0.2.2
       '@typescript-eslint/experimental-utils': 4.31.2_eslint@8.1.0+typescript@4.4.3
       eslint: 8.1.0
     transitivePeerDependencies:
@@ -4429,12 +4429,12 @@ packages:
       - typescript
     dev: false
 
-  /@rushstack/eslint-plugin/0.8.2_eslint@8.1.0+typescript@4.4.3:
-    resolution: {integrity: sha512-oAUdBEyRM7xSzZAre3+dUC5jgFYjusuQTH87/PN/thiUQEu+0rzrI7sgJXg+C92+tgmp87xPfiMQmiKxUwBJZg==}
+  /@rushstack/eslint-plugin/0.8.3_eslint@8.1.0+typescript@4.4.3:
+    resolution: {integrity: sha512-LUXUv9oUDHghe73HHIqDxJAqCYBsvKcbg+2KRs/aNczNZzoaXKJPLS6YvlCBiuI1XNq/eLEX7L/LPnKfbe+1Yw==}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0
     dependencies:
-      '@rushstack/tree-pattern': 0.2.1
+      '@rushstack/tree-pattern': 0.2.2
       '@typescript-eslint/experimental-utils': 4.31.2_eslint@8.1.0+typescript@4.4.3
       eslint: 8.1.0
     transitivePeerDependencies:
@@ -4555,6 +4555,11 @@ packages:
 
   /@rushstack/tree-pattern/0.2.1:
     resolution: {integrity: sha512-ZRPQdV0LxUY/HRIvVKNz3Sb/qbklSthL2pY0qkNoycXKcXbCgXEP3TxL+i1/tW9g1jqft4o+pl9wx12Q6Uc0Xw==}
+    dev: false
+
+  /@rushstack/tree-pattern/0.2.2:
+    resolution: {integrity: sha512-0KdqI7hGtVIlxobOBLWet0WGiD70V/QoYQr5A2ikACeQmIaN4WT6Fn9BcvgwgaSIMcazEcD8ql7Fb9N4dKdQlA==}
+    dev: true
 
   /@rushstack/ts-command-line/4.10.1:
     resolution: {integrity: sha512-FhWnQCjHtxmZr5sVEgoV1VHTFaPfJXQbVwujAaZUzuFfgqX+v2P9o0AXmUi/LED4tmPJp7A1nVgPx0ClyGUbWA==}
