@@ -56,6 +56,7 @@
     "z-schema": "~3.18.3"
   },
   "devDependencies": {
+    "@pnpm/logger": "4.0.0",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
