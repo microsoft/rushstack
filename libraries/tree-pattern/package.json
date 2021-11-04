@@ -14,7 +14,7 @@
     "build": "heft test --clean"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "2.4.2",
+    "@rushstack/eslint-config": "2.4.4",
     "@rushstack/heft": "0.41.6",
     "@rushstack/heft-node-rig": "1.2.25",
     "@types/heft-jest": "1.0.1",
