@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/package-deps-hash",
+      "comment": "Added repo-level state extraction and change listing functions to support having rush.json in a subfolder of the repository.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/package-deps-hash"
+}

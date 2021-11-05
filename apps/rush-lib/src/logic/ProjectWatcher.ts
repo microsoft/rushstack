@@ -80,7 +80,7 @@ export class ProjectWatcher {
 
     for (const project of this._projectsToWatch) {
       const projectState: Map<string, string> = (await previousState._tryGetProjectDependenciesAsync(
-        project.packageName,
+        project,
         this._terminal
       ))!;
       const projectFolder: string = project.projectRelativeFolder;
@@ -242,14 +242,12 @@ export class ProjectWatcher {
 
     const changedProjects: Set<RushConfigurationProject> = new Set();
     for (const project of this._projectsToWatch) {
-      const { packageName } = project;
+      const [previous, current] = await Promise.all([
+        previousState._tryGetProjectDependenciesAsync(project, this._terminal),
+        state._tryGetProjectDependenciesAsync(project, this._terminal)
+      ]);
 
-      if (
-        ProjectWatcher._haveProjectDepsChanged(
-          (await previousState._tryGetProjectDependenciesAsync(packageName, this._terminal))!,
-          (await state._tryGetProjectDependenciesAsync(packageName, this._terminal))!
-        )
-      ) {
+      if (ProjectWatcher._haveProjectDepsChanged(previous!, current!)) {
         // May need to detect if the nature of the change will break the process, e.g. changes to package.json
         changedProjects.add(project);
       }

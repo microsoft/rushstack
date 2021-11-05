@@ -126,7 +126,9 @@ export class BulkScriptAction extends BaseScriptAction {
       buildCacheConfiguration = await BuildCacheConfiguration.tryLoadAsync(terminal, this.rushConfiguration);
     }
 
-    const selection: Set<RushConfigurationProject> = this._selectionParameters.getSelectedProjects();
+    const selection: Set<RushConfigurationProject> = await this._selectionParameters.getSelectedProjectsAsync(
+      terminal
+    );
 
     if (!selection.size) {
       terminal.writeLine(colors.yellow(`The command line selection parameters did not match any projects.`));
