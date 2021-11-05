@@ -1,10 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import colors from 'colors/safe';
-
 import {
-  PackageName,
   AlreadyReportedError,
   PackageJsonLookup,
   IPackageJson,
@@ -15,7 +12,10 @@ import { CommandLineParameterProvider, CommandLineStringListParameter } from '@r
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { Selection } from '../logic/Selection';
-import { ProjectChangeAnalyzer } from '../logic/ProjectChangeAnalyzer';
+import type { ISelectorParser as ISelectorParser } from '../logic/selectors/ISelectorParser';
+import { GitChangedProjectSelectorParser } from '../logic/selectors/GitChangedProjectSelectorParser';
+import { NamedProjectSelectorParser } from '../logic/selectors/NamedProjectSelectorParser';
+import { VersionPolicyProjectSelectorParser } from '../logic/selectors/VersionPolicyProjectSelectorParser';
 
 /**
  * This class is provides the set of command line parameters used to select projects
@@ -36,10 +36,28 @@ export class SelectionParameterSet {
   private readonly _fromVersionPolicy: CommandLineStringListParameter;
   private readonly _toVersionPolicy: CommandLineStringListParameter;
 
+  private readonly _selectorParserByScope: Map<string, ISelectorParser<RushConfigurationProject>>;
+
   public constructor(rushConfiguration: RushConfiguration, action: CommandLineParameterProvider) {
     this._rushConfiguration = rushConfiguration;
 
-    const getSpecifierCompletions: () => Promise<string[]> = this._getSpecifierCompletions.bind(this);
+    const selectorParsers: Map<string, ISelectorParser<RushConfigurationProject>> =
+      (this._selectorParserByScope = new Map());
+
+    selectorParsers.set('name', new NamedProjectSelectorParser(rushConfiguration));
+    selectorParsers.set('git', new GitChangedProjectSelectorParser(rushConfiguration));
+    selectorParsers.set('version-policy', new VersionPolicyProjectSelectorParser(rushConfiguration));
+
+    const getSpecifierCompletions: () => Promise<string[]> = async (): Promise<string[]> => {
+      const completions: string[] = ['.'];
+      for (const [prefix, selector] of selectorParsers) {
+        for (const completion of selector.getCompletions()) {
+          completions.push(`${prefix}:${completion}`);
+        }
+      }
+
+      return completions;
+    };
 
     this._toProject = action.defineStringListParameter({
       parameterLongName: '--to',
@@ -302,156 +320,62 @@ export class SelectionParameterSet {
     listParameter: CommandLineStringListParameter,
     terminal: ITerminal
   ): Promise<Set<RushConfigurationProject>> {
-    const context: string = listParameter.longName;
+    const parameterName: string = listParameter.longName;
     const selection: Set<RushConfigurationProject> = new Set();
 
-    for (const rawSpecifier of listParameter.values) {
-      const protocolIndex: number = rawSpecifier.indexOf(':');
-
-      const protocol: string = protocolIndex < 0 ? 'name' : rawSpecifier.slice(0, protocolIndex);
-      const scopedSpecifier: string =
-        protocolIndex < 0 ? rawSpecifier : rawSpecifier.slice(protocolIndex + 1);
-
-      switch (protocol) {
-        case 'git':
-          for (const project of await this._evaluateGitProtocolAsync(scopedSpecifier, terminal)) {
-            selection.add(project);
-          }
-          continue;
-        case 'name':
-          for (const project of this._evaluateNameProtocol(scopedSpecifier, context)) {
-            selection.add(project);
-          }
-          continue;
-        case 'version-policy':
-          for (const project of this._evaluateVersionPolicyProtocol(scopedSpecifier, context)) {
-            selection.add(project);
-          }
-          continue;
-        default:
-          console.log(
-            colors.red(
-              `Unsupported specifier protocol "${protocol}" passed to "${context}": "${rawSpecifier}"`
-            )
+    for (const rawSelector of listParameter.values) {
+      // Handle the special case of "current project" without a scope
+      if (rawSelector === '.') {
+        const packageJsonLookup: PackageJsonLookup = PackageJsonLookup.instance;
+        const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(process.cwd());
+        if (packageJson) {
+          const project: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
+            packageJson.name
           );
-          throw new AlreadyReportedError();
-      }
-    }
 
-    return selection;
-  }
-
-  private async _evaluateGitProtocolAsync(
-    specifier: string,
-    terminal: ITerminal
-  ): Promise<Set<RushConfigurationProject>> {
-    const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this._rushConfiguration);
-
-    return await projectChangeAnalyzer.getChangedProjectsAsync({
-      terminal,
-      targetBranchName: specifier
-    });
-  }
-
-  private _evaluateNameProtocol(specifier: string, context: string): Set<RushConfigurationProject> {
-    const selection: Set<RushConfigurationProject> = new Set();
-    if (specifier === '.') {
-      const packageJsonLookup: PackageJsonLookup = PackageJsonLookup.instance;
-      const packageJson: IPackageJson | undefined = packageJsonLookup.tryLoadPackageJsonFor(process.cwd());
-      if (packageJson) {
-        const project: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(
-          packageJson.name
-        );
-
-        if (project) {
-          selection.add(project);
-        } else {
-          console.log(
-            colors.red(
+          if (project) {
+            selection.add(project);
+          } else {
+            terminal.writeErrorLine(
               'Rush is not currently running in a project directory specified in rush.json. ' +
-                `The "." value for the ${context} parameter is not allowed.`
-            )
+                `The "." value for the ${parameterName} parameter is not allowed.`
+            );
+            throw new AlreadyReportedError();
+          }
+        } else {
+          terminal.writeErrorLine(
+            'Rush is not currently running in a project directory. ' +
+              `The "." value for the ${parameterName} parameter is not allowed.`
           );
           throw new AlreadyReportedError();
         }
-      } else {
-        console.log(
-          colors.red(
-            'Rush is not currently running in a project directory. ' +
-              `The "." value for the ${context} parameter is not allowed.`
-          )
+
+        continue;
+      }
+
+      const scopeIndex: number = rawSelector.indexOf(':');
+
+      const scope: string = scopeIndex < 0 ? 'name' : rawSelector.slice(0, scopeIndex);
+      const unscopedSelector: string = scopeIndex < 0 ? rawSelector : rawSelector.slice(scopeIndex + 1);
+
+      const handler: ISelectorParser<RushConfigurationProject> | undefined =
+        this._selectorParserByScope.get(scope);
+      if (!handler) {
+        terminal.writeErrorLine(
+          `Unsupported selector prefix "${scope}" passed to "${parameterName}": "${rawSelector}".` +
+            ` Supported prefixes: ${Array.from(
+              this._selectorParserByScope.keys(),
+              (scope: string) => `"${scope}:"`
+            ).join(', ')}`
         );
         throw new AlreadyReportedError();
       }
-    } else {
-      const project: RushConfigurationProject | undefined =
-        this._rushConfiguration.findProjectByShorthandName(specifier);
-      if (!project) {
-        console.log(colors.red(`The project '${specifier}' does not exist in rush.json.`));
-        throw new AlreadyReportedError();
-      }
 
-      selection.add(project);
-    }
-
-    return selection;
-  }
-
-  /**
-   * Computes the set of projects that have the specified version policy
-   */
-  private _evaluateVersionPolicyProtocol(specifier: string, context: string): Set<RushConfigurationProject> {
-    const selection: Set<RushConfigurationProject> = new Set();
-
-    if (!this._rushConfiguration.versionPolicyConfiguration.versionPolicies.has(specifier)) {
-      console.log(colors.red(`The version policy '${specifier}' does not exist in version-policies.json.`));
-      throw new AlreadyReportedError();
-    }
-
-    for (const project of this._rushConfiguration.projects) {
-      if (project.versionPolicyName === specifier) {
+      for (const project of await handler.evaluateSelectorAsync(unscopedSelector, terminal, parameterName)) {
         selection.add(project);
       }
     }
 
     return selection;
-  }
-
-  /**
-   * Computes the set of available project names, for use by tab completion.
-   */
-  private async _getSpecifierCompletions(): Promise<string[]> {
-    const unscopedNamesMap: Map<string, number> = new Map<string, number>();
-
-    const scopedNames: Set<string> = new Set();
-
-    for (const project of this._rushConfiguration.rushConfigurationJson.projects) {
-      scopedNames.add(project.packageName);
-      const unscopedName: string = PackageName.getUnscopedName(project.packageName);
-      const count: number = unscopedNamesMap.get(unscopedName) || 0;
-      unscopedNamesMap.set(unscopedName, count + 1);
-    }
-
-    const unscopedNames: string[] = [];
-
-    for (const [unscopedName, unscopedNameCount] of unscopedNamesMap) {
-      // don't suggest ambiguous unscoped names
-      if (unscopedNameCount === 1 && !scopedNames.has(unscopedName)) {
-        unscopedNames.push(unscopedName);
-      }
-    }
-
-    const versionPolicies: string[] = [];
-    for (const policyName of this._rushConfiguration.versionPolicyConfiguration.versionPolicies.keys()) {
-      versionPolicies.push(`version-policy:${policyName}`);
-    }
-
-    const gitRefs: string[] = [
-      'git:HEAD',
-      'git:HEAD~1',
-      `git:${this._rushConfiguration.repositoryDefaultBranch}`
-    ].sort();
-
-    return unscopedNames.sort().concat([...scopedNames].sort(), versionPolicies.sort(), gitRefs);
   }
 }
