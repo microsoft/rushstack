@@ -10,6 +10,7 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 export class UpdateAction extends BaseInstallAction {
   private _fullParameter!: CommandLineFlagParameter;
   private _recheckParameter!: CommandLineFlagParameter;
+  private _lockfileOnlyParameter!: CommandLineFlagParameter;
 
   public constructor(parser: RushCommandLineParser) {
     super({
@@ -54,6 +55,12 @@ export class UpdateAction extends BaseInstallAction {
         " to process the shrinkwrap file.  This will also update your shrinkwrap file with Rush's fixups." +
         ' (To minimize shrinkwrap churn, these fixups are normally performed only in the temporary folder.)'
     });
+    this._lockfileOnlyParameter = this.defineFlagParameter({
+      parameterLongName: '--lockfile-only',
+      description:
+        'When used, only updates lockfile and repo-state.json instead of checking node_modules' +
+        ' and downloading dependencies Only update the shrinkwrap file, do not install dependencies.'
+    });
   }
 
   protected buildInstallOptions(): IInstallManagerOptions {
@@ -71,7 +78,8 @@ export class UpdateAction extends BaseInstallAction {
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
       pnpmFilterArguments: [],
-      checkOnly: false
+      checkOnly: false,
+      lockfileOnly: this._lockfileOnlyParameter.value!
     };
   }
 }

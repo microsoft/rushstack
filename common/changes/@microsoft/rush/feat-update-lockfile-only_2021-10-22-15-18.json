@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add --lockfile-only to rush update command, ONLY works when using pnpm",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

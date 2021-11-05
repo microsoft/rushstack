@@ -60,7 +60,8 @@ export class InstallAction extends BaseInstallAction {
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
       pnpmFilterArguments: this._selectionParameters!.getPnpmFilterArguments(),
-      checkOnly: this._checkOnlyParameter.value
+      checkOnly: this._checkOnlyParameter.value,
+      lockfileOnly: false
     };
   }
 }

@@ -138,7 +138,8 @@ export class PackageJsonUpdater {
       variant: variant,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
       pnpmFilterArguments: [],
-      checkOnly: false
+      checkOnly: false,
+      lockfileOnly: false
     };
     const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
       this._rushConfiguration,

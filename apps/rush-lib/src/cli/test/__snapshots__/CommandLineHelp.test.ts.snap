@@ -1079,7 +1079,7 @@ exports[`CommandLineHelp prints the help for each action: update 1`] = `
 "usage: rush update [-h] [-p] [--bypass-policy] [--no-link]
                    [--network-concurrency COUNT] [--debug-package-manager]
                    [--max-install-attempts NUMBER] [--ignore-hooks]
-                   [--variant VARIANT] [--full] [--recheck]
+                   [--variant VARIANT] [--full] [--recheck] [--lockfile-only]
                    
 
 The \\"rush update\\" command installs the dependencies described in your package.
@@ -1141,6 +1141,10 @@ Optional arguments:
                         your shrinkwrap file with Rush's fixups. (To minimize 
                         shrinkwrap churn, these fixups are normally performed 
                         only in the temporary folder.)
+  --lockfile-only       When used, only updates lockfile and repo-state.json 
+                        instead of checking node_modules and downloading 
+                        dependencies Only update the shrinkwrap file, do not 
+                        install dependencies.
 "
 `;
 
