@@ -31,8 +31,7 @@
 
         "cacheProvider": {
           "description": "Specify the cache provider to use",
-          "type": "string",
-          "enum": ["local-only", "azure-blob-storage", "amazon-s3"]
+          "type": "string"
         },
 
         "cacheEntryNamePattern": {
@@ -105,8 +104,7 @@
           "additionalProperties": true,
           "properties": {
             "cacheProvider": {
-              "type": "string",
-              "enum": ["local-only"]
+              "type": "string"
             }
           }
         },
