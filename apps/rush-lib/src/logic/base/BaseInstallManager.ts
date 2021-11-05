@@ -107,6 +107,11 @@ export interface IInstallManagerOptions {
    * These restrict the scope of a workspace installation.
    */
   pnpmFilterArguments: string[];
+
+  /**
+   * If true, Do not execute any scripts defined in the project package.json and its dependencies.
+   */
+  ignoreScripts: boolean;
 }
 
 /**
@@ -506,6 +511,10 @@ export abstract class BaseInstallManager {
       if (options.collectLogFile) {
         args.push('--verbose');
       }
+
+      if (options.ignoreScripts) {
+        args.push('--ignore-scripts');
+      }
     } else if (this._rushConfiguration.packageManager === 'pnpm') {
       // Only explicitly define the store path if `pnpmStore` is using the default, or has been set to
       // 'local'.  If `pnpmStore` = 'global', then allow PNPM to use the system's default
@@ -541,6 +550,10 @@ export abstract class BaseInstallManager {
       if (this._rushConfiguration.pnpmOptions.strictPeerDependencies) {
         args.push('--strict-peer-dependencies');
       }
+
+      if (options.ignoreScripts) {
+        args.push('--ignore-scripts');
+      }
     } else if (this._rushConfiguration.packageManager === 'yarn') {
       args.push('--link-folder', 'yarn-link');
       args.push('--cache-folder', this._rushConfiguration.yarnCacheFolder);
@@ -559,6 +572,10 @@ export abstract class BaseInstallManager {
 
       if (options.collectLogFile) {
         args.push('--verbose');
+      }
+
+      if (options.ignoreScripts) {
+        args.push('--ignore-scripts');
       }
     }
   }

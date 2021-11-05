@@ -138,7 +138,8 @@ export class PackageJsonUpdater {
       variant: variant,
       maxInstallAttempts: RushConstants.defaultMaxInstallAttempts,
       pnpmFilterArguments: [],
-      checkOnly: false
+      checkOnly: false,
+      ignoreScripts: false
     };
     const installManager: BaseInstallManager = InstallManagerFactory.getInstallManager(
       this._rushConfiguration,
@@ -203,9 +204,8 @@ export class PackageJsonUpdater {
 
           // otherwise we need to go update a bunch of other projects
           for (const [packageName, version] of Object.entries(updatePackages)) {
-            const mismatchedVersions: string[] | undefined = mismatchFinder.getVersionsOfMismatch(
-              packageName
-            );
+            const mismatchedVersions: string[] | undefined =
+              mismatchFinder.getVersionsOfMismatch(packageName);
             if (mismatchedVersions) {
               for (const mismatchedVersion of mismatchedVersions) {
                 for (const consumer of mismatchFinder.getConsumersOfMismatch(

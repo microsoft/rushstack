@@ -40,6 +40,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
   protected _debugPackageManagerParameter!: CommandLineFlagParameter;
   protected _maxInstallAttempts!: CommandLineIntegerParameter;
   protected _ignoreHooksParameter!: CommandLineFlagParameter;
+  protected _ignoreScriptsParameter!: CommandLineFlagParameter;
   /*
    * Subclasses can initialize the _selectionParameters property in order for
    * the parameters to be written to the telemetry file
@@ -87,6 +88,10 @@ export abstract class BaseInstallAction extends BaseRushAction {
     this._ignoreHooksParameter = this.defineFlagParameter({
       parameterLongName: '--ignore-hooks',
       description: `Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping.`
+    });
+    this._ignoreScriptsParameter = this.defineFlagParameter({
+      parameterLongName: '--ignore-scripts',
+      description: `Do not execute any scripts defined in the project package.json and its dependencies.`
     });
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
