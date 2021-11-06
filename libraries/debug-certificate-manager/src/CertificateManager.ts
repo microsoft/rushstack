@@ -7,7 +7,7 @@ import * as child_process from 'child_process';
 import { EOL } from 'os';
 import { FileSystem, ITerminal, Import } from '@rushstack/node-core-library';
 
-import { runSudoAsync, IRunResult, runAsync } from './exec';
+import { runSudoAsync, IRunResult, runAsync } from './runCommand';
 import { CertificateStore } from './CertificateStore';
 
 const forge: typeof import('node-forge') = Import.lazy('node-forge', require);
