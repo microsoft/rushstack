@@ -85,7 +85,7 @@ export class WriteBuildCacheAction extends BaseRushAction {
     });
 
     const trackedFiles: string[] = Array.from(
-      (await projectChangeAnalyzer._tryGetProjectDependenciesAsync(project.packageName, terminal))!.keys()
+      (await projectChangeAnalyzer._tryGetProjectDependenciesAsync(project, terminal))!.keys()
     );
     const commandLineConfigFilePath: string = path.join(
       this.rushConfiguration.commonRushConfigFolder,

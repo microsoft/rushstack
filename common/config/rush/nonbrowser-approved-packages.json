@@ -71,6 +71,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@pnpm/logger",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/debug-certificate-manager",
       "allowedCategories": [ "libraries" ]
     },

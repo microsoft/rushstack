@@ -327,11 +327,13 @@ export type PnpmStoreOptions = 'local' | 'global';
 // @beta (undocumented)
 export class ProjectChangeAnalyzer {
     constructor(rushConfiguration: RushConfiguration);
-    getChangedProjectsAsync(options: IGetChangedProjectsOptions): AsyncIterable<RushConfigurationProject>;
+    // (undocumented)
+    _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
+    getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
     // @internal
-    _tryGetProjectDependenciesAsync(projectName: string, terminal: ITerminal): Promise<Map<string, string> | undefined>;
+    _tryGetProjectDependenciesAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<Map<string, string> | undefined>;
     // @internal
-    _tryGetProjectStateHashAsync(projectName: string, terminal: ITerminal): Promise<string | undefined>;
+    _tryGetProjectStateHashAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<string | undefined>;
 }
 
 // @public
@@ -374,13 +376,16 @@ export class RushConfiguration {
     get experimentsConfiguration(): ExperimentsConfiguration;
     findProjectByShorthandName(shorthandProjectName: string): RushConfigurationProject | undefined;
     findProjectByTempName(tempProjectName: string): RushConfigurationProject | undefined;
-    findProjectForPosixRelativePath(posixRelativePath: string): RushConfigurationProject | undefined;
     getCommittedShrinkwrapFilename(variant?: string | undefined): string;
     getCommonVersions(variant?: string | undefined): CommonVersionsConfiguration;
     getCommonVersionsFilePath(variant?: string | undefined): string;
     getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string>;
     getPnpmfilePath(variant?: string | undefined): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
+    // Warning: (ae-forgotten-export) The symbol "LookupByPath" needs to be exported by the entry point index.d.ts
+    //
+    // @beta (undocumented)
+    getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject>;
     getRepoState(variant?: string | undefined): RepoStateFile;
     getRepoStateFilePath(variant?: string | undefined): string;
     get gitAllowedEmailRegExps(): string[];

@@ -56,7 +56,7 @@ export class UpdateAction extends BaseInstallAction {
     });
   }
 
-  protected buildInstallOptions(): IInstallManagerOptions {
+  protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: true,

@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Import, Sort } from '@rushstack/node-core-library';
+import { ConsoleTerminalProvider, Import, Sort, Terminal } from '@rushstack/node-core-library';
+import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+
 import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
-import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { VersionPolicyDefinitionName } from '../../api/VersionPolicy';
 import { SelectionParameterSet } from '../SelectionParameterSet';
@@ -109,8 +110,11 @@ export class ListAction extends BaseRushAction {
   }
 
   protected async runAsync(): Promise<void> {
-    const selection: Set<RushConfigurationProject> = this._selectionParameters.getSelectedProjects();
-    Sort.sortSetBy(selection, (x) => x.packageName);
+    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
+    const selection: Set<RushConfigurationProject> = await this._selectionParameters.getSelectedProjectsAsync(
+      terminal
+    );
+    Sort.sortSetBy(selection, (x: RushConfigurationProject) => x.packageName);
     if (this._jsonFlag.value && this._detailedFlag.value) {
       throw new Error(`The parameters "--json" and "--detailed" cannot be used together.`);
     }

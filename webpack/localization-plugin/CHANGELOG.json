@@ -2,6 +2,63 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.7.11",
+      "tag": "@rushstack/localization-plugin_v0.7.11",
+      "date": "Sat, 06 Nov 2021 00:09:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.43.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.4.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.42.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.30`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.2.90`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.2.89` to `^3.2.90`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.10",
+      "tag": "@rushstack/localization-plugin_v0.7.10",
+      "date": "Fri, 05 Nov 2021 15:09:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.43.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.4.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.42.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.29`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.2.89`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.2.88` to `^3.2.89`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.9",
       "tag": "@rushstack/localization-plugin_v0.7.9",
       "date": "Thu, 28 Oct 2021 00:08:22 GMT",
