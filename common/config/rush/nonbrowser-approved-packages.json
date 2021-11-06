@@ -108,7 +108,7 @@
     },
     {
       "name": "@rushstack/heft-dev-cert-plugin",
-      "allowedCategories": [ "tests" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/heft-jest-plugin",

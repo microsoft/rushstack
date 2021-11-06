@@ -9,15 +9,27 @@ import type {
   IHeftPlugin,
   IScopedLogger
 } from '@rushstack/heft';
-import { CertificateManager } from '@rushstack/debug-certificate-manager';
+import { CertificateManager, ICertificate } from '@rushstack/debug-certificate-manager';
+import { Configuration as WebpackDevServerConfig } from 'webpack-dev-server';
 
-const PLUGIN_NAME: string = 'DevCertPlugin';
+export interface IWebpackConfigPartial {
+  devServer?: WebpackDevServerConfig;
+}
 
+const PLUGIN_NAME: string = 'heft-dev-cert-plugin';
+
+/**
+ * @internal
+ */
 export class DevCertPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
 
   /**
-   * Ensure a developer certificate exists and is configured to be used by webpack-dev-server in serve mode.
+   * Ensures a developer certificate exists and is configured for use by webpack-dev-server in serve mode.
+   *
+   * Registers two custom actions for manually controlling the development certificate
+   * `heft trust-dev-cert` - creates and trusts a local development certificate for localhost
+   * `heft untrust-dev-cert` - untrusts the local development certificate for localhost
    */
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     const logger: IScopedLogger = heftSession.requestScopedLogger(PLUGIN_NAME);
@@ -25,7 +37,7 @@ export class DevCertPlugin implements IHeftPlugin {
 
     heftSession.registerAction<undefined>({
       actionName: 'trust-dev-cert',
-      documentation: 'Creates and trusts a local development certificate for serving localhost',
+      documentation: 'Creates and trusts a local development certificate for localhost',
       callback: async () => {
         try {
           await certificateManager.ensureCertificateAsync(true, logger.terminal);
@@ -52,18 +64,34 @@ export class DevCertPlugin implements IHeftPlugin {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
       build.hooks.bundle.tap(PLUGIN_NAME, (bundleSubstage: IBundleSubstage) => {
         if (build.properties.serveMode) {
-          bundleSubstage.hooks.afterConfigureWebpack.tapPromise(PLUGIN_NAME, async (conf: unknown) => {
-            logger.terminal.writeLine('Main config: ', String(conf));
-            const webpackConfiguration = bundleSubstage.properties.webpackConfiguration;
-            logger.terminal.writeLine('Alt config: ', String(webpackConfiguration));
-            await this._configureDevServerAsync(webpackConfiguration);
+          bundleSubstage.hooks.afterConfigureWebpack.tapPromise(PLUGIN_NAME, async () => {
+            await this._configureDevServerAsync(
+              bundleSubstage.properties?.webpackConfiguration as IWebpackConfigPartial | undefined,
+              certificateManager,
+              logger
+            );
           });
         }
       });
     });
   }
 
-  private async _configureDevServerAsync(webpackConfiguration: unknown): Promise<void> {
-    // Do something
+  private async _configureDevServerAsync(
+    webpackConfiguration: IWebpackConfigPartial | undefined,
+    certificateManager: CertificateManager,
+    logger: IScopedLogger
+  ): Promise<void> {
+    const certificate: ICertificate = await certificateManager.ensureCertificateAsync(true, logger.terminal);
+    if (!webpackConfiguration) {
+      webpackConfiguration = {};
+      logger.terminal.writeVerboseLine(`No webpack configuration available for plugin "${PLUGIN_NAME}"`);
+    }
+    webpackConfiguration.devServer = {
+      ...webpackConfiguration.devServer,
+      https: {
+        key: certificate.pemKey,
+        cert: certificate.pemCertificate
+      }
+    };
   }
 }
