@@ -2,6 +2,33 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.4.31",
+      "tag": "@rushstack/heft-web-rig_v0.4.31",
+      "date": "Sat, 06 Nov 2021 00:09:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.18.19`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.1.46`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-sass-plugin\" to `0.2.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `0.3.18`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.42.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.42.1` to `^0.42.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.30",
       "tag": "@rushstack/heft-web-rig_v0.4.30",
       "date": "Fri, 05 Nov 2021 15:09:18 GMT",

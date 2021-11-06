@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.43.2",
+      "tag": "@rushstack/node-core-library_v3.43.2",
+      "date": "Sat, 06 Nov 2021 00:09:13 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Updated Path.convertToSlashes() to use replace(/\\\\/g, '/') instead of split/join for better performance."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.43.1",
       "tag": "@rushstack/node-core-library_v3.43.1",
       "date": "Fri, 05 Nov 2021 15:09:18 GMT",
