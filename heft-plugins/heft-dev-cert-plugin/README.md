@@ -1,6 +1,6 @@
 # @rushstack/heft-dev-cert-plugin
 
-A Heft to manage development certificates for local serve.
+This is a Heft plugin to manage development certificates for local serve.
 Automatically configures webpack-dev-server to use https in serve mode.
 
 ## Links
