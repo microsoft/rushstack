@@ -83,8 +83,8 @@ export class DevCertPlugin implements IHeftPlugin {
   ): Promise<void> {
     const certificate: ICertificate = await certificateManager.ensureCertificateAsync(true, logger.terminal);
     if (!webpackConfiguration) {
-      webpackConfiguration = {};
-      logger.terminal.writeVerboseLine(`No webpack configuration available for plugin "${PLUGIN_NAME}"`);
+      logger.terminal.writeVerboseLine(`No webpack configuration available to configure devServer.`);
+      return;
     }
     webpackConfiguration.devServer = {
       ...webpackConfiguration.devServer,
