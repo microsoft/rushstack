@@ -83,15 +83,15 @@ export class DevCertPlugin implements IHeftPlugin {
   ): Promise<void> {
     const certificate: ICertificate = await certificateManager.ensureCertificateAsync(true, logger.terminal);
     if (!webpackConfiguration) {
-      logger.terminal.writeVerboseLine(`No webpack configuration available to configure devServer.`);
-      return;
+      logger.terminal.writeVerboseLine('No webpack configuration available to configure devServer.');
+    } else {
+      webpackConfiguration.devServer = {
+        ...webpackConfiguration.devServer,
+        https: {
+          key: certificate.pemKey,
+          cert: certificate.pemCertificate
+        }
+      };
     }
-    webpackConfiguration.devServer = {
-      ...webpackConfiguration.devServer,
-      https: {
-        key: certificate.pemKey,
-        cert: certificate.pemCertificate
-      }
-    };
   }
 }

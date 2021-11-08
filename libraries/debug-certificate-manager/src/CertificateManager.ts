@@ -67,7 +67,7 @@ export class CertificateManager {
         );
       }
 
-      if (!(await this._certificateIsTrustedAsync(terminal))) {
+      if (!(await this._detectIfCertificateIsTrustedAsync(terminal))) {
         invalidCertificate = true;
         messages.push('The existing development certificate is not currently trusted by your system.');
       }
@@ -145,7 +145,7 @@ export class CertificateManager {
           return false;
         }
 
-        const shaHash: string | undefined = this._macOsMatchingCertificateHash(
+        const shaHash: string | undefined = this._parseMacOsMatchingCertificateHash(
           macFindCertificateResult.stdout.join(EOL)
         );
 
@@ -334,7 +334,7 @@ export class CertificateManager {
     }
   }
 
-  private async _certificateIsTrustedAsync(terminal: ITerminal): Promise<boolean> {
+  private async _detectIfCertificateIsTrustedAsync(terminal: ITerminal): Promise<boolean> {
     switch (process.platform) {
       case 'win32':
         const winVerifyStoreResult: IRunResult = await runAsync(CERTUTIL_EXE_NAME, [
@@ -378,7 +378,7 @@ export class CertificateManager {
           return false;
         }
 
-        const shaHash: string | undefined = this._macOsMatchingCertificateHash(
+        const shaHash: string | undefined = this._parseMacOsMatchingCertificateHash(
           macFindCertificateResult.stdout.join(EOL)
         );
 
@@ -489,7 +489,7 @@ export class CertificateManager {
     return !!certificate.getExtension('subjectAltName');
   }
 
-  private _macOsMatchingCertificateHash(findCertificateOuput: string): string | undefined {
+  private _parseMacOsMatchingCertificateHash(findCertificateOuput: string): string | undefined {
     let shaHash: string | undefined = undefined;
     for (const line of findCertificateOuput.split(EOL)) {
       // Sets `shaHash` to the current certificate SHA-1 as we progress through the lines of certificate text.
