@@ -104,7 +104,8 @@
           "additionalProperties": true,
           "properties": {
             "cacheProvider": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^(?:(?!azure-blob-storage|amazon-s3).)*$"
             }
           }
         },

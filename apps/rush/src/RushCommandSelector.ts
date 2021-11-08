@@ -4,6 +4,7 @@
 import colors from 'colors/safe';
 import * as path from 'path';
 import * as rushLib from '@microsoft/rush-lib';
+import { Import } from '@rushstack/node-core-library';
 
 type CommandName = 'rush' | 'rushx' | undefined;
 
@@ -50,7 +51,25 @@ export class RushCommandSelector {
     } else {
       Rush.launch(launcherVersion, {
         isManaged: options.isManaged,
-        alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
+        alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError,
+        defaultRushPluginConfigurations: [
+          {
+            packageName: '@rushstack/rush-amazon-s3-build-cache-plugin',
+            pluginName: 'rush-amazon-s3-build-cache-plugin',
+            packageFolder: Import.resolvePackage({
+              baseFolderPath: __dirname,
+              packageName: '@rushstack/rush-amazon-s3-build-cache-plugin'
+            })
+          },
+          {
+            packageName: '@rushstack/rush-azure-storage-build-cache-plugin',
+            pluginName: 'rush-azure-storage-build-cache-plugin',
+            packageFolder: Import.resolvePackage({
+              baseFolderPath: __dirname,
+              packageName: '@rushstack/rush-azure-storage-build-cache-plugin'
+            })
+          }
+        ]
       });
     }
   }

@@ -485,10 +485,6 @@
     {
       "packageName": "@microsoft/rush-lib",
       "projectFolder": "apps/rush-lib",
-      "cyclicDependencyProjects": [
-        "@rushstack/rush-amazon-s3-build-cache-plugin",
-        "@rushstack/rush-azure-storage-build-cache-plugin"
-      ],
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
     },
