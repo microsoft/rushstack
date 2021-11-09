@@ -3,11 +3,10 @@
 
 import type { pki } from 'node-forge';
 import * as path from 'path';
-import * as child_process from 'child_process';
 import { EOL } from 'os';
 import { FileSystem, ITerminal, Import } from '@rushstack/node-core-library';
 
-import { runSudoAsync, IRunResult, runAsync } from './exec';
+import { runSudoAsync, IRunResult, runAsync } from './runCommand';
 import { CertificateStore } from './CertificateStore';
 
 const forge: typeof import('node-forge') = Import.lazy('node-forge', require);
@@ -47,7 +46,7 @@ export class CertificateManager {
   }
 
   /**
-   * Get a dev certificate from the store, or optionally, generate a new one
+   * Get a development certificate from the store, or optionally, generate a new one
    * and trust it if one doesn't exist in the store.
    *
    * @public
@@ -57,26 +56,43 @@ export class CertificateManager {
     terminal: ITerminal
   ): Promise<ICertificate> {
     if (this._certificateStore.certificateData && this._certificateStore.keyData) {
+      let invalidCertificate: boolean = false;
+      const messages: string[] = [];
+
       if (!this._certificateHasSubjectAltName()) {
-        let warningMessage: string =
+        invalidCertificate = true;
+        messages.push(
           'The existing development certificate is missing the subjectAltName ' +
-          'property and will not work with the latest versions of some browsers. ';
+            'property and will not work with the latest versions of some browsers.'
+        );
+      }
 
+      if (!(await this._detectIfCertificateIsTrustedAsync(terminal))) {
+        invalidCertificate = true;
+        messages.push('The existing development certificate is not currently trusted by your system.');
+      }
+
+      if (invalidCertificate) {
         if (canGenerateNewCertificate) {
-          warningMessage += ' Attempting to untrust the certificate and generate a new one.';
-        } else {
-          warningMessage += ' Untrust the certificate and generate a new one.';
-        }
-
-        terminal.writeWarningLine(warningMessage);
-
-        if (canGenerateNewCertificate) {
+          messages.push('Attempting to untrust the certificate and generate a new one.');
+          terminal.writeWarningLine(messages.join(' '));
           await this.untrustCertificateAsync(terminal);
           await this._ensureCertificateInternalAsync(terminal);
+        } else {
+          messages.push(
+            'Untrust the certificate and generate a new one, or set the ' +
+              '`canGenerateNewCertificate` parameter to `true` when calling `ensureCertificateAsync`.'
+          );
+          throw new Error(messages.join(' '));
         }
       }
     } else if (canGenerateNewCertificate) {
       await this._ensureCertificateInternalAsync(terminal);
+    } else {
+      throw new Error(
+        'No development certificate found. Generate a new certificate manually, or set the ' +
+          '`canGenerateNewCertificate` parameter to `true` when calling `ensureCertificateAsync`.'
+      );
     }
 
     return {
@@ -91,15 +107,20 @@ export class CertificateManager {
    * @public
    */
   public async untrustCertificateAsync(terminal: ITerminal): Promise<boolean> {
+    this._certificateStore.certificateData = undefined;
+    this._certificateStore.keyData = undefined;
+
     switch (process.platform) {
       case 'win32':
-        const winUntrustResult: child_process.SpawnSyncReturns<string> = child_process.spawnSync(
-          CERTUTIL_EXE_NAME,
-          ['-user', '-delstore', 'root', SERIAL_NUMBER]
-        );
+        const winUntrustResult: IRunResult = await runAsync(CERTUTIL_EXE_NAME, [
+          '-user',
+          '-delstore',
+          'root',
+          SERIAL_NUMBER
+        ]);
 
-        if (winUntrustResult.status !== 0) {
-          terminal.writeErrorLine(`Error: ${winUntrustResult.stdout.toString()}`);
+        if (winUntrustResult.code !== 0) {
+          terminal.writeErrorLine(`Error: ${winUntrustResult.stderr.join(' ')}`);
           return false;
         } else {
           terminal.writeVerboseLine('Successfully untrusted development certificate.');
@@ -107,42 +128,33 @@ export class CertificateManager {
         }
 
       case 'darwin':
-        terminal.writeVerboseLine('Trying to find the signature of the dev cert');
+        terminal.writeVerboseLine('Trying to find the signature of the development certificate.');
 
-        const macFindCertificateResult: child_process.SpawnSyncReturns<string> = child_process.spawnSync(
-          'security',
-          ['find-certificate', '-c', 'localhost', '-a', '-Z', MAC_KEYCHAIN]
-        );
-        if (macFindCertificateResult.status !== 0) {
+        const macFindCertificateResult: IRunResult = await runAsync('security', [
+          'find-certificate',
+          '-c',
+          'localhost',
+          '-a',
+          '-Z',
+          MAC_KEYCHAIN
+        ]);
+        if (macFindCertificateResult.code !== 0) {
           terminal.writeErrorLine(
-            `Error finding the dev certificate: ${macFindCertificateResult.output.join(' ')}`
+            `Error finding the development certificate: ${macFindCertificateResult.stderr.join(' ')}`
           );
           return false;
         }
 
-        const outputLines: string[] = macFindCertificateResult.stdout.toString().split(EOL);
-        let found: boolean = false;
-        let shaHash: string = '';
-        for (let i: number = 0; i < outputLines.length; i++) {
-          const line: string = outputLines[i];
-          const shaMatch: string[] | null = line.match(/^SHA-1 hash: (.+)$/);
-          if (shaMatch) {
-            shaHash = shaMatch[1];
-          }
+        const shaHash: string | undefined = this._parseMacOsMatchingCertificateHash(
+          macFindCertificateResult.stdout.join(EOL)
+        );
 
-          const snbrMatch: string[] | null = line.match(/^\s*"snbr"<blob>=0x([^\s]+).+$/);
-          if (snbrMatch && (snbrMatch[1] || '').toLowerCase() === SERIAL_NUMBER) {
-            found = true;
-            break;
-          }
-        }
-
-        if (!found) {
-          terminal.writeErrorLine('Unable to find the dev certificate.');
+        if (!shaHash) {
+          terminal.writeErrorLine('Unable to find the development certificate.');
           return false;
+        } else {
+          terminal.writeVerboseLine(`Found the development certificate. SHA is ${shaHash}`);
         }
-
-        terminal.writeVerboseLine(`Found the dev cert. SHA is ${shaHash}`);
 
         const macUntrustResult: IRunResult = await runSudoAsync('security', [
           'delete-certificate',
@@ -152,7 +164,7 @@ export class CertificateManager {
         ]);
 
         if (macUntrustResult.code === 0) {
-          terminal.writeVerboseLine('Successfully untrusted dev certificate.');
+          terminal.writeVerboseLine('Successfully untrusted development certificate.');
           return true;
         } else {
           terminal.writeErrorLine(macUntrustResult.stderr.join(' '));
@@ -236,7 +248,7 @@ export class CertificateManager {
     switch (process.platform) {
       case 'win32':
         terminal.writeLine(
-          'Attempting to trust a dev certificate. This self-signed certificate only points to localhost ' +
+          'Attempting to trust a development certificate. This self-signed certificate only points to localhost ' +
             'and will be stored in your local user profile to be used by other instances of ' +
             'debug-certificate-manager. If you do not consent to trust this certificate, click "NO" in the dialog.'
         );
@@ -275,7 +287,7 @@ export class CertificateManager {
 
       case 'darwin':
         terminal.writeLine(
-          'Attempting to trust a dev certificate. This self-signed certificate only points to localhost ' +
+          'Attempting to trust a development certificate. This self-signed certificate only points to localhost ' +
             'and will be stored in your local user profile to be used by other instances of ' +
             'debug-certificate-manager. If you do not consent to trust this certificate, do not enter your ' +
             'root password in the prompt.'
@@ -322,6 +334,78 @@ export class CertificateManager {
     }
   }
 
+  private async _detectIfCertificateIsTrustedAsync(terminal: ITerminal): Promise<boolean> {
+    switch (process.platform) {
+      case 'win32':
+        const winVerifyStoreResult: IRunResult = await runAsync(CERTUTIL_EXE_NAME, [
+          '-user',
+          '-verifystore',
+          'root',
+          SERIAL_NUMBER
+        ]);
+
+        if (winVerifyStoreResult.code !== 0) {
+          terminal.writeVerboseLine(
+            'The development certificate was not found in the store. CertUtil error: ',
+            winVerifyStoreResult.stderr.join(' ')
+          );
+          return false;
+        } else {
+          terminal.writeVerboseLine(
+            'The development certificate was found in the store. CertUtil output: ',
+            winVerifyStoreResult.stdout.join(' ')
+          );
+          return true;
+        }
+
+      case 'darwin':
+        terminal.writeVerboseLine('Trying to find the signature of the development certificate.');
+
+        const macFindCertificateResult: IRunResult = await runAsync('security', [
+          'find-certificate',
+          '-c',
+          'localhost',
+          '-a',
+          '-Z',
+          MAC_KEYCHAIN
+        ]);
+
+        if (macFindCertificateResult.code !== 0) {
+          terminal.writeVerboseLine(
+            'The development certificate was not found in keychain. Find certificate error: ',
+            macFindCertificateResult.stderr.join(' ')
+          );
+          return false;
+        }
+
+        const shaHash: string | undefined = this._parseMacOsMatchingCertificateHash(
+          macFindCertificateResult.stdout.join(EOL)
+        );
+
+        if (!shaHash) {
+          terminal.writeVerboseLine(
+            'The development certificate was not found in keychain. Find certificate output:\n',
+            macFindCertificateResult.stdout.join(' ')
+          );
+          return false;
+        }
+
+        terminal.writeVerboseLine(`The development certificate was found in keychain.`);
+        return true;
+
+      default:
+        // Linux + others: Have the user manually verify the cert is trusted
+        terminal.writeVerboseLine(
+          'Automatic certificate trust validation is only implemented for debug-certificate-manager on Windows ' +
+            'and macOS. Manually verify this development certificate is present in your trusted ' +
+            `root certification authorities: "${this._certificateStore.certificatePath}". ` +
+            `The certificate has serial number "${SERIAL_NUMBER}".`
+        );
+        // Always return true on Linux to prevent breaking flow.
+        return true;
+    }
+  }
+
   private async _trySetFriendlyNameAsync(certificatePath: string, terminal: ITerminal): Promise<boolean> {
     if (process.platform === 'win32') {
       const basePath: string = path.dirname(certificatePath);
@@ -338,19 +422,19 @@ export class CertificateManager {
 
       await FileSystem.writeFileAsync(friendlyNamePath, friendlyNameFile);
 
-      const commands: string[] = ['–repairstore', '–user', 'root', SERIAL_NUMBER, friendlyNamePath];
-      const repairStoreResult: child_process.SpawnSyncReturns<string> = child_process.spawnSync(
-        CERTUTIL_EXE_NAME,
-        commands
-      );
+      const repairStoreResult: IRunResult = await runAsync(CERTUTIL_EXE_NAME, [
+        '–repairstore',
+        '–user',
+        'root',
+        SERIAL_NUMBER,
+        friendlyNamePath
+      ]);
 
-      if (repairStoreResult.status !== 0) {
-        terminal.writeErrorLine(`CertUtil Error: ${repairStoreResult.stdout.toString()}`);
-
+      if (repairStoreResult.code !== 0) {
+        terminal.writeErrorLine(`CertUtil Error: ${repairStoreResult.stderr.join('')}`);
         return false;
       } else {
         terminal.writeVerboseLine('Successfully set certificate name.');
-
         return true;
       }
     } else {
@@ -370,7 +454,7 @@ export class CertificateManager {
     const tempCertificatePath: string = path.join(tempDirName, `${certificateName}.pem`);
     const pemFileContents: string | undefined = generatedCertificate.pemCertificate;
     if (pemFileContents) {
-      FileSystem.writeFile(tempCertificatePath, pemFileContents, {
+      await FileSystem.writeFileAsync(tempCertificatePath, pemFileContents, {
         ensureFolderExists: true
       });
     }
@@ -403,5 +487,21 @@ export class CertificateManager {
     }
     const certificate: pki.Certificate = forge.pki.certificateFromPem(certificateData);
     return !!certificate.getExtension('subjectAltName');
+  }
+
+  private _parseMacOsMatchingCertificateHash(findCertificateOuput: string): string | undefined {
+    let shaHash: string | undefined = undefined;
+    for (const line of findCertificateOuput.split(EOL)) {
+      // Sets `shaHash` to the current certificate SHA-1 as we progress through the lines of certificate text.
+      const shaHashMatch: string[] | null = line.match(/^SHA-1 hash: (.+)$/);
+      if (shaHashMatch) {
+        shaHash = shaHashMatch[1];
+      }
+
+      const snbrMatch: string[] | null = line.match(/^\s*"snbr"<blob>=0x([^\s]+).+$/);
+      if (snbrMatch && (snbrMatch[1] || '').toLowerCase() === SERIAL_NUMBER) {
+        return shaHash;
+      }
+    }
   }
 }
