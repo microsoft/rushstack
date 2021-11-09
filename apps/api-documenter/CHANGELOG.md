@@ -1,6 +1,13 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Sat, 06 Nov 2021 00:09:13 GMT and should not be manually modified.
+This log was last generated on Tue, 09 Nov 2021 01:09:37 GMT and should not be manually modified.
+
+## 7.13.68
+Tue, 09 Nov 2021 01:09:37 GMT
+
+### Patches
+
+- Links to enum members go to the enum page in markdown output
 
 ## 7.13.67
 Sat, 06 Nov 2021 00:09:13 GMT

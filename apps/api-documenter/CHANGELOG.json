@@ -2,6 +2,18 @@
   "name": "@microsoft/api-documenter",
   "entries": [
     {
+      "version": "7.13.68",
+      "tag": "@microsoft/api-documenter_v7.13.68",
+      "date": "Tue, 09 Nov 2021 01:09:37 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Links to enum members go to the enum page in markdown output"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.13.67",
       "tag": "@microsoft/api-documenter_v7.13.67",
       "date": "Sat, 06 Nov 2021 00:09:13 GMT",
