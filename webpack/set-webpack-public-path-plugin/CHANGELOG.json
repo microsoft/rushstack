@@ -2,6 +2,18 @@
   "name": "@rushstack/set-webpack-public-path-plugin",
   "entries": [
     {
+      "version": "3.3.0",
+      "tag": "@rushstack/set-webpack-public-path-plugin_v3.3.0",
+      "date": "Wed, 10 Nov 2021 16:09:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce a warning when running in Webpack 5."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.2.90",
       "tag": "@rushstack/set-webpack-public-path-plugin_v3.2.90",
       "date": "Sat, 06 Nov 2021 00:09:13 GMT",
