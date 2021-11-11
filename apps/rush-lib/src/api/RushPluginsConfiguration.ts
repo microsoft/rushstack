@@ -12,10 +12,6 @@ export interface IRushPluginConfigurationBase {
   pluginName: string;
 }
 
-export interface IDefaultRushPluginConfiguration extends IRushPluginConfigurationBase {
-  packageFolder: string;
-}
-
 /**
  * @beta
  */

@@ -134,7 +134,18 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
     return super.onExecute();
   }
 
+  /**
+   * If an error is encountered while trying to load plugins, it is saved in the `PluginManager.error`
+   * property, so we can defer throwing it until when `_throwPluginErrorIfNeed()` is called.
+   */
   private _throwPluginErrorIfNeed(): void {
+    // If the plugin configuration is broken, these three commands are used to fix the problem:
+    //
+    //   "rush update"
+    //   "rush init-autoinstaller"
+    //   "rush update-autoinstaller"
+    //
+    // Thus we do not report plugin errors when invoking these commands.
     if (!['update', 'init-autoinstaller', 'update-autoinstaller'].includes(this.actionName)) {
       const pluginError: Error | undefined = this.parser.pluginManager.error;
       if (pluginError) {

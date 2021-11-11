@@ -79,5 +79,9 @@
     "@types/z-schema": "3.16.31",
     "jest": "~25.4.0",
     "typescript": "~4.4.2"
+  },
+  "publishOnlyDependencies": {
+    "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
+    "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:*"
   }
 }

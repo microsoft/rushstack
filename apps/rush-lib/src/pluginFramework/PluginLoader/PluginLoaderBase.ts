@@ -3,6 +3,7 @@
 
 import {
   FileSystem,
+  Import,
   InternalError,
   ITerminal,
   JsonFile,
@@ -35,15 +36,16 @@ export interface IPluginLoaderOptions {
   terminal: ITerminal;
 }
 
-export abstract class PluginLoaderBase {
+export class PluginLoaderBase {
   protected static _jsonSchema: JsonSchema = JsonSchema.fromFile(
     path.join(__dirname, '../../schemas/rush-plugin-manifest.schema.json')
   );
 
-  protected _rushConfiguration: RushConfiguration;
-  protected _packageName: Readonly<string>;
-  protected _pluginName: Readonly<string>;
-  protected _terminal: ITerminal;
+  protected readonly _rushConfiguration: RushConfiguration;
+  protected readonly _packageName: Readonly<string>;
+  protected readonly _pluginName: Readonly<string>;
+  protected readonly _terminal: ITerminal;
+
   protected _manifestCache!: Readonly<IRushPluginManifest>;
 
   public constructor({ pluginConfiguration, rushConfiguration, terminal }: IPluginLoaderOptions) {
@@ -75,7 +77,13 @@ export abstract class PluginLoaderBase {
     return this._getRushPluginManifest();
   }
 
-  public abstract getPackageFolder(): string;
+  public getPackageFolder(): string {
+    const packageFolder: string = Import.resolvePackage({
+      baseFolderPath: __dirname,
+      packageName: this._packageName
+    });
+    return packageFolder;
+  }
 
   public getCommandLineConfiguration(): CommandLineConfiguration | undefined {
     const commandLineJsonFilePath: string | undefined = this._getCommandLineJsonFilePath();
@@ -205,7 +213,7 @@ export abstract class PluginLoaderBase {
         (item) => item.pluginName === pluginName
       );
       if (!pluginManifest) {
-        throw new Error(`${pluginName} does not provided by rush plugin package ${packageName}`);
+        throw new Error(`${pluginName} is not provided by Rush plugin package "${packageName}"`);
       }
 
       this._manifestCache = pluginManifest;

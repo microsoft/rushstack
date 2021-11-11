@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, InternalError, ITerminal } from '@rushstack/node-core-library';
+import { FileSystem, InternalError, IPackageJson, ITerminal } from '@rushstack/node-core-library';
 import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
 
 import { RushConfiguration } from '../api/RushConfiguration';
-import { IDefaultRushPluginConfiguration } from '../api/RushPluginsConfiguration';
+import { IRushPluginConfigurationBase } from '../api/RushPluginsConfiguration';
 import { DefaultPluginLoader } from './PluginLoader/DefaultPluginLoader';
 import { IRushPlugin } from './IRushPlugin';
 import { RemotePluginLoader } from './PluginLoader/RemotePluginLoader';
@@ -24,13 +24,13 @@ export interface ICustomCommandLineConfigurationInfo {
 }
 
 export class PluginManager {
-  private _terminal: ITerminal;
-  private _rushConfiguration: RushConfiguration;
-  private _rushSession: RushSession;
-  private _defaultPluginLoaders: DefaultPluginLoader[];
-  private _remotePluginLoaders: RemotePluginLoader[];
-  private _installedAutoinstallerNames: Set<string>;
-  private _loadedPluginNames: Set<string> = new Set<string>();
+  private readonly _terminal: ITerminal;
+  private readonly _rushConfiguration: RushConfiguration;
+  private readonly _rushSession: RushSession;
+  private readonly _defaultPluginLoaders: DefaultPluginLoader[];
+  private readonly _remotePluginLoaders: RemotePluginLoader[];
+  private readonly _installedAutoinstallerNames: Set<string>;
+  private readonly _loadedPluginNames: Set<string> = new Set<string>();
 
   private _error: Error | undefined;
 
@@ -41,7 +41,31 @@ export class PluginManager {
 
     this._installedAutoinstallerNames = new Set<string>();
 
-    const defaultPluginConfigurations: IDefaultRushPluginConfiguration[] = [];
+    // Eventually we will require end users to explicitly configure all Rush plugins in use, regardless of
+    // whether they are first party or third party plugins.  However, we're postponing that requirement
+    // until after the plugin feature has stabilized and is fully documented.  In the meantime, Rush's
+    // built-in plugins are dependencies of @microsoft/rush-lib and get loaded by default (without any
+    // configuration).
+    //
+    // The plugins have devDependencies on Rush, which would create a circular dependency in our local
+    // workspace if we added them to rush-lib/package.json.  Instead we put them in a special section
+    // "publishOnlyDependencies" which gets moved into "dependencies" during publishing.
+    const defaultPluginConfigurations: IRushPluginConfigurationBase[] = [];
+
+    const ownPackageJson: IPackageJson = require('../../package.json');
+    if (ownPackageJson.dependencies!['@rushstack/rush-amazon-s3-build-cache-plugin']) {
+      defaultPluginConfigurations.push({
+        packageName: '@rushstack/rush-amazon-s3-build-cache-plugin',
+        pluginName: 'rush-amazon-s3-build-cache-plugin'
+      });
+    }
+    if (ownPackageJson.dependencies!['@rushstack/rush-azure-storage-build-cache-plugin']) {
+      defaultPluginConfigurations.push({
+        packageName: '@rushstack/rush-azure-storage-build-cache-plugin',
+        pluginName: 'rush-azure-storage-build-cache-plugin'
+      });
+    }
+
     this._defaultPluginLoaders = defaultPluginConfigurations.map((pluginConfiguration) => {
       return new DefaultPluginLoader({
         pluginConfiguration,
@@ -61,22 +85,13 @@ export class PluginManager {
     });
   }
 
+  /**
+   * If an error occurs while attempting to load plugins, it will be saved in this property.
+   * Rush will attempt to continue and will report the error later by `BaseRushAction._throwPluginErrorIfNeed()`
+   * (unless we are invoking a command that is used to fix plugin problems).
+   */
   public get error(): Error | undefined {
     return this._error;
-  }
-
-  public addDefaultPluginConfigurations(
-    defaultPluginConfigurations: IDefaultRushPluginConfiguration[]
-  ): void {
-    for (const pluginConfiguration of defaultPluginConfigurations) {
-      this._defaultPluginLoaders.push(
-        new DefaultPluginLoader({
-          pluginConfiguration,
-          rushConfiguration: this._rushConfiguration,
-          terminal: this._terminal
-        })
-      );
-    }
   }
 
   public async updateAsync(): Promise<void> {

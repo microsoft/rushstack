@@ -7,12 +7,12 @@ export interface ILogger {
   readonly terminal: Terminal;
 
   /**
-   * Call this function to emit an error to the heft runtime.
+   * Call this function to emit an error to the Rush runtime.
    */
   emitError(error: Error): void;
 
   /**
-   * Call this function to emit an warning to the heft runtime.
+   * Call this function to emit a warning to the Rush runtime.
    */
   emitWarning(warning: Error): void;
 }
