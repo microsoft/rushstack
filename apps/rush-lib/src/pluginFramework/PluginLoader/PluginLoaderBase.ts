@@ -212,7 +212,7 @@ export class PluginLoaderBase {
         (item) => item.pluginName === pluginName
       );
       if (!pluginManifest) {
-        throw new Error(`${pluginName} does not provided by rush plugin package ${packageName}`);
+        throw new Error(`${pluginName} is not provided by Rush plugin package "${packageName}"`);
       }
 
       this._manifestCache = pluginManifest;

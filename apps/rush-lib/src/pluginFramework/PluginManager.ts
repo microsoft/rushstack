@@ -24,13 +24,13 @@ export interface ICustomCommandLineConfigurationInfo {
 }
 
 export class PluginManager {
-  private _terminal: ITerminal;
-  private _rushConfiguration: RushConfiguration;
-  private _rushSession: RushSession;
-  private _defaultPluginLoaders: DefaultPluginLoader[];
-  private _remotePluginLoaders: RemotePluginLoader[];
-  private _installedAutoinstallerNames: Set<string>;
-  private _loadedPluginNames: Set<string> = new Set<string>();
+  private readonly _terminal: ITerminal;
+  private readonly _rushConfiguration: RushConfiguration;
+  private readonly _rushSession: RushSession;
+  private readonly _defaultPluginLoaders: DefaultPluginLoader[];
+  private readonly _remotePluginLoaders: RemotePluginLoader[];
+  private readonly _installedAutoinstallerNames: Set<string>;
+  private readonly _loadedPluginNames: Set<string> = new Set<string>();
 
   private _error: Error | undefined;
 

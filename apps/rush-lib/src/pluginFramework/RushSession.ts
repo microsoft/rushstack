@@ -27,7 +27,8 @@ export type ICloudBuildCacheProviderFactory = (buildCacheJson: IBuildCacheJson) 
  */
 export class RushSession implements IRushLifecycle {
   private readonly _options: IRushSessionOptions;
-  private _cloudBuildCacheProviderFactories: Map<string, ICloudBuildCacheProviderFactory> = new Map();
+  private readonly _cloudBuildCacheProviderFactories: Map<string, ICloudBuildCacheProviderFactory> =
+    new Map();
 
   public readonly hooks: RushLifecycleHooks;
 

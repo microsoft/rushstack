@@ -59,7 +59,9 @@ export class RemotePluginLoader extends PluginLoaderBase {
       (item) => item.pluginName === pluginName
     );
     if (!pluginManifest) {
-      throw new Error(`${pluginName} does not provided by rush plugin package ${packageName}`);
+      throw new Error(
+        `A plugin named "${pluginName}" is not provided by the Rush plugin package "${packageName}"`
+      );
     }
 
     const commandLineJsonFilePath: string | undefined = pluginManifest.commandLineJsonFilePath;
@@ -67,7 +69,8 @@ export class RemotePluginLoader extends PluginLoaderBase {
       const commandLineJsonFullFilePath: string = path.join(packageFolder, commandLineJsonFilePath);
       if (!FileSystem.exists(commandLineJsonFullFilePath)) {
         this._terminal.writeErrorLine(
-          `Rush plugin ${pluginName} from ${packageName} specifies commandLineJsonFilePath ${commandLineJsonFilePath} does not exist.`
+          `The Rush plugin "${pluginName}" from "${packageName}" specifies a commandLineJsonFilePath` +
+            ` ${commandLineJsonFilePath} that does not exist.`
         );
       }
       FileSystem.copyFile({
