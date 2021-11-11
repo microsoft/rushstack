@@ -175,9 +175,7 @@ export class PluginManager {
     for (const pluginLoader of pluginLoaders) {
       const pluginName: string = pluginLoader.pluginName;
       if (this._loadedPluginNames.has(pluginName)) {
-        throw new Error(
-          `Error applying plugin: A plugin with name "${pluginName}" has ` + 'already been applied'
-        );
+        throw new Error(`Error applying plugin: A plugin with name "${pluginName}" has already been applied`);
       }
       const plugin: IRushPlugin | undefined = pluginLoader.load();
       this._loadedPluginNames.add(pluginName);

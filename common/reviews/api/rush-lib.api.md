@@ -233,8 +233,6 @@ export interface IGetFetchOptions extends IWebFetchOptionsBase {
 // @public
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
-    // Warning: (ae-forgotten-export) The symbol "IDefaultRushPluginConfiguration" needs to be exported by the entry point index.d.ts
-    defaultRushPluginConfigurations?: IDefaultRushPluginConfiguration[];
     isManaged: boolean;
 }
 
