@@ -3,4 +3,8 @@
 
 import { PluginLoaderBase } from './PluginLoaderBase';
 
-export class DefaultPluginLoader extends PluginLoaderBase {}
+/**
+ * Built-in plugin loader.
+ * Loading those plugins are directly installed by Rush.
+ */
+export class BuiltInPluginLoader extends PluginLoaderBase {}

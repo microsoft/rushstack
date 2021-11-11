@@ -6,7 +6,7 @@ import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { IRushPluginConfigurationBase } from '../api/RushPluginsConfiguration';
-import { DefaultPluginLoader } from './PluginLoader/DefaultPluginLoader';
+import { BuiltInPluginLoader } from './PluginLoader/BuiltInPluginLoader';
 import { IRushPlugin } from './IRushPlugin';
 import { RemotePluginLoader } from './PluginLoader/RemotePluginLoader';
 import { RushSession } from './RushSession';
@@ -27,7 +27,7 @@ export class PluginManager {
   private readonly _terminal: ITerminal;
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _rushSession: RushSession;
-  private readonly _defaultPluginLoaders: DefaultPluginLoader[];
+  private readonly _builtInPluginLoaders: BuiltInPluginLoader[];
   private readonly _remotePluginLoaders: RemotePluginLoader[];
   private readonly _installedAutoinstallerNames: Set<string>;
   private readonly _loadedPluginNames: Set<string> = new Set<string>();
@@ -50,24 +50,24 @@ export class PluginManager {
     // The plugins have devDependencies on Rush, which would create a circular dependency in our local
     // workspace if we added them to rush-lib/package.json.  Instead we put them in a special section
     // "publishOnlyDependencies" which gets moved into "dependencies" during publishing.
-    const defaultPluginConfigurations: IRushPluginConfigurationBase[] = [];
+    const builtInPluginConfigurations: IRushPluginConfigurationBase[] = [];
 
     const ownPackageJson: IPackageJson = require('../../package.json');
     if (ownPackageJson.dependencies!['@rushstack/rush-amazon-s3-build-cache-plugin']) {
-      defaultPluginConfigurations.push({
+      builtInPluginConfigurations.push({
         packageName: '@rushstack/rush-amazon-s3-build-cache-plugin',
         pluginName: 'rush-amazon-s3-build-cache-plugin'
       });
     }
     if (ownPackageJson.dependencies!['@rushstack/rush-azure-storage-build-cache-plugin']) {
-      defaultPluginConfigurations.push({
+      builtInPluginConfigurations.push({
         packageName: '@rushstack/rush-azure-storage-build-cache-plugin',
         pluginName: 'rush-azure-storage-build-cache-plugin'
       });
     }
 
-    this._defaultPluginLoaders = defaultPluginConfigurations.map((pluginConfiguration) => {
-      return new DefaultPluginLoader({
+    this._builtInPluginLoaders = builtInPluginConfigurations.map((pluginConfiguration) => {
+      return new BuiltInPluginLoader({
         pluginConfiguration,
         rushConfiguration: this._rushConfiguration,
         terminal: this._terminal
@@ -130,10 +130,10 @@ export class PluginManager {
         this._remotePluginLoaders
       );
       await this._preparePluginAutoinstallersAsync(remotePluginLoaders);
-      const defaultPluginLoaders: DefaultPluginLoader[] = this._getUnassociatedPluginLoaders(
-        this._defaultPluginLoaders
+      const builtInPluginLoaders: BuiltInPluginLoader[] = this._getUnassociatedPluginLoaders(
+        this._builtInPluginLoaders
       );
-      this._initializePlugins([...defaultPluginLoaders, ...remotePluginLoaders]);
+      this._initializePlugins([...builtInPluginLoaders, ...remotePluginLoaders]);
     } catch (e) {
       this._error = e as Error;
     }
@@ -146,11 +146,11 @@ export class PluginManager {
         this._remotePluginLoaders
       );
       await this._preparePluginAutoinstallersAsync(remotePluginLoaders);
-      const defaultPluginLoaders: DefaultPluginLoader[] = this._getPluginLoadersForCommand(
+      const builtInPluginLoaders: BuiltInPluginLoader[] = this._getPluginLoadersForCommand(
         commandName,
-        this._defaultPluginLoaders
+        this._builtInPluginLoaders
       );
-      this._initializePlugins([...defaultPluginLoaders, ...remotePluginLoaders]);
+      this._initializePlugins([...builtInPluginLoaders, ...remotePluginLoaders]);
     } catch (e) {
       this._error = e as Error;
     }
@@ -185,7 +185,7 @@ export class PluginManager {
     }
   }
 
-  private _getUnassociatedPluginLoaders<T extends RemotePluginLoader | DefaultPluginLoader>(
+  private _getUnassociatedPluginLoaders<T extends RemotePluginLoader | BuiltInPluginLoader>(
     pluginLoaders: T[]
   ): T[] {
     return pluginLoaders.filter((pluginLoader) => {
@@ -193,7 +193,7 @@ export class PluginManager {
     });
   }
 
-  private _getPluginLoadersForCommand<T extends RemotePluginLoader | DefaultPluginLoader>(
+  private _getPluginLoadersForCommand<T extends RemotePluginLoader | BuiltInPluginLoader>(
     commandName: string,
     pluginLoaders: T[]
   ): T[] {
