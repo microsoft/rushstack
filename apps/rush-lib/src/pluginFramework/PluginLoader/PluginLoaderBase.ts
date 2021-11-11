@@ -45,6 +45,7 @@ export class PluginLoaderBase {
   protected readonly _packageName: Readonly<string>;
   protected readonly _pluginName: Readonly<string>;
   protected readonly _terminal: ITerminal;
+
   protected _manifestCache!: Readonly<IRushPluginManifest>;
 
   public constructor({ pluginConfiguration, rushConfiguration, terminal }: IPluginLoaderOptions) {
