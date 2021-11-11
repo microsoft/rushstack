@@ -1,0 +1,22 @@
+{
+  "name": "@rushstack/heft-dev-cert-plugin",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@rushstack/heft-dev-cert-plugin_v0.1.0",
+      "date": "Tue, 09 Nov 2021 16:08:07 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Introduce the heft-dev-cert-plugin for https with webpack-dev-server."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/debug-certificate-manager\" to `1.1.12`"
+          }
+        ]
+      }
+    }
+  ]
+}

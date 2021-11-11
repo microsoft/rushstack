@@ -10,9 +10,14 @@ export interface IRunResult {
   code: number;
 }
 
+export interface ISudoOptions {
+  cachePassword?: boolean;
+  prompt?: string;
+  spawnOptions?: object;
+}
+
 export async function runSudoAsync(command: string, params: string[]): Promise<IRunResult> {
-  // eslint-disable-next-line
-  const sudo: (args: string[], options: any) => child_process.ChildProcess = require('sudo');
+  const sudo: (args: string[], options: ISudoOptions) => child_process.ChildProcess = require('sudo');
   const result: child_process.ChildProcess = sudo([command, ...params], {
     cachePassword: false,
     prompt: 'Enter your password: '

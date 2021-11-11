@@ -75,6 +75,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/debug-certificate-manager",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/eslint-config",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -101,6 +105,10 @@
     {
       "name": "@rushstack/heft-config-file",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/heft-dev-cert-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/heft-jest-plugin",

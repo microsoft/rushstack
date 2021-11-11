@@ -734,6 +734,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "set-webpack-public-path-plugin-webpack4-test",
+      "projectFolder": "build-tests/set-webpack-public-path-plugin-webpack4-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "ts-command-line-test",
       "projectFolder": "build-tests/ts-command-line-test",
       "reviewCategory": "tests",
@@ -741,6 +747,12 @@
     },
 
     // "heft-plugins" folder (alphabetical order)
+    {
+      "packageName": "@rushstack/heft-dev-cert-plugin",
+      "projectFolder": "heft-plugins/heft-dev-cert-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
     {
       "packageName": "@rushstack/heft-jest-plugin",
       "projectFolder": "heft-plugins/heft-jest-plugin",

@@ -2,6 +2,36 @@
   "name": "@rushstack/localization-plugin",
   "entries": [
     {
+      "version": "0.7.13",
+      "tag": "@rushstack/localization-plugin_v0.7.13",
+      "date": "Thu, 11 Nov 2021 01:17:03 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.3.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.3.0` to `^3.3.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.7.12",
+      "tag": "@rushstack/localization-plugin_v0.7.12",
+      "date": "Wed, 10 Nov 2021 16:09:47 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" to `3.3.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/set-webpack-public-path-plugin\" from `^3.2.90` to `^3.3.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.11",
       "tag": "@rushstack/localization-plugin_v0.7.11",
       "date": "Sat, 06 Nov 2021 00:09:13 GMT",
