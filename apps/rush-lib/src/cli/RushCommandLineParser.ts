@@ -128,9 +128,9 @@ export class RushCommandLineParser extends CommandLineParser {
         this._addCommandLineConfigActions(commandLineConfiguration);
       } catch (e) {
         this._terminal.writeErrorLine(
-          `Error from plugin ${pluginLoader.pluginName} by ${pluginLoader.packageName}: ${
-            (e as Error).message
-          }`
+          `Error from plugin ${pluginLoader.pluginName} by ${pluginLoader.packageName}: ${(
+            e as Error
+          ).toString()}`
         );
       }
     }

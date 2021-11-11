@@ -85,6 +85,11 @@ export class PluginManager {
     });
   }
 
+  /**
+   * If an error occurs while attempting to load plugins, it will be saved in this property.
+   * Rush will attempt to continue and will report the error later by `BaseRushAction._throwPluginErrorIfNeed()`
+   * (unless we are invoking a command that is used to fix plugin problems).
+   */
   public get error(): Error | undefined {
     return this._error;
   }
