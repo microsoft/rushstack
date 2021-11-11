@@ -30,6 +30,10 @@ export class RemotePluginLoader extends PluginLoaderBase {
     this._autoinstaller = new Autoinstaller(pluginConfiguration.autoinstallerName, this._rushConfiguration);
   }
 
+  protected override onGetPackageFolder(): string {
+    return path.join(this._autoinstaller.folderFullPath, 'node_modules', this._packageName);
+  }
+
   /**
    * The folder where rush plugins static files are stored.
    * Example: `C:\MyRepo\common\autoinstallers\<autoinstaller_name>\rush-plugins`
@@ -82,10 +86,6 @@ export class RemotePluginLoader extends PluginLoaderBase {
 
   public get autoinstaller(): Autoinstaller {
     return this._autoinstaller;
-  }
-
-  public override getPackageFolder(): string {
-    return path.join(this._autoinstaller.folderFullPath, 'node_modules', this._packageName);
   }
 
   protected override _getCommandLineAdditionalPathFolders(): string[] {

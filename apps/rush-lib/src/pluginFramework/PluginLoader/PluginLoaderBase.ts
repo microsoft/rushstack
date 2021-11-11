@@ -3,7 +3,6 @@
 
 import {
   FileSystem,
-  Import,
   InternalError,
   ITerminal,
   JsonFile,
@@ -36,7 +35,7 @@ export interface IPluginLoaderOptions {
   terminal: ITerminal;
 }
 
-export class PluginLoaderBase {
+export abstract class PluginLoaderBase {
   protected static _jsonSchema: JsonSchema = JsonSchema.fromFile(
     path.join(__dirname, '../../schemas/rush-plugin-manifest.schema.json')
   );
@@ -48,11 +47,26 @@ export class PluginLoaderBase {
 
   protected _manifestCache!: Readonly<IRushPluginManifest>;
 
+  private _cachedPackageFolder: string | undefined = undefined;
+
   public constructor({ pluginConfiguration, rushConfiguration, terminal }: IPluginLoaderOptions) {
     this._packageName = pluginConfiguration.packageName;
     this._pluginName = pluginConfiguration.pluginName;
     this._rushConfiguration = rushConfiguration;
     this._terminal = terminal;
+  }
+
+  /** Child classes use this to implement the lookup for getPackageFolder() */
+  protected abstract onGetPackageFolder(): string;
+
+  /**
+   * Returns the folder that should be used for resolving the plugin's NPM package.
+   */
+  public getPackageFolder(): string {
+    if (this._cachedPackageFolder === undefined) {
+      this._cachedPackageFolder = this.onGetPackageFolder();
+    }
+    return this._cachedPackageFolder;
   }
 
   public load(): IRushPlugin | undefined {
@@ -75,14 +89,6 @@ export class PluginLoaderBase {
 
   public get pluginManifest(): IRushPluginManifest {
     return this._getRushPluginManifest();
-  }
-
-  public getPackageFolder(): string {
-    const packageFolder: string = Import.resolvePackage({
-      baseFolderPath: __dirname,
-      packageName: this._packageName
-    });
-    return packageFolder;
   }
 
   public getCommandLineConfiguration(): CommandLineConfiguration | undefined {
