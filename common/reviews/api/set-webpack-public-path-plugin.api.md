@@ -4,8 +4,7 @@
 
 ```ts
 
-import type * as Webpack4 from 'webpack4';
-import type * as Webpack5 from 'webpack5';
+import type * as Webpack from 'webpack';
 
 // @public
 export function getGlobalRegisterCode(debug?: boolean): string;
@@ -34,10 +33,10 @@ export interface ISetWebpackPublicPathPluginOptions extends ISetWebpackPublicPat
 export const registryVariableName: string;
 
 // @public
-export class SetPublicPathPlugin implements Webpack4.Plugin {
+export class SetPublicPathPlugin implements Webpack.Plugin {
     constructor(options: ISetWebpackPublicPathPluginOptions);
     // (undocumented)
-    apply(compiler: Webpack4.Compiler | Webpack5.Compiler): void;
+    apply(compiler: Webpack.Compiler): void;
     // (undocumented)
     options: ISetWebpackPublicPathPluginOptions;
 }

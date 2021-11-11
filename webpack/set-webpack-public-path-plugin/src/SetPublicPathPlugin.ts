@@ -2,8 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { EOL } from 'os';
-import { cloneDeep, escapeRegExp } from 'lodash';
-import type * as Webpack4 from 'webpack4';
+import type * as Webpack from 'webpack';
 import type * as Webpack5 from 'webpack5';
 import type * as Tapable from 'tapable';
 
@@ -98,23 +97,19 @@ interface IAsset {
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-declare const __dummyWebpack4MainTemplate: Webpack4.compilation.MainTemplate;
-interface IWebpack4ExtendedMainTemplate extends Webpack4.compilation.MainTemplate {
+declare const __dummyWebpack4MainTemplate: Webpack.compilation.MainTemplate;
+interface IWebpack4ExtendedMainTemplate extends Webpack.compilation.MainTemplate {
   hooks: {
-    jsonpScript?: Tapable.SyncWaterfallHook<string, Webpack4.compilation.Chunk, string>;
-    requireExtensions: Tapable.SyncWaterfallHook<string, Webpack4.compilation.Chunk, string>;
-    startup: Tapable.SyncHook<string, Webpack4.compilation.Chunk, string>;
+    startup: Tapable.SyncHook<string, Webpack.compilation.Chunk, string>;
   } & typeof __dummyWebpack4MainTemplate.hooks;
-  requireFn: string;
 }
 
 const SHOULD_REPLACE_ASSET_NAME_TOKEN: unique symbol = Symbol(
   'set-public-path-plugin-should-replace-asset-name'
 );
 
-interface IExtendedChunk extends Webpack4.compilation.Chunk {
+interface IExtendedChunk extends Webpack.compilation.Chunk {
   [SHOULD_REPLACE_ASSET_NAME_TOKEN]: boolean;
-  forEachModule(callback: (module: Webpack4.compilation.Module) => void): void;
 }
 
 interface IStartupCodeOptions {
@@ -130,13 +125,17 @@ const ASSET_NAME_TOKEN: string = '-ASSET-NAME-c0ef4f86-b570-44d3-b210-4428c5b782
 
 const ASSET_NAME_TOKEN_REGEX: RegExp = new RegExp(ASSET_NAME_TOKEN);
 
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 /**
  * This simple plugin sets the __webpack_public_path__ variable to a value specified in the arguments,
  *  optionally appended to the SystemJs baseURL property.
  *
  * @public
  */
-export class SetPublicPathPlugin implements Webpack4.Plugin {
+export class SetPublicPathPlugin implements Webpack.Plugin {
   public options: ISetWebpackPublicPathPluginOptions;
 
   public constructor(options: ISetWebpackPublicPathPluginOptions) {
@@ -151,30 +150,31 @@ export class SetPublicPathPlugin implements Webpack4.Plugin {
     }
   }
 
-  public apply(compiler: Webpack4.Compiler | Webpack5.Compiler): void {
+  public apply(compiler: Webpack.Compiler): void {
     const isWebpack3OrEarlier: boolean = !compiler.hooks;
 
     if (isWebpack3OrEarlier) {
       throw new Error(`The ${SetPublicPathPlugin.name} plugin requires Webpack 4 or Webpack 5`);
     }
 
-    const webpackVersion: string | undefined = (compiler as Webpack5.Compiler | { webpack: undefined })
-      .webpack?.version;
+    const webpackVersion: string | undefined = (
+      compiler as unknown as Webpack5.Compiler | { webpack: undefined }
+    ).webpack?.version;
     const webpackMajorVersion: number = webpackVersion
       ? Number(webpackVersion.substr(0, webpackVersion.indexOf('.')))
       : 4;
 
     compiler.hooks.compilation.tap(
       PLUGIN_NAME,
-      (compilation: Webpack4.compilation.Compilation | Webpack5.Compilation) => {
+      (compilation: Webpack.compilation.Compilation | Webpack5.Compilation) => {
         if (webpackMajorVersion === 4) {
-          const webpack4Compilation: Webpack4.compilation.Compilation =
-            compilation as Webpack4.compilation.Compilation;
+          const webpack4Compilation: Webpack.compilation.Compilation =
+            compilation as Webpack.compilation.Compilation;
           const mainTemplate: IWebpack4ExtendedMainTemplate =
             webpack4Compilation.mainTemplate as IWebpack4ExtendedMainTemplate;
           mainTemplate.hooks.startup.tap(
             PLUGIN_NAME,
-            (source: string, chunk: Webpack4.compilation.Chunk, hash: string) => {
+            (source: string, chunk: Webpack.compilation.Chunk, hash: string) => {
               const extendedChunk: IExtendedChunk = chunk as IExtendedChunk;
               const assetOrChunkFound: boolean =
                 !!this.options.skipDetection || this._detectAssetsOrChunks(extendedChunk);
@@ -192,8 +192,8 @@ export class SetPublicPathPlugin implements Webpack4.Plugin {
           );
         } else {
           // Webpack 5 has its own automatic public path code, so only apply for Webpack 4
-          const Webpack5Error: typeof Webpack5.WebpackError = (compiler as Webpack5.Compiler).webpack
-            .WebpackError;
+          const Webpack5Error: typeof Webpack5.WebpackError = (compiler as unknown as Webpack5.Compiler)
+            .webpack.WebpackError;
           // Don't bother importing node-core-library for this
           const thisPackageJson: { name: string } = require('../package.json');
           compilation.warnings.push(
@@ -210,7 +210,7 @@ export class SetPublicPathPlugin implements Webpack4.Plugin {
     if (webpackMajorVersion === 4) {
       compiler.hooks.emit.tap(
         PLUGIN_NAME,
-        (compilation: Webpack4.compilation.Compilation | Webpack5.Compilation) => {
+        (compilation: Webpack.compilation.Compilation | Webpack5.Compilation) => {
           for (const chunkGroup of compilation.chunkGroups) {
             for (const chunk of chunkGroup.chunks) {
               if (chunk[SHOULD_REPLACE_ASSET_NAME_TOKEN]) {
@@ -268,7 +268,7 @@ export class SetPublicPathPlugin implements Webpack4.Plugin {
   }
 
   private _getStartupCode(options: IStartupCodeOptions): string {
-    const moduleOptions: IInternalOptions = cloneDeep(this.options);
+    const moduleOptions: IInternalOptions = { ...this.options };
 
     // If this module has ownership over any chunks or assets, inject the public path code
     moduleOptions.webpackPublicPathVariable = `${options.requireFn}.p`;
