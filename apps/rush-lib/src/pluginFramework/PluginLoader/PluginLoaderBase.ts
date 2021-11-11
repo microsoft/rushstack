@@ -165,17 +165,21 @@ export class PluginLoaderBase {
     const optionsJsonFilePath: string = this._getPluginOptionsJsonFilePath();
     const optionsSchema: JsonSchema | undefined = this._getRushPluginOptionsSchema();
 
-    const isOptionsJsonFileExists: boolean = FileSystem.exists(optionsJsonFilePath);
-
-    if (!isOptionsJsonFileExists) {
-      return {};
+    let pluginOptions: JsonObject = {};
+    try {
+      pluginOptions = JsonFile.load(optionsJsonFilePath);
+    } catch (e) {
+      if (FileSystem.isFileDoesNotExistError(e as Error)) {
+        return {};
+      }
+      throw e;
     }
 
     if (optionsSchema) {
-      return JsonFile.loadAndValidate(optionsJsonFilePath, optionsSchema);
-    } else {
-      return JsonFile.load(optionsJsonFilePath);
+      optionsSchema.validateObject(pluginOptions, optionsJsonFilePath);
     }
+
+    return pluginOptions;
   }
 
   protected _getPluginOptionsJsonFilePath(): string {

@@ -101,15 +101,27 @@ export class RemotePluginLoader extends PluginLoaderBase {
     const optionsJsonFilePath: string = this._getPluginOptionsJsonFilePath();
     const optionsSchema: JsonSchema | undefined = this._getRushPluginOptionsSchema();
 
-    const isOptionsJsonFileExists: boolean = FileSystem.exists(optionsJsonFilePath);
-
-    if (!isOptionsJsonFileExists && optionsSchema) {
-      throw new Error(
-        `Plugin options are required by ${this._pluginName} from package ${this._packageName}, please create it at ${optionsJsonFilePath}.`
-      );
+    let pluginOptions: JsonObject = {};
+    try {
+      pluginOptions = JsonFile.load(optionsJsonFilePath);
+    } catch (e) {
+      if (FileSystem.isFileDoesNotExistError(e as Error)) {
+        if (optionsSchema) {
+          throw new Error(
+            `Plugin options are required by ${this._pluginName} from package ${this._packageName}, please create it at ${optionsJsonFilePath}.`
+          );
+        } else {
+          return {};
+        }
+      }
+      throw e;
     }
 
-    return super._getPluginOptions();
+    if (optionsSchema) {
+      optionsSchema.validateObject(pluginOptions, optionsJsonFilePath);
+    }
+
+    return pluginOptions;
   }
 
   protected override _getManifestPath(): string {
