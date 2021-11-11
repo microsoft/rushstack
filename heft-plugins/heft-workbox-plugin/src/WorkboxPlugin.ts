@@ -90,16 +90,7 @@ export class WorkboxPlugin implements IHeftPlugin {
     // just copy sw file into dest if not in production
     if (!isProduction) {
       this._logger.terminal.writeLine(`Development build, copying ${swSrc} to ${swDest} without transform.`);
-      const copyPromise: Promise<void> = new Promise((resolve, reject): void => {
-        copyFile(swSrc, swDest, (err) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve();
-          }
-        });
-      });
-      return copyPromise;
+      await FileSystem.copyFileAsync({ source: swSrc, target: swDest });
     }
 
     this._logger.terminal.writeLine(`Injecting manifest in ${swSrc}, writing to ${swDest}.`);
