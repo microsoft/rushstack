@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/set-webpack-public-path-plugin",
+      "comment": "Update typings to only import from \"webpack.\"",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/set-webpack-public-path-plugin"
+}
