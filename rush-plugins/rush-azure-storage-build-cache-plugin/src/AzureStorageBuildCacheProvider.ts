@@ -3,6 +3,12 @@
 
 import { ITerminal } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
+import type {
+  ICloudBuildCacheProvider,
+  ICredentialCache,
+  ICredentialCacheEntry,
+  RushSession
+} from '@microsoft/rush-lib';
 import {
   BlobClient,
   BlobServiceClient,
@@ -14,11 +20,6 @@ import {
   ServiceGetUserDelegationKeyResponse
 } from '@azure/storage-blob';
 import { DeviceCodeCredential, DeviceCodeInfo } from '@azure/identity';
-
-import { EnvironmentConfiguration, EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
-import { CredentialCache, ICredentialCacheEntry } from '../CredentialCache';
-import { RushConstants } from '../RushConstants';
-import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // TODO: This is a temporary workaround; it should be reverted when we upgrade to "@azure/identity" version 2.x
@@ -54,28 +55,32 @@ interface IBlobError extends Error {
   };
 }
 
-export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase {
+export class AzureStorageBuildCacheProvider implements ICloudBuildCacheProvider {
   private readonly _storageAccountName: string;
   private readonly _storageContainerName: string;
   private readonly _azureEnvironment: AzureEnvironmentNames;
   private readonly _blobPrefix: string | undefined;
   private readonly _environmentCredential: string | undefined;
   private readonly _isCacheWriteAllowedByConfiguration: boolean;
+  private _rushSession: RushSession;
   private __credentialCacheId: string | undefined;
 
   public get isCacheWriteAllowed(): boolean {
-    return EnvironmentConfiguration.buildCacheWriteAllowed ?? this._isCacheWriteAllowedByConfiguration;
+    return (
+      this._rushSession.EnvironmentConfiguration.buildCacheWriteAllowed ??
+      this._isCacheWriteAllowedByConfiguration
+    );
   }
 
   private _containerClient: ContainerClient | undefined;
 
-  public constructor(options: IAzureStorageBuildCacheProviderOptions) {
-    super();
+  public constructor(options: IAzureStorageBuildCacheProviderOptions, rushSession: RushSession) {
+    this._rushSession = rushSession;
     this._storageAccountName = options.storageAccountName;
     this._storageContainerName = options.storageContainerName;
     this._azureEnvironment = options.azureEnvironment || 'AzurePublicCloud';
     this._blobPrefix = options.blobPrefix;
-    this._environmentCredential = EnvironmentConfiguration.buildCacheCredential;
+    this._environmentCredential = rushSession.EnvironmentConfiguration.buildCacheCredential;
     this._isCacheWriteAllowedByConfiguration = options.isCacheWriteAllowed;
 
     if (!(this._azureEnvironment in AzureAuthorityHosts)) {
@@ -114,6 +119,7 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
     cacheId: string
   ): Promise<Buffer | undefined> {
     const blobClient: BlobClient = await this._getBlobClientForCacheIdAsync(cacheId);
+    const { RushConstants, EnvironmentVariableNames } = this._rushSession;
     try {
       const blobExists: boolean = await blobClient.exists();
       if (blobExists) {
@@ -228,11 +234,12 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
   }
 
   public async updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void> {
+    const { CredentialCache } = this._rushSession;
     await CredentialCache.usingAsync(
       {
         supportEditing: true
       },
-      async (credentialsCache: CredentialCache) => {
+      async (credentialsCache: ICredentialCache) => {
         credentialsCache.setCacheEntry(this._credentialCacheId, credential);
         await credentialsCache.saveIfModifiedAsync();
       }
@@ -242,12 +249,13 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
   public async updateCachedCredentialInteractiveAsync(terminal: ITerminal): Promise<void> {
     const sasQueryParameters: SASQueryParameters = await this._getSasQueryParametersAsync(terminal);
     const sasString: string = sasQueryParameters.toString();
+    const { CredentialCache } = this._rushSession;
 
     await CredentialCache.usingAsync(
       {
         supportEditing: true
       },
-      async (credentialsCache: CredentialCache) => {
+      async (credentialsCache: ICredentialCache) => {
         credentialsCache.setCacheEntry(this._credentialCacheId, sasString, sasQueryParameters.expiresOn);
         await credentialsCache.saveIfModifiedAsync();
       }
@@ -255,11 +263,12 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
   }
 
   public async deleteCachedCredentialsAsync(terminal: ITerminal): Promise<void> {
+    const { CredentialCache } = this._rushSession;
     await CredentialCache.usingAsync(
       {
         supportEditing: true
       },
-      async (credentialsCache: CredentialCache) => {
+      async (credentialsCache: ICredentialCache) => {
         credentialsCache.deleteCacheEntry(this._credentialCacheId);
         await credentialsCache.saveIfModifiedAsync();
       }
@@ -273,6 +282,7 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
   }
 
   private async _getContainerClientAsync(): Promise<ContainerClient> {
+    const { CredentialCache, RushConstants, EnvironmentVariableNames } = this._rushSession;
     if (!this._containerClient) {
       let sasString: string | undefined = this._environmentCredential;
       if (!sasString) {
@@ -281,7 +291,7 @@ export class AzureStorageBuildCacheProvider extends CloudBuildCacheProviderBase 
           {
             supportEditing: false
           },
-          (credentialsCache: CredentialCache) => {
+          (credentialsCache: ICredentialCache) => {
             cacheEntry = credentialsCache.tryGetCacheEntry(this._credentialCacheId);
           }
         );

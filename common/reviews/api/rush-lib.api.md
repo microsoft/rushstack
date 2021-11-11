@@ -4,10 +4,16 @@
 
 ```ts
 
+/// <reference types="node" />
+
+import { AsyncSeriesHook } from 'tapable';
+import * as fetch from 'node-fetch';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
+import { ITerminalProvider } from '@rushstack/node-core-library';
 import { JsonObject } from '@rushstack/node-core-library';
 import { PackageNameParser } from '@rushstack/node-core-library';
+import { Terminal } from '@rushstack/node-core-library';
 
 // @public
 export class ApprovedPackagesConfiguration {
@@ -94,7 +100,7 @@ export const enum DependencyType {
 }
 
 // @public
-export const enum EnvironmentVariableNames {
+export enum EnvironmentVariableNames {
     RUSH_ABSOLUTE_SYMLINKS = "RUSH_ABSOLUTE_SYMLINKS",
     RUSH_ALLOW_UNSUPPORTED_NODEJS = "RUSH_ALLOW_UNSUPPORTED_NODEJS",
     RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD = "RUSH_ALLOW_WARNINGS_IN_SUCCESSFUL_BUILD",
@@ -137,6 +143,35 @@ export class ExperimentsConfiguration {
     get configuration(): Readonly<IExperimentsJson>;
 }
 
+// @beta (undocumented)
+export type IBuildCacheJson = ICloudBuildCacheJson | ILocalBuildCacheJson;
+
+// Warning: (ae-forgotten-export) The symbol "IBaseBuildCacheJson" needs to be exported by the entry point index.d.ts
+//
+// @beta (undocumented)
+export interface ICloudBuildCacheJson extends IBaseBuildCacheJson {
+    // (undocumented)
+    [otherConfigKey: string]: JsonObject;
+    // (undocumented)
+    readonly cacheProvider: string;
+}
+
+// @beta (undocumented)
+export interface ICloudBuildCacheProvider {
+    // (undocumented)
+    deleteCachedCredentialsAsync(terminal: ITerminal): Promise<void>;
+    // (undocumented)
+    readonly isCacheWriteAllowed: boolean;
+    // (undocumented)
+    tryGetCacheEntryBufferByIdAsync(terminal: ITerminal, cacheId: string): Promise<Buffer | undefined>;
+    // (undocumented)
+    trySetCacheEntryBufferAsync(terminal: ITerminal, cacheId: string, entryBuffer: Buffer): Promise<boolean>;
+    // (undocumented)
+    updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void>;
+    // (undocumented)
+    updateCachedCredentialInteractiveAsync(terminal: ITerminal): Promise<void>;
+}
+
 // @public
 export interface IConfigurationEnvironment {
     [environmentVariableName: string]: IConfigurationEnvironmentVariable;
@@ -146,6 +181,25 @@ export interface IConfigurationEnvironment {
 export interface IConfigurationEnvironmentVariable {
     override?: boolean;
     value: string;
+}
+
+// Warning: (ae-forgotten-export) The symbol "CredentialCache" needs to be exported by the entry point index.d.ts
+//
+// @beta (undocumented)
+export type ICredentialCache = CredentialCache;
+
+// @beta (undocumented)
+export interface ICredentialCacheEntry {
+    // (undocumented)
+    credential: string;
+    // (undocumented)
+    expires?: Date;
+}
+
+// @beta (undocumented)
+export interface ICredentialCacheOptions {
+    // (undocumented)
+    supportEditing: boolean;
 }
 
 // @beta
@@ -168,10 +222,24 @@ export interface IGetChangedProjectsOptions {
     terminal: ITerminal;
 }
 
+// Warning: (ae-forgotten-export) The symbol "IWebFetchOptionsBase" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export interface IGetFetchOptions extends IWebFetchOptionsBase {
+    // (undocumented)
+    verb: 'GET' | never;
+}
+
 // @public
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
     isManaged: boolean;
+}
+
+// @public (undocumented)
+export interface ILocalBuildCacheJson extends IBaseBuildCacheJson {
+    // (undocumented)
+    readonly cacheProvider: 'local-only';
 }
 
 // @beta
@@ -205,11 +273,40 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     useWorkspaces?: boolean;
 }
 
+// @public (undocumented)
+export interface IPutFetchOptions extends IWebFetchOptionsBase {
+    // (undocumented)
+    body?: Buffer;
+    // (undocumented)
+    verb: 'PUT';
+}
+
+// @public (undocumented)
+export interface IRushPlugin {
+    // Warning: (ae-incompatible-release-tags) The symbol "apply" is marked as @public, but its signature references "RushSession" which is marked as @beta
+    //
+    // (undocumented)
+    apply(rushSession: RushSession, rushConfiguration: RushConfiguration): void;
+}
+
+// @beta (undocumented)
+export interface IRushSessionOptions {
+    // (undocumented)
+    getIsDebugMode: () => boolean;
+    // (undocumented)
+    terminalProvider: ITerminalProvider;
+}
+
 // @public
 export interface ITryFindRushJsonLocationOptions {
     showVerbose?: boolean;
     startingFolder?: string;
 }
+
+// Warning: (ae-forgotten-export) The symbol "WebClient" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type IWebClient = WebClient;
 
 // @internal
 export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
@@ -424,6 +521,11 @@ export class RushConfiguration {
     get rushJsonFolder(): string;
     // @deprecated
     get rushLinkJsonFilename(): string;
+    get rushPluginOptionsFolder(): string;
+    // Warning: (ae-forgotten-export) The symbol "RushPluginsConfiguration" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    get rushPluginsConfiguration(): RushPluginsConfiguration;
     get shrinkwrapFilename(): string;
     get shrinkwrapFilePhrase(): string;
     get suppressNodeLtsWarning(): boolean;
@@ -485,6 +587,47 @@ export class _RushGlobalFolder {
     constructor();
     get nodeSpecificPath(): string;
     get path(): string;
+}
+
+// Warning: (ae-forgotten-export) The symbol "IRushLifecycle" needs to be exported by the entry point index.d.ts
+//
+// @beta (undocumented)
+export class RushSession implements IRushLifecycle {
+    constructor(options: IRushSessionOptions);
+    // (undocumented)
+    get CredentialCache(): typeof CredentialCache;
+    // Warning: (ae-forgotten-export) The symbol "EnvironmentConfiguration" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    get EnvironmentConfiguration(): typeof EnvironmentConfiguration;
+    // (undocumented)
+    get EnvironmentVariableNames(): typeof EnvironmentVariableNames;
+    // (undocumented)
+    getCloudBuildCacheProviderFactory(cacheProviderName: string): ICloudBuildCacheProviderFactory | undefined;
+    // Warning: (ae-forgotten-export) The symbol "ILogger" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    getLogger(name: string): ILogger;
+    // Warning: (ae-forgotten-export) The symbol "RushLifecycleHooks" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    readonly hooks: RushLifecycleHooks;
+    // Warning: (ae-forgotten-export) The symbol "ICloudBuildCacheProviderFactory" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    registerCloudBuildCacheProviderFactory(cacheProviderName: string, factory: ICloudBuildCacheProviderFactory): void;
+    // Warning: (ae-forgotten-export) The symbol "RushConstants" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    get RushConstants(): typeof RushConstants;
+    // Warning: (ae-forgotten-export) The symbol "RushUserConfiguration" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    get RushUserConfiguration(): typeof RushUserConfiguration;
+    // (undocumented)
+    get terminalProvider(): ITerminalProvider;
+    // (undocumented)
+    get WebClient(): typeof WebClient;
 }
 
 // @beta

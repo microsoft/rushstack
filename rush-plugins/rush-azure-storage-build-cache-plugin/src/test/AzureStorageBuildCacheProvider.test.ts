@@ -1,11 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { StringBufferTerminalProvider, Terminal } from '@rushstack/node-core-library';
-import { EnvironmentConfiguration } from '../../../api/EnvironmentConfiguration';
-import { RushUserConfiguration } from '../../../api/RushUserConfiguration';
-import { CredentialCache } from '../../CredentialCache';
+import {
+  ConsoleTerminalProvider,
+  StringBufferTerminalProvider,
+  Terminal
+} from '@rushstack/node-core-library';
+import { RushSession } from '@microsoft/rush-lib';
+
 import { AzureEnvironmentNames, AzureStorageBuildCacheProvider } from '../AzureStorageBuildCacheProvider';
+
+const rushSession = new RushSession({
+  terminalProvider: new ConsoleTerminalProvider(),
+  getIsDebugMode: () => false
+});
+
+const { EnvironmentConfiguration, RushUserConfiguration, CredentialCache } = rushSession;
 
 describe('AzureStorageBuildCacheProvider', () => {
   beforeEach(() => {
@@ -21,12 +31,15 @@ describe('AzureStorageBuildCacheProvider', () => {
   it('uses a correct list of Azure authority hosts', async () => {
     await expect(
       () =>
-        new AzureStorageBuildCacheProvider({
-          storageAccountName: 'storage-account',
-          storageContainerName: 'container-name',
-          azureEnvironment: 'INCORRECT_AZURE_ENVIRONMENT' as AzureEnvironmentNames,
-          isCacheWriteAllowed: false
-        })
+        new AzureStorageBuildCacheProvider(
+          {
+            storageAccountName: 'storage-account',
+            storageContainerName: 'container-name',
+            azureEnvironment: 'INCORRECT_AZURE_ENVIRONMENT' as AzureEnvironmentNames,
+            isCacheWriteAllowed: false
+          },
+          rushSession
+        )
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -36,11 +49,14 @@ describe('AzureStorageBuildCacheProvider', () => {
       envVarValue: boolean | undefined
     ): AzureStorageBuildCacheProvider {
       jest.spyOn(EnvironmentConfiguration, 'buildCacheWriteAllowed', 'get').mockReturnValue(envVarValue);
-      return new AzureStorageBuildCacheProvider({
-        storageAccountName: 'storage-account',
-        storageContainerName: 'container-name',
-        isCacheWriteAllowed: optionValue
-      });
+      return new AzureStorageBuildCacheProvider(
+        {
+          storageAccountName: 'storage-account',
+          storageContainerName: 'container-name',
+          isCacheWriteAllowed: optionValue
+        },
+        rushSession
+      );
     }
 
     it('is false if isCacheWriteAllowed is false', () => {
@@ -65,11 +81,14 @@ describe('AzureStorageBuildCacheProvider', () => {
   });
 
   async function testCredentialCache(isCacheWriteAllowed: boolean): Promise<void> {
-    const cacheProvider: AzureStorageBuildCacheProvider = new AzureStorageBuildCacheProvider({
-      storageAccountName: 'storage-account',
-      storageContainerName: 'container-name',
-      isCacheWriteAllowed
-    });
+    const cacheProvider: AzureStorageBuildCacheProvider = new AzureStorageBuildCacheProvider(
+      {
+        storageAccountName: 'storage-account',
+        storageContainerName: 'container-name',
+        isCacheWriteAllowed
+      },
+      rushSession
+    );
 
     // Mock the user folder to the current folder so a real .rush-user folder doesn't interfere with the test
     jest.spyOn(RushUserConfiguration, 'getRushUserFolderPath').mockReturnValue(__dirname);

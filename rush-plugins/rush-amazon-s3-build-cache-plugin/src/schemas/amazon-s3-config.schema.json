@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Configuration for build cache with Amazon S3 configuration",
+
+  "type": "object",
+
+  "additionalProperties": false,
+
+  "required": ["s3Region", "s3Bucket"],
+
+  "properties": {
+    "s3Region": {
+      "type": "string",
+      "description": "(Required) The Amazon S3 region of the bucket to use for build cache (e.g. \"us-east-1\")."
+    },
+
+    "s3Bucket": {
+      "type": "string",
+      "description": "(Required) The name of the bucket in Amazon S3 to use for build cache."
+    },
+
+    "s3Prefix": {
+      "type": "string",
+      "description": "An optional prefix (\"folder\") for cache items."
+    },
+
+    "isCacheWriteAllowed": {
+      "type": "boolean",
+      "description": "If set to true, allow writing to the cache. Defaults to false."
+    }
+  }
+}

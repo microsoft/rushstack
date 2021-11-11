@@ -90,6 +90,11 @@
 
     "html-webpack-plugin": [
       "~4.5.0" // Some test projects are still on Webpack 4 because some of our plugins don't support Webpack 5 yet
+    ],
+
+    "tapable": [
+      "2.2.1",
+      "1.1.3" // heft plugin is using an older version of tapable
     ]
   }
 }

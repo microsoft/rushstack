@@ -1,0 +1,16 @@
+{
+  "plugins": [
+    {
+      "pluginName": "rush-amazon-s3-build-cache-plugin",
+      "description": "Rush plugin for Amazon S3 cloud build cache",
+      "entryPoint": "lib/index.js",
+      "optionsSchema": "lib/schemas/amazon-s3-config.schema.json",
+      "associatedCommands": [
+        "build",
+        "rebuild",
+        "write-build-cache",
+        "update-cloud-credentials"
+      ]
+    }
+  ]
+}

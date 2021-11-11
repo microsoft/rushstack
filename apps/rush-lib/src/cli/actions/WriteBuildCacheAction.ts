@@ -67,7 +67,11 @@ export class WriteBuildCacheAction extends BaseRushAction {
     );
 
     const buildCacheConfiguration: BuildCacheConfiguration =
-      await BuildCacheConfiguration.loadAndRequireEnabledAsync(terminal, this.rushConfiguration);
+      await BuildCacheConfiguration.loadAndRequireEnabledAsync(
+        terminal,
+        this.rushConfiguration,
+        this.rushSession
+      );
 
     const command: string = this._command.value!;
     const commandToRun: string | undefined = TaskSelector.getScriptToRun(project, command, []);
