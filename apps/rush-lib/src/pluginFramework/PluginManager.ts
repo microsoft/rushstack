@@ -133,7 +133,7 @@ export class PluginManager {
       const defaultPluginLoaders: DefaultPluginLoader[] = this._getUnassociatedPluginLoaders(
         this._defaultPluginLoaders
       );
-      await this._initializePluginsAsync([...defaultPluginLoaders, ...remotePluginLoaders]);
+      this._initializePlugins([...defaultPluginLoaders, ...remotePluginLoaders]);
     } catch (e) {
       this._error = e as Error;
     }
@@ -150,7 +150,7 @@ export class PluginManager {
         commandName,
         this._defaultPluginLoaders
       );
-      await this._initializePluginsAsync([...defaultPluginLoaders, ...remotePluginLoaders]);
+      this._initializePlugins([...defaultPluginLoaders, ...remotePluginLoaders]);
     } catch (e) {
       this._error = e as Error;
     }
@@ -171,26 +171,19 @@ export class PluginManager {
     return commandLineConfigurationInfos;
   }
 
-  private async _initializePluginsAsync(pluginLoaders: PluginLoaderBase[]): Promise<void> {
-    const pluginInfos: { plugin: IRushPlugin; pluginName: string }[] = [];
+  private _initializePlugins(pluginLoaders: PluginLoaderBase[]): void {
     for (const pluginLoader of pluginLoaders) {
       const pluginName: string = pluginLoader.pluginName;
       if (this._loadedPluginNames.has(pluginName)) {
         throw new Error(
-          `Plugin "${pluginName}" has already been loaded. Please check your rush-plugins.json.`
+          `Error applying plugin: A plugin with name "${pluginName}" has ` + 'already been applied'
         );
       }
       const plugin: IRushPlugin | undefined = pluginLoader.load();
+      this._loadedPluginNames.add(pluginName);
       if (plugin) {
-        pluginInfos.push({
-          pluginName,
-          plugin
-        });
-        this._loadedPluginNames.add(pluginName);
+        this._applyPlugin(plugin, pluginName);
       }
-    }
-    for (const { plugin, pluginName } of pluginInfos) {
-      this._applyPlugin(plugin, pluginName);
     }
   }
 
