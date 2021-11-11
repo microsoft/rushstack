@@ -3,6 +3,7 @@
 
 import {
   FileSystem,
+  Import,
   InternalError,
   ITerminal,
   JsonFile,
@@ -35,7 +36,7 @@ export interface IPluginLoaderOptions {
   terminal: ITerminal;
 }
 
-export abstract class PluginLoaderBase {
+export class PluginLoaderBase {
   protected static _jsonSchema: JsonSchema = JsonSchema.fromFile(
     path.join(__dirname, '../../schemas/rush-plugin-manifest.schema.json')
   );
@@ -75,7 +76,13 @@ export abstract class PluginLoaderBase {
     return this._getRushPluginManifest();
   }
 
-  public abstract getPackageFolder(): string;
+  public getPackageFolder(): string {
+    const packageFolder: string = Import.resolvePackage({
+      baseFolderPath: __dirname,
+      packageName: this._packageName
+    });
+    return packageFolder;
+  }
 
   public getCommandLineConfiguration(): CommandLineConfiguration | undefined {
     const commandLineJsonFilePath: string | undefined = this._getCommandLineJsonFilePath();

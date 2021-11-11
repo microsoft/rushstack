@@ -5,7 +5,7 @@ import { FileSystem, InternalError, ITerminal } from '@rushstack/node-core-libra
 import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
 
 import { RushConfiguration } from '../api/RushConfiguration';
-import { IDefaultRushPluginConfiguration } from '../api/RushPluginsConfiguration';
+import { IRushPluginConfigurationBase } from '../api/RushPluginsConfiguration';
 import { DefaultPluginLoader } from './PluginLoader/DefaultPluginLoader';
 import { IRushPlugin } from './IRushPlugin';
 import { RemotePluginLoader } from './PluginLoader/RemotePluginLoader';
@@ -41,7 +41,16 @@ export class PluginManager {
 
     this._installedAutoinstallerNames = new Set<string>();
 
-    const defaultPluginConfigurations: IDefaultRushPluginConfiguration[] = [];
+    const defaultPluginConfigurations: IRushPluginConfigurationBase[] = [
+      {
+        packageName: '@rushstack/rush-amazon-s3-build-cache-plugin',
+        pluginName: 'rush-amazon-s3-build-cache-plugin'
+      },
+      {
+        packageName: '@rushstack/rush-azure-storage-build-cache-plugin',
+        pluginName: 'rush-azure-storage-build-cache-plugin'
+      }
+    ];
     this._defaultPluginLoaders = defaultPluginConfigurations.map((pluginConfiguration) => {
       return new DefaultPluginLoader({
         pluginConfiguration,
@@ -63,20 +72,6 @@ export class PluginManager {
 
   public get error(): Error | undefined {
     return this._error;
-  }
-
-  public addDefaultPluginConfigurations(
-    defaultPluginConfigurations: IDefaultRushPluginConfiguration[]
-  ): void {
-    for (const pluginConfiguration of defaultPluginConfigurations) {
-      this._defaultPluginLoaders.push(
-        new DefaultPluginLoader({
-          pluginConfiguration,
-          rushConfiguration: this._rushConfiguration,
-          terminal: this._terminal
-        })
-      );
-    }
   }
 
   public async updateAsync(): Promise<void> {
