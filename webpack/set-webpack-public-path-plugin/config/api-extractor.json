@@ -13,6 +13,7 @@
   },
 
   "dtsRollup": {
-    "enabled": false
+    "enabled": true,
+    "betaTrimmedFilePath": "<projectFolder>/dist/<unscopedPackageName>.d.ts"
   }
 }

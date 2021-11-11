@@ -3,7 +3,7 @@
   "version": "3.3.0",
   "description": "This plugin sets the webpack public path at runtime.",
   "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "typings": "dist/set-webpack-public-path-plugin.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -13,14 +13,15 @@
   "scripts": {
     "build": "heft build --clean"
   },
-  "dependencies": {
-    "lodash": "~4.17.15"
-  },
   "peerDependencies": {
-    "@types/webpack": "^4.39.8"
+    "@types/webpack": "^4.39.8",
+    "webpack": "^5.35.1"
   },
   "peerDependenciesMeta": {
     "@types/webpack": {
+      "optional": true
+    },
+    "webpack": {
       "optional": true
     }
   },
@@ -29,11 +30,9 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/lodash": "4.14.116",
     "@types/node": "12.20.24",
     "@types/tapable": "1.0.6",
-    "@types/uglify-js": "2.6.29",
-    "webpack5": "npm:webpack@~5.35.1",
-    "webpack4": "npm:@types/webpack@4.41.24"
+    "@types/webpack": "4.41.24",
+    "webpack5": "npm:webpack@~5.35.1"
   }
 }
