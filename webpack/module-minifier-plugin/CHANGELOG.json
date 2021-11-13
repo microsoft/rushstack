@@ -2,6 +2,18 @@
   "name": "@rushstack/module-minifier-plugin",
   "entries": [
     {
+      "version": "0.4.36",
+      "tag": "@rushstack/module-minifier-plugin_v0.4.36",
+      "date": "Sat, 13 Nov 2021 01:09:28 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a minor mistake in the README."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.35",
       "tag": "@rushstack/module-minifier-plugin_v0.4.35",
       "date": "Sat, 06 Nov 2021 00:09:13 GMT",
