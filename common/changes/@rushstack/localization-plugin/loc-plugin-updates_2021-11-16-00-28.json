@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/localization-plugin",
+      "comment": "Accept .resx.json as an alternative strings file extension.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/localization-plugin"
+}
