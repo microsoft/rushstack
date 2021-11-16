@@ -33,10 +33,10 @@ resources
 - [Project 3](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03)
   - This project contains four webpack entrypoints:
     - [`indexA.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03/src/indexA.ts)
-      directly references two `.loc.json` files and one `.resx` file, and dynamically imports an async chunk with
+      directly references one `.loc.json` file, one `.resx.json` file, and one `.resx` file, and dynamically imports an async chunk with
       localized data, and an async chunk without localized data
     - [`indexB.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03/src/indexB.ts)
-      directly references two `.loc.json` files
+      directly references one `.loc.json` file and one `.resx.json` file
     - [`indexC.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03/src/indexC.ts)
       directly references no localized resources, and dynamically imports an async chunk with localized data
     - [`indexD.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03/src/indexD.ts)

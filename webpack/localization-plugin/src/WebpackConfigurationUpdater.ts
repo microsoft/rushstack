@@ -47,23 +47,15 @@ export class WebpackConfigurationUpdater {
 
     WebpackConfigurationUpdater._addRulesToConfiguration(options.configuration, [
       {
-        test: Constants.LOC_JSON_REGEX,
-        use: [
-          {
-            loader: loader,
-            options: loaderOptions
-          }
-        ]
-      },
-      {
-        test: Constants.RESX_REGEX,
+        test: Constants.RESX_OR_LOC_JSON_REGEX,
         use: [
           {
             loader: loader,
             options: loaderOptions
           }
         ],
-        type: 'json'
+        type: 'json',
+        sideEffects: false
       }
     ]);
   }
@@ -104,18 +96,7 @@ export class WebpackConfigurationUpdater {
     WebpackConfigurationUpdater._addRulesToConfiguration(options.configuration, [
       {
         test: {
-          and: [(filePath: string) => !options.filesToIgnore.has(filePath), Constants.LOC_JSON_REGEX]
-        },
-        use: [
-          {
-            loader: loader,
-            options: loaderOptions
-          }
-        ]
-      },
-      {
-        test: {
-          and: [(filePath: string) => !options.filesToIgnore.has(filePath), Constants.RESX_REGEX]
+          and: [(filePath: string) => !options.filesToIgnore.has(filePath), Constants.RESX_OR_LOC_JSON_REGEX]
         },
         use: [
           {
@@ -123,7 +104,8 @@ export class WebpackConfigurationUpdater {
             options: loaderOptions
           }
         ],
-        type: 'json'
+        type: 'json',
+        sideEffects: false
       }
     ]);
   }

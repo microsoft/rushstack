@@ -1,5 +1,5 @@
 import strings1 from './strings1.loc.json';
-import strings3 from './strings3.loc.json';
+import strings3 from './strings3.resx.json';
 import strings5 from './strings5.resx';
 
 console.log(strings1.string1);
