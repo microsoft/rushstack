@@ -12,23 +12,23 @@ import { MinifyOptions } from 'terser';
 import './OverrideWebpackIdentifierAllocation';
 
 /**
- * Options for configuring the SynchronousMinifier
+ * Options for configuring the LocalMinifier
  * @public
  */
-export interface ISynchronousMinifierOptions {
+export interface ILocalMinifierOptions {
   terserOptions?: MinifyOptions;
 }
 
 /**
- * Minifier implementation that synchronously minifies code on the main thread.
+ * Minifier implementation that minifies code on the main thread.
  * @public
  */
-export class SynchronousMinifier implements IModuleMinifier {
+export class LocalMinifier implements IModuleMinifier {
   public readonly terserOptions: MinifyOptions;
 
   private readonly _resultCache: Map<string, IModuleMinificationResult>;
 
-  public constructor(options: ISynchronousMinifierOptions) {
+  public constructor(options: ILocalMinifierOptions) {
     const { terserOptions = {} } = options || {};
 
     this.terserOptions = {
@@ -44,7 +44,7 @@ export class SynchronousMinifier implements IModuleMinifier {
   }
 
   /**
-   * Transform that synchronously invokes Terser
+   * Transform that invokes Terser on the main thread
    * @param request - The request to process
    * @param callback - The callback to invoke
    */
@@ -56,9 +56,24 @@ export class SynchronousMinifier implements IModuleMinifier {
       return callback(cached);
     }
 
-    const result: IModuleMinificationResult = minifySingleFile(request, this.terserOptions);
-    this._resultCache.set(hash, result);
-
-    callback(result);
+    minifySingleFile(request, this.terserOptions)
+      .then((result: IModuleMinificationResult) => {
+        this._resultCache.set(hash, result);
+        callback(result);
+      })
+      .catch((error) => {
+        callback({
+          error: error as Error,
+          code: undefined,
+          map: undefined,
+          hash
+        });
+      });
   }
 }
+
+/**
+ * Use the name "LocalMinifier" instead for technical correctness.
+ * @deprecated
+ */
+export { LocalMinifier as SynchronousMinifier };

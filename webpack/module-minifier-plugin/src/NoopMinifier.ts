@@ -18,13 +18,23 @@ export class NoopMinifier implements IModuleMinifier {
    * @param callback - The callback to invoke
    */
   public minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void {
-    const { code, hash } = request;
+    const { code, hash, nameForMap } = request;
 
     callback({
       hash,
       error: undefined,
       code,
-      map: undefined
+      // If source maps are requested, provide an empty source map
+      map: nameForMap
+        ? {
+            version: 3,
+            names: [],
+            file: nameForMap,
+            sources: [nameForMap],
+            sourcesContent: [code],
+            mappings: 'AAAA'
+          }
+        : undefined
     });
   }
 }

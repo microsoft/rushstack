@@ -8,5 +8,5 @@ export * from './ModuleMinifierPlugin';
 export * from './NoopMinifier';
 export * from './PortableMinifierIdsPlugin';
 export * from './RehydrateAsset';
-export * from './SynchronousMinifier';
+export * from './LocalMinifier';
 export * from './WorkerPoolMinifier';
