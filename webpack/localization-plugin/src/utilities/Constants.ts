@@ -22,9 +22,6 @@ export class Constants {
   );
   public static STRING_PLACEHOLDER_PREFIX: string = '_LOCALIZED_STRING_f12dy0i7_n4bo_dqwj_39gf_sasqehjmihz9';
 
-  public static RESX_REGEX: RegExp = /\.resx$/i;
-  public static RESX_JSON_REGEX: RegExp = /\.resx$/i;
-  public static LOC_JSON_REGEX: RegExp = /\.loc\.json$/i;
   public static RESX_OR_LOC_JSON_REGEX: RegExp = /\.(resx|resx\.json|loc\.json)$/i;
 
   public static STRING_PLACEHOLDER_LABEL: string = 'A';
