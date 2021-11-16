@@ -32,6 +32,7 @@ export class NoopMinifier implements IModuleMinifier {
             file: nameForMap,
             sources: [nameForMap],
             sourcesContent: [code],
+            // In source mapping parlance, this means "map line 0, column 0 to the input file at index 0, line 0, column 0"
             mappings: 'AAAA'
           }
         : undefined

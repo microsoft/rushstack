@@ -24,14 +24,14 @@ export interface ILocalMinifierOptions {
  * @public
  */
 export class LocalMinifier implements IModuleMinifier {
-  public readonly terserOptions: MinifyOptions;
+  private readonly _terserOptions: MinifyOptions;
 
   private readonly _resultCache: Map<string, IModuleMinificationResult>;
 
   public constructor(options: ILocalMinifierOptions) {
     const { terserOptions = {} } = options || {};
 
-    this.terserOptions = {
+    this._terserOptions = {
       ...terserOptions,
       output: terserOptions.output
         ? {
@@ -56,12 +56,13 @@ export class LocalMinifier implements IModuleMinifier {
       return callback(cached);
     }
 
-    minifySingleFile(request, this.terserOptions)
+    minifySingleFile(request, this._terserOptions)
       .then((result: IModuleMinificationResult) => {
         this._resultCache.set(hash, result);
         callback(result);
       })
       .catch((error) => {
+        // This branch is here to satisfy the no-floating-promises lint rule
         callback({
           error: error as Error,
           code: undefined,
@@ -71,9 +72,3 @@ export class LocalMinifier implements IModuleMinifier {
       });
   }
 }
-
-/**
- * Use the name "LocalMinifier" instead for technical correctness.
- * @deprecated
- */
-export { LocalMinifier as SynchronousMinifier };

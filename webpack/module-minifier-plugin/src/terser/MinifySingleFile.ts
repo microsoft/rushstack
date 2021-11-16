@@ -19,8 +19,7 @@ const nth_identifier: SimpleIdentifierMangler = {
 };
 
 /**
- * Minifies a single chunk of code. Factored out for reuse between ThreadPoolMinifier and SynchronousMinifier
- * Mutates terserOptions.output.comments to support comment extraction
+ * Minifies a single chunk of code. Factored out for reuse between WorkerPoolMinifier and LocalMinifier
  * @internal
  */
 export async function minifySingleFile(

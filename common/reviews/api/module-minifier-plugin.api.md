@@ -168,14 +168,10 @@ export interface IWorkerPoolMinifierOptions {
 }
 
 // @public
-class LocalMinifier implements IModuleMinifier {
+export class LocalMinifier implements IModuleMinifier {
     constructor(options: ILocalMinifierOptions);
     minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
-    // (undocumented)
-    readonly terserOptions: MinifyOptions;
 }
-export { LocalMinifier }
-export { LocalMinifier as SynchronousMinifier }
 
 // @public
 export const MODULE_WRAPPER_PREFIX: '__MINIFY_MODULE__(';
