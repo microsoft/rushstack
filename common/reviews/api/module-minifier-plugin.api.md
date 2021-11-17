@@ -8,7 +8,7 @@ import { AsyncSeriesWaterfallHook } from 'tapable';
 import { Compiler } from 'webpack';
 import { MinifyOptions } from 'terser';
 import { Plugin } from 'webpack';
-import { RawSourceMap } from 'source-map';
+import type { RawSourceMap } from 'source-map';
 import { ReplaceSource } from 'webpack-sources';
 import { Source } from 'webpack-sources';
 import { SyncWaterfallHook } from 'tapable';
@@ -64,6 +64,12 @@ export interface IExtendedModule extends webpack.compilation.Module {
     modules?: IExtendedModule[];
     readableIdentifier(requestShortener: unknown): string;
     resource?: string;
+}
+
+// @public
+export interface ILocalMinifierOptions {
+    // (undocumented)
+    terserOptions?: MinifyOptions;
 }
 
 // @public
@@ -148,12 +154,6 @@ export interface _INormalModuleFactoryModuleData {
     };
 }
 
-// @public
-export interface ISynchronousMinifierOptions {
-    // (undocumented)
-    terserOptions?: MinifyOptions;
-}
-
 // @internal
 export interface _IWebpackCompilationData {
     // (undocumented)
@@ -165,6 +165,12 @@ export interface IWorkerPoolMinifierOptions {
     maxThreads?: number;
     terserOptions?: MinifyOptions;
     verbose?: boolean;
+}
+
+// @public
+export class LocalMinifier implements IModuleMinifier {
+    constructor(options: ILocalMinifierOptions);
+    minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
 }
 
 // @public
@@ -204,14 +210,6 @@ export const STAGE_AFTER: 100;
 
 // @public
 export const STAGE_BEFORE: -100;
-
-// @public
-export class SynchronousMinifier implements IModuleMinifier {
-    constructor(options: ISynchronousMinifierOptions);
-    minify(request: IModuleMinificationRequest, callback: IModuleMinificationCallback): void;
-    // (undocumented)
-    readonly terserOptions: MinifyOptions;
-}
 
 // @public
 export class WorkerPoolMinifier implements IModuleMinifier {

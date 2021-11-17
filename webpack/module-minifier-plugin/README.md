@@ -32,18 +32,18 @@ optimization: {
 }
 ```
 
-## Synchronous execution
+## Single-threaded execution
 You can also run the ModuleMinifierPlugin in a single-threaded configuration.
 
 ```js
 // webpack.config.js
-const { ModuleMinifierPlugin, SynchronousMinifier } = require('@rushstack/module-minifier-plugin');
+const { ModuleMinifierPlugin, LocalMinifier } = require('@rushstack/module-minifier-plugin');
 
 // In your webpack options:
 optimization: {
   minimizer: [
     new ModuleMinifierPlugin({
-      minifier: new SynchronousMinifier()
+      minifier: new LocalMinifier()
     })
   ]
 }

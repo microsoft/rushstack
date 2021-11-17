@@ -11,12 +11,12 @@ const terserOptions: MinifyOptions = workerData;
 // Set to non-zero to help debug unexpected graceful exit
 process.exitCode = 2;
 
-parentPort!.on('message', (message: IModuleMinificationRequest) => {
+parentPort!.on('message', async (message: IModuleMinificationRequest) => {
   if (!message) {
     process.exit(0);
   }
 
-  const result: IModuleMinificationResult = minifySingleFile(message, terserOptions);
+  const result: IModuleMinificationResult = await minifySingleFile(message, terserOptions);
 
   parentPort!.postMessage(result);
 });
