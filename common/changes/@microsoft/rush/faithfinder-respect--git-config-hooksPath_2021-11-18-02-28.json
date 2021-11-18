@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Improve the git hook installation process. Now stops `rush install` if `core.hooksPath` is configured",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
