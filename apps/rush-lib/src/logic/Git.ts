@@ -159,7 +159,7 @@ export class Git {
           '',
           '    git rev-parse --git-path hooks',
           '',
-          'Assuming hooks can still be installed in the degault location'
+          'Assuming hooks can still be installed in the default location'
         ].join(os.EOL)
       );
       return true;
