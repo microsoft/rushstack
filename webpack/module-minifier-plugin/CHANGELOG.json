@@ -2,6 +2,18 @@
   "name": "@rushstack/module-minifier-plugin",
   "entries": [
     {
+      "version": "0.5.0",
+      "tag": "@rushstack/module-minifier-plugin_v0.5.0",
+      "date": "Thu, 18 Nov 2021 01:10:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade to terser 5.10.2, fix source maps in NoopMinifier"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.36",
       "tag": "@rushstack/module-minifier-plugin_v0.4.36",
       "date": "Sat, 13 Nov 2021 01:09:28 GMT",
