@@ -329,57 +329,42 @@ export class WorkspaceInstallManager extends BaseInstallManager {
       );
     }
 
-    try {
-      Utilities.executeCommandWithRetry(
-        {
-          command: packageManagerFilename,
-          args: installArgs,
-          workingDirectory: this.rushConfiguration.commonTempFolder,
-          environment: packageManagerEnv,
-          suppressOutput: false
-        },
-        this.options.maxInstallAttempts,
-        () => {
-          if (this.rushConfiguration.packageManager === 'pnpm') {
-            console.log(colors.yellow(`Deleting the "node_modules" folder`));
-            this.installRecycler.moveFolder(commonNodeModulesFolder);
+    Utilities.executeCommandWithRetry(
+      {
+        command: packageManagerFilename,
+        args: installArgs,
+        workingDirectory: this.rushConfiguration.commonTempFolder,
+        environment: packageManagerEnv,
+        suppressOutput: false
+      },
+      this.options.maxInstallAttempts,
+      () => {
+        if (this.rushConfiguration.packageManager === 'pnpm') {
+          console.log(colors.yellow(`Deleting the "node_modules" folder`));
+          this.installRecycler.moveFolder(commonNodeModulesFolder);
 
-            // Leave the pnpm-store as is for the retry. This ensures that packages that have already
-            // been downloaded need not be downloaded again, thereby potentially increasing the chances
-            // of a subsequent successful install.
+          // Leave the pnpm-store as is for the retry. This ensures that packages that have already
+          // been downloaded need not be downloaded again, thereby potentially increasing the chances
+          // of a subsequent successful install.
 
-            Utilities.createFolderWithRetry(commonNodeModulesFolder);
-          }
+          Utilities.createFolderWithRetry(commonNodeModulesFolder);
         }
-      );
-
-      // Ensure that node_modules folders exist after install, since the timestamps on these folders are used
-      // to determine if the install can be skipped
-      const projectNodeModulesFolders: string[] = [
-        path.join(this.rushConfiguration.commonTempFolder, RushConstants.nodeModulesFolderName),
-        ...this.rushConfiguration.projects.map((x) => {
-          return path.join(x.projectFolder, RushConstants.nodeModulesFolderName);
-        })
-      ];
-
-      for (const nodeModulesFolder of projectNodeModulesFolders) {
-        FileSystem.ensureFolder(nodeModulesFolder);
       }
-    } catch (error) {
-      // All the install attempts failed.
+    );
 
-      if (
-        this.rushConfiguration.packageManager === 'pnpm' &&
-        this.rushConfiguration.pnpmOptions.pnpmStore === 'local'
-      ) {
-        // If the installation has failed even after the retries, then pnpm store may
-        // have got into a corrupted, irrecoverable state. Delete the store so that a
-        // future install can create the store afresh.
-        console.log(colors.yellow(`Deleting the "pnpm-store" folder`));
-        this.installRecycler.moveFolder(this.rushConfiguration.pnpmOptions.pnpmStorePath);
-      }
+    // If all attempts fail we just terminate. No special handling needed.
 
-      throw error;
+    // Ensure that node_modules folders exist after install, since the timestamps on these folders are used
+    // to determine if the install can be skipped
+    const projectNodeModulesFolders: string[] = [
+      path.join(this.rushConfiguration.commonTempFolder, RushConstants.nodeModulesFolderName),
+      ...this.rushConfiguration.projects.map((x) => {
+        return path.join(x.projectFolder, RushConstants.nodeModulesFolderName);
+      })
+    ];
+
+    for (const nodeModulesFolder of projectNodeModulesFolders) {
+      FileSystem.ensureFolder(nodeModulesFolder);
     }
 
     console.log('');
