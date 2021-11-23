@@ -10,3 +10,4 @@ export * from './PortableMinifierIdsPlugin';
 export * from './RehydrateAsset';
 export * from './LocalMinifier';
 export * from './WorkerPoolMinifier';
+export { getIdentifier } from './MinifiedIdentifier';
