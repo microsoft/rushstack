@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "comment": "Export a getIdentifier function for generating safe JavaScript identifiers.",
+      "type": "minor",
+      "packageName": "@rushstack/module-minifier-plugin"
+    }
+  ],
+  "packageName": "@rushstack/module-minifier-plugin",
+  "email": "iclanton@users.noreply.github.com"
+}

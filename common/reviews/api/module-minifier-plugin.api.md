@@ -20,6 +20,9 @@ export const CHUNK_MODULES_TOKEN: '__WEBPACK_CHUNK_MODULES__';
 // @public
 export function generateLicenseFileForAsset(compilation: webpack.compilation.Compilation, asset: IAssetInfo, minifiedModules: IModuleMap): string;
 
+// @public
+export function getIdentifier(ordinal: number): string;
+
 // @internal
 export interface _IAcornComment {
     // (undocumented)
