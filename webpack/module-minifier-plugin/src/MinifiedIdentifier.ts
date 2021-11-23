@@ -140,7 +140,6 @@ const RESERVED_ORDINALS: number[] = ((): number[] => {
 
 /**
  * Gets a base54 string suitable for use as a JavaScript identifier, omitting those that are valid ECMAScript keywords
- * Not guaranteed not to collide if `ordinal` \>= 100000
  *
  * @param ordinal - The number to convert to a base54 identifier
  *
