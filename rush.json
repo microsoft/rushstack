@@ -894,6 +894,22 @@
       "shouldPublish": true
     },
 
+    // "rush-plugins" folder (alphabetical order)
+    {
+      "packageName": "@rushstack/rush-amazon-s3-build-cache-plugin",
+      "projectFolder": "rush-plugins/rush-amazon-s3-build-cache-plugin",
+      "reviewCategory": "libraries",
+      // "versionPolicyName": "rush" (TODO: put this back and remove the "shouldPublish" property when we're ready to publish)
+      "shouldPublish": false
+    },
+    {
+      "packageName": "@rushstack/rush-azure-storage-build-cache-plugin",
+      "projectFolder": "rush-plugins/rush-azure-storage-build-cache-plugin",
+      "reviewCategory": "libraries",
+      // "versionPolicyName": "rush" (TODO: put this back and remove the "shouldPublish" property when we're ready to publish)
+      "shouldPublish": false
+    },
+
     // "stack" folder (alphabetical order)
     {
       "packageName": "@rushstack/eslint-config",
@@ -952,18 +968,6 @@
     {
       "packageName": "@rushstack/module-minifier-plugin",
       "projectFolder": "webpack/module-minifier-plugin",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@rushstack/rush-amazon-s3-build-cache-plugin",
-      "projectFolder": "rush-plugins/rush-amazon-s3-build-cache-plugin",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@rushstack/rush-azure-storage-build-cache-plugin",
-      "projectFolder": "rush-plugins/rush-azure-storage-build-cache-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
