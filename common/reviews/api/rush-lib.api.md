@@ -144,19 +144,6 @@ export class ExperimentsConfiguration {
 }
 
 // @beta (undocumented)
-export type IBuildCacheJson = ICloudBuildCacheJson | ILocalBuildCacheJson;
-
-// Warning: (ae-forgotten-export) The symbol "IBaseBuildCacheJson" needs to be exported by the entry point index.d.ts
-//
-// @beta (undocumented)
-export interface ICloudBuildCacheJson extends IBaseBuildCacheJson {
-    // (undocumented)
-    [otherConfigKey: string]: JsonObject;
-    // (undocumented)
-    readonly cacheProvider: string;
-}
-
-// @beta (undocumented)
 export interface ICloudBuildCacheProvider {
     // (undocumented)
     deleteCachedCredentialsAsync(terminal: ITerminal): Promise<void>;
@@ -234,12 +221,6 @@ export interface IGetFetchOptions extends IWebFetchOptionsBase {
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
     isManaged: boolean;
-}
-
-// @public (undocumented)
-export interface ILocalBuildCacheJson extends IBaseBuildCacheJson {
-    // (undocumented)
-    readonly cacheProvider: 'local-only';
 }
 
 // @beta

@@ -66,12 +66,6 @@ export { RushSession, IRushSessionOptions } from './pluginFramework/RushSession'
 
 export type { IRushPlugin } from './pluginFramework/IRushPlugin';
 
-export type {
-  IBuildCacheJson,
-  ILocalBuildCacheJson,
-  ICloudBuildCacheJson
-} from './api/BuildCacheConfiguration';
-
 export type { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCacheProvider';
 
 export type {
