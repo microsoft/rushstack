@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor",
+      "comment": "To reduce spurious warnings, \"ae-forgotten-export\" is no longer reported for APIs marked as \"@internal\". (To restore the old behavior, set reportForgottenExportsForInternalApis=true in api-extractor.json.)",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor"
+}
