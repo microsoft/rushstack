@@ -63,6 +63,15 @@
   "bundledPackages": [],
 
   /**
+   * Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files
+   * will be written with Windows-style newlines.  To use POSIX-style newlines, specify "lf" instead.
+   * To use the OS's default newline kind, specify "os".
+   *
+   * DEFAULT VALUE: "crlf"
+   */
+  // "newlineKind": "crlf",
+
+  /**
    * Determines how the TypeScript compiler engine will be invoked by API Extractor.
    */
   "compiler": {
@@ -260,13 +269,16 @@
   },
 
   /**
-   * Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files
-   * will be written with Windows-style newlines.  To use POSIX-style newlines, specify "lf" instead.
-   * To use the OS's default newline kind, specify "os".
-   *
-   * DEFAULT VALUE: "crlf"
+   * Configures the validation checks performed by API Extractor.
    */
-  // "newlineKind": "crlf",
+  "validation": {
+    /**
+     * Whether to report "ae-forgotten-export" warnings for APIs that are marked as "@internal".
+     *
+     * DEFAULT VALUE: false
+     */
+    // "reportForgottenExportsForInternalApis": true
+  },
 
   /**
    * Configures how API Extractor reports error and warning messages produced during analysis.

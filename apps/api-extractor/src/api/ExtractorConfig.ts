@@ -160,6 +160,7 @@ interface IExtractorConfigParameters {
   tsdocMetadataFilePath: string;
   tsdocConfigFile: TSDocConfigFile;
   tsdocConfiguration: TSDocConfiguration;
+  reportForgottenExportsForInternalApis: boolean;
   newlineKind: NewlineKind;
   messages: IExtractorMessagesConfig;
   testMode: boolean;
@@ -219,6 +220,12 @@ export class ExtractorConfig {
   /** {@inheritDoc IConfigFile.bundledPackages} */
   public readonly bundledPackages: string[];
 
+  /**
+   * Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files
+   * will be written with Windows-style newlines.
+   */
+  public readonly newlineKind: NewlineKind;
+
   /** {@inheritDoc IConfigCompiler.tsconfigFilePath} */
   public readonly tsconfigFilePath: string;
 
@@ -267,11 +274,8 @@ export class ExtractorConfig {
    */
   public readonly tsdocConfiguration: TSDocConfiguration;
 
-  /**
-   * Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files
-   * will be written with Windows-style newlines.
-   */
-  public readonly newlineKind: NewlineKind;
+  /** {@inheritDoc IConfigValidation.reportForgottenExportsForInternalApis} */
+  public readonly reportForgottenExportsForInternalApis: boolean;
 
   /** {@inheritDoc IConfigFile.messages} */
   public readonly messages: IExtractorMessagesConfig;
@@ -285,6 +289,7 @@ export class ExtractorConfig {
     this.packageFolder = parameters.packageFolder;
     this.mainEntryPointFilePath = parameters.mainEntryPointFilePath;
     this.bundledPackages = parameters.bundledPackages;
+    this.newlineKind = parameters.newlineKind;
     this.tsconfigFilePath = parameters.tsconfigFilePath;
     this.overrideTsconfig = parameters.overrideTsconfig;
     this.skipLibCheck = parameters.skipLibCheck;
@@ -302,7 +307,7 @@ export class ExtractorConfig {
     this.tsdocMetadataFilePath = parameters.tsdocMetadataFilePath;
     this.tsdocConfigFile = parameters.tsdocConfigFile;
     this.tsdocConfiguration = parameters.tsdocConfiguration;
-    this.newlineKind = parameters.newlineKind;
+    this.reportForgottenExportsForInternalApis = parameters.reportForgottenExportsForInternalApis;
     this.messages = parameters.messages;
     this.testMode = parameters.testMode;
   }
@@ -805,6 +810,19 @@ export class ExtractorConfig {
         }
       }
 
+      let newlineKind: NewlineKind;
+      switch (configObject.newlineKind) {
+        case 'lf':
+          newlineKind = NewlineKind.Lf;
+          break;
+        case 'os':
+          newlineKind = NewlineKind.OsDefault;
+          break;
+        default:
+          newlineKind = NewlineKind.CrLf;
+          break;
+      }
+
       const tsconfigFilePath: string = ExtractorConfig._resolvePathWithTokens(
         'tsconfigFilePath',
         configObject.compiler.tsconfigFilePath,
@@ -935,24 +953,19 @@ export class ExtractorConfig {
         omitTrimmingComments = !!configObject.dtsRollup.omitTrimmingComments;
       }
 
-      let newlineKind: NewlineKind;
-      switch (configObject.newlineKind) {
-        case 'lf':
-          newlineKind = NewlineKind.Lf;
-          break;
-        case 'os':
-          newlineKind = NewlineKind.OsDefault;
-          break;
-        default:
-          newlineKind = NewlineKind.CrLf;
-          break;
+      let reportForgottenExportsForInternalApis: boolean = false;
+      if (configObject.validation) {
+        reportForgottenExportsForInternalApis =
+          !!configObject.validation.reportForgottenExportsForInternalApis;
       }
+
       extractorConfigParameters = {
         projectFolder: projectFolder,
         packageJson,
         packageFolder,
         mainEntryPointFilePath,
         bundledPackages,
+        newlineKind,
         tsconfigFilePath,
         overrideTsconfig: configObject.compiler.overrideTsconfig,
         skipLibCheck: !!configObject.compiler.skipLibCheck,
@@ -968,7 +981,7 @@ export class ExtractorConfig {
         omitTrimmingComments,
         tsdocMetadataEnabled,
         tsdocMetadataFilePath,
-        newlineKind,
+        reportForgottenExportsForInternalApis,
         messages: configObject.messages || {},
         testMode: !!configObject.testMode
       };

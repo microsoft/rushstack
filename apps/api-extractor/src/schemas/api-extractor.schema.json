@@ -31,6 +31,13 @@
       }
     },
 
+    "newlineKind": {
+      "description": "Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files will be written with Windows-style newlines.  To use POSIX-style newlines, specify \"lf\" instead. To use the OS's default newline kind, specify \"os\".",
+      "type": "string",
+      "enum": ["crlf", "lf", "os"],
+      "default": "crlf"
+    },
+
     "compiler": {
       "description": "Determines how the TypeScript compiler engine will be invoked by API Extractor.",
       "type": "object",
@@ -141,11 +148,16 @@
       "additionalProperties": false
     },
 
-    "newlineKind": {
-      "description": "Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files will be written with Windows-style newlines.  To use POSIX-style newlines, specify \"lf\" instead. To use the OS's default newline kind, specify \"os\".",
-      "type": "string",
-      "enum": ["crlf", "lf", "os"],
-      "default": "crlf"
+    "validation": {
+      "description": "Configures the validation checks performed by API Extractor.",
+      "type": "object",
+      "properties": {
+        "reportForgottenExportsForInternalApis": {
+          "description": "Whether to report \"ae-forgotten-export\" warnings for APIs that are marked as \"@internal\".",
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
     },
 
     "messages": {

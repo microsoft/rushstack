@@ -39,6 +39,7 @@ export {
   IConfigTsdocMetadata,
   IConfigMessageReportingRule,
   IConfigMessageReportingTable,
+  IConfigValidation,
   IExtractorMessagesConfig,
   IConfigFile
 } from './api/IConfigFile';

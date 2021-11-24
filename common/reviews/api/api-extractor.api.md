@@ -69,6 +69,7 @@ export class ExtractorConfig {
     readonly projectFolder: string;
     readonly publicTrimmedFilePath: string;
     readonly reportFilePath: string;
+    readonly reportForgottenExportsForInternalApis: boolean;
     readonly reportTempFilePath: string;
     readonly rollupEnabled: boolean;
     readonly skipLibCheck: boolean;
@@ -207,6 +208,7 @@ export interface IConfigFile {
     testMode?: boolean;
     // @beta
     tsdocMetadata?: IConfigTsdocMetadata;
+    validation?: IConfigValidation;
 }
 
 // @public
@@ -224,6 +226,11 @@ export interface IConfigMessageReportingTable {
 export interface IConfigTsdocMetadata {
     enabled: boolean;
     tsdocMetadataFilePath?: string;
+}
+
+// @public
+export interface IConfigValidation {
+    reportForgottenExportsForInternalApis?: boolean;
 }
 
 // @public
@@ -264,6 +271,5 @@ export interface IExtractorMessagesConfig {
     extractorMessageReporting?: IConfigMessageReportingTable;
     tsdocMessageReporting?: IConfigMessageReportingTable;
 }
-
 
 ```

@@ -38,6 +38,10 @@
     "tsdocMetadataFilePath": "<lookup>"
   },
 
+  "validation": {
+    "reportForgottenExportsForInternalApis": false
+  },
+
   "messages": {
     "compilerMessageReporting": {
       "default": {
