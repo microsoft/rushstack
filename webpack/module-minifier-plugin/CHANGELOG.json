@@ -2,6 +2,18 @@
   "name": "@rushstack/module-minifier-plugin",
   "entries": [
     {
+      "version": "0.6.0",
+      "tag": "@rushstack/module-minifier-plugin_v0.6.0",
+      "date": "Wed, 24 Nov 2021 01:10:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Export a getIdentifier function for generating safe JavaScript identifiers."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.0",
       "tag": "@rushstack/module-minifier-plugin_v0.5.0",
       "date": "Thu, 18 Nov 2021 01:10:06 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @rushstack/module-minifier-plugin
 
-This log was last generated on Thu, 18 Nov 2021 01:10:06 GMT and should not be manually modified.
+This log was last generated on Wed, 24 Nov 2021 01:10:33 GMT and should not be manually modified.
+
+## 0.6.0
+Wed, 24 Nov 2021 01:10:33 GMT
+
+### Minor changes
+
+- Export a getIdentifier function for generating safe JavaScript identifiers.
 
 ## 0.5.0
 Thu, 18 Nov 2021 01:10:06 GMT
