@@ -239,20 +239,24 @@ export class ValidationEnhancer {
           );
         }
       } else {
-        const entryPointFilename: string = path.basename(
-          collector.workingPackage.entryPointSourceFile.fileName
-        );
+        if (
+          referencedEntity instanceof AstSymbol &&
+          ValidationEnhancer._isEcmaScriptSymbol(referencedEntity)
+        ) {
+          // The main usage scenario for ECMAScript symbols is to attach private data to a JavaScript object,
+          // so as a special case, we do NOT report them as forgotten exports.
+        } else if (
+          !collector.extractorConfig.reportForgottenExportsForInternalApis &&
+          declarationReleaseTag === ReleaseTag.Internal
+        ) {
+          // Ignore ae-forgotten-export for APIs marked as @internal
+        } else {
+          if (!alreadyWarnedEntities.has(referencedEntity)) {
+            alreadyWarnedEntities.add(referencedEntity);
 
-        if (!alreadyWarnedEntities.has(referencedEntity)) {
-          alreadyWarnedEntities.add(referencedEntity);
-
-          if (
-            referencedEntity instanceof AstSymbol &&
-            ValidationEnhancer._isEcmaScriptSymbol(referencedEntity)
-          ) {
-            // The main usage scenario for ECMAScript symbols is to attach private data to a JavaScript object,
-            // so as a special case, we do NOT report them as forgotten exports.
-          } else {
+            const entryPointFilename: string = path.basename(
+              collector.workingPackage.entryPointSourceFile.fileName
+            );
             collector.messageRouter.addAnalyzerIssue(
               ExtractorMessageId.ForgottenExport,
               `The symbol "${localName}" needs to be exported by the entry point ${entryPointFilename}`,
