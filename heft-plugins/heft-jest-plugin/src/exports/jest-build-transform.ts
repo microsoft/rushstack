@@ -2,3 +2,5 @@
 // See LICENSE in the project root for license information.
 
 export * from '../jest-build-transform';
+import { process } from '../jest-build-transform';
+export default { process };

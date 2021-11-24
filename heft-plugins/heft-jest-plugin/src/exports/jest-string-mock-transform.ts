@@ -2,3 +2,5 @@
 // See LICENSE in the project root for license information.
 
 export * from '../jest-string-mock-transform';
+import { process } from '../jest-string-mock-transform';
+export default { process };

@@ -79,4 +79,4 @@ function resolve(request: string, options: IResolverOptions): string {
   return options.defaultResolver(newRequest, options);
 }
 
-export = resolve;
+export default resolve;

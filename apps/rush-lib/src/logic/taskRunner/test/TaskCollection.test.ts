@@ -70,5 +70,6 @@ describe('TaskCollection', () => {
     beforeEach(() => {
       taskCollection = new TaskCollection();
     });
+    it('', () => expect(true).toStrictEqual(true));
   });
 });

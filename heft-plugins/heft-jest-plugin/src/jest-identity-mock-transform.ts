@@ -23,3 +23,5 @@ const proxyCode: string = FileSystem.readFile(path.join(__dirname, 'identityMock
 export function process(src: string, filename: string, jestOptions: InitialOptionsWithRootDir): string {
   return proxyCode;
 }
+
+export default { process };

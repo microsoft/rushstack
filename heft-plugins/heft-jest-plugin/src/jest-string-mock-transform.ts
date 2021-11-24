@@ -17,3 +17,5 @@ export function process(src: string, filename: string, jestOptions: InitialOptio
   // For a file called "myImage.png", this will generate a JS module that exports the literal string "myImage.png"
   return `module.exports = '${escapedFilename}';`;
 }
+
+export default { process };

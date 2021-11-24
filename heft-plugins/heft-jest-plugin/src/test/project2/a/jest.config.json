@@ -1,5 +1,5 @@
 {
   "setupFiles": ["@jest/core"],
 
-  "testEnvironment": "jsdom"
+  "testEnvironment": "jest-environment-jsdom"
 }

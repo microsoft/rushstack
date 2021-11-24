@@ -4,8 +4,11 @@
 // Load the Jest patch
 import './jestWorkerPatch';
 
+import { jestResolveWithPrefix } from './compat';
+import { resolveRunner } from 'jest-resolve';
+
 import * as path from 'path';
-import { resolve as jestResolve, resolveWithPrefix as jestResolveWithPrefix } from 'jest-config/build/utils';
+
 import { mergeWith, isObject } from 'lodash';
 import type {
   ICleanStageContext,
@@ -531,10 +534,9 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
               humanOptionName: propertyName,
               optionName: propertyName
             })
-          : jestResolve(/*resolver:*/ undefined, {
+          : resolveRunner(/*resolver:*/ undefined, {
               rootDir: configDir,
-              filePath: propertyValue,
-              key: propertyName
+              filePath: propertyValue
             });
       },
       pathResolutionMethod: PathResolutionMethod.custom

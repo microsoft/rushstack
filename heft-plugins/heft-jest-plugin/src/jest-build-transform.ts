@@ -3,7 +3,7 @@
 
 import * as path from 'path';
 import { Path, FileSystem, FileSystemStats, JsonObject } from '@rushstack/node-core-library';
-import { InitialOptionsWithRootDir } from '@jest/types/build/Config';
+import { Config } from '@jest/types';
 import { TransformedSource } from '@jest/transform';
 
 import { HeftJestDataFile, IHeftJestDataFileJson } from './HeftJestDataFile';
@@ -38,18 +38,18 @@ const POLLING_INTERVAL_MS: number = 50;
 export function process(
   srcCode: string,
   srcFilePath: string,
-  jestOptions: InitialOptionsWithRootDir
+  jestOptions: { config: Config.InitialOptionsWithRootDir }
 ): TransformedSource {
-  let heftJestDataFile: IHeftJestDataFileJson | undefined = dataFileJsonCache.get(jestOptions.rootDir);
+  let heftJestDataFile: IHeftJestDataFileJson | undefined = dataFileJsonCache.get(jestOptions.config.rootDir);
   if (heftJestDataFile === undefined) {
     // Read heft-jest-data.json, which is created by the JestPlugin.  It tells us
     // which emitted output folder to use for Jest.
-    heftJestDataFile = HeftJestDataFile.loadForProject(jestOptions.rootDir);
-    dataFileJsonCache.set(jestOptions.rootDir, heftJestDataFile);
+    heftJestDataFile = HeftJestDataFile.loadForProject(jestOptions.config.rootDir);
+    dataFileJsonCache.set(jestOptions.config.rootDir, heftJestDataFile);
   }
 
   // Is the input file under the "src" folder?
-  const srcFolder: string = path.join(jestOptions.rootDir, 'src');
+  const srcFolder: string = path.join(jestOptions.config.rootDir, 'src');
 
   if (Path.isUnder(srcFilePath, srcFolder)) {
     // Example: /path/to/project/src/folder1/folder2/Example.ts
@@ -60,7 +60,7 @@ export function process(
 
     // Example: /path/to/project/lib/folder1/folder2/Example.js
     const libFilePath: string = path.join(
-      jestOptions.rootDir,
+      jestOptions.config.rootDir,
       heftJestDataFile.emitFolderNameForTests,
       srcRelativeFolderPath,
       `${parsedFilename.name}${heftJestDataFile.extensionForTests}`
@@ -195,3 +195,5 @@ export function process(
     throw new Error('jest-build-transform: The input path is not under the "src" folder:\n' + srcFilePath);
   }
 }
+
+export default { process };

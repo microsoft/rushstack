@@ -15,6 +15,18 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "chalk",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-resolve",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-validate",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "react",
       "allowedCategories": [ "tests" ]
     },
