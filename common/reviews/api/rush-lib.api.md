@@ -51,7 +51,7 @@ export class ApprovedPackagesPolicy {
     get reviewCategories(): Set<string>;
 }
 
-// @beta
+// @public
 export enum BumpType {
     // (undocumented)
     'major' = 5,
@@ -85,7 +85,7 @@ export class CommonVersionsConfiguration {
     get xstitchPreferredVersions(): Map<string, string>;
 }
 
-// @beta (undocumented)
+// @public (undocumented)
 export const enum DependencyType {
     // (undocumented)
     Dev = "devDependencies",
@@ -136,7 +136,7 @@ export class EventHooks {
     get(event: Event): string[];
 }
 
-// @beta
+// @public
 export class ExperimentsConfiguration {
     // @internal
     constructor(jsonFileName: string);
@@ -189,7 +189,7 @@ export interface ICredentialCacheOptions {
     supportEditing: boolean;
 }
 
-// @beta
+// @public
 export interface IExperimentsJson {
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
     _multiPhaseCommands?: boolean;
@@ -223,7 +223,7 @@ export interface ILaunchOptions {
     isManaged: boolean;
 }
 
-// @beta
+// @public
 export class IndividualVersionPolicy extends VersionPolicy {
     // Warning: (ae-forgotten-export) The symbol "IIndividualVersionJson" needs to be exported by the entry point index.d.ts
     //
@@ -305,7 +305,7 @@ export class _LastInstallFlag {
     get path(): string;
 }
 
-// @beta
+// @public
 export class LockStepVersionPolicy extends VersionPolicy {
     // Warning: (ae-forgotten-export) The symbol "ILockStepVersionJson" needs to be exported by the entry point index.d.ts
     //
@@ -328,7 +328,7 @@ export class NpmOptionsConfiguration extends PackageManagerOptionsConfigurationB
     constructor(json: _INpmOptionsJson);
 }
 
-// @beta (undocumented)
+// @public (undocumented)
 export class PackageJsonDependency {
     constructor(name: string, version: string, type: DependencyType, onChange: () => void);
     // (undocumented)
@@ -341,7 +341,7 @@ export class PackageJsonDependency {
     get version(): string;
 }
 
-// @beta (undocumented)
+// @public (undocumented)
 export class PackageJsonEditor {
     // (undocumented)
     addOrUpdateDependency(packageName: string, newVersion: string, dependencyType: DependencyType): void;
@@ -367,7 +367,7 @@ export class PackageJsonEditor {
     get version(): string;
 }
 
-// @beta
+// @public
 export abstract class PackageManager {
     // @internal
     protected constructor(version: string, packageManager: PackageManagerName);
@@ -611,7 +611,7 @@ export class RushSession implements IRushLifecycle {
     get WebClient(): typeof WebClient;
 }
 
-// @beta
+// @public
 export abstract class VersionPolicy {
     // Warning: (ae-forgotten-export) The symbol "IVersionPolicyJson" needs to be exported by the entry point index.d.ts
     //
@@ -633,7 +633,7 @@ export abstract class VersionPolicy {
     abstract validate(versionString: string, packageName: string): void;
 }
 
-// @beta
+// @public
 export class VersionPolicyConfiguration {
     // @internal
     constructor(jsonFileName: string);
@@ -644,7 +644,7 @@ export class VersionPolicyConfiguration {
     get versionPolicies(): Map<string, VersionPolicy>;
 }
 
-// @beta
+// @public
 export enum VersionPolicyDefinitionName {
     // (undocumented)
     'individualVersion' = 1,
