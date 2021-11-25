@@ -488,6 +488,12 @@
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
     },
+    {
+      "packageName": "@rushstack/rush-sdk",
+      "projectFolder": "apps/rush-sdk",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
 
     // "build-tests" folder (alphabetical order)
     {

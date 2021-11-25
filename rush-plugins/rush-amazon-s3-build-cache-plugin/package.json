@@ -16,10 +16,10 @@
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/rush-sdk": "workspace:*",
     "node-fetch": "2.6.2"
   },
   "devDependencies": {
-    "@microsoft/rush-lib": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
