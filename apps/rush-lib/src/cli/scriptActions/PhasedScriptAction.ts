@@ -163,6 +163,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
     };
 
     if (this._watchForChanges) {
+      if (buildCacheConfiguration) {
+        // Cache writes are not supported during watch mode, only reads.
+        buildCacheConfiguration.cacheWriteEnabled = false;
+      }
       await this._runWatch(executeOptions);
     } else {
       await this._runOnce(executeOptions);

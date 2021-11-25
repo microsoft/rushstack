@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Respect the RUSH_BUILD_CACHE_WRITE_ALLOWED environment variable value \"0\" (disabled) even for the local build cache, e.g. to save CPU cycles on CI machines that will throw out the local machine state. Disables cache writes for watch mode commands.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
