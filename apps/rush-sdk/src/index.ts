@@ -4,10 +4,13 @@
 import * as path from 'path';
 import { Import, IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
 
+// SCENARIO 1:  Rush's PluginManager initializes "rush-sdk" with Rush's own instance of rush-lib.
 // eslint-disable-next-line
 let rushLibModule: any = (global as any).___rush___rushLibModule;
 
 if (rushLibModule === undefined) {
+  // SCENARIO 2:  The project importing "rush-sdk" has installed its own instance of "rush-lib"
+  // as a package.json dependency.  For example, this is used by the Jest tests for Rush plugins.
   const importingPath: string | undefined = module?.parent?.filename;
   if (importingPath !== undefined) {
     const callerPackageFolder: string | undefined =
@@ -40,6 +43,11 @@ if (rushLibModule === undefined) {
       }
     }
   }
+
+  // SCENARIO 3:  A tool or script depends on "rush-sdk", and is meant to be used inside a monorepo folder.
+  // In this case, we can use install-run-rush.js to obtain the appropriate rush-lib version for the monorepo.
+  //
+  // NOT IMPLEMENTED YET
 }
 
 if (rushLibModule === undefined) {
