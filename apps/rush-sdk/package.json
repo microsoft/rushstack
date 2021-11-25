@@ -13,14 +13,14 @@
   "engineStrict": true,
   "homepage": "https://rushjs.io",
   "main": "lib/index.js",
-  "typings": "dist/rush-sdk.d.ts",
+  "typings": "dist/rush-lib.d.ts",
   "scripts": {
     "build": "heft test --clean"
   },
   "license": "MIT",
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "node-fetch": "2.6.2",
+    "@types/node-fetch": "1.6.9",
     "tapable": "2.2.1"
   },
   "devDependencies": {

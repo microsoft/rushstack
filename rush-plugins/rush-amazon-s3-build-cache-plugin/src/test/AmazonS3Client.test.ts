@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Response, ResponseInit } from 'node-fetch';
-import { RushSession } from '@microsoft/rush-lib';
+import { RushSession } from '@rushstack/rush-sdk';
 import { ConsoleTerminalProvider } from '@rushstack/node-core-library';
 
 import { IAmazonS3BuildCacheProviderOptions } from '../AmazonS3BuildCacheProvider';

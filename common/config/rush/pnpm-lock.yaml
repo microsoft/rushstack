@@ -347,12 +347,12 @@ importers:
       '@rushstack/node-core-library': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
+      '@types/node-fetch': 1.6.9
       '@types/semver': 7.3.5
-      node-fetch: 2.6.2
       tapable: 2.2.1
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
-      node-fetch: 2.6.2
+      '@types/node-fetch': 1.6.9
       tapable: 2.2.1
     devDependencies:
       '@microsoft/rush-lib': link:../rush-lib
@@ -1722,6 +1722,7 @@ importers:
 
   ../../rush-plugins/rush-amazon-s3-build-cache-plugin:
     specifiers:
+      '@microsoft/rush-lib': workspace:*
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
@@ -1736,6 +1737,7 @@ importers:
       '@rushstack/rush-sdk': link:../../apps/rush-sdk
       node-fetch: 2.6.2
     devDependencies:
+      '@microsoft/rush-lib': link:../../apps/rush-lib
       '@rushstack/eslint-config': link:../../stack/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
@@ -1747,6 +1749,7 @@ importers:
     specifiers:
       '@azure/identity': ~1.0.0
       '@azure/storage-blob': ~12.3.0
+      '@microsoft/rush-lib': workspace:*
       '@rushstack/eslint-config': workspace:*
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
@@ -1762,6 +1765,7 @@ importers:
       '@rushstack/rush-sdk': link:../../apps/rush-sdk
       '@rushstack/terminal': link:../../libraries/terminal
     devDependencies:
+      '@microsoft/rush-lib': link:../../apps/rush-lib
       '@rushstack/eslint-config': link:../../stack/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
@@ -6371,7 +6375,6 @@ packages:
     resolution: {integrity: sha512-n2r6WLoY7+uuPT7pnEtKJCmPUGyJ+cbyBR8Avnu4+m1nzz7DwBVuyIvvlBzCZ/nrpC7rIgb3D6pNavL7rFEa9g==}
     dependencies:
       '@types/node': 12.20.24
-    dev: true
 
   /@types/node-fetch/2.5.12:
     resolution: {integrity: sha512-MKgC4dlq4kKNa/mYrwpKfzQMB5X3ee5U6fSprkKpToBqBmX4nFZL9cW5jl6sWn+xpRJ7ypWh2yyqqr8UUCstSw==}

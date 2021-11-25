@@ -6,7 +6,7 @@ import {
   StringBufferTerminalProvider,
   Terminal
 } from '@rushstack/node-core-library';
-import { RushSession } from '@microsoft/rush-lib';
+import { RushSession } from '@rushstack/rush-sdk';
 
 import { AzureEnvironmentNames, AzureStorageBuildCacheProvider } from '../AzureStorageBuildCacheProvider';
 
