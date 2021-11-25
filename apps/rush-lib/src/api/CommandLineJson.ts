@@ -31,12 +31,19 @@ export interface IBulkCommandJson extends IBaseCommandJson {
 }
 
 /**
- * "phasedCommand" from command-line.schema.json
+ * Base interface shared by the "phasedCommand" JSON entries and the post-processed
+ * "IPhase" interface in the CommandLineConfiguration
  */
-export interface IPhasedCommandJson extends IBaseCommandJson {
+export interface IPhasedCommandWithoutPhasesJson extends IBaseCommandJson {
   commandKind: 'phased';
   enableParallelism: boolean;
   incremental?: boolean;
+}
+
+/**
+ * "phasedCommand" from command-line.schema.json
+ */
+export interface IPhasedCommandJson extends IPhasedCommandWithoutPhasesJson {
   phases: string[];
 }
 

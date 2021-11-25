@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AsyncTaskQueue detects cyles 1`] = `
+"A cyclic dependency was encountered:
+  a
+  -> c
+  -> d
+  -> b
+  -> a
+Consider using the cyclicDependencyProjects option for rush.json."
+`;

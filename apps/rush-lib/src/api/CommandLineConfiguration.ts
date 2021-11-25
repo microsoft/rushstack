@@ -9,12 +9,12 @@ import type {
   CommandJson,
   ICommandLineJson,
   IPhaseJson,
-  IPhasedCommandJson,
   IBulkCommandJson,
   IGlobalCommandJson,
   IFlagParameterJson,
   IChoiceParameterJson,
-  IStringParameterJson
+  IStringParameterJson,
+  IPhasedCommandWithoutPhasesJson
 } from './CommandLineJson';
 
 export interface IShellCommandTokenContext {
@@ -36,12 +36,27 @@ export interface IPhase extends IPhaseJson {
   logFilenameIdentifier: string;
 
   associatedParameters: Set<Parameter>;
+
+  /**
+   * The index of the phase in the CommandLineConfiguration's phases map.
+   * Will be used to generate a unique numeric ID for each [RushConfigurationProject, IPhase] pair
+   * during command invocation for use as a map key.
+   */
+  index: number;
+
+  /**
+   * The resolved dependencies of the phase
+   */
+  phaseDependencies: {
+    self: Set<IPhase>;
+    upstream: Set<IPhase>;
+  };
 }
 
 export interface ICommandWithParameters {
   associatedParameters: Set<Parameter>;
 }
-export interface IPhasedCommand extends IPhasedCommandJson, ICommandWithParameters {
+export interface IPhasedCommand extends IPhasedCommandWithoutPhasesJson, ICommandWithParameters {
   /**
    * If set to "true," this this phased command was generated from a bulk command, and
    * was not explicitly defined in the command-line.json file.
@@ -49,6 +64,8 @@ export interface IPhasedCommand extends IPhasedCommandJson, ICommandWithParamete
   isSynthetic: boolean;
   watchForChanges?: boolean;
   disableBuildCache?: boolean;
+
+  phases: Set<IPhase>;
 }
 
 export interface IGlobalCommand extends IGlobalCommandJson, ICommandWithParameters {}
@@ -123,7 +140,7 @@ export class CommandLineConfiguration {
   /**
    * A map of bulk command names to their corresponding synthetic phase identifiers
    */
-  private readonly _syntheticPhasesNamesByTranslatedBulkCommandName: Map<string, string> = new Map();
+  private readonly _syntheticPhasesByTranslatedBulkCommandName: Map<string, IPhase> = new Map();
 
   /**
    * Use CommandLineConfiguration.loadFromFile()
@@ -153,18 +170,29 @@ export class CommandLineConfiguration {
           );
         }
 
-        this.phases.set(phase.name, {
+        const processedPhase: IPhase = {
           ...phase,
           isSynthetic: false,
           logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(phase.name),
-          associatedParameters: new Set()
-        });
+          associatedParameters: new Set(),
+          index: -1,
+          phaseDependencies: {
+            self: new Set(),
+            upstream: new Set()
+          }
+        };
+
+        this.phases.set(phase.name, processedPhase);
       }
     }
 
+    // Resolve the string links
     for (const phase of this.phases.values()) {
-      if (phase.dependencies?.self) {
-        for (const dependencyName of phase.dependencies.self) {
+      const selfDependencies: string[] | undefined = phase.dependencies?.self;
+      const upstreamDependencies: string[] | undefined = phase.dependencies?.upstream;
+
+      if (selfDependencies) {
+        for (const dependencyName of selfDependencies) {
           const dependency: IPhase | undefined = this.phases.get(dependencyName);
           if (!dependency) {
             throw new Error(
@@ -172,24 +200,42 @@ export class CommandLineConfiguration {
                 `dependency phase "${dependencyName}" does not exist.`
             );
           }
+          phase.phaseDependencies.self.add(dependency);
         }
       }
 
-      if (phase.dependencies?.upstream) {
-        for (const dependency of phase.dependencies.upstream) {
-          if (!this.phases.has(dependency)) {
+      if (upstreamDependencies) {
+        for (const dependencyName of upstreamDependencies) {
+          const dependency: IPhase | undefined = this.phases.get(dependencyName);
+          if (!dependency) {
             throw new Error(
               `In ${RushConstants.commandLineFilename}, in the phase "${phase.name}", ` +
-                `the upstream dependency phase "${dependency}" does not exist.`
+                `the upstream dependency phase "${dependencyName}" does not exist.`
             );
           }
+          phase.phaseDependencies.upstream.add(dependency);
+        }
+      }
+    }
+
+    // Do the recursive stuff after the dependencies have been converted
+    const safePhases: Set<IPhase> = new Set();
+    for (const phase of this.phases.values()) {
+      const relatedPhaseSet: Set<IPhase> = new Set([phase]);
+      for (const relatedPhase of relatedPhaseSet) {
+        for (const dependency of relatedPhase.phaseDependencies.self) {
+          relatedPhaseSet.add(dependency);
+        }
+
+        for (const dependency of relatedPhase.phaseDependencies.upstream) {
+          relatedPhaseSet.add(dependency);
         }
       }
 
-      this._checkForPhaseSelfCycles(phase);
+      this._checkForPhaseSelfCycles(phase, new Set(), safePhases);
     }
 
-    let buildCommandPhases: string[] | undefined;
+    let buildCommandPhases: Set<IPhase> | undefined;
     if (commandLineJson?.commands) {
       for (const command of commandLineJson.commands) {
         if (this.commands.has(command.name)) {
@@ -202,18 +248,36 @@ export class CommandLineConfiguration {
         let normalizedCommand: Command;
         switch (command.commandKind) {
           case RushConstants.phasedCommandKind: {
+            const commandPhases: Set<IPhase> = new Set();
+
             normalizedCommand = {
               ...command,
               isSynthetic: false,
-              associatedParameters: new Set<Parameter>()
+              associatedParameters: new Set<Parameter>(),
+              phases: commandPhases
             };
 
-            for (const phaseName of normalizedCommand.phases) {
-              if (!this.phases.has(phaseName)) {
+            for (const phaseName of command.phases) {
+              const phase: IPhase | undefined = this.phases.get(phaseName);
+              if (!phase) {
                 throw new Error(
                   `In ${RushConstants.commandLineFilename}, in the "phases" property of the ` +
                     `"${normalizedCommand.name}" command, the phase "${phaseName}" does not exist.`
                 );
+              }
+
+              commandPhases.add(phase);
+            }
+
+            // Apply implicit phase dependency expansion
+            // The equivalent of the "--to" operator used for projects
+            for (const phase of commandPhases) {
+              for (const dependency of phase.phaseDependencies.self) {
+                commandPhases.add(dependency);
+              }
+
+              for (const dependency of phase.phaseDependencies.upstream) {
+                commandPhases.add(dependency);
               }
             }
 
@@ -322,12 +386,12 @@ export class CommandLineConfiguration {
         let parameterIsOnlyAssociatedWithPhasedCommands: boolean = true;
         if (normalizedParameter.associatedCommands) {
           for (const associatedCommandName of normalizedParameter.associatedCommands) {
-            const syntheticPhaseName: string | undefined =
-              this._syntheticPhasesNamesByTranslatedBulkCommandName.get(associatedCommandName);
-            if (syntheticPhaseName) {
+            const syntheticPhase: IPhase | undefined =
+              this._syntheticPhasesByTranslatedBulkCommandName.get(associatedCommandName);
+            if (syntheticPhase) {
               // If this parameter was associated with a bulk command, include the association
               // with the synthetic phase
-              normalizedParameter.associatedPhases!.push(syntheticPhaseName);
+              normalizedParameter.associatedPhases!.push(syntheticPhase.name);
             }
 
             const associatedCommand: Command | undefined = this.commands.get(associatedCommandName);
@@ -378,38 +442,47 @@ export class CommandLineConfiguration {
         }
       }
     }
+
+    let phaseIndex: number = 0;
+    for (const phase of this.phases.values()) {
+      phase.index = phaseIndex;
+      phaseIndex++;
+    }
   }
 
-  private _checkForPhaseSelfCycles(phase: IPhase, checkedPhases: Set<string> = new Set<string>()): void {
-    const phaseSelfDependencies: string[] | undefined = phase.dependencies?.self;
-    if (phaseSelfDependencies) {
-      for (const dependencyName of phaseSelfDependencies) {
-        if (checkedPhases.has(dependencyName)) {
-          const dependencyNameForError: string =
-            typeof dependencyName === 'string' ? dependencyName : '<synthetic phase>';
-          throw new Error(
-            `In ${RushConstants.commandLineFilename}, there exists a cycle within the ` +
-              `set of ${dependencyNameForError} dependencies: ${Array.from(checkedPhases).join(', ')}`
-          );
-        } else {
-          checkedPhases.add(dependencyName);
-          const dependency: IPhase | undefined = this.phases.get(dependencyName);
-          if (!dependency) {
-            return; // Ignore, we check for this separately
-          } else {
-            if (phaseSelfDependencies.length > 1) {
-              this._checkForPhaseSelfCycles(
-                dependency,
-                // Clone the set of checked phases if there are multiple branches we need to check
-                new Set<string>(checkedPhases)
-              );
-            } else {
-              this._checkForPhaseSelfCycles(dependency, checkedPhases);
-            }
-          }
-        }
+  /**
+   * Performs a depth-first search to detect cycles in the directed graph of phase "self" dependencies.
+   */
+  private _checkForPhaseSelfCycles(
+    phase: IPhase,
+    // Phases in the current depth-first-search path
+    phasesInPath: Set<IPhase>,
+    // Phases that have already been fully walked and confirmed to not be in any cycles
+    cycleFreePhases: Set<IPhase>
+  ): void {
+    if (cycleFreePhases.has(phase)) {
+      // phase is known to not be reachable from itself, i.e. not in a cycle. Skip.
+      return;
+    }
+
+    for (const dependency of phase.phaseDependencies.self) {
+      if (phasesInPath.has(dependency)) {
+        throw new Error(
+          `In ${RushConstants.commandLineFilename}, there exists a cycle within the ` +
+            `set of ${dependency.name} dependencies: ${Array.from(
+              phasesInPath,
+              (phase: IPhase) => phase.name
+            ).join(', ')}`
+        );
+      } else {
+        phasesInPath.add(dependency);
+        this._checkForPhaseSelfCycles(dependency, phasesInPath, cycleFreePhases);
+        phasesInPath.delete(dependency);
       }
     }
+
+    // phase is not reachable from itself, mark for skipping
+    cycleFreePhases.add(phase);
   }
 
   /**
@@ -481,7 +554,7 @@ export class CommandLineConfiguration {
 
   private _translateBulkCommandToPhasedCommand(command: IBulkCommandJson): IPhasedCommand {
     const phaseName: string = command.name;
-    const phaseForBulkCommand: IPhase = {
+    const phase: IPhase = {
       name: phaseName,
       isSynthetic: true,
       dependencies: {
@@ -490,10 +563,21 @@ export class CommandLineConfiguration {
       ignoreMissingScript: command.ignoreMissingScript,
       allowWarningsOnSuccess: command.allowWarningsInSuccessfulBuild,
       logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(command.name),
-      associatedParameters: new Set()
+      associatedParameters: new Set(),
+      // This gets set to the correct value at the end of the constructor
+      index: -1,
+      phaseDependencies: {
+        self: new Set(),
+        upstream: new Set()
+      }
     };
-    this.phases.set(phaseName, phaseForBulkCommand);
-    this._syntheticPhasesNamesByTranslatedBulkCommandName.set(command.name, phaseName);
+
+    if (!command.ignoreDependencyOrder) {
+      phase.phaseDependencies.upstream.add(phase);
+    }
+
+    this.phases.set(phaseName, phase);
+    this._syntheticPhasesByTranslatedBulkCommandName.set(command.name, phase);
 
     const translatedCommand: IPhasedCommand = {
       ...command,
@@ -501,7 +585,7 @@ export class CommandLineConfiguration {
       disableBuildCache: true,
       isSynthetic: true,
       associatedParameters: new Set<Parameter>(),
-      phases: [phaseName]
+      phases: new Set([phase])
     };
     return translatedCommand;
   }

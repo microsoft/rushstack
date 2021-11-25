@@ -10,7 +10,8 @@ export class MockTaskRunner extends BaseTaskRunner {
   private readonly _action: ((terminal: CollatedTerminal) => Promise<TaskStatus>) | undefined;
   public readonly name: string;
   public readonly hadEmptyScript: boolean = false;
-  public readonly isSkipAllowed: boolean = false;
+  public isSkipAllowed: boolean = false;
+  public isCacheWriteAllowed: boolean = false;
   public readonly warningsAreAllowed: boolean;
 
   public constructor(

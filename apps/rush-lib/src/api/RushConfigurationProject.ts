@@ -58,6 +58,7 @@ export class RushConfigurationProject {
   private _dependencyProjects: ReadonlySet<RushConfigurationProject> | undefined;
   private _consumingProjects: ReadonlySet<RushConfigurationProject> | undefined;
   private readonly _rushConfiguration: RushConfiguration;
+  private readonly _index: number;
 
   /**
    * A set of projects within the Rush configuration which directly consume this package.
@@ -72,11 +73,13 @@ export class RushConfigurationProject {
   public constructor(
     projectJson: IRushConfigurationProjectJson,
     rushConfiguration: RushConfiguration,
-    tempProjectName: string
+    tempProjectName: string,
+    index: number
   ) {
     this._rushConfiguration = rushConfiguration;
     this._packageName = projectJson.packageName;
     this._projectRelativeFolder = projectJson.projectFolder;
+    this._index = index;
 
     // For example, the depth of "a/b/c" would be 3.  The depth of "a" is 1.
     const projectFolderDepth: number = projectJson.projectFolder.split('/').length;
@@ -214,6 +217,14 @@ export class RushConfigurationProject {
    */
   public get rushConfiguration(): RushConfiguration {
     return this._rushConfiguration;
+  }
+
+  /**
+   * This index of this project in the Rush configuration's projects array
+   * @internal
+   */
+  public get index(): number {
+    return this._index;
   }
 
   /**

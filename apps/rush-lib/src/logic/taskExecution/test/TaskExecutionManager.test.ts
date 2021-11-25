@@ -34,7 +34,7 @@ function createTaskExecutionManager(
 ): TaskExecutionManager {
   const task: Task = new Task(taskRunner, TaskStatus.Ready);
 
-  return new TaskExecutionManager([task], taskExecutionManagerOptions);
+  return new TaskExecutionManager(new Set([task]), taskExecutionManagerOptions);
 }
 
 const EXPECTED_FAIL: string = `Promise returned by ${TaskExecutionManager.prototype.executeAsync.name}() resolved but was expected to fail`;
@@ -64,7 +64,7 @@ describe(TaskExecutionManager.name, () => {
     it('throwsErrorOnInvalidParallelism', () => {
       expect(
         () =>
-          new TaskExecutionManager([], {
+          new TaskExecutionManager(new Set(), {
             quietMode: false,
             debugMode: false,
             parallelism: 'tequila',

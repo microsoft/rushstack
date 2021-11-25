@@ -22,7 +22,8 @@ import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { SelectionParameterSet } from '../SelectionParameterSet';
 import { CommandLineConfiguration, IPhase, IPhasedCommand } from '../../api/CommandLineConfiguration';
-import { IProjectTaskSelectorOptions, ProjectTaskSelector } from '../../logic/ProjectTaskSelector';
+import type { ICreateTasksOptions, IProjectTaskSelectorOptions } from '../../logic/ProjectTaskSelector';
+import { ProjectTaskSelector } from '../../logic/ProjectTaskSelector';
 import { Selection } from '../../logic/Selection';
 
 /**
@@ -34,13 +35,14 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
   watchForChanges: boolean;
   disableBuildCache: boolean;
 
-  actionPhases: string[];
+  actionPhases: Set<IPhase>;
   phases: Map<string, IPhase>;
 }
 
 interface IExecuteInternalOptions {
-  taskSelectorOptions: IProjectTaskSelectorOptions;
+  taskSelector: ProjectTaskSelector;
   taskExecutionManagerOptions: ITaskExecutionManagerOptions;
+  createTasksOptions: ICreateTasksOptions;
   stopwatch: Stopwatch;
   ignoreHooks?: boolean;
   terminal: Terminal;
@@ -62,7 +64,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
   private readonly _watchForChanges: boolean;
   private readonly _disableBuildCache: boolean;
   private readonly _repoCommandLineConfiguration: CommandLineConfiguration;
-  private readonly _actionPhases: string[];
+  private readonly _actionPhases: ReadonlySet<IPhase>;
   private readonly _phases: Map<string, IPhase>;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
@@ -126,11 +128,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       return;
     }
 
-    const phasesToRun: Set<string> = new Set(this._actionPhases);
+    const phasesToRun: Set<IPhase> = new Set(this._actionPhases);
     const taskSelectorOptions: IProjectTaskSelectorOptions = {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
-      projectSelection,
       isQuietMode: isQuietMode,
       isDebugMode: isDebugMode,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
@@ -147,9 +148,12 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       repoCommandLineConfiguration: this._repoCommandLineConfiguration
     };
 
+    const taskSelector: ProjectTaskSelector = new ProjectTaskSelector(taskSelectorOptions);
+
     const executeOptions: IExecuteInternalOptions = {
-      taskSelectorOptions,
+      taskSelector,
       taskExecutionManagerOptions: taskExecutionManagerOptions,
+      createTasksOptions: { projectSelection },
       stopwatch,
       terminal
     };
@@ -170,7 +174,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
    */
   private async _runWatch(options: IExecuteInternalOptions): Promise<void> {
     const {
-      taskSelectorOptions: { projectSelection: projectsToWatch },
+      taskSelector,
+      createTasksOptions: { projectSelection: projectsToWatch },
+      taskExecutionManagerOptions,
       stopwatch,
       terminal
     } = options;
@@ -221,14 +227,14 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       );
 
       const executeOptions: IExecuteInternalOptions = {
-        taskSelectorOptions: {
-          ...options.taskSelectorOptions,
+        taskSelector,
+        createTasksOptions: {
           // Revise down the set of projects to execute the command on
           projectSelection,
           // Pass the ProjectChangeAnalyzer from the state differ to save a bit of overhead
           projectChangeAnalyzer: state
         },
-        taskExecutionManagerOptions: options.taskExecutionManagerOptions,
+        taskExecutionManagerOptions,
         stopwatch,
         // For now, don't run pre-build or post-build in watch mode
         ignoreHooks: true,
@@ -301,12 +307,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
    * Runs a single invocation of the command
    */
   private async _runOnce(options: IExecuteInternalOptions): Promise<void> {
-    const taskSelector: ProjectTaskSelector = new ProjectTaskSelector(options.taskSelectorOptions);
-
-    // Register all tasks with the task collection
+    const { taskSelector, createTasksOptions } = options;
 
     const taskExecutionManager: TaskExecutionManager = new TaskExecutionManager(
-      taskSelector.registerTasks().getOrderedTasks(),
+      taskSelector.createTasks(createTasksOptions),
       options.taskExecutionManagerOptions
     );
 

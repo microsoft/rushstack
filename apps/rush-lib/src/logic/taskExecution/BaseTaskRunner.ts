@@ -44,6 +44,11 @@ export abstract class BaseTaskRunner {
   public abstract warningsAreAllowed: boolean;
 
   /**
+   * Indicates if the output of this task may be written to the cache
+   */
+  public abstract isCacheWriteAllowed: boolean;
+
+  /**
    * Method to be executed for the task.
    */
   public abstract executeAsync(context: ITaskRunnerContext): Promise<TaskStatus>;

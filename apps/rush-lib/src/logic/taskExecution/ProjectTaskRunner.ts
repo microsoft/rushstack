@@ -80,6 +80,7 @@ export class ProjectTaskRunner extends BaseTaskRunner {
   public readonly isSkipAllowed: boolean;
   public hadEmptyScript: boolean = false;
   public readonly warningsAreAllowed: boolean;
+  public isCacheWriteAllowed: boolean = false;
 
   private readonly _rushProject: RushConfigurationProject;
   private readonly _phase: IPhase;
@@ -100,7 +101,8 @@ export class ProjectTaskRunner extends BaseTaskRunner {
 
   public constructor(options: IProjectTaskRunnerOptions) {
     super();
-    const phase: IPhase = options.phase;
+    const { phase } = options;
+
     this.name = options.taskName;
     this._rushProject = options.rushProject;
     this._phase = phase;
@@ -361,15 +363,17 @@ export class ProjectTaskRunner extends BaseTaskRunner {
           ensureFolderExists: true
         });
 
-        // If the command is successful and we can calculate project hash, we will write a
-        // new cache entry even if incremental execution is not allowed.
-        const projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync(
-          terminal,
-          trackedFiles,
-          context.repoCommandLineConfiguration
-        );
-        const setCacheEntryPromise: Promise<boolean> | undefined =
-          projectBuildCache?.trySetCacheEntryAsync(terminal);
+        // If the command is successful, we can calculate project hash, and no dependencies were skipped,
+        // write a new cache entry.
+        const setCacheEntryPromise: Promise<boolean> | undefined = this.isCacheWriteAllowed
+          ? (
+              await this._tryGetProjectBuildCacheAsync(
+                terminal,
+                trackedFiles,
+                context.repoCommandLineConfiguration
+              )
+            )?.trySetCacheEntryAsync(terminal)
+          : undefined;
 
         const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
 

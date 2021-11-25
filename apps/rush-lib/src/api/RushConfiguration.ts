@@ -771,13 +771,15 @@ export class RushConfiguration {
     const tempNamesByProject: Map<IRushConfigurationProjectJson, string> =
       RushConfiguration._generateTempNamesForProjects(sortedProjectJsons);
 
-    for (const projectJson of sortedProjectJsons) {
+    for (let i: number = 0, len: number = sortedProjectJsons.length; i < len; i++) {
+      const projectJson: IRushConfigurationProjectJson = sortedProjectJsons[i];
       const tempProjectName: string | undefined = tempNamesByProject.get(projectJson);
       if (tempProjectName) {
         const project: RushConfigurationProject = new RushConfigurationProject(
           projectJson,
           this,
-          tempProjectName
+          tempProjectName,
+          i
         );
         this._projects.push(project);
         if (this._projectsByName.has(project.packageName)) {
