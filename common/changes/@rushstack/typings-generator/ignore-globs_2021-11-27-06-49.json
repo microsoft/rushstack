@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/typings-generator",
+      "comment": "(BREAKING CHANGE) Remove \"filesToIgnore\" option in favor of \"globsToIgnore.\"",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/typings-generator"
+}
