@@ -2,9 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { InternalError, ITerminalProvider } from '@rushstack/node-core-library';
-import { RushUserConfiguration } from '../api/RushUserConfiguration';
 import { IBuildCacheJson } from '../api/BuildCacheConfiguration';
-import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 import { ICloudBuildCacheProvider } from '../logic/buildCache/ICloudBuildCacheProvider';
 import { ILogger, ILoggerOptions, Logger } from './logging/Logger';
 import { IRushLifecycle, RushLifecycleHooks } from './RushLifeCycle';
@@ -67,15 +65,5 @@ export class RushSession implements IRushLifecycle {
     cacheProviderName: string
   ): ICloudBuildCacheProviderFactory | undefined {
     return this._cloudBuildCacheProviderFactories.get(cacheProviderName);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  public get EnvironmentConfiguration(): typeof EnvironmentConfiguration {
-    return EnvironmentConfiguration;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  public get RushUserConfiguration(): typeof RushUserConfiguration {
-    return RushUserConfiguration;
   }
 }

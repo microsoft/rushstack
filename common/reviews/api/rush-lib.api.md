@@ -119,7 +119,30 @@ export const enum DependencyType {
     YarnResolutions = "resolutions"
 }
 
-// @public
+// @beta
+export class EnvironmentConfiguration {
+    static get absoluteSymlinks(): boolean;
+    static get allowUnsupportedNodeVersion(): boolean;
+    static get allowWarningsInSuccessfulBuild(): boolean;
+    static get buildCacheCredential(): string | undefined;
+    static get buildCacheEnabled(): boolean | undefined;
+    static get buildCacheWriteAllowed(): boolean | undefined;
+    // Warning: (ae-forgotten-export) The symbol "IEnvironment" needs to be exported by the entry point index.d.ts
+    //
+    // @internal
+    static _getRushGlobalFolderOverride(processEnv: IEnvironment): string | undefined;
+    static get gitBinaryPath(): string | undefined;
+    // (undocumented)
+    static parseBooleanEnvironmentVariable(name: string, value: string | undefined): boolean | undefined;
+    static get pnpmStorePathOverride(): string | undefined;
+    static reset(): void;
+    static get rushGlobalFolderOverride(): string | undefined;
+    static get rushTempFolderOverride(): string | undefined;
+    static get tarBinaryPath(): string | undefined;
+    static validate(options?: IEnvironmentConfigurationInitializeOptions): void;
+}
+
+// @beta
 export enum EnvironmentVariableNames {
     RUSH_ABSOLUTE_SYMLINKS = "RUSH_ABSOLUTE_SYMLINKS",
     RUSH_ALLOW_UNSUPPORTED_NODEJS = "RUSH_ALLOW_UNSUPPORTED_NODEJS",
@@ -202,6 +225,12 @@ export interface ICredentialCacheEntry {
 export interface ICredentialCacheOptions {
     // (undocumented)
     supportEditing: boolean;
+}
+
+// @beta (undocumented)
+export interface IEnvironmentConfigurationInitializeOptions {
+    // (undocumented)
+    doNotNormalizePaths?: boolean;
 }
 
 // @public
@@ -639,10 +668,6 @@ export class _RushGlobalFolder {
 // @beta (undocumented)
 export class RushSession implements IRushLifecycle {
     constructor(options: IRushSessionOptions);
-    // Warning: (ae-forgotten-export) The symbol "EnvironmentConfiguration" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    get EnvironmentConfiguration(): typeof EnvironmentConfiguration;
     // (undocumented)
     getCloudBuildCacheProviderFactory(cacheProviderName: string): ICloudBuildCacheProviderFactory | undefined;
     // Warning: (ae-forgotten-export) The symbol "ILogger" needs to be exported by the entry point index.d.ts
@@ -657,12 +682,17 @@ export class RushSession implements IRushLifecycle {
     //
     // (undocumented)
     registerCloudBuildCacheProviderFactory(cacheProviderName: string, factory: ICloudBuildCacheProviderFactory): void;
-    // Warning: (ae-forgotten-export) The symbol "RushUserConfiguration" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    get RushUserConfiguration(): typeof RushUserConfiguration;
     // (undocumented)
     get terminalProvider(): ITerminalProvider;
+}
+
+// @beta
+export class RushUserConfiguration {
+    readonly buildCacheFolder: string | undefined;
+    // (undocumented)
+    static getRushUserFolderPath(): string;
+    // (undocumented)
+    static initializeAsync(): Promise<RushUserConfiguration>;
 }
 
 // @public

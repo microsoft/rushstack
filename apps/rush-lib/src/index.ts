@@ -24,13 +24,19 @@ export {
   YarnOptionsConfiguration
 } from './api/RushConfiguration';
 
+export {
+  EnvironmentConfiguration,
+  EnvironmentVariableNames,
+  IEnvironmentConfigurationInitializeOptions
+} from './api/EnvironmentConfiguration';
+
 export { RushConstants } from './logic/RushConstants';
 
 export { PackageManagerName, PackageManager } from './api/packageManager/PackageManager';
 
-export { EnvironmentVariableNames } from './api/EnvironmentConfiguration';
-
 export { RushConfigurationProject } from './api/RushConfigurationProject';
+
+export { RushUserConfiguration } from './api/RushUserConfiguration';
 
 export { RushGlobalFolder as _RushGlobalFolder } from './api/RushGlobalFolder';
 

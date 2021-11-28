@@ -6,7 +6,12 @@ import {
   StringBufferTerminalProvider,
   Terminal
 } from '@rushstack/node-core-library';
-import { RushSession } from '@rushstack/rush-sdk';
+import {
+  RushSession,
+  CredentialCache,
+  EnvironmentConfiguration,
+  RushUserConfiguration
+} from '@rushstack/rush-sdk';
 
 import { AzureEnvironmentNames, AzureStorageBuildCacheProvider } from '../AzureStorageBuildCacheProvider';
 
@@ -14,8 +19,6 @@ const rushSession = new RushSession({
   terminalProvider: new ConsoleTerminalProvider(),
   getIsDebugMode: () => false
 });
-
-const { EnvironmentConfiguration, RushUserConfiguration, CredentialCache } = rushSession;
 
 describe('AzureStorageBuildCacheProvider', () => {
   beforeEach(() => {
