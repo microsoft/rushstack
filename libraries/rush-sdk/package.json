@@ -24,6 +24,7 @@
     "tapable": "2.2.1"
   },
   "devDependencies": {
+    "@microsoft/rush-lib": "workspace:*",
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",

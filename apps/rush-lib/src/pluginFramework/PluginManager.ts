@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, InternalError, ITerminal } from '@rushstack/node-core-library';
+import { FileSystem, InternalError, IPackageJson, ITerminal } from '@rushstack/node-core-library';
 import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
 
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -46,16 +46,25 @@ export class PluginManager {
     // until after the plugin feature has stabilized and is fully documented.  In the meantime, Rush's
     // built-in plugins are dependencies of @microsoft/rush-lib and get loaded by default (without any
     // configuration).
-    const builtInPluginConfigurations: IRushPluginConfigurationBase[] = [
-      {
+    //
+    // The plugins have devDependencies on Rush, which would create a circular dependency in our local
+    // workspace if we added them to rush-lib/package.json.  Instead we put them in a special section
+    // "publishOnlyDependencies" which gets moved into "dependencies" during publishing.
+    const builtInPluginConfigurations: IRushPluginConfigurationBase[] = [];
+
+    const ownPackageJson: IPackageJson = require('../../package.json');
+    if (ownPackageJson.dependencies!['@rushstack/rush-amazon-s3-build-cache-plugin']) {
+      builtInPluginConfigurations.push({
         packageName: '@rushstack/rush-amazon-s3-build-cache-plugin',
         pluginName: 'rush-amazon-s3-build-cache-plugin'
-      },
-      {
+      });
+    }
+    if (ownPackageJson.dependencies!['@rushstack/rush-azure-storage-build-cache-plugin']) {
+      builtInPluginConfigurations.push({
         packageName: '@rushstack/rush-azure-storage-build-cache-plugin',
         pluginName: 'rush-azure-storage-build-cache-plugin'
-      }
-    ];
+      });
+    }
 
     this._builtInPluginLoaders = builtInPluginConfigurations.map((pluginConfiguration) => {
       return new BuiltInPluginLoader({
