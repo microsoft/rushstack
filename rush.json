@@ -490,7 +490,7 @@
     },
     {
       "packageName": "@rushstack/rush-sdk",
-      "projectFolder": "apps/rush-sdk",
+      "projectFolder": "libraries/rush-sdk",
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
     },
