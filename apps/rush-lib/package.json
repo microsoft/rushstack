@@ -15,7 +15,7 @@
   "main": "lib/index.js",
   "typings": "dist/rush-lib.d.ts",
   "scripts": {
-    "build": "heft test --clean"
+    "build": "node ./scripts/build.js"
   },
   "license": "MIT",
   "dependencies": {
