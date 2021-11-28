@@ -286,6 +286,7 @@ importers:
       '@rushstack/stream-collator': link:../../libraries/stream-collator
       '@rushstack/terminal': link:../../libraries/terminal
       '@rushstack/ts-command-line': link:../../libraries/ts-command-line
+      '@types/node-fetch': 1.6.9
       '@yarnpkg/lockfile': 1.0.2
       builtin-modules: 3.1.0
       cli-table: 0.3.9
@@ -325,7 +326,6 @@ importers:
       '@types/lodash': 4.14.116
       '@types/minimatch': 2.0.29
       '@types/node': 12.20.24
-      '@types/node-fetch': 1.6.9
       '@types/npm-package-arg': 6.1.0
       '@types/npm-packlist': 1.1.2
       '@types/read-package-tree': 5.1.0
