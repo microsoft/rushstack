@@ -1727,6 +1727,9 @@ export class RushConfiguration {
     return this._experimentsConfiguration;
   }
 
+  /**
+   * @internal
+   */
   public get rushPluginsConfiguration(): RushPluginsConfiguration {
     return this._rushPluginsConfiguration;
   }

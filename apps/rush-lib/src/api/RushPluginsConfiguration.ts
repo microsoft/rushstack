@@ -4,31 +4,19 @@
 import * as path from 'path';
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
-/**
- * @beta
- */
 export interface IRushPluginConfigurationBase {
   packageName: string;
   pluginName: string;
 }
 
-/**
- * @beta
- */
 export interface IRushPluginConfiguration extends IRushPluginConfigurationBase {
   autoinstallerName: string;
 }
 
-/**
- * @beta
- */
 interface IRushPluginsConfigurationJson {
   plugins: IRushPluginConfiguration[];
 }
 
-/**
- * @beta
- */
 export class RushPluginsConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
     path.join(__dirname, '..', 'schemas', 'rush-plugins.schema.json')

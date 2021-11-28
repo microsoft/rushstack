@@ -48,6 +48,7 @@ export { PackageJsonEditor, PackageJsonDependency, DependencyType } from './api/
 
 export { RepoStateFile } from './logic/RepoStateFile';
 
+export { LookupByPath } from './logic/LookupByPath';
 export { EventHooks, Event } from './api/EventHooks';
 
 export { ChangeManager } from './api/ChangeManager';

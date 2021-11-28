@@ -304,10 +304,8 @@ export interface IPutFetchOptions extends IWebFetchOptionsBase {
     verb: 'PUT';
 }
 
-// @public (undocumented)
+// @beta (undocumented)
 export interface IRushPlugin {
-    // Warning: (ae-incompatible-release-tags) The symbol "apply" is marked as @public, but its signature references "RushSession" which is marked as @beta
-    //
     // (undocumented)
     apply(rushSession: RushSession, rushConfiguration: RushConfiguration): void;
 }
@@ -367,6 +365,17 @@ export class LockStepVersionPolicy extends VersionPolicy {
     update(newVersionString: string): boolean;
     validate(versionString: string, packageName: string): void;
     get version(): string;
+}
+
+// @beta
+export class LookupByPath<TItem> {
+    constructor(entries?: Iterable<[string, TItem]>, delimiter?: string);
+    readonly delimiter: string;
+    findChildPath(childPath: string): TItem | undefined;
+    findChildPathFromSegments(childPathSegments: Iterable<string>): TItem | undefined;
+    static iteratePathSegments(serializedPath: string, delimiter?: string): Iterable<string>;
+    setItem(serializedPath: string, value: TItem): this;
+    setItemFromSegments(pathSegments: Iterable<string>, value: TItem): this;
 }
 
 // @public
@@ -507,8 +516,6 @@ export class RushConfiguration {
     getImplicitlyPreferredVersions(variant?: string | undefined): Map<string, string>;
     getPnpmfilePath(variant?: string | undefined): string;
     getProjectByName(projectName: string): RushConfigurationProject | undefined;
-    // Warning: (ae-forgotten-export) The symbol "LookupByPath" needs to be exported by the entry point index.d.ts
-    //
     // @beta (undocumented)
     getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject>;
     getRepoState(variant?: string | undefined): RepoStateFile;
@@ -552,7 +559,7 @@ export class RushConfiguration {
     get rushPluginOptionsFolder(): string;
     // Warning: (ae-forgotten-export) The symbol "RushPluginsConfiguration" needs to be exported by the entry point index.d.ts
     //
-    // (undocumented)
+    // @internal (undocumented)
     get rushPluginsConfiguration(): RushPluginsConfiguration;
     get shrinkwrapFilename(): string;
     get shrinkwrapFilePhrase(): string;
