@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Introduce \"@rushstack/rush-sdk\" interface to support Rush plugin development",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

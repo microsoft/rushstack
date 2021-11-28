@@ -6,7 +6,7 @@ import {
   StringBufferTerminalProvider,
   Terminal
 } from '@rushstack/node-core-library';
-import { RushSession } from '@microsoft/rush-lib';
+import { RushSession } from '@rushstack/rush-sdk';
 
 import { AmazonS3BuildCacheProvider } from '../AmazonS3BuildCacheProvider';
 

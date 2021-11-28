@@ -7,7 +7,7 @@ import type {
   ICredentialCacheEntry,
   ICredentialCache,
   RushSession
-} from '@microsoft/rush-lib';
+} from '@rushstack/rush-sdk';
 
 import { AmazonS3Client, IAmazonS3Credentials } from './AmazonS3Client';
 
