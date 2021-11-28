@@ -71,9 +71,16 @@ export { ExperimentsConfiguration, IExperimentsJson } from './api/ExperimentsCon
 
 export { ProjectChangeAnalyzer, IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
 
-export { RushSession, IRushSessionOptions } from './pluginFramework/RushSession';
+export {
+  RushSession,
+  IRushSessionOptions,
+  CloudBuildCacheProviderFactory
+} from './pluginFramework/RushSession';
+
+export { RushLifecycleHooks } from './pluginFramework/RushLifeCycle';
 
 export { IRushPlugin } from './pluginFramework/IRushPlugin';
+export { ILogger } from './pluginFramework/logging/Logger';
 
 export { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCacheProvider';
 

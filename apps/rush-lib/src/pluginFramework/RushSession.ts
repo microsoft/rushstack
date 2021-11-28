@@ -5,7 +5,7 @@ import { InternalError, ITerminalProvider } from '@rushstack/node-core-library';
 import { IBuildCacheJson } from '../api/BuildCacheConfiguration';
 import { ICloudBuildCacheProvider } from '../logic/buildCache/ICloudBuildCacheProvider';
 import { ILogger, ILoggerOptions, Logger } from './logging/Logger';
-import { IRushLifecycle, RushLifecycleHooks } from './RushLifeCycle';
+import { RushLifecycleHooks } from './RushLifeCycle';
 
 /**
  * @beta
@@ -15,15 +15,17 @@ export interface IRushSessionOptions {
   getIsDebugMode: () => boolean;
 }
 
-export type ICloudBuildCacheProviderFactory = (buildCacheJson: IBuildCacheJson) => ICloudBuildCacheProvider;
+/**
+ * @beta
+ */
+export type CloudBuildCacheProviderFactory = (buildCacheJson: IBuildCacheJson) => ICloudBuildCacheProvider;
 
 /**
  * @beta
  */
-export class RushSession implements IRushLifecycle {
+export class RushSession {
   private readonly _options: IRushSessionOptions;
-  private readonly _cloudBuildCacheProviderFactories: Map<string, ICloudBuildCacheProviderFactory> =
-    new Map();
+  private readonly _cloudBuildCacheProviderFactories: Map<string, CloudBuildCacheProviderFactory> = new Map();
 
   public readonly hooks: RushLifecycleHooks;
 
@@ -53,7 +55,7 @@ export class RushSession implements IRushLifecycle {
 
   public registerCloudBuildCacheProviderFactory(
     cacheProviderName: string,
-    factory: ICloudBuildCacheProviderFactory
+    factory: CloudBuildCacheProviderFactory
   ): void {
     if (this._cloudBuildCacheProviderFactories.has(cacheProviderName)) {
       throw new Error(`A build cache provider factory for ${cacheProviderName} has already been registered`);
@@ -63,7 +65,7 @@ export class RushSession implements IRushLifecycle {
 
   public getCloudBuildCacheProviderFactory(
     cacheProviderName: string
-  ): ICloudBuildCacheProviderFactory | undefined {
+  ): CloudBuildCacheProviderFactory | undefined {
     return this._cloudBuildCacheProviderFactories.get(cacheProviderName);
   }
 }

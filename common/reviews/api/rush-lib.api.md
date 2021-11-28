@@ -72,6 +72,11 @@ export class ChangeManager {
     static createEmptyChangeFiles(rushConfiguration: RushConfiguration, projectName: string, emailAddress: string): string | undefined;
 }
 
+// Warning: (ae-forgotten-export) The symbol "IBuildCacheJson" needs to be exported by the entry point index.d.ts
+//
+// @beta (undocumented)
+export type CloudBuildCacheProviderFactory = (buildCacheJson: IBuildCacheJson) => ICloudBuildCacheProvider;
+
 // @public
 export class CommonVersionsConfiguration {
     get allowedAlternativeVersions(): Map<string, ReadonlyArray<string>>;
@@ -263,6 +268,14 @@ export interface IGetFetchOptions extends IWebFetchOptionsBase {
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
     isManaged: boolean;
+}
+
+// @beta (undocumented)
+export interface ILogger {
+    emitError(error: Error): void;
+    emitWarning(warning: Error): void;
+    // (undocumented)
+    readonly terminal: Terminal;
 }
 
 // @public
@@ -670,25 +683,22 @@ export class _RushGlobalFolder {
     get path(): string;
 }
 
-// Warning: (ae-forgotten-export) The symbol "IRushLifecycle" needs to be exported by the entry point index.d.ts
-//
 // @beta (undocumented)
-export class RushSession implements IRushLifecycle {
+export class RushLifecycleHooks {
+    initialize: AsyncSeriesHook<void>;
+}
+
+// @beta (undocumented)
+export class RushSession {
     constructor(options: IRushSessionOptions);
     // (undocumented)
-    getCloudBuildCacheProviderFactory(cacheProviderName: string): ICloudBuildCacheProviderFactory | undefined;
-    // Warning: (ae-forgotten-export) The symbol "ILogger" needs to be exported by the entry point index.d.ts
-    //
+    getCloudBuildCacheProviderFactory(cacheProviderName: string): CloudBuildCacheProviderFactory | undefined;
     // (undocumented)
     getLogger(name: string): ILogger;
-    // Warning: (ae-forgotten-export) The symbol "RushLifecycleHooks" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     readonly hooks: RushLifecycleHooks;
-    // Warning: (ae-forgotten-export) The symbol "ICloudBuildCacheProviderFactory" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
-    registerCloudBuildCacheProviderFactory(cacheProviderName: string, factory: ICloudBuildCacheProviderFactory): void;
+    registerCloudBuildCacheProviderFactory(cacheProviderName: string, factory: CloudBuildCacheProviderFactory): void;
     // (undocumented)
     get terminalProvider(): ITerminalProvider;
 }
