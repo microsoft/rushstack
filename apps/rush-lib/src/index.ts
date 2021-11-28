@@ -66,15 +66,11 @@ export { ProjectChangeAnalyzer, IGetChangedProjectsOptions } from './logic/Proje
 
 export { RushSession, IRushSessionOptions } from './pluginFramework/RushSession';
 
-export type { IRushPlugin } from './pluginFramework/IRushPlugin';
+export { IRushPlugin } from './pluginFramework/IRushPlugin';
 
-export type { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCacheProvider';
+export { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCacheProvider';
 
-export type {
-  ICredentialCache,
-  ICredentialCacheOptions,
-  ICredentialCacheEntry
-} from './logic/CredentialCache';
+export { ICredentialCacheOptions, ICredentialCacheEntry, CredentialCache } from './logic/CredentialCache';
 
 export {
   WebClientResponse,

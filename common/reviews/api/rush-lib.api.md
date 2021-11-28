@@ -85,6 +85,26 @@ export class CommonVersionsConfiguration {
     get xstitchPreferredVersions(): Map<string, string>;
 }
 
+// @beta (undocumented)
+export class CredentialCache {
+    // (undocumented)
+    deleteCacheEntry(cacheId: string): void;
+    // (undocumented)
+    dispose(): void;
+    // (undocumented)
+    static initializeAsync(options: ICredentialCacheOptions): Promise<CredentialCache>;
+    // (undocumented)
+    saveIfModifiedAsync(): Promise<void>;
+    // (undocumented)
+    setCacheEntry(cacheId: string, credential: string, expires?: Date): void;
+    // (undocumented)
+    trimExpiredEntries(): void;
+    // (undocumented)
+    tryGetCacheEntry(cacheId: string): ICredentialCacheEntry | undefined;
+    // (undocumented)
+    static usingAsync(options: ICredentialCacheOptions, doActionAsync: (credentialCache: CredentialCache) => Promise<void> | void): Promise<void>;
+}
+
 // @public (undocumented)
 export const enum DependencyType {
     // (undocumented)
@@ -169,11 +189,6 @@ export interface IConfigurationEnvironmentVariable {
     override?: boolean;
     value: string;
 }
-
-// Warning: (ae-forgotten-export) The symbol "CredentialCache" needs to be exported by the entry point index.d.ts
-//
-// @beta (undocumented)
-export type ICredentialCache = CredentialCache;
 
 // @beta (undocumented)
 export interface ICredentialCacheEntry {
@@ -624,8 +639,6 @@ export class _RushGlobalFolder {
 // @beta (undocumented)
 export class RushSession implements IRushLifecycle {
     constructor(options: IRushSessionOptions);
-    // (undocumented)
-    get CredentialCache(): typeof CredentialCache;
     // Warning: (ae-forgotten-export) The symbol "EnvironmentConfiguration" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
