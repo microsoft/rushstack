@@ -4,6 +4,8 @@
 import * as path from 'path';
 import { Import, IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
 
+const RUSH_LIB_NAME: string = '@microsoft/rush-lib';
+
 type RushLibModuleType = Record<string, unknown>;
 declare const global: NodeJS.Global &
   typeof globalThis & {
@@ -24,8 +26,6 @@ if (rushLibModule === undefined) {
     if (callerPackageFolder !== undefined) {
       const callerPackageJson: IPackageJson = require(path.join(callerPackageFolder, 'package.json'));
 
-      const RUSH_LIB_NAME: string = '@microsoft/rush-lib';
-
       // Does the caller properly declare a dependency on rush-lib?
       if (
         (callerPackageJson.dependencies && callerPackageJson.dependencies[RUSH_LIB_NAME] !== undefined) ||
@@ -37,17 +37,13 @@ if (rushLibModule === undefined) {
         // Try to resolve rush-lib from the caller's folder
         try {
           const rushLibModulePath: string = Import.resolveModule({
-            modulePath: '@microsoft/rush-lib',
+            modulePath: RUSH_LIB_NAME,
             baseFolderPath: callerPackageFolder
           });
 
           rushLibModule = require(rushLibModulePath);
         } catch (error) {
           // If we fail to resolve it, ignore the error
-        }
-
-        if (rushLibModule !== undefined) {
-          global.___rush___rushLibModule = rushLibModule;
         }
       }
     }
