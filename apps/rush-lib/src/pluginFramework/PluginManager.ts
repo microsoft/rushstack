@@ -46,25 +46,16 @@ export class PluginManager {
     // until after the plugin feature has stabilized and is fully documented.  In the meantime, Rush's
     // built-in plugins are dependencies of @microsoft/rush-lib and get loaded by default (without any
     // configuration).
-    //
-    // The plugins have devDependencies on Rush, which would create a circular dependency in our local
-    // workspace if we added them to rush-lib/package.json.  Instead we put them in a special section
-    // "publishOnlyDependencies" which gets moved into "dependencies" during publishing.
-    const builtInPluginConfigurations: IRushPluginConfigurationBase[] = [];
-
-    const ownPackageJson: IPackageJson = require('../../package.json');
-    if (ownPackageJson.dependencies!['@rushstack/rush-amazon-s3-build-cache-plugin']) {
-      builtInPluginConfigurations.push({
+    const builtInPluginConfigurations: IRushPluginConfigurationBase[] = [
+      {
         packageName: '@rushstack/rush-amazon-s3-build-cache-plugin',
         pluginName: 'rush-amazon-s3-build-cache-plugin'
-      });
-    }
-    if (ownPackageJson.dependencies!['@rushstack/rush-azure-storage-build-cache-plugin']) {
-      builtInPluginConfigurations.push({
+      },
+      {
         packageName: '@rushstack/rush-azure-storage-build-cache-plugin',
         pluginName: 'rush-azure-storage-build-cache-plugin'
-      });
-    }
+      }
+    ];
 
     this._builtInPluginLoaders = builtInPluginConfigurations.map((pluginConfiguration) => {
       return new BuiltInPluginLoader({
