@@ -4,10 +4,9 @@
 import { InternalError, ITerminalProvider } from '@rushstack/node-core-library';
 import { RushUserConfiguration } from '../api/RushUserConfiguration';
 import { IBuildCacheJson } from '../api/BuildCacheConfiguration';
-import { EnvironmentConfiguration, EnvironmentVariableNames } from '../api/EnvironmentConfiguration';
+import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 import { ICloudBuildCacheProvider } from '../logic/buildCache/ICloudBuildCacheProvider';
 import { CredentialCache } from '../logic/CredentialCache';
-import { RushConstants } from '../logic/RushConstants';
 import { WebClient } from '../utilities/WebClient';
 import { ILogger, ILoggerOptions, Logger } from './logging/Logger';
 import { IRushLifecycle, RushLifecycleHooks } from './RushLifeCycle';
@@ -73,18 +72,8 @@ export class RushSession implements IRushLifecycle {
   }
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  public get EnvironmentVariableNames(): typeof EnvironmentVariableNames {
-    return EnvironmentVariableNames;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   public get EnvironmentConfiguration(): typeof EnvironmentConfiguration {
     return EnvironmentConfiguration;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  public get RushConstants(): typeof RushConstants {
-    return RushConstants;
   }
 
   // eslint-disable-next-line @typescript-eslint/naming-convention

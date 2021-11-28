@@ -563,6 +563,52 @@ export class RushConfigurationProject {
     get versionPolicyName(): string | undefined;
 }
 
+// @public
+export class RushConstants {
+    static readonly artifactoryFilename: string;
+    static readonly browserApprovedPackagesFilename: string;
+    static readonly buildCacheFilename: string;
+    static readonly buildCommandName: string;
+    static readonly bulkCommandKind: 'bulk';
+    static readonly changeFilesFolderName: string;
+    static readonly commandLineFilename: string;
+    static readonly commonFolderName: string;
+    static readonly commonVersionsFilename: string;
+    static readonly defaultMaxInstallAttempts: number;
+    static readonly experimentsFilename: string;
+    static readonly globalCommandKind: 'global';
+    static readonly hashDelimiter: string;
+    static readonly nodeModulesFolderName: string;
+    static readonly nonbrowserApprovedPackagesFilename: string;
+    static readonly npmShrinkwrapFilename: string;
+    static readonly phasedCommandKind: 'phased';
+    // @deprecated
+    static readonly pinnedVersionsFilename: string;
+    static readonly pnpmfileV1Filename: string;
+    static readonly pnpmfileV6Filename: string;
+    static readonly pnpmV3ShrinkwrapFilename: string;
+    static readonly projectRushFolderName: string;
+    static readonly projectShrinkwrapFilename: string;
+    static readonly rebuildCommandName: string;
+    static readonly repoStateFilename: string;
+    static readonly rushPackageName: string;
+    static readonly rushPluginManifestFilename: string;
+    static readonly rushPluginsConfigFilename: string;
+    static readonly rushProjectConfigFilename: string;
+    static readonly rushRecyclerFolderName: string;
+    static readonly rushTempFolderName: string;
+    static readonly rushTempNpmScope: string;
+    static readonly rushTempProjectsFolderName: string;
+    static readonly rushUserConfigurationFolderName: string;
+    static readonly rushVariantsFolderName: string;
+    static readonly rushWebSiteUrl: string;
+    // (undocumented)
+    static readonly updateCloudCredentialsCommandName: string;
+    // (undocumented)
+    static readonly versionPoliciesFilename: string;
+    static readonly yarnShrinkwrapFilename: string;
+}
+
 // @internal
 export class _RushGlobalFolder {
     constructor();
@@ -582,8 +628,6 @@ export class RushSession implements IRushLifecycle {
     // (undocumented)
     get EnvironmentConfiguration(): typeof EnvironmentConfiguration;
     // (undocumented)
-    get EnvironmentVariableNames(): typeof EnvironmentVariableNames;
-    // (undocumented)
     getCloudBuildCacheProviderFactory(cacheProviderName: string): ICloudBuildCacheProviderFactory | undefined;
     // Warning: (ae-forgotten-export) The symbol "ILogger" needs to be exported by the entry point index.d.ts
     //
@@ -597,10 +641,6 @@ export class RushSession implements IRushLifecycle {
     //
     // (undocumented)
     registerCloudBuildCacheProviderFactory(cacheProviderName: string, factory: ICloudBuildCacheProviderFactory): void;
-    // Warning: (ae-forgotten-export) The symbol "RushConstants" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    get RushConstants(): typeof RushConstants;
     // Warning: (ae-forgotten-export) The symbol "RushUserConfiguration" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)

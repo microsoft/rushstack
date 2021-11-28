@@ -24,6 +24,8 @@ export {
   YarnOptionsConfiguration
 } from './api/RushConfiguration';
 
+export { RushConstants } from './logic/RushConstants';
+
 export { PackageManagerName, PackageManager } from './api/packageManager/PackageManager';
 
 export { EnvironmentVariableNames } from './api/EnvironmentConfiguration';

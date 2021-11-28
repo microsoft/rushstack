@@ -3,11 +3,13 @@
 
 import { ITerminal } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
-import type {
+import {
   ICloudBuildCacheProvider,
   ICredentialCache,
   ICredentialCacheEntry,
-  RushSession
+  RushSession,
+  EnvironmentVariableNames,
+  RushConstants
 } from '@rushstack/rush-sdk';
 import {
   BlobClient,
@@ -119,7 +121,7 @@ export class AzureStorageBuildCacheProvider implements ICloudBuildCacheProvider 
     cacheId: string
   ): Promise<Buffer | undefined> {
     const blobClient: BlobClient = await this._getBlobClientForCacheIdAsync(cacheId);
-    const { RushConstants, EnvironmentVariableNames } = this._rushSession;
+
     try {
       const blobExists: boolean = await blobClient.exists();
       if (blobExists) {
@@ -282,7 +284,7 @@ export class AzureStorageBuildCacheProvider implements ICloudBuildCacheProvider 
   }
 
   private async _getContainerClientAsync(): Promise<ContainerClient> {
-    const { CredentialCache, RushConstants, EnvironmentVariableNames } = this._rushSession;
+    const { CredentialCache } = this._rushSession;
     if (!this._containerClient) {
       let sasString: string | undefined = this._environmentCredential;
       if (!sasString) {

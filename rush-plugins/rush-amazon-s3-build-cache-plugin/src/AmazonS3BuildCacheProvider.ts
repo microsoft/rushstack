@@ -2,11 +2,13 @@
 // See LICENSE in the project root for license information.
 
 import { ITerminal } from '@rushstack/node-core-library';
-import type {
+import {
   ICloudBuildCacheProvider,
   ICredentialCacheEntry,
   ICredentialCache,
-  RushSession
+  RushSession,
+  RushConstants,
+  EnvironmentVariableNames
 } from '@rushstack/rush-sdk';
 
 import { AmazonS3Client, IAmazonS3Credentials } from './AmazonS3Client';
@@ -62,7 +64,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
       let credentials: IAmazonS3Credentials | undefined = AmazonS3Client.tryDeserializeCredentials(
         this._environmentCredential
       );
-      const { RushConstants, CredentialCache, EnvironmentVariableNames } = this._rushSession;
+      const { CredentialCache } = this._rushSession;
       if (!credentials) {
         let cacheEntry: ICredentialCacheEntry | undefined;
         await CredentialCache.usingAsync(
