@@ -76,4 +76,11 @@ export type {
   ICredentialCacheEntry
 } from './logic/CredentialCache';
 
-export type { IWebClient, IGetFetchOptions, IPutFetchOptions } from './utilities/WebClient';
+export {
+  WebClientResponse,
+  IWebFetchOptionsBase,
+  IGetFetchOptions,
+  IPutFetchOptions,
+  WebClientProxy,
+  WebClient
+} from './utilities/WebClient';

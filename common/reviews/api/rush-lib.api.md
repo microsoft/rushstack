@@ -209,9 +209,7 @@ export interface IGetChangedProjectsOptions {
     terminal: ITerminal;
 }
 
-// Warning: (ae-forgotten-export) The symbol "IWebFetchOptionsBase" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
+// @beta
 export interface IGetFetchOptions extends IWebFetchOptionsBase {
     // (undocumented)
     verb: 'GET' | never;
@@ -254,7 +252,7 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     useWorkspaces?: boolean;
 }
 
-// @public (undocumented)
+// @beta
 export interface IPutFetchOptions extends IWebFetchOptionsBase {
     // (undocumented)
     body?: Buffer;
@@ -284,10 +282,15 @@ export interface ITryFindRushJsonLocationOptions {
     startingFolder?: string;
 }
 
-// Warning: (ae-forgotten-export) The symbol "WebClient" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export type IWebClient = WebClient;
+// @beta
+export interface IWebFetchOptionsBase {
+    // (undocumented)
+    headers?: fetch.Headers;
+    // (undocumented)
+    timeoutMs?: number;
+    // (undocumented)
+    verb?: 'GET' | 'PUT';
+}
 
 // @internal
 export interface _IYarnOptionsJson extends IPackageManagerOptionsJsonBase {
@@ -647,8 +650,6 @@ export class RushSession implements IRushLifecycle {
     get RushUserConfiguration(): typeof RushUserConfiguration;
     // (undocumented)
     get terminalProvider(): ITerminalProvider;
-    // (undocumented)
-    get WebClient(): typeof WebClient;
 }
 
 // @public
@@ -691,6 +692,38 @@ export enum VersionPolicyDefinitionName {
     // (undocumented)
     'lockStepVersion' = 0
 }
+
+// @beta
+export class WebClient {
+    constructor();
+    // (undocumented)
+    accept: string | undefined;
+    // (undocumented)
+    addBasicAuthHeader(userName: string, password: string): void;
+    // (undocumented)
+    fetchAsync(url: string, options?: IGetFetchOptions | IPutFetchOptions): Promise<WebClientResponse>;
+    // (undocumented)
+    static mergeHeaders(target: fetch.Headers, source: fetch.Headers): void;
+    // (undocumented)
+    proxy: WebClientProxy;
+    // (undocumented)
+    readonly standardHeaders: fetch.Headers;
+    // (undocumented)
+    userAgent: string | undefined;
+}
+
+// @beta
+export enum WebClientProxy {
+    // (undocumented)
+    Detect = 1,
+    // (undocumented)
+    Fiddler = 2,
+    // (undocumented)
+    None = 0
+}
+
+// @beta
+export type WebClientResponse = fetch.Response;
 
 // @public
 export class YarnOptionsConfiguration extends PackageManagerOptionsConfigurationBase {

@@ -7,10 +7,15 @@ import { Import } from '@rushstack/node-core-library';
 const createHttpsProxyAgent: typeof import('https-proxy-agent') = Import.lazy('https-proxy-agent', require);
 
 /**
- * @public
+ * For use with {@link WebClient}.
+ * @beta
  */
 export type WebClientResponse = fetch.Response;
 
+/**
+ * For use with {@link WebClient}.
+ * @beta
+ */
 export interface IWebFetchOptionsBase {
   timeoutMs?: number;
   verb?: 'GET' | 'PUT';
@@ -18,14 +23,16 @@ export interface IWebFetchOptionsBase {
 }
 
 /**
- * @public
+ * For use with {@link WebClient}.
+ * @beta
  */
 export interface IGetFetchOptions extends IWebFetchOptionsBase {
   verb: 'GET' | never;
 }
 
 /**
- * @public
+ * For use with {@link WebClient}.
+ * @beta
  */
 export interface IPutFetchOptions extends IWebFetchOptionsBase {
   verb: 'PUT';
@@ -33,7 +40,8 @@ export interface IPutFetchOptions extends IWebFetchOptionsBase {
 }
 
 /**
- * @public
+ * For use with {@link WebClient}.
+ * @beta
  */
 export enum WebClientProxy {
   None,
@@ -42,12 +50,8 @@ export enum WebClientProxy {
 }
 
 /**
- * @public
- */
-export type IWebClient = WebClient;
-
-/**
- * @public
+ * A helper for issuing HTTP requests.
+ * @beta
  */
 export class WebClient {
   public readonly standardHeaders: fetch.Headers = new fetch.Headers();

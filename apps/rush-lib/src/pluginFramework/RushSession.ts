@@ -7,7 +7,6 @@ import { IBuildCacheJson } from '../api/BuildCacheConfiguration';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 import { ICloudBuildCacheProvider } from '../logic/buildCache/ICloudBuildCacheProvider';
 import { CredentialCache } from '../logic/CredentialCache';
-import { WebClient } from '../utilities/WebClient';
 import { ILogger, ILoggerOptions, Logger } from './logging/Logger';
 import { IRushLifecycle, RushLifecycleHooks } from './RushLifeCycle';
 
@@ -84,10 +83,5 @@ export class RushSession implements IRushLifecycle {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   public get RushUserConfiguration(): typeof RushUserConfiguration {
     return RushUserConfiguration;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  public get WebClient(): typeof WebClient {
-    return WebClient;
   }
 }

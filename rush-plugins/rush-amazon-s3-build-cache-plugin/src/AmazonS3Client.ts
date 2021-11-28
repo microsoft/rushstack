@@ -3,7 +3,7 @@
 
 import * as crypto from 'crypto';
 import * as fetch from 'node-fetch';
-import type { IPutFetchOptions, IGetFetchOptions, IWebClient } from '@rushstack/rush-sdk';
+import { IPutFetchOptions, IGetFetchOptions, WebClient } from '@rushstack/rush-sdk';
 
 import { IAmazonS3BuildCacheProviderOptions } from './AmazonS3BuildCacheProvider';
 
@@ -30,12 +30,12 @@ export class AmazonS3Client {
   private readonly _s3Bucket: string;
   private readonly _s3Region: string;
 
-  private readonly _webClient: IWebClient;
+  private readonly _webClient: WebClient;
 
   public constructor(
     credentials: IAmazonS3Credentials | undefined,
     options: IAmazonS3BuildCacheProviderOptions,
-    webClient: IWebClient
+    webClient: WebClient
   ) {
     this._credentials = credentials;
 

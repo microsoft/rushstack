@@ -8,7 +8,8 @@ import {
   ICredentialCache,
   RushSession,
   RushConstants,
-  EnvironmentVariableNames
+  EnvironmentVariableNames,
+  WebClient
 } from '@rushstack/rush-sdk';
 
 import { AmazonS3Client, IAmazonS3Credentials } from './AmazonS3Client';
@@ -96,7 +97,7 @@ export class AmazonS3BuildCacheProvider implements ICloudBuildCacheProvider {
         }
       }
 
-      this.__s3Client = new AmazonS3Client(credentials, this._options, new this._rushSession.WebClient());
+      this.__s3Client = new AmazonS3Client(credentials, this._options, new WebClient());
     }
 
     return this.__s3Client;
