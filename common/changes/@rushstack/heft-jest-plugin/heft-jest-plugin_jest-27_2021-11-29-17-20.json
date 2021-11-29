@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-jest-plugin",
+      "comment": "Update to jest v27",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-jest-plugin"
+}
