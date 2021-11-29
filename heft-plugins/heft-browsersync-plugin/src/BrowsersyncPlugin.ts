@@ -71,7 +71,8 @@ export class BrowsersyncPlugin implements IHeftPlugin {
     const wdsConfigurationJson: IBrowsersyncConfigurationJson | undefined =
       await this._ensureConfigFileLoadedAsync(logger.terminal, heftConfiguration);
     if (!wdsConfigurationJson) {
-      throw new Error('Unable to find an wds.json config');
+      logger.emitError(new Error('Unable to find an wds.json config'));
+      return;
     }
     const { rootDir, watch, port } = wdsConfigurationJson;
     this._bs = bs.create();
