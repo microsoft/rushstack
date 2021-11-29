@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-workbox-plugin",
+      "comment": "Initial implementation of heft-workbox-plugin",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-workbox-plugin"
+}

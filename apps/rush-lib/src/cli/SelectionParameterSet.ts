@@ -41,8 +41,10 @@ export class SelectionParameterSet {
   public constructor(rushConfiguration: RushConfiguration, action: CommandLineParameterProvider) {
     this._rushConfiguration = rushConfiguration;
 
-    const selectorParsers: Map<string, ISelectorParser<RushConfigurationProject>> =
-      (this._selectorParserByScope = new Map());
+    const selectorParsers: Map<
+      string,
+      ISelectorParser<RushConfigurationProject>
+    > = (this._selectorParserByScope = new Map());
 
     selectorParsers.set('name', new NamedProjectSelectorParser(rushConfiguration));
     selectorParsers.set('git', new GitChangedProjectSelectorParser(rushConfiguration));
