@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft",
+      "comment": "Remove an unused dependency.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft"
+}

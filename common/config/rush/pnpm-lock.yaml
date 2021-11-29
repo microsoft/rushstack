@@ -116,7 +116,6 @@ importers:
       '@rushstack/node-core-library': workspace:*
       '@rushstack/rig-package': workspace:*
       '@rushstack/ts-command-line': workspace:*
-      '@rushstack/typings-generator': workspace:*
       '@types/argparse': 1.0.38
       '@types/eslint': 7.2.0
       '@types/glob': 7.1.1
@@ -141,7 +140,6 @@ importers:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/rig-package': link:../../libraries/rig-package
       '@rushstack/ts-command-line': link:../../libraries/ts-command-line
-      '@rushstack/typings-generator': link:../../libraries/typings-generator
       '@types/tapable': 1.0.6
       argparse: 1.0.10
       chokidar: 3.4.3
@@ -1610,8 +1608,8 @@ importers:
   ../../libraries/typings-generator:
     specifiers:
       '@rushstack/eslint-config': workspace:*
-      '@rushstack/heft': 0.41.6
-      '@rushstack/heft-node-rig': 1.2.25
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@types/glob': 7.1.1
       '@types/node': 12.20.24
@@ -1624,8 +1622,8 @@ importers:
       glob: 7.0.6
     devDependencies:
       '@rushstack/eslint-config': link:../../stack/eslint-config
-      '@rushstack/heft': 0.41.6
-      '@rushstack/heft-node-rig': 1.2.25_@rushstack+heft@0.41.6
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/glob': 7.1.1
 
   ../../repo-scripts/doc-plugin-rush-stack:
