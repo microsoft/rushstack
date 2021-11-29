@@ -189,11 +189,13 @@ result.
 ### `globsToIgnore = [ ]`
 
 This option is used to specify `.resx` and `.loc.json` files that should not be processed by this plugin.
-By default, every `.resx`, `.resx.json`, and `.loc.json` file import is intercepted by this plugin, and an error occurs
-if translations aren't provided for an intercepted file and the
-`localizedData.defaultLocale.fillMissingTranslationStrings` option is set to `false`. To avoid that error,
-list files that should be ignored by this plugin in this property. Files should be specified as either
-absolute paths or paths relative to the Webpack compilation context.
+By default, every `.resx`, `.resx.json`, and `.loc.json` file import is intercepted by this plugin, and an
+error occurs if translations aren't provided for an intercepted file and the
+`localizedData.defaultLocale.fillMissingTranslationStrings` option is set to falsy, or if the
+file is in an unexpected format. To avoid an error, specify files that should be ignored by this plugin in
+this property. This is useful if a dependency uses files with a `.resx`, `.resx.json`, or `.loc.json`
+extension, but are processed in a different way from how this plugin handles localization.
+For example: `globsToIgnore: [ 'node_modules/some-dependency-name/lib/**/*.loc.json' ]`
 
 ### `noStringsLocaleName = '...'`
 
