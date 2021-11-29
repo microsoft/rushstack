@@ -11,7 +11,7 @@ import type {
   IPostBuildSubstage
 } from '@rushstack/heft';
 
-import { configurationFileLoader, IBrowsersyncConfigurationJson } from './BrowsersyncConfigLoader.js';
+import { configurationFileLoader, IBrowsersyncConfigurationJson } from './BrowsersyncConfigLoader';
 
 import type { BrowserSyncInstance } from 'browser-sync';
 
