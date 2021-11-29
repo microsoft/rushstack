@@ -81,6 +81,5 @@ export class BrowsersyncPlugin implements IHeftPlugin {
       server: rootDir,
       port
     });
-    return;
   }
 }
