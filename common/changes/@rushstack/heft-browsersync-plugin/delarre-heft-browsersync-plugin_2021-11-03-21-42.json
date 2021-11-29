@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft-browsersync-plugin",
-      "comment": "Adds initial implementation of heft-browsersync-plugin",
+      "comment": "Initial implementation of heft-browsersync-plugin",
       "type": "minor"
     }
   ],
