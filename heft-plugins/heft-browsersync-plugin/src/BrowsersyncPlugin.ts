@@ -54,23 +54,11 @@ export class BrowsersyncPlugin implements IHeftPlugin {
     heftConfiguration: HeftConfiguration
   ): Promise<IBrowsersyncConfigurationJson | undefined> {
     const buildFolder: string = heftConfiguration.buildFolder;
-
-    let wdsConfigurationFileCacheEntry: IBrowsersyncConfigurationFileCacheEntry | undefined =
-      this._wdsConfigurationFileCache.get(buildFolder);
-
-    if (!wdsConfigurationFileCacheEntry) {
-      wdsConfigurationFileCacheEntry = {
-        configurationFile: await configurationFileLoader().tryLoadConfigurationFileForProjectAsync(
-          terminal,
-          buildFolder,
-          heftConfiguration.rigConfig
-        )
-      };
-
-      this._wdsConfigurationFileCache.set(buildFolder, wdsConfigurationFileCacheEntry);
-    }
-
-    return wdsConfigurationFileCacheEntry.configurationFile;
+    return await configurationFileLoader().tryLoadConfigurationFileForProjectAsync(
+      terminal,
+      buildFolder,
+      heftConfiguration.rigConfig
+    );
   }
 
   private async _runBrowsersyncAsync(
