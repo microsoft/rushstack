@@ -61,3 +61,23 @@ export { ILaunchOptions, Rush } from './api/Rush';
 export { ExperimentsConfiguration, IExperimentsJson } from './api/ExperimentsConfiguration';
 
 export { ProjectChangeAnalyzer, IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
+
+export { RushSession, IRushSessionOptions } from './pluginFramework/RushSession';
+
+export type { IRushPlugin } from './pluginFramework/IRushPlugin';
+
+export type {
+  IBuildCacheJson,
+  ILocalBuildCacheJson,
+  ICloudBuildCacheJson
+} from './api/BuildCacheConfiguration';
+
+export type { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCacheProvider';
+
+export type {
+  ICredentialCache,
+  ICredentialCacheOptions,
+  ICredentialCacheEntry
+} from './logic/CredentialCache';
+
+export type { IWebClient, IGetFetchOptions, IPutFetchOptions } from './utilities/WebClient';

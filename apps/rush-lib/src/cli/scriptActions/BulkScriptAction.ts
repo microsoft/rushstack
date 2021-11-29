@@ -4,7 +4,7 @@
 import * as os from 'os';
 import colors from 'colors/safe';
 
-import { AlreadyReportedError, ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
+import { AlreadyReportedError, Terminal } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
 import { Event } from '../../index';
@@ -120,13 +120,19 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
-    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
+    const terminal: Terminal = new Terminal(this.rushSession.terminalProvider);
     let buildCacheConfiguration: BuildCacheConfiguration | undefined;
-    if (!this._disableBuildCache) {
-      buildCacheConfiguration = await BuildCacheConfiguration.tryLoadAsync(terminal, this.rushConfiguration);
+    if (!this._disableBuildCache && ['build', 'rebuild'].includes(this.actionName)) {
+      buildCacheConfiguration = await BuildCacheConfiguration.tryLoadAsync(
+        terminal,
+        this.rushConfiguration,
+        this.rushSession
+      );
     }
 
-    const selection: Set<RushConfigurationProject> = this._selectionParameters.getSelectedProjects();
+    const selection: Set<RushConfigurationProject> = await this._selectionParameters.getSelectedProjectsAsync(
+      terminal
+    );
 
     if (!selection.size) {
       terminal.writeLine(colors.yellow(`The command line selection parameters did not match any projects.`));

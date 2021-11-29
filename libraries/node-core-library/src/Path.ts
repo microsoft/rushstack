@@ -2,7 +2,6 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Text } from './Text';
 
 /**
  * Options for {@link Path.formatConcisely}.
@@ -106,7 +105,7 @@ export class Path {
    * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
    */
   public static convertToSlashes(inputPath: string): string {
-    return Text.replaceAll(inputPath, '\\', '/');
+    return inputPath.replace(/\\/g, '/');
   }
 
   /**
@@ -116,7 +115,7 @@ export class Path {
    * POSIX is a registered trademark of the Institute of Electrical and Electronic Engineers, Inc.
    */
   public static convertToBackslashes(inputPath: string): string {
-    return Text.replaceAll(inputPath, '/', '\\');
+    return inputPath.replace(/\//g, '\\');
   }
 
   /**

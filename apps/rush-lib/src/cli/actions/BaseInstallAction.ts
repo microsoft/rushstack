@@ -91,7 +91,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
     this._variant = this.defineStringParameter(Variants.VARIANT_PARAMETER);
   }
 
-  protected abstract buildInstallOptions(): IInstallManagerOptions;
+  protected abstract buildInstallOptionsAsync(): Promise<IInstallManagerOptions>;
 
   protected async runAsync(): Promise<void> {
     VersionMismatchFinder.ensureConsistentVersions(this.rushConfiguration, {
@@ -137,7 +137,7 @@ export abstract class BaseInstallAction extends BaseRushAction {
       throw new Error(`The value of "${this._maxInstallAttempts.longName}" must be positive and nonzero.`);
     }
 
-    const installManagerOptions: IInstallManagerOptions = this.buildInstallOptions();
+    const installManagerOptions: IInstallManagerOptions = await this.buildInstallOptionsAsync();
 
     const installManager: BaseInstallManager =
       installManagerFactoryModule.InstallManagerFactory.getInstallManager(

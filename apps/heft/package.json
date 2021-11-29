@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft",
-  "version": "0.42.0",
+  "version": "0.42.3",
   "description": "Build all your JavaScript projects the same way: A way that works.",
   "keywords": [
     "toolchain",
@@ -36,7 +36,6 @@
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/rig-package": "workspace:*",
     "@rushstack/ts-command-line": "workspace:*",
-    "@rushstack/typings-generator": "workspace:*",
     "@types/tapable": "1.0.6",
     "argparse": "~1.0.9",
     "chokidar": "~3.4.0",

@@ -1,0 +1,31 @@
+{
+  "name": "@rushstack/rush-sdk",
+  "version": "5.56.0",
+  "description": "An API for interacting with the Rush engine",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "apps/rush-sdk"
+  },
+  "homepage": "https://rushjs.io",
+  "main": "lib/index.js",
+  "typings": "dist/rush-lib.d.ts",
+  "scripts": {
+    "build": "heft test --clean"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
+    "@types/node-fetch": "1.6.9",
+    "tapable": "2.2.1"
+  },
+  "devDependencies": {
+    "@microsoft/rush-lib": "workspace:*",
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@types/heft-jest": "1.0.1",
+    "@types/node": "12.20.24",
+    "@types/semver": "7.3.5"
+  }
+}

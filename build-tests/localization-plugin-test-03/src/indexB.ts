@@ -1,4 +1,4 @@
-import strings3 from './strings3.loc.json';
+import strings3 from './strings3.resx.json';
 const strings4: string = require('./strings4.loc.json');
 
 console.log(strings3.string1);

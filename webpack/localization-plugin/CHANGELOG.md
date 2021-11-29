@@ -1,6 +1,40 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Thu, 28 Oct 2021 00:08:22 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Nov 2021 07:26:16 GMT and should not be manually modified.
+
+## 0.9.0
+Mon, 29 Nov 2021 07:26:16 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Remove "filesToIgnore" option in favor of "globsToIgnore."
+
+## 0.8.0
+Tue, 16 Nov 2021 16:08:01 GMT
+
+### Minor changes
+
+- Accept .resx.json as an alternative strings file extension.
+
+## 0.7.13
+Thu, 11 Nov 2021 01:17:03 GMT
+
+_Version update only_
+
+## 0.7.12
+Wed, 10 Nov 2021 16:09:47 GMT
+
+_Version update only_
+
+## 0.7.11
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 0.7.10
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
 
 ## 0.7.9
 Thu, 28 Oct 2021 00:08:22 GMT

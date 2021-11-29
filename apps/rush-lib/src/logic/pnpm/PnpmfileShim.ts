@@ -111,7 +111,10 @@ const pnpmfileShim: IPnpmfile = {
       setPreferredVersions(pkg.devDependencies);
       setPreferredVersions(pkg.optionalDependencies);
       return userPnpmfile?.hooks?.readPackage ? userPnpmfile.hooks.readPackage(pkg, context) : pkg;
-    }
+    },
+
+    // Call the original pnpmfile (if it exists)
+    filterLog: userPnpmfile?.hooks?.filterLog
   }
 };
 

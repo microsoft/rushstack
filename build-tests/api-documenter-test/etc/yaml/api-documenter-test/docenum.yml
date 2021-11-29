@@ -16,7 +16,10 @@ fields:
   - name: Two
     uid: 'api-documenter-test!DocEnum.Two:member'
     package: api-documenter-test!
-    summary: These are some docs for Two
+    summary: |-
+      These are some docs for Two.
+
+      [DocEnum.One](xref:api-documenter-test!DocEnum.One:member) is a direct link to another enum member.
     value: '2'
   - name: Zero
     uid: 'api-documenter-test!DocEnum.Zero:member'

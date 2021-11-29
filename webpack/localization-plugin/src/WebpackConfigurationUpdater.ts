@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import minimatch from 'minimatch';
 import * as path from 'path';
 import * as Webpack from 'webpack';
 import * as SetPublicPathPluginPackageType from '@rushstack/set-webpack-public-path-plugin';
@@ -15,7 +16,7 @@ import { IBaseLoaderOptions } from './loaders/LoaderFactory';
 export interface IWebpackConfigurationUpdaterOptions {
   pluginInstance: LocalizationPlugin;
   configuration: Webpack.Configuration;
-  filesToIgnore: Set<string>;
+  globsToIgnore: string[] | undefined;
   localeNameOrPlaceholder: string;
   resxNewlineNormalization: NewlineKind | undefined;
 }
@@ -47,23 +48,15 @@ export class WebpackConfigurationUpdater {
 
     WebpackConfigurationUpdater._addRulesToConfiguration(options.configuration, [
       {
-        test: Constants.LOC_JSON_REGEX,
-        use: [
-          {
-            loader: loader,
-            options: loaderOptions
-          }
-        ]
-      },
-      {
-        test: Constants.RESX_REGEX,
+        test: Constants.RESX_OR_LOC_JSON_REGEX,
         use: [
           {
             loader: loader,
             options: loaderOptions
           }
         ],
-        type: 'json'
+        type: 'json',
+        sideEffects: false
       }
     ]);
   }
@@ -101,29 +94,26 @@ export class WebpackConfigurationUpdater {
     loader: string,
     loaderOptions: IBaseLoaderOptions
   ): void {
-    WebpackConfigurationUpdater._addRulesToConfiguration(options.configuration, [
-      {
-        test: {
-          and: [(filePath: string) => !options.filesToIgnore.has(filePath), Constants.LOC_JSON_REGEX]
-        },
-        use: [
-          {
-            loader: loader,
-            options: loaderOptions
+    const { globsToIgnore, configuration } = options;
+    const rules: Webpack.RuleSetCondition =
+      globsToIgnore && globsToIgnore.length > 0
+        ? {
+            include: Constants.RESX_OR_LOC_JSON_REGEX,
+            exclude: (filePath: string): boolean =>
+              globsToIgnore.some((glob: string): boolean => minimatch(filePath, glob))
           }
-        ]
-      },
+        : Constants.RESX_OR_LOC_JSON_REGEX;
+    WebpackConfigurationUpdater._addRulesToConfiguration(configuration, [
       {
-        test: {
-          and: [(filePath: string) => !options.filesToIgnore.has(filePath), Constants.RESX_REGEX]
-        },
+        test: rules,
         use: [
           {
             loader: loader,
             options: loaderOptions
           }
         ],
-        type: 'json'
+        type: 'json',
+        sideEffects: false
       }
     ]);
   }
