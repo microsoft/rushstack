@@ -13,11 +13,11 @@
       "description": "Optionally specifies another JSON config file that this file extends from.  This provides a way for standard settings to be shared across multiple projects.",
       "type": "string"
     },
-    "swSrc": {
+    "serviceWorkerSourcePath": {
       "type": "string",
       "description": "The path to the serviceworker source file"
     },
-    "swDest": {
+    "serviceWorkerOutputPath": {
       "type": "string",
       "description": "The path to write the serviceworker output to"
     },
@@ -36,14 +36,16 @@
       "description": "Array of globPatterns to include in the precache manifest",
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "string",
+        "pattern": "[^\\\\]"
       }
     },
     "globIgnores": {
       "description": "A set of patterns matching files to always exclude when generating the precache manifest",
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "string",
+        "pattern": "[^\\\\]"
       }
     }
   }

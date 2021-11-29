@@ -21,7 +21,7 @@
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
     "@rushstack/heft-config-file": "workspace:*",
-    "workbox-build": "~6.3.0"
+    "workbox-build": "~6.4.1"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",

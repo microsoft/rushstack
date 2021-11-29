@@ -9,14 +9,6 @@
     {
       "name": "react-dom",
       "allowedCategories": [ "tests" ]
-    },
-    {
-      "name": "type-fest",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "workbox-build",
-      "allowedCategories": [ "libraries" ]
     }
   ]
 }

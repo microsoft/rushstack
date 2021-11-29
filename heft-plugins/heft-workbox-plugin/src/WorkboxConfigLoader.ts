@@ -1,9 +1,9 @@
-import { ConfigurationFile, IConfigurationFileOptions } from '@rushstack/heft-config-file';
+import { ConfigurationFile } from '@rushstack/heft-config-file';
 import * as path from 'path';
 
 export interface IWorkboxConfigurationJson {
-  swSrc: string;
-  swDest: string;
+  serviceWorkerSourcePath: string;
+  serviceWorkerOutputPath: string;
   modifyURLPrefix: Record<string, string>;
   globDirectory: string;
   globPatterns: string[];
@@ -21,7 +21,7 @@ export function configurationFileLoader(): ConfigurationFile<IWorkboxConfigurati
     workboxConfigurationFileLoader = new ConfigurationFile<IWorkboxConfigurationJson>({
       projectRelativeFilePath: 'config/workbox.json',
       jsonSchemaPath: schemaPath
-    } as IConfigurationFileOptions<IWorkboxConfigurationJson>);
+    });
   }
 
   return workboxConfigurationFileLoader;
