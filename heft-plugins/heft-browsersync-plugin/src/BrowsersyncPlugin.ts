@@ -15,7 +15,7 @@ import { configurationFileLoader, IBrowsersyncConfigurationJson } from './Browse
 
 import type { BrowserSyncInstance } from 'browser-sync';
 
-const bs: typeof import('browser-sync') = Import.lazy('browser-sync', require);
+const browserSync: typeof import('browser-sync') = Import.lazy('browser-sync', require);
 
 const PLUGIN_NAME: string = 'BrowsersyncPlugin';
 
