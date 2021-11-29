@@ -15,12 +15,12 @@ export interface ITypingsGeneratorOptions {
   generatedTsFolder: string;
   terminal?: ITerminal;
   exportAsDefault?: boolean;
-  filesToIgnore?: string[];
+  globsToIgnore?: string[];
   resxNewlineNormalization?: NewlineKind | undefined;
 }
 
 /**
- * This is a simple tool that generates .d.ts files for .loc.json and .resx files.
+ * This is a simple tool that generates .d.ts files for .loc.json, .resx.json, and .resx files.
  *
  * @public
  */

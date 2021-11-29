@@ -7,9 +7,11 @@ import {
   Terminal,
   ConsoleTerminalProvider,
   Path,
-  NewlineKind
+  NewlineKind,
+  LegacyAdapters,
+  Async
 } from '@rushstack/node-core-library';
-import * as glob from 'glob';
+import glob from 'glob';
 import * as path from 'path';
 import { EOL } from 'os';
 import * as chokidar from 'chokidar';
@@ -26,6 +28,12 @@ export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> {
     filePath: string
   ) => TTypingsResult | Promise<TTypingsResult>;
   terminal?: ITerminal;
+  globsToIgnore?: string[];
+  /**
+   * @deprecated
+   *
+   * TODO: Remove when version 1.0.0 is released.
+   */
   filesToIgnore?: string[];
 }
 
@@ -43,12 +51,14 @@ export class TypingsGenerator {
 
   protected _options: ITypingsGeneratorOptions;
 
-  private _filesToIgnoreVal: Set<string> | undefined;
-
   public constructor(options: ITypingsGeneratorOptions) {
     this._options = {
       ...options
     };
+
+    if (options.filesToIgnore) {
+      throw new Error('The filesToIgnore option is no longer supported. Please use globsToIgnore instead.');
+    }
 
     if (!this._options.generatedTsFolder) {
       throw new Error('generatedTsFolder must be provided');
@@ -70,8 +80,8 @@ export class TypingsGenerator {
       throw new Error('At least one file extension must be provided.');
     }
 
-    if (!this._options.filesToIgnore) {
-      this._options.filesToIgnore = [];
+    if (!this._options.globsToIgnore) {
+      this._options.globsToIgnore = [];
     }
 
     if (!this._options.terminal) {
@@ -88,27 +98,39 @@ export class TypingsGenerator {
   public async generateTypingsAsync(): Promise<void> {
     await FileSystem.ensureEmptyFolderAsync(this._options.generatedTsFolder);
 
-    const filePaths: string[] = glob.sync(path.join('**', `*+(${this._options.fileExtensions.join('|')})`), {
-      cwd: this._options.srcFolder,
-      absolute: true,
-      nosort: true,
-      nodir: true
-    });
+    const filePaths: string[] = await LegacyAdapters.convertCallbackToPromise(
+      glob,
+      `**/*+(${this._options.fileExtensions.join('|')})`,
+      {
+        cwd: this._options.srcFolder,
+        absolute: true,
+        nosort: true,
+        nodir: true,
+        ignore: this._options.globsToIgnore
+      }
+    );
 
-    for (let filePath of filePaths) {
-      filePath = path.resolve(this._options.srcFolder, filePath);
-      await this._parseFileAndGenerateTypingsAsync(filePath);
-    }
+    await Async.forEachAsync(
+      filePaths,
+      async (filePath: string) => {
+        filePath = `${this._options.srcFolder}/${filePath}`;
+        await this._parseFileAndGenerateTypingsAsync(filePath);
+      },
+      { concurrency: 50 }
+    );
   }
 
   public async runWatcherAsync(): Promise<void> {
     await FileSystem.ensureFolderAsync(this._options.generatedTsFolder);
 
-    const globBase: string = path.resolve(this._options.srcFolder, '**');
+    const globBase: string = `${this._options.srcFolder}/**`;
 
     await new Promise((resolve, reject): void => {
       const watcher: chokidar.FSWatcher = chokidar.watch(
-        this._options.fileExtensions.map((fileExtension) => path.join(globBase, `*${fileExtension}`))
+        this._options.fileExtensions.map((fileExtension) => `${globBase}/*${fileExtension}`),
+        {
+          ignored: this._options.globsToIgnore
+        }
       );
       const boundGenerateTypingsFunction: (filePath: string) => Promise<void> =
         this._parseFileAndGenerateTypingsAsync.bind(this);
@@ -144,25 +166,22 @@ export class TypingsGenerator {
     dependencyTargetSet.add(target);
   }
 
-  private async _parseFileAndGenerateTypingsAsync(locFilePath: string): Promise<void> {
-    if (this._filesToIgnore.has(locFilePath)) {
-      return;
-    }
+  private async _parseFileAndGenerateTypingsAsync(filePath: string): Promise<void> {
     // Clear registered dependencies prior to reprocessing.
-    this._clearDependencies(locFilePath);
+    this._clearDependencies(filePath);
 
     // Check for targets that register this file as a dependency, and reprocess them too.
-    for (const target of this._getDependencyTargets(locFilePath)) {
+    for (const target of this._getDependencyTargets(filePath)) {
       await this._parseFileAndGenerateTypingsAsync(target);
     }
 
     try {
-      const fileContents: string = await FileSystem.readFileAsync(locFilePath);
+      const fileContents: string = await FileSystem.readFileAsync(filePath);
       const typingsData: string | undefined = await this._options.parseAndGenerateTypings(
         fileContents,
-        locFilePath
+        filePath
       );
-      const generatedTsFilePath: string = this._getTypingsFilePath(locFilePath);
+      const generatedTsFilePath: string = this._getTypingsFilePath(filePath);
 
       // Typings data will be undefined when no types should be generated for the parsed file.
       if (typingsData === undefined) {
@@ -181,20 +200,9 @@ export class TypingsGenerator {
       });
     } catch (e) {
       this._options.terminal!.writeError(
-        `Error occurred parsing and generating typings for file "${locFilePath}": ${e}`
+        `Error occurred parsing and generating typings for file "${filePath}": ${e}`
       );
     }
-  }
-
-  private get _filesToIgnore(): Set<string> {
-    if (!this._filesToIgnoreVal) {
-      this._filesToIgnoreVal = new Set<string>(
-        this._options.filesToIgnore!.map((fileToIgnore) => {
-          return path.resolve(this._options.srcFolder, fileToIgnore);
-        })
-      );
-    }
-    return this._filesToIgnoreVal;
   }
 
   private _clearDependencies(target: string): void {
@@ -211,11 +219,9 @@ export class TypingsGenerator {
     return [...(this._dependencyMap.get(dependency)?.keys() || [])];
   }
 
-  private _getTypingsFilePath(locFilePath: string): string {
-    return path.resolve(
-      this._options.generatedTsFolder,
-      path.relative(this._options.srcFolder, `${locFilePath}.d.ts`)
-    );
+  private _getTypingsFilePath(filePath: string): string {
+    const relativeSourceFilePath: string = path.relative(this._options.srcFolder, `${filePath}.d.ts`);
+    return `${this._options.generatedTsFolder}/${relativeSourceFilePath}`;
   }
 
   private _normalizeFileExtensions(fileExtensions: string[]): string[] {
