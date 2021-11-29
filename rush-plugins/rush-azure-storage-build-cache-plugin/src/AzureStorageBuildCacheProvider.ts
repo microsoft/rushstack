@@ -8,7 +8,7 @@ import type {
   ICredentialCache,
   ICredentialCacheEntry,
   RushSession
-} from '@microsoft/rush-lib';
+} from '@rushstack/rush-sdk';
 import {
   BlobClient,
   BlobServiceClient,

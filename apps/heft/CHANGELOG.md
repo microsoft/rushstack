@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Sat, 06 Nov 2021 00:09:13 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Nov 2021 07:26:16 GMT and should not be manually modified.
+
+## 0.42.3
+Mon, 29 Nov 2021 07:26:16 GMT
+
+### Patches
+
+- Remove an unused dependency.
 
 ## 0.42.2
 Sat, 06 Nov 2021 00:09:13 GMT

@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.42.3",
+      "tag": "@rushstack/heft_v0.42.3",
+      "date": "Mon, 29 Nov 2021 07:26:16 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Remove an unused dependency."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.42.2",
       "tag": "@rushstack/heft_v0.42.2",
       "date": "Sat, 06 Nov 2021 00:09:13 GMT",

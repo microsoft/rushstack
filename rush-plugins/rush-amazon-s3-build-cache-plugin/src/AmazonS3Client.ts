@@ -3,7 +3,7 @@
 
 import * as crypto from 'crypto';
 import * as fetch from 'node-fetch';
-import type { IPutFetchOptions, IGetFetchOptions, IWebClient } from '@microsoft/rush-lib';
+import type { IPutFetchOptions, IGetFetchOptions, IWebClient } from '@rushstack/rush-sdk';
 
 import { IAmazonS3BuildCacheProviderOptions } from './AmazonS3BuildCacheProvider';
 

@@ -61,10 +61,10 @@ return TypeScript declarations for the file it is called with.
 Optionally provide a [Terminal](https://github.com/microsoft/rushstack/blob/master/libraries/node-core-library/src/Terminal/Terminal.ts)
 object for logging. If one isn't provided, logs will go to the console.
 
-### `filesToIgnore`
+### `globsToIgnore`
 
-Optionally, provide an array of paths to files that should be ignored. These paths can either be absolute
-paths, or paths relative to the [`srcFolder`](#srcFolder--)
+Optionally, provide an array of globs matching files that should be ignored. These globs are evaluated
+under [`srcFolder`](#srcFolder--)
 
 ## `StringValuesTypingsGenerator`
 
@@ -125,8 +125,7 @@ is set to `IExportStyles`. If not specified, the interface name will be `IExport
 
 ## Links
 
-- [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/libraries/typings-generator/CHANGELOG.md) - Find
+- [CHANGELOG.md](https://github.com/microsoft/rushstack/blob/master/libraries/typings-generator/CHANGELOG.md) - Find
   out what's new in the latest version
 - [API Reference](https://rushstack.io/pages/api/typings-generator/)
 

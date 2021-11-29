@@ -15,6 +15,7 @@ import { RushConfiguration } from '../../api/RushConfiguration';
 import { IRushPluginConfigurationBase } from '../../api/RushPluginsConfiguration';
 import { RushConstants } from '../../logic/RushConstants';
 import { IRushPlugin } from '../IRushPlugin';
+import { RushSdk } from './RushSdk';
 
 export interface IRushPluginManifest {
   pluginName: string;
@@ -75,6 +76,8 @@ export abstract class PluginLoaderBase {
       return undefined;
     }
     const pluginOptions: JsonObject = this._getPluginOptions();
+
+    RushSdk.ensureInitialized();
 
     return this._loadAndValidatePluginPackage(resolvedPluginPath, pluginOptions);
   }
