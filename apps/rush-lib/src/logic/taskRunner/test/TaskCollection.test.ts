@@ -70,5 +70,9 @@ describe('TaskCollection', () => {
     beforeEach(() => {
       taskCollection = new TaskCollection();
     });
+    it('empty test for Jest 27 validity', () => {
+      // Jest 27 says 'beforeEach() may not be used in a describe block containing no tests.'
+      expect(true).toStrictEqual(true);
+    });
   });
 });
