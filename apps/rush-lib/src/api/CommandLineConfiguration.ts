@@ -17,6 +17,10 @@ import {
 
 const EXPECTED_PHASE_NAME_PREFIX: '_phase:' = '_phase:';
 
+export interface IShellCommandTokenContext {
+  packageFolder: string;
+}
+
 /**
  * Custom Commands and Options for the Rush Command Line
  */
@@ -32,6 +36,16 @@ export class CommandLineConfiguration {
     RushConstants.buildCommandName,
     RushConstants.rebuildCommandName
   ]);
+
+  /**
+   * These path will be prepended to the PATH environment variable
+   */
+  private _additionalPathFolders: string[] = [];
+
+  /**
+   * shellCommand from plugin custom command line configuration needs to be expanded with tokens
+   */
+  private _shellCommandTokenContext: IShellCommandTokenContext | undefined;
 
   public static readonly defaultBuildCommandJson: CommandJson = {
     commandKind: RushConstants.bulkCommandKind,
@@ -344,5 +358,21 @@ export class CommandLineConfiguration {
     }
 
     return new CommandLineConfiguration(commandLineJson);
+  }
+
+  public get additionalPathFolders(): Readonly<string[]> {
+    return this._additionalPathFolders;
+  }
+
+  public prependAdditionalPathFolder(pathFolder: string): void {
+    this._additionalPathFolders.unshift(pathFolder);
+  }
+
+  public get shellCommandTokenContext(): Readonly<IShellCommandTokenContext> | undefined {
+    return this._shellCommandTokenContext;
+  }
+
+  public set shellCommandTokenContext(tokenContext: IShellCommandTokenContext | undefined) {
+    this._shellCommandTokenContext = tokenContext;
   }
 }

@@ -1,6 +1,18 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Wed, 27 Oct 2021 00:08:15 GMT and should not be manually modified.
+This log was last generated on Sat, 06 Nov 2021 00:09:13 GMT and should not be manually modified.
+
+## 3.43.2
+Sat, 06 Nov 2021 00:09:13 GMT
+
+### Patches
+
+- Updated Path.convertToSlashes() to use replace(/\\/g, '/') instead of split/join for better performance.
+
+## 3.43.1
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
 
 ## 3.43.0
 Wed, 27 Oct 2021 00:08:15 GMT

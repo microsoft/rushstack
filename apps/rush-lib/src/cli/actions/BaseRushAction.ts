@@ -13,6 +13,7 @@ import { EventHooksManager } from '../../logic/EventHooksManager';
 import { RushCommandLineParser } from './../RushCommandLineParser';
 import { Utilities } from '../../utilities/Utilities';
 import { RushGlobalFolder } from '../../api/RushGlobalFolder';
+import { RushSession } from '../../pluginFramework/RushSession';
 
 export interface IBaseRushActionOptions extends ICommandLineActionOptions {
   /**
@@ -40,6 +41,10 @@ export abstract class BaseConfiglessRushAction extends CommandLineAction {
 
   protected get rushConfiguration(): RushConfiguration | undefined {
     return this._parser.rushConfiguration;
+  }
+
+  protected get rushSession(): RushSession {
+    return this._parser.rushSession;
   }
 
   protected get rushGlobalFolder(): RushGlobalFolder {
@@ -113,11 +118,39 @@ export abstract class BaseRushAction extends BaseConfiglessRushAction {
     return super.rushConfiguration!;
   }
 
-  protected onExecute(): Promise<void> {
+  protected async onExecute(): Promise<void> {
     if (!this.rushConfiguration) {
       throw Utilities.getRushConfigNotFoundError();
     }
 
+    this._throwPluginErrorIfNeed();
+
+    await this.parser.pluginManager.tryInitializeAssociatedCommandPluginsAsync(this.actionName);
+
+    this._throwPluginErrorIfNeed();
+
+    await this.rushSession.hooks.initialize.promise();
+
     return super.onExecute();
+  }
+
+  /**
+   * If an error is encountered while trying to load plugins, it is saved in the `PluginManager.error`
+   * property, so we can defer throwing it until when `_throwPluginErrorIfNeed()` is called.
+   */
+  private _throwPluginErrorIfNeed(): void {
+    // If the plugin configuration is broken, these three commands are used to fix the problem:
+    //
+    //   "rush update"
+    //   "rush init-autoinstaller"
+    //   "rush update-autoinstaller"
+    //
+    // Thus we do not report plugin errors when invoking these commands.
+    if (!['update', 'init-autoinstaller', 'update-autoinstaller'].includes(this.actionName)) {
+      const pluginError: Error | undefined = this.parser.pluginManager.error;
+      if (pluginError) {
+        throw pluginError;
+      }
+    }
   }
 }

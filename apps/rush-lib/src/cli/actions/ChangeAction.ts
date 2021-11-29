@@ -295,17 +295,17 @@ export class ChangeAction extends BaseRushAction {
     }
   }
 
-  private _generateHostMap(): Map<string, string> {
-    const hostMap: Map<string, string> = new Map<string, string>();
-    this.rushConfiguration.projects.forEach((project) => {
+  private _generateHostMap(): Map<RushConfigurationProject, string> {
+    const hostMap: Map<RushConfigurationProject, string> = new Map();
+    for (const project of this.rushConfiguration.projects) {
       let hostProjectName: string = project.packageName;
-      if (project.versionPolicy && project.versionPolicy.isLockstepped) {
+      if (project.versionPolicy?.isLockstepped) {
         const lockstepPolicy: LockStepVersionPolicy = project.versionPolicy as LockStepVersionPolicy;
         hostProjectName = lockstepPolicy.mainProject || project.packageName;
       }
 
-      hostMap.set(project.packageName, hostProjectName);
-    });
+      hostMap.set(project, hostProjectName);
+    }
 
     return hostMap;
   }
@@ -329,18 +329,18 @@ export class ChangeAction extends BaseRushAction {
 
   private async _getChangedProjectNamesAsync(): Promise<string[]> {
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
-    const changedProjects: AsyncIterable<RushConfigurationProject> =
-      projectChangeAnalyzer.getChangedProjectsAsync({
+    const changedProjects: Set<RushConfigurationProject> =
+      await projectChangeAnalyzer.getChangedProjectsAsync({
         targetBranchName: this._targetBranch,
         terminal: this._terminal,
         shouldFetch: !this._noFetchParameter.value
       });
-    const projectHostMap: Map<string, string> = this._generateHostMap();
+    const projectHostMap: Map<RushConfigurationProject, string> = this._generateHostMap();
 
     const changedProjectNames: Set<string> = new Set<string>();
-    for await (const changedProject of changedProjects) {
+    for (const changedProject of changedProjects) {
       if (changedProject.shouldPublish && !changedProject.versionPolicy?.exemptFromRushChange) {
-        const hostName: string | undefined = projectHostMap.get(changedProject.packageName);
+        const hostName: string | undefined = projectHostMap.get(changedProject);
         if (hostName) {
           changedProjectNames.add(hostName);
         }

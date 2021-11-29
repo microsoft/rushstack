@@ -488,6 +488,13 @@
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
     },
+    {
+      "packageName": "@rushstack/rush-sdk",
+      "projectFolder": "libraries/rush-sdk",
+      "reviewCategory": "libraries",
+      // "versionPolicyName": "rush" (TODO: put this back and remove the "shouldPublish" property when we're ready to publish)
+      "shouldPublish": false
+    },
 
     // "build-tests" folder (alphabetical order)
     {
@@ -730,6 +737,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "set-webpack-public-path-plugin-webpack4-test",
+      "projectFolder": "build-tests/set-webpack-public-path-plugin-webpack4-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "ts-command-line-test",
       "projectFolder": "build-tests/ts-command-line-test",
       "reviewCategory": "tests",
@@ -740,6 +753,12 @@
     {
       "packageName": "@rushstack/heft-browsersync-plugin",
       "projectFolder": "heft-plugins/heft-browsersync-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/heft-dev-cert-plugin",
+      "projectFolder": "heft-plugins/heft-dev-cert-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },
@@ -850,8 +869,7 @@
       "packageName": "@rushstack/typings-generator",
       "projectFolder": "libraries/typings-generator",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "shouldPublish": true
     },
 
     // "repo-scripts" folder (alphabetical order)
@@ -886,6 +904,22 @@
       "projectFolder": "rigs/heft-web-rig",
       "reviewCategory": "libraries",
       "shouldPublish": true
+    },
+
+    // "rush-plugins" folder (alphabetical order)
+    {
+      "packageName": "@rushstack/rush-amazon-s3-build-cache-plugin",
+      "projectFolder": "rush-plugins/rush-amazon-s3-build-cache-plugin",
+      "reviewCategory": "libraries",
+      // "versionPolicyName": "rush" (TODO: put this back and remove the "shouldPublish" property when we're ready to publish)
+      "shouldPublish": false
+    },
+    {
+      "packageName": "@rushstack/rush-azure-storage-build-cache-plugin",
+      "projectFolder": "rush-plugins/rush-azure-storage-build-cache-plugin",
+      "reviewCategory": "libraries",
+      // "versionPolicyName": "rush" (TODO: put this back and remove the "shouldPublish" property when we're ready to publish)
+      "shouldPublish": false
     },
 
     // "stack" folder (alphabetical order)

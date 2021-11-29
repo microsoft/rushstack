@@ -14,7 +14,7 @@ import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { RushConstants } from '../RushConstants';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
+import { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider';
 import { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
 import { TarExecutable } from '../../utilities/TarExecutable';
 import { Utilities } from '../../utilities/Utilities';
@@ -42,7 +42,7 @@ export class ProjectBuildCache {
 
   private readonly _project: RushConfigurationProject;
   private readonly _localBuildCacheProvider: FileSystemBuildCacheProvider;
-  private readonly _cloudBuildCacheProvider: CloudBuildCacheProviderBase | undefined;
+  private readonly _cloudBuildCacheProvider: ICloudBuildCacheProvider | undefined;
   private readonly _buildCacheEnabled: boolean;
   private readonly _projectOutputFolderNames: ReadonlyArray<string>;
   private _cacheId: string | undefined;
@@ -449,7 +449,7 @@ export class ProjectBuildCache {
         projectsThatHaveBeenProcessed.add(projectToProcess);
 
         const projectState: string | undefined = await projectChangeAnalyzer._tryGetProjectStateHashAsync(
-          projectToProcess.packageName,
+          projectToProcess,
           options.terminal
         );
         if (!projectState) {

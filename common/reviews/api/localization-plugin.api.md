@@ -41,7 +41,9 @@ export interface _ILocalizationFile {
 
 // @public
 export interface ILocalizationPluginOptions {
+    // @deprecated (undocumented)
     filesToIgnore?: string[];
+    globsToIgnore?: string[];
     localizationStats?: ILocalizationStatsOptions;
     localizedData: ILocalizedData;
     noStringsLocaleName?: string;
@@ -178,9 +180,9 @@ export interface ITypingsGeneratorOptions {
     // (undocumented)
     exportAsDefault?: boolean;
     // (undocumented)
-    filesToIgnore?: string[];
-    // (undocumented)
     generatedTsFolder: string;
+    // (undocumented)
+    globsToIgnore?: string[];
     // (undocumented)
     resxNewlineNormalization?: NewlineKind | undefined;
     // (undocumented)

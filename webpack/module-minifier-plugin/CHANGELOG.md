@@ -1,6 +1,42 @@
 # Change Log - @rushstack/module-minifier-plugin
 
-This log was last generated on Thu, 28 Oct 2021 00:08:22 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Nov 2021 07:26:16 GMT and should not be manually modified.
+
+## 0.6.1
+Mon, 29 Nov 2021 07:26:16 GMT
+
+_Version update only_
+
+## 0.6.0
+Wed, 24 Nov 2021 01:10:33 GMT
+
+### Minor changes
+
+- Export a getIdentifier function for generating safe JavaScript identifiers.
+
+## 0.5.0
+Thu, 18 Nov 2021 01:10:06 GMT
+
+### Minor changes
+
+- Upgrade to terser 5.10.2, fix source maps in NoopMinifier
+
+## 0.4.36
+Sat, 13 Nov 2021 01:09:28 GMT
+
+### Patches
+
+- Fix a minor mistake in the README.
+
+## 0.4.35
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 0.4.34
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
 
 ## 0.4.33
 Thu, 28 Oct 2021 00:08:22 GMT
