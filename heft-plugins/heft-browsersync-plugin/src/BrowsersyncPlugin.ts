@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITerminal, Import } from '@rushstack/node-core-library';
+import { ITerminal, Import, PackageJsonLookup, IPackageJson } from '@rushstack/node-core-library';
 import type {
   HeftConfiguration,
   HeftSession,
@@ -12,29 +12,21 @@ import type {
 } from '@rushstack/heft';
 
 import { configurationFileLoader, IBrowsersyncConfigurationJson } from './BrowsersyncConfigLoader';
-
 import type { BrowserSyncInstance } from 'browser-sync';
 
 const browserSync: typeof import('browser-sync') = Import.lazy('browser-sync', require);
 
 const PLUGIN_NAME: string = 'BrowsersyncPlugin';
 
-interface IBrowsersyncConfigurationFileCacheEntry {
-  configurationFile: IBrowsersyncConfigurationJson | undefined;
-}
+const packagePath: string = Import.resolvePackage({ packageName: 'browser-sync', baseFolderPath: __dirname });
+const ownPackage: IPackageJson = PackageJsonLookup.loadOwnPackageJson(packagePath);
+const version: string = ownPackage.version;
 
 /**
  * @internal
  */
 export class BrowsersyncPlugin implements IHeftPlugin {
   public readonly pluginName: string = PLUGIN_NAME;
-
-  private _wdsConfigurationFileCache: Map<string, IBrowsersyncConfigurationFileCacheEntry> = new Map<
-    string,
-    IBrowsersyncConfigurationFileCacheEntry
-  >();
-
-  private _bs?: BrowserSyncInstance;
 
   public apply(heftSession: HeftSession, heftConfiguration: HeftConfiguration): void {
     heftSession.hooks.build.tap(PLUGIN_NAME, (build: IBuildStageContext) => {
@@ -43,7 +35,7 @@ export class BrowsersyncPlugin implements IHeftPlugin {
       }
       build.hooks.postBuild.tap(PLUGIN_NAME, (postBuild: IPostBuildSubstage) => {
         postBuild.hooks.run.tapPromise(PLUGIN_NAME, async () => {
-          await this._runBrowsersyncAsync(heftSession, heftConfiguration);
+          await this._runBrowsersyncAsync(heftSession, heftConfiguration, build.properties.watchMode);
         });
       });
     });
@@ -63,22 +55,23 @@ export class BrowsersyncPlugin implements IHeftPlugin {
 
   private async _runBrowsersyncAsync(
     heftSession: HeftSession,
-    heftConfiguration: HeftConfiguration
+    heftConfiguration: HeftConfiguration,
+    watch: boolean
   ): Promise<void> {
     const logger: ScopedLogger = heftSession.requestScopedLogger('browser-sync');
 
-    logger.terminal.writeLine(`Using Browsersync version xxx`);
+    logger.terminal.writeLine(`Using Browsersync version ${version}`);
     const wdsConfigurationJson: IBrowsersyncConfigurationJson | undefined =
       await this._ensureConfigFileLoadedAsync(logger.terminal, heftConfiguration);
     if (!wdsConfigurationJson) {
       logger.emitError(new Error('Unable to find an wds.json config'));
       return;
     }
-    const { rootDir, watch, port } = wdsConfigurationJson;
-    this._bs = bs.create();
-    this._bs.init({
+    const { serveRoot, port } = wdsConfigurationJson;
+    const browserSyncInstance: BrowserSyncInstance = browserSync.create();
+    browserSyncInstance.init({
       watch,
-      server: rootDir,
+      server: serveRoot,
       port
     });
   }

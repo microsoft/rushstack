@@ -1,3 +1,0 @@
-{
-  "extends": "@rushstack/heft-node-rig/profiles/default/config/jest.config.json"
-}

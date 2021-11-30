@@ -1,10 +1,9 @@
-import { ConfigurationFile, IConfigurationFileOptions } from '@rushstack/heft-config-file';
+import { ConfigurationFile } from '@rushstack/heft-config-file';
 import * as path from 'path';
 
 export interface IBrowsersyncConfigurationJson {
-  rootDir: string;
+  serveRoot: string;
   port: number;
-  watch: boolean;
 }
 
 let browsersyncConfigurationFileLoader: ConfigurationFile<IBrowsersyncConfigurationJson> | undefined;
@@ -18,7 +17,7 @@ export function configurationFileLoader(): ConfigurationFile<IBrowsersyncConfigu
     browsersyncConfigurationFileLoader = new ConfigurationFile<IBrowsersyncConfigurationJson>({
       projectRelativeFilePath: 'config/browsersync.json',
       jsonSchemaPath: schemaPath
-    } as IConfigurationFileOptions<IBrowsersyncConfigurationJson>);
+    });
   }
 
   return browsersyncConfigurationFileLoader;

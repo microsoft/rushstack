@@ -17,10 +17,6 @@
       "type": "string",
       "description": "The dir to serve from"
     },
-    "watch": {
-      "type": "boolean",
-      "description": "Watch files in rootDir for change and reload"
-    },
     "port": {
       "type": "number",
       "description": "The port on which to start the server"
