@@ -2,10 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import { Response, ResponseInit } from 'node-fetch';
-import { WebClient } from '@rushstack/rush-sdk';
 
 import { IAmazonS3BuildCacheProviderOptions } from '../AmazonS3BuildCacheProvider';
 import { AmazonS3Client, IAmazonS3Credentials } from '../AmazonS3Client';
+import { WebClient } from '../WebClient';
 
 const webClient = new WebClient();
 

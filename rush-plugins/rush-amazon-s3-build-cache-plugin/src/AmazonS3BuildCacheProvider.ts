@@ -9,11 +9,11 @@ import {
   RushSession,
   RushConstants,
   EnvironmentVariableNames,
-  WebClient,
   EnvironmentConfiguration
 } from '@rushstack/rush-sdk';
 
 import { AmazonS3Client, IAmazonS3Credentials } from './AmazonS3Client';
+import { WebClient } from './WebClient';
 
 export interface IAmazonS3BuildCacheProviderOptions {
   s3Bucket: string;
