@@ -29,3 +29,4 @@
 
 # (Add your project-specific overrides here)
 !/includes/**
+!rush-plugin-manifest.json
