@@ -166,19 +166,18 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   public static loadFromFile(shrinkwrapFilename: string): YarnShrinkwrapFile | undefined {
-    let shrinkwrapString: string;
-    let shrinkwrapJson: YarnPkgLockfileTypes.ParseResult;
     try {
-      if (!FileSystem.exists(shrinkwrapFilename)) {
+      return YarnShrinkwrapFile.loadFromString(shrinkwrapFilename);
+    } catch (error) {
+      if (FileSystem.isNotExistError(error as Error)) {
         return undefined; // file does not exist
       }
-
-      shrinkwrapString = FileSystem.readFile(shrinkwrapFilename);
-      shrinkwrapJson = lockfileModule.parse(shrinkwrapString);
-    } catch (error) {
       throw new Error(`Error reading "${shrinkwrapFilename}":` + os.EOL + `  ${(error as Error).message}`);
     }
+  }
 
+  public static loadFromString(shrinkwrapContent: string): YarnShrinkwrapFile {
+    const shrinkwrapJson: YarnPkgLockfileTypes.ParseResult = lockfileModule.parse(shrinkwrapContent);
     return new YarnShrinkwrapFile(shrinkwrapJson.object);
   }
 

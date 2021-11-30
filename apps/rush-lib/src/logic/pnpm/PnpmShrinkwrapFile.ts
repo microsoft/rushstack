@@ -197,7 +197,6 @@ export function parsePnpmDependencyKey(
 }
 
 export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
-  public readonly shrinkwrapFilename: string;
   public readonly isWorkspaceCompatible: boolean;
   public readonly registry: string;
   public readonly dependencies: ReadonlyMap<string, string>;
@@ -208,9 +207,8 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   private readonly _shrinkwrapJson: IPnpmShrinkwrapYaml;
   private _pnpmfileConfiguration: PnpmfileConfiguration | undefined;
 
-  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml, shrinkwrapFilename: string) {
+  private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml) {
     super();
-    this.shrinkwrapFilename = shrinkwrapFilename;
     this._shrinkwrapJson = shrinkwrapJson;
 
     // Normalize the data
@@ -222,23 +220,23 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     // Importers only exist in workspaces
     this.isWorkspaceCompatible = this.importers.size > 0;
-  }
-
-  public static loadFromFile(
-    shrinkwrapYamlFilename: string,
-    pnpmOptions: PnpmOptionsConfiguration
-  ): PnpmShrinkwrapFile | undefined {
-    try {
-      if (!FileSystem.exists(shrinkwrapYamlFilename)) {
-        return undefined; // file does not exist
       }
 
+  public static loadFromFile(shrinkwrapYamlFilename: string): PnpmShrinkwrapFile | undefined {
+    try {
       const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapYamlFilename);
-      const parsedData: IPnpmShrinkwrapYaml = yamlModule.safeLoad(shrinkwrapContent);
-      return new PnpmShrinkwrapFile(parsedData, shrinkwrapYamlFilename);
+      return PnpmShrinkwrapFile.loadFromString(shrinkwrapContent);
     } catch (error) {
+      if (FileSystem.isNotExistError(error as Error)) {
+        return undefined; // file does not exist
+      }
       throw new Error(`Error reading "${shrinkwrapYamlFilename}":${os.EOL}  ${(error as Error).message}`);
     }
+  }
+
+  public static loadFromString(shrinkwrapContent: string): PnpmShrinkwrapFile {
+    const parsedData: IPnpmShrinkwrapYaml = yamlModule.safeLoad(shrinkwrapContent);
+    return new PnpmShrinkwrapFile(parsedData);
   }
 
   public getShrinkwrapHash(experimentsConfig?: IExperimentsJson): string {
@@ -405,8 +403,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   public getShrinkwrapEntry(name: string, version: string): IPnpmShrinkwrapDependencyYaml | undefined {
-    // Version can sometimes be in the form of a path that's already in the /name/version format.
-    const packageId: string = version.indexOf('/') !== -1 ? version : `/${name}/${version}`;
+    const packageId: string = this._getPackageId(name, version);
     return this.packages.get(packageId);
   }
 
@@ -483,10 +480,14 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return new PnpmProjectShrinkwrapFile(this, project);
   }
 
-  public getImporterKeys(): ReadonlyArray<string> {
+  public *getImporterKeys(): Iterable<string> {
     // Filter out the root importer used for the generated package.json in the root
     // of the install, since we do not use this.
-    return [...this.importers.keys()].filter((k) => k !== '.');
+    for (const key of this.importers.keys()) {
+      if (key !== '.') {
+        yield key;
+      }
+    }
   }
 
   public getImporterKeyByPath(workspaceRoot: string, projectFolder: string): string {
@@ -599,6 +600,12 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
       this.packages.get(tempProjectDependencyKey);
 
     return packageDescription && packageDescription.dependencies ? packageDescription : undefined;
+  }
+
+  private _getPackageId(name: string, version: string): string {
+    // Version can sometimes be in the form of a path that's already in the /name/version format.
+    const packageId: string = version.indexOf('/') !== -1 ? version : `/${name}/${version}`;
+    return packageId;
   }
 
   private _parsePnpmDependencyKey(
