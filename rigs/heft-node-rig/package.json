@@ -18,10 +18,10 @@
     "@microsoft/api-extractor": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "eslint": "~7.30.0",
+    "jest-environment-node": "~25.5.0",
     "typescript": "~4.4.2"
   },
   "devDependencies": {
-    "@rushstack/heft": "workspace:*",
-    "jest-environment-node": "~25.4.0"
+    "@rushstack/heft": "workspace:*"
   }
 }
