@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Supports filterLog hook in pnpmfile",
+      "comment": "Add support for the \"filterLog\" hook in common/config/rush/.pnpmfile.cjs",
       "type": "none"
     }
   ],

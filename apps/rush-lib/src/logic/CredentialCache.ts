@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { FileSystem, JsonFile, JsonSchema, LockFile } from '@rushstack/node-core-library';
 
-import { IDisposable, Utilities } from '../utilities/Utilities';
+import { Utilities } from '../utilities/Utilities';
 import { RushUserConfiguration } from '../api/RushUserConfiguration';
 
 const CACHE_FILENAME: string = 'credentials.json';
@@ -40,12 +40,7 @@ export interface ICredentialCacheOptions {
 /**
  * @beta
  */
-export type ICredentialCache = CredentialCache;
-
-/**
- * @beta
- */
-export class CredentialCache implements IDisposable {
+export class CredentialCache /* implements IDisposable */ {
   private readonly _cacheFilePath: string;
   private readonly _cacheEntries: Map<string, ICacheEntryJson>;
   private _modified: boolean = false;

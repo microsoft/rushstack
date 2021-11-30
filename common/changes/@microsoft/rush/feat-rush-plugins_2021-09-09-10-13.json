@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Rush plugin mode & cloud build cache plugins",
+      "comment": "(EXPERIMENTAL) Ability to load third-party plugin packages that customize the behavior of Rush",
       "type": "none"
     }
   ],

@@ -3,11 +3,14 @@
 
 import { ITerminal } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
-import type {
+import {
   ICloudBuildCacheProvider,
-  ICredentialCache,
+  CredentialCache,
   ICredentialCacheEntry,
-  RushSession
+  RushSession,
+  EnvironmentVariableNames,
+  RushConstants,
+  EnvironmentConfiguration
 } from '@rushstack/rush-sdk';
 import {
   BlobClient,
@@ -66,10 +69,7 @@ export class AzureStorageBuildCacheProvider implements ICloudBuildCacheProvider 
   private __credentialCacheId: string | undefined;
 
   public get isCacheWriteAllowed(): boolean {
-    return (
-      this._rushSession.EnvironmentConfiguration.buildCacheWriteAllowed ??
-      this._isCacheWriteAllowedByConfiguration
-    );
+    return EnvironmentConfiguration.buildCacheWriteAllowed ?? this._isCacheWriteAllowedByConfiguration;
   }
 
   private _containerClient: ContainerClient | undefined;
@@ -80,7 +80,7 @@ export class AzureStorageBuildCacheProvider implements ICloudBuildCacheProvider 
     this._storageContainerName = options.storageContainerName;
     this._azureEnvironment = options.azureEnvironment || 'AzurePublicCloud';
     this._blobPrefix = options.blobPrefix;
-    this._environmentCredential = rushSession.EnvironmentConfiguration.buildCacheCredential;
+    this._environmentCredential = EnvironmentConfiguration.buildCacheCredential;
     this._isCacheWriteAllowedByConfiguration = options.isCacheWriteAllowed;
 
     if (!(this._azureEnvironment in AzureAuthorityHosts)) {
@@ -119,7 +119,7 @@ export class AzureStorageBuildCacheProvider implements ICloudBuildCacheProvider 
     cacheId: string
   ): Promise<Buffer | undefined> {
     const blobClient: BlobClient = await this._getBlobClientForCacheIdAsync(cacheId);
-    const { RushConstants, EnvironmentVariableNames } = this._rushSession;
+
     try {
       const blobExists: boolean = await blobClient.exists();
       if (blobExists) {
@@ -234,12 +234,11 @@ export class AzureStorageBuildCacheProvider implements ICloudBuildCacheProvider 
   }
 
   public async updateCachedCredentialAsync(terminal: ITerminal, credential: string): Promise<void> {
-    const { CredentialCache } = this._rushSession;
     await CredentialCache.usingAsync(
       {
         supportEditing: true
       },
-      async (credentialsCache: ICredentialCache) => {
+      async (credentialsCache: CredentialCache) => {
         credentialsCache.setCacheEntry(this._credentialCacheId, credential);
         await credentialsCache.saveIfModifiedAsync();
       }
@@ -249,13 +248,12 @@ export class AzureStorageBuildCacheProvider implements ICloudBuildCacheProvider 
   public async updateCachedCredentialInteractiveAsync(terminal: ITerminal): Promise<void> {
     const sasQueryParameters: SASQueryParameters = await this._getSasQueryParametersAsync(terminal);
     const sasString: string = sasQueryParameters.toString();
-    const { CredentialCache } = this._rushSession;
 
     await CredentialCache.usingAsync(
       {
         supportEditing: true
       },
-      async (credentialsCache: ICredentialCache) => {
+      async (credentialsCache: CredentialCache) => {
         credentialsCache.setCacheEntry(this._credentialCacheId, sasString, sasQueryParameters.expiresOn);
         await credentialsCache.saveIfModifiedAsync();
       }
@@ -263,12 +261,11 @@ export class AzureStorageBuildCacheProvider implements ICloudBuildCacheProvider 
   }
 
   public async deleteCachedCredentialsAsync(terminal: ITerminal): Promise<void> {
-    const { CredentialCache } = this._rushSession;
     await CredentialCache.usingAsync(
       {
         supportEditing: true
       },
-      async (credentialsCache: ICredentialCache) => {
+      async (credentialsCache: CredentialCache) => {
         credentialsCache.deleteCacheEntry(this._credentialCacheId);
         await credentialsCache.saveIfModifiedAsync();
       }
@@ -282,7 +279,6 @@ export class AzureStorageBuildCacheProvider implements ICloudBuildCacheProvider 
   }
 
   private async _getContainerClientAsync(): Promise<ContainerClient> {
-    const { CredentialCache, RushConstants, EnvironmentVariableNames } = this._rushSession;
     if (!this._containerClient) {
       let sasString: string | undefined = this._environmentCredential;
       if (!sasString) {
@@ -291,7 +287,7 @@ export class AzureStorageBuildCacheProvider implements ICloudBuildCacheProvider 
           {
             supportEditing: false
           },
-          (credentialsCache: ICredentialCache) => {
+          (credentialsCache: CredentialCache) => {
             cacheEntry = credentialsCache.tryGetCacheEntry(this._credentialCacheId);
           }
         );

@@ -3,7 +3,7 @@
 
 /**
  * Constants used by the Rush tool.
- * @public
+ * @beta
  *
  * @remarks
  *
