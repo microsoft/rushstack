@@ -12,7 +12,7 @@ import type {
 } from '@rushstack/heft';
 
 import { configurationFileLoader, IEsbuildConfigurationJson } from './EsbuildConfigLoader.js';
-import { BuildFailure, BuildResult } from 'esbuild';
+import type { BuildFailure, BuildResult } from 'esbuild';
 
 const esbuild: typeof import('esbuild') = Import.lazy('esbuild', require);
 
