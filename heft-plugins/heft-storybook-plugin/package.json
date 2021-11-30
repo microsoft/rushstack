@@ -1,6 +1,6 @@
 {
   "name": "@rushstack/heft-storybook-plugin",
-  "version": "0.1.19",
+  "version": "0.1.20",
   "description": "Heft plugin for supporting UI development using Storybook",
   "repository": {
     "type": "git",
