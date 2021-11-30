@@ -7,7 +7,7 @@ import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 /**
  * This interface represents the raw experiments.json file which allows repo
  * maintainers to enable and disable experimental Rush features.
- * @public
+ * @beta
  */
 export interface IExperimentsJson {
   /**
@@ -82,6 +82,7 @@ export class ExperimentsConfiguration {
 
   /**
    * Get the experiments configuration.
+   * @beta
    */
   public get configuration(): Readonly<IExperimentsJson> {
     return this._experimentConfiguration;

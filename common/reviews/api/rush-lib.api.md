@@ -110,7 +110,7 @@ export class CredentialCache {
 }
 
 // @public (undocumented)
-export const enum DependencyType {
+export enum DependencyType {
     // (undocumented)
     Dev = "devDependencies",
     // (undocumented)
@@ -187,6 +187,7 @@ export class EventHooks {
 export class ExperimentsConfiguration {
     // @internal
     constructor(jsonFileName: string);
+    // @beta
     get configuration(): Readonly<IExperimentsJson>;
 }
 
@@ -237,7 +238,7 @@ export interface IEnvironmentConfigurationInitializeOptions {
     doNotNormalizePaths?: boolean;
 }
 
-// @public
+// @beta
 export interface IExperimentsJson {
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
     _multiPhaseCommands?: boolean;
@@ -605,7 +606,7 @@ export class RushConfigurationProject {
     get versionPolicyName(): string | undefined;
 }
 
-// @public
+// @beta
 export class RushConstants {
     static readonly artifactoryFilename: string;
     static readonly browserApprovedPackagesFilename: string;

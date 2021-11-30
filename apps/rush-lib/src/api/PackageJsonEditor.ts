@@ -9,7 +9,7 @@ const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 /**
  * @public
  */
-export const enum DependencyType {
+export enum DependencyType {
   Regular = 'dependencies',
   Dev = 'devDependencies',
   Optional = 'optionalDependencies',
