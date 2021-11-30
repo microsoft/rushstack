@@ -5,11 +5,7 @@ import * as crypto from 'crypto';
 import { InternalError, JsonFile } from '@rushstack/node-core-library';
 
 import { BaseProjectShrinkwrapFile } from '../base/BaseProjectShrinkwrapFile';
-import {
-  PnpmShrinkwrapFile,
-  IPnpmShrinkwrapDependencyYaml,
-  IPnpmShrinkwrapImporterYaml
-} from './PnpmShrinkwrapFile';
+import { PnpmShrinkwrapFile, IPnpmShrinkwrapDependencyYaml } from './PnpmShrinkwrapFile';
 import { DependencySpecifier } from '../DependencySpecifier';
 import { RushConstants } from '../RushConstants';
 
@@ -68,30 +64,9 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
       this.project.rushConfiguration.commonTempFolder,
       this.project.projectFolder
     );
-    const importer: IPnpmShrinkwrapImporterYaml | undefined = this.shrinkwrapFile.getImporter(importerKey);
-    if (!importer) {
-      // It's not in here. This is possible when perfoming filtered installs
-      return undefined;
-    }
 
-    // Only select the importer dependencies that are non-local since we already handle local
-    // project changes
-    const externalDependencies: [string, string][] = [
-      ...Object.entries(importer.dependencies || {}),
-      ...Object.entries(importer.devDependencies || {}),
-      ...Object.entries(importer.optionalDependencies || {})
-    ];
-
-    // Not used in workspace mode
-    const parentEntry: IPnpmShrinkwrapDependencyYaml = {};
-
-    const projectShrinkwrapMap: Map<string, string> = new Map();
-    for (const [name, version] of externalDependencies) {
-      // Add to the manifest and provide all the parent dependencies
-      if (!version.includes('link:')) {
-        this._addDependencyRecursive(projectShrinkwrapMap, name, version, parentEntry);
-      }
-    }
+    const projectShrinkwrapMap: Map<string, string> | undefined =
+      this.shrinkwrapFile.getIntegrityForImporter(importerKey);
 
     return projectShrinkwrapMap;
   }

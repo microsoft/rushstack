@@ -205,6 +205,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   public readonly packages: ReadonlyMap<string, IPnpmShrinkwrapDependencyYaml>;
 
   private readonly _shrinkwrapJson: IPnpmShrinkwrapYaml;
+  private readonly _integrities: Map<string, Map<string, string>>;
   private _pnpmfileConfiguration: PnpmfileConfiguration | undefined;
 
   private constructor(shrinkwrapJson: IPnpmShrinkwrapYaml) {
@@ -220,7 +221,9 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
     // Importers only exist in workspaces
     this.isWorkspaceCompatible = this.importers.size > 0;
-      }
+
+    this._integrities = new Map();
+  }
 
   public static loadFromFile(shrinkwrapYamlFilename: string): PnpmShrinkwrapFile | undefined {
     try {
@@ -498,6 +501,49 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     return this.importers.get(importerKey);
   }
 
+  public getIntegrityForImporter(importerKey: string): Map<string, string> | undefined {
+    // This logic formerly lived in PnpmProjectShrinkwrapFile. Moving it here allows caching of the external
+    // dependency integrity relationships across projects
+    let integrityMap: Map<string, string> | undefined = this._integrities.get(importerKey);
+    if (!integrityMap) {
+      const importer: IPnpmShrinkwrapImporterYaml | undefined = this.getImporter(importerKey);
+      if (importer) {
+        integrityMap = new Map();
+        this._integrities.set(importerKey, integrityMap);
+
+        const sha256Digest: string = crypto
+          .createHash('sha256')
+          .update(JSON.stringify(importerKey))
+          .digest('base64');
+        const selfIntegrity: string = `${importerKey}:${sha256Digest}:`;
+        integrityMap.set(importerKey, selfIntegrity);
+
+        const { dependencies, devDependencies, optionalDependencies } = importer;
+
+        const externalFilter: (name: string, version: string) => boolean = (
+          name: string,
+          version: string
+        ): boolean => {
+          return !version.includes('link:');
+        };
+
+        if (dependencies) {
+          this._addIntegrities(integrityMap, dependencies, false, externalFilter);
+        }
+
+        if (devDependencies) {
+          this._addIntegrities(integrityMap, devDependencies, false, externalFilter);
+        }
+
+        if (optionalDependencies) {
+          this._addIntegrities(integrityMap, optionalDependencies, true, externalFilter);
+        }
+      }
+    }
+
+    return integrityMap;
+  }
+
   /** @override */
   public isWorkspaceProjectModified(project: RushConfigurationProject, variant?: string): boolean {
     const importerKey: string = this.getImporterKeyByPath(
@@ -588,6 +634,81 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     }
 
     return false;
+  }
+
+  private _getIntegrityForPackage(specifier: string, optional: boolean): Map<string, string> {
+    const integrities: Map<string, Map<string, string>> = this._integrities;
+
+    let integrityMap: Map<string, string> | undefined = integrities.get(specifier);
+    if (integrityMap) {
+      return integrityMap;
+    }
+
+    integrityMap = new Map();
+    integrities.set(specifier, integrityMap);
+
+    const shrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined = this.packages.get(specifier);
+    if (!shrinkwrapEntry) {
+      if (!optional) {
+        throw new Error(`Missing shrinkwrap entry for non-optional dependency ${specifier}`);
+      } else {
+        // Indicate an empty entry
+        return integrityMap;
+      }
+    }
+
+    let selfIntegrity: string | undefined = shrinkwrapEntry.resolution?.integrity;
+    if (!selfIntegrity) {
+      // git dependency specifiers do not have an integrity entry. Instead, they specify the tarball field.
+      // So instead, we will hash the contents of the dependency entry and use that as the integrity hash.
+      // Ex:
+      // github.com/chfritz/node-xmlrpc/948db2fbd0260e5d56ed5ba58df0f5b6599bbe38:
+      //   ...
+      //   resolution:
+      //     tarball: 'https://codeload.github.com/chfritz/node-xmlrpc/tar.gz/948db2fbd0260e5d56ed5ba58df0f5b6599bbe38'
+      const sha256Digest: string = crypto
+        .createHash('sha256')
+        .update(JSON.stringify(shrinkwrapEntry))
+        .digest('base64');
+      selfIntegrity = `${specifier}:${sha256Digest}:`;
+    }
+
+    integrityMap.set(specifier, selfIntegrity);
+    const { dependencies, optionalDependencies } = shrinkwrapEntry;
+
+    if (dependencies) {
+      this._addIntegrities(integrityMap, dependencies, false);
+    }
+
+    if (optionalDependencies) {
+      this._addIntegrities(integrityMap, optionalDependencies, true);
+    }
+
+    return integrityMap;
+  }
+
+  private _addIntegrities(
+    integrityMap: Map<string, string>,
+    collection: Record<string, string>,
+    optional: boolean,
+    filter?: (name: string, version: string) => boolean
+  ): void {
+    for (const [name, version] of Object.entries(collection)) {
+      if (filter && !filter(name, version)) {
+        continue;
+      }
+
+      const packageId: string = this._getPackageId(name, version);
+      if (integrityMap.has(packageId)) {
+        // The entry could already have been added as a nested dependency
+        continue;
+      }
+
+      const contribution: Map<string, string> = this._getIntegrityForPackage(packageId, optional);
+      for (const [dep, integrity] of contribution) {
+        integrityMap.set(dep, integrity);
+      }
+    }
   }
 
   /**
