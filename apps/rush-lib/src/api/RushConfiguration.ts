@@ -486,7 +486,7 @@ export class RushConfiguration {
   private _versionPolicyConfigurationFilePath: string;
   private _experimentsConfiguration: ExperimentsConfiguration;
 
-  private _rushPluginsConfiguration: RushPluginsConfiguration;
+  private __rushPluginsConfiguration: RushPluginsConfiguration;
 
   private readonly _rushConfigurationJson: IRushConfigurationJson;
 
@@ -553,7 +553,7 @@ export class RushConfiguration {
       this._commonRushConfigFolder,
       RushConstants.rushPluginsConfigFilename
     );
-    this._rushPluginsConfiguration = new RushPluginsConfiguration(rushPluginsConfigFilename);
+    this.__rushPluginsConfiguration = new RushPluginsConfiguration(rushPluginsConfigFilename);
 
     this._npmOptions = new NpmOptionsConfiguration(rushConfigurationJson.npmOptions || {});
     this._pnpmOptions = new PnpmOptionsConfiguration(
@@ -1730,8 +1730,8 @@ export class RushConfiguration {
   /**
    * @internal
    */
-  public get rushPluginsConfiguration(): RushPluginsConfiguration {
-    return this._rushPluginsConfiguration;
+  public get _rushPluginsConfiguration(): RushPluginsConfiguration {
+    return this.__rushPluginsConfiguration;
   }
 
   /**

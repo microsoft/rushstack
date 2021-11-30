@@ -573,7 +573,7 @@ export class RushConfiguration {
     // Warning: (ae-forgotten-export) The symbol "RushPluginsConfiguration" needs to be exported by the entry point index.d.ts
     //
     // @internal (undocumented)
-    get rushPluginsConfiguration(): RushPluginsConfiguration;
+    get _rushPluginsConfiguration(): RushPluginsConfiguration;
     get shrinkwrapFilename(): string;
     get shrinkwrapFilePhrase(): string;
     get suppressNodeLtsWarning(): boolean;

@@ -75,7 +75,7 @@ export class PluginManager {
     });
 
     this._remotePluginLoaders = (
-      this._rushConfiguration?.rushPluginsConfiguration.configuration.plugins ?? []
+      this._rushConfiguration?._rushPluginsConfiguration.configuration.plugins ?? []
     ).map((pluginConfiguration) => {
       return new RemotePluginLoader({
         pluginConfiguration,
