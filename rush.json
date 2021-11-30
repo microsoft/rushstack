@@ -492,7 +492,8 @@
       "packageName": "@rushstack/rush-sdk",
       "projectFolder": "libraries/rush-sdk",
       "reviewCategory": "libraries",
-      "versionPolicyName": "rush"
+      // "versionPolicyName": "rush" (TODO: put this back and remove the "shouldPublish" property when we're ready to publish)
+      "shouldPublish": false
     },
 
     // "build-tests" folder (alphabetical order)
@@ -862,8 +863,7 @@
       "packageName": "@rushstack/typings-generator",
       "projectFolder": "libraries/typings-generator",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "shouldPublish": true
     },
 
     // "repo-scripts" folder (alphabetical order)
