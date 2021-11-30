@@ -1725,10 +1725,12 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       '@types/node-fetch': 1.6.9
+      https-proxy-agent: ~5.0.0
       node-fetch: 2.6.2
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/rush-sdk': link:../../libraries/rush-sdk
+      https-proxy-agent: 5.0.0
       node-fetch: 2.6.2
     devDependencies:
       '@microsoft/rush-lib': link:../../apps/rush-lib
