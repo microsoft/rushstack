@@ -7,7 +7,6 @@
 /// <reference types="node" />
 
 import { AsyncSeriesHook } from 'tapable';
-import * as fetch from 'node-fetch';
 import { IPackageJson } from '@rushstack/node-core-library';
 import { ITerminal } from '@rushstack/node-core-library';
 import { ITerminalProvider } from '@rushstack/node-core-library';
@@ -258,12 +257,6 @@ export interface IGetChangedProjectsOptions {
     terminal: ITerminal;
 }
 
-// @beta
-export interface IGetFetchOptions extends IWebFetchOptionsBase {
-    // (undocumented)
-    verb: 'GET' | never;
-}
-
 // @public
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
@@ -309,14 +302,6 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
     useWorkspaces?: boolean;
 }
 
-// @beta
-export interface IPutFetchOptions extends IWebFetchOptionsBase {
-    // (undocumented)
-    body?: Buffer;
-    // (undocumented)
-    verb: 'PUT';
-}
-
 // @beta (undocumented)
 export interface IRushPlugin {
     // (undocumented)
@@ -335,16 +320,6 @@ export interface IRushSessionOptions {
 export interface ITryFindRushJsonLocationOptions {
     showVerbose?: boolean;
     startingFolder?: string;
-}
-
-// @beta
-export interface IWebFetchOptionsBase {
-    // (undocumented)
-    headers?: fetch.Headers;
-    // (undocumented)
-    timeoutMs?: number;
-    // (undocumented)
-    verb?: 'GET' | 'PUT';
 }
 
 // @internal
@@ -752,38 +727,6 @@ export enum VersionPolicyDefinitionName {
     // (undocumented)
     'lockStepVersion' = 0
 }
-
-// @beta
-export class WebClient {
-    constructor();
-    // (undocumented)
-    accept: string | undefined;
-    // (undocumented)
-    addBasicAuthHeader(userName: string, password: string): void;
-    // (undocumented)
-    fetchAsync(url: string, options?: IGetFetchOptions | IPutFetchOptions): Promise<WebClientResponse>;
-    // (undocumented)
-    static mergeHeaders(target: fetch.Headers, source: fetch.Headers): void;
-    // (undocumented)
-    proxy: WebClientProxy;
-    // (undocumented)
-    readonly standardHeaders: fetch.Headers;
-    // (undocumented)
-    userAgent: string | undefined;
-}
-
-// @beta
-export enum WebClientProxy {
-    // (undocumented)
-    Detect = 1,
-    // (undocumented)
-    Fiddler = 2,
-    // (undocumented)
-    None = 0
-}
-
-// @beta
-export type WebClientResponse = fetch.Response;
 
 // @public
 export class YarnOptionsConfiguration extends PackageManagerOptionsConfigurationBase {

@@ -85,12 +85,3 @@ export { ILogger } from './pluginFramework/logging/Logger';
 export { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCacheProvider';
 
 export { ICredentialCacheOptions, ICredentialCacheEntry, CredentialCache } from './logic/CredentialCache';
-
-export {
-  WebClientResponse,
-  IWebFetchOptionsBase,
-  IGetFetchOptions,
-  IPutFetchOptions,
-  WebClientProxy,
-  WebClient
-} from './utilities/WebClient';
