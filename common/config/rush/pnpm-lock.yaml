@@ -1218,7 +1218,7 @@ importers:
       '@types/node': 12.20.24
       eslint: ~7.30.0
       jest-config: ~25.4.0
-      jest-environment-node: ~25.4.0
+      jest-environment-node: ~25.5.0
       jest-snapshot: ~25.4.0
       lodash: ~4.17.15
       typescript: ~4.4.2
@@ -1240,7 +1240,7 @@ importers:
       '@types/lodash': 4.14.116
       '@types/node': 12.20.24
       eslint: 7.30.0
-      jest-environment-node: 25.4.0
+      jest-environment-node: 25.5.0
       typescript: 4.4.4
 
   ../../heft-plugins/heft-sass-plugin:
@@ -1682,11 +1682,13 @@ importers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-jest-plugin': workspace:*
       eslint: ~7.30.0
+      jest-environment-node: ~25.5.0
       typescript: ~4.4.2
     dependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       eslint: 7.30.0
+      jest-environment-node: 25.5.0
       typescript: 4.4.4
     devDependencies:
       '@rushstack/heft': link:../../apps/heft
@@ -1699,6 +1701,7 @@ importers:
       '@rushstack/heft-sass-plugin': workspace:*
       '@rushstack/heft-webpack4-plugin': workspace:*
       eslint: ~7.30.0
+      jest-environment-jsdom: ~25.5.0
       typescript: ~4.4.2
     dependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
@@ -1706,6 +1709,7 @@ importers:
       '@rushstack/heft-sass-plugin': link:../../heft-plugins/heft-sass-plugin
       '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
       eslint: 7.30.0
+      jest-environment-jsdom: 25.5.0
       typescript: 4.4.4
     devDependencies:
       '@rushstack/heft': link:../../apps/heft
@@ -12254,7 +12258,7 @@ packages:
       deepmerge: 4.2.2
       glob: 7.2.0
       jest-environment-jsdom: 25.5.0
-      jest-environment-node: 25.4.0
+      jest-environment-node: 25.5.0
       jest-get-type: 25.2.6
       jest-jasmine2: 25.5.4
       jest-regex-util: 25.2.6
@@ -12338,17 +12342,6 @@ packages:
       - bufferutil
       - canvas
       - utf-8-validate
-
-  /jest-environment-node/25.4.0:
-    resolution: {integrity: sha512-wryZ18vsxEAKFH7Z74zi/y/SyI1j6UkVZ6QsllBuT/bWlahNfQjLNwFsgh/5u7O957dYFoXj4yfma4n4X6kU9A==}
-    engines: {node: '>= 8.3'}
-    dependencies:
-      '@jest/environment': 25.5.0
-      '@jest/fake-timers': 25.5.0
-      '@jest/types': 25.4.0
-      jest-mock: 25.5.0
-      jest-util: 25.5.0
-      semver: 6.3.0
 
   /jest-environment-node/25.5.0:
     resolution: {integrity: sha512-iuxK6rQR2En9EID+2k+IBs5fCFd919gVVK5BeND82fYeLWPqvRcFNPKu9+gxTwfB5XwBGBvZ0HFQa+cHtIoslA==}

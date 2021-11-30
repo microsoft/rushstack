@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-node-rig",
+      "comment": "Set default Jest environment in Jest configuration to \"jest-environment-node\"",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-node-rig"
+}
