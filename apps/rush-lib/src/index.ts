@@ -24,11 +24,19 @@ export {
   YarnOptionsConfiguration
 } from './api/RushConfiguration';
 
+export {
+  EnvironmentConfiguration,
+  EnvironmentVariableNames,
+  IEnvironmentConfigurationInitializeOptions
+} from './api/EnvironmentConfiguration';
+
+export { RushConstants } from './logic/RushConstants';
+
 export { PackageManagerName, PackageManager } from './api/packageManager/PackageManager';
 
-export { EnvironmentVariableNames } from './api/EnvironmentConfiguration';
-
 export { RushConfigurationProject } from './api/RushConfigurationProject';
+
+export { RushUserConfiguration } from './api/RushUserConfiguration';
 
 export { RushGlobalFolder as _RushGlobalFolder } from './api/RushGlobalFolder';
 
@@ -40,6 +48,7 @@ export { PackageJsonEditor, PackageJsonDependency, DependencyType } from './api/
 
 export { RepoStateFile } from './logic/RepoStateFile';
 
+export { LookupByPath } from './logic/LookupByPath';
 export { EventHooks, Event } from './api/EventHooks';
 
 export { ChangeManager } from './api/ChangeManager';
@@ -61,3 +70,18 @@ export { ILaunchOptions, Rush } from './api/Rush';
 export { ExperimentsConfiguration, IExperimentsJson } from './api/ExperimentsConfiguration';
 
 export { ProjectChangeAnalyzer, IGetChangedProjectsOptions } from './logic/ProjectChangeAnalyzer';
+
+export {
+  RushSession,
+  IRushSessionOptions,
+  CloudBuildCacheProviderFactory
+} from './pluginFramework/RushSession';
+
+export { RushLifecycleHooks } from './pluginFramework/RushLifeCycle';
+
+export { IRushPlugin } from './pluginFramework/IRushPlugin';
+export { ILogger } from './pluginFramework/logging/Logger';
+
+export { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCacheProvider';
+
+export { ICredentialCacheOptions, ICredentialCacheEntry, CredentialCache } from './logic/CredentialCache';

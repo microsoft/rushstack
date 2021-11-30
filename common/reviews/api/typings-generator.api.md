@@ -30,10 +30,12 @@ export interface IStringValueTypings {
 export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> {
     // (undocumented)
     fileExtensions: string[];
-    // (undocumented)
+    // @deprecated (undocumented)
     filesToIgnore?: string[];
     // (undocumented)
     generatedTsFolder: string;
+    // (undocumented)
+    globsToIgnore?: string[];
     // (undocumented)
     parseAndGenerateTypings: (fileContents: string, filePath: string) => TTypingsResult | Promise<TTypingsResult>;
     // (undocumented)

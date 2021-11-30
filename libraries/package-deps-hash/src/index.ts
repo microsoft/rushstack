@@ -14,3 +14,5 @@
  */
 
 export { getPackageDeps, getGitHashForFiles } from './getPackageDeps';
+export { getRepoChanges, getRepoRoot, getRepoState } from './getRepoState';
+export { IFileDiffStatus } from './getRepoState';

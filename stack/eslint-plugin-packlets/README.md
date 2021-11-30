@@ -143,7 +143,7 @@ require('@rushstack/eslint-config/patch/modern-module-resolution');
 module.exports = {
   extends: [
     "@rushstack/eslint-config/profile/node",
-    "@rushstack/eslint-config/profile/mixins/packlets" // <--- ADD THIS
+    "@rushstack/eslint-config/mixins/packlets" // <--- ADD THIS
   ],
   parserOptions: { tsconfigRootDir: __dirname }
 };
@@ -171,7 +171,7 @@ require('@rushstack/eslint-config/patch/modern-module-resolution');
 module.exports = {
   extends: [
     "@rushstack/eslint-config/profile/node",
-    "@rushstack/eslint-config/profile/mixins/packlets"
+    "@rushstack/eslint-config/mixins/packlets"
   ],
   parserOptions: { tsconfigRootDir: __dirname },
   overrides: [

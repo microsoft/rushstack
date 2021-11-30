@@ -2,6 +2,72 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.1.13",
+      "tag": "@rushstack/debug-certificate-manager_v1.1.13",
+      "date": "Mon, 29 Nov 2021 07:26:16 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.42.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.31`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.12",
+      "tag": "@rushstack/debug-certificate-manager_v1.1.12",
+      "date": "Tue, 09 Nov 2021 16:08:07 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix a bug where ensureCertificateAsync would assume a previously generated certificate was trusted."
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.11",
+      "tag": "@rushstack/debug-certificate-manager_v1.1.11",
+      "date": "Sat, 06 Nov 2021 00:09:13 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.43.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.42.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.30`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.1.10",
+      "tag": "@rushstack/debug-certificate-manager_v1.1.10",
+      "date": "Fri, 05 Nov 2021 15:09:18 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.43.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.4.5`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.42.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.29`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.9",
       "tag": "@rushstack/debug-certificate-manager_v1.1.9",
       "date": "Thu, 28 Oct 2021 00:08:22 GMT",

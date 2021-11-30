@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-web-rig",
+      "comment": "Set default Jest environment in Jest configuration to \"jest-environment-jsdom\"",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/heft-web-rig"
+}

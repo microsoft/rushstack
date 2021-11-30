@@ -34,6 +34,7 @@ import { PackageNameParsers } from './PackageNameParsers';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import { LookupByPath } from '../logic/LookupByPath';
 import { PackageJsonDependency } from './PackageJsonEditor';
+import { RushPluginsConfiguration } from './RushPluginsConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -56,7 +57,8 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.nonbrowserApprovedPackagesFilename,
   RushConstants.pinnedVersionsFilename,
   RushConstants.repoStateFilename,
-  RushConstants.versionPoliciesFilename
+  RushConstants.versionPoliciesFilename,
+  RushConstants.rushPluginsConfigFilename
 ];
 
 /**
@@ -437,7 +439,7 @@ export class RushConfiguration {
   private _ensureConsistentVersions: boolean;
   private _suppressNodeLtsWarning: boolean;
   private _variants: Set<string>;
-  private _projectByRelativePath: LookupByPath<RushConfigurationProject>;
+  private readonly _pathTrees: Map<string, LookupByPath<RushConfigurationProject>>;
 
   // "approvedPackagesPolicy" feature
   private _approvedPackagesPolicy: ApprovedPackagesPolicy;
@@ -483,6 +485,8 @@ export class RushConfiguration {
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
   private _versionPolicyConfigurationFilePath: string;
   private _experimentsConfiguration: ExperimentsConfiguration;
+
+  private __rushPluginsConfiguration: RushPluginsConfiguration;
 
   private readonly _rushConfigurationJson: IRushConfigurationJson;
 
@@ -544,6 +548,12 @@ export class RushConfiguration {
       RushConstants.experimentsFilename
     );
     this._experimentsConfiguration = new ExperimentsConfiguration(experimentsConfigFile);
+
+    const rushPluginsConfigFilename: string = path.join(
+      this._commonRushConfigFolder,
+      RushConstants.rushPluginsConfigFilename
+    );
+    this.__rushPluginsConfiguration = new RushPluginsConfiguration(rushPluginsConfigFilename);
 
     this._npmOptions = new NpmOptionsConfiguration(rushConfigurationJson.npmOptions || {});
     this._pnpmOptions = new PnpmOptionsConfiguration(
@@ -713,12 +723,7 @@ export class RushConfiguration {
       }
     }
 
-    const pathTree: LookupByPath<RushConfigurationProject> = new LookupByPath<RushConfigurationProject>();
-    for (const project of this.projects) {
-      const relativePath: string = Path.convertToSlashes(project.projectRelativeFolder);
-      pathTree.setItem(relativePath, project);
-    }
-    this._projectByRelativePath = pathTree;
+    this._pathTrees = new Map();
   }
 
   private _initializeAndValidateLocalProjects(): void {
@@ -1080,6 +1085,14 @@ export class RushConfiguration {
    */
   public get commonAutoinstallersFolder(): string {
     return path.join(this._commonFolder, 'autoinstallers');
+  }
+
+  /**
+   * The folder where rush-plugin options json files are stored.
+   * Example: `C:\MyRepo\common\config\rush-plugins`
+   */
+  public get rushPluginOptionsFolder(): string {
+    return path.join(this._commonFolder, 'config', 'rush-plugins');
   }
 
   /**
@@ -1675,12 +1688,19 @@ export class RushConfiguration {
   }
 
   /**
-   * Finds the project that owns the specified POSIX relative path (e.g. apps/rush-lib).
-   * The path is case-sensitive, so will only return a project if its projectRelativePath matches the casing.
-   * @returns The found project, or undefined if no match was found
+   * @returns An optimized lookup engine to find a project by its path relative to the specified root.
+   * @beta
    */
-  public findProjectForPosixRelativePath(posixRelativePath: string): RushConfigurationProject | undefined {
-    return this._projectByRelativePath.findChildPath(posixRelativePath);
+  public getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject> {
+    let pathTree: LookupByPath<RushConfigurationProject> | undefined = this._pathTrees.get(rootPath);
+    if (!pathTree) {
+      this._pathTrees.set(rootPath, (pathTree = new LookupByPath()));
+      for (const project of this.projects) {
+        const relativePath: string = path.relative(rootPath, project.projectFolder);
+        pathTree.setItemFromSegments(LookupByPath.iteratePathSegments(relativePath, path.sep), project);
+      }
+    }
+    return pathTree;
   }
 
   /**
@@ -1708,6 +1728,13 @@ export class RushConfiguration {
   }
 
   /**
+   * @internal
+   */
+  public get _rushPluginsConfiguration(): RushPluginsConfiguration {
+    return this.__rushPluginsConfiguration;
+  }
+
+  /**
    * Returns the project for which the specified path is underneath that project's folder.
    * If the path is not under any project's folder, returns undefined.
    */
@@ -1728,8 +1755,10 @@ export class RushConfiguration {
     variant: string | undefined
   ): void {
     const commonVersions: CommonVersionsConfiguration = this.getCommonVersions(variant);
-    const allowedAlternativeVersions: Map<string, ReadonlyArray<string>> =
-      commonVersions.allowedAlternativeVersions;
+    const allowedAlternativeVersions: Map<
+      string,
+      ReadonlyArray<string>
+    > = commonVersions.allowedAlternativeVersions;
 
     for (const dependency of dependencies) {
       const alternativesForThisDependency: ReadonlyArray<string> =

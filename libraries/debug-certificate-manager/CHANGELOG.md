@@ -1,6 +1,28 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Thu, 28 Oct 2021 00:08:22 GMT and should not be manually modified.
+This log was last generated on Mon, 29 Nov 2021 07:26:16 GMT and should not be manually modified.
+
+## 1.1.13
+Mon, 29 Nov 2021 07:26:16 GMT
+
+_Version update only_
+
+## 1.1.12
+Tue, 09 Nov 2021 16:08:07 GMT
+
+### Patches
+
+- Fix a bug where ensureCertificateAsync would assume a previously generated certificate was trusted.
+
+## 1.1.11
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 1.1.10
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
 
 ## 1.1.9
 Thu, 28 Oct 2021 00:08:22 GMT

@@ -71,6 +71,14 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@pnpm/logger",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/debug-certificate-manager",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/eslint-config",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -97,6 +105,10 @@
     {
       "name": "@rushstack/heft-config-file",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/heft-dev-cert-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/heft-jest-plugin",
@@ -144,6 +156,18 @@
     },
     {
       "name": "@rushstack/rig-package",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-amazon-s3-build-cache-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-azure-storage-build-cache-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-sdk",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -392,6 +416,10 @@
     },
     {
       "name": "jest-config",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-environment-jsdom",
       "allowedCategories": [ "libraries" ]
     },
     {

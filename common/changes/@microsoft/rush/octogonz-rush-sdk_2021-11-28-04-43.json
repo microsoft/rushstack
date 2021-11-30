@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(EXPERIMENTAL) Add a new NPM package \"@rushstack/rush-sdk\" for use by Rush plugins",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

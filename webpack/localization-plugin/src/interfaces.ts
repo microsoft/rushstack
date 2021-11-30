@@ -153,9 +153,10 @@ export interface ILocalizationPluginOptions {
   localizedData: ILocalizedData;
 
   /**
-   * This option is used to specify `.resx` and `.loc.json` files that should not be processed by this plugin.
+   * This option is used to specify `.resx`, `.resx.json` and `.loc.json` files that should not be processed by
+   * this plugin.
    */
-  filesToIgnore?: string[];
+  globsToIgnore?: string[];
 
   /**
    * The value to replace the [locale] token with for chunks without localized strings. Defaults to "none"
@@ -171,6 +172,13 @@ export interface ILocalizationPluginOptions {
    * This option is used to specify how and if TypeScript typings should be generated for loc files.
    */
   typingsOptions?: ITypingsGenerationOptions;
+
+  /**
+   * @deprecated
+   *
+   * TODO: Remove when version 1.0.0 is released.
+   */
+  filesToIgnore?: string[];
 }
 
 /**
