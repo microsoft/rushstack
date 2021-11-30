@@ -4,6 +4,8 @@
 import * as path from 'path';
 import { Import, IPackageJson, PackageJsonLookup } from '@rushstack/node-core-library';
 
+const RUSH_LIB_NAME: string = '@microsoft/rush-lib';
+
 type RushLibModuleType = Record<string, unknown>;
 declare const global: NodeJS.Global &
   typeof globalThis & {
@@ -11,6 +13,7 @@ declare const global: NodeJS.Global &
   };
 
 // SCENARIO 1:  Rush's PluginManager has initialized "rush-sdk" with Rush's own instance of rush-lib.
+// The Rush host process will assign "global.___rush___rushLibModule" before loading the plugin.
 let rushLibModule: RushLibModuleType | undefined = global.___rush___rushLibModule;
 
 // SCENARIO 2:  The project importing "rush-sdk" has installed its own instance of "rush-lib"
@@ -24,8 +27,6 @@ if (rushLibModule === undefined) {
     if (callerPackageFolder !== undefined) {
       const callerPackageJson: IPackageJson = require(path.join(callerPackageFolder, 'package.json'));
 
-      const RUSH_LIB_NAME: string = '@microsoft/rush-lib';
-
       // Does the caller properly declare a dependency on rush-lib?
       if (
         (callerPackageJson.dependencies && callerPackageJson.dependencies[RUSH_LIB_NAME] !== undefined) ||
@@ -37,7 +38,7 @@ if (rushLibModule === undefined) {
         // Try to resolve rush-lib from the caller's folder
         try {
           const rushLibModulePath: string = Import.resolveModule({
-            modulePath: '@microsoft/rush-lib',
+            modulePath: RUSH_LIB_NAME,
             baseFolderPath: callerPackageFolder
           });
 
@@ -46,7 +47,11 @@ if (rushLibModule === undefined) {
           // If we fail to resolve it, ignore the error
         }
 
+        // If two different libraries invoke `rush-sdk`, and one of them provides "rush-lib"
+        // then the first version to be loaded wins.  We do not support side-by-side instances of "rush-lib".
         if (rushLibModule !== undefined) {
+          // TODO: When we implement Scenario 3, we should also add some diagnostic state
+          // to track which scenario is active and how it got initialized.
           global.___rush___rushLibModule = rushLibModule;
         }
       }

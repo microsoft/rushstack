@@ -30,6 +30,7 @@ interface IPathTreeNode<TItem> {
  * tree.getNearestAncestor('foo/bar/baz'); returns 3
  * tree.getNearestAncestor('bar/foo/bar'); returns 2
  * ```
+ * @beta
  */
 export class LookupByPath<TItem> {
   /**

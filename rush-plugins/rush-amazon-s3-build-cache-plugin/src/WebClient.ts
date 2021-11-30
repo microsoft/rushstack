@@ -1,16 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+// ===================================================================================================================
+// AS A TEMPORARY WORKAROUND, THIS FILE WAS COPY+PASTED FROM THE "rush-lib" PROJECT.
+//
+// Eventually we plan to convert it into a more generic API for "node-core-library" or
+// else replace it with a third party solution such as Axios.  See the discussion here:
+// https://github.com/microsoft/rushstack/pull/3036#discussion_r758010126
+// ===================================================================================================================
+
 import * as os from 'os';
 import * as process from 'process';
 import * as fetch from 'node-fetch';
 import * as http from 'http';
 import { Import } from '@rushstack/node-core-library';
-
-// ===================================================================================================================
-// AS A TEMPORARY WORKAROUND, THIS FILE WAS COPY+PASTED INTO THE "rush-amazon-s3-build-cache-plugin" PROJECT.
-// See that copy for notes.
-// ===================================================================================================================
 
 const createHttpsProxyAgent: typeof import('https-proxy-agent') = Import.lazy('https-proxy-agent', require);
 

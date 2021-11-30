@@ -7,9 +7,9 @@ import { Import, InternalError, IPackageJson, JsonFile, Sort } from '@rushstack/
 const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 /**
- * @beta
+ * @public
  */
-export const enum DependencyType {
+export enum DependencyType {
   Regular = 'dependencies',
   Dev = 'devDependencies',
   Optional = 'optionalDependencies',
@@ -18,7 +18,7 @@ export const enum DependencyType {
 }
 
 /**
- * @beta
+ * @public
  */
 export class PackageJsonDependency {
   private _type: DependencyType;
@@ -55,7 +55,7 @@ export class PackageJsonDependency {
 }
 
 /**
- * @beta
+ * @public
  */
 export class PackageJsonEditor {
   private readonly _filePath: string;

@@ -34,8 +34,6 @@
   "dependencies": {
     "@microsoft/rush-lib": "workspace:*",
     "@rushstack/node-core-library": "workspace:*",
-    "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
-    "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:*",
     "colors": "~1.2.1",
     "semver": "~7.3.0"
   },

@@ -20,7 +20,7 @@ const lodash: typeof import('lodash') = Import.lazy('lodash', require);
 
 /**
  * Type of version bumps
- * @beta
+ * @public
  */
 export enum BumpType {
   // No version bump
@@ -39,7 +39,7 @@ export enum BumpType {
 
 /**
  * Version policy base type names
- * @beta
+ * @public
  */
 export enum VersionPolicyDefinitionName {
   'lockStepVersion',
@@ -48,7 +48,7 @@ export enum VersionPolicyDefinitionName {
 
 /**
  * This is the base class for version policy which controls how versions get bumped.
- * @beta
+ * @public
  */
 export abstract class VersionPolicy {
   private _policyName: string;
@@ -214,7 +214,7 @@ export abstract class VersionPolicy {
 
 /**
  * This policy indicates all related projects should use the same version.
- * @beta
+ * @public
  */
 export class LockStepVersionPolicy extends VersionPolicy {
   private _version: semver.SemVer;
@@ -345,7 +345,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
 
 /**
  * This policy indicates all related projects get version bump driven by their own changes.
- * @beta
+ * @public
  */
 export class IndividualVersionPolicy extends VersionPolicy {
   private _lockedMajor: number | undefined;

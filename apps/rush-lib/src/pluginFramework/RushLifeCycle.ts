@@ -3,10 +3,9 @@
 
 import { AsyncSeriesHook } from 'tapable';
 
-export interface IRushLifecycle {
-  hooks: RushLifecycleHooks;
-}
-
+/**
+ * @beta
+ */
 export class RushLifecycleHooks {
   /**
    * The hook to run when all rush plugins is initialized.

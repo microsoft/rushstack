@@ -2,17 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import { Response, ResponseInit } from 'node-fetch';
-import { RushSession } from '@rushstack/rush-sdk';
-import { ConsoleTerminalProvider } from '@rushstack/node-core-library';
 
 import { IAmazonS3BuildCacheProviderOptions } from '../AmazonS3BuildCacheProvider';
 import { AmazonS3Client, IAmazonS3Credentials } from '../AmazonS3Client';
+import { WebClient } from '../WebClient';
 
-const rushSession = new RushSession({
-  terminalProvider: new ConsoleTerminalProvider(),
-  getIsDebugMode: () => false
-});
-const { WebClient } = rushSession;
 const webClient = new WebClient();
 
 const DUMMY_OPTIONS_WITHOUT_BUCKET: Omit<IAmazonS3BuildCacheProviderOptions, 's3Bucket'> = {
