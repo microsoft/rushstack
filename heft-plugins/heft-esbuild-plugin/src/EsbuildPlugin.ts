@@ -138,8 +138,7 @@ export class EsbuildPlugin implements IHeftPlugin {
           });
       }
     );
-    return Promise.all(buildPromises).then(() => {
-      return;
-    });
+
+    await Promise.all(buildPromises);
   }
 }
