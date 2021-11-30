@@ -32,7 +32,7 @@ const noNewNullRule: TSESLint.RuleModule<MessageIds, Options> = {
       category: 'Stylistic Issues',
       recommended: 'error',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
-    }
+    } as TSESLint.RuleMetaDataDocs
   },
 
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {
@@ -54,7 +54,7 @@ const noNewNullRule: TSESLint.RuleModule<MessageIds, Options> = {
       switch ((node as TSESTree.Node).type) {
         case AST_NODE_TYPES.MethodDefinition:
           return true;
-        case AST_NODE_TYPES.ClassProperty:
+        case AST_NODE_TYPES.PropertyDefinition:
           return true;
         case AST_NODE_TYPES.TSIndexSignature:
           return true;

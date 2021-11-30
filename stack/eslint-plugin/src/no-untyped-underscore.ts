@@ -23,7 +23,7 @@ const noUntypedUnderscoreRule: TSESLint.RuleModule<MessageIds, Options> = {
       category: 'Stylistic Issues',
       recommended: false,
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
-    }
+    } as TSESLint.RuleMetaDataDocs
   },
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {
     const parserServices: ParserServices | undefined = context.parserServices;

@@ -29,7 +29,7 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
       category: 'Best Practices',
       recommended: 'warn',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin-packlets'
-    }
+    } as TSESLint.RuleMetaDataDocs
   },
 
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {
