@@ -283,6 +283,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "browser-sync",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "builtin-modules",
       "allowedCategories": [ "libraries" ]
     },

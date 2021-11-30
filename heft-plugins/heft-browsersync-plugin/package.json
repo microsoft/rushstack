@@ -1,0 +1,33 @@
+{
+  "name": "@rushstack/heft-browsersync-plugin",
+  "version": "0.0.0",
+  "description": "Heft plugin for Browsersync",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "heft-plugins/heft-browsersync-plugin"
+  },
+  "homepage": "https://rushstack.io/pages/heft/overview/",
+  "main": "lib/index.js",
+  "types": "dist/heft-browsersync-plugin.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "heft test --clean",
+    "start": "heft test --clean --watch"
+  },
+  "peerDependencies": {
+    "@rushstack/heft": "^0.42.0"
+  },
+  "dependencies": {
+    "@rushstack/node-core-library": "workspace:*",
+    "@rushstack/heft-config-file": "workspace:*",
+    "browser-sync": "~2.27.5"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@rushstack/heft-node-rig": "workspace:*",
+    "@types/node": "12.20.24",
+    "@types/browser-sync": "~2.26.2"
+  }
+}
