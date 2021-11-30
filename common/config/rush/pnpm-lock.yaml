@@ -193,8 +193,6 @@ importers:
       '@rushstack/heft': workspace:*
       '@rushstack/heft-node-rig': workspace:*
       '@rushstack/node-core-library': workspace:*
-      '@rushstack/rush-amazon-s3-build-cache-plugin': workspace:*
-      '@rushstack/rush-azure-storage-build-cache-plugin': workspace:*
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
       '@types/semver': 7.3.5
@@ -203,8 +201,6 @@ importers:
     dependencies:
       '@microsoft/rush-lib': link:../rush-lib
       '@rushstack/node-core-library': link:../../libraries/node-core-library
-      '@rushstack/rush-amazon-s3-build-cache-plugin': link:../../rush-plugins/rush-amazon-s3-build-cache-plugin
-      '@rushstack/rush-azure-storage-build-cache-plugin': link:../../rush-plugins/rush-azure-storage-build-cache-plugin
       colors: 1.2.5
       semver: 7.3.5
     devDependencies:
