@@ -21,6 +21,7 @@ import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from './RushConstants';
 import { LookupByPath } from './LookupByPath';
+import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 
 /**
  * @beta
@@ -180,10 +181,10 @@ export class ProjectChangeAnalyzer {
    * Gets a list of projects that have changed in the current state of the repo
    * when compared to the specified branch.
    */
-  public async getProjectsWithChangesAsync(
+  public async getProjectsWithLocalFileChangesAsync(
     options: IGetChangedProjectsOptions
   ): Promise<Set<RushConfigurationProject>> {
-    return await this._getChangedProjectsInternalAsync(options, false);
+    return await this._getChangedProjectsInternalAsync(options, true);
   }
 
   /**
@@ -194,43 +195,82 @@ export class ProjectChangeAnalyzer {
   public async getProjectsImpactedByDiffAsync(
     options: IGetChangedProjectsOptions
   ): Promise<Set<RushConfigurationProject>> {
-    return await this._getChangedProjectsInternalAsync(options, true);
+    return await this._getChangedProjectsInternalAsync(options, false);
   }
 
   private async _getChangedProjectsInternalAsync(
     options: IGetChangedProjectsOptions,
-    forIncrementalBuild: boolean
+    localOnly: boolean
   ): Promise<Set<RushConfigurationProject>> {
+    const { _rushConfiguration: rushConfiguration } = this;
+
+    const { targetBranchName, terminal } = options;
+
     const gitPath: string = this._git.getGitPathOrThrow();
-    const repoRoot: string = getRepoRoot(this._rushConfiguration.rushJsonFolder);
-    const repoChanges: Map<string, IFileDiffStatus> = getRepoChanges(
-      repoRoot,
-      options.targetBranchName,
-      gitPath
-    );
-    const { terminal } = options;
+    const repoRoot: string = getRepoRoot(rushConfiguration.rushJsonFolder);
+    const repoChanges: Map<string, IFileDiffStatus> = getRepoChanges(repoRoot, targetBranchName, gitPath);
 
-    if (forIncrementalBuild) {
+    const changedProjects: Set<RushConfigurationProject> = new Set();
+
+    if (!localOnly) {
+      // Even though changing the installed version of a nested dependency merits a change file,
+      // ignore lockfile changes for `rush change` for the moment
+
       // Determine the current variant from the link JSON.
-      const variant: string | undefined = this._rushConfiguration.currentInstalledVariant;
+      const variant: string | undefined = rushConfiguration.currentInstalledVariant;
 
-      // Add the shrinkwrap file to every project's dependencies
-      const shrinkwrapFile: string = Path.convertToSlashes(
-        path.relative(repoRoot, this._rushConfiguration.getCommittedShrinkwrapFilename(variant))
-      );
+      const fullShrinkwrapPath: string = rushConfiguration.getCommittedShrinkwrapFilename(variant);
 
-      if (repoChanges.has(shrinkwrapFile)) {
-        // TODO: Implement shrinkwrap diffing here.
-        return new Set(this._rushConfiguration.projects);
+      const shrinkwrapFile: string = Path.convertToSlashes(path.relative(repoRoot, fullShrinkwrapPath));
+      const shrinkwrapStatus: IFileDiffStatus | undefined = repoChanges.get(shrinkwrapFile);
+
+      if (shrinkwrapStatus) {
+        if (shrinkwrapStatus.status !== 'M') {
+          // The lockfile was created or deleted. Affects all projects.
+          return new Set(rushConfiguration.projects);
+        }
+
+        const { packageManager } = rushConfiguration;
+
+        if (packageManager === 'pnpm') {
+          const currentShrinkwrap: PnpmShrinkwrapFile | undefined =
+            PnpmShrinkwrapFile.loadFromFile(fullShrinkwrapPath);
+
+          if (!currentShrinkwrap) {
+            throw new Error(`Unable to obtain current shrinkwrap file.`);
+          }
+
+          const oldShrinkwrapText: string = this._git.getFileContent(
+            targetBranchName,
+            shrinkwrapFile,
+            repoRoot
+          );
+          const oldShrinkWrap: PnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromString(oldShrinkwrapText);
+
+          for (const project of rushConfiguration.projects) {
+            if (currentShrinkwrap.getProjectShrinkwrap(project).hasChanges(oldShrinkWrap.getProjectShrinkwrap(project))) {
+              changedProjects.add(project);
+            }
+          }
+        } else {
+          // Diffing only supported for pnpm. Must assume it affects all projects since we can't be sure.
+          return new Set(rushConfiguration.projects);
+        }
       }
     }
 
     const changesByProject: Map<RushConfigurationProject, Map<string, IFileDiffStatus>> = new Map();
     const lookup: LookupByPath<RushConfigurationProject> =
-      this._rushConfiguration.getProjectLookupForRoot(repoRoot);
+      rushConfiguration.getProjectLookupForRoot(repoRoot);
+
     for (const [file, diffStatus] of repoChanges) {
       const project: RushConfigurationProject | undefined = lookup.findChildPath(file);
       if (project) {
+        if (changedProjects.has(project)) {
+          // Lockfile changes cannot be ignored via rush-project.json
+          continue;
+        }
+
         let projectChanges: Map<string, IFileDiffStatus> | undefined = changesByProject.get(project);
         if (!projectChanges) {
           changesByProject.set(project, (projectChanges = new Map()));
@@ -239,27 +279,27 @@ export class ProjectChangeAnalyzer {
       }
     }
 
-    if (forIncrementalBuild) {
-      const changedProjects: Set<RushConfigurationProject> = new Set();
-      await Async.forEachAsync(
-        changesByProject,
-        async ([project, projectChanges]) => {
-          const filteredChanges: Map<string, IFileDiffStatus> = await this._filterProjectDataAsync(
-            project,
-            projectChanges,
-            repoRoot,
-            terminal
-          );
-          if (filteredChanges.size > 0) {
-            changedProjects.add(project);
-          }
-        },
-        { concurrency: 10 }
-      );
-      return changedProjects;
-    } else {
+    if (localOnly) {
       return new Set(changesByProject.keys());
     }
+
+    await Async.forEachAsync(
+      changesByProject,
+      async ([project, projectChanges]) => {
+        const filteredChanges: Map<string, IFileDiffStatus> = await this._filterProjectDataAsync(
+          project,
+          projectChanges,
+          repoRoot,
+          terminal
+        );
+        if (filteredChanges.size > 0) {
+          changedProjects.add(project);
+        }
+      },
+      { concurrency: 10 }
+    );
+
+    return changedProjects;
   }
 
   private _getData(terminal: ITerminal): IRawRepoState {

@@ -22,11 +22,44 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
    * @returns True if the project shrinkwrap was created or updated, false otherwise.
    */
   public async updateProjectShrinkwrapAsync(): Promise<void> {
+    const projectShrinkwrapMap: Map<string, string> | undefined = this.generateProjectShrinkwrapMap();
+
+    return projectShrinkwrapMap ? this.saveAsync(projectShrinkwrapMap) : this.deleteIfExistsAsync();
+  }
+
+  public hasChanges(otherShrinkwrap: PnpmProjectShrinkwrapFile): boolean {
+    const otherMap: Map<string, string> | undefined = otherShrinkwrap.generateProjectShrinkwrapMap();
+    const thisMap: Map<string, string> | undefined = this.generateProjectShrinkwrapMap();
+
+    if (!thisMap || !otherMap) {
+      // Handle one or both being undefined.
+      return !!(thisMap || otherMap);
+    }
+
+    if (thisMap.size !== otherMap.size) {
+      // Entries added or removed
+      return true;
+    }
+
+    for (const [key, value] of thisMap) {
+      if (otherMap.get(key) !== value) {
+        // A dependency changed or was added/removed
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Generate the project shrinkwrap file content
+   */
+  protected generateProjectShrinkwrapMap(): Map<string, string> | undefined {
     const projectShrinkwrapMap: Map<string, string> | undefined = this.shrinkwrapFile.isWorkspaceCompatible
       ? this.generateWorkspaceProjectShrinkwrapMap()
       : this.generateLegacyProjectShrinkwrapMap();
 
-    return projectShrinkwrapMap ? this.saveAsync(projectShrinkwrapMap) : this.deleteIfExistsAsync();
+    return projectShrinkwrapMap;
   }
 
   protected generateWorkspaceProjectShrinkwrapMap(): Map<string, string> | undefined {
@@ -47,15 +80,17 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
       ...Object.entries(importer.dependencies || {}),
       ...Object.entries(importer.devDependencies || {}),
       ...Object.entries(importer.optionalDependencies || {})
-    ].filter((d) => d[1].indexOf('link:') === -1);
+    ];
+
+    // Not used in workspace mode
+    const parentEntry: IPnpmShrinkwrapDependencyYaml = {};
 
     const projectShrinkwrapMap: Map<string, string> = new Map();
     for (const [name, version] of externalDependencies) {
       // Add to the manifest and provide all the parent dependencies
-      this._addDependencyRecursive(projectShrinkwrapMap, name, version, {
-        dependencies: { ...importer.dependencies, ...importer.devDependencies },
-        optionalDependencies: { ...importer.optionalDependencies }
-      });
+      if (!version.includes('link:')) {
+        this._addDependencyRecursive(projectShrinkwrapMap, name, version, parentEntry);
+      }
     }
 
     return projectShrinkwrapMap;
@@ -71,16 +106,18 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
     const parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml =
       this.shrinkwrapFile.getShrinkwrapEntryFromTempProjectDependencyKey(tempProjectDependencyKey)!;
 
-    // Only select the shrinkwrap dependencies that are non-local since we already handle local
-    // project changes
-    const externalDependencies: [string, string][] = [
+    const allDependencies: [string, string][] = [
       ...Object.entries(parentShrinkwrapEntry.dependencies || {}),
       ...Object.entries(parentShrinkwrapEntry.optionalDependencies || {})
-    ].filter((d) => d[0].indexOf('@rush-temp/') === -1);
+    ];
 
     const projectShrinkwrapMap: Map<string, string> = new Map();
-    for (const [name, version] of externalDependencies) {
-      this._addDependencyRecursive(projectShrinkwrapMap, name, version, parentShrinkwrapEntry);
+    for (const [name, version] of allDependencies) {
+      if (name.indexOf('@rush-temp/') < 0) {
+        // Only select the shrinkwrap dependencies that are non-local since we already handle local
+        // project changes
+        this._addDependencyRecursive(projectShrinkwrapMap, name, version, parentShrinkwrapEntry);
+      }
     }
 
     // Since peer dependencies within on external packages may be hoisted up to the top-level package,
@@ -97,6 +134,12 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
     parentShrinkwrapEntry: IPnpmShrinkwrapDependencyYaml,
     throwIfShrinkwrapEntryMissing: boolean = true
   ): void {
+    const specifier: string = `${name}@${version}`;
+    if (projectShrinkwrapMap.has(specifier)) {
+      // getShrinkwrapEntry is idempotent with respect to name and version
+      return;
+    }
+
     const shrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined = this.shrinkwrapFile.getShrinkwrapEntry(
       name,
       version
@@ -109,8 +152,7 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
       return;
     }
 
-    const specifier: string = `${name}@${version}`;
-    let integrity: string | undefined = shrinkwrapEntry?.resolution?.integrity;
+    let integrity: string | undefined = shrinkwrapEntry.resolution?.integrity;
     if (!integrity) {
       // git dependency specifiers do not have an integrity entry. Instead, they specify the tarball field.
       // So instead, we will hash the contents of the dependency entry and use that as the integrity hash.
@@ -124,14 +166,6 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
         .update(JSON.stringify(shrinkwrapEntry))
         .digest('hex');
       integrity = `${name}@${version}:${sha256Digest}:`;
-    }
-
-    const existingSpecifier: string | undefined = projectShrinkwrapMap.get(specifier);
-    if (existingSpecifier) {
-      if (existingSpecifier !== integrity) {
-        throw new Error(`Collision: ${specifier} already exists in with a different integrity`);
-      }
-      return;
     }
 
     // Add the current dependency

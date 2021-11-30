@@ -11,7 +11,7 @@ async function runAsync(): Promise<void> {
   const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
 
   const changedProjects: Set<RushConfigurationProject> =
-    await projectChangeAnalyzer.getProjectsWithChangesAsync({
+    await projectChangeAnalyzer.getProjectsWithLocalFileChangesAsync({
       targetBranchName: rushConfiguration.repositoryDefaultBranch,
       terminal
     });

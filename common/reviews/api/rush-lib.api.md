@@ -453,7 +453,7 @@ export class ProjectChangeAnalyzer {
     // (undocumented)
     _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
     getProjectsImpactedByDiffAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
-    getProjectsWithChangesAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
+    getProjectsWithLocalFileChangesAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
     // @internal
     _tryGetProjectDependenciesAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<Map<string, string> | undefined>;
     // @internal

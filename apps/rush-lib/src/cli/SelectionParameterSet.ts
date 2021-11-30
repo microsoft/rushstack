@@ -185,6 +185,8 @@ export class SelectionParameterSet {
       (this._toProject.values as string[]).push(`version-policy:${value}`);
     }
 
+    const mode: EvaluateSelectorMode = forIncremental ? EvaluateSelectorMode.IncrementalBuild : EvaluateSelectorMode.RushChange;
+
     const selectors: CommandLineStringListParameter[] = [
       this._onlyProject,
       this._fromProject,
@@ -219,7 +221,7 @@ export class SelectionParameterSet {
       impactedByExceptProjects
     ] = await Promise.all(
       selectors.map((param: CommandLineStringListParameter) => {
-        return this._evaluateProjectParameterAsync(param, terminal, EvaluateSelectorMode.IncrementalBuild);
+        return this._evaluateProjectParameterAsync(param, terminal, mode);
       })
     );
 
@@ -256,12 +258,13 @@ export class SelectionParameterSet {
    */
   public async getPnpmFilterArgumentsAsync(terminal: ITerminal): Promise<string[]> {
     const args: string[] = [];
+    const mode: EvaluateSelectorMode = EvaluateSelectorMode.RushChange;
 
     // Include exactly these projects (--only)
     for (const project of await this._evaluateProjectParameterAsync(
       this._onlyProject,
       terminal,
-      EvaluateSelectorMode.RushChange
+      mode
     )) {
       args.push('--filter', project.packageName);
     }
@@ -269,13 +272,13 @@ export class SelectionParameterSet {
     // Include all projects that depend on these projects, and all dependencies thereof
     const fromProjects: Set<RushConfigurationProject> = Selection.union(
       // --from
-      await this._evaluateProjectParameterAsync(this._fromProject, terminal, EvaluateSelectorMode.RushChange)
+      await this._evaluateProjectParameterAsync(this._fromProject, terminal, mode)
     );
 
     // All specified projects and all projects that they depend on
     for (const project of Selection.union(
       // --to
-      await this._evaluateProjectParameterAsync(this._toProject, terminal, EvaluateSelectorMode.RushChange),
+      await this._evaluateProjectParameterAsync(this._toProject, terminal, mode),
       // --from / --from-version-policy
       Selection.expandAllConsumers(fromProjects)
     )) {
@@ -287,7 +290,7 @@ export class SelectionParameterSet {
     for (const project of await this._evaluateProjectParameterAsync(
       this._toExceptProject,
       terminal,
-      EvaluateSelectorMode.RushChange
+      mode
     )) {
       args.push('--filter', `${project.packageName}^...`);
     }
@@ -297,7 +300,7 @@ export class SelectionParameterSet {
     for (const project of await this._evaluateProjectParameterAsync(
       this._impactedByProject,
       terminal,
-      EvaluateSelectorMode.RushChange
+      mode
     )) {
       args.push('--filter', `...${project.packageName}`);
     }
@@ -307,7 +310,7 @@ export class SelectionParameterSet {
     for (const project of await this._evaluateProjectParameterAsync(
       this._impactedByExceptProject,
       terminal,
-      EvaluateSelectorMode.RushChange
+      mode
     )) {
       args.push('--filter', `...^${project.packageName}`);
     }

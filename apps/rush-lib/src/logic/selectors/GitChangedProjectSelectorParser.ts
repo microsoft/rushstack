@@ -19,7 +19,7 @@ export class GitChangedProjectSelectorParser implements ISelectorParser<RushConf
 
     switch (mode) {
       case EvaluateSelectorMode.RushChange: {
-        return await projectChangeAnalyzer.getProjectsWithChangesAsync({
+        return await projectChangeAnalyzer.getProjectsWithLocalFileChangesAsync({
           terminal,
           targetBranchName: unscopedSelector
         });

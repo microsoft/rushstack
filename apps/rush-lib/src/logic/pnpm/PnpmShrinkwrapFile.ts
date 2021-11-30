@@ -476,7 +476,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   /** @override */
-  public getProjectShrinkwrap(project: RushConfigurationProject): PnpmProjectShrinkwrapFile | undefined {
+  public getProjectShrinkwrap(project: RushConfigurationProject): PnpmProjectShrinkwrapFile {
     return new PnpmProjectShrinkwrapFile(this, project);
   }
 

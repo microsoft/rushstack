@@ -207,6 +207,17 @@ export class Git {
     return result;
   }
 
+  public getFileContent(targetBranch: string, gitRelativePath: string, repositoryRoot: string): string {
+    const gitPath: string = this.getGitPathOrThrow();
+    const output: string = Utilities.executeCommandAndCaptureOutput(
+      gitPath,
+      ['cat-file', 'blob', `${targetBranch}:${gitRelativePath}`, '--'],
+      repositoryRoot
+    );
+
+    return output;
+  }
+
   /**
    * @param pathPrefix - An optional path prefix "git diff"s should be filtered by.
    * @returns
