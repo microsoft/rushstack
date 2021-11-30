@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Mon, 29 Nov 2021 07:26:16 GMT and should not be manually modified.
+This log was last generated on Tue, 30 Nov 2021 20:18:41 GMT and should not be manually modified.
+
+## 0.4.33
+Tue, 30 Nov 2021 20:18:41 GMT
+
+### Patches
+
+- Set default Jest environment in Jest configuration to "jest-environment-jsdom"
 
 ## 0.4.32
 Mon, 29 Nov 2021 07:26:16 GMT

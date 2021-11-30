@@ -2,6 +2,26 @@
   "name": "@rushstack/heft-web-rig",
   "entries": [
     {
+      "version": "0.4.33",
+      "tag": "@rushstack/heft-web-rig_v0.4.33",
+      "date": "Tue, 30 Nov 2021 20:18:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Set default Jest environment in Jest configuration to \"jest-environment-jsdom\""
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-sass-plugin\" to `0.2.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-webpack4-plugin\" to `0.3.20`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.32",
       "tag": "@rushstack/heft-web-rig_v0.4.32",
       "date": "Mon, 29 Nov 2021 07:26:16 GMT",

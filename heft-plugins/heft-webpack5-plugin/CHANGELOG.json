@@ -2,6 +2,18 @@
   "name": "@rushstack/heft-webpack5-plugin",
   "entries": [
     {
+      "version": "0.4.20",
+      "tag": "@rushstack/heft-webpack5-plugin_v0.4.20",
+      "date": "Tue, 30 Nov 2021 20:18:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.2.32`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.4.19",
       "tag": "@rushstack/heft-webpack5-plugin_v0.4.19",
       "date": "Mon, 29 Nov 2021 07:26:16 GMT",
