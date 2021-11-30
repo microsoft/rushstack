@@ -1,0 +1,17 @@
+pool:
+  vmImage: 'ubuntu-latest'
+variables:
+  NodeVersion: 12
+  FORCE_COLOR: 1
+steps:
+  - checkout: self
+    persistCredentials: true
+  - template: templates/build.yaml
+
+  - script: 'node apps/rush-lib/scripts/plugins-prepublish.js'
+    displayName: 'Prepublish workaround'
+
+  - script: 'node common/scripts/install-run-rush.js publish --apply --publish --include-all --target-branch $(Build.SourceBranchName) --add-commit-details --set-access-level public'
+    displayName: 'Rush Publish'
+    env:
+      NPM_AUTH_TOKEN: $(npmToken)
