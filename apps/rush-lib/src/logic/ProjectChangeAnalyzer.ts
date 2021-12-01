@@ -12,7 +12,7 @@ import {
   getGitHashForFiles,
   IFileDiffStatus
 } from '@rushstack/package-deps-hash';
-import { Path, InternalError, FileSystem, ITerminal } from '@rushstack/node-core-library';
+import { Path, InternalError, FileSystem, ITerminal, Async } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushProjectConfiguration } from '../api/RushProjectConfiguration';
@@ -180,8 +180,26 @@ export class ProjectChangeAnalyzer {
    * Gets a list of projects that have changed in the current state of the repo
    * when compared to the specified branch.
    */
-  public async getChangedProjectsAsync(
+  public async getProjectsWithChangesAsync(
     options: IGetChangedProjectsOptions
+  ): Promise<Set<RushConfigurationProject>> {
+    return await this._getChangedProjectsInternalAsync(options, false);
+  }
+
+  /**
+   * Gets a list of projects that have changed in the current state of the repo
+   * when compared to the specified branch, taking the shrinkwrap and settings in
+   * the rush-project.json file into consideration.
+   */
+  public async getProjectsImpactedByDiffAsync(
+    options: IGetChangedProjectsOptions
+  ): Promise<Set<RushConfigurationProject>> {
+    return await this._getChangedProjectsInternalAsync(options, true);
+  }
+
+  private async _getChangedProjectsInternalAsync(
+    options: IGetChangedProjectsOptions,
+    forIncrementalBuild: boolean
   ): Promise<Set<RushConfigurationProject>> {
     const gitPath: string = this._git.getGitPathOrThrow();
     const repoRoot: string = getRepoRoot(this._rushConfiguration.rushJsonFolder);
@@ -192,19 +210,19 @@ export class ProjectChangeAnalyzer {
     );
     const { terminal } = options;
 
-    const changedProjects: Set<RushConfigurationProject> = new Set();
+    if (forIncrementalBuild) {
+      // Determine the current variant from the link JSON.
+      const variant: string | undefined = this._rushConfiguration.currentInstalledVariant;
 
-    // Determine the current variant from the link JSON.
-    const variant: string | undefined = this._rushConfiguration.currentInstalledVariant;
+      // Add the shrinkwrap file to every project's dependencies
+      const shrinkwrapFile: string = Path.convertToSlashes(
+        path.relative(repoRoot, this._rushConfiguration.getCommittedShrinkwrapFilename(variant))
+      );
 
-    // Add the shrinkwrap file to every project's dependencies
-    const shrinkwrapFile: string = Path.convertToSlashes(
-      path.relative(repoRoot, this._rushConfiguration.getCommittedShrinkwrapFilename(variant))
-    );
-
-    if (repoChanges.has(shrinkwrapFile)) {
-      // TODO: Implement shrinkwrap diffing here.
-      return new Set(this._rushConfiguration.projects);
+      if (repoChanges.has(shrinkwrapFile)) {
+        // TODO: Implement shrinkwrap diffing here.
+        return new Set(this._rushConfiguration.projects);
+      }
     }
 
     const changesByProject: Map<RushConfigurationProject, Map<string, IFileDiffStatus>> = new Map();
@@ -221,22 +239,27 @@ export class ProjectChangeAnalyzer {
       }
     }
 
-    // Parallelize rush-project.json lookups
-    await Promise.all(
-      Array.from(changesByProject, async ([project, projectChanges]) => {
-        const filteredChanges: Map<string, IFileDiffStatus> = await this._filterProjectDataAsync(
-          project,
-          projectChanges,
-          repoRoot,
-          terminal
-        );
-        if (filteredChanges.size > 0) {
-          changedProjects.add(project);
-        }
-      })
-    );
-
-    return changedProjects;
+    if (forIncrementalBuild) {
+      const changedProjects: Set<RushConfigurationProject> = new Set();
+      await Async.forEachAsync(
+        changesByProject,
+        async ([project, projectChanges]) => {
+          const filteredChanges: Map<string, IFileDiffStatus> = await this._filterProjectDataAsync(
+            project,
+            projectChanges,
+            repoRoot,
+            terminal
+          );
+          if (filteredChanges.size > 0) {
+            changedProjects.add(project);
+          }
+        },
+        { concurrency: 10 }
+      );
+      return changedProjects;
+    } else {
+      return new Set(changesByProject.keys());
+    }
   }
 
   private _getData(terminal: ITerminal): IRawRepoState {
@@ -341,7 +364,7 @@ export class ProjectChangeAnalyzer {
     const projectConfiguration: RushProjectConfiguration | undefined =
       await RushProjectConfiguration.tryLoadForProjectAsync(project, undefined, terminal);
 
-    if (projectConfiguration && projectConfiguration.incrementalBuildIgnoredGlobs) {
+    if (projectConfiguration?.incrementalBuildIgnoredGlobs) {
       const ignoreMatcher: Ignore = ignore();
       ignoreMatcher.add(projectConfiguration.incrementalBuildIgnoredGlobs as string[]);
       return ignoreMatcher;
