@@ -20,7 +20,7 @@ import { ChangeFiles } from './ChangeFiles';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { DependencySpecifier, DependencySpecifierType } from './DependencySpecifier';
 import { Git, DEFAULT_GIT_TAG_SEPARATOR } from './Git';
-import { LockStepVersionPolicy } from '../api/VersionPolicy';
+import { BumpType, LockStepVersionPolicy } from '../api/VersionPolicy';
 
 export interface IChangeInfoHash {
   [key: string]: IChangeInfo;
@@ -66,20 +66,6 @@ export class PublishUtilities {
       }
     });
 
-    // For each requested package change, ensure downstream dependencies are also updated.
-    for (const packageName in allChanges) {
-      if (allChanges.hasOwnProperty(packageName)) {
-        PublishUtilities._updateDownstreamDependencies(
-          allChanges[packageName],
-          allChanges,
-          allPackages,
-          rushConfiguration,
-          prereleaseToken,
-          projectsToExclude
-        );
-      }
-    }
-
     // For each lock step version policy with no nextBump, calculate the changeType
     const policyChangeTypes: Map<string, ChangeType> = new Map<string, ChangeType>();
     Object.keys(allChanges).forEach((packageName) => {
@@ -108,6 +94,41 @@ export class PublishUtilities {
     });
 
     console.log(policyChangeTypes);
+
+    Object.keys(allChanges).forEach((packageName) => {
+      const pkg = allPackages.get(packageName);
+      if (projectsToExclude?.has(packageName) || pkg == null) {
+        return;
+      }
+
+      pkg.versionPolicy?.bump(BumpType.major);
+    });
+
+    // PublishUtilities._updateLockVersionPolicyProjects(
+    //   allChanges[packageName],
+    //   allChanges,
+    //   allPackages,
+    //   rushConfiguration,
+    //   prereleaseToken,
+    //   projectsToExclude,
+    //   versionPolicyName != null ? policyChangeTypes.get(versionPolicyName) : undefined
+    // );
+
+    // For each requested package change, ensure dependencies are also updated.
+    for (const packageName in allChanges) {
+      if (allChanges.hasOwnProperty(packageName)) {
+        const versionPolicyName: string | undefined = allPackages.get(packageName)!.versionPolicyName;
+        PublishUtilities._updateDownstreamDependencies(
+          allChanges[packageName],
+          allChanges,
+          allPackages,
+          rushConfiguration,
+          prereleaseToken,
+          projectsToExclude,
+          versionPolicyName != null ? policyChangeTypes.get(versionPolicyName) : undefined
+        );
+      }
+    }
 
     // Update orders so that downstreams are marked to come after upstreams.
     for (const packageName in allChanges) {
@@ -634,10 +655,17 @@ export class PublishUtilities {
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
-    projectsToExclude?: Set<string>
+    projectsToExclude?: Set<string>,
+    enforcedChangeType?: ChangeType
   ): void {
     const packageName: string = change.packageName;
+    const upstream: ReadonlySet<RushConfigurationProject> = allPackages.get(packageName)!.dependencyProjects;
     const downstream: ReadonlySet<RushConfigurationProject> = allPackages.get(packageName)!.consumingProjects;
+
+    console.log('packageName', packageName);
+    console.log('enforcedChangeType', enforcedChangeType);
+    console.log('downstream', downstream);
+    console.log('upstream', upstream);
 
     // Iterate through all downstream dependencies for the package.
     if (downstream) {
@@ -653,7 +681,8 @@ export class PublishUtilities {
             allPackages,
             rushConfiguration,
             prereleaseToken,
-            projectsToExclude
+            projectsToExclude,
+            enforcedChangeType
           );
           PublishUtilities._updateDownstreamDependency(
             pkg.name,
@@ -663,7 +692,8 @@ export class PublishUtilities {
             allPackages,
             rushConfiguration,
             prereleaseToken,
-            projectsToExclude
+            projectsToExclude,
+            enforcedChangeType
           );
         }
       }
@@ -678,7 +708,8 @@ export class PublishUtilities {
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
-    projectsToExclude?: Set<string>
+    projectsToExclude?: Set<string>,
+    enforcedChangeType?: ChangeType
   ): void {
     if (
       dependencies &&
@@ -698,20 +729,22 @@ export class PublishUtilities {
 
       // If the version range exists and has not yet been updated to this version, update it.
       if (requiredVersion.versionSpecifier !== change.newRangeDependency || alwaysUpdate) {
-        let changeType: ChangeType;
-        // Propagate hotfix changes to dependencies
-        if (change.changeType === ChangeType.hotfix) {
-          changeType = ChangeType.hotfix;
-        } else {
-          // Either it already satisfies the new version, or doesn't.
-          // If not, the downstream dep needs to be republished.
-          // The downstream dep will also need to be republished if using `workspace:*` as this will publish
-          // as the exact version.
-          changeType =
-            semver.satisfies(change.newVersion!, requiredVersion.versionSpecifier) &&
-            !isWorkspaceWildcardVersion
-              ? ChangeType.dependency
-              : ChangeType.patch;
+        let changeType: ChangeType | undefined = enforcedChangeType;
+        if (changeType == null) {
+          // Propagate hotfix changes to dependencies
+          if (change.changeType === ChangeType.hotfix) {
+            changeType = ChangeType.hotfix;
+          } else {
+            // Either it already satisfies the new version, or doesn't.
+            // If not, the downstream dep needs to be republished.
+            // The downstream dep will also need to be republished if using `workspace:*` as this will publish
+            // as the exact version.
+            changeType =
+              semver.satisfies(change.newVersion!, requiredVersion.versionSpecifier) &&
+              !isWorkspaceWildcardVersion
+                ? ChangeType.dependency
+                : ChangeType.patch;
+          }
         }
 
         const hasChanged: boolean = PublishUtilities._addChange(
