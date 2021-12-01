@@ -350,7 +350,7 @@ export class LockStepVersionPolicy extends VersionPolicy {
     // @internal
     get _json(): ILockStepVersionJson;
     get mainProject(): string | undefined;
-    get nextBump(): BumpType;
+    get nextBump(): BumpType | undefined;
     update(newVersionString: string): boolean;
     validate(versionString: string, packageName: string): void;
     get version(): string;

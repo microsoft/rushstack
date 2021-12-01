@@ -17,7 +17,7 @@ export interface IVersionPolicyJson {
 
 export interface ILockStepVersionJson extends IVersionPolicyJson {
   version: string;
-  nextBump: string;
+  nextBump?: string;
   mainProject?: string;
 }
 
