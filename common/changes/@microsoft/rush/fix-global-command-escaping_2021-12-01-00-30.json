@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where parameter values containing spaces are incorrectly passed to global scripts.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

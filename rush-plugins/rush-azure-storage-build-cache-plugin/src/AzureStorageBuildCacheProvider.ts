@@ -7,7 +7,6 @@ import {
   ICloudBuildCacheProvider,
   CredentialCache,
   ICredentialCacheEntry,
-  RushSession,
   EnvironmentVariableNames,
   RushConstants,
   EnvironmentConfiguration
@@ -65,7 +64,6 @@ export class AzureStorageBuildCacheProvider implements ICloudBuildCacheProvider 
   private readonly _blobPrefix: string | undefined;
   private readonly _environmentCredential: string | undefined;
   private readonly _isCacheWriteAllowedByConfiguration: boolean;
-  private _rushSession: RushSession;
   private __credentialCacheId: string | undefined;
 
   public get isCacheWriteAllowed(): boolean {
@@ -74,8 +72,7 @@ export class AzureStorageBuildCacheProvider implements ICloudBuildCacheProvider 
 
   private _containerClient: ContainerClient | undefined;
 
-  public constructor(options: IAzureStorageBuildCacheProviderOptions, rushSession: RushSession) {
-    this._rushSession = rushSession;
+  public constructor(options: IAzureStorageBuildCacheProviderOptions) {
     this._storageAccountName = options.storageAccountName;
     this._storageContainerName = options.storageContainerName;
     this._azureEnvironment = options.azureEnvironment || 'AzurePublicCloud';

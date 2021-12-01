@@ -1,9 +1,8 @@
-import type { ITerminal } from '@rushstack/node-core-library';
 import { AlreadyReportedError, PackageName } from '@rushstack/node-core-library';
 
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { ISelectorParser } from './ISelectorParser';
+import type { IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParser';
 
 export class NamedProjectSelectorParser implements ISelectorParser<RushConfigurationProject> {
   private readonly _rushConfiguration: RushConfiguration;
@@ -12,11 +11,11 @@ export class NamedProjectSelectorParser implements ISelectorParser<RushConfigura
     this._rushConfiguration = rushConfiguration;
   }
 
-  public async evaluateSelectorAsync(
-    unscopedSelector: string,
-    terminal: ITerminal,
-    parameterName: string
-  ): Promise<Iterable<RushConfigurationProject>> {
+  public async evaluateSelectorAsync({
+    unscopedSelector,
+    terminal,
+    parameterName
+  }: IEvaluateSelectorOptions): Promise<Iterable<RushConfigurationProject>> {
     const project: RushConfigurationProject | undefined =
       this._rushConfiguration.findProjectByShorthandName(unscopedSelector);
     if (!project) {

@@ -112,7 +112,8 @@ export class ListAction extends BaseRushAction {
   protected async runAsync(): Promise<void> {
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
     const selection: Set<RushConfigurationProject> = await this._selectionParameters.getSelectedProjectsAsync(
-      terminal
+      terminal,
+      false
     );
     Sort.sortSetBy(selection, (x: RushConfigurationProject) => x.packageName);
     if (this._jsonFlag.value && this._detailedFlag.value) {

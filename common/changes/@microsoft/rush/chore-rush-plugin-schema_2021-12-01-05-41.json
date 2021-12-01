@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "set $schema in rush plugin related json files",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
