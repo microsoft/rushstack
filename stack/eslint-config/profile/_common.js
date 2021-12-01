@@ -42,9 +42,10 @@ function buildRules(profile) {
       // Plugin documentation: https://www.npmjs.com/package/@rushstack/eslint-plugin-security
       '@rushstack/eslint-plugin-security',
       // Plugin documentation: https://www.npmjs.com/package/@typescript-eslint/eslint-plugin
-      '@typescript-eslint/eslint-plugin',
+      '@typescript-eslint/eslint-plugin'
       // Plugin documentation: https://www.npmjs.com/package/eslint-plugin-promise
-      'eslint-plugin-promise'
+      // TODO: Re-enable once updated to support eslint v8: https://github.com/xjamundx/eslint-plugin-promise/issues/218
+      // 'eslint-plugin-promise'
     ],
 
     // Manually authored .d.ts files are generally used to describe external APIs that are  not expected
@@ -760,7 +761,8 @@ function buildRules(profile) {
           'prefer-const': 'warn',
 
           // RATIONALE:         Catches a common coding mistake where "resolve" and "reject" are confused.
-          'promise/param-names': 'error',
+          // TODO: Re-enable once updated to support eslint v8: https://github.com/xjamundx/eslint-plugin-promise/issues/218
+          // 'promise/param-names': 'error',
 
           // RATIONALE:         Catches code that is likely to be incorrect
           // STANDARDIZED BY:   eslint\conf\eslint-recommended.js

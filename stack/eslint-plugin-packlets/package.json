@@ -31,7 +31,7 @@
     "@rushstack/heft": "0.42.3",
     "@rushstack/heft-node-rig": "1.2.32",
     "@types/eslint": "8.2.0",
-    "@types/estree": "0.0.44",
+    "@types/estree": "0.0.50",
     "@types/heft-jest": "1.0.1",
     "@types/node": "12.20.24",
     "@typescript-eslint/parser": "~5.3.0",
