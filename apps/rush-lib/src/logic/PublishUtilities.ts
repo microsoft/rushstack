@@ -20,6 +20,7 @@ import { ChangeFiles } from './ChangeFiles';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { DependencySpecifier, DependencySpecifierType } from './DependencySpecifier';
 import { Git, DEFAULT_GIT_TAG_SEPARATOR } from './Git';
+import { LockStepVersionPolicy } from '../api/VersionPolicy';
 
 export interface IChangeInfoHash {
   [key: string]: IChangeInfo;
@@ -79,6 +80,35 @@ export class PublishUtilities {
       }
     }
 
+    // For each lock step version policy with no nextBump, calculate the changeType
+    const policyChangeTypes: Map<string, ChangeType> = new Map<string, ChangeType>();
+    Object.keys(allChanges).forEach((packageName) => {
+      const pkg = allPackages.get(packageName);
+      if (projectsToExclude?.has(packageName) || pkg == null) {
+        return;
+      }
+
+      const change = allChanges[packageName];
+
+      if (change.changeType == null || change.changeType == ChangeType.none) {
+        return;
+      }
+
+      if (pkg.versionPolicy != null && pkg.versionPolicy.isLockstepped) {
+        const policy: LockStepVersionPolicy = pkg.versionPolicy as LockStepVersionPolicy;
+        if (policy.nextBump == null) {
+          // set the policy bump based on change files
+          const prevBump = policyChangeTypes.get(policy.policyName);
+          policyChangeTypes.set(
+            policy.policyName,
+            prevBump != null ? Math.max(prevBump, change.changeType) : change.changeType
+          );
+        }
+      }
+    });
+
+    console.log(policyChangeTypes);
+
     // Update orders so that downstreams are marked to come after upstreams.
     for (const packageName in allChanges) {
       if (allChanges.hasOwnProperty(packageName)) {
@@ -99,7 +129,14 @@ export class PublishUtilities {
           // For hotfix changes, do not re-write new version
           change.newVersion =
             change.changeType! >= ChangeType.patch
-              ? semver.inc(pkg.version, PublishUtilities._getReleaseType(change.changeType!))!
+              ? semver.inc(
+                  pkg.version,
+                  PublishUtilities._getReleaseType(
+                    (project.versionPolicyName != null
+                      ? policyChangeTypes.get(project.versionPolicyName)
+                      : null) ?? change.changeType!
+                  )
+                )!
               : change.changeType === ChangeType.hotfix
               ? change.newVersion
               : pkg.version;
@@ -134,7 +171,7 @@ export class PublishUtilities {
   }
 
   /**
-   * Given a single change request, updates the package json file with updated versions on disk.
+   * Given the change requests, updates the package json files and version policies with updated versions on disk.
    */
   public static updatePackages(
     allChanges: IChangeInfoHash,

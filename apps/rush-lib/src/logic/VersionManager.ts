@@ -128,7 +128,7 @@ export class VersionManager {
     const lockStepVersionPolicyNames: Set<string> = new Set<string>();
 
     this._versionPolicyConfiguration.versionPolicies.forEach((versionPolicy) => {
-      if (versionPolicy instanceof LockStepVersionPolicy) {
+      if (versionPolicy instanceof LockStepVersionPolicy && versionPolicy.nextBump !== undefined) {
         lockStepVersionPolicyNames.add(versionPolicy.policyName);
       }
     });
