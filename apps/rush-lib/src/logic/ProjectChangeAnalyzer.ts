@@ -254,7 +254,7 @@ export class ProjectChangeAnalyzer {
             changedProjects.add(project);
           }
         },
-        { concurrency: 50 }
+        { concurrency: 10 }
       );
       return changedProjects;
     } else {
