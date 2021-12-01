@@ -93,8 +93,8 @@ export class PublishUtilities {
       }
     });
 
-    console.log(policyChangeTypes);
-
+    // TODO:
+    // tried this to see if it's possible to update version-policies.json from here but it never calls saveFile...
     Object.keys(allChanges).forEach((packageName) => {
       const pkg = allPackages.get(packageName);
       if (projectsToExclude?.has(packageName) || pkg == null) {
@@ -104,15 +104,8 @@ export class PublishUtilities {
       pkg.versionPolicy?.bump(BumpType.major);
     });
 
-    // PublishUtilities._updateLockVersionPolicyProjects(
-    //   allChanges[packageName],
-    //   allChanges,
-    //   allPackages,
-    //   rushConfiguration,
-    //   prereleaseToken,
-    //   projectsToExclude,
-    //   versionPolicyName != null ? policyChangeTypes.get(versionPolicyName) : undefined
-    // );
+    // TODO:
+    // PublishUtilities._updateLockVersionPolicyProjects
 
     // For each requested package change, ensure dependencies are also updated.
     for (const packageName in allChanges) {
@@ -659,13 +652,7 @@ export class PublishUtilities {
     enforcedChangeType?: ChangeType
   ): void {
     const packageName: string = change.packageName;
-    const upstream: ReadonlySet<RushConfigurationProject> = allPackages.get(packageName)!.dependencyProjects;
     const downstream: ReadonlySet<RushConfigurationProject> = allPackages.get(packageName)!.consumingProjects;
-
-    console.log('packageName', packageName);
-    console.log('enforcedChangeType', enforcedChangeType);
-    console.log('downstream', downstream);
-    console.log('upstream', upstream);
 
     // Iterate through all downstream dependencies for the package.
     if (downstream) {
