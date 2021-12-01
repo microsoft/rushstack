@@ -251,6 +251,8 @@ export interface IExperimentsJson {
 // @beta (undocumented)
 export interface IGetChangedProjectsOptions {
     // (undocumented)
+    ignoreShrinkwrapChanges?: boolean;
+    // (undocumented)
     shouldFetch?: boolean;
     // (undocumented)
     targetBranchName: string;
@@ -453,6 +455,7 @@ export class ProjectChangeAnalyzer {
     // (undocumented)
     _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
     getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
+    getChangedProjectsForIncrementalBuildAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
     // @internal
     _tryGetProjectDependenciesAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<Map<string, string> | undefined>;
     // @internal

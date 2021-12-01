@@ -4,7 +4,8 @@ export interface ISelectorParser<T> {
   evaluateSelectorAsync(
     unscopedSpecifier: string,
     terminal: ITerminal,
-    parameterName: string
+    parameterName: string,
+    forIncrementalBuild: boolean
   ): Promise<Iterable<T>>;
   getCompletions(): Iterable<string>;
 }

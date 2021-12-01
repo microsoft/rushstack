@@ -12,7 +12,7 @@ import {
   getGitHashForFiles,
   IFileDiffStatus
 } from '@rushstack/package-deps-hash';
-import { Path, InternalError, FileSystem, ITerminal } from '@rushstack/node-core-library';
+import { Path, InternalError, FileSystem, ITerminal, Async } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushProjectConfiguration } from '../api/RushProjectConfiguration';
@@ -184,6 +184,24 @@ export class ProjectChangeAnalyzer {
   public async getChangedProjectsAsync(
     options: IGetChangedProjectsOptions
   ): Promise<Set<RushConfigurationProject>> {
+    return await this._getChangedProjectsInternalAsync(options, false);
+  }
+
+  /**
+   * Gets a list of projects that have changed in the current state of the repo
+   * when compared to the specified branch, taking settings in the rush-project.json file
+   * into consideration.
+   */
+  public async getChangedProjectsForIncrementalBuildAsync(
+    options: IGetChangedProjectsOptions
+  ): Promise<Set<RushConfigurationProject>> {
+    return await this._getChangedProjectsInternalAsync(options, true);
+  }
+
+  private async _getChangedProjectsInternalAsync(
+    options: IGetChangedProjectsOptions,
+    forIncrementalBuild: boolean
+  ): Promise<Set<RushConfigurationProject>> {
     const gitPath: string = this._git.getGitPathOrThrow();
     const repoRoot: string = getRepoRoot(this._rushConfiguration.rushJsonFolder);
     const repoChanges: Map<string, IFileDiffStatus> = getRepoChanges(
@@ -208,7 +226,6 @@ export class ProjectChangeAnalyzer {
       }
     }
 
-    const changedProjects: Set<RushConfigurationProject> = new Set();
     const changesByProject: Map<RushConfigurationProject, Map<string, IFileDiffStatus>> = new Map();
     const lookup: LookupByPath<RushConfigurationProject> =
       this._rushConfiguration.getProjectLookupForRoot(repoRoot);
@@ -223,22 +240,27 @@ export class ProjectChangeAnalyzer {
       }
     }
 
-    // Parallelize rush-project.json lookups
-    await Promise.all(
-      Array.from(changesByProject, async ([project, projectChanges]) => {
-        const filteredChanges: Map<string, IFileDiffStatus> = await this._filterProjectDataAsync(
-          project,
-          projectChanges,
-          repoRoot,
-          terminal
-        );
-        if (filteredChanges.size > 0) {
-          changedProjects.add(project);
-        }
-      })
-    );
-
-    return changedProjects;
+    if (forIncrementalBuild) {
+      const changedProjects: Set<RushConfigurationProject> = new Set();
+      await Async.forEachAsync(
+        changesByProject,
+        async ([project, projectChanges]) => {
+          const filteredChanges: Map<string, IFileDiffStatus> = await this._filterProjectDataAsync(
+            project,
+            projectChanges,
+            repoRoot,
+            terminal
+          );
+          if (filteredChanges.size > 0) {
+            changedProjects.add(project);
+          }
+        },
+        { concurrency: 50 }
+      );
+      return changedProjects;
+    } else {
+      return new Set(changesByProject.keys());
+    }
   }
 
   private _getData(terminal: ITerminal): IRawRepoState {
@@ -343,7 +365,7 @@ export class ProjectChangeAnalyzer {
     const projectConfiguration: RushProjectConfiguration | undefined =
       await RushProjectConfiguration.tryLoadForProjectAsync(project, undefined, terminal);
 
-    if (projectConfiguration && projectConfiguration.incrementalBuildIgnoredGlobs) {
+    if (projectConfiguration?.incrementalBuildIgnoredGlobs) {
       const ignoreMatcher: Ignore = ignore();
       ignoreMatcher.add(projectConfiguration.incrementalBuildIgnoredGlobs as string[]);
       return ignoreMatcher;

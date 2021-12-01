@@ -14,14 +14,22 @@ export class GitChangedProjectSelectorParser implements ISelectorParser<RushConf
   public async evaluateSelectorAsync(
     unscopedSelector: string,
     terminal: ITerminal,
-    parameterName: string
+    parameterName: string,
+    forIncrementalBuild: boolean
   ): Promise<Iterable<RushConfigurationProject>> {
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this._rushConfiguration);
 
-    return await projectChangeAnalyzer.getChangedProjectsAsync({
-      terminal,
-      targetBranchName: unscopedSelector
-    });
+    if (forIncrementalBuild) {
+      return await projectChangeAnalyzer.getChangedProjectsForIncrementalBuildAsync({
+        terminal,
+        targetBranchName: unscopedSelector
+      });
+    } else {
+      return await projectChangeAnalyzer.getChangedProjectsAsync({
+        terminal,
+        targetBranchName: unscopedSelector
+      });
+    }
   }
 
   public getCompletions(): Iterable<string> {

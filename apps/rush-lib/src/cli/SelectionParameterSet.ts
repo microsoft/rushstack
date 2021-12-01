@@ -41,8 +41,10 @@ export class SelectionParameterSet {
   public constructor(rushConfiguration: RushConfiguration, action: CommandLineParameterProvider) {
     this._rushConfiguration = rushConfiguration;
 
-    const selectorParsers: Map<string, ISelectorParser<RushConfigurationProject>> =
-      (this._selectorParserByScope = new Map());
+    const selectorParsers: Map<
+      string,
+      ISelectorParser<RushConfigurationProject>
+    > = (this._selectorParserByScope = new Map());
 
     selectorParsers.set('name', new NamedProjectSelectorParser(rushConfiguration));
     selectorParsers.set('git', new GitChangedProjectSelectorParser(rushConfiguration));
@@ -169,7 +171,10 @@ export class SelectionParameterSet {
    *
    * If no parameters are specified, returns all projects in the Rush config file.
    */
-  public async getSelectedProjectsAsync(terminal: ITerminal): Promise<Set<RushConfigurationProject>> {
+  public async getSelectedProjectsAsync(
+    terminal: ITerminal,
+    forIncremental: boolean
+  ): Promise<Set<RushConfigurationProject>> {
     // Hack out the old version-policy parameters
     for (const value of this._fromVersionPolicy.values) {
       (this._fromProject.values as string[]).push(`version-policy:${value}`);
@@ -212,7 +217,7 @@ export class SelectionParameterSet {
       impactedByExceptProjects
     ] = await Promise.all(
       selectors.map((param: CommandLineStringListParameter) => {
-        return this._evaluateProjectParameterAsync(param, terminal);
+        return this._evaluateProjectParameterAsync(param, terminal, forIncremental);
       })
     );
 
@@ -251,20 +256,20 @@ export class SelectionParameterSet {
     const args: string[] = [];
 
     // Include exactly these projects (--only)
-    for (const project of await this._evaluateProjectParameterAsync(this._onlyProject, terminal)) {
+    for (const project of await this._evaluateProjectParameterAsync(this._onlyProject, terminal, false)) {
       args.push('--filter', project.packageName);
     }
 
     // Include all projects that depend on these projects, and all dependencies thereof
     const fromProjects: Set<RushConfigurationProject> = Selection.union(
       // --from
-      await this._evaluateProjectParameterAsync(this._fromProject, terminal)
+      await this._evaluateProjectParameterAsync(this._fromProject, terminal, false)
     );
 
     // All specified projects and all projects that they depend on
     for (const project of Selection.union(
       // --to
-      await this._evaluateProjectParameterAsync(this._toProject, terminal),
+      await this._evaluateProjectParameterAsync(this._toProject, terminal, false),
       // --from / --from-version-policy
       Selection.expandAllConsumers(fromProjects)
     )) {
@@ -273,13 +278,17 @@ export class SelectionParameterSet {
 
     // --to-except
     // All projects that the project directly or indirectly declares as a dependency
-    for (const project of await this._evaluateProjectParameterAsync(this._toExceptProject, terminal)) {
+    for (const project of await this._evaluateProjectParameterAsync(this._toExceptProject, terminal, false)) {
       args.push('--filter', `${project.packageName}^...`);
     }
 
     // --impacted-by
     // The project and all projects directly or indirectly declare it as a dependency
-    for (const project of await this._evaluateProjectParameterAsync(this._impactedByProject, terminal)) {
+    for (const project of await this._evaluateProjectParameterAsync(
+      this._impactedByProject,
+      terminal,
+      false
+    )) {
       args.push('--filter', `...${project.packageName}`);
     }
 
@@ -287,7 +296,8 @@ export class SelectionParameterSet {
     // All projects that directly or indirectly declare the specified project as a dependency
     for (const project of await this._evaluateProjectParameterAsync(
       this._impactedByExceptProject,
-      terminal
+      terminal,
+      false
     )) {
       args.push('--filter', `...^${project.packageName}`);
     }
@@ -318,7 +328,8 @@ export class SelectionParameterSet {
    */
   private async _evaluateProjectParameterAsync(
     listParameter: CommandLineStringListParameter,
-    terminal: ITerminal
+    terminal: ITerminal,
+    forIncrementalBuild: boolean
   ): Promise<Set<RushConfigurationProject>> {
     const parameterName: string = listParameter.longName;
     const selection: Set<RushConfigurationProject> = new Set();
@@ -371,7 +382,12 @@ export class SelectionParameterSet {
         throw new AlreadyReportedError();
       }
 
-      for (const project of await handler.evaluateSelectorAsync(unscopedSelector, terminal, parameterName)) {
+      for (const project of await handler.evaluateSelectorAsync(
+        unscopedSelector,
+        terminal,
+        parameterName,
+        forIncrementalBuild
+      )) {
         selection.add(project);
       }
     }
