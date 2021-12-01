@@ -29,6 +29,7 @@ const noNewNullRule: TSESLint.RuleModule<MessageIds, Options> = {
         'Prevent usage of JavaScript\'s "null" keyword in new type declarations. To avoid hampering usage' +
         ' of preexisting APIs that require "null", the rule ignores declarations that are local variables,' +
         ' private members, or types that are not exported.',
+      // Deprecated in ESLint v8; Keep for backwards compatibility
       category: 'Stylistic Issues',
       recommended: 'error',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'

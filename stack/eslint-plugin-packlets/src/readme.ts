@@ -41,6 +41,7 @@ const readme: TSESLint.RuleModule<MessageIds, Options> = {
 
     docs: {
       description: 'Require each packlet folder to have a README.md file summarizing its purpose and usage',
+      // Deprecated in ESLint v8; Keep for backwards compatibility
       category: 'Best Practices',
       // Too strict to be recommended in the default configuration
       recommended: false,

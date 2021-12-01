@@ -41,6 +41,7 @@ const mechanics: TSESLint.RuleModule<MessageIds, Options> = {
     ],
     docs: {
       description: 'Check that file paths and imports follow the basic mechanics for the packlet formalism',
+      // Deprecated in ESLint v8; Keep for backwards compatibility
       category: 'Best Practices',
       recommended: 'warn',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin-packlets'

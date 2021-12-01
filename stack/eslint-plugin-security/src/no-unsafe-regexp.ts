@@ -59,6 +59,7 @@ const noUnsafeRegExp: TSESLint.RuleModule<MessageIds, Options> = {
       description:
         'Requires regular expressions to be constructed from string constants rather than dynamically' +
         ' building strings at runtime.',
+      // Deprecated in ESLint v8; Keep for backwards compatibility
       category: 'Best Practices',
       recommended: 'warn',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin-security'
