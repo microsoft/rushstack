@@ -28,7 +28,6 @@ import { LookupByPath } from './LookupByPath';
 export interface IGetChangedProjectsOptions {
   targetBranchName: string;
   terminal: ITerminal;
-  ignoreShrinkwrapChanges?: boolean;
   shouldFetch?: boolean;
 }
 
@@ -181,7 +180,7 @@ export class ProjectChangeAnalyzer {
    * Gets a list of projects that have changed in the current state of the repo
    * when compared to the specified branch.
    */
-  public async getChangedProjectsAsync(
+  public async getProjectsWithChangesAsync(
     options: IGetChangedProjectsOptions
   ): Promise<Set<RushConfigurationProject>> {
     return await this._getChangedProjectsInternalAsync(options, false);
@@ -189,10 +188,10 @@ export class ProjectChangeAnalyzer {
 
   /**
    * Gets a list of projects that have changed in the current state of the repo
-   * when compared to the specified branch, taking settings in the rush-project.json file
-   * into consideration.
+   * when compared to the specified branch, taking the shrinkwrap and settings in
+   * the rush-project.json file into consideration.
    */
-  public async getChangedProjectsForIncrementalBuildAsync(
+  public async getProjectsImpactedByDiffAsync(
     options: IGetChangedProjectsOptions
   ): Promise<Set<RushConfigurationProject>> {
     return await this._getChangedProjectsInternalAsync(options, true);
@@ -211,7 +210,7 @@ export class ProjectChangeAnalyzer {
     );
     const { terminal } = options;
 
-    if (!options.ignoreShrinkwrapChanges) {
+    if (forIncrementalBuild) {
       // Determine the current variant from the link JSON.
       const variant: string | undefined = this._rushConfiguration.currentInstalledVariant;
 
