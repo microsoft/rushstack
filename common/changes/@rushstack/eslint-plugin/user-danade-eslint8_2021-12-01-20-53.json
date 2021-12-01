@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin",
+      "comment": "Add support for ESLint v8",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin"
+}
