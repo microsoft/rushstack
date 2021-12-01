@@ -1568,7 +1568,6 @@ importers:
       '@rushstack/heft': 0.42.3
       '@rushstack/heft-node-rig': 1.2.32
       '@types/heft-jest': 1.0.1
-      '@typescript-eslint/parser': ~5.3.0
       eslint: ~7.30.0
       typescript: ~4.4.2
     devDependencies:
@@ -1576,7 +1575,6 @@ importers:
       '@rushstack/heft': 0.42.3
       '@rushstack/heft-node-rig': 1.2.32_@rushstack+heft@0.42.3
       '@types/heft-jest': 1.0.1
-      '@typescript-eslint/parser': 5.3.1_eslint@7.30.0+typescript@4.4.4
       eslint: 7.30.0
       typescript: 4.4.4
 
@@ -6880,26 +6878,6 @@ packages:
       '@typescript-eslint/scope-manager': 4.31.2_typescript@4.4.4
       '@typescript-eslint/types': 4.31.2_typescript@4.4.4
       '@typescript-eslint/typescript-estree': 4.31.2_typescript@4.4.4
-      debug: 4.3.3
-      eslint: 7.30.0
-      typescript: 4.4.4
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
-  /@typescript-eslint/parser/5.3.1_eslint@7.30.0+typescript@4.4.4:
-    resolution: {integrity: sha512-TD+ONlx5c+Qhk21x9gsJAMRohWAUMavSOmJgv3JGy9dgPhuBd5Wok0lmMClZDyJNLLZK1JRKiATzCKZNUmoyfw==}
-    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
-    peerDependencies:
-      eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
-      typescript: '*'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-    dependencies:
-      '@typescript-eslint/scope-manager': 5.3.1_typescript@4.4.4
-      '@typescript-eslint/types': 5.3.1_typescript@4.4.4
-      '@typescript-eslint/typescript-estree': 5.3.1_typescript@4.4.4
       debug: 4.3.3
       eslint: 7.30.0
       typescript: 4.4.4
