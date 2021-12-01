@@ -333,7 +333,8 @@ export class ChangeAction extends BaseRushAction {
       await projectChangeAnalyzer.getChangedProjectsAsync({
         targetBranchName: this._targetBranch,
         terminal: this._terminal,
-        shouldFetch: !this._noFetchParameter.value
+        shouldFetch: !this._noFetchParameter.value,
+        ignoreShrinkwrapChanges: true
       });
     const projectHostMap: Map<RushConfigurationProject, string> = this._generateHostMap();
 

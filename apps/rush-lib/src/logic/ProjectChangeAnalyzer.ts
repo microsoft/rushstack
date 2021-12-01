@@ -28,6 +28,7 @@ import { LookupByPath } from './LookupByPath';
 export interface IGetChangedProjectsOptions {
   targetBranchName: string;
   terminal: ITerminal;
+  ignoreShrinkwrapChanges?: boolean;
   shouldFetch?: boolean;
 }
 
@@ -192,21 +193,22 @@ export class ProjectChangeAnalyzer {
     );
     const { terminal } = options;
 
-    const changedProjects: Set<RushConfigurationProject> = new Set();
+    if (!options.ignoreShrinkwrapChanges) {
+      // Determine the current variant from the link JSON.
+      const variant: string | undefined = this._rushConfiguration.currentInstalledVariant;
 
-    // Determine the current variant from the link JSON.
-    const variant: string | undefined = this._rushConfiguration.currentInstalledVariant;
+      // Add the shrinkwrap file to every project's dependencies
+      const shrinkwrapFile: string = Path.convertToSlashes(
+        path.relative(repoRoot, this._rushConfiguration.getCommittedShrinkwrapFilename(variant))
+      );
 
-    // Add the shrinkwrap file to every project's dependencies
-    const shrinkwrapFile: string = Path.convertToSlashes(
-      path.relative(repoRoot, this._rushConfiguration.getCommittedShrinkwrapFilename(variant))
-    );
-
-    if (repoChanges.has(shrinkwrapFile)) {
-      // TODO: Implement shrinkwrap diffing here.
-      return new Set(this._rushConfiguration.projects);
+      if (repoChanges.has(shrinkwrapFile)) {
+        // TODO: Implement shrinkwrap diffing here.
+        return new Set(this._rushConfiguration.projects);
+      }
     }
 
+    const changedProjects: Set<RushConfigurationProject> = new Set();
     const changesByProject: Map<RushConfigurationProject, Map<string, IFileDiffStatus>> = new Map();
     const lookup: LookupByPath<RushConfigurationProject> =
       this._rushConfiguration.getProjectLookupForRoot(repoRoot);
