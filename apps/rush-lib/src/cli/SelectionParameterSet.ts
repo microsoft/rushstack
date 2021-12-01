@@ -12,6 +12,7 @@ import { CommandLineParameterProvider, CommandLineStringListParameter } from '@r
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { Selection } from '../logic/Selection';
+import { EvaluateSelectorMode } from '../logic/selectors/ISelectorParser';
 import type { ISelectorParser as ISelectorParser } from '../logic/selectors/ISelectorParser';
 import { GitChangedProjectSelectorParser } from '../logic/selectors/GitChangedProjectSelectorParser';
 import { NamedProjectSelectorParser } from '../logic/selectors/NamedProjectSelectorParser';
@@ -41,14 +42,15 @@ export class SelectionParameterSet {
   public constructor(rushConfiguration: RushConfiguration, action: CommandLineParameterProvider) {
     this._rushConfiguration = rushConfiguration;
 
-    const selectorParsers: Map<
+    const selectorParsers: Map<string, ISelectorParser<RushConfigurationProject>> = new Map<
       string,
       ISelectorParser<RushConfigurationProject>
-    > = (this._selectorParserByScope = new Map());
+    >();
 
     selectorParsers.set('name', new NamedProjectSelectorParser(rushConfiguration));
     selectorParsers.set('git', new GitChangedProjectSelectorParser(rushConfiguration));
     selectorParsers.set('version-policy', new VersionPolicyProjectSelectorParser(rushConfiguration));
+    this._selectorParserByScope = selectorParsers;
 
     const getSpecifierCompletions: () => Promise<string[]> = async (): Promise<string[]> => {
       const completions: string[] = ['.'];
@@ -217,7 +219,7 @@ export class SelectionParameterSet {
       impactedByExceptProjects
     ] = await Promise.all(
       selectors.map((param: CommandLineStringListParameter) => {
-        return this._evaluateProjectParameterAsync(param, terminal, forIncremental);
+        return this._evaluateProjectParameterAsync(param, terminal, EvaluateSelectorMode.IncrementalBuild);
       })
     );
 
@@ -256,20 +258,24 @@ export class SelectionParameterSet {
     const args: string[] = [];
 
     // Include exactly these projects (--only)
-    for (const project of await this._evaluateProjectParameterAsync(this._onlyProject, terminal, false)) {
+    for (const project of await this._evaluateProjectParameterAsync(
+      this._onlyProject,
+      terminal,
+      EvaluateSelectorMode.RushChange
+    )) {
       args.push('--filter', project.packageName);
     }
 
     // Include all projects that depend on these projects, and all dependencies thereof
     const fromProjects: Set<RushConfigurationProject> = Selection.union(
       // --from
-      await this._evaluateProjectParameterAsync(this._fromProject, terminal, false)
+      await this._evaluateProjectParameterAsync(this._fromProject, terminal, EvaluateSelectorMode.RushChange)
     );
 
     // All specified projects and all projects that they depend on
     for (const project of Selection.union(
       // --to
-      await this._evaluateProjectParameterAsync(this._toProject, terminal, false),
+      await this._evaluateProjectParameterAsync(this._toProject, terminal, EvaluateSelectorMode.RushChange),
       // --from / --from-version-policy
       Selection.expandAllConsumers(fromProjects)
     )) {
@@ -278,7 +284,11 @@ export class SelectionParameterSet {
 
     // --to-except
     // All projects that the project directly or indirectly declares as a dependency
-    for (const project of await this._evaluateProjectParameterAsync(this._toExceptProject, terminal, false)) {
+    for (const project of await this._evaluateProjectParameterAsync(
+      this._toExceptProject,
+      terminal,
+      EvaluateSelectorMode.RushChange
+    )) {
       args.push('--filter', `${project.packageName}^...`);
     }
 
@@ -287,7 +297,7 @@ export class SelectionParameterSet {
     for (const project of await this._evaluateProjectParameterAsync(
       this._impactedByProject,
       terminal,
-      false
+      EvaluateSelectorMode.RushChange
     )) {
       args.push('--filter', `...${project.packageName}`);
     }
@@ -297,7 +307,7 @@ export class SelectionParameterSet {
     for (const project of await this._evaluateProjectParameterAsync(
       this._impactedByExceptProject,
       terminal,
-      false
+      EvaluateSelectorMode.RushChange
     )) {
       args.push('--filter', `...^${project.packageName}`);
     }
@@ -329,7 +339,7 @@ export class SelectionParameterSet {
   private async _evaluateProjectParameterAsync(
     listParameter: CommandLineStringListParameter,
     terminal: ITerminal,
-    forIncrementalBuild: boolean
+    mode: EvaluateSelectorMode
   ): Promise<Set<RushConfigurationProject>> {
     const parameterName: string = listParameter.longName;
     const selection: Set<RushConfigurationProject> = new Set();
@@ -382,12 +392,12 @@ export class SelectionParameterSet {
         throw new AlreadyReportedError();
       }
 
-      for (const project of await handler.evaluateSelectorAsync(
+      for (const project of await handler.evaluateSelectorAsync({
         unscopedSelector,
         terminal,
         parameterName,
-        forIncrementalBuild
-      )) {
+        mode
+      })) {
         selection.add(project);
       }
     }

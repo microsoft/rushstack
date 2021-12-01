@@ -1,7 +1,6 @@
-import type { ITerminal } from '@rushstack/node-core-library';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { ISelectorParser } from './ISelectorParser';
+import { EvaluateSelectorMode, IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParser';
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 
 export class GitChangedProjectSelectorParser implements ISelectorParser<RushConfigurationProject> {
@@ -11,24 +10,31 @@ export class GitChangedProjectSelectorParser implements ISelectorParser<RushConf
     this._rushConfiguration = rushConfiguration;
   }
 
-  public async evaluateSelectorAsync(
-    unscopedSelector: string,
-    terminal: ITerminal,
-    parameterName: string,
-    forIncrementalBuild: boolean
-  ): Promise<Iterable<RushConfigurationProject>> {
+  public async evaluateSelectorAsync({
+    unscopedSelector,
+    terminal,
+    mode
+  }: IEvaluateSelectorOptions): Promise<Iterable<RushConfigurationProject>> {
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this._rushConfiguration);
 
-    if (forIncrementalBuild) {
-      return await projectChangeAnalyzer.getChangedProjectsForIncrementalBuildAsync({
-        terminal,
-        targetBranchName: unscopedSelector
-      });
-    } else {
-      return await projectChangeAnalyzer.getChangedProjectsAsync({
-        terminal,
-        targetBranchName: unscopedSelector
-      });
+    switch (mode) {
+      case EvaluateSelectorMode.RushChange: {
+        return await projectChangeAnalyzer.getChangedProjectsAsync({
+          terminal,
+          targetBranchName: unscopedSelector
+        });
+      }
+
+      case EvaluateSelectorMode.IncrementalBuild: {
+        return await projectChangeAnalyzer.getChangedProjectsForIncrementalBuildAsync({
+          terminal,
+          targetBranchName: unscopedSelector
+        });
+      }
+
+      default: {
+        throw new Error(`Unsupported mode: ${mode}`);
+      }
     }
   }
 
