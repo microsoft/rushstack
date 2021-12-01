@@ -104,6 +104,17 @@ export class GlobalScriptAction extends BaseScriptAction {
       customParameter.appendToArgList(customParameterValues);
     }
 
+    for (let i: number = 0; i < customParameterValues.length; i++) {
+      let customParameterValue: string = customParameterValues[i];
+      customParameterValue = customParameterValue.replace(/"/g, '\\"');
+
+      if (customParameterValue.indexOf(' ') >= 0) {
+        customParameterValue = `"${customParameterValue}"`;
+      }
+
+      customParameterValues[i] = customParameterValue;
+    }
+
     let shellCommand: string = this._shellCommand;
     if (customParameterValues.length > 0) {
       shellCommand += ' ' + customParameterValues.join(' ');
