@@ -123,18 +123,22 @@ export class PublishUtilities {
         return;
       }
 
-      const changed = this._addChange(
-        {
-          packageName: pkg.packageName,
-          changeType: ChangeType.patch, // force a bump
-          newVersion: versionPolicy.version // enforce the specific policy version
-        },
-        allChanges,
-        allPackages,
-        rushConfiguration,
-        prereleaseToken,
-        projectsToExclude
-      );
+      if (
+        this._addChange(
+          {
+            packageName: pkg.packageName,
+            changeType: ChangeType.patch, // force a bump
+            newVersion: versionPolicy.version // enforce the specific policy version
+          },
+          allChanges,
+          allPackages,
+          rushConfiguration,
+          prereleaseToken,
+          projectsToExclude
+        )
+      ) {
+        console.log(`${EOL}* APPLYING: update ${pkg.packageName} to version ${versionPolicy.version}`);
+      }
     });
 
     // For each requested package change, ensure dependencies are also updated.
@@ -215,7 +219,7 @@ export class PublishUtilities {
   }
 
   /**
-   * Given the change requests, updates the package json files and version policies with updated versions on disk.
+   * Given a single change request, updates the package json file with updated versions on disk.
    */
   public static updatePackages(
     allChanges: IChangeInfoHash,
