@@ -70,24 +70,24 @@ export class PublishUtilities {
     const versionPolicyChangeTypes: Map<string, ChangeType> = new Map<string, ChangeType>();
     Object.keys(allChanges).forEach((packageName) => {
       const pkg = allPackages.get(packageName);
-      if (projectsToExclude?.has(packageName) || pkg == null) {
+      if (projectsToExclude?.has(packageName) || pkg === undefined) {
         return;
       }
 
       const change = allChanges[packageName];
 
-      if (change.changeType == null || change.changeType == ChangeType.none) {
+      if (change.changeType === undefined || change.changeType === ChangeType.none) {
         return;
       }
 
-      if (pkg.versionPolicy != null && pkg.versionPolicy.isLockstepped) {
+      if (pkg.versionPolicy !== undefined && pkg.versionPolicy.isLockstepped) {
         const policy: LockStepVersionPolicy = pkg.versionPolicy as LockStepVersionPolicy;
-        if (policy.nextBump == null) {
+        if (policy.nextBump === undefined) {
           // set the policy bump based on change files
           const prevBump = versionPolicyChangeTypes.get(policy.policyName);
           versionPolicyChangeTypes.set(
             policy.policyName,
-            prevBump != null ? Math.max(prevBump, change.changeType) : change.changeType
+            prevBump !== undefined ? Math.max(prevBump, change.changeType) : change.changeType
           );
         }
       }
@@ -100,13 +100,18 @@ export class PublishUtilities {
       ) as LockStepVersionPolicy;
       const currentVersion = versionPolicy.version;
       const newVersion = semver.inc(currentVersion, PublishUtilities._getReleaseType(changeType));
-      if (newVersion != null) {
+      if (newVersion !== null) {
+        console.log(
+          `${EOL}* 'APPLYING': update version policy '${versionPolicyName}' from '${versionPolicy.version}' to '${newVersion}'`
+        );
         rushConfiguration.versionPolicyConfiguration.update(versionPolicyName, newVersion);
       }
     });
 
-    // TODO:
     // update projects affected by the lock version policy update
+    allPackages.forEach((pkg) => {
+      console.log(pkg);
+    });
 
     // For each requested package change, ensure dependencies are also updated.
     for (const packageName in allChanges) {
@@ -119,7 +124,7 @@ export class PublishUtilities {
           rushConfiguration,
           prereleaseToken,
           projectsToExclude,
-          versionPolicyName != null ? versionPolicyChangeTypes.get(versionPolicyName) : undefined
+          versionPolicyName !== undefined ? versionPolicyChangeTypes.get(versionPolicyName) : undefined
         );
       }
     }
@@ -147,7 +152,7 @@ export class PublishUtilities {
               ? semver.inc(
                   pkg.version,
                   PublishUtilities._getReleaseType(
-                    (project.versionPolicyName != null
+                    (project.versionPolicyName !== undefined
                       ? versionPolicyChangeTypes.get(project.versionPolicyName)
                       : null) ?? change.changeType!
                   )
@@ -718,7 +723,7 @@ export class PublishUtilities {
       // If the version range exists and has not yet been updated to this version, update it.
       if (requiredVersion.versionSpecifier !== change.newRangeDependency || alwaysUpdate) {
         let changeType: ChangeType | undefined = enforcedChangeType;
-        if (changeType == null) {
+        if (changeType === undefined) {
           // Propagate hotfix changes to dependencies
           if (change.changeType === ChangeType.hotfix) {
             changeType = ChangeType.hotfix;
