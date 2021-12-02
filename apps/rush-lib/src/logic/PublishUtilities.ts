@@ -102,15 +102,39 @@ export class PublishUtilities {
       const newVersion = semver.inc(currentVersion, PublishUtilities._getReleaseType(changeType));
       if (newVersion !== null) {
         console.log(
-          `${EOL}* 'APPLYING': update version policy '${versionPolicyName}' from '${versionPolicy.version}' to '${newVersion}'`
+          `${EOL}* APPLYING: update version policy ${versionPolicyName} from ${versionPolicy.version} to ${newVersion}`
         );
         rushConfiguration.versionPolicyConfiguration.update(versionPolicyName, newVersion);
       }
     });
 
-    // update projects affected by the lock version policy update
+    // add dependency change to projects affected by the lock version policy update
     allPackages.forEach((pkg) => {
-      console.log(pkg);
+      const versionPolicy =
+        pkg.versionPolicyName !== undefined
+          ? (rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
+              pkg.versionPolicyName
+            ) as LockStepVersionPolicy)
+          : undefined;
+      const versionPolicyChangeType =
+        versionPolicy !== undefined ? versionPolicyChangeTypes.get(versionPolicy.policyName) : undefined;
+
+      if (versionPolicy === undefined || versionPolicyChangeType === undefined) {
+        return;
+      }
+
+      const changed = this._addChange(
+        {
+          packageName: pkg.packageName,
+          changeType: ChangeType.patch, // force a bump
+          newVersion: versionPolicy.version // enforce the specific policy version
+        },
+        allChanges,
+        allPackages,
+        rushConfiguration,
+        prereleaseToken,
+        projectsToExclude
+      );
     });
 
     // For each requested package change, ensure dependencies are also updated.
@@ -604,6 +628,7 @@ export class PublishUtilities {
 
       hasChanged = hasChanged || oldChangeType !== currentChange.changeType;
     }
+
     const skipVersionBump: boolean = PublishUtilities._shouldSkipVersionBump(
       project,
       prereleaseToken,
@@ -611,7 +636,7 @@ export class PublishUtilities {
     );
 
     if (skipVersionBump) {
-      currentChange.newVersion = pkg.version;
+      currentChange.newVersion = change.newVersion ?? pkg.version;
       hasChanged = false;
       currentChange.changeType = ChangeType.none;
     } else {
@@ -621,7 +646,7 @@ export class PublishUtilities {
           throw new Error(`Cannot add hotfix change; hotfixChangeEnabled is false in configuration.`);
         }
 
-        currentChange.newVersion = pkg.version;
+        currentChange.newVersion = change.newVersion ?? pkg.version;
         if (!prereleaseComponents) {
           currentChange.newVersion += '-hotfix';
         }
@@ -629,7 +654,7 @@ export class PublishUtilities {
       } else {
         // When there are multiple changes of this package, the final value of new version
         // should not depend on the order of the changes.
-        let packageVersion: string = pkg.version;
+        let packageVersion: string = change.newVersion ?? pkg.version;
         if (currentChange.newVersion && semver.gt(currentChange.newVersion, pkg.version)) {
           packageVersion = currentChange.newVersion;
         }
@@ -638,6 +663,8 @@ export class PublishUtilities {
             ? semver.inc(pkg.version, PublishUtilities._getReleaseType(currentChange.changeType!))!
             : packageVersion;
       }
+
+      hasChanged = hasChanged || pkg.version !== currentChange.newVersion;
 
       // If hotfix change, force new range dependency to be the exact new version
       currentChange.newRangeDependency =
