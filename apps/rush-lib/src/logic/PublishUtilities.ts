@@ -67,7 +67,7 @@ export class PublishUtilities {
     });
 
     // For each lock step version policy with no nextBump, calculate the changeType
-    const policyChangeTypes: Map<string, ChangeType> = new Map<string, ChangeType>();
+    const versionPolicyChangeTypes: Map<string, ChangeType> = new Map<string, ChangeType>();
     Object.keys(allChanges).forEach((packageName) => {
       const pkg = allPackages.get(packageName);
       if (projectsToExclude?.has(packageName) || pkg == null) {
@@ -84,8 +84,8 @@ export class PublishUtilities {
         const policy: LockStepVersionPolicy = pkg.versionPolicy as LockStepVersionPolicy;
         if (policy.nextBump == null) {
           // set the policy bump based on change files
-          const prevBump = policyChangeTypes.get(policy.policyName);
-          policyChangeTypes.set(
+          const prevBump = versionPolicyChangeTypes.get(policy.policyName);
+          versionPolicyChangeTypes.set(
             policy.policyName,
             prevBump != null ? Math.max(prevBump, change.changeType) : change.changeType
           );
@@ -93,19 +93,20 @@ export class PublishUtilities {
       }
     });
 
-    // TODO:
-    // tried this to see if it's possible to update version-policies.json from here but it never calls saveFile...
-    Object.keys(allChanges).forEach((packageName) => {
-      const pkg = allPackages.get(packageName);
-      if (projectsToExclude?.has(packageName) || pkg == null) {
-        return;
+    // update lock version policies to new versions
+    versionPolicyChangeTypes.forEach((changeType, versionPolicyName) => {
+      const versionPolicy = rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
+        versionPolicyName
+      ) as LockStepVersionPolicy;
+      const currentVersion = versionPolicy.version;
+      const newVersion = semver.inc(currentVersion, PublishUtilities._getReleaseType(changeType));
+      if (newVersion != null) {
+        rushConfiguration.versionPolicyConfiguration.update(versionPolicyName, newVersion);
       }
-
-      pkg.versionPolicy?.bump(BumpType.major);
     });
 
     // TODO:
-    // PublishUtilities._updateLockVersionPolicyProjects
+    // update projects affected by the lock version policy update
 
     // For each requested package change, ensure dependencies are also updated.
     for (const packageName in allChanges) {
@@ -118,7 +119,7 @@ export class PublishUtilities {
           rushConfiguration,
           prereleaseToken,
           projectsToExclude,
-          versionPolicyName != null ? policyChangeTypes.get(versionPolicyName) : undefined
+          versionPolicyName != null ? versionPolicyChangeTypes.get(versionPolicyName) : undefined
         );
       }
     }
@@ -147,7 +148,7 @@ export class PublishUtilities {
                   pkg.version,
                   PublishUtilities._getReleaseType(
                     (project.versionPolicyName != null
-                      ? policyChangeTypes.get(project.versionPolicyName)
+                      ? versionPolicyChangeTypes.get(project.versionPolicyName)
                       : null) ?? change.changeType!
                   )
                 )!
