@@ -37,7 +37,13 @@ export class InstallAction extends BaseInstallAction {
   protected onDefineParameters(): void {
     super.onDefineParameters();
 
-    this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this);
+    this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
+      // Include lockfile processing since this expands the selection, and we need to select
+      // at least the same projects selected with the same query to "rush build"
+      includeLockfile: true,
+      // Disable filtering because rush-project.json is riggable and therefore may not be available
+      enableFiltering: false
+    });
 
     this._checkOnlyParameter = this.defineFlagParameter({
       parameterLongName: '--check-only',

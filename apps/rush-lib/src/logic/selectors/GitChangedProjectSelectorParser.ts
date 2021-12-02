@@ -1,41 +1,35 @@
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { EvaluateSelectorMode, IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParser';
-import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+import { IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParser';
+import { IGetChangedProjectsOptions, ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+
+export interface IGitSelectorParserOptions {
+  includeLockfile: boolean;
+  enableFiltering: boolean;
+}
 
 export class GitChangedProjectSelectorParser implements ISelectorParser<RushConfigurationProject> {
   private readonly _rushConfiguration: RushConfiguration;
+  private readonly _options: IGitSelectorParserOptions;
 
-  public constructor(rushConfiguration: RushConfiguration) {
+  public constructor(rushConfiguration: RushConfiguration, options: IGitSelectorParserOptions) {
     this._rushConfiguration = rushConfiguration;
+    this._options = options;
   }
 
   public async evaluateSelectorAsync({
     unscopedSelector,
-    terminal,
-    mode
+    terminal
   }: IEvaluateSelectorOptions): Promise<Iterable<RushConfigurationProject>> {
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this._rushConfiguration);
 
-    switch (mode) {
-      case EvaluateSelectorMode.RushChange: {
-        return await projectChangeAnalyzer.getProjectsWithLocalFileChangesAsync({
-          terminal,
-          targetBranchName: unscopedSelector
-        });
-      }
+    const options: IGetChangedProjectsOptions = {
+      terminal,
+      targetBranchName: unscopedSelector,
+      ...this._options
+    };
 
-      case EvaluateSelectorMode.IncrementalBuild: {
-        return await projectChangeAnalyzer.getProjectsImpactedByDiffAsync({
-          terminal,
-          targetBranchName: unscopedSelector
-        });
-      }
-
-      default: {
-        throw new Error(`Unsupported mode: ${mode}`);
-      }
-    }
+    return await projectChangeAnalyzer.getChangedProjectsAsync(options);
   }
 
   public getCompletions(): Iterable<string> {

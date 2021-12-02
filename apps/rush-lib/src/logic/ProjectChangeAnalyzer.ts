@@ -30,6 +30,9 @@ export interface IGetChangedProjectsOptions {
   targetBranchName: string;
   terminal: ITerminal;
   shouldFetch?: boolean;
+
+  includeLockfile: boolean;
+  enableFiltering: boolean;
 }
 
 interface IGitState {
@@ -179,32 +182,15 @@ export class ProjectChangeAnalyzer {
 
   /**
    * Gets a list of projects that have changed in the current state of the repo
-   * when compared to the specified branch.
-   */
-  public async getProjectsWithLocalFileChangesAsync(
-    options: IGetChangedProjectsOptions
-  ): Promise<Set<RushConfigurationProject>> {
-    return await this._getChangedProjectsInternalAsync(options, true);
-  }
-
-  /**
-   * Gets a list of projects that have changed in the current state of the repo
-   * when compared to the specified branch, taking the shrinkwrap and settings in
+   * when compared to the specified branch, optionally taking the shrinkwrap and settings in
    * the rush-project.json file into consideration.
    */
-  public async getProjectsImpactedByDiffAsync(
+  public async getChangedProjectsAsync(
     options: IGetChangedProjectsOptions
-  ): Promise<Set<RushConfigurationProject>> {
-    return await this._getChangedProjectsInternalAsync(options, false);
-  }
-
-  private async _getChangedProjectsInternalAsync(
-    options: IGetChangedProjectsOptions,
-    localOnly: boolean
   ): Promise<Set<RushConfigurationProject>> {
     const { _rushConfiguration: rushConfiguration } = this;
 
-    const { targetBranchName, terminal } = options;
+    const { targetBranchName, terminal, includeLockfile, enableFiltering } = options;
 
     const gitPath: string = this._git.getGitPathOrThrow();
     const repoRoot: string = getRepoRoot(rushConfiguration.rushJsonFolder);
@@ -212,7 +198,7 @@ export class ProjectChangeAnalyzer {
 
     const changedProjects: Set<RushConfigurationProject> = new Set();
 
-    if (!localOnly) {
+    if (includeLockfile) {
       // Even though changing the installed version of a nested dependency merits a change file,
       // ignore lockfile changes for `rush change` for the moment
 
@@ -248,7 +234,11 @@ export class ProjectChangeAnalyzer {
           const oldShrinkWrap: PnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromString(oldShrinkwrapText);
 
           for (const project of rushConfiguration.projects) {
-            if (currentShrinkwrap.getProjectShrinkwrap(project).hasChanges(oldShrinkWrap.getProjectShrinkwrap(project))) {
+            if (
+              currentShrinkwrap
+                .getProjectShrinkwrap(project)
+                .hasChanges(oldShrinkWrap.getProjectShrinkwrap(project))
+            ) {
               changedProjects.add(project);
             }
           }
@@ -271,33 +261,37 @@ export class ProjectChangeAnalyzer {
           continue;
         }
 
-        let projectChanges: Map<string, IFileDiffStatus> | undefined = changesByProject.get(project);
-        if (!projectChanges) {
-          changesByProject.set(project, (projectChanges = new Map()));
+        if (enableFiltering) {
+          let projectChanges: Map<string, IFileDiffStatus> | undefined = changesByProject.get(project);
+          if (!projectChanges) {
+            changesByProject.set(project, (projectChanges = new Map()));
+          }
+          projectChanges.set(file, diffStatus);
+        } else {
+          changedProjects.add(project);
         }
-        projectChanges.set(file, diffStatus);
       }
     }
 
-    if (localOnly) {
-      return new Set(changesByProject.keys());
-    }
+    if (enableFiltering) {
+      // Reading rush-project.json may be problematic if, e.g.
+      await Async.forEachAsync(
+        changesByProject,
+        async ([project, projectChanges]) => {
+          const filteredChanges: Map<string, IFileDiffStatus> = await this._filterProjectDataAsync(
+            project,
+            projectChanges,
+            repoRoot,
+            terminal
+          );
 
-    await Async.forEachAsync(
-      changesByProject,
-      async ([project, projectChanges]) => {
-        const filteredChanges: Map<string, IFileDiffStatus> = await this._filterProjectDataAsync(
-          project,
-          projectChanges,
-          repoRoot,
-          terminal
-        );
-        if (filteredChanges.size > 0) {
-          changedProjects.add(project);
-        }
-      },
-      { concurrency: 10 }
-    );
+          if (filteredChanges.size > 0) {
+            changedProjects.add(project);
+          }
+        },
+        { concurrency: 10 }
+      );
+    }
 
     return changedProjects;
   }
@@ -404,9 +398,11 @@ export class ProjectChangeAnalyzer {
     const projectConfiguration: RushProjectConfiguration | undefined =
       await RushProjectConfiguration.tryLoadForProjectAsync(project, undefined, terminal);
 
-    if (projectConfiguration?.incrementalBuildIgnoredGlobs) {
+    const { incrementalBuildIgnoredGlobs } = projectConfiguration || {};
+
+    if (incrementalBuildIgnoredGlobs && incrementalBuildIgnoredGlobs.length) {
       const ignoreMatcher: Ignore = ignore();
-      ignoreMatcher.add(projectConfiguration.incrementalBuildIgnoredGlobs as string[]);
+      ignoreMatcher.add(incrementalBuildIgnoredGlobs as string[]);
       return ignoreMatcher;
     }
   }
