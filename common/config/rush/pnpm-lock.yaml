@@ -2125,6 +2125,31 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
 
+  ../../webpack/hashed-folder-copy-plugin:
+    specifiers:
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/node-core-library': workspace:*
+      '@types/enhanced-resolve': 3.0.7
+      '@types/glob': 7.1.1
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      '@types/webpack': 4.41.24
+      glob: ~7.0.5
+    dependencies:
+      '@rushstack/node-core-library': link:../../libraries/node-core-library
+      glob: 7.0.6
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/enhanced-resolve': 3.0.7
+      '@types/glob': 7.1.1
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      '@types/webpack': 4.41.24
+
   ../../webpack/loader-load-themed-styles:
     specifiers:
       '@microsoft/load-themed-styles': workspace:*
@@ -7394,6 +7419,13 @@ packages:
     resolution: {integrity: sha512-XIpxU6Qdvp1ZE6Kr3yrkv1qgUab0fyf4mHYvW8N3Bx3PCsbN6or1q9/q72cv5jIFWolaGH08U9XyYoLLIykyKQ==}
     dev: true
 
+  /@types/enhanced-resolve/3.0.7:
+    resolution: {integrity: sha512-H23Fzk0BCz4LoKq1ricnLSRQuzoXTv57bGUwC+Cn84kKPaoHIS7bhFhfy4DzMeSBxoXc6jFziYoqpCab1U511w==}
+    dependencies:
+      '@types/node': 12.20.24
+      '@types/tapable': 0.2.5
+    dev: true
+
   /@types/eslint-scope/3.7.3:
     resolution: {integrity: sha512-PB3ldyrcnAicT35TWPs5IcwKD8S333HMaa2VVv4+wdvebJkjWuW/xESoB8IwRcog8HYVYamb1g/R31Qv5Bx03g==}
     dependencies:
@@ -7695,6 +7727,10 @@ packages:
 
   /@types/strict-uri-encode/2.0.0:
     resolution: {integrity: sha512-R6vDd7CHxcWMzv5wfVhR3qyCRVQoZKwVd6kit0rkozTThRZSXZKEW2Kz3AxfVqq9+UyJAz1g8Q+bJ3CL6NzztQ==}
+    dev: true
+
+  /@types/tapable/0.2.5:
+    resolution: {integrity: sha512-dEoVvo/I9QFomyhY+4Q6Qk+I+dhG59TYceZgC6Q0mCifVPErx6Y83PNTKGDS5e9h9Eti6q0S2mm16BU6iQK+3w==}
     dev: true
 
   /@types/tapable/1.0.6:
