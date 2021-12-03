@@ -3,7 +3,7 @@
     {
       "packageName": "@rushstack/heft-web-rig",
       "comment": "Bump ESLint to v8",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@rushstack/heft-web-rig"
