@@ -1,4 +1,3 @@
-variables:
 steps:
   - script: 'node repo-scripts/repo-toolbox/lib/start.js record-versions --out-file $(Build.ArtifactStagingDirectory)/published-versions/published-versions.json'
     displayName: 'Rush Install'
