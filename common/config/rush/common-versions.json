@@ -60,7 +60,7 @@
    */
   "allowedAlternativeVersions": {
     /**
-     * Temporary addition to allow for bumping ESLint in other projects. Only used by @rushstack/tree-pattern
+     * Used by build-tests/eslint-7-test
      */
     "eslint": ["~7.30.0"],
 
