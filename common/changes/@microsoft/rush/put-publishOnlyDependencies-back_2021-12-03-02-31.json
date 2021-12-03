@@ -3,9 +3,9 @@
     {
       "comment": "",
       "type": "none",
-      "packageName": "@microsoft/api-extractor-model"
+      "packageName": "@microsoft/rush"
     }
   ],
-  "packageName": "@microsoft/api-extractor-model",
+  "packageName": "@microsoft/rush",
   "email": "iclanton@users.noreply.github.com"
 }
