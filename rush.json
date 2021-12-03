@@ -601,6 +601,42 @@
       "shouldPublish": false
     },
 
+    // "eslint" folder (alphabetical order)
+    {
+      "packageName": "@rushstack/eslint-config",
+      "projectFolder": "eslint/eslint-config",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/eslint-patch",
+      "projectFolder": "eslint/eslint-patch",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
+      "packageName": "@rushstack/eslint-plugin",
+      "projectFolder": "eslint/eslint-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
+      "packageName": "@rushstack/eslint-plugin-packlets",
+      "projectFolder": "eslint/eslint-plugin-packlets",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
+      "packageName": "@rushstack/eslint-plugin-security",
+      "projectFolder": "eslint/eslint-plugin-security",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+
     // heft-* projects
     {
       "packageName": "heft-action-plugin",
@@ -917,42 +953,6 @@
       "projectFolder": "rush-plugins/rush-azure-storage-build-cache-plugin",
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
-    },
-
-    // "stack" folder (alphabetical order)
-    {
-      "packageName": "@rushstack/eslint-config",
-      "projectFolder": "stack/eslint-config",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@rushstack/eslint-patch",
-      "projectFolder": "stack/eslint-patch",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
-    },
-    {
-      "packageName": "@rushstack/eslint-plugin",
-      "projectFolder": "stack/eslint-plugin",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
-    },
-    {
-      "packageName": "@rushstack/eslint-plugin-packlets",
-      "projectFolder": "stack/eslint-plugin-packlets",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
-    },
-    {
-      "packageName": "@rushstack/eslint-plugin-security",
-      "projectFolder": "stack/eslint-plugin-security",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
 
     // "webpack" folder (alphabetical order)

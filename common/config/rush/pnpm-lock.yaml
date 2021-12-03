@@ -31,7 +31,7 @@ importers:
       js-yaml: 3.13.1
       resolve: 1.17.0
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
@@ -76,7 +76,7 @@ importers:
       source-map: 0.6.1
       typescript: 4.4.4
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': 0.42.3
       '@rushstack/heft-node-rig': 1.2.32_@rushstack+heft@0.42.3
       '@types/heft-jest': 1.0.1
@@ -100,7 +100,7 @@ importers:
       '@microsoft/tsdoc-config': 0.15.2
       '@rushstack/node-core-library': link:../../libraries/node-core-library
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': 0.42.3
       '@rushstack/heft-node-rig': 1.2.32_@rushstack+heft@0.42.3
       '@types/heft-jest': 1.0.1
@@ -152,7 +152,7 @@ importers:
       true-case-path: 2.2.1
     devDependencies:
       '@microsoft/api-extractor': link:../api-extractor
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': 0.42.3
       '@rushstack/heft-node-rig': 1.2.32_@rushstack+heft@0.42.3
       '@types/argparse': 1.0.38
@@ -180,7 +180,7 @@ importers:
       '@rushstack/ts-command-line': link:../../libraries/ts-command-line
       string-argv: 0.3.1
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
@@ -204,7 +204,7 @@ importers:
       colors: 1.2.5
       semver: 7.3.5
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
@@ -306,7 +306,7 @@ importers:
       z-schema: 3.18.4
     devDependencies:
       '@pnpm/logger': 4.0.0
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/cli-table': 0.3.0
@@ -338,7 +338,7 @@ importers:
       eslint: ~8.3.0
       typescript: ~4.4.2
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@types/heft-jest': 1.0.1
@@ -356,7 +356,7 @@ importers:
       eslint: ~8.3.0
       typescript: ~4.4.2
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@types/heft-jest': 1.0.1
@@ -372,7 +372,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
@@ -400,7 +400,7 @@ importers:
       typescript: ~4.4.2
       webpack: ~4.44.2
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@rushstack/heft-storybook-plugin': link:../../heft-plugins/heft-storybook-plugin
@@ -486,7 +486,7 @@ importers:
       typescript: ~4.4.2
       webpack: ~4.44.2
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@rushstack/heft-webpack5-plugin': link:../../heft-plugins/heft-webpack5-plugin
@@ -512,7 +512,7 @@ importers:
       eslint: ~8.3.0
       typescript: ~4.4.2
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@types/node': 12.20.24
       eslint: 8.3.0
@@ -676,7 +676,7 @@ importers:
       eslint: ~7.30.0
       typescript: ~4.4.2
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@types/node': 12.20.24
       '@typescript-eslint/parser': 5.3.1_eslint@7.30.0+typescript@4.4.4
@@ -694,7 +694,7 @@ importers:
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@types/node': 12.20.24
       eslint: 8.3.0
@@ -726,7 +726,7 @@ importers:
     dependencies:
       tapable: 1.1.3
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@types/node': 12.20.24
       '@types/tapable': 1.0.6
@@ -742,7 +742,7 @@ importers:
       heft-example-plugin-01: workspace:*
       typescript: ~4.4.2
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@types/node': 12.20.24
       eslint: 8.3.0
@@ -761,7 +761,7 @@ importers:
     dependencies:
       fastify: 3.16.2
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
@@ -781,7 +781,7 @@ importers:
     devDependencies:
       '@jest/reporters': 25.4.0
       '@jest/types': 25.4.0
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@types/heft-jest': 1.0.1
@@ -828,7 +828,7 @@ importers:
       typescript: ~4.4.2
     devDependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@types/heft-jest': 1.0.1
@@ -856,7 +856,7 @@ importers:
       typescript: ~4.4.2
     devDependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@types/heft-jest': 1.0.1
@@ -879,7 +879,7 @@ importers:
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@types/node': 12.20.24
       eslint: 8.3.0
@@ -929,7 +929,7 @@ importers:
     dependencies:
       buttono: 1.0.4
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@rushstack/heft-sass-plugin': link:../../heft-plugins/heft-sass-plugin
@@ -965,7 +965,7 @@ importers:
       tslint-microsoft-contrib: ~6.2.0
       typescript: ~4.4.2
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
       '@types/heft-jest': 1.0.1
@@ -1002,7 +1002,7 @@ importers:
       typescript: ~4.4.2
       webpack: ~4.44.2
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-dev-cert-plugin': link:../../heft-plugins/heft-dev-cert-plugin
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
@@ -1030,7 +1030,7 @@ importers:
       tslint-microsoft-contrib: ~6.2.0
       typescript: ~4.4.2
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-dev-cert-plugin': link:../../heft-plugins/heft-dev-cert-plugin
       '@rushstack/heft-jest-plugin': link:../../heft-plugins/heft-jest-plugin
@@ -1154,7 +1154,7 @@ importers:
       '@microsoft/rush-lib': link:../../apps/rush-lib
       '@rushstack/node-core-library': link:../../libraries/node-core-library
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/node': 12.20.24
@@ -1170,7 +1170,7 @@ importers:
       html-webpack-plugin: ~4.5.0
       typescript: ~4.4.2
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-webpack4-plugin': link:../../heft-plugins/heft-webpack4-plugin
       '@rushstack/set-webpack-public-path-plugin': link:../../webpack/set-webpack-public-path-plugin
@@ -1191,6 +1191,132 @@ importers:
       fs-extra: 7.0.1
       typescript: 4.4.4
 
+  ../../eslint/eslint-config:
+    specifiers:
+      '@rushstack/eslint-patch': workspace:*
+      '@rushstack/eslint-plugin': workspace:*
+      '@rushstack/eslint-plugin-packlets': workspace:*
+      '@rushstack/eslint-plugin-security': workspace:*
+      '@typescript-eslint/eslint-plugin': ~5.3.0
+      '@typescript-eslint/experimental-utils': ~5.3.0
+      '@typescript-eslint/parser': ~5.3.0
+      '@typescript-eslint/typescript-estree': ~5.3.0
+      eslint: ~8.3.0
+      eslint-plugin-react: ~7.27.1
+      eslint-plugin-tsdoc: ~0.2.14
+      typescript: ~4.4.2
+    dependencies:
+      '@rushstack/eslint-patch': link:../eslint-patch
+      '@rushstack/eslint-plugin': link:../eslint-plugin
+      '@rushstack/eslint-plugin-packlets': link:../eslint-plugin-packlets
+      '@rushstack/eslint-plugin-security': link:../eslint-plugin-security
+      '@typescript-eslint/eslint-plugin': 5.3.1_029522e665921a1ce263c4cbf833ef84
+      '@typescript-eslint/experimental-utils': 5.3.1_eslint@8.3.0+typescript@4.4.4
+      '@typescript-eslint/parser': 5.3.1_eslint@8.3.0+typescript@4.4.4
+      '@typescript-eslint/typescript-estree': 5.3.1_typescript@4.4.4
+      eslint-plugin-react: 7.27.1_eslint@8.3.0
+      eslint-plugin-tsdoc: 0.2.14
+    devDependencies:
+      eslint: 8.3.0
+      typescript: 4.4.4
+
+  ../../eslint/eslint-patch:
+    specifiers:
+      '@rushstack/heft': 0.42.3
+      '@rushstack/heft-node-rig': 1.2.32
+      '@types/node': 12.20.24
+    devDependencies:
+      '@rushstack/heft': 0.42.3
+      '@rushstack/heft-node-rig': 1.2.32_@rushstack+heft@0.42.3
+      '@types/node': 12.20.24
+
+  ../../eslint/eslint-plugin:
+    specifiers:
+      '@rushstack/heft': 0.42.3
+      '@rushstack/heft-node-rig': 1.2.32
+      '@rushstack/tree-pattern': workspace:*
+      '@types/eslint': 8.2.0
+      '@types/estree': 0.0.50
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      '@typescript-eslint/experimental-utils': ~5.3.0
+      '@typescript-eslint/parser': ~5.3.0
+      '@typescript-eslint/typescript-estree': ~5.3.0
+      eslint: ~8.3.0
+      typescript: ~4.4.2
+    dependencies:
+      '@rushstack/tree-pattern': link:../../libraries/tree-pattern
+      '@typescript-eslint/experimental-utils': 5.3.1_eslint@8.3.0+typescript@4.4.4
+    devDependencies:
+      '@rushstack/heft': 0.42.3
+      '@rushstack/heft-node-rig': 1.2.32_@rushstack+heft@0.42.3
+      '@types/eslint': 8.2.0
+      '@types/estree': 0.0.50
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      '@typescript-eslint/parser': 5.3.1_eslint@8.3.0+typescript@4.4.4
+      '@typescript-eslint/typescript-estree': 5.3.1_typescript@4.4.4
+      eslint: 8.3.0
+      typescript: 4.4.4
+
+  ../../eslint/eslint-plugin-packlets:
+    specifiers:
+      '@rushstack/heft': 0.42.3
+      '@rushstack/heft-node-rig': 1.2.32
+      '@rushstack/tree-pattern': workspace:*
+      '@types/eslint': 8.2.0
+      '@types/estree': 0.0.50
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      '@typescript-eslint/experimental-utils': ~5.3.0
+      '@typescript-eslint/parser': ~5.3.0
+      '@typescript-eslint/typescript-estree': ~5.3.0
+      eslint: ~8.3.0
+      typescript: ~4.4.2
+    dependencies:
+      '@rushstack/tree-pattern': link:../../libraries/tree-pattern
+      '@typescript-eslint/experimental-utils': 5.3.1_eslint@8.3.0+typescript@4.4.4
+    devDependencies:
+      '@rushstack/heft': 0.42.3
+      '@rushstack/heft-node-rig': 1.2.32_@rushstack+heft@0.42.3
+      '@types/eslint': 8.2.0
+      '@types/estree': 0.0.50
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      '@typescript-eslint/parser': 5.3.1_eslint@8.3.0+typescript@4.4.4
+      '@typescript-eslint/typescript-estree': 5.3.1_typescript@4.4.4
+      eslint: 8.3.0
+      typescript: 4.4.4
+
+  ../../eslint/eslint-plugin-security:
+    specifiers:
+      '@rushstack/heft': 0.42.3
+      '@rushstack/heft-node-rig': 1.2.32
+      '@rushstack/tree-pattern': workspace:*
+      '@types/eslint': 8.2.0
+      '@types/estree': 0.0.50
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      '@typescript-eslint/experimental-utils': ~5.3.0
+      '@typescript-eslint/parser': ~5.3.0
+      '@typescript-eslint/typescript-estree': ~5.3.0
+      eslint: ~8.3.0
+      typescript: ~4.4.2
+    dependencies:
+      '@rushstack/tree-pattern': link:../../libraries/tree-pattern
+      '@typescript-eslint/experimental-utils': 5.3.1_eslint@8.3.0+typescript@4.4.4
+    devDependencies:
+      '@rushstack/heft': 0.42.3
+      '@rushstack/heft-node-rig': 1.2.32_@rushstack+heft@0.42.3
+      '@types/eslint': 8.2.0
+      '@types/estree': 0.0.50
+      '@types/heft-jest': 1.0.1
+      '@types/node': 12.20.24
+      '@typescript-eslint/parser': 5.3.1_eslint@8.3.0+typescript@4.4.4
+      '@typescript-eslint/typescript-estree': 5.3.1_typescript@4.4.4
+      eslint: 8.3.0
+      typescript: 4.4.4
+
   ../../heft-plugins/heft-dev-cert-plugin:
     specifiers:
       '@microsoft/api-extractor': workspace:*
@@ -1209,7 +1335,7 @@ importers:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
     devDependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
@@ -1250,7 +1376,7 @@ importers:
     devDependencies:
       '@jest/types': 25.4.0
       '@microsoft/api-extractor': link:../../apps/api-extractor
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@types/heft-jest': 1.0.1
       '@types/lodash': 4.14.116
@@ -1285,7 +1411,7 @@ importers:
       postcss-modules: 1.5.0
     devDependencies:
       '@microsoft/api-extractor': link:../../apps/api-extractor
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
@@ -1304,7 +1430,7 @@ importers:
     dependencies:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/node': 12.20.24
@@ -1325,7 +1451,7 @@ importers:
       webpack: 4.44.2
       webpack-dev-server: 3.11.3_webpack@4.44.2
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/node': 12.20.24
@@ -1347,7 +1473,7 @@ importers:
       webpack: 5.35.1
       webpack-dev-server: 4.0.0_webpack@5.35.1
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/node': 12.20.24
@@ -1369,7 +1495,7 @@ importers:
       node-forge: 0.10.0
       sudo: 1.0.3
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
@@ -1391,7 +1517,7 @@ importers:
       '@rushstack/rig-package': link:../rig-package
       jsonpath-plus: 4.0.0
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': 0.42.3
       '@rushstack/heft-node-rig': 1.2.32_@rushstack+heft@0.42.3
       '@types/heft-jest': 1.0.1
@@ -1405,7 +1531,7 @@ importers:
       '@types/heft-jest': 1.0.1
       '@types/webpack-env': 1.13.0
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-web-rig': link:../../rigs/heft-web-rig
       '@types/heft-jest': 1.0.1
@@ -1443,7 +1569,7 @@ importers:
       timsort: 0.3.0
       z-schema: 3.18.4
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': 0.42.3
       '@rushstack/heft-node-rig': 1.2.32_@rushstack+heft@0.42.3
       '@types/fs-extra': 7.0.0
@@ -1465,7 +1591,7 @@ importers:
     dependencies:
       '@rushstack/node-core-library': link:../node-core-library
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
@@ -1486,7 +1612,7 @@ importers:
       resolve: 1.17.0
       strip-json-comments: 3.1.1
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': 0.42.3
       '@rushstack/heft-node-rig': 1.2.32_@rushstack+heft@0.42.3
       '@types/heft-jest': 1.0.1
@@ -1512,7 +1638,7 @@ importers:
       tapable: 2.2.1
     devDependencies:
       '@microsoft/rush-lib': link:../../apps/rush-lib
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
@@ -1530,7 +1656,7 @@ importers:
     dependencies:
       '@rushstack/node-core-library': link:../node-core-library
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
@@ -1549,7 +1675,7 @@ importers:
       '@rushstack/node-core-library': link:../node-core-library
       '@rushstack/terminal': link:../terminal
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
@@ -1571,7 +1697,7 @@ importers:
       '@types/node': 12.20.24
       wordwrap: 1.0.0
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
@@ -1611,7 +1737,7 @@ importers:
       colors: 1.2.5
       string-argv: 0.3.1
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': 0.42.3
       '@rushstack/heft-node-rig': 1.2.32_@rushstack+heft@0.42.3
       '@types/heft-jest': 1.0.1
@@ -1633,7 +1759,7 @@ importers:
       chokidar: 3.4.3
       glob: 7.0.6
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/glob': 7.1.1
@@ -1657,7 +1783,7 @@ importers:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       js-yaml: 3.13.1
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/js-yaml': 3.12.1
@@ -1670,7 +1796,7 @@ importers:
       doc-plugin-rush-stack: workspace:*
     devDependencies:
       '@microsoft/api-documenter': link:../../apps/api-documenter
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       doc-plugin-rush-stack: link:../doc-plugin-rush-stack
 
   ../../repo-scripts/repo-toolbox:
@@ -1687,7 +1813,7 @@ importers:
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/ts-command-line': link:../../libraries/ts-command-line
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/node': 12.20.24
@@ -1750,7 +1876,7 @@ importers:
       node-fetch: 2.6.2
     devDependencies:
       '@microsoft/rush-lib': link:../../apps/rush-lib
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
@@ -1778,137 +1904,11 @@ importers:
       '@rushstack/terminal': link:../../libraries/terminal
     devDependencies:
       '@microsoft/rush-lib': link:../../apps/rush-lib
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
       '@types/node': 12.20.24
-
-  ../../stack/eslint-config:
-    specifiers:
-      '@rushstack/eslint-patch': workspace:*
-      '@rushstack/eslint-plugin': workspace:*
-      '@rushstack/eslint-plugin-packlets': workspace:*
-      '@rushstack/eslint-plugin-security': workspace:*
-      '@typescript-eslint/eslint-plugin': ~5.3.0
-      '@typescript-eslint/experimental-utils': ~5.3.0
-      '@typescript-eslint/parser': ~5.3.0
-      '@typescript-eslint/typescript-estree': ~5.3.0
-      eslint: ~8.3.0
-      eslint-plugin-react: ~7.27.1
-      eslint-plugin-tsdoc: ~0.2.14
-      typescript: ~4.4.2
-    dependencies:
-      '@rushstack/eslint-patch': link:../eslint-patch
-      '@rushstack/eslint-plugin': link:../eslint-plugin
-      '@rushstack/eslint-plugin-packlets': link:../eslint-plugin-packlets
-      '@rushstack/eslint-plugin-security': link:../eslint-plugin-security
-      '@typescript-eslint/eslint-plugin': 5.3.1_029522e665921a1ce263c4cbf833ef84
-      '@typescript-eslint/experimental-utils': 5.3.1_eslint@8.3.0+typescript@4.4.4
-      '@typescript-eslint/parser': 5.3.1_eslint@8.3.0+typescript@4.4.4
-      '@typescript-eslint/typescript-estree': 5.3.1_typescript@4.4.4
-      eslint-plugin-react: 7.27.1_eslint@8.3.0
-      eslint-plugin-tsdoc: 0.2.14
-    devDependencies:
-      eslint: 8.3.0
-      typescript: 4.4.4
-
-  ../../stack/eslint-patch:
-    specifiers:
-      '@rushstack/heft': 0.42.3
-      '@rushstack/heft-node-rig': 1.2.32
-      '@types/node': 12.20.24
-    devDependencies:
-      '@rushstack/heft': 0.42.3
-      '@rushstack/heft-node-rig': 1.2.32_@rushstack+heft@0.42.3
-      '@types/node': 12.20.24
-
-  ../../stack/eslint-plugin:
-    specifiers:
-      '@rushstack/heft': 0.42.3
-      '@rushstack/heft-node-rig': 1.2.32
-      '@rushstack/tree-pattern': workspace:*
-      '@types/eslint': 8.2.0
-      '@types/estree': 0.0.50
-      '@types/heft-jest': 1.0.1
-      '@types/node': 12.20.24
-      '@typescript-eslint/experimental-utils': ~5.3.0
-      '@typescript-eslint/parser': ~5.3.0
-      '@typescript-eslint/typescript-estree': ~5.3.0
-      eslint: ~8.3.0
-      typescript: ~4.4.2
-    dependencies:
-      '@rushstack/tree-pattern': link:../../libraries/tree-pattern
-      '@typescript-eslint/experimental-utils': 5.3.1_eslint@8.3.0+typescript@4.4.4
-    devDependencies:
-      '@rushstack/heft': 0.42.3
-      '@rushstack/heft-node-rig': 1.2.32_@rushstack+heft@0.42.3
-      '@types/eslint': 8.2.0
-      '@types/estree': 0.0.50
-      '@types/heft-jest': 1.0.1
-      '@types/node': 12.20.24
-      '@typescript-eslint/parser': 5.3.1_eslint@8.3.0+typescript@4.4.4
-      '@typescript-eslint/typescript-estree': 5.3.1_typescript@4.4.4
-      eslint: 8.3.0
-      typescript: 4.4.4
-
-  ../../stack/eslint-plugin-packlets:
-    specifiers:
-      '@rushstack/heft': 0.42.3
-      '@rushstack/heft-node-rig': 1.2.32
-      '@rushstack/tree-pattern': workspace:*
-      '@types/eslint': 8.2.0
-      '@types/estree': 0.0.50
-      '@types/heft-jest': 1.0.1
-      '@types/node': 12.20.24
-      '@typescript-eslint/experimental-utils': ~5.3.0
-      '@typescript-eslint/parser': ~5.3.0
-      '@typescript-eslint/typescript-estree': ~5.3.0
-      eslint: ~8.3.0
-      typescript: ~4.4.2
-    dependencies:
-      '@rushstack/tree-pattern': link:../../libraries/tree-pattern
-      '@typescript-eslint/experimental-utils': 5.3.1_eslint@8.3.0+typescript@4.4.4
-    devDependencies:
-      '@rushstack/heft': 0.42.3
-      '@rushstack/heft-node-rig': 1.2.32_@rushstack+heft@0.42.3
-      '@types/eslint': 8.2.0
-      '@types/estree': 0.0.50
-      '@types/heft-jest': 1.0.1
-      '@types/node': 12.20.24
-      '@typescript-eslint/parser': 5.3.1_eslint@8.3.0+typescript@4.4.4
-      '@typescript-eslint/typescript-estree': 5.3.1_typescript@4.4.4
-      eslint: 8.3.0
-      typescript: 4.4.4
-
-  ../../stack/eslint-plugin-security:
-    specifiers:
-      '@rushstack/heft': 0.42.3
-      '@rushstack/heft-node-rig': 1.2.32
-      '@rushstack/tree-pattern': workspace:*
-      '@types/eslint': 8.2.0
-      '@types/estree': 0.0.50
-      '@types/heft-jest': 1.0.1
-      '@types/node': 12.20.24
-      '@typescript-eslint/experimental-utils': ~5.3.0
-      '@typescript-eslint/parser': ~5.3.0
-      '@typescript-eslint/typescript-estree': ~5.3.0
-      eslint: ~8.3.0
-      typescript: ~4.4.2
-    dependencies:
-      '@rushstack/tree-pattern': link:../../libraries/tree-pattern
-      '@typescript-eslint/experimental-utils': 5.3.1_eslint@8.3.0+typescript@4.4.4
-    devDependencies:
-      '@rushstack/heft': 0.42.3
-      '@rushstack/heft-node-rig': 1.2.32_@rushstack+heft@0.42.3
-      '@types/eslint': 8.2.0
-      '@types/estree': 0.0.50
-      '@types/heft-jest': 1.0.1
-      '@types/node': 12.20.24
-      '@typescript-eslint/parser': 5.3.1_eslint@8.3.0+typescript@4.4.4
-      '@typescript-eslint/typescript-estree': 5.3.1_typescript@4.4.4
-      eslint: 8.3.0
-      typescript: 4.4.4
 
   ../../webpack/loader-load-themed-styles:
     specifiers:
@@ -1925,7 +1925,7 @@ importers:
       '@microsoft/load-themed-styles': link:../../libraries/load-themed-styles
       loader-utils: 1.1.0
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
@@ -1944,7 +1944,7 @@ importers:
     dependencies:
       loader-utils: 1.1.0
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
@@ -1984,7 +1984,7 @@ importers:
       pseudolocale: 1.1.0
       xmldoc: 1.1.2
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@rushstack/set-webpack-public-path-plugin': link:../set-webpack-public-path-plugin
@@ -2017,7 +2017,7 @@ importers:
       tapable: 1.1.3
       terser: 5.10.0
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
@@ -2037,7 +2037,7 @@ importers:
       '@types/webpack': 4.41.24
       webpack5: npm:webpack@~5.35.1
     devDependencies:
-      '@rushstack/eslint-config': link:../../stack/eslint-config
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/heft-jest': 1.0.1
