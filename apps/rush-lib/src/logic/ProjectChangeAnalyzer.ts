@@ -31,7 +31,16 @@ export interface IGetChangedProjectsOptions {
   terminal: ITerminal;
   shouldFetch?: boolean;
 
-  includeLockfile: boolean;
+  /**
+   * If set to `true`, consider a project's external dependency installation layout as defined in the
+   * package manager lockfile when determining if it has changed.
+   */
+  includeExternalDependencies: boolean;
+
+  /**
+   * If set to `true` apply the `incrementalBuildIgnoredGlobs` property in a project's `rush-project.json`
+   * and exclude matched files from change detection.
+   */
   enableFiltering: boolean;
 }
 
@@ -190,7 +199,7 @@ export class ProjectChangeAnalyzer {
   ): Promise<Set<RushConfigurationProject>> {
     const { _rushConfiguration: rushConfiguration } = this;
 
-    const { targetBranchName, terminal, includeLockfile, enableFiltering } = options;
+    const { targetBranchName, terminal, includeExternalDependencies, enableFiltering } = options;
 
     const gitPath: string = this._git.getGitPathOrThrow();
     const repoRoot: string = getRepoRoot(rushConfiguration.rushJsonFolder);
@@ -198,7 +207,7 @@ export class ProjectChangeAnalyzer {
 
     const changedProjects: Set<RushConfigurationProject> = new Set();
 
-    if (includeLockfile) {
+    if (includeExternalDependencies) {
       // Even though changing the installed version of a nested dependency merits a change file,
       // ignore lockfile changes for `rush change` for the moment
 
@@ -226,11 +235,11 @@ export class ProjectChangeAnalyzer {
             throw new Error(`Unable to obtain current shrinkwrap file.`);
           }
 
-          const oldShrinkwrapText: string = this._git.getFileContent(
-            targetBranchName,
-            shrinkwrapFile,
-            repoRoot
-          );
+          const oldShrinkwrapText: string = this._git.getBlobContent({
+            // <ref>:<path> syntax: https://git-scm.com/docs/gitrevisions
+            blobSpec: `${targetBranchName}:${shrinkwrapFile}`,
+            repositoryRoot: repoRoot
+          });
           const oldShrinkWrap: PnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromString(oldShrinkwrapText);
 
           for (const project of rushConfiguration.projects) {
@@ -264,7 +273,8 @@ export class ProjectChangeAnalyzer {
         if (enableFiltering) {
           let projectChanges: Map<string, IFileDiffStatus> | undefined = changesByProject.get(project);
           if (!projectChanges) {
-            changesByProject.set(project, (projectChanges = new Map()));
+            projectChanges = new Map();
+            changesByProject.set(project, projectChanges);
           }
           projectChanges.set(file, diffStatus);
         } else {

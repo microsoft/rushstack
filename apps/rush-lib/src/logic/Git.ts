@@ -21,6 +21,11 @@ interface IResultOrError<TResult> {
   result?: TResult;
 }
 
+export interface IGetBlobOptions {
+  blobSpec: string;
+  repositoryRoot: string;
+}
+
 export class Git {
   private readonly _rushConfiguration: RushConfiguration;
   private _checkedGitPath: boolean = false;
@@ -207,11 +212,11 @@ export class Git {
     return result;
   }
 
-  public getFileContent(targetBranch: string, gitRelativePath: string, repositoryRoot: string): string {
+  public getBlobContent({ blobSpec, repositoryRoot }: IGetBlobOptions): string {
     const gitPath: string = this.getGitPathOrThrow();
     const output: string = Utilities.executeCommandAndCaptureOutput(
       gitPath,
-      ['cat-file', 'blob', `${targetBranch}:${gitRelativePath}`, '--'],
+      ['cat-file', 'blob', blobSpec, '--'],
       repositoryRoot
     );
 

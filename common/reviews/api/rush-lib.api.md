@@ -250,10 +250,8 @@ export interface IExperimentsJson {
 
 // @beta (undocumented)
 export interface IGetChangedProjectsOptions {
-    // (undocumented)
     enableFiltering: boolean;
-    // (undocumented)
-    includeLockfile: boolean;
+    includeExternalDependencies: boolean;
     // (undocumented)
     shouldFetch?: boolean;
     // (undocumented)

@@ -336,7 +336,7 @@ export class ChangeAction extends BaseRushAction {
         shouldFetch: !this._noFetchParameter.value,
         // Lockfile evaluation will expand the set of projects that request change files
         // Not enabling, since this would be a breaking change
-        includeLockfile: false,
+        includeExternalDependencies: false,
         // Since install may not have happened, cannot read rush-project.json
         enableFiltering: false
       });

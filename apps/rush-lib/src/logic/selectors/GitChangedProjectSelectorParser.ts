@@ -4,7 +4,16 @@ import { IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParser';
 import { IGetChangedProjectsOptions, ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 
 export interface IGitSelectorParserOptions {
-  includeLockfile: boolean;
+  /**
+   * If set to `true`, consider a project's external dependency installation layout as defined in the
+   * package manager lockfile when determining if it has changed.
+   */
+  includeExternalDependencies: boolean;
+
+  /**
+   * If set to `true` apply the `incrementalBuildIgnoredGlobs` property in a project's `rush-project.json`
+   * and exclude matched files from change detection.
+   */
   enableFiltering: boolean;
 }
 
