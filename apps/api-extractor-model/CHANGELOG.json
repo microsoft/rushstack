@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.13.17",
+      "tag": "@microsoft/api-extractor-model_v7.13.17",
+      "date": "Fri, 03 Dec 2021 03:05:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.13.16",
       "tag": "@microsoft/api-extractor-model_v7.13.16",
       "date": "Sat, 06 Nov 2021 00:09:13 GMT",
