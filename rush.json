@@ -492,8 +492,7 @@
       "packageName": "@rushstack/rush-sdk",
       "projectFolder": "libraries/rush-sdk",
       "reviewCategory": "libraries",
-      // "versionPolicyName": "rush" (TODO: put this back and remove the "shouldPublish" property when we're ready to publish)
-      "shouldPublish": false
+      "versionPolicyName": "rush"
     },
 
     // "build-tests" folder (alphabetical order)
@@ -905,15 +904,13 @@
       "packageName": "@rushstack/rush-amazon-s3-build-cache-plugin",
       "projectFolder": "rush-plugins/rush-amazon-s3-build-cache-plugin",
       "reviewCategory": "libraries",
-      // "versionPolicyName": "rush" (TODO: put this back and remove the "shouldPublish" property when we're ready to publish)
-      "shouldPublish": false
+      "versionPolicyName": "rush"
     },
     {
       "packageName": "@rushstack/rush-azure-storage-build-cache-plugin",
       "projectFolder": "rush-plugins/rush-azure-storage-build-cache-plugin",
       "reviewCategory": "libraries",
-      // "versionPolicyName": "rush" (TODO: put this back and remove the "shouldPublish" property when we're ready to publish)
-      "shouldPublish": false
+      "versionPolicyName": "rush"
     },
 
     // "stack" folder (alphabetical order)

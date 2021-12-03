@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "set $schema in rush plugin related json files",
+      "comment": "",
       "type": "none"
     }
   ],
