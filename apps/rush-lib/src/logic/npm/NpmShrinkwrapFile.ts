@@ -61,12 +61,12 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   public static loadFromString(shrinkwrapContent: string): NpmShrinkwrapFile {
-    // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
-    // and typically very large, so we want to load it the same way that NPM does.
     // strip BOM
     const data: string =
       shrinkwrapContent.charCodeAt(0) === 0xfeff ? shrinkwrapContent.slice(1) : shrinkwrapContent;
 
+    // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
+    // and typically very large, so we want to load it the same way that NPM does.
     return new NpmShrinkwrapFile(JSON.parse(data));
   }
 

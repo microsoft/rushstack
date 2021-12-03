@@ -167,7 +167,8 @@ export class YarnShrinkwrapFile extends BaseShrinkwrapFile {
 
   public static loadFromFile(shrinkwrapFilename: string): YarnShrinkwrapFile | undefined {
     try {
-      return YarnShrinkwrapFile.loadFromString(shrinkwrapFilename);
+      const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapFilename);
+      return YarnShrinkwrapFile.loadFromString(shrinkwrapContent);
     } catch (error) {
       if (FileSystem.isNotExistError(error as Error)) {
         return undefined; // file does not exist
