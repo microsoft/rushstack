@@ -1,6 +1,6 @@
 {
   "name": "eslint-7-test",
-  "description": "This project contains a build test to validate eslint 7 builds with the latest version of @rushstack/eslint-config",
+  "description": "This project contains a build test to validate ESLint 7 compatibility with the latest version of @rushstack/eslint-config (and by extension, the ESLint plugin)",
   "version": "1.0.0",
   "private": true,
   "main": "lib/index.js",
