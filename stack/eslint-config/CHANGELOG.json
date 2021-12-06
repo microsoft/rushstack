@@ -2,6 +2,29 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "2.5.0",
+      "tag": "@rushstack/eslint-config_v2.5.0",
+      "date": "Mon, 06 Dec 2021 16:08:32 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Temporarily disable eslint-plugin-promise until ESLint v8 support is added (https://github.com/xjamundx/eslint-plugin-promise/issues/218)"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin\" to `0.8.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-packlets\" to `0.3.4`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-plugin-security\" to `0.2.4`"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.4.5",
       "tag": "@rushstack/eslint-config_v2.4.5",
       "date": "Fri, 05 Nov 2021 15:09:18 GMT",

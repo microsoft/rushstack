@@ -1,6 +1,13 @@
 # Change Log - @rushstack/eslint-plugin
 
-This log was last generated on Wed, 27 Oct 2021 00:08:15 GMT and should not be manually modified.
+This log was last generated on Mon, 06 Dec 2021 16:08:32 GMT and should not be manually modified.
+
+## 0.8.4
+Mon, 06 Dec 2021 16:08:32 GMT
+
+### Patches
+
+- Add support for ESLint v8
 
 ## 0.8.3
 Wed, 27 Oct 2021 00:08:15 GMT
