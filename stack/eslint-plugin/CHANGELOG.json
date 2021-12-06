@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-plugin",
   "entries": [
     {
+      "version": "0.8.4",
+      "tag": "@rushstack/eslint-plugin_v0.8.4",
+      "date": "Mon, 06 Dec 2021 16:08:32 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Add support for ESLint v8"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.8.3",
       "tag": "@rushstack/eslint-plugin_v0.8.3",
       "date": "Wed, 27 Oct 2021 00:08:15 GMT",

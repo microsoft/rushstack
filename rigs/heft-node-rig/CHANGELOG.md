@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Fri, 03 Dec 2021 03:05:22 GMT and should not be manually modified.
+This log was last generated on Mon, 06 Dec 2021 16:08:32 GMT and should not be manually modified.
+
+## 1.3.0
+Mon, 06 Dec 2021 16:08:32 GMT
+
+### Minor changes
+
+- Bump ESLint to v8
 
 ## 1.2.33
 Fri, 03 Dec 2021 03:05:22 GMT
