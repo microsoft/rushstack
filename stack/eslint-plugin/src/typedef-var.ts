@@ -23,10 +23,11 @@ const typedefVar: TSESLint.RuleModule<MessageIds, Options> = {
     docs: {
       description:
         'Supplements the "@typescript-eslint/typedef" rule by relaxing the requirements for local variables',
+      // Deprecated in ESLint v8; Keep for backwards compatibility
       category: 'Stylistic Issues',
       recommended: 'error',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
-    }
+    } as TSESLint.RuleMetaDataDocs
   },
 
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {

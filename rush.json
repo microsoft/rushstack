@@ -550,6 +550,12 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
+    {
+      "packageName": "eslint-7-test",
+      "projectFolder": "build-tests/eslint-7-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
 
     // "build-tests-samples" folder (alphabetical order)
     {

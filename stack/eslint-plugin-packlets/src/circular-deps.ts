@@ -26,10 +26,11 @@ const circularDeps: TSESLint.RuleModule<MessageIds, Options> = {
     ],
     docs: {
       description: 'Check for circular dependencies between packlets',
+      // Deprecated in ESLint v8; Keep for backwards compatibility
       category: 'Best Practices',
       recommended: 'warn',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin-packlets'
-    }
+    } as TSESLint.RuleMetaDataDocs
   },
 
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {

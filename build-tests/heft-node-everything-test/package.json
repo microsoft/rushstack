@@ -15,7 +15,7 @@
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/node": "12.20.24",
-    "eslint": "~7.30.0",
+    "eslint": "~8.3.0",
     "heft-example-plugin-01": "workspace:*",
     "heft-example-plugin-02": "workspace:*",
     "tslint": "~5.20.1",
