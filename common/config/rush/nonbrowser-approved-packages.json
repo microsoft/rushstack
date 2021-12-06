@@ -236,7 +236,7 @@
     },
     {
       "name": "@typescript-eslint/parser",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@typescript-eslint/typescript-estree",
@@ -416,6 +416,10 @@
     },
     {
       "name": "jest-config",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-environment-jsdom",
       "allowedCategories": [ "libraries" ]
     },
     {

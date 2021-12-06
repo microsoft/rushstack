@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.55.0",
+  "rushVersion": "5.57.0",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -28,7 +28,7 @@
    */
   "pnpmVersion": "6.7.1",
 
-  // "npmVersion": "4.5.0",
+  // "npmVersion": "6.14.15",
   // "yarnVersion": "1.9.4",
 
   /**
@@ -257,7 +257,7 @@
      * you might configure your system's trigger to look for a special string such as "[skip-ci]"
      * in the commit message, and then customize Rush's message to contain that string.
      */
-    // "versionBumpCommitMessage": "Applying package updates. [skip-ci]",
+    // "versionBumpCommitMessage": "Bump versions [skip ci]",
 
     /**
      * The commit message to use when committing changes during 'rush version'.
@@ -266,7 +266,7 @@
      * you might configure your system's trigger to look for a special string such as "[skip-ci]"
      * in the commit message, and then customize Rush's message to contain that string.
      */
-    // "changeLogUpdateCommitMessage": "Deleting change files and updating change logs for package updates. [skip-ci]"
+    // "changeLogUpdateCommitMessage": "Update changelogs [skip ci]"
   },
 
   "repository": {
@@ -492,8 +492,7 @@
       "packageName": "@rushstack/rush-sdk",
       "projectFolder": "libraries/rush-sdk",
       "reviewCategory": "libraries",
-      // "versionPolicyName": "rush" (TODO: put this back and remove the "shouldPublish" property when we're ready to publish)
-      "shouldPublish": false
+      "versionPolicyName": "rush"
     },
 
     // "build-tests" folder (alphabetical order)
@@ -548,6 +547,12 @@
     {
       "packageName": "api-extractor-test-04",
       "projectFolder": "build-tests/api-extractor-test-04",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
+      "packageName": "eslint-7-test",
+      "projectFolder": "build-tests/eslint-7-test",
       "reviewCategory": "tests",
       "shouldPublish": false
     },
@@ -905,15 +910,13 @@
       "packageName": "@rushstack/rush-amazon-s3-build-cache-plugin",
       "projectFolder": "rush-plugins/rush-amazon-s3-build-cache-plugin",
       "reviewCategory": "libraries",
-      // "versionPolicyName": "rush" (TODO: put this back and remove the "shouldPublish" property when we're ready to publish)
-      "shouldPublish": false
+      "versionPolicyName": "rush"
     },
     {
       "packageName": "@rushstack/rush-azure-storage-build-cache-plugin",
       "projectFolder": "rush-plugins/rush-azure-storage-build-cache-plugin",
       "reviewCategory": "libraries",
-      // "versionPolicyName": "rush" (TODO: put this back and remove the "shouldPublish" property when we're ready to publish)
-      "shouldPublish": false
+      "versionPolicyName": "rush"
     },
 
     // "stack" folder (alphabetical order)

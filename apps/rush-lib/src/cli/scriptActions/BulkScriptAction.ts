@@ -131,7 +131,8 @@ export class BulkScriptAction extends BaseScriptAction {
     }
 
     const selection: Set<RushConfigurationProject> = await this._selectionParameters.getSelectedProjectsAsync(
-      terminal
+      terminal,
+      true
     );
 
     if (!selection.size) {

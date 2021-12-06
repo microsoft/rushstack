@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-config",
+      "comment": "Temporarily disable eslint-plugin-promise until ESLint v8 support is added (https://github.com/xjamundx/eslint-plugin-promise/issues/218)",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-config"
+}

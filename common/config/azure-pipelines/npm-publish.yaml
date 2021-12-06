@@ -10,3 +10,4 @@ steps:
   - template: templates/publish.yaml
     parameters:
       VersionPolicyName: noRush
+  - template: templates/record-published-versions.yaml

@@ -1,6 +1,18 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 28 Oct 2021 23:49:31 GMT and should not be manually modified.
+This log was last generated on Fri, 03 Dec 2021 02:16:10 GMT and should not be manually modified.
+
+## 5.57.0
+Fri, 03 Dec 2021 02:16:10 GMT
+
+### Updates
+
+- Add support for the "filterLog" hook in common/config/rush/.pnpmfile.cjs
+- (EXPERIMENTAL) Ability to load third-party plugin packages that customize the behavior of Rush
+- Fix an issue where parameter values containing spaces are incorrectly passed to global scripts.
+- Added support for the "--changed-since REF" and "--changed-since-only REF" selection parameters, which select projects that have been modified since the specified Git revision. Updated state computation and change detection to operate at the root of the Git repository that contains rush.json, rather than from the immediate parent folder. This allows nesting rush.json in a subfolder.
+- (EXPERIMENTAL) Add a new NPM package "@rushstack/rush-sdk" for use by Rush plugins
+- Stop deleting the pnpm-store after failed workspace installs. Usually a multiple failure is due to a network error or a package that does not exist in the registry, not an issue with the pnpm-store.
 
 ## 5.56.0
 Thu, 28 Oct 2021 23:49:31 GMT

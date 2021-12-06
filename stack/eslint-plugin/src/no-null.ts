@@ -16,10 +16,11 @@ const noNullRule: TSESLint.RuleModule<MessageIds, Options> = {
     schema: [],
     docs: {
       description: 'Prevent usage of JavaScript\'s "null" keyword',
+      // Deprecated in ESLint v8; Keep for backwards compatibility
       category: 'Stylistic Issues',
       recommended: 'error',
       url: 'https://www.npmjs.com/package/@rushstack/eslint-plugin'
-    }
+    } as TSESLint.RuleMetaDataDocs
   },
   create: (context: TSESLint.RuleContext<MessageIds, Options>) => {
     return {
