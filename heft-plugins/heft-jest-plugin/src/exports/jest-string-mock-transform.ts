@@ -2,4 +2,4 @@
 // See LICENSE in the project root for license information.
 
 import { StringMockTransformer } from '../transformers/StringMockTransformer';
-module.exports = new StringMockTransformer();
+export = new StringMockTransformer();

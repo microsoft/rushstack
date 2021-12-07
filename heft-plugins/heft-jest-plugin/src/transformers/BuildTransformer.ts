@@ -35,7 +35,8 @@ const POLLING_INTERVAL_MS: number = 50;
 /**
  * This Jest transformer maps TS files under a 'src' folder to their compiled equivalent under 'lib'.
  *
- * NOTE: Implements SyncTransformer interface instead of AsyncTransformer since async is only supported
+ * @privateRemarks
+ * Implements SyncTransformer interface instead of AsyncTransformer since async is only supported
  * in ESM, which is still considered experimental:
  * https://github.com/facebook/jest/issues/11226#issuecomment-804449688
  */

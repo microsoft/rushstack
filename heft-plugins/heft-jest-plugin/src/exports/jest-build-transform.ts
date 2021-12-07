@@ -2,4 +2,4 @@
 // See LICENSE in the project root for license information.
 
 import { BuildTransformer } from '../transformers/BuildTransformer';
-module.exports = new BuildTransformer();
+export = new BuildTransformer();
