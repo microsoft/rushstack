@@ -4,7 +4,7 @@
 import * as path from 'path';
 import { Path, FileSystem, FileSystemStats, JsonObject } from '@rushstack/node-core-library';
 import createCacheKeyFunction from '@jest/create-cache-key-function';
-import type { SyncTransformer, TransformedSource, TransformOptions } from '@jest/transform';
+import type { AsyncTransformer, SyncTransformer, TransformedSource, TransformOptions } from '@jest/transform';
 import type { Config } from '@jest/types';
 
 import { HeftJestDataFile, IHeftJestDataFileJson } from '../HeftJestDataFile';
@@ -16,6 +16,12 @@ const dataFileJsonCache: Map<string, IHeftJestDataFileJson> = new Map();
 // Synchronous delay that doesn't burn CPU cycles
 function delayMs(milliseconds: number): void {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
+}
+
+async function delayMsAsync(milliseconds: number): Promise<void> {
+  await new Promise<void>((resolve: () => void): void => {
+    setTimeout(resolve, milliseconds);
+  });
 }
 
 const DEBUG_TRANSFORM: boolean = false;
@@ -49,12 +55,12 @@ type NewGetCacheKeyFunction = (
  * in ESM, which is still considered experimental:
  * https://github.com/facebook/jest/issues/11226#issuecomment-804449688
  */
-export class BuildTransformer implements SyncTransformer {
+export class BuildTransformer implements AsyncTransformer, SyncTransformer {
   /**
    * Read heft-jest-data.json, which is created by the JestPlugin.  It tells us
    * which emitted output folder to use for Jest.
    */
-  private _getHeftJestDataFileJson(rootDir: string): IHeftJestDataFileJson {
+  private static _getHeftJestDataFileJson(rootDir: string): IHeftJestDataFileJson {
     let heftJestDataFile: IHeftJestDataFileJson | undefined = dataFileJsonCache.get(rootDir);
     if (heftJestDataFile === undefined) {
       heftJestDataFile = HeftJestDataFile.loadForProject(rootDir);
@@ -63,8 +69,255 @@ export class BuildTransformer implements SyncTransformer {
     return heftJestDataFile;
   }
 
+  /**
+   * Read heft-jest-data.json, which is created by the JestPlugin.  It tells us
+   * which emitted output folder to use for Jest.
+   */
+  private static async _getHeftJestDataFileJsonAsync(rootDir: string): Promise<IHeftJestDataFileJson> {
+    let heftJestDataFile: IHeftJestDataFileJson | undefined = dataFileJsonCache.get(rootDir);
+    if (heftJestDataFile === undefined) {
+      heftJestDataFile = await HeftJestDataFile.loadForProjectAsync(rootDir);
+      dataFileJsonCache.set(rootDir, heftJestDataFile);
+    }
+    return heftJestDataFile;
+  }
+
+  private static _getSourceMapText(sourceMapPath: string): string {
+    try {
+      return FileSystem.readFile(sourceMapPath);
+    } catch (error) {
+      if (FileSystem.isNotExistError(error as Error)) {
+        throw new Error(
+          'jest-build-transform: The source map file is missing -- check your tsconfig.json settings:\n' +
+            sourceMapPath
+        );
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  private static async _getSourceMapTextAsync(sourceMapPath: string): Promise<string> {
+    try {
+      return await FileSystem.readFileAsync(sourceMapPath);
+    } catch (error) {
+      if (FileSystem.isNotExistError(error as Error)) {
+        throw new Error(
+          'jest-build-transform: The source map file is missing -- check your tsconfig.json settings:\n' +
+            sourceMapPath
+        );
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  private static _getTranspiledText(transpiledPath: string): string {
+    try {
+      return FileSystem.readFile(transpiledPath);
+    } catch (error) {
+      if (FileSystem.isNotExistError(error as Error)) {
+        throw new Error(
+          'jest-build-transform: The expected transpiler output file does not exist:\n' + transpiledPath
+        );
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  private static async _getTranspiledTextAsync(transpiledPath: string): Promise<string> {
+    try {
+      return await FileSystem.readFileAsync(transpiledPath);
+    } catch (error) {
+      if (FileSystem.isNotExistError(error as Error)) {
+        throw new Error(
+          'jest-build-transform: The expected transpiler output file does not exist:\n' + transpiledPath
+        );
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  /**
+   * Transform the transpiled text and source map to reference the correct source file content.
+   */
+  private static _transform(
+    sourceText: string,
+    sourcePath: string,
+    transpiledText: string,
+    sourceMap: string,
+    sourceMapPath: string
+  ): TransformedSource {
+    // Fix up the source map, since Jest will present the .ts file path to VS Code as the executing script
+    const parsedSourceMap: JsonObject = JSON.parse(sourceMap);
+    if (parsedSourceMap.version !== 3) {
+      throw new Error('jest-build-transform: Unsupported source map file version: ' + sourceMapPath);
+    }
+    parsedSourceMap.file = sourcePath;
+    parsedSourceMap.sources = [sourcePath];
+    parsedSourceMap.sourcesContent = [sourceText];
+    delete parsedSourceMap.sourceRoot;
+    const correctedSourceMap: string = JSON.stringify(parsedSourceMap);
+
+    // Embed the source map, since if we return the { code, map } object, then the debugger does not believe
+    // it is the same file, and will show a separate view with the same file path.
+    //
+    // Note that if the Jest testEnvironment does not support vm.compileFunction (introduced with Node.js 10),
+    // then the Jest module wrapper will inject text below the "//# sourceMappingURL=" line which breaks source maps.
+    // See this PR for details: https://github.com/facebook/jest/pull/9252
+    const encodedSourceMap: string =
+      'data:application/json;charset=utf-8;base64,' +
+      Buffer.from(correctedSourceMap, 'utf8').toString('base64');
+
+    const sourceMappingUrlToken: string = 'sourceMappingURL=';
+    const sourceMappingCommentIndex: number = transpiledText.lastIndexOf(sourceMappingUrlToken);
+    let transpiledTextWithSourceMap: string;
+    if (sourceMappingCommentIndex !== -1) {
+      transpiledTextWithSourceMap =
+        transpiledText.slice(0, sourceMappingCommentIndex + sourceMappingUrlToken.length) + encodedSourceMap;
+    } else {
+      // If there isn't a sourceMappingURL comment, inject one
+      const sourceMapComment: string =
+        (transpiledText.endsWith('\n') ? '' : '\n') + `//# ${sourceMappingUrlToken}${encodedSourceMap}`;
+      transpiledTextWithSourceMap = transpiledText + sourceMapComment;
+    }
+
+    return transpiledTextWithSourceMap;
+  }
+
+  private static _waitForTranspiledFile(sourcePath: string, transpiledPath: string): void {
+    let stalled: boolean = false;
+    const startMs: number = new Date().getTime();
+
+    for (;;) {
+      let sourceFileStatistics: FileSystemStats;
+      try {
+        sourceFileStatistics = FileSystem.getStatistics(sourcePath);
+      } catch {
+        // If the source file was deleted, then fall through and allow readFile() to fail
+        break;
+      }
+      let transpiledFileStatistics: FileSystemStats | undefined = undefined;
+      try {
+        transpiledFileStatistics = FileSystem.getStatistics(transpiledPath);
+      } catch {
+        // ignore errors
+      }
+
+      const nowMs: number = new Date().getTime();
+      if (transpiledFileStatistics) {
+        // The lib/*.js timestamp must not be older than the src/*.ts timestamp, otherwise the transpiler
+        // is not done writing its outputs.
+        if (transpiledFileStatistics.ctimeMs + TIMESTAMP_TOLERANCE_MS > sourceFileStatistics.ctimeMs) {
+          // Also, the lib/*.js timestamp must not be too recent, otherwise the transpiler may not have
+          // finished flushing its output to disk.
+          if (nowMs > transpiledFileStatistics.ctimeMs + FLUSH_TIME_MS) {
+            // The .js file is newer than the .ts file, and is old enough to have been flushed
+            break;
+          }
+        }
+      }
+
+      if (nowMs - startMs > MAX_WAIT_MS) {
+        // Something is wrong -- why hasn't the compiler updated the .js file?
+        if (transpiledFileStatistics) {
+          throw new Error(
+            `jest-build-transform: Gave up waiting for the transpiler to update its output file:\n${transpiledPath}`
+          );
+        } else {
+          throw new Error(
+            `jest-build-transform: Gave up waiting for the transpiler to write its output file:\n${transpiledPath}`
+          );
+        }
+      }
+
+      // Jest's transforms are synchronous, so our only option here is to sleep synchronously. Bad Jest. :-(
+      stalled = true;
+      delayMs(POLLING_INTERVAL_MS);
+    }
+
+    if (stalled && DEBUG_TRANSFORM) {
+      const nowMs: number = new Date().getTime();
+      const elapsedMs: number = nowMs - startMs;
+      if (elapsedMs > POLLING_INTERVAL_MS) {
+        console.log(`Waited ${elapsedMs} ms for .js file`);
+      }
+      delayMs(2000);
+    }
+  }
+
+  private static async _waitForTranspiledFileAsync(
+    sourcePath: string,
+    transpiledPath: string
+  ): Promise<void> {
+    let stalled: boolean = false;
+    const startMs: number = new Date().getTime();
+
+    for (;;) {
+      let sourceFileStatistics: FileSystemStats;
+      try {
+        sourceFileStatistics = await FileSystem.getStatisticsAsync(sourcePath);
+      } catch {
+        // If the source file was deleted, then fall through and allow readFileAsync() to fail
+        break;
+      }
+      let transpiledFileStatistics: FileSystemStats | undefined = undefined;
+      try {
+        transpiledFileStatistics = await FileSystem.getStatisticsAsync(transpiledPath);
+      } catch {
+        // ignore errors
+      }
+
+      const nowMs: number = new Date().getTime();
+      if (transpiledFileStatistics) {
+        // The lib/*.js timestamp must not be older than the src/*.ts timestamp, otherwise the transpiler
+        // is not done writing its outputs.
+        if (transpiledFileStatistics.ctimeMs + TIMESTAMP_TOLERANCE_MS > sourceFileStatistics.ctimeMs) {
+          // Also, the lib/*.js timestamp must not be too recent, otherwise the transpiler may not have
+          // finished flushing its output to disk.
+          if (nowMs > transpiledFileStatistics.ctimeMs + FLUSH_TIME_MS) {
+            // The .js file is newer than the .ts file, and is old enough to have been flushed
+            break;
+          }
+        }
+      }
+
+      if (nowMs - startMs > MAX_WAIT_MS) {
+        // Something is wrong -- why hasn't the compiler updated the .js file?
+        if (transpiledFileStatistics) {
+          throw new Error(
+            `jest-build-transform: Gave up waiting for the transpiler to update its output file:\n${transpiledPath}`
+          );
+        } else {
+          throw new Error(
+            `jest-build-transform: Gave up waiting for the transpiler to write its output file:\n${transpiledPath}`
+          );
+        }
+      }
+
+      stalled = true;
+      await delayMsAsync(POLLING_INTERVAL_MS);
+    }
+
+    if (stalled && DEBUG_TRANSFORM) {
+      const nowMs: number = new Date().getTime();
+      const elapsedMs: number = nowMs - startMs;
+      if (elapsedMs > POLLING_INTERVAL_MS) {
+        console.log(`Waited ${elapsedMs} ms for .js file`);
+      }
+      await delayMsAsync(POLLING_INTERVAL_MS);
+    }
+  }
+
+  /**
+   * @override
+   */
   public getCacheKey(sourceText: string, sourcePath: Config.Path, options: TransformOptions): string {
-    const heftJestDataFile: IHeftJestDataFileJson = this._getHeftJestDataFileJson(options.config.rootDir);
+    const heftJestDataFile: IHeftJestDataFileJson = BuildTransformer._getHeftJestDataFileJson(
+      options.config.rootDir
+    );
     const cacheKeyFunction: NewGetCacheKeyFunction = createCacheKeyFunction(
       /* files: */ [__filename],
       /* values: */ [heftJestDataFile.emitFolderNameForTests, heftJestDataFile.extensionForTests]
@@ -72,9 +325,32 @@ export class BuildTransformer implements SyncTransformer {
     return cacheKeyFunction(sourceText, sourcePath, options);
   }
 
+  /**
+   * @override
+   */
+  public async getCacheKeyAsync(
+    sourceText: string,
+    sourcePath: Config.Path,
+    options: TransformOptions
+  ): Promise<string> {
+    const heftJestDataFile: IHeftJestDataFileJson = await BuildTransformer._getHeftJestDataFileJsonAsync(
+      options.config.rootDir
+    );
+    const cacheKeyFunction: NewGetCacheKeyFunction = createCacheKeyFunction(
+      /* files: */ [__filename],
+      /* values: */ [heftJestDataFile.emitFolderNameForTests, heftJestDataFile.extensionForTests]
+    ) as NewGetCacheKeyFunction;
+    return cacheKeyFunction(sourceText, sourcePath, options);
+  }
+
+  /**
+   * @override
+   */
   public process(sourceText: string, sourcePath: Config.Path, options: TransformOptions): TransformedSource {
     const jestOptions: Config.ProjectConfig = options.config;
-    const heftJestDataFile: IHeftJestDataFileJson = this._getHeftJestDataFileJson(jestOptions.rootDir);
+    const heftJestDataFile: IHeftJestDataFileJson = BuildTransformer._getHeftJestDataFileJson(
+      jestOptions.rootDir
+    );
 
     // Is the input file under the "src" folder?
     const srcFolder: string = path.join(jestOptions.rootDir, 'src');
@@ -87,140 +363,87 @@ export class BuildTransformer implements SyncTransformer {
       const srcRelativeFolderPath: string = path.relative(srcFolder, parsedFilename.dir);
 
       // Example: /path/to/project/lib/folder1/folder2/Example.js
-      const libFilePath: string = path.join(
+      const transpiledPath: string = path.join(
         jestOptions.rootDir,
         heftJestDataFile.emitFolderNameForTests,
         srcRelativeFolderPath,
         `${parsedFilename.name}${heftJestDataFile.extensionForTests}`
       );
 
-      const startOfLoopMs: number = new Date().getTime();
-      let stalled: boolean = false;
+      // Example: /path/to/project/lib/folder1/folder2/Example.js.map
+      const sourceMapPath: string = `${transpiledPath}.map`;
 
       if (!heftJestDataFile.skipTimestampCheck) {
-        for (;;) {
-          let srcFileStatistics: FileSystemStats;
-          try {
-            srcFileStatistics = FileSystem.getStatistics(sourcePath);
-          } catch {
-            // If the source file was deleted, then fall through and allow readFile() to fail
-            break;
-          }
-          let libFileStatistics: FileSystemStats | undefined = undefined;
-          try {
-            libFileStatistics = FileSystem.getStatistics(libFilePath);
-          } catch {
-            // ignore errors
-          }
-
-          const nowMs: number = new Date().getTime();
-          if (libFileStatistics) {
-            // The lib/*.js timestamp must not be older than the src/*.ts timestamp, otherwise the transpiler
-            // is not done writing its outputs.
-            if (libFileStatistics.ctimeMs + TIMESTAMP_TOLERANCE_MS > srcFileStatistics.ctimeMs) {
-              // Also, the lib/*.js timestamp must not be too recent, otherwise the transpiler may not have
-              // finished flushing its output to disk.
-              if (nowMs > libFileStatistics.ctimeMs + FLUSH_TIME_MS) {
-                // The .js file is newer than the .ts file, and is old enough to have been flushed
-                break;
-              }
-            }
-          }
-
-          if (nowMs - startOfLoopMs > MAX_WAIT_MS) {
-            // Something is wrong -- why hasn't the compiler updated the .js file?
-            if (libFileStatistics) {
-              throw new Error(
-                'jest-build-transform: Gave up waiting for the transpiler to update its output file:\n' +
-                  libFilePath
-              );
-            } else {
-              throw new Error(
-                'jest-build-transform: Gave up waiting for the transpiler to write its output file:\n' +
-                  libFilePath
-              );
-            }
-          }
-
-          // Jest's transforms are synchronous, so our only option here is to sleep synchronously. Bad Jest. :-(
-          // TODO: The better solution is to change how Jest's watch loop is notified.
-          stalled = true;
-          delayMs(POLLING_INTERVAL_MS);
-        }
+        BuildTransformer._waitForTranspiledFile(sourcePath, transpiledPath);
       }
 
-      if (stalled && DEBUG_TRANSFORM) {
-        const nowMs: number = new Date().getTime();
-        console.log(`Waited ${nowMs - startOfLoopMs} ms for .js file`);
-        delayMs(2000);
-      }
+      const transpiledText: string = BuildTransformer._getTranspiledText(transpiledPath);
+      const sourceMapText: string = BuildTransformer._getSourceMapText(sourceMapPath);
 
-      let libCode: string;
-      try {
-        libCode = FileSystem.readFile(libFilePath);
-      } catch (error) {
-        if (FileSystem.isNotExistError(error as Error)) {
-          throw new Error(
-            'jest-build-transform: The expected transpiler output file does not exist:\n' + libFilePath
-          );
-        } else {
-          throw error;
-        }
-      }
-
-      const sourceMapFilePath: string = libFilePath + '.map';
-
-      let originalSourceMap: string;
-      try {
-        originalSourceMap = FileSystem.readFile(sourceMapFilePath);
-      } catch (error) {
-        if (FileSystem.isNotExistError(error as Error)) {
-          throw new Error(
-            'jest-build-transform: The source map file is missing -- check your tsconfig.json settings:\n' +
-              sourceMapFilePath
-          );
-        } else {
-          throw error;
-        }
-      }
-
-      // Fix up the source map, since Jest will present the .ts file path to VS Code as the executing script
-      const parsedSourceMap: JsonObject = JSON.parse(originalSourceMap);
-      if (parsedSourceMap.version !== 3) {
-        throw new Error('jest-build-transform: Unsupported source map file version: ' + sourceMapFilePath);
-      }
-      parsedSourceMap.file = sourcePath;
-      parsedSourceMap.sources = [sourcePath];
-      parsedSourceMap.sourcesContent = [sourceText];
-      delete parsedSourceMap.sourceRoot;
-      const correctedSourceMap: string = JSON.stringify(parsedSourceMap);
-
-      // Embed the source map, since if we return the { code, map } object, then the debugger does not believe
-      // it is the same file, and will show a separate view with the same file path.
-      //
-      // Note that if the Jest testEnvironment does not support vm.compileFunction (introduced with Node.js 10),
-      // then the Jest module wrapper will inject text below the "//# sourceMappingURL=" line which breaks source maps.
-      // See this PR for details: https://github.com/facebook/jest/pull/9252
-      const encodedSourceMap: string =
-        'data:application/json;charset=utf-8;base64,' +
-        Buffer.from(correctedSourceMap, 'utf8').toString('base64');
-
-      const sourceMappingUrlToken: string = 'sourceMappingURL=';
-      const sourceMappingCommentIndex: number = libCode.lastIndexOf(sourceMappingUrlToken);
-      let libCodeWithSourceMap: string;
-      if (sourceMappingCommentIndex !== -1) {
-        libCodeWithSourceMap =
-          libCode.slice(0, sourceMappingCommentIndex + sourceMappingUrlToken.length) + encodedSourceMap;
-      } else {
-        // If there isn't a sourceMappingURL comment, inject one
-        const sourceMapComment: string =
-          (libCode.endsWith('\n') ? '' : '\n') + `//# ${sourceMappingUrlToken}${encodedSourceMap}`;
-        libCodeWithSourceMap = libCode + sourceMapComment;
-      }
-
-      return libCodeWithSourceMap;
+      return BuildTransformer._transform(
+        sourceText,
+        sourcePath,
+        transpiledText,
+        sourceMapText,
+        sourceMapPath
+      );
     } else {
-      throw new Error('jest-build-transform: The input path is not under the "src" folder:\n' + sourcePath);
+      throw new Error(`jest-build-transform: The input path is not under the "src" folder:\n${sourcePath}`);
+    }
+  }
+
+  /**
+   * @override
+   */
+  public async processAsync(
+    sourceText: string,
+    sourcePath: Config.Path,
+    options: TransformOptions
+  ): Promise<TransformedSource> {
+    const jestOptions: Config.ProjectConfig = options.config;
+    const heftJestDataFile: IHeftJestDataFileJson = await BuildTransformer._getHeftJestDataFileJsonAsync(
+      jestOptions.rootDir
+    );
+
+    // Is the input file under the "src" folder?
+    const srcFolder: string = path.join(jestOptions.rootDir, 'src');
+
+    if (Path.isUnder(sourcePath, srcFolder)) {
+      // Example: /path/to/project/src/folder1/folder2/Example.ts
+      const parsedFilename: path.ParsedPath = path.parse(sourcePath);
+
+      // Example: folder1/folder2
+      const srcRelativeFolderPath: string = path.relative(srcFolder, parsedFilename.dir);
+
+      // Example: /path/to/project/lib/folder1/folder2/Example.js
+      const transpiledPath: string = path.join(
+        jestOptions.rootDir,
+        heftJestDataFile.emitFolderNameForTests,
+        srcRelativeFolderPath,
+        `${parsedFilename.name}${heftJestDataFile.extensionForTests}`
+      );
+
+      // Example: /path/to/project/lib/folder1/folder2/Example.js.map
+      const sourceMapPath: string = `${transpiledPath}.map`;
+
+      if (!heftJestDataFile.skipTimestampCheck) {
+        await BuildTransformer._waitForTranspiledFileAsync(sourcePath, transpiledPath);
+      }
+
+      const [transpiledText, sourceMapText] = await Promise.all([
+        BuildTransformer._getTranspiledTextAsync(transpiledPath),
+        BuildTransformer._getSourceMapTextAsync(sourceMapPath)
+      ]);
+
+      return BuildTransformer._transform(
+        sourceText,
+        sourcePath,
+        transpiledText,
+        sourceMapText,
+        sourceMapPath
+      );
+    } else {
+      throw new Error(`jest-build-transform: The input path is not under the "src" folder:\n${sourcePath}`);
     }
   }
 }
