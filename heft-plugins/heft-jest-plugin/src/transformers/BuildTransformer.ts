@@ -33,6 +33,7 @@ const MAX_WAIT_MS: number = 7000;
 // Shamefully sleep this long to avoid consuming CPU cycles
 const POLLING_INTERVAL_MS: number = 50;
 
+// See: https://github.com/facebook/jest/blob/e0b33b74b5afd738edc183858b5c34053cfc26dd/packages/jest-create-cache-key-function/src/index.ts#L35
 type NewCacheKeyOptions = Pick<TransformOptions, 'config' | 'configString' | 'instrument'>;
 type NewGetCacheKeyFunction = (
   sourceText: string,

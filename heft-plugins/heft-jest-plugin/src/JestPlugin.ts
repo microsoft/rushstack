@@ -36,7 +36,7 @@ import {
   ITerminal
 } from '@rushstack/node-core-library';
 
-import { IHeftJestReporterOptions } from './HeftJestReporter';
+import type { IHeftJestReporterOptions } from './HeftJestReporter';
 import { HeftJestDataFile } from './HeftJestDataFile';
 import { jestResolve } from './JestUtils';
 
