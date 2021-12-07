@@ -5,34 +5,34 @@ import * as Webpack from 'webpack';
 import * as lodash from 'lodash';
 
 import { Constants } from './utilities/Constants';
-import { ILocaleElementMap } from './interfaces';
-import { LocalizationPlugin, IStringSerialNumberData as IStringData } from './LocalizationPlugin';
+import { LocalizationPlugin, IStringPlaceholder } from './LocalizationPlugin';
 
-interface IReconstructionElement {
-  kind: 'static' | 'localized' | 'dynamic';
-}
-
-interface IStaticReconstructionElement extends IReconstructionElement {
+interface IStaticReconstructionElement {
   kind: 'static';
   staticString: string;
 }
 
-interface ILocalizedReconstructionElement extends IReconstructionElement {
+interface ILocalizedReconstructionElement {
   kind: 'localized';
-  values: ILocaleElementMap;
+  values: Map<string, string>;
   size: number;
   stringName: string;
   escapedBackslash: string;
   locFilePath: string;
 }
 
-interface IDynamicReconstructionElement extends IReconstructionElement {
+interface IDynamicReconstructionElement {
   kind: 'dynamic';
   valueFn: (locale: string, token: string | undefined) => string;
   size: number;
   escapedBackslash: string;
   token?: string;
 }
+
+type IReconstructionElement =
+  | IStaticReconstructionElement
+  | ILocalizedReconstructionElement
+  | IDynamicReconstructionElement;
 
 interface IParseResult {
   issues: string[];
@@ -207,28 +207,29 @@ export class AssetProcessor {
   ): ILocalizedReconstructionResult {
     const localizedResults: Map<string, IReconstructedString> = new Map<string, IReconstructedString>();
     const issues: string[] = [];
+    const reconstruction: string[] = [];
+
+    const elementCount: number = reconstructionSeries.length;
 
     for (const locale of locales) {
-      const reconstruction: string[] = [];
-
-      let sizeDiff: number = 0;
-      for (const element of reconstructionSeries) {
+      let size: number = initialSize;
+      // Using index iteration to reuse the reconstruction array across locales
+      for (let i: number = 0; i < elementCount; i++) {
+        const element: IReconstructionElement = reconstructionSeries[i];
         switch (element.kind) {
           case 'static': {
-            reconstruction.push((element as IStaticReconstructionElement).staticString);
+            reconstruction[i] = element.staticString;
             break;
           }
 
           case 'localized': {
-            const localizedElement: ILocalizedReconstructionElement =
-              element as ILocalizedReconstructionElement;
-            let newValue: string | undefined = localizedElement.values[locale];
+            let newValue: string | undefined = element.values.get(locale);
             if (!newValue) {
               if (fillMissingTranslationStrings) {
-                newValue = localizedElement.values[defaultLocale];
+                newValue = element.values.get(defaultLocale)!;
               } else {
                 issues.push(
-                  `The string "${localizedElement.stringName}" in "${localizedElement.locFilePath}" is missing in ` +
+                  `The string "${element.stringName}" in "${element.locFilePath}" is missing in ` +
                     `the locale ${locale}`
                 );
 
@@ -236,40 +237,39 @@ export class AssetProcessor {
               }
             }
 
-            const escapedBackslash: string = localizedElement.escapedBackslash || '\\';
+            const escapedBackslash: string = element.escapedBackslash || '\\';
 
             // Replace backslashes with the properly escaped backslash
             newValue = newValue.replace(/\\/g, escapedBackslash);
 
             // @todo: look into using JSON.parse(...) to get the escaping characters
-            const escapingCharacterSequence: string = escapedBackslash.substr(escapedBackslash.length / 2);
+            const escapingCharacterSequence: string = escapedBackslash.slice(escapedBackslash.length / 2);
 
             // Ensure the the quotemark, apostrophe, tab, and newline characters are properly escaped
             newValue = newValue.replace(/\r/g, `${escapingCharacterSequence}r`);
             newValue = newValue.replace(/\n/g, `${escapingCharacterSequence}n`);
             newValue = newValue.replace(/\t/g, `${escapingCharacterSequence}t`);
-            newValue = newValue.replace(/\"/g, `${escapingCharacterSequence}u0022`);
-            newValue = newValue.replace(/\'/g, `${escapingCharacterSequence}u0027`);
+            newValue = newValue.replace(/\"/g, `${escapingCharacterSequence}x22`);
+            newValue = newValue.replace(/\'/g, `${escapingCharacterSequence}x27`);
 
-            reconstruction.push(newValue);
-            sizeDiff += newValue.length - localizedElement.size;
+            reconstruction[i] = newValue;
+            size += newValue.length - element.size;
             break;
           }
 
           case 'dynamic': {
-            const dynamicElement: IDynamicReconstructionElement = element as IDynamicReconstructionElement;
-            const newValue: string = dynamicElement.valueFn(locale, dynamicElement.token);
-            reconstruction.push(newValue);
-            sizeDiff += newValue.length - dynamicElement.size;
+            const newValue: string = element.valueFn(locale, element.token);
+            reconstruction[i] = newValue;
+            size += newValue.length - element.size;
             break;
           }
         }
       }
 
-      const newAssetSource: string = reconstruction.join('');
+      const source: string = reconstruction.join('');
       localizedResults.set(locale, {
-        source: newAssetSource,
-        size: initialSize + sizeDiff
+        source,
+        size
       });
     }
 
@@ -288,44 +288,41 @@ export class AssetProcessor {
 
     const reconstruction: string[] = [];
 
-    let sizeDiff: number = 0;
+    let size: number = initialSize;
     for (const element of reconstructionSeries) {
       switch (element.kind) {
         case 'static': {
-          reconstruction.push((element as IStaticReconstructionElement).staticString);
+          reconstruction.push(element.staticString);
           break;
         }
 
         case 'localized': {
-          const localizedElement: ILocalizedReconstructionElement =
-            element as ILocalizedReconstructionElement;
           issues.push(
-            `The string "${localizedElement.stringName}" in "${localizedElement.locFilePath}" appeared in an asset ` +
+            `The string "${element.stringName}" in "${element.locFilePath}" appeared in an asset ` +
               'that is not expected to contain localized resources.'
           );
 
           const newValue: string = '-- NOT EXPECTED TO BE LOCALIZED --';
           reconstruction.push(newValue);
-          sizeDiff += newValue.length - localizedElement.size;
+          size += newValue.length - element.size;
           break;
         }
 
         case 'dynamic': {
-          const dynamicElement: IDynamicReconstructionElement = element as IDynamicReconstructionElement;
-          const newValue: string = dynamicElement.valueFn(noStringsLocaleName, dynamicElement.token);
+          const newValue: string = element.valueFn(noStringsLocaleName, element.token);
           reconstruction.push(newValue);
-          sizeDiff += newValue.length - dynamicElement.size;
+          size += newValue.length - element.size;
           break;
         }
       }
     }
 
-    const newAssetSource: string = reconstruction.join('');
+    const source: string = reconstruction.join('');
     return {
       issues,
       result: {
-        source: newAssetSource,
-        size: initialSize + sizeDiff
+        source,
+        size
       }
     };
   }
@@ -344,7 +341,7 @@ export class AssetProcessor {
       // eslint-disable-line no-cond-assign
       const staticElement: IStaticReconstructionElement = {
         kind: 'static',
-        staticString: source.substring(lastIndex, regexResult.index)
+        staticString: source.slice(lastIndex, regexResult.index)
       };
       reconstructionSeries.push(staticElement);
 
@@ -353,7 +350,8 @@ export class AssetProcessor {
       let localizedReconstructionElement: IReconstructionElement;
       switch (elementLabel) {
         case Constants.STRING_PLACEHOLDER_LABEL: {
-          const stringData: IStringData | undefined = plugin.getDataForSerialNumber(placeholderSerialNumber);
+          const stringData: IStringPlaceholder | undefined =
+            plugin.getDataForSerialNumber(placeholderSerialNumber);
           if (!stringData) {
             issues.push(`Missing placeholder ${placeholder}`);
             const brokenLocalizedElement: IStaticReconstructionElement = {
@@ -447,19 +445,20 @@ export class AssetProcessor {
     } else if (idsWithoutStrings.size === 0) {
       return (locale: string) => JSON.stringify(locale);
     } else {
-      // Generate an array [<locale>, <nostrings locale>] and an object that is used as an indexer into that
-      // object that maps chunk IDs to 0s for chunks with localized strings and 1s for chunks without localized
-      // strings
+      // Generate an object that is used select between <locale> and <nostrings locale> for each chunk ID
+      // Method: pick the smaller set of (localized, non-localized) and map that to 1 (a truthy value)
+      // All other IDs map to `undefined` (a falsy value), so we then use the ternary operator to select
+      // the appropriate token
       //
       // This can be improved in the future. We can maybe sort the chunks such that the chunks below a certain ID
       // number are localized and the those above are not.
-      const chunkMapping: { [chunkId: string]: number } = {};
-      for (const idWithStrings of idsWithStrings) {
-        chunkMapping[idWithStrings] = 0;
-      }
-
-      for (const idWithoutStrings of idsWithoutStrings) {
-        chunkMapping[idWithoutStrings] = 1;
+      const chunkMapping: { [chunkId: string]: 1 } = {};
+      // Use the map with the fewest values to shorten the expression
+      const isLocalizedSmaller: boolean = idsWithStrings.size <= idsWithoutStrings.size;
+      // These are the ids for which the expression should evaluate to a truthy value
+      const smallerSet: Set<number | string> = isLocalizedSmaller ? idsWithStrings : idsWithoutStrings;
+      for (const id of smallerSet) {
+        chunkMapping[id] = 1;
       }
 
       return (locale: string, chunkIdToken: string | undefined) => {
@@ -467,9 +466,10 @@ export class AssetProcessor {
           throw new Error('Missing locale name.');
         }
 
-        return `(${JSON.stringify([locale, noStringsLocaleName])})[${JSON.stringify(
-          chunkMapping
-        )}[${chunkIdToken}]]`;
+        const tokenIfInSet: string = JSON.stringify(isLocalizedSmaller ? locale : noStringsLocaleName);
+        const tokenIfNotInSet: string = JSON.stringify(isLocalizedSmaller ? noStringsLocaleName : locale);
+
+        return `(${JSON.stringify(chunkMapping)}[${chunkIdToken}]?${tokenIfInSet}:${tokenIfNotInSet})`;
       };
     }
   }

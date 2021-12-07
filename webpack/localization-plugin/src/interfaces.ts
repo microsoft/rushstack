@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import * as webpack from 'webpack';
+
 /**
  * Options for the passthrough locale.
  *
@@ -104,7 +106,11 @@ export interface ILocalizedData {
    * Use this parameter to specify a function used to load translations missing from
    * the {@link ILocalizedData.translatedStrings} parameter.
    */
-  resolveMissingTranslatedStrings?: (locales: string[], filePath: string) => IResolvedMissingTranslations;
+  resolveMissingTranslatedStrings?: (
+    locales: string[],
+    filePath: string,
+    defaultLocaleModule: webpack.compilation.Module
+  ) => IResolvedMissingTranslations;
 
   /**
    * Options around including a passthrough locale.
