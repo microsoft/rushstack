@@ -2,9 +2,20 @@
 // See the @microsoft/rush package's LICENSE file for license information.
 
 import * as path from 'path';
-import { StringBuilder, Sort, FileSystem, Text } from '@rushstack/node-core-library';
+import {
+  StringBuilder,
+  Sort,
+  FileSystem,
+  Text,
+  Terminal,
+  ConsoleTerminalProvider,
+  AlreadyReportedError,
+  Colors,
+  IColorableSequence
+} from '@rushstack/node-core-library';
 import { RushConfiguration, RushConfigurationProject, LockStepVersionPolicy } from '@microsoft/rush-lib';
 import { CommandLineAction, CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import * as Diff from 'diff';
 
 const GENERATED_PROJECT_SUMMARY_START_COMMENT_TEXT: string = '<!-- GENERATED PROJECT SUMMARY START -->';
 const GENERATED_PROJECT_SUMMARY_END_COMMENT_TEXT: string = '<!-- GENERATED PROJECT SUMMARY END -->';
@@ -136,17 +147,45 @@ export class ReadmeAction extends CommandLineAction {
     builder.append(readmePostfix);
 
     const readmeString: string = builder.toString();
-    const readmeIsUpToDate: boolean = existingReadme === readmeString;
+    const diff: Diff.Change[] = Diff.diffLines(existingReadme, readmeString);
+    const readmeIsUpToDate: boolean = diff.length === 1 && !diff[0].added && !diff[0].removed;
+
+    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
 
     if (!readmeIsUpToDate) {
       if (this._verifyParameter.value) {
-        throw new Error(
+        for (const change of diff) {
+          const lines: string[] = change.value.trimEnd().split('\n');
+          let linePrefix: string;
+          let colorizer: (text: string | IColorableSequence) => IColorableSequence;
+          if (change.added) {
+            linePrefix = '+ ';
+            colorizer = Colors.green;
+          } else if (change.removed) {
+            linePrefix = '- ';
+            colorizer = Colors.red;
+          } else {
+            linePrefix = '  ';
+            colorizer = Colors.gray;
+          }
+
+          for (const line of lines) {
+            terminal.writeLine(colorizer(linePrefix + line));
+          }
+        }
+
+        terminal.writeLine();
+        terminal.writeLine();
+        terminal.writeErrorLine(
           `The README.md needs to be updated. Please run 'repo-toolbox readme' to update the README.md.`
         );
+
+        throw new AlreadyReportedError();
       } else {
-        console.log(`Writing ${repoReadmePath}`);
+        terminal.writeLine(`Writing ${repoReadmePath}`);
         await FileSystem.writeFileAsync(repoReadmePath, readmeString);
-        console.log('\nSuccess.');
+        terminal.writeLine();
+        terminal.writeLine(Colors.green('\nSuccess.'));
       }
     } else {
       console.log(`The README.md is up to date.`);
