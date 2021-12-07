@@ -3,6 +3,7 @@
 
 import * as path from 'path';
 import { Path, FileSystem, FileSystemStats, JsonObject } from '@rushstack/node-core-library';
+import createCacheKeyFunction from '@jest/create-cache-key-function';
 import type { SyncTransformer, TransformedSource, TransformOptions } from '@jest/transform';
 import type { Config } from '@jest/types';
 
@@ -32,6 +33,13 @@ const MAX_WAIT_MS: number = 7000;
 // Shamefully sleep this long to avoid consuming CPU cycles
 const POLLING_INTERVAL_MS: number = 50;
 
+type NewCacheKeyOptions = Pick<TransformOptions, 'config' | 'configString' | 'instrument'>;
+type NewGetCacheKeyFunction = (
+  sourceText: string,
+  sourcePath: Config.Path,
+  options: NewCacheKeyOptions
+) => string;
+
 /**
  * This Jest transformer maps TS files under a 'src' folder to their compiled equivalent under 'lib'.
  *
@@ -41,15 +49,31 @@ const POLLING_INTERVAL_MS: number = 50;
  * https://github.com/facebook/jest/issues/11226#issuecomment-804449688
  */
 export class BuildTransformer implements SyncTransformer {
+  /**
+   * Read heft-jest-data.json, which is created by the JestPlugin.  It tells us
+   * which emitted output folder to use for Jest.
+   */
+  private _getHeftJestDataFileJson(rootDir: string): IHeftJestDataFileJson {
+    let heftJestDataFile: IHeftJestDataFileJson | undefined = dataFileJsonCache.get(rootDir);
+    if (heftJestDataFile === undefined) {
+      heftJestDataFile = HeftJestDataFile.loadForProject(rootDir);
+      dataFileJsonCache.set(rootDir, heftJestDataFile);
+    }
+    return heftJestDataFile;
+  }
+
+  public getCacheKey(sourceText: string, sourcePath: Config.Path, options: TransformOptions): string {
+    const heftJestDataFile: IHeftJestDataFileJson = this._getHeftJestDataFileJson(options.config.rootDir);
+    const cacheKeyFunction: NewGetCacheKeyFunction = createCacheKeyFunction(
+      /* files: */ [__filename],
+      /* values: */ [heftJestDataFile.emitFolderNameForTests, heftJestDataFile.extensionForTests]
+    ) as NewGetCacheKeyFunction;
+    return cacheKeyFunction(sourceText, sourcePath, options);
+  }
+
   public process(sourceText: string, sourcePath: Config.Path, options: TransformOptions): TransformedSource {
     const jestOptions: Config.ProjectConfig = options.config;
-    let heftJestDataFile: IHeftJestDataFileJson | undefined = dataFileJsonCache.get(jestOptions.rootDir);
-    if (heftJestDataFile === undefined) {
-      // Read heft-jest-data.json, which is created by the JestPlugin.  It tells us
-      // which emitted output folder to use for Jest.
-      heftJestDataFile = HeftJestDataFile.loadForProject(jestOptions.rootDir);
-      dataFileJsonCache.set(jestOptions.rootDir, heftJestDataFile);
-    }
+    const heftJestDataFile: IHeftJestDataFileJson = this._getHeftJestDataFileJson(jestOptions.rootDir);
 
     // Is the input file under the "src" folder?
     const srcFolder: string = path.join(jestOptions.rootDir, 'src');

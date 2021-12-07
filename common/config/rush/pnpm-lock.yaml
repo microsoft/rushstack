@@ -1347,6 +1347,7 @@ importers:
   ../../heft-plugins/heft-jest-plugin:
     specifiers:
       '@jest/core': ~27.4.2
+      '@jest/create-cache-key-function': ~27.4.2
       '@jest/reporters': ~27.4.2
       '@jest/transform': ~27.4.2
       '@jest/types': ~27.4.2
@@ -1368,6 +1369,7 @@ importers:
       typescript: ~4.4.2
     dependencies:
       '@jest/core': 27.4.3
+      '@jest/create-cache-key-function': 27.4.2
       '@jest/reporters': 27.4.2
       '@jest/transform': 27.4.2
       '@rushstack/heft-config-file': link:../../libraries/heft-config-file
@@ -3901,6 +3903,13 @@ packages:
       - supports-color
       - ts-node
       - utf-8-validate
+
+  /@jest/create-cache-key-function/27.4.2:
+    resolution: {integrity: sha512-aSSCAJwUNX4R1hJQoyimsND5l+2EsFgzlepS8NuOJJHjXij/UdxYFngac44tmv9IYdI+kglAyORg0plt4/aFMQ==}
+    engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
+    dependencies:
+      '@jest/types': 27.4.2
+    dev: false
 
   /@jest/environment/25.5.0:
     resolution: {integrity: sha512-U2VXPEqL07E/V7pSZMSQCvV5Ea4lqOlT+0ZFijl/i316cRMHvZ4qC+jBdryd+lmRetjQo0YIQr6cVPNxxK87mA==}
