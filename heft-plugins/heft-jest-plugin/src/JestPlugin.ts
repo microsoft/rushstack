@@ -20,7 +20,7 @@ import type {
   ScopedLogger
 } from '@rushstack/heft';
 import { getVersion, runCLI } from '@jest/core';
-import { Config } from '@jest/types';
+import type { Config } from '@jest/types';
 import {
   ConfigurationFile,
   IJsonPathMetadata,
