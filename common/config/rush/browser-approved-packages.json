@@ -3,18 +3,6 @@
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/approved-packages.schema.json",
   "packages": [
     {
-      "name": "jest-resolve",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "jest-watch-master",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
-      "name": "jest-watch-select-projects",
-      "allowedCategories": [ "libraries" ]
-    },
-    {
       "name": "react",
       "allowedCategories": [ "tests" ]
     },

@@ -431,7 +431,15 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jest-resolve",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jest-snapshot",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-watch-select-projects",
       "allowedCategories": [ "libraries" ]
     },
     {
