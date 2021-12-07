@@ -84,7 +84,7 @@ export class HeftJestDataFile {
 
   public static async loadForProjectAsync(projectFolder: string): Promise<IHeftJestDataFileJson> {
     const jsonFilePath: string = HeftJestDataFile.getConfigFilePath(projectFolder);
-    return JsonFile.loadAsync(jsonFilePath);
+    return await JsonFile.loadAsync(jsonFilePath);
   }
 
   /**
