@@ -2,11 +2,12 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { InitialOptionsWithRootDir } from '@jest/types/build/Config';
 import { FileSystem } from '@rushstack/node-core-library';
+import type { SyncTransformer, TransformedSource, TransformOptions } from '@jest/transform';
+import type { Config } from '@jest/types';
 
 // The transpiled output for IdentityMockProxy.ts
-const proxyCode: string = FileSystem.readFile(path.join(__dirname, 'identityMock.js')).toString();
+const proxyCode: string = FileSystem.readFile(path.join(__dirname, '..', 'identityMock.js')).toString();
 
 /**
  * This Jest transform handles imports of files like CSS that would normally be
@@ -20,6 +21,8 @@ const proxyCode: string = FileSystem.readFile(path.join(__dirname, 'identityMock
  * (We don't import the actual "identity-obj-proxy" package because transform output gets resolved with respect
  * to the target project folder, not Heft's folder.)
  */
-export function process(src: string, filename: string, jestOptions: InitialOptionsWithRootDir): string {
-  return proxyCode;
+export class IdentityMockTransformer implements SyncTransformer {
+  public process(sourceText: string, sourcePath: Config.Path, options: TransformOptions): TransformedSource {
+    return proxyCode;
+  }
 }
