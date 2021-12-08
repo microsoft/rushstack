@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.14.0",
+      "tag": "@microsoft/api-extractor-model_v7.14.0",
+      "date": "Wed, 08 Dec 2021 16:14:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update to TypeScript 4.5"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.13.18",
       "tag": "@microsoft/api-extractor-model_v7.13.18",
       "date": "Mon, 06 Dec 2021 16:08:33 GMT",
