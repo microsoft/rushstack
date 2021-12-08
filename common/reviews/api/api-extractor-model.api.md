@@ -23,7 +23,7 @@ export class AedocDefinitions {
     static readonly preapprovedTag: TSDocTagDefinition;
     // (undocumented)
     static get tsdocConfiguration(): TSDocConfiguration;
-    }
+}
 
 // Warning: (ae-forgotten-export) The symbol "ApiCallSignature_base" needs to be exported by the entry point index.d.ts
 //
@@ -122,7 +122,7 @@ export class ApiDocumentedItem extends ApiItem {
     serializeInto(jsonObject: Partial<IApiDocumentedItemJson>): void;
     // (undocumented)
     get tsdocComment(): tsdoc.DocComment | undefined;
-    }
+}
 
 // Warning: (ae-forgotten-export) The symbol "ApiEntryPoint_base" needs to be exported by the entry point index.d.ts
 //
@@ -284,7 +284,7 @@ export namespace ApiItemContainerMixin {
 }
 
 // @public
-export const enum ApiItemKind {
+export enum ApiItemKind {
     // (undocumented)
     CallSignature = "CallSignature",
     // (undocumented)
@@ -446,7 +446,7 @@ export class ApiPackage extends ApiPackage_base {
     // (undocumented)
     saveToJsonFile(apiJsonFilename: string, options?: IApiPackageSaveOptions): void;
     get tsdocConfiguration(): TSDocConfiguration;
-    }
+}
 
 // @public
 export function ApiParameterListMixin<TBaseClass extends IApiItemConstructor>(baseClass: TBaseClass): TBaseClass & (new (...args: any[]) => ApiParameterListMixin);
@@ -632,10 +632,10 @@ export class ExcerptToken {
     get canonicalReference(): DeclarationReference | undefined;
     get kind(): ExcerptTokenKind;
     get text(): string;
-    }
+}
 
 // @public (undocumented)
-export const enum ExcerptTokenKind {
+export enum ExcerptTokenKind {
     Content = "Content",
     Reference = "Reference"
 }
@@ -913,6 +913,5 @@ export class TypeParameter {
     name: string;
     get tsdocTypeParamBlock(): tsdoc.DocParamBlock | undefined;
 }
-
 
 ```
