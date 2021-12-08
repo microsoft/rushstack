@@ -28,7 +28,7 @@
     // From the allowedAlternativeVersions list below, this should be the TypeScript version that's used to
     // build most of the projects in the repo.  Preferring it avoids errors for indirect dependencies
     // that request it as a peer dependency.
-    "typescript": "~4.4.2",
+    "typescript": "~4.5.2",
 
     // Workaround for https://github.com/microsoft/rushstack/issues/1466
     "eslint": "~8.3.0"
@@ -69,14 +69,14 @@
      * (in addition to whatever "usual" version is being used by other projects in the repo):
      */
     "typescript": [
-      // "~4.4.2" is the (inferred, not alternative) range used by most projects in this repo
+      // "~4.5.2" is the (inferred, not alternative) range used by most projects in this repo
 
       // The oldest supported compiler, used by build-tests/api-extractor-lib1-test
       "~2.9.2",
 
       // The newest supported compiler, used by most build tests and used as the bundled compiler
       // engine for API Extractor.
-      "~4.4.2"
+      "~4.5.2"
     ],
 
     "source-map": [
