@@ -8,7 +8,6 @@ import { ITerminal } from '@rushstack/node-core-library';
 import { NewlineKind } from '@rushstack/node-core-library';
 import { StringValuesTypingsGenerator } from '@rushstack/typings-generator';
 import * as Webpack from 'webpack';
-import webpack from 'webpack';
 
 // @public (undocumented)
 export interface IDefaultLocaleOptions {
@@ -48,6 +47,7 @@ export interface ILocalizationPluginOptions {
     localizationStats?: ILocalizationStatsOptions;
     localizedData: ILocalizedData;
     noStringsLocaleName?: string;
+    runtimeLocaleExpression?: string;
     typingsOptions?: ITypingsGenerationOptions;
 }
 
@@ -204,7 +204,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     // Warning: (ae-forgotten-export) The symbol "IAddDefaultLocFileResult" needs to be exported by the entry point index.d.ts
     //
     // @internal (undocumented)
-    addDefaultLocFile(terminal: ITerminal, localizedResourcePath: string, localizedResourceData: _ILocalizationFile | ILocaleFileData, defaultLocaleModule: webpack.compilation.Module): IAddDefaultLocFileResult;
+    addDefaultLocFile(terminal: ITerminal, localizedResourcePath: string, localizedResourceData: _ILocalizationFile | ILocaleFileData, defaultLocaleModule: Webpack.compilation.Module): IAddDefaultLocFileResult;
     // (undocumented)
     apply(compiler: Webpack.Compiler): void;
     // @internal (undocumented)
