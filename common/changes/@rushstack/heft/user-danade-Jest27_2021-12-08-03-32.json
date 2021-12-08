@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@rushstack/heft",
-      "comment": "Remove Jest-specific CLI arguments from Heft",
+      "comment": "Remove Jest-specific CLI arguments from Heft. These parameters have been moved to @rushstack/heft-jest-plugin.",
       "type": "minor"
     }
   ],
