@@ -25,7 +25,6 @@
     "@types/webpack-env": "1.13.0",
     "babel-loader": "^8.2.2",
     "css-loader": "~4.2.1",
-    "jest": "~27.4.2",
     "react-dom": "~16.13.1",
     "react": "~16.13.1",
     "style-loader": "~1.2.1",
