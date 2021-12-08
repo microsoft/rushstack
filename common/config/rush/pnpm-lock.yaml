@@ -1813,15 +1813,19 @@ importers:
       '@rushstack/heft-node-rig': workspace:*
       '@rushstack/node-core-library': workspace:*
       '@rushstack/ts-command-line': workspace:*
+      '@types/diff': 5.0.1
       '@types/node': 12.20.24
+      diff: ~5.0.0
     dependencies:
       '@microsoft/rush-lib': link:../../apps/rush-lib
       '@rushstack/node-core-library': link:../../libraries/node-core-library
       '@rushstack/ts-command-line': link:../../libraries/ts-command-line
+      diff: 5.0.0
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': link:../../apps/heft
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/diff': 5.0.1
       '@types/node': 12.20.24
 
   ../../rigs/heft-node-rig:
@@ -6358,6 +6362,10 @@ packages:
       '@types/node': 12.20.24
     dev: true
 
+  /@types/diff/5.0.1:
+    resolution: {integrity: sha512-XIpxU6Qdvp1ZE6Kr3yrkv1qgUab0fyf4mHYvW8N3Bx3PCsbN6or1q9/q72cv5jIFWolaGH08U9XyYoLLIykyKQ==}
+    dev: true
+
   /@types/eslint-scope/3.7.1:
     resolution: {integrity: sha512-SCFeogqiptms4Fg29WpOTk5nHIzfpKCemSN63ksBQYKTcXoJEmJagV+DhVmbapZzY4/5YaOV1nZwrsU79fFm1g==}
     dependencies:
@@ -9775,6 +9783,11 @@ packages:
   /diff/4.0.2:
     resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
     engines: {node: '>=0.3.1'}
+
+  /diff/5.0.0:
+    resolution: {integrity: sha512-/VTCrvm5Z0JGty/BWHljh+BAiw3IK+2j87NGMu8Nwc/f48WoDAC395uomO9ZD117ZOBaHmkX1oyLvkVM/aIT3w==}
+    engines: {node: '>=0.3.1'}
+    dev: false
 
   /diffie-hellman/5.0.3:
     resolution: {integrity: sha512-kqag/Nl+f3GwyK25fhUMYj81BUOrZ9IuJsjIcDE5icNM9FJHAVm3VcUDxdLPoQtTuUylWm6ZIknYJwwaPxsUzg==}
