@@ -2,8 +2,8 @@
   "changes": [
     {
       "packageName": "@microsoft/api-extractor-model",
-      "comment": "remove \"const\" keyword before enums to allow use with typescript isolatedModules",
-      "type": "patch"
+      "comment": "Replace const enums with conventional enums to allow for compatibility with JavaScript consumers.",
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/api-extractor-model"
