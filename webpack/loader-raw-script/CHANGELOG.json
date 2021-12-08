@@ -2,6 +2,36 @@
   "name": "@rushstack/loader-raw-script",
   "entries": [
     {
+      "version": "1.3.202",
+      "tag": "@rushstack/loader-raw-script_v1.3.202",
+      "date": "Wed, 08 Dec 2021 19:05:08 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.43.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.4.1`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "1.3.201",
+      "tag": "@rushstack/loader-raw-script_v1.3.201",
+      "date": "Wed, 08 Dec 2021 16:14:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.42.6`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.4.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.200",
       "tag": "@rushstack/loader-raw-script_v1.3.200",
       "date": "Mon, 06 Dec 2021 16:08:33 GMT",

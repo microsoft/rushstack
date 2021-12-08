@@ -14,11 +14,10 @@
     "build": "heft test --clean"
   },
   "devDependencies": {
-    "@rushstack/eslint-config": "2.4.5",
-    "@rushstack/heft": "0.42.3",
-    "@rushstack/heft-node-rig": "1.2.32",
+    "@rushstack/eslint-config": "2.5.0",
+    "@rushstack/heft": "0.43.0",
+    "@rushstack/heft-node-rig": "1.4.1",
     "@types/heft-jest": "1.0.1",
-    "eslint": "~7.30.0",
-    "typescript": "~4.4.2"
+    "eslint": "~7.30.0"
   }
 }

@@ -2,6 +2,30 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.43.0",
+      "tag": "@rushstack/heft_v0.43.0",
+      "date": "Wed, 08 Dec 2021 19:05:08 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for TypeScript 4.5"
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.42.6",
+      "tag": "@rushstack/heft_v0.42.6",
+      "date": "Wed, 08 Dec 2021 16:14:05 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor\" to `7.19.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.42.5",
       "tag": "@rushstack/heft_v0.42.5",
       "date": "Mon, 06 Dec 2021 16:08:32 GMT",
