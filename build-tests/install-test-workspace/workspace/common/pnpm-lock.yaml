@@ -5,13 +5,13 @@ importers:
   typescript-newest-test:
     specifiers:
       '@rushstack/eslint-config': file:rushstack-eslint-config-2.5.0.tgz
-      '@rushstack/heft': file:rushstack-heft-0.42.5.tgz
+      '@rushstack/heft': file:rushstack-heft-0.42.6.tgz
       eslint: ~8.3.0
       tslint: ~5.20.1
       typescript: ~4.5.2
     devDependencies:
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.5.0.tgz_eslint@8.3.0+typescript@4.5.2
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.42.5.tgz
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.42.6.tgz
       eslint: 8.3.0
       tslint: 5.20.1_typescript@4.5.2
       typescript: 4.5.2
@@ -19,13 +19,13 @@ importers:
   typescript-v3-test:
     specifiers:
       '@rushstack/eslint-config': file:rushstack-eslint-config-2.5.0.tgz
-      '@rushstack/heft': file:rushstack-heft-0.42.5.tgz
+      '@rushstack/heft': file:rushstack-heft-0.42.6.tgz
       eslint: ~8.3.0
       tslint: ~5.20.1
       typescript: ~4.5.2
     devDependencies:
       '@rushstack/eslint-config': file:../temp/tarballs/rushstack-eslint-config-2.5.0.tgz_eslint@8.3.0+typescript@4.5.2
-      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.42.5.tgz
+      '@rushstack/heft': file:../temp/tarballs/rushstack-heft-0.42.6.tgz
       eslint: 8.3.0
       tslint: 5.20.1_typescript@4.5.2
       typescript: 4.5.2
@@ -1484,7 +1484,7 @@ packages:
     dev: true
 
   /strip-json-comments/3.1.1:
-    resolution: {integrity: sha1-MfEoGzgyYwQ0gxwxDAHMzajL4AY=}
+    resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
     dev: true
 
@@ -1740,10 +1740,10 @@ packages:
       - typescript
     dev: true
 
-  file:../temp/tarballs/rushstack-heft-0.42.5.tgz:
-    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.42.5.tgz}
+  file:../temp/tarballs/rushstack-heft-0.42.6.tgz:
+    resolution: {tarball: file:../temp/tarballs/rushstack-heft-0.42.6.tgz}
     name: '@rushstack/heft'
-    version: 0.42.5
+    version: 0.42.6
     engines: {node: '>=10.13.0'}
     hasBin: true
     dependencies:
