@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/api-extractor-model",
+      "comment": "Update to TypeScript 4.5",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/api-extractor-model"
+}
