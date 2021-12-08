@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.43.0",
+      "tag": "@rushstack/heft_v0.43.0",
+      "date": "Wed, 08 Dec 2021 19:05:08 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add support for TypeScript 4.5"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.42.6",
       "tag": "@rushstack/heft_v0.42.6",
       "date": "Wed, 08 Dec 2021 16:14:05 GMT",
