@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/node-core-library",
+      "comment": "Update z-schema to ~5.0.2.",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@rushstack/node-core-library"
+}
