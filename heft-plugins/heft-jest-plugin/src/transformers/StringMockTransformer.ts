@@ -12,11 +12,7 @@ import type { Config } from '@jest/types';
  */
 export class StringMockTransformer implements SyncTransformer {
   public process(sourceText: string, sourcePath: Config.Path, options: TransformOptions): TransformedSource {
-    // Double-escape "'" and "\" characters in the filename because this is going to be serialized
-    // in a string in generated JS code, bounded by single quotes
-    const escapedSourcePath: string = sourcePath.replace(/\'/g, "\\'").replace(/\\/g, '\\\\');
-
     // For a file called "myImage.png", this will generate a JS module that exports the literal string "myImage.png"
-    return `module.exports = '${escapedSourcePath}';`;
+    return `module.exports = ${JSON.stringify(sourcePath)};`;
   }
 }
