@@ -183,6 +183,22 @@ export class Git {
     }
   }
 
+  public getMergeBase(targetBranch: string, terminal: ITerminal, shouldFetch: boolean = false): string {
+    if (shouldFetch) {
+      this._fetchRemoteBranch(targetBranch, terminal);
+    }
+
+    const gitPath: string = this.getGitPathOrThrow();
+    const output: string = Utilities.executeCommandAndCaptureOutput(
+      gitPath,
+      ['--no-optional-locks', 'merge-base', 'HEAD', `${targetBranch}`, '--'],
+      this._rushConfiguration.rushJsonFolder
+    );
+    const result: string = output.trim();
+
+    return result;
+  }
+
   public getChangedFolders(
     targetBranch: string,
     terminal: ITerminal,

@@ -199,11 +199,14 @@ export class ProjectChangeAnalyzer {
   ): Promise<Set<RushConfigurationProject>> {
     const { _rushConfiguration: rushConfiguration } = this;
 
-    const { targetBranchName, terminal, includeExternalDependencies, enableFiltering } = options;
+    const { targetBranchName, terminal, includeExternalDependencies, enableFiltering, shouldFetch } = options;
 
     const gitPath: string = this._git.getGitPathOrThrow();
     const repoRoot: string = getRepoRoot(rushConfiguration.rushJsonFolder);
-    const repoChanges: Map<string, IFileDiffStatus> = getRepoChanges(repoRoot, targetBranchName, gitPath);
+
+    const mergeCommit: string = this._git.getMergeBase(targetBranchName, terminal, shouldFetch);
+
+    const repoChanges: Map<string, IFileDiffStatus> = getRepoChanges(repoRoot, mergeCommit, gitPath);
 
     const changedProjects: Set<RushConfigurationProject> = new Set();
 
@@ -237,7 +240,7 @@ export class ProjectChangeAnalyzer {
 
           const oldShrinkwrapText: string = this._git.getBlobContent({
             // <ref>:<path> syntax: https://git-scm.com/docs/gitrevisions
-            blobSpec: `${targetBranchName}:${shrinkwrapFile}`,
+            blobSpec: `${mergeCommit}:${shrinkwrapFile}`,
             repositoryRoot: repoRoot
           });
           const oldShrinkWrap: PnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromString(oldShrinkwrapText);
