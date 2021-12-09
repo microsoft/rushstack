@@ -51,8 +51,7 @@
     "strict-uri-encode": "~2.0.0",
     "tapable": "2.2.1",
     "tar": "~5.0.5",
-    "true-case-path": "~2.2.1",
-    "z-schema": "~3.18.3"
+    "true-case-path": "~2.2.1"
   },
   "devDependencies": {
     "@pnpm/logger": "4.0.0",
@@ -74,7 +73,6 @@
     "@types/ssri": "~7.1.0",
     "@types/strict-uri-encode": "2.0.0",
     "@types/tar": "4.0.3",
-    "@types/z-schema": "3.16.31",
     "jest": "~25.4.0"
   },
   "publishOnlyDependencies": {

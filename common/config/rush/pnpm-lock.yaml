@@ -241,7 +241,6 @@ importers:
       '@types/ssri': ~7.1.0
       '@types/strict-uri-encode': 2.0.0
       '@types/tar': 4.0.3
-      '@types/z-schema': 3.16.31
       '@yarnpkg/lockfile': ~1.0.2
       builtin-modules: ~3.1.0
       cli-table: ~0.3.1
@@ -267,7 +266,6 @@ importers:
       tapable: 2.2.1
       tar: ~5.0.5
       true-case-path: ~2.2.1
-      z-schema: ~3.18.3
     dependencies:
       '@pnpm/link-bins': 5.3.25
       '@rushstack/heft-config-file': link:../../libraries/heft-config-file
@@ -302,7 +300,6 @@ importers:
       tapable: 2.2.1
       tar: 5.0.11
       true-case-path: 2.2.1
-      z-schema: 3.18.4
     devDependencies:
       '@pnpm/logger': 4.0.0
       '@rushstack/eslint-config': link:../../eslint/eslint-config
@@ -323,7 +320,6 @@ importers:
       '@types/ssri': 7.1.1
       '@types/strict-uri-encode': 2.0.0
       '@types/tar': 4.0.3
-      '@types/z-schema': 3.16.31
       jest: 25.4.0
 
   ../../build-tests-samples/heft-node-basic-tutorial:
@@ -1543,7 +1539,6 @@ importers:
       '@types/resolve': 1.17.1
       '@types/semver': 7.3.5
       '@types/timsort': 0.3.0
-      '@types/z-schema': 3.16.31
       colors: ~1.2.1
       fs-extra: ~7.0.1
       import-lazy: ~4.0.0
@@ -1551,7 +1546,7 @@ importers:
       resolve: ~1.17.0
       semver: ~7.3.0
       timsort: ~0.3.0
-      z-schema: ~3.18.3
+      z-schema: ~5.0.2
     dependencies:
       '@types/node': 12.20.24
       colors: 1.2.5
@@ -1561,7 +1556,7 @@ importers:
       resolve: 1.17.0
       semver: 7.3.5
       timsort: 0.3.0
-      z-schema: 3.18.4
+      z-schema: 5.0.2
     devDependencies:
       '@rushstack/eslint-config': link:../../eslint/eslint-config
       '@rushstack/heft': 0.43.0
@@ -1572,7 +1567,6 @@ importers:
       '@types/resolve': 1.17.1
       '@types/semver': 7.3.5
       '@types/timsort': 0.3.0
-      '@types/z-schema': 3.16.31
 
   ../../libraries/package-deps-hash:
     specifiers:
@@ -6710,10 +6704,6 @@ packages:
     resolution: {integrity: sha512-yEJzHoxf6SyQGhBhIYGXQDSCkJjB6HohDShto7m8vaKg9Yp0Yn8+71J9eakh2bnPg6BfsH9PRMhiRTZnd4eXGQ==}
     dependencies:
       '@types/yargs-parser': 20.2.1
-
-  /@types/z-schema/3.16.31:
-    resolution: {integrity: sha1-LrHQCl5Ow/pYx2r94S4YK2bcXBw=}
-    dev: true
 
   /@typescript-eslint/eslint-plugin/3.4.0_0b7524c316e77872f4b663a1d48f69be:
     resolution: {integrity: sha512-wfkpiqaEVhZIuQRmudDszc01jC/YR7gMSxa6ulhggAe/Hs0KVIuo9wzvFiDbG3JD5pRFQoqnf4m7REDsUvBnMQ==}
@@ -17945,6 +17935,11 @@ packages:
       builtins: 1.0.3
     dev: false
 
+  /validator/13.7.0:
+    resolution: {integrity: sha512-nYXQLCBkpJ8X6ltALua9dRrZDHVYxjJ1wgskNt1lH9fzGjs3tgojGSCBjmEPwkWS1y29+DrizMTW19Pr9uB2nw==}
+    engines: {node: '>= 0.10'}
+    dev: false
+
   /validator/8.2.0:
     resolution: {integrity: sha512-Yw5wW34fSv5spzTXNkokD6S6/Oq92d8q/t14TqsS3fAiA1RYnxSFSIZ+CY3n6PGGRCq5HhJTSepQvFUS2QUDxA==}
     engines: {node: '>= 0.10'}
@@ -18760,6 +18755,18 @@ packages:
       validator: 8.2.0
     optionalDependencies:
       commander: 2.20.3
+
+  /z-schema/5.0.2:
+    resolution: {integrity: sha512-40TH47ukMHq5HrzkeVE40Ad7eIDKaRV2b+Qpi2prLc9X9eFJFzV7tMe5aH12e6avaSS/u5l653EQOv+J9PirPw==}
+    engines: {node: '>=8.0.0'}
+    hasBin: true
+    dependencies:
+      lodash.get: 4.4.2
+      lodash.isequal: 4.5.0
+      validator: 13.7.0
+    optionalDependencies:
+      commander: 2.20.3
+    dev: false
 
   /zwitch/1.0.5:
     resolution: {integrity: sha512-V50KMwwzqJV0NpZIZFwfOD5/lyny3WlSzRiXgA0G7VUnRlqttta1L6UQIHzd6EuBY/cHGfwTIck7w1yH6Q5zUw==}
