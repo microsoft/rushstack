@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft-jest-plugin
 
-This log was last generated on Thu, 09 Dec 2021 20:34:41 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Dec 2021 21:18:06 GMT and should not be manually modified.
+
+## 0.2.0-pr3076.0
+Thu, 09 Dec 2021 21:18:06 GMT
+
+### Minor changes
+
+- Upgrade Jest to v27
 
 ## 0.1.53
 Thu, 09 Dec 2021 20:34:41 GMT

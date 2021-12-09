@@ -2,6 +2,18 @@
   "name": "@rushstack/heft",
   "entries": [
     {
+      "version": "0.44.0-pr3076.0",
+      "tag": "@rushstack/heft_v0.44.0-pr3076.0",
+      "date": "Thu, 09 Dec 2021 21:18:06 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Remove Jest-specific CLI arguments from Heft. These parameters have been moved to @rushstack/heft-jest-plugin."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.43.2",
       "tag": "@rushstack/heft_v0.43.2",
       "date": "Thu, 09 Dec 2021 20:34:41 GMT",

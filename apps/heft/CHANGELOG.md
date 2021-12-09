@@ -1,6 +1,13 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 09 Dec 2021 20:34:41 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Dec 2021 21:18:06 GMT and should not be manually modified.
+
+## 0.44.0-pr3076.0
+Thu, 09 Dec 2021 21:18:06 GMT
+
+### Minor changes
+
+- Remove Jest-specific CLI arguments from Heft. These parameters have been moved to @rushstack/heft-jest-plugin.
 
 ## 0.43.2
 Thu, 09 Dec 2021 20:34:41 GMT
@@ -101,7 +108,7 @@ Wed, 06 Oct 2021 15:08:25 GMT
 
 ### Patches
 
-- Improve the HeftSession.commandLine.register<Type>Parameter interface and add support for choice and choice list parameters. 
+- Improve the HeftSession.commandLine.register<Type>Parameter interface and add support for choice and choice list parameters.
 
 ## 0.41.1
 Wed, 06 Oct 2021 02:41:48 GMT
@@ -722,7 +729,7 @@ Sat, 24 Oct 2020 00:11:18 GMT
 
 ### Patches
 
-- Add fileExtensions config to SassTypingsGenerator. 
+- Add fileExtensions config to SassTypingsGenerator.
 
 ## 0.17.1
 Wed, 21 Oct 2020 05:09:44 GMT
