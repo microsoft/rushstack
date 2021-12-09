@@ -3,9 +3,9 @@
     {
       "comment": "",
       "type": "none",
-      "packageName": "@microsoft/rush"
+      "packageName": "@rushstack/eslint-patch"
     }
   ],
-  "packageName": "@microsoft/rush",
+  "packageName": "@rushstack/eslint-patch",
   "email": "iclanton@users.noreply.github.com"
 }

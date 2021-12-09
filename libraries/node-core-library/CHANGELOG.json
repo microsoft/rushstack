@@ -2,6 +2,18 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.44.2",
+      "tag": "@rushstack/node-core-library_v3.44.2",
+      "date": "Thu, 09 Dec 2021 20:34:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Update z-schema to ~5.0.2."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.44.1",
       "tag": "@rushstack/node-core-library_v3.44.1",
       "date": "Mon, 06 Dec 2021 16:08:33 GMT",

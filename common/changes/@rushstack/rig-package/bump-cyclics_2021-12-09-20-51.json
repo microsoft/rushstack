@@ -3,9 +3,9 @@
     {
       "comment": "",
       "type": "none",
-      "packageName": "@microsoft/api-extractor"
+      "packageName": "@rushstack/rig-package"
     }
   ],
-  "packageName": "@microsoft/api-extractor",
+  "packageName": "@rushstack/rig-package",
   "email": "iclanton@users.noreply.github.com"
 }

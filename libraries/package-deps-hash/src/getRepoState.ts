@@ -276,6 +276,8 @@ export function getRepoChanges(
       'diff-index',
       '--color=never',
       '--no-renames',
+      // rush change targets origin/main with this, and usually the current branch is not synced, so use the merge-base
+      '--merge-base',
       '--no-commit-id',
       '--cached',
       '-z',

@@ -3,9 +3,9 @@
     {
       "comment": "",
       "type": "none",
-      "packageName": "@microsoft/api-extractor-model"
+      "packageName": "@rushstack/ts-command-line"
     }
   ],
-  "packageName": "@microsoft/api-extractor-model",
+  "packageName": "@rushstack/ts-command-line",
   "email": "iclanton@users.noreply.github.com"
 }
