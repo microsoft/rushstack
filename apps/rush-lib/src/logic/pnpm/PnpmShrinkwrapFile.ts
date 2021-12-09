@@ -650,11 +650,13 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
     const shrinkwrapEntry: IPnpmShrinkwrapDependencyYaml | undefined = this.packages.get(specifier);
     if (!shrinkwrapEntry) {
       if (!optional) {
-        throw new Error(`Missing shrinkwrap entry for non-optional dependency ${specifier}`);
-      } else {
-        // Indicate an empty entry
-        return integrityMap;
+        // This algorithm heeds to be robust against missing shrinkwrap entries, so we can't just throw
+        // Instead set it to a value which will not match any valid shrinkwrap record
+        integrityMap.set(specifier, 'Missing shrinkwrap entry!');
       }
+
+      // Indicate an empty entry
+      return integrityMap;
     }
 
     let selfIntegrity: string | undefined = shrinkwrapEntry.resolution?.integrity;
