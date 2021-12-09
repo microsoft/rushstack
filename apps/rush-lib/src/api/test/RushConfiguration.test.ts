@@ -78,7 +78,7 @@ describe('RushConfiguration', () => {
 
     expect(rushConfiguration.packageManagerToolVersion).toEqual('4.5.0');
 
-    expect(rushConfiguration.repositoryUrl).toEqual('someFakeUrl');
+    expect(rushConfiguration.repositoryUrls).toEqual(['someFakeUrl']);
     expect(rushConfiguration.projectFolderMaxDepth).toEqual(99);
     expect(rushConfiguration.projectFolderMinDepth).toEqual(1);
     expect(rushConfiguration.hotfixChangeEnabled).toEqual(true);
@@ -158,7 +158,7 @@ describe('RushConfiguration', () => {
 
     expect(rushConfiguration.packageManagerToolVersion).toEqual('6.0.0');
 
-    expect(rushConfiguration.repositoryUrl).toEqual('someFakeUrl');
+    expect(rushConfiguration.repositoryUrls).toEqual(['someFakeUrl']);
     expect(rushConfiguration.projectFolderMaxDepth).toEqual(99);
     expect(rushConfiguration.projectFolderMinDepth).toEqual(1);
 
@@ -203,6 +203,7 @@ describe('RushConfiguration', () => {
       rushConfiguration.getPnpmfilePath(),
       './repo/common/config/rush/pnpmfile.js'
     );
+    expect(rushConfiguration.repositoryUrls).toEqual(['someFakeUrl', 'otherFakeUrl']);
 
     done();
   });

@@ -257,8 +257,8 @@ export class Git {
    * @param rushConfiguration - rush configuration
    */
   public getRemoteDefaultBranch(): string {
-    const repositoryUrl: string | undefined = this._rushConfiguration.repositoryUrl;
-    if (repositoryUrl) {
+    const repositoryUrls: string[] | undefined = this._rushConfiguration.repositoryUrls;
+    if (repositoryUrls) {
       const gitPath: string = this.getGitPathOrThrow();
       const output: string = Utilities.executeCommandAndCaptureOutput(
         gitPath,
@@ -266,8 +266,11 @@ export class Git {
         this._rushConfiguration.rushJsonFolder
       ).trim();
 
-      // Apply toUpperCase() for a case-insensitive comparison
-      const normalizedRepositoryUrl: string = Git.normalizeGitUrlForComparison(repositoryUrl).toUpperCase();
+      const normalizedRepositoryUrls: Set<string> = new Set<string>();
+      for (const repositoryUrl of repositoryUrls) {
+        // Apply toUpperCase() for a case-insensitive comparison
+        normalizedRepositoryUrls.add(Git.normalizeGitUrlForComparison(repositoryUrl).toUpperCase());
+      }
 
       const matchingRemotes: string[] = output.split('\n').filter((remoteName) => {
         if (remoteName) {
@@ -283,7 +286,7 @@ export class Git {
 
           // Also apply toUpperCase() for a case-insensitive comparison
           const normalizedRemoteUrl: string = Git.normalizeGitUrlForComparison(remoteUrl).toUpperCase();
-          if (normalizedRemoteUrl === normalizedRepositoryUrl) {
+          if (normalizedRepositoryUrls.has(normalizedRemoteUrl)) {
             return true;
           }
         }
@@ -300,12 +303,13 @@ export class Git {
 
         return `${matchingRemotes[0]}/${this._rushConfiguration.repositoryDefaultBranch}`;
       } else {
-        console.log(
-          colors.yellow(
-            `Unable to find a git remote matching the repository URL (${repositoryUrl}). ` +
-              'Detected changes are likely to be incorrect.'
-          )
-        );
+        const errorMessage: string =
+          repositoryUrls.length > 1
+            ? `Unable to find a git remote matching the repository URL (${repositoryUrls[0]}). `
+            : `Unable to find a git remote matching one of the repository URLs (${repositoryUrls.join(
+                ', '
+              )}). `;
+        console.log(colors.yellow(errorMessage + 'Detected changes are likely to be incorrect.'));
 
         return this._rushConfiguration.repositoryDefaultFullyQualifiedRemoteBranch;
       }

@@ -539,7 +539,7 @@ export class RushConfiguration {
     get repositoryDefaultBranch(): string;
     get repositoryDefaultFullyQualifiedRemoteBranch(): string;
     get repositoryDefaultRemote(): string;
-    get repositoryUrl(): string | undefined;
+    get repositoryUrls(): string[] | undefined;
     // @internal
     get rushConfigurationJson(): IRushConfigurationJson;
     get rushJsonFile(): string;

@@ -96,9 +96,12 @@ export interface IEventHooksJson {
  */
 export interface IRushRepositoryJson {
   /**
-   * The remote url of the repository. This helps "rush change" find the right remote to compare against.
+   * Remote url(s) of the repository. If a value is provided, \"rush change\" will
+   * use one of these to find the right remote to compare against. Specifying multiple URLs
+   * is useful if a GitHub repository is renamed or for "<projectName>.visualstudio.com" vs
+   * "dev.azure.com/<projectName>" URLs.
    */
-  url?: string;
+  url?: string | string[];
 
   /**
    * The default branch name. This tells "rush change" which remote branch to compare against.
@@ -455,7 +458,7 @@ export class RushConfiguration {
   private _hotfixChangeEnabled: boolean;
 
   // Repository info
-  private _repositoryUrl: string | undefined;
+  private _repositoryUrls: string[] | undefined;
   private _repositoryDefaultBranch: string;
   private _repositoryDefaultRemote: string;
 
@@ -694,7 +697,11 @@ export class RushConfiguration {
       rushConfigurationJson.repository = {};
     }
 
-    this._repositoryUrl = rushConfigurationJson.repository.url;
+    this._repositoryUrls = Array.isArray(rushConfigurationJson.repository.url)
+      ? rushConfigurationJson.repository.url
+      : rushConfigurationJson.repository.url
+      ? [rushConfigurationJson.repository.url]
+      : undefined;
     this._repositoryDefaultBranch = rushConfigurationJson.repository.defaultBranch || DEFAULT_BRANCH;
     this._repositoryDefaultRemote = rushConfigurationJson.repository.defaultRemote || DEFAULT_REMOTE;
 
@@ -1330,10 +1337,13 @@ export class RushConfiguration {
   }
 
   /**
-   * The remote url of the repository. This helps "rush change" find the right remote to compare against.
+   * Remote URL(s) of the repository. If a value is provided, \"rush change\" will
+   * use one of these to find the right remote to compare against. Specifying multiple URLs
+   * is useful if a GitHub repository is renamed or for "<projectName>.visualstudio.com" vs
+   * "dev.azure.com/<projectName>" URLs.
    */
-  public get repositoryUrl(): string | undefined {
-    return this._repositoryUrl;
+  public get repositoryUrls(): string[] | undefined {
+    return this._repositoryUrls;
   }
 
   /**
