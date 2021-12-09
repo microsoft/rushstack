@@ -224,7 +224,7 @@ export class ProjectChangeAnalyzer {
 
       if (shrinkwrapStatus) {
         if (shrinkwrapStatus.status !== 'M') {
-          // The lockfile was created or deleted. Affects all projects.
+          terminal.writeLine(`Lockfile was created or deleted. Assuming all projects are affected.`);
           return new Set(rushConfiguration.projects);
         }
 
@@ -255,7 +255,9 @@ export class ProjectChangeAnalyzer {
             }
           }
         } else {
-          // Diffing only supported for pnpm. Must assume it affects all projects since we can't be sure.
+          terminal.writeLine(
+            `Lockfile has changed and lockfile content comparison is only supported for pnpm. Assuming all projects are affected.`
+          );
           return new Set(rushConfiguration.projects);
         }
       }
@@ -287,7 +289,7 @@ export class ProjectChangeAnalyzer {
     }
 
     if (enableFiltering) {
-      // Reading rush-project.json may be problematic if, e.g.
+      // Reading rush-project.json may be problematic if, e.g. rush install has not yet occurred and rigs are in use
       await Async.forEachAsync(
         changesByProject,
         async ([project, projectChanges]) => {
