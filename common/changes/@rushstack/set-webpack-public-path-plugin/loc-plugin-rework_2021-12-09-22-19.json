@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/set-webpack-public-path-plugin",
+      "comment": "Adds support for the filenameTemplate for a chunk containing the '/' character, i.e. having a subfolder.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/set-webpack-public-path-plugin"
+}
