@@ -305,10 +305,10 @@ export class Git {
       } else {
         const errorMessage: string =
           repositoryUrls.length > 1
-            ? `Unable to find a git remote matching the repository URL (${repositoryUrls[0]}). `
-            : `Unable to find a git remote matching one of the repository URLs (${repositoryUrls.join(
+            ? `Unable to find a git remote matching one of the repository URLs (${repositoryUrls.join(
                 ', '
-              )}). `;
+              )}). `
+            : `Unable to find a git remote matching the repository URL (${repositoryUrls[0]}). `;
         console.log(colors.yellow(errorMessage + 'Detected changes are likely to be incorrect.'));
 
         return this._rushConfiguration.repositoryDefaultFullyQualifiedRemoteBranch;
