@@ -1,6 +1,28 @@
 # Change Log - @microsoft/api-extractor
 
-This log was last generated on Sat, 06 Nov 2021 00:09:13 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Dec 2021 00:21:54 GMT and should not be manually modified.
+
+## 7.19.1
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 7.19.0
+Wed, 08 Dec 2021 16:14:05 GMT
+
+### Minor changes
+
+- Update to TypeScript 4.5
+
+## 7.18.21
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 7.18.20
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
 
 ## 7.18.19
 Sat, 06 Nov 2021 00:09:13 GMT

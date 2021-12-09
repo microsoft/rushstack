@@ -1,6 +1,33 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Mon, 29 Nov 2021 07:26:16 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Dec 2021 00:21:54 GMT and should not be manually modified.
+
+## 0.43.1
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 0.43.0
+Wed, 08 Dec 2021 19:05:08 GMT
+
+### Minor changes
+
+- Add support for TypeScript 4.5
+
+## 0.42.6
+Wed, 08 Dec 2021 16:14:05 GMT
+
+_Version update only_
+
+## 0.42.5
+Mon, 06 Dec 2021 16:08:32 GMT
+
+_Version update only_
+
+## 0.42.4
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
 
 ## 0.42.3
 Mon, 29 Nov 2021 07:26:16 GMT

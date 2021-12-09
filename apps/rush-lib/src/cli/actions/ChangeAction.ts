@@ -333,7 +333,7 @@ export class ChangeAction extends BaseRushAction {
   private async _getChangedProjectNamesAsync(): Promise<string[]> {
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
     const changedProjects: Set<RushConfigurationProject> =
-      await projectChangeAnalyzer.getChangedProjectsAsync({
+      await projectChangeAnalyzer.getProjectsWithChangesAsync({
         targetBranchName: this._targetBranch,
         terminal: this._terminal,
         shouldFetch: !this._noFetchParameter.value

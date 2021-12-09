@@ -1,6 +1,18 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Sat, 06 Nov 2021 00:09:13 GMT and should not be manually modified.
+This log was last generated on Mon, 06 Dec 2021 16:08:33 GMT and should not be manually modified.
+
+## 3.44.1
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 3.44.0
+Fri, 03 Dec 2021 03:05:22 GMT
+
+### Minor changes
+
+- Replace const enums with conventional enums to allow for compatability with JavaScript consumers.
 
 ## 3.43.2
 Sat, 06 Nov 2021 00:09:13 GMT

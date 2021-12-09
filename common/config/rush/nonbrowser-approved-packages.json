@@ -236,7 +236,7 @@
     },
     {
       "name": "@typescript-eslint/parser",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@typescript-eslint/typescript-estree",
@@ -308,6 +308,10 @@
     },
     {
       "name": "decache",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "diff",
       "allowedCategories": [ "libraries" ]
     },
     {

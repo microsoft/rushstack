@@ -2,6 +2,57 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.15.0",
+      "tag": "@microsoft/api-extractor-model_v7.15.0",
+      "date": "Thu, 09 Dec 2021 00:21:54 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Replace const enums with conventional enums to allow for compatibility with JavaScript consumers."
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.14.0",
+      "tag": "@microsoft/api-extractor-model_v7.14.0",
+      "date": "Wed, 08 Dec 2021 16:14:05 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Update to TypeScript 4.5"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.13.18",
+      "tag": "@microsoft/api-extractor-model_v7.13.18",
+      "date": "Mon, 06 Dec 2021 16:08:33 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "7.13.17",
+      "tag": "@microsoft/api-extractor-model_v7.13.17",
+      "date": "Fri, 03 Dec 2021 03:05:22 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.13.16",
       "tag": "@microsoft/api-extractor-model_v7.13.16",
       "date": "Sat, 06 Nov 2021 00:09:13 GMT",

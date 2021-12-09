@@ -12,8 +12,8 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-jest-plugin": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "eslint": "~7.30.0",
-    "typescript": "~4.4.2",
+    "eslint": "~8.3.0",
+    "typescript": "~4.5.2",
     "@jest/reporters": "~25.4.0",
     "@jest/types": "~25.4.0"
   }

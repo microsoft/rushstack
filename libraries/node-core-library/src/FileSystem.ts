@@ -146,7 +146,7 @@ export interface IFileSystemCopyFileOptions extends IFileSystemCopyFileBaseOptio
  *
  * @public
  */
-export const enum AlreadyExistsBehavior {
+export enum AlreadyExistsBehavior {
   /**
    * If the output file path already exists, try to overwrite the existing object.
    *

@@ -1,6 +1,35 @@
 # Change Log - @rushstack/heft-node-rig
 
-This log was last generated on Tue, 30 Nov 2021 20:18:41 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Dec 2021 00:21:54 GMT and should not be manually modified.
+
+## 1.4.2
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 1.4.1
+Wed, 08 Dec 2021 19:05:08 GMT
+
+_Version update only_
+
+## 1.4.0
+Wed, 08 Dec 2021 16:14:05 GMT
+
+### Minor changes
+
+- Update to TypeScript 4.5
+
+## 1.3.0
+Mon, 06 Dec 2021 16:08:32 GMT
+
+### Minor changes
+
+- Bump ESLint to v8
+
+## 1.2.33
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
 
 ## 1.2.32
 Tue, 30 Nov 2021 20:18:41 GMT

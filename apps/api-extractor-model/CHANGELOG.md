@@ -1,6 +1,30 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Sat, 06 Nov 2021 00:09:13 GMT and should not be manually modified.
+This log was last generated on Thu, 09 Dec 2021 00:21:54 GMT and should not be manually modified.
+
+## 7.15.0
+Thu, 09 Dec 2021 00:21:54 GMT
+
+### Minor changes
+
+- Replace const enums with conventional enums to allow for compatibility with JavaScript consumers.
+
+## 7.14.0
+Wed, 08 Dec 2021 16:14:05 GMT
+
+### Minor changes
+
+- Update to TypeScript 4.5
+
+## 7.13.18
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 7.13.17
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
 
 ## 7.13.16
 Sat, 06 Nov 2021 00:09:13 GMT
