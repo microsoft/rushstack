@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor",
   "entries": [
     {
+      "version": "7.19.1",
+      "tag": "@microsoft/api-extractor_v7.19.1",
+      "date": "Thu, 09 Dec 2021 00:21:54 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@microsoft/api-extractor-model\" to `7.15.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "7.19.0",
       "tag": "@microsoft/api-extractor_v7.19.0",
       "date": "Wed, 08 Dec 2021 16:14:05 GMT",

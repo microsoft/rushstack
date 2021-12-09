@@ -2,6 +2,18 @@
   "name": "@microsoft/api-extractor-model",
   "entries": [
     {
+      "version": "7.15.0",
+      "tag": "@microsoft/api-extractor-model_v7.15.0",
+      "date": "Thu, 09 Dec 2021 00:21:54 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Replace const enums with conventional enums to allow for compatibility with JavaScript consumers."
+          }
+        ]
+      }
+    },
+    {
       "version": "7.14.0",
       "tag": "@microsoft/api-extractor-model_v7.14.0",
       "date": "Wed, 08 Dec 2021 16:14:05 GMT",
