@@ -20,7 +20,7 @@ import { ChangeFiles } from './ChangeFiles';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { DependencySpecifier, DependencySpecifierType } from './DependencySpecifier';
 import { Git, DEFAULT_GIT_TAG_SEPARATOR } from './Git';
-import { BumpType, LockStepVersionPolicy } from '../api/VersionPolicy';
+import { LockStepVersionPolicy } from '../api/VersionPolicy';
 
 export interface IChangeInfoHash {
   [key: string]: IChangeInfo;
@@ -69,12 +69,12 @@ export class PublishUtilities {
     // For each lock step version policy with no nextBump, calculate the changeType
     const versionPolicyChangeTypes: Map<string, ChangeType> = new Map<string, ChangeType>();
     Object.keys(allChanges).forEach((packageName) => {
-      const pkg = allPackages.get(packageName);
+      const pkg: RushConfigurationProject | undefined = allPackages.get(packageName);
       if (projectsToExclude?.has(packageName) || pkg === undefined) {
         return;
       }
 
-      const change = allChanges[packageName];
+      const change: IChangeInfo = allChanges[packageName];
 
       if (change.changeType === undefined || change.changeType === ChangeType.none) {
         return;
@@ -84,7 +84,7 @@ export class PublishUtilities {
         const policy: LockStepVersionPolicy = pkg.versionPolicy as LockStepVersionPolicy;
         if (policy.nextBump === undefined) {
           // set the policy bump based on change files
-          const prevBump = versionPolicyChangeTypes.get(policy.policyName);
+          const prevBump: ChangeType | undefined = versionPolicyChangeTypes.get(policy.policyName);
           versionPolicyChangeTypes.set(
             policy.policyName,
             prevBump !== undefined ? Math.max(prevBump, change.changeType) : change.changeType
@@ -95,11 +95,15 @@ export class PublishUtilities {
 
     // update lock version policies to new versions
     versionPolicyChangeTypes.forEach((changeType, versionPolicyName) => {
-      const versionPolicy = rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
-        versionPolicyName
-      ) as LockStepVersionPolicy;
-      const currentVersion = versionPolicy.version;
-      const newVersion = semver.inc(currentVersion, PublishUtilities._getReleaseType(changeType));
+      const versionPolicy: LockStepVersionPolicy =
+        rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
+          versionPolicyName
+        ) as LockStepVersionPolicy;
+      const currentVersion: string = versionPolicy.version;
+      const newVersion: string | null = semver.inc(
+        currentVersion,
+        PublishUtilities._getReleaseType(changeType)
+      );
       if (newVersion !== null) {
         console.log(
           `${EOL}* APPLYING: update version policy ${versionPolicyName} from ${versionPolicy.version} to ${newVersion}`
@@ -110,13 +114,13 @@ export class PublishUtilities {
 
     // add dependency change to projects affected by the lock version policy update
     allPackages.forEach((pkg) => {
-      const versionPolicy =
+      const versionPolicy: LockStepVersionPolicy | undefined =
         pkg.versionPolicyName !== undefined
           ? (rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
               pkg.versionPolicyName
             ) as LockStepVersionPolicy)
           : undefined;
-      const versionPolicyChangeType =
+      const versionPolicyChangeType: ChangeType | undefined =
         versionPolicy !== undefined ? versionPolicyChangeTypes.get(versionPolicy.policyName) : undefined;
 
       if (versionPolicy === undefined || versionPolicyChangeType === undefined) {
@@ -668,7 +672,9 @@ export class PublishUtilities {
             : packageVersion;
       }
 
-      hasChanged = hasChanged || pkg.version !== currentChange.newVersion;
+      // this causes an issue with cyclic dependencies
+      // hasChanged =
+      //   hasChanged || (currentChange.newVersion !== undefined && pkg.version !== currentChange.newVersion);
 
       // If hotfix change, force new range dependency to be the exact new version
       currentChange.newRangeDependency =
