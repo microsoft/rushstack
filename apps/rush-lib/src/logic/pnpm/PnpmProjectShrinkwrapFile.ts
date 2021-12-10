@@ -88,7 +88,7 @@ export class PnpmProjectShrinkwrapFile extends BaseProjectShrinkwrapFile {
 
     const projectShrinkwrapMap: Map<string, string> = new Map();
     for (const [name, version] of allDependencies) {
-      if (name.indexOf('@rush-temp/') < 0) {
+      if (name.indexOf(`${RushConstants.rushTempNpmScope}/`) < 0) {
         // Only select the shrinkwrap dependencies that are non-local since we already handle local
         // project changes
         this._addDependencyRecursive(projectShrinkwrapMap, name, version, parentShrinkwrapEntry);

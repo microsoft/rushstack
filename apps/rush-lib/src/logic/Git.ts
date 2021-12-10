@@ -191,7 +191,7 @@ export class Git {
     const gitPath: string = this.getGitPathOrThrow();
     const output: string = Utilities.executeCommandAndCaptureOutput(
       gitPath,
-      ['--no-optional-locks', 'merge-base', 'HEAD', `${targetBranch}`, '--'],
+      ['--no-optional-locks', 'merge-base', 'HEAD', targetBranch, '--'],
       this._rushConfiguration.rushJsonFolder
     );
     const result: string = output.trim();

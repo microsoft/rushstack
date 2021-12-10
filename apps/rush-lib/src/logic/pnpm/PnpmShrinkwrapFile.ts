@@ -513,7 +513,7 @@ export class PnpmShrinkwrapFile extends BaseShrinkwrapFile {
 
         const sha256Digest: string = crypto
           .createHash('sha256')
-          .update(JSON.stringify(importerKey))
+          .update(JSON.stringify(importer))
           .digest('base64');
         const selfIntegrity: string = `${importerKey}:${sha256Digest}:`;
         integrityMap.set(importerKey, selfIntegrity);

@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "When computing the set of projects affected by a Git change, if the change contains the lockfile and the package manager is pnpm, diff the content of the lockfile to determine which projects were affeted by the lockfile change, instead of assuming all projects are affected.",
+      "comment": "When computing the set of projects affected by a Git change, if the change modifies the lockfile and the package manager is pnpm, diff the content of the lockfile to determine which projects were affected by the lockfile change, instead of assuming all projects are affected.",
       "type": "none"
     }
   ],
