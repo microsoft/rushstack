@@ -10,11 +10,13 @@ async function runAsync(): Promise<void> {
   //#region Step 1: Get the list of changed projects
   const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
 
-  const changedProjects: Set<RushConfigurationProject> =
-    await projectChangeAnalyzer.getProjectsWithChangesAsync({
-      targetBranchName: rushConfiguration.repositoryDefaultBranch,
-      terminal
-    });
+  const changedProjects: Set<RushConfigurationProject> = await projectChangeAnalyzer.getChangedProjectsAsync({
+    targetBranchName: rushConfiguration.repositoryDefaultBranch,
+    terminal,
+
+    includeExternalDependencies: true,
+    enableFiltering: false
+  });
   //#endregion
 
   //#region Step 2: Expand all consumers

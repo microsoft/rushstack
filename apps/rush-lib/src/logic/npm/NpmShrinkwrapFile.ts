@@ -47,26 +47,27 @@ export class NpmShrinkwrapFile extends BaseShrinkwrapFile {
   }
 
   public static loadFromFile(shrinkwrapJsonFilename: string): NpmShrinkwrapFile | undefined {
-    let data: string | undefined = undefined;
     try {
-      if (!FileSystem.exists(shrinkwrapJsonFilename)) {
+      const shrinkwrapContent: string = FileSystem.readFile(shrinkwrapJsonFilename);
+      return NpmShrinkwrapFile.loadFromString(shrinkwrapContent);
+    } catch (error) {
+      if (FileSystem.isNotExistError(error as Error)) {
         return undefined; // file does not exist
       }
-
-      // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
-      // and typically very large, so we want to load it the same way that NPM does.
-      data = FileSystem.readFile(shrinkwrapJsonFilename);
-      if (data.charCodeAt(0) === 0xfeff) {
-        // strip BOM
-        data = data.slice(1);
-      }
-
-      return new NpmShrinkwrapFile(JSON.parse(data));
-    } catch (error) {
       throw new Error(
         `Error reading "${shrinkwrapJsonFilename}":` + os.EOL + `  ${(error as Error).message}`
       );
     }
+  }
+
+  public static loadFromString(shrinkwrapContent: string): NpmShrinkwrapFile {
+    // strip BOM
+    const data: string =
+      shrinkwrapContent.charCodeAt(0) === 0xfeff ? shrinkwrapContent.slice(1) : shrinkwrapContent;
+
+    // We don't use JsonFile/jju here because shrinkwrap.json is a special NPM file format
+    // and typically very large, so we want to load it the same way that NPM does.
+    return new NpmShrinkwrapFile(JSON.parse(data));
   }
 
   /** @override */

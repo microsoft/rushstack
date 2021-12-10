@@ -250,6 +250,8 @@ export interface IExperimentsJson {
 
 // @beta (undocumented)
 export interface IGetChangedProjectsOptions {
+    enableFiltering: boolean;
+    includeExternalDependencies: boolean;
     // (undocumented)
     shouldFetch?: boolean;
     // (undocumented)
@@ -452,8 +454,7 @@ export class ProjectChangeAnalyzer {
     constructor(rushConfiguration: RushConfiguration);
     // (undocumented)
     _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
-    getProjectsImpactedByDiffAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
-    getProjectsWithChangesAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
+    getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
     // @internal
     _tryGetProjectDependenciesAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<Map<string, string> | undefined>;
     // @internal

@@ -6,7 +6,7 @@ import { BaseShrinkwrapFile } from './base/BaseShrinkwrapFile';
 import { NpmShrinkwrapFile } from './npm/NpmShrinkwrapFile';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 import { YarnShrinkwrapFile } from './yarn/YarnShrinkwrapFile';
-import { PackageManagerOptionsConfigurationBase, PnpmOptionsConfiguration } from '../api/RushConfiguration';
+import { PackageManagerOptionsConfigurationBase } from '../api/RushConfiguration';
 
 export class ShrinkwrapFileFactory {
   public static getShrinkwrapFile(
@@ -18,12 +18,26 @@ export class ShrinkwrapFileFactory {
       case 'npm':
         return NpmShrinkwrapFile.loadFromFile(shrinkwrapFilename);
       case 'pnpm':
-        return PnpmShrinkwrapFile.loadFromFile(
-          shrinkwrapFilename,
-          packageManagerOptions as PnpmOptionsConfiguration
-        );
+        return PnpmShrinkwrapFile.loadFromFile(shrinkwrapFilename);
       case 'yarn':
         return YarnShrinkwrapFile.loadFromFile(shrinkwrapFilename);
+      default:
+        throw new Error(`Invalid package manager: ${packageManager}`);
+    }
+  }
+
+  public static parseShrinkwrapFile(
+    packageManager: PackageManagerName,
+    packageManagerOptions: PackageManagerOptionsConfigurationBase,
+    shrinkwrapContent: string
+  ): BaseShrinkwrapFile | undefined {
+    switch (packageManager) {
+      case 'npm':
+        return NpmShrinkwrapFile.loadFromString(shrinkwrapContent);
+      case 'pnpm':
+        return PnpmShrinkwrapFile.loadFromString(shrinkwrapContent);
+      case 'yarn':
+        return YarnShrinkwrapFile.loadFromString(shrinkwrapContent);
       default:
         throw new Error(`Invalid package manager: ${packageManager}`);
     }

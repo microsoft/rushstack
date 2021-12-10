@@ -21,6 +21,11 @@ interface IResultOrError<TResult> {
   result?: TResult;
 }
 
+export interface IGetBlobOptions {
+  blobSpec: string;
+  repositoryRoot: string;
+}
+
 export class Git {
   private readonly _rushConfiguration: RushConfiguration;
   private _checkedGitPath: boolean = false;
@@ -178,6 +183,22 @@ export class Git {
     }
   }
 
+  public getMergeBase(targetBranch: string, terminal: ITerminal, shouldFetch: boolean = false): string {
+    if (shouldFetch) {
+      this._fetchRemoteBranch(targetBranch, terminal);
+    }
+
+    const gitPath: string = this.getGitPathOrThrow();
+    const output: string = Utilities.executeCommandAndCaptureOutput(
+      gitPath,
+      ['--no-optional-locks', 'merge-base', 'HEAD', targetBranch, '--'],
+      this._rushConfiguration.rushJsonFolder
+    );
+    const result: string = output.trim();
+
+    return result;
+  }
+
   public getChangedFolders(
     targetBranch: string,
     terminal: ITerminal,
@@ -205,6 +226,17 @@ export class Git {
     }
 
     return result;
+  }
+
+  public getBlobContent({ blobSpec, repositoryRoot }: IGetBlobOptions): string {
+    const gitPath: string = this.getGitPathOrThrow();
+    const output: string = Utilities.executeCommandAndCaptureOutput(
+      gitPath,
+      ['cat-file', 'blob', blobSpec, '--'],
+      repositoryRoot
+    );
+
+    return output;
   }
 
   /**

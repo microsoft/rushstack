@@ -106,14 +106,19 @@ export class ListAction extends BaseRushAction {
       description: 'If this flag is specified, output will be in JSON format.'
     });
 
-    this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this);
+    this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
+      // Include lockfile processing since this expands the selection, and we need to select
+      // at least the same projects selected with the same query to "rush build"
+      includeExternalDependencies: true,
+      // Disable filtering because rush-project.json is riggable and therefore may not be available
+      enableFiltering: false
+    });
   }
 
   protected async runAsync(): Promise<void> {
     const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
     const selection: Set<RushConfigurationProject> = await this._selectionParameters.getSelectedProjectsAsync(
-      terminal,
-      false
+      terminal
     );
     Sort.sortSetBy(selection, (x: RushConfigurationProject) => x.packageName);
     if (this._jsonFlag.value && this._detailedFlag.value) {
