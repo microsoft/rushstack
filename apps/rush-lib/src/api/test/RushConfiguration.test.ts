@@ -34,17 +34,15 @@ describe('RushConfiguration', () => {
     process.env = _oldEnv;
   });
 
-  it("can't load too new rush", (done: jest.DoneCallback) => {
+  it("can't load too new rush", () => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-too-new.json');
 
     expect(() => {
       RushConfiguration.loadFromConfigurationFile(rushFilename);
     }).toThrow('Unable to load rush-too-new.json because its RushVersion is 99.0.0');
-
-    done();
   });
 
-  it('can load repo/rush-npm.json', (done: jest.DoneCallback) => {
+  it('can load repo/rush-npm.json', () => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-npm.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
@@ -114,11 +112,9 @@ describe('RushConfiguration', () => {
     // Validate project2 settings
     const project2: RushConfigurationProject = rushConfiguration.getProjectByName('project2')!;
     expect(project2.skipRushCheck).toEqual(true);
-
-    done();
   });
 
-  it('can load repo/rush-pnpm.json', (done: jest.DoneCallback) => {
+  it('can load repo/rush-pnpm.json', () => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
@@ -187,11 +183,9 @@ describe('RushConfiguration', () => {
     assertPathProperty('project1.projectFolder', project1.projectFolder, './repo/project1');
     expect(project1.tempProjectName).toEqual('@rush-temp/project1');
     expect(project1.unscopedTempProjectName).toEqual('project1');
-
-    done();
   });
 
-  it('can load repo/rush-pnpm-5.json', (done: jest.DoneCallback) => {
+  it('can load repo/rush-pnpm-5.json', () => {
     const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-pnpm-5.json');
     const rushConfiguration: RushConfiguration = RushConfiguration.loadFromConfigurationFile(rushFilename);
 
@@ -204,8 +198,6 @@ describe('RushConfiguration', () => {
       './repo/common/config/rush/pnpmfile.js'
     );
     expect(rushConfiguration.repositoryUrls).toEqual(['someFakeUrl', 'otherFakeUrl']);
-
-    done();
   });
 
   it('allows the temp directory to be set via environment variable', () => {
@@ -251,7 +243,7 @@ describe('RushConfiguration', () => {
     describe('Loading repo/rush-pnpm-local.json', () => {
       const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'repo', 'rush-pnpm-local.json');
 
-      it(`loads the correct path when pnpmStore = "local"`, (done: jest.DoneCallback) => {
+      it(`loads the correct path when pnpmStore = "local"`, () => {
         const EXPECT_STORE_PATH: string = path.resolve(__dirname, 'repo', 'common', 'temp', 'pnpm-store');
         const rushConfiguration: RushConfiguration =
           RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
@@ -260,11 +252,9 @@ describe('RushConfiguration', () => {
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
         expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(EXPECT_STORE_PATH);
         expect(path.isAbsolute(rushConfiguration.pnpmOptions.pnpmStorePath)).toEqual(true);
-
-        done();
       });
 
-      it('loads the correct path when environment variable is defined', (done: jest.DoneCallback) => {
+      it('loads the correct path when environment variable is defined', () => {
         const EXPECT_STORE_PATH: string = path.resolve('/var/temp');
         process.env[PNPM_STORE_PATH_ENV] = EXPECT_STORE_PATH;
 
@@ -275,15 +265,13 @@ describe('RushConfiguration', () => {
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('local');
         expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(EXPECT_STORE_PATH);
         expect(path.isAbsolute(rushConfiguration.pnpmOptions.pnpmStorePath)).toEqual(true);
-
-        done();
       });
     });
 
     describe('Loading repo/rush-pnpm-global.json', () => {
       const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'repo', 'rush-pnpm-global.json');
 
-      it(`loads the correct path when pnpmStore = "global"`, (done: jest.DoneCallback) => {
+      it(`loads the correct path when pnpmStore = "global"`, () => {
         const EXPECT_STORE_PATH: string = '';
         const rushConfiguration: RushConfiguration =
           RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
@@ -291,11 +279,9 @@ describe('RushConfiguration', () => {
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('global');
         expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(EXPECT_STORE_PATH);
-
-        done();
       });
 
-      it('loads the correct path when environment variable is defined', (done: jest.DoneCallback) => {
+      it('loads the correct path when environment variable is defined', () => {
         const EXPECT_STORE_PATH: string = path.resolve('/var/temp');
         process.env[PNPM_STORE_PATH_ENV] = EXPECT_STORE_PATH;
 
@@ -305,12 +291,10 @@ describe('RushConfiguration', () => {
         expect(rushConfiguration.packageManager).toEqual('pnpm');
         expect(rushConfiguration.pnpmOptions.pnpmStore).toEqual('global');
         expect(rushConfiguration.pnpmOptions.pnpmStorePath).toEqual(EXPECT_STORE_PATH);
-
-        done();
       });
     });
 
-    it(`throws an error when invalid pnpmStore is defined`, (done: jest.DoneCallback) => {
+    it(`throws an error when invalid pnpmStore is defined`, () => {
       const RUSH_JSON_FILENAME: string = path.resolve(__dirname, 'repo', 'rush-pnpm-invalid-store.json');
       expect(() => {
         // @ts-ignore
@@ -318,8 +302,6 @@ describe('RushConfiguration', () => {
         const rushConfiguration: RushConfiguration =
           RushConfiguration.loadFromConfigurationFile(RUSH_JSON_FILENAME);
       }).toThrow();
-
-      done();
     });
   });
 });

@@ -13,7 +13,7 @@ import { VersionMismatchFinderCommonVersions } from '../../logic/versionMismatch
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 describe('VersionMismatchFinder', () => {
-  it('finds no mismatches if there are none', (done: jest.DoneCallback) => {
+  it('finds no mismatches if there are none', () => {
     const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
       packageJsonEditor: PackageJsonEditor.fromObject(
@@ -44,10 +44,9 @@ describe('VersionMismatchFinder', () => {
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
     expect(mismatchFinder.numberOfMismatches).toEqual(0);
     expect(mismatchFinder.getMismatches()).toHaveLength(0);
-    done();
   });
 
-  it('finds a mismatch in two packages', (done: jest.DoneCallback) => {
+  it('finds a mismatch in two packages', () => {
     const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
       packageJsonEditor: PackageJsonEditor.fromObject(
@@ -82,10 +81,9 @@ describe('VersionMismatchFinder', () => {
     expect(mismatchFinder.getVersionsOfMismatch('@types/foo')!.sort()).toEqual(['1.2.3', '2.0.0']);
     expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0')).toEqual([projectB]);
     expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3')).toEqual([projectA]);
-    done();
   });
 
-  it('ignores cyclic dependencies', (done: jest.DoneCallback) => {
+  it('ignores cyclic dependencies', () => {
     const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
       packageJsonEditor: PackageJsonEditor.fromObject(
@@ -116,10 +114,9 @@ describe('VersionMismatchFinder', () => {
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
     expect(mismatchFinder.numberOfMismatches).toEqual(0);
     expect(mismatchFinder.getMismatches()).toHaveLength(0);
-    done();
   });
 
-  it("won't let you access mismatches that don\t exist", (done: jest.DoneCallback) => {
+  it("won't let you access mismatches that don\t exist", () => {
     const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
       packageJsonEditor: PackageJsonEditor.fromObject(
@@ -151,10 +148,9 @@ describe('VersionMismatchFinder', () => {
     expect(mismatchFinder.getVersionsOfMismatch('@types/foobar')).toEqual(undefined);
     expect(mismatchFinder.getConsumersOfMismatch('@types/fobar', '2.0.0')).toEqual(undefined);
     expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '9.9.9')).toEqual(undefined);
-    done();
   });
 
-  it('finds two mismatches in two different pairs of projects', (done: jest.DoneCallback) => {
+  it('finds two mismatches in two different pairs of projects', () => {
     const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
       packageJsonEditor: PackageJsonEditor.fromObject(
@@ -223,10 +219,9 @@ describe('VersionMismatchFinder', () => {
     expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0')).toEqual([projectB]);
     expect(mismatchFinder.getConsumersOfMismatch('mocha', '1.2.3')).toEqual([projectC]);
     expect(mismatchFinder.getConsumersOfMismatch('mocha', '2.0.0')).toEqual([projectD]);
-    done();
   });
 
-  it('finds three mismatches in three projects', (done: jest.DoneCallback) => {
+  it('finds three mismatches in three projects', () => {
     const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
       packageJsonEditor: PackageJsonEditor.fromObject(
@@ -275,10 +270,9 @@ describe('VersionMismatchFinder', () => {
     expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3')).toEqual([projectA]);
     expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0')).toEqual([projectB]);
     expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '9.9.9')).toEqual([projectC]);
-    done();
   });
 
-  it('checks dev dependencies', (done: jest.DoneCallback) => {
+  it('checks dev dependencies', () => {
     const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
       packageJsonEditor: PackageJsonEditor.fromObject(
@@ -314,10 +308,9 @@ describe('VersionMismatchFinder', () => {
     expect(mismatchFinder.getVersionsOfMismatch('@types/foo')!.sort()).toEqual(['1.2.3', '2.0.0']);
     expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0')).toEqual([projectB]);
     expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3')).toEqual([projectA]);
-    done();
   });
 
-  it('does not check peer dependencies', (done: jest.DoneCallback) => {
+  it('does not check peer dependencies', () => {
     const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
       packageJsonEditor: PackageJsonEditor.fromObject(
@@ -347,10 +340,9 @@ describe('VersionMismatchFinder', () => {
 
     const mismatchFinder: VersionMismatchFinder = new VersionMismatchFinder([projectA, projectB]);
     expect(mismatchFinder.numberOfMismatches).toEqual(0);
-    done();
   });
 
-  it('checks optional dependencies', (done: jest.DoneCallback) => {
+  it('checks optional dependencies', () => {
     const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
       packageJsonEditor: PackageJsonEditor.fromObject(
@@ -385,10 +377,9 @@ describe('VersionMismatchFinder', () => {
     expect(mismatchFinder.getVersionsOfMismatch('@types/foo')!.sort()).toEqual(['1.2.3', '2.0.0']);
     expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '2.0.0')).toEqual([projectB]);
     expect(mismatchFinder.getConsumersOfMismatch('@types/foo', '1.2.3')).toEqual([projectA]);
-    done();
   });
 
-  it('allows alternative versions', (done: jest.DoneCallback) => {
+  it('allows alternative versions', () => {
     const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
       packageJsonEditor: PackageJsonEditor.fromObject(
@@ -424,10 +415,9 @@ describe('VersionMismatchFinder', () => {
     );
     expect(mismatchFinder.numberOfMismatches).toEqual(0);
     expect(mismatchFinder.getMismatches()).toHaveLength(0);
-    done();
   });
 
-  it('handles the common-versions.json file correctly', (done: jest.DoneCallback) => {
+  it('handles the common-versions.json file correctly', () => {
     const projectA: VersionMismatchFinderEntity = new VersionMismatchFinderProject({
       packageName: 'A',
       packageJsonEditor: PackageJsonEditor.fromObject(
@@ -452,6 +442,5 @@ describe('VersionMismatchFinder', () => {
     expect(mismatchFinder.getVersionsOfMismatch('@scope/library-1')!.sort()).toEqual(['1.2.3', '~3.2.1']);
     expect(mismatchFinder.getConsumersOfMismatch('@scope/library-1', '~3.2.1')).toEqual([projectB]);
     expect(mismatchFinder.getConsumersOfMismatch('@scope/library-1', '1.2.3')).toEqual([projectA]);
-    done();
   });
 });
