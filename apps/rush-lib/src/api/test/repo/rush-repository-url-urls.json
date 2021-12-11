@@ -10,7 +10,8 @@
   },
 
   "repository": {
-    "urls": ["someFakeUrl", "otherFakeUrl"]
+    "url": "someFakeUrl",
+    "urls": ["otherFakeUrl"]
   },
 
   "gitPolicy": {

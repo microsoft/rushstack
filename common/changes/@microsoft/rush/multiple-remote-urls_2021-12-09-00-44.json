@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(BREAKING CHANGE) Replace the RushConfiguration repositoryUrl field with repositoryUrls to support multiple remote URLs specified in rush.json.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
