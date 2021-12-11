@@ -257,8 +257,8 @@ export class Git {
    * @param rushConfiguration - rush configuration
    */
   public getRemoteDefaultBranch(): string {
-    const repositoryUrls: string[] | undefined = this._rushConfiguration.repositoryUrls;
-    if (repositoryUrls && repositoryUrls.length > 0) {
+    const repositoryUrls: string[] = this._rushConfiguration.repositoryUrls;
+    if (repositoryUrls.length > 0) {
       const gitPath: string = this.getGitPathOrThrow();
       const output: string = Utilities.executeCommandAndCaptureOutput(
         gitPath,

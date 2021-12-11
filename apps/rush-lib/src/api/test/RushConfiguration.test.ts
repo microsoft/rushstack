@@ -236,6 +236,11 @@ describe('RushConfiguration', () => {
     );
   });
 
+  it('fails to load repo/rush-repository-url-urls.json', () => {
+    const rushFilename: string = path.resolve(__dirname, 'repo', 'rush-repository-url-urls.json');
+    expect(() => RushConfiguration.loadFromConfigurationFile(rushFilename)).toThrowErrorMatchingSnapshot();
+  });
+
   describe('PNPM Store Paths', () => {
     afterEach(() => {
       EnvironmentConfiguration['_pnpmStorePathOverride'] = undefined;
