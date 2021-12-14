@@ -34,6 +34,7 @@ export class Git {
   private _gitInfo: gitInfo.GitRepoInfo | undefined;
 
   private _gitEmailResult: IResultOrError<string> | undefined = undefined;
+  private _gitHooksPath: IResultOrError<string> | undefined = undefined;
 
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
@@ -145,6 +146,52 @@ export class Git {
       return path.join(repoInfo.worktreeGitDir, 'hooks');
     }
     return undefined;
+  }
+
+  public isHooksPathDefault(): boolean {
+    const repoInfo: gitInfo.GitRepoInfo | undefined = this.getGitInfo();
+    if (!repoInfo?.commonGitDir) {
+      // This should have never been called in a non-Git environment
+      return true;
+    }
+    const defaultHooksPath: string = path.resolve(repoInfo.commonGitDir, 'hooks');
+    const hooksResult: IResultOrError<string> = this._tryGetGitHooksPath();
+    if (hooksResult.error) {
+      console.log(
+        [
+          `Error: ${hooksResult.error.message}`,
+          'Unable to determine your Git configuration using this command:',
+          '',
+          '    git rev-parse --git-path hooks',
+          '',
+          'Assuming hooks can still be installed in the default location'
+        ].join(os.EOL)
+      );
+      return true;
+    }
+
+    if (hooksResult.result) {
+      const absoluteHooksPath: string = path.resolve(repoInfo.root, hooksResult.result);
+      return absoluteHooksPath === defaultHooksPath;
+    }
+
+    // No error, but also empty result? Not sure it's possible.
+    return true;
+  }
+
+  public getConfigHooksPath(): string {
+    let configHooksPath: string = '';
+    const gitPath: string = this.getGitPathOrThrow();
+    try {
+      configHooksPath = Utilities.executeCommandAndCaptureOutput(
+        gitPath,
+        ['config', 'core.hooksPath'],
+        this._rushConfiguration.rushJsonFolder
+      ).trim();
+    } catch (e) {
+      // git config returns error code 1 if core.hooksPath is not set.
+    }
+    return configHooksPath;
   }
 
   /**
@@ -464,6 +511,27 @@ export class Git {
     }
 
     return this._gitEmailResult;
+  }
+
+  private _tryGetGitHooksPath(): IResultOrError<string> {
+    if (this._gitHooksPath === undefined) {
+      const gitPath: string = this.getGitPathOrThrow();
+      try {
+        this._gitHooksPath = {
+          result: Utilities.executeCommandAndCaptureOutput(
+            gitPath,
+            ['rev-parse', '--git-path', 'hooks'],
+            this._rushConfiguration.rushJsonFolder
+          ).trim()
+        };
+      } catch (e) {
+        this._gitHooksPath = {
+          error: e as Error
+        };
+      }
+    }
+
+    return this._gitHooksPath;
   }
 
   private _getUntrackedChanges(): string[] {
