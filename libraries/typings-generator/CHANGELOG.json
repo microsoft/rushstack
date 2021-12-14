@@ -2,6 +2,18 @@
   "name": "@rushstack/typings-generator",
   "entries": [
     {
+      "version": "0.6.0",
+      "tag": "@rushstack/typings-generator_v0.6.0",
+      "date": "Fri, 10 Dec 2021 01:09:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Support additional output files beyond the typings files."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.7",
       "tag": "@rushstack/typings-generator_v0.5.7",
       "date": "Thu, 09 Dec 2021 20:34:41 GMT",

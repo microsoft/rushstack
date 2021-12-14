@@ -155,8 +155,7 @@ export class RepoStateFile {
       rushConfiguration.pnpmOptions.preventManualShrinkwrapChanges;
     if (preventShrinkwrapChanges) {
       const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-        rushConfiguration.getCommittedShrinkwrapFilename(this._variant),
-        rushConfiguration.pnpmOptions
+        rushConfiguration.getCommittedShrinkwrapFilename(this._variant)
       );
 
       if (pnpmShrinkwrapFile) {

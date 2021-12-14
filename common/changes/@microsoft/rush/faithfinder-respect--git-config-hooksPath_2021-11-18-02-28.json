@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix an issue where Rush's Git hooks were broken if another tool such as Husky had tampered with the `core.hooksPath` (GitHub #3004)",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

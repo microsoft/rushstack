@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow multiple remote URLs to be specified in the rush.json in the new repository.urls field.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}

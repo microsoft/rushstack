@@ -1,6 +1,13 @@
 # Change Log - @rushstack/typings-generator
 
-This log was last generated on Thu, 09 Dec 2021 20:34:41 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Dec 2021 01:09:33 GMT and should not be manually modified.
+
+## 0.6.0
+Fri, 10 Dec 2021 01:09:33 GMT
+
+### Minor changes
+
+- Support additional output files beyond the typings files.
 
 ## 0.5.7
 Thu, 09 Dec 2021 20:34:41 GMT

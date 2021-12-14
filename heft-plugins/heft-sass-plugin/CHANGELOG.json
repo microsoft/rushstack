@@ -2,6 +2,23 @@
   "name": "@rushstack/heft-sass-plugin",
   "entries": [
     {
+      "version": "0.3.0",
+      "tag": "@rushstack/heft-sass-plugin_v0.3.0",
+      "date": "Fri, 10 Dec 2021 01:09:33 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Add a \"cssOuputFolders\" option to \"config/sass.json\" to emit compiled CSS."
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/typings-generator\" to `0.6.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.10",
       "tag": "@rushstack/heft-sass-plugin_v0.2.10",
       "date": "Thu, 09 Dec 2021 20:34:41 GMT",
