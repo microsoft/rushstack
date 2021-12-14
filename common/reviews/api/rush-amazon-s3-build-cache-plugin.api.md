@@ -4,9 +4,9 @@
 
 ```ts
 
-import type { IRushPlugin } from '@microsoft/rush-lib';
-import type { RushConfiguration } from '@microsoft/rush-lib';
-import type { RushSession } from '@microsoft/rush-lib';
+import type { IRushPlugin } from '@rushstack/rush-sdk';
+import type { RushConfiguration } from '@rushstack/rush-sdk';
+import type { RushSession } from '@rushstack/rush-sdk';
 
 // @public (undocumented)
 class RushAmazonS3BuildCachePlugin implements IRushPlugin {

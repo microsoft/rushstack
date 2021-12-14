@@ -95,6 +95,9 @@ export class SassTypingsPlugin implements IHeftPlugin {
           },
           '$.srcFolder.*': {
             pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
+          },
+          '$.cssOutputFolders.*': {
+            pathResolutionMethod: PathResolutionMethod.resolvePathRelativeToProjectRoot
           }
         }
       });

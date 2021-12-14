@@ -1,6 +1,57 @@
 # Change Log - @rushstack/heft-web-rig
 
-This log was last generated on Sat, 06 Nov 2021 00:09:13 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Dec 2021 01:09:33 GMT and should not be manually modified.
+
+## 0.6.4
+Fri, 10 Dec 2021 01:09:33 GMT
+
+_Version update only_
+
+## 0.6.3
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 0.6.2
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 0.6.1
+Wed, 08 Dec 2021 19:05:08 GMT
+
+_Version update only_
+
+## 0.6.0
+Wed, 08 Dec 2021 16:14:05 GMT
+
+### Minor changes
+
+- Update to TypeScript 4.5
+
+## 0.5.0
+Mon, 06 Dec 2021 16:08:32 GMT
+
+### Minor changes
+
+- Bump ESLint to v8
+
+## 0.4.34
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 0.4.33
+Tue, 30 Nov 2021 20:18:41 GMT
+
+### Patches
+
+- Set default Jest environment in Jest configuration to "jest-environment-jsdom"
+
+## 0.4.32
+Mon, 29 Nov 2021 07:26:16 GMT
+
+_Version update only_
 
 ## 0.4.31
 Sat, 06 Nov 2021 00:09:13 GMT

@@ -1,6 +1,53 @@
 # Change Log - @rushstack/localization-plugin
 
-This log was last generated on Tue, 16 Nov 2021 16:08:01 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Dec 2021 01:09:33 GMT and should not be manually modified.
+
+## 0.9.8
+Fri, 10 Dec 2021 01:09:33 GMT
+
+_Version update only_
+
+## 0.9.7
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 0.9.6
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 0.9.5
+Wed, 08 Dec 2021 19:05:08 GMT
+
+_Version update only_
+
+## 0.9.4
+Wed, 08 Dec 2021 16:14:05 GMT
+
+_Version update only_
+
+## 0.9.3
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 0.9.2
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 0.9.1
+Tue, 30 Nov 2021 20:18:41 GMT
+
+_Version update only_
+
+## 0.9.0
+Mon, 29 Nov 2021 07:26:16 GMT
+
+### Minor changes
+
+- (BREAKING CHANGE) Remove "filesToIgnore" option in favor of "globsToIgnore."
 
 ## 0.8.0
 Tue, 16 Nov 2021 16:08:01 GMT

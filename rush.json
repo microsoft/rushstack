@@ -16,7 +16,7 @@
    * path segment in the "$schema" field for all your Rush config files.  This will ensure
    * correct error-underlining and tab-completion for editors such as VS Code.
    */
-  "rushVersion": "5.55.0",
+  "rushVersion": "5.57.1",
 
   /**
    * The next field selects which package manager should be installed and determines its version.
@@ -28,7 +28,7 @@
    */
   "pnpmVersion": "6.7.1",
 
-  // "npmVersion": "4.5.0",
+  // "npmVersion": "6.14.15",
   // "yarnVersion": "1.9.4",
 
   /**
@@ -257,7 +257,7 @@
      * you might configure your system's trigger to look for a special string such as "[skip-ci]"
      * in the commit message, and then customize Rush's message to contain that string.
      */
-    // "versionBumpCommitMessage": "Applying package updates. [skip-ci]",
+    // "versionBumpCommitMessage": "Bump versions [skip ci]",
 
     /**
      * The commit message to use when committing changes during 'rush version'.
@@ -266,7 +266,7 @@
      * you might configure your system's trigger to look for a special string such as "[skip-ci]"
      * in the commit message, and then customize Rush's message to contain that string.
      */
-    // "changeLogUpdateCommitMessage": "Deleting change files and updating change logs for package updates. [skip-ci]"
+    // "changeLogUpdateCommitMessage": "Update changelogs [skip ci]"
   },
 
   "repository": {
@@ -488,6 +488,12 @@
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
     },
+    {
+      "packageName": "@rushstack/rush-sdk",
+      "projectFolder": "libraries/rush-sdk",
+      "reviewCategory": "libraries",
+      "versionPolicyName": "rush"
+    },
 
     // "build-tests" folder (alphabetical order)
     {
@@ -544,6 +550,12 @@
       "reviewCategory": "tests",
       "shouldPublish": false
     },
+    {
+      "packageName": "eslint-7-test",
+      "projectFolder": "build-tests/eslint-7-test",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
 
     // "build-tests-samples" folder (alphabetical order)
     {
@@ -587,6 +599,42 @@
       "projectFolder": "build-tests-samples/packlets-tutorial",
       "reviewCategory": "tests",
       "shouldPublish": false
+    },
+
+    // "eslint" folder (alphabetical order)
+    {
+      "packageName": "@rushstack/eslint-config",
+      "projectFolder": "eslint/eslint-config",
+      "reviewCategory": "libraries",
+      "shouldPublish": true
+    },
+    {
+      "packageName": "@rushstack/eslint-patch",
+      "projectFolder": "eslint/eslint-patch",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
+      "packageName": "@rushstack/eslint-plugin",
+      "projectFolder": "eslint/eslint-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
+      "packageName": "@rushstack/eslint-plugin-packlets",
+      "projectFolder": "eslint/eslint-plugin-packlets",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+    },
+    {
+      "packageName": "@rushstack/eslint-plugin-security",
+      "projectFolder": "eslint/eslint-plugin-security",
+      "reviewCategory": "libraries",
+      "shouldPublish": true,
+      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
     },
 
     // heft-* projects
@@ -856,8 +904,7 @@
       "packageName": "@rushstack/typings-generator",
       "projectFolder": "libraries/typings-generator",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "shouldPublish": true
     },
 
     // "repo-scripts" folder (alphabetical order)
@@ -894,40 +941,18 @@
       "shouldPublish": true
     },
 
-    // "stack" folder (alphabetical order)
+    // "rush-plugins" folder (alphabetical order)
     {
-      "packageName": "@rushstack/eslint-config",
-      "projectFolder": "stack/eslint-config",
+      "packageName": "@rushstack/rush-amazon-s3-build-cache-plugin",
+      "projectFolder": "rush-plugins/rush-amazon-s3-build-cache-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": true
+      "versionPolicyName": "rush"
     },
     {
-      "packageName": "@rushstack/eslint-patch",
-      "projectFolder": "stack/eslint-patch",
+      "packageName": "@rushstack/rush-azure-storage-build-cache-plugin",
+      "projectFolder": "rush-plugins/rush-azure-storage-build-cache-plugin",
       "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
-    },
-    {
-      "packageName": "@rushstack/eslint-plugin",
-      "projectFolder": "stack/eslint-plugin",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
-    },
-    {
-      "packageName": "@rushstack/eslint-plugin-packlets",
-      "projectFolder": "stack/eslint-plugin-packlets",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
-    },
-    {
-      "packageName": "@rushstack/eslint-plugin-security",
-      "projectFolder": "stack/eslint-plugin-security",
-      "reviewCategory": "libraries",
-      "shouldPublish": true,
-      "cyclicDependencyProjects": ["@rushstack/heft-node-rig", "@rushstack/heft"]
+      "versionPolicyName": "rush"
     },
 
     // "webpack" folder (alphabetical order)
@@ -952,18 +977,6 @@
     {
       "packageName": "@rushstack/module-minifier-plugin",
       "projectFolder": "webpack/module-minifier-plugin",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@rushstack/rush-amazon-s3-build-cache-plugin",
-      "projectFolder": "rush-plugins/rush-amazon-s3-build-cache-plugin",
-      "reviewCategory": "libraries",
-      "shouldPublish": true
-    },
-    {
-      "packageName": "@rushstack/rush-azure-storage-build-cache-plugin",
-      "projectFolder": "rush-plugins/rush-azure-storage-build-cache-plugin",
       "reviewCategory": "libraries",
       "shouldPublish": true
     },

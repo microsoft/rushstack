@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { Import } from '@rushstack/node-core-library';
-import type { IRushPlugin, RushSession, RushConfiguration } from '@microsoft/rush-lib';
+import type { IRushPlugin, RushSession, RushConfiguration } from '@rushstack/rush-sdk';
 import type { AmazonS3BuildCacheProvider } from './AmazonS3BuildCacheProvider';
 
 const AmazonS3BuildCacheProviderModule: typeof import('./AmazonS3BuildCacheProvider') = Import.lazy(

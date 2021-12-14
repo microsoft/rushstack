@@ -13,7 +13,10 @@ import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { Selection } from '../logic/Selection';
 import type { ISelectorParser as ISelectorParser } from '../logic/selectors/ISelectorParser';
-import { GitChangedProjectSelectorParser } from '../logic/selectors/GitChangedProjectSelectorParser';
+import {
+  GitChangedProjectSelectorParser,
+  IGitSelectorParserOptions
+} from '../logic/selectors/GitChangedProjectSelectorParser';
 import { NamedProjectSelectorParser } from '../logic/selectors/NamedProjectSelectorParser';
 import { VersionPolicyProjectSelectorParser } from '../logic/selectors/VersionPolicyProjectSelectorParser';
 
@@ -38,15 +41,22 @@ export class SelectionParameterSet {
 
   private readonly _selectorParserByScope: Map<string, ISelectorParser<RushConfigurationProject>>;
 
-  public constructor(rushConfiguration: RushConfiguration, action: CommandLineParameterProvider) {
+  public constructor(
+    rushConfiguration: RushConfiguration,
+    action: CommandLineParameterProvider,
+    gitOptions: IGitSelectorParserOptions
+  ) {
     this._rushConfiguration = rushConfiguration;
 
-    const selectorParsers: Map<string, ISelectorParser<RushConfigurationProject>> =
-      (this._selectorParserByScope = new Map());
+    const selectorParsers: Map<string, ISelectorParser<RushConfigurationProject>> = new Map<
+      string,
+      ISelectorParser<RushConfigurationProject>
+    >();
 
     selectorParsers.set('name', new NamedProjectSelectorParser(rushConfiguration));
-    selectorParsers.set('git', new GitChangedProjectSelectorParser(rushConfiguration));
+    selectorParsers.set('git', new GitChangedProjectSelectorParser(rushConfiguration, gitOptions));
     selectorParsers.set('version-policy', new VersionPolicyProjectSelectorParser(rushConfiguration));
+    this._selectorParserByScope = selectorParsers;
 
     const getSpecifierCompletions: () => Promise<string[]> = async (): Promise<string[]> => {
       const completions: string[] = ['.'];
@@ -371,7 +381,11 @@ export class SelectionParameterSet {
         throw new AlreadyReportedError();
       }
 
-      for (const project of await handler.evaluateSelectorAsync(unscopedSelector, terminal, parameterName)) {
+      for (const project of await handler.evaluateSelectorAsync({
+        unscopedSelector,
+        terminal,
+        parameterName
+      })) {
         selection.add(project);
       }
     }

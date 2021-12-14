@@ -7,9 +7,11 @@ import {
   Terminal,
   ConsoleTerminalProvider,
   Path,
-  NewlineKind
+  NewlineKind,
+  LegacyAdapters,
+  Async
 } from '@rushstack/node-core-library';
-import * as glob from 'glob';
+import glob from 'glob';
 import * as path from 'path';
 import { EOL } from 'os';
 import * as chokidar from 'chokidar';
@@ -23,9 +25,17 @@ export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> {
   fileExtensions: string[];
   parseAndGenerateTypings: (
     fileContents: string,
-    filePath: string
+    filePath: string,
+    relativePath: string
   ) => TTypingsResult | Promise<TTypingsResult>;
+  getAdditionalOutputFiles?: (relativePath: string) => string[];
   terminal?: ITerminal;
+  globsToIgnore?: string[];
+  /**
+   * @deprecated
+   *
+   * TODO: Remove when version 1.0.0 is released.
+   */
   filesToIgnore?: string[];
 }
 
@@ -35,20 +45,27 @@ export interface ITypingsGeneratorOptions<TTypingsResult = string | undefined> {
  * @public
  */
 export class TypingsGenerator {
-  // Map of target file path -> Set<dependency file path>
-  private _targetMap: Map<string, Set<string>>;
+  // Map of resolved consumer file path -> Set<resolved dependency file path>
+  private readonly _dependenciesOfFile: Map<string, Set<string>>;
 
-  // Map of dependency file path -> Set<target file path>
-  private _dependencyMap: Map<string, Set<string>>;
+  // Map of resolved dependency file path -> Set<resolved consumer file path>
+  private readonly _consumersOfFile: Map<string, Set<string>>;
+
+  // Map of resolved file path -> relative file path
+  private readonly _relativePaths: Map<string, string>;
 
   protected _options: ITypingsGeneratorOptions;
 
-  private _filesToIgnoreVal: Set<string> | undefined;
+  private readonly _fileGlob: string;
 
   public constructor(options: ITypingsGeneratorOptions) {
     this._options = {
       ...options
     };
+
+    if (options.filesToIgnore) {
+      throw new Error('The filesToIgnore option is no longer supported. Please use globsToIgnore instead.');
+    }
 
     if (!this._options.generatedTsFolder) {
       throw new Error('generatedTsFolder must be provided');
@@ -70,8 +87,8 @@ export class TypingsGenerator {
       throw new Error('At least one file extension must be provided.');
     }
 
-    if (!this._options.filesToIgnore) {
-      this._options.filesToIgnore = [];
+    if (!this._options.globsToIgnore) {
+      this._options.globsToIgnore = [];
     }
 
     if (!this._options.terminal) {
@@ -80,89 +97,175 @@ export class TypingsGenerator {
 
     this._options.fileExtensions = this._normalizeFileExtensions(this._options.fileExtensions);
 
-    this._targetMap = new Map();
+    this._dependenciesOfFile = new Map();
+    this._consumersOfFile = new Map();
+    this._relativePaths = new Map();
 
-    this._dependencyMap = new Map();
+    this._fileGlob = `**/*+(${this._options.fileExtensions.join('|')})`;
   }
 
   public async generateTypingsAsync(): Promise<void> {
     await FileSystem.ensureEmptyFolderAsync(this._options.generatedTsFolder);
 
-    const filePaths: string[] = glob.sync(path.join('**', `*+(${this._options.fileExtensions.join('|')})`), {
-      cwd: this._options.srcFolder,
-      absolute: true,
-      nosort: true,
-      nodir: true
-    });
+    const filePaths: string[] = await LegacyAdapters.convertCallbackToPromise(
+      glob,
+      this._fileGlob,
+      {
+        cwd: this._options.srcFolder,
+        absolute: true,
+        nosort: true,
+        nodir: true,
+        ignore: this._options.globsToIgnore
+      }
+    );
 
-    for (let filePath of filePaths) {
-      filePath = path.resolve(this._options.srcFolder, filePath);
-      await this._parseFileAndGenerateTypingsAsync(filePath);
-    }
+    await this._reprocessFiles(filePaths);
   }
 
   public async runWatcherAsync(): Promise<void> {
     await FileSystem.ensureFolderAsync(this._options.generatedTsFolder);
 
-    const globBase: string = path.resolve(this._options.srcFolder, '**');
-
     await new Promise((resolve, reject): void => {
       const watcher: chokidar.FSWatcher = chokidar.watch(
-        this._options.fileExtensions.map((fileExtension) => path.join(globBase, `*${fileExtension}`))
+        this._fileGlob,
+        {
+          cwd: this._options.srcFolder,
+          ignored: this._options.globsToIgnore
+        }
       );
-      const boundGenerateTypingsFunction: (filePath: string) => Promise<void> =
-        this._parseFileAndGenerateTypingsAsync.bind(this);
-      watcher.on('add', boundGenerateTypingsFunction);
-      watcher.on('change', boundGenerateTypingsFunction);
-      watcher.on('unlink', async (filePath) => {
-        const generatedTsFilePath: string = this._getTypingsFilePath(filePath);
-        await FileSystem.deleteFileAsync(generatedTsFilePath);
+
+      const queue: Set<string> = new Set();
+      let timeout: NodeJS.Timeout | undefined;
+      let processing: boolean = false;
+      let flushAfterCompletion: boolean = false;
+
+      const flushInternal: () => void = () => {
+        processing = true;
+
+        const toProcess: string[] = Array.from(queue);
+        queue.clear();
+        this._reprocessFiles(toProcess)
+          .then(() => {
+            processing = false;
+            // If the timeout was invoked again, immediately reexecute with the changed files.
+            if (flushAfterCompletion) {
+              flushAfterCompletion = false;
+              flushInternal();
+            }
+          })
+          .catch(reject);
+      };
+
+      const debouncedFlush: () => void = () => {
+        timeout = undefined;
+        if (processing) {
+          // If the callback was invoked while processing is ongoing, indicate that we should flush immediately
+          // upon completion of the current change batch.
+          flushAfterCompletion = true;
+          return;
+        }
+
+        flushInternal();
+      };
+
+      const onChange: (relativePath: string) => void = (relativePath: string) => {
+        queue.add(relativePath);
+        if (timeout) {
+          clearTimeout(timeout);
+        }
+
+        setTimeout(debouncedFlush, 100);
+      };
+
+      watcher.on('add', onChange);
+      watcher.on('change', onChange);
+      watcher.on('unlink', async (relativePath) => {
+        await Promise.all(
+          this.getOutputFilePaths(relativePath).map(async (outputFile: string) => {
+            await FileSystem.deleteFileAsync(outputFile);
+          })
+        );
       });
       watcher.on('error', reject);
     });
   }
 
   /**
-   * Register file dependencies that may effect the typings of a target file.
+   * Register file dependencies that may effect the typings of a consumer file.
    * Note: This feature is only useful in watch mode.
    * The registerDependency method must be called in the body of parseAndGenerateTypings every
    * time because the registry for a file is cleared at the beginning of processing.
    */
-  public registerDependency(target: string, dependency: string): void {
-    let targetDependencySet: Set<string> | undefined = this._targetMap.get(target);
-    if (!targetDependencySet) {
-      targetDependencySet = new Set();
-      this._targetMap.set(target, targetDependencySet);
-    }
-    targetDependencySet.add(dependency);
+  public registerDependency(consumer: string, rawDependency: string): void {
+    // Need to normalize slashes in the dependency path
+    const dependency: string = path.resolve(this._options.srcFolder, rawDependency);
 
-    let dependencyTargetSet: Set<string> | undefined = this._dependencyMap.get(dependency);
-    if (!dependencyTargetSet) {
-      dependencyTargetSet = new Set();
-      this._dependencyMap.set(dependency, dependencyTargetSet);
+    let dependencies: Set<string> | undefined = this._dependenciesOfFile.get(consumer);
+    if (!dependencies) {
+      dependencies = new Set();
+      this._dependenciesOfFile.set(consumer, dependencies);
     }
-    dependencyTargetSet.add(target);
+    dependencies.add(dependency);
+
+    let consumers: Set<string> | undefined = this._consumersOfFile.get(dependency);
+    if (!consumers) {
+      consumers = new Set();
+      this._consumersOfFile.set(dependency, consumers);
+    }
+    consumers.add(consumer);
   }
 
-  private async _parseFileAndGenerateTypingsAsync(locFilePath: string): Promise<void> {
-    if (this._filesToIgnore.has(locFilePath)) {
-      return;
-    }
-    // Clear registered dependencies prior to reprocessing.
-    this._clearDependencies(locFilePath);
+  public getOutputFilePaths(relativePath: string): string[] {
+    const typingsFile: string = this._getTypingsFilePath(relativePath);
+    const additionalPaths: string[] | undefined = this._options.getAdditionalOutputFiles?.(relativePath);
+    return additionalPaths ? [typingsFile, ...additionalPaths] : [typingsFile];
+  }
 
-    // Check for targets that register this file as a dependency, and reprocess them too.
-    for (const target of this._getDependencyTargets(locFilePath)) {
-      await this._parseFileAndGenerateTypingsAsync(target);
+  private async _reprocessFiles(relativePaths: Iterable<string>): Promise<void> {
+    // Build a queue of resolved paths
+    const toProcess: Set<string> = new Set();
+    for (const rawPath of relativePaths) {
+      const relativePath: string = Path.convertToSlashes(rawPath);
+      const resolvedPath: string = path.resolve(this._options.srcFolder, rawPath);
+      this._relativePaths.set(resolvedPath, relativePath);
+      toProcess.add(resolvedPath);
     }
+
+    // Expand out all registered consumers, according to the current dependency graph
+    for (const file of toProcess) {
+      const consumers: Set<string> | undefined = this._consumersOfFile.get(file);
+      if (consumers) {
+        for (const consumer of consumers) {
+          toProcess.add(consumer);
+        }
+      }
+    }
+
+    // Map back to the relative paths so that the information is available
+    await Async.forEachAsync(
+      toProcess,
+      async (resolvedPath: string) => {
+        const relativePath: string | undefined = this._relativePaths.get(resolvedPath);
+        if (!relativePath) {
+          throw new Error(`Missing relative path for file ${resolvedPath}`);
+        }
+        await this._parseFileAndGenerateTypingsAsync(relativePath, resolvedPath);
+      },
+      { concurrency: 20 }
+    );
+  }
+
+  private async _parseFileAndGenerateTypingsAsync(relativePath: string, resolvedPath: string): Promise<void> {
+    // Clear registered dependencies prior to reprocessing.
+    this._clearDependencies(resolvedPath);
 
     try {
-      const fileContents: string = await FileSystem.readFileAsync(locFilePath);
+      const fileContents: string = await FileSystem.readFileAsync(resolvedPath);
       const typingsData: string | undefined = await this._options.parseAndGenerateTypings(
         fileContents,
-        locFilePath
+        resolvedPath,
+        relativePath
       );
-      const generatedTsFilePath: string = this._getTypingsFilePath(locFilePath);
 
       // Typings data will be undefined when no types should be generated for the parsed file.
       if (typingsData === undefined) {
@@ -175,59 +278,46 @@ export class TypingsGenerator {
         typingsData
       ].join(EOL);
 
+      const generatedTsFilePath: string = this._getTypingsFilePath(relativePath);
+
       await FileSystem.writeFileAsync(generatedTsFilePath, prefixedTypingsData, {
         ensureFolderExists: true,
         convertLineEndings: NewlineKind.OsDefault
       });
     } catch (e) {
       this._options.terminal!.writeError(
-        `Error occurred parsing and generating typings for file "${locFilePath}": ${e}`
+        `Error occurred parsing and generating typings for file "${resolvedPath}": ${e}`
       );
     }
   }
 
-  private get _filesToIgnore(): Set<string> {
-    if (!this._filesToIgnoreVal) {
-      this._filesToIgnoreVal = new Set<string>(
-        this._options.filesToIgnore!.map((fileToIgnore) => {
-          return path.resolve(this._options.srcFolder, fileToIgnore);
-        })
-      );
-    }
-    return this._filesToIgnoreVal;
-  }
-
-  private _clearDependencies(target: string): void {
-    const targetDependencySet: Set<string> | undefined = this._targetMap.get(target);
-    if (targetDependencySet) {
-      for (const dependency of targetDependencySet) {
-        this._dependencyMap.get(dependency)!.delete(target);
+  /**
+   * Removes the consumer from all extant dependencies
+   */
+  private _clearDependencies(consumer: string): void {
+    const dependencies: Set<string> | undefined = this._dependenciesOfFile.get(consumer);
+    if (dependencies) {
+      for (const dependency of dependencies) {
+        this._consumersOfFile.get(dependency)!.delete(consumer);
       }
-      targetDependencySet.clear();
+      dependencies.clear();
     }
   }
 
-  private _getDependencyTargets(dependency: string): string[] {
-    return [...(this._dependencyMap.get(dependency)?.keys() || [])];
-  }
-
-  private _getTypingsFilePath(locFilePath: string): string {
-    return path.resolve(
-      this._options.generatedTsFolder,
-      path.relative(this._options.srcFolder, `${locFilePath}.d.ts`)
-    );
+  private _getTypingsFilePath(relativePath: string): string {
+    return path.resolve(this._options.generatedTsFolder, `${relativePath}.d.ts`);
   }
 
   private _normalizeFileExtensions(fileExtensions: string[]): string[] {
-    const result: string[] = [];
+    const result: Set<string> = new Set();
     for (const fileExtension of fileExtensions) {
       if (!fileExtension.startsWith('.')) {
-        result.push(`.${fileExtension}`);
+        result.add(`.${fileExtension}`);
       } else {
-        result.push(fileExtension);
+        result.add(fileExtension);
       }
     }
 
-    return result;
+    return Array.from(result);
   }
 }

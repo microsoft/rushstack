@@ -1,7 +1,7 @@
 import { ITerminalProvider, Terminal } from '@rushstack/node-core-library';
 
 /**
- * @public
+ * @beta
  */
 export interface ILogger {
   readonly terminal: Terminal;
@@ -17,18 +17,12 @@ export interface ILogger {
   emitWarning(warning: Error): void;
 }
 
-/**
- * @public
- */
 export interface ILoggerOptions {
   loggerName: string;
   terminalProvider: ITerminalProvider;
   getShouldPrintStacks: () => boolean;
 }
 
-/**
- * @public
- */
 export class Logger implements ILogger {
   private readonly _options: ILoggerOptions;
   private readonly _errors: Error[] = [];

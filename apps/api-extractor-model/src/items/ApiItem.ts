@@ -15,7 +15,7 @@ import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
  *
  * @public
  */
-export const enum ApiItemKind {
+export enum ApiItemKind {
   CallSignature = 'CallSignature',
   Class = 'Class',
   Constructor = 'Constructor',

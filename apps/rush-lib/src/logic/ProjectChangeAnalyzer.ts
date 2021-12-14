@@ -12,7 +12,7 @@ import {
   getGitHashForFiles,
   IFileDiffStatus
 } from '@rushstack/package-deps-hash';
-import { Path, InternalError, FileSystem, ITerminal } from '@rushstack/node-core-library';
+import { Path, InternalError, FileSystem, ITerminal, Async } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushProjectConfiguration } from '../api/RushProjectConfiguration';
@@ -21,6 +21,7 @@ import { BaseProjectShrinkwrapFile } from './base/BaseProjectShrinkwrapFile';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from './RushConstants';
 import { LookupByPath } from './LookupByPath';
+import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
 
 /**
  * @beta
@@ -29,6 +30,18 @@ export interface IGetChangedProjectsOptions {
   targetBranchName: string;
   terminal: ITerminal;
   shouldFetch?: boolean;
+
+  /**
+   * If set to `true`, consider a project's external dependency installation layout as defined in the
+   * package manager lockfile when determining if it has changed.
+   */
+  includeExternalDependencies: boolean;
+
+  /**
+   * If set to `true` apply the `incrementalBuildIgnoredGlobs` property in a project's `rush-project.json`
+   * and exclude matched files from change detection.
+   */
+  enableFiltering: boolean;
 }
 
 interface IGitState {
@@ -178,63 +191,122 @@ export class ProjectChangeAnalyzer {
 
   /**
    * Gets a list of projects that have changed in the current state of the repo
-   * when compared to the specified branch.
+   * when compared to the specified branch, optionally taking the shrinkwrap and settings in
+   * the rush-project.json file into consideration.
    */
   public async getChangedProjectsAsync(
     options: IGetChangedProjectsOptions
   ): Promise<Set<RushConfigurationProject>> {
+    const { _rushConfiguration: rushConfiguration } = this;
+
+    const { targetBranchName, terminal, includeExternalDependencies, enableFiltering, shouldFetch } = options;
+
     const gitPath: string = this._git.getGitPathOrThrow();
-    const repoRoot: string = getRepoRoot(this._rushConfiguration.rushJsonFolder);
-    const repoChanges: Map<string, IFileDiffStatus> = getRepoChanges(
-      repoRoot,
-      options.targetBranchName,
-      gitPath
-    );
-    const { terminal } = options;
+    const repoRoot: string = getRepoRoot(rushConfiguration.rushJsonFolder);
+
+    const mergeCommit: string = this._git.getMergeBase(targetBranchName, terminal, shouldFetch);
+
+    const repoChanges: Map<string, IFileDiffStatus> = getRepoChanges(repoRoot, mergeCommit, gitPath);
 
     const changedProjects: Set<RushConfigurationProject> = new Set();
 
-    // Determine the current variant from the link JSON.
-    const variant: string | undefined = this._rushConfiguration.currentInstalledVariant;
+    if (includeExternalDependencies) {
+      // Even though changing the installed version of a nested dependency merits a change file,
+      // ignore lockfile changes for `rush change` for the moment
 
-    // Add the shrinkwrap file to every project's dependencies
-    const shrinkwrapFile: string = Path.convertToSlashes(
-      path.relative(repoRoot, this._rushConfiguration.getCommittedShrinkwrapFilename(variant))
-    );
+      // Determine the current variant from the link JSON.
+      const variant: string | undefined = rushConfiguration.currentInstalledVariant;
 
-    if (repoChanges.has(shrinkwrapFile)) {
-      // TODO: Implement shrinkwrap diffing here.
-      return new Set(this._rushConfiguration.projects);
+      const fullShrinkwrapPath: string = rushConfiguration.getCommittedShrinkwrapFilename(variant);
+
+      const shrinkwrapFile: string = Path.convertToSlashes(path.relative(repoRoot, fullShrinkwrapPath));
+      const shrinkwrapStatus: IFileDiffStatus | undefined = repoChanges.get(shrinkwrapFile);
+
+      if (shrinkwrapStatus) {
+        if (shrinkwrapStatus.status !== 'M') {
+          terminal.writeLine(`Lockfile was created or deleted. Assuming all projects are affected.`);
+          return new Set(rushConfiguration.projects);
+        }
+
+        const { packageManager } = rushConfiguration;
+
+        if (packageManager === 'pnpm') {
+          const currentShrinkwrap: PnpmShrinkwrapFile | undefined =
+            PnpmShrinkwrapFile.loadFromFile(fullShrinkwrapPath);
+
+          if (!currentShrinkwrap) {
+            throw new Error(`Unable to obtain current shrinkwrap file.`);
+          }
+
+          const oldShrinkwrapText: string = this._git.getBlobContent({
+            // <ref>:<path> syntax: https://git-scm.com/docs/gitrevisions
+            blobSpec: `${mergeCommit}:${shrinkwrapFile}`,
+            repositoryRoot: repoRoot
+          });
+          const oldShrinkWrap: PnpmShrinkwrapFile = PnpmShrinkwrapFile.loadFromString(oldShrinkwrapText);
+
+          for (const project of rushConfiguration.projects) {
+            if (
+              currentShrinkwrap
+                .getProjectShrinkwrap(project)
+                .hasChanges(oldShrinkWrap.getProjectShrinkwrap(project))
+            ) {
+              changedProjects.add(project);
+            }
+          }
+        } else {
+          terminal.writeLine(
+            `Lockfile has changed and lockfile content comparison is only supported for pnpm. Assuming all projects are affected.`
+          );
+          return new Set(rushConfiguration.projects);
+        }
+      }
     }
 
     const changesByProject: Map<RushConfigurationProject, Map<string, IFileDiffStatus>> = new Map();
     const lookup: LookupByPath<RushConfigurationProject> =
-      this._rushConfiguration.getProjectLookupForRoot(repoRoot);
+      rushConfiguration.getProjectLookupForRoot(repoRoot);
+
     for (const [file, diffStatus] of repoChanges) {
       const project: RushConfigurationProject | undefined = lookup.findChildPath(file);
       if (project) {
-        let projectChanges: Map<string, IFileDiffStatus> | undefined = changesByProject.get(project);
-        if (!projectChanges) {
-          changesByProject.set(project, (projectChanges = new Map()));
+        if (changedProjects.has(project)) {
+          // Lockfile changes cannot be ignored via rush-project.json
+          continue;
         }
-        projectChanges.set(file, diffStatus);
+
+        if (enableFiltering) {
+          let projectChanges: Map<string, IFileDiffStatus> | undefined = changesByProject.get(project);
+          if (!projectChanges) {
+            projectChanges = new Map();
+            changesByProject.set(project, projectChanges);
+          }
+          projectChanges.set(file, diffStatus);
+        } else {
+          changedProjects.add(project);
+        }
       }
     }
 
-    // Parallelize rush-project.json lookups
-    await Promise.all(
-      Array.from(changesByProject, async ([project, projectChanges]) => {
-        const filteredChanges: Map<string, IFileDiffStatus> = await this._filterProjectDataAsync(
-          project,
-          projectChanges,
-          repoRoot,
-          terminal
-        );
-        if (filteredChanges.size > 0) {
-          changedProjects.add(project);
-        }
-      })
-    );
+    if (enableFiltering) {
+      // Reading rush-project.json may be problematic if, e.g. rush install has not yet occurred and rigs are in use
+      await Async.forEachAsync(
+        changesByProject,
+        async ([project, projectChanges]) => {
+          const filteredChanges: Map<string, IFileDiffStatus> = await this._filterProjectDataAsync(
+            project,
+            projectChanges,
+            repoRoot,
+            terminal
+          );
+
+          if (filteredChanges.size > 0) {
+            changedProjects.add(project);
+          }
+        },
+        { concurrency: 10 }
+      );
+    }
 
     return changedProjects;
   }
@@ -341,9 +413,11 @@ export class ProjectChangeAnalyzer {
     const projectConfiguration: RushProjectConfiguration | undefined =
       await RushProjectConfiguration.tryLoadForProjectAsync(project, undefined, terminal);
 
-    if (projectConfiguration && projectConfiguration.incrementalBuildIgnoredGlobs) {
+    const { incrementalBuildIgnoredGlobs } = projectConfiguration || {};
+
+    if (incrementalBuildIgnoredGlobs && incrementalBuildIgnoredGlobs.length) {
       const ignoreMatcher: Ignore = ignore();
-      ignoreMatcher.add(projectConfiguration.incrementalBuildIgnoredGlobs as string[]);
+      ignoreMatcher.add(incrementalBuildIgnoredGlobs as string[]);
       return ignoreMatcher;
     }
   }

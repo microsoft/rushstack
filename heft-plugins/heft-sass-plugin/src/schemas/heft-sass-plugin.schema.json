@@ -32,6 +32,15 @@
       "description": "Determines if export values are wrapped in a default property, or not."
     },
 
+    "cssOutputFolders": {
+      "type": "array",
+      "description": "If specified, folders where compiled CSS files will be emitted to. They will be named by appending \".css\" to the source file name for ease of reference translation.",
+      "items": {
+        "type": "string",
+        "pattern": "[^\\\\]"
+      }
+    },
+
     "fileExtensions": {
       "type": "array",
       "description": "Files with these extensions will pass through the Sass transpiler for typings generation.",

@@ -7,13 +7,16 @@ import { trueCasePathSync } from 'true-case-path';
 
 import { IEnvironment } from '../utilities/Utilities';
 
+/**
+ * @beta
+ */
 export interface IEnvironmentConfigurationInitializeOptions {
   doNotNormalizePaths?: boolean;
 }
 
 /**
  * Names of environment variables used by Rush.
- * @public
+ * @beta
  */
 export enum EnvironmentVariableNames {
   /**
@@ -154,7 +157,7 @@ export enum EnvironmentVariableNames {
 /**
  * Provides Rush-specific environment variable data. All Rush environment variables must start with "RUSH_". This class
  * is designed to be used by RushConfiguration.
- * @public
+ * @beta
  *
  * @remarks
  * Initialize will throw if any unknown parameters are present.

@@ -21,6 +21,11 @@ interface IResultOrError<TResult> {
   result?: TResult;
 }
 
+export interface IGetBlobOptions {
+  blobSpec: string;
+  repositoryRoot: string;
+}
+
 export class Git {
   private readonly _rushConfiguration: RushConfiguration;
   private _checkedGitPath: boolean = false;
@@ -225,6 +230,22 @@ export class Git {
     }
   }
 
+  public getMergeBase(targetBranch: string, terminal: ITerminal, shouldFetch: boolean = false): string {
+    if (shouldFetch) {
+      this._fetchRemoteBranch(targetBranch, terminal);
+    }
+
+    const gitPath: string = this.getGitPathOrThrow();
+    const output: string = Utilities.executeCommandAndCaptureOutput(
+      gitPath,
+      ['--no-optional-locks', 'merge-base', 'HEAD', targetBranch, '--'],
+      this._rushConfiguration.rushJsonFolder
+    );
+    const result: string = output.trim();
+
+    return result;
+  }
+
   public getChangedFolders(
     targetBranch: string,
     terminal: ITerminal,
@@ -252,6 +273,17 @@ export class Git {
     }
 
     return result;
+  }
+
+  public getBlobContent({ blobSpec, repositoryRoot }: IGetBlobOptions): string {
+    const gitPath: string = this.getGitPathOrThrow();
+    const output: string = Utilities.executeCommandAndCaptureOutput(
+      gitPath,
+      ['cat-file', 'blob', blobSpec, '--'],
+      repositoryRoot
+    );
+
+    return output;
   }
 
   /**
@@ -304,8 +336,8 @@ export class Git {
    * @param rushConfiguration - rush configuration
    */
   public getRemoteDefaultBranch(): string {
-    const repositoryUrl: string | undefined = this._rushConfiguration.repositoryUrl;
-    if (repositoryUrl) {
+    const repositoryUrls: string[] = this._rushConfiguration.repositoryUrls;
+    if (repositoryUrls.length > 0) {
       const gitPath: string = this.getGitPathOrThrow();
       const output: string = Utilities.executeCommandAndCaptureOutput(
         gitPath,
@@ -313,8 +345,11 @@ export class Git {
         this._rushConfiguration.rushJsonFolder
       ).trim();
 
-      // Apply toUpperCase() for a case-insensitive comparison
-      const normalizedRepositoryUrl: string = Git.normalizeGitUrlForComparison(repositoryUrl).toUpperCase();
+      const normalizedRepositoryUrls: Set<string> = new Set<string>();
+      for (const repositoryUrl of repositoryUrls) {
+        // Apply toUpperCase() for a case-insensitive comparison
+        normalizedRepositoryUrls.add(Git.normalizeGitUrlForComparison(repositoryUrl).toUpperCase());
+      }
 
       const matchingRemotes: string[] = output.split('\n').filter((remoteName) => {
         if (remoteName) {
@@ -330,7 +365,7 @@ export class Git {
 
           // Also apply toUpperCase() for a case-insensitive comparison
           const normalizedRemoteUrl: string = Git.normalizeGitUrlForComparison(remoteUrl).toUpperCase();
-          if (normalizedRemoteUrl === normalizedRepositoryUrl) {
+          if (normalizedRepositoryUrls.has(normalizedRemoteUrl)) {
             return true;
           }
         }
@@ -347,12 +382,13 @@ export class Git {
 
         return `${matchingRemotes[0]}/${this._rushConfiguration.repositoryDefaultBranch}`;
       } else {
-        console.log(
-          colors.yellow(
-            `Unable to find a git remote matching the repository URL (${repositoryUrl}). ` +
-              'Detected changes are likely to be incorrect.'
-          )
-        );
+        const errorMessage: string =
+          repositoryUrls.length > 1
+            ? `Unable to find a git remote matching one of the repository URLs (${repositoryUrls.join(
+                ', '
+              )}). `
+            : `Unable to find a git remote matching the repository URL (${repositoryUrls[0]}). `;
+        console.log(colors.yellow(errorMessage + 'Detected changes are likely to be incorrect.'));
 
         return this._rushConfiguration.repositoryDefaultFullyQualifiedRemoteBranch;
       }

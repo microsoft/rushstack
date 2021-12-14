@@ -1,27 +1,44 @@
-import type { ITerminal } from '@rushstack/node-core-library';
 import type { RushConfiguration } from '../../api/RushConfiguration';
 import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import type { ISelectorParser } from './ISelectorParser';
-import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+import { IEvaluateSelectorOptions, ISelectorParser } from './ISelectorParser';
+import { IGetChangedProjectsOptions, ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+
+export interface IGitSelectorParserOptions {
+  /**
+   * If set to `true`, consider a project's external dependency installation layout as defined in the
+   * package manager lockfile when determining if it has changed.
+   */
+  includeExternalDependencies: boolean;
+
+  /**
+   * If set to `true` apply the `incrementalBuildIgnoredGlobs` property in a project's `rush-project.json`
+   * and exclude matched files from change detection.
+   */
+  enableFiltering: boolean;
+}
 
 export class GitChangedProjectSelectorParser implements ISelectorParser<RushConfigurationProject> {
   private readonly _rushConfiguration: RushConfiguration;
+  private readonly _options: IGitSelectorParserOptions;
 
-  public constructor(rushConfiguration: RushConfiguration) {
+  public constructor(rushConfiguration: RushConfiguration, options: IGitSelectorParserOptions) {
     this._rushConfiguration = rushConfiguration;
+    this._options = options;
   }
 
-  public async evaluateSelectorAsync(
-    unscopedSelector: string,
-    terminal: ITerminal,
-    parameterName: string
-  ): Promise<Iterable<RushConfigurationProject>> {
+  public async evaluateSelectorAsync({
+    unscopedSelector,
+    terminal
+  }: IEvaluateSelectorOptions): Promise<Iterable<RushConfigurationProject>> {
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this._rushConfiguration);
 
-    return await projectChangeAnalyzer.getChangedProjectsAsync({
+    const options: IGetChangedProjectsOptions = {
       terminal,
-      targetBranchName: unscopedSelector
-    });
+      targetBranchName: unscopedSelector,
+      ...this._options
+    };
+
+    return await projectChangeAnalyzer.getChangedProjectsAsync(options);
   }
 
   public getCompletions(): Iterable<string> {

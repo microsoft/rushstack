@@ -53,7 +53,7 @@ export interface IExperimentsJson {
 /**
  * Use this class to load the "common/config/rush/experiments.json" config file.
  * This file allows repo maintainers to enable and disable experimental Rush features.
- * @beta
+ * @public
  */
 export class ExperimentsConfiguration {
   private static _jsonSchema: JsonSchema = JsonSchema.fromFile(
@@ -82,6 +82,7 @@ export class ExperimentsConfiguration {
 
   /**
    * Get the experiments configuration.
+   * @beta
    */
   public get configuration(): Readonly<IExperimentsJson> {
     return this._experimentConfiguration;

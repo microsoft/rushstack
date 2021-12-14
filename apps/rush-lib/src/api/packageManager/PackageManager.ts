@@ -9,7 +9,7 @@ export type PackageManagerName = 'pnpm' | 'npm' | 'yarn';
 
 /**
  * An abstraction for controlling the supported package managers: PNPM, NPM, and Yarn.
- * @beta
+ * @public
  */
 export abstract class PackageManager {
   /**

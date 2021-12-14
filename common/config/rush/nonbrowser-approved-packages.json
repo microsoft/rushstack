@@ -51,10 +51,6 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "@microsoft/rush-stack-compiler-3.9",
-      "allowedCategories": [ "tests" ]
-    },
-    {
       "name": "@microsoft/teams-js",
       "allowedCategories": [ "tests" ]
     },
@@ -159,6 +155,18 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "@rushstack/rush-amazon-s3-build-cache-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-azure-storage-build-cache-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-sdk",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@rushstack/set-webpack-public-path-plugin",
       "allowedCategories": [ "libraries", "tests" ]
     },
@@ -224,7 +232,7 @@
     },
     {
       "name": "@typescript-eslint/parser",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@typescript-eslint/typescript-estree",
@@ -296,6 +304,10 @@
     },
     {
       "name": "decache",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "diff",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -404,6 +416,10 @@
     },
     {
       "name": "jest-config",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-environment-jsdom",
       "allowedCategories": [ "libraries" ]
     },
     {

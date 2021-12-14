@@ -27,3 +27,4 @@ import('./chunks/unnamedChunkWithStrings').then(({ UnnamedChunkWithStringsClass 
 
 console.log(strings5.string1);
 console.log(strings5.stringWithQuotes);
+console.log(require('./invalid-strings.loc.json'));

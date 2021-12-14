@@ -24,21 +24,21 @@ export abstract class BaseBuilder {
   /**
    * Name of the task definition.
    */
-  abstract readonly name: string;
+  public abstract readonly name: string;
 
   /**
    * This flag determines if the task is allowed to be skipped if up to date.
    */
-  abstract isSkipAllowed: boolean;
+  public abstract isSkipAllowed: boolean;
 
   /**
    * Assigned by execute().  True if the build script was an empty string.  Operationally an empty string is
    * like a shell command that succeeds instantly, but e.g. it would be odd to report build time statistics for it.
    */
-  abstract hadEmptyScript: boolean;
+  public abstract hadEmptyScript: boolean;
 
   /**
    * Method to be executed for the task.
    */
-  abstract executeAsync(context: IBuilderContext): Promise<TaskStatus>;
+  public abstract executeAsync(context: IBuilderContext): Promise<TaskStatus>;
 }
