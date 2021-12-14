@@ -41,6 +41,11 @@ describe('JestConfigLoader', () => {
     // Validate testEnvironment
     expect(loadedConfig.testEnvironment).toBe(require.resolve('jest-environment-node'));
 
+    // Validate watchPlugins
+    expect(loadedConfig.watchPlugins?.length).toBe(2);
+    expect(loadedConfig.watchPlugins?.[0]).toBe(require.resolve('jest-watch-select-projects'));
+    expect(loadedConfig.watchPlugins?.[1]).toBe(path.join(rootDir, 'a', 'b', 'mockWatchPlugin.js'));
+
     // Validate reporters
     expect(loadedConfig.reporters?.length).toBe(3);
     expect(loadedConfig.reporters![0]).toBe('default');
@@ -102,7 +107,7 @@ describe('JestConfigLoader', () => {
   it('resolves extended package modules', async () => {
     // Because we require the built modules, we need to set our rootDir to be in the 'lib' folder, since transpilation
     // means that we don't run on the built test assets directly
-    const rootDir: string = path.resolve(__dirname, '..', '..', 'lib', 'test', 'project1');
+    const rootDir: string = path.resolve(__dirname, '..', '..', 'lib', 'test', 'project2');
     const loader: ConfigurationFile<IHeftJestConfiguration> = JestPlugin._getJestConfigurationLoader(
       rootDir,
       'config/jest.config.json'

@@ -72,8 +72,7 @@
     "@types/semver": "7.3.5",
     "@types/ssri": "~7.1.0",
     "@types/strict-uri-encode": "2.0.0",
-    "@types/tar": "4.0.3",
-    "jest": "~25.4.0"
+    "@types/tar": "4.0.3"
   },
   "publishOnlyDependencies": {
     "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",

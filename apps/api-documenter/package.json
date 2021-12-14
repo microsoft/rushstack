@@ -33,7 +33,6 @@
     "@types/heft-jest": "1.0.1",
     "@types/js-yaml": "3.12.1",
     "@types/node": "12.20.24",
-    "@types/resolve": "1.17.1",
-    "jest": "~25.4.0"
+    "@types/resolve": "1.17.1"
   }
 }

@@ -1,20 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { Path } from '@jest/types/build/Config';
+import type { Config } from '@jest/types';
 
 // This signature is declared here:
-// https://github.com/facebook/jest/blob/6f7db3e40f88678f4986c969c6a76c575b51a138/packages/jest-resolve/src/defaultResolver.ts#L14
+// https://github.com/facebook/jest/blob/c76f9a7c8eb2fab1a15dfe8952d125a8607d1bbe/packages/jest-resolve/src/defaultResolver.ts#L26
 interface IResolverOptions {
-  allowPnp?: boolean;
-  basedir: Path;
+  basedir: Config.Path;
   browser?: boolean;
-  defaultResolver: (path: Path, options: IResolverOptions) => Path;
-  extensions?: string[];
-  moduleDirectory?: string[];
-  paths?: Path[];
-  rootDir?: Path;
-  packageFilter?: unknown;
+  conditions?: Array<string>;
+  defaultResolver: (path: Config.Path, options: IResolverOptions) => Config.Path;
+  extensions?: Array<string>;
+  moduleDirectory?: Array<string>;
+  paths?: Array<Config.Path>;
+  rootDir?: Config.Path;
+  packageFilter?: unknown; // (pkg: PkgJson, dir: string) => PkgJson
+  pathFilter?: unknown; // (pkg: PkgJson, path: string, relativePath: string) => string
 }
 
 // Match Jest's magic convention for specifying a mock:
@@ -29,7 +30,7 @@ interface IResolverOptions {
 // NO:   some-package/__mocks__/Thing
 const mockPathRegExp: RegExp = /^(\..*[\/])__mocks__\/([^\/]+)$/;
 
-function resolve(request: string, options: IResolverOptions): string {
+function resolve(request: Config.Path, options: IResolverOptions): Config.Path {
   let newRequest: string = request;
 
   // Jest's manual mock feature works by looking for a matching filename in a  "__mocks__" subfolder,

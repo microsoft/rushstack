@@ -15,6 +15,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@jest/create-cache-key-function",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@jest/core",
       "allowedCategories": [ "libraries" ]
     },
@@ -427,7 +431,15 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jest-resolve",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jest-snapshot",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-watch-select-projects",
       "allowedCategories": [ "libraries" ]
     },
     {

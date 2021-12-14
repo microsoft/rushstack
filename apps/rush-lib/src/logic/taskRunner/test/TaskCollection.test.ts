@@ -65,10 +65,4 @@ describe('TaskCollection', () => {
       checkConsoleOutput(terminalProvider);
     });
   });
-
-  describe('Error logging', () => {
-    beforeEach(() => {
-      taskCollection = new TaskCollection();
-    });
-  });
 });
