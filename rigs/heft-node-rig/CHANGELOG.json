@@ -2,6 +2,29 @@
   "name": "@rushstack/heft-node-rig",
   "entries": [
     {
+      "version": "1.5.0",
+      "tag": "@rushstack/heft-node-rig_v1.5.0",
+      "date": "Tue, 14 Dec 2021 19:27:51 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Upgrade Jest to v27"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft-jest-plugin\" to `0.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" from `^0.43.2` to `^0.44.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.3",
       "tag": "@rushstack/heft-node-rig_v1.4.3",
       "date": "Thu, 09 Dec 2021 20:34:41 GMT",
