@@ -43,8 +43,8 @@ export const jestResolve = (
   // eslint-disable-next-line @rushstack/no-new-null
   resolver: string | null | undefined,
   options: IResolveOptions
+  // eslint-disable-next-line @rushstack/no-new-null
 ): string | null => {
-  // eslint-disable-line @rushstack/no-new-null
   const { key, filePath, rootDir, optional } = options;
   const module: string | null = JestResolver.findNodeModule(replaceRootDirInPath(rootDir, filePath), {
     basedir: rootDir,
