@@ -459,25 +459,28 @@ export abstract class BaseInstallManager {
             color(
               [
                 ' ',
-                `Rush cannot install the "common/git-hooks" scripts because your Git configuration specifies "core.hooksPath=${git.getConfigHooksPath()}".`,
-                'You can remove the setting by running:',
+                `Rush cannot install the "common/git-hooks" scripts because your Git configuration `,
+                `specifies "core.hooksPath=${git.getConfigHooksPath()}". You can remove the setting by running:`,
                 ' ',
                 '    git config --unset core.hooksPath',
                 ' '
               ].join(os.EOL)
             )
           );
-          if (!this.options.bypassPolicy) {
-            console.error(
-              color(
-                [
-                  '(Or, to temporarily ignore this problem, invoke Rush with the "--bypass-policy" option.)',
-                  ' '
-                ].join(os.EOL)
-              )
-            );
-            throw new AlreadyReportedError();
+          if (this.options.bypassPolicy) {
+            // If "--bypass-policy" is specified, skip installation of hooks because Rush doesn't
+            // own the hooks folder
+            return;
           }
+          console.error(
+            color(
+              [
+                '(Or, to temporarily ignore this problem, invoke Rush with the "--bypass-policy" option.)',
+                ' '
+              ].join(os.EOL)
+            )
+          );
+          throw new AlreadyReportedError();
         }
 
         // Clear the currently installed git hooks and install fresh copies
