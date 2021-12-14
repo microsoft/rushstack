@@ -3,26 +3,15 @@
 
 import * as path from 'path';
 import { Path, FileSystem, FileSystemStats, JsonObject } from '@rushstack/node-core-library';
-import createCacheKeyFunction from '@jest/create-cache-key-function';
 import type { AsyncTransformer, SyncTransformer, TransformedSource, TransformOptions } from '@jest/transform';
 import type { Config } from '@jest/types';
 
 import { HeftJestDataFile, IHeftJestDataFileJson } from '../HeftJestDataFile';
+import { GetCacheKeyFunction, createCacheKeyFunction, createCacheKeyFunctionAsync } from '../JestUtils';
 
 // This caches heft-jest-data.json file contents.
 // Map from jestOptions.rootDir --> IHeftJestDataFileJson
 const dataFileJsonCache: Map<string, IHeftJestDataFileJson> = new Map();
-
-// Synchronous delay that doesn't burn CPU cycles
-function delayMs(milliseconds: number): void {
-  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
-}
-
-async function delayMsAsync(milliseconds: number): Promise<void> {
-  await new Promise<void>((resolve: () => void): void => {
-    setTimeout(resolve, milliseconds);
-  });
-}
 
 const DEBUG_TRANSFORM: boolean = false;
 
@@ -39,14 +28,6 @@ const MAX_WAIT_MS: number = 7000;
 // Shamefully sleep this long to avoid consuming CPU cycles
 const POLLING_INTERVAL_MS: number = 50;
 
-// See: https://github.com/facebook/jest/blob/e0b33b74b5afd738edc183858b5c34053cfc26dd/packages/jest-create-cache-key-function/src/index.ts#L35
-type NewCacheKeyOptions = Pick<TransformOptions, 'config' | 'configString' | 'instrument'>;
-type NewGetCacheKeyFunction = (
-  sourceText: string,
-  sourcePath: Config.Path,
-  options: NewCacheKeyOptions
-) => string;
-
 /**
  * This Jest transformer maps TS files under a 'src' folder to their compiled equivalent under 'lib'.
  *
@@ -56,6 +37,22 @@ type NewGetCacheKeyFunction = (
  * https://github.com/facebook/jest/issues/11226#issuecomment-804449688
  */
 export class BuildTransformer implements AsyncTransformer, SyncTransformer {
+  /**
+   * Synchronous delay using Atomics that doesn't burn CPU cycles
+   */
+  private static _delayMs(milliseconds: number): void {
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
+  }
+
+  /**
+   * Async delay using setTimeout.
+   */
+  private static async _delayMsAsync(milliseconds: number): Promise<void> {
+    await new Promise<void>((resolve: () => void): void => {
+      setTimeout(resolve, milliseconds);
+    });
+  }
+
   /**
    * Read heft-jest-data.json, which is created by the JestPlugin.  It tells us
    * which emitted output folder to use for Jest.
@@ -235,7 +232,7 @@ export class BuildTransformer implements AsyncTransformer, SyncTransformer {
 
       // Jest's transforms are synchronous, so our only option here is to sleep synchronously. Bad Jest. :-(
       stalled = true;
-      delayMs(POLLING_INTERVAL_MS);
+      BuildTransformer._delayMs(POLLING_INTERVAL_MS);
     }
 
     if (stalled && DEBUG_TRANSFORM) {
@@ -244,7 +241,7 @@ export class BuildTransformer implements AsyncTransformer, SyncTransformer {
       if (elapsedMs > POLLING_INTERVAL_MS) {
         console.log(`Waited ${elapsedMs} ms for .js file`);
       }
-      delayMs(2000);
+      BuildTransformer._delayMs(2000);
     }
   }
 
@@ -298,7 +295,7 @@ export class BuildTransformer implements AsyncTransformer, SyncTransformer {
       }
 
       stalled = true;
-      await delayMsAsync(POLLING_INTERVAL_MS);
+      await BuildTransformer._delayMsAsync(POLLING_INTERVAL_MS);
     }
 
     if (stalled && DEBUG_TRANSFORM) {
@@ -307,7 +304,7 @@ export class BuildTransformer implements AsyncTransformer, SyncTransformer {
       if (elapsedMs > POLLING_INTERVAL_MS) {
         console.log(`Waited ${elapsedMs} ms for .js file`);
       }
-      await delayMsAsync(POLLING_INTERVAL_MS);
+      await BuildTransformer._delayMsAsync(POLLING_INTERVAL_MS);
     }
   }
 
@@ -318,10 +315,10 @@ export class BuildTransformer implements AsyncTransformer, SyncTransformer {
     const heftJestDataFile: IHeftJestDataFileJson = BuildTransformer._getHeftJestDataFileJson(
       options.config.rootDir
     );
-    const cacheKeyFunction: NewGetCacheKeyFunction = createCacheKeyFunction(
+    const cacheKeyFunction: GetCacheKeyFunction = createCacheKeyFunction(
       /* files: */ [__filename],
       /* values: */ [heftJestDataFile.emitFolderNameForTests, heftJestDataFile.extensionForTests]
-    ) as NewGetCacheKeyFunction;
+    );
     return cacheKeyFunction(sourceText, sourcePath, options);
   }
 
@@ -336,10 +333,10 @@ export class BuildTransformer implements AsyncTransformer, SyncTransformer {
     const heftJestDataFile: IHeftJestDataFileJson = await BuildTransformer._getHeftJestDataFileJsonAsync(
       options.config.rootDir
     );
-    const cacheKeyFunction: NewGetCacheKeyFunction = createCacheKeyFunction(
+    const cacheKeyFunction: GetCacheKeyFunction = await createCacheKeyFunctionAsync(
       /* files: */ [__filename],
       /* values: */ [heftJestDataFile.emitFolderNameForTests, heftJestDataFile.extensionForTests]
-    ) as NewGetCacheKeyFunction;
+    );
     return cacheKeyFunction(sourceText, sourcePath, options);
   }
 

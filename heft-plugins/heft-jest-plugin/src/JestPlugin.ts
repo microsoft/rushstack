@@ -88,8 +88,8 @@ const JEST_CONFIGURATION_LOCATION: string = `config/jest.config.json`;
 const ROOTDIR_TOKEN: string = '<rootDir>';
 const CONFIGDIR_TOKEN: string = '<configDir>';
 const PACKAGE_CAPTUREGROUP: string = 'package';
-const PACKAGEDIR_REGEX: RegExp = new RegExp(/^<packageDir:\s*(?<package>[^\s>]+)\s*>/);
-const JSONPATHPROPERTY_REGEX: RegExp = new RegExp(/^\$\['([^']+)'\]/);
+const PACKAGEDIR_REGEX: RegExp = /^<packageDir:\s*(?<package>[^\s>]+)\s*>/;
+const JSONPATHPROPERTY_REGEX: RegExp = /^\$\['([^']+)'\]/;
 
 /**
  * @internal
@@ -520,11 +520,13 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
               filePath: propertyValue
             });
           default:
+            // We know the value will be non-null since resolve will throw an error if it is null
+            // and non-optional
             return jestResolve(/*resolver:*/ undefined, {
               rootDir: configDir,
               filePath: propertyValue,
               key: propertyName
-            });
+            })!;
         }
       },
       pathResolutionMethod: PathResolutionMethod.custom
@@ -672,7 +674,7 @@ export class JestPlugin implements IHeftPlugin<IJestPluginOptions> {
       argumentName: 'REGEXP',
       description:
         'Run only tests with a source file path that matches a regular expression.' +
-        ' On Windows you will need to use "/" instead of ""' +
+        ' On Windows you will need to use "/" instead of "\\"' +
         ' This corresponds to the "--testPathPattern" parameter in Jest\'s documentation.'
     });
 
