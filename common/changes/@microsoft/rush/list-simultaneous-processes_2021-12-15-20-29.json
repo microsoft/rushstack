@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Allow \"rush list\" to be invoked while other rush processes are running in the same repo.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
