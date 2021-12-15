@@ -64,7 +64,8 @@ export class ListAction extends BaseRushAction {
         'List package names, and optionally version (--version) and ' +
         'path (--path) or full path (--full-path), for projects in the ' +
         'current rush config.',
-      parser
+      parser,
+      safeForSimultaneousRushProcesses: true
     });
   }
 
@@ -97,7 +98,7 @@ export class ListAction extends BaseRushAction {
       description:
         'For the non --json view, if this flag is specified, ' +
         'include path (-p), version (-v) columns along with ' +
-        'the project’s applicable: versionPolicy, versionPolicyName, ' +
+        "the project's applicable: versionPolicy, versionPolicyName, " +
         'shouldPublish, and reviewPolicy fields.'
     });
 
