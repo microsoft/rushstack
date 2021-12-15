@@ -4,6 +4,18 @@
 import type * as child_process from 'child_process';
 import { Executable } from '@rushstack/node-core-library';
 
+export interface IGitVersion {
+  major: number;
+  minor: number;
+  patch: number;
+}
+
+const MINIMUM_GIT_VERSION: IGitVersion = {
+  major: 2,
+  minor: 30,
+  patch: 0
+};
+
 /**
  * Parses the output of the "git ls-tree -r -z" command
  * @internal
@@ -290,10 +302,53 @@ export function getRepoChanges(
   );
 
   if (result.status !== 0) {
+    const gitVersion: IGitVersion = getGitVersion(gitPath);
+    if (
+      gitVersion.major < MINIMUM_GIT_VERSION.major ||
+      (gitVersion.major === MINIMUM_GIT_VERSION.major && gitVersion.minor < MINIMUM_GIT_VERSION.minor) ||
+      (gitVersion.major === MINIMUM_GIT_VERSION.major &&
+        gitVersion.minor === MINIMUM_GIT_VERSION.minor &&
+        gitVersion.patch < MINIMUM_GIT_VERSION.patch)
+    ) {
+      throw new Error(
+        `The minimum Git version required is ` +
+          `${MINIMUM_GIT_VERSION.major}.${MINIMUM_GIT_VERSION.minor}.${MINIMUM_GIT_VERSION.patch}. ` +
+          `Your version is ${gitVersion.major}.${gitVersion.minor}.${gitVersion.patch}.`
+      );
+    }
+
     throw new Error(`git diff-index exited with status ${result.status}: ${result.stderr}`);
   }
 
   const changes: Map<string, IFileDiffStatus> = parseGitDiffIndex(result.stdout);
 
   return changes;
+}
+
+export function getGitVersion(gitPath?: string): IGitVersion {
+  const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(gitPath || 'git', ['version']);
+
+  if (result.status !== 0) {
+    throw new Error(`git version exited with status ${result.status}: ${result.stderr}`);
+  }
+
+  return parseGitVersion(result.stdout);
+}
+
+export function parseGitVersion(gitVersionOutput: string): IGitVersion {
+  const versionRegex: RegExp = /^git version (\d+)\.(\d+)\.(\d+)/;
+  const match: RegExpMatchArray | null = versionRegex.exec(gitVersionOutput);
+  if (!match) {
+    throw new Error(`Unable to parse git version output: ${gitVersionOutput}`);
+  }
+
+  const major: number = parseInt(match[1], 10);
+  const minor: number = parseInt(match[2], 10);
+  const patch: number = parseInt(match[3], 10);
+
+  return {
+    major,
+    minor,
+    patch
+  };
 }
