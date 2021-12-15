@@ -336,6 +336,12 @@ export function getGitVersion(gitPath?: string): IGitVersion {
 }
 
 export function parseGitVersion(gitVersionOutput: string): IGitVersion {
+  // This regexp matches output of "git version" that looks like `git version <number>.<number>.<number>(+whatever)`
+  // Examples:
+  // - git version 1.2.3
+  // - git version 1.2.3.4.5
+  // - git version 1.2.3windows.1
+  // - git version 1.2.3.windows.1
   const versionRegex: RegExp = /^git version (\d+)\.(\d+)\.(\d+)/;
   const match: RegExpMatchArray | null = versionRegex.exec(gitVersionOutput);
   if (!match) {
