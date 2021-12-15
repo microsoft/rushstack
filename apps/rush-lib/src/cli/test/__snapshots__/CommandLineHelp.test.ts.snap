@@ -700,7 +700,7 @@ Optional arguments:
                         be displayed in a column along with the package name.
   --detailed            For the non --json view, if this flag is specified, 
                         include path (-p), version (-v) columns along with 
-                        the project’s applicable: versionPolicy, 
+                        the project's applicable: versionPolicy, 
                         versionPolicyName, shouldPublish, and reviewPolicy 
                         fields.
   --json                If this flag is specified, output will be in JSON 
