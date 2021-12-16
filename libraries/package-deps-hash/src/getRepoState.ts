@@ -159,6 +159,8 @@ export function getRepoRoot(currentWorkingDirectory: string, gitPath?: string): 
     );
 
     if (result.status !== 0) {
+      ensureGitMinimumVersion(gitPath);
+
       throw new Error(`git rev-parse exited with status ${result.status}: ${result.stderr}`);
     }
 
@@ -189,6 +191,8 @@ export function applyWorkingTreeState(
   );
 
   if (statusResult.status !== 0) {
+    ensureGitMinimumVersion(gitPath);
+
     throw new Error(`git status exited with status ${statusResult.status}: ${statusResult.stderr}`);
   }
 
@@ -213,6 +217,8 @@ export function applyWorkingTreeState(
     );
 
     if (hashObjectResult.status !== 0) {
+      ensureGitMinimumVersion(gitPath);
+
       throw new Error(
         `git hash-object exited with status ${hashObjectResult.status}: ${hashObjectResult.stderr}`
       );
@@ -256,6 +262,8 @@ export function getRepoState(currentWorkingDirectory: string, gitPath?: string):
   );
 
   if (lsTreeResult.status !== 0) {
+    ensureGitMinimumVersion(gitPath);
+
     throw new Error(`git ls-tree exited with status ${lsTreeResult.status}: ${lsTreeResult.stderr}`);
   }
 
@@ -302,20 +310,7 @@ export function getRepoChanges(
   );
 
   if (result.status !== 0) {
-    const gitVersion: IGitVersion = getGitVersion(gitPath);
-    if (
-      gitVersion.major < MINIMUM_GIT_VERSION.major ||
-      (gitVersion.major === MINIMUM_GIT_VERSION.major && gitVersion.minor < MINIMUM_GIT_VERSION.minor) ||
-      (gitVersion.major === MINIMUM_GIT_VERSION.major &&
-        gitVersion.minor === MINIMUM_GIT_VERSION.minor &&
-        gitVersion.patch < MINIMUM_GIT_VERSION.patch)
-    ) {
-      throw new Error(
-        `The minimum Git version required is ` +
-          `${MINIMUM_GIT_VERSION.major}.${MINIMUM_GIT_VERSION.minor}.${MINIMUM_GIT_VERSION.patch}. ` +
-          `Your version is ${gitVersion.major}.${gitVersion.minor}.${gitVersion.patch}.`
-      );
-    }
+    ensureGitMinimumVersion(gitPath);
 
     throw new Error(`git diff-index exited with status ${result.status}: ${result.stderr}`);
   }
@@ -325,7 +320,29 @@ export function getRepoChanges(
   return changes;
 }
 
-export function getGitVersion(gitPath?: string): IGitVersion {
+/**
+ * Checks the git version and throws an error if it is less than the minimum required version.
+ *
+ * @public
+ */
+export function ensureGitMinimumVersion(gitPath?: string): void {
+  const gitVersion: IGitVersion = getGitVersion(gitPath);
+  if (
+    gitVersion.major < MINIMUM_GIT_VERSION.major ||
+    (gitVersion.major === MINIMUM_GIT_VERSION.major && gitVersion.minor < MINIMUM_GIT_VERSION.minor) ||
+    (gitVersion.major === MINIMUM_GIT_VERSION.major &&
+      gitVersion.minor === MINIMUM_GIT_VERSION.minor &&
+      gitVersion.patch < MINIMUM_GIT_VERSION.patch)
+  ) {
+    throw new Error(
+      `The minimum Git version required is ` +
+        `${MINIMUM_GIT_VERSION.major}.${MINIMUM_GIT_VERSION.minor}.${MINIMUM_GIT_VERSION.patch}. ` +
+        `Your version is ${gitVersion.major}.${gitVersion.minor}.${gitVersion.patch}.`
+    );
+  }
+}
+
+function getGitVersion(gitPath?: string): IGitVersion {
   const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(gitPath || 'git', ['version']);
 
   if (result.status !== 0) {

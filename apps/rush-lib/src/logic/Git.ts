@@ -8,6 +8,7 @@ import * as path from 'path';
 import * as url from 'url';
 import colors from 'colors/safe';
 import { Executable, AlreadyReportedError, Path, ITerminal } from '@rushstack/node-core-library';
+import { ensureGitMinimumVersion } from '@rushstack/package-deps-hash';
 
 import { Utilities } from '../utilities/Utilities';
 import { GitEmailPolicy } from './policy/GitEmailPolicy';
@@ -183,11 +184,7 @@ export class Git {
     let configHooksPath: string = '';
     const gitPath: string = this.getGitPathOrThrow();
     try {
-      configHooksPath = Utilities.executeCommandAndCaptureOutput(
-        gitPath,
-        ['config', 'core.hooksPath'],
-        this._rushConfiguration.rushJsonFolder
-      ).trim();
+      configHooksPath = this._executeGitCommandAndCaptureOutput(gitPath, ['config', 'core.hooksPath']).trim();
     } catch (e) {
       // git config returns error code 1 if core.hooksPath is not set.
     }
@@ -216,68 +213,27 @@ export class Git {
     return this._gitInfo;
   }
 
-  public getRepositoryRootPath(): string | undefined {
-    const gitPath: string = this.getGitPathOrThrow();
-    const output: child_process.SpawnSyncReturns<string> = Executable.spawnSync(gitPath, [
-      'rev-parse',
-      '--show-toplevel'
-    ]);
-
-    if (output.status !== 0) {
-      return undefined;
-    } else {
-      return output.stdout.trim();
-    }
-  }
-
   public getMergeBase(targetBranch: string, terminal: ITerminal, shouldFetch: boolean = false): string {
     if (shouldFetch) {
       this._fetchRemoteBranch(targetBranch, terminal);
     }
 
     const gitPath: string = this.getGitPathOrThrow();
-    const output: string = Utilities.executeCommandAndCaptureOutput(
-      gitPath,
-      ['--no-optional-locks', 'merge-base', 'HEAD', targetBranch, '--'],
-      this._rushConfiguration.rushJsonFolder
-    );
+    const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
+      '--no-optional-locks',
+      'merge-base',
+      'HEAD',
+      targetBranch,
+      '--'
+    ]);
     const result: string = output.trim();
-
-    return result;
-  }
-
-  public getChangedFolders(
-    targetBranch: string,
-    terminal: ITerminal,
-    shouldFetch: boolean = false
-  ): string[] | undefined {
-    if (shouldFetch) {
-      this._fetchRemoteBranch(targetBranch, terminal);
-    }
-
-    const gitPath: string = this.getGitPathOrThrow();
-    const output: string = Utilities.executeCommandAndCaptureOutput(
-      gitPath,
-      ['diff', `${targetBranch}...`, '--dirstat=files,0'],
-      this._rushConfiguration.rushJsonFolder
-    );
-    const lines: string[] = output.split('\n');
-    const result: string[] = [];
-    for (const line of lines) {
-      if (line) {
-        const delimiterIndex: number = line.indexOf('%');
-        if (delimiterIndex > 0 && delimiterIndex + 1 < line.length) {
-          result.push(line.substring(delimiterIndex + 1).trim());
-        }
-      }
-    }
 
     return result;
   }
 
   public getBlobContent({ blobSpec, repositoryRoot }: IGetBlobOptions): string {
     const gitPath: string = this.getGitPathOrThrow();
-    const output: string = Utilities.executeCommandAndCaptureOutput(
+    const output: string = this._executeGitCommandAndCaptureOutput(
       gitPath,
       ['cat-file', 'blob', blobSpec, '--'],
       repositoryRoot
@@ -304,11 +260,13 @@ export class Git {
     }
 
     const gitPath: string = this.getGitPathOrThrow();
-    const output: string = Utilities.executeCommandAndCaptureOutput(
-      gitPath,
-      ['diff', `${targetBranch}...`, '--name-only', '--no-renames', '--diff-filter=A'],
-      this._rushConfiguration.rushJsonFolder
-    );
+    const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
+      'diff',
+      `${targetBranch}...`,
+      '--name-only',
+      '--no-renames',
+      '--diff-filter=A'
+    ]);
     return output
       .split('\n')
       .map((line) => {
@@ -339,11 +297,7 @@ export class Git {
     const repositoryUrls: string[] = this._rushConfiguration.repositoryUrls;
     if (repositoryUrls.length > 0) {
       const gitPath: string = this.getGitPathOrThrow();
-      const output: string = Utilities.executeCommandAndCaptureOutput(
-        gitPath,
-        ['remote'],
-        this._rushConfiguration.rushJsonFolder
-      ).trim();
+      const output: string = this._executeGitCommandAndCaptureOutput(gitPath, ['remote']).trim();
 
       const normalizedRepositoryUrls: Set<string> = new Set<string>();
       for (const repositoryUrl of repositoryUrls) {
@@ -353,11 +307,11 @@ export class Git {
 
       const matchingRemotes: string[] = output.split('\n').filter((remoteName) => {
         if (remoteName) {
-          const remoteUrl: string = Utilities.executeCommandAndCaptureOutput(
-            gitPath,
-            ['remote', 'get-url', remoteName],
-            this._rushConfiguration.rushJsonFolder
-          ).trim();
+          const remoteUrl: string = this._executeGitCommandAndCaptureOutput(gitPath, [
+            'remote',
+            'get-url',
+            remoteName
+          ]).trim();
 
           if (!remoteUrl) {
             return false;
@@ -497,11 +451,7 @@ export class Git {
       const gitPath: string = this.getGitPathOrThrow();
       try {
         this._gitEmailResult = {
-          result: Utilities.executeCommandAndCaptureOutput(
-            gitPath,
-            ['config', 'user.email'],
-            this._rushConfiguration.rushJsonFolder
-          ).trim()
+          result: this._executeGitCommandAndCaptureOutput(gitPath, ['config', 'user.email']).trim()
         };
       } catch (e) {
         this._gitEmailResult = {
@@ -518,11 +468,11 @@ export class Git {
       const gitPath: string = this.getGitPathOrThrow();
       try {
         this._gitHooksPath = {
-          result: Utilities.executeCommandAndCaptureOutput(
-            gitPath,
-            ['rev-parse', '--git-path', 'hooks'],
-            this._rushConfiguration.rushJsonFolder
-          ).trim()
+          result: this._executeGitCommandAndCaptureOutput(gitPath, [
+            'rev-parse',
+            '--git-path',
+            'hooks'
+          ]).trim()
         };
       } catch (e) {
         this._gitHooksPath = {
@@ -536,22 +486,18 @@ export class Git {
 
   private _getUntrackedChanges(): string[] {
     const gitPath: string = this.getGitPathOrThrow();
-    const output: string = Utilities.executeCommandAndCaptureOutput(
-      gitPath,
-      ['ls-files', '--exclude-standard', '--others'],
-      this._rushConfiguration.rushJsonFolder
-    );
+    const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
+      'ls-files',
+      '--exclude-standard',
+      '--others'
+    ]);
     return output.trim().split('\n');
   }
 
   private _getDiffOnHEAD(): string[] {
     const gitPath: string = this.getGitPathOrThrow();
 
-    const output: string = Utilities.executeCommandAndCaptureOutput(
-      gitPath,
-      ['diff', 'HEAD', '--name-only'],
-      this._rushConfiguration.rushJsonFolder
-    );
+    const output: string = this._executeGitCommandAndCaptureOutput(gitPath, ['diff', 'HEAD', '--name-only']);
     return output.trim().split('\n');
   }
 
@@ -584,6 +530,19 @@ export class Git {
       terminal.writeWarningLine(
         `Error fetching git remote branch ${remoteBranchName}. Detected changed files may be incorrect.`
       );
+    }
+  }
+
+  private _executeGitCommandAndCaptureOutput(
+    gitPath: string,
+    args: string[],
+    repositoryRoot: string = this._rushConfiguration.rushJsonFolder
+  ): string {
+    try {
+      return Utilities.executeCommandAndCaptureOutput(gitPath, args, repositoryRoot);
+    } catch (e) {
+      ensureGitMinimumVersion(gitPath);
+      throw e;
     }
   }
 }
