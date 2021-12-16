@@ -346,7 +346,10 @@ function getGitVersion(gitPath?: string): IGitVersion {
   const result: child_process.SpawnSyncReturns<string> = Executable.spawnSync(gitPath || 'git', ['version']);
 
   if (result.status !== 0) {
-    throw new Error(`git version exited with status ${result.status}: ${result.stderr}`);
+    throw new Error(
+      `While validating the Git installation, the "git version" command failed with ` +
+        `status ${result.status}: ${result.stderr}`
+    );
   }
 
   return parseGitVersion(result.stdout);
@@ -362,7 +365,10 @@ export function parseGitVersion(gitVersionOutput: string): IGitVersion {
   const versionRegex: RegExp = /^git version (\d+)\.(\d+)\.(\d+)/;
   const match: RegExpMatchArray | null = versionRegex.exec(gitVersionOutput);
   if (!match) {
-    throw new Error(`Unable to parse git version output: ${gitVersionOutput}`);
+    throw new Error(
+      `While validating the Git installation, the "git version" command produced ` +
+        `unexpected output: "${gitVersionOutput}"`
+    );
   }
 
   const major: number = parseInt(match[1], 10);
