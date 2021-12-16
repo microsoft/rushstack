@@ -2,6 +2,18 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "3.1.10",
+      "tag": "@rushstack/package-deps-hash_v3.1.10",
+      "date": "Thu, 16 Dec 2021 05:38:20 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Provide a more useful error message if the git version is too old."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.1.9",
       "tag": "@rushstack/package-deps-hash_v3.1.9",
       "date": "Tue, 14 Dec 2021 19:27:51 GMT",
