@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as path from 'path';
 import { FileSystem, FileWriter, InternalError } from '@rushstack/node-core-library';
 import { TerminalChunkKind, TerminalWritable, ITerminalChunk } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
@@ -13,13 +12,13 @@ export class ProjectLogWritable extends TerminalWritable {
   private readonly _project: RushConfigurationProject;
   private readonly _terminal: CollatedTerminal;
 
-  private _buildLogPath: string;
+  private _logPath: string;
   private _errorLogPath: string;
 
-  private _buildLogWriter: FileWriter | undefined = undefined;
+  private _logWriter: FileWriter | undefined = undefined;
   private _errorLogWriter: FileWriter | undefined = undefined;
 
-  public constructor(project: RushConfigurationProject, terminal: CollatedTerminal) {
+  public constructor(project: RushConfigurationProject, terminal: CollatedTerminal, commandName: string) {
     super();
     this._project = project;
     this._terminal = terminal;
@@ -28,24 +27,24 @@ export class ProjectLogWritable extends TerminalWritable {
       this._project.packageName
     );
 
-    this._buildLogPath = path.join(this._project.projectFolder, `${unscopedProjectName}.build.log`);
-    this._errorLogPath = path.join(this._project.projectFolder, `${unscopedProjectName}.build.error.log`);
+    this._logPath = `${this._project.projectFolder}/${unscopedProjectName}.${commandName}.log`;
+    this._errorLogPath = `${this._project.projectFolder}/${unscopedProjectName}.${commandName}.error.log`;
 
-    FileSystem.deleteFile(this._buildLogPath);
+    FileSystem.deleteFile(this._logPath);
     FileSystem.deleteFile(this._errorLogPath);
 
-    this._buildLogWriter = FileWriter.open(this._buildLogPath);
+    this._logWriter = FileWriter.open(this._logPath);
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {
-    if (!this._buildLogWriter) {
+    if (!this._logWriter) {
       throw new InternalError('Output file was closed');
     }
-    // Both stderr and stdout get written to *.build.log
-    this._buildLogWriter.write(chunk.text);
+    // Both stderr and stdout get written to *.<phaseName>.log
+    this._logWriter.write(chunk.text);
 
     if (chunk.kind === TerminalChunkKind.Stderr) {
-      // Only stderr gets written to *.build.error.log
+      // Only stderr gets written to *.<phaseName>.error.log
       if (!this._errorLogWriter) {
         this._errorLogWriter = FileWriter.open(this._errorLogPath);
       }
@@ -54,13 +53,13 @@ export class ProjectLogWritable extends TerminalWritable {
   }
 
   protected onClose(): void {
-    if (this._buildLogWriter) {
+    if (this._logWriter) {
       try {
-        this._buildLogWriter.close();
+        this._logWriter.close();
       } catch (error) {
-        this._terminal.writeStderrLine('Failed to close file handle for ' + this._buildLogWriter.filePath);
+        this._terminal.writeStderrLine('Failed to close file handle for ' + this._logWriter.filePath);
       }
-      this._buildLogWriter = undefined;
+      this._logWriter = undefined;
     }
 
     if (this._errorLogWriter) {

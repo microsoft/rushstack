@@ -4,7 +4,7 @@
 import { TaskCollection } from '../TaskCollection';
 import { Task } from '../Task';
 import { StringBufferTerminalProvider } from '@rushstack/node-core-library';
-import { MockBuilder } from './MockBuilder';
+import { MockTaskRunner } from './MockTaskRunner';
 import { TaskStatus } from '../TaskStatus';
 
 function checkConsoleOutput(terminalProvider: StringBufferTerminalProvider): void {
@@ -32,13 +32,13 @@ describe('TaskCollection', () => {
     });
 
     it('throwsErrorOnNonExistentDependency', () => {
-      taskCollection.addTask(new MockBuilder('foo'));
+      taskCollection.addTask(new MockTaskRunner('foo'));
       expect(() => taskCollection.addDependencies('foo', ['bar'])).toThrowErrorMatchingSnapshot();
     });
 
     it('detectsDependencyCycle', () => {
-      taskCollection.addTask(new MockBuilder('foo'));
-      taskCollection.addTask(new MockBuilder('bar'));
+      taskCollection.addTask(new MockTaskRunner('foo'));
+      taskCollection.addTask(new MockTaskRunner('bar'));
       taskCollection.addDependencies('foo', ['bar']);
       taskCollection.addDependencies('bar', ['foo']);
       expect(() => taskCollection.getOrderedTasks()).toThrowErrorMatchingSnapshot();
@@ -47,13 +47,13 @@ describe('TaskCollection', () => {
     it('respectsDependencyOrder', () => {
       const result: string[] = [];
       taskCollection.addTask(
-        new MockBuilder('two', async () => {
+        new MockTaskRunner('two', async () => {
           result.push('2');
           return TaskStatus.Success;
         })
       );
       taskCollection.addTask(
-        new MockBuilder('one', async () => {
+        new MockTaskRunner('one', async () => {
           result.push('1');
           return TaskStatus.Success;
         })

@@ -10,7 +10,7 @@ import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import { ProjectBuilder } from '../../logic/taskRunner/ProjectBuilder';
+import { ProjectTaskRunner } from '../../logic/taskExecution/ProjectTaskRunner';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { Utilities } from '../../utilities/Utilities';
 import { TaskSelector } from '../../logic/TaskSelector';
@@ -77,7 +77,7 @@ export class WriteBuildCacheAction extends BaseRushAction {
     const commandToRun: string | undefined = TaskSelector.getScriptToRun(project, command, []);
 
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
-    const projectBuilder: ProjectBuilder = new ProjectBuilder({
+    const projectBuilder: ProjectTaskRunner = new ProjectTaskRunner({
       rushProject: project,
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,

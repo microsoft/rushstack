@@ -16,19 +16,24 @@ import { AlreadyReportedError, NewlineKind, InternalError, Sort } from '@rushsta
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { Task } from './Task';
 import { TaskStatus } from './TaskStatus';
-import { IBuilderContext } from './BaseBuilder';
+import { ITaskRunnerContext } from './BaseTaskRunner';
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 import { TaskError } from './TaskError';
 
-export interface ITaskRunnerOptions {
+export interface ITaskExecutionManagerOptions {
   quietMode: boolean;
   debugMode: boolean;
   parallelism: string | undefined;
   changedProjectsOnly: boolean;
-  allowWarningsInSuccessfulBuild: boolean;
+  allowWarningsInSuccessfulExecution: boolean;
   repoCommandLineConfiguration: CommandLineConfiguration | undefined;
   destination?: TerminalWritable;
 }
+
+/**
+ * Format "======" lines for a shell window with classic 80 columns
+ */
+const ASCII_HEADER_WIDTH: number = 79;
 
 /**
  * A class which manages the execution of a set of tasks with interdependencies.
@@ -36,14 +41,11 @@ export interface ITaskRunnerOptions {
  * are added to a ready queue which is then executed. This is done continually until all
  * tasks are complete, or prematurely fails if any of the tasks fail.
  */
-export class TaskRunner {
-  // Format "======" lines for a shell window with classic 80 columns
-  private static readonly _ASCII_HEADER_WIDTH: number = 79;
-
+export class TaskExecutionManager {
   private readonly _tasks: Task[];
   private readonly _changedProjectsOnly: boolean;
-  private readonly _allowWarningsInSuccessfulBuild: boolean;
-  private readonly _buildQueue: Task[];
+  private readonly _allowWarningsInSuccessfulExecution: boolean;
+  private readonly _taskQueue: Task[];
   private readonly _quietMode: boolean;
   private readonly _debugMode: boolean;
   private readonly _parallelism: number;
@@ -60,23 +62,23 @@ export class TaskRunner {
 
   private _terminal: CollatedTerminal;
 
-  public constructor(orderedTasks: Task[], options: ITaskRunnerOptions) {
+  public constructor(orderedTasks: Task[], options: ITaskExecutionManagerOptions) {
     const {
       quietMode,
       debugMode,
       parallelism,
       changedProjectsOnly,
-      allowWarningsInSuccessfulBuild,
+      allowWarningsInSuccessfulExecution,
       repoCommandLineConfiguration
     } = options;
     this._tasks = orderedTasks;
-    this._buildQueue = orderedTasks.slice(0);
+    this._taskQueue = [...orderedTasks]; // Clone the task array
     this._quietMode = quietMode;
     this._debugMode = debugMode;
     this._hasAnyFailures = false;
     this._hasAnyWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
-    this._allowWarningsInSuccessfulBuild = allowWarningsInSuccessfulBuild;
+    this._allowWarningsInSuccessfulExecution = allowWarningsInSuccessfulExecution;
     this._repoCommandLineConfiguration = repoCommandLineConfiguration;
 
     // TERMINAL PIPELINE:
@@ -145,7 +147,7 @@ export class TaskRunner {
       // middlePart: "]=================["
       const twoBracketsLength: number = 2;
       const middlePartLengthMinusTwoBrackets: number = Math.max(
-        TaskRunner._ASCII_HEADER_WIDTH - (leftPartLength + rightPartLength + twoBracketsLength),
+        ASCII_HEADER_WIDTH - (leftPartLength + rightPartLength + twoBracketsLength),
         0
       );
 
@@ -189,28 +191,28 @@ export class TaskRunner {
     if (this._hasAnyFailures) {
       this._terminal.writeStderrLine(colors.red('Projects failed to build.') + '\n');
       throw new AlreadyReportedError();
-    } else if (this._hasAnyWarnings && !this._allowWarningsInSuccessfulBuild) {
+    } else if (this._hasAnyWarnings && !this._allowWarningsInSuccessfulExecution) {
       this._terminal.writeStderrLine(colors.yellow('Projects succeeded with warnings.') + '\n');
       throw new AlreadyReportedError();
     }
   }
 
   /**
-   * Pulls the next task with no dependencies off the build queue
-   * Removes any non-ready tasks from the build queue (this should only be blocked tasks)
+   * Pulls the next task with no dependencies off the task queue
+   * Removes any non-ready tasks from the task queue (this should only be blocked tasks)
    */
   private _getNextTask(): Task | undefined {
-    for (let i: number = 0; i < this._buildQueue.length; i++) {
-      const task: Task = this._buildQueue[i];
+    for (let i: number = 0; i < this._taskQueue.length; i++) {
+      const task: Task = this._taskQueue[i];
 
       if (task.status !== TaskStatus.Ready) {
         // It shouldn't be on the queue, remove it
-        this._buildQueue.splice(i, 1);
+        this._taskQueue.splice(i, 1);
         // Decrement since we modified the array
         i--;
       } else if (task.dependencies.size === 0 && task.status === TaskStatus.Ready) {
         // this is a task which is ready to go. remove it and return it
-        return this._buildQueue.splice(i, 1)[0];
+        return this._taskQueue.splice(i, 1)[0];
       }
       // Otherwise task is still waiting
     }
@@ -223,10 +225,10 @@ export class TaskRunner {
    */
   private async _startAvailableTasksAsync(): Promise<void> {
     const taskPromises: Promise<void>[] = [];
-    let ctask: Task | undefined;
-    while (this._currentActiveTasks < this._parallelism && (ctask = this._getNextTask())) {
+    let currentTask: Task | undefined;
+    while (this._currentActiveTasks < this._parallelism && (currentTask = this._getNextTask())) {
       this._currentActiveTasks++;
-      const task: Task = ctask;
+      const task: Task = currentTask;
       task.status = TaskStatus.Executing;
 
       task.stopwatch = Stopwatch.start();
@@ -240,7 +242,7 @@ export class TaskRunner {
   }
 
   private async _executeTaskAndChainAsync(task: Task): Promise<void> {
-    const context: IBuilderContext = {
+    const context: ITaskRunnerContext = {
       repoCommandLineConfiguration: this._repoCommandLineConfiguration,
       stdioSummarizer: task.stdioSummarizer,
       collatedWriter: task.collatedWriter,
@@ -249,7 +251,7 @@ export class TaskRunner {
     };
 
     try {
-      const result: TaskStatus = await task.builder.executeAsync(context);
+      const result: TaskStatus = await task.runner.executeAsync(context);
 
       task.stopwatch.stop();
       task.stdioSummarizer.close();
@@ -328,7 +330,7 @@ export class TaskRunner {
    * Marks a task as being completed, and removes it from the dependencies list of all its dependents
    */
   private _markTaskAsSuccess(task: Task): void {
-    if (task.builder.hadEmptyScript) {
+    if (task.runner.hadEmptyScript) {
       task.collatedWriter.terminal.writeStdoutLine(colors.green(`"${task.name}" had an empty script.`));
     } else {
       task.collatedWriter.terminal.writeStdoutLine(
@@ -339,7 +341,7 @@ export class TaskRunner {
 
     task.dependents.forEach((dependent: Task) => {
       if (!this._changedProjectsOnly) {
-        dependent.builder.isSkipAllowed = false;
+        dependent.runner.isSkipAllowed = false;
       }
       dependent.dependencies.delete(task);
     });
@@ -356,7 +358,7 @@ export class TaskRunner {
     task.status = TaskStatus.SuccessWithWarning;
     task.dependents.forEach((dependent: Task) => {
       if (!this._changedProjectsOnly) {
-        dependent.builder.isSkipAllowed = false;
+        dependent.runner.isSkipAllowed = false;
       }
       dependent.dependencies.delete(task);
     });
@@ -481,7 +483,7 @@ export class TaskRunner {
     const longestTaskName: number = Math.max(...tasks.map((x) => x.name.length));
 
     for (const task of tasks) {
-      if (task.stopwatch && !task.builder.hadEmptyScript && task.status !== TaskStatus.Skipped) {
+      if (task.stopwatch && !task.runner.hadEmptyScript && task.status !== TaskStatus.Skipped) {
         const time: string = task.stopwatch.toString();
         const padding: string = ' '.repeat(longestTaskName - task.name.length);
         this._terminal.writeStdoutLine(`  ${task.name}${padding}    ${time}`);
@@ -504,7 +506,7 @@ export class TaskRunner {
     //
     // --[ WARNINGS: f ]------------------------------------[ 5.07 seconds ]--
     //
-    // [eslint] Warning: src/logic/taskRunner/TaskRunner.ts:393:3 ...
+    // [eslint] Warning: src/logic/taskExecution/TaskExecutionManager.ts:393:3 ...
 
     const tasks: Task[] | undefined = tasksByStatus[status];
     if (!tasks || tasks.length === 0) {
@@ -536,7 +538,7 @@ export class TaskRunner {
       // middlePart: "]----------------------["
       const twoBracketsLength: number = 2;
       const middlePartLengthMinusTwoBrackets: number = Math.max(
-        TaskRunner._ASCII_HEADER_WIDTH - (leftPartLength + rightPartLength + twoBracketsLength),
+        ASCII_HEADER_WIDTH - (leftPartLength + rightPartLength + twoBracketsLength),
         0
       );
 
@@ -571,10 +573,7 @@ export class TaskRunner {
     const leftPart: string = colors.gray('==[') + ' ' + headingColor(headingText) + ' ';
     const leftPartLength: number = 3 + 1 + headingText.length + 1;
 
-    const rightPartLengthMinusBracket: number = Math.max(
-      TaskRunner._ASCII_HEADER_WIDTH - (leftPartLength + 1),
-      0
-    );
+    const rightPartLengthMinusBracket: number = Math.max(ASCII_HEADER_WIDTH - (leftPartLength + 1), 0);
 
     // rightPart: "]======================"
     const rightPart: string = colors.gray(']' + '='.repeat(rightPartLengthMinusBracket));

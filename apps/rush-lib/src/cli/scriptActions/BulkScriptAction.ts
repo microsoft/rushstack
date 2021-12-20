@@ -12,7 +12,10 @@ import { SetupChecks } from '../../logic/SetupChecks';
 import { ITaskSelectorOptions, TaskSelector } from '../../logic/TaskSelector';
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
-import { ITaskRunnerOptions, TaskRunner } from '../../logic/taskRunner/TaskRunner';
+import {
+  ITaskExecutionManagerOptions,
+  TaskExecutionManager
+} from '../../logic/taskExecution/TaskExecutionManager';
 import { Utilities } from '../../utilities/Utilities';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
@@ -43,7 +46,7 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
 
 interface IExecuteInternalOptions {
   taskSelectorOptions: ITaskSelectorOptions;
-  taskRunnerOptions: ITaskRunnerOptions;
+  taskExecutionManagerOptions: ITaskExecutionManagerOptions;
   stopwatch: Stopwatch;
   ignoreHooks?: boolean;
   terminal: Terminal;
@@ -155,18 +158,18 @@ export class BulkScriptAction extends BaseScriptAction {
       packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun)
     };
 
-    const taskRunnerOptions: ITaskRunnerOptions = {
+    const taskExecutionManagerOptions: ITaskExecutionManagerOptions = {
       quietMode: isQuietMode,
       debugMode: this.parser.isDebug,
       parallelism: parallelism,
       changedProjectsOnly: changedProjectsOnly,
-      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild,
+      allowWarningsInSuccessfulExecution: this._allowWarningsInSuccessfulBuild,
       repoCommandLineConfiguration: this._repoCommandLineConfiguration
     };
 
     const executeOptions: IExecuteInternalOptions = {
       taskSelectorOptions,
-      taskRunnerOptions,
+      taskExecutionManagerOptions: taskExecutionManagerOptions,
       stopwatch,
       terminal
     };
@@ -245,7 +248,7 @@ export class BulkScriptAction extends BaseScriptAction {
           // Pass the ProjectChangeAnalyzer from the state differ to save a bit of overhead
           projectChangeAnalyzer: state
         },
-        taskRunnerOptions: options.taskRunnerOptions,
+        taskExecutionManagerOptions: options.taskExecutionManagerOptions,
         stopwatch,
         // For now, don't run pre-build or post-build in watch mode
         ignoreHooks: true,
@@ -322,15 +325,15 @@ export class BulkScriptAction extends BaseScriptAction {
 
     // Register all tasks with the task collection
 
-    const taskRunner: TaskRunner = new TaskRunner(
+    const taskExecutionManager: TaskExecutionManager = new TaskExecutionManager(
       taskSelector.registerTasks().getOrderedTasks(),
-      options.taskRunnerOptions
+      options.taskExecutionManagerOptions
     );
 
     const { ignoreHooks, stopwatch } = options;
 
     try {
-      await taskRunner.executeAsync();
+      await taskExecutionManager.executeAsync();
 
       stopwatch.stop();
       console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));

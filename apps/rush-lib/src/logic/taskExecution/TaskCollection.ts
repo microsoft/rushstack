@@ -5,7 +5,7 @@ import { Sort } from '@rushstack/node-core-library';
 
 import { Task } from './Task';
 import { TaskStatus } from './TaskStatus';
-import { BaseBuilder } from './BaseBuilder';
+import { BaseTaskRunner } from './BaseTaskRunner';
 
 /**
  * This class represents a set of tasks with interdependencies.  Any class of task definition
@@ -22,12 +22,12 @@ export class TaskCollection {
   /**
    * Registers a task definition to the map of defined tasks
    */
-  public addTask(builder: BaseBuilder): void {
-    if (this._tasks.has(builder.name)) {
+  public addTask(taskRunner: BaseTaskRunner): void {
+    if (this._tasks.has(taskRunner.name)) {
       throw new Error('A task with that name has already been registered.');
     }
 
-    const task: Task = new Task(builder, TaskStatus.Ready);
+    const task: Task = new Task(taskRunner, TaskStatus.Ready);
     task.criticalPathLength = undefined;
     this._tasks.set(task.name, task);
   }
@@ -76,16 +76,13 @@ export class TaskCollection {
       this._calculateCriticalPaths(task);
     });
 
-    const buildQueue: Task[] = [];
-    // Add everything to the buildQueue
-    this._tasks.forEach((task: Task) => {
-      buildQueue.push(task);
-    });
+    // Add everything to the queue
+    const queue: Task[] = [...this._tasks.values()];
 
     // Sort the queue in descending order, nothing will mess with the order
-    Sort.sortBy(buildQueue, (task: Task): number => -task.criticalPathLength!);
+    Sort.sortBy(queue, (task: Task): number => -task.criticalPathLength!);
 
-    return buildQueue;
+    return queue;
   }
 
   /**

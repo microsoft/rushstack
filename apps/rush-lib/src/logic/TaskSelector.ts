@@ -4,9 +4,9 @@
 import { BuildCacheConfiguration } from '../api/BuildCacheConfiguration';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
-import { ProjectBuilder, convertSlashesForWindows } from '../logic/taskRunner/ProjectBuilder';
+import { ProjectTaskRunner, convertSlashesForWindows } from './taskExecution/ProjectTaskRunner';
 import { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';
-import { TaskCollection } from './taskRunner/TaskCollection';
+import { TaskCollection } from './taskExecution/TaskCollection';
 
 export interface ITaskSelectorOptions {
   rushConfiguration: RushConfiguration;
@@ -29,7 +29,7 @@ export interface ITaskSelectorOptions {
  * This class is responsible for:
  *  - based on to/from flags, solving the dependency graph and figuring out which projects need to be run
  *  - creating a ProjectBuilder for each project that needs to be built
- *  - registering the necessary ProjectBuilders with the TaskRunner, which actually orchestrates execution
+ *  - registering the necessary ProjectBuilders with the TaskExecutionManager, which actually orchestrates execution
  */
 export class TaskSelector {
   private _options: ITaskSelectorOptions;
@@ -87,7 +87,7 @@ export class TaskSelector {
         for (const dep of project.dependencyProjects) {
           if (projects.has(dep)) {
             // Add direct relationships for projects in the set
-            dependencyTaskNames.add(ProjectBuilder.getTaskName(dep));
+            dependencyTaskNames.add(ProjectTaskRunner.getTaskName(dep));
           } else {
             // Add indirect relationships for projects not in the set
             for (const indirectDep of getDependencyTaskNames(dep)) {
@@ -101,7 +101,10 @@ export class TaskSelector {
 
       // Add ordering relationships for each dependency
       for (const project of projects) {
-        taskCollection.addDependencies(ProjectBuilder.getTaskName(project), getDependencyTaskNames(project));
+        taskCollection.addDependencies(
+          ProjectTaskRunner.getTaskName(project),
+          getDependencyTaskNames(project)
+        );
       }
     }
 
@@ -109,7 +112,7 @@ export class TaskSelector {
   }
 
   private _registerTask(project: RushConfigurationProject | undefined, taskCollection: TaskCollection): void {
-    if (!project || taskCollection.hasTask(ProjectBuilder.getTaskName(project))) {
+    if (!project || taskCollection.hasTask(ProjectTaskRunner.getTaskName(project))) {
       return;
     }
 
@@ -125,7 +128,7 @@ export class TaskSelector {
     }
 
     taskCollection.addTask(
-      new ProjectBuilder({
+      new ProjectTaskRunner({
         rushProject: project,
         rushConfiguration: this._options.rushConfiguration,
         buildCacheConfiguration: this._options.buildCacheConfiguration,
