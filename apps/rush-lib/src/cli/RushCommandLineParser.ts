@@ -50,6 +50,7 @@ import { SetupAction } from './actions/SetupAction';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 import { ICustomCommandLineConfigurationInfo, PluginManager } from '../pluginFramework/PluginManager';
 import { RushSession } from '../pluginFramework/RushSession';
+import { ProjectLogWritable } from '../logic/taskExecution/ProjectLogWritable';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -70,6 +71,8 @@ export class RushCommandLineParser extends CommandLineParser {
   private _rushOptions: IRushCommandLineParserOptions;
   private _terminalProvider: ConsoleTerminalProvider;
   private _terminal: Terminal;
+  private readonly _commandNameForLogFilenamesToCommandNameMap: Map<string, Set<string>> = new Map();
+  private readonly _commandNamesWithLogFilenameCollisions: Set<string> = new Set();
 
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {
     super({
@@ -250,6 +253,24 @@ export class RushCommandLineParser extends CommandLineParser {
     // Build actions from the command line configuration supersede default build actions.
     this._addCommandLineConfigActions(commandLineConfiguration);
     this._addDefaultBuildActions(commandLineConfiguration);
+
+    if (this._commandNamesWithLogFilenameCollisions.size > 0) {
+      const errorMessageParts: string[] = [];
+      for (const commandNameWithLogFilenameCollisions of this._commandNamesWithLogFilenameCollisions) {
+        const collidingCommands: string[] = Array.from(
+          this._commandNameForLogFilenamesToCommandNameMap.get(commandNameWithLogFilenameCollisions)!
+        );
+        errorMessageParts.push(
+          `- [${collidingCommands.join(', ')}] will all write to ` +
+            `"<projectName>.${commandNameWithLogFilenameCollisions}.log" files`
+        );
+      }
+
+      throw new Error(
+        `The following command names will produce log files with names that will ` +
+          `collide:\n${errorMessageParts.join('\n')}`
+      );
+    }
   }
 
   private _addDefaultBuildActions(commandLineConfiguration?: CommandLineConfiguration): void {
@@ -292,15 +313,28 @@ export class RushCommandLineParser extends CommandLineParser {
       );
     }
 
-    this._validateCommandLineConfigCommand(command);
+    if (
+      (command.name === RushConstants.buildCommandName ||
+        command.name === RushConstants.rebuildCommandName) &&
+      command.safeForSimultaneousRushProcesses
+    ) {
+      // Build and rebuild can't be designated "safeForSimultaneousRushProcesses"
+      throw new Error(
+        `${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
+          `"safeForSimultaneousRushProcesses=true". This configuration is not supported for "${command.name}".`
+      );
+    }
 
     const overrideAllowWarnings: boolean = EnvironmentConfiguration.allowWarningsInSuccessfulBuild;
 
     switch (command.commandKind) {
       case RushConstants.bulkCommandKind: {
+        const commandNameForLogFilenames: string = this._getCommandNameForLogFilenames(command, commandToRun);
+
         this.addAction(
           new BulkScriptAction({
             actionName: command.name,
+            commandNameForLogFilenames,
 
             // By default, the "rebuild" action runs the "build" script. However, if the command-line.json file
             // overrides "rebuild," the "rebuild" script should be run.
@@ -327,6 +361,17 @@ export class RushCommandLineParser extends CommandLineParser {
       }
 
       case RushConstants.globalCommandKind: {
+        if (
+          command.name === RushConstants.buildCommandName ||
+          command.name === RushConstants.rebuildCommandName
+        ) {
+          throw new Error(
+            `${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
+              `the command kind "${RushConstants.globalCommandKind}". This command can only be designated as a command ` +
+              `kind "${RushConstants.bulkCommandKind}" or "${RushConstants.phasedCommandKind}".`
+          );
+        }
+
         this.addAction(
           new GlobalScriptAction({
             actionName: command.name,
@@ -367,31 +412,29 @@ export class RushCommandLineParser extends CommandLineParser {
     }
   }
 
-  private _validateCommandLineConfigCommand(command: CommandJson): void {
-    // There are some restrictions on the 'build' and 'rebuild' commands.
-    if (
-      command.name !== RushConstants.buildCommandName &&
-      command.name !== RushConstants.rebuildCommandName
-    ) {
-      return;
+  private _getCommandNameForLogFilenames(command: CommandJson, commandToRun: string = command.name): string {
+    const commandNameForLogFilenames: string = ProjectLogWritable.normalizeCommandNameForLogFilenames(
+      // "rebuild" and "build" should write to the same log file ("build.log")
+      commandToRun
+    );
+
+    // Ensure two log files won't collide
+    let commandNamesForCommandNameForLogFilenames: Set<string> | undefined =
+      this._commandNameForLogFilenamesToCommandNameMap.get(commandNameForLogFilenames);
+    if (!commandNamesForCommandNameForLogFilenames) {
+      commandNamesForCommandNameForLogFilenames = new Set<string>();
+      this._commandNameForLogFilenamesToCommandNameMap.set(
+        commandNameForLogFilenames,
+        commandNamesForCommandNameForLogFilenames
+      );
     }
 
-    if (
-      command.commandKind !== RushConstants.bulkCommandKind &&
-      command.commandKind !== RushConstants.phasedCommandKind
-    ) {
-      throw new Error(
-        `${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
-          `the command kind "${RushConstants.globalCommandKind}". This command can only be designated as a command ` +
-          `kind "${RushConstants.bulkCommandKind}" or "${RushConstants.phasedCommandKind}".`
-      );
+    commandNamesForCommandNameForLogFilenames.add(commandToRun);
+    if (commandNamesForCommandNameForLogFilenames.size > 1) {
+      this._commandNamesWithLogFilenameCollisions.add(commandNameForLogFilenames);
     }
-    if (command.safeForSimultaneousRushProcesses) {
-      throw new Error(
-        `${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
-          `"safeForSimultaneousRushProcesses=true". This configuration is not supported for "${command.name}".`
-      );
-    }
+
+    return commandNameForLogFilenames;
   }
 
   private _reportErrorAndSetExitCode(error: Error): void {

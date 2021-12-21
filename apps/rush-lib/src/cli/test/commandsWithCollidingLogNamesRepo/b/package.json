@@ -1,0 +1,12 @@
+{
+  "name": "b",
+  "version": "1.0.0",
+  "description": "Test package b",
+  "dependencies": {
+    "a": "1.0.0"
+  },
+  "scripts": {
+    "command:a": "fake_build_task_but_works_with_mock",
+    "command-a": "fake_build_task_but_works_with_mock"
+  }
+}

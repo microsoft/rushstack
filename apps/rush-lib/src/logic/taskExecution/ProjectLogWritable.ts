@@ -36,6 +36,10 @@ export class ProjectLogWritable extends TerminalWritable {
     this._logWriter = FileWriter.open(this._logPath);
   }
 
+  public static normalizeCommandNameForLogFilenames(commandName: string): string {
+    return commandName.replace(/[^a-zA-Z0-9]/g, '_');
+  }
+
   protected onWriteChunk(chunk: ITerminalChunk): void {
     if (!this._logWriter) {
       throw new InternalError('Output file was closed');

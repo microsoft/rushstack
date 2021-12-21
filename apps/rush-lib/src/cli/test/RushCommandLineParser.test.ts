@@ -291,7 +291,9 @@ describe('RushCommandLineParser', () => {
 
         await expect(() => {
           getCommandLineParserInstance(repoName, 'doesnt-matter');
-        }).toThrowError('This command can only be designated as a command kind "bulk"');
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"command-line.json defines a command \\"build\\" using the command kind \\"global\\". This command can only be designated as a command kind \\"bulk\\" or \\"phased\\"."`
+        );
       });
     });
 
@@ -301,7 +303,9 @@ describe('RushCommandLineParser', () => {
 
         await expect(() => {
           getCommandLineParserInstance(repoName, 'doesnt-matter');
-        }).toThrowError('This command can only be designated as a command kind "bulk"');
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"command-line.json defines a command \\"rebuild\\" using the command kind \\"global\\". This command can only be designated as a command kind \\"bulk\\" or \\"phased\\"."`
+        );
       });
     });
 
@@ -311,7 +315,9 @@ describe('RushCommandLineParser', () => {
 
         await expect(() => {
           getCommandLineParserInstance(repoName, 'doesnt-matter');
-        }).toThrowError('"safeForSimultaneousRushProcesses=true". This configuration is not supported');
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"command-line.json defines a command \\"build\\" using \\"safeForSimultaneousRushProcesses=true\\". This configuration is not supported for \\"build\\"."`
+        );
       });
     });
 
@@ -321,7 +327,22 @@ describe('RushCommandLineParser', () => {
 
         await expect(() => {
           getCommandLineParserInstance(repoName, 'doesnt-matter');
-        }).toThrowError('"safeForSimultaneousRushProcesses=true". This configuration is not supported');
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"command-line.json defines a command \\"rebuild\\" using \\"safeForSimultaneousRushProcesses=true\\". This configuration is not supported for \\"rebuild\\"."`
+        );
+      });
+    });
+
+    describe(`in repo with two commands that will produce colliding log filenames`, () => {
+      it('throws an error when starting Rush', async () => {
+        const repoName: string = 'commandsWithCollidingLogNamesRepo';
+
+        await expect(() => {
+          getCommandLineParserInstance(repoName, 'doesnt-matter');
+        }).toThrowErrorMatchingInlineSnapshot(`
+                "The following command names will produce log files with names that will collide:
+                - [command:a, command-a] will all write to \\"<projectName>.command_a.log\\" files"
+              `);
       });
     });
   });

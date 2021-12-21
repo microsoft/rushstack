@@ -1,0 +1,16 @@
+{
+  "commands": [
+    {
+      "name": "command:a",
+      "commandKind": "bulk",
+      "summary": "Test command",
+      "enableParallelism": true
+    },
+    {
+      "name": "command-a",
+      "commandKind": "bulk",
+      "summary": "Test command",
+      "enableParallelism": true
+    }
+  ]
+}

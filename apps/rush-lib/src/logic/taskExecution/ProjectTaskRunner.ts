@@ -54,6 +54,8 @@ export interface IProjectTaskRunnerOptions {
   projectChangeAnalyzer: ProjectChangeAnalyzer;
   packageDepsFilename: string;
   allowWarningsInSuccessfulBuild?: boolean;
+  taskName: string;
+  commandNameForLogFilenames: string;
 }
 
 function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
@@ -75,9 +77,7 @@ function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
  * incremental state.
  */
 export class ProjectTaskRunner extends BaseTaskRunner {
-  public get name(): string {
-    return ProjectTaskRunner.getTaskName(this._rushProject);
-  }
+  public readonly name: string;
 
   /**
    * This property is mutated by TaskExecutionManager, so is not readonly
@@ -104,6 +104,7 @@ export class ProjectTaskRunner extends BaseTaskRunner {
 
   public constructor(options: IProjectTaskRunnerOptions) {
     super();
+    this.name = options.taskName;
     this._rushProject = options.rushProject;
     this._rushConfiguration = options.rushConfiguration;
     this._buildCacheConfiguration = options.buildCacheConfiguration;
@@ -114,15 +115,7 @@ export class ProjectTaskRunner extends BaseTaskRunner {
     this._projectChangeAnalyzer = options.projectChangeAnalyzer;
     this._packageDepsFilename = options.packageDepsFilename;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild || false;
-    this._commandNameForLogFilenames = options.commandName;
-  }
-
-  /**
-   * A helper method to determine the task name of a ProjectBuilder. Used when the task
-   * name is required before a task is created.
-   */
-  public static getTaskName(rushProject: RushConfigurationProject): string {
-    return rushProject.packageName;
+    this._commandNameForLogFilenames = options.commandNameForLogFilenames;
   }
 
   public async executeAsync(context: ITaskRunnerContext): Promise<TaskStatus> {
