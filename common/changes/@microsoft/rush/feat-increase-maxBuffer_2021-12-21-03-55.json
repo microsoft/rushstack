@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "[rush-lib] increase maxBuffer to 10mb when executeCommand",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
