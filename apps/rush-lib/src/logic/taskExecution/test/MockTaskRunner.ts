@@ -4,9 +4,9 @@
 import { CollatedTerminal } from '@rushstack/stream-collator';
 
 import { TaskStatus } from '../TaskStatus';
-import { BaseBuilder, IBuilderContext } from '../BaseBuilder';
+import { BaseTaskRunner, ITaskRunnerContext } from '../BaseTaskRunner';
 
-export class MockBuilder extends BaseBuilder {
+export class MockTaskRunner extends BaseTaskRunner {
   private readonly _action: ((terminal: CollatedTerminal) => Promise<TaskStatus>) | undefined;
   public readonly name: string;
   public readonly hadEmptyScript: boolean = false;
@@ -19,7 +19,7 @@ export class MockBuilder extends BaseBuilder {
     this._action = action;
   }
 
-  public async executeAsync(context: IBuilderContext): Promise<TaskStatus> {
+  public async executeAsync(context: ITaskRunnerContext): Promise<TaskStatus> {
     let result: TaskStatus | void;
     if (this._action) {
       result = await this._action(context.collatedWriter.terminal);

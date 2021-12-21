@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-// The TaskRunner prints "x.xx seconds" in TestRunner.test.ts.snap; ensure that the Stopwatch timing is deterministic
+// The TaskExecutionManager prints "x.xx seconds" in TestRunner.test.ts.snap; ensure that the Stopwatch timing is deterministic
 jest.mock('../../../utilities/Utilities');
 
 import colors from 'colors/safe';
@@ -9,12 +9,12 @@ import { EOL } from 'os';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 import { MockWritable } from '@rushstack/terminal';
 
-import { TaskRunner, ITaskRunnerOptions } from '../TaskRunner';
+import { TaskExecutionManager, ITaskExecutionManagerOptions } from '../TaskExecutionManager';
 import { TaskStatus } from '../TaskStatus';
 import { Task } from '../Task';
 import { Utilities } from '../../../utilities/Utilities';
-import { BaseBuilder } from '../BaseBuilder';
-import { MockBuilder } from './MockBuilder';
+import { BaseTaskRunner } from '../BaseTaskRunner';
+import { MockTaskRunner } from './MockTaskRunner';
 
 const mockGetTimeInMs: jest.Mock = jest.fn();
 Utilities.getTimeInMs = mockGetTimeInMs;
@@ -28,17 +28,20 @@ mockGetTimeInMs.mockImplementation(() => {
 
 const mockWritable: MockWritable = new MockWritable();
 
-function createTaskRunner(taskRunnerOptions: ITaskRunnerOptions, builder: BaseBuilder): TaskRunner {
-  const task: Task = new Task(builder, TaskStatus.Ready);
+function createTaskExecutionManager(
+  taskExecutionManagerOptions: ITaskExecutionManagerOptions,
+  taskRunner: BaseTaskRunner
+): TaskExecutionManager {
+  const task: Task = new Task(taskRunner, TaskStatus.Ready);
 
-  return new TaskRunner([task], taskRunnerOptions);
+  return new TaskExecutionManager([task], taskExecutionManagerOptions);
 }
 
-const EXPECTED_FAIL: string = `Promise returned by ${TaskRunner.prototype.executeAsync.name}() resolved but was expected to fail`;
+const EXPECTED_FAIL: string = `Promise returned by ${TaskExecutionManager.prototype.executeAsync.name}() resolved but was expected to fail`;
 
-describe('TaskRunner', () => {
-  let taskRunner: TaskRunner;
-  let taskRunnerOptions: ITaskRunnerOptions;
+describe(TaskExecutionManager.name, () => {
+  let taskExecutionManager: TaskExecutionManager;
+  let taskExecutionManagerOptions: ITaskExecutionManagerOptions;
 
   let initialColorsEnabled: boolean;
 
@@ -61,13 +64,13 @@ describe('TaskRunner', () => {
     it('throwsErrorOnInvalidParallelism', () => {
       expect(
         () =>
-          new TaskRunner([], {
+          new TaskExecutionManager([], {
             quietMode: false,
             debugMode: false,
             parallelism: 'tequila',
             changedProjectsOnly: false,
             destination: mockWritable,
-            allowWarningsInSuccessfulBuild: false,
+            allowWarningsInSuccessfulExecution: false,
             repoCommandLineConfiguration: undefined
           })
       ).toThrowErrorMatchingSnapshot();
@@ -76,21 +79,21 @@ describe('TaskRunner', () => {
 
   describe('Error logging', () => {
     beforeEach(() => {
-      taskRunnerOptions = {
+      taskExecutionManagerOptions = {
         quietMode: false,
         debugMode: false,
         parallelism: '1',
         changedProjectsOnly: false,
         destination: mockWritable,
-        allowWarningsInSuccessfulBuild: false,
+        allowWarningsInSuccessfulExecution: false,
         repoCommandLineConfiguration: undefined
       };
     });
 
     it('printedStderrAfterError', async () => {
-      taskRunner = createTaskRunner(
-        taskRunnerOptions,
-        new MockBuilder('stdout+stderr', async (terminal: CollatedTerminal) => {
+      taskExecutionManager = createTaskExecutionManager(
+        taskExecutionManagerOptions,
+        new MockTaskRunner('stdout+stderr', async (terminal: CollatedTerminal) => {
           terminal.writeStdoutLine('Build step 1' + EOL);
           terminal.writeStderrLine('Error: step 1 failed' + EOL);
           return TaskStatus.Failure;
@@ -98,7 +101,7 @@ describe('TaskRunner', () => {
       );
 
       try {
-        await taskRunner.executeAsync();
+        await taskExecutionManager.executeAsync();
         fail(EXPECTED_FAIL);
       } catch (err) {
         expect((err as Error).message).toMatchSnapshot();
@@ -109,9 +112,9 @@ describe('TaskRunner', () => {
     });
 
     it('printedStdoutAfterErrorWithEmptyStderr', async () => {
-      taskRunner = createTaskRunner(
-        taskRunnerOptions,
-        new MockBuilder('stdout only', async (terminal: CollatedTerminal) => {
+      taskExecutionManager = createTaskExecutionManager(
+        taskExecutionManagerOptions,
+        new MockTaskRunner('stdout only', async (terminal: CollatedTerminal) => {
           terminal.writeStdoutLine('Build step 1' + EOL);
           terminal.writeStdoutLine('Error: step 1 failed' + EOL);
           return TaskStatus.Failure;
@@ -119,7 +122,7 @@ describe('TaskRunner', () => {
       );
 
       try {
-        await taskRunner.executeAsync();
+        await taskExecutionManager.executeAsync();
         fail(EXPECTED_FAIL);
       } catch (err) {
         expect((err as Error).message).toMatchSnapshot();
@@ -134,21 +137,21 @@ describe('TaskRunner', () => {
   describe('Warning logging', () => {
     describe('Fail on warning', () => {
       beforeEach(() => {
-        taskRunnerOptions = {
+        taskExecutionManagerOptions = {
           quietMode: false,
           debugMode: false,
           parallelism: '1',
           changedProjectsOnly: false,
           destination: mockWritable,
-          allowWarningsInSuccessfulBuild: false,
+          allowWarningsInSuccessfulExecution: false,
           repoCommandLineConfiguration: undefined
         };
       });
 
       it('Logs warnings correctly', async () => {
-        taskRunner = createTaskRunner(
-          taskRunnerOptions,
-          new MockBuilder('success with warnings (failure)', async (terminal: CollatedTerminal) => {
+        taskExecutionManager = createTaskExecutionManager(
+          taskExecutionManagerOptions,
+          new MockTaskRunner('success with warnings (failure)', async (terminal: CollatedTerminal) => {
             terminal.writeStdoutLine('Build step 1' + EOL);
             terminal.writeStdoutLine('Warning: step 1 succeeded with warnings' + EOL);
             return TaskStatus.SuccessWithWarning;
@@ -156,7 +159,7 @@ describe('TaskRunner', () => {
         );
 
         try {
-          await taskRunner.executeAsync();
+          await taskExecutionManager.executeAsync();
           fail(EXPECTED_FAIL);
         } catch (err) {
           expect((err as Error).message).toMatchSnapshot();
@@ -170,28 +173,28 @@ describe('TaskRunner', () => {
 
     describe('Success on warning', () => {
       beforeEach(() => {
-        taskRunnerOptions = {
+        taskExecutionManagerOptions = {
           quietMode: false,
           debugMode: false,
           parallelism: '1',
           changedProjectsOnly: false,
           destination: mockWritable,
-          allowWarningsInSuccessfulBuild: true,
+          allowWarningsInSuccessfulExecution: true,
           repoCommandLineConfiguration: undefined
         };
       });
 
       it('Logs warnings correctly', async () => {
-        taskRunner = createTaskRunner(
-          taskRunnerOptions,
-          new MockBuilder('success with warnings (success)', async (terminal: CollatedTerminal) => {
+        taskExecutionManager = createTaskExecutionManager(
+          taskExecutionManagerOptions,
+          new MockTaskRunner('success with warnings (success)', async (terminal: CollatedTerminal) => {
             terminal.writeStdoutLine('Build step 1' + EOL);
             terminal.writeStdoutLine('Warning: step 1 succeeded with warnings' + EOL);
             return TaskStatus.SuccessWithWarning;
           })
         );
 
-        await taskRunner.executeAsync();
+        await taskExecutionManager.executeAsync();
         const allMessages: string = mockWritable.getAllOutput();
         expect(allMessages).toContain('Build step 1');
         expect(allMessages).toContain('Warning: step 1 succeeded with warnings');

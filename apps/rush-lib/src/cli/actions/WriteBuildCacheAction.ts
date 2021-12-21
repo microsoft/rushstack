@@ -10,12 +10,13 @@ import { BaseRushAction } from './BaseRushAction';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import { ProjectBuilder } from '../../logic/taskRunner/ProjectBuilder';
+import { ProjectTaskRunner } from '../../logic/taskExecution/ProjectTaskRunner';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 import { Utilities } from '../../utilities/Utilities';
-import { TaskSelector } from '../../logic/TaskSelector';
+import { NonPhasedProjectTaskSelector } from '../../logic/NonPhasedProjectTaskSelector';
 import { RushConstants } from '../../logic/RushConstants';
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
+import { ProjectLogWritable } from '../../logic/taskExecution/ProjectLogWritable';
 
 export class WriteBuildCacheAction extends BaseRushAction {
   private _command!: CommandLineStringParameter;
@@ -74,18 +75,26 @@ export class WriteBuildCacheAction extends BaseRushAction {
       );
 
     const command: string = this._command.value!;
-    const commandToRun: string | undefined = TaskSelector.getScriptToRun(project, command, []);
+    const commandToRun: string | undefined = NonPhasedProjectTaskSelector.getScriptToRun(
+      project,
+      command,
+      []
+    );
 
+    // TODO: With phased commands, this will need to be updated
+    const taskName: string = NonPhasedProjectTaskSelector.getTaskNameForProject(project);
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
-    const projectBuilder: ProjectBuilder = new ProjectBuilder({
+    const projectBuilder: ProjectTaskRunner = new ProjectTaskRunner({
       rushProject: project,
+      taskName,
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
       commandName: command,
       commandToRun: commandToRun || '',
       isIncrementalBuildAllowed: false,
       projectChangeAnalyzer,
-      packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(command)
+      packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(command),
+      logFilenameIdentifier: ProjectLogWritable.normalizeNameForLogFilenameIdentifiers(command)
     });
 
     const trackedFiles: string[] = Array.from(

@@ -30,7 +30,7 @@ import { Utilities, UNINITIALIZED } from '../../utilities/Utilities';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
-import { BaseBuilder, IBuilderContext } from './BaseBuilder';
+import { BaseTaskRunner, ITaskRunnerContext } from './BaseTaskRunner';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
@@ -39,12 +39,12 @@ import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvid
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 import { RushConstants } from '../RushConstants';
 
-export interface IProjectBuildDeps {
+export interface IProjectDeps {
   files: { [filePath: string]: string };
   arguments: string;
 }
 
-export interface IProjectBuilderOptions {
+export interface IProjectTaskRunnerOptions {
   rushProject: RushConfigurationProject;
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration: BuildCacheConfiguration | undefined;
@@ -54,6 +54,8 @@ export interface IProjectBuilderOptions {
   projectChangeAnalyzer: ProjectChangeAnalyzer;
   packageDepsFilename: string;
   allowWarningsInSuccessfulBuild?: boolean;
+  taskName: string;
+  logFilenameIdentifier: string;
 }
 
 function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
@@ -71,16 +73,14 @@ function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
 }
 
 /**
- * A `BaseBuilder` subclass that builds a Rush project and updates its package-deps-hash
+ * A `BaseTaskRunner` subclass that executes a task for a Rush project and updates its package-deps-hash
  * incremental state.
  */
-export class ProjectBuilder extends BaseBuilder {
-  public get name(): string {
-    return ProjectBuilder.getTaskName(this._rushProject);
-  }
+export class ProjectTaskRunner extends BaseTaskRunner {
+  public readonly name: string;
 
   /**
-   * This property is mutated by TaskRunner, so is not readonly
+   * This property is mutated by TaskExecutionManager, so is not readonly
    */
   public isSkipAllowed: boolean;
   public hadEmptyScript: boolean = false;
@@ -94,6 +94,7 @@ export class ProjectBuilder extends BaseBuilder {
   private readonly _projectChangeAnalyzer: ProjectChangeAnalyzer;
   private readonly _packageDepsFilename: string;
   private readonly _allowWarningsInSuccessfulBuild: boolean;
+  private readonly _logFilenameIdentifier: string;
 
   /**
    * UNINITIALIZED === we haven't tried to initialize yet
@@ -101,8 +102,9 @@ export class ProjectBuilder extends BaseBuilder {
    */
   private _projectBuildCache: ProjectBuildCache | undefined | UNINITIALIZED = UNINITIALIZED;
 
-  public constructor(options: IProjectBuilderOptions) {
+  public constructor(options: IProjectTaskRunnerOptions) {
     super();
+    this.name = options.taskName;
     this._rushProject = options.rushProject;
     this._rushConfiguration = options.rushConfiguration;
     this._buildCacheConfiguration = options.buildCacheConfiguration;
@@ -113,17 +115,10 @@ export class ProjectBuilder extends BaseBuilder {
     this._projectChangeAnalyzer = options.projectChangeAnalyzer;
     this._packageDepsFilename = options.packageDepsFilename;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild || false;
+    this._logFilenameIdentifier = options.logFilenameIdentifier;
   }
 
-  /**
-   * A helper method to determine the task name of a ProjectBuilder. Used when the task
-   * name is required before a task is created.
-   */
-  public static getTaskName(rushProject: RushConfigurationProject): string {
-    return rushProject.packageName;
-  }
-
-  public async executeAsync(context: IBuilderContext): Promise<TaskStatus> {
+  public async executeAsync(context: ITaskRunnerContext): Promise<TaskStatus> {
     try {
       if (!this._commandToRun) {
         this.hadEmptyScript = true;
@@ -147,7 +142,7 @@ export class ProjectBuilder extends BaseBuilder {
     return projectBuildCache?.trySetCacheEntryAsync(terminal);
   }
 
-  private async _executeTaskAsync(context: IBuilderContext): Promise<TaskStatus> {
+  private async _executeTaskAsync(context: ITaskRunnerContext): Promise<TaskStatus> {
     // TERMINAL PIPELINE:
     //
     //                             +--> quietModeTransform? --> collatedWriter
@@ -157,7 +152,8 @@ export class ProjectBuilder extends BaseBuilder {
     //                                                        +--> stdioSummarizer
     const projectLogWritable: ProjectLogWritable = new ProjectLogWritable(
       this._rushProject,
-      context.collatedWriter.terminal
+      context.collatedWriter.terminal,
+      this._logFilenameIdentifier
     );
 
     try {
@@ -198,7 +194,7 @@ export class ProjectBuilder extends BaseBuilder {
 
       let hasWarningOrError: boolean = false;
       const projectFolder: string = this._rushProject.projectFolder;
-      let lastProjectBuildDeps: IProjectBuildDeps | undefined = undefined;
+      let lastProjectDeps: IProjectDeps | undefined = undefined;
 
       const currentDepsPath: string = path.join(
         this._rushProject.projectRushTempFolder,
@@ -207,7 +203,7 @@ export class ProjectBuilder extends BaseBuilder {
 
       if (FileSystem.exists(currentDepsPath)) {
         try {
-          lastProjectBuildDeps = JsonFile.load(currentDepsPath);
+          lastProjectDeps = JsonFile.load(currentDepsPath);
         } catch (e) {
           // Warn and ignore - treat failing to load the file as the project being not built.
           terminal.writeWarningLine(
@@ -217,7 +213,7 @@ export class ProjectBuilder extends BaseBuilder {
         }
       }
 
-      let projectBuildDeps: IProjectBuildDeps | undefined;
+      let projectDeps: IProjectDeps | undefined;
       let trackedFiles: string[] | undefined;
       try {
         const fileHashes: Map<string, string> | undefined =
@@ -231,7 +227,7 @@ export class ProjectBuilder extends BaseBuilder {
             trackedFiles.push(filePath);
           }
 
-          projectBuildDeps = {
+          projectDeps = {
             files,
             arguments: this._commandToRun
           };
@@ -241,7 +237,7 @@ export class ProjectBuilder extends BaseBuilder {
           terminal.writeLine({
             text: PrintUtilities.wrapWords(
               'This workspace does not appear to be tracked by Git. ' +
-                'Rush will proceed without incremental build, caching, and change detection.'
+                'Rush will proceed without incremental execution, caching, and change detection.'
             ),
             foregroundColor: ColorValue.Cyan
           });
@@ -249,27 +245,27 @@ export class ProjectBuilder extends BaseBuilder {
       } catch (error) {
         // To test this code path:
         // Delete a project's ".rush/temp/shrinkwrap-deps.json" then run "rush build --verbose"
-        terminal.writeLine('Unable to calculate incremental build state: ' + (error as Error).toString());
+        terminal.writeLine('Unable to calculate incremental state: ' + (error as Error).toString());
         terminal.writeLine({
-          text: 'Rush will proceed without incremental build, caching, and change detection.',
+          text: 'Rush will proceed without incremental execution, caching, and change detection.',
           foregroundColor: ColorValue.Cyan
         });
       }
 
-      // If possible, we want to skip this build -- either by restoring it from the
-      // build cache, if build caching is enabled, or determining that the project
-      // is unchanged (using the older incremental build logic). These two approaches,
+      // If possible, we want to skip this task -- either by restoring it from the
+      // cache, if caching is enabled, or determining that the project
+      // is unchanged (using the older incremental execution logic). These two approaches,
       // "caching" and "skipping", are incompatible, so only one applies.
       //
-      // Note that "build caching" and "build skipping" take two different approaches
+      // Note that "caching" and "skipping" take two different approaches
       // to tracking dependents:
       //
-      //   - For build caching, "isCacheReadAllowed" is set if a project supports
+      //   - For caching, "isCacheReadAllowed" is set if a project supports
       //     incremental builds, and determining whether this project or a dependent
       //     has changed happens inside the hashing logic.
       //
-      //   - For build skipping, "isSkipAllowed" is set to true initially, and during
-      //     the process of building dependents, it will be changed by TaskRunner to
+      //   - For skipping, "isSkipAllowed" is set to true initially, and during
+      //     the process of running dependents, it will be changed by TaskExecutionManager to
       //     false if a dependency wasn't able to be skipped.
       //
       let buildCacheReadAttempted: boolean = false;
@@ -290,10 +286,10 @@ export class ProjectBuilder extends BaseBuilder {
       }
       if (this.isSkipAllowed && !buildCacheReadAttempted) {
         const isPackageUnchanged: boolean = !!(
-          lastProjectBuildDeps &&
-          projectBuildDeps &&
-          projectBuildDeps.arguments === lastProjectBuildDeps.arguments &&
-          _areShallowEqual(projectBuildDeps.files, lastProjectBuildDeps.files)
+          lastProjectDeps &&
+          projectDeps &&
+          projectDeps.arguments === lastProjectDeps.arguments &&
+          _areShallowEqual(projectDeps.files, lastProjectDeps.files)
         );
 
         if (isPackageUnchanged) {
@@ -301,7 +297,7 @@ export class ProjectBuilder extends BaseBuilder {
         }
       }
 
-      // If the deps file exists, remove it before starting a build.
+      // If the deps file exists, remove it before starting execution.
       FileSystem.deleteFile(currentDepsPath);
 
       // TODO: Remove legacyDepsPath with the next major release of Rush
@@ -311,8 +307,8 @@ export class ProjectBuilder extends BaseBuilder {
 
       if (!this._commandToRun) {
         // Write deps on success.
-        if (projectBuildDeps) {
-          JsonFile.save(projectBuildDeps, currentDepsPath, {
+        if (projectDeps) {
+          JsonFile.save(projectDeps, currentDepsPath, {
             ensureFolderExists: true
           });
         }
@@ -333,7 +329,7 @@ export class ProjectBuilder extends BaseBuilder {
         }
       });
 
-      // Hook into events, in order to get live streaming of build log
+      // Hook into events, in order to get live streaming of the log
       if (task.stdout !== null) {
         task.stdout.on('data', (data: Buffer) => {
           const text: string = data.toString();
@@ -373,18 +369,14 @@ export class ProjectBuilder extends BaseBuilder {
           !!this._rushConfiguration.experimentsConfiguration.configuration
             .buildCacheWithAllowWarningsInSuccessfulBuild);
 
-      if (taskIsSuccessful && projectBuildDeps) {
+      if (taskIsSuccessful && projectDeps) {
         // Write deps on success.
-        const writeProjectStatePromise: Promise<boolean> = JsonFile.saveAsync(
-          projectBuildDeps,
-          currentDepsPath,
-          {
-            ensureFolderExists: true
-          }
-        );
+        const writeProjectStatePromise: Promise<boolean> = JsonFile.saveAsync(projectDeps, currentDepsPath, {
+          ensureFolderExists: true
+        });
 
         // If the command is successful and we can calculate project hash, we will write a
-        // new cache entry even if incremental builds are not allowed.
+        // new cache entry even if incremental execution is not allowed.
         const setCacheEntryPromise: Promise<boolean | undefined> = this.tryWriteCacheEntryAsync(
           terminal,
           trackedFiles,

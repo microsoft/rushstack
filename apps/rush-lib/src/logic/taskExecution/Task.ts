@@ -7,19 +7,19 @@ import { CollatedWriter } from '@rushstack/stream-collator';
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
-import { BaseBuilder } from './BaseBuilder';
+import { BaseTaskRunner } from './BaseTaskRunner';
 
 /**
- * The `Task` class is a node in the dependency graph of work that needs to be scheduled by the `TaskRunner`.
- * Each `Task` has a `BaseBuilder` member, whose subclass manages the actual operations for building a single
- * project.
+ * The `Task` class is a node in the dependency graph of work that needs to be scheduled by the
+ * `TaskExecutionManager`. Each `Task` has a `runner` member of type `BaseTaskRunner`, whose subclass
+ * manages the actual operations for running a single task.
  */
 export class Task {
   /**
-   * When the scheduler is ready to process this `Task`, the `builder` implements the actual work of
-   * building the project.
+   * When the scheduler is ready to process this `Task`, the `runner` implements the actual work of
+   * running the task.
    */
-  public builder: BaseBuilder;
+  public runner: BaseTaskRunner;
 
   /**
    * The current execution status of a task. Tasks start in the 'ready' state,
@@ -67,7 +67,7 @@ export class Task {
    * Z has a score of 2, since only X depends on it, and X has a score of 1
    * Y has a score of 2, since the chain Y->X->C is longer than Y->C
    *
-   * The algorithm is implemented in TaskRunner as _calculateCriticalPaths()
+   * The algorithm is implemented in TaskExecutionManager as _calculateCriticalPaths()
    */
   public criticalPathLength: number | undefined;
 
@@ -89,12 +89,12 @@ export class Task {
    */
   public stopwatch!: Stopwatch;
 
-  public constructor(builder: BaseBuilder, initialStatus: TaskStatus) {
-    this.builder = builder;
+  public constructor(runner: BaseTaskRunner, initialStatus: TaskStatus) {
+    this.runner = runner;
     this.status = initialStatus;
   }
 
   public get name(): string {
-    return this.builder.name;
+    return this.runner.name;
   }
 }

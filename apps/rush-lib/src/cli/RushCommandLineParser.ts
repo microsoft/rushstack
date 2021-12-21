@@ -50,6 +50,7 @@ import { SetupAction } from './actions/SetupAction';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 import { ICustomCommandLineConfigurationInfo, PluginManager } from '../pluginFramework/PluginManager';
 import { RushSession } from '../pluginFramework/RushSession';
+import { ProjectLogWritable } from '../logic/taskExecution/ProjectLogWritable';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -67,9 +68,9 @@ export class RushCommandLineParser extends CommandLineParser {
   public readonly pluginManager: PluginManager;
 
   private _debugParameter!: CommandLineFlagParameter;
-  private _rushOptions: IRushCommandLineParserOptions;
-  private _terminalProvider: ConsoleTerminalProvider;
-  private _terminal: Terminal;
+  private readonly _rushOptions: IRushCommandLineParserOptions;
+  private readonly _terminalProvider: ConsoleTerminalProvider;
+  private readonly _terminal: Terminal;
 
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {
     super({
@@ -88,7 +89,6 @@ export class RushCommandLineParser extends CommandLineParser {
 
     this._terminalProvider = new ConsoleTerminalProvider();
     this._terminal = new Terminal(this._terminalProvider);
-
     this._rushOptions = this._normalizeOptions(options || {});
 
     try {
@@ -261,6 +261,8 @@ export class RushCommandLineParser extends CommandLineParser {
     }
 
     if (!this.tryGetAction(RushConstants.rebuildCommandName)) {
+      // By default, the "rebuild" action runs the "build" script. However, if the command-line.json file
+      // overrides "rebuild," the "rebuild" script should be run.
       this._addCommandLineConfigAction(
         commandLineConfiguration,
         CommandLineConfiguration.defaultRebuildCommandJson,
@@ -283,7 +285,7 @@ export class RushCommandLineParser extends CommandLineParser {
   private _addCommandLineConfigAction(
     commandLineConfiguration: CommandLineConfiguration | undefined,
     command: CommandJson,
-    commandToRun?: string
+    commandToRun: string = command.name
   ): void {
     if (this.tryGetAction(command.name)) {
       throw new Error(
@@ -292,18 +294,29 @@ export class RushCommandLineParser extends CommandLineParser {
       );
     }
 
-    this._validateCommandLineConfigCommand(command);
+    if (
+      (command.name === RushConstants.buildCommandName ||
+        command.name === RushConstants.rebuildCommandName) &&
+      command.safeForSimultaneousRushProcesses
+    ) {
+      // Build and rebuild can't be designated "safeForSimultaneousRushProcesses"
+      throw new Error(
+        `${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
+          `"safeForSimultaneousRushProcesses=true". This configuration is not supported for "${command.name}".`
+      );
+    }
 
     const overrideAllowWarnings: boolean = EnvironmentConfiguration.allowWarningsInSuccessfulBuild;
 
     switch (command.commandKind) {
       case RushConstants.bulkCommandKind: {
+        const logFilenameIdentifier: string =
+          ProjectLogWritable.normalizeNameForLogFilenameIdentifiers(commandToRun);
+
         this.addAction(
           new BulkScriptAction({
             actionName: command.name,
-
-            // By default, the "rebuild" action runs the "build" script. However, if the command-line.json file
-            // overrides "rebuild," the "rebuild" script should be run.
+            logFilenameIdentifier: logFilenameIdentifier,
             commandToRun: commandToRun,
 
             summary: command.summary,
@@ -327,6 +340,17 @@ export class RushCommandLineParser extends CommandLineParser {
       }
 
       case RushConstants.globalCommandKind: {
+        if (
+          command.name === RushConstants.buildCommandName ||
+          command.name === RushConstants.rebuildCommandName
+        ) {
+          throw new Error(
+            `${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
+              `the command kind "${RushConstants.globalCommandKind}". This command can only be designated as a command ` +
+              `kind "${RushConstants.bulkCommandKind}" or "${RushConstants.phasedCommandKind}".`
+          );
+        }
+
         this.addAction(
           new GlobalScriptAction({
             actionName: command.name,
@@ -364,33 +388,6 @@ export class RushCommandLineParser extends CommandLineParser {
           `${RushConstants.commandLineFilename} defines a command "${(command as CommandJson).name}"` +
             ` using an unsupported command kind "${(command as CommandJson).commandKind}"`
         );
-    }
-  }
-
-  private _validateCommandLineConfigCommand(command: CommandJson): void {
-    // There are some restrictions on the 'build' and 'rebuild' commands.
-    if (
-      command.name !== RushConstants.buildCommandName &&
-      command.name !== RushConstants.rebuildCommandName
-    ) {
-      return;
-    }
-
-    if (
-      command.commandKind !== RushConstants.bulkCommandKind &&
-      command.commandKind !== RushConstants.phasedCommandKind
-    ) {
-      throw new Error(
-        `${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
-          `the command kind "${RushConstants.globalCommandKind}". This command can only be designated as a command ` +
-          `kind "${RushConstants.bulkCommandKind}" or "${RushConstants.phasedCommandKind}".`
-      );
-    }
-    if (command.safeForSimultaneousRushProcesses) {
-      throw new Error(
-        `${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
-          `"safeForSimultaneousRushProcesses=true". This configuration is not supported for "${command.name}".`
-      );
     }
   }
 

@@ -9,10 +9,16 @@ import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack
 
 import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
-import { ITaskSelectorOptions, TaskSelector } from '../../logic/TaskSelector';
+import {
+  INonPhasedProjectTaskSelectorOptions,
+  NonPhasedProjectTaskSelector
+} from '../../logic/NonPhasedProjectTaskSelector';
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
-import { ITaskRunnerOptions, TaskRunner } from '../../logic/taskRunner/TaskRunner';
+import {
+  ITaskExecutionManagerOptions,
+  TaskExecutionManager
+} from '../../logic/taskExecution/TaskExecutionManager';
 import { Utilities } from '../../utilities/Utilities';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
@@ -34,16 +40,13 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   allowWarningsInSuccessfulBuild: boolean;
   watchForChanges: boolean;
   disableBuildCache: boolean;
-
-  /**
-   * Optional command to run. Otherwise, use the `actionName` as the command to run.
-   */
-  commandToRun?: string;
+  logFilenameIdentifier: string;
+  commandToRun: string;
 }
 
 interface IExecuteInternalOptions {
-  taskSelectorOptions: ITaskSelectorOptions;
-  taskRunnerOptions: ITaskRunnerOptions;
+  taskSelectorOptions: INonPhasedProjectTaskSelectorOptions;
+  taskExecutionManagerOptions: ITaskExecutionManagerOptions;
   stopwatch: Stopwatch;
   ignoreHooks?: boolean;
   terminal: Terminal;
@@ -68,6 +71,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
   private readonly _ignoreDependencyOrder: boolean;
   private readonly _allowWarningsInSuccessfulBuild: boolean;
+  private readonly _logFilenameIdentifier: string;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
   private _selectionParameters!: SelectionParameterSet;
@@ -80,12 +84,13 @@ export class BulkScriptAction extends BaseScriptAction {
     this._enableParallelism = options.enableParallelism;
     this._ignoreMissingScript = options.ignoreMissingScript;
     this._isIncrementalBuildAllowed = options.incremental;
-    this._commandToRun = options.commandToRun || options.actionName;
+    this._commandToRun = options.commandToRun;
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
     this._watchForChanges = options.watchForChanges;
     this._disableBuildCache = options.disableBuildCache;
     this._repoCommandLineConfiguration = options.commandLineConfiguration;
+    this._logFilenameIdentifier = options.logFilenameIdentifier;
   }
 
   public async runAsync(): Promise<void> {
@@ -139,7 +144,7 @@ export class BulkScriptAction extends BaseScriptAction {
       return;
     }
 
-    const taskSelectorOptions: ITaskSelectorOptions = {
+    const taskSelectorOptions: INonPhasedProjectTaskSelectorOptions = {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
       selection,
@@ -152,21 +157,22 @@ export class BulkScriptAction extends BaseScriptAction {
       ignoreMissingScript: this._ignoreMissingScript,
       ignoreDependencyOrder: this._ignoreDependencyOrder,
       allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild,
-      packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun)
+      packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun),
+      logFilenameIdentifier: this._logFilenameIdentifier
     };
 
-    const taskRunnerOptions: ITaskRunnerOptions = {
+    const taskExecutionManagerOptions: ITaskExecutionManagerOptions = {
       quietMode: isQuietMode,
       debugMode: this.parser.isDebug,
       parallelism: parallelism,
       changedProjectsOnly: changedProjectsOnly,
-      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild,
+      allowWarningsInSuccessfulExecution: this._allowWarningsInSuccessfulBuild,
       repoCommandLineConfiguration: this._repoCommandLineConfiguration
     };
 
     const executeOptions: IExecuteInternalOptions = {
       taskSelectorOptions,
-      taskRunnerOptions,
+      taskExecutionManagerOptions: taskExecutionManagerOptions,
       stopwatch,
       terminal
     };
@@ -245,7 +251,7 @@ export class BulkScriptAction extends BaseScriptAction {
           // Pass the ProjectChangeAnalyzer from the state differ to save a bit of overhead
           projectChangeAnalyzer: state
         },
-        taskRunnerOptions: options.taskRunnerOptions,
+        taskExecutionManagerOptions: options.taskExecutionManagerOptions,
         stopwatch,
         // For now, don't run pre-build or post-build in watch mode
         ignoreHooks: true,
@@ -318,19 +324,21 @@ export class BulkScriptAction extends BaseScriptAction {
    * Runs a single invocation of the command
    */
   private async _runOnce(options: IExecuteInternalOptions): Promise<void> {
-    const taskSelector: TaskSelector = new TaskSelector(options.taskSelectorOptions);
+    const taskSelector: NonPhasedProjectTaskSelector = new NonPhasedProjectTaskSelector(
+      options.taskSelectorOptions
+    );
 
     // Register all tasks with the task collection
 
-    const taskRunner: TaskRunner = new TaskRunner(
+    const taskExecutionManager: TaskExecutionManager = new TaskExecutionManager(
       taskSelector.registerTasks().getOrderedTasks(),
-      options.taskRunnerOptions
+      options.taskExecutionManagerOptions
     );
 
     const { ignoreHooks, stopwatch } = options;
 
     try {
-      await taskRunner.executeAsync();
+      await taskExecutionManager.executeAsync();
 
       stopwatch.stop();
       console.log(colors.green(`rush ${this.actionName} (${stopwatch.toString()})`));
