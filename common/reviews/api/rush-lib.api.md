@@ -428,6 +428,10 @@ export interface IPhasedCommand extends IRushCommand {
 
 // @internal
 export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
+    neverBuiltDependencies?: string[];
+    overrides?: Record<string, string> | undefined;
+    // Warning: (ae-forgotten-export) The symbol "IPnpmPackageExtensions" needs to be exported by the entry point index.d.ts
+    packageExtensions?: IPnpmPackageExtensions;
     pnpmStore?: PnpmStoreOptions;
     preventManualShrinkwrapChanges?: boolean;
     strictPeerDependencies?: boolean;
@@ -637,6 +641,9 @@ export class PhasedCommandHooks {
 export class PnpmOptionsConfiguration extends PackageManagerOptionsConfigurationBase {
     // @internal
     constructor(json: _IPnpmOptionsJson, commonTempFolder: string);
+    readonly neverBuiltDependencies: string[] | undefined;
+    readonly overrides: Record<string, string> | undefined;
+    readonly packageExtensions: IPnpmPackageExtensions | undefined;
     readonly pnpmStore: PnpmStoreOptions;
     readonly pnpmStorePath: string;
     readonly preventManualShrinkwrapChanges: boolean;

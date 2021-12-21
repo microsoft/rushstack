@@ -188,6 +188,24 @@ export interface IConfigurationEnvironmentVariable {
 export interface INpmOptionsJson extends IPackageManagerOptionsJsonBase {}
 
 /**
+ * Part of IPnpmOptionsJson.
+ * @internal
+ */
+export interface IPnpmPackageExtensions {
+  [packageName: string]: {
+    dependencies?: Record<string, string>;
+    optionalDependencies?: Record<string, string>;
+    peerDependencies?: Record<string, string>;
+    peerDependenciesMeta?: Record<
+      string,
+      {
+        optional?: boolean;
+      }
+    >;
+  };
+}
+
+/**
  * Part of IRushConfigurationJson.
  * @internal
  */
@@ -208,6 +226,18 @@ export interface IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
    * {@inheritDoc PnpmOptionsConfiguration.useWorkspaces}
    */
   useWorkspaces?: boolean;
+  /**
+   * {@inheritdoc PnpmOptionsConfiguration.neverBuiltDependencies}
+   */
+  neverBuiltDependencies?: string[];
+  /**
+   * {@inheritdoc PnpmOptionsConfiguration.packageExtensions}
+   */
+  packageExtensions?: IPnpmPackageExtensions;
+  /**
+   * {@inheritdoc PnpmOptionsConfiguration.overrides}
+   */
+  overrides?: Record<string, string> | undefined;
 }
 
 /**
@@ -370,6 +400,34 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
    */
   public readonly useWorkspaces: boolean;
 
+  /**
+   * See https://pnpm.io/package_json#pnpmneverbuiltdependencies
+   *
+   * @remarks
+   * This field allows to ignore the builds of specific dependencies. The "preinstall", "install", and
+   * "postinstall" scripts of the listed packages will not be executed during installation.
+   */
+  public readonly neverBuiltDependencies: string[] | undefined;
+
+  /**
+   * See https://pnpm.io/package_json#pnpmpackageextensions
+   *
+   * @remarks
+   * The packageExtensions fields offer a way to extend the existing package definitions with additional
+   * information.
+   */
+  public readonly packageExtensions: IPnpmPackageExtensions | undefined;
+
+  /**
+   * See https://pnpm.io/package_json#pnpmoverrides
+   *
+   * @remarks
+   * This field allows you to instruct pnpm to override any dependency in the dependency graph. This is
+   * useful to enforce all your packages to use a single version of a dependency, backport a fix, or
+   * replace a dependency with a fork.
+   */
+  public readonly overrides: Record<string, string> | undefined;
+
   /** @internal */
   public constructor(json: IPnpmOptionsJson, commonTempFolder: string) {
     super(json);
@@ -384,6 +442,16 @@ export class PnpmOptionsConfiguration extends PackageManagerOptionsConfiguration
     this.strictPeerDependencies = !!json.strictPeerDependencies;
     this.preventManualShrinkwrapChanges = !!json.preventManualShrinkwrapChanges;
     this.useWorkspaces = !!json.useWorkspaces;
+
+    if ('neverBuiltDependencies' in json) {
+      this.neverBuiltDependencies = json.neverBuiltDependencies;
+    }
+    if ('packageExtensions' in json) {
+      this.packageExtensions = json.packageExtensions;
+    }
+    if ('overrides' in json) {
+      this.overrides = json.overrides;
+    }
   }
 }
 

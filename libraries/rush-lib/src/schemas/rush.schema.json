@@ -110,6 +110,65 @@
         "useWorkspaces": {
           "description": "If true, then Rush will use the workspaces feature to install and link packages when invoking PNPM. The default value is false.",
           "type": "boolean"
+        },
+        "neverBuiltDependencies": {
+          "description": "This field allows to ignore the builds of specific dependencies. The \"preinstall\", \"install\", and \"postinstall\" scripts of the listed packages will not be executed during installation.",
+          "type": "array",
+          "items": {
+            "description": "Specify package name of the dependency",
+            "type": "string"
+          }
+        },
+        "overrides": {
+          "description": "This field allows you to instruct pnpm to override any dependency in the dependency graph. This is useful to enforce all your packages to use a single version of a dependency, backport a fix, or replace a dependency with a fork.",
+          "type": "object",
+          "additionalProperties": {
+            "description": "You may specify the package the overriden dependency belongs to by separating the package selector from the dependency selector with a \">\", for example qar@1>zoo will only override the zoo dependency of qar@1, not for any other dependencies.",
+            "type": "string"
+          }
+        },
+        "packageExtensions": {
+          "description": "The packageExtensions fields offer a way to extend the existing package definitions with additional information.",
+          "type": "object",
+          "additionalProperties": {
+            "description": "Specify the extension to a package",
+            "type": "object",
+            "properties": {
+              "dependencies": {
+                "type": "object",
+                "additionalProperties": {
+                  "description": "Specify the version of the dependency",
+                  "type": "string"
+                }
+              },
+              "optionalDependencies": {
+                "type": "object",
+                "additionalProperties": {
+                  "description": "Specify the version of the optionalDependency",
+                  "type": "string"
+                }
+              },
+              "peerDependencies": {
+                "type": "object",
+                "additionalProperties": {
+                  "description": "Specify the version of the peerDependency",
+                  "type": "string"
+                }
+              },
+              "peerDependenciesMeta": {
+                "description": "Specify the peerDependenciesMeta",
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "optional": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       },
       "additionalProperties": false
