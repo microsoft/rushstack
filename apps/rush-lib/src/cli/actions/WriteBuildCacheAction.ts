@@ -94,7 +94,7 @@ export class WriteBuildCacheAction extends BaseRushAction {
       isIncrementalBuildAllowed: false,
       projectChangeAnalyzer,
       packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(command),
-      logFilename: ProjectLogWritable.normalizeNameForLogFilenames(command)
+      logFilenameIdentifier: ProjectLogWritable.normalizeNameForLogFilenameIdentifiers(command)
     });
 
     const trackedFiles: string[] = Array.from(

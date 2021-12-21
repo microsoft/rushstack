@@ -50,7 +50,7 @@ import { SetupAction } from './actions/SetupAction';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 import { ICustomCommandLineConfigurationInfo, PluginManager } from '../pluginFramework/PluginManager';
 import { RushSession } from '../pluginFramework/RushSession';
-import { LogFilenameManager } from '../utilities/LogFilenameManager';
+import { ProjectLogWritable } from '../logic/taskExecution/ProjectLogWritable';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -71,7 +71,6 @@ export class RushCommandLineParser extends CommandLineParser {
   private readonly _rushOptions: IRushCommandLineParserOptions;
   private readonly _terminalProvider: ConsoleTerminalProvider;
   private readonly _terminal: Terminal;
-  private readonly _logFilenameManager: LogFilenameManager;
 
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {
     super({
@@ -91,7 +90,6 @@ export class RushCommandLineParser extends CommandLineParser {
     this._terminalProvider = new ConsoleTerminalProvider();
     this._terminal = new Terminal(this._terminalProvider);
     this._rushOptions = this._normalizeOptions(options || {});
-    this._logFilenameManager = new LogFilenameManager();
 
     try {
       const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
@@ -252,8 +250,6 @@ export class RushCommandLineParser extends CommandLineParser {
     // Build actions from the command line configuration supersede default build actions.
     this._addCommandLineConfigActions(commandLineConfiguration);
     this._addDefaultBuildActions(commandLineConfiguration);
-
-    this._logFilenameManager.throwErrorIfLogFilenameCollisionsExist();
   }
 
   private _addDefaultBuildActions(commandLineConfiguration?: CommandLineConfiguration): void {
@@ -314,12 +310,13 @@ export class RushCommandLineParser extends CommandLineParser {
 
     switch (command.commandKind) {
       case RushConstants.bulkCommandKind: {
-        const logFilename: string = this._logFilenameManager.getLogFilename(commandToRun);
+        const logFilenameIdentifier: string =
+          ProjectLogWritable.normalizeNameForLogFilenameIdentifiers(commandToRun);
 
         this.addAction(
           new BulkScriptAction({
             actionName: command.name,
-            logFilename: logFilename,
+            logFilenameIdentifier: logFilenameIdentifier,
             commandToRun: commandToRun,
 
             summary: command.summary,

@@ -40,7 +40,7 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   allowWarningsInSuccessfulBuild: boolean;
   watchForChanges: boolean;
   disableBuildCache: boolean;
-  logFilename: string;
+  logFilenameIdentifier: string;
   commandToRun: string;
 }
 
@@ -71,7 +71,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
   private readonly _ignoreDependencyOrder: boolean;
   private readonly _allowWarningsInSuccessfulBuild: boolean;
-  private readonly _logFilename: string;
+  private readonly _logFilenameIdentifier: string;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
   private _selectionParameters!: SelectionParameterSet;
@@ -90,7 +90,7 @@ export class BulkScriptAction extends BaseScriptAction {
     this._watchForChanges = options.watchForChanges;
     this._disableBuildCache = options.disableBuildCache;
     this._repoCommandLineConfiguration = options.commandLineConfiguration;
-    this._logFilename = options.logFilename;
+    this._logFilenameIdentifier = options.logFilenameIdentifier;
   }
 
   public async runAsync(): Promise<void> {
@@ -158,7 +158,7 @@ export class BulkScriptAction extends BaseScriptAction {
       ignoreDependencyOrder: this._ignoreDependencyOrder,
       allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild,
       packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun),
-      logFilename: this._logFilename
+      logFilenameIdentifier: this._logFilenameIdentifier
     };
 
     const taskExecutionManagerOptions: ITaskExecutionManagerOptions = {

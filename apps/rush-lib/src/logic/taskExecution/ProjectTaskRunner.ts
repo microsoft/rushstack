@@ -55,7 +55,7 @@ export interface IProjectTaskRunnerOptions {
   packageDepsFilename: string;
   allowWarningsInSuccessfulBuild?: boolean;
   taskName: string;
-  logFilename: string;
+  logFilenameIdentifier: string;
 }
 
 function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
@@ -94,7 +94,7 @@ export class ProjectTaskRunner extends BaseTaskRunner {
   private readonly _projectChangeAnalyzer: ProjectChangeAnalyzer;
   private readonly _packageDepsFilename: string;
   private readonly _allowWarningsInSuccessfulBuild: boolean;
-  private readonly _logFilename: string;
+  private readonly _logFilenameIdentifier: string;
 
   /**
    * UNINITIALIZED === we haven't tried to initialize yet
@@ -115,7 +115,7 @@ export class ProjectTaskRunner extends BaseTaskRunner {
     this._projectChangeAnalyzer = options.projectChangeAnalyzer;
     this._packageDepsFilename = options.packageDepsFilename;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild || false;
-    this._logFilename = options.logFilename;
+    this._logFilenameIdentifier = options.logFilenameIdentifier;
   }
 
   public async executeAsync(context: ITaskRunnerContext): Promise<TaskStatus> {
@@ -153,7 +153,7 @@ export class ProjectTaskRunner extends BaseTaskRunner {
     const projectLogWritable: ProjectLogWritable = new ProjectLogWritable(
       this._rushProject,
       context.collatedWriter.terminal,
-      this._logFilename
+      this._logFilenameIdentifier
     );
 
     try {

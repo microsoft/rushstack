@@ -7,6 +7,7 @@ import { CollatedTerminal } from '@rushstack/stream-collator';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { PackageNameParsers } from '../../api/PackageNameParsers';
+import { RushConstants } from '../RushConstants';
 
 export class ProjectLogWritable extends TerminalWritable {
   private readonly _project: RushConfigurationProject;
@@ -18,17 +19,48 @@ export class ProjectLogWritable extends TerminalWritable {
   private _logWriter: FileWriter | undefined = undefined;
   private _errorLogWriter: FileWriter | undefined = undefined;
 
-  public constructor(project: RushConfigurationProject, terminal: CollatedTerminal, logFilename: string) {
+  public constructor(
+    project: RushConfigurationProject,
+    terminal: CollatedTerminal,
+    logFilenameIdentifier: string
+  ) {
     super();
     this._project = project;
     this._terminal = terminal;
 
-    const unscopedProjectName: string = PackageNameParsers.permissive.getUnscopedName(
-      this._project.packageName
-    );
+    function getLogFilePaths(
+      basePath: string,
+      logFilenameIdentifier: string
+    ): { logPath: string; errorLogPath: string } {
+      const unscopedProjectName: string = PackageNameParsers.permissive.getUnscopedName(project.packageName);
 
-    this._logPath = `${this._project.projectFolder}/${unscopedProjectName}.${logFilename}.log`;
-    this._errorLogPath = `${this._project.projectFolder}/${unscopedProjectName}.${logFilename}.error.log`;
+      return {
+        logPath: `${basePath}/${unscopedProjectName}.${logFilenameIdentifier}.log`,
+        errorLogPath: `${basePath}/${unscopedProjectName}.${logFilenameIdentifier}.error.log`
+      };
+    }
+
+    const projectFolder: string = this._project.projectFolder;
+    const { logPath: legacyLogPath, errorLogPath: legacyErrorLogPath } = getLogFilePaths(
+      projectFolder,
+      'build'
+    );
+    // If the multi-phase commands experiment is enabled, put logs under `rush-logs`
+    if (project.rushConfiguration.experimentsConfiguration.configuration._multiPhaseCommands) {
+      // Delete the legacy logs
+      FileSystem.deleteFile(legacyLogPath);
+      FileSystem.deleteFile(legacyErrorLogPath);
+
+      const logPathPrefix: string = `${projectFolder}/${RushConstants.rushLogsFolderName}`;
+      FileSystem.ensureFolder(logPathPrefix);
+
+      const { logPath, errorLogPath } = getLogFilePaths(logPathPrefix, logFilenameIdentifier);
+      this._logPath = logPath;
+      this._errorLogPath = errorLogPath;
+    } else {
+      this._logPath = legacyLogPath;
+      this._errorLogPath = legacyErrorLogPath;
+    }
 
     FileSystem.deleteFile(this._logPath);
     FileSystem.deleteFile(this._errorLogPath);
@@ -36,8 +68,8 @@ export class ProjectLogWritable extends TerminalWritable {
     this._logWriter = FileWriter.open(this._logPath);
   }
 
-  public static normalizeNameForLogFilenames(commandName: string): string {
-    return commandName.replace(/[^a-zA-Z0-9]/g, '_');
+  public static normalizeNameForLogFilenameIdentifiers(name: string): string {
+    return name.replace(/:/g, '_'); // Replace colons with underscores to be filesystem-safe
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {

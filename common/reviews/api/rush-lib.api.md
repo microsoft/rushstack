@@ -636,6 +636,7 @@ export class RushConstants {
     static readonly projectShrinkwrapFilename: string;
     static readonly rebuildCommandName: string;
     static readonly repoStateFilename: string;
+    static readonly rushLogsFolderName: string;
     static readonly rushPackageName: string;
     static readonly rushPluginManifestFilename: string;
     static readonly rushPluginsConfigFilename: string;

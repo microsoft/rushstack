@@ -7,15 +7,15 @@ import { TaskCollection } from './taskExecution/TaskCollection';
 import { ProjectTaskRunner } from './taskExecution/ProjectTaskRunner';
 
 export interface INonPhasedProjectTaskSelectorOptions extends ITaskSelectorOptions {
-  logFilename: string;
+  logFilenameIdentifier: string;
 }
 
 export class NonPhasedProjectTaskSelector extends TaskSelectorBase {
-  private readonly _logFilename: string;
+  private readonly _logFilenameIdentifier: string;
 
   public constructor(options: INonPhasedProjectTaskSelectorOptions) {
     super(options);
-    this._logFilename = options.logFilename;
+    this._logFilenameIdentifier = options.logFilenameIdentifier;
   }
 
   public registerTasks(): TaskCollection {
@@ -96,7 +96,7 @@ export class NonPhasedProjectTaskSelector extends TaskSelectorBase {
         projectChangeAnalyzer: this._projectChangeAnalyzer,
         packageDepsFilename: this._options.packageDepsFilename,
         allowWarningsInSuccessfulBuild: this._options.allowWarningsInSuccessfulBuild,
-        logFilename: this._logFilename
+        logFilenameIdentifier: this._logFilenameIdentifier
       })
     );
   }
