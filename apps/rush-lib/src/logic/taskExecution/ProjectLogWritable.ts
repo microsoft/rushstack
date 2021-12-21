@@ -18,7 +18,7 @@ export class ProjectLogWritable extends TerminalWritable {
   private _logWriter: FileWriter | undefined = undefined;
   private _errorLogWriter: FileWriter | undefined = undefined;
 
-  public constructor(project: RushConfigurationProject, terminal: CollatedTerminal, commandName: string) {
+  public constructor(project: RushConfigurationProject, terminal: CollatedTerminal, logFilename: string) {
     super();
     this._project = project;
     this._terminal = terminal;
@@ -27,8 +27,8 @@ export class ProjectLogWritable extends TerminalWritable {
       this._project.packageName
     );
 
-    this._logPath = `${this._project.projectFolder}/${unscopedProjectName}.${commandName}.log`;
-    this._errorLogPath = `${this._project.projectFolder}/${unscopedProjectName}.${commandName}.error.log`;
+    this._logPath = `${this._project.projectFolder}/${unscopedProjectName}.${logFilename}.log`;
+    this._errorLogPath = `${this._project.projectFolder}/${unscopedProjectName}.${logFilename}.error.log`;
 
     FileSystem.deleteFile(this._logPath);
     FileSystem.deleteFile(this._errorLogPath);
@@ -36,7 +36,7 @@ export class ProjectLogWritable extends TerminalWritable {
     this._logWriter = FileWriter.open(this._logPath);
   }
 
-  public static normalizeCommandNameForLogFilenames(commandName: string): string {
+  public static normalizeNameForLogFilenames(commandName: string): string {
     return commandName.replace(/[^a-zA-Z0-9]/g, '_');
   }
 

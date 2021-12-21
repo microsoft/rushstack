@@ -40,12 +40,8 @@ export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
   allowWarningsInSuccessfulBuild: boolean;
   watchForChanges: boolean;
   disableBuildCache: boolean;
-  commandNameForLogFilenames: string;
-
-  /**
-   * Optional command to run. Otherwise, use the `actionName` as the command to run.
-   */
-  commandToRun?: string;
+  logFilename: string;
+  commandToRun: string;
 }
 
 interface IExecuteInternalOptions {
@@ -75,7 +71,7 @@ export class BulkScriptAction extends BaseScriptAction {
   private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
   private readonly _ignoreDependencyOrder: boolean;
   private readonly _allowWarningsInSuccessfulBuild: boolean;
-  private readonly _commandNameForLogFilenames: string;
+  private readonly _logFilename: string;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
   private _selectionParameters!: SelectionParameterSet;
@@ -88,13 +84,13 @@ export class BulkScriptAction extends BaseScriptAction {
     this._enableParallelism = options.enableParallelism;
     this._ignoreMissingScript = options.ignoreMissingScript;
     this._isIncrementalBuildAllowed = options.incremental;
-    this._commandToRun = options.commandToRun || options.actionName;
+    this._commandToRun = options.commandToRun;
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
     this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
     this._watchForChanges = options.watchForChanges;
     this._disableBuildCache = options.disableBuildCache;
     this._repoCommandLineConfiguration = options.commandLineConfiguration;
-    this._commandNameForLogFilenames = options.commandNameForLogFilenames;
+    this._logFilename = options.logFilename;
   }
 
   public async runAsync(): Promise<void> {
@@ -162,7 +158,7 @@ export class BulkScriptAction extends BaseScriptAction {
       ignoreDependencyOrder: this._ignoreDependencyOrder,
       allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild,
       packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun),
-      commandNameForLogFilenames: this._commandNameForLogFilenames
+      logFilename: this._logFilename
     };
 
     const taskExecutionManagerOptions: ITaskExecutionManagerOptions = {

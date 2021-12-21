@@ -50,7 +50,7 @@ import { SetupAction } from './actions/SetupAction';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 import { ICustomCommandLineConfigurationInfo, PluginManager } from '../pluginFramework/PluginManager';
 import { RushSession } from '../pluginFramework/RushSession';
-import { ProjectLogWritable } from '../logic/taskExecution/ProjectLogWritable';
+import { LogFilenameManager } from '../utilities/LogFilenameManager';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -68,11 +68,10 @@ export class RushCommandLineParser extends CommandLineParser {
   public readonly pluginManager: PluginManager;
 
   private _debugParameter!: CommandLineFlagParameter;
-  private _rushOptions: IRushCommandLineParserOptions;
-  private _terminalProvider: ConsoleTerminalProvider;
-  private _terminal: Terminal;
-  private readonly _commandNameForLogFilenamesToCommandNameMap: Map<string, Set<string>> = new Map();
-  private readonly _commandNamesWithLogFilenameCollisions: Set<string> = new Set();
+  private readonly _rushOptions: IRushCommandLineParserOptions;
+  private readonly _terminalProvider: ConsoleTerminalProvider;
+  private readonly _terminal: Terminal;
+  private readonly _logFilenameManager: LogFilenameManager;
 
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {
     super({
@@ -91,8 +90,8 @@ export class RushCommandLineParser extends CommandLineParser {
 
     this._terminalProvider = new ConsoleTerminalProvider();
     this._terminal = new Terminal(this._terminalProvider);
-
     this._rushOptions = this._normalizeOptions(options || {});
+    this._logFilenameManager = new LogFilenameManager();
 
     try {
       const rushJsonFilename: string | undefined = RushConfiguration.tryFindRushJsonLocation({
@@ -254,23 +253,7 @@ export class RushCommandLineParser extends CommandLineParser {
     this._addCommandLineConfigActions(commandLineConfiguration);
     this._addDefaultBuildActions(commandLineConfiguration);
 
-    if (this._commandNamesWithLogFilenameCollisions.size > 0) {
-      const errorMessageParts: string[] = [];
-      for (const commandNameWithLogFilenameCollisions of this._commandNamesWithLogFilenameCollisions) {
-        const collidingCommands: string[] = Array.from(
-          this._commandNameForLogFilenamesToCommandNameMap.get(commandNameWithLogFilenameCollisions)!
-        );
-        errorMessageParts.push(
-          `- [${collidingCommands.join(', ')}] will all write to ` +
-            `"<projectName>.${commandNameWithLogFilenameCollisions}.log" files`
-        );
-      }
-
-      throw new Error(
-        `The following command names will produce log files with names that will ` +
-          `collide:\n${errorMessageParts.join('\n')}`
-      );
-    }
+    this._logFilenameManager.throwErrorIfLogFilenameCollisionsExist();
   }
 
   private _addDefaultBuildActions(commandLineConfiguration?: CommandLineConfiguration): void {
@@ -282,6 +265,8 @@ export class RushCommandLineParser extends CommandLineParser {
     }
 
     if (!this.tryGetAction(RushConstants.rebuildCommandName)) {
+      // By default, the "rebuild" action runs the "build" script. However, if the command-line.json file
+      // overrides "rebuild," the "rebuild" script should be run.
       this._addCommandLineConfigAction(
         commandLineConfiguration,
         CommandLineConfiguration.defaultRebuildCommandJson,
@@ -304,7 +289,7 @@ export class RushCommandLineParser extends CommandLineParser {
   private _addCommandLineConfigAction(
     commandLineConfiguration: CommandLineConfiguration | undefined,
     command: CommandJson,
-    commandToRun?: string
+    commandToRun: string = command.name
   ): void {
     if (this.tryGetAction(command.name)) {
       throw new Error(
@@ -329,15 +314,12 @@ export class RushCommandLineParser extends CommandLineParser {
 
     switch (command.commandKind) {
       case RushConstants.bulkCommandKind: {
-        const commandNameForLogFilenames: string = this._getCommandNameForLogFilenames(command, commandToRun);
+        const logFilename: string = this._logFilenameManager.getLogFilename(commandToRun);
 
         this.addAction(
           new BulkScriptAction({
             actionName: command.name,
-            commandNameForLogFilenames,
-
-            // By default, the "rebuild" action runs the "build" script. However, if the command-line.json file
-            // overrides "rebuild," the "rebuild" script should be run.
+            logFilename: logFilename,
             commandToRun: commandToRun,
 
             summary: command.summary,
@@ -410,31 +392,6 @@ export class RushCommandLineParser extends CommandLineParser {
             ` using an unsupported command kind "${(command as CommandJson).commandKind}"`
         );
     }
-  }
-
-  private _getCommandNameForLogFilenames(command: CommandJson, commandToRun: string = command.name): string {
-    const commandNameForLogFilenames: string = ProjectLogWritable.normalizeCommandNameForLogFilenames(
-      // "rebuild" and "build" should write to the same log file ("build.log")
-      commandToRun
-    );
-
-    // Ensure two log files won't collide
-    let commandNamesForCommandNameForLogFilenames: Set<string> | undefined =
-      this._commandNameForLogFilenamesToCommandNameMap.get(commandNameForLogFilenames);
-    if (!commandNamesForCommandNameForLogFilenames) {
-      commandNamesForCommandNameForLogFilenames = new Set<string>();
-      this._commandNameForLogFilenamesToCommandNameMap.set(
-        commandNameForLogFilenames,
-        commandNamesForCommandNameForLogFilenames
-      );
-    }
-
-    commandNamesForCommandNameForLogFilenames.add(commandToRun);
-    if (commandNamesForCommandNameForLogFilenames.size > 1) {
-      this._commandNamesWithLogFilenameCollisions.add(commandNameForLogFilenames);
-    }
-
-    return commandNameForLogFilenames;
   }
 
   private _reportErrorAndSetExitCode(error: Error): void {
