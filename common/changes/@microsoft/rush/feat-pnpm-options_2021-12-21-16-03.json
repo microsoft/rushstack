@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Add support for overrides,packageExtensions,neverBuiltDependencies in pnpmOptions",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
