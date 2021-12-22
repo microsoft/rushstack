@@ -1,23 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITaskSelectorOptions, TaskSelectorBase } from './TaskSelectorBase';
+import { ITaskSelectorBaseOptions, ProjectTaskSelectorBase } from './ProjectTaskSelectorBase';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { TaskCollection } from './taskExecution/TaskCollection';
 import { ProjectTaskRunner } from './taskExecution/ProjectTaskRunner';
 
-export interface INonPhasedProjectTaskSelectorOptions extends ITaskSelectorOptions {
+export interface INonPhasedProjectTaskSelectorOptions extends ITaskSelectorBaseOptions {
   logFilenameIdentifier: string;
+  commandToRun: string;
 }
 
-export class NonPhasedProjectTaskSelector extends TaskSelectorBase {
-  private readonly _logFilenameIdentifier: string;
-
-  public constructor(options: INonPhasedProjectTaskSelectorOptions) {
-    super(options);
-    this._logFilenameIdentifier = options.logFilenameIdentifier;
-  }
-
+export class NonPhasedProjectTaskSelector extends ProjectTaskSelectorBase<INonPhasedProjectTaskSelectorOptions> {
   public registerTasks(): TaskCollection {
     const projects: ReadonlySet<RushConfigurationProject> = this._options.selection;
     const taskCollection: TaskCollection = new TaskCollection();
@@ -73,7 +67,7 @@ export class NonPhasedProjectTaskSelector extends TaskSelectorBase {
       return;
     }
 
-    const commandToRun: string | undefined = TaskSelectorBase.getScriptToRun(
+    const commandToRun: string | undefined = ProjectTaskSelectorBase.getScriptToRun(
       project,
       this._options.commandToRun,
       this._options.customParameterValues
@@ -94,9 +88,8 @@ export class NonPhasedProjectTaskSelector extends TaskSelectorBase {
         commandName: this._options.commandName,
         isIncrementalBuildAllowed: this._options.isIncrementalBuildAllowed,
         projectChangeAnalyzer: this._projectChangeAnalyzer,
-        packageDepsFilename: this._options.packageDepsFilename,
         allowWarningsInSuccessfulBuild: this._options.allowWarningsInSuccessfulBuild,
-        logFilenameIdentifier: this._logFilenameIdentifier
+        logFilenameIdentifier: this._options.logFilenameIdentifier
       })
     );
   }

@@ -12,7 +12,6 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { ProjectTaskRunner } from '../../logic/taskExecution/ProjectTaskRunner';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
-import { Utilities } from '../../utilities/Utilities';
 import { NonPhasedProjectTaskSelector } from '../../logic/NonPhasedProjectTaskSelector';
 import { RushConstants } from '../../logic/RushConstants';
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
@@ -93,7 +92,6 @@ export class WriteBuildCacheAction extends BaseRushAction {
       commandToRun: commandToRun || '',
       isIncrementalBuildAllowed: false,
       projectChangeAnalyzer,
-      packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(command),
       logFilenameIdentifier: ProjectLogWritable.normalizeNameForLogFilenameIdentifiers(command)
     });
 

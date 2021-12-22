@@ -8,19 +8,17 @@ import { convertSlashesForWindows } from './taskExecution/ProjectTaskRunner';
 import { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';
 import { TaskCollection } from './taskExecution/TaskCollection';
 
-export interface ITaskSelectorOptions {
+export interface ITaskSelectorBaseOptions {
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration: BuildCacheConfiguration | undefined;
   selection: ReadonlySet<RushConfigurationProject>;
   commandName: string;
-  commandToRun: string;
   customParameterValues: string[];
   isQuietMode: boolean;
   isDebugMode: boolean;
   isIncrementalBuildAllowed: boolean;
   ignoreMissingScript: boolean;
   ignoreDependencyOrder: boolean;
-  packageDepsFilename: string;
   projectChangeAnalyzer?: ProjectChangeAnalyzer;
   allowWarningsInSuccessfulBuild?: boolean;
 }
@@ -31,11 +29,13 @@ export interface ITaskSelectorOptions {
  *  - creating a ProjectBuilder for each project that needs to be built
  *  - registering the necessary ProjectBuilders with the TaskExecutionManager, which actually orchestrates execution
  */
-export abstract class TaskSelectorBase {
-  protected _options: ITaskSelectorOptions;
+export abstract class ProjectTaskSelectorBase<
+  TOptions extends ITaskSelectorBaseOptions = ITaskSelectorBaseOptions
+> {
+  protected _options: TOptions;
   protected _projectChangeAnalyzer: ProjectChangeAnalyzer;
 
-  public constructor(options: ITaskSelectorOptions) {
+  public constructor(options: TOptions) {
     this._options = options;
 
     const { projectChangeAnalyzer = new ProjectChangeAnalyzer(options.rushConfiguration) } = options;
@@ -48,7 +48,7 @@ export abstract class TaskSelectorBase {
     commandToRun: string,
     customParameterValues: string[]
   ): string | undefined {
-    const script: string | undefined = TaskSelectorBase._getScriptCommand(rushProject, commandToRun);
+    const script: string | undefined = ProjectTaskSelectorBase._getScriptCommand(rushProject, commandToRun);
 
     if (script === undefined) {
       return undefined;

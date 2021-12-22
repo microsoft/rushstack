@@ -12,7 +12,8 @@ import {
   ICommandLineJson,
   IPhaseJson,
   ParameterJson,
-  IPhasedCommandJson
+  IPhasedCommandJson,
+  IBulkCommandJson
 } from './CommandLineJson';
 
 const EXPECTED_PHASE_NAME_PREFIX: '_phase:' = '_phase:';
@@ -47,7 +48,7 @@ export class CommandLineConfiguration {
    */
   private _shellCommandTokenContext: IShellCommandTokenContext | undefined;
 
-  public static readonly defaultBuildCommandJson: CommandJson = {
+  public static readonly defaultBuildCommandJson: IBulkCommandJson = {
     commandKind: RushConstants.bulkCommandKind,
     name: RushConstants.buildCommandName,
     summary: "Build all projects that haven't been built, or have changed since they were last built.",
@@ -68,7 +69,7 @@ export class CommandLineConfiguration {
     safeForSimultaneousRushProcesses: false
   };
 
-  public static readonly defaultRebuildCommandJson: CommandJson = {
+  public static readonly defaultRebuildCommandJson: IBulkCommandJson = {
     commandKind: RushConstants.bulkCommandKind,
     name: RushConstants.rebuildCommandName,
     summary: 'Clean and rebuild the entire set of projects',

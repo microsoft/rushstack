@@ -17,7 +17,7 @@ import { PrintUtilities } from '@rushstack/terminal';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
 import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
-import { CommandJson } from '../api/CommandLineJson';
+import { CommandJson, IBulkCommandJson, IGlobalCommandJson } from '../api/CommandLineJson';
 import { Utilities } from '../utilities/Utilities';
 
 import { AddAction } from './actions/AddAction';
@@ -40,8 +40,9 @@ import { VersionAction } from './actions/VersionAction';
 import { UpdateCloudCredentialsAction } from './actions/UpdateCloudCredentialsAction';
 import { WriteBuildCacheAction } from './actions/WriteBuildCacheAction';
 
-import { BulkScriptAction } from './scriptActions/BulkScriptAction';
+import { NonPhasedBulkScriptAction } from './scriptActions/NonPhasedBulkScriptAction';
 import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
+import { IBaseScriptActionOptions } from './scriptActions/BaseScriptAction';
 
 import { Telemetry } from '../logic/Telemetry';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
@@ -254,7 +255,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private _addDefaultBuildActions(commandLineConfiguration?: CommandLineConfiguration): void {
     if (!this.tryGetAction(RushConstants.buildCommandName)) {
-      this._addCommandLineConfigAction(
+      this._addBulkCommandLineConfigAction(
         commandLineConfiguration,
         CommandLineConfiguration.defaultBuildCommandJson
       );
@@ -263,7 +264,7 @@ export class RushCommandLineParser extends CommandLineParser {
     if (!this.tryGetAction(RushConstants.rebuildCommandName)) {
       // By default, the "rebuild" action runs the "build" script. However, if the command-line.json file
       // overrides "rebuild," the "rebuild" script should be run.
-      this._addCommandLineConfigAction(
+      this._addBulkCommandLineConfigAction(
         commandLineConfiguration,
         CommandLineConfiguration.defaultRebuildCommandJson,
         RushConstants.buildCommandName
@@ -284,8 +285,7 @@ export class RushCommandLineParser extends CommandLineParser {
 
   private _addCommandLineConfigAction(
     commandLineConfiguration: CommandLineConfiguration | undefined,
-    command: CommandJson,
-    commandToRun: string = command.name
+    command: CommandJson
   ): void {
     if (this.tryGetAction(command.name)) {
       throw new Error(
@@ -294,78 +294,14 @@ export class RushCommandLineParser extends CommandLineParser {
       );
     }
 
-    if (
-      (command.name === RushConstants.buildCommandName ||
-        command.name === RushConstants.rebuildCommandName) &&
-      command.safeForSimultaneousRushProcesses
-    ) {
-      // Build and rebuild can't be designated "safeForSimultaneousRushProcesses"
-      throw new Error(
-        `${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
-          `"safeForSimultaneousRushProcesses=true". This configuration is not supported for "${command.name}".`
-      );
-    }
-
-    const overrideAllowWarnings: boolean = EnvironmentConfiguration.allowWarningsInSuccessfulBuild;
-
     switch (command.commandKind) {
       case RushConstants.bulkCommandKind: {
-        const logFilenameIdentifier: string =
-          ProjectLogWritable.normalizeNameForLogFilenameIdentifiers(commandToRun);
-
-        this.addAction(
-          new BulkScriptAction({
-            actionName: command.name,
-            logFilenameIdentifier: logFilenameIdentifier,
-            commandToRun: commandToRun,
-
-            summary: command.summary,
-            documentation: command.description || command.summary,
-            safeForSimultaneousRushProcesses: command.safeForSimultaneousRushProcesses,
-
-            parser: this,
-            commandLineConfiguration: commandLineConfiguration,
-
-            enableParallelism: command.enableParallelism,
-            ignoreMissingScript: command.ignoreMissingScript || false,
-            ignoreDependencyOrder: command.ignoreDependencyOrder || false,
-            incremental: command.incremental || false,
-            allowWarningsInSuccessfulBuild: overrideAllowWarnings || !!command.allowWarningsInSuccessfulBuild,
-
-            watchForChanges: command.watchForChanges || false,
-            disableBuildCache: command.disableBuildCache || false
-          })
-        );
+        this._addBulkCommandLineConfigAction(commandLineConfiguration, command);
         break;
       }
 
       case RushConstants.globalCommandKind: {
-        if (
-          command.name === RushConstants.buildCommandName ||
-          command.name === RushConstants.rebuildCommandName
-        ) {
-          throw new Error(
-            `${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
-              `the command kind "${RushConstants.globalCommandKind}". This command can only be designated as a command ` +
-              `kind "${RushConstants.bulkCommandKind}" or "${RushConstants.phasedCommandKind}".`
-          );
-        }
-
-        this.addAction(
-          new GlobalScriptAction({
-            actionName: command.name,
-            summary: command.summary,
-            documentation: command.description || command.summary,
-            safeForSimultaneousRushProcesses: command.safeForSimultaneousRushProcesses,
-
-            parser: this,
-            commandLineConfiguration: commandLineConfiguration,
-
-            shellCommand: command.shellCommand,
-
-            autoinstallerName: command.autoinstallerName
-          })
-        );
+        this._addGlobalScriptAction(commandLineConfiguration, command);
         break;
       }
 
@@ -389,6 +325,93 @@ export class RushCommandLineParser extends CommandLineParser {
             ` using an unsupported command kind "${(command as CommandJson).commandKind}"`
         );
     }
+  }
+
+  private _getSharedCommandActionOptions(
+    commandLineConfiguration: CommandLineConfiguration | undefined,
+    command: CommandJson
+  ): IBaseScriptActionOptions {
+    return {
+      actionName: command.name,
+      summary: command.summary,
+      documentation: command.description || command.summary,
+      safeForSimultaneousRushProcesses: command.safeForSimultaneousRushProcesses,
+
+      parser: this,
+      commandLineConfiguration: commandLineConfiguration
+    };
+  }
+
+  private _addBulkCommandLineConfigAction(
+    commandLineConfiguration: CommandLineConfiguration | undefined,
+    command: IBulkCommandJson,
+    commandToRun: string = command.name
+  ): void {
+    if (
+      (command.name === RushConstants.buildCommandName ||
+        command.name === RushConstants.rebuildCommandName) &&
+      command.safeForSimultaneousRushProcesses
+    ) {
+      // Build and rebuild can't be designated "safeForSimultaneousRushProcesses"
+      throw new Error(
+        `${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
+          `"safeForSimultaneousRushProcesses=true". This configuration is not supported for "${command.name}".`
+      );
+    }
+    const logFilenameIdentifier: string =
+      ProjectLogWritable.normalizeNameForLogFilenameIdentifiers(commandToRun);
+    const sharedCommandOptions: IBaseScriptActionOptions = this._getSharedCommandActionOptions(
+      commandLineConfiguration,
+      command
+    );
+
+    this.addAction(
+      new NonPhasedBulkScriptAction({
+        ...sharedCommandOptions,
+
+        enableParallelism: command.enableParallelism,
+        ignoreMissingScript: command.ignoreMissingScript || false,
+        ignoreDependencyOrder: command.ignoreDependencyOrder || false,
+        incremental: command.incremental || false,
+        allowWarningsInSuccessfulBuild:
+          EnvironmentConfiguration.allowWarningsInSuccessfulBuild || !!command.allowWarningsInSuccessfulBuild,
+        logFilenameIdentifier: logFilenameIdentifier,
+        commandToRun: commandToRun,
+
+        watchForChanges: command.watchForChanges || false,
+        disableBuildCache: command.disableBuildCache || false
+      })
+    );
+  }
+
+  private _addGlobalScriptAction(
+    commandLineConfiguration: CommandLineConfiguration | undefined,
+    command: IGlobalCommandJson
+  ): void {
+    if (
+      command.name === RushConstants.buildCommandName ||
+      command.name === RushConstants.rebuildCommandName
+    ) {
+      throw new Error(
+        `${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
+          `the command kind "${RushConstants.globalCommandKind}". This command can only be designated as a command ` +
+          `kind "${RushConstants.bulkCommandKind}" or "${RushConstants.phasedCommandKind}".`
+      );
+    }
+
+    const sharedCommandOptions: IBaseScriptActionOptions = this._getSharedCommandActionOptions(
+      commandLineConfiguration,
+      command
+    );
+
+    this.addAction(
+      new GlobalScriptAction({
+        ...sharedCommandOptions,
+
+        shellCommand: command.shellCommand,
+        autoinstallerName: command.autoinstallerName
+      })
+    );
   }
 
   private _reportErrorAndSetExitCode(error: Error): void {
