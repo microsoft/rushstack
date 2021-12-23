@@ -1,17 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { ITaskSelectorBaseOptions, ProjectTaskSelectorBase } from './ProjectTaskSelectorBase';
+import { ITaskSelectorOptions, ProjectTaskSelector } from './ProjectTaskSelectorBase';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { TaskCollection } from './taskExecution/TaskCollection';
 import { ProjectTaskRunner } from './taskExecution/ProjectTaskRunner';
 
-export interface INonPhasedProjectTaskSelectorOptions extends ITaskSelectorBaseOptions {
-  logFilenameIdentifier: string;
-  commandToRun: string;
-}
+export interface INonPhasedProjectTaskSelectorOptions extends ITaskSelectorOptions {}
 
-export class NonPhasedProjectTaskSelector extends ProjectTaskSelectorBase<INonPhasedProjectTaskSelectorOptions> {
+export class NonPhasedProjectTaskSelector extends ProjectTaskSelector<INonPhasedProjectTaskSelectorOptions> {
   public registerTasks(): TaskCollection {
     const projects: ReadonlySet<RushConfigurationProject> = this._options.selection;
     const taskCollection: TaskCollection = new TaskCollection();
@@ -67,7 +64,7 @@ export class NonPhasedProjectTaskSelector extends ProjectTaskSelectorBase<INonPh
       return;
     }
 
-    const commandToRun: string | undefined = ProjectTaskSelectorBase.getScriptToRun(
+    const commandToRun: string | undefined = ProjectTaskSelector.getScriptToRun(
       project,
       this._options.commandToRun,
       this._options.customParameterValues

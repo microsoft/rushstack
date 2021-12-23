@@ -11,16 +11,80 @@ import {
   CommandJson,
   ICommandLineJson,
   IPhaseJson,
-  ParameterJson,
   IPhasedCommandJson,
-  IBulkCommandJson
+  IBulkCommandJson,
+  IGlobalCommandJson,
+  IFlagParameterJson,
+  IChoiceParameterJson,
+  IStringParameterJson
 } from './CommandLineJson';
+import { ProjectLogWritable } from '../logic/taskExecution/ProjectLogWritable';
 
 const EXPECTED_PHASE_NAME_PREFIX: '_phase:' = '_phase:';
 
 export interface IShellCommandTokenContext {
   packageFolder: string;
 }
+
+export interface IPhase extends IPhaseJson {
+  logFilenameIdentifier: string;
+}
+
+export interface ICommandWithParameters {
+  associatedParameters: Set<Parameter>;
+}
+export interface IPhasedCommand extends IPhasedCommandJson, ICommandWithParameters {
+  isSynthetic?: boolean;
+  watchForChanges?: boolean;
+  disableBuildCache?: boolean;
+}
+
+export interface IGlobalCommand extends IGlobalCommandJson, ICommandWithParameters {}
+
+export type Command = IGlobalCommand | IPhasedCommand;
+
+export type Parameter = IFlagParameterJson | IChoiceParameterJson | IStringParameterJson;
+
+const DEFAULT_BUILD_COMMAND_JSON: IBulkCommandJson = {
+  commandKind: RushConstants.bulkCommandKind,
+  name: RushConstants.buildCommandName,
+  summary: "Build all projects that haven't been built, or have changed since they were last built.",
+  description:
+    'This command is similar to "rush rebuild", except that "rush build" performs' +
+    ' an incremental build. In other words, it only builds projects whose source files have changed' +
+    ' since the last successful build. The analysis requires a Git working tree, and only considers' +
+    ' source files that are tracked by Git and whose path is under the project folder. (For more details' +
+    ' about this algorithm, see the documentation for the "package-deps-hash" NPM package.) The incremental' +
+    ' build state is tracked in a per-project folder called ".rush/temp" which should NOT be added to Git. The' +
+    ' build command is tracked by the "arguments" field in the "package-deps_build.json" file contained' +
+    ' therein; a full rebuild is forced whenever the command has changed (e.g. "--production" or not).',
+  enableParallelism: true,
+  ignoreMissingScript: false,
+  ignoreDependencyOrder: false,
+  incremental: true,
+  allowWarningsInSuccessfulBuild: false,
+  safeForSimultaneousRushProcesses: false
+};
+
+const DEFAULT_REBUILD_COMMAND_JSON: IBulkCommandJson = {
+  commandKind: RushConstants.bulkCommandKind,
+  name: RushConstants.rebuildCommandName,
+  summary: 'Clean and rebuild the entire set of projects.',
+  description:
+    'This command assumes that the package.json file for each project contains' +
+    ' a "scripts" entry for "npm run build" that performs a full clean build.' +
+    ' Rush invokes this script to build each project that is registered in rush.json.' +
+    ' Projects are built in parallel where possible, but always respecting the dependency' +
+    ' graph for locally linked projects.  The number of simultaneous processes will be' +
+    ' based on the number of machine cores unless overridden by the --parallelism flag.' +
+    ' (For an incremental build, see "rush build" instead of "rush rebuild".)',
+  enableParallelism: true,
+  ignoreMissingScript: false,
+  ignoreDependencyOrder: false,
+  incremental: false,
+  allowWarningsInSuccessfulBuild: false,
+  safeForSimultaneousRushProcesses: false
+};
 
 /**
  * Custom Commands and Options for the Rush Command Line
@@ -30,13 +94,9 @@ export class CommandLineConfiguration {
     path.join(__dirname, '../schemas/command-line.schema.json')
   );
 
-  public readonly commands: Map<string, CommandJson> = new Map<string, CommandJson>();
-  public readonly phases: Map<string, IPhaseJson> = new Map<string, IPhaseJson>();
-  public readonly parameters: ParameterJson[] = [];
-  private readonly _commandNames: Set<string> = new Set<string>([
-    RushConstants.buildCommandName,
-    RushConstants.rebuildCommandName
-  ]);
+  public readonly commands: Map<string, Command> = new Map<string, Command>();
+  public readonly phases: Map<string, IPhase> = new Map<string, IPhase>();
+  public readonly parameters: Parameter[] = [];
 
   /**
    * These path will be prepended to the PATH environment variable
@@ -48,252 +108,373 @@ export class CommandLineConfiguration {
    */
   private _shellCommandTokenContext: IShellCommandTokenContext | undefined;
 
-  public static readonly defaultBuildCommandJson: IBulkCommandJson = {
-    commandKind: RushConstants.bulkCommandKind,
-    name: RushConstants.buildCommandName,
-    summary: "Build all projects that haven't been built, or have changed since they were last built.",
-    description:
-      'This command is similar to "rush rebuild", except that "rush build" performs' +
-      ' an incremental build. In other words, it only builds projects whose source files have changed' +
-      ' since the last successful build. The analysis requires a Git working tree, and only considers' +
-      ' source files that are tracked by Git and whose path is under the project folder. (For more details' +
-      ' about this algorithm, see the documentation for the "package-deps-hash" NPM package.) The incremental' +
-      ' build state is tracked in a per-project folder called ".rush/temp" which should NOT be added to Git. The' +
-      ' build command is tracked by the "arguments" field in the "package-deps_build.json" file contained' +
-      ' therein; a full rebuild is forced whenever the command has changed (e.g. "--production" or not).',
-    enableParallelism: true,
-    ignoreMissingScript: false,
-    ignoreDependencyOrder: false,
-    incremental: true,
-    allowWarningsInSuccessfulBuild: false,
-    safeForSimultaneousRushProcesses: false
-  };
-
-  public static readonly defaultRebuildCommandJson: IBulkCommandJson = {
-    commandKind: RushConstants.bulkCommandKind,
-    name: RushConstants.rebuildCommandName,
-    summary: 'Clean and rebuild the entire set of projects',
-    description:
-      'This command assumes that the package.json file for each project contains' +
-      ' a "scripts" entry for "npm run build" that performs a full clean build.' +
-      ' Rush invokes this script to build each project that is registered in rush.json.' +
-      ' Projects are built in parallel where possible, but always respecting the dependency' +
-      ' graph for locally linked projects.  The number of simultaneous processes will be' +
-      ' based on the number of machine cores unless overridden by the --parallelism flag.' +
-      ' (For an incremental build, see "rush build" instead of "rush rebuild".)',
-    enableParallelism: true,
-    ignoreMissingScript: false,
-    ignoreDependencyOrder: false,
-    incremental: false,
-    allowWarningsInSuccessfulBuild: false,
-    safeForSimultaneousRushProcesses: false
-  };
-
   /**
    * Use CommandLineConfiguration.loadFromFile()
    *
    * @internal
    */
   public constructor(commandLineJson: ICommandLineJson | undefined) {
-    if (commandLineJson) {
-      if (commandLineJson.phases) {
-        for (const phase of commandLineJson.phases) {
-          if (this.phases.has(phase.name)) {
+    const commandsForPhase: Map<string, Set<IPhasedCommand>> = new Map();
+    const phaseCliques: Map<string, Set<string>> = new Map();
+    if (commandLineJson?.phases) {
+      for (const phase of commandLineJson.phases) {
+        if (this.phases.has(phase.name)) {
+          throw new Error(
+            `In ${RushConstants.commandLineFilename}, the phase "${phase.name}" is specified ` +
+              'more than once.'
+          );
+        }
+
+        if (phase.name.substring(0, EXPECTED_PHASE_NAME_PREFIX.length) !== EXPECTED_PHASE_NAME_PREFIX) {
+          throw new Error(
+            `In ${RushConstants.commandLineFilename}, the phase "${phase.name}"'s name ` +
+              `does not begin with the required prefix "${EXPECTED_PHASE_NAME_PREFIX}".`
+          );
+        }
+
+        if (phase.name.length <= EXPECTED_PHASE_NAME_PREFIX.length) {
+          throw new Error(
+            `In ${RushConstants.commandLineFilename}, the phase "${phase.name}"'s name ` +
+              `must have characters after "${EXPECTED_PHASE_NAME_PREFIX}"`
+          );
+        }
+
+        this.phases.set(phase.name, {
+          ...phase,
+          logFilenameIdentifier: ProjectLogWritable.normalizeNameForLogFilenameIdentifiers(phase.name)
+        });
+        commandsForPhase.set(phase.name, new Set<IPhasedCommand>());
+      }
+    }
+
+    for (const phase of this.phases.values()) {
+      if (phase.dependencies?.self) {
+        for (const dependencyName of phase.dependencies.self) {
+          const dependency: IPhase | undefined = this.phases.get(dependencyName);
+          if (!dependency) {
             throw new Error(
-              `In ${RushConstants.commandLineFilename}, the phase "${phase.name}" is specified ` +
-                'more than once.'
+              `In ${RushConstants.commandLineFilename}, in the phase "${phase.name as string}", the self ` +
+                `dependency phase "${dependencyName as string}" does not exist.`
             );
           }
-
-          if (phase.name.substring(0, EXPECTED_PHASE_NAME_PREFIX.length) !== EXPECTED_PHASE_NAME_PREFIX) {
-            throw new Error(
-              `In ${RushConstants.commandLineFilename}, the phase "${phase.name}"'s name ` +
-                `does not begin with the required prefix "${EXPECTED_PHASE_NAME_PREFIX}".`
-            );
-          }
-
-          if (phase.name.length <= EXPECTED_PHASE_NAME_PREFIX.length) {
-            throw new Error(
-              `In ${RushConstants.commandLineFilename}, the phase "${phase.name}"'s name ` +
-                `must have characters after "${EXPECTED_PHASE_NAME_PREFIX}"`
-            );
-          }
-
-          this.phases.set(phase.name, phase);
         }
       }
 
-      for (const phase of this.phases.values()) {
-        if (phase.dependencies?.self) {
-          for (const dependencyName of phase.dependencies.self) {
-            const dependency: IPhaseJson | undefined = this.phases.get(dependencyName);
-            if (!dependency) {
-              throw new Error(
-                `In ${RushConstants.commandLineFilename}, in the phase "${phase.name}", the self ` +
-                  `dependency phase "${dependencyName}" does not exist.`
-              );
-            }
-          }
-        }
-
-        if (phase.dependencies?.upstream) {
-          for (const dependency of phase.dependencies.upstream) {
-            if (!this.phases.has(dependency)) {
-              throw new Error(
-                `In ${RushConstants.commandLineFilename}, in the phase "${phase.name}", the upstream ` +
-                  `dependency phase "${dependency}" does not exist.`
-              );
-            }
-          }
-        }
-
-        this._checkForPhaseSelfCycles(phase);
-      }
-
-      if (commandLineJson.commands) {
-        for (const command of commandLineJson.commands) {
-          if (this.commands.has(command.name)) {
+      if (phase.dependencies?.upstream) {
+        for (const dependency of phase.dependencies.upstream) {
+          if (!this.phases.has(dependency)) {
             throw new Error(
-              `In ${RushConstants.commandLineFilename}, the command "${command.name}" is specified ` +
-                'more than once.'
+              `In ${RushConstants.commandLineFilename}, in the phase "${phase.name as string}", ` +
+                `the upstream dependency phase "${dependency as string}" does not exist.`
             );
           }
+        }
+      }
 
-          if (command.commandKind === 'phased') {
-            const phasedCommand: IPhasedCommandJson = command as IPhasedCommandJson;
-            for (const phase of phasedCommand.phases) {
-              if (!this.phases.has(phase)) {
+      this._checkForPhaseSelfCycles(phase);
+      const phaseClique: Set<string> = new Set<string>();
+      this._populatePhaseClique(phase.name, phaseClique);
+      phaseCliques.set(phase.name, phaseClique);
+    }
+
+    function populateCommandsForPhase(phaseName: string, command: IPhasedCommand): void {
+      const phaseClique: Set<string> = phaseCliques.get(phaseName)!;
+      for (const phaseCliqueIdentifier of phaseClique) {
+        commandsForPhase.get(phaseCliqueIdentifier)!.add(command);
+      }
+    }
+
+    // A map of bulk command names to their corresponding synthetic phase identifiers
+    const syntheticPhasesForTranslatedBulkCommands: Map<string, string> = new Map<string, string>();
+    const translateBulkCommandToPhasedCommand: (command: IBulkCommandJson) => IPhasedCommand = (
+      command: IBulkCommandJson
+    ) => {
+      const phaseName: string = command.name;
+      const phaseForBulkCommand: IPhase = {
+        name: phaseName,
+        dependencies: {
+          upstream: command.ignoreDependencyOrder ? undefined : [phaseName]
+        },
+        ignoreMissingScript: command.ignoreMissingScript,
+        allowWarningsOnSuccess: command.allowWarningsInSuccessfulBuild,
+        logFilenameIdentifier: ProjectLogWritable.normalizeNameForLogFilenameIdentifiers(command.name)
+      };
+      this.phases.set(phaseName, phaseForBulkCommand);
+      syntheticPhasesForTranslatedBulkCommands.set(command.name, phaseName);
+      const phaseClique: Set<string> = new Set<string>();
+      this._populatePhaseClique(phaseName, phaseClique);
+      phaseCliques.set(phaseName, phaseClique);
+
+      const translatedCommand: IPhasedCommand = {
+        ...command,
+        commandKind: 'phased',
+        disableBuildCache: true,
+        isSynthetic: true,
+        associatedParameters: new Set<Parameter>(),
+        phases: [phaseName]
+      };
+      commandsForPhase.set(phaseName, new Set<IPhasedCommand>());
+      populateCommandsForPhase(phaseName, translatedCommand);
+      return translatedCommand;
+    };
+
+    let buildCommandPhases: string[] | undefined;
+    if (commandLineJson?.commands) {
+      for (const command of commandLineJson.commands) {
+        if (this.commands.has(command.name)) {
+          throw new Error(
+            `In ${RushConstants.commandLineFilename}, the command "${command.name}" is specified ` +
+              'more than once.'
+          );
+        }
+
+        let normalizedCommand: Command;
+        switch (command.commandKind) {
+          case RushConstants.phasedCommandKind: {
+            normalizedCommand = {
+              ...command,
+              associatedParameters: new Set<Parameter>()
+            };
+
+            for (const phaseName of normalizedCommand.phases) {
+              if (!this.phases.has(phaseName)) {
                 throw new Error(
                   `In ${RushConstants.commandLineFilename}, in the "phases" property of the ` +
-                    `"${command.name}" command, the phase "${phase}" does not exist.`
+                    `"${normalizedCommand.name}" command, the phase "${phaseName as string}" does not exist.`
                 );
               }
+
+              populateCommandsForPhase(phaseName, normalizedCommand);
             }
 
-            if (phasedCommand.skipPhasesForCommand) {
-              for (const phase of phasedCommand.skipPhasesForCommand) {
-                if (!this.phases.has(phase)) {
+            if (normalizedCommand.skipPhasesForCommand) {
+              for (const phaseName of normalizedCommand.skipPhasesForCommand) {
+                if (!this.phases.has(phaseName)) {
                   throw new Error(
                     `In ${RushConstants.commandLineFilename}, in the "skipPhasesForCommand" property of the ` +
-                      `"${command.name}" command, the phase "${phase}" does not exist.`
+                      `"${normalizedCommand.name}" command, the phase ` +
+                      `"${phaseName as string}" does not exist.`
                   );
                 }
+
+                populateCommandsForPhase(phaseName, normalizedCommand);
               }
             }
+
+            break;
           }
 
-          this.commands.set(command.name, command);
-          this._commandNames.add(command.name);
+          case RushConstants.globalCommandKind: {
+            normalizedCommand = {
+              ...command,
+              associatedParameters: new Set<Parameter>()
+            };
+            break;
+          }
+
+          case RushConstants.bulkCommandKind: {
+            // Translate the bulk command into a phased command
+            normalizedCommand = translateBulkCommandToPhasedCommand(command);
+            break;
+          }
+        }
+
+        if (
+          normalizedCommand.name === RushConstants.buildCommandName ||
+          normalizedCommand.name === RushConstants.rebuildCommandName
+        ) {
+          if (normalizedCommand.commandKind === RushConstants.globalCommandKind) {
+            throw new Error(
+              `${RushConstants.commandLineFilename} defines a command "${normalizedCommand.name}" using ` +
+                `the command kind "${RushConstants.globalCommandKind}". This command can only be designated as a command ` +
+                `kind "${RushConstants.bulkCommandKind}" or "${RushConstants.phasedCommandKind}".`
+            );
+          } else if (command.safeForSimultaneousRushProcesses) {
+            throw new Error(
+              `${RushConstants.commandLineFilename} defines a command "${normalizedCommand.name}" using ` +
+                `"safeForSimultaneousRushProcesses=true". This configuration is not supported for "${normalizedCommand.name}".`
+            );
+          } else if (normalizedCommand.name === RushConstants.buildCommandName) {
+            // Record the build command phases in case we need to construct a synthetic "rebuild" command
+            buildCommandPhases = normalizedCommand.phases;
+          }
+        }
+
+        this.commands.set(normalizedCommand.name, normalizedCommand);
+      }
+    }
+
+    let buildCommand: Command | undefined = this.commands.get(RushConstants.buildCommandName);
+    if (!buildCommand) {
+      // If the build command was not specified in the config file, add the default build command
+      buildCommand = translateBulkCommandToPhasedCommand(DEFAULT_BUILD_COMMAND_JSON);
+      buildCommand.disableBuildCache = DEFAULT_BUILD_COMMAND_JSON.disableBuildCache;
+      buildCommandPhases = buildCommand.phases;
+      this.commands.set(buildCommand.name, buildCommand);
+    }
+
+    if (!this.commands.has(RushConstants.rebuildCommandName)) {
+      // If a rebuild command was not specified in the config file, add the default rebuild command
+      if (!buildCommandPhases) {
+        throw new Error(`Phases for the "${RushConstants.buildCommandName}" were not found.`);
+      }
+
+      const rebuildCommand: IPhasedCommand = {
+        ...DEFAULT_REBUILD_COMMAND_JSON,
+        commandKind: RushConstants.phasedCommandKind,
+        isSynthetic: true,
+        phases: buildCommandPhases,
+        disableBuildCache: DEFAULT_REBUILD_COMMAND_JSON.disableBuildCache,
+        associatedParameters: buildCommand.associatedParameters // rebuild should share build's parameters in this case
+      };
+      this.commands.set(rebuildCommand.name, rebuildCommand);
+    }
+
+    if (commandLineJson?.parameters) {
+      function populateCommandAssociatedParametersForPhase(phaseName: string, parameter: Parameter): void {
+        const commands: Set<Command> = commandsForPhase.get(phaseName)!;
+        for (const command of commands) {
+          command.associatedParameters.add(parameter);
         }
       }
 
-      if (commandLineJson.parameters) {
-        for (const parameter of commandLineJson.parameters) {
-          this.parameters.push(parameter);
+      for (const parameter of commandLineJson.parameters) {
+        const normalizedParameter: Parameter = {
+          ...parameter,
+          associatedPhases: parameter.associatedPhases ? [...parameter.associatedPhases] : [],
+          associatedCommands: parameter.associatedCommands ? [...parameter.associatedCommands] : []
+        };
 
-          let parameterHasAssociations: boolean = false;
+        this.parameters.push(normalizedParameter);
 
-          // Do some basic validation
-          switch (parameter.parameterKind) {
-            case 'flag': {
-              const addPhasesToCommandSet: Set<string> = new Set<string>();
+        let parameterHasAssociations: boolean = false;
 
-              if (parameter.addPhasesToCommand) {
-                for (const phase of parameter.addPhasesToCommand) {
-                  addPhasesToCommandSet.add(phase);
-                  if (!this.phases.has(phase)) {
-                    throw new Error(
-                      `${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}" ` +
-                        `that lists phase "${phase}" in its "addPhasesToCommand" property that does not exist.`
-                    );
-                  } else {
-                    parameterHasAssociations = true;
-                  }
+        // Do some basic validation
+        switch (normalizedParameter.parameterKind) {
+          case 'flag': {
+            const addPhasesToCommandSet: Set<string> = new Set<string>();
+
+            if (normalizedParameter.addPhasesToCommand) {
+              for (const phase of normalizedParameter.addPhasesToCommand) {
+                addPhasesToCommandSet.add(phase);
+                if (!this.phases.has(phase)) {
+                  throw new Error(
+                    `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
+                      `that lists phase "${phase as string}" in its "addPhasesToCommand" ` +
+                      'property that does not exist.'
+                  );
+                } else {
+                  populateCommandAssociatedParametersForPhase(phase, normalizedParameter);
+                  parameterHasAssociations = true;
                 }
               }
+            }
 
-              if (parameter.skipPhasesForCommand) {
-                for (const phase of parameter.skipPhasesForCommand) {
-                  if (!this.phases.has(phase)) {
-                    throw new Error(
-                      `${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}" ` +
-                        `that lists phase "${phase}" in its skipPhasesForCommand" property that does not exist.`
-                    );
-                  } else if (addPhasesToCommandSet.has(phase)) {
-                    throw new Error(
-                      `${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}" ` +
-                        `that lists phase "${phase}" in both its "addPhasesToCommand" and "skipPhasesForCommand" properties.`
-                    );
-                  } else {
-                    parameterHasAssociations = true;
-                  }
+            if (normalizedParameter.skipPhasesForCommand) {
+              for (const phase of normalizedParameter.skipPhasesForCommand) {
+                if (!this.phases.has(phase)) {
+                  throw new Error(
+                    `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
+                      `that lists phase "${phase as string}" in its skipPhasesForCommand" ` +
+                      'property that does not exist.'
+                  );
+                } else if (addPhasesToCommandSet.has(phase)) {
+                  throw new Error(
+                    `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
+                      `that lists phase "${phase as string}" in both its "addPhasesToCommand" ` +
+                      'and "skipPhasesForCommand" properties.'
+                  );
+                } else {
+                  populateCommandAssociatedParametersForPhase(phase, normalizedParameter);
+                  parameterHasAssociations = true;
                 }
               }
-
-              break;
             }
 
-            case 'choice': {
-              const alternativeNames: string[] = parameter.alternatives.map((x) => x.name);
-
-              if (parameter.defaultValue && alternativeNames.indexOf(parameter.defaultValue) < 0) {
-                throw new Error(
-                  `In ${RushConstants.commandLineFilename}, the parameter "${parameter.longName}",` +
-                    ` specifies a default value "${parameter.defaultValue}"` +
-                    ` which is not one of the defined alternatives: "${alternativeNames.toString()}"`
-                );
-              }
-
-              break;
-            }
+            break;
           }
 
-          for (const associatedCommand of parameter.associatedCommands || []) {
-            if (!this._commandNames.has(associatedCommand)) {
+          case 'choice': {
+            const alternativeNames: string[] = normalizedParameter.alternatives.map((x) => x.name);
+
+            if (
+              normalizedParameter.defaultValue &&
+              alternativeNames.indexOf(normalizedParameter.defaultValue) < 0
+            ) {
               throw new Error(
-                `${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}" ` +
-                  `that is associated with a command "${associatedCommand}" that does not exist or does ` +
+                `In ${RushConstants.commandLineFilename}, the parameter "${normalizedParameter.longName}",` +
+                  ` specifies a default value "${normalizedParameter.defaultValue}"` +
+                  ` which is not one of the defined alternatives: "${alternativeNames.toString()}"`
+              );
+            }
+
+            break;
+          }
+        }
+
+        if (normalizedParameter.associatedCommands) {
+          for (let i: number = 0; i < normalizedParameter.associatedCommands.length; i++) {
+            const associatedCommandName: string = normalizedParameter.associatedCommands[i];
+            const syntheticPhaseName: string | undefined =
+              syntheticPhasesForTranslatedBulkCommands.get(associatedCommandName);
+            if (syntheticPhaseName) {
+              // If this parameter was associated with a bulk command, change the association to
+              // the command's synthetic phase
+              normalizedParameter.associatedPhases!.push(syntheticPhaseName);
+              normalizedParameter.associatedCommands.splice(i, 1);
+              i--;
+              populateCommandAssociatedParametersForPhase(syntheticPhaseName, normalizedParameter);
+              parameterHasAssociations = true;
+            } else if (!this.commands.has(associatedCommandName)) {
+              throw new Error(
+                `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
+                  `that is associated with a command "${associatedCommandName}" that does not exist or does ` +
                   'not support custom parameters.'
               );
             } else {
+              const associatedCommand: Command = this.commands.get(associatedCommandName)!;
+              associatedCommand.associatedParameters.add(normalizedParameter);
               parameterHasAssociations = true;
             }
           }
+        }
 
-          for (const associatedPhase of parameter.associatedPhases || []) {
-            if (!this.phases.has(associatedPhase)) {
-              throw new Error(
-                `${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}" ` +
-                  `that is associated with a phase "${associatedPhase}" that does not exist.`
-              );
-            } else {
-              parameterHasAssociations = true;
-            }
-          }
-
-          if (!parameterHasAssociations) {
+        for (const associatedPhase of normalizedParameter.associatedPhases || []) {
+          if (!this.phases.has(associatedPhase)) {
             throw new Error(
-              `${RushConstants.commandLineFilename} defines a parameter "${parameter.longName}"` +
-                ` that lists no associated commands or phases.`
+              `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
+                `that is associated with a phase "${associatedPhase as string}" that does not exist.`
             );
+          } else {
+            populateCommandAssociatedParametersForPhase(associatedPhase, normalizedParameter);
+            parameterHasAssociations = true;
           }
+        }
+
+        if (!parameterHasAssociations) {
+          throw new Error(
+            `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}"` +
+              ` that lists no associated commands or phases.`
+          );
         }
       }
     }
   }
 
-  private _checkForPhaseSelfCycles(phase: IPhaseJson, checkedPhases: Set<string> = new Set<string>()): void {
+  private _checkForPhaseSelfCycles(phase: IPhase, checkedPhases: Set<string> = new Set<string>()): void {
     const dependencies: string[] | undefined = phase.dependencies?.self;
     if (dependencies) {
       for (const dependencyName of dependencies) {
         if (checkedPhases.has(dependencyName)) {
+          const dependencyNameForError: string =
+            typeof dependencyName === 'string' ? dependencyName : '<synthetic phase>';
           throw new Error(
             `In ${RushConstants.commandLineFilename}, there exists a cycle within the ` +
-              `set of ${dependencyName} dependencies: ${Array.from(checkedPhases).join(', ')}`
+              `set of ${dependencyNameForError} dependencies: ${Array.from(checkedPhases).join(', ')}`
           );
         } else {
           checkedPhases.add(dependencyName);
-          const dependency: IPhaseJson | undefined = this.phases.get(dependencyName);
+          const dependency: IPhase | undefined = this.phases.get(dependencyName);
           if (!dependency) {
             return; // Ignore, we check for this separately
           } else {
@@ -306,6 +487,26 @@ export class CommandLineConfiguration {
             } else {
               this._checkForPhaseSelfCycles(dependency, checkedPhases);
             }
+          }
+        }
+      }
+    }
+  }
+
+  private _populatePhaseClique(phaseName: string, clique: Set<string>): void {
+    if (!clique.has(phaseName)) {
+      clique.add(phaseName);
+      const phase: IPhase = this.phases.get(phaseName)!;
+      if (phase.dependencies) {
+        if (phase.dependencies.self) {
+          for (const dependencyName of phase.dependencies.self) {
+            this._populatePhaseClique(dependencyName, clique);
+          }
+        }
+
+        if (phase.dependencies.upstream) {
+          for (const dependencyName of phase.dependencies.upstream) {
+            this._populatePhaseClique(dependencyName, clique);
           }
         }
       }
@@ -334,12 +535,12 @@ export class CommandLineConfiguration {
             case RushConstants.bulkCommandKind: {
               switch (command.name) {
                 case RushConstants.buildCommandName: {
-                  commandDefaultDefinition = CommandLineConfiguration.defaultBuildCommandJson;
+                  commandDefaultDefinition = DEFAULT_BUILD_COMMAND_JSON;
                   break;
                 }
 
                 case RushConstants.rebuildCommandName: {
-                  commandDefaultDefinition = CommandLineConfiguration.defaultRebuildCommandJson;
+                  commandDefaultDefinition = DEFAULT_REBUILD_COMMAND_JSON;
                   break;
                 }
               }

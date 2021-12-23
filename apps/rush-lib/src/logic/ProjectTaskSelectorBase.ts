@@ -8,7 +8,12 @@ import { convertSlashesForWindows } from './taskExecution/ProjectTaskRunner';
 import { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';
 import { TaskCollection } from './taskExecution/TaskCollection';
 
-export interface ITaskSelectorBaseOptions {
+export interface ITaskSelectorOptions {
+  logFilenameIdentifier: string;
+  commandToRun: string;
+  ignoreMissingScript: boolean;
+  ignoreDependencyOrder: boolean;
+  allowWarningsInSuccessfulBuild?: boolean;
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration: BuildCacheConfiguration | undefined;
   selection: ReadonlySet<RushConfigurationProject>;
@@ -17,10 +22,7 @@ export interface ITaskSelectorBaseOptions {
   isQuietMode: boolean;
   isDebugMode: boolean;
   isIncrementalBuildAllowed: boolean;
-  ignoreMissingScript: boolean;
-  ignoreDependencyOrder: boolean;
   projectChangeAnalyzer?: ProjectChangeAnalyzer;
-  allowWarningsInSuccessfulBuild?: boolean;
 }
 
 /**
@@ -29,13 +31,11 @@ export interface ITaskSelectorBaseOptions {
  *  - creating a ProjectBuilder for each project that needs to be built
  *  - registering the necessary ProjectBuilders with the TaskExecutionManager, which actually orchestrates execution
  */
-export abstract class ProjectTaskSelectorBase<
-  TOptions extends ITaskSelectorBaseOptions = ITaskSelectorBaseOptions
-> {
-  protected _options: TOptions;
+export class ProjectTaskSelector {
+  protected _options: ITaskSelectorOptions;
   protected _projectChangeAnalyzer: ProjectChangeAnalyzer;
 
-  public constructor(options: TOptions) {
+  public constructor(options: ITaskSelectorOptions) {
     this._options = options;
 
     const { projectChangeAnalyzer = new ProjectChangeAnalyzer(options.rushConfiguration) } = options;
@@ -48,7 +48,7 @@ export abstract class ProjectTaskSelectorBase<
     commandToRun: string,
     customParameterValues: string[]
   ): string | undefined {
-    const script: string | undefined = ProjectTaskSelectorBase._getScriptCommand(rushProject, commandToRun);
+    const script: string | undefined = ProjectTaskSelector._getScriptCommand(rushProject, commandToRun);
 
     if (script === undefined) {
       return undefined;

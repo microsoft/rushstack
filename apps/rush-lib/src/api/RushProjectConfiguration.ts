@@ -293,13 +293,10 @@ export class RushProjectConfiguration {
     const duplicateCommandNames: Set<string> = new Set<string>();
     const invalidCommandNames: string[] = [];
     if (rushProjectJson.buildCacheOptions?.optionsForCommands) {
-      const commandNames: Set<string> = new Set<string>([
-        RushConstants.buildCommandName,
-        RushConstants.rebuildCommandName
-      ]);
+      const commandNames: Set<string> = new Set<string>();
       if (repoCommandLineConfiguration) {
         for (const [commandName, command] of repoCommandLineConfiguration.commands) {
-          if (command.commandKind === RushConstants.bulkCommandKind) {
+          if (command.commandKind === RushConstants.phasedCommandKind) {
             commandNames.add(commandName);
           }
         }

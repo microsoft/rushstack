@@ -78,11 +78,9 @@ function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
 export class ProjectTaskRunner extends BaseTaskRunner {
   public readonly name: string;
 
-  /**
-   * This property is mutated by TaskExecutionManager, so is not readonly
-   */
-  public isSkipAllowed: boolean;
+  public readonly isSkipAllowed: boolean;
   public hadEmptyScript: boolean = false;
+  public readonly warningsAreAllowed: boolean;
 
   private readonly _rushProject: RushConfigurationProject;
   private readonly _rushConfiguration: RushConfiguration;
@@ -92,7 +90,6 @@ export class ProjectTaskRunner extends BaseTaskRunner {
   private readonly _isCacheReadAllowed: boolean;
   private readonly _projectChangeAnalyzer: ProjectChangeAnalyzer;
   private readonly _packageDepsFilename: string;
-  private readonly _allowWarningsInSuccessfulBuild: boolean;
   private readonly _logFilenameIdentifier: string;
 
   /**
@@ -113,7 +110,7 @@ export class ProjectTaskRunner extends BaseTaskRunner {
     this.isSkipAllowed = options.isIncrementalBuildAllowed;
     this._projectChangeAnalyzer = options.projectChangeAnalyzer;
     this._packageDepsFilename = `package-deps_${this._commandToRun}.json`;
-    this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild || false;
+    this.warningsAreAllowed = options.allowWarningsInSuccessfulBuild || false;
     this._logFilenameIdentifier = options.logFilenameIdentifier;
   }
 
@@ -364,7 +361,7 @@ export class ProjectTaskRunner extends BaseTaskRunner {
       const taskIsSuccessful: boolean =
         status === TaskStatus.Success ||
         (status === TaskStatus.SuccessWithWarning &&
-          this._allowWarningsInSuccessfulBuild &&
+          this.warningsAreAllowed &&
           !!this._rushConfiguration.experimentsConfiguration.configuration
             .buildCacheWithAllowWarningsInSuccessfulBuild);
 

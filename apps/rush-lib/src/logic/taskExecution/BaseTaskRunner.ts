@@ -38,6 +38,12 @@ export abstract class BaseTaskRunner {
   public abstract hadEmptyScript: boolean;
 
   /**
+   * If set to true, a warning result should not make Rush exit with a nonzero
+   * exit code
+   */
+  public abstract warningsAreAllowed: boolean;
+
+  /**
    * Method to be executed for the task.
    */
   public abstract executeAsync(context: ITaskRunnerContext): Promise<TaskStatus>;

@@ -33,6 +33,19 @@ export abstract class BaseScriptAction extends BaseRushAction {
     this._commandLineConfiguration = options.commandLineConfiguration;
   }
 
+  /**
+   * @virtual
+   */
+  protected isParameterAssociatedWithThisCommand(parameterJson: ParameterJson): boolean {
+    for (const associatedCommand of parameterJson.associatedCommands || []) {
+      if (associatedCommand === this.actionName) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   protected defineScriptParameters(): void {
     if (!this._commandLineConfiguration) {
       return;
@@ -40,14 +53,7 @@ export abstract class BaseScriptAction extends BaseRushAction {
 
     // Find any parameters that are associated with this command
     for (const parameterJson of this._commandLineConfiguration.parameters) {
-      let associated: boolean = false;
-      for (const associatedCommand of parameterJson.associatedCommands || []) {
-        if (associatedCommand === this.actionName) {
-          associated = true;
-        }
-      }
-
-      if (associated) {
+      if (this.isParameterAssociatedWithThisCommand(parameterJson)) {
         let customParameter: CommandLineParameter | undefined;
 
         switch (parameterJson.parameterKind) {
@@ -86,9 +92,7 @@ export abstract class BaseScriptAction extends BaseRushAction {
             );
         }
 
-        if (customParameter) {
-          this.customParameters.push(customParameter);
-        }
+        this.customParameters.push(customParameter);
       }
     }
   }

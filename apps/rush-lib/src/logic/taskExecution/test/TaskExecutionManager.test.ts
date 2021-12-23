@@ -70,7 +70,6 @@ describe(TaskExecutionManager.name, () => {
             parallelism: 'tequila',
             changedProjectsOnly: false,
             destination: mockWritable,
-            allowWarningsInSuccessfulExecution: false,
             repoCommandLineConfiguration: undefined
           })
       ).toThrowErrorMatchingSnapshot();
@@ -85,7 +84,6 @@ describe(TaskExecutionManager.name, () => {
         parallelism: '1',
         changedProjectsOnly: false,
         destination: mockWritable,
-        allowWarningsInSuccessfulExecution: false,
         repoCommandLineConfiguration: undefined
       };
     });
@@ -143,7 +141,6 @@ describe(TaskExecutionManager.name, () => {
           parallelism: '1',
           changedProjectsOnly: false,
           destination: mockWritable,
-          allowWarningsInSuccessfulExecution: false,
           repoCommandLineConfiguration: undefined
         };
       });
@@ -179,7 +176,6 @@ describe(TaskExecutionManager.name, () => {
           parallelism: '1',
           changedProjectsOnly: false,
           destination: mockWritable,
-          allowWarningsInSuccessfulExecution: true,
           repoCommandLineConfiguration: undefined
         };
       });
@@ -187,11 +183,15 @@ describe(TaskExecutionManager.name, () => {
       it('Logs warnings correctly', async () => {
         taskExecutionManager = createTaskExecutionManager(
           taskExecutionManagerOptions,
-          new MockTaskRunner('success with warnings (success)', async (terminal: CollatedTerminal) => {
-            terminal.writeStdoutLine('Build step 1' + EOL);
-            terminal.writeStdoutLine('Warning: step 1 succeeded with warnings' + EOL);
-            return TaskStatus.SuccessWithWarning;
-          })
+          new MockTaskRunner(
+            'success with warnings (success)',
+            async (terminal: CollatedTerminal) => {
+              terminal.writeStdoutLine('Build step 1' + EOL);
+              terminal.writeStdoutLine('Warning: step 1 succeeded with warnings' + EOL);
+              return TaskStatus.SuccessWithWarning;
+            },
+            /* warningsAreAllowed */ true
+          )
         );
 
         await taskExecutionManager.executeAsync();

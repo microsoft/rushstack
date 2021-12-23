@@ -23,23 +23,28 @@ import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { Selection } from '../../logic/Selection';
 import { SelectionParameterSet } from '../SelectionParameterSet';
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
-import { ITaskSelectorBaseOptions, ProjectTaskSelectorBase } from '../../logic/ProjectTaskSelectorBase';
+import { ITaskSelectorOptions, ProjectTaskSelector } from '../../logic/ProjectTaskSelectorBase';
+import { IPhaseJson } from '../../api/CommandLineJson';
+
+export interface IPhase extends IPhaseJson {
+  logFilenameIdentifier: string;
+}
 
 /**
  * Constructor parameters for BulkScriptAction.
  */
 export interface IBaseBulkScriptActionOptions extends IBaseScriptActionOptions {
   enableParallelism: boolean;
-  ignoreMissingScript: boolean;
-  ignoreDependencyOrder: boolean;
   incremental: boolean;
-  allowWarningsInSuccessfulBuild: boolean;
   watchForChanges: boolean;
   disableBuildCache: boolean;
+
+  actionPhases: (string | symbol)[];
+  phases: Map<string | symbol, IPhaseJson>;
 }
 
 interface IExecuteInternalOptions {
-  taskSelectorOptions: ITaskSelectorBaseOptions;
+  taskSelectorOptions: ITaskSelectorOptions;
   taskExecutionManagerOptions: ITaskExecutionManagerOptions;
   stopwatch: Stopwatch;
   ignoreHooks?: boolean;
@@ -56,13 +61,15 @@ interface IExecuteInternalOptions {
  * and "rebuild" commands are also modeled as bulk commands, because they essentially just
  * execute scripts from package.json in the same as any custom command.
  */
-export abstract class BaseBulkScriptAction extends BaseScriptAction {
+export class BulkScriptAction extends BaseScriptAction {
   private readonly _enableParallelism: boolean;
   private readonly _ignoreMissingScript: boolean;
   private readonly _isIncrementalBuildAllowed: boolean;
   private readonly _watchForChanges: boolean;
   private readonly _disableBuildCache: boolean;
   private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
+  private readonly _logFilenameIdentifier: string;
+  private readonly _commandToRun: string;
   private readonly _ignoreDependencyOrder: boolean;
   private readonly _allowWarningsInSuccessfulBuild: boolean;
 
@@ -75,6 +82,8 @@ export abstract class BaseBulkScriptAction extends BaseScriptAction {
   public constructor(options: IBaseBulkScriptActionOptions) {
     super(options);
     this._enableParallelism = options.enableParallelism;
+    this._logFilenameIdentifier = options.logFilenameIdentifier;
+    this._commandToRun = options.commandToRun;
     this._ignoreMissingScript = options.ignoreMissingScript;
     this._isIncrementalBuildAllowed = options.incremental;
     this._ignoreDependencyOrder = options.ignoreDependencyOrder;
@@ -135,7 +144,7 @@ export abstract class BaseBulkScriptAction extends BaseScriptAction {
       return;
     }
 
-    const taskSelectorOptions: ITaskSelectorBaseOptions = {
+    const taskSelectorOptions: ITaskSelectorOptions = {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
       selection,
@@ -154,7 +163,6 @@ export abstract class BaseBulkScriptAction extends BaseScriptAction {
       debugMode: this.parser.isDebug,
       parallelism: parallelism,
       changedProjectsOnly: changedProjectsOnly,
-      allowWarningsInSuccessfulExecution: this._allowWarningsInSuccessfulBuild,
       repoCommandLineConfiguration: this._repoCommandLineConfiguration
     };
 
@@ -308,15 +316,11 @@ export abstract class BaseBulkScriptAction extends BaseScriptAction {
     this.defineScriptParameters();
   }
 
-  protected abstract _getTaskSelector(
-    baseTaskSelectorOptions: ITaskSelectorBaseOptions
-  ): ProjectTaskSelectorBase;
-
   /**
    * Runs a single invocation of the command
    */
   private async _runOnce(options: IExecuteInternalOptions): Promise<void> {
-    const taskSelector: ProjectTaskSelectorBase = this._getTaskSelector(options.taskSelectorOptions);
+    const taskSelector: ProjectTaskSelector = this._getTaskSelector(options.taskSelectorOptions);
 
     // Register all tasks with the task collection
 
