@@ -12,7 +12,7 @@ import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { ProjectTaskRunner } from '../../logic/taskExecution/ProjectTaskRunner';
 import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
-import { NonPhasedProjectTaskSelector } from '../../logic/NonPhasedProjectTaskSelector';
+import { ProjectTaskSelector } from '../../logic/ProjectTaskSelector';
 import { RushConstants } from '../../logic/RushConstants';
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 import { ProjectLogWritable } from '../../logic/taskExecution/ProjectLogWritable';
@@ -74,14 +74,10 @@ export class WriteBuildCacheAction extends BaseRushAction {
       );
 
     const command: string = this._command.value!;
-    const commandToRun: string | undefined = NonPhasedProjectTaskSelector.getScriptToRun(
-      project,
-      command,
-      []
-    );
+    const commandToRun: string | undefined = ProjectTaskSelector.getScriptToRun(project, command, []);
 
     // TODO: With phased commands, this will need to be updated
-    const taskName: string = NonPhasedProjectTaskSelector.getTaskNameForProject(project);
+    const taskName: string = ProjectTaskSelector.getPhaseTaskNameForProject(project);
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
     const projectBuilder: ProjectTaskRunner = new ProjectTaskRunner({
       rushProject: project,
