@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fix error in situation where rush is not located at git root",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
