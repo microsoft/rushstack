@@ -8,9 +8,9 @@ import {
   Import,
   IPackageJson,
   PackageJsonLookup,
-  Executable
+  Executable,
+  FileSystem
 } from '@rushstack/node-core-library';
-import findUp from 'find-up';
 
 const RUSH_LIB_NAME: string = '@microsoft/rush-lib';
 
@@ -71,9 +71,7 @@ if (rushLibModule === undefined) {
 // In this case, we can use install-run-rush.js to obtain the appropriate rush-lib version for the monorepo.
 if (rushLibModule === undefined) {
   try {
-    const rushJsonPath: string | undefined = findUp.sync('rush.json', {
-      cwd: process.cwd()
-    });
+    const rushJsonPath: string | undefined = findRushJsonLocation(process.cwd());
     if (!rushJsonPath) {
       throw new Error('Could not find rush.json');
     }
@@ -136,4 +134,27 @@ for (const property in rushLibModule) {
       }
     });
   }
+}
+
+
+function findRushJsonLocation(startingFolder: string): string | undefined {
+  let currentFolder: string = startingFolder;
+
+  // Look upwards at parent folders until we find a folder containing rush.json
+  for (let i: number = 0; i < 10; ++i) {
+    const rushJsonFilename: string = path.join(currentFolder, 'rush.json');
+
+    if (FileSystem.exists(rushJsonFilename)) {
+      return rushJsonFilename;
+    }
+
+    const parentFolder: string = path.dirname(currentFolder);
+    if (parentFolder === currentFolder) {
+      break;
+    }
+
+    currentFolder = parentFolder;
+  }
+
+  return undefined;
 }
