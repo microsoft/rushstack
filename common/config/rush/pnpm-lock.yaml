@@ -1186,6 +1186,7 @@ importers:
       '@typescript-eslint/parser': ~5.6.0
       '@typescript-eslint/typescript-estree': ~5.6.0
       eslint: ~8.3.0
+      eslint-plugin-promise: ~6.0.0
       eslint-plugin-react: ~7.27.1
       eslint-plugin-tsdoc: ~0.2.14
       typescript: ~4.5.2
@@ -1198,6 +1199,7 @@ importers:
       '@typescript-eslint/experimental-utils': 5.6.0_eslint@8.3.0+typescript@4.5.2
       '@typescript-eslint/parser': 5.6.0_eslint@8.3.0+typescript@4.5.2
       '@typescript-eslint/typescript-estree': 5.6.0_typescript@4.5.2
+      eslint-plugin-promise: 6.0.0_eslint@8.3.0
       eslint-plugin-react: 7.27.1_eslint@8.3.0
       eslint-plugin-tsdoc: 0.2.14
     devDependencies:
@@ -10017,6 +10019,15 @@ packages:
       optionator: 0.8.3
     optionalDependencies:
       source-map: 0.6.1
+
+  /eslint-plugin-promise/6.0.0_eslint@8.3.0:
+    resolution: {integrity: sha512-7GPezalm5Bfi/E22PnQxDWH2iW9GTvAlUNTztemeHb6c1BniSyoeTrM87JkC0wYdi6aQrZX9p2qEiAno8aTcbw==}
+    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    peerDependencies:
+      eslint: ^7.0.0 || ^8.0.0
+    dependencies:
+      eslint: 8.3.0
+    dev: false
 
   /eslint-plugin-react/7.27.1_eslint@7.30.0:
     resolution: {integrity: sha512-meyunDjMMYeWr/4EBLTV1op3iSG3mjT/pz5gti38UzfM4OPpNc2m0t2xvKCOMU5D6FSdd34BIMFOvQbW+i8GAA==}
