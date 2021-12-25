@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "(BREAKING CHANGE) Remove the \"write-build-cache\" action.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
