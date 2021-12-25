@@ -70,7 +70,7 @@ describe(TaskExecutionManager.name, () => {
             parallelism: 'tequila',
             changedProjectsOnly: false,
             destination: mockWritable,
-            repoCommandLineConfiguration: undefined
+            repoCommandLineConfiguration: undefined!
           })
       ).toThrowErrorMatchingSnapshot();
     });
@@ -84,7 +84,7 @@ describe(TaskExecutionManager.name, () => {
         parallelism: '1',
         changedProjectsOnly: false,
         destination: mockWritable,
-        repoCommandLineConfiguration: undefined
+        repoCommandLineConfiguration: undefined!
       };
     });
 
@@ -141,7 +141,7 @@ describe(TaskExecutionManager.name, () => {
           parallelism: '1',
           changedProjectsOnly: false,
           destination: mockWritable,
-          repoCommandLineConfiguration: undefined
+          repoCommandLineConfiguration: undefined!
         };
       });
 
@@ -176,7 +176,7 @@ describe(TaskExecutionManager.name, () => {
           parallelism: '1',
           changedProjectsOnly: false,
           destination: mockWritable,
-          repoCommandLineConfiguration: undefined
+          repoCommandLineConfiguration: undefined!
         };
       });
 

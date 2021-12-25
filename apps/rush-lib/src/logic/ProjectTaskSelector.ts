@@ -8,7 +8,6 @@ import { convertSlashesForWindows, ProjectTaskRunner } from './taskExecution/Pro
 import { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';
 import { TaskCollection } from './taskExecution/TaskCollection';
 import { IPhase } from '../api/CommandLineConfiguration';
-import { EnvironmentConfiguration } from '..';
 
 export interface IProjectTaskSelectorOptions {
   rushConfiguration: RushConfiguration;
@@ -35,7 +34,6 @@ export class ProjectTaskSelector {
   private readonly _projectChangeAnalyzer: ProjectChangeAnalyzer;
   private readonly _phasesToRun: ReadonlyArray<string>;
   private readonly _phases: Map<string, IPhase>;
-  private readonly _overrideAllowWarnings: boolean = EnvironmentConfiguration.allowWarningsInSuccessfulBuild;
 
   public constructor(options: IProjectTaskSelectorOptions) {
     this._options = options;
@@ -70,54 +68,11 @@ export class ProjectTaskSelector {
 
     // Register all tasks
     for (const phaseName of this._phasesToRun) {
-      const phase: IPhase | undefined = this._phases.get(phaseName);
-      if (!phase) {
-        throw new Error(`Phase ${phaseName} not found`);
-      }
-
+      const phase: IPhase = this._getPhaseByName(phaseName);
       for (const rushProject of projects) {
         this._registerProjectPhaseTask(rushProject, phase, taskCollection);
       }
     }
-
-    // TODO: Expand phase dependencies
-
-    // if (!this._options.ignoreDependencyOrder) {
-    //   const dependencyMap: Map<RushConfigurationProject, Set<string>> = new Map();
-
-    //   // Generate the filtered dependency graph for selected projects
-    //   function getDependencyTaskNames(project: RushConfigurationProject): Set<string> {
-    //     const cached: Set<string> | undefined = dependencyMap.get(project);
-    //     if (cached) {
-    //       return cached;
-    //     }
-
-    //     const dependencyTaskNames: Set<string> = new Set();
-    //     dependencyMap.set(project, dependencyTaskNames);
-
-    //     for (const dep of project.dependencyProjects) {
-    //       if (projects.has(dep)) {
-    //         // Add direct relationships for projects in the set
-    //         dependencyTaskNames.add(ProjectTaskSelector.getPhaseTaskNameForProject(dep));
-    //       } else {
-    //         // Add indirect relationships for projects not in the set
-    //         for (const indirectDep of getDependencyTaskNames(dep)) {
-    //           dependencyTaskNames.add(indirectDep);
-    //         }
-    //       }
-    //     }
-
-    //     return dependencyTaskNames;
-    //   }
-
-    //   // Add ordering relationships for each dependency
-    //   for (const project of projects) {
-    //     taskCollection.addDependencies(
-    //       ProjectTaskSelector.getPhaseTaskNameForProject(project),
-    //       getDependencyTaskNames(project)
-    //     );
-    //   }
-    // }
 
     return taskCollection;
   }
@@ -126,10 +81,10 @@ export class ProjectTaskSelector {
     project: RushConfigurationProject,
     phase: IPhase,
     taskCollection: TaskCollection
-  ): void {
-    const taskName: string = ProjectTaskSelector.getPhaseTaskNameForProject(project, phase);
+  ): string {
+    const taskName: string = phase.getDisplayNameForProject(project);
     if (taskCollection.hasTask(taskName)) {
-      return;
+      return taskName;
     }
 
     const commandToRun: string | undefined = ProjectTaskSelector.getScriptToRun(
@@ -150,21 +105,53 @@ export class ProjectTaskSelector {
         rushConfiguration: this._options.rushConfiguration,
         buildCacheConfiguration: this._options.buildCacheConfiguration,
         commandToRun: commandToRun || '',
-        commandName: phase.name,
         isIncrementalBuildAllowed: this._options.isIncrementalBuildAllowed,
         projectChangeAnalyzer: this._projectChangeAnalyzer,
-        allowWarningsInSuccessfulBuild: this._overrideAllowWarnings || phase.allowWarningsOnSuccess,
-        logFilenameIdentifier: phase.logFilenameIdentifier
+        phase
       })
     );
+
+    const dependencyTasks: Set<string> = new Set();
+    if (phase.dependencies?.self) {
+      for (const dependencyPhaseName of phase.dependencies.self) {
+        const dependencyPhase: IPhase = this._getPhaseByName(dependencyPhaseName);
+        const dependencyTaskName: string = this._registerProjectPhaseTask(
+          project,
+          dependencyPhase,
+          taskCollection
+        );
+
+        dependencyTasks.add(dependencyTaskName);
+      }
+    }
+
+    if (phase.dependencies?.upstream) {
+      for (const dependencyPhaseName of phase.dependencies.upstream) {
+        const dependencyPhase: IPhase = this._getPhaseByName(dependencyPhaseName);
+        for (const dependencyProject of project.dependencyProjects) {
+          const dependencyTaskName: string = this._registerProjectPhaseTask(
+            dependencyProject,
+            dependencyPhase,
+            taskCollection
+          );
+
+          dependencyTasks.add(dependencyTaskName);
+        }
+      }
+    }
+
+    taskCollection.addDependencies(taskName, dependencyTasks);
+
+    return taskName;
   }
 
-  /**
-   * A helper method to determine the task name of a ProjectBuilder. Used when the task
-   * name is required before a task is created.
-   */
-  public static getPhaseTaskNameForProject(rushProject: RushConfigurationProject, phase: IPhase): string {
-    return `${rushProject.packageName} (${phase.name})`;
+  private _getPhaseByName(phaseName: string): IPhase {
+    const phase: IPhase | undefined = this._phases.get(phaseName);
+    if (!phase) {
+      throw new Error(`Phase ${phaseName} not found`);
+    }
+
+    return phase;
   }
 
   private static _getScriptCommand(

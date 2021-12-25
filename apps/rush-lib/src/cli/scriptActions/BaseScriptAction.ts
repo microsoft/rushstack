@@ -11,7 +11,7 @@ import type { ParameterJson } from '../../api/CommandLineJson';
  * Constructor parameters for BaseScriptAction
  */
 export interface IBaseScriptActionOptions<TCommand extends Command> extends IBaseRushActionOptions {
-  commandLineConfiguration: CommandLineConfiguration | undefined;
+  commandLineConfiguration: CommandLineConfiguration;
   command: TCommand;
 }
 

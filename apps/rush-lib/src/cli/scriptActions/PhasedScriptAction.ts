@@ -60,7 +60,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
   private readonly _isIncrementalBuildAllowed: boolean;
   private readonly _watchForChanges: boolean;
   private readonly _disableBuildCache: boolean;
-  private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
+  private readonly _repoCommandLineConfiguration: CommandLineConfiguration;
   private readonly _actionPhases: string[];
   private readonly _phases: Map<string, IPhase>;
 

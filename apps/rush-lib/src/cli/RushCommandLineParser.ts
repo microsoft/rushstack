@@ -235,27 +235,22 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   private _populateScriptActions(): void {
-    let commandLineConfiguration: CommandLineConfiguration | undefined = undefined;
-
     // If there is not a rush.json file, we still want "build" and "rebuild" to appear in the
     // command-line help
+    let commandLineConfigFilePath: string | undefined;
     if (this.rushConfiguration) {
-      const commandLineConfigFilePath: string = path.join(
+      commandLineConfigFilePath = path.join(
         this.rushConfiguration.commonRushConfigFolder,
         RushConstants.commandLineFilename
       );
-
-      commandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFilePath);
     }
 
+    const commandLineConfiguration: CommandLineConfiguration =
+      CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFilePath);
     this._addCommandLineConfigActions(commandLineConfiguration);
   }
 
-  private _addCommandLineConfigActions(commandLineConfiguration?: CommandLineConfiguration): void {
-    if (!commandLineConfiguration) {
-      return;
-    }
-
+  private _addCommandLineConfigActions(commandLineConfiguration: CommandLineConfiguration): void {
     // Register each custom command
     for (const command of commandLineConfiguration.commands.values()) {
       this._addCommandLineConfigAction(commandLineConfiguration, command);
@@ -305,7 +300,7 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   private _getSharedCommandActionOptions<TCommand extends Command>(
-    commandLineConfiguration: CommandLineConfiguration | undefined,
+    commandLineConfiguration: CommandLineConfiguration,
     command: TCommand
   ): IBaseScriptActionOptions<TCommand> {
     return {
@@ -321,7 +316,7 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   private _addGlobalScriptAction(
-    commandLineConfiguration: CommandLineConfiguration | undefined,
+    commandLineConfiguration: CommandLineConfiguration,
     command: IGlobalCommand
   ): void {
     if (

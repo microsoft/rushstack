@@ -24,20 +24,21 @@ import {
 } from '@rushstack/terminal';
 import { CollatedTerminal } from '@rushstack/stream-collator';
 
-import { RushConfiguration } from '../../api/RushConfiguration';
-import { RushConfigurationProject } from '../../api/RushConfigurationProject';
+import type { RushConfiguration } from '../../api/RushConfiguration';
+import type { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { Utilities, UNINITIALIZED } from '../../utilities/Utilities';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
-import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
+import type { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import { BaseTaskRunner, ITaskRunnerContext } from './BaseTaskRunner';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
-import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
+import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { ICacheOptionsForCommand, RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { CollatedTerminalProvider } from '../../utilities/CollatedTerminalProvider';
-import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
+import type { CommandLineConfiguration, IPhase } from '../../api/CommandLineConfiguration';
 import { RushConstants } from '../RushConstants';
+import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 
 export interface IProjectDeps {
   files: { [filePath: string]: string };
@@ -49,12 +50,11 @@ export interface IProjectTaskRunnerOptions {
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration: BuildCacheConfiguration | undefined;
   commandToRun: string;
-  commandName: string;
   isIncrementalBuildAllowed: boolean;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
   allowWarningsInSuccessfulBuild?: boolean;
   taskName: string;
-  logFilenameIdentifier: string;
+  phase: IPhase;
 }
 
 function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
@@ -83,6 +83,7 @@ export class ProjectTaskRunner extends BaseTaskRunner {
   public readonly warningsAreAllowed: boolean;
 
   private readonly _rushProject: RushConfigurationProject;
+  private readonly _phase: IPhase;
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _buildCacheConfiguration: BuildCacheConfiguration | undefined;
   private readonly _commandName: string;
@@ -100,18 +101,23 @@ export class ProjectTaskRunner extends BaseTaskRunner {
 
   public constructor(options: IProjectTaskRunnerOptions) {
     super();
+    const phase: IPhase = options.phase;
     this.name = options.taskName;
     this._rushProject = options.rushProject;
+    this._phase = phase;
     this._rushConfiguration = options.rushConfiguration;
     this._buildCacheConfiguration = options.buildCacheConfiguration;
-    this._commandName = options.commandName;
+    this._commandName = phase.name;
     this._commandToRun = options.commandToRun;
     this._isCacheReadAllowed = options.isIncrementalBuildAllowed;
     this.isSkipAllowed = options.isIncrementalBuildAllowed;
     this._projectChangeAnalyzer = options.projectChangeAnalyzer;
-    this._packageDepsFilename = `package-deps_${this._commandToRun}.json`;
-    this.warningsAreAllowed = options.allowWarningsInSuccessfulBuild || false;
-    this._logFilenameIdentifier = options.logFilenameIdentifier;
+    this._packageDepsFilename = `package-deps_${phase.logFilenameIdentifier}.json`;
+    this.warningsAreAllowed =
+      EnvironmentConfiguration.allowWarningsInSuccessfulBuild ||
+      options.allowWarningsInSuccessfulBuild ||
+      false;
+    this._logFilenameIdentifier = phase.logFilenameIdentifier;
   }
 
   public async executeAsync(context: ITaskRunnerContext): Promise<TaskStatus> {
@@ -394,7 +400,7 @@ export class ProjectTaskRunner extends BaseTaskRunner {
   private async _tryGetProjectBuildCacheAsync(
     terminal: ITerminal,
     trackedProjectFiles: string[] | undefined,
-    commandLineConfiguration: CommandLineConfiguration | undefined
+    commandLineConfiguration: CommandLineConfiguration
   ): Promise<ProjectBuildCache | undefined> {
     if (this._projectBuildCache === UNINITIALIZED) {
       this._projectBuildCache = undefined;
@@ -417,8 +423,11 @@ export class ProjectTaskRunner extends BaseTaskRunner {
                 `Caching has been disabled for this project's "${this._commandName}" command.`
               );
             } else {
+              const projectOutputFolderNames: ReadonlyArray<string> =
+                projectConfiguration.projectOutputFolderNamesForPhases.get(this._phase.name) || [];
               this._projectBuildCache = await ProjectBuildCache.tryGetProjectBuildCache({
                 projectConfiguration,
+                projectOutputFolderNames,
                 buildCacheConfiguration: this._buildCacheConfiguration,
                 terminal,
                 command: this._commandToRun,

@@ -58,7 +58,7 @@ Positional arguments:
     upload              Uploads the built files to the server
     build               Build all projects that haven't been built, or have 
                         changed since they were last built.
-    rebuild             Clean and rebuild the entire set of projects
+    rebuild             Clean and rebuild the entire set of projects.
     tab-complete        Provides tab completion.
 
 Optional arguments:

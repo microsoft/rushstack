@@ -22,6 +22,7 @@ import { Utilities } from '../../utilities/Utilities';
 export interface IProjectBuildCacheOptions {
   buildCacheConfiguration: BuildCacheConfiguration;
   projectConfiguration: RushProjectConfiguration;
+  projectOutputFolderNames: ReadonlyArray<string>;
   command: string;
   trackedProjectFiles: string[] | undefined;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
@@ -52,7 +53,7 @@ export class ProjectBuildCache {
     this._localBuildCacheProvider = options.buildCacheConfiguration.localCacheProvider;
     this._cloudBuildCacheProvider = options.buildCacheConfiguration.cloudCacheProvider;
     this._buildCacheEnabled = options.buildCacheConfiguration.buildCacheEnabled;
-    this._projectOutputFolderNames = options.projectConfiguration.projectOutputFolderNames || [];
+    this._projectOutputFolderNames = options.projectOutputFolderNames || [];
     this._cacheId = cacheId;
   }
 
@@ -67,12 +68,19 @@ export class ProjectBuildCache {
   public static async tryGetProjectBuildCache(
     options: IProjectBuildCacheOptions
   ): Promise<ProjectBuildCache | undefined> {
-    const { terminal, projectConfiguration, trackedProjectFiles } = options;
+    const { terminal, projectConfiguration, projectOutputFolderNames, trackedProjectFiles } = options;
     if (!trackedProjectFiles) {
       return undefined;
     }
 
-    if (!ProjectBuildCache._validateProject(terminal, projectConfiguration, trackedProjectFiles)) {
+    if (
+      !ProjectBuildCache._validateProject(
+        terminal,
+        projectConfiguration,
+        projectOutputFolderNames,
+        trackedProjectFiles
+      )
+    ) {
       return undefined;
     }
 
@@ -83,14 +91,15 @@ export class ProjectBuildCache {
   private static _validateProject(
     terminal: ITerminal,
     projectConfiguration: RushProjectConfiguration,
+    projectOutputFolderNames: ReadonlyArray<string>,
     trackedProjectFiles: string[]
   ): boolean {
     const normalizedProjectRelativeFolder: string = Path.convertToSlashes(
       projectConfiguration.project.projectRelativeFolder
     );
     const outputFolders: string[] = [];
-    if (projectConfiguration.projectOutputFolderNames) {
-      for (const outputFolderName of projectConfiguration.projectOutputFolderNames) {
+    if (projectOutputFolderNames) {
+      for (const outputFolderName of projectOutputFolderNames) {
         outputFolders.push(`${normalizedProjectRelativeFolder}/${outputFolderName}/`);
       }
     }
@@ -470,9 +479,7 @@ export class ProjectBuildCache {
 
     const sortedProjectStates: string[] = projectStates.sort();
     const hash: crypto.Hash = crypto.createHash('sha1');
-    const serializedOutputFolders: string = JSON.stringify(
-      options.projectConfiguration.projectOutputFolderNames
-    );
+    const serializedOutputFolders: string = JSON.stringify(options.projectOutputFolderNames);
     hash.update(serializedOutputFolders);
     hash.update(RushConstants.hashDelimiter);
     hash.update(options.command);

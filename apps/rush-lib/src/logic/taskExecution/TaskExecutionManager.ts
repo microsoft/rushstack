@@ -25,7 +25,7 @@ export interface ITaskExecutionManagerOptions {
   debugMode: boolean;
   parallelism: string | undefined;
   changedProjectsOnly: boolean;
-  repoCommandLineConfiguration: CommandLineConfiguration | undefined;
+  repoCommandLineConfiguration: CommandLineConfiguration;
   destination?: TerminalWritable;
 }
 
@@ -47,7 +47,7 @@ export class TaskExecutionManager {
   private readonly _quietMode: boolean;
   private readonly _debugMode: boolean;
   private readonly _parallelism: number;
-  private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
+  private readonly _repoCommandLineConfiguration: CommandLineConfiguration;
   private _hasAnyFailures: boolean;
   private _hasAnyNonAllowedWarnings: boolean;
   private _currentActiveTasks!: number;

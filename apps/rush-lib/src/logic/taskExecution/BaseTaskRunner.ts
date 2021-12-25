@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { StdioSummarizer } from '@rushstack/terminal';
-import { CollatedWriter } from '@rushstack/stream-collator';
+import type { StdioSummarizer } from '@rushstack/terminal';
+import type { CollatedWriter } from '@rushstack/stream-collator';
 
-import { TaskStatus } from './TaskStatus';
-import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
+import type { TaskStatus } from './TaskStatus';
+import type { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 
 export interface ITaskRunnerContext {
-  repoCommandLineConfiguration: CommandLineConfiguration | undefined;
+  repoCommandLineConfiguration: CommandLineConfiguration;
   collatedWriter: CollatedWriter;
   stdioSummarizer: StdioSummarizer;
   quietMode: boolean;

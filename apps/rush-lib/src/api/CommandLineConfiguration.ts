@@ -7,7 +7,7 @@ import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
 import { RushConstants } from '../logic/RushConstants';
 
-import {
+import type {
   CommandJson,
   ICommandLineJson,
   IPhaseJson,
@@ -19,6 +19,7 @@ import {
   IStringParameterJson
 } from './CommandLineJson';
 import { ProjectLogWritable } from '../logic/taskExecution/ProjectLogWritable';
+import type { RushConfigurationProject } from './RushConfigurationProject';
 
 const EXPECTED_PHASE_NAME_PREFIX: '_phase:' = '_phase:';
 
@@ -28,6 +29,7 @@ export interface IShellCommandTokenContext {
 
 export interface IPhase extends IPhaseJson {
   logFilenameIdentifier: string;
+  getDisplayNameForProject(rushProject: RushConfigurationProject): string;
 }
 
 export interface ICommandWithParameters {
@@ -139,9 +141,12 @@ export class CommandLineConfiguration {
           );
         }
 
+        const phaseNameWithoutPrefix: string = phase.name.substring(EXPECTED_PHASE_NAME_PREFIX.length);
         this.phases.set(phase.name, {
           ...phase,
-          logFilenameIdentifier: ProjectLogWritable.normalizeNameForLogFilenameIdentifiers(phase.name)
+          logFilenameIdentifier: ProjectLogWritable.normalizeNameForLogFilenameIdentifiers(phase.name),
+          getDisplayNameForProject: (rushProject: RushConfigurationProject) =>
+            `${rushProject.packageName} (${phaseNameWithoutPrefix})`
         });
         commandsForPhase.set(phase.name, new Set<IPhasedCommand>());
       }
@@ -186,9 +191,10 @@ export class CommandLineConfiguration {
 
     // A map of bulk command names to their corresponding synthetic phase identifiers
     const syntheticPhasesForTranslatedBulkCommands: Map<string, string> = new Map<string, string>();
-    const translateBulkCommandToPhasedCommand: (command: IBulkCommandJson) => IPhasedCommand = (
-      command: IBulkCommandJson
-    ) => {
+    const translateBulkCommandToPhasedCommand: (
+      command: IBulkCommandJson,
+      isBuildCommand: boolean
+    ) => IPhasedCommand = (command: IBulkCommandJson, isBuildCommand: boolean) => {
       const phaseName: string = command.name;
       const phaseForBulkCommand: IPhase = {
         name: phaseName,
@@ -197,7 +203,9 @@ export class CommandLineConfiguration {
         },
         ignoreMissingScript: command.ignoreMissingScript,
         allowWarningsOnSuccess: command.allowWarningsInSuccessfulBuild,
-        logFilenameIdentifier: ProjectLogWritable.normalizeNameForLogFilenameIdentifiers(command.name)
+        logFilenameIdentifier: ProjectLogWritable.normalizeNameForLogFilenameIdentifiers(command.name),
+        // Because this is a synthetic phase, just use the project name because there aren't any other phases
+        getDisplayNameForProject: (rushProject: RushConfigurationProject) => rushProject.packageName
       };
       this.phases.set(phaseName, phaseForBulkCommand);
       syntheticPhasesForTranslatedBulkCommands.set(command.name, phaseName);
@@ -274,7 +282,7 @@ export class CommandLineConfiguration {
 
           case RushConstants.bulkCommandKind: {
             // Translate the bulk command into a phased command
-            normalizedCommand = translateBulkCommandToPhasedCommand(command);
+            normalizedCommand = translateBulkCommandToPhasedCommand(command, /* isBuildCommand */ false);
             break;
           }
         }
@@ -307,7 +315,10 @@ export class CommandLineConfiguration {
     let buildCommand: Command | undefined = this.commands.get(RushConstants.buildCommandName);
     if (!buildCommand) {
       // If the build command was not specified in the config file, add the default build command
-      buildCommand = translateBulkCommandToPhasedCommand(DEFAULT_BUILD_COMMAND_JSON);
+      buildCommand = translateBulkCommandToPhasedCommand(
+        DEFAULT_BUILD_COMMAND_JSON,
+        /* isBuildCommand */ true
+      );
       buildCommand.disableBuildCache = DEFAULT_BUILD_COMMAND_JSON.disableBuildCache;
       buildCommandPhases = buildCommand.phases;
       this.commands.set(buildCommand.name, buildCommand);
@@ -518,9 +529,9 @@ export class CommandLineConfiguration {
    * settings.  If the file does not exist, then an empty default instance is returned.
    * If the file contains errors, then an exception is thrown.
    */
-  public static loadFromFileOrDefault(jsonFilename: string): CommandLineConfiguration {
+  public static loadFromFileOrDefault(jsonFilename?: string): CommandLineConfiguration {
     let commandLineJson: ICommandLineJson | undefined = undefined;
-    if (FileSystem.exists(jsonFilename)) {
+    if (jsonFilename && FileSystem.exists(jsonFilename)) {
       commandLineJson = JsonFile.load(jsonFilename);
 
       // merge commands specified in command-line.json and default (re)build settings
