@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "[rush-lib] increase maxBuffer to 10mb when executeCommand",
+      "comment": "Fix an issue that occurs when running a command with a selection argument with a Git ref (like `--from git:main`) in a repo with a pnpm lockfile larger than 1MB.",
       "type": "none"
     }
   ],
