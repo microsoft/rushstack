@@ -219,14 +219,16 @@ export class InitAction extends BaseConfiglessRushAction {
   // A single-line section may appear inside a block section, in which case it will get
   // commented twice.
   private _copyTemplateFile(sourcePath: string, destinationPath: string): void {
+    const destinationFileExists: boolean = FileSystem.exists(destinationPath);
+
     if (!this._overwriteParameter.value) {
-      if (FileSystem.exists(destinationPath)) {
+      if (destinationFileExists) {
         console.log(colors.yellow('Not overwriting already existing file: ') + destinationPath);
         return;
       }
     }
 
-    if (FileSystem.exists(destinationPath)) {
+    if (destinationFileExists) {
       console.log(colors.yellow(`Overwriting: ${destinationPath}`));
     } else {
       console.log(`Generating: ${destinationPath}`);
@@ -341,7 +343,7 @@ export class InitAction extends BaseConfiglessRushAction {
     }
 
     // Write the output
-    FileSystem.writeFile(destinationPath, outputLines.join('\r\n'), {
+    FileSystem.writeFile(destinationPath, outputLines.join('\n'), {
       ensureFolderExists: true
     });
   }
