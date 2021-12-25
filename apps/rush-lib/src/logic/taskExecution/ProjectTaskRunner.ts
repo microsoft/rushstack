@@ -125,19 +125,6 @@ export class ProjectTaskRunner extends BaseTaskRunner {
     }
   }
 
-  public async tryWriteCacheEntryAsync(
-    terminal: ITerminal,
-    trackedFilePaths: string[] | undefined,
-    repoCommandLineConfiguration: CommandLineConfiguration | undefined
-  ): Promise<boolean | undefined> {
-    const projectBuildCache: ProjectBuildCache | undefined = await this._getProjectBuildCacheAsync(
-      terminal,
-      trackedFilePaths,
-      repoCommandLineConfiguration
-    );
-    return projectBuildCache?.trySetCacheEntryAsync(terminal);
-  }
-
   private async _executeTaskAsync(context: ITaskRunnerContext): Promise<TaskStatus> {
     // TERMINAL PIPELINE:
     //
@@ -266,7 +253,7 @@ export class ProjectTaskRunner extends BaseTaskRunner {
       //
       let buildCacheReadAttempted: boolean = false;
       if (this._isCacheReadAllowed) {
-        const projectBuildCache: ProjectBuildCache | undefined = await this._getProjectBuildCacheAsync(
+        const projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync(
           terminal,
           trackedFiles,
           context.repoCommandLineConfiguration
@@ -373,11 +360,13 @@ export class ProjectTaskRunner extends BaseTaskRunner {
 
         // If the command is successful and we can calculate project hash, we will write a
         // new cache entry even if incremental execution is not allowed.
-        const setCacheEntryPromise: Promise<boolean | undefined> = this.tryWriteCacheEntryAsync(
+        const projectBuildCache: ProjectBuildCache | undefined = await this._tryGetProjectBuildCacheAsync(
           terminal,
           trackedFiles,
           context.repoCommandLineConfiguration
         );
+        const setCacheEntryPromise: Promise<boolean> | undefined =
+          projectBuildCache?.trySetCacheEntryAsync(terminal);
 
         const [, cacheWriteSuccess] = await Promise.all([writeProjectStatePromise, setCacheEntryPromise]);
 
@@ -402,7 +391,7 @@ export class ProjectTaskRunner extends BaseTaskRunner {
     }
   }
 
-  private async _getProjectBuildCacheAsync(
+  private async _tryGetProjectBuildCacheAsync(
     terminal: ITerminal,
     trackedProjectFiles: string[] | undefined,
     commandLineConfiguration: CommandLineConfiguration | undefined
