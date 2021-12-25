@@ -127,6 +127,9 @@ for (const property in rushLibModule) {
   }
 }
 
+/**
+ * Require `@microsoft/rush-lib` under the specified folder path.
+ */
 function requireRushLibUnderFolderPath(folderPath: string): RushLibModuleType {
   const rushLibModulePath: string = Import.resolveModule({
     modulePath: RUSH_LIB_NAME,
@@ -136,6 +139,12 @@ function requireRushLibUnderFolderPath(folderPath: string): RushLibModuleType {
   return require(rushLibModulePath);
 }
 
+/**
+ * Find the rush.json location and return the path, or undefined if a rush.json can't be found.
+ *
+ * @privateRemarks
+ * Keep this in sync with `RushConfiguration.tryFindRushJsonLocation`.
+ */
 function findRushJsonLocation(startingFolder: string): string | undefined {
   let currentFolder: string = startingFolder;
 
