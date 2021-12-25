@@ -45,12 +45,7 @@ if (rushLibModule === undefined) {
       ) {
         // Try to resolve rush-lib from the caller's folder
         try {
-          const rushLibModulePath: string = Import.resolveModule({
-            modulePath: RUSH_LIB_NAME,
-            baseFolderPath: callerPackageFolder
-          });
-
-          rushLibModule = require(rushLibModulePath);
+          rushLibModule = requireRushLibUnderFolderPath(callerPackageFolder);
         } catch (error) {
           // If we fail to resolve it, ignore the error
         }
@@ -58,7 +53,6 @@ if (rushLibModule === undefined) {
         // If two different libraries invoke `rush-sdk`, and one of them provides "rush-lib"
         // then the first version to be loaded wins.  We do not support side-by-side instances of "rush-lib".
         if (rushLibModule !== undefined) {
-          // TODO: When we implement Scenario 3, we should also add some diagnostic state
           // to track which scenario is active and how it got initialized.
           global.___rush___rushLibModule = rushLibModule;
         }
@@ -86,28 +80,25 @@ if (rushLibModule === undefined) {
     );
 
     try {
-      const rushLibModulePath: string = Import.resolveModule({
-        modulePath: RUSH_LIB_NAME,
-        baseFolderPath: installRunNodeModuleFolder
-      });
-
-      rushLibModule = require(rushLibModulePath);
+      // First, try to load the version of "rush-lib" that was installed by install-run-rush.js
+      rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
     } catch (e) {
       try {
-        // retry after install-run-rush
         const installAndRunRushJSPath: string = path.join(monorepoRoot, 'common/scripts/install-run-rush.js');
         Executable.spawnSync('node', [installAndRunRushJSPath, '--help'], {
           stdio: 'ignore'
         });
-        const rushLibModulePath: string = Import.resolveModule({
-          modulePath: RUSH_LIB_NAME,
-          baseFolderPath: installRunNodeModuleFolder
-        });
 
-        rushLibModule = require(rushLibModulePath);
+        // Retry to load "rush-lib" after install-run-rush run
+        rushLibModule = requireRushLibUnderFolderPath(installRunNodeModuleFolder);
       } catch (e) {
         throw new Error(`Could not load @microsoft/rush-lib from ${installRunNodeModuleFolder}`);
       }
+    }
+
+    if (rushLibModule !== undefined) {
+      // to track which scenario is active and how it got initialized.
+      global.___rush___rushLibModule = rushLibModule;
     }
   } catch (e) {
     // no-catch
@@ -136,6 +127,14 @@ for (const property in rushLibModule) {
   }
 }
 
+function requireRushLibUnderFolderPath(folderPath: string): RushLibModuleType {
+  const rushLibModulePath: string = Import.resolveModule({
+    modulePath: RUSH_LIB_NAME,
+    baseFolderPath: folderPath
+  });
+
+  return require(rushLibModulePath);
+}
 
 function findRushJsonLocation(startingFolder: string): string | undefined {
   let currentFolder: string = startingFolder;
