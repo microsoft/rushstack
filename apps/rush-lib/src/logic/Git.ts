@@ -172,7 +172,10 @@ export class Git {
     }
 
     if (hooksResult.result) {
-      const absoluteHooksPath: string = path.resolve(repoInfo.root, hooksResult.result);
+      const absoluteHooksPath: string = path.resolve(
+        this._rushConfiguration.rushJsonFolder,
+        hooksResult.result
+      );
       return absoluteHooksPath === defaultHooksPath;
     }
 
