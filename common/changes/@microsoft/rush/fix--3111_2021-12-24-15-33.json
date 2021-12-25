@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Fix error in situation where rush is not located at git root",
+      "comment": "Fix an issue with installing Git hooks that occurs when the rush.json folder isn't at the repo's root.",
       "type": "none"
     }
   ],
