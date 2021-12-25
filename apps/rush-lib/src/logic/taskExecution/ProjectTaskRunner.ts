@@ -432,7 +432,8 @@ export class ProjectTaskRunner extends BaseTaskRunner {
                 terminal,
                 command: this._commandToRun,
                 trackedProjectFiles: trackedProjectFiles,
-                projectChangeAnalyzer: this._projectChangeAnalyzer
+                projectChangeAnalyzer: this._projectChangeAnalyzer,
+                phaseName: this._phase.name
               });
             }
           }

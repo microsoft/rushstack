@@ -18,7 +18,6 @@ import type {
   IChoiceParameterJson,
   IStringParameterJson
 } from './CommandLineJson';
-import { ProjectLogWritable } from '../logic/taskExecution/ProjectLogWritable';
 import type { RushConfigurationProject } from './RushConfigurationProject';
 
 const EXPECTED_PHASE_NAME_PREFIX: '_phase:' = '_phase:';
@@ -101,14 +100,14 @@ export class CommandLineConfiguration {
   public readonly parameters: Parameter[] = [];
 
   /**
+   * shellCommand from plugin custom command line configuration needs to be expanded with tokens
+   */
+  public shellCommandTokenContext: IShellCommandTokenContext | undefined;
+
+  /**
    * These path will be prepended to the PATH environment variable
    */
   private _additionalPathFolders: string[] = [];
-
-  /**
-   * shellCommand from plugin custom command line configuration needs to be expanded with tokens
-   */
-  private _shellCommandTokenContext: IShellCommandTokenContext | undefined;
 
   /**
    * Use CommandLineConfiguration.loadFromFile()
@@ -144,7 +143,7 @@ export class CommandLineConfiguration {
         const phaseNameWithoutPrefix: string = phase.name.substring(EXPECTED_PHASE_NAME_PREFIX.length);
         this.phases.set(phase.name, {
           ...phase,
-          logFilenameIdentifier: ProjectLogWritable.normalizeNameForLogFilenameIdentifiers(phase.name),
+          logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(phase.name),
           getDisplayNameForProject: (rushProject: RushConfigurationProject) =>
             `${rushProject.packageName} (${phaseNameWithoutPrefix})`
         });
@@ -203,7 +202,7 @@ export class CommandLineConfiguration {
         },
         ignoreMissingScript: command.ignoreMissingScript,
         allowWarningsOnSuccess: command.allowWarningsInSuccessfulBuild,
-        logFilenameIdentifier: ProjectLogWritable.normalizeNameForLogFilenameIdentifiers(command.name),
+        logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(command.name),
         // Because this is a synthetic phase, just use the project name because there aren't any other phases
         getDisplayNameForProject: (rushProject: RushConfigurationProject) => rushProject.packageName
       };
@@ -581,11 +580,7 @@ export class CommandLineConfiguration {
     this._additionalPathFolders.unshift(pathFolder);
   }
 
-  public get shellCommandTokenContext(): Readonly<IShellCommandTokenContext> | undefined {
-    return this._shellCommandTokenContext;
-  }
-
-  public set shellCommandTokenContext(tokenContext: IShellCommandTokenContext | undefined) {
-    this._shellCommandTokenContext = tokenContext;
+  private _normalizeNameForLogFilenameIdentifiers(name: string): string {
+    return name.replace(/:/g, '_'); // Replace colons with underscores to be filesystem-safe
   }
 }

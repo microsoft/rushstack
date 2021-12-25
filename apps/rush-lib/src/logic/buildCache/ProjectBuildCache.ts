@@ -27,6 +27,7 @@ export interface IProjectBuildCacheOptions {
   trackedProjectFiles: string[] | undefined;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
   terminal: ITerminal;
+  phaseName: string;
 }
 
 interface IPathsToCache {
@@ -493,7 +494,8 @@ export class ProjectBuildCache {
 
     return options.buildCacheConfiguration.getCacheEntryId({
       projectName: options.projectConfiguration.project.packageName,
-      projectStateHash
+      projectStateHash,
+      phaseName: options.phaseName
     });
   }
 }

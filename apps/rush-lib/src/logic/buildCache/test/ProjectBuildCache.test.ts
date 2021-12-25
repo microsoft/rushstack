@@ -46,7 +46,8 @@ describe('ProjectBuildCache', () => {
       command: 'build',
       trackedProjectFiles: options.hasOwnProperty('trackedProjectFiles') ? options.trackedProjectFiles : [],
       projectChangeAnalyzer,
-      terminal
+      terminal,
+      phaseName: 'build'
     });
 
     return subject;
