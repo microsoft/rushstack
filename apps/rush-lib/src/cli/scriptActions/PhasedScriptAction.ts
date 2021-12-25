@@ -23,6 +23,7 @@ import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { SelectionParameterSet } from '../SelectionParameterSet';
 import { CommandLineConfiguration, IPhase, IPhasedCommand } from '../../api/CommandLineConfiguration';
 import { IProjectTaskSelectorOptions, ProjectTaskSelector } from '../../logic/ProjectTaskSelector';
+import { IFlagParameterJson } from '../../api/CommandLineJson';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -131,6 +132,26 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       return;
     }
 
+    const phasesToRun: Set<string> = new Set(this._actionPhases);
+    for (const parameter of this.commandLineConfiguration.parameters) {
+      if (parameter.parameterKind === 'flag') {
+        if (this.getFlagParameter(parameter.longName)!.value) {
+          const flagParameter: IFlagParameterJson = parameter as IFlagParameterJson;
+          if (flagParameter.addPhasesToCommand) {
+            for (const phase of flagParameter.addPhasesToCommand) {
+              phasesToRun.add(phase);
+            }
+          }
+
+          if (flagParameter.skipPhasesForCommand) {
+            for (const phase of flagParameter.skipPhasesForCommand) {
+              phasesToRun.delete(phase);
+            }
+          }
+        }
+      }
+    }
+
     const taskSelectorOptions: IProjectTaskSelectorOptions = {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
@@ -139,7 +160,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       isQuietMode: isQuietMode,
       isDebugMode: isDebugMode,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
-      phasesToRun: this._actionPhases,
+      phasesToRun: phasesToRun,
       phases: this._phases
     };
 

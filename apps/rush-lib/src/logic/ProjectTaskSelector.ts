@@ -19,7 +19,7 @@ export interface IProjectTaskSelectorOptions {
   isIncrementalBuildAllowed: boolean;
   projectChangeAnalyzer?: ProjectChangeAnalyzer;
 
-  phasesToRun: ReadonlyArray<string>;
+  phasesToRun: Iterable<string>;
   phases: Map<string, IPhase>;
 }
 
@@ -32,7 +32,7 @@ export interface IProjectTaskSelectorOptions {
 export class ProjectTaskSelector {
   private readonly _options: IProjectTaskSelectorOptions;
   private readonly _projectChangeAnalyzer: ProjectChangeAnalyzer;
-  private readonly _phasesToRun: ReadonlyArray<string>;
+  private readonly _phasesToRun: Iterable<string>;
   private readonly _phases: Map<string, IPhase>;
 
   public constructor(options: IProjectTaskSelectorOptions) {

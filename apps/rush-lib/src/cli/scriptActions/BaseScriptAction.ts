@@ -26,7 +26,7 @@ export interface IBaseScriptActionOptions<TCommand extends Command> extends IBas
  * The two subclasses are BulkScriptAction and GlobalScriptAction.
  */
 export abstract class BaseScriptAction<TCommand extends Command> extends BaseRushAction {
-  protected readonly commandLineConfiguration: CommandLineConfiguration | undefined;
+  protected readonly commandLineConfiguration: CommandLineConfiguration;
   protected readonly customParameters: CommandLineParameter[] = [];
   protected readonly command: TCommand;
 

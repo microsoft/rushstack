@@ -27,6 +27,7 @@ export interface IShellCommandTokenContext {
 }
 
 export interface IPhase extends IPhaseJson {
+  isSynthetic?: boolean;
   logFilenameIdentifier: string;
   getDisplayNameForProject(rushProject: RushConfigurationProject): string;
 }
@@ -157,8 +158,8 @@ export class CommandLineConfiguration {
           const dependency: IPhase | undefined = this.phases.get(dependencyName);
           if (!dependency) {
             throw new Error(
-              `In ${RushConstants.commandLineFilename}, in the phase "${phase.name as string}", the self ` +
-                `dependency phase "${dependencyName as string}" does not exist.`
+              `In ${RushConstants.commandLineFilename}, in the phase "${phase.name}", the self ` +
+                `dependency phase "${dependencyName}" does not exist.`
             );
           }
         }
@@ -168,8 +169,8 @@ export class CommandLineConfiguration {
         for (const dependency of phase.dependencies.upstream) {
           if (!this.phases.has(dependency)) {
             throw new Error(
-              `In ${RushConstants.commandLineFilename}, in the phase "${phase.name as string}", ` +
-                `the upstream dependency phase "${dependency as string}" does not exist.`
+              `In ${RushConstants.commandLineFilename}, in the phase "${phase.name}", ` +
+                `the upstream dependency phase "${dependency}" does not exist.`
             );
           }
         }
@@ -197,6 +198,7 @@ export class CommandLineConfiguration {
       const phaseName: string = command.name;
       const phaseForBulkCommand: IPhase = {
         name: phaseName,
+        isSynthetic: true,
         dependencies: {
           upstream: command.ignoreDependencyOrder ? undefined : [phaseName]
         },
@@ -247,7 +249,7 @@ export class CommandLineConfiguration {
               if (!this.phases.has(phaseName)) {
                 throw new Error(
                   `In ${RushConstants.commandLineFilename}, in the "phases" property of the ` +
-                    `"${normalizedCommand.name}" command, the phase "${phaseName as string}" does not exist.`
+                    `"${normalizedCommand.name}" command, the phase "${phaseName}" does not exist.`
                 );
               }
 
@@ -260,7 +262,7 @@ export class CommandLineConfiguration {
                   throw new Error(
                     `In ${RushConstants.commandLineFilename}, in the "skipPhasesForCommand" property of the ` +
                       `"${normalizedCommand.name}" command, the phase ` +
-                      `"${phaseName as string}" does not exist.`
+                      `"${phaseName}" does not exist.`
                   );
                 }
 
@@ -365,37 +367,39 @@ export class CommandLineConfiguration {
             const addPhasesToCommandSet: Set<string> = new Set<string>();
 
             if (normalizedParameter.addPhasesToCommand) {
-              for (const phase of normalizedParameter.addPhasesToCommand) {
-                addPhasesToCommandSet.add(phase);
-                if (!this.phases.has(phase)) {
+              for (const phaseName of normalizedParameter.addPhasesToCommand) {
+                addPhasesToCommandSet.add(phaseName);
+                const phase: IPhase | undefined = this.phases.get(phaseName);
+                if (!phase || phase.isSynthetic) {
                   throw new Error(
                     `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
-                      `that lists phase "${phase as string}" in its "addPhasesToCommand" ` +
+                      `that lists phase "${phaseName}" in its "addPhasesToCommand" ` +
                       'property that does not exist.'
                   );
                 } else {
-                  populateCommandAssociatedParametersForPhase(phase, normalizedParameter);
+                  populateCommandAssociatedParametersForPhase(phaseName, normalizedParameter);
                   parameterHasAssociations = true;
                 }
               }
             }
 
             if (normalizedParameter.skipPhasesForCommand) {
-              for (const phase of normalizedParameter.skipPhasesForCommand) {
-                if (!this.phases.has(phase)) {
+              for (const phaseName of normalizedParameter.skipPhasesForCommand) {
+                const phase: IPhase | undefined = this.phases.get(phaseName);
+                if (!phase || phase.isSynthetic) {
                   throw new Error(
                     `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
-                      `that lists phase "${phase as string}" in its skipPhasesForCommand" ` +
+                      `that lists phase "${phaseName}" in its skipPhasesForCommand" ` +
                       'property that does not exist.'
                   );
-                } else if (addPhasesToCommandSet.has(phase)) {
+                } else if (addPhasesToCommandSet.has(phaseName)) {
                   throw new Error(
                     `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
-                      `that lists phase "${phase as string}" in both its "addPhasesToCommand" ` +
+                      `that lists phase "${phaseName}" in both its "addPhasesToCommand" ` +
                       'and "skipPhasesForCommand" properties.'
                   );
                 } else {
-                  populateCommandAssociatedParametersForPhase(phase, normalizedParameter);
+                  populateCommandAssociatedParametersForPhase(phaseName, normalizedParameter);
                   parameterHasAssociations = true;
                 }
               }
@@ -453,7 +457,7 @@ export class CommandLineConfiguration {
           if (!this.phases.has(associatedPhase)) {
             throw new Error(
               `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
-                `that is associated with a phase "${associatedPhase as string}" that does not exist.`
+                `that is associated with a phase "${associatedPhase}" that does not exist.`
             );
           } else {
             populateCommandAssociatedParametersForPhase(associatedPhase, normalizedParameter);
