@@ -185,7 +185,7 @@ Object {
 `;
 
 exports[`ConfigurationFile error cases Throws an error when the file isn't valid JSON 1`] = `
-[Error: In config file "<project root>/src/test/errorCases/invalidJson/config.json": SyntaxError: Unexpected token '\\n' at 2:19
+[Error: In config file "<project root>/src/test/errorCases/invalidJson/config.json": SyntaxError: Unexpected token '}' at 2:19
   "filePaths": "A
                  ^]
 `;
