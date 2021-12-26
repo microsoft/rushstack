@@ -880,6 +880,9 @@ export class RushConfiguration {
 
   /**
    * Find the rush.json location and return the path, or undefined if a rush.json can't be found.
+   *
+   * @privateRemarks
+   * Keep this in sync with `findRushJsonLocation` in `rush-sdk/src/index.ts`.
    */
   public static tryFindRushJsonLocation(options?: ITryFindRushJsonLocationOptions): string | undefined {
     const optionsIn: ITryFindRushJsonLocationOptions = options || {};
