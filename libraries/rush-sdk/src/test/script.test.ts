@@ -2,9 +2,9 @@ import * as path from 'path';
 import { Executable } from '@rushstack/node-core-library';
 
 const rushSdkPath: string = path.join(__dirname, '../../lib/index.js');
-const sandboxRepoPath: string = path.join(__dirname, './sandbox');
-const mockPackageFolder: string = path.join(sandboxRepoPath, 'mock-package');
-const mockRushLibPath: string = path.join(__dirname, './fixture/mock-rush-lib.js');
+const sandboxRepoPath: string = `${__dirname}/sandbox`;
+const mockPackageFolder: string = `${sandboxRepoPath}/mock-package`;
+const mockRushLibPath: string = `${__dirname}/fixture/mock-rush-lib.js`;
 
 const coreLibPath: string = require.resolve('@rushstack/node-core-library');
 
