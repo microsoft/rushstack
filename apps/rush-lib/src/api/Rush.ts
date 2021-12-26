@@ -28,6 +28,13 @@ export interface ILaunchOptions {
    * with this version of Rush, so we shouldn't print a similar error.
    */
   alreadyReportedNodeTooNewError?: boolean;
+
+  /**
+   * If the built-in plugins are dependencies of a different package than `rush-lib`,
+   * the path to that package should be specified here. This is useful for development
+   * of the built-in plugins.
+   */
+  builtInPluginsProjectPath?: string;
 }
 
 /**
@@ -66,7 +73,8 @@ export class Rush {
 
     Rush._assignRushInvokedFolder();
     const parser: RushCommandLineParser = new RushCommandLineParser({
-      alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
+      alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError,
+      builtInPluginsProjectPath: options.builtInPluginsProjectPath
     });
     parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
   }

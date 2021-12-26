@@ -1,7 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, InternalError, IPackageJson, ITerminal } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  InternalError,
+  IPackageJson,
+  ITerminal,
+  PackageJsonLookup
+} from '@rushstack/node-core-library';
 import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
 
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -12,10 +18,16 @@ import { RemotePluginLoader } from './PluginLoader/RemotePluginLoader';
 import { RushSession } from './RushSession';
 import { PluginLoaderBase } from './PluginLoader/PluginLoaderBase';
 
+export type PluginLoader = BuiltInPluginLoader | RemotePluginLoader;
+
 export interface IPluginManagerOptions {
   terminal: ITerminal;
   rushConfiguration: RushConfiguration;
   rushSession: RushSession;
+  /**
+   * {@see ILaunchOptions.builtInPluginsProjectPath}
+   */
+  builtInPluginsProjectPath?: string;
 }
 
 export interface ICustomCommandLineConfigurationInfo {
@@ -52,14 +64,25 @@ export class PluginManager {
     // "publishOnlyDependencies" which gets moved into "dependencies" during publishing.
     const builtInPluginConfigurations: IRushPluginConfigurationBase[] = [];
 
-    const ownPackageJson: IPackageJson = require('../../package.json');
-    if (ownPackageJson.dependencies!['@rushstack/rush-amazon-s3-build-cache-plugin']) {
+    const builtInPluginsProjectRootPath: string | undefined =
+      PackageJsonLookup.instance.tryGetPackageFolderFor(options.builtInPluginsProjectPath || __dirname);
+    if (!builtInPluginsProjectRootPath) {
+      throw new InternalError(
+        'Unable to find package.json for built-in plugins. This is probably because Rush was invoked ' +
+          'in an unexpected way.'
+      );
+    }
+
+    const builtInPluginsProjectPackageJson: IPackageJson = PackageJsonLookup.instance.loadPackageJson(
+      `${builtInPluginsProjectRootPath}/package.json`
+    );
+    if (builtInPluginsProjectPackageJson.dependencies!['@rushstack/rush-amazon-s3-build-cache-plugin']) {
       builtInPluginConfigurations.push({
         packageName: '@rushstack/rush-amazon-s3-build-cache-plugin',
         pluginName: 'rush-amazon-s3-build-cache-plugin'
       });
     }
-    if (ownPackageJson.dependencies!['@rushstack/rush-azure-storage-build-cache-plugin']) {
+    if (builtInPluginsProjectPackageJson.dependencies!['@rushstack/rush-azure-storage-build-cache-plugin']) {
       builtInPluginConfigurations.push({
         packageName: '@rushstack/rush-azure-storage-build-cache-plugin',
         pluginName: 'rush-azure-storage-build-cache-plugin'
@@ -70,7 +93,8 @@ export class PluginManager {
       return new BuiltInPluginLoader({
         pluginConfiguration,
         rushConfiguration: this._rushConfiguration,
-        terminal: this._terminal
+        terminal: this._terminal,
+        builtInPluginsProjectRootPath
       });
     });
 
@@ -185,18 +209,13 @@ export class PluginManager {
     }
   }
 
-  private _getUnassociatedPluginLoaders<T extends RemotePluginLoader | BuiltInPluginLoader>(
-    pluginLoaders: T[]
-  ): T[] {
+  private _getUnassociatedPluginLoaders<T extends PluginLoader>(pluginLoaders: T[]): T[] {
     return pluginLoaders.filter((pluginLoader) => {
       return !pluginLoader.pluginManifest.associatedCommands;
     });
   }
 
-  private _getPluginLoadersForCommand<T extends RemotePluginLoader | BuiltInPluginLoader>(
-    commandName: string,
-    pluginLoaders: T[]
-  ): T[] {
+  private _getPluginLoadersForCommand<T extends PluginLoader>(commandName: string, pluginLoaders: T[]): T[] {
     return pluginLoaders.filter((pluginLoader) => {
       return pluginLoader.pluginManifest.associatedCommands?.includes(commandName);
     });

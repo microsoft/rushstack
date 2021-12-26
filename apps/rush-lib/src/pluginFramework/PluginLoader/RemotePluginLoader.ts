@@ -2,17 +2,19 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, JsonFile, JsonObject, JsonSchema, ITerminal } from '@rushstack/node-core-library';
-import { RushConfiguration } from '../../api/RushConfiguration';
+import { FileSystem, JsonFile, JsonObject, JsonSchema } from '@rushstack/node-core-library';
 import { IRushPluginConfiguration } from '../../api/RushPluginsConfiguration';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import { RushConstants } from '../../logic/RushConstants';
-import { IRushPluginManifest, IRushPluginManifestJson, PluginLoaderBase } from './PluginLoaderBase';
+import {
+  IPluginLoaderBaseOptions,
+  IRushPluginManifest,
+  IRushPluginManifestJson,
+  PluginLoaderBase
+} from './PluginLoaderBase';
 
-export interface IRemotePluginLoaderOptions {
+export interface IRemotePluginLoaderOptions extends IPluginLoaderBaseOptions {
   pluginConfiguration: IRushPluginConfiguration;
-  rushConfiguration: RushConfiguration;
-  terminal: ITerminal;
 }
 
 /**
@@ -21,13 +23,12 @@ export interface IRemotePluginLoaderOptions {
 export class RemotePluginLoader extends PluginLoaderBase {
   private _autoinstaller: Autoinstaller;
 
-  public constructor({ pluginConfiguration, rushConfiguration, terminal }: IRemotePluginLoaderOptions) {
-    super({
-      pluginConfiguration,
-      rushConfiguration,
-      terminal
-    });
-    this._autoinstaller = new Autoinstaller(pluginConfiguration.autoinstallerName, this._rushConfiguration);
+  public constructor(options: IRemotePluginLoaderOptions) {
+    super(options);
+    this._autoinstaller = new Autoinstaller(
+      options.pluginConfiguration.autoinstallerName,
+      this._rushConfiguration
+    );
   }
 
   protected override onGetPackageFolder(): string {

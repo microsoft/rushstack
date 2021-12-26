@@ -30,7 +30,7 @@ export interface IRushPluginManifestJson {
   plugins: IRushPluginManifest[];
 }
 
-export interface IPluginLoaderOptions {
+export interface IPluginLoaderBaseOptions {
   pluginConfiguration: IRushPluginConfigurationBase;
   rushConfiguration: RushConfiguration;
   terminal: ITerminal;
@@ -50,7 +50,7 @@ export abstract class PluginLoaderBase {
 
   private _cachedPackageFolder: string | undefined = undefined;
 
-  public constructor({ pluginConfiguration, rushConfiguration, terminal }: IPluginLoaderOptions) {
+  public constructor({ pluginConfiguration, rushConfiguration, terminal }: IPluginLoaderBaseOptions) {
     this._packageName = pluginConfiguration.packageName;
     this._pluginName = pluginConfiguration.pluginName;
     this._rushConfiguration = rushConfiguration;

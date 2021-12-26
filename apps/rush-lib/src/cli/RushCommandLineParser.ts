@@ -58,6 +58,11 @@ import { ProjectLogWritable } from '../logic/taskExecution/ProjectLogWritable';
 export interface IRushCommandLineParserOptions {
   cwd: string; // Defaults to `cwd`
   alreadyReportedNodeTooNewError: boolean;
+
+  /**
+   * {@see ILaunchOptions.builtInPluginsProjectPath}
+   */
+  builtInPluginsProjectPath?: string;
 }
 
 export class RushCommandLineParser extends CommandLineParser {
@@ -116,6 +121,7 @@ export class RushCommandLineParser extends CommandLineParser {
     this.pluginManager = new PluginManager({
       rushSession: this.rushSession,
       rushConfiguration: this.rushConfiguration,
+      builtInPluginsProjectPath: options?.builtInPluginsProjectPath,
       terminal: this._terminal
     });
 
