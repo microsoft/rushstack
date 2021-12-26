@@ -778,6 +778,12 @@
       "shouldPublish": false
     },
     {
+      "packageName": "rush-tester",
+      "projectFolder": "build-tests/rush-tester",
+      "reviewCategory": "tests",
+      "shouldPublish": false
+    },
+    {
       "packageName": "set-webpack-public-path-plugin-webpack4-test",
       "projectFolder": "build-tests/set-webpack-public-path-plugin-webpack4-test",
       "reviewCategory": "tests",

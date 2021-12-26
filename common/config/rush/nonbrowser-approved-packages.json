@@ -15,11 +15,11 @@
       "allowedCategories": [ "tests" ]
     },
     {
-      "name": "@jest/create-cache-key-function",
+      "name": "@jest/core",
       "allowedCategories": [ "libraries" ]
     },
     {
-      "name": "@jest/core",
+      "name": "@jest/create-cache-key-function",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -160,11 +160,11 @@
     },
     {
       "name": "@rushstack/rush-amazon-s3-build-cache-plugin",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/rush-azure-storage-build-cache-plugin",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/rush-sdk",

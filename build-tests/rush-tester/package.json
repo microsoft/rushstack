@@ -1,0 +1,21 @@
+{
+  "name": "rush-tester",
+  "description": "This is a project that can be used to run the copy of Rush from inside the rushstack repo with plugin support.",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "heft build --clean",
+    "start": "heft start"
+  },
+  "dependencies": {
+    "@rushstack/rush-amazon-s3-build-cache-plugin": "workspace:*",
+    "@rushstack/rush-azure-storage-build-cache-plugin": "workspace:*",
+    "@microsoft/rush-lib": "workspace:*"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-config": "workspace:*",
+    "@rushstack/heft": "workspace:*",
+    "@types/node": "12.20.24",
+    "@rushstack/heft-node-rig": "workspace:*"
+  }
+}

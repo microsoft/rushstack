@@ -1143,6 +1143,25 @@ importers:
       '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
       '@types/node': 12.20.24
 
+  ../../build-tests/rush-tester:
+    specifiers:
+      '@microsoft/rush-lib': workspace:*
+      '@rushstack/eslint-config': workspace:*
+      '@rushstack/heft': workspace:*
+      '@rushstack/heft-node-rig': workspace:*
+      '@rushstack/rush-amazon-s3-build-cache-plugin': workspace:*
+      '@rushstack/rush-azure-storage-build-cache-plugin': workspace:*
+      '@types/node': 12.20.24
+    dependencies:
+      '@microsoft/rush-lib': link:../../apps/rush-lib
+      '@rushstack/rush-amazon-s3-build-cache-plugin': link:../../rush-plugins/rush-amazon-s3-build-cache-plugin
+      '@rushstack/rush-azure-storage-build-cache-plugin': link:../../rush-plugins/rush-azure-storage-build-cache-plugin
+    devDependencies:
+      '@rushstack/eslint-config': link:../../eslint/eslint-config
+      '@rushstack/heft': link:../../apps/heft
+      '@rushstack/heft-node-rig': link:../../rigs/heft-node-rig
+      '@types/node': 12.20.24
+
   ../../build-tests/set-webpack-public-path-plugin-webpack4-test:
     specifiers:
       '@rushstack/eslint-config': workspace:*

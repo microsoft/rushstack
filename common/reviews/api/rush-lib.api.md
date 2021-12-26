@@ -263,6 +263,7 @@ export interface IGetChangedProjectsOptions {
 // @public
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
+    builtInPluginsProjectPath?: string;
     isManaged: boolean;
 }
 
