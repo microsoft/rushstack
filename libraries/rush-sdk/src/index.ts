@@ -65,7 +65,7 @@ if (rushLibModule === undefined) {
 // In this case, we can use install-run-rush.js to obtain the appropriate rush-lib version for the monorepo.
 if (rushLibModule === undefined) {
   try {
-    const rushJsonPath: string | undefined = findRushJsonLocation(process.cwd());
+    const rushJsonPath: string | undefined = tryFindRushJsonLocation(process.cwd());
     if (!rushJsonPath) {
       throw new Error('Could not find rush.json');
     }
@@ -145,7 +145,7 @@ function requireRushLibUnderFolderPath(folderPath: string): RushLibModuleType {
  * @privateRemarks
  * Keep this in sync with `RushConfiguration.tryFindRushJsonLocation`.
  */
-function findRushJsonLocation(startingFolder: string): string | undefined {
+function tryFindRushJsonLocation(startingFolder: string): string | undefined {
   let currentFolder: string = startingFolder;
 
   // Look upwards at parent folders until we find a folder containing rush.json
