@@ -2,6 +2,18 @@
   "name": "@rushstack/eslint-config",
   "entries": [
     {
+      "version": "2.5.1",
+      "tag": "@rushstack/eslint-config_v2.5.1",
+      "date": "Mon, 27 Dec 2021 16:10:40 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Re-enable eslint-plugin-promise rules which now support ESLint v8"
+          }
+        ]
+      }
+    },
+    {
       "version": "2.5.0",
       "tag": "@rushstack/eslint-config_v2.5.0",
       "date": "Mon, 06 Dec 2021 16:08:32 GMT",
