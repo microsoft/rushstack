@@ -117,7 +117,10 @@ export class CommandLineConfiguration {
    */
   public constructor(commandLineJson: ICommandLineJson | undefined) {
     const commandsForPhase: Map<string, Set<IPhasedCommand>> = new Map();
-    const phaseCliques: Map<string, Set<string>> = new Map();
+    // This maps phase names to the names of all other phases that depend on it or are
+    // dependent on it. This is used to determine which commands a phase affects, even
+    // if that phase isn't explicitly listed for that command.
+    const relatedPhaseSets: Map<string, Set<string>> = new Map();
     if (commandLineJson?.phases) {
       for (const phase of commandLineJson.phases) {
         if (this.phases.has(phase.name)) {
@@ -177,15 +180,15 @@ export class CommandLineConfiguration {
       }
 
       this._checkForPhaseSelfCycles(phase);
-      const phaseClique: Set<string> = new Set<string>();
-      this._populatePhaseClique(phase.name, phaseClique);
-      phaseCliques.set(phase.name, phaseClique);
+      const relatedPhaseSet: Set<string> = new Set<string>();
+      this._populateRelatedPhaseSets(phase.name, relatedPhaseSet);
+      relatedPhaseSets.set(phase.name, relatedPhaseSet);
     }
 
     function populateCommandsForPhase(phaseName: string, command: IPhasedCommand): void {
-      const phaseClique: Set<string> = phaseCliques.get(phaseName)!;
-      for (const phaseCliqueIdentifier of phaseClique) {
-        commandsForPhase.get(phaseCliqueIdentifier)!.add(command);
+      const populateRelatedPhaseSet: Set<string> = relatedPhaseSets.get(phaseName)!;
+      for (const relatedPhaseSetIdentifier of populateRelatedPhaseSet) {
+        commandsForPhase.get(relatedPhaseSetIdentifier)!.add(command);
       }
     }
 
@@ -210,9 +213,9 @@ export class CommandLineConfiguration {
       };
       this.phases.set(phaseName, phaseForBulkCommand);
       syntheticPhasesForTranslatedBulkCommands.set(command.name, phaseName);
-      const phaseClique: Set<string> = new Set<string>();
-      this._populatePhaseClique(phaseName, phaseClique);
-      phaseCliques.set(phaseName, phaseClique);
+      const relatedPhaseSet: Set<string> = new Set<string>();
+      this._populateRelatedPhaseSets(phaseName, relatedPhaseSet);
+      relatedPhaseSets.set(phaseName, relatedPhaseSet);
 
       const translatedCommand: IPhasedCommand = {
         ...command,
@@ -507,20 +510,20 @@ export class CommandLineConfiguration {
     }
   }
 
-  private _populatePhaseClique(phaseName: string, clique: Set<string>): void {
-    if (!clique.has(phaseName)) {
-      clique.add(phaseName);
+  private _populateRelatedPhaseSets(phaseName: string, relatedPhaseSet: Set<string>): void {
+    if (!relatedPhaseSet.has(phaseName)) {
+      relatedPhaseSet.add(phaseName);
       const phase: IPhase = this.phases.get(phaseName)!;
       if (phase.dependencies) {
         if (phase.dependencies.self) {
           for (const dependencyName of phase.dependencies.self) {
-            this._populatePhaseClique(dependencyName, clique);
+            this._populateRelatedPhaseSets(dependencyName, relatedPhaseSet);
           }
         }
 
         if (phase.dependencies.upstream) {
           for (const dependencyName of phase.dependencies.upstream) {
-            this._populatePhaseClique(dependencyName, clique);
+            this._populateRelatedPhaseSets(dependencyName, relatedPhaseSet);
           }
         }
       }
