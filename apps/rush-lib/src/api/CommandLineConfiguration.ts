@@ -116,7 +116,7 @@ export class CommandLineConfiguration {
    * @internal
    */
   public constructor(commandLineJson: ICommandLineJson | undefined) {
-    const commandsForPhase: Map<string, Set<IPhasedCommand>> = new Map();
+    const commandsByPhaseName: Map<string, Set<IPhasedCommand>> = new Map();
     // This maps phase names to the names of all other phases that depend on it or are
     // dependent on it. This is used to determine which commands a phase affects, even
     // if that phase isn't explicitly listed for that command.
@@ -151,7 +151,7 @@ export class CommandLineConfiguration {
           getDisplayNameForProject: (rushProject: RushConfigurationProject) =>
             `${rushProject.packageName} (${phaseNameWithoutPrefix})`
         });
-        commandsForPhase.set(phase.name, new Set<IPhasedCommand>());
+        commandsByPhaseName.set(phase.name, new Set<IPhasedCommand>());
       }
     }
 
@@ -188,7 +188,7 @@ export class CommandLineConfiguration {
     function populateCommandsForPhase(phaseName: string, command: IPhasedCommand): void {
       const populateRelatedPhaseSet: Set<string> = relatedPhaseSets.get(phaseName)!;
       for (const relatedPhaseSetIdentifier of populateRelatedPhaseSet) {
-        commandsForPhase.get(relatedPhaseSetIdentifier)!.add(command);
+        commandsByPhaseName.get(relatedPhaseSetIdentifier)!.add(command);
       }
     }
 
@@ -225,7 +225,7 @@ export class CommandLineConfiguration {
         associatedParameters: new Set<Parameter>(),
         phases: [phaseName]
       };
-      commandsForPhase.set(phaseName, new Set<IPhasedCommand>());
+      commandsByPhaseName.set(phaseName, new Set<IPhasedCommand>());
       populateCommandsForPhase(phaseName, translatedCommand);
       return translatedCommand;
     };
@@ -347,7 +347,7 @@ export class CommandLineConfiguration {
 
     if (commandLineJson?.parameters) {
       function populateCommandAssociatedParametersForPhase(phaseName: string, parameter: Parameter): void {
-        const commands: Set<Command> = commandsForPhase.get(phaseName)!;
+        const commands: Set<Command> = commandsByPhaseName.get(phaseName)!;
         for (const command of commands) {
           command.associatedParameters.add(parameter);
         }
