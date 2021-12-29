@@ -45,8 +45,8 @@ export class ProjectLogWritable extends TerminalWritable {
       projectFolder,
       'build'
     );
-    // If the multi-phase commands experiment is enabled, put logs under `rush-logs`
-    if (project.rushConfiguration.experimentsConfiguration.configuration.multiPhaseCommands) {
+    // If the phased commands experiment is enabled, put logs under `rush-logs`
+    if (project.rushConfiguration.experimentsConfiguration.configuration.phasedCommands) {
       // Delete the legacy logs
       FileSystem.deleteFile(legacyLogPath);
       FileSystem.deleteFile(legacyErrorLogPath);

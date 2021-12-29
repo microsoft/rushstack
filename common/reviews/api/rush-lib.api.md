@@ -241,9 +241,9 @@ export interface IEnvironmentConfigurationInitializeOptions {
 // @beta
 export interface IExperimentsJson {
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
-    multiPhaseCommands?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
+    phasedCommands?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
 }

@@ -277,12 +277,12 @@ export class RushCommandLineParser extends CommandLineParser {
       case RushConstants.phasedCommandKind: {
         if (
           !command.isSynthetic && // synthetic commands come from bulk commands
-          !this.rushConfiguration.experimentsConfiguration.configuration.multiPhaseCommands
+          !this.rushConfiguration.experimentsConfiguration.configuration.phasedCommands
         ) {
           throw new Error(
             `${RushConstants.commandLineFilename} defines a command "${command.name}" ` +
               `that uses the "${RushConstants.phasedCommandKind}" command kind. To use this command kind, ` +
-              'the "multiPhaseCommands" experiment must be enabled. Note that this feature is not complete ' +
+              'the "phasedCommands" experiment must be enabled. Note that this feature is not complete ' +
               'and will not work as expected.'
           );
         }
