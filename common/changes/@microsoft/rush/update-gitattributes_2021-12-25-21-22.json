@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Update \"rush init\" to write files with LF line endings instead of CRLF line endings.",
+      "comment": "Update \"rush init\" to write files with OS-default line endings (CRLF on Windows, LF otherwise) instead of always writing CRLF line endings.",
       "type": "none"
     }
   ],

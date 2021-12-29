@@ -343,7 +343,7 @@ export class InitAction extends BaseConfiglessRushAction {
     }
 
     // Write the output
-    FileSystem.writeFile(destinationPath, outputLines.join('\n'), {
+    FileSystem.writeFile(destinationPath, outputLines.join(os.EOL), {
       ensureFolderExists: true
     });
   }
