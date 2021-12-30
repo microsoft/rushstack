@@ -1,6 +1,15 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 16 Dec 2021 05:39:21 GMT and should not be manually modified.
+This log was last generated on Thu, 30 Dec 2021 02:48:39 GMT and should not be manually modified.
+
+## 5.59.0-rc.0
+Thu, 30 Dec 2021 02:48:39 GMT
+
+### Updates
+
+- Fix an issue with installing Git hooks that occurs when the rush.json folder isn't at the repo's root.
+- (BREAKING CHANGE) Remove the experimental command "rush write-build-cache", since it is no longer needed and would be incompatible with phased builds. If you need this command for some reason, please create a GitHub issue.
+- Add support for phased commands behind the multiPhaseCommands experiment.
 
 ## 5.58.0
 Thu, 16 Dec 2021 05:39:21 GMT
