@@ -25,8 +25,7 @@ export interface ITaskExecutionManagerOptions {
   debugMode: boolean;
   parallelism: string | undefined;
   changedProjectsOnly: boolean;
-  allowWarningsInSuccessfulExecution: boolean;
-  repoCommandLineConfiguration: CommandLineConfiguration | undefined;
+  repoCommandLineConfiguration: CommandLineConfiguration;
   destination?: TerminalWritable;
 }
 
@@ -44,14 +43,13 @@ const ASCII_HEADER_WIDTH: number = 79;
 export class TaskExecutionManager {
   private readonly _tasks: Task[];
   private readonly _changedProjectsOnly: boolean;
-  private readonly _allowWarningsInSuccessfulExecution: boolean;
   private readonly _taskQueue: Task[];
   private readonly _quietMode: boolean;
   private readonly _debugMode: boolean;
   private readonly _parallelism: number;
-  private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
+  private readonly _repoCommandLineConfiguration: CommandLineConfiguration;
   private _hasAnyFailures: boolean;
-  private _hasAnyWarnings: boolean;
+  private _hasAnyNonAllowedWarnings: boolean;
   private _currentActiveTasks!: number;
   private _totalTasks!: number;
   private _completedTasks!: number;
@@ -63,22 +61,14 @@ export class TaskExecutionManager {
   private _terminal: CollatedTerminal;
 
   public constructor(orderedTasks: Task[], options: ITaskExecutionManagerOptions) {
-    const {
-      quietMode,
-      debugMode,
-      parallelism,
-      changedProjectsOnly,
-      allowWarningsInSuccessfulExecution,
-      repoCommandLineConfiguration
-    } = options;
+    const { quietMode, debugMode, parallelism, changedProjectsOnly, repoCommandLineConfiguration } = options;
     this._tasks = orderedTasks;
     this._taskQueue = [...orderedTasks]; // Clone the task array
     this._quietMode = quietMode;
     this._debugMode = debugMode;
     this._hasAnyFailures = false;
-    this._hasAnyWarnings = false;
+    this._hasAnyNonAllowedWarnings = false;
     this._changedProjectsOnly = changedProjectsOnly;
-    this._allowWarningsInSuccessfulExecution = allowWarningsInSuccessfulExecution;
     this._repoCommandLineConfiguration = repoCommandLineConfiguration;
 
     // TERMINAL PIPELINE:
@@ -191,7 +181,7 @@ export class TaskExecutionManager {
     if (this._hasAnyFailures) {
       this._terminal.writeStderrLine(colors.red('Projects failed to build.') + '\n');
       throw new AlreadyReportedError();
-    } else if (this._hasAnyWarnings && !this._allowWarningsInSuccessfulExecution) {
+    } else if (this._hasAnyNonAllowedWarnings) {
       this._terminal.writeStderrLine(colors.yellow('Projects succeeded with warnings.') + '\n');
       throw new AlreadyReportedError();
     }
@@ -262,7 +252,7 @@ export class TaskExecutionManager {
           this._markTaskAsSuccess(task);
           break;
         case TaskStatus.SuccessWithWarning:
-          this._hasAnyWarnings = true;
+          this._hasAnyNonAllowedWarnings = this._hasAnyNonAllowedWarnings || !task.runner.warningsAreAllowed;
           this._markTaskAsSuccessWithWarning(task);
           break;
         case TaskStatus.FromCache:

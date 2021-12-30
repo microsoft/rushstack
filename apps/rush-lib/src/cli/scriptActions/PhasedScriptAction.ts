@@ -9,43 +9,37 @@ import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack
 
 import { Event } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
-import {
-  INonPhasedProjectTaskSelectorOptions,
-  NonPhasedProjectTaskSelector
-} from '../../logic/NonPhasedProjectTaskSelector';
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import {
   ITaskExecutionManagerOptions,
   TaskExecutionManager
 } from '../../logic/taskExecution/TaskExecutionManager';
-import { Utilities } from '../../utilities/Utilities';
 import { RushConstants } from '../../logic/RushConstants';
 import { EnvironmentVariableNames } from '../../api/EnvironmentConfiguration';
 import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import { Selection } from '../../logic/Selection';
 import { SelectionParameterSet } from '../SelectionParameterSet';
-import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
+import { CommandLineConfiguration, IPhase, IPhasedCommand } from '../../api/CommandLineConfiguration';
+import { IProjectTaskSelectorOptions, ProjectTaskSelector } from '../../logic/ProjectTaskSelector';
+import { IFlagParameterJson } from '../../api/CommandLineJson';
 
 /**
  * Constructor parameters for BulkScriptAction.
  */
-export interface IBulkScriptActionOptions extends IBaseScriptActionOptions {
+export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPhasedCommand> {
   enableParallelism: boolean;
-  ignoreMissingScript: boolean;
-  ignoreDependencyOrder: boolean;
   incremental: boolean;
-  allowWarningsInSuccessfulBuild: boolean;
   watchForChanges: boolean;
   disableBuildCache: boolean;
-  logFilenameIdentifier: string;
-  commandToRun: string;
+
+  actionPhases: string[];
+  phases: Map<string, IPhase>;
 }
 
 interface IExecuteInternalOptions {
-  taskSelectorOptions: INonPhasedProjectTaskSelectorOptions;
+  taskSelectorOptions: IProjectTaskSelectorOptions;
   taskExecutionManagerOptions: ITaskExecutionManagerOptions;
   stopwatch: Stopwatch;
   ignoreHooks?: boolean;
@@ -54,24 +48,22 @@ interface IExecuteInternalOptions {
 
 /**
  * This class implements bulk commands which are run individually for each project in the repo,
- * possibly in parallel.  The action executes a script found in the project's package.json file.
+ * possibly in parallel. The task selector is abstract and is implemented for phased or non-phased
+ * commands.
  *
  * @remarks
  * Bulk commands can be defined via common/config/command-line.json.  Rush's predefined "build"
  * and "rebuild" commands are also modeled as bulk commands, because they essentially just
  * execute scripts from package.json in the same as any custom command.
  */
-export class BulkScriptAction extends BaseScriptAction {
+export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
   private readonly _enableParallelism: boolean;
-  private readonly _ignoreMissingScript: boolean;
   private readonly _isIncrementalBuildAllowed: boolean;
-  private readonly _commandToRun: string;
   private readonly _watchForChanges: boolean;
   private readonly _disableBuildCache: boolean;
-  private readonly _repoCommandLineConfiguration: CommandLineConfiguration | undefined;
-  private readonly _ignoreDependencyOrder: boolean;
-  private readonly _allowWarningsInSuccessfulBuild: boolean;
-  private readonly _logFilenameIdentifier: string;
+  private readonly _repoCommandLineConfiguration: CommandLineConfiguration;
+  private readonly _actionPhases: string[];
+  private readonly _phases: Map<string, IPhase>;
 
   private _changedProjectsOnly!: CommandLineFlagParameter;
   private _selectionParameters!: SelectionParameterSet;
@@ -79,18 +71,15 @@ export class BulkScriptAction extends BaseScriptAction {
   private _parallelismParameter: CommandLineStringParameter | undefined;
   private _ignoreHooksParameter!: CommandLineFlagParameter;
 
-  public constructor(options: IBulkScriptActionOptions) {
+  public constructor(options: IPhasedScriptActionOptions) {
     super(options);
     this._enableParallelism = options.enableParallelism;
-    this._ignoreMissingScript = options.ignoreMissingScript;
     this._isIncrementalBuildAllowed = options.incremental;
-    this._commandToRun = options.commandToRun;
-    this._ignoreDependencyOrder = options.ignoreDependencyOrder;
-    this._allowWarningsInSuccessfulBuild = options.allowWarningsInSuccessfulBuild;
     this._watchForChanges = options.watchForChanges;
     this._disableBuildCache = options.disableBuildCache;
     this._repoCommandLineConfiguration = options.commandLineConfiguration;
-    this._logFilenameIdentifier = options.logFilenameIdentifier;
+    this._actionPhases = options.actionPhases;
+    this._phases = options.phases;
   }
 
   public async runAsync(): Promise<void> {
@@ -127,7 +116,7 @@ export class BulkScriptAction extends BaseScriptAction {
 
     const terminal: Terminal = new Terminal(this.rushSession.terminalProvider);
     let buildCacheConfiguration: BuildCacheConfiguration | undefined;
-    if (!this._disableBuildCache && ['build', 'rebuild'].includes(this.actionName)) {
+    if (!this._disableBuildCache) {
       buildCacheConfiguration = await BuildCacheConfiguration.tryLoadAsync(
         terminal,
         this.rushConfiguration,
@@ -135,30 +124,44 @@ export class BulkScriptAction extends BaseScriptAction {
       );
     }
 
-    const selection: Set<RushConfigurationProject> = await this._selectionParameters.getSelectedProjectsAsync(
-      terminal
-    );
+    const projectSelection: Set<RushConfigurationProject> =
+      await this._selectionParameters.getSelectedProjectsAsync(terminal);
 
-    if (!selection.size) {
+    if (!projectSelection.size) {
       terminal.writeLine(colors.yellow(`The command line selection parameters did not match any projects.`));
       return;
     }
 
-    const taskSelectorOptions: INonPhasedProjectTaskSelectorOptions = {
+    const phasesToRun: Set<string> = new Set(this._actionPhases);
+    for (const parameter of this.commandLineConfiguration.parameters) {
+      if (parameter.parameterKind === 'flag') {
+        if (this.getFlagParameter(parameter.longName)!.value) {
+          const flagParameter: IFlagParameterJson = parameter as IFlagParameterJson;
+          if (flagParameter.addPhasesToCommand) {
+            for (const phase of flagParameter.addPhasesToCommand) {
+              phasesToRun.add(phase);
+            }
+          }
+
+          if (flagParameter.skipPhasesForCommand) {
+            for (const phase of flagParameter.skipPhasesForCommand) {
+              phasesToRun.delete(phase);
+            }
+          }
+        }
+      }
+    }
+
+    const taskSelectorOptions: IProjectTaskSelectorOptions = {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
-      selection,
-      commandName: this.actionName,
-      commandToRun: this._commandToRun,
+      projectSelection,
       customParameterValues,
       isQuietMode: isQuietMode,
       isDebugMode: isDebugMode,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
-      ignoreMissingScript: this._ignoreMissingScript,
-      ignoreDependencyOrder: this._ignoreDependencyOrder,
-      allowWarningsInSuccessfulBuild: this._allowWarningsInSuccessfulBuild,
-      packageDepsFilename: Utilities.getPackageDepsFilenameForCommand(this._commandToRun),
-      logFilenameIdentifier: this._logFilenameIdentifier
+      phasesToRun: phasesToRun,
+      phases: this._phases
     };
 
     const taskExecutionManagerOptions: ITaskExecutionManagerOptions = {
@@ -166,7 +169,6 @@ export class BulkScriptAction extends BaseScriptAction {
       debugMode: this.parser.isDebug,
       parallelism: parallelism,
       changedProjectsOnly: changedProjectsOnly,
-      allowWarningsInSuccessfulExecution: this._allowWarningsInSuccessfulBuild,
       repoCommandLineConfiguration: this._repoCommandLineConfiguration
     };
 
@@ -193,7 +195,7 @@ export class BulkScriptAction extends BaseScriptAction {
    */
   private async _runWatch(options: IExecuteInternalOptions): Promise<void> {
     const {
-      taskSelectorOptions: { selection: projectsToWatch },
+      taskSelectorOptions: { projectSelection: projectsToWatch },
       stopwatch,
       terminal
     } = options;
@@ -223,31 +225,25 @@ export class BulkScriptAction extends BaseScriptAction {
       // On the initial invocation, this promise will return immediately with the full set of projects
       const { changedProjects, state } = await projectWatcher.waitForChange(onWatchingFiles);
 
-      let selection: ReadonlySet<RushConfigurationProject> = changedProjects;
-
       if (stopwatch.state === StopwatchState.Stopped) {
         // Clear and reset the stopwatch so that we only report time from a single execution at a time
         stopwatch.reset();
         stopwatch.start();
       }
 
-      terminal.writeLine(`Detected changes in ${selection.size} project${selection.size === 1 ? '' : 's'}:`);
-      const names: string[] = [...selection].map((x) => x.packageName).sort();
+      terminal.writeLine(
+        `Detected changes in ${changedProjects.size} project${changedProjects.size === 1 ? '' : 's'}:`
+      );
+      const names: string[] = [...changedProjects].map((x) => x.packageName).sort();
       for (const name of names) {
         terminal.writeLine(`    ${colors.cyan(name)}`);
-      }
-
-      // If the command ignores dependency order, that means that only the changed projects should be affected
-      // That said, running watch for commands that ignore dependency order may have unexpected results
-      if (!this._ignoreDependencyOrder) {
-        selection = Selection.intersection(Selection.expandAllConsumers(selection), projectsToWatch);
       }
 
       const executeOptions: IExecuteInternalOptions = {
         taskSelectorOptions: {
           ...options.taskSelectorOptions,
           // Revise down the set of projects to execute the command on
-          selection,
+          projectSelection: changedProjects,
           // Pass the ProjectChangeAnalyzer from the state differ to save a bit of overhead
           projectChangeAnalyzer: state
         },
@@ -324,9 +320,7 @@ export class BulkScriptAction extends BaseScriptAction {
    * Runs a single invocation of the command
    */
   private async _runOnce(options: IExecuteInternalOptions): Promise<void> {
-    const taskSelector: NonPhasedProjectTaskSelector = new NonPhasedProjectTaskSelector(
-      options.taskSelectorOptions
-    );
+    const taskSelector: ProjectTaskSelector = new ProjectTaskSelector(options.taskSelectorOptions);
 
     // Register all tasks with the task collection
 

@@ -9,11 +9,12 @@ import { EnvironmentConfiguration } from '../../api/EnvironmentConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { LookupByPath } from '../LookupByPath';
+import { UNINITIALIZED } from '../../utilities/Utilities';
 
 describe(ProjectChangeAnalyzer.name, () => {
   beforeEach(() => {
     jest.spyOn(EnvironmentConfiguration, 'gitBinaryPath', 'get').mockReturnValue(undefined);
-    jest.spyOn(RushProjectConfiguration, 'tryLoadForProjectAsync').mockResolvedValue(undefined);
+    jest.spyOn(RushProjectConfiguration, 'tryLoadIgnoreGlobsForProjectAsync').mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -87,11 +88,13 @@ describe(ProjectChangeAnalyzer.name, () => {
 
     it('ignores files specified by project configuration files, relative to project folder', async () => {
       // rush-project.json configuration for 'apple'
-      jest.spyOn(RushProjectConfiguration, 'tryLoadForProjectAsync').mockResolvedValueOnce({
-        incrementalBuildIgnoredGlobs: ['assets/*.png', '*.js.map'] as ReadonlyArray<string>
-      } as RushProjectConfiguration);
+      jest
+        .spyOn(RushProjectConfiguration, 'tryLoadIgnoreGlobsForProjectAsync')
+        .mockResolvedValueOnce(['assets/*.png', '*.js.map']);
       // rush-project.json configuration for 'banana' does not exist
-      jest.spyOn(RushProjectConfiguration, 'tryLoadForProjectAsync').mockResolvedValueOnce(undefined);
+      jest
+        .spyOn(RushProjectConfiguration, 'tryLoadIgnoreGlobsForProjectAsync')
+        .mockResolvedValueOnce(undefined);
 
       const projects: RushConfigurationProject[] = [
         {
@@ -132,13 +135,9 @@ describe(ProjectChangeAnalyzer.name, () => {
 
     it('interprets ignored globs as a dot-ignore file (not as individually handled globs)', async () => {
       // rush-project.json configuration for 'apple'
-      jest.spyOn(RushProjectConfiguration, 'tryLoadForProjectAsync').mockResolvedValue({
-        incrementalBuildIgnoredGlobs: [
-          '*.png',
-          'assets/*.psd',
-          '!assets/important/**'
-        ] as ReadonlyArray<string>
-      } as RushProjectConfiguration);
+      jest
+        .spyOn(RushProjectConfiguration, 'tryLoadIgnoreGlobsForProjectAsync')
+        .mockResolvedValue(['*.png', 'assets/*.psd', '!assets/important/**']);
 
       const projects: RushConfigurationProject[] = [
         {
@@ -247,11 +246,12 @@ describe(ProjectChangeAnalyzer.name, () => {
       // ProjectChangeAnalyzer is inert until someone actually requests project data,
       // this test makes that expectation explicit.
 
-      expect(subject['_data']).toEqual(undefined);
+      expect(subject['_data']).toEqual(UNINITIALIZED);
       expect(await subject._tryGetProjectDependenciesAsync(projects[0], terminal)).toEqual(
         new Map([['apps/apple/core.js', 'a101']])
       );
       expect(subject['_data']).toBeDefined();
+      expect(subject['_data']).not.toEqual(UNINITIALIZED);
       expect(await subject._tryGetProjectDependenciesAsync(projects[0], terminal)).toEqual(
         new Map([['apps/apple/core.js', 'a101']])
       );

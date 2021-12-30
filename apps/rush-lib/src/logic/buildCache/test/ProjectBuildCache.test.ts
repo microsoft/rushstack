@@ -35,8 +35,8 @@ describe('ProjectBuildCache', () => {
           isCacheWriteAllowed: options.hasOwnProperty('writeAllowed') ? options.writeAllowed : false
         }
       } as unknown as BuildCacheConfiguration,
+      projectOutputFolderNames: ['dist'],
       projectConfiguration: {
-        projectOutputFolderNames: ['dist'],
         project: {
           packageName: 'acme-wizard',
           projectRelativeFolder: 'apps/acme-wizard',
@@ -46,7 +46,8 @@ describe('ProjectBuildCache', () => {
       command: 'build',
       trackedProjectFiles: options.hasOwnProperty('trackedProjectFiles') ? options.trackedProjectFiles : [],
       projectChangeAnalyzer,
-      terminal
+      terminal,
+      phaseName: 'build'
     });
 
     return subject;

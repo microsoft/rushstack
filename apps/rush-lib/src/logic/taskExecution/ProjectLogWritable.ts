@@ -45,8 +45,8 @@ export class ProjectLogWritable extends TerminalWritable {
       projectFolder,
       'build'
     );
-    // If the multi-phase commands experiment is enabled, put logs under `rush-logs`
-    if (project.rushConfiguration.experimentsConfiguration.configuration._multiPhaseCommands) {
+    // If the phased commands experiment is enabled, put logs under `rush-logs`
+    if (project.rushConfiguration.experimentsConfiguration.configuration.phasedCommands) {
       // Delete the legacy logs
       FileSystem.deleteFile(legacyLogPath);
       FileSystem.deleteFile(legacyErrorLogPath);
@@ -66,10 +66,6 @@ export class ProjectLogWritable extends TerminalWritable {
     FileSystem.deleteFile(this._errorLogPath);
 
     this._logWriter = FileWriter.open(this._logPath);
-  }
-
-  public static normalizeNameForLogFilenameIdentifiers(name: string): string {
-    return name.replace(/:/g, '_'); // Replace colons with underscores to be filesystem-safe
   }
 
   protected onWriteChunk(chunk: ITerminalChunk): void {

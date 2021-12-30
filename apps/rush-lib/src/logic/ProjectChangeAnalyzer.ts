@@ -22,6 +22,7 @@ import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { RushConstants } from './RushConstants';
 import { LookupByPath } from './LookupByPath';
 import { PnpmShrinkwrapFile } from './pnpm/PnpmShrinkwrapFile';
+import { UNINITIALIZED } from '../utilities/Utilities';
 
 /**
  * @beta
@@ -63,10 +64,10 @@ export class ProjectChangeAnalyzer {
    * UNINITIALIZED === we haven't looked
    * undefined === data isn't available (i.e. - git isn't present)
    */
-  private _data: IRawRepoState | undefined = undefined;
-  private _filteredData: Map<RushConfigurationProject, Map<string, string>> = new Map();
-  private _projectStateCache: Map<RushConfigurationProject, string> = new Map();
-  private _rushConfiguration: RushConfiguration;
+  private _data: IRawRepoState | UNINITIALIZED | undefined = UNINITIALIZED;
+  private readonly _filteredData: Map<RushConfigurationProject, Map<string, string>> = new Map();
+  private readonly _projectStateCache: Map<RushConfigurationProject, string> = new Map();
+  private readonly _rushConfiguration: RushConfiguration;
   private readonly _git: Git;
 
   public constructor(rushConfiguration: RushConfiguration) {
@@ -92,8 +93,12 @@ export class ProjectChangeAnalyzer {
       return filteredProjectData;
     }
 
-    if (this._data === undefined) {
+    if (this._data === UNINITIALIZED) {
       this._data = this._getData(terminal);
+    }
+
+    if (!this._data) {
+      return undefined;
     }
 
     const { projectState, rootDir } = this._data;
@@ -410,10 +415,8 @@ export class ProjectChangeAnalyzer {
     project: RushConfigurationProject,
     terminal: ITerminal
   ): Promise<Ignore | undefined> {
-    const projectConfiguration: RushProjectConfiguration | undefined =
-      await RushProjectConfiguration.tryLoadForProjectAsync(project, undefined, terminal);
-
-    const { incrementalBuildIgnoredGlobs } = projectConfiguration || {};
+    const incrementalBuildIgnoredGlobs: ReadonlyArray<string> | undefined =
+      await RushProjectConfiguration.tryLoadIgnoreGlobsForProjectAsync(project, terminal);
 
     if (incrementalBuildIgnoredGlobs && incrementalBuildIgnoredGlobs.length) {
       const ignoreMatcher: Ignore = ignore();

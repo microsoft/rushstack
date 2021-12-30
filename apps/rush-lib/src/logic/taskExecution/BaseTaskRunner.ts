@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { StdioSummarizer } from '@rushstack/terminal';
-import { CollatedWriter } from '@rushstack/stream-collator';
+import type { StdioSummarizer } from '@rushstack/terminal';
+import type { CollatedWriter } from '@rushstack/stream-collator';
 
-import { TaskStatus } from './TaskStatus';
-import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
+import type { TaskStatus } from './TaskStatus';
+import type { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 
 export interface ITaskRunnerContext {
-  repoCommandLineConfiguration: CommandLineConfiguration | undefined;
+  repoCommandLineConfiguration: CommandLineConfiguration;
   collatedWriter: CollatedWriter;
   stdioSummarizer: StdioSummarizer;
   quietMode: boolean;
@@ -36,6 +36,12 @@ export abstract class BaseTaskRunner {
    * like a shell command that succeeds instantly, but e.g. it would be odd to report time statistics for it.
    */
   public abstract hadEmptyScript: boolean;
+
+  /**
+   * If set to true, a warning result should not make Rush exit with a nonzero
+   * exit code
+   */
+  public abstract warningsAreAllowed: boolean;
 
   /**
    * Method to be executed for the task.

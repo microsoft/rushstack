@@ -9,12 +9,12 @@ import { FileSystem, IPackageJson, JsonFile, AlreadyReportedError, Text } from '
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { Utilities } from '../../utilities/Utilities';
 import { Autoinstaller } from '../../logic/Autoinstaller';
-import { IShellCommandTokenContext } from '../../api/CommandLineConfiguration';
+import { IGlobalCommand, IShellCommandTokenContext } from '../../api/CommandLineConfiguration';
 
 /**
  * Constructor parameters for GlobalScriptAction.
  */
-export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions {
+export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions<IGlobalCommand> {
   shellCommand: string;
   autoinstallerName: string | undefined;
 }
@@ -29,7 +29,7 @@ export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions {
  * and "rebuild" commands are also modeled as bulk commands, because they essentially just
  * invoke scripts from package.json in the same way as a custom command.
  */
-export class GlobalScriptAction extends BaseScriptAction {
+export class GlobalScriptAction extends BaseScriptAction<IGlobalCommand> {
   private readonly _shellCommand: string;
   private readonly _autoinstallerName: string;
   private readonly _autoinstallerFullPath: string;
@@ -88,7 +88,7 @@ export class GlobalScriptAction extends BaseScriptAction {
 
   public async runAsync(): Promise<void> {
     const additionalPathFolders: string[] =
-      this._commandLineConfiguration?.additionalPathFolders.slice() || [];
+      this.commandLineConfiguration?.additionalPathFolders.slice() || [];
 
     if (this._autoinstallerName) {
       await this._prepareAutoinstallerName();
@@ -121,7 +121,7 @@ export class GlobalScriptAction extends BaseScriptAction {
     }
 
     const shellCommandTokenContext: IShellCommandTokenContext | undefined =
-      this._commandLineConfiguration?.shellCommandTokenContext;
+      this.commandLineConfiguration?.shellCommandTokenContext;
     if (shellCommandTokenContext) {
       shellCommand = this._expandShellCommandWithTokens(shellCommand, shellCommandTokenContext);
     }

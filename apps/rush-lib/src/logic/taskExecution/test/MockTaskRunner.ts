@@ -11,12 +11,18 @@ export class MockTaskRunner extends BaseTaskRunner {
   public readonly name: string;
   public readonly hadEmptyScript: boolean = false;
   public readonly isSkipAllowed: boolean = false;
+  public readonly warningsAreAllowed: boolean;
 
-  public constructor(name: string, action?: (terminal: CollatedTerminal) => Promise<TaskStatus>) {
+  public constructor(
+    name: string,
+    action?: (terminal: CollatedTerminal) => Promise<TaskStatus>,
+    warningsAreAllowed: boolean = false
+  ) {
     super();
 
     this.name = name;
     this._action = action;
+    this.warningsAreAllowed = warningsAreAllowed;
   }
 
   public async executeAsync(context: ITaskRunnerContext): Promise<TaskStatus> {
