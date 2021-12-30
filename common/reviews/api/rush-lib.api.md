@@ -627,6 +627,7 @@ export class RushConstants {
     static readonly nonbrowserApprovedPackagesFilename: string;
     static readonly npmShrinkwrapFilename: string;
     static readonly phasedCommandKind: 'phased';
+    static readonly phaseNamePrefix: '_phase:';
     // @deprecated
     static readonly pinnedVersionsFilename: string;
     static readonly pnpmfileV1Filename: string;

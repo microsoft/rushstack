@@ -2,11 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-
 import { JsonFile, JsonSchema, FileSystem } from '@rushstack/node-core-library';
 
 import { RushConstants } from '../logic/RushConstants';
-
 import type {
   CommandJson,
   ICommandLineJson,
@@ -18,9 +16,6 @@ import type {
   IChoiceParameterJson,
   IStringParameterJson
 } from './CommandLineJson';
-import type { RushConfigurationProject } from './RushConfigurationProject';
-
-const EXPECTED_PHASE_NAME_PREFIX: '_phase:' = '_phase:';
 
 export interface IShellCommandTokenContext {
   packageFolder: string;
@@ -39,8 +34,6 @@ export interface IPhase extends IPhaseJson {
    * a phase with name "_phase:compile" has a `logFilenameIdentifier` of "_phase_compile".
    */
   logFilenameIdentifier: string;
-
-  getDisplayNameForProject(rushProject: RushConfigurationProject): string;
 }
 
 export interface ICommandWithParameters {
@@ -137,6 +130,7 @@ export class CommandLineConfiguration {
     // if that phase isn't explicitly listed for that command.
     const relatedPhaseSets: Map<string, Set<string>> = new Map();
     if (commandLineJson?.phases) {
+      const phaseNamePrefix: string = RushConstants.phaseNamePrefix;
       for (const phase of commandLineJson.phases) {
         if (this.phases.has(phase.name)) {
           throw new Error(
@@ -145,26 +139,23 @@ export class CommandLineConfiguration {
           );
         }
 
-        if (phase.name.substring(0, EXPECTED_PHASE_NAME_PREFIX.length) !== EXPECTED_PHASE_NAME_PREFIX) {
+        if (phase.name.substring(0, phaseNamePrefix.length) !== phaseNamePrefix) {
           throw new Error(
             `In ${RushConstants.commandLineFilename}, the phase "${phase.name}"'s name ` +
-              `does not begin with the required prefix "${EXPECTED_PHASE_NAME_PREFIX}".`
+              `does not begin with the required prefix "${phaseNamePrefix}".`
           );
         }
 
-        if (phase.name.length <= EXPECTED_PHASE_NAME_PREFIX.length) {
+        if (phase.name.length <= phaseNamePrefix.length) {
           throw new Error(
             `In ${RushConstants.commandLineFilename}, the phase "${phase.name}"'s name ` +
-              `must have characters after "${EXPECTED_PHASE_NAME_PREFIX}"`
+              `must have characters after "${phaseNamePrefix}"`
           );
         }
 
-        const phaseNameWithoutPrefix: string = phase.name.substring(EXPECTED_PHASE_NAME_PREFIX.length);
         this.phases.set(phase.name, {
           ...phase,
-          logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(phase.name),
-          getDisplayNameForProject: (rushProject: RushConfigurationProject) =>
-            `${rushProject.packageName} (${phaseNameWithoutPrefix})`
+          logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(phase.name)
         });
         commandsByPhaseName.set(phase.name, new Set<IPhasedCommand>());
       }
@@ -222,9 +213,7 @@ export class CommandLineConfiguration {
         },
         ignoreMissingScript: command.ignoreMissingScript,
         allowWarningsOnSuccess: command.allowWarningsInSuccessfulBuild,
-        logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(command.name),
-        // Because this is a synthetic phase, just use the project name because there aren't any other phases
-        getDisplayNameForProject: (rushProject: RushConfigurationProject) => rushProject.packageName
+        logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(command.name)
       };
       this.phases.set(phaseName, phaseForBulkCommand);
       syntheticPhasesForTranslatedBulkCommands.set(command.name, phaseName);

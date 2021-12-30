@@ -8,6 +8,7 @@ import { convertSlashesForWindows, ProjectTaskRunner } from './taskExecution/Pro
 import { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';
 import { TaskCollection } from './taskExecution/TaskCollection';
 import { IPhase } from '../api/CommandLineConfiguration';
+import { RushConstants } from './RushConstants';
 
 export interface IProjectTaskSelectorOptions {
   rushConfiguration: RushConfiguration;
@@ -82,7 +83,7 @@ export class ProjectTaskSelector {
     phase: IPhase,
     taskCollection: TaskCollection
   ): string {
-    const taskName: string = phase.getDisplayNameForProject(project);
+    const taskName: string = this._getPhaseDisplayNameForProject(phase, project);
     if (taskCollection.hasTask(taskName)) {
       return taskName;
     }
@@ -152,6 +153,16 @@ export class ProjectTaskSelector {
     }
 
     return phase;
+  }
+
+  private _getPhaseDisplayNameForProject(phase: IPhase, project: RushConfigurationProject): string {
+    if (phase.isSynthetic) {
+      // Because this is a synthetic phase, just use the project name because there aren't any other phases
+      return project.packageName;
+    } else {
+      const phaseNameWithoutPrefix: string = phase.name.substring(RushConstants.phaseNamePrefix.length);
+      return `${project.packageName} (${phaseNameWithoutPrefix})`;
+    }
   }
 
   private static _getScriptCommand(
