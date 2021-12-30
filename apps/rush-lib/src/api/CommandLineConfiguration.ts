@@ -125,12 +125,12 @@ export class CommandLineConfiguration {
    * dependent on it. This is used to determine which commands a phase affects, even
    * if that phase isn't explicitly listed for that command.
    */
-  private readonly _relatedPhaseSets: Map<string, Set<string>> = new Map();
+  private readonly _relatedPhaseSetsByPhaseName: Map<string, Set<string>> = new Map();
 
   /**
    * A map of bulk command names to their corresponding synthetic phase identifiers
    */
-  private readonly _syntheticPhasesForTranslatedBulkCommands: Map<string, string> = new Map();
+  private readonly _syntheticPhasesNamesByTranslatedBulkCommandName: Map<string, string> = new Map();
 
   /**
    * Use CommandLineConfiguration.loadFromFile()
@@ -196,7 +196,7 @@ export class CommandLineConfiguration {
       this._checkForPhaseSelfCycles(phase);
       const relatedPhaseSet: Set<string> = new Set<string>();
       this._populateRelatedPhaseSets(phase.name, relatedPhaseSet);
-      this._relatedPhaseSets.set(phase.name, relatedPhaseSet);
+      this._relatedPhaseSetsByPhaseName.set(phase.name, relatedPhaseSet);
     }
 
     let buildCommandPhases: string[] | undefined;
@@ -393,7 +393,7 @@ export class CommandLineConfiguration {
           for (let i: number = 0; i < normalizedParameter.associatedCommands.length; i++) {
             const associatedCommandName: string = normalizedParameter.associatedCommands[i];
             const syntheticPhaseName: string | undefined =
-              this._syntheticPhasesForTranslatedBulkCommands.get(associatedCommandName);
+              this._syntheticPhasesNamesByTranslatedBulkCommandName.get(associatedCommandName);
             if (syntheticPhaseName) {
               // If this parameter was associated with a bulk command, change the association to
               // the command's synthetic phase
@@ -558,7 +558,7 @@ export class CommandLineConfiguration {
   }
 
   private _populateCommandsForPhase(phaseName: string, command: IPhasedCommand): void {
-    const populateRelatedPhaseSet: Set<string> = this._relatedPhaseSets.get(phaseName)!;
+    const populateRelatedPhaseSet: Set<string> = this._relatedPhaseSetsByPhaseName.get(phaseName)!;
     for (const relatedPhaseSetIdentifier of populateRelatedPhaseSet) {
       this._commandsByPhaseName.get(relatedPhaseSetIdentifier)!.add(command);
     }
@@ -584,10 +584,10 @@ export class CommandLineConfiguration {
       logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(command.name)
     };
     this.phases.set(phaseName, phaseForBulkCommand);
-    this._syntheticPhasesForTranslatedBulkCommands.set(command.name, phaseName);
+    this._syntheticPhasesNamesByTranslatedBulkCommandName.set(command.name, phaseName);
     const relatedPhaseSet: Set<string> = new Set<string>();
     this._populateRelatedPhaseSets(phaseName, relatedPhaseSet);
-    this._relatedPhaseSets.set(phaseName, relatedPhaseSet);
+    this._relatedPhaseSetsByPhaseName.set(phaseName, relatedPhaseSet);
 
     const translatedCommand: IPhasedCommand = {
       ...command,
