@@ -26,6 +26,36 @@ describe(CommandLineConfiguration.name, () => {
           ]
         })
     ).toThrowErrorMatchingSnapshot();
+    expect(
+      () =>
+        new CommandLineConfiguration({
+          phases: [
+            {
+              name: '_phase:0'
+            }
+          ]
+        })
+    ).toThrowErrorMatchingSnapshot();
+    expect(
+      () =>
+        new CommandLineConfiguration({
+          phases: [
+            {
+              name: '_phase:A'
+            }
+          ]
+        })
+    ).toThrowErrorMatchingSnapshot();
+    expect(
+      () =>
+        new CommandLineConfiguration({
+          phases: [
+            {
+              name: '_phase:A-'
+            }
+          ]
+        })
+    ).toThrowErrorMatchingSnapshot();
   });
 
   it('Detects a missing phase', () => {
@@ -41,7 +71,7 @@ describe(CommandLineConfiguration.name, () => {
               safeForSimultaneousRushProcesses: false,
 
               enableParallelism: true,
-              phases: ['_phase:A']
+              phases: ['_phase:a']
             }
           ]
         })
@@ -54,9 +84,9 @@ describe(CommandLineConfiguration.name, () => {
         new CommandLineConfiguration({
           phases: [
             {
-              name: '_phase:A',
+              name: '_phase:a',
               dependencies: {
-                upstream: ['_phase:B']
+                upstream: ['_phase:b']
               }
             }
           ]
@@ -68,9 +98,9 @@ describe(CommandLineConfiguration.name, () => {
         new CommandLineConfiguration({
           phases: [
             {
-              name: '_phase:A',
+              name: '_phase:a',
               dependencies: {
-                self: ['_phase:B']
+                self: ['_phase:b']
               }
             }
           ]
@@ -84,21 +114,21 @@ describe(CommandLineConfiguration.name, () => {
         new CommandLineConfiguration({
           phases: [
             {
-              name: '_phase:A',
+              name: '_phase:a',
               dependencies: {
-                self: ['_phase:B']
+                self: ['_phase:b']
               }
             },
             {
-              name: '_phase:B',
+              name: '_phase:b',
               dependencies: {
-                self: ['_phase:C']
+                self: ['_phase:c']
               }
             },
             {
-              name: '_phase:C',
+              name: '_phase:c',
               dependencies: {
-                self: ['_phase:A']
+                self: ['_phase:a']
               }
             }
           ]
@@ -168,19 +198,19 @@ describe(CommandLineConfiguration.name, () => {
             summary: 'custom-phased',
             enableParallelism: true,
             safeForSimultaneousRushProcesses: false,
-            phases: ['_phase:A']
+            phases: ['_phase:a']
           }
         ],
         phases: [
           {
-            name: '_phase:A'
+            name: '_phase:a'
           }
         ],
         parameters: [
           {
             parameterKind: 'flag',
             longName: '--flag',
-            associatedPhases: ['_phase:A'],
+            associatedPhases: ['_phase:a'],
             description: 'flag'
           }
         ]
@@ -202,25 +232,25 @@ describe(CommandLineConfiguration.name, () => {
             summary: 'custom-phased',
             enableParallelism: true,
             safeForSimultaneousRushProcesses: false,
-            phases: ['_phase:A']
+            phases: ['_phase:a']
           }
         ],
         phases: [
           {
-            name: '_phase:A',
+            name: '_phase:a',
             dependencies: {
-              upstream: ['_phase:B']
+              upstream: ['_phase:b']
             }
           },
           {
-            name: '_phase:B'
+            name: '_phase:b'
           }
         ],
         parameters: [
           {
             parameterKind: 'flag',
             longName: '--flag',
-            associatedPhases: ['_phase:B'],
+            associatedPhases: ['_phase:b'],
             description: 'flag'
           }
         ]

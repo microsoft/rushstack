@@ -139,7 +139,9 @@ export class CommandLineConfiguration {
    */
   public constructor(commandLineJson: ICommandLineJson | undefined) {
     if (commandLineJson?.phases) {
-      const phaseNamePrefix: string = RushConstants.phaseNamePrefix;
+      const phaseNameRegexp: RegExp = new RegExp(
+        `^${RushConstants.phaseNamePrefix}[a-z][a-z0-9]*([-][a-z0-9]+)*$`
+      );
       for (const phase of commandLineJson.phases) {
         if (this.phases.has(phase.name)) {
           throw new Error(
@@ -148,17 +150,13 @@ export class CommandLineConfiguration {
           );
         }
 
-        if (phase.name.substring(0, phaseNamePrefix.length) !== phaseNamePrefix) {
+        if (!phase.name.match(phaseNameRegexp)) {
           throw new Error(
             `In ${RushConstants.commandLineFilename}, the phase "${phase.name}"'s name ` +
-              `does not begin with the required prefix "${phaseNamePrefix}".`
-          );
-        }
-
-        if (phase.name.length <= phaseNamePrefix.length) {
-          throw new Error(
-            `In ${RushConstants.commandLineFilename}, the phase "${phase.name}"'s name ` +
-              `must have characters after "${phaseNamePrefix}"`
+              'is not a valid phase name. Phase names must begin with the ' +
+              `required prefix "${RushConstants.phaseNamePrefix}" followed by a name containing ` +
+              'lowercase letters, numbers, or hyphens. The name must start with a letter and ' +
+              'must not end with a hyphen.'
           );
         }
 
@@ -441,9 +439,9 @@ export class CommandLineConfiguration {
   }
 
   private _checkForPhaseSelfCycles(phase: IPhase, checkedPhases: Set<string> = new Set<string>()): void {
-    const dependencies: string[] | undefined = phase.dependencies?.self;
-    if (dependencies) {
-      for (const dependencyName of dependencies) {
+    const phaseSelfDependencies: string[] | undefined = phase.dependencies?.self;
+    if (phaseSelfDependencies) {
+      for (const dependencyName of phaseSelfDependencies) {
         if (checkedPhases.has(dependencyName)) {
           const dependencyNameForError: string =
             typeof dependencyName === 'string' ? dependencyName : '<synthetic phase>';
@@ -457,7 +455,7 @@ export class CommandLineConfiguration {
           if (!dependency) {
             return; // Ignore, we check for this separately
           } else {
-            if (dependencies.length > 1) {
+            if (phaseSelfDependencies.length > 1) {
               this._checkForPhaseSelfCycles(
                 dependency,
                 // Clone the set of checked phases if there are multiple branches we need to check
@@ -549,6 +547,12 @@ export class CommandLineConfiguration {
     this._additionalPathFolders.unshift(pathFolder);
   }
 
+  /**
+   * This function replaces colons (":") with underscores ("_").
+   *
+   * ts-command-line restricts command names to lowercase letters, numbers, underscores, and colons.
+   * Replacing colons with underscores produces a filesystem-safe name.
+   */
   private _normalizeNameForLogFilenameIdentifiers(name: string): string {
     return name.replace(/:/g, '_'); // Replace colons with underscores to be filesystem-safe
   }
