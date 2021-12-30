@@ -133,7 +133,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
     }
 
     const phasesToRun: Set<string> = new Set(this._actionPhases);
-    for (const parameter of this.commandLineConfiguration.parameters) {
+    for (const parameter of this.command.associatedParameters) {
       if (parameter.parameterKind === 'flag') {
         if (this.getFlagParameter(parameter.longName)!.value) {
           const flagParameter: IFlagParameterJson = parameter as IFlagParameterJson;
