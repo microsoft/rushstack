@@ -42,48 +42,46 @@ export abstract class BaseScriptAction<TCommand extends Command> extends BaseRus
     }
 
     // Find any parameters that are associated with this command
-    for (const parameter of this.commandLineConfiguration.parameters) {
-      if (this.command.associatedParameters.has(parameter)) {
-        let customParameter: CommandLineParameter | undefined;
+    for (const parameter of this.command.associatedParameters) {
+      let customParameter: CommandLineParameter | undefined;
 
-        switch (parameter.parameterKind) {
-          case 'flag':
-            customParameter = this.defineFlagParameter({
-              parameterShortName: parameter.shortName,
-              parameterLongName: parameter.longName,
-              description: parameter.description,
-              required: parameter.required
-            });
-            break;
-          case 'choice':
-            customParameter = this.defineChoiceParameter({
-              parameterShortName: parameter.shortName,
-              parameterLongName: parameter.longName,
-              description: parameter.description,
-              required: parameter.required,
-              alternatives: parameter.alternatives.map((x) => x.name),
-              defaultValue: parameter.defaultValue
-            });
-            break;
-          case 'string':
-            customParameter = this.defineStringParameter({
-              parameterLongName: parameter.longName,
-              parameterShortName: parameter.shortName,
-              description: parameter.description,
-              required: parameter.required,
-              argumentName: parameter.argumentName
-            });
-            break;
-          default:
-            throw new Error(
-              `${RushConstants.commandLineFilename} defines a parameter "${
-                (parameter as ParameterJson).longName
-              }" using an unsupported parameter kind "${(parameter as ParameterJson).parameterKind}"`
-            );
-        }
-
-        this.customParameters.push(customParameter);
+      switch (parameter.parameterKind) {
+        case 'flag':
+          customParameter = this.defineFlagParameter({
+            parameterShortName: parameter.shortName,
+            parameterLongName: parameter.longName,
+            description: parameter.description,
+            required: parameter.required
+          });
+          break;
+        case 'choice':
+          customParameter = this.defineChoiceParameter({
+            parameterShortName: parameter.shortName,
+            parameterLongName: parameter.longName,
+            description: parameter.description,
+            required: parameter.required,
+            alternatives: parameter.alternatives.map((x) => x.name),
+            defaultValue: parameter.defaultValue
+          });
+          break;
+        case 'string':
+          customParameter = this.defineStringParameter({
+            parameterLongName: parameter.longName,
+            parameterShortName: parameter.shortName,
+            description: parameter.description,
+            required: parameter.required,
+            argumentName: parameter.argumentName
+          });
+          break;
+        default:
+          throw new Error(
+            `${RushConstants.commandLineFilename} defines a parameter "${
+              (parameter as ParameterJson).longName
+            }" using an unsupported parameter kind "${(parameter as ParameterJson).parameterKind}"`
+          );
       }
+
+      this.customParameters.push(customParameter);
     }
   }
 }
