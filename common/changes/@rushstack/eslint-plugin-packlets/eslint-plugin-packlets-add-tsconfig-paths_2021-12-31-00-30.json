@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-plugin-packlets",
+      "comment": "Check imports which use compilerOptions.paths aliases ",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-plugin-packlets"
+}
