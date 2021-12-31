@@ -92,6 +92,24 @@ export class PackletAnalyzer {
       return;
     }
 
+    // Construct the path alias tester
+    // Example { "compilerOptions": { "paths": { "@my-org/*": ['app/*'], "@tools": ['tools'] } } }
+    const tsconfigPaths: MapLike<string[]> = compilerOptions.paths ? compilerOptions.paths : {};
+    // Remove any path mappings which are pointing to src/packlets, or node_modules
+    // (this would be nice to make configurable)
+    // Example [[alias, paths], ...]
+    const nonPackletMappings: [string, string[]][] = Object.entries(tsconfigPaths).filter(
+      ([, paths]) =>
+        !paths.some((path) => path.startsWith('src/packlets') || path.startsWith('node_modules/'))
+    );
+    // Create a test for each compilerOptions.paths to test that the
+    const tsconfigAliases: string[] = nonPackletMappings
+      .map(([alias]) => alias) // get just the aliases
+      .map((alias) => alias.replace('/*', '')); // '@my-org/*' -> '@my-org', '@tools' -> '@tools'
+    this.isModulePathAnAlias = (modulePath: string): boolean => {
+      return tsconfigAliases.some((alias) => modulePath === alias || modulePath.startsWith(`${alias}/`));
+    };
+
     srcFolderPath = Path.join(Path.dirname(tsconfigFilePath), 'src');
 
     if (!fs.existsSync(srcFolderPath)) {
@@ -112,23 +130,6 @@ export class PackletAnalyzer {
     const pathParts: string[] = inputFilePathRelativeToSrc.split(/[\/\\]+/);
 
     const expectedPackletsFolder: string = Path.join(srcFolderPath, 'packlets');
-
-    // Construct the path alias tester
-    // Example { "compilerOptions": { "paths": { "@my-org/*": ['app/*'], "@tools": ['tools'] } } }
-    const tsconfigPaths: MapLike<string[]> = compilerOptions.paths ? compilerOptions.paths : {};
-    // Remove any path mappings which are pointing to src/packlets, or node_modules
-    // (this would be nice to make configurable)
-    const nonPackletMappings: [string, string[]][] = Object.entries(tsconfigPaths).filter(
-      ([, paths]) =>
-        !paths.some((path) => path.startsWith('src/packlets') || path.startsWith('node_modules/'))
-    );
-    // Create a test for each compilerOptions.paths to test that the
-    const tsconfigPathTests: RegExp[] = nonPackletMappings
-      .map(([alias]) => alias) // get just the aliases
-      .map((alias) => alias.replace('/*', '')) // '@my-org/*' -> '@my-org', '@tools' -> '@tools'
-      .map((alias) => new RegExp(`^${alias}$|^${alias}\/`));
-    this.isModulePathAnAlias = (modulePath: string): boolean =>
-      tsconfigPathTests.some((re) => re.test(modulePath));
 
     let underPackletsFolder: boolean = false;
 
@@ -207,8 +208,6 @@ export class PackletAnalyzer {
 
     // Example: /path/to/my-project/src/other-packlet/index
     const importedPath: string = Path.resolve(inputFileFolder, modulePath);
-
-    console.log(`modulePath: ${modulePath} tests ${this.isModulePathAnAlias(modulePath)}`);
 
     // Is the imported path referring to a file under the src/packlets folder?
     if (!this.isModulePathAnAlias(modulePath) && Path.isUnder(importedPath, this.packletsFolderPath)) {
