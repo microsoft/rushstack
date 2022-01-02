@@ -335,6 +335,11 @@
             "parameterKind": {
               "enum": ["flag"]
             },
+            "doNotIncludeInProjectCommandLine": {
+              "title": "Do not include in project command line",
+              "description": "If true, then this parameter will not be passed along to projects' build commands. This only applies to parameters with \"addPhasesToCommand\" and/or \"skipPhasesForCommand\" properties set.",
+              "type": "boolean"
+            },
             "addPhasesToCommand": {
               "title": "Add phases to command",
               "description": "Include the phases listed here in the command's execution if this parameter is specified.",
@@ -365,6 +370,7 @@
             "associatedPhases": { "$ref": "#/definitions/anything" },
             "required": { "$ref": "#/definitions/anything" },
 
+            "doNotIncludeInProjectCommandLine": { "$ref": "#/definitions/anything" },
             "addPhasesToCommand": { "$ref": "#/definitions/anything" },
             "skipPhasesForCommand": { "$ref": "#/definitions/anything" }
           }

@@ -329,6 +329,20 @@ export class CommandLineConfiguration {
           case 'flag': {
             const addPhasesToCommandSet: Set<string> = new Set<string>();
 
+            if (
+              normalizedParameter.doNotIncludeInProjectCommandLine &&
+              !normalizedParameter.addPhasesToCommand?.length &&
+              !normalizedParameter.skipPhasesForCommand?.length
+            ) {
+              throw new Error(
+                `In ${RushConstants.commandLineFilename}, the parameter "${normalizedParameter.longName}" ` +
+                  'has the "doNotIncludeInProjectCommandLine" property set to true, but does not specify ' +
+                  'any phases in the "addPhasesToCommand" or "skipPhasesForCommand" properties. The ' +
+                  '"doNotIncludeInProjectCommandLine" parameter only applies to flag parameters that ' +
+                  'control phase execution.'
+              );
+            }
+
             if (normalizedParameter.addPhasesToCommand) {
               for (const phaseName of normalizedParameter.addPhasesToCommand) {
                 addPhasesToCommandSet.add(phaseName);

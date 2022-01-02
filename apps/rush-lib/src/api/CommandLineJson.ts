@@ -81,6 +81,7 @@ export interface IBaseParameterJson {
  */
 export interface IFlagParameterJson extends IBaseParameterJson {
   parameterKind: 'flag';
+  doNotIncludeInProjectCommandLine?: boolean;
   addPhasesToCommand?: string[];
   skipPhasesForCommand?: string[];
 }

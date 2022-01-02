@@ -28,6 +28,7 @@ export interface IBaseScriptActionOptions<TCommand extends Command> extends IBas
 export abstract class BaseScriptAction<TCommand extends Command> extends BaseRushAction {
   protected readonly commandLineConfiguration: CommandLineConfiguration;
   protected readonly customParameters: CommandLineParameter[] = [];
+  protected readonly customParametersToPassToScript: CommandLineParameter[] = [];
   protected readonly command: TCommand;
 
   public constructor(options: IBaseScriptActionOptions<TCommand>) {
@@ -44,6 +45,7 @@ export abstract class BaseScriptAction<TCommand extends Command> extends BaseRus
     // Find any parameters that are associated with this command
     for (const parameter of this.command.associatedParameters) {
       let customParameter: CommandLineParameter | undefined;
+      let shouldIncludeInScript: boolean = true;
 
       switch (parameter.parameterKind) {
         case 'flag':
@@ -53,6 +55,7 @@ export abstract class BaseScriptAction<TCommand extends Command> extends BaseRus
             description: parameter.description,
             required: parameter.required
           });
+          shouldIncludeInScript = !parameter.doNotIncludeInProjectCommandLine;
           break;
         case 'choice':
           customParameter = this.defineChoiceParameter({
@@ -82,6 +85,9 @@ export abstract class BaseScriptAction<TCommand extends Command> extends BaseRus
       }
 
       this.customParameters.push(customParameter);
+      if (shouldIncludeInScript) {
+        this.customParametersToPassToScript.push(customParameter);
+      }
     }
   }
 }

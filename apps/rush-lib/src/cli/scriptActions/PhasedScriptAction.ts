@@ -108,7 +108,7 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
 
     // Collect all custom parameter values
     const customParameterValues: string[] = [];
-    for (const customParameter of this.customParameters) {
+    for (const customParameter of this.customParametersToPassToScript) {
       customParameter.appendToArgList(customParameterValues);
     }
 
