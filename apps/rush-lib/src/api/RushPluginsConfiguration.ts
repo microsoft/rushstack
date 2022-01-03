@@ -4,6 +4,9 @@
 import * as path from 'path';
 import { FileSystem, JsonFile, JsonSchema } from '@rushstack/node-core-library';
 
+/**
+ * @internal
+ */
 export interface IRushPluginConfigurationBase {
   packageName: string;
   pluginName: string;

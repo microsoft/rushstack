@@ -53,6 +53,7 @@ import { SetupAction } from './actions/SetupAction';
 import { ICustomCommandLineConfigurationInfo, PluginManager } from '../pluginFramework/PluginManager';
 import { RushSession } from '../pluginFramework/RushSession';
 import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
+import { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -60,6 +61,7 @@ import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
 export interface IRushCommandLineParserOptions {
   cwd: string; // Defaults to `cwd`
   alreadyReportedNodeTooNewError: boolean;
+  builtInPluginConfigurations: IBuiltInPluginConfiguration[];
 }
 
 export class RushCommandLineParser extends CommandLineParser {
@@ -118,7 +120,8 @@ export class RushCommandLineParser extends CommandLineParser {
     this.pluginManager = new PluginManager({
       rushSession: this.rushSession,
       rushConfiguration: this.rushConfiguration,
-      terminal: this._terminal
+      terminal: this._terminal,
+      builtInPluginConfigurations: this._rushOptions.builtInPluginConfigurations
     });
 
     this._populateActions();
@@ -188,7 +191,8 @@ export class RushCommandLineParser extends CommandLineParser {
   private _normalizeOptions(options: Partial<IRushCommandLineParserOptions>): IRushCommandLineParserOptions {
     return {
       cwd: options.cwd || process.cwd(),
-      alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError || false
+      alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError || false,
+      builtInPluginConfigurations: options.builtInPluginConfigurations || []
     };
   }
 

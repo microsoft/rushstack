@@ -30,44 +30,40 @@ export interface IRushPluginManifestJson {
   plugins: IRushPluginManifest[];
 }
 
-export interface IPluginLoaderOptions {
-  pluginConfiguration: IRushPluginConfigurationBase;
+export interface IPluginLoaderOptions<TPluginConfiguration extends IRushPluginConfigurationBase> {
+  pluginConfiguration: TPluginConfiguration;
   rushConfiguration: RushConfiguration;
   terminal: ITerminal;
 }
 
-export abstract class PluginLoaderBase {
+export abstract class PluginLoaderBase<
+  TPluginConfiguration extends IRushPluginConfigurationBase = IRushPluginConfigurationBase
+> {
   protected static _jsonSchema: JsonSchema = JsonSchema.fromFile(
     path.join(__dirname, '../../schemas/rush-plugin-manifest.schema.json')
   );
 
+  public readonly packageName: Readonly<string>;
+  public readonly pluginName: Readonly<string>;
   protected readonly _rushConfiguration: RushConfiguration;
-  protected readonly _packageName: Readonly<string>;
-  protected readonly _pluginName: Readonly<string>;
   protected readonly _terminal: ITerminal;
 
-  protected _manifestCache!: Readonly<IRushPluginManifest>;
-
-  private _cachedPackageFolder: string | undefined = undefined;
-
-  public constructor({ pluginConfiguration, rushConfiguration, terminal }: IPluginLoaderOptions) {
-    this._packageName = pluginConfiguration.packageName;
-    this._pluginName = pluginConfiguration.pluginName;
-    this._rushConfiguration = rushConfiguration;
-    this._terminal = terminal;
-  }
-
-  /** Child classes use this to implement the lookup for getPackageFolder() */
-  protected abstract onGetPackageFolder(): string;
+  protected _manifestCache: Readonly<IRushPluginManifest> | undefined;
 
   /**
-   * Returns the folder that should be used for resolving the plugin's NPM package.
+   * The folder that should be used for resolving the plugin's NPM package.
    */
-  public getPackageFolder(): string {
-    if (this._cachedPackageFolder === undefined) {
-      this._cachedPackageFolder = this.onGetPackageFolder();
-    }
-    return this._cachedPackageFolder;
+  public abstract readonly packageFolder: string;
+
+  public constructor({
+    pluginConfiguration,
+    rushConfiguration,
+    terminal
+  }: IPluginLoaderOptions<TPluginConfiguration>) {
+    this.packageName = pluginConfiguration.packageName;
+    this.pluginName = pluginConfiguration.pluginName;
+    this._rushConfiguration = rushConfiguration;
+    this._terminal = terminal;
   }
 
   public load(): IRushPlugin | undefined {
@@ -80,14 +76,6 @@ export abstract class PluginLoaderBase {
     RushSdk.ensureInitialized();
 
     return this._loadAndValidatePluginPackage(resolvedPluginPath, pluginOptions);
-  }
-
-  public get packageName(): string {
-    return this._packageName;
-  }
-
-  public get pluginName(): string {
-    return this._pluginName;
   }
 
   public get pluginManifest(): IRushPluginManifest {
@@ -105,7 +93,7 @@ export abstract class PluginLoaderBase {
       commandLineConfiguration.prependAdditionalPathFolder(additionalPathFolder);
     }
     commandLineConfiguration.shellCommandTokenContext = {
-      packageFolder: this.getPackageFolder()
+      packageFolder: this.packageFolder
     };
     return commandLineConfiguration;
   }
@@ -114,7 +102,7 @@ export abstract class PluginLoaderBase {
     return [
       // Example: `@microsoft/rush-lib/node_modules/<packageName>/node_modules/.bin`
       // Example: `common/autoinstaller/plugins/node_modules/<packageName>/node_modules/.bin`
-      path.join(this.getPackageFolder(), 'node_modules', '.bin')
+      path.join(this.packageFolder, 'node_modules', '.bin')
     ];
   }
 
@@ -123,7 +111,7 @@ export abstract class PluginLoaderBase {
     if (!commandLineJsonFilePath) {
       return undefined;
     }
-    return path.join(this.getPackageFolder(), commandLineJsonFilePath);
+    return path.join(this.packageFolder, commandLineJsonFilePath);
   }
 
   private _loadAndValidatePluginPackage(resolvedPluginPath: string, options?: JsonObject): IRushPlugin {
@@ -160,11 +148,11 @@ export abstract class PluginLoaderBase {
     if (!entryPoint) {
       return undefined;
     }
-    const packageFolder: string = this.getPackageFolder();
+    const packageFolder: string = this.packageFolder;
     const modulePath: string = path.join(packageFolder, entryPoint);
     if (!FileSystem.exists(modulePath)) {
       throw new InternalError(
-        `Unable to find entry point "${modulePath}" for rush plugin "${this._pluginName}".`
+        `Unable to find entry point "${modulePath}" for rush plugin "${this.pluginName}".`
       );
     }
     return modulePath;
@@ -192,7 +180,7 @@ export abstract class PluginLoaderBase {
   }
 
   protected _getPluginOptionsJsonFilePath(): string {
-    return path.join(this._rushConfiguration.rushPluginOptionsFolder, `${this._pluginName}.json`);
+    return path.join(this._rushConfiguration.rushPluginOptionsFolder, `${this.pluginName}.json`);
   }
 
   protected _getRushPluginOptionsSchema(): JsonSchema | undefined {
@@ -200,14 +188,14 @@ export abstract class PluginLoaderBase {
     if (!optionsSchema) {
       return undefined;
     }
-    const optionsSchemaFilePath: string = path.join(this.getPackageFolder(), optionsSchema);
+    const optionsSchemaFilePath: string = path.join(this.packageFolder, optionsSchema);
     return JsonSchema.fromFile(optionsSchemaFilePath);
   }
 
   private _getRushPluginManifest(): IRushPluginManifest {
     if (!this._manifestCache) {
-      const packageName: string = this._packageName;
-      const pluginName: string = this._pluginName;
+      const packageName: string = this.packageName;
+      const pluginName: string = this.pluginName;
 
       const manifestPath: string = this._getManifestPath();
 
@@ -236,6 +224,6 @@ export abstract class PluginLoaderBase {
   }
 
   protected _getManifestPath(): string {
-    return path.join(this.getPackageFolder(), RushConstants.rushPluginManifestFilename);
+    return path.join(this.packageFolder, RushConstants.rushPluginManifestFilename);
   }
 }
