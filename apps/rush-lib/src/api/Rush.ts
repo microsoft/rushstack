@@ -9,6 +9,7 @@ import { RushXCommandLine } from '../cli/RushXCommandLine';
 import { CommandLineMigrationAdvisor } from '../cli/CommandLineMigrationAdvisor';
 import { Utilities } from '../utilities/Utilities';
 import { EnvironmentVariableNames } from './EnvironmentConfiguration';
+import { IBuiltInPluginConfiguration } from '../pluginFramework/PluginLoader/BuiltInPluginLoader';
 
 /**
  * Options to pass to the rush "launch" functions.
@@ -28,6 +29,13 @@ export interface ILaunchOptions {
    * with this version of Rush, so we shouldn't print a similar error.
    */
   alreadyReportedNodeTooNewError?: boolean;
+
+  /**
+   * Used to specify Rush plugins that are dependencies of the "\@microsoft/rush" package.
+   *
+   * @internal
+   */
+  builtInPluginConfigurations?: IBuiltInPluginConfiguration[];
 }
 
 /**
@@ -66,7 +74,8 @@ export class Rush {
 
     Rush._assignRushInvokedFolder();
     const parser: RushCommandLineParser = new RushCommandLineParser({
-      alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
+      alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError,
+      builtInPluginConfigurations: options.builtInPluginConfigurations
     });
     parser.execute().catch(console.error); // CommandLineParser.execute() should never reject the promise
   }

@@ -80,6 +80,8 @@ export {
 export { RushLifecycleHooks } from './pluginFramework/RushLifeCycle';
 
 export { IRushPlugin } from './pluginFramework/IRushPlugin';
+export { IBuiltInPluginConfiguration as _IBuiltInPluginConfiguration } from './pluginFramework/PluginLoader/BuiltInPluginLoader';
+export { IRushPluginConfigurationBase as _IRushPluginConfigurationBase } from './api/RushPluginsConfiguration';
 export { ILogger } from './pluginFramework/logging/Logger';
 
 export { ICloudBuildCacheProvider } from './logic/buildCache/ICloudBuildCacheProvider';

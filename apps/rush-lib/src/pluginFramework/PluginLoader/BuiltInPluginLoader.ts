@@ -4,6 +4,9 @@
 import { IRushPluginConfigurationBase } from '../../api/RushPluginsConfiguration';
 import { IPluginLoaderOptions, PluginLoaderBase } from './PluginLoaderBase';
 
+/**
+ * @internal
+ */
 export interface IBuiltInPluginConfiguration extends IRushPluginConfigurationBase {
   pluginPackageFolder: string;
 }

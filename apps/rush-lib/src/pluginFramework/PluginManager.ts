@@ -2,8 +2,8 @@
 // See LICENSE in the project root for license information.
 
 import { FileSystem, Import, InternalError, ITerminal } from '@rushstack/node-core-library';
-import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
 
+import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { BuiltInPluginLoader, IBuiltInPluginConfiguration } from './PluginLoader/BuiltInPluginLoader';
 import { IRushPlugin } from './IRushPlugin';
@@ -15,6 +15,7 @@ export interface IPluginManagerOptions {
   terminal: ITerminal;
   rushConfiguration: RushConfiguration;
   rushSession: RushSession;
+  builtInPluginConfigurations: IBuiltInPluginConfiguration[];
 }
 
 export interface ICustomCommandLineConfigurationInfo {
@@ -49,7 +50,7 @@ export class PluginManager {
     // The plugins have devDependencies on Rush, which would create a circular dependency in our local
     // workspace if we added them to rush-lib/package.json.  Instead we put them in a special section
     // "publishOnlyDependencies" which gets moved into "dependencies" during publishing.
-    const builtInPluginConfigurations: IBuiltInPluginConfiguration[] = [];
+    const builtInPluginConfigurations: IBuiltInPluginConfiguration[] = options.builtInPluginConfigurations;
 
     const ownPackageJsonDependencies: Record<string, string> = require('../../package.json').dependencies;
     function tryAddBuiltInPlugin(builtInPluginName: string): void {
