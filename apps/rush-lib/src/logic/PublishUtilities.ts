@@ -113,9 +113,8 @@ export class PublishUtilities {
         currentVersion,
         PublishUtilities._getReleaseType(changeType)
       );
-      if (newVersion !== null) {
-        versionPolicyChanges[versionPolicyName] = new SemVer(newVersion);
-      }
+
+      versionPolicyChanges[versionPolicyName] = new SemVer(newVersion ?? currentVersion);
     });
 
     // add dependency change to projects affected by the lock version policy update
@@ -133,7 +132,7 @@ export class PublishUtilities {
         this._addChange(
           {
             packageName: pkg.packageName,
-            changeType: ChangeType.patch, // force a release
+            changeType: ChangeType.none,
             newVersion: versionPolicyVersion // enforce the specific policy version
           },
           packageChanges,
@@ -181,7 +180,7 @@ export class PublishUtilities {
           change.newVersion = pkg.version;
         } else {
           // For hotfix changes, do not re-write new version
-          change.newVersion =
+          const newVersion =
             change.changeType! >= ChangeType.patch
               ? semver.inc(
                   pkg.version,
@@ -194,6 +193,13 @@ export class PublishUtilities {
               : change.changeType === ChangeType.hotfix
               ? change.newVersion
               : pkg.version;
+
+          change.newVersion =
+            newVersion !== undefined &&
+            change.newVersion !== undefined &&
+            semver.gt(change.newVersion, newVersion)
+              ? change.newVersion
+              : newVersion;
         }
 
         if (deps) {
@@ -637,6 +643,11 @@ export class PublishUtilities {
       currentChange.changes!.push(change);
 
       hasChanged = hasChanged || oldChangeType !== currentChange.changeType;
+      hasChanged =
+        hasChanged ||
+        (change.newVersion !== undefined &&
+          currentChange.newVersion !== undefined &&
+          semver.gt(change.newVersion, currentChange.newVersion));
     }
 
     const skipVersionBump: boolean = PublishUtilities._shouldSkipVersionBump(
@@ -665,12 +676,13 @@ export class PublishUtilities {
         // When there are multiple changes of this package, the final value of new version
         // should not depend on the order of the changes.
         let packageVersion: string = change.newVersion ?? pkg.version;
-        if (currentChange.newVersion && semver.gt(currentChange.newVersion, pkg.version)) {
+        if (currentChange.newVersion && semver.gt(currentChange.newVersion, packageVersion)) {
           packageVersion = currentChange.newVersion;
         }
+
         currentChange.newVersion =
           change.changeType! >= ChangeType.patch
-            ? semver.inc(pkg.version, PublishUtilities._getReleaseType(currentChange.changeType!))!
+            ? semver.inc(packageVersion, PublishUtilities._getReleaseType(currentChange.changeType!))!
             : packageVersion;
       }
 
