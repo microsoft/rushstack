@@ -120,16 +120,12 @@ export class PublishUtilities {
 
     // add dependency change to projects affected by the lock version policy update
     allPackages.forEach((pkg) => {
-      const versionPolicy: LockStepVersionPolicy | undefined =
+      const versionPolicyVersion: string | undefined =
         pkg.versionPolicyName !== undefined
-          ? (rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
-              pkg.versionPolicyName
-            ) as LockStepVersionPolicy)
+          ? versionPolicyChanges[pkg.versionPolicyName]?.format()
           : undefined;
-      const versionPolicyChangeType: ChangeType | undefined =
-        versionPolicy !== undefined ? versionPolicyChangeTypes.get(versionPolicy.policyName) : undefined;
 
-      if (versionPolicy === undefined || versionPolicyChangeType === undefined) {
+      if (versionPolicyVersion === undefined) {
         return;
       }
 
@@ -137,8 +133,8 @@ export class PublishUtilities {
         this._addChange(
           {
             packageName: pkg.packageName,
-            changeType: ChangeType.patch, // force a bump
-            newVersion: versionPolicy.version // enforce the specific policy version
+            changeType: ChangeType.patch, // force a release
+            newVersion: versionPolicyVersion // enforce the specific policy version
           },
           packageChanges,
           allPackages,
@@ -147,7 +143,7 @@ export class PublishUtilities {
           projectsToExclude
         )
       ) {
-        console.log(`${EOL}* APPLYING: update ${pkg.packageName} to version ${versionPolicy.version}`);
+        console.log(`${EOL}* APPLYING: update ${pkg.packageName} to version ${versionPolicyVersion}`);
       }
     });
 
