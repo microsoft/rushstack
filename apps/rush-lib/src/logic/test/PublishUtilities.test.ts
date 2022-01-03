@@ -301,7 +301,7 @@ describe('findChangeRequests', () => {
       undefined,
       new Set<string>(['a', 'b', 'e'])
     );
-    expect(Object.keys(allChanges)).toHaveLength(5);
+    expect(Object.keys(allChanges)).toHaveLength(7);
     expect(allChanges['a'].newVersion).toEqual('1.0.0');
     expect(allChanges['b'].newVersion).toEqual('2.0.0');
     expect(allChanges['c'].changeType).toEqual(ChangeType.patch);
@@ -309,6 +309,9 @@ describe('findChangeRequests', () => {
     expect(allChanges['d'].changeType).toEqual(ChangeType.patch);
     expect(allChanges['d'].newVersion).toEqual('4.1.2');
     expect(allChanges['e'].newVersion).toEqual(allPackages.get('e')!.packageJson.version);
+    expect(allChanges['f'].changeType).toEqual(ChangeType.none);
+    expect(allChanges['h'].changeType).toEqual(ChangeType.patch);
+    expect(allChanges['h'].newVersion).toEqual('1.0.1');
   });
 });
 
