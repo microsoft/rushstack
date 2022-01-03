@@ -136,7 +136,7 @@ export class VersionPolicyConfiguration {
    * @param versionPolicyName - version policy name
    * @param newVersion - new version
    */
-  public update(versionPolicyName: string, newVersion: string, shouldCommit: boolean): void {
+  public update(versionPolicyName: string, newVersion: string, shouldCommit?: boolean): void {
     const policy: VersionPolicy | undefined = this.versionPolicies.get(versionPolicyName);
     if (!policy || !policy.isLockstepped) {
       throw new Error(`Lockstep Version policy with name "${versionPolicyName}" cannot be found`);
