@@ -24,7 +24,8 @@
   "engineStrict": true,
   "homepage": "https://rushjs.io",
   "scripts": {
-    "build": "heft test --clean"
+    "build": "heft test --clean",
+    "start": "node lib/start-dev-docs.js"
   },
   "bin": {
     "rush": "./bin/rush",

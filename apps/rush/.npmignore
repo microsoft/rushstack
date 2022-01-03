@@ -28,5 +28,6 @@
 #--------------------------------------------
 
 /lib/start-dev.*
+/lib/start-dev-docs.*
 
 # (Add your project-specific overrides here)
