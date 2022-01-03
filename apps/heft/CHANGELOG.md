@@ -1,6 +1,23 @@
 # Change Log - @rushstack/heft
 
-This log was last generated on Thu, 09 Dec 2021 00:21:54 GMT and should not be manually modified.
+This log was last generated on Mon, 27 Dec 2021 16:10:40 GMT and should not be manually modified.
+
+## 0.44.1
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 0.44.0
+Tue, 14 Dec 2021 19:27:51 GMT
+
+### Minor changes
+
+- Remove Jest-specific CLI arguments from Heft. These parameters have been moved to @rushstack/heft-jest-plugin.
+
+## 0.43.2
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
 
 ## 0.43.1
 Thu, 09 Dec 2021 00:21:54 GMT

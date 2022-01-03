@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { CommandLineConfiguration } from '../CommandLineConfiguration';
+import { RushConstants } from '../../logic/RushConstants';
+import { Command, CommandLineConfiguration, Parameter } from '../CommandLineConfiguration';
 
-describe('CommandLineConfiguration', () => {
+describe(CommandLineConfiguration.name, () => {
   it('Forbids a misnamed phase', () => {
     expect(
       () =>
@@ -25,6 +26,36 @@ describe('CommandLineConfiguration', () => {
           ]
         })
     ).toThrowErrorMatchingSnapshot();
+    expect(
+      () =>
+        new CommandLineConfiguration({
+          phases: [
+            {
+              name: '_phase:0'
+            }
+          ]
+        })
+    ).toThrowErrorMatchingSnapshot();
+    expect(
+      () =>
+        new CommandLineConfiguration({
+          phases: [
+            {
+              name: '_phase:A'
+            }
+          ]
+        })
+    ).toThrowErrorMatchingSnapshot();
+    expect(
+      () =>
+        new CommandLineConfiguration({
+          phases: [
+            {
+              name: '_phase:A-'
+            }
+          ]
+        })
+    ).toThrowErrorMatchingSnapshot();
   });
 
   it('Detects a missing phase', () => {
@@ -40,7 +71,7 @@ describe('CommandLineConfiguration', () => {
               safeForSimultaneousRushProcesses: false,
 
               enableParallelism: true,
-              phases: ['_phase:A']
+              phases: ['_phase:a']
             }
           ]
         })
@@ -53,9 +84,9 @@ describe('CommandLineConfiguration', () => {
         new CommandLineConfiguration({
           phases: [
             {
-              name: '_phase:A',
+              name: '_phase:a',
               dependencies: {
-                upstream: ['_phase:B']
+                upstream: ['_phase:b']
               }
             }
           ]
@@ -67,9 +98,9 @@ describe('CommandLineConfiguration', () => {
         new CommandLineConfiguration({
           phases: [
             {
-              name: '_phase:A',
+              name: '_phase:a',
               dependencies: {
-                self: ['_phase:B']
+                self: ['_phase:b']
               }
             }
           ]
@@ -83,25 +114,153 @@ describe('CommandLineConfiguration', () => {
         new CommandLineConfiguration({
           phases: [
             {
-              name: '_phase:A',
+              name: '_phase:a',
               dependencies: {
-                self: ['_phase:B']
+                self: ['_phase:b']
               }
             },
             {
-              name: '_phase:B',
+              name: '_phase:b',
               dependencies: {
-                self: ['_phase:C']
+                self: ['_phase:c']
               }
             },
             {
-              name: '_phase:C',
+              name: '_phase:c',
               dependencies: {
-                self: ['_phase:A']
+                self: ['_phase:a']
               }
             }
           ]
         })
     ).toThrowErrorMatchingSnapshot();
+  });
+
+  describe('associatedParameters', () => {
+    it('correctly populates the associatedParameters object for a parameter associated with the "build" command', () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        parameters: [
+          {
+            parameterKind: 'flag',
+            longName: '--flag',
+            associatedCommands: ['build'],
+            description: 'flag'
+          }
+        ]
+      });
+
+      function validateCommandByName(commandName: string): void {
+        const command: Command | undefined = commandLineConfiguration.commands.get(commandName);
+        expect(command).toBeDefined();
+        const associatedParametersArray: Parameter[] = Array.from(command!.associatedParameters);
+        expect(associatedParametersArray).toHaveLength(1);
+        expect(associatedParametersArray[0].longName).toEqual('--flag');
+      }
+
+      validateCommandByName(RushConstants.buildCommandName);
+      validateCommandByName(RushConstants.rebuildCommandName);
+    });
+
+    it('correctly populates the associatedParameters object for a parameter associated with a custom bulk command', () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'bulk',
+            name: 'custom-bulk',
+            summary: 'custom-bulk',
+            enableParallelism: true,
+            safeForSimultaneousRushProcesses: false
+          }
+        ],
+        parameters: [
+          {
+            parameterKind: 'flag',
+            longName: '--flag',
+            associatedCommands: ['custom-bulk'],
+            description: 'flag'
+          }
+        ]
+      });
+
+      const command: Command | undefined = commandLineConfiguration.commands.get('custom-bulk');
+      expect(command).toBeDefined();
+      const associatedParametersArray: Parameter[] = Array.from(command!.associatedParameters);
+      expect(associatedParametersArray).toHaveLength(1);
+      expect(associatedParametersArray[0].longName).toEqual('--flag');
+    });
+
+    it("correctly populates the associatedParameters object for a parameter associated with a custom phased command's phase", () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'phased',
+            name: 'custom-phased',
+            summary: 'custom-phased',
+            enableParallelism: true,
+            safeForSimultaneousRushProcesses: false,
+            phases: ['_phase:a']
+          }
+        ],
+        phases: [
+          {
+            name: '_phase:a'
+          }
+        ],
+        parameters: [
+          {
+            parameterKind: 'flag',
+            longName: '--flag',
+            associatedPhases: ['_phase:a'],
+            description: 'flag'
+          }
+        ]
+      });
+
+      const command: Command | undefined = commandLineConfiguration.commands.get('custom-phased');
+      expect(command).toBeDefined();
+      const associatedParametersArray: Parameter[] = Array.from(command!.associatedParameters);
+      expect(associatedParametersArray).toHaveLength(1);
+      expect(associatedParametersArray[0].longName).toEqual('--flag');
+    });
+
+    it("correctly populates the associatedParameters object for a parameter associated with a custom phased command's transitive phase", () => {
+      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
+        commands: [
+          {
+            commandKind: 'phased',
+            name: 'custom-phased',
+            summary: 'custom-phased',
+            enableParallelism: true,
+            safeForSimultaneousRushProcesses: false,
+            phases: ['_phase:a']
+          }
+        ],
+        phases: [
+          {
+            name: '_phase:a',
+            dependencies: {
+              upstream: ['_phase:b']
+            }
+          },
+          {
+            name: '_phase:b'
+          }
+        ],
+        parameters: [
+          {
+            parameterKind: 'flag',
+            longName: '--flag',
+            associatedPhases: ['_phase:b'],
+            description: 'flag'
+          }
+        ]
+      });
+
+      const command: Command | undefined = commandLineConfiguration.commands.get('custom-phased');
+      expect(command).toBeDefined();
+      const associatedParametersArray: Parameter[] = Array.from(command!.associatedParameters);
+      expect(associatedParametersArray).toHaveLength(1);
+      expect(associatedParametersArray[0].longName).toEqual('--flag');
+    });
   });
 });

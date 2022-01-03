@@ -94,12 +94,7 @@ export interface IEventHooksJson {
 /**
  * Part of IRushConfigurationJson.
  */
-export interface IRushRepositoryJson {
-  /**
-   * The remote url of the repository. This helps "rush change" find the right remote to compare against.
-   */
-  url?: string;
-
+export interface IRushRepositoryJsonBase {
   /**
    * The default branch name. This tells "rush change" which remote branch to compare against.
    */
@@ -111,6 +106,28 @@ export interface IRushRepositoryJson {
    */
   defaultRemote?: string;
 }
+
+export interface IRushRepositoryJsonSingleUrl extends IRushRepositoryJsonBase {
+  /**
+   * The remote url of the repository. If a value is provided,
+   * \"rush change\" will use it to find the right remote to compare against.
+   *
+   * @deprecated Use "urls" instead.
+   */
+  url?: string;
+}
+
+export interface IRushRepositoryJsonMultipleUrls extends IRushRepositoryJsonBase {
+  /**
+   * Remote url(s) of the repository. If a value is provided, \"rush change\" will
+   * use one of these to find the right remote to compare against. Specifying multiple URLs
+   * is useful if a GitHub repository is renamed or for "<projectName>.visualstudio.com" vs
+   * "dev.azure.com/<projectName>" URLs.
+   */
+  urls?: string[];
+}
+
+export type IRushRepositoryJson = IRushRepositoryJsonSingleUrl | IRushRepositoryJsonMultipleUrls;
 
 /**
  * This represents the available PNPM store options
@@ -455,7 +472,7 @@ export class RushConfiguration {
   private _hotfixChangeEnabled: boolean;
 
   // Repository info
-  private _repositoryUrl: string | undefined;
+  private _repositoryUrls: string[];
   private _repositoryDefaultBranch: string;
   private _repositoryDefaultRemote: string;
 
@@ -694,9 +711,23 @@ export class RushConfiguration {
       rushConfigurationJson.repository = {};
     }
 
-    this._repositoryUrl = rushConfigurationJson.repository.url;
     this._repositoryDefaultBranch = rushConfigurationJson.repository.defaultBranch || DEFAULT_BRANCH;
     this._repositoryDefaultRemote = rushConfigurationJson.repository.defaultRemote || DEFAULT_REMOTE;
+    const repositoryFieldWithMultipleUrls: IRushRepositoryJsonMultipleUrls =
+      rushConfigurationJson.repository as IRushRepositoryJsonMultipleUrls;
+    const repositoryFieldWithSingleUrl: IRushRepositoryJsonSingleUrl =
+      rushConfigurationJson.repository as IRushRepositoryJsonSingleUrl;
+    if (repositoryFieldWithMultipleUrls.urls) {
+      if (repositoryFieldWithSingleUrl.url) {
+        throw new Error("The 'repository.url' field cannot be used when 'repository.urls' is present");
+      }
+
+      this._repositoryUrls = repositoryFieldWithMultipleUrls.urls;
+    } else if (repositoryFieldWithSingleUrl.url) {
+      this._repositoryUrls = [repositoryFieldWithSingleUrl.url];
+    } else {
+      this._repositoryUrls = [];
+    }
 
     this._telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
     this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks || {});
@@ -1330,10 +1361,13 @@ export class RushConfiguration {
   }
 
   /**
-   * The remote url of the repository. This helps "rush change" find the right remote to compare against.
+   * Remote URL(s) of the repository. If a value is provided, \"rush change\" will
+   * use one of these to find the right remote to compare against. Specifying multiple URLs
+   * is useful if a GitHub repository is renamed or for "<projectName>.visualstudio.com" vs
+   * "dev.azure.com/<projectName>" URLs.
    */
-  public get repositoryUrl(): string | undefined {
-    return this._repositoryUrl;
+  public get repositoryUrls(): string[] {
+    return this._repositoryUrls;
   }
 
   /**

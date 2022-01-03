@@ -16,8 +16,12 @@ import { PrintUtilities } from '@rushstack/terminal';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConstants } from '../logic/RushConstants';
-import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
-import { CommandJson } from '../api/CommandLineJson';
+import {
+  Command,
+  CommandLineConfiguration,
+  IGlobalCommand,
+  IPhasedCommand
+} from '../api/CommandLineConfiguration';
 import { Utilities } from '../utilities/Utilities';
 
 import { AddAction } from './actions/AddAction';
@@ -38,18 +42,17 @@ import { UpdateAction } from './actions/UpdateAction';
 import { UpdateAutoinstallerAction } from './actions/UpdateAutoinstallerAction';
 import { VersionAction } from './actions/VersionAction';
 import { UpdateCloudCredentialsAction } from './actions/UpdateCloudCredentialsAction';
-import { WriteBuildCacheAction } from './actions/WriteBuildCacheAction';
 
-import { BulkScriptAction } from './scriptActions/BulkScriptAction';
 import { GlobalScriptAction } from './scriptActions/GlobalScriptAction';
+import { IBaseScriptActionOptions } from './scriptActions/BaseScriptAction';
 
 import { Telemetry } from '../logic/Telemetry';
 import { RushGlobalFolder } from '../api/RushGlobalFolder';
 import { NodeJsCompatibility } from '../logic/NodeJsCompatibility';
 import { SetupAction } from './actions/SetupAction';
-import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
 import { ICustomCommandLineConfigurationInfo, PluginManager } from '../pluginFramework/PluginManager';
 import { RushSession } from '../pluginFramework/RushSession';
+import { PhasedScriptAction } from './scriptActions/PhasedScriptAction';
 
 /**
  * Options for `RushCommandLineParser`.
@@ -67,9 +70,9 @@ export class RushCommandLineParser extends CommandLineParser {
   public readonly pluginManager: PluginManager;
 
   private _debugParameter!: CommandLineFlagParameter;
-  private _rushOptions: IRushCommandLineParserOptions;
-  private _terminalProvider: ConsoleTerminalProvider;
-  private _terminal: Terminal;
+  private readonly _rushOptions: IRushCommandLineParserOptions;
+  private readonly _terminalProvider: ConsoleTerminalProvider;
+  private readonly _terminal: Terminal;
 
   public constructor(options?: Partial<IRushCommandLineParserOptions>) {
     super({
@@ -88,7 +91,6 @@ export class RushCommandLineParser extends CommandLineParser {
 
     this._terminalProvider = new ConsoleTerminalProvider();
     this._terminal = new Terminal(this._terminalProvider);
-
     this._rushOptions = this._normalizeOptions(options || {});
 
     try {
@@ -225,7 +227,6 @@ export class RushCommandLineParser extends CommandLineParser {
       this.addAction(new UpdateAutoinstallerAction(this));
       this.addAction(new UpdateCloudCredentialsAction(this));
       this.addAction(new VersionAction(this));
-      this.addAction(new WriteBuildCacheAction(this));
 
       this._populateScriptActions();
     } catch (error) {
@@ -234,46 +235,22 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   private _populateScriptActions(): void {
-    let commandLineConfiguration: CommandLineConfiguration | undefined = undefined;
-
     // If there is not a rush.json file, we still want "build" and "rebuild" to appear in the
     // command-line help
+    let commandLineConfigFilePath: string | undefined;
     if (this.rushConfiguration) {
-      const commandLineConfigFilePath: string = path.join(
+      commandLineConfigFilePath = path.join(
         this.rushConfiguration.commonRushConfigFolder,
         RushConstants.commandLineFilename
       );
-
-      commandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFilePath);
     }
 
-    // Build actions from the command line configuration supersede default build actions.
+    const commandLineConfiguration: CommandLineConfiguration =
+      CommandLineConfiguration.loadFromFileOrDefault(commandLineConfigFilePath);
     this._addCommandLineConfigActions(commandLineConfiguration);
-    this._addDefaultBuildActions(commandLineConfiguration);
   }
 
-  private _addDefaultBuildActions(commandLineConfiguration?: CommandLineConfiguration): void {
-    if (!this.tryGetAction(RushConstants.buildCommandName)) {
-      this._addCommandLineConfigAction(
-        commandLineConfiguration,
-        CommandLineConfiguration.defaultBuildCommandJson
-      );
-    }
-
-    if (!this.tryGetAction(RushConstants.rebuildCommandName)) {
-      this._addCommandLineConfigAction(
-        commandLineConfiguration,
-        CommandLineConfiguration.defaultRebuildCommandJson,
-        RushConstants.buildCommandName
-      );
-    }
-  }
-
-  private _addCommandLineConfigActions(commandLineConfiguration?: CommandLineConfiguration): void {
-    if (!commandLineConfiguration) {
-      return;
-    }
-
+  private _addCommandLineConfigActions(commandLineConfiguration: CommandLineConfiguration): void {
     // Register each custom command
     for (const command of commandLineConfiguration.commands.values()) {
       this._addCommandLineConfigAction(commandLineConfiguration, command);
@@ -281,9 +258,8 @@ export class RushCommandLineParser extends CommandLineParser {
   }
 
   private _addCommandLineConfigAction(
-    commandLineConfiguration: CommandLineConfiguration | undefined,
-    command: CommandJson,
-    commandToRun?: string
+    commandLineConfiguration: CommandLineConfiguration,
+    command: Command
   ): void {
     if (this.tryGetAction(command.name)) {
       throw new Error(
@@ -292,93 +268,60 @@ export class RushCommandLineParser extends CommandLineParser {
       );
     }
 
-    this._validateCommandLineConfigCommand(command);
-
-    const overrideAllowWarnings: boolean = EnvironmentConfiguration.allowWarningsInSuccessfulBuild;
-
     switch (command.commandKind) {
-      case RushConstants.bulkCommandKind: {
-        this.addAction(
-          new BulkScriptAction({
-            actionName: command.name,
-
-            // By default, the "rebuild" action runs the "build" script. However, if the command-line.json file
-            // overrides "rebuild," the "rebuild" script should be run.
-            commandToRun: commandToRun,
-
-            summary: command.summary,
-            documentation: command.description || command.summary,
-            safeForSimultaneousRushProcesses: command.safeForSimultaneousRushProcesses,
-
-            parser: this,
-            commandLineConfiguration: commandLineConfiguration,
-
-            enableParallelism: command.enableParallelism,
-            ignoreMissingScript: command.ignoreMissingScript || false,
-            ignoreDependencyOrder: command.ignoreDependencyOrder || false,
-            incremental: command.incremental || false,
-            allowWarningsInSuccessfulBuild: overrideAllowWarnings || !!command.allowWarningsInSuccessfulBuild,
-
-            watchForChanges: command.watchForChanges || false,
-            disableBuildCache: command.disableBuildCache || false
-          })
-        );
-        break;
-      }
-
       case RushConstants.globalCommandKind: {
-        this.addAction(
-          new GlobalScriptAction({
-            actionName: command.name,
-            summary: command.summary,
-            documentation: command.description || command.summary,
-            safeForSimultaneousRushProcesses: command.safeForSimultaneousRushProcesses,
-
-            parser: this,
-            commandLineConfiguration: commandLineConfiguration,
-
-            shellCommand: command.shellCommand,
-
-            autoinstallerName: command.autoinstallerName
-          })
-        );
+        this._addGlobalScriptAction(commandLineConfiguration, command);
         break;
       }
 
       case RushConstants.phasedCommandKind: {
-        if (!this.rushConfiguration.experimentsConfiguration.configuration._multiPhaseCommands) {
+        if (
+          !command.isSynthetic && // synthetic commands come from bulk commands
+          !this.rushConfiguration.experimentsConfiguration.configuration.phasedCommands
+        ) {
           throw new Error(
             `${RushConstants.commandLineFilename} defines a command "${command.name}" ` +
               `that uses the "${RushConstants.phasedCommandKind}" command kind. To use this command kind, ` +
-              'the "_multiPhaseCommands" experiment must be enabled. Note that this feature is not complete ' +
+              'the "phasedCommands" experiment must be enabled. Note that this feature is not complete ' +
               'and will not work as expected.'
           );
         }
 
-        // TODO
+        this._addPhasedCommandLineConfigAction(commandLineConfiguration, command);
         break;
       }
 
       default:
         throw new Error(
-          `${RushConstants.commandLineFilename} defines a command "${(command as CommandJson).name}"` +
-            ` using an unsupported command kind "${(command as CommandJson).commandKind}"`
+          `${RushConstants.commandLineFilename} defines a command "${(command as Command).name}"` +
+            ` using an unsupported command kind "${(command as Command).commandKind}"`
         );
     }
   }
 
-  private _validateCommandLineConfigCommand(command: CommandJson): void {
-    // There are some restrictions on the 'build' and 'rebuild' commands.
-    if (
-      command.name !== RushConstants.buildCommandName &&
-      command.name !== RushConstants.rebuildCommandName
-    ) {
-      return;
-    }
+  private _getSharedCommandActionOptions<TCommand extends Command>(
+    commandLineConfiguration: CommandLineConfiguration,
+    command: TCommand
+  ): IBaseScriptActionOptions<TCommand> {
+    return {
+      actionName: command.name,
+      summary: command.summary,
+      documentation: command.description || command.summary,
+      safeForSimultaneousRushProcesses: command.safeForSimultaneousRushProcesses,
 
+      command,
+      parser: this,
+      commandLineConfiguration: commandLineConfiguration
+    };
+  }
+
+  private _addGlobalScriptAction(
+    commandLineConfiguration: CommandLineConfiguration,
+    command: IGlobalCommand
+  ): void {
     if (
-      command.commandKind !== RushConstants.bulkCommandKind &&
-      command.commandKind !== RushConstants.phasedCommandKind
+      command.name === RushConstants.buildCommandName ||
+      command.name === RushConstants.rebuildCommandName
     ) {
       throw new Error(
         `${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
@@ -386,12 +329,42 @@ export class RushCommandLineParser extends CommandLineParser {
           `kind "${RushConstants.bulkCommandKind}" or "${RushConstants.phasedCommandKind}".`
       );
     }
-    if (command.safeForSimultaneousRushProcesses) {
-      throw new Error(
-        `${RushConstants.commandLineFilename} defines a command "${command.name}" using ` +
-          `"safeForSimultaneousRushProcesses=true". This configuration is not supported for "${command.name}".`
-      );
-    }
+
+    const sharedCommandOptions: IBaseScriptActionOptions<IGlobalCommand> =
+      this._getSharedCommandActionOptions(commandLineConfiguration, command);
+
+    this.addAction(
+      new GlobalScriptAction({
+        ...sharedCommandOptions,
+
+        shellCommand: command.shellCommand,
+        autoinstallerName: command.autoinstallerName
+      })
+    );
+  }
+
+  private _addPhasedCommandLineConfigAction(
+    commandLineConfiguration: CommandLineConfiguration,
+    command: IPhasedCommand
+  ): void {
+    const baseCommandOptions: IBaseScriptActionOptions<IPhasedCommand> = this._getSharedCommandActionOptions(
+      commandLineConfiguration,
+      command
+    );
+
+    this.addAction(
+      new PhasedScriptAction({
+        ...baseCommandOptions,
+
+        enableParallelism: command.enableParallelism,
+        incremental: command.incremental || false,
+        watchForChanges: command.watchForChanges || false,
+        disableBuildCache: command.disableBuildCache || false,
+
+        actionPhases: command.phases,
+        phases: commandLineConfiguration.phases
+      })
+    );
   }
 
   private _reportErrorAndSetExitCode(error: Error): void {

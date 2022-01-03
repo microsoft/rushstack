@@ -30,8 +30,8 @@
       "description": "If true, build caching will respect the allowWarningsInSuccessfulBuild flag and cache builds with warnings. This will not replay warnings from the cached build.",
       "type": "boolean"
     },
-    "_multiPhaseCommands": {
-      "description": "(NOT YET FEATURE COMPLETE) If true, the multi-phase commands feature is enabled. To use this feature, create a \"phased\" command in common/config/rush/command-line.json.",
+    "phasedCommands": {
+      "description": "If true, the phased commands feature is enabled. To use this feature, create a \"phased\" command in common/config/rush/command-line.json.",
       "type": "boolean"
     }
   },

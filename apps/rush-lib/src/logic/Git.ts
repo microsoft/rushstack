@@ -8,6 +8,7 @@ import * as path from 'path';
 import * as url from 'url';
 import colors from 'colors/safe';
 import { Executable, AlreadyReportedError, Path, ITerminal } from '@rushstack/node-core-library';
+import { ensureGitMinimumVersion } from '@rushstack/package-deps-hash';
 
 import { Utilities } from '../utilities/Utilities';
 import { GitEmailPolicy } from './policy/GitEmailPolicy';
@@ -21,6 +22,11 @@ interface IResultOrError<TResult> {
   result?: TResult;
 }
 
+export interface IGetBlobOptions {
+  blobSpec: string;
+  repositoryRoot: string;
+}
+
 export class Git {
   private readonly _rushConfiguration: RushConfiguration;
   private _checkedGitPath: boolean = false;
@@ -29,6 +35,7 @@ export class Git {
   private _gitInfo: gitInfo.GitRepoInfo | undefined;
 
   private _gitEmailResult: IResultOrError<string> | undefined = undefined;
+  private _gitHooksPath: IResultOrError<string> | undefined = undefined;
 
   public constructor(rushConfiguration: RushConfiguration) {
     this._rushConfiguration = rushConfiguration;
@@ -142,6 +149,51 @@ export class Git {
     return undefined;
   }
 
+  public isHooksPathDefault(): boolean {
+    const repoInfo: gitInfo.GitRepoInfo | undefined = this.getGitInfo();
+    if (!repoInfo?.commonGitDir) {
+      // This should have never been called in a non-Git environment
+      return true;
+    }
+    const defaultHooksPath: string = path.resolve(repoInfo.commonGitDir, 'hooks');
+    const hooksResult: IResultOrError<string> = this._tryGetGitHooksPath();
+    if (hooksResult.error) {
+      console.log(
+        [
+          `Error: ${hooksResult.error.message}`,
+          'Unable to determine your Git configuration using this command:',
+          '',
+          '    git rev-parse --git-path hooks',
+          '',
+          'Assuming hooks can still be installed in the default location'
+        ].join(os.EOL)
+      );
+      return true;
+    }
+
+    if (hooksResult.result) {
+      const absoluteHooksPath: string = path.resolve(
+        this._rushConfiguration.rushJsonFolder,
+        hooksResult.result
+      );
+      return absoluteHooksPath === defaultHooksPath;
+    }
+
+    // No error, but also empty result? Not sure it's possible.
+    return true;
+  }
+
+  public getConfigHooksPath(): string {
+    let configHooksPath: string = '';
+    const gitPath: string = this.getGitPathOrThrow();
+    try {
+      configHooksPath = this._executeGitCommandAndCaptureOutput(gitPath, ['config', 'core.hooksPath']).trim();
+    } catch (e) {
+      // git config returns error code 1 if core.hooksPath is not set.
+    }
+    return configHooksPath;
+  }
+
   /**
    * Get information about the current Git working tree.
    * Returns undefined if the current path is not under a Git working tree.
@@ -164,47 +216,33 @@ export class Git {
     return this._gitInfo;
   }
 
-  public getRepositoryRootPath(): string | undefined {
-    const gitPath: string = this.getGitPathOrThrow();
-    const output: child_process.SpawnSyncReturns<string> = Executable.spawnSync(gitPath, [
-      'rev-parse',
-      '--show-toplevel'
-    ]);
-
-    if (output.status !== 0) {
-      return undefined;
-    } else {
-      return output.stdout.trim();
-    }
-  }
-
-  public getChangedFolders(
-    targetBranch: string,
-    terminal: ITerminal,
-    shouldFetch: boolean = false
-  ): string[] | undefined {
+  public getMergeBase(targetBranch: string, terminal: ITerminal, shouldFetch: boolean = false): string {
     if (shouldFetch) {
       this._fetchRemoteBranch(targetBranch, terminal);
     }
 
     const gitPath: string = this.getGitPathOrThrow();
-    const output: string = Utilities.executeCommandAndCaptureOutput(
-      gitPath,
-      ['diff', `${targetBranch}...`, '--dirstat=files,0'],
-      this._rushConfiguration.rushJsonFolder
-    );
-    const lines: string[] = output.split('\n');
-    const result: string[] = [];
-    for (const line of lines) {
-      if (line) {
-        const delimiterIndex: number = line.indexOf('%');
-        if (delimiterIndex > 0 && delimiterIndex + 1 < line.length) {
-          result.push(line.substring(delimiterIndex + 1).trim());
-        }
-      }
-    }
+    const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
+      '--no-optional-locks',
+      'merge-base',
+      'HEAD',
+      targetBranch,
+      '--'
+    ]);
+    const result: string = output.trim();
 
     return result;
+  }
+
+  public getBlobContent({ blobSpec, repositoryRoot }: IGetBlobOptions): string {
+    const gitPath: string = this.getGitPathOrThrow();
+    const output: string = this._executeGitCommandAndCaptureOutput(
+      gitPath,
+      ['cat-file', 'blob', blobSpec, '--'],
+      repositoryRoot
+    );
+
+    return output;
   }
 
   /**
@@ -225,11 +263,13 @@ export class Git {
     }
 
     const gitPath: string = this.getGitPathOrThrow();
-    const output: string = Utilities.executeCommandAndCaptureOutput(
-      gitPath,
-      ['diff', `${targetBranch}...`, '--name-only', '--no-renames', '--diff-filter=A'],
-      this._rushConfiguration.rushJsonFolder
-    );
+    const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
+      'diff',
+      `${targetBranch}...`,
+      '--name-only',
+      '--no-renames',
+      '--diff-filter=A'
+    ]);
     return output
       .split('\n')
       .map((line) => {
@@ -257,25 +297,24 @@ export class Git {
    * @param rushConfiguration - rush configuration
    */
   public getRemoteDefaultBranch(): string {
-    const repositoryUrl: string | undefined = this._rushConfiguration.repositoryUrl;
-    if (repositoryUrl) {
+    const repositoryUrls: string[] = this._rushConfiguration.repositoryUrls;
+    if (repositoryUrls.length > 0) {
       const gitPath: string = this.getGitPathOrThrow();
-      const output: string = Utilities.executeCommandAndCaptureOutput(
-        gitPath,
-        ['remote'],
-        this._rushConfiguration.rushJsonFolder
-      ).trim();
+      const output: string = this._executeGitCommandAndCaptureOutput(gitPath, ['remote']).trim();
 
-      // Apply toUpperCase() for a case-insensitive comparison
-      const normalizedRepositoryUrl: string = Git.normalizeGitUrlForComparison(repositoryUrl).toUpperCase();
+      const normalizedRepositoryUrls: Set<string> = new Set<string>();
+      for (const repositoryUrl of repositoryUrls) {
+        // Apply toUpperCase() for a case-insensitive comparison
+        normalizedRepositoryUrls.add(Git.normalizeGitUrlForComparison(repositoryUrl).toUpperCase());
+      }
 
       const matchingRemotes: string[] = output.split('\n').filter((remoteName) => {
         if (remoteName) {
-          const remoteUrl: string = Utilities.executeCommandAndCaptureOutput(
-            gitPath,
-            ['remote', 'get-url', remoteName],
-            this._rushConfiguration.rushJsonFolder
-          ).trim();
+          const remoteUrl: string = this._executeGitCommandAndCaptureOutput(gitPath, [
+            'remote',
+            'get-url',
+            remoteName
+          ]).trim();
 
           if (!remoteUrl) {
             return false;
@@ -283,7 +322,7 @@ export class Git {
 
           // Also apply toUpperCase() for a case-insensitive comparison
           const normalizedRemoteUrl: string = Git.normalizeGitUrlForComparison(remoteUrl).toUpperCase();
-          if (normalizedRemoteUrl === normalizedRepositoryUrl) {
+          if (normalizedRepositoryUrls.has(normalizedRemoteUrl)) {
             return true;
           }
         }
@@ -300,12 +339,13 @@ export class Git {
 
         return `${matchingRemotes[0]}/${this._rushConfiguration.repositoryDefaultBranch}`;
       } else {
-        console.log(
-          colors.yellow(
-            `Unable to find a git remote matching the repository URL (${repositoryUrl}). ` +
-              'Detected changes are likely to be incorrect.'
-          )
-        );
+        const errorMessage: string =
+          repositoryUrls.length > 1
+            ? `Unable to find a git remote matching one of the repository URLs (${repositoryUrls.join(
+                ', '
+              )}). `
+            : `Unable to find a git remote matching the repository URL (${repositoryUrls[0]}). `;
+        console.log(colors.yellow(errorMessage + 'Detected changes are likely to be incorrect.'));
 
         return this._rushConfiguration.repositoryDefaultFullyQualifiedRemoteBranch;
       }
@@ -414,11 +454,7 @@ export class Git {
       const gitPath: string = this.getGitPathOrThrow();
       try {
         this._gitEmailResult = {
-          result: Utilities.executeCommandAndCaptureOutput(
-            gitPath,
-            ['config', 'user.email'],
-            this._rushConfiguration.rushJsonFolder
-          ).trim()
+          result: this._executeGitCommandAndCaptureOutput(gitPath, ['config', 'user.email']).trim()
         };
       } catch (e) {
         this._gitEmailResult = {
@@ -430,24 +466,41 @@ export class Git {
     return this._gitEmailResult;
   }
 
+  private _tryGetGitHooksPath(): IResultOrError<string> {
+    if (this._gitHooksPath === undefined) {
+      const gitPath: string = this.getGitPathOrThrow();
+      try {
+        this._gitHooksPath = {
+          result: this._executeGitCommandAndCaptureOutput(gitPath, [
+            'rev-parse',
+            '--git-path',
+            'hooks'
+          ]).trim()
+        };
+      } catch (e) {
+        this._gitHooksPath = {
+          error: e as Error
+        };
+      }
+    }
+
+    return this._gitHooksPath;
+  }
+
   private _getUntrackedChanges(): string[] {
     const gitPath: string = this.getGitPathOrThrow();
-    const output: string = Utilities.executeCommandAndCaptureOutput(
-      gitPath,
-      ['ls-files', '--exclude-standard', '--others'],
-      this._rushConfiguration.rushJsonFolder
-    );
+    const output: string = this._executeGitCommandAndCaptureOutput(gitPath, [
+      'ls-files',
+      '--exclude-standard',
+      '--others'
+    ]);
     return output.trim().split('\n');
   }
 
   private _getDiffOnHEAD(): string[] {
     const gitPath: string = this.getGitPathOrThrow();
 
-    const output: string = Utilities.executeCommandAndCaptureOutput(
-      gitPath,
-      ['diff', 'HEAD', '--name-only'],
-      this._rushConfiguration.rushJsonFolder
-    );
+    const output: string = this._executeGitCommandAndCaptureOutput(gitPath, ['diff', 'HEAD', '--name-only']);
     return output.trim().split('\n');
   }
 
@@ -480,6 +533,19 @@ export class Git {
       terminal.writeWarningLine(
         `Error fetching git remote branch ${remoteBranchName}. Detected changed files may be incorrect.`
       );
+    }
+  }
+
+  private _executeGitCommandAndCaptureOutput(
+    gitPath: string,
+    args: string[],
+    repositoryRoot: string = this._rushConfiguration.rushJsonFolder
+  ): string {
+    try {
+      return Utilities.executeCommandAndCaptureOutput(gitPath, args, repositoryRoot);
+    } catch (e) {
+      ensureGitMinimumVersion(gitPath);
+      throw e;
     }
   }
 }

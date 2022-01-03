@@ -241,15 +241,17 @@ export interface IEnvironmentConfigurationInitializeOptions {
 // @beta
 export interface IExperimentsJson {
     buildCacheWithAllowWarningsInSuccessfulBuild?: boolean;
-    _multiPhaseCommands?: boolean;
     noChmodFieldInTarHeaderNormalization?: boolean;
     omitImportersFromPreventManualShrinkwrapChanges?: boolean;
+    phasedCommands?: boolean;
     usePnpmFrozenLockfileForRushInstall?: boolean;
     usePnpmPreferFrozenLockfileForRushUpdate?: boolean;
 }
 
 // @beta (undocumented)
 export interface IGetChangedProjectsOptions {
+    enableFiltering: boolean;
+    includeExternalDependencies: boolean;
     // (undocumented)
     shouldFetch?: boolean;
     // (undocumented)
@@ -452,8 +454,7 @@ export class ProjectChangeAnalyzer {
     constructor(rushConfiguration: RushConfiguration);
     // (undocumented)
     _filterProjectDataAsync<T>(project: RushConfigurationProject, unfilteredProjectData: Map<string, T>, rootDir: string, terminal: ITerminal): Promise<Map<string, T>>;
-    getProjectsImpactedByDiffAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
-    getProjectsWithChangesAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
+    getChangedProjectsAsync(options: IGetChangedProjectsOptions): Promise<Set<RushConfigurationProject>>;
     // @internal
     _tryGetProjectDependenciesAsync(project: RushConfigurationProject, terminal: ITerminal): Promise<Map<string, string> | undefined>;
     // @internal
@@ -539,7 +540,7 @@ export class RushConfiguration {
     get repositoryDefaultBranch(): string;
     get repositoryDefaultFullyQualifiedRemoteBranch(): string;
     get repositoryDefaultRemote(): string;
-    get repositoryUrl(): string | undefined;
+    get repositoryUrls(): string[];
     // @internal
     get rushConfigurationJson(): IRushConfigurationJson;
     get rushJsonFile(): string;
@@ -626,6 +627,7 @@ export class RushConstants {
     static readonly nonbrowserApprovedPackagesFilename: string;
     static readonly npmShrinkwrapFilename: string;
     static readonly phasedCommandKind: 'phased';
+    static readonly phaseNamePrefix: '_phase:';
     // @deprecated
     static readonly pinnedVersionsFilename: string;
     static readonly pnpmfileV1Filename: string;
@@ -635,6 +637,7 @@ export class RushConstants {
     static readonly projectShrinkwrapFilename: string;
     static readonly rebuildCommandName: string;
     static readonly repoStateFilename: string;
+    static readonly rushLogsFolderName: string;
     static readonly rushPackageName: string;
     static readonly rushPluginManifestFilename: string;
     static readonly rushPluginsConfigFilename: string;

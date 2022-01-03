@@ -2,6 +2,78 @@
   "name": "@rushstack/package-deps-hash",
   "entries": [
     {
+      "version": "3.1.11",
+      "tag": "@rushstack/package-deps-hash_v3.1.11",
+      "date": "Mon, 27 Dec 2021 16:10:40 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/eslint-config\" to `2.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.5.1`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.3`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.10",
+      "tag": "@rushstack/package-deps-hash_v3.1.10",
+      "date": "Thu, 16 Dec 2021 05:38:20 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Provide a more useful error message if the git version is too old."
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.9",
+      "tag": "@rushstack/package-deps-hash_v3.1.9",
+      "date": "Tue, 14 Dec 2021 19:27:51 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.44.0`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.5.0`"
+          }
+        ]
+      }
+    },
+    {
+      "version": "3.1.8",
+      "tag": "@rushstack/package-deps-hash_v3.1.8",
+      "date": "Thu, 09 Dec 2021 20:34:41 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft\" to `0.43.2`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/heft-node-rig\" to `1.4.3`"
+          },
+          {
+            "comment": "Updating dependency \"@rushstack/node-core-library\" to `3.44.2`"
+          }
+        ]
+      }
+    },
+    {
       "version": "3.1.7",
       "tag": "@rushstack/package-deps-hash_v3.1.7",
       "date": "Thu, 09 Dec 2021 00:21:54 GMT",

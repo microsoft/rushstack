@@ -594,10 +594,6 @@ export class Utilities {
     return new Error('Unable to find rush.json configuration file');
   }
 
-  public static getPackageDepsFilenameForCommand(command: string): string {
-    return `package-deps_${command}.json`;
-  }
-
   public static async usingAsync<TDisposable extends IDisposable>(
     getDisposableAsync: () => Promise<TDisposable> | IDisposable,
     doActionAsync: (disposable: TDisposable) => Promise<void> | void

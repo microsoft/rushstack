@@ -155,18 +155,14 @@ export class RushProjectConfiguration {
   public readonly project: RushConfigurationProject;
 
   /**
-   * A list of folder names under the project root that should be cached.
-   *
-   * These folders should not be tracked by git.
-   */
-  public readonly projectOutputFolderNames?: ReadonlyArray<string>;
-
-  /**
    * A list of folder names under the project root that should be cached for each phase.
    *
    * These folders should not be tracked by git.
+   *
+   * @remarks
+   * The `projectOutputFolderNames` property is populated in a "build" entry
    */
-  public readonly projectOutputFolderNamesForPhases?: ReadonlyMap<string, ReadonlyArray<string>>;
+  public readonly projectOutputFolderNamesForPhases: ReadonlyMap<string, ReadonlyArray<string>>;
 
   /**
    * The incremental analyzer can skip Rush commands for projects whose input files have
@@ -185,11 +181,9 @@ export class RushProjectConfiguration {
   private constructor(
     project: RushConfigurationProject,
     rushProjectJson: IRushProjectJson,
-    projectOutputFolderNamesForPhases: ReadonlyMap<string, ReadonlyArray<string>> | undefined
+    projectOutputFolderNamesForPhases: ReadonlyMap<string, ReadonlyArray<string>>
   ) {
     this.project = project;
-
-    this.projectOutputFolderNames = rushProjectJson.projectOutputFolderNames;
 
     this.projectOutputFolderNamesForPhases = projectOutputFolderNamesForPhases;
 
@@ -215,28 +209,20 @@ export class RushProjectConfiguration {
    */
   public static async tryLoadForProjectAsync(
     project: RushConfigurationProject,
-    repoCommandLineConfiguration: CommandLineConfiguration | undefined,
-    terminal: ITerminal,
-    skipCache?: boolean
+    repoCommandLineConfiguration: CommandLineConfiguration,
+    terminal: ITerminal
   ): Promise<RushProjectConfiguration | undefined> {
     // false is a signal that the project config does not exist
-    const cacheEntry: RushProjectConfiguration | false | undefined = skipCache
-      ? undefined
-      : RushProjectConfiguration._configCache.get(project);
+    const cacheEntry: RushProjectConfiguration | false | undefined =
+      RushProjectConfiguration._configCache.get(project);
     if (cacheEntry !== undefined) {
       return cacheEntry || undefined;
     }
 
-    const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
-      projectFolderPath: project.projectFolder
-    });
-
-    const rushProjectJson: IRushProjectJson | undefined =
-      await this._projectBuildCacheConfigurationFile.tryLoadConfigurationFileForProjectAsync(
-        terminal,
-        project.projectFolder,
-        rigConfig
-      );
+    const rushProjectJson: IRushProjectJson | undefined = await this._tryLoadJsonForProjectAsync(
+      project,
+      terminal
+    );
 
     if (rushProjectJson) {
       const result: RushProjectConfiguration = RushProjectConfiguration._getRushProjectConfiguration(
@@ -253,10 +239,48 @@ export class RushProjectConfiguration {
     }
   }
 
+  /**
+   * Load only the `incrementalBuildIgnoredGlobs` property from the rush-project.json file, skipping
+   * validation of other parts of the config file.
+   *
+   * @remarks
+   * This function exists to allow the ProjectChangeAnalyzer to load just the ignore globs without
+   * having to validate the rest of the `rush-project.json` file against the repo's command-line configuration.
+   */
+  public static async tryLoadIgnoreGlobsForProjectAsync(
+    project: RushConfigurationProject,
+    terminal: ITerminal
+  ): Promise<ReadonlyArray<string> | undefined> {
+    const rushProjectJson: IRushProjectJson | undefined = await this._tryLoadJsonForProjectAsync(
+      project,
+      terminal
+    );
+
+    return rushProjectJson?.incrementalBuildIgnoredGlobs;
+  }
+
+  private static async _tryLoadJsonForProjectAsync(
+    project: RushConfigurationProject,
+    terminal: ITerminal
+  ): Promise<IRushProjectJson | undefined> {
+    const rigConfig: RigConfig = await RigConfig.loadForProjectFolderAsync({
+      projectFolderPath: project.projectFolder
+    });
+
+    const rushProjectJson: IRushProjectJson | undefined =
+      await this._projectBuildCacheConfigurationFile.tryLoadConfigurationFileForProjectAsync(
+        terminal,
+        project.projectFolder,
+        rigConfig
+      );
+
+    return rushProjectJson;
+  }
+
   private static _getRushProjectConfiguration(
     project: RushConfigurationProject,
     rushProjectJson: IRushProjectJson,
-    repoCommandLineConfiguration: CommandLineConfiguration | undefined,
+    repoCommandLineConfiguration: CommandLineConfiguration,
     terminal: ITerminal
   ): RushProjectConfiguration {
     if (rushProjectJson.projectOutputFolderNames) {
@@ -293,15 +317,10 @@ export class RushProjectConfiguration {
     const duplicateCommandNames: Set<string> = new Set<string>();
     const invalidCommandNames: string[] = [];
     if (rushProjectJson.buildCacheOptions?.optionsForCommands) {
-      const commandNames: Set<string> = new Set<string>([
-        RushConstants.buildCommandName,
-        RushConstants.rebuildCommandName
-      ]);
-      if (repoCommandLineConfiguration) {
-        for (const [commandName, command] of repoCommandLineConfiguration.commands) {
-          if (command.commandKind === RushConstants.bulkCommandKind) {
-            commandNames.add(commandName);
-          }
+      const commandNames: Set<string> = new Set<string>();
+      for (const [commandName, command] of repoCommandLineConfiguration.commands) {
+        if (command.commandKind === RushConstants.phasedCommandKind) {
+          commandNames.add(commandName);
         }
       }
 
@@ -334,11 +353,16 @@ export class RushProjectConfiguration {
       );
     }
 
-    let projectOutputFolderNamesForPhases: Map<string, string[]> | undefined;
+    const projectOutputFolderNamesForPhases: Map<string, string[]> = new Map<string, string[]>();
+    if (rushProjectJson.projectOutputFolderNames) {
+      projectOutputFolderNamesForPhases.set(
+        RushConstants.buildCommandName,
+        rushProjectJson.projectOutputFolderNames
+      );
+    }
+
     if (rushProjectJson.phaseOptions) {
       const overlappingPathAnalyzer: OverlappingPathAnalyzer<string> = new OverlappingPathAnalyzer<string>();
-
-      projectOutputFolderNamesForPhases = new Map<string, string[]>();
       const phaseOptionsByPhase: Map<string, IRushProjectJsonPhaseOptionsJson> = new Map<
         string,
         IRushProjectJsonPhaseOptionsJson
@@ -375,7 +399,7 @@ export class RushProjectConfiguration {
           }
 
           terminal.writeErrorLine(errorMessage);
-        } else if (!repoCommandLineConfiguration?.phases.has(phaseName)) {
+        } else if (!repoCommandLineConfiguration.phases.has(phaseName)) {
           terminal.writeErrorLine(
             `Invalid "${RushProjectConfiguration._projectBuildCacheConfigurationFile.projectRelativeFilePath}"` +
               ` for project "${project.packageName}". Phase "${phaseName}" is not defined in the repo's ${RushConstants.commandLineFilename}.`
@@ -401,7 +425,7 @@ export class RushProjectConfiguration {
                   terminal.writeErrorLine(
                     `Invalid "${RushProjectConfiguration._projectBuildCacheConfigurationFile.projectRelativeFilePath}" ` +
                       `for project "${project.packageName}". The project output folder name "${projectOutputFolderName}" in ` +
-                      `phase ${phaseName} overlaps with other another folder name in the same phase.`
+                      `phase ${phaseName} overlaps with another folder name in the same phase.`
                   );
                 } else {
                   const otherPhaseNames: string[] = overlappingPhaseNames.filter(
@@ -410,7 +434,7 @@ export class RushProjectConfiguration {
                   terminal.writeErrorLine(
                     `Invalid "${RushProjectConfiguration._projectBuildCacheConfigurationFile.projectRelativeFilePath}" ` +
                       `for project "${project.packageName}". The project output folder name "${projectOutputFolderName}" in ` +
-                      `phase ${phaseName} overlaps with other another folder names in the same phase and with ` +
+                      `phase ${phaseName} overlaps with other folder names in the same phase and with ` +
                       `folder names in the following other phases: ${otherPhaseNames.join(', ')}.`
                   );
                 }

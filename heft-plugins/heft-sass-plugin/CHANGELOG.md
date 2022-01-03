@@ -1,6 +1,28 @@
 # Change Log - @rushstack/heft-sass-plugin
 
-This log was last generated on Thu, 09 Dec 2021 00:21:54 GMT and should not be manually modified.
+This log was last generated on Mon, 27 Dec 2021 16:10:40 GMT and should not be manually modified.
+
+## 0.3.2
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 0.3.1
+Tue, 14 Dec 2021 19:27:51 GMT
+
+_Version update only_
+
+## 0.3.0
+Fri, 10 Dec 2021 01:09:33 GMT
+
+### Minor changes
+
+- Add a "cssOuputFolders" option to "config/sass.json" to emit compiled CSS.
+
+## 0.2.10
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
 
 ## 0.2.9
 Thu, 09 Dec 2021 00:21:54 GMT

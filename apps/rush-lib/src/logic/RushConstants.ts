@@ -229,4 +229,14 @@ export class RushConstants {
    * The name of the per-user Rush configuration data folder.
    */
   public static readonly rushUserConfigurationFolderName: string = '.rush-user';
+
+  /**
+   * The name of the project `rush-logs` folder.
+   */
+  public static readonly rushLogsFolderName: string = 'rush-logs';
+
+  /**
+   * The expected prefix for phase names in "common/config/rush/command-line.json"
+   */
+  public static readonly phaseNamePrefix: '_phase:' = '_phase:';
 }

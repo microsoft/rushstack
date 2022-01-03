@@ -291,7 +291,9 @@ describe('RushCommandLineParser', () => {
 
         await expect(() => {
           getCommandLineParserInstance(repoName, 'doesnt-matter');
-        }).toThrowError('This command can only be designated as a command kind "bulk"');
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"command-line.json defines a command \\"build\\" using the command kind \\"global\\". This command can only be designated as a command kind \\"bulk\\" or \\"phased\\"."`
+        );
       });
     });
 
@@ -301,7 +303,9 @@ describe('RushCommandLineParser', () => {
 
         await expect(() => {
           getCommandLineParserInstance(repoName, 'doesnt-matter');
-        }).toThrowError('This command can only be designated as a command kind "bulk"');
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"command-line.json defines a command \\"rebuild\\" using the command kind \\"global\\". This command can only be designated as a command kind \\"bulk\\" or \\"phased\\"."`
+        );
       });
     });
 
@@ -311,7 +315,9 @@ describe('RushCommandLineParser', () => {
 
         await expect(() => {
           getCommandLineParserInstance(repoName, 'doesnt-matter');
-        }).toThrowError('"safeForSimultaneousRushProcesses=true". This configuration is not supported');
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"command-line.json defines a command \\"build\\" using \\"safeForSimultaneousRushProcesses=true\\". This configuration is not supported for \\"build\\"."`
+        );
       });
     });
 
@@ -321,7 +327,9 @@ describe('RushCommandLineParser', () => {
 
         await expect(() => {
           getCommandLineParserInstance(repoName, 'doesnt-matter');
-        }).toThrowError('"safeForSimultaneousRushProcesses=true". This configuration is not supported');
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"command-line.json defines a command \\"rebuild\\" using \\"safeForSimultaneousRushProcesses=true\\". This configuration is not supported for \\"rebuild\\"."`
+        );
       });
     });
   });

@@ -333,10 +333,15 @@ export class ChangeAction extends BaseRushAction {
   private async _getChangedProjectNamesAsync(): Promise<string[]> {
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
     const changedProjects: Set<RushConfigurationProject> =
-      await projectChangeAnalyzer.getProjectsWithChangesAsync({
+      await projectChangeAnalyzer.getChangedProjectsAsync({
         targetBranchName: this._targetBranch,
         terminal: this._terminal,
-        shouldFetch: !this._noFetchParameter.value
+        shouldFetch: !this._noFetchParameter.value,
+        // Lockfile evaluation will expand the set of projects that request change files
+        // Not enabling, since this would be a breaking change
+        includeExternalDependencies: false,
+        // Since install may not have happened, cannot read rush-project.json
+        enableFiltering: false
       });
     const projectHostMap: Map<RushConfigurationProject, string> = this._generateHostMap();
 
