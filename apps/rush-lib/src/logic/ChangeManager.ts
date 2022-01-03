@@ -8,10 +8,11 @@ import { IChangelog } from '../api/Changelog';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { VersionPolicyConfiguration } from '../api/VersionPolicyConfiguration';
-import { PublishUtilities, IChangeInfoHash } from './PublishUtilities';
+import { PublishUtilities, IChangeInfoHash, IAllChanges } from './PublishUtilities';
 import { ChangeFiles } from './ChangeFiles';
 import { PrereleaseToken } from './PrereleaseToken';
 import { ChangelogGenerator } from './ChangelogGenerator';
+import { EOL } from 'os';
 
 /**
  * The class manages change files and controls how changes logged by change files
@@ -21,7 +22,7 @@ export class ChangeManager {
   private _prereleaseToken!: PrereleaseToken;
   private _orderedChanges!: IChangeInfo[];
   private _allPackages!: Map<string, RushConfigurationProject>;
-  private _allChanges!: IChangeInfoHash;
+  private _allChanges!: IAllChanges;
   private _changeFiles!: ChangeFiles;
   private _rushConfiguration: RushConfiguration;
   private _lockStepProjectsToExclude: Set<string> | undefined;
@@ -58,15 +59,18 @@ export class ChangeManager {
       this._prereleaseToken,
       this._lockStepProjectsToExclude
     );
-    this._orderedChanges = PublishUtilities.sortChangeRequests(this._allChanges);
+    this._orderedChanges = PublishUtilities.sortChangeRequests(this._allChanges.packages);
   }
 
   public hasChanges(): boolean {
-    return this._orderedChanges && this._orderedChanges.length > 0;
+    return (
+      (this._orderedChanges && this._orderedChanges.length > 0) ||
+      (this._allChanges && Object.keys(this._allChanges.versionPolicies).length > 0)
+    );
   }
 
-  public get changes(): IChangeInfo[] {
-    return this._orderedChanges;
+  public get packageChanges(): IChangeInfo[] {
+    return this._orderedChanges ?? [];
   }
 
   public get allPackages(): Map<string, RushConfigurationProject> {
@@ -78,7 +82,7 @@ export class ChangeManager {
       const projectInfo: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(key);
       if (projectInfo) {
         if (projectInfo.versionPolicy) {
-          const changeInfo: IChangeInfo = this._allChanges[key];
+          const changeInfo: IChangeInfo = this._allChanges.packages[key];
           projectInfo.versionPolicy.validate(changeInfo.newVersion!, key);
         }
       }
@@ -95,9 +99,15 @@ export class ChangeManager {
       return;
     }
 
+    // Update all the changed version policies
+    Object.keys(this._allChanges.versionPolicies).forEach((versionPolicyName) => {
+      const newVersion = this._allChanges.versionPolicies[versionPolicyName].format();
+      this._rushConfiguration.versionPolicyConfiguration.update(versionPolicyName, newVersion, shouldCommit);
+    });
+
     // Apply all changes to package.json files.
     const updatedPackages: Map<string, IPackageJson> = PublishUtilities.updatePackages(
-      this._allChanges,
+      this._allChanges.packages,
       this._allPackages,
       this._rushConfiguration,
       shouldCommit,
@@ -114,7 +124,7 @@ export class ChangeManager {
     if (!this._prereleaseToken.hasValue) {
       // Update changelogs.
       const updatedChangelogs: IChangelog[] = ChangelogGenerator.updateChangelogs(
-        this._allChanges,
+        this._allChanges.packages,
         this._allPackages,
         this._rushConfiguration,
         shouldCommit

@@ -90,19 +90,29 @@ describe('VersionManager', () => {
   });
 
   describe('bump', () => {
-    it('bumps to prerelease version', async () => {
+    it('bumps a lockStepPolicy to prerelease version', async () => {
       await versionManager.bumpAsync('testPolicy1', BumpType.prerelease, 'dev', false);
       const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
-      const expectedVersion: string = '10.10.1-dev.0';
-
       const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
 
+      const expectedVersion: string = '10.10.1-dev.0';
       expect(updatedPackages.get('a')!.version).toEqual(expectedVersion);
       expect(updatedPackages.get('b')!.version).toEqual(expectedVersion);
       expect(updatedPackages.get('e')!.version).toEqual(expectedVersion);
       expect(updatedPackages.get('g')!.devDependencies!['a']).toEqual(`~${expectedVersion}`);
       expect(_getChanges(changeFiles, 'a')).not.toBeDefined();
       expect(_getChanges(changeFiles, 'b')).not.toBeDefined();
+    });
+
+    it('bumps a lockStepPolicy without bumpType to prerelease version', async () => {
+      await versionManager.bumpAsync('lockStepWithoutNextBump', BumpType.prerelease, 'dev', false);
+      const updatedPackages: Map<string, IPackageJson> = versionManager.updatedProjects;
+      const changeFiles: Map<string, ChangeFile> = versionManager.changeFiles;
+
+      const expectedVersion: string = '1.2.4-dev.0';
+      expect(updatedPackages.get('h')!.version).toEqual(expectedVersion);
+      expect(updatedPackages.get('f')!.dependencies!['h']).toEqual(`^${expectedVersion}`);
+      expect(_getChanges(changeFiles, 'h')).not.toBeDefined();
     });
   });
   /* eslint-enable dot-notation */

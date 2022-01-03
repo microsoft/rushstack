@@ -30,7 +30,7 @@ describe('findChangeRequests', () => {
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'noChange'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(0);
   });
@@ -41,7 +41,7 @@ describe('findChangeRequests', () => {
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'leafChange'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(1);
     expect(allChanges).toHaveProperty('d');
@@ -54,7 +54,7 @@ describe('findChangeRequests', () => {
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'rootPatchChange'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(4);
 
@@ -79,7 +79,7 @@ describe('findChangeRequests', () => {
       packagesRushConfiguration.projectsByName,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'rootHotfixChange'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(7);
 
@@ -114,7 +114,7 @@ describe('findChangeRequests', () => {
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'rootMajorChange'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(6);
 
@@ -146,7 +146,7 @@ describe('findChangeRequests', () => {
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'cyclicDeps'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(2);
 
@@ -190,7 +190,7 @@ describe('findChangeRequests', () => {
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'multipleChanges'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(6);
     expect(allChanges).toHaveProperty('a');
@@ -219,7 +219,7 @@ describe('findChangeRequests', () => {
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'orderedChanges'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(6);
     expect(allChanges).toHaveProperty('a');
@@ -248,7 +248,7 @@ describe('findChangeRequests', () => {
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'multipleHotfixChanges'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(7);
     expect(allChanges).toHaveProperty('a');
@@ -282,7 +282,7 @@ describe('findChangeRequests', () => {
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'explicitVersionChange'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(2);
     expect(allChanges).toHaveProperty('c');
@@ -300,7 +300,7 @@ describe('findChangeRequests', () => {
       false,
       undefined,
       new Set<string>(['a', 'b', 'e'])
-    );
+    ).packages;
     expect(Object.keys(allChanges)).toHaveLength(7);
     expect(allChanges['a'].newVersion).toEqual('1.0.0');
     expect(allChanges['b'].newVersion).toEqual('2.0.0');
@@ -311,7 +311,7 @@ describe('findChangeRequests', () => {
     expect(allChanges['e'].newVersion).toEqual(allPackages.get('e')!.packageJson.version);
     expect(allChanges['f'].changeType).toEqual(ChangeType.none);
     expect(allChanges['h'].changeType).toEqual(ChangeType.patch);
-    expect(allChanges['h'].newVersion).toEqual('1.0.1');
+    expect(allChanges['h'].newVersion).toEqual('1.2.4');
   });
 });
 
@@ -330,7 +330,7 @@ describe('sortChangeRequests', () => {
       allPackages,
       rushConfiguration,
       new ChangeFiles(path.join(__dirname, 'multipleChanges'))
-    );
+    ).packages;
     const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(allChanges);
 
     expect(orderedChanges).toHaveLength(6);
@@ -415,7 +415,7 @@ describe('findWorkspaceChangeRequests', () => {
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'noChange'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(0);
   });
@@ -426,7 +426,7 @@ describe('findWorkspaceChangeRequests', () => {
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'leafChange'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(1);
     expect(allChanges).toHaveProperty('d');
@@ -439,7 +439,7 @@ describe('findWorkspaceChangeRequests', () => {
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'rootPatchChange'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(4);
 
@@ -464,7 +464,7 @@ describe('findWorkspaceChangeRequests', () => {
       packagesRushConfiguration.projectsByName,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'rootHotfixChange'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(7);
 
@@ -499,7 +499,7 @@ describe('findWorkspaceChangeRequests', () => {
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'rootMajorChange'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(6);
 
@@ -531,7 +531,7 @@ describe('findWorkspaceChangeRequests', () => {
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'cyclicDeps'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(2);
 
@@ -575,7 +575,7 @@ describe('findWorkspaceChangeRequests', () => {
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'multipleChanges'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(6);
     expect(allChanges).toHaveProperty('a');
@@ -604,7 +604,7 @@ describe('findWorkspaceChangeRequests', () => {
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'orderedChanges'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(6);
     expect(allChanges).toHaveProperty('a');
@@ -633,7 +633,7 @@ describe('findWorkspaceChangeRequests', () => {
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'multipleHotfixChanges'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(7);
     expect(allChanges).toHaveProperty('a');
@@ -667,7 +667,7 @@ describe('findWorkspaceChangeRequests', () => {
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'explicitVersionChange'))
-    );
+    ).packages;
 
     expect(Object.keys(allChanges)).toHaveLength(2);
     expect(allChanges).toHaveProperty('c');
@@ -685,7 +685,7 @@ describe('findWorkspaceChangeRequests', () => {
       false,
       undefined,
       new Set<string>(['a', 'b', 'e'])
-    );
+    ).packages;
     expect(Object.keys(allChanges)).toHaveLength(5);
     expect(allChanges['a'].newVersion).toEqual('1.0.0');
     expect(allChanges['b'].newVersion).toEqual('2.0.0');

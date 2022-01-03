@@ -21,6 +21,12 @@ import { RushConfiguration } from '../api/RushConfiguration';
 import { DependencySpecifier, DependencySpecifierType } from './DependencySpecifier';
 import { Git, DEFAULT_GIT_TAG_SEPARATOR } from './Git';
 import { LockStepVersionPolicy } from '../api/VersionPolicy';
+import { SemVer } from 'semver';
+
+export interface IAllChanges {
+  packages: IChangeInfoHash;
+  versionPolicies: Record<string, SemVer>;
+}
 
 export interface IChangeInfoHash {
   [key: string]: IChangeInfo;
@@ -39,8 +45,11 @@ export class PublishUtilities {
     includeCommitDetails?: boolean,
     prereleaseToken?: PrereleaseToken,
     projectsToExclude?: Set<string>
-  ): IChangeInfoHash {
-    const allChanges: IChangeInfoHash = {};
+  ): IAllChanges {
+    const aallChanges: IAllChanges = { packages: {}, versionPolicies: {} };
+    const packageChanges: IChangeInfoHash = aallChanges.packages;
+    const versionPolicyChanges: Record<string, semver.SemVer> = aallChanges.versionPolicies;
+
     console.log(`Finding changes in: ${changeFiles.getChangesPath()}`);
 
     const files: string[] = changeFiles.getFiles();
@@ -57,7 +66,7 @@ export class PublishUtilities {
       for (const change of changeRequest.changes!) {
         PublishUtilities._addChange(
           change,
-          allChanges,
+          packageChanges,
           allPackages,
           rushConfiguration,
           prereleaseToken,
@@ -68,13 +77,13 @@ export class PublishUtilities {
 
     // For each lock step version policy with no nextBump, calculate the changeType
     const versionPolicyChangeTypes: Map<string, ChangeType> = new Map<string, ChangeType>();
-    Object.keys(allChanges).forEach((packageName) => {
+    Object.keys(packageChanges).forEach((packageName) => {
       const pkg: RushConfigurationProject | undefined = allPackages.get(packageName);
       if (projectsToExclude?.has(packageName) || pkg === undefined) {
         return;
       }
 
-      const change: IChangeInfo = allChanges[packageName];
+      const change: IChangeInfo = packageChanges[packageName];
 
       if (change.changeType === undefined || change.changeType === ChangeType.none) {
         return;
@@ -105,10 +114,7 @@ export class PublishUtilities {
         PublishUtilities._getReleaseType(changeType)
       );
       if (newVersion !== null) {
-        console.log(
-          `${EOL}* APPLYING: update version policy ${versionPolicyName} from ${versionPolicy.version} to ${newVersion}`
-        );
-        rushConfiguration.versionPolicyConfiguration.update(versionPolicyName, newVersion);
+        versionPolicyChanges[versionPolicyName] = new SemVer(newVersion);
       }
     });
 
@@ -134,7 +140,7 @@ export class PublishUtilities {
             changeType: ChangeType.patch, // force a bump
             newVersion: versionPolicy.version // enforce the specific policy version
           },
-          allChanges,
+          packageChanges,
           allPackages,
           rushConfiguration,
           prereleaseToken,
@@ -146,12 +152,12 @@ export class PublishUtilities {
     });
 
     // For each requested package change, ensure dependencies are also updated.
-    for (const packageName in allChanges) {
-      if (allChanges.hasOwnProperty(packageName)) {
+    for (const packageName in packageChanges) {
+      if (packageChanges.hasOwnProperty(packageName)) {
         const versionPolicyName: string | undefined = allPackages.get(packageName)!.versionPolicyName;
         PublishUtilities._updateDownstreamDependencies(
-          allChanges[packageName],
-          allChanges,
+          packageChanges[packageName],
+          packageChanges,
           allPackages,
           rushConfiguration,
           prereleaseToken,
@@ -162,9 +168,9 @@ export class PublishUtilities {
     }
 
     // Update orders so that downstreams are marked to come after upstreams.
-    for (const packageName in allChanges) {
-      if (allChanges.hasOwnProperty(packageName)) {
-        const change: IChangeInfo = allChanges[packageName];
+    for (const packageName in packageChanges) {
+      if (packageChanges.hasOwnProperty(packageName)) {
+        const change: IChangeInfo = packageChanges[packageName];
         const project: RushConfigurationProject = allPackages.get(packageName)!;
         const pkg: IPackageJson = project.packageJson;
         const deps: Set<string> = project._consumingProjectNames;
@@ -196,7 +202,7 @@ export class PublishUtilities {
 
         if (deps) {
           for (const depName of deps) {
-            const depChange: IChangeInfo = allChanges[depName];
+            const depChange: IChangeInfo = packageChanges[depName];
 
             if (depChange) {
               depChange.order = Math.max(change.order! + 1, depChange.order!);
@@ -206,17 +212,17 @@ export class PublishUtilities {
       }
     }
 
-    return allChanges;
+    return aallChanges;
   }
 
   /**
    * Given the changes hash, flattens them into a sorted array based on their dependency order.
-   * @params allChanges - hash of change requests.
+   * @params packageChanges - hash of change requests.
    * @returns Sorted array of change requests.
    */
-  public static sortChangeRequests(allChanges: IChangeInfoHash): IChangeInfo[] {
-    return Object.keys(allChanges)
-      .map((key) => allChanges[key])
+  public static sortChangeRequests(packageChanges: IChangeInfoHash): IChangeInfo[] {
+    return Object.keys(packageChanges)
+      .map((key) => packageChanges[key])
       .sort((a, b) =>
         a.order! === b.order! ? a.packageName.localeCompare(b.packageName) : a.order! < b.order! ? -1 : 1
       );
@@ -226,7 +232,7 @@ export class PublishUtilities {
    * Given a single change request, updates the package json file with updated versions on disk.
    */
   public static updatePackages(
-    allChanges: IChangeInfoHash,
+    packageChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     shouldCommit: boolean,
@@ -235,10 +241,10 @@ export class PublishUtilities {
   ): Map<string, IPackageJson> {
     const updatedPackages: Map<string, IPackageJson> = new Map<string, IPackageJson>();
 
-    Object.keys(allChanges).forEach((packageName) => {
+    Object.keys(packageChanges).forEach((packageName) => {
       const updatedPackage: IPackageJson = PublishUtilities._writePackageChanges(
-        allChanges[packageName],
-        allChanges,
+        packageChanges[packageName],
+        packageChanges,
         allPackages,
         rushConfiguration,
         shouldCommit,
@@ -407,7 +413,7 @@ export class PublishUtilities {
 
   private static _writePackageChanges(
     change: IChangeInfo,
-    allChanges: IChangeInfoHash,
+    packageChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     shouldCommit: boolean,
@@ -443,7 +449,7 @@ export class PublishUtilities {
     PublishUtilities._updateDependencies(
       pkg.name,
       pkg.dependencies,
-      allChanges,
+      packageChanges,
       allPackages,
       rushConfiguration,
       prereleaseToken,
@@ -453,7 +459,7 @@ export class PublishUtilities {
     PublishUtilities._updateDependencies(
       pkg.name,
       pkg.devDependencies,
-      allChanges,
+      packageChanges,
       allPackages,
       rushConfiguration,
       prereleaseToken,
@@ -463,7 +469,7 @@ export class PublishUtilities {
     PublishUtilities._updateDependencies(
       pkg.name,
       pkg.peerDependencies,
-      allChanges,
+      packageChanges,
       allPackages,
       rushConfiguration,
       prereleaseToken,
@@ -494,7 +500,7 @@ export class PublishUtilities {
   private static _updateDependencies(
     packageName: string,
     dependencies: { [key: string]: string } | undefined,
-    allChanges: IChangeInfoHash,
+    packageChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
@@ -503,7 +509,7 @@ export class PublishUtilities {
     if (dependencies) {
       Object.keys(dependencies).forEach((depName) => {
         if (!PublishUtilities._isCyclicDependency(allPackages, packageName, depName)) {
-          const depChange: IChangeInfo = allChanges[depName];
+          const depChange: IChangeInfo = packageChanges[depName];
           if (!depChange) {
             return;
           }
@@ -540,7 +546,7 @@ export class PublishUtilities {
               dependencies,
               depName,
               depChange,
-              allChanges,
+              packageChanges,
               allPackages,
               rushConfiguration
             );
@@ -576,13 +582,13 @@ export class PublishUtilities {
   }
 
   /**
-   * Adds the given change to the allChanges map.
+   * Adds the given change to the packageChanges map.
    *
    * @returns true if the change caused the dependency change type to increase.
    */
   private static _addChange(
     change: IChangeInfo,
-    allChanges: IChangeInfoHash,
+    packageChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken?: PrereleaseToken,
@@ -607,16 +613,16 @@ export class PublishUtilities {
       change.changeType = Enum.tryGetValueByKey(ChangeType, change.type!);
     }
 
-    if (!allChanges[packageName]) {
+    if (!packageChanges[packageName]) {
       hasChanged = true;
-      currentChange = allChanges[packageName] = {
+      currentChange = packageChanges[packageName] = {
         packageName,
         changeType: change.changeType,
         order: 0,
         changes: [change]
       };
     } else {
-      currentChange = allChanges[packageName];
+      currentChange = packageChanges[packageName];
 
       const oldChangeType: ChangeType = currentChange.changeType!;
 
@@ -687,7 +693,7 @@ export class PublishUtilities {
 
   private static _updateDownstreamDependencies(
     change: IChangeInfo,
-    allChanges: IChangeInfoHash,
+    packageChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
@@ -707,7 +713,7 @@ export class PublishUtilities {
             pkg.name,
             pkg.dependencies,
             change,
-            allChanges,
+            packageChanges,
             allPackages,
             rushConfiguration,
             prereleaseToken,
@@ -718,7 +724,7 @@ export class PublishUtilities {
             pkg.name,
             pkg.devDependencies,
             change,
-            allChanges,
+            packageChanges,
             allPackages,
             rushConfiguration,
             prereleaseToken,
@@ -734,7 +740,7 @@ export class PublishUtilities {
     parentPackageName: string,
     dependencies: { [packageName: string]: string } | undefined,
     change: IChangeInfo,
-    allChanges: IChangeInfoHash,
+    packageChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
@@ -754,7 +760,9 @@ export class PublishUtilities {
         requiredVersion.specifierType === DependencySpecifierType.Workspace &&
         requiredVersion.versionSpecifier === '*';
       const alwaysUpdate: boolean =
-        (!!prereleaseToken && prereleaseToken.hasValue && !allChanges.hasOwnProperty(parentPackageName)) ||
+        (!!prereleaseToken &&
+          prereleaseToken.hasValue &&
+          !packageChanges.hasOwnProperty(parentPackageName)) ||
         isWorkspaceWildcardVersion;
 
       // If the version range exists and has not yet been updated to this version, update it.
@@ -782,7 +790,7 @@ export class PublishUtilities {
             packageName: parentPackageName,
             changeType
           },
-          allChanges,
+          packageChanges,
           allPackages,
           rushConfiguration,
           prereleaseToken,
@@ -793,8 +801,8 @@ export class PublishUtilities {
           // Only re-evaluate downstream dependencies if updating the parent package's dependency
           // caused a version bump.
           PublishUtilities._updateDownstreamDependencies(
-            allChanges[parentPackageName],
-            allChanges,
+            packageChanges[parentPackageName],
+            packageChanges,
             allPackages,
             rushConfiguration,
             prereleaseToken,
@@ -810,7 +818,7 @@ export class PublishUtilities {
     dependencies: { [key: string]: string },
     dependencyName: string,
     dependencyChange: IChangeInfo,
-    allChanges: IChangeInfoHash,
+    packageChanges: IChangeInfoHash,
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration
   ): void {
@@ -855,7 +863,7 @@ export class PublishUtilities {
           (currentDependencyVersion ? `from \`${currentDependencyVersion}\` ` : '') +
           `to \`${newDependencyVersion}\``
       },
-      allChanges,
+      packageChanges,
       allPackages,
       rushConfiguration
     );
