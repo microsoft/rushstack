@@ -69,7 +69,7 @@ export class ChangeManager {
   }
 
   public get packageChanges(): IChangeInfo[] {
-    return this._orderedChanges ?? [];
+    return this._orderedChanges;
   }
 
   public get allPackages(): Map<string, RushConfigurationProject> {
