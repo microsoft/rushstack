@@ -142,7 +142,7 @@ export class VersionPolicyConfiguration {
       throw new Error(`Lockstep Version policy with name "${versionPolicyName}" cannot be found`);
     }
     const lockStepVersionPolicy: LockStepVersionPolicy = policy as LockStepVersionPolicy;
-    const previousVersion = lockStepVersionPolicy.version;
+    const previousVersion: string = lockStepVersionPolicy.version;
     if (lockStepVersionPolicy.update(newVersion)) {
       console.log(
         `${EOL}* APPLYING: update version policy ${versionPolicyName} from ${previousVersion} to ${newVersion}`

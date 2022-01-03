@@ -180,7 +180,7 @@ export class PublishUtilities {
           change.newVersion = pkg.version;
         } else {
           // For hotfix changes, do not re-write new version
-          const newVersion =
+          const newVersion: string | undefined =
             change.changeType! >= ChangeType.patch
               ? semver.inc(
                   pkg.version,

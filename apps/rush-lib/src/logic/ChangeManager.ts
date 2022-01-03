@@ -8,11 +8,10 @@ import { IChangelog } from '../api/Changelog';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { VersionPolicyConfiguration } from '../api/VersionPolicyConfiguration';
-import { PublishUtilities, IChangeInfoHash, IAllChanges } from './PublishUtilities';
+import { PublishUtilities, IAllChanges } from './PublishUtilities';
 import { ChangeFiles } from './ChangeFiles';
 import { PrereleaseToken } from './PrereleaseToken';
 import { ChangelogGenerator } from './ChangelogGenerator';
-import { EOL } from 'os';
 
 /**
  * The class manages change files and controls how changes logged by change files
@@ -101,7 +100,7 @@ export class ChangeManager {
 
     // Update all the changed version policies
     Object.keys(this._allChanges.versionPolicies).forEach((versionPolicyName) => {
-      const newVersion = this._allChanges.versionPolicies[versionPolicyName].format();
+      const newVersion: string = this._allChanges.versionPolicies[versionPolicyName].format();
       this._rushConfiguration.versionPolicyConfiguration.update(versionPolicyName, newVersion, shouldCommit);
     });
 
