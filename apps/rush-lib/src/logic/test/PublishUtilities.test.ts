@@ -494,13 +494,13 @@ describe('findWorkspaceChangeRequests', () => {
     expect(packageChanges['b'].changeType).toEqual(ChangeType.dependency);
     expect(packageChanges['e'].changeType).toEqual(ChangeType.dependency);
     expect(packageChanges['g'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['h'].changeType).toEqual(ChangeType.patch);
+    expect(packageChanges['h'].changeType).toEqual(ChangeType.dependency);
 
     expect(packageChanges['a'].newVersion).toEqual('1.0.1');
     expect(packageChanges['b'].newVersion).toEqual('1.0.0');
     expect(packageChanges['e'].newVersion).toEqual('1.0.0');
     expect(packageChanges['g'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['h'].newVersion).toEqual('1.2.4');
+    expect(packageChanges['h'].newVersion).toEqual('1.0.0');
   });
 
   it('returns 8 changes when hotfixing a root package', () => {
