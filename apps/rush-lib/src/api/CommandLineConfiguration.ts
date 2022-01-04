@@ -308,6 +308,8 @@ export class CommandLineConfiguration {
 
         this.parameters.push(normalizedParameter);
 
+        let parameterHasAssociatedPhases: boolean = false;
+
         // Do some basic validation
         switch (normalizedParameter.parameterKind) {
           case 'flag': {
@@ -324,6 +326,8 @@ export class CommandLineConfiguration {
                       'property that does not exist.'
                   );
                 }
+
+                parameterHasAssociatedPhases = true;
               }
             }
 
@@ -343,6 +347,8 @@ export class CommandLineConfiguration {
                       'and "skipPhasesForCommand" properties.'
                   );
                 }
+
+                parameterHasAssociatedPhases = true;
               }
             }
 
@@ -367,7 +373,8 @@ export class CommandLineConfiguration {
           }
         }
 
-        let parameterHasAssociations: boolean = false;
+        let parameterHasAssociatedCommands: boolean = false;
+        let parameterIsOnlyAssociatedWithPhasedCommands: boolean = true;
         if (normalizedParameter.associatedCommands) {
           for (const associatedCommandName of normalizedParameter.associatedCommands) {
             const syntheticPhaseName: string | undefined =
@@ -387,7 +394,11 @@ export class CommandLineConfiguration {
               );
             } else {
               associatedCommand.associatedParameters.add(normalizedParameter);
-              parameterHasAssociations = true;
+              parameterHasAssociatedCommands = true;
+
+              if (associatedCommand.commandKind !== RushConstants.phasedCommandKind) {
+                parameterIsOnlyAssociatedWithPhasedCommands = false;
+              }
             }
           }
         }
@@ -402,15 +413,23 @@ export class CommandLineConfiguration {
               );
             } else {
               associatedPhase.associatedParameters.add(normalizedParameter);
+              parameterHasAssociatedPhases = true;
             }
           }
+        }
 
-          if (!parameterHasAssociations) {
-            throw new Error(
-              `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}"` +
-                ` that lists no associated commands.`
-            );
-          }
+        if (!parameterHasAssociatedCommands) {
+          throw new Error(
+            `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}"` +
+              ` that lists no associated commands.`
+          );
+        }
+
+        if (parameterIsOnlyAssociatedWithPhasedCommands && !parameterHasAssociatedPhases) {
+          throw new Error(
+            `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
+              `that is only associated with phased commands, but lists no associated phases.`
+          );
         }
       }
     }
