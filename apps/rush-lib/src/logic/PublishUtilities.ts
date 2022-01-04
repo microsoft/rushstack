@@ -128,11 +128,20 @@ export class PublishUtilities {
         return;
       }
 
+      const versionDiff: semver.ReleaseType | null = semver.diff(
+        pkg.packageJson.version,
+        versionPolicyVersion
+      );
+
+      if (versionDiff === null) {
+        return;
+      }
+
       if (
         this._addChange(
           {
             packageName: pkg.packageName,
-            changeType: ChangeType.none,
+            changeType: this._getChangeType(versionDiff),
             newVersion: versionPolicyVersion // enforce the specific policy version
           },
           packageChanges,
@@ -367,6 +376,24 @@ export class PublishUtilities {
         return 'prerelease';
       default:
         throw new Error(`Wrong change type ${changeType}`);
+    }
+  }
+
+  private static _getChangeType(releaseType: semver.ReleaseType): ChangeType {
+    switch (releaseType) {
+      case 'major':
+        return ChangeType.major;
+      case 'minor':
+        return ChangeType.minor;
+      case 'patch':
+        return ChangeType.patch;
+      case 'premajor':
+      case 'preminor':
+      case 'prepatch':
+      case 'prerelease':
+        return ChangeType.hotfix;
+      default:
+        throw new Error(`Wrong release type ${releaseType}`);
     }
   }
 
@@ -680,15 +707,12 @@ export class PublishUtilities {
           packageVersion = currentChange.newVersion;
         }
 
-        currentChange.newVersion =
-          change.changeType! >= ChangeType.patch
-            ? semver.inc(packageVersion, PublishUtilities._getReleaseType(currentChange.changeType!))!
-            : packageVersion;
-      }
+        const shouldBump: boolean = change.newVersion === undefined && change.changeType! >= ChangeType.patch;
 
-      // this causes an issue with cyclic dependencies
-      // hasChanged =
-      //   hasChanged || (currentChange.newVersion !== undefined && pkg.version !== currentChange.newVersion);
+        currentChange.newVersion = shouldBump
+          ? semver.inc(packageVersion, PublishUtilities._getReleaseType(currentChange.changeType!))!
+          : packageVersion;
+      }
 
       // If hotfix change, force new range dependency to be the exact new version
       currentChange.newRangeDependency =

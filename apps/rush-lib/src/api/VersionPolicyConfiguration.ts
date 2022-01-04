@@ -145,7 +145,7 @@ export class VersionPolicyConfiguration {
     const previousVersion: string = lockStepVersionPolicy.version;
     if (lockStepVersionPolicy.update(newVersion)) {
       console.log(
-        `${EOL}update version policy ${versionPolicyName} from ${previousVersion} to ${newVersion}`
+        `${EOL}Update version policy ${versionPolicyName} from ${previousVersion} to ${newVersion}`
       );
       this._saveFile(!!shouldCommit);
     }
