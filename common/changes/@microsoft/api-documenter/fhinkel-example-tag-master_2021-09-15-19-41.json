@@ -3,7 +3,7 @@
     {
       "packageName": "@microsoft/api-documenter",
       "comment": "Add support for @example when generating yaml",
-      "type": "patch"
+      "type": "minor"
     }
   ],
   "packageName": "@microsoft/api-documenter",
