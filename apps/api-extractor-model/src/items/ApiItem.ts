@@ -15,7 +15,7 @@ import { ApiItemContainerMixin } from '../mixins/ApiItemContainerMixin';
  *
  * @public
  */
-export const enum ApiItemKind {
+export enum ApiItemKind {
   CallSignature = 'CallSignature',
   Class = 'Class',
   Constructor = 'Constructor',
@@ -114,7 +114,7 @@ export class ApiItem {
         this._canonicalReference = this.buildCanonicalReference();
       } catch (e) {
         const name: string = this.getScopedNameWithinPackage() || this.displayName;
-        throw new InternalError(`Error building canonical reference for ${name}:\n` + e.message);
+        throw new InternalError(`Error building canonical reference for ${name}:\n` + (e as Error).message);
       }
     }
     return this._canonicalReference;

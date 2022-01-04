@@ -1,6 +1,91 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Tue, 14 Sep 2021 01:17:04 GMT and should not be manually modified.
+This log was last generated on Mon, 27 Dec 2021 16:10:40 GMT and should not be manually modified.
+
+## 3.44.3
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 3.44.2
+Thu, 09 Dec 2021 20:34:41 GMT
+
+### Patches
+
+- Update z-schema to ~5.0.2.
+
+## 3.44.1
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 3.44.0
+Fri, 03 Dec 2021 03:05:22 GMT
+
+### Minor changes
+
+- Replace const enums with conventional enums to allow for compatability with JavaScript consumers.
+
+## 3.43.2
+Sat, 06 Nov 2021 00:09:13 GMT
+
+### Patches
+
+- Updated Path.convertToSlashes() to use replace(/\\/g, '/') instead of split/join for better performance.
+
+## 3.43.1
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 3.43.0
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Minor changes
+
+- Add more elaborate "repository" field types in IPackageJson.
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 3.42.3
+Wed, 13 Oct 2021 15:09:54 GMT
+
+_Version update only_
+
+## 3.42.2
+Fri, 08 Oct 2021 08:08:34 GMT
+
+### Patches
+
+- Fix an issue where Async.foreEachAsync can never resolve when operating on a large array.
+
+## 3.42.1
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 3.42.0
+Tue, 05 Oct 2021 15:08:38 GMT
+
+### Minor changes
+
+- Expose an ITerminal interface.
+
+## 3.41.0
+Fri, 24 Sep 2021 00:09:29 GMT
+
+### Minor changes
+
+- Allow Async.mapAsync and Async.forEachAsync to take an iterator.
+
+## 3.40.3
+Thu, 23 Sep 2021 00:10:41 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
 
 ## 3.40.2
 Tue, 14 Sep 2021 01:17:04 GMT

@@ -2,9 +2,9 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Executable, FileSystem, FileWriter, Terminal } from '@rushstack/node-core-library';
+import { Executable, FileSystem, FileWriter, ITerminal } from '@rushstack/node-core-library';
 import { ChildProcess } from 'child_process';
-import * as events from 'events';
+import events from 'events';
 
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { EnvironmentConfiguration } from '../api/EnvironmentConfiguration';
@@ -31,7 +31,7 @@ export class TarExecutable {
     this._tarExecutablePath = tarExecutablePath;
   }
 
-  public static tryInitialize(terminal: Terminal): TarExecutable | undefined {
+  public static tryInitialize(terminal: ITerminal): TarExecutable | undefined {
     terminal.writeVerboseLine('Trying to find "tar" binary');
     const tarExecutablePath: string | undefined =
       EnvironmentConfiguration.tarBinaryPath || Executable.tryResolve('tar');
@@ -151,8 +151,8 @@ export class TarExecutable {
       currentWorkingDirectory: currentWorkingDirectory
     });
 
-    childProcess.stdout.on('data', (chunk) => fileWriter.write(`[stdout] ${chunk}`));
-    childProcess.stderr.on('data', (chunk) => fileWriter.write(`[stderr] ${chunk}`));
+    childProcess.stdout?.on('data', (chunk) => fileWriter.write(`[stdout] ${chunk}`));
+    childProcess.stderr?.on('data', (chunk) => fileWriter.write(`[stderr] ${chunk}`));
 
     const [tarExitCode] = await events.once(childProcess, 'exit');
 

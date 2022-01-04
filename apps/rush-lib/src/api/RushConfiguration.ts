@@ -34,6 +34,7 @@ import { PackageNameParsers } from './PackageNameParsers';
 import { RepoStateFile } from '../logic/RepoStateFile';
 import { LookupByPath } from '../logic/LookupByPath';
 import { PackageJsonDependency } from './PackageJsonEditor';
+import { RushPluginsConfiguration } from './RushPluginsConfiguration';
 
 const MINIMUM_SUPPORTED_RUSH_JSON_VERSION: string = '0.0.0';
 const DEFAULT_BRANCH: string = 'master';
@@ -56,7 +57,8 @@ const knownRushConfigFilenames: string[] = [
   RushConstants.nonbrowserApprovedPackagesFilename,
   RushConstants.pinnedVersionsFilename,
   RushConstants.repoStateFilename,
-  RushConstants.versionPoliciesFilename
+  RushConstants.versionPoliciesFilename,
+  RushConstants.rushPluginsConfigFilename
 ];
 
 /**
@@ -75,6 +77,7 @@ export interface IRushGitPolicyJson {
   sampleEmail?: string;
   versionBumpCommitMessage?: string;
   changeLogUpdateCommitMessage?: string;
+  tagSeparator?: string;
 }
 
 /**
@@ -91,12 +94,7 @@ export interface IEventHooksJson {
 /**
  * Part of IRushConfigurationJson.
  */
-export interface IRushRepositoryJson {
-  /**
-   * The remote url of the repository. This helps "rush change" find the right remote to compare against.
-   */
-  url?: string;
-
+export interface IRushRepositoryJsonBase {
   /**
    * The default branch name. This tells "rush change" which remote branch to compare against.
    */
@@ -108,6 +106,28 @@ export interface IRushRepositoryJson {
    */
   defaultRemote?: string;
 }
+
+export interface IRushRepositoryJsonSingleUrl extends IRushRepositoryJsonBase {
+  /**
+   * The remote url of the repository. If a value is provided,
+   * \"rush change\" will use it to find the right remote to compare against.
+   *
+   * @deprecated Use "urls" instead.
+   */
+  url?: string;
+}
+
+export interface IRushRepositoryJsonMultipleUrls extends IRushRepositoryJsonBase {
+  /**
+   * Remote url(s) of the repository. If a value is provided, \"rush change\" will
+   * use one of these to find the right remote to compare against. Specifying multiple URLs
+   * is useful if a GitHub repository is renamed or for "<projectName>.visualstudio.com" vs
+   * "dev.azure.com/<projectName>" URLs.
+   */
+  urls?: string[];
+}
+
+export type IRushRepositoryJson = IRushRepositoryJsonSingleUrl | IRushRepositoryJsonMultipleUrls;
 
 /**
  * This represents the available PNPM store options
@@ -436,7 +456,7 @@ export class RushConfiguration {
   private _ensureConsistentVersions: boolean;
   private _suppressNodeLtsWarning: boolean;
   private _variants: Set<string>;
-  private _projectByRelativePath: LookupByPath<RushConfigurationProject>;
+  private readonly _pathTrees: Map<string, LookupByPath<RushConfigurationProject>>;
 
   // "approvedPackagesPolicy" feature
   private _approvedPackagesPolicy: ApprovedPackagesPolicy;
@@ -446,12 +466,13 @@ export class RushConfiguration {
   private _gitSampleEmail: string;
   private _gitVersionBumpCommitMessage: string | undefined;
   private _gitChangeLogUpdateCommitMessage: string | undefined;
+  private _gitTagSeparator: string | undefined;
 
   // "hotfixChangeEnabled" feature
   private _hotfixChangeEnabled: boolean;
 
   // Repository info
-  private _repositoryUrl: string | undefined;
+  private _repositoryUrls: string[];
   private _repositoryDefaultBranch: string;
   private _repositoryDefaultRemote: string;
 
@@ -481,6 +502,8 @@ export class RushConfiguration {
   private _versionPolicyConfiguration: VersionPolicyConfiguration;
   private _versionPolicyConfigurationFilePath: string;
   private _experimentsConfiguration: ExperimentsConfiguration;
+
+  private __rushPluginsConfiguration: RushPluginsConfiguration;
 
   private readonly _rushConfigurationJson: IRushConfigurationJson;
 
@@ -542,6 +565,12 @@ export class RushConfiguration {
       RushConstants.experimentsFilename
     );
     this._experimentsConfiguration = new ExperimentsConfiguration(experimentsConfigFile);
+
+    const rushPluginsConfigFilename: string = path.join(
+      this._commonRushConfigFolder,
+      RushConstants.rushPluginsConfigFilename
+    );
+    this.__rushPluginsConfiguration = new RushPluginsConfiguration(rushPluginsConfigFilename);
 
     this._npmOptions = new NpmOptionsConfiguration(rushConfigurationJson.npmOptions || {});
     this._pnpmOptions = new PnpmOptionsConfiguration(
@@ -667,6 +696,10 @@ export class RushConfiguration {
       if (rushConfigurationJson.gitPolicy.changeLogUpdateCommitMessage) {
         this._gitChangeLogUpdateCommitMessage = rushConfigurationJson.gitPolicy.changeLogUpdateCommitMessage;
       }
+
+      if (rushConfigurationJson.gitPolicy.tagSeparator) {
+        this._gitTagSeparator = rushConfigurationJson.gitPolicy.tagSeparator;
+      }
     }
 
     this._hotfixChangeEnabled = false;
@@ -678,9 +711,23 @@ export class RushConfiguration {
       rushConfigurationJson.repository = {};
     }
 
-    this._repositoryUrl = rushConfigurationJson.repository.url;
     this._repositoryDefaultBranch = rushConfigurationJson.repository.defaultBranch || DEFAULT_BRANCH;
     this._repositoryDefaultRemote = rushConfigurationJson.repository.defaultRemote || DEFAULT_REMOTE;
+    const repositoryFieldWithMultipleUrls: IRushRepositoryJsonMultipleUrls =
+      rushConfigurationJson.repository as IRushRepositoryJsonMultipleUrls;
+    const repositoryFieldWithSingleUrl: IRushRepositoryJsonSingleUrl =
+      rushConfigurationJson.repository as IRushRepositoryJsonSingleUrl;
+    if (repositoryFieldWithMultipleUrls.urls) {
+      if (repositoryFieldWithSingleUrl.url) {
+        throw new Error("The 'repository.url' field cannot be used when 'repository.urls' is present");
+      }
+
+      this._repositoryUrls = repositoryFieldWithMultipleUrls.urls;
+    } else if (repositoryFieldWithSingleUrl.url) {
+      this._repositoryUrls = [repositoryFieldWithSingleUrl.url];
+    } else {
+      this._repositoryUrls = [];
+    }
 
     this._telemetryEnabled = !!rushConfigurationJson.telemetryEnabled;
     this._eventHooks = new EventHooks(rushConfigurationJson.eventHooks || {});
@@ -707,12 +754,7 @@ export class RushConfiguration {
       }
     }
 
-    const pathTree: LookupByPath<RushConfigurationProject> = new LookupByPath<RushConfigurationProject>();
-    for (const project of this.projects) {
-      const relativePath: string = Path.convertToSlashes(project.projectRelativeFolder);
-      pathTree.setItem(relativePath, project);
-    }
-    this._projectByRelativePath = pathTree;
+    this._pathTrees = new Map();
   }
 
   private _initializeAndValidateLocalProjects(): void {
@@ -1077,6 +1119,14 @@ export class RushConfiguration {
   }
 
   /**
+   * The folder where rush-plugin options json files are stored.
+   * Example: `C:\MyRepo\common\config\rush-plugins`
+   */
+  public get rushPluginOptionsFolder(): string {
+    return path.join(this._commonFolder, 'config', 'rush-plugins');
+  }
+
+  /**
    * The local folder that will store the NPM package cache.  Rush does not rely on the
    * npm's default global cache folder, because npm's caching implementation does not
    * reliably handle multiple processes.  (For example, if a build box is running
@@ -1295,6 +1345,14 @@ export class RushConfiguration {
   }
 
   /**
+   * [Part of the "gitPolicy" feature.]
+   * The separator between package name and version in git tag.
+   */
+  public get gitTagSeparator(): string | undefined {
+    return this._gitTagSeparator;
+  }
+
+  /**
    * [Part of the "hotfixChange" feature.]
    * Enables creating hotfix changes
    */
@@ -1303,10 +1361,13 @@ export class RushConfiguration {
   }
 
   /**
-   * The remote url of the repository. This helps "rush change" find the right remote to compare against.
+   * Remote URL(s) of the repository. If a value is provided, \"rush change\" will
+   * use one of these to find the right remote to compare against. Specifying multiple URLs
+   * is useful if a GitHub repository is renamed or for "<projectName>.visualstudio.com" vs
+   * "dev.azure.com/<projectName>" URLs.
    */
-  public get repositoryUrl(): string | undefined {
-    return this._repositoryUrl;
+  public get repositoryUrls(): string[] {
+    return this._repositoryUrls;
   }
 
   /**
@@ -1661,12 +1722,19 @@ export class RushConfiguration {
   }
 
   /**
-   * Finds the project that owns the specified POSIX relative path (e.g. apps/rush-lib).
-   * The path is case-sensitive, so will only return a project if its projectRelativePath matches the casing.
-   * @returns The found project, or undefined if no match was found
+   * @returns An optimized lookup engine to find a project by its path relative to the specified root.
+   * @beta
    */
-  public findProjectForPosixRelativePath(posixRelativePath: string): RushConfigurationProject | undefined {
-    return this._projectByRelativePath.findChildPath(posixRelativePath);
+  public getProjectLookupForRoot(rootPath: string): LookupByPath<RushConfigurationProject> {
+    let pathTree: LookupByPath<RushConfigurationProject> | undefined = this._pathTrees.get(rootPath);
+    if (!pathTree) {
+      this._pathTrees.set(rootPath, (pathTree = new LookupByPath()));
+      for (const project of this.projects) {
+        const relativePath: string = path.relative(rootPath, project.projectFolder);
+        pathTree.setItemFromSegments(LookupByPath.iteratePathSegments(relativePath, path.sep), project);
+      }
+    }
+    return pathTree;
   }
 
   /**
@@ -1694,6 +1762,13 @@ export class RushConfiguration {
   }
 
   /**
+   * @internal
+   */
+  public get _rushPluginsConfiguration(): RushPluginsConfiguration {
+    return this.__rushPluginsConfiguration;
+  }
+
+  /**
    * Returns the project for which the specified path is underneath that project's folder.
    * If the path is not under any project's folder, returns undefined.
    */
@@ -1714,8 +1789,10 @@ export class RushConfiguration {
     variant: string | undefined
   ): void {
     const commonVersions: CommonVersionsConfiguration = this.getCommonVersions(variant);
-    const allowedAlternativeVersions: Map<string, ReadonlyArray<string>> =
-      commonVersions.allowedAlternativeVersions;
+    const allowedAlternativeVersions: Map<
+      string,
+      ReadonlyArray<string>
+    > = commonVersions.allowedAlternativeVersions;
 
     for (const dependency of dependencies) {
       const alternativesForThisDependency: ReadonlyArray<string> =

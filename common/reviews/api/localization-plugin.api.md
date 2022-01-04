@@ -4,9 +4,9 @@
 
 ```ts
 
+import { ITerminal } from '@rushstack/node-core-library';
 import { NewlineKind } from '@rushstack/node-core-library';
 import { StringValuesTypingsGenerator } from '@rushstack/typings-generator';
-import { Terminal } from '@rushstack/node-core-library';
 import * as Webpack from 'webpack';
 
 // @public (undocumented)
@@ -41,7 +41,9 @@ export interface _ILocalizationFile {
 
 // @public
 export interface ILocalizationPluginOptions {
+    // @deprecated (undocumented)
     filesToIgnore?: string[];
+    globsToIgnore?: string[];
     localizationStats?: ILocalizationStatsOptions;
     localizedData: ILocalizedData;
     noStringsLocaleName?: string;
@@ -119,7 +121,7 @@ export interface _IParseLocFileOptions {
     // (undocumented)
     resxNewlineNormalization: NewlineKind | undefined;
     // (undocumented)
-    terminal: Terminal;
+    terminal: ITerminal;
 }
 
 // @public
@@ -178,15 +180,15 @@ export interface ITypingsGeneratorOptions {
     // (undocumented)
     exportAsDefault?: boolean;
     // (undocumented)
-    filesToIgnore?: string[];
-    // (undocumented)
     generatedTsFolder: string;
+    // (undocumented)
+    globsToIgnore?: string[];
     // (undocumented)
     resxNewlineNormalization?: NewlineKind | undefined;
     // (undocumented)
     srcFolder: string;
     // (undocumented)
-    terminal?: Terminal;
+    terminal?: ITerminal;
 }
 
 // @public
@@ -195,7 +197,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     // Warning: (ae-forgotten-export) The symbol "IAddDefaultLocFileResult" needs to be exported by the entry point index.d.ts
     //
     // @internal (undocumented)
-    addDefaultLocFile(terminal: Terminal, localizedResourcePath: string, localizedResourceData: _ILocalizationFile): IAddDefaultLocFileResult;
+    addDefaultLocFile(terminal: ITerminal, localizedResourcePath: string, localizedResourceData: _ILocalizationFile): IAddDefaultLocFileResult;
     // (undocumented)
     apply(compiler: Webpack.Compiler): void;
     // Warning: (ae-forgotten-export) The symbol "IStringSerialNumberData" needs to be exported by the entry point index.d.ts

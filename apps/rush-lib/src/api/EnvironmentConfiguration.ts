@@ -7,15 +7,18 @@ import { trueCasePathSync } from 'true-case-path';
 
 import { IEnvironment } from '../utilities/Utilities';
 
+/**
+ * @beta
+ */
 export interface IEnvironmentConfigurationInitializeOptions {
   doNotNormalizePaths?: boolean;
 }
 
 /**
  * Names of environment variables used by Rush.
- * @public
+ * @beta
  */
-export const enum EnvironmentVariableNames {
+export enum EnvironmentVariableNames {
   /**
    * This variable overrides the temporary folder used by Rush.
    * The default value is "common/temp" under the repository root.
@@ -154,6 +157,7 @@ export const enum EnvironmentVariableNames {
 /**
  * Provides Rush-specific environment variable data. All Rush environment variables must start with "RUSH_". This class
  * is designed to be used by RushConfiguration.
+ * @beta
  *
  * @remarks
  * Initialize will throw if any unknown parameters are present.
@@ -474,7 +478,7 @@ export class EnvironmentConfiguration {
    * this function returns undefined.
    *
    * @example
-   * If the following path exists on disk: C:\Folder1\folder2\
+   * If the following path exists on disk: `C:\Folder1\folder2\`
    * _normalizeFirstExistingFolderPath('c:\\folder1\\folder2\\temp\\subfolder')
    * returns 'C:\\Folder1\\folder2\\temp\\subfolder'
    */

@@ -1,6 +1,45 @@
 # Change Log - @rushstack/rig-package
 
-This log was last generated on Fri, 27 Aug 2021 00:07:25 GMT and should not be manually modified.
+This log was last generated on Mon, 27 Dec 2021 16:10:40 GMT and should not be manually modified.
+
+## 0.3.7
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 0.3.6
+Mon, 06 Dec 2021 16:08:32 GMT
+
+_Version update only_
+
+## 0.3.5
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 0.3.4
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 0.3.3
+Wed, 13 Oct 2021 15:09:54 GMT
+
+_Version update only_
+
+## 0.3.2
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 0.3.1
+Thu, 23 Sep 2021 00:10:41 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
 
 ## 0.3.0
 Fri, 27 Aug 2021 00:07:25 GMT

@@ -1,12 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+import { ConsoleTerminalProvider, Terminal } from '@rushstack/node-core-library';
+
 import { BaseInstallAction } from './BaseInstallAction';
 import { IInstallManagerOptions } from '../../logic/base/BaseInstallManager';
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { SelectionParameterSet } from '../SelectionParameterSet';
 
 export class InstallAction extends BaseInstallAction {
+  private _checkOnlyParameter!: CommandLineFlagParameter;
+
   public constructor(parser: RushCommandLineParser) {
     super({
       actionName: 'install',
@@ -32,10 +37,22 @@ export class InstallAction extends BaseInstallAction {
   protected onDefineParameters(): void {
     super.onDefineParameters();
 
-    this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this);
+    this._selectionParameters = new SelectionParameterSet(this.rushConfiguration, this, {
+      // Include lockfile processing since this expands the selection, and we need to select
+      // at least the same projects selected with the same query to "rush build"
+      includeExternalDependencies: true,
+      // Disable filtering because rush-project.json is riggable and therefore may not be available
+      enableFiltering: false
+    });
+
+    this._checkOnlyParameter = this.defineFlagParameter({
+      parameterLongName: '--check-only',
+      description: `Only check the validity of the shrinkwrap file without performing an install.`
+    });
   }
 
-  protected buildInstallOptions(): IInstallManagerOptions {
+  protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
+    const terminal: Terminal = new Terminal(new ConsoleTerminalProvider());
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: false,
@@ -50,7 +67,8 @@ export class InstallAction extends BaseInstallAction {
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
       // These are derived independently of the selection for command line brevity
-      pnpmFilterArguments: this._selectionParameters!.getPnpmFilterArguments()
+      pnpmFilterArguments: await this._selectionParameters!.getPnpmFilterArgumentsAsync(terminal),
+      checkOnly: this._checkOnlyParameter.value
     };
   }
 }

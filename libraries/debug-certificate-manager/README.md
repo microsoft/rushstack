@@ -28,7 +28,7 @@ Set data using the same property names `certificateData: string | undefined` and
 
 ## `ensureCertificate`
 
-Get a dev certificate from the store, or optionally, generate a new one and trust it if one does not exist in the store. Returns a certificate object following the `ICertificate` interface.
+Get a development certificate from the store, or optionally, generate a new one and trust it if one does not exist in the store. Returns a certificate object following the `ICertificate` interface.
 
 ```typescript
 export interface ICertificate {

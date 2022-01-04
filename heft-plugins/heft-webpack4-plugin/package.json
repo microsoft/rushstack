@@ -1,10 +1,11 @@
 {
   "name": "@rushstack/heft-webpack4-plugin",
-  "version": "0.3.0",
+  "version": "0.3.28",
   "description": "Heft plugin for Webpack 4",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/heft-plugins/heft-webpack4-plugin"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "heft-plugins/heft-webpack4-plugin"
   },
   "homepage": "https://rushstack.io/pages/heft/overview/",
   "main": "lib/index.js",
@@ -15,7 +16,7 @@
     "start": "heft test --clean --watch"
   },
   "peerDependencies": {
-    "@rushstack/heft": "^0.38.0"
+    "@rushstack/heft": "^0.44.1"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
@@ -26,8 +27,8 @@
     "@rushstack/eslint-config": "workspace:*",
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
-    "@types/node": "10.17.13",
+    "@types/node": "12.20.24",
     "@types/webpack": "4.41.24",
-    "@types/webpack-dev-server": "3.11.2"
+    "@types/webpack-dev-server": "3.11.3"
   }
 }

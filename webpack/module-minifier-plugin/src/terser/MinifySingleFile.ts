@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { minify, MinifyOptions, MinifyOutput } from 'terser';
-import { RawSourceMap } from 'source-map';
-import './Base54';
+import { minify, MinifyOptions, MinifyOutput, SimpleIdentifierMangler } from 'terser';
+import type { RawSourceMap } from 'source-map';
 
 declare module 'terser' {
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -12,62 +11,77 @@ declare module 'terser' {
   }
 }
 
+import { getIdentifier } from '../MinifiedIdentifier';
 import { IModuleMinificationRequest, IModuleMinificationResult } from '../ModuleMinifierPlugin.types';
 
+const nth_identifier: SimpleIdentifierMangler = {
+  get: getIdentifier
+};
+
 /**
- * Minifies a single chunk of code. Factored out for reuse between ThreadPoolMinifier and SynchronousMinifier
- * Mutates terserOptions.output.comments to support comment extraction
+ * Minifies a single chunk of code. Factored out for reuse between WorkerPoolMinifier and LocalMinifier
  * @internal
  */
-export function minifySingleFile(
+export async function minifySingleFile(
   request: IModuleMinificationRequest,
   terserOptions: MinifyOptions
-): IModuleMinificationResult {
-  const output: MinifyOptions['output'] = terserOptions.output || {};
-  const { mangle: originalMangle } = terserOptions;
-
-  const mangle: MinifyOptions['mangle'] =
-    originalMangle === false ? false : typeof originalMangle === 'object' ? { ...originalMangle } : {};
-
-  const finalOptions: MinifyOptions = {
-    ...terserOptions,
-    output,
-    mangle
-  };
-  output.comments = false;
-
+): Promise<IModuleMinificationResult> {
   const { code, nameForMap, hash, externals } = request;
 
-  if (mangle && externals) {
-    mangle.reserved = mangle.reserved ? externals.concat(mangle.reserved) : externals;
-  }
+  try {
+    const {
+      format: rawFormat,
+      output: rawOutput,
+      mangle: originalMangle,
+      ...remainingOptions
+    } = terserOptions;
 
-  finalOptions.sourceMap = nameForMap
-    ? {
-        asObject: true
-      }
-    : false;
+    const format: MinifyOptions['format'] = rawFormat || rawOutput || {};
 
-  const minified: MinifyOutput = minify(
-    {
-      [nameForMap || 'code']: code
-    },
-    finalOptions
-  );
+    const mangle: MinifyOptions['mangle'] =
+      originalMangle === false ? false : typeof originalMangle === 'object' ? { ...originalMangle } : {};
 
-  if (minified.error) {
+    const finalOptions: MinifyOptions = {
+      ...remainingOptions,
+      format,
+      mangle
+    };
+    format.comments = false;
+
+    if (mangle) {
+      mangle.nth_identifier = nth_identifier;
+    }
+
+    if (mangle && externals) {
+      mangle.reserved = mangle.reserved ? externals.concat(mangle.reserved) : externals;
+    }
+
+    finalOptions.sourceMap = nameForMap
+      ? {
+          asObject: true
+        }
+      : false;
+
+    const minified: MinifyOutput = await minify(
+      {
+        [nameForMap || 'code']: code
+      },
+      finalOptions
+    );
+
     return {
-      error: minified.error,
+      error: undefined,
+      code: minified.code!,
+      map: minified.map as unknown as RawSourceMap,
+      hash
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      error: error as Error,
       code: undefined,
       map: undefined,
       hash
     };
   }
-
-  return {
-    error: undefined,
-    code: minified.code!,
-    map: minified.map as unknown as RawSourceMap,
-    hash
-  };
 }

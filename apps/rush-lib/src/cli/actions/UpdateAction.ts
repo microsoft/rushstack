@@ -56,7 +56,17 @@ export class UpdateAction extends BaseInstallAction {
     });
   }
 
-  protected buildInstallOptions(): IInstallManagerOptions {
+  protected async runAsync(): Promise<void> {
+    await this.parser.pluginManager.updateAsync();
+
+    if (this.parser.pluginManager.error) {
+      await this.parser.pluginManager.reinitializeAllPluginsForCommandAsync(this.actionName);
+    }
+
+    return super.runAsync();
+  }
+
+  protected async buildInstallOptionsAsync(): Promise<IInstallManagerOptions> {
     return {
       debug: this.parser.isDebug,
       allowShrinkwrapUpdates: true,
@@ -70,7 +80,8 @@ export class UpdateAction extends BaseInstallAction {
       // Because the 'defaultValue' option on the _maxInstallAttempts parameter is set,
       // it is safe to assume that the value is not null
       maxInstallAttempts: this._maxInstallAttempts.value!,
-      pnpmFilterArguments: []
+      pnpmFilterArguments: [],
+      checkOnly: false
     };
   }
 }

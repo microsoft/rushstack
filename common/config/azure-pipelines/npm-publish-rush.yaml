@@ -13,3 +13,7 @@ steps:
   - template: templates/publish.yaml
     parameters:
       VersionPolicyName: rush
+      PrePublishSteps:
+        - script: 'node apps/rush-lib/scripts/plugins-prepublish.js'
+          displayName: 'Prepublish workaround'
+  - template: templates/record-published-versions.yaml

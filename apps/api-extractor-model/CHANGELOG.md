@@ -1,6 +1,89 @@
 # Change Log - @microsoft/api-extractor-model
 
-This log was last generated on Tue, 14 Sep 2021 01:17:04 GMT and should not be manually modified.
+This log was last generated on Mon, 27 Dec 2021 16:10:40 GMT and should not be manually modified.
+
+## 7.15.2
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 7.15.1
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 7.15.0
+Thu, 09 Dec 2021 00:21:54 GMT
+
+### Minor changes
+
+- Replace const enums with conventional enums to allow for compatibility with JavaScript consumers.
+
+## 7.14.0
+Wed, 08 Dec 2021 16:14:05 GMT
+
+### Minor changes
+
+- Update to TypeScript 4.5
+
+## 7.13.18
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 7.13.17
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 7.13.16
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 7.13.15
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 7.13.14
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 7.13.13
+Wed, 13 Oct 2021 15:09:54 GMT
+
+_Version update only_
+
+## 7.13.12
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 7.13.11
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 7.13.10
+Tue, 05 Oct 2021 15:08:38 GMT
+
+_Version update only_
+
+## 7.13.9
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 7.13.8
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
 
 ## 7.13.7
 Tue, 14 Sep 2021 01:17:04 GMT

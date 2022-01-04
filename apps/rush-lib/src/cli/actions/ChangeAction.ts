@@ -16,6 +16,7 @@ import {
   AlreadyReportedError,
   Import,
   Terminal,
+  ITerminal,
   ConsoleTerminalProvider
 } from '@rushstack/node-core-library';
 
@@ -39,7 +40,7 @@ const inquirer: typeof inquirerTypes = Import.lazy('inquirer', require);
 
 export class ChangeAction extends BaseRushAction {
   private readonly _git: Git;
-  private readonly _terminal: Terminal;
+  private readonly _terminal: ITerminal;
   private _verifyParameter!: CommandLineFlagParameter;
   private _noFetchParameter!: CommandLineFlagParameter;
   private _targetBranchParameter!: CommandLineStringParameter;
@@ -290,21 +291,21 @@ export class ChangeAction extends BaseRushAction {
         interactiveMode
       );
     } catch (error) {
-      throw new Error(`There was an error creating a change file: ${error.toString()}`);
+      throw new Error(`There was an error creating a change file: ${(error as Error).toString()}`);
     }
   }
 
-  private _generateHostMap(): Map<string, string> {
-    const hostMap: Map<string, string> = new Map<string, string>();
-    this.rushConfiguration.projects.forEach((project) => {
+  private _generateHostMap(): Map<RushConfigurationProject, string> {
+    const hostMap: Map<RushConfigurationProject, string> = new Map();
+    for (const project of this.rushConfiguration.projects) {
       let hostProjectName: string = project.packageName;
-      if (project.versionPolicy && project.versionPolicy.isLockstepped) {
+      if (project.versionPolicy?.isLockstepped) {
         const lockstepPolicy: LockStepVersionPolicy = project.versionPolicy as LockStepVersionPolicy;
         hostProjectName = lockstepPolicy.mainProject || project.packageName;
       }
 
-      hostMap.set(project.packageName, hostProjectName);
-    });
+      hostMap.set(project, hostProjectName);
+    }
 
     return hostMap;
   }
@@ -328,18 +329,23 @@ export class ChangeAction extends BaseRushAction {
 
   private async _getChangedProjectNamesAsync(): Promise<string[]> {
     const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(this.rushConfiguration);
-    const changedProjects: AsyncIterable<RushConfigurationProject> =
-      projectChangeAnalyzer.getChangedProjectsAsync({
+    const changedProjects: Set<RushConfigurationProject> =
+      await projectChangeAnalyzer.getChangedProjectsAsync({
         targetBranchName: this._targetBranch,
         terminal: this._terminal,
-        shouldFetch: !this._noFetchParameter.value
+        shouldFetch: !this._noFetchParameter.value,
+        // Lockfile evaluation will expand the set of projects that request change files
+        // Not enabling, since this would be a breaking change
+        includeExternalDependencies: false,
+        // Since install may not have happened, cannot read rush-project.json
+        enableFiltering: false
       });
-    const projectHostMap: Map<string, string> = this._generateHostMap();
+    const projectHostMap: Map<RushConfigurationProject, string> = this._generateHostMap();
 
     const changedProjectNames: Set<string> = new Set<string>();
-    for await (const changedProject of changedProjects) {
+    for (const changedProject of changedProjects) {
       if (changedProject.shouldPublish && !changedProject.versionPolicy?.exemptFromRushChange) {
-        const hostName: string | undefined = projectHostMap.get(changedProject.packageName);
+        const hostName: string | undefined = projectHostMap.get(changedProject);
         if (hostName) {
           changedProjectNames.add(hostName);
         }

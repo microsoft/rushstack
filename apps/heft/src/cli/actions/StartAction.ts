@@ -32,13 +32,6 @@ export class StartAction extends HeftActionBase {
       parameterLongName: '--clean',
       description: 'If specified, clean the package before starting the development server.'
     });
-
-    // TODO: Expose an API for custom CLI parameters similar to HeftSession.registerAction()
-    this._storybookFlag = this.defineFlagParameter({
-      parameterLongName: '--storybook',
-      description:
-        '(EXPERIMENTAL) Used by the "@rushstack/heft-storybook-plugin" package to launch Storybook.'
-    });
   }
 
   protected async actionExecuteAsync(): Promise<void> {

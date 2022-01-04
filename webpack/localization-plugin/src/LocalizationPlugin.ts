@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { JsonFile, FileSystem, Terminal, NewlineKind } from '@rushstack/node-core-library';
+import { JsonFile, FileSystem, ITerminal, NewlineKind } from '@rushstack/node-core-library';
 import * as Webpack from 'webpack';
 import * as path from 'path';
 import * as Tapable from 'tapable';
@@ -95,7 +95,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
 
   private _options: ILocalizationPluginOptions;
   private _resolvedTranslatedStringsFromOptions!: ILocalizedStrings;
-  private _filesToIgnore: Set<string> = new Set<string>();
+  private _globsToIgnore: string[] | undefined;
   private _stringPlaceholderCounter: number = 0;
   private _stringPlaceholderMap: Map<string, IStringSerialNumberData> = new Map<
     string,
@@ -123,6 +123,10 @@ export class LocalizationPlugin implements Webpack.Plugin {
   >();
 
   public constructor(options: ILocalizationPluginOptions) {
+    if (options.filesToIgnore) {
+      throw new Error('The filesToIgnore option is no longer supported. Please use globsToIgnore instead.');
+    }
+
     this._options = options;
   }
 
@@ -166,7 +170,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
         srcFolder: this._options.typingsOptions.sourceRoot || compiler.context,
         generatedTsFolder: this._options.typingsOptions.generatedTsFolder,
         exportAsDefault: this._options.typingsOptions.exportAsDefault,
-        filesToIgnore: this._options.filesToIgnore
+        globsToIgnore: this._options.globsToIgnore
       });
     } else {
       typingsPreprocessor = undefined;
@@ -175,7 +179,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
     const webpackConfigurationUpdaterOptions: IWebpackConfigurationUpdaterOptions = {
       pluginInstance: this,
       configuration: compiler.options,
-      filesToIgnore: this._filesToIgnore,
+      globsToIgnore: this._globsToIgnore,
       localeNameOrPlaceholder: Constants.LOCALE_NAME_PLACEHOLDER,
       resxNewlineNormalization: this._resxNewlineNormalization
     };
@@ -461,7 +465,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
    * @returns
    */
   public addDefaultLocFile(
-    terminal: Terminal,
+    terminal: ITerminal,
     localizedResourcePath: string,
     localizedResourceData: ILocalizationFile
   ): IAddDefaultLocFileResult {
@@ -511,7 +515,7 @@ export class LocalizationPlugin implements Webpack.Plugin {
           localizedResourcePath
         );
       } catch (e) {
-        errors.push(e);
+        errors.push(e as Error);
       }
 
       if (resolvedTranslatedData) {
@@ -613,15 +617,12 @@ export class LocalizationPlugin implements Webpack.Plugin {
     }
     // END configuration
 
-    // START options.filesToIgnore
+    // START misc options
     // eslint-disable-next-line no-lone-blocks
     {
-      for (const filePath of this._options.filesToIgnore || []) {
-        const normalizedFilePath: string = path.resolve(configuration.context!, filePath);
-        this._filesToIgnore.add(normalizedFilePath);
-      }
+      this._globsToIgnore = this._options.globsToIgnore;
     }
-    // END options.filesToIgnore
+    // END misc options
 
     // START options.localizedData
     if (this._options.localizedData) {

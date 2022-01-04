@@ -180,7 +180,7 @@ export class Utilities {
         looped = true;
         const currentTime: number = Utilities.getTimeInMs();
         if (currentTime - startTime > maxWaitTimeMs) {
-          throw getTimeoutError(e);
+          throw getTimeoutError(e as Error);
         }
       }
     }
@@ -270,7 +270,7 @@ export class Utilities {
       FileSystem.deleteFolder(folderPath);
     } catch (e) {
       throw new Error(
-        `${e.message}${os.EOL}Often this is caused by a file lock from a process ` +
+        `${(e as Error).message}${os.EOL}Often this is caused by a file lock from a process ` +
           'such as your text editor, command prompt, or a filesystem watcher'
       );
     }
@@ -366,7 +366,7 @@ export class Utilities {
       } catch (error) {
         console.log(os.EOL + 'The command failed:');
         console.log(` ${options.command} ` + options.args.join(' '));
-        console.log(`ERROR: ${error.toString()}`);
+        console.log(`ERROR: ${(error as Error).toString()}`);
 
         if (attemptNumber < maxAttempts) {
           ++attemptNumber;
@@ -592,10 +592,6 @@ export class Utilities {
 
   public static getRushConfigNotFoundError(): Error {
     return new Error('Unable to find rush.json configuration file');
-  }
-
-  public static getPackageDepsFilenameForCommand(command: string): string {
-    return `package-deps_${command}.json`;
   }
 
   public static async usingAsync<TDisposable extends IDisposable>(

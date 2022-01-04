@@ -2,7 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import { StringValuesTypingsGenerator, IStringValueTyping } from '@rushstack/typings-generator';
-import { Terminal, NewlineKind } from '@rushstack/node-core-library';
+import { ITerminal, NewlineKind } from '@rushstack/node-core-library';
 
 import { ILocalizationFile } from './interfaces';
 import { LocFileParser } from './utilities/LocFileParser';
@@ -13,14 +13,14 @@ import { LocFileParser } from './utilities/LocFileParser';
 export interface ITypingsGeneratorOptions {
   srcFolder: string;
   generatedTsFolder: string;
-  terminal?: Terminal;
+  terminal?: ITerminal;
   exportAsDefault?: boolean;
-  filesToIgnore?: string[];
+  globsToIgnore?: string[];
   resxNewlineNormalization?: NewlineKind | undefined;
 }
 
 /**
- * This is a simple tool that generates .d.ts files for .loc.json and .resx files.
+ * This is a simple tool that generates .d.ts files for .loc.json, .resx.json, and .resx files.
  *
  * @public
  */
@@ -28,7 +28,7 @@ export class LocFileTypingsGenerator extends StringValuesTypingsGenerator {
   public constructor(options: ITypingsGeneratorOptions) {
     super({
       ...options,
-      fileExtensions: ['.resx', '.loc.json'],
+      fileExtensions: ['.resx', '.resx.json', '.loc.json'],
       parseAndGenerateTypings: (fileContents: string, filePath: string) => {
         const locFileData: ILocalizationFile = LocFileParser.parseLocFile({
           filePath: filePath,

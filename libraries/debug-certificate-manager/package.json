@@ -1,12 +1,14 @@
 {
   "name": "@rushstack/debug-certificate-manager",
-  "version": "1.0.65",
+  "version": "1.1.22",
   "description": "Cross-platform functionality to create debug ssl certificates.",
   "main": "lib/index.js",
   "typings": "dist/debug-certificate-manager.d.ts",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/debug-certificate-manager"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "libraries/debug-certificate-manager"
   },
   "scripts": {
     "build": "heft build --clean"
@@ -21,7 +23,7 @@
     "@rushstack/heft": "workspace:*",
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
-    "@types/node": "10.17.13",
+    "@types/node": "12.20.24",
     "@types/node-forge": "0.10.2"
   }
 }

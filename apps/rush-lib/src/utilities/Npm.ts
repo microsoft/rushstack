@@ -37,15 +37,19 @@ export class Npm {
           true
         );
         if (packageVersions && packageVersions.length > 0) {
-          JSON.parse(packageVersions).forEach((version: string) => {
-            versions.push(version);
-          });
+          const parsedPackageVersions: string | string[] = JSON.parse(packageVersions);
+          // NPM <= 6 always returns an array, NPM >= 7 returns a string if the package has only one version available
+          (Array.isArray(parsedPackageVersions) ? parsedPackageVersions : [parsedPackageVersions]).forEach(
+            (version: string) => {
+              versions.push(version);
+            }
+          );
         } else {
           console.log(`No version is found for ${packageName}`);
         }
       }
     } catch (error) {
-      if (error.message.indexOf('npm ERR! 404') >= 0) {
+      if ((error as Error).message.indexOf('npm ERR! 404') >= 0) {
         console.log(`Package ${packageName} does not exist in the registry.`);
       } else {
         console.log(`Failed to get NPM information about ${packageName}.`);

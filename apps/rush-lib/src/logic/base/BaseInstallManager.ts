@@ -50,6 +50,11 @@ export interface IInstallManagerOptions {
   allowShrinkwrapUpdates: boolean;
 
   /**
+   * Whether to check the validation before install only, without actually installing anything.
+   */
+  checkOnly: boolean;
+
+  /**
    * Whether to skip policy checks.
    */
   bypassPolicy: boolean;
@@ -180,6 +185,10 @@ export abstract class BaseInstallManager {
 
     const { shrinkwrapIsUpToDate, variantIsUpToDate } = await this.prepareAsync();
 
+    if (this.options.checkOnly) {
+      return;
+    }
+
     console.log(
       os.EOL + colors.bold(`Checking installation in "${this.rushConfiguration.commonTempFolder}"`)
     );
@@ -302,42 +311,7 @@ export abstract class BaseInstallManager {
     // Check the policies
     PolicyValidator.validatePolicy(this._rushConfiguration, this.options);
 
-    // Git hooks are only installed if the repo opts in by including files in /common/git-hooks
-    const hookSource: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
-    const git: Git = new Git(this.rushConfiguration);
-    const hookDestination: string | undefined = git.getHooksFolder();
-
-    if (FileSystem.exists(hookSource) && hookDestination) {
-      const allHookFilenames: string[] = FileSystem.readFolder(hookSource);
-      // Ignore the ".sample" file(s) in this folder.
-      const hookFilenames: string[] = allHookFilenames.filter((x) => !/\.sample$/.test(x));
-      if (hookFilenames.length > 0) {
-        console.log(os.EOL + colors.bold('Found files in the "common/git-hooks" folder.'));
-
-        // Clear the currently installed git hooks and install fresh copies
-        FileSystem.ensureEmptyFolder(hookDestination);
-
-        // Only copy files that look like Git hook names
-        const filteredHookFilenames: string[] = hookFilenames.filter((x) => /^[a-z\-]+/.test(x));
-        for (const filename of filteredHookFilenames) {
-          // Copy the file.  Important: For Bash scripts, the EOL must not be CRLF.
-          const hookFileContent: string = FileSystem.readFile(path.join(hookSource, filename));
-          FileSystem.writeFile(path.join(hookDestination, filename), hookFileContent, {
-            convertLineEndings: NewlineKind.Lf
-          });
-
-          FileSystem.changePosixModeBits(
-            path.join(hookDestination, filename),
-            // eslint-disable-next-line no-bitwise
-            PosixModeBits.UserRead | PosixModeBits.UserExecute
-          );
-        }
-
-        console.log(
-          'Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + os.EOL
-        );
-      }
-    }
+    this._installGitHooks();
 
     const approvedPackagesChecker: ApprovedPackagesChecker = new ApprovedPackagesChecker(
       this._rushConfiguration
@@ -374,7 +348,9 @@ export abstract class BaseInstallManager {
         );
       } catch (ex) {
         console.log();
-        console.log(`Unable to load the ${this._rushConfiguration.shrinkwrapFilePhrase}: ${ex.message}`);
+        console.log(
+          `Unable to load the ${this._rushConfiguration.shrinkwrapFilePhrase}: ${(ex as Error).message}`
+        );
 
         if (!this.options.allowShrinkwrapUpdates) {
           console.log();
@@ -463,6 +439,77 @@ export abstract class BaseInstallManager {
   }
 
   /**
+   * Git hooks are only installed if the repo opts in by including files in /common/git-hooks
+   */
+  private _installGitHooks(): void {
+    const hookSource: string = path.join(this._rushConfiguration.commonFolder, 'git-hooks');
+    const git: Git = new Git(this.rushConfiguration);
+    const hookDestination: string | undefined = git.getHooksFolder();
+
+    if (FileSystem.exists(hookSource) && hookDestination) {
+      const allHookFilenames: string[] = FileSystem.readFolder(hookSource);
+      // Ignore the ".sample" file(s) in this folder.
+      const hookFilenames: string[] = allHookFilenames.filter((x) => !/\.sample$/.test(x));
+      if (hookFilenames.length > 0) {
+        console.log(os.EOL + colors.bold('Found files in the "common/git-hooks" folder.'));
+
+        if (!git.isHooksPathDefault()) {
+          const color: (str: string) => string = this.options.bypassPolicy ? colors.yellow : colors.red;
+          console.error(
+            color(
+              [
+                ' ',
+                `Rush cannot install the "common/git-hooks" scripts because your Git configuration `,
+                `specifies "core.hooksPath=${git.getConfigHooksPath()}". You can remove the setting by running:`,
+                ' ',
+                '    git config --unset core.hooksPath',
+                ' '
+              ].join(os.EOL)
+            )
+          );
+          if (this.options.bypassPolicy) {
+            // If "--bypass-policy" is specified, skip installation of hooks because Rush doesn't
+            // own the hooks folder
+            return;
+          }
+          console.error(
+            color(
+              [
+                '(Or, to temporarily ignore this problem, invoke Rush with the "--bypass-policy" option.)',
+                ' '
+              ].join(os.EOL)
+            )
+          );
+          throw new AlreadyReportedError();
+        }
+
+        // Clear the currently installed git hooks and install fresh copies
+        FileSystem.ensureEmptyFolder(hookDestination);
+
+        // Only copy files that look like Git hook names
+        const filteredHookFilenames: string[] = hookFilenames.filter((x) => /^[a-z\-]+/.test(x));
+        for (const filename of filteredHookFilenames) {
+          // Copy the file.  Important: For Bash scripts, the EOL must not be CRLF.
+          const hookFileContent: string = FileSystem.readFile(path.join(hookSource, filename));
+          FileSystem.writeFile(path.join(hookDestination, filename), hookFileContent, {
+            convertLineEndings: NewlineKind.Lf
+          });
+
+          FileSystem.changePosixModeBits(
+            path.join(hookDestination, filename),
+            // eslint-disable-next-line no-bitwise
+            PosixModeBits.UserRead | PosixModeBits.UserExecute
+          );
+        }
+
+        console.log(
+          'Successfully installed these Git hook scripts: ' + filteredHookFilenames.join(', ') + os.EOL
+        );
+      }
+    }
+  }
+
+  /**
    * Used when invoking the NPM tool.  Appends the common configuration options
    * to the command-line.
    */
@@ -544,6 +591,10 @@ export abstract class BaseInstallManager {
 
       if (this._rushConfiguration.yarnOptions.ignoreEngines) {
         args.push('--ignore-engines');
+      }
+
+      if (options.collectLogFile) {
+        args.push('--verbose');
       }
     }
   }

@@ -20,7 +20,7 @@ If running on node 10, you will need to ensure that the `--experimental-workers`
 const { ModuleMinifierPlugin, WorkerPoolMinifier } = require('@rushstack/module-minifier-plugin');
 
 // In your webpack options:
-optimization: [
+optimization: {
   minimizer: [
     new ModuleMinifierPlugin({
       minifier: new WorkerPoolMinifier(),
@@ -29,24 +29,24 @@ optimization: [
       useSourceMap: true
     })
   ]
-]
+}
 ```
 
-## Synchronous execution
+## Single-threaded execution
 You can also run the ModuleMinifierPlugin in a single-threaded configuration.
 
 ```js
 // webpack.config.js
-const { ModuleMinifierPlugin, SynchronousMinifier } = require('@rushstack/module-minifier-plugin');
+const { ModuleMinifierPlugin, LocalMinifier } = require('@rushstack/module-minifier-plugin');
 
 // In your webpack options:
-optimization: [
+optimization: {
   minimizer: [
     new ModuleMinifierPlugin({
-      minifier: new SynchronousMinifier()
+      minifier: new LocalMinifier()
     })
   ]
-]
+}
 ```
 
 ## Links

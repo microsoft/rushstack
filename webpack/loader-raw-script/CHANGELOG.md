@@ -1,6 +1,150 @@
 # Change Log - @rushstack/loader-raw-script
 
-This log was last generated on Tue, 14 Sep 2021 01:17:04 GMT and should not be manually modified.
+This log was last generated on Mon, 27 Dec 2021 16:10:40 GMT and should not be manually modified.
+
+## 1.3.206
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 1.3.205
+Tue, 14 Dec 2021 19:27:51 GMT
+
+_Version update only_
+
+## 1.3.204
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 1.3.203
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 1.3.202
+Wed, 08 Dec 2021 19:05:08 GMT
+
+_Version update only_
+
+## 1.3.201
+Wed, 08 Dec 2021 16:14:05 GMT
+
+_Version update only_
+
+## 1.3.200
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 1.3.199
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 1.3.198
+Tue, 30 Nov 2021 20:18:41 GMT
+
+_Version update only_
+
+## 1.3.197
+Mon, 29 Nov 2021 07:26:16 GMT
+
+_Version update only_
+
+## 1.3.196
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 1.3.195
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 1.3.194
+Thu, 28 Oct 2021 00:08:22 GMT
+
+_Version update only_
+
+## 1.3.193
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 1.3.192
+Wed, 13 Oct 2021 15:09:55 GMT
+
+_Version update only_
+
+## 1.3.191
+Fri, 08 Oct 2021 09:35:07 GMT
+
+_Version update only_
+
+## 1.3.190
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 1.3.189
+Thu, 07 Oct 2021 23:43:12 GMT
+
+_Version update only_
+
+## 1.3.188
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 1.3.187
+Wed, 06 Oct 2021 15:08:26 GMT
+
+_Version update only_
+
+## 1.3.186
+Wed, 06 Oct 2021 02:41:48 GMT
+
+_Version update only_
+
+## 1.3.185
+Tue, 05 Oct 2021 15:08:38 GMT
+
+_Version update only_
+
+## 1.3.184
+Mon, 04 Oct 2021 15:10:18 GMT
+
+_Version update only_
+
+## 1.3.183
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 1.3.182
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 1.3.181
+Wed, 22 Sep 2021 03:27:12 GMT
+
+_Version update only_
+
+## 1.3.180
+Wed, 22 Sep 2021 00:09:32 GMT
+
+_Version update only_
+
+## 1.3.179
+Sat, 18 Sep 2021 03:05:57 GMT
+
+_Version update only_
 
 ## 1.3.178
 Tue, 14 Sep 2021 01:17:04 GMT

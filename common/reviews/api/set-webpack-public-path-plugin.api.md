@@ -4,7 +4,7 @@
 
 ```ts
 
-import * as Webpack from 'webpack';
+import type * as Webpack from 'webpack';
 
 // @public
 export function getGlobalRegisterCode(debug?: boolean): string;

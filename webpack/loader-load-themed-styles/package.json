@@ -1,13 +1,14 @@
 {
   "name": "@microsoft/loader-load-themed-styles",
-  "version": "1.9.92",
+  "version": "1.9.122",
   "description": "This simple loader wraps the loading of CSS in script equivalent to `require('load-themed-styles').loadStyles( /* css text */ )`. It is designed to be a replacement for style-loader.",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/rushstack/tree/master/webpack/loader-load-themed-styles"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "directory": "webpack/loader-load-themed-styles"
   },
   "scripts": {
     "build": "heft test --clean"
@@ -22,7 +23,7 @@
     "@rushstack/heft-node-rig": "workspace:*",
     "@types/heft-jest": "1.0.1",
     "@types/loader-utils": "1.1.3",
-    "@types/node": "10.17.13",
+    "@types/node": "12.20.24",
     "@types/webpack": "4.41.24"
   }
 }

@@ -3,6 +3,7 @@
 
 /**
  * Constants used by the Rush tool.
+ * @beta
  *
  * @remarks
  *
@@ -40,7 +41,7 @@ export class RushConstants {
   public static readonly commonFolderName: string = 'common';
 
   /**
-   * The NPM scope ("@rush-temp") that is used for Rush's temporary projects.
+   * The NPM scope ("\@rush-temp") that is used for Rush's temporary projects.
    */
   public static readonly rushTempNpmScope: string = '@rush-temp';
 
@@ -60,7 +61,7 @@ export class RushConstants {
   /**
    * The folder name ("variants") under which named variant configurations for
    * alternate dependency sets may be found.
-   * Example: "C:\MyRepo\common\config\rush\variants"
+   * Example: `C:\MyRepo\common\config\rush\variants`
    */
   public static readonly rushVariantsFolderName: string = 'variants';
 
@@ -144,6 +145,16 @@ export class RushConstants {
   public static readonly experimentsFilename: string = 'experiments.json';
 
   /**
+   * Rush plugins configuration file name.
+   */
+  public static readonly rushPluginsConfigFilename: string = 'rush-plugins.json';
+
+  /**
+   * Rush plugin manifest file name.
+   */
+  public static readonly rushPluginManifestFilename: string = 'rush-plugin-manifest.json';
+
+  /**
    * The artifactory.json configuration file name.
    */
   public static readonly artifactoryFilename: string = 'artifactory.json';
@@ -164,7 +175,7 @@ export class RushConstants {
   public static readonly rushWebSiteUrl: string = 'https://rushjs.io';
 
   /**
-   * The name of the NPM package for the Rush tool ("@microsoft/rush").
+   * The name of the NPM package for the Rush tool ("\@microsoft/rush").
    */
   public static readonly rushPackageName: string = '@microsoft/rush';
 
@@ -191,6 +202,11 @@ export class RushConstants {
   public static readonly globalCommandKind: 'global' = 'global';
 
   /**
+   * The value of the "commandKind" property for a phased command in command-line.json
+   */
+  public static readonly phasedCommandKind: 'phased' = 'phased';
+
+  /**
    * The name of the incremental build command.
    */
   public static readonly buildCommandName: string = 'build';
@@ -213,4 +229,14 @@ export class RushConstants {
    * The name of the per-user Rush configuration data folder.
    */
   public static readonly rushUserConfigurationFolderName: string = '.rush-user';
+
+  /**
+   * The name of the project `rush-logs` folder.
+   */
+  public static readonly rushLogsFolderName: string = 'rush-logs';
+
+  /**
+   * The expected prefix for phase names in "common/config/rush/command-line.json"
+   */
+  public static readonly phaseNamePrefix: '_phase:' = '_phase:';
 }

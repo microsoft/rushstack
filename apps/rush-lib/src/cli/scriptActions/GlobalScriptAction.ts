@@ -5,24 +5,16 @@ import colors from 'colors/safe';
 import * as os from 'os';
 import * as path from 'path';
 
-import {
-  FileSystem,
-  LockFile,
-  IPackageJson,
-  JsonFile,
-  AlreadyReportedError
-} from '@rushstack/node-core-library';
+import { FileSystem, IPackageJson, JsonFile, AlreadyReportedError, Text } from '@rushstack/node-core-library';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
 import { Utilities } from '../../utilities/Utilities';
-import { InstallHelpers } from '../../logic/installManager/InstallHelpers';
-import { RushConstants } from '../../logic/RushConstants';
-import { LastInstallFlag } from '../../api/LastInstallFlag';
 import { Autoinstaller } from '../../logic/Autoinstaller';
+import { IGlobalCommand, IShellCommandTokenContext } from '../../api/CommandLineConfiguration';
 
 /**
  * Constructor parameters for GlobalScriptAction.
  */
-export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions {
+export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions<IGlobalCommand> {
   shellCommand: string;
   autoinstallerName: string | undefined;
 }
@@ -37,7 +29,7 @@ export interface IGlobalScriptActionOptions extends IBaseScriptActionOptions {
  * and "rebuild" commands are also modeled as bulk commands, because they essentially just
  * invoke scripts from package.json in the same way as a custom command.
  */
-export class GlobalScriptAction extends BaseScriptAction {
+export class GlobalScriptAction extends BaseScriptAction<IGlobalCommand> {
   private readonly _shellCommand: string;
   private readonly _autoinstallerName: string;
   private readonly _autoinstallerFullPath: string;
@@ -89,73 +81,14 @@ export class GlobalScriptAction extends BaseScriptAction {
   }
 
   private async _prepareAutoinstallerName(): Promise<void> {
-    await InstallHelpers.ensureLocalPackageManager(
-      this.rushConfiguration,
-      this.rushGlobalFolder,
-      RushConstants.defaultMaxInstallAttempts
-    );
+    const autoInstaller: Autoinstaller = new Autoinstaller(this._autoinstallerName, this.rushConfiguration);
 
-    // Example: common/autoinstallers/my-task/package.json
-    const relativePathForLogs: string = path.relative(
-      this.rushConfiguration.rushJsonFolder,
-      this._autoinstallerFullPath
-    );
-
-    console.log(`Acquiring lock for "${relativePathForLogs}" folder...`);
-
-    const lock: LockFile = await LockFile.acquire(this._autoinstallerFullPath, 'autoinstaller');
-
-    // Example: .../common/autoinstallers/my-task/.rush/temp
-    const lastInstallFlagPath: string = path.join(
-      this._autoinstallerFullPath,
-      RushConstants.projectRushFolderName,
-      'temp'
-    );
-
-    const packageJsonPath: string = path.join(this._autoinstallerFullPath, 'package.json');
-    const packageJson: IPackageJson = JsonFile.load(packageJsonPath);
-
-    const lastInstallFlag: LastInstallFlag = new LastInstallFlag(lastInstallFlagPath, {
-      node: process.versions.node,
-      packageManager: this.rushConfiguration.packageManager,
-      packageManagerVersion: this.rushConfiguration.packageManagerToolVersion,
-      packageJson: packageJson
-    });
-
-    if (!lastInstallFlag.isValid() || lock.dirtyWhenAcquired) {
-      // Example: ../common/autoinstallers/my-task/node_modules
-      const nodeModulesFolder: string = path.join(this._autoinstallerFullPath, 'node_modules');
-
-      if (FileSystem.exists(nodeModulesFolder)) {
-        console.log('Deleting old files from ' + nodeModulesFolder);
-        FileSystem.ensureEmptyFolder(nodeModulesFolder);
-      }
-
-      // Copy: .../common/autoinstallers/my-task/.npmrc
-      Utilities.syncNpmrc(this.rushConfiguration.commonRushConfigFolder, this._autoinstallerFullPath);
-
-      console.log(`Installing dependencies under ${this._autoinstallerFullPath}...\n`);
-
-      Utilities.executeCommand({
-        command: this.rushConfiguration.packageManagerToolFilename,
-        args: ['install', '--frozen-lockfile'],
-        workingDirectory: this._autoinstallerFullPath,
-        keepEnvironment: true
-      });
-
-      // Create file: ../common/autoinstallers/my-task/.rush/temp/last-install.flag
-      lastInstallFlag.create();
-
-      console.log('Autoinstall completed successfully\n');
-    } else {
-      console.log('Autoinstaller folder is already up to date\n');
-    }
-
-    lock.release();
+    await autoInstaller.prepareAsync();
   }
 
   public async runAsync(): Promise<void> {
-    const additionalPathFolders: string[] = [];
+    const additionalPathFolders: string[] =
+      this.commandLineConfiguration?.additionalPathFolders.slice() || [];
 
     if (this._autoinstallerName) {
       await this._prepareAutoinstallerName();
@@ -166,15 +99,32 @@ export class GlobalScriptAction extends BaseScriptAction {
 
     // Collect all custom parameter values
     const customParameterValues: string[] = [];
+    for (const { tsCommandLineParameter } of this.customParameters) {
+      tsCommandLineParameter.appendToArgList(customParameterValues);
+    }
 
-    for (const customParameter of this.customParameters) {
-      customParameter.appendToArgList(customParameterValues);
+    for (let i: number = 0; i < customParameterValues.length; i++) {
+      let customParameterValue: string = customParameterValues[i];
+      customParameterValue = customParameterValue.replace(/"/g, '\\"');
+
+      if (customParameterValue.indexOf(' ') >= 0) {
+        customParameterValue = `"${customParameterValue}"`;
+      }
+
+      customParameterValues[i] = customParameterValue;
     }
 
     let shellCommand: string = this._shellCommand;
     if (customParameterValues.length > 0) {
       shellCommand += ' ' + customParameterValues.join(' ');
     }
+
+    const shellCommandTokenContext: IShellCommandTokenContext | undefined =
+      this.commandLineConfiguration?.shellCommandTokenContext;
+    if (shellCommandTokenContext) {
+      shellCommand = this._expandShellCommandWithTokens(shellCommand, shellCommandTokenContext);
+    }
+    this._rejectAnyTokensInShellCommand(shellCommand, shellCommandTokenContext);
 
     const exitCode: number = Utilities.executeLifecycleCommand(shellCommand, {
       rushConfiguration: this.rushConfiguration,
@@ -197,5 +147,35 @@ export class GlobalScriptAction extends BaseScriptAction {
 
   protected onDefineParameters(): void {
     this.defineScriptParameters();
+  }
+
+  private _expandShellCommandWithTokens(
+    shellCommand: string,
+    tokenContext: IShellCommandTokenContext
+  ): string {
+    let expandedShellCommand: string = shellCommand;
+    for (const [token, tokenReplacement] of Object.entries(tokenContext)) {
+      expandedShellCommand = Text.replaceAll(expandedShellCommand, `<${token}>`, tokenReplacement);
+    }
+    return expandedShellCommand;
+  }
+
+  private _rejectAnyTokensInShellCommand(
+    shellCommand: string,
+    tokenContext?: IShellCommandTokenContext
+  ): void {
+    if (shellCommand.indexOf('<') < 0 && shellCommand.indexOf('>') < 0) {
+      return;
+    }
+    const tokenRegExp: RegExp = /(\<[^<]*?\>)/;
+    const match: RegExpExecArray | null = tokenRegExp.exec(shellCommand);
+    if (match) {
+      throw new Error(
+        `The "shellCommand" value contains an unrecognized token "${match[1]}".${
+          tokenContext ? ` Available tokens are ${Object.keys(tokenContext).join(', ')}.` : ''
+        }`
+      );
+    }
+    throw new Error(`The "shellCommand" value contains extra token characters ("<" or ">"): ${shellCommand}`);
   }
 }

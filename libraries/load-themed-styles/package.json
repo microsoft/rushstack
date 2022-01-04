@@ -1,10 +1,12 @@
 {
   "name": "@microsoft/load-themed-styles",
-  "version": "1.10.211",
+  "version": "1.10.241",
   "description": "Loads themed styles.",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/load-themed-styles"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "libraries/load-themed-styles"
   },
   "scripts": {
     "build": "heft build --clean"

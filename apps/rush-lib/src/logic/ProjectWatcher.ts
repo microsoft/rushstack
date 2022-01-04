@@ -4,7 +4,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import { once } from 'events';
-import { Path, Terminal } from '@rushstack/node-core-library';
+import { Path, ITerminal } from '@rushstack/node-core-library';
 
 import { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -14,7 +14,7 @@ export interface IProjectWatcherOptions {
   debounceMilliseconds?: number;
   rushConfiguration: RushConfiguration;
   projectsToWatch: ReadonlySet<RushConfigurationProject>;
-  terminal: Terminal;
+  terminal: ITerminal;
 }
 
 export interface IProjectChangeResult {
@@ -42,7 +42,7 @@ export class ProjectWatcher {
   private readonly _debounceMilliseconds: number;
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _projectsToWatch: ReadonlySet<RushConfigurationProject>;
-  private readonly _terminal: Terminal;
+  private readonly _terminal: ITerminal;
 
   private _initialState: ProjectChangeAnalyzer | undefined;
   private _previousState: ProjectChangeAnalyzer | undefined;
@@ -80,7 +80,7 @@ export class ProjectWatcher {
 
     for (const project of this._projectsToWatch) {
       const projectState: Map<string, string> = (await previousState._tryGetProjectDependenciesAsync(
-        project.packageName,
+        project,
         this._terminal
       ))!;
       const projectFolder: string = project.projectRelativeFolder;
@@ -129,7 +129,7 @@ export class ProjectWatcher {
           } catch (err) {
             // eslint-disable-next-line require-atomic-updates
             terminated = true;
-            reject(err);
+            reject(err as NodeJS.ErrnoException);
           }
         };
 
@@ -179,7 +179,9 @@ export class ProjectWatcher {
                     addWatcher(normalizedName, changeListener);
                   }
                 } catch (err) {
-                  if (err.code !== 'ENOENT' && err.code !== 'ENOTDIR') {
+                  const code: string | undefined = (err as NodeJS.ErrnoException).code;
+
+                  if (code !== 'ENOENT' && code !== 'ENOTDIR') {
                     throw err;
                   }
                 }
@@ -194,7 +196,7 @@ export class ProjectWatcher {
             timeout = setTimeout(resolveIfChanged, this._debounceMilliseconds);
           } catch (err) {
             terminated = true;
-            reject(err);
+            reject(err as NodeJS.ErrnoException);
           }
         };
 
@@ -240,14 +242,12 @@ export class ProjectWatcher {
 
     const changedProjects: Set<RushConfigurationProject> = new Set();
     for (const project of this._projectsToWatch) {
-      const { packageName } = project;
+      const [previous, current] = await Promise.all([
+        previousState._tryGetProjectDependenciesAsync(project, this._terminal),
+        state._tryGetProjectDependenciesAsync(project, this._terminal)
+      ]);
 
-      if (
-        ProjectWatcher._haveProjectDepsChanged(
-          (await previousState._tryGetProjectDependenciesAsync(packageName, this._terminal))!,
-          (await state._tryGetProjectDependenciesAsync(packageName, this._terminal))!
-        )
-      ) {
+      if (ProjectWatcher._haveProjectDepsChanged(previous!, current!)) {
         // May need to detect if the nature of the change will break the process, e.g. changes to package.json
         changedProjects.add(project);
       }

@@ -101,7 +101,7 @@ export class RepoStateFile {
     try {
       fileContents = FileSystem.readFile(jsonFilename);
     } catch (error) {
-      if (!FileSystem.isNotExistError(error)) {
+      if (!FileSystem.isNotExistError(error as Error)) {
         throw error;
       }
     }
@@ -155,8 +155,7 @@ export class RepoStateFile {
       rushConfiguration.pnpmOptions.preventManualShrinkwrapChanges;
     if (preventShrinkwrapChanges) {
       const pnpmShrinkwrapFile: PnpmShrinkwrapFile | undefined = PnpmShrinkwrapFile.loadFromFile(
-        rushConfiguration.getCommittedShrinkwrapFilename(this._variant),
-        rushConfiguration.pnpmOptions
+        rushConfiguration.getCommittedShrinkwrapFilename(this._variant)
       );
 
       if (pnpmShrinkwrapFile) {

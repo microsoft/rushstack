@@ -11,10 +11,12 @@ const DUMMY_BRANCH_NAME: string = '-branch-name-';
 export class PublishGit {
   private readonly _targetBranch: string | undefined;
   private readonly _gitPath: string;
+  private readonly _gitTagSeparator: string;
 
   public constructor(git: Git, targetBranch: string | undefined) {
     this._targetBranch = targetBranch;
     this._gitPath = git.getGitPathOrThrow();
+    this._gitTagSeparator = git.getTagSeparator();
   }
 
   public checkout(branchName: string | undefined, createBranch: boolean = false): void {
@@ -91,7 +93,11 @@ export class PublishGit {
     commitId: string | undefined
   ): void {
     // Tagging only happens if we're publishing to real NPM and committing to git.
-    const tagName: string = PublishUtilities.createTagname(packageName, packageVersion);
+    const tagName: string = PublishUtilities.createTagname(
+      packageName,
+      packageVersion,
+      this._gitTagSeparator
+    );
     PublishUtilities.execCommand(!!this._targetBranch && shouldExecute, this._gitPath, [
       'tag',
       '-a',
@@ -105,7 +111,8 @@ export class PublishGit {
   public hasTag(packageConfig: RushConfigurationProject): boolean {
     const tagName: string = PublishUtilities.createTagname(
       packageConfig.packageName,
-      packageConfig.packageJson.version
+      packageConfig.packageJson.version,
+      this._gitTagSeparator
     );
     const tagOutput: string = Utilities.executeCommandAndCaptureOutput(
       this._gitPath,

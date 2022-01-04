@@ -40,6 +40,12 @@
       /**
        * The path to the plugin package.
        */
+      "plugin": "@rushstack/heft-dev-cert-plugin"
+    },
+    {
+      /**
+       * The path to the plugin package.
+       */
       "plugin": "@rushstack/heft-webpack4-plugin"
 
       /**

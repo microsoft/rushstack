@@ -162,6 +162,7 @@ export abstract class CommandLineParameterProvider {
     getStringParameter(parameterLongName: string): CommandLineStringParameter;
     protected abstract onDefineParameters(): void;
     get parameters(): ReadonlyArray<CommandLineParameter>;
+    get parametersProcessed(): boolean;
     // @internal (undocumented)
     protected _processParsedData(data: _ICommandLineParserData): void;
     get remainder(): CommandLineRemainder | undefined;

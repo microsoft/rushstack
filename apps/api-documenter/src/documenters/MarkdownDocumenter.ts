@@ -1112,6 +1112,7 @@ export class MarkdownDocumenter {
       switch (hierarchyItem.kind) {
         case ApiItemKind.Model:
         case ApiItemKind.EntryPoint:
+        case ApiItemKind.EnumMember:
           break;
         case ApiItemKind.Package:
           baseName = Utilities.getSafeFilenameForName(PackageName.getUnscopedName(hierarchyItem.displayName));

@@ -4,7 +4,7 @@
 import * as path from 'path';
 import type * as TTslint from 'tslint';
 import * as crypto from 'crypto';
-import { Import, Terminal, JsonFile } from '@rushstack/node-core-library';
+import { Import, ITerminal, JsonFile } from '@rushstack/node-core-library';
 
 import { LinterBase, ILinterBaseOptions } from './LinterBase';
 import { IExtendedSourceFile, IExtendedProgram } from './internalTypings/TypeScriptInternals';
@@ -45,7 +45,7 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
    */
   public static getConfigHash(
     configFilePath: string,
-    terminal: Terminal,
+    terminal: ITerminal,
     cachedFileSystem: TypeScriptCachedFileSystem,
     previousHash?: crypto.Hash
   ): crypto.Hash {
@@ -161,7 +161,7 @@ export class Tslint extends LinterBase<TTslint.RuleFailure> {
     );
   }
 
-  protected lintFile(sourceFile: IExtendedSourceFile): TTslint.RuleFailure[] {
+  protected async lintFileAsync(sourceFile: IExtendedSourceFile): Promise<TTslint.RuleFailure[]> {
     // Some of this code comes from here:
     // https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L161-L179
     // Modified to only lint files that have changed and that we care about

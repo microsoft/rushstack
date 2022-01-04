@@ -42,7 +42,7 @@ function readPackage(packageJson, context) {
     }
 
     switch (packageJson.version) {
-      case '3.11.2': {
+      case '3.11.3': {
         // This is for heft-webpack4-plugin and the other projects that use Webpack 4
         packageJson.peerDependencies['@types/webpack'] = '^4.0.0';
         break;
@@ -62,8 +62,12 @@ function readPackage(packageJson, context) {
         );
       }
     }
-  } else if (packageJson.name === '@typescript-eslint/types') {
-    // Workaround for https://github.com/typescript-eslint/typescript-eslint/issues/3622
+  } else if (
+    packageJson.name === '@typescript-eslint/types' ||
+    packageJson.name === 'tslint-microsoft-contrib'
+  ) {
+    // The `@typescript-eslint/types` check is a workaround for https://github.com/typescript-eslint/typescript-eslint/issues/3622.
+    // The `tslint-microsoft-contrib` repo is archived so it can't be updated to TS 4.4+.
     if (!packageJson.peerDependencies) {
       packageJson.peerDependencies = {};
     }

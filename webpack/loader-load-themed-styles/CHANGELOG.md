@@ -1,6 +1,160 @@
 # Change Log - @microsoft/loader-load-themed-styles
 
-This log was last generated on Tue, 14 Sep 2021 01:17:04 GMT and should not be manually modified.
+This log was last generated on Mon, 27 Dec 2021 16:10:40 GMT and should not be manually modified.
+
+## 1.9.122
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 1.9.121
+Tue, 14 Dec 2021 19:27:51 GMT
+
+_Version update only_
+
+## 1.9.120
+Fri, 10 Dec 2021 01:09:33 GMT
+
+_Version update only_
+
+## 1.9.119
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 1.9.118
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 1.9.117
+Wed, 08 Dec 2021 19:05:08 GMT
+
+_Version update only_
+
+## 1.9.116
+Wed, 08 Dec 2021 16:14:05 GMT
+
+_Version update only_
+
+## 1.9.115
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 1.9.114
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 1.9.113
+Tue, 30 Nov 2021 20:18:41 GMT
+
+_Version update only_
+
+## 1.9.112
+Mon, 29 Nov 2021 07:26:16 GMT
+
+_Version update only_
+
+## 1.9.111
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 1.9.110
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 1.9.109
+Thu, 28 Oct 2021 23:48:23 GMT
+
+_Version update only_
+
+## 1.9.108
+Thu, 28 Oct 2021 00:08:22 GMT
+
+_Version update only_
+
+## 1.9.107
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 1.9.106
+Wed, 13 Oct 2021 15:09:54 GMT
+
+_Version update only_
+
+## 1.9.105
+Fri, 08 Oct 2021 09:35:07 GMT
+
+_Version update only_
+
+## 1.9.104
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 1.9.103
+Thu, 07 Oct 2021 23:43:12 GMT
+
+_Version update only_
+
+## 1.9.102
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 1.9.101
+Wed, 06 Oct 2021 15:08:26 GMT
+
+_Version update only_
+
+## 1.9.100
+Wed, 06 Oct 2021 02:41:48 GMT
+
+_Version update only_
+
+## 1.9.99
+Tue, 05 Oct 2021 15:08:38 GMT
+
+_Version update only_
+
+## 1.9.98
+Mon, 04 Oct 2021 15:10:18 GMT
+
+_Version update only_
+
+## 1.9.97
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 1.9.96
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 1.9.95
+Wed, 22 Sep 2021 03:27:12 GMT
+
+_Version update only_
+
+## 1.9.94
+Wed, 22 Sep 2021 00:09:32 GMT
+
+_Version update only_
+
+## 1.9.93
+Sat, 18 Sep 2021 03:05:57 GMT
+
+_Version update only_
 
 ## 1.9.92
 Tue, 14 Sep 2021 01:17:04 GMT

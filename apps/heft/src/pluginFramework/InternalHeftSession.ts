@@ -11,6 +11,7 @@ import { TestStage } from '../stages/TestStage';
 import { MetricsCollector } from '../metrics/MetricsCollector';
 import { LoggingManager } from './logging/LoggingManager';
 import { IHeftLifecycle } from './HeftLifecycle';
+import { HeftCommandLine } from '../cli/HeftCommandLine';
 
 /**
  * @internal
@@ -25,6 +26,7 @@ export interface IInternalHeftSessionOptions {
   loggingManager: LoggingManager;
   getIsDebugMode(): boolean;
   registerAction: RegisterAction;
+  commandLine: HeftCommandLine;
 }
 
 /**

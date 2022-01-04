@@ -1,6 +1,157 @@
 # Change Log - @microsoft/api-documenter
 
-This log was last generated on Tue, 14 Sep 2021 01:17:04 GMT and should not be manually modified.
+This log was last generated on Mon, 27 Dec 2021 16:10:40 GMT and should not be manually modified.
+
+## 7.13.78
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 7.13.77
+Tue, 14 Dec 2021 19:27:51 GMT
+
+_Version update only_
+
+## 7.13.76
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 7.13.75
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 7.13.74
+Wed, 08 Dec 2021 19:05:08 GMT
+
+_Version update only_
+
+## 7.13.73
+Wed, 08 Dec 2021 16:14:05 GMT
+
+_Version update only_
+
+## 7.13.72
+Mon, 06 Dec 2021 16:08:32 GMT
+
+_Version update only_
+
+## 7.13.71
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 7.13.70
+Tue, 30 Nov 2021 20:18:41 GMT
+
+_Version update only_
+
+## 7.13.69
+Mon, 29 Nov 2021 07:26:16 GMT
+
+_Version update only_
+
+## 7.13.68
+Tue, 09 Nov 2021 01:09:37 GMT
+
+### Patches
+
+- Links to enum members go to the enum page in markdown output
+
+## 7.13.67
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 7.13.66
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 7.13.65
+Thu, 28 Oct 2021 00:08:22 GMT
+
+_Version update only_
+
+## 7.13.64
+Wed, 27 Oct 2021 00:08:14 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 7.13.63
+Wed, 13 Oct 2021 15:09:54 GMT
+
+_Version update only_
+
+## 7.13.62
+Fri, 08 Oct 2021 09:35:07 GMT
+
+_Version update only_
+
+## 7.13.61
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 7.13.60
+Thu, 07 Oct 2021 23:43:12 GMT
+
+_Version update only_
+
+## 7.13.59
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 7.13.58
+Wed, 06 Oct 2021 15:08:25 GMT
+
+_Version update only_
+
+## 7.13.57
+Wed, 06 Oct 2021 02:41:48 GMT
+
+_Version update only_
+
+## 7.13.56
+Tue, 05 Oct 2021 15:08:38 GMT
+
+_Version update only_
+
+## 7.13.55
+Mon, 04 Oct 2021 15:10:18 GMT
+
+_Version update only_
+
+## 7.13.54
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 7.13.53
+Thu, 23 Sep 2021 00:10:40 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 7.13.52
+Wed, 22 Sep 2021 03:27:12 GMT
+
+_Version update only_
+
+## 7.13.51
+Wed, 22 Sep 2021 00:09:32 GMT
+
+_Version update only_
+
+## 7.13.50
+Sat, 18 Sep 2021 03:05:57 GMT
+
+_Version update only_
 
 ## 7.13.49
 Tue, 14 Sep 2021 01:17:04 GMT

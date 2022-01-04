@@ -51,7 +51,7 @@ export class SplitterTransform extends TerminalWritable {
         try {
           destination.close();
         } catch (error) {
-          errors.push(error);
+          errors.push(error as Error);
         }
       }
     }

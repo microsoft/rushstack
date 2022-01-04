@@ -432,7 +432,7 @@ export class NodeServicePlugin implements IHeftPlugin {
     try {
       action();
     } catch (error) {
-      this._logger.emitError(error);
+      this._logger.emitError(error as Error);
       this._logger.terminal.writeErrorLine('An unexpected error occurred');
 
       // TODO: Provide a Heft facility for this

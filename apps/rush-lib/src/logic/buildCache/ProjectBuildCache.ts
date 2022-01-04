@@ -2,11 +2,11 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import * as events from 'events';
+import events from 'events';
 import * as crypto from 'crypto';
 import type * as stream from 'stream';
 import * as tar from 'tar';
-import { FileSystem, LegacyAdapters, Path, Terminal } from '@rushstack/node-core-library';
+import { FileSystem, LegacyAdapters, Path, ITerminal } from '@rushstack/node-core-library';
 import * as fs from 'fs';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
@@ -14,18 +14,20 @@ import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import { RushProjectConfiguration } from '../../api/RushProjectConfiguration';
 import { RushConstants } from '../RushConstants';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
-import { CloudBuildCacheProviderBase } from './CloudBuildCacheProviderBase';
+import { ICloudBuildCacheProvider } from './ICloudBuildCacheProvider';
 import { FileSystemBuildCacheProvider } from './FileSystemBuildCacheProvider';
 import { TarExecutable } from '../../utilities/TarExecutable';
 import { Utilities } from '../../utilities/Utilities';
 
-interface IProjectBuildCacheOptions {
+export interface IProjectBuildCacheOptions {
   buildCacheConfiguration: BuildCacheConfiguration;
   projectConfiguration: RushProjectConfiguration;
+  projectOutputFolderNames: ReadonlyArray<string>;
   command: string;
   trackedProjectFiles: string[] | undefined;
   projectChangeAnalyzer: ProjectChangeAnalyzer;
-  terminal: Terminal;
+  terminal: ITerminal;
+  phaseName: string;
 }
 
 interface IPathsToCache {
@@ -42,9 +44,9 @@ export class ProjectBuildCache {
 
   private readonly _project: RushConfigurationProject;
   private readonly _localBuildCacheProvider: FileSystemBuildCacheProvider;
-  private readonly _cloudBuildCacheProvider: CloudBuildCacheProviderBase | undefined;
+  private readonly _cloudBuildCacheProvider: ICloudBuildCacheProvider | undefined;
   private readonly _buildCacheEnabled: boolean;
-  private readonly _projectOutputFolderNames: string[];
+  private readonly _projectOutputFolderNames: ReadonlyArray<string>;
   private _cacheId: string | undefined;
 
   private constructor(cacheId: string | undefined, options: IProjectBuildCacheOptions) {
@@ -52,11 +54,11 @@ export class ProjectBuildCache {
     this._localBuildCacheProvider = options.buildCacheConfiguration.localCacheProvider;
     this._cloudBuildCacheProvider = options.buildCacheConfiguration.cloudCacheProvider;
     this._buildCacheEnabled = options.buildCacheConfiguration.buildCacheEnabled;
-    this._projectOutputFolderNames = options.projectConfiguration.projectOutputFolderNames || [];
+    this._projectOutputFolderNames = options.projectOutputFolderNames || [];
     this._cacheId = cacheId;
   }
 
-  private static _tryGetTarUtility(terminal: Terminal): TarExecutable | undefined {
+  private static _tryGetTarUtility(terminal: ITerminal): TarExecutable | undefined {
     if (ProjectBuildCache._tarUtility === null) {
       ProjectBuildCache._tarUtility = TarExecutable.tryInitialize(terminal);
     }
@@ -67,12 +69,19 @@ export class ProjectBuildCache {
   public static async tryGetProjectBuildCache(
     options: IProjectBuildCacheOptions
   ): Promise<ProjectBuildCache | undefined> {
-    const { terminal, projectConfiguration, trackedProjectFiles } = options;
+    const { terminal, projectConfiguration, projectOutputFolderNames, trackedProjectFiles } = options;
     if (!trackedProjectFiles) {
       return undefined;
     }
 
-    if (!ProjectBuildCache._validateProject(terminal, projectConfiguration, trackedProjectFiles)) {
+    if (
+      !ProjectBuildCache._validateProject(
+        terminal,
+        projectConfiguration,
+        projectOutputFolderNames,
+        trackedProjectFiles
+      )
+    ) {
       return undefined;
     }
 
@@ -81,16 +90,17 @@ export class ProjectBuildCache {
   }
 
   private static _validateProject(
-    terminal: Terminal,
+    terminal: ITerminal,
     projectConfiguration: RushProjectConfiguration,
+    projectOutputFolderNames: ReadonlyArray<string>,
     trackedProjectFiles: string[]
   ): boolean {
     const normalizedProjectRelativeFolder: string = Path.convertToSlashes(
       projectConfiguration.project.projectRelativeFolder
     );
     const outputFolders: string[] = [];
-    if (projectConfiguration.projectOutputFolderNames) {
-      for (const outputFolderName of projectConfiguration.projectOutputFolderNames) {
+    if (projectOutputFolderNames) {
+      for (const outputFolderName of projectOutputFolderNames) {
         outputFolders.push(`${normalizedProjectRelativeFolder}/${outputFolderName}/`);
       }
     }
@@ -115,7 +125,7 @@ export class ProjectBuildCache {
     }
   }
 
-  public async tryRestoreFromCacheAsync(terminal: Terminal): Promise<boolean> {
+  public async tryRestoreFromCacheAsync(terminal: ITerminal): Promise<boolean> {
     const cacheId: string | undefined = this._cacheId;
     if (!cacheId) {
       terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
@@ -230,7 +240,7 @@ export class ProjectBuildCache {
     return restoreSuccess;
   }
 
-  public async trySetCacheEntryAsync(terminal: Terminal): Promise<boolean> {
+  public async trySetCacheEntryAsync(terminal: ITerminal): Promise<boolean> {
     const cacheId: string | undefined = this._cacheId;
     if (!cacheId) {
       terminal.writeWarningLine('Unable to get cache ID. Ensure Git is installed.');
@@ -346,7 +356,7 @@ export class ProjectBuildCache {
     return success;
   }
 
-  private async _tryCollectPathsToCacheAsync(terminal: Terminal): Promise<IPathsToCache | undefined> {
+  private async _tryCollectPathsToCacheAsync(terminal: ITerminal): Promise<IPathsToCache | undefined> {
     const projectFolderPath: string = this._project.projectFolder;
     const outputFolderNamesThatExist: boolean[] = await Promise.all(
       this._projectOutputFolderNames.map((outputFolderName) =>
@@ -395,7 +405,7 @@ export class ProjectBuildCache {
   }
 
   private async *_getPathsInFolder(
-    terminal: Terminal,
+    terminal: ITerminal,
     symbolicLinkPathCallback: (path: string) => void,
     posixPrefix: string,
     folderPath: string
@@ -449,7 +459,7 @@ export class ProjectBuildCache {
         projectsThatHaveBeenProcessed.add(projectToProcess);
 
         const projectState: string | undefined = await projectChangeAnalyzer._tryGetProjectStateHashAsync(
-          projectToProcess.packageName,
+          projectToProcess,
           options.terminal
         );
         if (!projectState) {
@@ -470,9 +480,7 @@ export class ProjectBuildCache {
 
     const sortedProjectStates: string[] = projectStates.sort();
     const hash: crypto.Hash = crypto.createHash('sha1');
-    const serializedOutputFolders: string = JSON.stringify(
-      options.projectConfiguration.projectOutputFolderNames
-    );
+    const serializedOutputFolders: string = JSON.stringify(options.projectOutputFolderNames);
     hash.update(serializedOutputFolders);
     hash.update(RushConstants.hashDelimiter);
     hash.update(options.command);
@@ -486,7 +494,8 @@ export class ProjectBuildCache {
 
     return options.buildCacheConfiguration.getCacheEntryId({
       projectName: options.projectConfiguration.project.packageName,
-      projectStateHash
+      projectStateHash,
+      phaseName: options.phaseName
     });
   }
 }

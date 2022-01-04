@@ -1,6 +1,164 @@
 # Change Log - @rushstack/set-webpack-public-path-plugin
 
-This log was last generated on Tue, 14 Sep 2021 01:17:04 GMT and should not be manually modified.
+This log was last generated on Mon, 27 Dec 2021 16:10:40 GMT and should not be manually modified.
+
+## 3.3.11
+Mon, 27 Dec 2021 16:10:40 GMT
+
+_Version update only_
+
+## 3.3.10
+Tue, 14 Dec 2021 19:27:51 GMT
+
+_Version update only_
+
+## 3.3.9
+Thu, 09 Dec 2021 20:34:41 GMT
+
+_Version update only_
+
+## 3.3.8
+Thu, 09 Dec 2021 00:21:54 GMT
+
+_Version update only_
+
+## 3.3.7
+Wed, 08 Dec 2021 19:05:08 GMT
+
+_Version update only_
+
+## 3.3.6
+Wed, 08 Dec 2021 16:14:05 GMT
+
+_Version update only_
+
+## 3.3.5
+Mon, 06 Dec 2021 16:08:33 GMT
+
+_Version update only_
+
+## 3.3.4
+Fri, 03 Dec 2021 03:05:22 GMT
+
+_Version update only_
+
+## 3.3.3
+Tue, 30 Nov 2021 20:18:41 GMT
+
+_Version update only_
+
+## 3.3.2
+Mon, 29 Nov 2021 07:26:16 GMT
+
+_Version update only_
+
+## 3.3.1
+Thu, 11 Nov 2021 01:17:02 GMT
+
+### Patches
+
+- Update typings to only import from "webpack."
+
+## 3.3.0
+Wed, 10 Nov 2021 16:09:47 GMT
+
+### Minor changes
+
+- Introduce a warning when running in Webpack 5.
+
+## 3.2.90
+Sat, 06 Nov 2021 00:09:13 GMT
+
+_Version update only_
+
+## 3.2.89
+Fri, 05 Nov 2021 15:09:18 GMT
+
+_Version update only_
+
+## 3.2.88
+Thu, 28 Oct 2021 00:08:22 GMT
+
+_Version update only_
+
+## 3.2.87
+Wed, 27 Oct 2021 00:08:15 GMT
+
+### Patches
+
+- Update the package.json repository field to include the directory property.
+
+## 3.2.86
+Wed, 13 Oct 2021 15:09:55 GMT
+
+_Version update only_
+
+## 3.2.85
+Fri, 08 Oct 2021 09:35:07 GMT
+
+_Version update only_
+
+## 3.2.84
+Fri, 08 Oct 2021 08:08:34 GMT
+
+_Version update only_
+
+## 3.2.83
+Thu, 07 Oct 2021 23:43:12 GMT
+
+_Version update only_
+
+## 3.2.82
+Thu, 07 Oct 2021 07:13:35 GMT
+
+_Version update only_
+
+## 3.2.81
+Wed, 06 Oct 2021 15:08:26 GMT
+
+_Version update only_
+
+## 3.2.80
+Wed, 06 Oct 2021 02:41:48 GMT
+
+_Version update only_
+
+## 3.2.79
+Tue, 05 Oct 2021 15:08:38 GMT
+
+_Version update only_
+
+## 3.2.78
+Mon, 04 Oct 2021 15:10:18 GMT
+
+_Version update only_
+
+## 3.2.77
+Fri, 24 Sep 2021 00:09:29 GMT
+
+_Version update only_
+
+## 3.2.76
+Thu, 23 Sep 2021 00:10:41 GMT
+
+### Patches
+
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 3.2.75
+Wed, 22 Sep 2021 03:27:12 GMT
+
+_Version update only_
+
+## 3.2.74
+Wed, 22 Sep 2021 00:09:32 GMT
+
+_Version update only_
+
+## 3.2.73
+Sat, 18 Sep 2021 03:05:57 GMT
+
+_Version update only_
 
 ## 3.2.72
 Tue, 14 Sep 2021 01:17:04 GMT

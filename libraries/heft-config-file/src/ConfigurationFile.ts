@@ -9,7 +9,7 @@ import {
   PackageJsonLookup,
   Import,
   FileSystem,
-  Terminal
+  ITerminal
 } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
 
@@ -216,7 +216,7 @@ export class ConfigurationFile<TConfigurationFile> {
    * file cannot be found in the rig or project config folder.
    */
   public async loadConfigurationFileForProjectAsync(
-    terminal: Terminal,
+    terminal: ITerminal,
     projectPath: string,
     rigConfig?: RigConfig
   ): Promise<TConfigurationFile> {
@@ -234,14 +234,14 @@ export class ConfigurationFile<TConfigurationFile> {
    * that it returns `undefined` instead of throwing an error if the configuration file cannot be found.
    */
   public async tryLoadConfigurationFileForProjectAsync(
-    terminal: Terminal,
+    terminal: ITerminal,
     projectPath: string,
     rigConfig?: RigConfig
   ): Promise<TConfigurationFile | undefined> {
     try {
       return await this.loadConfigurationFileForProjectAsync(terminal, projectPath, rigConfig);
     } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
+      if (FileSystem.isNotExistError(e as Error)) {
         return undefined;
       }
       throw e;
@@ -287,7 +287,7 @@ export class ConfigurationFile<TConfigurationFile> {
   }
 
   private async _loadConfigurationFileInnerWithCacheAsync(
-    terminal: Terminal,
+    terminal: ITerminal,
     resolvedConfigurationFilePath: string,
     visitedConfigurationFilePaths: Set<string>,
     rigConfig: RigConfig | undefined
@@ -326,7 +326,7 @@ export class ConfigurationFile<TConfigurationFile> {
   // Don't call this function directly, as it does not provide config file loop detection,
   // and you won't get the advantage of queueing up for a config file that is already loading.
   private async _loadConfigurationFileInnerAsync(
-    terminal: Terminal,
+    terminal: ITerminal,
     resolvedConfigurationFilePath: string,
     visitedConfigurationFilePaths: Set<string>,
     rigConfig: RigConfig | undefined
@@ -339,7 +339,7 @@ export class ConfigurationFile<TConfigurationFile> {
     try {
       fileText = await FileSystem.readFileAsync(resolvedConfigurationFilePath);
     } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
+      if (FileSystem.isNotExistError(e as Error)) {
         if (rigConfig) {
           terminal.writeDebugLine(
             `Config file "${resolvedConfigurationFilePathForLogging}" does not exist. Attempting to load via rig.`
@@ -358,7 +358,7 @@ export class ConfigurationFile<TConfigurationFile> {
           );
         }
 
-        e.message = `File does not exist: ${resolvedConfigurationFilePathForLogging}`;
+        (e as Error).message = `File does not exist: ${resolvedConfigurationFilePathForLogging}`;
       }
 
       throw e;
@@ -409,7 +409,7 @@ export class ConfigurationFile<TConfigurationFile> {
           undefined
         );
       } catch (e) {
-        if (FileSystem.isNotExistError(e)) {
+        if (FileSystem.isNotExistError(e as Error)) {
           throw new Error(
             `In file "${resolvedConfigurationFilePathForLogging}", file referenced in "extends" property ` +
               `("${configurationJson.extends}") cannot be resolved.`
@@ -552,7 +552,7 @@ export class ConfigurationFile<TConfigurationFile> {
   }
 
   private async _tryLoadConfigurationFileInRigAsync(
-    terminal: Terminal,
+    terminal: ITerminal,
     rigConfig: RigConfig,
     visitedConfigurationFilePaths: Set<string>
   ): Promise<TConfigurationFile | undefined> {
@@ -567,7 +567,7 @@ export class ConfigurationFile<TConfigurationFile> {
         );
       } catch (e) {
         // Ignore cases where a configuration file doesn't exist in a rig
-        if (!FileSystem.isNotExistError(e)) {
+        if (!FileSystem.isNotExistError(e as Error)) {
           throw e;
         } else {
           terminal.writeDebugLine(

@@ -15,6 +15,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "@jest/create-cache-key-function",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "@jest/core",
       "allowedCategories": [ "libraries" ]
     },
@@ -51,10 +55,6 @@
       "allowedCategories": [ "libraries", "tests" ]
     },
     {
-      "name": "@microsoft/rush-stack-compiler-3.9",
-      "allowedCategories": [ "tests" ]
-    },
-    {
       "name": "@microsoft/teams-js",
       "allowedCategories": [ "tests" ]
     },
@@ -68,6 +68,14 @@
     },
     {
       "name": "@pnpm/link-bins",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@pnpm/logger",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/debug-certificate-manager",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -97,6 +105,10 @@
     {
       "name": "@rushstack/heft-config-file",
       "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/heft-dev-cert-plugin",
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@rushstack/heft-jest-plugin",
@@ -144,6 +156,18 @@
     },
     {
       "name": "@rushstack/rig-package",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-amazon-s3-build-cache-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-azure-storage-build-cache-plugin",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "@rushstack/rush-sdk",
       "allowedCategories": [ "libraries" ]
     },
     {
@@ -212,7 +236,7 @@
     },
     {
       "name": "@typescript-eslint/parser",
-      "allowedCategories": [ "libraries" ]
+      "allowedCategories": [ "libraries", "tests" ]
     },
     {
       "name": "@typescript-eslint/typescript-estree",
@@ -287,6 +311,10 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "diff",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "doc-plugin-rush-stack",
       "allowedCategories": [ "libraries" ]
     },
@@ -351,6 +379,10 @@
       "allowedCategories": [ "tests" ]
     },
     {
+      "name": "heft-parameter-plugin",
+      "allowedCategories": [ "tests" ]
+    },
+    {
       "name": "heft-storybook-react-tutorial",
       "allowedCategories": [ "tests" ]
     },
@@ -391,11 +423,23 @@
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jest-environment-jsdom",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jest-environment-node",
       "allowedCategories": [ "libraries" ]
     },
     {
+      "name": "jest-resolve",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
       "name": "jest-snapshot",
+      "allowedCategories": [ "libraries" ]
+    },
+    {
+      "name": "jest-watch-select-projects",
       "allowedCategories": [ "libraries" ]
     },
     {

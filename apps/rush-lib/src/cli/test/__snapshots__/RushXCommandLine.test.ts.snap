@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RushXCommandLine launchRushX executes a valid package script 1`] = `
+Array [
+  Array [
+    "[1mRush Multi-Project Build Tool 40.40.40[22m - Node.js 12.12.12 (LTS)",
+  ],
+  Array [
+    "> \\"an acme project build command\\"
+",
+  ],
+]
+`;
+
+exports[`RushXCommandLine launchRushX executes a valid package script with no startup banner 1`] = `Array []`;
+
+exports[`RushXCommandLine launchRushX fails if the package does not contain a matching script 1`] = `
+Array [
+  Array [
+    "[1mRush Multi-Project Build Tool 40.40.40[22m - Node.js 12.12.12 (LTS)",
+  ],
+  Array [
+    "[31mError: The command \\"asdf\\" is not defined in the package.json file for this project.[39m",
+  ],
+  Array [
+    "
+Available commands for this project are: \\"build\\", \\"test\\"",
+  ],
+  Array [
+    "Use [33m\\"rushx --help\\"[39m for more information.",
+  ],
+]
+`;
+
+exports[`RushXCommandLine launchRushX prints usage info 1`] = `
+Array [
+  Array [
+    "[1mRush Multi-Project Build Tool 40.40.40[22m - Node.js 12.12.12 (LTS)",
+  ],
+  Array [
+    "usage: rushx [-h]",
+  ],
+  Array [
+    "       rushx [-q/--quiet] <command> ...
+",
+  ],
+  Array [
+    "Optional arguments:",
+  ],
+  Array [
+    "  -h, --help            Show this help message and exit.",
+  ],
+  Array [
+    "  -q, --quiet           Hide rushx startup information.
+",
+  ],
+  Array [
+    "Project commands for [36m@acme/acme[39m:",
+  ],
+  Array [
+    "  [36mbuild: [39m\\"an acme project build command\\"",
+  ],
+  Array [
+    "  [36mtest:  [39m\\"an acme project test command\\"",
+  ],
+]
+`;

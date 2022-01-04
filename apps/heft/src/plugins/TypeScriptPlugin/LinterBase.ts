@@ -2,14 +2,14 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { Terminal, FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
+import { ITerminal, FileSystem, JsonFile, Path } from '@rushstack/node-core-library';
 
 import {
   IExtendedSourceFile,
   IExtendedProgram,
   IExtendedTypeScript
 } from './internalTypings/TypeScriptInternals';
-import { PerformanceMeasurer } from '../../utilities/Performance';
+import { PerformanceMeasurer, PerformanceMeasurerAsync } from '../../utilities/Performance';
 import { IScopedLogger } from '../../pluginFramework/logging/ScopedLogger';
 import { createHash, Hash } from 'crypto';
 
@@ -27,6 +27,11 @@ export interface ILinterBaseOptions {
    * A performance measurer for the lint run.
    */
   measurePerformance: PerformanceMeasurer;
+
+  /**
+   * An asynchronous performance measurer for the lint run.
+   */
+  measurePerformanceAsync: PerformanceMeasurerAsync;
 }
 
 export interface IRunLinterOptions {
@@ -64,11 +69,12 @@ interface ITsLintCacheData {
 
 export abstract class LinterBase<TLintResult> {
   protected readonly _scopedLogger: IScopedLogger;
-  protected readonly _terminal: Terminal;
+  protected readonly _terminal: ITerminal;
   protected readonly _buildFolderPath: string;
   protected readonly _buildMetadataFolderPath: string;
   protected readonly _linterConfigFilePath: string;
   protected readonly _measurePerformance: PerformanceMeasurer;
+  protected readonly _measurePerformanceAsync: PerformanceMeasurerAsync;
 
   private readonly _ts: IExtendedTypeScript;
   private readonly _linterName: string;
@@ -82,6 +88,7 @@ export abstract class LinterBase<TLintResult> {
     this._linterConfigFilePath = options.linterConfigFilePath;
     this._linterName = linterName;
     this._measurePerformance = options.measurePerformance;
+    this._measurePerformanceAsync = options.measurePerformanceAsync;
   }
 
   protected abstract get cacheVersion(): string;
@@ -114,7 +121,7 @@ export abstract class LinterBase<TLintResult> {
     try {
       tslintCacheData = await JsonFile.loadAsync(cacheFilePath);
     } catch (e) {
-      if (FileSystem.isNotExistError(e)) {
+      if (FileSystem.isNotExistError(e as Error)) {
         tslintCacheData = undefined;
       } else {
         throw e;
@@ -132,10 +139,8 @@ export abstract class LinterBase<TLintResult> {
     // https://github.com/palantir/tslint/blob/24d29e421828348f616bf761adb3892bcdf51662/src/linter.ts#L161-L179
     // Modified to only lint files that have changed and that we care about
     const lintFailures: TLintResult[] = [];
-
     for (const sourceFile of options.tsProgram.getSourceFiles()) {
       const filePath: string = sourceFile.fileName;
-
       const relative: string | undefined = relativePaths.get(filePath);
 
       if (relative === undefined || (await this.isFileExcludedAsync(filePath))) {
@@ -151,8 +156,8 @@ export abstract class LinterBase<TLintResult> {
         cachedVersion !== version ||
         options.changedFiles.has(sourceFile)
       ) {
-        this._measurePerformance(this._linterName, () => {
-          const failures: TLintResult[] = this.lintFile(sourceFile);
+        await this._measurePerformanceAsync(this._linterName, async () => {
+          const failures: TLintResult[] = await this.lintFileAsync(sourceFile);
           if (failures.length === 0) {
             newNoFailureFileVersions.set(relative, version);
           } else {
@@ -188,7 +193,7 @@ export abstract class LinterBase<TLintResult> {
 
   protected abstract initializeAsync(tsProgram: IExtendedProgram): void;
 
-  protected abstract lintFile(sourceFile: IExtendedSourceFile): TLintResult[];
+  protected abstract lintFileAsync(sourceFile: IExtendedSourceFile): Promise<TLintResult[]>;
 
   protected abstract lintingFinished(lintFailures: TLintResult[]): void;
 

@@ -1,19 +1,21 @@
 {
   "name": "@rushstack/terminal",
-  "version": "0.2.26",
+  "version": "0.3.21",
   "description": "User interface primitives for console applications",
   "main": "lib/index.js",
   "typings": "dist/terminal.d.ts",
   "license": "MIT",
   "repository": {
-    "url": "https://github.com/microsoft/rushstack/tree/master/libraries/terminal"
+    "url": "https://github.com/microsoft/rushstack.git",
+    "type": "git",
+    "directory": "libraries/terminal"
   },
   "scripts": {
     "build": "heft test --clean"
   },
   "dependencies": {
     "@rushstack/node-core-library": "workspace:*",
-    "@types/node": "10.17.13",
+    "@types/node": "12.20.24",
     "wordwrap": "~1.0.0"
   },
   "devDependencies": {

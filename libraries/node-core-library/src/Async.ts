@@ -36,7 +36,7 @@ export class Async {
    * then the loop stops immediately.  Any remaining array items will be skipped, and
    * overall operation will reject with the first error that was encountered.
    *
-   * @param array - the array of inputs for the callback function
+   * @param iterable - the array of inputs for the callback function
    * @param callback - a function that starts an asynchronous promise for an element
    *   from the array
    * @param options - options for customizing the control flow
@@ -44,14 +44,14 @@ export class Async {
    *   as the original input `array`
    */
   public static async mapAsync<TEntry, TRetVal>(
-    array: TEntry[],
+    iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
     callback: (entry: TEntry, arrayIndex: number) => Promise<TRetVal>,
     options?: IAsyncParallelismOptions | undefined
   ): Promise<TRetVal[]> {
     const result: TRetVal[] = [];
 
     await Async.forEachAsync(
-      array,
+      iterable,
       async (item: TEntry, arrayIndex: number): Promise<void> => {
         result[arrayIndex] = await callback(item, arrayIndex);
       },
@@ -74,45 +74,70 @@ export class Async {
    * then the loop stops immediately.  Any remaining array items will be skipped, and
    * overall operation will reject with the first error that was encountered.
    *
-   * @param array - the array of inputs for the callback function
+   * @param iterable - the array of inputs for the callback function
    * @param callback - a function that starts an asynchronous promise for an element
    *   from the array
    * @param options - options for customizing the control flow
    */
   public static async forEachAsync<TEntry>(
-    array: TEntry[],
+    iterable: Iterable<TEntry> | AsyncIterable<TEntry>,
     callback: (entry: TEntry, arrayIndex: number) => Promise<void>,
     options?: IAsyncParallelismOptions | undefined
   ): Promise<void> {
-    await new Promise((resolve: () => void, reject: (error: Error) => void) => {
+    await new Promise<void>((resolve: () => void, reject: (error: Error) => void) => {
       const concurrency: number =
         options?.concurrency && options.concurrency > 0 ? options.concurrency : Infinity;
-      let operationsInProgress: number = 1;
-      let arrayIndex: number = 0;
+      let operationsInProgress: number = 0;
 
-      function onOperationCompletion(): void {
-        operationsInProgress--;
-        if (operationsInProgress === 0 && arrayIndex >= array.length) {
-          resolve();
+      const iterator: Iterator<TEntry> | AsyncIterator<TEntry> = (
+        (iterable as Iterable<TEntry>)[Symbol.iterator] ||
+        (iterable as AsyncIterable<TEntry>)[Symbol.asyncIterator]
+      ).call(iterable);
+
+      let arrayIndex: number = 0;
+      let iteratorIsComplete: boolean = false;
+      let promiseHasResolvedOrRejected: boolean = false;
+
+      async function queueOperationsAsync(): Promise<void> {
+        while (operationsInProgress < concurrency && !iteratorIsComplete && !promiseHasResolvedOrRejected) {
+          const currentIteratorResult: IteratorResult<TEntry> = await iterator.next();
+          // eslint-disable-next-line require-atomic-updates
+          iteratorIsComplete = !!currentIteratorResult.done;
+
+          if (!iteratorIsComplete) {
+            operationsInProgress++;
+            Promise.resolve(callback(currentIteratorResult.value, arrayIndex++))
+              .then(async () => {
+                operationsInProgress--;
+                await onOperationCompletionAsync();
+              })
+              .catch((error) => {
+                promiseHasResolvedOrRejected = true;
+                reject(error);
+              });
+          }
         }
 
-        while (operationsInProgress < concurrency) {
-          if (arrayIndex < array.length) {
-            operationsInProgress++;
-            try {
-              Promise.resolve(callback(array[arrayIndex], arrayIndex++))
-                .then(() => onOperationCompletion())
-                .catch(reject);
-            } catch (error) {
-              reject(error);
-            }
-          } else {
-            break;
+        if (iteratorIsComplete) {
+          await onOperationCompletionAsync();
+        }
+      }
+
+      async function onOperationCompletionAsync(): Promise<void> {
+        if (!promiseHasResolvedOrRejected) {
+          if (operationsInProgress === 0 && iteratorIsComplete) {
+            promiseHasResolvedOrRejected = true;
+            resolve();
+          } else if (!iteratorIsComplete) {
+            await queueOperationsAsync();
           }
         }
       }
 
-      onOperationCompletion();
+      queueOperationsAsync().catch((error) => {
+        promiseHasResolvedOrRejected = true;
+        reject(error);
+      });
     });
   }
 

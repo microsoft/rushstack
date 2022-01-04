@@ -1,6 +1,85 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 10 Sep 2021 23:20:00 GMT and should not be manually modified.
+This log was last generated on Thu, 16 Dec 2021 05:39:21 GMT and should not be manually modified.
+
+## 5.58.0
+Thu, 16 Dec 2021 05:39:21 GMT
+
+### Updates
+
+- Fix an issue where Rush's Git hooks were broken if another tool such as Husky had tampered with the `core.hooksPath` (GitHub #3004)
+- Provide a more useful error message if the git version is too old.
+- Allow "rush list" to be invoked while other rush processes are running in the same repo.
+- For project selection parameters such as "rush build --to git:REF", improve the diff analysis to detect which individual projects are impacted by a modification of the PNPM lockfile (GitHub #3050)
+- Allow multiple remote URLs to be specified in the rush.json in the new repository.urls field.
+- (BREAKING CHANGE) Replace the RushConfiguration repositoryUrl field with repositoryUrls to support multiple remote URLs specified in rush.json.
+
+## 5.57.1
+Thu, 09 Dec 2021 00:24:47 GMT
+
+_Version update only_
+
+## 5.57.0
+Fri, 03 Dec 2021 02:16:10 GMT
+
+### Updates
+
+- Add support for the "filterLog" hook in common/config/rush/.pnpmfile.cjs
+- (EXPERIMENTAL) Ability to load third-party plugin packages that customize the behavior of Rush
+- Fix an issue where parameter values containing spaces are incorrectly passed to global scripts.
+- Parameters such as "--to" and "--from" now accept selector expressions: "version-policy:NAME" indicates the set of projects belonging to a publishing version policy. "git:REF" detects the set of projects that have been modified since the specified Git revision; for example, this allows a Rush command to process only the projects modified by a PR branch. (GitHub #2968)
+- Improved the change detection logic to work correctly when a second rush.json appears in a subfolder.
+- (EXPERIMENTAL) Add a new NPM package "@rushstack/rush-sdk" for use by Rush plugins
+- Stop deleting the pnpm-store after failed workspace installs. Usually a multiple failure is due to a network error or a package that does not exist in the registry, not an issue with the pnpm-store.
+
+## 5.56.0
+Thu, 28 Oct 2021 23:49:31 GMT
+
+### Updates
+
+- Add CI skipping to default version & changelog commits
+- Update suggested version of NPM
+- Fix update-autoinstaller with NPM
+- Streamline rushx output and add quiet flag.
+- Include support for adding multiple packages with the "rush add" command.
+- Update the package.json repository field to include the directory property.
+- Fix the error message printed when `--interactive` is passed to `rush update-cloud-credentials` and the cloud cache provider is Amazon S3.
+- Mark Node 16 as the current latest LTS version.
+- support `--debug-package-manager` install options for yarn
+
+## 5.55.1
+Tue, 12 Oct 2021 22:26:25 GMT
+
+### Updates
+
+- Fix an issue where a version field isn't parsed correctly when using NPM version 7 and newer.
+
+## 5.55.0
+Thu, 07 Oct 2021 23:44:52 GMT
+
+### Updates
+
+- Fix typo when project dependencies do not match the current shrinkwrap
+- Use ITerminal in the rush-lib API instead of Terminal to allow for compatibility with other versions of @rushstack/node-core-library.
+- Add a new parameter "--detailed" for the "rush list" command
+- Print the full event hooks output if the --debug paramter is specified.
+- Upgrade the `@types/node` dependency to version to version 12.
+
+## 5.54.0
+Wed, 22 Sep 2021 22:54:17 GMT
+
+### Minor changes
+
+- Add ability to customize tag separator
+
+### Patches
+
+- Lock node-fetch dependency to 2.6.2 due to an incompatibility with 2.6.3 in the Azure Cloud Cache Provider.
+
+### Updates
+
+- Add a "--check-only" parameter to "rush install" to check the validity of the shrinkwrap without performing a full install.
+- Fix an issue where `rush update-autoinstaller` does not use the repo's .npmrc
 
 ## 5.53.0
 Fri, 10 Sep 2021 23:20:00 GMT

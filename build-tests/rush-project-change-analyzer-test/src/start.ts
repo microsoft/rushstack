@@ -7,57 +7,39 @@ async function runAsync(): Promise<void> {
     startingFolder: process.cwd()
   });
 
-  //#region Step 1: Determine each project's downstream dependencies
-  const projectDirectDependentsMap: Map<RushConfigurationProject, Set<RushConfigurationProject>> = new Map<
-    RushConfigurationProject,
-    Set<RushConfigurationProject>
-  >();
-  for (const project of rushConfiguration.projects) {
-    projectDirectDependentsMap.set(project, new Set<RushConfigurationProject>());
-  }
-
-  for (const project of rushConfiguration.projects) {
-    for (const dependencyProject of project.dependencyProjects) {
-      projectDirectDependentsMap.get(dependencyProject)!.add(project);
-    }
-  }
-  //#endregion
-
-  //#region Step 2: Get the list of changed projects and recursively collect their downstream dependencies
+  //#region Step 1: Get the list of changed projects
   const projectChangeAnalyzer: ProjectChangeAnalyzer = new ProjectChangeAnalyzer(rushConfiguration);
 
-  const changedProjects: AsyncIterable<RushConfigurationProject> =
-    projectChangeAnalyzer.getChangedProjectsAsync({
-      targetBranchName: rushConfiguration.repositoryDefaultBranch,
-      terminal
-    });
-  const projectsNeedingValidation: Set<RushConfigurationProject> = new Set<RushConfigurationProject>();
-  function addProject(project: RushConfigurationProject): void {
-    if (!projectsNeedingValidation.has(project)) {
-      projectsNeedingValidation.add(project);
+  const changedProjects: Set<RushConfigurationProject> = await projectChangeAnalyzer.getChangedProjectsAsync({
+    targetBranchName: rushConfiguration.repositoryDefaultBranch,
+    terminal,
 
-      for (const projectDirectDependent of projectDirectDependentsMap.get(project)!) {
-        addProject(projectDirectDependent);
-      }
+    includeExternalDependencies: true,
+    enableFiltering: false
+  });
+  //#endregion
+
+  //#region Step 2: Expand all consumers
+  for (const project of changedProjects) {
+    for (const consumer of project.consumingProjects) {
+      changedProjects.add(consumer);
     }
-  }
-  for await (const project of changedProjects) {
-    addProject(project);
   }
   //#endregion
 
-  //#region Step 3: Print the list of projects that were changed and their downstream dependencies
+  //#region Step 3: Print the list of projects that were changed and their consumers
   terminal.writeLine('Projects needing validation due to changes: ');
-  const namesOfProjectsNeedingValidation: string[] = Array.from(projectsNeedingValidation)
-    .map((project) => project.packageName)
-    .sort();
+  const namesOfProjectsNeedingValidation: string[] = Array.from(
+    changedProjects,
+    (project) => project.packageName
+  ).sort();
   for (const nameOfProjectsNeedingValidation of namesOfProjectsNeedingValidation) {
     terminal.writeLine(` - ${nameOfProjectsNeedingValidation}`);
   }
   //#endregion
 }
 
-runAsync().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+process.exitCode = 1;
+runAsync().then(() => {
+  process.exitCode = 0;
+}, console.error);

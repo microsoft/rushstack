@@ -16,7 +16,7 @@ There are three example projects in this repository that make use of this plugin
 
 - [Project 1](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-01)
   - This project contains two webpack entrypoints (one with an async chunk, one without), without any localized
-resources
+  resources
   - The output is a single, non-localized variant
 - [Project 2](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-02)
   - This project contains three webpack entrypoints:
@@ -33,10 +33,10 @@ resources
 - [Project 3](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03)
   - This project contains four webpack entrypoints:
     - [`indexA.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03/src/indexA.ts)
-      directly references two `.loc.json` files and one `.resx` file, and dynamically imports an async chunk with
+      directly references one `.loc.json` file, one `.resx.json` file, and one `.resx` file, and dynamically imports an async chunk with
       localized data, and an async chunk without localized data
     - [`indexB.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03/src/indexB.ts)
-      directly references two `.loc.json` files
+      directly references one `.loc.json` file and one `.resx.json` file
     - [`indexC.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03/src/indexC.ts)
       directly references no localized resources, and dynamically imports an async chunk with localized data
     - [`indexD.ts`](https://github.com/microsoft/rushstack/tree/master/build-tests/localization-plugin-test-03/src/indexD.ts)
@@ -101,9 +101,9 @@ this option is unset or set to `false`, an error will be emitted if a string is 
 
 This option is used to specify the localization data to be used in the build. This object has the following
 structure:
- - Locale name
-   - Compilation context-relative or absolute localization file path
-     - Translated strings
+- Locale name
+  - Compilation context-relative or absolute localization file path
+    - Translated strings
 
 For example:
 
@@ -186,14 +186,16 @@ clones on Windows can end up with CRLF newlines and clones on 'nix operating sys
 newlines. This option can be used to help make compilations run on different platforms produce the same
 result.
 
-### `filesToIgnore = [ ]`
+### `globsToIgnore = [ ]`
 
 This option is used to specify `.resx` and `.loc.json` files that should not be processed by this plugin.
-By default, every `.resx` and `.loc.json` file import is intercepted by this plugin, and an error occurs
-if translations aren't provided for an intercepted file and the
-`localizedData.defaultLocale.fillMissingTranslationStrings` option is set to `false` To avoid that error,
-list files that should be ignored by this plugin in this property. Files should be specified as either
-absolute paths or paths relative to the Webpack compilation context.
+By default, every `.resx`, `.resx.json`, and `.loc.json` file import is intercepted by this plugin, and an
+error occurs if translations aren't provided for an intercepted file and the
+`localizedData.defaultLocale.fillMissingTranslationStrings` option is set to falsy, or if the
+file is in an unexpected format. To avoid an error, specify files that should be ignored by this plugin in
+this property. This is useful if a dependency uses files with a `.resx`, `.resx.json`, or `.loc.json`
+extension, but are processed in a different way from how this plugin handles localization.
+For example: `globsToIgnore: [ 'node_modules/some-dependency-name/lib/**/*.loc.json' ]`
 
 ### `noStringsLocaleName = '...'`
 
@@ -274,11 +276,9 @@ allows strings to be imported by using the `import strings from './strings.loc.j
 the `import { string1 } from './strings.loc.json';` or the `import * as strings from './strings.loc.json';`
 syntax. This option is not recommended.
 
-
 ## Links
 
-- [CHANGELOG.md](
-  https://github.com/microsoft/rushstack/blob/master/webpack/localization-plugin/CHANGELOG.md) - Find
+- [CHANGELOG.md](https://github.com/microsoft/rushstack/blob/master/webpack/localization-plugin/CHANGELOG.md) - Find
   out what's new in the latest version
 
 `@rushstack/localization-plugin` is part of the [Rush Stack](https://rushstack.io/) family of projects.
