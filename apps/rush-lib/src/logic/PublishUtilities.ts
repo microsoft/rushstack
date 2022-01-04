@@ -725,7 +725,7 @@ export class PublishUtilities {
           ? semver.inc(packageVersion, PublishUtilities._getReleaseType(currentChange.changeType!))!
           : packageVersion;
 
-        // set versionpolicy if the version is greater than the current
+        // set versionpolicy version to the current bumped version
         if (
           project.versionPolicyName !== undefined &&
           project.versionPolicy !== undefined &&
