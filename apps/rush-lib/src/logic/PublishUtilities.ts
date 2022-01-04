@@ -67,6 +67,7 @@ export class PublishUtilities {
         PublishUtilities._addChange(
           change,
           packageChanges,
+          versionPolicyChanges,
           allPackages,
           rushConfiguration,
           prereleaseToken,
@@ -145,6 +146,7 @@ export class PublishUtilities {
             newVersion: versionPolicyVersion // enforce the specific policy version
           },
           packageChanges,
+          versionPolicyChanges,
           allPackages,
           rushConfiguration,
           prereleaseToken,
@@ -162,6 +164,7 @@ export class PublishUtilities {
         PublishUtilities._updateDownstreamDependencies(
           packageChanges[packageName],
           packageChanges,
+          versionPolicyChanges,
           allPackages,
           rushConfiguration,
           prereleaseToken,
@@ -244,6 +247,7 @@ export class PublishUtilities {
    */
   public static updatePackages(
     packageChanges: IChangeInfoHash,
+    versionPolicyChanges: Record<string, SemVer>,
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     shouldCommit: boolean,
@@ -256,6 +260,7 @@ export class PublishUtilities {
       const updatedPackage: IPackageJson = PublishUtilities._writePackageChanges(
         packageChanges[packageName],
         packageChanges,
+        versionPolicyChanges,
         allPackages,
         rushConfiguration,
         shouldCommit,
@@ -443,6 +448,7 @@ export class PublishUtilities {
   private static _writePackageChanges(
     change: IChangeInfo,
     packageChanges: IChangeInfoHash,
+    versionPolicyChanges: Record<string, SemVer>,
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     shouldCommit: boolean,
@@ -479,6 +485,7 @@ export class PublishUtilities {
       pkg.name,
       pkg.dependencies,
       packageChanges,
+      versionPolicyChanges,
       allPackages,
       rushConfiguration,
       prereleaseToken,
@@ -489,6 +496,7 @@ export class PublishUtilities {
       pkg.name,
       pkg.devDependencies,
       packageChanges,
+      versionPolicyChanges,
       allPackages,
       rushConfiguration,
       prereleaseToken,
@@ -499,6 +507,7 @@ export class PublishUtilities {
       pkg.name,
       pkg.peerDependencies,
       packageChanges,
+      versionPolicyChanges,
       allPackages,
       rushConfiguration,
       prereleaseToken,
@@ -530,6 +539,7 @@ export class PublishUtilities {
     packageName: string,
     dependencies: { [key: string]: string } | undefined,
     packageChanges: IChangeInfoHash,
+    versionPolicyChanges: Record<string, SemVer>,
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
@@ -576,6 +586,7 @@ export class PublishUtilities {
               depName,
               depChange,
               packageChanges,
+              versionPolicyChanges,
               allPackages,
               rushConfiguration
             );
@@ -618,6 +629,7 @@ export class PublishUtilities {
   private static _addChange(
     change: IChangeInfo,
     packageChanges: IChangeInfoHash,
+    versionPolicyChanges: Record<string, SemVer>,
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken?: PrereleaseToken,
@@ -712,6 +724,19 @@ export class PublishUtilities {
         currentChange.newVersion = shouldBump
           ? semver.inc(packageVersion, PublishUtilities._getReleaseType(currentChange.changeType!))!
           : packageVersion;
+
+        // set versionpolicy if the version is greater than the current
+        if (
+          project.versionPolicyName !== undefined &&
+          project.versionPolicy !== undefined &&
+          project.versionPolicy.isLockstepped &&
+          (project.versionPolicy as LockStepVersionPolicy).nextBump === undefined &&
+          semver.gt(currentChange.newVersion, (project.versionPolicy as LockStepVersionPolicy).version) &&
+          (versionPolicyChanges[project.versionPolicyName] === undefined ||
+            semver.gt(currentChange.newVersion, versionPolicyChanges[project.versionPolicyName]))
+        ) {
+          versionPolicyChanges[project.versionPolicyName] = new SemVer(currentChange.newVersion);
+        }
       }
 
       // If hotfix change, force new range dependency to be the exact new version
@@ -726,6 +751,7 @@ export class PublishUtilities {
   private static _updateDownstreamDependencies(
     change: IChangeInfo,
     packageChanges: IChangeInfoHash,
+    versionPolicyChanges: Record<string, SemVer>,
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
@@ -746,6 +772,7 @@ export class PublishUtilities {
             pkg.dependencies,
             change,
             packageChanges,
+            versionPolicyChanges,
             allPackages,
             rushConfiguration,
             prereleaseToken,
@@ -757,6 +784,7 @@ export class PublishUtilities {
             pkg.devDependencies,
             change,
             packageChanges,
+            versionPolicyChanges,
             allPackages,
             rushConfiguration,
             prereleaseToken,
@@ -773,6 +801,7 @@ export class PublishUtilities {
     dependencies: { [packageName: string]: string } | undefined,
     change: IChangeInfo,
     packageChanges: IChangeInfoHash,
+    versionPolicyChanges: Record<string, SemVer>,
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
@@ -823,6 +852,7 @@ export class PublishUtilities {
             changeType
           },
           packageChanges,
+          versionPolicyChanges,
           allPackages,
           rushConfiguration,
           prereleaseToken,
@@ -835,6 +865,7 @@ export class PublishUtilities {
           PublishUtilities._updateDownstreamDependencies(
             packageChanges[parentPackageName],
             packageChanges,
+            versionPolicyChanges,
             allPackages,
             rushConfiguration,
             prereleaseToken,
@@ -851,6 +882,7 @@ export class PublishUtilities {
     dependencyName: string,
     dependencyChange: IChangeInfo,
     packageChanges: IChangeInfoHash,
+    versionPolicyChanges: Record<string, SemVer>,
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration
   ): void {
@@ -896,6 +928,7 @@ export class PublishUtilities {
           `to \`${newDependencyVersion}\``
       },
       packageChanges,
+      versionPolicyChanges,
       allPackages,
       rushConfiguration
     );

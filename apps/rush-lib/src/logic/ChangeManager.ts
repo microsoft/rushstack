@@ -107,6 +107,7 @@ export class ChangeManager {
     // Apply all changes to package.json files.
     const updatedPackages: Map<string, IPackageJson> = PublishUtilities.updatePackages(
       this._allChanges.packages,
+      this._allChanges.versionPolicies,
       this._allPackages,
       this._rushConfiguration,
       shouldCommit,
