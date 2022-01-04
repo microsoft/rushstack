@@ -34,6 +34,8 @@ export interface IPhase extends IPhaseJson {
    * a phase with name "_phase:compile" has a `logFilenameIdentifier` of "_phase_compile".
    */
   logFilenameIdentifier: string;
+
+  associatedParameters: Set<Parameter>;
 }
 
 export interface ICommandWithParameters {
@@ -116,16 +118,7 @@ export class CommandLineConfiguration {
   /**
    * These path will be prepended to the PATH environment variable
    */
-  private _additionalPathFolders: string[] = [];
-
-  private readonly _commandsByPhaseName: Map<string, Set<IPhasedCommand>> = new Map();
-
-  /**
-   * This maps phase names to the names of all other phases that depend on it or are
-   * dependent on it. This is used to determine which commands a phase affects, even
-   * if that phase isn't explicitly listed for that command.
-   */
-  private readonly _relatedPhaseSetsByPhaseName: Map<string, Set<string>> = new Map();
+  private readonly _additionalPathFolders: string[] = [];
 
   /**
    * A map of bulk command names to their corresponding synthetic phase identifiers
@@ -163,9 +156,9 @@ export class CommandLineConfiguration {
         this.phases.set(phase.name, {
           ...phase,
           isSynthetic: false,
-          logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(phase.name)
+          logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(phase.name),
+          associatedParameters: new Set()
         });
-        this._commandsByPhaseName.set(phase.name, new Set<IPhasedCommand>());
       }
     }
 
@@ -194,9 +187,6 @@ export class CommandLineConfiguration {
       }
 
       this._checkForPhaseSelfCycles(phase);
-      const relatedPhaseSet: Set<string> = new Set<string>();
-      this._populateRelatedPhaseSets(phase.name, relatedPhaseSet);
-      this._relatedPhaseSetsByPhaseName.set(phase.name, relatedPhaseSet);
     }
 
     let buildCommandPhases: string[] | undefined;
@@ -225,8 +215,6 @@ export class CommandLineConfiguration {
                     `"${normalizedCommand.name}" command, the phase "${phaseName}" does not exist.`
                 );
               }
-
-              this._populateCommandsForPhase(phaseName, normalizedCommand);
             }
 
             if (normalizedCommand.skipPhasesForCommand) {
@@ -238,8 +226,6 @@ export class CommandLineConfiguration {
                       `"${phaseName}" does not exist.`
                   );
                 }
-
-                this._populateCommandsForPhase(phaseName, normalizedCommand);
               }
             }
 
@@ -322,7 +308,7 @@ export class CommandLineConfiguration {
 
         this.parameters.push(normalizedParameter);
 
-        let parameterHasAssociations: boolean = false;
+        let parameterHasAssociatedPhases: boolean = false;
 
         // Do some basic validation
         switch (normalizedParameter.parameterKind) {
@@ -339,10 +325,9 @@ export class CommandLineConfiguration {
                       `that lists phase "${phaseName}" in its "addPhasesToCommand" ` +
                       'property that does not exist.'
                   );
-                } else {
-                  this._populateCommandAssociatedParametersForPhase(phaseName, normalizedParameter);
-                  parameterHasAssociations = true;
                 }
+
+                parameterHasAssociatedPhases = true;
               }
             }
 
@@ -361,10 +346,9 @@ export class CommandLineConfiguration {
                       `that lists phase "${phaseName}" in both its "addPhasesToCommand" ` +
                       'and "skipPhasesForCommand" properties.'
                   );
-                } else {
-                  this._populateCommandAssociatedParametersForPhase(phaseName, normalizedParameter);
-                  parameterHasAssociations = true;
                 }
+
+                parameterHasAssociatedPhases = true;
               }
             }
 
@@ -389,49 +373,62 @@ export class CommandLineConfiguration {
           }
         }
 
+        let parameterHasAssociatedCommands: boolean = false;
+        let parameterIsOnlyAssociatedWithPhasedCommands: boolean = true;
         if (normalizedParameter.associatedCommands) {
-          for (let i: number = 0; i < normalizedParameter.associatedCommands.length; i++) {
-            const associatedCommandName: string = normalizedParameter.associatedCommands[i];
+          for (const associatedCommandName of normalizedParameter.associatedCommands) {
             const syntheticPhaseName: string | undefined =
               this._syntheticPhasesNamesByTranslatedBulkCommandName.get(associatedCommandName);
             if (syntheticPhaseName) {
-              // If this parameter was associated with a bulk command, change the association to
-              // the command's synthetic phase
+              // If this parameter was associated with a bulk command, include the association
+              // with the synthetic phase
               normalizedParameter.associatedPhases!.push(syntheticPhaseName);
-              normalizedParameter.associatedCommands.splice(i, 1);
-              i--;
-              this._populateCommandAssociatedParametersForPhase(syntheticPhaseName, normalizedParameter);
-              parameterHasAssociations = true;
-            } else if (!this.commands.has(associatedCommandName)) {
+            }
+
+            const associatedCommand: Command | undefined = this.commands.get(associatedCommandName);
+            if (!associatedCommand) {
               throw new Error(
                 `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
                   `that is associated with a command "${associatedCommandName}" that does not exist or does ` +
                   'not support custom parameters.'
               );
             } else {
-              const associatedCommand: Command = this.commands.get(associatedCommandName)!;
               associatedCommand.associatedParameters.add(normalizedParameter);
-              parameterHasAssociations = true;
+              parameterHasAssociatedCommands = true;
+
+              if (associatedCommand.commandKind !== RushConstants.phasedCommandKind) {
+                parameterIsOnlyAssociatedWithPhasedCommands = false;
+              }
             }
           }
         }
 
-        for (const associatedPhase of normalizedParameter.associatedPhases || []) {
-          if (!this.phases.has(associatedPhase)) {
-            throw new Error(
-              `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
-                `that is associated with a phase "${associatedPhase}" that does not exist.`
-            );
-          } else {
-            this._populateCommandAssociatedParametersForPhase(associatedPhase, normalizedParameter);
-            parameterHasAssociations = true;
+        if (normalizedParameter.associatedPhases) {
+          for (const associatedPhaseName of normalizedParameter.associatedPhases) {
+            const associatedPhase: IPhase | undefined = this.phases.get(associatedPhaseName);
+            if (!associatedPhase) {
+              throw new Error(
+                `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
+                  `that is associated with a phase "${associatedPhaseName}" that does not exist.`
+              );
+            } else {
+              associatedPhase.associatedParameters.add(normalizedParameter);
+              parameterHasAssociatedPhases = true;
+            }
           }
         }
 
-        if (!parameterHasAssociations) {
+        if (!parameterHasAssociatedCommands) {
           throw new Error(
             `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}"` +
-              ` that lists no associated commands or phases.`
+              ` that lists no associated commands.`
+          );
+        }
+
+        if (parameterIsOnlyAssociatedWithPhasedCommands && !parameterHasAssociatedPhases) {
+          throw new Error(
+            `${RushConstants.commandLineFilename} defines a parameter "${normalizedParameter.longName}" ` +
+              `that is only associated with phased commands, but lists no associated phases.`
           );
         }
       }
@@ -464,26 +461,6 @@ export class CommandLineConfiguration {
             } else {
               this._checkForPhaseSelfCycles(dependency, checkedPhases);
             }
-          }
-        }
-      }
-    }
-  }
-
-  private _populateRelatedPhaseSets(phaseName: string, relatedPhaseSet: Set<string>): void {
-    if (!relatedPhaseSet.has(phaseName)) {
-      relatedPhaseSet.add(phaseName);
-      const phase: IPhase = this.phases.get(phaseName)!;
-      if (phase.dependencies) {
-        if (phase.dependencies.self) {
-          for (const dependencyName of phase.dependencies.self) {
-            this._populateRelatedPhaseSets(dependencyName, relatedPhaseSet);
-          }
-        }
-
-        if (phase.dependencies.upstream) {
-          for (const dependencyName of phase.dependencies.upstream) {
-            this._populateRelatedPhaseSets(dependencyName, relatedPhaseSet);
           }
         }
       }
@@ -557,20 +534,6 @@ export class CommandLineConfiguration {
     return name.replace(/:/g, '_'); // Replace colons with underscores to be filesystem-safe
   }
 
-  private _populateCommandsForPhase(phaseName: string, command: IPhasedCommand): void {
-    const populateRelatedPhaseSet: Set<string> = this._relatedPhaseSetsByPhaseName.get(phaseName)!;
-    for (const relatedPhaseSetIdentifier of populateRelatedPhaseSet) {
-      this._commandsByPhaseName.get(relatedPhaseSetIdentifier)!.add(command);
-    }
-  }
-
-  private _populateCommandAssociatedParametersForPhase(phaseName: string, parameter: Parameter): void {
-    const commands: Set<Command> = this._commandsByPhaseName.get(phaseName)!;
-    for (const command of commands) {
-      command.associatedParameters.add(parameter);
-    }
-  }
-
   private _translateBulkCommandToPhasedCommand(command: IBulkCommandJson): IPhasedCommand {
     const phaseName: string = command.name;
     const phaseForBulkCommand: IPhase = {
@@ -581,13 +544,11 @@ export class CommandLineConfiguration {
       },
       ignoreMissingScript: command.ignoreMissingScript,
       allowWarningsOnSuccess: command.allowWarningsInSuccessfulBuild,
-      logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(command.name)
+      logFilenameIdentifier: this._normalizeNameForLogFilenameIdentifiers(command.name),
+      associatedParameters: new Set()
     };
     this.phases.set(phaseName, phaseForBulkCommand);
     this._syntheticPhasesNamesByTranslatedBulkCommandName.set(command.name, phaseName);
-    const relatedPhaseSet: Set<string> = new Set<string>();
-    this._populateRelatedPhaseSets(phaseName, relatedPhaseSet);
-    this._relatedPhaseSetsByPhaseName.set(phaseName, relatedPhaseSet);
 
     const translatedCommand: IPhasedCommand = {
       ...command,
@@ -597,8 +558,6 @@ export class CommandLineConfiguration {
       associatedParameters: new Set<Parameter>(),
       phases: [phaseName]
     };
-    this._commandsByPhaseName.set(phaseName, new Set<IPhasedCommand>());
-    this._populateCommandsForPhase(phaseName, translatedCommand);
     return translatedCommand;
   }
 }

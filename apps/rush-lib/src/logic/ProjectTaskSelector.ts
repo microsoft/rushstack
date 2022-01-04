@@ -9,16 +9,17 @@ import { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';
 import { TaskCollection } from './taskExecution/TaskCollection';
 import { IPhase } from '../api/CommandLineConfiguration';
 import { RushConstants } from './RushConstants';
+import { IRegisteredCustomParameter } from '../cli/scriptActions/BaseScriptAction';
 
 export interface IProjectTaskSelectorOptions {
   rushConfiguration: RushConfiguration;
   buildCacheConfiguration: BuildCacheConfiguration | undefined;
   projectSelection: ReadonlySet<RushConfigurationProject>;
-  customParameterValues: string[];
   isQuietMode: boolean;
   isDebugMode: boolean;
   isIncrementalBuildAllowed: boolean;
   projectChangeAnalyzer?: ProjectChangeAnalyzer;
+  customParameters: IRegisteredCustomParameter[];
 
   phasesToRun: Iterable<string>;
   phases: Map<string, IPhase>;
@@ -35,6 +36,7 @@ export class ProjectTaskSelector {
   private readonly _projectChangeAnalyzer: ProjectChangeAnalyzer;
   private readonly _phasesToRun: Iterable<string>;
   private readonly _phases: Map<string, IPhase>;
+  private readonly _customParametersByPhaseName: Map<string, string[]>;
 
   public constructor(options: IProjectTaskSelectorOptions) {
     this._options = options;
@@ -42,6 +44,7 @@ export class ProjectTaskSelector {
       options.projectChangeAnalyzer || new ProjectChangeAnalyzer(options.rushConfiguration);
     this._phasesToRun = options.phasesToRun;
     this._phases = options.phases;
+    this._customParametersByPhaseName = new Map();
   }
 
   public static getScriptToRun(
@@ -88,10 +91,11 @@ export class ProjectTaskSelector {
       return taskName;
     }
 
+    const customParameterValues: string[] = this._getCustomParameterValuesForPhase(phase);
     const commandToRun: string | undefined = ProjectTaskSelector.getScriptToRun(
       project,
       phase.name,
-      this._options.customParameterValues
+      customParameterValues
     );
     if (commandToRun === undefined && !phase.ignoreMissingScript) {
       throw new Error(
@@ -163,6 +167,22 @@ export class ProjectTaskSelector {
       const phaseNameWithoutPrefix: string = phase.name.substring(RushConstants.phaseNamePrefix.length);
       return `${project.packageName} (${phaseNameWithoutPrefix})`;
     }
+  }
+
+  private _getCustomParameterValuesForPhase(phase: IPhase): string[] {
+    let customParameterValues: string[] | undefined = this._customParametersByPhaseName.get(phase.name);
+    if (customParameterValues === undefined) {
+      customParameterValues = [];
+      for (const { tsCommandLineParameter, parameter } of this._options.customParameters) {
+        if (phase.associatedParameters.has(parameter)) {
+          tsCommandLineParameter.appendToArgList(customParameterValues);
+        }
+      }
+
+      this._customParametersByPhaseName.set(phase.name, customParameterValues);
+    }
+
+    return customParameterValues;
   }
 
   private static _getScriptCommand(

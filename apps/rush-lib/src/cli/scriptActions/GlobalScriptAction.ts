@@ -99,9 +99,8 @@ export class GlobalScriptAction extends BaseScriptAction<IGlobalCommand> {
 
     // Collect all custom parameter values
     const customParameterValues: string[] = [];
-
-    for (const customParameter of this.customParameters) {
-      customParameter.appendToArgList(customParameterValues);
+    for (const { tsCommandLineParameter } of this.customParameters) {
+      tsCommandLineParameter.appendToArgList(customParameterValues);
     }
 
     for (let i: number = 0; i < customParameterValues.length; i++) {

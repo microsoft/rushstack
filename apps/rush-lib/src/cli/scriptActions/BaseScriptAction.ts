@@ -3,7 +3,7 @@
 
 import { CommandLineParameter } from '@rushstack/ts-command-line';
 import { BaseRushAction, IBaseRushActionOptions } from '../actions/BaseRushAction';
-import { Command, CommandLineConfiguration } from '../../api/CommandLineConfiguration';
+import { Command, CommandLineConfiguration, Parameter } from '../../api/CommandLineConfiguration';
 import { RushConstants } from '../../logic/RushConstants';
 import type { ParameterJson } from '../../api/CommandLineJson';
 
@@ -13,6 +13,11 @@ import type { ParameterJson } from '../../api/CommandLineJson';
 export interface IBaseScriptActionOptions<TCommand extends Command> extends IBaseRushActionOptions {
   commandLineConfiguration: CommandLineConfiguration;
   command: TCommand;
+}
+
+export interface IRegisteredCustomParameter {
+  parameter: Parameter;
+  tsCommandLineParameter: CommandLineParameter;
 }
 
 /**
@@ -27,7 +32,7 @@ export interface IBaseScriptActionOptions<TCommand extends Command> extends IBas
  */
 export abstract class BaseScriptAction<TCommand extends Command> extends BaseRushAction {
   protected readonly commandLineConfiguration: CommandLineConfiguration;
-  protected readonly customParameters: CommandLineParameter[] = [];
+  protected readonly customParameters: IRegisteredCustomParameter[] = [];
   protected readonly command: TCommand;
 
   public constructor(options: IBaseScriptActionOptions<TCommand>) {
@@ -43,11 +48,11 @@ export abstract class BaseScriptAction<TCommand extends Command> extends BaseRus
 
     // Find any parameters that are associated with this command
     for (const parameter of this.command.associatedParameters) {
-      let customParameter: CommandLineParameter | undefined;
+      let tsCommandLineParameter: CommandLineParameter | undefined;
 
       switch (parameter.parameterKind) {
         case 'flag':
-          customParameter = this.defineFlagParameter({
+          tsCommandLineParameter = this.defineFlagParameter({
             parameterShortName: parameter.shortName,
             parameterLongName: parameter.longName,
             description: parameter.description,
@@ -55,7 +60,7 @@ export abstract class BaseScriptAction<TCommand extends Command> extends BaseRus
           });
           break;
         case 'choice':
-          customParameter = this.defineChoiceParameter({
+          tsCommandLineParameter = this.defineChoiceParameter({
             parameterShortName: parameter.shortName,
             parameterLongName: parameter.longName,
             description: parameter.description,
@@ -65,7 +70,7 @@ export abstract class BaseScriptAction<TCommand extends Command> extends BaseRus
           });
           break;
         case 'string':
-          customParameter = this.defineStringParameter({
+          tsCommandLineParameter = this.defineStringParameter({
             parameterLongName: parameter.longName,
             parameterShortName: parameter.shortName,
             description: parameter.description,
@@ -81,7 +86,10 @@ export abstract class BaseScriptAction<TCommand extends Command> extends BaseRus
           );
       }
 
-      this.customParameters.push(customParameter);
+      this.customParameters.push({
+        parameter,
+        tsCommandLineParameter
+      });
     }
   }
 }
