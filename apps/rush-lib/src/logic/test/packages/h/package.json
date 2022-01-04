@@ -1,6 +1,6 @@
 {
   "name": "h",
-  "version": "1.2.3",
+  "version": "1.0.0",
   "description": "Test package h",
   "dependencies": {
     "a": "~1.0.0"
