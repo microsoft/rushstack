@@ -106,12 +106,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
     // if parallelism is not enabled, then restrict to 1 core
     const parallelism: string | undefined = this._enableParallelism ? this._parallelismParameter!.value : '1';
 
-    // Collect all custom parameter values
-    const customParameterValues: string[] = [];
-    for (const customParameter of this.customParameters) {
-      customParameter.appendToArgList(customParameterValues);
-    }
-
     const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
     const terminal: Terminal = new Terminal(this.rushSession.terminalProvider);
@@ -156,10 +150,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
       projectSelection,
-      customParameterValues,
       isQuietMode: isQuietMode,
       isDebugMode: isDebugMode,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
+      customParameters: this.customParameters,
       phasesToRun: phasesToRun,
       phases: this._phases
     };
