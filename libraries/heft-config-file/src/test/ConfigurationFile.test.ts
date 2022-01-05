@@ -9,7 +9,8 @@ import {
   JsonFile,
   Path,
   StringBufferTerminalProvider,
-  Terminal
+  Terminal,
+  Text
 } from '@rushstack/node-core-library';
 import { RigConfig } from '@rushstack/rig-package';
 
@@ -540,8 +541,22 @@ describe('ConfigurationFile', () => {
 
     it("Throws an error when the file isn't valid JSON", async () => {
       const errorCaseFolderName: string = 'invalidJson';
+      const configFilePath: string = `${errorCasesFolderName}/${errorCaseFolderName}/config.json`;
+      const fullConfigFilePath: string = `${__dirname}/${configFilePath}`;
+      // Normalize newlines to make the error message consistent across platforms
+      const normalizedRawConfigFile: string = Text.convertToLf(
+        await FileSystem.readFileAsync(fullConfigFilePath)
+      );
+      jest
+        .spyOn(FileSystem, 'readFileAsync')
+        .mockImplementation((filePath: string) =>
+          Path.convertToSlashes(filePath) === Path.convertToSlashes(fullConfigFilePath)
+            ? Promise.resolve(normalizedRawConfigFile)
+            : Promise.reject(new Error('File not found'))
+        );
+
       const configFileLoader: ConfigurationFile<void> = new ConfigurationFile({
-        projectRelativeFilePath: `${errorCasesFolderName}/${errorCaseFolderName}/config.json`,
+        projectRelativeFilePath: configFilePath,
         jsonSchemaPath: nodeJsPath.resolve(
           __dirname,
           errorCasesFolderName,
@@ -553,6 +568,8 @@ describe('ConfigurationFile', () => {
       await expect(
         configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname)
       ).rejects.toThrowErrorMatchingSnapshot();
+
+      jest.restoreAllMocks();
     });
 
     it("Throws an error for a file that doesn't match its schema", async () => {
