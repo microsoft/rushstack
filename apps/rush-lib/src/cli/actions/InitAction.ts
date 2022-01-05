@@ -2,14 +2,20 @@
 // See LICENSE in the project root for license information.
 
 import colors from 'colors/safe';
-import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
 import { RushCommandLineParser } from '../RushCommandLineParser';
 import { BaseConfiglessRushAction } from './BaseRushAction';
-import { FileSystem, NewlineKind, InternalError, AlreadyReportedError } from '@rushstack/node-core-library';
+import {
+  FileSystem,
+  NewlineKind,
+  InternalError,
+  AlreadyReportedError,
+  FileSystemStats
+} from '@rushstack/node-core-library';
 import { CommandLineFlagParameter } from '@rushstack/ts-command-line';
+
 import { Rush } from '../../api/Rush';
 
 export class InitAction extends BaseConfiglessRushAction {
@@ -118,7 +124,7 @@ export class InitAction extends BaseConfiglessRushAction {
       return false;
     }
 
-    for (const itemName of FileSystem.readFolder(initFolder)) {
+    for (const itemName of FileSystem.readFolderItemNames(initFolder)) {
       if (itemName.substr(0, 1) === '.') {
         // Ignore any items that start with ".", for example ".git"
         continue;
@@ -126,7 +132,7 @@ export class InitAction extends BaseConfiglessRushAction {
 
       const itemPath: string = path.join(initFolder, itemName);
 
-      const stats: fs.Stats = FileSystem.getStatistics(itemPath);
+      const stats: FileSystemStats = FileSystem.getStatistics(itemPath);
       // Ignore any loose files in the current folder, e.g. "README.md"
       // or "CONTRIBUTING.md"
       if (stats.isDirectory()) {

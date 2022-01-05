@@ -2,10 +2,15 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
-import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { JsonFile, IPackageJson, FileSystem, FileConstants } from '@rushstack/node-core-library';
+import {
+  JsonFile,
+  IPackageJson,
+  FileSystem,
+  FileConstants,
+  FileSystemStats
+} from '@rushstack/node-core-library';
 import type * as stream from 'stream';
 import { CommandLineHelper } from '@rushstack/ts-command-line';
 
@@ -235,7 +240,7 @@ export class Utilities {
     let exists: boolean = false;
 
     try {
-      const lstat: fs.Stats = FileSystem.getLinkStatistics(filePath);
+      const lstat: FileSystemStats = FileSystem.getLinkStatistics(filePath);
       exists = lstat.isFile();
     } catch (e) {
       /* no-op */
@@ -251,7 +256,7 @@ export class Utilities {
     let exists: boolean = false;
 
     try {
-      const lstat: fs.Stats = FileSystem.getLinkStatistics(directoryPath);
+      const lstat: FileSystemStats = FileSystem.getLinkStatistics(directoryPath);
       exists = lstat.isDirectory();
     } catch (e) {
       /* no-op */
@@ -299,7 +304,7 @@ export class Utilities {
         return false;
       }
 
-      const inputStats: fs.Stats = FileSystem.getStatistics(inputFilename);
+      const inputStats: FileSystemStats = FileSystem.getStatistics(inputFilename);
       if (dateToCompare < inputStats.mtime) {
         return false;
       }

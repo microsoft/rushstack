@@ -4,7 +4,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import { once } from 'events';
-import { Path, ITerminal } from '@rushstack/node-core-library';
+import { Path, ITerminal, FileSystemStats, FileSystem } from '@rushstack/node-core-library';
 
 import { ProjectChangeAnalyzer } from './ProjectChangeAnalyzer';
 import { RushConfiguration } from '../api/RushConfiguration';
@@ -144,7 +144,7 @@ export class ProjectWatcher {
 
         const addWatcher = (
           watchedPath: string,
-          listener: (event: string, fileName: string | Buffer) => void
+          listener: (event: string, fileName: string) => void
         ): void => {
           const watcher: fs.FSWatcher = fs.watch(
             watchedPath,
@@ -161,7 +161,7 @@ export class ProjectWatcher {
           });
         };
 
-        const changeListener = (event: string, fileName: string | Buffer): void => {
+        const changeListener = (event: string, fileName: string): void => {
           try {
             if (terminated) {
               return;
@@ -174,7 +174,7 @@ export class ProjectWatcher {
 
               if (normalizedName && !watchers.has(normalizedName)) {
                 try {
-                  const stat: fs.Stats = fs.statSync(fileName);
+                  const stat: FileSystemStats = FileSystem.getStatistics(fileName);
                   if (stat.isDirectory()) {
                     addWatcher(normalizedName, changeListener);
                   }

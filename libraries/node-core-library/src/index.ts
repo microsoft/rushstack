@@ -63,6 +63,7 @@ export {
   FileSystem,
   FileSystemCopyFilesAsyncFilter,
   FileSystemCopyFilesFilter,
+  FolderItem,
   FileSystemStats,
   IFileSystemCopyFileBaseOptions,
   IFileSystemCopyFileOptions,

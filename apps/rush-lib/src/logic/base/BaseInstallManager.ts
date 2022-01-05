@@ -3,7 +3,6 @@
 
 import colors from 'colors/safe';
 import * as fetch from 'node-fetch';
-import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -12,7 +11,8 @@ import {
   JsonFile,
   PosixModeBits,
   NewlineKind,
-  AlreadyReportedError
+  AlreadyReportedError,
+  FileSystemStats
 } from '@rushstack/node-core-library';
 import { PrintUtilities } from '@rushstack/terminal';
 
@@ -203,7 +203,7 @@ export abstract class BaseInstallManager {
     // Allow us to defer the file read until we need it
     const canSkipInstall: () => boolean = () => {
       // Based on timestamps, can we skip this install entirely?
-      const outputStats: fs.Stats = FileSystem.getStatistics(this._commonTempInstallFlag.path);
+      const outputStats: FileSystemStats = FileSystem.getStatistics(this._commonTempInstallFlag.path);
       return this.canSkipInstall(outputStats.mtime);
     };
 
@@ -447,7 +447,7 @@ export abstract class BaseInstallManager {
     const hookDestination: string | undefined = git.getHooksFolder();
 
     if (FileSystem.exists(hookSource) && hookDestination) {
-      const allHookFilenames: string[] = FileSystem.readFolder(hookSource);
+      const allHookFilenames: string[] = FileSystem.readFolderItemNames(hookSource);
       // Ignore the ".sample" file(s) in this folder.
       const hookFilenames: string[] = allHookFilenames.filter((x) => !/\.sample$/.test(x));
       if (hookFilenames.length > 0) {
