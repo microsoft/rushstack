@@ -31,6 +31,7 @@ functions:
     package: api-documenter-test!
     summary: An exported function with hyperlinked parameters and return value.
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -50,6 +51,7 @@ functions:
     package: api-documenter-test!
     summary: ''
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
