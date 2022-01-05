@@ -494,12 +494,10 @@ describe('ConfigurationFile', () => {
         projectRelativeFilePath: 'config/notExist.json',
         jsonSchemaPath: schemaPath
       });
-      try {
-        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, projectFolder, rigConfig);
-        fail();
-      } catch (e) {
-        expect(e).toMatchSnapshot();
-      }
+
+      await expect(
+        configFileLoader.loadConfigurationFileForProjectAsync(terminal, projectFolder, rigConfig)
+      ).rejects.toThrowErrorMatchingSnapshot();
     });
   });
 
@@ -517,12 +515,10 @@ describe('ConfigurationFile', () => {
           'config.schema.json'
         )
       });
-      try {
-        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
-        fail();
-      } catch (e) {
-        expect(e).toMatchSnapshot();
-      }
+
+      await expect(
+        configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname)
+      ).rejects.toThrowErrorMatchingSnapshot();
     });
 
     it("returns undefined when the file doesn't exist for tryLoadConfigurationFileForProjectAsync", async () => {
@@ -536,9 +532,10 @@ describe('ConfigurationFile', () => {
           'config.schema.json'
         )
       });
-      expect(
-        await configFileLoader.tryLoadConfigurationFileForProjectAsync(terminal, __dirname)
-      ).toBeUndefined();
+
+      await expect(
+        configFileLoader.tryLoadConfigurationFileForProjectAsync(terminal, __dirname)
+      ).resolves.toBeUndefined();
     });
 
     it("Throws an error when the file isn't valid JSON", async () => {
@@ -552,12 +549,10 @@ describe('ConfigurationFile', () => {
           'config.schema.json'
         )
       });
-      try {
-        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
-        fail();
-      } catch (e) {
-        expect(e).toMatchSnapshot();
-      }
+
+      await expect(
+        configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname)
+      ).rejects.toThrowErrorMatchingSnapshot();
     });
 
     it("Throws an error for a file that doesn't match its schema", async () => {
@@ -571,12 +566,10 @@ describe('ConfigurationFile', () => {
           'config.schema.json'
         )
       });
-      try {
-        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
-        fail();
-      } catch (e) {
-        expect(e).toMatchSnapshot();
-      }
+
+      await expect(
+        configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname)
+      ).rejects.toThrowErrorMatchingSnapshot();
     });
 
     it('Throws an error when there is a circular reference in "extends" properties', async () => {
@@ -590,12 +583,10 @@ describe('ConfigurationFile', () => {
           'config.schema.json'
         )
       });
-      try {
-        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
-        fail();
-      } catch (e) {
-        expect(e).toMatchSnapshot();
-      }
+
+      await expect(
+        configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname)
+      ).rejects.toThrowErrorMatchingSnapshot();
     });
 
     it('Throws an error when an "extends" property points to a file that cannot be resolved', async () => {
@@ -609,12 +600,10 @@ describe('ConfigurationFile', () => {
           'config.schema.json'
         )
       });
-      try {
-        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
-        fail();
-      } catch (e) {
-        expect(e).toMatchSnapshot();
-      }
+
+      await expect(
+        configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname)
+      ).rejects.toThrowErrorMatchingSnapshot();
     });
 
     it("Throws an error when a combined config file doesn't match the schema", async () => {
@@ -629,12 +618,9 @@ describe('ConfigurationFile', () => {
         )
       });
 
-      try {
-        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
-        fail();
-      } catch (e) {
-        expect(e).toMatchSnapshot();
-      }
+      await expect(
+        configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname)
+      ).rejects.toThrowErrorMatchingSnapshot();
     });
 
     it("Throws an error when a requested file doesn't exist", async () => {
@@ -648,12 +634,9 @@ describe('ConfigurationFile', () => {
         )
       });
 
-      try {
-        await configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname);
-        fail();
-      } catch (e) {
-        expect(e).toMatchSnapshot();
-      }
+      await expect(
+        configFileLoader.loadConfigurationFileForProjectAsync(terminal, __dirname)
+      ).rejects.toThrowErrorMatchingSnapshot();
     });
   });
 });
