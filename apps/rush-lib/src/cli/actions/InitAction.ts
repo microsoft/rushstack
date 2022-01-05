@@ -124,7 +124,7 @@ export class InitAction extends BaseConfiglessRushAction {
       return false;
     }
 
-    for (const itemName of FileSystem.readFolder(initFolder)) {
+    for (const itemName of FileSystem.readFolderItemNames(initFolder)) {
       if (itemName.substr(0, 1) === '.') {
         // Ignore any items that start with ".", for example ".git"
         continue;

@@ -596,12 +596,31 @@ export class FileSystem {
   }
 
   /**
-   * Reads the contents of the folder, not including "." or "..".
+   * @deprecated
+   * Use {@link FileSystem.readFolderItemNames} instead.
+   */
+  public static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[] {
+    return FileSystem.readFolderItemNames(folderPath, options);
+  }
+
+  /**
+   * @deprecated
+   * Use {@link FileSystem.readFolderItemNamesAsync} instead.
+   */
+  public static async readFolderAsync(
+    folderPath: string,
+    options?: IFileSystemReadFolderOptions
+  ): Promise<string[]> {
+    return await FileSystem.readFolderItemNamesAsync(folderPath, options);
+  }
+
+  /**
+   * Reads the names of folder entries, not including "." or "..".
    * Behind the scenes it uses `fs.readdirSync()`.
    * @param folderPath - The absolute or relative path to the folder which should be read.
    * @param options - Optional settings that can change the behavior. Type: `IReadFolderOptions`
    */
-  public static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[] {
+  public static readFolderItemNames(folderPath: string, options?: IFileSystemReadFolderOptions): string[] {
     return FileSystem._wrapException(() => {
       options = {
         ...READ_FOLDER_DEFAULT_OPTIONS,
@@ -618,9 +637,9 @@ export class FileSystem {
   }
 
   /**
-   * An async version of {@link FileSystem.readFolder}.
+   * An async version of {@link FileSystem.readFolderItemNames}.
    */
-  public static async readFolderAsync(
+  public static async readFolderItemNamesAsync(
     folderPath: string,
     options?: IFileSystemReadFolderOptions
   ): Promise<string[]> {

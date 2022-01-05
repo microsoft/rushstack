@@ -30,7 +30,7 @@ export class DeployArchiver {
   private static _getFilePathsRecursively(dir: string): string[] {
     // returns a flat array of absolute paths of all files recursively contained in the dir
     let results: string[] = [];
-    const list: string[] = FileSystem.readFolder(dir);
+    const list: string[] = FileSystem.readFolderItemNames(dir);
 
     if (!list.length) return results;
 

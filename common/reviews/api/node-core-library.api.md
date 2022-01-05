@@ -233,8 +233,12 @@ export class FileSystem {
     static readFileAsync(filePath: string, options?: IFileSystemReadFileOptions): Promise<string>;
     static readFileToBuffer(filePath: string): Buffer;
     static readFileToBufferAsync(filePath: string): Promise<Buffer>;
+    // @deprecated (undocumented)
     static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
+    // @deprecated (undocumented)
     static readFolderAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]>;
+    static readFolderItemNames(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
+    static readFolderItemNamesAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]>;
     static readFolderItems(folderPath: string, options?: IFileSystemReadFolderOptions): FolderItem[];
     static readFolderItemsAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<FolderItem[]>;
     static readLink(path: string): string;

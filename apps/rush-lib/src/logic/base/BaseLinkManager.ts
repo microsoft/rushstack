@@ -140,7 +140,7 @@ export abstract class BaseLinkManager {
       // If there are children, then we need to symlink each item in the folder individually
       Utilities.createFolderWithRetry(localPackage.folderPath);
 
-      for (const filename of FileSystem.readFolder(localPackage.symlinkTargetFolderPath)) {
+      for (const filename of FileSystem.readFolderItemNames(localPackage.symlinkTargetFolderPath)) {
         if (filename.toLowerCase() !== 'node_modules') {
           // Create the symlink
           let symlinkKind: SymlinkKind = SymlinkKind.File;

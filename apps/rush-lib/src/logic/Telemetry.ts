@@ -68,7 +68,7 @@ export class Telemetry {
    */
   private _cleanUp(): void {
     if (FileSystem.exists(this._dataFolder)) {
-      const files: string[] = FileSystem.readFolder(this._dataFolder);
+      const files: string[] = FileSystem.readFolderItemNames(this._dataFolder);
       if (files.length > MAX_FILE_COUNT) {
         const sortedFiles: string[] = files
           .map((fileName) => {

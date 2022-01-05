@@ -447,7 +447,7 @@ export abstract class BaseInstallManager {
     const hookDestination: string | undefined = git.getHooksFolder();
 
     if (FileSystem.exists(hookSource) && hookDestination) {
-      const allHookFilenames: string[] = FileSystem.readFolder(hookSource);
+      const allHookFilenames: string[] = FileSystem.readFolderItemNames(hookSource);
       // Ignore the ".sample" file(s) in this folder.
       const hookFilenames: string[] = allHookFilenames.filter((x) => !/\.sample$/.test(x));
       if (hookFilenames.length > 0) {
