@@ -775,7 +775,8 @@ export class Utilities {
       stdio: stdio,
       env: keepEnvironment
         ? environment
-        : Utilities._createEnvironmentForRushCommand({ initialEnvironment: environment })
+        : Utilities._createEnvironmentForRushCommand({ initialEnvironment: environment }),
+      maxBuffer: 10 * 1024 * 1024 // Set default max buffer size to 10MB
     };
 
     // This is needed since we specify shell=true below.
