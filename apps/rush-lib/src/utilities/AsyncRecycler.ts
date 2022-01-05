@@ -2,11 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
-import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { Text, Path, FileSystem } from '@rushstack/node-core-library';
+import { Text, Path, FileSystem, FileSystemStats } from '@rushstack/node-core-library';
 
 import { Utilities } from './Utilities';
 
@@ -95,7 +94,7 @@ export class AsyncRecycler {
       if (!excludeSet.has(normalizedMemberName)) {
         let shouldMove: boolean = false;
         try {
-          const stats: fs.Stats = FileSystem.getLinkStatistics(memberPath);
+          const stats: FileSystemStats = FileSystem.getLinkStatistics(memberPath);
           shouldMove = stats.isDirectory();
         } catch (error) {
           // If we fail to access the item, assume it's not a folder

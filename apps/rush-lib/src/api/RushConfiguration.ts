@@ -4,7 +4,6 @@
 /* eslint max-lines: off */
 
 import * as path from 'path';
-import * as fs from 'fs';
 import * as semver from 'semver';
 import {
   JsonFile,
@@ -12,7 +11,8 @@ import {
   JsonNull,
   Path,
   FileSystem,
-  PackageNameParser
+  PackageNameParser,
+  FileSystemStats
 } from '@rushstack/node-core-library';
 import { trueCasePathSync } from 'true-case-path';
 
@@ -967,7 +967,7 @@ export class RushConfiguration {
 
     for (const filename of FileSystem.readFolder(commonRushConfigFolder)) {
       // Ignore things that aren't actual files
-      const stat: fs.Stats = FileSystem.getLinkStatistics(path.join(commonRushConfigFolder, filename));
+      const stat: FileSystemStats = FileSystem.getLinkStatistics(path.join(commonRushConfigFolder, filename));
       if (!stat.isFile() && !stat.isSymbolicLink()) {
         continue;
       }

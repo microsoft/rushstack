@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import * as fs from 'fs';
 import * as path from 'path';
-import { FileSystem, Import } from '@rushstack/node-core-library';
+import { FileSystem, FileSystemStats, Import } from '@rushstack/node-core-library';
 
 import { RushConfiguration } from '../api/RushConfiguration';
 import { Rush } from '../api/Rush';
@@ -74,7 +73,7 @@ export class Telemetry {
         const sortedFiles: string[] = files
           .map((fileName) => {
             const filePath: string = path.join(this._dataFolder, fileName);
-            const stats: fs.Stats = FileSystem.getStatistics(filePath);
+            const stats: FileSystemStats = FileSystem.getStatistics(filePath);
             return {
               filePath: filePath,
               modifiedTime: stats.mtime.getTime(),
