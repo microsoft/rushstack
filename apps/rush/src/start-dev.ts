@@ -7,7 +7,6 @@
 import * as rushLib from '@microsoft/rush-lib';
 import { PackageJsonLookup, Import } from '@rushstack/node-core-library';
 
-import { MinimalRushConfiguration } from './MinimalRushConfiguration';
 import { RushCommandSelector } from './RushCommandSelector';
 
 const builtInPluginConfigurations: rushLib._IBuiltInPluginConfiguration[] = [];
@@ -27,13 +26,9 @@ function includePlugin(pluginName: string): void {
 includePlugin('rush-amazon-s3-build-cache-plugin');
 includePlugin('rush-azure-storage-build-cache-plugin');
 
-// Load the configuration
-const configuration: MinimalRushConfiguration | undefined =
-  MinimalRushConfiguration.loadFromDefaultLocation();
-
 const currentPackageVersion: string = PackageJsonLookup.loadOwnPackageJson(__dirname).version;
 RushCommandSelector.execute(currentPackageVersion, rushLib, {
-  isManaged: !!configuration,
+  isManaged: false,
   alreadyReportedNodeTooNewError: false,
   builtInPluginConfigurations
 });
