@@ -1,6 +1,14 @@
 # Change Log - @rushstack/node-core-library
 
-This log was last generated on Mon, 27 Dec 2021 16:10:40 GMT and should not be manually modified.
+This log was last generated on Wed, 05 Jan 2022 16:07:47 GMT and should not be manually modified.
+
+## 3.45.0
+Wed, 05 Jan 2022 16:07:47 GMT
+
+### Minor changes
+
+- Expose a FileSystem.readFolderItems and FileSystem.readFolderItemsAsync API to get folder entries with types in a single API call.
+- Deprecate FileSystem.readFolder in favor of FileSystem.readFolderItemNames.
 
 ## 3.44.3
 Mon, 27 Dec 2021 16:10:40 GMT
