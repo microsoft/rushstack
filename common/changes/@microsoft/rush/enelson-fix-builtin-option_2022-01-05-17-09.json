@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Pass builtin plugins to the internal Rush launcher",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
