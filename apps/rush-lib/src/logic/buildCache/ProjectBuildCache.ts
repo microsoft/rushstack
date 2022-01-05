@@ -6,8 +6,7 @@ import events from 'events';
 import * as crypto from 'crypto';
 import type * as stream from 'stream';
 import * as tar from 'tar';
-import { FileSystem, LegacyAdapters, Path, ITerminal } from '@rushstack/node-core-library';
-import * as fs from 'fs';
+import { FileSystem, Path, ITerminal, FolderItem } from '@rushstack/node-core-library';
 
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
@@ -410,9 +409,7 @@ export class ProjectBuildCache {
     posixPrefix: string,
     folderPath: string
   ): AsyncIterableIterator<string> {
-    const folderEntries: fs.Dirent[] = await LegacyAdapters.convertCallbackToPromise(fs.readdir, folderPath, {
-      withFileTypes: true
-    });
+    const folderEntries: FolderItem[] = await FileSystem.readFolderItemsAsync(folderPath);
     for (const folderEntry of folderEntries) {
       const entryPath: string = `${posixPrefix}/${folderEntry.name}`;
       if (folderEntry.isSymbolicLink()) {

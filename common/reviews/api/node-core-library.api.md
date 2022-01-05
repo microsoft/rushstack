@@ -235,6 +235,8 @@ export class FileSystem {
     static readFileToBufferAsync(filePath: string): Promise<Buffer>;
     static readFolder(folderPath: string, options?: IFileSystemReadFolderOptions): string[];
     static readFolderAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<string[]>;
+    static readFolderItems(folderPath: string, options?: IFileSystemReadFolderOptions): FolderItem[];
+    static readFolderItemsAsync(folderPath: string, options?: IFileSystemReadFolderOptions): Promise<FolderItem[]>;
     static readLink(path: string): string;
     static readLinkAsync(path: string): Promise<string>;
     static updateTimes(path: string, times: IFileSystemUpdateTimeParameters): void;
@@ -265,6 +267,9 @@ export enum FolderConstants {
     Git = ".git",
     NodeModules = "node_modules"
 }
+
+// @public
+export type FolderItem = fs.Dirent;
 
 // @public
 export interface IAnsiEscapeConvertForTestsOptions {
