@@ -45,12 +45,14 @@ export class RushCommandSelector {
       }
       Rush.launchRushX(launcherVersion, {
         isManaged: options.isManaged,
-        alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
+        alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError,
+        builtInPluginConfigurations: options.builtInPluginConfigurations
       });
     } else {
       Rush.launch(launcherVersion, {
         isManaged: options.isManaged,
-        alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
+        alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError,
+        builtInPluginConfigurations: options.builtInPluginConfigurations
       });
     }
   }
