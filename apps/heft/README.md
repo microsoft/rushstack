@@ -26,7 +26,7 @@ Ultimately, you'll want to define a small set of stereotypical project types
 overriding the rig configuration. Being consistent ensures that any person can easily contribute to any project.
 Heft is a ready-made implementation of all these concepts.
 
-You don’t need a monorepo to use Heft, however. It also works well for small standalone projects. Compared to other
+You don't need a monorepo to use Heft, however. It also works well for small standalone projects. Compared to other
 similar systems, Heft has some unique design goals:
 
 - **Scalable**: Heft interfaces with the [Rush Stack](https://rushstack.io/) family of tools, which are tailored
