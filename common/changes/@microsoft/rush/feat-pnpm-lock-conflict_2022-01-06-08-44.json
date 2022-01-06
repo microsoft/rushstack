@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Change pnpm-lock.yaml to text in gitattributes & set useWorkspaces to true",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
