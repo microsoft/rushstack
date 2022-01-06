@@ -110,7 +110,7 @@
      *
      * This option is experimental. The default value is false.
      */
-    /*[LINE "HYPOTHETICAL"]*/ "useWorkspaces": true
+    "useWorkspaces": true
   },
 
   /**
