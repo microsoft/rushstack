@@ -1,0 +1,15 @@
+{
+  "extends": "../../rush-project-base.json",
+  "projectOutputFolderNames": ["b"],
+
+  "phaseOptions": [
+    {
+      "phaseName": "_phase:a",
+      "projectOutputFolderNames": ["a-b"]
+    },
+    {
+      "phaseName": "_phase:a",
+      "projectOutputFolderNames": ["a-c"]
+    }
+  ]
+}

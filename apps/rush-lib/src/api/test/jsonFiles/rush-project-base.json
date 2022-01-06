@@ -1,0 +1,14 @@
+{
+  "projectOutputFolderNames": ["a"],
+
+  "phaseOptions": [
+    {
+      "phaseName": "_phase:a",
+      "projectOutputFolderNames": ["a-a"]
+    },
+    {
+      "phaseName": "_phase:b",
+      "projectOutputFolderNames": ["b-a"]
+    }
+  ]
+}
