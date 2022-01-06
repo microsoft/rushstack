@@ -2,6 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as os from 'os';
+import * as path from 'path';
 import colors from 'colors/safe';
 import {
   StdioSummarizer,
@@ -11,7 +12,7 @@ import {
   TextRewriterTransform
 } from '@rushstack/terminal';
 import { StreamCollator, CollatedTerminal, CollatedWriter } from '@rushstack/stream-collator';
-import { AlreadyReportedError, NewlineKind, InternalError, Sort } from '@rushstack/node-core-library';
+import { AlreadyReportedError, NewlineKind, InternalError, Sort, FileSystem } from '@rushstack/node-core-library';
 
 import { Stopwatch } from '../../utilities/Stopwatch';
 import { Task } from './Task';
@@ -33,6 +34,25 @@ export interface ITaskExecutionManagerOptions {
  * Format "======" lines for a shell window with classic 80 columns
  */
 const ASCII_HEADER_WIDTH: number = 79;
+
+/**
+ * Blah
+ */
+const TIMELINE_WIDTH: number = 120;
+
+/**
+ * Blah
+ */
+const TIMELINE_GRAPH_CHARS: Record<TaskStatus, string> = {
+  [TaskStatus.Ready]: '?',
+  [TaskStatus.Executing]: '?',
+  [TaskStatus.Success]: '#',
+  [TaskStatus.SuccessWithWarning]: '!',
+  [TaskStatus.Failure]: '!',
+  [TaskStatus.Blocked]: '.',
+  [TaskStatus.Skipped]: '%',
+  [TaskStatus.FromCache]: '%'
+};
 
 /**
  * A class which manages the execution of a set of tasks with interdependencies.
@@ -177,6 +197,8 @@ export class TaskExecutionManager {
     await this._startAvailableTasksAsync();
 
     this._printTaskStatus();
+
+    await this._generateTaskTimeline();
 
     if (this._hasAnyFailures) {
       this._terminal.writeStderrLine(colors.red('Projects failed to build.') + '\n');
@@ -570,5 +592,142 @@ export class TaskExecutionManager {
 
     this._terminal.writeStdoutLine(leftPart + rightPart);
     this._terminal.writeStdoutLine('');
+  }
+
+  private async _generateTaskTimeline(): Promise<void> {
+    const lines: string[] = [];
+
+    const tasks: Task[] = this._tasks.filter(task => task.stopwatch.startTime && task.stopwatch.endTime);
+    tasks.sort((a, b) => a.stopwatch.startTime! - b.stopwatch.startTime!);
+
+    const overallStart: number = tasks[0].stopwatch.startTime!;
+    const overallEnd: number = Math.max(...tasks.map(task => task.stopwatch.endTime!));
+    const overallLength: number = overallEnd - overallStart;
+
+    const totalWork: number = tasks.map(task => task.stopwatch.duration).reduce((sum, value) => sum + value);
+
+    const maxName: number = Math.max(...tasks.map(x => x.name.length));
+    const maxDuration: number = String(Math.ceil(Math.max(...tasks.map(x => x.stopwatch.duration)))).length;
+    const graphWidth: number = TIMELINE_WIDTH - maxName - maxDuration - 4;
+
+    lines.push('='.repeat(TIMELINE_WIDTH));
+
+    const cpuBusy: number[] = Array(this._parallelism).fill(-1);
+
+    for (const task of tasks) {
+      const startIdx: number = Math.floor((task.stopwatch.startTime! - overallStart) * graphWidth / overallLength);
+      const endIdx: number = Math.floor((task.stopwatch.endTime! - overallStart) * graphWidth / overallLength);
+      const length: number = endIdx - startIdx + 1;
+
+      const graph: string = '-'.repeat(startIdx) + TIMELINE_GRAPH_CHARS[task.status].repeat(length) + '-'.repeat(graphWidth - endIdx);
+      lines.push(
+        task.name.padEnd(maxName) + ' ' + graph + ' ' + Math.floor(task.stopwatch.duration) + 's'
+      );
+
+      const openCpu: number = cpuBusy.findIndex(end => end === -1 || end < task.stopwatch.startTime!);
+      cpuBusy[openCpu] = task.stopwatch.endTime!;
+    }
+
+    lines.push('='.repeat(TIMELINE_WIDTH));
+
+    const usedCpus: number = cpuBusy.filter(cpu => cpu !== -1).length;
+
+    const legend: string[] = [
+      'LEGEND:',
+      '  [#] Success  [!] Failed/warnings  [%] Skipped/cached'
+    ];
+
+    const summary: string[] = [
+      'Total Work: ' + String(Math.floor(totalWork)).padStart(8) + 's',
+      'Wall Clock: ' + String(Math.floor(overallLength / 1000.0)).padStart(8) + 's',
+      'Parallelism Used: ' + `${usedCpus}/${this._parallelism}`.padStart(9)
+    ];
+
+    lines.push(legend[0] + summary[0].padStart(TIMELINE_WIDTH - legend[0].length));
+    lines.push(legend[1] + summary[1].padStart(TIMELINE_WIDTH - legend[1].length));
+    lines.push(summary[2].padStart(TIMELINE_WIDTH));
+
+    await FileSystem.writeFileAsync('.timeline.log', lines.join('\n'));
+
+    /*
+    let cpuList: number[] = Array(this._parallelism).fill(-1);
+
+    let tasks = this._tasks.filter(x => x.stopwatch.startTime && x.stopwatch.endTime);
+    tasks.sort((a,b) => a.stopwatch.startTime! - b.stopwatch.startTime!);
+
+    let overallStart = tasks[0].stopwatch.startTime!;
+    let overallEnd = Math.max(...tasks.map(x => x.stopwatch.endTime!));
+    let overallLength = overallEnd - overallStart;
+      this._terminal.writeStdoutLine(line);
+    }
+    this._terminal.writeStdoutLine('='.repeat(maxWidth));
+
+    let totalWork = (tasks.map(x => x.stopwatch.duration).reduce((s,v) => s+v));
+
+    let onCpu: Record<number, number> = {};
+
+    for (let i = 0; i < tasks.length; i++) {
+      let open = cpuList.findIndex(x => x === -1 || x < tasks[i].stopwatch.startTime!);
+      cpuList[open] = tasks[i].stopwatch.endTime!;
+      onCpu[i] = open;
+    }
+
+    console.log(onCpu);
+
+    this._terminal.writeStdoutLine(String(Object.entries(onCpu)));
+
+    let maxWidth = 120;
+    let maxName = Math.max(...tasks.map(x => x.name.length));
+    let maxDuration = String(Math.ceil(Math.max(...tasks.map(x => x.stopwatch.duration)))).length;
+    let graphWidth = maxWidth - maxName - maxDuration - 4;
+    this._terminal.writeStdoutLine(''+maxWidth);
+    this._terminal.writeStdoutLine(''+maxName);
+    this._terminal.writeStdoutLine(''+maxDuration);
+    this._terminal.writeStdoutLine(''+graphWidth);
+
+    for (let thread = 0; thread < this._parallelism; thread++) {
+      let hist = '-'.repeat(graphWidth);
+    }
+
+    this._terminal.writeStdoutLine('='.repeat(maxWidth));
+
+    for (let task of tasks) {
+      let hist = '-'.repeat(graphWidth);
+      let start = Math.floor((task.stopwatch.startTime! - overallStart) * graphWidth / overallLength);
+      let end = Math.floor((task.stopwatch.endTime! - overallStart) * graphWidth / overallLength);
+      let length = (end - start + 1);
+
+      let krab: Record<TaskStatus, string> = {
+        [TaskStatus.Ready]: '?',
+        [TaskStatus.Executing]: '?',
+        [TaskStatus.Success]: '#',
+        [TaskStatus.SuccessWithWarning]: '!',
+        [TaskStatus.Failure]: '!',
+        [TaskStatus.Blocked]: '.',
+        [TaskStatus.Skipped]: '%',
+        [TaskStatus.FromCache]: '%'
+      };
+
+
+      hist = hist.slice(0, start) + krab[task.status].repeat(length) + hist.slice(end);
+      let line = task.name.padEnd(maxName) + ' ' + hist + ' ' + Math.ceil(task.stopwatch.duration) + 's';
+      this._terminal.writeStdoutLine(line);
+    }
+    this._terminal.writeStdoutLine('='.repeat(maxWidth));
+
+    let totalWork = (tasks.map(x => x.stopwatch.duration).reduce((s,v) => s+v));
+
+    const legend: string[] = [
+      'LEGEND:',
+      '  [#] Success  [!] Failed/warnings  [%] Skipped/cached'
+    ];
+    const summary: string[] = [
+      'Total Work: ' + String(Math.floor(totalWork)).padStart(8) + 's',
+      'Wall Clock: ' + String(Math.floor(overallLength / 1000.0)).padStart(8) + 's'
+    ];
+
+    this._terminal.writeStdoutLine(legend[0] + summary[0].padStart(maxWidth - legend[0].length));
+    this._terminal.writeStdoutLine(legend[1] + summary[1].padStart(maxWidth - legend[1].length));
+    */
   }
 }
