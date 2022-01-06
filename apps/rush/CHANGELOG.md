@@ -1,6 +1,21 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 16 Dec 2021 05:39:21 GMT and should not be manually modified.
+This log was last generated on Thu, 06 Jan 2022 22:18:13 GMT and should not be manually modified.
+
+## 5.59.0
+Thu, 06 Jan 2022 22:18:13 GMT
+
+### Minor changes
+
+- Update the "rush init" template to enable pnpm workspaces and to merge the pnpm-lock.yaml file as text.
+
+### Updates
+
+- Fix an issue that occurs when running a command with a selection argument with a Git ref (like `--from git:main`) in a repo with a pnpm lockfile larger than 1MB.
+- Fix an issue with installing Git hooks that occurs when the rush.json folder isn't at the repo's root.
+- (BREAKING CHANGE) Remove the experimental command "rush write-build-cache", since it is no longer needed and would be incompatible with phased builds. If you need this command for some reason, please create a GitHub issue.
+- Add support for phased commands behind the multiPhaseCommands experiment.
+- Update "rush init" to write files with OS-default line endings (CRLF on Windows, LF otherwise) instead of always writing CRLF line endings.
 
 ## 5.58.0
 Thu, 16 Dec 2021 05:39:21 GMT

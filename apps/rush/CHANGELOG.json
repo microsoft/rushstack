@@ -2,6 +2,35 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.59.0",
+      "tag": "@microsoft/rush_v5.59.0",
+      "date": "Thu, 06 Jan 2022 22:18:13 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fix an issue that occurs when running a command with a selection argument with a Git ref (like `--from git:main`) in a repo with a pnpm lockfile larger than 1MB."
+          },
+          {
+            "comment": "Fix an issue with installing Git hooks that occurs when the rush.json folder isn't at the repo's root."
+          },
+          {
+            "comment": "(BREAKING CHANGE) Remove the experimental command \"rush write-build-cache\", since it is no longer needed and would be incompatible with phased builds. If you need this command for some reason, please create a GitHub issue."
+          },
+          {
+            "comment": "Add support for phased commands behind the multiPhaseCommands experiment."
+          },
+          {
+            "comment": "Update \"rush init\" to write files with OS-default line endings (CRLF on Windows, LF otherwise) instead of always writing CRLF line endings."
+          }
+        ],
+        "minor": [
+          {
+            "comment": "Update the \"rush init\" template to enable pnpm workspaces and to merge the pnpm-lock.yaml file as text."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.58.0",
       "tag": "@microsoft/rush_v5.58.0",
       "date": "Thu, 16 Dec 2021 05:39:21 GMT",
