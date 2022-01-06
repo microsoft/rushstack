@@ -132,13 +132,13 @@ export class ProjectTaskSelector {
           TaskStatus.Ready
         );
 
-        taskByOrdinal.set(phaseOffset + project.index, task);
+        taskByOrdinal.set(phaseOffset + project._index, task);
       }
     }
 
     /**
      * Enumerates the declared dependencies of the task in (phase * project) key space
-     * task_ordinal = (project_count * phase_index) + project.index
+     * task_ordinal = (project_count * phase_index) + project._index
      */
     function* getRawDependencies(taskOrdinal: number): Iterable<number> {
       const projectIndex: number = taskOrdinal % projectCount;
@@ -156,7 +156,7 @@ export class ProjectTaskSelector {
       for (const phase of upstream) {
         const targetPhaseOffset: number = phase.index * projectCount;
         for (const dependencyProject of project.dependencyProjects) {
-          yield targetPhaseOffset + dependencyProject.index;
+          yield targetPhaseOffset + dependencyProject._index;
         }
       }
     }

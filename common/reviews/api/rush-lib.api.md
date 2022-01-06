@@ -599,7 +599,7 @@ export class RushConfigurationProject {
     // @deprecated
     get downstreamDependencyProjects(): string[];
     // @internal
-    get index(): number;
+    get _index(): number;
     // @beta
     get isMainProject(): boolean;
     // @deprecated
