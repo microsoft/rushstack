@@ -14,7 +14,7 @@ import { OverlappingPathAnalyzer } from '../utilities/OverlappingPathAnalyzer';
 /**
  * Describes the file structure for the "<project root>/config/rush-project.json" config file.
  */
-interface IRushProjectJson {
+export interface IRushProjectJson {
   /**
    * A list of folder names under the project root that should be cached.
    *
@@ -42,7 +42,7 @@ interface IRushProjectJson {
   buildCacheOptions?: IBuildCacheOptionsJson;
 }
 
-interface IRushProjectJsonPhaseOptionsJson {
+export interface IRushProjectJsonPhaseOptionsJson {
   /**
    * The name of the phase. This is the name that appears in command-line.json.
    */
@@ -56,7 +56,7 @@ interface IRushProjectJsonPhaseOptionsJson {
   projectOutputFolderNames?: string[];
 }
 
-interface IBuildCacheOptionsJson extends IBuildCacheOptionsBase {
+export interface IBuildCacheOptionsJson extends IBuildCacheOptionsBase {
   /**
    * Allows for fine-grained control of cache for individual commands.
    */
@@ -103,6 +103,104 @@ export interface ICacheOptionsForCommand {
   disableBuildCache?: boolean;
 }
 
+export const RUSH_PROJECT_CONFIGURATION_FILE: ConfigurationFile<IRushProjectJson> =
+  new ConfigurationFile<IRushProjectJson>({
+    projectRelativeFilePath: `config/${RushConstants.rushProjectConfigFilename}`,
+    jsonSchemaPath: path.resolve(__dirname, '..', 'schemas', 'rush-project.schema.json'),
+    propertyInheritance: {
+      projectOutputFolderNames: {
+        inheritanceType: InheritanceType.append
+      },
+      phaseOptions: {
+        inheritanceType: InheritanceType.custom,
+        inheritanceFunction: (
+          child: IRushProjectJsonPhaseOptionsJson[] | undefined,
+          parent: IRushProjectJsonPhaseOptionsJson[] | undefined
+        ) => {
+          if (!child) {
+            return parent;
+          } else if (!parent) {
+            return child;
+          } else {
+            // Merge the projectOutputFolderNames arrays
+
+            const resultPhaseOptionsByPhaseName: Map<string, IRushProjectJsonPhaseOptionsJson> = new Map();
+            for (const parentPhaseOptions of parent) {
+              resultPhaseOptionsByPhaseName.set(parentPhaseOptions.phaseName, parentPhaseOptions);
+            }
+
+            const childEncounteredPhaseNames: Set<string> = new Set();
+            for (const childPhaseOptions of child) {
+              const phaseName: string = childPhaseOptions.phaseName;
+              if (childEncounteredPhaseNames.has(phaseName)) {
+                // If the phase options already exist, but didn't come from the parent, then
+                // it shows up multiple times in the child.
+                const childSourceFilePath: string =
+                  RUSH_PROJECT_CONFIGURATION_FILE.getObjectSourceFilePath(child)!;
+                throw new Error(
+                  `The phase "${phaseName}" occurs multiple times in the "phaseOptions" array ` +
+                    `in "${childSourceFilePath}".`
+                );
+              }
+
+              childEncounteredPhaseNames.add(phaseName);
+
+              let mergedPhaseOptions: IRushProjectJsonPhaseOptionsJson | undefined =
+                resultPhaseOptionsByPhaseName.get(phaseName);
+              if (mergedPhaseOptions) {
+                // The parent phase options object already exists, so append to the projectOutputFolderNames
+                const projectOutputFolderNames: string[] | undefined =
+                  mergedPhaseOptions.projectOutputFolderNames && childPhaseOptions.projectOutputFolderNames
+                    ? [
+                        ...mergedPhaseOptions.projectOutputFolderNames,
+                        ...childPhaseOptions.projectOutputFolderNames
+                      ]
+                    : mergedPhaseOptions.projectOutputFolderNames ||
+                      childPhaseOptions.projectOutputFolderNames;
+
+                mergedPhaseOptions = {
+                  ...mergedPhaseOptions,
+                  ...childPhaseOptions,
+                  projectOutputFolderNames
+                };
+                resultPhaseOptionsByPhaseName.set(phaseName, mergedPhaseOptions);
+              } else {
+                resultPhaseOptionsByPhaseName.set(phaseName, childPhaseOptions);
+              }
+            }
+
+            return Array.from(resultPhaseOptionsByPhaseName.values());
+          }
+        }
+      },
+      incrementalBuildIgnoredGlobs: {
+        inheritanceType: InheritanceType.replace
+      },
+      buildCacheOptions: {
+        inheritanceType: InheritanceType.custom,
+        inheritanceFunction: (
+          current: IBuildCacheOptionsJson | undefined,
+          parent: IBuildCacheOptionsJson | undefined
+        ): IBuildCacheOptionsJson | undefined => {
+          if (!current) {
+            return parent;
+          } else if (!parent) {
+            return current;
+          } else {
+            return {
+              ...parent,
+              ...current,
+              optionsForCommands: [
+                ...(parent.optionsForCommands || []),
+                ...(current.optionsForCommands || [])
+              ]
+            };
+          }
+        }
+      }
+    }
+  });
+
 /**
  * Use this class to load the "config/rush-project.json" config file.
  *
@@ -110,45 +208,6 @@ export interface ICacheOptionsForCommand {
  * @public
  */
 export class RushProjectConfiguration {
-  private static _projectBuildCacheConfigurationFile: ConfigurationFile<IRushProjectJson> =
-    new ConfigurationFile<IRushProjectJson>({
-      projectRelativeFilePath: `config/${RushConstants.rushProjectConfigFilename}`,
-      jsonSchemaPath: path.resolve(__dirname, '..', 'schemas', 'rush-project.schema.json'),
-      propertyInheritance: {
-        projectOutputFolderNames: {
-          inheritanceType: InheritanceType.append
-        },
-        phaseOptions: {
-          inheritanceType: InheritanceType.append
-        },
-        incrementalBuildIgnoredGlobs: {
-          inheritanceType: InheritanceType.replace
-        },
-        buildCacheOptions: {
-          inheritanceType: InheritanceType.custom,
-          inheritanceFunction: (
-            current: IBuildCacheOptionsJson | undefined,
-            parent: IBuildCacheOptionsJson | undefined
-          ): IBuildCacheOptionsJson | undefined => {
-            if (!current) {
-              return parent;
-            } else if (!parent) {
-              return current;
-            } else {
-              return {
-                ...parent,
-                ...current,
-                optionsForCommands: [
-                  ...(parent.optionsForCommands || []),
-                  ...(current.optionsForCommands || [])
-                ]
-              };
-            }
-          }
-        }
-      }
-    });
-
   private static readonly _configCache: Map<RushConfigurationProject, RushProjectConfiguration | false> =
     new Map();
 
@@ -268,7 +327,7 @@ export class RushProjectConfiguration {
     });
 
     const rushProjectJson: IRushProjectJson | undefined =
-      await this._projectBuildCacheConfigurationFile.tryLoadConfigurationFileForProjectAsync(
+      await RUSH_PROJECT_CONFIGURATION_FILE.tryLoadConfigurationFileForProjectAsync(
         terminal,
         project.projectFolder,
         rigConfig
@@ -373,16 +432,12 @@ export class RushProjectConfiguration {
           phaseOptionsByPhase.get(phaseName);
         if (existingPhaseOptions) {
           const existingPhaseOptionsJsonPath: string | undefined =
-            RushProjectConfiguration._projectBuildCacheConfigurationFile.getObjectSourceFilePath(
-              existingPhaseOptions
-            );
+            RUSH_PROJECT_CONFIGURATION_FILE.getObjectSourceFilePath(existingPhaseOptions);
           const phaseOptionsJsonPath: string | undefined =
-            RushProjectConfiguration._projectBuildCacheConfigurationFile.getObjectSourceFilePath(
-              phaseOptions
-            );
+            RUSH_PROJECT_CONFIGURATION_FILE.getObjectSourceFilePath(phaseOptions);
           let errorMessage: string =
             `The phase "${phaseName}" appears multiple times in the "${project.packageName}" project's ` +
-            `${RushProjectConfiguration._projectBuildCacheConfigurationFile.projectRelativeFilePath} file's ` +
+            `${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath} file's ` +
             'phaseOptions property.';
           if (existingPhaseOptionsJsonPath && phaseOptionsJsonPath) {
             if (existingPhaseOptionsJsonPath !== phaseOptionsJsonPath) {
@@ -401,7 +456,7 @@ export class RushProjectConfiguration {
           terminal.writeErrorLine(errorMessage);
         } else if (!repoCommandLineConfiguration.phases.has(phaseName)) {
           terminal.writeErrorLine(
-            `Invalid "${RushProjectConfiguration._projectBuildCacheConfigurationFile.projectRelativeFilePath}"` +
+            `Invalid "${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}"` +
               ` for project "${project.packageName}". Phase "${phaseName}" is not defined in the repo's ${RushConstants.commandLineFilename}.`
           );
         } else {
@@ -423,7 +478,7 @@ export class RushProjectConfiguration {
               if (overlapsWithOwnPhase) {
                 if (overlappingPhaseNames.length === 1) {
                   terminal.writeErrorLine(
-                    `Invalid "${RushProjectConfiguration._projectBuildCacheConfigurationFile.projectRelativeFilePath}" ` +
+                    `Invalid "${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" ` +
                       `for project "${project.packageName}". The project output folder name "${projectOutputFolderName}" in ` +
                       `phase ${phaseName} overlaps with another folder name in the same phase.`
                   );
@@ -432,7 +487,7 @@ export class RushProjectConfiguration {
                     (overlappingPhaseName) => overlappingPhaseName !== phaseName
                   );
                   terminal.writeErrorLine(
-                    `Invalid "${RushProjectConfiguration._projectBuildCacheConfigurationFile.projectRelativeFilePath}" ` +
+                    `Invalid "${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" ` +
                       `for project "${project.packageName}". The project output folder name "${projectOutputFolderName}" in ` +
                       `phase ${phaseName} overlaps with other folder names in the same phase and with ` +
                       `folder names in the following other phases: ${otherPhaseNames.join(', ')}.`
@@ -440,7 +495,7 @@ export class RushProjectConfiguration {
                 }
               } else {
                 terminal.writeErrorLine(
-                  `Invalid "${RushProjectConfiguration._projectBuildCacheConfigurationFile.projectRelativeFilePath}" ` +
+                  `Invalid "${RUSH_PROJECT_CONFIGURATION_FILE.projectRelativeFilePath}" ` +
                     `for project "${project.packageName}". The project output folder name "${projectOutputFolderName}" in ` +
                     `phase ${phaseName} overlaps with other folder name(s) in the following other phases: ` +
                     `${overlappingPhaseNames.join(', ')}.`
