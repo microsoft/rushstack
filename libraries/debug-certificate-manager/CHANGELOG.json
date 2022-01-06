@@ -2,6 +2,18 @@
   "name": "@rushstack/debug-certificate-manager",
   "entries": [
     {
+      "version": "1.1.24",
+      "tag": "@rushstack/debug-certificate-manager_v1.1.24",
+      "date": "Thu, 06 Jan 2022 08:49:34 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fix an incorrect argument passed to the command to repair the certificate store on Windows."
+          }
+        ]
+      }
+    },
+    {
       "version": "1.1.23",
       "tag": "@rushstack/debug-certificate-manager_v1.1.23",
       "date": "Wed, 05 Jan 2022 16:07:47 GMT",
