@@ -2,7 +2,7 @@
   "changes": [
     {
       "packageName": "@microsoft/rush",
-      "comment": "Change pnpm-lock.yaml to text in gitattributes & set useWorkspaces to true",
+      "comment": "Update the \"rush init\" template to enable pnpm workspaces and to merge the pnpm-lock.yaml file as text.",
       "type": "minor"
     }
   ],
