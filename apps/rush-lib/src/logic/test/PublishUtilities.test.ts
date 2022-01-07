@@ -125,7 +125,7 @@ describe('findChangeRequests', () => {
     expect(packageChanges['h'].newVersion).toEqual('1.0.0-hotfix.0');
   });
 
-  it('returns 7 changes when major bumping a root package', () => {
+  it('returns 8 changes when major bumping a root package', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
       allPackages,
@@ -135,7 +135,7 @@ describe('findChangeRequests', () => {
     const packageChanges: IChangeInfoHash = allChanges.packages;
     const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(7);
+    expect(Object.keys(packageChanges)).toHaveLength(8);
     expect(Object.keys(versionPolicyChanges)).toHaveLength(1);
 
     expect(packageChanges).toHaveProperty('a');
@@ -145,6 +145,7 @@ describe('findChangeRequests', () => {
     expect(packageChanges).toHaveProperty('f');
     expect(packageChanges).toHaveProperty('g');
     expect(packageChanges).toHaveProperty('h');
+    expect(packageChanges).toHaveProperty('i');
 
     expect(packageChanges['a'].changeType).toEqual(ChangeType.major);
     expect(packageChanges['b'].changeType).toEqual(ChangeType.patch);
@@ -153,6 +154,7 @@ describe('findChangeRequests', () => {
     expect(packageChanges['f'].changeType).toEqual(ChangeType.dependency);
     expect(packageChanges['g'].changeType).toEqual(ChangeType.dependency);
     expect(packageChanges['h'].changeType).toEqual(ChangeType.patch);
+    expect(packageChanges['i'].changeType).toEqual(ChangeType.patch);
 
     expect(packageChanges['a'].newVersion).toEqual('2.0.0');
     expect(packageChanges['b'].newVersion).toEqual('1.0.1');
@@ -161,6 +163,7 @@ describe('findChangeRequests', () => {
     expect(packageChanges['f'].newVersion).toEqual('1.0.0');
     expect(packageChanges['g'].newVersion).toEqual('1.0.0');
     expect(packageChanges['h'].newVersion).toEqual('1.0.1');
+    expect(packageChanges['i'].newVersion).toEqual('1.0.1');
 
     expect(versionPolicyChanges['lockStepWithoutNextBump'].format()).toEqual('1.0.1');
   });
@@ -222,7 +225,7 @@ describe('findChangeRequests', () => {
     const packageChanges: IChangeInfoHash = allChanges.packages;
     const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(7);
+    expect(Object.keys(packageChanges)).toHaveLength(8);
     expect(Object.keys(versionPolicyChanges)).toHaveLength(1);
 
     expect(packageChanges).toHaveProperty('a');
@@ -232,6 +235,7 @@ describe('findChangeRequests', () => {
     expect(packageChanges).toHaveProperty('f');
     expect(packageChanges).toHaveProperty('g');
     expect(packageChanges).toHaveProperty('h');
+    expect(packageChanges).toHaveProperty('i');
 
     expect(packageChanges['a'].changeType).toEqual(ChangeType.major);
     expect(packageChanges['b'].changeType).toEqual(ChangeType.patch);
@@ -240,6 +244,7 @@ describe('findChangeRequests', () => {
     expect(packageChanges['f'].changeType).toEqual(ChangeType.dependency);
     expect(packageChanges['g'].changeType).toEqual(ChangeType.dependency);
     expect(packageChanges['h'].changeType).toEqual(ChangeType.patch);
+    expect(packageChanges['i'].changeType).toEqual(ChangeType.patch);
 
     expect(packageChanges['a'].newVersion).toEqual('2.0.0');
     expect(packageChanges['b'].newVersion).toEqual('1.0.1');
@@ -248,6 +253,7 @@ describe('findChangeRequests', () => {
     expect(packageChanges['f'].newVersion).toEqual('1.0.0');
     expect(packageChanges['g'].newVersion).toEqual('1.0.0');
     expect(packageChanges['h'].newVersion).toEqual('1.0.1');
+    expect(packageChanges['i'].newVersion).toEqual('1.0.1');
 
     expect(versionPolicyChanges['lockStepWithoutNextBump'].format()).toEqual('1.0.1');
   });
@@ -262,7 +268,7 @@ describe('findChangeRequests', () => {
     const packageChanges: IChangeInfoHash = allChanges.packages;
     const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(7);
+    expect(Object.keys(packageChanges)).toHaveLength(8);
     expect(Object.keys(versionPolicyChanges)).toHaveLength(1);
 
     expect(packageChanges).toHaveProperty('a');
@@ -272,6 +278,7 @@ describe('findChangeRequests', () => {
     expect(packageChanges).toHaveProperty('f');
     expect(packageChanges).toHaveProperty('g');
     expect(packageChanges).toHaveProperty('h');
+    expect(packageChanges).toHaveProperty('i');
 
     expect(packageChanges['a'].changeType).toEqual(ChangeType.major);
     expect(packageChanges['b'].changeType).toEqual(ChangeType.patch);
@@ -280,6 +287,7 @@ describe('findChangeRequests', () => {
     expect(packageChanges['f'].changeType).toEqual(ChangeType.dependency);
     expect(packageChanges['g'].changeType).toEqual(ChangeType.dependency);
     expect(packageChanges['h'].changeType).toEqual(ChangeType.patch);
+    expect(packageChanges['i'].changeType).toEqual(ChangeType.patch);
 
     expect(packageChanges['a'].newVersion).toEqual('2.0.0');
     expect(packageChanges['b'].newVersion).toEqual('1.0.1');
@@ -288,6 +296,7 @@ describe('findChangeRequests', () => {
     expect(packageChanges['f'].newVersion).toEqual('1.0.0');
     expect(packageChanges['g'].newVersion).toEqual('1.0.0');
     expect(packageChanges['h'].newVersion).toEqual('1.0.1');
+    expect(packageChanges['i'].newVersion).toEqual('1.0.1');
 
     expect(versionPolicyChanges['lockStepWithoutNextBump'].format()).toEqual('1.0.1');
   });
@@ -365,7 +374,7 @@ describe('findChangeRequests', () => {
     const packageChanges: IChangeInfoHash = allChanges.packages;
     const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(7);
+    expect(Object.keys(packageChanges)).toHaveLength(8);
     expect(Object.keys(versionPolicyChanges)).toHaveLength(1);
 
     expect(packageChanges['a'].newVersion).toEqual('1.0.0');
@@ -378,6 +387,8 @@ describe('findChangeRequests', () => {
     expect(packageChanges['f'].changeType).toEqual(ChangeType.none);
     expect(packageChanges['h'].changeType).toEqual(ChangeType.patch);
     expect(packageChanges['h'].newVersion).toEqual('1.2.4');
+    expect(packageChanges['i'].changeType).toEqual(ChangeType.patch);
+    expect(packageChanges['i'].newVersion).toEqual('1.2.4');
 
     expect(versionPolicyChanges['lockStepWithoutNextBump'].format()).toEqual('1.2.4');
   });
@@ -402,14 +413,15 @@ describe('sortChangeRequests', () => {
     const packageChanges: IChangeInfoHash = allChanges.packages;
     const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(packageChanges);
 
-    expect(orderedChanges).toHaveLength(7);
+    expect(orderedChanges).toHaveLength(8);
     expect(orderedChanges[0].packageName).toEqual('a');
-    expect(orderedChanges[1].packageName).toEqual('b');
-    expect(orderedChanges[2].packageName).toEqual('e');
-    expect(orderedChanges[3].packageName).toEqual('g');
-    expect(orderedChanges[4].packageName).toEqual('h');
-    expect(orderedChanges[5].packageName).toEqual('c');
-    expect(orderedChanges[6].packageName).toEqual('f');
+    expect(orderedChanges[1].packageName).toEqual('i');
+    expect(orderedChanges[2].packageName).toEqual('b');
+    expect(orderedChanges[3].packageName).toEqual('e');
+    expect(orderedChanges[4].packageName).toEqual('g');
+    expect(orderedChanges[5].packageName).toEqual('h');
+    expect(orderedChanges[6].packageName).toEqual('c');
+    expect(orderedChanges[7].packageName).toEqual('f');
   });
 });
 
@@ -582,7 +594,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(packageChanges['h'].newVersion).toEqual('1.0.0-hotfix.0');
   });
 
-  it('returns 7 changes when major bumping a root package', () => {
+  it('returns 8 changes when major bumping a root package', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
     const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
       allPackages,
@@ -592,7 +604,7 @@ describe('findWorkspaceChangeRequests', () => {
     const packageChanges: IChangeInfoHash = allChanges.packages;
     const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(7);
+    expect(Object.keys(packageChanges)).toHaveLength(8);
     expect(Object.keys(versionPolicyChanges)).toHaveLength(1);
 
     expect(packageChanges).toHaveProperty('a');
@@ -602,6 +614,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(packageChanges).toHaveProperty('f');
     expect(packageChanges).toHaveProperty('g');
     expect(packageChanges).toHaveProperty('h');
+    expect(packageChanges).toHaveProperty('i');
 
     expect(packageChanges['a'].changeType).toEqual(ChangeType.major);
     expect(packageChanges['b'].changeType).toEqual(ChangeType.patch);
@@ -610,6 +623,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(packageChanges['f'].changeType).toEqual(ChangeType.dependency);
     expect(packageChanges['g'].changeType).toEqual(ChangeType.patch);
     expect(packageChanges['h'].changeType).toEqual(ChangeType.patch);
+    expect(packageChanges['i'].changeType).toEqual(ChangeType.patch);
 
     expect(packageChanges['a'].newVersion).toEqual('2.0.0');
     expect(packageChanges['b'].newVersion).toEqual('1.0.1');
@@ -618,6 +632,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(packageChanges['f'].newVersion).toEqual('1.0.0');
     expect(packageChanges['g'].newVersion).toEqual('1.0.1');
     expect(packageChanges['h'].newVersion).toEqual('1.0.1');
+    expect(packageChanges['i'].newVersion).toEqual('1.0.1');
 
     expect(versionPolicyChanges['lockStepWithoutNextBump'].format()).toEqual('1.0.1');
   });
@@ -679,7 +694,7 @@ describe('findWorkspaceChangeRequests', () => {
     const packageChanges: IChangeInfoHash = allChanges.packages;
     const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(7);
+    expect(Object.keys(packageChanges)).toHaveLength(8);
     expect(Object.keys(versionPolicyChanges)).toHaveLength(1);
 
     expect(packageChanges).toHaveProperty('a');
@@ -689,6 +704,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(packageChanges).toHaveProperty('f');
     expect(packageChanges).toHaveProperty('g');
     expect(packageChanges).toHaveProperty('h');
+    expect(packageChanges).toHaveProperty('i');
 
     expect(packageChanges['a'].changeType).toEqual(ChangeType.major);
     expect(packageChanges['b'].changeType).toEqual(ChangeType.patch);
@@ -697,6 +713,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(packageChanges['f'].changeType).toEqual(ChangeType.dependency);
     expect(packageChanges['g'].changeType).toEqual(ChangeType.patch);
     expect(packageChanges['h'].changeType).toEqual(ChangeType.patch);
+    expect(packageChanges['i'].changeType).toEqual(ChangeType.patch);
 
     expect(packageChanges['a'].newVersion).toEqual('2.0.0');
     expect(packageChanges['b'].newVersion).toEqual('1.0.1');
@@ -705,6 +722,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(packageChanges['f'].newVersion).toEqual('1.0.0');
     expect(packageChanges['g'].newVersion).toEqual('1.0.1');
     expect(packageChanges['h'].newVersion).toEqual('1.0.1');
+    expect(packageChanges['i'].newVersion).toEqual('1.0.1');
 
     expect(versionPolicyChanges['lockStepWithoutNextBump'].format()).toEqual('1.0.1');
   });
@@ -719,7 +737,7 @@ describe('findWorkspaceChangeRequests', () => {
     const packageChanges: IChangeInfoHash = allChanges.packages;
     const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(7);
+    expect(Object.keys(packageChanges)).toHaveLength(8);
     expect(Object.keys(versionPolicyChanges)).toHaveLength(1);
 
     expect(packageChanges).toHaveProperty('a');
@@ -729,6 +747,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(packageChanges).toHaveProperty('f');
     expect(packageChanges).toHaveProperty('g');
     expect(packageChanges).toHaveProperty('h');
+    expect(packageChanges).toHaveProperty('i');
 
     expect(packageChanges['a'].changeType).toEqual(ChangeType.major);
     expect(packageChanges['b'].changeType).toEqual(ChangeType.patch);
@@ -737,6 +756,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(packageChanges['f'].changeType).toEqual(ChangeType.dependency);
     expect(packageChanges['g'].changeType).toEqual(ChangeType.patch);
     expect(packageChanges['h'].changeType).toEqual(ChangeType.patch);
+    expect(packageChanges['i'].changeType).toEqual(ChangeType.patch);
 
     expect(packageChanges['a'].newVersion).toEqual('2.0.0');
     expect(packageChanges['b'].newVersion).toEqual('1.0.1');
@@ -745,6 +765,7 @@ describe('findWorkspaceChangeRequests', () => {
     expect(packageChanges['f'].newVersion).toEqual('1.0.0');
     expect(packageChanges['g'].newVersion).toEqual('1.0.1');
     expect(packageChanges['h'].newVersion).toEqual('1.0.1');
+    expect(packageChanges['i'].newVersion).toEqual('1.0.1');
 
     expect(versionPolicyChanges['lockStepWithoutNextBump'].format()).toEqual('1.0.1');
   });
@@ -823,7 +844,7 @@ describe('findWorkspaceChangeRequests', () => {
     const packageChanges: IChangeInfoHash = allChanges.packages;
     const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(7);
+    expect(Object.keys(packageChanges)).toHaveLength(8);
     expect(Object.keys(versionPolicyChanges)).toHaveLength(1);
 
     expect(packageChanges['a'].newVersion).toEqual('1.0.0');
@@ -836,6 +857,8 @@ describe('findWorkspaceChangeRequests', () => {
     expect(packageChanges['f'].changeType).toEqual(ChangeType.none);
     expect(packageChanges['h'].changeType).toEqual(ChangeType.patch);
     expect(packageChanges['h'].newVersion).toEqual('1.2.4');
+    expect(packageChanges['i'].changeType).toEqual(ChangeType.patch);
+    expect(packageChanges['i'].newVersion).toEqual('1.2.4');
 
     expect(versionPolicyChanges['lockStepWithoutNextBump'].format()).toEqual('1.2.4');
   });

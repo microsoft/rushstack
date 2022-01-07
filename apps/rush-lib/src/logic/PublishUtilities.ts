@@ -118,45 +118,6 @@ export class PublishUtilities {
       versionPolicyChanges[versionPolicyName] = new SemVer(newVersion ?? currentVersion);
     });
 
-    // add dependency change to projects affected by the lock version policy update
-    allPackages.forEach((pkg) => {
-      const versionPolicyVersion: string | undefined =
-        pkg.versionPolicyName !== undefined
-          ? versionPolicyChanges[pkg.versionPolicyName]?.format()
-          : undefined;
-
-      if (versionPolicyVersion === undefined) {
-        return;
-      }
-
-      const versionDiff: semver.ReleaseType | null = semver.diff(
-        pkg.packageJson.version,
-        versionPolicyVersion
-      );
-
-      if (versionDiff === null) {
-        return;
-      }
-
-      if (
-        this._addChange(
-          {
-            packageName: pkg.packageName,
-            changeType: this._getChangeType(versionDiff),
-            newVersion: versionPolicyVersion // enforce the specific policy version
-          },
-          packageChanges,
-          versionPolicyChanges,
-          allPackages,
-          rushConfiguration,
-          prereleaseToken,
-          projectsToExclude
-        )
-      ) {
-        console.log(`${EOL}* APPLYING: update ${pkg.packageName} to version ${versionPolicyVersion}`);
-      }
-    });
-
     // For each requested package change, ensure dependencies are also updated.
     for (const packageName in packageChanges) {
       if (packageChanges.hasOwnProperty(packageName)) {
@@ -225,6 +186,45 @@ export class PublishUtilities {
         }
       }
     }
+
+    // add dependency change to projects affected by the lock version policy updates
+    allPackages.forEach((pkg) => {
+      const versionPolicyVersion: string | undefined =
+        pkg.versionPolicyName !== undefined
+          ? versionPolicyChanges[pkg.versionPolicyName]?.format()
+          : undefined;
+
+      if (versionPolicyVersion === undefined) {
+        return;
+      }
+
+      const versionDiff: semver.ReleaseType | null = semver.diff(
+        pkg.packageJson.version,
+        versionPolicyVersion
+      );
+
+      if (versionDiff === null) {
+        return;
+      }
+
+      if (
+        this._addChange(
+          {
+            packageName: pkg.packageName,
+            changeType: this._getChangeType(versionDiff),
+            newVersion: versionPolicyVersion // enforce the specific policy version
+          },
+          packageChanges,
+          versionPolicyChanges,
+          allPackages,
+          rushConfiguration,
+          prereleaseToken,
+          projectsToExclude
+        )
+      ) {
+        console.log(`${EOL}* APPLYING: update ${pkg.packageName} to version ${versionPolicyVersion}`);
+      }
+    });
 
     return allChanges;
   }
