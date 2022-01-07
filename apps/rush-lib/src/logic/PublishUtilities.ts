@@ -46,9 +46,9 @@ export class PublishUtilities {
     prereleaseToken?: PrereleaseToken,
     projectsToExclude?: Set<string>
   ): IAllChanges {
-    const aallChanges: IAllChanges = { packages: {}, versionPolicies: {} };
-    const packageChanges: IChangeInfoHash = aallChanges.packages;
-    const versionPolicyChanges: Record<string, semver.SemVer> = aallChanges.versionPolicies;
+    const allChanges: IAllChanges = { packages: {}, versionPolicies: {} };
+    const packageChanges: IChangeInfoHash = allChanges.packages;
+    const versionPolicyChanges: Record<string, semver.SemVer> = allChanges.versionPolicies;
 
     console.log(`Finding changes in: ${changeFiles.getChangesPath()}`);
 
@@ -226,7 +226,7 @@ export class PublishUtilities {
       }
     }
 
-    return aallChanges;
+    return allChanges;
   }
 
   /**
