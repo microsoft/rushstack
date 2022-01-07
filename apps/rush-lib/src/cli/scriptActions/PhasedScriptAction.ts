@@ -24,6 +24,7 @@ import { SelectionParameterSet } from '../SelectionParameterSet';
 import { CommandLineConfiguration, IPhase, IPhasedCommand } from '../../api/CommandLineConfiguration';
 import { IProjectTaskSelectorOptions, ProjectTaskSelector } from '../../logic/ProjectTaskSelector';
 import { IFlagParameterJson } from '../../api/CommandLineJson';
+import { Selection } from '../../logic/Selection';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -233,11 +234,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
         terminal.writeLine(`    ${colors.cyan(name)}`);
       }
 
+      // Account for consumer relationships
+      const projectSelection: Set<RushConfigurationProject> = Selection.intersection(
+        Selection.expandAllConsumers(changedProjects),
+        projectsToWatch
+      );
+
       const executeOptions: IExecuteInternalOptions = {
         taskSelectorOptions: {
           ...options.taskSelectorOptions,
           // Revise down the set of projects to execute the command on
-          projectSelection: changedProjects,
+          projectSelection,
           // Pass the ProjectChangeAnalyzer from the state differ to save a bit of overhead
           projectChangeAnalyzer: state
         },
