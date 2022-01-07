@@ -120,6 +120,10 @@ export class ProjectTaskRunner extends BaseTaskRunner {
     this._logFilenameIdentifier = phase.logFilenameIdentifier;
   }
 
+  public get phase(): IPhase {
+    return this._phase;
+  }
+
   public async executeAsync(context: ITaskRunnerContext): Promise<TaskStatus> {
     try {
       if (!this._commandToRun) {
