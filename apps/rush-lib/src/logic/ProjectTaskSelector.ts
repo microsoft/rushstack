@@ -112,7 +112,7 @@ export class ProjectTaskSelector {
         );
         if (commandToRun === undefined && !phase.ignoreMissingScript) {
           throw new Error(
-            `The project [${project.packageName}] does not define a '${phase.name}' command in the 'scripts' section of its package.json`
+            `The project '${project.packageName}' does not define a '${phase.name}' command in the 'scripts' section of its package.json`
           );
         }
 
