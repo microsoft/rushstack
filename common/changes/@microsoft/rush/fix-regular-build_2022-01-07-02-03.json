@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fixes a regression that broke \"rush build\" completely when not using the \"--only\" parameter.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
