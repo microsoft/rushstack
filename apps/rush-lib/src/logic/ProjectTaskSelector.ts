@@ -96,6 +96,8 @@ export class ProjectTaskSelector {
       return selectedDependencies;
     }
 
+    const taskDependencies: Map<string, Set<string>> = new Map();
+
     // Register all tasks
     // This currently does not correctly handle the scenario in which a phase is skipped.
     // If that happens, the dependency graph will have an error due to a missing task.
@@ -153,8 +155,12 @@ export class ProjectTaskSelector {
           }
         }
 
-        taskCollection.addDependencies(taskName, dependencyTasks);
+        taskDependencies.set(taskName, dependencyTasks);
       }
+    }
+
+    for (const [taskName, dependencies] of taskDependencies) {
+      taskCollection.addDependencies(taskName, dependencies);
     }
 
     return taskCollection;
