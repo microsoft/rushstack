@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.59.1",
+      "tag": "@microsoft/rush_v5.59.1",
+      "date": "Fri, 07 Jan 2022 01:21:44 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "Fixes a regression in bulk command execution when using \"unsafe\" selector parameters, e.g. \"--only\". Ensures that only the projects selected by the parameters get included in the build, rather that forcibly including all dependencies."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.59.0",
       "tag": "@microsoft/rush_v5.59.0",
       "date": "Thu, 06 Jan 2022 22:18:13 GMT",

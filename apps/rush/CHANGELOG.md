@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Thu, 06 Jan 2022 22:18:13 GMT and should not be manually modified.
+This log was last generated on Fri, 07 Jan 2022 01:21:44 GMT and should not be manually modified.
+
+## 5.59.1
+Fri, 07 Jan 2022 01:21:44 GMT
+
+### Patches
+
+- Fixes a regression in bulk command execution when using "unsafe" selector parameters, e.g. "--only". Ensures that only the projects selected by the parameters get included in the build, rather that forcibly including all dependencies.
 
 ## 5.59.0
 Thu, 06 Jan 2022 22:18:13 GMT
