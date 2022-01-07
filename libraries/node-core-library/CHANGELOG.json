@@ -2,6 +2,21 @@
   "name": "@rushstack/node-core-library",
   "entries": [
     {
+      "version": "3.45.0",
+      "tag": "@rushstack/node-core-library_v3.45.0",
+      "date": "Wed, 05 Jan 2022 16:07:47 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "Expose a FileSystem.readFolderItems and FileSystem.readFolderItemsAsync API to get folder entries with types in a single API call."
+          },
+          {
+            "comment": "Deprecate FileSystem.readFolder in favor of FileSystem.readFolderItemNames."
+          }
+        ]
+      }
+    },
+    {
       "version": "3.44.3",
       "tag": "@rushstack/node-core-library_v3.44.3",
       "date": "Mon, 27 Dec 2021 16:10:40 GMT",

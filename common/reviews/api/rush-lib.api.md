@@ -191,6 +191,12 @@ export class ExperimentsConfiguration {
     get configuration(): Readonly<IExperimentsJson>;
 }
 
+// @internal (undocumented)
+export interface _IBuiltInPluginConfiguration extends _IRushPluginConfigurationBase {
+    // (undocumented)
+    pluginPackageFolder: string;
+}
+
 // @beta (undocumented)
 export interface ICloudBuildCacheProvider {
     // (undocumented)
@@ -263,6 +269,8 @@ export interface IGetChangedProjectsOptions {
 // @public
 export interface ILaunchOptions {
     alreadyReportedNodeTooNewError?: boolean;
+    // @internal
+    builtInPluginConfigurations?: _IBuiltInPluginConfiguration[];
     isManaged: boolean;
 }
 
@@ -309,6 +317,14 @@ export interface _IPnpmOptionsJson extends IPackageManagerOptionsJsonBase {
 export interface IRushPlugin {
     // (undocumented)
     apply(rushSession: RushSession, rushConfiguration: RushConfiguration): void;
+}
+
+// @internal (undocumented)
+export interface _IRushPluginConfigurationBase {
+    // (undocumented)
+    packageName: string;
+    // (undocumented)
+    pluginName: string;
 }
 
 // @beta (undocumented)

@@ -2,11 +2,10 @@
 // See LICENSE in the project root for license information.
 
 import * as child_process from 'child_process';
-import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { Text, Path, FileSystem } from '@rushstack/node-core-library';
+import { Text, Path, FileSystem, FileSystemStats } from '@rushstack/node-core-library';
 
 import { Utilities } from './Utilities';
 
@@ -90,12 +89,12 @@ export class AsyncRecycler {
 
     const excludeSet: Set<string> = new Set<string>((membersToExclude || []).map((x) => x.toUpperCase()));
 
-    for (const memberPath of FileSystem.readFolder(resolvedFolderPath, { absolutePaths: true })) {
+    for (const memberPath of FileSystem.readFolderItemNames(resolvedFolderPath, { absolutePaths: true })) {
       const normalizedMemberName: string = path.basename(memberPath).toUpperCase();
       if (!excludeSet.has(normalizedMemberName)) {
         let shouldMove: boolean = false;
         try {
-          const stats: fs.Stats = FileSystem.getLinkStatistics(memberPath);
+          const stats: FileSystemStats = FileSystem.getLinkStatistics(memberPath);
           shouldMove = stats.isDirectory();
         } catch (error) {
           // If we fail to access the item, assume it's not a folder
@@ -167,7 +166,7 @@ export class AsyncRecycler {
 
       // child_process.spawn() doesn't expand wildcards.  To be safe, we will do it manually
       // rather than rely on an unknown shell.
-      for (const filename of FileSystem.readFolder(this.recyclerFolder)) {
+      for (const filename of FileSystem.readFolderItemNames(this.recyclerFolder)) {
         // The "." and ".." are supposed to be excluded, but let's be safe
         if (filename !== '.' && filename !== '..') {
           args.push(path.join(this.recyclerFolder, filename));

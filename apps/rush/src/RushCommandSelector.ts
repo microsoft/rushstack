@@ -43,15 +43,9 @@ export class RushCommandSelector {
             ` which does not support the "rushx" command`
         );
       }
-      Rush.launchRushX(launcherVersion, {
-        isManaged: options.isManaged,
-        alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
-      });
+      Rush.launchRushX(launcherVersion, options);
     } else {
-      Rush.launch(launcherVersion, {
-        isManaged: options.isManaged,
-        alreadyReportedNodeTooNewError: options.alreadyReportedNodeTooNewError
-      });
+      Rush.launch(launcherVersion, options);
     }
   }
 

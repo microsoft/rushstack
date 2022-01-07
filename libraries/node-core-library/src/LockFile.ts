@@ -270,7 +270,7 @@ export class LockFile {
       let smallestBirthTimePid: string = pid.toString();
 
       // now, scan the directory for all lockfiles
-      const files: string[] = FileSystem.readFolder(resourceFolder);
+      const files: string[] = FileSystem.readFolderItemNames(resourceFolder);
 
       // look for anything ending with # then numbers and ".lock"
       const lockFileRegExp: RegExp = /^(.+)#([0-9]+)\.lock$/;

@@ -14,6 +14,7 @@ remarks: >-
 
   The constructor for this class is marked as internal. Third-party code should not call the constructor directly or
   create subclasses that extend the `DocClass1` class.
+example: []
 isPreview: false
 isDeprecated: false
 type: class
@@ -24,6 +25,7 @@ properties:
     fullName: readonlyProperty
     summary: ''
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -36,6 +38,7 @@ properties:
     fullName: regularProperty
     summary: This is a regular property that happens to use the SystemEvent type.
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -48,6 +51,7 @@ properties:
     fullName: writeableProperty
     summary: ''
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -64,6 +68,7 @@ methods:
     fullName: deprecatedExample()
     summary: ''
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: true
     customDeprecatedMessage: Use `otherThing()` instead.
@@ -78,6 +83,7 @@ methods:
     fullName: 'exampleFunction(a, b)'
     summary: This is an overloaded function.
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -98,6 +104,7 @@ methods:
     fullName: exampleFunction(x)
     summary: This is also an overloaded function.
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -118,6 +125,7 @@ methods:
 
       The regular expression used to validate the constraints is /^\[a-zA-Z0-9<!-- -->\\<!-- -->-\_\]+$/
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -131,6 +139,21 @@ methods:
     fullName: 'sumWithExample(x, y)'
     summary: Returns the sum of two numbers.
     remarks: This illustrates usage of the `@example` block tag.
+    example:
+      - |-
+        Here's a simple example:
+
+        ```
+        // Prints "2":
+        console.log(DocClass1.sumWithExample(1,1));
+        ```
+      - |-
+        Here's an example with negative numbers:
+
+        ```
+        // Prints "0":
+        console.log(DocClass1.sumWithExample(1,-1));
+        ```
     isPreview: false
     isDeprecated: false
     syntax:
@@ -151,6 +174,7 @@ methods:
     fullName: tableExample()
     summary: 'An example with tables:'
     remarks: <table> <tr> <td>John</td> <td>Doe</td> </tr> </table>
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -165,6 +189,7 @@ events:
     fullName: malformedEvent
     summary: This event should have been marked as readonly.
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -177,6 +202,7 @@ events:
     fullName: modifiedEvent
     summary: This event is fired whenever the object is modified.
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:

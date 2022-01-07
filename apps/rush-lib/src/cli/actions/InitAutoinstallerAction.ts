@@ -42,7 +42,7 @@ export class InitAutoinstallerAction extends BaseRushAction {
 
     if (FileSystem.exists(autoinstaller.folderFullPath)) {
       // It's okay if the folder is empty
-      if (FileSystem.readFolder(autoinstaller.folderFullPath).length > 0) {
+      if (FileSystem.readFolderItemNames(autoinstaller.folderFullPath).length > 0) {
         throw new Error('The target folder already exists: ' + autoinstaller.folderFullPath);
       }
     }

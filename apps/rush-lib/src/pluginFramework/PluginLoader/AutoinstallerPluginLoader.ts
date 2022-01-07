@@ -2,36 +2,34 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { FileSystem, JsonFile, JsonObject, JsonSchema, ITerminal } from '@rushstack/node-core-library';
-import { RushConfiguration } from '../../api/RushConfiguration';
+import { FileSystem, JsonFile, JsonObject, JsonSchema } from '@rushstack/node-core-library';
+
 import { IRushPluginConfiguration } from '../../api/RushPluginsConfiguration';
 import { Autoinstaller } from '../../logic/Autoinstaller';
 import { RushConstants } from '../../logic/RushConstants';
-import { IRushPluginManifest, IRushPluginManifestJson, PluginLoaderBase } from './PluginLoaderBase';
-
-export interface IRemotePluginLoaderOptions {
-  pluginConfiguration: IRushPluginConfiguration;
-  rushConfiguration: RushConfiguration;
-  terminal: ITerminal;
-}
+import {
+  IPluginLoaderOptions,
+  IRushPluginManifest,
+  IRushPluginManifestJson,
+  PluginLoaderBase
+} from './PluginLoaderBase';
 
 /**
  * @beta
  */
-export class RemotePluginLoader extends PluginLoaderBase {
+export class AutoinstallerPluginLoader extends PluginLoaderBase<IRushPluginConfiguration> {
   private _autoinstaller: Autoinstaller;
 
-  public constructor({ pluginConfiguration, rushConfiguration, terminal }: IRemotePluginLoaderOptions) {
-    super({
-      pluginConfiguration,
-      rushConfiguration,
-      terminal
-    });
-    this._autoinstaller = new Autoinstaller(pluginConfiguration.autoinstallerName, this._rushConfiguration);
-  }
+  public readonly packageFolder: string;
 
-  protected override onGetPackageFolder(): string {
-    return path.join(this._autoinstaller.folderFullPath, 'node_modules', this._packageName);
+  public constructor(options: IPluginLoaderOptions<IRushPluginConfiguration>) {
+    super(options);
+    this._autoinstaller = new Autoinstaller(
+      options.pluginConfiguration.autoinstallerName,
+      this._rushConfiguration
+    );
+
+    this.packageFolder = path.join(this._autoinstaller.folderFullPath, 'node_modules', this.packageName);
   }
 
   /**
@@ -43,15 +41,15 @@ export class RemotePluginLoader extends PluginLoaderBase {
   }
 
   public update(): void {
-    const packageName: string = this._packageName;
-    const pluginName: string = this._pluginName;
-    const packageFolder: string = this.getPackageFolder();
+    const packageName: string = this.packageName;
+    const pluginName: string = this.pluginName;
+    const packageFolder: string = this.packageFolder;
     const manifestPath: string = path.join(packageFolder, RushConstants.rushPluginManifestFilename);
 
     // validate
     const manifest: IRushPluginManifestJson = JsonFile.loadAndValidate(
       manifestPath,
-      RemotePluginLoader._jsonSchema
+      AutoinstallerPluginLoader._jsonSchema
     );
 
     FileSystem.copyFile({
@@ -108,7 +106,7 @@ export class RemotePluginLoader extends PluginLoaderBase {
       if (FileSystem.isFileDoesNotExistError(e as Error)) {
         if (optionsSchema) {
           throw new Error(
-            `Plugin options are required by ${this._pluginName} from package ${this._packageName}, please create it at ${optionsJsonFilePath}.`
+            `Plugin options are required by ${this.pluginName} from package ${this.packageName}, please create it at ${optionsJsonFilePath}.`
           );
         } else {
           return {};
@@ -126,17 +124,17 @@ export class RemotePluginLoader extends PluginLoaderBase {
 
   protected override _getManifestPath(): string {
     return path.join(
-      RemotePluginLoader.getPluginAutoinstallerStorePath(this._autoinstaller),
-      this._packageName,
+      AutoinstallerPluginLoader.getPluginAutoinstallerStorePath(this._autoinstaller),
+      this.packageName,
       RushConstants.rushPluginManifestFilename
     );
   }
 
   protected override _getCommandLineJsonFilePath(): string {
     return path.join(
-      RemotePluginLoader.getPluginAutoinstallerStorePath(this._autoinstaller),
-      this._packageName,
-      this._pluginName,
+      AutoinstallerPluginLoader.getPluginAutoinstallerStorePath(this._autoinstaller),
+      this.packageName,
+      this.pluginName,
       RushConstants.commandLineFilename
     );
   }

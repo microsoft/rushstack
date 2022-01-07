@@ -29,7 +29,7 @@ function convert(inputPath: string, outputPath: string): void {
     return;
   }
 
-  FileSystem.readFolder(inputPath).forEach((name) => {
+  FileSystem.readFolderItemNames(inputPath).forEach((name) => {
     const fpath: string = path.join(inputPath, name);
     if (FileSystem.getStatistics(fpath).isFile()) {
       // only convert yaml
@@ -291,6 +291,12 @@ function convertCommonYamlModel(
     result.remarks = element.remarks;
   } else {
     result.remarks = '';
+  }
+
+  if (element.example) {
+    result.example = element.example;
+  } else {
+    result.example = [];
   }
 
   result.isPreview = element.isPreview;

@@ -5,6 +5,7 @@ package: api-documenter-test!
 fullName: IDocInterface6
 summary: Interface without inline tag to test custom TOC with injection
 remarks: ''
+example: []
 isPreview: false
 isDeprecated: false
 type: interface
@@ -15,6 +16,7 @@ properties:
     fullName: arrayProperty
     summary: ''
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -27,6 +29,7 @@ properties:
     fullName: intersectionProperty
     summary: ''
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -41,6 +44,7 @@ properties:
     fullName: regularProperty
     summary: Property of type number that does something
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -53,6 +57,7 @@ properties:
     fullName: tupleProperty
     summary: ''
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -67,6 +72,7 @@ properties:
     fullName: typeReferenceProperty
     summary: ''
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -81,6 +87,7 @@ properties:
     fullName: unionProperty
     summary: ''
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -96,6 +103,7 @@ methods:
     fullName: genericReferenceMethod(x)
     summary: ''
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:

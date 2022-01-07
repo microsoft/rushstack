@@ -7,7 +7,7 @@
     "build": "node build.js"
   },
   "devDependencies": {
-    "@types/jest": "25.2.1",
+    "@types/jest": "27.4.0",
     "@types/node": "12.20.24",
     "api-extractor-test-02": "workspace:*",
     "fs-extra": "~7.0.1",

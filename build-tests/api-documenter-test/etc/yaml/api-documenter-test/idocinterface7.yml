@@ -5,6 +5,7 @@ package: api-documenter-test!
 fullName: IDocInterface7
 summary: Interface for testing optional properties
 remarks: ''
+example: []
 isPreview: false
 isDeprecated: false
 type: interface
@@ -15,6 +16,7 @@ properties:
     fullName: optionalField
     summary: Description of optionalField
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -27,6 +29,7 @@ properties:
     fullName: optionalReadonlyField
     summary: Description of optionalReadonlyField
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -39,6 +42,7 @@ properties:
     fullName: optionalUndocumentedField
     summary: ''
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:
@@ -52,6 +56,7 @@ methods:
     fullName: optionalMember()
     summary: Description of optionalMember
     remarks: ''
+    example: []
     isPreview: false
     isDeprecated: false
     syntax:

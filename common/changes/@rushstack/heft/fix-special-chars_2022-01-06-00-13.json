@@ -1,10 +1,10 @@
 {
   "changes": [
     {
-      "packageName": "@microsoft/rush",
+      "packageName": "@rushstack/heft",
       "comment": "",
       "type": "none"
     }
   ],
-  "packageName": "@microsoft/rush"
+  "packageName": "@rushstack/heft"
 }

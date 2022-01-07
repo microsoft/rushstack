@@ -24,6 +24,7 @@ import { SelectionParameterSet } from '../SelectionParameterSet';
 import { CommandLineConfiguration, IPhase, IPhasedCommand } from '../../api/CommandLineConfiguration';
 import { IProjectTaskSelectorOptions, ProjectTaskSelector } from '../../logic/ProjectTaskSelector';
 import { IFlagParameterJson } from '../../api/CommandLineJson';
+import { Selection } from '../../logic/Selection';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -106,12 +107,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
     // if parallelism is not enabled, then restrict to 1 core
     const parallelism: string | undefined = this._enableParallelism ? this._parallelismParameter!.value : '1';
 
-    // Collect all custom parameter values
-    const customParameterValues: string[] = [];
-    for (const customParameter of this.customParameters) {
-      customParameter.appendToArgList(customParameterValues);
-    }
-
     const changedProjectsOnly: boolean = this._isIncrementalBuildAllowed && this._changedProjectsOnly.value;
 
     const terminal: Terminal = new Terminal(this.rushSession.terminalProvider);
@@ -156,10 +151,10 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
       projectSelection,
-      customParameterValues,
       isQuietMode: isQuietMode,
       isDebugMode: isDebugMode,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
+      customParameters: this.customParameters,
       phasesToRun: phasesToRun,
       phases: this._phases
     };
@@ -239,11 +234,17 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
         terminal.writeLine(`    ${colors.cyan(name)}`);
       }
 
+      // Account for consumer relationships
+      const projectSelection: Set<RushConfigurationProject> = Selection.intersection(
+        Selection.expandAllConsumers(changedProjects),
+        projectsToWatch
+      );
+
       const executeOptions: IExecuteInternalOptions = {
         taskSelectorOptions: {
           ...options.taskSelectorOptions,
           // Revise down the set of projects to execute the command on
-          projectSelection: changedProjects,
+          projectSelection,
           // Pass the ProjectChangeAnalyzer from the state differ to save a bit of overhead
           projectChangeAnalyzer: state
         },

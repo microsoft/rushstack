@@ -423,8 +423,8 @@ export class CertificateManager {
       await FileSystem.writeFileAsync(friendlyNamePath, friendlyNameFile);
 
       const repairStoreResult: IRunResult = await runAsync(CERTUTIL_EXE_NAME, [
-        '–repairstore',
-        '–user',
+        '-repairstore',
+        '-user',
         'root',
         SERIAL_NUMBER,
         friendlyNamePath

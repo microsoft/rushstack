@@ -756,7 +756,7 @@ export class DeployManager {
     FileSystem.ensureFolder(targetRootFolder);
 
     // Is the target folder empty?
-    if (FileSystem.readFolder(targetRootFolder).length > 0) {
+    if (FileSystem.readFolderItemNames(targetRootFolder).length > 0) {
       if (overwriteExisting) {
         console.log('Deleting target folder contents because "--overwrite" was specified...');
         FileSystem.ensureEmptyFolder(targetRootFolder);

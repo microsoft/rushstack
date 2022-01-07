@@ -12,7 +12,7 @@ import {
   NewlineKind,
   InternalError
 } from '@rushstack/node-core-library';
-import { StringBuilder, DocSection, DocComment } from '@microsoft/tsdoc';
+import { StringBuilder, DocSection, DocComment, DocBlock, StandardTags } from '@microsoft/tsdoc';
 import {
   ApiModel,
   ApiItem,
@@ -394,6 +394,20 @@ export class YamlDocumenter {
         const remarks: string = this._renderMarkdown(tsdocComment.remarksBlock.content, apiItem);
         if (remarks) {
           yamlItem.remarks = remarks;
+        }
+      }
+
+      if (tsdocComment) {
+        // Write the @example blocks
+        const exampleBlocks: DocBlock[] = tsdocComment.customBlocks.filter(
+          (x) => x.blockTag.tagNameWithUpperCase === StandardTags.example.tagNameWithUpperCase
+        );
+
+        for (const exampleBlock of exampleBlocks) {
+          const example: string = this._renderMarkdown(exampleBlock.content, apiItem);
+          if (example) {
+            yamlItem.example = [...(yamlItem.example || []), example];
+          }
         }
       }
 

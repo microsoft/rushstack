@@ -1,6 +1,18 @@
 # Change Log - @rushstack/debug-certificate-manager
 
-This log was last generated on Mon, 27 Dec 2021 16:10:40 GMT and should not be manually modified.
+This log was last generated on Thu, 06 Jan 2022 08:49:34 GMT and should not be manually modified.
+
+## 1.1.24
+Thu, 06 Jan 2022 08:49:34 GMT
+
+### Patches
+
+- Fix an incorrect argument passed to the command to repair the certificate store on Windows.
+
+## 1.1.23
+Wed, 05 Jan 2022 16:07:47 GMT
+
+_Version update only_
 
 ## 1.1.22
 Mon, 27 Dec 2021 16:10:40 GMT

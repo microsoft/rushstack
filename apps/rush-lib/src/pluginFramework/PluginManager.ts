@@ -1,14 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
-import { FileSystem, InternalError, IPackageJson, ITerminal } from '@rushstack/node-core-library';
-import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
+import { FileSystem, Import, InternalError, ITerminal } from '@rushstack/node-core-library';
 
+import { CommandLineConfiguration } from '../api/CommandLineConfiguration';
 import { RushConfiguration } from '../api/RushConfiguration';
-import { IRushPluginConfigurationBase } from '../api/RushPluginsConfiguration';
-import { BuiltInPluginLoader } from './PluginLoader/BuiltInPluginLoader';
+import { BuiltInPluginLoader, IBuiltInPluginConfiguration } from './PluginLoader/BuiltInPluginLoader';
 import { IRushPlugin } from './IRushPlugin';
-import { RemotePluginLoader } from './PluginLoader/RemotePluginLoader';
+import { AutoinstallerPluginLoader } from './PluginLoader/AutoinstallerPluginLoader';
 import { RushSession } from './RushSession';
 import { PluginLoaderBase } from './PluginLoader/PluginLoaderBase';
 
@@ -16,6 +15,7 @@ export interface IPluginManagerOptions {
   terminal: ITerminal;
   rushConfiguration: RushConfiguration;
   rushSession: RushSession;
+  builtInPluginConfigurations: IBuiltInPluginConfiguration[];
 }
 
 export interface ICustomCommandLineConfigurationInfo {
@@ -28,7 +28,7 @@ export class PluginManager {
   private readonly _rushConfiguration: RushConfiguration;
   private readonly _rushSession: RushSession;
   private readonly _builtInPluginLoaders: BuiltInPluginLoader[];
-  private readonly _remotePluginLoaders: RemotePluginLoader[];
+  private readonly _autoinstallerPluginLoaders: AutoinstallerPluginLoader[];
   private readonly _installedAutoinstallerNames: Set<string>;
   private readonly _loadedPluginNames: Set<string> = new Set<string>();
 
@@ -50,21 +50,25 @@ export class PluginManager {
     // The plugins have devDependencies on Rush, which would create a circular dependency in our local
     // workspace if we added them to rush-lib/package.json.  Instead we put them in a special section
     // "publishOnlyDependencies" which gets moved into "dependencies" during publishing.
-    const builtInPluginConfigurations: IRushPluginConfigurationBase[] = [];
+    const builtInPluginConfigurations: IBuiltInPluginConfiguration[] = options.builtInPluginConfigurations;
 
-    const ownPackageJson: IPackageJson = require('../../package.json');
-    if (ownPackageJson.dependencies!['@rushstack/rush-amazon-s3-build-cache-plugin']) {
-      builtInPluginConfigurations.push({
-        packageName: '@rushstack/rush-amazon-s3-build-cache-plugin',
-        pluginName: 'rush-amazon-s3-build-cache-plugin'
-      });
+    const ownPackageJsonDependencies: Record<string, string> = require('../../package.json').dependencies;
+    function tryAddBuiltInPlugin(builtInPluginName: string): void {
+      const pluginPackageName: string = `@rushstack/${builtInPluginName}`;
+      if (ownPackageJsonDependencies[pluginPackageName]) {
+        builtInPluginConfigurations.push({
+          packageName: pluginPackageName,
+          pluginName: builtInPluginName,
+          pluginPackageFolder: Import.resolvePackage({
+            packageName: pluginPackageName,
+            baseFolderPath: __dirname
+          })
+        });
+      }
     }
-    if (ownPackageJson.dependencies!['@rushstack/rush-azure-storage-build-cache-plugin']) {
-      builtInPluginConfigurations.push({
-        packageName: '@rushstack/rush-azure-storage-build-cache-plugin',
-        pluginName: 'rush-azure-storage-build-cache-plugin'
-      });
-    }
+
+    tryAddBuiltInPlugin('rush-amazon-s3-build-cache-plugin');
+    tryAddBuiltInPlugin('rush-azure-storage-build-cache-plugin');
 
     this._builtInPluginLoaders = builtInPluginConfigurations.map((pluginConfiguration) => {
       return new BuiltInPluginLoader({
@@ -74,10 +78,10 @@ export class PluginManager {
       });
     });
 
-    this._remotePluginLoaders = (
+    this._autoinstallerPluginLoaders = (
       this._rushConfiguration?._rushPluginsConfiguration.configuration.plugins ?? []
     ).map((pluginConfiguration) => {
-      return new RemotePluginLoader({
+      return new AutoinstallerPluginLoader({
         pluginConfiguration,
         rushConfiguration: this._rushConfiguration,
         terminal: this._terminal
@@ -95,16 +99,16 @@ export class PluginManager {
   }
 
   public async updateAsync(): Promise<void> {
-    await this._preparePluginAutoinstallersAsync(this._remotePluginLoaders);
+    await this._preparePluginAutoinstallersAsync(this._autoinstallerPluginLoaders);
     const preparedAutoinstallerNames: Set<string> = new Set<string>();
-    for (const { autoinstaller } of this._remotePluginLoaders) {
-      const storePath: string = RemotePluginLoader.getPluginAutoinstallerStorePath(autoinstaller);
+    for (const { autoinstaller } of this._autoinstallerPluginLoaders) {
+      const storePath: string = AutoinstallerPluginLoader.getPluginAutoinstallerStorePath(autoinstaller);
       if (!preparedAutoinstallerNames.has(autoinstaller.name)) {
         FileSystem.ensureEmptyFolder(storePath);
         preparedAutoinstallerNames.add(autoinstaller.name);
       }
     }
-    for (const pluginLoader of this._remotePluginLoaders) {
+    for (const pluginLoader of this._autoinstallerPluginLoaders) {
       pluginLoader.update();
     }
   }
@@ -115,7 +119,7 @@ export class PluginManager {
     await this.tryInitializeAssociatedCommandPluginsAsync(commandName);
   }
 
-  public async _preparePluginAutoinstallersAsync(pluginLoaders: RemotePluginLoader[]): Promise<void> {
+  public async _preparePluginAutoinstallersAsync(pluginLoaders: AutoinstallerPluginLoader[]): Promise<void> {
     for (const { autoinstaller } of pluginLoaders) {
       if (!this._installedAutoinstallerNames.has(autoinstaller.name)) {
         await autoinstaller.prepareAsync();
@@ -126,14 +130,14 @@ export class PluginManager {
 
   public async tryInitializeUnassociatedPluginsAsync(): Promise<void> {
     try {
-      const remotePluginLoaders: RemotePluginLoader[] = this._getUnassociatedPluginLoaders(
-        this._remotePluginLoaders
+      const autoinstallerPluginLoaders: AutoinstallerPluginLoader[] = this._getUnassociatedPluginLoaders(
+        this._autoinstallerPluginLoaders
       );
-      await this._preparePluginAutoinstallersAsync(remotePluginLoaders);
+      await this._preparePluginAutoinstallersAsync(autoinstallerPluginLoaders);
       const builtInPluginLoaders: BuiltInPluginLoader[] = this._getUnassociatedPluginLoaders(
         this._builtInPluginLoaders
       );
-      this._initializePlugins([...builtInPluginLoaders, ...remotePluginLoaders]);
+      this._initializePlugins([...builtInPluginLoaders, ...autoinstallerPluginLoaders]);
     } catch (e) {
       this._error = e as Error;
     }
@@ -141,16 +145,16 @@ export class PluginManager {
 
   public async tryInitializeAssociatedCommandPluginsAsync(commandName: string): Promise<void> {
     try {
-      const remotePluginLoaders: RemotePluginLoader[] = this._getPluginLoadersForCommand(
+      const autoinstallerPluginLoaders: AutoinstallerPluginLoader[] = this._getPluginLoadersForCommand(
         commandName,
-        this._remotePluginLoaders
+        this._autoinstallerPluginLoaders
       );
-      await this._preparePluginAutoinstallersAsync(remotePluginLoaders);
+      await this._preparePluginAutoinstallersAsync(autoinstallerPluginLoaders);
       const builtInPluginLoaders: BuiltInPluginLoader[] = this._getPluginLoadersForCommand(
         commandName,
         this._builtInPluginLoaders
       );
-      this._initializePlugins([...builtInPluginLoaders, ...remotePluginLoaders]);
+      this._initializePlugins([...builtInPluginLoaders, ...autoinstallerPluginLoaders]);
     } catch (e) {
       this._error = e as Error;
     }
@@ -158,7 +162,7 @@ export class PluginManager {
 
   public tryGetCustomCommandLineConfigurationInfos(): ICustomCommandLineConfigurationInfo[] {
     const commandLineConfigurationInfos: ICustomCommandLineConfigurationInfo[] = [];
-    for (const pluginLoader of this._remotePluginLoaders) {
+    for (const pluginLoader of this._autoinstallerPluginLoaders) {
       const commandLineConfiguration: CommandLineConfiguration | undefined =
         pluginLoader.getCommandLineConfiguration();
       if (commandLineConfiguration) {
@@ -185,7 +189,7 @@ export class PluginManager {
     }
   }
 
-  private _getUnassociatedPluginLoaders<T extends RemotePluginLoader | BuiltInPluginLoader>(
+  private _getUnassociatedPluginLoaders<T extends AutoinstallerPluginLoader | BuiltInPluginLoader>(
     pluginLoaders: T[]
   ): T[] {
     return pluginLoaders.filter((pluginLoader) => {
@@ -193,7 +197,7 @@ export class PluginManager {
     });
   }
 
-  private _getPluginLoadersForCommand<T extends RemotePluginLoader | BuiltInPluginLoader>(
+  private _getPluginLoadersForCommand<T extends AutoinstallerPluginLoader | BuiltInPluginLoader>(
     commandName: string,
     pluginLoaders: T[]
   ): T[] {

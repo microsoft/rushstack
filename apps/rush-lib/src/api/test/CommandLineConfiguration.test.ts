@@ -136,7 +136,7 @@ describe(CommandLineConfiguration.name, () => {
     ).toThrowErrorMatchingSnapshot();
   });
 
-  describe('associatedParameters', () => {
+  describe('parameters', () => {
     it('correctly populates the associatedParameters object for a parameter associated with the "build" command', () => {
       const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
         parameters: [
@@ -152,9 +152,9 @@ describe(CommandLineConfiguration.name, () => {
       function validateCommandByName(commandName: string): void {
         const command: Command | undefined = commandLineConfiguration.commands.get(commandName);
         expect(command).toBeDefined();
-        const associatedParametersArray: Parameter[] = Array.from(command!.associatedParameters);
-        expect(associatedParametersArray).toHaveLength(1);
-        expect(associatedParametersArray[0].longName).toEqual('--flag');
+        const parametersArray: Parameter[] = Array.from(command!.associatedParameters);
+        expect(parametersArray).toHaveLength(1);
+        expect(parametersArray[0].longName).toEqual('--flag');
       }
 
       validateCommandByName(RushConstants.buildCommandName);
@@ -184,9 +184,9 @@ describe(CommandLineConfiguration.name, () => {
 
       const command: Command | undefined = commandLineConfiguration.commands.get('custom-bulk');
       expect(command).toBeDefined();
-      const associatedParametersArray: Parameter[] = Array.from(command!.associatedParameters);
-      expect(associatedParametersArray).toHaveLength(1);
-      expect(associatedParametersArray[0].longName).toEqual('--flag');
+      const parametersArray: Parameter[] = Array.from(command!.associatedParameters);
+      expect(parametersArray).toHaveLength(1);
+      expect(parametersArray[0].longName).toEqual('--flag');
     });
 
     it("correctly populates the associatedParameters object for a parameter associated with a custom phased command's phase", () => {
@@ -211,6 +211,7 @@ describe(CommandLineConfiguration.name, () => {
             parameterKind: 'flag',
             longName: '--flag',
             associatedPhases: ['_phase:a'],
+            associatedCommands: ['custom-phased'],
             description: 'flag'
           }
         ]
@@ -218,49 +219,108 @@ describe(CommandLineConfiguration.name, () => {
 
       const command: Command | undefined = commandLineConfiguration.commands.get('custom-phased');
       expect(command).toBeDefined();
-      const associatedParametersArray: Parameter[] = Array.from(command!.associatedParameters);
-      expect(associatedParametersArray).toHaveLength(1);
-      expect(associatedParametersArray[0].longName).toEqual('--flag');
+      const parametersArray: Parameter[] = Array.from(command!.associatedParameters);
+      expect(parametersArray).toHaveLength(1);
+      expect(parametersArray[0].longName).toEqual('--flag');
     });
 
-    it("correctly populates the associatedParameters object for a parameter associated with a custom phased command's transitive phase", () => {
-      const commandLineConfiguration: CommandLineConfiguration = new CommandLineConfiguration({
-        commands: [
-          {
-            commandKind: 'phased',
-            name: 'custom-phased',
-            summary: 'custom-phased',
-            enableParallelism: true,
-            safeForSimultaneousRushProcesses: false,
-            phases: ['_phase:a']
-          }
-        ],
-        phases: [
-          {
-            name: '_phase:a',
-            dependencies: {
-              upstream: ['_phase:b']
-            }
-          },
-          {
-            name: '_phase:b'
-          }
-        ],
-        parameters: [
-          {
-            parameterKind: 'flag',
-            longName: '--flag',
-            associatedPhases: ['_phase:b'],
-            description: 'flag'
-          }
-        ]
-      });
+    it('allows a parameter to only add or skip phases', () => {
+      expect(
+        () =>
+          new CommandLineConfiguration({
+            commands: [
+              {
+                commandKind: 'phased',
+                name: 'custom-phased',
+                summary: 'custom-phased',
+                enableParallelism: true,
+                safeForSimultaneousRushProcesses: false,
+                phases: ['_phase:a']
+              }
+            ],
+            phases: [
+              {
+                name: '_phase:a'
+              },
+              {
+                name: '_phase:b'
+              }
+            ],
+            parameters: [
+              {
+                parameterKind: 'flag',
+                longName: '--flag',
+                associatedCommands: ['custom-phased'],
+                description: 'flag',
+                addPhasesToCommand: ['_phase:a']
+              }
+            ]
+          })
+      ).not.toThrow();
 
-      const command: Command | undefined = commandLineConfiguration.commands.get('custom-phased');
-      expect(command).toBeDefined();
-      const associatedParametersArray: Parameter[] = Array.from(command!.associatedParameters);
-      expect(associatedParametersArray).toHaveLength(1);
-      expect(associatedParametersArray[0].longName).toEqual('--flag');
+      expect(
+        () =>
+          new CommandLineConfiguration({
+            commands: [
+              {
+                commandKind: 'phased',
+                name: 'custom-phased',
+                summary: 'custom-phased',
+                enableParallelism: true,
+                safeForSimultaneousRushProcesses: false,
+                phases: ['_phase:a', '_phase:b']
+              }
+            ],
+            phases: [
+              {
+                name: '_phase:a'
+              },
+              {
+                name: '_phase:b'
+              }
+            ],
+            parameters: [
+              {
+                parameterKind: 'flag',
+                longName: '--flag',
+                associatedCommands: ['custom-phased'],
+                description: 'flag',
+                skipPhasesForCommand: ['_phase:b']
+              }
+            ]
+          })
+      ).not.toThrow();
+    });
+
+    it('does not allow a parameter to only be associated with phased commands but not have any associated phases', () => {
+      expect(
+        () =>
+          new CommandLineConfiguration({
+            commands: [
+              {
+                commandKind: 'phased',
+                name: 'custom-phased',
+                summary: 'custom-phased',
+                enableParallelism: true,
+                safeForSimultaneousRushProcesses: false,
+                phases: ['_phase:a']
+              }
+            ],
+            phases: [
+              {
+                name: '_phase:a'
+              }
+            ],
+            parameters: [
+              {
+                parameterKind: 'flag',
+                longName: '--flag',
+                associatedCommands: ['custom-phased'],
+                description: 'flag'
+              }
+            ]
+          })
+      ).toThrowErrorMatchingSnapshot();
     });
   });
 });
