@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/heft-node-rig",
+      "comment": "Add a \"_phase:build\" cache configuration to config/rush-project.json.",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/heft-node-rig"
+}
