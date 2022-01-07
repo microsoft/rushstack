@@ -2,6 +2,18 @@
   "name": "@microsoft/rush",
   "entries": [
     {
+      "version": "5.59.2",
+      "tag": "@microsoft/rush_v5.59.2",
+      "date": "Fri, 07 Jan 2022 02:34:59 GMT",
+      "comments": {
+        "none": [
+          {
+            "comment": "Fixes a regression that broke \"rush build\" completely when not using the \"--only\" parameter."
+          }
+        ]
+      }
+    },
+    {
       "version": "5.59.1",
       "tag": "@microsoft/rush_v5.59.1",
       "date": "Fri, 07 Jan 2022 01:21:44 GMT",

@@ -1,6 +1,13 @@
 # Change Log - @microsoft/rush
 
-This log was last generated on Fri, 07 Jan 2022 01:21:44 GMT and should not be manually modified.
+This log was last generated on Fri, 07 Jan 2022 02:34:59 GMT and should not be manually modified.
+
+## 5.59.2
+Fri, 07 Jan 2022 02:34:59 GMT
+
+### Updates
+
+- Fixes a regression that broke "rush build" completely when not using the "--only" parameter.
 
 ## 5.59.1
 Fri, 07 Jan 2022 01:21:44 GMT
