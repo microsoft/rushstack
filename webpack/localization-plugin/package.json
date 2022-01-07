@@ -11,7 +11,8 @@
     "directory": "webpack/localization-plugin"
   },
   "scripts": {
-    "build": "heft build --clean"
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean"
   },
   "peerDependencies": {
     "@rushstack/set-webpack-public-path-plugin": "^3.3.13",

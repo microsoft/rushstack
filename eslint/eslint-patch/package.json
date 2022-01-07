@@ -11,7 +11,8 @@
   },
   "homepage": "https://rushstack.io",
   "scripts": {
-    "build": "heft build --clean"
+    "build": "heft build --clean",
+    "_phase:build": "heft build --clean"
   },
   "keywords": [
     "eslintrc",

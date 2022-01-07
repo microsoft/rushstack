@@ -28,8 +28,10 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "heft test --clean",
-    "start": "heft test --clean --watch"
+    "build": "heft build --clean",
+    "start": "heft test --clean --watch",
+    "_phase:build": "heft build --clean",
+    "_phase:test": "heft test --no-build"
   },
   "dependencies": {
     "@rushstack/heft-config-file": "workspace:*",

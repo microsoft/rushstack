@@ -10,7 +10,8 @@
   },
   "homepage": "https://rushstack.io",
   "scripts": {
-    "build": ""
+    "build": "",
+    "_phase:build": ""
   },
   "keywords": [
     "eslint",

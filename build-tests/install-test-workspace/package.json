@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "node build.js"
+    "build": "node build.js",
+    "_phase:build": "node build.js"
   },
   "devDependencies": {
     "@microsoft/rush-lib": "workspace:*",

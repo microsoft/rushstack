@@ -8,7 +8,8 @@
   "scripts": {
     "build": "heft build --clean",
     "start": "heft start --clean",
-    "serve": "node lib/start.js"
+    "serve": "node lib/start.js",
+    "_phase:build": "heft build --clean"
   },
   "devDependencies": {
     "@rushstack/eslint-config": "workspace:*",
