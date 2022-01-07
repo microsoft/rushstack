@@ -1,3 +1,10 @@
 {
-  "projectOutputFolderNames": ["dist", "lib", "temp"]
+  "projectOutputFolderNames": ["dist", "lib", "temp"],
+
+  "phaseOptions": [
+    {
+      "phaseName": "_phase:build",
+      "projectOutputFolderNames": ["dist", "lib", "temp"]
+    }
+  ]
 }
