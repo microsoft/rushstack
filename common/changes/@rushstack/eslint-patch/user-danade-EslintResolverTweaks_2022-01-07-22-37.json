@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@rushstack/eslint-patch",
+      "comment": "Allow consumption of non-\"eslint-config-\" prefixed shareable configs",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@rushstack/eslint-patch"
+}
