@@ -8,31 +8,36 @@
 //
 //    require("@rushstack/eslint-patch/custom-config-package-names");
 //
-import { ConfigArrayFactory, Naming } from './_patch-base';
+import { ConfigArrayFactory, ModuleResolver, Naming } from './_patch-base';
 
-if (!ConfigArrayFactory.__loadExtendedSharableConfigPatched) {
-  ConfigArrayFactory.__loadExtendedSharableConfigPatched = true;
-  const originalLoadExtendedSharableConfig = ConfigArrayFactory.prototype._loadExtendedSharableConfig;
+if (!ConfigArrayFactory.__loadExtendedShareableConfigPatched) {
+  ConfigArrayFactory.__loadExtendedShareableConfigPatched = true;
+  const originalLoadExtendedShareableConfig = ConfigArrayFactory.prototype._loadExtendedShareableConfig;
 
-  ConfigArrayFactory.prototype._loadExtendedSharableConfig = function () {
+  ConfigArrayFactory.prototype._loadExtendedShareableConfig = function (extendName: string) {
+    const originalResolve = ModuleResolver.resolve;
     try {
-      return originalLoadExtendedSharableConfig.apply(this, arguments);
-    } catch (e) {
-      // We only care about the case where extended configs are not found.
-      const error: Error & { messageTemplate?: string } = e as Error & { messageTemplate?: string };
-      if (!error.messageTemplate || error.messageTemplate !== 'extend-config-missing') {
-        throw e;
-      }
-    }
-
-    // Extend config could not be resolved from the original location. Override the normalization
-    // logic to use the extended config as it was specified.
-    const originalNormalize = Naming.normalizePackageName;
-    try {
-      Naming.normalizePackageName = (name: string, prefix: string) => name;
-      return originalLoadExtendedSharableConfig.apply(this, arguments);
+      ModuleResolver.resolve = function (moduleName: string, relativeToPath: string) {
+        try {
+          return originalResolve.call(this, moduleName, relativeToPath);
+        } catch (e) {
+          // Only change the name we resolve if we cannot find the normalized module, since it is
+          // valid to rely on the normalized package name. Use the originally provided module path
+          // instead of the normalized module path.
+          if (
+            (e as NodeJS.ErrnoException)?.code === 'MODULE_NOT_FOUND' &&
+            moduleName !== extendName &&
+            moduleName === Naming.normalizePackageName(extendName, 'eslint-config')
+          ) {
+            return originalResolve.call(this, extendName, relativeToPath);
+          } else {
+            throw e;
+          }
+        }
+      };
+      return originalLoadExtendedShareableConfig.apply(this, arguments);
     } finally {
-      Naming.normalizePackageName = originalNormalize;
+      ModuleResolver.resolve = originalResolve;
     }
   };
 }
