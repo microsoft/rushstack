@@ -398,7 +398,7 @@ export class PublishUtilities {
       case 'prerelease':
         return ChangeType.hotfix;
       default:
-        throw new Error(`Wrong release type ${releaseType}`);
+        throw new Error(`Unsupported release type "${releaseType}"`);
     }
   }
 
