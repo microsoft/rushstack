@@ -8,7 +8,7 @@ import { IChangelog } from '../api/Changelog';
 import { RushConfiguration } from '../api/RushConfiguration';
 import { RushConfigurationProject } from '../api/RushConfigurationProject';
 import { VersionPolicyConfiguration } from '../api/VersionPolicyConfiguration';
-import { PublishUtilities, IAllChanges } from './PublishUtilities';
+import { PublishUtilities, IChangeRequests } from './PublishUtilities';
 import { ChangeFiles } from './ChangeFiles';
 import { PrereleaseToken } from './PrereleaseToken';
 import { ChangelogGenerator } from './ChangelogGenerator';
@@ -21,17 +21,14 @@ export class ChangeManager {
   private _prereleaseToken!: PrereleaseToken;
   private _orderedChanges!: IChangeInfo[];
   private _allPackages!: Map<string, RushConfigurationProject>;
-  private _allChanges!: IAllChanges;
+  private _allChanges!: IChangeRequests;
   private _changeFiles!: ChangeFiles;
   private _rushConfiguration: RushConfiguration;
-  private _lockStepProjectsToExclude: Set<string> | undefined;
+  private _projectsToExclude: Set<string> | undefined;
 
-  public constructor(
-    rushConfiguration: RushConfiguration,
-    lockStepProjectsToExclude?: Set<string> | undefined
-  ) {
+  public constructor(rushConfiguration: RushConfiguration, projectsToExclude?: Set<string> | undefined) {
     this._rushConfiguration = rushConfiguration;
-    this._lockStepProjectsToExclude = lockStepProjectsToExclude;
+    this._projectsToExclude = projectsToExclude;
   }
 
   /**
@@ -56,15 +53,15 @@ export class ChangeManager {
       this._changeFiles,
       includeCommitDetails,
       this._prereleaseToken,
-      this._lockStepProjectsToExclude
+      this._projectsToExclude
     );
-    this._orderedChanges = PublishUtilities.sortChangeRequests(this._allChanges.packages);
+    this._orderedChanges = PublishUtilities.sortChangeRequests(this._allChanges.changeInfoByProjectName);
   }
 
   public hasChanges(): boolean {
     return (
       (this._orderedChanges && this._orderedChanges.length > 0) ||
-      (this._allChanges && Object.keys(this._allChanges.versionPolicies).length > 0)
+      (this._allChanges && this._allChanges.versionPolicies.size > 0)
     );
   }
 
@@ -77,12 +74,12 @@ export class ChangeManager {
   }
 
   public validateChanges(versionConfig: VersionPolicyConfiguration): void {
-    Object.keys(this._allChanges).filter((key) => {
-      const projectInfo: RushConfigurationProject | undefined = this._rushConfiguration.getProjectByName(key);
+    this._allChanges.changeInfoByProjectName.forEach((change, projectName) => {
+      const projectInfo: RushConfigurationProject | undefined =
+        this._rushConfiguration.getProjectByName(projectName);
       if (projectInfo) {
         if (projectInfo.versionPolicy) {
-          const changeInfo: IChangeInfo = this._allChanges.packages[key];
-          projectInfo.versionPolicy.validate(changeInfo.newVersion!, key);
+          projectInfo.versionPolicy.validate(change.newVersion!, projectName);
         }
       }
     });
@@ -99,20 +96,22 @@ export class ChangeManager {
     }
 
     // Update all the changed version policies
-    Object.keys(this._allChanges.versionPolicies).forEach((versionPolicyName) => {
-      const newVersion: string = this._allChanges.versionPolicies[versionPolicyName].format();
-      this._rushConfiguration.versionPolicyConfiguration.update(versionPolicyName, newVersion, shouldCommit);
+    this._allChanges.versionPolicies.forEach((newVersion, versionPolicyName) => {
+      this._rushConfiguration.versionPolicyConfiguration.update(
+        versionPolicyName,
+        newVersion.format(),
+        shouldCommit
+      );
     });
 
     // Apply all changes to package.json files.
     const updatedPackages: Map<string, IPackageJson> = PublishUtilities.updatePackages(
-      this._allChanges.packages,
-      this._allChanges.versionPolicies,
+      this._allChanges,
       this._allPackages,
       this._rushConfiguration,
       shouldCommit,
       this._prereleaseToken,
-      this._lockStepProjectsToExclude
+      this._projectsToExclude
     );
 
     return updatedPackages;
@@ -124,7 +123,7 @@ export class ChangeManager {
     if (!this._prereleaseToken.hasValue) {
       // Update changelogs.
       const updatedChangelogs: IChangelog[] = ChangelogGenerator.updateChangelogs(
-        this._allChanges.packages,
+        this._allChanges,
         this._allPackages,
         this._rushConfiguration,
         shouldCommit

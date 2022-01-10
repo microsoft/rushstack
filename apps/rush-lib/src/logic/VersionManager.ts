@@ -83,7 +83,7 @@ export class VersionManager {
     // Update projects based on individual policies
     const changeManager: ChangeManager = new ChangeManager(
       this._rushConfiguration,
-      this._getLockStepProjects()
+      this._getManuallyVersionedProjects()
     );
 
     changeManager.load(this._rushConfiguration.changesFolder);
@@ -124,7 +124,7 @@ export class VersionManager {
     }
   }
 
-  private _getLockStepProjects(): Set<string> | undefined {
+  private _getManuallyVersionedProjects(): Set<string> | undefined {
     const lockStepVersionPolicyNames: Set<string> = new Set<string>();
 
     this._versionPolicyConfiguration.versionPolicies.forEach((versionPolicy) => {

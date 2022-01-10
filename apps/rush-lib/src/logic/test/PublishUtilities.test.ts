@@ -6,9 +6,8 @@ import * as path from 'path';
 import { IChangeInfo, ChangeType } from '../../api/ChangeManagement';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
-import { PublishUtilities, IChangeInfoHash, IAllChanges } from '../PublishUtilities';
+import { PublishUtilities, IChangeRequests } from '../PublishUtilities';
 import { ChangeFiles } from '../ChangeFiles';
-import { SemVer } from 'semver';
 
 /* eslint-disable dot-notation */
 
@@ -27,165 +26,155 @@ describe('findChangeRequests', () => {
 
   it('returns no changes in an empty change folder', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'noChange'))
     );
 
-    expect(Object.keys(allChanges.packages)).toHaveLength(0);
-    expect(Object.keys(allChanges.versionPolicies)).toHaveLength(0);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(0);
+    expect(allChanges.versionPolicies.size).toEqual(0);
   });
 
   it('returns 1 change when changing a leaf package', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'leafChange'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
 
-    expect(Object.keys(packageChanges)).toHaveLength(1);
-    expect(Object.keys(allChanges.versionPolicies)).toHaveLength(0);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(1);
+    expect(allChanges.versionPolicies.size).toEqual(0);
 
-    expect(packageChanges).toHaveProperty('d');
-    expect(packageChanges['d'].changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('d')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('d')!.changeType).toEqual(ChangeType.patch);
   });
 
   it('returns 5 changes when patching a root package', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'rootPatchChange'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
+    expect(allChanges.changeInfoByProjectName.size).toEqual(5);
+    expect(allChanges.versionPolicies.size).toEqual(0);
 
-    expect(Object.keys(packageChanges)).toHaveLength(5);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(0);
+    expect(allChanges.changeInfoByProjectName.get('a')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('b')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('e')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('g')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('h')).not.toBeUndefined();
 
-    expect(packageChanges).toHaveProperty('a');
-    expect(packageChanges).toHaveProperty('b');
-    expect(packageChanges).toHaveProperty('e');
-    expect(packageChanges).toHaveProperty('g');
-    expect(packageChanges).toHaveProperty('h');
+    expect(allChanges.changeInfoByProjectName.get('a')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('b')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('e')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('g')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('h')!.changeType).toEqual(ChangeType.dependency);
 
-    expect(packageChanges['a'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['b'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['e'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['g'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['h'].changeType).toEqual(ChangeType.dependency);
-
-    expect(packageChanges['a'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['b'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['e'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['g'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['h'].newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('a')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('b')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('e')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('g')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('h')!.newVersion).toEqual('1.0.0');
   });
 
   it('returns 8 changes when hotfixing a root package', () => {
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       packagesRushConfiguration.projectsByName,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'rootHotfixChange'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(8);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(0);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(8);
+    expect(allChanges.versionPolicies.size).toEqual(0);
 
-    expect(packageChanges).toHaveProperty('a');
-    expect(packageChanges).toHaveProperty('b');
-    expect(packageChanges).toHaveProperty('c');
-    expect(packageChanges).toHaveProperty('d');
-    expect(packageChanges).toHaveProperty('e');
-    expect(packageChanges).toHaveProperty('f');
-    expect(packageChanges).toHaveProperty('g');
-    expect(packageChanges).toHaveProperty('h');
+    expect(allChanges.changeInfoByProjectName.get('a')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('b')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('c')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('d')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('e')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('f')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('g')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('h')).not.toBeUndefined();
 
-    expect(packageChanges['a'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['b'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['c'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['d'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['e'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['f'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['g'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['h'].changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('a')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('b')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('c')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('d')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('e')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('f')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('g')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('h')!.changeType).toEqual(ChangeType.hotfix);
 
-    expect(packageChanges['a'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['b'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['c'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['d'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['e'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['f'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['g'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['h'].newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('a')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('b')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('c')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('d')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('e')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('f')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('g')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('h')!.newVersion).toEqual('1.0.0-hotfix.0');
   });
 
   it('returns 8 changes when major bumping a root package', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'rootMajorChange'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(8);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(1);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(8);
+    expect(allChanges.versionPolicies.size).toEqual(1);
 
-    expect(packageChanges).toHaveProperty('a');
-    expect(packageChanges).toHaveProperty('b');
-    expect(packageChanges).toHaveProperty('c');
-    expect(packageChanges).toHaveProperty('e');
-    expect(packageChanges).toHaveProperty('f');
-    expect(packageChanges).toHaveProperty('g');
-    expect(packageChanges).toHaveProperty('h');
-    expect(packageChanges).toHaveProperty('i');
+    expect(allChanges.changeInfoByProjectName.get('a')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('b')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('c')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('e')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('f')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('g')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('h')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('i')).not.toBeUndefined();
 
-    expect(packageChanges['a'].changeType).toEqual(ChangeType.major);
-    expect(packageChanges['b'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['c'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['e'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['f'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['g'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['h'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['i'].changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('a')!.changeType).toEqual(ChangeType.major);
+    expect(allChanges.changeInfoByProjectName.get('b')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('c')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('e')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('f')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('g')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('h')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('i')!.changeType).toEqual(ChangeType.patch);
 
-    expect(packageChanges['a'].newVersion).toEqual('2.0.0');
-    expect(packageChanges['b'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['c'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['e'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['f'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['g'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['h'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['i'].newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('a')!.newVersion).toEqual('2.0.0');
+    expect(allChanges.changeInfoByProjectName.get('b')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('c')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('e')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('f')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('g')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('h')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('i')!.newVersion).toEqual('1.0.1');
 
-    expect(versionPolicyChanges['lockStepWithoutNextBump'].format()).toEqual('1.0.1');
+    expect(allChanges.versionPolicies.get('lockStepWithoutNextBump')!.format()).toEqual('1.0.1');
   });
 
   it('returns 2 changes when bumping cyclic dependencies', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'cyclicDeps'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(2);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(0);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(2);
+    expect(allChanges.versionPolicies.size).toEqual(0);
 
-    expect(packageChanges).toHaveProperty('cyclic-dep-1');
-    expect(packageChanges).toHaveProperty('cyclic-dep-2');
+    expect(allChanges.changeInfoByProjectName.get('cyclic-dep-1')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('cyclic-dep-2')).not.toBeUndefined();
 
-    expect(packageChanges['cyclic-dep-1'].changeType).toEqual(ChangeType.major);
-    expect(packageChanges['cyclic-dep-2'].changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('cyclic-dep-1')!.changeType).toEqual(ChangeType.major);
+    expect(allChanges.changeInfoByProjectName.get('cyclic-dep-2')!.changeType).toEqual(ChangeType.patch);
   });
 
   it('returns error when mixing hotfix and non-hotfix changes', () => {
@@ -217,153 +206,145 @@ describe('findChangeRequests', () => {
 
   it('can resolve multiple changes requests on the same package', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'multipleChanges'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(8);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(1);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(8);
+    expect(allChanges.versionPolicies.size).toEqual(1);
 
-    expect(packageChanges).toHaveProperty('a');
-    expect(packageChanges).toHaveProperty('b');
-    expect(packageChanges).toHaveProperty('c');
-    expect(packageChanges).toHaveProperty('e');
-    expect(packageChanges).toHaveProperty('f');
-    expect(packageChanges).toHaveProperty('g');
-    expect(packageChanges).toHaveProperty('h');
-    expect(packageChanges).toHaveProperty('i');
+    expect(allChanges.changeInfoByProjectName.get('a')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('b')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('c')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('e')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('f')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('g')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('h')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('i')).not.toBeUndefined();
 
-    expect(packageChanges['a'].changeType).toEqual(ChangeType.major);
-    expect(packageChanges['b'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['c'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['e'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['f'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['g'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['h'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['i'].changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('a')!.changeType).toEqual(ChangeType.major);
+    expect(allChanges.changeInfoByProjectName.get('b')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('c')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('e')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('f')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('g')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('h')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('i')!.changeType).toEqual(ChangeType.patch);
 
-    expect(packageChanges['a'].newVersion).toEqual('2.0.0');
-    expect(packageChanges['b'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['c'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['e'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['f'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['g'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['h'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['i'].newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('a')!.newVersion).toEqual('2.0.0');
+    expect(allChanges.changeInfoByProjectName.get('b')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('c')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('e')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('f')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('g')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('h')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('i')!.newVersion).toEqual('1.0.1');
 
-    expect(versionPolicyChanges['lockStepWithoutNextBump'].format()).toEqual('1.0.1');
+    expect(allChanges.versionPolicies.get('lockStepWithoutNextBump')!.format()).toEqual('1.0.1');
   });
 
   it('can resolve multiple reverse-ordered changes requests on the same package', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'orderedChanges'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(8);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(1);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(8);
+    expect(allChanges.versionPolicies.size).toEqual(1);
 
-    expect(packageChanges).toHaveProperty('a');
-    expect(packageChanges).toHaveProperty('b');
-    expect(packageChanges).toHaveProperty('c');
-    expect(packageChanges).toHaveProperty('e');
-    expect(packageChanges).toHaveProperty('f');
-    expect(packageChanges).toHaveProperty('g');
-    expect(packageChanges).toHaveProperty('h');
-    expect(packageChanges).toHaveProperty('i');
+    expect(allChanges.changeInfoByProjectName.get('a')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('b')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('c')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('e')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('f')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('g')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('h')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('i')).not.toBeUndefined();
 
-    expect(packageChanges['a'].changeType).toEqual(ChangeType.major);
-    expect(packageChanges['b'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['c'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['e'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['f'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['g'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['h'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['i'].changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('a')!.changeType).toEqual(ChangeType.major);
+    expect(allChanges.changeInfoByProjectName.get('b')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('c')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('e')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('f')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('g')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('h')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('i')!.changeType).toEqual(ChangeType.patch);
 
-    expect(packageChanges['a'].newVersion).toEqual('2.0.0');
-    expect(packageChanges['b'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['c'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['e'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['f'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['g'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['h'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['i'].newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('a')!.newVersion).toEqual('2.0.0');
+    expect(allChanges.changeInfoByProjectName.get('b')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('c')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('e')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('f')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('g')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('h')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('i')!.newVersion).toEqual('1.0.1');
 
-    expect(versionPolicyChanges['lockStepWithoutNextBump'].format()).toEqual('1.0.1');
+    expect(allChanges.versionPolicies.get('lockStepWithoutNextBump')!.format()).toEqual('1.0.1');
   });
 
   it('can resolve multiple hotfix changes', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'multipleHotfixChanges'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(8);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(0);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(8);
+    expect(allChanges.versionPolicies.size).toEqual(0);
 
-    expect(packageChanges).toHaveProperty('a');
-    expect(packageChanges).toHaveProperty('b');
-    expect(packageChanges).toHaveProperty('c');
-    expect(packageChanges).toHaveProperty('d');
-    expect(packageChanges).toHaveProperty('e');
-    expect(packageChanges).toHaveProperty('f');
-    expect(packageChanges).toHaveProperty('g');
-    expect(packageChanges).toHaveProperty('h');
+    expect(allChanges.changeInfoByProjectName.get('a')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('b')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('c')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('d')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('e')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('f')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('g')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('h')).not.toBeUndefined();
 
-    expect(packageChanges['a'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['b'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['c'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['d'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['e'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['f'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['g'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['h'].changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('a')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('b')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('c')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('d')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('e')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('f')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('g')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('h')!.changeType).toEqual(ChangeType.hotfix);
 
-    expect(packageChanges['a'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['b'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['c'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['d'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['e'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['f'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['g'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['h'].newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('a')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('b')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('c')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('d')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('e')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('f')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('g')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('h')!.newVersion).toEqual('1.0.0-hotfix.0');
   });
 
   it('can update an explicit dependency', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'explicitVersionChange'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(2);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(0);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(2);
+    expect(allChanges.versionPolicies.size).toEqual(0);
 
-    expect(packageChanges).toHaveProperty('c');
-    expect(packageChanges).toHaveProperty('d');
-    expect(packageChanges['c'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['d'].changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('c')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('d')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('c')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('d')!.changeType).toEqual(ChangeType.patch);
   });
 
   it('can exclude lock step projects', () => {
     const allPackages: Map<string, RushConfigurationProject> = repoRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       repoRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'repo', 'changes')),
@@ -371,26 +352,26 @@ describe('findChangeRequests', () => {
       undefined,
       new Set<string>(['a', 'b', 'e'])
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(8);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(1);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(8);
+    expect(allChanges.versionPolicies.size).toEqual(1);
 
-    expect(packageChanges['a'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['b'].newVersion).toEqual('2.0.0');
-    expect(packageChanges['c'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['c'].newVersion).toEqual('3.1.2');
-    expect(packageChanges['d'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['d'].newVersion).toEqual('4.1.2');
-    expect(packageChanges['e'].newVersion).toEqual(allPackages.get('e')!.packageJson.version);
-    expect(packageChanges['f'].changeType).toEqual(ChangeType.none);
-    expect(packageChanges['h'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['h'].newVersion).toEqual('1.2.4');
-    expect(packageChanges['i'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['i'].newVersion).toEqual('1.2.4');
+    expect(allChanges.changeInfoByProjectName.get('a')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('b')!.newVersion).toEqual('2.0.0');
+    expect(allChanges.changeInfoByProjectName.get('c')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('c')!.newVersion).toEqual('3.1.2');
+    expect(allChanges.changeInfoByProjectName.get('d')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('d')!.newVersion).toEqual('4.1.2');
+    expect(allChanges.changeInfoByProjectName.get('e')!.newVersion).toEqual(
+      allPackages.get('e')!.packageJson.version
+    );
+    expect(allChanges.changeInfoByProjectName.get('f')!.changeType).toEqual(ChangeType.none);
+    expect(allChanges.changeInfoByProjectName.get('h')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('h')!.newVersion).toEqual('1.2.4');
+    expect(allChanges.changeInfoByProjectName.get('i')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('i')!.newVersion).toEqual('1.2.4');
 
-    expect(versionPolicyChanges['lockStepWithoutNextBump'].format()).toEqual('1.2.4');
+    expect(allChanges.versionPolicies.get('lockStepWithoutNextBump')!.format()).toEqual('1.2.4');
   });
 });
 
@@ -405,13 +386,14 @@ describe('sortChangeRequests', () => {
 
   it('can return a sorted array of the change requests to be published in the correct order', () => {
     const allPackages: Map<string, RushConfigurationProject> = rushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       rushConfiguration,
       new ChangeFiles(path.join(__dirname, 'multipleChanges'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(packageChanges);
+    const orderedChanges: IChangeInfo[] = PublishUtilities.sortChangeRequests(
+      allChanges.changeInfoByProjectName
+    );
 
     expect(orderedChanges).toHaveLength(8);
     expect(orderedChanges[0].packageName).toEqual('a');
@@ -493,168 +475,156 @@ describe('findWorkspaceChangeRequests', () => {
 
   it('returns no changes in an empty change folder', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'noChange'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(0);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(0);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(0);
+    expect(allChanges.versionPolicies.size).toEqual(0);
   });
 
   it('returns 1 change when changing a leaf package', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'leafChange'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(1);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(0);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(1);
+    expect(allChanges.versionPolicies.size).toEqual(0);
 
-    expect(packageChanges).toHaveProperty('d');
-    expect(packageChanges['d'].changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('d')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('d')!.changeType).toEqual(ChangeType.patch);
   });
 
   it('returns 5 changes when patching a root package', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'rootPatchChange'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(5);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(0);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(5);
+    expect(allChanges.versionPolicies.size).toEqual(0);
 
-    expect(packageChanges).toHaveProperty('a');
-    expect(packageChanges).toHaveProperty('b');
-    expect(packageChanges).toHaveProperty('e');
-    expect(packageChanges).toHaveProperty('g');
-    expect(packageChanges).toHaveProperty('h');
+    expect(allChanges.changeInfoByProjectName.get('a')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('b')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('e')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('g')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('h')).not.toBeUndefined();
 
-    expect(packageChanges['a'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['b'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['e'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['g'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['h'].changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('a')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('b')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('e')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('g')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('h')!.changeType).toEqual(ChangeType.dependency);
 
-    expect(packageChanges['a'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['b'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['e'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['g'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['h'].newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('a')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('b')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('e')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('g')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('h')!.newVersion).toEqual('1.0.0');
   });
 
   it('returns 8 changes when hotfixing a root package', () => {
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       packagesRushConfiguration.projectsByName,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'rootHotfixChange'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(8);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(0);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(8);
+    expect(allChanges.versionPolicies.size).toEqual(0);
 
-    expect(packageChanges).toHaveProperty('a');
-    expect(packageChanges).toHaveProperty('b');
-    expect(packageChanges).toHaveProperty('c');
-    expect(packageChanges).toHaveProperty('d');
-    expect(packageChanges).toHaveProperty('e');
-    expect(packageChanges).toHaveProperty('f');
-    expect(packageChanges).toHaveProperty('g');
-    expect(packageChanges).toHaveProperty('h');
+    expect(allChanges.changeInfoByProjectName.get('a')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('b')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('c')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('d')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('e')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('f')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('g')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('h')).not.toBeUndefined();
 
-    expect(packageChanges['a'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['b'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['c'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['d'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['e'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['f'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['g'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['h'].changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('a')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('b')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('c')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('d')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('e')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('f')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('g')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('h')!.changeType).toEqual(ChangeType.hotfix);
 
-    expect(packageChanges['a'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['b'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['c'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['d'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['e'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['f'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['g'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['h'].newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('a')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('b')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('c')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('d')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('e')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('f')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('g')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('h')!.newVersion).toEqual('1.0.0-hotfix.0');
   });
 
   it('returns 8 changes when major bumping a root package', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'rootMajorChange'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(8);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(1);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(8);
+    expect(allChanges.versionPolicies.size).toEqual(1);
 
-    expect(packageChanges).toHaveProperty('a');
-    expect(packageChanges).toHaveProperty('b');
-    expect(packageChanges).toHaveProperty('c');
-    expect(packageChanges).toHaveProperty('e');
-    expect(packageChanges).toHaveProperty('f');
-    expect(packageChanges).toHaveProperty('g');
-    expect(packageChanges).toHaveProperty('h');
-    expect(packageChanges).toHaveProperty('i');
+    expect(allChanges.changeInfoByProjectName.get('a')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('b')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('c')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('e')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('f')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('g')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('h')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('i')).not.toBeUndefined();
 
-    expect(packageChanges['a'].changeType).toEqual(ChangeType.major);
-    expect(packageChanges['b'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['c'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['e'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['f'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['g'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['h'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['i'].changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('a')!.changeType).toEqual(ChangeType.major);
+    expect(allChanges.changeInfoByProjectName.get('b')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('c')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('e')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('f')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('g')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('h')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('i')!.changeType).toEqual(ChangeType.patch);
 
-    expect(packageChanges['a'].newVersion).toEqual('2.0.0');
-    expect(packageChanges['b'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['c'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['e'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['f'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['g'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['h'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['i'].newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('a')!.newVersion).toEqual('2.0.0');
+    expect(allChanges.changeInfoByProjectName.get('b')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('c')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('e')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('f')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('g')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('h')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('i')!.newVersion).toEqual('1.0.1');
 
-    expect(versionPolicyChanges['lockStepWithoutNextBump'].format()).toEqual('1.0.1');
+    expect(allChanges.versionPolicies.get('lockStepWithoutNextBump')!.format()).toEqual('1.0.1');
   });
 
   it('returns 2 changes when bumping cyclic dependencies', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'cyclicDeps'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(2);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(0);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(2);
+    expect(allChanges.versionPolicies.size).toEqual(0);
 
-    expect(packageChanges).toHaveProperty('cyclic-dep-1');
-    expect(packageChanges).toHaveProperty('cyclic-dep-2');
+    expect(allChanges.changeInfoByProjectName.get('cyclic-dep-1')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('cyclic-dep-2')).not.toBeUndefined();
 
-    expect(packageChanges['cyclic-dep-1'].changeType).toEqual(ChangeType.major);
-    expect(packageChanges['cyclic-dep-2'].changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('cyclic-dep-1')!.changeType).toEqual(ChangeType.major);
+    expect(allChanges.changeInfoByProjectName.get('cyclic-dep-2')!.changeType).toEqual(ChangeType.patch);
   });
 
   it('returns error when mixing hotfix and non-hotfix changes', () => {
@@ -686,154 +656,146 @@ describe('findWorkspaceChangeRequests', () => {
 
   it('can resolve multiple changes requests on the same package', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'multipleChanges'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(8);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(1);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(8);
+    expect(allChanges.versionPolicies.size).toEqual(1);
 
-    expect(packageChanges).toHaveProperty('a');
-    expect(packageChanges).toHaveProperty('b');
-    expect(packageChanges).toHaveProperty('c');
-    expect(packageChanges).toHaveProperty('e');
-    expect(packageChanges).toHaveProperty('f');
-    expect(packageChanges).toHaveProperty('g');
-    expect(packageChanges).toHaveProperty('h');
-    expect(packageChanges).toHaveProperty('i');
+    expect(allChanges.changeInfoByProjectName.get('a')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('b')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('c')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('e')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('f')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('g')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('h')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('i')).not.toBeUndefined();
 
-    expect(packageChanges['a'].changeType).toEqual(ChangeType.major);
-    expect(packageChanges['b'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['c'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['e'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['f'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['g'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['h'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['i'].changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('a')!.changeType).toEqual(ChangeType.major);
+    expect(allChanges.changeInfoByProjectName.get('b')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('c')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('e')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('f')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('g')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('h')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('i')!.changeType).toEqual(ChangeType.patch);
 
-    expect(packageChanges['a'].newVersion).toEqual('2.0.0');
-    expect(packageChanges['b'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['c'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['e'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['f'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['g'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['h'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['i'].newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('a')!.newVersion).toEqual('2.0.0');
+    expect(allChanges.changeInfoByProjectName.get('b')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('c')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('e')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('f')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('g')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('h')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('i')!.newVersion).toEqual('1.0.1');
 
-    expect(versionPolicyChanges['lockStepWithoutNextBump'].format()).toEqual('1.0.1');
+    expect(allChanges.versionPolicies.get('lockStepWithoutNextBump')!.format()).toEqual('1.0.1');
   });
 
   it('can resolve multiple reverse-ordered changes requests on the same package', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'orderedChanges'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(8);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(1);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(8);
+    expect(allChanges.versionPolicies.size).toEqual(1);
 
-    expect(packageChanges).toHaveProperty('a');
-    expect(packageChanges).toHaveProperty('b');
-    expect(packageChanges).toHaveProperty('c');
-    expect(packageChanges).toHaveProperty('e');
-    expect(packageChanges).toHaveProperty('f');
-    expect(packageChanges).toHaveProperty('g');
-    expect(packageChanges).toHaveProperty('h');
-    expect(packageChanges).toHaveProperty('i');
+    expect(allChanges.changeInfoByProjectName.get('a')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('b')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('c')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('e')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('f')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('g')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('h')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('i')).not.toBeUndefined();
 
-    expect(packageChanges['a'].changeType).toEqual(ChangeType.major);
-    expect(packageChanges['b'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['c'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['e'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['f'].changeType).toEqual(ChangeType.dependency);
-    expect(packageChanges['g'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['h'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['i'].changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('a')!.changeType).toEqual(ChangeType.major);
+    expect(allChanges.changeInfoByProjectName.get('b')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('c')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('e')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('f')!.changeType).toEqual(ChangeType.dependency);
+    expect(allChanges.changeInfoByProjectName.get('g')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('h')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('i')!.changeType).toEqual(ChangeType.patch);
 
-    expect(packageChanges['a'].newVersion).toEqual('2.0.0');
-    expect(packageChanges['b'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['c'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['e'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['f'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['g'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['h'].newVersion).toEqual('1.0.1');
-    expect(packageChanges['i'].newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('a')!.newVersion).toEqual('2.0.0');
+    expect(allChanges.changeInfoByProjectName.get('b')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('c')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('e')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('f')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('g')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('h')!.newVersion).toEqual('1.0.1');
+    expect(allChanges.changeInfoByProjectName.get('i')!.newVersion).toEqual('1.0.1');
 
-    expect(versionPolicyChanges['lockStepWithoutNextBump'].format()).toEqual('1.0.1');
+    expect(allChanges.versionPolicies.get('lockStepWithoutNextBump')!.format()).toEqual('1.0.1');
   });
 
   it('can resolve multiple hotfix changes', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'multipleHotfixChanges'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(8);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(0);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(8);
+    expect(allChanges.versionPolicies.size).toEqual(0);
 
-    expect(packageChanges).toHaveProperty('a');
-    expect(packageChanges).toHaveProperty('b');
-    expect(packageChanges).toHaveProperty('c');
-    expect(packageChanges).toHaveProperty('d');
-    expect(packageChanges).toHaveProperty('e');
-    expect(packageChanges).toHaveProperty('f');
-    expect(packageChanges).toHaveProperty('g');
-    expect(packageChanges).toHaveProperty('h');
+    expect(allChanges.changeInfoByProjectName.get('a')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('b')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('c')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('d')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('e')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('f')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('g')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('h')).not.toBeUndefined();
 
-    expect(packageChanges['a'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['b'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['c'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['d'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['e'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['f'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['g'].changeType).toEqual(ChangeType.hotfix);
-    expect(packageChanges['h'].changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('a')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('b')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('c')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('d')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('e')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('f')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('g')!.changeType).toEqual(ChangeType.hotfix);
+    expect(allChanges.changeInfoByProjectName.get('h')!.changeType).toEqual(ChangeType.hotfix);
 
-    expect(packageChanges['a'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['b'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['c'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['d'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['e'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['f'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['g'].newVersion).toEqual('1.0.0-hotfix.0');
-    expect(packageChanges['h'].newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('a')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('b')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('c')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('d')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('e')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('f')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('g')!.newVersion).toEqual('1.0.0-hotfix.0');
+    expect(allChanges.changeInfoByProjectName.get('h')!.newVersion).toEqual('1.0.0-hotfix.0');
   });
 
   it('can update an explicit dependency', () => {
     const allPackages: Map<string, RushConfigurationProject> = packagesRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       packagesRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'explicitVersionChange'))
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(2);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(0);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(2);
+    expect(allChanges.versionPolicies.size).toEqual(0);
 
-    expect(packageChanges).toHaveProperty('c');
-    expect(packageChanges).toHaveProperty('d');
+    expect(allChanges.changeInfoByProjectName.get('c')).not.toBeUndefined();
+    expect(allChanges.changeInfoByProjectName.get('d')).not.toBeUndefined();
 
-    expect(packageChanges['c'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['d'].changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('c')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('d')!.changeType).toEqual(ChangeType.patch);
   });
 
   it('can exclude lock step projects', () => {
     const allPackages: Map<string, RushConfigurationProject> = repoRushConfiguration.projectsByName;
-    const allChanges: IAllChanges = PublishUtilities.findChangeRequests(
+    const allChanges: IChangeRequests = PublishUtilities.findChangeRequests(
       allPackages,
       repoRushConfiguration,
       new ChangeFiles(path.join(__dirname, 'repo', 'changes')),
@@ -841,26 +803,26 @@ describe('findWorkspaceChangeRequests', () => {
       undefined,
       new Set<string>(['a', 'b', 'e'])
     );
-    const packageChanges: IChangeInfoHash = allChanges.packages;
-    const versionPolicyChanges: Record<string, SemVer> = allChanges.versionPolicies;
 
-    expect(Object.keys(packageChanges)).toHaveLength(8);
-    expect(Object.keys(versionPolicyChanges)).toHaveLength(1);
+    expect(allChanges.changeInfoByProjectName.size).toEqual(8);
+    expect(allChanges.versionPolicies.size).toEqual(1);
 
-    expect(packageChanges['a'].newVersion).toEqual('1.0.0');
-    expect(packageChanges['b'].newVersion).toEqual('2.0.0');
-    expect(packageChanges['c'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['c'].newVersion).toEqual('3.1.2');
-    expect(packageChanges['d'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['d'].newVersion).toEqual('4.1.2');
-    expect(packageChanges['e'].newVersion).toEqual(allPackages.get('e')!.packageJson.version);
-    expect(packageChanges['f'].changeType).toEqual(ChangeType.none);
-    expect(packageChanges['h'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['h'].newVersion).toEqual('1.2.4');
-    expect(packageChanges['i'].changeType).toEqual(ChangeType.patch);
-    expect(packageChanges['i'].newVersion).toEqual('1.2.4');
+    expect(allChanges.changeInfoByProjectName.get('a')!.newVersion).toEqual('1.0.0');
+    expect(allChanges.changeInfoByProjectName.get('b')!.newVersion).toEqual('2.0.0');
+    expect(allChanges.changeInfoByProjectName.get('c')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('c')!.newVersion).toEqual('3.1.2');
+    expect(allChanges.changeInfoByProjectName.get('d')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('d')!.newVersion).toEqual('4.1.2');
+    expect(allChanges.changeInfoByProjectName.get('e')!.newVersion).toEqual(
+      allPackages.get('e')!.packageJson.version
+    );
+    expect(allChanges.changeInfoByProjectName.get('f')!.changeType).toEqual(ChangeType.none);
+    expect(allChanges.changeInfoByProjectName.get('h')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('h')!.newVersion).toEqual('1.2.4');
+    expect(allChanges.changeInfoByProjectName.get('i')!.changeType).toEqual(ChangeType.patch);
+    expect(allChanges.changeInfoByProjectName.get('i')!.newVersion).toEqual('1.2.4');
 
-    expect(versionPolicyChanges['lockStepWithoutNextBump'].format()).toEqual('1.2.4');
+    expect(allChanges.versionPolicies.get('lockStepWithoutNextBump')!.format()).toEqual('1.2.4');
   });
 });
 

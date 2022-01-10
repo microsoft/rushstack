@@ -171,7 +171,6 @@
       "name": "prettier",
       "commandKind": "global",
       "summary": "Used by the pre-commit Git hook. This command invokes Prettier to reformat staged changes.",
-      "description": "This is an example custom command that runs once for the entire repo",
 
       "autoinstallerName": "rush-prettier",
 

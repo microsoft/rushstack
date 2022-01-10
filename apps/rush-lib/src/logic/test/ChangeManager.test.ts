@@ -2,8 +2,7 @@
 // See LICENSE in the project root for license information.
 
 import * as path from 'path';
-import { LockStepVersionPolicy } from '../..';
-
+import { LockStepVersionPolicy } from '../../api/VersionPolicy';
 import { RushConfiguration } from '../../api/RushConfiguration';
 import { ChangeManager } from '../ChangeManager';
 import { PrereleaseToken } from '../PrereleaseToken';
