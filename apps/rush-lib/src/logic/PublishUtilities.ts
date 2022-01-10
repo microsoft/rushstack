@@ -72,7 +72,7 @@ export class PublishUtilities {
       }
     });
 
-    // For each requested package change, ensure dependencies are also updated.
+    // For each requested package change, ensure downstream dependencies are also updated.
     allChanges.packageChanges.forEach((change, packageName) => {
       PublishUtilities._updateDownstreamDependencies(
         change,
@@ -125,7 +125,7 @@ export class PublishUtilities {
       }
     });
 
-    // add dependency change to projects affected by the lock version policy updates
+    // Bump projects affected by the version policy changes.
     allPackages.forEach((pkg) => {
       const versionPolicyVersion: string | undefined =
         pkg.versionPolicyName !== undefined
