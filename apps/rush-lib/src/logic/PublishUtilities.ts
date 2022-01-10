@@ -72,57 +72,15 @@ export class PublishUtilities {
       }
     });
 
-    // For each lock step version policy with no nextBump, calculate the changeType
-    const versionPolicyChangeTypes: Map<string, ChangeType> = new Map<string, ChangeType>();
-    allChanges.packageChanges.forEach((change, packageName) => {
-      const pkg: RushConfigurationProject | undefined = allPackages.get(packageName);
-      if (projectsToExclude?.has(packageName) || pkg === undefined) {
-        return;
-      }
-
-      if (change.changeType === undefined || change.changeType === ChangeType.none) {
-        return;
-      }
-
-      if (pkg.versionPolicy !== undefined && pkg.versionPolicy.isLockstepped) {
-        const policy: LockStepVersionPolicy = pkg.versionPolicy as LockStepVersionPolicy;
-        if (policy.nextBump === undefined) {
-          // set the policy bump based on change files
-          const prevBump: ChangeType | undefined = versionPolicyChangeTypes.get(policy.policyName);
-          versionPolicyChangeTypes.set(
-            policy.policyName,
-            prevBump !== undefined ? Math.max(prevBump, change.changeType) : change.changeType
-          );
-        }
-      }
-    });
-
-    // update lock version policies to new versions
-    versionPolicyChangeTypes.forEach((changeType, versionPolicyName) => {
-      const versionPolicy: LockStepVersionPolicy =
-        rushConfiguration.versionPolicyConfiguration.getVersionPolicy(
-          versionPolicyName
-        ) as LockStepVersionPolicy;
-      const currentVersion: string = versionPolicy.version;
-      const newVersion: string | null = semver.inc(
-        currentVersion,
-        PublishUtilities._getReleaseType(changeType)
-      );
-
-      allChanges.versionPolicyChanges.set(versionPolicyName, new SemVer(newVersion ?? currentVersion));
-    });
-
     // For each requested package change, ensure dependencies are also updated.
     allChanges.packageChanges.forEach((change, packageName) => {
-      const versionPolicyName: string | undefined = allPackages.get(packageName)!.versionPolicyName;
       PublishUtilities._updateDownstreamDependencies(
         change,
         allChanges,
         allPackages,
         rushConfiguration,
         prereleaseToken,
-        projectsToExclude,
-        versionPolicyName !== undefined ? versionPolicyChangeTypes.get(versionPolicyName) : undefined
+        projectsToExclude
       );
     });
 
@@ -144,14 +102,7 @@ export class PublishUtilities {
         // For hotfix changes, do not re-write new version
         const newVersion: string | undefined =
           change.changeType! >= ChangeType.patch
-            ? semver.inc(
-                pkg.version,
-                PublishUtilities._getReleaseType(
-                  (project.versionPolicyName !== undefined
-                    ? versionPolicyChangeTypes.get(project.versionPolicyName)
-                    : null) ?? change.changeType!
-                )
-              )!
+            ? semver.inc(pkg.version, PublishUtilities._getReleaseType(change.changeType!))!
             : change.changeType === ChangeType.hotfix
             ? change.newVersion
             : pkg.version;
@@ -739,8 +690,7 @@ export class PublishUtilities {
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
-    projectsToExclude?: Set<string>,
-    enforcedChangeType?: ChangeType
+    projectsToExclude?: Set<string>
   ): void {
     const packageName: string = change.packageName;
     const downstream: ReadonlySet<RushConfigurationProject> = allPackages.get(packageName)!.consumingProjects;
@@ -759,8 +709,7 @@ export class PublishUtilities {
             allPackages,
             rushConfiguration,
             prereleaseToken,
-            projectsToExclude,
-            enforcedChangeType
+            projectsToExclude
           );
           PublishUtilities._updateDownstreamDependency(
             pkg.name,
@@ -770,8 +719,7 @@ export class PublishUtilities {
             allPackages,
             rushConfiguration,
             prereleaseToken,
-            projectsToExclude,
-            enforcedChangeType
+            projectsToExclude
           );
         }
       }
@@ -786,8 +734,7 @@ export class PublishUtilities {
     allPackages: Map<string, RushConfigurationProject>,
     rushConfiguration: RushConfiguration,
     prereleaseToken: PrereleaseToken | undefined,
-    projectsToExclude?: Set<string>,
-    enforcedChangeType?: ChangeType
+    projectsToExclude?: Set<string>
   ): void {
     if (
       dependencies &&
@@ -809,7 +756,7 @@ export class PublishUtilities {
 
       // If the version range exists and has not yet been updated to this version, update it.
       if (requiredVersion.versionSpecifier !== change.newRangeDependency || alwaysUpdate) {
-        let changeType: ChangeType | undefined = enforcedChangeType;
+        let changeType: ChangeType | undefined;
         if (changeType === undefined) {
           // Propagate hotfix changes to dependencies
           if (change.changeType === ChangeType.hotfix) {
