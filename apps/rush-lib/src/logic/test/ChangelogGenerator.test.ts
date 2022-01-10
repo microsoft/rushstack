@@ -264,16 +264,16 @@ describe('updateChangelogs', () => {
 
   /* eslint-disable dot-notation */
   it('skips changes logs if the project version is not changed.', () => {
-    const allChanges: IChangeRequests = { changeInfoByProjectName: new Map(), versionPolicies: new Map() };
+    const allChanges: IChangeRequests = { packageChanges: new Map(), versionPolicyChanges: new Map() };
     // Package a does not have version change.
-    allChanges.changeInfoByProjectName.set('a', {
+    allChanges.packageChanges.set('a', {
       packageName: 'a',
       changeType: ChangeType.dependency,
       newVersion: '1.0.0',
       changes: []
     });
     // Package b has version change.
-    allChanges.changeInfoByProjectName.set('b', {
+    allChanges.packageChanges.set('b', {
       packageName: 'b',
       changeType: ChangeType.patch,
       newVersion: '1.0.1',
@@ -290,16 +290,16 @@ describe('updateChangelogs', () => {
   });
 
   it('skips changes logs if the project is in pre-release', () => {
-    const allChanges: IChangeRequests = { changeInfoByProjectName: new Map(), versionPolicies: new Map() };
+    const allChanges: IChangeRequests = { packageChanges: new Map(), versionPolicyChanges: new Map() };
     // Package a is a prerelease
-    allChanges.changeInfoByProjectName.set('a', {
+    allChanges.packageChanges.set('a', {
       packageName: 'a',
       changeType: ChangeType.dependency,
       newVersion: '1.0.1-pre.1',
       changes: []
     });
     // Package b is not a prerelease
-    allChanges.changeInfoByProjectName.set('b', {
+    allChanges.packageChanges.set('b', {
       packageName: 'b',
       changeType: ChangeType.patch,
       newVersion: '1.0.1',
@@ -320,16 +320,16 @@ describe('updateChangelogs', () => {
   });
 
   it('writes changelog for hotfix changes', () => {
-    const allChanges: IChangeRequests = { changeInfoByProjectName: new Map(), versionPolicies: new Map() };
+    const allChanges: IChangeRequests = { packageChanges: new Map(), versionPolicyChanges: new Map() };
     // Package a is a hotfix
-    allChanges.changeInfoByProjectName.set('a', {
+    allChanges.packageChanges.set('a', {
       packageName: 'a',
       changeType: ChangeType.hotfix,
       newVersion: '1.0.1-hotfix.1',
       changes: []
     });
     // Package b is not a hotfix
-    allChanges.changeInfoByProjectName.set('b', {
+    allChanges.packageChanges.set('b', {
       packageName: 'b',
       changeType: ChangeType.patch,
       newVersion: '1.0.1',

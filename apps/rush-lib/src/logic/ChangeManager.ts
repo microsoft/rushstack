@@ -55,13 +55,13 @@ export class ChangeManager {
       this._prereleaseToken,
       this._projectsToExclude
     );
-    this._orderedChanges = PublishUtilities.sortChangeRequests(this._allChanges.changeInfoByProjectName);
+    this._orderedChanges = PublishUtilities.sortChangeRequests(this._allChanges.packageChanges);
   }
 
   public hasChanges(): boolean {
     return (
       (this._orderedChanges && this._orderedChanges.length > 0) ||
-      (this._allChanges && this._allChanges.versionPolicies.size > 0)
+      (this._allChanges && this._allChanges.versionPolicyChanges.size > 0)
     );
   }
 
@@ -74,7 +74,7 @@ export class ChangeManager {
   }
 
   public validateChanges(versionConfig: VersionPolicyConfiguration): void {
-    this._allChanges.changeInfoByProjectName.forEach((change, projectName) => {
+    this._allChanges.packageChanges.forEach((change, projectName) => {
       const projectInfo: RushConfigurationProject | undefined =
         this._rushConfiguration.getProjectByName(projectName);
       if (projectInfo) {
@@ -96,7 +96,7 @@ export class ChangeManager {
     }
 
     // Update all the changed version policies
-    this._allChanges.versionPolicies.forEach((newVersion, versionPolicyName) => {
+    this._allChanges.versionPolicyChanges.forEach((newVersion, versionPolicyName) => {
       this._rushConfiguration.versionPolicyConfiguration.update(
         versionPolicyName,
         newVersion.format(),

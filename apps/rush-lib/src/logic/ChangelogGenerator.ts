@@ -28,7 +28,7 @@ export class ChangelogGenerator {
   ): IChangelog[] {
     const updatedChangeLogs: IChangelog[] = [];
 
-    allChanges.changeInfoByProjectName.forEach((change, packageName) => {
+    allChanges.packageChanges.forEach((change, packageName) => {
       const project: RushConfigurationProject | undefined = allProjects.get(packageName);
 
       if (project && ChangelogGenerator._shouldUpdateChangeLog(project, allChanges)) {
@@ -270,7 +270,7 @@ export class ChangelogGenerator {
     return (
       project.shouldPublish &&
       (!semver.prerelease(project.packageJson.version) ||
-        allChanges.changeInfoByProjectName.get(project.packageName)?.changeType === ChangeType.hotfix)
+        allChanges.packageChanges.get(project.packageName)?.changeType === ChangeType.hotfix)
     );
   }
 }
