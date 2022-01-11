@@ -7,7 +7,7 @@ import colors from 'colors/safe';
 import { AlreadyReportedError, Terminal } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
-import { Event } from '../../index';
+import { Event, ProjectChangeAnalyzer } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
@@ -21,10 +21,11 @@ import { LastLinkFlag, LastLinkFlagFactory } from '../../api/LastLinkFlag';
 import { RushConfigurationProject } from '../../api/RushConfigurationProject';
 import { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
 import { SelectionParameterSet } from '../SelectionParameterSet';
-import { CommandLineConfiguration, IPhase, IPhasedCommand } from '../../api/CommandLineConfiguration';
-import type { ICreateTasksOptions, IProjectTaskSelectorOptions } from '../../logic/ProjectTaskSelector';
+import type { CommandLineConfiguration, IPhase, IPhasedCommand } from '../../api/CommandLineConfiguration';
+import type { IProjectTaskSelectorOptions } from '../../logic/ProjectTaskSelector';
 import { ProjectTaskSelector } from '../../logic/ProjectTaskSelector';
 import { Selection } from '../../logic/Selection';
+import { IProjectTaskFactoryOptions, ProjectTaskFactory } from '../../logic/taskExecution/ProjectTaskFactory';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -42,7 +43,8 @@ export interface IPhasedScriptActionOptions extends IBaseScriptActionOptions<IPh
 interface IExecuteInternalOptions {
   taskSelector: ProjectTaskSelector;
   taskExecutionManagerOptions: ITaskExecutionManagerOptions;
-  createTasksOptions: ICreateTasksOptions;
+  projectSelection: Set<RushConfigurationProject>;
+  taskFactoryOptions: IProjectTaskFactoryOptions;
   stopwatch: Stopwatch;
   ignoreHooks?: boolean;
   terminal: Terminal;
@@ -102,7 +104,6 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
     const stopwatch: Stopwatch = Stopwatch.start();
 
     const isQuietMode: boolean = !this._verboseParameter.value;
-    const isDebugMode: boolean = !!this.parser.isDebug;
 
     // if this is parallelizable, then use the value from the flag (undefined or a number),
     // if parallelism is not enabled, then restrict to 1 core
@@ -129,13 +130,16 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
     }
 
     const phasesToRun: Set<IPhase> = new Set(this._actionPhases);
-    const taskSelectorOptions: IProjectTaskSelectorOptions = {
+    const taskFactoryOptions: IProjectTaskFactoryOptions = {
       rushConfiguration: this.rushConfiguration,
       buildCacheConfiguration,
-      isQuietMode: isQuietMode,
-      isDebugMode: isDebugMode,
       isIncrementalBuildAllowed: this._isIncrementalBuildAllowed,
       customParameters: this.customParameters,
+      projectChangeAnalyzer: new ProjectChangeAnalyzer(this.rushConfiguration)
+    };
+
+    const taskSelectorOptions: IProjectTaskSelectorOptions = {
+      projects: this.rushConfiguration.projects,
       phasesToRun: phasesToRun,
       phases: this._phases
     };
@@ -153,7 +157,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
     const executeOptions: IExecuteInternalOptions = {
       taskSelector,
       taskExecutionManagerOptions: taskExecutionManagerOptions,
-      createTasksOptions: { projectSelection },
+      projectSelection,
+      taskFactoryOptions,
       stopwatch,
       terminal
     };
@@ -175,7 +180,8 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
   private async _runWatch(options: IExecuteInternalOptions): Promise<void> {
     const {
       taskSelector,
-      createTasksOptions: { projectSelection: projectsToWatch },
+      projectSelection: projectsToWatch,
+      taskFactoryOptions,
       taskExecutionManagerOptions,
       stopwatch,
       terminal
@@ -228,10 +234,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
 
       const executeOptions: IExecuteInternalOptions = {
         taskSelector,
-        createTasksOptions: {
-          // Revise down the set of projects to execute the command on
-          projectSelection,
-          // Pass the ProjectChangeAnalyzer from the state differ to save a bit of overhead
+        projectSelection,
+        taskFactoryOptions: {
+          ...taskFactoryOptions,
           projectChangeAnalyzer: state
         },
         taskExecutionManagerOptions,
@@ -307,10 +312,15 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
    * Runs a single invocation of the command
    */
   private async _runOnce(options: IExecuteInternalOptions): Promise<void> {
-    const { taskSelector, createTasksOptions } = options;
+    const { taskSelector, projectSelection, taskFactoryOptions } = options;
+
+    const taskFactory: ProjectTaskFactory = new ProjectTaskFactory(taskFactoryOptions);
 
     const taskExecutionManager: TaskExecutionManager = new TaskExecutionManager(
-      taskSelector.createTasks(createTasksOptions),
+      taskSelector.createTasks({
+        projectSelection,
+        taskFactory
+      }),
       options.taskExecutionManagerOptions
     );
 
