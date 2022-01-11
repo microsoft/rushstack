@@ -7,8 +7,8 @@ import type { Task } from './taskExecution/Task';
 
 export interface IProjectTaskSelectorOptions {
   phasesToRun: ReadonlySet<IPhase>;
-  phases: Map<string, IPhase>;
-  projects: ReadonlyArray<RushConfigurationProject>;
+  phases: ReadonlyMap<string, IPhase>;
+  projects: ReadonlyMap<string, RushConfigurationProject>;
 }
 
 export interface ICreateTasksOptions {
@@ -25,8 +25,10 @@ export interface IProjectTaskFactory {
   createTask(options: IProjectTaskOptions): Task;
 }
 
+type ITaskKey = string;
+
 interface ITaskDependencies {
-  tasks: Set<number>;
+  tasks: Set<Task> | undefined;
   isCacheWriteAllowed: boolean;
 }
 
@@ -35,96 +37,115 @@ interface ITaskDependencies {
  */
 export class ProjectTaskSelector {
   private readonly _phasesToRun: ReadonlySet<IPhase>;
-  private readonly _knownPhases: ReadonlyArray<IPhase>;
-  private readonly _knownProjects: ReadonlyArray<RushConfigurationProject>;
+  private readonly _knownPhases: ReadonlyMap<string, IPhase>;
+  private readonly _knownProjects: ReadonlyMap<string, RushConfigurationProject>;
 
   public constructor(options: IProjectTaskSelectorOptions) {
     this._knownProjects = options.projects;
     this._phasesToRun = options.phasesToRun;
-    this._knownPhases = Array.from(options.phases.values());
+    this._knownPhases = options.phases;
   }
 
   public createTasks(createTasksOptions: ICreateTasksOptions): Set<Task> {
+    const start: bigint = process.hrtime.bigint();
     const { projectSelection, taskFactory } = createTasksOptions;
 
-    const ordinalProjects: ReadonlyArray<RushConfigurationProject> = this._knownProjects;
-    const ordinalPhases: ReadonlyArray<IPhase> = this._knownPhases;
-    const projectCount: number = ordinalProjects.length;
+    const knownProjects: ReadonlyMap<string, RushConfigurationProject> = this._knownProjects;
+    const knownPhases: ReadonlyMap<string, IPhase> = this._knownPhases;
 
-    const maxOrdinal: number = projectCount * ordinalPhases.length;
-    // Note, this is 9007199254740991; performance will degrade to the point of uselessness long before hitting this number
-    if (maxOrdinal > Number.MAX_SAFE_INTEGER) {
-      throw new Error(
-        `The product of the number of defined phases (${ordinalPhases.length}) and number of projects (${projectCount}) exceeds ${Number.MAX_SAFE_INTEGER}. This is not currently supported.`
-      );
-    }
-
-    const taskByOrdinal: Map<number, Task> = new Map();
+    const taskByKey: Map<ITaskKey, Task> = new Map();
+    const selectedTasks: Set<Task> = new Set();
 
     // Create tasks for selected phases and projects
     for (const phase of this._phasesToRun) {
-      const phaseOffset: number = phase.index * projectCount;
-
       for (const project of projectSelection) {
         const task: Task = taskFactory.createTask({
           phase,
           project
         });
 
-        taskByOrdinal.set(phaseOffset + project._index, task);
+        taskByKey.set(getTaskKey(phase, project), task);
+        selectedTasks.add(task);
       }
+    }
+
+    // Convert the [IPhase, RushConfigurationProject] into a value suitable for use as a Map key
+    function getTaskKey(phase: IPhase, project: RushConfigurationProject): ITaskKey {
+      return `${project.packageName};${phase.name}`;
+    }
+
+    // Conver the Map key back to the [IPhase, RushConfigurationProject] tuple
+    function getPhaseAndProject(key: ITaskKey): [IPhase, RushConfigurationProject] {
+      const index: number = key.indexOf(';');
+      const phase: IPhase = knownPhases.get(key.slice(index + 1))!;
+      const project: RushConfigurationProject = knownProjects.get(key.slice(0, index))!;
+      return [phase, project];
     }
 
     /**
      * Enumerates the declared dependencies of the task in (phase * project) key space
      * task_ordinal = (project_count * phase_index) + project._index
      */
-    function* getRawDependencies(taskOrdinal: number): Iterable<number> {
-      const projectIndex: number = taskOrdinal % projectCount;
-
-      const {
-        phaseDependencies: { self, upstream }
-      }: IPhase = ordinalPhases[Math.floor(taskOrdinal / projectCount)];
-      const project: RushConfigurationProject = ordinalProjects[projectIndex];
+    function* getRawDependencies(taskKey: ITaskKey): Iterable<ITaskKey> {
+      const [
+        {
+          phaseDependencies: { self, upstream }
+        },
+        project
+      ] = getPhaseAndProject(taskKey);
 
       for (const phase of self) {
         // Different phase, same project
-        yield phase.index * projectCount + projectIndex;
+        yield getTaskKey(phase, project);
       }
 
-      for (const phase of upstream) {
-        const targetPhaseOffset: number = phase.index * projectCount;
-        for (const dependencyProject of project.dependencyProjects) {
-          yield targetPhaseOffset + dependencyProject._index;
+      if (upstream.size) {
+        const { dependencyProjects } = project;
+        if (dependencyProjects.size) {
+          for (const phase of upstream) {
+            for (const dependencyProject of dependencyProjects) {
+              yield getTaskKey(phase, dependencyProject);
+            }
+          }
         }
       }
     }
 
-    const filteredDependencyCache: Map<number, ITaskDependencies> = new Map();
-    function getFilteredDependencies(node: number): ITaskDependencies {
+    const filteredDependencyCache: Map<ITaskKey, ITaskDependencies> = new Map();
+    function getFilteredDependencies(node: ITaskKey): ITaskDependencies {
       const cached: ITaskDependencies | undefined = filteredDependencyCache.get(node);
       if (cached) {
         return cached;
       }
 
       const dependencies: ITaskDependencies = {
-        tasks: new Set(),
-        isCacheWriteAllowed: true
+        tasks: undefined,
+        isCacheWriteAllowed: taskByKey.has(node)
       };
 
       filteredDependencyCache.set(node, dependencies);
 
       for (const dep of getRawDependencies(node)) {
-        if (taskByOrdinal.has(dep)) {
+        const task: Task | undefined = taskByKey.get(dep);
+        if (task) {
           // This task is part of the current execution
-          dependencies.tasks.add(dep);
+          if (!dependencies.tasks) {
+            dependencies.tasks = new Set();
+          }
+          dependencies.tasks.add(task);
         } else {
           // This task is not part of the current execution, but may have dependencies that are
           // Since a task has been excluded, we cannot guarantee the results, so it is cache unsafe
           dependencies.isCacheWriteAllowed = false;
-          const indirectDependencies: ITaskDependencies = getFilteredDependencies(dep);
-          for (const indirectDep of indirectDependencies.tasks) {
-            dependencies.tasks.add(indirectDep);
+          const { tasks: indirectDependencies }: ITaskDependencies = getFilteredDependencies(dep);
+          if (indirectDependencies) {
+            if (!dependencies.tasks) {
+              dependencies.tasks = new Set();
+            }
+
+            for (const indirectDep of indirectDependencies) {
+              dependencies.tasks.add(indirectDep);
+            }
           }
         }
       }
@@ -133,17 +154,21 @@ export class ProjectTaskSelector {
     }
 
     // Add dependency relationships
-    for (const [ordinal, task] of taskByOrdinal) {
-      const deps: ITaskDependencies = getFilteredDependencies(ordinal);
-      for (const dep of deps.tasks) {
-        const dependencyTask: Task = taskByOrdinal.get(dep)!;
-        task.dependencies.add(dependencyTask);
-        dependencyTask.dependents.add(task);
+    for (const [key, task] of taskByKey) {
+      const deps: ITaskDependencies = getFilteredDependencies(key);
+      if (deps.tasks) {
+        for (const dependencyTask of deps.tasks) {
+          task.dependencies.add(dependencyTask);
+          dependencyTask.dependents.add(task);
+        }
       }
 
       task.runner.isCacheWriteAllowed = deps.isCacheWriteAllowed;
     }
 
-    return new Set(taskByOrdinal.values());
+    const end: bigint = process.hrtime.bigint();
+    console.log(`Task creation took: ${end - start} ns`);
+
+    return selectedTasks;
   }
 }

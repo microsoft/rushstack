@@ -7,7 +7,6 @@ import colors from 'colors/safe';
 import { AlreadyReportedError, Terminal } from '@rushstack/node-core-library';
 import { CommandLineFlagParameter, CommandLineStringParameter } from '@rushstack/ts-command-line';
 
-import { Event, ProjectChangeAnalyzer } from '../../index';
 import { SetupChecks } from '../../logic/SetupChecks';
 import { Stopwatch, StopwatchState } from '../../utilities/Stopwatch';
 import { BaseScriptAction, IBaseScriptActionOptions } from './BaseScriptAction';
@@ -26,6 +25,8 @@ import type { IProjectTaskSelectorOptions } from '../../logic/ProjectTaskSelecto
 import { ProjectTaskSelector } from '../../logic/ProjectTaskSelector';
 import { Selection } from '../../logic/Selection';
 import { IProjectTaskFactoryOptions, ProjectTaskFactory } from '../../logic/taskExecution/ProjectTaskFactory';
+import { Event } from '../../api/EventHooks';
+import { ProjectChangeAnalyzer } from '../../logic/ProjectChangeAnalyzer';
 
 /**
  * Constructor parameters for BulkScriptAction.
@@ -139,9 +140,9 @@ export class PhasedScriptAction extends BaseScriptAction<IPhasedCommand> {
     };
 
     const taskSelectorOptions: IProjectTaskSelectorOptions = {
-      projects: this.rushConfiguration.projects,
-      phasesToRun: phasesToRun,
-      phases: this._phases
+      projects: this.rushConfiguration.projectsByName,
+      phases: this._phases,
+      phasesToRun: phasesToRun
     };
 
     const taskExecutionManagerOptions: ITaskExecutionManagerOptions = {

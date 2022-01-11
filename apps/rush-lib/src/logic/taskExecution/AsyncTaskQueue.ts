@@ -5,14 +5,13 @@ import { Task } from './Task';
 import { TaskStatus } from './TaskStatus';
 
 /**
- * @internal
- *
  * Implmentation of the async iteration protocol for a collection of Task objects.
  * The async iterator will wait for a task to be ready for execution, or terminate if there are no more tasks.
  *
  * @remarks
- * It is imperative that the caller update the status of tasks prior to invoking `next()` on the iterator again,
- * otherwise it will stall forever unless some other call stack invokes next().
+ * If the caller does not update dependencies prior to invoking `next()` on the iterator again,
+ * it must manually invoke `assignTasks()` after performing the updates, otherwise iterators will
+ * stall until another task completes.
  */
 export class AsyncTaskQueue implements AsyncIterable<Task>, AsyncIterator<Task> {
   private readonly _queue: Task[];
@@ -35,7 +34,7 @@ export class AsyncTaskQueue implements AsyncIterable<Task>, AsyncIterator<Task> 
    * @see {AsyncIterator}
    */
   public next(): Promise<IteratorResult<Task>> {
-    const { _queue: taskQueue, _pendingIterators: waitingIterators } = this;
+    const { _pendingIterators: waitingIterators } = this;
 
     const promise: Promise<IteratorResult<Task>> = new Promise(
       (resolve: (result: IteratorResult<Task>) => void) => {
@@ -43,14 +42,28 @@ export class AsyncTaskQueue implements AsyncIterable<Task>, AsyncIterator<Task> 
       }
     );
 
+    this.assignTasks();
+
+    return promise;
+  }
+
+  /**
+   * Routes ready tasks with 0 dependencies to waiting iterators. Normally invoked as part of `next()`, but
+   * if the caller does not update task dependencies prior to calling `next()`, may need to be invoked manually.
+   */
+  public assignTasks(): void {
+    const { _queue: taskQueue, _pendingIterators: waitingIterators } = this;
+
     // By iterating in reverse order we do less array shuffling when removing tasks
     for (let i: number = taskQueue.length - 1; waitingIterators.length > 0 && i >= 0; i--) {
       const task: Task = taskQueue[i];
 
-      if (task.status !== TaskStatus.Ready) {
+      if (task.status === TaskStatus.Blocked) {
         // It shouldn't be on the queue, remove it
-        // This should be a blocked task
         taskQueue.splice(i, 1);
+      } else if (task.status !== TaskStatus.Ready) {
+        // Sanity check
+        throw new Error(`Unexpected status "${task.status}" for queued task: ${task.name}`);
       } else if (task.dependencies.size === 0) {
         // This task is ready to process, hand it to the iterator.
         taskQueue.splice(i, 1);
@@ -71,8 +84,6 @@ export class AsyncTaskQueue implements AsyncIterable<Task>, AsyncIterator<Task> 
         });
       }
     }
-
-    return promise;
   }
 
   /**

@@ -37,7 +37,7 @@ export class ProjectTaskFactory implements IProjectTaskFactory {
 
     const customParameterValues: ReadonlyArray<string> = this._getCustomParameterValuesForPhase(phase);
 
-    const commandToRun: string | undefined = ProjectTaskFactory.getScriptToRun(
+    const commandToRun: string | undefined = ProjectTaskFactory._getScriptToRun(
       project,
       phase.name,
       customParameterValues
@@ -48,7 +48,7 @@ export class ProjectTaskFactory implements IProjectTaskFactory {
       );
     }
 
-    const taskName: string = ProjectTaskFactory.getTaskDisplayName(phase, project);
+    const taskName: string = ProjectTaskFactory._getTaskDisplayName(phase, project);
 
     const task: Task = new Task(
       new ProjectTaskRunner({
@@ -67,26 +67,28 @@ export class ProjectTaskFactory implements IProjectTaskFactory {
     return task;
   }
 
-  public static getScriptToRun(
+  private static _getScriptToRun(
     rushProject: RushConfigurationProject,
     commandToRun: string,
     customParameterValues: ReadonlyArray<string>
   ): string | undefined {
-    const script: string | undefined = ProjectTaskFactory._getScriptCommand(rushProject, commandToRun);
+    const { scripts } = rushProject.packageJson;
 
-    if (script === undefined) {
+    const rawCommand: string | undefined | null = scripts?.[commandToRun];
+
+    if (rawCommand === undefined || rawCommand === null) {
       return undefined;
     }
 
-    if (!script) {
+    if (!rawCommand) {
       return '';
     } else {
-      const taskCommand: string = `${script} ${customParameterValues.join(' ')}`;
+      const taskCommand: string = `${rawCommand} ${customParameterValues.join(' ')}`;
       return process.platform === 'win32' ? convertSlashesForWindows(taskCommand) : taskCommand;
     }
   }
 
-  public static getTaskDisplayName(phase: IPhase, project: RushConfigurationProject): string {
+  private static _getTaskDisplayName(phase: IPhase, project: RushConfigurationProject): string {
     if (phase.isSynthetic) {
       // Because this is a synthetic phase, just use the project name because there aren't any other phases
       return project.packageName;
@@ -94,25 +96,6 @@ export class ProjectTaskFactory implements IProjectTaskFactory {
       const phaseNameWithoutPrefix: string = phase.name.slice(RushConstants.phaseNamePrefix.length);
       return `${project.packageName} (${phaseNameWithoutPrefix})`;
     }
-  }
-
-  private static _getScriptCommand(
-    rushProject: RushConfigurationProject,
-    script: string
-  ): string | undefined {
-    const { scripts } = rushProject.packageJson;
-
-    if (!scripts) {
-      return undefined;
-    }
-
-    const rawCommand: string = scripts[script];
-
-    if (rawCommand === undefined || rawCommand === null) {
-      return undefined;
-    }
-
-    return rawCommand;
   }
 
   private _getCustomParameterValuesForPhase(phase: IPhase): ReadonlyArray<string> {

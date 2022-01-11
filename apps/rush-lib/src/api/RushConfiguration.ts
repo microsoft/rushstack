@@ -768,28 +768,28 @@ export class RushConfiguration {
       a.packageName.localeCompare(b.packageName)
     );
 
-    const tempNamesByProject: Map<IRushConfigurationProjectJson, string> =
-      RushConfiguration._generateTempNamesForProjects(sortedProjectJsons);
-
+    const usedTempNames: Set<string> = new Set();
     for (let i: number = 0, len: number = sortedProjectJsons.length; i < len; i++) {
       const projectJson: IRushConfigurationProjectJson = sortedProjectJsons[i];
-      const tempProjectName: string | undefined = tempNamesByProject.get(projectJson);
-      if (tempProjectName) {
-        const project: RushConfigurationProject = new RushConfigurationProject(
-          projectJson,
-          this,
-          tempProjectName,
-          i
+      const tempProjectName: string | undefined = RushConfiguration._generateTempNameForProject(
+        projectJson,
+        usedTempNames
+      );
+      const project: RushConfigurationProject = new RushConfigurationProject({
+        projectJson,
+        rushConfiguration: this,
+        tempProjectName,
+        index: i
+      });
+
+      this._projects.push(project);
+      if (this._projectsByName.has(project.packageName)) {
+        throw new Error(
+          `The project name "${project.packageName}" was specified more than once` +
+            ` in the rush.json configuration file.`
         );
-        this._projects.push(project);
-        if (this._projectsByName.has(project.packageName)) {
-          throw new Error(
-            `The project name "${project.packageName}" was specified more than once` +
-              ` in the rush.json configuration file.`
-          );
-        }
-        this._projectsByName.set(project.packageName, project);
       }
+      this._projectsByName.set(project.packageName, project);
     }
 
     for (const project of this._projects) {
@@ -801,12 +801,9 @@ export class RushConfiguration {
           );
         }
       });
-
-      // Compute the downstream dependencies within the list of Rush projects.
-      this._populateDownstreamDependencies(project.packageJson.dependencies, project.packageName);
-      this._populateDownstreamDependencies(project.packageJson.devDependencies, project.packageName);
-      this._populateDownstreamDependencies(project.packageJson.optionalDependencies, project.packageName);
       this._versionPolicyConfiguration.validate(this.projectsByName);
+
+      // Consumer relationships will be established the first time one is requested
     }
   }
 
@@ -920,33 +917,24 @@ export class RushConfiguration {
    * in the Rush common folder.
    * NOTE: sortedProjectJsons is sorted by the caller.
    */
-  private static _generateTempNamesForProjects(
-    sortedProjectJsons: IRushConfigurationProjectJson[]
-  ): Map<IRushConfigurationProjectJson, string> {
-    const tempNamesByProject: Map<IRushConfigurationProjectJson, string> = new Map<
-      IRushConfigurationProjectJson,
-      string
-    >();
-    const usedTempNames: Set<string> = new Set<string>();
+  private static _generateTempNameForProject(
+    projectJson: IRushConfigurationProjectJson,
+    usedTempNames: Set<string>
+  ): string {
+    // If the name is "@ms/MyProject", extract the "MyProject" part
+    const unscopedName: string = PackageNameParsers.permissive.getUnscopedName(projectJson.packageName);
 
-    // NOTE: projectJsons was already sorted in alphabetical order by the caller.
-    for (const projectJson of sortedProjectJsons) {
-      // If the name is "@ms/MyProject", extract the "MyProject" part
-      const unscopedName: string = PackageNameParsers.permissive.getUnscopedName(projectJson.packageName);
-
-      // Generate a unique like name "@rush-temp/MyProject", or "@rush-temp/MyProject-2" if
-      // there is a naming conflict
-      let counter: number = 0;
-      let tempProjectName: string = `${RushConstants.rushTempNpmScope}/${unscopedName}`;
-      while (usedTempNames.has(tempProjectName)) {
-        ++counter;
-        tempProjectName = `${RushConstants.rushTempNpmScope}/${unscopedName}-${counter}`;
-      }
-      usedTempNames.add(tempProjectName);
-      tempNamesByProject.set(projectJson, tempProjectName);
+    // Generate a unique like name "@rush-temp/MyProject", or "@rush-temp/MyProject-2" if
+    // there is a naming conflict
+    let counter: number = 0;
+    let tempProjectName: string = `${RushConstants.rushTempNpmScope}/${unscopedName}`;
+    while (usedTempNames.has(tempProjectName)) {
+      ++counter;
+      tempProjectName = `${RushConstants.rushTempNpmScope}/${unscopedName}-${counter}`;
     }
+    usedTempNames.add(tempProjectName);
 
-    return tempNamesByProject;
+    return tempProjectName;
   }
 
   /**
@@ -1837,22 +1825,6 @@ export class RushConfiguration {
         }
       }
     }
-  }
-
-  private _populateDownstreamDependencies(
-    dependencies: { [key: string]: string } | undefined,
-    packageName: string
-  ): void {
-    if (!dependencies) {
-      return;
-    }
-    Object.keys(dependencies).forEach((dependencyName) => {
-      const depProject: RushConfigurationProject | undefined = this.projectsByName.get(dependencyName);
-
-      if (depProject) {
-        depProject._consumingProjectNames.add(packageName);
-      }
-    });
   }
 
   private _getVariantConfigFolderPath(variant?: string | undefined): string {

@@ -85,7 +85,7 @@ export class PublishUtilities {
         const change: IChangeInfo = allChanges[packageName];
         const project: RushConfigurationProject = allPackages.get(packageName)!;
         const pkg: IPackageJson = project.packageJson;
-        const deps: Set<string> = project._consumingProjectNames;
+        const deps: Iterable<RushConfigurationProject> = project.consumingProjects;
 
         // Write the new version expected for the change.
         const skipVersionBump: boolean = PublishUtilities._shouldSkipVersionBump(
@@ -106,8 +106,8 @@ export class PublishUtilities {
         }
 
         if (deps) {
-          for (const depName of deps) {
-            const depChange: IChangeInfo = allChanges[depName];
+          for (const dep of deps) {
+            const depChange: IChangeInfo = allChanges[dep.packageName];
 
             if (depChange) {
               depChange.order = Math.max(change.order! + 1, depChange.order!);

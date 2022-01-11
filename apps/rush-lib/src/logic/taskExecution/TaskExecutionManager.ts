@@ -48,20 +48,24 @@ export class TaskExecutionManager {
   private readonly _debugMode: boolean;
   private readonly _parallelism: number;
   private readonly _repoCommandLineConfiguration: CommandLineConfiguration;
-  private _hasAnyFailures: boolean;
-  private _hasAnyNonAllowedWarnings: boolean;
-  private _totalTasks!: number;
-  private _completedTasks!: number;
+  private readonly _totalTasks: number;
 
   private readonly _outputWritable: TerminalWritable;
   private readonly _colorsNewlinesTransform: TextRewriterTransform;
   private readonly _streamCollator: StreamCollator;
 
-  private _terminal: CollatedTerminal;
+  private readonly _terminal: CollatedTerminal;
+
+  // Variables for current status
+  private _hasAnyFailures: boolean;
+  private _hasAnyNonAllowedWarnings: boolean;
+  private _completedTasks: number;
 
   public constructor(tasks: Set<Task>, options: ITaskExecutionManagerOptions) {
     const { quietMode, debugMode, parallelism, changedProjectsOnly, repoCommandLineConfiguration } = options;
     this._tasks = tasks;
+    this._completedTasks = 0;
+    this._totalTasks = tasks.size;
     this._quietMode = quietMode;
     this._debugMode = debugMode;
     this._hasAnyFailures = false;
@@ -155,7 +159,7 @@ export class TaskExecutionManager {
    */
   public async executeAsync(): Promise<void> {
     this._completedTasks = 0;
-    const totalTasks: number = (this._totalTasks = this._tasks.size);
+    const totalTasks: number = this._totalTasks;
 
     if (!this._quietMode) {
       const plural: string = totalTasks === 1 ? '' : 's';

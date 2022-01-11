@@ -186,7 +186,7 @@ export class CommandLineConfiguration {
       }
     }
 
-    // Resolve the string links
+    // Resolve phase names to the underlying objects
     for (const phase of this.phases.values()) {
       const selfDependencies: string[] | undefined = phase.dependencies?.self;
       const upstreamDependencies: string[] | undefined = phase.dependencies?.upstream;
@@ -221,17 +221,6 @@ export class CommandLineConfiguration {
     // Do the recursive stuff after the dependencies have been converted
     const safePhases: Set<IPhase> = new Set();
     for (const phase of this.phases.values()) {
-      const relatedPhaseSet: Set<IPhase> = new Set([phase]);
-      for (const relatedPhase of relatedPhaseSet) {
-        for (const dependency of relatedPhase.phaseDependencies.self) {
-          relatedPhaseSet.add(dependency);
-        }
-
-        for (const dependency of relatedPhase.phaseDependencies.upstream) {
-          relatedPhaseSet.add(dependency);
-        }
-      }
-
       this._checkForPhaseSelfCycles(phase, new Set(), safePhases);
     }
 
@@ -271,6 +260,7 @@ export class CommandLineConfiguration {
 
             // Apply implicit phase dependency expansion
             // The equivalent of the "--to" operator used for projects
+            // Appending to the set while iterating it accomplishes a full breadth-first search
             for (const phase of commandPhases) {
               for (const dependency of phase.phaseDependencies.self) {
                 commandPhases.add(dependency);
@@ -452,12 +442,14 @@ export class CommandLineConfiguration {
 
   /**
    * Performs a depth-first search to detect cycles in the directed graph of phase "self" dependencies.
+   *
+   * @param phase The phase node currently being checked
+   * @param phasesInPath The current path from the start node to `phase`
+   * @param cycleFreePhases Phases that have already been fully walked and confirmed to not be in any cycles
    */
   private _checkForPhaseSelfCycles(
     phase: IPhase,
-    // Phases in the current depth-first-search path
     phasesInPath: Set<IPhase>,
-    // Phases that have already been fully walked and confirmed to not be in any cycles
     cycleFreePhases: Set<IPhase>
   ): void {
     if (cycleFreePhases.has(phase)) {
