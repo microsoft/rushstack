@@ -17,7 +17,7 @@ import { Stopwatch } from '../../utilities/Stopwatch';
 import { AsyncTaskQueue, ITaskSortFunction } from './AsyncTaskQueue';
 import { Task } from './Task';
 import { TaskStatus } from './TaskStatus';
-import { ITaskRunnerContext } from './BaseTaskRunner';
+import { ITaskRunnerContext } from './ITaskRunner';
 import { CommandLineConfiguration } from '../../api/CommandLineConfiguration';
 import { TaskError } from './TaskError';
 

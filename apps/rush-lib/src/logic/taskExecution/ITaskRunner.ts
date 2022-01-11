@@ -17,39 +17,39 @@ export interface ITaskRunnerContext {
 
 /**
  * The `Task` class is a node in the dependency graph of work that needs to be scheduled by the
- * `TaskExecutionManager`. Each `Task` has a `runner` member of type `BaseTaskRunner`, whose subclass
+ * `TaskExecutionManager`. Each `Task` has a `runner` member of type `BITaskRunner`, whose implementation
  * manages the actual operations for running a single task.
  */
-export abstract class BaseTaskRunner {
+export interface ITaskRunner {
   /**
    * Name of the task definition.
    */
-  public abstract readonly name: string;
+  readonly name: string;
 
   /**
    * This flag determines if the task is allowed to be skipped if up to date.
    */
-  public abstract isSkipAllowed: boolean;
+  isSkipAllowed: boolean;
 
   /**
    * Assigned by execute().  True if the script was an empty string.  Operationally an empty string is
    * like a shell command that succeeds instantly, but e.g. it would be odd to report time statistics for it.
    */
-  public abstract hadEmptyScript: boolean;
+  hadEmptyScript: boolean;
 
   /**
    * If set to true, a warning result should not make Rush exit with a nonzero
    * exit code
    */
-  public abstract warningsAreAllowed: boolean;
+  warningsAreAllowed: boolean;
 
   /**
    * Indicates if the output of this task may be written to the cache
    */
-  public abstract isCacheWriteAllowed: boolean;
+  isCacheWriteAllowed: boolean;
 
   /**
    * Method to be executed for the task.
    */
-  public abstract executeAsync(context: ITaskRunnerContext): Promise<TaskStatus>;
+  executeAsync(context: ITaskRunnerContext): Promise<TaskStatus>;
 }

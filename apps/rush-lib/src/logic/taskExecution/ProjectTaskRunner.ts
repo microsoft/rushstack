@@ -30,7 +30,7 @@ import { Utilities, UNINITIALIZED } from '../../utilities/Utilities';
 import { TaskStatus } from './TaskStatus';
 import { TaskError } from './TaskError';
 import type { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
-import { BaseTaskRunner, ITaskRunnerContext } from './BaseTaskRunner';
+import { ITaskRunner, ITaskRunnerContext } from './ITaskRunner';
 import { ProjectLogWritable } from './ProjectLogWritable';
 import { ProjectBuildCache } from '../buildCache/ProjectBuildCache';
 import type { BuildCacheConfiguration } from '../../api/BuildCacheConfiguration';
@@ -74,7 +74,7 @@ function _areShallowEqual(object1: JsonObject, object2: JsonObject): boolean {
  * A `BaseTaskRunner` subclass that executes a task for a Rush project and updates its package-deps-hash
  * incremental state.
  */
-export class ProjectTaskRunner extends BaseTaskRunner {
+export class ProjectTaskRunner implements ITaskRunner {
   public readonly name: string;
 
   public readonly isSkipAllowed: boolean;
@@ -100,7 +100,6 @@ export class ProjectTaskRunner extends BaseTaskRunner {
   private _projectBuildCache: ProjectBuildCache | undefined | UNINITIALIZED = UNINITIALIZED;
 
   public constructor(options: IProjectTaskRunnerOptions) {
-    super();
     const { phase } = options;
 
     this.name = options.taskName;
