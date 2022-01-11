@@ -9,6 +9,8 @@ import type { IRegisteredCustomParameter } from '../../cli/scriptActions/BaseScr
 import { ProjectChangeAnalyzer } from '../ProjectChangeAnalyzer';
 import type { IProjectTaskOptions, IProjectTaskFactory } from '../ProjectTaskSelector';
 import { RushConstants } from '../RushConstants';
+import { ITaskRunner } from './ITaskRunner';
+import { NullTaskRunner } from './NullTaskRunner';
 import { convertSlashesForWindows, ProjectTaskRunner } from './ProjectTaskRunner';
 import { Task } from './Task';
 import { TaskStatus } from './TaskStatus';
@@ -50,19 +52,21 @@ export class ProjectTaskFactory implements IProjectTaskFactory {
 
     const taskName: string = ProjectTaskFactory._getTaskDisplayName(phase, project);
 
-    const task: Task = new Task(
-      new ProjectTaskRunner({
-        rushProject: project,
-        taskName,
-        rushConfiguration: factoryOptions.rushConfiguration,
-        buildCacheConfiguration: factoryOptions.buildCacheConfiguration,
-        commandToRun: commandToRun || '',
-        isIncrementalBuildAllowed: factoryOptions.isIncrementalBuildAllowed,
-        projectChangeAnalyzer: factoryOptions.projectChangeAnalyzer,
-        phase
-      }),
-      TaskStatus.Ready
-    );
+    // Empty build script indicates a no-op, so use a no-op runner
+    const runner: ITaskRunner = commandToRun
+      ? new ProjectTaskRunner({
+          rushProject: project,
+          taskName,
+          rushConfiguration: factoryOptions.rushConfiguration,
+          buildCacheConfiguration: factoryOptions.buildCacheConfiguration,
+          commandToRun: commandToRun || '',
+          isIncrementalBuildAllowed: factoryOptions.isIncrementalBuildAllowed,
+          projectChangeAnalyzer: factoryOptions.projectChangeAnalyzer,
+          phase
+        })
+      : new NullTaskRunner(taskName, TaskStatus.FromCache);
+
+    const task: Task = new Task(runner, TaskStatus.Ready);
 
     return task;
   }
