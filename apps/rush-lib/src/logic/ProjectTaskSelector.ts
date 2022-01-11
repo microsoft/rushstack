@@ -47,7 +47,6 @@ export class ProjectTaskSelector {
   }
 
   public createTasks(createTasksOptions: ICreateTasksOptions): Set<Task> {
-    const start: bigint = process.hrtime.bigint();
     const { projectSelection, taskFactory } = createTasksOptions;
 
     const knownProjects: ReadonlyMap<string, RushConfigurationProject> = this._knownProjects;
@@ -165,9 +164,6 @@ export class ProjectTaskSelector {
 
       task.runner.isCacheWriteAllowed = deps.isCacheWriteAllowed;
     }
-
-    const end: bigint = process.hrtime.bigint();
-    console.log(`Task creation took: ${end - start} ns`);
 
     return selectedTasks;
   }
