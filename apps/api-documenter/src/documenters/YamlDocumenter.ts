@@ -352,6 +352,7 @@ export class YamlDocumenter {
       case ApiItemKind.Package:
       case ApiItemKind.Interface:
       case ApiItemKind.Enum:
+      case ApiItemKind.TypeAlias:
         return false;
       case ApiItemKind.Namespace:
         return !this.newDocfxNamespaces;
