@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
 
+import { ITerminal } from '@rushstack/node-core-library';
+
 export enum WatchState {
   /** No output received yet */
   Start = 'Start',
@@ -101,10 +103,10 @@ export class WatchProject {
     }
   }
 
-  public printBufferedLines(): void {
+  public printBufferedLines(terminal: ITerminal): void {
     if (this.bufferedLines.length > 0) {
       for (const line of this.bufferedLines) {
-        console.log(line);
+        terminal.writeLine(line);
       }
       this.bufferedLines.length = 0;
     }
