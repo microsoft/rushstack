@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Fixes rush plugin error on duplicate build commands",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
