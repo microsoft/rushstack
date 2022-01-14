@@ -87,8 +87,12 @@ export abstract class PluginLoaderBase<
     if (!commandLineJsonFilePath || !FileSystem.exists(commandLineJsonFilePath)) {
       return undefined;
     }
-    const commandLineConfiguration: CommandLineConfiguration =
-      CommandLineConfiguration.loadFromFileOrDefault(commandLineJsonFilePath);
+    const commandLineConfiguration: CommandLineConfiguration = CommandLineConfiguration.loadFromFileOrDefault(
+      commandLineJsonFilePath,
+      {
+        disableDefaultBuildCommands: true
+      }
+    );
     for (const additionalPathFolder of this._getCommandLineAdditionalPathFolders().reverse()) {
       commandLineConfiguration.prependAdditionalPathFolder(additionalPathFolder);
     }
