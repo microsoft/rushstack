@@ -954,6 +954,12 @@
       "reviewCategory": "libraries",
       "versionPolicyName": "rush"
     },
+    {
+      "packageName": "@rushstack/rush-litewatch-plugin",
+      "projectFolder": "rush-plugins/rush-litewatch-plugin",
+      "reviewCategory": "libraries",
+      "shouldPublish": false
+    },
 
     // "webpack" folder (alphabetical order)
     {
