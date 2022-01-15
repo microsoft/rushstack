@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@microsoft/rush",
+      "comment": "Remove the skipPhasesForCommand and addPhasesToCommand options until the design can be better formalized.",
+      "type": "none"
+    }
+  ],
+  "packageName": "@microsoft/rush"
+}
