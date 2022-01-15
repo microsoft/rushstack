@@ -62,6 +62,7 @@ export const IDENTIFIER_TRAILING_DIGITS: string;
 // @public
 export interface IExtendedModule extends webpack.compilation.Module {
     external?: boolean;
+    hasDependencies(callback: (dep: webpack.compilation.Dependency) => boolean | void): boolean;
     id: string | number | null;
     identifier(): string;
     modules?: IExtendedModule[];
@@ -132,13 +133,14 @@ export interface IModuleMinifierFunction {
 
 // @public
 export interface IModuleMinifierPluginHooks {
-    finalModuleId: SyncWaterfallHook<string | number | undefined>;
-    postProcessCodeFragment: SyncWaterfallHook<ReplaceSource, string>;
+    finalModuleId: SyncWaterfallHook<string | number | undefined, webpack.compilation.Compilation>;
+    postProcessCodeFragment: SyncWaterfallHook<ReplaceSource, IPostProcessFragmentContext>;
     rehydrateAssets: AsyncSeriesWaterfallHook<IDehydratedAssets, webpack.compilation.Compilation>;
 }
 
 // @public
 export interface IModuleMinifierPluginOptions {
+    compressAsyncImports?: boolean;
     minifier: IModuleMinifier;
     sourceMap?: boolean;
     usePortableModules?: boolean;
@@ -155,6 +157,13 @@ export interface _INormalModuleFactoryModuleData {
         descriptionFileRoot?: string;
         relativePath?: string;
     };
+}
+
+// @public
+export interface IPostProcessFragmentContext {
+    compilation: webpack.compilation.Compilation;
+    loggingName: string;
+    module: webpack.compilation.Module | undefined;
 }
 
 // @internal

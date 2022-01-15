@@ -12,7 +12,8 @@ import {
   _INormalModuleFactoryModuleData,
   IExtendedModule,
   IModuleMinifierPluginHooks,
-  _IWebpackCompilationData
+  _IWebpackCompilationData,
+  IPostProcessFragmentContext
 } from './ModuleMinifierPlugin.types';
 
 const PLUGIN_NAME: 'PortableMinifierModuleIdsPlugin' = 'PortableMinifierModuleIdsPlugin';
@@ -28,7 +29,7 @@ const TAP_AFTER: TapOptions<'sync'> = {
 };
 
 const STABLE_MODULE_ID_PREFIX: '__MODULEID_SHA_' = '__MODULEID_SHA_';
-const STABLE_MODULE_ID_REGEX: RegExp = /['"]?(__MODULEID_SHA_[0-9a-f]+)['"]?/g;
+const STABLE_MODULE_ID_REGEX: RegExp = /(?<!C)['"]?(__MODULEID_SHA_[0-9a-f]+)['"]?/g;
 
 /**
  * Plugin responsible for converting the Webpack module ids (of whatever variety) to stable ids before code is handed to the minifier, then back again.
@@ -65,29 +66,36 @@ export class PortableMinifierModuleIdsPlugin implements Plugin {
 
     const stableIdToFinalId: Map<string | number, string | number> = new Map();
 
-    this._minifierHooks.finalModuleId.tap(PLUGIN_NAME, (id: string | number | undefined) => {
+    const { finalModuleId } = this._minifierHooks;
+
+    finalModuleId.tap(PLUGIN_NAME, (id: string | number | undefined) => {
       return id === undefined ? id : stableIdToFinalId.get(id);
     });
 
-    this._minifierHooks.postProcessCodeFragment.tap(PLUGIN_NAME, (source: ReplaceSource, context: string) => {
-      const code: string = source.original().source() as string;
+    this._minifierHooks.postProcessCodeFragment.tap(
+      PLUGIN_NAME,
+      (source: ReplaceSource, context: IPostProcessFragmentContext) => {
+        const code: string = source.original().source() as string;
 
-      STABLE_MODULE_ID_REGEX.lastIndex = -1;
-      // RegExp.exec uses null or an array as the return type, explicitly
-      let match: RegExpExecArray | null = null;
-      while ((match = STABLE_MODULE_ID_REGEX.exec(code))) {
-        const id: string = match[1];
-        const mapped: string | number | undefined = stableIdToFinalId.get(id);
+        STABLE_MODULE_ID_REGEX.lastIndex = -1;
+        // RegExp.exec uses null or an array as the return type, explicitly
+        let match: RegExpExecArray | null = null;
+        while ((match = STABLE_MODULE_ID_REGEX.exec(code))) {
+          const id: string = match[1];
+          const mapped: string | number | undefined = finalModuleId.call(id, context.compilation);
 
-        if (mapped === undefined) {
-          console.error(`Missing module id for ${id} in ${context}!`);
+          if (mapped === undefined) {
+            context.compilation.errors.push(
+              new Error(`Missing module id for ${id} in ${context.loggingName}!`)
+            );
+          }
+
+          source.replace(match.index, STABLE_MODULE_ID_REGEX.lastIndex - 1, JSON.stringify(mapped));
         }
 
-        source.replace(match.index, STABLE_MODULE_ID_REGEX.lastIndex - 1, JSON.stringify(mapped));
+        return source;
       }
-
-      return source;
-    });
+    );
 
     compiler.hooks.thisCompilation.tap(
       PLUGIN_NAME,
@@ -137,6 +145,7 @@ export class PortableMinifierModuleIdsPlugin implements Plugin {
             const originalId: string | number = mod.id;
 
             // Need to handle ConcatenatedModules, which don't have the resource property directly
+            // Also need different cache keys for different sets of loaders
             const { resource } = mod.rootModule || mod;
 
             if (resource) {
